@@ -5,6 +5,7 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -38,7 +39,6 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Boot/GameplayInit.h"
 #include "Boot/Lifecycle.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -612,11 +612,11 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     vector = (VECTOR) { 0x71C, 0x71C, 0x71C };
 
     Audio_ResetSoundSlots();
-    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
+    VS::Core::Memory::ResetLiveGameHeap();
     Render_legacyPrimitiveBuffers[1] = 0;
     Render_legacyPrimitiveBuffers[0] = NULL;
-    Render_legacyOrderingTables[0] = Core_Memory_AllocateFromLowEnd(0x2088);
-    Render_legacyOrderingTables[1] = Core_Memory_AllocateFromLowEnd(0x2088);
+    Render_legacyOrderingTables[0] = VS::Core::Memory::AllocateLiveFromLowEnd(0x2088);
+    Render_legacyOrderingTables[1] = VS::Core::Memory::AllocateLiveFromLowEnd(0x2088);
     SetDrawStp(&Render_legacyMaskBitOffPackets[0], 0);
     SetDrawStp(&Render_legacyMaskBitOffPackets[1], 0);
     SetDrawStp(&Render_legacyMaskBitOnPackets[0], 1);
@@ -684,7 +684,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     }
 
     Actors_SpawnAshleyWithEquipment();
-    (*(void* (*))&Battle_actionState) = Core_Memory_AllocateFromHighEnd(sizeof *Battle_actionState);
+    (*(void* (*))&Battle_actionState) = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Battle_actionState);
     VS::Core::Memory::ZeroLiveAlignedWords((*(void* (*))&Battle_actionState), sizeof *Battle_actionState);
     Field_isFieldRenderingEnabled = 1;
     Boot_gameplayResetWordTwo = 0;

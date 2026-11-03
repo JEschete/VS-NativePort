@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -115,7 +115,7 @@ int Menu_Setup_LoadCombinationRecipes(int id)
 
     if (id != 0) {
         --id;
-        Menu_Setup_sydData = Core_Memory_AllocateFromHighEnd(Menu_Setup_loadCombinationRecipesSydSizes[id]);
+        Menu_Setup_sydData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Setup_loadCombinationRecipesSydSizes[id]);
         cdFile.lba = Menu_Setup_loadCombinationRecipesSydLbas[id];
         cdFile.size = Menu_Setup_loadCombinationRecipesSydSizes[id];
         Menu_Setup_loadCombinationRecipesSydCdQueueSlot = Content_AllocateDiscRequest(&cdFile);
@@ -254,7 +254,7 @@ int Menu_Setup_SelectCombinationBlade(int ingredient_slot)
             break;
         }
 
-        textBuf = (char *)(Core_Memory_AllocateFromHighEnd(0x72C));
+        textBuf = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x72C));
 
 
         if (blade == NULL) {
@@ -302,7 +302,7 @@ int Menu_Setup_SelectCombinationBlade(int ingredient_slot)
         }
 
         Menu_Setup_BuildItemList(count, menuText, Menu_Framework_rowTypeBuf);
-        Core_Memory_FreeFromHighEnd(textBuf);
+        VS::Core::Memory::FreeLiveFromHighEnd(textBuf);
         Menu_Setup_combinationBladeState = 1;
         break;
     case 1:
@@ -848,7 +848,7 @@ int Menu_Setup_SelectCombinationShield(int ingredient_slot)
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
 
-            stringBuf = Core_Memory_AllocateFromHighEnd(0x3CC);
+            stringBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x3CC);
 
 
 
@@ -893,7 +893,7 @@ int Menu_Setup_SelectCombinationShield(int ingredient_slot)
             }
 
             Menu_Setup_BuildItemList(rowType, menuText, Menu_Framework_rowTypeBuf);
-            Core_Memory_FreeFromHighEnd(stringBuf);
+            VS::Core::Memory::FreeLiveFromHighEnd(stringBuf);
 
             Menu_Setup_combinationShieldState = 1;
         }
@@ -1418,7 +1418,7 @@ int Menu_Setup_SelectCombinationArmor(int ingredient_slot)
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             s0_2 = itemId;
-            armor_text_allocation = (char *)(Core_Memory_AllocateFromHighEnd(0x72CU));
+            armor_text_allocation = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x72CU));
 
             if (armor_item == NULL) {
                 armor_row_text[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor];
@@ -1456,7 +1456,7 @@ int Menu_Setup_SelectCombinationArmor(int ingredient_slot)
                 }
             }
             Menu_Setup_BuildItemList(armor_row_count, armor_row_text, Menu_Framework_rowTypeBuf);
-            Core_Memory_FreeFromHighEnd(armor_text_allocation);
+            VS::Core::Memory::FreeLiveFromHighEnd(armor_text_allocation);
             Menu_Setup_combinationArmorStep = 1;
         }
         break;
@@ -1872,7 +1872,7 @@ int Menu_Setup_UpdateCombinationCategory(int initialize_combination_category)
         if (Menu_Setup_LoadCombinationRecipes(0) != 0) {
             i = Menu_Setup_combineMenus[Menu_Setup_combinationCategoryState - 2](0);
             if (i != 0) {
-                Core_Memory_FreeFromHighEnd(Menu_Setup_sydData);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Setup_sydData);
                 Menu_Setup_sydData = NULL;
                 if (i == -1) {
                     Menu_Setup_combinationCategoryState = 5;

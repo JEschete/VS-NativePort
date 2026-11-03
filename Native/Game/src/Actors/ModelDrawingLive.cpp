@@ -29,7 +29,6 @@ extern "C" {
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Field/Actors.h"
 #include "Field/GimmickLookup.h"

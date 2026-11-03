@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/TargetingDrawLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -75,7 +75,7 @@ void Battle_InitSphere(void)
     short* edges;
 
     if (Battle_targetSphere == NULL) {
-        Battle_targetSphere = (Battle_TargetSphereSetupView *)(Core_Memory_AllocateFromLowEnd(sizeof *Battle_targetSphere));
+        Battle_targetSphere = (Battle_TargetSphereSetupView *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_targetSphere));
     }
 
     VS::Core::Memory::ZeroLiveWordsBackward(Battle_targetSphere, sizeof *Battle_targetSphere);
@@ -145,7 +145,7 @@ void Battle_FreeSphere(void)
 {
     Battle_ResetTargetPages();
     if (Battle_targetSphere != NULL) {
-        Core_Memory_FreeFromLowEnd(Battle_targetSphere);
+        VS::Core::Memory::FreeLiveFromLowEnd(Battle_targetSphere);
         Battle_targetSphere = NULL;
     }
 }

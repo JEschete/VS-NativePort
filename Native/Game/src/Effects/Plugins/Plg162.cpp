@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -66,7 +66,7 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* renderer_slot, u_i
     battle = Effects_currentInstance;
     switch (lifecycle_command) {
     case 1:
-        state = (Effects_TransposedRingState *)(Core_Memory_AllocateFromHighEnd(sizeof(*state)));
+        state = (Effects_TransposedRingState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));
         renderer_slot->rendererState = state;
         state->lifetime = packed_parameters;
         state->effect = packed_parameters >> 8;

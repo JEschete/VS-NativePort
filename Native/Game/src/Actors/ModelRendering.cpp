@@ -3,6 +3,7 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
@@ -508,8 +508,8 @@ void Actors_InitializeActorModelResources(void)
         Actors_actorRecords[i] = NULL;
     }
 
-    Actors_primarySequenceBuffer = Core_Memory_AllocateFromLowEnd(0x7800);
-    Actors_sequenceWorkBuffer = Core_Memory_AllocateFromLowEnd(0x4800);
+    Actors_primarySequenceBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x7800);
+    Actors_sequenceWorkBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x4800);
 
     for (i = 0; i < 20; ++i) {
         equipment_actor_slot = (i / 2);
@@ -524,7 +524,7 @@ void Actors_InitializeActorModelResources(void)
 
     for (i = 0; i < 2; ++i) {
         Content_legacyWeaponModelBuffers[i] =
-            (Actors_WeaponModelData *)(Core_Memory_AllocateFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]));
+            (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]));
     }
 
     for (i = 0; i < 16; ++i) {

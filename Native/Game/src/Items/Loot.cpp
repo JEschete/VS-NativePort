@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RandomLive.hpp"
 extern "C" {
@@ -10,7 +11,6 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Rewards.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/GameMode.h"
@@ -159,7 +159,7 @@ void Items_QueueEnemyLoot(Battle_Actor* enemy)
 {
     int i;
     Battle_ActorStats* enemy_stats = enemy->stats;
-    Items_LootListNode* lootList = (Items_LootListNode *)(Core_Memory_AllocateFromHighEnd(sizeof *lootList));
+    Items_LootListNode* lootList = (Items_LootListNode *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *lootList));
 
     if (lootList == NULL) {
         return;
@@ -204,7 +204,7 @@ void Items_QueueEnemyLoot(Battle_Actor* enemy)
         }
     }
 
-    Core_Memory_FreeFromHighEnd(lootList);
+    VS::Core::Memory::FreeLiveFromHighEnd(lootList);
 }
 
 // decomp: BATTLE.PRG func_8006FB48 (src/BATTLE/BATTLE.PRG/146C.c:3372)
@@ -230,7 +230,7 @@ void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1)
     Items_LootListNode* previous_loot_head;
     Items_LootListNode* scripted_loot;
 
-    scripted_loot = (Items_LootListNode *)(Core_Memory_AllocateFromHighEnd(sizeof *scripted_loot));
+    scripted_loot = (Items_LootListNode *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *scripted_loot));
     if (scripted_loot != NULL) {
         VS::Core::Memory::ZeroLiveAlignedWords(scripted_loot, sizeof *scripted_loot);
         scripted_loot->loot.misc[0].itemId = id0;
@@ -251,7 +251,7 @@ void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1)
             Items_lootListHead = scripted_loot;
             scripted_loot->next = previous_loot_head;
         } else {
-            Core_Memory_FreeFromHighEnd(scripted_loot);
+            VS::Core::Memory::FreeLiveFromHighEnd(scripted_loot);
         }
     }
     if (Items_lootListHead != NULL) {
@@ -273,7 +273,7 @@ void Items_ClearRoomLootList(void)
 
     while (loot_node != 0) {
         Items_LootListNode* next_loot_node = loot_node->next;
-        Core_Memory_FreeFromHighEnd(loot_node);
+        VS::Core::Memory::FreeLiveFromHighEnd(loot_node);
         loot_node = next_loot_node;
     }
     Items_lootListHead = NULL;

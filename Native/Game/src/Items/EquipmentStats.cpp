@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RuntimeLive.hpp"
 extern "C" {
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Memory/Heap.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentInit.h"
 #include "Items/EquipmentStats.h"
@@ -322,7 +322,7 @@ void Items_LoadInventoryWeaponStats(Items_WeaponLoadout* target, Items_Inventory
 {
     int i;
 
-    Items_WeaponSpawnLoadout* tempWeapon = (Items_WeaponSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *tempWeapon));
+    Items_WeaponSpawnLoadout* tempWeapon = (Items_WeaponSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempWeapon));
     VS::Core::Memory::ZeroLiveAlignedWords(tempWeapon, sizeof *tempWeapon);
 
     if (source != NULL) {
@@ -353,13 +353,13 @@ void Items_LoadInventoryWeaponStats(Items_WeaponLoadout* target, Items_Inventory
     }
 
     Items_BuildWeaponStatsFromParts(target, tempWeapon);
-    Core_Memory_FreeFromHighEnd(tempWeapon);
+    VS::Core::Memory::FreeLiveFromHighEnd(tempWeapon);
 }
 
 // decomp: BATTLE.PRG vs_battle_applyShield (src/BATTLE/BATTLE.PRG/146C.c:1295)
 void Items_LoadInventoryShieldStats(Items_ShieldLoadout* target, Items_InventoryShield* source)
 {
-    Items_ShieldSpawnLoadout* tempShield = (Items_ShieldSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *tempShield));
+    Items_ShieldSpawnLoadout* tempShield = (Items_ShieldSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempShield));
     VS::Core::Memory::ZeroLiveAlignedWords(tempShield, sizeof *tempShield);
 
     if (source != NULL) {
@@ -380,13 +380,13 @@ void Items_LoadInventoryShieldStats(Items_ShieldLoadout* target, Items_Inventory
     }
 
     Items_BuildShieldStatsFromParts(target, tempShield);
-    Core_Memory_FreeFromHighEnd(tempShield);
+    VS::Core::Memory::FreeLiveFromHighEnd(tempShield);
 }
 
 // decomp: BATTLE.PRG vs_battle_applyArmor (src/BATTLE/BATTLE.PRG/146C.c:1321)
 void Items_LoadInventoryArmorStats(Items_ArmorLoadout* target, Items_InventoryArmor* source)
 {
-    Items_ArmorInit* tempArmor = (Items_ArmorInit *)(Core_Memory_AllocateFromHighEnd(sizeof *tempArmor));
+    Items_ArmorInit* tempArmor = (Items_ArmorInit *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempArmor));
     VS::Core::Memory::ZeroLiveAlignedWords(tempArmor, sizeof *tempArmor);
 
     if (source != NULL) {
@@ -398,14 +398,14 @@ void Items_LoadInventoryArmorStats(Items_ArmorLoadout* target, Items_InventoryAr
     }
 
     Items_BuildArmorStatsFromPart(target, tempArmor);
-    Core_Memory_FreeFromHighEnd(tempArmor);
+    VS::Core::Memory::FreeLiveFromHighEnd(tempArmor);
 }
 
 // decomp: BATTLE.PRG vs_battle_applyAccessory (src/BATTLE/BATTLE.PRG/146C.c:1338)
 void Items_LoadInventoryAccessoryStats(
     Items_AccessorySpawnLoadout* target, Items_InventoryArmor* source)
 {
-    Items_AccessoryInit* tempAccessory = (Items_AccessoryInit *)(Core_Memory_AllocateFromHighEnd(sizeof *tempAccessory));
+    Items_AccessoryInit* tempAccessory = (Items_AccessoryInit *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempAccessory));
     VS::Core::Memory::ZeroLiveAlignedWords(tempAccessory, sizeof *tempAccessory);
 
     if (source != NULL) {
@@ -415,7 +415,7 @@ void Items_LoadInventoryAccessoryStats(
     }
 
     Items_BuildAccessoryStatsFromPart(target, tempAccessory);
-    Core_Memory_FreeFromHighEnd(tempAccessory);
+    VS::Core::Memory::FreeLiveFromHighEnd(tempAccessory);
 }
 
 // decomp: BATTLE.PRG func_8006B214 (src/BATTLE/BATTLE.PRG/146C.c:1356)

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Input/Buttons.h"
@@ -197,7 +197,7 @@ int Menu_DismissAllTextBoxes(void)
 // decomp: BATTLE.PRG vs_battle_displaySceneMessage (src/BATTLE/BATTLE.PRG/5BF94.c:3771)
 void Menu_ShowSceneNotification(int notification_kind, int notification_subject_id, int timed_notification)
 {
-    Menu_sceneNotificationBuffer = (int *)(Core_Memory_AllocateFromHighEnd(112));
+    Menu_sceneNotificationBuffer = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(112));
     Menu_sceneNotificationTimed = timed_notification;
     if (Menu_sceneNotificationTimed) {
         Menu_sceneNotificationTimer = 0x78;
@@ -259,7 +259,7 @@ void Menu_ReleaseSceneNotification(void)
 {
     if (Menu_sceneNotificationBuffer != NULL) {
         Menu_DismissTextBox(7);
-        Core_Memory_FreeFromHighEnd(Menu_sceneNotificationBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_sceneNotificationBuffer);
         Menu_sceneNotificationBuffer = NULL;
     }
 }

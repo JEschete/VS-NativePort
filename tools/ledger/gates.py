@@ -464,6 +464,11 @@ class Gates:
                 report.add("ownership", "unregistered-row-in-owned-file", identifier,
                            f"{row['final_location']} is owned but the row is neither registered nor retired")
         report.ownership_counts = dict(sorted(Counter(report.ownership_states.values()).items()))
+        for ledger in (self.workspace.data_ledger, self.workspace.type_ledger):
+            for row in read_csv(ledger) if ledger.is_file() else []:
+                if row.get("copied") == "retired" and "retired-by:" not in row.get("notes", ""):
+                    report.add("ownership", "retired-without-evidence", row["id"],
+                               "a retired data or type row requires a retired-by: note")
         for column in ("copied", "compiles", "named", "understood", "modernized", "cpp", "verified"):
             report.status_counts[column] = dict(sorted(Counter(row.get(column, "") for row in self.catalog).items()))
 

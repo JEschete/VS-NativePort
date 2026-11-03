@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/Stream.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 
 // decomp: SLUS_010.40 vs_main_streamXa (src/SLUS_010.40/main.c:9358)
@@ -61,7 +61,7 @@ int Audio_FreeCutsceneStreamSlot(int slot_id)
     if ((slot_id - 1u) < 3) {
         if (Audio_soundState.sfxStreamData[slot_id - 1] != 0) {
             Audio_Control_StopCutsceneStream();
-            Core_Memory_FreeFromHighEnd(Audio_soundState.sfxStreamData[slot_id - 1]);
+            VS::Core::Memory::FreeLiveFromHighEnd(Audio_soundState.sfxStreamData[slot_id - 1]);
             Audio_soundState.sfxStreamData[slot_id - 1] = 0;
             return 1;
         }

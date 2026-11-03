@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -10,7 +11,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "Field/RoomRendering.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -1566,7 +1566,7 @@ int Menu_Loot_Update(u_char* state)
             Items_Inventory_RebuildDisplayIndices(i);
         }
 
-        buf = Core_Memory_AllocateFromHighEnd(
+        buf = VS::Core::Memory::AllocateLiveFromHighEnd(
             sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity * 2);
 
         Menu_Loot_inventory = (Items_Inventory *)(buf);
@@ -1649,7 +1649,7 @@ int Menu_Loot_Update(u_char* state)
         }
 
         Menu_Loot_ResetPaging();
-        Core_Memory_FreeFromHighEnd(Menu_Loot_inventory);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Loot_inventory);
 
         if (Menu_Framework_lootLists != 0) {
             Items_ClearRoomLootList();

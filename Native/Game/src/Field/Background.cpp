@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -275,8 +275,8 @@ int Field_QueueTiledBackgroundLoad(int texture_page)
             if ((layout_allocation_bytes & 0x7FF) != 0) {
                 layout_allocation_bytes = (layout_allocation_bytes + disc_sector_bytes) - (layout_allocation_bytes & 0x7FF);
             }
-            Field_legacyBackgroundTimBuffer = (u_long *)(Core_Memory_AllocateFromHighEnd(texture_allocation_bytes));
-            Field_loadedBackgroundLayout = (Field_BackgroundLayout *)(Core_Memory_AllocateFromHighEnd(layout_allocation_bytes));
+            Field_legacyBackgroundTimBuffer = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(texture_allocation_bytes));
+            Field_loadedBackgroundLayout = (Field_BackgroundLayout *)(VS::Core::Memory::AllocateLiveFromHighEnd(layout_allocation_bytes));
             if ((Field_legacyBackgroundTimBuffer == 0) || (Field_loadedBackgroundLayout == 0)) {
                 return 0;
             }
@@ -314,7 +314,7 @@ int Field_FinishTiledBackgroundLoad(void)
     }
 
     if ((Field_backgroundLayoutDiscRequest != NULL) && (Field_backgroundLayoutDiscRequest->state == 4)) {
-        Core_Memory_FreeFromHighEnd(Field_legacyBackgroundTimBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Field_legacyBackgroundTimBuffer);
         Field_legacyBackgroundTimBuffer = NULL;
         Content_ReleaseDiscRequest(Field_backgroundLayoutDiscRequest);
         Field_backgroundLayoutDiscRequest = NULL;
@@ -330,7 +330,7 @@ int Field_ReleaseTiledBackground(void)
     if (Field_loadedBackgroundLayout != NULL) {
         Field_isTiledBackgroundEnabled = 0;
         Render_RetireTexturePageRange(Field_legacyBackgroundTexturePage, Field_legacyBackgroundTextureReservationId, 5);
-        Core_Memory_FreeFromHighEnd(Field_loadedBackgroundLayout);
+        VS::Core::Memory::FreeLiveFromHighEnd(Field_loadedBackgroundLayout);
         Field_loadedBackgroundLayout = NULL;
         return 1;
     }

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/StreamControlLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Effects/TrailEmitterLive.hpp"
@@ -9,7 +10,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
 #include "Effects/EffectResources.h"
@@ -218,7 +218,7 @@ int Effects_LoadEffectPackage(void)
     int _[16];
 
     if (Effects_packageBuffer == NULL) {
-        Effects_packageBuffer = Core_Memory_AllocateFromHighEnd(Effects_packageFile.size);
+        Effects_packageBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Effects_packageFile.size);
     }
 
     return Effects_PollEffectResourceRead(Effects_packageFile.lba + VS_E000_P_LBA,
@@ -241,7 +241,7 @@ void Effects_ReleaseEffectPackageResources(void)
         }
     }
     if (Effects_packageBuffer != NULL) {
-        Core_Memory_FreeFromHighEnd(Effects_packageBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Effects_packageBuffer);
         Effects_packageBuffer = NULL;
     }
 }
@@ -265,7 +265,7 @@ int Effects_UpdateEffectTextureLoading(void)
     case 1:
         if (Effects_textureLoadBuffer == NULL) {
             // FBT sizes are all equal
-            Effects_textureLoadBuffer = (u_long *)(Core_Memory_AllocateFromHighEnd(VS_E000_0_FBT_SIZE));
+            Effects_textureLoadBuffer = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_E000_0_FBT_SIZE));
         }
 
         loading_pending = Effects_PollEffectResourceRead(Effects_textureLoads.loadContexts[Effects_textureLoadIndex].lba + VS_E000_P_LBA,
@@ -304,7 +304,7 @@ int Effects_UpdateEffectTextureLoading(void)
 
     case 2:
         if (Effects_textureLoadBuffer != NULL) {
-            Core_Memory_FreeFromHighEnd(Effects_textureLoadBuffer);
+            VS::Core::Memory::FreeLiveFromHighEnd(Effects_textureLoadBuffer);
             Effects_textureLoadBuffer = NULL;
         }
         /* fallthrough */

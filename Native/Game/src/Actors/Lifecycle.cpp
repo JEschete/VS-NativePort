@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Gimmicks.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -98,7 +98,7 @@ int Actors_RemoveActorAtSlot(u_int index, int hidden_in_cache)
                 }
             }
 
-            Core_Memory_FreeFromLowEnd(actor);
+            VS::Core::Memory::FreeLiveFromLowEnd(actor);
 
             Battle_actors[index] = NULL;
         }

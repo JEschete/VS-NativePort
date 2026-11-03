@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/StreamControlLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
@@ -193,7 +193,7 @@ void Effects_InitEffectInstance(Effects_EffectSpawnRequest* spawn_request, Effec
 Effects_EffectInstance* Effects_CreatePrimaryEffectInstance(Effects_EffectSpawnRequest* spawn_request)
 {
     Effects_EffectInstance* currentNode;
-    Effects_EffectInstance* newNode = (Effects_EffectInstance *)(Core_Memory_AllocateFromHighEnd(sizeof *newNode));
+    Effects_EffectInstance* newNode = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode));
 
     Effects_InitEffectInstance(spawn_request, newNode);
 
@@ -244,7 +244,7 @@ void Effects_DestroyPrimaryEffectInstance(Effects_EffectInstance* effect_instanc
         renderer_cursor = next_renderer;
     }
 
-    Core_Memory_FreeFromHighEnd(effect_instance);
+    VS::Core::Memory::FreeLiveFromHighEnd(effect_instance);
 }
 
 // decomp: BATTLE.PRG func_800CE9B0 (src/BATTLE/BATTLE.PRG/5BF94.c:5170)
@@ -558,7 +558,7 @@ void Effects_ClearPrimaryEffects(void)
     while (instance_cursor != NULL) {
         Effects_EffectInstance* next_instance = instance_cursor->next;
         if (instance_cursor->context.timeline != NULL) {
-            Core_Memory_FreeFromHighEnd(instance_cursor->context.timeline);
+            VS::Core::Memory::FreeLiveFromHighEnd(instance_cursor->context.timeline);
             instance_cursor->context.timeline = NULL;
         }
         Effects_DestroyPrimaryEffectInstance(instance_cursor);
@@ -692,7 +692,7 @@ void Effects_ReleaseEffectToken(int effect_token)
 Effects_EffectInstance* Effects_CreateSecondaryEffectInstance(Effects_EffectSpawnRequest* spawn_request)
 {
     Effects_EffectInstance* instance_cursor;
-    Effects_EffectInstance* new_instance = (Effects_EffectInstance *)(Core_Memory_AllocateFromHighEnd(sizeof *new_instance));
+    Effects_EffectInstance* new_instance = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance));
     Effects_InitEffectInstance(spawn_request, new_instance);
     instance_cursor = Effects_secondaryInstances;
 
@@ -730,13 +730,13 @@ void Effects_DestroySecondaryEffectInstance(Effects_EffectInstance* effect_insta
     }
     Effects_ReleaseAllEffectParticles(effect_instance);
     Effects_ReleaseEffectToken(effect_instance->token);
-    Core_Memory_FreeFromHighEnd(effect_instance);
+    VS::Core::Memory::FreeLiveFromHighEnd(effect_instance);
 }
 
 // decomp: BATTLE.PRG func_800CF694 (src/BATTLE/BATTLE.PRG/5BF94.c:5636)
 Effects_RendererSlot* Effects_AttachEffectRenderer(Effects_EffectInstance* effect_instance, Effects_EffectRenderer renderer, int renderer_parameters)
 {
-    Effects_RendererSlot* new_renderer = (Effects_RendererSlot *)(Core_Memory_AllocateFromHighEnd(sizeof *new_renderer));
+    Effects_RendererSlot* new_renderer = (Effects_RendererSlot *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer));
     new_renderer->next = effect_instance->context.renderer;
     effect_instance->context.renderer = new_renderer;
     new_renderer->renderer = renderer;
@@ -749,7 +749,7 @@ Effects_RendererSlot* Effects_AttachEffectRenderer(Effects_EffectInstance* effec
 void Effects_DetachEffectRenderer(Effects_EffectInstance* effect_instance, Effects_RendererSlot* renderer_slot)
 {
     if (renderer_slot->rendererState != NULL) {
-        Core_Memory_FreeFromHighEnd(renderer_slot->rendererState);
+        VS::Core::Memory::FreeLiveFromHighEnd(renderer_slot->rendererState);
     }
 
     if (effect_instance->context.renderer == renderer_slot) {
@@ -762,7 +762,7 @@ void Effects_DetachEffectRenderer(Effects_EffectInstance* effect_instance, Effec
         renderer_cursor->next = renderer_slot->next;
     }
 
-    Core_Memory_FreeFromHighEnd(renderer_slot);
+    VS::Core::Memory::FreeLiveFromHighEnd(renderer_slot);
 }
 
 // decomp: BATTLE.PRG func_800CF8BC (src/BATTLE/BATTLE.PRG/5BF94.c:5697)

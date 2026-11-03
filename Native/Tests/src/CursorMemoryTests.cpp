@@ -5,12 +5,14 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <span>
 #include <string_view>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -21,8 +23,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Targeting.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Input/Buttons.h"
@@ -47,8 +47,6 @@ extern "C" {
 namespace {
 struct CursorFixture {
   State_Settings saved_settings = Input_settings;
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
   Menu_Framework_MenuMemory saved_memory = Menu_Framework_menuMemory;
   Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
   u_short* saved_text = Menu_Framework_itemsText;
@@ -61,7 +59,9 @@ struct CursorFixture {
   char saved_list_row = Menu_Framework_itemsListRow;
   u_char saved_id = Menu_Framework_subMenuId;
   u_short saved_count = Menu_Framework_subMenuRowCount;
-  std::array<Core_HeapBlockHeader, 512> heap{};
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   struct {
     std::array<Menu_Framework_MenuRow, 40> rows{};
     std::array<std::byte, 0x124> scratch{};
@@ -70,7 +70,6 @@ struct CursorFixture {
   std::array<int, 20> row_types{};
 
   CursorFixture() {
-    Core_Memory_InitializeHeap(heap.data(), sizeof(heap));
     Menu_Framework_menuItems = workspace.rows.data();
     Menu_Framework_itemsText = nullptr;
     Menu_Framework_menuMemory = {};
@@ -79,11 +78,9 @@ struct CursorFixture {
 
   ~CursorFixture() {
     if (Menu_Framework_itemsText != nullptr) {
-      Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
+      VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
     }
     Input_settings = saved_settings;
-    Core_legacyHeapList = saved_heap;
-    Core_legacySecondaryHeapList = saved_secondary;
     Menu_Framework_menuMemory = saved_memory;
     Menu_Framework_menuItems = saved_items;
     Menu_Framework_itemsText = saved_text;
@@ -103,14 +100,6 @@ struct CursorFixture {
                                   row_types.data());
   }
 };
-
-void CheckNativeHeapAllocation(void* allocation, std::size_t units) {
-  const auto* header = static_cast<Core_HeapBlockHeader*>(allocation) - 1;
-  CHECK(header->blockSize == units);
-  CHECK(reinterpret_cast<std::uintptr_t>(allocation) %
-            alignof(Core_HeapBlockHeader) ==
-        0);
-}
 
 struct PuzzleOptionsFixture {
   CursorFixture rows;
@@ -350,7 +339,7 @@ struct WorkshopChoicesFixture {
 
   ~WorkshopChoicesFixture() {
     if (Menu_Setup_itemsList != nullptr) {
-      Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
+      VS::Core::Memory::FreeLiveFromHighEnd(Menu_Setup_itemsList);
     }
     Menu_Setup_itemsList = saved_list;
     Menu_Setup_itemCount = saved_count;
@@ -419,12 +408,12 @@ struct WorkshopChoicesFixture {
   void Open(int (*select)(int), int initial, int capacity) {
     REQUIRE(select(initial) == 0);
     for (auto& row : setup.rows.workspace.rows) row.state = 1;
-    // InitializeHeap excludes its final header from the usable span.
-    std::array<std::byte, sizeof(Core_HeapBlockHeader)> before{}, after{};
-    std::memcpy(before.data(), &setup.rows.heap.back(), before.size());
+    // InitializeHeap excludes the arena's final unit from the usable span.
+    const auto slack =
+        std::span(setup.rows.arena).last<VS::Core::Memory::kHeapUnitBytes>();
+    const std::vector<std::byte> before(slack.begin(), slack.end());
     REQUIRE(select(0) == 0);
-    std::memcpy(after.data(), &setup.rows.heap.back(), after.size());
-    CHECK(before == after);
+    CHECK(std::ranges::equal(before, slack));
     REQUIRE(Menu_Setup_itemCount == capacity + 1);
     REQUIRE(Menu_Setup_itemsList != nullptr);
   }
@@ -658,45 +647,6 @@ std::vector<unsigned char> ReadWorkshopRecipe(std::string_view file) {
   SKIP("Extracted original workshop recipe is unavailable");
 }
 }  // namespace
-
-TEST_CASE(
-    "Heap allocation splitting uses native header units in both directions",
-    "[memory][heap]") {
-  CursorFixture fixture;
-  const bool from_high = GENERATE(false, true);
-  const auto allocate = from_high ? Core_Memory_AllocateFromHighEnd
-                                  : Core_Memory_AllocateFromLowEnd;
-  const auto release =
-      from_high ? Core_Memory_FreeFromHighEnd : Core_Memory_FreeFromLowEnd;
-  constexpr std::size_t kUnit = sizeof(Core_HeapBlockHeader);
-  constexpr u_int kBytes = static_cast<u_int>(kUnit + 1);
-  constexpr std::size_t kAllocationUnits = (kBytes + kUnit - 1) / kUnit + 1;
-  const auto available = Core_legacyHeapList.next->blockSize;
-  void* first = allocate(kBytes);
-  void* second = allocate(kBytes);
-  REQUIRE(first != nullptr);
-  REQUIRE(second != nullptr);
-  CheckNativeHeapAllocation(first, kAllocationUnits);
-  CheckNativeHeapAllocation(second, kAllocationUnits);
-  CHECK(Core_legacyHeapList.next->blockSize ==
-        available - 2 * kAllocationUnits);
-  release(first);
-  release(second);
-  CHECK(Core_legacyHeapList.next == fixture.heap.data());
-  CHECK(Core_legacyHeapList.prev == fixture.heap.data());
-  CHECK(Core_legacyHeapList.next->blockSize == available);
-}
-
-TEST_CASE("Heap setup and allocation do not manufacture initialized payloads",
-          "[memory][heap]") {
-  CursorFixture fixture;
-  auto* payload = reinterpret_cast<std::byte*>(fixture.heap.data() + 1);
-  std::fill_n(payload, sizeof(Core_HeapBlockHeader), std::byte{0xCD});
-  void* allocation = Core_Memory_AllocateFromLowEnd(1);
-  REQUIRE(allocation == payload);
-  CHECK(*static_cast<std::byte*>(allocation) == std::byte{0xCD});
-  Core_Memory_FreeFromLowEnd(allocation);
-}
 
 TEST_CASE("Workshop repair restores DP with original rounded PP cost",
           "[menu][equipment][workshop][repair]") {

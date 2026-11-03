@@ -10,12 +10,11 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Battle/Targeting.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Event/Camera.h"
 #include "Event/Script.h"
 #include "Event/ScriptAudio.h"
@@ -32,8 +31,9 @@ constexpr std::array<u_char, 3> kLookAtReturn{0xC2, 0x01, 0x55};
 
 struct EventSessionFixture {
   static constexpr std::size_t kArenaBytes = std::size_t{16} * 1024;
-  alignas(Core_HeapBlockHeader) std::array<std::byte, kArenaBytes> arena{};
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, kArenaBytes> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   decltype(Event_playbackPhase) saved_phase = Event_playbackPhase;
   decltype(Event_isStartConfirmed) saved_start = Event_isStartConfirmed;
   decltype(Event_isMainThreadFinished) saved_finished =
@@ -51,12 +51,6 @@ struct EventSessionFixture {
   decltype(std::to_array(Event_threadWaitFrames)) saved_waits =
       std::to_array(Event_threadWaitFrames);
 
-  EventSessionFixture() {
-    Core_Memory_InitializeHeap(
-        reinterpret_cast<Core_HeapBlockHeader*>(arena.data()),
-        static_cast<u_int>(arena.size()));
-  }
-
   ~EventSessionFixture() {
     Event_playbackPhase = saved_phase;
     Event_isStartConfirmed = saved_start;
@@ -68,7 +62,6 @@ struct EventSessionFixture {
     Event_legacySkipHandlerCopy = saved_dispatch;
     std::copy(saved_threads.begin(), saved_threads.end(), Event_threadCursors);
     std::copy(saved_waits.begin(), saved_waits.end(), Event_threadWaitFrames);
-    Core_legacyHeapList = saved_heap;
   }
 };
 

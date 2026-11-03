@@ -16,6 +16,7 @@
 
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleRenderLive.hpp"
@@ -26,8 +27,6 @@
 
 extern "C" {
 #include "Core/BiosRand.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -570,24 +569,15 @@ struct ChildEmissionFixture : EmissionFixture {
 };
 
 struct DispatchHeap {
-  Core_HeapBlockHeader saved = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
-  std::array<Core_HeapBlockHeader, 256> storage{};
-  unsigned free_units = 0;
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 384> storage{};
+  VS::Core::Memory::ScopedLiveGameHeap scope{storage};
 
-  DispatchHeap() {
-    Core_Memory_InitializeHeap(storage.data(), sizeof storage);
-    free_units = Core_legacyHeapList.next->blockSize;
-  }
-
-  ~DispatchHeap() {
-    Core_legacyHeapList = saved;
-    Core_legacySecondaryHeapList = saved_secondary;
-  }
-
-  static std::size_t Capacity(void* allocation) {
-    const auto* header = static_cast<Core_HeapBlockHeader*>(allocation) - 1;
-    return (header->blockSize - 1) * sizeof(Core_HeapBlockHeader);
+  static std::size_t Capacity(const void* allocation) {
+    const auto capacity = VS::Core::Memory::PayloadCapacity(
+        VS::Core::Memory::GameHeap(), allocation);
+    REQUIRE(capacity.has_value());
+    return capacity.value_or(0);
   }
 
   static void CheckPrefix(const Effects_ParticleQuadSet& state) {
@@ -631,8 +621,8 @@ TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
     fixture.CheckTexture(*state);
   }
   CHECK(dispatch(&renderer, 4, 0) == 0);
-  Core_Memory_FreeFromHighEnd(renderer.rendererState);
-  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
@@ -642,17 +632,16 @@ TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
   Effects_RendererSlot renderer{};
   REQUIRE(Effects_Plg265_ParticleDispatch(&renderer, 1, 30) == 1);
   const auto prefix = offsetof(Effects_ParticleQuadSet, textureAnimation);
-  const auto rounded = (prefix + sizeof(Core_HeapBlockHeader) - 1) /
-                       sizeof(Core_HeapBlockHeader) *
-                       sizeof(Core_HeapBlockHeader);
+  constexpr auto kUnit = VS::Core::Memory::kHeapUnitBytes;
+  const auto rounded = (prefix + kUnit - 1) / kUnit * kUnit;
   CHECK(DispatchHeap::Capacity(renderer.rendererState) == rounded);
   const auto* state =
       static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
   DispatchHeap::CheckPrefix(*state);
   CHECK(state->opaque8 == 0);
   CHECK(Effects_Plg265_ParticleDispatch(&renderer, 4, 0) == 0);
-  Core_Memory_FreeFromHighEnd(renderer.rendererState);
-  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
@@ -1362,8 +1351,8 @@ void CheckPlg074RingLifecycle(Effects_EffectRenderer renderer,
     CHECK(state->lifetime == (lifetime == 0 ? 0 : 1));
     fixture.ResetPackets();
     StopPlg074Ring<State>(renderer, slot);
-    Core_Memory_FreeFromHighEnd(state);
-    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    VS::Core::Memory::FreeLiveFromHighEnd(state);
+    CHECK(VS::Core::Memory::GameHeap().empty());
     fixture.ResetPackets();
   }
 }
@@ -1429,7 +1418,7 @@ TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
   CheckPlg074TiledRingGeometry(packets);
   CheckPlg074TiledRingPackets(packets);
   fixture.CheckGuards();
-  Core_Memory_FreeFromHighEnd(slot.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
   fixture.ResetPackets();
   CheckPlg074RingLifecycle<Effects_TiledRingState>(entry, fixture);
 }
@@ -1454,7 +1443,7 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
   CHECK(packets[0].poly.y0 == 120);
   CHECK(packets[7].poly.x1 == packets[0].poly.x0);
   fixture.CheckGuards();
-  Core_Memory_FreeFromHighEnd(slot.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
   fixture.ResetPackets();
   CheckPlg074RingLifecycle<Effects_RingState>(entry, fixture);
 }
@@ -1654,8 +1643,8 @@ TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
     REQUIRE(entry(&slot, 2, 0) == 1);
     CheckPlg074EmitterTick(*state, count, cycle);
     StopPlg074Emitter(entry, slot, cancel);
-    Core_Memory_FreeFromHighEnd(state);
-    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    VS::Core::Memory::FreeLiveFromHighEnd(state);
+    CHECK(VS::Core::Memory::GameHeap().empty());
     fixture.ResetPackets();
   }
 }
@@ -1712,7 +1701,7 @@ std::array<u_char, 5> CreatedTransparency(Plg074Fixture& fixture,
                   offsetof(Effects_TrailQuadSet, sampledTransparencyCurve),
               samples.size());
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
-  Core_Memory_FreeFromHighEnd(state);
+  VS::Core::Memory::FreeLiveFromHighEnd(state);
   return samples;
 }
 }  // namespace
@@ -1736,7 +1725,7 @@ TEST_CASE("PLG074 trail emitter refuses definitions the package lacks",
   CHECK(slot.rendererState == nullptr);
   CHECK(log.Contains("definition 1 is outside"));
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
-  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("PLG074 trail emitter refuses negative trail counts",
@@ -1749,7 +1738,7 @@ TEST_CASE("PLG074 trail emitter refuses negative trail counts",
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   CHECK(slot.rendererState == nullptr);
   CHECK(log.Contains("negative trail count"));
-  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("PLG074 trail emitter stops when its package is replaced",
@@ -1766,8 +1755,8 @@ TEST_CASE("PLG074 trail emitter stops when its package is replaced",
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
   CHECK(state->trails == nullptr);
   CHECK(log.Contains("no longer holds definition 0"));
-  Core_Memory_FreeFromHighEnd(state);
-  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  VS::Core::Memory::FreeLiveFromHighEnd(state);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
@@ -1787,7 +1776,7 @@ TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
   CHECK(CreatedTransparency(fixture, 3) ==
         std::array<u_char, 5>{128, 128, 128, 128, 128});
   CHECK(log.Contains("transparency curve 3 is outside"));
-  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("PLG074 trail tick events stay within the package's definitions",
@@ -1804,8 +1793,8 @@ TEST_CASE("PLG074 trail tick events stay within the package's definitions",
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 1);
   CHECK(log.Contains("tick event 1 is outside"));
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
-  Core_Memory_FreeFromHighEnd(state);
-  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  VS::Core::Memory::FreeLiveFromHighEnd(state);
+  CHECK(VS::Core::Memory::GameHeap().empty());
   fixture.ResetPackets();
 }
 
@@ -1825,7 +1814,7 @@ TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
   CHECK(Render_frameScratch.primitiveCursor == packets + 64);
   CheckPlg074SurfacePackets(packets);
   fixture.CheckGuards();
-  Core_Memory_FreeFromHighEnd(slot.rendererState);
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
   fixture.ResetPackets();
   CheckPlg074RingLifecycle<Effects_RotatingSurfaceState>(entry, fixture);
 }
@@ -1849,7 +1838,7 @@ TEST_CASE(
     fixture.ResetPackets();
     CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
     CHECK(fixture.instance.context.renderer == nullptr);
-    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    CHECK(VS::Core::Memory::GameHeap().empty());
     fixture.CheckGuards();
     fixture.ResetPackets();
   }
@@ -1877,7 +1866,7 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
     fixture.ResetPackets();
     CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
     CHECK(fixture.instance.context.renderer == nullptr);
-    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    CHECK(VS::Core::Memory::GameHeap().empty());
     fixture.ResetPackets();
   }
   Effects_Plg053_closedRingColorFactors[0] = saved_color;

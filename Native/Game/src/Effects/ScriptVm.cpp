@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Package.h"
@@ -245,7 +245,7 @@ int Effects_BranchIfEffectTimelineFinished(Effects_EffectInstance* effect_instan
 int Effects_FreeEffectScriptTimeline(Effects_EffectInstance* effect_instance)
 {
     if (effect_instance->context.timeline != NULL) {
-        Core_Memory_FreeFromHighEnd(effect_instance->context.timeline);
+        VS::Core::Memory::FreeLiveFromHighEnd(effect_instance->context.timeline);
         effect_instance->context.timeline = NULL;
     }
     return 1;

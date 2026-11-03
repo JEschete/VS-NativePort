@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/TrailEmitter.hpp"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Scratch.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
@@ -208,7 +208,7 @@ class LiveTrailEmitterHost final : public TrailEmitterHost {
   void ReleaseTrails() override {
     Effects_TrailQuadSet* state = State();
     if (state->trails != nullptr) {
-      Core_Memory_FreeFromHighEnd(state->trails);
+      VS::Core::Memory::FreeLiveFromHighEnd(state->trails);
       state->trails = nullptr;
     }
   }
@@ -243,17 +243,18 @@ void LiveTrailEmitterHost::Create(TrailEmitterPlan plan) {
                 plan.definition_index);
     return;
   }
-  auto* state =
-      static_cast<Effects_TrailQuadSet*>(Core_Memory_AllocateFromHighEnd(
-          sizeof(Effects_TrailQuadSet) + kStateTailBytes));
+  auto* state = static_cast<Effects_TrailQuadSet*>(
+      VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_TrailQuadSet) +
+                                                kStateTailBytes));
   if (state == nullptr) {
     VS_LOG_ERROR("effects", "PLG074 trail emitter: heap exhausted for state");
     return;
   }
-  auto* trails = static_cast<Effects_Trail*>(
-      Core_Memory_AllocateFromHighEnd(*count * sizeof(Effects_Trail)));
+  auto* trails =
+      static_cast<Effects_Trail*>(VS::Core::Memory::AllocateLiveFromHighEnd(
+          *count * sizeof(Effects_Trail)));
   if (trails == nullptr) {
-    Core_Memory_FreeFromHighEnd(state);
+    VS::Core::Memory::FreeLiveFromHighEnd(state);
     VS_LOG_ERROR("effects",
                  "PLG074 trail emitter: heap exhausted for {} trails", *count);
     return;

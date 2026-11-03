@@ -18,6 +18,7 @@ extern "C" {
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Core/Memory/HeapLive.hpp"
 
 extern "C" {
 #include "Actors/ActorAllocation.h"
@@ -41,7 +42,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -134,7 +134,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
 
   void PublishRoomAiMap(const RoomAiGrid& grid) override {
     auto* storage = static_cast<RoomAiStorage*>(
-        Core_Memory_AllocateFromLowEnd(sizeof(RoomAiStorage)));
+        VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(RoomAiStorage)));
     if (storage == nullptr) {
       Core_Errorf("ai", "Room AI allocation failed: bytes=%zu",
                   sizeof(RoomAiStorage));
@@ -212,7 +212,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
 
   void ReleaseRoomAiMap() override {
     if (Battle_Ai_roomAiState != nullptr) {
-      Core_Memory_FreeFromLowEnd(Battle_Ai_roomAiState);
+      VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_roomAiState);
     }
     ClearRoomAiBindings();
   }

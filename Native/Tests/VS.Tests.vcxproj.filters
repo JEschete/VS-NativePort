@@ -201,6 +201,9 @@
     <ClCompile Include="src\GroundNavigationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\HeapTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\InformationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

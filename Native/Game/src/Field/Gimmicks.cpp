@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
@@ -18,7 +19,6 @@ extern "C" {
 #include "Audio/ActorSound.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
 #include "Field/Collision.h"
@@ -949,7 +949,7 @@ int Field_ReleaseGimmickInstance(int gimmick_slot)
 exit:
     if (!found) {
         VS::Render::ForgetLiveModelExtent(released_gimmick->model);
-        Core_Memory_FreeFromLowEnd(released_gimmick->model);
+        VS::Core::Memory::FreeLiveFromLowEnd(released_gimmick->model);
     }
 
     VS::Battle::Ai::RemoveLiveAiTileOccupant(released_gimmick);

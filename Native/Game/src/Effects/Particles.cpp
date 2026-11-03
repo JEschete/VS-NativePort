@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -94,7 +94,7 @@ void Effects_AcquireParticlePool(int count)
         return;
     }
 
-    Effects_particlePool = (Effects_Particle *)(Core_Memory_AllocateFromHighEnd(sizeof *Effects_particlePool * count));
+    Effects_particlePool = (Effects_Particle *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Effects_particlePool * count));
     Effects_particlePool[0].previous = NULL;
     Effects_particlePool[0].next = &Effects_particlePool[1];
 
@@ -116,7 +116,7 @@ void Effects_ReleaseParticlePool(void)
 {
     if (Effects_particlePoolReferences == 1) {
         if (Effects_particlePool != NULL) {
-            Core_Memory_FreeFromHighEnd(Effects_particlePool);
+            VS::Core::Memory::FreeLiveFromHighEnd(Effects_particlePool);
             Effects_particlePool = NULL;
         }
         Effects_particlePoolReferences = 0;

@@ -2,6 +2,7 @@
 #include "Boot/Session.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 extern "C" {
@@ -16,7 +17,6 @@ extern "C" {
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
 #include "Ending/Credits/StaffRoll.h"
@@ -188,7 +188,7 @@ void Boot_InitializeTitleSession(void)
     Render_ShowLoadingScreen();
     Audio_Native_EnableReverb(1);
     VSyncCallback(VS::Core::IgnoreCall);
-    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
+    VS::Core::Memory::ResetLiveGameHeap();
     Battle_Ai_InvalidateSessionBindings();
     Content_InitializeDiscQueue();
     VS::Content::ResetLiveDiscDrive();

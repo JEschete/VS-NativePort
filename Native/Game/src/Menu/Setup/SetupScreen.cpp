@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/RoomLoading.h"
 #include "Input/Buttons.h"
@@ -316,7 +316,7 @@ void Menu_Setup_BuildItemList(int count, char** text, int* rowTypes)
             u_short description[48];
         };
     but this doesn't match */
-    Menu_Setup_itemsList = (u_short *)(Core_Memory_AllocateFromHighEnd(count << 7));
+    Menu_Setup_itemsList = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(count << 7));
 
     for (i = 0; i < count; ++i) {
 
@@ -417,7 +417,7 @@ void Menu_Setup_UpdateItemList(int list_update_flags)
                     VS::Menu::PlayLeaveSound();
                 }
 
-                Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Setup_itemsList);
 
                 Menu_Setup_itemsList = NULL;
                 Menu_Setup_itemsListSelection = -3;
@@ -428,7 +428,7 @@ void Menu_Setup_UpdateItemList(int list_update_flags)
                 if (menuItem->unselectable != 0) {
                     VS::Menu::PlayInvalidSound();
                 } else {
-                    Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
+                    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Setup_itemsList);
 
                     Menu_Setup_itemsList = NULL;
                     Menu_Setup_itemsListSelection = previousSelection;
@@ -449,7 +449,7 @@ void Menu_Setup_UpdateItemList(int list_update_flags)
             if (Input_buttonsPressed.allButtons & PADRdown) {
 
                 VS::Menu::PlayLeaveSound();
-                Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Setup_itemsList);
 
                 Menu_Setup_itemsList = NULL;
                 Menu_Setup_itemsListSelection = -2;

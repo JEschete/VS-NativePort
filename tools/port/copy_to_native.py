@@ -28,6 +28,9 @@ The output is regenerated from the decomp until each item is modernized. Two saf
                by tools\\port\\own.py into a file the copy tool never writes). They are not emitted; their names
                are provided by the owned header listed there, and their ledger `modernized` column reads `wip`
                (`x` once the rewrite tool approves them).
+  retired      DATA_LEDGER/TYPE_LEDGER rows with `copied` = retired and a `retired-by:` note name state or a type
+               that a promoted system replaced. They are not emitted and nothing provides their names, so a copied
+               use left behind fails to build; --mark keeps them retired.
   manifest     tools\\port\\copy_manifest.json (committed) records the hash of every generated file. If a
                generated file was edited by hand, or a file to be written exists and is not generated, the run
                stops without writing anything: take ownership with own.py (or revert the edit) instead.
@@ -212,6 +215,15 @@ def c_name(final: str) -> str:
 def note(row: dict, key: str) -> str | None:
     m = re.search(rf"(?:^|;)\s*{key}:(\w+)", row.get("notes") or "")
     return m[1] if m else None
+
+
+def retired(row: dict) -> bool:
+    """A global or type row replaced by a promoted system (module docstring): it must say what retired it."""
+    if row.get("copied") != "retired":
+        return False
+    if not re.search(r"(?:^|;)\s*retired-by:\S", row.get("notes") or ""):
+        raise SystemExit(f"{row['id']} {row.get('final_name', '')}: a retired row needs a retired-by: note")
+    return True
 
 
 def strip_code(text: str) -> str:
@@ -1166,6 +1178,9 @@ class Copier:
         for r in self.data:
             if note(r, "dup-of") or r["linkage"] == "local-static":
                 continue
+            if retired(r):
+                self.report["retired"].append(f"{r['id']} {r['final_name']}")
+                continue
             loc = r["final_location"].strip()
             name = c_name(r["final_name"])
             if self.take_owned(r["id"], name):
@@ -1489,6 +1504,9 @@ class Copier:
         for r in self.types:
             tid = r["id"]
             if self.canon_type(tid) != tid:
+                continue
+            if retired(r):
+                self.report["retired"].append(f"{tid} {r['final_name']}")
                 continue
             loc = r["final_location"].strip()
             name = c_name(r["final_name"])
@@ -2413,6 +2431,9 @@ def mark_ledgers(cp: Copier) -> dict[str, collections.Counter]:
                     seen.add(dup)
                     dup = note(cp.cat_by_id[dup], "dup-of") or dup
                 st = emitted.get(rid) or emitted.get(dup or "") or ("x" if r["kind"] == "template-body" else "")
+            elif retired(r):
+                c["retired"] += 1
+                continue
             elif key == "G":
                 st = emitted.get(rid) or ("x" if r["linkage"] == "local-static" or note(r, "dup-of") else "")
             else:

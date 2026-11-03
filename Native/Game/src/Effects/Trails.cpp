@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
 #include "Battle/BattleTypes.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Trails.h"
@@ -90,7 +90,7 @@ int Effects_UpdateBoneTrail(Effects_RendererSlot* node, u_int mode, int config)
 
     switch (mode) {
     case 1:
-        t = (Effects_BoneTrail *)(Core_Memory_AllocateFromHighEnd(sizeof *t));
+        t = (Effects_BoneTrail *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *t));
         node->rendererState = t;
         t->index = 0;
         t->age = 0;
@@ -161,7 +161,7 @@ int Effects_UpdateBoneTrail(Effects_RendererSlot* node, u_int mode, int config)
         t->config.life = 8;
         break;
     case 4:
-        Core_Memory_FreeFromHighEnd(t);
+        VS::Core::Memory::FreeLiveFromHighEnd(t);
         node->rendererState = NULL;
         result = 0;
         break;

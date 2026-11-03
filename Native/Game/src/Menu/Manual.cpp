@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
@@ -271,14 +271,14 @@ int Menu_Manual_UpdateHelpPages(void)
         } else {
             Menu_Manual_showMenuState = Menu_Manual_ManualMenuState_LoadSubMenu;
             if (Menu_Manual_helpText != NULL) {
-                Core_Memory_FreeFromHighEnd(Menu_Manual_helpText);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpText);
             }
             if (Menu_Manual_helpAssets != NULL) {
-                Core_Memory_FreeFromHighEnd(Menu_Manual_helpAssets);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpAssets);
             }
 
-            Menu_Manual_helpText = (int *)(Core_Memory_AllocateFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size));
-            Menu_Manual_helpAssets = (u_long *)(Core_Memory_AllocateFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size));
+            Menu_Manual_helpText = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size));
+            Menu_Manual_helpAssets = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size));
             Menu_Manual_helpAssetsCdQueue =
                 Content_AllocateDiscRequest(&Menu_Manual_kHelpFileCdFiles[selectedRow * 2]);
             Content_EnqueueDiscRequest(Menu_Manual_helpAssetsCdQueue, Menu_Manual_helpAssets);
@@ -299,7 +299,7 @@ int Menu_Manual_UpdateHelpPages(void)
         Menu_Manual_UploadSpriteTiles(Menu_Manual_helpAssets + 2, Menu_Manual_helpAssets[0]);
         Menu_Manual_UploadCluts(Menu_Manual_helpAssets + ((Menu_Manual_helpAssets[0] << 5) + 2), Menu_Manual_helpAssets[1]);
         if (Menu_Manual_helpAssets != NULL) {
-            Core_Memory_FreeFromHighEnd(Menu_Manual_helpAssets);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpAssets);
         }
         Menu_Manual_helpAssets = NULL;
         Menu_Manual_showMenuState = Menu_Manual_ManualMenuState_InitSubMenu;
@@ -390,7 +390,7 @@ int Menu_Manual_UpdateHelpPages(void)
             }
             Menu_TextBox(0)->state = 0;
             if (Menu_Manual_helpText != NULL) {
-                Core_Memory_FreeFromHighEnd(Menu_Manual_helpText);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpText);
             }
             Menu_Manual_helpText = NULL;
             break;
@@ -412,19 +412,19 @@ int Menu_Manual_UpdateHelpPages(void)
         break;
     case Menu_Manual_ManualMenuState_ExitToMenu:
         if (Menu_Manual_helpText != NULL) {
-            Core_Memory_FreeFromHighEnd(Menu_Manual_helpText);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpText);
         }
         if (Menu_Manual_helpAssets != NULL) {
-            Core_Memory_FreeFromHighEnd(Menu_Manual_helpAssets);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpAssets);
         }
         Render_RetireTexturePageRange(0x1D, 3, 5);
         return 1;
     case Menu_Manual_ManualMenuState_ExitToBattle:
         if (Menu_Manual_helpText != NULL) {
-            Core_Memory_FreeFromHighEnd(Menu_Manual_helpText);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpText);
         }
         if (Menu_Manual_helpAssets != NULL) {
-            Core_Memory_FreeFromHighEnd(Menu_Manual_helpAssets);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpAssets);
         }
         Render_RetireTexturePageRange(0x1D, 3, 5);
         return 2;

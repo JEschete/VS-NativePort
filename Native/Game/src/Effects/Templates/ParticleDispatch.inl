@@ -1,8 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Memory/HeapLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -24,9 +26,9 @@ int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lif
     case 1:
 #ifdef VS_PARTICLE_UNTEXTURED
         /* This variant uses only the state prefix, without texture animation. */
-        particle_set = (Effects_ParticleQuadSet *)(Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation)));
+        particle_set = (Effects_ParticleQuadSet *)(VS::Core::Memory::AllocateLiveFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation)));
 #else
-        particle_set = (Effects_ParticleQuadSet *)(Core_Memory_AllocateFromHighEnd(sizeof(Effects_ParticleQuadSet)));
+        particle_set = (Effects_ParticleQuadSet *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_ParticleQuadSet)));
 #endif
         renderer_slot->rendererState = particle_set;
         particle_set->definitionIndex = packed_parameters >> 8;
@@ -46,7 +48,7 @@ int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lif
             control_point_capacity = 8;
         }
 
-        particle_set->controlPoints = (SVECTOR *)(Core_Memory_AllocateFromHighEnd(control_point_capacity << 5));
+        particle_set->controlPoints = (SVECTOR *)(VS::Core::Memory::AllocateLiveFromHighEnd(control_point_capacity << 5));
 #ifndef VS_PARTICLE_UNTEXTURED
         Effects_ClearParticleTextureState((int*)(&particle_set->textureAnimation));
         Effects_InitializeParticleTextureAnimation(&particle_set->textureAnimation, particle_definition->textureIndex, particle_definition->animationId);
@@ -83,7 +85,7 @@ int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lif
         if (particle_set->opaque0 != 0) {
             --particle_set->opaque0;
             if (!particle_set->opaque0) {
-                Core_Memory_FreeFromHighEnd(particle_set->controlPoints);
+                VS::Core::Memory::FreeLiveFromHighEnd(particle_set->controlPoints);
                 renderer_alive = 0;
             }
         }
@@ -94,7 +96,7 @@ int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lif
         break;
 
     case 4:
-        Core_Memory_FreeFromHighEnd(particle_set->controlPoints);
+        VS::Core::Memory::FreeLiveFromHighEnd(particle_set->controlPoints);
         renderer_alive = 0;
         break;
     }

@@ -3,12 +3,13 @@
 // queue, low-end heap, texture pages and the screens' text tables.
 #include "Save/MenuAssetsLive.hpp"
 
+#include "Core/Memory/HeapLive.hpp"
+
 extern "C" {
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/Files.h"
@@ -83,8 +84,8 @@ class LiveMenuAssets final : public MenuAssetHost {
                                   kSaveTextureOwner);
   }
   void AllocateAssets(MenuAssetOwner owner) override {
-    Title_memoryCardUiResource =
-        static_cast<char*>(Core_Memory_AllocateFromLowEnd(kImageBytes));
+    Title_memoryCardUiResource = static_cast<char*>(
+        VS::Core::Memory::AllocateLiveFromLowEnd(kImageBytes));
     Save_MemoryCard_uiResources = reinterpret_cast<Save_CardUiResources*>(
         Title_memoryCardUiResource + kResourceOffset);
     if (owner == MenuAssetOwner::kDataMenu) {
@@ -97,7 +98,7 @@ class LiveMenuAssets final : public MenuAssetHost {
         &Save_MemoryCard_uiResources->directoryEntry;
   }
   void FreeAssets() override {
-    Core_Memory_FreeFromLowEnd(Title_memoryCardUiResource);
+    VS::Core::Memory::FreeLiveFromLowEnd(Title_memoryCardUiResource);
     Title_memoryCardUiResource = nullptr;
     Save_MemoryCard_uiResources = nullptr;
   }

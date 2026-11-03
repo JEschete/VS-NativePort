@@ -1,12 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Stream.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits.h"
@@ -890,7 +890,7 @@ void Ending_Credits_RunStaffRoll(void)
     for (i = 5; i < 16; ++i) {
         file.lba = Ending_Credits_illustrationDiscLocations[i - 5];
         file.size = Ending_Credits_illustrationDiscSizes[i - 5];
-        Ending_Credits_illustrationResources[i] = Core_Memory_AllocateFromHighEnd(file.size);
+        Ending_Credits_illustrationResources[i] = VS::Core::Memory::AllocateLiveFromHighEnd(file.size);
         slot = Content_AllocateDiscRequest(&file);
         Content_EnqueuePriorityDiscRequest(slot, Ending_Credits_illustrationResources[i]);
 
@@ -921,7 +921,7 @@ void Ending_Credits_RunStaffRoll(void)
     SetDispMask(0);
 
     for (i = 5; i < 16; ++i) {
-        Core_Memory_FreeFromHighEnd(Ending_Credits_illustrationResources[i]);
+        VS::Core::Memory::FreeLiveFromHighEnd(Ending_Credits_illustrationResources[i]);
     }
 
     Ending_Credits_WaitForMusicEnd();
@@ -1342,11 +1342,11 @@ int Ending_Credits_PresentFrame(u_long* ordering_table)
 void Ending_Credits_AllocateRenderBuffers(void)
 {
     Ending_Credits_InitializeDisplay(0x140, 0xF0, 0x200, 0, 0, 0);
-    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
-    Render_legacyPrimitiveBuffers[0] = Core_Memory_AllocateFromLowEnd(0x20000);
-    Render_legacyPrimitiveBuffers[1] = Core_Memory_AllocateFromLowEnd(0x20000);
-    Render_legacyOrderingTables[0] = Core_Memory_AllocateFromLowEnd(0x2088);
-    Render_legacyOrderingTables[1] = Core_Memory_AllocateFromLowEnd(0x2088);
+    VS::Core::Memory::ResetLiveGameHeap();
+    Render_legacyPrimitiveBuffers[0] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
+    Render_legacyPrimitiveBuffers[1] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
+    Render_legacyOrderingTables[0] = VS::Core::Memory::AllocateLiveFromLowEnd(0x2088);
+    Render_legacyOrderingTables[1] = VS::Core::Memory::AllocateLiveFromLowEnd(0x2088);
 }
 
 // decomp: ENDING.PRG func_8006B930 (src/ENDING/ENDING.PRG/D4.c:1551)

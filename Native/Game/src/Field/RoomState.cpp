@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -6,7 +7,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/ValueLabels.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -87,9 +87,9 @@ void Field_InitializeRoomRuntimeState(void)
     VS::Core::Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
     VS::Core::Memory::ZeroLiveAlignedWords(&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory);
     VS::Core::Memory::ZeroLiveAlignedWords(&Field_manualDisplayState, sizeof Field_manualDisplayState);
-    Field_roomPalettes = (u_short *)(Core_Memory_AllocateFromLowEnd(0x800));
-    Battle_floatingLabels = (Battle_FloatingLabel (*)[32])(Core_Memory_AllocateFromLowEnd(sizeof *Battle_floatingLabels));
-    Battle_placedLabelPositions = (DVECTOR *)(Core_Memory_AllocateFromLowEnd(0x80));
+    Field_roomPalettes = (u_short *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x800));
+    Battle_floatingLabels = (Battle_FloatingLabel (*)[32])(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_floatingLabels));
+    Battle_placedLabelPositions = (DVECTOR *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x80));
     Field_enteredDoorId = -1;
     Field_areRoomUpdatesPaused = 0;
     Field_isRoomTintActive = 0;

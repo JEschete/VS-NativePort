@@ -2,6 +2,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Boot/SessionLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/MinimapSceneLive.hpp"
@@ -34,7 +35,6 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
 #include "Effects/Weather.h"
@@ -126,7 +126,7 @@ void Field_LoadZoneRoomFileTable(void* room_file_table_data, int size)
     if (size == 0) {
         VS::Core::IgnoreDiagnostic(0x8B, 0);
     }
-    Field_zoneContext.mpdFiles = (Content_DiscFile *)(Core_Memory_AllocateFromLowEnd(size));
+    Field_zoneContext.mpdFiles = (Content_DiscFile *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
     VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.mpdFiles, room_file_table_data, size);
 }
 
@@ -136,10 +136,10 @@ void Field_LoadZoneEnemyTemplates(long* data, int arg1 __attribute__((unused)))
     Field_zoneContext.zndEnemyCount = *data;
 
     if (Field_zoneContext.zndEnemyCount != 0) {
-        Field_zoneContext.zudFiles = (Content_DiscFile *)(Core_Memory_AllocateFromLowEnd(Field_zoneContext.zndEnemyCount * 8));
+        Field_zoneContext.zudFiles = (Content_DiscFile *)(VS::Core::Memory::AllocateLiveFromLowEnd(Field_zoneContext.zndEnemyCount * 8));
         VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.zudFiles, data + 1,
             Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zudFiles);
-        Field_zoneContext.zndEnemies = (Field_ZndEnemyRecord *)(Core_Memory_AllocateFromLowEnd(
+        Field_zoneContext.zndEnemies = (Field_ZndEnemyRecord *)(VS::Core::Memory::AllocateLiveFromLowEnd(
             Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zndEnemies));
         VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.zndEnemies,
             data + ((Field_zoneContext.zndEnemyCount * 2) + 1),
@@ -165,7 +165,7 @@ void Field_QueueZoneLoad(int id)
     if (Field_zoneContext.zndData != NULL) {
         VS::Core::IgnoreDiagnostic(0x88, 0);
     }
-    Field_zoneContext.zndData = Core_Memory_AllocateFromHighEnd(cdFile.size);
+    Field_zoneContext.zndData = VS::Core::Memory::AllocateLiveFromHighEnd(cdFile.size);
     Content_EnqueuePriorityDiscRequest(Field_zoneContext.zndDiscRequest, Field_zoneContext.zndData);
     if (Field_zoneContext.isMusicFadeEnabled != 0) {
         int zone_music_id = Field_zoneMusicIds[id];
@@ -206,7 +206,7 @@ void Field_FinishZoneLoad(int id)
 
     musicId = header->musicId;
 
-    Core_Memory_FreeFromHighEnd(header);
+    VS::Core::Memory::FreeLiveFromHighEnd(header);
     Field_zoneContext.zndData = NULL;
 
     if (!Save_NativeResumePending()) {
@@ -244,12 +244,12 @@ void Field_ReleaseZoneData(void)
     Event_ReleaseZoneEventResources();
     Field_ZoneCleanupHook(0);
     if (Field_zoneContext.zndEnemies != NULL) {
-        Core_Memory_FreeFromLowEnd(Field_zoneContext.zndEnemies);
+        VS::Core::Memory::FreeLiveFromLowEnd(Field_zoneContext.zndEnemies);
     }
     if (Field_zoneContext.zudFiles != NULL) {
-        Core_Memory_FreeFromLowEnd(Field_zoneContext.zudFiles);
+        VS::Core::Memory::FreeLiveFromLowEnd(Field_zoneContext.zudFiles);
     }
-    Core_Memory_FreeFromLowEnd(Field_zoneContext.mpdFiles);
+    VS::Core::Memory::FreeLiveFromLowEnd(Field_zoneContext.mpdFiles);
 }
 
 // decomp: BATTLE.PRG func_80089104 (src/BATTLE/BATTLE.PRG/146C.c:14899)
@@ -414,7 +414,7 @@ void Field_SpawnRoomActors(void)
                     VS::Core::IgnoreDiagnostic(0x86, 0);
 
                     if (Field_zoneContext.zudData != NULL) {
-                        Core_Memory_FreeFromHighEnd(Field_zoneContext.zudData);
+                        VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
                     }
 
                     Field_zoneContext.zudData = NULL;
@@ -428,7 +428,7 @@ void Field_SpawnRoomActors(void)
                     VS::Core::IgnoreDiagnostic(0x86, 0);
 
                     if (Field_zoneContext.zudData != NULL) {
-                        Core_Memory_FreeFromHighEnd(Field_zoneContext.zudData);
+                        VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
                     }
 
                     Field_zoneContext.zudData = NULL;
@@ -490,7 +490,7 @@ void Field_SpawnRoomActors(void)
         }
     }
     if (Field_zoneContext.zudData != NULL) {
-        Core_Memory_FreeFromHighEnd(Field_zoneContext.zudData);
+        VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
     }
 
     Field_zoneContext.zudData = NULL;
@@ -600,7 +600,7 @@ void Field_LoadRoomEnemyPlacements(void* data, u_int dataLen)
 {
     Boot_EncounterRoomPlacements(&data, &dataLen);
     if (dataLen != 0) {
-        Field_zoneContext.mpdEnemies = (Field_MpdEnemySpawn *)(Core_Memory_AllocateFromLowEnd(dataLen));
+        Field_zoneContext.mpdEnemies = (Field_MpdEnemySpawn *)(VS::Core::Memory::AllocateLiveFromLowEnd(dataLen));
         VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.mpdEnemies, data, dataLen);
         Field_zoneContext.mpdEnemyCount = dataLen / sizeof(Field_MpdEnemySpawn);
         return;
@@ -624,7 +624,7 @@ void Field_QueueRoomLoad(int id)
     if (Field_zoneContext.mpdData != NULL) {
         VS::Core::IgnoreDiagnostic(0x8A, 0);
     }
-    Field_zoneContext.mpdData = Core_Memory_AllocateFromHighEnd(file.size);
+    Field_zoneContext.mpdData = VS::Core::Memory::AllocateLiveFromHighEnd(file.size);
     Content_EnqueuePriorityDiscRequest(Field_zoneContext.mpdDiscRequest, Field_zoneContext.mpdData);
 }
 
@@ -651,8 +651,8 @@ void Field_FinishRoomLoad(int requested_room_id)
     Content_ReleaseDiscRequest(Field_zoneContext.mpdDiscRequest);
     Field_zoneContext.mpdDiscRequest = NULL;
 
-    Render_legacyPrimitiveBuffers[0] = Core_Memory_AllocateFromLowEnd(0x20000);
-    Render_legacyPrimitiveBuffers[1] = Core_Memory_AllocateFromLowEnd(0x20000);
+    Render_legacyPrimitiveBuffers[0] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
+    Render_legacyPrimitiveBuffers[1] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
 
     Render_InitializeClutAnimation();
 
@@ -742,7 +742,7 @@ void Field_FinishRoomLoad(int requested_room_id)
     Field_LoadRoomEnemyPlacements(
         (void*)(mpd_section_offset + (intptr_t)mpdHeader), ((Field_MpdHeader*)mpdHeader)->enemySectionSize);
 
-    Core_Memory_FreeFromHighEnd(mpdHeader);
+    VS::Core::Memory::FreeLiveFromHighEnd(mpdHeader);
 
     Field_roomLoadResetBlock.reserved14 = 0;
 
@@ -876,7 +876,7 @@ void Field_UnloadCurrentRoom(void)
     Field_MarkCurrentRoomVisited();
     Field_ReleaseOwnedRoomSections(0);
     if (Field_roomCleanupBuffer != NULL) {
-        Core_Memory_FreeFromLowEnd(Field_roomCleanupBuffer);
+        VS::Core::Memory::FreeLiveFromLowEnd(Field_roomCleanupBuffer);
     }
     if (Field_auxiliaryActor != NULL) {
         VS::Battle::Ai::FreeLiveActorAiState(Field_auxiliaryActor);
@@ -886,8 +886,8 @@ void Field_UnloadCurrentRoom(void)
     Battle_SetActorMarker(0, 0);
     Actors_ResetAllActorMovement();
     Items_ClearRoomLootList();
-    Core_Memory_FreeFromLowEnd(Render_legacyPrimitiveBuffers[1]);
-    Core_Memory_FreeFromLowEnd(Render_legacyPrimitiveBuffers[0]);
+    VS::Core::Memory::FreeLiveFromLowEnd(Render_legacyPrimitiveBuffers[1]);
+    VS::Core::Memory::FreeLiveFromLowEnd(Render_legacyPrimitiveBuffers[0]);
 }
 
 // decomp: BATTLE.PRG _loadZndTims (src/BATTLE/BATTLE.PRG/146C.c:15608)
@@ -965,7 +965,7 @@ int Field_LoadRoomSections(int owner_room_index, void* data)
     }
 
     VS::Core::Memory::CopyLiveAlignedWords(&Field_roomData.header, data, 0x60);
-    room_section_allocation = Core_Memory_AllocateFromLowEnd(dataSz);
+    room_section_allocation = VS::Core::Memory::AllocateLiveFromLowEnd(dataSz);
     VS::Core::Memory::CopyLiveAlignedWords(room_section_allocation, ((u_char*)(data)) + 0x60, dataSz);
 
     dataSz = 0;
@@ -1043,7 +1043,7 @@ int Field_ReleaseOwnedRoomSections(int owner_room_index)
             Field_ReleaseWeatherParticles();
             ((void (*)(void))Field_ReleaseRoomEffects)();
             if (Field_roomData.geometry != 0) {
-                Core_Memory_FreeFromLowEnd((void*)Field_roomData.geometry);
+                VS::Core::Memory::FreeLiveFromLowEnd((void*)Field_roomData.geometry);
             }
             VS::Core::Memory::ZeroLiveAlignedWords(&Field_roomData, sizeof(Field_RoomRecord));
             return 1;

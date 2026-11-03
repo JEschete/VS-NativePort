@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
@@ -120,7 +120,7 @@ int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int
     int curve;
     switch (lifecycle_command) {
     case 1:
-        state = (Effects_Plg128_CameraEffectState *)(renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state)));
+        state = (Effects_Plg128_CameraEffectState *)(renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));
         state->effect = packed_parameters >> 8;
         state->lifetime = packed_parameters;
         state->mode = packed_parameters >> 16;

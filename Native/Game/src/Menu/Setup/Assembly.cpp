@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -287,7 +287,7 @@ int Menu_Setup_SelectAssemblyBlade(int params)
     switch (Menu_Setup_assemblyBladeState) {
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            textBuf = Core_Memory_AllocateFromHighEnd(0x72C);
+            textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x72C);
 
             if (blade == NULL) {
                 menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_blades];
@@ -326,7 +326,7 @@ int Menu_Setup_SelectAssemblyBlade(int params)
             }
 
             Menu_Setup_BuildItemList(bladeCount, menuText, Menu_Framework_rowTypeBuf);
-            Core_Memory_FreeFromHighEnd(textBuf);
+            VS::Core::Memory::FreeLiveFromHighEnd(textBuf);
             Menu_Setup_assemblyBladeState = 1;
         }
         break;
@@ -401,7 +401,7 @@ int Menu_Setup_SelectAssemblyGrip(int params)
     switch (Menu_Setup_assemblyGripState) {
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            textBuf = Core_Memory_AllocateFromHighEnd(0x72CU);
+            textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x72CU);
 
             if (grip == NULL) {
                 menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_grips];
@@ -441,7 +441,7 @@ int Menu_Setup_SelectAssemblyGrip(int params)
             }
 
             Menu_Setup_BuildItemList(gripCount, menuText, Menu_Framework_rowTypeBuf);
-            Core_Memory_FreeFromHighEnd(textBuf);
+            VS::Core::Memory::FreeLiveFromHighEnd(textBuf);
             Menu_Setup_assemblyGripState = 1;
         }
         break;
@@ -513,7 +513,7 @@ int Menu_Setup_SelectGem(int params)
     switch (Menu_Setup_gemState) {
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            textBuf = Core_Memory_AllocateFromHighEnd(0x14AC);
+            textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x14AC);
 
 
             if (gem == NULL) {
@@ -545,7 +545,7 @@ int Menu_Setup_SelectGem(int params)
                 }
             }
             Menu_Setup_BuildItemList(gemCount, menuText, Menu_Framework_rowTypeBuf);
-            Core_Memory_FreeFromHighEnd(textBuf);
+            VS::Core::Memory::FreeLiveFromHighEnd(textBuf);
             Menu_Setup_gemState = 1;
         }
         break;

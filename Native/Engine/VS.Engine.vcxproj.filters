@@ -378,21 +378,15 @@
     <ClCompile Include="src\Core\Memory\Heap.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Memory\Heap.h">
+    <ClCompile Include="src\Core\Memory\HeapLive.cpp">
       <Filter>src\Core\Memory</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Core\Memory\WordCopy.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Memory\WordCopyLive.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\Memory.cpp">
-      <Filter>src\Core</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Core\Memory.h">
-      <Filter>src\Core</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\Overlays.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -766,6 +760,12 @@
       <Filter>include\Core\Memory</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Memory\CopyLive.hpp">
+      <Filter>include\Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Memory\Heap.hpp">
+      <Filter>include\Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Memory\HeapLive.hpp">
       <Filter>include\Core\Memory</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Memory\WordCopy.hpp">

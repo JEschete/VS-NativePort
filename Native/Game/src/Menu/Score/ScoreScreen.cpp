@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
@@ -540,7 +540,7 @@ int Menu_Score_Update(void)
         } else if (selectedRow == -2) {
             Menu_Score_nextState = 1;
         } else if (selectedRow == 3) {
-            Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(Core_Memory_AllocateFromHighEnd(Menu_Score_kMonBinFile.size));
+            Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size));
             Menu_Score_monBinCdQueueSlot = Content_AllocateDiscRequest(&Menu_Score_kMonBinFile);
 
             Content_EnqueueDiscRequest(Menu_Score_monBinCdQueueSlot, Menu_Score_monBinData);
@@ -985,12 +985,12 @@ int Menu_Score_Update(void)
             }
 
             if (Menu_Score_nextState != 1) {
-                Core_Memory_FreeFromHighEnd(Menu_Score_monBinData);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_monBinData);
                 Menu_Score_menuState = 1;
                 break;
             }
 
-            Core_Memory_FreeFromHighEnd(Menu_Score_monBinData);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_monBinData);
             Menu_Score_RestoreCamera();
             return 2;
         }
@@ -1255,7 +1255,7 @@ int Menu_Score_Update(void)
         Menu_Score_FreeEnemyPreview();
 
         if (Menu_Score_nextState != 0) {
-            Core_Memory_FreeFromHighEnd(Menu_Score_monBinData);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_monBinData);
             Menu_Score_RestoreCamera();
             return 2;
         }

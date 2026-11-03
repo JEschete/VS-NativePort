@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/XaMixLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Save/FileMenuLive.hpp"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Boot/PlayerSettings.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "Event/ScriptAudio.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
@@ -364,7 +364,7 @@ void Title_LoadBackgroundTextures(void)
     u_long* p;
 
     i = 0;
-    data = (u_long *)(Core_Memory_AllocateFromLowEnd(544 * (512 + 64) * sizeof(u_short)));
+    data = (u_long *)(VS::Core::Memory::AllocateLiveFromLowEnd(544 * (512 + 64) * sizeof(u_short)));
     p = data;
 
 
@@ -392,7 +392,7 @@ void Title_LoadBackgroundTextures(void)
     }
     setRECT(&rect, 480, 394, 16, 1);
     LoadImage(&rect, (u_long*)Title_kMenuItemOutlinePalettes);
-    Core_Memory_FreeFromLowEnd(data);
+    VS::Core::Memory::FreeLiveFromLowEnd(data);
 }
 
 // decomp: TITLE.PRG _initTitleScreen (src/TITLE/TITLE.PRG/22C.c:3821)
@@ -428,7 +428,7 @@ void* Title_InitializeMenu(int menuItem)
     Title_InitializeMenuItem(menuItem, 64);
     Title_InitializeMenuItem((menuItem + 1) & 3, 96);
     Title_InitializeMenuItem((menuItem + 3) & 3, 32);
-    p = (u_long *)(Core_Memory_AllocateFromLowEnd(0x22380));
+    p = (u_long *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x22380));
     offset = p + 160 * 64;
     setRECT(&rect, 192, 448, 160, 64);
     StoreImage(&rect, offset);
@@ -441,7 +441,7 @@ void* Title_InitializeMenu(int menuItem)
 }
 
 // decomp: TITLE.PRG _freeHeap (src/TITLE/TITLE.PRG/22C.c:3867)
-void Title_ReleaseMenuCapture(void* menu_capture) { Core_Memory_FreeFromLowEnd(menu_capture); }
+void Title_ReleaseMenuCapture(void* menu_capture) { VS::Core::Memory::FreeLiveFromLowEnd(menu_capture); }
 
 // decomp: TITLE.PRG _fadeInMenu (src/TITLE/TITLE.PRG/22C.c:3869)
 void Title_BlendMenuBackground(u_short* bgData, int textBlendFactor)

@@ -12,6 +12,7 @@
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -27,8 +28,6 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
 #include "State/Timers.h"
@@ -36,8 +35,6 @@ extern "C" {
 
 namespace {
 struct CleanupFixture {
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
@@ -50,15 +47,14 @@ struct CleanupFixture {
   Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
   int saved_attribute = Battle_Ai_attributeActorMask;
   int saved_busy = Battle_Ai_candidateEngagedThisUpdate;
-  std::array<Core_HeapBlockHeader, 2048> heap{};
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<Battle_Actor, 3> actors{};
   Battle_Ai_RoomAiState room{};
   u_short flags[32][32]{};
-  unsigned free_units = 0;
 
   CleanupFixture() {
-    Core_Memory_InitializeHeap(heap.data(), sizeof(heap));
-    free_units = Core_legacyHeapList.next->blockSize;
     Battle_Ai_roomAiState = &room;
     Battle_Ai_tileFlagMap = flags;
     Battle_Ai_arenaOrbit = nullptr;
@@ -81,8 +77,6 @@ struct CleanupFixture {
   }
 
   ~CleanupFixture() {
-    Core_legacyHeapList = saved_heap;
-    Core_legacySecondaryHeapList = saved_secondary;
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
               Battle_Ai_actorAiStates);
@@ -97,7 +91,8 @@ struct CleanupFixture {
 
   Battle_Ai_ActorAiState* AllocateState(std::size_t index) {
     auto* state = static_cast<Battle_Ai_ActorAiState*>(
-        Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState)));
+        VS::Core::Memory::AllocateLiveFromLowEnd(
+            sizeof(Battle_Ai_ActorAiState)));
     REQUIRE(state != nullptr);
     std::construct_at(state);
     state->actorId = static_cast<u_char>(actors[index].id);
@@ -157,7 +152,7 @@ TEST_CASE("Defeat detaches every native peer reference before repeat cleanup",
   VS::Battle::Ai::ClearLiveActorAiLinksAndPlan(5);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("AI navigation override views retain a full native pointer",
@@ -174,17 +169,17 @@ TEST_CASE(
     "[ai][cleanup]") {
   CleanupFixture fixture;
   auto* state = fixture.AllocateState(1);
-  void* route = Core_Memory_AllocateFromHighEnd(512);
+  void* route = VS::Core::Memory::AllocateLiveFromHighEnd(512);
   REQUIRE(route != nullptr);
   state->nativePointer18C = route;
-  const auto allocated = Core_legacyHeapList.next->blockSize;
+  const auto allocated = VS::Core::Memory::GameHeap().free_units();
   CHECK(reinterpret_cast<uintptr_t>(route) > 0xFFFFFFFFu);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(2);
   CHECK(state->nativePointer18C == nullptr);
-  CHECK(Core_legacyHeapList.next->blockSize > allocated);
+  CHECK(VS::Core::Memory::GameHeap().free_units() > allocated);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(2);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE(
@@ -226,7 +221,7 @@ TEST_CASE(
   CHECK(fixture.room.specialActors[3] == nullptr);
   CHECK(fixture.room.specialActors[1] == &fixture.actors[2]);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("AI teardown leaves no engaged-list or marker references",
@@ -242,21 +237,21 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   CHECK(Battle_actorMarkers[2] == 0);
   CHECK(fixture.actors[1].commandFlags == 0xF8);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("AI teardown preserves the original Ashley state lifetime",
           "[ai][cleanup]") {
   CleanupFixture fixture;
   auto* state = fixture.AllocateState(0);
-  state->nativePointer18C = Core_Memory_AllocateFromHighEnd(128);
+  state->nativePointer18C = VS::Core::Memory::AllocateLiveFromHighEnd(128);
   REQUIRE(state->nativePointer18C != nullptr);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[0]);
   CHECK(Battle_Ai_actorAiStates[0] == state);
   CHECK(state->nativePointer18C == nullptr);
-  Core_Memory_FreeFromLowEnd(state);
+  VS::Core::Memory::FreeLiveFromLowEnd(state);
   Battle_Ai_actorAiStates[0] = nullptr;
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
@@ -266,11 +261,11 @@ TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
   Battle_Ai_SettingsView input{};
   std::array<unsigned char, sizeof(input)> before{};
   std::memcpy(before.data(), &input, before.size());
-  auto* dirty =
-      Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ArenaOrbitState));
+  auto* dirty = VS::Core::Memory::AllocateLiveFromLowEnd(
+      sizeof(Battle_Ai_ArenaOrbitState));
   REQUIRE(dirty != nullptr);
   std::memset(dirty, 0xA5, sizeof(Battle_Ai_ArenaOrbitState));
-  Core_Memory_FreeFromLowEnd(dirty);
+  VS::Core::Memory::FreeLiveFromLowEnd(dirty);
   VS::Battle::Ai::AllocateLiveOrbitingBossState(supplied ? &input : nullptr);
   REQUIRE(Battle_Ai_arenaOrbit != nullptr);
   CHECK(static_cast<void*>(Battle_Ai_arenaOrbit) == dirty);
@@ -283,10 +278,10 @@ TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
   std::array<unsigned char, sizeof(input)> after{};
   std::memcpy(after.data(), &input, after.size());
   CHECK(after == before);
-  CHECK(Core_legacyHeapList.next->blockSize < fixture.free_units);
-  Core_Memory_FreeFromLowEnd(Battle_Ai_arenaOrbit);
+  CHECK_FALSE(VS::Core::Memory::GameHeap().empty());
+  VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_arenaOrbit);
   Battle_Ai_arenaOrbit = nullptr;
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
@@ -301,7 +296,7 @@ TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
     REQUIRE(Battle_Ai_arenaOrbit != nullptr);
     VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
     CHECK(Battle_Ai_arenaOrbit == nullptr);
-    CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+    CHECK(VS::Core::Memory::GameHeap().empty());
   }
 }
 namespace {
@@ -562,7 +557,7 @@ TEST_CASE("AI retirement follows allocation ownership after kind changes",
   auto* removed = fixture.AllocateState(1);
   auto* peer = fixture.AllocateState(2);
   peer->linkedActor = 2;
-  removed->nativePointer18C = Core_Memory_AllocateFromHighEnd(128);
+  removed->nativePointer18C = VS::Core::Memory::AllocateLiveFromHighEnd(128);
   REQUIRE(removed->nativePointer18C != nullptr);
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
   Battle_Ai_FrameState()->actors[2] = removed;
@@ -573,7 +568,7 @@ TEST_CASE("AI retirement follows allocation ownership after kind changes",
   fixture.actors[1].kind = 4;
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE(
@@ -583,7 +578,7 @@ TEST_CASE(
   const auto kind = GENERATE(0, 1, 4, 0x10);
   CleanupFixture fixture;
   auto* state = fixture.AllocateState(0);
-  state->nativePointer18C = Core_Memory_AllocateFromHighEnd(128);
+  state->nativePointer18C = VS::Core::Memory::AllocateLiveFromHighEnd(128);
   REQUIRE(state->nativePointer18C != nullptr);
   Battle_Ai_FrameState()->actors[0] = state;
   fixture.actors[0].kind = static_cast<u_short>(kind);
@@ -591,7 +586,7 @@ TEST_CASE(
   CHECK(Battle_Ai_actorAiStates[0] == state);
   CHECK(Battle_Ai_FrameState()->actors[0] == state);
   CHECK(state->nativePointer18C == nullptr);
-  Core_Memory_FreeFromLowEnd(state);
+  VS::Core::Memory::FreeLiveFromLowEnd(state);
   Battle_Ai_actorAiStates[0] = nullptr;
 }
 

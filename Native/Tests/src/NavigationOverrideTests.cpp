@@ -15,6 +15,7 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
 
@@ -28,8 +29,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/BiosRand.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -98,8 +97,6 @@ struct NavigationOverrideFixture {
 };
 
 struct ScriptedOverrideFixture : NavigationOverrideFixture {
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
@@ -112,16 +109,15 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   int saved_movement_random = Battle_Ai_savedMovementRandomState;
   std::array<Battle_Ai_DirectionDelta, 8> saved_directions =
       std::to_array(Battle_Ai_directionDeltas);
-  std::array<Core_HeapBlockHeader, 2048> heap{};
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<Battle_Actor, 2> actors{};
   Actors_ActorRecord ashley_model{};
   Battle_Ai_RoomAiState room{};
   u_short heights[32][32]{};
-  unsigned free_units = 0;
 
   ScriptedOverrideFixture() {
-    Core_Memory_InitializeHeap(heap.data(), sizeof heap);
-    free_units = Core_legacyHeapList.next->blockSize;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     Battle_actors[0] = &actors[0];
     Battle_actors[1] = &actors[1];
@@ -163,7 +159,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
 
   ~ScriptedOverrideFixture() {
     if (source.nativePointer18C != nullptr) {
-      Core_Memory_FreeFromHighEnd(source.nativePointer18C);
+      VS::Core::Memory::FreeLiveFromHighEnd(source.nativePointer18C);
     }
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_markers, Battle_actorMarkers);
@@ -173,8 +169,6 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     Battle_Ai_specialTerrainHeights = saved_heights;
     Battle_Ai_savedMovementRandomState = saved_movement_random;
     *Battle_Ai_FrameState() = saved_frame;
-    Core_legacyHeapList = saved_heap;
-    Core_legacySecondaryHeapList = saved_secondary;
   }
 
   Battle_Ai_ActorAiState* ActiveRoute() {
@@ -183,7 +177,8 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
 
   void AllocateCopiedRoute(unsigned target) {
     auto* record = static_cast<Battle_Ai_ActorAiState*>(
-        Core_Memory_AllocateFromHighEnd(sizeof(Battle_Ai_ActorAiState)));
+        VS::Core::Memory::AllocateLiveFromHighEnd(
+            sizeof(Battle_Ai_ActorAiState)));
     REQUIRE(record != nullptr);
     std::construct_at(record);
     source.nativePointer18C = record;
@@ -783,11 +778,10 @@ TEST_CASE("Production scripted path request allocates a complete native route",
   Actors_BeginScriptedActorPath(1, &target);
   auto* route = fixture.ActiveRoute();
   REQUIRE(route != nullptr);
-  const auto* header = static_cast<const Core_HeapBlockHeader*>(
-                           fixture.source.nativePointer18C) -
-                       1;
-  REQUIRE(header->blockSize > 1);
-  CHECK((header->blockSize - 1) * sizeof(*header) >= sizeof(*route));
+  const auto capacity =
+      VS::Core::Memory::PayloadCapacity(VS::Core::Memory::GameHeap(), route);
+  REQUIRE(capacity.has_value());
+  CHECK(*capacity >= sizeof(*route));
   CHECK(route->actorId == 1);
   CHECK(route->scriptedTargetXZ == (1200u | (1300u << 16)));
   CHECK(route->nativePointer18C == route);
@@ -804,7 +798,7 @@ TEST_CASE(
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(fixture.actors[1].commandState == 0x80);
   CHECK(fixture.actors[1].commandOpcode == 2);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE(
@@ -831,7 +825,7 @@ TEST_CASE(
   std::memcpy(&actual, record->reserved160 + 4, sizeof actual);
   CHECK(actual == preserved);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(1);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE(
@@ -841,13 +835,13 @@ TEST_CASE(
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   auto* first = fixture.ActiveRoute();
   REQUIRE(first != nullptr);
-  const auto units = Core_legacyHeapList.next->blockSize;
+  const auto units = VS::Core::Memory::GameHeap().free_units();
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1400, 1500);
   CHECK(fixture.ActiveRoute() == first);
   CHECK(first->scriptedTargetXZ == (1200u | (1300u << 16)));
   CHECK(fixture.source.scriptedTargetXZ == (1400u | (1500u << 16)));
   CHECK(fixture.source.settingsBit14 == 3);
-  CHECK(Core_legacyHeapList.next->blockSize == units);
+  CHECK(VS::Core::Memory::GameHeap().free_units() == units);
 }
 
 TEST_CASE("Scripted path packing preserves every halfword and signed high bits",
@@ -882,7 +876,7 @@ TEST_CASE("Scripted path requests retain missing map and AI-state gates",
   Battle_Ai_actorAiStates[1] = nullptr;
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   CHECK(fixture.source.nativePointer18C == nullptr);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
 }
 
@@ -962,7 +956,7 @@ TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(fixture.actors[1].commandOpcode == 2);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  CHECK(VS::Core::Memory::GameHeap().empty());
 }
 
 TEST_CASE("Scripted arrival retains signed source square-sum behavior",

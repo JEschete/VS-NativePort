@@ -6,6 +6,7 @@
 #include <span>
 
 #include "Core/Memory/Copy.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Save/FileMenu.hpp"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Heap.h"
 #include "Field/RoomRendering.h"
 #include "Input/Controller.h"
 #include "Items/Inventory.h"
@@ -74,7 +74,7 @@ class LiveContainerSave final : public ContainerSaveHost {
         static_cast<char>(Input_settings.containerEmpty);
     Menu_Framework_unusedInventoryStorage =
         static_cast<Menu_Container_InventoryStorage*>(
-            Core_Memory_AllocateFromHighEnd(
+            VS::Core::Memory::AllocateLiveFromHighEnd(
                 sizeof *Menu_Framework_unusedInventoryStorage));
     static_assert(
         sizeof(Menu_Container_InventoryStorage) % sizeof(std::uint32_t) == 0);
@@ -213,7 +213,8 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void EndSession() override {
-    Core_Memory_FreeFromHighEnd(Menu_Framework_unusedInventoryStorage);
+    VS::Core::Memory::FreeLiveFromHighEnd(
+        Menu_Framework_unusedInventoryStorage);
     Menu_Framework_unusedInventoryStorage = nullptr;
     Save_NativeReleaseContainer();
   }

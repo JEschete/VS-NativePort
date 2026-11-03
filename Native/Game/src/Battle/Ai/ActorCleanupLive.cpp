@@ -16,6 +16,7 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Core/BiosRand.h"
+#include "Core/Memory/HeapLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -29,7 +30,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Heap.h"
 }
 
 namespace VS::Battle::Ai {
@@ -226,7 +226,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
     Battle_Ai_ActorAiState& state = *StateAt(actor_id);
     void* route = state.nativePointer18C;
     state.nativePointer18C = nullptr;
-    Core_Memory_FreeFromHighEnd(route);
+    VS::Core::Memory::FreeLiveFromHighEnd(route);
   }
   void ClearContactOccupancy(int contact) override {
     ClearLiveAiContactOccupancy(contact);
@@ -248,16 +248,16 @@ class LiveCleanupHost final : public ActorCleanupHost {
     Battle_Ai_FrameContext* frame = Battle_Ai_FrameState();
     Require(frame != nullptr, "AI teardown requires the frame state");
     frame->actors[slot] = nullptr;
-    if (state != nullptr) Core_Memory_FreeFromLowEnd(state);
+    if (state != nullptr) VS::Core::Memory::FreeLiveFromLowEnd(state);
   }
   void FreeOrbitingBossState() override {
     Battle_Ai_ArenaOrbitState* orbit = Battle_Ai_arenaOrbit;
     Battle_Ai_arenaOrbit = nullptr;
-    if (orbit != nullptr) Core_Memory_FreeFromLowEnd(orbit);
+    if (orbit != nullptr) VS::Core::Memory::FreeLiveFromLowEnd(orbit);
   }
   bool AllocateOrbitingBossState(std::int16_t cooldown) override {
-    void* storage =
-        Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ArenaOrbitState));
+    void* storage = VS::Core::Memory::AllocateLiveFromLowEnd(
+        sizeof(Battle_Ai_ArenaOrbitState));
     if (storage == nullptr) return false;
     Battle_Ai_ArenaOrbitState* orbit =
         std::construct_at(static_cast<Battle_Ai_ArenaOrbitState*>(storage));

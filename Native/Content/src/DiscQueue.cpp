@@ -1,11 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 
 // decomp: _cdReadBuffer (_cdReadBuffer@SLUS_010.40)
-Core_HeapBlockHeader* Content_legacyDiscReadBuffer;
+u_char* Content_legacyDiscReadBuffer;
 
 // decomp: cdReadLoc (cdReadLoc@SLUS_010.40)
 DslLOC Content_legacyDiscReadLocation;

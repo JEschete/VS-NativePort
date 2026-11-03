@@ -1,7 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Memory/HeapLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -27,7 +29,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
 
     switch (lifecycle_command) {
     case 1:
-        new_trail_set = (Effects_TrailQuadSet *)(Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 8));
+        new_trail_set = (Effects_TrailQuadSet *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_trail_set + 8));
         renderer_slot->rendererState = new_trail_set;
         new_trail_set->definitionIndex = packed_parameters >> 8;
         new_trail_set->opaque0 = packed_parameters;
@@ -39,7 +41,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
             trail = 16;
         }
 
-        new_trail_set->trails = (Effects_Trail *)(Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails));
+        new_trail_set->trails = (Effects_Trail *)(VS::Core::Memory::AllocateLiveFromHighEnd(trail * sizeof *new_trail_set->trails));
         new_trail_set->trailcount = trail;
         new_trail_set->opaque3 = 0;
 
@@ -138,7 +140,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
             --trail_set->opaque0;
             if (!trail_set->opaque0) {
                 renderer_alive = 0;
-                Core_Memory_FreeFromHighEnd(trail_set->trails);
+                VS::Core::Memory::FreeLiveFromHighEnd(trail_set->trails);
             }
         }
         break;
@@ -149,7 +151,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
 
     case 4:
         renderer_alive = 0;
-        Core_Memory_FreeFromHighEnd(trail_set->trails);
+        VS::Core::Memory::FreeLiveFromHighEnd(trail_set->trails);
         break;
     }
 

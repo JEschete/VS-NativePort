@@ -4,7 +4,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "State/PlayTime.h"
 
@@ -28,7 +27,7 @@ void Content_ReadSectorCallback(u_char intr, u_char result[] __attribute__((unus
     if (Content_discDriveState.bufferMode == Content_DiscBufferMode_Direct) {
         DsGetSector(((u_char*)(Content_discDriveState.destination)) + Content_discDriveState.destinationSector * 2048, 512);
     } else {
-        DsGetSector(Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 128, 512);
+        DsGetSector(Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 2048, 512);
         if (++Content_discDriveState.ringWriteIndex >= 16) {
             Content_discDriveState.ringWriteIndex = 0;
         }

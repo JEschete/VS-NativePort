@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -1041,7 +1041,7 @@ loop_1:
         Menu_Framework_InitializeInformationBox();
         /* fallthrough */
     case 1:
-        temp_s1 = (u_short *)(Core_Memory_AllocateFromHighEnd(0x6C00));
+        temp_s1 = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00));
         initial_row_types = (int *)(((u_char*)((void*)temp_s1)) + 0x6000);
         initial_row_text = (char **)(((u_char*)((void*)temp_s1)) + 0x6400);
         Menu_Inventory_freezeTabArrows = 1;
@@ -1068,7 +1068,7 @@ loop_1:
             }
             Input_settings.cursorMemory = temp_s3;
         }
-        Core_Memory_FreeFromHighEnd(temp_s1);
+        VS::Core::Memory::FreeLiveFromHighEnd(temp_s1);
         Menu_Container_itemListStep = 2;
         break;
     case 2:
@@ -1121,7 +1121,7 @@ loop_1:
                     Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
                     Menu_Container_itemListStep = 4;
                 } else {
-                    rebuilt_rows_allocation = Core_Memory_AllocateFromHighEnd(0x6C00U);
+                    rebuilt_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00U);
                     rebuilt_row_text = (char **)(((u_char*)(rebuilt_rows_allocation)) + 0x6400);
                     rebuilt_row_types = (int *)(((u_char*)(rebuilt_rows_allocation)) + 0x6000);
                     temp_s0 = Menu_Container_BuildItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, (char *)(rebuilt_rows_allocation));
@@ -1134,7 +1134,7 @@ loop_1:
                     Menu_Container_RestoreItemRows(selected_category_id);
                     Menu_Container_controlsPanelMode = 1;
                     Menu_Inventory_freezeTabArrows = 0;
-                    Core_Memory_FreeFromHighEnd(rebuilt_rows_allocation);
+                    VS::Core::Memory::FreeLiveFromHighEnd(rebuilt_rows_allocation);
                     Menu_Container_itemListStep = 6;
                 }
             } else if (Menu_Container_itemListSelectedRow == -2) {
@@ -1555,7 +1555,7 @@ loop_1:
         break;
     case 13:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            pending_rows_allocation = Core_Memory_AllocateFromHighEnd(0x6C00U);
+            pending_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00U);
             pending_row_text = (char **)(((u_char*)(pending_rows_allocation)) + 0x6400);
             pending_row_types = (int *)(((u_char*)(pending_rows_allocation)) + 0x6000);
             temp_s2 = Menu_Container_BuildItemRows(7, pending_row_text, pending_row_types, (char *)(pending_rows_allocation));
@@ -1567,7 +1567,7 @@ loop_1:
                 Menu_Framework_CreateMenuRows(
                     temp_s2, (selected_category_id + 0x51) | 0x19200, pending_row_text, pending_row_types);
             }
-            Core_Memory_FreeFromHighEnd(pending_rows_allocation);
+            VS::Core::Memory::FreeLiveFromHighEnd(pending_rows_allocation);
             Menu_Container_itemListStep = 0xE;
         }
         break;

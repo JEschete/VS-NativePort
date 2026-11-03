@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
-#include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
 #include "Field/Collision.h"
@@ -44,14 +44,14 @@ int Event_LoadRoomEventSections(void* clearedSection, u_short clearedSectionLen,
     }
 
     if (clearedSectionLen != 0) {
-        Event_roomEventTriggers = Core_Memory_AllocateFromLowEnd(clearedSectionLen);
+        Event_roomEventTriggers = VS::Core::Memory::AllocateLiveFromLowEnd(clearedSectionLen);
         memcpy(Event_roomEventTriggers, clearedSection, clearedSectionLen);
     } else {
         Event_roomEventTriggers = NULL;
     }
 
     if (doorSectionLen != 0) {
-        Event_roomDoorEventData = Core_Memory_AllocateFromLowEnd(doorSectionLen);
+        Event_roomDoorEventData = VS::Core::Memory::AllocateLiveFromLowEnd(doorSectionLen);
         memcpy(Event_roomDoorEventData, doorSection, doorSectionLen);
     } else {
         Event_roomDoorEventData = NULL;
@@ -83,10 +83,10 @@ void Event_FreeRoomEventSections(void)
         ((void (*)(...))Event_ReleaseScriptActorControl)();
     }
     if (Event_roomEventTriggers != 0) {
-        Core_Memory_FreeFromLowEnd(Event_roomEventTriggers);
+        VS::Core::Memory::FreeLiveFromLowEnd(Event_roomEventTriggers);
     }
     if (Event_roomDoorEventData != 0) {
-        Core_Memory_FreeFromLowEnd(Event_roomDoorEventData);
+        VS::Core::Memory::FreeLiveFromLowEnd(Event_roomDoorEventData);
     }
 }
 

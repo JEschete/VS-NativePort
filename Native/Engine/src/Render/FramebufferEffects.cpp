@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Memory/Heap.h"
 #include "Field/RoomLoading.h"
 #include "Field/Transitions.h"
 #include "Render/Display.h"
@@ -363,7 +363,7 @@ void Render_DrawFramebufferEffect(void* ordering_table)
             Render_framebufferEffectState = 0;
 
             if (Render_legacyFramebufferEffectPackets != NULL) {
-                Core_Memory_FreeFromHighEnd(Render_legacyFramebufferEffectPackets);
+                VS::Core::Memory::FreeLiveFromHighEnd(Render_legacyFramebufferEffectPackets);
                 Render_legacyFramebufferEffectPackets = NULL;
             }
         }
@@ -376,7 +376,7 @@ void Render_SetFramebufferEffectEnabled(int enabled)
     if (enabled != 0) {
         Render_framebufferEffectState = 1;
         if (Render_legacyFramebufferEffectPackets == NULL) {
-            Render_legacyFramebufferEffectPackets = (Render_LegacyFramebufferEffectPackets *)(Core_Memory_AllocateFromHighEnd(sizeof *Render_legacyFramebufferEffectPackets));
+            Render_legacyFramebufferEffectPackets = (Render_LegacyFramebufferEffectPackets *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Render_legacyFramebufferEffectPackets));
             Render_BuildFramebufferEffectPrimitives();
         }
     } else {

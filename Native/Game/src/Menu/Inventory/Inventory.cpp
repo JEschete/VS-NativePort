@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
@@ -206,7 +206,7 @@ void Menu_Inventory_UpdateMiscItemShortcut(int initialize)
         break;
 
     case Menu_Inventory_MiscItemShortcutState_InitItemRows:
-        buf = Core_Memory_AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText));
+        buf = VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText));
         rowCount = 0;
 
         Items_Inventory_RebuildDisplayIndices(Items_ItemCategory_Misc);
@@ -269,7 +269,7 @@ void Menu_Inventory_UpdateMiscItemShortcut(int initialize)
             Input_settings.cursorMemory = i;
         }
 
-        Core_Memory_FreeFromHighEnd(buf);
+        VS::Core::Memory::FreeLiveFromHighEnd(buf);
 
         Menu_Inventory_miscItemShortcutState = Menu_Inventory_MiscItemShortcutState_WaitForInput;
         break;
@@ -345,7 +345,7 @@ void Menu_Inventory_CreateEquipmentRows(int count, u_short** menuText, int* rowT
 
     if (Menu_Inventory_itemsText && Menu_Inventory_itemsText) { }
 
-    Menu_Inventory_itemsText = (char *)(Core_Memory_AllocateFromHighEnd(count * 128));
+    Menu_Inventory_itemsText = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(count * 128));
 
     for (i = 0; i < count; ++i) {
         u_short* text;
@@ -458,7 +458,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
                 VS::Menu::PlayLeaveSound();
             }
 
-            Core_Memory_FreeFromHighEnd(Menu_Inventory_itemsText);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Inventory_itemsText);
 
             Menu_Inventory_itemsText = NULL;
             Menu_Inventory_selectedItemRow = -3;
@@ -471,7 +471,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
                 VS::Menu::PlayInvalidSound();
             } else {
 
-                Core_Memory_FreeFromHighEnd(Menu_Inventory_itemsText);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Inventory_itemsText);
 
                 Menu_Inventory_itemsText = NULL;
                 Menu_Inventory_selectedItemRow = selected_absolute_row;
@@ -492,7 +492,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
         if (Input_buttonsPressed.allButtons & PADRdown) {
 
             VS::Menu::PlayLeaveSound();
-            Core_Memory_FreeFromHighEnd(Menu_Inventory_itemsText);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Inventory_itemsText);
 
             Menu_Inventory_itemsText = NULL;
             Menu_Inventory_selectedItemRow = -2;

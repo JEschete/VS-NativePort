@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"
@@ -401,7 +401,7 @@ int Menu_Framework_LoadItemText(int load)
 
     if (load != 0) {
 
-        Menu_Framework_itemNames = (char (*)[24])(Core_Memory_AllocateFromHighEnd(
+        Menu_Framework_itemNames = (char (*)[24])(VS::Core::Memory::AllocateLiveFromHighEnd(
             VS_ITEMNAME_BIN_SIZE + VS_ITEMHELP_BIN_SIZE + VS_MENU12_BIN_SIZE));
         Menu_Framework_itemHelp = (u_short *)(((u_char*)((void*)Menu_Framework_itemNames)) + VS_ITEMNAME_BIN_SIZE);
         Menu_Framework_menu12Text = (u_short *)(((u_char*)((void*)Menu_Framework_itemHelp)) + VS_ITEMHELP_BIN_SIZE);
@@ -442,7 +442,7 @@ int Menu_Framework_UnloadItemTextWhenReady(void)
 
     if (Menu_Framework_LoadItemText(0) != 0) {
 
-        Core_Memory_FreeFromHighEnd(Menu_Framework_itemNames);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemNames);
 
         Menu_Framework_itemNames = NULL;
         return 1;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Menu/Framework/ActorPreview.h"
@@ -594,7 +594,7 @@ void Menu_Score_QueueEnemyModelRead(int zudId)
     Menu_Score_queueEnemyModelReadZudId = zudId;
     sourceFile.size = Menu_Score_zudSizes[zudId];
     Menu_Score_zudCdSlot = Content_AllocateDiscRequest(&sourceFile);
-    Menu_Score_zudData = (Menu_Score_ZudHeader *)(Core_Memory_AllocateFromHighEnd(sourceFile.size));
+    Menu_Score_zudData = (Menu_Score_ZudHeader *)(VS::Core::Memory::AllocateLiveFromHighEnd(sourceFile.size));
 
     Content_EnqueuePriorityDiscRequest(Menu_Score_zudCdSlot, Menu_Score_zudData);
 
@@ -609,9 +609,9 @@ void Menu_Score_QueueEnemyModelRead(int zudId)
     }
 
     if (Menu_Score_modelVariant != 0) {
-        Menu_Score_zudBuffer = Core_Memory_AllocateFromLowEnd(2 * sizeof(Actors_ActorRecord));
+        Menu_Score_zudBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(2 * sizeof(Actors_ActorRecord));
     } else {
-        Menu_Score_zudBuffer = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord) + 2 * sizeof(Actors_WeaponModel));
+        Menu_Score_zudBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord) + 2 * sizeof(Actors_WeaponModel));
     }
 }
 
@@ -701,7 +701,7 @@ int Menu_Score_LoadEnemyModelParts(void)
     Content_UpdateActorAssetQueue();
 
     if (Content_FindFreeActorAssetRequest() == 0) {
-        Core_Memory_FreeFromHighEnd(Menu_Score_zudData);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_zudData);
         Menu_Score_zudData = NULL;
     }
 
@@ -711,7 +711,7 @@ int Menu_Score_LoadEnemyModelParts(void)
 // decomp: MENU9.PRG vs_menu9_freeZudFile (src/MENU/MENU9.PRG/592C.c:295)
 void Menu_Score_FreeEnemyModelBuffer(void)
 {
-    Core_Memory_FreeFromHighEnd(Menu_Score_zudBuffer);
+    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_zudBuffer);
     Menu_Score_zudBuffer = NULL;
 }
 

@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -127,7 +127,7 @@ void Field_UpdateRoomEffects(void)
                 Field_ExecuteRoomEffectCommands((Field_RoomEffectObjectView*)Field_roomEffectInstances[i + 64].currentData,
                     Field_roomEffectInstances[i + 64].kindOrObjectCount, &Field_roomEffectInstances[i + 64]);
             if (Field_roomEffectInstances[i + 64].isActive == 0) {
-                Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[i + 64].currentData);
+                VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[i + 64].currentData);
                 Field_roomEffectInstances[i + 64].currentData = Field_roomEffectInstances[i + 64].originalData;
             }
         }
@@ -457,7 +457,7 @@ void Field_CreateRoomEffectObjects(Field_RoomEffectInstance* effect_instance)
     int _[32] __attribute__((unused));
     int i;
     signed char* script;
-    Field_RoomEffectObject* elem = (Field_RoomEffectObject *)(Core_Memory_AllocateFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount));
+    Field_RoomEffectObject* elem = (Field_RoomEffectObject *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount));
     signed char* ids = (signed char*)effect_instance->currentData;
 
     effect_instance->currentData = (Field_SwingEffectRecord*)elem;
@@ -505,7 +505,7 @@ int Field_StartRoomEffect(int effect_index)
     if (effect_index < Field_roomEffectScriptCount + 0x40) {
         if ((Field_roomEffectInstances[effect_index].isActive != 0)
             || (Field_roomEffectInstances[effect_index].currentData != Field_roomEffectInstances[effect_index].originalData)) {
-            Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[effect_index].currentData);
+            VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[effect_index].currentData);
         }
         Field_roomEffectInstances[effect_index].isActive = 1;
         Field_roomEffectInstances[effect_index].currentData = Field_roomEffectInstances[effect_index].originalData;
@@ -528,7 +528,7 @@ int Field_ReleaseRoomEffects(void)
         if ((Field_roomEffectInstances[i + 64].isActive != 0)
             || (Field_roomEffectInstances[i + 64].currentData != Field_roomEffectInstances[i + 64].originalData)) {
             Field_roomEffectInstances[i + 64].isActive = 0;
-            Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[i + 64].currentData);
+            VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[i + 64].currentData);
         }
     }
 
@@ -820,7 +820,7 @@ int Field_ExecuteRoomEffectHideGroup(Field_RoomEffectObject* unk0 __attribute__(
 int Field_ExecuteRoomEffectStopScript(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
 {
     if (Field_roomEffectInstances[effect_command->operands[0].word + 0x40].isActive != 0) {
-        Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[effect_command->operands[0].word + 0x40].currentData);
+        VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[effect_command->operands[0].word + 0x40].currentData);
         Field_roomEffectInstances[effect_command->operands[0].word + 0x40].currentData =
             Field_roomEffectInstances[effect_command->operands[0].word + 0x40].originalData;
         Field_roomEffectInstances[effect_command->operands[0].word + 0x40].isActive = 0;

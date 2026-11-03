@@ -11,6 +11,7 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Battle/ActionResultsLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Legacy/Psx.h"
@@ -33,8 +34,6 @@ extern "C" {
 #include "Battle/HitChance.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Random.h"
 #include "Effects/EffectResources.h"
 #include "Effects/PurgeTables.h"
@@ -573,8 +572,9 @@ void CheckLootItem(const Items_LootedItem& item, int id, int count, int flags) {
 
 struct EnemyLootFixture : LootInventoryFixture {
   LootRandomFixture random;
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 384> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   Items_LootListNode* saved_head = Items_lootListHead;
   Battle_Actor* saved_actor = Battle_actors[1];
   Items_Inventory* saved_staging = Menu_Loot_inventory;
@@ -584,15 +584,11 @@ struct EnemyLootFixture : LootInventoryFixture {
   u_char saved_offset = Menu_Loot_lootListOffset;
   char saved_selection = Menu_Loot_selectedLoot;
   char saved_difficulty = Audio_Seq_unusedStateFlags.difficulty;
-  std::array<Core_HeapBlockHeader, 256> heap{};
   std::array<Menu_Loot_LootListItem, kMenuLootRowCapacity> rows{};
   Battle_Actor enemy{};
   Battle_ActorStats stats{};
-  unsigned initial_free_units = 0;
 
   EnemyLootFixture() {
-    Core_Memory_InitializeHeap(heap.data(), sizeof(heap));
-    initial_free_units = Core_legacyHeapList.next->blockSize;
     Items_lootListHead = nullptr;
     enemy.id = 1;
     enemy.roomSpawnIndex = 1;
@@ -611,8 +607,6 @@ struct EnemyLootFixture : LootInventoryFixture {
 
   ~EnemyLootFixture() {
     Items_ClearRoomLootList();
-    Core_legacyHeapList = saved_heap;
-    Core_legacySecondaryHeapList = saved_secondary;
     Items_lootListHead = saved_head;
     Battle_actors[1] = saved_actor;
     Menu_Loot_inventory = saved_staging;
@@ -665,8 +659,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   void CheckCleared() {
     Items_ClearRoomLootList();
     CHECK(Items_lootListHead == nullptr);
-    CHECK(Core_legacyHeapList.next == Core_legacyHeapList.prev);
-    CHECK(Core_legacyHeapList.next->blockSize == initial_free_units);
+    CHECK(VS::Core::Memory::GameHeap().empty());
   }
 };
 
@@ -2483,11 +2476,11 @@ TEST_CASE("Direct duplicate loot queues release rejected nodes after rolling",
   Items_QueueEnemyLoot(&fixture.enemy);
   REQUIRE(Items_lootListHead != nullptr);
   auto* const first = Items_lootListHead;
-  const auto free_units = Core_legacyHeapList.next->blockSize;
+  const auto free_units = VS::Core::Memory::GameHeap().free_units();
   Items_QueueEnemyLoot(&fixture.enemy);
   CHECK(Items_lootListHead == first);
   CHECK(first->next == nullptr);
-  CHECK(Core_legacyHeapList.next->blockSize == free_units);
+  CHECK(VS::Core::Memory::GameHeap().free_units() == free_units);
   auto second_enemy = fixture.enemy;
   second_enemy.id = 2;
   Items_QueueEnemyLoot(&second_enemy);

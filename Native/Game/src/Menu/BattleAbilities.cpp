@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
@@ -609,7 +609,7 @@ int Menu_BattleAbilities_CreateAbilityRows(int abilityCount, int abilityType, u_
     Menu_BattleAbilities_abilityCount = abilityCount;
     Menu_BattleAbilities_abilityMenuState = 0;
 
-    Menu_BattleAbilities_abilityText = (u_short *)(Core_Memory_AllocateFromHighEnd(abilityCount * 128));
+    Menu_BattleAbilities_abilityText = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(abilityCount * 128));
 
     for (i = 0; i < abilityCount; ++i) {
 
@@ -842,7 +842,7 @@ int Menu_BattleAbilities_UpdateAssignments(void)
         if (Input_buttonsPressed.allButtons & PADRdown) {
 
             VS::Menu::PlayLeaveSound();
-            Core_Memory_FreeFromHighEnd(Menu_BattleAbilities_abilityText);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_BattleAbilities_abilityText);
 
             Menu_BattleAbilities_abilityText = NULL;
             Menu_Framework_menuMemory.cursorMemories[Menu_BattleAbilities_selectedAbilityType * 2] = Menu_BattleAbilities_highlightedAbility;

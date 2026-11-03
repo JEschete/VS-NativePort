@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/Targeting.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
@@ -734,7 +734,7 @@ void Field_BeginFirstPersonView(void)
 
     if (Field_cameraTransition == NULL) {
         Field_cameraTransition =
-            (Field_CameraTransition *)(Core_Memory_AllocateFromHighEnd(sizeof *Field_cameraTransition));
+            (Field_CameraTransition *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Field_cameraTransition));
     }
     if (Field_controlMode != 7) {
         Field_cameraTransition->fromCameraState = Render_frameScratch.camera;
@@ -785,7 +785,7 @@ void Field_EndFirstPersonView(void)
     Render_SetCameraNearClip(Field_cameraTransition->fromNearClip);
     Render_SetCameraProjectionDistance(Field_cameraTransition->fromProjectionDistance);
     if (Field_cameraTransition != NULL) {
-        Core_Memory_FreeFromHighEnd(Field_cameraTransition);
+        VS::Core::Memory::FreeLiveFromHighEnd(Field_cameraTransition);
         Field_cameraTransition = NULL;
     }
     Battle_SetHudHidden(0);

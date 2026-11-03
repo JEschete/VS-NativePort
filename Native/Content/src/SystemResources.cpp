@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "Menu/Framework/Framework.h"
 #include "Render/Palette.h"
 #include "SystemResources.h"
@@ -15,7 +15,7 @@ void Content_LoadSystemResources(void)
     RECT* p_hdr;
     Content_SystemDatHeader* buf;
 
-    buf = (Content_SystemDatHeader*)Core_Memory_AllocateFromHighEnd(VS_SYSTEM_DAT_SIZE);
+    buf = (Content_SystemDatHeader*)VS::Core::Memory::AllocateLiveFromHighEnd(VS_SYSTEM_DAT_SIZE);
     Content_ReadDiscFileBlocking(VS_SYSTEM_DAT_LBA, VS_SYSTEM_DAT_SIZE, buf);
 
     p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image0Offset);
@@ -46,7 +46,7 @@ void Content_LoadSystemResources(void)
     LoadImage(&rect, (u_long*)p_hdr + 1);
 
     Menu_Framework_InitGameInterface(((u_char*)((void*)buf)) + buf->interfaceDataOffset);
-    Core_Memory_FreeFromHighEnd(buf);
+    VS::Core::Memory::FreeLiveFromHighEnd(buf);
 }
 
 }  // extern "C"

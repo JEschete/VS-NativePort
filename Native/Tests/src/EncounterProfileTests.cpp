@@ -17,6 +17,7 @@
 #include "CombatLab/Trace.hpp"
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Legacy/Psx.h"
 
@@ -27,8 +28,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Input/Controller.h"
 #include "Items/EquipmentStats.h"
 #include "Menu/Setup/Assembly.h"
@@ -707,14 +706,9 @@ void OpenWeaponSourceData() {
 }
 
 struct WeaponHeap {
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
-  std::array<Core_HeapBlockHeader, 256> heap{};
-  WeaponHeap() { Core_Memory_InitializeHeap(heap.data(), sizeof heap); }
-  ~WeaponHeap() {
-    Core_legacyHeapList = saved_heap;
-    Core_legacySecondaryHeapList = saved_secondary;
-  }
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 384> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 };
 
 void CheckWeaponStats(const Items_WeaponLoadout& actual,

@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Camera.h"
 #include "Event/Screen.h"
@@ -99,7 +99,7 @@ void Event_InitializeEventCamera(void)
     VECTOR field_eye_position;
     VECTOR field_look_at;
 
-    Event_camera = (Event_CameraState *)(Core_Memory_AllocateFromHighEnd(sizeof *Event_camera));
+    Event_camera = (Event_CameraState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera));
     Event_skipNextFieldCameraRestore = 0;
 
     Field_CameraPosition(&field_eye_position);
@@ -162,7 +162,7 @@ void Event_InitializeEventCamera(void)
 }
 
 // decomp: BATTLE.PRG func_800BBDDC (src/BATTLE/BATTLE.PRG/4A0A8.c:3082)
-void Event_FreeEventCamera(void) { Core_Memory_FreeFromHighEnd(Event_camera); }
+void Event_FreeEventCamera(void) { VS::Core::Memory::FreeLiveFromHighEnd(Event_camera); }
 
 // decomp: BATTLE.PRG func_800BBE04 (src/BATTLE/BATTLE.PRG/4A0A8.c:3084)
 void Event_SetEventFieldCameraOverride(int field_camera_override) { Event_skipNextFieldCameraRestore = field_camera_override; }

@@ -463,7 +463,7 @@ class EncounterFixupTests(unittest.TestCase):
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
         ).read_text(encoding="utf-8")
         self.assertIn("std::construct_at(storage)", source)
-        self.assertIn("Core_Memory_AllocateFromHighEnd(sizeof(Battle_Ai_ActorAiState))", source)
+        self.assertIn("VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_Ai_ActorAiState))", source)
         self.assertIn("auto* destination = state;", source)
         self.assertIn("destination->scriptedTargetXZ = target;", source)
         self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actorId)", source)
@@ -2057,7 +2057,7 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
         self.assertTrue(source.endswith("    if (c->motionMode != 11) {"))
 
     def test_particle_dispatch_preserves_native_prefix_and_textured_variant(self):
-        source = "temp_s1 = Core_Memory_AllocateFromHighEnd(0x10);"
+        source = "temp_s1 = VS::Core::Memory::AllocateFromHighEnd(0x10);"
         for old, new, _ in copy_fixups.FIXES["F01865"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
@@ -2265,7 +2265,7 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
     def test_title_arena_reset_invalidates_native_ai_before_new_allocations(self):
         source = """void Boot_InitializeTitleSession(void)
 {
-    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
+    VS::Core::Memory::InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
     Content_InitializeDiscQueue();
     VS::Content::ResetDiscDrive();
 }
@@ -2274,12 +2274,12 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertLess(
-            source.index("Core_Memory_InitializeHeap"),
+            source.index("VS::Core::Memory::ResetLiveGameHeap()"),
             source.index("Battle_Ai_InvalidateSessionBindings"),
         )
         self.assertLess(
             source.index("Save_NativeResetSession"),
-            source.index("Core_Memory_InitializeHeap"),
+            source.index("VS::Core::Memory::ResetLiveGameHeap()"),
         )
         self.assertLess(
             source.index("Battle_Ai_InvalidateSessionBindings"),
@@ -2424,8 +2424,8 @@ slot.destination = Menu_Score_zudBuffer + 0x1EE8;
         self.assertIn("sizeof(Actors_WeaponModel)", source)
         self.assertNotIn("0x1900", source)
         self.assertNotIn("0x1EE8", source)
-        allocation = """Core_Memory_AllocateFromLowEnd(0x3200);
-Core_Memory_AllocateFromLowEnd(0x24D0);
+        allocation = """VS::Core::Memory::AllocateFromLowEnd(0x3200);
+VS::Core::Memory::AllocateFromLowEnd(0x24D0);
 """
         for old, new, _ in copy_fixups.FIXES["F02839"]:
             self.assertIn(old, allocation)
@@ -2433,37 +2433,32 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertIn("2 * sizeof(Actors_ActorRecord)", allocation)
         self.assertIn("2 * sizeof(Actors_WeaponModel)", allocation)
 
-    def test_heap_names_preserve_native_header_units_and_search_direction(self):
-        examples = {
-            "Core::Memory::FreeFromHighEnd": (
-                "var_a1 = var_a1->prev; target->next = var_a1->next;",
-                "previous_free = previous_free->prev; "
-                "target->next = previous_free->next;",
-            ),
-            "Core::Memory::AllocateFromHighEnd": (
-                "blockSz = size; var_a2 = var_a1; "
-                "var_a1 += var_a1->blockSize;",
-                "allocation_units = size; following_free = allocation_block; "
-                "allocation_block += allocation_block->blockSize;",
-            ),
-            "Core::Memory::AllocateFromLowEnd": (
-                "temp_v1 = var_a1 + blockSz; var_v1->next = temp_v1;",
-                "remainder = allocation_block + allocation_units; "
-                "previous_free->next = remainder;",
-            ),
-            "Core::Memory::InitializeHeap": (
-                "node->blockSize = value / sizeof(Core_HeapBlockHeader) - 1;",
-                "node->blockSize = byte_count / "
-                "sizeof(Core_HeapBlockHeader) - 1;",
-            ),
-        }
-        for name, (original, expected) in examples.items():
+    def test_heap_callers_use_the_live_binding_and_disc_ring_is_bytes(self):
+        names = ("AllocateFromLowEnd", "AllocateFromHighEnd", "FreeFromLowEnd", "FreeFromHighEnd")
+        for name in names:
             with self.subTest(name=name):
-                source = original
+                source = f"block = VS::Core::Memory::{name}(size);"
                 for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
+                    if re.search(row, "Content::Unrelated"):
                         source = re.sub(pattern, replacement, source)
-                self.assertEqual(source, expected)
+                live = name.replace("From", "LiveFrom")
+                self.assertEqual(source, f"block = VS::Core::Memory::{live}(size);")
+                self.assertEqual(
+                    copy_fixups.NATIVE_HELPER_HEADERS[f"VS::Core::Memory::{live}"],
+                    r"Native\Engine\include\Core\Memory\HeapLive.hpp",
+                )
+        source = "extern Core_HeapBlockHeader* Content_legacyDiscReadBuffer;"
+        for old, new, _ in copy_fixups.FIXES["G01921"]:
+            source = source.replace(old, new)
+        self.assertEqual(source, "extern u_char* Content_legacyDiscReadBuffer;")
+        source = "Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 128"
+        for old, new, _ in copy_fixups.FIXES["F03468"]:
+            source = source.replace(old, new)
+        self.assertTrue(source.endswith("ringWriteIndex * 2048"))
+        bound = {name for _, _, name in copy_fixups.MODULE_BINDING_ENTRIES}
+        for name in ("FreeLiveFromHighEndAt", "FreeLiveFromLowEndAt", "AllocateLiveFromHighEndAt",
+                     "AllocateLiveFromLowEndAt", "InitializeLiveHeapAt"):
+            self.assertIn(f"VS::Core::Memory::{name}", bound)
 
     def test_math_names_preserve_distinct_vector_destination_positions(self):
         examples = {
@@ -3203,7 +3198,7 @@ int arg01 = arg0;'''
         source = """void* Content_CopyModelGeometry(int* arg0, void* arg1, int arg2)
 {
     if (arg0 == NULL) {
-        arg0 = Core_Memory_AllocateFromLowEnd(arg2);
+        arg0 = VS::Core::Memory::AllocateFromLowEnd(arg2);
     }
     memcpy(arg0, arg1, arg2);
     arg0[12] += (u_long)arg0;
@@ -3336,7 +3331,7 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertIn("Battle_TargetPreview previews[255];", action)
         self.assertIn("Battle_HitResult targets[255];", action)
         boot = (root / "Native/Game/src/Boot/GameLoop.cpp").read_text()
-        self.assertIn("AllocateFromHighEnd(sizeof *Battle_actionState)", boot)
+        self.assertIn("AllocateLiveFromHighEnd(sizeof *Battle_actionState)", boot)
         self.assertNotIn("0x2C10", boot)
         targeting = (root / "Native/Game/src/Battle/Targeting.cpp").read_text()
         self.assertIn("sizeof Battle_actionState->selection", targeting)
@@ -3506,7 +3501,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
                 self.assertNotIn(f"char** {variable};", body)
                 self.assertNotRegex(body, rf"{variable}\s*=\s*.*0x(?:6A4|384|1324)")
                 self.assertIn("Menu_Setup_BuildItemList(", body)
-                self.assertIn("Core_Memory_FreeFromHighEnd(", body)
+                self.assertIn("VS::Core::Memory::FreeLiveFromHighEnd(", body)
 
     def test_loot_staging_uses_last_slots_and_preflights_composites(self):
         root = Path(__file__).resolve().parents[2]
@@ -3560,7 +3555,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         cleanup = cleanup.split("void Items_ClearRoomLootList(", 1)[1]
         self.assertLess(
             cleanup.index("Menu_Loot_ResetPaging();"),
-            cleanup.index("Core_Memory_FreeFromHighEnd("),
+            cleanup.index("VS::Core::Memory::FreeLiveFromHighEnd("),
         )
 
     def test_misc_inventory_write_checks_capacity_before_mutation(self):
@@ -3638,11 +3633,11 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
         self.assertIn(
-            "Core_Memory_AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
+            "VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
             source,
         )
         self.assertIn("menuText = (char **)(((u_char*)(buf)) + 0x1900);", source)
-        self.assertNotIn("Core_Memory_AllocateFromHighEnd(0x1B00)", source)
+        self.assertNotIn("AllocateLiveFromHighEnd(0x1B00)", source)
 
     def test_plugin_table_never_binds_the_development_dispatcher(self):
         root = Path(__file__).resolve().parents[2]

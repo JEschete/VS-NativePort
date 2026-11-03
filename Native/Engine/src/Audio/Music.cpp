@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "CdDrive.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.h"
@@ -187,7 +187,7 @@ int Audio_LoadMusicSlot(int id, int targetSlot)
                 if (Audio_soundState.musicData[slot] != 0) {
                     VS::Core::IgnoreDiagnostic(0x8E, 0);
                 }
-                Audio_soundState.musicData[slot] = Core_Memory_AllocateFromHighEnd(cdFile.size);
+                Audio_soundState.musicData[slot] = VS::Core::Memory::AllocateLiveFromHighEnd(cdFile.size);
                 Content_EnqueueDiscRequest(Audio_soundState.musicRequests[slot],
                     Audio_soundState.musicData[slot]);
                 Audio_soundState.musicIds[slot] = id;
@@ -287,7 +287,7 @@ int Audio_FreeMusicSlot(int slotId)
         return 0;
     }
 
-    Core_Memory_FreeFromHighEnd(Audio_soundState.musicData[slotId - 1]);
+    VS::Core::Memory::FreeLiveFromHighEnd(Audio_soundState.musicData[slotId - 1]);
     Audio_soundState.musicData[slotId - 1] = 0;
     Audio_soundState.musicIds[slotId - 1] = 0;
     return 1;

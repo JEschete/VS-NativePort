@@ -20,6 +20,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
@@ -223,7 +223,8 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
   }
   bool AllocateOverride(int actor_id) override {
     auto* storage = static_cast<Battle_Ai_ActorAiState*>(
-        Core_Memory_AllocateFromHighEnd(sizeof(Battle_Ai_ActorAiState)));
+        VS::Core::Memory::AllocateLiveFromHighEnd(
+            sizeof(Battle_Ai_ActorAiState)));
     if (storage == nullptr) return false;
     ActorState(actor_id).nativePointer18C = std::construct_at(storage);
     return true;

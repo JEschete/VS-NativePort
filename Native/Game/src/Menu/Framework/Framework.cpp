@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
@@ -35,7 +36,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Overlays.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -341,7 +341,7 @@ int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
     if (state->loading == 0) {
         if (Menu_Framework_menuBackgroundBuffer != NULL) {
 
-            Core_Memory_FreeFromHighEnd(Menu_Framework_menuBackgroundBuffer);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_menuBackgroundBuffer);
 
             Menu_Framework_menuBackgroundBuffer = NULL;
 
@@ -370,7 +370,7 @@ int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
         }
 
         if (subMenu == 0) {
-            Menu_Framework_menuBackgroundBuffer = (u_int*)Core_Memory_AllocateFromHighEnd(0xB400);
+            Menu_Framework_menuBackgroundBuffer = (u_int*)VS::Core::Memory::AllocateLiveFromHighEnd(0xB400);
             Menu_Framework_LoadBackgroundTexture(Menu_Framework_menuBackgroundBuffer);
         }
     }
@@ -843,7 +843,7 @@ int Menu_Framework_OpenGameMenu(int menuState, int menu_invocation_mode)
 
             Content_AcquireOverlayWorkspace(6);
 
-            miscIndex = Core_Memory_AllocateFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
+            miscIndex = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
             enabled_menu_flags = Input_settings.menuFlags;
             Menu_Framework_stringBuf = (char*)((Menu_Framework_MenuRow*)miscIndex + 40);
             Menu_Framework_menuItems = (Menu_Framework_MenuRow *)(miscIndex);
@@ -922,7 +922,7 @@ void Menu_Framework_ReleaseMenuRows(void)
 {
     if (Menu_Framework_menuItems != 0) {
         Content_ReleaseOverlayWorkspace(6);
-        Core_Memory_FreeFromHighEnd(Menu_Framework_menuItems);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_menuItems);
         Menu_Framework_menuItems = 0;
     }
 }
@@ -1043,7 +1043,7 @@ void Menu_Framework_CreateActionRows(
     Menu_Framework_itemActionCount = rowCount;
     Menu_Framework_actionMenuState = 0;
 
-    Menu_Framework_sortItemsTextBuf = (u_short *)(Core_Memory_AllocateFromHighEnd(rowCount * 128));
+    Menu_Framework_sortItemsTextBuf = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128));
 
     for (i = 0; i < rowCount; ++i) {
         char* text;
@@ -1157,7 +1157,7 @@ void Menu_Framework_UpdateActionMenu(void)
 
             if (Input_buttonsPressed.allButtons & PADRup) {
 
-                Core_Memory_FreeFromHighEnd(Menu_Framework_sortItemsTextBuf);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_sortItemsTextBuf);
 
                 Menu_Framework_sortItemsTextBuf = NULL;
                 Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2] = Menu_Framework_selectedItemAction;
@@ -1170,7 +1170,7 @@ void Menu_Framework_UpdateActionMenu(void)
             if (Input_buttonsPressed.allButtons & PADRright) {
                 if (menuItem->unselectable == 0) {
                     menuItem->selected = 1;
-                    Core_Memory_FreeFromHighEnd(Menu_Framework_sortItemsTextBuf);
+                    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_sortItemsTextBuf);
                     Menu_Framework_sortItemsTextBuf = NULL;
                     Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2] =
                         Menu_Framework_selectedItemAction;
@@ -1185,7 +1185,7 @@ void Menu_Framework_UpdateActionMenu(void)
             menuItem->selected = 0;
 
             if (Input_buttonsPressed.allButtons & PADRdown) {
-                Core_Memory_FreeFromHighEnd(Menu_Framework_sortItemsTextBuf);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_sortItemsTextBuf);
                 Menu_Framework_sortItemsTextBuf = NULL;
                 Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2] = Menu_Framework_selectedItemAction;
                 Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2 + 1] =
@@ -1771,7 +1771,7 @@ void Menu_Framework_CreateMenuRows(int rowCount, int rowInfo, char* strings[], i
     Menu_Framework_subMenuRowInfo = rowInfo;
     Menu_Framework_itemsListRow = 0;
 
-    Menu_Framework_itemsText = (u_short *)(Core_Memory_AllocateFromHighEnd(rowCount * 128));
+    Menu_Framework_itemsText = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128));
 
     for (i = 0; i < rowCount; ++i) {
         char* text;
@@ -1805,7 +1805,7 @@ void Menu_Framework_CreateMenuRows(int rowCount, int rowInfo, char* strings[], i
 // decomp: MAINMENU.PRG vs_mainMenu_storeCursor (src/MENU/MAINMENU.PRG/58EC.c:892)
 int Menu_Framework_CloseRowsAndRememberCursor(void)
 {
-    Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
+    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
 
     Menu_Framework_itemsText = NULL;
     Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;
@@ -1872,7 +1872,7 @@ void Menu_Framework_UpdateRowSelection(void)
     if (Menu_Framework_subMenuRowCount == 0) {
 
         if (Menu_Framework_itemsText != NULL) {
-            Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
             Menu_Framework_itemsText = NULL;
         }
 
@@ -1920,7 +1920,7 @@ void Menu_Framework_UpdateRowSelection(void)
             if (Input_buttonsPressed.allButtons & PADRup) {
 
                 VS::Menu::PlayLeaveSound();
-                Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
 
                 Menu_Framework_itemsText = NULL;
                 Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;
@@ -1936,7 +1936,7 @@ void Menu_Framework_UpdateRowSelection(void)
                     menuItem->selected = 1;
 
                     VS::Menu::PlaySelectSound();
-                    Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
+                    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
 
                     Menu_Framework_itemsText = NULL;
                     Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;
@@ -1954,7 +1954,7 @@ void Menu_Framework_UpdateRowSelection(void)
             if (Input_buttonsPressed.allButtons & PADRdown) {
 
                 VS::Menu::PlayLeaveSound();
-                Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
+                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
 
                 Menu_Framework_itemsText = NULL;
                 Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;

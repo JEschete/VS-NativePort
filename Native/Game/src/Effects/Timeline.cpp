@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/ActionResultsLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Audio/Stream.h"
 #include "Battle/Abilities.h"
 #include "Battle/ActionFlow.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
@@ -35,10 +35,10 @@ void Effects_LoadEffectTimeline(Effects_EffectInstance* effect_instance, int tim
     int i;
 
     if (effect_instance->context.timeline != NULL) {
-        Core_Memory_FreeFromHighEnd(effect_instance->context.timeline);
+        VS::Core::Memory::FreeLiveFromHighEnd(effect_instance->context.timeline);
     }
 
-    effect_instance->context.timeline = (Effects_EffectTimeline *)(Core_Memory_AllocateFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)));
+    effect_instance->context.timeline = (Effects_EffectTimeline *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)));
     p = effect_instance->context.timeline;
     p->trackCount = entry->trackCount;
     p->frame = 0;

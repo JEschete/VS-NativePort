@@ -94,6 +94,10 @@ NATIVE_HELPER_HEADERS = {
        for name in ("ReadLiveUnalignedShort", "ZeroLiveWordsBackward", "CopyLiveBytesBackward", "CopyLiveWords",
                     "SwapLiveWords", "ReadLiveUnalignedShortAt", "ZeroLiveWordsBackwardAt",
                     "CopyLiveBytesBackwardAt", "CopyLiveWordsAt", "SwapLiveWordsAt")},
+    **{f"VS::Core::Memory::{name}": r"Native\Engine\include\Core\Memory\HeapLive.hpp"
+       for name in ("AllocateLiveFromLowEnd", "AllocateLiveFromHighEnd", "FreeLiveFromLowEnd", "FreeLiveFromHighEnd",
+                    "ResetLiveGameHeap", "AllocateLiveFromLowEndAt", "AllocateLiveFromHighEndAt",
+                    "FreeLiveFromLowEndAt", "FreeLiveFromHighEndAt", "InitializeLiveHeapAt")},
     **{f"VS::Core::{name}": r"Native\Engine\include\Core\Runtime.hpp"
        for name in ("IgnoreCall", "ReturnZero", "IgnoreDiagnostic", "IdleInstruction", "NoOperation")},
     "VS::Core::IgnoreLiveActorCallback": r"Native\Engine\include\Core\RuntimeLive.hpp",
@@ -426,6 +430,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800CCC34, "VS::Core::Memory::CopyLiveBytesBackwardAt"),  # F01402
     ("SLUS_010.40", 0x80019154, "VS::Core::Memory::CopyLiveWordsAt"),  # F03263
     ("SLUS_010.40", 0x800191D4, "VS::Core::Memory::SwapLiveWordsAt"),  # F03264
+    ("SLUS_010.40", 0x80043C60, "VS::Core::Memory::FreeLiveFromHighEndAt"),  # F03463
+    ("SLUS_010.40", 0x80043D50, "VS::Core::Memory::FreeLiveFromLowEndAt"),  # F03464
+    ("SLUS_010.40", 0x80043E3C, "VS::Core::Memory::AllocateLiveFromHighEndAt"),  # F03465
+    ("SLUS_010.40", 0x80043EC4, "VS::Core::Memory::AllocateLiveFromLowEndAt"),  # F03466
+    ("SLUS_010.40", 0x80043F74, "VS::Core::Memory::InitializeLiveHeapAt"),  # F03467
     ("BATTLE/BATTLE.PRG", 0x800CCC8C, "VS::Core::NextLiveInterfaceRandomBits"),  # F01404
     ("BATTLE/BATTLE.PRG", 0x800CFB80, "VS::Core::LiveRandomRangeExclusive"),  # F01455
     ("SLUS_010.40", 0x8004274C, "VS::Core::InitializeLiveRandomShuffleTable"),  # F03433
@@ -749,9 +758,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F02865": [
         (" * 160", " * kMenuLootRowCapacity",
          "Reserve metadata for every original inventory slot, including rows created by disassembly."),
-        ("        Core_Memory_FreeFromHighEnd(Menu_Loot_inventory);",
+        ("        VS::Core::Memory::FreeFromHighEnd(Menu_Loot_inventory);",
          "        Menu_Loot_ResetPaging();\n"
-         "        Core_Memory_FreeFromHighEnd(Menu_Loot_inventory);",
+         "        VS::Core::Memory::FreeFromHighEnd(Menu_Loot_inventory);",
          "Discard page source references before the working inventory and pending nodes are released."),
     ],
     "F02844": [
@@ -1177,11 +1186,11 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "238.c:2069 preserve the complete valid encyclopedia header and its terminator"),
     ],
     "F02839": [
-        ("Core_Memory_AllocateFromLowEnd(0x3200)",
-         "Core_Memory_AllocateFromLowEnd(2 * sizeof(Actors_ActorRecord))",
+        ("VS::Core::Memory::AllocateFromLowEnd(0x3200)",
+         "VS::Core::Memory::AllocateFromLowEnd(2 * sizeof(Actors_ActorRecord))",
          "592C.c:171 companion previews own two native actor records"),
-        ("Core_Memory_AllocateFromLowEnd(0x24D0)",
-         "Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord) + "
+        ("VS::Core::Memory::AllocateFromLowEnd(0x24D0)",
+         "VS::Core::Memory::AllocateFromLowEnd(sizeof(Actors_ActorRecord) + "
          "2 * sizeof(Actors_WeaponModel))",
          "Normal previews own a native actor plus two native equipment records"),
     ],
@@ -1201,8 +1210,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
         (r'"MISC\00000|0xF8|"',
          r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"',
          "C48.c:485 pragma vsstring encodes MISC then E7 termination; preserve reset bytes and avoid runaway glyph packets"),
-        ("Core_Memory_AllocateFromHighEnd(0x1B00)",
-         "Core_Memory_AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
+        ("VS::Core::Memory::AllocateFromHighEnd(0x1B00)",
+         "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
          "C48.c:546 scratch ends with 128 text pointers; reserve native pointer width, not the PS1 512 bytes"),
     ],
     "F03669": [
@@ -1533,7 +1542,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F02464": [
         ("    Content_ActorAssetRequest sp10;", "    Content_ActorAssetRequest sp10 = {0};",
          "menu clones must not interpret uninitialized placement bytes as a platform id"),
-        ("Core_Memory_AllocateFromLowEnd(0x1900)", "Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord))",
+        ("VS::Core::Memory::AllocateFromLowEnd(0x1900)", "VS::Core::Memory::AllocateFromLowEnd(sizeof(Actors_ActorRecord))",
          "menu actor and companion clones need complete native record storage"),
     ],
     "F02465": [
@@ -1812,8 +1821,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "record unavailable texture-group provenance before investigating malformed frames; no fallback or changed playback"),
     ],
     "F01865": [
-        ("Core_Memory_AllocateFromHighEnd(0x10)",
-         "Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation))",
+        ("VS::Core::Memory::AllocateFromHighEnd(0x10)",
+         "VS::Core::Memory::AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation))",
          "particleDispatch.h: allocate the complete native untextured prefix instead of its PS1 byte extent"),
     ],
     "F02351": [
@@ -2100,8 +2109,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
             "clear all forty native rows and the original 0x124-byte scratch tail"),
         ],
         "F01367": [
-           ("Core_Memory_AllocateFromHighEnd(0xB24)",
-            "Core_Memory_AllocateFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124)",
+           ("VS::Core::Memory::AllocateFromHighEnd(0xB24)",
+            "VS::Core::Memory::AllocateFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124)",
             "native menu rows contain a full subtext pointer and outgrow the PS1 workspace"),
            ("miscIndex + 0xA00", "(char*)((Menu_Framework_MenuRow*)miscIndex + 40)",
             "string scratch follows all forty native menu rows"),
@@ -2560,7 +2569,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("((int*)Battle_Ai_roomAiState)[10 + i]", "Battle_Ai_roomAiState->specialActors[i]",
          "room special actors are native pointers, not PS1 word offsets"),
         ("= (int)actor;", "= (Battle_Actor*)actor;", "preserve special actor pointer"),
-        ("Core_Memory_AllocateFromLowEnd(0x484)", "Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState))",
+        ("VS::Core::Memory::AllocateFromLowEnd(0x484)", "VS::Core::Memory::AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState))",
          "allocate full native state, never sizeof the partial initialization view"),
         ("VS::Core::Memory::ClearAlignedWords(state, 0x484)", "VS::Core::Memory::ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState))",
          "clear full native state including candidate pointer array"),
@@ -2641,6 +2650,14 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "eight native function pointers occupy the original table range 0x800F56A8..0x800F56C8"),
     ],
     "G00579": [("Battle_Ai_actorAiStates[]", "Battle_Ai_actorAiStates[16]", "AI actor pointer table extent")],
+    # main.c:9042 declares the disc ring buffer as heap-header pointers only to step it in 16-byte units (128 per
+    # 2048-byte sector). Natively it is a byte pointer: the heap header type is retired (F03463-F03467 #276) and an
+    # x64 header stride would have stepped 3072 bytes per sector.
+    "G01921": [("Core_HeapBlockHeader* Content_legacyDiscReadBuffer", "u_char* Content_legacyDiscReadBuffer",
+                "F03468 #276 the ring buffer is bytes")],
+    "F03468": [("Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 128",
+                "Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 2048",
+                "main.c:9042 one 2048-byte sector per ring slot, as 128 PS1 heap-header units")],
     "G00614": [
         ("char const Battle_puzzleTimerText[]", "char Battle_puzzleTimerText[9]",
          "5BF94.c:3842 the timer rewrites six digits; retain nine bytes of mutable native storage, including separators and terminator"),
@@ -2792,21 +2809,15 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "follow a link"),
         ("((u_long)arg1 & a3)", "LegacyGpu_Handle(arg1)", "link to the spliced packet"),
     ],
-    # The game heap is a fixed PS1 RAM range (0x8010C000, 0xF2000 bytes) in three start-up paths; natively it is
-    # Core's arena (Core/Arena.h).
-    **{fid: [("(Core_HeapBlockHeader*)0x8010C000, 0xF2000", "(Core_HeapBlockHeader*)Core_GameHeapArena(), "
-              "CORE_GAME_HEAP_SIZE", "game heap base and size")] for fid in ("F01858", "F02435", "F03437")},
+    # The game heap is a fixed PS1 RAM range (0x8010C000, 0xF2000 bytes) in three start-up paths; natively the live
+    # game heap is reset over Core's arena (Core/Arena.h, HeapLive.hpp).
+    **{fid: [("VS::Core::Memory::InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000)",
+              "VS::Core::Memory::ResetLiveGameHeap()", "F03467 #276 the live game heap spans Core's arena")]
+       for fid in ("F01858", "F02435", "F03437")},
     # vs_overlay_slots (overlay.c) holds the PS1 load addresses of the overlay modules; natively they are offsets in
     # Core's overlay block (Core/Arena.h), which keeps the slots that overlap overlapping.
     "G02018": [(f"(void*)0x{a:08X}", f"Core_OverlayAddress(0x{a:08X}u)", "overlay load address")
                for a in (0x80068800, 0x800F9800, 0x80102800)],
-    # The heap (main.c:8944-9018) counts in units of its 16-byte block header; on x64 the header holds two 8-byte
-    # links and is 24 bytes, so the unit is the header's size.
-    "F03465": [("((size + 15) >> 4) + 1", "((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1",
-                "heap unit is the block header")],
-    "F03466": [("((size + 0xF) >> 4) + 1", "((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1",
-                "heap unit is the block header")],
-    "F03467": [("value / 16 - 1", "value / sizeof(Core_HeapBlockHeader) - 1", "heap unit is the block header")],
     # main.c:8093 reaches the loading image's pixels as the words after its 4-byte size header (one rgb555Sized
     # asset in the module image); natively the pixels are their own global, filled from the same bytes.
     "F03421": [("(u_long*)&Render_legacyLoadingImageHeader + 1", "Render_loadingScreenPixels",
@@ -2830,11 +2841,11 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # 146C.c:6578 lays out an enemy as one block by PS1 offsets: Battle_Actor, its stats, the model record at
     # 0x9B4 and two weapon model slots (0x22B4, 0x289C), or a second body record at 0x22B4. That block is
     # Actors::ActorAllocation; the spawn settings are the 8 bytes at 0x30 (a 32-bit flag run and reserved34).
-    "F00176": [("actor = Core_Memory_AllocateFromLowEnd(0x3BB4);",
-                "actor = Core_Memory_AllocateFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) "
+    "F00176": [("actor = VS::Core::Memory::AllocateFromLowEnd(0x3BB4);",
+                "actor = VS::Core::Memory::AllocateFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) "
                 "+ sizeof(Actors_ActorRecord));", "allocation with a second body record"),
-               ("actor = Core_Memory_AllocateFromLowEnd(0x2E84);",
-                "actor = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorAllocation));", "allocation"),
+               ("actor = VS::Core::Memory::AllocateFromLowEnd(0x2E84);",
+                "actor = VS::Core::Memory::AllocateFromLowEnd(sizeof(Actors_ActorAllocation));", "allocation"),
                ("actor->model = (void*)((char*)actor + 0x9B4);",
                 "actor->model = (void*)&((Actors_ActorAllocation*)actor)->core.model;", "model record"),
                ("actor->equipmentModels[0] = (void*)((char*)actor + 0x22B4);",
@@ -2899,9 +2910,9 @@ FIXES["F00782"] = FIXES.get("F00782", []) + [
      "#269: the copied gimmick SHP holds modelDataSize bytes"),
 ]
 FIXES["F00783"] = FIXES.get("F00783", []) + [
-    ("        Core_Memory_FreeFromLowEnd(temp_s0->model);",
+    ("        VS::Core::Memory::FreeFromLowEnd(temp_s0->model);",
      "        VS::Render::ForgetLiveModelExtent(temp_s0->model);\n"
-     "        Core_Memory_FreeFromLowEnd(temp_s0->model);",
+     "        VS::Core::Memory::FreeFromLowEnd(temp_s0->model);",
      "#269: the released SHP no longer has an extent"),
 ]
 FIXES["F00788"] = FIXES.get("F00788", []) + [
@@ -2916,13 +2927,13 @@ FIXES["F00788"] = FIXES.get("F00788", []) + [
      "#269: the loaded WEP holds `size` bytes, at most the slot buffer for slots 0 and 1 (#270 tracks the copy)"),
 ]
 FIXES["F00790"] = FIXES.get("F00790", []) + [
-    ("                Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+    ("                VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
      "                VS::Render::ForgetLiveModelExtent(model->sectionOffsets);\n"
-     "                Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+     "                VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
      "#269: the released WEP no longer has an extent"),
-    ("        } else {\n            Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+    ("        } else {\n            VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
      "        } else {\n            VS::Render::ForgetLiveModelExtent(model->sectionOffsets);\n"
-     "            Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+     "            VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
      "#269: the released WEP no longer has an extent"),
 ]
 
@@ -3165,6 +3176,13 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
       for fid, name, live in (("F02822", "CopyGameText", "CopyLiveGameText"),
                               ("F02826", "FormatGameInteger", "FormatLiveGameInteger"),
                               ("F02827", "FormatGamePercent", "FormatLiveGamePercent"))],
+    *[(r"", rf"\bVS::Core::Memory::{name}\(", rf"VS::Core::Memory::{live}(",
+       f"{fid} #276 typed promotion: the game heap keeps its block tables out of the arena, refuses stray and "
+       "repeated frees and reports exhaustion")
+      for fid, name, live in (("F03463", "FreeFromHighEnd", "FreeLiveFromHighEnd"),
+                              ("F03464", "FreeFromLowEnd", "FreeLiveFromLowEnd"),
+                              ("F03465", "AllocateFromHighEnd", "AllocateLiveFromHighEnd"),
+                              ("F03466", "AllocateFromLowEnd", "AllocateLiveFromLowEnd"))],
     (r"", r"\bVS::Core::IgnoreCallback\(", r"VS::Core::IgnoreLiveActorCallback(",
      "F00023 #276 typed promotion: the actor-stats callback keeps its original argument"),
     (r"^Menu::(Container|Inventory)::SortEquipment$",
@@ -3704,21 +3722,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
                        ("i", "variantIndex"))],
     (r"^Menu::Score::LoadEnemyModelParts$", r"\bslot\b", "request",
      "592C.c:203 the local is an asset request, not a queue slot"),
-    *[(r"^Core::Memory::FreeFrom(?:High|Low)End$", r"\bvar_a1\b", "previous_free",
-       "main.c:8884/8914 locate the free-list insertion predecessor before coalescing")],
-    *[(r"^Core::Memory::AllocateFromHighEnd$", rf"\b{old}\b", new,
-       "main.c:8944 searches backward and splits allocation units from the selected block tail")
-      for old, new in (("var_a1", "allocation_block"),
-                       ("var_a2", "following_free"),
-                       ("blockSz", "allocation_units"))],
-    *[(r"^Core::Memory::AllocateFromLowEnd$", rf"\b{old}\b", new,
-       "main.c:8974 searches forward and preserves the split remainder as a free block")
-      for old, new in (("var_a1", "allocation_block"),
-                       ("var_v1", "previous_free"),
-                       ("temp_v1", "remainder"),
-                       ("blockSz", "allocation_units"))],
-    (r"^Core::Memory::InitializeHeap$", r"\bvalue\b", "byte_count",
-     "main.c:9008 divides the supplied arena byte extent by sizeof the native heap header"),
     *[(r"^Field::ClearSavedRoomEnemies$", rf"\b{old}\b", new,
        "146C.c:8509 forwards room and zone to the matching actor-state cache clear at146C.c:789")
       for old, new in (("arg0", "mapId"), ("arg1", "zoneId"))],
@@ -4008,12 +4011,12 @@ FIXES["F00793"] = FIXES["F00793"] + [
     ("VS::Core::Memory::CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], 0x1900);",
      "VS::Core::Memory::CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));",
      "record size"),
-    ("    model = Core_Memory_AllocateFromLowEnd(size);\n"
+    ("    model = VS::Core::Memory::AllocateFromLowEnd(size);\n"
      "    memcpy(model, data, size);\n"
      "    actor->instance.model = model;\n"
      "    if (model == NULL) {\n        return -2;\n    }",
      "    if (size < (int)sizeof(Actors_ShpModel)) {\n        return -2;\n    }\n"
-     "    model = Core_Memory_AllocateFromLowEnd(size);\n"
+     "    model = VS::Core::Memory::AllocateFromLowEnd(size);\n"
      "    if (model == NULL) {\n        return -2;\n    }\n"
      "    memcpy(model, data, size);\n"
      "    actor->instance.model = model;\n"

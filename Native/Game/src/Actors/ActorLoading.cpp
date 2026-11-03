@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "CdDrive.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/Mpd.h"
@@ -76,7 +76,7 @@ Battle_Actor* Actors_CreateAuxiliaryActor(
     }
 
     if (Battle_actors[index] == NULL) {
-        actor_core = (Actors_ActorCore *)(Core_Memory_AllocateFromLowEnd(sizeof *actor_core));
+        actor_core = (Actors_ActorCore *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *actor_core));
         VS::Core::Memory::ZeroLiveAlignedWords(actor_core, sizeof actor_core->actor);
         actor_core->actor.actor.stats = &actor_core->actor.stats;
         actor_core->actor.actor.model = &actor_core->model;
@@ -476,7 +476,7 @@ Actors_ActorAllocation* Actors_AllocateActorWithEquipment(int actor_id, int mode
         return NULL;
     }
     if (actor_id < 0xA) {
-        allocation = (Actors_ActorAllocation *)(Core_Memory_AllocateFromLowEnd(sizeof *allocation));
+        allocation = (Actors_ActorAllocation *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *allocation));
         VS::Core::Memory::ZeroLiveAlignedWords(allocation, sizeof allocation->core.actor);
         i = 0xA;
         allocation->core.actor.actor.stats = &allocation->core.actor.stats;
@@ -574,13 +574,13 @@ Battle_Actor* Actors_SpawnRoomEnemy(
         bladeId = (u_char)init->weapon.blade.weaponModelId;
         shieldId = (u_char)init->shield.base.weaponModelId;
         if (Actors_usesSecondaryBodyModel[(u_char)init->characterKind]) {
-            actor = (Battle_Actor *)(Core_Memory_AllocateFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) + sizeof(Actors_ActorRecord)));
+            actor = (Battle_Actor *)(VS::Core::Memory::AllocateLiveFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) + sizeof(Actors_ActorRecord)));
             actor->stats = (Battle_ActorStats*)(actor + 1);
             actor->allocationKind = 2;
             actor->model = (Actors_ModelInstance *)((void*)&((Actors_ActorAllocation*)actor)->core.model);
             actor->equipmentModels[0] = (Actors_ActorModelSlot *)((void*)((Actors_ActorAllocation*)actor)->modelSlots);
         } else {
-            actor = (Battle_Actor *)(Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorAllocation)));
+            actor = (Battle_Actor *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorAllocation)));
             actor->stats = (Battle_ActorStats*)(actor + 1);
             actor->allocationKind = 1;
             actor->model = (Actors_ModelInstance *)((void*)&((Actors_ActorAllocation*)actor)->core.model);
@@ -598,7 +598,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
             if (zudIndex + 1 == Field_zoneContext.loadedZudIndexPlusOne) {
                 loaded = 1;
             } else {
-                Core_Memory_FreeFromHighEnd(Field_zoneContext.zudData);
+                VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
                 Field_zoneContext.zudData = NULL;
                 Field_zoneContext.loadedZudIndexPlusOne = 0;
             }
@@ -610,7 +610,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                 VS::Core::IgnoreDiagnostic(0xA7, 0);
             }
             Field_zoneContext.zudDiscRequest = Content_AllocateDiscRequest(&file);
-            Field_zoneContext.zudData = Core_Memory_AllocateFromHighEnd(file.size);
+            Field_zoneContext.zudData = VS::Core::Memory::AllocateLiveFromHighEnd(file.size);
             Content_EnqueuePriorityDiscRequest(Field_zoneContext.zudDiscRequest, Field_zoneContext.zudData);
             while (Field_zoneContext.zudDiscRequest->state != 4) {
                 State_UpdatePlayTimeAndLoading(0);
@@ -790,7 +790,7 @@ int Actors_QueueScriptedActorSpawn(u_int actor_id, int model_id, Field_ActorPlac
     if (actor_id < 16) {
         if (Battle_actors[actor_id] == NULL) {
             actor_slot = &Battle_actors[actor_id];
-            allocation = (Actors_ActorAllocation *)(Core_Memory_AllocateFromLowEnd(sizeof *allocation));
+            allocation = (Actors_ActorAllocation *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *allocation));
             *actor_slot = &allocation->core.actor.actor;
             allocation->core.actor.actor.stats = &allocation->core.actor.stats;
             allocation->core.actor.actor.allocationKind = 1;

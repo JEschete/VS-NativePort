@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Event/ScriptAudio.h"
@@ -1802,7 +1802,7 @@ int Menu_Files_LoadGameOverAssetsStep(int begin_asset_load)
         cdFile.lba = VS_GAMEOVER_BIN_LBA;
         cdFile.size = VS_GAMEOVER_BIN_SIZE;
         Menu_Files_loadGameOverAssetsStepQueueSlot = Content_AllocateDiscRequest(&cdFile);
-        Menu_Files_loadGameOverAssetsStepGameOverBin = (u_int *)(Core_Memory_AllocateFromHighEnd(VS_GAMEOVER_BIN_SIZE));
+        Menu_Files_loadGameOverAssetsStepGameOverBin = (u_int *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE));
         Content_EnqueueDiscRequest(Menu_Files_loadGameOverAssetsStepQueueSlot, Menu_Files_loadGameOverAssetsStepGameOverBin);
         Menu_Files_loadGameOverAssetsStepState = 0;
         return 0;
@@ -1817,7 +1817,7 @@ int Menu_Files_LoadGameOverAssetsStep(int begin_asset_load)
         }
         return 0;
     case 1:
-        Core_Memory_FreeFromHighEnd(Menu_Files_loadGameOverAssetsStepGameOverBin);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Files_loadGameOverAssetsStepGameOverBin);
         return 1;
     default:
         return 0;
@@ -2194,7 +2194,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
     Items_ContainerIndices* targetIndices;
     int sourceIndex;
 
-    targetIndices = (Items_ContainerIndices *)(Core_Memory_AllocateFromHighEnd(sizeof *targetIndices));
+    targetIndices = (Items_ContainerIndices *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *targetIndices));
     VS::Core::Memory::ZeroLiveWordsBackward(targetIndices, sizeof *targetIndices);
     VS::Core::Memory::ZeroLiveWordsBackward(target, sizeof *target);
 
@@ -2303,7 +2303,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         }
     }
 
-    Core_Memory_FreeFromHighEnd(targetIndices);
+    VS::Core::Memory::FreeLiveFromHighEnd(targetIndices);
 }
 
 // decomp: MENU7.PRG _drawPlayTime (src/MENU/MENU7.PRG/260.c:4157)

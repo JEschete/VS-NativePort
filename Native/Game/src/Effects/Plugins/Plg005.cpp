@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -49,7 +49,7 @@ int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int 
 
     switch (lifecycle_command) {
     case 1:
-        fp = (Effects_Plg005_AnalyzeGridQuad *)(Core_Memory_AllocateFromHighEnd(sizeof *fp));
+        fp = (Effects_Plg005_AnalyzeGridQuad *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *fp));
         renderer_slot->rendererState = fp;
         fp->opaque1 = packed_parameters >> 8;
         fp->opaque0 = packed_parameters;

@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Weather.h"
 #include "Field/Background.h"
 #include "Field/Collision.h"
@@ -24,9 +24,9 @@ extern "C" {
 void Effects_AllocateWeatherParticles(void)
 {
     if (Field_weatherParticles != NULL) {
-        Core_Memory_FreeFromLowEnd(Field_weatherParticles);
+        VS::Core::Memory::FreeLiveFromLowEnd(Field_weatherParticles);
     }
-    Field_weatherParticles = (Field_WeatherParticle *)(Core_Memory_AllocateFromLowEnd(0x800));
+    Field_weatherParticles = (Field_WeatherParticle *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x800));
 }
 
 // decomp: BATTLE.PRG func_8008EA90 (src/BATTLE/BATTLE.PRG/146C.c:17500)

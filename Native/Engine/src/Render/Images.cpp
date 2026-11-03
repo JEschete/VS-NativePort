@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -6,7 +7,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Event/Splash.h"
 #include "Menu/Framework/Framework.h"
@@ -60,9 +60,9 @@ void Render_QueueGimImage(int id, int first_texture_page)
     int i;
 
     if ((*(Render_GimLayer* (*))&Render_gimLayers) == NULL) {
-        layer_cursor = (Render_GimLayer *)(Core_Memory_AllocateFromHighEnd(sizeof *layer_cursor * 3));
+        layer_cursor = (Render_GimLayer *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *layer_cursor * 3));
         (*(Render_GimLayer* (*))&Render_gimLayers) = layer_cursor;
-        layer_cursor->fileData = (u_short *)(Core_Memory_AllocateFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB));
+        layer_cursor->fileData = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB));
 
         for (i = 0; i < 3; ++i) {
             *(u_short*)layer_cursor = 0;
@@ -143,7 +143,7 @@ void Render_ReleaseGimImages(void)
             }
             ++layer_cursor;
         }
-        Core_Memory_FreeFromHighEnd((*(Render_GimLayer* (*))&Render_gimLayers));
+        VS::Core::Memory::FreeLiveFromHighEnd((*(Render_GimLayer* (*))&Render_gimLayers));
         (*(Render_GimLayer* (*))&Render_gimLayers) = NULL;
     }
 }
@@ -266,7 +266,7 @@ void Render_UpdateGimImages(void)
         gim->loadPhase = 2;
         break;
     case 2:
-        Core_Memory_FreeFromHighEnd(gim->fileData);
+        VS::Core::Memory::FreeLiveFromHighEnd(gim->fileData);
 
         for (j = 0; j < 3; ++j) {
             gim[j].loading = 0;

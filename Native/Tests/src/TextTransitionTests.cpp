@@ -8,11 +8,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Input/Controller.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Render/Display.h"
@@ -27,9 +26,9 @@ constexpr int kWidth = 58;
 constexpr int kHeight = 30;
 
 struct TextTransitionFixture {
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
-  std::array<Core_HeapBlockHeader, 1024> heap{};
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 1024> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   decltype(std::to_array(Render_variableFontGlyphWidths)) widths =
       std::to_array(Render_variableFontGlyphWidths);
   decltype(std::to_array(Render_kGlyphPixelExpansion)) expansion =
@@ -48,7 +47,6 @@ struct TextTransitionFixture {
   TextTransitionFixture() {
     StoreImage(&target, reinterpret_cast<u_long*>(saved_target.data()));
     StoreImage(&atlas, reinterpret_cast<u_long*>(saved_atlas.data()));
-    Core_Memory_InitializeHeap(heap.data(), sizeof(heap));
     std::fill(std::begin(Render_variableFontGlyphWidths),
               std::end(Render_variableFontGlyphWidths), 6);
     Render_kGlyphPixelExpansion[1] = 0x7FFF;
@@ -80,8 +78,6 @@ struct TextTransitionFixture {
     Render_fontTableSelect = font_table;
     Render_frameBuf = frame_buffer;
     Input_buttonsPressed.allButtons = buttons;
-    Core_legacyHeapList = saved_heap;
-    Core_legacySecondaryHeapList = saved_secondary;
   }
 
   void Glyph(unsigned code, u_short index) {

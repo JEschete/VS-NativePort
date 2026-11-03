@@ -4,6 +4,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Gimmicks.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -613,7 +613,7 @@ int Battle_Ai_SnapshotPlanningActorStats(void)
 {
     Battle_Actor* actor;
 
-    Battle_Ai_planningStatsSnapshot = (Battle_ActorStats *)(Core_Memory_AllocateFromHighEnd(sizeof(Battle_ActorStats) * 16));
+    Battle_Ai_planningStatsSnapshot = (Battle_ActorStats *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActorStats) * 16));
     if (Battle_Ai_planningStatsSnapshot == NULL) {
         return 0;
     }
@@ -631,7 +631,7 @@ void Battle_Ai_RestorePlanningActorStats(void)
     for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
         VS::Battle::Ai::CopyLivePlanningActorStats(&Battle_Ai_planningStatsSnapshot[actor->id], actor->stats);
     }
-    Core_Memory_FreeFromHighEnd(Battle_Ai_planningStatsSnapshot);
+    VS::Core::Memory::FreeLiveFromHighEnd(Battle_Ai_planningStatsSnapshot);
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/74088.c:1264

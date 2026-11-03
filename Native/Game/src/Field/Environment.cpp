@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Sfx.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Weather.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -219,7 +219,7 @@ void Field_ReleaseWeatherParticles(void)
     Field_weatherParticleCount = 0;
     Field_weatherParticleCapacity = 0;
     if ((*(void* (*))&Field_weatherParticles) != NULL) {
-        Core_Memory_FreeFromLowEnd((*(void* (*))&Field_weatherParticles));
+        VS::Core::Memory::FreeLiveFromLowEnd((*(void* (*))&Field_weatherParticles));
     }
     (*(void* (*))&Field_weatherParticles) = NULL;
 }

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
@@ -663,7 +663,7 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         Event_SetEventActorActivity(instruction[2]);
         break;
     case 6:
-        Core_Memory_FreeFromHighEnd(Event_chainedEventBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Event_chainedEventBuffer);
         break;
     case 7:
         Event_SetEventFieldCameraOverride(instruction[2]);
@@ -754,7 +754,7 @@ intptr_t Event_CommandStopScriptContext(u_char* instruction, short thread_index)
 intptr_t Event_CommandLoadNextEvent(u_char* instruction, short thread_index)
 {
     Event_eventId = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
-    Event_chainedEventBuffer = Core_Memory_AllocateFromHighEnd(0x1800);
+    Event_chainedEventBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(0x1800);
     Event_QueueEventScriptLoad(Event_eventId, Event_chainedEventBuffer);
     Event_isChainedEventLoaded = 1;
     return 0;
@@ -888,7 +888,7 @@ int Event_UpdateEventPlayback(void)
             Content_ReleaseDiscRequest((Content_DiscQueueSlot*)Event_eventFileDiscRequest);
             if (Event_isChainedEventLoaded != 0) {
                 VS::Core::Memory::CopyLiveAlignedWords(Event_scriptBuffer, Event_chainedEventBuffer, 0x1800);
-                Core_Memory_FreeFromHighEnd(Event_chainedEventBuffer);
+                VS::Core::Memory::FreeLiveFromHighEnd(Event_chainedEventBuffer);
                 Event_isChainedEventLoaded = 0;
             }
             Event_InitializeEventScriptData((u_char *)(Event_scriptBuffer));
@@ -1129,9 +1129,9 @@ void Event_InitializeScriptOpcodeTable(void)
     VS::Core::Memory::ZeroLiveAlignedWords(Event_threadCursors, sizeof Event_threadCursors);
     VS::Core::Memory::ZeroLiveAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);
     Event_roomChangeState = 0;
-    Event_scriptBuffer = Core_Memory_AllocateFromLowEnd(0x1800);
-    Event_vibrationPatternBuffer = Core_Memory_AllocateFromLowEnd(0x80);
-    Event_legacySkipHandlerCopy = (intptr_t (**)(u_char *, short))(Core_Memory_AllocateFromLowEnd(sizeof(Event_kSkipOpcodeHandlers)));
+    Event_scriptBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x1800);
+    Event_vibrationPatternBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x80);
+    Event_legacySkipHandlerCopy = (intptr_t (**)(u_char *, short))(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers)));
     VS::Core::Memory::CopyLiveAlignedWords(Event_legacySkipHandlerCopy, Event_kSkipOpcodeHandlers, sizeof(Event_kSkipOpcodeHandlers));
 }
 

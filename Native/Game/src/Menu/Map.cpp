@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -15,7 +16,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
 #include "Field/Doors.h"
@@ -303,7 +303,7 @@ int Menu_Map_LoadBackground(int begin_background_load)
         cdFile.lba = VS_MAPBG_BIN_LBA;
         cdFile.size = VS_MAPBG_BIN_SIZE;
         Menu_Map_loadBackgroundSlot = Content_AllocateDiscRequest(&cdFile);
-        Menu_Map_backgroundImage = (u_short *)(Core_Memory_AllocateFromHighEnd(VS_MAPBG_BIN_SIZE));
+        Menu_Map_backgroundImage = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_MAPBG_BIN_SIZE));
         Content_EnqueueDiscRequest(Menu_Map_loadBackgroundSlot, Menu_Map_backgroundImage);
         Menu_Map_loadBackgroundState = 0;
         return 0;
@@ -319,7 +319,7 @@ int Menu_Map_LoadBackground(int begin_background_load)
         }
         return 0;
     case 1:
-        Core_Memory_FreeFromHighEnd(Menu_Map_backgroundImage);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Map_backgroundImage);
         return 1;
     default:
         return 0;
@@ -340,7 +340,7 @@ int Menu_Map_UpdateScreen(u_char* state)
     switch (*state) {
     case Menu_Framework_InitOnlyState_Init:
         Menu_Map_currentMapRow = -1;
-        Menu_Map_screenMenuBgBackup = (u_long *)(Core_Memory_AllocateFromHighEnd(0xB600));
+        Menu_Map_screenMenuBgBackup = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(0xB600));
         Menu_Map_screenMenuBgBackRects[0].x = 768;
         Menu_Map_screenMenuBgBackRects[0].y = 227;
         Menu_Map_screenMenuBgBackRects[0].w = 256;
@@ -445,7 +445,7 @@ int Menu_Map_UpdateScreen(u_char* state)
             Menu_Framework_menuState.currentMenu = 6;
         }
 
-        Core_Memory_FreeFromHighEnd(Menu_Map_screenMenuBgBackup);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Map_screenMenuBgBackup);
 
         Menu_Framework_hideMenu = 0;
         *state = 0;
@@ -497,7 +497,7 @@ int Menu_Map_LoadSceneMap(void)
         Menu_Map_uiAnimationState = 0;
         Menu_Map_isPaling = paling;
 
-        Battle_unusedSceneBuffer = Core_Memory_AllocateFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
+        Battle_unusedSceneBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
         Menu_Map_sceneCdQueueSlot = Content_AllocateDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]);
         Content_EnqueueDiscRequest(Menu_Map_sceneCdQueueSlot, Battle_unusedSceneBuffer);
 
@@ -821,7 +821,7 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_Map_currentScene = Menu_Map_sceneRowIdMap[area_selection_result];
             Menu_Map_menuState = Menu_Map_MapMenuState_InitNewMap;
 
-            Menu_Map_armFileBuff = Core_Memory_AllocateFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
+            Menu_Map_armFileBuff = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
             Menu_Map_sceneCdQueueSlot =
                 Content_AllocateDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]);
             Content_EnqueueDiscRequest(Menu_Map_sceneCdQueueSlot, Menu_Map_armFileBuff);
@@ -832,7 +832,7 @@ int Menu_Map_UpdateMapMenu(void)
         Menu_Map_uiAnimationState = 2;
 
         if (Menu_Map_backgroundBrightness >= 128) {
-            Core_Memory_FreeFromHighEnd(Battle_unusedSceneBuffer);
+            VS::Core::Memory::FreeLiveFromHighEnd(Battle_unusedSceneBuffer);
 
             Battle_unusedSceneBuffer = NULL;
             return Menu_Map_quitState;
@@ -853,14 +853,14 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_Map_isPaling = 0;
 
             Content_ReleaseDiscRequest(Menu_Map_sceneCdQueueSlot);
-            Core_Memory_FreeFromHighEnd(Battle_unusedSceneBuffer);
+            VS::Core::Memory::FreeLiveFromHighEnd(Battle_unusedSceneBuffer);
 
             Battle_unusedSceneBuffer =
-                Core_Memory_AllocateFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
+                VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
             VS::Core::Memory::CopyLiveAlignedWords(
                 Battle_unusedSceneBuffer, Menu_Map_armFileBuff, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
-            Core_Memory_FreeFromHighEnd(Menu_Map_armFileBuff);
+            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Map_armFileBuff);
 
             Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 

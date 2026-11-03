@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -933,7 +933,7 @@ loop_1:
     switch (Menu_Inventory_itemListState) {
     case Menu_Inventory_ItemListState_None:
     case Menu_Inventory_ItemListState_Init: {
-        void* textBuf = Core_Memory_AllocateFromHighEnd(72 * 96);
+        void* textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(72 * 96);
         rowTypes = (int *)(((u_char*)(textBuf)) + 0x1800);
         menuText = (char **)(((u_char*)(textBuf)) + 0x1900);
 
@@ -999,7 +999,7 @@ loop_1:
             Input_settings.cursorMemory = i;
         }
 
-        Core_Memory_FreeFromHighEnd(textBuf);
+        VS::Core::Memory::FreeLiveFromHighEnd(textBuf);
 
         Menu_Inventory_itemListState = 2;
         break;
@@ -1061,7 +1061,7 @@ loop_1:
                     return Menu_Inventory_itemListSelectedRow;
                 }
 
-                textBuf = Core_Memory_AllocateFromHighEnd(72 * 96);
+                textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(72 * 96);
                 sp310 = (char **)(((u_char*)(textBuf)) + 0x1900);
                 rowTypes = (int *)(((u_char*)(textBuf)) + 0x1800);
 
@@ -1081,7 +1081,7 @@ loop_1:
                 Menu_Inventory_statusCommandState = 1;
                 Menu_Inventory_freezeTabArrows = 0;
 
-                Core_Memory_FreeFromHighEnd(textBuf);
+                VS::Core::Memory::FreeLiveFromHighEnd(textBuf);
 
                 Menu_Inventory_itemListState = 6;
                 break;

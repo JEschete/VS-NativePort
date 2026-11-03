@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "CdDrive.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Input/Buttons.h"
@@ -332,7 +332,7 @@ int Menu_Results_InitializeGameClear(void)
 
         Render_ReserveTexturePageRange(0x1D, 3, 5);
 
-        Menu_Results_initializeGameClearTimData = Core_Memory_AllocateFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Rank].size);
+        Menu_Results_initializeGameClearTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Rank].size);
         Menu_Results_initializeGameClearCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Rank]);
 
         Content_EnqueueDiscRequest(Menu_Results_initializeGameClearCdSlot, Menu_Results_initializeGameClearTimData);
@@ -381,7 +381,7 @@ int Menu_Results_InitializeGameClear(void)
         u_int chestsOpened;
 
         Audio_PlayMusicSlot(2, 0x7F, 0);
-        Core_Memory_FreeFromHighEnd(Menu_Results_initializeGameClearTimData);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Results_initializeGameClearTimData);
 
         Menu_Results_onScreenMapCompletion = 0;
         Menu_Results_onScreenScore = 0;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits/StaffRoll.h"
@@ -290,7 +290,7 @@ int Ending_LoadClearResultsStep(void)
 
     if (Ending_resultsLoadPhase == 0) {
 
-        Ending_resultsTimBuffer = Core_Memory_AllocateFromHighEnd(Ending_resultsDiscFiles->size);
+        Ending_resultsTimBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Ending_resultsDiscFiles->size);
         Ending_resultsDiscReadSlot = Content_AllocateDiscRequest(Ending_resultsDiscFiles);
 
         Content_EnqueueDiscRequest(Ending_resultsDiscReadSlot, Ending_resultsTimBuffer);
@@ -331,7 +331,7 @@ int Ending_LoadClearResultsStep(void)
 
     } else if (Ending_resultsLoadPhase == 2) {
 
-        Core_Memory_FreeFromHighEnd(Ending_resultsTimBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Ending_resultsTimBuffer);
 
         visited_room_count = 0;
         Ending_displayedMapCompletion = 0;
@@ -371,7 +371,7 @@ int Ending_LoadClearResultsStep(void)
         Ending_CalculateClearScore();
         Ending_DetermineRiskbreakerRank();
 
-        Ending_resultsTimBuffer = Core_Memory_AllocateFromHighEnd(Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1].size);
+        Ending_resultsTimBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1].size);
         Ending_resultsDiscReadSlot = Content_AllocateDiscRequest(&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1]);
         Content_EnqueueDiscRequest(Ending_resultsDiscReadSlot, Ending_resultsTimBuffer);
         ++Ending_resultsLoadPhase;
@@ -396,7 +396,7 @@ int Ending_LoadClearResultsStep(void)
 
     } else {
         Ending_resultsLoadPhase = 0;
-        Core_Memory_FreeFromHighEnd(Ending_resultsTimBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Ending_resultsTimBuffer);
 
         return 1;
     }

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -48,7 +48,7 @@ void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_Inventor
     Items_ContainerData* container)
 {
     int i;
-    Items_WeaponSpawnLoadout* temp = (Items_WeaponSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *temp));
+    Items_WeaponSpawnLoadout* temp = (Items_WeaponSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));
     VS::Core::Memory::ZeroLiveAlignedWords(temp, sizeof *temp);
 
     if (source != NULL) {
@@ -77,7 +77,7 @@ void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_Inventor
     }
 
     Items_BuildWeaponStatsFromParts(target, temp);
-    Core_Memory_FreeFromHighEnd(temp);
+    VS::Core::Memory::FreeLiveFromHighEnd(temp);
 }
 
 // decomp: MENUD.PRG vs_menuD_initUiShield (src/MENU/MENUD.PRG/234.c:57)
@@ -85,7 +85,7 @@ void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_Inventor
     Items_ContainerData* container)
 {
     int i;
-    Items_ShieldSpawnLoadout* temp = (Items_ShieldSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *temp));
+    Items_ShieldSpawnLoadout* temp = (Items_ShieldSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));
     VS::Core::Memory::ZeroLiveAlignedWords(temp, sizeof *temp);
 
     if (source != NULL) {
@@ -101,7 +101,7 @@ void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_Inventor
         }
     }
     Items_BuildShieldStatsFromParts(target, temp);
-    Core_Memory_FreeFromHighEnd(temp);
+    VS::Core::Memory::FreeLiveFromHighEnd(temp);
 }
 
 // decomp: MENUD.PRG _getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:85)

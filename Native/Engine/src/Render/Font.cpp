@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Render/ScaledFont.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -8,7 +9,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -717,7 +717,7 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* text_box, int glyph_a
         return;
     }
 
-    buf = (u_short *)(Core_Memory_AllocateFromHighEnd(width * height * 2));
+    buf = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(width * height * 2));
 
     if ((glyph_alpha >> 0x10) != 0) {
         glyph_alpha = 0x10000;
@@ -799,7 +799,7 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* text_box, int glyph_a
     }
     Render_UploadImageRectangle(
         (x + (Render_frameBuf * 320)) | (_y << 0x10), buf, width | (height << 0x10));
-    Core_Memory_FreeFromHighEnd(buf);
+    VS::Core::Memory::FreeLiveFromHighEnd(buf);
 }
 
 }  // extern "C"

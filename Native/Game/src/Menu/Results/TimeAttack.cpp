@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -65,7 +65,7 @@ int Menu_Results_InitializeTimeAttackResults(void)
 
         Render_ReserveTexturePageRange(0x1D, 1, 5);
 
-        Menu_Results_initializeTimeAttackResultsTimData = Core_Memory_AllocateFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Time].size);
+        Menu_Results_initializeTimeAttackResultsTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Time].size);
         Menu_Results_initializeTimeAttackResultsCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[1]);
 
         Content_EnqueueDiscRequest(Menu_Results_initializeTimeAttackResultsCdSlot, Menu_Results_initializeTimeAttackResultsTimData);
@@ -162,7 +162,7 @@ int Menu_Results_InitializeTimeAttackResults(void)
         Menu_Results_elementAnimationState = 0;
         Battle_unusedSubmenuState = 0;
 
-        Core_Memory_FreeFromHighEnd(Menu_Results_initializeTimeAttackResultsTimData);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Results_initializeTimeAttackResultsTimData);
 
         return 1;
     }
@@ -179,7 +179,7 @@ int Menu_Results_InitializeTimeAttackStart(void)
 
         Render_ReserveTexturePageRange(0x1D, 2, 5);
 
-        Menu_Results_initializeTimeAttackStartTimData = Core_Memory_AllocateFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Attack].size);
+        Menu_Results_initializeTimeAttackStartTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Attack].size);
         Menu_Results_initializeTimeAttackStartCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack]);
 
         Content_EnqueueDiscRequest(Menu_Results_initializeTimeAttackStartCdSlot, Menu_Results_initializeTimeAttackStartTimData);
@@ -219,7 +219,7 @@ int Menu_Results_InitializeTimeAttackStart(void)
             ++Battle_unusedSubmenuState;
         }
     } else {
-        Core_Memory_FreeFromHighEnd(Menu_Results_initializeTimeAttackStartTimData);
+        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Results_initializeTimeAttackStartTimData);
 
         Menu_Results_onScreenMapCompletion = 0;
         Menu_Results_onScreenScore = 0;

@@ -12,6 +12,7 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -21,8 +22,6 @@ extern "C" {
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Field/RoomLoading.h"
 }
 
@@ -224,8 +223,6 @@ TEST_CASE(
 
 namespace {
 struct RoomCommandFixture : CommandFixture {
-  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
-  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
@@ -243,10 +240,11 @@ struct RoomCommandFixture : CommandFixture {
   decltype(std::to_array(Battle_Ai_directionDeltas)) saved_directions =
       std::to_array(Battle_Ai_directionDeltas);
   Field_MpdCollisionHeader dimensions{2, 2, 0, 4};
-  std::array<Core_HeapBlockHeader, 2048> heap{};
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 
   RoomCommandFixture() {
-    Core_Memory_InitializeHeap(heap.data(), sizeof heap);
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
     Battle_actors[2] = &actor;
@@ -266,8 +264,6 @@ struct RoomCommandFixture : CommandFixture {
 
   ~RoomCommandFixture() {
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
-    Core_legacyHeapList = saved_heap;
-    Core_legacySecondaryHeapList = saved_secondary;
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
               Battle_Ai_actorAiStates);

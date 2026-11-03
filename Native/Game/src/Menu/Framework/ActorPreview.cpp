@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Memory/Heap.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
 #include "Menu/Framework/ActorPreview.h"
@@ -48,7 +48,7 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
     void* cloned_asset_allocation;
 
     source_actor = Actors_actorRecords[source_actor_slot];
-    preview_actor = (Actors_ActorRecord *)(Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord)));
+    preview_actor = (Actors_ActorRecord *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));
     asset_request.assetKind = 2;
     asset_request.targetSlot = 1;
     asset_request.modelId = source_actor->modelId;
@@ -62,7 +62,7 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
 
     if (source_actor->companionSlot >= 2) {
         temp_s0 = Actors_actorRecords[source_actor->companionSlot];
-        cloned_asset_allocation = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord));
+        cloned_asset_allocation = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord));
         asset_request.assetKind = 2;
         asset_request.targetSlot = 16;
         asset_request.modelId = temp_s0->modelId;
@@ -80,7 +80,7 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
         Actors_WeaponModel* temp_s0 =
             Actors_weaponModels[(source_actor->instance.slot * 2) + i];
         if (temp_s0 != 0) {
-            cloned_asset_allocation = Core_Memory_AllocateFromLowEnd(sizeof *temp_s0);
+            cloned_asset_allocation = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *temp_s0);
             asset_request.assetKind = 4;
             asset_request.targetSlot = i + 2;
             asset_request.modelId = temp_s0->modelId;
@@ -99,7 +99,7 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
     preview_actor->commonSequence = source_actor->commonSequence;
 
     if (source_actor->instance.slot == 0) {
-        preview_actor->battleSequence = Core_Memory_AllocateFromLowEnd(0x7800);
+        preview_actor->battleSequence = VS::Core::Memory::AllocateLiveFromLowEnd(0x7800);
 
         Content_CopyWeaponSequence((Content_SequenceBuffer *)(preview_actor->battleSequence), (Content_SequenceBuffer *)(source_actor->battleSequence));
     } else {
@@ -172,21 +172,21 @@ void Menu_Framework_ReleaseActorPreview(void)
     preview_weapon_allocations[1] = Actors_weaponModels[3];
 
     Content_ReleaseActorModel(1);
-    Core_Memory_FreeFromLowEnd(preview_actor_allocation);
+    VS::Core::Memory::FreeLiveFromLowEnd(preview_actor_allocation);
 
     preview_actor_allocation = Actors_actorRecords[16];
 
     if (preview_actor_allocation != NULL) {
         Content_ReleaseActorModel(0x10);
-        Core_Memory_FreeFromLowEnd(preview_actor_allocation);
+        VS::Core::Memory::FreeLiveFromLowEnd(preview_actor_allocation);
     }
 
     if (preview_weapon_allocations[0] != NULL) {
-        Core_Memory_FreeFromLowEnd(preview_weapon_allocations[0]);
+        VS::Core::Memory::FreeLiveFromLowEnd(preview_weapon_allocations[0]);
     }
 
     if (preview_weapon_allocations[1] != NULL) {
-        Core_Memory_FreeFromLowEnd(preview_weapon_allocations[1]);
+        VS::Core::Memory::FreeLiveFromLowEnd(preview_weapon_allocations[1]);
     }
 }
 

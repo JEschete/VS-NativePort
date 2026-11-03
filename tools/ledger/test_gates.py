@@ -85,6 +85,8 @@ class Fixture:
         )]
         self.verify: list[dict[str, str]] = []
         self.slices: list[dict[str, str]] = []
+        self.data = [{"id": "G00001", "copied": "retired", "notes": "retired-by:VS::Sys::Thing"}]
+        self.types = [{"id": "T00001", "copied": "retired", "notes": "retired-by:VS::Sys::Thing"}]
         self.bridges = [
             {"ec": "EC-03", "path": "Native/Engine/include/Core/Gte.h", "kind": "header"},
             {"ec": "EC-03", "path": "Native/Engine/src/Core/Gte.cpp", "kind": "source"},
@@ -132,6 +134,8 @@ class Fixture:
         write_csv(self.root / "Docs/ledgers/CPP_PROMOTION.csv", gates.PROMOTION_FIELDS, self.promotion)
         write_csv(self.root / "Docs/ledgers/VERIFY_LEDGER.csv", gates.VERIFY_FIELDS, self.verify)
         write_csv(self.root / "Docs/ledgers/GATE_SLICES.csv", gates.SLICE_FIELDS, self.slices)
+        write_csv(self.root / "Docs/ledgers/DATA_LEDGER.csv", ["id", "copied", "notes"], self.data)
+        write_csv(self.root / "Docs/ledgers/TYPE_LEDGER.csv", ["id", "copied", "notes"], self.types)
         write_csv(self.root / "Docs/ledgers/EC_BRIDGES.csv", gates.BRIDGE_FIELDS, self.bridges)
         manifest = self.root / "tools/port/copy_manifest.json"
         manifest.write_text(json.dumps(self.manifest), encoding="utf-8")
@@ -259,6 +263,14 @@ class OwnershipGateTests(GateTestCase):
     def test_retired_row_requires_a_retired_by_note(self) -> None:
         self.fixture.catalog[3]["notes"] = "replaced"
         self.assertIn("retired-without-evidence", self.rules("ownership"))
+
+    def test_retired_global_and_type_rows_require_a_retired_by_note(self) -> None:
+        self.assertNotIn("retired-without-evidence", self.rules("ownership"))
+        for ledger in (self.fixture.data, self.fixture.types):
+            with self.subTest(row=ledger[0]["id"]):
+                ledger[0]["notes"] = "replaced-by:native allocator"
+                self.assertIn("retired-without-evidence", self.rules("ownership"))
+                ledger[0]["notes"] = "retired-by:VS::Sys::Thing"
 
     def test_retired_row_in_an_owned_file_is_not_missing_ownership(self) -> None:
         self.assertNotIn("unregistered-row-in-owned-file", self.rules("ownership"))

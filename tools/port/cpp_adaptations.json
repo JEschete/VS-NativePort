@@ -12,10 +12,10 @@
 [
 250,
 [
-"        destination = Core_Memory_AllocateFromLowEnd(byteCount);"
+"        destination = VS::Core::Memory::AllocateLiveFromLowEnd(byteCount);"
 ],
 [
-"        destination = (int *)(Core_Memory_AllocateFromLowEnd(byteCount));"
+"        destination = (int *)(VS::Core::Memory::AllocateLiveFromLowEnd(byteCount));"
 ]
 ],
 [
@@ -39,10 +39,10 @@
 [
 393,
 [
-"                    buf = Core_Memory_AllocateFromLowEnd(sizeof *buf);"
+"                    buf = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *buf);"
 ],
 [
-"                    buf = (Actors_WeaponModelData *)(Core_Memory_AllocateFromLowEnd(sizeof *buf));"
+"                    buf = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *buf));"
 ]
 ],
 [
@@ -57,10 +57,10 @@
 [
 464,
 [
-"        dst = Core_Memory_AllocateFromLowEnd(size);"
+"        dst = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
 ],
 [
-"        dst = (Actors_WeaponModelData *)(Core_Memory_AllocateFromLowEnd(size));"
+"        dst = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
 ]
 ],
 [
@@ -102,10 +102,10 @@
 [
 887,
 [
-"    model = Core_Memory_AllocateFromLowEnd(size);"
+"    model = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
 ],
 [
-"    model = (Actors_ShpModel *)(Core_Memory_AllocateFromLowEnd(size));"
+"    model = (Actors_ShpModel *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
 ]
 ],
 [
@@ -129,19 +129,19 @@
 [
 1377,
 [
-"            seq = Core_Memory_AllocateFromLowEnd(size);"
+"            seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
 ],
 [
-"            seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));"
+"            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
 ]
 ],
 [
 1391,
 [
-"            seq = Core_Memory_AllocateFromLowEnd(size);"
+"            seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
 ],
 [
-"            seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));"
+"            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
 ]
 ],
 [
@@ -165,10 +165,10 @@
 [
 1408,
 [
-"                    seq = Core_Memory_AllocateFromLowEnd(0x7800);"
+"                    seq = VS::Core::Memory::AllocateLiveFromLowEnd(0x7800);"
 ],
 [
-"                    seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(0x7800));"
+"                    seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x7800));"
 ]
 ],
 [
@@ -183,10 +183,10 @@
 [
 1430,
 [
-"            seq = Core_Memory_AllocateFromLowEnd(size);"
+"            seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
 ],
 [
-"            seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));"
+"            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
 ]
 ],
 [
@@ -210,10 +210,10 @@
 [
 1461,
 [
-"        seq = Core_Memory_AllocateFromLowEnd(size);"
+"        seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
 ],
 [
-"        seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));"
+"        seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
 ]
 ],
 [
@@ -228,10 +228,10 @@
 [
 1723,
 [
-"            Content_legacyEtmFileBuffer = Core_Memory_AllocateFromHighEnd(fileSize);"
+"            Content_legacyEtmFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(fileSize);"
 ],
 [
-"            Content_legacyEtmFileBuffer = (u_short *)(Core_Memory_AllocateFromHighEnd(fileSize));"
+"            Content_legacyEtmFileBuffer = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(fileSize));"
 ]
 ],
 [
@@ -843,10 +843,10 @@
 [
 719,
 [
-"    buf = Core_Memory_AllocateFromHighEnd(width * height * 2);"
+"    buf = VS::Core::Memory::AllocateLiveFromHighEnd(width * height * 2);"
 ],
 [
-"    buf = (u_short *)(Core_Memory_AllocateFromHighEnd(width * height * 2));"
+"    buf = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(width * height * 2));"
 ]
 ],
 [
@@ -934,10 +934,10 @@
 [
 378,
 [
-"            Render_legacyFramebufferEffectPackets = Core_Memory_AllocateFromHighEnd(sizeof *Render_legacyFramebufferEffectPackets);"
+"            Render_legacyFramebufferEffectPackets = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Render_legacyFramebufferEffectPackets);"
 ],
 [
-"            Render_legacyFramebufferEffectPackets = (Render_LegacyFramebufferEffectPackets *)(Core_Memory_AllocateFromHighEnd(sizeof *Render_legacyFramebufferEffectPackets));"
+"            Render_legacyFramebufferEffectPackets = (Render_LegacyFramebufferEffectPackets *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Render_legacyFramebufferEffectPackets));"
 ]
 ]
 ],
@@ -945,19 +945,19 @@
 [
 62,
 [
-"        layer_cursor = Core_Memory_AllocateFromHighEnd(sizeof *layer_cursor * 3);"
+"        layer_cursor = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *layer_cursor * 3);"
 ],
 [
-"        layer_cursor = (Render_GimLayer *)(Core_Memory_AllocateFromHighEnd(sizeof *layer_cursor * 3));"
+"        layer_cursor = (Render_GimLayer *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *layer_cursor * 3));"
 ]
 ],
 [
 64,
 [
-"        layer_cursor->fileData = Core_Memory_AllocateFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB);"
+"        layer_cursor->fileData = VS::Core::Memory::AllocateLiveFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB);"
 ],
 [
-"        layer_cursor->fileData = (u_short *)(Core_Memory_AllocateFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB));"
+"        layer_cursor->fileData = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB));"
 ]
 ],
 [
@@ -1494,10 +1494,10 @@
 [
 78,
 [
-"        actor_core = Core_Memory_AllocateFromLowEnd(sizeof *actor_core);"
+"        actor_core = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *actor_core);"
 ],
 [
-"        actor_core = (Actors_ActorCore *)(Core_Memory_AllocateFromLowEnd(sizeof *actor_core));"
+"        actor_core = (Actors_ActorCore *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *actor_core));"
 ]
 ],
 [
@@ -1512,10 +1512,10 @@
 [
 478,
 [
-"        allocation = Core_Memory_AllocateFromLowEnd(sizeof *allocation);"
+"        allocation = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *allocation);"
 ],
 [
-"        allocation = (Actors_ActorAllocation *)(Core_Memory_AllocateFromLowEnd(sizeof *allocation));"
+"        allocation = (Actors_ActorAllocation *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *allocation));"
 ]
 ],
 [
@@ -1530,10 +1530,10 @@
 [
 576,
 [
-"            actor = Core_Memory_AllocateFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) + sizeof(Actors_ActorRecord));"
+"            actor = VS::Core::Memory::AllocateLiveFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) + sizeof(Actors_ActorRecord));"
 ],
 [
-"            actor = (Battle_Actor *)(Core_Memory_AllocateFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) + sizeof(Actors_ActorRecord)));"
+"            actor = (Battle_Actor *)(VS::Core::Memory::AllocateLiveFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) + sizeof(Actors_ActorRecord)));"
 ]
 ],
 [
@@ -1550,10 +1550,10 @@
 [
 582,
 [
-"            actor = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorAllocation));"
+"            actor = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorAllocation));"
 ],
 [
-"            actor = (Battle_Actor *)(Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorAllocation)));"
+"            actor = (Battle_Actor *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorAllocation)));"
 ]
 ],
 [
@@ -1617,10 +1617,10 @@
 [
 792,
 [
-"            allocation = Core_Memory_AllocateFromLowEnd(sizeof *allocation);"
+"            allocation = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *allocation);"
 ],
 [
-"            allocation = (Actors_ActorAllocation *)(Core_Memory_AllocateFromLowEnd(sizeof *allocation));"
+"            allocation = (Actors_ActorAllocation *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *allocation));"
 ]
 ],
 [
@@ -2026,10 +2026,10 @@
 [
 526,
 [
-"            Core_Memory_AllocateFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]);"
+"            VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]);"
 ],
 [
-"            (Actors_WeaponModelData *)(Core_Memory_AllocateFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]));"
+"            (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]));"
 ]
 ]
 ],
@@ -2305,10 +2305,10 @@
 [
 615,
 [
-"    Battle_Ai_planningStatsSnapshot = Core_Memory_AllocateFromHighEnd(sizeof(Battle_ActorStats) * 16);"
+"    Battle_Ai_planningStatsSnapshot = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActorStats) * 16);"
 ],
 [
-"    Battle_Ai_planningStatsSnapshot = (Battle_ActorStats *)(Core_Memory_AllocateFromHighEnd(sizeof(Battle_ActorStats) * 16));"
+"    Battle_Ai_planningStatsSnapshot = (Battle_ActorStats *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActorStats) * 16));"
 ]
 ],
 [
@@ -2390,11 +2390,11 @@
 [
 194,
 [
-"    state = Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState));",
+"    state = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Battle_Ai_ActorAiState));",
 "    Battle_Ai_actorAiStates[id] = (void*)state;"
 ],
 [
-"    state = (Battle_Ai_AiCreationView *)(Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState)));",
+"    state = (Battle_Ai_AiCreationView *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Battle_Ai_ActorAiState)));",
 "    Battle_Ai_actorAiStates[id] = (Battle_Ai_ActorAiState *)((void*)state);"
 ]
 ],
@@ -3718,10 +3718,10 @@
 [
 77,
 [
-"        Battle_targetSphere = Core_Memory_AllocateFromLowEnd(sizeof *Battle_targetSphere);"
+"        Battle_targetSphere = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_targetSphere);"
 ],
 [
-"        Battle_targetSphere = (Battle_TargetSphereSetupView *)(Core_Memory_AllocateFromLowEnd(sizeof *Battle_targetSphere));"
+"        Battle_targetSphere = (Battle_TargetSphereSetupView *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_targetSphere));"
 ]
 ],
 [
@@ -4203,10 +4203,10 @@
 [
 266,
 [
-"            Effects_textureLoadBuffer = Core_Memory_AllocateFromHighEnd(VS_E000_0_FBT_SIZE);"
+"            Effects_textureLoadBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(VS_E000_0_FBT_SIZE);"
 ],
 [
-"            Effects_textureLoadBuffer = (u_long *)(Core_Memory_AllocateFromHighEnd(VS_E000_0_FBT_SIZE));"
+"            Effects_textureLoadBuffer = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_E000_0_FBT_SIZE));"
 ]
 ],
 [
@@ -4223,10 +4223,10 @@
 [
 96,
 [
-"    Effects_particlePool = Core_Memory_AllocateFromHighEnd(sizeof *Effects_particlePool * count);"
+"    Effects_particlePool = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Effects_particlePool * count);"
 ],
 [
-"    Effects_particlePool = (Effects_Particle *)(Core_Memory_AllocateFromHighEnd(sizeof *Effects_particlePool * count));"
+"    Effects_particlePool = (Effects_Particle *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Effects_particlePool * count));"
 ]
 ],
 [
@@ -4261,10 +4261,10 @@
 [
 51,
 [
-"        fp = Core_Memory_AllocateFromHighEnd(sizeof *fp);"
+"        fp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *fp);"
 ],
 [
-"        fp = (Effects_Plg005_AnalyzeGridQuad *)(Core_Memory_AllocateFromHighEnd(sizeof *fp));"
+"        fp = (Effects_Plg005_AnalyzeGridQuad *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *fp));"
 ]
 ],
 [
@@ -4323,10 +4323,10 @@
 [
 61,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof(*state));"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
 [
-"        state = (Effects_ClosedRingState *)(Core_Memory_AllocateFromHighEnd(sizeof(*state)));"
+"        state = (Effects_ClosedRingState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));"
 ]
 ],
 [
@@ -4514,10 +4514,10 @@
 [
 122,
 [
-"        state = renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state));"
+"        state = renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
 [
-"        state = (Effects_Plg128_CameraEffectState *)(renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state)));"
+"        state = (Effects_Plg128_CameraEffectState *)(renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));"
 ]
 ]
 ],
@@ -4753,10 +4753,10 @@
 [
 68,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof(*state));"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
 [
-"        state = (Effects_TransposedRingState *)(Core_Memory_AllocateFromHighEnd(sizeof(*state)));"
+"        state = (Effects_TransposedRingState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));"
 ]
 ],
 [
@@ -4993,10 +4993,10 @@
 [
 71,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof(*state));"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
 [
-"        state = (Effects_ClosedRingState *)(Core_Memory_AllocateFromHighEnd(sizeof(*state)));"
+"        state = (Effects_ClosedRingState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));"
 ]
 ],
 [
@@ -5053,10 +5053,10 @@
 [
 195,
 [
-"    Effects_EffectInstance* newNode = Core_Memory_AllocateFromHighEnd(sizeof *newNode);"
+"    Effects_EffectInstance* newNode = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode);"
 ],
 [
-"    Effects_EffectInstance* newNode = (Effects_EffectInstance *)(Core_Memory_AllocateFromHighEnd(sizeof *newNode));"
+"    Effects_EffectInstance* newNode = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode));"
 ]
 ],
 [
@@ -5080,19 +5080,19 @@
 [
 694,
 [
-"    Effects_EffectInstance* new_instance = Core_Memory_AllocateFromHighEnd(sizeof *new_instance);"
+"    Effects_EffectInstance* new_instance = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance);"
 ],
 [
-"    Effects_EffectInstance* new_instance = (Effects_EffectInstance *)(Core_Memory_AllocateFromHighEnd(sizeof *new_instance));"
+"    Effects_EffectInstance* new_instance = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance));"
 ]
 ],
 [
 738,
 [
-"    Effects_RendererSlot* new_renderer = Core_Memory_AllocateFromHighEnd(sizeof *new_renderer);"
+"    Effects_RendererSlot* new_renderer = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer);"
 ],
 [
-"    Effects_RendererSlot* new_renderer = (Effects_RendererSlot *)(Core_Memory_AllocateFromHighEnd(sizeof *new_renderer));"
+"    Effects_RendererSlot* new_renderer = (Effects_RendererSlot *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer));"
 ]
 ]
 ],
@@ -5140,10 +5140,10 @@
 [
 60,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof *state);"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state);"
 ],
 [
-"        state = (Effects_ClosedRingState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));"
+"        state = (Effects_ClosedRingState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state));"
 ]
 ],
 [
@@ -5198,10 +5198,10 @@
 [
 55,
 [
-"        state = renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state));"
+"        state = renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
 [
-"        state = (Effects_GridState *)(renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state)));"
+"        state = (Effects_GridState *)(renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));"
 ]
 ],
 [
@@ -5247,10 +5247,10 @@
 [
 45,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof *state);"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state);"
 ],
 [
-"        state = (Effects_Mesh10State *)(Core_Memory_AllocateFromHighEnd(sizeof *state));"
+"        state = (Effects_Mesh10State *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state));"
 ]
 ],
 [
@@ -5287,10 +5287,10 @@
 [
 60,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof *state);"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state);"
 ],
 [
-"        state = (Effects_MirrorSurfaceState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));"
+"        state = (Effects_MirrorSurfaceState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state));"
 ]
 ],
 [
@@ -5336,28 +5336,28 @@
 [
 26,
 [
-"        particle_set = Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation));"
+"        particle_set = VS::Core::Memory::AllocateLiveFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation));"
 ],
 [
-"        particle_set = (Effects_ParticleQuadSet *)(Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation)));"
+"        particle_set = (Effects_ParticleQuadSet *)(VS::Core::Memory::AllocateLiveFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation)));"
 ]
 ],
 [
 28,
 [
-"        particle_set = Core_Memory_AllocateFromHighEnd(sizeof(Effects_ParticleQuadSet));"
+"        particle_set = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_ParticleQuadSet));"
 ],
 [
-"        particle_set = (Effects_ParticleQuadSet *)(Core_Memory_AllocateFromHighEnd(sizeof(Effects_ParticleQuadSet)));"
+"        particle_set = (Effects_ParticleQuadSet *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_ParticleQuadSet)));"
 ]
 ],
 [
 48,
 [
-"        particle_set->controlPoints = Core_Memory_AllocateFromHighEnd(control_point_capacity << 5);"
+"        particle_set->controlPoints = VS::Core::Memory::AllocateLiveFromHighEnd(control_point_capacity << 5);"
 ],
 [
-"        particle_set->controlPoints = (SVECTOR *)(Core_Memory_AllocateFromHighEnd(control_point_capacity << 5));"
+"        particle_set->controlPoints = (SVECTOR *)(VS::Core::Memory::AllocateLiveFromHighEnd(control_point_capacity << 5));"
 ]
 ]
 ],
@@ -5480,10 +5480,10 @@
 [
 67,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof *state);"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state);"
 ],
 [
-"        state = (Effects_RingState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));"
+"        state = (Effects_RingState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state));"
 ]
 ],
 [
@@ -5520,10 +5520,10 @@
 [
 67,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof *state);"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state);"
 ],
 [
-"        state = (Effects_RotatingSurfaceState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));"
+"        state = (Effects_RotatingSurfaceState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state));"
 ]
 ],
 [
@@ -5569,10 +5569,10 @@
 [
 60,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof *state);"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state);"
 ],
 [
-"        state = (Effects_SurfaceState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));"
+"        state = (Effects_SurfaceState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *state));"
 ]
 ],
 [
@@ -5618,10 +5618,10 @@
 [
 54,
 [
-"        state = Core_Memory_AllocateFromHighEnd(sizeof(*state));"
+"        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
 [
-"        state = (Effects_TiledRingState *)(Core_Memory_AllocateFromHighEnd(sizeof(*state)));"
+"        state = (Effects_TiledRingState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));"
 ]
 ],
 [
@@ -5667,19 +5667,19 @@
 [
 29,
 [
-"        new_trail_set = Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 8);"
+"        new_trail_set = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_trail_set + 8);"
 ],
 [
-"        new_trail_set = (Effects_TrailQuadSet *)(Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 8));"
+"        new_trail_set = (Effects_TrailQuadSet *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_trail_set + 8));"
 ]
 ],
 [
 41,
 [
-"        new_trail_set->trails = Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails);"
+"        new_trail_set->trails = VS::Core::Memory::AllocateLiveFromHighEnd(trail * sizeof *new_trail_set->trails);"
 ],
 [
-"        new_trail_set->trails = (Effects_Trail *)(Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails));"
+"        new_trail_set->trails = (Effects_Trail *)(VS::Core::Memory::AllocateLiveFromHighEnd(trail * sizeof *new_trail_set->trails));"
 ]
 ]
 ],
@@ -5696,19 +5696,19 @@
 [
 29,
 [
-"        new_trail_set = Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 12);"
+"        new_trail_set = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_trail_set + 12);"
 ],
 [
-"        new_trail_set = (Effects_Trail9State *)(Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 12));"
+"        new_trail_set = (Effects_Trail9State *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_trail_set + 12));"
 ]
 ],
 [
 41,
 [
-"        new_trail_set->trails = Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails);"
+"        new_trail_set->trails = VS::Core::Memory::AllocateLiveFromHighEnd(trail * sizeof *new_trail_set->trails);"
 ],
 [
-"        new_trail_set->trails = (Effects_Trail9 *)(Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails));"
+"        new_trail_set->trails = (Effects_Trail9 *)(VS::Core::Memory::AllocateLiveFromHighEnd(trail * sizeof *new_trail_set->trails));"
 ]
 ]
 ],
@@ -5787,10 +5787,10 @@
 [
 40,
 [
-"    effect_instance->context.timeline = Core_Memory_AllocateFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));"
+"    effect_instance->context.timeline = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));"
 ],
 [
-"    effect_instance->context.timeline = (Effects_EffectTimeline *)(Core_Memory_AllocateFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)));"
+"    effect_instance->context.timeline = (Effects_EffectTimeline *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)));"
 ]
 ],
 [
@@ -5852,10 +5852,10 @@
 [
 92,
 [
-"        t = Core_Memory_AllocateFromHighEnd(sizeof *t);"
+"        t = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *t);"
 ],
 [
-"        t = (Effects_BoneTrail *)(Core_Memory_AllocateFromHighEnd(sizeof *t));"
+"        t = (Effects_BoneTrail *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *t));"
 ]
 ]
 ],
@@ -5901,10 +5901,10 @@
 [
 28,
 [
-"    Field_weatherParticles = Core_Memory_AllocateFromLowEnd(0x800);"
+"    Field_weatherParticles = VS::Core::Memory::AllocateLiveFromLowEnd(0x800);"
 ],
 [
-"    Field_weatherParticles = (Field_WeatherParticle *)(Core_Memory_AllocateFromLowEnd(0x800));"
+"    Field_weatherParticles = (Field_WeatherParticle *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x800));"
 ]
 ],
 [
@@ -6295,10 +6295,10 @@
 [
 101,
 [
-"    Event_camera = Core_Memory_AllocateFromHighEnd(sizeof *Event_camera);"
+"    Event_camera = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera);"
 ],
 [
-"    Event_camera = (Event_CameraState *)(Core_Memory_AllocateFromHighEnd(sizeof *Event_camera));"
+"    Event_camera = (Event_CameraState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera));"
 ]
 ]
 ],
@@ -6362,10 +6362,10 @@
 [
 1133,
 [
-"    Event_legacySkipHandlerCopy = Core_Memory_AllocateFromLowEnd(sizeof(Event_kSkipOpcodeHandlers));"
+"    Event_legacySkipHandlerCopy = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers));"
 ],
 [
-"    Event_legacySkipHandlerCopy = (intptr_t (**)(u_char *, short))(Core_Memory_AllocateFromLowEnd(sizeof(Event_kSkipOpcodeHandlers)));"
+"    Event_legacySkipHandlerCopy = (intptr_t (**)(u_char *, short))(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers)));"
 ]
 ]
 ],
@@ -6411,12 +6411,12 @@
 [
 277,
 [
-"            Field_legacyBackgroundTimBuffer = Core_Memory_AllocateFromHighEnd(texture_allocation_bytes);",
-"            Field_loadedBackgroundLayout = Core_Memory_AllocateFromHighEnd(layout_allocation_bytes);"
+"            Field_legacyBackgroundTimBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(texture_allocation_bytes);",
+"            Field_loadedBackgroundLayout = VS::Core::Memory::AllocateLiveFromHighEnd(layout_allocation_bytes);"
 ],
 [
-"            Field_legacyBackgroundTimBuffer = (u_long *)(Core_Memory_AllocateFromHighEnd(texture_allocation_bytes));",
-"            Field_loadedBackgroundLayout = (Field_BackgroundLayout *)(Core_Memory_AllocateFromHighEnd(layout_allocation_bytes));"
+"            Field_legacyBackgroundTimBuffer = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(texture_allocation_bytes));",
+"            Field_loadedBackgroundLayout = (Field_BackgroundLayout *)(VS::Core::Memory::AllocateLiveFromHighEnd(layout_allocation_bytes));"
 ]
 ],
 [
@@ -6433,10 +6433,10 @@
 [
 736,
 [
-"            Core_Memory_AllocateFromHighEnd(sizeof *Field_cameraTransition);"
+"            VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Field_cameraTransition);"
 ],
 [
-"            (Field_CameraTransition *)(Core_Memory_AllocateFromHighEnd(sizeof *Field_cameraTransition));"
+"            (Field_CameraTransition *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Field_cameraTransition));"
 ]
 ]
 ],
@@ -6899,10 +6899,10 @@
 [
 459,
 [
-"    Field_RoomEffectObject* elem = Core_Memory_AllocateFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount);"
+"    Field_RoomEffectObject* elem = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount);"
 ],
 [
-"    Field_RoomEffectObject* elem = (Field_RoomEffectObject *)(Core_Memory_AllocateFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount));"
+"    Field_RoomEffectObject* elem = (Field_RoomEffectObject *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount));"
 ]
 ],
 [
@@ -7018,29 +7018,29 @@
 [
 129,
 [
-"    Field_zoneContext.mpdFiles = Core_Memory_AllocateFromLowEnd(size);"
+"    Field_zoneContext.mpdFiles = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
 ],
 [
-"    Field_zoneContext.mpdFiles = (Content_DiscFile *)(Core_Memory_AllocateFromLowEnd(size));"
+"    Field_zoneContext.mpdFiles = (Content_DiscFile *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
 ]
 ],
 [
 139,
 [
-"        Field_zoneContext.zudFiles = Core_Memory_AllocateFromLowEnd(Field_zoneContext.zndEnemyCount * 8);"
+"        Field_zoneContext.zudFiles = VS::Core::Memory::AllocateLiveFromLowEnd(Field_zoneContext.zndEnemyCount * 8);"
 ],
 [
-"        Field_zoneContext.zudFiles = (Content_DiscFile *)(Core_Memory_AllocateFromLowEnd(Field_zoneContext.zndEnemyCount * 8));"
+"        Field_zoneContext.zudFiles = (Content_DiscFile *)(VS::Core::Memory::AllocateLiveFromLowEnd(Field_zoneContext.zndEnemyCount * 8));"
 ]
 ],
 [
 142,
 [
-"        Field_zoneContext.zndEnemies = Core_Memory_AllocateFromLowEnd(",
+"        Field_zoneContext.zndEnemies = VS::Core::Memory::AllocateLiveFromLowEnd(",
 "            Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zndEnemies);"
 ],
 [
-"        Field_zoneContext.zndEnemies = (Field_ZndEnemyRecord *)(Core_Memory_AllocateFromLowEnd(",
+"        Field_zoneContext.zndEnemies = (Field_ZndEnemyRecord *)(VS::Core::Memory::AllocateLiveFromLowEnd(",
 "            Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zndEnemies));"
 ]
 ],
@@ -7119,10 +7119,10 @@
 [
 603,
 [
-"        Field_zoneContext.mpdEnemies = Core_Memory_AllocateFromLowEnd(dataLen);"
+"        Field_zoneContext.mpdEnemies = VS::Core::Memory::AllocateLiveFromLowEnd(dataLen);"
 ],
 [
-"        Field_zoneContext.mpdEnemies = (Field_MpdEnemySpawn *)(Core_Memory_AllocateFromLowEnd(dataLen));"
+"        Field_zoneContext.mpdEnemies = (Field_MpdEnemySpawn *)(VS::Core::Memory::AllocateLiveFromLowEnd(dataLen));"
 ]
 ],
 [
@@ -7264,14 +7264,14 @@
 [
 89,
 [
-"    Field_roomPalettes = Core_Memory_AllocateFromLowEnd(0x800);",
-"    Battle_floatingLabels = Core_Memory_AllocateFromLowEnd(sizeof *Battle_floatingLabels);",
-"    Battle_placedLabelPositions = Core_Memory_AllocateFromLowEnd(0x80);"
+"    Field_roomPalettes = VS::Core::Memory::AllocateLiveFromLowEnd(0x800);",
+"    Battle_floatingLabels = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_floatingLabels);",
+"    Battle_placedLabelPositions = VS::Core::Memory::AllocateLiveFromLowEnd(0x80);"
 ],
 [
-"    Field_roomPalettes = (u_short *)(Core_Memory_AllocateFromLowEnd(0x800));",
-"    Battle_floatingLabels = (Battle_FloatingLabel (*)[32])(Core_Memory_AllocateFromLowEnd(sizeof *Battle_floatingLabels));",
-"    Battle_placedLabelPositions = (DVECTOR *)(Core_Memory_AllocateFromLowEnd(0x80));"
+"    Field_roomPalettes = (u_short *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x800));",
+"    Battle_floatingLabels = (Battle_FloatingLabel (*)[32])(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_floatingLabels));",
+"    Battle_placedLabelPositions = (DVECTOR *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x80));"
 ]
 ]
 ],
@@ -7319,37 +7319,37 @@
 [
 324,
 [
-"    Items_WeaponSpawnLoadout* tempWeapon = Core_Memory_AllocateFromHighEnd(sizeof *tempWeapon);"
+"    Items_WeaponSpawnLoadout* tempWeapon = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempWeapon);"
 ],
 [
-"    Items_WeaponSpawnLoadout* tempWeapon = (Items_WeaponSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *tempWeapon));"
+"    Items_WeaponSpawnLoadout* tempWeapon = (Items_WeaponSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempWeapon));"
 ]
 ],
 [
 361,
 [
-"    Items_ShieldSpawnLoadout* tempShield = Core_Memory_AllocateFromHighEnd(sizeof *tempShield);"
+"    Items_ShieldSpawnLoadout* tempShield = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempShield);"
 ],
 [
-"    Items_ShieldSpawnLoadout* tempShield = (Items_ShieldSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *tempShield));"
+"    Items_ShieldSpawnLoadout* tempShield = (Items_ShieldSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempShield));"
 ]
 ],
 [
 388,
 [
-"    Items_ArmorInit* tempArmor = Core_Memory_AllocateFromHighEnd(sizeof *tempArmor);"
+"    Items_ArmorInit* tempArmor = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempArmor);"
 ],
 [
-"    Items_ArmorInit* tempArmor = (Items_ArmorInit *)(Core_Memory_AllocateFromHighEnd(sizeof *tempArmor));"
+"    Items_ArmorInit* tempArmor = (Items_ArmorInit *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempArmor));"
 ]
 ],
 [
 407,
 [
-"    Items_AccessoryInit* tempAccessory = Core_Memory_AllocateFromHighEnd(sizeof *tempAccessory);"
+"    Items_AccessoryInit* tempAccessory = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempAccessory);"
 ],
 [
-"    Items_AccessoryInit* tempAccessory = (Items_AccessoryInit *)(Core_Memory_AllocateFromHighEnd(sizeof *tempAccessory));"
+"    Items_AccessoryInit* tempAccessory = (Items_AccessoryInit *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempAccessory));"
 ]
 ]
 ],
@@ -7357,19 +7357,19 @@
 [
 161,
 [
-"    Items_LootListNode* lootList = Core_Memory_AllocateFromHighEnd(sizeof *lootList);"
+"    Items_LootListNode* lootList = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *lootList);"
 ],
 [
-"    Items_LootListNode* lootList = (Items_LootListNode *)(Core_Memory_AllocateFromHighEnd(sizeof *lootList));"
+"    Items_LootListNode* lootList = (Items_LootListNode *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *lootList));"
 ]
 ],
 [
 232,
 [
-"    scripted_loot = Core_Memory_AllocateFromHighEnd(sizeof *scripted_loot);"
+"    scripted_loot = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *scripted_loot);"
 ],
 [
-"    scripted_loot = (Items_LootListNode *)(Core_Memory_AllocateFromHighEnd(sizeof *scripted_loot));"
+"    scripted_loot = (Items_LootListNode *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *scripted_loot));"
 ]
 ]
 ],
@@ -7404,10 +7404,10 @@
 [
 611,
 [
-"    Menu_BattleAbilities_abilityText = Core_Memory_AllocateFromHighEnd(abilityCount * 128);"
+"    Menu_BattleAbilities_abilityText = VS::Core::Memory::AllocateLiveFromHighEnd(abilityCount * 128);"
 ],
 [
-"    Menu_BattleAbilities_abilityText = (u_short *)(Core_Memory_AllocateFromHighEnd(abilityCount * 128));"
+"    Menu_BattleAbilities_abilityText = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(abilityCount * 128));"
 ]
 ],
 [
@@ -7534,12 +7534,12 @@
 [
 1043,
 [
-"        temp_s1 = Core_Memory_AllocateFromHighEnd(0x6C00);",
+"        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
 "        initial_row_text = (void*)temp_s1 + 0x6400;"
 ],
 [
-"        temp_s1 = (u_short *)(Core_Memory_AllocateFromHighEnd(0x6C00));",
+"        temp_s1 = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00));",
 "        initial_row_types = (int *)(((u_char*)((void*)temp_s1)) + 0x6000);",
 "        initial_row_text = (char **)(((u_char*)((void*)temp_s1)) + 0x6400);"
 ]
@@ -7710,19 +7710,19 @@
 [
 50,
 [
-"    Items_WeaponSpawnLoadout* temp = Core_Memory_AllocateFromHighEnd(sizeof *temp);"
+"    Items_WeaponSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
 ],
 [
-"    Items_WeaponSpawnLoadout* temp = (Items_WeaponSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *temp));"
+"    Items_WeaponSpawnLoadout* temp = (Items_WeaponSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));"
 ]
 ],
 [
 87,
 [
-"    Items_ShieldSpawnLoadout* temp = Core_Memory_AllocateFromHighEnd(sizeof *temp);"
+"    Items_ShieldSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
 ],
 [
-"    Items_ShieldSpawnLoadout* temp = (Items_ShieldSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *temp));"
+"    Items_ShieldSpawnLoadout* temp = (Items_ShieldSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));"
 ]
 ],
 [
@@ -7811,10 +7811,10 @@
 [
 1803,
 [
-"        Menu_Files_loadGameOverAssetsStepGameOverBin = Core_Memory_AllocateFromHighEnd(VS_GAMEOVER_BIN_SIZE);"
+"        Menu_Files_loadGameOverAssetsStepGameOverBin = VS::Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE);"
 ],
 [
-"        Menu_Files_loadGameOverAssetsStepGameOverBin = (u_int *)(Core_Memory_AllocateFromHighEnd(VS_GAMEOVER_BIN_SIZE));"
+"        Menu_Files_loadGameOverAssetsStepGameOverBin = (u_int *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE));"
 ]
 ],
 [
@@ -7847,10 +7847,10 @@
 [
 2195,
 [
-"    targetIndices = Core_Memory_AllocateFromHighEnd(sizeof *targetIndices);"
+"    targetIndices = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *targetIndices);"
 ],
 [
-"    targetIndices = (Items_ContainerIndices *)(Core_Memory_AllocateFromHighEnd(sizeof *targetIndices));"
+"    targetIndices = (Items_ContainerIndices *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *targetIndices));"
 ]
 ],
 [
@@ -7907,10 +7907,10 @@
 [
 50,
 [
-"    preview_actor = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord));"
+"    preview_actor = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord));"
 ],
 [
-"    preview_actor = (Actors_ActorRecord *)(Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord)));"
+"    preview_actor = (Actors_ActorRecord *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));"
 ]
 ],
 [
@@ -8123,10 +8123,10 @@
 [
 1045,
 [
-"    Menu_Framework_sortItemsTextBuf = Core_Memory_AllocateFromHighEnd(rowCount * 128);"
+"    Menu_Framework_sortItemsTextBuf = VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128);"
 ],
 [
-"    Menu_Framework_sortItemsTextBuf = (u_short *)(Core_Memory_AllocateFromHighEnd(rowCount * 128));"
+"    Menu_Framework_sortItemsTextBuf = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128));"
 ]
 ],
 [
@@ -8215,10 +8215,10 @@
 [
 1773,
 [
-"    Menu_Framework_itemsText = Core_Memory_AllocateFromHighEnd(rowCount * 128);"
+"    Menu_Framework_itemsText = VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128);"
 ],
 [
-"    Menu_Framework_itemsText = (u_short *)(Core_Memory_AllocateFromHighEnd(rowCount * 128));"
+"    Menu_Framework_itemsText = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128));"
 ]
 ],
 [
@@ -8460,13 +8460,13 @@
 [
 403,
 [
-"        Menu_Framework_itemNames = Core_Memory_AllocateFromHighEnd(",
+"        Menu_Framework_itemNames = VS::Core::Memory::AllocateLiveFromHighEnd(",
 "            VS_ITEMNAME_BIN_SIZE + VS_ITEMHELP_BIN_SIZE + VS_MENU12_BIN_SIZE);",
 "        Menu_Framework_itemHelp = (void*)Menu_Framework_itemNames + VS_ITEMNAME_BIN_SIZE;",
 "        Menu_Framework_menu12Text = (void*)Menu_Framework_itemHelp + VS_ITEMHELP_BIN_SIZE;"
 ],
 [
-"        Menu_Framework_itemNames = (char (*)[24])(Core_Memory_AllocateFromHighEnd(",
+"        Menu_Framework_itemNames = (char (*)[24])(VS::Core::Memory::AllocateLiveFromHighEnd(",
 "            VS_ITEMNAME_BIN_SIZE + VS_ITEMHELP_BIN_SIZE + VS_MENU12_BIN_SIZE));",
 "        Menu_Framework_itemHelp = (u_short *)(((u_char*)((void*)Menu_Framework_itemNames)) + VS_ITEMNAME_BIN_SIZE);",
 "        Menu_Framework_menu12Text = (u_short *)(((u_char*)((void*)Menu_Framework_itemHelp)) + VS_ITEMHELP_BIN_SIZE);"
@@ -8497,10 +8497,10 @@
 [
 347,
 [
-"    Menu_Inventory_itemsText = Core_Memory_AllocateFromHighEnd(count * 128);"
+"    Menu_Inventory_itemsText = VS::Core::Memory::AllocateLiveFromHighEnd(count * 128);"
 ],
 [
-"    Menu_Inventory_itemsText = (char *)(Core_Memory_AllocateFromHighEnd(count * 128));"
+"    Menu_Inventory_itemsText = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(count * 128));"
 ]
 ],
 [
@@ -8881,12 +8881,12 @@
 [
 279,
 [
-"            Menu_Manual_helpText = Core_Memory_AllocateFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size);",
-"            Menu_Manual_helpAssets = Core_Memory_AllocateFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size);"
+"            Menu_Manual_helpText = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size);",
+"            Menu_Manual_helpAssets = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size);"
 ],
 [
-"            Menu_Manual_helpText = (int *)(Core_Memory_AllocateFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size));",
-"            Menu_Manual_helpAssets = (u_long *)(Core_Memory_AllocateFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size));"
+"            Menu_Manual_helpText = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size));",
+"            Menu_Manual_helpAssets = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size));"
 ]
 ],
 [
@@ -9002,19 +9002,19 @@
 [
 305,
 [
-"        Menu_Map_backgroundImage = Core_Memory_AllocateFromHighEnd(VS_MAPBG_BIN_SIZE);"
+"        Menu_Map_backgroundImage = VS::Core::Memory::AllocateLiveFromHighEnd(VS_MAPBG_BIN_SIZE);"
 ],
 [
-"        Menu_Map_backgroundImage = (u_short *)(Core_Memory_AllocateFromHighEnd(VS_MAPBG_BIN_SIZE));"
+"        Menu_Map_backgroundImage = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_MAPBG_BIN_SIZE));"
 ]
 ],
 [
 342,
 [
-"        Menu_Map_screenMenuBgBackup = Core_Memory_AllocateFromHighEnd(0xB600);"
+"        Menu_Map_screenMenuBgBackup = VS::Core::Memory::AllocateLiveFromHighEnd(0xB600);"
 ],
 [
-"        Menu_Map_screenMenuBgBackup = (u_long *)(Core_Memory_AllocateFromHighEnd(0xB600));"
+"        Menu_Map_screenMenuBgBackup = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(0xB600));"
 ]
 ],
 [
@@ -10182,10 +10182,10 @@
 [
 596,
 [
-"    Menu_Score_zudData = Core_Memory_AllocateFromHighEnd(sourceFile.size);"
+"    Menu_Score_zudData = VS::Core::Memory::AllocateLiveFromHighEnd(sourceFile.size);"
 ],
 [
-"    Menu_Score_zudData = (Menu_Score_ZudHeader *)(Core_Memory_AllocateFromHighEnd(sourceFile.size));"
+"    Menu_Score_zudData = (Menu_Score_ZudHeader *)(VS::Core::Memory::AllocateLiveFromHighEnd(sourceFile.size));"
 ]
 ]
 ],
@@ -10350,10 +10350,10 @@
 [
 542,
 [
-"            Menu_Score_monBinData = Core_Memory_AllocateFromHighEnd(Menu_Score_kMonBinFile.size);"
+"            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
 [
-"            Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(Core_Memory_AllocateFromHighEnd(Menu_Score_kMonBinFile.size));"
+"            Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size));"
 ]
 ],
 [
@@ -10588,10 +10588,10 @@
 [
 256,
 [
-"        textBuf = Core_Memory_AllocateFromHighEnd(0x72C);"
+"        textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x72C);"
 ],
 [
-"        textBuf = (char *)(Core_Memory_AllocateFromHighEnd(0x72C));"
+"        textBuf = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x72C));"
 ]
 ],
 [
@@ -10615,10 +10615,10 @@
 [
 1420,
 [
-"            armor_text_allocation = Core_Memory_AllocateFromHighEnd(0x72CU);"
+"            armor_text_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(0x72CU);"
 ],
 [
-"            armor_text_allocation = (char *)(Core_Memory_AllocateFromHighEnd(0x72CU));"
+"            armor_text_allocation = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x72CU));"
 ]
 ],
 [
@@ -10719,10 +10719,10 @@
 [
 318,
 [
-"    Menu_Setup_itemsList = Core_Memory_AllocateFromHighEnd(count << 7);"
+"    Menu_Setup_itemsList = VS::Core::Memory::AllocateLiveFromHighEnd(count << 7);"
 ],
 [
-"    Menu_Setup_itemsList = (u_short *)(Core_Memory_AllocateFromHighEnd(count << 7));"
+"    Menu_Setup_itemsList = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(count << 7));"
 ]
 ],
 [
@@ -10983,10 +10983,10 @@
 [
 199,
 [
-"    Menu_sceneNotificationBuffer = Core_Memory_AllocateFromHighEnd(112);"
+"    Menu_sceneNotificationBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(112);"
 ],
 [
-"    Menu_sceneNotificationBuffer = (int *)(Core_Memory_AllocateFromHighEnd(112));"
+"    Menu_sceneNotificationBuffer = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(112));"
 ]
 ],
 [
@@ -11198,19 +11198,19 @@
 [
 365,
 [
-"    data = Core_Memory_AllocateFromLowEnd(544 * (512 + 64) * sizeof(u_short));"
+"    data = VS::Core::Memory::AllocateLiveFromLowEnd(544 * (512 + 64) * sizeof(u_short));"
 ],
 [
-"    data = (u_long *)(Core_Memory_AllocateFromLowEnd(544 * (512 + 64) * sizeof(u_short)));"
+"    data = (u_long *)(VS::Core::Memory::AllocateLiveFromLowEnd(544 * (512 + 64) * sizeof(u_short)));"
 ]
 ],
 [
 429,
 [
-"    p = Core_Memory_AllocateFromLowEnd(0x22380);"
+"    p = VS::Core::Memory::AllocateLiveFromLowEnd(0x22380);"
 ],
 [
-"    p = (u_long *)(Core_Memory_AllocateFromLowEnd(0x22380));"
+"    p = (u_long *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x22380));"
 ]
 ],
 [

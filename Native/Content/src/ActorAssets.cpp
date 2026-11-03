@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
@@ -19,7 +20,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
@@ -248,7 +248,7 @@ int Content_FindSharedWeaponModel(Content_ActorAssetRequest* objData)
 void* Content_CopyModelGeometry(int* destination, void* source, int byteCount)
 {
     if (destination == NULL) {
-        destination = (int *)(Core_Memory_AllocateFromLowEnd(byteCount));
+        destination = (int *)(VS::Core::Memory::AllocateLiveFromLowEnd(byteCount));
     }
 
     memcpy(destination, source, byteCount);
@@ -293,7 +293,7 @@ int Content_UpdateWeaponModelLoad(Content_ActorAssetRequest* request)
     default:
         wepFileSize = Content_legacyWepSectorCounts[request->modelId];
         wepFileSize <<= 0xB;
-        Content_legacyWeaponFileBuffer = Core_Memory_AllocateFromHighEnd(wepFileSize);
+        Content_legacyWeaponFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(wepFileSize);
         request->dataAddress = (uintptr_t)Content_legacyWeaponFileBuffer;
 
         if (Content_legacyWeaponFileBuffer == NULL) {
@@ -326,7 +326,7 @@ int Content_UpdateWeaponModelLoad(Content_ActorAssetRequest* request)
 
     if (Content_legacyWeaponFileLoaded != 0) {
         Content_legacyWeaponFileLoaded = 0;
-        Core_Memory_FreeFromHighEnd(Content_legacyWeaponFileBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacyWeaponFileBuffer);
     }
 
     Content_legacyModelLoadPhase = 0;
@@ -391,7 +391,7 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
                     buf = Content_legacyWeaponModelBuffers[objectData->targetSlot];
                     model->sectionOffsets = buf;
                 } else {
-                    buf = (Actors_WeaponModelData *)(Core_Memory_AllocateFromLowEnd(sizeof *buf));
+                    buf = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *buf));
                     model->sectionOffsets = buf;
                 }
 
@@ -462,7 +462,7 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
     dst = buf;
 
     if (dst == NULL) {
-        dst = (Actors_WeaponModelData *)(Core_Memory_AllocateFromLowEnd(size));
+        dst = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
     }
 
     memcpy(dst, data, size);
@@ -647,11 +647,11 @@ int Content_ReleaseWeaponModel(int index)
         exit:
             if (shared_model_found == 0) {
                 VS::Render::ForgetLiveModelExtent(model->sectionOffsets);
-                Core_Memory_FreeFromLowEnd(model->sectionOffsets);
+                VS::Core::Memory::FreeLiveFromLowEnd(model->sectionOffsets);
             }
         } else {
             VS::Render::ForgetLiveModelExtent(model->sectionOffsets);
-            Core_Memory_FreeFromLowEnd(model->sectionOffsets);
+            VS::Core::Memory::FreeLiveFromLowEnd(model->sectionOffsets);
         }
     }
 
@@ -721,7 +721,7 @@ int Content_UpdateActorModelLoad(Content_ActorAssetRequest* request)
         }
 
         shpFileSize <<= 0xB;
-        Content_legacyShpFileBuffer = Core_Memory_AllocateFromHighEnd(shpFileSize);
+        Content_legacyShpFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(shpFileSize);
         request->dataAddress = (uintptr_t)Content_legacyShpFileBuffer;
 
         if (Content_legacyShpFileBuffer == NULL) {
@@ -756,7 +756,7 @@ int Content_UpdateActorModelLoad(Content_ActorAssetRequest* request)
 
     if (Content_legacyShpAllocated != 0) {
         Content_legacyShpAllocated = 0;
-        Core_Memory_FreeFromHighEnd(Content_legacyShpFileBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacyShpFileBuffer);
     }
 
     Content_legacyModelLoadPhase = 0;
@@ -885,7 +885,7 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
     if (size < (int)sizeof(Actors_ShpModel)) {
         return -2;
     }
-    model = (Actors_ShpModel *)(Core_Memory_AllocateFromLowEnd(size));
+    model = (Actors_ShpModel *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
     if (model == NULL) {
         return -2;
     }
@@ -1232,7 +1232,7 @@ int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
         if (!sectors) {
             return 0;
         }
-        Content_legacySequenceFileBuffer = Core_Memory_AllocateFromHighEnd(sectors << 11);
+        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
         object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
         if (!Content_legacySequenceFileBuffer) {
             return -2;
@@ -1252,7 +1252,7 @@ int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
         if (!sectors) {
             return -2;
         }
-        Content_legacySequenceFileBuffer = Core_Memory_AllocateFromLowEnd(sectors << 11);
+        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(sectors << 11);
         object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
         if (!Content_legacySequenceFileBuffer) {
             return -2;
@@ -1261,7 +1261,7 @@ int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
         break;
     case 3:
         sectors = Content_legacyMaterialSequenceSectorCounts[(u_char)object->material];
-        Content_legacySequenceFileBuffer = Core_Memory_AllocateFromHighEnd(sectors << 11);
+        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
         object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
         if (!Content_legacySequenceFileBuffer) {
             return -2;
@@ -1276,7 +1276,7 @@ int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
             object->material = 2;
             object->modelId = 0;
         }
-        Content_legacySequenceFileBuffer = Core_Memory_AllocateFromHighEnd(sectors << 11);
+        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
         object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
         if (!Content_legacySequenceFileBuffer) {
             return -2;
@@ -1296,7 +1296,7 @@ int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
             return -2;
         }
         Content_legacySequenceFileLocation.lba = actor->specialSequenceLbas[object->modelId];
-        Content_legacySequenceFileBuffer = Core_Memory_AllocateFromHighEnd(sectors << 11);
+        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
         object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
         if (!Content_legacySequenceFileBuffer) {
             return -2;
@@ -1321,7 +1321,7 @@ parse:
     }
     if (Content_legacySequenceBufferOwned) {
         Content_legacySequenceBufferOwned = 0;
-        Core_Memory_FreeFromHighEnd(Content_legacySequenceFileBuffer);
+        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacySequenceFileBuffer);
     }
     Content_legacyModelLoadPhase = 0;
     return result;
@@ -1375,7 +1375,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
             if (size & 3) {
                 size += (4 - size) & 3;
             }
-            seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));
+            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
             if (seq == NULL) {
                 return -2;
             }
@@ -1389,7 +1389,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
             if (size & 3) {
                 size += (4 - size) & 3;
             }
-            seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));
+            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
             if (seq == NULL) {
                 return -2;
             }
@@ -1406,7 +1406,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
                     goto clone;
                 }
                 if (Content_legacySequenceParseData == 0) {
-                    seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(0x7800));
+                    seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x7800));
                 clone:
                     Content_CopyWeaponSequence(seq, (Content_SequenceBuffer *)(source->battleSequence));
                 }
@@ -1428,7 +1428,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
             size += (4 - size) & 3;
         }
         if (actor->instance.slot != 0) {
-            seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));
+            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
             if (seq == NULL) {
                 return -2;
             }
@@ -1459,7 +1459,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         if (size & 3) {
             size += (4 - size) & 3;
         }
-        seq = (Content_SequenceBuffer *)(Core_Memory_AllocateFromLowEnd(size));
+        seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
         if (seq == NULL) {
             return -2;
         }
@@ -1568,9 +1568,9 @@ int Content_ReleaseActorSequence(int target_id, int sequence_kind)
             objectData.targetSlot = target_id;
             objectData.modelId = actor->sequenceModelId;
             if (target_id == 1 && actor->modelId == 0) {
-                Core_Memory_FreeFromLowEnd(actor->battleSequence);
+                VS::Core::Memory::FreeLiveFromLowEnd(actor->battleSequence);
             } else if (!Content_FindSharedActorSequence(&objectData)) {
-                Core_Memory_FreeFromLowEnd(actor->battleSequence);
+                VS::Core::Memory::FreeLiveFromLowEnd(actor->battleSequence);
             }
         }
         actor->battleSequence = NULL;
@@ -1591,7 +1591,7 @@ int Content_ReleaseActorSequence(int target_id, int sequence_kind)
             return i;
         }
         if (Actors_sharedSequenceData[target_id] != NULL) {
-            Core_Memory_FreeFromLowEnd(Actors_sharedSequenceData[target_id]);
+            VS::Core::Memory::FreeLiveFromLowEnd(Actors_sharedSequenceData[target_id]);
         }
         Actors_sharedSequenceData[target_id] = NULL;
         break;
@@ -1604,7 +1604,7 @@ int Content_ReleaseActorSequence(int target_id, int sequence_kind)
         if (actor->sharedSequences[3] == NULL) {
             return 0;
         }
-        Core_Memory_FreeFromLowEnd(actor->sharedSequences[3]);
+        VS::Core::Memory::FreeLiveFromLowEnd(actor->sharedSequences[3]);
         actor->sharedSequences[3] = NULL;
         actor->battleAnimationCount = 0;
         break;
@@ -1651,8 +1651,8 @@ int Content_ReleaseActorModel(int actor_index)
     exit:
         if (shared_model_found == 0) {
             Audio_StopBankSfx(0x180, (int *)(VS_ONDISC(actor->instance.model, soundSection, void *)), 0);
-            Core_Memory_FreeFromLowEnd(actor->instance.model);
-            Core_Memory_FreeFromLowEnd(actor->ownedSequence);
+            VS::Core::Memory::FreeLiveFromLowEnd(actor->instance.model);
+            VS::Core::Memory::FreeLiveFromLowEnd(actor->ownedSequence);
         }
 
         if (actor->commonSequence != 0) {
@@ -1663,7 +1663,7 @@ int Content_ReleaseActorModel(int actor_index)
                 }
             }
             if (i >= 17) {
-                Core_Memory_FreeFromLowEnd(actor->commonSequence);
+                VS::Core::Memory::FreeLiveFromLowEnd(actor->commonSequence);
             }
         }
     exit2:
@@ -1721,7 +1721,7 @@ int Content_UpdateSequenceEffectTextureLoad(Content_ActorAssetRequest* objdata)
             return -2;
         } else {
             fileSize = sectorSize << 0xB;
-            Content_legacyEtmFileBuffer = (u_short *)(Core_Memory_AllocateFromHighEnd(fileSize));
+            Content_legacyEtmFileBuffer = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(fileSize));
             if (Content_legacyEtmFileBuffer == NULL) {
                 return -2;
             }
@@ -1760,7 +1760,7 @@ int Content_UpdateSequenceEffectTextureLoad(Content_ActorAssetRequest* objdata)
         return -1;
 
     case 2:
-        Core_Memory_FreeFromHighEnd(Content_legacyEtmFileBuffer - 2);
+        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacyEtmFileBuffer - 2);
         Content_legacyEtmLoadPhase = 0;
         return 0;
     }

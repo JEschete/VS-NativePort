@@ -1,7 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Memory/HeapLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Memory/Heap.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -27,7 +29,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
 
     switch (lifecycle_command) {
     case 1:
-        new_trail_set = (Effects_Trail9State *)(Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 12));
+        new_trail_set = (Effects_Trail9State *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_trail_set + 12));
         renderer_slot->rendererState = new_trail_set;
         new_trail_set->effect = packed_parameters >> 8;
         new_trail_set->lifetime = packed_parameters;
@@ -39,7 +41,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
             trail = 8;
         }
 
-        new_trail_set->trails = (Effects_Trail9 *)(Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails));
+        new_trail_set->trails = (Effects_Trail9 *)(VS::Core::Memory::AllocateLiveFromHighEnd(trail * sizeof *new_trail_set->trails));
         new_trail_set->trailCount = trail;
         new_trail_set->opaque3 = 0;
 
@@ -134,7 +136,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
         if (trail_set->lifetime != 0) {
             --trail_set->lifetime;
             if (!trail_set->lifetime) {
-                Core_Memory_FreeFromHighEnd(trail_set->trails);
+                VS::Core::Memory::FreeLiveFromHighEnd(trail_set->trails);
                 renderer_alive = 0;
             }
         }
@@ -145,7 +147,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
         break;
 
     case 4:
-        Core_Memory_FreeFromHighEnd(trail_set->trails);
+        VS::Core::Memory::FreeLiveFromHighEnd(trail_set->trails);
         renderer_alive = 0;
         break;
     }

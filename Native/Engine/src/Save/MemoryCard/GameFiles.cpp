@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
@@ -8,7 +9,6 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
 #include "Field/Map.h"
@@ -832,7 +832,7 @@ int Save_MemoryCard_LoadIntroSnapshotStep(int action)
             Save_MemoryCard_ValidateAndApplyLoadedSave(1);
             State_playTime.t = gametime.t;
             intro_snapshot_allocation = Save_MemoryCard_legacyIntroSnapshotImage;
-            Core_Memory_FreeFromHighEnd(intro_snapshot_allocation);
+            VS::Core::Memory::FreeLiveFromHighEnd(intro_snapshot_allocation);
             return 1;
         }
         return 0;
@@ -849,7 +849,7 @@ int Save_MemoryCard_LoadIntroSnapshotStep(int action)
     file.lba = lba;
     file.size = VS_OPMCIMG1_BIN_SIZE;
     Save_MemoryCard_legacyIntroSnapshotDiscRequest = Content_AllocateDiscRequest(&file);
-    intro_snapshot_allocation = Core_Memory_AllocateFromHighEnd(sizeof *Save_MemoryCard_legacyIntroSnapshotImage);
+    intro_snapshot_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Save_MemoryCard_legacyIntroSnapshotImage);
     Save_MemoryCard_legacyIntroSnapshotImage = (Save_GameSaveImage *)(intro_snapshot_allocation);
     Content_EnqueueDiscRequest(Save_MemoryCard_legacyIntroSnapshotDiscRequest, Save_MemoryCard_legacyIntroSnapshotImage);
     return 0;

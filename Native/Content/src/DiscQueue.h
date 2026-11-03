@@ -95,9 +95,8 @@ typedef struct Content_DiscDrive {
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_DISCQUEUE_H_DECLS)
 #define VS_DISCQUEUE_H_DECLS
-#include "Core/Memory/Heap.h"
 
-extern Core_HeapBlockHeader* Content_legacyDiscReadBuffer;
+extern u_char* Content_legacyDiscReadBuffer;
 extern DslLOC Content_legacyDiscReadLocation;
 extern int Content_legacyXaReadyBcdField;
 extern int Content_legacyXaReadyByteThree;

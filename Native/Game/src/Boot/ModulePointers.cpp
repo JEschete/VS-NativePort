@@ -6,6 +6,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
@@ -102,8 +103,6 @@ extern "C" {
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory.h"
-#include "Core/Memory/Heap.h"
 #include "Core/Overlays.h"
 #include "Core/Random.h"
 #include "DiscQueue.h"
@@ -2815,11 +2814,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x800436B4u, 0u, (void*)&Input_UpdateVibrationPatterns, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800438C8u, 0u, (void*)&Input_PlayVibrationPreset, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80043940u, 0u, (void*)&Input_UpdateControllers, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043C60u, 0u, (void*)&Core_Memory_FreeFromHighEnd, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043D50u, 0u, (void*)&Core_Memory_FreeFromLowEnd, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043E3Cu, 0u, (void*)&Core_Memory_AllocateFromHighEnd, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043EC4u, 0u, (void*)&Core_Memory_AllocateFromLowEnd, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043F74u, 0u, (void*)&Core_Memory_InitializeHeap, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80043FB4u, 0u, (void*)&Content_ReadSectorCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044148u, 0u, (void*)&Content_ReadCommandCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800441C4u, 0u, (void*)&Content_SeekCommandCallback, 0u, 0u, 0u},
@@ -2949,8 +2943,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80050110u, 4u, (void*)&Content_legacyDiscReadBuffer, sizeof Content_legacyDiscReadBuffer, 0u, 0u},
     {"SLUS_010.40", 0x80050118u, 112u, (void*)&Input_vibrationPatternSlots, sizeof Input_vibrationPatternSlots, 0u, 0u},
     {"SLUS_010.40", 0x80050190u, 22u, (void*)&Input_controllerPorts, sizeof Input_controllerPorts, 1u, 1u},
-    {"SLUS_010.40", 0x800501A8u, 16u, (void*)&Core_legacyHeapList, sizeof Core_legacyHeapList, 0u, 0u},
-    {"SLUS_010.40", 0x800501B8u, 16u, (void*)&Core_legacySecondaryHeapList, sizeof Core_legacySecondaryHeapList, 0u, 0u},
     {"SLUS_010.40", 0x800501C8u, 4u, (void*)&Content_legacyDiscReadLocation, sizeof Content_legacyDiscReadLocation, 1u, 1u},
     {"SLUS_010.40", 0x800501CCu, 4u, (void*)&Content_legacyXaReadyBcdField, sizeof Content_legacyXaReadyBcdField, 1u, 1u},
     {"SLUS_010.40", 0x800501D0u, 4u, (void*)&Content_legacyXaReadyByteThree, sizeof Content_legacyXaReadyByteThree, 1u, 1u},
@@ -3088,6 +3080,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CCC34u, 0u, (void*)&VS::Core::Memory::CopyLiveBytesBackwardAt, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80019154u, 0u, (void*)&VS::Core::Memory::CopyLiveWordsAt, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800191D4u, 0u, (void*)&VS::Core::Memory::SwapLiveWordsAt, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80043C60u, 0u, (void*)&VS::Core::Memory::FreeLiveFromHighEndAt, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80043D50u, 0u, (void*)&VS::Core::Memory::FreeLiveFromLowEndAt, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80043E3Cu, 0u, (void*)&VS::Core::Memory::AllocateLiveFromHighEndAt, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80043EC4u, 0u, (void*)&VS::Core::Memory::AllocateLiveFromLowEndAt, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80043F74u, 0u, (void*)&VS::Core::Memory::InitializeLiveHeapAt, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCC8Cu, 0u, (void*)&VS::Core::NextLiveInterfaceRandomBits, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CFB80u, 0u, (void*)&VS::Core::LiveRandomRangeExclusive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004274Cu, 0u, (void*)&VS::Core::InitializeLiveRandomShuffleTable, 0u, 0u, 0u},
