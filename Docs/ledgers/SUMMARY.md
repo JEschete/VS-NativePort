@@ -34,32 +34,32 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 323 | owned functions |
-| 323 | owned functions in C++ sources |
-| 3437 | generated function rows |
+| 380 | owned functions |
+| 380 | owned functions in C++ sources |
+| 3380 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
 
 | Column | `x` | Other non-blank | Blank |
 | --- | ---: | ---: | ---: |
-| `copied` | 3,752 | 10 (`retired`, `stub`) | 445 |
+| `copied` | 3,760 | 2 (`retired`) | 445 |
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 323 | 0 | 3,884 |
-| `cpp` | 323 | 0 | 3,884 |
+| `modernized` | 380 | 0 | 3,827 |
+| `cpp` | 380 | 0 | 3,827 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 323 |
-| `vs_namespace` | 323 |
-| `typed_interface` | 323 |
-| `no_bridge` | 323 |
-| `strict_clean` | 323 |
-| `behavior_evidence` | 323 |
+| `source_cpp` | 380 |
+| `vs_namespace` | 380 |
+| `typed_interface` | 380 |
+| `no_bridge` | 380 |
+| `strict_clean` | 380 |
+| `behavior_evidence` | 380 |
 
-Promotion records: 323; derived `cpp=x`: 323, `cpp=wip`: 0. Verification records: 102; `verified=x` markers: 45.
+Promotion records: 380; derived `cpp=x`: 380, `cpp=wip`: 0. Verification records: 103; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -250,6 +250,8 @@ The fifty-sixth, and the first generated-function slice (#276), is the core runt
 and Callbacks.h, Compatibility.h, Memory/Copy.h, Runtime.h, String/GameText.h and the twenty Core_ symbols are retired.
 The fifty-seventh slice (#276 A2) is the game heap (F03463, F03464, F03465, F03466, F03467): VS::Core::Memory::Heap keeps its block tables outside the arena with the original placement, and the live binding refuses stray, repeated and misaligned frees and reports exhaustion and damaged header guards,
 and Core/Memory.h, Core/Memory/Heap.h, Core_HeapBlockHeader, the two legacy list heads and the five Core_Memory_ heap functions are retired.
+The fifty-eighth slice (#276 A3, #278) is the core math kernels (58 functions across ScalarMath, Vector, Matrix and Interpolation): typed VS::Core::Math kernels with VectorLive, MatrixLive and InterpolationLive bindings follow the console tables for normalization, square root and arctangent and define every edge input,
+and the generated Core/Math Vector, Matrix, Interpolation and Trig sources, their 36 Core_Math_ functions and the ten Gte.cpp math bridges are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

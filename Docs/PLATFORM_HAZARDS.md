@@ -53,7 +53,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `NULL-RETURN` | Lookup result read without a check | 2 | 0 | 0 | 2 | 0 | 2 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 8 | 0 | 0 | 8 | 0 | 8 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
-| `DIV-ZERO` | Division by a value that was not checked | 230 | 0 | 0 | 160 | 70 | 229 |
+| `DIV-ZERO` | Division by a value that was not checked | 210 | 0 | 0 | 142 | 68 | 209 |
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 84 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
@@ -66,7 +66,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 71 | 0 | 0 | 71 | 0 | 71 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 1,143 | 239 | 239 | 798 | 106 | 1,142 |
+| **Total** | | 1,123 | 239 | 239 | 780 | 104 | 1,122 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -92,21 +92,21 @@ there would have hidden the defect and left the wrong behavior in place.
 | --- | ---: |
 | #56 | 228 |
 | #60 | 162 |
-| #61 | 151 |
+| #61 | 150 |
 | #55 | 107 |
 | #57 | 102 |
 | #253 | 89 |
 | no roadmap issue | 79 |
-| #45 | 63 |
+| #45 | 60 |
 | #58 | 27 |
 | #62 | 25 |
 | #59 | 25 |
 | #47 | 24 |
 | #50 | 21 |
-| #51 | 19 |
 | #48 | 7 |
 | #54 | 7 |
 | #44 | 5 |
+| #51 | 3 |
 | #49 | 2 |
 
 <!-- hazards:end -->
