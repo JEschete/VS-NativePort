@@ -98,6 +98,35 @@ _RENDER_LIVE = {
         ("ReadLiveFramebufferEffectOffset", "F00323")),
 }
 
+# #276 slice 8 (save-memory-card): the C-shaped bindings over the typed VS::Save::MemoryCard game-file core and the
+# VS::Save snapshot core, by binding name and the rows whose generated callers reach them (OWNED_CALL_BINDINGS).
+# PollEvents, ClearEvents, ReadSaveSummary and HasSaveSuffix have no generated callers left, and AnySaveFileExists'
+# only caller (F03670) calls the typed function through its fixup.
+_SAVE_MEMORY_CARD_LIVE = {
+    "BuildLiveSaveFilename": ("F02720", "F03587"),
+    "BuildLiveTemporaryFilename": ("F02721", "F03588"),
+    "NewestLiveSaveSlot": ("F02722",),
+    "FindLiveMatchingSaveSlot": ("F02723",),
+    "ParseLiveSaveFileNumber": ("F02724", "F03591"),
+    "HasLiveChecksumError": ("F02725", "F03592"),
+    "DecodeLiveSaveBytes": ("F02726", "F03593"),
+    "DeleteLiveRedundantTemporaryFiles": ("F02729", "F03596"),
+    "ScanLiveSaveDirectory": ("F02730",),
+    "CreateLiveSaveFile": ("F02731", "F03598"),
+    "AdvanceLiveCardReadiness": ("F02732",),
+    "ValidateAndApplyLiveLoadedSave": ("F02733",),
+    "PackageLiveGameSave": ("F02734",),
+    "ReadLiveSaveStep": ("F02735",),
+    "WriteLiveSaveStep": ("F02736",),
+    "LoadLiveIntroSnapshotStep": ("F02768",),
+    "NextLiveTitleCipherBits": ("F03581",),
+    "PackageLiveClearSave": ("F03601",),
+}
+_SAVE_SNAPSHOT_LIVE = {
+    "MarkLiveAshleySnapshotValid": ("F03442",),
+    "CaptureLiveAshleySnapshot": ("F03443",),
+}
+
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
@@ -172,6 +201,9 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Game\include\Save\MenuAssetsLive.hpp"
        for name in ("VS::Save::MemoryCard::StepLiveMenuResources", "VS::Save::MemoryCard::ReleaseLiveMenuResources",
                     "VS::Save::MemoryCard::StepLiveTitleResources", "VS::Save::MemoryCard::ReleaseLiveTitleResources")},
+    **{f"VS::Save::MemoryCard::{name}": r"Native\Game\include\Save\MemoryCard\GameFilesLive.hpp"
+       for name in _SAVE_MEMORY_CARD_LIVE},
+    **{f"VS::Save::{name}": r"Native\Game\include\Save\SnapshotLive.hpp" for name in _SAVE_SNAPSHOT_LIVE},
     **{name: r"Native\Game\include\Actors\ModelDrawingLive.hpp"
        for name in ("VS::Actors::DrawLiveActorModel", "VS::Actors::ResolveLiveAttachmentParentMatrix",
                     "VS::Actors::ProjectLiveActorBoneEndpoint")},
@@ -406,7 +438,11 @@ OWNED_CALL_BINDINGS = {
         ("EvaluateLiveEase", ("F02428",)),
     )
     for fid in fids
-} | {fid: f"VS::Render::{name}" for rows in _RENDER_LIVE.values() for name, fid in rows}
+} | {fid: f"VS::Render::{name}" for rows in _RENDER_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Save::MemoryCard::{name}" for name, fids in _SAVE_MEMORY_CARD_LIVE.items() for fid in fids
+} | {
+    fid: f"VS::Save::{name}" for name, fids in _SAVE_SNAPSHOT_LIVE.items() for fid in fids
+}
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -2259,7 +2295,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "        Save_NativeStageClearGame();\n"
          "        Boot_isClearSavePending = 0;",
          "22C.c:4508 stage original ending inputs before consuming clear-save provenance"),
-        ("    menuItem = Save_MemoryCard_AnySaveFileExists();",
+        ("    menuItem = VS::Save::MemoryCard::AnySaveFileExists();",
          "    menuItem = Save_NativeInitialTitleSelection();",
          "22C.c:4491 choose title focus from native slots without probing card BIOS"),
         ("VS::Movie::Intro::Start();", "VS::Movie::Intro::StartLive();",
@@ -2897,14 +2933,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "                                                   + state->goal.tile.tileX]",
          "(*Battle_Ai_TerrainRegionCell(state->goal.tile.tileX, state->goal.tile.tileZ))",
          "771A8.c:1638 validate wander direction access against the authored payload"),
-    ],
-    # TITLE 22C.c _packageGameSaveData copies the inventory blocks with `savedata->unkXXX`, char arrays in its
-    # view of the save record; the ledger type has them as Items::Inventory / Items::InventoryIndices structs.
-    "F03601": [
-        ("VS::Core::Memory::CopyBytesBackward(savedata->inventory,", "VS::Core::Memory::CopyBytesBackward(&savedata->inventory,",
-         "array view of the inventory block (22C.c)"),
-        ("VS::Core::Memory::CopyBytesBackward(savedata->inventoryIndices,",
-         "VS::Core::Memory::CopyBytesBackward(&savedata->inventoryIndices,", "array view of the inventory indices (22C.c)"),
     ],
     # TITLE 22C.c _applyLoadedSaveFile: the same blocks copied back from the loaded save (22C.c:596).
     "F03600": [
@@ -8356,10 +8384,6 @@ REGEX_FIXES += [
 # Individually reviewed lifecycle bindings; structural fixups run first.
 # Separate shadowed locals and cast-prototype parameters before naming outer bindings.
 for identifier, old, new, evidence in (
-    ("F02735",
-     "        int new_var = 320;",
-     "        int progress_target_x = 320;",
-     "F02735 original MENU7/260.c:871-950 assigns new_var=320 in the initialization case and uses it as the transfer-progress terminal x coordinate. Rename only this declaration before the function-local identifier map handles its uses."),
     ("F03602",
      "        int new_var = 320;",
      "        int progress_target_x = 320;",
@@ -8398,30 +8422,9 @@ REGEX_FIXES += [
         ("Movie::Intro::WaitForDecodedFrame",
          (('sp0', 'decode_spin_countdown'), ('new_var', 'frame_complete_alias'), ('i', 'frame_complete')),
          "F03647 _waitForFrame initializes sp0[0] to 0x800000 and decrements it until completion or fallback flips/reset the frame rectangle. i copies frameComplete, and new_var only takes &i for the while condition. sp0[1] remains unused; retain the volatile two-int array and all timeout/control-flow behavior. arg1 is explicitly unused in the original definition and _playIntroMovie passes zero."),
-        ("Save::MemoryCard::ValidateAndApplyLoadedSave",
-         (('write', 'apply_loaded_state'), ('spmcimg', 'save_image_workspace'), ('s4', 'loaded_save_image'), ('unk180', 'cipher_header')),
-         "F02733 _applyLoadedSaveFile decodes the image in workspace slot 1, checks the 0x20000107 marker and 92 blocks (32 for nonzero write), returns without applying when write==0, otherwise restores state/settings/inventory/door/room/arts/play time and marks Ashley pending. spmcimg is workspace slot 0, s4 is slot 1, unk180 points to slot 1's cipher header. spmcimg2 is assigned slot 1 and later the arts-state destination but never read; it is not a second loaded-state consumer."),
-        ("Save::MemoryCard::PackageGameSave",
-         (('s0', 'save_title_template'), ('savedata2', 'loaded_save_image'), ('savedata3', 'card_header_image'), ('s5', 'protected_header'), ('var_a0', 'block_checksum')),
-         "F02734 _packageGameSaveData captures Ashley, clears workspace slot 0, copies the card-title template and selected icon/palette, writes the protected header, copies runtime state and slot-1 container data, XORs 256-byte blocks and encodes from the slotState offset. s0 is the title template; savedata2 is the loaded image in workspace slot 1; savedata3 aliases output slot 0 specifically for title/icon writes; s5 is its protected header; var_a0 is the XOR checksum accumulator. savedata2 is not a second independent allocation."),
-        ("Save::MemoryCard::ReadSaveStep",
-         (('temp_s2', 'loaded_save_buffer'), ('new_var', 'progress_target_x')),
-         "F02735 _loadSaveData uses temp_s2=(savedata_t*)_spmcimg+1 as memset/read destination. In the init case new_var=320 is the transfer-progress terminal x coordinate in the interpolation formula, not a byte count. Nonzero portFileno resets persistent reader state; zero polls the existing read. Keep its bit fields, read lengths and retry state untouched."),
-        ("Save::MemoryCard::WriteSaveStep",
-         (('temp_v1_2', 'progress_x_delta'), ('temp_s3', 'io_result_or_saved_progress')),
-         "F02736 _saveFile computes temp_v1_2 as the interpolated x advance, writes a staging file, polls completion, starts readback, compares every save-image byte, then renames to the final name. temp_s3 is one deliberately reused binding: card event result, saved previous-progress counter across _loadSaveData initialization, then asynchronous read result. Naming it only event or saved progress would be incorrect."),
-        ("Save::MemoryCard::LoadIntroSnapshotStep",
-         (('new_var', 'play_time_backup_alias'), ('new_var2', 'intro_snapshot_allocation')),
-         "F02768 _loadIntroSaveFile actions 1/2 select OPMCIMG1/2 LBAs and allocate/enqueue one image. Action 0 waits for Loaded, releases the request, saves/restores play time around apply, and frees that image. new_var is an unused alias of the local play-time backup; new_var2 carries the allocated image and the same image on the free path. Naming does not repair the historical workspace-minus-one convention."),
-        ("Save::CaptureAshleySnapshot",
-         (('sp10', 'ashley_placement'), ('temp_t0', 'ashley_stats'), ('temp_t5', 'ashley_snapshot'), ('var_s1', 'action_byte_or_actor_slot')),
-         "F03443 func_80042CB0 queries actor zero into sp10 and derives saved tile/facing/entry fields. temp_t0 points to Ashley's live battle stats; temp_t5 points to persistent D_80060068. It copies stats, status timers, limbs and camera data. var_s1 is reused first for 32 action-flag groups of eight actions, later for 16 room actor slots. The remaining declared registers have no behavioral role in this original function; their exact dead uses are individually recorded rather than guessed."),
         ("Title::SaveCard::ValidateAndApplyLoadedSave",
          (('verifyOnly', 'apply_loaded_state'), ('spmcimg', 'save_image_workspace'), ('s4', 'loaded_save_image'), ('unk180', 'cipher_header')),
          "F03600 Independently read TITLE _applyLoadedSaveFile: verifyOnly!=0 chooses 32 checksum blocks and applies runtime state; verifyOnly==0 validates 92 blocks and returns without applying. The original name is misleading, as the catalog already notes. spmcimg is workspace base, s4 is workspace slot 1 and unk180 is its protected cipher header. TITLE's differently represented payload fields do not change those pointer roles."),
-        ("Save::MemoryCard::PackageClearSave",
-         (('s0', 'save_title_template'), ('s5', 'protected_header'), ('savedata2', 'loaded_save_image'), ('savedata3', 'card_header_image'), ('var_a0', 'block_checksum')),
-         "F03601 TITLE's original _packageGameSaveData is a distinct clear-save path, not a duplicate of MENU7 packaging. It zeros play time/current-game save count, changes menu/puzzle state, clears miscellaneous inventory/container bytes and writes clear-save location 0x30. s0, s5, savedata2, savedata3 and var_a0 have the independently verified template/protected-header/loaded-image/output-header/checksum roles. Preserve the source's container misc sizeof/4 expression and all clear-specific state changes."),
         ("Title::SaveCard::ReadSaveStep",
          (('temp_s2', 'loaded_save_buffer'), ('new_var', 'progress_target_x')),
          "F03602 TITLE _loadSaveData separately confirms temp_s2 as workspace slot-1 read/clear destination and new_var=320 as progress x target. It uses its own statics and named O_NOWAIT|O_RDONLY constants; the original padding is a short rather than MENU7's char[2]. Preserve these differences and reset semantics."),

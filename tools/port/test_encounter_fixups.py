@@ -2860,7 +2860,6 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
 
     def test_loaded_save_validation_names_preserve_true_means_apply(self):
         for name, old in (
-            ("Save::MemoryCard::ValidateAndApplyLoadedSave", "write"),
             ("Title::SaveCard::ValidateAndApplyLoadedSave", "verifyOnly"),
         ):
             with self.subTest(name=name):
@@ -2875,7 +2874,6 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
 
     def test_lifecycle_scoped_names_preserve_exact_declaration_shapes(self):
         for identity, old, new in (
-            ("F02735", "int new_var = 320;", "int progress_target_x = 320;"),
             ("F03602", "int new_var = 320;", "int progress_target_x = 320;"),
             ("F03623", "int v0;", "int location_texture_page;"),
             ("F03626", "int new_var;", "int card_and_partial_read_flags;"),

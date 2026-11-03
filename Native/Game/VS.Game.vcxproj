@@ -1900,6 +1900,9 @@
     <ClCompile Include="src\Save\FileMenuLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Save\MemoryCard\GameFilesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Save\MenuAssets.cpp" />
     <ClCompile Include="src\Save\MenuAssetsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1921,6 +1924,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Save\RuntimeSnapshot.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Save\SnapshotLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\State\Ashley.cpp">
@@ -2457,6 +2463,7 @@
     <ClInclude Include="include\Menu\Sounds.hpp" />
     <ClInclude Include="include\Save\FileMenu.hpp" />
     <ClInclude Include="include\Save\FileMenuLive.hpp" />
+    <ClInclude Include="include\Save\MemoryCard\GameFilesLive.hpp" />
     <ClInclude Include="include\Save\MenuAssets.hpp" />
     <ClInclude Include="include\Save\MenuAssetsLive.hpp" />
     <ClInclude Include="include\Save\NativeContainer.hpp" />
@@ -2468,6 +2475,7 @@
     <ClInclude Include="include\Save\NativeResume.h" />
     <ClInclude Include="include\Save\NativeSnapshot.hpp" />
     <ClInclude Include="include\Save\RuntimeSnapshot.hpp" />
+    <ClInclude Include="include\Save\SnapshotLive.hpp" />
     <ClInclude Include="include\State\GameTime.h" />
     <ClInclude Include="include\State\Progress.h" />
   </ItemGroup>

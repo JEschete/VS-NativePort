@@ -1,110 +1,98 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Location.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/RoomState.h"
-#include "Actors/Skeleton.h"
-#include "Battle/Abilities.h"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
-#include "Field/Camera.h"
-#include "Field/Doors.h"
-#include "Field/Mpd.h"
-#include "Items/Equipment.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Weapons.h"
-#include "Render/Palette.h"
-#include "Save/Snapshot.h"
-#include "State/Ashley.h"
-#include "State/Location.h"
-#include "State/Progress.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Save/Snapshot.hpp"
 
-// decomp: SLUS_010.40 func_80042CA0 (src/SLUS_010.40/main.c:8373)
-void Save_MarkAshleySnapshotValid(void) { State_ashleySnapshot.stats.isPending = 1; }
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <span>
 
-// decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375)
-void Save_CaptureAshleySnapshot(void)
-{
-    Actors_ActorLocationQuery ashley_placement;
-    int j;
-    int i;
-    int action_byte_or_actor_slot;
-    int var_t3;
-    int new_var;
-    int var_t4;
-    signed char actionsLearned;
-    Battle_ActorStats* ashley_stats;
-    State_AshleySnapshot* ashley_snapshot;
-    int v0;
-    int v0_2;
-    int v1;
-    int v1_2;
+namespace VS::Save {
+namespace {
 
-    State_savedEntryDoor = Field_pendingDestinationDoor;
-    Actors_ActorPlacement(0, &ashley_placement);
+constexpr unsigned kBitsPerByte = 8;
+constexpr std::uint32_t kByteMask = 0xFF;
+// State_AshleyStatsSnapshot.isPending, a little-endian int.
+constexpr std::size_t kPendingFlagBytes = 4;
 
-    State_savedEntryDoor.entryTileX = ashley_placement.location.packedTile.target.tileX;
-    State_savedEntryDoor.entryTileZ = ashley_placement.location.packedTile.target.tileZ;
-    State_savedEntryDoor.tileLocation.entryDirection = ashley_placement.location.packedTile.target.tileLayer;
-    State_savedEntryDoor.entryElevation = ashley_placement.location.packedTile.target.facing >> 6;
-    State_savedEntryDoor.requiredFlagId = Field_snapshotDoorFlagSource.requiredFlagId;
+// A bit field of a Field_MpdDoorRecord halfword.
+struct DoorField {
+  std::size_t offset = 0;
+  unsigned shift = 0;
+  unsigned width = 0;
+};
 
-    for (action_byte_or_actor_slot = 0; action_byte_or_actor_slot < 32; ++action_byte_or_actor_slot) {
-        for (actionsLearned = 0, i = 0; i < 8; ++i) {
-            actionsLearned =
-                (*(int*)&actionsLearned * 2) | Battle_actionDefinitions[action_byte_or_actor_slot * 8 + i].unlocked;
-        }
-        State_learnedActionFlags[action_byte_or_actor_slot] = actionsLearned;
-    }
-    ashley_stats = Battle_characterState->stats;
-    ashley_snapshot = &State_ashleySnapshot;
-    ashley_snapshot->stats.currentHp = ashley_stats->currentHp;
-    ashley_snapshot->stats.maxHp = ashley_stats->maxHp;
-    ashley_snapshot->stats.currentMp = ashley_stats->currentMp;
-    ashley_snapshot->stats.maxMp = ashley_stats->maxMp;
-    ashley_snapshot->stats.strength = ashley_stats->strength;
-    ashley_snapshot->stats.totalStrength = ashley_stats->totalStrength;
-    ashley_snapshot->stats.intelligence = ashley_stats->intelligence;
-    ashley_snapshot->stats.totalIntelligence = ashley_stats->totalIntelligence;
-    ashley_snapshot->stats.agility = ashley_stats->agility;
-    ashley_snapshot->stats.totalAgility = ashley_stats->totalAgility;
-    ashley_snapshot->stats.risk = ashley_stats->risk;
-    ashley_snapshot->stats.actorFlags = ashley_stats->actionRecoveryTimer;
-    ashley_snapshot->stats.statuses = ashley_stats->statuses;
+constexpr DoorField kEntryDirection = {.offset = 2, .shift = 13, .width = 3};
+constexpr DoorField kEntryTileX = {.offset = 4, .shift = 8, .width = 5};
+constexpr DoorField kEntryElevation = {.offset = 4, .shift = 13, .width = 2};
+constexpr DoorField kRequiredFlagId = {.offset = 6, .shift = 0, .width = 10};
+constexpr DoorField kEntryTileZ = {.offset = 6, .shift = 10, .width = 5};
+// Actors_TileTarget.facing keeps the elevation in its top two bits.
+constexpr unsigned kFacingElevationShift = 6;
 
-    for (i = 0; i < 8; ++i) {
-        ashley_snapshot->stats.statusTimers[i] = ashley_stats->statusTimers[i];
-    }
-
-    var_t4 = 0;
-    var_t3 = 0;
-
-    for (i = 0; i < 6; ++i) {
-        ashley_snapshot->stats.limbs[i].hp = ashley_stats->limbs[i].hp;
-        ashley_snapshot->stats.limbs[i].maxHp = ashley_stats->limbs[i].maxHp;
-
-        for (j = 0; j < 4; ++j) {
-            ashley_snapshot->stats.limbs[i].types[j] = ashley_stats->limbs[i].types[j];
-        }
-
-        for (j = 0; j < 8; ++j) {
-            ashley_snapshot->stats.limbs[i].affinities[j] = ashley_stats->limbs[i].affinities[j];
-        }
-    }
-
-    ashley_snapshot->stats.weaponDrawn = Battle_characterState->weaponDrawn;
-    ashley_snapshot->stats.cameraPitch = Field_sphericalCamera.delta.pitch;
-    ashley_snapshot->stats.cameraDistance = Field_sphericalCamera.initialDistance;
-
-    for (action_byte_or_actor_slot = 0; action_byte_or_actor_slot < 16; ++action_byte_or_actor_slot) {
-        Actors_StoreRoomActorState(action_byte_or_actor_slot, 0);
-    }
-    Field_StoreEntranceDoorForReload();
+void SetDoorField(EntryDoor& door, DoorField field, unsigned value) {
+  const unsigned low = std::to_integer<unsigned>(door.at(field.offset));
+  const unsigned high = std::to_integer<unsigned>(door.at(field.offset + 1));
+  const unsigned mask = ((1U << field.width) - 1U) << field.shift;
+  const unsigned half = ((low | (high << kBitsPerByte)) & ~mask) |
+                        ((value << field.shift) & mask);
+  door.at(field.offset) = static_cast<std::byte>(half & kByteMask);
+  door.at(field.offset + 1) =
+      static_cast<std::byte>((half >> kBitsPerByte) & kByteMask);
 }
 
-}  // extern "C"
+}  // namespace
+
+// decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375), the
+// door fields
+EntryDoor PlaceEntryDoor(const EntryDoor& pending, TilePlacement placement,
+                         std::uint16_t flag_id) {
+  EntryDoor door = pending;
+  SetDoorField(door, kEntryTileX, placement.tile_x);
+  SetDoorField(door, kEntryTileZ, placement.tile_z);
+  SetDoorField(door, kEntryDirection, placement.tile_layer);
+  SetDoorField(
+      door, kEntryElevation,
+      static_cast<unsigned>(placement.facing) >> kFacingElevationShift);
+  SetDoorField(door, kRequiredFlagId, flag_id);
+  return door;
+}
+
+// decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375), the
+// learned-action loop. The original shifts a char held in a register; the
+// copied C read four bytes through `*(int*)&actionsLearned`.
+LearnedActions PackLearnedActions(SnapshotHost& host) {
+  LearnedActions learned{};
+  for (std::size_t index = 0; index < kLearnedActionBytes; ++index) {
+    unsigned bits = 0;
+    for (std::size_t bit = 0; bit < kActionsPerLearnedByte; ++bit) {
+      const bool unlocked =
+          host.ActionUnlocked(index * kActionsPerLearnedByte + bit);
+      bits = (bits << 1U) | (unlocked ? 1U : 0U);
+    }
+    learned.at(index) = static_cast<std::uint8_t>(bits & kByteMask);
+  }
+  return learned;
+}
+
+// decomp: SLUS_010.40 func_80042CA0 (src/SLUS_010.40/main.c:8373)
+void MarkAshleySnapshotValid(std::span<std::byte, kAshleySnapshotBytes> bytes) {
+  const auto is_pending = bytes.first<kPendingFlagBytes>();
+  std::ranges::fill(is_pending, std::byte{0});
+  is_pending[0] = std::byte{1};
+}
+
+// decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375)
+void CaptureAshleySnapshot(SnapshotHost& host) {
+  host.StoreEntryDoor(PlaceEntryDoor(host.PendingDestinationDoor(),
+                                     host.AshleyPlacement(),
+                                     host.SnapshotDoorFlagId()));
+  host.StoreLearnedActions(PackLearnedActions(host));
+  if (const auto stats = host.AshleyStats(); stats.has_value()) {
+    host.StoreSnapshot({.stats = *stats, .camera = host.Camera()});
+  }
+  for (std::int32_t actor = 0; actor < kSnapshotRoomActorCount; ++actor) {
+    host.StoreRoomActorState(actor);
+  }
+  host.StoreEntranceDoorForReload();
+}
+}  // namespace VS::Save

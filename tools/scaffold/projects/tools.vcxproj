@@ -338,6 +338,7 @@
     <None Include="..\..\port\relaxed_sources.txt" />
     <None Include="..\..\port\test_assembly_gap_audit.py" />
     <None Include="..\..\port\test_encounter_fixups.py" />
+    <None Include="..\..\port\test_module_symbol_extents.py" />
     <None Include="..\..\port\test_scene_trace_fixups.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />

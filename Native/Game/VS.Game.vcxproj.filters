@@ -43,6 +43,9 @@
     <Filter Include="include\Save">
       <UniqueIdentifier>{D7A69607-1CF4-5C9C-B0F8-B7A2F2245DCE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Save\MemoryCard">
+      <UniqueIdentifier>{8A437394-BEA8-5142-923B-28CD3B9FD35C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\State">
       <UniqueIdentifier>{5C6F0E0E-46C9-5E7B-9E34-5D22414E35BA}</UniqueIdentifier>
     </Filter>
@@ -120,6 +123,9 @@
     </Filter>
     <Filter Include="src\Save">
       <UniqueIdentifier>{071E8949-9F08-501E-B3B6-5F71A23680F5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Save\MemoryCard">
+      <UniqueIdentifier>{25851C9F-F8C8-51C9-865A-FE8DDBA58699}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\State">
       <UniqueIdentifier>{3A39455F-5F22-57B3-888A-EFC812F4D87D}</UniqueIdentifier>
@@ -2088,6 +2094,9 @@
     <ClCompile Include="src\Save\FileMenuLive.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
+    <ClCompile Include="src\Save\MemoryCard\GameFilesLive.cpp">
+      <Filter>src\Save\MemoryCard</Filter>
+    </ClCompile>
     <ClCompile Include="src\Save\MenuAssets.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
@@ -2113,6 +2122,9 @@
       <Filter>src\Save</Filter>
     </ClCompile>
     <ClCompile Include="src\Save\RuntimeSnapshot.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Save\SnapshotLive.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
     <ClCompile Include="src\State\Ashley.cpp">
@@ -2475,6 +2487,9 @@
     <ClInclude Include="include\Save\FileMenuLive.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
+    <ClInclude Include="include\Save\MemoryCard\GameFilesLive.hpp">
+      <Filter>include\Save\MemoryCard</Filter>
+    </ClInclude>
     <ClInclude Include="include\Save\MenuAssets.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
@@ -2506,6 +2521,9 @@
       <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\RuntimeSnapshot.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\SnapshotLive.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\State\GameTime.h">

@@ -1,1037 +1,1250 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/RandomLive.hpp"
-#include "Save/MenuAssetsLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
-#include "CdDrive.h"
-#include "Content/DiscLayout.h"
-#include "DiscQueue.h"
-#include "Field/Doors.h"
-#include "Field/Map.h"
-#include "Field/Mpd.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Inventory.h"
-#include "Items/Weapons.h"
-#include "Menu/Files.h"
-#include "Menu/Framework/Framework.h"
-#include "Save/MemoryCard/GameFiles.h"
-#include "Save/MemoryCard/Resources.h"
-#include "Save/Snapshot.h"
-#include "State/Ashley.h"
-#include "State/GameTime.h"
-#include "State/Location.h"
-#include "State/PlayTime.h"
-#include "State/Progress.h"
-#include "State/RoomCache.h"
-#include "State/RoomMemory.h"
-#include "State/Settings.h"
-#include "State/StateFlags.h"
-#include "Title/SaveCard.h"
-#include "Title/SaveFiles.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Save/MemoryCard/GameFiles.hpp"  // NOLINT(build/include): native C++ interface.
 
-// decomp: local static of _keystreamBits, at file scope so the module reset reaches it
-static u_int Save_MemoryCard_keystreamSeed = 0x19660D;
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <expected>
+#include <optional>
+#include <span>
+#include <string_view>
 
-// decomp: _memcardFilenameTemplate (_memcardFilenameTemplate@src/TITLE/TITLE.PRG/22C.c)
-char const* Save_MemoryCard_kOriginalFilenameTemplate = "bu00:BASLUS-01040VAG0";
+#include "Core/Math/ScalarMath.hpp"
+#include "Save/Snapshot.hpp"
+
+namespace VS::Save::MemoryCard {
+namespace {
+
+using VS::Core::Math::R3000Quotient;
+using VS::Core::Math::WrappingAdd;
+using VS::Core::Math::WrappingMultiply;
+using VS::Core::Math::WrappingSubtract;
+
+constexpr unsigned kBitsPerByte = 8;
+constexpr std::uint32_t kByteMask = 0xFF;
+constexpr std::size_t kWordBytes = sizeof(std::uint32_t);
+constexpr std::size_t kHalfBytes = sizeof(std::uint16_t);
+
+// Save_CardFileSlotStatus below the in-use states.
+constexpr std::uint32_t kSlotUnavailable = 0;
+constexpr std::uint32_t kSlotAvailable = 1;
+constexpr std::uint32_t kSlotTemporary = 2;
+
+// The card filename template and the characters the builders replace.
+constexpr std::string_view kFilenameTemplate = "bu00:BASLUS-01040VAG0";
+constexpr std::size_t kFilenamePortIndex = 2;
+constexpr std::size_t kFilenameNumberIndex = 20;
+constexpr std::size_t kGameCodeOffset = 5;
+// "BASLUS-01040VAG": a directory name before its file number.
+constexpr std::string_view kGameCode = kFilenameTemplate.substr(
+    kGameCodeOffset, kFilenameNumberIndex - kGameCodeOffset);
+constexpr std::size_t kNameNumberIndex = kGameCode.size();
+constexpr std::uint32_t kDigitZero = '0';
+constexpr std::uint32_t kTemporaryBase = 'A' - 1;
+constexpr std::uint32_t kSaveSuffixBase = '1';
+constexpr std::uint32_t kTemporarySuffixBase = 'A';
+constexpr char kFirstTemporarySuffix = 'A';
+constexpr char kLastTemporarySuffix = 'E';
+constexpr char kFirstSaveSuffix = '1';
+constexpr char kLastSaveSuffix = '5';
+constexpr std::string_view kPortOnePattern = "bu00:*";
+constexpr std::string_view kPortTwoPattern = "bu10:*";
+// _saveFileExists' probe: "bu?0:BASLUS-01040VAG?" with '/' + port.
+constexpr std::uint32_t kProbePortBase = '/';
+constexpr char kAnyFileNumber = '?';
+constexpr std::int32_t kChannelsPerPort = 16;
+constexpr std::int32_t kPortCount = 2;
+
+constexpr std::size_t kChecksumBlock = 1;
+constexpr std::size_t kMinimumChecksumBlocks = 2;
+constexpr std::size_t kHeaderBlockCount = kHeaderBytes / kBlockBytes;
+constexpr int kSummaryReadAttempts = 3;
+constexpr unsigned kCipherByteShift = 24;
+constexpr std::uint32_t kWordBits = 32;
+constexpr std::uint32_t kShiftMask = kWordBits - 1;
+
+// Card space: a file takes whole 8 KiB card blocks and a save needs three.
+constexpr std::int32_t kCardBlockRoundUp = 0x1FFF;
+constexpr unsigned kCardBlockShift = 13;
+constexpr std::int32_t kSaveFileCardBlocks = 3;
+
+constexpr std::int8_t kInitPollLimit = 4;
+constexpr std::int8_t kEventPollLimit = 64;
+constexpr std::uint32_t kReadinessMask = 3;
+
+// Transfer requests and the progress bar.
+constexpr unsigned kRequestChannelShift = 12;
+constexpr unsigned kRequestHeaderOnlyShift = 8;
+constexpr std::int32_t kRequestFileIndexMask = 0xF;
+constexpr std::int32_t kFileNumberMask = 7;
+constexpr std::int32_t kTemporaryFileBit = 8;
+constexpr std::int8_t kTransferErrorLimit = 3;
+constexpr unsigned kRenameErrorShift = 4;
+constexpr std::size_t kHeaderReadBytes = 0x2000;
+constexpr std::uint16_t kProgressStart = 80;
+constexpr std::int32_t kProgressEnd = 320;
+constexpr std::int32_t kProgressErrorStep = 20;
+constexpr std::uint16_t kReadProgressSpan = 192;
+constexpr unsigned kHeaderOnlyProgressShift = 7;
+constexpr auto kHeaderReadProgressSpan = static_cast<std::uint16_t>(
+    kReadProgressSpan - (1U << kHeaderOnlyProgressShift));
+constexpr std::uint16_t kWriteProgressSpan = 384;
+
+// Packaging.
+constexpr std::array kCardMagic = {
+    std::byte{0x53},
+    std::byte{0x43},
+    std::byte{0x11},
+    std::byte{0x03},
+};
+// The Shift-JIS card title "VAGRANT STORY FILE 1   00:00:00 ".
+using CardTitleGlyphs = std::array<std::uint16_t, kCardTitleBytes / kHalfBytes>;
+constexpr CardTitleGlyphs kCardTitleTemplate = {
+    0x7582, 0x6082, 0x6682, 0x7182, 0x6082, 0x6D82, 0x7382, 0x4081,
+    0x7282, 0x7382, 0x6E82, 0x7182, 0x7882, 0x4081, 0x6582, 0x6882,
+    0x6B82, 0x6482, 0x4081, 0x5082, 0x4081, 0x4081, 0x4081, 0x4F82,
+    0x4F82, 0x4681, 0x4F82, 0x4F82, 0x4681, 0x4F82, 0x4F82, 0x4081,
+};
+constexpr std::size_t kTailFileDigit = 3;
+constexpr std::size_t kTailHundredHours = 6;
+// Each two-digit field is a tens glyph followed by its ones glyph.
+constexpr std::size_t kTailHoursTens = 7;
+constexpr std::size_t kTailMinutesTens = 10;
+constexpr std::size_t kTailSecondsTens = 13;
+constexpr std::size_t kTailTerminator = 15;
+constexpr unsigned kGlyphDigitShift = 8;
+constexpr std::int32_t kDecimalBase = 10;
+constexpr std::int32_t kHundredHours = 100;
+constexpr std::uint16_t kHundredHoursGlyph = 0x5082;
+// State_PlayTime bytes: frames, seconds, minutes, hours.
+constexpr unsigned kPlayTimeSecondsShift = 8;
+constexpr unsigned kPlayTimeMinutesShift = 16;
+constexpr unsigned kPlayTimeHoursShift = 24;
+constexpr std::int32_t kRandomWordBits = 32;
+constexpr std::int32_t kRandomByteBits = 8;
+constexpr std::uint32_t kFallbackSlotState = 0x17385CA9;
+constexpr std::uint16_t kMaxSaveCount = 9999;
+constexpr std::uint8_t kClearSaveLocation = 0x30;
+// State_Settings.menuFlags bit 5 and reserved0Bit0 bit 3.
+constexpr std::uint32_t kClearedMenuFlags = 0xFFDF;
+constexpr unsigned kPuzzleModeSettingShift = 3;
+
+static_assert(kHeaderBlockCount == kMinimumChecksumBlocks);
+static_assert(LayoutOf(SaveSection::kSettings).size == kSettingsBytes);
+static_assert(LayoutOf(SaveSection::kAshleySnapshot).size ==
+              VS::Save::kAshleySnapshotBytes);
+static_assert(LayoutOf(SaveSection::kRecentRoomEnemyStates).size ==
+              kRoomStateSlotCount * kRoomEnemyStatesBytes);
+static_assert(kChecksumOffset + kImageBlockCount ==
+              kSummaryOffset + kRecordBytes);
+static_assert(LayoutOf(SaveSection::kArtsStatus).offset +
+                  LayoutOf(SaveSection::kArtsStatus).size ==
+              kContainerOffset);
+// The image ends with reserved bytes after the container data.
+static_assert(kContainerOffset + kContainerBytes < kSaveImageBytes);
+static_assert(kCardTitleTailOffset + (kTailTerminator + 1) * kHalfBytes ==
+              kCardTitleOffset + kCardTitleBytes);
+
+std::uint32_t LoadWord(std::span<const std::byte> bytes, std::size_t offset) {
+  std::uint32_t value = 0;
+  for (std::size_t index = 0; index < kWordBytes; ++index) {
+    value |= std::to_integer<std::uint32_t>(bytes[offset + index])
+             << (index * kBitsPerByte);
+  }
+  return value;
+}
+
+std::uint16_t LoadHalf(std::span<const std::byte> bytes, std::size_t offset) {
+  const auto low = std::to_integer<std::uint32_t>(bytes[offset]);
+  const auto high = std::to_integer<std::uint32_t>(bytes[offset + 1]);
+  return static_cast<std::uint16_t>(low | (high << kBitsPerByte));
+}
+
+void StoreWord(std::span<std::byte> bytes, std::size_t offset,
+               std::uint32_t value) {
+  for (std::size_t index = 0; index < kWordBytes; ++index) {
+    bytes[offset + index] =
+        static_cast<std::byte>((value >> (index * kBitsPerByte)) & kByteMask);
+  }
+}
+
+// Stores the low halfword of `value`.
+void StoreHalf(std::span<std::byte> bytes, std::size_t offset,
+               std::uint32_t value) {
+  bytes[offset] = static_cast<std::byte>(value & kByteMask);
+  bytes[offset + 1] =
+      static_cast<std::byte>((value >> kBitsPerByte) & kByteMask);
+}
+
+char NarrowChar(std::uint32_t value) {
+  return static_cast<char>(static_cast<std::uint8_t>(value & kByteMask));
+}
+
+// Copies `source` over the start of `target`, never past either end; callers
+// check the sizes first.
+void CopyBytes(std::span<const std::byte> source, std::span<std::byte> target) {
+  std::ranges::copy(source.first(std::min(source.size(), target.size())),
+                    target.begin());
+}
+
+std::int8_t Incremented(std::int8_t value) {
+  return static_cast<std::int8_t>(value + 1);
+}
+
+std::uint16_t LowHalf(std::int32_t value) {
+  return static_cast<std::uint16_t>(static_cast<std::uint32_t>(value));
+}
+
+std::int32_t ChannelOf(std::int32_t port) {
+  return WrappingMultiply(WrappingSubtract(port, 1), kChannelsPerPort);
+}
+
+CardFilename PathOf(std::string_view text) {
+  CardFilename path{};
+  std::ranges::copy(text.substr(0, kFilenameBytes - 1), path.begin());
+  return path;
+}
+
+CardFilename FilenameFor(std::int32_t channel, char number) {
+  CardFilename name = PathOf(kFilenameTemplate);
+  name.at(kFilenamePortIndex) = channel == 0 ? '0' : '1';
+  name.at(kFilenameNumberIndex) = number;
+  return name;
+}
+
+std::string_view NameOf(const CardDirectoryEntry& entry) {
+  return {entry.name.begin(), std::ranges::find(entry.name, '\0')};
+}
+
+std::span<std::byte, kRecordBytes> SlotRecord(SummaryTable summaries,
+                                              std::size_t slot) {
+  return summaries.subspan(slot * kRecordBytes).first<kRecordBytes>();
+}
+
+std::span<const std::byte, kRecordBytes> SlotRecord(ConstSummaryTable summaries,
+                                                    std::size_t slot) {
+  return summaries.subspan(slot * kRecordBytes).first<kRecordBytes>();
+}
+
+std::uint32_t SlotStateOf(std::span<const std::byte, kRecordBytes> record) {
+  return LoadWord(record, kSummarySlotStateOffset);
+}
+
+std::optional<std::size_t> FirstUnavailableSlot(ConstSummaryTable summaries) {
+  for (std::size_t slot = 0; slot < kSlotCount; ++slot) {
+    if (SlotStateOf(SlotRecord(summaries, slot)) == kSlotUnavailable) {
+      return slot;
+    }
+  }
+  return std::nullopt;
+}
+
+std::uint8_t BlockChecksum(std::span<const std::byte> image,
+                           std::size_t block) {
+  std::byte checksum{0};
+  for (const std::byte value :
+       image.subspan(block * kBlockBytes, kBlockBytes)) {
+    checksum ^= value;
+  }
+  return std::to_integer<std::uint8_t>(checksum);
+}
+
+std::span<std::byte> ImageSection(SaveImage image, SaveSection section) {
+  const SectionLayout layout = LayoutOf(section);
+  return image.subspan(layout.offset, layout.size);
+}
+
+SaveSection SectionAt(std::size_t index) {
+  return static_cast<SaveSection>(index);
+}
+
+std::expected<void, SaveImageError> CheckHostSections(SaveStateHost& state) {
+  for (std::size_t index = 0; index < kSaveSectionCount; ++index) {
+    const SaveSection section = SectionAt(index);
+    if (state.Section(section).size() != LayoutOf(section).size) {
+      return std::unexpected(SaveImageError::kSectionSizeMismatch);
+    }
+  }
+  return {};
+}
+
+// The recent-room slot and each room's next actor slot index live arrays when
+// the save is applied.
+std::expected<void, SaveImageError> CheckRoomState(ConstSaveImage image) {
+  const SectionLayout slot = LayoutOf(SaveSection::kRoomStateSlot);
+  if (LoadWord(image, slot.offset) >= kRoomStateSlotCount) {
+    return std::unexpected(SaveImageError::kRoomStateSlotOutOfRange);
+  }
+  const SectionLayout recent = LayoutOf(SaveSection::kRecentRoomEnemyStates);
+  for (std::size_t room = 0; room < kRoomStateSlotCount; ++room) {
+    const std::size_t offset =
+        recent.offset + room * kRoomEnemyStatesBytes + kRoomEnemyNextSlotOffset;
+    if (LoadWord(image, offset) >= kRoomEnemyActorStateCount) {
+      return std::unexpected(SaveImageError::kRoomEnemySlotOutOfRange);
+    }
+  }
+  return {};
+}
+
+// _memcardEventHandler's phases.
+CardReadiness ReadyStep(CardReadinessState& state, CardHost& card) {
+  switch (PollEvents(card, CardEventGroup::kSoftware)) {
+    case CardEvent::kIoEnd:
+      state.phase = CardReadinessPhase::kLoadReady;
+      break;
+    case CardEvent::kError:
+    case CardEvent::kTimeout:
+      state.phase = CardReadinessPhase::kInit;
+      break;
+    case CardEvent::kUnformatted:
+      state.phase = CardReadinessPhase::kUnformatted;
+      break;
+    case CardEvent::kNone:
+      if (state.event_polls > kEventPollLimit) {
+        state.phase = CardReadinessPhase::kInit;
+      }
+      state.event_polls = Incremented(state.event_polls);
+      break;
+  }
+  return CardReadiness::kPending;
+}
+
+CardReadiness InitStep(CardReadinessState& state, CardHost& card) {
+  state.init_polls = Incremented(state.init_polls);
+  if (state.init_polls >= kInitPollLimit) {
+    return CardReadiness::kTimeout;
+  }
+  ClearEvents(card, CardEventGroup::kSoftware);
+  if (!card.StartCardInfo(state.channel)) {
+    return CardReadiness::kPending;
+  }
+  state.phase = CardReadinessPhase::kReady;
+  state.event_polls = 0;
+  state.event_group = CardEventGroup::kSoftware;
+  return ReadyStep(state, card);
+}
+
+// The original spins here until an event arrives; this polls once a call.
+CardReadiness ConfirmedStep(CardReadinessState& state, CardHost& card) {
+  switch (PollEvents(card, CardEventGroup::kHardware)) {
+    case CardEvent::kNone:
+      break;
+    case CardEvent::kIoEnd:
+      state.phase = CardReadinessPhase::kLoadReady;
+      break;
+    case CardEvent::kError:
+    case CardEvent::kTimeout:
+    case CardEvent::kUnformatted:
+      state.phase = CardReadinessPhase::kInit;
+      break;
+  }
+  return CardReadiness::kPending;
+}
+
+CardReadiness UnformattedStep(CardReadinessState& state, CardHost& card) {
+  ClearEvents(card, CardEventGroup::kHardware);
+  if (!card.StartCardClear(state.channel)) {
+    return CardReadiness::kPending;
+  }
+  state.phase = CardReadinessPhase::kConfirmed;
+  state.event_polls = 0;
+  state.event_group = CardEventGroup::kHardware;
+  return ConfirmedStep(state, card);
+}
+
+CardReadiness LoadedStep(CardReadinessState& state, CardHost& card) {
+  const bool cleared = state.event_group == CardEventGroup::kHardware;
+  switch (PollEvents(card, CardEventGroup::kSoftware)) {
+    case CardEvent::kIoEnd:
+      return cleared ? CardReadiness::kReadyAfterClear : CardReadiness::kReady;
+    case CardEvent::kError:
+    case CardEvent::kTimeout:
+      state.phase = CardReadinessPhase::kInit;
+      break;
+    case CardEvent::kUnformatted:
+      return cleared ? CardReadiness::kUnformattedAfterClear
+                     : CardReadiness::kUnformatted;
+    case CardEvent::kNone:
+      if (state.event_polls > kEventPollLimit) {
+        state.phase = CardReadinessPhase::kInit;
+      }
+      state.event_polls = Incremented(state.event_polls);
+      break;
+  }
+  return CardReadiness::kPending;
+}
+
+CardReadiness LoadReadyStep(CardReadinessState& state, CardHost& card) {
+  ClearEvents(card, CardEventGroup::kSoftware);
+  if (!card.StartCardLoad(state.channel)) {
+    return CardReadiness::kPending;
+  }
+  state.phase = CardReadinessPhase::kLoaded;
+  state.event_polls = 0;
+  return LoadedStep(state, card);
+}
+
+TransferStatus StatusAfter(std::int8_t errors) {
+  return errors == kTransferErrorLimit ? TransferStatus::kFailed
+                                       : TransferStatus::kPending;
+}
+
+// Moves the bar by `remaining` scaled by the frames since the last step over
+// the expected frames (the original divides without a zero check).
+void AdvanceProgress(SaveTransfer& transfer, std::int32_t remaining) {
+  TransferProgress& progress = transfer.progress;
+  const std::int32_t elapsed =
+      WrappingSubtract(transfer.progress_counter, progress.previous);
+  const std::int32_t delta =
+      R3000Quotient(WrappingMultiply(elapsed, remaining), progress.target);
+  progress.position = LowHalf(WrappingAdd(progress.position, delta));
+}
+
+CardFilename ReadFilename(const SaveReadState& state) {
+  if ((state.file_index & kTemporaryFileBit) != 0) {
+    return BuildTemporaryFilename(state.channel,
+                                  state.file_index & kFileNumberMask);
+  }
+  return BuildSaveFilename(state.channel, state.file_index);
+}
+
+// _loadSaveData's open phase; true once the read is queued.
+bool QueueRead(SaveReadState& state, SaveTransfer& transfer) {
+  TransferProgress& progress = transfer.progress;
+  AdvanceProgress(transfer, progress.error_offset * kProgressErrorStep -
+                                (progress.position - kProgressEnd));
+  progress.error_offset = state.errors;
+  progress.target =
+      state.header_only ? kHeaderReadProgressSpan : kReadProgressSpan;
+  progress.previous = LowHalf(transfer.progress_counter);
+  std::ranges::fill(transfer.workspace.incoming, std::byte{0});
+  const auto file =
+      transfer.card.Open(ReadFilename(state), kOpenNoWait | kOpenRead);
+  if (!file.has_value()) {
+    state.errors = Incremented(state.errors);
+    return false;
+  }
+  state.file = *file;
+  ClearEvents(transfer.card, CardEventGroup::kSoftware);
+  const std::span<std::byte> target =
+      state.header_only ? transfer.workspace.incoming.first(kHeaderReadBytes)
+                        : std::span<std::byte>{transfer.workspace.incoming};
+  if (!transfer.card.Read(state.file, target).has_value()) {
+    transfer.card.Close(state.file);
+    state.errors = Incremented(state.errors);
+    return false;
+  }
+  state.phase = SaveReadPhase::kReading;
+  return true;
+}
+
+void RenameToTemporary(SaveWriteState& state, CardHost& card) {
+  if (card.Rename(BuildSaveFilename(state.channel, state.file_index),
+                  BuildTemporaryFilename(state.channel, state.file_index))) {
+    state.errors = 0;
+    state.rename_errors = 0;
+    state.phase = SaveWritePhase::kWrite;
+    return;
+  }
+  state.rename_errors = Incremented(state.rename_errors);
+  state.errors =
+      static_cast<std::int8_t>(state.rename_errors >> kRenameErrorShift);
+}
+
+// _saveFile's write phase; true once the write is queued.
+bool QueueWrite(SaveWriteState& state, SaveTransfer& transfer) {
+  TransferProgress& progress = transfer.progress;
+  AdvanceProgress(transfer, kProgressEnd - progress.position);
+  progress.previous = LowHalf(transfer.progress_counter);
+  progress.target = kWriteProgressSpan;
+  const auto file = transfer.card.Open(
+      BuildTemporaryFilename(state.channel, state.file_index),
+      kOpenNoWait | kOpenWrite);
+  if (!file.has_value()) {
+    state.errors = Incremented(state.errors);
+    return false;
+  }
+  state.file = *file;
+  ClearEvents(transfer.card, CardEventGroup::kSoftware);
+  if (!transfer.card.Write(state.file, transfer.workspace.outgoing)) {
+    transfer.card.Close(state.file);
+    state.errors = Incremented(state.errors);
+    return false;
+  }
+  state.phase = SaveWritePhase::kWritePending;
+  return true;
+}
+
+void AwaitWrite(SaveWriteState& state, SaveReadState& read_state,
+                SaveTransfer& transfer) {
+  const CardEvent event = PollEvents(transfer.card, CardEventGroup::kSoftware);
+  if (event == CardEvent::kNone) {
+    return;
+  }
+  transfer.card.Close(state.file);
+  if (event != CardEvent::kIoEnd) {
+    state.errors = Incremented(state.errors);
+    state.phase = SaveWritePhase::kWrite;
+    return;
+  }
+  state.phase = SaveWritePhase::kVerify;
+  // Starting the verifying read resets the bar; keep its position.
+  const std::uint16_t position = transfer.progress.position;
+  const std::uint16_t previous = transfer.progress.previous;
+  // The original shifts the sign-extended char port.
+  const auto request = static_cast<std::int32_t>(
+      (static_cast<std::uint32_t>(state.channel) << kRequestChannelShift) |
+      static_cast<std::uint32_t>(state.file_index + kTemporaryFileBit));
+  static_cast<void>(ReadSaveStep(read_state, transfer, request));
+  transfer.progress.position = position;
+  transfer.progress.previous = previous;
+}
+
+// Nothing while the read-back runs; kFailed when it failed or differs.
+std::optional<TransferStatus> VerifyWrite(SaveWriteState& state,
+                                          SaveReadState& read_state,
+                                          SaveTransfer& transfer) {
+  const TransferStatus read = ReadSaveStep(read_state, transfer, 0);
+  if (read == TransferStatus::kPending) {
+    return std::nullopt;
+  }
+  if (read == TransferStatus::kFailed ||
+      !std::ranges::equal(transfer.workspace.outgoing,
+                          transfer.workspace.incoming)) {
+    return TransferStatus::kFailed;
+  }
+  state.phase = SaveWritePhase::kCommit;
+  return std::nullopt;
+}
+
+bool CommitWrite(SaveWriteState& state, CardHost& card) {
+  if (card.Rename(BuildTemporaryFilename(state.channel, state.file_index),
+                  BuildSaveFilename(state.channel, state.file_index))) {
+    return true;
+  }
+  state.rename_errors = Incremented(state.rename_errors);
+  state.errors =
+      static_cast<std::int8_t>(state.rename_errors >> kRenameErrorShift);
+  return false;
+}
+
+enum class PackageKind : std::uint8_t { kGame, kClear };
+
+std::expected<void, SaveImageError> CheckPackageInputs(
+    SaveStateHost& state, std::int32_t target_file) {
+  if (state.FileIconPalette(target_file).size() != kIconPaletteBytes ||
+      state.FileIconBitmap(target_file).size() != kIconBitmapBytes) {
+    return std::unexpected(SaveImageError::kFileIconOutOfRange);
+  }
+  return CheckHostSections(state);
+}
+
+std::int32_t PlayTimeField(std::uint32_t play_time, unsigned shift) {
+  return static_cast<std::int8_t>((play_time >> shift) & kByteMask);
+}
+
+void AddToTitleTail(SaveImage image, std::size_t glyph, std::uint32_t amount) {
+  const std::size_t offset = kCardTitleTailOffset + glyph * kHalfBytes;
+  StoreHalf(image, offset, LoadHalf(image, offset) + amount);
+}
+
+// Adds `value`'s two decimal digits to the two glyphs from `tens`.
+void AddTitleDigits(SaveImage image, std::size_t tens, std::int32_t value) {
+  AddToTitleTail(image, tens,
+                 static_cast<std::uint32_t>(value / kDecimalBase)
+                     << kGlyphDigitShift);
+  AddToTitleTail(image, tens + 1,
+                 static_cast<std::uint32_t>(value % kDecimalBase)
+                     << kGlyphDigitShift);
+}
+
+// The magic, Shift-JIS title with the file number and play time, and icon.
+void WriteCardHeader(SaveStateHost& state, SaveImage outgoing,
+                     std::int32_t target_file) {
+  std::ranges::fill(outgoing, std::byte{0});
+  CopyBytes(kCardMagic, outgoing.subspan(kCardMagicOffset, kCardMagic.size()));
+  for (std::size_t glyph = 0; glyph < kCardTitleTemplate.size(); ++glyph) {
+    StoreHalf(outgoing, kCardTitleOffset + glyph * kHalfBytes,
+              kCardTitleTemplate.at(glyph));
+  }
+  AddToTitleTail(outgoing, kTailFileDigit,
+                 static_cast<std::uint32_t>(target_file) << kGlyphDigitShift);
+  const std::uint32_t play_time = state.PlayTime();
+  if (PlayTimeField(play_time, kPlayTimeHoursShift) == kHundredHours) {
+    StoreHalf(outgoing, kCardTitleTailOffset + kTailHundredHours * kHalfBytes,
+              kHundredHoursGlyph);
+  } else {
+    AddTitleDigits(outgoing, kTailHoursTens,
+                   PlayTimeField(play_time, kPlayTimeHoursShift));
+    AddTitleDigits(outgoing, kTailMinutesTens,
+                   PlayTimeField(play_time, kPlayTimeMinutesShift));
+    AddTitleDigits(outgoing, kTailSecondsTens,
+                   PlayTimeField(play_time, kPlayTimeSecondsShift));
+  }
+  StoreHalf(outgoing, kCardTitleTailOffset + kTailTerminator * kHalfBytes, 0);
+  CopyBytes(state.FileIconPalette(target_file),
+            outgoing.subspan(kIconPaletteOffset, kIconPaletteBytes));
+  CopyBytes(state.FileIconBitmap(target_file),
+            outgoing.subspan(kIconBitmapOffset, kIconBitmapBytes));
+}
+
+// A first save draws its slot identity; it starts a fresh container unless
+// the game keeps a container save's data.
+void AssignSlotIdentity(SaveStateHost& state, SaveImage incoming,
+                        PackageKind kind) {
+  const std::span<std::byte> settings = state.Section(SaveSection::kSettings);
+  if (LoadWord(settings, kSettingsSlotStateOffset) != kSlotUnavailable) {
+    return;
+  }
+  std::uint32_t slot_state = state.NextKeystreamBits(kRandomWordBits);
+  if (slot_state < kFirstInUseSlotState) {
+    slot_state = kFallbackSlotState;
+  }
+  StoreWord(settings, kSettingsSlotStateOffset, slot_state);
+  if (kind == PackageKind::kClear || !state.KeepsContainerData()) {
+    std::ranges::fill(incoming.subspan<kContainerOffset, kContainerBytes>(),
+                      std::byte{0});
+  }
+}
+
+std::uint32_t NextGeneration(ConstSummaryTable summaries) {
+  std::uint32_t generation = 0;
+  for (std::size_t slot = 0; slot < kSlotCount; ++slot) {
+    const auto record = SlotRecord(summaries, slot);
+    if (SlotStateOf(record) >= kFirstInUseSlotState) {
+      generation =
+          std::max(generation, LoadWord(record, kSummaryGenerationOffset));
+    }
+  }
+  return generation + 1U;
+}
+
+void CountSave(std::span<std::byte> settings, PackageKind kind) {
+  const std::uint16_t cumulative =
+      LoadHalf(settings, kSettingsCumulativeSavesOffset);
+  if (cumulative < kMaxSaveCount) {
+    StoreHalf(settings, kSettingsCumulativeSavesOffset, cumulative + 1U);
+  }
+  const std::uint16_t current =
+      LoadHalf(settings, kSettingsCurrentGameSavesOffset);
+  if (kind == PackageKind::kClear) {
+    StoreHalf(settings, kSettingsCurrentGameSavesOffset, 0);
+  } else if (current < kMaxSaveCount) {
+    StoreHalf(settings, kSettingsCurrentGameSavesOffset, current + 1U);
+  }
+}
+
+// The cipher header: key, slot state, generation and signature.
+void WriteCipherHeader(SaveStateHost& state, SaveImage outgoing,
+                       ConstSummaryTable summaries) {
+  const std::span<std::byte> settings = state.Section(SaveSection::kSettings);
+  const auto record = outgoing.subspan<kSummaryOffset, kRecordBytes>();
+  const std::uint32_t key = state.NextKeystreamBits(kRandomWordBits);
+  StoreWord(settings, kSettingsKeyOffset, key);
+  StoreWord(record, kSummaryKeyOffset, key);
+  StoreWord(record, kSummarySlotStateOffset,
+            LoadWord(settings, kSettingsSlotStateOffset));
+  const std::uint32_t generation = NextGeneration(summaries);
+  StoreWord(settings, kSettingsGenerationOffset, generation);
+  StoreWord(record, kSummaryGenerationOffset, generation);
+  StoreWord(record, kSummarySignatureOffset, kSaveSignature);
+}
+
+void WriteStatistics(SaveStateHost& state, SaveImage outgoing,
+                     PackageKind kind) {
+  const std::span<std::byte> settings = state.Section(SaveSection::kSettings);
+  const std::span<std::byte> snapshot =
+      state.Section(SaveSection::kAshleySnapshot);
+  const auto stats =
+      outgoing.subspan<kSummaryOffset + kSummaryStatsOffset, kStatsBytes>();
+  const bool clear = kind == PackageKind::kClear;
+  StoreWord(stats, kStatsGameTimeOffset, state.PlayTime());
+  StoreHalf(stats, kStatsHpOffset, LoadHalf(snapshot, kSnapshotHpOffset));
+  StoreHalf(stats, kStatsMaxHpOffset, LoadHalf(snapshot, kSnapshotMaxHpOffset));
+  StoreHalf(stats, kStatsCumulativeSavesOffset,
+            LoadHalf(settings, kSettingsCumulativeSavesOffset));
+  StoreHalf(stats, kStatsCurrentGameSavesOffset,
+            LoadHalf(settings, kSettingsCurrentGameSavesOffset));
+  stats[kStatsSaveLocationOffset] =
+      std::byte{clear ? kClearSaveLocation : state.SaveLocation()};
+  stats[kStatsMapCompletionOffset] =
+      std::byte{clear ? std::uint8_t{0} : state.MapCompletion()};
+  stats[kStatsClearCountOffset] =
+      state.Section(SaveSection::kStateFlags)[kStateFlagsClearCountOffset];
+  StoreHalf(stats, kStatsMpOffset, LoadHalf(snapshot, kSnapshotMpOffset));
+  StoreHalf(stats, kStatsMaxMpOffset, LoadHalf(snapshot, kSnapshotMaxMpOffset));
+}
+
+// A clear save starts the next game without misc items.
+void ClearMiscItems(SaveStateHost& state, SaveImage incoming) {
+  std::ranges::fill(state.Section(SaveSection::kInventory)
+                        .subspan(kInventoryMiscOffset, kInventoryMiscBytes),
+                    std::byte{0});
+  std::ranges::fill(
+      state.Section(SaveSection::kInventoryIndices)
+          .subspan(kInventoryIndicesMiscOffset, kInventoryIndicesMiscBytes),
+      std::byte{0});
+  std::ranges::fill(
+      incoming.subspan<kContainerMiscOffset, kClearedContainerMiscBytes>(),
+      std::byte{0});
+}
+
+void CopySectionsOut(SaveStateHost& state, SaveWorkspace workspace) {
+  for (std::size_t index = 0; index < kSaveSectionCount; ++index) {
+    const SaveSection section = SectionAt(index);
+    CopyBytes(state.Section(section),
+              ImageSection(workspace.outgoing, section));
+  }
+  CopyBytes(workspace.incoming.subspan<kContainerOffset, kContainerBytes>(),
+            workspace.outgoing.subspan<kContainerOffset, kContainerBytes>());
+}
+
+void WriteChecksums(SaveImage image) {
+  for (std::size_t block = 0; block < kImageBlockCount; ++block) {
+    if (block != kChecksumBlock) {
+      image[kChecksumOffset + block] = std::byte{BlockChecksum(image, block)};
+    }
+  }
+  image[kChecksumOffset + kChecksumBlock] =
+      std::byte{BlockChecksum(image, kChecksumBlock)};
+}
+
+void EncodeImage(SaveStateHost& state, SaveImage image) {
+  for (std::byte& value : image.subspan<kCipherStart>()) {
+    value = static_cast<std::byte>((std::to_integer<std::uint32_t>(value) +
+                                    state.NextKeystreamBits(kRandomByteBits)) &
+                                   kByteMask);
+  }
+}
+
+// _packageGameSaveData (MENU7.PRG and TITLE.PRG): both overlays build the
+// image the same way around their own prologue and statistics.
+std::expected<void, SaveImageError> PackageSave(SaveStateHost& state,
+                                                SaveWorkspace workspace,
+                                                ConstSummaryTable summaries,
+                                                std::int32_t target_file,
+                                                PackageKind kind) {
+  if (auto inputs = CheckPackageInputs(state, target_file); !inputs) {
+    return inputs;
+  }
+  if (kind == PackageKind::kGame) {
+    state.CaptureSnapshot();
+  } else {
+    const std::span<std::byte> settings = state.Section(SaveSection::kSettings);
+    state.SetPlayTime(0);
+    StoreHalf(settings, kSettingsMenuFlagsOffset,
+              LoadHalf(settings, kSettingsMenuFlagsOffset) & kClearedMenuFlags);
+    const std::uint32_t flags = LoadWord(settings, kSettingsFlagsOffset);
+    state.Section(SaveSection::kStateFlags)[kStateFlagsPuzzleModeOffset] =
+        std::byte{static_cast<std::uint8_t>(
+            ~(flags >> kPuzzleModeSettingShift) & 1U)};
+  }
+  WriteCardHeader(state, workspace.outgoing, target_file);
+  AssignSlotIdentity(state, workspace.incoming, kind);
+  WriteCipherHeader(state, workspace.outgoing, summaries);
+  CountSave(state.Section(SaveSection::kSettings), kind);
+  if (kind == PackageKind::kClear) {
+    ClearMiscItems(state, workspace.incoming);
+  }
+  WriteStatistics(state, workspace.outgoing, kind);
+  CopySectionsOut(state, workspace);
+  WriteChecksums(workspace.outgoing);
+  EncodeImage(state, workspace.outgoing);
+  return {};
+}
+
+IntroSnapshotResult ApplyIntroSnapshot(IntroSnapshotHost& intro,
+                                       SaveStateHost& state) {
+  if (!intro.LoadQueued()) {
+    return IntroSnapshotResult::kRejected;
+  }
+  if (!intro.LoadComplete()) {
+    return IntroSnapshotResult::kPending;
+  }
+  const SaveImage image = intro.TakeImage();
+  const std::uint32_t play_time = state.PlayTime();
+  const auto applied = ValidateAndApplyLoadedSave(state, image, true);
+  state.SetPlayTime(play_time);
+  intro.FreeImage();
+  return applied.has_value() ? IntroSnapshotResult::kApplied
+                             : IntroSnapshotResult::kRejected;
+}
+
+constexpr std::array kPolledEvents = {
+    CardEvent::kIoEnd,
+    CardEvent::kError,
+    CardEvent::kTimeout,
+    CardEvent::kUnformatted,
+};
+
+}  // namespace
 
 // decomp: MENU7.PRG _testMemcardEvents (src/MENU/MENU7.PRG/260.c:172)
-enum Save_CardEventSignal Save_MemoryCard_PollEvents(enum Save_CardEventGroup type)
-{
-    int i;
-
-    for (i = 0; i < 4; ++i) {
-        if (TestEvent(Title_cardEventDescriptors[i + type]) == 1) {
-            return (enum Save_CardEventSignal)(i);
-        }
+CardEvent PollEvents(CardHost& card, CardEventGroup group) {
+  for (const CardEvent event : kPolledEvents) {
+    if (card.TestEvent(group, event)) {
+      return event;
     }
-    return (enum Save_CardEventSignal)(i);
+  }
+  return CardEvent::kNone;
 }
 
-// decomp: MENU7.PRG _resetMemcardEvents (src/MENU/MENU7.PRG/260.c:187)
-void Save_MemoryCard_ClearEvents(int type)
-{
-    int i;
-
-    for (i = 0; i < 4; ++i) {
-    }
+// decomp: MENU7.PRG _resetMemcardEvents (src/MENU/MENU7.PRG/260.c:187):
+// testing an event clears it.
+void ClearEvents(CardHost& card, CardEventGroup group) {
+  for (const CardEvent event : kPolledEvents) {
+    static_cast<void>(card.TestEvent(group, event));
+  }
 }
 
-// decomp: MENU7.PRG _memcardMakeFilename (src/MENU/MENU7.PRG/260.c:238)
-char* Save_MemoryCard_BuildSaveFilename(int port, int fileNo)
-{
-    static char Save_MemoryCard_legacySaveFilename[32];
-
-    memset(Save_MemoryCard_legacySaveFilename, 0, ' ');
-    strcpy(Save_MemoryCard_legacySaveFilename, Save_MemoryCard_kOriginalFilenameTemplate);
-    Save_MemoryCard_legacySaveFilename[2] = port == 0 ? '0' : '1';
-    Save_MemoryCard_legacySaveFilename[20] = fileNo + '0';
-    return Save_MemoryCard_legacySaveFilename;
+// decomp: MENU7.PRG _memcardMakeFilename (src/MENU/MENU7.PRG/260.c:238),
+// TITLE.PRG _memcardMakeFilename (src/TITLE/TITLE.PRG/22C.c:110)
+CardFilename BuildSaveFilename(std::int32_t channel, std::int32_t file_number) {
+  return FilenameFor(
+      channel,
+      NarrowChar(static_cast<std::uint32_t>(file_number) + kDigitZero));
 }
 
-// decomp: MENU7.PRG _memcardMakeTempFilename (src/MENU/MENU7.PRG/260.c:254)
-char* Save_MemoryCard_BuildTemporaryFilename(int port, int fileNo)
-{
-    static char Save_MemoryCard_legacyStagingFilename[32];
-
-    memset(Save_MemoryCard_legacyStagingFilename, 0, ' ');
-    strcpy(Save_MemoryCard_legacyStagingFilename, Save_MemoryCard_kOriginalFilenameTemplate);
-    Save_MemoryCard_legacyStagingFilename[2] = port == 0 ? '0' : '1';
-    Save_MemoryCard_legacyStagingFilename[20] = fileNo + 'A' - 1;
-    return Save_MemoryCard_legacyStagingFilename;
+// decomp: MENU7.PRG _memcardMakeTempFilename (src/MENU/MENU7.PRG/260.c:254),
+// TITLE.PRG _memcardMakeTempFilename (src/TITLE/TITLE.PRG/22C.c:121)
+CardFilename BuildTemporaryFilename(std::int32_t channel,
+                                    std::int32_t file_number) {
+  return FilenameFor(
+      channel,
+      NarrowChar(static_cast<std::uint32_t>(file_number) + kTemporaryBase));
 }
 
 // decomp: MENU7.PRG _getNewestSaveFile (src/MENU/MENU7.PRG/260.c:278)
-u_int Save_MemoryCard_NewestSaveSlot(void)
-{
-    u_int i;
-    u_int maxCounter = 0;
-    u_int fileIndex = 0;
-
-    for (i = 0; i < 5; ++i) {
-        if (Title_saveFileSummaries[i].summary.base.slotState >= 3) {
-            if (maxCounter < Title_saveFileSummaries[i].summary.base.generation) {
-                maxCounter = Title_saveFileSummaries[i].summary.base.generation;
-                fileIndex = i;
-            }
-        }
+std::size_t NewestSaveSlot(ConstSummaryTable summaries) {
+  std::uint32_t newest = 0;
+  std::size_t newest_slot = 0;
+  for (std::size_t slot = 0; slot < kSlotCount; ++slot) {
+    const auto record = SlotRecord(summaries, slot);
+    const std::uint32_t generation = LoadWord(record, kSummaryGenerationOffset);
+    if (SlotStateOf(record) >= kFirstInUseSlotState && newest < generation) {
+      newest = generation;
+      newest_slot = slot;
     }
-    return fileIndex;
+  }
+  return newest_slot;
 }
 
-// decomp: MENU7.PRG _findCurrentSaveOnActiveMemcard (src/MENU/MENU7.PRG/260.c:300)
-int Save_MemoryCard_FindMatchingSaveSlot(void)
-{
-    int i;
-    for (i = 0; i < 5; ++i) {
-        if ((Title_saveFileSummaries[i].summary.base.slotState >= Save_CardFileSlotStatus_InUse)
-            && (Title_saveFileSummaries[i].summary.base.slotState == Input_settings.slotState)
-            && (Title_saveFileSummaries[i].key == Input_settings.key)
-            && (Title_saveFileSummaries[i].summary.stats.cumulativeSaveCount
-                == Input_settings.cumulativeSaveCount)
-            && (Title_saveFileSummaries[i].summary.base.generation
-                == Input_settings.saveFileGeneration)) {
-            return i + 1;
-        }
+// decomp: MENU7.PRG _findCurrentSaveOnActiveMemcard
+// (src/MENU/MENU7.PRG/260.c:300)
+std::optional<std::size_t> FindMatchingSaveSlot(
+    ConstSummaryTable summaries,
+    std::span<const std::byte, kSettingsBytes> settings) {
+  const std::uint32_t slot_state = LoadWord(settings, kSettingsSlotStateOffset);
+  for (std::size_t slot = 0; slot < kSlotCount; ++slot) {
+    const auto record = SlotRecord(summaries, slot);
+    if (SlotStateOf(record) >= kFirstInUseSlotState &&
+        SlotStateOf(record) == slot_state &&
+        LoadWord(record, kSummaryKeyOffset) ==
+            LoadWord(settings, kSettingsKeyOffset) &&
+        LoadHalf(record, kSummaryStatsOffset + kStatsCumulativeSavesOffset) ==
+            LoadHalf(settings, kSettingsCumulativeSavesOffset) &&
+        LoadWord(record, kSummaryGenerationOffset) ==
+            LoadWord(settings, kSettingsGenerationOffset)) {
+      return slot;
     }
-    return 0;
+  }
+  return std::nullopt;
 }
 
-// decomp: MENU7.PRG _memcardFileNumberFromFilename (src/MENU/MENU7.PRG/260.c:323)
-int Save_MemoryCard_ParseSaveFileNumber(char* filename)
-{
-    int i;
-    char const* gameCode = &Save_MemoryCard_kOriginalFilenameTemplate[5];
-
-    for (i = 0; i < 15; ++i) {
-        if (gameCode[i] != filename[i]) {
-            return 0;
-        }
-    }
-
-    i = filename[15] - 'A';
-
-    if (i < 5u) {
-        return -(filename[15] - 'A' + 1);
-    }
-
-    i = filename[15] - '1';
-
-    if (i < 5u) {
-        return filename[15] - '0';
-    }
-
-    return 0;
+// decomp: MENU7.PRG _memcardFileNumberFromFilename
+// (src/MENU/MENU7.PRG/260.c:323), TITLE.PRG _memcardFileNumberFromFilename
+// (src/TITLE/TITLE.PRG/22C.c:226)
+std::optional<SaveFileNumber> ParseSaveFileNumber(std::string_view name) {
+  if (name.size() <= kNameNumberIndex || !name.starts_with(kGameCode)) {
+    return std::nullopt;
+  }
+  const char suffix = name[kNameNumberIndex];
+  if (suffix >= kFirstTemporarySuffix && suffix <= kLastTemporarySuffix) {
+    return SaveFileNumber{.number = suffix - kFirstTemporarySuffix + 1,
+                          .temporary = true};
+  }
+  if (suffix >= kFirstSaveSuffix && suffix <= kLastSaveSuffix) {
+    return SaveFileNumber{.number = suffix - kFirstSaveSuffix + 1,
+                          .temporary = false};
+  }
+  return std::nullopt;
 }
 
-// decomp: MENU7.PRG _verifySaveChecksums (src/MENU/MENU7.PRG/260.c:355)
-int Save_MemoryCard_HasChecksumError(Save_GameSaveImage data[], int sectorCount)
-{
-    int checksum;
-    int i;
-    int j;
-    char* p = (char*)data;
-
-    for (i = 0; i < sectorCount; ++i) {
-        checksum = 0;
-        if (i != 1) {
-            for (j = 0; j < 256; ++j) {
-                checksum ^= p[j];
-            }
-
-            if (data->protectedHeader.blockChecksums[i] != checksum) {
-                return 1;
-            }
-        }
-        p += 256;
+// decomp: MENU7.PRG _verifySaveChecksums (src/MENU/MENU7.PRG/260.c:355),
+// TITLE.PRG _verifySaveChecksums (src/TITLE/TITLE.PRG/22C.c:284). The
+// originals read the bytes unsigned (lbu).
+std::expected<bool, SaveImageError> HasChecksumError(
+    std::span<const std::byte> image, std::size_t block_count) {
+  if (block_count > kImageBlockCount ||
+      image.size() <
+          std::max(block_count, kMinimumChecksumBlocks) * kBlockBytes) {
+    return std::unexpected(SaveImageError::kBlockCountOutOfRange);
+  }
+  for (std::size_t block = 0; block < block_count; ++block) {
+    if (block != kChecksumBlock &&
+        BlockChecksum(image, block) !=
+            std::to_integer<std::uint8_t>(image[kChecksumOffset + block])) {
+      return true;
     }
-
-    p = data->reserved100;
-    checksum = 0;
-    for (j = 0; j < 256; ++j) {
-        checksum ^= p[j];
-    }
-
-    return checksum != 0;
+  }
+  return BlockChecksum(image, kChecksumBlock) != 0;
 }
 
-// decomp: MENU7.PRG _decode (src/MENU/MENU7.PRG/260.c:388)
-void Save_MemoryCard_DecodeSaveBytes(u_int key, void* buf, uintptr_t count)
-{
-    for (; count != 0; --count) {
-        key *= 0x19660D;
-        *((char*)buf) -= key >> 24;
-        buf = (char*)buf + 1;
-    }
+// decomp: MENU7.PRG _decode (src/MENU/MENU7.PRG/260.c:388), TITLE.PRG _decode
+// (src/TITLE/TITLE.PRG/22C.c:314)
+void DecodeSaveBytes(std::uint32_t key, std::span<std::byte> bytes) {
+  for (std::byte& value : bytes) {
+    key *= kCipherMultiplier;
+    value = static_cast<std::byte>(
+        (std::to_integer<std::uint32_t>(value) - (key >> kCipherByteShift)) &
+        kByteMask);
+  }
 }
 
 // decomp: MENU7.PRG _readSaveFileInfo (src/MENU/MENU7.PRG/260.c:404)
-int Save_MemoryCard_ReadSaveSummary(int id)
-{
-    Save_CardFileInfoRecord saveInfo[4];
-    int i;
-    int port = id >> 12;
-
-    id &= 7;
-
-    for (i = 0; i < 3; ++i) {
-        int bytesRead;
-        int file = LegacyApi_open(Save_MemoryCard_BuildSaveFilename(port, id), O_RDONLY);
-
-        if (file == -1) {
-            continue;
-        }
-        bytesRead = LegacyApi_read(file, saveInfo, sizeof saveInfo);
-        LegacyApi_close(file);
-        if (bytesRead != sizeof saveInfo) {
-            continue;
-        }
-        Save_MemoryCard_DecodeSaveBytes(saveInfo[3].key, &saveInfo[3].summary.base.slotState,
-            sizeof(Save_CardFileInfoRecord) - sizeof(int));
-        if (Save_MemoryCard_HasChecksumError((Save_GameSaveImage*)saveInfo, 2) == 0) {
-            VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[id - 1], &saveInfo[3], sizeof saveInfo[3]);
-            return 0;
-        }
+bool ReadSaveSummary(CardHost& card, SummaryTable summaries,
+                     std::int32_t channel, std::int32_t file_number) {
+  if (file_number < 1 || file_number > static_cast<std::int32_t>(kSlotCount)) {
+    return false;
+  }
+  const auto slot =
+      SlotRecord(summaries, static_cast<std::size_t>(file_number - 1));
+  std::array<std::byte, kHeaderBytes> header{};
+  const auto record = std::span{header}.subspan<kSummaryOffset, kRecordBytes>();
+  for (int attempt = 0; attempt < kSummaryReadAttempts; ++attempt) {
+    const auto file =
+        card.Open(BuildSaveFilename(channel, file_number), kOpenRead);
+    if (!file.has_value()) {
+      continue;
     }
-
-    memset(&Title_saveFileSummaries[id - 1], 0, sizeof Title_saveFileSummaries[id - 1]);
-    return 1;
+    const auto bytes_read = card.Read(*file, header);
+    card.Close(*file);
+    if (bytes_read != static_cast<std::int32_t>(kHeaderBytes)) {
+      continue;
+    }
+    DecodeSaveBytes(LoadWord(record, kSummaryKeyOffset),
+                    record.subspan<kSummarySlotStateOffset>());
+    const auto checksum_error = HasChecksumError(header, kHeaderBlockCount);
+    if (checksum_error.has_value() && !*checksum_error) {
+      CopyBytes(record, slot);
+      return true;
+    }
+  }
+  std::ranges::fill(slot, std::byte{0});
+  return false;
 }
 
 // decomp: MENU7.PRG _memcardSaveIdExists (src/MENU/MENU7.PRG/260.c:439)
-int Save_MemoryCard_HasSaveSuffix(int id)
-{
-    int i;
-
-    for (i = 0; i < 15; ++i) {
-        char* filename = Title_cardDirectoryEntries[i]->name;
-        if ((filename != 0) && (Save_MemoryCard_ParseSaveFileNumber(filename) != 0)
-            && (filename[15] == id)) {
-            return 1;
+bool HasSaveSuffix(const CardDirectory& directory, char suffix) {
+  return std::ranges::any_of(
+      directory, [suffix](const std::optional<CardDirectoryEntry>& entry) {
+        if (!entry.has_value()) {
+          return false;
         }
-    }
-    return 0;
+        const std::string_view name = NameOf(*entry);
+        return ParseSaveFileNumber(name).has_value() &&
+               name[kNameNumberIndex] == suffix;
+      });
 }
 
-// decomp: MENU7.PRG _deleteRedundantTempFiles (src/MENU/MENU7.PRG/260.c:458)
-int Save_MemoryCard_DeleteRedundantTemporaryFiles(int port)
-{
-    int i;
-    int ret = 0;
-
-    for (i = 0; i < 5; ++i) {
-        if ((Save_MemoryCard_HasSaveSuffix(i + '1') != 0)
-            && (Save_MemoryCard_HasSaveSuffix(i + 'A') != 0)) {
-            if (LegacyApi_erase(Save_MemoryCard_BuildTemporaryFilename(port, i + 1)) == 0) {
-                return 0x80;
-            }
-            ret |= 1 << i;
-        }
+// decomp: MENU7.PRG _deleteRedundantTempFiles (src/MENU/MENU7.PRG/260.c:458),
+// TITLE.PRG _deleteRedundantTempFiles (src/TITLE/TITLE.PRG/22C.c:368)
+std::expected<std::uint8_t, CardError> DeleteRedundantTemporaryFiles(
+    CardHost& card, const CardDirectory& directory, std::int32_t channel) {
+  std::uint8_t erased = 0;
+  for (std::int32_t slot = 0; slot < static_cast<std::int32_t>(kSlotCount);
+       ++slot) {
+    const auto offset = static_cast<std::uint32_t>(slot);
+    if (HasSaveSuffix(directory, NarrowChar(kSaveSuffixBase + offset)) &&
+        HasSaveSuffix(directory, NarrowChar(kTemporarySuffixBase + offset))) {
+      if (!card.Erase(BuildTemporaryFilename(channel, slot + 1))) {
+        return std::unexpected(CardError::kEraseFailed);
+      }
+      erased = static_cast<std::uint8_t>(erased | (1U << offset));
     }
-    return ret;
+  }
+  return erased;
 }
 
 // decomp: MENU7.PRG _initSaveFileInfo (src/MENU/MENU7.PRG/260.c:480)
-int Save_MemoryCard_ScanSaveDirectory(int port)
-{
-    intptr_t fileNo;
-    int i;
-    int tempFilesDeleted;
-    int slotsAvailable = 15;
-
-    for (i = 14; i >= 0; --i) {
-        Title_cardDirectoryEntries[i] = 0;
+std::expected<void, CardError> ScanSaveDirectory(CardHost& card,
+                                                 CardDirectory& directory,
+                                                 SummaryTable summaries,
+                                                 std::int32_t port) {
+  directory.fill(std::nullopt);
+  directory[0] =
+      card.FirstFile(PathOf(port == 1 ? kPortOnePattern : kPortTwoPattern));
+  for (std::size_t index = 1;
+       index < kDirectoryCapacity && directory.at(index - 1).has_value();
+       ++index) {
+    directory.at(index) = card.NextFile(index);
+  }
+  std::ranges::fill(summaries, std::byte{0});
+  const std::int32_t channel = ChannelOf(port);
+  const auto erased = DeleteRedundantTemporaryFiles(card, directory, channel);
+  if (!erased.has_value()) {
+    return std::unexpected(erased.error());
+  }
+  auto available = static_cast<std::int32_t>(kDirectoryCapacity);
+  for (const auto& entry : directory) {
+    if (!entry.has_value()) {
+      continue;
     }
-
-    fileNo = (intptr_t)LegacyApi_firstfile((char *)((port == 1) ? ("bu00:*") : ("bu10:*")), Title_cardDirectoryEntryBuffer);
-    Title_cardDirectoryEntries[0] = (struct DIRENTRY *)((void*)fileNo);
-
-    for (i = 1; (i < 15) && fileNo; ++i) {
-        fileNo = (intptr_t)LegacyApi_nextfile(Title_cardDirectoryEntryBuffer + i);
-        Title_cardDirectoryEntries[i] = (struct DIRENTRY *)((void*)fileNo);
+    const std::int32_t blocks =
+        WrappingAdd(entry->size, kCardBlockRoundUp) >> kCardBlockShift;
+    const auto number = ParseSaveFileNumber(NameOf(*entry));
+    if (number.has_value() && number->temporary) {
+      const auto slot = static_cast<std::size_t>(number->number - 1);
+      if (((*erased >> slot) & 1U) != 0) {
+        continue;
+      }
+      std::ranges::fill(SlotRecord(summaries, slot), std::byte{0});
+      StoreWord(SlotRecord(summaries, slot), kSummarySlotStateOffset,
+                kSlotTemporary);
+    } else if (number.has_value() &&
+               !ReadSaveSummary(card, summaries, channel, number->number)) {
+      available += blocks;
     }
-
-    memset(Title_saveFileSummaries, 0, sizeof *Title_saveFileSummaries * 5);
-    tempFilesDeleted = Save_MemoryCard_DeleteRedundantTemporaryFiles((port - 1) * 16);
-    if (tempFilesDeleted & 0x80) {
-        return 1;
+    available -= blocks;
+  }
+  // Each three free card blocks make one unavailable slot available.
+  for (; available >= kSaveFileCardBlocks; available -= kSaveFileCardBlocks) {
+    const auto slot = FirstUnavailableSlot(summaries);
+    if (!slot.has_value()) {
+      break;
     }
-    for (i = 0; i < 15; ++i) {
-        struct DIRENTRY* file = Title_cardDirectoryEntries[i];
-
-        if (file == 0) {
-            continue;
-        }
-        fileNo = Save_MemoryCard_ParseSaveFileNumber(file->name);
-        if (fileNo != 0) {
-            if (fileNo < 0) {
-                fileNo = -fileNo;
-                if ((tempFilesDeleted >> (fileNo - 1)) & 1) {
-                    continue;
-                }
-                memset(&Title_saveFileSummaries[fileNo - 1], 0, sizeof Title_saveFileSummaries[fileNo - 1]);
-                Title_saveFileSummaries[fileNo - 1].summary.base.slotState = Save_CardFileSlotStatus_Temporary;
-            } else if (Save_MemoryCard_ReadSaveSummary(((port - 1) << 16) | fileNo) != 0) {
-                slotsAvailable += (file->size + 0x1FFF) >> 13;
-            }
-        }
-        slotsAvailable -= (file->size + 0x1FFF) >> 13;
-    }
-
-    for (; slotsAvailable >= 3; slotsAvailable -= 3) {
-        for (i = 0; i < 5; ++i) {
-            if (Title_saveFileSummaries[i].summary.base.slotState == Save_CardFileSlotStatus_Unavailable) {
-                Title_saveFileSummaries[i].summary.base.slotState = Save_CardFileSlotStatus_Available;
-                break;
-            }
-        }
-    }
-
-    return 0;
+    StoreWord(SlotRecord(summaries, *slot), kSummarySlotStateOffset,
+              kSlotAvailable);
+  }
+  return {};
 }
 
-// decomp: MENU7.PRG _createSaveFile (src/MENU/MENU7.PRG/260.c:543)
-int Save_MemoryCard_CreateSaveFile(int port, int id)
-{
-    long file;
-    char* fileName = Save_MemoryCard_BuildSaveFilename((port - 1) * 16, id);
-
-    LegacyApi_erase(fileName);
-    file = LegacyApi_open(fileName, O_CREAT | (3 << 16));
-    if (file != -1) {
-        LegacyApi_close(file);
-        return 0;
-    }
-    return -1;
+// decomp: MENU7.PRG _createSaveFile (src/MENU/MENU7.PRG/260.c:543), TITLE.PRG
+// _createSaveFile (src/TITLE/TITLE.PRG/22C.c:443)
+std::expected<void, CardError> CreateSaveFile(CardHost& card, std::int32_t port,
+                                              std::int32_t file_number) {
+  const CardFilename name = BuildSaveFilename(ChannelOf(port), file_number);
+  static_cast<void>(card.Erase(name));
+  const auto file = card.Open(
+      name, kOpenCreate | (static_cast<std::uint32_t>(kSaveFileCardBlocks)
+                           << kOpenBlockCountShift));
+  if (!file.has_value()) {
+    return std::unexpected(CardError::kCreateFailed);
+  }
+  card.Close(*file);
+  return {};
 }
 
 // decomp: MENU7.PRG _memcardEventHandler (src/MENU/MENU7.PRG/260.c:563)
-enum Save_CardReadinessResult Save_MemoryCard_AdvanceCardReadiness(int initPort)
-{
-    enum Save_CardReadinessState {
-        Save_CardReadinessState_Init = 0,
-        Save_CardReadinessState_Ready = 1,
-        Save_CardReadinessState_Unformatted = 2,
-        Save_CardReadinessState_Confirmed = 3,
-        Save_CardReadinessState_LoadReady = 4,
-        Save_CardReadinessState_Loaded = 5,
-    };
-
-    static char Title_cardPollPhase;
-    static char Title_cardPollPort;
-    static char Title_cardInitializationPollCount;
-    static char Title_cardEventPollTimeout;
-    static char Title_cardPollEventType;
-
-    int event;
-
-    if (initPort != 0) {
-        Title_cardPollPort = (initPort - 1) * 16;
-        Title_cardPollPhase = Save_CardReadinessState_Init;
-        Title_cardInitializationPollCount = 0;
-        return Save_CardReadinessResult_Pending;
-    }
-    switch (Title_cardPollPhase) {
-    case Save_CardReadinessState_Init:
-        if (++Title_cardInitializationPollCount >= 4) {
-            return Save_CardReadinessResult_Timeout;
-        }
-        Save_MemoryCard_ClearEvents(Save_CardEventGroup_Software);
-        if (_card_info(Title_cardPollPort) == 0) {
-            break;
-        }
-        Title_cardPollPhase = Save_CardReadinessState_Ready;
-        Title_cardEventPollTimeout = 0;
-        Title_cardPollEventType = Save_CardEventGroup_Software;
-        // fallthrough
-    case Save_CardReadinessState_Ready:
-        switch (Save_MemoryCard_PollEvents(Save_CardEventGroup_Software)) {
-        case Save_CardEventSignal_IoEnd:
-            Title_cardPollPhase = Save_CardReadinessState_LoadReady;
-            break;
-        case Save_CardEventSignal_Error:
-        case Save_CardEventSignal_Timeout:
-            Title_cardPollPhase = Save_CardReadinessState_Init;
-            break;
-        case Save_CardEventSignal_Unformatted:
-            Title_cardPollPhase = Save_CardReadinessState_Unformatted;
-            break;
-        case Save_CardEventSignal_None:
-            if (Title_cardEventPollTimeout++ > 64) {
-                Title_cardPollPhase = Save_CardReadinessState_Init;
-            }
-            break;
-        }
-        break;
-    case Save_CardReadinessState_Unformatted:
-        Save_MemoryCard_ClearEvents(Save_CardEventGroup_Hardware);
-        if (_card_clear(Title_cardPollPort) == 0) {
-            break;
-        }
-        Title_cardPollPhase = Save_CardReadinessState_Confirmed;
-        Title_cardEventPollTimeout = 0;
-        Title_cardPollEventType = Save_CardEventGroup_Hardware;
-        // fallthrough
-    case Save_CardReadinessState_Confirmed:
-        do {
-            event = Save_MemoryCard_PollEvents(Save_CardEventGroup_Hardware);
-        } while (event == Save_CardEventSignal_None);
-        if (event == Save_CardEventSignal_IoEnd) {
-            Title_cardPollPhase = Save_CardReadinessState_LoadReady;
-            break;
-        }
-        if (event < Save_CardEventSignal_IoEnd) {
-            break;
-        }
-        if (event >= Save_CardEventSignal_None) {
-            break;
-        }
-        Title_cardPollPhase = Save_CardReadinessState_Init;
-        break;
-    case Save_CardReadinessState_LoadReady:
-        Save_MemoryCard_ClearEvents(Save_CardEventGroup_Software);
-        if (_card_load(Title_cardPollPort) == 0) {
-            break;
-        }
-        Title_cardPollPhase = Save_CardReadinessState_Loaded;
-        Title_cardEventPollTimeout = 0;
-        // fallthrough
-    case Save_CardReadinessState_Loaded:
-        event = Save_MemoryCard_PollEvents(Save_CardEventGroup_Software);
-        switch (event) {
-        case Save_CardEventSignal_IoEnd:
-            return (enum Save_CardReadinessResult)(Title_cardPollEventType + Save_CardReadinessResult_Ready);
-        case Save_CardEventSignal_Error:
-        case Save_CardEventSignal_Timeout:
-            Title_cardPollPhase = Save_CardReadinessState_Init;
-            break;
-        case Save_CardEventSignal_Unformatted:
-            return (enum Save_CardReadinessResult)(Title_cardPollEventType + Save_CardReadinessResult_Unformatted);
-        case Save_CardEventSignal_None:
-            if (Title_cardEventPollTimeout++ > 64) {
-                Title_cardPollPhase = Save_CardReadinessState_Init;
-            }
-            break;
-        }
-        break;
-    }
-    return Save_CardReadinessResult_Pending;
+CardReadiness AdvanceCardReadiness(CardReadinessState& state, CardHost& card,
+                                   std::int32_t begin_port) {
+  if (begin_port != 0) {
+    state.channel = ChannelOf(begin_port);
+    state.phase = CardReadinessPhase::kInit;
+    state.init_polls = 0;
+    return CardReadiness::kPending;
+  }
+  switch (state.phase) {
+    case CardReadinessPhase::kInit:
+      return InitStep(state, card);
+    case CardReadinessPhase::kReady:
+      return ReadyStep(state, card);
+    case CardReadinessPhase::kUnformatted:
+      return UnformattedStep(state, card);
+    case CardReadinessPhase::kConfirmed:
+      return ConfirmedStep(state, card);
+    case CardReadinessPhase::kLoadReady:
+      return LoadReadyStep(state, card);
+    case CardReadinessPhase::kLoaded:
+      return LoadedStep(state, card);
+  }
+  return CardReadiness::kPending;
 }
 
 // decomp: MENU7.PRG _applyLoadedSaveFile (src/MENU/MENU7.PRG/260.c:681)
-int Save_MemoryCard_ValidateAndApplyLoadedSave(int apply_loaded_state)
-{
-    int blockCount;
-    Save_GameSaveImage* save_image_workspace = (Save_GameSaveImage*)Title_memoryCardUiResource;
-    void* spmcimg2 = save_image_workspace + 1;
-    Save_GameSaveImage* loaded_save_image = save_image_workspace + 1;
-    Save_SaveCipherHeader* cipher_header = &save_image_workspace[1].protectedHeader.cipherHeader;
-
-    Save_MemoryCard_DecodeSaveBytes(cipher_header->cipherKey, &cipher_header->slotHeader.slotState,
-        sizeof(Save_GameSaveImage) - (uintptr_t) & ((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState);
-
-    blockCount = 92;
-    if (apply_loaded_state != 0) {
-        blockCount = 32;
-    }
-
-    if ((Save_MemoryCard_HasChecksumError(save_image_workspace + 1, blockCount) != 0)
-        || (cipher_header->slotHeader.formatSignature != 0x20000107)) {
-        do {
-            return 1;
-        } while (0);
-    }
-
-    if (apply_loaded_state == 0) {
-        return 0;
-    }
-
-    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedStateFlags, save_image_workspace[1].stateFlags, sizeof Audio_Seq_unusedStateFlags);
-    VS::Core::Memory::CopyLiveBytesBackward(
-        State_learnedActionFlags, save_image_workspace[1].learnedActions, sizeof State_learnedActionFlags);
-    VS::Core::Memory::CopyLiveBytesBackward(&State_roomVisitProgress, save_image_workspace[1].mapStatus, sizeof State_roomVisitProgress);
-    VS::Core::Memory::CopyLiveBytesBackward(&Input_settings, &save_image_workspace[1].settings, sizeof Input_settings);
-    VS::Core::Memory::CopyLiveBytesBackward(&State_ashleySnapshot, &save_image_workspace[1].ashleySnapshot, sizeof State_ashleySnapshot);
-    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedInventory, &save_image_workspace[1].inventory, sizeof Audio_Seq_unusedInventory);
-    VS::Core::Memory::CopyLiveBytesBackward(
-        &Audio_Seq_unusedInventoryIndices, &save_image_workspace[1].inventoryIndices, sizeof Audio_Seq_unusedInventoryIndices);
-    VS::Core::Memory::CopyLiveBytesBackward(&State_savedEntryDoor, &save_image_workspace[1].entryDoor, sizeof State_savedEntryDoor);
-    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedScoredata, &save_image_workspace[1].scoreData, sizeof Audio_Seq_unusedScoredata);
-    State_currentRoomStateSlot = loaded_save_image->roomStateSlot;
-    VS::Core::Memory::CopyLiveBytesBackward(State_recentRoomEnemyStates, save_image_workspace[1].recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
-    spmcimg2 = &Audio_Seq_unusedArtsStatus;
-    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedArtsStatus, &save_image_workspace[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
-    State_playTime.t = save_image_workspace[1].protectedHeader.summary.gameTime.t;
-    Save_MarkAshleySnapshotValid();
-    Audio_SetMonoOutput(Input_settings.monoSound);
-    return 0;
+std::expected<void, SaveImageError> ValidateAndApplyLoadedSave(
+    SaveStateHost& state, SaveImage incoming, bool apply) {
+  const auto record = incoming.subspan<kSummaryOffset, kRecordBytes>();
+  DecodeSaveBytes(LoadWord(record, kSummaryKeyOffset),
+                  incoming.subspan<kCipherStart>());
+  const auto checksum_error =
+      HasChecksumError(incoming, apply ? kAppliedBlockCount : kImageBlockCount);
+  if (!checksum_error.has_value()) {
+    return std::unexpected(checksum_error.error());
+  }
+  if (*checksum_error) {
+    return std::unexpected(SaveImageError::kChecksumMismatch);
+  }
+  if (LoadWord(record, kSummarySignatureOffset) != kSaveSignature) {
+    return std::unexpected(SaveImageError::kSignatureMismatch);
+  }
+  if (!apply) {
+    return {};
+  }
+  if (auto room_state = CheckRoomState(incoming); !room_state) {
+    return room_state;
+  }
+  if (auto sections = CheckHostSections(state); !sections) {
+    return sections;
+  }
+  for (std::size_t index = 0; index < kSaveSectionCount; ++index) {
+    const SaveSection section = SectionAt(index);
+    CopyBytes(ImageSection(incoming, section), state.Section(section));
+  }
+  state.SetPlayTime(
+      LoadWord(record, kSummaryStatsOffset + kStatsGameTimeOffset));
+  VS::Save::MarkAshleySnapshotValid(
+      state.Section(SaveSection::kAshleySnapshot)
+          .first<VS::Save::kAshleySnapshotBytes>());
+  const std::span<std::byte> settings = state.Section(SaveSection::kSettings);
+  state.SetMonoOutput(static_cast<std::int8_t>(
+      std::to_integer<std::uint8_t>(settings[kSettingsMonoSoundOffset])));
+  return {};
 }
 
 // decomp: MENU7.PRG _packageGameSaveData (src/MENU/MENU7.PRG/260.c:735)
-void Save_MemoryCard_PackageGameSave(int targetFile)
-{
-    static const u_short Save_MemoryCard_saveTitleTemplate[] = { 0x7582, 0x6082, 0x6682, 0x7182, 0x6082, 0x6D82,
-        0x7382, 0x4081, 0x7282, 0x7382, 0x6E82, 0x7182, 0x7882, 0x4081, 0x6582, 0x6882,
-        0x6B82, 0x6482, 0x4081, 0x5082, 0x4081, 0x4081, 0x4081, 0x4F82, 0x4F82, 0x4681,
-        0x4F82, 0x4F82, 0x4681, 0x4F82, 0x4F82, 0x4081 };
-
-    intptr_t i;
-    int j;
-    int block_checksum;
-    u_short const* save_title_template = Save_MemoryCard_saveTitleTemplate;
-    Save_GameSaveImage* savedata = (Save_GameSaveImage*)Title_memoryCardUiResource;
-    Save_GameSaveImage* loaded_save_image = savedata + 1;
-    Save_GameSaveImage* card_header_image = savedata;
-    Save_SaveProtectedHeader* protected_header = &savedata->protectedHeader;
-
-    Save_CaptureAshleySnapshot();
-    memset(savedata, 0, sizeof *savedata);
-    ((char*)&savedata->cardHeader.key)[0] = 0x53;
-    ((char*)&savedata->cardHeader.key)[1] = 0x43;
-    ((char*)&savedata->cardHeader.key)[2] = 0x11;
-    ((char*)&savedata->cardHeader.key)[3] = 3;
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->cardHeader.summary, save_title_template, sizeof savedata->cardHeader.summary);
-    savedata->cardHeader.summary.cardTitleTail[3] += (targetFile << 8);
-
-    if (State_playTime.t.hours == 100) {
-        savedata->cardHeader.summary.cardTitleTail[6] = 0x5082;
-    } else {
-        savedata->cardHeader.summary.cardTitleTail[7] += ((State_playTime.t.hours / 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[8] += ((State_playTime.t.hours % 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[10] += ((State_playTime.t.minutes / 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[11] += ((State_playTime.t.minutes % 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[13] += ((State_playTime.t.seconds / 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[14] += ((State_playTime.t.seconds % 10) << 8);
-    }
-    card_header_image->cardHeader.summary.cardTitleTail[15] = 0;
-    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->cardHeader.iconHeaderBytes, Save_MemoryCard_uiResources->fileIconPalettes[targetFile],
-        sizeof savedata->cardHeader.iconHeaderBytes);
-    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->iconBitmap, Save_MemoryCard_uiResources->fileIconBitmaps[targetFile], sizeof savedata->iconBitmap);
-
-    if (Input_settings.slotState == 0) {
-        Input_settings.slotState = VS::Core::NextLiveInterfaceRandomBits(0x20);
-        if (Input_settings.slotState < 3) {
-            Input_settings.slotState = 0x17385CA9;
-        }
-        if (!(Menu_Framework_actionRestrictions & 0x400)) {
-            memset(&loaded_save_image->containerData, 0, sizeof loaded_save_image->containerData);
-        }
-    }
-
-    Input_settings.key = VS::Core::NextLiveInterfaceRandomBits(0x20);
-    protected_header->cipherHeader.cipherKey = Input_settings.key;
-    protected_header->cipherHeader.slotHeader.slotState = (enum Save_CardFileSlotStatus)(Input_settings.slotState);
-    Input_settings.saveFileGeneration = 0;
-
-    for (i = 0; i < 5; ++i) {
-        if (Title_saveFileSummaries[i].summary.base.slotState >= Save_CardFileSlotStatus_InUse) {
-            if (Input_settings.saveFileGeneration
-                < Title_saveFileSummaries[i].summary.base.generation) {
-                Input_settings.saveFileGeneration =
-                    Title_saveFileSummaries[i].summary.base.generation;
-            }
-        }
-    }
-    protected_header->cipherHeader.slotHeader.generation = ++Input_settings.saveFileGeneration;
-
-    if (Input_settings.cumulativeSaveCount < 9999) {
-        ++Input_settings.cumulativeSaveCount;
-    }
-
-    if (Input_settings.currentGameSaveCount < 9999) {
-        ++Input_settings.currentGameSaveCount;
-    }
-
-    protected_header->cipherHeader.slotHeader.formatSignature = 0x20000107;
-    protected_header->summary.gameTime.t = State_playTime.t;
-    protected_header->summary.currentHP = State_ashleySnapshot.stats.currentHp;
-    protected_header->summary.maxHP = State_ashleySnapshot.stats.maxHp;
-    protected_header->summary.cumulativeSaveCount = Input_settings.cumulativeSaveCount;
-    protected_header->summary.currentGameSaveCount = Input_settings.currentGameSaveCount;
-    protected_header->summary.saveLocation = Menu_saveLocationId;
-    protected_header->summary.mapCompletion = Field_MapCompletionPercent();
-    protected_header->summary.clearCount = Audio_Seq_unusedStateFlags.clearCount;
-    protected_header->summary.currentMP = State_ashleySnapshot.stats.currentMp;
-    protected_header->summary.maxMP = State_ashleySnapshot.stats.maxMp;
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->stateFlags, &Audio_Seq_unusedStateFlags, sizeof savedata->stateFlags);
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->learnedActions, State_learnedActionFlags,
-        sizeof savedata->learnedActions);
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->mapStatus, &State_roomVisitProgress, sizeof savedata->mapStatus);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->settings, &Input_settings, sizeof savedata->settings);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->ashleySnapshot, &State_ashleySnapshot, sizeof savedata->ashleySnapshot);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventory, &Audio_Seq_unusedInventory, sizeof savedata->inventory);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventoryIndices, &Audio_Seq_unusedInventoryIndices, sizeof savedata->inventoryIndices);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->entryDoor, &State_savedEntryDoor, sizeof savedata->entryDoor);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->scoreData, &Audio_Seq_unusedScoredata, sizeof savedata->scoreData);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->containerData, &loaded_save_image->containerData,
-        sizeof savedata->containerData);
-    savedata->roomStateSlot = State_currentRoomStateSlot;
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->recentRoomEnemyStates, State_recentRoomEnemyStates, sizeof savedata->recentRoomEnemyStates);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->artsStatus, &Audio_Seq_unusedArtsStatus, sizeof savedata->artsStatus);
-
-    for (i = 0; i < 92; ++i) {
-        block_checksum = 0;
-        if (i != 1) {
-            for (j = 0; j < 256; ++j) {
-                block_checksum ^= Title_memoryCardUiResource[i * 0x100 + j];
-            }
-            protected_header->blockChecksums[i] = block_checksum;
-        }
-    }
-    block_checksum = 0;
-    for (j = 0; j < 256; ++j) {
-        block_checksum ^= Title_memoryCardUiResource[j + 256];
-    }
-    protected_header->blockChecksums[1] = block_checksum;
-    for (i = (intptr_t)&((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState;
-        i < (int)sizeof(Save_GameSaveImage); ++i) {
-        Title_memoryCardUiResource[i] += VS::Core::NextLiveInterfaceRandomBits(8);
-    }
+std::expected<void, SaveImageError> PackageGameSave(SaveStateHost& state,
+                                                    SaveWorkspace workspace,
+                                                    ConstSummaryTable summaries,
+                                                    std::int32_t target_file) {
+  return PackageSave(state, workspace, summaries, target_file,
+                     PackageKind::kGame);
 }
 
 // decomp: MENU7.PRG _loadSaveData (src/MENU/MENU7.PRG/260.c:871)
-int Save_MemoryCard_ReadSaveStep(int portFileno)
-{
-    enum Save_SaveReadState { Save_SaveReadState_Init = 0, Save_SaveReadState_Reading = 1 };
-
-    static char Title_saveReadPhase;
-    static char Title_saveReadCardSlot;
-    static char Title_saveReadFileIndex;
-    static char Title_isReadingTemporarySave;
-    static char Title_saveReadErrorCount;
-    static char Save_MemoryCard_readSaveStepLayoutPadding[2] __attribute__((unused));
-    static int Title_saveReadFileDescriptor;
-
-    void* loaded_save_buffer = (Save_GameSaveImage*)Title_memoryCardUiResource + 1;
-
-    if (portFileno != 0) {
-        Title_saveReadPhase = Save_SaveReadState_Init;
-        Title_saveReadErrorCount = 0;
-        Title_saveTransferErrorOffset = 0;
-        Title_saveReadCardSlot = portFileno >> 0xC;
-        Title_isReadingTemporarySave = (portFileno >> 8) & 1;
-        Title_saveReadFileIndex = portFileno & 0xF;
-        Title_transferProgressPosition = 80;
-        Title_previousTransferProgress = 0;
-        return 0;
+TransferStatus ReadSaveStep(SaveReadState& state, SaveTransfer& transfer,
+                            std::int32_t request) {
+  if (request != 0) {
+    state.phase = SaveReadPhase::kOpen;
+    state.errors = 0;
+    transfer.progress.error_offset = 0;
+    state.channel = static_cast<std::int8_t>(request >> kRequestChannelShift);
+    state.header_only = ((request >> kRequestHeaderOnlyShift) & 1) != 0;
+    state.file_index =
+        static_cast<std::int8_t>(request & kRequestFileIndexMask);
+    transfer.progress.position = kProgressStart;
+    transfer.progress.previous = 0;
+    return TransferStatus::kPending;
+  }
+  if (state.phase == SaveReadPhase::kOpen && !QueueRead(state, transfer)) {
+    return StatusAfter(state.errors);
+  }
+  const CardEvent event = PollEvents(transfer.card, CardEventGroup::kSoftware);
+  if (event != CardEvent::kNone) {
+    transfer.card.Close(state.file);
+    if (event == CardEvent::kIoEnd) {
+      return TransferStatus::kDone;
     }
-
-    switch (Title_saveReadPhase) {
-    case Save_SaveReadState_Init: {
-        int nBytes;
-        char* filename;
-        int progress_target_x = 320;
-
-        Title_transferProgressPosition +=
-            ((Menu_Files_fileProgressCounter - Title_previousTransferProgress)
-                * ((Title_saveTransferErrorOffset * 20) - (Title_transferProgressPosition - progress_target_x)))
-            / Title_transferProgressTarget;
-        Title_saveTransferErrorOffset = Title_saveReadErrorCount;
-        Title_transferProgressTarget = 192 - (Title_isReadingTemporarySave << 7);
-        Title_previousTransferProgress = Menu_Files_fileProgressCounter;
-
-        memset(loaded_save_buffer, 0, sizeof(Save_GameSaveImage));
-
-        if (Title_saveReadFileIndex & 8) {
-            filename = Save_MemoryCard_BuildTemporaryFilename(Title_saveReadCardSlot, Title_saveReadFileIndex & 7);
-        } else {
-            filename = Save_MemoryCard_BuildSaveFilename(Title_saveReadCardSlot, Title_saveReadFileIndex);
-        }
-        Title_saveReadFileDescriptor = LegacyApi_open(filename, 0x8000 | 1);
-        if (Title_saveReadFileDescriptor == -1) {
-            ++Title_saveReadErrorCount;
-            break;
-        }
-        Save_MemoryCard_ClearEvents(Save_CardEventGroup_Software);
-        nBytes = sizeof(Save_GameSaveImage);
-        if (Title_isReadingTemporarySave != 0) {
-            nBytes = 0x2000;
-        }
-        if (LegacyApi_read(Title_saveReadFileDescriptor, loaded_save_buffer, nBytes) == -1) {
-            LegacyApi_close(Title_saveReadFileDescriptor);
-            ++Title_saveReadErrorCount;
-            break;
-        }
-        Title_saveReadPhase = Save_SaveReadState_Reading;
-    }
-        // fallthrough
-    case Save_SaveReadState_Reading: {
-        int event = Save_MemoryCard_PollEvents(Save_CardEventGroup_Software);
-        if (event < Save_CardEventSignal_None) {
-            LegacyApi_close(Title_saveReadFileDescriptor);
-            if (event == Save_CardEventSignal_IoEnd) {
-                return 1;
-            }
-            Title_saveReadPhase = Save_SaveReadState_Init;
-            ++Title_saveReadErrorCount;
-        }
-        break;
-    }
-    }
-    return Title_saveReadErrorCount == 3 ? -1 : 0;
+    state.phase = SaveReadPhase::kOpen;
+    state.errors = Incremented(state.errors);
+  }
+  return StatusAfter(state.errors);
 }
 
 // decomp: MENU7.PRG _saveFile (src/MENU/MENU7.PRG/260.c:960)
-int Save_MemoryCard_WriteSaveStep(int portFile)
-{
-    enum Save_SaveWriteState {
-        Save_SaveWriteState_Init = 0,
-        Save_SaveWriteState_TemporaryFileCreated = 1,
-        Save_SaveWriteState_ReadReady = 2,
-        Save_SaveWriteState_VerifyPending = 3,
-        Save_SaveWriteState_FileVerified = 4
-    };
-
-    static char Title_saveWritePhase;
-    static char Title_saveWriteFileIndex;
-    static char Title_saveWriteCardSlot;
-    static char Title_saveWriteErrorCount;
-    static char Title_saveRenameErrorCount;
-    static char Save_MemoryCard_writeSaveStepLayoutPadding[3] __attribute__((unused));
-    static int Title_saveWriteFileDescriptor;
-
-    int progress_x_delta;
-    int i;
-    int io_result_or_saved_progress;
-
-    if (portFile != 0) {
-        Title_saveWriteErrorCount = 0;
-        Title_saveRenameErrorCount = 0;
-        Title_saveTransferErrorOffset = 0;
-        Title_saveWriteCardSlot = portFile >> 0xC;
-        Title_saveWriteFileIndex = portFile & 7;
-        Title_transferProgressPosition = 80;
-        Title_previousTransferProgress = 0;
-        Title_saveWritePhase = Save_MemoryCard_HasSaveSuffix(Title_saveWriteFileIndex + 'A' - 1);
-        return 0;
-    }
-    switch (Title_saveWritePhase) {
-    case Save_SaveWriteState_Init:
-        if (LegacyApi_rename(Save_MemoryCard_BuildSaveFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), Save_MemoryCard_BuildTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex))
-            != 0) {
-            Title_saveWriteErrorCount = 0;
-            Title_saveRenameErrorCount = 0;
-            Title_saveWritePhase = Save_SaveWriteState_TemporaryFileCreated;
-        } else {
-            ++Title_saveRenameErrorCount;
-            Title_saveWriteErrorCount = Title_saveRenameErrorCount >> 4;
-        }
-        break;
-    case Save_SaveWriteState_TemporaryFileCreated:
-        progress_x_delta = ((Menu_Files_fileProgressCounter - Title_previousTransferProgress)
-                        * (320 - Title_transferProgressPosition))
-                  / Title_transferProgressTarget;
-        Title_previousTransferProgress = Menu_Files_fileProgressCounter;
-        Title_transferProgressTarget = 384;
-        Title_transferProgressPosition += progress_x_delta;
-        Title_saveWriteFileDescriptor = LegacyApi_open(Save_MemoryCard_BuildTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), 0x8000 | 0x0002);
-        ;
-        if (Title_saveWriteFileDescriptor == -1) {
-            ++Title_saveWriteErrorCount;
-            break;
-        }
-        Save_MemoryCard_ClearEvents(Save_CardEventGroup_Software);
-        if (LegacyApi_write(Title_saveWriteFileDescriptor, Title_memoryCardUiResource, sizeof(Save_GameSaveImage)) == -1) {
-            LegacyApi_close(Title_saveWriteFileDescriptor);
-            ++Title_saveWriteErrorCount;
-            break;
-        }
-        Title_saveWritePhase = Save_SaveWriteState_ReadReady;
-        // fallthrough
-    case Save_SaveWriteState_ReadReady: {
-        io_result_or_saved_progress = Save_MemoryCard_PollEvents(Save_CardEventGroup_Software);
-        if (io_result_or_saved_progress < Save_CardEventSignal_None) {
-            LegacyApi_close(Title_saveWriteFileDescriptor);
-            if (io_result_or_saved_progress == Save_CardEventSignal_IoEnd) {
-                Title_saveWritePhase = Save_SaveWriteState_VerifyPending;
-                i = Title_transferProgressPosition;
-                io_result_or_saved_progress = Title_previousTransferProgress;
-                Save_MemoryCard_ReadSaveStep((Title_saveWriteCardSlot << 12) | (Title_saveWriteFileIndex + 8));
-                Title_transferProgressPosition = i;
-                Title_previousTransferProgress = io_result_or_saved_progress;
-            } else {
-                ++Title_saveWriteErrorCount;
-                Title_saveWritePhase = Save_SaveWriteState_TemporaryFileCreated;
-            }
-        }
-        break;
-    }
-    case Save_SaveWriteState_VerifyPending:
-        io_result_or_saved_progress = Save_MemoryCard_ReadSaveStep(0);
-        if (io_result_or_saved_progress == 0) {
-            break;
-        }
-        if (io_result_or_saved_progress < 0) {
-            return -1;
-        }
-        for (i = 0; i < (int)sizeof(Save_GameSaveImage); ++i) {
-            if (Title_memoryCardUiResource[i] != Title_memoryCardUiResource[sizeof(Save_GameSaveImage) + i]) {
-                break;
-            }
-        }
-        if (i < (int)sizeof(Save_GameSaveImage)) {
-            return -1;
-        }
-        Title_saveWritePhase = Save_SaveWriteState_FileVerified;
-        break;
-    case Save_SaveWriteState_FileVerified:
-        if (LegacyApi_rename(Save_MemoryCard_BuildTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), Save_MemoryCard_BuildSaveFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex))
-            == 0) {
-            ++Title_saveRenameErrorCount;
-            Title_saveWriteErrorCount = (Title_saveRenameErrorCount >> 4);
-            break;
-        }
-        return 1;
-    }
-    return Title_saveWriteErrorCount == 3 ? -1 : 0;
+TransferStatus WriteSaveStep(SaveWriteState& state, SaveReadState& read_state,
+                             SaveTransfer& transfer,
+                             const CardDirectory& directory,
+                             std::int32_t request) {
+  if (request != 0) {
+    state.errors = 0;
+    state.rename_errors = 0;
+    transfer.progress.error_offset = 0;
+    state.channel = static_cast<std::int8_t>(request >> kRequestChannelShift);
+    state.file_index = static_cast<std::int8_t>(request & kFileNumberMask);
+    transfer.progress.position = kProgressStart;
+    transfer.progress.previous = 0;
+    const bool staged = HasSaveSuffix(
+        directory, NarrowChar(static_cast<std::uint32_t>(state.file_index) +
+                              kTemporaryBase));
+    state.phase = staged ? SaveWritePhase::kWrite : SaveWritePhase::kRename;
+    return TransferStatus::kPending;
+  }
+  switch (state.phase) {
+    case SaveWritePhase::kRename:
+      RenameToTemporary(state, transfer.card);
+      break;
+    case SaveWritePhase::kWrite:
+      if (QueueWrite(state, transfer)) {
+        AwaitWrite(state, read_state, transfer);
+      }
+      break;
+    case SaveWritePhase::kWritePending:
+      AwaitWrite(state, read_state, transfer);
+      break;
+    case SaveWritePhase::kVerify:
+      if (const auto failed = VerifyWrite(state, read_state, transfer)) {
+        return *failed;
+      }
+      break;
+    case SaveWritePhase::kCommit:
+      if (CommitWrite(state, transfer.card)) {
+        return TransferStatus::kDone;
+      }
+      break;
+  }
+  return StatusAfter(state.errors);
 }
 
 // decomp: MENU7.PRG _loadIntroSaveFile (src/MENU/MENU7.PRG/260.c:3315)
-int Save_MemoryCard_LoadIntroSnapshotStep(int action)
-{
-    static Content_DiscQueueSlot* Save_MemoryCard_legacyIntroSnapshotDiscRequest;
-    static Save_GameSaveImage* Save_MemoryCard_legacyIntroSnapshotImage;
-
-    Content_DiscFile file;
-    void* intro_snapshot_allocation;
-    State_PlayTime gametime;
-    int lba;
-    State_PlayTime* play_time_backup_alias;
-
-    switch (action) {
+IntroSnapshotResult LoadIntroSnapshotStep(IntroSnapshotHost& intro,
+                                          SaveStateHost& state,
+                                          std::int32_t action) {
+  switch (action) {
     case 0:
-        play_time_backup_alias = &gametime;
-        if (Save_MemoryCard_legacyIntroSnapshotDiscRequest->state == Content_DiscRequestState_Loaded) {
-            Content_ReleaseDiscRequest(Save_MemoryCard_legacyIntroSnapshotDiscRequest);
-            gametime.t = State_playTime.t;
-            Title_memoryCardUiResource = (char*)(Save_MemoryCard_legacyIntroSnapshotImage - 1);
-            Save_MemoryCard_ValidateAndApplyLoadedSave(1);
-            State_playTime.t = gametime.t;
-            intro_snapshot_allocation = Save_MemoryCard_legacyIntroSnapshotImage;
-            VS::Core::Memory::FreeLiveFromHighEnd(intro_snapshot_allocation);
-            return 1;
-        }
-        return 0;
-    case 1: // First combat in courtyard
-        lba = VS_OPMCIMG1_BIN_LBA;
-        break;
-    case 2: // D'tok
-        lba = VS_OPMCIMG2_BIN_LBA;
-        break;
+      return ApplyIntroSnapshot(intro, state);
+    case static_cast<std::int32_t>(IntroSnapshot::kCourtyard):
+      intro.BeginLoad(IntroSnapshot::kCourtyard);
+      break;
+    case static_cast<std::int32_t>(IntroSnapshot::kDtok):
+      intro.BeginLoad(IntroSnapshot::kDtok);
+      break;
     default:
-        return 0;
-    }
-
-    file.lba = lba;
-    file.size = VS_OPMCIMG1_BIN_SIZE;
-    Save_MemoryCard_legacyIntroSnapshotDiscRequest = Content_AllocateDiscRequest(&file);
-    intro_snapshot_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Save_MemoryCard_legacyIntroSnapshotImage);
-    Save_MemoryCard_legacyIntroSnapshotImage = (Save_GameSaveImage *)(intro_snapshot_allocation);
-    Content_EnqueueDiscRequest(Save_MemoryCard_legacyIntroSnapshotDiscRequest, Save_MemoryCard_legacyIntroSnapshotImage);
-    return 0;
+      break;
+  }
+  return IntroSnapshotResult::kPending;
 }
 
-// decomp: TITLE.PRG _keystreamBits (src/TITLE/TITLE.PRG/22C.c:50)
-u_int Save_MemoryCard_NextCipherBits(int value)
-{
-    u_int seed = Save_MemoryCard_keystreamSeed;
-
-    Save_MemoryCard_keystreamSeed = seed * 0x19660D;
-    return seed >> (32 - value);
+// decomp: TITLE.PRG _keystreamBits (src/TITLE/TITLE.PRG/22C.c:50): the shift
+// is a variable srlv, so 32 bits returns the whole seed.
+std::uint32_t NextCipherBits(CipherState& cipher, std::int32_t bits) {
+  const std::uint32_t seed = cipher.seed;
+  cipher.seed = seed * kCipherMultiplier;
+  return seed >> ((kWordBits - static_cast<std::uint32_t>(bits)) & kShiftMask);
 }
 
 // decomp: TITLE.PRG _packageGameSaveData (src/TITLE/TITLE.PRG/22C.c:616)
-void Save_MemoryCard_PackageClearSave(int targetFile)
-{
-    static const u_short Save_MemoryCard_saveTitleTemplate[] = { 0x7582, 0x6082, 0x6682, 0x7182, 0x6082, 0x6D82,
-        0x7382, 0x4081, 0x7282, 0x7382, 0x6E82, 0x7182, 0x7882, 0x4081, 0x6582, 0x6882,
-        0x6B82, 0x6482, 0x4081, 0x5082, 0x4081, 0x4081, 0x4081, 0x4F82, 0x4F82, 0x4681,
-        0x4F82, 0x4F82, 0x4681, 0x4F82, 0x4F82, 0x4081 };
-
-    intptr_t i;
-    int j;
-    int block_checksum;
-    u_short const* save_title_template = Save_MemoryCard_saveTitleTemplate;
-    Save_GameSaveImage* savedata = (Save_GameSaveImage*)Title_memoryCardUiResource;
-    Save_GameSaveImage* loaded_save_image = savedata + 1;
-    Save_GameSaveImage* card_header_image = savedata;
-    Save_SaveProtectedHeader* protected_header = &savedata->protectedHeader;
-
-    State_playTime.all = 0;
-    Input_settings.menuFlags &= 0xFFDF;
-    Audio_Seq_unusedStateFlags.puzzleMode = ~(*(u_int*)&Input_settings >> 3) & 1;
-    memset(savedata, 0, sizeof *savedata);
-    ((char*)&savedata->cardHeader.key)[0] = 0x53;
-    ((char*)&savedata->cardHeader.key)[1] = 0x43;
-    ((char*)&savedata->cardHeader.key)[2] = 0x11;
-    ((char*)&savedata->cardHeader.key)[3] = 3;
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->cardHeader.summary, save_title_template, sizeof savedata->cardHeader.summary);
-    savedata->cardHeader.summary.cardTitleTail[3] += (targetFile << 8);
-
-    if (State_playTime.t.hours == 100) {
-        savedata->cardHeader.summary.cardTitleTail[6] = 0x5082;
-    } else {
-        savedata->cardHeader.summary.cardTitleTail[7] += ((State_playTime.t.hours / 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[8] += ((State_playTime.t.hours % 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[10] += ((State_playTime.t.minutes / 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[11] += ((State_playTime.t.minutes % 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[13] += ((State_playTime.t.seconds / 10) << 8);
-        savedata->cardHeader.summary.cardTitleTail[14] += ((State_playTime.t.seconds % 10) << 8);
-    }
-    card_header_image->cardHeader.summary.cardTitleTail[15] = 0;
-    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->cardHeader.iconHeaderBytes, Save_MemoryCard_uiResources->fileIconPalettes[targetFile],
-        sizeof savedata->cardHeader.iconHeaderBytes);
-    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->iconBitmap, Save_MemoryCard_uiResources->fileIconBitmaps[targetFile], sizeof savedata->iconBitmap);
-
-    if (Input_settings.slotState == 0) {
-        Input_settings.slotState = Save_MemoryCard_NextCipherBits(0x20);
-        if (Input_settings.slotState < 3) {
-            Input_settings.slotState = 0x17385CA9;
-        }
-        memset(&loaded_save_image->containerData, 0, sizeof loaded_save_image->containerData);
-    }
-
-    Input_settings.key = Save_MemoryCard_NextCipherBits(0x20);
-    protected_header->cipherHeader.cipherKey = Input_settings.key;
-    protected_header->cipherHeader.slotHeader.slotState = (enum Save_CardFileSlotStatus)(Input_settings.slotState);
-    Input_settings.saveFileGeneration = 0;
-
-    for (i = 0; i < 5; ++i) {
-        if (Title_saveFileSummaries[i].summary.base.slotState >= Save_CardFileSlotStatus_InUse) {
-            if (Input_settings.saveFileGeneration
-                < Title_saveFileSummaries[i].summary.base.generation) {
-                Input_settings.saveFileGeneration =
-                    Title_saveFileSummaries[i].summary.base.generation;
-            }
-        }
-    }
-
-    protected_header->cipherHeader.slotHeader.generation = ++Input_settings.saveFileGeneration;
-
-    if (Input_settings.cumulativeSaveCount < 9999) {
-        ++Input_settings.cumulativeSaveCount;
-    }
-
-    Input_settings.currentGameSaveCount = 0;
-    protected_header->cipherHeader.slotHeader.formatSignature = 0x20000107;
-    protected_header->summary.gameTime.t = State_playTime.t;
-    protected_header->summary.currentHP = State_ashleySnapshot.stats.currentHp;
-    protected_header->summary.maxHP = State_ashleySnapshot.stats.maxHp;
-    protected_header->summary.cumulativeSaveCount = Input_settings.cumulativeSaveCount;
-    protected_header->summary.currentGameSaveCount = Input_settings.currentGameSaveCount;
-    protected_header->summary.saveLocation = 0x30;
-    protected_header->summary.mapCompletion = 0;
-    memset(&Audio_Seq_unusedInventory.misc, 0, sizeof Audio_Seq_unusedInventory.misc);
-    memset(&Audio_Seq_unusedInventoryIndices.misc, 0, sizeof Audio_Seq_unusedInventoryIndices.misc);
-    memset(&loaded_save_image->containerData.misc, 0,
-        sizeof loaded_save_image->containerData.misc / 4); // Why / 4?
-    protected_header->summary.clearCount = Audio_Seq_unusedStateFlags.clearCount;
-    protected_header->summary.currentMP = State_ashleySnapshot.stats.currentMp;
-    protected_header->summary.maxMP = State_ashleySnapshot.stats.maxMp;
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->stateFlags, &Audio_Seq_unusedStateFlags, sizeof savedata->stateFlags);
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->learnedActions, State_learnedActionFlags, sizeof savedata->learnedActions);
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->mapStatus, &State_roomVisitProgress, sizeof savedata->mapStatus);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->settings, &Input_settings, sizeof savedata->settings);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->ashleySnapshot, &State_ashleySnapshot, sizeof savedata->ashleySnapshot);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventory, &Audio_Seq_unusedInventory, sizeof savedata->inventory);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventoryIndices, &Audio_Seq_unusedInventoryIndices, sizeof savedata->inventoryIndices);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->entryDoor, &State_savedEntryDoor, sizeof savedata->entryDoor);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->scoreData, &Audio_Seq_unusedScoredata, sizeof savedata->scoreData);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->containerData, &loaded_save_image->containerData,
-        sizeof savedata->containerData);
-    savedata->roomStateSlot = State_currentRoomStateSlot;
-    VS::Core::Memory::CopyLiveBytesBackward(savedata->recentRoomEnemyStates, State_recentRoomEnemyStates, sizeof savedata->recentRoomEnemyStates);
-    VS::Core::Memory::CopyLiveBytesBackward(&savedata->artsStatus, &Audio_Seq_unusedArtsStatus, sizeof savedata->artsStatus);
-
-    for (i = 0; i < 92; ++i) {
-        block_checksum = 0;
-        if (i != 1) {
-            for (j = 0; j < 256; ++j) {
-                block_checksum ^= Title_memoryCardUiResource[i * 0x100 + j];
-            }
-            protected_header->blockChecksums[i] = block_checksum;
-        }
-    }
-    block_checksum = 0;
-    for (j = 0; j < 256; ++j) {
-        block_checksum ^= Title_memoryCardUiResource[j + 256];
-    }
-    protected_header->blockChecksums[1] = block_checksum;
-    for (i = (intptr_t)&((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState;
-        i < (int)sizeof(Save_GameSaveImage); ++i) {
-        Title_memoryCardUiResource[i] += Save_MemoryCard_NextCipherBits(8);
-    }
+std::expected<void, SaveImageError> PackageClearSave(
+    SaveStateHost& state, SaveWorkspace workspace, ConstSummaryTable summaries,
+    std::int32_t target_file) {
+  return PackageSave(state, workspace, summaries, target_file,
+                     PackageKind::kClear);
 }
 
 // decomp: TITLE.PRG _saveFileExists (src/TITLE/TITLE.PRG/22C.c:3189)
-int Save_MemoryCard_AnySaveFileExists(void)
-{
-    struct DIRENTRY dir;
-    char filename[22];
-    int memCardState;
-    int i;
-    int ret = 0;
-
-    VS::Save::MemoryCard::StepLiveTitleResources(1);
-
+bool AnySaveFileExists(TitleCardProbeHost& host) {
+  host.BeginResources();
+  do {
+    host.WaitLoadingFrame();
+  } while (!host.ResourcesReady());
+  bool found = false;
+  for (std::int32_t port = 1; port <= kPortCount && !found; ++port) {
+    host.BeginCardReadiness(port);
+    std::uint32_t readiness = 0;
     do {
-        State_UpdatePlayTimeAndLoading(2);
-    } while (VS::Save::MemoryCard::StepLiveTitleResources(0) == 0);
-
-    for (i = 1; i <= 2; ++i) {
-        Title_SaveCard_AdvanceCardReadiness(i);
-        do {
-            memCardState = Title_SaveCard_AdvanceCardReadiness(0) & 3;
-            VSync(2);
-        } while (memCardState == Save_CardReadinessResult_Pending);
-
-        if (memCardState == Save_CardReadinessResult_Ready) {
-            VS::Core::Memory::CopyLiveBytesBackward(filename, Save_MemoryCard_kOriginalFilenameTemplate, sizeof filename);
-
-            filename[2] = i + '/';
-            filename[20] = '?';
-
-            if (LegacyApi_firstfile(filename, &dir) != NULL) {
-                ret = 1;
-                break;
-            }
-        }
+      readiness =
+          static_cast<std::uint32_t>(host.PollCardReadiness()) & kReadinessMask;
+      host.WaitFrames();
+    } while (readiness == static_cast<std::uint32_t>(CardReadiness::kPending));
+    if (readiness == static_cast<std::uint32_t>(CardReadiness::kReady)) {
+      CardFilename pattern = FilenameFor(0, kAnyFileNumber);
+      pattern.at(kFilenamePortIndex) =
+          NarrowChar(kProbePortBase + static_cast<std::uint32_t>(port));
+      found = host.AnyFileMatches(pattern);
     }
-    VS::Save::MemoryCard::ReleaseLiveTitleResources();
-    return ret;
+  }
+  host.ReleaseResources();
+  return found;
 }
-
-// TITLE.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Save_MemoryCard_GameFiles_ResetTitleStatics(void)
-{
-    {
-        static const u_int initial = 0x19660D;
-        memcpy((void*)&Save_MemoryCard_keystreamSeed, &initial, sizeof Save_MemoryCard_keystreamSeed);
-    }
-}
-
-}  // extern "C"
+}  // namespace VS::Save::MemoryCard

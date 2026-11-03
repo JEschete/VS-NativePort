@@ -1983,6 +1983,9 @@
     <None Include="..\..\port\test_encounter_fixups.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\test_module_symbol_extents.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\test_scene_trace_fixups.py">
       <Filter>tools\port</Filter>
     </None>

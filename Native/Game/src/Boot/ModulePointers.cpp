@@ -222,7 +222,6 @@ extern "C" {
 #include "Render/Text/VariableFont.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/Flags.h"
 #include "State/GameTime.h"
@@ -2670,8 +2669,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8004261Cu, 0u, (void*)&State_UpdatePlayTimeAndLoading, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C74u, 0u, (void*)&Boot_WaitForOverlayReady, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C94u, 0u, (void*)&Boot_SetSoftResetEnabled, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042CA0u, 0u, (void*)&Save_MarkAshleySnapshotValid, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042CB0u, 0u, (void*)&Save_CaptureAshleySnapshot, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80043FB4u, 0u, (void*)&Content_ReadSectorCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044148u, 0u, (void*)&Content_ReadCommandCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800441C4u, 0u, (void*)&Content_SeekCommandCallback, 0u, 0u, 0u},

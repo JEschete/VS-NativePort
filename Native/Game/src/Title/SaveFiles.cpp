@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Save/MemoryCard/GameFilesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -1322,7 +1323,7 @@ int Title_SaveFiles_UpdateSaveFiles(int initPort)
             } else if (val > Title_CardPollResult_Error) {
                 val = Title_saveMenuFileSlot + Title_saveMenuPageIndex;
                 if (Title_saveFileSummaries[val].summary.base.slotState == Save_CardFileSlotStatus_Available) {
-                    if (Save_MemoryCard_CreateSaveFile(Title_saveMenuCardSlot, val + 1) != 0) {
+                    if (VS::Save::MemoryCard::CreateLiveSaveFile(Title_saveMenuCardSlot, val + 1) != 0) {
                         Title_saveMenuPhase = Menu_Files_SaveFilesState_LeaveWithTimer;
                         Title_memoryCardMessage =
                             (char*)(Title_saveMenuText + Text_Menu_MCMAN_BIN_Offset_saveFailed);
@@ -1371,7 +1372,7 @@ int Title_SaveFiles_UpdateSaveFiles(int initPort)
             Title_savedMainMenuSetting = (*(u_int*)&Input_settings >> 4) & 1;
             *(int*)&Input_settings |= 0x10;
         }
-        Save_MemoryCard_PackageClearSave(val);
+        VS::Save::MemoryCard::PackageLiveClearSave(val);
         Title_SaveCard_WriteSaveStep((val + 1) | ((Title_saveMenuCardSlot - 1) << 0x10));
         Title_saveMenuPhase = Menu_Files_SaveFilesState_Validate;
         break;
@@ -1401,7 +1402,7 @@ int Title_SaveFiles_UpdateSaveFiles(int initPort)
                 VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[saveId],
                     Title_memoryCardUiResource + sizeof Title_saveFileSummaries[saveId] * 3,
                     sizeof Title_saveFileSummaries[saveId]);
-                Save_MemoryCard_DecodeSaveBytes(Title_saveFileSummaries[saveId].key,
+                VS::Save::MemoryCard::DecodeLiveSaveBytes(Title_saveFileSummaries[saveId].key,
                     &Title_saveFileSummaries[saveId].summary.base.slotState,
                     sizeof Title_saveFileSummaries[saveId] - sizeof(int));
                 Title_fileMenuElements[saveId + 5].saveLocation =
@@ -1438,7 +1439,7 @@ int Title_SaveFiles_UpdateSaveFiles(int initPort)
         if (val != 0) {
             if (val < 0) {
                 Title_saveMenuPhase = Menu_Files_SaveFilesState_LeaveError;
-            } else if (Save_MemoryCard_CreateSaveFile(Title_saveMenuCardSlot, Title_saveMenuPageIndex + Title_saveMenuFileSlot + 1) != 0) {
+            } else if (VS::Save::MemoryCard::CreateLiveSaveFile(Title_saveMenuCardSlot, Title_saveMenuPageIndex + Title_saveMenuFileSlot + 1) != 0) {
                 Title_saveMenuPhase = Menu_Files_SaveFilesState_LeaveWithTimer;
                 Title_memoryCardMessage = (char*)(Title_saveMenuText + Text_Menu_MCMAN_BIN_Offset_saveFailed);
             } else {

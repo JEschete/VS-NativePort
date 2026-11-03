@@ -218,6 +218,8 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Save\NativeResume.cpp",
                 r"src\Save\FileMenuLive.cpp",
                 r"src\Save\NativeFilePresentation.cpp",
+                r"src\Save\MemoryCard\GameFilesLive.cpp",
+                r"src\Save\SnapshotLive.cpp",
             ))
 
 

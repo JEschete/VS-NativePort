@@ -7,6 +7,7 @@
 #include "Core/Runtime.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Save/SnapshotLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Input/Controllers.h"
 #include "Save/NativeResume.h"
-#include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
 #include "State/PlayTime.h"
@@ -143,7 +143,7 @@ void Boot_RunEndingAndReturnToTitle(void)
     VS::Input::UpdateLiveControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
     Audio_Control_StopAllMusic();
     Audio_Control_StopSceneSoundEffects();
-    Save_CaptureAshleySnapshot();
+    VS::Save::CaptureLiveAshleySnapshot();
     Boot_LoadEndingOverlay();
     Ending_Credits_RunStaffRoll();
     SetDispMask(0);

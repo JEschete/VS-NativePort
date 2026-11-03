@@ -5,6 +5,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Save/FileMenuLive.hpp"
+#include "Save/MemoryCard/GameFilesLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/TextureAnimation.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "Save/NativeMenu.h"
 #include "Save/NativeResume.h"
 #include "State/Ashley.h"
@@ -208,7 +208,7 @@ void Title_ShowClearSaveScreen(void)
         State_UpdatePlayTimeAndLoading(2);
         Menu_Files_SwapBuffers();
         VS::Input::UpdateLiveControllers();
-        Save_MemoryCard_NextCipherBits(0);
+        VS::Save::MemoryCard::NextLiveTitleCipherBits(0);
 
         switch (Title_clearSaveScreenPhase) {
         case Title_ClearSaveScreenPhase_Initialize:

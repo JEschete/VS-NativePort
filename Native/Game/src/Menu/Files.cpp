@@ -8,6 +8,7 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/FileMenuLive.hpp"
+#include "Save/MemoryCard/GameFilesLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -500,15 +501,15 @@ int Menu_Files_FindCurrentDataSaveStep(int init)
             (char*)(Menu_Files_textTable + Menu_Files_textTable[Text_Menu_MCMAN_BIN_Index_accessing0 - 1 + port]));
         Menu_Files_memoryCardMessage =
             (char*)(Menu_Files_textTable + Menu_Files_textTable[Text_Menu_MCMAN_BIN_Index_accessing0 - 1 + port]);
-        Save_MemoryCard_AdvanceCardReadiness(realPort + 1);
+        VS::Save::MemoryCard::AdvanceLiveCardReadiness(realPort + 1);
         ++Menu_Files_findCurrentDataSaveStepState;
     } else {
-        event = Save_MemoryCard_AdvanceCardReadiness(0) & 3;
+        event = VS::Save::MemoryCard::AdvanceLiveCardReadiness(0) & 3;
 
         if (event != Save_CardReadinessResult_Pending) {
             if (event == Save_CardReadinessResult_Ready) {
-                if (Save_MemoryCard_ScanSaveDirectory(realPort + 1) == 0) {
-                    currentSave = Save_MemoryCard_FindMatchingSaveSlot();
+                if (VS::Save::MemoryCard::ScanLiveSaveDirectory(realPort + 1) == 0) {
+                    currentSave = VS::Save::MemoryCard::FindLiveMatchingSaveSlot();
                     if (currentSave != 0) {
                         return currentSave + (realPort * 16);
                     }
@@ -537,11 +538,11 @@ enum Save_MaskedHandlerResult Menu_Files_CheckCardStep(int portMask)
     int event;
 
     if (portMask != 0) {
-        Save_MemoryCard_AdvanceCardReadiness(portMask & 3);
+        VS::Save::MemoryCard::AdvanceLiveCardReadiness(portMask & 3);
         Menu_Files_checkCardStepMask = (portMask >> 4);
         return Save_MaskedHandlerResult_Pending;
     }
-    event = Save_MemoryCard_AdvanceCardReadiness(0);
+    event = VS::Save::MemoryCard::AdvanceLiveCardReadiness(0);
     if (event != Save_CardReadinessResult_Pending) {
         switch (event & Menu_Files_checkCardStepMask) {
         case Save_CardReadinessResult_Ready:
@@ -1069,12 +1070,12 @@ int Menu_Files_UpdateFormatPrompt(int initPort)
         return 0;
     case Menu_Files_FormatPromptState_InitEvents:
         if (Menu_Files_AreAnimationsComplete() != 0) {
-            Save_MemoryCard_AdvanceCardReadiness(Menu_Files_formatPromptPort);
+            VS::Save::MemoryCard::AdvanceLiveCardReadiness(Menu_Files_formatPromptPort);
             Menu_Files_formatPromptState = Menu_Files_FormatPromptState_HandleEvents;
         }
         return 0;
     case Menu_Files_FormatPromptState_HandleEvents:
-        val = Save_MemoryCard_AdvanceCardReadiness(0);
+        val = VS::Save::MemoryCard::AdvanceLiveCardReadiness(0);
 
         if (val != 0) {
             if (val == Save_CardReadinessResult_Unformatted) {
@@ -1135,7 +1136,7 @@ int Menu_Files_UpdateSaveFiles(int initPort)
 
     if (initPort != 0) {
         Menu_Files_saveFilesPort = initPort;
-        Menu_Files_saveFilesSlot = Save_MemoryCard_FindMatchingSaveSlot();
+        Menu_Files_saveFilesSlot = VS::Save::MemoryCard::FindLiveMatchingSaveSlot();
         if (Menu_Files_saveFilesSlot) {
             --Menu_Files_saveFilesSlot;
         }
@@ -1222,7 +1223,7 @@ int Menu_Files_UpdateSaveFiles(int initPort)
             } else if (val > Save_MaskedHandlerResult_Error) {
                 val = Menu_Files_saveFilesSlot + Menu_Files_saveFilesPage;
                 if (Title_saveFileSummaries[val].summary.base.slotState == Save_CardFileSlotStatus_Available) {
-                    if (Save_MemoryCard_CreateSaveFile(Menu_Files_saveFilesPort, val + 1) != 0) {
+                    if (VS::Save::MemoryCard::CreateLiveSaveFile(Menu_Files_saveFilesPort, val + 1) != 0) {
                         Menu_Files_saveFilesState = Menu_Files_SaveFilesState_LeaveWithTimer;
                         Menu_Files_memoryCardMessage =
                             (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_saveFailed);
@@ -1253,7 +1254,7 @@ int Menu_Files_UpdateSaveFiles(int initPort)
         val = Menu_Files_CheckCardStep(0);
         if (val != Save_MaskedHandlerResult_Pending) {
             if (val > Save_MaskedHandlerResult_Error) {
-                Menu_Files_dataNotSaved |= (Save_MemoryCard_FindMatchingSaveSlot() == (Menu_Files_saveFilesSlot + Menu_Files_saveFilesPage + 1));
+                Menu_Files_dataNotSaved |= (VS::Save::MemoryCard::FindLiveMatchingSaveSlot() == (Menu_Files_saveFilesSlot + Menu_Files_saveFilesPage + 1));
                 Menu_Files_saveFilesState = Menu_Files_SaveFilesState_Save;
             } else {
                 Menu_Files_saveFilesState = Menu_Files_SaveFilesState_LeaveWithTimer;
@@ -1270,12 +1271,12 @@ int Menu_Files_UpdateSaveFiles(int initPort)
             Menu_Files_backupMainSetting = (*(u_int*)&Input_settings >> 4) & 1;
             *(int*)&Input_settings |= 0x10;
         }
-        Save_MemoryCard_PackageGameSave(val);
-        Save_MemoryCard_WriteSaveStep((val + 1) | ((Menu_Files_saveFilesPort - 1) << 0x10));
+        VS::Save::MemoryCard::PackageLiveGameSave(val);
+        VS::Save::MemoryCard::WriteLiveSaveStep((val + 1) | ((Menu_Files_saveFilesPort - 1) << 0x10));
         Menu_Files_saveFilesState = Menu_Files_SaveFilesState_Validate;
         break;
     case Menu_Files_SaveFilesState_Validate:
-        val = Save_MemoryCard_WriteSaveStep(0);
+        val = VS::Save::MemoryCard::WriteLiveSaveStep(0);
         ++Menu_Files_fileProgressCounter;
         if (val != 0) {
             Audio_Seq_unusedStateFlags.doorEntered = 0;
@@ -1300,7 +1301,7 @@ int Menu_Files_UpdateSaveFiles(int initPort)
                 VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[saveId],
                     Title_memoryCardUiResource + sizeof Title_saveFileSummaries[saveId] * 3,
                     sizeof Title_saveFileSummaries[saveId]);
-                Save_MemoryCard_DecodeSaveBytes(Title_saveFileSummaries[saveId].key,
+                VS::Save::MemoryCard::DecodeLiveSaveBytes(Title_saveFileSummaries[saveId].key,
                     &Title_saveFileSummaries[saveId].summary.base.slotState,
                     sizeof Title_saveFileSummaries[saveId] - sizeof(int));
                 Menu_Files_fileMenuElements[saveId + 5].saveLocation =
@@ -1337,7 +1338,7 @@ int Menu_Files_UpdateSaveFiles(int initPort)
         if (val != 0) {
             if (val < 0) {
                 Menu_Files_saveFilesState = Menu_Files_SaveFilesState_LeaveError;
-            } else if (Save_MemoryCard_CreateSaveFile(Menu_Files_saveFilesPort, Menu_Files_saveFilesPage + Menu_Files_saveFilesSlot + 1) != 0) {
+            } else if (VS::Save::MemoryCard::CreateLiveSaveFile(Menu_Files_saveFilesPort, Menu_Files_saveFilesPage + Menu_Files_saveFilesSlot + 1) != 0) {
                 Menu_Files_saveFilesState = Menu_Files_SaveFilesState_LeaveWithTimer;
                 Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_saveFailed);
             } else {
@@ -1405,12 +1406,12 @@ int Menu_Files_UpdateSaveCard(int initPort)
         break;
     case Menu_Files_SaveCardState_WaitForAnimation:
         if (Menu_Files_AreAnimationsComplete() != 0) {
-            Save_MemoryCard_AdvanceCardReadiness(Menu_Files_saveCardPort);
+            VS::Save::MemoryCard::AdvanceLiveCardReadiness(Menu_Files_saveCardPort);
             Menu_Files_saveCardState = Menu_Files_SaveCardState_HandleEvents;
         }
         break;
     case Menu_Files_SaveCardState_HandleEvents:
-        i = Save_MemoryCard_AdvanceCardReadiness(0) & 3;
+        i = VS::Save::MemoryCard::AdvanceLiveCardReadiness(0) & 3;
         if (i == 0) {
             break;
         }
@@ -1453,7 +1454,7 @@ int Menu_Files_UpdateSaveCard(int initPort)
         }
         break;
     case Menu_Files_SaveCardState_InitSaveMenu:
-        if (Save_MemoryCard_ScanSaveDirectory(Menu_Files_saveCardPort) != 0) {
+        if (VS::Save::MemoryCard::ScanLiveSaveDirectory(Menu_Files_saveCardPort) != 0) {
             Menu_Files_saveCardState = Menu_Files_SaveCardState_AnimateLeave;
             Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_loadfailed);
             break;
@@ -1516,7 +1517,7 @@ int Menu_Files_UpdateLoadFiles(int initPort)
 
     if (initPort != 0) {
         Menu_Files_loadFilesPort = initPort;
-        Menu_Files_loadFilesSlot = Save_MemoryCard_NewestSaveSlot();
+        Menu_Files_loadFilesSlot = VS::Save::MemoryCard::NewestLiveSaveSlot();
         Menu_Files_loadFilesPage = 0;
         if (Menu_Files_loadFilesSlot == 4) {
             Menu_Files_loadFilesPage = 2;
@@ -1599,7 +1600,7 @@ int Menu_Files_UpdateLoadFiles(int initPort)
         if (currentSlot != Save_MaskedHandlerResult_Pending) {
             if (currentSlot >= Save_MaskedHandlerResult_Pending) {
                 int load_port_and_read_flags;
-                Save_MemoryCard_ReadSaveStep(((Menu_Files_loadFilesSlot + Menu_Files_loadFilesPage) + 1) | (load_port_and_read_flags = ((Menu_Files_loadFilesPort - 1) << 16) | 256));
+                VS::Save::MemoryCard::ReadLiveSaveStep(((Menu_Files_loadFilesSlot + Menu_Files_loadFilesPage) + 1) | (load_port_and_read_flags = ((Menu_Files_loadFilesPort - 1) << 16) | 256));
                 Menu_Files_loadFilesState = Menu_Files_LoadFilesState_ApplyLoad;
                 Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_loading);
             } else {
@@ -1608,7 +1609,7 @@ int Menu_Files_UpdateLoadFiles(int initPort)
         }
         break;
     case Menu_Files_LoadFilesState_ApplyLoad:
-        currentSlot = Save_MemoryCard_ReadSaveStep(0);
+        currentSlot = VS::Save::MemoryCard::ReadLiveSaveStep(0);
         ++Menu_Files_fileProgressCounter;
         if (currentSlot != 0) {
             Menu_Files_fileProgressCounter = 0;
@@ -1619,7 +1620,7 @@ int Menu_Files_UpdateLoadFiles(int initPort)
                         (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_loadfailed);
                     break;
                 }
-                switch (Save_MemoryCard_ValidateAndApplyLoadedSave(1)) {
+                switch (VS::Save::MemoryCard::ValidateAndApplyLiveLoadedSave(1)) {
                 case 0:
                     Menu_Files_fileProgressCounter = -16;
                     Audio_PlaySfxCentered(0x7E, VS_SFX_FILEOPCOMPLETE);
@@ -1749,7 +1750,7 @@ long Menu_Files_UpdateLoadCard(int initPort)
         break;
 
     case Menu_Files_LoadCardState_PollSuccess:
-        if (Save_MemoryCard_ScanSaveDirectory(Menu_Files_loadCardPort) != 0) {
+        if (VS::Save::MemoryCard::ScanLiveSaveDirectory(Menu_Files_loadCardPort) != 0) {
             Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_loadfailed);
             Menu_Files_loadCardState = Menu_Files_LoadCardState_Leave;
             break;
@@ -2032,7 +2033,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         if (option != 2) {
             option = Audio_Seq_unusedStateFlags.introState;
             if (((option - 1) < 2U) && (Audio_Seq_unusedStateFlags.clearCount == 0)) {
-                Save_MemoryCard_LoadIntroSnapshotStep(option);
+                VS::Save::MemoryCard::LoadLiveIntroSnapshotStep(option);
                 *state = Menu_Files_GameOverState_RestartIntro;
             } else {
                 *state = Menu_Files_GameOverState_InitFileMenu;
@@ -2077,7 +2078,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         }
         break;
     case Menu_Files_GameOverState_RestartIntro:
-        if (Save_MemoryCard_LoadIntroSnapshotStep(0) != 0) {
+        if (VS::Save::MemoryCard::LoadLiveIntroSnapshotStep(0) != 0) {
             Input_settings = Menu_Files_gameOverSettingsBackup;
             Audio_Seq_unusedStateFlags.difficulty = Menu_Files_gameOverDifficulty;
             Audio_FreeMusicSlot(1);

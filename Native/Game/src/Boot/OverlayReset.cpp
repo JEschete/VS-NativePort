@@ -32,7 +32,6 @@ extern "C" {
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
 #include "Movie/Intro/Playback.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // Call where the original loads MAINMENU.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMainMenuStatics(void)
@@ -146,7 +145,6 @@ void Boot_ResetMenufStatics(void)
 void Boot_ResetTitleStatics(void)
 {
     Movie_Intro_Playback_ResetTitleStatics();
-    Save_MemoryCard_GameFiles_ResetTitleStatics();
 }
 
 }  // extern "C"

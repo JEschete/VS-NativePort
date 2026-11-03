@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Save/MemoryCard/GameFilesLive.hpp"
+#include "Save/SnapshotLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -10,7 +12,6 @@ extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Save/MemoryCard/GameFiles.h"
-#include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
 #include "State/Location.h"
@@ -110,7 +111,7 @@ int Title_SaveCard_ReadSaveSummary(int id)
 
     for (i = 0; i < 3; ++i) {
         int bytesRead;
-        int file = LegacyApi_open(Save_MemoryCard_BuildSaveFilename(port, id), O_RDONLY);
+        int file = LegacyApi_open(VS::Save::MemoryCard::BuildLiveSaveFilename(port, id), O_RDONLY);
 
         if (file == -1) {
             continue;
@@ -120,9 +121,9 @@ int Title_SaveCard_ReadSaveSummary(int id)
         if (bytesRead != sizeof saveInfo) {
             continue;
         }
-        Save_MemoryCard_DecodeSaveBytes(saveInfo[3].key, &saveInfo[3].summary.base.slotState,
+        VS::Save::MemoryCard::DecodeLiveSaveBytes(saveInfo[3].key, &saveInfo[3].summary.base.slotState,
             sizeof saveInfo[3] - sizeof(int));
-        if (Save_MemoryCard_HasChecksumError((Save_GameSaveImage*)saveInfo, 2) == 0) {
+        if (VS::Save::MemoryCard::HasLiveChecksumError((Save_GameSaveImage*)saveInfo, 2) == 0) {
             VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[id - 1], &saveInfo[3], sizeof saveInfo[3]);
             return 0;
         }
@@ -139,7 +140,7 @@ int Title_SaveCard_HasSaveSuffix(int id)
 
     for (i = 0; i < 15; ++i) {
         char* filename = Title_cardDirectoryEntries[i]->name;
-        if ((filename != NULL) && (Save_MemoryCard_ParseSaveFileNumber(filename) != 0)
+        if ((filename != NULL) && (VS::Save::MemoryCard::ParseLiveSaveFileNumber(filename) != 0)
             && (filename[15] == id)) {
             return 1;
         }
@@ -168,7 +169,7 @@ int Title_SaveCard_ScanSaveDirectory(int port)
     }
 
     memset(Title_saveFileSummaries, 0, sizeof *Title_saveFileSummaries * 5);
-    tempFilesDeleted = Save_MemoryCard_DeleteRedundantTemporaryFiles((port - 1) * 16);
+    tempFilesDeleted = VS::Save::MemoryCard::DeleteLiveRedundantTemporaryFiles((port - 1) * 16);
     if (tempFilesDeleted & 0x80) {
         return 1;
     }
@@ -178,7 +179,7 @@ int Title_SaveCard_ScanSaveDirectory(int port)
         if (file == NULL) {
             continue;
         }
-        fileNo = Save_MemoryCard_ParseSaveFileNumber(file->name);
+        fileNo = VS::Save::MemoryCard::ParseLiveSaveFileNumber(file->name);
         if (fileNo != 0) {
             if (fileNo < 0) {
                 fileNo = -fileNo;
@@ -328,7 +329,7 @@ int Title_SaveCard_ValidateAndApplyLoadedSave(int apply_loaded_state)
     Save_GameSaveImage* loaded_save_image = save_image_workspace + 1;
     Save_SaveCipherHeader* cipher_header = &save_image_workspace[1].protectedHeader.cipherHeader;
 
-    Save_MemoryCard_DecodeSaveBytes(cipher_header->cipherKey, &cipher_header->slotHeader.slotState,
+    VS::Save::MemoryCard::DecodeLiveSaveBytes(cipher_header->cipherKey, &cipher_header->slotHeader.slotState,
         sizeof(Save_GameSaveImage) - (uintptr_t) & ((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState);
 
     blockCount = 92;
@@ -336,7 +337,7 @@ int Title_SaveCard_ValidateAndApplyLoadedSave(int apply_loaded_state)
         blockCount = 32;
     }
 
-    if ((Save_MemoryCard_HasChecksumError(save_image_workspace + 1, blockCount) != 0)
+    if ((VS::Save::MemoryCard::HasLiveChecksumError(save_image_workspace + 1, blockCount) != 0)
         || (cipher_header->slotHeader.formatSignature != 0x20000107)) {
         do {
             return 1;
@@ -362,7 +363,7 @@ int Title_SaveCard_ValidateAndApplyLoadedSave(int apply_loaded_state)
     spmcimg2 = &Audio_Seq_unusedArtsStatus;
     VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedArtsStatus, &save_image_workspace[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
     State_playTime.t = save_image_workspace[1].protectedHeader.summary.gameTime.t;
-    Save_MarkAshleySnapshotValid();
+    VS::Save::MarkLiveAshleySnapshotValid();
     Audio_SetMonoOutput(Input_settings.monoSound);
     return 0;
 }
@@ -411,9 +412,9 @@ int Title_SaveCard_ReadSaveStep(int portFileno)
         memset(loaded_save_buffer, 0, sizeof(Save_GameSaveImage));
 
         if (Title_saveReadFileIndex & 8) {
-            filename = Save_MemoryCard_BuildTemporaryFilename(Title_saveReadCardSlot, Title_saveReadFileIndex & 7);
+            filename = VS::Save::MemoryCard::BuildLiveTemporaryFilename(Title_saveReadCardSlot, Title_saveReadFileIndex & 7);
         } else {
-            filename = Save_MemoryCard_BuildSaveFilename(Title_saveReadCardSlot, Title_saveReadFileIndex);
+            filename = VS::Save::MemoryCard::BuildLiveSaveFilename(Title_saveReadCardSlot, Title_saveReadFileIndex);
         }
         Title_saveReadFileDescriptor = LegacyApi_open(filename, O_NOWAIT | O_RDONLY);
         if (Title_saveReadFileDescriptor == -1) {
@@ -485,7 +486,7 @@ int Title_SaveCard_WriteSaveStep(int portFile)
     }
     switch (Title_saveWritePhase) {
     case Save_SaveWriteState_Init:
-        if (LegacyApi_rename(Save_MemoryCard_BuildSaveFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), Save_MemoryCard_BuildTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex))
+        if (LegacyApi_rename(VS::Save::MemoryCard::BuildLiveSaveFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), VS::Save::MemoryCard::BuildLiveTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex))
             != 0) {
             Title_saveWriteErrorCount = 0;
             Title_saveRenameErrorCount = 0;
@@ -502,7 +503,7 @@ int Title_SaveCard_WriteSaveStep(int portFile)
         Title_previousTransferProgress = Title_transferProgressCounter;
         Title_transferProgressTarget = 384;
         Title_transferProgressPosition += progress_x_delta;
-        Title_saveWriteFileDescriptor = LegacyApi_open(Save_MemoryCard_BuildTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), O_NOWAIT | O_WRONLY);
+        Title_saveWriteFileDescriptor = LegacyApi_open(VS::Save::MemoryCard::BuildLiveTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), O_NOWAIT | O_WRONLY);
         ;
         if (Title_saveWriteFileDescriptor == -1) {
             ++Title_saveWriteErrorCount;
@@ -553,7 +554,7 @@ int Title_SaveCard_WriteSaveStep(int portFile)
         Title_saveWritePhase = Save_SaveWriteState_FileVerified;
         break;
     case Save_SaveWriteState_FileVerified:
-        if (LegacyApi_rename(Save_MemoryCard_BuildTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), Save_MemoryCard_BuildSaveFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex))
+        if (LegacyApi_rename(VS::Save::MemoryCard::BuildLiveTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), VS::Save::MemoryCard::BuildLiveSaveFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex))
             == 0) {
             ++Title_saveRenameErrorCount;
             Title_saveWriteErrorCount = (Title_saveRenameErrorCount >> 4);

@@ -354,6 +354,9 @@
     <ClCompile Include="src\RuntimeSnapshotTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SaveMemoryCardTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SaveStoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

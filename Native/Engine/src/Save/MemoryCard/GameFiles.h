@@ -156,34 +156,3 @@ typedef struct Save_GameSaveImage {
 } Save_GameSaveImage;
 
 #endif // VS_SAVE_MEMORYCARD_GAMEFILES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_SAVE_MEMORYCARD_GAMEFILES_H_DECLS)
-#define VS_SAVE_MEMORYCARD_GAMEFILES_H_DECLS
-
-extern char const* Save_MemoryCard_kOriginalFilenameTemplate;
-enum Save_CardEventSignal Save_MemoryCard_PollEvents(enum Save_CardEventGroup type);
-void Save_MemoryCard_ClearEvents(int type);
-char* Save_MemoryCard_BuildSaveFilename(int port, int fileNo);
-char* Save_MemoryCard_BuildTemporaryFilename(int port, int fileNo);
-u_int Save_MemoryCard_NewestSaveSlot(void);
-int Save_MemoryCard_FindMatchingSaveSlot(void);
-int Save_MemoryCard_ParseSaveFileNumber(char* filename);
-int Save_MemoryCard_HasChecksumError(Save_GameSaveImage data[], int sectorCount);
-void Save_MemoryCard_DecodeSaveBytes(u_int key, void* buf, uintptr_t count);
-int Save_MemoryCard_ReadSaveSummary(int id);
-int Save_MemoryCard_HasSaveSuffix(int id);
-int Save_MemoryCard_DeleteRedundantTemporaryFiles(int port);
-int Save_MemoryCard_ScanSaveDirectory(int port);
-int Save_MemoryCard_CreateSaveFile(int port, int id);
-enum Save_CardReadinessResult Save_MemoryCard_AdvanceCardReadiness(int initPort);
-int Save_MemoryCard_ValidateAndApplyLoadedSave(int apply_loaded_state);
-void Save_MemoryCard_PackageGameSave(int targetFile);
-int Save_MemoryCard_ReadSaveStep(int portFileno);
-int Save_MemoryCard_WriteSaveStep(int portFile);
-int Save_MemoryCard_LoadIntroSnapshotStep(int action);
-u_int Save_MemoryCard_NextCipherBits(int value);
-void Save_MemoryCard_PackageClearSave(int targetFile);
-int Save_MemoryCard_AnySaveFileExists(void);
-void Save_MemoryCard_GameFiles_ResetTitleStatics(void);
-
-#endif // VS_SAVE_MEMORYCARD_GAMEFILES_H_DECLS
