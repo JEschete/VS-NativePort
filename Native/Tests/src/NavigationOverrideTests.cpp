@@ -778,8 +778,7 @@ TEST_CASE("Production scripted path request allocates a complete native route",
   Actors_BeginScriptedActorPath(1, &target);
   auto* route = fixture.ActiveRoute();
   REQUIRE(route != nullptr);
-  const auto capacity =
-      VS::Core::Memory::PayloadCapacity(VS::Core::Memory::GameHeap(), route);
+  const auto capacity = VS::Core::Memory::LivePayloadCapacity(route);
   REQUIRE(capacity.has_value());
   CHECK(*capacity >= sizeof(*route));
   CHECK(route->actorId == 1);

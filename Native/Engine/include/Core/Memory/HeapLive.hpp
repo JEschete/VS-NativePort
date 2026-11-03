@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <source_location>
 #include <span>
 
@@ -31,6 +32,10 @@ void FreeLiveFromLowEnd(
 void FreeLiveFromHighEnd(
     const void* payload,
     std::source_location site = std::source_location::current());
+// The bytes a live game heap payload can hold. It refuses the pointers the
+// frees refuse, without counting or reporting them.
+[[nodiscard]] std::expected<std::size_t, HeapError> LivePayloadCapacity(
+    const void* payload);
 
 // Allocations refused and frees rejected since start-up.
 [[nodiscard]] std::uint64_t RefusedLiveHeapRequestCount() noexcept;

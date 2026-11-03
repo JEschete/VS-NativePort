@@ -108,14 +108,22 @@ void* AllocateLiveFromHighEnd(std::size_t bytes, std::source_location site) {
                    AllocateFromHighEnd(GameHeap(), bytes), site);
 }
 
+// Generated callers hold untyped payload pointers; Locate validates them
+// against the allocated block table before anything is released.
 void FreeLiveFromLowEnd(const void* payload, std::source_location site) {
-  Released("FreeFromLowEnd", payload, FreeFromLowEnd(GameHeap(), payload),
+  Released("FreeFromLowEnd", payload,
+           FreeFromLowEnd(GameHeap(), static_cast<const std::byte*>(payload)),
            site);
 }
 
 void FreeLiveFromHighEnd(const void* payload, std::source_location site) {
-  Released("FreeFromHighEnd", payload, FreeFromHighEnd(GameHeap(), payload),
+  Released("FreeFromHighEnd", payload,
+           FreeFromHighEnd(GameHeap(), static_cast<const std::byte*>(payload)),
            site);
+}
+
+std::expected<std::size_t, HeapError> LivePayloadCapacity(const void* payload) {
+  return PayloadCapacity(GameHeap(), static_cast<const std::byte*>(payload));
 }
 
 std::uint64_t RefusedLiveHeapRequestCount() noexcept {

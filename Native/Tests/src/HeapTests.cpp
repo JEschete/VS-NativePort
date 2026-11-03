@@ -475,12 +475,15 @@ TEST_CASE("The live game heap reports refused requests",
   alignas(kHeapUnitBytes) std::array<std::byte, 256> bytes{};
   alignas(kHeapUnitBytes) std::array<std::byte, 64> elsewhere{};
   const memory::ScopedLiveGameHeap scope(bytes);
-  memory::AllocateLiveFromLowEnd(8);
+  void* const kept = memory::AllocateLiveFromLowEnd(8);
+  CHECK(memory::LivePayloadCapacity(kept).value() == kHeapUnitBytes);
   const auto refused = memory::RefusedLiveHeapRequestCount();
   CHECK(memory::AllocateLiveFromLowEnd(1024) == nullptr);
   memory::FreeLiveFromLowEnd(nullptr);
   memory::FreeLiveFromHighEnd(elsewhere.data() + 16);
   CHECK(memory::RefusedLiveHeapRequestCount() == refused + 3);
+  CHECK(memory::LivePayloadCapacity(elsewhere.data()).error() ==
+        HeapError::kOutsideArena);
   CHECK(memory::GameHeap().allocated_blocks().size() == 1);
 }
 

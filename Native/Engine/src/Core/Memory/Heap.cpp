@@ -64,9 +64,8 @@ struct HeapAccess {
 namespace {
 // The index of the allocated block whose payload starts at `payload`.
 std::expected<std::size_t, HeapError> Locate(const Heap& heap,
-                                             const void* payload) {
+                                             const std::byte* address) {
   const std::span<std::byte> arena = HeapAccess::Arena(heap);
-  const auto* address = static_cast<const std::byte*>(payload);
   const std::less<const std::byte*> before;
   if (address == nullptr || arena.empty() || before(address, arena.data()) ||
       !before(address, std::to_address(arena.end()))) {
@@ -104,7 +103,8 @@ std::span<std::byte> Commit(Heap& heap, const HeapBlock& block,
 // main.c:8884/8914: both frees insert the block in address order and
 // coalesce it with the following free block, then the preceding one. They
 // searched the free list from opposite ends and find the same neighbours.
-std::expected<HeapRelease, HeapError> Release(Heap& heap, const void* payload) {
+std::expected<HeapRelease, HeapError> Release(Heap& heap,
+                                              const std::byte* payload) {
   const auto index = Locate(heap, payload);
   if (!index) {
     return std::unexpected(index.error());
@@ -241,17 +241,17 @@ std::expected<std::span<std::byte>, HeapError> AllocateFromHighEnd(
 }
 
 std::expected<HeapRelease, HeapError> FreeFromLowEnd(Heap& heap,
-                                                     const void* payload) {
+                                                     const std::byte* payload) {
   return Release(heap, payload);
 }
 
-std::expected<HeapRelease, HeapError> FreeFromHighEnd(Heap& heap,
-                                                      const void* payload) {
+std::expected<HeapRelease, HeapError> FreeFromHighEnd(
+    Heap& heap, const std::byte* payload) {
   return Release(heap, payload);
 }
 
-std::expected<std::size_t, HeapError> PayloadCapacity(const Heap& heap,
-                                                      const void* payload) {
+std::expected<std::size_t, HeapError> PayloadCapacity(
+    const Heap& heap, const std::byte* payload) {
   const auto index = Locate(heap, payload);
   if (!index) {
     return std::unexpected(index.error());

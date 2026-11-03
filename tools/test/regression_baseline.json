@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 7885484,
+  "assertions": 7885486,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",

@@ -574,8 +574,7 @@ struct DispatchHeap {
   VS::Core::Memory::ScopedLiveGameHeap scope{storage};
 
   static std::size_t Capacity(const void* allocation) {
-    const auto capacity = VS::Core::Memory::PayloadCapacity(
-        VS::Core::Memory::GameHeap(), allocation);
+    const auto capacity = VS::Core::Memory::LivePayloadCapacity(allocation);
     REQUIRE(capacity.has_value());
     return capacity.value_or(0);
   }
