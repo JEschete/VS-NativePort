@@ -1083,6 +1083,9 @@
     <None Include="..\..\lint\baseline.json">
       <Filter>tools\lint</Filter>
     </None>
+    <None Include="..\..\lint\jscpd_files.js">
+      <Filter>tools\lint</Filter>
+    </None>
     <None Include="..\..\lint\native_boundary.py">
       <Filter>tools\lint</Filter>
     </None>

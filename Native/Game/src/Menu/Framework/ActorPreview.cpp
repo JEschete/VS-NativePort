@@ -17,6 +17,7 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
 #include "Field/Actors.h"

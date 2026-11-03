@@ -218,6 +218,7 @@
     <ClCompile Include="src\SeqVoiceCommandsTests.cpp" />
     <ClCompile Include="src\SessionTests.cpp" />
     <ClCompile Include="src\SfxBankSelectionTests.cpp" />
+    <ClCompile Include="src\SkeletonTests.cpp" />
     <ClCompile Include="src\SoundTransitionTests.cpp" />
     <ClCompile Include="src\SourceNormalizationTests.cpp" />
     <ClCompile Include="src\SpecialTerrainTests.cpp" />

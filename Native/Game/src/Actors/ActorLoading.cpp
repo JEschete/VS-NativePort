@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -224,11 +225,11 @@ void Actors_ApplyActorInitialStats(
         actor->limbs[i].hp = actor->limbs[i].maxHp = init->limbs[i].hp;
         actor->limbs[i].agilityDefenseBonus = init->limbs[i].agilityDefenseBonus;
 
-        j = Actors_FindActorBoneTag(actor_id, i, 2);
+        j = VS::Actors::FindLiveActorBoneTag(actor_id, i, 2);
 
         if (j >= 0) {
             actor->limbs[i].anchorBone = j;
-            actor->limbs[i].nameIndex = Actors_ActorBoneTag(actor_id, j, 0);
+            actor->limbs[i].nameIndex = VS::Actors::LiveActorBoneTag(actor_id, j, 0);
         } else {
             actor->limbs[i].nameIndex = 0;
             actor->limbs[i].anchorBone = 0;

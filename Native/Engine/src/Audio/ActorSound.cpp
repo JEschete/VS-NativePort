@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -40,7 +41,7 @@ void Audio_ActorSoundPanAndVolume(int actor_index, int* output_pan, int* output_
     } else {
         if (actor->instance.actionAnimationState || actor->instance.isPreviewModel || !actor->instance.soundEnabled
             || actor->instance.movementMode || actor->instance.locomotionState || actor->instance.motionLocked) {
-            ((void (*)(int, int, SVECTOR*, int))Actors_ProjectActorTaggedBone)(actor_index, 0xFF, &actor->soundPosition, 0);
+            VS::Actors::ProjectLiveActorTaggedBone(actor_index, 0xFF, &actor->soundPosition, 0);
         }
 
         packed_pan_volume = Audio_SfxPanAndVolume(*(int*)&actor->soundPosition, actor->soundPosition.vz);
@@ -78,7 +79,7 @@ void Audio_PlayActorModelSound(Actors_ModelInstance* model_instance, int sound_i
         sp[1] = 0;
     } else {
         if ((*((int*)&actor->instance.quadCount + 1) & 0x3F9F00) != 0x8000) {
-            Actors_ProjectActorTaggedBone(model_instance->slot, 0xFF, &actor->soundPosition, 0);
+            VS::Actors::ProjectLiveActorTaggedBone(model_instance->slot, 0xFF, &actor->soundPosition, 0);
         }
 
         temp = Audio_SfxPanAndVolume(*(int*)&actor->soundPosition, actor->soundPosition.vz);
@@ -128,7 +129,7 @@ void Audio_PlayActorSoundPair(Actors_ActorRecord* source_actor, int first_effect
 
         if (actor->instance.actionAnimationState || actor->instance.isPreviewModel || !actor->instance.soundEnabled
             || actor->instance.movementMode || actor->instance.locomotionState || actor->instance.motionLocked) {
-            Actors_ProjectActorTaggedBone(source_actor->instance.slot, 0xFF, &actor->soundPosition, 0);
+            VS::Actors::ProjectLiveActorTaggedBone(source_actor->instance.slot, 0xFF, &actor->soundPosition, 0);
         }
 
         packed_pan_volume = Audio_SfxPanAndVolume(*(int*)&actor->soundPosition, actor->soundPosition.vz);

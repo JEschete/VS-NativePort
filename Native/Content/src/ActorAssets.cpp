@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -18,6 +19,7 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
@@ -416,7 +418,7 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
             model->reserved13 = 0;
             model->actorId = objectData->subKind;
             model->attachmentSlot = objectData->textureSlot;
-            model->attachmentBone = Actors_FindActorBoneTag(objectData->subKind, objectData->textureSlot, 0);
+            model->attachmentBone = VS::Actors::FindLiveActorBoneTag(objectData->subKind, objectData->textureSlot, 0);
             Content_modelParseResetFlag = 0;
 
             return 0;
@@ -584,7 +586,7 @@ fixPrims:
     model->reserved13 = 0;
     model->actorId = objectData->subKind;
     model->attachmentSlot = objectData->textureSlot;
-    model->attachmentBone = Actors_FindActorBoneTag(objectData->subKind, objectData->textureSlot, 0);
+    model->attachmentBone = VS::Actors::FindLiveActorBoneTag(objectData->subKind, objectData->textureSlot, 0);
     Content_modelParseResetFlag = 0;
 
     return 0;

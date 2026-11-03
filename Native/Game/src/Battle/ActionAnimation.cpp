@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
@@ -40,7 +41,7 @@ void Battle_PlayMeleeAttackAnimation(int actor_slot, SVECTOR* target_position, i
             actor->instance.turnFrames = 0x14;
         }
 
-        target_pitch = Actors_ActorPitchToPoint(actor, target_position);
+        target_pitch = VS::Actors::LiveActorPitchToPoint(actor, target_position);
 
         if (target_pitch >= -0xE4) {
             animation_id = 0x49;
@@ -55,7 +56,7 @@ void Battle_PlayMeleeAttackAnimation(int actor_slot, SVECTOR* target_position, i
         }
 
         Actors_PlayActorAnimation(actor_slot, animation_id, 0, 6);
-        Actors_ResetActorHeadTrackingSpeed(actor);
+        VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 }
 
@@ -81,7 +82,7 @@ void Battle_PlayDefenseAnimation(int actor_slot, SVECTOR* target_position)
             blend_frames = 4;
         }
 
-        target_pitch = Actors_ActorPitchToPoint(actor, target_position);
+        target_pitch = VS::Actors::LiveActorPitchToPoint(actor, target_position);
         animation_id = 0x4F;
 
         if (target_pitch >= -0xE4) {
@@ -92,7 +93,7 @@ void Battle_PlayDefenseAnimation(int actor_slot, SVECTOR* target_position)
         }
 
         Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
-        Actors_ResetActorHeadTrackingSpeed(actor);
+        VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 
     if (actor->instance.slot == 0) {
@@ -210,7 +211,7 @@ void Battle_PlaySpellCastAnimation(int actor_slot, SVECTOR* target_position, int
     }
 
     Actors_PlayActorAnimation(actor_slot, anim, 0, 6);
-    Actors_ResetActorHeadTrackingSpeed(actor);
+    VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
 }
 
 // decomp: BATTLE.PRG func_8009EA14 (src/BATTLE/BATTLE.PRG/30DB0.c:2837)
@@ -258,7 +259,7 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
                     }
 
                     var_s0 = VS::Core::Math::SquareRootInteger(var_s0 + distance_z_squared);
-                    Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
+                    VS::Actors::LiveActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
                     source_pitch = VS::Core::Math::Arctangent2(source_position->vy - bone_position.vy, var_s0);
                 }
 
@@ -329,7 +330,7 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
         Actors_ClearActorMovementRequest(actor);
         actor->animationSet = 0xFF;
         Actors_PlayActorAnimation(actor_slot, var_s0, 0, blend_frames);
-        Actors_ResetActorHeadTrackingSpeed(actor);
+        VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 }
 
@@ -372,7 +373,7 @@ void Battle_PlayChainAbilityAnimation(int actor_slot, SVECTOR* target_position, 
         }
 
         dist = VS::Core::Math::SquareRootInteger(dist + zz);
-        Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
+        VS::Actors::LiveActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
         pitch = VS::Core::Math::Arctangent2(target_position->vy - bone_position.vy, dist);
     }
 
@@ -440,7 +441,7 @@ void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position
             blend_frames = 4;
         }
 
-        target_pitch = Actors_ActorPitchToPoint(actor, target_position);
+        target_pitch = VS::Actors::LiveActorPitchToPoint(actor, target_position);
         animation_id = 0x4F;
 
         if (target_pitch >= -0xE4) {
@@ -451,7 +452,7 @@ void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position
         }
 
         Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
-        Actors_ResetActorHeadTrackingSpeed(actor);
+        VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 
     if (actor->instance.slot == 0) {
@@ -510,7 +511,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
             value = 0xC1;
         }
         Actors_PlayActorAnimation(actorId, value, 0, 8);
-        Actors_ResetActorHeadTrackingSpeed(actor);
+        VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
         return;
     } else if (mode == 1) {
         Actors_FindActorAnimationHeader(actor, 0xFFU, &animation);
@@ -522,7 +523,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
                 if ((u_short)fallbackActor->collisionRadius >= 0x81U) {
                     fallbackActor->instance.turnFrames = 0x14;
                 }
-                pitch = Actors_ActorPitchToPoint(fallbackActor, target);
+                pitch = VS::Actors::LiveActorPitchToPoint(fallbackActor, target);
                 reactionAnimation = 0x48;
                 if (pitch >= -0xE4) {
                     reactionAnimation = 0x49;
@@ -531,7 +532,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
                     }
                 }
                 Actors_PlayActorAnimation(actorId, reactionAnimation, 0, 6);
-                Actors_ResetActorHeadTrackingSpeed(fallbackActor);
+                VS::Actors::ResetLiveActorHeadTrackingSpeed(fallbackActor);
                 return;
             }
         } else {
@@ -549,7 +550,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
                     verticalAngle = -verticalAngle;
                 }
                 value = VS::Core::Math::SquareRootInteger(value + verticalAngle);
-                Actors_ActorBonePosition(actor->instance.slot, 0, &origin, 0);
+                VS::Actors::LiveActorBonePosition(actor->instance.slot, 0, &origin, 0);
                 verticalAngle = VS::Core::Math::Arctangent2(target->vy - origin.vy, value);
             }
             if (verticalAngle < -0xE4) {

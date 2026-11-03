@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -374,7 +375,7 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
     int i;
     Battle_ActionDefinition* action_definition;
 
-    Actors_ActorBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 0, &origin, 0);
+    VS::Actors::LiveActorBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 0, &origin, 0);
     action_definition = &Battle_actionDefinitions[action];
     Battle_actionState->areaShape = action_definition->shape;
     Battle_actionState->areaKind = 1;
@@ -417,13 +418,13 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
                 int limb;
 
                 for (limb = 0; limb < 6; ++limb) {
-                    int part = Actors_FindActorBoneTag(i, limb, 2);
+                    int part = VS::Actors::FindLiveActorBoneTag(i, limb, 2);
 
                     if (part >= 0) {
-                        Actors_ActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                        VS::Actors::LiveActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
                         if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->areaShape),
                                 (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = Actors_ActorBoneTag(i, part, 0);
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = VS::Actors::LiveActorBoneTag(i, part, 0);
                             Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = limb;
                             Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                             Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
@@ -435,7 +436,7 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
                     }
                 }
             } else {
-                Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                VS::Actors::LiveActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
                 if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->areaShape),
                         (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
                     Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = 16;
@@ -487,7 +488,7 @@ void Battle_CollectDirectActionTargets(int source_actor_slot)
         Battle_actionState->rangeAngle = action_definition->angle * 8;
     }
 
-    Actors_ActorTaggedBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 250, &Battle_actionState->rangeOrigin, 0);
+    VS::Actors::LiveActorTaggedBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 250, &Battle_actionState->rangeOrigin, 0);
 
     if (Battle_actionState->isPlayerAction) {
         ((void (*)(void*, void*, int, void*))Battle_SetSphereVolumes)(&Battle_actionState->rangeShape, NULL, 0, NULL);
@@ -506,14 +507,14 @@ void Battle_CollectDirectActionTargets(int source_actor_slot)
             && !(Battle_actors[i]->kind & 0x8000)) {
             if (Battle_categoryTargetsBodyParts[Battle_actionDefinitions[action].category]) {
                 for (j = 0; j < 6; ++j) {
-                    int part = Actors_FindActorBoneTag(i, j, 2);
+                    int part = VS::Actors::FindLiveActorBoneTag(i, j, 2);
 
                     if (part >= 0) {
-                        Actors_ActorLowGroupBonePosition(i, j, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                        VS::Actors::LiveActorLowGroupBonePosition(i, j, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
 
                         if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->rangeShape),
                                 (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = Actors_ActorBoneTag(i, part, 0);
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = VS::Actors::LiveActorBoneTag(i, part, 0);
                             Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = j;
                             Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                             Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
@@ -525,7 +526,7 @@ void Battle_CollectDirectActionTargets(int source_actor_slot)
                     }
                 }
             } else {
-                Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                VS::Actors::LiveActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
 
                 if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->rangeShape),
                         (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
@@ -659,18 +660,18 @@ void Battle_CollectGroundAreaActionTargets(int source_actor_slot)
                     int limb;
 
                     for (limb = 0; limb < 6; ++limb) {
-                        int part = Actors_FindActorBoneTag(i, limb, 2);
+                        int part = VS::Actors::FindLiveActorBoneTag(i, limb, 2);
 
                         if (part >= 0) {
-                            Actors_ActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = Actors_ActorBoneTag(i, part, 0);
+                            VS::Actors::LiveActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = VS::Actors::LiveActorBoneTag(i, part, 0);
                             Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = limb;
                             Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                             ++count;
                         }
                     }
                 } else {
-                    Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                    VS::Actors::LiveActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
                     Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = -1;
                     Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                     ++count;
@@ -680,7 +681,7 @@ void Battle_CollectGroundAreaActionTargets(int source_actor_slot)
     }
 
     Battle_actionState->previewCount = count;
-    Actors_ActorTaggedBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 250, &Battle_actionState->rangeOrigin, 0);
+    VS::Actors::LiveActorTaggedBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 250, &Battle_actionState->rangeOrigin, 0);
 
     if (Battle_actionState->selection.primaryTarget.target.targetActor) {
         Battle_actionState->areaCenter =
@@ -719,7 +720,7 @@ void Battle_InitializeActionTargeting(int action)
         Battle_actionState->rangeY = 4;
         Battle_actionState->rangeZ = 4;
         Battle_actionState->rangeAngle = 0;
-        Actors_ActorTaggedBonePosition(0, 250, &Battle_actionState->rangeOrigin, 0);
+        VS::Actors::LiveActorTaggedBonePosition(0, 250, &Battle_actionState->rangeOrigin, 0);
         ((void (*)(void*, void*, int, void*))Battle_SetSphereVolumes)(&Battle_actionState->rangeShape, NULL, 0, NULL);
 
         Battle_actionState->areaShape = 2;
@@ -730,14 +731,14 @@ void Battle_InitializeActionTargeting(int action)
         Battle_actionState->areaY = 4;
         Battle_actionState->areaZ = 4;
         Battle_actionState->areaAngle = 0;
-        Actors_ActorTaggedBonePosition(1, 250, &Battle_actionState->areaOrigin, 0);
+        VS::Actors::LiveActorTaggedBonePosition(1, 250, &Battle_actionState->areaOrigin, 0);
         ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
 
         for (limb = 0, count = 0; limb < 6; ++limb) {
-            part = Actors_FindActorBoneTag(1, limb, 2);
+            part = VS::Actors::FindLiveActorBoneTag(1, limb, 2);
             if (part >= 0) {
-                Actors_ActorLowGroupBonePosition(1, limb, &Battle_actionState->previews[count].position, 0);
-                Battle_actionState->previews[count].kind = Actors_ActorBoneTag(1, part, 0);
+                VS::Actors::LiveActorLowGroupBonePosition(1, limb, &Battle_actionState->previews[count].position, 0);
+                Battle_actionState->previews[count].kind = VS::Actors::LiveActorBoneTag(1, part, 0);
                 Battle_actionState->previews[count].limb = limb;
                 Battle_actionState->previews[count].actorId = 1;
                 ++count;

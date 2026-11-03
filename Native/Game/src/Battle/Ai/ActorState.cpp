@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
@@ -203,7 +204,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     state->stats = actor->stats;
     Core_Debugf("ai", "created state=%p id=%u viewModel=%p viewStats=%p",
         (void*)state, (unsigned int)state->actorId, (void*)model, (void*)state->stats);
-    Actors_ActorTaggedBonePosition(state->actorId, 0xFA, &result, 0);
+    VS::Actors::LiveActorTaggedBonePosition(state->actorId, 0xFA, &result, 0);
     state->pointHeight = result.vy - model->position[1];
     radius = model->radius;
     if (!id) {
@@ -226,7 +227,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     state->opaque89 = 0;
     state->opaque8A = 0;
     state->opaque103 = 1;
-    state->hasTaggedBone3 = Actors_FindActorBoneTag(id, 2, 3) >= 0;
+    state->hasTaggedBone3 = VS::Actors::FindLiveActorBoneTag(id, 2, 3) >= 0;
     stats = actor->stats;
     state->opaque224 = stats->opaque30;
     state->opaque225 = stats->opaque32;

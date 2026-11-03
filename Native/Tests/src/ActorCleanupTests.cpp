@@ -21,7 +21,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"

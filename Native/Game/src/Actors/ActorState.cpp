@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
@@ -19,6 +20,7 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
 #include "Audio/ActorSound.h"
@@ -255,7 +257,7 @@ void Actors_ResetActorMotionState(int actor_id, int arg1)
         actor->routePhase = 0;
         actor->instance.reactionState = 0;
         actor->instance.poseState = 0;
-        Actors_ResetActorHeadTrackingSpeed(actor);
+        VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
         if (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] != 0) {
             VS::Actors::UploadLiveActorTextureFrame(actor, 0, 0);
             VS::Actors::UploadLiveActorTextureFrame(actor, 1, 0);
@@ -369,7 +371,7 @@ void Actors_BeginActorDeath(int actorId, void* context, int animate)
                 }
             }
             Actors_PlayActorAnimation(actorId, animationId, 0, 6);
-            Actors_ResetActorHeadTrackingSpeed(actor);
+            VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
             actor->instance.actionAnimationState = 1;
         } else {
             actor->instance.actionAnimationState = 2;

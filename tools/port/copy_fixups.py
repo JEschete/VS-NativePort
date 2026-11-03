@@ -214,6 +214,20 @@ _ACTORS_MODEL_RENDERING_LIVE = {
         ("TransformLiveActorRootOffset", "F01012"), ("DrawLiveGimmickModel", "F01020"),
         ("DrawLiveActorWeaponModel", "F01021"), ("InitializeLiveActorModelResources", "F01860")),
 }
+# #276 row 20 (actors-animation-skeleton): the Live adapter each generated caller of a skeleton query uses instead,
+# in the original argument order.
+_ACTORS_SKELETON_LIVE = {
+    r"Native\Game\include\Actors\SkeletonLive.hpp": (
+        ("LiveActorPitchToPoint", "F00822"), ("SetLiveActorHeadTracking", "F00847"),
+        ("ResetLiveActorHeadTrackingSpeed", "F00848"), ("LiveActorTaggedBoneMatrix", "F00874"),
+        ("LiveActorBoneMatrix", "F00875"), ("ProjectLiveActorTaggedBone", "F00876"),
+        ("ProjectLiveActorBone", "F00877"), ("FindLiveActorBoneTag", "F00879"), ("LiveActorBoneTag", "F00880"),
+        ("LiveActorAnchorMatrix", "F00881"), ("LiveActorBoneWorldMatrix", "F00882"),
+        ("LiveActorTaggedBonePosition", "F00883"), ("LiveActorBonePosition", "F00884"),
+        ("LiveActorHighGroupBonePosition", "F00885"), ("LiveActorLowGroupBonePosition", "F00886"),
+        ("LiveActorBoneEndpointPosition", "F00887"), ("LiveActorBoneViewTransform", "F00888"),
+        ("BuildLiveActorPoseAtMatrix", "F00918")),
+}
 
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
@@ -224,6 +238,7 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_APPEARANCE_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_TEXTURE_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_MODEL_RENDERING_LIVE.items() for name, _ in rows},
+    **{f"VS::Actors::{name}": header for header, rows in _ACTORS_SKELETON_LIVE.items() for name, _ in rows},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
        for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
@@ -665,7 +680,8 @@ OWNED_CALL_BINDINGS = {
 } | {fid: f"VS::Items::{name}" for rows in _ITEMS_LIVE.values() for name, fid in rows} | {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_APPEARANCE_LIVE.values() for name, fid in rows} | {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_TEXTURE_LIVE.values() for name, fid in rows} | {
-    fid: f"VS::Actors::{name}" for rows in _ACTORS_MODEL_RENDERING_LIVE.values() for name, fid in rows}
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_MODEL_RENDERING_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_SKELETON_LIVE.values() for name, fid in rows}
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -1432,11 +1448,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("(void*)node", "&parent",
          "tick, lifetime-end and texture-end emissions must not reinterpret "
          "native particle links and texture pointers as parent coordinates or appearance"),
-    ],
-    "F00876": [
-        ("(MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014)",
-         "&((Render_FrameScratch*)Core_ScratchBase())->viewMatrix",
-         "the actor overhead projection must use the rebased native frame matrix"),
     ],
     "F00731": [
         ("*ot = ((u_long)prim << 8) >> 8;", "*ot = LegacyGpu_Handle(prim);",
@@ -2325,24 +2336,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    while ((temp_v0_2 = Field_FindActorAboveGimmick",
          "the top search can have no object; retain preceding stack updates before ending the actor scan"),
     ],
-    "F00887": [
-        ("    Actors_ShpModel* model = actor->instance.model;",
-         "    Actors_ShpModel* model;",
-         "func_800A1C10: the original low-address model read precedes the gimmick fallback; defer it natively"),
-        ("        model = actor->instance.model;\n    }\n\n"
-         "    matrix = Actors_ActorBoneWorldTransform",
-         "    }\n\n    model = actor->instance.model;\n"
-         "    matrix = Actors_ActorBoneWorldTransform",
-         "resolve the actor or gimmick owner before the sole model read"),
-    ],
-    "F00882": [
-        ("    *(MATRIX*)arg2 = *Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);",
-         "    MATRIX* bone_transform = Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);\n"
-         "    if (bone_transform == NULL) return -1;\n"
-         "    *(MATRIX*)arg2 = *bone_transform;",
-         "38C1C.c:216 must propagate the existing missing-owner/weapon status "
-         "without dereferencing a null transform or modifying output storage"),
-    ],
     "F01170": [
         ("    Effects_StartScriptedActorEffect(\n"
          "        VS::Core::Memory::ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(VS::Core::Memory::ReadUnalignedShort(arg0 + 3)));",
@@ -2949,8 +2942,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "allocate full native state, never sizeof the partial initialization view"),
         ("VS::Core::Memory::ClearAlignedWords(state, 0x484)", "VS::Core::Memory::ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState))",
          "clear full native state including candidate pointer array"),
-        ("((void (*)(unsigned char, int, void*, int))Actors_ActorTaggedBonePosition)(state->actorId, 250, result, 0)",
-         "Actors_ActorTaggedBonePosition(state->actorId, 0xFA, &result, 0)", "use actual int/SVECTOR signature"),
+        ("VS::Actors::LiveActorTaggedBonePosition(state->actorId, 250, result, 0)",
+         "VS::Actors::LiveActorTaggedBonePosition(state->actorId, 0xFA, &result, 0)", "use actual int/SVECTOR signature"),
         ("result[1]", "result.vy", "typed tagged bone height"),
         ("    return (short)options >= 0", '    Core_Debugf("ai", "initialized actor=%d state=%p bytes=%u radius=%u height=%u",\n'
          "        id, (void*)state, (unsigned int)sizeof(Battle_Ai_ActorAiState),\n"
@@ -5345,54 +5338,6 @@ REGEX_FIXES += [
         ("Actors::StoreRoomActorState",
          (('arg0', 'actor_id'), ('arg1', 'hidden_in_cache'), ('sp10', 'placement'), ('temp_s0', 'actor'), ('temp_s1', 'stats'), ('temp_v0', 'cached_state')),
          "F00007 146C.c:840-882 caches actor stats/limbs/statuses/AI and placement by roomSpawnIndex; arg1 writes isHidden regardless of action/death flag, with death-state HP forced1. Placement query is filled then saved placement overrides packed tile."),
-        ("Actors::ActorPitchToPoint",
-         (('arg0', 'actor'), ('arg1', 'target_point'), ('sp10', 'root_bone_position'), ('var_s0', 'horizontal_distance_work'), ('var_v1', 'z_distance_squared')),
-         "F00822 30DB0.c:2525: var_s0 progresses X delta->X squared->sqrt(Xsq+Zsq); var_v1 progresses Z delta->Z squared. Bone0 position provides reference Y for atan2(targetY-rootY,horizontal distance). Preserve reuse/arithmetic."),
-        ("Actors::SetActorHeadTracking",
-         (('arg0', 'actor_id'), ('arg1', 'tracking_target'), ('arg2', 'tracking_vector'), ('arg3', 'tracking_step'), ('temp_s0', 'actor')),
-         "F00847 30DB0.c:3512 checks auxiliary bone tag2, stores headTrackTarget and vector/current look angles, with -1 restoring default pad. UpdateMotionAndLookAt clamps yaw/pitch delta to headTracking.pad (Animation.c:2094), proving angular step not duration."),
-        ("Actors::ResetActorHeadTrackingSpeed",
-         (('arg0', 'actor'),),
-         "F00848 30DB0.c:3540 sets tracking pad30 or20 depending collision radius>128; consumer clamps each look-angle update."),
-        ("Actors::ActorTaggedBoneMatrix",
-         (('arg0', 'actor_id'), ('arg1', 'bone_tag'), ('arg2', 'matrix_out'), ('arg3', 'bone_length_out'), ('temp_v0', 'bone_index')),
-         "F00874 30DB0.c:4200 resolves tag via FindActorBoneTag mode0, forwards resolved index to ActorBoneMatrix with matrix/length output pointers."),
-        ("Actors::ActorBoneMatrix",
-         (('arg0', 'actor_id'), ('arg1', 'bone_index'), ('arg2', 'matrix_out'), ('arg3', 'bone_length_out'), ('var_t0', 'model_owner')),
-         "F00875 30DB0.c:4210 resolves actor or layout-compatible gimmick, exports indexed bone matrix and model bone length; model_owner intentionally includes fallback."),
-        ("Actors::ProjectActorTaggedBone",
-         (('arg0', 'actor_id'), ('arg1', 'bone_tag'), ('arg2', 'screen_position_out'), ('arg3', 'endpoint'), ('sp10', 'packed_screen_position'), ('sp14', 'depth_cue_or_status'), ('sp18', 'projection_flags'), ('new_var', 'screen_y_halfword'), ('new_var2', 'screen_y'), ('temp_a1', 'actor'), ('temp_v1', 'gimmick'), ('var_v0', 'resolved_bone_index'), ('v1', 'projection_result')),
-         "F00876 30DB0.c:4224-4278: tagFB uses target point then RotTransPers outputs packed screen XY, depth-cue value and flag; high short extracted as Y. sp14 is also overwritten by unused bone/projection status on other branch, so name records both uses. Other tags resolve bone then project endpoint. Native-only cast has separate prototype-name bindings; see secondary_bindings. Use resolved_bone_index for the enclosing local, distinct from bone_index declared in the protected cast prototype. This also eliminates the purely lexical same-target overlap during simulation."),
-        ("Actors::ProjectActorBone",
-         (('arg0', 'actor_id'), ('arg1', 'bone_index'), ('arg2', 'screen_position_out'), ('arg3', 'endpoint'), ('var_v0', 'projection_result')),
-         "F00877 30DB0.c:4280 forwards actor/bone/output/endpoint to func_800A141C, propagates negative result. Native cast parameter names are separate prototype bindings."),
-        ("Actors::FindActorBoneTag",
-         (('arg0', 'actor_id'), ('arg1', 'tag_value'), ('arg2', 'tag_kind'), ('var_v0_2', 'model_owner'), ('var_v1', 'model'), ('new_var', 'high_limb_matches')),
-         "F00879 38C1C.c:103-159: search selector0 tag,1 upper limb nibble,2 lower nibble,3 auxiliary tag. new_var is upper-nibble equality to tag+1. model owner may be actor or gimmick."),
-        ("Actors::ActorBoneTag",
-         (('arg0', 'actor_id'), ('arg1', 'bone_index'), ('arg2', 'tag_kind')),
-         "F00880 38C1C.c:161-193 reads indexed bone tag or selected limb nibble, with zero-limb sentinel -3. Matches F00879 modes0..2."),
-        ("Actors::ActorAnchorMatrix",
-         (('arg0', 'actor_id'), ('arg1', 'bone_selector'), ('arg2', 'matrix_out'), ('arg3', 'bone_length_out'), ('var_v0', 'bone_index_or_status')),
-         "F00881 38C1C.c:195-214: FD selector maps to bone0 then var_v0 overwritten with ActorBoneWorldMatrix status; FD restores actor Y translation. Keep packed matrix int indexing unchanged."),
-        ("Actors::ActorBoneWorldMatrix",
-         (('arg0', 'actor_id'), ('arg1', 'bone_selector'), ('arg2', 'matrix_out'), ('arg3', 'bone_length_out')),
-         "F00882 38C1C.c:216-244: copies world transform, writes bone length from actor/gimmick or equipped weapon selector4x, root selectorFF length0."),
-        ("Actors::ActorTaggedBonePosition",
-         (('arg0', 'actor_id'), ('arg1', 'bone_tag'), ('arg2', 'position_out'), ('arg3', 'endpoint'), ('var_a2', 'model_owner'), ('var_v0', 'position_query_value')),
-         "F00883 38C1C.c:246-298: FB target point/FD actor origin/FA scaled anchor height or resolved bone endpoints. var_v0 has three explicit roles: scaled height in FA branch, bone selector/index elsewhere, then endpoint status. Broad query-value name avoids falsely claiming a single bone/status role."),
-        ("Actors::ActorBonePosition",
-         (('arg0', 'actor_id'), ('arg1', 'bone_index'), ('arg2', 'position_out'), ('arg3', 'endpoint'), ('var_v0', 'query_result')),
-         "F00884 38C1C.c:300: direct endpoint-position wrapper propagates negative status; endpoint0 is origin,1 tip,otherwise midpoint in F00887."),
-        ("Actors::ActorHighGroupBonePosition",
-         (('arg0', 'actor_id'), ('arg1', 'limb_index'), ('arg2', 'position_out'), ('arg3', 'endpoint'), ('var_v0', 'bone_index_or_status')),
-         "F00885 38C1C.c:311: resolves high limb nibble by FindActorBoneTag mode1, reuses local for endpoint-position result."),
-        ("Actors::ActorLowGroupBonePosition",
-         (('arg0', 'actor_id'), ('arg1', 'limb_index'), ('arg2', 'position_out'), ('arg3', 'endpoint'), ('var_v0', 'bone_index_or_status')),
-         "F00886 38C1C.c:328: resolves low limb nibble by FindActorBoneTag mode2, reuses local for endpoint-position result."),
-        ("Actors::BuildActorPoseAtMatrix",
-         (('arg0', 'actor_id'), ('arg1', 'camera_matrix'), ('temp_s1', 'actor')),
-         "F00918 3A1A0.c:1036 temporarily hides actor, sets one frame/step, prepares camera matrices from arg1, root transform and actor drawing, restores prior visible flag."),
     )
     for old, new in bindings
 ]

@@ -1,571 +1,211 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ModelDrawingLive.hpp"
-#include "Actors/ModelRenderingLive.hpp"
+// Hand-maintained (tools/port/owned.csv).
+// Typed skeleton queries (Skeleton.hpp); SkeletonLive.cpp binds them to the
+// actor, gimmick and weapon tables.
+#include "Actors/Skeleton.hpp"  // NOLINT(build/include): native C++ interface.
+
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
+
+#include "Actors/ModelDrawing.hpp"
+#include "Actors/ModelRendering.hpp"
+#include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Render/CameraViewLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelDraw.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/WeaponModel.h"
-#include "Field/GimmickLookup.h"
-#include "Field/Gimmicks.h"
-#include "Render/ModelDraw.h"
-#include "Render/ModelWorkspace.h"
-#include "Render/Palette.h"
-#include "Render/Render.h"
 
-// decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
-Actors_SkeletonPose Actors_skeletonPose;
+namespace VS::Actors {
+namespace {
+using Core::Math::Transform3;
+using Core::Math::Vec3;
+using Core::Math::WrappingAdd;
+using Core::Math::WrappingMultiply;
+using Core::Math::WrappingNegate;
+using Core::Math::WrappingSubtract;
 
-// decomp: D_800F3C78 (D_800F3C78@BATTLE/BATTLE.PRG)
-MATRIX Actors_skeletonRootMatrix;
+constexpr std::int32_t kTagByteMask = 0xFF;
+constexpr unsigned kHighLimbShift = 4;
+constexpr std::uint8_t kLowLimbMask = 0x0F;
+// Limb groups are stored one above their index, so 0 names no group.
+constexpr std::int32_t kLimbGroupBias = 1;
+constexpr std::int16_t kHeadTrackingStep = 30;
+constexpr std::int16_t kWideHeadTrackingStep = 20;
+constexpr std::uint16_t kWideActorRadius = 128;
+constexpr std::uint32_t kHalfwordMask = 0xFFFFU;
+constexpr unsigned kHalfwordBits = 16;
 
-// decomp: vs_battle_wepModels (vs_battle_wepModels@BATTLE/BATTLE.PRG)
-Actors_WeaponModel* Actors_weaponModels[20];
-
-// decomp: D_800F49B8 (D_800F49B8@BATTLE/BATTLE.PRG)
-MATRIX Actors_boneMatrixScratch;
-
-// decomp: BATTLE.PRG func_8009E228 (src/BATTLE/BATTLE.PRG/30DB0.c:2525)
-int Actors_ActorPitchToPoint(Actors_ActorRecord* actor, SVECTOR* target_point)
-{
-    SVECTOR root_bone_position;
-    int horizontal_distance_work;
-    int z_distance_squared;
-
-    if (target_point == NULL) {
-        return 0;
-    }
-
-    horizontal_distance_work = target_point->vx - actor->instance.position.vx;
-    horizontal_distance_work = horizontal_distance_work * horizontal_distance_work;
-    z_distance_squared = target_point->vz - actor->instance.position.vz;
-
-    if (horizontal_distance_work < 0) {
-        horizontal_distance_work = -horizontal_distance_work;
-    }
-
-    z_distance_squared = z_distance_squared * z_distance_squared;
-
-    if (z_distance_squared < 0) {
-        z_distance_squared = -z_distance_squared;
-    }
-
-    horizontal_distance_work = VS::Core::Math::SquareRootInteger(horizontal_distance_work + z_distance_squared);
-    Actors_ActorBonePosition(actor->instance.slot, 0, &root_bone_position, 0);
-    return VS::Core::Math::Arctangent2(target_point->vy - root_bone_position.vy, horizontal_distance_work);
+[[nodiscard]] std::int16_t Halfword(std::int32_t value) noexcept {
+  return static_cast<std::int16_t>(value);
 }
 
-// decomp: BATTLE.PRG func_8009FC60 (src/BATTLE/BATTLE.PRG/30DB0.c:3512)
-int Actors_SetActorHeadTracking(int actor_id, int tracking_target, SVECTOR* tracking_vector, int tracking_step)
-{
-    int _[2] __attribute__((unused));
-    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
-
-    if (actor == NULL) {
-        return -1;
-    }
-
-    if (Actors_FindActorBoneTag(actor_id, 2, 3) < 0) {
-        return -2;
-    }
-
-    actor->headTrackTarget = tracking_target;
-    if (tracking_vector == NULL) {
-        actor->headTracking.vx = actor->instance.lookPitch;
-        actor->headTracking.vy = actor->instance.lookYaw;
-    } else {
-        actor->headTracking = *tracking_vector;
-    }
-    if (tracking_step == -1) {
-        Actors_ResetActorHeadTrackingSpeed(actor);
-    } else {
-        actor->headTracking.pad = tracking_step;
-    }
-    return 0;
+[[nodiscard]] Vec3 Halfwords(Vec3 value) noexcept {
+  return {Halfword(value.x), Halfword(value.y), Halfword(value.z)};
 }
 
-// decomp: BATTLE.PRG func_8009FD38 (src/BATTLE/BATTLE.PRG/30DB0.c:3540)
-void Actors_ResetActorHeadTrackingSpeed(Actors_ActorRecord* actor)
-{
-    actor->headTracking.pad = 30;
-    if (actor->collisionRadius > 128) {
-        actor->headTracking.pad = 20;
-    }
+// The square of a difference with the original's wrapping product, negated
+// when the product wrapped negative.
+[[nodiscard]] std::int32_t WrappedSquare(std::int32_t delta) noexcept {
+  const std::int32_t square = WrappingMultiply(delta, delta);
+  return square < 0 ? WrappingNegate(square) : square;
 }
 
-// decomp: BATTLE.PRG func_800A1178 (src/BATTLE/BATTLE.PRG/30DB0.c:4200)
-int Actors_ActorTaggedBoneMatrix(int actor_id, int bone_tag, MATRIX* matrix_out, u_long* bone_length_out)
-{
-    int bone_index = Actors_FindActorBoneTag(actor_id, bone_tag, 0);
-    if (bone_index < 0) {
-        return bone_index;
-    }
-    Actors_ActorBoneMatrix(actor_id, bone_index, matrix_out, bone_length_out);
-    return 0;
+[[nodiscard]] std::int32_t HighLimb(const BoneLabels& bone) noexcept {
+  return bone.limb_ids >> kHighLimbShift;
 }
 
-// decomp: BATTLE.PRG func_800A11D8 (src/BATTLE/BATTLE.PRG/30DB0.c:4210)
-void Actors_ActorBoneMatrix(int actor_id, int bone_index, MATRIX* matrix_out, u_long* bone_length_out)
-{
-    Actors_ActorRecord* model_owner = Actors_actorRecords[actor_id];
-
-    if (model_owner == NULL) {
-        model_owner = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
-        if (model_owner == NULL) {
-            return;
-        }
-    }
-    *matrix_out = model_owner->boneMatrices[bone_index];
-    *bone_length_out = model_owner->instance.model->bones[bone_index].length;
+[[nodiscard]] std::int32_t LowLimb(const BoneLabels& bone) noexcept {
+  return bone.limb_ids & kLowLimbMask;
 }
 
-// decomp: BATTLE.PRG func_800A1280 (src/BATTLE/BATTLE.PRG/30DB0.c:4224)
-int Actors_ProjectActorTaggedBone(int actor_id, int bone_tag, SVECTOR* screen_position_out, int endpoint)
-{
-    long packed_screen_position;
-    long depth_cue_or_status;
-    long projection_flags;
-    int resolved_bone_index;
-    int projection_result;
-
-    if (bone_tag == 0xFB) {
-        short* screen_y_halfword;
-        unsigned int screen_y;
-        Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
-
-        if (actor == NULL) {
-            Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(actor_id);
-            if (gimmick == NULL) {
-                return -1;
-            }
-            screen_position_out->vx = gimmick->positionX;
-            screen_position_out->vz = gimmick->positionZ;
-            screen_position_out->vy = gimmick->positionY - 0xC0;
-        } else {
-            if (actor->instance.reactionState) {
-                return -1;
-            }
-            screen_position_out->vx = actor->instance.position.vx;
-            screen_position_out->vz = actor->instance.position.vz;
-            screen_position_out->vy = actor->instance.position.vy - actor->targetPointHeight;
-        }
-
-        Core_Gte_SetRotMatrix(&((Render_FrameScratch*)Core_ScratchBase())->viewMatrix);
-        Core_Gte_SetTransMatrix(&((Render_FrameScratch*)Core_ScratchBase())->viewMatrix);
-        screen_position_out->vz = Core_Gte_RotTransPers(screen_position_out, &packed_screen_position, &depth_cue_or_status, &projection_flags);
-        screen_position_out->vx = packed_screen_position;
-        screen_y_halfword = &((short*)(&packed_screen_position))[1];
-        screen_y = *screen_y_halfword;
-        screen_position_out->vy = screen_y;
-
-        return 0;
-    }
-
-    resolved_bone_index = Actors_FindActorBoneTag(actor_id, bone_tag, 0);
-    depth_cue_or_status = resolved_bone_index;
-
-    if (resolved_bone_index < 0) {
-        return resolved_bone_index;
-    }
-
-    projection_result = VS::Actors::ProjectLiveActorBoneEndpoint(actor_id, resolved_bone_index, (int*)screen_position_out, endpoint);
-    depth_cue_or_status = projection_result;
-    if (projection_result < 0) {
-        return projection_result;
-    }
-    return 0;
+[[nodiscard]] bool LabelMatches(const BoneLabels& bone, std::int32_t tag,
+                                BoneTagKind kind) noexcept {
+  switch (kind) {
+    case BoneTagKind::kTag:
+      return bone.tag == tag;
+    case BoneTagKind::kHighLimb:
+      return HighLimb(bone) == tag + kLimbGroupBias;
+    case BoneTagKind::kLowLimb:
+      return LowLimb(bone) == tag + kLimbGroupBias;
+    case BoneTagKind::kAuxiliary:
+      return bone.auxiliary_tag == tag;
+  }
+  return false;
 }
 
-// decomp: BATTLE.PRG func_800A13EC (src/BATTLE/BATTLE.PRG/30DB0.c:4280)
-int Actors_ProjectActorBone(int actor_id, int bone_index, int* screen_position_out, int endpoint)
-{
-    int projection_result = VS::Actors::ProjectLiveActorBoneEndpoint(actor_id, bone_index, screen_position_out, endpoint);
+[[nodiscard]] std::optional<std::int32_t> LimbGroup(
+    std::int32_t nibble) noexcept {
+  if (nibble == 0) return std::nullopt;
+  return nibble;
+}
+}  // namespace
 
-    if (projection_result < 0) {
-        return projection_result;
-    }
-
-    return 0;
+std::optional<BoneTagKind> ClassifyBoneTagKind(int kind) noexcept {
+  if (kind < static_cast<int>(BoneTagKind::kTag) ||
+      kind > static_cast<int>(BoneTagKind::kAuxiliary)) {
+    return std::nullopt;
+  }
+  return static_cast<BoneTagKind>(kind);
 }
 
 // decomp: BATTLE.PRG func_800A152C (src/BATTLE/BATTLE.PRG/38C1C.c:103)
-int Actors_FindActorBoneTag(int actor_id, int tag_value, int tag_kind)
-{
-    Actors_ActorRecord* model_owner;
-    Actors_ShpModel* model;
-    int i;
-    int nBones;
-    int high_limb_matches;
-
-    model_owner = Actors_actorRecords[actor_id];
-
-    if (model_owner == NULL) {
-        model_owner = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
-        if (model_owner == NULL) {
-            return -1;
-        }
-    }
-
-    nBones = model_owner->instance.boneCount;
-    model = model_owner->instance.model;
-
-    do {
-        if (tag_value == 0xFF) {
-            return 0;
-        }
-    } while (0);
-
-    for (i = 0; i < nBones; ++i) {
-        switch (tag_kind) {
-        case 0:
-            if (model->bones[i].tag == (tag_value & 0xFF)) {
-                return i;
-            }
-            break;
-
-        case 1:
-            high_limb_matches = (model->bones[i].limbIds >> 4) == ((tag_value & 0xFF) + 1);
-            if (high_limb_matches) {
-                return i;
-            }
-            break;
-
-        case 2:
-            if ((model->bones[i].limbIds & 0xF) == ((tag_value & 0xFF) + 1)) {
-                return i;
-            }
-            break;
-
-        case 3:
-            if (model->bones[i].auxiliaryTag == (tag_value & 0xFF)) {
-                return i;
-            }
-            break;
-        }
-    }
-
-    return -4;
+std::optional<std::size_t> FindBoneTag(std::span<const BoneLabels> bones,
+                                       std::int32_t tag,
+                                       BoneTagKind kind) noexcept {
+  if (tag == kRootSelector) return 0;
+  const std::int32_t wanted = tag & kTagByteMask;
+  for (std::size_t bone = 0; bone < bones.size(); ++bone) {
+    if (LabelMatches(bones[bone], wanted, kind)) return bone;
+  }
+  return std::nullopt;
 }
 
 // decomp: BATTLE.PRG func_800A1648 (src/BATTLE/BATTLE.PRG/38C1C.c:161)
-int Actors_ActorBoneTag(int actor_id, int bone_index, int tag_kind)
-{
-    Actors_ActorRecord* actor;
-    Actors_ShpModel* model;
-    u_int v;
-
-    actor = Actors_actorRecords[actor_id];
-    if (actor == NULL) {
-        actor = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
-        if (actor == NULL) {
-            return -1;
-        }
-    }
-    model = actor->instance.model;
-    switch (tag_kind) {
-    case 0:
-        v = model->bones[bone_index].tag;
-        break;
-    case 1:
-        v = model->bones[bone_index].limbIds >> 4;
-        if (v == 0) {
-            return -3;
-        }
-        break;
-    case 2:
-        v = model->bones[bone_index].limbIds & 0xF;
-        if (v == 0) {
-            return -3;
-        }
-        break;
-    }
-    return v;
+std::optional<std::int32_t> BoneTagValue(const BoneLabels& bone,
+                                         BoneTagKind kind) noexcept {
+  switch (kind) {
+    case BoneTagKind::kTag:
+      return bone.tag;
+    case BoneTagKind::kHighLimb:
+      return LimbGroup(HighLimb(bone));
+    case BoneTagKind::kLowLimb:
+      return LimbGroup(LowLimb(bone));
+    case BoneTagKind::kAuxiliary:
+      return bone.auxiliary_tag;
+  }
+  return std::nullopt;
 }
 
-// decomp: BATTLE.PRG func_800A1720 (src/BATTLE/BATTLE.PRG/38C1C.c:195)
-int Actors_ActorAnchorMatrix(int actor_id, int bone_selector, int* matrix_out, int* bone_length_out)
-{
-    int bone_index_or_status = bone_selector;
-
-    if (bone_selector == 0xFD) {
-        bone_index_or_status = 0;
-    }
-
-    bone_index_or_status = Actors_ActorBoneWorldMatrix(actor_id, bone_index_or_status, matrix_out, bone_length_out);
-
-    if (bone_index_or_status < 0) {
-        return bone_index_or_status;
-    }
-
-    if (bone_selector == 0xFD) {
-        matrix_out[6] = Actors_actorRecords[actor_id]->instance.position.vy;
-    }
-
-    return 0;
+// decomp: BATTLE.PRG func_8009E228 (src/BATTLE/BATTLE.PRG/30DB0.c:2525)
+std::int32_t PitchToPoint(Vec3 origin, Vec3 target,
+                          std::int32_t root_height) noexcept {
+  const std::int32_t horizontal = Core::Math::SquareRootInteger(
+      WrappingAdd(WrappedSquare(WrappingSubtract(target.x, origin.x)),
+                  WrappedSquare(WrappingSubtract(target.z, origin.z))));
+  return Core::Math::Arctangent2(WrappingSubtract(target.y, root_height),
+                                 horizontal);
 }
 
-// decomp: BATTLE.PRG func_800A17BC (src/BATTLE/BATTLE.PRG/38C1C.c:216)
-int Actors_ActorBoneWorldMatrix(int actor_id, int bone_selector, void* matrix_out, int* bone_length_out)
-{
-    Actors_ActorRecord* actor;
-    Actors_ActorRecord* obj;
-    Actors_WeaponModel* model;
-    int _[22] __attribute__((unused));
-
-    MATRIX* bone_transform = Actors_ActorBoneWorldTransform(actor_id, bone_selector, &Actors_boneMatrixScratch);
-    if (bone_transform == NULL) return -1;
-    *(MATRIX*)matrix_out = *bone_transform;
-
-    actor = Actors_actorRecords[actor_id];
-    if (actor == NULL) {
-        obj = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
-        if (obj == NULL) {
-            return 0;
-        }
-        *bone_length_out = obj->instance.model->bones[bone_selector].length;
-    } else if (bone_selector == 0xFF) {
-        *bone_length_out = 0;
-    } else if ((bone_selector & 0xF0) == 0x40) {
-        model = Actors_weaponModels[actor_id * 2];
-        if (model == NULL) {
-            return 0;
-        }
-        *bone_length_out = ((Actors_ShpModel*)model->sectionOffsets)->bones[bone_selector - 0x3F].length;
-    } else {
-        *bone_length_out = actor->instance.model->bones[bone_selector].length;
-    }
-    return 0;
+// decomp: BATTLE.PRG func_8009FD38 (src/BATTLE/BATTLE.PRG/30DB0.c:3540)
+std::int16_t HeadTrackingSpeed(std::uint16_t collision_radius) noexcept {
+  return collision_radius > kWideActorRadius ? kWideHeadTrackingStep
+                                             : kHeadTrackingStep;
 }
 
-// decomp: BATTLE.PRG func_800A190C (src/BATTLE/BATTLE.PRG/38C1C.c:246)
-int Actors_ActorTaggedBonePosition(int actor_id, int bone_tag, SVECTOR* position_out, int endpoint)
-{
-    Actors_ActorRecord* model_owner;
-    int position_query_value;
-
-    if (bone_tag == 0xFB) {
-        model_owner = Actors_actorRecords[actor_id];
-
-        if (model_owner == NULL) {
-            model_owner = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
-            if (model_owner == NULL) {
-                return -1;
-            }
-
-            *position_out = model_owner->instance.position;
-            position_out->vy -= 0xC0;
-        } else {
-            *position_out = model_owner->instance.position;
-            position_out->vy -= model_owner->targetPointHeight;
-        }
-
-        return 0;
-    }
-
-    if (bone_tag == 0xFD) {
-        *position_out = Actors_actorRecords[actor_id]->instance.position;
-        return 0;
-    }
-
-    if ((bone_tag & 0xF0) == 0x40) {
-        position_query_value = bone_tag;
-    } else if (bone_tag == 0xFA) {
-        model_owner = Actors_actorRecords[actor_id];
-        *position_out = model_owner->instance.position;
-        position_query_value = model_owner->anchorHeight * model_owner->scale / ONE;
-        position_out->vy += position_query_value;
-        return 0;
-    } else {
-        position_query_value = Actors_FindActorBoneTag(actor_id, bone_tag, 0);
-
-        if (position_query_value < 0) {
-            return position_query_value;
-        }
-    }
-
-    position_query_value = Actors_ActorBoneEndpointPosition(actor_id, position_query_value, position_out, endpoint);
-
-    if (position_query_value < 0) {
-        return position_query_value;
-    }
-
-    return 0;
+// decomp: BATTLE.PRG func_8009FC60 (src/BATTLE/BATTLE.PRG/30DB0.c:3512)
+HeadTracking StartHeadTracking(const HeadTracking& current,
+                               const HeadTrackingRequest& request,
+                               const ActorLook& look) noexcept {
+  HeadTracking tracking = current;
+  tracking.target = static_cast<std::int8_t>(request.target);
+  if (request.aim) {
+    tracking.aim_x = Halfword(request.aim->x);
+    tracking.aim_y = Halfword(request.aim->y);
+    tracking.aim_z = Halfword(request.aim->z);
+  } else {
+    tracking.aim_x = static_cast<std::int16_t>(look.pitch);
+    tracking.aim_y = static_cast<std::int16_t>(look.yaw);
+  }
+  tracking.speed = request.step == kHeadTrackingUsesRadiusStep
+                       ? HeadTrackingSpeed(look.collision_radius)
+                       : Halfword(request.step);
+  return tracking;
 }
 
-// decomp: BATTLE.PRG func_800A1AF8 (src/BATTLE/BATTLE.PRG/38C1C.c:300)
-int Actors_ActorBonePosition(int actor_id, int bone_index, SVECTOR* position_out, int endpoint)
-{
-    int query_result = Actors_ActorBoneEndpointPosition(actor_id, bone_index, position_out, endpoint);
-
-    if (query_result < 0) {
-        return query_result;
-    }
-
-    return 0;
+// decomp: BATTLE.PRG func_800A1DE8 (src/BATTLE/BATTLE.PRG/38C1C.c:400): the
+// saturating MulMatrix of the camera and the bone, then RotTrans of the
+// bone's offset from the camera, reduced to halfwords, with no translation.
+Transform3 BoneViewTransform(const Transform3& camera,
+                             const Transform3& bone) noexcept {
+  const Vec3 offset{WrappingSubtract(bone.translation.x, camera.translation.x),
+                    WrappingSubtract(bone.translation.y, camera.translation.y),
+                    WrappingSubtract(bone.translation.z, camera.translation.z)};
+  return Transform3{
+      Core::Math::MultiplyMatrixIntoRight(camera.rotation, bone.rotation),
+      Core::Math::RotateTranslate(Transform3{camera.rotation, Vec3{}}, offset)};
 }
 
-// decomp: BATTLE.PRG func_800A1B28 (src/BATTLE/BATTLE.PRG/38C1C.c:311)
-int Actors_ActorHighGroupBonePosition(int actor_id, int limb_index, SVECTOR* position_out, int endpoint)
-{
-    int bone_index_or_status = Actors_FindActorBoneTag(actor_id, limb_index, 1);
-
-    if (bone_index_or_status < 0) {
-        return bone_index_or_status;
-    }
-
-    bone_index_or_status = Actors_ActorBoneEndpointPosition(actor_id, bone_index_or_status, position_out, endpoint);
-
-    if (bone_index_or_status < 0) {
-        return bone_index_or_status;
-    }
-
-    return 0;
+// decomp: BATTLE.PRG func_800A1DE8 (src/BATTLE/BATTLE.PRG/38C1C.c:400), bone
+// 0xFF: the root key halved and scaled by the actor scale in halfwords (the
+// unit-scale root offset of func_800AEAE8), then func_800B07DC; the matrix
+// takes the placed root offset as its translation.
+Transform3 RootSelectorTransform(Core::Math::Angles3 angles, Vec3 root_key,
+                                 std::int32_t actor_scale,
+                                 Vec3 position) noexcept {
+  const Vec3 unit_scale{kUnitActorScale, kUnitActorScale, kUnitActorScale};
+  const RootTransform root = TransformRootOffset(
+      angles, ActorRootOffset(root_key, unit_scale, actor_scale), position);
+  return Transform3{root.matrix.rotation, root.root_offset};
 }
 
-// decomp: BATTLE.PRG func_800A1B9C (src/BATTLE/BATTLE.PRG/38C1C.c:328)
-int Actors_ActorLowGroupBonePosition(int actor_id, int limb_index, SVECTOR* position_out, int endpoint)
-{
-    int bone_index_or_status = Actors_FindActorBoneTag(actor_id, limb_index, 2);
-
-    if (bone_index_or_status < 0) {
-        return bone_index_or_status;
-    }
-
-    bone_index_or_status = Actors_ActorBoneEndpointPosition(actor_id, bone_index_or_status, position_out, endpoint);
-
-    if (bone_index_or_status < 0) {
-        return bone_index_or_status;
-    }
-
-    return 0;
+// decomp: BATTLE.PRG func_800A1C10 (src/BATTLE/BATTLE.PRG/38C1C.c:345): the
+// base copies the translation; another endpoint is RTV0TR of the bone-local
+// offset, each stored to a halfword.
+Vec3 BoneEndpointPoint(const Transform3& transform, std::int32_t length,
+                       BoneEndpoint endpoint) noexcept {
+  if (endpoint == BoneEndpoint::kBase) return Halfwords(transform.translation);
+  const Vec3 local{BoneEndpointOffset(length, endpoint), 0, 0};
+  return Halfwords(Core::Math::RotateTranslate(transform, local));
 }
 
-// decomp: BATTLE.PRG func_800A1C10 (src/BATTLE/BATTLE.PRG/38C1C.c:345)
-int Actors_ActorBoneEndpointPosition(int actorId, int bone, SVECTOR* result, int endpoint)
-{
-    SVECTOR local;
-    VECTOR transformed;
-    Actors_ActorRecord* actor = Actors_actorRecords[actorId];
-    Actors_ShpModel* model;
-    MATRIX* matrix;
-
-    if (actor == NULL) {
-        actor = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actorId);
-
-        if (actor == NULL) {
-            return -1;
-        }
-
-    }
-
-    model = actor->instance.model;
-    matrix = Actors_ActorBoneWorldTransform(actorId, bone, &Actors_boneMatrixScratch);
-
-    if (endpoint == 0) {
-        setVector(result, matrix->t[0], matrix->t[1], matrix->t[2]);
-        return 0;
-    }
-
-    local.vy = 0;
-    local.vz = 0;
-
-    if ((bone & 0xF0) == 0x40) {
-        Actors_WeaponModel* weapon = Actors_weaponModels[actorId * 2];
-
-        bone -= 0x3F;
-
-        if (weapon == NULL) {
-            return -1;
-        }
-
-        model = (Actors_ShpModel*)weapon->sectionOffsets;
-    }
-
-    if (endpoint == 1) {
-        local.vx = -model->bones[bone].length;
-    } else {
-        local.vx = -model->bones[bone].length / 2;
-    }
-
-    Core_Gte_SetRotMatrix(matrix);
-    Core_Gte_SetTransMatrix(matrix);
-    Core_Gte_LoadV0(&local);
-    Core_Gte_Rtv0Tr();
-    Core_Gte_StoreLvnl(&transformed);
-    setVector(result, transformed.vx, transformed.vy, transformed.vz);
-    return 0;
+// decomp: BATTLE.PRG func_800A190C (src/BATTLE/BATTLE.PRG/38C1C.c:246) and
+// func_800A1280 (30DB0.c:4224), selector 0xFB.
+Vec3 TargetPoint(Vec3 position, std::int32_t height) noexcept {
+  return Halfwords(
+      Vec3{position.x, WrappingSubtract(position.y, height), position.z});
 }
 
-// decomp: BATTLE.PRG func_800A1DE8 (src/BATTLE/BATTLE.PRG/38C1C.c:400)
-MATRIX* Actors_ActorBoneWorldTransform(int actorId, int bone, MATRIX* unused)
-{
-    MATRIX zeroTranslation;
-    long flag;
-    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
-    Actors_ActorRecord* actor = Actors_actorRecords[actorId];
-
-    if (actor == NULL) {
-        Actors_ActorRecord* object = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actorId);
-
-        if (object == NULL) {
-            return NULL;
-        }
-
-        scratch->matrix = object->boneMatrices[bone];
-    } else if ((bone & 0xF0) == 0x40) {
-        Actors_WeaponModel* weapon = Actors_weaponModels[actorId * 2];
-
-        if (weapon == NULL) {
-            return NULL;
-        }
-
-        scratch->matrix = *(weapon->boneWorldMatrices + bone - 0x3F);
-    } else if (bone == 0xFF) {
-        setVector(&scratch->rootOffset, actor->blendPose.boneKeys[41].vx >> 1,
-            actor->blendPose.boneKeys[41].vy >> 1, actor->blendPose.boneKeys[41].vz >> 1);
-        setVector(&scratch->rootOffset, scratch->rootOffset.vx * actor->scale / ONE,
-            scratch->rootOffset.vy * actor->scale / ONE,
-            scratch->rootOffset.vz * actor->scale / ONE);
-        VS::Actors::TransformLiveActorRootOffset(actor);
-        scratch->matrix.t[0] = scratch->rootOffset.vx;
-        scratch->matrix.t[1] = scratch->rootOffset.vy;
-        scratch->matrix.t[2] = scratch->rootOffset.vz;
-        return &scratch->matrix;
-    } else {
-        scratch->matrix = actor->boneMatrices[bone];
-    }
-
-    VS::Core::Math::ApplyMultiplyMatrixIntoRight(Actors_boneMatrixScratch, scratch->matrix);
-    Core_Gte_SetRotMatrix(&Actors_boneMatrixScratch);
-    zeroTranslation.t[0] = 0;
-    zeroTranslation.t[1] = 0;
-    zeroTranslation.t[2] = 0;
-    Core_Gte_SetTransMatrix(&zeroTranslation);
-    setVector(&scratch->position, scratch->matrix.t[0] - Actors_boneMatrixScratch.t[0],
-        scratch->matrix.t[1] - Actors_boneMatrixScratch.t[1], scratch->matrix.t[2] - Actors_boneMatrixScratch.t[2]);
-    Core_Gte_RotTrans(&scratch->position, (VECTOR*)scratch->matrix.t, &flag);
-    return &scratch->matrix;
+// decomp: BATTLE.PRG func_800A190C (src/BATTLE/BATTLE.PRG/38C1C.c:246),
+// selector 0xFA.
+Vec3 AnchorPoint(Vec3 position, std::int32_t anchor_height,
+                 std::int32_t scale) noexcept {
+  const std::int32_t raise =
+      WrappingMultiply(anchor_height, scale) / kUnitActorScale;
+  return Halfwords(
+      Vec3{position.x, WrappingAdd(position.y, raise), position.z});
 }
 
-// decomp: BATTLE.PRG func_800A4828 (src/BATTLE/BATTLE.PRG/3A1A0.c:1036)
-void Actors_BuildActorPoseAtMatrix(int actor_id, MATRIX* camera_matrix)
-{
-    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
-    int visible = actor->instance.isVisible;
-    actor->instance.isVisible = 0;
-    actor->framesPerStep = 1;
-    VS::Render::PrepareLiveActorCameraMatrices(camera_matrix);
-    VS::Actors::PrepareLiveActorRootTransform(actor);
-    VS::Actors::DrawLiveActorModel(*actor, *camera_matrix, 0);
-    actor->instance.isVisible = visible;
+WordHalves SplitWord(std::int32_t word) noexcept {
+  const auto bits = static_cast<std::uint32_t>(word);
+  return {.low = static_cast<std::int16_t>(bits & kHalfwordMask),
+          .high = static_cast<std::int16_t>(bits >> kHalfwordBits)};
 }
-
-}  // extern "C"
+}  // namespace VS::Actors

@@ -16,7 +16,7 @@ extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
@@ -267,7 +268,7 @@ void Battle_BeginActionTrailFade(void)
     Battle_actionFlowMode = 10;
     initial_action = &Battle_actionState->queue[0];
     Effects_FadeWeaponTrails(initial_action->primaryTarget.target.targetActor,
-        Actors_FindActorBoneTag(initial_action->primaryTarget.target.targetActor, 0xF0, 0));
+        VS::Actors::FindLiveActorBoneTag(initial_action->primaryTarget.target.targetActor, 0xF0, 0));
 }
 
 // decomp: BATTLE.PRG func_8006FD0C (src/BATTLE/BATTLE.PRG/146C.c:3418)
@@ -543,7 +544,7 @@ void Battle_StartActionPresentation(void)
     request.source.value.actor.actor = action->primaryTarget.target.targetActor;
     request.source.value.actor.eventActorSlot = 0;
     request.source.value.actor.part =
-        Actors_FindActorBoneTag(action->primaryTarget.target.targetActor, 255, 2);
+        VS::Actors::FindLiveActorBoneTag(action->primaryTarget.target.targetActor, 255, 2);
 
     count = 0;
 
@@ -566,16 +567,16 @@ void Battle_StartActionPresentation(void)
             request.targets[count].type = 4;
             request.targets[count].value.actor.actor = action->targets[i].target.targetActor;
             request.targets[count].value.actor.eventActorSlot = 0;
-            request.targets[count].value.actor.part = Actors_FindActorBoneTag(
+            request.targets[count].value.actor.part = VS::Actors::FindLiveActorBoneTag(
                 action->targets[i].target.targetActor, action->targets[i].target.targetLimb, 2);
             // BUG: tests the limb of the entry at the output index
             if (action->targets[count].target.targetLimb == -1) {
-                request.targets[count].value.actor.part = Actors_FindActorBoneTag(
+                request.targets[count].value.actor.part = VS::Actors::FindLiveActorBoneTag(
                     action->targets[i].target.targetActor,
                     Battle_actors[action->targets[i].target.targetActor]->stats->defaultTargetLimb, 2);
             } else {
                 request.targets[count].value.actor.part =
-                    Actors_FindActorBoneTag(action->targets[i].target.targetActor,
+                    VS::Actors::FindLiveActorBoneTag(action->targets[i].target.targetActor,
                         action->targets[i].target.targetLimb, 2);
             }
 

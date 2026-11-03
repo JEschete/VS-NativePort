@@ -20,6 +20,7 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLiveState.h"
+#include "Actors/SkeletonLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -37,6 +38,7 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
@@ -379,10 +381,10 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   }
   // A tag the holder lacks leaves its anchor at the origin.
   std::array<SVECTOR, 2> anchors{};
-  Actors_ActorTaggedBonePosition(object.parent, kFirstAnchorTag, &anchors[0],
-                                 kAnchorEndpoint);
-  Actors_ActorTaggedBonePosition(object.parent, kSecondAnchorTag, &anchors[1],
-                                 kAnchorEndpoint);
+  LiveActorTaggedBonePosition(object.parent, kFirstAnchorTag, &anchors[0],
+                              kAnchorEndpoint);
+  LiveActorTaggedBonePosition(object.parent, kSecondAnchorTag, &anchors[1],
+                              kAnchorEndpoint);
   pose.anchors = {VectorOf(anchors[0]), VectorOf(anchors[1])};
   pose.holder_rotation = ActorAngles(holder->instance);
   return pose;

@@ -239,6 +239,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Actors\AppearanceLive.cpp",
                 r"src\Actors\TextureAnimationLive.cpp",
                 r"src\Actors\ModelRenderingLive.cpp",
+                r"src\Actors\SkeletonLive.cpp",
             ))
 
 

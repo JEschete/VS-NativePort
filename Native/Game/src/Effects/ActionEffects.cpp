@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -52,7 +53,7 @@ void Effects_QueueActionHitEffect(int effect_id, Battle_HitResult* hit_result, i
         hit_effect_request.opaque14.targetActor = hit_result->target.targetActor;
         hit_effect_request.opaque14.targetLimb = targetLimb;
         hit_effect_request.opaque14.hitThreshold =
-            Actors_FindActorBoneTag(hit_result->target.targetActor, hit_result->target.targetLimb, 2);
+            VS::Actors::FindLiveActorBoneTag(hit_result->target.targetActor, hit_result->target.targetLimb, 2);
     } else {
         hit_effect_request.opaque10 = 5;
         hit_effect_request.opaque14 = hit_result->target;

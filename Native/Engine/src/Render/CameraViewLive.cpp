@@ -10,7 +10,7 @@
 #include "Render/RoomDrawLive.hpp"
 
 extern "C" {
-#include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Core/Gte.h"
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"

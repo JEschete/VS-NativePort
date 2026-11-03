@@ -23,6 +23,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
+#include "Actors/Movement.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"

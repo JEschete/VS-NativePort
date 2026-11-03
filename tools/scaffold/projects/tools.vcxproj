@@ -38,6 +38,7 @@
     <None Include="..\..\ledger\test_modernization.py" />
     <None Include="..\..\lint\.gitignore" />
     <None Include="..\..\lint\baseline.json" />
+    <None Include="..\..\lint\jscpd_files.js" />
     <None Include="..\..\lint\native_boundary.py" />
     <None Include="..\..\lint\package-lock.json" />
     <None Include="..\..\lint\package.json" />

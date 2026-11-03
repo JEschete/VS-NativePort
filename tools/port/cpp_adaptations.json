@@ -5325,10 +5325,10 @@
 [
 861,
 [
-"    Actors_ActorTaggedBoneMatrix(actor_id, 1, &tagged_bone_matrix, &anchor_projection_workspace[2]);"
+"    VS::Actors::LiveActorTaggedBoneMatrix(actor_id, 1, &tagged_bone_matrix, &anchor_projection_workspace[2]);"
 ],
 [
-"    Actors_ActorTaggedBoneMatrix(actor_id, 1, &tagged_bone_matrix, (u_long *)(&anchor_projection_workspace[2]));"
+"    VS::Actors::LiveActorTaggedBoneMatrix(actor_id, 1, &tagged_bone_matrix, (u_long *)(&anchor_projection_workspace[2]));"
 ]
 ]
 ],

@@ -21,7 +21,7 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
 #include "Field/GimmickLookup.h"

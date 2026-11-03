@@ -6,12 +6,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/SkeletonLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
 #include "Battle/Feedback.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -94,7 +94,7 @@ TEST_CASE(
   REQUIRE(reinterpret_cast<std::uintptr_t>(fixture.storage.data()) >
           UINT32_MAX);
   SVECTOR projected{};
-  REQUIRE(Actors_ProjectActorTaggedBone(2, 251, &projected, 0) == 0);
+  REQUIRE(VS::Actors::ProjectLiveActorTaggedBone(2, 251, &projected, 0) == 0);
   CHECK(projected.vx == 160);
   CHECK(projected.vz == 384);
   Battle_DrawActorMarker(2, kind);

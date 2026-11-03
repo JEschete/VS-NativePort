@@ -2351,31 +2351,24 @@ d = VS::Core::Math::SquaredDistanceWithHeightOffsets((short*)&state->position,
         self.assertLess(source.index("return;"), source.index("sp10.vx"))
         self.assertIn("absolute slide skips absent actor=%d", source)
 
-    def test_bone_endpoints_resolve_owner_before_model_access(self):
-        source = """    Actors_ShpModel* model = actor->instance.model;
-    MATRIX* matrix;
-    if (actor == NULL) {
-        actor = (Actors_ActorRecord*)Field_gimmickInstances[actorId];
-        if (actor == NULL) {
-            return -1;
-        }
-
-        model = actor->instance.model;
-    }
-
-    matrix = Actors_ActorBoneWorldTransform(actorId, bone, &Actors_boneMatrixScratch);
-"""
-        for old, new, _ in copy_fixups.FIXES["F00887"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertEqual(source.count("actor->instance.model"), 1)
-        self.assertLess(
-            source.index("return -1;"), source.index("model = actor->instance.model;")
+    def test_bone_endpoints_are_owned_by_the_skeleton_binding(self):
+        # #276 row 20: the typed skeleton binding resolves the actor or gimmick
+        # owner itself, so the owner-ordering and null-transform fixes retire
+        # with the generated bodies.
+        owned = self.owned_items()
+        for identity in ("F00876", "F00882", "F00887"):
+            with self.subTest(identity=identity):
+                self.assertNotIn(identity, copy_fixups.FIXES)
+                self.assertEqual(
+                    owned[identity]["path"], r"Native\Game\src\Actors\Skeleton.cpp"
+                )
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Actors\SkeletonLive.cpp").read_text(
+            encoding="utf-8"
         )
-        self.assertLess(
-            source.index("model = actor->instance.model;"),
-            source.index("matrix = Actors_ActorBoneWorldTransform"),
-        )
+        self.assertIn("Field_FindGimmickForActorSlot(actor_id)", live)
+        self.assertNotIn("(Actors_ActorRecord*)", live)
+        self.assertNotIn("Field_gimmickInstances[", live)
 
     def test_room_lifetimes_revoke_diagnostic_readiness(self):
         for key, header in (
@@ -2614,12 +2607,16 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             source,
         )
         root = Path(__file__).resolve().parents[2]
-        skeleton = (root / r"Native\Game\src\Actors\Skeleton.cpp").read_text(
+        skeleton = (root / r"Native\Game\src\Actors\SkeletonLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn(
-            "VS::Actors::ProjectLiveActorBoneEndpoint(actor_id, resolved_bone_index,",
+        self.assertRegex(
             skeleton,
+            r"ProjectLiveActorBoneEndpoint\(\s*actor_id, bone, projected\.data\(\), endpoint\)",
+        )
+        self.assertRegex(
+            skeleton,
+            r"ProjectLiveActorBoneEndpoint\(\s*actor_id, bone, screen_out, endpoint\)",
         )
         self.assertNotIn("ProjectActorBoneEndpoint)", skeleton)
 

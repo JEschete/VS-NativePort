@@ -12,13 +12,14 @@
 #include <iterator>
 #include <span>
 
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
 #include "Field/Collision.h"
@@ -200,9 +201,8 @@ class LiveActorAppearance final : public ActorAppearance {
     Require(object != nullptr, "carrying actor has no carried gimmick");
     SVECTOR first;
     SVECTOR second;
-    Actors_ActorTaggedBonePosition(object->parent, kCarryFirstBone, &first, 1);
-    Actors_ActorTaggedBonePosition(object->parent, kCarrySecondBone, &second,
-                                   1);
+    LiveActorTaggedBonePosition(object->parent, kCarryFirstBone, &first, 1);
+    LiveActorTaggedBonePosition(object->parent, kCarrySecondBone, &second, 1);
     object->positionX = actor_.instance.position.vx;
     object->positionZ = actor_.instance.position.vz;
     object->positionY = VS::Core::Math::WrapSigned16(

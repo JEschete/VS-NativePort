@@ -7,6 +7,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"

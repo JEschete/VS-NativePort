@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
@@ -467,7 +468,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
         result->primaryTarget.target.targetActor = source->primaryTarget.target.targetActor;
         result->primaryTarget.target.targetLimb = source->primaryTarget.target.targetLimb;
         attacker = Battle_actors[result->primaryTarget.target.targetActor]->stats;
-        Actors_ActorBonePosition(result->primaryTarget.target.targetActor, 0, &origin, 0);
+        VS::Actors::LiveActorBonePosition(result->primaryTarget.target.targetActor, 0, &origin, 0);
     } else {
         attacker = NULL;
     }
@@ -717,7 +718,7 @@ int Battle_PreviewActionAgainstActor(int action_id, int source_actor_slot, int t
         target_count = 0;
 
         for (i = 0; i < 6; ++i) {
-            if ((Actors_ActorLowGroupBonePosition(targetActor, i, &limb_position, 2) >= 0)
+            if ((VS::Actors::LiveActorLowGroupBonePosition(targetActor, i, &limb_position, 2) >= 0)
                 && (Battle_IsPointInTargetVolume(&target_volume, (u_short*)&limb_position) != 0)) {
                 preview_request.targets[target_count].targetsPosition = 0;
                 preview_request.targets[target_count].target.targetActor = targetActor;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Input/Controller.hpp"
 #include "Menu/Sounds.hpp"
@@ -746,7 +747,7 @@ int Menu_Status_UpdateLimbPanel(int init)
                 (Menu_Framework_rowAnimationSteps[step] + 224) | ((34 + i * 16) << 16), 0);
 
             if (step < 8) {
-                Actors_ProjectActorBone(1, limb->anchorBone, lineXy, 0);
+                VS::Actors::ProjectLiveActorBone(1, limb->anchorBone, lineXy, 0);
                 Menu_Status_DrawLimbLeaderLine(i, lineXy[0], 8 - step, 0);
             }
 
@@ -793,7 +794,7 @@ int Menu_Status_UpdateLimbPanel(int init)
                           : vs_getRGB888(128, 128, 128) >> panel_dimming_shift,
                 0);
 
-            Actors_ProjectActorBone(1, limb->anchorBone, lineXy, 0);
+            VS::Actors::ProjectLiveActorBone(1, limb->anchorBone, lineXy, 0);
 
             if (!(step & 0x80) && ((Menu_Status_fadeScreen | Menu_Status_drawBackgroundFirst) == 0)) {
                 Menu_Status_DrawLimbLeaderLine(i, lineXy[0], 8, i == step);

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Items/LootLive.hpp"
@@ -7,7 +8,6 @@ extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Skeleton.h"
 #include "Battle/Action.h"
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
@@ -42,9 +42,9 @@ void Battle_ActionTargetLimbPosition(int actor_slot, int limb_tag, SVECTOR* posi
     if (limb_tag == -1) {
         bone_index = 0;
     } else {
-        bone_index = Actors_FindActorBoneTag(actor_slot, limb_tag, 2);
+        bone_index = VS::Actors::FindLiveActorBoneTag(actor_slot, limb_tag, 2);
     }
-    Actors_ActorBonePosition(actor_slot, bone_index, position_out, 0);
+    VS::Actors::LiveActorBonePosition(actor_slot, bone_index, position_out, 0);
 }
 
 // decomp: BATTLE.PRG func_80077F70 (src/BATTLE/BATTLE.PRG/146C.c:6833)
@@ -59,7 +59,7 @@ int Battle_ActionTargetDistance(void)
     int delta_y;
 
     queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex];
-    Actors_ActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &source_position, 0);
+    VS::Actors::LiveActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &source_position, 0);
     if (queued_action->targetCount != 0) {
         if (queued_action->targets[0].targetsPosition == 0) {
             Battle_ActionTargetLimbPosition(queued_action->targets[0].target.targetActor,
@@ -68,7 +68,7 @@ int Battle_ActionTargetDistance(void)
             target_position = *(SVECTOR*)&queued_action->targets[0].target;
         }
     } else {
-        Actors_ActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &target_position, 0);
+        VS::Actors::LiveActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &target_position, 0);
     }
     delta_x = target_position.vx - source_position.vx;
     delta_z = target_position.vz - source_position.vz;
@@ -86,7 +86,7 @@ void Battle_ActionCameraMidpoint(SVECTOR* midpoint_out)
     Battle_ActionRequest* queued_action;
 
     queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex];
-    Actors_ActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &source_position, 0);
+    VS::Actors::LiveActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &source_position, 0);
     if (queued_action->targetCount != 0) {
         if (queued_action->targets[0].targetsPosition == 0) {
             Battle_ActionTargetLimbPosition(queued_action->targets[0].target.targetActor,

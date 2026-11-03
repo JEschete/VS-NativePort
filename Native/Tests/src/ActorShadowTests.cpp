@@ -20,6 +20,7 @@ extern "C" {
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Field/Collision.h"
 #include "Field/Mpd.h"
 #include "Render/Camera.h"

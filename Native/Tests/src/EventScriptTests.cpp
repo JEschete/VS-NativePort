@@ -44,6 +44,7 @@ extern "C" {
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
+#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"

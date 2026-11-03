@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Boot/SessionLive.hpp"
@@ -545,7 +546,7 @@ void Field_PlaceAshleyAtRoomEntrance(void)
     }
     Actors_ActorPlacement(0, &sp18);
     Actors_RestoreActorIdlePose(0);
-    Actors_BuildActorPoseAtMatrix(0, &Render_frameScratch.viewMatrix);
+    VS::Actors::BuildLiveActorPoseAtMatrix(0, &Render_frameScratch.viewMatrix);
     Field_SetActorCollisionBypass(0, 0);
     Battle_Ai_InitializeRoomNavigation();
 }

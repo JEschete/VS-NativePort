@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -8,7 +9,6 @@
 #include "Effects/ParticleRenderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/Skeleton.h"
 #include "Core/Diagnostics.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -613,7 +613,7 @@ void Effects_EmitParticleEvent(
     switch (scratch->flags & 0xE000) {
     case 0x4000:
         if (effect_instance->context.emitFrom.type == 4) {
-            Actors_ActorBonePosition(((u_char*)&effect_instance->context.emitFrom.value)[0],
+            VS::Actors::LiveActorBonePosition(((u_char*)&effect_instance->context.emitFrom.value)[0],
                 ((u_char*)&effect_instance->context.emitFrom.value)[2], &scratch->vector, 0);
         } else {
             scratch->vector = effect_instance->context.emitFrom.value.position;
@@ -621,7 +621,7 @@ void Effects_EmitParticleEvent(
         goto aim;
     case 0x6000:
         if (effect_instance->context.emitTo.type == 4) {
-            Actors_ActorBonePosition(((u_char*)&effect_instance->context.emitTo.value)[0],
+            VS::Actors::LiveActorBonePosition(((u_char*)&effect_instance->context.emitTo.value)[0],
                 ((u_char*)&effect_instance->context.emitTo.value)[2], &scratch->vector, 0);
         } else {
             scratch->vector = effect_instance->context.emitTo.value.position;

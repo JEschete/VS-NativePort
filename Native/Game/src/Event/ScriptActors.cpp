@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -493,7 +494,7 @@ intptr_t Event_ScriptSetActorHeadAngles(u_char* instruction, short thread_index)
     if (instruction[7] != 0) {
         tracking_rate = instruction[7];
     }
-    Actors_SetActorHeadTracking(actor_id, -4, &head_angles, tracking_rate);
+    VS::Actors::SetLiveActorHeadTracking(actor_id, -4, &head_angles, tracking_rate);
     return 0;
 }
 
@@ -543,7 +544,7 @@ intptr_t Event_ScriptLookAtActor(u_char* instruction, short thread_index)
     if (instruction[5] != 0) {
         tracking_rate = instruction[5];
     }
-    Actors_SetActorHeadTracking(actor_id, tracking_target, 0, tracking_rate);
+    VS::Actors::SetLiveActorHeadTracking(actor_id, tracking_target, 0, tracking_rate);
     return 0;
 }
 
@@ -561,7 +562,7 @@ intptr_t Event_ScriptLookAtWorldPos(u_char* instruction, short thread_index)
     if (instruction[9] != 0) {
         tracking_rate = instruction[9];
     }
-    Actors_SetActorHeadTracking(actor_id, -1, &target_position, tracking_rate);
+    VS::Actors::SetLiveActorHeadTracking(actor_id, -1, &target_position, tracking_rate);
     return 0;
 }
 
@@ -860,11 +861,11 @@ int Event_ActorDialogAnchor(int actor_id, SVECTOR* dialog_anchor)
     dialog_anchor->vx = 0;
     dialog_anchor->vy = -0x3E8;
     dialog_anchor->vz = 0;
-    Actors_ActorTaggedBoneMatrix(actor_id, 1, &tagged_bone_matrix, (u_long *)(&anchor_projection_workspace[2]));
+    VS::Actors::LiveActorTaggedBoneMatrix(actor_id, 1, &tagged_bone_matrix, (u_long *)(&anchor_projection_workspace[2]));
     Core_Gte_SetRotMatrix(&tagged_bone_matrix);
     Core_Gte_SetTransMatrix(&tagged_bone_matrix);
     Core_Gte_RotTransPers(dialog_anchor, anchor_projection_workspace, &anchor_projection_workspace[3], &anchor_projection_workspace[4]);
-    Actors_ProjectActorTaggedBone(actor_id, 1, dialog_anchor, anchor_projection_workspace[2]);
+    VS::Actors::ProjectLiveActorTaggedBone(actor_id, 1, dialog_anchor, anchor_projection_workspace[2]);
     dialog_anchor->vz = VS::Core::Math::Arctangent2(((short*)&anchor_projection_workspace)[1] - dialog_anchor->vy, (short)anchor_projection_workspace[0] - dialog_anchor->vx);
     return dialog_anchor->vz;
 }

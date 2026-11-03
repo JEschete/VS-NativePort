@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
 #include "Actors/Location.h"
-#include "Actors/Skeleton.h"
 #include "Core/Diagnostics.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Camera.h"
@@ -397,7 +397,7 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         return 0;
     }
     case 7:
-        ((void (*)(int, int, SVECTOR*, int))Actors_ActorTaggedBonePosition)(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1)), script[3],
+        VS::Actors::LiveActorTaggedBonePosition(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1)), script[3],
             (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), 2);
         VS::Core::Math::WidenLiveShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8));
         Event_ReadScriptFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), script + 4);
@@ -431,7 +431,7 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
         Event_ReadScriptFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), script + 4);
         Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        ((void (*)(int, int, SVECTOR*, int))Actors_ActorTaggedBonePosition)(s->value, script[3], (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0), 2);
+        VS::Actors::LiveActorTaggedBonePosition(s->value, script[3], (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0), 2);
         VS::Core::Math::AddLiveVectors(&c->destination,
             VS::Core::Math::WidenLiveShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0)),
             (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
@@ -571,7 +571,7 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         break;
     }
     case 8:
-        ((void (*)(int, int, SVECTOR*, int))Actors_ActorTaggedBonePosition)(c->motionScalar, c->motionScalarDelta, (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), 2);
+        VS::Actors::LiveActorTaggedBonePosition(c->motionScalar, c->motionScalarDelta, (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), 2);
         VS::Core::Math::AddLiveVectors(&c->computedPosition,
             VS::Core::Math::WidenLiveShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8)),
             &c->displacement);

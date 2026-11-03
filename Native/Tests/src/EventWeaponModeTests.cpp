@@ -18,6 +18,7 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"

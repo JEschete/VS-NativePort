@@ -270,6 +270,12 @@
     <ClInclude Include="src\Actors\Skeleton.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\SkeletonLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\SkeletonLiveState.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClCompile Include="src\Actors\SoundOverrides.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -2287,6 +2293,12 @@
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\SequencePlaybackLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\Skeleton.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\SkeletonLive.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\SoundTransition.hpp">

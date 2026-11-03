@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/MovementCommand.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -383,19 +384,19 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = 0;
             break;
         case 3:
-            Actors_SetActorHeadTracking(actorId, -4, NULL, 0);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -4, NULL, 0);
             VS::Actors::TurnLiveNavigationActor(actorId, ((short*)&actor->commandArg0)[0]);
             state = 0;
             break;
         case 4:
             step.vx = 0;
             step.vy = ((short*)&actor->commandArg0)[0];
-            Actors_SetActorHeadTracking(actorId, -3, &step, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -3, &step, -1);
             VS::Actors::TurnLiveActorAtSpeed(actorId, ((short*)&actor->commandArg0)[0], ((short*)&actor->commandArg0)[1]);
             state = 0;
             break;
         case 15:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             if (actor->commandTarget >= 16) {
                 VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0],
                     ((short*)&actor->commandArg0)[1] * ONE, ((short*)&actor->commandArg0)[0]);
@@ -409,7 +410,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = ((Actors_ActorStateFlags(actorId) & 0x4000) != 0) << 6;
             break;
         case 9:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             if (actor->stats->gaitClass == 2) {
                 movementSpeed = actor->stats->runSpeed << 12;
             } else if (actor->stats->gaitClass == 0x40) {
@@ -428,7 +429,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = ((Actors_ActorStateFlags(actorId) & 0x4000) != 0) << 6;
             break;
         case 10:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             if (actor->stats->gaitClass == 4) {
                 movementSpeed = actor->stats->runSpeed << 12;
             } else if (actor->stats->gaitClass == 0x80) {
@@ -443,7 +444,7 @@ int Actors_ExecuteQueuedActorCommands(void)
         case 12:
         case 14:
         case 18:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             target.position.vx = ((u_char*)&actor->commandArg0)[0] * 128 + 64;
             target.position.vz = ((u_char*)&actor->commandArg0)[2] * 128 + 64;
             angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
@@ -469,7 +470,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = ((actor->commandArg0 | actor->commandArg1.word | (actorFlags & 0x4000)) != 0) << 6;
             break;
         case 23:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             if (actor->commandTarget >= 16) {
                 angle = position.position.pad;
             } else {
@@ -481,7 +482,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = 0x40;
             break;
         case 16:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             if (actor->stats->gaitClass == 0x10) {
                 movementSpeed = actor->stats->runSpeed << 12;
             } else {
@@ -499,7 +500,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = 0;
             break;
         case 17:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             if (actor->stats->gaitClass == 0x20) {
                 movementSpeed = actor->stats->runSpeed << 12;
             } else {
@@ -535,7 +536,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             queuedFrame = ((u_short*)&actor->commandArg0)[0];
             step.vx = 0;
             step.vy = queuedFrame;
-            Actors_SetActorHeadTracking(actorId, -4, &step, ((short*)&actor->commandArg0)[1]);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -4, &step, ((short*)&actor->commandArg0)[1]);
             state = 0;
             break;
         case 7:
@@ -543,7 +544,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             queuedFrame = ((u_short*)&actor->commandArg0)[0];
             step.vx = 0;
             step.vy = queuedFrame;
-            Actors_SetActorHeadTracking(actorId, -4, &step, 0x1000);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -4, &step, 0x1000);
             state = 0;
             break;
         case 22:
@@ -588,7 +589,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = 0;
             break;
         case 24:
-            Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(actorId, -2, NULL, -1);
             state = (u_short)actor->stats->limbActions[((u_short*)&actor->commandArg0)[0]][((u_short*)&actor->commandArg0)[1]].actionId;
             if (state == 0) {
                 state = 1;

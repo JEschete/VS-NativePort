@@ -19,7 +19,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Field/Gimmicks.h"
 }

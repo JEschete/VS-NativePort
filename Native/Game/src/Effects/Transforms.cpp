@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -6,7 +7,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
 #include "Actors/Location.h"
-#include "Actors/Skeleton.h"
 #include "Battle/BattleTypes.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
@@ -295,7 +295,7 @@ void Effects_ResolveTransformAttachment(Effects_EffectInstance* effect_instance,
     int bone_length_output[2];
 
     if (transform_motion->actor < 0x10U) {
-        ((void (*)(int, int, MATRIX*, void*))Actors_ActorAnchorMatrix)(transform_motion->actor, transform_motion->bone, &transform_motion->attachment, bone_length_output);
+        VS::Actors::LiveActorAnchorMatrix(transform_motion->actor, transform_motion->bone, &transform_motion->attachment, bone_length_output);
         Actors_ActorPlacement(transform_motion->actor, &actor_placement);
         transform_motion->saved.pad = actor_placement.location.position.pad;
         return;
@@ -330,7 +330,7 @@ void Effects_UpdateEffectTransforms(Effects_EffectInstance* effect_instance)
                 setVector(&state->saved, Effects_actionRequest.position.vx, Effects_actionRequest.position.vy,
                     Effects_actionRequest.position.vz);
             } else {
-                Actors_ActorBonePosition(state->targetActor, state->targetBone, &state->saved, 0);
+                VS::Actors::LiveActorBonePosition(state->targetActor, state->targetBone, &state->saved, 0);
             }
 
             state->flags |= 2;

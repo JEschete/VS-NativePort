@@ -6,6 +6,7 @@
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -21,6 +22,7 @@ extern "C" {
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Battle/ActionAnimation.h"
@@ -1012,7 +1014,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
       // The started effect's emitTo readers must leave defaults untouched.
       SVECTOR bone = {11, 22, 33, 44};
       int placement[3] = {55, 66, 77};
-      passed &= Actors_ActorBonePosition(slot, 0, &bone, 0) == -1 &&
+      passed &= VS::Actors::LiveActorBonePosition(slot, 0, &bone, 0) == -1 &&
                 bone.vx == 11 && bone.vy == 22 && bone.vz == 33 &&
                 Actors_ActorPlacement(slot, placement) == -1 &&
                 placement[0] == 55 && placement[1] == 66 &&
@@ -1063,6 +1065,8 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   }
   actor.instance.model = object.model = model;
   actor.instance.boneCount = object.boneCount = 1;
+  actor.modelDataSize = sizeof model_bytes;
+  VS::Render::RecordLiveModelExtent(model, sizeof model_bytes);
   model->bones[0].length = kBoneLength;
   Actors_boneMatrixScratch = (MATRIX){0};
   for (int axis = 0; axis < kSpatialDimensions; ++axis) {
@@ -1076,7 +1080,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   Core_Gte_Reset();
   SVECTOR result = {1, 2, 3, 77};
   const int status =
-      Actors_ActorBoneEndpointPosition(slot, 0, &result, endpoint);
+      VS::Actors::LiveActorBoneEndpointPosition(slot, 0, &result, endpoint);
   const int offset = owner == 1 ? 100 : 0;
   const int length = endpoint == 0   ? 0
                      : endpoint == 1 ? kBoneLength
@@ -1092,16 +1096,16 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
     int bone_length = 777;
     memset(&untouched, 0x6B, sizeof untouched);
     original = untouched;
-    passed &= Actors_ActorBoneWorldTransform(
-                  slot, 0, &Actors_boneMatrixScratch) == nullptr;
-    passed &=
-        Actors_ActorBoneWorldMatrix(slot, 0, &untouched, &bone_length) == -1;
+    passed &= !VS::Actors::LiveActorBoneViewTransform(slot, 0);
+    passed &= VS::Actors::LiveActorBoneWorldMatrix(slot, 0, &untouched,
+                                                   &bone_length) == -1;
     passed &= memcmp(untouched.m, original.m, sizeof untouched.m) == 0 &&
               memcmp(untouched.t, original.t, sizeof untouched.t) == 0 &&
               bone_length == 777;
   }
   Actors_actorRecords[slot] = saved_actor;
   if (has_gimmick_slot) Field_gimmickInstances[slot] = saved_object;
+  VS::Render::ForgetLiveModelExtent(model);
   Actors_boneMatrixScratch = saved_matrix;
   *Render_ModelWorkspace() = saved_workspace;
   Core_Gte_Reset();

@@ -25,6 +25,7 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Targeting.h"
+#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Input/Buttons.h"

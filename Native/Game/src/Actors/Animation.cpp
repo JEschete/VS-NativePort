@@ -3,6 +3,7 @@
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -15,11 +16,11 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/AnimationBindings.h"
-#include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
 #include "Audio/ActorSound.h"
@@ -1089,7 +1090,7 @@ void Actors_SetActorBonePoseLock(Actors_ActorRecord* actor, int bone_index, int 
                 return;
             }
         } else if (actor->lockedBones[i] == 0) {
-            ((void (*)(int, int, void*, int*))Actors_ActorAnchorMatrix)(actor->instance.slot, bone_index, &actor->lockedBoneMatrices[i], &bone_length);
+            VS::Actors::LiveActorAnchorMatrix(actor->instance.slot, bone_index, &actor->lockedBoneMatrices[i], &bone_length);
             bone->poseLockSlot = i + 1;
             actor->lockedBones[i] = bone_index;
             return;
@@ -1455,7 +1456,7 @@ loop: {
             sfx[0] = 0x80;
         } else {
             if ((*(int*)((char*)target + 8) & 0x3F9F00) != 0x8000) {
-                Actors_ProjectActorTaggedBone(id, 0xFF, &target->soundPosition, 0);
+                VS::Actors::ProjectLiveActorTaggedBone(id, 0xFF, &target->soundPosition, 0);
             }
             sfx[0] =
                 Audio_SfxPanAndVolume(*(int*)&target->soundPosition, target->soundPosition.vz) >> 16;
@@ -1478,7 +1479,7 @@ loop: {
             sfx[1] = 0;
         } else {
             if ((*(int*)((char*)target + 8) & 0x3F9F00) != 0x8000) {
-                Actors_ProjectActorTaggedBone(id, 0xFF, &target->soundPosition, 0);
+                VS::Actors::ProjectLiveActorTaggedBone(id, 0xFF, &target->soundPosition, 0);
             }
             value = Audio_SfxPanAndVolume(*(int*)&target->soundPosition, target->soundPosition.vz);
             sfx[0] = value >> 16;
@@ -1505,7 +1506,7 @@ loop: {
             sfx[0] = 0x80;
         } else {
             if ((*(int*)((char*)target + 8) & 0x3F9F00) != 0x8000) {
-                Actors_ProjectActorTaggedBone(id, 0xFF, &target->soundPosition, 0);
+                VS::Actors::ProjectLiveActorTaggedBone(id, 0xFF, &target->soundPosition, 0);
             }
             sfx[0] =
                 Audio_SfxPanAndVolume(*(int*)&target->soundPosition, target->soundPosition.vz) >> 16;

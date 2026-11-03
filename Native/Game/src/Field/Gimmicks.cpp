@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -1491,8 +1492,8 @@ void Field_ApplyGimmickInteractionCommand(Actors_ActorRecord* actor, int mode)
         object->positionX = x * 128 + 64;
         object->positionZ = z * 128 + 64;
         object->rotationY = (object->rotationY + step * (ONE / 4)) & 0xFFF;
-        Actors_ActorTaggedBonePosition(object->parent, 0xF0, &points[0], 1);
-        Actors_ActorTaggedBonePosition(object->parent, 0xF1, &points[1], 1);
+        VS::Actors::LiveActorTaggedBonePosition(object->parent, 0xF0, &points[0], 1);
+        VS::Actors::LiveActorTaggedBonePosition(object->parent, 0xF1, &points[1], 1);
         object->positionY = (points[0].vy + points[1].vy) / 2 + 60;
         object->mode = 0xFC;
         object->velocityY = 24;

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -57,7 +58,7 @@ void Event_PrepareCutsceneActors(void)
 
     for (i = 0; i < 16; ++i) {
         if (Battle_actors[i] != NULL) {
-            Actors_SetActorHeadTracking(i, -2, NULL, -1);
+            VS::Actors::SetLiveActorHeadTracking(i, -2, NULL, -1);
             switch (Battle_actors[i]->commandState) {
             case 0x10:
                 break;

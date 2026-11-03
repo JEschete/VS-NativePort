@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/Skeleton.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Feedback.h"
 #include "Effects/Particles.h"
@@ -98,8 +98,8 @@ int Effects_UpdateBoneTrail(Effects_RendererSlot* node, u_int mode, int config)
         break;
     case 2:
         t->index = (t->index + 1) & 7;
-        Actors_ActorBonePosition(t->config.actor, t->config.bone, &t->first[t->index], 0);
-        Actors_ActorBonePosition(t->config.actor, t->config.bone, &t->second[t->index], 1);
+        VS::Actors::LiveActorBonePosition(t->config.actor, t->config.bone, &t->first[t->index], 0);
+        VS::Actors::LiveActorBonePosition(t->config.actor, t->config.bone, &t->second[t->index], 1);
 
         if (++t->age >= 4) {
             int segments = (t->age < 9) ? t->age - 3 : 5;

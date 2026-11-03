@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/Skeleton.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
@@ -158,7 +158,7 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
     Battle_FloatingLabel* p;
 
     if (limb_tag != -1) {
-        limb = Actors_FindActorBoneTag(actor_slot, limb_tag, 2);
+        limb = VS::Actors::FindLiveActorBoneTag(actor_slot, limb_tag, 2);
 
         if (limb < 0) {
             return -2;
@@ -192,9 +192,9 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
     p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
 
     if (limb != 255) {
-        result = Actors_ActorBonePosition(actor_slot, limb, &p->position, 2);
+        result = VS::Actors::LiveActorBonePosition(actor_slot, limb, &p->position, 2);
     } else {
-        result = Actors_ActorTaggedBonePosition(actor_slot, 255, &p->position, 2);
+        result = VS::Actors::LiveActorTaggedBonePosition(actor_slot, 255, &p->position, 2);
     }
 
     if (result != 0) {
@@ -202,7 +202,7 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
     }
 
     if (label_flags & 128) {
-        if (Actors_ProjectActorTaggedBone(actor_slot, 251, &position, 0) != 0) {
+        if (VS::Actors::ProjectLiveActorTaggedBone(actor_slot, 251, &position, 0) != 0) {
             return 0;
         }
 
@@ -217,7 +217,7 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
 
     label_flags &= 127;
 
-    if (Actors_ActorTaggedBonePosition(actor_slot, 251, &position, 0) != 0) {
+    if (VS::Actors::LiveActorTaggedBonePosition(actor_slot, 251, &position, 0) != 0) {
         return -2;
     }
 
@@ -334,7 +334,7 @@ int Battle_QueueActorStatusLabel(int actor_slot, int bone_tag, int status_index,
 
     p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
     if (label_flags & 0x80) {
-        if (Actors_ProjectActorTaggedBone(actor_slot, 0xFB, &screen_position, 0) != 0) {
+        if (VS::Actors::ProjectLiveActorTaggedBone(actor_slot, 0xFB, &screen_position, 0) != 0) {
             return 0;
         }
         if ((u_short)screen_position.vx >= 0x141) {
@@ -409,7 +409,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
         }
 
         if (label->key.bytes[0] < 3) {
-            if (Actors_ActorTaggedBonePosition(label->key.bytes[1], 251, &position, 0) != 0) {
+            if (VS::Actors::LiveActorTaggedBonePosition(label->key.bytes[1], 251, &position, 0) != 0) {
                 label->key.bytes[0] = 0;
                 ++removed;
                 continue;
@@ -1040,10 +1040,10 @@ void Battle_DrawActorMarker(int actor, int kind)
                 kind = 5;
             }
         }
-        if (Actors_ProjectActorTaggedBone(actor, 251, &position, 0)) {
+        if (VS::Actors::ProjectLiveActorTaggedBone(actor, 251, &position, 0)) {
             return;
         }
-        if (Actors_ProjectActorTaggedBone(0, 251, &other, 0)) {
+        if (VS::Actors::ProjectLiveActorTaggedBone(0, 251, &other, 0)) {
             return;
         }
 
@@ -1142,8 +1142,8 @@ void Battle_DrawActorMarker(int actor, int kind)
     } else {
         long depth;
 
-        if (Actors_ActorTaggedBonePosition(actor, 255, &other, 0) == 0) {
-            if (Actors_ActorTaggedBonePosition(0, 255, &position, 0)) {
+        if (VS::Actors::LiveActorTaggedBonePosition(actor, 255, &other, 0) == 0) {
+            if (VS::Actors::LiveActorTaggedBonePosition(0, 255, &position, 0)) {
                 return;
             }
 
@@ -1466,7 +1466,7 @@ void Battle_ShowAbilityTimingCue(int cue_duration_frames)
         return;
     }
 
-    if (Actors_ProjectActorTaggedBone(0, 0xFB, &Battle_abilityTimingCuePosition, 0) != 0) {
+    if (VS::Actors::ProjectLiveActorTaggedBone(0, 0xFB, &Battle_abilityTimingCuePosition, 0) != 0) {
         return;
     }
 
