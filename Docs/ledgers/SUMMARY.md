@@ -84,11 +84,14 @@ which is why they say little on their own: the other four steps carry the promot
 **Correction, not regression (#247):** 28 rows recorded `cpp=x` before this ledger: 23 audio
 rows in `XaPlayback.cpp`, `SequencerOutput.cpp`, `MusicState.cpp` and `StreamPlayback.cpp`,
 and 5 menu rows in `Menu/Sounds.cpp`. All were global C-ABI symbols with blank `modernized`,
-in files including `Legacy/Psx.h`, so they failed §8.2 steps 2 and 4. They now read `wip`,
-as does every other owned C++ function with an incomplete record.
+in files including `Legacy/Psx.h`, so they failed §8.2 steps 2 and 4. The correction set them to `wip`;
+they reached `cpp=x` again only through the promotion slices recorded in [GATE_SLICES.csv](GATE_SLICES.csv), and any
+owned C++ function with an incomplete record reads `wip`.
 
 **Limit:** a function with generated callers cannot reach `cpp=x` until those callers migrate, because generated code
-keeps C linkage and untyped signatures. Most owned C++ functions are in that position.
+keeps C linkage and untyped signatures. All 281 owned functions now derive `cpp=x`; the catalog functions that are not
+owned have no promotion record. `cpp=x` is not behavior verification or EC retirement: the slices' live bindings still
+read the global game state named in each slice's limits, and those compatibility contracts stay open.
 
 ### Behavior verification
 
