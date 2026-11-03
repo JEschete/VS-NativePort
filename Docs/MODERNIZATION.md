@@ -22,24 +22,24 @@ architecture changes rather than per-function work, so this ledger is what track
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
 | 10: #50 Render submission and frame ownership | 0 | 0 | 0 | 144 | 0 | 0 |
 | 14: #55 Actor identity and teardown | 0 | 213 | 8,121 | 160 | 78 | 0 |
-| 15: #58 Item definitions and instances | 0 | 66 | 2,010 | 50 | 16 | 0 |
+| 15: #58 Item definitions and instances | 66 | 0 | 2,010 | 50 | 16 | 0 |
 | 23: #57 AI, navigation and collision contexts | 0 | 122 | 5,899 | 201 | 49 | 0 |
 | 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
 | 26: #59 Event VM results and execution | 0 | 236 | 3,830 | 59 | 178 | 0 |
-| 30A: #253 Typed voices and owned audio playback | 0 | 303 | 5,582 | 233 | 165 | 0 |
+| 30A: #253 Typed voices and owned audio playback | 0 | 244 | 3,917 | 259 | 139 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 761 | 11,774 | 180 | 587 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 3126 | 98,004 | 1750 | 2000 | 0 |
+| **Total** | 66 | 3001 | 96,339 | 1776 | 1974 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 624 |
-| todo | 3,126 |
+| done | 683 |
+| todo | 3,067 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (2 active, 10 done, 42 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 11 done, 42 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -53,7 +53,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 8 | save-memory-card | done | agent:a8-save | 2 | 0 | 0 |
 | 9 | movie-intro | done | coordinator | 1 | 0 | 0 |
 | 10 | audio-seq-voices | done | agent:a10-audio-voices | 3 | 0 | 0 |
-| 11 | audio-seq-control | active | agent:a11-audio-seq-control | 3 | 59 | 1,665 |
+| 11 | audio-seq-control | done | agent:a11-audio-seq-control | 3 | 0 | 0 |
 | 12 | audio-mixer-driver | planned | - | 3 | 56 | 1,497 |
 | 13 | audio-playback-banks | planned | - | 3 | 58 | 703 |
 | 14 | audio-control-sfx | planned | - | 3 | 80 | 1,092 |
@@ -100,13 +100,13 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,707 |
-| Referenced by the original-address module table | 0 | 1,833 |
-| Calls an SDK shim | 0 | 410 |
-| Signature uses SDK integer types or `void*` | 0 | 726 |
-| Compiled with relaxed settings | 0 | 3,126 |
+| Called from generated code | 0 | 1,641 |
+| Referenced by the original-address module table | 0 | 1,719 |
+| Calls an SDK shim | 0 | 409 |
+| Signature uses SDK integer types or `void*` | 0 | 692 |
+| Compiled with relaxed settings | 0 | 3,001 |
 
-Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
+Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 66 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 33.
 

@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 624 | owned functions |
-| 624 | owned functions in C++ sources |
-| 3126 | generated function rows |
+| 749 | owned functions |
+| 749 | owned functions in C++ sources |
+| 3001 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 624 | 0 | 3,583 |
-| `cpp` | 624 | 0 | 3,583 |
+| `modernized` | 683 | 0 | 3,524 |
+| `cpp` | 683 | 66 (`wip`) | 3,458 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 624 |
-| `vs_namespace` | 624 |
-| `typed_interface` | 624 |
-| `no_bridge` | 624 |
-| `strict_clean` | 624 |
-| `behavior_evidence` | 624 |
+| `source_cpp` | 749 |
+| `vs_namespace` | 749 |
+| `typed_interface` | 683 |
+| `no_bridge` | 683 |
+| `strict_clean` | 749 |
+| `behavior_evidence` | 683 |
 
-Promotion records: 624; derived `cpp=x`: 624, `cpp=wip`: 0. Verification records: 112; `verified=x` markers: 45.
+Promotion records: 749; derived `cpp=x`: 683, `cpp=wip`: 66. Verification records: 113; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -269,6 +269,8 @@ The sixty-sixth slice (#276 row 6 part 2) is the event-script GIM images (11 fun
 and the generated Render_ GIM routines, the gim_t layer records, the D_800EB9BC, D_800EC25C, D_800F51C8 and _gimLbas tables, the splash-layer view and their module address entries are retired.
 The sixty-seventh slice (#276 row 6 part 3) is the font and dialogue text drawers (10 functions in VS::Render EncodedText, GameFont and TextBoxText): typed cores format and measure game-encoded text in bounded spans, build the variable-width and compact glyph sprites from a FontStyle value, and reveal, scale and blend dialogue text box text through a PacketQueue, ScaledGlyphTarget or VramPixelTarget; overruns, unset strings, self-references and boxes outside Menu_textBoxes are refused and counted,
 and the generated Render_ font routines, the font style globals, the D_800F4E80 active box index, the unused _writeStringTerminator and their module address entries are retired.
+The sixty-eighth slice (#276 row 11) is the music sequencer and sequence control opcodes (59 functions in VS::Audio::Seq SeqMusicSequence, SeqSequencer and SeqControlCommands): typed cores load, rebase, tick and step music sequences over spans of sequence data and value records, mask loop depth to the 4-entry stack, wrap reverb and rebase deltas at 32 bits, replace division traps with defined results, refuse reads outside the sequence and cap unbounded loops,
+and the generated Audio_Seq_ routines, the Control.h and MusicSequence.h headers and the routines' module address entries are retired; four Live adapters bind the channel and music configuration globals through pinned layouts.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

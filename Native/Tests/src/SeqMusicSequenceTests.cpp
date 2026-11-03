@@ -626,7 +626,7 @@ TEST_CASE("Live track loads refuse sequences shorter than their header",
   CHECK(Seq::LiveRefusalCount() == refused + 4);
 }
 
-TEST_CASE("Music commands keep their live bindings; helpers keep none",
+TEST_CASE("Music commands keep their live bindings and helpers keep none",
           "[audio-seq-control][audio]") {
   using CommandHandler = void (*)(Audio_CommandParams*);
   const auto symbols =
