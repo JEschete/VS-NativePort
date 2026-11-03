@@ -463,7 +463,10 @@ class EncounterFixupTests(unittest.TestCase):
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
         ).read_text(encoding="utf-8")
         self.assertIn("std::construct_at(storage)", source)
-        self.assertIn("VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_Ai_ActorAiState))", source)
+        self.assertIn(
+            "VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_Ai_ActorAiState))",
+            "".join(source.split()),
+        )
         self.assertIn("auto* destination = state;", source)
         self.assertIn("destination->scriptedTargetXZ = target;", source)
         self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actorId)", source)
