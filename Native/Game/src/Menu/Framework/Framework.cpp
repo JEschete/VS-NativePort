@@ -5,6 +5,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/CameraViewLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -1701,7 +1702,7 @@ void Menu_Framework_LoadBackgroundTexture(u_int* buf)
         && (Audio_Seq_unusedStateFlags.gameOver == 1)) {
         VS::Render::UploadLiveImageRectangle(vs_getXY(640, 511), data, vs_getWH(256, 1));
     } else {
-        Render_LoadClutColors((u_short*)data, 3, 0, 256);
+        VS::Render::LoadLiveClutColors((u_short*)data, 3, 0, 256);
     }
 
     VS::Render::UploadLiveImageRectangle(vs_getXY(672, 256), buf, vs_getWH(96, 240));

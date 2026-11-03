@@ -11,6 +11,7 @@
 
 #include "Core/RandomLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 
 extern "C" {
 #include "Core/Diagnostics.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Input/Controllers.h"
 #include "Render/Display.h"
 #include "Render/Loading.h"
-#include "Render/Palette.h"
 #include "State/PlayTime.h"
 #include "State/Timers.h"
 }
@@ -147,7 +147,7 @@ class LiveFieldFrame final : public FieldFrameHost {
   void PresentFrameBuffer(int index) override {
     PresentEnvironments(static_cast<std::size_t>(index & 1));
   }
-  void CommitPalettes() override { Render_CommitClutBuffer(); }
+  void CommitPalettes() override { CommitLiveClutRows(); }
   void DrawOrderingTable() override { DrawOTag(ordering_table_); }
 
  private:

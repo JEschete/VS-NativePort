@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Animation.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
-#include "Render/Palette.h"
 #include "State/Flags.h"
 
 // decomp: D_800F1860 (D_800F1860@BATTLE/BATTLE.PRG)
@@ -64,8 +64,8 @@ void Battle_UpdateAbilityUnlockResults(void)
 // decomp: BATTLE.PRG func_8007B410 (src/BATTLE/BATTLE.PRG/146C.c:8287)
 void Battle_BeginRewardPause(void)
 {
-    Render_TransformRoomPalettes(0xD, 4, -4, -4, 0);
-    Render_SetClutAnimationEnabled(0);
+    VS::Render::TransformLiveRoomPalettes(0xD, 4, -4, -4, 0);
+    VS::Render::SetLiveClutAnimationEnabled(0);
     Actors_UnfreezeAllActorAnimations();
     Field_SetRoomAnimationsPaused(1);
     Field_SetMinimapVisible(0);
@@ -76,8 +76,8 @@ void Battle_BeginRewardPause(void)
 // decomp: BATTLE.PRG func_8007B470 (src/BATTLE/BATTLE.PRG/146C.c:8298)
 void Battle_EndRewardPause(void)
 {
-    Render_SetClutAnimationEnabled(1);
-    Render_TransformSceneColors(8, 4, 0, 0, 0);
+    VS::Render::SetLiveClutAnimationEnabled(1);
+    VS::Render::TransformLiveSceneColors(8, 4, 0, 0, 0);
     Actors_FreezeAllActorAnimations();
     Field_SetRoomAnimationsPaused(0);
     Audio_SetRoomAmbienceDucked(0);

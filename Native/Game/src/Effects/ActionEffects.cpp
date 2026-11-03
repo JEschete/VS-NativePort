@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -132,13 +133,13 @@ void Effects_SignalActorEffectAnimation(int actor_index) { Actors_RequestActorAn
 void Effects_TintActionActorRed(int actor_index, int unused __attribute__((unused)))
 {
     Effects_tintedActor = actor_index;
-    Render_TransformActorColors(0xE, 8, actor_index, 0x10, 0, 0);
+    VS::Render::TransformLiveActorColors(0xE, 8, actor_index, 0x10, 0, 0);
 }
 
 // decomp: BATTLE.PRG func_8006D064 (src/BATTLE/BATTLE.PRG/146C.c:2217)
 void Effects_RestoreActionActorTint(void)
 {
-    Render_TransformActorColors(8, 4, Effects_tintedActor, 0, 0, 0);
+    VS::Render::TransformLiveActorColors(8, 4, Effects_tintedActor, 0, 0, 0);
     Effects_tintedActor = 0;
 }
 

@@ -10,6 +10,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -568,9 +569,9 @@ void Boot_RunGameLoop(void)
                     Menu_UpdateTextBoxes();
                     for (; i < State_tickSpeed / 2; ++i) {
                         VS::Input::UpdateLiveVibrationPatterns();
-                        Render_UpdateBackgroundGradientTransition();
-                        Render_UpdateModelColorTransitions();
-                        Render_UpdateClutTransitions();
+                        VS::Render::UpdateLiveBackgroundGradientTransition();
+                        VS::Render::UpdateLiveModelTintTransitions();
+                        VS::Render::UpdateLiveClutTransitions();
                     }
                     VS::Render::DrawLiveScreenTransition(ot);
                     VS::Render::DrawLiveFramebufferEffect(ot);
@@ -623,7 +624,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     SetDrawStp(&Render_legacyMaskBitOffPackets[1], 0);
     SetDrawStp(&Render_legacyMaskBitOnPackets[0], 1);
     SetDrawStp(&Render_legacyMaskBitOnPackets[1], 1);
-    Render_InitializeClutAnimation();
+    VS::Render::InitializeLiveClutAnimation();
     Field_InitializeRoomTransitionPrimitives();
     VS::Render::InitializeLiveFramebufferEffect();
     Event_InitializeScriptOpcodeTable();

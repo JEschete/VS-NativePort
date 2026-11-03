@@ -5,6 +5,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/FileMenuLive.hpp"
@@ -39,7 +40,6 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
-#include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/TextureAnimation.h"
 #include "Render/Textures.h"
@@ -2047,7 +2047,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         Menu_Files_ResetElements();
         setRECT(&rect, 640, 511, 256, 1);
         StoreImage(&rect, (u_long*)Menu_Files_gameOverClutBuf);
-        Render_LoadClutColors(Menu_Files_gameOverClutBuf, 3, 0, 256);
+        VS::Render::LoadLiveClutColors(Menu_Files_gameOverClutBuf, 3, 0, 256);
         *state = Menu_Files_GameOverState_DisplayFileMenu;
         break;
     case Menu_Files_GameOverState_DisplayFileMenu:

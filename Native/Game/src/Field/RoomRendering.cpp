@@ -4,6 +4,7 @@
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -258,9 +259,9 @@ void Field_CopyZonePaletteRow(void* source_colors, int palette_row, int first_co
 // decomp: BATTLE.PRG func_8008B320 (src/BATTLE/BATTLE.PRG/146C.c:15958)
 void Field_UploadRoomPalettes(void)
 {
-    Render_LoadClutColors(Field_roomPalettes, 0, 0, 0x100);
-    Render_LoadClutColors(Field_roomPalettes + 0x100, 1, 0, 0x100);
-    Render_LoadClutColors(Field_roomPalettes + 0x200, 2, 0, 0x100);
+    VS::Render::LoadLiveClutColors(Field_roomPalettes, 0, 0, 0x100);
+    VS::Render::LoadLiveClutColors(Field_roomPalettes + 0x100, 1, 0, 0x100);
+    VS::Render::LoadLiveClutColors(Field_roomPalettes + 0x200, 2, 0, 0x100);
     ((void (*)(u_short*))Field_SetGimmickPaletteTable)(Field_roomPalettes + 0x300);
 }
 

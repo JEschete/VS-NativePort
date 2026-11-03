@@ -3,6 +3,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -610,7 +611,7 @@ void Content_LoadWeaponMaterialPalette(int index, int material)
 
     VS::Core::Memory::CopyLiveAlignedWords(&model->workingPalette[offset], &model->palettes[palette], count * 2);
     VS::Core::Memory::CopyLiveAlignedWords(&model->uploadPalette, model->workingPalette, sizeof model->uploadPalette);
-    Render_LoadClutColors(model->uploadPalette, (model->paletteSlotOffset >> 1) + 4,
+    VS::Render::LoadLiveClutColors(model->uploadPalette, (model->paletteSlotOffset >> 1) + 4,
         ((model->paletteSlotOffset & 1) * 48) + 160, offset + count);
 }
 
@@ -1070,12 +1071,12 @@ setupPalettes:
     VS::Core::Memory::CopyLiveAlignedWords(actor->currentPalette, actor->basePalette, Content_legacyShpCopiedWordCount * 2);
 
     if (object->targetSlot == 16) {
-        Render_LoadClutColors(actor->basePalette, 0x17, 0, Content_legacyShpCopiedWordCount);
+        VS::Render::LoadLiveClutColors(actor->basePalette, 0x17, 0, Content_legacyShpCopiedWordCount);
         actor->clutA = Render_legacyActorTextureSlots[1].alternatePalette;
         actor->clutB = Render_legacyActorTextureSlots[1].alternatePalette;
     } else {
-        Render_LoadClutColors(actor->basePalette, object->targetSlot + 4, 0, Content_legacyShpCopiedWordCount);
-        Render_LoadClutColors(actor->basePalette, object->targetSlot + 0x16, 0, Content_legacyShpCopiedWordCount);
+        VS::Render::LoadLiveClutColors(actor->basePalette, object->targetSlot + 4, 0, Content_legacyShpCopiedWordCount);
+        VS::Render::LoadLiveClutColors(actor->basePalette, object->targetSlot + 0x16, 0, Content_legacyShpCopiedWordCount);
         actor->clutA = Render_legacyActorTextureSlots[object->targetSlot].palette;
         actor->clutB = Render_legacyActorTextureSlots[object->targetSlot].alternatePalette;
     }

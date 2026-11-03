@@ -9,6 +9,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -656,7 +657,7 @@ void Field_FinishRoomLoad(int requested_room_id)
     Render_legacyPrimitiveBuffers[0] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
     Render_legacyPrimitiveBuffers[1] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
 
-    Render_InitializeClutAnimation();
+    VS::Render::InitializeLiveClutAnimation();
 
     mpdHeader = (char *)(Field_zoneContext.mpdData);
     mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->roomSectionOffset;
@@ -706,7 +707,7 @@ void Field_FinishRoomLoad(int requested_room_id)
         reset_tail_words[2] = 0;
     }
 
-    Render_CaptureRoomBackgroundColors();
+    VS::Render::CaptureLiveRoomBackgroundColors();
 
     if (((Field_MpdHeader*)mpdHeader)->lootSectionSize != 0) {
         mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->lootSectionOffset;
@@ -816,7 +817,7 @@ void Field_FinishRoomLoad(int requested_room_id)
     Actors_ActorPlacement(0, &ashley_placement);
     Field_UpdateCameraTileConstraint(0, &ashley_placement.location.packedTile.target);
     VS::Render::ResetLiveFramebufferEffect();
-    Render_CommitClutBuffer();
+    VS::Render::CommitLiveClutRows();
     VS::Render::ConfigureLiveFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
 
     if (Save_NativeResumePending() && !Save_NativeFinishResume()) {

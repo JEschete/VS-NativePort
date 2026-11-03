@@ -2,6 +2,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
@@ -16,7 +17,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/Images.h"
 #include "Render/LegacyPackets.h"
-#include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
@@ -244,7 +244,7 @@ void Render_UpdateGimImages(void)
             }
         }
 
-        Render_LoadClutColors(gim->fileData + (count + 64), 3, 0, 256);
+        VS::Render::LoadLiveClutColors(gim->fileData + (count + 64), 3, 0, 256);
 
         i = gim->fileData[1];
         height = i >> 8;

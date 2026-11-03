@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Field/RoomState.h"
 #include "Field/Transitions.h"
 #include "Render/Images.h"
-#include "Render/Palette.h"
 
 // decomp: D_800F4B30 (D_800F4B30@BATTLE/BATTLE.PRG)
 Event_SplashTween Event_splashTweens[6];
@@ -184,16 +184,16 @@ intptr_t Event_ScriptTransformPalettes(u_char* instruction, short thread_index)
             if (actor_id == 1) {
                 break;
             }
-            Render_TransformActorColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, actor_id,
+            VS::Render::TransformLiveActorColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, actor_id,
                 (signed char)instruction[5], (signed char)instruction[6], (signed char)instruction[7]);
         }
         break;
     case 1:
-        Render_TransformSceneColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, (signed char)instruction[5],
+        VS::Render::TransformLiveSceneColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, (signed char)instruction[5],
             (signed char)instruction[6], (signed char)instruction[7]);
         break;
     case 2:
-        Render_TransformBackgroundColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, (signed char)instruction[5],
+        VS::Render::TransformLiveBackgroundColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, (signed char)instruction[5],
             (signed char)instruction[6], (signed char)instruction[7]);
         break;
     }

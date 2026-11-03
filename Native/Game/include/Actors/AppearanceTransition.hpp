@@ -63,6 +63,19 @@ enum class PaletteTransition : std::uint8_t {
   kBlack = 6,
 };
 
+// func_800AC168 (BATTLE.PRG 40564.c:2033): applies `mode` by `amount` to each
+// colour over the shorter of the two spans, kRestore taking the same index of
+// `reference` as its floor. Returns whether any colour is still changing:
+// kRemoveRedGreen until its red and green reach zero, kDarken and kSlowDarken
+// (four times and once the amount) until black, kRestore until it matches the
+// reference; kWhite, kBrightenGreenBlue and kBlack never report a change, and
+// a mode without a name changes nothing. The channel arithmetic is the
+// original's words, so a negative amount carries into the neighbouring
+// channel as it did.
+bool ApplyPaletteTransition(std::span<std::uint16_t> colors,
+                            std::span<const std::uint16_t> reference,
+                            PaletteTransition mode, int amount);
+
 // The model's transition color, fade level and the tint it returns to.
 struct AppearanceColors {
   std::array<std::uint8_t, kRgbChannels> rgb{};

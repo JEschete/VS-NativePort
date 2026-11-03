@@ -5,6 +5,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -757,9 +758,9 @@ void Field_SetPlatformFreezeAppearance(int freeze_appearance_enabled)
 
     if (Field_isPlatformFreezeTintActive != freeze_appearance_enabled) {
         if (freeze_appearance_enabled != 0) {
-            Render_LoadClutColors(Field_platformFreezePalette, 2, 0x30, 0x10);
+            VS::Render::LoadLiveClutColors(Field_platformFreezePalette, 2, 0x30, 0x10);
         } else {
-            Render_LoadClutColors(Field_roomPalettes + 0x230, 2, 0x30, 0x10);
+            VS::Render::LoadLiveClutColors(Field_roomPalettes + 0x230, 2, 0x30, 0x10);
         }
 
         platform_cursor = Field_roomData.movingPlatforms;
@@ -863,7 +864,7 @@ exit:
     created_gimmick->objectInfo.objectId = asset_request->subKind;
 
     VS::Core::Memory::CopyLiveAlignedWords(base_palette_colors, (created_gimmick->objectInfo.objectId * 32) + Field_gimmickPaletteColors, sizeof created_gimmick->basePalette);
-    Render_LoadClutColors(base_palette_colors, 0xD, created_gimmick->slot * 0x10, 0x10);
+    VS::Render::LoadLiveClutColors(base_palette_colors, 0xD, created_gimmick->slot * 0x10, 0x10);
 
     created_gimmick->objectInfo.carrier = 0xFF;
     created_gimmick->parent = 0xFF;

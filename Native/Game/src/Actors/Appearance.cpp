@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -107,9 +108,9 @@ int Actors_EnableModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot
         pulse->level = 0;
         pulse->flags = (pulse->flags & 0xFC) | (pulse_flags & 1);
         if (actor != NULL) {
-            Render_LoadClutColors(actor->basePalette, actor->instance.slot + 0x16, 0, 0xA0);
+            VS::Render::LoadLiveClutColors(actor->basePalette, actor->instance.slot + 0x16, 0, 0xA0);
         } else {
-            Render_LoadClutColors(gimmick->basePalette, 0x1F, gimmick->slot * 16, 16);
+            VS::Render::LoadLiveClutColors(gimmick->basePalette, 0x1F, gimmick->slot * 16, 16);
         }
     }
 

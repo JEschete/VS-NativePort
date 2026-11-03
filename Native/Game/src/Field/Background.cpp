@@ -2,6 +2,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Field/Zone.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
-#include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
 
@@ -306,7 +306,7 @@ int Field_FinishTiledBackgroundLoad(void)
             LoadImage(tim.prect, (u_long*)tim.paddr);
         }
         if (tim.caddr != NULL) {
-            Render_LoadClutColors((const u_short *)((void*)tim.caddr), 0xE, 0, 0x100);
+            VS::Render::LoadLiveClutColors((const u_short *)((void*)tim.caddr), 0xE, 0, 0x100);
         }
         Content_ReleaseDiscRequest(Field_backgroundTextureDiscRequest);
         Field_backgroundTextureDiscRequest = NULL;

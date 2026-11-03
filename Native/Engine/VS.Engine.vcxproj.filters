@@ -546,12 +546,15 @@
     <ClCompile Include="src\Render\PageSpace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Palette.cpp">
-      <Filter>src\Render</Filter>
-    </ClCompile>
     <ClInclude Include="src\Render\Palette.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\PaletteAnimation.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\PaletteAnimationLive.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClInclude Include="src\Render\Primitives.h">
       <Filter>src\Render</Filter>
     </ClInclude>
@@ -907,6 +910,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\PaletteAnimation.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\PaletteAnimationLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\RoomDraw.hpp">

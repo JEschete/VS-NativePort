@@ -13,6 +13,7 @@
 #include <span>
 
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -86,15 +87,12 @@ bool ApplyTransition(std::span<u_short> colors, std::span<u_short> reference,
                      PaletteTransition mode, int speed) {
   Require(reference.size() >= colors.size(),
           "palette transition reference is shorter than its colors");
-  return Render_ApplyPaletteTransition(
-             colors.data(), static_cast<int>(colors.size()), speed,
-             static_cast<int>(mode), reference.data()) != 0;
+  return ApplyPaletteTransition(colors, reference, mode, speed);
 }
 
 void UploadClut(std::span<const u_short> colors, int row, int offset) {
-  Render_LoadClutColors(colors.data(), static_cast<u_int>(row),
-                        static_cast<u_int>(offset),
-                        static_cast<u_int>(colors.size()));
+  (void)VS::Render::LoadLiveClutRow(static_cast<std::uint32_t>(row),
+                                    static_cast<std::uint32_t>(offset), colors);
 }
 
 u_char StateBits(int state) {

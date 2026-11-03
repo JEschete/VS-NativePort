@@ -4,11 +4,13 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <span>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/AppearanceTransition.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -29,7 +31,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Field/Gimmicks.h"
-#include "Render/Palette.h"
 #include "State/Timers.h"
 }
 
@@ -426,11 +427,17 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
                    : state == 10              ? 4
                    : state == 12              ? 5
                                               : 6;
-  const int changed = Render_ApplyPaletteTransition(
-      expected.data() + skip, count - skip, 1, mode, actor.basePalette + skip);
-  if (state == 3 && changed == 0) {
-    Render_ApplyPaletteTransition(expected.data() + skip, count - skip, 1, 2,
-                                  actor.basePalette + skip);
+  const auto expected_colors = std::span<std::uint16_t>(expected).subspan(
+      static_cast<std::size_t>(skip), static_cast<std::size_t>(count - skip));
+  const auto reference = std::span<const std::uint16_t>(actor.basePalette)
+                             .subspan(static_cast<std::size_t>(skip),
+                                      static_cast<std::size_t>(count - skip));
+  const bool changed = VS::Actors::ApplyPaletteTransition(
+      expected_colors, reference,
+      static_cast<VS::Actors::PaletteTransition>(mode), 1);
+  if (state == 3 && !changed) {
+    VS::Actors::ApplyPaletteTransition(
+        expected_colors, reference, VS::Actors::PaletteTransition::kWhite, 1);
   }
   VS::Actors::UpdateLiveActorAppearanceTransition(actor);
   for (int index = 0; index < 160; ++index) {
@@ -454,11 +461,13 @@ TEST_CASE("Gimmick palette fades stay on their own typed path",
   expected.fill(0x7FFF);
   const int speed = object.motionState == 2 ? 2 : 1;
   const int mode = object.motionState == 2 ? 0 : 1;
-  const int changed = Render_ApplyPaletteTransition(expected.data(), 16, speed,
-                                                    mode, object.basePalette);
-  if (object.motionState == 3 && changed == 0) {
-    Render_ApplyPaletteTransition(expected.data(), 16, speed, 2,
-                                  object.basePalette);
+  const bool changed = VS::Actors::ApplyPaletteTransition(
+      expected, object.basePalette,
+      static_cast<VS::Actors::PaletteTransition>(mode), speed);
+  if (object.motionState == 3 && !changed) {
+    VS::Actors::ApplyPaletteTransition(expected, object.basePalette,
+                                       VS::Actors::PaletteTransition::kWhite,
+                                       speed);
   }
   VS::Actors::UpdateLiveGimmickAppearanceTransition(object);
   for (int index = 0; index < 16; ++index) {

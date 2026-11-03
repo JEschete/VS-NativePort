@@ -96,6 +96,14 @@ _RENDER_LIVE = {
         ("SetLiveFramebufferEffectDepth", "F00317"), ("SetLiveFramebufferPreviousFrame", "F00318"),
         ("ReadLiveFramebufferEffectScale", "F00321"), ("ReadLiveFramebufferEffectTint", "F00322"),
         ("ReadLiveFramebufferEffectOffset", "F00323")),
+    # #276 slice 5b (palette animation): the CLUT rows, the room background gradient and the model tints.
+    "PaletteAnimationLive.hpp": (
+        ("LoadLiveClutColors", "F03561"), ("CommitLiveClutRows", "F03565"),
+        ("InitializeLiveClutAnimation", "F03567"), ("UpdateLiveBackgroundGradientTransition", "F04177"),
+        ("UpdateLiveModelTintTransitions", "F03558"), ("UpdateLiveClutTransitions", "F03559"),
+        ("CaptureLiveRoomBackgroundColors", "F03564"), ("SetLiveClutAnimationEnabled", "F03566"),
+        ("TransformLiveRoomPalettes", "F00215"), ("TransformLiveSceneColors", "F00216"),
+        ("TransformLiveActorColors", "F00217"), ("TransformLiveBackgroundColors", "F00218")),
 }
 
 # #276 slice 8 (save-memory-card): the C-shaped bindings over the typed VS::Save::MemoryCard game-file core and the

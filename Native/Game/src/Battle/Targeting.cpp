@@ -6,6 +6,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/Controller.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -797,7 +798,7 @@ void Battle_BeginActorActionSelection(int source_actor_slot, u_short action_id)
 
     if (Battle_actionState->isPlayerAction != 0) {
         Battle_InitSphere();
-        Render_TransformRoomPalettes(0xD, 4, -4, -4, 0);
+        VS::Render::TransformLiveRoomPalettes(0xD, 4, -4, -4, 0);
     }
 
     Actors_FreezeAllActorAnimations();
@@ -820,7 +821,7 @@ void Battle_BeginActorActionSelection(int source_actor_slot, u_short action_id)
         Battle_SetActorMarkersHidden(1);
     }
     Battle_InitializeActionTargeting(Battle_actionState->selection.actionId);
-    Render_SetClutAnimationEnabled(0);
+    VS::Render::SetLiveClutAnimationEnabled(0);
 }
 
 // decomp: BATTLE.PRG func_800C4794 (src/BATTLE/BATTLE.PRG/5BF94.c:640)

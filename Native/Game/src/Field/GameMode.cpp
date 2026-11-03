@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -65,8 +66,8 @@ void Field_PauseFieldForObjectInteraction(void)
 // decomp: BATTLE.PRG func_8006C39C (src/BATTLE/BATTLE.PRG/146C.c:1893)
 void Field_PauseFieldForMenu(void)
 {
-    Render_TransformRoomPalettes(13, 4, -4, -4, 0);
-    Render_SetClutAnimationEnabled(0);
+    VS::Render::TransformLiveRoomPalettes(13, 4, -4, -4, 0);
+    VS::Render::SetLiveClutAnimationEnabled(0);
     Actors_UnfreezeAllActorAnimations();
     Field_SetRoomAnimationsPaused(1);
     Field_SetMovingPlatformsPaused(1);
@@ -80,8 +81,8 @@ void Field_PauseFieldForMenu(void)
 // decomp: BATTLE.PRG func_8006C40C (src/BATTLE/BATTLE.PRG/146C.c:1907)
 void Field_ResumeFieldAfterMenu(void)
 {
-    Render_SetClutAnimationEnabled(1);
-    Render_TransformSceneColors(8, 4, 0, 0, 0);
+    VS::Render::SetLiveClutAnimationEnabled(1);
+    VS::Render::TransformLiveSceneColors(8, 4, 0, 0, 0);
     Actors_FreezeAllActorAnimations();
     Field_SetRoomAnimationsPaused(0);
     Field_SetMovingPlatformsPaused(0);

@@ -4,6 +4,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Render/DepthCueLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -39,7 +40,6 @@ extern "C" {
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
-#include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
@@ -312,7 +312,7 @@ int Menu_Map_LoadBackground(int begin_background_load)
     case 0:
         if (Menu_Map_loadBackgroundSlot->state == 4) {
             Content_ReleaseDiscRequest(Menu_Map_loadBackgroundSlot);
-            Render_LoadClutColors(Menu_Map_backgroundImage, 3, 0, 256);
+            VS::Render::LoadLiveClutColors(Menu_Map_backgroundImage, 3, 0, 256);
             VS::Render::UploadLiveImageRectangle(vs_getXY(640, 256), Menu_Map_backgroundImage + 256, vs_getWH(160, 240));
             Menu_Framework_SetBackgroundPriority(-4, 128);
             Menu_Map_loadBackgroundState = 1;
@@ -433,7 +433,7 @@ int Menu_Map_UpdateScreen(u_char* state)
 
             ClearImage(Menu_Map_screenMenuBgBackRects, 0, 0, 0);
             ClearImage(&Menu_Map_screenMenuBgBackRects[1], 0, 0, 0);
-            Render_LoadClutColors((u_short*)Menu_Map_screenMenuBgBackup, 3, 0, 0x100);
+            VS::Render::LoadLiveClutColors((u_short*)Menu_Map_screenMenuBgBackup, 3, 0, 0x100);
             VS::Render::UploadLiveImageRectangle(0x010002A0, Menu_Map_screenMenuBgBackup + 0x80, 0xF00060);
 
             *state = 10;

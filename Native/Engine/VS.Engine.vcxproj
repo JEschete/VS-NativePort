@@ -375,12 +375,9 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Render\PageSpace.cpp" />
-    <ClCompile Include="src\Render\Palette.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Render\PaletteAnimation.cpp" />
+    <ClCompile Include="src\Render\PaletteAnimationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Render\ResultAtlas.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -620,6 +617,8 @@
     <ClInclude Include="include\Render\ModelGeometryLive.hpp" />
     <ClInclude Include="include\Render\ModelWorkspace.h" />
     <ClInclude Include="include\Render\PageSpace.hpp" />
+    <ClInclude Include="include\Render\PaletteAnimation.hpp" />
+    <ClInclude Include="include\Render\PaletteAnimationLive.hpp" />
     <ClInclude Include="include\Render\RoomDraw.hpp" />
     <ClInclude Include="include\Render\RoomDrawLive.hpp" />
     <ClInclude Include="include\Render\RoomLighting.hpp" />

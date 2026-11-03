@@ -2,6 +2,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -247,9 +248,9 @@ void Battle_BeginPostActionRecovery(int recovery_reward_mode)
             Actors_RestoreActorIdlePose(i);
         }
     }
-    Render_TransformRoomPalettes(8, 4, 0, 0, 0);
+    VS::Render::TransformLiveRoomPalettes(8, 4, 0, 0, 0);
     Actors_FreezeAllActorAnimations();
-    Render_SetClutAnimationEnabled(1);
+    VS::Render::SetLiveClutAnimationEnabled(1);
     Field_SetRoomAnimationsPaused(0);
     Battle_SetActorMarkersHidden(0);
     Battle_recoveryRewardMode = recovery_reward_mode;
@@ -465,8 +466,8 @@ void Battle_CommitSelectedAction(int target_selection_mode)
         }
     }
 
-    Render_SetClutAnimationEnabled(1);
-    Render_TransformSceneColors(8, 4, 0, 0, 0);
+    VS::Render::SetLiveClutAnimationEnabled(1);
+    VS::Render::TransformLiveSceneColors(8, 4, 0, 0, 0);
     Actors_FreezeAllActorAnimations();
     Battle_SetActorMarkersHidden(1);
     Field_SetMinimapVisible(0);

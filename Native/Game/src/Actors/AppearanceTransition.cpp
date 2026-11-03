@@ -8,8 +8,12 @@
 #include <cstdint>
 #include <span>
 
+#include "Core/Math/ScalarMath.hpp"
+
 namespace VS::Actors {
 namespace {
+namespace Math = VS::Core::Math;
+
 constexpr int kPulseStep = 2;
 constexpr std::uint8_t kPulseDescending = 2;
 constexpr int kDoubleTickSpeed = 4;
@@ -35,6 +39,104 @@ std::uint8_t Byte(int value) { return static_cast<std::uint8_t>(value); }
 
 int ClampChannel(int channel) {
   return std::clamp(channel, 0, kChannelMaximum);
+}
+
+// func_800AC168's colour arithmetic: a 15-bit colour's channels as the
+// original's word registers.
+constexpr int kChannelBits = 0x1F;
+constexpr int kColorBits = 0x7FFF;
+constexpr std::uint16_t kWhiteColor = 0xFFFF;
+constexpr int kDarkenScale = 4;
+
+struct ColorWords {
+  int red = 0;
+  int green = 0;
+  int blue = 0;
+};
+
+ColorWords WordsOf(std::uint16_t color) {
+  return {.red = color & kChannelBits,
+          .green = (color >> kGreenShift) & kChannelBits,
+          .blue = (color >> kBlueShift) & kChannelBits};
+}
+
+// r | g << 5 | b << 10 over words: a channel outside 0 to 31 carries into its
+// neighbour as in the original.
+int PackWords(const ColorWords& words) {
+  return words.red | (words.green << kGreenShift) | (words.blue << kBlueShift);
+}
+
+std::uint16_t Halfword(int value) { return static_cast<std::uint16_t>(value); }
+
+int Lowered(int channel, int delta, int floor) {
+  return std::max(Math::WrappingSubtract(channel, delta), floor);
+}
+
+int Raised(int channel, int delta) {
+  return std::min(Math::WrappingAdd(channel, delta), kChannelMaximum);
+}
+
+bool RemoveRedGreen(std::uint16_t& color, int amount) {
+  const ColorWords words = WordsOf(color);
+  const int delta = Math::WrappingMultiply(amount, 2);
+  const int red_green = PackWords({.red = Lowered(words.red, delta, 0),
+                                   .green = Lowered(words.green, delta, 0)});
+  color = Halfword(red_green | (words.blue << kBlueShift) | kOpaqueBit);
+  return red_green != 0;
+}
+
+bool FadeToBlack(std::uint16_t& color, int delta) {
+  const ColorWords words = WordsOf(color);
+  const int packed = PackWords({.red = Lowered(words.red, delta, 0),
+                                .green = Lowered(words.green, delta, 0),
+                                .blue = Lowered(words.blue, delta, 0)});
+  color = Halfword(packed | kOpaqueBit);
+  return packed != 0;
+}
+
+void BrightenGreenBlue(std::uint16_t& color, int amount) {
+  const ColorWords words = WordsOf(color);
+  const int twice = Math::WrappingMultiply(amount, 2);
+  color = Halfword(PackWords({.red = Raised(words.red, amount),
+                              .green = Raised(words.green, twice),
+                              .blue = Raised(words.blue, twice)}) |
+                   kOpaqueBit);
+}
+
+bool RestoreToward(std::uint16_t& color, std::uint16_t reference, int amount) {
+  const ColorWords words = WordsOf(color);
+  const ColorWords floor = WordsOf(reference);
+  const int delta = Math::WrappingMultiply(amount, 2);
+  const int packed =
+      PackWords({.red = Lowered(words.red, delta, floor.red),
+                 .green = Lowered(words.green, delta, floor.green),
+                 .blue = Lowered(words.blue, delta, floor.blue)});
+  color = Halfword((reference & kOpaqueBit) | packed);
+  return packed != (reference & kColorBits);
+}
+
+bool ApplyToColor(std::uint16_t& color, std::uint16_t reference,
+                  PaletteTransition mode, int amount) {
+  switch (mode) {
+    case PaletteTransition::kRemoveRedGreen:
+      return RemoveRedGreen(color, amount);
+    case PaletteTransition::kDarken:
+      return FadeToBlack(color, Math::WrappingMultiply(amount, kDarkenScale));
+    case PaletteTransition::kWhite:
+      color = kWhiteColor;
+      return false;
+    case PaletteTransition::kBrightenGreenBlue:
+      BrightenGreenBlue(color, amount);
+      return false;
+    case PaletteTransition::kRestore:
+      return RestoreToward(color, reference, amount);
+    case PaletteTransition::kSlowDarken:
+      return FadeToBlack(color, amount);
+    case PaletteTransition::kBlack:
+      color = kOpaqueBit;
+      return false;
+  }
+  return false;
 }
 
 void SetRgb(AppearanceColors& colors, int value) {
@@ -156,7 +258,7 @@ int UpdatePalettePulse(PalettePulse& pulse, int tick_speed,
   return level;
 }
 
-// Render_StepRgbTowardTarget (SLUS_010.40): the channels are bytes, so a step
+// func_800AC0D4 (BATTLE.PRG 40564.c:2003): the channels are bytes, so a step
 // past zero wraps before the clamp compares them.
 bool StepRgbTowardTarget(std::span<std::uint8_t, kRgbChannels> current,
                          std::span<const std::uint8_t, kRgbChannels> target,
@@ -174,6 +276,17 @@ bool StepRgbTowardTarget(std::span<std::uint8_t, kRgbChannels> current,
     if (signed_step < 0 ? value < goal : goal < value) {
       value = goal;
     }
+  }
+  return changed;
+}
+
+bool ApplyPaletteTransition(std::span<std::uint16_t> colors,
+                            std::span<const std::uint16_t> reference,
+                            PaletteTransition mode, int amount) {
+  const std::size_t count = std::min(colors.size(), reference.size());
+  bool changed = false;
+  for (std::size_t index = 0; index < count; ++index) {
+    changed |= ApplyToColor(colors[index], reference[index], mode, amount);
   }
   return changed;
 }

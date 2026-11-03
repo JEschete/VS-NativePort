@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Menu/Framework/Framework.h"
-#include "Render/Palette.h"
 #include "SystemResources.h"
 
 // decomp: INITBTL.PRG _loadSystemDat (src/BATTLE/INITBTL.PRG/18.c:258)
@@ -27,7 +27,7 @@ void Content_LoadSystemResources(void)
     LoadImage(&rect, (u_long*)p_hdr + 2);
 
     p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->paletteOffset);
-    Render_LoadClutColors((u_short*)p_hdr + 2, 0xF, 0, p_hdr->x);
+    VS::Render::LoadLiveClutColors((u_short*)p_hdr + 2, 0xF, 0, p_hdr->x);
 
     p_hdr = (RECT*)((signed char*)buf + buf->image2Offset);
     setRECT(&rect, p_hdr->x, p_hdr->y, p_hdr->w, p_hdr->h);

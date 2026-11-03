@@ -2,6 +2,7 @@
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "PFile.h"
-#include "Render/Palette.h"
 
 // decomp: BATTLE.PRG func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
 void Effects_LoadEffectTimeline(Effects_EffectInstance* effect_instance, int timeline_index, int arg2)
@@ -288,7 +288,7 @@ int Effects_TickSourceActorColorTrack(Effects_EffectInstance* effect_instance, E
     if (color_key->frame == effect_instance->context.timeline->frame) {
         if ((effect_instance->context.emitFrom.type == 4)
             && (Actors_ActorStateFlags(effect_instance->context.emitFrom.value.actor.actor) & 2)) {
-            Render_TransformActorColors(color_key->mode, color_key->duration,
+            VS::Render::TransformLiveActorColors(color_key->mode, color_key->duration,
                 effect_instance->context.emitFrom.value.actor.actor, color_key->red - 0x80,
                 color_key->green - 0x80, color_key->blue - 0x80);
         }
@@ -313,14 +313,14 @@ int Effects_TickTargetActorColorTrack(Effects_EffectInstance* effect_instance, E
         for (i = 0; i < Effects_actionRequest.count; ++i) {
             if ((effect->targets[i].type == 4)
                 && (Actors_ActorStateFlags(effect->targets[i].value.actor.actor) & 2)) {
-                Render_TransformActorColors(entry->mode, entry->duration,
+                VS::Render::TransformLiveActorColors(entry->mode, entry->duration,
                     effect->targets[i].value.actor.actor, entry->red - 128,
                     entry->green - 128, entry->blue - 128);
             }
         }
     } else if ((effect_instance->context.emitTo.type == 4)
                && (Actors_ActorStateFlags(effect_instance->context.emitTo.value.actor.actor) & 2)) {
-        Render_TransformActorColors(entry->mode, entry->duration, effect_instance->context.emitTo.value.actor.actor,
+        VS::Render::TransformLiveActorColors(entry->mode, entry->duration, effect_instance->context.emitTo.value.actor.actor,
             entry->red - 128, entry->green - 128, entry->blue - 128);
     }
     return Effects_AdvanceEffectTimelineKey(timeline_track);
@@ -335,7 +335,7 @@ int Effects_TickOtherActorColorTrack(Effects_EffectInstance* effect_instance, Ef
     if (color_key->frame == effect_instance->context.timeline->frame) {
         for (i = 0; i < Effects_actionRequest.otherCount; ++i) {
             if (Actors_ActorStateFlags(Effects_actionRequest.others[i]) & 2) {
-                Render_TransformActorColors(color_key->mode, color_key->duration, Effects_actionRequest.others[i],
+                VS::Render::TransformLiveActorColors(color_key->mode, color_key->duration, Effects_actionRequest.others[i],
                     color_key->red - 0x80, (color_key->green - 0x80), (color_key->blue - 0x80));
             }
         }
@@ -350,7 +350,7 @@ int Effects_TickSceneColorTrack(Effects_EffectInstance* effect_instance, Effects
     Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)timeline_track->keys + (timeline_track->keyIndex);
 
     if (color_key->frame == effect_instance->context.timeline->frame) {
-        Render_TransformSceneColors(color_key->mode, color_key->duration, color_key->red - 0x80,
+        VS::Render::TransformLiveSceneColors(color_key->mode, color_key->duration, color_key->red - 0x80,
             color_key->green - 0x80, (color_key->blue - 0x80));
         return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
@@ -363,7 +363,7 @@ int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Ef
     Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)(timeline_track->keys + timeline_track->keyIndex * 2);
 
     if (color_key->frame == effect_instance->context.timeline->frame) {
-        Render_TransformBackgroundColors(color_key->mode, color_key->duration, color_key->red - 0x80,
+        VS::Render::TransformLiveBackgroundColors(color_key->mode, color_key->duration, color_key->red - 0x80,
             color_key->green - 0x80, color_key->blue - 0x80);
         return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
