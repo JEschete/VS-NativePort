@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 683 | 0 | 3,524 |
-| `cpp` | 683 | 66 (`wip`) | 3,458 |
+| `modernized` | 749 | 0 | 3,458 |
+| `cpp` | 749 | 0 | 3,458 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 749 |
 | `vs_namespace` | 749 |
-| `typed_interface` | 683 |
-| `no_bridge` | 683 |
+| `typed_interface` | 749 |
+| `no_bridge` | 749 |
 | `strict_clean` | 749 |
-| `behavior_evidence` | 683 |
+| `behavior_evidence` | 749 |
 
-Promotion records: 749; derived `cpp=x`: 683, `cpp=wip`: 66. Verification records: 113; `verified=x` markers: 45.
+Promotion records: 749; derived `cpp=x`: 749, `cpp=wip`: 0. Verification records: 114; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -271,6 +271,8 @@ The sixty-seventh slice (#276 row 6 part 3) is the font and dialogue text drawer
 and the generated Render_ font routines, the font style globals, the D_800F4E80 active box index, the unused _writeStringTerminator and their module address entries are retired.
 The sixty-eighth slice (#276 row 11) is the music sequencer and sequence control opcodes (59 functions in VS::Audio::Seq SeqMusicSequence, SeqSequencer and SeqControlCommands): typed cores load, rebase, tick and step music sequences over spans of sequence data and value records, mask loop depth to the 4-entry stack, wrap reverb and rebase deltas at 32 bits, replace division traps with defined results, refuse reads outside the sequence and cap unbounded loops,
 and the generated Audio_Seq_ routines, the Control.h and MusicSequence.h headers and the routines' module address entries are retired; four Live adapters bind the channel and music configuration globals through pinned layouts.
+The sixty-ninth slice (#276 row 18) is the items system (66 functions in VS::Items EquipmentStats, Loot, EquipmentAffinity, EquipmentWear, Recovery and VS::Items::Inventory): typed cores build and store equipment loadouts, roll and queue drops, restore room chests, grow ratings, apply wear, calculate recovery and keep the inventory display indices over value records with pinned layouts, refuse out-of-range references with an items warning and keep the weapon load off the game heap,
+and the generated Items_ routines, the EquipmentAffinity.h, EquipmentStats.h, EquipmentWear.h and Recovery.h headers and 54 module address entries are retired; four Live adapters bind the battle, inventory, room and menu globals.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

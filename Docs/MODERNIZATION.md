@@ -22,7 +22,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
 | 10: #50 Render submission and frame ownership | 0 | 0 | 0 | 144 | 0 | 0 |
 | 14: #55 Actor identity and teardown | 0 | 213 | 8,121 | 160 | 78 | 0 |
-| 15: #58 Item definitions and instances | 66 | 0 | 2,010 | 50 | 16 | 0 |
+| 15: #58 Item definitions and instances | 0 | 0 | 0 | 66 | 0 | 0 |
 | 23: #57 AI, navigation and collision contexts | 0 | 122 | 5,899 | 201 | 49 | 0 |
 | 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
@@ -32,14 +32,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 66 | 3001 | 96,339 | 1776 | 1974 | 0 |
+| **Total** | 0 | 3001 | 94,329 | 1792 | 1958 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 683 |
-| todo | 3,067 |
+| done | 749 |
+| todo | 3,001 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 11 done, 42 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (12 done, 42 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -60,7 +60,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 15 | audio-music-streams | planned | - | 5 | 50 | 625 |
 | 16 | content | planned | - | 6 | 43 | 1,945 |
 | 17 | state-boot | planned | - | 6 | 23 | 976 |
-| 18 | items | active | agent:a18-items | 6 | 66 | 2,010 |
+| 18 | items | done | agent:a18-items | 6 | 0 | 0 |
 | 19 | actors-state-loading | planned | - | 6 | 63 | 1,812 |
 | 20 | actors-animation-skeleton | planned | - | 2 | 68 | 2,368 |
 | 21 | actors-movement | planned | - | 1 | 58 | 2,872 |
@@ -106,7 +106,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | Signature uses SDK integer types or `void*` | 0 | 692 |
 | Compiled with relaxed settings | 0 | 3,001 |
 
-Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 66 open owned functions have generated callers.
+Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 33.
 
