@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 318 | owned functions |
-| 318 | owned functions in C++ sources |
-| 3442 | generated function rows |
+| 323 | owned functions |
+| 323 | owned functions in C++ sources |
+| 3437 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 318 | 0 | 3,889 |
-| `cpp` | 318 | 0 | 3,889 |
+| `modernized` | 323 | 0 | 3,884 |
+| `cpp` | 323 | 0 | 3,884 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 318 |
-| `vs_namespace` | 318 |
-| `typed_interface` | 318 |
-| `no_bridge` | 318 |
-| `strict_clean` | 318 |
-| `behavior_evidence` | 318 |
+| `source_cpp` | 323 |
+| `vs_namespace` | 323 |
+| `typed_interface` | 323 |
+| `no_bridge` | 323 |
+| `strict_clean` | 323 |
+| `behavior_evidence` | 323 |
 
-Promotion records: 318; derived `cpp=x`: 318, `cpp=wip`: 0. Verification records: 101; `verified=x` markers: 45.
+Promotion records: 323; derived `cpp=x`: 323, `cpp=wip`: 0. Verification records: 102; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -248,6 +248,8 @@ The fifty-fifth is AI ground navigation and navigation primitives (F01645, F0164
 and GroundNavigation.h, NavigationPrimitives.h and the thirty-four Battle_Ai_ symbols are retired.
 The fifty-sixth, and the first generated-function slice (#276), is the core runtime, copy, random and game text helpers (F00023, F00055, F00213, F00214, F00241, F00328, F01273, F01401, F01402, F01404, F01455, F02719, F02822, F02823, F02826, F02827, F03263, F03264, F03427, F03428, F03429, F03430, F03431, F03432, F03433, F03434, F03435, F03485, F03503, F03509, F03510, F03568, F03569, F03570, F03571, F03574, F03586): the empty handlers, span copies, random draws and game text formatting are VS::Core C++ whose live bindings refuse runaway sizes and unterminated or oversized text,
 and Callbacks.h, Compatibility.h, Memory/Copy.h, Runtime.h, String/GameText.h and the twenty Core_ symbols are retired.
+The fifty-seventh slice (#276 A2) is the game heap (F03463, F03464, F03465, F03466, F03467): VS::Core::Memory::Heap keeps its block tables outside the arena with the original placement, and the live binding refuses stray, repeated and misaligned frees and reports exhaustion and damaged header guards,
+and Core/Memory.h, Core/Memory/Heap.h, Core_HeapBlockHeader, the two legacy list heads and the five Core_Memory_ heap functions are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
