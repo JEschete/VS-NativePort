@@ -1,13 +1,56 @@
 # Current handoff
 
-Updated 2026-10-31. This is a short entry point, not another work tracker.
+Updated 2026-11-05. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
 
 ## Work order and current state
 
-### Latest source and next observation
+### Owner-pause publication checkpoint
+
+- Implementation is paused at the owner's request. Do not resume promotion until
+  the owner says to continue. #247 is closed; #276 remains the continuation tracker.
+- Branch `imp/01-ma04-gates`: `c83d7772` publishes the #288 collision hazard scanner
+  controls; `34cdf8b7` publishes the integrated native-system promotions, their
+  generated callers, ownership, project integration, tests and ledgers. This
+  accumulated checkpoint spans interdependent systems; it is not one small slice.
+  [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) records the publication commits.
+- Promotion status: 2,631 of 3,749 functions done (70.2%), 1,118 remaining;
+  41 of 54 plan rows done. Remaining rows: 27, 28, 29, 30, 32, 33, 35, 37, 39,
+  47, 48, 50 and 52. The 763 tracked hazard sites are not all resolved.
+  Promotion, behavior verification and compatibility retirement remain separate
+  gates; these counts do not mean the game is fully verified or mod-ready.
+- The unfinished row-33 event VM source and header are preserved outside the
+  repository in the current session's `files\owner-pause-row33` directory. They
+  were not integrated, built or published. The published source retains the
+  pre-draft VM matching the copier manifest; #313 remains open.
+- Fresh local validation of the source published as `34cdf8b7` (before commit,
+  based on `77591989` with the integrated changes, excluding the row-33 draft):
+  Debug and Release x64 solution builds pass; `python tools\test\regression.py
+  check --config <Debug|Release>` passes 4,359 cases and 7,899,775 assertions in
+  each configuration, with no failures or skips. `silver_wolves` (2,400 frames)
+  and `first_lever_room` (900 frames) match the existing replay baseline in both.
+  The replay expectations were not changed.
+- `gates.py --check`, `modernization.py --check` and `hazards.py --check` pass.
+  Python unittest discovery passes for `tools\port` (223), `tools\ledger` (199),
+  `tools\lint` (30) and `tools\naming` (39). `quality-native.cmd --changed --jobs 2`
+  reports zero findings/new findings, with one separately classified inapplicable
+  C++ header advisory; this is not a fresh full clang-tidy run.
+  A second copier run leaves all 512 generated outputs unchanged.
+  `python tools\port\check_event_dispatch.py` checks 179 handlers and both tables
+  with zero errors. Local logs are under `build\owner-checkpoint`.
+- Exact fixing-revision CI:
+  [Source Quality, 34cdf8b7](https://github.com/JEschete/VS-NativePort/actions/runs/42161727516).
+  Issue closures must cite a successful exact-revision run and their specific
+  acceptance evidence. CI does not run the game. The two replays do not replace
+  menu, chest/lock, off-floor-room or interactive-combat verification.
+- Remaining explicit limits include chest/lock interactions (#287), damage
+  reaction blend-frame semantics (#296), the still-generated particle emitter
+  (#271), and the event VM (#313). Broad quality and content-safety issues stay
+  open where their complete acceptance evidence is still missing.
+
+### Earlier published runtime evidence
 
 - Published: 0.0.10 from `157f9303`. 0.0.11 follows it with the two changes below.
   0.0.11 adds `chdr.dll`; no real self-update to it has run yet.
@@ -29,7 +72,7 @@ verification of the current worktree.
   sites that may rely on what PS1 hardware tolerated, including the capacity limits
   that block inventory expansion. CI fails on a new hazard site until it is fixed or
   acknowledged. `tools\test\regression.py check` must pass locally before merging,
-  because CI does not build. Measured: tests or replays execute 1,600 functions;
+  because CI does not build. At that earlier checkpoint, tests or replays executed 1,600 functions;
   2,160 need characterizing first. Replays step the frame counter, and two runs match
   on every field, as do Debug and Release, once script addresses become offsets. Copied
   code now keeps null and overflow checks in Release. Limits: replays cover only two
