@@ -13,6 +13,7 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
+#include "Content/ModuleData.h"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
@@ -21,6 +22,7 @@
 extern "C" {
 #include "DiscQueue.h"
 #include "Event/ScriptActors.h"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
 }
@@ -410,6 +412,15 @@ std::intptr_t StopBridge(std::uint8_t* instruction, std::int16_t thread) {
 
 std::intptr_t PointerResult(std::uint8_t*, std::int16_t) { return 0x12345678; }
 
+std::intptr_t NoOperationSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_ScriptNoOperationOpcode(instruction, thread);
+}
+
+std::intptr_t YieldSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
+  return Event_ScriptYieldFrameOpcode(instruction, thread);
+}
+
 void BindTestData(event::ScriptLocation start) {
   auto& host = event::LiveScriptVm();
   host.SetDialogStrings(start);
@@ -622,6 +633,51 @@ TEST_CASE("Original loop differential detects counter value and target mutants",
   for (int mutation = 1; mutation <= 3; ++mutation) {
     CHECK_FALSE(CompareOriginalLoop(3, 7, false, mutation));
   }
+}
+
+TEST_CASE("Native control opcode entries resolve to owned table bindings",
+          "[event-vm-live][content][module][control-opcode]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B66E4) ==
+      reinterpret_cast<void*>(&Event_ScriptNoOperationOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B66EC) ==
+      reinterpret_cast<void*>(&Event_ScriptYieldFrameOpcode));
+}
+
+TEST_CASE("Native control bindings preserve normal and skip yield behavior",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      const LiveVmFixture fixture;
+      const auto start = MountScript({0xE0, 0xE1, 0xF0});
+      Event_skipState = static_cast<char>(skip);
+      Event_kSkipOpcodeHandlers[0xE0] = Event_kOpcodeHandlers[0xE0] =
+          guarded ? NoOperationSlotBridge : Event_ScriptNoOperationOpcode;
+      Event_kSkipOpcodeHandlers[0xE1] = Event_kOpcodeHandlers[0xE1] =
+          guarded ? YieldSlotBridge : Event_ScriptYieldFrameOpcode;
+      Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
+          Event_CommandStopScriptContext;
+      auto& host = event::LiveScriptVm();
+      host.SetThreadCursor(0, start);
+      CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+      CHECK(host.ThreadCursor(0) ==
+            event::ScriptLocation{start.region, 2, start.generation});
+      CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+      CHECK_FALSE(host.ThreadCursor(0).Present());
+    }
+  }
+}
+
+TEST_CASE("Native control opcode bindings refuse detached command borrows",
+          "[event-vm-live][control-opcode]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint8_t, 1> command{};
+  const auto expected =
+      static_cast<std::intptr_t>(event::ScriptFlowKind::kStop);
+  CHECK(Event_ScriptNoOperationOpcode(command.data(), 0) == expected);
+  CHECK(Event_ScriptYieldFrameOpcode(command.data(), 0) == expected);
 }
 
 TEST_CASE("Live VM dispatch carries typed jumps without pointer results",

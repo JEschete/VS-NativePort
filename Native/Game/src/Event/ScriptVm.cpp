@@ -30,6 +30,7 @@ extern "C" {
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptAudioOpcodes.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptEffectOpcodes.h"
 #include "Event/ScriptEffects.h"
@@ -149,48 +150,48 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptWaitForEventFile, Event_ScriptReportInvalidOpcode, Event_ScriptWaitForSplashFile, Event_ScriptBeginSkippableCutscene, Event_ScriptEndCutsceneAndJump,
-    Event_ScriptEndCutscene, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptDismissDialogBoxOpcode,
-    Event_ScriptNoOperation, Event_ScriptYieldFrame, Event_ScriptYieldFrame, Event_ScriptLoadSplashImage, Event_ScriptConfigureSplashLayer,
-    Event_ScriptTweenSplashLayer, Event_ScriptFreeSplashImage, Event_ScriptYieldFrame, Event_ScriptSetDialogIntegerOpcode,
+    Event_ScriptEndCutscene, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptDismissDialogBoxOpcode,
+    Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptLoadSplashImage, Event_ScriptConfigureSplashLayer,
+    Event_ScriptTweenSplashLayer, Event_ScriptFreeSplashImage, Event_ScriptYieldFrameOpcode, Event_ScriptSetDialogIntegerOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptSetDialogTransitionDurationOpcode, Event_ScriptResetActorGroupStateOpcode, Event_ScriptStoreActorTileOpcode, Event_ScriptSpawnActorOpcode,
-    Event_ScriptNavigateActorToTileOpcode, Event_ScriptNoOperation, Event_ScriptSetActorGroupFlagsOpcode, Event_ScriptSetActorSoundMixOpcode, Event_ScriptWalkActorToTileOpcode,
+    Event_ScriptNavigateActorToTileOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetActorGroupFlagsOpcode, Event_ScriptSetActorSoundMixOpcode, Event_ScriptWalkActorToTileOpcode,
     Event_ScriptWalkActorToWorldPosOpcode, Event_ScriptSlideActorToTileOpcode, Event_ScriptSlideActorToWorldPosOpcode, Event_ScriptSetActorAttachmentOpcode, Event_ScriptNavigateActorToWorldPosOpcode,
     Event_ScriptTurnActorToFacingOpcode, Event_ScriptFaceOtherActorOpcode, Event_ScriptFaceTileOpcode, Event_ScriptScaleActorOpcode, Event_ScriptRemoveActorGroupOpcode,
-    Event_ScriptYieldFrame, Event_ScriptSetActorColorOverrideOpcode, Event_ScriptNoOperation, Event_ScriptRotateActorAxesOpcode, Event_ScriptSetActorHeadAnglesOpcode,
-    Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptSetActorIdleAnimationOpcode, Event_ScriptLookAtActorOpcode, Event_ScriptLookAtWorldPosOpcode,
+    Event_ScriptYieldFrameOpcode, Event_ScriptSetActorColorOverrideOpcode, Event_ScriptNoOperationOpcode, Event_ScriptRotateActorAxesOpcode, Event_ScriptSetActorHeadAnglesOpcode,
+    Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetActorIdleAnimationOpcode, Event_ScriptLookAtActorOpcode, Event_ScriptLookAtWorldPosOpcode,
     Event_ScriptLoadObjectModelOpcode, Event_ScriptWaitForObjectLoadOpcode, Event_ScriptReleaseObjectModelOpcode, Event_ScriptSelectObjectTextureBankOpcode, Event_ScriptSetActorOverlayPassOpcode,
     Event_ScriptSetActorWeaponDrawnOpcode, Event_ScriptBranchOnFlagImmediate, Event_ScriptBranchOnFlagPair,
-    Event_ScriptJumpForward, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptJumpForward,
+    Event_ScriptJumpForward, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptJumpForward,
     Event_ScriptCacheFlagValue, Event_ScriptBranchOnCachedFlag,
-    Event_ScriptNoOperation, Event_ScriptSetLoopCounter, Event_ScriptLoopBackward, Event_ScriptJumpForward,
+    Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounter, Event_ScriptLoopBackward, Event_ScriptJumpForward,
     Event_ScriptJumpForward, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperation, Event_ScriptApplyFlagPairOperation,
-    Event_ScriptStoreInventoryItemPresence, Event_ScriptClearRoomActorCache, Event_ScriptNoOperation,
+    Event_ScriptStoreInventoryItemPresence, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
     Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonState, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
     Event_ScriptRunMenuTransition, Event_ScriptConfigureTimer, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
-    Event_ScriptYieldFrame, Event_ScriptConfigureEasingCurve, Event_ScriptSetGimmickVisibility, Event_ScriptOverrideDepthCueDistance, Event_ScriptSetRoomLightingMode,
+    Event_ScriptYieldFrameOpcode, Event_ScriptConfigureEasingCurve, Event_ScriptSetGimmickVisibility, Event_ScriptOverrideDepthCueDistance, Event_ScriptSetRoomLightingMode,
     Event_ScriptClearAshleyStatusEffectsOpcode, Event_ScriptShowGeometryGroup, Event_ScriptHideGeometryGroup, Event_ScriptSwapGeometryGroupFlags, Event_ScriptSetCollisionTileMode,
-    Event_ScriptChangeRoom, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptSetWipeAngle, Event_ScriptConfigureScreenTransition,
-    Event_ScriptNoOperation, Event_ScriptYieldFrame, Event_ScriptTogglePaletteHook, Event_ScriptTransformPalettes, Event_ScriptSetActorRenderModeOpcode,
+    Event_ScriptChangeRoom, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetWipeAngle, Event_ScriptConfigureScreenTransition,
+    Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptTogglePaletteHook, Event_ScriptTransformPalettes, Event_ScriptSetActorRenderModeOpcode,
     Event_ScriptSetAshleyBattleModeOpcode, Event_ScriptSetRoomBackgroundVisible, Event_ScriptLoadRoomBackground, Event_ScriptWaitForRoomBackground, Event_ScriptFreeRoomBackground,
     Event_ScriptSetEnvironmentParticles, Event_ScriptSetParticleVariationEnabled, Event_ScriptControlRoomAnimation, Event_ScriptMuteEnvironmentSound, Event_ScriptSetBackgroundOffset,
-    Event_ScriptSetFirstPersonView, Event_ScriptAdjustGeometryDepthBias, Event_ScriptSetBackgroundParallax, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperation,
-    Event_ScriptNoOperation, Event_ScriptNoOperation, Event_CommandStopAllSfxOpcode, Event_CommandStopSfxOpcode,
+    Event_ScriptSetFirstPersonView, Event_ScriptAdjustGeometryDepthBias, Event_ScriptSetBackgroundParallax, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperationOpcode,
+    Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_CommandStopAllSfxOpcode, Event_CommandStopSfxOpcode,
     Event_CommandLoadSfxSlotOpcode, Event_CommandWaitSfxSlotReleaseOpcode, Event_CommandFreeSfxOpcode,
     Event_CommandSelectSfxBankOpcode, Event_CommandLoadEventMusicOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperation,
-    Event_CommandLoadMusicSlotOpcode, Event_CommandFreeMusicOpcode, Event_ScriptNoOperation,
-    Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptNoOperation,
-    Event_ScriptNoOperation, Event_CommandWaitMusicSlotLoadOpcode, Event_ScriptYieldFrame, Event_ScriptNoOperation,
-    Event_ScriptNoOperation, Event_CommandLoadSoundFileOpcode, Event_CommandWaitSoundQueueOpcode,
-    Event_ScriptNoOperation, Event_CommandPlayActorEffectOpcode, Event_CommandAdvanceEffectStageOpcode, Event_CommandWaitEffectStateOpcode, Event_CommandYieldEffectReleaseOpcode,
+    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperationOpcode,
+    Event_CommandLoadMusicSlotOpcode, Event_CommandFreeMusicOpcode, Event_ScriptNoOperationOpcode,
+    Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode,
+    Event_ScriptNoOperationOpcode, Event_CommandWaitMusicSlotLoadOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptNoOperationOpcode,
+    Event_ScriptNoOperationOpcode, Event_CommandLoadSoundFileOpcode, Event_CommandWaitSoundQueueOpcode,
+    Event_ScriptNoOperationOpcode, Event_CommandPlayActorEffectOpcode, Event_CommandAdvanceEffectStageOpcode, Event_CommandWaitEffectStateOpcode, Event_CommandYieldEffectReleaseOpcode,
     Event_CommandWaitEffectContinuationOpcode, Event_CommandWaitEffectReleaseOpcode, Event_CommandMarkEffectStageReadyOpcode, Event_ScriptReportInvalidOpcode, Event_CommandSetMusicJumpThresholdOpcode,
-    Event_ScriptNoOperation, Event_CommandSetActorTrailOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
+    Event_ScriptNoOperationOpcode, Event_CommandSetActorTrailOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_CommandSetEnteredDoorOpcode, Event_CommandStoreActorRangeBearingOpcode, Event_CommandSetActorActivityOpcode,
     Event_ScriptReportInvalidOpcode, Event_CommandConsumeMiscItemOpcode, Event_CommandStoreActorDistanceOpcode, Event_CommandSpecialOperation,
-    Event_CommandWaitScreenEffectLoadOpcode, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_ScriptNoOperation, Event_CommandLoadScreenEffectsOpcode,
+    Event_CommandWaitScreenEffectLoadOpcode, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_ScriptNoOperationOpcode, Event_CommandLoadScreenEffectsOpcode,
     Event_CommandReservedScreenEffectOpcode, Event_CommandFreeScreenEffectsOpcode, Event_CommandScreenTransform, Event_CommandCameraMotion, Event_CommandCameraMotion,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcode,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion,
@@ -198,10 +199,10 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcode, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcode, Event_CommandCameraMotion, Event_CommandCameraMotion,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_CommandStopCameraMotion, Event_CommandSetCameraFollowing, Event_ScriptYieldFrame, Event_CommandSetScreenCapture,
+    Event_ScriptReportInvalidOpcode, Event_CommandStopCameraMotion, Event_CommandSetCameraFollowing, Event_ScriptYieldFrameOpcode, Event_CommandSetScreenCapture,
     Event_CommandTweenCameraRoll, Event_CommandTweenCameraRoll, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_CommandScreenTransform,
     Event_CommandScreenTransform, Event_CommandSetCameraOriginActor, Event_CommandRestoreFieldCamera, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake,
-    Event_CommandCameraLensOrShake, Event_CommandScreenTransform, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake, Event_ScriptYieldFrame,
+    Event_CommandCameraLensOrShake, Event_CommandScreenTransform, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake, Event_ScriptYieldFrameOpcode,
     Event_CommandSetTickSpeed, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContext,
     Event_CommandStartScriptContext, Event_CommandStopScriptContext, Event_CommandLoadNextEvent, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
@@ -238,12 +239,6 @@ intptr_t Event_ScriptReportInvalidOpcode(u_char* instruction, short thread_index
     // Debug printing presumably ifdef'd out
     return 0;
 }
-
-// decomp: BATTLE.PRG func_800B66E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:597)
-intptr_t Event_ScriptNoOperation(u_char* instruction, short thread_index) { return 0; }
-
-// decomp: BATTLE.PRG func_800B66EC (src/BATTLE/BATTLE.PRG/4A0A8.c:599)
-intptr_t Event_ScriptYieldFrame(u_char* instruction, short thread_index) { return 4; }
 
 // decomp: BATTLE.PRG func_800B66F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:601)
 intptr_t Event_ScriptWaitForEventFile(u_char* instruction, short thread_index)

@@ -910,11 +910,13 @@ ScriptFlow ScriptReportInvalidOpcode(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG func_800B66E4 (4A0A8.c:597), returns 0.
 ScriptFlow ScriptNoOperation(const ScriptInstruction& /*instruction*/,
                              ScriptVmHost& /*host*/) {
   return Advance();
 }
 
+// decomp: BATTLE.PRG func_800B66EC (4A0A8.c:599), returns 4.
 ScriptFlow ScriptYieldFrame(const ScriptInstruction& /*instruction*/,
                             ScriptVmHost& /*host*/) {
   return Yield();

@@ -47,6 +47,7 @@ extern "C" {
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptField.h"
 #include "Event/ScriptScreen.h"
@@ -68,7 +69,7 @@ constexpr std::size_t kSceneTimerScopeCount = 4;
 constexpr std::size_t kCameraPitchPresetCount = 4;
 
 struct ControlBinding {
-  OpcodeHandler legacy;
+  OpcodeHandler slot;
   ScriptControlOpcode typed;
 };
 
@@ -76,8 +77,8 @@ struct ControlBinding {
 // control handlers in 4A0A8.c and 573B8.c. Match the selected table's target.
 constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptReportInvalidOpcode, ScriptReportInvalidOpcode},
-    ControlBinding{Event_ScriptNoOperation, ScriptNoOperation},
-    ControlBinding{Event_ScriptYieldFrame, ScriptYieldFrame},
+    ControlBinding{Event_ScriptNoOperationOpcode, ScriptNoOperation},
+    ControlBinding{Event_ScriptYieldFrameOpcode, ScriptYieldFrame},
     ControlBinding{Event_ScriptWaitForEventFile, ScriptWaitForEventFile},
     ControlBinding{Event_ScriptBeginSkippableCutscene,
                    ScriptBeginSkippableCutscene},
@@ -119,7 +120,7 @@ constexpr std::array kControlBindings{
 
 ScriptControlOpcode NativeControl(OpcodeHandler handler) {
   for (const auto& binding : kControlBindings) {
-    if (binding.legacy == handler) {
+    if (binding.slot == handler) {
       return binding.typed;
     }
   }
@@ -935,3 +936,17 @@ void AbandonLiveScriptUses() {
 }
 
 }  // namespace VS::Event
+
+// decomp: BATTLE.PRG func_800B66E4 (4A0A8.c:597).
+std::intptr_t Event_ScriptNoOperationOpcode(std::uint8_t* instruction,
+                                            std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptNoOperation);
+}
+
+// decomp: BATTLE.PRG func_800B66EC (4A0A8.c:599).
+std::intptr_t Event_ScriptYieldFrameOpcode(std::uint8_t* instruction,
+                                           std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptYieldFrame);
+}

@@ -52,6 +52,7 @@ extern "C" {
 #include "Effects/Runtime.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -809,7 +810,7 @@ int Tests_EventScriptNativeBranches(int skip) {
   skipCopy[1] = Event_kSkipOpcodeHandlers[1] = Event_kOpcodeHandlers[1] =
       Event_ScriptReturnToSavedAddress;
   skipCopy[2] = Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
-      Event_ScriptYieldFrame;
+      Event_ScriptYieldFrameOpcode;
   skipCopy[3] = Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =
       Event_CommandStopScriptContext;
   Event_legacySkipHandlerCopy = skipCopy;

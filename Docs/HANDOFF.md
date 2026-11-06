@@ -7,6 +7,32 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Control Slot Basics (#276 Row 33)
+
+- F01028/F01029 now register the existing strict no-op/yield cores. Actual
+  `800B66E4-800B66F0` returns 0/4; their typed results preserve advance/yield.
+  The established actor-opcode pattern keeps module-table ABI at guarded native
+  `Event_*Opcode` bindings, not old C bodies or pointer-valued outcomes. Generated
+  normal/skip/module mappings use the new identities; no old name reference remains.
+- Guarded adapters validate the active command, thread and mounted generation;
+  typed flow stays in invocation state. Direct/native lookup and guarded-call tests
+  cover normal/skip no-op, yield and stop; detached command borrows refuse. Three
+  cases pass 24 assertions. The initial fixture observer overflow was fixed by a
+  stateless production stop identity without changing expected flow.
+- On `e8f773bb` plus this slice, complete Debug/Release builds and regressions pass
+  4,644 cases / 8,145,138 assertions and both unchanged canonical replays. Actual
+  module imports load 440 globals / 16 tables / 1,705 symbols / 75 modules with
+  zero failures. Broad quality/tidy has zero new findings; 190 copier / nine extent
+  controls and Python syntax checks pass. Repeated copier/project generation
+  preserves tracked Native/manifest/solution and the new header bytes.
+  Evidence: `VR-EVENT-CONTROL-OPCODE-BASICS` and
+  `build\owner-checkpoint\native-control-opcode-basics-*-regression.log`.
+  Only these two cores are reviewed; the table ABI and remaining control identities
+  remain tracked debt, not global EC retirement. Cleanup predecessor `e8f773bb`
+  is green on exact CI `42295990919`.
+  Unmodified gates derive 2,645 promoted / four compatibility `wip`; row 33 is
+  now 13/57. Retained control table bindings are explicitly not EC retirement.
+
 ### Native Cleanup Ownership (#276 Row 33)
 
 - F01257/F01272 register the existing strict native zone hook and actor-control

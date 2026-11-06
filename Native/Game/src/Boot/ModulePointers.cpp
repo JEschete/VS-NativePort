@@ -126,6 +126,7 @@ extern "C" {
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptAudioOpcodes.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptDialog.h"
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptEffectOpcodes.h"
@@ -585,8 +586,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&Field_UpdateGimmickMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B101Cu, 0u, (void*)&Field_UpdateGimmickReactionAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66A8u, 0u, (void*)&Event_ScriptReportInvalidOpcode, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B66E4u, 0u, (void*)&Event_ScriptNoOperation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B66ECu, 0u, (void*)&Event_ScriptYieldFrame, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66F4u, 0u, (void*)&Event_ScriptWaitForEventFile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6724u, 0u, (void*)&Event_ScriptWaitForSplashFile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6744u, 0u, (void*)&Event_ScriptBeginSkippableCutscene, 0u, 0u, 0u},
@@ -1559,6 +1558,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80042C74u, 0u, (void*)&VS::Boot::WaitForOverlayReadyLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C94u, 0u, (void*)&VS::Boot::SetSoftResetEnabledLive, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B66E4u, 0u, (void*)&Event_ScriptNoOperationOpcode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B66ECu, 0u, (void*)&Event_ScriptYieldFrameOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7428u, 0u, (void*)&Event_ScriptResetActorGroupStateOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7490u, 0u, (void*)&Event_ScriptStoreActorTileOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7574u, 0u, (void*)&Event_ScriptSpawnActorOpcode, 0u, 0u, 0u},

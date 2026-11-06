@@ -1972,6 +1972,7 @@
     <ClInclude Include="src\Event\ScriptAudio.h" />
     <ClInclude Include="src\Event\ScriptAudioOpcodes.h" />
     <ClInclude Include="src\Event\ScriptCamera.h" />
+    <ClInclude Include="src\Event\ScriptControlOpcodes.h" />
     <ClInclude Include="src\Event\ScriptDialog.h" />
     <ClInclude Include="src\Event\ScriptDialogOpcodes.h" />
     <ClInclude Include="src\Event\ScriptEffectOpcodes.h" />

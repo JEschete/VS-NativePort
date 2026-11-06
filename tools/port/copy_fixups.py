@@ -2016,6 +2016,15 @@ OWNED_CALL_BINDINGS |= {
     )
 }
 
+EVENT_SCRIPT_CONTROL_OPCODES = (
+    ("F01028", 0x800B66E4, "ScriptNoOperation"),
+    ("F01029", 0x800B66EC, "ScriptYieldFrame"),
+)
+NATIVE_HELPER_HEADERS |= {
+    f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
+    for _, _, name in EVENT_SCRIPT_CONTROL_OPCODES
+}
+
 EVENT_CUTSCENE_LIVE_BINDINGS = {
     "F00128": "PrepareLiveCutsceneActors",
     "F00129": "StartLivePreparedCutscene",
@@ -2334,6 +2343,7 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x80042C74, "VS::Boot::WaitForOverlayReadyLive"),  # F03440
     ("SLUS_010.40", 0x80042C94, "VS::Boot::SetSoftResetEnabledLive"),  # F03441
     ("BATTLE/BATTLE.PRG", 0x800B9DB4, "Event_ScriptSetAshleyBattleModeOpcode"),  # F01130 opcode table
+    *(('BATTLE/BATTLE.PRG', address, f"Event_{name}Opcode") for _, address, name in EVENT_SCRIPT_CONTROL_OPCODES),
     # #276 row 34 opcode table slots
     *(("BATTLE/BATTLE.PRG", address, f"Event_{name}Opcode") for _, address, name in EVENT_SCRIPT_ACTOR_OPCODES),
     # #276 row 36 opcode table slots
@@ -4355,6 +4365,8 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Event::ScriptSetAshleyBattleMode\b",
      r"Event_ScriptSetAshleyBattleModeOpcode",
      "F01130 #46 typed promotion: the event VM opcode slot holds the adapter that decodes the command bytes"),
+    (r"", rf"\bVS::Event::({'|'.join(name for _, _, name in EVENT_SCRIPT_CONTROL_OPCODES)})\b", r"Event_\1Opcode",
+     "#276 row 33 typed promotion: control slots use guarded native invocation bindings and typed flow"),
     (r"", rf"\bVS::Event::({'|'.join(name for _, _, name in EVENT_SCRIPT_ACTOR_OPCODES)})\b", r"Event_\1Opcode",
      "#276 row 34 typed promotion: each actor opcode slot holds the C binding that decodes the command bytes and runs "
      "the typed handler over the live host"),
@@ -4804,6 +4816,7 @@ SIG_RETYPE.update({fid: {"ret": "intptr_t"} for fid in EVENT_OPCODE_HANDLERS})
 # header is in NATIVE_HELPER_HEADERS and MODULE_BINDING_ENTRIES maps the module-image address to it.
 EVENT_OPCODE_BINDINGS: dict[str, str] = {
     "F01130": "Event_ScriptSetAshleyBattleModeOpcode",
+    **{fid: f"Event_{name}Opcode" for fid, _, name in EVENT_SCRIPT_CONTROL_OPCODES},
     **{fid: f"Event_{name}Opcode" for fid, _, name in EVENT_SCRIPT_ACTOR_OPCODES},
     **{fid: f"Event_{name}Opcode" for fid, _, name in EVENT_SCRIPT_MEDIA_OPCODES},
 }
