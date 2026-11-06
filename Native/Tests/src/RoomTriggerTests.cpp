@@ -1,6 +1,9 @@
+#include <algorithm>
 #include <array>
 #include <cstdint>
+#include <expected>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <tuple>
 #include <utility>
@@ -17,7 +20,8 @@ using Result = event::RoomTriggerResult;
 using Request = event::RoomTriggerRequest;
 using Bytes = std::vector<std::uint8_t>;
 
-class TriggerHost final : public event::RoomTriggerHost {
+class TriggerHost final : public event::RoomTriggerHost,
+                          public event::RoomEventSectionHost {
  public:
   event::PlaybackPhase phase = event::PlaybackPhase::kIdle;
   bool direct = false;
@@ -40,6 +44,39 @@ class TriggerHost final : public event::RoomTriggerHost {
   std::vector<int> model_queries;
   std::vector<std::uint16_t> references;
   int item_query = 0;
+  std::int16_t room_change = 0;
+  bool confirmed = false;
+  bool fail_copy = false;
+  int actor_releases = 0;
+  event::RoomEventLease sections;
+  event::RoomEventLease main_script;
+  std::vector<event::RoomEventLoadError> section_refusals;
+
+  void Refuse(event::RoomEventLoadError error) override {
+    section_refusals.push_back(error);
+  }
+  event::RoomEventCopy CopySections(
+      const event::RoomEventInput& input) override {
+    if (fail_copy) {
+      return std::unexpected(event::RoomEventLoadError{
+          event::RoomEventRefusal::kAllocation, input.triggers.size() +
+                                                    input.entry_script.size() +
+                                                    input.doors.size()});
+    }
+    return event::RoomEventSections::Copy(input);
+  }
+  void PublishSections(event::RoomEventLease value) override {
+    sections = std::move(value);
+  }
+  void BindEntryScript(event::RoomEventLease value) override {
+    main_script = std::move(value);
+  }
+  std::int16_t RoomChangeState() override { return room_change; }
+  void SetRoomChangeState(std::int16_t state) override { room_change = state; }
+  void SetPlaybackPhase(event::PlaybackPhase value) override { phase = value; }
+  void SetStartConfirmed(bool value) override { confirmed = value; }
+  void SetRoomEntryPending(bool value) override { entry = value; }
+  void ReleaseScriptActorControl() override { ++actor_releases; }
 
   void Refuse(event::RoomTriggerRefusal reason, std::size_t location) override {
     refusals.emplace_back(reason, location);
@@ -59,6 +96,9 @@ class TriggerHost final : public event::RoomTriggerHost {
   std::uint8_t Flag(int flag) override { return flags.at(flag); }
   void SetFlag(int flag, std::int16_t value) override {
     writes.emplace_back(flag, value);
+    if (flag >= 0 && static_cast<std::size_t>(flag) < flags.size()) {
+      flags.at(flag) = static_cast<std::uint8_t>(value);
+    }
   }
   bool ActorPresent(int actor) override { return actors.at(actor).has_value(); }
   std::optional<int> FindActorByModel(int id) override {
@@ -416,4 +456,220 @@ TEST_CASE("Trigger masks keep their full halfword before special dispatch",
                                       std::monostate{}};
   CHECK(event::EvaluateRoomEventTriggers(query, Section({0xFF}), host) ==
         Result::kStarted);
+}
+
+TEST_CASE("Room section snapshots own exact copies of all imported bytes",
+          "[room-triggers][room-event-sections]") {
+  Bytes triggers{0xFF, 0xFF};
+  Bytes script{1, 2, 3};
+  Bytes doors{4, 5, 6, 7};
+  auto copy = event::RoomEventSections::Copy({triggers, script, doors});
+  REQUIRE(copy.has_value());
+  REQUIRE(*copy);
+  triggers[0] = script[0] = doors[0] = 0;
+  CHECK(std::ranges::equal((*copy)->Triggers(), Bytes{0xFF, 0xFF}));
+  CHECK(std::ranges::equal((*copy)->EntryScript(), Bytes{1, 2, 3}));
+  CHECK(std::ranges::equal((*copy)->Doors(), Bytes{4, 5, 6, 7}));
+}
+
+TEST_CASE("Room section imports accept the exact legacy extent limits",
+          "[room-triggers][room-event-sections]") {
+  const Bytes triggers(65535, 1);
+  const Bytes script(event::kEventScriptBytes, 2);
+  const Bytes doors(65535, 3);
+  auto copy = event::RoomEventSections::Copy({triggers, script, doors});
+  REQUIRE(copy.has_value());
+  REQUIRE(*copy);
+  CHECK(std::ranges::equal((*copy)->Triggers(), triggers));
+  CHECK(std::ranges::equal((*copy)->EntryScript(), script));
+  CHECK(std::ranges::equal((*copy)->Doors(), doors));
+}
+
+TEST_CASE("Room section imports refuse oversized sections instead of narrowing",
+          "[room-triggers][room-event-sections]") {
+  const auto section = GENERATE(0u, 1u, 2u);
+  std::array<Bytes, 3> input;
+  input[section].resize(section == 1 ? event::kEventScriptBytes + 1 : 65536);
+  auto copy = event::RoomEventSections::Copy({input[0], input[1], input[2]});
+  REQUIRE_FALSE(copy.has_value());
+  const std::array reasons{event::RoomEventRefusal::kTriggerExtent,
+                           event::RoomEventRefusal::kEntryScriptExtent,
+                           event::RoomEventRefusal::kDoorExtent};
+  CHECK(copy.error() ==
+        event::RoomEventLoadError{reasons[section], input[section].size()});
+}
+
+TEST_CASE("Room loading clears its flags except on the first game entry",
+          "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  host.flags[0xA9] = host.flags[32] = 9;
+  const bool first = GENERATE(false, true);
+  const Bytes script{1, 2, 3};
+  auto loaded = event::LoadRoomEventSections({{}, script, {}, first}, host);
+  REQUIRE(loaded.has_value());
+  CHECK(*loaded == event::RoomEventLoadResult::kReady);
+  CHECK(host.flags[0xA9] == 0);
+  CHECK(host.flags[32] == (first ? 9 : 0));
+  CHECK(host.writes.size() == (first ? 1 : 33));
+  CHECK(host.entry);
+  REQUIRE(host.sections);
+  CHECK(host.main_script == host.sections);
+}
+
+TEST_CASE(
+    "Room continuation replaces room sections but retains the main script",
+    "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  const Bytes old_script{11, 12};
+  REQUIRE(event::LoadRoomEventSections({{}, old_script, {}}, host));
+  const auto old_main = host.main_script;
+  host.room_change = 1;
+  host.phase = event::PlaybackPhase::kRunning;
+  host.confirmed = true;
+  const Bytes ignored_script(event::kEventScriptBytes + 1);
+  auto loaded = event::LoadRoomEventSections({{}, ignored_script, {}}, host);
+  REQUIRE(loaded.has_value());
+  CHECK(*loaded == event::RoomEventLoadResult::kContinuingEvent);
+  CHECK(std::make_tuple(host.room_change, host.phase, host.confirmed,
+                        host.entry) ==
+        std::make_tuple(2, event::PlaybackPhase::kRunning, true, true));
+  CHECK(host.main_script == old_main);
+  CHECK(host.section_refusals.empty());
+}
+
+TEST_CASE("Room continuation copies only new trigger and door bytes",
+          "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  host.room_change = 1;
+  const Bytes ignored_script(event::kEventScriptBytes + 1);
+  const Bytes triggers{0xFF, 0xFF};
+  const Bytes doors{21, 22};
+  const auto loaded =
+      event::LoadRoomEventSections({triggers, ignored_script, doors}, host);
+  REQUIRE(loaded.has_value());
+  CHECK(*loaded == event::RoomEventLoadResult::kContinuingEvent);
+  REQUIRE(host.sections);
+  CHECK(host.sections->EntryScript().empty());
+  CHECK(std::ranges::equal(host.sections->Triggers(), triggers));
+  CHECK(std::ranges::equal(host.sections->Doors(), doors));
+}
+
+TEST_CASE(
+    "A stopping room transition resets playback only after successful copy",
+    "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  host.room_change = 3;
+  host.phase = event::PlaybackPhase::kRunning;
+  host.confirmed = true;
+  const Bytes script{1};
+  REQUIRE(event::LoadRoomEventSections({{}, script, {}}, host));
+  CHECK(host.room_change == 0);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK_FALSE(host.confirmed);
+  CHECK(host.entry);
+}
+
+TEST_CASE("Room section allocation failure preserves every published owner",
+          "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  const Bytes old_script{1};
+  REQUIRE(event::LoadRoomEventSections({{}, old_script, {}}, host));
+  const auto old_sections = host.sections;
+  const auto old_main = host.main_script;
+  host.writes.clear();
+  host.room_change = 3;
+  host.phase = event::PlaybackPhase::kRunning;
+  host.confirmed = true;
+  host.fail_copy = true;
+  const Bytes new_doors{2, 3};
+  auto loaded = event::LoadRoomEventSections({{}, {}, new_doors}, host);
+  REQUIRE_FALSE(loaded.has_value());
+  CHECK(loaded.error() ==
+        event::RoomEventLoadError{event::RoomEventRefusal::kAllocation, 2});
+  CHECK(host.section_refusals ==
+        std::vector<event::RoomEventLoadError>{loaded.error()});
+  CHECK(host.sections == old_sections);
+  CHECK(host.main_script == old_main);
+  CHECK(host.writes.empty());
+  CHECK(std::make_tuple(host.room_change, host.phase, host.confirmed,
+                        host.entry) ==
+        std::make_tuple(3, event::PlaybackPhase::kRunning, true, true));
+}
+
+TEST_CASE("Room section extent failure cannot look like event continuation",
+          "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  host.room_change = 1;
+  const Bytes doors(65536);
+  auto loaded = event::LoadRoomEventSections({{}, {}, doors}, host);
+  REQUIRE_FALSE(loaded.has_value());
+  CHECK(loaded.error().reason == event::RoomEventRefusal::kDoorExtent);
+  CHECK(host.room_change == 1);
+  CHECK_FALSE(host.sections);
+  CHECK(host.writes.empty());
+  REQUIRE(host.section_refusals.size() == 1);
+}
+
+TEST_CASE("An executing door lease survives room replacement and repeated free",
+          "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  const Bytes old_doors{7, 8, 9};
+  REQUIRE(event::LoadRoomEventSections({{}, {}, old_doors}, host));
+  auto executing = host.sections;
+  std::weak_ptr<const event::RoomEventSections> old_owner = executing;
+  const Bytes new_doors{10, 11};
+  REQUIRE(event::LoadRoomEventSections({{}, {}, new_doors}, host));
+  REQUIRE(host.sections);
+  CHECK(host.sections != executing);
+  CHECK(host.sections->Doors().front() == 10);
+  event::FreeRoomEventSections(host);
+  event::FreeRoomEventSections(host);
+  CHECK_FALSE(host.sections);
+  CHECK_FALSE(old_owner.expired());
+  CHECK(std::ranges::equal(executing->Doors(), old_doors));
+  executing.reset();
+  CHECK(old_owner.expired());
+}
+
+TEST_CASE("Room section copying permits input borrowed from the previous owner",
+          "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  const Bytes doors{7, 8, 9};
+  REQUIRE(event::LoadRoomEventSections({{}, {}, doors}, host));
+  std::weak_ptr<const event::RoomEventSections> old_owner = host.sections;
+  const auto borrowed = host.sections->Doors();
+  REQUIRE(event::LoadRoomEventSections({{}, {}, borrowed}, host));
+  CHECK(old_owner.expired());
+  REQUIRE(host.sections);
+  CHECK(host.sections->Doors().size() == 3);
+  CHECK(host.sections->Doors().front() == 7);
+}
+
+TEST_CASE(
+    "Freeing room sections preserves the separately retained entry script",
+    "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  const Bytes script{1, 2};
+  REQUIRE(event::LoadRoomEventSections({{}, script, {}}, host));
+  host.room_change = 3;
+  event::FreeRoomEventSections(host);
+  CHECK_FALSE(host.sections);
+  CHECK(host.actor_releases == 1);
+  REQUIRE(host.main_script);
+  CHECK(host.main_script->EntryScript().front() == 1);
+  CHECK(host.entry);
+  event::ReleaseZoneEventResources();
+  CHECK(std::ranges::equal(host.main_script->EntryScript(), script));
+}
+
+TEST_CASE("Empty room loading clears entry presence but retains the main bytes",
+          "[room-triggers][room-event-sections]") {
+  TriggerHost host;
+  const Bytes script{1, 2};
+  REQUIRE(event::LoadRoomEventSections({{}, script, {}}, host));
+  REQUIRE(event::LoadRoomEventSections({}, host));
+  CHECK_FALSE(host.sections);
+  CHECK_FALSE(host.entry);
+  REQUIRE(host.main_script);
+  CHECK(std::ranges::equal(host.main_script->EntryScript(), script));
 }

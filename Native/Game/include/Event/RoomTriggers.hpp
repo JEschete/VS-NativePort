@@ -2,13 +2,105 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <expected>
+#include <memory>
 #include <optional>
 #include <variant>
+#include <vector>
 
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptVm.hpp"
 
 namespace VS::Event {
+
+struct RoomEventInput {
+  ScriptCommand triggers;
+  ScriptCommand entry_script;
+  ScriptCommand doors;
+  bool first_entry = false;
+};
+
+enum class RoomEventRefusal : std::uint8_t {
+  kTriggerExtent,
+  kEntryScriptExtent,
+  kDoorExtent,
+  kAllocation,
+};
+
+struct RoomEventLoadError {
+  RoomEventRefusal reason;
+  std::size_t bytes = 0;
+  friend bool operator==(const RoomEventLoadError&,
+                         const RoomEventLoadError&) = default;
+};
+
+class RoomEventSections;
+using RoomEventLease = std::shared_ptr<const RoomEventSections>;
+using RoomEventCopy = std::expected<RoomEventLease, RoomEventLoadError>;
+
+// Immutable imported bytes. The current room and an executing door script can
+// retain independent leases, including while the next room replaces its data.
+class RoomEventSections {
+ public:
+  [[nodiscard]] static RoomEventCopy Copy(const RoomEventInput& input);
+  RoomEventSections(const RoomEventSections&) = delete;
+  RoomEventSections& operator=(const RoomEventSections&) = delete;
+  RoomEventSections(RoomEventSections&&) = delete;
+  RoomEventSections& operator=(RoomEventSections&&) = delete;
+  ~RoomEventSections() = default;
+
+  [[nodiscard]] ScriptCommand Triggers() const { return triggers_; }
+  [[nodiscard]] ScriptCommand EntryScript() const { return entry_script_; }
+  [[nodiscard]] ScriptCommand Doors() const { return doors_; }
+
+ private:
+  explicit RoomEventSections(const RoomEventInput& input)
+      : triggers_(input.triggers.begin(), input.triggers.end()),
+        entry_script_(input.entry_script.begin(), input.entry_script.end()),
+        doors_(input.doors.begin(), input.doors.end()) {}
+  std::vector<std::uint8_t> triggers_;
+  std::vector<std::uint8_t> entry_script_;
+  std::vector<std::uint8_t> doors_;
+};
+
+enum class RoomEventLoadResult : std::uint8_t {
+  kReady,
+  kContinuingEvent,
+};
+using RoomEventLoad = std::expected<RoomEventLoadResult, RoomEventLoadError>;
+
+class RoomEventSectionHost {
+ public:
+  RoomEventSectionHost() = default;
+  RoomEventSectionHost(const RoomEventSectionHost&) = delete;
+  RoomEventSectionHost& operator=(const RoomEventSectionHost&) = delete;
+  RoomEventSectionHost(RoomEventSectionHost&&) = delete;
+  RoomEventSectionHost& operator=(RoomEventSectionHost&&) = delete;
+  virtual ~RoomEventSectionHost() = default;
+
+  virtual void Refuse(RoomEventLoadError error) = 0;
+  [[nodiscard]] virtual RoomEventCopy CopySections(
+      const RoomEventInput& input) = 0;
+  // Publication only retains prepared owners; it must not allocate or fail.
+  virtual void PublishSections(RoomEventLease sections) = 0;
+  virtual void BindEntryScript(RoomEventLease sections) = 0;
+  [[nodiscard]] virtual std::int16_t RoomChangeState() = 0;
+  virtual void SetRoomChangeState(std::int16_t state) = 0;
+  virtual void SetPlaybackPhase(PlaybackPhase phase) = 0;
+  virtual void SetStartConfirmed(bool confirmed) = 0;
+  virtual void SetRoomEntryPending(bool pending) = 0;
+  virtual void SetFlag(int flag, std::int16_t value) = 0;
+  virtual void ReleaseScriptActorControl() = 0;
+};
+
+// decomp: _loadMpdClearedScriptDoorSections (4A0A8.c:4201).
+// Allocation/extent failure leaves the previously published state unchanged.
+[[nodiscard]] RoomEventLoad LoadRoomEventSections(RoomEventInput input,
+                                                  RoomEventSectionHost& host);
+// decomp: func_800BEB34 (4A0A8.c:4250).
+void FreeRoomEventSections(RoomEventSectionHost& host);
+// decomp: func_800BEBEC (4A0A8.c:4273), an original no-op.
+void ReleaseZoneEventResources();
 
 enum class RoomTriggerRequest : std::uint16_t {
   kRoomEntry = 1,

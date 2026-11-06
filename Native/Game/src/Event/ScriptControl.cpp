@@ -277,12 +277,30 @@ enum class CurveFamily : std::uint8_t {
   return offset <= region.size() && region.size() - offset >= kHalfBytes;
 }
 
+[[nodiscard]] bool IsCurrent(ScriptLocation location, ScriptVmHost& host) {
+  if (location.generation == host.RegionGeneration(location.region)) {
+    return true;
+  }
+  host.Refuse(ScriptVmRefusal::kStaleScriptRegion,
+              static_cast<int>(location.region));
+  return false;
+}
+
+[[nodiscard]] ScriptLocation StartOf(ScriptRegion region,
+                                     const ScriptVmHost& host) {
+  return {.region = region, .generation = host.RegionGeneration(region)};
+}
+
 // A position `offset` bytes into `region`, or none (refused) outside it.
-[[nodiscard]] ScriptLocation Within(ScriptRegion region,
+[[nodiscard]] ScriptLocation Within(ScriptLocation source,
                                     std::span<const std::uint8_t> bytes,
                                     std::uint32_t offset, ScriptVmHost& host) {
+  if (!IsCurrent(source, host)) {
+    return {};
+  }
   if (offset < bytes.size()) {
-    return {.region = region, .offset = offset};
+    source.offset = offset;
+    return source;
   }
   host.Refuse(ScriptVmRefusal::kScriptHeader, static_cast<int>(offset));
   return {};
@@ -293,7 +311,7 @@ enum class CurveFamily : std::uint8_t {
 [[nodiscard]] ScriptLocation TableEntry(ScriptLocation table,
                                         std::span<const std::uint8_t> bytes,
                                         int entry, ScriptVmHost& host) {
-  if (!table.Present()) {
+  if (!table.Present() || !IsCurrent(table, host)) {
     return {};
   }
   const std::uint32_t at =
@@ -306,16 +324,16 @@ enum class CurveFamily : std::uint8_t {
   if (value == 0) {
     return {};
   }
-  return Within(table.region, bytes, table.offset + value, host);
+  return Within(table, bytes, table.offset + value, host);
 }
 
 void BindScriptHeader(ScriptLocation data, std::span<const std::uint8_t> bytes,
                       ScriptVmHost& host) {
   host.SetDialogStrings(Within(
-      data.region, bytes,
+      data, bytes,
       data.offset + ReadHalf(bytes, data.offset + kDialogStringsOffset), host));
   const ScriptLocation styles = Within(
-      data.region, bytes,
+      data, bytes,
       data.offset + ReadHalf(bytes, data.offset + kFrameStyleTableOffset),
       host);
   for (int style = kTextBoxFrameStyleFirst; style < kTextBoxFrameStyleCount;
@@ -324,7 +342,7 @@ void BindScriptHeader(ScriptLocation data, std::span<const std::uint8_t> bytes,
         style, TableEntry(styles, bytes, style - kFrameStyleEntryBias, host));
   }
   const ScriptLocation patterns = Within(
-      data.region, bytes,
+      data, bytes,
       data.offset + ReadHalf(bytes, data.offset + kVibrationTableOffset), host);
   for (int pattern = 0; pattern < kVibrationPatternSlots; ++pattern) {
     host.SetVibrationPattern(pattern,
@@ -401,6 +419,9 @@ void ResetSkippedPalettes(ScriptVmHost& host) {
 // True when the sound restore marker comes before the next end of cutscene.
 [[nodiscard]] bool FindSoundRestoreMarker(ScriptLocation scan,
                                           ScriptVmHost& host) {
+  if (!IsCurrent(scan, host)) {
+    return false;
+  }
   const std::span<const std::uint8_t> region = host.Region(scan.region);
   const std::span<const std::uint8_t> marker = host.SoundRestoreMarker();
   std::size_t offset = scan.offset;
@@ -477,10 +498,13 @@ void ResetSkippedPalettes(ScriptVmHost& host) {
 
 [[nodiscard]] ScriptFlow CallSubroutine(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
-  host.SetSubroutineReturn(
-      {.region = instruction.location.region,
-       .offset = instruction.location.offset + kSubroutineCallBytes});
-  return ScriptFlow::JumpTo({.region = ScriptRegion::kSubroutine, .offset = 0});
+  if (!IsCurrent(instruction.location, host)) {
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
+  ScriptLocation return_to = instruction.location;
+  return_to.offset += kSubroutineCallBytes;
+  host.SetSubroutineReturn(return_to);
+  return ScriptFlow::JumpTo(StartOf(ScriptRegion::kSubroutine, host));
 }
 
 void SetCameraPitchPreset(std::uint8_t preset, ScriptVmHost& host) {
@@ -551,6 +575,9 @@ void UnlockActionOnce(std::uint8_t action, ScriptVmHost& host) {
 [[nodiscard]] ScriptLocation JumpTarget(ScriptLocation cursor,
                                         std::int32_t displacement,
                                         ScriptVmHost& host) {
+  if (!IsCurrent(cursor, host)) {
+    return {};
+  }
   const std::int64_t target =
       static_cast<std::int64_t>(cursor.offset) + displacement;
   const std::span<const std::uint8_t> region = host.Region(cursor.region);
@@ -559,8 +586,8 @@ void UnlockActionOnce(std::uint8_t action, ScriptVmHost& host) {
                 static_cast<int>(displacement));
     return {};
   }
-  return {.region = cursor.region,
-          .offset = static_cast<std::uint32_t>(target)};
+  cursor.offset = static_cast<std::uint32_t>(target);
+  return cursor;
 }
 
 // What a thread does after an opcode: run on from `cursor` this frame,
@@ -574,6 +601,12 @@ struct Step {
 
 [[nodiscard]] Step Follow(ScriptFlow flow, ScriptLocation cursor, int size,
                           ScriptVmHost& host) {
+  const bool reuses_cursor = flow.kind != ScriptFlowKind::kStop &&
+                             flow.kind != ScriptFlowKind::kFinish &&
+                             flow.kind != ScriptFlowKind::kJumpTo;
+  if (reuses_cursor && !IsCurrent(cursor, host)) {
+    return {.store = true};
+  }
   switch (flow.kind) {
     case ScriptFlowKind::kAdvance:
       if (size == 0) {
@@ -608,6 +641,9 @@ struct Step {
 // Refuses a cursor that is not at a whole instruction inside its script.
 [[nodiscard]] bool RunnableAt(ScriptLocation cursor, ScriptVmHost& host,
                               int& size) {
+  if (!IsCurrent(cursor, host)) {
+    return false;
+  }
   const std::span<const std::uint8_t> region = host.Region(cursor.region);
   if (cursor.offset < region.size()) {
     size = OpcodeSize(region[cursor.offset], host);
@@ -632,7 +668,8 @@ struct Step {
     const std::int16_t offset = OperandHalf(doors, entry);
     if (offset >= 0 && static_cast<std::size_t>(offset) < doors.size()) {
       return {.region = ScriptRegion::kDoorEvents,
-              .offset = static_cast<std::uint32_t>(offset)};
+              .offset = static_cast<std::uint32_t>(offset),
+              .generation = host.RegionGeneration(ScriptRegion::kDoorEvents)};
     }
   }
   host.Refuse(ScriptVmRefusal::kDoorScript, event_id);
@@ -656,8 +693,8 @@ void StartEventScript(ScriptVmHost& host) {
   host.SetChainedEventLoaded(false);
   switch (host.Source()) {
     case EventSource::kRoomEntryScript:
-      InitializeEventScriptData(
-          {.region = ScriptRegion::kEventScript, .offset = 0}, host);
+      InitializeEventScriptData(StartOf(ScriptRegion::kEventScript, host),
+                                host);
       host.SetPhase(PlaybackPhase::kRunning);
       break;
     case EventSource::kDoorScript:
@@ -687,8 +724,7 @@ void AwaitEventFile(ScriptVmHost& host) {
     host.AdoptChainedEvent();
     host.SetChainedEventLoaded(false);
   }
-  InitializeEventScriptData({.region = ScriptRegion::kEventScript, .offset = 0},
-                            host);
+  InitializeEventScriptData(StartOf(ScriptRegion::kEventScript, host), host);
   host.SetPhase(PlaybackPhase::kRunning);
 }
 
@@ -871,6 +907,9 @@ ScriptFlow ScriptBranchOnCachedFlag(const ScriptInstruction& instruction,
 ScriptFlow ScriptReturnToSavedAddress(const ScriptInstruction& /*instruction*/,
                                       ScriptVmHost& host) {
   const ScriptLocation saved = host.SubroutineReturn();
+  if (saved.Present() && !IsCurrent(saved, host)) {
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
   return saved.Present() ? ScriptFlow::JumpTo(saved) : Advance();
 }
 
@@ -1149,12 +1188,16 @@ ScriptFlow CommandStartScriptContext(const ScriptInstruction& instruction,
   if (!Fits(instruction, kThreeOperandBytes, host)) {
     return Advance();
   }
+  if (!IsCurrent(instruction.location, host)) {
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
   const ScriptCommand command = Bytes(instruction);
   const int thread = OperandByte(command, kFirstOperand);
   if (ValidThread(thread, host)) {
     host.SetThreadCursor(
         thread, {.region = instruction.location.region,
-                 .offset = instruction.location.offset + kContextStartBytes});
+                 .offset = instruction.location.offset + kContextStartBytes,
+                 .generation = instruction.location.generation});
   }
   return ScriptFlow::JumpBy(OperandHalf(command, kSecondOperand));
 }
@@ -1210,13 +1253,19 @@ int RequestEventStart(ScriptVmHost& host) {
 }
 
 void InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
-  const std::span<const std::uint8_t> bytes = host.Region(data.region);
-  const bool header = data.Present() && data.offset <= bytes.size() &&
+  const bool current = IsCurrent(data, host);
+  const std::span<const std::uint8_t> bytes =
+      current ? host.Region(data.region) : ScriptCommand{};
+  const bool header = current && data.Present() &&
+                      data.offset <= bytes.size() &&
                       bytes.size() - data.offset > kEventScriptHeaderBytes;
   if (header) {
     BindScriptHeader(data, bytes, host);
   } else {
-    host.Refuse(ScriptVmRefusal::kScriptHeader, static_cast<int>(data.offset));
+    if (current) {
+      host.Refuse(ScriptVmRefusal::kScriptHeader,
+                  static_cast<int>(data.offset));
+    }
     host.SetDialogStrings({});
     for (int style = kTextBoxFrameStyleFirst; style < kTextBoxFrameStyleCount;
          ++style) {
@@ -1229,7 +1278,8 @@ void InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
   host.SetThreadCursor(
       0, header
              ? ScriptLocation{.region = data.region,
-                              .offset = data.offset + kEventScriptHeaderBytes}
+                              .offset = data.offset + kEventScriptHeaderBytes,
+                              .generation = data.generation}
              : ScriptLocation{});
   for (int thread = 1; thread < kScriptThreadCount; ++thread) {
     host.SetThreadCursor(thread, {});

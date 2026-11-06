@@ -1,6 +1,8 @@
 #include "Event/RoomTriggers.hpp"
 
 #include <array>
+#include <limits>
+#include <new>
 
 namespace VS::Event {
 namespace {
@@ -311,6 +313,89 @@ RoomTriggerResult EvaluateRecord(RoomTriggerHost& host, ScriptCommand section,
 }
 
 }  // namespace
+
+RoomEventCopy RoomEventSections::Copy(const RoomEventInput& input) {
+  // The legacy importer passed unsigned-halfword lengths, not truncated spans.
+  constexpr auto kImportedSectionBytes =
+      std::numeric_limits<std::uint16_t>::max();
+  if (input.triggers.size() > kImportedSectionBytes) {
+    return std::unexpected(RoomEventLoadError{RoomEventRefusal::kTriggerExtent,
+                                              input.triggers.size()});
+  }
+  if (input.entry_script.size() > kEventScriptBytes) {
+    return std::unexpected(RoomEventLoadError{
+        RoomEventRefusal::kEntryScriptExtent, input.entry_script.size()});
+  }
+  if (input.doors.size() > kImportedSectionBytes) {
+    return std::unexpected(
+        RoomEventLoadError{RoomEventRefusal::kDoorExtent, input.doors.size()});
+  }
+  if (input.triggers.empty() && input.entry_script.empty() &&
+      input.doors.empty()) {
+    return RoomEventLease{};
+  }
+  try {
+    return RoomEventLease(new RoomEventSections(input));
+  } catch (const std::bad_alloc&) {
+    return std::unexpected(RoomEventLoadError{RoomEventRefusal::kAllocation,
+                                              input.triggers.size() +
+                                                  input.entry_script.size() +
+                                                  input.doors.size()});
+  }
+}
+
+// decomp: BATTLE.PRG _loadMpdClearedScriptDoorSections (4A0A8.c:4201).
+RoomEventLoad LoadRoomEventSections(RoomEventInput input,
+                                    RoomEventSectionHost& host) {
+  constexpr std::int16_t kWaitingForRoom = 1;
+  constexpr std::int16_t kRoomReady = 2;
+  constexpr std::int16_t kStopForRoom = 3;
+  constexpr int kRoomLoadFlag = 0xA9;
+  constexpr int kRoomFlagFirst = 32;
+  constexpr int kRoomFlagEnd = 64;
+  const std::int16_t transition = host.RoomChangeState();
+  if (transition == kWaitingForRoom) {
+    input.entry_script = {};
+  }
+  const auto prepared = host.CopySections(input);
+  if (!prepared) {
+    host.Refuse(prepared.error());
+    return std::unexpected(prepared.error());
+  }
+  host.SetFlag(kRoomLoadFlag, 0);
+  if (!input.first_entry) {
+    for (int flag = kRoomFlagFirst; flag < kRoomFlagEnd; ++flag) {
+      host.SetFlag(flag, 0);
+    }
+  }
+  host.PublishSections(*prepared);
+  if (transition == kWaitingForRoom) {
+    host.SetRoomChangeState(kRoomReady);
+    return RoomEventLoadResult::kContinuingEvent;
+  }
+  if (transition == kStopForRoom) {
+    host.SetPlaybackPhase(PlaybackPhase::kIdle);
+    host.SetRoomChangeState(0);
+    host.SetStartConfirmed(false);
+  }
+  host.SetRoomEntryPending(!input.entry_script.empty());
+  if (!input.entry_script.empty()) {
+    host.BindEntryScript(*prepared);
+  }
+  return RoomEventLoadResult::kReady;
+}
+
+// decomp: BATTLE.PRG func_800BEB34 (4A0A8.c:4250).
+void FreeRoomEventSections(RoomEventSectionHost& host) {
+  constexpr std::int16_t kStopForRoom = 3;
+  if (host.RoomChangeState() == kStopForRoom) {
+    host.ReleaseScriptActorControl();
+  }
+  host.PublishSections({});
+}
+
+// decomp: BATTLE.PRG func_800BEBEC (4A0A8.c:4273).
+void ReleaseZoneEventResources() {}
 
 // decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4A0A8.c:4302)
 RoomTriggerResult EvaluateRoomEventTriggers(const RoomTriggerQuery& query,

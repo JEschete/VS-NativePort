@@ -28,6 +28,8 @@ using Handler = Flow (*)(const event::ScriptInstruction&, event::ScriptVmHost&);
 class RecordingHost final : public event::ScriptVmHost {
  public:
   std::array<Bytes, 4> regions;
+  std::array<std::uint64_t, 4> generations{};
+  mutable std::vector<event::ScriptRegion> region_reads;
   std::array<std::uint8_t, 256> sizes{};
   std::function<Flow(Location, int)> dispatch;
   std::vector<std::pair<Refusal, int>> refusals;
@@ -112,7 +114,11 @@ class RecordingHost final : public event::ScriptVmHost {
   }
   std::span<const std::uint8_t> Region(
       event::ScriptRegion region) const override {
+    region_reads.push_back(region);
     return regions.at(static_cast<std::size_t>(region));
+  }
+  std::uint64_t RegionGeneration(event::ScriptRegion region) const override {
+    return generations.at(static_cast<std::size_t>(region));
   }
   std::span<const std::uint8_t> OpcodeSizes() const override { return sizes; }
   Flow RunOpcode(Location location, int thread) override {
@@ -332,8 +338,9 @@ class RecordingHost final : public event::ScriptVmHost {
   void RestartRoomEffectSound() override { calls.emplace_back("RoomSound"); }
 };
 
-Location At(std::uint32_t offset, Region region = Region::kEventScript) {
-  return {.region = region, .offset = offset};
+Location At(std::uint32_t offset, Region region = Region::kEventScript,
+            std::uint64_t generation = 0) {
+  return {.region = region, .offset = offset, .generation = generation};
 }
 
 Flow Run(Handler handler, RecordingHost& host, const Bytes& bytes,
@@ -1120,4 +1127,221 @@ TEST_CASE(
   CHECK(event::EventPlaybackState(host) == event::PlaybackPhase::kIdle);
   Run(event::CommandSetTickSpeed, host, {0, 17});
   CHECK(host.tick_speed == 17);
+}
+
+TEST_CASE("VM refuses a cursor after its region is replaced in place",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1] = {0x22};
+  host.cursors[0] = {Region::kEventScript, 0};
+  const auto* original_address = host.regions[1].data();
+  host.regions[1][0] = 0x23;
+  ++host.generations[1];
+  REQUIRE(host.regions[1].data() == original_address);
+  host.dispatch = [](Location, int) { return Flow::Of(Kind::kStop); };
+  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK(host.instructions.empty());
+  CHECK(host.region_reads.empty());
+  CHECK(host.refusals ==
+        std::vector<std::pair<Refusal, int>>{{Refusal::kStaleScriptRegion, 1}});
+  CHECK_FALSE(host.cursors[0].Present());
+}
+
+TEST_CASE("VM headers preserve their mounted generation in every bound view",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  Header(host);
+  host.generations[1] = 7;
+  event::InitializeEventScriptData(At(0, Region::kEventScript, 7), host);
+  CHECK(host.cursors[0] == At(16, Region::kEventScript, 7));
+  CHECK(host.strings == At(80, Region::kEventScript, 7));
+  CHECK(host.styles[9] == At(64, Region::kEventScript, 7));
+  CHECK(host.styles[15] == At(68, Region::kEventScript, 7));
+  CHECK(host.patterns[0] == At(96, Region::kEventScript, 7));
+  CHECK(host.patterns[7] == At(100, Region::kEventScript, 7));
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("VM stale headers clear views without reading the replacement",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  Header(host);
+  event::InitializeEventScriptData(At(0), host);
+  host.region_reads.clear();
+  ++host.generations[1];
+  event::InitializeEventScriptData(At(0), host);
+  CHECK(host.region_reads.empty());
+  CHECK_FALSE(host.cursors[0].Present());
+  CHECK_FALSE(host.strings.Present());
+  CHECK(std::ranges::none_of(host.styles, &Location::Present));
+  CHECK(std::ranges::none_of(host.patterns, &Location::Present));
+  CHECK(host.refusals ==
+        std::vector<std::pair<Refusal, int>>{{Refusal::kStaleScriptRegion, 1}});
+}
+
+TEST_CASE("VM relative jumps and yields retain a full-width generation",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1].resize(5);
+  host.generations[1] = 0x100000001;
+  host.cursors[0] = At(0, Region::kEventScript, 0x100000001);
+  host.dispatch = [](Location location, int) {
+    return location.offset == 0 ? Flow::JumpBy(2)
+                                : Flow::Of(Kind::kAdvanceAndYield);
+  };
+  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK(host.cursors[0] == At(3, Region::kEventScript, 0x100000001));
+  CHECK(host.instructions ==
+        std::vector<std::pair<Location, int>>{
+            {At(0, Region::kEventScript, 0x100000001), 0},
+            {At(2, Region::kEventScript, 0x100000001), 0}});
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("VM generation checks do not discard the upper 32 bits",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1].resize(5);
+  host.generations[1] = 0x100000001;
+  host.cursors[0] = At(0, Region::kEventScript, 1);
+  host.dispatch = [](Location, int) { return Flow::Of(Kind::kStop); };
+  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK(host.instructions.empty());
+  CHECK(host.region_reads.empty());
+  REQUIRE(host.refusals.size() == 1);
+  CHECK(host.refusals.front().first == Refusal::kStaleScriptRegion);
+}
+
+TEST_CASE("VM explicit jumps refuse stale destination generations",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1].resize(5);
+  host.regions[2].resize(5);
+  host.generations[2] = 2;
+  host.cursors[0] = At(0);
+  host.dispatch = [](Location, int) {
+    return Flow::JumpTo(At(0, Region::kDoorEvents, 1));
+  };
+  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  REQUIRE(host.instructions.size() == 1);
+  CHECK(host.region_reads == std::vector{Region::kEventScript});
+  CHECK(host.refusals ==
+        std::vector<std::pair<Refusal, int>>{{Refusal::kStaleScriptRegion, 2}});
+}
+
+TEST_CASE("VM subroutine calls and returns preserve source generations",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.generations[1] = 7;
+  host.generations[3] = 9;
+  CHECK(Run(event::CommandSpecialOperation, host, {0, 16, 0}, 0,
+            At(7, Region::kEventScript, 7)) ==
+        Flow::JumpTo(At(0, Region::kSubroutine, 9)));
+  CHECK(host.return_to == At(13, Region::kEventScript, 7));
+  CHECK(Run(event::ScriptReturnToSavedAddress, host, {0}) ==
+        Flow::JumpTo(At(13, Region::kEventScript, 7)));
+  ++host.generations[1];
+  CHECK(Run(event::ScriptReturnToSavedAddress, host, {0}).kind == Kind::kStop);
+  REQUIRE(host.refusals.size() == 1);
+  CHECK(host.refusals.front().first == Refusal::kStaleScriptRegion);
+}
+
+TEST_CASE("VM started contexts inherit the instruction source generation",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.generations[1] = 7;
+  CHECK(Run(event::CommandStartScriptContext, host, {0, 3, 12, 0}, 0,
+            At(20, Region::kEventScript, 7)) == Flow::JumpBy(12));
+  CHECK(host.cursors[3] == At(24, Region::kEventScript, 7));
+  host.cursors[3] = {};
+  ++host.generations[1];
+  CHECK(Run(event::CommandStartScriptContext, host, {0, 3, 12, 0}, 0,
+            At(20, Region::kEventScript, 7))
+            .kind == Kind::kStop);
+  CHECK_FALSE(host.cursors[3].Present());
+}
+
+TEST_CASE("VM skip scans refuse stale sources before reading replacement bytes",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1] = {0x82, 5, 0, 0, 0x0F};
+  host.generations[1] = 1;
+  event::FinishSkippedCutscene(At(0), host);
+  CHECK(host.region_reads.empty());
+  CHECK(host.refusals ==
+        std::vector<std::pair<Refusal, int>>{{Refusal::kStaleScriptRegion, 1}});
+}
+
+TEST_CASE("VM source replacement during dispatch cannot retain the old cursor",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1] = {0};
+  host.cursors[0] = At(0);
+  host.dispatch = [&](Location, int) {
+    ++host.generations[1];
+    return Flow::Of(Kind::kHold);
+  };
+  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  REQUIRE(host.instructions.size() == 1);
+  CHECK_FALSE(host.cursors[0].Present());
+  CHECK(host.refusals ==
+        std::vector<std::pair<Refusal, int>>{{Refusal::kStaleScriptRegion, 1}});
+}
+
+TEST_CASE("VM dispatch can explicitly jump to a freshly mounted source",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1] = {0};
+  host.cursors[0] = At(0);
+  host.dispatch = [&](Location location, int) {
+    if (location.generation == 0) {
+      ++host.generations[1];
+      return Flow::JumpTo(At(0, Region::kEventScript, 1));
+    }
+    return Flow::Of(Kind::kStop);
+  };
+  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK(host.instructions ==
+        std::vector<std::pair<Location, int>>{
+            {At(0), 0}, {At(0, Region::kEventScript, 1), 0}});
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("VM completion does not reuse a source released by its final opcode",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  host.regions[1] = {0};
+  host.cursors[0] = At(0);
+  host.dispatch = [&](Location, int) {
+    ++host.generations[1];
+    return Flow::Of(Kind::kFinish);
+  };
+  CHECK(event::ExecuteScriptThread(0, host));
+  REQUIRE(host.instructions.size() == 1);
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("VM playback starts each script from its mounted generation",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  Header(host);
+  host.generations[1] = 7;
+  host.source = event::EventSource::kRoomEntryScript;
+  host.phase = event::PlaybackPhase::kStarting;
+  CHECK(event::UpdateEventPlayback(host) == 2);
+  CHECK(host.cursors[0] == At(16, Region::kEventScript, 7));
+  host.source = event::EventSource::kEventFile;
+  host.phase = event::PlaybackPhase::kLoading;
+  host.file = event::EventFileStatus::kReady;
+  host.generations[1] = 8;
+  CHECK(event::UpdateEventPlayback(host) == 2);
+  CHECK(host.cursors[0] == At(16, Region::kEventScript, 8));
+  host.regions[2] = host.regions[1];
+  host.generations[2] = 9;
+  host.source = event::EventSource::kDoorScript;
+  host.event_id = 0;
+  host.phase = event::PlaybackPhase::kStarting;
+  CHECK(event::UpdateEventPlayback(host) == 2);
+  CHECK(host.cursors[0] == At(16, Region::kDoorEvents, 9));
+  CHECK(host.refusals.empty());
 }

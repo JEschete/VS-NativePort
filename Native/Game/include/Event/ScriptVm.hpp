@@ -42,10 +42,11 @@ enum class ScriptRegion : std::uint8_t {
   kSubroutine,
 };
 
-// A position in a script region; kNone is no position (a stopped thread).
+// A position in one mounted generation; kNone is a stopped thread.
 struct ScriptLocation {
   ScriptRegion region = ScriptRegion::kNone;
   std::uint32_t offset = 0;
+  std::uint64_t generation = 0;
 
   [[nodiscard]] constexpr bool Present() const {
     return region != ScriptRegion::kNone;
@@ -205,6 +206,9 @@ enum class ScriptVmRefusal : std::uint8_t {
   kDoorScript,
   // An event file wait with no event file queued.
   kMissingEventFile,
+  // The location's source was replaced, even if its address/extent is
+  // unchanged.
+  kStaleScriptRegion,
 };
 
 // The event VM state, the script regions and the systems the opcodes and
@@ -228,6 +232,10 @@ class ScriptVmHost {
   // with any jump resolved to a location (a stop for a jump outside every
   // region).
   [[nodiscard]] virtual std::span<const std::uint8_t> Region(
+      ScriptRegion region) const = 0;
+  // Versions the mounted VM source, not a newly loaded, unmounted room section.
+  // Keep returned region bytes alive through each operation and its callbacks.
+  [[nodiscard]] virtual std::uint64_t RegionGeneration(
       ScriptRegion region) const = 0;
   [[nodiscard]] virtual std::span<const std::uint8_t> OpcodeSizes() const = 0;
   [[nodiscard]] virtual ScriptFlow RunOpcode(ScriptLocation location,

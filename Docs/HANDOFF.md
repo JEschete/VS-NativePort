@@ -13,6 +13,44 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- The next core-only checkpoint adds immutable, shared room-section owners
+  and explicit load results. Preparation is transactional: allocation/extent
+  failures publish nothing and do not clear flags or alter playback. Executing
+  door leases survive room replacement/free; borrowed old input is copied
+  before publication. Empty loads retain the previous main script, and a
+  continuation does not inspect/copy the unused entry script.
+- Legacy import limits are explicit: trigger/door sections at most 65,535
+  bytes, entry script at most 6,144 bytes; excess is refused rather than
+  narrowed or copied past the old buffer. This is not a new authoring format.
+  Allocator-failure tests inject the host's preparation failure; they do not
+  exhaust operating-system memory.
+- Script locations now carry 64-bit mounted-source generations. The core
+  refuses stale dispatch, headers, skip scans, saved returns and context
+  starts before reading replacement bytes, even at an unchanged address.
+  Derived views/jumps retain generations; explicit jumps to fresh sources and
+  completion after source release remain valid. The pre-fix reproduction
+  failed two of five assertions (`vm-lifetime-before.log`). Generation checks
+  do not own memory: Live must pin mounted sources through callbacks and room
+  continuation, and clear borrowed legacy views before releasing owners.
+- Verification on `be48f8bf` plus the six scoped source/test changes:
+  26 new lifetime/ownership cases add 152 assertions. The combined
+  `[event-vm],[room-triggers],[cutscene-lifecycle]` selection passes 115 cases /
+  4,857 assertions in Debug and Release. Full suites each pass **4,474 cases /
+  7,904,624 assertions and both unchanged replays**. Loader/free recording-host
+  differentials make 40,000 comparisons (seed `0x5EC710`), detecting seven
+  mutants; the 100,000 trigger comparisons still pass. Corrected ownership and
+  malformed/allocation cases are covered by explicit tests, not equated to
+  the original's leaking/dangling allocations.
+- Scoped clang-tidy/default quality is clean. Evidence:
+  `VR-EVENT-SCRIPT-SOURCE-LIFETIME`, `VR-EVENT-ROOM-SECTION-CORE`,
+  `build\owner-checkpoint\room-ownership-*`, `room-sections-*`,
+  `vm-lifetime-*`, and session `files\room_sections_diff.cpp`,
+  `room_sections_original.inc`, `room_sections_mutants.ps1`,
+  `room-ownership-before-baseline.json`. Production integration is still
+  pending: neither these owners nor source generations protect the generated
+  runtime yet. Finish VM allocation/I/O error paths, mount/pin the native
+  sources, propagate failed event loads through Field, and migrate all callers
+  and borrowed fixtures before promotion.
 - The bounded `Event/RoomTriggers.cpp` evaluator is compiled and tested
   alongside the generated production trigger path. Its actor-pair, tile and
   no-context variants replace pointer-encoded context in the core; offset
