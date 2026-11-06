@@ -20,6 +20,7 @@ enum class ScriptSourceError : std::uint8_t {
   kNoActiveUse,
   kUseDepth,
   kRetentionAllocation,
+  kPreparedSource,
 };
 
 // Keep this counter outside resettable module data; clearing a mount does not
@@ -69,6 +70,28 @@ class ScriptSource {
   std::uint64_t generation_ = 0;
 };
 
+class ScriptSourceMounts;
+
+// A single-use publication token. It must not outlive its originating mounts;
+// reset invalidates unpublished tokens without revoking their owned bytes.
+class PreparedScriptSource {
+ public:
+  PreparedScriptSource() = default;
+  PreparedScriptSource(const PreparedScriptSource&) = delete;
+  PreparedScriptSource& operator=(const PreparedScriptSource&) = delete;
+  PreparedScriptSource(PreparedScriptSource&& other) noexcept;
+  PreparedScriptSource& operator=(PreparedScriptSource&& other) noexcept;
+  ~PreparedScriptSource() = default;
+
+ private:
+  friend class ScriptSourceMounts;
+  PreparedScriptSource(ScriptSourceMounts* origin, ScriptRegion region,
+                       ScriptSource source) noexcept;
+  ScriptSourceMounts* origin_ = nullptr;
+  ScriptRegion region_ = ScriptRegion::kNone;
+  ScriptSource source_;
+};
+
 // Keep this state outside module-image resets. Explicit use boundaries retain
 // every exposed generation through nested callbacks without automatic owning
 // guards that a non-returning session transition could skip.
@@ -81,6 +104,16 @@ class ScriptSourceMounts {
   ScriptSourceMounts& operator=(ScriptSourceMounts&&) = delete;
   ~ScriptSourceMounts() = default;
 
+  // Preparation issues a fresh generation without changing a mount. Publish
+  // consumes only a valid token from this instance; no allocation is needed.
+  [[nodiscard]] std::expected<PreparedScriptSource, ScriptSourceError>
+  PrepareBuffer(
+      ScriptRegion region,
+      std::shared_ptr<const std::vector<std::uint8_t>> buffer) noexcept;
+  [[nodiscard]] std::expected<PreparedScriptSource, ScriptSourceError>
+  PrepareRoom(ScriptRegion region, RoomEventLease room) noexcept;
+  [[nodiscard]] std::expected<void, ScriptSourceError> Publish(
+      PreparedScriptSource&& prepared) noexcept;
   [[nodiscard]] std::expected<void, ScriptSourceError> MountBuffer(
       ScriptRegion region,
       std::shared_ptr<const std::vector<std::uint8_t>> buffer) noexcept;
@@ -108,6 +141,7 @@ class ScriptSourceMounts {
   std::array<ScriptSource, kRegionCount> mounted_{};
   std::vector<ScriptSource> retained_;
   std::uint64_t serial_ = 0;
+  std::uint64_t reset_serial_ = 0;
   std::size_t use_depth_ = 0;
 };
 

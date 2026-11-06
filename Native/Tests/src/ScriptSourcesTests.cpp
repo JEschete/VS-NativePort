@@ -419,3 +419,100 @@ TEST_CASE("Script source uses release before an actual nonreturning transfer",
       Required(mounts->Lease(event::ScriptRegion::kEventScript)).Generation() ==
       2);
 }
+
+TEST_CASE("Script source preparation does not replace the published mount",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  REQUIRE(mounts.MountBuffer(region, MakeBuffer()));
+  const auto previous = Required(mounts.Lease(region)).Generation();
+  auto prepared = mounts.PrepareBuffer(region, MakeBuffer());
+  REQUIRE(prepared);
+  CHECK(Required(mounts.Lease(region)).Generation() == previous);
+  REQUIRE(mounts.Publish(std::move(*prepared)));
+  CHECK(Required(mounts.Lease(region)).Generation() == previous + 1);
+  CheckError(mounts.Publish(std::move(*prepared)),
+             event::ScriptSourceError::kPreparedSource);
+  CHECK(Required(mounts.Lease(region)).Generation() == previous + 1);
+}
+
+TEST_CASE("Discarded script preparation releases its unpublished owner",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  auto buffer = MakeBuffer();
+  const std::weak_ptr<const Buffer> owner = buffer;
+  auto prepared =
+      mounts.PrepareBuffer(event::ScriptRegion::kEventScript, buffer);
+  REQUIRE(prepared);
+  buffer.reset();
+  CHECK_FALSE(owner.expired());
+  prepared = event::PreparedScriptSource{};
+  CHECK(owner.expired());
+  CheckError(mounts.Lease(event::ScriptRegion::kEventScript),
+             event::ScriptSourceError::kMissingOwner);
+}
+
+TEST_CASE("Script source reset refuses a previously prepared publication",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  auto prepared = mounts.PrepareBuffer(region, MakeBuffer());
+  REQUIRE(prepared);
+  mounts.Reset();
+  CheckError(mounts.Publish(std::move(*prepared)),
+             event::ScriptSourceError::kPreparedSource);
+  CheckError(mounts.Lease(region), event::ScriptSourceError::kMissingOwner);
+  REQUIRE(mounts.MountBuffer(region, MakeBuffer()));
+  CHECK(Required(mounts.Lease(region)).Generation() == 2);
+}
+
+TEST_CASE("Prepared script publication cannot target a different mount set",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts origin;
+  event::ScriptSourceMounts other;
+  const auto region = event::ScriptRegion::kEventScript;
+  auto prepared = origin.PrepareBuffer(region, MakeBuffer());
+  REQUIRE(prepared);
+  CheckError(other.Publish(std::move(*prepared)),
+             event::ScriptSourceError::kPreparedSource);
+  CheckError(other.Lease(region), event::ScriptSourceError::kMissingOwner);
+  REQUIRE(origin.Publish(std::move(*prepared)));
+  CHECK(Required(origin.Lease(region)).Generation() == 1);
+}
+
+TEST_CASE("Prepared script moves transfer the single publication right",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  auto prepared = mounts.PrepareBuffer(region, MakeBuffer());
+  REQUIRE(prepared);
+  event::PreparedScriptSource moved(std::move(*prepared));
+  CheckError(mounts.Publish(std::move(*prepared)),
+             event::ScriptSourceError::kPreparedSource);
+  event::PreparedScriptSource assigned;
+  assigned = std::move(moved);
+  REQUIRE(mounts.Publish(std::move(assigned)));
+  // Publication leaves an invalid token whose reuse must be refused.
+  // NOLINTNEXTLINE(bugprone-use-after-move)
+  CheckError(mounts.Publish(std::move(assigned)),
+             event::ScriptSourceError::kPreparedSource);
+  CHECK(Required(mounts.Lease(region)).Generation() == 1);
+}
+
+TEST_CASE("Room source preparation can precede nonallocating publication",
+          "[event-vm][script-sources]") {
+  const std::array<std::uint8_t, 2> entry{0x11, 0x22};
+  auto room = Required(event::RoomEventSections::Copy({.entry_script = entry}));
+  const std::weak_ptr<const event::RoomEventSections> owner = room;
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  auto prepared = mounts.PrepareRoom(region, room);
+  REQUIRE(prepared);
+  room.reset();
+  CHECK_FALSE(owner.expired());
+  CheckError(mounts.Lease(region), event::ScriptSourceError::kMissingOwner);
+  REQUIRE(mounts.Publish(std::move(*prepared)));
+  CheckBytes(Required(mounts.Lease(region)).Bytes(), entry);
+  mounts.Reset();
+  CHECK(owner.expired());
+}

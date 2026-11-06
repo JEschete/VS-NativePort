@@ -13,6 +13,19 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- Source publication can now be prepared before the room host's nonallocating
+  commit boundary. Move-only tokens preserve the current mount until
+  publication, belong to their originating mount set, and can be consumed
+  only once. Reset invalidates outstanding preparations without reusing
+  their generations. Tokens must not outlive their originating mount set.
+  Six new cases / 51 assertions pass; the combined
+  `[script-sources],[event-vm],[room-triggers]` selection passes **145 cases /
+  2,965 assertions** in Debug/Release. Both full suites pass **4,566 cases /
+  7,905,566 assertions**, with all 4,560 previous names and complete replay
+  objects unchanged. Full builds, scoped quality/clang-tidy and gates pass.
+  Evidence: `VR-EVENT-SOURCE-PUBLICATION`,
+  `build\owner-checkpoint\script-source-publication-*`. This prepares the
+  integration contract; the production VM and room host are still unwired.
 - `ScriptSourceMounts` now owns the three versioned source mounts and retains
   every exposed generation through explicit nested use boundaries. Repeated
   reads retain a generation only once; ordinary reset invalidates mounts but
@@ -32,6 +45,7 @@ verification of the current worktree.
   gates pass. Evidence: `VR-EVENT-SOURCE-MOUNTS` and
   `build\owner-checkpoint\script-mounts-*`. No production VM migration or
   promotion/retirement credit; allocation-failure injection is not claimed.
+  Published as `40047346`; exact Source Quality `42209961570` succeeded.
 - Buffered script vibration now validates its 120-byte stream window and
   stores a separate immutable copy in each native controller slot. New or
   malformed requests cannot overwrite a playing pattern through the former

@@ -121,33 +121,80 @@ std::optional<ScriptCommand> ScriptSource::View(
   return bytes_.subspan(location.offset);
 }
 
-std::expected<void, ScriptSourceError> ScriptSourceMounts::MountBuffer(
+PreparedScriptSource::PreparedScriptSource(ScriptSourceMounts* origin,
+                                           ScriptRegion region,
+                                           ScriptSource source) noexcept {
+  origin_ = origin;
+  region_ = region;
+  source_ = std::move(source);
+}
+
+PreparedScriptSource::PreparedScriptSource(
+    PreparedScriptSource&& other) noexcept {
+  *this = std::move(other);
+}
+
+PreparedScriptSource& PreparedScriptSource::operator=(
+    PreparedScriptSource&& other) noexcept {
+  if (this != &other) {
+    origin_ = std::exchange(other.origin_, nullptr);
+    region_ = std::exchange(other.region_, ScriptRegion::kNone);
+    source_ = std::move(other.source_);
+  }
+  return *this;
+}
+
+std::expected<PreparedScriptSource, ScriptSourceError>
+ScriptSourceMounts::PrepareBuffer(
     ScriptRegion region,
     std::shared_ptr<const std::vector<std::uint8_t>> buffer) noexcept {
-  const auto index = RegionIndex(region);
-  if (!index) {
-    return std::unexpected(ScriptSourceError::kRegion);
-  }
   auto source = ScriptSource::FromBuffer(region, std::move(buffer), serial_);
   if (!source) {
     return std::unexpected(source.error());
   }
-  mounted_[*index] = std::move(*source);
-  return {};
+  return PreparedScriptSource(this, region, std::move(*source));
 }
 
-std::expected<void, ScriptSourceError> ScriptSourceMounts::MountRoom(
-    ScriptRegion region, RoomEventLease room) noexcept {
-  const auto index = RegionIndex(region);
-  if (!index) {
-    return std::unexpected(ScriptSourceError::kRegion);
-  }
+std::expected<PreparedScriptSource, ScriptSourceError>
+ScriptSourceMounts::PrepareRoom(ScriptRegion region,
+                                RoomEventLease room) noexcept {
   auto source = ScriptSource::FromRoom(region, std::move(room), serial_);
   if (!source) {
     return std::unexpected(source.error());
   }
-  mounted_[*index] = std::move(*source);
+  return PreparedScriptSource(this, region, std::move(*source));
+}
+
+std::expected<void, ScriptSourceError> ScriptSourceMounts::Publish(
+    PreparedScriptSource&& prepared) noexcept {
+  const auto index = RegionIndex(prepared.region_);
+  if (prepared.origin_ != this || !index ||
+      prepared.source_.Generation() <= reset_serial_) {
+    return std::unexpected(ScriptSourceError::kPreparedSource);
+  }
+  mounted_[*index] = std::move(prepared.source_);
+  prepared.origin_ = nullptr;
+  prepared.region_ = ScriptRegion::kNone;
   return {};
+}
+
+std::expected<void, ScriptSourceError> ScriptSourceMounts::MountBuffer(
+    ScriptRegion region,
+    std::shared_ptr<const std::vector<std::uint8_t>> buffer) noexcept {
+  auto prepared = PrepareBuffer(region, std::move(buffer));
+  if (!prepared) {
+    return std::unexpected(prepared.error());
+  }
+  return Publish(std::move(*prepared));
+}
+
+std::expected<void, ScriptSourceError> ScriptSourceMounts::MountRoom(
+    ScriptRegion region, RoomEventLease room) noexcept {
+  auto prepared = PrepareRoom(region, std::move(room));
+  if (!prepared) {
+    return std::unexpected(prepared.error());
+  }
+  return Publish(std::move(*prepared));
 }
 
 std::expected<ScriptSource, ScriptSourceError> ScriptSourceMounts::Lease(
@@ -172,7 +219,10 @@ std::expected<void, ScriptSourceError> ScriptSourceMounts::Clear(
   return {};
 }
 
-void ScriptSourceMounts::Reset() noexcept { mounted_.fill({}); }
+void ScriptSourceMounts::Reset() noexcept {
+  reset_serial_ = serial_;
+  mounted_.fill({});
+}
 
 std::expected<void, ScriptSourceError> ScriptSourceMounts::BeginUse() noexcept {
   if (use_depth_ == std::numeric_limits<std::size_t>::max()) {

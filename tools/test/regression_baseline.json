@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 7905515,
+  "assertions": 7905566,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -1317,6 +1317,7 @@
    "Disc seek command interrupts finish the seek or report an error",
    "Disc volume fades wrap their step instead of trapping",
    "Disc volume requests keep their volume words whole",
+   "Discarded script preparation releases its unpublished owner",
    "Discarding stale native audio retains the scheduling buffer",
    "Disconnect and pad reset invalidate active actuator output",
    "Disengagement by ID ignores Ashley and empty slots and refuses IDs outside the table",
@@ -2953,6 +2954,8 @@
    "Post-Minotaur Lab profiles grant only representative native actions",
    "Post-prologue Lab profiles enable original Setup and Score gates",
    "Prepared cutscene confirms start before preparation",
+   "Prepared script moves transfer the single publication right",
+   "Prepared script publication cannot target a different mount set",
    "Prepared-cache metadata cannot bypass source-disc verification",
    "Preparing replacement programs does not interrupt another voice",
    "PresentFrame flips the buffer and draws the ordering table",
@@ -3313,6 +3316,7 @@
    "Room set-up fills the texture effect slots from their records",
    "Room set-up refuses effect scripts that leave their section",
    "Room set-up refuses texture effects that leave their section",
+   "Room source preparation can precede nonallocating publication",
    "Room stream binding refuses an occupied slot and missing data",
    "Room stream binding returns handle 3 for a valid stream",
    "Room stream binding validates the stream and its assets",
@@ -3547,6 +3551,8 @@
    "Script source generation exhaustion never wraps or publishes",
    "Script source moves revoke the moved-from view",
    "Script source offsets and region identities are bounded",
+   "Script source preparation does not replace the published mount",
+   "Script source reset refuses a previously prepared publication",
    "Script source uses release before an actual nonreturning transfer",
    "Script weapon draw states refuse indexes past their table",
    "Script weapon mode also waits for the original queued idle",
