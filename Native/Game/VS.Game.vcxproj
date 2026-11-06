@@ -1310,6 +1310,9 @@
     <ClCompile Include="src\Field\GameModeLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Field\GimmickPlacementLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Gimmicks.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1990,6 +1993,7 @@
     <ClInclude Include="src\Field\GameModeLiveState.h" />
     <ClInclude Include="src\Field\GimmickLookup.h" />
     <ClInclude Include="src\Field\GimmickMotion.h" />
+    <ClInclude Include="src\Field\GimmickPlacementLive.h" />
     <ClInclude Include="src\Field\Gimmicks.h" />
     <ClInclude Include="src\Field\Input.h" />
     <ClInclude Include="src\Field\Interaction.h" />

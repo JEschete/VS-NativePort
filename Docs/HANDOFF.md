@@ -7,6 +7,37 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Gimmick snapshot and native trigger host (#316 / #313)
+
+- Source review found F00853 `Field_GimmickPlacement` checking an uninitialized
+  local before its slot load, with unchecked slot/output arguments. Original ASM
+  `func_800A0024.s` branches on inherited `$s0` at `800A0034`, loads the chosen
+  pointer at `800A004C` and reads it at `800A0054`; this is not a defined C++ local
+  value or a reproduced retail crash. Logged as #316 before the fix; #299 covers
+  the separate actor-placement path, not this field snapshot helper.
+- F00853 is registered owned strict C++. It validates the slot/output and loaded
+  record, preserves attached/falling/moving refusal, and writes a complete local
+  snapshot only on success. Named fields and explicit signed packing preserve
+  original stores at `800A00A0/00B0/00D0/00DC/00E8`; signed height division truncates
+  as the original add-127/arithmetic-shift sequence did. Its C/module entry remains,
+  so `cpp=wip` records ownership without promotion/retirement credit.
+- `EvaluateLiveRoomEventTriggers` now binds the bounded trigger core to actual
+  flag, actor, inventory, collision and repaired gimmick snapshot APIs. It uses no
+  actor-query cast for gimmick placement and preserves signed-halfword references
+  in context-only comparisons. Production trigger/playback callers are not switched
+  yet; this host is the prerequisite for switching producer/evaluator/playback
+  together under #313.
+- On `4e430c80` plus the snapshot/host/caller/generator/tests, six new cases add
+  170 assertions. Snapshot-only controls pass 3 cases / 159 assertions; snapshot
+  plus room-trigger selection passes 52 / 655, including real native condition-11,
+  context and status consumers. Full Debug/Release builds and suites pass 4,621
+  cases / 7,939,613 assertions; every previous case and both canonical replays
+  remain unchanged. Scoped quality/clang-tidy, 190 copier controls and ledger gates
+  pass; repeat copy/project generation preserves nine scoped hashes. Evidence:
+  `VR-GIMMICK-SNAPSHOT-SAFETY`, `VR-EVENT-NATIVE-TRIGGER-HOST`, and
+  `build\owner-checkpoint\gimmick-snapshot-*-regression.log`. #316 awaits its fixing
+  push and exact CI before closure. #313/#315/#276 remain open.
+
 ### Native control-table routing (#313)
 
 - The native VM recognizes the selected normal/skip table's 31 original control

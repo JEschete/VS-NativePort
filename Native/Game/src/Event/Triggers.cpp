@@ -10,6 +10,7 @@ extern "C" {
 #include "Actors/Location.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
+#include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 
 // decomp: D_800F4BA8 (D_800F4BA8@BATTLE/BATTLE.PRG)

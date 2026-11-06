@@ -145,6 +145,7 @@ extern "C" {
 #include "Field/EnvironmentLiveState.h"
 #include "Field/GameModeLiveState.h"
 #include "Field/GimmickMotion.h"
+#include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Input.h"
 #include "Field/Interaction.h"

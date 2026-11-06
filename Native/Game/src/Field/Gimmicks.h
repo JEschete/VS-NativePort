@@ -374,7 +374,6 @@ void Field_RefreshAshleyInteractionTile(Actors_ActorRecord* actor_record);
 void Field_DropUnsupportedGimmickStack(int removed_gimmick_slot);
 int Field_FindGimmickBelow(Field_GimmickInstance* reference_gimmick);
 int Field_GimmickSubtype(int gimmick_slot);
-int Field_GimmickPlacement(int gimmick_slot, Field_GimmickSnapshot* output_snapshot);
 int Field_SetGimmickOrientation(int index, int material);
 int Field_FindInteractableGimmickAhead(int actorId);
 Actors_ActorRecord* Field_FindActorAboveGimmick(Field_GimmickInstance* support_gimmick, u_int occupancy_mode_or_first_actor);

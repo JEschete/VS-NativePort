@@ -1683,6 +1683,12 @@
     <ClInclude Include="src\Field\GimmickMotion.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\GimmickPlacementLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\GimmickPlacementLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClCompile Include="src\Field\Gimmicks.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>

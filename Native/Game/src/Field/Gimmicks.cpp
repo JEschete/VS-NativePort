@@ -1118,43 +1118,6 @@ int Field_GimmickSubtype(int gimmick_slot)
     return gimmick_record->objectInfo.subtype;
 }
 
-// decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3654)
-int Field_GimmickPlacement(int gimmick_slot, Field_GimmickSnapshot* output_snapshot)
-{
-    Field_GimmickInstance* gimmick_record;
-    int support_height_difference;
-
-    // BUG: Check performed on garbage
-    if (gimmick_record == 0) {
-        return -1;
-    }
-
-    gimmick_record = Field_gimmickInstances[gimmick_slot];
-
-    if (gimmick_record->parent != 0xFF) {
-        return -1;
-    }
-
-    if ((gimmick_record->objectInfo.isFalling)) {
-        return -1;
-    }
-
-    if (gimmick_record->mode != 0) {
-        return -1;
-    }
-
-    *(int*)&output_snapshot->placementByte0 = *(int*)&gimmick_record->tileX;
-    output_snapshot->orientation = gimmick_record->objectInfo.material;
-    support_height_difference = VS::Field::LiveSampleSupportHeightAt(gimmick_record->positionX, gimmick_record->positionY, gimmick_record->positionZ, 0, 0, 0) - gimmick_record->positionY;
-    if (support_height_difference < 0) {
-        support_height_difference += 0x7F;
-    }
-    output_snapshot->heightAboveGround = support_height_difference >> 7;
-    output_snapshot->positionXY = *(int*)&gimmick_record->positionX;
-    output_snapshot->positionZ = *(int*)&gimmick_record->positionZ;
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800A0104 (src/BATTLE/BATTLE.PRG/30DB0.c:3690)
 int Field_SetGimmickOrientation(int index, int material)
 {

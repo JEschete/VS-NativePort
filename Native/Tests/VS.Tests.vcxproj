@@ -168,6 +168,7 @@
     <ClCompile Include="src\GameFontTests.cpp" />
     <ClCompile Include="src\GameplayLoopTests.cpp" />
     <ClCompile Include="src\GimImagesTests.cpp" />
+    <ClCompile Include="src\GimmickPlacementTests.cpp" />
     <ClCompile Include="src\GimRenderTestCases.cpp" />
     <ClCompile Include="src\GimRenderTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>

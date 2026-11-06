@@ -5,6 +5,8 @@ extern "C++" {
 
 namespace VS::Event {
 bool EvaluateLiveActorRoomEventTrigger(int actor_id);
+[[nodiscard]] RoomTriggerResult EvaluateLiveRoomEventTriggers(
+    const RoomTriggerQuery& query);
 // Bounded import boundary while the legacy VM still owns the destinations.
 [[nodiscard]] RoomEventLoad LoadLiveRoomEventSections(RoomEventInput input);
 // Native VM import: prepare the entry source before committing room state;
