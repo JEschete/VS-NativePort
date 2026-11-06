@@ -1,12 +1,18 @@
+#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <random>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Memory/HeapLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Menu/TextBoxFrames.hpp"
+#include "Menu/TextBoxFramesLive.h"
 
 extern "C" {
 #include "Event/ScriptVm.h"
@@ -46,23 +52,23 @@ class FrameQueue final : public VS::Render::PacketQueue {
 using Triangle = std::array<std::uint8_t, 14>;
 const Triangle kTriangle = {3, 0, 3, 1, 0, 0, 255, 0, 0, 255, 0, 1, 2, 255};
 
-class OriginalFrameFixture {
+class LiveFrameFixture {
  public:
-  OriginalFrameFixture()
+  LiveFrameFixture()
       : saved_box_(Menu_textBoxes[0]),
-        saved_style_(Event_textBoxFrameStyles[0]),
         saved_table_(Menu_activeTextBoxOrderingTable),
         saved_frame_(Render_frameScratch),
         slot_(Render_frameBuf & 1),
         saved_buffer_(Render_legacyPrimitiveBuffers[slot_]),
         storage_(kPrimitiveWords) {
+    std::ranges::copy(Event_textBoxFrameStyles, saved_styles_.begin());
     Menu_activeTextBoxOrderingTable = ordering_.data();
     Render_legacyPrimitiveBuffers[slot_] = storage_.data();
   }
 
-  ~OriginalFrameFixture() {
+  ~LiveFrameFixture() {
     Menu_textBoxes[0] = saved_box_;
-    Event_textBoxFrameStyles[0] = saved_style_;
+    std::ranges::copy(saved_styles_, Event_textBoxFrameStyles);
     Menu_activeTextBoxOrderingTable = saved_table_;
     Render_frameScratch = saved_frame_;
     Render_legacyPrimitiveBuffers[slot_] = saved_buffer_;
@@ -70,9 +76,21 @@ class OriginalFrameFixture {
 
   std::vector<std::vector<std::uint32_t>> Draw(
       std::vector<std::uint8_t>& bytes, const VS::Menu::FrameRequest& request) {
+    auto* source = static_cast<std::uint8_t*>(
+        VS::Core::Memory::AllocateLiveFromHighEnd(bytes.size()));
+    REQUIRE(source != nullptr);
+    std::ranges::copy(bytes, source);
+    auto packets = DrawSource(source, request);
+    VS::Core::Memory::FreeLiveFromHighEnd(source);
+    return packets;
+  }
+
+  std::vector<std::vector<std::uint32_t>> DrawSource(
+      const std::uint8_t* source, const VS::Menu::FrameRequest& request,
+      unsigned style = 0, std::size_t capacity_words = kPrimitiveWords) {
     Menu_textBoxes[0] = {};
     auto& box = Menu_textBoxes[0];
-    box.flags.frameShape = 0;
+    box.flags.frameShape = style;
     box.flags.framePart = static_cast<unsigned>(request.part);
     box.flags.alignment = request.alignment;
     box.frameX = static_cast<std::int16_t>(request.x);
@@ -80,14 +98,16 @@ class OriginalFrameFixture {
     box.frameWidth = static_cast<std::int16_t>(request.width);
     box.frameHeight = static_cast<std::int16_t>(request.height);
     box.brightness = request.brightness;
-    Event_textBoxFrameStyles[0] = bytes.data();
+    Event_textBoxFrameStyles[style] = const_cast<std::uint8_t*>(source);
     ordering_.fill(0xFFFFFF);
-    Render_frameScratch.primitiveCursor = storage_.data();
+    auto* start = storage_.data() + kPrimitiveWords - capacity_words;
+    Render_frameScratch.primitiveCursor = start;
     Menu_DrawTextBoxFrame(0);
     std::vector<std::vector<std::uint32_t>> packets;
     const auto* end =
         static_cast<const std::uint32_t*>(Render_frameScratch.primitiveCursor);
-    for (const auto* cursor = storage_.data(); cursor < end;) {
+    REQUIRE(end <= storage_.data() + storage_.size());
+    for (const auto* cursor = start; cursor < end;) {
       const auto words = (*cursor >> 24) + 1;
       REQUIRE(words <= static_cast<std::size_t>(end - cursor));
       packets.emplace_back(cursor, cursor + words);
@@ -100,8 +120,11 @@ class OriginalFrameFixture {
  private:
   static constexpr std::size_t kPrimitiveWords =
       0x20000 / sizeof(std::uint32_t);
+  static constexpr std::size_t kArenaBytes = 4096;
+  std::array<std::byte, kArenaBytes> arena_{};
+  VS::Core::Memory::ScopedLiveGameHeap heap_{arena_};
   Menu_TextBoxState saved_box_;
-  unsigned char* saved_style_;
+  std::array<unsigned char*, 16> saved_styles_{};
   decltype(Menu_activeTextBoxOrderingTable) saved_table_;
   Render_FrameScratch saved_frame_;
   int slot_;
@@ -120,7 +143,7 @@ VS::Menu::FrameRequest RandomFrameRequest(std::mt19937& random) {
           0};
 }
 
-void CompareFramePackets(OriginalFrameFixture& original,
+void CompareFramePackets(LiveFrameFixture& original,
                          std::vector<std::uint8_t>& bytes,
                          const VS::Menu::FrameRequest& request) {
   const auto expected = original.Draw(bytes, request);
@@ -135,6 +158,36 @@ void CompareFramePackets(OriginalFrameFixture& original,
   }
   REQUIRE(actual == expected);
 }
+
+std::uint64_t HashFramePackets(
+    std::uint64_t hash,
+    const std::vector<std::vector<std::uint32_t>>& packets) {
+  constexpr std::uint64_t kPrime = 1099511628211;
+  for (const auto& packet : packets) {
+    hash = (hash ^ packet.size()) * kPrime;
+    for (const auto word : packet) {
+      hash = (hash ^ word) * kPrime;
+    }
+  }
+  return hash;
+}
+
+void BindNativeFrame(
+    const std::shared_ptr<const std::vector<std::uint8_t>>& owner) {
+  namespace event = VS::Event;
+  REQUIRE(
+      event::MountLiveScriptSource(event::ScriptRegion::kEventScript, owner));
+  const auto source =
+      event::LeaseLiveScriptSource(event::ScriptRegion::kEventScript);
+  REQUIRE(source);
+  REQUIRE(source->At(0));
+  event::LiveScriptVm().SetTextBoxFrameStyle(9, *source->At(0));
+}
+
+struct FrameVmScope {
+  FrameVmScope() { VS::Event::ResetLiveScriptRuntime(); }
+  ~FrameVmScope() { VS::Event::ResetLiveScriptRuntime(); }
+};
 
 }  // namespace
 
@@ -269,9 +322,10 @@ TEST_CASE("Text box frame parts cannot borrow vertices from another part",
 
 TEST_CASE("Text box frame packets match the original valid renderer",
           "[text-box-frame]") {
-  OriginalFrameFixture original;
+  LiveFrameFixture original;
   std::seed_seq seed{315};
   std::mt19937 random(seed);
+  std::uint64_t original_hash = 14695981039346656037ULL;
   for (int sample = 0; sample < 100; ++sample) {
     for (std::uint8_t alignment = 0; alignment < 4; ++alignment) {
       for (std::size_t part = 0; part < 3; ++part) {
@@ -286,7 +340,57 @@ TEST_CASE("Text box frame packets match the original valid renderer",
         request.alignment = alignment;
         request.part = part;
         CompareFramePackets(original, bytes, request);
+        original_hash =
+            HashFramePackets(original_hash, original.Draw(bytes, request));
       }
     }
   }
+  CHECK(original_hash == 0x9C1CB765277A2800ULL);
+}
+
+TEST_CASE("Live text box frames refuse untracked style bytes",
+          "[text-box-frame]") {
+  LiveFrameFixture frame;
+  CHECK(frame.DrawSource(kTriangle.data(), {}).empty());
+  Menu_DrawTextBoxFrame(-1);
+  Menu_DrawTextBoxFrame(8);
+  CHECK(frame.DrawSource(nullptr, {}).empty());
+}
+
+TEST_CASE("Live text box frames bound every primitive write",
+          "[text-box-frame]") {
+  LiveFrameFixture frame;
+  std::vector<std::uint8_t> bytes(kTriangle.begin(), kTriangle.end());
+  auto* source = static_cast<std::uint8_t*>(
+      VS::Core::Memory::AllocateLiveFromHighEnd(bytes.size()));
+  REQUIRE(source != nullptr);
+  std::ranges::copy(bytes, source);
+  for (std::size_t capacity = 0; capacity < 40; ++capacity) {
+    const auto packets = frame.DrawSource(source, {}, 0, capacity);
+    std::size_t emitted_words = 0;
+    for (const auto& packet : packets) {
+      emitted_words += packet.size();
+    }
+    CHECK(emitted_words <= capacity);
+  }
+  VS::Core::Memory::FreeLiveFromHighEnd(source);
+}
+
+TEST_CASE("Live text box frames consume retained native VM leases",
+          "[text-box-frame][event-vm-live]") {
+  namespace event = VS::Event;
+  FrameVmScope vm;
+  LiveFrameFixture frame;
+  const auto owner = std::make_shared<const std::vector<std::uint8_t>>(
+      kTriangle.begin(), kTriangle.end());
+  BindNativeFrame(owner);
+  const auto original = frame.DrawSource(nullptr, {}, 9);
+  REQUIRE_FALSE(original.empty());
+  const auto replacement =
+      std::make_shared<const std::vector<std::uint8_t>>(4, 0);
+  REQUIRE(event::MountLiveScriptSource(event::ScriptRegion::kEventScript,
+                                       replacement));
+  CHECK(frame.DrawSource(nullptr, {}, 9) == original);
+  BindNativeFrame(replacement);
+  CHECK(frame.DrawSource(nullptr, {}, 9).empty());
 }

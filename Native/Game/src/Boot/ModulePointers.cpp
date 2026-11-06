@@ -186,6 +186,7 @@ extern "C" {
 #include "Menu/Magic.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxFramesLive.h"
 #include "ModelLoading.h"
 #include "Movie/Intro.h"
 #include "OverlayWorkspaceLiveState.h"

@@ -2163,6 +2163,12 @@
     <ClCompile Include="src\Menu\TextBoxFrames.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxFramesLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\TextBoxFramesLive.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
     <ClCompile Include="src\Save\FileMenu.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>

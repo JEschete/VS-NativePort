@@ -4710,15 +4710,6 @@
 [
 "    AddPrims(((u_char*)(Render_frameScratch.orderingTable)) - 24, Menu_activeTextBoxOrderingTable, Menu_activeTextBoxOrderingTable + 33);"
 ]
-],
-[
-657,
-[
-"    prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"    prim = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
 ]
 ],
 "Native\\Game\\src\\Title\\NewGame.cpp": [

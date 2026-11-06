@@ -9,6 +9,36 @@ verification of the current worktree.
 
 ### Text-box frame safety (#315)
 
+- F01416 is now an owned, strict-compiled production entry point. Its live
+  binding prefers retained native VM leases and bounds compatibility styles to
+  known module symbols or game-heap allocations. Invalid indices, unknown source
+  storage, malformed geometry and exhausted primitive buffers refuse safely;
+  allocation failure is caught at the C boundary. Every packet goes through the
+  existing bounded queue; the scratch-point and direct-packet writes are gone.
+- On `81bd2cdc` plus the live binding/caller/generator/test changes, the focused
+  selection passes 11 cases / 33,210 assertions. The independent original-renderer
+  fingerprint is `9c1cb765277a2800`, captured before replacing the generated body.
+  Both full suites pass 4,598 cases / 7,939,000 assertions with all previous names
+  retained, no failures/skips, and both canonical replays unchanged. Full builds,
+  scoped quality/clang-tidy and all 190 encounter-copier controls pass. Repeat
+  copying/generation preserves nine scoped source/manifest/project hashes.
+- Actual New Game captures in Debug and Release show the opening speech frame.
+  With existing local saves, use `1200:Up` before `1300:Circle`; confirming without
+  Up enters Continue and is not dialogue evidence. The verified runner command is
+  `tools\test\run_native.ps1 -NoCopy -SkipIntro -Config <Debug|Release> -Frames 6800
+  -Press '1200:Up,1300:Circle,5000:Circle,5200:Circle' -At '4800,5400,6500' -Speed 8
+  -Cap build\owner-checkpoint\text-box-frame-new-game-<debug|release>`.
+  Both runs exit 0 and produce all captures; the retained Debug log contains no
+  frame refusal or crash. Evidence: `VR-TEXT-BOX-FRAME-LIVE`,
+  `build\owner-checkpoint\text-box-frame-live-*-regression.log`, and the two
+  `text-box-frame-new-game-*` capture directories. No original-game visual-parity
+  or physical-controller claim is added.
+- Limits: the compatibility source fallback knows allocation/module capacity,
+  not every imported section's logical extent. Production VM loading/dispatch is
+  still generated, and the original C entry/module binding remains. Exact native
+  producer adoption and remaining UI/dialog/vibration lifetimes stay under #313;
+  #315 and #276 remain open. F01416 is `cpp=wip`, not promoted or retired. Baselines
+  are unchanged. The component-only checkpoint below is historical.
 - The bounded `Menu::DecodeTextBoxFrame` and `DrawTextBoxFrame` component now
   owns decoded geometry, validates all parts/faces before drawing, refuses
   backward outline resumes and uses `Render::PacketQueue` for every packet.
@@ -24,8 +54,8 @@ verification of the current worktree.
   previous tests and both canonical gameplay replays with zero regressions.
   Evidence: `VR-TEXT-BOX-FRAME-CORE` and
   `build\owner-checkpoint\text-box-frame-release-regression.log`.
-- This component is not a production caller yet. The generated frame renderer
-  remains unchanged so its original output can be compared directly. Production
+- At published prerequisite `81bd2cdc`, this component was not a production caller.
+  The generated frame renderer remained unchanged for direct comparison. Production
   adoption must supply exact owner-backed style bytes, including default module
   styles, preserve retained UI lifetimes, and migrate the caller through ownership
   registration or the copier. #315, #313 and #276 remain open; no promotion or

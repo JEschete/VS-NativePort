@@ -1668,6 +1668,9 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Menu\TextBoxFrames.cpp" />
+    <ClCompile Include="src\Menu\TextBoxFramesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Save\FileMenu.cpp" />
     <ClCompile Include="src\Save\FileMenuLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2055,6 +2058,7 @@
     <ClInclude Include="src\Menu\Status\ActorStatus.h" />
     <ClInclude Include="src\Menu\Status\EquipmentDetails.h" />
     <ClInclude Include="src\Menu\TextBox.h" />
+    <ClInclude Include="src\Menu\TextBoxFramesLive.h" />
     <ClInclude Include="src\State\Ashley.h" />
     <ClInclude Include="src\State\Location.h" />
     <ClInclude Include="src\State\PlayTime.h" />

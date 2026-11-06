@@ -4,6 +4,10 @@ extern "C" {
 #include <string.h>
 
 extern "C++" {
+#include <array>
+#include <cstddef>
+
+#include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -27,6 +31,7 @@ extern "C++" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxFramesLive.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -102,6 +107,22 @@ int Tests_CompactTextAndGaugeLinks(void) {
   return passed;
 }
 
+static bool DrawTrackedFrameFixture(int index, const void* shape,
+                                    std::size_t shape_bytes) {
+  constexpr std::size_t kFrameArenaBytes = 4096;
+  std::array<std::byte, kFrameArenaBytes> frame_arena{};
+  VS::Core::Memory::ScopedLiveGameHeap frame_heap(frame_arena);
+  void* const source = VS::Core::Memory::AllocateLiveFromHighEnd(shape_bytes);
+  if (source == nullptr) {
+    return false;
+  }
+  memcpy(source, shape, shape_bytes);
+  Event_textBoxFrameStyles[0] = static_cast<u_char*>(source);
+  Menu_DrawTextBoxFrame(index);
+  VS::Core::Memory::FreeLiveFromHighEnd(source);
+  return true;
+}
+
 int Tests_ScaledDialogueGlyphs(void) {
   unsigned char* memory = (unsigned char*)(malloc(0x20010));
   if (memory == nullptr) return 0;
@@ -172,7 +193,6 @@ int Tests_ScaledDialogueGlyphs(void) {
            Render_frameScratch.primitiveCursor ==
                memory + 8 + 3 * 6 * sizeof(u_long);
   unsigned shape[] = {0x01040004, 0x00FF0000, 0xFFFFFF00, 0x03020100};
-  Event_textBoxFrameStyles[0] = reinterpret_cast<u_char*>(shape);
   memset(&Menu_textBoxes[2], 0, sizeof Menu_textBoxes[2]);
   Menu_textBoxes[2].frameX = 10;
   Menu_textBoxes[2].frameY = 20;
@@ -181,7 +201,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   Menu_textBoxes[2].brightness = 128;
   Render_frameScratch.primitiveCursor = memory + 8;
   ClearOTag(ordering, 34);
-  Menu_DrawTextBoxFrame(2);
+  passed = DrawTrackedFrameFixture(2, shape, sizeof shape) && passed;
   passed = passed && (ordering[9] >> 24) == 0 && (ordering[10] >> 24) == 0 &&
            nextPrim(&ordering[9]) != nullptr &&
            nextPrim(&ordering[10]) != nullptr &&

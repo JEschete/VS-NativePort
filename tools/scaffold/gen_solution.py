@@ -261,6 +261,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\FilesLive.cpp",
                 r"src\Menu\OptionsLive.cpp",
                 r"src\Menu\RenameLive.cpp",
+                r"src\Menu\TextBoxFramesLive.cpp",
                 r"src\Menu\Framework\ItemRowsLive.cpp",
                 r"src\Menu\Framework\EquipmentDetailsLive.cpp",
                 r"src\Menu\Framework\ActorPreviewLive.cpp",

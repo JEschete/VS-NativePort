@@ -35,6 +35,5 @@ int Menu_DismissTextBox(int id);
 void Menu_DrawInformationBoxHeader(int header_y, u_int header_kind);
 void Menu_DrawInformationBoxBackdrop(int id);
 int Menu_FlipTextBoxShapePoint(int packed_shape_point, int flip_axes);
-void Menu_DrawTextBoxFrame(int index);
 
 #endif // VS_MENU_TEXTBOX_H_DECLS
