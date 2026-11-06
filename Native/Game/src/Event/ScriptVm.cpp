@@ -203,8 +203,8 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_CommandTweenCameraRoll, Event_CommandTweenCameraRoll, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_CommandScreenTransform,
     Event_CommandScreenTransform, Event_CommandSetCameraOriginActor, Event_CommandRestoreFieldCamera, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake,
     Event_CommandCameraLensOrShake, Event_CommandScreenTransform, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake, Event_ScriptYieldFrameOpcode,
-    Event_CommandSetTickSpeedOpcode, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContext,
-    Event_CommandStartScriptContext, Event_CommandStopScriptContext, Event_CommandLoadNextEvent, Event_ScriptReportInvalidOpcode,
+    Event_CommandSetTickSpeedOpcode, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContextOpcode,
+    Event_CommandStartScriptContextOpcode, Event_CommandStopScriptContextOpcode, Event_CommandLoadNextEvent, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_CommandFinishEvent, Event_CommandFinishEvent };
 
@@ -686,27 +686,6 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
     }
     return 0;
 }
-
-// decomp: BATTLE.PRG func_800BB504 (src/BATTLE/BATTLE.PRG/4A0A8.c:2827)
-intptr_t Event_CommandWaitScriptContext(u_char* instruction, short thread_index)
-{
-    u_short target_thread_index = instruction[1] & 3;
-    if ((instruction[1] & 0x80)) {
-        Event_threadCursors[target_thread_index] = 0;
-        return 0;
-    }
-    return Event_threadCursors[target_thread_index] != 0;
-}
-
-// decomp: BATTLE.PRG func_800BB554 (src/BATTLE/BATTLE.PRG/4A0A8.c:2837)
-intptr_t Event_CommandStartScriptContext(u_char* instruction, short thread_index)
-{
-    Event_threadCursors[instruction[1]] = instruction + 4;
-    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
-}
-
-// decomp: BATTLE.PRG func_800BB5A4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2843)
-intptr_t Event_CommandStopScriptContext(u_char* instruction, short thread_index) { return 3; }
 
 // decomp: BATTLE.PRG func_800BB5AC (src/BATTLE/BATTLE.PRG/4A0A8.c:2845)
 intptr_t Event_CommandLoadNextEvent(u_char* instruction, short thread_index)

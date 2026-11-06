@@ -2021,6 +2021,9 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01029", 0x800B66EC, "ScriptYieldFrame"),
     ("F01199", 0x800BB474, "CommandWaitFrames"),
     ("F01200", 0x800BB4CC, "CommandSetTickSpeed"),
+    ("F01202", 0x800BB504, "CommandWaitScriptContext"),
+    ("F01203", 0x800BB554, "CommandStartScriptContext"),
+    ("F01204", 0x800BB5A4, "CommandStopScriptContext"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"

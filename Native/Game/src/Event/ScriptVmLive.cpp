@@ -111,9 +111,12 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_CommandSpecialOperation, CommandSpecialOperation},
     ControlBinding{Event_CommandWaitFramesOpcode, CommandWaitFrames},
     ControlBinding{Event_CommandSetTickSpeedOpcode, CommandSetTickSpeed},
-    ControlBinding{Event_CommandWaitScriptContext, CommandWaitScriptContext},
-    ControlBinding{Event_CommandStartScriptContext, CommandStartScriptContext},
-    ControlBinding{Event_CommandStopScriptContext, CommandStopScriptContext},
+    ControlBinding{Event_CommandWaitScriptContextOpcode,
+                   CommandWaitScriptContext},
+    ControlBinding{Event_CommandStartScriptContextOpcode,
+                   CommandStartScriptContext},
+    ControlBinding{Event_CommandStopScriptContextOpcode,
+                   CommandStopScriptContext},
     ControlBinding{Event_CommandLoadNextEvent, CommandLoadNextEvent},
     ControlBinding{Event_CommandFinishEvent, CommandFinishEvent},
 };
@@ -963,4 +966,25 @@ std::intptr_t Event_CommandSetTickSpeedOpcode(std::uint8_t* instruction,
                                               std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandSetTickSpeed);
+}
+
+// decomp: BATTLE.PRG func_800BB504 (4A0A8.c:2827).
+std::intptr_t Event_CommandWaitScriptContextOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandWaitScriptContext);
+}
+
+// decomp: BATTLE.PRG func_800BB554 (4A0A8.c:2837).
+std::intptr_t Event_CommandStartScriptContextOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandStartScriptContext);
+}
+
+// decomp: BATTLE.PRG func_800BB5A4 (4A0A8.c:2843).
+std::intptr_t Event_CommandStopScriptContextOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandStopScriptContext);
 }

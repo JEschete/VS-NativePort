@@ -1303,6 +1303,7 @@ ScriptFlow CommandSetTickSpeed(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG func_800BB504 (4A0A8.c:2827).
 ScriptFlow CommandWaitScriptContext(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -1317,6 +1318,7 @@ ScriptFlow CommandWaitScriptContext(const ScriptInstruction& instruction,
   return host.ThreadCursor(thread).Present() ? Hold() : Advance();
 }
 
+// decomp: BATTLE.PRG func_800BB554 (4A0A8.c:2837).
 ScriptFlow CommandStartScriptContext(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {
@@ -1338,9 +1340,10 @@ ScriptFlow CommandStartScriptContext(const ScriptInstruction& instruction,
   return ScriptFlow::JumpBy(OperandHalf(command, kSecondOperand));
 }
 
+// decomp: BATTLE.PRG func_800BB5A4 (4A0A8.c:2843), returns 3.
 ScriptFlow CommandStopScriptContext(const ScriptInstruction& /*instruction*/,
                                     ScriptVmHost& /*host*/) {
-  return ScriptFlow::Of(ScriptFlowKind::kStop);
+  return {.kind = ScriptFlowKind::kStop};
 }
 
 ScriptFlow CommandLoadNextEvent(const ScriptInstruction& instruction,

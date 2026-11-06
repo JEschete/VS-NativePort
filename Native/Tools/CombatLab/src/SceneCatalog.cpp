@@ -21,6 +21,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptField.h"
 #include "Event/ScriptVm.h"
 }
@@ -87,13 +88,13 @@ SceneOpcodes ProductionOpcodes() {
     } else if (handler == Event_ScriptLoopBackward) {
       opcode.flow = SceneFlow::kLoop;
       opcode.branch_operand = 2;
-    } else if (handler == Event_CommandStartScriptContext) {
+    } else if (handler == Event_CommandStartScriptContextOpcode) {
       opcode.flow = SceneFlow::kThread;
       opcode.branch_operand = 2;
     } else if (handler == Event_ScriptReturnToSavedAddress) {
       opcode.flow = SceneFlow::kReturn;
     } else if (handler == Event_CommandFinishEvent ||
-               handler == Event_CommandStopScriptContext) {
+               handler == Event_CommandStopScriptContextOpcode) {
       opcode.flow = SceneFlow::kFinish;
     } else if (handler == Event_CommandSpecialOperation) {
       opcode.flow = SceneFlow::kSpecial;

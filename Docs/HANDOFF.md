@@ -7,6 +7,31 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Context Control Slots (#276 Row 33)
+
+- F01202/F01203/F01204 register strict native wait/start/stop context cores.
+  Guarded module bindings preserve low-two-bit selection/release bit `0x80`,
+  embedded context start at instruction+4, signed caller skip and stop status 3.
+  Original C bodies/names/prototypes and consumers are gone. Combat Lab parser,
+  weapon dispatch and the legacy branch test now use native identities; the branch
+  test keeps relative positions with native generations rather than raw pointers.
+- Normal/skip/direct/guarded child scheduling and all 256 release-selector bytes
+  pass; exact caller/child cursor generations are checked. Seven control cases
+  pass 13,738 assertions. Size helpers preserve all checks. Stop uses a direct
+  typed constant value, not a factory forwarder counted as a native core.
+- On `b33cc082` plus this slice, complete Debug/Release builds and regressions pass
+  4,648 cases / 8,158,855 assertions and both unchanged canonical replays. Two new
+  cases, six binding checks and three source-fixture assertions add 3,169; no
+  baseline changes. Broad quality/tidy has zero new findings; 190 copier/nine
+  extent controls and Python syntax pass. Repeat copying preserves all tracked
+  Native/project/manifest bytes; old context names have no Native reference.
+  Evidence: `VR-EVENT-CONTROL-CONTEXTS` and
+  `build\owner-checkpoint\native-control-contexts-*-regression.log`.
+  Only these three cores are reviewed; required table ABI and remaining controls
+  remain debt. Wait/tick predecessor `b33cc082` is green on exact CI `42302771043`.
+  Unmodified gates derive 2,650 promoted / four compatibility `wip`; row 33 is
+  now 18/57. Required module-table ABI is still explicitly tracked debt.
+
 ### Native Wait/Tick Control Slots (#276 Row 33)
 
 - F01199/F01200 now register strict native frame-wait/tick cores with guarded

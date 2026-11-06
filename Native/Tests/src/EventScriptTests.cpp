@@ -812,7 +812,7 @@ int Tests_EventScriptNativeBranches(int skip) {
   skipCopy[2] = Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
       Event_ScriptYieldFrameOpcode;
   skipCopy[3] = Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =
-      Event_CommandStopScriptContext;
+      Event_CommandStopScriptContextOpcode;
   Event_legacySkipHandlerCopy = skipCopy;
   Event_skipState = skip ? 2 : 0;
   host.SetSubroutineReturn({script.region, 8, script.generation});
@@ -836,11 +836,17 @@ int Tests_EventScriptNativeBranches(int skip) {
 }
 
 int Tests_EventScriptBranchHandlers(void) {
+  const VS::test_support::LiveScriptRuntimeScope runtime;
   char savedFlag = Event_cachedFlagValue;
-  u_char* savedThread = Event_threadCursors[2];
+  const char saved_skip = Event_skipState;
+  std::array<TestOpcodeHandler, 2> saved_handlers{};
+  std::array<u_char, 2> saved_sizes{};
+  std::copy_n(Event_kOpcodeHandlers + 0xE0, saved_handlers.size(),
+              saved_handlers.begin());
+  std::copy_n(Event_kOpcodeSizes + 0xE0, saved_sizes.size(),
+              saved_sizes.begin());
   u_char conditional[] = {0, 7, 4, 0, 0};
   u_char backward[] = {0, 0, 0, 0, 0, 0xFF, 4, 0};
-  u_char context[] = {0, 2, 5, 0, 0, 0};
   int passed;
   Event_cachedFlagValue = 7;
   passed = Event_ScriptBranchOnCachedFlag(conditional, 1) ==
@@ -848,10 +854,24 @@ int Tests_EventScriptBranchHandlers(void) {
   Event_cachedFlagValue = 6;
   passed &= Event_ScriptBranchOnCachedFlag(conditional, 1) == 0;
   passed &= Event_ScriptLoopBackward(&backward[4], 1) == (intptr_t)backward;
-  passed &=
-      Event_CommandStartScriptContext(context, 1) == (intptr_t)&context[5];
-  passed &= Event_threadCursors[2] == &context[4];
-  Event_threadCursors[2] = savedThread;
+  const auto context =
+      VS::test_support::MountLiveEventScript({0xE0, 2, 5, 0, 0xF0, 0xE1, 2});
+  auto& host = VS::Event::LiveScriptVm();
+  Event_skipState = 0;
+  Event_kOpcodeHandlers[0xE0] = Event_CommandStartScriptContextOpcode;
+  Event_kOpcodeHandlers[0xE1] = Event_CommandWaitScriptContextOpcode;
+  Event_kOpcodeSizes[0xE0] = 4;
+  Event_kOpcodeSizes[0xE1] = 2;
+  host.SetThreadCursor(1, context);
+  passed &= !VS::Event::ExecuteLiveScriptThread(1) &&
+            host.ThreadCursor(1) == VS::Event::ScriptLocation{
+                                        context.region, 5, context.generation};
+  passed &= host.ThreadCursor(2) ==
+            VS::Event::ScriptLocation{context.region, 4, context.generation};
+  std::copy(saved_handlers.begin(), saved_handlers.end(),
+            Event_kOpcodeHandlers + 0xE0);
+  std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes + 0xE0);
+  Event_skipState = saved_skip;
   Event_cachedFlagValue = savedFlag;
   return passed;
 }

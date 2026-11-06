@@ -435,6 +435,65 @@ std::intptr_t TickSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
   return Event_CommandSetTickSpeedOpcode(instruction, thread);
 }
 
+std::intptr_t StartContextSlotBridge(std::uint8_t* instruction,
+                                     std::int16_t thread) {
+  return Event_CommandStartScriptContextOpcode(instruction, thread);
+}
+
+std::intptr_t WaitContextSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_CommandWaitScriptContextOpcode(instruction, thread);
+}
+
+std::intptr_t StopContextSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_CommandStopScriptContextOpcode(instruction, thread);
+}
+
+event::ScriptLocation PrepareContextScenario(int skip, bool guarded) {
+  const auto start =
+      MountScript({0xE4, 3, 8, 0, 0xE2, 2, 0xE6, 0xE6, 0xE5, 3, 0xE3, 4, 0xE6});
+  Event_skipState = static_cast<char>(skip);
+  State_tickSpeed = 2;
+  Event_kSkipOpcodeHandlers[0xE4] = Event_kOpcodeHandlers[0xE4] =
+      guarded ? StartContextSlotBridge : Event_CommandStartScriptContextOpcode;
+  Event_kSkipOpcodeHandlers[0xE5] = Event_kOpcodeHandlers[0xE5] =
+      guarded ? WaitContextSlotBridge : Event_CommandWaitScriptContextOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      guarded ? StopContextSlotBridge : Event_CommandStopScriptContextOpcode;
+  Event_kSkipOpcodeHandlers[0xE2] = Event_kOpcodeHandlers[0xE2] =
+      Event_CommandWaitFramesOpcode;
+  Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
+      Event_CommandSetTickSpeedOpcode;
+  Event_kOpcodeSizes[0xE4] = 4;
+  Event_kOpcodeSizes[0xE5] = Event_kOpcodeSizes[0xE2] =
+      Event_kOpcodeSizes[0xE3] = 2;
+  auto& host = event::LiveScriptVm();
+  host.SetWaitFrames(3, 0);
+  host.SetThreadCursor(0, start);
+  return start;
+}
+
+event::ScriptLocation PrepareContextRelease(int operand, bool guarded) {
+  const auto start =
+      MountScript({0xE5, static_cast<std::uint8_t>(operand), 0xE6, 0xE6});
+  Event_kOpcodeHandlers[0xE5] =
+      guarded ? WaitContextSlotBridge : Event_CommandWaitScriptContextOpcode;
+  Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE5] = 2;
+  auto& host = event::LiveScriptVm();
+  const event::ScriptLocation target{start.region, 3, start.generation};
+  for (int thread = 0; thread < event::kScriptThreadCount; ++thread) {
+    host.SetThreadCursor(thread, target);
+  }
+  host.SetThreadCursor(0, start);
+  return start;
+}
+
+void CheckThreadCursorMatches(int thread, event::ScriptLocation expected) {
+  CHECK(event::LiveScriptVm().ThreadCursor(thread) == expected);
+}
+
 struct WaitScenario {
   int skip;
   int thread;
@@ -475,7 +534,7 @@ void CheckWaitScenario(WaitScenario scenario) {
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
       scenario.guarded ? TickSlotBridge : Event_CommandSetTickSpeedOpcode;
   Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
-      Event_CommandStopScriptContext;
+      Event_CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE2] = Event_kOpcodeSizes[0xE3] = 2;
   auto& host = event::LiveScriptVm();
   host.SetWaitFrames(scenario.thread, 0);
@@ -724,6 +783,15 @@ TEST_CASE("Native control opcode entries resolve to owned table bindings",
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB4CC) ==
       reinterpret_cast<void*>(&Event_CommandSetTickSpeedOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB504) ==
+      reinterpret_cast<void*>(&Event_CommandWaitScriptContextOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB554) ==
+      reinterpret_cast<void*>(&Event_CommandStartScriptContextOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB5A4) ==
+      reinterpret_cast<void*>(&Event_CommandStopScriptContextOpcode));
 }
 
 TEST_CASE("Native control bindings preserve normal and skip yield behavior",
@@ -738,7 +806,7 @@ TEST_CASE("Native control bindings preserve normal and skip yield behavior",
       Event_kSkipOpcodeHandlers[0xE1] = Event_kOpcodeHandlers[0xE1] =
           guarded ? YieldSlotBridge : Event_ScriptYieldFrameOpcode;
       Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
-          Event_CommandStopScriptContext;
+          Event_CommandStopScriptContextOpcode;
       auto& host = event::LiveScriptVm();
       host.SetThreadCursor(0, start);
       CHECK_FALSE(event::ExecuteLiveScriptThread(0));
@@ -760,6 +828,9 @@ TEST_CASE("Native control opcode bindings refuse detached command borrows",
   CHECK(Event_ScriptYieldFrameOpcode(command.data(), 0) == expected);
   CHECK(Event_CommandWaitFramesOpcode(command.data(), 0) == expected);
   CHECK(Event_CommandSetTickSpeedOpcode(command.data(), 0) == expected);
+  CHECK(Event_CommandWaitScriptContextOpcode(command.data(), 0) == expected);
+  CHECK(Event_CommandStartScriptContextOpcode(command.data(), 0) == expected);
+  CHECK(Event_CommandStopScriptContextOpcode(command.data(), 0) == expected);
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",
@@ -785,13 +856,54 @@ TEST_CASE("Native tick binding preserves the existing byte selector policy",
       State_tickSpeed = 2;
       Event_kOpcodeHandlers[0xE3] =
           guarded ? TickSlotBridge : Event_CommandSetTickSpeedOpcode;
-      Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContext;
+      Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContextOpcode;
       Event_kOpcodeSizes[0xE3] = 2;
       auto& host = event::LiveScriptVm();
       host.SetThreadCursor(0, start);
       CHECK_FALSE(event::ExecuteLiveScriptThread(0));
       CHECK_FALSE(host.ThreadCursor(0).Present());
       CHECK(State_tickSpeed == (operand == 4 ? 4 : 2));
+    }
+  }
+}
+
+TEST_CASE("Native context bindings preserve embedded child scheduling",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      const LiveVmFixture fixture;
+      const auto start = PrepareContextScenario(skip, guarded);
+      const event::ScriptLocation caller{start.region, 8, start.generation};
+      const event::ScriptLocation child{start.region, 4, start.generation};
+      CheckWaitDispatch(0);
+      CheckThreadCursorMatches(0, caller);
+      CheckThreadCursorMatches(3, child);
+      for (const int remaining : {2, 1, 0}) {
+        CheckWaitDispatch(3);
+        CheckWaitDispatch(0);
+        CheckWaitSnapshot(child, 3, remaining, remaining != 0);
+        CheckThreadCursorMatches(
+            0, remaining != 0 ? caller : event::ScriptLocation{});
+      }
+    }
+  }
+}
+
+TEST_CASE("Native context wait bindings preserve all encoded release selectors",
+          "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    for (int operand = 0; operand < 256; ++operand) {
+      const LiveVmFixture fixture;
+      const auto start = PrepareContextRelease(operand, guarded);
+      const event::ScriptLocation target{start.region, 3, start.generation};
+      CheckWaitDispatch(0);
+      const bool released = (operand & 0x80) != 0;
+      CheckThreadCursorMatches(0, released ? event::ScriptLocation{} : start);
+      for (int thread = 1; thread < event::kScriptThreadCount; ++thread) {
+        const bool cleared = released && thread == (operand & 3);
+        CheckThreadCursorMatches(thread,
+                                 cleared ? event::ScriptLocation{} : target);
+      }
     }
   }
 }
