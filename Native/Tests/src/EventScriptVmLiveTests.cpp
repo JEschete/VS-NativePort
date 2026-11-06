@@ -132,8 +132,11 @@ void InitializeFlagSample(const FlagComparison& sample) {
   }
 }
 
-bool CompareOriginalFlagOperation(const FlagComparison& sample,
-                                  int mutation = 0) {
+void AddResultDigest(std::uint64_t& digest, std::uint32_t value);
+
+bool CompareOriginalFlagOperation(
+    const FlagComparison& sample, int mutation = 0,
+    std::array<std::uint64_t, 2>* fingerprints = nullptr) {
   auto command = FlagCommand(sample);
   InitializeFlagSample(sample);
   const auto original =
@@ -150,6 +153,19 @@ bool CompareOriginalFlagOperation(const FlagComparison& sample,
                                         instruction, event::LiveScriptVm())
                                   : event::ScriptApplyImmediateFlagOperation(
                                         instruction, event::LiveScriptVm());
+  if (fingerprints != nullptr) {
+    const auto expected_value =
+        static_cast<std::uint32_t>(first) |
+        (sample.pair ? static_cast<std::uint32_t>(second) << 8 : 0);
+    const auto native_value =
+        static_cast<std::uint32_t>(VS::State::LiveScriptFlag(sample.first)) |
+        (sample.pair ? static_cast<std::uint32_t>(
+                           VS::State::LiveScriptFlag(sample.second))
+                           << 8
+                     : 0);
+    AddResultDigest((*fingerprints)[0], expected_value);
+    AddResultDigest((*fingerprints)[1], native_value);
+  }
   return original == 0 && result.kind == event::ScriptFlowKind::kAdvance &&
          VS::State::LiveScriptFlag(sample.first) == first &&
          VS::State::LiveScriptFlag(sample.second) == second;
@@ -164,6 +180,8 @@ std::uint32_t NextFlagSample(std::uint32_t& state) {
 
 void CompareFlagCorpus(bool pair) {
   FlagDifferentialFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
   std::uint32_t random = 0xF1A670;
   for (std::uint8_t operation = 0; operation < 16; ++operation) {
     for (int iteration = 0; iteration < 2048; ++iteration) {
@@ -177,9 +195,12 @@ void CompareFlagCorpus(bool pair) {
       }
       REQUIRE(CompareOriginalFlagOperation(
           {first, second, left, right,
-           static_cast<std::uint8_t>(operation << 4), pair}));
+           static_cast<std::uint8_t>(operation << 4), pair},
+          0, &fingerprints));
     }
   }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == (pair ? 0x593182F1F2B16919 : 0x41C1AFD9493A9DAF));
 }
 
 bool SameBranchResult(std::intptr_t original, event::ScriptFlow native,
@@ -231,7 +252,7 @@ void CompareFlagBranchCorpus(bool pair) {
   }
 }
 
-void AddCachedDigest(std::uint64_t& digest, std::uint32_t value) {
+void AddResultDigest(std::uint64_t& digest, std::uint32_t value) {
   for (int byte = 0; byte < 4; ++byte) {
     digest ^= static_cast<std::uint8_t>(value >> (byte * 8));
     digest *= 0x100000001B3;
@@ -274,11 +295,11 @@ bool CompareFrozenCachedBranch(
         static_cast<std::uint16_t>(native_jump ? native.displacement : 0);
     const auto native_value =
         static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag());
-    AddCachedDigest((*fingerprints)[0],
+    AddResultDigest((*fingerprints)[0],
                     expected_cache |
                         (static_cast<std::uint32_t>(expected_jump) << 8) |
                         (static_cast<std::uint32_t>(expected_offset) << 16));
-    AddCachedDigest((*fingerprints)[1],
+    AddResultDigest((*fingerprints)[1],
                     native_value |
                         (static_cast<std::uint32_t>(native_jump) << 8) |
                         (static_cast<std::uint32_t>(native_offset) << 16));
@@ -290,7 +311,8 @@ bool CompareFrozenCachedBranch(
 }
 
 bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
-                         int mutation = 0) {
+                         int mutation = 0,
+                         std::array<std::uint64_t, 2>* fingerprints = nullptr) {
   auto& host = event::LiveScriptVm();
   std::ranges::fill(Event_loopCounters, 0x55);
   for (int index = 0; index < event::kLoopCounterCount; ++index) {
@@ -326,6 +348,25 @@ bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
   const event::ScriptInstruction instruction{{command, 32}, {}, 0};
   const auto native = setting ? event::ScriptSetLoopCounter(instruction, host)
                               : event::ScriptLoopBackward(instruction, host);
+  if (fingerprints != nullptr) {
+    const auto expected_offset = static_cast<std::uint16_t>(
+        original == 0 ? 0
+                      : original - reinterpret_cast<std::intptr_t>(command));
+    const bool native_jump = native.kind == event::ScriptFlowKind::kJumpBy;
+    AddResultDigest((*fingerprints)[0],
+                    static_cast<std::uint32_t>(original != 0) |
+                        (static_cast<std::uint32_t>(expected_offset) << 16));
+    AddResultDigest((*fingerprints)[1],
+                    static_cast<std::uint32_t>(native_jump) |
+                        (static_cast<std::uint32_t>(static_cast<std::uint16_t>(
+                             native_jump ? native.displacement : 0))
+                         << 16));
+    for (int index = 0; index < event::kLoopCounterCount; ++index) {
+      AddResultDigest((*fingerprints)[0],
+                      expected[static_cast<std::size_t>(index)]);
+      AddResultDigest((*fingerprints)[1], host.LoopCounter(index));
+    }
+  }
   if (!SameBranchResult(original, native, command)) {
     return false;
   }
@@ -339,15 +380,19 @@ bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
 
 void CompareLoopCorpus(bool setting) {
   const LiveVmFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
   for (int index = 0; index <= event::kLoopCounterCount; ++index) {
     const auto counter = static_cast<std::uint8_t>(
         index == event::kLoopCounterCount ? 0xFF : index);
     for (int value = 0; value < 256; ++value) {
       CAPTURE(setting, counter, value);
       REQUIRE(CompareOriginalLoop(counter, static_cast<std::uint8_t>(value),
-                                  setting));
+                                  setting, 0, &fingerprints));
     }
   }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == (setting ? 0x79BC34873972BB25 : 0xDF9CCA1BC970DBA5));
 }
 
 struct LiveRoomFixture {

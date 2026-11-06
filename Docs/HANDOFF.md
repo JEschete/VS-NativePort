@@ -7,6 +7,24 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Loop/Arithmetic Original Oracle Preservation (#276)
+
+- Before those C handlers retire, existing safe per-case corpora capture normalized
+  FNV64 directly from actual originals: immediate arithmetic `41C1AFD9493A9DAF`,
+  pair arithmetic `593182F1F2B16919`, loop store `79BC34873972BB25`, loop back
+  `DF9CCA1BC970DBA5`. Original/native equality and frozen constants are checked.
+  Digests contain modified result flags or all 16 counters/relative flow; raw
+  addresses and unmodified immediate-operand state are excluded. Existing safe
+  divisor/index limits and mutant coverage remain; original functions still run.
+- Debug/Release focused coverage passes six cases / 74,259 assertions; full suites
+  on `447f6140` plus this test-only slice pass 4,650 / 8,159,033 and both unchanged
+  canonical replays. Eight extra digest assertions; no case/baseline/promotion/
+  retirement change. Scoped quality/tidy is clean; temporary prints are removed.
+  Evidence: `VR-EVENT-LOOP-ARITHMETIC-ORIGINAL-FREEZE` and
+  `build\owner-checkpoint\loop-arithmetic-oracle-freeze-*-regression.log`.
+  Cached predecessor `447f6140` is green on exact CI `42310971131`. Preserve these
+  original constants independently when their handlers retire.
+
 ### Native Cached Control Slots (#276 Row 33)
 
 - F01089/F01090 now register strict native cached flag/equality/jump cores with
