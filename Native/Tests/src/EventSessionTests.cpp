@@ -406,6 +406,18 @@ TEST_CASE("Native session transfer abandons the active owned VM source",
           .has_value());
 }
 
+TEST_CASE("Retired event lifecycle entries have no native module bindings",
+          "[event-vm-live][content][module][retired-entry]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  constexpr std::array<std::uint32_t, 3> kEntries{0x800BF5F0, 0x800BF850,
+                                                  0x800BFBB8};
+  for (const auto address : kEntries) {
+    CAPTURE(address);
+    CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                            address) == nullptr);
+  }
+}
+
 TEST_CASE("Retired stack capture and room code jumps have no native bindings",
           "[event][session-reset][retired-entry]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);

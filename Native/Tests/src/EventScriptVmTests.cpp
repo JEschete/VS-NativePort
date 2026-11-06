@@ -723,7 +723,8 @@ TEST_CASE("VM dispatch distinguishes hold yield stop finish and relative jumps",
     host.sizes[0] = 3;
     host.cursors[1] = At(5);
     host.dispatch = [kind](Location, int) { return Flow::Of(kind); };
-    CHECK(event::ExecuteScriptThread(1, host) == (kind == Kind::kFinish));
+    CHECK(event::ExecuteScriptThread(event::ScriptThreadId::kContext1, host) ==
+          (kind == Kind::kFinish));
     const auto expected = kind == Kind::kAdvanceAndYield ? At(8)
                           : kind == Kind::kStop          ? Location{}
                                                          : At(5);
@@ -736,7 +737,7 @@ TEST_CASE("VM dispatch distinguishes hold yield stop finish and relative jumps",
   host.dispatch = [](Location location, int) {
     return location.offset == 5 ? Flow::JumpBy(-3) : Flow::Of(Kind::kHold);
   };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(host.cursors[0] == At(2));
   CHECK(host.instructions.size() == 2);
 }
@@ -749,7 +750,7 @@ TEST_CASE("VM dispatch stops invalid jumps", "[event-vm]") {
     host.dispatch = [displacement](Location, int) {
       return Flow::JumpBy(displacement);
     };
-    CHECK_FALSE(event::ExecuteScriptThread(0, host));
+    CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
     CHECK_FALSE(host.cursors[0].Present());
     REQUIRE(host.refusals.size() == 1);
     CHECK(host.refusals[0].first == Refusal::kJumpOutsideScript);
@@ -761,7 +762,7 @@ TEST_CASE("VM dispatch stops before a truncated instruction", "[event-vm]") {
   host.regions[1].resize(3);
   host.cursors[0] = At(1);
   host.sizes[0] = 3;
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(host.instructions.empty());
   CHECK(host.refusals.back().first == Refusal::kCursorOutsideScript);
 }
@@ -772,7 +773,7 @@ TEST_CASE("VM dispatch stops on a zero-sized advancing opcode", "[event-vm]") {
   host.cursors[0] = At(1);
   host.sizes[0] = 0;
   host.dispatch = [](Location, int) { return Flow::Of(Kind::kAdvance); };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK_FALSE(host.cursors[0].Present());
   CHECK(host.refusals.back().first == Refusal::kZeroLengthOpcode);
 }
@@ -789,7 +790,7 @@ TEST_CASE("VM dispatch refuses an in-region self-jump at the exact budget",
     }
     return Flow::JumpBy(0);
   };
-  CHECK_NOTHROW(event::ExecuteScriptThread(0, host));
+  CHECK_NOTHROW(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(steps == event::kScriptDispatchBudget);
   CHECK_FALSE(host.cursors[0].Present());
   CHECK(host.refusals ==
@@ -834,7 +835,8 @@ TEST_CASE("VM permits all terminal flows on the last budgeted instruction",
       return ++steps == event::kScriptDispatchBudget ? Flow::Of(terminal)
                                                      : Flow::JumpBy(0);
     };
-    CHECK(event::ExecuteScriptThread(0, host) == (terminal == Kind::kFinish));
+    CHECK(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host) ==
+          (terminal == Kind::kFinish));
     CHECK(steps == event::kScriptDispatchBudget);
     const Location expected = terminal == Kind::kStop              ? Location{}
                               : terminal == Kind::kAdvanceAndYield ? At(1)
@@ -857,7 +859,8 @@ TEST_CASE("VM dispatch budgets renew independently for each thread and frame",
   };
   for (std::size_t frame = 1; frame <= 2; ++frame) {
     for (int thread : {0, 3}) {
-      CHECK_FALSE(event::ExecuteScriptThread(thread, host));
+      CHECK_FALSE(event::ExecuteScriptThread(
+          static_cast<event::ScriptThreadId>(thread), host));
       CHECK(steps.at(thread) == frame * event::kScriptDispatchBudget);
       CHECK(host.cursors.at(thread) == At(0));
     }
@@ -880,7 +883,7 @@ TEST_CASE("VM cross-region jumps cannot renew a thread dispatch budget",
                                   ? Region::kDoorEvents
                                   : Region::kEventScript));
   };
-  CHECK_NOTHROW(event::ExecuteScriptThread(0, host));
+  CHECK_NOTHROW(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(steps == event::kScriptDispatchBudget);
   CHECK_FALSE(host.cursors[0].Present());
   CHECK(host.refusals ==
@@ -967,7 +970,7 @@ void SkipMainThread(RecordingHost& host) {
   host.text_waits.fill(true);
   host.actors[0] = host.actors[16] = true;
   host.dispatch = [](Location, int) { return Flow::Of(Kind::kHold); };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
 }
 }  // namespace
 
@@ -1610,7 +1613,7 @@ TEST_CASE("VM refuses a cursor after its region is replaced in place",
   ++host.generations[1];
   REQUIRE(host.regions[1].data() == original_address);
   host.dispatch = [](Location, int) { return Flow::Of(Kind::kStop); };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(host.instructions.empty());
   CHECK(host.region_reads.empty());
   CHECK(host.refusals ==
@@ -1660,7 +1663,7 @@ TEST_CASE("VM relative jumps and yields retain a full-width generation",
     return location.offset == 0 ? Flow::JumpBy(2)
                                 : Flow::Of(Kind::kAdvanceAndYield);
   };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(host.cursors[0] == At(3, Region::kEventScript, 0x100000001));
   CHECK(host.instructions ==
         std::vector<std::pair<Location, int>>{
@@ -1676,7 +1679,7 @@ TEST_CASE("VM generation checks do not discard the upper 32 bits",
   host.generations[1] = 0x100000001;
   host.cursors[0] = At(0, Region::kEventScript, 1);
   host.dispatch = [](Location, int) { return Flow::Of(Kind::kStop); };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(host.instructions.empty());
   CHECK(host.region_reads.empty());
   REQUIRE(host.refusals.size() == 1);
@@ -1693,7 +1696,7 @@ TEST_CASE("VM explicit jumps refuse stale destination generations",
   host.dispatch = [](Location, int) {
     return Flow::JumpTo(At(0, Region::kDoorEvents, 1));
   };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   REQUIRE(host.instructions.size() == 1);
   CHECK(host.region_reads == std::vector{Region::kEventScript});
   CHECK(host.refusals ==
@@ -1752,7 +1755,7 @@ TEST_CASE("VM source replacement during dispatch cannot retain the old cursor",
     ++host.generations[1];
     return Flow::Of(Kind::kHold);
   };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   REQUIRE(host.instructions.size() == 1);
   CHECK_FALSE(host.cursors[0].Present());
   CHECK(host.refusals ==
@@ -1771,7 +1774,7 @@ TEST_CASE("VM dispatch can explicitly jump to a freshly mounted source",
     }
     return Flow::Of(Kind::kStop);
   };
-  CHECK_FALSE(event::ExecuteScriptThread(0, host));
+  CHECK_FALSE(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   CHECK(host.instructions ==
         std::vector<std::pair<Location, int>>{
             {At(0), 0}, {At(0, Region::kEventScript, 1), 0}});
@@ -1787,9 +1790,24 @@ TEST_CASE("VM completion does not reuse a source released by its final opcode",
     ++host.generations[1];
     return Flow::Of(Kind::kFinish);
   };
-  CHECK(event::ExecuteScriptThread(0, host));
+  CHECK(event::ExecuteScriptThread(event::ScriptThreadId::kMain, host));
   REQUIRE(host.instructions.size() == 1);
   CHECK(host.refusals.empty());
+}
+
+TEST_CASE("VM typed thread ids refuse invalid values before reading sources",
+          "[event-vm]") {
+  for (const int thread :
+       {-1, event::kScriptThreadCount, std::numeric_limits<int>::min(),
+        std::numeric_limits<int>::max()}) {
+    RecordingHost host;
+    CHECK(event::ExecuteScriptThread(static_cast<event::ScriptThreadId>(thread),
+                                     host));
+    CHECK(host.instructions.empty());
+    CHECK(host.region_reads.empty());
+    CHECK(host.refusals ==
+          std::vector{std::pair{Refusal::kScriptThread, thread}});
+  }
 }
 
 TEST_CASE("VM playback starts each script from its mounted generation",

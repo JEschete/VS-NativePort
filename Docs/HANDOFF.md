@@ -7,6 +7,39 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Lifecycle Ownership (#276 Row 33)
+
+- F01262/F01263/F01271 now register the existing strict native initialization,
+  playback and dispatcher implementations in `ScriptControl.cpp`. Supported copying
+  removes their obsolete C bodies/prototypes and all three unused module entries.
+  Three adaptation hunks belonging only to the removed playback body were deleted;
+  unrelated palette and skip-table allocation adaptations stay. A complete Native
+  reference sweep finds no old code consumers, only one historical trace comment.
+- The dispatcher accepts `ScriptThreadId`; numeric Live bindings explicitly convert
+  and preserve full-width refusal before any source access. Recording-host callers
+  use named ids. Source/assembly provenance is retained in the implementations.
+  Core-only typed host operations have no legacy/shim include or call; the remaining
+  Live compatibility boundaries and other opcode families are not retired by this.
+- On `d2ec7bcb14053f3b3c8a8c54dca30cbf47bc6c99` plus this ownership slice,
+  complete Debug/Release builds and regressions pass 4,640 cases / 8,145,061
+  assertions and both unchanged canonical replays. Two new cases add 19 assertions;
+  removing three entries removes exactly six iterations in two per-symbol checks.
+  No baseline changes. Direct address-resolution checks return null for
+  `800BF5F0`, `800BF850`, `800BFBB8`; actual imports load 440 globals, 16 pointer
+  tables and 1,709 symbols across 75 modules with zero failures.
+- Broad changed-source/header quality and clang-tidy has zero new findings; existing
+  generated warnings remain. All 190 copier and nine module-extent controls pass.
+  The weapon-wait reset control follows both actual native reset and Live setter,
+  preserving the named-state/no-old-alias checks. Repeated copying preserves all
+  tracked Native/manifest hashes before final provenance/test additions.
+  Evidence: `VR-EVENT-LIFECYCLE-PROMOTION` and
+  `build\owner-checkpoint\native-vm-lifecycle-promotion-*-regression.log`.
+  Reviewed promotion claims cover only these three functions; row 33 and global EC
+  retirement remain incomplete. Prerequisite `d2ec7bcb` is green on `42287455543`.
+  Unmodified ledger gates derive 2,639 promoted / four compatibility `wip`, with
+  row 33 now 7/57. Modernization review markers apply only to the three owned cores;
+  no global bridge marker or behavior-verification status was advanced.
+
 ### Native Lifecycle Regression Migration (#276 Row 33)
 
 - The existing Game Over initialization, weapon dispatch and branch/return/yield

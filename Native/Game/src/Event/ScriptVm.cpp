@@ -3,8 +3,6 @@
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Audio/MusicLive.hpp"
-#include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -12,15 +10,11 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
-#include "Event/ScriptEffectCommandsLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
-#include "Field/TransitionsLive.hpp"
-#include "Input/ControllerLive.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Render/DisplayControlLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -28,7 +22,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Rewards.h"
 #include "Content/DiscLayout.h"
-#include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Playback.h"
@@ -44,10 +37,7 @@ extern "C" {
 #include "Event/ScriptField.h"
 #include "Event/ScriptScreen.h"
 #include "Event/ScriptVm.h"
-#include "Event/Splash.h"
-#include "Event/Triggers.h"
 #include "Event/WeaponModeOpcode.h"
-#include "Event/Weather.h"
 #include "Field/Gimmicks.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/TextBox.h"
@@ -793,221 +783,6 @@ int Event_RequestEventStart(void)
         return 1;
     }
     return 1;
-}
-
-// decomp: BATTLE.PRG func_800BF5F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:4588)
-void Event_InitializeEventScriptData(u_char* data)
-{
-    short i;
-    u_char* table;
-    Event_dialogStrings = (u_short*)(data + *(u_short*)(data + 2));
-    table = data + *(u_short*)(data + 4);
-    for (i = 9; i < 16; ++i) {
-        Event_textBoxFrameStyles[i] = ((u_short*)table)[i - 8] ? table + ((u_short*)table)[i - 8] : 0;
-    }
-    table = data + *(u_short*)(data + 6);
-    for (i = 0; i < 8; ++i) {
-        Event_vibrationPatterns[i] = ((u_short*)table)[i] ? (char*)table + ((u_short*)table)[i] : 0;
-    }
-    Event_threadCursors[0] = data + 16;
-    Event_threadCursors[1] = Event_threadCursors[2] = Event_threadCursors[3] = 0;
-    Event_skipState = 0;
-    Event_isSkipForced = 0;
-    VS::State::SetLiveScriptFlag(168, 0);
-    Event_threadWaitFrames[1] = Event_threadWaitFrames[2] = Event_threadWaitFrames[3] = 0;
-    Event_isEffectWaitPending = 0;
-    Event_weaponTransitionPending = 0;
-    Event_isTextSelectionActive = 0;
-    Event_isScanlineOverlayEnabled = 0;
-    Event_isMenuTransitionActive = 0;
-    Event_roomChangeState = 0;
-    Event_isFieldCameraRestoreScripted = 0;
-    Event_threadWaitFrames[0] = 0;
-    Event_isMainThreadFinished = 0;
-    for (i = 0; i < 8; ++i) {
-        Event_isTextBoxAwaitingClose[i] = 0;
-    }
-    for (i = 0; i < 4; ++i) {
-        ((Event_ScriptBytePair*)Event_customEasingCurves)[i].lowByte = ((Event_ScriptBytePair*)Event_customEasingCurves)[i].highByte = 0;
-    }
-    Event_weatherTweenDuration = 0;
-    Event_splashTweens[0].durationFrames = Event_splashTweens[1].durationFrames = Event_splashTweens[2].durationFrames = 0;
-    Event_musicSlot = VS::Audio::LiveCurrentMusicSlot();
-    Event_eventFileDiscRequest = 0;
-    for (i = 16; i < 32; ++i) {
-        VS::State::SetLiveScriptFlag(i, 0);
-    }
-}
-
-// decomp: BATTLE.PRG func_800BF850 (src/BATTLE/BATTLE.PRG/4A0A8.c:4633)
-int Event_UpdateEventPlayback(void)
-{
-    short i;
-    int _[2] __attribute__((unused));
-
-    if (Event_playbackPhase == 0) {
-        return 0;
-    }
-    if (Event_playbackPhase == 1) {
-        if (Event_isStartConfirmed != 0) {
-            Event_playbackPhase = 2;
-            Event_isStartConfirmed = 0;
-            Event_InitializeEventCamera();
-            VS::Actors::ReturnAllLiveActorsToIdle();
-            for (i = 0; i < 17; ++i) {
-                Event_scriptControlledActors[i] = 0;
-            }
-            return 2;
-        }
-        return 0;
-    }
-    if (Event_playbackPhase == 2) {
-        Event_isScriptBackdropEnabled = 0;
-        Event_isChainedEventLoaded = 0;
-        switch ((short)Event_eventSource) {
-        case 1:
-            Event_InitializeEventScriptData((u_char *)(Event_scriptBuffer));
-            Event_playbackPhase = 4;
-            break;
-        case 2:
-            Event_InitializeEventScriptData(
-                (u_char*)Event_roomDoorEventData + ((short*)Event_roomDoorEventData)[Event_eventId]);
-            Event_playbackPhase = 4;
-            break;
-        case 0:
-            Event_QueueEventScriptLoad(Event_eventId, Event_scriptBuffer);
-            Event_playbackPhase = 3;
-            break;
-        }
-        return 2;
-    }
-    if (Event_playbackPhase == 3) {
-        if (*Event_eventFileDiscRequest == 4) {
-            VS::Content::ReleaseLiveDiscRequest((Content_DiscQueueSlot*)Event_eventFileDiscRequest);
-            if (Event_isChainedEventLoaded != 0) {
-                VS::Core::Memory::CopyLiveAlignedWords(Event_scriptBuffer, Event_chainedEventBuffer, 0x1800);
-                VS::Core::Memory::FreeLiveFromHighEnd(Event_chainedEventBuffer);
-                Event_isChainedEventLoaded = 0;
-            }
-            Event_InitializeEventScriptData((u_char *)(Event_scriptBuffer));
-            Event_playbackPhase = 4;
-        }
-        return 2;
-    }
-    Event_UpdateEventCameraOrigin();
-    if (Event_isMainThreadFinished == 0) {
-        if (Event_ExecuteScriptThread(Event_threadCursors, 0) != 0) {
-            if (Event_isFieldCameraRestoreScripted == 0 && Event_isChainedEventLoaded == 0 && Event_roomChangeState == 0) {
-                Event_RestoreEventFieldCamera(-1, -1);
-            }
-            Event_isMainThreadFinished = 1;
-        }
-        for (i = 1; i < 4; ++i) {
-            if (Event_threadCursors[i] != NULL) {
-                Event_ExecuteScriptThread(&Event_threadCursors[i], i);
-            }
-        }
-    }
-    Event_UpdateEventCameraTracks();
-    Event_UpdateEventScreenTransforms();
-    Event_ApplyEventCameraState();
-    VS::Event::UpdateLiveImageTweens();
-    VS::Event::UpdateLiveWeatherTween();
-    if (Event_isScanlineOverlayEnabled != 0) {
-        VS::Event::DrawLiveScanlineOverlay();
-    }
-    if (Event_isMainThreadFinished != 0 && (u_char)Event_EventCameraCompletionMask() == 0xFF) {
-        if (Event_isChainedEventLoaded != 0) {
-            Event_playbackPhase = 3;
-            Event_eventSource = 0;
-        } else {
-            ((void (*)(...))Event_ReleaseScriptActorControl)();
-            Event_playbackPhase = 0;
-        }
-        Event_isMainThreadFinished = 0;
-    }
-    return 2;
-}
-
-// decomp: BATTLE.PRG func_800BFBB8 (src/BATTLE/BATTLE.PRG/573B8.c:67)
-short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index)
-{
-    intptr_t ret;
-    u_char* script = *thread_cursor;
-
-    if ((thread_index == 0) && (Event_skipState == 1)
-        && ((Input_buttonsPressed.allButtons & PADstart) || (Event_isSkipForced != 0))) {
-        Core_Debugf("event", "skip event=%d source=%d thread=%d start=%u forced=%d",
-            (int)Event_eventId, (int)Event_eventSource, (int)thread_index,
-            (unsigned)((Input_buttonsPressed.allButtons & PADstart) != 0), (int)Event_isSkipForced);
-        Event_isSkipForced = 0;
-        Event_threadWaitFrames[3] = 0;
-        Event_threadWaitFrames[2] = 0;
-        Event_threadWaitFrames[1] = 0;
-        Event_threadWaitFrames[0] = 0;
-        Event_isTextBoxAwaitingClose[3] = 0;
-        Event_isTextBoxAwaitingClose[2] = 0;
-        Event_isTextBoxAwaitingClose[1] = 0;
-        Event_isTextBoxAwaitingClose[0] = 0;
-
-        if (Event_stopsMusicOnSkip != 0) {
-            VS::Audio::LiveStopMusicSlotPlayback(0);
-        }
-
-        VS::Audio::LiveStopAllSfxPlayback();
-        VS::Input::StopLiveVibrationPatterns(0, 2);
-        Event_ResetCutsceneActorsToIdle();
-        VS::Field::LiveBeginScreenFadeOut(0, 0xFF, 0);
-        VS::Render::DisableLiveDisplay();
-        VS::State::SetLiveScriptFlag(0xA8, 1);
-        Event_skipState = 2;
-    }
-
-    while (1) {
-        uint64_t scene_command = Diagnostics_RecordSceneCommand(
-            (int32_t)Event_eventId, (int32_t)Event_eventSource, (int32_t)thread_index,
-            script, Event_scriptBuffer, Event_kOpcodeSizes[*script], (int32_t)Event_skipState);
-        if (Event_skipState != 2) {
-            ret = Event_kOpcodeHandlers[*script](script, thread_index);
-        } else {
-            ret = Event_legacySkipHandlerCopy[*script](script, thread_index);
-        }
-
-        Diagnostics_RecordSceneResult(scene_command, (int64_t)ret);
-        Core_Debugf("event-step", "event=%d thread=%d op=%02X result=%lld args=%02X,%02X,%02X pc=%p",
-            (int)Event_eventId, (int)thread_index, (unsigned)*script, (long long)ret,
-            Event_kOpcodeSizes[*script] > 1 ? (unsigned)script[1] : 0,
-            Event_kOpcodeSizes[*script] > 2 ? (unsigned)script[2] : 0,
-            Event_kOpcodeSizes[*script] > 3 ? (unsigned)script[3] : 0, (void*)script);
-        switch (ret) {
-        case 0:
-            script += Event_OpcodeSize(script);
-            continue;
-
-        case 1:
-            break;
-
-        case 3:
-            *thread_cursor = NULL;
-            return 0;
-
-        case 2:
-            return 1;
-
-        case 4:
-            script += Event_OpcodeSize(script);
-            break;
-
-        default:
-            Core_Debugf("event", "thread=%d branch=%p -> %p skip=%d",
-                (int)thread_index, (void*)script, (void*)ret, (int)Event_skipState);
-            script = (u_char*)ret;
-            continue;
-        }
-
-        *thread_cursor = script;
-        return 0;
-    }
 }
 
 // decomp: BATTLE.PRG func_800BFD9C (src/BATTLE/BATTLE.PRG/573B8.c:133)

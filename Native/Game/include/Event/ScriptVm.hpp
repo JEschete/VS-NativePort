@@ -36,6 +36,13 @@ inline constexpr int kEventLocalFlagEnd = 32;
 // Set while a cutscene skip runs; cleared when the skip finishes.
 inline constexpr int kSkipActiveFlag = 0xA8;
 
+enum class ScriptThreadId : std::int32_t {
+  kMain = 0,
+  kContext1 = 1,
+  kContext2 = 2,
+  kContext3 = 3,
+};
+
 // Where a script lies.
 enum class ScriptRegion : std::uint8_t {
   kNone,
@@ -547,7 +554,7 @@ int UpdateEventPlayback(ScriptVmHost& host);
 // Runs `thread` from its cursor until an opcode holds, yields, stops or
 // finishes it, starting a requested skip on thread 0 first; true when the
 // script finished (or the thread had no cursor).
-bool ExecuteScriptThread(int thread, ScriptVmHost& host);
+bool ExecuteScriptThread(ScriptThreadId thread, ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BFD9C (src/BATTLE/BATTLE.PRG/573B8.c:133)
 void ReleaseScriptActorControl(ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)

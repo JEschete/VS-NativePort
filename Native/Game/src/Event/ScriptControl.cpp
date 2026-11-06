@@ -857,7 +857,7 @@ void AwaitEventFile(ScriptVmHost& host) {
 }
 
 void RunScriptThreads(ScriptVmHost& host) {
-  if (ExecuteScriptThread(0, host)) {
+  if (ExecuteScriptThread(ScriptThreadId::kMain, host)) {
     if (!host.FieldCameraRestoreScripted() && !host.ChainedEventLoaded() &&
         host.RoomChangeState() == 0) {
       host.RestoreEventFieldCamera();
@@ -866,7 +866,7 @@ void RunScriptThreads(ScriptVmHost& host) {
   }
   for (int thread = 1; thread < kScriptThreadCount; ++thread) {
     if (host.ThreadCursor(thread).Present()) {
-      ExecuteScriptThread(thread, host);
+      ExecuteScriptThread(static_cast<ScriptThreadId>(thread), host);
     }
   }
 }
@@ -1397,6 +1397,7 @@ int RequestEventStart(ScriptVmHost& host) {
   return 1;
 }
 
+// decomp: BATTLE.PRG func_800BF5F0 (4A0A8.c:4588).
 bool InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
   if (host.EventFile() != EventFileStatus::kNone) {
     host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
@@ -1433,6 +1434,7 @@ bool InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
   return header;
 }
 
+// decomp: BATTLE.PRG func_800BF850 (4A0A8.c:4633).
 int UpdateEventPlayback(ScriptVmHost& host) {
   switch (host.Phase()) {
     case PlaybackPhase::kIdle:
@@ -1452,7 +1454,9 @@ int UpdateEventPlayback(ScriptVmHost& host) {
   }
 }
 
-bool ExecuteScriptThread(int thread, ScriptVmHost& host) {
+// decomp: BATTLE.PRG func_800BFBB8 (573B8.c:67).
+bool ExecuteScriptThread(ScriptThreadId script_thread, ScriptVmHost& host) {
+  const int thread = static_cast<int>(script_thread);
   if (!ValidThread(thread, host)) {
     return true;
   }

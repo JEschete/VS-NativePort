@@ -904,8 +904,9 @@ int UpdateLiveEventPlayback() {
 }
 
 bool ExecuteLiveScriptThread(int thread) {
-  return WithSourceUse(
-      [thread] { return ExecuteScriptThread(thread, live_host); });
+  return WithSourceUse([thread] {
+    return ExecuteScriptThread(static_cast<ScriptThreadId>(thread), live_host);
+  });
 }
 
 void ReleaseLiveScriptActorControl() { ReleaseScriptActorControl(live_host); }

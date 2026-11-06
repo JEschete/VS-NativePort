@@ -2294,33 +2294,6 @@
 ]
 ],
 [
-870,
-[
-"            Event_InitializeEventScriptData(Event_scriptBuffer);"
-],
-[
-"            Event_InitializeEventScriptData((u_char *)(Event_scriptBuffer));"
-]
-],
-[
-893,
-[
-"            Event_InitializeEventScriptData(Event_scriptBuffer);"
-],
-[
-"            Event_InitializeEventScriptData((u_char *)(Event_scriptBuffer));"
-]
-],
-[
-925,
-[
-"            ((void (*)())Event_ReleaseScriptActorControl)();"
-],
-[
-"            ((void (*)(...))Event_ReleaseScriptActorControl)();"
-]
-],
-[
 1133,
 [
 "    Event_legacySkipHandlerCopy = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers));"

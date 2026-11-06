@@ -1351,11 +1351,18 @@ class EncounterFixupTests(unittest.TestCase):
             encoding="utf-8-sig", newline=""
         ) as handle:
             self.assertNotIn("G00473", {item["id"] for item in csv.DictReader(handle)})
-        source = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(
+        source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Event_weaponTransitionPending = 0;", source)
+        self.assertIn(
+            "Event_weaponTransitionPending = static_cast<char>(value);", source
+        )
         self.assertNotIn("Event_reservedResetByte", source)
+        self.assertNotIn("Event_reservedResetByte", vm)
+        control = (root / r"Native\Game\src\Event\ScriptControl.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("host.SetWeaponTransitionPending(false);", control)
 
     def test_owned_function_catalog_matches_the_registered_native_definition(self):
         root = Path(__file__).resolve().parents[2]
