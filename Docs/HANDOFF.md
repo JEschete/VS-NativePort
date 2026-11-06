@@ -7,6 +7,34 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Unsigned flag branch correction (#317 / #313)
+
+- Fresh branch comparison found a native semantic defect: immediate/pair branches
+  sign-extended byte values, and cached equality rejected values above 127.
+  Original BATTLE `800B88D4`/`800B8A10` mask bytes and use `sltu`; cached branch
+  `800B8BF8` uses `lbu` for both operands. Copied originals compile with `/J`.
+  Two focused high-byte assertions failed before the correction; #317 was logged
+  before implementation. Native comparisons now preserve every unsigned byte.
+- Safe actual-original differential coverage adds 65,536 immediate/pair samples
+  across all operation nibbles, full flag IDs and aliases, plus all 65,536 cached
+  byte pairs. Signed relative targets stay inside a 64-byte backing array; original
+  handlers are invoked once, not allowed to follow loops. Three planted comparison,
+  target and operand mutations are detected. All flags/cache state are restored.
+  The five-case selection passes 131,078 assertions; existing VM/refusal/routing
+  coverage passes 149 cases / 199,839 assertions in Debug.
+- The older branch helper and cached test encoded signed assumptions contradicted
+  by actual ASM. Their expectations are explicitly corrected, with extra unequal
+  cached-byte checks. The regression baseline changes only that cached test's name;
+  no assertion floor, replay fingerprint, normalization or quality baseline changes.
+- On `b8375c98490cd9feb91f948ad273a2da43856770` plus this correction, complete
+  Debug/Release builds and suites pass 4,635 cases / 8,136,312 assertions with no
+  failures/skips. Both canonical replay fingerprints match; scoped quality/tidy is
+  clean. Evidence: `VR-EVENT-FLAG-BRANCH-ORIGINAL` and
+  `build\owner-checkpoint\unsigned-flag-branch-*-regression.log`.
+  #317 awaits the pushed fixing revision's CI. #313/#276 retain broader
+  differential, source promotion and retirement gates; this is not retail-wide
+  event verification or full row-33 promotion.
+
 ### Fresh original flag differential (#313)
 
 - The live VM tests now compare immediate and flag-pair arithmetic directly with
@@ -22,6 +50,7 @@ verification of the current worktree.
   `build\owner-checkpoint\native-flag-differential-*-regression.log`.
   This is fresh arithmetic evidence, not complete VM/trigger differential coverage
   or row-33 promotion; #313/#276 remain open for their remaining gates.
+  Published checkpoint `b8375c98` has successful exact CI `42277412014`.
 - Production switch `41df09f3` initially failed Source Quality `42274649322` on
   two long lines and formatting in the late room-local inspection condition.
   Layout-only correction `e731e2b5` has successful exact CI `42276114919`.

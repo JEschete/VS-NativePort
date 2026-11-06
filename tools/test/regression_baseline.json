@@ -4381,7 +4381,7 @@
    "VM buffer initialization reports allocation refusal",
    "VM button and inventory stores retain their encoded flag selectors",
    "VM button waits initialize before consuming buttons",
-   "VM cached signed flags do not match unsigned operands above 127",
+    "VM cached flag equality preserves every unsigned byte value",
    "VM chain allocation refusal preserves the selector and never queues",
    "VM chain queue refusal discards prepared storage",
    "VM chain queue refusal permits a successful retry",

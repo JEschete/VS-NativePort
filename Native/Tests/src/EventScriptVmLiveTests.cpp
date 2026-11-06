@@ -41,6 +41,7 @@ struct LiveVmFixture {
   std::array<char, 64> loop_counters{};
   std::array<std::uint16_t, 66> legacy_curves{};
   std::uintptr_t subroutine_return = Event_subroutineReturnCursor;
+  char cached_flag = Event_cachedFlagValue;
   char phase = Event_playbackPhase;
   char confirmed = Event_isStartConfirmed;
   std::int16_t finished = Event_isMainThreadFinished;
@@ -72,6 +73,7 @@ struct LiveVmFixture {
     std::ranges::copy(loop_counters, Event_loopCounters);
     std::ranges::copy(legacy_curves, Event_customEasingCurves);
     Event_subroutineReturnCursor = subroutine_return;
+    Event_cachedFlagValue = cached_flag;
     Event_playbackPhase = phase;
     Event_isStartConfirmed = confirmed;
     Event_isMainThreadFinished = finished;
@@ -170,6 +172,78 @@ void CompareFlagCorpus(bool pair) {
            static_cast<std::uint8_t>(operation << 4), pair}));
     }
   }
+}
+
+bool SameBranchResult(std::intptr_t original, event::ScriptFlow native,
+                      const std::uint8_t* instruction) {
+  if (original == 0) {
+    return native.kind == event::ScriptFlowKind::kAdvance;
+  }
+  return native.kind == event::ScriptFlowKind::kJumpBy &&
+         original ==
+             reinterpret_cast<std::intptr_t>(instruction) + native.displacement;
+}
+
+bool CompareOriginalFlagBranch(const FlagComparison& sample,
+                               std::int16_t displacement, int mutation = 0) {
+  std::array<std::uint8_t, 64> storage{};
+  auto* command = storage.data() + 32;
+  std::ranges::copy(FlagCommand(sample), command);
+  command[4] = static_cast<std::uint8_t>(displacement);
+  command[5] =
+      static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
+  InitializeFlagSample(sample);
+  const auto original = sample.pair
+                            ? Event_ScriptBranchOnFlagPair(command, 0)
+                            : Event_ScriptBranchOnFlagImmediate(command, 0);
+  if (mutation == 1) command[1] ^= 0x10;
+  if (mutation == 2) ++command[4];
+  if (mutation == 3) command[3] ^= 0x80;
+  const event::ScriptInstruction instruction{{command, 32}, {}, 0};
+  const auto native = sample.pair ? event::ScriptBranchOnFlagPair(
+                                        instruction, event::LiveScriptVm())
+                                  : event::ScriptBranchOnFlagImmediate(
+                                        instruction, event::LiveScriptVm());
+  return SameBranchResult(original, native, command);
+}
+
+void CompareFlagBranchCorpus(bool pair) {
+  FlagDifferentialFixture fixture;
+  std::uint32_t random = 0xB8A10;
+  for (std::uint8_t operation = 0; operation < 16; ++operation) {
+    for (int iteration = 0; iteration < 2048; ++iteration) {
+      const int first = iteration & 1023;
+      const int second = (iteration & 1) == 0 ? first : (iteration * 13) & 1023;
+      REQUIRE(CompareOriginalFlagBranch(
+          {first, second, static_cast<std::uint8_t>(NextFlagSample(random)),
+           static_cast<std::uint8_t>(NextFlagSample(random)),
+           static_cast<std::uint8_t>(operation << 4), pair},
+          static_cast<std::int16_t>((iteration & 63) - 32)));
+    }
+  }
+}
+
+bool CompareOriginalCachedBranch(std::uint8_t value, std::uint8_t operand) {
+  const int flag = value * 4 + (operand & 3);
+  VS::State::SetLiveScriptFlag(flag, value);
+  std::array<std::uint8_t, 3> cache{0, static_cast<std::uint8_t>(flag),
+                                    static_cast<std::uint8_t>(flag >> 8)};
+  const auto original_cache = Event_ScriptCacheFlagValue(cache.data(), 0);
+  const auto native_cache =
+      event::ScriptCacheFlagValue({cache, {}, 0}, event::LiveScriptVm());
+  std::array<std::uint8_t, 64> storage{};
+  auto* command = storage.data() + 32;
+  const auto displacement = static_cast<std::int16_t>((operand & 63) - 32);
+  command[1] = operand;
+  command[2] = static_cast<std::uint8_t>(displacement);
+  command[3] =
+      static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
+  const auto original = Event_ScriptBranchOnCachedFlag(command, 0);
+  const auto native = event::ScriptBranchOnCachedFlag({{command, 32}, {}, 0},
+                                                      event::LiveScriptVm());
+  return original_cache == 0 &&
+         native_cache.kind == event::ScriptFlowKind::kAdvance &&
+         SameBranchResult(original, native, command);
 }
 
 struct LiveRoomFixture {
@@ -412,6 +486,54 @@ TEST_CASE(
   REQUIRE(CompareOriginalFlagOperation(sample));
   for (int mutation = 1; mutation <= 3; ++mutation) {
     CHECK_FALSE(CompareOriginalFlagOperation(sample, mutation));
+  }
+}
+
+TEST_CASE("Flag branches compare high bytes as unsigned like the original ASM",
+          "[event-vm-live][event-branch-differential]") {
+  FlagDifferentialFixture fixture;
+  VS::State::SetLiveScriptFlag(32, 0x80);
+  VS::State::SetLiveScriptFlag(33, 0x7F);
+  const std::array<std::uint8_t, 8> immediate{0, 0, 0x80, 0x7F, 6, 0};
+  const std::array<std::uint8_t, 8> pair{0, 0, 0x80, 33, 6, 0};
+  const auto expected = event::ScriptFlow::JumpBy(6);
+  CHECK(event::ScriptBranchOnFlagImmediate({immediate, {}, 0},
+                                           event::LiveScriptVm()) == expected);
+  CHECK(event::ScriptBranchOnFlagPair({pair, {}, 0}, event::LiveScriptVm()) ==
+        expected);
+}
+
+TEST_CASE("Native immediate flag branches match actual bounded original cases",
+          "[event-vm-live][event-branch-differential]") {
+  CompareFlagBranchCorpus(false);
+}
+
+TEST_CASE("Native flag pair branches match actual bounded original cases",
+          "[event-vm-live][event-branch-differential]") {
+  CompareFlagBranchCorpus(true);
+}
+
+TEST_CASE("Native cached flag branches match all original byte pairs",
+          "[event-vm-live][event-branch-differential]") {
+  const LiveVmFixture vm;
+  FlagDifferentialFixture fixture;
+  for (int value = 0; value < 256; ++value) {
+    for (int operand = 0; operand < 256; ++operand) {
+      REQUIRE(CompareOriginalCachedBranch(static_cast<std::uint8_t>(value),
+                                          static_cast<std::uint8_t>(operand)));
+    }
+  }
+}
+
+TEST_CASE(
+    "Original branch differential detects comparison target and operand "
+    "mutants",
+    "[event-vm-live][event-branch-differential]") {
+  FlagDifferentialFixture fixture;
+  const FlagComparison sample{32, 33, 0x80, 0x7F, 0, false};
+  REQUIRE(CompareOriginalFlagBranch(sample, 6));
+  for (int mutation = 1; mutation <= 3; ++mutation) {
+    CHECK_FALSE(CompareOriginalFlagBranch(sample, 6, mutation));
   }
 }
 

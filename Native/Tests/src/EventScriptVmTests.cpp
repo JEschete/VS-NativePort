@@ -473,12 +473,8 @@ namespace {
 void CheckFlagBranches(RecordingHost& host, int left, int right) {
   host.flags[1000] = static_cast<std::uint8_t>(left);
   host.flags[513] = static_cast<std::uint8_t>(right);
-  const int signed_left = left < 128 ? left : left - 256;
-  const int signed_right = right < 128 ? right : right - 256;
-  const std::array matches{
-      signed_left <= signed_right, signed_left >= signed_right,
-      signed_left == signed_right, signed_left != signed_right,
-      signed_left<signed_right, signed_left> signed_right};
+  const std::array matches{left <= right, left >= right, left == right,
+                           left != right, left<right, left> right};
   for (std::size_t op = 0; op < matches.size(); ++op) {
     const auto operation = static_cast<std::uint8_t>(op << 4);
     const auto expected =
@@ -1512,16 +1508,18 @@ TEST_CASE("VM repeat initialization cancels writes before replacing buffers",
                                                "AllocateBuffers"});
 }
 
-TEST_CASE("VM cached signed flags do not match unsigned operands above 127",
+TEST_CASE("VM cached flag equality preserves every unsigned byte value",
           "[event-vm]") {
   RecordingHost host;
   for (int value : {0, 127, 128, 255}) {
     host.flags[511] = static_cast<std::uint8_t>(value);
     Run(event::ScriptCacheFlagValue, host, {0, 0xFF, 1});
-    const auto expected =
-        value < 128 ? Flow::JumpBy(-7) : Flow::Of(Kind::kAdvance);
     CHECK(Run(event::ScriptBranchOnCachedFlag, host,
-              {0, static_cast<std::uint8_t>(value), 0xF9, 0xFF}) == expected);
+              {0, static_cast<std::uint8_t>(value), 0xF9, 0xFF}) ==
+          Flow::JumpBy(-7));
+    CHECK(Run(event::ScriptBranchOnCachedFlag, host,
+              {0, static_cast<std::uint8_t>(value ^ 1), 0xF9, 0xFF}) ==
+          Flow::Of(Kind::kAdvance));
   }
   CHECK(Run(event::ScriptJumpForward, host, {0, 0xF9, 0xFF}) ==
         Flow::JumpBy(-7));

@@ -981,9 +981,8 @@ ScriptFlow ScriptBranchOnFlagImmediate(const ScriptInstruction& instruction,
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
-  const auto flag = static_cast<std::int8_t>(host.Flag(FirstFlagId(command)));
-  const auto immediate =
-      static_cast<std::int8_t>(OperandByte(command, kThirdOperand));
+  const auto flag = host.Flag(FirstFlagId(command));
+  const auto immediate = OperandByte(command, kThirdOperand);
   if (TestHolds(OperationOf(command), flag, immediate, true)) {
     return Advance();
   }
@@ -996,8 +995,8 @@ ScriptFlow ScriptBranchOnFlagPair(const ScriptInstruction& instruction,
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
-  const auto left = static_cast<std::int8_t>(host.Flag(FirstFlagId(command)));
-  const auto right = static_cast<std::int8_t>(host.Flag(SecondFlagId(command)));
+  const auto left = host.Flag(FirstFlagId(command));
+  const auto right = host.Flag(SecondFlagId(command));
   if (TestHolds(OperationOf(command), left, right, false)) {
     return Advance();
   }
@@ -1028,9 +1027,8 @@ ScriptFlow ScriptBranchOnCachedFlag(const ScriptInstruction& instruction,
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
-  const std::int8_t cached = host.CachedFlag();
-  if (cached >= 0 && static_cast<std::uint8_t>(cached) ==
-                         OperandByte(command, kFirstOperand)) {
+  const auto cached = static_cast<std::uint8_t>(host.CachedFlag());
+  if (cached == OperandByte(command, kFirstOperand)) {
     return ScriptFlow::JumpBy(OperandHalf(command, kSecondOperand));
   }
   return Advance();
