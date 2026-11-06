@@ -7,6 +7,47 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Fresh Safety Acceptance Refresh (#313)
+
+- On clean published `e8f45c4e8be8cae81e44e2f2e69ee577348c8c93`, the retained
+  frozen-generated-original harnesses were rebuilt against current native cores
+  with MSVC x64 `/std:c++latest /O2 /J`. Trigger evaluation passes 100,000
+  comparisons (seed `0x7A1663`, all 13 callback categories exercised), room
+  load/free passes 40,000 (`0x5EC710`), and cutscene lifecycle passes 40,000
+  (`0xC075CE`). All six trigger, seven room and five cutscene mutants are detected.
+  These are fresh results, not reuse of historical reports or calls through the
+  new compatibility wrappers.
+- Retained harness root is the user session-state
+  `7b8f0cc4-51d4-4651-bd50-6037b3afeab1\files`. Existing
+  `triggers_mutants.ps1 -BaselineOnly -Suite <triggers|room_sections|cutscene>`
+  rebuilds/runs each baseline; `-Suite triggers` / `-Suite cutscene` runs their
+  mutants, and `room_sections_mutants.ps1` runs the room mutants. Compiler and
+  execution limits are 60/30 seconds with owned-child cleanup. Frozen originals
+  and harness C++ stay unchanged; mutation copies are isolated under
+  `build\owner-checkpoint` and their removal was verified on disk.
+- Evidence: `VR-EVENT-FRESH-ORIGINAL-DIFFERENTIAL`,
+  `build\owner-checkpoint\{triggers,room_sections,cutscene}-fresh-differential.log`
+  and `{triggers,room-sections,cutscene}-mutant-results.txt`. Callback stand-ins
+  compare bounded valid state, bytes and order, not actual actor/render/audio
+  service output. Unsafe original indices, extents and dispatch loops are excluded;
+  maintained native refusal/lifetime tests cover those cases separately.
+- Complete Debug/Release builds and regressions at this source checkpoint pass
+  4,638 cases / 8,145,023 assertions and both canonical replay fingerprints.
+  Scoped quality/tidy and ledger gates pass without baseline refreshes. Exact
+  Source Quality `42281621566` is green; #317 is closed on `7267c7ac` plus the
+  independent-oracle follow-up `e8f45c4e`. #313 awaits publication/CI of this
+  safety-acceptance evidence refresh. Formal row-33 promotion remains #276;
+  original unused bodies/module identities and global EC retirement are not done.
+
+Frozen original SHA-256 values:
+
+- `triggers_original.inc`:
+  `819C2C43E7B8D1D3E489166A213CF6A170989CA5A0919055F97BBC6932E79233`
+- `room_sections_original.inc`:
+  `8DA47335EF7945FE6C88D006F335FA37FD8834C86F592CBCDC45DBC960EFDF8F`
+- `cutscene_original.inc`:
+  `234449B412323A4A5F17C9E3B2810B0F4A2CAE0235B993DEC54863F51F430935`
+
 ### Independent loop/cache differential (#313)
 
 - Actual loop originals match native stores/decrements over all 16 valid indices,
@@ -54,10 +95,9 @@ verification of the current worktree.
   failures/skips. Both canonical replay fingerprints match; scoped quality/tidy is
   clean. Evidence: `VR-EVENT-FLAG-BRANCH-ORIGINAL` and
   `build\owner-checkpoint\unsigned-flag-branch-*-regression.log`.
-  Semantic fix `7267c7ac` has successful exact CI `42279833831`; #317 awaits the
-  independent-oracle follow-up's pushed CI. #313/#276 retain broader differential,
-  source promotion and retirement gates; this is not retail-wide event verification
-  or full row-33 promotion.
+  Semantic fix `7267c7ac` has successful exact CI `42279833831`; independent-oracle
+  follow-up `e8f45c4e` is green on `42281621566`, and #317 is closed. This is not
+  retail-wide event verification or full row-33 promotion.
 
 ### Fresh original flag differential (#313)
 
@@ -121,8 +161,8 @@ verification of the current worktree.
   `native-vm-switch-*` dialogue captures and `native-vm-final-evt-*` captures/logs.
 - This is production integration, not complete row-33 C++ promotion or global EC
   retirement. Original unused C VM/control bodies and module identities remain;
-  F01261/F01276 join F01416/F00853 as `cpp=wip`. #313 still owns fresh complete
-  original-differential/mutation and remaining promotion gates; #276 stays active.
+  F01261/F01276 join F01416/F00853 as `cpp=wip`. Fresh safety-acceptance
+  differentials are recorded above; formal row-33 promotion remains under #276.
   #315 subsequently closed after layout correction `e731e2b5` and successful exact
   CI `42276114919`. No full playthrough, physical-controller/audio parity, or
   new behavior markers are claimed. #316 is closed on `86f27ef7`, green exact
