@@ -1175,8 +1175,10 @@ extern "C" void Boot_EncounterPollStop() {
         const auto locals = room ? room->Doors() : VS::Event::ScriptCommand{};
         constexpr std::size_t kDoorOffsetBytes = sizeof(std::int16_t);
         if (selector < 0 ||
-          static_cast<std::size_t>(selector) >= locals.size() / kDoorOffsetBytes ||
-          VS::Event::OperandHalf(locals, static_cast<std::size_t>(selector) * kDoorOffsetBytes) == 0) {
+            static_cast<std::size_t>(selector) >=
+                locals.size() / kDoorOffsetBytes ||
+            VS::Event::OperandHalf(locals, static_cast<std::size_t>(selector) *
+                                               kDoorOffsetBytes) == 0) {
           Core_Errorf("encounter.event", "Room %d/%d has no local event %d",
                       Field_zoneContext.zndId, Field_zoneContext.mapId,
                       selector);
