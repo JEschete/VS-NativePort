@@ -109,8 +109,8 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptConfigureEasingCurve,
                    ScriptConfigureEasingCurve},
     ControlBinding{Event_CommandSpecialOperation, CommandSpecialOperation},
-    ControlBinding{Event_CommandWaitFrames, CommandWaitFrames},
-    ControlBinding{Event_CommandSetTickSpeed, CommandSetTickSpeed},
+    ControlBinding{Event_CommandWaitFramesOpcode, CommandWaitFrames},
+    ControlBinding{Event_CommandSetTickSpeedOpcode, CommandSetTickSpeed},
     ControlBinding{Event_CommandWaitScriptContext, CommandWaitScriptContext},
     ControlBinding{Event_CommandStartScriptContext, CommandStartScriptContext},
     ControlBinding{Event_CommandStopScriptContext, CommandStopScriptContext},
@@ -949,4 +949,18 @@ std::intptr_t Event_ScriptYieldFrameOpcode(std::uint8_t* instruction,
                                            std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptYieldFrame);
+}
+
+// decomp: BATTLE.PRG func_800BB474 (4A0A8.c:2799).
+std::intptr_t Event_CommandWaitFramesOpcode(std::uint8_t* instruction,
+                                            std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandWaitFrames);
+}
+
+// decomp: BATTLE.PRG func_800BB4CC (4A0A8.c:2815).
+std::intptr_t Event_CommandSetTickSpeedOpcode(std::uint8_t* instruction,
+                                              std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandSetTickSpeed);
 }

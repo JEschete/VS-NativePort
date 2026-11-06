@@ -71,8 +71,6 @@ intptr_t Event_ScriptConfigureTimer(u_char* instruction, short thread_index);
 intptr_t Event_ScriptWaitForButtonOrTimeout(u_char* instruction, short thread_index);
 intptr_t Event_ScriptConfigureEasingCurve(u_char* instruction, short thread_index);
 intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index);
-intptr_t Event_CommandWaitFrames(u_char* instruction, short thread_index);
-intptr_t Event_CommandSetTickSpeed(u_char* instruction, short thread_index);
 intptr_t Event_CommandWaitScriptContext(u_char* instruction, short thread_index);
 intptr_t Event_CommandStartScriptContext(u_char* instruction, short thread_index);
 intptr_t Event_CommandStopScriptContext(u_char* instruction, short thread_index);

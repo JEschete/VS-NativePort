@@ -1282,6 +1282,7 @@ ScriptFlow CommandSpecialOperation(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG func_800BB474 (4A0A8.c:2799).
 ScriptFlow CommandWaitFrames(const ScriptInstruction& instruction,
                              ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host) ||
@@ -1292,6 +1293,7 @@ ScriptFlow CommandWaitFrames(const ScriptInstruction& instruction,
                 instruction, host);
 }
 
+// decomp: BATTLE.PRG func_800BB4CC (4A0A8.c:2815).
 ScriptFlow CommandSetTickSpeed(const ScriptInstruction& instruction,
                                ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {

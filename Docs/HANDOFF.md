@@ -7,6 +7,31 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Wait/Tick Control Slots (#276 Row 33)
+
+- F01199/F01200 now register strict native frame-wait/tick cores with guarded
+  module ABI bindings. Old C bodies/names/prototypes are gone; original addresses
+  remain mapped to native table adapters. `800BB474-800BB4C8` confirms the halfword
+  countdown; `800BB4D4` loads the unsigned tick operand. Actual tick selection still
+  accepts 2/4 and preserves current speed for other bytes, not a new opcode bound.
+- Live normal/skip, contexts 0/3 and direct/guarded invocation cover durations
+  0/1/2/255, exact resume and tick state. All 256 tick bytes are checked against
+  the existing live policy. Wait/tick globals are snapshotted/restored in fixtures.
+  Five control cases pass 10,572 assertions; scenario/transition helper extraction
+  satisfies strict size limits without removing assertions.
+- On `e7a2326d` plus this slice, complete Debug/Release builds and regressions pass
+  4,646 cases / 8,155,686 assertions and both unchanged canonical replays. Two new
+  cases and four extended contract checks add 10,548 assertions; no baseline change.
+  Broad quality/tidy has zero new findings; 190 copier/nine extent controls and
+  Python syntax pass. Repeat copying preserves tracked Native/project/manifest
+  bytes; actual imports across 75 modules have zero failures.
+  Evidence: `VR-EVENT-CONTROL-WAIT-TICK` and
+  `build\owner-checkpoint\native-control-wait-tick-*-regression.log`.
+  Only these two cores are reviewed; table ABI and remaining identities stay
+  separate debt. Control predecessor `e7a2326d` is green on exact CI `42299194355`.
+  Unmodified gates derive 2,647 promoted / four compatibility `wip`; row 33 is
+  now 15/57. Retained module-table bindings are not global EC retirement.
+
 ### Native Control Slot Basics (#276 Row 33)
 
 - F01028/F01029 now register the existing strict no-op/yield cores. Actual

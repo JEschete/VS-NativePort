@@ -25,6 +25,7 @@ extern "C" {
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
+#include "State/Timers.h"
 }
 
 namespace {
@@ -41,9 +42,11 @@ struct LiveVmFixture {
   std::array<Handler, 256> skip_handlers{};
   std::array<std::uint8_t, 256> sizes{};
   std::array<char, 64> loop_counters{};
+  std::array<std::int16_t, 6> wait_frames{};
   std::array<std::uint16_t, 66> legacy_curves{};
   std::uintptr_t subroutine_return = Event_subroutineReturnCursor;
   char cached_flag = Event_cachedFlagValue;
+  int tick_speed = State_tickSpeed;
   char phase = Event_playbackPhase;
   char confirmed = Event_isStartConfirmed;
   std::int16_t finished = Event_isMainThreadFinished;
@@ -56,6 +59,7 @@ struct LiveVmFixture {
     std::ranges::copy(Event_kSkipOpcodeHandlers, skip_handlers.begin());
     std::ranges::copy(Event_kOpcodeSizes, sizes.begin());
     std::ranges::copy(Event_loopCounters, loop_counters.begin());
+    std::ranges::copy(Event_threadWaitFrames, wait_frames.begin());
     std::ranges::copy(Event_customEasingCurves, legacy_curves.begin());
     content::InitializeLiveDiscQueue();
     Content_discDriveState = {};
@@ -73,9 +77,11 @@ struct LiveVmFixture {
     std::ranges::copy(skip_handlers, Event_kSkipOpcodeHandlers);
     std::ranges::copy(sizes, Event_kOpcodeSizes);
     std::ranges::copy(loop_counters, Event_loopCounters);
+    std::ranges::copy(wait_frames, Event_threadWaitFrames);
     std::ranges::copy(legacy_curves, Event_customEasingCurves);
     Event_subroutineReturnCursor = subroutine_return;
     Event_cachedFlagValue = cached_flag;
+    State_tickSpeed = tick_speed;
     Event_playbackPhase = phase;
     Event_isStartConfirmed = confirmed;
     Event_isMainThreadFinished = finished;
@@ -421,6 +427,74 @@ std::intptr_t YieldSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
   return Event_ScriptYieldFrameOpcode(instruction, thread);
 }
 
+std::intptr_t WaitSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
+  return Event_CommandWaitFramesOpcode(instruction, thread);
+}
+
+std::intptr_t TickSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
+  return Event_CommandSetTickSpeedOpcode(instruction, thread);
+}
+
+struct WaitScenario {
+  int skip;
+  int thread;
+  bool guarded;
+  int duration;
+};
+
+void CheckWaitSnapshot(event::ScriptLocation start, int thread, int remaining,
+                       bool waiting) {
+  auto& host = event::LiveScriptVm();
+  CHECK(host.WaitFrames(thread) == remaining);
+  CHECK(host.ThreadCursor(thread) ==
+        (waiting ? start : event::ScriptLocation{}));
+  CHECK(State_tickSpeed == (waiting ? 2 : 4));
+}
+
+void CheckWaitDispatch(int thread) {
+  CHECK_FALSE(event::ExecuteLiveScriptThread(thread));
+}
+
+void CheckUnreleasedWait(event::ScriptLocation start, int thread) {
+  auto& host = event::LiveScriptVm();
+  CHECK_FALSE(event::ExecuteLiveScriptThread(thread));
+  CHECK(host.WaitFrames(thread) == 0);
+  CHECK(host.ThreadCursor(thread) == start);
+}
+
+void CheckUnchangedTickSpeed() { CHECK(State_tickSpeed == 2); }
+
+void CheckWaitScenario(WaitScenario scenario) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript(
+      {0xE2, static_cast<std::uint8_t>(scenario.duration), 0xE3, 4, 0xF0});
+  Event_skipState = static_cast<char>(scenario.skip);
+  State_tickSpeed = 2;
+  Event_kSkipOpcodeHandlers[0xE2] = Event_kOpcodeHandlers[0xE2] =
+      scenario.guarded ? WaitSlotBridge : Event_CommandWaitFramesOpcode;
+  Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
+      scenario.guarded ? TickSlotBridge : Event_CommandSetTickSpeedOpcode;
+  Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
+      Event_CommandStopScriptContext;
+  Event_kOpcodeSizes[0xE2] = Event_kOpcodeSizes[0xE3] = 2;
+  auto& host = event::LiveScriptVm();
+  host.SetWaitFrames(scenario.thread, 0);
+  host.SetThreadCursor(scenario.thread, start);
+  CheckWaitDispatch(scenario.thread);
+  CheckWaitSnapshot(start, scenario.thread, scenario.duration, true);
+  if (scenario.duration == 0) {
+    for (int frame = 0; frame < 3; ++frame) {
+      CheckUnreleasedWait(start, scenario.thread);
+    }
+    CheckUnchangedTickSpeed();
+    return;
+  }
+  for (int remaining = scenario.duration - 1; remaining >= 0; --remaining) {
+    CheckWaitDispatch(scenario.thread);
+    CheckWaitSnapshot(start, scenario.thread, remaining, remaining != 0);
+  }
+}
+
 void BindTestData(event::ScriptLocation start) {
   auto& host = event::LiveScriptVm();
   host.SetDialogStrings(start);
@@ -644,6 +718,12 @@ TEST_CASE("Native control opcode entries resolve to owned table bindings",
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B66EC) ==
       reinterpret_cast<void*>(&Event_ScriptYieldFrameOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB474) ==
+      reinterpret_cast<void*>(&Event_CommandWaitFramesOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB4CC) ==
+      reinterpret_cast<void*>(&Event_CommandSetTickSpeedOpcode));
 }
 
 TEST_CASE("Native control bindings preserve normal and skip yield behavior",
@@ -678,6 +758,42 @@ TEST_CASE("Native control opcode bindings refuse detached command borrows",
       static_cast<std::intptr_t>(event::ScriptFlowKind::kStop);
   CHECK(Event_ScriptNoOperationOpcode(command.data(), 0) == expected);
   CHECK(Event_ScriptYieldFrameOpcode(command.data(), 0) == expected);
+  CHECK(Event_CommandWaitFramesOpcode(command.data(), 0) == expected);
+  CHECK(Event_CommandSetTickSpeedOpcode(command.data(), 0) == expected);
+}
+
+TEST_CASE("Native wait bindings preserve countdown and tick resume state",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const int thread : {0, 3}) {
+      for (const bool guarded : {false, true}) {
+        for (const int duration : {0, 1, 2, 255}) {
+          CheckWaitScenario({skip, thread, guarded, duration});
+        }
+      }
+    }
+  }
+}
+
+TEST_CASE("Native tick binding preserves the existing byte selector policy",
+          "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    for (int operand = 0; operand < 256; ++operand) {
+      const LiveVmFixture fixture;
+      const auto start =
+          MountScript({0xE3, static_cast<std::uint8_t>(operand), 0xF0});
+      State_tickSpeed = 2;
+      Event_kOpcodeHandlers[0xE3] =
+          guarded ? TickSlotBridge : Event_CommandSetTickSpeedOpcode;
+      Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContext;
+      Event_kOpcodeSizes[0xE3] = 2;
+      auto& host = event::LiveScriptVm();
+      host.SetThreadCursor(0, start);
+      CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+      CHECK_FALSE(host.ThreadCursor(0).Present());
+      CHECK(State_tickSpeed == (operand == 4 ? 4 : 2));
+    }
+  }
 }
 
 TEST_CASE("Live VM dispatch carries typed jumps without pointer results",

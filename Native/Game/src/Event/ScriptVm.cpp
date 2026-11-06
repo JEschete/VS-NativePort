@@ -203,7 +203,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_CommandTweenCameraRoll, Event_CommandTweenCameraRoll, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_CommandScreenTransform,
     Event_CommandScreenTransform, Event_CommandSetCameraOriginActor, Event_CommandRestoreFieldCamera, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake,
     Event_CommandCameraLensOrShake, Event_CommandScreenTransform, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake, Event_ScriptYieldFrameOpcode,
-    Event_CommandSetTickSpeed, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContext,
+    Event_CommandSetTickSpeedOpcode, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContext,
     Event_CommandStartScriptContext, Event_CommandStopScriptContext, Event_CommandLoadNextEvent, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_CommandFinishEvent, Event_CommandFinishEvent };
@@ -684,30 +684,6 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         sprintf(diagnostic_message, "<SPECIAL=%d> IS UNDEFINED!", instruction[1]);
         break;
     }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BB474 (src/BATTLE/BATTLE.PRG/4A0A8.c:2799)
-intptr_t Event_CommandWaitFrames(u_char* instruction, short thread_index)
-{
-    if (Event_threadWaitFrames[thread_index] == 0) {
-        Event_threadWaitFrames[thread_index] = instruction[1];
-        return 1;
-    }
-
-    --Event_threadWaitFrames[thread_index];
-
-    if ((Event_threadWaitFrames[thread_index] << 0x10) <= 0) {
-        Event_threadWaitFrames[thread_index] = 0;
-        return 0;
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800BB4CC (src/BATTLE/BATTLE.PRG/4A0A8.c:2815)
-intptr_t Event_CommandSetTickSpeed(u_char* instruction, short thread_index)
-{
-    VS::State::SetLiveTickSpeed(instruction[1]);
     return 0;
 }
 
