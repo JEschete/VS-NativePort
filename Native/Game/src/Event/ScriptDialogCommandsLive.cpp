@@ -2,14 +2,20 @@
 // Binds the typed event script dialog commands (ScriptDialogCommands.cpp) to
 // the event VM's opcode slots, the menu text boxes, the script's dialog
 // strings, the script flags and the string context integers.
+#include "Event/ScriptDialogCommandsLive.hpp"
+
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <string>
 
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogOpcodes.h"
+#include "Event/ScriptVmLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
@@ -38,6 +44,67 @@ static_assert(std::size(Battle_stringContext.integers) ==
 constexpr char kSkipActive = 2;
 constexpr unsigned kAlignmentMask = 0x3;
 constexpr unsigned kFramePartMask = 0xF;
+std::array<event::ScriptDataLease, event::kTextBoxCount + 1> dialog_owners{};
+
+bool ContainsDialogText(const event::ScriptDataLease& lease,
+                        const char* text) noexcept {
+  const auto bytes = lease.source.Bytes();
+  const auto base = reinterpret_cast<std::uintptr_t>(bytes.data());
+  const auto pointer = reinterpret_cast<std::uintptr_t>(text);
+  return base != 0 && pointer >= base && pointer - base < bytes.size();
+}
+
+bool RetainedDialogText(const char* text) noexcept {
+  return std::ranges::any_of(dialog_owners, [text](const auto& owner) {
+    return ContainsDialogText(owner, text);
+  });
+}
+
+void ClearRetainedDialogText(Menu_TextBoxState& box) noexcept {
+  if (RetainedDialogText(box.string)) {
+    box.string = nullptr;
+  }
+}
+
+void PruneDialogOwners() noexcept {
+  for (auto& box : Menu_textBoxes) {
+    if (box.state == 0) {
+      ClearRetainedDialogText(box);
+    }
+  }
+  for (auto& owner : dialog_owners) {
+    const bool borrowed =
+        std::ranges::any_of(Menu_textBoxes, [&owner](const auto& box) {
+          return ContainsDialogText(owner, box.string);
+        });
+    if (!borrowed) {
+      owner = {};
+    }
+  }
+}
+
+bool RetainDialogOwner(const event::ScriptDataLease& lease) {
+  PruneDialogOwners();
+  const auto bytes = lease.source.Bytes();
+  for (auto& owner : dialog_owners) {
+    const auto retained = owner.source.Bytes();
+    if (retained.data() == bytes.data() && retained.size() == bytes.size()) {
+      return true;
+    }
+  }
+  for (auto& owner : dialog_owners) {
+    if (owner.source.Bytes().empty()) {
+      owner = lease;
+      return true;
+    }
+  }
+  return false;
+}
+
+void RefuseNativeDialog(int box, int string_id) {
+  Core_Warnf("event", "Native dialog string refused: box=%d string=%d", box,
+             string_id);
+}
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -85,6 +152,8 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
   }
 
   void InitTextBox(int box, const event::TextBoxLayout& layout) override {
+    ClearRetainedDialogText(Box(box));
+    PruneDialogOwners();
     Menu_InitTextBox(box, layout.flags, layout.x, layout.y,
                      layout.chars_per_line, layout.line_count, layout.center_x,
                      layout.center_y);
@@ -132,6 +201,27 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
   // The script's dialog strings open with a table of half-word offsets, from
   // the start of the strings, of each string.
   void ShowDialogString(int box, int string_id) override {
+    const auto lease = event::LeaseLiveDialogStrings();
+    if (lease) {
+      const auto bytes = lease->Bytes();
+      if (!bytes) {
+        RefuseNativeDialog(box, string_id);
+        return;
+      }
+      const auto text = event::ResolveDialogString(*bytes, string_id);
+      if (!text || !RetainDialogOwner(*lease)) {
+        RefuseNativeDialog(box, string_id);
+        return;
+      }
+      static_cast<void>(Menu_SetTextBoxText(
+          box, const_cast<char*>(reinterpret_cast<const char*>(text->data()))));
+      PruneDialogOwners();
+      return;
+    }
+    if (lease.error() != event::ScriptSourceError::kMissingOwner) {
+      RefuseNativeDialog(box, string_id);
+      return;
+    }
     Require(Event_dialogStrings != nullptr,
             "Script dialog strings are missing");
     const std::uint16_t offset = Event_dialogStrings[string_id];
@@ -145,7 +235,9 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     Audio_Seq_unusedStateFlags.textBoxSelection = static_cast<char>(selection);
   }
   [[nodiscard]] int DismissTextBox(int box) override {
-    return Menu_DismissTextBox(box);
+    const int result = Menu_DismissTextBox(box);
+    PruneDialogOwners();
+    return result;
   }
   [[nodiscard]] bool SelectionActive() const override {
     return Event_isTextSelectionActive != 0;
@@ -179,6 +271,19 @@ intptr_t RunCommand(Handler handler, const u_char* command,
       handler(event::ScriptCommand{command, length}, host));
 }
 }  // namespace
+
+namespace VS::Event {
+
+void PruneLiveScriptDialogText() noexcept { PruneDialogOwners(); }
+
+void ReleaseLiveScriptDialogText() noexcept {
+  for (auto& box : Menu_textBoxes) {
+    ClearRetainedDialogText(box);
+  }
+  std::ranges::fill(dialog_owners, ScriptDataLease{});
+}
+
+}  // namespace VS::Event
 
 // decomp: vs_battle_script_initTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:672),
 // opcode 0x10

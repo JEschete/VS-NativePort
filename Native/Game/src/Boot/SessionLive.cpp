@@ -19,6 +19,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Ending/EndingLive.hpp"
+#include "Event/ScriptDialogCommandsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/DisplayControlLive.hpp"
@@ -67,6 +68,7 @@ class LiveSessionHost final : public SessionHost {
   // title/battle initialization replaces the game heap (SLUS main.c:8119,
   // 8344).
   void InvalidateSceneUi() override {
+    Event::ReleaseLiveScriptDialogText();
     std::memset(Menu_textBoxes, 0, sizeof Menu_textBoxes);
     std::memset(&Menu_textBoxSelector, 0, sizeof Menu_textBoxSelector);
     std::memset(&Battle_stringContext, 0, sizeof Battle_stringContext);

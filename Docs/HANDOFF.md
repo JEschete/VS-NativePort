@@ -7,6 +7,38 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native dialog retention (#313)
+
+- Native dialog display now resolves bounded halfword-offset tables and validates
+  string indices, offsets, control parameters and a real terminator. The table
+  convention was checked against the original consumer and an extracted event;
+  tests use synthetic bytes only. Invalid native data does not replace existing
+  UI text or fall back to unrelated legacy strings.
+- A fixed retention set pins immutable source storage rather than box indices,
+  so the actual selection routine can swap entire text-box records safely. Eight
+  different box owners can be replaced without dropping live bytes; repeated
+  generations of the same storage do not accumulate pins. Reinitialization,
+  completed dismissal and actual session invalidation clear borrowed pointers
+  before releasing their owners. Ordinary VM reset alone preserves open UI text.
+- On `72866afd` plus the dialog source/Live/session/tests/header registrations,
+  nine new cases add 323 assertions. Debug dialog/reset selection passes 28 cases
+  / 589 assertions, including a real title-session transfer with no automatic
+  owning object in its abandoned frame. Both complete builds and full suites pass
+  4,611 cases / 7,939,427 assertions, with every previous case retained and both
+  canonical replays unchanged. Scoped quality/clang-tidy is clean; repeated
+  project generation preserves nine scoped source/header/project hashes. The
+  shared source-mount test helper preserves the existing vibration assertions.
+  Evidence: `VR-SCRIPT-DIALOG-OWNERS` and
+  `build\owner-checkpoint\script-dialog-owners-*-regression.log`.
+- Limits: production VM loading/control-opcode dispatch and exact native room/file
+  producer adoption remain generated. Legacy-only dialog display is unchanged;
+  native dialog retention is a verified consumer contract, not retail native-VM
+  playback or complete text/render modernization. #313/#315/#276 remain open;
+  no new promotion or compatibility-retirement credit is claimed. Native vibration
+  milestone `72866afd` is pushed with successful exact Source Quality
+  `42239255504`; its predecessor frame milestone `ac6f55db` is green on
+  `42237200065`.
+
 ### Native vibration consumer (#313)
 
 - The production script-effect host now prefers `LeaseLiveVibrationPattern` and

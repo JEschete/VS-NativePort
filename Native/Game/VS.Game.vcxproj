@@ -2227,6 +2227,7 @@
     <ClInclude Include="include\Event\ScriptAudioCommands.hpp" />
     <ClInclude Include="include\Event\ScriptCommand.hpp" />
     <ClInclude Include="include\Event\ScriptDialogCommands.hpp" />
+    <ClInclude Include="include\Event\ScriptDialogCommandsLive.hpp" />
     <ClInclude Include="include\Event\ScriptEffectCommands.hpp" />
     <ClInclude Include="include\Event\ScriptEffectCommandsLive.hpp" />
     <ClInclude Include="include\Event\ScriptSources.hpp" />

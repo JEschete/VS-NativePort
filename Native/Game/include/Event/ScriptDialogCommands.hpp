@@ -8,11 +8,17 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptStep.hpp"
 
 namespace VS::Event {
+
+enum class DialogStringError { kTable, kIndex, kOffset, kControl, kTerminator };
+
+[[nodiscard]] std::expected<ScriptCommand, DialogStringError>
+ResolveDialogString(ScriptCommand table, std::size_t index);
 
 // Instruction lengths in bytes, opcode included, from the event VM's opcode
 // size table (BATTLE.PRG D_800E9C30).

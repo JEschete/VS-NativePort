@@ -669,6 +669,9 @@
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClInclude Include="include\TestSupport\ScriptSources.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>

@@ -2772,6 +2772,9 @@
     <ClInclude Include="include\Event\ScriptDialogCommands.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
+    <ClInclude Include="include\Event\ScriptDialogCommandsLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
     <ClInclude Include="include\Event\ScriptEffectCommands.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>

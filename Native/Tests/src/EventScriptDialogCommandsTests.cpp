@@ -1,8 +1,11 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <format>
 #include <map>
+#include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -10,7 +13,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/SessionLive.hpp"
 #include "Event/ScriptDialogCommands.hpp"
+#include "Event/ScriptDialogCommandsLive.hpp"
+#include "Event/ScriptVmLive.hpp"
+#include "TestSupport/ScriptSources.hpp"
+
+extern "C" {
+#include "Audio/Seq/Channel.h"
+#include "Event/ScriptDialogOpcodes.h"
+#include "Event/ScriptVm.h"
+#include "Input/ControllerLiveState.h"
+#include "Menu/TextBox.h"
+}
 
 namespace {
 namespace event = VS::Event;
@@ -19,6 +34,85 @@ using event::ScriptStep;
 using Calls = std::vector<std::string>;
 using Refusal = std::pair<ScriptDialogRefusal, int>;
 using Bytes = std::vector<std::uint8_t>;
+
+void CheckDialogString(const Bytes& table, std::size_t index,
+                       event::ScriptCommand expected) {
+  const auto text = event::ResolveDialogString(table, index);
+  REQUIRE(text);
+  CHECK(std::ranges::equal(*text, expected));
+}
+
+struct LiveDialogFixture {
+  std::array<Menu_TextBoxState, event::kTextBoxCount> boxes{};
+  Menu_Framework_TextBoxSelector selector = Menu_textBoxSelector;
+  decltype(Audio_Seq_unusedStateFlags) audio_flags = Audio_Seq_unusedStateFlags;
+  decltype(Input_buttonsPressed) pressed = Input_buttonsPressed;
+  std::uint16_t* strings = Event_dialogStrings;
+  std::array<std::uint16_t, 3> legacy{1, 0xE701, 0};
+
+  LiveDialogFixture() {
+    std::ranges::copy(Menu_textBoxes, boxes.begin());
+    event::ReleaseLiveScriptDialogText();
+    event::ResetLiveScriptRuntime();
+    Event_dialogStrings = legacy.data();
+    Menu_textBoxSelector = {};
+    Input_buttonsPressed = {};
+    Audio_Seq_unusedStateFlags.opaque11 = 1;
+    for (auto& box : Menu_textBoxes) {
+      box = {};
+      box.flags.speakerTexture = event::kNoSpeakerTexture;
+      box.state = 1;
+    }
+  }
+  ~LiveDialogFixture() {
+    event::ReleaseLiveScriptDialogText();
+    event::ResetLiveScriptRuntime();
+    std::ranges::copy(boxes, Menu_textBoxes);
+    Menu_textBoxSelector = selector;
+    Audio_Seq_unusedStateFlags = audio_flags;
+    Input_buttonsPressed = pressed;
+    Event_dialogStrings = strings;
+  }
+};
+
+void BindDialogTable(Bytes bytes,
+                     std::weak_ptr<const Bytes>* lifetime = nullptr) {
+  const auto start =
+      VS::test_support::MountLiveEventScript(std::move(bytes), lifetime);
+  event::LiveScriptVm().SetDialogStrings(start);
+}
+
+void ShowNativeDialog(std::uint8_t box) {
+  std::array<std::uint8_t, 4> command{0x11, box, 0, 1};
+  CHECK(Event_ScriptShowDialogTextOpcode(command.data(), 0) == 0);
+}
+
+void DismissNativeDialog(std::uint8_t box) {
+  Menu_textBoxes[box].state = 0;
+  std::array<std::uint8_t, 2> command{0x12, box};
+  CHECK(Event_ScriptDismissDialogBoxOpcode(command.data(), 0) == 0);
+}
+
+std::weak_ptr<const Bytes> session_dialog_owner;
+int session_dialog_entries = 0;
+
+void PrepareSessionDialog() {
+  Menu_textBoxes[0].state = 1;
+  Menu_textBoxes[0].flags.speakerTexture = event::kNoSpeakerTexture;
+  BindDialogTable({1, 0, 0x24, 0xE7}, &session_dialog_owner);
+  ShowNativeDialog(0);
+  CHECK_FALSE(session_dialog_owner.expired());
+}
+
+int EnterDialogSession() {
+  if (++session_dialog_entries > 1) {
+    return session_dialog_owner.expired() && Menu_textBoxes[0].string == nullptr
+               ? 41
+               : -1;
+  }
+  PrepareSessionDialog();
+  VS::Boot::JumpToLiveTitle();
+}
 
 class RecordingHost final : public event::ScriptDialogHost {
  public:
@@ -146,6 +240,168 @@ std::array<int, 4> Summary(const event::DialogPlacement& placement) {
           placement.clamp_distance};
 }
 }  // namespace
+
+TEST_CASE("Native dialog text survives VM reset until UI invalidation",
+          "[event-script-dialog][event-vm-live][session-reset]") {
+  LiveDialogFixture fixture;
+  std::weak_ptr<const Bytes> lifetime;
+  BindDialogTable({1, 0, 0x24, 0xE7}, &lifetime);
+  ShowNativeDialog(0);
+  REQUIRE(Menu_textBoxes[0].string != nullptr);
+  CHECK(static_cast<std::uint8_t>(Menu_textBoxes[0].string[0]) == 0x24);
+  event::ResetLiveScriptRuntime();
+  CHECK_FALSE(lifetime.expired());
+  CHECK(static_cast<std::uint8_t>(Menu_textBoxes[0].string[0]) == 0x24);
+  event::ReleaseLiveScriptDialogText();
+  CHECK(lifetime.expired());
+  CHECK(Menu_textBoxes[0].string == nullptr);
+}
+
+TEST_CASE("Actual title transfer clears native dialog pointers before owners",
+          "[event-script-dialog][event-vm-live][session-reset]") {
+  LiveDialogFixture fixture;
+  session_dialog_owner.reset();
+  session_dialog_entries = 0;
+  CHECK(VS::Boot::RunLiveSessionLoop(EnterDialogSession, EnterDialogSession) ==
+        41);
+  CHECK(session_dialog_entries == 2);
+  CHECK(session_dialog_owner.expired());
+  CHECK(Menu_textBoxes[0].string == nullptr);
+}
+
+TEST_CASE("Native dialog reinitialization releases the previous text owner",
+          "[event-script-dialog][event-vm-live]") {
+  LiveDialogFixture fixture;
+  std::weak_ptr<const Bytes> lifetime;
+  BindDialogTable({1, 0, 0x24, 0xE7}, &lifetime);
+  ShowNativeDialog(0);
+  event::ResetLiveScriptRuntime();
+  CHECK_FALSE(lifetime.expired());
+  std::array<std::uint8_t, event::kInitDialogBoxLength> command{
+      0x10, 0, 7, 0, 0, 0, 20, 2, 0, 0, 0};
+  CHECK(Event_ScriptInitDialogBoxOpcode(command.data(), 0) == 0);
+  CHECK(lifetime.expired());
+  CHECK(Menu_textBoxes[0].string == nullptr);
+  CHECK(Menu_textBoxes[0].speed == 0);
+}
+
+TEST_CASE("Native dialog ownership follows actual text box selection swaps",
+          "[event-script-dialog][event-vm-live]") {
+  LiveDialogFixture fixture;
+  std::weak_ptr<const Bytes> first;
+  std::weak_ptr<const Bytes> second;
+  BindDialogTable({1, 0, 0x24, 0xE7}, &first);
+  ShowNativeDialog(0);
+  const char* selected_text = Menu_textBoxes[0].string;
+  BindDialogTable({1, 0, 0x25, 0xE7}, &second);
+  ShowNativeDialog(1);
+  Menu_textBoxes[0].y = 0;
+  Menu_textBoxes[1].y = 100;
+  CHECK(Menu_SelectTextBoxChoice(3) == 0);
+  CHECK(Menu_textBoxes[1].string == selected_text);
+  event::ResetLiveScriptRuntime();
+  CHECK_FALSE(first.expired());
+  CHECK_FALSE(second.expired());
+  DismissNativeDialog(0);
+  CHECK(second.expired());
+  CHECK_FALSE(first.expired());
+  CHECK(Menu_textBoxes[1].string == selected_text);
+  DismissNativeDialog(1);
+  CHECK(first.expired());
+}
+
+TEST_CASE("Malformed native dialog leaves existing text and ownership intact",
+          "[event-script-dialog][event-vm-live]") {
+  LiveDialogFixture fixture;
+  std::weak_ptr<const Bytes> lifetime;
+  BindDialogTable({1, 0, 0x24, 0xE7}, &lifetime);
+  ShowNativeDialog(0);
+  const char* text = Menu_textBoxes[0].string;
+  BindDialogTable({1, 0, 0xFA});
+  ShowNativeDialog(0);
+  CHECK(Menu_textBoxes[0].string == text);
+  CHECK_FALSE(lifetime.expired());
+  CHECK(static_cast<std::uint8_t>(text[0]) == 0x24);
+}
+
+TEST_CASE("Native dialog retention replaces a full set of eight source owners",
+          "[event-script-dialog][event-vm-live]") {
+  LiveDialogFixture fixture;
+  std::array<std::weak_ptr<const Bytes>, event::kTextBoxCount> owners;
+  for (std::size_t box = 0; box < owners.size(); ++box) {
+    BindDialogTable({1, 0, static_cast<std::uint8_t>(0x20 + box), 0xE7},
+                    &owners[box]);
+    ShowNativeDialog(static_cast<std::uint8_t>(box));
+  }
+  event::ResetLiveScriptRuntime();
+  for (const auto& owner : owners) {
+    CHECK_FALSE(owner.expired());
+  }
+  std::weak_ptr<const Bytes> replacement;
+  BindDialogTable({1, 0, 0x30, 0xE7}, &replacement);
+  ShowNativeDialog(0);
+  CHECK(owners[0].expired());
+  for (std::size_t box = 1; box < owners.size(); ++box) {
+    CHECK_FALSE(owners[box].expired());
+  }
+  event::ResetLiveScriptRuntime();
+  event::ReleaseLiveScriptDialogText();
+  CHECK(replacement.expired());
+  for (const auto& owner : owners) {
+    CHECK(owner.expired());
+  }
+}
+
+TEST_CASE("Native dialog repeated generations retain the same storage once",
+          "[event-script-dialog][event-vm-live]") {
+  LiveDialogFixture fixture;
+  const auto owner = std::make_shared<const Bytes>(Bytes{1, 0, 0x24, 0xE7});
+  std::int64_t retained_count = 0;
+  for (int repeat = 0; repeat < 32; ++repeat) {
+    REQUIRE(
+        event::MountLiveScriptSource(event::ScriptRegion::kEventScript, owner));
+    const auto source =
+        event::LeaseLiveScriptSource(event::ScriptRegion::kEventScript);
+    REQUIRE(source);
+    REQUIRE(source->At(0));
+    event::LiveScriptVm().SetDialogStrings(*source->At(0));
+    ShowNativeDialog(0);
+    if (repeat == 0) {
+      retained_count = owner.use_count();
+    }
+    CHECK(owner.use_count() == retained_count);
+    CHECK(static_cast<std::uint8_t>(Menu_textBoxes[0].string[0]) == 0x24);
+  }
+}
+
+TEST_CASE("Native dialog strings resolve bounded halfword offsets",
+          "[event-script-dialog][script-sources]") {
+  const Bytes table{2, 0, 4, 0, 0x10, 0xE7, 0, 0, 0x20, 0xFA, 0xE7, 0xE7};
+  CheckDialogString(table, 0, std::span(table).subspan(4, 2));
+  CheckDialogString(table, 1, std::span(table).subspan(8, 4));
+  CHECK(event::ResolveDialogString(table, 2).error() ==
+        event::DialogStringError::kIndex);
+}
+
+TEST_CASE("Native dialog strings refuse malformed tables and text controls",
+          "[event-script-dialog][script-sources]") {
+  CHECK(event::ResolveDialogString(Bytes{0}, 0).error() ==
+        event::DialogStringError::kTable);
+  CHECK(event::ResolveDialogString(Bytes{0, 0}, 0).error() ==
+        event::DialogStringError::kTable);
+  CHECK(event::ResolveDialogString(Bytes{3, 0}, 0).error() ==
+        event::DialogStringError::kTable);
+  CHECK(event::ResolveDialogString(Bytes{2, 0, 1, 0, 0, 0}, 1).error() ==
+        event::DialogStringError::kOffset);
+  CHECK(event::ResolveDialogString(Bytes{2, 0, 255, 255, 0, 0}, 1).error() ==
+        event::DialogStringError::kOffset);
+  CHECK(event::ResolveDialogString(Bytes{1, 0, 0xFA}, 0).error() ==
+        event::DialogStringError::kControl);
+  CHECK(event::ResolveDialogString(Bytes{1, 0, 0xFF, 10, 0xE7}, 0).error() ==
+        event::DialogStringError::kControl);
+  CHECK(event::ResolveDialogString(Bytes{1, 0, 0x20}, 0).error() ==
+        event::DialogStringError::kTerminator);
+}
 
 TEST_CASE("Event script dialog commands refuse short instructions",
           "[event-script-dialog]") {

@@ -307,6 +307,7 @@
   <ItemGroup>
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />
+    <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />
   </ItemGroup>
   <ItemGroup>

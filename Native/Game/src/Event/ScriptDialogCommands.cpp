@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/EncodedText.hpp"
 
 namespace VS::Event {
 namespace {
@@ -169,6 +170,51 @@ struct AxisClamp {
 }
 
 }  // namespace
+
+// decomp: vs_battle_script_showTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:707).
+std::expected<ScriptCommand, DialogStringError> ResolveDialogString(
+    ScriptCommand table, std::size_t index) {
+  constexpr std::size_t kHalfwordBytes = 2;
+  if (table.size() < kHalfwordBytes) {
+    return std::unexpected(DialogStringError::kTable);
+  }
+  const std::size_t entries = OperandHalf(table, 0);
+  if (entries == 0 || entries > table.size() / kHalfwordBytes) {
+    return std::unexpected(DialogStringError::kTable);
+  }
+  if (index >= entries) {
+    return std::unexpected(DialogStringError::kIndex);
+  }
+  const std::size_t offset =
+      OperandHalf(table, index * kHalfwordBytes) * kHalfwordBytes;
+  if (offset < entries * kHalfwordBytes || offset >= table.size()) {
+    return std::unexpected(DialogStringError::kOffset);
+  }
+  std::size_t end = table.size();
+  for (std::size_t entry = 0; entry < entries; ++entry) {
+    const std::size_t next =
+        OperandHalf(table, entry * kHalfwordBytes) * kHalfwordBytes;
+    if (next > offset && next < end) {
+      end = next;
+    }
+  }
+  const auto text = table.subspan(offset, end - offset);
+  for (std::size_t cursor = 0; cursor < text.size(); ++cursor) {
+    const auto code = text[cursor];
+    if (code == Render::kTextTerminator) {
+      return text.first(cursor + 1);
+    }
+    if (code >= Render::kTextFirstParameterized) {
+      ++cursor;
+      if (cursor >= text.size() ||
+          (code == Render::kTextPrintString &&
+           text[cursor] >= Render::kEncodedTextArgumentCount)) {
+        return std::unexpected(DialogStringError::kControl);
+      }
+    }
+  }
+  return std::unexpected(DialogStringError::kTerminator);
+}
 
 DialogPlacement CalcDialogAnchorPlacement(DialogOrigin origin,
                                           const DialogAnchor& anchor,

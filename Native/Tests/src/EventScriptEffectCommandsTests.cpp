@@ -16,6 +16,7 @@
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "TestSupport/ScriptSources.hpp"
 #include "TestSupport/ScriptSteps.hpp"
 
 extern "C" {
@@ -223,17 +224,9 @@ struct NativeVibrationFixture {
 
 void BindNativeVibration(Bytes bytes,
                          std::weak_ptr<const Bytes>* lifetime = nullptr) {
-  const auto owner = std::make_shared<const Bytes>(std::move(bytes));
-  if (lifetime != nullptr) {
-    *lifetime = owner;
-  }
-  REQUIRE(
-      event::MountLiveScriptSource(event::ScriptRegion::kEventScript, owner));
-  const auto source =
-      event::LeaseLiveScriptSource(event::ScriptRegion::kEventScript);
-  REQUIRE(source);
-  REQUIRE(source->At(0));
-  event::LiveScriptVm().SetVibrationPattern(0, *source->At(0));
+  const auto start =
+      VS::test_support::MountLiveEventScript(std::move(bytes), lifetime);
+  event::LiveScriptVm().SetVibrationPattern(0, start);
 }
 
 Bytes NativeVibrationBytes() {
