@@ -7,6 +7,30 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Cached Control Slots (#276 Row 33)
+
+- F01089/F01090 now register strict native cached flag/equality/jump cores with
+  guarded module ABI identities. Original C bodies/names/prototypes and parser/
+  raw-pointer test consumers retire. The independently captured actual-original
+  digest `A21BEE19C943E325` was published first in `deea1c7f`, green exact CI
+  `42308284876`. Current per-case model and normalized native digest must match
+  that unchanged original constant, not a new binding substituted as the oracle.
+- All 65,536 byte pairs remain checked; direct/guarded normal/skip cached values
+  0/127/128/255 preserve branch target/tick results. Planted wrong cache byte,
+  operand and target mutants are rejected. Control/branch selection passes
+  14 cases / 144,986 assertions; helper factoring preserves all assertions.
+- On `deea1c7f` plus this slice, complete Debug/Release builds and regressions pass
+  4,650 cases / 8,159,025 assertions and both unchanged canonical replays. Two new
+  cases/four binding checks add 168; no baseline changes. Broad quality/tidy has
+  zero new findings; 190 copier/nine extent controls and Python syntax pass.
+  Repeat generation preserves all tracked Native/project/manifest bytes; old
+  cached names have no Native reference. Evidence: `VR-EVENT-CONTROL-CACHED` and
+  `build\owner-checkpoint\native-control-cached-*-regression.log`.
+  Only these cores are reviewed; table ABI and other original/control oracles stay
+  independent tracked debt, not global EC retirement.
+  Unmodified gates derive 2,652 promoted / four compatibility `wip`; row 33 is
+  now 20/57. The original cached digest and required module-table ABI are retained.
+
 ### Cached Original Oracle Preservation (#276)
 
 - Before cached-flag handler retirement, the existing exhaustive 65,536-byte-pair

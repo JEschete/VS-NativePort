@@ -238,15 +238,14 @@ void AddCachedDigest(std::uint64_t& digest, std::uint32_t value) {
   }
 }
 
-bool CompareOriginalCachedBranch(
+bool CompareFrozenCachedBranch(
     std::uint8_t value, std::uint8_t operand,
-    std::array<std::uint64_t, 2>* fingerprints = nullptr) {
+    std::array<std::uint64_t, 2>* fingerprints = nullptr, int mutation = 0) {
   const int flag = value * 4 + (operand & 3);
   VS::State::SetLiveScriptFlag(flag, value);
   std::array<std::uint8_t, 3> cache{0, static_cast<std::uint8_t>(flag),
                                     static_cast<std::uint8_t>(flag >> 8)};
-  const auto original_cache = Event_ScriptCacheFlagValue(cache.data(), 0);
-  const auto expected_cache = static_cast<std::uint8_t>(Event_cachedFlagValue);
+  const auto expected_cache = value;
   std::array<std::uint8_t, 64> storage{};
   auto* command = storage.data() + 32;
   const auto displacement = static_cast<std::int16_t>((operand & 63) - 32);
@@ -254,15 +253,22 @@ bool CompareOriginalCachedBranch(
   command[2] = static_cast<std::uint8_t>(displacement);
   command[3] =
       static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
-  const auto original = Event_ScriptBranchOnCachedFlag(command, 0);
+  const bool expected_jump = value == operand;
+  const auto expected_flow =
+      expected_jump ? event::ScriptFlow::JumpBy(displacement)
+                    : event::ScriptFlow::Of(event::ScriptFlowKind::kAdvance);
   const auto native_cache =
       event::ScriptCacheFlagValue({cache, {}, 0}, event::LiveScriptVm());
+  if (mutation == 1) {
+    event::LiveScriptVm().SetCachedFlag(static_cast<std::int8_t>(value ^ 0x80));
+  }
+  if (mutation == 2) command[1] ^= 0x80;
+  if (mutation == 3) ++command[2];
   const auto native = event::ScriptBranchOnCachedFlag({{command, 32}, {}, 0},
                                                       event::LiveScriptVm());
   if (fingerprints != nullptr) {
-    const auto original_offset = static_cast<std::uint16_t>(
-        original == 0 ? 0
-                      : original - reinterpret_cast<std::intptr_t>(command));
+    const auto expected_offset =
+        static_cast<std::uint16_t>(expected_jump ? displacement : 0);
     const bool native_jump = native.kind == event::ScriptFlowKind::kJumpBy;
     const auto native_offset =
         static_cast<std::uint16_t>(native_jump ? native.displacement : 0);
@@ -270,18 +276,17 @@ bool CompareOriginalCachedBranch(
         static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag());
     AddCachedDigest((*fingerprints)[0],
                     expected_cache |
-                        (static_cast<std::uint32_t>(original != 0) << 8) |
-                        (static_cast<std::uint32_t>(original_offset) << 16));
+                        (static_cast<std::uint32_t>(expected_jump) << 8) |
+                        (static_cast<std::uint32_t>(expected_offset) << 16));
     AddCachedDigest((*fingerprints)[1],
                     native_value |
                         (static_cast<std::uint32_t>(native_jump) << 8) |
                         (static_cast<std::uint32_t>(native_offset) << 16));
   }
-  return original_cache == 0 &&
-         native_cache.kind == event::ScriptFlowKind::kAdvance &&
+  return native_cache.kind == event::ScriptFlowKind::kAdvance &&
          static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag()) ==
              expected_cache &&
-         SameBranchResult(original, native, command);
+         native == expected_flow;
 }
 
 bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
@@ -475,6 +480,41 @@ std::intptr_t WaitContextSlotBridge(std::uint8_t* instruction,
 std::intptr_t StopContextSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
   return Event_CommandStopScriptContextOpcode(instruction, thread);
+}
+
+std::intptr_t CacheSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
+  return Event_ScriptCacheFlagValueOpcode(instruction, thread);
+}
+
+std::intptr_t CachedBranchSlotBridge(std::uint8_t* instruction,
+                                     std::int16_t thread) {
+  return Event_ScriptBranchOnCachedFlagOpcode(instruction, thread);
+}
+
+event::ScriptLocation PrepareCachedScenario(int skip, bool guarded,
+                                            std::uint8_t operand) {
+  const auto start =
+      MountScript({0xE7, 0xFF, 1, 0xE8, operand, 6, 0, 0xE3, 4, 0xF0});
+  Event_skipState = static_cast<char>(skip);
+  State_tickSpeed = 2;
+  Event_kSkipOpcodeHandlers[0xE7] = Event_kOpcodeHandlers[0xE7] =
+      guarded ? CacheSlotBridge : Event_ScriptCacheFlagValueOpcode;
+  Event_kSkipOpcodeHandlers[0xE8] = Event_kOpcodeHandlers[0xE8] =
+      guarded ? CachedBranchSlotBridge : Event_ScriptBranchOnCachedFlagOpcode;
+  Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
+      Event_CommandSetTickSpeedOpcode;
+  Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE7] = 3;
+  Event_kOpcodeSizes[0xE8] = 4;
+  Event_kOpcodeSizes[0xE3] = 2;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  return start;
+}
+
+void CheckCachedOutcome(int value, bool equal) {
+  CHECK(static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag()) == value);
+  CHECK(State_tickSpeed == (equal ? 2 : 4));
 }
 
 event::ScriptLocation PrepareContextScenario(int skip, bool guarded) {
@@ -756,9 +796,9 @@ TEST_CASE("Native cached flag branches match all original byte pairs",
                                             0xCBF29CE484222325};
   for (int value = 0; value < 256; ++value) {
     for (int operand = 0; operand < 256; ++operand) {
-      REQUIRE(CompareOriginalCachedBranch(static_cast<std::uint8_t>(value),
-                                          static_cast<std::uint8_t>(operand),
-                                          &fingerprints));
+      REQUIRE(CompareFrozenCachedBranch(static_cast<std::uint8_t>(value),
+                                        static_cast<std::uint8_t>(operand),
+                                        &fingerprints));
     }
   }
   CHECK(fingerprints[0] == fingerprints[1]);
@@ -824,6 +864,12 @@ TEST_CASE("Native control opcode entries resolve to owned table bindings",
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB5A4) ==
       reinterpret_cast<void*>(&Event_CommandStopScriptContextOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B8BC4) ==
+      reinterpret_cast<void*>(&Event_ScriptCacheFlagValueOpcode));
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B8BF8) ==
+      reinterpret_cast<void*>(&Event_ScriptBranchOnCachedFlagOpcode));
 }
 
 TEST_CASE("Native control bindings preserve normal and skip yield behavior",
@@ -863,6 +909,8 @@ TEST_CASE("Native control opcode bindings refuse detached command borrows",
   CHECK(Event_CommandWaitScriptContextOpcode(command.data(), 0) == expected);
   CHECK(Event_CommandStartScriptContextOpcode(command.data(), 0) == expected);
   CHECK(Event_CommandStopScriptContextOpcode(command.data(), 0) == expected);
+  CHECK(Event_ScriptCacheFlagValueOpcode(command.data(), 0) == expected);
+  CHECK(Event_ScriptBranchOnCachedFlagOpcode(command.data(), 0) == expected);
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",
@@ -937,6 +985,37 @@ TEST_CASE("Native context wait bindings preserve all encoded release selectors",
                                  cleared ? event::ScriptLocation{} : target);
       }
     }
+  }
+}
+
+TEST_CASE("Native cached bindings preserve byte boundaries and branch targets",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (const int value : {0, 127, 128, 255}) {
+        for (const bool equal : {false, true}) {
+          const LiveVmFixture fixture;
+          FlagDifferentialFixture flags;
+          const auto operand =
+              static_cast<std::uint8_t>(equal ? value : value ^ 1);
+          PrepareCachedScenario(skip, guarded, operand);
+          VS::State::SetLiveScriptFlag(511, static_cast<std::uint8_t>(value));
+          CheckWaitDispatch(0);
+          CheckThreadCursorMatches(0, {});
+          CheckCachedOutcome(value, equal);
+        }
+      }
+    }
+  }
+}
+
+TEST_CASE("Frozen cached oracle rejects cache byte operand and target mutants",
+          "[event-vm-live][event-branch-differential]") {
+  const LiveVmFixture fixture;
+  FlagDifferentialFixture flags;
+  REQUIRE(CompareFrozenCachedBranch(128, 128));
+  for (int mutation = 1; mutation <= 3; ++mutation) {
+    CHECK_FALSE(CompareFrozenCachedBranch(128, 128, nullptr, mutation));
   }
 }
 

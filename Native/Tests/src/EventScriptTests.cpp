@@ -848,15 +848,17 @@ int Tests_EventScriptBranchHandlers(void) {
   u_char conditional[] = {0, 7, 4, 0, 0};
   u_char backward[] = {0, 0, 0, 0, 0, 0xFF, 4, 0};
   int passed;
+  auto& host = VS::Event::LiveScriptVm();
   Event_cachedFlagValue = 7;
-  passed = Event_ScriptBranchOnCachedFlag(conditional, 1) ==
-           (intptr_t)&conditional[4];
+  passed = VS::Event::ScriptBranchOnCachedFlag({conditional, {}, 1}, host) ==
+           VS::Event::ScriptFlow::JumpBy(4);
   Event_cachedFlagValue = 6;
-  passed &= Event_ScriptBranchOnCachedFlag(conditional, 1) == 0;
+  passed &=
+      VS::Event::ScriptBranchOnCachedFlag({conditional, {}, 1}, host).kind ==
+      VS::Event::ScriptFlowKind::kAdvance;
   passed &= Event_ScriptLoopBackward(&backward[4], 1) == (intptr_t)backward;
   const auto context =
       VS::test_support::MountLiveEventScript({0xE0, 2, 5, 0, 0xF0, 0xE1, 2});
-  auto& host = VS::Event::LiveScriptVm();
   Event_skipState = 0;
   Event_kOpcodeHandlers[0xE0] = Event_CommandStartScriptContextOpcode;
   Event_kOpcodeHandlers[0xE1] = Event_CommandWaitScriptContextOpcode;

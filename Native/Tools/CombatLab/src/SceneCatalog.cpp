@@ -76,7 +76,7 @@ SceneOpcodes ProductionOpcodes() {
                handler == Event_ScriptBranchOnFlagPair) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = kFlagBranchOperand;
-    } else if (handler == Event_ScriptBranchOnCachedFlag) {
+    } else if (handler == Event_ScriptBranchOnCachedFlagOpcode) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = 2;
     } else if (handler == Event_ScriptEndCutsceneAndJump) {

@@ -162,7 +162,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptLoadObjectModelOpcode, Event_ScriptWaitForObjectLoadOpcode, Event_ScriptReleaseObjectModelOpcode, Event_ScriptSelectObjectTextureBankOpcode, Event_ScriptSetActorOverlayPassOpcode,
     Event_ScriptSetActorWeaponDrawnOpcode, Event_ScriptBranchOnFlagImmediate, Event_ScriptBranchOnFlagPair,
     Event_ScriptJumpForward, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptJumpForward,
-    Event_ScriptCacheFlagValue, Event_ScriptBranchOnCachedFlag,
+    Event_ScriptCacheFlagValueOpcode, Event_ScriptBranchOnCachedFlagOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounter, Event_ScriptLoopBackward, Event_ScriptJumpForward,
     Event_ScriptJumpForward, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperation, Event_ScriptApplyFlagPairOperation,
@@ -408,22 +408,6 @@ intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index)
 intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index)
 {
     return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)];
-}
-
-// decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (src/BATTLE/BATTLE.PRG/4A0A8.c:1640)
-intptr_t Event_ScriptCacheFlagValue(u_char* instruction, short thread_index)
-{
-    Event_cachedFlagValue = VS::State::LiveScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlagContext (src/BATTLE/BATTLE.PRG/4A0A8.c:1646)
-intptr_t Event_ScriptBranchOnCachedFlag(u_char* instruction, short thread_index)
-{
-    if (Event_cachedFlagValue == instruction[1]) {
-        return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
-    }
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800B8C44 (src/BATTLE/BATTLE.PRG/4A0A8.c:1654)

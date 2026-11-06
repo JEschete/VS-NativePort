@@ -58,8 +58,6 @@ intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_ind
 intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_index);
 intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index);
 intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index);
-intptr_t Event_ScriptCacheFlagValue(u_char* instruction, short thread_index);
-intptr_t Event_ScriptBranchOnCachedFlag(u_char* instruction, short thread_index);
 intptr_t Event_ScriptReturnToSavedAddress(u_char* instruction, short thread_index);
 intptr_t Event_ScriptSetLoopCounter(u_char* instruction, short thread_index);
 intptr_t Event_ScriptLoopBackward(u_char* instruction, short thread_index);

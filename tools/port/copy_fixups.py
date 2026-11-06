@@ -2019,6 +2019,8 @@ OWNED_CALL_BINDINGS |= {
 EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01028", 0x800B66E4, "ScriptNoOperation"),
     ("F01029", 0x800B66EC, "ScriptYieldFrame"),
+    ("F01089", 0x800B8BC4, "ScriptCacheFlagValue"),
+    ("F01090", 0x800B8BF8, "ScriptBranchOnCachedFlag"),
     ("F01199", 0x800BB474, "CommandWaitFrames"),
     ("F01200", 0x800BB4CC, "CommandSetTickSpeed"),
     ("F01202", 0x800BB504, "CommandWaitScriptContext"),

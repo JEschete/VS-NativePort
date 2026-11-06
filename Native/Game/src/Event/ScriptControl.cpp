@@ -1013,6 +1013,7 @@ ScriptFlow ScriptJumpForward(const ScriptInstruction& instruction,
   return ScriptFlow::JumpBy(OperandHalf(Bytes(instruction), kFirstOperand));
 }
 
+// decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (4A0A8.c:1640).
 ScriptFlow ScriptCacheFlagValue(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1023,6 +1024,7 @@ ScriptFlow ScriptCacheFlagValue(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlagContext (4A0A8.c:1646).
 ScriptFlow ScriptBranchOnCachedFlag(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {

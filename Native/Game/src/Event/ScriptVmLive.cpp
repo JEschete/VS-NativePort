@@ -90,8 +90,9 @@ constexpr std::array kControlBindings{
                    ScriptBranchOnFlagImmediate},
     ControlBinding{Event_ScriptBranchOnFlagPair, ScriptBranchOnFlagPair},
     ControlBinding{Event_ScriptJumpForward, ScriptJumpForward},
-    ControlBinding{Event_ScriptCacheFlagValue, ScriptCacheFlagValue},
-    ControlBinding{Event_ScriptBranchOnCachedFlag, ScriptBranchOnCachedFlag},
+    ControlBinding{Event_ScriptCacheFlagValueOpcode, ScriptCacheFlagValue},
+    ControlBinding{Event_ScriptBranchOnCachedFlagOpcode,
+                   ScriptBranchOnCachedFlag},
     ControlBinding{Event_ScriptReturnToSavedAddress,
                    ScriptReturnToSavedAddress},
     ControlBinding{Event_ScriptSetLoopCounter, ScriptSetLoopCounter},
@@ -987,4 +988,18 @@ std::intptr_t Event_CommandStopScriptContextOpcode(std::uint8_t* instruction,
                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandStopScriptContext);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (4A0A8.c:1640).
+std::intptr_t Event_ScriptCacheFlagValueOpcode(std::uint8_t* instruction,
+                                               std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptCacheFlagValue);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlagContext (4A0A8.c:1646).
+std::intptr_t Event_ScriptBranchOnCachedFlagOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptBranchOnCachedFlag);
 }
