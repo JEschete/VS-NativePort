@@ -84,6 +84,94 @@ struct LiveVmFixture {
   LiveVmFixture& operator=(LiveVmFixture&&) = delete;
 };
 
+struct FlagDifferentialFixture {
+  std::array<std::uint8_t, VS::State::kScriptFlagCount> saved{};
+  FlagDifferentialFixture() {
+    for (std::size_t flag = 0; flag < saved.size(); ++flag) {
+      saved[flag] = VS::State::LiveScriptFlag(static_cast<int>(flag));
+    }
+  }
+  ~FlagDifferentialFixture() {
+    for (std::size_t flag = 0; flag < saved.size(); ++flag) {
+      VS::State::SetLiveScriptFlag(static_cast<int>(flag), saved[flag]);
+    }
+  }
+};
+
+struct FlagComparison {
+  int first = 0;
+  int second = 0;
+  std::uint8_t left = 0;
+  std::uint8_t right = 0;
+  std::uint8_t operation = 0;
+  bool pair = false;
+};
+
+std::array<std::uint8_t, 4> FlagCommand(const FlagComparison& sample) {
+  return {
+      0, static_cast<std::uint8_t>(sample.operation | (sample.first >> 6)),
+      static_cast<std::uint8_t>(((sample.first & 63) << 2) |
+                                (sample.pair ? sample.second >> 8 : 0)),
+      sample.pair ? static_cast<std::uint8_t>(sample.second) : sample.right};
+}
+
+void InitializeFlagSample(const FlagComparison& sample) {
+  VS::State::SetLiveScriptFlag(sample.first, sample.left);
+  if (sample.pair) {
+    VS::State::SetLiveScriptFlag(sample.second, sample.right);
+  }
+}
+
+bool CompareOriginalFlagOperation(const FlagComparison& sample,
+                                  int mutation = 0) {
+  auto command = FlagCommand(sample);
+  InitializeFlagSample(sample);
+  const auto original =
+      sample.pair ? Event_ScriptApplyFlagPairOperation(command.data(), 0)
+                  : Event_ScriptApplyImmediateFlagOperation(command.data(), 0);
+  const auto first = VS::State::LiveScriptFlag(sample.first);
+  const auto second = VS::State::LiveScriptFlag(sample.second);
+  InitializeFlagSample(sample);
+  if (mutation == 1) command[1] ^= 0x10;
+  if (mutation == 2) command[2] ^= 4;
+  if (mutation == 3) ++command[3];
+  const event::ScriptInstruction instruction{command, {}, 0};
+  const auto result = sample.pair ? event::ScriptApplyFlagPairOperation(
+                                        instruction, event::LiveScriptVm())
+                                  : event::ScriptApplyImmediateFlagOperation(
+                                        instruction, event::LiveScriptVm());
+  return original == 0 && result.kind == event::ScriptFlowKind::kAdvance &&
+         VS::State::LiveScriptFlag(sample.first) == first &&
+         VS::State::LiveScriptFlag(sample.second) == second;
+}
+
+std::uint32_t NextFlagSample(std::uint32_t& state) {
+  state ^= state << 13;
+  state ^= state >> 17;
+  state ^= state << 5;
+  return state;
+}
+
+void CompareFlagCorpus(bool pair) {
+  FlagDifferentialFixture fixture;
+  std::uint32_t random = 0xF1A670;
+  for (std::uint8_t operation = 0; operation < 16; ++operation) {
+    for (int iteration = 0; iteration < 2048; ++iteration) {
+      const int first = iteration & 1023;
+      const int second = (iteration & 1) == 0 ? first : (iteration * 13) & 1023;
+      const auto left = static_cast<std::uint8_t>(NextFlagSample(random));
+      auto right = static_cast<std::uint8_t>(NextFlagSample(random));
+      if ((operation == 3 || operation == 4) &&
+          (right == 0 || (pair && first == second && left == 0))) {
+        right = 1;
+      }
+      REQUIRE(CompareOriginalFlagOperation(
+          {first, second, left, right,
+           static_cast<std::uint8_t>(operation << 4), pair}));
+    }
+  }
+}
+
 struct LiveRoomFixture {
   LiveVmFixture vm;
   std::int16_t change = Event_roomChangeState;
@@ -303,6 +391,28 @@ TEST_CASE("Production room event boundary publishes exact owned script sources",
   CHECK(std::ranges::equal(room->Doors(), doors));
   event::FreeLiveRoomScripts();
   CHECK(source->Bytes().front() == 0x55);
+}
+
+TEST_CASE("Native immediate flag arithmetic matches actual safe original cases",
+          "[event-vm-live][event-differential]") {
+  CompareFlagCorpus(false);
+}
+
+TEST_CASE("Native flag pair arithmetic matches actual safe original cases",
+          "[event-vm-live][event-differential]") {
+  CompareFlagCorpus(true);
+}
+
+TEST_CASE(
+    "Original flag differential detects planted operator target and operand "
+    "mutants",
+    "[event-vm-live][event-differential]") {
+  FlagDifferentialFixture fixture;
+  const FlagComparison sample{32, 33, 5, 3, 0, false};
+  REQUIRE(CompareOriginalFlagOperation(sample));
+  for (int mutation = 1; mutation <= 3; ++mutation) {
+    CHECK_FALSE(CompareOriginalFlagOperation(sample, mutation));
+  }
 }
 
 TEST_CASE("Live VM dispatch carries typed jumps without pointer results",

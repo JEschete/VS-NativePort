@@ -7,6 +7,29 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Fresh original flag differential (#313)
+
+- The live VM tests now compare immediate and flag-pair arithmetic directly with
+  the retained actual C originals over a deterministic 65,536-case corpus. Every
+  byte operation class, all ten-bit flag indices, alias/nonalias pairs, byte wraps
+  and safe nonzero divisors are included. Original zero-divisor paths are never
+  executed; separate typed tests retain those refusal/R3000-semantics controls.
+  Three planted operator/target/operand mutations are detected by the oracle.
+- Three new cases add 65,540 assertions. On `e731e2b5` plus this test-only slice,
+  both complete builds and full suites pass 4,630 cases / 8,005,230 assertions with
+  all baseline tests and both canonical replay fingerprints unchanged. Scoped
+  quality/clang-tidy is clean. Evidence: `VR-EVENT-FLAG-ORIGINAL-DIFFERENTIAL` and
+  `build\owner-checkpoint\native-flag-differential-*-regression.log`.
+  This is fresh arithmetic evidence, not complete VM/trigger differential coverage
+  or row-33 promotion; #313/#276 remain open for their remaining gates.
+- Production switch `41df09f3` initially failed Source Quality `42274649322` on
+  two long lines and formatting in the late room-local inspection condition.
+  Layout-only correction `e731e2b5` has successful exact CI `42276114919`.
+  #315 is now closed against that revision and its concrete frame/actual-playback
+  evidence; #316 remains closed on `86f27ef7`, green `42251517985`. Naming-only
+  prerequisite `cfdb4af8` is green on `42268046105`; #273 remains open for its
+  complete review/CI decision. No baseline was refreshed or marker advanced.
+
 ### Production native VM switch (#313 / #315)
 
 - Production Boot now initializes and updates the native VM; room import/free
@@ -47,8 +70,8 @@ verification of the current worktree.
   retirement. Original unused C VM/control bodies and module identities remain;
   F01261/F01276 join F01416/F00853 as `cpp=wip`. #313 still owns fresh complete
   original-differential/mutation and remaining promotion gates; #276 stays active.
-  #315 is ready for fixing-revision CI/acceptance reconciliation, not closed by
-  this local record. No full playthrough, physical-controller/audio parity, or
+  #315 subsequently closed after layout correction `e731e2b5` and successful exact
+  CI `42276114919`. No full playthrough, physical-controller/audio parity, or
   new behavior markers are claimed. #316 is closed on `86f27ef7`, green exact
   Source Quality `42251517985`; routing `4e430c80` is green on `42246868261`.
 
