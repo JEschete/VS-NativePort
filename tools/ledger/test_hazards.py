@@ -150,6 +150,21 @@ class NullTests(unittest.TestCase):
         body = "int Battle_Hit(int i) { const std::optional<Thing> t = Field_FindThing(i); return t->flags; }\n"
         self.assertIn("NULL-RETURN", classes(body))
 
+    def test_a_qualified_cell_lookup_read_unguarded_is_found(self) -> None:
+        body = ("int Battle_Hit(int x) { const auto* cell =\n      VS::Field::LiveCollisionCellAt(x, 0, 0);\n"
+                "  return cell->isPit; }\n")
+        self.assertIn("NULL-RETURN", classes(body))
+        self.assertIn("NULL-RETURN", classes("int Battle_Hit(int x) { return Field_RoomTriggerAtTile(x, 0, 0)->kind; }\n"))
+
+    def test_a_qualified_cell_lookup_kept_and_guarded_is_clean(self) -> None:
+        body = ("int Battle_Hit(int x) { const auto* cell = VS::Field::LiveCollisionCellAt(x, 0, 0);\n"
+                "  return cell != nullptr && cell->isPit; }\n")
+        self.assertEqual(classes(body), set())
+
+    def test_a_never_null_cell_reader_is_clean(self) -> None:
+        body = "int Battle_Hit(int x) { return VS::Field::LiveCollisionCellOrAbsent(x, 0, 0)->isPit; }\n"
+        self.assertEqual(classes(body), set())
+
 
 class DivisionTests(unittest.TestCase):
     def test_a_variable_divisor_is_found(self) -> None:

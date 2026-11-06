@@ -180,7 +180,9 @@ NARROW_TYPES = {"u_char", "char", "unsigned char", "signed char"}
 NARROW_NAME = re.compile(r"^(?:id|index|subId|blade|grip|shield|weapon|armor|gem|gems|item|slot|\w+Index|\w+Id|weapons|blades"
                          r"|grips|shields|misc)$")
 TEXT_FIELD = re.compile(r"^(?:name|text|label|types)$")
-LOOKUP = r"\w*(?:Find|Lookup|Try)[A-Z]\w*"
+LOOKUP = r"\w*(?:Find|Lookup|Try)[A-Z]\w*|\w*(?:CellAt|AtTile)\b"
+# A namespace qualifier before a lookup call, e.g. `VS::Field::`.
+QUALIFIER = r"(?:\w+::)*"
 ARGUMENTS = r"\((?:[^()]|\([^()]*\))*\)"
 CAST = r"(?:\([^()]*\)\s*)?"
 DIVISION = re.compile(r"(?<![/*])[/%]=?(?![/*=])\s*(?P<divisor>\((?:[^()]|\([^()]*\))*\)|[A-Za-z_]\w*(?:(?:->|\.)\w+|\[[^\]]*\]|\([^()]*\))*|\d[\w.]*)")
@@ -284,8 +286,9 @@ class FunctionScan:
 
     def null_returns(self, body: str) -> list[tuple[str, str, str, str]]:
         found = [("NULL-RETURN", match["call"], "medium", match.group(0))
-                 for match in re.finditer(rf"(?P<call>\b{LOOKUP}){ARGUMENTS}\s*\)*\s*->", body)]
-        for match in re.finditer(rf"(?P<alias>[A-Za-z_]\w*)\s*=\s*{CAST}(?P<call>\b{LOOKUP}){ARGUMENTS}\s*;", body):
+                 for match in re.finditer(rf"(?P<call>\b(?:{LOOKUP})){ARGUMENTS}\s*\)*\s*->", body)]
+        alias = rf"(?P<alias>[A-Za-z_]\w*)\s*=\s*{CAST}{QUALIFIER}(?P<call>\b(?:{LOOKUP})){ARGUMENTS}\s*;"
+        for match in re.finditer(alias, body):
             found += self.alias_reads(body, match, "NULL-RETURN", match["call"])
         return found
 
