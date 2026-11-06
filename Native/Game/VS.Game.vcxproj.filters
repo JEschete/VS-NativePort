@@ -1494,6 +1494,9 @@
     <ClInclude Include="src\Event\ScriptCamera.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\ScriptControl.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Event\ScriptDialog.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -2749,6 +2752,9 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\ScriptStep.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptVm.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\TriggersLive.hpp">

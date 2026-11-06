@@ -7,10 +7,34 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Resumed row-33 work
+
+- The owner resumed implementation and authorized commits/pushes at verified
+  milestones. #276 remains active; the promotion counts below are unchanged.
+- The recovered typed VM core is now `Event/ScriptControl.cpp`, with the
+  `Event/ScriptVm.hpp` interface. It is compiled and tested alongside, not in
+  place of, the generated production VM. Script locations are region/offset
+  values and dispatch outcomes distinguish control codes from jumps.
+  Rejected headers clear old dialog/style/vibration views.
+- Core-only verification on `1bcfa1f0` plus this checkpoint's changes:
+  `[event-vm]` passes 40 cases / 1,941 assertions. Debug and Release x64 builds
+  and `python tools\test\regression.py record --config <Debug|Release>` each pass
+  4,399 cases / 7,901,716 assertions and both replays. The recorded baseline
+  change adds those 40 test names/assertions only: all earlier names are retained,
+  and both configurations' replay expectations are identical to the pre-run
+  baseline. Logs: `build\owner-checkpoint\resume-vm-*`.
+- Scoped `quality-native.cmd --files <core/header/tests> --tidy --jobs 2`
+  reports zero new/actionable findings; gate and modernization checks pass.
+  No ownership or promotion credit is claimed for this core-only checkpoint.
+- Next: finish the production Live adapter, bounded room triggers and cutscene
+  lifecycle, retarget every caller, run the original differential/mutation
+  controls and all row acceptance gates, then publish and close only what passes.
+  #313 and row 33 remain open/planned. The original draft backup is retained.
+
 ### Owner-pause publication checkpoint
 
-- Implementation is paused at the owner's request. Do not resume promotion until
-  the owner says to continue. #247 is closed; #276 remains the continuation tracker.
+- At this earlier checkpoint the owner paused implementation; work has since
+  resumed as recorded above. #247 is closed; #276 remains the continuation tracker.
 - Branch `imp/01-ma04-gates`: `c83d7772` publishes the #288 collision hazard scanner
   controls; `34cdf8b7` publishes the integrated native-system promotions, their
   generated callers, ownership, project integration, tests and ledgers. This

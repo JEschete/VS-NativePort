@@ -1191,6 +1191,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Event\ScriptControl.cpp" />
     <ClCompile Include="src\Event\ScriptDialog.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2220,6 +2221,7 @@
     <ClInclude Include="include\Event\ScriptEffectCommands.hpp" />
     <ClInclude Include="include\Event\ScriptEffectCommandsLive.hpp" />
     <ClInclude Include="include\Event\ScriptStep.hpp" />
+    <ClInclude Include="include\Event\ScriptVm.hpp" />
     <ClInclude Include="include\Event\TriggersLive.hpp" />
     <ClInclude Include="include\Event\WeaponMode.hpp" />
     <ClInclude Include="include\Field\ActorCollision.hpp" />
