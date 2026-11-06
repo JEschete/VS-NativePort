@@ -249,6 +249,7 @@
     <ClCompile Include="src\ScenePlaybackTests.cpp" />
     <ClCompile Include="src\ScreenEffectStateTests.cpp" />
     <ClCompile Include="src\ScreenWarpTests.cpp" />
+    <ClCompile Include="src\ScriptSourcesTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
     <ClCompile Include="src\SegmentCollisionTests.cpp" />
     <ClCompile Include="src\SeqControlCommandsTests.cpp" />

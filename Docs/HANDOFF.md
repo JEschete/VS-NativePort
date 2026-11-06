@@ -13,6 +13,25 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- The new `ScriptSource` value retains a buffer or immutable room section
+  behind an exact byte span and a fresh, nonwrapping generation. Copies pin
+  the old source during replacement; moves revoke the moved-from view.
+  Preparation errors are explicit and leave the generation unchanged.
+  This is an ownership component, **not yet the production VM adapter**:
+  no new promotion or compatibility-retirement credit is recorded.
+  Eight cases / 86 assertions cover ownership, replacement, same-address
+  remounts, invalid locations, empty sources, moves and generation exhaustion.
+  Debug and Release full suites pass **4,538 cases / 7,905,117 assertions**;
+  all 4,530 previous names and both replay objects are unchanged. Scoped
+  quality/clang-tidy is clean; two generations preserve 1,658 source/project
+  hashes. Evidence: `VR-EVENT-SOURCE-LEASES` and
+  `build\owner-checkpoint\script-sources-*`.
+- Remaining borrower obligations are concrete: text-box selection swaps
+  complete records, so per-index string leases alone are insufficient.
+  Controller vibration retains input spans, and its raw importer assumes a
+  4,096-byte scan window. Production integration must use actual source
+  bounds and retain or revoke these borrows before dropping their owners;
+  #313 comment `6682106906` records the source evidence, not a retail crash.
 - Room/encounter imports now carry `Event::RoomEventLoad` through Field rather
   than interpreting an error integer as a started event. Shared validation
   rejects oversize sections before the legacy boundary narrows lengths:
@@ -39,7 +58,8 @@ verification of the current worktree.
   local run preceded the final bool-return change. The correction updates
   only those signature expectations, preserving both ordering checks. All
   190 encounter tests now pass against the final bool-return API, with clean
-  scoped Python quality. Exact-revision CI must still confirm the correction.
+  scoped Python quality. Correction `141e87c3` has successful exact Source
+  Quality `42195383745`.
   Two generations preserve 1,656 source/project hashes. Evidence:
   `VR-ROOM-EVENT-FAILURE-CHAIN`, `build\owner-checkpoint\room-event-failure-*`,
   and #313 comments `6681095636`, `6681134039`, `6681303616`.
