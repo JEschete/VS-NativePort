@@ -17,6 +17,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/GimImagesLive.hpp"
@@ -147,10 +148,34 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
   }
 
   [[nodiscard]] bool VibrationPatternLoaded(int pattern) const override {
+    const auto lease = event::LeaseLiveVibrationPattern(pattern);
+    if (lease) {
+      const auto bytes = lease->Bytes();
+      return bytes && bytes->size() > kVibrationHeaderBytes;
+    }
+    if (lease.error() != event::ScriptSourceError::kMissingOwner) {
+      return false;
+    }
     return Event_vibrationPatterns[pattern] != nullptr;
   }
   // Buffered requests own separate copies, not the original shared scratch.
   void StartVibrationPattern(int pattern, bool buffered) override {
+    const auto lease = event::LeaseLiveVibrationPattern(pattern);
+    if (lease) {
+      const auto bytes = lease->Bytes();
+      if (!bytes || bytes->size() <= kVibrationHeaderBytes) {
+        Refuse(event::ScriptEffectRefusal::kVibrationPattern, pattern);
+        return;
+      }
+      static_cast<void>(VS::Input::StartLiveOwnedVibrationPattern(
+          std::as_bytes(*bytes).subspan(kVibrationHeaderBytes), kAllMotors,
+          kScriptVibrationOwner));
+      return;
+    }
+    if (lease.error() != event::ScriptSourceError::kMissingOwner) {
+      Refuse(event::ScriptEffectRefusal::kVibrationPattern, pattern);
+      return;
+    }
     const char* source = Event_vibrationPatterns[pattern];
     if (buffered) {
       const std::span bytes(reinterpret_cast<const std::byte*>(source),

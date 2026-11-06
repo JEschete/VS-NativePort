@@ -7,6 +7,33 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native vibration consumer (#313)
+
+- The production script-effect host now prefers `LeaseLiveVibrationPattern` and
+  passes its exact post-header span to slot-owned playback for both buffered and
+  unbuffered script modes. Invalid native bindings and short headers cannot fall
+  back to unrelated legacy bytes; malformed streams leave active slots unchanged.
+  Playback copies outlive VM reset without retaining the original script owner.
+- Three pre-integration controls failed 13 of 78 assertions. The final four new
+  cases add 104 assertions, covering source selection, both modes, source release,
+  every short-header length, a complete stream beyond the old 120-byte copy
+  window, and malformed-stream refusal preserving existing playback.
+  `[input-controller],[event-script-effects],[event-vm-live]` passes 78 cases /
+  981 assertions in Debug. On `ac6f55db` plus these two source/test files, both
+  complete builds and full suites pass 4,602 cases / 7,939,104 assertions, with
+  every previous case retained and both canonical replays unchanged. Scoped
+  quality/clang-tidy is clean. Evidence: `VR-SCRIPT-VIBRATION-NATIVE-SOURCE` and
+  `build\owner-checkpoint\script-vibration-native-*-regression.log`.
+- The legacy-only fallback is unchanged: buffered playback still assumes a
+  readable 128-byte source record, and unbuffered playback still borrows its
+  original pointer through the trusted importer. Production VM loading/dispatch
+  is not switched yet, so those producer paths are not retired. No retail crash,
+  physical motor, new promotion or compatibility-retirement claim is made.
+  Dialog retention and exact native source-producer adoption remain under #313;
+  #313/#315/#276 remain open. Frame milestone `ac6f55db` is pushed with successful
+  exact Source Quality `42237200065`; its predecessor `81bd2cdc` is green on
+  `42232929820`.
+
 ### Text-box frame safety (#315)
 
 - F01416 is now an owned, strict-compiled production entry point. Its live
