@@ -13,6 +13,7 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
+#include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -38,6 +39,7 @@ struct LiveVmFixture {
   std::array<Handler, 256> skip_handlers{};
   std::array<std::uint8_t, 256> sizes{};
   std::array<char, 64> loop_counters{};
+  std::array<std::uint16_t, 66> legacy_curves{};
   std::uintptr_t subroutine_return = Event_subroutineReturnCursor;
   char phase = Event_playbackPhase;
   char confirmed = Event_isStartConfirmed;
@@ -51,6 +53,7 @@ struct LiveVmFixture {
     std::ranges::copy(Event_kSkipOpcodeHandlers, skip_handlers.begin());
     std::ranges::copy(Event_kOpcodeSizes, sizes.begin());
     std::ranges::copy(Event_loopCounters, loop_counters.begin());
+    std::ranges::copy(Event_customEasingCurves, legacy_curves.begin());
     content::InitializeLiveDiscQueue();
     Content_discDriveState = {};
     Content_discDriveState.state = Content_DiscDriveState_Idle;
@@ -67,6 +70,7 @@ struct LiveVmFixture {
     std::ranges::copy(skip_handlers, Event_kSkipOpcodeHandlers);
     std::ranges::copy(sizes, Event_kOpcodeSizes);
     std::ranges::copy(loop_counters, Event_loopCounters);
+    std::ranges::copy(legacy_curves, Event_customEasingCurves);
     Event_subroutineReturnCursor = subroutine_return;
     Event_playbackPhase = phase;
     Event_isStartConfirmed = confirmed;
@@ -276,6 +280,31 @@ MountedRoomSources ImportTestRoomSources() {
 }
 }  // namespace
 
+TEST_CASE("Production room event boundary publishes exact owned script sources",
+          "[event-vm-live][room-triggers]") {
+  LiveRoomFixture fixture;
+  Bytes entry{0x55, 0x66};
+  const Bytes triggers{0xFF, 0xFF};
+  const Bytes doors{0x22, 0x33};
+  const auto loaded = event::LoadLiveRoomEventSections({.triggers = triggers,
+                                                        .entry_script = entry,
+                                                        .doors = doors,
+                                                        .first_entry = true});
+  REQUIRE(loaded);
+  CHECK(*loaded == event::RoomEventLoadResult::kReady);
+  const auto source =
+      event::LeaseLiveScriptSource(event::ScriptRegion::kEventScript);
+  REQUIRE(source);
+  CHECK(source->Bytes().size() == entry.size());
+  entry[0] = 0;
+  CHECK(source->Bytes().front() == 0x55);
+  const auto room = event::LiveRoomScriptSections();
+  REQUIRE(room);
+  CHECK(std::ranges::equal(room->Doors(), doors));
+  event::FreeLiveRoomScripts();
+  CHECK(source->Bytes().front() == 0x55);
+}
+
 TEST_CASE("Live VM dispatch carries typed jumps without pointer results",
           "[event-vm-live]") {
   const LiveVmFixture fixture;
@@ -356,6 +385,14 @@ TEST_CASE("Live VM original return handler uses the owned native location",
   REQUIRE(observations == 1);
   CHECK(observed[0] ==
         event::ScriptLocation{start.region, 2, start.generation});
+}
+
+TEST_CASE("Legacy easing entry reads the native owned custom curve",
+          "[event-vm-live]") {
+  const LiveVmFixture fixture;
+  Event_customEasingCurves[0] = 0;
+  event::LiveScriptVm().SetCustomEasingCurve(0, {0, 1});
+  CHECK(Event_EvaluateInterpolationCurve(4, 1, 2) == 1024);
 }
 
 TEST_CASE("Live VM refuses pointer results and detached control adapters",

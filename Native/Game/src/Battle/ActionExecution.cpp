@@ -24,7 +24,7 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/TargetingState.h"
 #include "Effects/Runtime.h"
-#include "Event/Triggers.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Interactions.h"
 #include "Menu/TextBox.h"

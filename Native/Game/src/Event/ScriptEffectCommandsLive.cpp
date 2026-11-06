@@ -15,6 +15,7 @@
 #include <span>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.h"
 #include "Event/ScriptVmLive.hpp"

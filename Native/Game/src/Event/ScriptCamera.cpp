@@ -17,6 +17,7 @@ extern "C" {
 #include "Core/Diagnostics.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Camera.h"
+#include "Event/InterpolationCurveLive.h"
 #include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptVm.h"

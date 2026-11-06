@@ -33,7 +33,7 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Event/Triggers.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"

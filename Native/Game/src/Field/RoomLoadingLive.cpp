@@ -72,6 +72,7 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
 #include "Effects/Weather.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
 #include "Field/Actors.h"
@@ -1245,7 +1246,7 @@ class LiveRoomUnloadHost final
     static_cast<void>(State::UpdateLivePlayTimeAndLoading(0));
   }
 
-  void FreeRoomEventSections() override { Event_FreeRoomEventSections(); }
+  void FreeRoomEventSections() override { Event::FreeLiveRoomScripts(); }
 
   void MarkCurrentRoomVisited() override { LiveMarkCurrentRoomVisited(); }
 

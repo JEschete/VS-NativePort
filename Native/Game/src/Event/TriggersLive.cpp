@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -22,8 +23,6 @@ extern "C" {
 
 namespace VS::Event {
 namespace {
-constexpr int kActorInteractionTriggerRequest = 4;
-
 // decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4A0A8.c:4302).
 class LiveRoomTriggerHost final : public RoomTriggerHost {
  public:
@@ -168,10 +167,9 @@ class LiveRoomSectionHost final : public RoomEventSectionHost {
 }  // namespace
 
 bool EvaluateLiveActorRoomEventTrigger(int actor_id) {
-  const auto context =
-      reinterpret_cast<u_char*>(static_cast<std::intptr_t>(actor_id));
-  return Event_EvaluateRoomEventTriggers(kActorInteractionTriggerRequest, 0,
-                                         context, 0) == 1;
+  const RoomTriggerQuery query{.request = RoomTriggerRequest::kInteraction,
+                               .context = TriggerActorPair{0, actor_id}};
+  return EvaluateLiveRoomEventTriggers(query) == RoomTriggerResult::kStarted;
 }
 
 RoomTriggerResult EvaluateLiveRoomEventTriggers(const RoomTriggerQuery& query) {
@@ -182,25 +180,7 @@ RoomTriggerResult EvaluateLiveRoomEventTriggers(const RoomTriggerQuery& query) {
 }
 
 RoomEventLoad LoadLiveRoomEventSections(RoomEventInput input) {
-  constexpr std::int16_t kWaitingForRoom = 1;
-  if (Event_roomChangeState == kWaitingForRoom) {
-    input.entry_script = {};
-  }
-  if (const auto error = ValidateRoomEventInput(input)) {
-    Core_Warnf("event", "Room event import refused: section %d, %zu bytes",
-               static_cast<int>(error->reason), error->bytes);
-    return std::unexpected(*error);
-  }
-  const int result = Event_LoadRoomEventSections(
-      const_cast<std::uint8_t*>(input.triggers.data()),
-      static_cast<std::uint16_t>(input.triggers.size()),
-      const_cast<std::uint8_t*>(input.entry_script.data()),
-      static_cast<std::uint16_t>(input.entry_script.size()),
-      const_cast<std::uint8_t*>(input.doors.data()),
-      static_cast<std::uint16_t>(input.doors.size()),
-      input.first_entry ? 1 : 0);
-  return result == 0 ? RoomEventLoadResult::kReady
-                     : RoomEventLoadResult::kContinuingEvent;
+  return ImportLiveRoomScripts(input);
 }
 
 RoomEventLoad ImportLiveRoomScripts(RoomEventInput input) {

@@ -7,6 +7,51 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Production native VM switch (#313 / #315)
+
+- Production Boot now initializes and updates the native VM; room import/free
+  publishes exact native-owned sections. The remaining C trigger entry converts
+  actor/tile contexts into the bounded native query, so timer, cutscene, facing-tile,
+  encounter and gameplay callers use the same owner. Easing's owned C entry reads
+  native custom curves. Canonical scene inspection resolves native generation-owned
+  cursors rather than the obsolete raw cursor globals; the room-local fixture also
+  reads its offsets from a bounded native door lease.
+- Verification found and repaired two frame assumptions before acceptance: missing
+  encoded parts use the original base-frame fallback (`800CD574 -> 800CD684`), and
+  storage may have an unused slot (stock style 3 reserves 62, while base plus parts
+  accounts for 61). Original `800CD5D8-800CD674` transforms every post-base slot;
+  part faces may share those initialized extras. The prior intermediate per-part
+  restriction test is explicitly corrected to initialized-storage bounds, with
+  separate valid shared-slot and unwritten-base controls. Frame selection passes
+  14 cases / 33,266 assertions; the frozen original packet oracle is unchanged.
+- On `cfdb4af8` plus this functional switch, both complete builds and full suites
+  pass 4,627 cases / 7,939,690 assertions with no failures/skips. All original
+  baseline names/assertions and both canonical replays are preserved without a
+  baseline refresh. Timer and actor-retention fixtures now publish the identical
+  synthetic bytes through native ownership; the existing byte-return/no-cast
+  copier control follows the owned host. All 190 copier controls and the broad
+  changed-source quality/clang-tidy gate pass with zero new findings. Thirteen
+  scoped source/manifest/project hashes survive repeat copying/generation before
+  the final frame-source review; the frame changes are registered owned code.
+- Actual native New Game dialogue captures at 4800/5400/6500 match the earlier
+  generated-VM BMPs byte for byte in both configurations. Fresh final Debug/Release
+  16,000-tick attract runs load real `EVENT/0020.EVT` at tick 12,581 and advance to
+  MAP214. Captures at 8000/13000/15000 are byte-identical between configurations;
+  the retained Debug log has no VM, trigger, frame, dialog or crash refusal. The
+  failed earlier frame-format runs and bounded diagnostics remain separate local
+  evidence; temporary header/part probes and rename scripts were removed.
+  Evidence: `VR-EVENT-PRODUCTION-SWITCH`, `VR-FRAME-ORIGINAL-STORAGE`,
+  `build\owner-checkpoint\native-vm-switch-*-regression.log`,
+  `native-vm-switch-*` dialogue captures and `native-vm-final-evt-*` captures/logs.
+- This is production integration, not complete row-33 C++ promotion or global EC
+  retirement. Original unused C VM/control bodies and module identities remain;
+  F01261/F01276 join F01416/F00853 as `cpp=wip`. #313 still owns fresh complete
+  original-differential/mutation and remaining promotion gates; #276 stays active.
+  #315 is ready for fixing-revision CI/acceptance reconciliation, not closed by
+  this local record. No full playthrough, physical-controller/audio parity, or
+  new behavior markers are claimed. #316 is closed on `86f27ef7`, green exact
+  Source Quality `42251517985`; routing `4e430c80` is green on `42246868261`.
+
 ### Shared-header naming prerequisite (#273 / #248)
 
 - Production VM validation expanded clang-tidy reach into unchanged typed SEQ and

@@ -1145,6 +1145,7 @@
     <ClCompile Include="src\Event\CutsceneLifecycleLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Event\InterpolationCurveLive.cpp" />
     <ClCompile Include="src\Event\Playback.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1152,6 +1153,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Event\RoomTriggerEntryLive.cpp" />
     <ClCompile Include="src\Event\RoomTriggers.cpp" />
     <ClCompile Include="src\Event\Script.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -1960,7 +1962,9 @@
     <ClInclude Include="src\Event\Camera.h" />
     <ClInclude Include="src\Event\Dialog.h" />
     <ClInclude Include="src\Event\Interpolation.h" />
+    <ClInclude Include="src\Event\InterpolationCurveLive.h" />
     <ClInclude Include="src\Event\Playback.h" />
+    <ClInclude Include="src\Event\RoomTriggerEntryLive.h" />
     <ClInclude Include="src\Event\Screen.h" />
     <ClInclude Include="src\Event\Script.h" />
     <ClInclude Include="src\Event\ScriptActorOpcodes.h" />

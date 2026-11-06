@@ -8,6 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -191,4 +192,16 @@ TEST_CASE("Native room trigger status queries require no section bytes",
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kRunning);
   CHECK(VS::Event::EvaluateLiveRoomEventTriggers(query) ==
         VS::Event::RoomTriggerResult::kBusy);
+}
+
+TEST_CASE(
+    "C trigger entry preserves tile contexts and refuses missing contexts",
+    "[room-triggers][event-vm-live]") {
+  TriggerFixture fixture;
+  PublishTrigger({4, 0, 255, 255, 4, 12, 0, 8, 7, 9, 255});
+  std::array<std::uint8_t, 4> tile{7, 0, 9, 0};
+  CHECK(Event_EvaluateRoomEventTriggers(4, 0, tile.data(), 1) == 1);
+  CHECK(VS::Event::LiveScriptVm().EventId() == 12);
+  VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
+  CHECK(Event_EvaluateRoomEventTriggers(4, 0, nullptr, 1) == 0);
 }

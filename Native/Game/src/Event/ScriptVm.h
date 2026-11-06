@@ -89,7 +89,6 @@ short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index);
 void Event_ReleaseScriptActorControl(void);
 int Event_OpcodeSize(u_char* instruction);
 int Event_ResolveScriptActorReference(u_short actor_reference);
-int Event_EvaluateInterpolationCurve(short mode, short frame, short duration);
 void Event_QueueEventScriptLoad(int arg0, void* destination_buffer);
 void Event_ResetCutsceneActorsToIdle(void);
 void Event_InitializeScriptOpcodeTable(void);

@@ -8,6 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Event/ScriptVmLive.hpp"
 #include "State/GameClock.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/KillScore.hpp"
@@ -100,6 +101,7 @@ struct LiveTimerState {
   char saved_hud = Battle_lowerScreenUiState;
   unsigned saved_random = Core_Random_State();
   void* saved_triggers = Event_roomEventTriggers;
+  VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   char saved_phase = Event_playbackPhase;
   char saved_direct = Event_isDirectEventRequest;
   std::int16_t saved_event = Event_eventId;
@@ -117,6 +119,7 @@ struct LiveTimerState {
     Battle_lowerScreenUiState = saved_hud;
     Core_Random_Seed(saved_random);
     Event_roomEventTriggers = saved_triggers;
+    VS::Event::PublishLiveRoomScriptSections(saved_room);
     Event_playbackPhase = saved_phase;
     Event_isDirectEventRequest = saved_direct;
     Event_eventId = saved_event;
@@ -142,6 +145,12 @@ struct LiveTimerExpiry {
         static_cast<std::uint16_t>(offsetof(TriggerTable, trigger));
     table.trigger = {static_cast<std::uint8_t>(state::kSceneTimerExpiryTrigger),
                      kExpiryEvent, 0, kPlayEvent};
+    const auto bytes = std::as_bytes(std::span(&table, 1));
+    const auto room = VS::Event::RoomEventSections::Copy(
+        {.triggers = {reinterpret_cast<const std::uint8_t*>(bytes.data()),
+                      bytes.size()}});
+    REQUIRE(room);
+    VS::Event::PublishLiveRoomScriptSections(*room);
     Event_roomEventTriggers = &table;
     Event_playbackPhase = 0;
     Event_isDirectEventRequest = 0;

@@ -11,6 +11,7 @@
 #include "Content/SystemResourcesLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
@@ -80,7 +81,10 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Render::InitializeLiveFramebufferEffect();
   }
   void InitializeScriptOpcodeTable() override {
-    Event_InitializeScriptOpcodeTable();
+    if (!VS::Event::InitializeLiveScriptOpcodeTable()) {
+      Core_Errorf("boot", "Native event VM initialization refused");
+      std::abort();
+    }
   }
   void InitializeEffectRuntime() override { Effects_InitEffectRuntime(); }
   void InitializeRoomRuntimeState() override {

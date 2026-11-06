@@ -9,6 +9,7 @@ namespace VS::Menu {
 namespace {
 
 constexpr std::size_t kRecordBytes = 4;
+constexpr std::size_t kMaximumEncodedPart = 15;
 constexpr std::uint8_t kTriangleSentinel = 255;
 constexpr std::uint32_t kOutlineColor = 0x40303030;
 constexpr std::uint32_t kFrameClut = 0x373E;
@@ -82,8 +83,8 @@ FramePoints TransformPoints(const FrameDefinition& frame,
     const FramePart& part = frame.parts[request.part - 1];
     const auto anchor =
         AlignedPoint(frame.vertices[part.start_edge], request.alignment);
-    for (std::size_t index = part.first_vertex;
-         index < part.first_vertex + part.vertex_count; ++index) {
+    for (std::size_t index = frame.base_vertices; index < frame.vertices.size();
+         ++index) {
       auto relative = AlignedPoint(frame.vertices[index], request.alignment);
       for (std::size_t axis = 0; axis < relative.size(); ++axis) {
         if (relative[axis] >= kSignedByteBoundary) {
@@ -191,16 +192,13 @@ bool DrawFace(Render::PacketQueue& foreground, Render::PacketQueue& shadow,
   return shadow.Emit(packet);
 }
 
-bool ValidFace(const FrameFace& face, std::size_t base_vertices,
-               const FramePart& part) {
+bool ValidFace(const FrameFace& face, std::size_t initialized_vertices) {
   for (std::size_t corner = 0; corner < face.size(); ++corner) {
     const std::size_t vertex = face[corner];
     if (corner == face.size() - 1 && vertex == kTriangleSentinel) {
       continue;
     }
-    if (vertex >= base_vertices &&
-        (vertex < part.first_vertex ||
-         vertex - part.first_vertex >= part.vertex_count)) {
+    if (vertex >= initialized_vertices) {
       return false;
     }
   }
@@ -243,7 +241,7 @@ std::expected<FrameDefinition, FrameDecodeError> DecodeTextBoxFrame(
     next_face += part.face_count;
     frame.parts.push_back(part);
   }
-  if (next_vertex != vertex_count) {
+  if (next_vertex > vertex_count) {
     return std::unexpected(FrameDecodeError::kVertexCount);
   }
   if (next_face > (bytes.size() - face_offset) / kRecordBytes) {
@@ -253,21 +251,14 @@ std::expected<FrameDefinition, FrameDecodeError> DecodeTextBoxFrame(
     frame.vertices.push_back({bytes[vertex_offset + index * 2],
                               bytes[vertex_offset + index * 2 + 1]});
   }
-  const FramePart base{};
-  std::size_t selected_part = 0;
   for (std::size_t index = 0; index < next_face; ++index) {
-    while (selected_part < frame.parts.size() &&
-           index >= frame.parts[selected_part].first_face +
-                        frame.parts[selected_part].face_count) {
-      ++selected_part;
-    }
     const auto record =
         bytes.subspan(face_offset + index * kRecordBytes, kRecordBytes);
     const FrameFace face{record[0], record[1], record[2],
                          record[kBaseFacesOffset]};
-    const FramePart& part =
-        index < frame.base_faces ? base : frame.parts[selected_part];
-    if (!ValidFace(face, frame.base_vertices, part)) {
+    const std::size_t initialized =
+        index < frame.base_faces ? frame.base_vertices : vertex_count;
+    if (!ValidFace(face, initialized)) {
       return std::unexpected(FrameDecodeError::kFace);
     }
     frame.faces.push_back(face);
@@ -283,17 +274,21 @@ std::expected<void, FrameDecodeError> DrawTextBoxFrame(
   if (!frame) {
     return std::unexpected(frame.error());
   }
-  if (request.part > frame->parts.size()) {
+  if (request.part > kMaximumEncodedPart) {
     return std::unexpected(FrameDecodeError::kSelectedPart);
   }
-  const auto points = TransformPoints(*frame, request);
-  if (!DrawOutline(foreground, *frame, points, request.part)) {
+  auto effective = request;
+  if (effective.part > frame->parts.size()) {
+    effective.part = 0;
+  }
+  const auto points = TransformPoints(*frame, effective);
+  if (!DrawOutline(foreground, *frame, points, effective.part)) {
     return std::unexpected(FrameDecodeError::kCapacity);
   }
   for (std::size_t index = 0; index < frame->faces.size(); ++index) {
     bool selected = index < frame->base_faces;
-    if (!selected && request.part != 0) {
-      const auto& part = frame->parts[request.part - 1];
+    if (!selected && effective.part != 0) {
+      const auto& part = frame->parts[effective.part - 1];
       selected =
           index >= part.first_face && index - part.first_face < part.face_count;
     }

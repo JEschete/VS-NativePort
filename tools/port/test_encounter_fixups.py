@@ -334,7 +334,7 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_room_retention_predicate_uses_the_declared_byte_return(self):
         # #276 slice 19b: the predicate is owned; the Live adapter returns 0 or 1 through its declared char, so the
-        # generated caller needs no function-pointer cast fixup.
+        # native trigger host needs no function-pointer cast fixup.
         self.assertNotIn("F01261", copy_fixups.FIXES)
         root = Path(__file__).resolve().parents[2]
         with (root / "tools/port/owned.csv").open(newline="") as file:
@@ -342,8 +342,8 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(owned["F00296"]["name"], "VS::Actors::IsActorRetainedAfterDefeat")
         live = (root / r"Native\Game\include\Actors\ActorStateLive.hpp").read_text(encoding="utf-8")
         self.assertIn("char IsLiveActorRetainedAfterDefeat(int actor_id);", live)
-        triggers = (root / r"Native\Game\src\Event\Triggers.cpp").read_text(encoding="utf-8")
-        self.assertIn("VS::Actors::IsLiveActorRetainedAfterDefeat(actorId) != 0", triggers)
+        triggers = (root / r"Native\Game\src\Event\TriggersLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Actors::IsLiveActorRetainedAfterDefeat(actor) != 0", triggers)
         self.assertNotIn("int (*)(int)", triggers)
 
     def test_animation_unwind_uses_the_bound_clip_without_suppressing_failures(self):

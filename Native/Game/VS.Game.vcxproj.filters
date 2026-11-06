@@ -1443,10 +1443,22 @@
     <ClInclude Include="src\Event\Interpolation.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\InterpolationCurveLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\InterpolationCurveLive.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
     <ClCompile Include="src\Event\Playback.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
     <ClInclude Include="src\Event\Playback.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\RoomTriggerEntryLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\RoomTriggerEntryLive.h">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\RoomTriggers.cpp">

@@ -19,7 +19,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/TargetingState.h"
-#include "Event/Triggers.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"

@@ -20,6 +20,8 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
+#include "Event/RoomTriggerEntryLive.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -225,7 +227,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   void StartPreparedCutscene() override { Event::StartLivePreparedCutscene(); }
   void EndFieldCutscene() override { Event::EndLiveFieldCutscene(); }
   void UpdateEventPlayback() override {
-    static_cast<void>(Event_UpdateEventPlayback());
+    static_cast<void>(Event::UpdateLiveEventPlayback());
   }
 
   void UpdateAshleyMovementInput() override {

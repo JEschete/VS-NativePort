@@ -21,7 +21,7 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingState.h"
-#include "Event/Triggers.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Field/Interactions.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"

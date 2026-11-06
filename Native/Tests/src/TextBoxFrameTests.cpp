@@ -262,7 +262,7 @@ TEST_CASE("Text box frame refusal does not emit malformed geometry",
   FrameQueue foreground;
   FrameQueue shadow;
   VS::Menu::FrameRequest request;
-  request.part = 15;
+  request.part = 16;
   CHECK(VS::Menu::DrawTextBoxFrame(foreground, shadow, kTriangle, request)
             .error() == VS::Menu::FrameDecodeError::kSelectedPart);
   CHECK(foreground.packets.empty());
@@ -273,6 +273,55 @@ TEST_CASE("Text box frame refusal does not emit malformed geometry",
             .error() == VS::Menu::FrameDecodeError::kCapacity);
   CHECK(foreground.words == 14);
   CHECK(shadow.packets.empty());
+}
+
+TEST_CASE(
+    "Missing encoded frame parts preserve the original base shape fallback",
+    "[text-box-frame]") {
+  const VS::Menu::FrameRequest base{10, 20, 256, 256, 0, 128, 0};
+  FrameQueue expected_foreground;
+  FrameQueue expected_shadow;
+  REQUIRE(VS::Menu::DrawTextBoxFrame(expected_foreground, expected_shadow,
+                                     kTriangle, base));
+  for (std::size_t part = 1; part < 16; ++part) {
+    FrameQueue foreground;
+    FrameQueue shadow;
+    auto request = base;
+    request.part = part;
+    REQUIRE(VS::Menu::DrawTextBoxFrame(foreground, shadow, kTriangle, request));
+    CHECK(foreground.packets == expected_foreground.packets);
+    CHECK(shadow.packets == expected_shadow.packets);
+  }
+}
+
+TEST_CASE("Frame vertex storage may include an unused alignment slot",
+          "[text-box-frame]") {
+  const std::array<std::uint8_t, 16> padded{4, 0,   3,  1,  0, 0, 255, 0,
+                                            0, 255, 99, 99, 0, 1, 2,   255};
+  REQUIRE(VS::Menu::DecodeTextBoxFrame(padded));
+  FrameQueue foreground;
+  FrameQueue shadow;
+  FrameQueue expected_foreground;
+  FrameQueue expected_shadow;
+  REQUIRE(VS::Menu::DrawTextBoxFrame(foreground, shadow, padded, {}));
+  REQUIRE(VS::Menu::DrawTextBoxFrame(expected_foreground, expected_shadow,
+                                     kTriangle, {}));
+  CHECK(foreground.packets == expected_foreground.packets);
+  CHECK(shadow.packets == expected_shadow.packets);
+}
+
+TEST_CASE("Frame part faces may share transformed extra storage slots",
+          "[text-box-frame]") {
+  const std::array<std::uint8_t, 28> shared{
+      6,   2, 4,   0,   0, 1,   1, 1,  2,  3,  1, 0, 0, 0,
+      255, 0, 255, 255, 0, 255, 0, 32, 32, 32, 0, 4, 5, 1};
+  REQUIRE(VS::Menu::DecodeTextBoxFrame(shared));
+  FrameQueue foreground;
+  FrameQueue shadow;
+  const VS::Menu::FrameRequest request{10, 20, 256, 256, 0, 128, 1};
+  REQUIRE(VS::Menu::DrawTextBoxFrame(foreground, shadow, shared, request));
+  REQUIRE(foreground.packets.size() == 8);
+  CHECK(foreground.packets[6][6] == 0x0034002A);
 }
 
 TEST_CASE("Text box frame queues respect every foreground capacity boundary",
@@ -300,13 +349,17 @@ TEST_CASE("Text box frame queues respect every foreground capacity boundary",
   }
 }
 
-TEST_CASE("Text box frame parts cannot borrow vertices from another part",
+TEST_CASE("Text box frame faces cannot leave initialized vertex storage",
           "[text-box-frame]") {
   std::vector<std::uint8_t> bytes{6, 2,   4, 0,   0, 1,   1,   1, 2,   3,  1,
                                   1, 0,   0, 255, 0, 255, 255, 0, 255, 0,  32,
                                   0, 224, 0, 4,   1, 255, 2,   5, 3,   255};
+  const std::array<std::uint8_t, 14> unwritten_base{3, 0, 2,   1, 0, 0, 255,
+                                                    0, 0, 255, 0, 1, 2, 255};
+  CHECK(VS::Menu::DecodeTextBoxFrame(unwritten_base).error() ==
+        VS::Menu::FrameDecodeError::kFace);
   REQUIRE(VS::Menu::DecodeTextBoxFrame(bytes));
-  bytes[25] = 5;
+  bytes[25] = 6;
   CHECK(VS::Menu::DecodeTextBoxFrame(bytes).error() ==
         VS::Menu::FrameDecodeError::kFace);
   FrameQueue foreground;

@@ -23,6 +23,7 @@
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -62,6 +63,7 @@ extern "C" {
 #include "Effects/Runtime.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits/StaffRoll.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
@@ -900,11 +902,22 @@ EncounterState InspectGameplay() {
 namespace {
 nlohmann::json InspectThreads() {
   auto threads = nlohmann::json::array();
-  const auto base = reinterpret_cast<std::uintptr_t>(Event_scriptBuffer);
+  const auto script =
+      Event::LeaseLiveScriptSource(Event::ScriptRegion::kEventScript);
+  const auto base =
+      script ? reinterpret_cast<std::uintptr_t>(script->Bytes().data()) : 0;
   for (std::size_t index = 0; index < std::size(Event_threadWaitFrames);
        ++index) {
-    const auto pc =
-        reinterpret_cast<std::uintptr_t>(Event_threadCursors[index]);
+    const auto cursor =
+        Event::LiveScriptVm().ThreadCursor(static_cast<int>(index));
+    std::uintptr_t pc = 0;
+    if (cursor.Present()) {
+      const auto source = Event::LeaseLiveScriptSource(cursor.region);
+      const auto bytes = source ? source->View(cursor) : std::nullopt;
+      if (bytes) {
+        pc = reinterpret_cast<std::uintptr_t>(bytes->data());
+      }
+    }
     nlohmann::json thread{{"thread", index}, {"pc", pc}};
     if (base != 0 && pc >= base) thread["script_base_delta"] = pc - base;
     thread["wait_frames"] = Event_threadWaitFrames[index];
@@ -959,12 +972,15 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
       {"results_leaving", Ending_isLeavingResults != 0}};
   if (!available) return scene;
   const auto& camera = Field_sphericalCamera;
+  const auto script =
+      Event::LeaseLiveScriptSource(Event::ScriptRegion::kEventScript);
   scene["id"] = Field_zoneContext.currentSceneId;
   scene["event"] = {
       {"id", Event_eventId},
       {"source", Event_eventSource},
       {"phase", Event_playbackPhase},
-      {"script_buffer", reinterpret_cast<std::uintptr_t>(Event_scriptBuffer)},
+      {"script_buffer",
+       script ? reinterpret_cast<std::uintptr_t>(script->Bytes().data()) : 0},
       {"skip_state", Event_skipState},
       {"forced_skip", Event_isSkipForced != 0},
       {"main_thread_finished", Event_isMainThreadFinished != 0},
@@ -1155,9 +1171,12 @@ extern "C" void Boot_EncounterPollStop() {
                  Field_zoneContext.zndId == VS::Game::configuration.zone &&
                  Field_zoneContext.mapId == VS::Game::configuration.room) {
         const int selector = *VS::Game::configuration.room_local_event;
-        const auto* locals =
-            static_cast<const int16_t*>(Event_roomDoorEventData);
-        if (locals == nullptr || locals[selector] == 0) {
+        const auto room = VS::Event::LiveRoomScriptSections();
+        const auto locals = room ? room->Doors() : VS::Event::ScriptCommand{};
+        constexpr std::size_t kDoorOffsetBytes = sizeof(std::int16_t);
+        if (selector < 0 ||
+          static_cast<std::size_t>(selector) >= locals.size() / kDoorOffsetBytes ||
+          VS::Event::OperandHalf(locals, static_cast<std::size_t>(selector) * kDoorOffsetBytes) == 0) {
           Core_Errorf("encounter.event", "Room %d/%d has no local event %d",
                       Field_zoneContext.zndId, Field_zoneContext.mapId,
                       selector);

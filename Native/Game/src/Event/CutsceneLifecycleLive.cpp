@@ -23,6 +23,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Core/Diagnostics.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
 #include "Field/CameraLiveState.h"

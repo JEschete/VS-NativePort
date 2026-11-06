@@ -6,6 +6,8 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Battle/Encounter.hpp"
+#include "Event/RoomTriggerEntryLive.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -26,6 +28,7 @@ constexpr unsigned kTriggerOffset = 32;
 struct RetentionPredicateFixture {
   Battle_Actor* saved_actor = Battle_actors[kActorSlot];
   decltype(Event_roomEventTriggers) saved_triggers = Event_roomEventTriggers;
+  VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   decltype(Event_playbackPhase) saved_phase = Event_playbackPhase;
   decltype(Event_eventId) saved_id = Event_eventId;
   decltype(Event_eventSource) saved_source = Event_eventSource;
@@ -51,6 +54,10 @@ struct RetentionPredicateFixture {
       std::copy(retained.begin(), retained.end(),
                 triggers.begin() + kTriggerOffset);
     }
+    const auto room =
+        VS::Event::RoomEventSections::Copy({.triggers = triggers});
+    REQUIRE(room);
+    VS::Event::PublishLiveRoomScriptSections(*room);
     Event_roomEventTriggers = triggers.data();
     Event_playbackPhase = 0;
     Event_eventId = 0;
@@ -62,6 +69,7 @@ struct RetentionPredicateFixture {
   }
 
   ~RetentionPredicateFixture() {
+    VS::Event::PublishLiveRoomScriptSections(saved_room);
     Battle_actors[kActorSlot] = saved_actor;
     Event_roomEventTriggers = saved_triggers;
     Event_playbackPhase = saved_phase;

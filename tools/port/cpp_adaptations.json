@@ -2339,15 +2339,6 @@
 [
 "        ((void (*)(...))Event_ReleaseScriptActorControl)();"
 ]
-],
-[
-258,
-[
-"                        && trigger_context == otherActorId) {"
-],
-[
-"                        && trigger_context == (u_char*)(intptr_t)otherActorId) {"
-]
 ]
 ],
 "Native\\Game\\src\\Field\\Gimmicks.cpp": [

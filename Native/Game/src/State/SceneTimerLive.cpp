@@ -13,6 +13,7 @@
 extern "C" {
 #include "Battle/Hud.h"
 #include "Core/BiosRand.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/Triggers.h"
 #include "State/SceneTimer.h"
 #include "State/Timers.h"

@@ -8,7 +8,6 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -32,7 +31,6 @@ extern "C" {
 #include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
-#include "Event/Interpolation.h"
 #include "Event/Playback.h"
 #include "Event/Script.h"
 #include "Event/ScriptActorOpcodes.h"
@@ -1041,62 +1039,6 @@ int Event_ResolveScriptActorReference(u_short actor_reference)
         return actor_reference;
     }
     return actor_reference;
-}
-
-// decomp: BATTLE.PRG func_800BFEBC (src/BATTLE/BATTLE.PRG/573B8.c:168)
-int Event_EvaluateInterpolationCurve(short mode, short frame, short duration)
-{
-    short position = frame;
-    int value;
-    int power;
-    int i;
-
-    if (frame > duration) {
-        position = duration;
-    }
-
-    switch (mode) {
-    case 0:
-        return position * ONE / duration;
-    case 1:
-        return VS::Core::Math::Sine(position * (ONE / 4) / duration);
-    case 2:
-        return (VS::Core::Math::Cosine(position * (ONE / 2) / duration + ONE / 2) + ONE) >> 1;
-    case 3:
-        return VS::Core::Math::Sine(position * (ONE / 4) / duration - ONE / 4) + ONE;
-    default:
-        mode -= 4;
-        power = (*(Event_InterpolationCurve (*)[])&Event_customEasingCurves)[mode].power;
-        value = position * ONE / duration;
-
-        if (power != 0) {
-            if (power > 0) {
-                for (i = 0; i < power; ++i) {
-                    value = (value * value) >> 12;
-                }
-            } else {
-                value = ONE - value;
-
-                for (i = 0; i < -power; ++i) {
-                    value = (value * value) >> 12;
-                }
-
-                value = ONE - value;
-            }
-        }
-
-        switch ((*(Event_InterpolationCurve (*)[])&Event_customEasingCurves)[mode].curveFamily) {
-        case 1:
-            return VS::Core::Math::Sine(value / 4);
-        case 2:
-            return (VS::Core::Math::Cosine(value / 2 + ONE / 2) + ONE) >> 1;
-        case 3:
-            return VS::Core::Math::Sine(value / 4 - ONE / 4) + ONE;
-        case 0:
-        default:
-            return value;
-        }
-    }
 }
 
 // decomp: BATTLE.PRG func_800C00E8 (src/BATTLE/BATTLE.PRG/573B8.c:223)
