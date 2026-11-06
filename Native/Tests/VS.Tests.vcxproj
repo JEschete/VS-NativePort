@@ -240,6 +240,7 @@
     <ClCompile Include="src\RoomEffectsTests.cpp" />
     <ClCompile Include="src\RoomLightingTests.cpp" />
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp" />
+    <ClCompile Include="src\RoomTriggerTests.cpp" />
     <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
     <ClCompile Include="src\SaveMemoryCardTests.cpp" />
     <ClCompile Include="src\SaveStoreTests.cpp" />

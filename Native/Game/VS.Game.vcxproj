@@ -1152,6 +1152,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Event\RoomTriggers.cpp" />
     <ClCompile Include="src\Event\Script.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2211,6 +2212,7 @@
     <ClInclude Include="include\Ending\EndingLive.hpp" />
     <ClInclude Include="include\Event\CutsceneLifecycle.hpp" />
     <ClInclude Include="include\Event\CutsceneLifecycleLive.hpp" />
+    <ClInclude Include="include\Event\RoomTriggers.hpp" />
     <ClInclude Include="include\Event\ScriptActorCommands.hpp" />
     <ClInclude Include="include\Event\ScriptActorCommandsLive.hpp" />
     <ClInclude Include="include\Event\ScriptAudioCommands.hpp" />

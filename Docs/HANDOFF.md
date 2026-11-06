@@ -13,6 +13,34 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- The bounded `Event/RoomTriggers.cpp` evaluator is compiled and tested
+  alongside the generated production trigger path. Its actor-pair, tile and
+  no-context variants replace pointer-encoded context in the core; offset
+  tables, headers and all 16 conditions are bounded. Missing placements and
+  malformed/unterminated records refuse explicitly. This is **core-only**:
+  no additional promotion or compatibility-retirement credit is claimed.
+- Trigger-core verification on `76da31a5` plus these scoped changes:
+  `[room-triggers]` adds 27 cases / 316 assertions; combined with
+  `[cutscene-lifecycle],[event-vm]`, 89 cases / 4,705 assertions pass in both
+  configurations. The frozen-generated-original recording-host differential
+  makes 100,000 comparisons (seed `0x7A1663`), with zero mismatches and six
+  detected mutants. It covers valid bounded records, not malformed original
+  accesses or actual actor/render/audio services.
+- Debug and Release solution builds and full regression recordings each pass
+  **4,448 cases / 7,904,472 assertions and both unchanged replays**. The baseline
+  adds exactly the 27 new tests and 316 assertions; no old test or replay
+  expectation changes. Evidence: `VR-EVENT-ROOM-TRIGGER-CORE`,
+  `build\owner-checkpoint\triggers-*`, and session `files\triggers_diff.cpp`,
+  `triggers_original.inc`, `triggers_mutants.ps1`, and
+  `triggers-before-baseline.json`. Scoped clang-tidy/default quality is clean.
+- Trigger integration still requires owned section lengths, repeated-load/free
+  handling and explicit load-failure propagation through `Field/RoomLoading`.
+  The original continuation opcode's bit 4 preserves VM cursors while room
+  unloading frees door storage; executing door data must remain pinned across
+  that transition. New source generations must reject stale cursors after
+  replacement/reset. This source-backed lifetime construction is recorded on
+  #313; no retail reproduction is claimed. Do not wire the evaluator through
+  guessed spans or replace door ownership independently of VM lifetime.
 - The complete four-function cutscene file is now the typed
   `Event/CutsceneLifecycle.cpp` core and `CutsceneLifecycleLive.cpp` binding.
   Generated and maintained callers use the native entries. The old C ABI,

@@ -1449,6 +1449,9 @@
     <ClInclude Include="src\Event\Playback.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\RoomTriggers.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClInclude Include="src\Event\Screen.h">
       <Filter>src\Event</Filter>
     </ClInclude>
@@ -2734,6 +2737,9 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\CutsceneLifecycleLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\RoomTriggers.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\ScriptActorCommands.hpp">
