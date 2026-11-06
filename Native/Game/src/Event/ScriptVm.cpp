@@ -163,7 +163,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptSetActorWeaponDrawnOpcode, Event_ScriptBranchOnFlagImmediate, Event_ScriptBranchOnFlagPair,
     Event_ScriptJumpForward, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptJumpForward,
     Event_ScriptCacheFlagValueOpcode, Event_ScriptBranchOnCachedFlagOpcode,
-    Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounter, Event_ScriptLoopBackward, Event_ScriptJumpForward,
+    Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForward,
     Event_ScriptJumpForward, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperation, Event_ScriptApplyFlagPairOperation,
     Event_ScriptStoreInventoryItemPresence, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
@@ -412,27 +412,6 @@ intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index)
 
 // decomp: BATTLE.PRG func_800B8C44 (src/BATTLE/BATTLE.PRG/4A0A8.c:1654)
 intptr_t Event_ScriptReturnToSavedAddress(u_char* instruction, short thread_index) { return Event_subroutineReturnCursor; }
-
-// decomp: BATTLE.PRG func_800B8C54 (src/BATTLE/BATTLE.PRG/4A0A8.c:1656)
-intptr_t Event_ScriptSetLoopCounter(u_char* instruction, short thread_index)
-{
-    if (instruction[1] != 0xFF) {
-        Event_loopCounters[instruction[1]] = instruction[2];
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_script_jumpBackIf (src/BATTLE/BATTLE.PRG/4A0A8.c:1664)
-intptr_t Event_ScriptLoopBackward(u_char* instruction, short thread_index)
-{
-    if (instruction[1] == 0xFF) {
-        return (intptr_t)&instruction[-VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
-    }
-    if (--Event_loopCounters[instruction[1]] != 0) {
-        return (intptr_t)&instruction[-VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
-    }
-    return 0;
-}
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagImm (src/BATTLE/BATTLE.PRG/4A0A8.c:1685)
 intptr_t Event_ScriptApplyImmediateFlagOperation(u_char* instruction, short thread_index)

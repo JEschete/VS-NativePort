@@ -95,8 +95,8 @@ constexpr std::array kControlBindings{
                    ScriptBranchOnCachedFlag},
     ControlBinding{Event_ScriptReturnToSavedAddress,
                    ScriptReturnToSavedAddress},
-    ControlBinding{Event_ScriptSetLoopCounter, ScriptSetLoopCounter},
-    ControlBinding{Event_ScriptLoopBackward, ScriptLoopBackward},
+    ControlBinding{Event_ScriptSetLoopCounterOpcode, ScriptSetLoopCounter},
+    ControlBinding{Event_ScriptLoopBackwardOpcode, ScriptLoopBackward},
     ControlBinding{Event_ScriptApplyImmediateFlagOperation,
                    ScriptApplyImmediateFlagOperation},
     ControlBinding{Event_ScriptApplyFlagPairOperation,
@@ -1002,4 +1002,18 @@ std::intptr_t Event_ScriptBranchOnCachedFlagOpcode(std::uint8_t* instruction,
                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptBranchOnCachedFlag);
+}
+
+// decomp: BATTLE.PRG func_800B8C54 (4A0A8.c:1656).
+std::intptr_t Event_ScriptSetLoopCounterOpcode(std::uint8_t* instruction,
+                                               std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetLoopCounter);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_jumpBackIf (4A0A8.c:1664).
+std::intptr_t Event_ScriptLoopBackwardOpcode(std::uint8_t* instruction,
+                                             std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptLoopBackward);
 }

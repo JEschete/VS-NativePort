@@ -856,7 +856,9 @@ int Tests_EventScriptBranchHandlers(void) {
   passed &=
       VS::Event::ScriptBranchOnCachedFlag({conditional, {}, 1}, host).kind ==
       VS::Event::ScriptFlowKind::kAdvance;
-  passed &= Event_ScriptLoopBackward(&backward[4], 1) == (intptr_t)backward;
+  passed &=
+      VS::Event::ScriptLoopBackward({std::span{backward}.subspan(4), {}, 1},
+                                    host) == VS::Event::ScriptFlow::JumpBy(-4);
   const auto context =
       VS::test_support::MountLiveEventScript({0xE0, 2, 5, 0, 0xF0, 0xE1, 2});
   Event_skipState = 0;

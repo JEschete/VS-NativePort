@@ -85,7 +85,7 @@ SceneOpcodes ProductionOpcodes() {
     } else if (handler == Event_ScriptJumpForward) {
       opcode.flow = SceneFlow::kJump;
       opcode.branch_operand = 1;
-    } else if (handler == Event_ScriptLoopBackward) {
+    } else if (handler == Event_ScriptLoopBackwardOpcode) {
       opcode.flow = SceneFlow::kLoop;
       opcode.branch_operand = 2;
     } else if (handler == Event_CommandStartScriptContextOpcode) {

@@ -34,6 +34,25 @@ namespace content = VS::Content;
 using Bytes = std::vector<std::uint8_t>;
 using Handler = std::intptr_t (*)(std::uint8_t*, std::int16_t);
 
+struct ControlEntry {
+  std::uint32_t address;
+  Handler handler;
+};
+
+constexpr auto kControlEntries = std::to_array<ControlEntry>({
+    {0x800B66E4, Event_ScriptNoOperationOpcode},
+    {0x800B66EC, Event_ScriptYieldFrameOpcode},
+    {0x800BB474, Event_CommandWaitFramesOpcode},
+    {0x800BB4CC, Event_CommandSetTickSpeedOpcode},
+    {0x800BB504, Event_CommandWaitScriptContextOpcode},
+    {0x800BB554, Event_CommandStartScriptContextOpcode},
+    {0x800BB5A4, Event_CommandStopScriptContextOpcode},
+    {0x800B8BC4, Event_ScriptCacheFlagValueOpcode},
+    {0x800B8BF8, Event_ScriptBranchOnCachedFlagOpcode},
+    {0x800B8C54, Event_ScriptSetLoopCounterOpcode},
+    {0x800B8C7C, Event_ScriptLoopBackwardOpcode},
+});
+
 struct LiveVmFixture {
   std::array<Content_DiscQueueSlot, 32> slots{};
   Content_DiscRequestCounts counts = Content_discRequestCounts;
@@ -310,9 +329,9 @@ bool CompareFrozenCachedBranch(
          native == expected_flow;
 }
 
-bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
-                         int mutation = 0,
-                         std::array<std::uint64_t, 2>* fingerprints = nullptr) {
+bool CompareFrozenLoop(std::uint8_t counter, std::uint8_t value, bool setting,
+                       int mutation = 0,
+                       std::array<std::uint64_t, 2>* fingerprints = nullptr) {
   auto& host = event::LiveScriptVm();
   std::ranges::fill(Event_loopCounters, 0x55);
   for (int index = 0; index < event::kLoopCounterCount; ++index) {
@@ -329,17 +348,16 @@ bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
   command[2] = setting ? value : static_cast<std::uint8_t>(displacement);
   command[3] =
       static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
-  const auto original = setting ? Event_ScriptSetLoopCounter(command, 0)
-                                : Event_ScriptLoopBackward(command, 0);
   std::array<std::uint8_t, event::kLoopCounterCount> expected{};
-  for (int index = 0; index < event::kLoopCounterCount; ++index) {
-    expected[static_cast<std::size_t>(index)] =
-        static_cast<std::uint8_t>(Event_loopCounters[index]);
-    host.SetLoopCounter(index, 0x55);
+  expected.fill(0x55);
+  if (counter != 0xFF) {
+    expected[counter] = setting ? value : static_cast<std::uint8_t>(value - 1);
   }
-  if (!setting && counter != 0xFF) {
-    host.SetLoopCounter(counter, value);
-  }
+  const bool expected_jump =
+      !setting && (counter == 0xFF || expected[counter] != 0);
+  const auto expected_flow =
+      expected_jump ? event::ScriptFlow::JumpBy(-displacement)
+                    : event::ScriptFlow::Of(event::ScriptFlowKind::kAdvance);
   if (mutation == 1) command[1] ^= 1;
   if (mutation == 2) ++command[2];
   if (mutation == 3 && counter != 0xFF) {
@@ -349,12 +367,11 @@ bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
   const auto native = setting ? event::ScriptSetLoopCounter(instruction, host)
                               : event::ScriptLoopBackward(instruction, host);
   if (fingerprints != nullptr) {
-    const auto expected_offset = static_cast<std::uint16_t>(
-        original == 0 ? 0
-                      : original - reinterpret_cast<std::intptr_t>(command));
+    const auto expected_offset =
+        static_cast<std::uint16_t>(expected_jump ? -displacement : 0);
     const bool native_jump = native.kind == event::ScriptFlowKind::kJumpBy;
     AddResultDigest((*fingerprints)[0],
-                    static_cast<std::uint32_t>(original != 0) |
+                    static_cast<std::uint32_t>(expected_jump) |
                         (static_cast<std::uint32_t>(expected_offset) << 16));
     AddResultDigest((*fingerprints)[1],
                     static_cast<std::uint32_t>(native_jump) |
@@ -367,7 +384,7 @@ bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
       AddResultDigest((*fingerprints)[1], host.LoopCounter(index));
     }
   }
-  if (!SameBranchResult(original, native, command)) {
+  if (native != expected_flow) {
     return false;
   }
   for (int index = 0; index < event::kLoopCounterCount; ++index) {
@@ -387,8 +404,8 @@ void CompareLoopCorpus(bool setting) {
         index == event::kLoopCounterCount ? 0xFF : index);
     for (int value = 0; value < 256; ++value) {
       CAPTURE(setting, counter, value);
-      REQUIRE(CompareOriginalLoop(counter, static_cast<std::uint8_t>(value),
-                                  setting, 0, &fingerprints));
+      REQUIRE(CompareFrozenLoop(counter, static_cast<std::uint8_t>(value),
+                                setting, 0, &fingerprints));
     }
   }
   CHECK(fingerprints[0] == fingerprints[1]);
@@ -536,6 +553,52 @@ std::intptr_t CachedBranchSlotBridge(std::uint8_t* instruction,
   return Event_ScriptBranchOnCachedFlagOpcode(instruction, thread);
 }
 
+std::intptr_t SetLoopSlotBridge(std::uint8_t* instruction,
+                                std::int16_t thread) {
+  return Event_ScriptSetLoopCounterOpcode(instruction, thread);
+}
+
+std::intptr_t LoopBackSlotBridge(std::uint8_t* instruction,
+                                 std::int16_t thread) {
+  return Event_ScriptLoopBackwardOpcode(instruction, thread);
+}
+
+struct LoopScenario {
+  int skip;
+  bool guarded;
+  std::uint8_t counter;
+  std::uint8_t initial;
+};
+
+event::ScriptLocation PrepareLoopScenario(LoopScenario scenario) {
+  const auto start =
+      MountScript({0xE9, scenario.counter, scenario.initial, 0xE1, 0xEA,
+                   scenario.counter, 1, 0, 0xE3, 4, 0xE6});
+  Event_skipState = static_cast<char>(scenario.skip);
+  State_tickSpeed = 2;
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      scenario.guarded ? SetLoopSlotBridge : Event_ScriptSetLoopCounterOpcode;
+  Event_kSkipOpcodeHandlers[0xEA] = Event_kOpcodeHandlers[0xEA] =
+      scenario.guarded ? LoopBackSlotBridge : Event_ScriptLoopBackwardOpcode;
+  Event_kSkipOpcodeHandlers[0xE1] = Event_kOpcodeHandlers[0xE1] =
+      Event_ScriptYieldFrameOpcode;
+  Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
+      Event_CommandSetTickSpeedOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = 3;
+  Event_kOpcodeSizes[0xEA] = 4;
+  Event_kOpcodeSizes[0xE3] = 2;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  return start;
+}
+
+void CheckLoopResult(std::uint8_t counter, std::uint8_t remaining,
+                     bool finished) {
+  CHECK(event::LiveScriptVm().LoopCounter(counter) == remaining);
+  CHECK(State_tickSpeed == (finished ? 4 : 2));
+}
+
 event::ScriptLocation PrepareCachedScenario(int skip, bool guarded,
                                             std::uint8_t operand) {
   const auto start =
@@ -634,6 +697,24 @@ void CheckUnreleasedWait(event::ScriptLocation start, int thread) {
 }
 
 void CheckUnchangedTickSpeed() { CHECK(State_tickSpeed == 2); }
+
+void CheckLoopScenario(LoopScenario scenario) {
+  const LiveVmFixture fixture;
+  const auto start = PrepareLoopScenario(scenario);
+  const event::ScriptLocation back{start.region, 4, start.generation};
+  CheckWaitDispatch(0);
+  CheckThreadCursorMatches(0, back);
+  CheckLoopResult(scenario.counter, scenario.initial, false);
+  const int iterations = scenario.initial == 0 ? 256 : scenario.initial;
+  for (int iteration = 0; iteration < iterations; ++iteration) {
+    const auto remaining =
+        static_cast<std::uint8_t>(scenario.initial - iteration - 1);
+    CheckWaitDispatch(0);
+    CheckThreadCursorMatches(0,
+                             remaining == 0 ? event::ScriptLocation{} : back);
+    CheckLoopResult(scenario.counter, remaining, remaining == 0);
+  }
+}
 
 void CheckWaitScenario(WaitScenario scenario) {
   const LiveVmFixture fixture;
@@ -875,46 +956,25 @@ TEST_CASE("Native loop back matches original byte wraps and signed targets",
 TEST_CASE("Original loop differential detects counter value and target mutants",
           "[event-vm-live][event-loop-differential]") {
   const LiveVmFixture fixture;
-  REQUIRE(CompareOriginalLoop(3, 7, true));
+  REQUIRE(CompareFrozenLoop(3, 7, true));
   for (int mutation = 1; mutation <= 2; ++mutation) {
-    CHECK_FALSE(CompareOriginalLoop(3, 7, true, mutation));
+    CHECK_FALSE(CompareFrozenLoop(3, 7, true, mutation));
   }
-  REQUIRE(CompareOriginalLoop(3, 7, false));
+  REQUIRE(CompareFrozenLoop(3, 7, false));
   for (int mutation = 1; mutation <= 3; ++mutation) {
-    CHECK_FALSE(CompareOriginalLoop(3, 7, false, mutation));
+    CHECK_FALSE(CompareFrozenLoop(3, 7, false, mutation));
   }
 }
 
 TEST_CASE("Native control opcode entries resolve to owned table bindings",
           "[event-vm-live][content][module][control-opcode]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B66E4) ==
-      reinterpret_cast<void*>(&Event_ScriptNoOperationOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B66EC) ==
-      reinterpret_cast<void*>(&Event_ScriptYieldFrameOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB474) ==
-      reinterpret_cast<void*>(&Event_CommandWaitFramesOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB4CC) ==
-      reinterpret_cast<void*>(&Event_CommandSetTickSpeedOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB504) ==
-      reinterpret_cast<void*>(&Event_CommandWaitScriptContextOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB554) ==
-      reinterpret_cast<void*>(&Event_CommandStartScriptContextOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BB5A4) ==
-      reinterpret_cast<void*>(&Event_CommandStopScriptContextOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B8BC4) ==
-      reinterpret_cast<void*>(&Event_ScriptCacheFlagValueOpcode));
-  CHECK(
-      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800B8BF8) ==
-      reinterpret_cast<void*>(&Event_ScriptBranchOnCachedFlagOpcode));
+  for (const auto& entry : kControlEntries) {
+    CAPTURE(entry.address);
+    CHECK(content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        entry.address) ==
+          reinterpret_cast<void*>(entry.handler));
+  }
 }
 
 TEST_CASE("Native control bindings preserve normal and skip yield behavior",
@@ -947,15 +1007,10 @@ TEST_CASE("Native control opcode bindings refuse detached command borrows",
   std::array<std::uint8_t, 1> command{};
   const auto expected =
       static_cast<std::intptr_t>(event::ScriptFlowKind::kStop);
-  CHECK(Event_ScriptNoOperationOpcode(command.data(), 0) == expected);
-  CHECK(Event_ScriptYieldFrameOpcode(command.data(), 0) == expected);
-  CHECK(Event_CommandWaitFramesOpcode(command.data(), 0) == expected);
-  CHECK(Event_CommandSetTickSpeedOpcode(command.data(), 0) == expected);
-  CHECK(Event_CommandWaitScriptContextOpcode(command.data(), 0) == expected);
-  CHECK(Event_CommandStartScriptContextOpcode(command.data(), 0) == expected);
-  CHECK(Event_CommandStopScriptContextOpcode(command.data(), 0) == expected);
-  CHECK(Event_ScriptCacheFlagValueOpcode(command.data(), 0) == expected);
-  CHECK(Event_ScriptBranchOnCachedFlagOpcode(command.data(), 0) == expected);
+  for (const auto& entry : kControlEntries) {
+    CAPTURE(entry.address);
+    CHECK(entry.handler(command.data(), 0) == expected);
+  }
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",
@@ -1064,6 +1119,40 @@ TEST_CASE("Frozen cached oracle rejects cache byte operand and target mutants",
   }
 }
 
+TEST_CASE("Native loop bindings preserve wrapping countdown and frame yield",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (const int counter : {0, 15}) {
+        for (const int initial : {0, 1, 2, 255}) {
+          CheckLoopScenario({skip, guarded, static_cast<std::uint8_t>(counter),
+                             static_cast<std::uint8_t>(initial)});
+        }
+      }
+    }
+  }
+}
+
+TEST_CASE("Native loop sentinel never touches the bounded counter bank",
+          "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    const LiveVmFixture fixture;
+    auto& host = event::LiveScriptVm();
+    for (int counter = 0; counter < event::kLoopCounterCount; ++counter) {
+      host.SetLoopCounter(counter, 0x55);
+    }
+    const auto start = PrepareLoopScenario({2, guarded, 0xFF, 7});
+    const event::ScriptLocation back{start.region, 4, start.generation};
+    for (int frame = 0; frame < 3; ++frame) {
+      CheckWaitDispatch(0);
+      CheckThreadCursorMatches(0, back);
+      for (int counter = 0; counter < event::kLoopCounterCount; ++counter) {
+        CheckLoopResult(static_cast<std::uint8_t>(counter), 0x55, false);
+      }
+    }
+  }
+}
+
 TEST_CASE("Live VM dispatch carries typed jumps without pointer results",
           "[event-vm-live]") {
   const LiveVmFixture fixture;
@@ -1119,7 +1208,7 @@ TEST_CASE("Live VM original loop handler obeys the bounded counter contract",
   const auto start = MountScript({0xE1, 20, 7, 0xF0});
   observations = 0;
   Event_loopCounters[20] = 0x55;
-  Event_kOpcodeHandlers[0xE1] = Event_ScriptSetLoopCounter;
+  Event_kOpcodeHandlers[0xE1] = Event_ScriptSetLoopCounterOpcode;
   Event_kOpcodeHandlers[0xF0] = StopBridge;
   Event_kOpcodeSizes[0xE1] = 3;
   event::LiveScriptVm().SetThreadCursor(0, start);

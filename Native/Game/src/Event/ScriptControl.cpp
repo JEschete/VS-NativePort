@@ -1047,6 +1047,7 @@ ScriptFlow ScriptReturnToSavedAddress(const ScriptInstruction& /*instruction*/,
   return saved.Present() ? ScriptFlow::JumpTo(saved) : Advance();
 }
 
+// decomp: BATTLE.PRG func_800B8C54 (4A0A8.c:1656).
 ScriptFlow ScriptSetLoopCounter(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1065,6 +1066,7 @@ ScriptFlow ScriptSetLoopCounter(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG vs_battle_script_jumpBackIf (4A0A8.c:1664).
 ScriptFlow ScriptLoopBackward(const ScriptInstruction& instruction,
                               ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {

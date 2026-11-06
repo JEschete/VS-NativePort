@@ -7,6 +7,30 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Loop Control Slots (#276 Row 33)
+
+- F01092/F01093 register strict native counter-store/backward-loop cores with
+  guarded table identities. Old C bodies/names/prototypes/parser/raw-pointer test
+  consumers retire. Independently captured original digests `79BC34873972BB25` /
+  `DF9CCA1BC970DBA5` were published in `16fd680c`, green exact CI `42312665009`;
+  every valid per-case/all-16-counter/model/flow/mutant check remains and normalized
+  native results must match those unchanged original constants.
+- Live normal/skip/direct/guarded indices 0/15 and initial counts 0/1/2/255 verify
+  byte wrap, frame yield and finish. Bounded sentinel frames preserve the entire
+  counter bank. Control/loop selection passes 13 cases / 39,435 assertions. Shared
+  data-driven binding checks retain all 11 entries and checks below strict limits.
+- On `16fd680c` plus this slice, complete Debug/Release builds and regressions pass
+  4,652 cases / 8,175,851 assertions and both unchanged canonical replays. Two new
+  cases/four binding checks add 16,818; no baseline changes. Broad quality/tidy has
+  zero new findings; 190 copier/nine extent controls and Python syntax pass.
+  Repeat copying preserves all tracked Native/project/manifest bytes; old loop
+  names have no Native reference. Evidence: `VR-EVENT-CONTROL-LOOPS` and
+  `build\owner-checkpoint\native-control-loops-*-regression.log`.
+  Only these two cores are reviewed; table ABI and remaining controls/oracles stay
+  explicit debt, not whole-row or global EC retirement.
+  Unmodified gates derive 2,654 promoted / four compatibility `wip`; row 33 is
+  now 22/57. Required table bindings and frozen original digests remain explicit.
+
 ### Loop/Arithmetic Original Oracle Preservation (#276)
 
 - Before those C handlers retire, existing safe per-case corpora capture normalized

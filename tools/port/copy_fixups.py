@@ -2021,6 +2021,8 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01029", 0x800B66EC, "ScriptYieldFrame"),
     ("F01089", 0x800B8BC4, "ScriptCacheFlagValue"),
     ("F01090", 0x800B8BF8, "ScriptBranchOnCachedFlag"),
+    ("F01092", 0x800B8C54, "ScriptSetLoopCounter"),
+    ("F01093", 0x800B8C7C, "ScriptLoopBackward"),
     ("F01199", 0x800BB474, "CommandWaitFrames"),
     ("F01200", 0x800BB4CC, "CommandSetTickSpeed"),
     ("F01202", 0x800BB504, "CommandWaitScriptContext"),
