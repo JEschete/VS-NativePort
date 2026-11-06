@@ -7,6 +7,29 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Independent loop/cache differential (#313)
+
+- Actual loop originals match native stores/decrements over all 16 valid indices,
+  every byte value and the `0xFF` sentinel: 8,704 comparisons with signed targets
+  kept inside 64-byte storage. Five planted counter/value/target/state mutations
+  are rejected. Original ASM `800B8C54-800B8C70` and `800B8C94-800B8CD4` grounds
+  the sentinel, byte wrap and signed subtraction. Invalid original indices and
+  original dispatch loops are never executed; existing native refusal tests stay.
+- Initial loop-oracle failures exposed shared storage, not a production defect:
+  the live counter/cache accessors alias the retained C globals. Expected original
+  counter results are now snapshotted before restoring inputs for native execution.
+  The cached branch corpus likewise snapshots original cache/flow before native
+  cache writes, independently checking the byte result. This explicitly supersedes
+  the prior cached oracle's shared-state ordering without weakening any expectation.
+- Three new cases add 8,711 assertions. Loop plus branch selection passes
+  8 cases / 139,789 assertions. On `7267c7ac38ae035114601240b6460236a6c7c9ed`
+  plus this test-only follow-up, Debug/Release test builds and full regressions pass
+  4,638 cases / 8,145,023 assertions with no failures/skips and both canonical
+  replay fingerprints unchanged. Scoped quality/tidy is clean; no baseline changes.
+  Evidence: `VR-EVENT-LOOP-ORIGINAL-DIFFERENTIAL` and
+  `build\owner-checkpoint\native-loop-differential-*-regression.log`.
+  Broader #313 differential/source promotion and #276 gates remain open.
+
 ### Unsigned flag branch correction (#317 / #313)
 
 - Fresh branch comparison found a native semantic defect: immediate/pair branches
@@ -31,9 +54,10 @@ verification of the current worktree.
   failures/skips. Both canonical replay fingerprints match; scoped quality/tidy is
   clean. Evidence: `VR-EVENT-FLAG-BRANCH-ORIGINAL` and
   `build\owner-checkpoint\unsigned-flag-branch-*-regression.log`.
-  #317 awaits the pushed fixing revision's CI. #313/#276 retain broader
-  differential, source promotion and retirement gates; this is not retail-wide
-  event verification or full row-33 promotion.
+  Semantic fix `7267c7ac` has successful exact CI `42279833831`; #317 awaits the
+  independent-oracle follow-up's pushed CI. #313/#276 retain broader differential,
+  source promotion and retirement gates; this is not retail-wide event verification
+  or full row-33 promotion.
 
 ### Fresh original flag differential (#313)
 

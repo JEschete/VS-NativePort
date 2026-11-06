@@ -229,8 +229,7 @@ bool CompareOriginalCachedBranch(std::uint8_t value, std::uint8_t operand) {
   std::array<std::uint8_t, 3> cache{0, static_cast<std::uint8_t>(flag),
                                     static_cast<std::uint8_t>(flag >> 8)};
   const auto original_cache = Event_ScriptCacheFlagValue(cache.data(), 0);
-  const auto native_cache =
-      event::ScriptCacheFlagValue({cache, {}, 0}, event::LiveScriptVm());
+  const auto expected_cache = static_cast<std::uint8_t>(Event_cachedFlagValue);
   std::array<std::uint8_t, 64> storage{};
   auto* command = storage.data() + 32;
   const auto displacement = static_cast<std::int16_t>((operand & 63) - 32);
@@ -239,11 +238,76 @@ bool CompareOriginalCachedBranch(std::uint8_t value, std::uint8_t operand) {
   command[3] =
       static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
   const auto original = Event_ScriptBranchOnCachedFlag(command, 0);
+  const auto native_cache =
+      event::ScriptCacheFlagValue({cache, {}, 0}, event::LiveScriptVm());
   const auto native = event::ScriptBranchOnCachedFlag({{command, 32}, {}, 0},
                                                       event::LiveScriptVm());
   return original_cache == 0 &&
          native_cache.kind == event::ScriptFlowKind::kAdvance &&
+         static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag()) ==
+             expected_cache &&
          SameBranchResult(original, native, command);
+}
+
+bool CompareOriginalLoop(std::uint8_t counter, std::uint8_t value, bool setting,
+                         int mutation = 0) {
+  auto& host = event::LiveScriptVm();
+  std::ranges::fill(Event_loopCounters, 0x55);
+  for (int index = 0; index < event::kLoopCounterCount; ++index) {
+    host.SetLoopCounter(index, 0x55);
+  }
+  if (!setting && counter != 0xFF) {
+    Event_loopCounters[counter] = static_cast<char>(value);
+    host.SetLoopCounter(counter, value);
+  }
+  std::array<std::uint8_t, 64> storage{};
+  auto* command = storage.data() + 32;
+  command[1] = counter;
+  const auto displacement = static_cast<std::int16_t>((value & 63) - 31);
+  command[2] = setting ? value : static_cast<std::uint8_t>(displacement);
+  command[3] =
+      static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
+  const auto original = setting ? Event_ScriptSetLoopCounter(command, 0)
+                                : Event_ScriptLoopBackward(command, 0);
+  std::array<std::uint8_t, event::kLoopCounterCount> expected{};
+  for (int index = 0; index < event::kLoopCounterCount; ++index) {
+    expected[static_cast<std::size_t>(index)] =
+        static_cast<std::uint8_t>(Event_loopCounters[index]);
+    host.SetLoopCounter(index, 0x55);
+  }
+  if (!setting && counter != 0xFF) {
+    host.SetLoopCounter(counter, value);
+  }
+  if (mutation == 1) command[1] ^= 1;
+  if (mutation == 2) ++command[2];
+  if (mutation == 3 && counter != 0xFF) {
+    host.SetLoopCounter(counter, static_cast<std::uint8_t>(value + 1));
+  }
+  const event::ScriptInstruction instruction{{command, 32}, {}, 0};
+  const auto native = setting ? event::ScriptSetLoopCounter(instruction, host)
+                              : event::ScriptLoopBackward(instruction, host);
+  if (!SameBranchResult(original, native, command)) {
+    return false;
+  }
+  for (int index = 0; index < event::kLoopCounterCount; ++index) {
+    if (expected[static_cast<std::size_t>(index)] != host.LoopCounter(index)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void CompareLoopCorpus(bool setting) {
+  const LiveVmFixture fixture;
+  for (int index = 0; index <= event::kLoopCounterCount; ++index) {
+    const auto counter = static_cast<std::uint8_t>(
+        index == event::kLoopCounterCount ? 0xFF : index);
+    for (int value = 0; value < 256; ++value) {
+      CAPTURE(setting, counter, value);
+      REQUIRE(CompareOriginalLoop(counter, static_cast<std::uint8_t>(value),
+                                  setting));
+    }
+  }
 }
 
 struct LiveRoomFixture {
@@ -534,6 +598,29 @@ TEST_CASE(
   REQUIRE(CompareOriginalFlagBranch(sample, 6));
   for (int mutation = 1; mutation <= 3; ++mutation) {
     CHECK_FALSE(CompareOriginalFlagBranch(sample, 6, mutation));
+  }
+}
+
+TEST_CASE("Native loop counter stores match all safe original byte values",
+          "[event-vm-live][event-loop-differential]") {
+  CompareLoopCorpus(true);
+}
+
+TEST_CASE("Native loop back matches original byte wraps and signed targets",
+          "[event-vm-live][event-loop-differential]") {
+  CompareLoopCorpus(false);
+}
+
+TEST_CASE("Original loop differential detects counter value and target mutants",
+          "[event-vm-live][event-loop-differential]") {
+  const LiveVmFixture fixture;
+  REQUIRE(CompareOriginalLoop(3, 7, true));
+  for (int mutation = 1; mutation <= 2; ++mutation) {
+    CHECK_FALSE(CompareOriginalLoop(3, 7, true, mutation));
+  }
+  REQUIRE(CompareOriginalLoop(3, 7, false));
+  for (int mutation = 1; mutation <= 3; ++mutation) {
+    CHECK_FALSE(CompareOriginalLoop(3, 7, false, mutation));
   }
 }
 
