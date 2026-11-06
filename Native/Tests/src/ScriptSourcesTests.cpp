@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <csetjmp>
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -28,6 +29,39 @@ T Required(const std::optional<T>& value) {
     throw std::logic_error("REQUIRE did not stop the test");
   }
   return *value;
+}
+
+template <typename T, typename E>
+T Required(const std::expected<T, E>& value) {
+  REQUIRE(value);
+  return value.value();
+}
+
+template <typename T, typename E>
+void CheckError(const std::expected<T, E>& actual, E error) {
+  REQUIRE_FALSE(actual);
+  CHECK(actual.error() == error);
+}
+
+event::ScriptCommand StartMountedUse(
+    event::ScriptSourceMounts& mounts, event::ScriptRegion region,
+    const std::shared_ptr<const Buffer>& buffer) {
+  REQUIRE(mounts.MountBuffer(region, buffer));
+  REQUIRE(mounts.BeginUse());
+  return Required(mounts.Borrow(region));
+}
+
+[[noreturn]] void TransferAfterSourceUse(event::ScriptSourceMounts& mounts,
+                                         std::jmp_buf& boundary) {
+  if (!mounts.BeginUse() || !mounts.Borrow(event::ScriptRegion::kEventScript)) {
+    throw std::logic_error("Could not begin the source use");
+  }
+  mounts.Reset();
+  mounts.AbandonUses();
+  // No automatic owning objects cross this transition, as in SessionLive.
+  // NOLINTNEXTLINE(cert-err52-cpp): exercises the explicit abandonment
+  // boundary.
+  std::longjmp(boundary, 1);
 }
 
 void CheckBytes(event::ScriptCommand actual, event::ScriptCommand expected) {
@@ -218,4 +252,170 @@ TEST_CASE("Script source generation exhaustion never wraps or publishes",
   REQUIRE_FALSE(retry);
   CHECK(retry.error() == event::ScriptSourceError::kGenerationExhausted);
   CHECK(last->Bytes().front() == 0x10);
+}
+
+TEST_CASE("Script mounts keep every exposed generation through nested uses",
+          "[event-vm][script-sources]") {
+  const auto region = GENERATE(event::ScriptRegion::kEventScript,
+                               event::ScriptRegion::kDoorEvents,
+                               event::ScriptRegion::kSubroutine);
+  event::ScriptSourceMounts mounts;
+  auto first = MakeBuffer();
+  const std::weak_ptr<const Buffer> first_owner = first;
+  const auto outer = StartMountedUse(mounts, region, first);
+  first.reset();
+  auto second = MakeBuffer();
+  const std::weak_ptr<const Buffer> second_owner = second;
+  const auto inner = StartMountedUse(mounts, region, second);
+  second.reset();
+  mounts.Reset();
+  REQUIRE(mounts.EndUse());
+  REQUIRE_FALSE(first_owner.expired());
+  REQUIRE_FALSE(second_owner.expired());
+  CheckBytes(outer, inner);
+  REQUIRE(mounts.EndUse());
+  CHECK(first_owner.expired());
+  CHECK(second_owner.expired());
+}
+
+TEST_CASE("Script mount reset never reuses a same-address generation",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  const auto buffer = MakeBuffer();
+  REQUIRE(mounts.MountBuffer(region, buffer));
+  const auto first = Required(mounts.Lease(region));
+  const auto cursor = Required(first.At(0));
+  mounts.Reset();
+  REQUIRE(mounts.MountBuffer(region, buffer));
+  const auto second = Required(mounts.Lease(region));
+  CheckFreshMount(first, second, cursor);
+  CHECK(second.Generation() == first.Generation() + 1);
+}
+
+TEST_CASE("Script mount borrowing requires an active use and a real source",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  CheckError(mounts.Borrow(region), event::ScriptSourceError::kNoActiveUse);
+  CheckError(mounts.EndUse(), event::ScriptSourceError::kNoActiveUse);
+  REQUIRE(mounts.BeginUse());
+  CheckError(mounts.Borrow(region), event::ScriptSourceError::kMissingOwner);
+  CheckError(mounts.Borrow(event::ScriptRegion::kNone),
+             event::ScriptSourceError::kRegion);
+  REQUIRE(mounts.EndUse());
+}
+
+TEST_CASE("Repeated script borrows retain each generation only once",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  auto buffer = MakeBuffer();
+  const std::weak_ptr<const Buffer> owner = buffer;
+  const auto first = StartMountedUse(mounts, region, buffer);
+  REQUIRE(owner.use_count() == 3);
+  for (int repeat = 0; repeat < 20; ++repeat) {
+    CheckBytes(Required(mounts.Borrow(region)), first);
+  }
+  CHECK(owner.use_count() == 3);
+  buffer.reset();
+  REQUIRE(mounts.Clear(region));
+  CHECK_FALSE(owner.expired());
+  REQUIRE(mounts.EndUse());
+  CHECK(owner.expired());
+}
+
+TEST_CASE("Rejected script mounts preserve the current owner and generation",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  REQUIRE(mounts.MountBuffer(region, MakeBuffer()));
+  const auto first = Required(mounts.Lease(region));
+  CheckError(mounts.MountBuffer(region, {}),
+             event::ScriptSourceError::kMissingOwner);
+  CheckError(mounts.MountBuffer(event::ScriptRegion::kNone, MakeBuffer()),
+             event::ScriptSourceError::kRegion);
+  CheckError(mounts.MountRoom(event::ScriptRegion::kSubroutine, {}),
+             event::ScriptSourceError::kRegion);
+  CHECK(Required(mounts.Lease(region)).Generation() == first.Generation());
+  REQUIRE(mounts.MountBuffer(region, MakeBuffer()));
+  CHECK(Required(mounts.Lease(region)).Generation() == first.Generation() + 1);
+}
+
+TEST_CASE("Script mount abandonment releases uses without resetting serials",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  auto buffer = MakeBuffer();
+  const std::weak_ptr<const Buffer> owner = buffer;
+  static_cast<void>(StartMountedUse(mounts, region, buffer));
+  const auto generation = Required(mounts.Lease(region)).Generation();
+  buffer.reset();
+  REQUIRE(mounts.BeginUse());
+  mounts.Reset();
+  CHECK_FALSE(owner.expired());
+  mounts.AbandonUses();
+  CHECK(owner.expired());
+  CheckError(mounts.EndUse(), event::ScriptSourceError::kNoActiveUse);
+  REQUIRE(mounts.MountBuffer(region, MakeBuffer()));
+  CHECK(Required(mounts.Lease(region)).Generation() == generation + 1);
+}
+
+TEST_CASE("Mounted room sources keep independent entry and door leases",
+          "[event-vm][script-sources]") {
+  const std::array<std::uint8_t, 2> entry{0x11, 0x22};
+  const std::array<std::uint8_t, 3> doors{0x33, 0x44, 0x55};
+  auto room = Required(
+      event::RoomEventSections::Copy({.entry_script = entry, .doors = doors}));
+  const std::weak_ptr<const event::RoomEventSections> owner = room;
+  event::ScriptSourceMounts mounts;
+  REQUIRE(mounts.MountRoom(event::ScriptRegion::kEventScript, room));
+  REQUIRE(mounts.MountRoom(event::ScriptRegion::kDoorEvents, room));
+  room.reset();
+  auto door = Required(mounts.Lease(event::ScriptRegion::kDoorEvents));
+  REQUIRE(mounts.Clear(event::ScriptRegion::kEventScript));
+  CheckBytes(door.Bytes(), doors);
+  mounts.Reset();
+  CHECK_FALSE(owner.expired());
+  door = {};
+  CHECK(owner.expired());
+}
+
+TEST_CASE("Empty mounted sources differ from absent and invalid regions",
+          "[event-vm][script-sources]") {
+  event::ScriptSourceMounts mounts;
+  const auto region = event::ScriptRegion::kEventScript;
+  REQUIRE(mounts.MountBuffer(region, std::make_shared<const Buffer>()));
+  REQUIRE(mounts.BeginUse());
+  CHECK(Required(mounts.Borrow(region)).empty());
+  CHECK(Required(mounts.Lease(region)).Generation() != 0);
+  CheckError(mounts.Clear(event::ScriptRegion::kNone),
+             event::ScriptSourceError::kRegion);
+  CheckError(mounts.Lease(event::ScriptRegion::kNone),
+             event::ScriptSourceError::kRegion);
+  REQUIRE(mounts.Clear(region));
+  CheckError(mounts.Lease(region), event::ScriptSourceError::kMissingOwner);
+  REQUIRE(mounts.EndUse());
+}
+
+TEST_CASE("Script source uses release before an actual nonreturning transfer",
+          "[event-vm][script-sources]") {
+  const auto mounts = std::make_unique<event::ScriptSourceMounts>();
+  const std::weak_ptr<const Buffer> owner = [&] {
+    const auto buffer = MakeBuffer();
+    REQUIRE(mounts->MountBuffer(event::ScriptRegion::kEventScript, buffer));
+    return std::weak_ptr<const Buffer>(buffer);
+  }();
+  std::jmp_buf boundary;
+  // The pointer and weak owner are unchanged across setjmp; only heap state
+  // is mutated by the called function.
+  if (setjmp(boundary) == 0) {
+    TransferAfterSourceUse(*mounts, boundary);
+  }
+  CHECK(owner.expired());
+  CheckError(mounts->EndUse(), event::ScriptSourceError::kNoActiveUse);
+  REQUIRE(mounts->MountBuffer(event::ScriptRegion::kEventScript, MakeBuffer()));
+  CHECK(
+      Required(mounts->Lease(event::ScriptRegion::kEventScript)).Generation() ==
+      2);
 }

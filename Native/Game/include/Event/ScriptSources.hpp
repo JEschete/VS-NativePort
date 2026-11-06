@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <memory>
@@ -15,6 +17,9 @@ enum class ScriptSourceError : std::uint8_t {
   kMissingOwner,
   kExtent,
   kGenerationExhausted,
+  kNoActiveUse,
+  kUseDepth,
+  kRetentionAllocation,
 };
 
 // Keep this counter outside resettable module data; clearing a mount does not
@@ -62,6 +67,48 @@ class ScriptSource {
   // individually allocated byte.
   std::shared_ptr<const std::uint8_t> owner_;
   std::uint64_t generation_ = 0;
+};
+
+// Keep this state outside module-image resets. Explicit use boundaries retain
+// every exposed generation through nested callbacks without automatic owning
+// guards that a non-returning session transition could skip.
+class ScriptSourceMounts {
+ public:
+  ScriptSourceMounts() = default;
+  ScriptSourceMounts(const ScriptSourceMounts&) = delete;
+  ScriptSourceMounts& operator=(const ScriptSourceMounts&) = delete;
+  ScriptSourceMounts(ScriptSourceMounts&&) = delete;
+  ScriptSourceMounts& operator=(ScriptSourceMounts&&) = delete;
+  ~ScriptSourceMounts() = default;
+
+  [[nodiscard]] std::expected<void, ScriptSourceError> MountBuffer(
+      ScriptRegion region,
+      std::shared_ptr<const std::vector<std::uint8_t>> buffer) noexcept;
+  [[nodiscard]] std::expected<void, ScriptSourceError> MountRoom(
+      ScriptRegion region, RoomEventLease room) noexcept;
+  // A persistent lease for UI/data consumers, not an automatic callback guard.
+  [[nodiscard]] std::expected<ScriptSource, ScriptSourceError> Lease(
+      ScriptRegion region) const noexcept;
+  [[nodiscard]] std::expected<void, ScriptSourceError> Clear(
+      ScriptRegion region) noexcept;
+  // Invalidate mounts without revoking bytes already borrowed by active uses.
+  // Neither reset nor abandonment reuses a generation.
+  void Reset() noexcept;
+
+  [[nodiscard]] std::expected<void, ScriptSourceError> BeginUse() noexcept;
+  [[nodiscard]] std::expected<ScriptCommand, ScriptSourceError> Borrow(
+      ScriptRegion region) noexcept;
+  [[nodiscard]] std::expected<void, ScriptSourceError> EndUse() noexcept;
+  // Only after every active user has unwound, or immediately before a
+  // non-returning transition which abandons them. Normal callbacks use Reset.
+  void AbandonUses() noexcept;
+
+ private:
+  static constexpr std::size_t kRegionCount = 3;
+  std::array<ScriptSource, kRegionCount> mounted_{};
+  std::vector<ScriptSource> retained_;
+  std::uint64_t serial_ = 0;
+  std::size_t use_depth_ = 0;
 };
 
 }  // namespace VS::Event

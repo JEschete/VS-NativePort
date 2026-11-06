@@ -13,6 +13,25 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- `ScriptSourceMounts` now owns the three versioned source mounts and retains
+  every exposed generation through explicit nested use boundaries. Repeated
+  reads retain a generation only once; ordinary reset invalidates mounts but
+  leaves active byte views alive. Abandonment is separate and only valid once
+  users have unwound or immediately before a non-returning transfer. The
+  serial survives both operations. This is **not yet wired to production**;
+  the Live VM must bracket reads, propagate retention errors, keep leases for
+  UI consumers, and abandon uses at the actual session boundary.
+- Mount verification on `55c7da02` plus the three ScriptSources source/test
+  files: nine new cases / 185 assertions, including an actual `setjmp` /
+  `longjmp` control with ownership in persistent heap state and no automatic
+  owning objects in the abandoned frame. `[script-sources]` passes 17 cases /
+  271 assertions; combined `[script-sources],[event-vm]` passes 96 / 2,482 in
+  Debug and Release. Both full suites pass **4,560 cases / 7,905,515
+  assertions**, retaining all 4,551 prior names and unchanged complete replay
+  objects. Full solution builds, scoped quality/clang-tidy and static/ledger
+  gates pass. Evidence: `VR-EVENT-SOURCE-MOUNTS` and
+  `build\owner-checkpoint\script-mounts-*`. No production VM migration or
+  promotion/retirement credit; allocation-failure injection is not claimed.
 - Buffered script vibration now validates its 120-byte stream window and
   stores a separate immutable copy in each native controller slot. New or
   malformed requests cannot overwrite a playing pattern through the former
@@ -42,6 +61,7 @@ verification of the current worktree.
   production-opcode reproductions, not a reported retail crash or physical
   controller test. No new promotion or compatibility-retirement credit;
   #313 remains open and production VM dispatch is still generated.
+  Published as `55c7da02`; exact Source Quality `42206619195` succeeded.
 - The new `ScriptSource` value retains a buffer or immutable room section
   behind an exact byte span and a fresh, nonwrapping generation. Copies pin
   the old source during replacement; moves revoke the moved-from view.
