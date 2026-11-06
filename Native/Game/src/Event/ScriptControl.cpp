@@ -292,6 +292,25 @@ enum class CurveFamily : std::uint8_t {
   return {.region = region, .generation = host.RegionGeneration(region)};
 }
 
+[[nodiscard]] ScriptLocation After(ScriptLocation source, std::uint32_t bytes,
+                                   ScriptVmHost& host) {
+  if (bytes > std::numeric_limits<std::uint32_t>::max() - source.offset) {
+    host.Refuse(ScriptVmRefusal::kJumpOutsideScript, static_cast<int>(bytes));
+    return {};
+  }
+  source.offset += bytes;
+  return source;
+}
+
+[[nodiscard]] bool RepresentableRegion(ScriptRegion region, ScriptCommand bytes,
+                                       ScriptVmHost& host) {
+  if (bytes.size() > std::numeric_limits<std::uint32_t>::max()) {
+    host.Refuse(ScriptVmRefusal::kScriptRegionExtent, static_cast<int>(region));
+    return false;
+  }
+  return true;
+}
+
 // A position `offset` bytes into `region`, or none (refused) outside it.
 [[nodiscard]] ScriptLocation Within(ScriptLocation source,
                                     std::span<const std::uint8_t> bytes,
@@ -465,6 +484,9 @@ void ResetSkippedPalettes(ScriptVmHost& host) {
     return false;
   }
   const std::span<const std::uint8_t> region = host.Region(scan.region);
+  if (!RepresentableRegion(scan.region, region, host)) {
+    return false;
+  }
   const std::span<const std::uint8_t> marker = host.SoundRestoreMarker();
   std::size_t offset = scan.offset;
   while (offset < region.size()) {
@@ -543,8 +565,11 @@ void ResetSkippedPalettes(ScriptVmHost& host) {
   if (!IsCurrent(instruction.location, host)) {
     return ScriptFlow::Of(ScriptFlowKind::kStop);
   }
-  ScriptLocation return_to = instruction.location;
-  return_to.offset += kSubroutineCallBytes;
+  const ScriptLocation return_to =
+      After(instruction.location, kSubroutineCallBytes, host);
+  if (!return_to.Present()) {
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
   host.SetSubroutineReturn(return_to);
   return ScriptFlow::JumpTo(StartOf(ScriptRegion::kSubroutine, host));
 }
@@ -623,7 +648,10 @@ void UnlockActionOnce(std::uint8_t action, ScriptVmHost& host) {
   const std::int64_t target =
       static_cast<std::int64_t>(cursor.offset) + displacement;
   const std::span<const std::uint8_t> region = host.Region(cursor.region);
-  if (target < 0 || static_cast<std::uint64_t>(target) >= region.size()) {
+  if (target < 0 ||
+      static_cast<std::uint64_t>(target) >
+          std::numeric_limits<std::uint32_t>::max() ||
+      static_cast<std::uint64_t>(target) >= region.size()) {
     host.Refuse(ScriptVmRefusal::kJumpOutsideScript,
                 static_cast<int>(displacement));
     return {};
@@ -656,14 +684,16 @@ struct Step {
                     static_cast<int>(cursor.offset));
         return {.store = true};
       }
-      cursor.offset += static_cast<std::uint32_t>(size);
-      return {.keep_running = true, .cursor = cursor};
+      cursor = After(cursor, static_cast<std::uint32_t>(size), host);
+      return {.keep_running = cursor.Present(),
+              .cursor = cursor,
+              .store = !cursor.Present()};
     case ScriptFlowKind::kHold:
       return {.cursor = cursor, .store = true};
     case ScriptFlowKind::kFinish:
       return {.finished = true};
     case ScriptFlowKind::kAdvanceAndYield:
-      cursor.offset += static_cast<std::uint32_t>(size);
+      cursor = After(cursor, static_cast<std::uint32_t>(size), host);
       return {.cursor = cursor, .store = true};
     case ScriptFlowKind::kJumpBy:
       cursor = JumpTarget(cursor, flow.displacement, host);
@@ -687,6 +717,9 @@ struct Step {
     return false;
   }
   const std::span<const std::uint8_t> region = host.Region(cursor.region);
+  if (!RepresentableRegion(cursor.region, region, host)) {
+    return false;
+  }
   if (cursor.offset < region.size()) {
     size = OpcodeSize(region[cursor.offset], host);
     if (static_cast<std::size_t>(std::max(size, 1)) <=
@@ -1289,10 +1322,12 @@ ScriptFlow CommandStartScriptContext(const ScriptInstruction& instruction,
   const ScriptCommand command = Bytes(instruction);
   const int thread = OperandByte(command, kFirstOperand);
   if (ValidThread(thread, host)) {
-    host.SetThreadCursor(
-        thread, {.region = instruction.location.region,
-                 .offset = instruction.location.offset + kContextStartBytes,
-                 .generation = instruction.location.generation});
+    const ScriptLocation start =
+        After(instruction.location, kContextStartBytes, host);
+    if (!start.Present()) {
+      return ScriptFlow::Of(ScriptFlowKind::kStop);
+    }
+    host.SetThreadCursor(thread, start);
   }
   return ScriptFlow::JumpBy(OperandHalf(command, kSecondOperand));
 }
@@ -1428,7 +1463,7 @@ bool ExecuteScriptThread(int thread, ScriptVmHost& host) {
     host.Refuse(ScriptVmRefusal::kMissingCursor, thread);
     return true;
   }
-  for (;;) {
+  for (std::size_t steps = 0; steps < kScriptDispatchBudget; ++steps) {
     int size = 0;
     if (!RunnableAt(cursor, host, size)) {
       host.SetThreadCursor(thread, {});
@@ -1445,6 +1480,10 @@ bool ExecuteScriptThread(int thread, ScriptVmHost& host) {
     }
     cursor = step.cursor;
   }
+  host.Refuse(ScriptVmRefusal::kDispatchBudget,
+              static_cast<int>(kScriptDispatchBudget));
+  host.SetThreadCursor(thread, {});
+  return false;
 }
 
 void ReleaseScriptActorControl(ScriptVmHost& host) {

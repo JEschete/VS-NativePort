@@ -13,8 +13,29 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- The VM now refuses a thread after exactly 65,536 non-yielding dispatches
+  per frame, including cross-region jumps. Hold/yield/stop/finish on the last
+  allowed instruction remain valid; each thread/frame receives a fresh
+  budget. Context starts, saved returns and cursor advances check offset
+  overflow before publication. This is an intentional malformed-script
+  refusal limit, not a measured maximum for every retail script.
+- Dispatch-guard verification on `253edb44` plus the three VM changes:
+  three pre-fix cases failed all ten assertions. Seven added cases contribute
+  48 assertions; `[event-vm],[room-triggers],[cutscene-lifecycle]` passes
+  **141 cases / 5,066 assertions** in Debug and Release. Full suites on the
+  combined dirty tree (also containing the pending #314 disc changes) each
+  pass **4,523 cases / 7,904,983 assertions**, with both replay objects
+  unchanged. All 4,493 previous case names remain; the combined addition is
+  30 cases / 198 assertions. No promotion markers changed.
+- Evidence: `VR-EVENT-SCRIPT-DISPATCH-GUARDS`,
+  `build\owner-checkpoint\vm-budget-*`, `disc-lifetime-*`, session
+  `files\vm-budget-before-baseline.json`, and #313 comment `6680071363`.
+  Scoped quality/clang-tidy is clean; two copier/scaffold passes preserve all
+  1,656 inspected source/project hashes. Production VM integration and its
+  source ownership remain unfinished.
 - Ownership/generation checkpoint `13b0e482` is pushed; exact-revision
-  Source Quality `42181532222` succeeded. The next core-only checkpoint checks
+  Source Quality `42181532222` succeeded. Failure-contract checkpoint
+  `253edb44` is also pushed with successful Source Quality `42183675692`. It checks
   buffer allocation, queueing, read status, chained adoption and complete
   header initialization. Failed startup reports its reason, clears borrowed
   views/cursors, releases actor/camera control and returns to idle instead of
@@ -38,8 +59,8 @@ verification of the current worktree.
   session `files\vm-failure-before-baseline.json`, and #313 comments
   `6679731263`, `6679770807`, `6679949962`. This is failure-injection/core
   evidence, not a production cancellation or retail failure reproduction.
-- Remaining before the Live switch: bound dispatch loops and cursor arithmetic,
-  implement actual request cancellation, mount/pin sources through callbacks
+- Remaining before the Live switch: wire the bounded core and actual request
+  cancellation, mount/pin sources through callbacks
   and transitions, propagate failures through Field/Boot, and migrate all
   callers. Promotion counts remain unchanged; #313 and #276 stay open.
 - The published ownership checkpoint adds immutable, shared room-section owners

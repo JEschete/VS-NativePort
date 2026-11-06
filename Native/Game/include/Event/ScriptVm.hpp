@@ -22,6 +22,8 @@ inline constexpr std::size_t kSubroutineScriptBytes = 132;
 // The four script threads, their wait counters and the text box waits the
 // skip clears.
 inline constexpr int kScriptThreadCount = 4;
+// Deterministic work limit per thread/frame; exhaustion refuses the thread.
+inline constexpr std::size_t kScriptDispatchBudget = 65'536;
 inline constexpr int kLoopCounterCount = 16;
 inline constexpr int kCustomEasingCurveCount = 4;
 inline constexpr int kScriptControlledActorCount = 17;
@@ -215,6 +217,8 @@ enum class ScriptVmRefusal : std::uint8_t {
   kEventFileBusy,
   kChainedEventAdoption,
   kEventSource,
+  kDispatchBudget,
+  kScriptRegionExtent,
 };
 
 // The event VM state, the script regions and the systems the opcodes and

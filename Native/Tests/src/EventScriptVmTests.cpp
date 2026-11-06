@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -755,6 +756,134 @@ TEST_CASE("VM dispatch stops on a zero-sized advancing opcode", "[event-vm]") {
   CHECK_FALSE(event::ExecuteScriptThread(0, host));
   CHECK_FALSE(host.cursors[0].Present());
   CHECK(host.refusals.back().first == Refusal::kZeroLengthOpcode);
+}
+
+TEST_CASE("VM dispatch refuses an in-region self-jump at the exact budget",
+          "[event-vm][event-vm-budget]") {
+  RecordingHost host;
+  host.regions[1].resize(1);
+  host.cursors[0] = At(0);
+  std::size_t steps = 0;
+  host.dispatch = [&steps](Location, int) {
+    if (++steps > event::kScriptDispatchBudget) {
+      throw std::runtime_error("VM exceeded its dispatch budget");
+    }
+    return Flow::JumpBy(0);
+  };
+  CHECK_NOTHROW(event::ExecuteScriptThread(0, host));
+  CHECK(steps == event::kScriptDispatchBudget);
+  CHECK_FALSE(host.cursors[0].Present());
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kDispatchBudget,
+                              static_cast<int>(event::kScriptDispatchBudget)}});
+}
+
+TEST_CASE("VM context continuation refuses offset wrap before publication",
+          "[event-vm][event-vm-budget]") {
+  RecordingHost host;
+  host.cursors[1] = At(17);
+  const Location source = At(std::numeric_limits<std::uint32_t>::max() - 3);
+  CHECK(Run(event::CommandStartScriptContext, host, {0, 1, 0, 0}, 0, source)
+            .kind == Kind::kStop);
+  CHECK(host.cursors[1] == At(17));
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kJumpOutsideScript, 4}});
+}
+
+TEST_CASE("VM subroutine continuation refuses offset wrap before saving",
+          "[event-vm][event-vm-budget]") {
+  RecordingHost host;
+  host.return_to = At(17);
+  const Location source = At(std::numeric_limits<std::uint32_t>::max() - 5);
+  CHECK(
+      Run(event::CommandSpecialOperation, host, {0, 16, 0, 0, 0, 0}, 0, source)
+          .kind == Kind::kStop);
+  CHECK(host.return_to == At(17));
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kJumpOutsideScript, 6}});
+}
+
+TEST_CASE("VM permits all terminal flows on the last budgeted instruction",
+          "[event-vm][event-vm-budget]") {
+  for (Kind terminal :
+       {Kind::kHold, Kind::kAdvanceAndYield, Kind::kStop, Kind::kFinish}) {
+    RecordingHost host;
+    host.regions[1].resize(2);
+    host.cursors[0] = At(0);
+    std::size_t steps = 0;
+    host.dispatch = [&steps, terminal](Location, int) {
+      return ++steps == event::kScriptDispatchBudget ? Flow::Of(terminal)
+                                                     : Flow::JumpBy(0);
+    };
+    CHECK(event::ExecuteScriptThread(0, host) == (terminal == Kind::kFinish));
+    CHECK(steps == event::kScriptDispatchBudget);
+    const Location expected = terminal == Kind::kStop              ? Location{}
+                              : terminal == Kind::kAdvanceAndYield ? At(1)
+                                                                   : At(0);
+    CHECK(host.cursors[0] == expected);
+    CHECK(host.refusals.empty());
+  }
+}
+
+TEST_CASE("VM dispatch budgets renew independently for each thread and frame",
+          "[event-vm][event-vm-budget]") {
+  RecordingHost host;
+  host.regions[1].resize(1);
+  host.cursors.fill(At(0));
+  std::array<std::size_t, event::kScriptThreadCount> steps{};
+  host.dispatch = [&steps](Location, int thread) {
+    return ++steps.at(thread) % event::kScriptDispatchBudget == 0
+               ? Flow::Of(Kind::kHold)
+               : Flow::JumpBy(0);
+  };
+  for (std::size_t frame = 1; frame <= 2; ++frame) {
+    for (int thread : {0, 3}) {
+      CHECK_FALSE(event::ExecuteScriptThread(thread, host));
+      CHECK(steps.at(thread) == frame * event::kScriptDispatchBudget);
+      CHECK(host.cursors.at(thread) == At(0));
+    }
+  }
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("VM cross-region jumps cannot renew a thread dispatch budget",
+          "[event-vm][event-vm-budget]") {
+  RecordingHost host;
+  host.regions[1].resize(1);
+  host.regions[2].resize(1);
+  host.cursors[0] = At(0);
+  std::size_t steps = 0;
+  host.dispatch = [&steps](Location location, int) {
+    if (++steps > event::kScriptDispatchBudget) {
+      throw std::runtime_error("VM renewed its budget across a region jump");
+    }
+    return Flow::JumpTo(At(0, location.region == Region::kEventScript
+                                  ? Region::kDoorEvents
+                                  : Region::kEventScript));
+  };
+  CHECK_NOTHROW(event::ExecuteScriptThread(0, host));
+  CHECK(steps == event::kScriptDispatchBudget);
+  CHECK_FALSE(host.cursors[0].Present());
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kDispatchBudget,
+                              static_cast<int>(event::kScriptDispatchBudget)}});
+}
+
+TEST_CASE("VM continuation arithmetic preserves the last representable offset",
+          "[event-vm][event-vm-budget]") {
+  RecordingHost host;
+  constexpr auto kLastOffset = std::numeric_limits<std::uint32_t>::max();
+  host.generations[1] = 9;
+  host.generations[3] = 11;
+  CHECK(Run(event::CommandStartScriptContext, host, {0, 1, 0, 0}, 0,
+            At(kLastOffset - 4, Region::kEventScript, 9))
+            .kind == Kind::kJumpBy);
+  CHECK(host.cursors[1] == At(kLastOffset, Region::kEventScript, 9));
+  CHECK(Run(event::CommandSpecialOperation, host, {0, 16, 0, 0, 0, 0}, 0,
+            At(kLastOffset - 6, Region::kEventScript, 9)) ==
+        Flow::JumpTo(At(0, Region::kSubroutine, 11)));
+  CHECK(host.return_to == At(kLastOffset, Region::kEventScript, 9));
+  CHECK(host.refusals.empty());
 }
 
 TEST_CASE("VM thread contexts start wait release and reject invalid indices",
