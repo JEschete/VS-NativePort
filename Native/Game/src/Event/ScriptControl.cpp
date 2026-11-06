@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <span>
 
 #include "Core/Math/ScalarMath.hpp"
@@ -294,14 +295,18 @@ enum class CurveFamily : std::uint8_t {
 // A position `offset` bytes into `region`, or none (refused) outside it.
 [[nodiscard]] ScriptLocation Within(ScriptLocation source,
                                     std::span<const std::uint8_t> bytes,
-                                    std::uint32_t offset, ScriptVmHost& host) {
+                                    std::uint64_t offset, ScriptVmHost& host,
+                                    bool& valid) {
   if (!IsCurrent(source, host)) {
+    valid = false;
     return {};
   }
-  if (offset < bytes.size()) {
-    source.offset = offset;
+  if (offset < bytes.size() &&
+      offset <= std::numeric_limits<std::uint32_t>::max()) {
+    source.offset = static_cast<std::uint32_t>(offset);
     return source;
   }
+  valid = false;
   host.Refuse(ScriptVmRefusal::kScriptHeader, static_cast<int>(offset));
   return {};
 }
@@ -310,43 +315,80 @@ enum class CurveFamily : std::uint8_t {
 // table.
 [[nodiscard]] ScriptLocation TableEntry(ScriptLocation table,
                                         std::span<const std::uint8_t> bytes,
-                                        int entry, ScriptVmHost& host) {
-  if (!table.Present() || !IsCurrent(table, host)) {
+                                        int entry, ScriptVmHost& host,
+                                        bool& valid) {
+  if (!table.Present()) {
     return {};
   }
-  const std::uint32_t at =
-      table.offset + static_cast<std::uint32_t>(entry) * kHalfBytes;
-  if (!HalfFits(bytes, at)) {
+  if (!IsCurrent(table, host)) {
+    valid = false;
+    return {};
+  }
+  const std::uint64_t at = std::uint64_t{table.offset} +
+                           static_cast<std::uint64_t>(entry) * kHalfBytes;
+  if (at > bytes.size() || bytes.size() - at < kHalfBytes) {
+    valid = false;
     host.Refuse(ScriptVmRefusal::kScriptHeader, static_cast<int>(at));
     return {};
   }
-  const std::uint16_t value = ReadHalf(bytes, at);
+  const std::uint16_t value = ReadHalf(bytes, static_cast<std::size_t>(at));
   if (value == 0) {
     return {};
   }
-  return Within(table, bytes, table.offset + value, host);
+  return Within(table, bytes, std::uint64_t{table.offset} + value, host, valid);
 }
 
-void BindScriptHeader(ScriptLocation data, std::span<const std::uint8_t> bytes,
-                      ScriptVmHost& host) {
-  host.SetDialogStrings(Within(
-      data, bytes,
-      data.offset + ReadHalf(bytes, data.offset + kDialogStringsOffset), host));
-  const ScriptLocation styles = Within(
-      data, bytes,
-      data.offset + ReadHalf(bytes, data.offset + kFrameStyleTableOffset),
-      host);
+[[nodiscard]] bool BindScriptHeader(ScriptLocation data,
+                                    std::span<const std::uint8_t> bytes,
+                                    ScriptVmHost& host) {
+  bool valid = true;
+  const ScriptLocation strings =
+      Within(data, bytes,
+             std::uint64_t{data.offset} +
+                 ReadHalf(bytes, data.offset + kDialogStringsOffset),
+             host, valid);
+  const ScriptLocation styles =
+      Within(data, bytes,
+             std::uint64_t{data.offset} +
+                 ReadHalf(bytes, data.offset + kFrameStyleTableOffset),
+             host, valid);
+  std::array<ScriptLocation, kTextBoxFrameStyleCount> frames{};
   for (int style = kTextBoxFrameStyleFirst; style < kTextBoxFrameStyleCount;
        ++style) {
-    host.SetTextBoxFrameStyle(
-        style, TableEntry(styles, bytes, style - kFrameStyleEntryBias, host));
+    frames[style] =
+        TableEntry(styles, bytes, style - kFrameStyleEntryBias, host, valid);
   }
-  const ScriptLocation patterns = Within(
-      data, bytes,
-      data.offset + ReadHalf(bytes, data.offset + kVibrationTableOffset), host);
+  const ScriptLocation patterns =
+      Within(data, bytes,
+             std::uint64_t{data.offset} +
+                 ReadHalf(bytes, data.offset + kVibrationTableOffset),
+             host, valid);
+  std::array<ScriptLocation, kVibrationPatternSlots> vibrations{};
   for (int pattern = 0; pattern < kVibrationPatternSlots; ++pattern) {
-    host.SetVibrationPattern(pattern,
-                             TableEntry(patterns, bytes, pattern, host));
+    vibrations[pattern] = TableEntry(patterns, bytes, pattern, host, valid);
+  }
+  if (!valid) {
+    return false;
+  }
+  host.SetDialogStrings(strings);
+  for (int style = kTextBoxFrameStyleFirst; style < kTextBoxFrameStyleCount;
+       ++style) {
+    host.SetTextBoxFrameStyle(style, frames[style]);
+  }
+  for (int pattern = 0; pattern < kVibrationPatternSlots; ++pattern) {
+    host.SetVibrationPattern(pattern, vibrations[pattern]);
+  }
+  return IsCurrent(data, host);
+}
+
+void ClearScriptViews(ScriptVmHost& host) {
+  host.SetDialogStrings({});
+  for (int style = kTextBoxFrameStyleFirst; style < kTextBoxFrameStyleCount;
+       ++style) {
+    host.SetTextBoxFrameStyle(style, {});
+  }
+  for (int pattern = 0; pattern < kVibrationPatternSlots; ++pattern) {
+    host.SetVibrationPattern(pattern, {});
   }
 }
 
@@ -688,43 +730,92 @@ struct Step {
   return 2;
 }
 
+void StopEventStartup(ScriptVmHost& host) {
+  if (host.EventFile() != EventFileStatus::kNone) {
+    host.CancelEventFile();
+  }
+  host.DiscardChainedEventBuffer();
+  host.SetChainedEventLoaded(false);
+  host.SetStartConfirmed(false);
+  host.SetMainThreadFinished(false);
+  host.SetSubroutineReturn({});
+  for (int thread = 0; thread < kScriptThreadCount; ++thread) {
+    host.SetThreadCursor(thread, {});
+    host.SetWaitFrames(thread, 0);
+  }
+  ClearScriptViews(host);
+  ReleaseScriptActorControl(host);
+  host.ClearScriptControlledActors();
+  host.SetPhase(PlaybackPhase::kIdle);
+}
+
 void StartEventScript(ScriptVmHost& host) {
+  if (host.EventFile() != EventFileStatus::kNone) {
+    host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
+    StopEventStartup(host);
+    return;
+  }
   host.SetScriptBackdropEnabled(false);
   host.SetChainedEventLoaded(false);
   switch (host.Source()) {
     case EventSource::kRoomEntryScript:
-      InitializeEventScriptData(StartOf(ScriptRegion::kEventScript, host),
-                                host);
-      host.SetPhase(PlaybackPhase::kRunning);
+      if (InitializeEventScriptData(StartOf(ScriptRegion::kEventScript, host),
+                                    host)) {
+        host.SetPhase(PlaybackPhase::kRunning);
+        return;
+      }
       break;
-    case EventSource::kDoorScript:
-      InitializeEventScriptData(DoorScript(host), host);
-      host.SetPhase(PlaybackPhase::kRunning);
+    case EventSource::kDoorScript: {
+      const ScriptLocation door = DoorScript(host);
+      if (door.Present() && InitializeEventScriptData(door, host)) {
+        host.SetPhase(PlaybackPhase::kRunning);
+        return;
+      }
       break;
+    }
     case EventSource::kEventFile:
-      QueueEventScriptLoad(EventBuffer::kScript, host);
-      host.SetPhase(PlaybackPhase::kLoading);
+      if (QueueEventScriptLoad(EventBuffer::kScript, host)) {
+        host.SetPhase(PlaybackPhase::kLoading);
+        return;
+      }
       break;
     default:
+      host.Refuse(ScriptVmRefusal::kEventSource,
+                  static_cast<int>(host.Source()));
       break;
   }
+  StopEventStartup(host);
 }
 
 void AwaitEventFile(ScriptVmHost& host) {
   const EventFileStatus status = host.EventFile();
   if (status == EventFileStatus::kNone) {
     host.Refuse(ScriptVmRefusal::kMissingEventFile, host.EventId());
+    StopEventStartup(host);
     return;
   }
-  if (status != EventFileStatus::kReady) {
+  if (status == EventFileStatus::kLoading) {
     return;
   }
   host.ReleaseEventFile();
+  if (status != EventFileStatus::kReady) {
+    host.Refuse(ScriptVmRefusal::kEventFileRead, host.EventId());
+    StopEventStartup(host);
+    return;
+  }
   if (host.ChainedEventLoaded()) {
-    host.AdoptChainedEvent();
+    if (!host.AdoptChainedEvent()) {
+      host.Refuse(ScriptVmRefusal::kChainedEventAdoption, host.EventId());
+      StopEventStartup(host);
+      return;
+    }
     host.SetChainedEventLoaded(false);
   }
-  InitializeEventScriptData(StartOf(ScriptRegion::kEventScript, host), host);
+  if (!InitializeEventScriptData(StartOf(ScriptRegion::kEventScript, host),
+                                 host)) {
+    StopEventStartup(host);
+    return;
+  }
   host.SetPhase(PlaybackPhase::kRunning);
 }
 
@@ -794,6 +885,10 @@ ScriptFlow ScriptYieldFrame(const ScriptInstruction& /*instruction*/,
 
 ScriptFlow ScriptWaitForEventFile(const ScriptInstruction& /*instruction*/,
                                   ScriptVmHost& host) {
+  if (host.EventFile() == EventFileStatus::kFailed) {
+    host.Refuse(ScriptVmRefusal::kEventFileRead, host.EventId());
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
   return host.EventFile() == EventFileStatus::kLoading ? Hold() : Advance();
 }
 
@@ -1212,9 +1307,22 @@ ScriptFlow CommandLoadNextEvent(const ScriptInstruction& instruction,
   if (!Fits(instruction, kTwoOperandBytes, host)) {
     return Advance();
   }
+  if (host.EventFile() != EventFileStatus::kNone || host.ChainedEventLoaded()) {
+    host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
+  const std::int16_t previous = host.EventId();
   host.SetEventId(OperandHalf(Bytes(instruction), kFirstOperand));
-  host.AllocateChainedEventBuffer();
-  QueueEventScriptLoad(EventBuffer::kChained, host);
+  if (!host.AllocateChainedEventBuffer()) {
+    host.Refuse(ScriptVmRefusal::kEventBufferAllocation, host.EventId());
+    host.SetEventId(previous);
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
+  if (!QueueEventScriptLoad(EventBuffer::kChained, host)) {
+    host.DiscardChainedEventBuffer();
+    host.SetEventId(previous);
+    return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
   host.SetChainedEventLoaded(true);
   return Advance();
 }
@@ -1252,28 +1360,28 @@ int RequestEventStart(ScriptVmHost& host) {
   return 1;
 }
 
-void InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
+bool InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
+  if (host.EventFile() != EventFileStatus::kNone) {
+    host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
+    return false;
+  }
   const bool current = IsCurrent(data, host);
   const std::span<const std::uint8_t> bytes =
       current ? host.Region(data.region) : ScriptCommand{};
-  const bool header = current && data.Present() &&
-                      data.offset <= bytes.size() &&
-                      bytes.size() - data.offset > kEventScriptHeaderBytes;
+  bool header = current && data.Present() &&
+                bytes.size() <= std::numeric_limits<std::uint32_t>::max() &&
+                data.offset <= bytes.size() &&
+                bytes.size() - data.offset > kEventScriptHeaderBytes;
   if (header) {
-    BindScriptHeader(data, bytes, host);
+    header = BindScriptHeader(data, bytes, host);
   } else {
     if (current) {
       host.Refuse(ScriptVmRefusal::kScriptHeader,
                   static_cast<int>(data.offset));
     }
-    host.SetDialogStrings({});
-    for (int style = kTextBoxFrameStyleFirst; style < kTextBoxFrameStyleCount;
-         ++style) {
-      host.SetTextBoxFrameStyle(style, {});
-    }
-    for (int pattern = 0; pattern < kVibrationPatternSlots; ++pattern) {
-      host.SetVibrationPattern(pattern, {});
-    }
+  }
+  if (!header) {
+    ClearScriptViews(host);
   }
   host.SetThreadCursor(
       0, header
@@ -1285,6 +1393,7 @@ void InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
     host.SetThreadCursor(thread, {});
   }
   ResetEventState(host);
+  return header;
 }
 
 int UpdateEventPlayback(ScriptVmHost& host) {
@@ -1392,8 +1501,16 @@ int EvaluateInterpolationCurve(std::int16_t mode, std::int16_t frame,
                  RaiseFraction(ratio(kOne), easing.power));
 }
 
-void QueueEventScriptLoad(EventBuffer destination, ScriptVmHost& host) {
-  host.QueueEventFileLoad(host.EventId(), destination);
+bool QueueEventScriptLoad(EventBuffer destination, ScriptVmHost& host) {
+  if (host.EventFile() != EventFileStatus::kNone) {
+    host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
+    return false;
+  }
+  if (!host.QueueEventFileLoad(host.EventId(), destination)) {
+    host.Refuse(ScriptVmRefusal::kEventFileQueue, host.EventId());
+    return false;
+  }
+  return true;
 }
 
 void ResetCutsceneActorsToIdle(ScriptVmHost& host) {
@@ -1404,7 +1521,14 @@ void ResetCutsceneActorsToIdle(ScriptVmHost& host) {
   }
 }
 
-void InitializeScriptOpcodeTable(ScriptVmHost& host) {
+bool InitializeScriptOpcodeTable(ScriptVmHost& host) {
+  if (host.EventFile() != EventFileStatus::kNone) {
+    host.CancelEventFile();
+  }
+  host.DiscardChainedEventBuffer();
+  host.SetChainedEventLoaded(false);
+  host.SetSubroutineReturn({});
+  ClearScriptViews(host);
   host.SetAmbientSoundSuspended(false);
   host.SetPhase(PlaybackPhase::kIdle);
   host.SetStartConfirmed(false);
@@ -1414,7 +1538,12 @@ void InitializeScriptOpcodeTable(ScriptVmHost& host) {
     host.SetWaitFrames(thread, 0);
   }
   host.SetRoomChangeState(0);
-  host.AllocateEventBuffers();
+  if (!host.AllocateEventBuffers()) {
+    host.Refuse(ScriptVmRefusal::kEventBufferAllocation,
+                static_cast<int>(kEventScriptBytes));
+    return false;
+  }
+  return true;
 }
 
 }  // namespace VS::Event

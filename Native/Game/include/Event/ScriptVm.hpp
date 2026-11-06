@@ -116,7 +116,7 @@ enum class CutsceneSkip : std::uint8_t {
   kSkipping = 2,
 };
 
-enum class EventFileStatus : std::uint8_t { kNone, kLoading, kReady };
+enum class EventFileStatus : std::uint8_t { kNone, kLoading, kReady, kFailed };
 
 // The buffer an event file is read into.
 enum class EventBuffer : std::uint8_t { kScript, kChained };
@@ -209,6 +209,12 @@ enum class ScriptVmRefusal : std::uint8_t {
   // The location's source was replaced, even if its address/extent is
   // unchanged.
   kStaleScriptRegion,
+  kEventBufferAllocation,
+  kEventFileQueue,
+  kEventFileRead,
+  kEventFileBusy,
+  kChainedEventAdoption,
+  kEventSource,
 };
 
 // The event VM state, the script regions and the systems the opcodes and
@@ -318,12 +324,21 @@ class ScriptVmHost {
 
   // Event files and the script buffers.
   [[nodiscard]] virtual EventFileStatus EventFile() const = 0;
-  virtual void QueueEventFileLoad(int event_id, EventBuffer destination) = 0;
+  // False leaves no request or outstanding write to the destination.
+  [[nodiscard]] virtual bool QueueEventFileLoad(int event_id,
+                                                EventBuffer destination) = 0;
+  // Release only terminal requests; keep destinations alive while loading.
   virtual void ReleaseEventFile() = 0;
+  // Synchronously prevent all further writes before releasing request
+  // ownership. Merely freeing a queue slot or clearing its pointer is not
+  // cancellation.
+  virtual void CancelEventFile() = 0;
   virtual void ClearEventFile() = 0;
-  virtual void AllocateChainedEventBuffer() = 0;
-  virtual void AdoptChainedEvent() = 0;
-  virtual void AllocateEventBuffers() = 0;
+  // Allocation/adoption failure leaves the existing owners unchanged.
+  [[nodiscard]] virtual bool AllocateChainedEventBuffer() = 0;
+  [[nodiscard]] virtual bool AdoptChainedEvent() = 0;
+  virtual void DiscardChainedEventBuffer() = 0;
+  [[nodiscard]] virtual bool AllocateEventBuffers() = 0;
 
   // Flags and the controller.
   [[nodiscard]] virtual std::uint8_t Flag(int flag) const = 0;
@@ -511,11 +526,14 @@ int RequestEventStart(ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BF5F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:4588)
 // Reads the script header at `data` (the dialog strings, frame styles and
 // vibration patterns) and resets the threads and per-event state. A header
-// or table outside its region is refused and that part left unset.
-void InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host);
+// or table outside its region refuses the complete header, clearing borrowed
+// views and every cursor. True only when the script can start.
+[[nodiscard]] bool InitializeEventScriptData(ScriptLocation data,
+                                             ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BF850 (src/BATTLE/BATTLE.PRG/4A0A8.c:4633)
 // Advances event playback by a frame: 0 while idle or awaiting the start,
-// else 2.
+// else 2. A failed startup reports a refusal and returns to idle; its frame
+// still returns 2, not a success or failure code.
 int UpdateEventPlayback(ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BFBB8 (src/BATTLE/BATTLE.PRG/573B8.c:67)
 // Runs `thread` from its cursor until an opcode holds, yields, stops or
@@ -540,11 +558,12 @@ void ReleaseScriptActorControl(ScriptVmHost& host);
                                              ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800C00E8 (src/BATTLE/BATTLE.PRG/573B8.c:223)
 // Reads the current event id's file into `destination`.
-void QueueEventScriptLoad(EventBuffer destination, ScriptVmHost& host);
+[[nodiscard]] bool QueueEventScriptLoad(EventBuffer destination,
+                                        ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800C0150 (src/BATTLE/BATTLE.PRG/573B8.c:231)
 void ResetCutsceneActorsToIdle(ScriptVmHost& host);
 // decomp: INITBTL.PRG _initScriptFunctionTable
 // (src/BATTLE/INITBTL.PRG/12AC.c:69)
-void InitializeScriptOpcodeTable(ScriptVmHost& host);
+[[nodiscard]] bool InitializeScriptOpcodeTable(ScriptVmHost& host);
 
 }  // namespace VS::Event

@@ -45,6 +45,11 @@ class RecordingHost final : public event::ScriptVmHost {
   event::CutsceneSkip skip = event::CutsceneSkip::kNone;
   event::EventFileStatus file = event::EventFileStatus::kNone;
   event::EventBuffer queued_buffer = event::EventBuffer::kScript;
+  bool queue_succeeds = true;
+  bool buffers_allocate = true;
+  bool chained_allocates = true;
+  bool adoption_succeeds = true;
+  bool owns_chained = false;
   std::int16_t event_id = 0;
   std::int16_t room_change = 0;
   bool confirmed = false;
@@ -224,13 +229,18 @@ class RecordingHost final : public event::ScriptVmHost {
   }
   void ClearScriptControlledActors() override { controlled.fill(false); }
   event::EventFileStatus EventFile() const override { return file; }
-  void QueueEventFileLoad(int id, event::EventBuffer destination) override {
+  bool QueueEventFileLoad(int id, event::EventBuffer destination) override {
     CHECK(id == event_id);
+    calls.emplace_back("QueueFile");
+    if (!queue_succeeds) {
+      return false;
+    }
     queued_buffer = destination;
     file = event::EventFileStatus::kLoading;
-    calls.emplace_back("QueueFile");
+    return true;
   }
   void ReleaseEventFile() override {
+    REQUIRE(file != event::EventFileStatus::kLoading);
     file = event::EventFileStatus::kNone;
     calls.emplace_back("ReleaseFile");
   }
@@ -238,12 +248,32 @@ class RecordingHost final : public event::ScriptVmHost {
     file = event::EventFileStatus::kNone;
     calls.emplace_back("ClearFile");
   }
-  void AllocateChainedEventBuffer() override {
-    calls.emplace_back("AllocateChained");
+  void CancelEventFile() override {
+    file = event::EventFileStatus::kNone;
+    calls.emplace_back("CancelFile");
   }
-  void AdoptChainedEvent() override { calls.emplace_back("AdoptChained"); }
-  void AllocateEventBuffers() override {
+  bool AllocateChainedEventBuffer() override {
+    calls.emplace_back("AllocateChained");
+    if (chained_allocates) {
+      owns_chained = true;
+    }
+    return chained_allocates;
+  }
+  bool AdoptChainedEvent() override {
+    calls.emplace_back("AdoptChained");
+    if (adoption_succeeds) {
+      owns_chained = false;
+    }
+    return adoption_succeeds;
+  }
+  void DiscardChainedEventBuffer() override {
+    REQUIRE(file != event::EventFileStatus::kLoading);
+    owns_chained = false;
+    calls.emplace_back("DiscardChained");
+  }
+  bool AllocateEventBuffers() override {
     calls.emplace_back("AllocateBuffers");
+    return buffers_allocate;
   }
   std::uint8_t Flag(int flag) const override {
     flag_reads.push_back(flag);
@@ -575,7 +605,7 @@ TEST_CASE("VM timers use bounded mode and scope tables and packed durations",
 TEST_CASE("VM script headers bind table-relative entries", "[event-vm]") {
   RecordingHost host;
   Header(host);
-  event::InitializeEventScriptData(At(0), host);
+  CHECK(event::InitializeEventScriptData(At(0), host));
   CHECK(host.cursors[0] == At(16));
   CHECK(host.strings == At(80));
   CHECK(host.styles[9] == At(64));
@@ -589,9 +619,9 @@ TEST_CASE("VM script headers bind table-relative entries", "[event-vm]") {
 TEST_CASE("VM short headers clear previously bound views", "[event-vm]") {
   RecordingHost host;
   Header(host);
-  event::InitializeEventScriptData(At(0), host);
+  REQUIRE(event::InitializeEventScriptData(At(0), host));
   host.regions[1].resize(7);
-  event::InitializeEventScriptData(At(0), host);
+  CHECK_FALSE(event::InitializeEventScriptData(At(0), host));
   CHECK_FALSE(host.cursors[0].Present());
   CHECK_FALSE(host.strings.Present());
   CHECK(std::ranges::none_of(host.styles, &Location::Present));
@@ -608,11 +638,12 @@ TEST_CASE(
   Half(host.regions[1], 2, 128);
   Half(host.regions[1], 4, 127);
   Half(host.regions[1], 48, 255);
-  event::InitializeEventScriptData(At(0), host);
+  CHECK_FALSE(event::InitializeEventScriptData(At(0), host));
   CHECK_FALSE(host.strings.Present());
   CHECK(std::ranges::none_of(host.styles, &Location::Present));
   CHECK_FALSE(host.patterns[0].Present());
-  CHECK(host.patterns[7] == At(100));
+  CHECK_FALSE(host.patterns[7].Present());
+  CHECK_FALSE(host.cursors[0].Present());
   CHECK(host.refusals.size() == 9);
 }
 
@@ -630,7 +661,7 @@ void ResetDirtyEvent(RecordingHost& host) {
   host.effect_pending = true;
   host.room_change = 3;
   host.skip = event::CutsceneSkip::kSkipping;
-  event::InitializeEventScriptData(At(0), host);
+  REQUIRE(event::InitializeEventScriptData(At(0), host));
 }
 }  // namespace
 
@@ -877,7 +908,7 @@ TEST_CASE(
   host.file = event::EventFileStatus::kNone;
   event::UpdateEventPlayback(host);
   CHECK(host.refusals.back().first == Refusal::kMissingEventFile);
-  CHECK(host.phase == event::PlaybackPhase::kLoading);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
 }
 
 TEST_CASE("VM finished playback waits for the camera before releasing actors",
@@ -1015,13 +1046,14 @@ TEST_CASE("VM table initialization clears every runnable thread and wait",
   host.phase = event::PlaybackPhase::kRunning;
   host.ambient_suspended = host.confirmed = host.main_finished = true;
   host.room_change = 3;
-  event::InitializeScriptOpcodeTable(host);
+  CHECK(event::InitializeScriptOpcodeTable(host));
   CHECK(host.cursors == std::array<Location, 4>{});
   CHECK(host.waits == std::array<std::int16_t, 4>{});
   CHECK(host.phase == event::PlaybackPhase::kIdle);
   CHECK_FALSE((host.ambient_suspended || host.confirmed || host.main_finished));
   CHECK(host.room_change == 0);
-  CHECK(host.calls == std::vector<std::string>{"AllocateBuffers"});
+  CHECK(host.calls ==
+        std::vector<std::string>{"DiscardChained", "AllocateBuffers"});
 }
 
 TEST_CASE("VM simple opcodes retain their control results and diagnostics",
@@ -1037,6 +1069,295 @@ TEST_CASE("VM simple opcodes retain their control results and diagnostics",
   CHECK(Run(event::ScriptWaitForEventFile, host, {0}).kind == Kind::kHold);
   host.file = event::EventFileStatus::kReady;
   CHECK(Run(event::ScriptWaitForEventFile, host, {0}).kind == Kind::kAdvance);
+}
+
+TEST_CASE("VM missing file startup terminates its loading wait",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.phase = event::PlaybackPhase::kLoading;
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK(host.refusals == std::vector{std::pair{Refusal::kMissingEventFile, 0}});
+}
+
+TEST_CASE("VM refuses to run a truncated starting script",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.phase = event::PlaybackPhase::kStarting;
+  host.source = event::EventSource::kRoomEntryScript;
+  host.regions[1].resize(7);
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK_FALSE(host.cursors[0].Present());
+}
+
+TEST_CASE("VM refuses to run a script with malformed header tables",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  Header(host);
+  Half(host.regions[1], 48, 255);
+  host.phase = event::PlaybackPhase::kStarting;
+  host.source = event::EventSource::kRoomEntryScript;
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK_FALSE(host.cursors[0].Present());
+  CHECK_FALSE(host.strings.Present());
+  CHECK(std::ranges::none_of(host.patterns, &Location::Present));
+}
+
+TEST_CASE("VM startup queue refusal clears borrowed views and every cursor",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  Header(host);
+  REQUIRE(event::InitializeEventScriptData(At(0), host));
+  host.phase = event::PlaybackPhase::kStarting;
+  host.queue_succeeds = false;
+  host.return_to = At(20);
+  host.waits.fill(9);
+  CHECK(event::UpdateEventPlayback(host) == 2);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK(host.file == event::EventFileStatus::kNone);
+  CHECK_FALSE(host.return_to.Present());
+  CHECK_FALSE(host.strings.Present());
+  CHECK(host.cursors == std::array<Location, 4>{});
+  CHECK(host.waits == std::array<std::int16_t, 4>{});
+  CHECK(host.refusals == std::vector{std::pair{Refusal::kEventFileQueue, 0}});
+}
+
+TEST_CASE("VM failed startup releases camera and actor control exactly once",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.phase = event::PlaybackPhase::kStarting;
+  host.queue_succeeds = false;
+  host.controlled[0] = host.controlled[16] = true;
+  event::UpdateEventPlayback(host);
+  CHECK(host.reset_actors == std::vector{0, 16});
+  CHECK(
+      std::ranges::none_of(host.controlled, [](bool value) { return value; }));
+  CHECK(std::ranges::count(host.calls, "FreeCamera") == 1);
+  const auto calls = host.calls;
+  CHECK(event::UpdateEventPlayback(host) == 0);
+  CHECK(host.calls == calls);
+}
+
+TEST_CASE("VM failed file reads release the request before chained storage",
+          "[event-vm][event-vm-failure]") {
+  for (bool chained : {false, true}) {
+    RecordingHost host;
+    Header(host);
+    host.phase = event::PlaybackPhase::kLoading;
+    host.file = event::EventFileStatus::kFailed;
+    host.chained = host.owns_chained = chained;
+    event::UpdateEventPlayback(host);
+    CHECK(host.phase == event::PlaybackPhase::kIdle);
+    CHECK(host.file == event::EventFileStatus::kNone);
+    CHECK_FALSE((host.chained || host.owns_chained));
+    CHECK(std::ranges::find(host.calls, "ReleaseFile") <
+          std::ranges::find(host.calls, "DiscardChained"));
+    CHECK(std::ranges::count(host.calls, "AdoptChained") == 0);
+    CHECK(host.region_reads.empty());
+    CHECK(host.refusals == std::vector{std::pair{Refusal::kEventFileRead, 0}});
+  }
+}
+
+TEST_CASE("VM pending reads retain their destination and all loading state",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.phase = event::PlaybackPhase::kLoading;
+  host.file = event::EventFileStatus::kLoading;
+  host.chained = host.owns_chained = true;
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kLoading);
+  CHECK(host.file == event::EventFileStatus::kLoading);
+  CHECK((host.chained && host.owns_chained));
+  CHECK(host.calls.empty());
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("VM adoption failure never starts or reads the previous main script",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  Header(host);
+  const auto previous = host.regions[1];
+  host.phase = event::PlaybackPhase::kLoading;
+  host.file = event::EventFileStatus::kReady;
+  host.chained = host.owns_chained = true;
+  host.adoption_succeeds = false;
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK(host.regions[1] == previous);
+  CHECK(host.region_reads.empty());
+  CHECK_FALSE((host.chained || host.owns_chained));
+  CHECK(host.calls == std::vector<std::string>{"ReleaseFile", "AdoptChained",
+                                               "DiscardChained", "FreeCamera"});
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kChainedEventAdoption, 0}});
+}
+
+TEST_CASE("VM completed malformed file headers do not enter running playback",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.phase = event::PlaybackPhase::kLoading;
+  host.file = event::EventFileStatus::kReady;
+  host.regions[1].resize(16);
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK(host.file == event::EventFileStatus::kNone);
+  CHECK(host.cursors == std::array<Location, 4>{});
+  CHECK(std::ranges::count(host.calls, "ReleaseFile") == 1);
+  CHECK(host.refusals == std::vector{std::pair{Refusal::kScriptHeader, 0}});
+}
+
+TEST_CASE("VM chain allocation refusal preserves the selector and never queues",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.event_id = 17;
+  host.chained_allocates = false;
+  CHECK(Run(event::CommandLoadNextEvent, host, {0, 0x34, 0x12}).kind ==
+        Kind::kStop);
+  CHECK(host.event_id == 17);
+  CHECK_FALSE((host.chained || host.owns_chained));
+  CHECK(host.file == event::EventFileStatus::kNone);
+  CHECK(host.calls == std::vector<std::string>{"AllocateChained"});
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kEventBufferAllocation, 0x1234}});
+}
+
+TEST_CASE("VM chain queue refusal discards prepared storage",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.event_id = 17;
+  host.queue_succeeds = false;
+  CHECK(Run(event::CommandLoadNextEvent, host, {0, 0x34, 0x12}).kind ==
+        Kind::kStop);
+  CHECK(host.event_id == 17);
+  CHECK_FALSE((host.chained || host.owns_chained));
+  CHECK(host.file == event::EventFileStatus::kNone);
+  CHECK(host.calls == std::vector<std::string>{"AllocateChained", "QueueFile",
+                                               "DiscardChained"});
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kEventFileQueue, 0x1234}});
+}
+
+TEST_CASE("VM chain queue refusal permits a successful retry",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.queue_succeeds = false;
+  REQUIRE(Run(event::CommandLoadNextEvent, host, {0, 0x34, 0x12}).kind ==
+          Kind::kStop);
+  host.queue_succeeds = true;
+  CHECK(Run(event::CommandLoadNextEvent, host, {0, 0x34, 0x12}).kind ==
+        Kind::kAdvance);
+  CHECK(host.event_id == 0x1234);
+  CHECK((host.chained && host.owns_chained));
+  CHECK(host.file == event::EventFileStatus::kLoading);
+}
+
+TEST_CASE("VM repeated chain commands preserve the outstanding request",
+          "[event-vm][event-vm-failure]") {
+  for (auto status :
+       {event::EventFileStatus::kLoading, event::EventFileStatus::kReady,
+        event::EventFileStatus::kFailed}) {
+    RecordingHost host;
+    host.event_id = 17;
+    host.file = status;
+    host.chained = host.owns_chained = true;
+    CHECK(Run(event::CommandLoadNextEvent, host, {0, 0x34, 0x12}).kind ==
+          Kind::kStop);
+    CHECK(host.event_id == 17);
+    CHECK(host.file == status);
+    CHECK((host.chained && host.owns_chained));
+    CHECK(host.calls.empty());
+    CHECK(host.refusals == std::vector{std::pair{Refusal::kEventFileBusy, 17}});
+  }
+}
+
+TEST_CASE("VM file wait stops on a read failure without advancing",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.file = event::EventFileStatus::kFailed;
+  CHECK(Run(event::ScriptWaitForEventFile, host, {0}).kind == Kind::kStop);
+  CHECK(host.refusals == std::vector{std::pair{Refusal::kEventFileRead, 0}});
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("VM buffer initialization reports allocation refusal",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.buffers_allocate = false;
+  host.cursors.fill(At(7));
+  host.waits.fill(12);
+  host.phase = event::PlaybackPhase::kRunning;
+  CHECK_FALSE(event::InitializeScriptOpcodeTable(host));
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK(host.cursors == std::array<Location, 4>{});
+  CHECK(host.waits == std::array<std::int16_t, 4>{});
+  CHECK(host.refusals ==
+        std::vector{std::pair{Refusal::kEventBufferAllocation,
+                              static_cast<int>(event::kEventScriptBytes)}});
+  host.buffers_allocate = true;
+  CHECK(event::InitializeScriptOpcodeTable(host));
+}
+
+TEST_CASE("VM unknown event sources refuse rather than waiting forever",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  // An imported fixed-underlying enum can contain an unnamed value.
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  host.source = static_cast<event::EventSource>(3);
+  host.phase = event::PlaybackPhase::kStarting;
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK(host.refusals == std::vector{std::pair{Refusal::kEventSource, 3}});
+}
+
+TEST_CASE("VM interrupted startup cancels writes before discarding their owner",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  host.phase = event::PlaybackPhase::kStarting;
+  host.file = event::EventFileStatus::kLoading;
+  host.chained = host.owns_chained = true;
+  event::UpdateEventPlayback(host);
+  CHECK(host.phase == event::PlaybackPhase::kIdle);
+  CHECK(host.file == event::EventFileStatus::kNone);
+  CHECK_FALSE((host.chained || host.owns_chained));
+  CHECK(host.calls ==
+        std::vector<std::string>{"CancelFile", "DiscardChained", "FreeCamera"});
+  CHECK(host.refusals == std::vector{std::pair{Refusal::kEventFileBusy, 0}});
+}
+
+TEST_CASE("VM direct load and header entry cannot discard a pending request",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  Header(host);
+  host.file = event::EventFileStatus::kLoading;
+  host.cursors[0] = At(20);
+  CHECK_FALSE(event::QueueEventScriptLoad(event::EventBuffer::kScript, host));
+  CHECK_FALSE(event::InitializeEventScriptData(At(0), host));
+  CHECK(host.file == event::EventFileStatus::kLoading);
+  CHECK(host.cursors[0] == At(20));
+  CHECK(host.region_reads.empty());
+  CHECK(host.calls.empty());
+  CHECK(host.refusals == std::vector(2, std::pair{Refusal::kEventFileBusy, 0}));
+}
+
+TEST_CASE("VM repeat initialization cancels writes before replacing buffers",
+          "[event-vm][event-vm-failure]") {
+  RecordingHost host;
+  Header(host);
+  REQUIRE(event::InitializeEventScriptData(At(0), host));
+  host.calls.clear();
+  host.file = event::EventFileStatus::kLoading;
+  host.chained = host.owns_chained = true;
+  host.return_to = At(20);
+  REQUIRE(event::InitializeScriptOpcodeTable(host));
+  CHECK(host.file == event::EventFileStatus::kNone);
+  CHECK_FALSE((host.chained || host.owns_chained));
+  CHECK_FALSE(host.return_to.Present());
+  CHECK_FALSE(host.strings.Present());
+  CHECK(std::ranges::none_of(host.patterns, &Location::Present));
+  CHECK(host.calls == std::vector<std::string>{"CancelFile", "DiscardChained",
+                                               "AllocateBuffers"});
 }
 
 TEST_CASE("VM cached signed flags do not match unsigned operands above 127",
@@ -1152,7 +1473,7 @@ TEST_CASE("VM headers preserve their mounted generation in every bound view",
   RecordingHost host;
   Header(host);
   host.generations[1] = 7;
-  event::InitializeEventScriptData(At(0, Region::kEventScript, 7), host);
+  CHECK(event::InitializeEventScriptData(At(0, Region::kEventScript, 7), host));
   CHECK(host.cursors[0] == At(16, Region::kEventScript, 7));
   CHECK(host.strings == At(80, Region::kEventScript, 7));
   CHECK(host.styles[9] == At(64, Region::kEventScript, 7));
@@ -1166,10 +1487,10 @@ TEST_CASE("VM stale headers clear views without reading the replacement",
           "[event-vm][event-vm-lifetime]") {
   RecordingHost host;
   Header(host);
-  event::InitializeEventScriptData(At(0), host);
+  REQUIRE(event::InitializeEventScriptData(At(0), host));
   host.region_reads.clear();
   ++host.generations[1];
-  event::InitializeEventScriptData(At(0), host);
+  CHECK_FALSE(event::InitializeEventScriptData(At(0), host));
   CHECK(host.region_reads.empty());
   CHECK_FALSE(host.cursors[0].Present());
   CHECK_FALSE(host.strings.Present());

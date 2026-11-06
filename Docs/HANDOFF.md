@@ -13,7 +13,36 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
-- The next core-only checkpoint adds immutable, shared room-section owners
+- Ownership/generation checkpoint `13b0e482` is pushed; exact-revision
+  Source Quality `42181532222` succeeded. The next core-only checkpoint checks
+  buffer allocation, queueing, read status, chained adoption and complete
+  header initialization. Failed startup reports its reason, clears borrowed
+  views/cursors, releases actor/camera control and returns to idle instead of
+  hanging in Loading or entering Running with refused data. Chained refusal
+  preserves the previous selector, discards unqueued storage and permits retry;
+  another outstanding request is not overwritten.
+- Header validation now prepares all views before publication; one malformed
+  table refuses the complete header rather than exposing a partially valid
+  script. Header-relative arithmetic is widened before addition. Direct
+  header/queue entry refuses an outstanding request without discarding it.
+  Repeat initialization and interrupted startup require synchronous
+  cancellation before releasing the destination. **Live must implement that
+  contract:** freeing a busy disc queue slot alone does not stop pending writes.
+- Verification on `13b0e482` plus the three scoped source/test changes:
+  three pre-fix cases failed six of eight assertions. The final addition is
+  19 cases / 161 assertions; `[event-vm],[room-triggers],[cutscene-lifecycle]`
+  passes 134 cases / 5,018 assertions in Debug and Release. Full suites each
+  pass **4,493 cases / 7,904,785 assertions and both unchanged replays**.
+  Scoped quality/clang-tidy is clean. Evidence:
+  `VR-EVENT-SCRIPT-FAILURE-CONTRACTS`, `build\owner-checkpoint\vm-failure-*`,
+  session `files\vm-failure-before-baseline.json`, and #313 comments
+  `6679731263`, `6679770807`, `6679949962`. This is failure-injection/core
+  evidence, not a production cancellation or retail failure reproduction.
+- Remaining before the Live switch: bound dispatch loops and cursor arithmetic,
+  implement actual request cancellation, mount/pin sources through callbacks
+  and transitions, propagate failures through Field/Boot, and migrate all
+  callers. Promotion counts remain unchanged; #313 and #276 stay open.
+- The published ownership checkpoint adds immutable, shared room-section owners
   and explicit load results. Preparation is transactional: allocation/extent
   failures publish nothing and do not clear flags or alter playback. Executing
   door leases survive room replacement/free; borrowed old input is copied
