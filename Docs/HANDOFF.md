@@ -13,6 +13,40 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- #314's shared-disc prerequisite now exposes terminal queue errors and
+  distinct refused/failed/completed native reads. The integer blocking
+  adapter also returns success only on completion (its two production
+  callers discard the result); queue-exhaustion fallback cannot mark failed
+  data Loaded. Deferred command failure is published to its own request
+  before clients poll, then the drive is released for the next request.
+- `CancelLiveDiscWrites` is a game-thread operation for writes starting
+  exactly at the supplied span's address, not every subrange of an allocation.
+  It stops the deferred write before changing matching pending records,
+  clears borrowed destinations, repairs priorities/counts and preserves
+  terminal handles for release. Unrelated destinations and XA playback are
+  untouched. Completion requires the same read generation and actual
+  delivery, not merely an idle drive. Legacy release is still not
+  cancellation; #313 must call the new API before dropping a pending owner.
+- Disc verification on `cef090ce` plus the seven Content source/test changes:
+  four original reproduction cases failed nine of sixteen assertions; the
+  Live blocking adapter additionally failed one of five before correction.
+  **23 new cases / 150 assertions** pass in both configurations, including
+  actual Live deferred commands, fallback records, repeat cancellation and
+  recovery. Combined disc/event coverage is **196 cases / 5,438 assertions**.
+  Full Debug/Release solution builds and suites pass **4,523 cases /
+  7,904,983 assertions**, with both complete replay objects unchanged.
+- Scoped quality/clang-tidy and static/ledger gates pass; two generation runs
+  preserve 1,656 source/project hashes. Evidence: `VR-DISC-FAILURE-CANCELLATION`,
+  `build\owner-checkpoint\disc-lifetime-*`, `disc-failure-before*`,
+  `disc-blocking-before*`, and #314 comment `6680692023`. Full-suite validation
+  corrected an invalid test assumption: an unsuccessful read may modify its
+  destination, so the test checks a guard byte outside the requested extent
+  rather than asserting failed data stayed unchanged.
+- Limits: this does not migrate the production VM, make all callers respond
+  to read failure, or establish retail failure recovery. The current native
+  read completes synchronously inside deferred command service; a genuinely
+  asynchronous backend would require persistent request identity, not this
+  per-update host identity. No promotion or compatibility-retirement credit.
 - The VM now refuses a thread after exactly 65,536 non-yielding dispatches
   per frame, including cross-region jumps. Hold/yield/stop/finish on the last
   allowed instruction remain valid; each thread/frame receives a fresh

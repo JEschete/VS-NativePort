@@ -24,16 +24,21 @@ namespace VS::Content {
 
 Content_DiscQueueSlot* AllocateLiveDiscRequest(const Content_DiscFile* file);
 void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request);
+// Game-thread cancellation for pending writes starting at destination.data().
+// Stops the deferred command before marking matching requests Error. The owner
+// can then release their handles and storage; unrelated destinations are
+// untouched.
+[[nodiscard]] bool CancelLiveDiscWrites(std::span<std::byte> destination);
 void EnqueueLiveDiscRequest(Content_DiscQueueSlot* request, void* destination);
 void EnqueueLivePriorityDiscRequest(Content_DiscQueueSlot* request,
                                     void* destination);
 void InitializeLiveDiscQueue();
 void UpdateLiveDiscQueue();
-// vs_main_diskLoadFile's int result: 1 when the drive took the read.
+// Returns 1 only when the read completed; refusal/failure returns 0 and warns.
 int ReadLiveDiscFileBlocking(int sector, int bytes, void* destination);
 // Reads `file` into `destination` without a request (#282), once the drive
 // is free. Returns 1 when it was read; 0 (with a warning) when the drive
-// stayed busy for a minute of frames or refused the read.
+// stayed busy for a minute of frames, refused the read, or failed to read.
 int ReadLiveRefusedDiscFile(const Content_DiscFile* file, void* destination);
 // #282: reads `file` as ReadLiveRefusedDiscFile does and returns a record
 // outside the request array: Loaded when it was read, Error when not (a

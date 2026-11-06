@@ -34,6 +34,15 @@ void Queue(DiscRequest& request, DiscDestination destination,
   request.reserved = 0;
   request.priority = priority;
 }
+
+void RecountRequests(DiscRequestQueue& queue) {
+  queue.reading = 0;
+  queue.waiting = 0;
+  for (const DiscRequest& request : queue.requests) {
+    if (request.state == DiscRequestState::kReading) ++queue.reading;
+    if (request.state == DiscRequestState::kEnqueued) ++queue.waiting;
+  }
+}
 }  // namespace
 
 // decomp: SLUS_010.40 _diskReadCallback (src/SLUS_010.40/main.c:9021)
@@ -173,13 +182,15 @@ void ClearDiscReadError(DiscTransfer& drive) {
 }
 
 // decomp: SLUS_010.40 vs_main_diskLoadFile (src/SLUS_010.40/main.c:9334)
-bool ReadDiscFileBlocking(DiscQueueHost& host, const DiscFileExtent& file,
-                          DiscDestination destination) {
-  if (!host.BeginRead(file, destination)) return false;
+DiscReadResult ReadDiscFileBlocking(DiscQueueHost& host,
+                                    const DiscFileExtent& file,
+                                    DiscDestination destination) {
+  if (!host.BeginRead(file, destination)) return DiscReadResult::kRefused;
   while (BlockingReadPending(host.DriveState())) {
     host.WaitFrame();
   }
-  return true;
+  return host.ReadCompleted() ? DiscReadResult::kComplete
+                              : DiscReadResult::kFailed;
 }
 
 bool ReadRefusedDiscFile(DiscQueueHost& host, const DiscFileExtent& file,
@@ -190,7 +201,8 @@ bool ReadRefusedDiscFile(DiscQueueHost& host, const DiscFileExtent& file,
     if (frames >= max_wait_frames) return false;
     host.WaitFrame();
   }
-  return ReadDiscFileBlocking(host, file, destination);
+  return ReadDiscFileBlocking(host, file, destination) ==
+         DiscReadResult::kComplete;
 }
 
 // decomp: SLUS_010.40 _initCdQueue (src/SLUS_010.40/main.c:9401)
@@ -258,18 +270,21 @@ bool EnqueuePriorityDiscRequest(DiscRequestQueue& queue, std::size_t index,
 
 // decomp: SLUS_010.40 _processCdQueue (src/SLUS_010.40/main.c:9461)
 void UpdateDiscQueue(DiscRequestQueue& queue, DiscQueueHost& host) {
+  ResolveFailedDiscRequest(queue, host);
   host.CountFrameSinceRead();
   if ((queue.reading != 0 || queue.waiting != 0) &&
       host.DriveState() == DiscDriveState::kIdle) {
-    for (DiscRequest& request : queue.requests) {
+    for (std::size_t index = 0; index < queue.requests.size(); ++index) {
+      DiscRequest& request = queue.requests[index];
       if (request.state == DiscRequestState::kEnqueued) {
         if (request.priority == 0) {
-          request.state = DiscRequestState::kReading;
-          // The original ignores whether the drive took the read.
-          static_cast<void>(host.BeginRead(request.file, request.destination));
+          const bool accepted =
+              host.BeginQueuedRead(index, request.file, request.destination);
+          request.state =
+              accepted ? DiscRequestState::kReading : DiscRequestState::kError;
           host.RestartFramesSinceRead();
           --queue.waiting;
-          ++queue.reading;
+          if (accepted) ++queue.reading;
         } else {
           --request.priority;
         }
@@ -280,6 +295,45 @@ void UpdateDiscQueue(DiscRequestQueue& queue, DiscQueueHost& host) {
     }
   }
   host.UpdateCommands();
+  ResolveFailedDiscRequest(queue, host);
+}
+
+bool ResolveFailedDiscRequest(DiscRequestQueue& queue, DiscQueueHost& host) {
+  const std::optional<std::size_t> failed = host.FailedRequest();
+  if (!failed) return false;
+  DiscRequest* const request = At(queue, *failed);
+  if (request == nullptr || request->state != DiscRequestState::kReading) {
+    return false;
+  }
+  request->state = DiscRequestState::kError;
+  RecountRequests(queue);
+  host.ClearReadFailure();
+  return true;
+}
+
+bool CancelDiscWrites(DiscRequestQueue& queue, DiscDestination destination,
+                      DiscQueueHost& host) {
+  if (destination == DiscDestination::kNone) return false;
+  host.CancelRead(destination);
+  for (DiscRequest& request : queue.requests) {
+    if (request.destination != destination) continue;
+    if (request.state == DiscRequestState::kEnqueued) {
+      const auto removed_priority = request.priority;
+      request.state = DiscRequestState::kError;
+      request.destination = DiscDestination::kNone;
+      for (DiscRequest& waiting : queue.requests) {
+        if (waiting.state == DiscRequestState::kEnqueued &&
+            waiting.priority > removed_priority) {
+          --waiting.priority;
+        }
+      }
+    } else if (request.state == DiscRequestState::kReading) {
+      request.state = DiscRequestState::kError;
+      request.destination = DiscDestination::kNone;
+    }
+  }
+  RecountRequests(queue);
+  return true;
 }
 
 }  // namespace VS::Content

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <optional>
 #include <span>
 #include <utility>
@@ -12,6 +13,8 @@
 
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscReaderLive.hpp"
+#include "State/GameClockLive.hpp"
 
 extern "C" {
 #include "DiscQueue.h"
@@ -23,6 +26,7 @@ using Content::DiscDestination;
 using Content::DiscDriveState;
 using Content::DiscFileExtent;
 using Content::DiscInterrupt;
+using Content::DiscReadResult;
 using Content::DiscRequestState;
 
 struct DiscRead {
@@ -38,17 +42,54 @@ class FakeDiscQueueHost final : public Content::DiscQueueHost {
   bool BeginRead(const DiscFileExtent& file,
                  DiscDestination destination) override {
     reads.push_back({file, destination});
+    if (accept_reads) {
+      read_canceled = false;
+      active_destination = destination;
+      active_request.reset();
+    }
     if (accept_reads && read_frames != 0) {
       state = read_state;
       frames_left = read_frames;
     }
     return accept_reads;
   }
+  bool ReadCompleted() const override {
+    return state == DiscDriveState::kIdle && !read_canceled;
+  }
+  bool BeginQueuedRead(std::size_t index, const DiscFileExtent& file,
+                       DiscDestination destination) override {
+    if (!BeginRead(file, destination)) return false;
+    active_request = index;
+    return true;
+  }
+  std::optional<std::size_t> FailedRequest() const override {
+    return state == DiscDriveState::kReadError ||
+                   state == DiscDriveState::kCommandFailed
+               ? active_request
+               : std::nullopt;
+  }
+  void ClearReadFailure() override {
+    ++cleared_failures;
+    state = DiscDriveState::kIdle;
+    read_canceled = true;
+    active_request.reset();
+  }
+  void CancelRead(DiscDestination destination) override {
+    if (cancel_observer) cancel_observer();
+    cancellations.push_back(destination);
+    if (active_destination == destination) {
+      read_canceled = true;
+      active_destination = DiscDestination::kNone;
+      active_request.reset();
+      state = DiscDriveState::kIdle;
+    }
+  }
   void UpdateCommands() override { ++commands; }
   void CountFrameSinceRead() override { ++counted_frames; }
   void RestartFramesSinceRead() override { ++restarts; }
   void WaitFrame() override {
     ++waited_frames;
+    if (frame_observer) frame_observer();
     if (frames_left == 0) return;
     --frames_left;
     if (frames_left == 0) state = DiscDriveState::kIdle;
@@ -56,9 +97,16 @@ class FakeDiscQueueHost final : public Content::DiscQueueHost {
 
   DiscDriveState state = DiscDriveState::kIdle;
   bool accept_reads = true;
+  bool read_canceled = false;
   DiscDriveState read_state = DiscDriveState::kReadInit;
   std::uint32_t read_frames = 0;
   std::uint32_t frames_left = 0;
+  DiscDestination active_destination = DiscDestination::kNone;
+  std::optional<std::size_t> active_request;
+  std::vector<DiscDestination> cancellations;
+  int cleared_failures = 0;
+  std::function<void()> cancel_observer;
+  std::function<void()> frame_observer;
   std::vector<DiscRead> reads;
   int commands = 0;
   int counted_frames = 0;
@@ -149,6 +197,9 @@ struct LiveDiscQueueFixture {
   std::array<Content_DiscQueueSlot, 32> saved_slots{};
   Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
   Content_DiscDrive saved_drive = Content_discDriveState;
+  VS::State::PlayTime saved_play_time = VS::State::LivePlayTime();
+  decltype(Content_legacyDiscReadBuffer) saved_read_buffer =
+      Content_legacyDiscReadBuffer;
 
   LiveDiscQueueFixture() {
     std::memcpy(saved_slots.data(), Content_discRequestSlots,
@@ -163,12 +214,22 @@ struct LiveDiscQueueFixture {
                 sizeof Content_discRequestSlots);
     Content_discRequestCounts = saved_counts;
     Content_discDriveState = saved_drive;
+    VS::State::StoreLivePlayTime(saved_play_time);
+    Content_legacyDiscReadBuffer = saved_read_buffer;
   }
   LiveDiscQueueFixture(const LiveDiscQueueFixture&) = delete;
   LiveDiscQueueFixture& operator=(const LiveDiscQueueFixture&) = delete;
   LiveDiscQueueFixture(LiveDiscQueueFixture&&) = delete;
   LiveDiscQueueFixture& operator=(LiveDiscQueueFixture&&) = delete;
 };
+
+Content_DiscQueueSlot* QueueLiveRead(const Content_DiscFile& file,
+                                     std::span<std::byte> destination) {
+  auto* request = Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(request != nullptr);
+  Content::EnqueueLiveDiscRequest(request, destination.data());
+  return request;
+}
 }  // namespace
 
 TEST_CASE(
@@ -341,23 +402,208 @@ TEST_CASE("Disc queue updates skip the scan while both counts are zero",
   CHECK(host.commands == 4);
 }
 
+TEST_CASE("Rejected queued disc reads never become loaded",
+          "[content][disc-queue][disc-failure]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  host.accept_reads = false;
+  Content::UpdateDiscQueue(queue, host);
+  CHECK(queue.requests[0].state == DiscRequestState::kError);
+  CHECK(Counts(queue) == std::pair{0, 1});
+  Content::UpdateDiscQueue(queue, host);
+  CHECK(queue.requests[0].state == DiscRequestState::kError);
+  CHECK(queue.requests[1].state == DiscRequestState::kError);
+  CHECK(Counts(queue) == std::pair{0, 0});
+}
+
+TEST_CASE("Queued disc read errors become terminal instead of waiting forever",
+          "[content][disc-queue][disc-failure]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  host.read_frames = 1;
+  host.read_state = DiscDriveState::kReadError;
+  Content::UpdateDiscQueue(queue, host);
+  CHECK(queue.requests[0].state == DiscRequestState::kError);
+  CHECK(queue.requests[1].state == DiscRequestState::kEnqueued);
+  CHECK(Counts(queue) == std::pair{0, 1});
+}
+
+TEST_CASE("Blocking disc reads report read failure rather than acceptance",
+          "[content][disc-queue][disc-failure]") {
+  FakeDiscQueueHost host;
+  host.read_frames = 1;
+  host.read_state = DiscDriveState::kReadError;
+  CHECK(Content::ReadDiscFileBlocking(host, {.sector = 30, .bytes = 2048},
+                                      DestinationAt(8)) ==
+        DiscReadResult::kFailed);
+  CHECK(host.state == DiscDriveState::kReadError);
+}
+
+TEST_CASE("Disc read failures do not consume an unrelated blocking read error",
+          "[content][disc-queue][disc-failure]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  Content::UpdateDiscQueue(queue, host);
+  host.read_frames = 1;
+  host.read_state = DiscDriveState::kReadError;
+  REQUIRE(host.BeginRead({.sector = 99, .bytes = 8}, DestinationAt(0x900)));
+  CHECK_FALSE(Content::ResolveFailedDiscRequest(queue, host));
+  CHECK(queue.requests[0].state == DiscRequestState::kReading);
+  CHECK(host.state == DiscDriveState::kReadError);
+  CHECK(host.cleared_failures == 0);
+}
+
+TEST_CASE("Disc failed requests permit later independent requests to complete",
+          "[content][disc-queue][disc-failure]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  host.read_frames = 1;
+  host.read_state = DiscDriveState::kReadError;
+  Content::UpdateDiscQueue(queue, host);
+  REQUIRE(queue.requests[0].state == DiscRequestState::kError);
+  CHECK(host.state == DiscDriveState::kIdle);
+  CHECK(host.cleared_failures == 1);
+  host.read_frames = 0;
+  Content::UpdateDiscQueue(queue, host);
+  Content::UpdateDiscQueue(queue, host);
+  CHECK(queue.requests[1].state == DiscRequestState::kLoaded);
+  CHECK(queue.requests[0].state == DiscRequestState::kError);
+  CHECK(Counts(queue) == std::pair{0, 0});
+}
+
+TEST_CASE("Disc cancellation stops the destination before changing requests",
+          "[content][disc-queue][disc-cancel]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  host.read_frames = 1;
+  Content::UpdateDiscQueue(queue, host);
+  host.cancel_observer = [&queue] {
+    CHECK(queue.requests[0].state == DiscRequestState::kReading);
+    CHECK(Counts(queue) == std::pair{1, 1});
+  };
+  REQUIRE(Content::CancelDiscWrites(queue, DestinationAt(0x100), host));
+  CHECK(queue.requests[0].state == DiscRequestState::kError);
+  CHECK(queue.requests[1].state == DiscRequestState::kEnqueued);
+  CHECK(host.state == DiscDriveState::kIdle);
+  CHECK(host.active_destination == DiscDestination::kNone);
+  CHECK(Counts(queue) == std::pair{0, 1});
+}
+
+TEST_CASE("Disc cancellation repairs waiting priorities for later reads",
+          "[content][disc-queue][disc-cancel]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  REQUIRE(Content::EnqueueDiscRequest(queue, 2, DestinationAt(0x300)));
+  REQUIRE(Content::CancelDiscWrites(queue, DestinationAt(0x200), host));
+  CHECK(queue.requests[1].state == DiscRequestState::kError);
+  CHECK(queue.requests[0].priority == 0);
+  CHECK(queue.requests[2].priority == 1);
+  CHECK(Counts(queue) == std::pair{0, 2});
+  Content::UpdateDiscQueue(queue, host);
+  Content::UpdateDiscQueue(queue, host);
+  CHECK(queue.requests[0].state == DiscRequestState::kLoaded);
+  CHECK(queue.requests[2].state == DiscRequestState::kReading);
+}
+
+TEST_CASE("Disc cancellation is repeatable without changing terminal requests",
+          "[content][disc-queue][disc-cancel]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  REQUIRE(Content::CancelDiscWrites(queue, DestinationAt(0x200), host));
+  const auto once = queue;
+  REQUIRE(Content::CancelDiscWrites(queue, DestinationAt(0x200), host));
+  CHECK(SameQueue(queue, once));
+}
+
+TEST_CASE("Disc cancellation keeps another active destination untouched",
+          "[content][disc-queue][disc-cancel]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  host.read_frames = 1;
+  Content::UpdateDiscQueue(queue, host);
+  const auto first = queue.requests[0];
+  REQUIRE(Content::CancelDiscWrites(queue, DestinationAt(0x200), host));
+  CHECK(queue.requests[0].state == first.state);
+  CHECK(queue.requests[0].destination == first.destination);
+  CHECK(host.state == DiscDriveState::kReadInit);
+  CHECK(host.active_destination == DestinationAt(0x100));
+  CHECK(Counts(queue) == std::pair{1, 0});
+}
+
+TEST_CASE("Disc cancellation only marks pending requests and recounts them",
+          "[content][disc-queue][disc-cancel]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  FakeDiscQueueHost host;
+  queue.requests[1].destination = DestinationAt(0x100);
+  queue.requests[2].destination = DestinationAt(0x100);
+  queue.requests[2].state = DiscRequestState::kLoaded;
+  queue.requests[3].destination = DestinationAt(0x100);
+  queue.requests[3].state = DiscRequestState::kAllocated;
+  queue.reading = queue.waiting = 0;
+  REQUIRE(Content::CancelDiscWrites(queue, DestinationAt(0x100), host));
+  CHECK(queue.requests[0].state == DiscRequestState::kError);
+  CHECK(queue.requests[1].state == DiscRequestState::kError);
+  CHECK(queue.requests[2].state == DiscRequestState::kLoaded);
+  CHECK(queue.requests[3].state == DiscRequestState::kAllocated);
+  CHECK(Counts(queue) == std::pair{0, 0});
+}
+
+TEST_CASE(
+    "Disc cancellation refuses an absent destination without side effects",
+    "[content][disc-queue][disc-cancel]") {
+  Content::DiscRequestQueue queue = TwoWaitingRequests();
+  const auto before = queue;
+  FakeDiscQueueHost host;
+  CHECK_FALSE(Content::CancelDiscWrites(queue, DiscDestination::kNone, host));
+  CHECK(SameQueue(queue, before));
+  CHECK(host.cancellations.empty());
+}
+
+TEST_CASE("Cancellation during a blocking frame is not successful completion",
+          "[content][disc-queue][disc-cancel]") {
+  Content::DiscRequestQueue queue;
+  FakeDiscQueueHost host;
+  host.read_frames = 1;
+  host.frame_observer = [&queue, &host] {
+    REQUIRE(Content::CancelDiscWrites(queue, DestinationAt(8), host));
+  };
+  CHECK(Content::ReadDiscFileBlocking(host, {.sector = 30, .bytes = 8},
+                                      DestinationAt(8)) ==
+        DiscReadResult::kFailed);
+  CHECK(host.state == DiscDriveState::kIdle);
+  CHECK(host.waited_frames == 1);
+}
+
+TEST_CASE("Queue exhaustion fallback does not turn a read error into success",
+          "[content][disc-queue][disc-failure]") {
+  FakeDiscQueueHost host;
+  host.read_frames = 1;
+  host.read_state = DiscDriveState::kReadError;
+  CHECK_FALSE(Content::ReadRefusedDiscFile(host, {.sector = 30, .bytes = 2048},
+                                           DestinationAt(8), 0));
+  CHECK(host.state == DiscDriveState::kReadError);
+}
+
 TEST_CASE(
     "Blocking disc reads wait while the drive reads and fail when it refuses",
     "[content-slice][content][disc-queue]") {
   FakeDiscQueueHost host;
   const DiscFileExtent file{.sector = 1387, .bytes = 188416};
   host.read_frames = 3;
-  CHECK(Content::ReadDiscFileBlocking(host, file, DestinationAt(0x40)));
+  CHECK(Content::ReadDiscFileBlocking(host, file, DestinationAt(0x40)) ==
+        DiscReadResult::kComplete);
   CHECK(host.waited_frames == 3);
   REQUIRE(host.reads.size() == 1);
   CHECK(SameRead(host.reads[0], file, DestinationAt(0x40)));
-  // vs_main_diskLoadFile stops waiting outside the seek and read phases.
+  // The native result distinguishes a failed accepted read from completion.
   host.read_state = DiscDriveState::kReadError;
-  CHECK(Content::ReadDiscFileBlocking(host, file, DestinationAt(0x40)));
+  CHECK(Content::ReadDiscFileBlocking(host, file, DestinationAt(0x40)) ==
+        DiscReadResult::kFailed);
   CHECK(host.waited_frames == 3);
   host.state = DiscDriveState::kIdle;
   host.accept_reads = false;
-  CHECK_FALSE(Content::ReadDiscFileBlocking(host, file, DestinationAt(0x40)));
+  CHECK(Content::ReadDiscFileBlocking(host, file, DestinationAt(0x40)) ==
+        DiscReadResult::kRefused);
   CHECK(host.waited_frames == 3);
 }
 
@@ -611,6 +857,173 @@ TEST_CASE("Live disc queue binding allocates requests in slot order",
   Content::ReleaseLiveDiscRequest(first);
   CHECK(first->state == Content_DiscRequestState_Free);
   CHECK(second->state == Content_DiscRequestState_Allocated);
+}
+
+TEST_CASE("Live rejected disc requests become Error without being loaded",
+          "[content][disc-queue][disc-failure]") {
+  const LiveDiscQueueFixture fixture;
+  const Content_DiscFile file{.lba = 2, .size = -1};
+  std::array<std::byte, 8> bytes{};
+  auto* request = QueueLiveRead(file, bytes);
+  Content::UpdateLiveDiscQueue();
+  CHECK(request->state == Content_DiscRequestState_Error);
+  CHECK(Content_discRequestCounts.reading == 0);
+  CHECK(Content_discRequestCounts.waiting == 0);
+  Content::UpdateLiveDiscQueue();
+  CHECK(request->state == Content_DiscRequestState_Error);
+  Content::ReleaseLiveDiscRequest(request);
+  CHECK(request->state == Content_DiscRequestState_Free);
+}
+
+TEST_CASE("Live deferred read failures reach their request before polling",
+          "[content][disc-queue][disc-failure]") {
+  const LiveDiscQueueFixture fixture;
+  const Content_DiscFile absent{.lba = -1, .size = 1};
+  const Content_DiscFile empty{.lba = 0, .size = 0};
+  std::array<std::byte, 2> bytes{std::byte{0x7F}, std::byte{0x7F}};
+  auto* failed = QueueLiveRead(absent, bytes);
+  auto* following = QueueLiveRead(empty, bytes);
+  Content::UpdateLiveDiscQueue();
+  CHECK(failed->state == Content_DiscRequestState_Error);
+  CHECK_FALSE(
+      Content::LiveDiscReadCompleted(Content::LiveDiscReadGeneration()));
+  CHECK(following->state == Content_DiscRequestState_Enqueued);
+  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(bytes[1] == std::byte{0x7F});
+  Content::UpdateLiveDiscQueue();
+  Content::UpdateLiveDiscQueue();
+  CHECK(following->state == Content_DiscRequestState_Loaded);
+  CHECK(failed->state == Content_DiscRequestState_Error);
+  CHECK(Content_discRequestCounts.reading == 0);
+}
+
+TEST_CASE("Live cancellation prevents a deferred destination write",
+          "[content][disc-queue][disc-cancel]") {
+  const LiveDiscQueueFixture fixture;
+  const Content_DiscFile file{.lba = -1, .size = 8};
+  std::array<std::byte, 8> bytes{};
+  bytes.fill(std::byte{0x7F});
+  const auto before = bytes;
+  auto* request = QueueLiveRead(file, bytes);
+  REQUIRE(Content::BeginLiveDiscRead(file.lba, file.size, bytes.data()));
+  REQUIRE(Content::CancelLiveDiscWrites(bytes));
+  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(request->state == Content_DiscRequestState_Error);
+  CHECK(request->vram == nullptr);
+  Content::UpdateLiveDiscCommands();
+  CHECK(bytes == before);
+  CHECK(Content_discDriveState.failureCount == 0);
+  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
+}
+
+TEST_CASE("Live blocking reads report completion rather than acceptance",
+          "[content][disc-queue][disc-failure]") {
+  const LiveDiscQueueFixture fixture;
+  std::array<std::byte, 1> bytes{};
+  CHECK(Content::ReadLiveDiscFileBlocking(-1, 1, bytes.data()) == 0);
+  CHECK_FALSE(
+      Content::LiveDiscReadCompleted(Content::LiveDiscReadGeneration()));
+  Content::ClearLiveDiscReadError();
+  CHECK(Content::ReadLiveDiscFileBlocking(0, 0, bytes.data()) == 1);
+  CHECK(Content::LiveDiscReadCompleted(Content::LiveDiscReadGeneration()));
+  CHECK(Content::ReadLiveDiscFileBlocking(0, -1, bytes.data()) == 0);
+}
+
+TEST_CASE("Live fallback records distinguish failure from completion",
+          "[content][disc-queue][disc-failure]") {
+  const LiveDiscQueueFixture fixture;
+  std::array<std::byte, 1> bytes{};
+  const Content_DiscFile absent{.lba = -1, .size = 1};
+  auto* failed = Content::CompleteLiveRefusedDiscRequest(&absent, bytes.data());
+  REQUIRE(failed != nullptr);
+  CHECK(failed->state == Content_DiscRequestState_Error);
+  Content::ReleaseLiveDiscRequest(failed);
+  Content::ClearLiveDiscReadError();
+  const Content_DiscFile empty{.lba = 0, .size = 0};
+  auto* completed =
+      Content::CompleteLiveRefusedDiscRequest(&empty, bytes.data());
+  REQUIRE(completed != nullptr);
+  CHECK(completed->state == Content_DiscRequestState_Loaded);
+  Content::ReleaseLiveDiscRequest(completed);
+}
+
+TEST_CASE("Live cancellation leaves another deferred destination armed",
+          "[content][disc-queue][disc-cancel]") {
+  const LiveDiscQueueFixture fixture;
+  std::array<std::byte, 8> canceled{};
+  std::array<std::byte, 8> other{};
+  const Content_DiscFile file{.lba = -1, .size = 8};
+  auto* request = QueueLiveRead(file, canceled);
+  REQUIRE(Content::BeginLiveDiscRead(file.lba, file.size, other.data()));
+  REQUIRE(Content::CancelLiveDiscWrites(canceled));
+  CHECK(request->state == Content_DiscRequestState_Error);
+  CHECK(Content::LiveDiscState() == Content_DiscDriveState_ReadInit);
+  CHECK(Content_discDriveState.destination == other.data());
+  CHECK(Content_discDriveState.byteCount == file.size);
+  CHECK(Content_discDriveState.sectorCount == 1);
+}
+
+TEST_CASE("Live repeated cancellation preserves completed handles and counts",
+          "[content][disc-queue][disc-cancel]") {
+  const LiveDiscQueueFixture fixture;
+  std::array<std::byte, 8> bytes{};
+  const Content_DiscFile file{.lba = 0, .size = 0};
+  auto* completed = QueueLiveRead(file, bytes);
+  auto* pending = Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(pending != nullptr);
+  Content::UpdateLiveDiscQueue();
+  Content::UpdateLiveDiscQueue();
+  REQUIRE(completed->state == Content_DiscRequestState_Loaded);
+  Content::EnqueueLiveDiscRequest(pending, bytes.data());
+  REQUIRE(Content::CancelLiveDiscWrites(bytes));
+  REQUIRE(Content::CancelLiveDiscWrites(bytes));
+  CHECK(completed->state == Content_DiscRequestState_Loaded);
+  CHECK(pending->state == Content_DiscRequestState_Error);
+  CHECK(Content_discRequestCounts.reading == 0);
+  CHECK(Content_discRequestCounts.waiting == 0);
+}
+
+TEST_CASE("Live cancellation drops an old destination without stopping XA",
+          "[content][disc-queue][disc-cancel]") {
+  const LiveDiscQueueFixture fixture;
+  std::array<std::byte, 8> bytes{};
+  Content_discDriveState.destination = bytes.data();
+  Content_discDriveState.state = Content_DiscDriveState_StreamXa;
+  Content_discDriveState.byteCount = 99;
+  REQUIRE(Content::CancelLiveDiscWrites(bytes));
+  CHECK(Content::LiveDiscState() == Content_DiscDriveState_StreamXa);
+  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(Content_discDriveState.byteCount == 99);
+  CHECK_FALSE(Content::CancelLiveDiscWrites({}));
+  CHECK(Content::LiveDiscState() == Content_DiscDriveState_StreamXa);
+}
+
+TEST_CASE("Live completion belongs to one generation and excludes cancellation",
+          "[content][disc-queue][disc-cancel]") {
+  const LiveDiscQueueFixture fixture;
+  std::array<std::byte, 1> bytes{};
+  REQUIRE(Content::BeginLiveDiscRead(0, 0, bytes.data()));
+  const auto first = Content::LiveDiscReadGeneration();
+  CHECK_FALSE(Content::LiveDiscReadCompleted(first));
+  Content::UpdateLiveDiscCommands();
+  CHECK(Content::LiveDiscReadCompleted(first));
+  REQUIRE(Content::BeginLiveDiscRead(0, 0, bytes.data()));
+  const auto second = Content::LiveDiscReadGeneration();
+  CHECK(second != first);
+  CHECK_FALSE(Content::LiveDiscReadCompleted(first));
+  REQUIRE(Content::CancelLiveDiscWrites(bytes));
+  Content::UpdateLiveDiscCommands();
+  CHECK_FALSE(Content::LiveDiscReadCompleted(second));
+}
+
+TEST_CASE("Live nonempty reads refuse a null destination without arming",
+          "[content][disc-queue][disc-failure]") {
+  const LiveDiscQueueFixture fixture;
+  const auto generation = Content::LiveDiscReadGeneration();
+  CHECK_FALSE(Content::BeginLiveDiscRead(0, 1, nullptr));
+  CHECK(Content::LiveDiscReadGeneration() == generation);
+  CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
 }
 
 TEST_CASE("Live disc queue binding commits enqueues and initialization",

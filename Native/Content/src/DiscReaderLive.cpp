@@ -2,8 +2,10 @@
 #include "Content/DiscReaderLive.hpp"
 
 #include <cstdint>
+#include <limits>
 
 #include "Content/DiscReader.hpp"
+#include "Core/Diagnostics.h"
 extern "C" {
 #include "Audio/XaPlayback.h"
 #include "Content/DataAccess.h"
@@ -16,6 +18,8 @@ namespace {
 
 // The XA markers read 128 while no XA stream owns the drive.
 constexpr int kInactiveXaMarker = 128;
+std::uint64_t read_generation = 0;
+bool read_completed = false;
 
 DiscDrivePhase PhaseOf(int state) {
   switch (state) {
@@ -103,12 +107,14 @@ class LiveDiscDriveHost final : public DiscDriveHost {
     };
   }
   [[nodiscard]] bool ReadPendingData() override {
+    read_completed = false;
     const Content_DiscDrive& drive = Content_discDriveState;
     return Content_ReadDiscBytes(static_cast<unsigned>(drive.startSector),
                                  static_cast<unsigned>(drive.byteCount),
                                  drive.destination) != 0;
   }
   void MarkSectorsDelivered(std::uint32_t sectors) override {
+    read_completed = true;
     Content_discDriveState.sectorsReceived = sectors;
     Content_discDriveState.destinationSector = sectors;
   }
@@ -159,8 +165,43 @@ class LiveDiscDriveHost final : public DiscDriveHost {
 
 bool BeginLiveDiscRead(std::int32_t sector, std::uint32_t bytes,
                        void* destination) {
+  if ((bytes != 0 && destination == nullptr) ||
+      read_generation == std::numeric_limits<std::uint64_t>::max()) {
+    Core_Warnf(
+        "content",
+        "Disc read refused: missing destination or exhausted generation");
+    return false;
+  }
   LiveDiscDriveHost host(destination);
-  return BeginDiscRead(host, sector, bytes);
+  if (!BeginDiscRead(host, sector, bytes)) return false;
+  ++read_generation;
+  read_completed = false;
+  return true;
+}
+
+std::uint64_t LiveDiscReadGeneration() noexcept { return read_generation; }
+
+bool LiveDiscReadCompleted(std::uint64_t generation) noexcept {
+  return generation != 0 && generation == read_generation && read_completed;
+}
+
+void CancelLiveDiscRead(const void* destination) {
+  if (destination == nullptr) {
+    Core_Warnf("content", "CancelDiscRead refused: null destination");
+    return;
+  }
+  if (Content_discDriveState.destination != destination) return;
+  read_completed = false;
+  Content_discDriveState.destination = nullptr;
+  const auto phase = PhaseOf(Content_discDriveState.state);
+  if (phase == DiscDrivePhase::kReadXaInit ||
+      phase == DiscDrivePhase::kStreamXa ||
+      phase == DiscDrivePhase::kStreamXaEnd) {
+    return;
+  }
+  Content_discDriveState.state = Content_DiscDriveState_Idle;
+  Content_discDriveState.byteCount = 0;
+  Content_discDriveState.sectorCount = 0;
 }
 
 void UpdateLiveDiscCommands() {
@@ -169,6 +210,8 @@ void UpdateLiveDiscCommands() {
 }
 
 void ResetLiveDiscDrive() {
+  read_completed = false;
+  Content_discDriveState.destination = nullptr;
   LiveDiscDriveHost host;
   ResetDiscDrive(host);
 }

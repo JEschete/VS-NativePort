@@ -72,6 +72,8 @@ struct DiscFileExtent {
 // and hands it back to the host, never dereferences it.
 enum class DiscDestination : std::uintptr_t { kNone = 0 };
 
+enum class DiscReadResult : std::uint8_t { kRefused, kFailed, kComplete };
+
 // vs_main_CdQueueSlot.
 struct DiscRequest {
   DiscRequestState state = DiscRequestState::kFree;
@@ -104,6 +106,15 @@ class DiscQueueHost {
   // Arms a read of `file` into `destination`; false when the drive refuses.
   virtual bool BeginRead(const DiscFileExtent& file,
                          DiscDestination destination) = 0;
+  // Completion of this host's accepted operation, not merely an idle drive.
+  [[nodiscard]] virtual bool ReadCompleted() const = 0;
+  virtual bool BeginQueuedRead(std::size_t index, const DiscFileExtent& file,
+                               DiscDestination destination) = 0;
+  // Identify a failed queued command, never an unrelated blocking read.
+  [[nodiscard]] virtual std::optional<std::size_t> FailedRequest() const = 0;
+  virtual void ClearReadFailure() = 0;
+  // Stop future writes to this destination without affecting another read.
+  virtual void CancelRead(DiscDestination destination) = 0;
   // Serves the drive's pending commands (once per queue update).
   virtual void UpdateCommands() = 0;
   // The drive's frames-since-last-read counter (wraps).
@@ -143,16 +154,27 @@ bool EnqueuePriorityDiscRequest(DiscRequestQueue& queue, std::size_t index,
 // idle marks finished reads loaded, starts the request whose turn it is and
 // moves the others up; then serves the drive's commands.
 void UpdateDiscQueue(DiscRequestQueue& queue, DiscQueueHost& host);
+// The Live binding serves deferred commands after publishing the queue.
+// Call again after those commands to publish their failure before polling.
+bool ResolveFailedDiscRequest(DiscRequestQueue& queue, DiscQueueHost& host);
+// Marks only pending writes to destination as Error, retaining their handles
+// for the owner to release, but clearing their borrowed destinations.
+// Cancellation precedes every ownership change.
+[[nodiscard]] bool CancelDiscWrites(DiscRequestQueue& queue,
+                                    DiscDestination destination,
+                                    DiscQueueHost& host);
 
 // vs_main_diskLoadFile (main.c:9334): starts a read and runs frames until
-// the drive leaves its seek/read phases. False when the drive refused it.
-bool ReadDiscFileBlocking(DiscQueueHost& host, const DiscFileExtent& file,
-                          DiscDestination destination);
+// the drive leaves its seek/read phases. Acceptance and completion are
+// distinct.
+[[nodiscard]] DiscReadResult ReadDiscFileBlocking(DiscQueueHost& host,
+                                                  const DiscFileExtent& file,
+                                                  DiscDestination destination);
 
 // #282: reads a file whose request the full queue refused. Runs frames while
 // the drive is busy with another command or stream, as the queue would have
 // waited, at most `max_wait_frames`, then reads it blocking. False when the
-// drive stayed busy or refused the read.
+// drive stayed busy, refused the read, or failed after accepting it.
 bool ReadRefusedDiscFile(DiscQueueHost& host, const DiscFileExtent& file,
                          DiscDestination destination,
                          std::uint32_t max_wait_frames);

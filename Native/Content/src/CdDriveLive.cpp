@@ -162,9 +162,43 @@ class LiveDiscQueueHost final : public DiscQueueHost {
   }
   bool BeginRead(const DiscFileExtent& file,
                  DiscDestination destination) override {
-    return BeginLiveDiscRead(file.sector,
-                             static_cast<std::uint32_t>(file.bytes),
-                             Pointer(destination));
+    const bool accepted =
+        BeginLiveDiscRead(file.sector, static_cast<std::uint32_t>(file.bytes),
+                          Pointer(destination));
+    if (!accepted) {
+      Core_Warnf("content", "Disc read refused: sector %d, %d bytes, state %d",
+                 file.sector, file.bytes, static_cast<int>(DriveState()));
+    } else {
+      queued_request_.reset();
+      read_generation_ = LiveDiscReadGeneration();
+    }
+    return accepted;
+  }
+  bool ReadCompleted() const override {
+    return LiveDiscReadCompleted(read_generation_);
+  }
+  bool BeginQueuedRead(std::size_t index, const DiscFileExtent& file,
+                       DiscDestination destination) override {
+    if (!BeginRead(file, destination)) return false;
+    queued_request_ = index;
+    return true;
+  }
+  std::optional<std::size_t> FailedRequest() const override {
+    const auto state = DriveState();
+    return read_generation_ == LiveDiscReadGeneration() &&
+                   (state == DiscDriveState::kReadError ||
+                    state == DiscDriveState::kCommandFailed)
+               ? queued_request_
+               : std::nullopt;
+  }
+  void ClearReadFailure() override {
+    Core_Warnf("content", "Queued disc read failed: state %d",
+               static_cast<int>(DriveState()));
+    CancelLiveDiscRead(Content_discDriveState.destination);
+    queued_request_.reset();
+  }
+  void CancelRead(DiscDestination destination) override {
+    CancelLiveDiscRead(Pointer(destination));
   }
   // Deferred until the queue is committed (the original served the commands
   // after its scan).
@@ -183,6 +217,8 @@ class LiveDiscQueueHost final : public DiscQueueHost {
 
  private:
   bool commands_pending_ = false;
+  std::optional<std::size_t> queued_request_;
+  std::uint64_t read_generation_ = 0;
 };
 
 DiscTransfer LoadTransfer() {
@@ -287,6 +323,21 @@ void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request) {
   CommitQueue(queue);
 }
 
+bool CancelLiveDiscWrites(std::span<std::byte> destination) {
+  if (destination.empty()) {
+    Core_Warnf("content", "CancelDiscWrites refused: empty destination");
+    return false;
+  }
+  DiscRequestQueue queue = LoadQueue();
+  LiveDiscQueueHost host;
+  if (!CancelDiscWrites(queue, Destination(destination.data()), host)) {
+    Core_Warnf("content", "CancelDiscWrites refused: null destination");
+    return false;
+  }
+  CommitQueue(queue);
+  return true;
+}
+
 Content_DiscQueueSlot* CompleteLiveRefusedDiscRequest(
     const Content_DiscFile* file, void* destination) {
   if (file == nullptr) {
@@ -348,15 +399,23 @@ void UpdateLiveDiscQueue() {
   LiveDiscQueueHost host;
   UpdateDiscQueue(queue, host);
   CommitQueue(queue);
-  if (host.CommandsPending()) UpdateLiveDiscCommands();
+  if (host.CommandsPending()) {
+    UpdateLiveDiscCommands();
+    queue = LoadQueue();
+    if (ResolveFailedDiscRequest(queue, host)) CommitQueue(queue);
+  }
 }
 
 int ReadLiveDiscFileBlocking(int sector, int bytes, void* destination) {
   LiveDiscQueueHost host;
-  return ReadDiscFileBlocking(host, {.sector = sector, .bytes = bytes},
-                              Destination(destination))
-             ? 1
-             : 0;
+  const auto result = ReadDiscFileBlocking(
+      host, {.sector = sector, .bytes = bytes}, Destination(destination));
+  if (result == DiscReadResult::kFailed) {
+    Core_Warnf("content",
+               "Accepted disc read failed: sector %d, %d bytes, state %d",
+               sector, bytes, static_cast<int>(host.DriveState()));
+  }
+  return result == DiscReadResult::kComplete ? 1 : 0;
 }
 
 int ReadLiveRefusedDiscFile(const Content_DiscFile* file, void* destination) {
