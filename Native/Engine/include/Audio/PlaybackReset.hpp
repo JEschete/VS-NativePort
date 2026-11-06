@@ -14,34 +14,34 @@ inline constexpr std::uint32_t kFirstSoundEffectVoice = 12;
 // The assignment a music channel holds when it owns no hardware voice.
 inline constexpr std::uint32_t kNoVoice = 24;
 
-enum class ChannelKind : std::uint8_t { Music = 0, SoundEffect = 1 };
+enum class ChannelKind : std::uint8_t { kMusic = 0, kSoundEffect = 1 };
 
 // One channel's cleared state: no pending updates, priority 0, the voice it
 // owns, and for sound effects full volume with no volume or pitch slides.
 struct ChannelReset {
-  ChannelKind kind = ChannelKind::Music;
+  ChannelKind kind = ChannelKind::kMusic;
   std::uint32_t voice = kNoVoice;
-  std::int16_t effectVolume = 0;
+  std::int16_t effect_volume = 0;
 };
 
 // The primary music layer becomes the active one; the secondary and saved
 // layers, tempo and pitch scales, loops and channel mutes are cleared.
 struct MusicLayerReset {
-  std::int32_t masterVolume = 0;  // 16.16
-  std::int32_t reverbDepth = 0;   // 16.16
+  std::int32_t master_volume = 0;  // 16.16
+  std::int32_t reverb_depth = 0;   // 16.16
 };
 
 // The voice scheduler and its masks are cleared and the effect tempo restarts.
 struct VoiceSchedulerReset {
-  std::uint32_t effectTempo = 0;  // 16.16
-  std::uint32_t tempoAccumulator = 0;
+  std::uint32_t effect_tempo = 0;  // 16.16
+  std::uint32_t tempo_accumulator = 0;
 };
 
 // The driver latches, sample bank selections, CD level and XA stream volume.
 struct DriverControlReset {
-  std::uint32_t mixBehavior = 0;
-  std::int32_t discVolume = 0;  // 16.16
-  std::int32_t streamVolume = 0;
+  std::uint32_t mix_behavior = 0;
+  std::int32_t disc_volume = 0;  // 16.16
+  std::int32_t stream_volume = 0;
 };
 
 struct PlaybackReset {
@@ -49,15 +49,15 @@ struct PlaybackReset {
   VoiceSchedulerReset voices;
   DriverControlReset controls;
   // Deferred voice-mode update the first tick applies.
-  std::uint32_t voiceModeUpdate = 0;
-  int reverbMode = 0;
+  std::uint32_t voice_mode_update = 0;
+  int reverb_mode = 0;
 };
 
 // The values the original stores.
 [[nodiscard]] PlaybackReset DefaultPlaybackReset();
 
 // The channel reset for slot `index` of the music table, or of the
-// sound-effect table when `kind` is SoundEffect. Returns false for a slot
+// sound-effect table when `kind` is kSoundEffect. Returns false for a slot
 // outside the table.
 [[nodiscard]] bool ChannelResetFor(ChannelKind kind, std::size_t index,
                                    ChannelReset& reset);

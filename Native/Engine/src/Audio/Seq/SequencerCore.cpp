@@ -138,7 +138,7 @@ void SetBits(std::int32_t& mask, std::uint32_t bits) {
 }
 
 bool IsMusic(const StepState& state) {
-  return state.channel.kind == ChannelKind::Music;
+  return state.channel.kind == ChannelKind::kMusic;
 }
 
 std::uint16_t LoopTop(const ProgramState& program) {

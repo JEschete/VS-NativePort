@@ -31,7 +31,7 @@ constexpr std::uint32_t kVoiceEffectFlags{
 };
 
 bool IsMusic(const ChannelState& channel) {
-  return channel.kind == ChannelKind::Music;
+  return channel.kind == ChannelKind::kMusic;
 }
 
 // B4 and B5: the oscillator amplitude in pitch units. B4 passes the base

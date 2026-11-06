@@ -280,8 +280,8 @@ static int CheckPendingModulationSlides(Audio_SeqChannel* channel, int effect,
   for (index = 1; index <= 4; ++index) {
     VS::Audio::Mixer::LiveUpdateChannelSlidesAndDelays(
         channel, 1,
-        effect ? VS::Audio::Driver::ChannelKind::SoundEffect
-               : VS::Audio::Driver::ChannelKind::Music);
+        effect ? VS::Audio::Driver::ChannelKind::kSoundEffect
+               : VS::Audio::Driver::ChannelKind::kMusic);
     const unsigned depth = kind == 0   ? channel->vibratoDepth
                            : kind == 1 ? channel->tremoloDepth
                                        : channel->autoPanDepth;

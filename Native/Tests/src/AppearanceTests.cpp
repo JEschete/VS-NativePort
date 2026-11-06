@@ -206,27 +206,27 @@ TEST_CASE("Palette pulse slots disarm one bit or every bit",
 
 TEST_CASE("Shadow blend snaps or steps toward the actor's own rates",
           "[actors-appearance-rendering][actors]") {
-  actors::ShadowBlend shadow{.levelFrames = 3,
-                             .radiusFrames = 4,
+  actors::ShadowBlend shadow{.level_frames = 3,
+                             .radius_frames = 4,
                              .level = 40,
-                             .radiusExpandRate = 100,
-                             .radiusShrinkRate = 300};
+                             .radius_expand_rate = 100,
+                             .radius_shrink_rate = 300};
   actors::BeginActorShadowBlend(shadow, {.expand = 160, .shrink = 200}, 8);
-  CHECK(shadow == actors::ShadowBlend{.levelFrames = 8,
-                                      .radiusFrames = 8,
+  CHECK(shadow == actors::ShadowBlend{.level_frames = 8,
+                                      .radius_frames = 8,
                                       .level = 40,
-                                      .levelDelta = -40,
-                                      .radiusExpandRate = 100,
-                                      .radiusShrinkRate = 300,
-                                      .radiusExpandDelta = 60,
-                                      .radiusShrinkDelta = -100});
+                                      .level_delta = -40,
+                                      .radius_expand_rate = 100,
+                                      .radius_shrink_rate = 300,
+                                      .radius_expand_delta = 60,
+                                      .radius_shrink_delta = -100});
 
   actors::BeginActorShadowBlend(shadow, {.expand = 160, .shrink = 200}, 0);
-  CHECK(shadow.radiusExpandRate == 160);
-  CHECK(shadow.radiusShrinkRate == 200);
+  CHECK(shadow.radius_expand_rate == 160);
+  CHECK(shadow.radius_shrink_rate == 200);
   CHECK(shadow.level == 0);
-  CHECK(shadow.levelFrames == 0);
-  CHECK(shadow.radiusFrames == 0);
+  CHECK(shadow.level_frames == 0);
+  CHECK(shadow.radius_frames == 0);
 }
 
 TEST_CASE("Actor fade color and tint keep the caller's code and last tint",

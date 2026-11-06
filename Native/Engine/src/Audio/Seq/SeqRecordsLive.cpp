@@ -546,8 +546,8 @@ LiveProgramMemory LiveProgramMemory::From(char* start) const {
 }
 
 Driver::ChannelKind LiveChannelKind(const Audio_SeqChannel& legacy) {
-  return legacy.type == kMusicChannelType ? Driver::ChannelKind::Music
-                                          : Driver::ChannelKind::SoundEffect;
+  return legacy.type == kMusicChannelType ? Driver::ChannelKind::kMusic
+                                          : Driver::ChannelKind::kSoundEffect;
 }
 
 ChannelState LoadChannelState(const Audio_SeqChannel& legacy) {

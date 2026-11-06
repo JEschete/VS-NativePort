@@ -105,20 +105,20 @@ AppearanceStatus DisableModelPalettePulse(PalettePulseRequest& request,
 // decomp: BATTLE.PRG func_800A06B8 (src/BATTLE/BATTLE.PRG/30DB0.c:3877)
 void BeginActorShadowBlend(ShadowBlend& shadow, ShadowRates rates,
                            int blend_frames) {
-  shadow.radiusFrames = 0;
+  shadow.radius_frames = 0;
   if (blend_frames == 0) {
-    shadow.radiusExpandRate = rates.expand;
-    shadow.radiusShrinkRate = rates.shrink;
+    shadow.radius_expand_rate = rates.expand;
+    shadow.radius_shrink_rate = rates.shrink;
     shadow.level = 0;
   } else {
-    shadow.radiusExpandDelta =
-        static_cast<std::int16_t>(rates.expand - shadow.radiusExpandRate);
-    shadow.radiusShrinkDelta =
-        static_cast<std::int16_t>(rates.shrink - shadow.radiusShrinkRate);
-    shadow.levelDelta = static_cast<std::int16_t>(-shadow.level);
+    shadow.radius_expand_delta =
+        static_cast<std::int16_t>(rates.expand - shadow.radius_expand_rate);
+    shadow.radius_shrink_delta =
+        static_cast<std::int16_t>(rates.shrink - shadow.radius_shrink_rate);
+    shadow.level_delta = static_cast<std::int16_t>(-shadow.level);
   }
-  shadow.levelFrames = static_cast<std::uint8_t>(blend_frames);
-  shadow.radiusFrames = static_cast<std::uint8_t>(blend_frames);
+  shadow.level_frames = static_cast<std::uint8_t>(blend_frames);
+  shadow.radius_frames = static_cast<std::uint8_t>(blend_frames);
 }
 
 // decomp: BATTLE.PRG func_800A071C (src/BATTLE/BATTLE.PRG/30DB0.c:3894)

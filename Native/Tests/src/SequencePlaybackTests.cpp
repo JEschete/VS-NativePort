@@ -53,7 +53,7 @@ const PoseVector kStartDelta{1, 1, 1, 0};
 TrackDecode DecodeFirstFrame(std::span<const std::uint8_t> track,
                              PoseVector& value, PoseVector& delta) {
   return DecodeAnimationTrack(track, {.first = 1, .last = 1}, value, delta,
-                              TrackKind::Linear);
+                              TrackKind::kLinear);
 }
 }  // namespace
 
@@ -62,7 +62,7 @@ TEST_CASE("SEQ commands cut short by the bank end are not applied",
   const std::uint8_t track[] = {0xE0, 1};
   PoseVector value = kStartValue;
   PoseVector delta = kStartDelta;
-  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::Overrun);
+  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::kOverrun);
   CHECK(Same(value, kStartValue));
   CHECK(Same(delta, kStartDelta));
 }
@@ -72,7 +72,7 @@ TEST_CASE("SEQ packed commands cut short by the bank end are not applied",
   const std::uint8_t track[] = {0x07, 0x00, 0x0C, 0x00};
   PoseVector value = kStartValue;
   PoseVector delta = kStartDelta;
-  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::Overrun);
+  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::kOverrun);
   CHECK(Same(delta, kStartDelta));
 }
 
@@ -81,7 +81,7 @@ TEST_CASE("SEQ track cursors past the bank end are not followed",
   const std::uint8_t track[] = {0xE0, 1, 1, 1};
   PoseVector value{0, 0, 0, 200};
   PoseVector delta = kStartDelta;
-  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::Overrun);
+  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::kOverrun);
   CHECK(value.word == 200);
 }
 
@@ -90,7 +90,7 @@ TEST_CASE("SEQ track terminators leave the cursors unchanged",
   const std::uint8_t track[] = {0};
   PoseVector value = kStartValue;
   PoseVector delta = kStartDelta;
-  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::Ended);
+  CHECK(DecodeFirstFrame(track, value, delta) == TrackDecode::kEnded);
   CHECK(Same(value, kStartValue));
   CHECK(Same(delta, kStartDelta));
 }
@@ -155,33 +155,33 @@ TEST_CASE("Pose blends never divide by a zero frame count",
   PoseKeys source;
   destination.rotations[0].x = 10;
   source.rotations[0].x = 50;
-  CHECK(BlendActorPose(destination, source, 1, 0, 0) == PoseBlend::CopySource);
-  CHECK(BlendActorPose(destination, source, 1, 3, 0) == PoseBlend::Skipped);
+  CHECK(BlendActorPose(destination, source, 1, 0, 0) == PoseBlend::kCopySource);
+  CHECK(BlendActorPose(destination, source, 1, 3, 0) == PoseBlend::kSkipped);
   CHECK(destination.rotations[0].x == 10);
-  CHECK(BlendActorPose(destination, source, 1, 2, 4) == PoseBlend::Halfway);
-  CHECK(BlendActorPose(destination, source, 255, 1, 4) == PoseBlend::Weighted);
+  CHECK(BlendActorPose(destination, source, 1, 2, 4) == PoseBlend::kHalfway);
+  CHECK(BlendActorPose(destination, source, 255, 1, 4) == PoseBlend::kWeighted);
   CHECK(destination.rotations[0].x == 20);
 }
 
 TEST_CASE("Shadow blends step their remaining deltas once per frame",
           "[actors][sequence]") {
-  VS::Actors::ShadowBlend shadow{.levelFrames = 2,
-                                 .radiusFrames = 1,
+  VS::Actors::ShadowBlend shadow{.level_frames = 2,
+                                 .radius_frames = 1,
                                  .level = 0xFFE,
-                                 .levelDelta = 100,
-                                 .radiusExpandRate = 10,
-                                 .radiusShrinkRate = 20,
-                                 .radiusExpandDelta = 7,
-                                 .radiusShrinkDelta = -4};
+                                 .level_delta = 100,
+                                 .radius_expand_rate = 10,
+                                 .radius_shrink_rate = 20,
+                                 .radius_expand_delta = 7,
+                                 .radius_shrink_delta = -4};
   VS::Actors::AdvanceShadowBlend(shadow);
-  CHECK(shadow.levelFrames == 1);
-  CHECK(shadow.levelDelta == 50);
+  CHECK(shadow.level_frames == 1);
+  CHECK(shadow.level_delta == 50);
   CHECK(shadow.level == ((0xFFE + 50) & 0xFFF));
-  CHECK(shadow.radiusFrames == 0);
-  CHECK(shadow.radiusExpandRate == 17);
-  CHECK(shadow.radiusShrinkRate == 16);
-  CHECK(shadow.radiusExpandDelta == 0);
-  CHECK(shadow.radiusShrinkDelta == 0);
+  CHECK(shadow.radius_frames == 0);
+  CHECK(shadow.radius_expand_rate == 17);
+  CHECK(shadow.radius_shrink_rate == 16);
+  CHECK(shadow.radius_expand_delta == 0);
+  CHECK(shadow.radius_shrink_delta == 0);
 }
 
 namespace {

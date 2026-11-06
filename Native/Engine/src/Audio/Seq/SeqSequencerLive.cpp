@@ -484,8 +484,8 @@ class LivePlaybackHost final : public PlaybackHost {
       Mixer::LiveUpdateChannelSlidesAndDelays(
           channel, ChannelBit(group, index),
           group == ChannelGroup::kSoundEffects
-              ? Driver::ChannelKind::SoundEffect
-              : Driver::ChannelKind::Music);
+              ? Driver::ChannelKind::kSoundEffect
+              : Driver::ChannelKind::kMusic);
     }
     LoadPlayback(state);
   }

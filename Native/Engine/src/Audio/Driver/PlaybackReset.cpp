@@ -24,29 +24,29 @@ constexpr int kReverbMode = 4;
 
 PlaybackReset DefaultPlaybackReset() {
   return PlaybackReset{
-      .music = {.masterVolume = kMusicMasterVolume,
-                .reverbDepth = kMusicReverbDepth},
-      .voices = {.effectTempo = kEffectTempo,
-                 .tempoAccumulator = kTempoAccumulator},
-      .controls = {.mixBehavior = kMixBehavior,
-                   .discVolume = kDiscVolume,
-                   .streamVolume = kStreamVolume},
-      .voiceModeUpdate = kVoiceModeUpdate,
-      .reverbMode = kReverbMode,
+      .music = {.master_volume = kMusicMasterVolume,
+                .reverb_depth = kMusicReverbDepth},
+      .voices = {.effect_tempo = kEffectTempo,
+                 .tempo_accumulator = kTempoAccumulator},
+      .controls = {.mix_behavior = kMixBehavior,
+                   .disc_volume = kDiscVolume,
+                   .stream_volume = kStreamVolume},
+      .voice_mode_update = kVoiceModeUpdate,
+      .reverb_mode = kReverbMode,
   };
 }
 
 bool ChannelResetFor(ChannelKind kind, std::size_t index, ChannelReset& reset) {
-  if (kind == ChannelKind::Music) {
+  if (kind == ChannelKind::kMusic) {
     if (index >= kMusicChannelCount) return false;
-    reset = ChannelReset{.kind = kind, .voice = kNoVoice, .effectVolume = 0};
+    reset = ChannelReset{.kind = kind, .voice = kNoVoice, .effect_volume = 0};
     return true;
   }
   if (index >= kSoundEffectChannelCount) return false;
   reset = ChannelReset{
       .kind = kind,
       .voice = kFirstSoundEffectVoice + static_cast<std::uint32_t>(index),
-      .effectVolume = kEffectVolume};
+      .effect_volume = kEffectVolume};
   return true;
 }
 
@@ -59,17 +59,17 @@ void ResetPlaybackState(PlaybackResetHost& host) {
   host.ResetDriverControls(reset.controls);
   ChannelReset channel;
   for (std::size_t index = 0; index < kMusicChannelCount; ++index) {
-    if (ChannelResetFor(ChannelKind::Music, index, channel)) {
+    if (ChannelResetFor(ChannelKind::kMusic, index, channel)) {
       host.ResetChannel(index, channel);
     }
   }
   for (std::size_t index = 0; index < kSoundEffectChannelCount; ++index) {
-    if (ChannelResetFor(ChannelKind::SoundEffect, index, channel)) {
+    if (ChannelResetFor(ChannelKind::kSoundEffect, index, channel)) {
       host.ResetChannel(index, channel);
     }
   }
-  host.RequestVoiceModeUpdate(reset.voiceModeUpdate);
-  host.SetReverbMode(reset.reverbMode);
+  host.RequestVoiceModeUpdate(reset.voice_mode_update);
+  host.SetReverbMode(reset.reverb_mode);
   host.EnableReverb(true);
 }
 }  // namespace VS::Audio::Driver

@@ -326,7 +326,7 @@ void EnableLegato(ChannelState& channel) { channel.play_modes = kLegatoPlay; }
 // decomp: SLUS_010.40 SoundVM_D0_EnableSustainedNote
 // (src/SLUS_010.40/25AC.c:5763)
 void EnableSustainedSoundEffect(ChannelState& channel) {
-  if (channel.kind != Driver::ChannelKind::Music) {
+  if (channel.kind != Driver::ChannelKind::kMusic) {
     channel.play_modes = kFullLengthPlay;
   }
 }

@@ -57,7 +57,7 @@ class RecordingHost final : public PlaybackResetHost {
     controls = reset;
   }
   void ResetChannel(std::size_t index, const ChannelReset& reset) override {
-    const bool effect = reset.kind == ChannelKind::SoundEffect;
+    const bool effect = reset.kind == ChannelKind::kSoundEffect;
     if (calls.empty() || calls.back() != (effect ? "Effects" : "Music")) {
       calls.emplace_back(effect ? "Effects" : "Music");
     }
@@ -83,45 +83,45 @@ class RecordingHost final : public PlaybackResetHost {
 TEST_CASE("Playback reset uses the original driver defaults",
           "[audio][driver]") {
   const auto reset = DefaultPlaybackReset();
-  CHECK(reset.music.masterVolume == 0x7F0000);
-  CHECK(reset.music.reverbDepth == 0x3FFF000);
-  CHECK(reset.voices.effectTempo == 0x66A80000U);
-  CHECK(reset.voices.tempoAccumulator == 1);
-  CHECK(reset.controls.mixBehavior == 1);
-  CHECK(reset.controls.discVolume == 0x7FFF0000);
-  CHECK(reset.controls.streamVolume == 0x7F00);
-  CHECK(reset.voiceModeUpdate == 0x80);
-  CHECK(reset.reverbMode == 4);
+  CHECK(reset.music.master_volume == 0x7F0000);
+  CHECK(reset.music.reverb_depth == 0x3FFF000);
+  CHECK(reset.voices.effect_tempo == 0x66A80000U);
+  CHECK(reset.voices.tempo_accumulator == 1);
+  CHECK(reset.controls.mix_behavior == 1);
+  CHECK(reset.controls.disc_volume == 0x7FFF0000);
+  CHECK(reset.controls.stream_volume == 0x7F00);
+  CHECK(reset.voice_mode_update == 0x80);
+  CHECK(reset.reverb_mode == 4);
 }
 
 TEST_CASE("Playback reset frees every music channel's voice",
           "[audio][driver]") {
   ChannelReset reset;
-  REQUIRE(ChannelResetFor(ChannelKind::Music, 31, reset));
-  CHECK(reset.kind == ChannelKind::Music);
+  REQUIRE(ChannelResetFor(ChannelKind::kMusic, 31, reset));
+  CHECK(reset.kind == ChannelKind::kMusic);
   CHECK(reset.voice == VS::Audio::Driver::kNoVoice);
-  CHECK(reset.effectVolume == 0);
+  CHECK(reset.effect_volume == 0);
 }
 
 TEST_CASE("Playback reset maps sound effects to the upper voices",
           "[audio][driver]") {
   ChannelReset reset;
-  REQUIRE(ChannelResetFor(ChannelKind::SoundEffect, 0, reset));
-  CHECK(reset.kind == ChannelKind::SoundEffect);
+  REQUIRE(ChannelResetFor(ChannelKind::kSoundEffect, 0, reset));
+  CHECK(reset.kind == ChannelKind::kSoundEffect);
   CHECK(reset.voice == 12);
-  CHECK(reset.effectVolume == 0x7F00);
-  REQUIRE(ChannelResetFor(ChannelKind::SoundEffect, 11, reset));
+  CHECK(reset.effect_volume == 0x7F00);
+  REQUIRE(ChannelResetFor(ChannelKind::kSoundEffect, 11, reset));
   CHECK(reset.voice == 23);
 }
 
 TEST_CASE("Playback reset rejects channel slots outside its tables",
           "[audio][driver]") {
   ChannelReset reset{
-      .kind = ChannelKind::SoundEffect, .voice = 7, .effectVolume = 3};
-  CHECK_FALSE(ChannelResetFor(ChannelKind::Music, 32, reset));
-  CHECK_FALSE(ChannelResetFor(ChannelKind::SoundEffect, 12, reset));
+      .kind = ChannelKind::kSoundEffect, .voice = 7, .effect_volume = 3};
+  CHECK_FALSE(ChannelResetFor(ChannelKind::kMusic, 32, reset));
+  CHECK_FALSE(ChannelResetFor(ChannelKind::kSoundEffect, 12, reset));
   CHECK(reset.voice == 7);
-  CHECK(reset.effectVolume == 3);
+  CHECK(reset.effect_volume == 3);
 }
 
 TEST_CASE("Playback reset resets output first and enables reverb last",
@@ -132,9 +132,9 @@ TEST_CASE("Playback reset resets output first and enables reverb last",
                           "Output", "MusicLayers", "VoiceScheduler",
                           "DriverControls", "Music", "Effects",
                           "VoiceModeUpdate", "ReverbMode", "EnableReverb"});
-  CHECK(host.layers.masterVolume == 0x7F0000);
-  CHECK(host.scheduler.effectTempo == 0x66A80000U);
-  CHECK(host.controls.discVolume == 0x7FFF0000);
+  CHECK(host.layers.master_volume == 0x7F0000);
+  CHECK(host.scheduler.effect_tempo == 0x66A80000U);
+  CHECK(host.controls.disc_volume == 0x7FFF0000);
   CHECK(host.voice_mode_update == 0x80);
   CHECK(host.reverb_mode == 4);
   CHECK(host.reverb_enabled);

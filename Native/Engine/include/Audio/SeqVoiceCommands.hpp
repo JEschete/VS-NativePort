@@ -82,7 +82,7 @@ struct VoiceState {
 // widths and signedness. `kind`, `pitch_base` and `effect_voice_mask` are
 // inputs only.
 struct ChannelState {
-  Driver::ChannelKind kind = Driver::ChannelKind::Music;
+  Driver::ChannelKind kind = Driver::ChannelKind::kMusic;
   std::int32_t pitch_base = 0;
   std::int32_t effect_voice_mask = 0;
 

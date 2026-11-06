@@ -326,38 +326,38 @@ void StoreLivePoseKeys(const PoseKeys& keys, Actors_AnimationPose& pose) {
 SkeletalPose LoadLiveSkeletalPose(const Actors_AnimationPose& pose) {
   SkeletalPose typed;
   typed.keys = LoadLivePoseKeys(pose);
-  LoadKeys(pose.reserved2A0, typed.rotationDeltas);
-  LoadKeys(pose.trackStates, typed.scaleDeltas);
+  LoadKeys(pose.reserved2A0, typed.rotation_deltas);
+  LoadKeys(pose.trackStates, typed.scale_deltas);
   return typed;
 }
 
 void StoreLiveSkeletalPose(const SkeletalPose& typed,
                            Actors_AnimationPose& pose) {
   StoreLivePoseKeys(typed.keys, pose);
-  StoreKeys(typed.rotationDeltas, pose.reserved2A0);
-  StoreKeys(typed.scaleDeltas, pose.trackStates);
+  StoreKeys(typed.rotation_deltas, pose.reserved2A0);
+  StoreKeys(typed.scale_deltas, pose.trackStates);
 }
 
 ShadowBlend LoadLiveShadowBlend(const Actors_ShadowBlend& live) {
-  return {.levelFrames = live.levelFrames,
-          .radiusFrames = live.radiusFrames,
+  return {.level_frames = live.levelFrames,
+          .radius_frames = live.radiusFrames,
           .level = live.level,
-          .levelDelta = live.levelDelta,
-          .radiusExpandRate = live.radiusExpandRate,
-          .radiusShrinkRate = live.radiusShrinkRate,
-          .radiusExpandDelta = live.radiusExpandDelta,
-          .radiusShrinkDelta = live.radiusShrinkDelta};
+          .level_delta = live.levelDelta,
+          .radius_expand_rate = live.radiusExpandRate,
+          .radius_shrink_rate = live.radiusShrinkRate,
+          .radius_expand_delta = live.radiusExpandDelta,
+          .radius_shrink_delta = live.radiusShrinkDelta};
 }
 
 void StoreLiveShadowBlend(const ShadowBlend& shadow, Actors_ShadowBlend& live) {
-  live.levelFrames = shadow.levelFrames;
-  live.radiusFrames = shadow.radiusFrames;
+  live.levelFrames = shadow.level_frames;
+  live.radiusFrames = shadow.radius_frames;
   live.level = shadow.level;
-  live.levelDelta = shadow.levelDelta;
-  live.radiusExpandRate = shadow.radiusExpandRate;
-  live.radiusShrinkRate = shadow.radiusShrinkRate;
-  live.radiusExpandDelta = shadow.radiusExpandDelta;
-  live.radiusShrinkDelta = shadow.radiusShrinkDelta;
+  live.levelDelta = shadow.level_delta;
+  live.radiusExpandRate = shadow.radius_expand_rate;
+  live.radiusShrinkRate = shadow.radius_shrink_rate;
+  live.radiusExpandDelta = shadow.radius_expand_delta;
+  live.radiusShrinkDelta = shadow.radius_shrink_delta;
 }
 
 void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode) {
@@ -371,18 +371,18 @@ void BlendLiveActorPose(Actors_AnimationPose& destination,
   PoseKeys keys = LoadLivePoseKeys(destination);
   const PoseKeys from = LoadLivePoseKeys(source);
   switch (BlendActorPose(keys, from, bones, frame, frames)) {
-    case PoseBlend::CopySource:
+    case PoseBlend::kCopySource:
       destination = source;
       return;
-    case PoseBlend::Halfway:
+    case PoseBlend::kHalfway:
       keys = LoadLivePoseKeys(destination);
       BlendActorPoseHalfway(keys, from, bones);
       StoreLivePoseKeys(keys, destination);
       return;
-    case PoseBlend::Weighted:
+    case PoseBlend::kWeighted:
       StoreLivePoseKeys(keys, destination);
       return;
-    case PoseBlend::Skipped:
+    case PoseBlend::kSkipped:
       Core_Errorf(kChannel,
                   "Pose blend at frame %d of zero frames skipped (#261)",
                   frame);

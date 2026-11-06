@@ -564,7 +564,7 @@ constexpr std::array<std::int16_t, 5> kWave{0x4000, -0x4000, 0, 0, -2};
 Mixer::LfoCursor WaveAt(std::size_t position) { return {kWave, position}; }
 
 void Slide(Mixer::MixChannel& channel, Mixer::SlideState& state, Refusals& sink,
-           ChannelKind kind = ChannelKind::Music,
+           ChannelKind kind = ChannelKind::kMusic,
            std::uint32_t channel_bit = 1) {
   Mixer::UpdateChannelSlidesAndDelays(channel, state, channel_bit, kind, sink);
 }
@@ -624,7 +624,7 @@ TEST_CASE("Channel slides dirty the volume only when audible bits change",
   // Sound effects keep their balance.
   fields.voice.dirty_flags = 0;
   fields.volume_balance_slide_length = 1;
-  Slide(channel, state, sink, ChannelKind::SoundEffect);
+  Slide(channel, state, sink, ChannelKind::kSoundEffect);
   CHECK(fields.volume_balance == 0x1100);
   CHECK(fields.volume_balance_slide_length == 1);
   CHECK(fields.voice.dirty_flags == 0);
@@ -677,7 +677,7 @@ TEST_CASE("Channel timers toggle the noise and modulation voices they own",
   Mixer::SlideState state;
   state.active.noise_channels = 0x4;
   Mixer::MixChannel music = TimedChannel();
-  Slide(music, state, sink, ChannelKind::Music, 0x4);
+  Slide(music, state, sink, ChannelKind::kMusic, 0x4);
   CHECK(state.active.noise_channels == 0);
   CHECK(state.active.fm_channels == 0);
   CHECK(state.driver_update_flags == 0x110);
@@ -694,9 +694,9 @@ TEST_CASE("Channel modulation timers toggle their voice on the expiring tick",
   Mixer::SlideState state;
   state.active.noise_channels = 0x4;
   Mixer::MixChannel music = TimedChannel();
-  Slide(music, state, sink, ChannelKind::Music, 0x4);
+  Slide(music, state, sink, ChannelKind::kMusic, 0x4);
   state.driver_update_flags = 0;
-  Slide(music, state, sink, ChannelKind::Music, 0x4);
+  Slide(music, state, sink, ChannelKind::kMusic, 0x4);
   CHECK(state.active.fm_channels == 0x4);
   CHECK(state.active.noise_channels == 0);
   CHECK(state.driver_update_flags == 0x100);
@@ -710,7 +710,7 @@ TEST_CASE("Sound-effect timers toggle the voice scheduler's masks",
   Mixer::MixChannel effect;
   effect.state.noise_timer = 1;
   effect.state.fm_timer = 1;
-  Slide(effect, effects, sink, ChannelKind::SoundEffect, 1U << 13);
+  Slide(effect, effects, sink, ChannelKind::kSoundEffect, 1U << 13);
   CHECK(effects.scheduler.noise_voices == 1U << 13);
   CHECK(effects.scheduler.fm_voices == 1U << 13);
   CHECK(effects.active.noise_channels == 0);
@@ -2855,13 +2855,13 @@ TEST_CASE("Live mixer passes refuse missing channels and unbound layers",
   const LiveLayerFixture fixture;
   const std::uint64_t refused = Seq::LiveRefusalCount();
   Audio_SeqChannel channel{};
-  Mixer::LiveUpdateChannelSlidesAndDelays(nullptr, 1, ChannelKind::Music);
+  Mixer::LiveUpdateChannelSlidesAndDelays(nullptr, 1, ChannelKind::kMusic);
   Mixer::LiveUpdateMusicChannelModulation(nullptr);
   Mixer::LiveUpdateSoundEffectModulation(nullptr);
   CHECK(Seq::LiveRefusalCount() == refused + 3);
 
   Audio_Seq_activeMusicConfig = nullptr;
-  Mixer::LiveUpdateChannelSlidesAndDelays(&channel, 1, ChannelKind::Music);
+  Mixer::LiveUpdateChannelSlidesAndDelays(&channel, 1, ChannelKind::kMusic);
   Mixer::LiveUpdateMusicChannelModulation(&channel);
   Mixer::LiveCommitPlaybackVoices();
   Mixer::LiveReleasePendingVoices();

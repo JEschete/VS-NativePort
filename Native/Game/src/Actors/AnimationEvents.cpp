@@ -438,17 +438,17 @@ std::int16_t RateDelta(std::uint16_t target, std::uint16_t rate) {
 }
 
 void ApplyRadiusDeltas(ShadowBlend& shadow) {
-  shadow.radiusExpandRate = static_cast<std::uint16_t>(
-      shadow.radiusExpandRate + shadow.radiusExpandDelta);
-  shadow.radiusShrinkRate = static_cast<std::uint16_t>(
-      shadow.radiusShrinkRate + shadow.radiusShrinkDelta);
+  shadow.radius_expand_rate = static_cast<std::uint16_t>(
+      shadow.radius_expand_rate + shadow.radius_expand_delta);
+  shadow.radius_shrink_rate = static_cast<std::uint16_t>(
+      shadow.radius_shrink_rate + shadow.radius_shrink_delta);
 }
 
 void SetRadiusFrames(ShadowBlend& shadow, std::uint8_t frames) {
   if (frames == 0) {
     ApplyRadiusDeltas(shadow);
   }
-  shadow.radiusFrames = frames;
+  shadow.radius_frames = frames;
 }
 
 // The shortest way round to `target`, a 4096-unit turn apart.
@@ -460,12 +460,12 @@ void SetLevelDelta(ShadowBlend& shadow, int target) {
   if (delta > kHalfTurn) {
     delta -= kAngleOne;
   }
-  shadow.levelDelta = static_cast<std::int16_t>(delta);
+  shadow.level_delta = static_cast<std::int16_t>(delta);
 }
 
 void ApplyLevelDelta(ShadowBlend& shadow) {
-  shadow.level = static_cast<std::uint16_t>((shadow.level + shadow.levelDelta) &
-                                            kAngleMask);
+  shadow.level = static_cast<std::uint16_t>(
+      (shadow.level + shadow.level_delta) & kAngleMask);
 }
 
 EventFlow ShadowRates(EventContext& ctx) {
@@ -473,13 +473,15 @@ EventFlow ShadowRates(EventContext& ctx) {
   const auto op = static_cast<EventOp>(ctx.Op());
   std::uint8_t frames = ctx.Operand(kThirdOperand);
   if (op == EventOp::kShadowShrink) {
-    shadow.radiusShrinkDelta = RateDelta(ctx.Word(1), shadow.radiusShrinkRate);
+    shadow.radius_shrink_delta =
+        RateDelta(ctx.Word(1), shadow.radius_shrink_rate);
   } else {
-    shadow.radiusExpandDelta = RateDelta(ctx.Word(1), shadow.radiusExpandRate);
+    shadow.radius_expand_delta =
+        RateDelta(ctx.Word(1), shadow.radius_expand_rate);
   }
   if (op == EventOp::kShadowRadius) {
-    shadow.radiusShrinkDelta =
-        RateDelta(ctx.Word(kThirdOperand), shadow.radiusShrinkRate);
+    shadow.radius_shrink_delta =
+        RateDelta(ctx.Word(kThirdOperand), shadow.radius_shrink_rate);
     frames = ctx.Operand(kFifthOperand);
   }
   SetRadiusFrames(shadow, frames);
@@ -494,7 +496,7 @@ EventFlow ShadowLevel(EventContext& ctx) {
   if (frames == 0) {
     ApplyLevelDelta(shadow);
   }
-  shadow.levelFrames = frames;
+  shadow.level_frames = frames;
   ctx.host.StoreShadow(shadow);
   return EventFlow::kNext;
 }
@@ -506,13 +508,13 @@ EventFlow ShadowPoint(EventContext& ctx) {
   }
   const ShadowPointWords& point = ctx.tables.points[index];
   ShadowBlend shadow = ctx.host.LoadShadow();
-  shadow.radiusExpandDelta = RateDelta(point[0], shadow.radiusExpandRate);
-  shadow.radiusShrinkDelta = RateDelta(point[1], shadow.radiusShrinkRate);
-  if (shadow.radiusFrames == 0) {
+  shadow.radius_expand_delta = RateDelta(point[0], shadow.radius_expand_rate);
+  shadow.radius_shrink_delta = RateDelta(point[1], shadow.radius_shrink_rate);
+  if (shadow.radius_frames == 0) {
     ApplyRadiusDeltas(shadow);
   }
   SetLevelDelta(shadow, static_cast<std::int16_t>(point[2]));
-  if (shadow.levelFrames == 0) {
+  if (shadow.level_frames == 0) {
     ApplyLevelDelta(shadow);
   }
   ctx.host.StoreShadow(shadow);

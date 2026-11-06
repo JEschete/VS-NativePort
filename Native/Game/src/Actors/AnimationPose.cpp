@@ -251,7 +251,7 @@ constexpr int kLookLimit = 800;
                              .z = kUnitBoneScale,
                              .word = 0};
     }
-    pose.scaleDeltas[i].word = 0;
+    pose.scale_deltas[i].word = 0;
   }
   return true;
 }
@@ -268,7 +268,7 @@ constexpr int kLookLimit = 800;
   if (!root_scale ||
       (*root_scale != 0 && !DecodeKey(bank, header, kRootScaleWord, kNoClip,
                                       pose.keys.scales[kRootPoseKey],
-                                      pose.scaleDeltas[kRootPoseKey]))) {
+                                      pose.scale_deltas[kRootPoseKey]))) {
     return false;
   }
   if (!Fits(bank, header + kBaseClipByte, 1)) {
@@ -281,13 +281,13 @@ constexpr int kLookLimit = 800;
   }
   if (!DecodeKey(bank, header, kRootRotationWord, base,
                  pose.keys.rotations[kRootPoseKey],
-                 pose.rotationDeltas[kRootPoseKey])) {
+                 pose.rotation_deltas[kRootPoseKey])) {
     return false;
   }
   const std::size_t count = PoseBoneCount(clip.bones);
   for (std::size_t i = 0; i < count; ++i) {
     if (!DecodeKey(bank, header, kFirstBoneWord + i, base,
-                   pose.keys.rotations[i], pose.rotationDeltas[i])) {
+                   pose.keys.rotations[i], pose.rotation_deltas[i])) {
       return false;
     }
   }
@@ -604,7 +604,7 @@ PoseStart InitializeActorAnimationPose(
   state.frame = 0;
   state.event_wait = 0;
   state.pose.keys.scales[kRootPoseKey] = {};
-  state.pose.scaleDeltas[kRootPoseKey].word = 0;
+  state.pose.scale_deltas[kRootPoseKey].word = 0;
   if (!clip) {
     return PoseStart::kNoClip;
   }

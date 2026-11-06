@@ -54,7 +54,7 @@ class LivePlaybackReset final : public PlaybackResetHost {
     primary.keyedVoices = 0;                        // +0x08
     primary.musicId = 0;                            // +0x6E
     primary.pausedChannels = 0;                     // +0x1C
-    primary.masterVolume = reset.masterVolume;      // +0x60
+    primary.masterVolume = reset.master_volume;     // +0x60
     primary.masterVolumeSlideLength = 0;            // +0x68
     primary.noiseChannels = 0;                      // +0x4C
     primary.reverbChannels = 0;                     // +0x50
@@ -66,7 +66,7 @@ class LivePlaybackReset final : public PlaybackResetHost {
     primary.pendingKeyOff = 0;                      // +0x18
     primary.activeNotes = 0;                        // +0x14
     primary.pendingKeyOn = 0;                       // +0x10
-    primary.reverbDepth = reset.reverbDepth;        // +0x58
+    primary.reverbDepth = reset.reverb_depth;       // +0x58
     primary.reverbDepthSlideStep = 0;               // +0x5C
     primary.reverbDepthSlideLength = 0;             // +0x6A
     Audio_Seq_savedMusicConfig.musicId = 0;         // +0x6E
@@ -82,15 +82,15 @@ class LivePlaybackReset final : public PlaybackResetHost {
   void ResetVoiceScheduler(const VoiceSchedulerReset& reset) override {
     Audio_VoiceScheduler& scheduler = Audio_Mixer_voiceScheduler;
     scheduler.activeVoices = 0;
-    scheduler.pausedEffectVoices = 0;                     // +0x10
-    scheduler.noiseVoices = 0;                            // +0x1C
-    scheduler.reverbVoices = 0;                           // +0x20
-    scheduler.fmVoices = 0;                               // +0x24
-    scheduler.tempoAccumulator = reset.tempoAccumulator;  // +0x18
-    scheduler.effectTempo = reset.effectTempo;            // +0x14
-    scheduler.pendingKeyOff = 0;                          // +0x0C
-    scheduler.keyedVoices = 0;                            // +0x08
-    scheduler.pendingKeyOn = 0;                           // +0x04
+    scheduler.pausedEffectVoices = 0;                      // +0x10
+    scheduler.noiseVoices = 0;                             // +0x1C
+    scheduler.reverbVoices = 0;                            // +0x20
+    scheduler.fmVoices = 0;                                // +0x24
+    scheduler.tempoAccumulator = reset.tempo_accumulator;  // +0x18
+    scheduler.effectTempo = reset.effect_tempo;            // +0x14
+    scheduler.pendingKeyOff = 0;                           // +0x0C
+    scheduler.keyedVoices = 0;                             // +0x08
+    scheduler.pendingKeyOn = 0;                            // +0x04
     Audio_Mixer_voiceModes.fm = 0;
     Audio_Mixer_voiceModes.noise = 0;
     Audio_Mixer_voiceModes.reverb = 0;
@@ -98,21 +98,21 @@ class LivePlaybackReset final : public PlaybackResetHost {
 
   void ResetDriverControls(const DriverControlReset& reset) override {
     Audio_Driver_controlLatches.controlLatches = 0;
-    Audio_Driver_controlLatches.mixBehavior = reset.mixBehavior;
+    Audio_Driver_controlLatches.mixBehavior = reset.mix_behavior;
     Audio_Samples_musicSampleBankIds.alternateBankId = 0;
     Audio_Samples_musicSampleBankIds.bankId = 0;
     Audio_Samples_soundEffectBankIds[2] = 0;
     Audio_Samples_soundEffectBankIds[1] = 0;
     Audio_Samples_soundEffectBankIds[0] = 0;
-    Audio_Seq_discVolume = reset.discVolume;
+    Audio_Seq_discVolume = reset.disc_volume;
     Audio_Seq_discVolumeFadeLength = 0;
-    Audio_Cutscene_streamState.controlFlags = 0;             // +0x5C
-    Audio_Cutscene_streamState.volume = reset.streamVolume;  // +0x40
-    Audio_Cutscene_streamState.volumeFadeTicksLeft = 0;      // +0x48
+    Audio_Cutscene_streamState.controlFlags = 0;              // +0x5C
+    Audio_Cutscene_streamState.volume = reset.stream_volume;  // +0x40
+    Audio_Cutscene_streamState.volumeFadeTicksLeft = 0;       // +0x48
   }
 
   void ResetChannel(std::size_t index, const ChannelReset& reset) override {
-    const bool effect = reset.kind == ChannelKind::SoundEffect;
+    const bool effect = reset.kind == ChannelKind::kSoundEffect;
     Audio_SeqChannel& channel = effect ? Audio_SoundEffects_channels[index]
                                        : Audio_Seq_musicChannels[index];
     channel.updateFlags = 0;                                // +0x34
@@ -120,11 +120,11 @@ class LivePlaybackReset final : public PlaybackResetHost {
     channel.type = static_cast<std::uint16_t>(reset.kind);  // +0x64
     channel.priority = 0;                                   // +0x58
     if (effect) {
-      channel.effectVolume = reset.effectVolume;  // +0xDC
-      channel.effectVolumeSlideLength = 0;        // +0x8C
-      channel.effectPitchScaleSlideLength = 0;    // +0x86
-      channel.effectPitchScale = 0;               // +0x40
-      channel.keyOnVolumeSlideLength = 0;         // +0x8A
+      channel.effectVolume = reset.effect_volume;  // +0xDC
+      channel.effectVolumeSlideLength = 0;         // +0x8C
+      channel.effectPitchScaleSlideLength = 0;     // +0x86
+      channel.effectPitchScale = 0;                // +0x40
+      channel.keyOnVolumeSlideLength = 0;          // +0x8A
     }
     InitializePendingModulation(channel);
   }

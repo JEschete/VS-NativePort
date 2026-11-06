@@ -44,7 +44,7 @@ enum class LayerUse : std::uint8_t { kNone, kMusicChannels, kAlways };
 bool NeedsLayer(const Audio_SeqChannel& channel, LayerUse use) {
   if (use == LayerUse::kAlways) return true;
   return use == LayerUse::kMusicChannels &&
-         LiveChannelKind(channel) == Driver::ChannelKind::Music;
+         LiveChannelKind(channel) == Driver::ChannelKind::kMusic;
 }
 
 const char* RefusalReason(ControlStatus status) {

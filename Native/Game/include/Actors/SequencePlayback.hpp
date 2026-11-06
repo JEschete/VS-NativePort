@@ -38,8 +38,8 @@ struct PoseKeys {
 // A pose's keys and the per-key deltas its tracks are decoding.
 struct SkeletalPose {
   PoseKeys keys{};
-  PoseKeyArray rotationDeltas{};
-  PoseKeyArray scaleDeltas{};
+  PoseKeyArray rotation_deltas{};
+  PoseKeyArray scale_deltas{};
 };
 
 // The inclusive frame range a decode advances through.
@@ -48,16 +48,16 @@ struct TrackFrames {
   int last = 0;
 };
 
-enum class TrackKind : std::uint8_t { Linear, Rotation };
+enum class TrackKind : std::uint8_t { kLinear, kRotation };
 
 enum class TrackDecode : std::uint8_t {
   // Every frame in range was applied and the cursors were stored.
-  Complete,
+  kComplete,
   // The track's terminator was reached; the cursors were left unchanged.
-  Ended,
+  kEnded,
   // A cursor or command would read past the track; decoding stopped there
   // and the cursors were left unchanged.
-  Overrun,
+  kOverrun,
 };
 
 // Advances `value` through `frames` by the deltas decoded from `track`, the
@@ -99,14 +99,14 @@ std::size_t PoseBoneCount(int bones);
 
 // An actor's shadow fade and radius blend, stepped once per animation frame.
 struct ShadowBlend {
-  std::uint8_t levelFrames = 0;
-  std::uint8_t radiusFrames = 0;
+  std::uint8_t level_frames = 0;
+  std::uint8_t radius_frames = 0;
   std::uint16_t level = 0;
-  std::int16_t levelDelta = 0;
-  std::uint16_t radiusExpandRate = 0;
-  std::uint16_t radiusShrinkRate = 0;
-  std::int16_t radiusExpandDelta = 0;
-  std::int16_t radiusShrinkDelta = 0;
+  std::int16_t level_delta = 0;
+  std::uint16_t radius_expand_rate = 0;
+  std::uint16_t radius_shrink_rate = 0;
+  std::int16_t radius_expand_delta = 0;
+  std::int16_t radius_shrink_delta = 0;
 
   friend bool operator==(const ShadowBlend&, const ShadowBlend&) = default;
 };
@@ -141,13 +141,13 @@ void AdvanceSkeletalAnimation(SkeletalAnimationHost& host);
 
 enum class PoseBlend : std::uint8_t {
   // The blend is complete: the caller copies the whole source pose.
-  CopySource,
+  kCopySource,
   // The blend is at its midpoint: the caller averages the two poses.
-  Halfway,
+  kHalfway,
   // The destination keys were blended towards the source keys.
-  Weighted,
+  kWeighted,
   // A zero-length blend past its first frame; nothing was blended.
-  Skipped,
+  kSkipped,
 };
 
 // Blends `destination` towards `source` by `frame` of `frames` for `bones`

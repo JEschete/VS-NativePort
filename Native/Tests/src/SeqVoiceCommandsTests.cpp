@@ -50,7 +50,7 @@ std::array<std::uint8_t, sizeof...(Values)> Bytes(Values... values) {
 }
 
 // A channel with every field the commands touch set away from its default.
-ChannelState SampleChannel(ChannelKind kind = ChannelKind::Music) {
+ChannelState SampleChannel(ChannelKind kind = ChannelKind::kMusic) {
   ChannelState channel;
   channel.kind = kind;
   channel.pitch_base = 0x1000;
@@ -93,7 +93,7 @@ InstrumentRecord TestInstrument(std::int32_t index) {
 }
 
 struct ModeChange {
-  ChannelKind kind = ChannelKind::Music;
+  ChannelKind kind = ChannelKind::kMusic;
   VoiceMode mode = VoiceMode::kReverb;
   std::uint32_t channel_bits = 0;
   bool enabled = false;
@@ -108,7 +108,7 @@ class FakeVoiceHost final : public Seq::VoiceCommandHost {
 
   std::int32_t resolve_offset = 0;
   std::vector<std::uint8_t> resolved;
-  ChannelKind resolved_kind = ChannelKind::Music;
+  ChannelKind resolved_kind = ChannelKind::kMusic;
   std::int32_t resolved_mask = 0;
   PatchEntry patch;
   std::vector<std::uint8_t> patches;
@@ -118,7 +118,7 @@ class FakeVoiceHost final : public Seq::VoiceCommandHost {
   std::optional<std::uint8_t> missing_waveform;
   std::vector<ModeChange> modes;
   std::uint16_t noise_clock = 0x3E;
-  ChannelKind clock_kind = ChannelKind::Music;
+  ChannelKind clock_kind = ChannelKind::kMusic;
   std::vector<std::uint16_t> clocks;
   std::vector<std::uint32_t> updates;
 
@@ -554,7 +554,7 @@ TEST_CASE("Play mode and flag commands change only their own state",
   CHECK(channel.play_modes == Seq::kLegatoPlay);
   Seq::EnableSustainedSoundEffect(channel);
   CHECK(channel.play_modes == Seq::kLegatoPlay);
-  channel.kind = ChannelKind::SoundEffect;
+  channel.kind = ChannelKind::kSoundEffect;
   Seq::EnableSustainedSoundEffect(channel);
   CHECK(channel.play_modes == Seq::kFullLengthPlay);
 
@@ -570,7 +570,7 @@ TEST_CASE(
     "[audio-seq-voices][audio]") {
   FakeVoiceHost host;
   host.resolve_offset = 2;
-  ChannelState channel = SampleChannel(ChannelKind::SoundEffect);
+  ChannelState channel = SampleChannel(ChannelKind::kSoundEffect);
   const InstrumentRecord record = TestInstrument(5);
   ChannelState expected = channel;
   expected.voice.sample_start = record.sample_start;
@@ -584,7 +584,7 @@ TEST_CASE(
   Expect(Seq::LoadInstrument(channel, Bytes(3), host), Seq::Applied(1), channel,
          expected);
   CHECK(host.resolved == std::vector<std::uint8_t>{3});
-  CHECK(host.resolved_kind == ChannelKind::SoundEffect);
+  CHECK(host.resolved_kind == ChannelKind::kSoundEffect);
   CHECK(host.resolved_mask == 6);
 
   const ChannelState before = channel;
@@ -796,7 +796,7 @@ TEST_CASE("Vibrato uses the base pitch's low half for B4 and all of it for B5",
 TEST_CASE("Sound effect LFOs take depth from the delay operand",
           "[audio-seq-voices][audio]") {
   FakeVoiceHost host;
-  ChannelState channel = SampleChannel(ChannelKind::SoundEffect);
+  ChannelState channel = SampleChannel(ChannelKind::kSoundEffect);
   channel.vibrato_delay = 3;
   ChannelState expected = channel;
   expected.vibrato_delay = 0;
@@ -820,7 +820,7 @@ TEST_CASE("Sound effect LFOs take depth from the delay operand",
         std::array<std::uint16_t, 3>{0x0500, 256, 0});
   CHECK(channel.tremolo_delay == 0);
 
-  channel.kind = ChannelKind::Music;
+  channel.kind = ChannelKind::kMusic;
   CHECK(Seq::EnableTremolo(channel, Bytes(0x85, 1, 9), host) ==
         Seq::Applied(3));
   CHECK(std::array<std::uint16_t, 3>{channel.tremolo_depth,
@@ -900,7 +900,7 @@ TEST_CASE("Voice mode commands reach the host for the channel kind",
           "[audio-seq-voices][audio]") {
   FakeVoiceHost host;
   ChannelState music = SampleChannel();
-  ChannelState effect = SampleChannel(ChannelKind::SoundEffect);
+  ChannelState effect = SampleChannel(ChannelKind::kSoundEffect);
   Seq::EnableNoise(music, host, kChannelBit);
   Seq::DisableNoise(music, host, kChannelBit);
   Seq::EnableReverb(effect, host, kChannelBit);
@@ -912,15 +912,15 @@ TEST_CASE("Voice mode commands reach the host for the channel kind",
   Seq::DisableFrequencyModulation(effect, host, kChannelBit);
   CHECK(host.modes ==
         std::vector<ModeChange>{
-            {ChannelKind::Music, VoiceMode::kNoise, kChannelBit, true},
-            {ChannelKind::Music, VoiceMode::kNoise, kChannelBit, false},
-            {ChannelKind::SoundEffect, VoiceMode::kReverb, kChannelBit, true},
-            {ChannelKind::SoundEffect, VoiceMode::kReverb, kChannelBit, false},
-            {ChannelKind::Music, VoiceMode::kFrequencyModulation, kChannelBit,
+            {ChannelKind::kMusic, VoiceMode::kNoise, kChannelBit, true},
+            {ChannelKind::kMusic, VoiceMode::kNoise, kChannelBit, false},
+            {ChannelKind::kSoundEffect, VoiceMode::kReverb, kChannelBit, true},
+            {ChannelKind::kSoundEffect, VoiceMode::kReverb, kChannelBit, false},
+            {ChannelKind::kMusic, VoiceMode::kFrequencyModulation, kChannelBit,
              true},
-            {ChannelKind::SoundEffect, VoiceMode::kFrequencyModulation,
+            {ChannelKind::kSoundEffect, VoiceMode::kFrequencyModulation,
              kChannelBit, true},
-            {ChannelKind::SoundEffect, VoiceMode::kFrequencyModulation,
+            {ChannelKind::kSoundEffect, VoiceMode::kFrequencyModulation,
              kChannelBit, false},
         });
   CHECK(host.updates == std::vector<std::uint32_t>{0x110, 0x110, 0x100, 0x100,
@@ -932,7 +932,7 @@ TEST_CASE("Voice mode commands reach the host for the channel kind",
 TEST_CASE("Noise clock steps add within six bits and absolute values replace",
           "[audio-seq-voices][audio]") {
   FakeVoiceHost host;
-  ChannelState channel = SampleChannel(ChannelKind::SoundEffect);
+  ChannelState channel = SampleChannel(ChannelKind::kSoundEffect);
   const ChannelState before = channel;
   for (const std::uint8_t frequency : {0x20, 0xC5, 0x45, 0x9F}) {
     CHECK(Seq::SetNoiseClock(channel, Bytes(frequency), host) ==
@@ -940,14 +940,14 @@ TEST_CASE("Noise clock steps add within six bits and absolute values replace",
   }
   CHECK(host.clocks == std::vector<std::uint16_t>{0x20, 0x25, 0x2A, 0x09});
   CHECK(host.updates == std::vector<std::uint32_t>(4, 0x10));
-  CHECK(host.clock_kind == ChannelKind::SoundEffect);
+  CHECK(host.clock_kind == ChannelKind::kSoundEffect);
   CHECK(channel == before);
 }
 
 TEST_CASE("Timed noise counts one tick beyond its delay",
           "[audio-seq-voices][audio]") {
   FakeVoiceHost host;
-  ChannelState channel = SampleChannel(ChannelKind::SoundEffect);
+  ChannelState channel = SampleChannel(ChannelKind::kSoundEffect);
   CHECK(Seq::EnableTimedNoise(channel, Bytes(0), host, kChannelBit) ==
         Seq::Applied(1));
   CHECK(channel.noise_timer == 0x101);
@@ -955,14 +955,14 @@ TEST_CASE("Timed noise counts one tick beyond its delay",
   CHECK(channel.noise_timer == 0x100);
   CHECK(host.modes ==
         std::vector<ModeChange>{
-            {ChannelKind::SoundEffect, VoiceMode::kNoise, kChannelBit, true}});
+            {ChannelKind::kSoundEffect, VoiceMode::kNoise, kChannelBit, true}});
   CHECK(host.updates == std::vector<std::uint32_t>{0x110});
 }
 
 TEST_CASE("Timed frequency modulation counts one tick beyond its delay",
           "[audio-seq-voices][audio]") {
   FakeVoiceHost host;
-  ChannelState channel = SampleChannel(ChannelKind::SoundEffect);
+  ChannelState channel = SampleChannel(ChannelKind::kSoundEffect);
   CHECK(Seq::EnableTimedFrequencyModulation(channel, Bytes(5), host,
                                             kChannelBit) == Seq::Applied(1));
   CHECK(channel.fm_timer == 6);
@@ -989,10 +989,10 @@ TEST_CASE("Resetting voice effects clears modes, flags, timers and play modes",
   CHECK(channel == expected);
   CHECK(host.modes ==
         std::vector<ModeChange>{
-            {ChannelKind::Music, VoiceMode::kNoise, kChannelBit, false},
-            {ChannelKind::Music, VoiceMode::kFrequencyModulation, kChannelBit,
+            {ChannelKind::kMusic, VoiceMode::kNoise, kChannelBit, false},
+            {ChannelKind::kMusic, VoiceMode::kFrequencyModulation, kChannelBit,
              false},
-            {ChannelKind::Music, VoiceMode::kReverb, kChannelBit, false}});
+            {ChannelKind::kMusic, VoiceMode::kReverb, kChannelBit, false}});
   CHECK(host.updates == std::vector<std::uint32_t>{0x110, 0x100, 0x100});
 }
 

@@ -113,7 +113,7 @@ struct EffectIdentity {
 // Everything a flow-control command reads or writes.
 struct ControlState {
   ProgramState program;
-  Driver::ChannelKind kind = Driver::ChannelKind::Music;
+  Driver::ChannelKind kind = Driver::ChannelKind::kMusic;
   std::uint32_t update_flags = 0;
   std::int32_t volume = 0;
   std::uint16_t pan = 0;

@@ -156,16 +156,16 @@ TEST_CASE("Animation tracks retain delta cursors across frame ranges",
   const std::uint8_t data[] = {0xE2, 1, 254, 3, 0xE1, 255, 2, 253, 0};
   VS::Actors::PoseVector value{}, delta{};
   CHECK(VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 3}, value,
-                                         delta, TrackKind::Linear) ==
-        TrackDecode::Complete);
+                                         delta, TrackKind::kLinear) ==
+        TrackDecode::kComplete);
   CHECK(value.x == 3);
   CHECK(value.y == -6);
   CHECK(value.z == 9);
   CHECK(value.word == 4);
   CHECK(delta.word == 3);
   CHECK(VS::Actors::DecodeAnimationTrack(data, {.first = 4, .last = 5}, value,
-                                         delta, TrackKind::Linear) ==
-        TrackDecode::Complete);
+                                         delta, TrackKind::kLinear) ==
+        TrackDecode::kComplete);
   CHECK(value.x == 1);
   CHECK(value.y == -2);
   CHECK(value.z == 3);
@@ -180,7 +180,7 @@ TEST_CASE("Animation track rotation wrapping and packed deltas match SEQ rules",
     const std::uint8_t data[] = {0xE0, 1, 255, 1, 0};
     VS::Actors::PoseVector value{8191, 0, 8191, 0}, delta{};
     VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 1}, value,
-                                     delta, TrackKind::Rotation);
+                                     delta, TrackKind::kRotation);
     CHECK(value.x == 0);
     CHECK(value.y == 8191);
     CHECK(value.z == 0);
@@ -191,7 +191,7 @@ TEST_CASE("Animation track rotation wrapping and packed deltas match SEQ rules",
     const std::uint8_t data[] = {0x10, 0xFF, 0xF4, 0};
     VS::Actors::PoseVector value{}, delta{};
     VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 1}, value,
-                                     delta, TrackKind::Linear);
+                                     delta, TrackKind::kLinear);
     CHECK(value.x == -2);
     CHECK(value.y == 0);
     CHECK(value.z == 0);
@@ -201,7 +201,7 @@ TEST_CASE("Animation track rotation wrapping and packed deltas match SEQ rules",
     const std::uint8_t data[] = {0xFF, 2, 2, 255, 0, 0};
     VS::Actors::PoseVector value{}, delta{};
     VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 34}, value,
-                                     delta, TrackKind::Linear);
+                                     delta, TrackKind::kLinear);
     CHECK(value.x == 68);
     CHECK(value.y == -34);
     CHECK(delta.word == 34);

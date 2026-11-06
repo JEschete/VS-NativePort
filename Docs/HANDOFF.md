@@ -7,6 +7,25 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Shared-header naming prerequisite (#273 / #248)
+
+- Production VM validation expanded clang-tidy reach into unchanged typed SEQ and
+  audio-reset headers, exposing 30 native naming findings: 18 pose/shadow/enum
+  identifiers and 12 reset/channel-kind identifiers. Identifier-only updates
+  preserve layouts, enum numeric values, serialized keys and legacy record names;
+  the bridge reads/writes retain their original SDK field spellings. No suppression
+  or baseline refresh is used. Temporary guarded rename scripts were removed and
+  their absence verified.
+- Focused Debug sequence/pose/appearance controls pass 131 cases / 5,684 assertions;
+  audio reset/control/voice/mixer controls pass 247 / 2,132. The unchanged broad
+  `quality-native.cmd --changed --tidy` gate passes with zero new findings after
+  these fixes. Validation on `86f27ef7` plus both the naming repairs and pending
+  native VM switch passes complete Debug/Release builds, 4,626 cases / 7,939,685
+  assertions each, and both original canonical replays without baseline changes.
+  Naming cleanup is committed separately from the functional VM switch; these
+  are combined-worktree local results, not exact-revision native test claims for
+  the naming-only commit. #273's complete review and CI decision remain open.
+
 ### Gimmick snapshot and native trigger host (#316 / #313)
 
 - Source review found F00853 `Field_GimmickPlacement` checking an uninitialized

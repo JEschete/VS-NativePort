@@ -417,7 +417,7 @@ void SlidePitch(MixChannel& channel) {
 void UpdateChannelSlidesAndDelays(MixChannel& channel, SlideState& state,
                                   std::uint32_t channel_bit, ChannelKind kind,
                                   RefusalSink& sink) {
-  const bool music = kind == ChannelKind::Music;
+  const bool music = kind == ChannelKind::kMusic;
   SlideLevels(channel.state, music);
   TickTimers(channel.state, state, channel_bit, music);
   SlideLfoDepths(channel, sink);

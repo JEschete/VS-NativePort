@@ -109,8 +109,8 @@ void FinishReset(ActorStateRecord& record) {
   record.visible = true;
   record.frozen = true;
   record.motion.is_running = false;
-  record.shadow = ShadowBlend{.radiusExpandRate = record.shadow_expand_rate,
-                              .radiusShrinkRate = record.shadow_shrink_rate};
+  record.shadow = ShadowBlend{.radius_expand_rate = record.shadow_expand_rate,
+                              .radius_shrink_rate = record.shadow_shrink_rate};
   record.shadow_extras = {};
   ClearMovementRequest(record);
 }

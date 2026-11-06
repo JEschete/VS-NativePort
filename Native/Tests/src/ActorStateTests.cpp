@@ -662,7 +662,7 @@ actors::ActorStateRecord Busy(int slot) {
   record.platform_offset_x = 24;
   record.platform_offset_z = 25;
   record.animation_locked = true;
-  record.shadow = {.levelFrames = 1, .level = 2, .radiusExpandRate = 3};
+  record.shadow = {.level_frames = 1, .level = 2, .radius_expand_rate = 3};
   record.shadow_extras = {.reserved0 = 26, .reserved6 = 27, .reserved7 = 28};
   record.shadow_expand_rate = 0x30;
   record.shadow_shrink_rate = 0x31;
@@ -725,7 +725,7 @@ actors::ActorStateRecord BusyReset(int slot) {
   record.skipped = true;
   record.visible = true;
   record.frozen = true;
-  record.shadow = {.radiusExpandRate = 0x30, .radiusShrinkRate = 0x31};
+  record.shadow = {.radius_expand_rate = 0x30, .radius_shrink_rate = 0x31};
   record.shadow_extras = {};
   record.request_extras = {};
   return record;

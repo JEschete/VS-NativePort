@@ -326,7 +326,7 @@ TEST_CASE("Finishing the last music channel of a track ends the track",
 TEST_CASE("Finishing a sound effect channel releases its scheduler voice",
           "[audio-seq-control][audio]") {
   ControlState state;
-  state.kind = VS::Audio::Driver::ChannelKind::SoundEffect;
+  state.kind = VS::Audio::Driver::ChannelKind::kSoundEffect;
   constexpr std::uint32_t kVoices = kChannelBit | 1;
   state.scheduler = {kVoices, kVoices, kVoices, kVoices, kVoices, 3,
                      4,       kVoices, kVoices, kVoices, 5};

@@ -164,10 +164,10 @@ actors::AnimationPoseState PlayingState() {
   state.next_event_frame = 9;
   state.event_offset = 99;
   state.pose.keys.scales[kRootPoseKey] = {.x = 1, .y = 2, .z = 3, .word = 4};
-  state.pose.scaleDeltas[kRootPoseKey].word = 5;
+  state.pose.scale_deltas[kRootPoseKey].word = 5;
   state.pose.keys.rotations[0] = {.x = 7, .y = 7, .z = 7, .word = 7};
-  state.pose.rotationDeltas[0].word = 11;
-  state.pose.scaleDeltas[0].word = 12;
+  state.pose.rotation_deltas[0].word = 11;
+  state.pose.scale_deltas[0].word = 12;
   return state;
 }
 
@@ -176,13 +176,13 @@ void CheckOnlyClockReset(const actors::AnimationPoseState& state) {
   CHECK(state.frame == 0);
   CHECK(state.event_wait == 0);
   CHECK(KeyOf(state.pose.keys.scales[kRootPoseKey]) == Key{});
-  CHECK(state.pose.scaleDeltas[kRootPoseKey].word == 0);
+  CHECK(state.pose.scale_deltas[kRootPoseKey].word == 0);
   CHECK(state.holding_last_frame);
   CHECK(state.animation_id == 4);
   CHECK(state.next_event_frame == 9);
   CHECK(state.event_offset == std::optional<std::size_t>{99});
   CHECK(KeyOf(state.pose.keys.rotations[0]) == Key{7, 7, 7, 7});
-  CHECK(state.pose.rotationDeltas[0].word == 11);
+  CHECK(state.pose.rotation_deltas[0].word == 11);
 }
 
 class FakeBlendHost final : public actors::AnimationBlendHost {
@@ -719,8 +719,8 @@ TEST_CASE("A clip start decodes the clip's first keys",
   CHECK(KeyOf(keys.rotations[0]) == Key{0x200, 0x400, 0x600, 6});
   // FE 01 marks a packed scale: the decoded vector halved.
   CHECK(KeyOf(keys.scales[0]) == Key{0x20, 0x40, 0x60, 8});
-  CHECK(state.pose.rotationDeltas[0].word == 0);
-  CHECK(state.pose.scaleDeltas[0].word == 0);
+  CHECK(state.pose.rotation_deltas[0].word == 0);
+  CHECK(state.pose.scale_deltas[0].word == 0);
 }
 
 TEST_CASE("A clip based on another starts its track cursors at zero",
@@ -1309,12 +1309,12 @@ TEST_CASE("Shadow points blend the radius and level the short way round",
           "[actors][actors-animation-events]") {
   FakeEventHost point({60, 1, 0, 0});
   point.shadow = {
-      .level = 4000, .radiusExpandRate = 100, .radiusShrinkRate = 50};
+      .level = 4000, .radius_expand_rate = 100, .radius_shrink_rate = 50};
   CHECK(RunEvents(point).status == AnimationEventStatus::kDone);
-  CHECK(point.shadow.radiusExpandRate == 300);
-  CHECK(point.shadow.radiusShrinkRate == 200);
+  CHECK(point.shadow.radius_expand_rate == 300);
+  CHECK(point.shadow.radius_shrink_rate == 200);
   // 100 lies 196 past 4000 the short way round.
-  CHECK(point.shadow.levelDelta == 196);
+  CHECK(point.shadow.level_delta == 196);
   CHECK(point.shadow.level == 100);
 
   FakeEventHost missing({60, 8, 0, 0});
@@ -1329,8 +1329,8 @@ TEST_CASE("Shadow level events blend over their frames",
   blending.shadow.level = 4000;
   RunEvents(blending);
   CHECK(blending.shadow.level == 4000);
-  CHECK(blending.shadow.levelDelta == 196);
-  CHECK(blending.shadow.levelFrames == 5);
+  CHECK(blending.shadow.level_delta == 196);
+  CHECK(blending.shadow.level_frames == 5);
 }
 
 TEST_CASE("Action events finish the action and reset movement",

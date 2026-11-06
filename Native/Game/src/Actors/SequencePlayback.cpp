@@ -185,13 +185,13 @@ bool DecodeClipTrack(const AnimationClip& clip, std::size_t index,
     return false;
   }
   return DecodeAnimationTrack(clip.motion.subspan(offset), frames, value, delta,
-                              kind) != TrackDecode::Overrun;
+                              kind) != TrackDecode::kOverrun;
 }
 
 std::int16_t BlendComponent(std::int16_t from, std::int16_t to, int weight,
                             TrackKind kind) {
   int delta = static_cast<int>(to) - from;
-  if (kind == TrackKind::Rotation) {
+  if (kind == TrackKind::kRotation) {
     if (delta >= kOne) {
       delta -= kOne * 2;
     } else if (delta < -kOne) {
@@ -239,16 +239,16 @@ TrackDecode DecodeAnimationTrack(std::span<const std::uint8_t> track,
     while (next_frame < frame) {
       const Command command = DecodeCommand(reader, next_frame, delta);
       if (command == Command::kEnded) {
-        return TrackDecode::Ended;
+        return TrackDecode::kEnded;
       }
       if (command == Command::kOverrun) {
-        return TrackDecode::Overrun;
+        return TrackDecode::kOverrun;
       }
     }
     value.x = AddWrapped(value.x, delta.x);
     value.y = AddWrapped(value.y, delta.y);
     value.z = AddWrapped(value.z, delta.z);
-    if (kind == TrackKind::Rotation) {
+    if (kind == TrackKind::kRotation) {
       value.x = MaskRotation(value.x);
       value.y = MaskRotation(value.y);
       value.z = MaskRotation(value.z);
@@ -256,7 +256,7 @@ TrackDecode DecodeAnimationTrack(std::span<const std::uint8_t> track,
   }
   value.word = static_cast<std::uint16_t>(reader.At());
   delta.word = static_cast<std::uint16_t>(next_frame);
-  return TrackDecode::Complete;
+  return TrackDecode::kComplete;
 }
 
 PoseTrackResult ApplyPoseTracks(const AnimationClip& clip, int bones,
@@ -275,15 +275,15 @@ PoseTrackResult ApplyPoseTracks(const AnimationClip& clip, int bones,
   }
   if (translation != 0) {
     PoseVector& root = pose.keys.scales[kRootPoseKey];
-    decode(kRootTranslationTrack, root, pose.scaleDeltas[kRootPoseKey],
-           TrackKind::Linear);
+    decode(kRootTranslationTrack, root, pose.scale_deltas[kRootPoseKey],
+           TrackKind::kLinear);
     result.moved = true;
     result.step = {root.x / kRootTranslationDivisor,
                    root.y / kRootTranslationDivisor,
                    root.z / kRootTranslationDivisor};
   }
   decode(kRootRotationTrack, pose.keys.rotations[kRootPoseKey],
-         pose.rotationDeltas[kRootPoseKey], TrackKind::Linear);
+         pose.rotation_deltas[kRootPoseKey], TrackKind::kLinear);
   const bool scaled = clip.header.size() > kScaleFlagsByte &&
                       (clip.header[kScaleFlagsByte] & kHasScaleTracks) != 0;
   // Scale track words follow every bone the header describes, even ones
@@ -292,10 +292,10 @@ PoseTrackResult ApplyPoseTracks(const AnimationClip& clip, int bones,
   const std::size_t pose_bones = PoseBoneCount(bones);
   for (std::size_t bone = 0; bone < pose_bones; ++bone) {
     decode(kFirstBoneTrack + bone, pose.keys.rotations[bone],
-           pose.rotationDeltas[bone], TrackKind::Rotation);
+           pose.rotation_deltas[bone], TrackKind::kRotation);
     if (scaled) {
       decode(kFirstBoneTrack + header_bones + bone, pose.keys.scales[bone],
-             pose.scaleDeltas[bone], TrackKind::Linear);
+             pose.scale_deltas[bone], TrackKind::kLinear);
     }
   }
   return result;
@@ -304,21 +304,23 @@ PoseTrackResult ApplyPoseTracks(const AnimationClip& clip, int bones,
 // decomp: BATTLE.PRG func_800AF960 (src/BATTLE/BATTLE.PRG/44F14.c:1225)
 // The unused original; func_800AFA28 inlines the same shadow blend step.
 void AdvanceShadowBlend(ShadowBlend& shadow) {
-  if (shadow.levelFrames != 0) {
-    const int delta = shadow.levelDelta / shadow.levelFrames;
-    shadow.levelDelta = SubtractStep(shadow.levelDelta, delta);
+  if (shadow.level_frames != 0) {
+    const int delta = shadow.level_delta / shadow.level_frames;
+    shadow.level_delta = SubtractStep(shadow.level_delta, delta);
     shadow.level = AddRate(shadow.level, delta);
-    --shadow.levelFrames;
+    --shadow.level_frames;
   }
   shadow.level &= kShadowLevelMask;
-  if (shadow.radiusFrames != 0) {
-    const int expand = shadow.radiusExpandDelta / shadow.radiusFrames;
-    shadow.radiusExpandDelta = SubtractStep(shadow.radiusExpandDelta, expand);
-    shadow.radiusExpandRate = AddRate(shadow.radiusExpandRate, expand);
-    const int shrink = shadow.radiusShrinkDelta / shadow.radiusFrames;
-    shadow.radiusShrinkDelta = SubtractStep(shadow.radiusShrinkDelta, shrink);
-    shadow.radiusShrinkRate = AddRate(shadow.radiusShrinkRate, shrink);
-    --shadow.radiusFrames;
+  if (shadow.radius_frames != 0) {
+    const int expand = shadow.radius_expand_delta / shadow.radius_frames;
+    shadow.radius_expand_delta =
+        SubtractStep(shadow.radius_expand_delta, expand);
+    shadow.radius_expand_rate = AddRate(shadow.radius_expand_rate, expand);
+    const int shrink = shadow.radius_shrink_delta / shadow.radius_frames;
+    shadow.radius_shrink_delta =
+        SubtractStep(shadow.radius_shrink_delta, shrink);
+    shadow.radius_shrink_rate = AddRate(shadow.radius_shrink_rate, shrink);
+    --shadow.radius_frames;
   }
 }
 
@@ -361,24 +363,24 @@ void AdvanceSkeletalAnimation(SkeletalAnimationHost& host) {
 PoseBlend BlendActorPose(PoseKeys& destination, const PoseKeys& source,
                          int bones, int frame, int frames) {
   if (frame == frames) {
-    return PoseBlend::CopySource;
+    return PoseBlend::kCopySource;
   }
   if (frame == (frames >> 1)) {
-    return PoseBlend::Halfway;
+    return PoseBlend::kHalfway;
   }
   if (frames == 0) {
-    return PoseBlend::Skipped;
+    return PoseBlend::kSkipped;
   }
   const int weight = (frame * kOne) / frames;
   BlendVector(destination.rotations[kRootPoseKey],
-              source.rotations[kRootPoseKey], weight, TrackKind::Linear);
+              source.rotations[kRootPoseKey], weight, TrackKind::kLinear);
   const std::size_t count = PoseBoneCount(bones);
   for (std::size_t bone = 0; bone < count; ++bone) {
     BlendVector(destination.rotations[bone], source.rotations[bone], weight,
-                TrackKind::Rotation);
+                TrackKind::kRotation);
     BlendVector(destination.scales[bone], source.scales[bone], weight,
-                TrackKind::Linear);
+                TrackKind::kLinear);
   }
-  return PoseBlend::Weighted;
+  return PoseBlend::kWeighted;
 }
 }  // namespace VS::Actors

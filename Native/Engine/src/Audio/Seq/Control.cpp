@@ -144,7 +144,7 @@ std::optional<std::optional<std::uint32_t>> EmbeddedProgram(
 // decomp: SLUS_010.40 SoundVM_A0_FinishChannel (src/SLUS_010.40/25AC.c:4989)
 ControlResult FinishChannel(ControlState& state, ProgramData /*program*/,
                             std::uint32_t voice_bit) {
-  if (state.kind == Driver::ChannelKind::Music) {
+  if (state.kind == Driver::ChannelKind::kMusic) {
     MusicLayerState& layer = state.layer;
     ClearBits(layer.active_channels, voice_bit);
     if (layer.active_channels == 0) {

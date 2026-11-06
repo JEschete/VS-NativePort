@@ -103,7 +103,7 @@ Operands OperandWindow(const Audio_SeqChannel& channel,
 }
 
 std::uint32_t& VoiceModeMask(ChannelKind kind, VoiceMode mode) {
-  const bool music = kind == ChannelKind::Music;
+  const bool music = kind == ChannelKind::kMusic;
   if (mode == VoiceMode::kNoise) {
     return music ? Audio_Seq_activeMusicConfig->noiseChannels
                  : Audio_Mixer_voiceScheduler.noiseVoices;
@@ -117,8 +117,8 @@ std::uint32_t& VoiceModeMask(ChannelKind kind, VoiceMode mode) {
 }
 
 std::uint16_t& NoiseClockOf(ChannelKind kind) {
-  return kind == ChannelKind::Music ? Audio_Seq_activeMusicConfig->noiseClock
-                                    : Audio_Mixer_voiceScheduler.noiseClock;
+  return kind == ChannelKind::kMusic ? Audio_Seq_activeMusicConfig->noiseClock
+                                     : Audio_Mixer_voiceScheduler.noiseClock;
 }
 
 // The commands reach the music layer only after Run has checked that the
@@ -128,7 +128,7 @@ class LiveVoiceCommandHost final : public VoiceCommandHost {
   std::int32_t ResolveInstrument(ChannelKind kind,
                                  std::int32_t effect_voice_mask,
                                  std::uint8_t instrument) override {
-    if (kind == ChannelKind::Music) {
+    if (kind == ChannelKind::kMusic) {
       return ResolveMusicInstrument(Audio_Seq_activeMusicConfig->statusFlags,
                                     instrument);
     }
@@ -220,7 +220,7 @@ bool MissingMusicLayer(const Audio_SeqChannel& channel, LayerUse layer) {
   if (Audio_Seq_activeMusicConfig != nullptr) return false;
   if (layer == LayerUse::kAlways) return true;
   return layer == LayerUse::kMusicChannels &&
-         LiveChannelKind(channel) == ChannelKind::Music;
+         LiveChannelKind(channel) == ChannelKind::kMusic;
 }
 
 // Each command shape, as (channel, operands, host, channel bits) -> result.
