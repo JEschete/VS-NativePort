@@ -7,6 +7,30 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native control-table routing (#313)
+
+- The native VM recognizes the selected normal/skip table's 31 original control
+  handler identities and invokes their typed implementations directly. Branches
+  and returns remain checked native locations, not integer-cast pointers. Other
+  opcode families keep the existing guarded C-slot invocation contract.
+- The two initial normal/skip reproductions failed two of six assertions before
+  routing. Four new cases add 16 assertions, including the original loop handler's
+  16-counter bound and return handling through the native saved location. The
+  combined `[event-vm-live],[event-vm],[script-sources],[room-triggers],[session-reset]`
+  selection passes 186 cases / 3,785 assertions in Debug. On `3ff2bf3c` plus the
+  runtime/test changes, both full suites pass 4,615 cases / 7,939,443 assertions
+  with every previous case and both canonical replays preserved. Complete builds
+  and scoped quality/clang-tidy pass unchanged baselines. Evidence:
+  `VR-EVENT-NATIVE-CONTROL-ROUTING` and
+  `build\owner-checkpoint\script-control-routing-*-regression.log`.
+- This still does not switch production gameplay from the generated VM. The room
+  loader, trigger evaluator and playback caller must migrate together: the current
+  legacy trigger evaluator cannot consume only the native room-section owner.
+  Native trigger-host integration is the next dependency before that atomic
+  switch. No original C control body is retired or promoted by pointer-identity
+  routing; #313/#315/#276 remain open. Dialog milestone `3ff2bf3c` is pushed with
+  successful exact Source Quality `42244488428`.
+
 ### Native dialog retention (#313)
 
 - Native dialog display now resolves bounded halfword-offset tables and validates

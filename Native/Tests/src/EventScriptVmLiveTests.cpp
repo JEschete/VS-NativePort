@@ -35,7 +35,10 @@ struct LiveVmFixture {
   Content_DiscRequestCounts counts = Content_discRequestCounts;
   Content_DiscDrive drive = Content_discDriveState;
   std::array<Handler, 256> handlers{};
+  std::array<Handler, 256> skip_handlers{};
   std::array<std::uint8_t, 256> sizes{};
+  std::array<char, 64> loop_counters{};
+  std::uintptr_t subroutine_return = Event_subroutineReturnCursor;
   char phase = Event_playbackPhase;
   char confirmed = Event_isStartConfirmed;
   std::int16_t finished = Event_isMainThreadFinished;
@@ -45,7 +48,9 @@ struct LiveVmFixture {
   LiveVmFixture() {
     std::ranges::copy(Content_discRequestSlots, slots.begin());
     std::ranges::copy(Event_kOpcodeHandlers, handlers.begin());
+    std::ranges::copy(Event_kSkipOpcodeHandlers, skip_handlers.begin());
     std::ranges::copy(Event_kOpcodeSizes, sizes.begin());
+    std::ranges::copy(Event_loopCounters, loop_counters.begin());
     content::InitializeLiveDiscQueue();
     Content_discDriveState = {};
     Content_discDriveState.state = Content_DiscDriveState_Idle;
@@ -59,7 +64,10 @@ struct LiveVmFixture {
     Content_discRequestCounts = counts;
     Content_discDriveState = drive;
     std::ranges::copy(handlers, Event_kOpcodeHandlers);
+    std::ranges::copy(skip_handlers, Event_kSkipOpcodeHandlers);
     std::ranges::copy(sizes, Event_kOpcodeSizes);
+    std::ranges::copy(loop_counters, Event_loopCounters);
+    Event_subroutineReturnCursor = subroutine_return;
     Event_playbackPhase = phase;
     Event_isStartConfirmed = confirmed;
     Event_isMainThreadFinished = finished;
@@ -283,6 +291,71 @@ TEST_CASE("Live VM dispatch carries typed jumps without pointer results",
   CHECK(observed[1] ==
         event::ScriptLocation{start.region, 3, start.generation});
   CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+}
+
+TEST_CASE("Live VM routes the original control handler through typed dispatch",
+          "[event-vm-live]") {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0x42, 3, 0, 0xF0});
+  observations = 0;
+  Event_kOpcodeHandlers[0x42] = Event_ScriptJumpForward;
+  Event_kOpcodeHandlers[0xF0] = StopBridge;
+  Event_kOpcodeSizes[0x42] = 3;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  REQUIRE(observations == 1);
+  CHECK(observed[0] ==
+        event::ScriptLocation{start.region, 3, start.generation});
+}
+
+TEST_CASE("Live VM selects typed control handlers from the skip table",
+          "[event-vm-live]") {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0x42, 3, 0, 0xF0});
+  observations = 0;
+  Event_skipState = 2;
+  Event_kOpcodeHandlers[0x42] = PointerResult;
+  Event_kSkipOpcodeHandlers[0x42] = Event_ScriptJumpForward;
+  Event_kSkipOpcodeHandlers[0xF0] = StopBridge;
+  Event_kOpcodeSizes[0x42] = 3;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  REQUIRE(observations == 1);
+  CHECK(observed[0] ==
+        event::ScriptLocation{start.region, 3, start.generation});
+}
+
+TEST_CASE("Live VM original loop handler obeys the bounded counter contract",
+          "[event-vm-live]") {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE1, 20, 7, 0xF0});
+  observations = 0;
+  Event_loopCounters[20] = 0x55;
+  Event_kOpcodeHandlers[0xE1] = Event_ScriptSetLoopCounter;
+  Event_kOpcodeHandlers[0xF0] = StopBridge;
+  Event_kOpcodeSizes[0xE1] = 3;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(Event_loopCounters[20] == 0x55);
+  CHECK(observations == 1);
+}
+
+TEST_CASE("Live VM original return handler uses the owned native location",
+          "[event-vm-live]") {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE1, 0xF3, 0xF0});
+  observations = 0;
+  Event_subroutineReturnCursor = 0;
+  Event_kOpcodeHandlers[0xE1] = Event_ScriptReturnToSavedAddress;
+  Event_kOpcodeHandlers[0xF3] = StopBridge;
+  Event_kOpcodeHandlers[0xF0] = StopBridge;
+  auto& host = event::LiveScriptVm();
+  host.SetSubroutineReturn({start.region, 2, start.generation});
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  REQUIRE(observations == 1);
+  CHECK(observed[0] ==
+        event::ScriptLocation{start.region, 2, start.generation});
 }
 
 TEST_CASE("Live VM refuses pointer results and detached control adapters",

@@ -67,6 +67,65 @@ constexpr std::size_t kSceneTimerModeCount = 2;
 constexpr std::size_t kSceneTimerScopeCount = 4;
 constexpr std::size_t kCameraPitchPresetCount = 4;
 
+struct ControlBinding {
+  OpcodeHandler legacy;
+  ScriptControlOpcode typed;
+};
+
+// decomp: INITBTL.PRG _initScriptFunctionTable (12AC.c:69), BATTLE.PRG
+// control handlers in 4A0A8.c and 573B8.c. Match the selected table's target.
+constexpr std::array kControlBindings{
+    ControlBinding{Event_ScriptReportInvalidOpcode, ScriptReportInvalidOpcode},
+    ControlBinding{Event_ScriptNoOperation, ScriptNoOperation},
+    ControlBinding{Event_ScriptYieldFrame, ScriptYieldFrame},
+    ControlBinding{Event_ScriptWaitForEventFile, ScriptWaitForEventFile},
+    ControlBinding{Event_ScriptBeginSkippableCutscene,
+                   ScriptBeginSkippableCutscene},
+    ControlBinding{Event_ScriptEndCutsceneAndJump, ScriptEndCutsceneAndJump},
+    ControlBinding{Event_ScriptEndCutscene, ScriptEndCutscene},
+    ControlBinding{Event_ScriptWaitForButtonAndYield,
+                   ScriptWaitForButtonAndYield},
+    ControlBinding{Event_ScriptBranchOnFlagImmediate,
+                   ScriptBranchOnFlagImmediate},
+    ControlBinding{Event_ScriptBranchOnFlagPair, ScriptBranchOnFlagPair},
+    ControlBinding{Event_ScriptJumpForward, ScriptJumpForward},
+    ControlBinding{Event_ScriptCacheFlagValue, ScriptCacheFlagValue},
+    ControlBinding{Event_ScriptBranchOnCachedFlag, ScriptBranchOnCachedFlag},
+    ControlBinding{Event_ScriptReturnToSavedAddress,
+                   ScriptReturnToSavedAddress},
+    ControlBinding{Event_ScriptSetLoopCounter, ScriptSetLoopCounter},
+    ControlBinding{Event_ScriptLoopBackward, ScriptLoopBackward},
+    ControlBinding{Event_ScriptApplyImmediateFlagOperation,
+                   ScriptApplyImmediateFlagOperation},
+    ControlBinding{Event_ScriptApplyFlagPairOperation,
+                   ScriptApplyFlagPairOperation},
+    ControlBinding{Event_ScriptStoreInventoryItemPresence,
+                   ScriptStoreInventoryItemPresence},
+    ControlBinding{Event_ScriptStoreButtonState, ScriptStoreButtonState},
+    ControlBinding{Event_ScriptConfigureTimer, ScriptConfigureTimer},
+    ControlBinding{Event_ScriptWaitForButtonOrTimeout,
+                   ScriptWaitForButtonOrTimeout},
+    ControlBinding{Event_ScriptConfigureEasingCurve,
+                   ScriptConfigureEasingCurve},
+    ControlBinding{Event_CommandSpecialOperation, CommandSpecialOperation},
+    ControlBinding{Event_CommandWaitFrames, CommandWaitFrames},
+    ControlBinding{Event_CommandSetTickSpeed, CommandSetTickSpeed},
+    ControlBinding{Event_CommandWaitScriptContext, CommandWaitScriptContext},
+    ControlBinding{Event_CommandStartScriptContext, CommandStartScriptContext},
+    ControlBinding{Event_CommandStopScriptContext, CommandStopScriptContext},
+    ControlBinding{Event_CommandLoadNextEvent, CommandLoadNextEvent},
+    ControlBinding{Event_CommandFinishEvent, CommandFinishEvent},
+};
+
+ScriptControlOpcode NativeControl(OpcodeHandler handler) {
+  for (const auto& binding : kControlBindings) {
+    if (binding.legacy == handler) {
+      return binding.typed;
+    }
+  }
+  return nullptr;
+}
+
 struct OpcodeInvocation {
   ScriptInstruction instruction{};
   ScriptFlow result = ScriptFlow::Of(ScriptFlowKind::kStop);
@@ -712,6 +771,9 @@ ScriptFlow LiveVmHost::RunOpcode(ScriptLocation location, int thread) {
   if (handler == nullptr) {
     NoteInvalidOpcode({command, location, thread});
     return ScriptFlow::Of(ScriptFlowKind::kStop);
+  }
+  if (const auto control = NativeControl(handler)) {
+    return control({command, location, thread}, *this);
   }
   static_assert(std::is_trivially_destructible_v<OpcodeInvocation>);
   const OpcodeInvocation previous = invocation;
