@@ -2303,17 +2303,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Event\\Triggers.cpp": [
-[
-82,
-[
-"        ((void (*)())Event_ReleaseScriptActorControl)();"
-],
-[
-"        ((void (*)(...))Event_ReleaseScriptActorControl)();"
-]
-]
-],
 "Native\\Game\\src\\Field\\Gimmicks.cpp": [
 [
 374,

@@ -7,6 +7,31 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Room-Section Ownership (#276 Row 33)
+
+- F01252/F01255 now register the existing strict native room load/free cores in
+  `RoomTriggers.cpp`. Production already uses transactional bounded input, immutable
+  section owners and retained execution leases; this slice removes only the unused
+  C bodies/prototypes/module entries and the obsolete free-body cast adaptation.
+  An old-name sweep finds no code consumer, only a historical room-input comment.
+  The original empty zone hook and C trigger entry remain separate debt.
+- On `be560ec15053845efbf6293cced497a832d1947f` plus this ownership slice, both
+  complete builds and full Debug/Release regressions pass 4,640 cases / 8,145,059
+  assertions and both unchanged canonical replays. Two new address checks offset
+  four removed iterations from two per-symbol tests; no baseline refresh. All five
+  retired lifecycle/room addresses resolve null. Actual imports load 440 globals,
+  16 tables and 1,707 symbols across 75 modules with zero failures.
+- Focused room/lifecycle/module coverage passes 189 cases / 1,546,564 assertions.
+  Broad quality/tidy has zero new findings; 190 copier and nine module-extent
+  controls pass. Repeat copying preserves every tracked Native/manifest hash.
+  Native core semantics are unchanged; fresh original load/free comparisons and
+  seven mutants remain in `VR-EVENT-FRESH-ORIGINAL-DIFFERENTIAL`.
+  Evidence: `VR-EVENT-ROOM-SECTION-PROMOTION` and
+  `build\owner-checkpoint\native-room-sections-promotion-*-regression.log`.
+  Reviewed claims cover only this pair; row 33 and global EC retirement remain open.
+  Unmodified gates derive 2,641 promoted / four compatibility `wip`, with row 33
+  now 9/57. No behavior-verification or global EC marker was advanced.
+
 ### Native Lifecycle Ownership (#276 Row 33)
 
 - F01262/F01263/F01271 now register the existing strict native initialization,
@@ -39,6 +64,7 @@ verification of the current worktree.
   Unmodified ledger gates derive 2,639 promoted / four compatibility `wip`, with
   row 33 now 7/57. Modernization review markers apply only to the three owned cores;
   no global bridge marker or behavior-verification status was advanced.
+  Published lifecycle milestone `be560ec1` is green on exact CI `42291264882`.
 
 ### Native Lifecycle Regression Migration (#276 Row 33)
 

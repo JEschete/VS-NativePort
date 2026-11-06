@@ -13,10 +13,6 @@ extern char Event_isDirectEventRequest;
 extern void* Event_roomEventTriggers;
 extern void* Event_roomDoorEventData;
 extern short Event_hasRoomEntryScript;
-int Event_LoadRoomEventSections(void* clearedSection, u_short clearedSectionLen,
-    void* scriptSection, u_short scriptSectionLen, void* doorSection,
-    u_short doorSectionLen, int startState);
-void Event_FreeRoomEventSections(void);
 void Event_ReleaseZoneEventResources(void);
 
 #endif // VS_EVENT_TRIGGERS_H_DECLS
