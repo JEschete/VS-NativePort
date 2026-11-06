@@ -13,6 +13,5 @@ extern char Event_isDirectEventRequest;
 extern void* Event_roomEventTriggers;
 extern void* Event_roomDoorEventData;
 extern short Event_hasRoomEntryScript;
-void Event_ReleaseZoneEventResources(void);
 
 #endif // VS_EVENT_TRIGGERS_H_DECLS

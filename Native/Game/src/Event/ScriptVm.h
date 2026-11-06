@@ -83,7 +83,6 @@ intptr_t Event_CommandFinishEvent(u_char* instruction, short thread_index);
 int Event_EventPlaybackState(void);
 short Event_PendingEventSelector(void);
 int Event_RequestEventStart(void);
-void Event_ReleaseScriptActorControl(void);
 int Event_OpcodeSize(u_char* instruction);
 int Event_ResolveScriptActorReference(u_short actor_reference);
 void Event_QueueEventScriptLoad(int arg0, void* destination_buffer);

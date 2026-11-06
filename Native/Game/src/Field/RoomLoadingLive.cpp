@@ -30,6 +30,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
+#include "Event/RoomTriggers.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -927,7 +928,7 @@ class LiveZoneLoadHost final
 class LiveZoneReleaseHost final : public ZoneReleaseHost {
  public:
   void ReleaseZoneEventResources() override {
-    Event_ReleaseZoneEventResources();
+    VS::Event::ReleaseZoneEventResources();
   }
 
   // decomp: BATTLE.PRG func_80089098 (146C.c:14889-14896); the original

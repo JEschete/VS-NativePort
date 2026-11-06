@@ -108,6 +108,7 @@ class RecordingHost final : public event::ScriptVmHost {
   std::vector<Bytes> palette_passes;
   std::vector<event::TextureMove> moves;
   std::vector<int> reset_actors;
+  std::vector<int> cleanup_order;
   std::vector<int> idle_actors;
   std::vector<int> skipped_threads;
 
@@ -350,7 +351,10 @@ class RecordingHost final : public event::ScriptVmHost {
   void InitializeEventCamera() override {
     calls.emplace_back("InitializeCamera");
   }
-  void FreeEventCamera() override { calls.emplace_back("FreeCamera"); }
+  void FreeEventCamera() override {
+    cleanup_order.push_back(-1);
+    calls.emplace_back("FreeCamera");
+  }
   void UpdateEventCameraOrigin() override {
     calls.emplace_back("CameraOrigin");
   }
@@ -379,7 +383,10 @@ class RecordingHost final : public event::ScriptVmHost {
   void BeginSkipFadeOut() override { calls.emplace_back("Fade"); }
   void DisableDisplay() override { calls.emplace_back("DisableDisplay"); }
   void ReturnAllActorsToIdle() override { calls.emplace_back("ActorsIdle"); }
-  void ResetActorMovement(int actor) override { reset_actors.push_back(actor); }
+  void ResetActorMovement(int actor) override {
+    cleanup_order.push_back(actor);
+    reset_actors.push_back(actor);
+  }
   bool ActorPresent(int actor) override {
     return actors.at(static_cast<std::size_t>(actor));
   }
@@ -1807,6 +1814,27 @@ TEST_CASE("VM typed thread ids refuse invalid values before reading sources",
     CHECK(host.region_reads.empty());
     CHECK(host.refusals ==
           std::vector{std::pair{Refusal::kScriptThread, thread}});
+  }
+}
+
+TEST_CASE(
+    "VM actor control release resets every selected slot before camera free",
+    "[event-vm]") {
+  for (int selected = -2; selected < event::kScriptControlledActorCount;
+       ++selected) {
+    RecordingHost host;
+    std::vector<int> expected;
+    for (int actor = 0; actor < event::kScriptControlledActorCount; ++actor) {
+      host.controlled[actor] = selected == -1 || selected == actor;
+      if (host.controlled[actor]) {
+        expected.push_back(actor);
+      }
+    }
+    event::ReleaseScriptActorControl(host);
+    CHECK(host.reset_actors == expected);
+    expected.push_back(-1);
+    CHECK(host.cleanup_order == expected);
+    CHECK(host.calls == std::vector<std::string>{"FreeCamera"});
   }
 }
 

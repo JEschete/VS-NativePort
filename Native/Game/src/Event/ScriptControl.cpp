@@ -1492,6 +1492,7 @@ bool ExecuteScriptThread(ScriptThreadId script_thread, ScriptVmHost& host) {
   return false;
 }
 
+// decomp: BATTLE.PRG func_800BFD9C (573B8.c:133).
 void ReleaseScriptActorControl(ScriptVmHost& host) {
   for (int actor = 0; actor < kScriptControlledActorCount; ++actor) {
     if (host.ScriptControlledActor(actor)) {

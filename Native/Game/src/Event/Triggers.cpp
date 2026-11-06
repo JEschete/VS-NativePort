@@ -15,7 +15,4 @@ void* Event_roomDoorEventData;
 // decomp: _mpdScriptSection (_mpdScriptSection@BATTLE/BATTLE.PRG)
 short Event_hasRoomEntryScript;
 
-// decomp: BATTLE.PRG func_800BEBEC (src/BATTLE/BATTLE.PRG/4A0A8.c:4273)
-void Event_ReleaseZoneEventResources(void) { }
-
 }  // extern "C"

@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
@@ -783,20 +782,6 @@ int Event_RequestEventStart(void)
         return 1;
     }
     return 1;
-}
-
-// decomp: BATTLE.PRG func_800BFD9C (src/BATTLE/BATTLE.PRG/573B8.c:133)
-void Event_ReleaseScriptActorControl(void)
-{
-    int i;
-
-    for (i = 0; i < 17; i++) {
-        if ((*(unsigned char (*)[17])&Event_scriptControlledActors)[i] != 0) {
-            VS::Actors::ResetLiveActorMovement(i);
-        }
-    }
-
-    Event_FreeEventCamera();
 }
 
 // decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)

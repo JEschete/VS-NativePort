@@ -7,6 +7,31 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Cleanup Ownership (#276 Row 33)
+
+- F01257/F01272 register the existing strict native zone hook and actor-control
+  cleanup. The zone hook is an actual original no-op (`800BEBEC/800BEBF0` is
+  `jr ra`/`nop`), not missing implementation. Its lone zone-release caller now
+  uses the native core. Actor cleanup preserves the original 17-byte selection
+  and resets selected movement before camera free (`800BFDBC-800BFDE4`).
+  Supported copying removes both old C bodies/prototypes/module entries; no old
+  cleanup-name reference remains in Native.
+- None/all/every individual actor selection passes 57 ordering assertions, and
+  all seven retired lifecycle/room/cleanup addresses resolve null. Complete
+  Debug/Release builds and regressions at `061e2da8` plus this ownership slice
+  pass 4,641 cases / 8,145,114 assertions and both unchanged canonical replays.
+  The new case plus two address checks offset four per-symbol iterations; no
+  baseline changes. Surrounding cleanup/room/VM coverage passes 282 / 209,630.
+- Broad quality/tidy reports zero new findings; 190 copier and nine extent
+  controls pass. All tracked Native/manifest hashes survive repeat generation.
+  Evidence: `VR-EVENT-CLEANUP-PROMOTION` and
+  `build\owner-checkpoint\native-event-cleanup-promotion-*-regression.log`.
+  Only these two cores are reviewed; remaining VM/control/C-entry compatibility
+  and global EC retirement stay separate. Room predecessor `061e2da8` is green
+  on exact CI `42293389198`.
+  Unmodified gates derive 2,643 promoted / four compatibility `wip`; row 33 is
+  now 11/57. No behavior-verification or global EC marker was advanced.
+
 ### Native Room-Section Ownership (#276 Row 33)
 
 - F01252/F01255 now register the existing strict native room load/free cores in
