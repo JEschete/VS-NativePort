@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <memory>
 #include <span>
 #include <string>
 #include <vector>
@@ -459,7 +460,7 @@ TEST_CASE("Starting a pattern resets the first idle slot's envelopes",
   const Input::VibrationSlot& first = vibration.slots[0];
   CHECK(first.active);
   CHECK(first.owner == 0x2345);
-  CHECK(first.pattern.data() == pattern.data());
+  CHECK(first.pattern.Bytes().data() == pattern.data());
   CHECK(first.envelopes[0].cursor == 1);
   CHECK(first.envelopes[1].cursor == 3);
   CHECK(first.envelopes[0].remaining == 0);
@@ -487,7 +488,7 @@ TEST_CASE("Stopping a vibration slot clears only that slot",
   vibration.slots[0].envelopes[1].level = 7;
   CHECK(Input::StopVibrationPatterns(vibration, 1, 0x10) == 1);
   CHECK_FALSE(vibration.slots[0].active);
-  CHECK(vibration.slots[0].pattern.empty());
+  CHECK(vibration.slots[0].pattern.Bytes().empty());
   CHECK(vibration.slots[0].envelopes[1].level == 0);
   CHECK(vibration.slots[1].active);
   CHECK(Input::StopVibrationPatterns(vibration, 3, 0) == 0);
@@ -528,7 +529,7 @@ TEST_CASE("Pausing and resuming one slot keeps its pattern",
   Input::StartVibrationPattern(vibration, pattern, 2, 0);
   CHECK(Input::PauseVibrationSlot(vibration, 2) == 2);
   CHECK_FALSE(vibration.slots[1].active);
-  CHECK(vibration.slots[1].pattern.data() == pattern.data());
+  CHECK(vibration.slots[1].pattern.Bytes().data() == pattern.data());
   CHECK(Input::ResumeVibrationSlot(vibration, 2) == 2);
   CHECK(vibration.slots[1].active);
 }
@@ -548,6 +549,102 @@ TEST_CASE("Pausing and resuming every pattern take a slot or zero",
   CHECK(vibration.slots[1].active);
 }
 
+TEST_CASE("Owned vibration patterns follow copied and paused slot state",
+          "[input-controller][input]") {
+  const auto pattern = Bytes(kStepPattern);
+  auto storage = std::make_shared<const Input::VibrationPattern::Storage>(
+      pattern.begin(), pattern.end());
+  const std::weak_ptr<const Input::VibrationPattern::Storage> lifetime =
+      storage;
+  Input::VibrationState state;
+  REQUIRE(Input::StartOwnedVibrationPattern(state, storage, 1, 2) == 1);
+  storage.reset();
+  Input::VibrationState snapshot = state;
+  CHECK(Input::ClearVibrationSlot(state, 1) == 1);
+  CHECK_FALSE(lifetime.expired());
+  CHECK(Input::PauseVibrationSlot(snapshot, 1) == 1);
+  CHECK_FALSE(lifetime.expired());
+  CHECK(Input::ResumeVibrationSlot(snapshot, 1) == 1);
+  CHECK(snapshot.slots[0].pattern.Bytes().front() == std::byte{3});
+  CHECK(Input::ClearVibrationSlot(snapshot, 1) == 1);
+  CHECK(lifetime.expired());
+}
+
+TEST_CASE("Owned vibration releases storage on reset or natural completion",
+          "[input-controller][input]") {
+  const bool reset = GENERATE(false, true);
+  const auto pattern = Bytes(kStepPattern);
+  auto storage = std::make_shared<const Input::VibrationPattern::Storage>(
+      pattern.begin(), pattern.end());
+  const std::weak_ptr<const Input::VibrationPattern::Storage> lifetime =
+      storage;
+  Input::VibrationState state;
+  REQUIRE(Input::StartOwnedVibrationPattern(state, storage, 1, 2) == 1);
+  storage.reset();
+  Input::ControllerPorts ports{};
+  if (reset) {
+    Input::ResetVibrationPatterns(state, ports);
+  } else {
+    CHECK(Input::UpdateVibrationPatterns(state, ports[0], true) == 0);
+  }
+  CHECK_FALSE(state.slots[0].active);
+  CHECK(state.slots[0].pattern.Bytes().empty());
+  CHECK(lifetime.expired());
+}
+
+TEST_CASE("Owned and borrowed vibration produce the same motor frames",
+          "[input-controller][input]") {
+  const std::array<std::uint8_t, 11> data{5, 2, 1, 0, 0, 2, 128, 2, 128, 0, 0};
+  const auto pattern = Bytes(data);
+  const auto storage = std::make_shared<const Input::VibrationPattern::Storage>(
+      pattern.begin(), pattern.end());
+  Input::VibrationState borrowed;
+  Input::VibrationState owned;
+  REQUIRE(Input::StartVibrationPattern(borrowed, pattern, 1, 2) == 1);
+  REQUIRE(Input::StartOwnedVibrationPattern(owned, storage, 1, 2) == 1);
+  Input::ControllerPortState borrowed_port;
+  Input::ControllerPortState owned_port;
+  for (int frame = 0; frame < 16; ++frame) {
+    CAPTURE(frame);
+    CHECK(Input::UpdateVibrationPatterns(borrowed, borrowed_port, true) == 0);
+    CHECK(Input::UpdateVibrationPatterns(owned, owned_port, true) == 0);
+    CHECK(owned.motor_levels == borrowed.motor_levels);
+    CHECK(owned_port.motor_commands == borrowed_port.motor_commands);
+    CHECK(owned.slots[0].active == borrowed.slots[0].active);
+  }
+}
+
+TEST_CASE("Starting a view of owned vibration retains its storage",
+          "[input-controller][input]") {
+  const auto [destination, offset] =
+      GENERATE(Catch::Generators::table<std::uint32_t, std::size_t>(
+          {{1, 0}, {1, 2}, {2, 0}, {2, 2}}));
+  const auto pattern = Bytes(kStepPattern);
+  Input::VibrationPattern::Storage data(offset, std::byte{0});
+  data.insert(data.end(), pattern.begin(), pattern.end());
+  data.resize(data.size() + 2);
+  auto storage = std::make_shared<const Input::VibrationPattern::Storage>(data);
+  const std::weak_ptr<const Input::VibrationPattern::Storage> lifetime =
+      storage;
+  Input::VibrationState state;
+  REQUIRE(Input::StartOwnedVibrationPattern(state, storage, 1, 2) == 1);
+  const auto view =
+      state.slots[0].pattern.Bytes().subspan(offset, pattern.size());
+  REQUIRE(Input::StartVibrationPattern(state, view, destination, 2) ==
+          destination);
+  if (destination != 1) {
+    CHECK(Input::ClearVibrationSlot(state, 1) == 1);
+  }
+  storage.reset();
+  REQUIRE_FALSE(lifetime.expired());
+  const auto& started = state.slots[destination - 1].pattern;
+  CHECK(started.Bytes().data() == view.data());
+  CHECK(started.Bytes().size() == view.size());
+  Input::ControllerPortState port;
+  CHECK(Input::UpdateVibrationPatterns(state, port, true) == 0);
+  CHECK(lifetime.expired());
+}
+
 TEST_CASE("Resetting vibration disconnects the ports and clears the slots",
           "[input-controller][input]") {
   Input::VibrationState vibration;
@@ -562,7 +659,7 @@ TEST_CASE("Resetting vibration disconnects the ports and clears the slots",
   CHECK_FALSE(ports[1].connected);
   for (const Input::VibrationSlot& slot : vibration.slots) {
     CHECK_FALSE(slot.active);
-    CHECK(slot.pattern.empty());
+    CHECK(slot.pattern.Bytes().empty());
     CHECK(slot.envelopes[0].level == 0);
     CHECK(slot.envelopes[1].level == 0);
   }
@@ -600,7 +697,7 @@ TEST_CASE("Vibration envelopes step the small motor and ramp the large one",
     CHECK(port.motor_commands == kCommands.at(tick));
     CHECK(vibration.slots[0].active == kPlaying.at(tick));
   }
-  CHECK(vibration.slots[0].pattern.empty());
+  CHECK(vibration.slots[0].pattern.Bytes().empty());
 }
 
 TEST_CASE("The vibration mix clamps and leaves motors alone when disabled",
@@ -661,7 +758,8 @@ TEST_CASE("Presets start in a free slot owned by the preset player",
   const auto first = Input::PlayVibrationPreset(vibration, presets, 0);
   REQUIRE(first.has_value());
   CHECK(*first == 1);
-  CHECK(vibration.slots[0].pattern.data() == presets.subspan(12).data());
+  CHECK(vibration.slots[0].pattern.Bytes().data() ==
+        presets.subspan(12).data());
   CHECK(vibration.slots[0].owner == Input::kPresetVibrationOwner);
   CHECK(Input::PlayVibrationPreset(vibration, presets, 0).value_or(0) == 2);
   CHECK(Input::PlayVibrationPreset(vibration, presets, 0).value_or(9) == 0);
@@ -822,6 +920,68 @@ TEST_CASE("Live controller requests refuse unknown ports motors and patterns",
   CHECK(static_cast<unsigned char>(
             Input_controllerPorts[1].actuatorLevels[1]) == 0x77);
   CHECK(Input::RefusedLiveControllerRequestCount() == refusals + 6);
+}
+
+TEST_CASE("Bounded Live vibration refuses every truncated stream prefix",
+          "[input-controller][input]") {
+  const LiveControllerGlobals saved;
+  const auto length = GENERATE(0U, 1U, 2U, 3U, 4U);
+  const auto pattern = Bytes(kStepPattern);
+  REQUIRE(Input::StartLiveVibrationPattern(pattern, 1, 0x80) == 1);
+  auto& slot = Input::LiveVibrationState().slots[0];
+  slot.envelopes[0].level = 0x70;
+  const auto refusals = Input::RefusedLiveControllerRequestCount();
+  CHECK(Input::StartLiveVibrationPattern(pattern.first(length), 1, 2) == 0);
+  CHECK(slot.active);
+  CHECK(slot.owner == 0x80);
+  CHECK(slot.pattern.Bytes().data() == pattern.data());
+  CHECK(slot.pattern.Bytes().size() == pattern.size());
+  CHECK(slot.envelopes[0].level == 0x70);
+  CHECK(Input::RefusedLiveControllerRequestCount() == refusals + 1);
+}
+
+TEST_CASE("Bounded Live vibration retains only the two complete streams",
+          "[input-controller][input]") {
+  const LiveControllerGlobals saved;
+  // The small stream ends at byte 3; the large stream ends at byte 9.
+  const std::array<std::uint8_t, 13> data{7, 1, 1, 0, 0,    0xAA, 0xAA,
+                                          2, 2, 0, 0, 0xBB, 0xBB};
+  const auto pattern = Bytes(data);
+  REQUIRE(Input::StartLiveVibrationPattern(pattern, 1, 2) == 1);
+  const auto& slot = Input::LiveVibrationState().slots[0];
+  CHECK(slot.pattern.Bytes().data() == pattern.data());
+  CHECK(slot.pattern.Bytes().size() == 11);
+  CHECK(slot.envelopes[0].cursor == 1);
+  CHECK(slot.envelopes[1].cursor == 7);
+  CHECK(Input::StopLiveVibrationPatterns(1, 2) == 1);
+  CHECK(slot.pattern.Bytes().empty());
+}
+
+TEST_CASE("Bounded Live vibration checks the large stream offset",
+          "[input-controller][input]") {
+  const LiveControllerGlobals saved;
+  const auto start = GENERATE(4U, 5U, 0xFFU);
+  auto data = kStepPattern;
+  data[0] = static_cast<std::uint8_t>(start);
+  const auto refusals = Input::RefusedLiveControllerRequestCount();
+  CHECK(Input::StartLiveVibrationPattern(Bytes(data), 1, 2) == 0);
+  CHECK(Input::RefusedLiveControllerRequestCount() == refusals + 1);
+}
+
+TEST_CASE(
+    "Bounded Live vibration uses the real extent beyond the legacy window",
+    "[input-controller][input]") {
+  const LiveControllerGlobals saved;
+  std::vector<std::uint8_t> data(4099, 1);
+  data[data.size() - 2] = 0;
+  data.back() = 0;
+  const auto pattern = Bytes(data);
+  REQUIRE(Input::StartLiveVibrationPattern(pattern, 1, 2) == 1);
+  CHECK(Input::LiveVibrationState().slots[0].pattern.Bytes().size() ==
+        data.size());
+  CHECK(Input::StopLiveVibrationPatterns(1, 2) == 1);
+  CHECK(Input::StartLiveVibrationPattern(
+            reinterpret_cast<const char*>(data.data()), 1, 2) == 0);
 }
 
 TEST_CASE("Live controller updates publish the legacy button state",

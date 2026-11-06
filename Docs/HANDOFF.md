@@ -13,6 +13,35 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- Buffered script vibration now validates its 120-byte stream window and
+  stores a separate immutable copy in each native controller slot. New or
+  malformed requests cannot overwrite a playing pattern through the former
+  shared scratch buffer. Copies and pauses retain ownership; clear, reset
+  and natural completion release it. Restarting a view of slot-owned bytes
+  retains that owner and exact subview before replacement, including when
+  moving playback to the other slot.
+- Verification on `5e0003f9` plus the eight Input/Event source/test changes:
+  three production-opcode reproductions failed eight of fourteen assertions
+  before repair. The additional alias-lifetime control failed four of
+  fourteen assertions before correction (#313 comment `6683012020`).
+  `[input],[event-script-effects],[script-sources]` passes **84 cases /
+  968 assertions** in Debug and Release. Both full suites pass **4,551 cases /
+  7,905,330 assertions**; all 4,538 previous names remain and the complete
+  Debug/Release replay objects are unchanged. Thirteen new cases add 213
+  assertions, including frame-for-frame owned/borrowed motor equivalence.
+  Scoped quality/clang-tidy and static/ledger gates pass. Two generations
+  preserve 1,659 source/project hashes (including the solution). Evidence:
+  `VR-SCRIPT-VIBRATION-OWNERSHIP`,
+  `build\owner-checkpoint\script-vibration-ownership-*`, and
+  `build\owner-checkpoint\script-vibration-alias-before*`.
+- Vibration limits remain explicit: the generated producer still assumes a
+  readable 128-byte buffered record; source-owner extent validation belongs
+  to the pending VM integration. Unbuffered playback and the trusted raw
+  4,096-byte compatibility importer remain borrowed. The bounded overload
+  supports actual extents beyond that window. This fixes synthetic
+  production-opcode reproductions, not a reported retail crash or physical
+  controller test. No new promotion or compatibility-retirement credit;
+  #313 remains open and production VM dispatch is still generated.
 - The new `ScriptSource` value retains a buffer or immutable room section
   behind an exact byte span and a fresh, nonwrapping generation. Copies pin
   the old source during replacement; moves revoke the moved-from view.
@@ -25,7 +54,8 @@ verification of the current worktree.
   all 4,530 previous names and both replay objects are unchanged. Scoped
   quality/clang-tidy is clean; two generations preserve 1,658 source/project
   hashes. Evidence: `VR-EVENT-SOURCE-LEASES` and
-  `build\owner-checkpoint\script-sources-*`.
+  `build\owner-checkpoint\script-sources-*`. Published as `5e0003f9` with
+  successful exact Source Quality `42200489658`.
 - Remaining borrower obligations are concrete: text-box selection swaps
   complete records, so per-index string leases alone are insufficient.
   Controller vibration retains input spans, and its raw importer assumes a

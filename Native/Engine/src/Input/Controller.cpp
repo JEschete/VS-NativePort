@@ -10,6 +10,7 @@
 #include <expected>
 #include <limits>
 #include <span>
+#include <utility>
 
 namespace VS::Input {
 namespace {
@@ -242,7 +243,56 @@ std::uint32_t SetPatternsPlaying(VibrationState& vibration,
   }
   return 1;
 }
+
+std::uint32_t StartPattern(VibrationState& vibration, VibrationPattern pattern,
+                           std::uint32_t request, std::int32_t owner) noexcept {
+  const std::span<const std::byte> bytes = pattern.Bytes();
+  if (bytes.empty()) {
+    return 0;
+  }
+  std::uint32_t slot_id = 0;
+  if (request == kFreeVibrationSlot) {
+    const auto idle =
+        std::ranges::find(vibration.slots, false, &VibrationSlot::active);
+    if (idle != vibration.slots.end()) {
+      slot_id = static_cast<std::uint32_t>(idle - vibration.slots.begin()) + 1;
+    }
+  } else if (IsSlotId(request)) {
+    slot_id = request;
+  }
+  if (slot_id == 0) {
+    return 0;
+  }
+  VibrationSlot& slot = SlotFor(vibration, slot_id);
+  slot.pattern = std::move(pattern);
+  auto& [small_motor, large_motor] = slot.envelopes;
+  small_motor.cursor = kSmallMotorStreamStart;
+  large_motor.cursor = std::to_integer<std::uint32_t>(bytes.front());
+  for (VibrationEnvelope& envelope : slot.envelopes) {
+    envelope.remaining = 0;
+    envelope.level = 0;
+  }
+  slot.active = true;
+  slot.owner = static_cast<std::uint16_t>(owner);
+  return slot_id;
+}
 }  // namespace
+
+std::optional<VibrationPattern> VibrationPattern::RetainView(
+    std::span<const std::byte> bytes) const noexcept {
+  if (!owned_) {
+    return std::nullopt;
+  }
+  const auto base = reinterpret_cast<std::uintptr_t>(owned_->data());
+  const auto address = reinterpret_cast<std::uintptr_t>(bytes.data());
+  if (address < base || address - base > owned_->size() ||
+      bytes.size() > owned_->size() - (address - base)) {
+    return std::nullopt;
+  }
+  VibrationPattern view(owned_);
+  view.owned_view_ = bytes;
+  return view;
+}
 
 const char* VibrationPresetErrorName(VibrationPresetError error) noexcept {
   switch (error) {
@@ -384,34 +434,20 @@ std::uint32_t StartVibrationPattern(VibrationState& vibration,
                                     std::span<const std::byte> pattern,
                                     std::uint32_t request,
                                     std::int32_t owner) noexcept {
-  if (pattern.empty()) {
-    return 0;
-  }
-  std::uint32_t slot_id = 0;
-  if (request == kFreeVibrationSlot) {
-    const auto idle =
-        std::ranges::find(vibration.slots, false, &VibrationSlot::active);
-    if (idle != vibration.slots.end()) {
-      slot_id = static_cast<std::uint32_t>(idle - vibration.slots.begin()) + 1;
+  for (const VibrationSlot& slot : vibration.slots) {
+    if (auto retained = slot.pattern.RetainView(pattern)) {
+      return StartPattern(vibration, std::move(*retained), request, owner);
     }
-  } else if (IsSlotId(request)) {
-    slot_id = request;
   }
-  if (slot_id == 0) {
-    return 0;
-  }
-  VibrationSlot& slot = SlotFor(vibration, slot_id);
-  slot.pattern = pattern;
-  auto& [small_motor, large_motor] = slot.envelopes;
-  small_motor.cursor = kSmallMotorStreamStart;
-  large_motor.cursor = std::to_integer<std::uint32_t>(pattern.front());
-  for (VibrationEnvelope& envelope : slot.envelopes) {
-    envelope.remaining = 0;
-    envelope.level = 0;
-  }
-  slot.active = true;
-  slot.owner = static_cast<std::uint16_t>(owner);
-  return slot_id;
+  return StartPattern(vibration, VibrationPattern(pattern), request, owner);
+}
+
+std::uint32_t StartOwnedVibrationPattern(VibrationState& vibration,
+                                         VibrationPattern::Owner pattern,
+                                         std::uint32_t request,
+                                         std::int32_t owner) noexcept {
+  return StartPattern(vibration, VibrationPattern(std::move(pattern)), request,
+                      owner);
 }
 
 // decomp: SLUS_010.40 func_80043470 (src/SLUS_010.40/main.c:8596)
@@ -500,13 +536,14 @@ std::uint32_t UpdateVibrationPatterns(VibrationState& vibration,
     if (!slot.active) {
       continue;
     }
-    if (slot.pattern.empty()) {
+    const std::span<const std::byte> pattern = slot.pattern.Bytes();
+    if (pattern.empty()) {
       slot.active = false;
       continue;
     }
     for (std::size_t motor = 0; motor < kMotorCount; ++motor) {
       VibrationEnvelope& envelope = slot.envelopes[motor];
-      outside += AdvanceEnvelope(envelope, slot.pattern, motor != 0);
+      outside += AdvanceEnvelope(envelope, pattern, motor != 0);
       std::int32_t& level = vibration.motor_levels[motor];
       level = std::clamp(level + envelope.level, 0, kMaxMotorLevel);
     }

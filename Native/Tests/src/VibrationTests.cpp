@@ -135,7 +135,7 @@ struct PatternState {
 
   int Start(unsigned int slot, int owner_tag = 0x80) {
     return VS::Input::StartLiveVibrationPattern(
-        reinterpret_cast<const char*>(pattern.data()), slot, owner_tag);
+        std::as_bytes(std::span(pattern)), slot, owner_tag);
   }
 
   static const VS::Input::VibrationSlot& Slot(std::size_t slot_index) {
@@ -144,13 +144,13 @@ struct PatternState {
 
   void CheckSlot(std::size_t slot_index, bool active, bool stored = true) {
     CHECK(Slot(slot_index).active == active);
-    CHECK(Slot(slot_index).pattern.data() ==
+    CHECK(Slot(slot_index).pattern.Bytes().data() ==
           (stored ? reinterpret_cast<const std::byte*>(pattern.data())
                   : nullptr));
   }
 
   static void CheckPresetSlot(std::size_t slot_index) {
-    CHECK(Slot(slot_index).pattern.data() ==
+    CHECK(Slot(slot_index).pattern.Bytes().data() ==
           reinterpret_cast<const std::byte*>(Input_vibrationPresets + 8));
     CHECK(Slot(slot_index).owner == 0x80);
     CHECK(Slot(slot_index).active);
@@ -173,9 +173,9 @@ TEST_CASE("Original vibration preset uses its directory and preview owner",
   REQUIRE(Input_vibrationPresets[0] == 1);
   VS::Input::PlayLiveVibrationPreset(0);
   PatternState::CheckPresetSlot(0);
-  CHECK(PatternState::Slot(1).pattern.data() == nullptr);
+  CHECK(PatternState::Slot(1).pattern.Bytes().data() == nullptr);
   VS::Input::PlayLiveVibrationPreset(1);
-  CHECK(PatternState::Slot(1).pattern.data() == nullptr);
+  CHECK(PatternState::Slot(1).pattern.Bytes().data() == nullptr);
   VS::Input::PlayLiveVibrationPreset(0);
   PatternState::CheckPresetSlot(1);
   VS::Input::PlayLiveVibrationPreset(0);
@@ -380,7 +380,7 @@ TEST_CASE("Original vibration reset clears slots and controller connections",
   Input_controllerPorts[1].connected = 1;
   VS::Input::ResetLiveVibrationPatterns();
   for (const auto& slot : VS::Input::LiveVibrationState().slots) {
-    CHECK(slot.pattern.empty());
+    CHECK(slot.pattern.Bytes().empty());
     CHECK_FALSE(slot.active);
     CHECK(slot.envelopes[0].level == 0);
     CHECK(slot.envelopes[1].level == 0);

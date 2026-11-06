@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <expected>
 #include <limits>
+#include <memory>
+#include <optional>
 #include <span>
+#include <utility>
+#include <vector>
 
 // The SLUS_010.40 controller service (main.c:8454-8870) and the battle
 // stick dead zone (BATTLE 5BE50.c:82): pad packets, connection and analog
@@ -144,10 +148,38 @@ struct VibrationEnvelope {
   std::uint32_t remaining = 0;
 };
 
+// Owned copies follow slot snapshots; borrowed patterns retain the original
+// caller-managed lifetime contract.
+class VibrationPattern {
+ public:
+  using Storage = std::vector<std::byte>;
+  using Owner = std::shared_ptr<const Storage>;
+
+  VibrationPattern() = default;
+  explicit VibrationPattern(std::span<const std::byte> bytes) noexcept
+      : borrowed_(bytes) {}
+  explicit VibrationPattern(Owner owner) noexcept : owned_(std::move(owner)) {
+    if (owned_) {
+      owned_view_ = *owned_;
+    }
+  }
+
+  [[nodiscard]] std::span<const std::byte> Bytes() const noexcept {
+    return owned_ ? owned_view_ : borrowed_;
+  }
+  [[nodiscard]] std::optional<VibrationPattern> RetainView(
+      std::span<const std::byte> bytes) const noexcept;
+
+ private:
+  std::span<const std::byte> borrowed_{};
+  Owner owned_;
+  std::span<const std::byte> owned_view_{};
+};
+
 // Byte 0 is the offset of the large motor's stream; the small motor's stream
 // starts at byte 1.
 struct VibrationSlot {
-  std::span<const std::byte> pattern;
+  VibrationPattern pattern;
   bool active = false;
   std::uint16_t owner = 0;
   std::array<VibrationEnvelope, kMotorCount> envelopes{};
@@ -191,10 +223,16 @@ void SetMotorCommand(ControllerPortState& state, Motor motor,
 [[nodiscard]] std::uint8_t MotorCommand(const ControllerPortState& state,
                                         Motor motor) noexcept;
 
+// Views into slot-owned storage retain that owner; other inputs must remain
+// readable until the slot is cleared or replaced, including while paused.
 std::uint32_t StartVibrationPattern(VibrationState& vibration,
                                     std::span<const std::byte> pattern,
                                     std::uint32_t request,
                                     std::int32_t owner) noexcept;
+std::uint32_t StartOwnedVibrationPattern(VibrationState& vibration,
+                                         VibrationPattern::Owner pattern,
+                                         std::uint32_t request,
+                                         std::int32_t owner) noexcept;
 // Slot functions refuse IDs other than 1 and 2 and return 0 for them.
 std::uint32_t ClearVibrationSlot(VibrationState& vibration,
                                  std::uint32_t slot_id) noexcept;

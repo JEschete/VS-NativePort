@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <format>
 #include <map>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -11,7 +13,15 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Event/ScriptEffectCommands.hpp"
+#include "Input/ControllerLive.hpp"
 #include "TestSupport/ScriptSteps.hpp"
+
+extern "C" {
+#include "Event/ScriptActors.h"
+#include "Event/ScriptEffectOpcodes.h"
+#include "Event/ScriptEffects.h"
+#include "Event/ScriptVm.h"
+}
 
 namespace {
 namespace event = VS::Event;
@@ -175,7 +185,120 @@ class LinearTweenHost final : public event::ImageTweenHost {
         placement.brightness);
   }
 };
+
+struct LiveVibrationFixture {
+  char* saved_pattern = Event_vibrationPatterns[0];
+  void* saved_buffer = Event_vibrationPatternBuffer;
+  char saved_skip = Event_skipState;
+  VS::Input::VibrationState saved_vibration = VS::Input::LiveVibrationState();
+  alignas(std::uint32_t) std::array<std::uint8_t, 4104> source{};
+  // Readable tail makes the old over-scan deterministic without a bad access.
+  alignas(std::uint32_t) std::array<std::uint8_t, 4104> destination{};
+
+  LiveVibrationFixture() {
+    Event_vibrationPatterns[0] = reinterpret_cast<char*>(source.data());
+    Event_vibrationPatternBuffer = destination.data();
+    Event_skipState = 0;
+    VS::Input::LiveVibrationState() = {};
+  }
+  LiveVibrationFixture(const LiveVibrationFixture&) = delete;
+  LiveVibrationFixture& operator=(const LiveVibrationFixture&) = delete;
+  LiveVibrationFixture(LiveVibrationFixture&&) = delete;
+  LiveVibrationFixture& operator=(LiveVibrationFixture&&) = delete;
+  ~LiveVibrationFixture() {
+    Event_vibrationPatterns[0] = saved_pattern;
+    Event_vibrationPatternBuffer = saved_buffer;
+    Event_skipState = saved_skip;
+    VS::Input::LiveVibrationState() = saved_vibration;
+  }
+};
 }  // namespace
+
+TEST_CASE("Live buffered script vibration cannot scan beyond its copy",
+          "[event-script-effects][input-controller]") {
+  LiveVibrationFixture fixture;
+  fixture.source.fill(1);
+  std::array<std::uint8_t, 2> command{0xA7, 0x08};
+  const auto refusals = VS::Input::RefusedLiveControllerRequestCount();
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  CHECK_FALSE(VS::Input::LiveVibrationState().slots[0].active);
+  CHECK(VS::Input::RefusedLiveControllerRequestCount() == refusals + 1);
+}
+
+TEST_CASE("Live buffered script vibration accepts a final complete step",
+          "[event-script-effects][input-controller]") {
+  LiveVibrationFixture fixture;
+  fixture.source.fill(1);
+  fixture.source[8] = 4;
+  fixture.source[9] = 0;
+  fixture.source[10] = 0;
+  fixture.source[126] = 0;
+  fixture.source[127] = 0;
+  std::array<std::uint8_t, 2> command{0xA7, 0x08};
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  const auto& slot = VS::Input::LiveVibrationState().slots[0];
+  CHECK(slot.active);
+  CHECK(slot.pattern.Bytes().size() == 120);
+  CHECK(slot.pattern.Bytes().data() !=
+        reinterpret_cast<const std::byte*>(fixture.destination.data() + 8));
+  CHECK(std::ranges::equal(
+      slot.pattern.Bytes(),
+      std::as_bytes(std::span(fixture.source).subspan(8, 120))));
+  CHECK(fixture.destination.front() == 0);
+}
+
+TEST_CASE("Live unbuffered script vibration still borrows its original source",
+          "[event-script-effects][input-controller]") {
+  LiveVibrationFixture fixture;
+  fixture.source[8] = 3;
+  fixture.destination.fill(0x7F);
+  std::array<std::uint8_t, 2> command{0xA7, 0x00};
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  const auto& slot = VS::Input::LiveVibrationState().slots[0];
+  CHECK(slot.active);
+  CHECK(slot.pattern.Bytes().size() == 5);
+  CHECK(slot.pattern.Bytes().data() ==
+        reinterpret_cast<const std::byte*>(fixture.source.data() + 8));
+  CHECK(fixture.destination.front() == 0x7F);
+}
+
+TEST_CASE("Live buffered vibration patterns do not overwrite each other",
+          "[event-script-effects][input-controller]") {
+  LiveVibrationFixture fixture;
+  fixture.source[8] = 3;
+  fixture.source[9] = 1;
+  fixture.source[10] = 0x20;
+  std::array<std::uint8_t, 2> command{0xA7, 0x08};
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  fixture.source[10] = 0x60;
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  fixture.source[10] = 0x70;
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  const auto& slots = VS::Input::LiveVibrationState().slots;
+  CHECK(slots[0].pattern.Bytes().data() != slots[1].pattern.Bytes().data());
+  fixture.source.fill(0x7F);
+  fixture.destination.fill(0x7F);
+  CHECK(slots[0].pattern.Bytes()[2] == std::byte{0x20});
+  CHECK(slots[1].pattern.Bytes()[2] == std::byte{0x60});
+}
+
+TEST_CASE("Malformed buffered vibration preserves a playing pattern",
+          "[event-script-effects][input-controller]") {
+  LiveVibrationFixture fixture;
+  fixture.source[8] = 3;
+  fixture.source[9] = 1;
+  fixture.source[10] = 0x20;
+  std::array<std::uint8_t, 2> command{0xA7, 0x08};
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  fixture.source.fill(1);
+  const auto refusals = VS::Input::RefusedLiveControllerRequestCount();
+  CHECK(Event_CommandPlayVibrationPatternOpcode(command.data(), 0) == 0);
+  const auto& slots = VS::Input::LiveVibrationState().slots;
+  CHECK(slots[0].active);
+  CHECK(slots[0].pattern.Bytes()[2] == std::byte{0x20});
+  CHECK_FALSE(slots[1].active);
+  CHECK(VS::Input::RefusedLiveControllerRequestCount() == refusals + 1);
+}
 
 TEST_CASE("Event script effect commands refuse short instructions",
           "[event-script-effects]") {

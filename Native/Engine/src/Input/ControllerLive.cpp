@@ -9,6 +9,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
+#include <memory>
+#include <new>
 #include <optional>
 #include <span>
 
@@ -223,23 +226,41 @@ class LibPadHost final : public ControllerHost {
 };
 
 // The bytes a playing pattern reads: both (frames, level) streams through
-// their terminating zero-frame step (main.c:8721-8745). Empty when a stream
-// does not end within kMaxPatternBytes.
-std::span<const std::byte> PatternExtent(const char* pattern) noexcept {
-  const std::span window(reinterpret_cast<const std::uint8_t*>(pattern),
-                         kMaxPatternBytes);
-  const std::array<std::size_t, kMotorCount> starts{1, window[0]};
+// their terminating zero-frame step (main.c:8721-8745).
+std::span<const std::byte> PatternExtent(
+    std::span<const std::byte> window) noexcept {
+  if (window.empty()) {
+    return {};
+  }
+  const std::array<std::size_t, kMotorCount> starts{
+      1, std::to_integer<std::size_t>(window.front())};
   std::size_t end = 0;
   for (std::size_t cursor : starts) {
-    while (cursor + 1 < window.size() && window[cursor] != 0) {
+    while (cursor < window.size() && window.size() - cursor >= 2 &&
+           window[cursor] != std::byte{0}) {
       cursor += 2;
     }
-    if (cursor + 1 >= window.size()) {
+    if (cursor >= window.size() || window.size() - cursor < 2) {
       return {};
     }
     end = std::max(end, cursor + 2);
   }
-  return std::as_bytes(window.first(end));
+  return window.first(end);
+}
+
+std::span<const std::byte> ReadVibrationPattern(
+    std::span<const std::byte> pattern, std::uint32_t request) {
+  if (pattern.size() > std::numeric_limits<std::uint32_t>::max()) {
+    Refused("StartLiveVibrationPattern", "pattern exceeds cursor range",
+            request);
+    return {};
+  }
+  const std::span<const std::byte> extent = PatternExtent(pattern);
+  if (extent.empty()) {
+    Refused("StartLiveVibrationPattern", "unterminated pattern, slot request",
+            request);
+  }
+  return extent;
 }
 
 ButtonState LoadButtons() noexcept {
@@ -362,6 +383,36 @@ void SetLiveMotorCommand(int port_index, int motor, std::uint8_t command) {
   StorePort(port, state);
 }
 
+int StartLiveVibrationPattern(std::span<const std::byte> pattern,
+                              std::uint32_t request, int owner) {
+  const std::span<const std::byte> extent =
+      ReadVibrationPattern(pattern, request);
+  if (extent.empty()) {
+    return 0;
+  }
+  return static_cast<int>(
+      StartVibrationPattern(live_vibration, extent, request, owner));
+}
+
+int StartLiveOwnedVibrationPattern(std::span<const std::byte> pattern,
+                                   std::uint32_t request, int owner) {
+  const std::span<const std::byte> extent =
+      ReadVibrationPattern(pattern, request);
+  if (extent.empty()) {
+    return 0;
+  }
+  try {
+    const auto storage = std::make_shared<const VibrationPattern::Storage>(
+        extent.begin(), extent.end());
+    return static_cast<int>(
+        StartOwnedVibrationPattern(live_vibration, storage, request, owner));
+  } catch (const std::bad_alloc&) {
+    Refused("StartLiveOwnedVibrationPattern",
+            "pattern allocation failed, slot request", request);
+    return 0;
+  }
+}
+
 int StartLiveVibrationPattern(const char* pattern, std::uint32_t request,
                               int owner) {
   if (pattern == nullptr) {
@@ -369,14 +420,9 @@ int StartLiveVibrationPattern(const char* pattern, std::uint32_t request,
             request);
     return 0;
   }
-  const std::span<const std::byte> extent = PatternExtent(pattern);
-  if (extent.empty()) {
-    Refused("StartLiveVibrationPattern", "unterminated pattern, slot request",
-            request);
-    return 0;
-  }
-  return static_cast<int>(
-      StartVibrationPattern(live_vibration, extent, request, owner));
+  return StartLiveVibrationPattern(
+      {reinterpret_cast<const std::byte*>(pattern), kMaxPatternBytes}, request,
+      owner);
 }
 
 int StopLiveVibrationPatterns(std::uint32_t selector, int owner) {

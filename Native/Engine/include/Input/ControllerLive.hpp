@@ -1,6 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstddef>
 #include <cstdint>
 #include <span>
 
@@ -25,7 +26,16 @@ void ConfigureLiveControllerActuators(int port_id, LegacyPadPacket packet);
 int ReadLiveControllerPort(int port_id, LegacyPadPacket packet);
 void UpdateLiveControllerConnection(int port_id, LegacyPadPacket packet);
 void SetLiveMotorCommand(int port_index, int motor, std::uint8_t command);
-// `pattern` is trusted through the end of both of its streams.
+// The caller retains these bytes until the slot is cleared or replaced,
+// including while a pattern is paused. Both streams must end inside the span.
+int StartLiveVibrationPattern(std::span<const std::byte> pattern,
+                              std::uint32_t request, int owner);
+// Copies the validated streams before replacing a slot. The native slot owns
+// the copy through pauses and state snapshots; refusal leaves it unchanged.
+int StartLiveOwnedVibrationPattern(std::span<const std::byte> pattern,
+                                   std::uint32_t request, int owner);
+// Compatibility import: `pattern` is trusted through both stream terminators.
+// New callers with a known source extent must use the bounded overload.
 int StartLiveVibrationPattern(const char* pattern, std::uint32_t request,
                               int owner);
 int StopLiveVibrationPatterns(std::uint32_t selector, int owner);

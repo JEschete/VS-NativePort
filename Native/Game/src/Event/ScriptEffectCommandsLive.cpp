@@ -15,7 +15,6 @@
 #include <span>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.h"
 #include "Field/EnvironmentLive.hpp"
@@ -150,15 +149,16 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
   [[nodiscard]] bool VibrationPatternLoaded(int pattern) const override {
     return Event_vibrationPatterns[pattern] != nullptr;
   }
-  // A buffered pattern plays from a copy, so the script may reuse its own.
+  // Buffered requests own separate copies, not the original shared scratch.
   void StartVibrationPattern(int pattern, bool buffered) override {
     const char* source = Event_vibrationPatterns[pattern];
     if (buffered) {
-      Require(Event_vibrationPatternBuffer != nullptr,
-              "Script vibration buffer is missing");
-      VS::Core::Memory::CopyLiveAlignedWords(Event_vibrationPatternBuffer,
-                                             source, kVibrationPatternBytes);
-      source = static_cast<const char*>(Event_vibrationPatternBuffer);
+      const std::span bytes(reinterpret_cast<const std::byte*>(source),
+                            kVibrationPatternBytes);
+      static_cast<void>(VS::Input::StartLiveOwnedVibrationPattern(
+          bytes.subspan(kVibrationHeaderBytes), kAllMotors,
+          kScriptVibrationOwner));
+      return;
     }
     static_cast<void>(VS::Input::StartLiveVibrationPattern(
         source + kVibrationHeaderBytes, kAllMotors, kScriptVibrationOwner));
