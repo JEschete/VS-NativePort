@@ -19,6 +19,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -57,7 +58,6 @@ extern "C" {
 #include "Core/Gte.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Event/Cutscene.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
 #include "Field/CameraLiveState.h"
@@ -221,9 +221,9 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   bool TryTriggerFacingTileEvent(int slot) override {
     return Field_TryTriggerFacingTileEvent(slot) != 0;
   }
-  void BeginQueuedCutscene() override { Event_BeginQueuedCutscene(); }
-  void StartPreparedCutscene() override { Event_StartPreparedCutscene(); }
-  void EndFieldCutscene() override { Event_EndFieldCutscene(); }
+  void BeginQueuedCutscene() override { Event::BeginLiveQueuedCutscene(); }
+  void StartPreparedCutscene() override { Event::StartLivePreparedCutscene(); }
+  void EndFieldCutscene() override { Event::EndLiveFieldCutscene(); }
   void UpdateEventPlayback() override {
     static_cast<void>(Event_UpdateEventPlayback());
   }

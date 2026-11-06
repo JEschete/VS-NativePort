@@ -4,6 +4,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorMatchesLive.hpp"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Event/Cutscene.h"
 #include "Event/Triggers.h"
 #include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
@@ -594,7 +594,7 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
         || tileMode != actor->lastTriggerTile.bytes[3] || (phaseValue & 0x70000)) {
         if (Field_controlMode != 3) {
             if (tile->hasEventTrigger && Event_EvaluateRoomEventTriggers(2, 0, NULL, 0) == 1) {
-                Event_BeginQueuedCutscene();
+                VS::Event::BeginLiveQueuedCutscene();
                 actor->lastTriggerTile.word = *(u_int*)position;
                 actor->lastTriggerTile.bytes[3] = tileMode;
                 if (tile->hasRoomTrigger) {

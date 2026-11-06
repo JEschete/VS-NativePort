@@ -13,6 +13,7 @@ struct Battle_Actor;
 // table, a null record or a null argument the original dereferenced is
 // refused with a warning on the "actors" channel.
 namespace VS::Actors {
+struct SoundEffectSlot;
 // `actor` is unused, as in the original.
 void QueueLiveActorBaseSequenceLoad(Battle_Actor* actor, int actor_id);
 // `actor_bytes` is the Battle_Actor whose equipped weapon category is read
@@ -53,6 +54,8 @@ void RestoreLiveActorIdlePose(int actor_id);
 void RestoreLiveActorNeutralPose(int actor_id);
 void RestoreLiveActorBasePose(int actor_id, int animation);
 int LiveAnimationBattleWindowFrame(int actor_id);
+void SetLiveActorSoundOverrides(int actor_id,
+                                const SoundEffectSlot& sound_override);
 void SetLiveActorSoundOverrides(int actor_id,
                                 Actors_ModelEffectSlot* sound_override);
 void ApplyLiveActorSoundOverrides(int actor_id,

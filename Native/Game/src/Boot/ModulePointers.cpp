@@ -116,7 +116,6 @@ extern "C" {
 #include "Ending/Credits/StaffRoll.h"
 #include "Event/Actors.h"
 #include "Event/Camera.h"
-#include "Event/Cutscene.h"
 #include "Event/Playback.h"
 #include "Event/Screen.h"
 #include "Event/Script.h"
@@ -275,10 +274,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800734C0u, 0u, (void*)&Battle_BeginAshleyWeaponToggle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007350Cu, 0u, (void*)&Battle_EndAshleyWeaponToggle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80073718u, 0u, (void*)&Event_PrepareCutsceneActors, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80073870u, 0u, (void*)&Event_StartPreparedCutscene, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80073898u, 0u, (void*)&Event_BeginQueuedCutscene, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800738E4u, 0u, (void*)&Event_EndFieldCutscene, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073AA4u, 0u, (void*)&Field_BeginObjectInteractionWait, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073ACCu, 0u, (void*)&Field_EndObjectInteractionWait, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073AFCu, 0u, (void*)&Field_InteractWithLockedRoomObject, 0u, 0u, 0u},

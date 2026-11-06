@@ -2,6 +2,7 @@
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/TargetingState.h"
-#include "Event/Cutscene.h"
 #include "Event/Triggers.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -54,7 +54,7 @@ int Battle_ResolveActorDefeat(int source_actor_slot, int target_actor_slot, int 
             if (target_actor_slot == 0) {
                 Battle_SuppressAshleyStatusLabels();
                 Event_EvaluateRoomEventTriggers(0x40, 0, NULL, 0);
-                Event_BeginQueuedCutscene();
+                VS::Event::BeginLiveQueuedCutscene();
                 ret = 1;
             } else if (Battle_actors[target_actor_slot]->retainAfterDefeat == 0) {
                 VS::Actors::RemoveLiveActorAtSlot(target_actor_slot, 1);

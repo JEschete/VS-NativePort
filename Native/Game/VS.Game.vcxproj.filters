@@ -1431,12 +1431,12 @@
     <ClInclude Include="src\Event\Camera.h">
       <Filter>src\Event</Filter>
     </ClInclude>
-    <ClCompile Include="src\Event\Cutscene.cpp">
+    <ClCompile Include="src\Event\CutsceneLifecycle.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\Cutscene.h">
+    <ClCompile Include="src\Event\CutsceneLifecycleLive.cpp">
       <Filter>src\Event</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="src\Event\Dialog.h">
       <Filter>src\Event</Filter>
     </ClInclude>
@@ -2729,6 +2729,12 @@
     </ClInclude>
     <ClInclude Include="include\Ending\EndingLive.hpp">
       <Filter>include\Ending</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\CutsceneLifecycle.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\CutsceneLifecycleLive.hpp">
+      <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\ScriptActorCommands.hpp">
       <Filter>include\Event</Filter>

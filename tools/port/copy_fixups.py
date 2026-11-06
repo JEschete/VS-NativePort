@@ -2017,6 +2017,18 @@ OWNED_CALL_BINDINGS |= {
     )
 }
 
+EVENT_CUTSCENE_LIVE_BINDINGS = {
+    "F00128": "PrepareLiveCutsceneActors",
+    "F00129": "StartLivePreparedCutscene",
+    "F00130": "BeginLiveQueuedCutscene",
+    "F00131": "EndLiveFieldCutscene",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Event::{name}" for fid, name in EVENT_CUTSCENE_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Event::{name}": r"Native\Game\include\Event\CutsceneLifecycleLive.hpp"
+    for name in EVENT_CUTSCENE_LIVE_BINDINGS.values()
+}
+
 # #276 row 34 (event script actor opcodes): the 47 BATTLE.PRG actor opcode handlers of 4A0A8.c are typed C++
 # (Event/ScriptActorCommands.cpp) behind a ScriptActorHost. Each opcode table slot holds a C binding with the dispatch
 # ABI (Event/ScriptActorOpcodes.h) at the handler's module-image address. The generated script VM, screen and dialog

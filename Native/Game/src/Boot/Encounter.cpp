@@ -22,6 +22,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLive.hpp"
@@ -60,7 +61,6 @@ extern "C" {
 #include "Effects/Runtime.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits/StaffRoll.h"
-#include "Event/Cutscene.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
@@ -1145,7 +1145,7 @@ extern "C" void Boot_EncounterPollStop() {
                     "Starting external event {} in zone {} room {}; "
                     "component fixture, not story progression",
                     event, Field_zoneContext.zndId, Field_zoneContext.mapId);
-        Event_BeginQueuedCutscene();
+        VS::Event::BeginLiveQueuedCutscene();
       } else if (VS::Game::configuration.room_local_event &&
                  !VS::Game::room_local_event_started &&
                  Event_playbackPhase == 0 && Field_controlMode == 1 &&
@@ -1171,7 +1171,7 @@ extern "C" void Boot_EncounterPollStop() {
                     "Starting room-local event {} in zone {} room {}; "
                     "trigger conditions not evaluated",
                     selector, Field_zoneContext.zndId, Field_zoneContext.mapId);
-        Event_BeginQueuedCutscene();
+        VS::Event::BeginLiveQueuedCutscene();
       }
     }
   }

@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-11-05. This is a short entry point, not another work tracker.
+Updated 2026-11-06. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -10,7 +10,33 @@ verification of the current worktree.
 ### Resumed row-33 work
 
 - The owner resumed implementation and authorized commits/pushes at verified
-  milestones. #276 remains active; the promotion counts below are unchanged.
+  milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
+  1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
+  promoted and remains planned. The pause-era counts below are historical.
+- The complete four-function cutscene file is now the typed
+  `Event/CutsceneLifecycle.cpp` core and `CutsceneLifecycleLive.cpp` binding.
+  Generated and maintained callers use the native entries. The old C ABI,
+  header and four unused original-address module entries are gone
+  (9 source consumers to 0). Player preparation failure is explicit, actor
+  state is re-read after callbacks, and music handles remain bounded and
+  32-bit. Sound reset uses a value-initialized typed request.
+- Cutscene verification on `2ed487e1` plus these scoped changes:
+  `[cutscene-lifecycle]` passes 22 cases / 2,448 assertions; the combined
+  cutscene/event-VM/actor-animation selection passes 113 cases / 4,703
+  assertions in Debug and Release. A frozen-generated-original differential
+  makes 40,000 comparisons (seed `0xC075CE`); five planted mutants are detected.
+  Callback stand-ins compare state and ordering, not audiovisual output.
+- Debug and Release x64 solution builds and
+  `python tools\test\regression.py record --config <Debug|Release>` each pass
+  **4,421 cases / 7,904,156 assertions and both unchanged replays**. All old
+  test names remain. The exact assertion delta is +2,448 from new tests minus
+  eight checks in two existing per-module-symbol tests for the four retired
+  entries. No replay expectation changed. Logs: `build\owner-checkpoint\cutscene-*`;
+  detailed commands/limits: `VR-EVENT-CUTSCENE-LIFECYCLE` and
+  `VR-EVENT-CUTSCENE-REPLAY`. Scoped clang-tidy/default quality is clean;
+  copier/scaffold second runs preserve all 1,691 native/project/manifest files.
+  Generator controls pass (190 encounter checks with the repository's
+  `.venv-3` Python, 9 module-extent checks, 94 ledger-gate checks).
 - The recovered typed VM core is now `Event/ScriptControl.cpp`, with the
   `Event/ScriptVm.hpp` interface. It is compiled and tested alongside, not in
   place of, the generated production VM. Script locations are region/offset
@@ -26,8 +52,10 @@ verification of the current worktree.
 - Scoped `quality-native.cmd --files <core/header/tests> --tidy --jobs 2`
   reports zero new/actionable findings; gate and modernization checks pass.
   No ownership or promotion credit is claimed for this core-only checkpoint.
-- Next: finish the production Live adapter, bounded room triggers and cutscene
-  lifecycle, retarget every caller, run the original differential/mutation
+- The core-only checkpoint was published as `2ed487e1`; its exact-revision
+  Source Quality run `42166879061` succeeded.
+- Next: finish the production VM Live adapter and bounded room triggers,
+  retarget every remaining caller, run the original differential/mutation
   controls and all row acceptance gates, then publish and close only what passes.
   #313 and row 33 remain open/planned. The original draft backup is retained.
 

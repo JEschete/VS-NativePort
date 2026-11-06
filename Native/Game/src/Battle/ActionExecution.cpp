@@ -6,6 +6,7 @@
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Items/LootLive.hpp"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/TargetingState.h"
 #include "Effects/Runtime.h"
-#include "Event/Cutscene.h"
 #include "Event/Triggers.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Interactions.h"
@@ -413,7 +413,7 @@ void Battle_FinishActionSequence(void)
         return;
     }
     if (Event_EvaluateRoomEventTriggers(12, 0, 0, 0) == 1) {
-        Event_BeginQueuedCutscene();
+        VS::Event::BeginLiveQueuedCutscene();
         return;
     }
     VS::Items::OpenLivePendingEnemyLoot();

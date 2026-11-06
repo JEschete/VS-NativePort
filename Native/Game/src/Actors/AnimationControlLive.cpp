@@ -652,6 +652,12 @@ int LiveAnimationBattleWindowFrame(int actor_id) {
   return AnimationBattleWindowFrame(host, actor_id);
 }
 
+void SetLiveActorSoundOverrides(int actor_id,
+                                const SoundEffectSlot& sound_override) {
+  LiveAnimationHost host;
+  SetActorSoundOverrides(host, actor_id, sound_override);
+}
+
 // decomp: BATTLE.PRG func_8009F990 (src/BATTLE/BATTLE.PRG/30DB0.c:3401)
 void SetLiveActorSoundOverrides(int actor_id,
                                 Actors_ModelEffectSlot* sound_override) {
@@ -659,8 +665,7 @@ void SetLiveActorSoundOverrides(int actor_id,
     VS_LOG_WARN("actors", "Sound overrides refused: null override");
     return;
   }
-  LiveAnimationHost host;
-  SetActorSoundOverrides(host, actor_id, SlotOf(*sound_override));
+  SetLiveActorSoundOverrides(actor_id, SlotOf(*sound_override));
 }
 
 // decomp: BATTLE.PRG func_8009F9F4 (src/BATTLE/BATTLE.PRG/30DB0.c:3414)

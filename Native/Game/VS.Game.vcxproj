@@ -1141,12 +1141,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Event\Cutscene.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Event\CutsceneLifecycle.cpp" />
+    <ClCompile Include="src\Event\CutsceneLifecycleLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Event\Playback.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -1949,7 +1946,6 @@
     <ClInclude Include="src\Ending\Results.h" />
     <ClInclude Include="src\Event\Actors.h" />
     <ClInclude Include="src\Event\Camera.h" />
-    <ClInclude Include="src\Event\Cutscene.h" />
     <ClInclude Include="src\Event\Dialog.h" />
     <ClInclude Include="src\Event\Interpolation.h" />
     <ClInclude Include="src\Event\Playback.h" />
@@ -2213,6 +2209,8 @@
     <ClInclude Include="include\Ending\Credits\StaffRollCore.hpp" />
     <ClInclude Include="include\Ending\DisplayHost.hpp" />
     <ClInclude Include="include\Ending\EndingLive.hpp" />
+    <ClInclude Include="include\Event\CutsceneLifecycle.hpp" />
+    <ClInclude Include="include\Event\CutsceneLifecycleLive.hpp" />
     <ClInclude Include="include\Event\ScriptActorCommands.hpp" />
     <ClInclude Include="include\Event\ScriptActorCommandsLive.hpp" />
     <ClInclude Include="include\Event\ScriptAudioCommands.hpp" />

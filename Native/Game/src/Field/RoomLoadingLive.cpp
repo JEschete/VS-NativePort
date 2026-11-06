@@ -28,6 +28,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -69,7 +70,6 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
 #include "Effects/Weather.h"
-#include "Event/Cutscene.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
 #include "Field/Actors.h"
@@ -1185,7 +1185,7 @@ class LiveRoomLoadHost final
     static_cast<void>(Effects_InitializeRoomWeather(event_running ? 1 : 0));
   }
 
-  void PrepareCutsceneActors() override { Event_PrepareCutsceneActors(); }
+  void PrepareCutsceneActors() override { Event::PrepareLiveCutsceneActors(); }
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15466-15471)
   void EnterExploration() override {

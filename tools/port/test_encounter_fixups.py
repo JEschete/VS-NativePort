@@ -3570,7 +3570,7 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertIn("VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[", execution)
         self.assertIn('#include "Battle/Ai/PlanningWorkspaceLive.hpp"', execution)
         for path in ("Actors/ActorStateLive.cpp", "Battle/Ai/ActorState.cpp", "Boot/GameplayLoopLive.cpp",
-                     "Event/Cutscene.cpp"):
+                     "Event/CutsceneLifecycleLive.cpp"):
             text = (root / "Native/Game/src" / path).read_text(encoding="utf-8")
             self.assertNotIn("Battle_Ai_RebuildActorActionPlans(", text, path)
             # ActorStateLive.cpp sits inside namespace VS, so it names Battle::Ai without the VS:: prefix.

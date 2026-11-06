@@ -243,6 +243,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Event\ScriptAudioCommandsLive.cpp",
                 r"src\Event\ScriptDialogCommandsLive.cpp",
                 r"src\Event\ScriptEffectCommandsLive.cpp",
+                r"src\Event\CutsceneLifecycleLive.cpp",
                 r"src\Effects\ScreenEffectState.cpp",
                 r"src\Effects\ScreenDistortion\RadialWarpLive.cpp",
                 r"src\Battle\TargetingDrawLive.cpp",
