@@ -11,6 +11,7 @@
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Content/CdDrive.hpp"
+#include "Event/RoomTriggers.hpp"
 #include "Field/RoomState.hpp"
 #include "Render/DisplayControl.hpp"
 
@@ -81,6 +82,7 @@ enum class RoomLoadRefusal : std::uint8_t {
   kEnemyTemplate,
   kActorSlot,
   kNoEnvironment,
+  kRoomEventLoad,
 };
 
 // Reports for every host: the original's diagnostics and the refusals.
@@ -736,8 +738,8 @@ class RoomLoadHost : public RoomFileReadHost,
 
   // The room's events: the encounter's, or the room file's.
   [[nodiscard]] virtual bool EncounterUsesRoomEvents() const = 0;
-  [[nodiscard]] virtual int LoadEncounterRoomEvents() = 0;
-  [[nodiscard]] virtual int LoadRoomEvents(
+  [[nodiscard]] virtual Event::RoomEventLoad LoadEncounterRoomEvents() = 0;
+  [[nodiscard]] virtual Event::RoomEventLoad LoadRoomEvents(
       const RoomEventSections& sections) = 0;
   [[nodiscard]] virtual int GameEntryMode() const = 0;
   virtual void SetGameEntryMode(int mode) = 0;
@@ -784,8 +786,10 @@ bool QueueRoomLoad(RoomLoadHost& host, int room_id);
 // A room id outside the table, a failed read or a malformed file is refused
 // once the primitive buffers are taken (so the unload stays balanced) and
 // leaves the room unloaded. A room without an environment section is
-// refused and keeps the loaded scene.
-void FinishRoomLoad(RoomLoadHost& host, int room_id);
+// refused and keeps the loaded scene. A refused event load frees the room
+// sections and file without advancing game-entry state or starting play.
+// False tells the gameplay loop to reset rather than run an unloaded room.
+bool FinishRoomLoad(RoomLoadHost& host, int room_id);
 
 class RoomActorRemovalHost {
  public:

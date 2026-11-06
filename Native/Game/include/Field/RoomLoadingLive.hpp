@@ -23,7 +23,7 @@ void LiveSpawnRoomActors();
 // decomp: BATTLE.PRG _loadMpd (src/BATTLE/BATTLE.PRG/146C.c:15254)
 void LiveQueueRoomLoad(int room_id);
 // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15272)
-void LiveFinishRoomLoad(int room_id);
+[[nodiscard]] bool LiveFinishRoomLoad(int room_id);
 // decomp: BATTLE.PRG func_8008A3A0 (src/BATTLE/BATTLE.PRG/146C.c:15489)
 void LiveUnloadCurrentRoom();
 

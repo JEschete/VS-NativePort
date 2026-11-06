@@ -106,6 +106,7 @@ class RecordingLoopHost final : public VS::Boot::GameplayLoopHost {
   int room_frames = 0;
   int zones_before_exit = -1;
   int zones_released = 0;
+  bool room_load_succeeds = true;
 
   [[nodiscard]] std::ptrdiff_t Count(const std::string& call) const {
     return std::ranges::count(calls, call);
@@ -116,11 +117,12 @@ class RecordingLoopHost final : public VS::Boot::GameplayLoopHost {
 
   void InitializeGameplayOverlay() override { calls.emplace_back("init"); }
   void FinishPendingZoneLoad() override { calls.emplace_back("zone-load"); }
-  void FinishPendingRoomLoad() override {
+  bool FinishPendingRoomLoad() override {
     calls.emplace_back("room-load");
     transition_step = ScreenTransitionStep::kIdle;
     transition_alpha = 0;
     room_frames = 0;
+    return room_load_succeeds;
   }
   void UnloadCurrentRoom() override {
     calls.emplace_back("room-unload");
@@ -1118,13 +1120,36 @@ TEST_CASE("Gameplay loop runs rooms until the zone exit",
   host.frames_per_room = 2;
   host.room_exits = {ScreenTransitionStep::kRoomExit,
                      ScreenTransitionStep::kZoneExit};
-  VS::Boot::RunGameplayZone(state, host);
+  CHECK(VS::Boot::RunGameplayZone(state, host));
   CHECK(host.calls.front() == "zone-load");
   CHECK(host.calls.back() == "zone-release");
   CHECK(host.Count("room-load") == 2);
   CHECK(host.Count("room-unload") == 2);
   CHECK(host.Count("present") == 4);
   CHECK(host.Count("menu-queued:0") == 2);
+}
+
+TEST_CASE("Gameplay room refusal resets before running a frame or teardown",
+          "[boot-gameplay-loop][room-event-failure]") {
+  RecordingLoopHost host;
+  GameplayLoopState state;
+  host.room_load_succeeds = false;
+  host.room_exits = {ScreenTransitionStep::kZoneExit};
+  CHECK_FALSE(VS::Boot::RunGameplayRoom(state, host));
+  CHECK(host.calls == std::vector<std::string>{"room-load", "reset-title"});
+}
+
+TEST_CASE("Gameplay load refusal exits the zone and outer loop",
+          "[boot-gameplay-loop][room-event-failure]") {
+  RecordingLoopHost host;
+  GameplayLoopState state;
+  host.room_load_succeeds = false;
+  host.room_exits = {ScreenTransitionStep::kZoneExit};
+  host.zones_before_exit = 1;
+  CHECK_NOTHROW(VS::Boot::RunGameplayLoop(state, host));
+  CHECK(host.calls == std::vector<std::string>{"menu-queued:0", "init",
+                                               "zone-load", "room-load",
+                                               "reset-title"});
 }
 
 TEST_CASE("Gameplay loop repeats zones after one initialization",

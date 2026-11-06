@@ -13,12 +13,38 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Event/RoomTriggers.hpp"
+#include "Event/TriggersLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
+
+extern "C" {
+#include "Event/ScriptVm.h"
+#include "Event/Triggers.h"
+}
 
 namespace {
 namespace event = VS::Event;
 using Result = event::RoomTriggerResult;
 using Request = event::RoomTriggerRequest;
 using Bytes = std::vector<std::uint8_t>;
+
+struct LiveRoomImportFixture {
+  std::int16_t transition = Event_roomChangeState;
+  void* triggers = Event_roomEventTriggers;
+  void* doors = Event_roomDoorEventData;
+  int load_flag = VS::State::LiveScriptFlag(0xA9);
+
+  LiveRoomImportFixture() { Event_roomChangeState = 0; }
+  ~LiveRoomImportFixture() {
+    Event_roomChangeState = transition;
+    Event_roomEventTriggers = triggers;
+    Event_roomDoorEventData = doors;
+    VS::State::SetLiveScriptFlag(0xA9, load_flag);
+  }
+  LiveRoomImportFixture(const LiveRoomImportFixture&) = delete;
+  LiveRoomImportFixture& operator=(const LiveRoomImportFixture&) = delete;
+  LiveRoomImportFixture(LiveRoomImportFixture&&) = delete;
+  LiveRoomImportFixture& operator=(LiveRoomImportFixture&&) = delete;
+};
 
 class TriggerHost final : public event::RoomTriggerHost,
                           public event::RoomEventSectionHost {
@@ -672,4 +698,52 @@ TEST_CASE("Empty room loading clears entry presence but retains the main bytes",
   CHECK_FALSE(host.entry);
   REQUIRE(host.main_script);
   CHECK(std::ranges::equal(host.main_script->EntryScript(), script));
+}
+
+TEST_CASE("Live room import refuses oversized sections before narrowing",
+          "[room-triggers][room-event-sections][room-event-failure]") {
+  const LiveRoomImportFixture fixture;
+  const Bytes oversized(65536, 0x7F);
+  const std::array inputs{event::RoomEventInput{.triggers = oversized},
+                          event::RoomEventInput{.entry_script = oversized},
+                          event::RoomEventInput{.doors = oversized}};
+  const std::array reasons{event::RoomEventRefusal::kTriggerExtent,
+                           event::RoomEventRefusal::kEntryScriptExtent,
+                           event::RoomEventRefusal::kDoorExtent};
+  for (std::size_t index = 0; index < inputs.size(); ++index) {
+    const auto loaded = event::LoadLiveRoomEventSections(inputs[index]);
+    REQUIRE_FALSE(loaded);
+    CHECK(loaded.error() ==
+          event::RoomEventLoadError{reasons[index], oversized.size()});
+    CHECK(Event_roomEventTriggers == fixture.triggers);
+    CHECK(Event_roomDoorEventData == fixture.doors);
+    CHECK(VS::State::LiveScriptFlag(0xA9) == fixture.load_flag);
+    CHECK(Event_roomChangeState == 0);
+  }
+}
+
+TEST_CASE("Live room import refuses entry data beyond the VM buffer",
+          "[room-triggers][room-event-sections][room-event-failure]") {
+  const LiveRoomImportFixture fixture;
+  const Bytes oversized(event::kEventScriptBytes + 1);
+  const auto loaded =
+      event::LoadLiveRoomEventSections({.entry_script = oversized});
+  REQUIRE_FALSE(loaded);
+  CHECK(loaded.error() ==
+        event::RoomEventLoadError{event::RoomEventRefusal::kEntryScriptExtent,
+                                  oversized.size()});
+  CHECK(Event_roomEventTriggers == fixture.triggers);
+  CHECK(Event_roomDoorEventData == fixture.doors);
+}
+
+TEST_CASE("Live continuation does not narrow or consume unused entry data",
+          "[room-triggers][room-event-sections][room-event-failure]") {
+  const LiveRoomImportFixture fixture;
+  const Bytes unused(65536, 0x7F);
+  Event_roomChangeState = 1;
+  const auto loaded = event::LoadLiveRoomEventSections(
+      {.entry_script = unused, .first_entry = true});
+  REQUIRE(loaded);
+  CHECK(*loaded == event::RoomEventLoadResult::kContinuingEvent);
+  CHECK(Event_roomChangeState == 2);
 }

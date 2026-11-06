@@ -1121,10 +1121,10 @@ void SetRoomExtent(RoomLoadHost& host) {
 
 // The room's events: the encounter's, or the room file's sections. A new
 // game's first room is then marked entered.
-[[nodiscard]] int LoadRoomFileEvents(RoomLoadHost& host,
-                                     std::span<const std::byte> file,
-                                     const RoomFileLayout& layout) {
-  int result = 0;
+[[nodiscard]] Event::RoomEventLoad LoadRoomFileEvents(
+    RoomLoadHost& host, std::span<const std::byte> file,
+    const RoomFileLayout& layout) {
+  Event::RoomEventLoad result;
   if (!host.EncounterUsesRoomEvents()) {
     result = host.LoadEncounterRoomEvents();
   } else {
@@ -1134,7 +1134,7 @@ void SetRoomExtent(RoomLoadHost& host) {
          .doors = Section(file, layout.doors),
          .first_entry = host.GameEntryMode() == kNewGameEntryMode});
   }
-  if (host.GameEntryMode() == kNewGameEntryMode) {
+  if (result && host.GameEntryMode() == kNewGameEntryMode) {
     host.SetGameEntryMode(kResumedNewGameEntryMode);
   }
   return result;
@@ -1142,7 +1142,7 @@ void SetRoomExtent(RoomLoadHost& host) {
 
 struct LoadedRoomFile {
   CurrentRoom room;
-  int event_result = 0;
+  Event::RoomEventLoadResult event_result = Event::RoomEventLoadResult::kReady;
 };
 
 // Loads the read room file's sections, scene, extent, loot, events and
@@ -1171,10 +1171,16 @@ struct LoadedRoomFile {
   if (layout->loot.bytes != 0) {
     host.LoadChestLoot(Section(file, layout->loot));
   }
-  const int event_result = LoadRoomFileEvents(host, file, *layout);
+  const auto event_result = LoadRoomFileEvents(host, file, *layout);
+  if (!event_result) {
+    host.Refuse(RoomLoadRefusal::kRoomEventLoad, room_id);
+    ReleaseOwnedRoomSections(host, kCurrentRoomOwner);
+    host.FreeLoadedData(LoadedFile::kRoom);
+    return std::nullopt;
+  }
   LoadRoomEnemyPlacements(host, Section(file, layout->enemies));
   host.FreeLoadedData(LoadedFile::kRoom);
-  return LoadedRoomFile{.room = room, .event_result = event_result};
+  return LoadedRoomFile{.room = room, .event_result = *event_result};
 }
 
 void RestoreRoomEnemies(RoomLoadHost& host, const CurrentRoom& room) {
@@ -1198,10 +1204,10 @@ void StartRoomCamera(RoomLoadHost& host, const CurrentRoom& room) {
   host.FrameCameraOnAshley();
 }
 
-// An event the room's events started (in the result's low half) or a
-// triggered one runs; otherwise the room is explored.
-void StartRoomPlay(RoomLoadHost& host, int event_result) {
-  if (static_cast<std::int16_t>(event_result) != 0) {
+// A continuing or triggered event runs; otherwise the room is explored.
+void StartRoomPlay(RoomLoadHost& host,
+                   Event::RoomEventLoadResult event_result) {
+  if (event_result == Event::RoomEventLoadResult::kContinuingEvent) {
     host.InitializeWeather(true);
     host.PrepareCutsceneActors();
     return;
@@ -1222,7 +1228,7 @@ void StartRoomPlay(RoomLoadHost& host, int event_result) {
 }
 }  // namespace
 
-void FinishRoomLoad(RoomLoadHost& host, int room_id) {
+bool FinishRoomLoad(RoomLoadHost& host, int room_id) {
   host.ResetGameplayInspection();
   const bool read =
       (host.ReadPending(LoadedFile::kRoom) || QueueRoomLoad(host, room_id)) &&
@@ -1230,11 +1236,11 @@ void FinishRoomLoad(RoomLoadHost& host, int room_id) {
   // Taken even when the read is refused, so the unload frees what it took.
   host.AllocatePrimitiveBuffers();
   if (!read) {
-    return;
+    return false;
   }
   const auto loaded = LoadRoomFileContents(host, room_id);
   if (!loaded) {
-    return;
+    return false;
   }
   RestoreRoomEnemies(host, loaded->room);
   PlaceAshleyAtRoomEntrance(host);
@@ -1244,10 +1250,11 @@ void FinishRoomLoad(RoomLoadHost& host, int room_id) {
   StartRoomCamera(host, loaded->room);
   if (host.NativeResumePending() && !host.FinishNativeResume()) {
     host.JumpToTitle();
-    return;
+    return false;
   }
   StartRoomPlay(host, loaded->event_result);
   host.InvalidateControllerConnections();
+  return true;
 }
 
 void RemoveRoomActors(RoomActorRemovalHost& host) {

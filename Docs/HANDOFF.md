@@ -13,6 +13,38 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- Room/encounter imports now carry `Event::RoomEventLoad` through Field rather
+  than interpreting an error integer as a started event. Shared validation
+  rejects oversize sections before the legacy boundary narrows lengths:
+  trigger/door data above 65,535 bytes and entry data above 6,144 bytes.
+  Continuations discard unused entry input before validation, as the core
+  already does. The obsolete C encounter-load hook is replaced by a typed
+  `VS::Game` entry point.
+- Field refusal releases the room sections and read file without placing
+  actors, starting the camera/play, or advancing new-game entry mode. A checked
+  result now reaches the room, zone and outer gameplay loops: the existing
+  title reset runs before any frame, and the loops stop if that host returns.
+  The former void caller would otherwise run against the refused room.
+- Verification on `55a43d06` plus the scoped Event/Field/Boot changes:
+  the two initial failure-injection cases failed nine of thirteen assertions.
+  Seven added cases contribute 47 assertions; one existing loop test now
+  also checks its success result. The combined
+  `[field-room-loading],[room-triggers],[event-vm],[session-reset],[boot-gameplay-loop]`
+  selection passes **254 cases / 3,386 assertions** in Debug and Release.
+  Both final full suites pass **4,530 cases / 7,905,031 assertions**; all 4,523
+  prior names and both complete replay objects remain unchanged.
+- Scoped quality/clang-tidy is clean; the 190 encounter-copier tests pass.
+  Two generations preserve 1,656 source/project hashes. Evidence:
+  `VR-ROOM-EVENT-FAILURE-CHAIN`, `build\owner-checkpoint\room-event-failure-*`,
+  and #313 comments `6681095636`, `6681134039`, `6681303616`.
+  Live extent refusal and recording-host failure/reset paths are covered,
+  not a retail malformed-room recovery. The legacy loader still owns the
+  actual room/VM buffers; allocation failures there are not made transactional
+  by this boundary. Native source ownership and production dispatch migration
+  remain required before row-33 promotion.
+- Published prerequisites: `cef090ce` dispatch guards have successful exact
+  Source Quality `42189695444`; `55a43d06` disc lifetime changes have successful
+  exact Source Quality `42190451967`. #314 is closed; #313 and #276 remain open.
 - #314's shared-disc prerequisite now exposes terminal queue errors and
   distinct refused/failed/completed native reads. The integer blocking
   adapter also returns success only on completion (its two production

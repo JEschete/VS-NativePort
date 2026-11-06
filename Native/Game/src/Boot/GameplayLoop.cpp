@@ -529,28 +529,32 @@ bool IsRoomExitComplete(const GameplayLoopHost& host) {
          host.TransitionAlpha() == kOpaqueAlpha;
 }
 
-void RunGameplayRoom(GameplayLoopState& state, GameplayLoopHost& host) {
-  host.FinishPendingRoomLoad();
+bool RunGameplayRoom(GameplayLoopState& state, GameplayLoopHost& host) {
+  if (!host.FinishPendingRoomLoad()) {
+    host.ResetToTitle();
+    return false;
+  }
   host.SetMenuRequestQueued(false);
   do {
     static_cast<void>(RunGameplayFrame(state, host));
   } while (!IsRoomExitComplete(host));
   host.UnloadCurrentRoom();
+  return true;
 }
 
-void RunGameplayZone(GameplayLoopState& state, GameplayLoopHost& host) {
+bool RunGameplayZone(GameplayLoopState& state, GameplayLoopHost& host) {
   host.FinishPendingZoneLoad();
   do {
-    RunGameplayRoom(state, host);
+    if (!RunGameplayRoom(state, host)) return false;
   } while (host.TransitionStep() != ScreenTransitionStep::kZoneExit);
   host.ReleaseZoneData();
+  return true;
 }
 
 void RunGameplayLoop(GameplayLoopState& state, GameplayLoopHost& host) {
   host.SetMenuRequestQueued(false);
   host.InitializeGameplayOverlay();
-  for (;;) {
-    RunGameplayZone(state, host);
+  while (RunGameplayZone(state, host)) {
   }
 }
 }  // namespace VS::Boot

@@ -1860,11 +1860,12 @@ class RoomLoadRecorder
   [[nodiscard]] bool EncounterUsesRoomEvents() const override {
     return room_events;
   }
-  [[nodiscard]] int LoadEncounterRoomEvents() override {
+  [[nodiscard]] VS::Event::RoomEventLoad LoadEncounterRoomEvents() override {
     Log("LoadEncounterRoomEvents");
     return event_result;
   }
-  [[nodiscard]] int LoadRoomEvents(const RoomEventSections& sections) override {
+  [[nodiscard]] VS::Event::RoomEventLoad LoadRoomEvents(
+      const RoomEventSections& sections) override {
     Log("LoadRoomEvents");
     event_sizes = {sections.cleared.size(), sections.script.size(),
                    sections.doors.size()};
@@ -1931,7 +1932,8 @@ class RoomLoadRecorder
   ZoneBounds bounds;
   std::size_t loot_bytes = 0;
   bool room_events = true;
-  int event_result = 0;
+  VS::Event::RoomEventLoad event_result =
+      VS::Event::RoomEventLoadResult::kReady;
   std::vector<std::size_t> event_sizes;
   bool first_entry = false;
   int entry_mode = kNewGameEntryMode;
@@ -2177,18 +2179,17 @@ TEST_CASE("A remembered room hides the enemies it remembers hidden",
 TEST_CASE("A room's started or triggered event runs in place of exploring",
           "[field][field-room-loading]") {
   RoomLoadRecorder started;
-  started.event_result = 0x10001;
+  started.event_result = VS::Event::RoomEventLoadResult::kContinuingEvent;
   FinishRoomLoad(started, 2);
   CHECK(LogFrom(started.log, "FrameCameraOnAshley", 9) ==
         std::vector<std::string>{
             "FrameCameraOnAshley", "InitializeWeather event",
             "PrepareCutsceneActors", "InvalidateControllerConnections"});
 
-  // Only the result's low half names a started event.
-  RoomLoadRecorder high_half;
-  high_half.event_result = 0x10000;
-  FinishRoomLoad(high_half, 2);
-  CHECK(high_half.Called("EnterExploration"));
+  RoomLoadRecorder ready;
+  ready.event_result = VS::Event::RoomEventLoadResult::kReady;
+  FinishRoomLoad(ready, 2);
+  CHECK(ready.Called("EnterExploration"));
 
   RoomLoadRecorder triggered;
   triggered.event_triggered = true;
@@ -2206,6 +2207,42 @@ TEST_CASE("A room's started or triggered event runs in place of exploring",
         std::vector<std::string>{"FrameCameraOnAshley", "EnterExploration",
                                  "SetScreenTransition 4", "ShowDisplay",
                                  "InvalidateControllerConnections"});
+}
+
+void CheckNoRoomActorStartup(const RoomLoadRecorder& host) {
+  CHECK_FALSE(host.Called("PrepareCutsceneActors"));
+  CHECK_FALSE(host.Called("PlaceAshley"));
+  CHECK_FALSE(host.Called("StorePlacements"));
+}
+
+TEST_CASE("A refused room event load cannot start room play",
+          "[field][field-room-loading][room-event-failure]") {
+  RoomLoadRecorder host;
+  host.event_result = std::unexpected(VS::Event::RoomEventLoadError{
+      VS::Event::RoomEventRefusal::kAllocation, 8});
+  CHECK_FALSE(FinishRoomLoad(host, 2));
+  CheckNoRoomActorStartup(host);
+  CHECK_FALSE(host.Called("EnterExploration"));
+  CHECK_FALSE(host.Called("FrameCameraOnAshley"));
+  CHECK(host.Called("FreeLoadedData"));
+  CHECK(host.entry_mode == kNewGameEntryMode);
+  CHECK_FALSE(host.room.loaded);
+  CHECK(host.refusals ==
+        std::vector<Refusal>{{RoomLoadRefusal::kRoomEventLoad, 2}});
+}
+
+TEST_CASE("A refused encounter event load cannot start room play",
+          "[field][field-room-loading][room-event-failure]") {
+  RoomLoadRecorder host;
+  host.room_events = false;
+  host.event_result = std::unexpected(VS::Event::RoomEventLoadError{
+      VS::Event::RoomEventRefusal::kAllocation, 8});
+  CHECK_FALSE(FinishRoomLoad(host, 2));
+  CHECK(host.Called("LoadEncounterRoomEvents"));
+  CheckNoRoomActorStartup(host);
+  CHECK(host.Called("FreeLoadedData"));
+  CHECK(host.entry_mode == kNewGameEntryMode);
+  CHECK_FALSE(host.room.loaded);
 }
 
 TEST_CASE("A pending native resume finishes or jumps to the title",

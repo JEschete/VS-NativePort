@@ -23,6 +23,7 @@
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
+#include "Event/TriggersLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLive.hpp"
@@ -1101,15 +1102,17 @@ extern "C" int Boot_EncounterUsesRoomEvents() {
                                            VS::Game::external_event_started);
 }
 
-extern "C" int Boot_EncounterLoadRoomEvents() {
+VS::Event::RoomEventLoad VS::Game::LoadEncounterRoomEvents() {
   // _mpdClearedSection is a terminated offset table, not a nullable list.
   // Provenance: BATTLE/4A0A8.c:4302, func_800BEC58.
   constexpr std::size_t kTriggerSlots = 16;
   constexpr std::uint16_t kEndOfTriggers = 0xFFFF;
   std::array<std::uint16_t, kTriggerSlots> empty_triggers;
   empty_triggers.fill(kEndOfTriggers);
-  return Event_LoadRoomEventSections(
-      empty_triggers.data(), sizeof(empty_triggers), nullptr, 0, nullptr, 0, 0);
+  return Event::LoadLiveRoomEventSections(
+      {.triggers = {
+           reinterpret_cast<const std::uint8_t*>(empty_triggers.data()),
+           sizeof(empty_triggers)}});
 }
 
 extern "C" void Boot_EncounterPollStop() {

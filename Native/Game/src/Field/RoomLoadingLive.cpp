@@ -23,12 +23,14 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Battle/Encounter.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
+#include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -207,6 +209,8 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
       return "actor slot outside the room's slots";
     case RoomLoadRefusal::kNoEnvironment:
       return "room without an environment section";
+    case RoomLoadRefusal::kRoomEventLoad:
+      return "room event import failed";
   }
   return "unknown refusal";
 }
@@ -1054,22 +1058,22 @@ class LiveRoomLoadHost final
     return Boot_EncounterUsesRoomEvents() != 0;
   }
 
-  [[nodiscard]] int LoadEncounterRoomEvents() override {
-    return Boot_EncounterLoadRoomEvents();
+  [[nodiscard]] Event::RoomEventLoad LoadEncounterRoomEvents() override {
+    return Game::LoadEncounterRoomEvents();
   }
 
-  // The event loader copies the sections; it takes them as mutable.
-  [[nodiscard]] int LoadRoomEvents(const RoomEventSections& sections) override {
+  [[nodiscard]] Event::RoomEventLoad LoadRoomEvents(
+      const RoomEventSections& sections) override {
     const auto data = [](std::span<const std::byte> section) {
-      return static_cast<void*>(const_cast<std::byte*>(section.data()));
+      return Event::ScriptCommand{
+          reinterpret_cast<const std::uint8_t*>(section.data()),
+          section.size()};
     };
-    const auto size = [](std::span<const std::byte> section) {
-      return static_cast<u_short>(section.size());
-    };
-    return Event_LoadRoomEventSections(
-        data(sections.cleared), size(sections.cleared), data(sections.script),
-        size(sections.script), data(sections.doors), size(sections.doors),
-        sections.first_entry ? 1 : 0);
+    return Event::LoadLiveRoomEventSections(
+        {.triggers = data(sections.cleared),
+         .entry_script = data(sections.script),
+         .doors = data(sections.doors),
+         .first_entry = sections.first_entry});
   }
 
   [[nodiscard]] int GameEntryMode() const override {
@@ -1303,9 +1307,9 @@ void LiveQueueRoomLoad(int room_id) {
   static_cast<void>(QueueRoomLoad(host, room_id));
 }
 
-void LiveFinishRoomLoad(int room_id) {
+bool LiveFinishRoomLoad(int room_id) {
   LiveRoomLoadHost host;
-  FinishRoomLoad(host, room_id);
+  return FinishRoomLoad(host, room_id);
 }
 
 void LiveUnloadCurrentRoom() {

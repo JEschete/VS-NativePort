@@ -314,21 +314,29 @@ RoomTriggerResult EvaluateRecord(RoomTriggerHost& host, ScriptCommand section,
 
 }  // namespace
 
-RoomEventCopy RoomEventSections::Copy(const RoomEventInput& input) {
+std::optional<RoomEventLoadError> ValidateRoomEventInput(
+    const RoomEventInput& input) {
   // The legacy importer passed unsigned-halfword lengths, not truncated spans.
   constexpr auto kImportedSectionBytes =
       std::numeric_limits<std::uint16_t>::max();
   if (input.triggers.size() > kImportedSectionBytes) {
-    return std::unexpected(RoomEventLoadError{RoomEventRefusal::kTriggerExtent,
-                                              input.triggers.size()});
+    return RoomEventLoadError{RoomEventRefusal::kTriggerExtent,
+                              input.triggers.size()};
   }
   if (input.entry_script.size() > kEventScriptBytes) {
-    return std::unexpected(RoomEventLoadError{
-        RoomEventRefusal::kEntryScriptExtent, input.entry_script.size()});
+    return RoomEventLoadError{RoomEventRefusal::kEntryScriptExtent,
+                              input.entry_script.size()};
   }
   if (input.doors.size() > kImportedSectionBytes) {
-    return std::unexpected(
-        RoomEventLoadError{RoomEventRefusal::kDoorExtent, input.doors.size()});
+    return RoomEventLoadError{RoomEventRefusal::kDoorExtent,
+                              input.doors.size()};
+  }
+  return std::nullopt;
+}
+
+RoomEventCopy RoomEventSections::Copy(const RoomEventInput& input) {
+  if (const auto error = ValidateRoomEventInput(input)) {
+    return std::unexpected(*error);
   }
   if (input.triggers.empty() && input.entry_script.empty() &&
       input.doors.empty()) {

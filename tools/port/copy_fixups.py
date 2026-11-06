@@ -937,7 +937,6 @@ NATIVE_HELPER_HEADERS = {
        for name in (
            "Boot_EncounterRoomPlacements",
            "Boot_EncounterUsesRoomEvents",
-           "Boot_EncounterLoadRoomEvents",
            "Boot_EncounterPollStop",
        )},
     "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.h",

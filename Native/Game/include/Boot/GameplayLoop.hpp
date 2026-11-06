@@ -130,7 +130,7 @@ class GameplayLoopHost {
   // Session, zone and room lifecycle.
   virtual void InitializeGameplayOverlay() = 0;
   virtual void FinishPendingZoneLoad() = 0;
-  virtual void FinishPendingRoomLoad() = 0;
+  [[nodiscard]] virtual bool FinishPendingRoomLoad() = 0;
   virtual void UnloadCurrentRoom() = 0;
   virtual void ReleaseZoneData() = 0;
   virtual void ResetToTitle() = 0;
@@ -278,9 +278,13 @@ bool RunGameplayFrame(GameplayLoopState& state, GameplayLoopHost& host);
 // True once a room or zone exit has fully faded out.
 [[nodiscard]] bool IsRoomExitComplete(const GameplayLoopHost& host);
 // Loads the pending room, runs frames until it is left, then unloads it.
-void RunGameplayRoom(GameplayLoopState& state, GameplayLoopHost& host);
+// A refused load resets to title before any frame and returns false.
+[[nodiscard]] bool RunGameplayRoom(GameplayLoopState& state,
+                                   GameplayLoopHost& host);
 // Loads the pending zone and runs rooms until a zone exit, then releases it.
-void RunGameplayZone(GameplayLoopState& state, GameplayLoopHost& host);
-// The whole loop; returns only if the host leaves it (as the session does).
+// False propagates the room refusal; session reset owns cleanup in that case.
+[[nodiscard]] bool RunGameplayZone(GameplayLoopState& state,
+                                   GameplayLoopHost& host);
+// The whole loop; a refused room ends it after the reset-to-title request.
 void RunGameplayLoop(GameplayLoopState& state, GameplayLoopHost& host);
 }  // namespace VS::Boot

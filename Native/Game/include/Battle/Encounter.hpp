@@ -7,7 +7,11 @@
 #include <string>
 #include <vector>
 
+#include "Event/RoomTriggers.hpp"
+
 namespace VS::Game {
+
+[[nodiscard]] Event::RoomEventLoad LoadEncounterRoomEvents();
 
 struct EncounterLimits {
   static constexpr int kEnemies = 8;

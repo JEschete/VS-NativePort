@@ -14,9 +14,9 @@
 namespace VS::Event {
 
 struct RoomEventInput {
-  ScriptCommand triggers;
-  ScriptCommand entry_script;
-  ScriptCommand doors;
+  ScriptCommand triggers{};
+  ScriptCommand entry_script{};
+  ScriptCommand doors{};
   bool first_entry = false;
 };
 
@@ -37,6 +37,9 @@ struct RoomEventLoadError {
 class RoomEventSections;
 using RoomEventLease = std::shared_ptr<const RoomEventSections>;
 using RoomEventCopy = std::expected<RoomEventLease, RoomEventLoadError>;
+
+[[nodiscard]] std::optional<RoomEventLoadError> ValidateRoomEventInput(
+    const RoomEventInput& input);
 
 // Immutable imported bytes. The current room and an executing door script can
 // retain independent leases, including while the next room replaces its data.

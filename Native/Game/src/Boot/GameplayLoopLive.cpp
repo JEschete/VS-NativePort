@@ -111,8 +111,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Field::LiveFinishZoneLoad(
         Field_pendingDestinationDoor.destinationZoneId);
   }
-  void FinishPendingRoomLoad() override {
-    VS::Field::LiveFinishRoomLoad(
+  bool FinishPendingRoomLoad() override {
+    return VS::Field::LiveFinishRoomLoad(
         Field_pendingDestinationDoor.destinationRoomId);
   }
   void UnloadCurrentRoom() override { VS::Field::LiveUnloadCurrentRoom(); }
