@@ -2160,6 +2160,9 @@
     <ClInclude Include="src\Menu\TextBox.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\TextBoxFrames.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Save\FileMenu.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
@@ -3019,6 +3022,9 @@
       <Filter>include\Menu\Setup</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Sounds.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\TextBoxFrames.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\FileMenu.hpp">

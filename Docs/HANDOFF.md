@@ -7,6 +7,30 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Text-box frame safety (#315)
+
+- The bounded `Menu::DecodeTextBoxFrame` and `DrawTextBoxFrame` component now
+  owns decoded geometry, validates all parts/faces before drawing, refuses
+  backward outline resumes and uses `Render::PacketQueue` for every packet.
+  Native point storage supports all 255 encoded vertices without scratch RAM.
+- On `615c4b87` plus the frame implementation, tests and generated projects,
+  `[text-box-frame]` adds 8 cases / 15,351 assertions. This includes
+  1,200 deterministic comparisons against the current production renderer's
+  valid-domain packet output, all four alignments, both optional parts,
+  triangles/quads, brightness, signed dimensions and every small-buffer cutoff.
+  Scoped quality/clang-tidy is clean; full Debug/Release builds pass. Both full
+  suites pass 4,595 cases / 7,921,141 assertions with no failures or skips.
+  `regression.py check --config Debug` and `--config Release` each preserve the
+  previous tests and both canonical gameplay replays with zero regressions.
+  Evidence: `VR-TEXT-BOX-FRAME-CORE` and
+  `build\owner-checkpoint\text-box-frame-release-regression.log`.
+- This component is not a production caller yet. The generated frame renderer
+  remains unchanged so its original output can be compared directly. Production
+  adoption must supply exact owner-backed style bytes, including default module
+  styles, preserve retained UI lifetimes, and migrate the caller through ownership
+  registration or the copier. #315, #313 and #276 remain open; no promotion or
+  compatibility-retirement credit is claimed. Quality baselines are unchanged.
+
 ### Resumed row-33 work
 
 - The owner resumed implementation and authorized commits/pushes at verified

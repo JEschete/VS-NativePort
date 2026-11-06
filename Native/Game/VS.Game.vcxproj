@@ -1667,6 +1667,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxFrames.cpp" />
     <ClCompile Include="src\Save\FileMenu.cpp" />
     <ClCompile Include="src\Save\FileMenuLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2308,6 +2309,7 @@
     <ClInclude Include="include\Menu\Setup\SetupLive.hpp" />
     <ClInclude Include="include\Menu\Setup\SetupScreen.hpp" />
     <ClInclude Include="include\Menu\Sounds.hpp" />
+    <ClInclude Include="include\Menu\TextBoxFrames.hpp" />
     <ClInclude Include="include\Save\FileMenu.hpp" />
     <ClInclude Include="include\Save\FileMenuLive.hpp" />
     <ClInclude Include="include\Save\MemoryCard\GameFilesLive.hpp" />

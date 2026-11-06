@@ -281,6 +281,7 @@
     <ClCompile Include="src\TargetingDrawSliceTests.cpp" />
     <ClCompile Include="src\TargetPagePartitionTests.cpp" />
     <ClCompile Include="src\TerrainHeightTests.cpp" />
+    <ClCompile Include="src\TextBoxFrameTests.cpp" />
     <ClCompile Include="src\TextTransitionTests.cpp" />
     <ClCompile Include="src\TextureAnimationTests.cpp" />
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />
