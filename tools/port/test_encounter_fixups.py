@@ -2089,7 +2089,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("F00543", copy_fixups.FIXES)
         root = Path(__file__).resolve().parents[2]
         loading = (root / r"Native\Game\src\Field\RoomLoading.cpp").read_text(encoding="utf-8")
-        room = loading.split("void FinishRoomLoad(RoomLoadHost& host, int room_id) {", 1)[1]
+        room = loading.split("bool FinishRoomLoad(RoomLoadHost& host, int room_id) {", 1)[1]
         self.assertLess(room.index("host.FinishNativeResume()"), room.index("StartRoomPlay("))
         self.assertLess(room.index("StartRoomCamera("), room.index("host.FinishNativeResume()"))
         self.assertIn("host.JumpToTitle();", room.split("StartRoomPlay(", 1)[0])
@@ -2611,7 +2611,7 @@ d = VS::Core::Math::SquaredDistanceWithHeightOffsets((short*)&state->position,
         root = Path(__file__).resolve().parents[2]
         loading = (root / r"Native\Game\src\Field\RoomLoading.cpp").read_text(encoding="utf-8")
         for header in (
-            "void FinishRoomLoad(RoomLoadHost& host, int room_id) {",
+            "bool FinishRoomLoad(RoomLoadHost& host, int room_id) {",
             "void UnloadCurrentRoom(RoomUnloadHost& host) {",
         ):
             with self.subTest(header=header):

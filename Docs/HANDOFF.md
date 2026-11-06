@@ -33,7 +33,13 @@ verification of the current worktree.
   selection passes **254 cases / 3,386 assertions** in Debug and Release.
   Both final full suites pass **4,530 cases / 7,905,031 assertions**; all 4,523
   prior names and both complete replay objects remain unchanged.
-- Scoped quality/clang-tidy is clean; the 190 encounter-copier tests pass.
+- Scoped quality/clang-tidy is clean. The first pushed room-load revision
+  `f3ce984c` failed Source Quality `42194816527`: two encounter-copier tests
+  still searched for the old `void FinishRoomLoad` signature. Their prior
+  local run preceded the final bool-return change. The correction updates
+  only those signature expectations, preserving both ordering checks. All
+  190 encounter tests now pass against the final bool-return API, with clean
+  scoped Python quality. Exact-revision CI must still confirm the correction.
   Two generations preserve 1,656 source/project hashes. Evidence:
   `VR-ROOM-EVENT-FAILURE-CHAIN`, `build\owner-checkpoint\room-event-failure-*`,
   and #313 comments `6681095636`, `6681134039`, `6681303616`.
