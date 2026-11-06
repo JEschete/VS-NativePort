@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <span>
@@ -30,6 +31,7 @@
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "TestSupport/ScriptSources.hpp"
 
 extern "C" {
 
@@ -782,33 +784,50 @@ _Static_assert(sizeof(Event_kSkipOpcodeHandlers) ==
                "complete skip table");
 
 int Tests_EventScriptNativeBranches(int skip) {
+  const VS::test_support::LiveScriptRuntimeScope runtime;
   TestOpcodeHandler savedNormal[4];
+  std::array<TestOpcodeHandler, 4> saved_skip_handlers{};
+  std::array<u_char, 4> saved_sizes{};
+  constexpr std::array<u_char, 4> kOpcodeSizes{3, 1, 1, 1};
   TestOpcodeHandler skipCopy[256];
   TestOpcodeHandler* savedSkipCopy = Event_legacySkipHandlerCopy;
   uintptr_t savedReturn = Event_subroutineReturnCursor;
   char savedSkip = Event_skipState;
-  u_char savedYieldSize = Event_kOpcodeSizes[2];
-  u_char script[] = {0, 4, 0, 0, 1, 0, 0, 0, 2, 3};
-  u_char* cursor = script;
+  const auto script =
+      VS::test_support::MountLiveEventScript({0, 4, 0, 0, 1, 0, 0, 0, 2, 3});
+  auto& host = VS::Event::LiveScriptVm();
   int passed;
   memcpy(savedNormal, Event_kOpcodeHandlers, sizeof savedNormal);
+  std::copy_n(Event_kSkipOpcodeHandlers, saved_skip_handlers.size(),
+              saved_skip_handlers.begin());
+  std::copy_n(Event_kOpcodeSizes, saved_sizes.size(), saved_sizes.begin());
   VS::Core::Memory::CopyLiveAlignedWords(skipCopy, Event_kSkipOpcodeHandlers,
                                          sizeof skipCopy);
   passed = memcmp(skipCopy, Event_kSkipOpcodeHandlers, sizeof skipCopy) == 0;
-  skipCopy[0] = Event_kOpcodeHandlers[0] = Event_ScriptJumpForward;
-  skipCopy[1] = Event_kOpcodeHandlers[1] = Event_ScriptReturnToSavedAddress;
-  skipCopy[2] = Event_kOpcodeHandlers[2] = Event_ScriptYieldFrame;
-  skipCopy[3] = Event_kOpcodeHandlers[3] = Event_CommandStopScriptContext;
+  skipCopy[0] = Event_kSkipOpcodeHandlers[0] = Event_kOpcodeHandlers[0] =
+      Event_ScriptJumpForward;
+  skipCopy[1] = Event_kSkipOpcodeHandlers[1] = Event_kOpcodeHandlers[1] =
+      Event_ScriptReturnToSavedAddress;
+  skipCopy[2] = Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
+      Event_ScriptYieldFrame;
+  skipCopy[3] = Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =
+      Event_CommandStopScriptContext;
   Event_legacySkipHandlerCopy = skipCopy;
   Event_skipState = skip ? 2 : 0;
-  Event_subroutineReturnCursor = (uintptr_t)&script[8];
-  Event_kOpcodeSizes[2] = 1;
+  host.SetSubroutineReturn({script.region, 8, script.generation});
+  host.SetThreadCursor(1, script);
+  std::copy(kOpcodeSizes.begin(), kOpcodeSizes.end(), Event_kOpcodeSizes);
   // Forward jump, saved-address return, advance-and-yield, then thread
   // termination.
-  passed &= Event_ExecuteScriptThread(&cursor, 1) == 0 && cursor == &script[9];
-  passed &= Event_ExecuteScriptThread(&cursor, 1) == 0 && cursor == nullptr;
+  passed &= !VS::Event::ExecuteLiveScriptThread(1) &&
+            host.ThreadCursor(1) ==
+                VS::Event::ScriptLocation{script.region, 9, script.generation};
+  passed &=
+      !VS::Event::ExecuteLiveScriptThread(1) && !host.ThreadCursor(1).Present();
   memcpy(Event_kOpcodeHandlers, savedNormal, sizeof savedNormal);
-  Event_kOpcodeSizes[2] = savedYieldSize;
+  std::copy(saved_skip_handlers.begin(), saved_skip_handlers.end(),
+            Event_kSkipOpcodeHandlers);
+  std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
   Event_subroutineReturnCursor = savedReturn;
   Event_skipState = savedSkip;
   Event_legacySkipHandlerCopy = savedSkipCopy;

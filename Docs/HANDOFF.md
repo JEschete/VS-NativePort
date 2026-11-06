@@ -7,6 +7,27 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Lifecycle Regression Migration (#276 Row 33)
+
+- The existing Game Over initialization, weapon dispatch and branch/return/yield
+  cases now exercise production native lifecycle APIs with owned source generations
+  and typed cursors. Both normal/skip tables are tested and restored. A shared
+  scoped runtime reset keeps ownership cleanup exception-safe. No case is removed
+  or renamed; all four native contexts and existing animation/hold/stop expectations
+  remain checked. The branch fixture explicitly sets/restores all four instruction
+  lengths; its legacy version only specified the yield length and failed full-suite
+  ordering after migration because bounded dispatch validates every opcode size.
+- Focused Debug reset/weapon/script coverage passes 25 cases / 1,017 assertions.
+  On `201e56754ec6734b9e991acd6216e7ccb58ad359` plus this test-only slice,
+  Debug/Release test builds and full regressions pass 4,638 cases / 8,145,048
+  assertions and both unchanged canonical replays. Scoped quality/tidy has zero
+  new findings; existing test debt and the copied-C compiler's delayed-template
+  parsing deprecation warning are not suppressed. No baseline changes or formal
+  promotion credit. Evidence: `VR-EVENT-NATIVE-LIFECYCLE-REGRESSIONS` and
+  `build\owner-checkpoint\native-vm-lifecycle-tests-*-regression.log`.
+  Next: reference/data checks and registered ownership for obsolete initialization,
+  playback and dispatcher bodies, not another runtime switch.
+
 ### Fresh Safety Acceptance Refresh (#313)
 
 - On clean published `e8f45c4e8be8cae81e44e2f2e69ee577348c8c93`, the retained
@@ -35,8 +56,8 @@ verification of the current worktree.
   4,638 cases / 8,145,023 assertions and both canonical replay fingerprints.
   Scoped quality/tidy and ledger gates pass without baseline refreshes. Exact
   Source Quality `42281621566` is green; #317 is closed on `7267c7ac` plus the
-  independent-oracle follow-up `e8f45c4e`. #313 awaits publication/CI of this
-  safety-acceptance evidence refresh. Formal row-33 promotion remains #276;
+  independent-oracle follow-up `e8f45c4e`. #313 is closed with evidence publication
+  `201e5675` and successful exact CI `42283641169`. Formal row-33 promotion remains #276;
   original unused bodies/module identities and global EC retirement are not done.
 
 Frozen original SHA-256 values:

@@ -11,6 +11,14 @@
 
 namespace VS::test_support {
 
+class LiveScriptRuntimeScope {
+ public:
+  LiveScriptRuntimeScope() { Event::ResetLiveScriptRuntime(); }
+  ~LiveScriptRuntimeScope() { Event::ResetLiveScriptRuntime(); }
+  LiveScriptRuntimeScope(const LiveScriptRuntimeScope&) = delete;
+  LiveScriptRuntimeScope& operator=(const LiveScriptRuntimeScope&) = delete;
+};
+
 inline Event::ScriptLocation MountLiveEventScript(
     std::vector<std::uint8_t> bytes,
     std::weak_ptr<const std::vector<std::uint8_t>>* lifetime = nullptr) {

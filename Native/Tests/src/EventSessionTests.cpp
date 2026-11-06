@@ -17,6 +17,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
+#include "TestSupport/ScriptSources.hpp"
 
 extern "C" {
 #include "Battle/TargetingState.h"
@@ -333,28 +334,32 @@ TEST_CASE("Orbit return tracks retain original easing and 85-tick completion",
 TEST_CASE("Gameplay initialization cannot resume a previous Game Over event",
           "[event][session-reset]") {
   EventSessionFixture fixture;
-  std::array<u_char, 16> old_script{};
+  const VS::test_support::LiveScriptRuntimeScope runtime;
+  const auto old_script =
+      VS::test_support::MountLiveEventScript(std::vector<std::uint8_t>(16));
+  auto& host = VS::Event::LiveScriptVm();
   Event_playbackPhase = 4;
   Event_isStartConfirmed = 1;
   Event_isMainThreadFinished = 1;
   Event_roomChangeState = 3;
-  std::fill(std::begin(Event_threadCursors), std::end(Event_threadCursors),
-            old_script.data());
+  for (int thread = 0; thread < VS::Event::kScriptThreadCount; ++thread) {
+    host.SetThreadCursor(thread, old_script);
+  }
   std::fill(std::begin(Event_threadWaitFrames),
             std::end(Event_threadWaitFrames), 30);
 
-  Event_InitializeScriptOpcodeTable();
+  REQUIRE(VS::Event::InitializeLiveScriptOpcodeTable());
 
   REQUIRE(Event_playbackPhase == 0);
   CHECK(Event_isStartConfirmed == 0);
   CHECK(Event_isMainThreadFinished == 0);
-  CHECK(std::all_of(std::begin(Event_threadCursors),
-                    std::end(Event_threadCursors),
-                    [](const auto* cursor) { return cursor == nullptr; }));
+  for (int thread = 0; thread < VS::Event::kScriptThreadCount; ++thread) {
+    CHECK_FALSE(host.ThreadCursor(thread).Present());
+  }
   CHECK(std::all_of(std::begin(Event_threadWaitFrames),
                     std::end(Event_threadWaitFrames),
                     [](auto wait) { return wait == 0; }));
-  CHECK(Event_UpdateEventPlayback() == 0);
+  CHECK(VS::Event::UpdateLiveEventPlayback() == 0);
 }
 
 TEST_CASE("Native session entry invalidates every borrowed textbox",

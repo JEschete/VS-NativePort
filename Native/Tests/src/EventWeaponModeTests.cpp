@@ -14,6 +14,7 @@
 #include "Event/WeaponModeOpcode.h"
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
+#include "TestSupport/ScriptSources.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -50,6 +51,8 @@ struct WeaponModeFixture {
       std::to_array(Event_weaponDrawStates);
   decltype(std::to_array(Event_kOpcodeHandlers)) saved_handlers =
       std::to_array(Event_kOpcodeHandlers);
+  decltype(std::to_array(Event_kSkipOpcodeHandlers)) saved_native_skip =
+      std::to_array(Event_kSkipOpcodeHandlers);
   decltype(std::to_array(Event_kOpcodeSizes)) saved_sizes =
       std::to_array(Event_kOpcodeSizes);
   decltype(Event_legacySkipHandlerCopy) saved_skip_handlers =
@@ -102,6 +105,8 @@ struct WeaponModeFixture {
     std::copy(saved_modes.begin(), saved_modes.end(), Event_weaponDrawStates);
     std::copy(saved_handlers.begin(), saved_handlers.end(),
               Event_kOpcodeHandlers);
+    std::copy(saved_native_skip.begin(), saved_native_skip.end(),
+              Event_kSkipOpcodeHandlers);
     std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
     Event_legacySkipHandlerCopy = saved_skip_handlers;
     pending = saved_pending;
@@ -189,19 +194,20 @@ struct WeaponModeFixture {
     CHECK((record.pose.holdingLastFrame != 0) == retained_idle);
   }
 
-  void CheckVmWait(u_char* cursor, u_char* script) const {
+  void CheckVmWait(VS::Event::ScriptLocation cursor,
+                   VS::Event::ScriptLocation script) const {
     REQUIRE(cursor == script);
     CHECK(pending == 1);
   }
 
-  void CheckVmFinish(u_char* cursor, int mode) const {
-    CHECK(cursor == nullptr);
+  void CheckVmFinish(VS::Event::ScriptLocation cursor, int mode) const {
+    CHECK_FALSE(cursor.Present());
     CHECK(pending == 0);
     CHECK(record.animationId == (mode ? 101 : 6));
   }
 
-  void CheckVmSkip(u_char* cursor, int mode) const {
-    CHECK(cursor == nullptr);
+  void CheckVmSkip(VS::Event::ScriptLocation cursor, int mode) const {
+    CHECK_FALSE(cursor.Present());
     CheckImmediate(mode);
   }
 
@@ -313,27 +319,32 @@ TEST_CASE("Production event dispatch holds then advances the weapon opcode",
   const int mode = GENERATE(0, 1);
   const int skip = GENERATE(0, 2);
   WeaponModeFixture fixture;
+  const VS::test_support::LiveScriptRuntimeScope runtime;
   fixture.Prepare(mode);
+  Event_playbackPhase = 4;
   Event_skipState = static_cast<char>(skip);
   const auto weapon =
       WeaponModeFixture::Opcode(Event_ScriptSetAshleyBattleModeOpcode);
   const auto stop = WeaponModeFixture::Opcode(Event_CommandStopScriptContext);
-  Event_kOpcodeHandlers[weapon] = WeaponModeFixture::ResolveHandler();
-  Event_kOpcodeHandlers[stop] = Event_CommandStopScriptContext;
+  Event_kSkipOpcodeHandlers[weapon] = Event_kOpcodeHandlers[weapon] =
+      WeaponModeFixture::ResolveHandler();
+  Event_kSkipOpcodeHandlers[stop] = Event_kOpcodeHandlers[stop] =
+      Event_CommandStopScriptContext;
   Event_kOpcodeSizes[weapon] = 3;
   Event_kOpcodeSizes[stop] = 1;
-  Event_legacySkipHandlerCopy = Event_kSkipOpcodeHandlers;
-  std::array<u_char, 4> script{weapon, static_cast<u_char>(mode), 1, stop};
-  auto* cursor = script.data();
-  REQUIRE(Event_ExecuteScriptThread(&cursor, 0) == 0);
+  const auto script = VS::test_support::MountLiveEventScript(
+      {weapon, static_cast<u_char>(mode), 1, stop});
+  auto& host = VS::Event::LiveScriptVm();
+  host.SetThreadCursor(0, script);
+  REQUIRE_FALSE(VS::Event::ExecuteLiveScriptThread(0));
   if (skip != 0) {
-    fixture.CheckVmSkip(cursor, mode);
+    fixture.CheckVmSkip(host.ThreadCursor(0), mode);
     return;
   }
-  fixture.CheckVmWait(cursor, script.data());
+  fixture.CheckVmWait(host.ThreadCursor(0), script);
   fixture.FinishAnimation();
-  CHECK(Event_ExecuteScriptThread(&cursor, 0) == 0);
-  fixture.CheckVmFinish(cursor, mode);
+  CHECK_FALSE(VS::Event::ExecuteLiveScriptThread(0));
+  fixture.CheckVmFinish(host.ThreadCursor(0), mode);
 }
 
 TEST_CASE(
