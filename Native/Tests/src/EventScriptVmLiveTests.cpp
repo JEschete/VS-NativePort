@@ -231,7 +231,16 @@ void CompareFlagBranchCorpus(bool pair) {
   }
 }
 
-bool CompareOriginalCachedBranch(std::uint8_t value, std::uint8_t operand) {
+void AddCachedDigest(std::uint64_t& digest, std::uint32_t value) {
+  for (int byte = 0; byte < 4; ++byte) {
+    digest ^= static_cast<std::uint8_t>(value >> (byte * 8));
+    digest *= 0x100000001B3;
+  }
+}
+
+bool CompareOriginalCachedBranch(
+    std::uint8_t value, std::uint8_t operand,
+    std::array<std::uint64_t, 2>* fingerprints = nullptr) {
   const int flag = value * 4 + (operand & 3);
   VS::State::SetLiveScriptFlag(flag, value);
   std::array<std::uint8_t, 3> cache{0, static_cast<std::uint8_t>(flag),
@@ -250,6 +259,24 @@ bool CompareOriginalCachedBranch(std::uint8_t value, std::uint8_t operand) {
       event::ScriptCacheFlagValue({cache, {}, 0}, event::LiveScriptVm());
   const auto native = event::ScriptBranchOnCachedFlag({{command, 32}, {}, 0},
                                                       event::LiveScriptVm());
+  if (fingerprints != nullptr) {
+    const auto original_offset = static_cast<std::uint16_t>(
+        original == 0 ? 0
+                      : original - reinterpret_cast<std::intptr_t>(command));
+    const bool native_jump = native.kind == event::ScriptFlowKind::kJumpBy;
+    const auto native_offset =
+        static_cast<std::uint16_t>(native_jump ? native.displacement : 0);
+    const auto native_value =
+        static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag());
+    AddCachedDigest((*fingerprints)[0],
+                    expected_cache |
+                        (static_cast<std::uint32_t>(original != 0) << 8) |
+                        (static_cast<std::uint32_t>(original_offset) << 16));
+    AddCachedDigest((*fingerprints)[1],
+                    native_value |
+                        (static_cast<std::uint32_t>(native_jump) << 8) |
+                        (static_cast<std::uint32_t>(native_offset) << 16));
+  }
   return original_cache == 0 &&
          native_cache.kind == event::ScriptFlowKind::kAdvance &&
          static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag()) ==
@@ -725,12 +752,17 @@ TEST_CASE("Native cached flag branches match all original byte pairs",
           "[event-vm-live][event-branch-differential]") {
   const LiveVmFixture vm;
   FlagDifferentialFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
   for (int value = 0; value < 256; ++value) {
     for (int operand = 0; operand < 256; ++operand) {
       REQUIRE(CompareOriginalCachedBranch(static_cast<std::uint8_t>(value),
-                                          static_cast<std::uint8_t>(operand)));
+                                          static_cast<std::uint8_t>(operand),
+                                          &fingerprints));
     }
   }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == 0xA21BEE19C943E325);
 }
 
 TEST_CASE(

@@ -7,6 +7,23 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Cached Original Oracle Preservation (#276)
+
+- Before cached-flag handler retirement, the existing exhaustive 65,536-byte-pair
+  test captured a normalized FNV64 digest directly from the still-present original
+  C cache/branch handlers: `A21BEE19C943E325`. Records retain cached byte, branch
+  decision and signed relative offset, not ASLR-dependent pointers. Original outputs
+  are captured before native mutation; all individual comparisons remain.
+- The digest and native/original equality checks pass in Debug and Release with
+  65,538 focused assertions. Full suites on `e07806d2` plus this test-only slice
+  pass 4,648 cases / 8,158,857 assertions and both unchanged canonical replays.
+  Scoped quality/tidy is clean; the temporary capture print is removed. No case,
+  baseline, promotion or retirement change. Evidence:
+  `VR-EVENT-CACHED-ORIGINAL-FREEZE` and
+  `build\owner-checkpoint\cached-oracle-freeze-*-regression.log`.
+  Context predecessor `e07806d2` is green on exact CI `42306516301`.
+  Keep this oracle independent when the original C handlers retire.
+
 ### Native Context Control Slots (#276 Row 33)
 
 - F01202/F01203/F01204 register strict native wait/start/stop context cores.
