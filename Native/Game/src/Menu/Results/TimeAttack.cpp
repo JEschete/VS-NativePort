@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/MusicLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -7,11 +9,10 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/TimImageLive.hpp"
+#include "State/SceneTimerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Audio/Music.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Battle/StatusEffects.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Render/Images.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-#include "State/Timers.h"
 
 // decomp: _disFiles (_disFiles@src/MENU/MENUF.PRG/3B8.c)
 Content_DiscFile const Menu_Results_kDisFiles[] = { { VS_RANK_DIS_LBA, VS_RANK_DIS_SIZE },
@@ -108,9 +108,9 @@ int Menu_Results_InitializeTimeAttackResults(void)
 
             ++Battle_unusedSubmenuState;
         }
-    } else if (Audio_PollMusicLoads() == 0) {
+    } else if (VS::Audio::LivePollMusicLoads() == 0) {
 
-        Audio_PlayMusicSlot(2, 0x7F, 0);
+        VS::Audio::LivePlayMusicSlot(2, 0x7F, 0);
 
         Menu_Results_timeTrialTime = (Audio_Seq_unusedStateFlags.timeAttackMins << 0x10)
                        | (Audio_Seq_unusedStateFlags.timeAttackSecs << 8)
@@ -255,12 +255,12 @@ int Menu_Results_UpdateTimeAttackResults(void)
 
     if (Menu_Results_screenState == 0) {
         if (Menu_Results_screenTimer == 0x30) {
-            Audio_PlaySfxCentered(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x72);
         }
 
         if (Menu_Results_screenTimer == 0x60) {
-            Audio_StopSfx(0x7E, 0x72);
-            Audio_PlaySfxCentered(0x7E, 0x73);
+            VS::Audio::LiveStopSfx(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
         }
 
         Menu_Results_DrawTimeAttackResultsHeading(160, 52, Menu_Results_screenTimer);
@@ -272,19 +272,19 @@ int Menu_Results_UpdateTimeAttackResults(void)
         }
 
         if ((Menu_Results_screenTimer == 128) && (Menu_Results_newTimeSlot == 0)) {
-            Audio_PlaySfxCentered(0x7E, 0x76);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x76);
         }
 
         if (Menu_Results_screenTimer == 160) {
-            Audio_PlaySfxCentered(0x7E, 0x73);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
         }
 
         if (Menu_Results_screenTimer == 168) {
-            Audio_PlaySfxCentered(0x7E, 0x73);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
         }
 
         if (Menu_Results_screenTimer == 176) {
-            Audio_PlaySfxCentered(0x7E, 0x73);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
         }
 
         Menu_Results_DrawLeaderboardEntry(304, 144, 0, Menu_Results_screenTimer - 160);
@@ -295,7 +295,7 @@ int Menu_Results_UpdateTimeAttackResults(void)
 
         if ((Input_buttonsPressed.allButtons & PADRright) || (Menu_Results_screenTimer >= 192)) {
 
-            Audio_StopSfx(0x7E, 0);
+            VS::Audio::LiveStopSfx(0x7E, 0);
 
             Menu_Results_screenTimer = 0;
             ++Menu_Results_screenState;
@@ -317,7 +317,7 @@ int Menu_Results_UpdateTimeAttackResults(void)
         if ((Input_buttonsPressed.allButtons & PADRright) || (Menu_Results_screenTimer >= 450)) {
 
             if (Input_buttonsPressed.allButtons & PADRright) {
-                Audio_PlaySfxCentered(0x7E, 5);
+                VS::Audio::LivePlaySfxCentered(0x7E, 5);
             }
 
             ++Menu_Results_screenState;
@@ -360,9 +360,9 @@ int Menu_Results_UpdateTimeAttackStart(void)
 
     if (Menu_Results_screenState == 0) {
         if ((Menu_Results_screenTimer == ((Menu_Results_screenTimer / 15) * 0xF)) && (Menu_Results_screenTimer < 0x2E)) {
-            Audio_PlaySfxCentered(0x7E, 0x7A);
-            Audio_PlaySfxCentered(0x7E, 0x7B);
-            Audio_PlaySfxCentered(0x7E, 0x7C);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x7A);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x7B);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x7C);
         }
 
         Menu_Results_DrawTimeAttackHeading(160, 48, Menu_Results_screenTimer);
@@ -393,7 +393,7 @@ int Menu_Results_UpdateTimeAttackStart(void)
         }
 
     } else if (Menu_Results_screenState == 2) {
-        State_SetTickSpeed(4);
+        VS::State::SetLiveTickSpeed(4);
         VS::Render::SetLiveFramebufferEffectRotation(0);
         VS::Render::SetLiveFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[0]);
         VS::Render::SetLiveFramebufferEffectTint(&Menu_Results_timeAttackStartColors[1]);
@@ -415,15 +415,15 @@ int Menu_Results_UpdateTimeAttackStart(void)
             case 0:
             case 1:
             case 2:
-                Audio_PlaySfxCentered(0x7E, 0x7D);
-                Audio_PlaySfxCentered(0x7E, 0x7E);
-                Audio_PlaySfxCentered(0x7E, 0x7F);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x7E);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x7F);
                 break;
 
             case 3:
-                Audio_PlaySfxCentered(0x7E, 0x80);
-                Audio_PlaySfxCentered(0x7E, 0x81);
-                Audio_PlaySfxCentered(0x7E, 0x82);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x80);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x81);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x82);
                 break;
             }
         }
@@ -469,7 +469,7 @@ int Menu_Results_UpdateTimeAttackStart(void)
         }
 
     } else if (Menu_Results_screenState == 4) {
-        State_SetTickSpeed(2);
+        VS::State::SetLiveTickSpeed(2);
         VS::Render::SetLiveFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[2]);
         VS::Render::SetLiveFramebufferEffectEnabled(0);
         VS::Render::RetireLiveTexturePageRange(0x1D, 2, 5);

@@ -1,13 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/CameraLive.hpp"
+#include "Field/GameModeLive.hpp"
 #include "Items/LootLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
 #include "Battle/Action.h"
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
@@ -18,12 +21,11 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Effects/Runtime.h"
 #include "Event/Cutscene.h"
 #include "Event/Triggers.h"
-#include "Field/Camera.h"
-#include "Field/GameMode.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Interactions.h"
 #include "Menu/TextBox.h"
 #include "Render/Camera.h"
@@ -109,7 +111,7 @@ void Battle_StepCameraTowardActionMidpoint(int update_camera)
 
     Battle_ActionCameraMidpoint(&action_midpoint);
     if (update_camera != 0) {
-        Field_StepCameraLookAtTowardTarget(&action_midpoint, 1, 0x28);
+        VS::Field::LiveStepCameraLookAtTowardTarget(&action_midpoint, 1, 0x28);
     }
 }
 
@@ -121,7 +123,7 @@ void Battle_UpdateInitialTargetSelection(void)
             if (++Battle_actionState->selectionFrames >= 0x1F) {
                 Battle_CommitSelectedAction(1);
             }
-        } else if (Battle_UpdateTargetSelectionMenu(&Battle_actionState->cameraPreview) != 0) {
+        } else if (VS::Battle::LiveUpdateTargetSelectionMenu(&Battle_actionState->cameraPreview) != 0) {
             Battle_actionState->selectedPreview = Battle_actionState->cameraPreview;
             Battle_CommitSelectedAction(1);
         }
@@ -139,11 +141,11 @@ void Battle_UpdateActionAreaSelection(void)
             if (v < 0x1F) {
                 return;
             }
-        } else if (Battle_UpdateSphereTargetPosition(&Battle_actionState->areaCenter) == 0) {
+        } else if (VS::Battle::LiveUpdateSphereTargetPosition(&Battle_actionState->areaCenter) == 0) {
             return;
         }
     }
-    Battle_FilterAreaActionTargets();
+    VS::Battle::LiveFilterAreaActionTargets();
 }
 
 // decomp: BATTLE.PRG func_80078364 (src/BATTLE/BATTLE.PRG/146C.c:6927)
@@ -155,19 +157,19 @@ void Battle_UpdateFinalTargetSelection(void)
                 Battle_actionState->selectedPreview = 0;
                 Battle_CommitSelectedAction(2);
             }
-        } else if (Battle_UpdateTargetSelectionMenu(&Battle_actionState->cameraPreview) != 0) {
+        } else if (VS::Battle::LiveUpdateTargetSelectionMenu(&Battle_actionState->cameraPreview) != 0) {
             Battle_actionState->selectedPreview = Battle_actionState->cameraPreview;
             if (Battle_actionState->selectedPreview == 0xFF) {
                 if (Battle_categoryNeedsTargetSelection[Battle_actionDefinitions[Battle_actionState->selection.actionId].category]
                     != 0) {
-                    Battle_InitializeActionTargeting(Battle_actionState->selection.actionId);
+                    VS::Battle::LiveInitializeActionTargeting(Battle_actionState->selection.actionId);
                     return;
                 }
                 ((void (*)(...))Battle_ClearSphereTargets)();
                 Battle_ClearPrimarySphereVolume();
                 Battle_ClearSecondarySphereVolume();
                 Battle_FreeSphere();
-                Battle_ReturnToBattleActionMenu();
+                VS::Battle::LiveReturnToBattleActionMenu();
                 return;
             }
             Battle_CommitSelectedAction(2);
@@ -194,7 +196,7 @@ void Battle_UpdateActionCameraZoom(void)
         if (Battle_actionState->cameraZoomState == 0) {
             Battle_StepCameraTowardActionMidpoint(1);
             Battle_ActionCameraMidpoint(&action_midpoint);
-            Field_ComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
+            VS::Field::LiveComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
                 Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", camera_displacement.vx, camera_displacement.vy, camera_displacement.vz);
             if ((((camera_displacement.vx | camera_displacement.vy | camera_displacement.vz) == 0)
                     && (Field_sphericalCamera.delta.yaw == 0))
@@ -217,7 +219,7 @@ void Battle_UpdateActionCameraZoom(void)
             }
             if (Render_projectionDistance == 0x300) {
                 Battle_ActionCameraMidpoint(&action_midpoint);
-                Field_ComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
+                VS::Field::LiveComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
                 Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", camera_displacement.vx, camera_displacement.vy, camera_displacement.vz);
                 if ((((camera_displacement.vx | camera_displacement.vy | camera_displacement.vz) == 0)
                         && (Field_sphericalCamera.delta.yaw == 0))
@@ -236,7 +238,7 @@ void Battle_UpdateActionCameraZoom(void)
             }
             if (Field_sphericalCamera.values.distance == 0x900) {
                 Battle_ActionCameraMidpoint(&action_midpoint);
-                Field_ComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
+                VS::Field::LiveComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
                 Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", camera_displacement.vx, camera_displacement.vy, camera_displacement.vz);
                 if ((((camera_displacement.vx | camera_displacement.vy | camera_displacement.vz) == 0)
                         && (Field_sphericalCamera.delta.yaw == 0))
@@ -258,7 +260,7 @@ void Battle_WaitForActionEffectReady(void)
 {
     Battle_ActionRequest* queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
     if ((Menu_IsSceneNotificationPending() == 0)
-        && ((Actors_ActorStateFlags(queued_action->primaryTarget.target.targetActor) & 0x08000100) == 0x08000100)
+        && ((VS::Actors::LiveActorStateFlags(queued_action->primaryTarget.target.targetActor) & 0x08000100) == 0x08000100)
         && (VS::Content::FindLiveFreeActorAssetRequest() == 0) && (Effects_CanStartEffectTrack() != 0)) {
         Battle_AdvanceActionEffectPhase();
     }
@@ -301,7 +303,7 @@ void Battle_WaitForTargetRecovery(void)
 
         for (j = 0; j < queued_action->targetCount; ++j) {
             if ((queued_action->targets[j].targetsPosition == 0)
-                && ((((u_int (*)(int))Actors_IsActorActionAnimationBusy)(queued_action->targets[j].target.targetActor) + 1) > 1)) {
+                && ((VS::Actors::IsLiveActorActionAnimationBusy(queued_action->targets[j].target.targetActor) + 1) > 1)) {
                 var_s4 = 0;
             }
         }
@@ -372,7 +374,7 @@ void Battle_FinishActionSequence(void)
         }
     }
     if ((Render_projectionDistance != 512) || (Field_sphericalCamera.values.distance != Battle_actionState->preferredCameraDistance)
-        || !Field_IsCameraLookAtOnAshley()) {
+        || !VS::Field::LiveIsCameraLookAtOnAshley()) {
         return;
     }
     ready = 1;
@@ -380,7 +382,7 @@ void Battle_FinishActionSequence(void)
         action = &Battle_actionState->queue[i % 4];
         for (j = 0; j < action->targetCount; ++j) {
             if ((action->targets[j].targetsPosition == 0)
-                && ((((u_int (*)(int))Actors_IsActorActionAnimationBusy)(action->targets[j].target.targetActor) + 1) >= 2)) {
+                && ((VS::Actors::IsLiveActorActionAnimationBusy(action->targets[j].target.targetActor) + 1) >= 2)) {
                 ready = 0;
             }
         }
@@ -388,9 +390,9 @@ void Battle_FinishActionSequence(void)
     if (!ready) {
         return;
     }
-    Field_ResumeFieldAfterMenu();
+    VS::Field::LiveResumeFieldAfterMenu();
     Battle_SetHudHidden(0);
-    Actors_RestoreActorIdlePose(Battle_actionState->selection.primaryTarget.target.targetActor);
+    VS::Actors::RestoreLiveActorIdlePose(Battle_actionState->selection.primaryTarget.target.targetActor);
     for (i = 0; i < Battle_actionState->chainStep; ++i) {
         action = &Battle_actionState->queue[i % 4];
         for (j = 0; j < action->targetCount; ++j) {

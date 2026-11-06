@@ -689,7 +689,7 @@ Game::EncounterProfile DecodeProfile(const std::string& profile) {
 }
 
 void CheckAttractDemo(const Game::EncounterSetup& setup) {
-  // Original title-timeout state only: Title_InitializeNewGameData's entry
+  // Original title-timeout state only: VS::Title::InitializeNewGameData's entry
   // tile/New Game kit and _setTitleExitFlags' door (TITLE 22C.c:4741).
   constexpr int kFirstDemoZone = 20;
   constexpr int kEntryTileX = 4;

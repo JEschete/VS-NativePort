@@ -1,1108 +1,1274 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/SkeletonLive.hpp"
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/RoomAiMap.hpp"
-#include "Boot/SessionLive.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Core/Runtime.hpp"
-#include "Field/MinimapSceneLive.hpp"
-#include "Input/ControllerLive.hpp"
-#include "Items/LootLive.hpp"
-#include "Render/CameraViewLive.hpp"
-#include "Render/DisplayControlLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/ScreenOverlayLive.hpp"
-#include "Render/TimImageLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorLoading.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/CharacterInit.h"
-#include "Actors/Lifecycle.h"
-#include "Actors/Location.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/RoomActorCache.h"
-#include "Actors/RoomState.h"
-#include "Actors/Skeleton.h"
-#include "Actors/Spawning.h"
-#include "Audio/Music.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
-#include "Battle/Abilities.h"
-#include "Battle/Actor.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Damage.h"
-#include "Battle/EncounterHooks.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
-#include "Battle/StatusEffects.h"
-#include "Boot/GameLoop.h"
-#include "Boot/Lifecycle.h"
-#include "DiscQueue.h"
-#include "Effects/Runtime.h"
-#include "Effects/Weather.h"
-#include "Event/Cutscene.h"
-#include "Event/ScriptVm.h"
-#include "Event/Triggers.h"
-#include "Field/Actors.h"
-#include "Field/Background.h"
-#include "Field/Camera.h"
-#include "Field/Collision.h"
-#include "Field/Doors.h"
-#include "Field/Environment.h"
-#include "Field/GameMode.h"
-#include "Field/Gimmicks.h"
-#include "Field/Locations.h"
-#include "Field/Map.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Field/RoomEffects.h"
-#include "Field/RoomLoading.h"
-#include "Field/RoomRendering.h"
-#include "Field/RoomState.h"
-#include "Field/Transitions.h"
-#include "Field/Znd.h"
-#include "Field/Zone.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Equipment.h"
-#include "Items/EquipmentInit.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
-#include "Items/Weapons.h"
-#include "Render/Camera.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Palette.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
-#include "Save/NativeResume.h"
-#include "State/Flags.h"
-#include "State/PlayTime.h"
-#include "State/RoomCache.h"
-#include "State/RoomLoad.h"
-#include "State/RoomMemory.h"
-#include "State/SceneTimer.h"
-#include "State/StateFlags.h"
-#include "State/Timers.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Field/RoomLoading.hpp"
 
-// decomp: _zoneContext (_zoneContext@BATTLE/BATTLE.PRG)
-Field_ZoneContext Field_zoneContext;
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <optional>
+#include <span>
+#include <vector>
 
-// decomp: D_800F18C8 (D_800F18C8@BATTLE/BATTLE.PRG)
-Field_RoomLoadResetBlock Field_roomLoadResetBlock;
+#include "Field/RoomEffectsCore.hpp"
+#include "Render/TimImage.hpp"
 
-// decomp: D_800F18E0 (D_800F18E0@BATTLE/BATTLE.PRG)
-int Field_isRoomActorSpawnEnabled;
+namespace VS::Field {
+namespace {
+using room_effects::Fits;
+using room_effects::Load;
+using room_effects::Store;
 
-// decomp: D_800F18E4 (D_800F18E4@BATTLE/BATTLE.PRG)
-void* Field_roomCleanupBuffer;
+constexpr std::size_t kWordBytes = 4;
+constexpr std::size_t kHalfwordBytes = 2;
 
-// decomp: D_800F1908 (D_800F1908@BATTLE/BATTLE.PRG)
-int Field_roomResetWord;
+// The zone file header (Field_ZndHeader).
+constexpr std::size_t kZoneRoomFilesOffsetAt = 0x00;
+constexpr std::size_t kZoneRoomFilesSizeAt = 0x04;
+constexpr std::size_t kZoneEnemiesOffsetAt = 0x08;
+constexpr std::size_t kZoneTexturesOffsetAt = 0x10;
+constexpr std::size_t kZoneMusicIdAt = 0x18;
 
-// decomp: D_800F192C (D_800F192C@BATTLE/BATTLE.PRG)
-Battle_Actor* Field_auxiliaryActor;
+// The enemy section: the count, then the ZUD files.
+constexpr std::size_t kZoneEnemyFilesAt = 4;
+// A disc file entry: its sector, then its byte size.
+constexpr std::size_t kFileEntrySizeAt = 4;
 
-// decomp: vs_battle_screenTransitionAlpha (vs_battle_screenTransitionAlpha@BATTLE/BATTLE.PRG)
-int Field_screenTransitionAlpha;
+// The texture section: four table sizes, then the tables.
+constexpr std::size_t kTextureTableCount = 4;
+constexpr std::size_t kTextureTablesAt = kTextureTableCount * kWordBytes;
 
-// decomp: D_800F1BBC (D_800F1BBC@BATTLE/BATTLE.PRG)
-char Field_reservedResetByte;
+// The room file header (Field_MpdHeader): word offsets, then halfword sizes
+// for the first four sections and word sizes for the last two.
+constexpr std::size_t kRoomSectionsOffsetAt = 0x00;
+constexpr std::size_t kClearedOffsetAt = 0x08;
+constexpr std::size_t kClearedSizeAt = 0x0C;
+constexpr std::size_t kScriptOffsetAt = 0x10;
+constexpr std::size_t kScriptSizeAt = 0x14;
+constexpr std::size_t kDoorOffsetAt = 0x18;
+constexpr std::size_t kDoorSizeAt = 0x1C;
+constexpr std::size_t kEnemyOffsetAt = 0x20;
+constexpr std::size_t kEnemySizeAt = 0x24;
+constexpr std::size_t kLootOffsetAt = 0x28;
+constexpr std::size_t kLootSizeAt = 0x2C;
 
-// decomp: BATTLE.PRG func_80088CAC (src/BATTLE/BATTLE.PRG/146C.c:14766)
-void Field_BeginSceneActorTransition(void)
-{
-    if (State_sceneTimer.resetScope == 2) {
-        State_ResetSceneTimer();
-    }
-    Actors_ClearRoomActorStateCache();
+// A placement record (Field_MpdEnemySpawn and Field_MpdObjectSpawn).
+constexpr std::size_t kPlacementKindAt = 0x00;
+constexpr std::size_t kPlacementHiddenAt = 0x02;
+constexpr std::size_t kEnemyIdAt = 0x04;
+constexpr std::size_t kEnemySlotAt = 0x05;
+constexpr std::size_t kEnemyFlagTestAt = 0x06;
+constexpr std::size_t kEnemyStatTestAt = 0x07;
+constexpr std::size_t kEnemyFlagValueAt = 0x08;
+constexpr std::size_t kEnemyStatValueAt = 0x0A;
+constexpr std::size_t kEnemyTileXAt = 0x0C;
+constexpr std::size_t kEnemyDirectionAt = 0x0D;
+constexpr std::size_t kEnemyTileZAt = 0x0E;
+constexpr std::size_t kEnemyHeightAt = 0x0F;
+constexpr std::size_t kEnemyFacingAt = 0x23;
+constexpr std::size_t kEnemyEngagedAt = 0x24;
+constexpr std::size_t kEnemySceneTestAt = 0x27;
+constexpr std::size_t kObjectFlagAt = 0x04;
+constexpr std::size_t kObjectFlagMinAt = 0x06;
+constexpr std::size_t kObjectFlagMaxAt = 0x07;
+constexpr std::size_t kObjectSlotAt = 0x08;
+constexpr std::size_t kObjectTileXAt = 0x0A;
+constexpr std::size_t kObjectTileZAt = 0x0B;
+constexpr std::size_t kObjectHeightAt = 0x0C;
+constexpr std::size_t kObjectDirectionAt = 0x0D;
+constexpr std::size_t kObjectModelAt = 0x0E;
+
+// The placement tests (146C.c:14936-15016): the scene test reads script
+// flags 1 and 2, the flag test flag 0x82, and the stat test Ashley's hit
+// points or the flag in the stat value's low 10 bits against its top 6.
+constexpr int kSceneFirstFlag = 1;
+constexpr int kSceneSecondFlag = 2;
+constexpr int kPlacementFlag = 0x82;
+constexpr std::uint16_t kStatValueMask = 0x3FF;
+constexpr int kStatThresholdShift = 10;
+constexpr std::uint16_t kObjectFlagMask = 0x3FF;
+// The test codes; 0 and any other code pass.
+constexpr std::uint8_t kSceneFirstFlagClear = 1;
+constexpr std::uint8_t kSceneFirstFlagSet = 2;
+constexpr std::uint8_t kSceneSecondFlagSet = 3;
+constexpr std::uint8_t kFlagEqual = 1;
+constexpr std::uint8_t kFlagAtMost = 2;
+constexpr std::uint8_t kFlagAtLeast = 3;
+constexpr std::uint8_t kStatHpAtMost = 1;
+constexpr std::uint8_t kStatHpAtLeast = 2;
+constexpr std::uint8_t kStatFlagEqual = 3;
+constexpr std::uint8_t kStatFlagAtMost = 4;
+constexpr std::uint8_t kStatFlagAtLeast = 5;
+
+// The enemy spawn flags (146C.c:15020-15036): facing codes 1 and 2 pick
+// their own, every other code the default.
+constexpr std::uint8_t kFacingCodeOne = 1;
+constexpr std::uint8_t kFacingCodeTwo = 2;
+constexpr int kDefaultFacingSpawnFlags = 6;
+constexpr int kFacingOneSpawnFlags = 0;
+constexpr int kFacingTwoSpawnFlags = 1;
+constexpr int kEngagedSpawnFlag = 0x80;
+
+// The object model word: the model in bits 12-15 and 8-11, the material in
+// bits 5-7 (as 2-4).
+constexpr int kObjectModelHighShift = 12;
+constexpr int kObjectModelLowMask = 0xF00;
+constexpr int kObjectMaterialShift = 3;
+constexpr int kObjectMaterialMask = 0x1C;
+
+// The collision map header (Field_MpdCollisionHeader).
+constexpr std::size_t kCollisionWidthAt = 0;
+constexpr std::size_t kCollisionHeightAt = 2;
+constexpr std::size_t kCollisionCellCountAt = 6;
+// Section E (Field_MpdSectionE).
+constexpr std::size_t kSecondArrayOffsetAt = 4;
+constexpr std::size_t kHasSecondArrayAt = 8;
+constexpr std::size_t kFirstArrayAt = 0x0C;
+constexpr std::size_t kSecondArrayAt = 0x10;
+// The environment section (Field_MpdEnvironment).
+constexpr std::size_t kWorkshopAt = 0x30;
+constexpr std::size_t kEnvironmentFlagsAt = 0x31;
+constexpr std::size_t kTrapLevelAt = 0x32;
+constexpr std::size_t kSceneIdAt = 0x50;
+constexpr std::size_t kFallZoneAt = 0x52;
+constexpr std::size_t kFallRoomAt = 0x54;
+constexpr std::size_t kEnvironmentParameterAt = 0x56;
+constexpr int kFallZoneShift = 16;
+
+// The collision map's packed dimensions: the width in tile units (16 per
+// tile) in the low half, the rows in the top 12 bits. The original's
+// rounded shift divides toward zero.
+constexpr std::uint32_t kDimensionWidthMask = 0xFFFF;
+constexpr std::uint32_t kTileUnits = 16;
+constexpr int kDimensionRowsUnit = 0x100000;
+// Section E's second array offset, rounded down to a word.
+constexpr std::uint32_t kWordAlignMask = ~std::uint32_t{kWordBytes - 1};
+// The room record the field loads its room into.
+constexpr int kCurrentRoomOwner = 0;
+// The entrance elevations that take a step (0-3): even ones step along x,
+// odd ones along z.
+constexpr std::uint8_t kSteppingElevations = 4;
+
+// The room enemy memory's most recent room.
+constexpr std::uint8_t kMostRecentRoom = 4;
+// The raised camera's room (zone 27, room 1).
+constexpr int kRaisedCameraZone = 27;
+constexpr int kRaisedCameraRoom = 1;
+// The screen transition steps a room starts with (Field_screenTransitionStep).
+constexpr int kFadeInTransitionEffect = 3;
+constexpr int kFadeInStartStep = 0;
+constexpr int kCoverStep = 3;
+constexpr int kExploringStep = 4;
+
+[[nodiscard]] std::int32_t LoadWord(std::span<const std::byte> bytes,
+                                    std::size_t offset) {
+  return Load<std::int32_t>(bytes, offset);
 }
 
-// decomp: BATTLE.PRG _loadMpdLbas (src/BATTLE/BATTLE.PRG/146C.c:14774)
-void Field_LoadZoneRoomFileTable(void* room_file_table_data, int size)
-{
-    if (size == 0) {
-        VS::Core::IgnoreDiagnostic(0x8B, 0);
-    }
-    Field_zoneContext.mpdFiles = (Content_DiscFile *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
-    VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.mpdFiles, room_file_table_data, size);
+[[nodiscard]] std::span<const std::byte> Section(
+    std::span<const std::byte> file, const ByteRange& range) {
+  return file.subspan(range.offset, range.bytes);
 }
 
-// decomp: BATTLE.PRG _loadZndEnemies (src/BATTLE/BATTLE.PRG/146C.c:14783)
-void Field_LoadZoneEnemyTemplates(long* data, int arg1 __attribute__((unused)))
-{
-    Field_zoneContext.zndEnemyCount = *data;
-
-    if (Field_zoneContext.zndEnemyCount != 0) {
-        Field_zoneContext.zudFiles = (Content_DiscFile *)(VS::Core::Memory::AllocateLiveFromLowEnd(Field_zoneContext.zndEnemyCount * 8));
-        VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.zudFiles, data + 1,
-            Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zudFiles);
-        Field_zoneContext.zndEnemies = (Field_ZndEnemyRecord *)(VS::Core::Memory::AllocateLiveFromLowEnd(
-            Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zndEnemies));
-        VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.zndEnemies,
-            data + ((Field_zoneContext.zndEnemyCount * 2) + 1),
-            Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zndEnemies);
-        return;
-    }
-
-    Field_zoneContext.zudFiles = NULL;
-    Field_zoneContext.zndEnemies = NULL;
+// A section from `offset` to the file's end; nothing when the offset is
+// negative or past the end.
+[[nodiscard]] std::optional<ByteRange> RangeToEnd(std::size_t file_bytes,
+                                                  std::int32_t offset) {
+  if (offset < 0 || static_cast<std::size_t>(offset) > file_bytes) {
+    return std::nullopt;
+  }
+  const auto start = static_cast<std::size_t>(offset);
+  return ByteRange{.offset = start, .bytes = file_bytes - start};
 }
 
-// decomp: BATTLE.PRG _loadZnd (src/BATTLE/BATTLE.PRG/146C.c:14803)
-void Field_QueueZoneLoad(int id)
-{
-    Content_DiscFile cdFile;
-
-    cdFile.lba = Field_legacyZoneDiscFiles[id].lba;
-    cdFile.size = Field_legacyZoneDiscFiles[id].size;
-    if (Field_zoneContext.zndDiscRequest != 0) {
-        VS::Core::IgnoreDiagnostic(0x87, 0);
-    }
-    Field_zoneContext.zndDiscRequest = VS::Content::AllocateLiveDiscRequest(&cdFile);
-    if (Field_zoneContext.zndData != NULL) {
-        VS::Core::IgnoreDiagnostic(0x88, 0);
-    }
-    Field_zoneContext.zndData = VS::Core::Memory::AllocateLiveFromHighEnd(cdFile.size);
-    if (Field_zoneContext.zndDiscRequest != NULL) {
-        VS::Content::EnqueueLivePriorityDiscRequest(Field_zoneContext.zndDiscRequest, Field_zoneContext.zndData);
-    } else {
-        Field_zoneContext.zndDiscRequest = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Field_zoneContext.zndData);
-    }
-    if (Field_zoneContext.isMusicFadeEnabled != 0) {
-        int zone_music_id = Field_zoneMusicIds[id];
-        if (Audio_CurrentMusicId() != zone_music_id) {
-            Audio_FadeMusicSlotVolume(Audio_soundState.currentMusicSlot, 0, 0x78);
-        }
-    }
+// A sized section; an empty one is empty wherever its offset points, since
+// no reader follows it.
+[[nodiscard]] std::optional<ByteRange> SizedRange(std::size_t file_bytes,
+                                                  std::int32_t offset,
+                                                  std::int64_t bytes) {
+  if (bytes == 0) {
+    return ByteRange{};
+  }
+  if (offset < 0 || bytes < 0 ||
+      !Fits(file_bytes, static_cast<std::size_t>(offset),
+            static_cast<std::size_t>(bytes))) {
+    return std::nullopt;
+  }
+  return ByteRange{.offset = static_cast<std::size_t>(offset),
+                   .bytes = static_cast<std::size_t>(bytes)};
 }
 
-// decomp: BATTLE.PRG _finishLoadZnd (src/BATTLE/BATTLE.PRG/146C.c:14826)
-void Field_FinishZoneLoad(int id)
-{
-    int musicId;
-    int i;
-    Field_ZndHeader* header;
+[[nodiscard]] std::vector<Content::DiscFileExtent> DecodeFileEntries(
+    std::span<const std::byte> entries, std::size_t count) {
+  std::vector<Content::DiscFileExtent> files;
+  files.reserve(count);
+  for (std::size_t index = 0; index < count; ++index) {
+    const std::size_t at = index * kRoomFileEntryBytes;
+    files.push_back({.sector = LoadWord(entries, at),
+                     .bytes = LoadWord(entries, at + kFileEntrySizeAt)});
+  }
+  return files;
+}
+}  // namespace
 
-    if (Field_zoneContext.zndDiscRequest == NULL) {
-        Field_QueueZoneLoad(id);
-    }
+// --- Reading the zone and room files
 
-    while (Field_zoneContext.zndDiscRequest->state != Content_DiscRequestState_Loaded) {
-        State_UpdatePlayTimeAndLoading(0);
-    }
-
-    VS::Content::ReleaseLiveDiscRequest(Field_zoneContext.zndDiscRequest);
-
-    Field_zoneContext.zndDiscRequest = NULL;
-
-    if (State_sceneTimer.resetScope == 1) {
-        State_ResetSceneTimer();
-    }
-
-    header = (Field_ZndHeader *)(Field_zoneContext.zndData);
-
-    Field_LoadZoneEnemyTemplates((long*)(header->enemiesOffset + (intptr_t)header), header->enemiesSize);
-    Field_UploadZoneTextures((long*)(header->texturesOffset + (intptr_t)header));
-    Field_LoadZoneRoomFileTable((long*)(header->mpdListOffset + (intptr_t)header), header->mpdListSize);
-
-    musicId = header->musicId;
-
-    VS::Core::Memory::FreeLiveFromHighEnd(header);
-    Field_zoneContext.zndData = NULL;
-
-    if (!Save_NativeResumePending()) {
-        if (Boot_gameEntryMode == 1) {
-            State_ResetZoneScriptFlags(1);
-        } else {
-            State_ResetZoneScriptFlags(0);
-        }
-    }
-
-    if (Audio_CurrentMusicId() != musicId) {
-        if (Audio_zoneMusicSwitchEnabled != 0) {
-            Audio_StopAndFreeCurrentMusic();
-
-            for (i = 0; i < 4;) {
-                Audio_FreeMusicSlot(++i);
-            }
-
-            Field_zoneContext.musicSlot = 0;
-
-            if (musicId != 0) {
-                Audio_LoadWaveBankBlocking(musicId);
-                Field_zoneContext.musicSlot = Audio_LoadMusicSlotBlocking(musicId, 3);
-            }
-        }
-    }
-    Field_zoneContext.musicId = musicId;
-    Field_zoneContext.isMusicFadeEnabled = 1;
-    Field_zoneContext.reserved38 = 0;
+void QueueFileRead(RoomFileReadHost& host, LoadedFile file,
+                   Content::DiscFileExtent extent, RoomLoadDiagnostic pending,
+                   RoomLoadDiagnostic held) {
+  if (host.ReadPending(file)) {
+    host.Diagnostic(pending);
+  }
+  if (host.DataHeld(file)) {
+    host.Diagnostic(held);
+  }
+  host.BeginRead(file, extent);
 }
 
-// decomp: BATTLE.PRG func_80089098 (src/BATTLE/BATTLE.PRG/146C.c:14886)
-void Field_ReleaseZoneData(void)
-{
-    Event_ReleaseZoneEventResources();
-    Field_ZoneCleanupHook(0);
-    if (Field_zoneContext.zndEnemies != NULL) {
-        VS::Core::Memory::FreeLiveFromLowEnd(Field_zoneContext.zndEnemies);
+bool AwaitFileRead(RoomFileReadHost& host, LoadedFile file) {
+  for (;;) {
+    const DiscReadState state = host.PollRead(file);
+    if (state == DiscReadState::kLoaded) {
+      break;
     }
-    if (Field_zoneContext.zudFiles != NULL) {
-        VS::Core::Memory::FreeLiveFromLowEnd(Field_zoneContext.zudFiles);
+    if (state == DiscReadState::kFailed) {
+      host.ReleaseRead(file);
+      host.FreeLoadedData(file);
+      host.Refuse(file == LoadedFile::kZone ? RoomLoadRefusal::kZoneReadFailed
+                                            : RoomLoadRefusal::kRoomReadFailed,
+                  0);
+      return false;
     }
-    VS::Core::Memory::FreeLiveFromLowEnd(Field_zoneContext.mpdFiles);
+    host.UpdateWhileLoading();
+  }
+  host.ReleaseRead(file);
+  return true;
 }
 
-// decomp: BATTLE.PRG func_80089104 (src/BATTLE/BATTLE.PRG/146C.c:14899)
-int Field_ZoneSoundFileId(void) { return Field_zoneSoundFileId; }
+// --- The zone file
 
-// decomp: BATTLE.PRG func_80089114 (src/BATTLE/BATTLE.PRG/146C.c:14901)
-void Field_SpawnRoomActors(void)
-{
-    int _[4] __attribute__((unused));
-    int slots[16];
-    Field_ActorPlacement data;
-    Field_MpdEnemySpawn* enemy;
-    Actors_RoomActorRecord* saved;
-    Field_ZndEnemyRecord* template_;
-    int i;
-    int visible;
-    u_short param;
-    int j;
-    u_short slot;
-    u_short id;
-
-    if (Field_zoneContext.mpdEnemyCount == 0) {
-        return;
-    }
-
-    for (j = 15; j >= 0; --j) {
-        slots[j] = 0;
-    }
-
-    for (i = 0; i < Field_zoneContext.mpdEnemyCount; ++i) {
-        enemy = &Field_zoneContext.mpdEnemies[i];
-        slot = (enemy->kind == 0) ? enemy->slot : ((Field_MpdObjectSpawn*)enemy)->slot;
-
-        if (slot < 16) {
-            slots[slot] = 1;
-        }
-    }
-
-    for (i = 0; i < Field_zoneContext.mpdEnemyCount; ++i) {
-        enemy = &Field_zoneContext.mpdEnemies[i];
-
-        if (enemy->kind == 0) {
-            visible = enemy->isHidden == 0;
-
-            switch (enemy->sceneTest) {
-            case 1:
-                if (State_ScriptFlag(1) != 0) {
-                    visible = 0;
-                }
-                break;
-
-            case 2:
-                if (State_ScriptFlag(1) != 1) {
-                    visible = 0;
-                }
-                break;
-
-            case 3:
-                if (State_ScriptFlag(2) != 1) {
-                    visible = 0;
-                }
-                break;
-            }
-
-            switch (enemy->flagTest) {
-            case 1:
-                if (State_ScriptFlag(0x82) != enemy->flagValue) {
-                    visible = 0;
-                }
-                break;
-
-            case 2:
-                if (State_ScriptFlag(0x82) > enemy->flagValue) {
-                    visible = 0;
-                }
-                break;
-
-            case 3:
-                if (State_ScriptFlag(0x82) < enemy->flagValue) {
-                    visible = 0;
-                }
-                break;
-            }
-
-            switch (enemy->statTest) {
-            case 1:
-                if ((enemy->statValue & 0x3FF)
-                    < Battle_characterState->stats->currentHp) {
-                    visible = 0;
-                }
-                break;
-
-            case 2:
-                if (Battle_characterState->stats->currentHp
-                    < (enemy->statValue & 0x3FF)) {
-                    visible = 0;
-                }
-                break;
-
-            case 3:
-                if (State_ScriptFlag(enemy->statValue & 0x3FF)
-                    != (enemy->statValue >> 10)) {
-                    visible = 0;
-                }
-                break;
-
-            case 4:
-                if (State_ScriptFlag(enemy->statValue & 0x3FF)
-                    > (enemy->statValue >> 10)) {
-                    visible = 0;
-                }
-                break;
-
-            case 5:
-                if (State_ScriptFlag(enemy->statValue & 0x3FF)
-                    < (enemy->statValue >> 10)) {
-                    visible = 0;
-                }
-                break;
-            }
-
-            id = enemy->enemyId;
-
-            switch (enemy->facing) {
-            case 0:
-            case 3:
-                param = 6;
-                break;
-
-            case 1:
-                param = 0;
-                break;
-
-            case 2:
-                param = 1;
-                break;
-            }
-            if (enemy->actorStateByte) {
-                param |= 0x80;
-            }
-
-            template_ = &Field_zoneContext.zndEnemies[id];
-            slot = enemy->slot;
-
-            if (slot == 0) {
-                for (j = 2; j < 10; ++j) {
-                    if ((Battle_actors[j] == NULL) && (slots[j] == 0)) {
-                        if (Actors_usesSecondaryBodyModel[template_->recordBytes[2]] != 0) {
-                            if ((Battle_actors[j + 4] != NULL)
-                                || (slots[j + 4] != 0)) {
-                                continue;
-                            }
-
-                            slots[j + 4] = 1;
-                        }
-
-                        slot = j;
-                        break;
-                    }
-                }
-                if (j >= 10) {
-                    VS::Core::IgnoreDiagnostic(0x86, 0);
-
-                    if (Field_zoneContext.zudData != NULL) {
-                        VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
-                    }
-
-                    Field_zoneContext.zudData = NULL;
-                    Field_zoneContext.loadedZudIndexPlusOne = 0;
-                    return;
-                }
-            } else if (Actors_usesSecondaryBodyModel[template_->recordBytes[2]] != 0) {
-                if ((Battle_actors[slot + 4] == NULL) && (slots[slot + 4] == 0)) {
-                    slots[slot + 4] = 1;
-                } else {
-                    VS::Core::IgnoreDiagnostic(0x86, 0);
-
-                    if (Field_zoneContext.zudData != NULL) {
-                        VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
-                    }
-
-                    Field_zoneContext.zudData = NULL;
-                    Field_zoneContext.loadedZudIndexPlusOne = 0;
-                    return;
-                }
-            }
-
-            if (visible) {
-                if (id == 0x7F) {
-                    data.tileX = enemy->tileX;
-                    data.tileZ = enemy->tileZ;
-                    data.direction = enemy->direction;
-                    data.height = enemy->height * 64;
-                    Actors_CreateActorWithEquipment(slot, 0x7F, 0, 0, 0, 0, &data, param);
-                } else {
-                    Actors_SpawnRoomEnemy(slot, enemy, (Actors_CharacterInit*)template_, param);
-                }
-            }
-        } else {
-            u_int flag = State_ScriptFlag(((Field_MpdObjectSpawn*)enemy)->flag & 0x3FF);
-            u_int model;
-            u_int max = ((Field_MpdObjectSpawn*)enemy)->flagMax;
-
-            if ((flag >= ((Field_MpdObjectSpawn*)enemy)->flagMin) && (flag <= max)) {
-                data.tileX = ((Field_MpdObjectSpawn*)enemy)->tileX;
-                data.tileZ = ((Field_MpdObjectSpawn*)enemy)->tileZ;
-                data.direction = ((Field_MpdObjectSpawn*)enemy)->height;
-                data.height = ((Field_MpdObjectSpawn*)enemy)->direction * 64;
-                slot = ((Field_MpdObjectSpawn*)enemy)->slot;
-
-                if (slot == 0xFF) {
-                    for (j = 2; j < 16; ++j) {
-                        if ((Battle_actors[j] == NULL) && (slots[j] == 0)) {
-                            slot = j;
-                            break;
-                        }
-                    }
-                    if (j >= 16) {
-                        VS::Core::IgnoreDiagnostic(0x86, 0);
-                        return;
-                    }
-                }
-
-                param = ((Field_MpdObjectSpawn*)enemy)->model;
-                model = param;
-                Actors_CreateAuxiliaryActor(slot, (model >> 12) | (model & 0xF00), &data,
-                    ((model >> 3) & 0x1C) | (data.height / 64), 0);
-            }
-        }
-    }
-
-    for (i = 0; i < 32; ++i) {
-        enemy = &Field_zoneContext.mpdEnemies[i];
-        saved = (Actors_RoomActorRecord *)(Actors_FindCachedRoomActorState(i));
-
-        if (saved != NULL) {
-            saved->isHidden = enemy->isHidden;
-        }
-    }
-    if (Field_zoneContext.zudData != NULL) {
-        VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
-    }
-
-    Field_zoneContext.zudData = NULL;
-    Field_zoneContext.loadedZudIndexPlusOne = 0;
+std::optional<ZoneFileLayout> DecodeZoneFile(std::span<const std::byte> file) {
+  if (file.size() < kZoneHeaderBytes) {
+    return std::nullopt;
+  }
+  const auto room_files =
+      SizedRange(file.size(), LoadWord(file, kZoneRoomFilesOffsetAt),
+                 LoadWord(file, kZoneRoomFilesSizeAt));
+  const auto enemies =
+      RangeToEnd(file.size(), LoadWord(file, kZoneEnemiesOffsetAt));
+  const auto textures =
+      RangeToEnd(file.size(), LoadWord(file, kZoneTexturesOffsetAt));
+  if (!room_files || !enemies || !textures) {
+    return std::nullopt;
+  }
+  return ZoneFileLayout{.room_files = *room_files,
+                        .enemies = *enemies,
+                        .textures = *textures,
+                        .music_id = LoadWord(file, kZoneMusicIdAt)};
 }
 
-// decomp: BATTLE.PRG func_80089888 (src/BATTLE/BATTLE.PRG/146C.c:15142)
-void Field_PlaceAshleyAtRoomEntrance(void)
-{
-    SVECTOR entry_step_offset;
-    Actors_ActorLocationQuery sp18;
-    Field_ActorPlacement entrance_placement;
-
-    Actors_FinishActorPlacement();
-    entrance_placement.tileX = Field_pendingDestinationDoor.entryTileX;
-    entrance_placement.tileZ = Field_pendingDestinationDoor.entryTileZ;
-    entrance_placement.direction = Field_pendingDestinationDoor.tileLocation.entryDirection;
-    entrance_placement.height = Field_pendingDestinationDoor.entryElevation * 64;
-    Actors_PlaceActorInRoom(0, &entrance_placement, -0x800, 2);
-
-    if (Field_pendingDestinationDoor.hasEntryStep) {
-        switch (Field_pendingDestinationDoor.entryElevation) {
-        case 0:
-            entry_step_offset.vx = 0x40;
-            entry_step_offset.vz = 0;
-            entry_step_offset.vy = 0;
-            break;
-        case 1:
-            entry_step_offset.vx = 0;
-            entry_step_offset.vz = 0x40;
-            entry_step_offset.vy = 0;
-            break;
-        case 2:
-            entry_step_offset.vx = 0x40;
-            entry_step_offset.vz = 0;
-            entry_step_offset.vy = 0;
-            break;
-        case 3:
-            entry_step_offset.vx = 0;
-            entry_step_offset.vz = 0x40;
-            entry_step_offset.vy = 0;
-            break;
-        default:
-            entry_step_offset.vy = 0;
-            break;
-        }
-        Actors_TranslateActorByAtRate(0, &entry_step_offset, 0);
-    }
-    Actors_ActorPlacement(0, &sp18);
-    Actors_RestoreActorIdlePose(0);
-    VS::Actors::BuildLiveActorPoseAtMatrix(0, &Render_frameScratch.viewMatrix);
-    Field_SetActorCollisionBypass(0, 0);
-    Battle_Ai_InitializeRoomNavigation();
+std::vector<Content::DiscFileExtent> DecodeRoomFileTable(
+    std::span<const std::byte> table) {
+  return DecodeFileEntries(table, table.size() / kRoomFileEntryBytes);
 }
 
-// decomp: BATTLE.PRG func_80089A00 (src/BATTLE/BATTLE.PRG/146C.c:15190)
-void Field_RestoreRoomEnemyCache(void)
-{
-    int j;
-    int i;
-    int found_cached_room;
-    Field_MpdEnemySpawn* enemy_spawn;
-    u_char* cached_actor_state;
-
-    found_cached_room = 0;
-
-    for (j = 0; j < 4; ++j) {
-        if ((State_recentRoomEnemyStates[j].recency != 0) && (State_recentRoomEnemyStates[j].zoneId == Field_zoneContext.zndId)
-            && (State_recentRoomEnemyStates[j].mapId == Field_zoneContext.mapId)) {
-            found_cached_room = 1;
-            State_currentRoomStateSlot = j;
-            for (i = 0; i < Field_zoneContext.mpdEnemyCount; ++i) {
-                enemy_spawn = &Field_zoneContext.mpdEnemies[i];
-                cached_actor_state = (u_char *)(Actors_FindCachedRoomActorState(i));
-                if (cached_actor_state != NULL) {
-                    enemy_spawn->isHidden = cached_actor_state[1];
-                }
-            }
-            break;
-        }
-    }
-
-    if (found_cached_room == 0) {
-        i = 0;
-        for (j = 0; j < 4; ++j) {
-            if (State_recentRoomEnemyStates[j].recency < State_recentRoomEnemyStates[i].recency) {
-                i = j;
-            }
-        }
-        State_currentRoomStateSlot = i;
-        VS::Core::Memory::ZeroLiveAlignedWords(&State_recentRoomEnemyStates[i], sizeof State_recentRoomEnemyStates[i]);
-    }
-
-    for (i = 0; i < 4; ++i) {
-        if (State_recentRoomEnemyStates[State_currentRoomStateSlot].recency < State_recentRoomEnemyStates[i].recency) {
-            --State_recentRoomEnemyStates[i].recency;
-        }
-    }
-
-    State_recentRoomEnemyStates[State_currentRoomStateSlot].recency = 4;
-    State_recentRoomEnemyStates[State_currentRoomStateSlot].zoneId = Field_zoneContext.zndId;
-    State_recentRoomEnemyStates[State_currentRoomStateSlot].mapId = Field_zoneContext.mapId;
+std::optional<ZoneEnemyTables> DecodeZoneEnemyTables(
+    std::span<const std::byte> section) {
+  if (section.size() < kWordBytes) {
+    return std::nullopt;
+  }
+  const std::int32_t count = LoadWord(section, 0);
+  if (count < 0) {
+    return std::nullopt;
+  }
+  const auto templates_at =
+      kZoneEnemyFilesAt +
+      (static_cast<std::size_t>(count) * kRoomFileEntryBytes);
+  const auto template_bytes =
+      static_cast<std::size_t>(count) * kZoneEnemyTemplateBytes;
+  if (!Fits(section.size(), templates_at, template_bytes)) {
+    return std::nullopt;
+  }
+  return ZoneEnemyTables{
+      .zud_files = DecodeFileEntries(section.subspan(kZoneEnemyFilesAt),
+                                     static_cast<std::size_t>(count)),
+      .templates = section.subspan(templates_at, template_bytes)};
 }
 
-// decomp: BATTLE.PRG _loadMpdEnemySection (src/BATTLE/BATTLE.PRG/146C.c:15238)
-void Field_LoadRoomEnemyPlacements(void* data, u_int dataLen)
-{
-    Boot_EncounterRoomPlacements(&data, &dataLen);
-    if (dataLen != 0) {
-        Field_zoneContext.mpdEnemies = (Field_MpdEnemySpawn *)(VS::Core::Memory::AllocateLiveFromLowEnd(dataLen));
-        VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.mpdEnemies, data, dataLen);
-        Field_zoneContext.mpdEnemyCount = dataLen / sizeof(Field_MpdEnemySpawn);
-        return;
-    }
-    Field_zoneContext.mpdEnemies = NULL;
-    Field_zoneContext.mpdEnemyCount = 0;
+void LoadZoneRoomFileTable(ZoneTableHost& host,
+                           std::span<const std::byte> table) {
+  if (table.empty()) {
+    host.Diagnostic(RoomLoadDiagnostic::kEmptyRoomFileTable);
+  }
+  host.StoreRoomFiles(DecodeRoomFileTable(table));
 }
 
-// decomp: BATTLE.PRG _loadMpd (src/BATTLE/BATTLE.PRG/146C.c:15254)
-void Field_QueueRoomLoad(int id)
-{
-    Content_DiscFile file;
-
-    file.lba = Field_zoneContext.mpdFiles[id].lba;
-    file.size = Field_zoneContext.mpdFiles[id].size;
-
-    if (Field_zoneContext.mpdDiscRequest != NULL) {
-        VS::Core::IgnoreDiagnostic(0x89, 0);
+void LoadZoneEnemyTemplates(ZoneTableHost& host,
+                            std::span<const std::byte> section) {
+  const auto tables = DecodeZoneEnemyTables(section);
+  if (!tables) {
+    host.Refuse(RoomLoadRefusal::kMalformedZoneEnemies, 0);
+    host.StoreZoneEnemies({}, {});
+    return;
+  }
+  host.StoreZoneEnemies(tables->zud_files, tables->templates);
+}
+namespace {
+// A palette TIM's lines in the room palette rows; lines outside the rows
+// are passed over.
+void CopyPaletteRows(ZoneTextureHost& host, std::span<const std::byte> pixels,
+                     const Render::ScreenRect& area) {
+  const auto line_bytes = static_cast<std::size_t>(area.width) * kHalfwordBytes;
+  std::size_t at = 0;
+  for (int line = area.y; line < area.y + area.height; ++line) {
+    const int row = line - kZonePaletteLine;
+    if (row >= 0 && row < kZonePaletteRows) {
+      host.CopyPaletteRow(pixels.subspan(at, line_bytes),
+                          {.row = row,
+                           .first_color = area.x - kZonePaletteColumn,
+                           .colors = area.width});
     }
-    Field_zoneContext.mpdDiscRequest = VS::Content::AllocateLiveDiscRequest(&file);
-    if (Field_zoneContext.mpdData != NULL) {
-        VS::Core::IgnoreDiagnostic(0x8A, 0);
-    }
-    Field_zoneContext.mpdData = VS::Core::Memory::AllocateLiveFromHighEnd(file.size);
-    if (Field_zoneContext.mpdDiscRequest != NULL) {
-        VS::Content::EnqueueLivePriorityDiscRequest(Field_zoneContext.mpdDiscRequest, Field_zoneContext.mpdData);
-    } else {
-        Field_zoneContext.mpdDiscRequest = VS::Content::CompleteLiveRefusedDiscRequest(&file, Field_zoneContext.mpdData);
-    }
+    at += line_bytes;
+  }
 }
 
-// decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15272)
-void Field_FinishRoomLoad(int requested_room_id)
-{
-    Boot_ResetGameplayInspection();
-    VECTOR initial_camera_target_fixed12;
-    VECTOR lookAt;
-    Actors_ActorLocationQuery ashley_placement;
-    int room_event_load_result;
-    int scene_id_or_packed_dimensions;
-    char* mpdHeader;
-    int mpd_section_offset;
-
-    if (Field_zoneContext.mpdDiscRequest == NULL) {
-        Field_QueueRoomLoad(requested_room_id);
-    }
-
-    while (Field_zoneContext.mpdDiscRequest->state != Content_DiscRequestState_Loaded) {
-        State_UpdatePlayTimeAndLoading(0);
-    }
-
-    VS::Content::ReleaseLiveDiscRequest(Field_zoneContext.mpdDiscRequest);
-    Field_zoneContext.mpdDiscRequest = NULL;
-
-    Render_legacyPrimitiveBuffers[0] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
-    Render_legacyPrimitiveBuffers[1] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);
-
-    VS::Render::InitializeLiveClutAnimation();
-
-    mpdHeader = (char *)(Field_zoneContext.mpdData);
-    mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->roomSectionOffset;
-
-    Field_LoadRoomSections(0, (void*)(mpd_section_offset + (intptr_t)mpdHeader));
-
-    Field_zoneContext.zndId = Field_pendingDestinationDoor.destinationZoneId;
-    Field_zoneContext.mapId = Field_pendingDestinationDoor.destinationRoomId;
-
-    scene_id_or_packed_dimensions = Field_CurrentSceneId();
-
-    if (scene_id_or_packed_dimensions != Field_zoneContext.currentSceneId) {
-        Field_zoneContext.currentSceneId = scene_id_or_packed_dimensions;
-        Field_BeginSceneActorTransition();
-    }
-
-    if (State_sceneTimer.resetScope == 0) {
-        State_ResetSceneTimer();
-    }
-
-    Field_isRoomVisitPending = 1;
-    scene_id_or_packed_dimensions = Field_CollisionMapDimensions(0);
-    Field_zoneContext.tileColumns = (scene_id_or_packed_dimensions & 0xFFFF) / 16;
-
-    if (scene_id_or_packed_dimensions < 0) {
-        scene_id_or_packed_dimensions += 0xFFFFF;
-    }
-    Field_zoneContext.tileRows = scene_id_or_packed_dimensions >> 0x14;
-
-    if (Field_RoomCameraBounds(0) != NULL) {
-        Field_zoneContext.bounds = *Field_RoomCameraBounds(0);
-    } else {
-        Field_zoneContext.bounds.minZ = 0;
-        Field_zoneContext.bounds.minX = 0;
-        Field_zoneContext.bounds.maxX = Field_zoneContext.tileColumns;
-        Field_zoneContext.bounds.maxZ = Field_zoneContext.tileRows;
-    }
-
-    {
-        short* reset_tail_words;
-        Field_roomLoadResetBlock.reserved00 = 0;
-        reset_tail_words = &Field_roomLoadResetBlock.reserved08;
-        Field_roomLoadResetBlock.reserved02 = 0;
-        Field_roomLoadResetBlock.reserved04 = 0;
-        Field_roomLoadResetBlock.reserved08 = 0;
-        reset_tail_words[1] = 0;
-        reset_tail_words[2] = 0;
-    }
-
-    VS::Render::CaptureLiveRoomBackgroundColors();
-
-    if (((Field_MpdHeader*)mpdHeader)->lootSectionSize != 0) {
-        mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->lootSectionOffset;
-        VS::Items::LoadLiveRoomChestLoot((void*)(mpd_section_offset + (intptr_t)mpdHeader));
-    }
-
-    {
-        u_short door_section_bytes;
-        intptr_t script_section_address;
-        int initial_entry_mode;
-        intptr_t door_section_address;
-        intptr_t cleared_section_address = ((Field_MpdHeader*)mpdHeader)->clearedSectionOffset;
-        cleared_section_address += (intptr_t)mpdHeader;
-        script_section_address = ((Field_MpdHeader*)mpdHeader)->scriptSectionOffset;
-        script_section_address += ((intptr_t)mpdHeader);
-        door_section_address = ((Field_MpdHeader*)mpdHeader)->doorSectionOffset;
-        door_section_address += ((intptr_t)mpdHeader);
-        door_section_bytes = ((Field_MpdHeader*)mpdHeader)->doorSectionSize;
-        initial_entry_mode = 1;
-        if (!Boot_EncounterUsesRoomEvents()) {
-            room_event_load_result = Boot_EncounterLoadRoomEvents();
-        } else {
-        room_event_load_result = Event_LoadRoomEventSections((void*)(cleared_section_address),
-            ((Field_MpdHeader*)mpdHeader)->clearedSectionSize, (void*)(script_section_address),
-            ((Field_MpdHeader*)mpdHeader)->scriptSectionSize, (void*)(door_section_address), door_section_bytes,
-            Boot_gameEntryMode == initial_entry_mode);
-        }
-    }
-
-    if (Boot_gameEntryMode == 1) {
-        Boot_gameEntryMode = 5;
-    }
-
-    mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->enemySectionOffset;
-    Field_LoadRoomEnemyPlacements(
-        (void*)(mpd_section_offset + (intptr_t)mpdHeader), ((Field_MpdHeader*)mpdHeader)->enemySectionSize);
-
-    VS::Core::Memory::FreeLiveFromHighEnd(mpdHeader);
-
-    Field_roomLoadResetBlock.reserved14 = 0;
-
-    Field_RestoreRoomEnemyCache();
-    Field_PlaceAshleyAtRoomEntrance();
-    Field_SpawnRoomActors();
-    Field_SnapRoomActorsToSupport();
-    ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(0, 0, Battle_characterState->stats->statuses & 0x21000, 1);
-    Battle_RemoveActorStatuses(0x21000, Battle_characterState->stats);
-
-    Field_roomGeometryDrawMode = 0;
-    Field_isFirstPersonViewEnabled = 0;
-    Actors_ashleyMoveInput[0] = 1;
-    Effects_effectBusyFlags = 0;
-    Actors_SetOtherActorLogicEnabled(1);
-    State_roomLoadResetWordTwo = 0;
-    State_roomLoadResetWordThree = 0;
-    State_roomLoadResetWordOne = 0;
-    Input_buttonRepeat = 0;
-    Input_releasedButtons = 0;
-    Input_buttonsPressed.allButtons = 0;
-    Input_previousButtons = 0;
-    Input_buttonsState = 0;
-    Render_frameScratch.camera.farClip = ONE;
-
-    if (Field_screenTransitionEffect == 3) {
-        Field_screenTransitionStep = 0;
-        Field_screenTransitionAlpha = 0;
-    } else {
-        Field_screenTransitionStep = 3;
-    }
-
-    VS::Render::SetLiveCameraNearClip(ONE / 64);
-    VS::Render::SetLiveCameraProjectionDistance(ONE / 8);
-
-    Field_sphericalCamera.delta.yaw = 0;
-    Field_sphericalCamera.delta.distance = 0;
-    Field_sphericalCamera.values.yaw =
-        Field_sphericalCamera.delta.pitch;
-    Field_sphericalCamera.values.distance =
-        Field_sphericalCamera.initialDistance;
-    if (Field_sphericalCamera.initialDistance == (3 * ONE / 8)) {
-        Field_sphericalCamera.delta.mode = 1;
-    } else {
-        Field_sphericalCamera.delta.mode = 3;
-    }
-
-    Field_sphericalCamera.values.pitch = -384;
-    Field_sphericalCamera.zoomVelocity = 0;
-
-    if ((Field_zoneContext.zndId == 27) && (Field_zoneContext.mapId == 1)) {
-        Field_sphericalCamera.values.pitch = -128;
-    }
-
-    Field_roomResetWord = 0;
-
-    Actors_ActorPlacement(0, &ashley_placement);
-
-    initial_camera_target_fixed12.vx = ashley_placement.location.position.vx * ONE;
-    initial_camera_target_fixed12.vy = ashley_placement.location.position.vy * ONE - 90 * ONE;
-    initial_camera_target_fixed12.vz = ashley_placement.location.position.vz * ONE;
-
-    Field_ClampCameraLookAtToZone(&initial_camera_target_fixed12, &lookAt);
-
-    Render_frameScratch.camera.lookAt = lookAt;
-    Render_frameScratch.camera.angles.vy = Field_sphericalCamera.values.yaw;
-
-    Field_SetCameraPositionFromAngles(&Field_sphericalCamera.values);
-    Actors_ActorPlacement(0, &ashley_placement);
-    Field_UpdateCameraTileConstraint(0, &ashley_placement.location.packedTile.target);
-    VS::Render::ResetLiveFramebufferEffect();
-    VS::Render::CommitLiveClutRows();
-    VS::Render::ConfigureLiveFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
-
-    if (Save_NativeResumePending() && !Save_NativeFinishResume()) {
-        VS::Boot::JumpToLiveTitle();
-        return;
-    }
-
-    if ((room_event_load_result << 0x10) != 0) {
-        Effects_InitializeRoomWeather(1);
-        Event_PrepareCutsceneActors();
-    } else {
-        if (Event_EvaluateRoomEventTriggers(1, 0, NULL, 0) == 1) {
-            Event_RequestEventStart();
-            Effects_InitializeRoomWeather(1);
-            Event_PrepareCutsceneActors();
-        } else {
-            Field_ShowPrimaryRoomGeometry();
-            Actors_EnableAllActorModels();
-            Effects_InitializeRoomWeather(0);
-            Field_RestoreRoomEffectSoundVolume();
-            Field_EnterFieldExplorationMode();
-            Battle_SetHudHidden(0);
-            if (Field_roomMusicSlot != 0) {
-                Audio_PlayMusicSlot(Field_roomMusicSlot, 0x7F, 0);
-            }
-            Field_screenTransitionStep = 4;
-            VS::Render::ShowLiveDisplay();
-        }
-    }
-    VS::Input::InvalidateLiveControllerConnections();
+void UploadZoneTexture(ZoneTextureHost& host,
+                       std::span<const std::byte> tim_bytes) {
+  const auto tim = Render::ParseTim(tim_bytes);
+  if (!tim) {
+    return;
+  }
+  const Render::TimBlock& image = tim->image;
+  const auto pixels = tim_bytes.subspan(image.pixel_offset, image.pixel_bytes);
+  if (image.area.x >= kZonePaletteColumn) {
+    CopyPaletteRows(host, pixels, image.area);
+    return;
+  }
+  Render::ScreenRect area = image.area;
+  area.x = static_cast<std::int16_t>(area.x - kZoneTextureColumnShift);
+  area.y = static_cast<std::int16_t>(area.y + kZoneTextureLineShift);
+  host.UploadImage(area, pixels);
 }
 
-// decomp: BATTLE.PRG func_8008A364 (src/BATTLE/BATTLE.PRG/146C.c:15480)
-void Field_RemoveRoomActors(void)
-{
-    int i;
+// decomp: BATTLE.PRG _finishLoadZnd (146C.c:14862-14873)
+void SwitchZoneMusic(ZoneLoadHost& host, int music_id) {
+  host.StopAndFreeCurrentMusic();
+  for (int slot = 1; slot <= kZoneMusicSlots; ++slot) {
+    host.FreeMusicSlot(slot);
+  }
+  host.SetMusicSlot(0);
+  if (music_id != 0) {
+    host.LoadWaveBank(music_id);
+    host.SetMusicSlot(host.LoadMusicSlot(music_id, kZoneMusicTargetSlot));
+  }
+}
+}  // namespace
 
-    for (i = 2; i < 16; ++i) {
-        Actors_RemoveActorAtSlot(i, 0);
+void UploadZoneTextures(ZoneTextureHost& host,
+                        std::span<const std::byte> section) {
+  if (section.size() < kTextureTablesAt) {
+    host.Refuse(RoomLoadRefusal::kMalformedZoneTextures, 0);
+    return;
+  }
+  const std::int32_t first_table_bytes = LoadWord(section, 0);
+  if (first_table_bytes <= 0) {
+    return;
+  }
+  const auto table_bytes = static_cast<std::size_t>(first_table_bytes);
+  if (table_bytes < kWordBytes ||
+      !Fits(section.size(), kTextureTablesAt, table_bytes)) {
+    host.Refuse(RoomLoadRefusal::kMalformedZoneTextures, 0);
+    return;
+  }
+  const auto table = section.subspan(kTextureTablesAt, table_bytes);
+  const std::int32_t count = LoadWord(table, 0);
+  std::size_t at = kWordBytes;
+  for (std::int32_t index = 0; index < count; ++index) {
+    if (!Fits(table.size(), at, kWordBytes)) {
+      host.Refuse(RoomLoadRefusal::kMalformedZoneTextures, index);
+      return;
     }
+    const std::int32_t tim_size = LoadWord(table, at);
+    at += kWordBytes;
+    const std::size_t advance =
+        tim_size < 0
+            ? 0
+            : (static_cast<std::size_t>(tim_size) / kWordBytes) * kWordBytes;
+    if (tim_size < 0 || !Fits(table.size(), at, advance)) {
+      host.Refuse(RoomLoadRefusal::kMalformedZoneTextures, index);
+      return;
+    }
+    UploadZoneTexture(host, table.subspan(at));
+    at += advance;
+  }
 }
 
-// decomp: BATTLE.PRG func_8008A3A0 (src/BATTLE/BATTLE.PRG/146C.c:15489)
-void Field_UnloadCurrentRoom(void)
-{
-    Boot_ResetGameplayInspection();
-    int i;
-
-    for (i = 0; i < 2; ++i) {
-        Render_frameScratch.orderingTable = ((u_char*)(Render_legacyOrderingTables[Render_frameBuf])) + 0x10;
-        ClearOTagR((u_long *)(Render_frameScratch.orderingTable), 0x800);
-        VS::Core::NoOperation();
-        VS::Render::DrawLiveScreenTransition(Render_frameScratch.orderingTable);
-        VS::Render::PresentLiveFieldFrame((u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + 0x1FFC));
-    }
-
-    State_UpdatePlayTimeAndLoading(0);
-    Event_FreeRoomEventSections();
-    Field_MarkCurrentRoomVisited();
-    Field_ReleaseOwnedRoomSections(0);
-    if (Field_roomCleanupBuffer != NULL) {
-        VS::Core::Memory::FreeLiveFromLowEnd(Field_roomCleanupBuffer);
-    }
-    if (Field_auxiliaryActor != NULL) {
-        VS::Battle::Ai::FreeLiveActorAiState(Field_auxiliaryActor);
-    }
-    Field_RemoveRoomActors();
-    VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
-    Battle_SetActorMarker(0, 0);
-    Actors_ResetAllActorMovement();
-    VS::Items::ClearLiveRoomLootList();
-    VS::Core::Memory::FreeLiveFromLowEnd(Render_legacyPrimitiveBuffers[1]);
-    VS::Core::Memory::FreeLiveFromLowEnd(Render_legacyPrimitiveBuffers[0]);
+bool QueueZoneLoad(ZoneLoadHost& host, int zone_id) {
+  if (zone_id < 0 || zone_id >= kZoneCount) {
+    host.Refuse(RoomLoadRefusal::kZoneId, zone_id);
+    return false;
+  }
+  QueueFileRead(host, LoadedFile::kZone, host.ZoneFile(zone_id),
+                RoomLoadDiagnostic::kZoneReadPending,
+                RoomLoadDiagnostic::kZoneDataHeld);
+  if (host.MusicFadeEnabled() &&
+      host.CurrentMusicId() != host.ZoneMusicId(zone_id)) {
+    host.FadeOutCurrentMusic();
+  }
+  return true;
 }
 
-// decomp: BATTLE.PRG _loadZndTims (src/BATTLE/BATTLE.PRG/146C.c:15608)
-void Field_UploadZoneTextures(void* data)
-{
-    TIM_IMAGE tim;
-    u_long* timPtrs[4];
-    int numTims;
-    int i;
-    u_long* dataPtr = (u_long *)(data);
-    int byteOffset = 0;
-    int* sizePtr = (int*)dataPtr;
-    u_long** ptrTableEntry = timPtrs;
+void FinishZoneLoad(ZoneLoadHost& host, int zone_id) {
+  if (!host.ReadPending(LoadedFile::kZone) && !QueueZoneLoad(host, zone_id)) {
+    return;
+  }
+  if (!AwaitFileRead(host, LoadedFile::kZone)) {
+    return;
+  }
+  if (host.SceneTimerResetScope() == SceneTimerScope::kZone) {
+    host.ResetSceneTimer();
+  }
+  const auto file = host.LoadedData(LoadedFile::kZone);
+  const auto layout = DecodeZoneFile(file);
+  if (!layout) {
+    host.Refuse(RoomLoadRefusal::kMalformedZoneFile, zone_id);
+    host.FreeLoadedData(LoadedFile::kZone);
+    return;
+  }
+  LoadZoneEnemyTemplates(host, Section(file, layout->enemies));
+  UploadZoneTextures(host, Section(file, layout->textures));
+  LoadZoneRoomFileTable(host, Section(file, layout->room_files));
+  const int music_id = layout->music_id;
+  host.FreeLoadedData(LoadedFile::kZone);
 
-    do {
-        if (*sizePtr > 0) {
-            *ptrTableEntry = dataPtr + ((byteOffset / 4) + 4);
-        } else {
-            *ptrTableEntry = NULL;
-        }
-        byteOffset += *sizePtr;
-        ++sizePtr;
-        ++ptrTableEntry;
-    } while ((intptr_t)sizePtr < ((intptr_t)data + 0x10));
-
-    dataPtr = timPtrs[0];
-    numTims = *dataPtr++;
-
-    for (i = 0; i < numTims; ++i) {
-        byteOffset = *dataPtr++;
-
-        VS::Render::ParseLiveTim(dataPtr, &tim);
-
-        if (tim.paddr != NULL) {
-            if (tim.prect->x >= 768) {
-                int line = tim.prect->y;
-                u_short* pixels = (u_short*)tim.paddr;
-
-                while (line < (tim.prect->y + tim.prect->h)) {
-                    u_int clutIndex = line - 224;
-                    if (clutIndex < 4) {
-                        Field_CopyZonePaletteRow(
-                            pixels, clutIndex, tim.prect->x - 768, tim.prect->w);
-                    }
-                    ++line;
-                    pixels += tim.prect->w;
-                }
-            } else {
-                tim.prect->x -= 320;
-                tim.prect->y += 256;
-                LoadImage(tim.prect, tim.paddr);
-            }
-        }
-        dataPtr += byteOffset >> 2;
-    }
+  if (!host.NativeResumePending()) {
+    host.ResetZoneScriptFlags(host.GameEntryMode() == kNewGameEntryMode);
+  }
+  if (host.CurrentMusicId() != music_id && host.MusicFadeEnabled()) {
+    SwitchZoneMusic(host, music_id);
+  }
+  host.FinishZoneMusic(music_id);
 }
 
-// decomp: BATTLE.PRG _loadMpdRoomSection (src/BATTLE/BATTLE.PRG/146C.c:15663)
-int Field_LoadRoomSections(int owner_room_index, void* data)
-{
-    int i;
-    void* room_section_allocation;
-    Field_RoomRecord* room_record;
-    Field_MpdSectionE* sectionE;
-    u_int dataSz;
-
-    Field_isRoomTintActive = 0;
-
-    for (i = 0, dataSz = 0; i < 24; ++i) {
-        dataSz += ((int*)data)[i];
-    }
-
-    if (dataSz == 0) {
-        return 0;
-    }
-
-    VS::Core::Memory::CopyLiveAlignedWords(&Field_roomData.header, data, 0x60);
-    room_section_allocation = VS::Core::Memory::AllocateLiveFromLowEnd(dataSz);
-    VS::Core::Memory::CopyLiveAlignedWords(room_section_allocation, ((u_char*)(data)) + 0x60, dataSz);
-
-    dataSz = 0;
-    room_record = &Field_roomData;
-
-    for (i = 0; i < 24; i++) {
-        if (((int*)data)[i] > 0) {
-            (&room_record->geometry)[i] = (int *)((void*)(((u_char*)(room_section_allocation)) + dataSz));
-        } else {
-            (&room_record->geometry)[i] = NULL;
-        }
-        dataSz += ((int*)data)[i];
-    }
-
-    Field_roomData.isLoaded = 1;
-    Field_roomData.displayFlag = 0;
-    Field_roomData.roomIndex = owner_room_index;
-
-    if (Field_roomData.geometry != NULL) {
-        Field_OffsetRoomTextureIds(11, Field_roomData.geometry);
-    }
-
-    sectionE = Field_roomData.sectionE;
-    if (sectionE != NULL) {
-        sectionE->firstArray = sizeof(*sectionE);
-        if (sectionE->hasSecondArray > 0) {
-            sectionE->secondArray = sizeof(*sectionE);
-            sectionE->secondArray += (sectionE->secondArrayOffset >> 2) * sizeof(int);
-        } else {
-            sectionE->secondArray = 0;
-        }
-    }
-
-    if (Field_roomData.collisionMap != NULL) {
-        Field_roomData.collisionMap->cellCount =
-            Field_roomData.collisionMap->width
-            * Field_roomData.collisionMap->height;
-    }
-
-    if (Field_roomData.minimapScene != NULL) {
-        VS::Field::ResolveLiveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
-        Field_RestoreSceneRoomVisits(Field_roomData.minimapScene);
-        Field_roomData.minimapScene->rooms[0].visited = 1;
-        if (Audio_Seq_unusedStateFlags.doorEntered == 0) {
-            Field_MarkEntranceDoorOnSceneMap(Field_enteredDoorId);
-        } else {
-            Field_MarkEntranceDoorOnSceneMap(Audio_Seq_unusedStateFlags.doorEntered - 1);
-            Audio_Seq_unusedStateFlags.doorEntered = 0;
-        }
-    }
-
-    Field_ResetGimmickAnimationQueue();
-    Field_InitializeRoomEffects();
-    VS::Items::RestoreLiveRoomChestStates();
-    Field_InitializeMovingPlatforms();
-    Battle_ResetFloatingLabels();
-    Effects_AllocateWeatherParticles();
-    Field_InitializeRoomBackgroundColors();
-    Field_UploadRoomPalettes();
-
-    Field_reservedResetByte = 0;
-
-    if (Field_roomData.sectionE != NULL) {
-        Boot_WaitForOverlayReady();
-    }
-    return 1;
+void ReleaseZoneData(ZoneReleaseHost& host) {
+  host.ReleaseZoneEventResources();
+  host.FreeZoneTables();
 }
 
-// decomp: BATTLE.PRG func_8008ABF0 (src/BATTLE/BATTLE.PRG/146C.c:15774)
-int Field_ReleaseOwnedRoomSections(int owner_room_index)
-{
-    if (Field_roomData.isLoaded == 1) {
-        if (Field_roomData.roomIndex == owner_room_index) {
-            Field_ReleaseTiledBackground();
-            Field_ReleaseWeatherParticles();
-            ((void (*)(void))Field_ReleaseRoomEffects)();
-            if (Field_roomData.geometry != 0) {
-                VS::Core::Memory::FreeLiveFromLowEnd((void*)Field_roomData.geometry);
-            }
-            VS::Core::Memory::ZeroLiveAlignedWords(&Field_roomData, sizeof(Field_RoomRecord));
-            return 1;
-        }
+int ZoneSoundFileId(int zone_music_id) { return zone_music_id; }
+
+// --- Room placements
+
+namespace {
+[[nodiscard]] std::uint8_t LoadByte(std::span<const std::byte> bytes,
+                                    std::size_t offset) {
+  return Load<std::uint8_t>(bytes, offset);
+}
+
+[[nodiscard]] std::uint16_t LoadHalfword(std::span<const std::byte> bytes,
+                                         std::size_t offset) {
+  return Load<std::uint16_t>(bytes, offset);
+}
+
+[[nodiscard]] EnemyPlacement DecodeEnemyPlacement(
+    std::span<const std::byte> record) {
+  return {.enemy_id = LoadByte(record, kEnemyIdAt),
+          .slot = LoadByte(record, kEnemySlotAt),
+          .flag_test = LoadByte(record, kEnemyFlagTestAt),
+          .stat_test = LoadByte(record, kEnemyStatTestAt),
+          .flag_value = LoadHalfword(record, kEnemyFlagValueAt),
+          .stat_value = LoadHalfword(record, kEnemyStatValueAt),
+          .placement = {.tile_x = LoadByte(record, kEnemyTileXAt),
+                        .direction = LoadByte(record, kEnemyDirectionAt),
+                        .tile_z = LoadByte(record, kEnemyTileZAt),
+                        .height = LoadByte(record, kEnemyHeightAt)},
+          .facing = LoadByte(record, kEnemyFacingAt),
+          .starts_engaged = LoadByte(record, kEnemyEngagedAt) != 0,
+          .scene_test = LoadByte(record, kEnemySceneTestAt)};
+}
+
+[[nodiscard]] ObjectPlacement DecodeObjectPlacement(
+    std::span<const std::byte> record) {
+  return {.flag = LoadHalfword(record, kObjectFlagAt),
+          .flag_min = LoadByte(record, kObjectFlagMinAt),
+          .flag_max = LoadByte(record, kObjectFlagMaxAt),
+          .slot = LoadByte(record, kObjectSlotAt),
+          .tile_x = LoadByte(record, kObjectTileXAt),
+          .tile_z = LoadByte(record, kObjectTileZAt),
+          .height = LoadByte(record, kObjectHeightAt),
+          .direction = LoadByte(record, kObjectDirectionAt),
+          .model = LoadHalfword(record, kObjectModelAt)};
+}
+
+[[nodiscard]] bool SceneTestPasses(std::uint8_t test,
+                                   const PlacementTestHost& host) {
+  switch (test) {
+    case kSceneFirstFlagClear:
+      return host.ScriptFlag(kSceneFirstFlag) == 0;
+    case kSceneFirstFlagSet:
+      return host.ScriptFlag(kSceneFirstFlag) == 1;
+    case kSceneSecondFlagSet:
+      return host.ScriptFlag(kSceneSecondFlag) == 1;
+    default:
+      return true;
+  }
+}
+
+[[nodiscard]] bool FlagTestPasses(const EnemyPlacement& enemy,
+                                  const PlacementTestHost& host) {
+  switch (enemy.flag_test) {
+    case kFlagEqual:
+      return host.ScriptFlag(kPlacementFlag) == enemy.flag_value;
+    case kFlagAtMost:
+      return host.ScriptFlag(kPlacementFlag) <= enemy.flag_value;
+    case kFlagAtLeast:
+      return host.ScriptFlag(kPlacementFlag) >= enemy.flag_value;
+    default:
+      return true;
+  }
+}
+
+[[nodiscard]] bool StatTestPasses(const EnemyPlacement& enemy,
+                                  const PlacementTestHost& host) {
+  const int value = enemy.stat_value & kStatValueMask;
+  const int threshold = enemy.stat_value >> kStatThresholdShift;
+  switch (enemy.stat_test) {
+    case kStatHpAtMost:
+      return host.AshleyCurrentHp() <= value;
+    case kStatHpAtLeast:
+      return host.AshleyCurrentHp() >= value;
+    case kStatFlagEqual:
+      return host.ScriptFlag(value) == threshold;
+    case kStatFlagAtMost:
+      return host.ScriptFlag(value) <= threshold;
+    case kStatFlagAtLeast:
+      return host.ScriptFlag(value) >= threshold;
+    default:
+      return true;
+  }
+}
+
+// The actor slots the room's placements name, which the free slot searches
+// pass over, plus the second bodies already given.
+using ReservedSlots = std::array<bool, kRoomActorSlots>;
+
+enum class SlotChoice : std::uint8_t { kChosen, kNoFreeSlot, kRefused };
+
+struct EnemySlot {
+  SlotChoice choice = SlotChoice::kChosen;
+  int slot = 0;
+};
+
+[[nodiscard]] bool SlotFree(const RoomActorSpawnHost& host,
+                            const ReservedSlots& reserved, int slot) {
+  return !host.ActorSlotOccupied(slot) &&
+         !reserved.at(static_cast<std::size_t>(slot));
+}
+
+// The first free enemy slot (2-9) whose second body's slot, when it has
+// one, is free too; that slot is reserved.
+[[nodiscard]] EnemySlot FirstFreeEnemySlot(const RoomActorSpawnHost& host,
+                                           ReservedSlots& reserved,
+                                           bool secondary) {
+  for (int slot = kFirstRoomActorSlot; slot < kRoomEnemySlotEnd; ++slot) {
+    if (!SlotFree(host, reserved, slot)) {
+      continue;
     }
-    return 0;
-}
-
-// decomp: BATTLE.PRG _vsBattleNop2 (src/BATTLE/BATTLE.PRG/146C.c:16031)
-void Field_ZoneCleanupHook(int arg0 __attribute__((unused))) { }
-
-// decomp: BATTLE.PRG func_8008B6FC (src/BATTLE/BATTLE.PRG/146C.c:16061)
-intptr_t Field_RoomAuxiliaryData(void) { return (intptr_t)(Field_roomData.section6); }
-
-// decomp: BATTLE.PRG func_8008C478 (src/BATTLE/BATTLE.PRG/146C.c:16467)
-intptr_t Field_RoomSupplementalRecord(int supplemental_record_index)
-{
-    if (Field_roomData.section7 != 0) {
-        return (intptr_t)(((u_char*)(Field_roomData.section7)) + (supplemental_record_index * 8));
+    if (secondary) {
+      const int body = slot + kSecondaryBodySlotOffset;
+      if (!SlotFree(host, reserved, body)) {
+        continue;
+      }
+      reserved.at(static_cast<std::size_t>(body)) = true;
     }
-    return 0;
+    return {.choice = SlotChoice::kChosen, .slot = slot};
+  }
+  return {.choice = SlotChoice::kNoFreeSlot};
 }
 
-// decomp: BATTLE.PRG vs_battle_inWorkshop (src/BATTLE/BATTLE.PRG/146C.c:16798)
-int Field_IsCurrentRoomWorkshop(void) { return Field_roomData.environment->isWorkshop; }
-
-// decomp: BATTLE.PRG func_8008D3E8 (src/BATTLE/BATTLE.PRG/146C.c:16800)
-int Field_RoomEnvironmentFlags(void) { return Field_roomData.environment->environmentFlags; }
-
-// decomp: BATTLE.PRG vs_battle_getCurrentSceneId (src/BATTLE/BATTLE.PRG/146C.c:16802)
-int Field_CurrentSceneId(void) { return Field_roomData.environment->sceneId; }
-
-// decomp: BATTLE.PRG func_8008D418 (src/BATTLE/BATTLE.PRG/146C.c:16804)
-int Field_RoomFallDestination(void)
-{
-    return (Field_roomData.environment->fallDestinationZone << 0x10)
-         | Field_roomData.environment->fallDestinationRoom;
+// decomp: BATTLE.PRG func_80089114 (146C.c:15041-15100)
+[[nodiscard]] EnemySlot ChooseEnemySlot(RoomActorSpawnHost& host,
+                                        ReservedSlots& reserved, int named,
+                                        bool secondary) {
+  if (named == 0) {
+    return FirstFreeEnemySlot(host, reserved, secondary);
+  }
+  const int body = named + kSecondaryBodySlotOffset;
+  if (named >= kRoomActorSlots || (secondary && body >= kRoomActorSlots)) {
+    host.Refuse(RoomLoadRefusal::kActorSlot, named);
+    return {.choice = SlotChoice::kRefused, .slot = named};
+  }
+  if (secondary) {
+    if (!SlotFree(host, reserved, body)) {
+      return {.choice = SlotChoice::kNoFreeSlot, .slot = named};
+    }
+    reserved.at(static_cast<std::size_t>(body)) = true;
+  }
+  return {.choice = SlotChoice::kChosen, .slot = named};
 }
 
-// decomp: BATTLE.PRG func_8008E470 (src/BATTLE/BATTLE.PRG/146C.c:17321)
-int Field_IsRoomAudioSequenceAbsent(void) { return (uintptr_t)Field_roomData.soundData < 1; }
+// False when no slot is free, which ends the spawning.
+bool SpawnEnemyPlacement(RoomActorSpawnHost& host, ReservedSlots& reserved,
+                         const RoomPlacement& placement, std::size_t index) {
+  const EnemyPlacement& enemy = placement.enemy;
+  const int enemy_id = enemy.enemy_id;
+  const bool templated = enemy_id != kUntemplatedEnemyId;
+  const int templates = host.ZoneEnemyCount();
+  if (templated && enemy_id >= templates) {
+    host.Refuse(RoomLoadRefusal::kEnemyTemplate, static_cast<int>(index));
+    return true;
+  }
+  const bool secondary =
+      enemy_id < templates && host.TemplateUsesSecondaryBody(enemy_id);
+  const EnemySlot slot = ChooseEnemySlot(host, reserved, enemy.slot, secondary);
+  if (slot.choice == SlotChoice::kNoFreeSlot) {
+    host.Diagnostic(RoomLoadDiagnostic::kNoFreeActorSlot);
+    host.FreeCachedZud();
+    return false;
+  }
+  if (slot.choice == SlotChoice::kRefused ||
+      !EnemyPlacementVisible(placement, host)) {
+    return true;
+  }
+  const int flags = EnemySpawnFlags(enemy);
+  if (templated) {
+    host.SpawnEnemy(slot.slot, index, enemy_id, flags);
+    return true;
+  }
+  const Actors::SpawnPlacement& at = enemy.placement;
+  host.SpawnUntemplatedEnemy(
+      slot.slot,
+      {.tile_x = at.tile_x,
+       .direction = at.direction,
+       .tile_z = at.tile_z,
+       .height = static_cast<std::uint8_t>(at.height * kElevationHeightUnits)},
+      flags);
+  return true;
+}
 
-// decomp: BATTLE.PRG func_8008E4AC (src/BATTLE/BATTLE.PRG/146C.c:17329)
-short Field_RoomEnvironmentParameter(void) { return Field_roomData.environment->opaque56; }
+// False when no slot is free, which ends the spawning.
+bool SpawnObjectPlacement(RoomActorSpawnHost& host,
+                          const ReservedSlots& reserved,
+                          const ObjectPlacement& object) {
+  if (!ObjectPlacementVisible(object, host)) {
+    return true;
+  }
+  int slot = object.slot;
+  if (object.slot == kAnyObjectSlot) {
+    slot = kRoomActorSlots;
+    for (int free = kFirstRoomActorSlot; free < kRoomActorSlots; ++free) {
+      if (SlotFree(host, reserved, free)) {
+        slot = free;
+        break;
+      }
+    }
+    if (slot == kRoomActorSlots) {
+      host.Diagnostic(RoomLoadDiagnostic::kNoFreeActorSlot);
+      return false;
+    }
+  } else if (slot >= kRoomActorSlots) {
+    host.Refuse(RoomLoadRefusal::kActorSlot, slot);
+    return true;
+  }
+  // The object's height and direction swap places in its placement.
+  const Actors::SpawnPlacement at{
+      .tile_x = object.tile_x,
+      .direction = object.height,
+      .tile_z = object.tile_z,
+      .height =
+          static_cast<std::uint8_t>(object.direction * kElevationHeightUnits)};
+  const int model = object.model;
+  host.SpawnObject(
+      slot, (model >> kObjectModelHighShift) | (model & kObjectModelLowMask),
+      at,
+      ((model >> kObjectMaterialShift) & kObjectMaterialMask) |
+          (at.height / kElevationHeightUnits));
+  return true;
+}
 
-// decomp: BATTLE.PRG _getRoomTrapLevel (src/BATTLE/BATTLE.PRG/146C.c:17331)
-int Field_RoomTrapLevel(void) { return Field_roomData.environment->trapLevel; }
+void RememberHiddenFlags(RoomActorSpawnHost& host) {
+  const auto records = host.PlacementRecords();
+  const std::size_t count =
+      std::min(records.size() / kRoomPlacementBytes, kRememberedHiddenFlags);
+  for (std::size_t index = 0; index < count; ++index) {
+    host.RememberHidden(
+        static_cast<int>(index),
+        LoadByte(records, (index * kRoomPlacementBytes) + kPlacementHiddenAt));
+  }
+}
+}  // namespace
 
-}  // extern "C"
+std::vector<RoomPlacement> DecodeRoomPlacements(
+    std::span<const std::byte> records) {
+  const std::size_t count = records.size() / kRoomPlacementBytes;
+  std::vector<RoomPlacement> placements;
+  placements.reserve(count);
+  for (std::size_t index = 0; index < count; ++index) {
+    const auto record =
+        records.subspan(index * kRoomPlacementBytes, kRoomPlacementBytes);
+    placements.push_back({.kind = LoadByte(record, kPlacementKindAt),
+                          .hidden = LoadByte(record, kPlacementHiddenAt),
+                          .enemy = DecodeEnemyPlacement(record),
+                          .object = DecodeObjectPlacement(record)});
+  }
+  return placements;
+}
+
+bool EnemyPlacementVisible(const RoomPlacement& placement,
+                           const PlacementTestHost& host) {
+  const EnemyPlacement& enemy = placement.enemy;
+  return placement.hidden == 0 && SceneTestPasses(enemy.scene_test, host) &&
+         FlagTestPasses(enemy, host) && StatTestPasses(enemy, host);
+}
+
+int EnemySpawnFlags(const EnemyPlacement& enemy) {
+  int flags = kDefaultFacingSpawnFlags;
+  if (enemy.facing == kFacingCodeOne) {
+    flags = kFacingOneSpawnFlags;
+  } else if (enemy.facing == kFacingCodeTwo) {
+    flags = kFacingTwoSpawnFlags;
+  }
+  if (enemy.starts_engaged) {
+    flags |= kEngagedSpawnFlag;
+  }
+  return flags;
+}
+
+bool ObjectPlacementVisible(const ObjectPlacement& object,
+                            const PlacementTestHost& host) {
+  const int value = host.ScriptFlag(object.flag & kObjectFlagMask);
+  return value >= object.flag_min && value <= object.flag_max;
+}
+
+void SpawnRoomActors(RoomActorSpawnHost& host) {
+  const auto placements = DecodeRoomPlacements(host.PlacementRecords());
+  if (placements.empty()) {
+    return;
+  }
+  ReservedSlots reserved{};
+  for (const RoomPlacement& placement : placements) {
+    if (placement.NamedSlot() < kRoomActorSlots) {
+      reserved.at(placement.NamedSlot()) = true;
+    }
+  }
+  for (std::size_t index = 0; index < placements.size(); ++index) {
+    const RoomPlacement& placement = placements[index];
+    const bool spawning =
+        placement.IsEnemy()
+            ? SpawnEnemyPlacement(host, reserved, placement, index)
+            : SpawnObjectPlacement(host, reserved, placement.object);
+    if (!spawning) {
+      return;
+    }
+  }
+  RememberHiddenFlags(host);
+  host.FreeCachedZud();
+}
+
+// --- Ashley's entrance
+
+EntryStep EntranceStep(const RoomEntrance& entrance) {
+  if (entrance.elevation >= kSteppingElevations) {
+    return {};
+  }
+  if (entrance.elevation % 2 == 0) {
+    return {.x = kEntryStepDistance, .z = 0};
+  }
+  return {.x = 0, .z = kEntryStepDistance};
+}
+
+void PlaceAshleyAtRoomEntrance(RoomEntranceHost& host) {
+  const RoomEntrance entrance = host.PendingEntrance();
+  host.PlaceAshley({.tile_x = entrance.tile_x,
+                    .direction = entrance.direction,
+                    .tile_z = entrance.tile_z,
+                    .height = static_cast<std::uint8_t>(
+                        entrance.elevation * kElevationHeightUnits)});
+  if (entrance.has_entry_step) {
+    host.StepAshley(EntranceStep(entrance));
+  }
+  host.SettleAshley();
+}
+
+std::vector<HiddenFlag> RestoreRoomEnemyCache(
+    Actors::RoomEnemyMemory& memory, const CurrentRoom& room,
+    std::span<const RoomPlacement> placements) {
+  std::vector<HiddenFlag> flags;
+  auto& rooms = memory.rooms;
+  const auto remembered = std::find_if(
+      rooms.begin(), rooms.end(), [&room](const Actors::RememberedRoom& at) {
+        return at.recency != 0 && at.zone == room.zone_id &&
+               at.map == room.room_id;
+      });
+  if (remembered != rooms.end()) {
+    memory.current_room =
+        static_cast<std::int32_t>(std::distance(rooms.begin(), remembered));
+    flags.reserve(placements.size());
+    for (std::size_t index = 0; index < placements.size(); ++index) {
+      const Actors::RememberedEnemy* enemy =
+          Actors::FindRememberedEnemy(memory, static_cast<int>(index));
+      flags.push_back({.placement_index = index,
+                       .hidden = enemy != nullptr ? enemy->hidden
+                                                  : placements[index].hidden});
+    }
+  } else {
+    const auto oldest =
+        std::min_element(rooms.begin(), rooms.end(),
+                         [](const Actors::RememberedRoom& left,
+                            const Actors::RememberedRoom& right) {
+                           return left.recency < right.recency;
+                         });
+    memory.current_room =
+        static_cast<std::int32_t>(std::distance(rooms.begin(), oldest));
+    *oldest = Actors::RememberedRoom{};
+  }
+  Actors::RememberedRoom& current =
+      rooms.at(static_cast<std::size_t>(memory.current_room));
+  for (Actors::RememberedRoom& other : rooms) {
+    if (current.recency < other.recency) {
+      --other.recency;
+    }
+  }
+  current.recency = kMostRecentRoom;
+  current.zone = static_cast<std::uint8_t>(room.zone_id);
+  current.map = static_cast<std::uint16_t>(room.room_id);
+  return flags;
+}
+
+void LoadRoomEnemyPlacements(RoomPlacementHost& host,
+                             std::span<const std::byte> section) {
+  host.StorePlacements(host.EncounterPlacements(section));
+}
+
+// --- The room sections
+
+std::optional<RoomSectionLayout> DecodeRoomSectionLayout(
+    std::span<const std::byte> data) {
+  if (data.size() < kRoomSectionHeaderBytes) {
+    return std::nullopt;
+  }
+  RoomSectionLayout layout;
+  for (std::size_t index = 0; index < kRoomSectionCount; ++index) {
+    const std::int32_t length = LoadWord(data, index * kWordBytes);
+    if (length < 0) {
+      return std::nullopt;
+    }
+    layout.lengths.at(index) = static_cast<std::uint32_t>(length);
+    layout.offsets.at(index) = layout.total_bytes;
+    layout.total_bytes += static_cast<std::size_t>(length);
+  }
+  if (!Fits(data.size(), kRoomSectionHeaderBytes, layout.total_bytes)) {
+    return std::nullopt;
+  }
+  return layout;
+}
+
+bool ResolveSectionEArrays(std::span<std::byte> section_e) {
+  if (section_e.size() < kSectionEHeaderBytes) {
+    return false;
+  }
+  const std::span<const std::byte> header = section_e;
+  constexpr auto kHeaderBytes =
+      static_cast<std::uint32_t>(kSectionEHeaderBytes);
+  std::uint32_t second_array = 0;
+  if (LoadWord(header, kHasSecondArrayAt) > 0) {
+    second_array =
+        kHeaderBytes +
+        (static_cast<std::uint32_t>(LoadWord(header, kSecondArrayOffsetAt)) &
+         kWordAlignMask);
+  }
+  Store<std::uint32_t>(section_e, kFirstArrayAt, kHeaderBytes);
+  Store<std::uint32_t>(section_e, kSecondArrayAt, second_array);
+  return true;
+}
+
+bool ResolveCollisionCellCount(std::span<std::byte> collision_map) {
+  if (collision_map.size() < kCollisionCellCountAt + kHalfwordBytes) {
+    return false;
+  }
+  const std::span<const std::byte> header = collision_map;
+  const int cells = Load<std::int16_t>(header, kCollisionWidthAt) *
+                    Load<std::int16_t>(header, kCollisionHeightAt);
+  Store<std::int16_t>(collision_map, kCollisionCellCountAt,
+                      static_cast<std::int16_t>(cells));
+  return true;
+}
+
+namespace {
+void ResolveRoomSectionHeaders(RoomSectionHost& host) {
+  const auto section_e = host.RoomSection(RoomSectionId::kSectionE);
+  if (!section_e.empty() && !ResolveSectionEArrays(section_e)) {
+    host.Refuse(RoomLoadRefusal::kMalformedRoomSections,
+                static_cast<int>(RoomSectionId::kSectionE));
+  }
+  const auto collision_map = host.RoomSection(RoomSectionId::kCollisionMap);
+  if (!collision_map.empty() && !ResolveCollisionCellCount(collision_map)) {
+    host.Refuse(RoomLoadRefusal::kMalformedRoomSections,
+                static_cast<int>(RoomSectionId::kCollisionMap));
+  }
+}
+
+void MarkMinimapEntrance(RoomSectionHost& host) {
+  host.PrepareMinimapScene();
+  const int door = host.PendingEnteredDoor();
+  if (door == 0) {
+    host.MarkEntranceDoor(host.EnteredDoorId());
+    return;
+  }
+  host.MarkEntranceDoor(door - 1);
+  host.ClearPendingEnteredDoor();
+}
+
+[[nodiscard]] std::span<std::byte> SectionOf(const RoomSections& sections,
+                                             RoomSectionId section) {
+  return sections.at(static_cast<std::size_t>(section));
+}
+}  // namespace
+
+bool LoadRoomSections(RoomSectionHost& host, int owner_room_index,
+                      std::span<const std::byte> data) {
+  host.ClearRoomTint();
+  const auto layout = DecodeRoomSectionLayout(data);
+  if (!layout) {
+    host.Refuse(RoomLoadRefusal::kMalformedRoomSections, owner_room_index);
+    return false;
+  }
+  if (layout->total_bytes == 0) {
+    return false;
+  }
+  if (!host.StoreRoomSections(
+          owner_room_index, *layout,
+          data.subspan(kRoomSectionHeaderBytes, layout->total_bytes))) {
+    return false;
+  }
+  if (!host.RoomSection(RoomSectionId::kGeometry).empty()) {
+    host.OffsetRoomTextureIds();
+  }
+  ResolveRoomSectionHeaders(host);
+  if (!host.RoomSection(RoomSectionId::kMinimapScene).empty()) {
+    MarkMinimapEntrance(host);
+  }
+  host.InitializeRoomSystems();
+  if (!host.RoomSection(RoomSectionId::kSectionE).empty()) {
+    host.WaitForOverlayReady();
+  }
+  return true;
+}
+
+bool ReleaseOwnedRoomSections(RoomSectionHost& host, int owner_room_index) {
+  const RoomDisplay room = host.LoadedRoom();
+  if (!room.loaded || room.owner_room_index != owner_room_index) {
+    return false;
+  }
+  host.ReleaseRoomResources();
+  host.FreeRoomSections();
+  return true;
+}
+
+std::span<std::byte> RoomAuxiliaryData(const RoomSections& sections) {
+  return SectionOf(sections, RoomSectionId::kAuxiliary);
+}
+
+std::span<std::byte> RoomSupplementalRecord(const RoomSections& sections,
+                                            int index) {
+  const auto section = SectionOf(sections, RoomSectionId::kSupplemental);
+  if (index < 0) {
+    return {};
+  }
+  const std::size_t at =
+      static_cast<std::size_t>(index) * kSupplementalRecordBytes;
+  if (!Fits(section.size(), at, kSupplementalRecordBytes)) {
+    return {};
+  }
+  return section.subspan(at, kSupplementalRecordBytes);
+}
+
+bool IsRoomAudioSequenceAbsent(const RoomSections& sections) {
+  return SectionOf(sections, RoomSectionId::kSoundData).empty();
+}
+
+std::optional<RoomEnvironmentProperties> DecodeRoomEnvironmentProperties(
+    std::span<const std::byte> section) {
+  if (section.size() < kRoomEnvironmentBytes) {
+    return std::nullopt;
+  }
+  return RoomEnvironmentProperties{
+      .workshop = LoadByte(section, kWorkshopAt),
+      .flags = LoadByte(section, kEnvironmentFlagsAt),
+      .trap_level = LoadByte(section, kTrapLevelAt),
+      .scene_id = Load<std::int16_t>(section, kSceneIdAt),
+      .fall_zone = Load<std::int16_t>(section, kFallZoneAt),
+      .fall_room = Load<std::int16_t>(section, kFallRoomAt),
+      .parameter = Load<std::int16_t>(section, kEnvironmentParameterAt)};
+}
+
+int IsCurrentRoomWorkshop(const RoomEnvironmentProperties& environment) {
+  return environment.workshop;
+}
+
+int RoomEnvironmentFlags(const RoomEnvironmentProperties& environment) {
+  return environment.flags;
+}
+
+int CurrentSceneId(const RoomEnvironmentProperties& environment) {
+  return environment.scene_id;
+}
+
+int RoomFallDestination(const RoomEnvironmentProperties& environment) {
+  const auto zone = static_cast<std::uint32_t>(
+      static_cast<std::uint16_t>(environment.fall_zone));
+  const auto room =
+      static_cast<std::uint32_t>(static_cast<int>(environment.fall_room));
+  return static_cast<int>((zone << kFallZoneShift) | room);
+}
+
+int RoomEnvironmentParameter(const RoomEnvironmentProperties& environment) {
+  return environment.parameter;
+}
+
+int RoomTrapLevel(const RoomEnvironmentProperties& environment) {
+  return environment.trap_level;
+}
+
+// --- Loading and unloading the room
+
+std::optional<RoomFileLayout> DecodeRoomFile(std::span<const std::byte> file) {
+  if (file.size() < kRoomFileHeaderBytes) {
+    return std::nullopt;
+  }
+  const std::size_t size = file.size();
+  const auto room_sections =
+      RangeToEnd(size, LoadWord(file, kRoomSectionsOffsetAt));
+  const auto cleared = SizedRange(size, LoadWord(file, kClearedOffsetAt),
+                                  LoadHalfword(file, kClearedSizeAt));
+  const auto script = SizedRange(size, LoadWord(file, kScriptOffsetAt),
+                                 LoadHalfword(file, kScriptSizeAt));
+  const auto doors = SizedRange(size, LoadWord(file, kDoorOffsetAt),
+                                LoadHalfword(file, kDoorSizeAt));
+  const auto enemies = SizedRange(size, LoadWord(file, kEnemyOffsetAt),
+                                  LoadWord(file, kEnemySizeAt));
+  const auto loot = SizedRange(size, LoadWord(file, kLootOffsetAt),
+                               LoadWord(file, kLootSizeAt));
+  if (!room_sections || !cleared || !script || !doors || !enemies || !loot) {
+    return std::nullopt;
+  }
+  return RoomFileLayout{.room_sections = *room_sections,
+                        .cleared = *cleared,
+                        .script = *script,
+                        .doors = *doors,
+                        .enemies = *enemies,
+                        .loot = *loot};
+}
+
+ZoneTileExtent ZoneTileExtentFromDimensions(int dimensions) {
+  const std::uint32_t width =
+      static_cast<std::uint32_t>(dimensions) & kDimensionWidthMask;
+  return {.columns = static_cast<std::int16_t>(width / kTileUnits),
+          .rows = static_cast<std::int16_t>(dimensions / kDimensionRowsUnit)};
+}
+
+RoomEntryCamera EntryCamera(const CurrentRoom& room, int initial_distance) {
+  const bool raised =
+      room.zone_id == kRaisedCameraZone && room.room_id == kRaisedCameraRoom;
+  return {.pitch = raised ? kRaisedEntryCameraPitch : kDefaultEntryCameraPitch,
+          .mode = initial_distance == kNearEntryCameraDistance
+                      ? kNearEntryCameraMode
+                      : kFarEntryCameraMode};
+}
+
+void BeginSceneActorTransition(RoomLoadHost& host) {
+  if (host.SceneTimerResetScope() == SceneTimerScope::kScene) {
+    host.ResetSceneTimer();
+  }
+  host.ClearRoomEnemyMemory();
+}
+
+bool QueueRoomLoad(RoomLoadHost& host, int room_id) {
+  if (room_id < 0 || room_id >= host.RoomFileCount()) {
+    host.Refuse(RoomLoadRefusal::kRoomFileId, room_id);
+    return false;
+  }
+  QueueFileRead(host, LoadedFile::kRoom, host.RoomFile(room_id),
+                RoomLoadDiagnostic::kRoomReadPending,
+                RoomLoadDiagnostic::kRoomDataHeld);
+  return true;
+}
+
+namespace {
+// The room's scene; a new one clears the room enemy memory.
+void EnterRoomScene(RoomLoadHost& host, int room_id) {
+  const auto environment = DecodeRoomEnvironmentProperties(
+      host.RoomSection(RoomSectionId::kEnvironment));
+  if (!environment) {
+    host.Refuse(RoomLoadRefusal::kNoEnvironment, room_id);
+    return;
+  }
+  const int scene_id = CurrentSceneId(*environment);
+  if (scene_id != host.LoadedSceneId()) {
+    host.SetLoadedSceneId(scene_id);
+    BeginSceneActorTransition(host);
+  }
+}
+
+void SetRoomExtent(RoomLoadHost& host) {
+  const ZoneTileExtent extent =
+      ZoneTileExtentFromDimensions(host.CollisionMapDimensions());
+  host.SetZoneExtent(extent, host.RoomCameraBounds().value_or(
+                                 ZoneBounds{.min_x = 0,
+                                            .min_z = 0,
+                                            .max_x = extent.columns,
+                                            .max_z = extent.rows}));
+}
+
+// The room's events: the encounter's, or the room file's sections. A new
+// game's first room is then marked entered.
+[[nodiscard]] int LoadRoomFileEvents(RoomLoadHost& host,
+                                     std::span<const std::byte> file,
+                                     const RoomFileLayout& layout) {
+  int result = 0;
+  if (!host.EncounterUsesRoomEvents()) {
+    result = host.LoadEncounterRoomEvents();
+  } else {
+    result = host.LoadRoomEvents(
+        {.cleared = Section(file, layout.cleared),
+         .script = Section(file, layout.script),
+         .doors = Section(file, layout.doors),
+         .first_entry = host.GameEntryMode() == kNewGameEntryMode});
+  }
+  if (host.GameEntryMode() == kNewGameEntryMode) {
+    host.SetGameEntryMode(kResumedNewGameEntryMode);
+  }
+  return result;
+}
+
+struct LoadedRoomFile {
+  CurrentRoom room;
+  int event_result = 0;
+};
+
+// Loads the read room file's sections, scene, extent, loot, events and
+// placements, then frees it; nothing when it is malformed (refused).
+[[nodiscard]] std::optional<LoadedRoomFile> LoadRoomFileContents(
+    RoomLoadHost& host, int room_id) {
+  const auto file = host.LoadedData(LoadedFile::kRoom);
+  const auto layout = DecodeRoomFile(file);
+  if (!layout) {
+    host.Refuse(RoomLoadRefusal::kMalformedRoomFile, room_id);
+    host.FreeLoadedData(LoadedFile::kRoom);
+    return std::nullopt;
+  }
+  LoadRoomSections(host, kCurrentRoomOwner,
+                   Section(file, layout->room_sections));
+  const CurrentRoom room = host.PendingDestination();
+  host.SetCurrentRoom(room);
+  EnterRoomScene(host, room_id);
+  if (host.SceneTimerResetScope() == SceneTimerScope::kRoom) {
+    host.ResetSceneTimer();
+  }
+  host.MarkRoomVisitPending();
+  SetRoomExtent(host);
+  host.ClearRoomResetWords();
+  host.CaptureBackgroundColors();
+  if (layout->loot.bytes != 0) {
+    host.LoadChestLoot(Section(file, layout->loot));
+  }
+  const int event_result = LoadRoomFileEvents(host, file, *layout);
+  LoadRoomEnemyPlacements(host, Section(file, layout->enemies));
+  host.FreeLoadedData(LoadedFile::kRoom);
+  return LoadedRoomFile{.room = room, .event_result = event_result};
+}
+
+void RestoreRoomEnemies(RoomLoadHost& host, const CurrentRoom& room) {
+  Actors::RoomEnemyMemory memory = host.LoadRoomEnemyMemory();
+  const auto placements = DecodeRoomPlacements(host.PlacementRecords());
+  const auto flags = RestoreRoomEnemyCache(memory, room, placements);
+  host.StoreRoomEnemyMemory(memory);
+  for (const HiddenFlag& flag : flags) {
+    host.SetPlacementHidden(flag.placement_index, flag.hidden);
+  }
+}
+
+void StartRoomCamera(RoomLoadHost& host, const CurrentRoom& room) {
+  host.ResetRoomEntryState();
+  if (host.ScreenTransitionEffect() == kFadeInTransitionEffect) {
+    host.SetScreenTransition(kFadeInStartStep, true);
+  } else {
+    host.SetScreenTransition(kCoverStep, false);
+  }
+  host.ResetCamera(EntryCamera(room, host.InitialCameraDistance()));
+  host.FrameCameraOnAshley();
+}
+
+// An event the room's events started (in the result's low half) or a
+// triggered one runs; otherwise the room is explored.
+void StartRoomPlay(RoomLoadHost& host, int event_result) {
+  if (static_cast<std::int16_t>(event_result) != 0) {
+    host.InitializeWeather(true);
+    host.PrepareCutsceneActors();
+    return;
+  }
+  if (host.RoomEventTriggered()) {
+    host.RequestEventStart();
+    host.InitializeWeather(true);
+    host.PrepareCutsceneActors();
+    return;
+  }
+  host.EnterExploration();
+  const int music_slot = host.RoomMusicSlot();
+  if (music_slot != 0) {
+    host.PlayRoomMusic(music_slot);
+  }
+  host.SetScreenTransition(kExploringStep, false);
+  host.ShowDisplay();
+}
+}  // namespace
+
+void FinishRoomLoad(RoomLoadHost& host, int room_id) {
+  host.ResetGameplayInspection();
+  const bool read =
+      (host.ReadPending(LoadedFile::kRoom) || QueueRoomLoad(host, room_id)) &&
+      AwaitFileRead(host, LoadedFile::kRoom);
+  // Taken even when the read is refused, so the unload frees what it took.
+  host.AllocatePrimitiveBuffers();
+  if (!read) {
+    return;
+  }
+  const auto loaded = LoadRoomFileContents(host, room_id);
+  if (!loaded) {
+    return;
+  }
+  RestoreRoomEnemies(host, loaded->room);
+  PlaceAshleyAtRoomEntrance(host);
+  SpawnRoomActors(host);
+  host.SnapActorsToSupport();
+  host.ClearAshleyStatuses(kRoomEntryClearedStatuses);
+  StartRoomCamera(host, loaded->room);
+  if (host.NativeResumePending() && !host.FinishNativeResume()) {
+    host.JumpToTitle();
+    return;
+  }
+  StartRoomPlay(host, loaded->event_result);
+  host.InvalidateControllerConnections();
+}
+
+void RemoveRoomActors(RoomActorRemovalHost& host) {
+  for (int slot = kFirstRoomActorSlot; slot < kRoomActorSlots; ++slot) {
+    host.RemoveActor(slot);
+  }
+}
+
+void UnloadCurrentRoom(RoomUnloadHost& host) {
+  host.ResetGameplayInspection();
+  for (int frame = 0; frame < kUnloadTransitionFrames; ++frame) {
+    host.DrawTransitionFrame();
+  }
+  host.UpdateWhileLoading();
+  host.FreeRoomEventSections();
+  host.MarkCurrentRoomVisited();
+  ReleaseOwnedRoomSections(host, kCurrentRoomOwner);
+  host.FreePlacements();
+  host.FreeScriptedActorAi();
+  RemoveRoomActors(host);
+  host.ResetRoomActorState();
+  host.FreePrimitiveBuffers();
+}
+}  // namespace VS::Field

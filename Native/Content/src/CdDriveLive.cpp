@@ -19,6 +19,7 @@
 #include "Content/CdDrive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.h"
+#include "State/GameClockLive.hpp"
 
 extern "C" {
 #include "DiscQueue.h"
@@ -176,7 +177,7 @@ class LiveDiscQueueHost final : public DiscQueueHost {
   void RestartFramesSinceRead() override {
     Content_discDriveState.framesSinceLastRead = 0;
   }
-  void WaitFrame() override { State_UpdatePlayTimeAndLoading(0); }
+  void WaitFrame() override { VS::State::UpdateLivePlayTimeAndLoading(0); }
 
   [[nodiscard]] bool CommandsPending() const { return commands_pending_; }
 

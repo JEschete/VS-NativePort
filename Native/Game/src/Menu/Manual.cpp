@@ -1,26 +1,25 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Audio/Sfx.h"
 #include "Battle/Hud.h"
 #include "Battle/TextBoxes.h"
 #include "Content/DiscLayout.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
-#include "Event/ScriptAudio.h"
 #include "Field/Locations.h"
 #include "Field/Manual.h"
-#include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/Files.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Manual.h"
 #include "Menu/TextBox.h"
@@ -122,7 +121,7 @@ void Menu_Manual_SetTopicRows(int rowCount, int highlightedRow, char** strings)
     }
     cursor = Input_settings.cursorMemory;
     Input_settings.cursorMemory = 1;
-    Menu_Framework_CreateMenuRows(rowCount, 0x102, strings, rowTypes);
+    VS::Menu::Framework::CreateLiveMenuRows(rowCount, 0x102, strings, rowTypes);
     Input_settings.cursorMemory = cursor;
 }
 
@@ -131,22 +130,22 @@ int Menu_Manual_GetSelectedTopicRow(void)
 {
     int row;
 
-    row = Menu_Framework_GetSelectedRow();
+    row = VS::Menu::Framework::LiveSelectedRow();
     if (row < -1) {
-        Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(5));
+        VS::Menu::Framework::ClearLiveMenuExcept(5);
         return row;
     }
     if (row >= 0) {
-        Menu_Framework_FlyOutRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[4], 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[4], 1);
     }
     return row;
 }
 
 // decomp: MENUE.PRG func_80102E9C (src/MENU/MENUE.PRG/494.c:132)
-void Menu_Manual_ClearMenuExceptRow8(void) { Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(8)); }
+void Menu_Manual_ClearMenuExceptRow8(void) { VS::Menu::Framework::ClearLiveMenuExcept(8); }
 
 // decomp: MENUE.PRG _menuReady (src/MENU/MENUE.PRG/494.c:134)
-void Menu_Manual_PollMenuReady(void) { Menu_Framework_AreMenuRowsIdle(); }
+void Menu_Manual_PollMenuReady(void) { VS::Menu::Framework::AreLiveMenuRowsIdle(); }
 
 // decomp: MENUE.PRG vs_menuE_exec (src/MENU/MENUE.PRG/494.c:142)
 int Menu_Manual_UpdateScreen(u_char* state)
@@ -157,7 +156,7 @@ int Menu_Manual_UpdateScreen(u_char* state)
 
     switch (*state) {
     case Menu_Manual_ManualOverlayState_Init:
-        Menu_Framework_SetBackgroundFade(1);
+        VS::Menu::Framework::SetLiveBackgroundFade(1);
         Menu_Manual_openDelay = 8;
         Menu_Manual_screenIsInit = 0;
         *state = Menu_Manual_ManualOverlayState_InitMenu;
@@ -169,30 +168,30 @@ int Menu_Manual_UpdateScreen(u_char* state)
         if (Menu_Manual_openDelay != 0) {
             Menu_Manual_openDelay -= 1;
         } else if (Menu_Manual_screenIsInit != 0) {
-            Field_SetFieldRenderingEnabled(0);
+            VS::Field::LiveSetFieldRenderingEnabled(0);
             Battle_SetHudHidden(1);
             Battle_hudSlideOffset = 0x200000;
             *state = Menu_Manual_ManualOverlayState_WaitReady;
         }
         break;
     case Menu_Manual_ManualOverlayState_WaitReady:
-        *state += Menu_Framework_AreMenuRowsIdle();
+        *state += VS::Menu::Framework::AreLiveMenuRowsIdle();
         break;
     case Menu_Manual_ManualOverlayState_ShowMenu:
         Menu_Manual_screenMenuResult = Menu_Manual_UpdateHelpPages();
         if (Menu_Manual_screenMenuResult == 0) {
             break;
         }
-        Menu_Framework_SetBackgroundPriority(-4, 128);
+        VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
         Battle_SetHudHidden(0);
         Battle_hudSlideOffset = 0;
-        Field_SetFieldRenderingEnabled(1);
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-        Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+        VS::Field::LiveSetFieldRenderingEnabled(1);
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
         *state = Menu_Manual_ManualOverlayState_ShutDown;
         break;
     case Menu_Manual_ManualOverlayState_ShutDown:
-        Menu_Framework_SetBackgroundFade(0);
+        VS::Menu::Framework::SetLiveBackgroundFade(0);
         *state = Menu_Manual_ManualOverlayState_Exit;
         break;
     case Menu_Manual_ManualOverlayState_Exit:
@@ -247,11 +246,11 @@ int Menu_Manual_UpdateHelpPages(void)
 
     switch (Menu_Manual_showMenuState) {
     case Menu_Manual_ManualMenuState_Init:
-        Menu_Framework_SetBackgroundPriority(2046, 128);
+        VS::Menu::Framework::SetLiveBackgroundPriority(2046, 128);
         ++Menu_Manual_showMenuState;
         break;
     case Menu_Manual_ManualMenuState_InitMenu:
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
         Menu_Manual_UpdateTopicMenu(1);
         ++Menu_Manual_showMenuState;
         break;
@@ -294,7 +293,7 @@ int Menu_Manual_UpdateHelpPages(void)
         }
         Field_manualDisplayState.currentManual =
             Menu_Framework_menuMemory.cursorMemories[4] + Menu_Framework_menuMemory.cursorMemories[5];
-        Menu_Framework_DismissInformationBox();
+        VS::Menu::Framework::DismissLiveInformationBox();
         break;
     case Menu_Manual_ManualMenuState_LoadSubMenu:
         cdState = Menu_Manual_helpAssetsCdQueue->state;
@@ -340,44 +339,44 @@ int Menu_Manual_UpdateHelpPages(void)
                 && (lastPage > 0)) {
                 currentPage = lastPage;
                 Menu_Manual_scrollPosition = lastPage * 10;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             } else if ((Input_buttonsPressed.allButtons & PADLdown)
                        && (currentPage == lastPage) && (lastPage > 0)) {
                 currentPage = 0;
                 Menu_Manual_scrollPosition = 0;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             } else if ((Input_buttonRepeat & PADLup) && (currentPage > 0)) {
                 --currentPage;
                 Menu_Manual_scrollPosition = currentPage * 10;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             } else if ((Input_buttonRepeat & PADLdown) && (currentPage < lastPage)) {
                 ++currentPage;
                 Menu_Manual_scrollPosition = currentPage * 10;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             }
         } else {
             if ((Input_buttonsPressed.allButtons & PADLup) && (Menu_Manual_scrollPosition == 0)
                 && (Menu_Manual_lineCount > 0)) {
                 Menu_Manual_scrollPosition = Menu_Manual_lineCount;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             } else if (Input_buttonsPressed.allButtons & PADLdown
                        && (Menu_Manual_scrollPosition == Menu_Manual_lineCount) && (Menu_Manual_scrollPosition > 0)) {
                 Menu_Manual_scrollPosition = 0;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             } else if ((Input_buttonRepeat & PADLup) && (Menu_Manual_scrollPosition > 0)) {
                 --Menu_Manual_scrollPosition;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             } else if ((Input_buttonRepeat & PADLdown)
                        && (Menu_Manual_scrollPosition < Menu_Manual_lineCount)) {
                 ++Menu_Manual_scrollPosition;
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             }
         }
         frame_scratch = &Render_frameScratch;
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, ((u_long*)frame_scratch->orderingTable) + 6);
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, ((u_long*)frame_scratch->orderingTable) + 6);
         VS::Render::DrawLiveCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x12, 0x60, 0xC);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, ((u_long*)frame_scratch->orderingTable) + 6);
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, ((u_long*)frame_scratch->orderingTable) + 6);
         VS::Render::DrawLiveCompactTextColor("MENU", 0x24001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x24, 0x40, 0xC);
         VS::Render::DrawLiveCompactTextColor("PAGE", 0xC400D8, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
@@ -390,9 +389,9 @@ int Menu_Manual_UpdateHelpPages(void)
             Menu_Manual_scrollPosition;
         if (Menu_Manual_showMenuState != Menu_Manual_ManualMenuState_ShowSubMenu) {
             if (Input_buttonsPressed.allButtons & PADRright) {
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENUSELECT);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUSELECT);
             } else {
-                Audio_PlaySfxCentered(0x7E, VS_SFX_MENULEAVE);
+                VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENULEAVE);
             }
             Menu_TextBox(0)->state = 0;
             if (Menu_Manual_helpText != NULL) {

@@ -1,75 +1,112 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+// Hand-maintained (tools/port/owned.csv).
+#include "Field/Map.hpp"  // NOLINT(build/include): typed API
+
+#include <bit>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <span>
+
 #include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Field/Map.h"
-#include "Field/MapProgress.h"
-#include "Field/Minimap.h"
-#include "Field/RoomState.h"
-#include "State/Progress.h"
+
+namespace VS::Field {
+namespace {
+constexpr std::size_t kSceneCountBytes = 4;
+constexpr std::size_t kSceneRoomBytes = 12;
+constexpr std::size_t kRoomZoneOffset = 8;
+constexpr std::size_t kRoomMapOffset = 10;
+constexpr std::int32_t kVisitWordShift = 5;
+constexpr std::uint32_t kVisitBitMask = 0x1F;
+constexpr std::int32_t kMinimapTiltCosine = 2633;
+constexpr std::int32_t kMinimapTiltSine = 3138;
+constexpr std::int32_t kQ12One = 4096;
+constexpr std::size_t kMarkedWord = 1;
+constexpr std::uint32_t kMarkingVisit = 0x800000;
+constexpr std::uint32_t kMarkedVisit = 0x400000;
+constexpr std::int32_t kPercent = 100;
+constexpr std::size_t kBitsPerWord = 32;
+
+static_assert(kRoomVisitFlagWords * kBitsPerWord ==
+              static_cast<std::size_t>(kRoomLocationCount));
+
+template <typename T>
+T ReadScalar(std::span<const std::byte> bytes, std::size_t offset) {
+  T value{};
+  std::memcpy(&value, bytes.subspan(offset, sizeof(T)).data(), sizeof(T));
+  return value;
+}
+
+std::int16_t Q12(std::int32_t value) {
+  return static_cast<std::int16_t>(value / kQ12One);
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_8008B4C8 (src/BATTLE/BATTLE.PRG/146C.c:16012)
-int Field_SetMinimapVisible(char visible) { return Field_isMinimapVisible = visible; }
+std::uint8_t SetMinimapVisible(std::uint8_t& visibility, std::int32_t visible) {
+  visibility = static_cast<std::uint8_t>(visible);
+  return visibility;
+}
 
-// decomp: BATTLE.PRG vs_battle_setRoomsUnk0 (src/BATTLE/BATTLE.PRG/146C.c:16014)
-void Field_RestoreSceneRoomVisits(Field_MapScene* scene)
-{
-    int i;
-    Field_MapRoom* room = scene->rooms;
-    int roomCount = scene->roomCount;
-
-    for (i = 0; i < roomCount; ++i, ++room) {
-        int locationId = Field_FindLocationId(room->zoneId, room->mapId - 1);
-        if (locationId > 0) {
-            room->visited =
-                State_roomVisitProgress.roomFlags[locationId >> 5] & (1 << (locationId & 0x1F));
-        } else {
-            room->visited = 0;
-        }
+// decomp: BATTLE.PRG vs_battle_setRoomsUnk0
+// (src/BATTLE/BATTLE.PRG/146C.c:16014)
+bool RestoreSceneRoomVisits(std::span<std::byte> scene,
+                            const RoomVisitFlags& room_flags,
+                            RoomLocationIndex& locations) {
+  if (scene.size() < kSceneCountBytes) return false;
+  const auto room_count = ReadScalar<std::int32_t>(scene, 0);
+  if (room_count < 0 ||
+      static_cast<std::size_t>(room_count) >
+          (scene.size() - kSceneCountBytes) / kSceneRoomBytes) {
+    return false;
+  }
+  for (std::size_t room = 0; room < static_cast<std::size_t>(room_count);
+       ++room) {
+    const auto record = scene.subspan(
+        kSceneCountBytes + (room * kSceneRoomBytes), kSceneRoomBytes);
+    const std::int32_t zone_id =
+        ReadScalar<std::int16_t>(record, kRoomZoneOffset);
+    const std::int32_t map_id =
+        ReadScalar<std::int16_t>(record, kRoomMapOffset);
+    const std::int32_t location = locations.LocationId(zone_id, map_id - 1);
+    std::uint32_t visited = 0;
+    if (location > 0 && location < kRoomLocationCount) {
+      const auto word = static_cast<std::size_t>(location >> kVisitWordShift);
+      const auto bit = static_cast<std::uint32_t>(location) & kVisitBitMask;
+      visited = room_flags.at(word) & (std::uint32_t{1} << bit);
     }
+    std::memcpy(record.data(), &visited, sizeof(visited));
+  }
+  return true;
 }
 
 // decomp: BATTLE.PRG func_8008B590 (src/BATTLE/BATTLE.PRG/146C.c:16033)
-void Field_BuildMinimapRotation(MATRIX* output_rotation, int yaw_angle)
-{
-    int yaw_sine = VS::Core::Math::Sine(yaw_angle);
-    int yaw_cosine = VS::Core::Math::Cosine(yaw_angle);
-    int negative_yaw_sine = -yaw_sine;
-
-    output_rotation->m[0][0] = yaw_cosine;
-    output_rotation->m[0][1] = 0;
-    output_rotation->m[0][2] = yaw_sine;
-
-    output_rotation->m[1][0] = ((negative_yaw_sine * -3138) / ONE);
-    output_rotation->m[1][1] = 2633;
-    output_rotation->m[1][2] = (-(yaw_cosine * 3138) / ONE);
-
-    output_rotation->m[2][0] = ((negative_yaw_sine * 2633) / ONE);
-    output_rotation->m[2][1] = 3138;
-    output_rotation->m[2][2] = ((yaw_cosine * 2633) / ONE);
+MinimapRotation BuildMinimapRotation(std::int32_t yaw_angle) {
+  const std::int32_t sine = Core::Math::Sine(yaw_angle);
+  const std::int32_t cosine = Core::Math::Cosine(yaw_angle);
+  const std::int32_t negative_sine = -sine;
+  MinimapRotation rotation{};
+  rotation[0] = {static_cast<std::int16_t>(cosine), 0,
+                 static_cast<std::int16_t>(sine)};
+  rotation[1] = {Q12(negative_sine * -kMinimapTiltSine),
+                 static_cast<std::int16_t>(kMinimapTiltCosine),
+                 Q12(-(cosine * kMinimapTiltSine))};
+  rotation[2] = {Q12(negative_sine * kMinimapTiltCosine),
+                 static_cast<std::int16_t>(kMinimapTiltSine),
+                 Q12(cosine * kMinimapTiltCosine)};
+  return rotation;
 }
 
-// decomp: BATTLE.PRG vs_battle_getMapCompletion (src/BATTLE/BATTLE.PRG/146C.c:17367)
-int Field_MapCompletionPercent(void)
-{
-    int i;
-    int j;
-    int value;
-
-    if (State_roomVisitProgress.roomFlags[1] & 0x800000) {
-        State_roomVisitProgress.roomFlags[1] |= 0x400000;
-    }
-    value = 0;
-    for (i = 0; i < 16; ++i) {
-        for (j = 0; j < 32; ++j) {
-            int v = 1;
-            if (State_roomVisitProgress.roomFlags[i] & Field_countableRoomMask[i]
-                & (v << j)) {
-                ++value;
-            }
-        }
-    }
-    return (value * 100) / 361;
+// decomp: BATTLE.PRG vs_battle_getMapCompletion
+// (src/BATTLE/BATTLE.PRG/146C.c:17367)
+std::int32_t MapCompletionPercent(RoomVisitFlags& room_flags,
+                                  const RoomVisitFlags& countable_rooms) {
+  if ((room_flags[kMarkedWord] & kMarkingVisit) != 0) {
+    room_flags[kMarkedWord] |= kMarkedVisit;
+  }
+  std::int32_t visited = 0;
+  for (std::size_t word = 0; word < kRoomVisitFlagWords; ++word) {
+    visited += std::popcount(room_flags[word] & countable_rooms[word]);
+  }
+  return (visited * kPercent) / kCountableRoomTotal;
 }
-
-}  // extern "C"
+}  // namespace VS::Field

@@ -11,6 +11,6 @@
 
 extern SVECTOR Effects_Plg158_surfaceVertices[5][16];
 extern SVECTOR Effects_Plg158_mirrorSurfaceVertices[5][16];
-extern CVECTOR Effects_Plg158_closedRingColorFactors[];
+extern CVECTOR Effects_Plg158_closedRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG158_H_DECLS

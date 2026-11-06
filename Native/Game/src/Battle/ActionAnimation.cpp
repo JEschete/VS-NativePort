@@ -1,4 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorMovementLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -35,7 +39,7 @@ void Battle_PlayMeleeAttackAnimation(int actor_slot, SVECTOR* target_position, i
 
     actor = Actors_actorRecords[actor_slot];
     if (actor != NULL) {
-        actor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(actor, target_position);
+        actor->instance.facingDelta = VS::Actors::LiveActorFacingDeltaToPoint(actor, target_position);
         actor->instance.turnFrames = 0xA;
         if (actor->collisionRadius >= 0x81U) {
             actor->instance.turnFrames = 0x14;
@@ -55,7 +59,7 @@ void Battle_PlayMeleeAttackAnimation(int actor_slot, SVECTOR* target_position, i
             animation_id = 0x48;
         }
 
-        Actors_PlayActorAnimation(actor_slot, animation_id, 0, 6);
+        VS::Actors::PlayLiveActorAnimation(actor_slot, animation_id, 0, 6);
         VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 }
@@ -75,7 +79,7 @@ void Battle_PlayDefenseAnimation(int actor_slot, SVECTOR* target_position)
         int target_pitch;
 
         if (actor->collisionRadius < 0x80) {
-            actor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(actor, target_position);
+            actor->instance.facingDelta = VS::Actors::LiveActorFacingDeltaToPoint(actor, target_position);
             actor->instance.turnFrames = 4;
             blend_frames = 8;
         } else {
@@ -92,7 +96,7 @@ void Battle_PlayDefenseAnimation(int actor_slot, SVECTOR* target_position)
             }
         }
 
-        Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
+        VS::Actors::PlayLiveActorAnimation(actor_slot, animation_id, 0, blend_frames);
         VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 
@@ -134,7 +138,7 @@ void Battle_SetEnemyCombatPose(int actor_slot, int pose_mode)
         }
         ++animation_id;
         blend_frames = 8;
-        Actors_FindActorAnimationHeader(actor, animation_id, &animation_header);
+        VS::Actors::FindLiveActorAnimationHeader(actor, animation_id, &animation_header);
         if (animation_header == NULL) {
             animation_id = 6;
             blend_frames = 0x10;
@@ -142,7 +146,7 @@ void Battle_SetEnemyCombatPose(int actor_slot, int pose_mode)
         break;
     }
 
-    Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
+    VS::Actors::PlayLiveActorAnimation(actor_slot, animation_id, 0, blend_frames);
     if (pose_mode < 3) {
         VS::Core::Memory::CopyLiveAlignedWords(&actor->blendPose, &actor->pose, sizeof actor->blendPose);
     }
@@ -201,7 +205,7 @@ void Battle_PlaySpellCastAnimation(int actor_slot, SVECTOR* target_position, int
         anim += 100;
     }
 
-    Actors_FindActorAnimationHeader(actor, anim, &animation_header);
+    VS::Actors::FindLiveActorAnimationHeader(actor, anim, &animation_header);
 
     if (animation_header == 0) {
         anim = fallback_cast_animations[cast_phase];
@@ -210,7 +214,7 @@ void Battle_PlaySpellCastAnimation(int actor_slot, SVECTOR* target_position, int
         }
     }
 
-    Actors_PlayActorAnimation(actor_slot, anim, 0, 6);
+    VS::Actors::PlayLiveActorAnimation(actor_slot, anim, 0, 6);
     VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
 }
 
@@ -314,7 +318,7 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
             var_s0 = 0x3B;
         } else {
             if (actor->instance.reactionState == 3) {
-                Actors_CancelActorTeleportTransition(actor);
+                VS::Actors::CancelLiveActorTeleportTransition(actor);
             }
             actor->instance.turnFrames = 0;
             if (actor->instance.slot == 0) {
@@ -327,9 +331,9 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
                 blend_frames = 8;
             }
         }
-        Actors_ClearActorMovementRequest(actor);
+        VS::Actors::ClearLiveActorMovementRequest(actor);
         actor->animationSet = 0xFF;
-        Actors_PlayActorAnimation(actor_slot, var_s0, 0, blend_frames);
+        VS::Actors::PlayLiveActorAnimation(actor_slot, var_s0, 0, blend_frames);
         VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 }
@@ -416,7 +420,7 @@ void Battle_PlayChainAbilityAnimation(int actor_slot, SVECTOR* target_position, 
 
     actor->instance.facingDelta = turn;
     actor->instance.turnFrames = 0xA;
-    Actors_PlayActorAnimation(actor_slot, anim, 0, 8);
+    VS::Actors::PlayLiveActorAnimation(actor_slot, anim, 0, 8);
 }
 
 // decomp: BATTLE.PRG func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3040)
@@ -434,7 +438,7 @@ void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position
         int blend_frames;
 
         if (actor->collisionRadius < 0x80) {
-            actor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(actor, target_position);
+            actor->instance.facingDelta = VS::Actors::LiveActorFacingDeltaToPoint(actor, target_position);
             actor->instance.turnFrames = 4;
             blend_frames = 8;
         } else {
@@ -451,7 +455,7 @@ void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position
             }
         }
 
-        Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
+        VS::Actors::PlayLiveActorAnimation(actor_slot, animation_id, 0, blend_frames);
         VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
 
@@ -505,20 +509,20 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
         if ((u_short)actor->collisionRadius >= 0x80U) {
             actor->instance.turnFrames = 0x14;
         }
-        Actors_FindActorAnimationHeader(actor, 0xBFU, &animation);
+        VS::Actors::FindLiveActorAnimationHeader(actor, 0xBFU, &animation);
         value = 0xBF;
         if (animation == NULL) {
             value = 0xC1;
         }
-        Actors_PlayActorAnimation(actorId, value, 0, 8);
+        VS::Actors::PlayLiveActorAnimation(actorId, value, 0, 8);
         VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
         return;
     } else if (mode == 1) {
-        Actors_FindActorAnimationHeader(actor, 0xFFU, &animation);
+        VS::Actors::FindLiveActorAnimationHeader(actor, 0xFFU, &animation);
         if (animation == NULL) {
             fallbackActor = Actors_actorRecords[actorId];
             if (fallbackActor != NULL) {
-                fallbackActor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(fallbackActor, target);
+                fallbackActor->instance.facingDelta = VS::Actors::LiveActorFacingDeltaToPoint(fallbackActor, target);
                 fallbackActor->instance.turnFrames = 0xA;
                 if ((u_short)fallbackActor->collisionRadius >= 0x81U) {
                     fallbackActor->instance.turnFrames = 0x14;
@@ -531,7 +535,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
                         reactionAnimation = 0x4A;
                     }
                 }
-                Actors_PlayActorAnimation(actorId, reactionAnimation, 0, 6);
+                VS::Actors::PlayLiveActorAnimation(actorId, reactionAnimation, 0, 6);
                 VS::Actors::ResetLiveActorHeadTrackingSpeed(fallbackActor);
                 return;
             }
@@ -562,7 +566,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
                     Battle_specialActionPitch = 1;
                 }
             }
-            Actors_PlayActorAnimation(actorId, 0xFF, 0, 8);
+            VS::Actors::PlayLiveActorAnimation(actorId, 0xFF, 0, 8);
             return;
         }
     }
@@ -575,9 +579,9 @@ void Battle_PlayBreakArtAnimation(int actor_slot, SVECTOR* target_position, int 
 
     Battle_PlaySpecialActionAnimation(actor_slot, target_position, action_phase);
     if (action_phase == 1) {
-        Actors_FindActorAnimationHeader(Actors_actorRecords[actor_slot], 0xFE, &animation_header);
+        VS::Actors::FindLiveActorAnimationHeader(Actors_actorRecords[actor_slot], 0xFE, &animation_header);
         if (animation_header != 0) {
-            Actors_QueueActorAnimation((int)actor_slot, 0xFE, 8, 0);
+            VS::Actors::QueueLiveActorAnimation((int)actor_slot, 0xFE, 8, 0);
         }
     }
 }
@@ -586,7 +590,7 @@ void Battle_PlayBreakArtAnimation(int actor_slot, SVECTOR* target_position, int 
 void Battle_FinishEnemyCombatPose(int actor_slot, short facing)
 {
     Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
-    ((void (*)(int, int, int))Actors_TurnActorToAtRate)(actor_slot, facing, 8);
+    VS::Actors::TurnLiveActorToAtRate(actor_slot, facing, 8);
     Battle_SetEnemyCombatPose(actor_slot, 3);
     actor->instance.poseState = 6;
 }

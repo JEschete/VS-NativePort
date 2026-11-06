@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Audio/AudioDevice.hpp"
+#include "Audio/SoundControlLive.hpp"
 #include "Audio/XaMix.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Content/AudioStream.hpp"
@@ -231,7 +232,7 @@ int Audio_Native_StartXaStream(int sector, int volume) {
                  volume);
     return 0;
   }
-  Audio_Control_SetDiscVolume(volume);
+  VS::Audio::Control::LiveSetDiscVolume(volume);
   VS::Audio::Control::SetLiveDiscMixVolume(VS::Audio::kDefaultDiscMixVolume);
   return Playback().Start(*store, *entry, static_cast<unsigned>(sector)) ? 1
                                                                          : 0;

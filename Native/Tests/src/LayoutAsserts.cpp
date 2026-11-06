@@ -5,16 +5,17 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "Audio/SoundBanksLive.hpp"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 
 extern "C" {
 #include "Actors/ActorAllocation.h"
-#include "Actors/ActorLoading.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Audio/SoundBanks.h"
@@ -27,8 +28,8 @@ extern "C" {
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
 #include "Battle/TargetVolume.h"
-#include "Battle/Targeting.h"
-#include "Effects/EffectResources.h"
+#include "Battle/TargetingState.h"
+#include "Effects/Package.h"
 #include "Effects/Runtime.h"
 #include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
@@ -58,9 +59,10 @@ int TestsRoomSfxBankBinding(void) {
   Audio_soundState = (Audio_SoundState){0};
   unsigned char bank = 0;
   unsigned char replacement = 0;
-  int passed = Audio_BindRoomSfxBank((uintptr_t)&bank) == 1 &&
+  int passed = VS::Audio::LiveBindRoomSfxBank((uintptr_t)&bank) == 1 &&
                Audio_soundState.sfxBankData[2] == &bank;
-  passed = passed && Audio_BindRoomSfxBank((uintptr_t)&replacement) == 0 &&
+  passed = passed &&
+           VS::Audio::LiveBindRoomSfxBank((uintptr_t)&replacement) == 0 &&
            Audio_soundState.sfxBankData[2] == &bank &&
            Audio_soundState.sfxBankData[0] == nullptr &&
            Audio_soundState.sfxBankData[1] == nullptr;
@@ -134,7 +136,8 @@ _Static_assert(offsetof(Actors_ActorAllocation, modelSlots) -
                    sizeof(Actors_ActorRecord),
                "the actor record overlaps the weapon model slots");
 
-// Actors_SpawnRoomEnemy: `actor + 1` is the stats block of the allocation.
+// VS::Actors::LiveActorSpawnHost (ActorSpawningLive.cpp) addresses the stats
+// block of an allocation as `actor + 1`.
 _Static_assert(offsetof(Actors_ActorAllocation, core.actor.stats) ==
                    sizeof(Battle_Actor),
                "stats do not follow the Battle_Actor");
@@ -453,8 +456,7 @@ int Tests_DefaultEffectPackageLoaded(void) {
   Effects_EffectPackage* saved = Effects_package;
   const uintptr_t base = (uintptr_t)Effects_emptyPackage;
   Effects_package = &package;
-  Effects_BindEffectPackageBlocks(
-      reinterpret_cast<Effects_PackageFile*>(Effects_emptyPackage));
+  VS::Effects::LiveBindEffectPackageBlocks(Effects_emptyPackage);
   const int passed =
       package.block1TableCount == 1 && package.block2Count == 19 &&
       package.block3Data->count == 49 && package.curveBlock->count == 32 &&

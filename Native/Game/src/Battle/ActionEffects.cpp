@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -16,13 +17,12 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Render/Palette.h"
-#include "State/Flags.h"
 
 // decomp: BATTLE.PRG func_80084228 (src/BATTLE/BATTLE.PRG/146C.c:12547)
 int Battle_MarkSourceActionSuccess(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
@@ -59,7 +59,7 @@ int Battle_SetActionFlag64(Battle_ActionDefinition* action_definition __attribut
     int execute_action)
 {
     if (execute_action != 0) {
-        State_SetScriptFlag(0x40, 1);
+        VS::State::SetLiveScriptFlag(0x40, 1);
     }
 }
 
@@ -70,7 +70,7 @@ int Battle_SetActionFlag32(Battle_ActionDefinition* action_definition __attribut
     int execute_action)
 {
     if (execute_action != 0) {
-        State_SetScriptFlag(0x20, 1);
+        VS::State::SetLiveScriptFlag(0x20, 1);
     }
 }
 

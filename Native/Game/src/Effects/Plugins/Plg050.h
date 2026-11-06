@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG050_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG050_H_DECLS
 
-extern u_char Effects_Plg050_ringColorFactors[][4];
+extern u_char Effects_Plg050_ringColorFactors[8][4];
 extern int Effects_Plg050_trailEmissionCounter;
 
 #endif // VS_EFFECTS_PLUGINS_PLG050_H_DECLS

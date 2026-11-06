@@ -1,461 +1,196 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Plugins/Plg057.h"
-#include "Effects/Plugins/Plg073.h"
-#include "Effects/Plugins/Plg086.h"
-#include "Effects/Plugins/Plg087.h"
-#include "Effects/Plugins/Plg128.h"
-#include "Effects/Plugins/Plg134.h"
-#include "Effects/Plugins/Plg137.h"
-#include "Effects/Plugins/Plg141.h"
-#include "Effects/Plugins/Plg146.h"
-#include "Effects/Plugins/Plg148.h"
-#include "Effects/Plugins/Plg242.h"
-#include "Effects/Plugins/Plg255.h"
-#include "Effects/Plugins/Plg265.h"
-#include "Effects/Plugins/Plg266.h"
-#include "Effects/Plugins/Plg291.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/ClosedRing.h"
-#include "Effects/Templates/Grid.h"
-#include "Effects/Templates/Mesh10.h"
-#include "Effects/Templates/MirrorSurface.h"
-#include "Effects/Templates/ParticleControl.h"
-#include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/ParticleLineRender.h"
-#include "Effects/Templates/ParticleOrigin.h"
-#include "Effects/Templates/ParticleRender.h"
-#include "Effects/Templates/ParticleTarget.h"
-#include "Effects/Templates/Ring.h"
-#include "Effects/Templates/RotatingSurface.h"
-#include "Effects/Templates/Surface.h"
-#include "Effects/Templates/TiledRing.h"
-#include "Effects/Templates/TrailControl.h"
-#include "Effects/Templates/TrailDispatch.h"
-#include "Effects/Templates/TrailInit.h"
-#include "Effects/Templates/TrailOrigin.h"
-#include "Effects/Templates/TrailRender.h"
-#include "Effects/Templates/TrailTarget.h"
-#include "Effects/Templates/TrailUpdate.h"
-#include "Effects/Trails.h"
-#include "Effects/Transforms.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Effects/Templates/TrailInit.hpp"
 
-// decomp: PLG057.BIN func_800FE70C (src/EFFECT/PLG057.BIN/2D0.c:28): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg057_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg057_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg057_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg057_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg057_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg057_particleEmissionCounter
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg057_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg057_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg057_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg057_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg057_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg057_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg057_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg057_trailEmissionCounter2
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+#include <cstddef>
+#include <cstdint>
+#include <span>
 
-// decomp: PLG073.BIN func_800FC28C (src/EFFECT/PLG073.BIN/F8.c:14): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg073_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg073_tiledRingColorFactors
-#define VS_RING_FUNCTION Effects_Plg073_Ring
-#define VS_RING_COLORS Effects_Plg073_ringColorFactors
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg073_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg073_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg073_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg073_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg073_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg073_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg073_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg073_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+#include "Core/Math/Interpolation.hpp"
+#include "Effects/Templates/TrailCore.hpp"
 
-// decomp: PLG086.BIN func_800FD0E8 (src/EFFECT/PLG086.BIN/F8.c:23): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_CLOSED_RING_FUNCTION Effects_Plg086_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg086_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg086_RotatingSurface
-#define VS_GRID_FUNCTION Effects_Plg086_Grid
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg086_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg086_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg086_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg086_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg086_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg086_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg086_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg086_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_GRID_FUNCTION
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+namespace VS::Effects::Templates {
+namespace {
+namespace math = Core::Math;
 
-// decomp: PLG087.BIN func_800FCEC0 (src/EFFECT/PLG087.BIN/1F0.c:25): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_SURFACE_FUNCTION Effects_Plg087_Surface
-#define VS_SURFACE_VERTICES Effects_Plg087_surfaceVertices
-#define VS_SURFACE_REPEAT
-#define VS_CLOSED_RING_FUNCTION Effects_Plg087_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg087_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_GRID_FUNCTION Effects_Plg087_Grid
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg087_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg087_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg087_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg087_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg087_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg087_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg087_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg087_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_SURFACE_REPEAT
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_GRID_FUNCTION
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// The inner extent is the starting speed in 1/4096ths of a span (progress
+// counts 0x01000000 per span).
+constexpr unsigned kSpeedShift = 12;
 
-// decomp: PLG128.BIN func_800FF248 (src/EFFECT/PLG128.BIN/F8.c:256): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define TRAIL_SAMPLE_COUNT 5
-#define VS_SURFACE_FUNCTION Effects_Plg128_Surface2
-#define VS_SURFACE_VERTICES Effects_Plg128_surfaceVertices2
-#define VS_SURFACE_REPEAT
-#define VS_CLOSED_RING_FUNCTION Effects_Plg128_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg128_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_ROTATING_SURFACE_REPEAT
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg128_RotatingSurface
-#define VS_GRID_FUNCTION Effects_Plg128_Grid
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg128_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg128_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg128_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg128_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg128_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg128_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg128_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg128_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef TRAIL_SAMPLE_COUNT
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_SURFACE_REPEAT
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_ROTATING_SURFACE_REPEAT
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_GRID_FUNCTION
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+template <std::size_t History>
+void StartTrails(const TrailDefinition& definition, TrailScratch& scratch,
+                 std::span<BasicTrailRecord<History>> trails,
+                 TrailServices& host) {
+  scratch.lifetime = math::InterpolateSevenBitPlane(definition.lifetime, 0);
+  const auto speed = static_cast<std::int32_t>(
+      static_cast<std::uint32_t>(
+          math::InterpolateSevenBitScalar(definition.inner_extent, 0))
+      << kSpeedShift);
+  for (BasicTrailRecord<History>& trail : trails) {
+    std::int32_t steps =
+        host.RandomRangeExclusive(scratch.lifetime.x, scratch.lifetime.y);
+    if (steps == 0) {
+      steps = 1;
+    }
+    trail.step_count = static_cast<std::uint8_t>(steps);
+    trail.sample_count = 1;
+    trail.collapse = kTrailFullCollapseOf<History>;
+    trail.current = 0;
+    trail.samples.front() = trail.points.front();
+    trail.progress = 0;
+    trail.speed = speed;
+    // The original divided by the drawn count, not its stored low byte.
+    trail.first_step = TrailSpeedStep(trail, steps);
+  }
+}
+}  // namespace
 
-// decomp: PLG134.BIN func_800FA758 (src/EFFECT/PLG134.BIN/E0.c:12): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg134_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg134_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg134_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg134_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg134_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg134_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg134_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg134_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: EFFECT VS_TRAIL_INIT_FUNCTION (src/EFFECT/trails5.h:380).
+void TrailInit(const TrailDefinition& definition, TrailScratch& scratch,
+               std::span<TrailRecord> trails, std::int32_t /*distance*/,
+               TrailHost& host) {
+  StartTrails<kTrailHistory>(definition, scratch, trails, host);
+}
 
-// decomp: PLG137.BIN func_800FB27C (src/EFFECT/PLG137.BIN/F8.c:11): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_MESH10_FUNCTION Effects_Plg137_Mesh10
-#define VS_MESH10_VERTICES Effects_Plg137_mesh10Vertices
-#define VS_MESH10_FACES Effects_Plg137_mesh10Faces
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg137_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg137_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg137_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg137_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg137_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg137_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg137_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg137_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_MESH10_FUNCTION
-#undef VS_MESH10_VERTICES
-#undef VS_MESH10_FACES
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: EFFECT VS_TRAIL_INIT_FUNCTION (src/EFFECT/trails9.h:387).
+// decomp: PLG049.BIN func_800FA76C (src/EFFECT/PLG049.BIN/E0.c:4).
+// decomp: PLG050.BIN func_800FB390 (src/EFFECT/PLG050.BIN/E0.c:10).
+// decomp: PLG057.BIN func_800FC600 (src/EFFECT/PLG057.BIN/2D0.c:18).
+// decomp: PLG069.BIN func_800FB278 (src/EFFECT/PLG069.BIN/E0.c:11).
+// decomp: PLG135.BIN func_800FB6D8 (src/EFFECT/PLG135.BIN/E0.c:16).
+// decomp: PLG161.BIN func_800FC260 (src/EFFECT/PLG161.BIN/F8.c:14).
+// decomp: PLG165.BIN func_800FA784 (src/EFFECT/PLG165.BIN/F8.c:12).
+// decomp: PLG167.BIN func_800FC590 (src/EFFECT/PLG167.BIN/E0.c:19).
+// decomp: PLG168.BIN func_800FA87C (src/EFFECT/PLG168.BIN/1F0.c:6).
+// decomp: PLG169.BIN func_800FA76C (src/EFFECT/PLG169.BIN/E0.c:12).
+// decomp: PLG232.BIN func_800FA76C (src/EFFECT/PLG232.BIN/E0.c:6).
+// The plugin instances are byte-identical; each overlay's renderer-slot entry
+// (TrailsLive.cpp) binds this one definition.
+void TrailNineInit(const TrailDefinition& definition, TrailScratch& scratch,
+                   std::span<TrailNineRecord> trails, std::int32_t /*distance*/,
+                   TrailNineHost& host) {
+  StartTrails<kTrailNineHistory>(definition, scratch, trails, host);
+}
+}  // namespace VS::Effects::Templates
 
-// decomp: PLG141.BIN func_800FA758 (src/EFFECT/PLG141.BIN/E0.c:6): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg141_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg141_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg141_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg141_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg141_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg141_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg141_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg141_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+namespace VS::Effects {
+// decomp: PLG057.BIN func_800FE70C (src/EFFECT/PLG057.BIN/2D0.c:28).
+void Plg057::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-// decomp: PLG146.BIN func_800FE5D4 (src/EFFECT/PLG146.BIN/1D8.c:43): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg146_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg146_tiledRingColorFactors
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg146_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg146_mirrorSurfaceVertices
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg146_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg146_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg146_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg146_ParticleLineRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg146_ParticleDispatch
-#define VS_PARTICLE_UNTEXTURED
-#define VS_RING_FUNCTION Effects_Plg146_Ring
-#define VS_RING_COLORS Effects_Plg146_ringColorFactors
-#define VS_RING_TRANSPOSED
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg146_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg146_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg146_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg146_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg146_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg146_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg146_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg146_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_UNTEXTURED
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: PLG073.BIN func_800FC28C (src/EFFECT/PLG073.BIN/F8.c:14).
+// decomp: PLG074.BIN func_800FC28C (src/EFFECT/PLG074.BIN/F8.c:13).
+void Plg073::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-// decomp: PLG148.BIN func_800FA758 (src/EFFECT/PLG148.BIN/E0.c:6): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg148_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg148_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg148_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg148_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg148_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg148_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg148_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg148_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: PLG086.BIN func_800FD0E8 (src/EFFECT/PLG086.BIN/F8.c:23).
+void Plg086::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-// decomp: PLG242.BIN func_800FC1B8 (src/EFFECT/PLG242.BIN/F8.c:13): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg242_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg242_tiledRingColorFactors
-#define VS_GRID_FUNCTION Effects_Plg242_Grid
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg242_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg242_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg242_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg242_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg242_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg242_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg242_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg242_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_GRID_FUNCTION
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: PLG087.BIN func_800FCEC0 (src/EFFECT/PLG087.BIN/1F0.c:25).
+void Plg087::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-// decomp: PLG255.BIN func_800FA850 (src/EFFECT/PLG255.BIN/1D8.c:6): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg255_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg255_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg255_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg255_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg255_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg255_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg255_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg255_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: PLG128.BIN func_800FF248 (src/EFFECT/PLG128.BIN/F8.c:256).
+void Plg128::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-// decomp: PLG265.BIN func_800FCE4C (src/EFFECT/PLG265.BIN/2E8.c:34): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg265_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg265_tiledRingColorFactors
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg265_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg265_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg265_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg265_ParticleLineRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg265_ParticleDispatch
-#define VS_PARTICLE_UNTEXTURED
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg265_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg265_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg265_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg265_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg265_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg265_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg265_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg265_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_UNTEXTURED
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: PLG134.BIN func_800FA758 (src/EFFECT/PLG134.BIN/E0.c:12).
+void Plg134::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-// decomp: PLG266.BIN func_800FDBF8 (src/EFFECT/PLG266.BIN/2E8.c:42): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg266_ParticleDispatch2
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg266_ParticleOrigin2
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg266_ParticleTarget2
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg266_ParticleControl2
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg266_ParticleLineRender
-#define VS_PARTICLE_UNTEXTURED
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg266_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg266_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg266_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg266_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg266_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg266_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg266_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg266_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_UNTEXTURED
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: PLG137.BIN func_800FB27C (src/EFFECT/PLG137.BIN/F8.c:11).
+void Plg137::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-// decomp: PLG291.BIN func_800FA770 (src/EFFECT/PLG291.BIN/F8.c:12): VS_TRAIL_INIT_FUNCTION, instance of Effects/Templates/TrailInit.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg291_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg291_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg291_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg291_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg291_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg291_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg291_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg291_trailEmissionCounter
-#include "Effects/Templates/TrailInit.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
+// decomp: PLG141.BIN func_800FA758 (src/EFFECT/PLG141.BIN/E0.c:6).
+void Plg141::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
 
-}  // extern "C"
+// decomp: PLG146.BIN func_800FE5D4 (src/EFFECT/PLG146.BIN/1D8.c:43).
+void Plg146::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
+
+// decomp: PLG148.BIN func_800FA758 (src/EFFECT/PLG148.BIN/E0.c:6).
+void Plg148::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
+
+// decomp: PLG242.BIN func_800FC1B8 (src/EFFECT/PLG242.BIN/F8.c:13).
+void Plg242::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
+
+// decomp: PLG255.BIN func_800FA850 (src/EFFECT/PLG255.BIN/1D8.c:6).
+void Plg255::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
+
+// decomp: PLG265.BIN func_800FCE4C (src/EFFECT/PLG265.BIN/2E8.c:34).
+void Plg265::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
+
+// decomp: PLG266.BIN func_800FDBF8 (src/EFFECT/PLG266.BIN/2E8.c:42).
+void Plg266::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
+
+// decomp: PLG291.BIN func_800FA770 (src/EFFECT/PLG291.BIN/F8.c:12).
+void Plg291::TrailInit(const Templates::TrailDefinition& definition,
+                       Templates::TrailScratch& scratch,
+                       std::span<Templates::TrailRecord> trails,
+                       std::int32_t distance, Templates::TrailHost& host) {
+  Templates::TrailInit(definition, scratch, trails, distance, host);
+}
+}  // namespace VS::Effects

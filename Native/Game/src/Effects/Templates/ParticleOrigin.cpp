@@ -1,507 +1,447 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Plugins/Plg045.h"
-#include "Effects/Plugins/Plg057.h"
-#include "Effects/Plugins/Plg065.h"
-#include "Effects/Plugins/Plg082.h"
-#include "Effects/Plugins/Plg087.h"
-#include "Effects/Plugins/Plg114.h"
-#include "Effects/Plugins/Plg146.h"
-#include "Effects/Plugins/Plg147.h"
-#include "Effects/Plugins/Plg153.h"
-#include "Effects/Plugins/Plg156.h"
-#include "Effects/Plugins/Plg168.h"
-#include "Effects/Plugins/Plg224.h"
-#include "Effects/Plugins/Plg255.h"
-#include "Effects/Plugins/Plg263.h"
-#include "Effects/Plugins/Plg265.h"
-#include "Effects/Plugins/Plg266.h"
-#include "Effects/Plugins/Plg300.h"
-#include "Effects/Plugins/Plg301.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/ClosedRing.h"
-#include "Effects/Templates/Grid.h"
-#include "Effects/Templates/Mesh10.h"
-#include "Effects/Templates/MirrorSurface.h"
-#include "Effects/Templates/ParticleControl.h"
-#include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/ParticleLineRender.h"
-#include "Effects/Templates/ParticleOrigin.h"
-#include "Effects/Templates/ParticleRender.h"
-#include "Effects/Templates/ParticleTarget.h"
-#include "Effects/Templates/Ring.h"
-#include "Effects/Templates/RotatingSurface.h"
-#include "Effects/Templates/Surface.h"
-#include "Effects/Templates/TemplateState.h"
-#include "Effects/Templates/TiledRing.h"
-#include "Effects/Templates/TrailControl.h"
-#include "Effects/Templates/TrailDispatch.h"
-#include "Effects/Templates/TrailInit.h"
-#include "Effects/Templates/TrailNineControl.h"
-#include "Effects/Templates/TrailNineDispatch.h"
-#include "Effects/Templates/TrailNineInit.h"
-#include "Effects/Templates/TrailNineOrigin.h"
-#include "Effects/Templates/TrailNineRender.h"
-#include "Effects/Templates/TrailNineTarget.h"
-#include "Effects/Templates/TrailNineUpdate.h"
-#include "Effects/Templates/TrailOrigin.h"
-#include "Effects/Templates/TrailRender.h"
-#include "Effects/Templates/TrailTarget.h"
-#include "Effects/Templates/TrailUpdate.h"
-#include "Effects/Trails.h"
-#include "Effects/Transforms.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Effects/Templates/ParticleOrigin.hpp"
 
-// decomp: PLG045.BIN func_800F9910 (src/EFFECT/PLG045.BIN/110.c:1): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg045_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg045_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg045_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg045_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg045_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg045_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+#include <cstddef>
+#include <cstdint>
 
-// decomp: PLG057.BIN func_800F9AD0 (src/EFFECT/PLG057.BIN/2D0.c:2): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg057_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg057_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg057_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg057_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg057_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg057_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+#include "Core/Math/Matrix.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/Vector.hpp"
+#include "Effects/Templates/ParticleCore.hpp"
 
-// decomp: PLG065.BIN func_800FC340 (src/EFFECT/PLG065.BIN/F8.c:19): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg065_RotatingSurface
-#define VS_CLOSED_RING_FUNCTION Effects_Plg065_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg065_closedRingColorFactors
-#define VS_RING_FUNCTION Effects_Plg065_Ring
-#define VS_RING_COLORS Effects_Plg065_ringColorFactors
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg065_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg065_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg065_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg065_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg065_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+namespace VS::Effects::Templates {
+namespace {
+namespace math = Core::Math;
+using math::Vec3;
 
-// decomp: PLG082.BIN func_800F9928 (src/EFFECT/PLG082.BIN/128.c:8): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg082_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg082_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg082_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg082_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg082_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg082_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+constexpr std::int32_t kBoxFaces = 6;
+constexpr std::uint32_t kCornerMask = 7;
+constexpr std::int32_t kCornerX = 1;
+constexpr std::int32_t kCornerY = 2;
+constexpr std::int32_t kCornerZ = 4;
+constexpr std::int32_t kFourPositionRing = 4;
+constexpr std::int32_t kFullTurn = 0x1000;
+// Ring positions start an eighth of a turn round.
+constexpr std::int32_t kRingAngleOffset = 0x200;
+// A ring point between two positions takes a Q12 weight from a 15-bit draw.
+constexpr unsigned kRingWeightShift = 3;
 
-// decomp: PLG087.BIN func_800FE168 (src/EFFECT/PLG087.BIN/1F0.c:31): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_SURFACE_FUNCTION Effects_Plg087_Surface
-#define VS_SURFACE_VERTICES Effects_Plg087_surfaceVertices
-#define VS_SURFACE_REPEAT
-#define VS_CLOSED_RING_FUNCTION Effects_Plg087_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg087_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_GRID_FUNCTION Effects_Plg087_Grid
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg087_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg087_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg087_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg087_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg087_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg087_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg087_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg087_trailEmissionCounter
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg087_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg087_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg087_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg087_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg087_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_SURFACE_REPEAT
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_GRID_FUNCTION
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// The value Core_Random_Rand() % 6 picks: the box face a point lands on.
+enum class BoxFace : std::int32_t {
+  kPositiveX = 0,
+  kNegativeX = 1,
+  kPositiveY = 2,
+  kNegativeY = 3,
+  kPositiveZ = 4,
+  kNegativeZ = 5,
+};
 
-// decomp: PLG114.BIN func_800F9A08 (src/EFFECT/PLG114.BIN/208.c:2): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg114_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg114_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg114_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg114_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg114_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg114_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// A ring position in the extent's x-z plane.
+struct RingPosition {
+  std::int32_t x{};
+  std::int32_t z{};
+};
 
-// decomp: PLG114.BIN func_800FB6AC (src/EFFECT/PLG114.BIN/208.c:14): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg114_ParticleOrigin2
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg114_ParticleTarget2
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg114_ParticleControl2
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg114_ParticleLineRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg114_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg114_particleEmissionCounter2
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+[[nodiscard]] std::int16_t Halfword(std::int32_t value) noexcept {
+  return math::WrapSigned16(static_cast<std::uint32_t>(value));
+}
 
-// decomp: PLG146.BIN func_800FB544 (src/EFFECT/PLG146.BIN/1D8.c:10): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg146_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg146_tiledRingColorFactors
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg146_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg146_mirrorSurfaceVertices
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg146_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg146_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg146_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg146_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg146_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// `extent` or its negation.
+[[nodiscard]] std::int16_t Side(std::int32_t extent, bool positive) noexcept {
+  return Halfword(positive ? extent : math::WrappingNegate(extent));
+}
 
-// decomp: PLG147.BIN func_800FA51C (src/EFFECT/PLG147.BIN/F8.c:6): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_RING_FUNCTION Effects_Plg147_Ring
-#define VS_RING_COLORS Effects_Plg147_ringColorFactors
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg147_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg147_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg147_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg147_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg147_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// A draw across the box: [-extent, extent) either way round.
+[[nodiscard]] std::int16_t Across(std::int32_t extent, ParticleSetHost& host) {
+  return Halfword(host.RandomRange(extent, math::WrappingNegate(extent)));
+}
 
-// decomp: PLG152.BIN func_800FA478 (src/EFFECT/PLG152.BIN/128.c:11): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_GRID_FUNCTION Effects_Plg152_Grid
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg152_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg152_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg152_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg152_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg152_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg082_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_GRID_FUNCTION
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// Turns the offset by the transform's world rotation when the definition
+// asks, then stores it, moved to the sampled position, as the ribbon's first
+// point. decomp: particleSetup.h:96-105 (ApplyRotMatrix with the translation
+// cleared, then the position added as halfwords).
+void PlaceOrigin(ParticleSetFrame& frame, std::size_t ribbon,
+                 ParticlePoint offset) {
+  ParticleSetScratch& scratch = frame.scratch;
+  if ((scratch.flags & kParticleRotateOffsets) != 0) {
+    scratch.aim_point = math::RotateTranslate(
+        {.rotation = frame.inputs.world.rotation, .translation = {}},
+        ParticleVector(offset));
+    offset = ParticlePointAt(scratch.aim_point);
+  }
+  frame.points.sets.at(ribbon)[0] = ParticlePointAt(
+      math::AddVectors(ParticleVector(offset), scratch.position));
+}
 
-// decomp: PLG153.BIN func_800FB040 (src/EFFECT/PLG153.BIN/110.c:12): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_MESH10_FUNCTION Effects_Plg153_Mesh10
-#define VS_MESH10_VERTICES Effects_Plg153_mesh10Vertices
-#define VS_MESH10_FACES Effects_Plg153_mesh10Faces
-#define VS_RING_FUNCTION Effects_Plg153_Ring
-#define VS_RING_COLORS Effects_Plg153_ringColorFactors
-#define VS_RING_TRANSPOSED
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg153_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg153_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg153_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg153_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg153_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg153_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_MESH10_FUNCTION
-#undef VS_MESH10_VERTICES
-#undef VS_MESH10_FACES
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: particleSetup.h:77-107, a point on the extent's ellipsoid at two
+// random angles.
+void PlaceOnSphere(ParticleSetFrame& frame, ParticleSetHost& host) {
+  ParticleSetScratch& scratch = frame.scratch;
+  const std::size_t ribbons = ParticleRibbons(frame);
+  for (std::size_t ribbon = 0; ribbon < ribbons; ++ribbon) {
+    std::int32_t angle = host.Rand();
+    scratch.sine[0] = math::Sine(angle);
+    scratch.cosine[0] = math::Cosine(angle);
+    angle = host.Rand();
+    scratch.sine[1] = math::Sine(angle);
+    scratch.cosine[1] = math::Cosine(angle);
+    const Vec3& extent = scratch.extent;
+    const ParticlePoint offset{
+        Halfword(ParticleFixed(ParticleFixed(extent.x, scratch.cosine[0]),
+                               scratch.cosine[1])),
+        Halfword(ParticleFixed(ParticleFixed(extent.y, scratch.cosine[0]),
+                               scratch.sine[1])),
+        Halfword(ParticleFixed(extent.z, scratch.sine[0]))};
+    PlaceOrigin(frame, ribbon, offset);
+  }
+}
 
-// decomp: PLG156.BIN func_800F9928 (src/EFFECT/PLG156.BIN/128.c:2): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg156_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg156_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg156_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg156_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg156_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg156_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: particleSetup.h:117-156, the face `face` of the box, drawing the
+// two other axes across it. Another value leaves `point` as it was.
+[[nodiscard]] ParticlePoint OnBoxFace(std::int32_t face, ParticlePoint point,
+                                      const Vec3& extent,
+                                      ParticleSetHost& host) {
+  const auto side = static_cast<BoxFace>(face);
+  switch (side) {
+    case BoxFace::kPositiveX:
+    case BoxFace::kNegativeX:
+      point.x = Side(extent.x, side == BoxFace::kPositiveX);
+      point.y = Across(extent.y, host);
+      point.z = Across(extent.z, host);
+      break;
+    case BoxFace::kPositiveY:
+    case BoxFace::kNegativeY:
+      point.y = Side(extent.y, side == BoxFace::kPositiveY);
+      point.x = Across(extent.x, host);
+      point.z = Across(extent.z, host);
+      break;
+    case BoxFace::kPositiveZ:
+    case BoxFace::kNegativeZ:
+      point.z = Side(extent.z, side == BoxFace::kPositiveZ);
+      point.x = Across(extent.x, host);
+      point.y = Across(extent.y, host);
+      break;
+    default:
+      break;
+  }
+  return point;
+}
 
-// decomp: PLG168.BIN func_800FBB10 (src/EFFECT/PLG168.BIN/1F0.c:12): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg168_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg168_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg168_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg168_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg168_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg168_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg168_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg168_trailEmissionCounter
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg168_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg168_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg168_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg168_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg168_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: particleSetup.h:159-181, the corner whose bits 0-2 select the
+// positive x, y and z sides.
+[[nodiscard]] ParticlePoint OnBoxCorner(std::int32_t corner,
+                                        const Vec3& extent) noexcept {
+  return {Side(extent.x, (corner & kCornerX) != 0),
+          Side(extent.y, (corner & kCornerY) != 0),
+          Side(extent.z, (corner & kCornerZ) != 0)};
+}
 
-// decomp: PLG224.BIN func_800F98F8 (src/EFFECT/PLG224.BIN/F8.c:2): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg224_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg224_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg224_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg224_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg224_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: particleSetup.h:109-195. A point keeps its previous offset for the
+// fixed placement; the corners step the overlay's emission cursor, which is
+// stored back after the loop as the original's register copy was.
+void PlaceOnBox(ParticleEmissionCounter counter, ParticleSetFrame& frame,
+                ParticleSetHost& host) {
+  const auto placement = static_cast<ParticlePlacement>(frame.scratch.flags &
+                                                        kParticlePlacementMask);
+  std::int32_t corner = host.EmissionCounter(counter);
+  const std::size_t ribbons = ParticleRibbons(frame);
+  for (std::size_t ribbon = 0; ribbon < ribbons; ++ribbon) {
+    ParticlePoint offset = frame.points.sets.at(ribbon)[0];
+    switch (placement) {
+      case ParticlePlacement::kRandom:
+      case ParticlePlacement::kRandomAlternate:
+        offset = OnBoxFace(ParticleRemainder(host.Rand(), kBoxFaces), offset,
+                           frame.scratch.extent, host);
+        break;
+      case ParticlePlacement::kCorners:
+        corner = static_cast<std::int32_t>(
+            static_cast<std::uint32_t>(math::WrappingAdd(corner, 1)) &
+            kCornerMask);
+        offset = OnBoxCorner(corner, frame.scratch.extent);
+        break;
+      case ParticlePlacement::kFixed:
+        break;
+    }
+    PlaceOrigin(frame, ribbon, offset);
+  }
+  host.StoreEmissionCounter(counter, corner);
+}
 
-// decomp: PLG255.BIN func_800FBAF8 (src/EFFECT/PLG255.BIN/1D8.c:12): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg255_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg255_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg255_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg255_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg255_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg255_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg255_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg255_trailEmissionCounter
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg255_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg255_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg255_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg255_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg255_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: particleSetup.h:197-220, the ring's segment and position counts:
+// four each, or the definition's (a zero segment count is one and a zero
+// position count takes the segment count). False for the unused shape.
+[[nodiscard]] bool CountRing(ParticleShape shape,
+                             const ParticleSetDefinition& definition,
+                             ParticleSetScratch& scratch) noexcept {
+  switch (shape) {
+    case ParticleShape::kRingA:
+    case ParticleShape::kRingB:
+    case ParticleShape::kRingC:
+    case ParticleShape::kRingD:
+      scratch.ring_segments = kFourPositionRing;
+      scratch.ring_positions = kFourPositionRing;
+      return true;
+    case ParticleShape::kCustomRing:
+      scratch.ring_segments =
+          definition.ring_segments != 0 ? definition.ring_segments : 1;
+      scratch.ring_positions = definition.ring_positions != 0
+                                   ? definition.ring_positions
+                                   : scratch.ring_segments;
+      return true;
+    case ParticleShape::kSphere:
+    case ParticleShape::kBox:
+    default:
+      return false;
+  }
+}
 
-// decomp: PLG263.BIN func_800FC00C (src/EFFECT/PLG263.BIN/110.c:344): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_SURFACE_FUNCTION Effects_Plg263_Surface
-#define VS_SURFACE_VERTICES Effects_Plg263_surfaceVertices
-#define VS_RING_FUNCTION Effects_Plg263_Ring
-#define VS_RING_COLORS Effects_Plg263_ringColorFactors
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg263_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg263_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg263_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg263_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg263_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg263_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// The ring position `index` steps of `step` round, scaled by the extent.
+[[nodiscard]] RingPosition RingPositionAt(std::int32_t index, std::int32_t step,
+                                          const Vec3& extent) noexcept {
+  const std::int32_t angle =
+      math::WrappingAdd(math::WrappingMultiply(index, step), kRingAngleOffset);
+  return {.x = ParticleFixed(math::Cosine(angle), extent.x),
+          .z = ParticleFixed(math::Sine(angle), extent.z)};
+}
 
-// decomp: PLG265.BIN func_800FA9E0 (src/EFFECT/PLG265.BIN/2E8.c:6): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg265_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg265_tiledRingColorFactors
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg265_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg265_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg265_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg265_ParticleLineRender
-#define VS_PARTICLE_CORNER_STATE Effects_Plg265_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// A Q12 `weight` of the way from `start` to `end`.
+[[nodiscard]] std::int16_t Between(std::int32_t start, std::int32_t end,
+                                   std::int32_t weight) noexcept {
+  return Halfword(math::WrappingAdd(
+      ParticleFixed(math::WrappingSubtract(end, start), weight), start));
+}
 
-// decomp: PLG265.BIN func_800FE0F4 (src/EFFECT/PLG265.BIN/2E8.c:40): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg265_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg265_tiledRingColorFactors
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg265_ParticleOrigin2
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg265_ParticleTarget2
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg265_ParticleControl2
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg265_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg265_ParticleDispatch2
-#define VS_PARTICLE_UNTEXTURED
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg265_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg265_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg265_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg265_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg265_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg265_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg265_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg265_trailEmissionCounter
-#define VS_PARTICLE_CORNER_STATE Effects_Plg265_particleEmissionCounter2
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_UNTEXTURED
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: particleSetup.h:223-259. Each point advances the emission cursor
+// one ring position and lands on it (corners) or at a random weight between
+// the cursor's first position and it.
+void PlaceOnRing(ParticleEmissionCounter counter, ParticleSetFrame& frame,
+                 ParticleSetHost& host) {
+  ParticleSetScratch& scratch = frame.scratch;
+  const bool corners =
+      static_cast<ParticlePlacement>(scratch.flags & kParticlePlacementMask) ==
+      ParticlePlacement::kCorners;
+  const std::int32_t step =
+      math::R3000Quotient(kFullTurn, scratch.ring_segments);
+  std::int32_t position = host.EmissionCounter(counter);
+  RingPosition start{};
+  if (!corners) {
+    position = ParticleRemainder(position, scratch.ring_positions);
+    start = RingPositionAt(position, step, scratch.extent);
+  }
+  const std::size_t ribbons = ParticleRibbons(frame);
+  for (std::size_t ribbon = 0; ribbon < ribbons; ++ribbon) {
+    position = ParticleRemainder(math::WrappingAdd(position, 1),
+                                 scratch.ring_positions);
+    const RingPosition end = RingPositionAt(position, step, scratch.extent);
+    ParticlePoint offset{.x = Halfword(end.x), .y = 0, .z = Halfword(end.z)};
+    if (!corners) {
+      const std::int32_t weight = host.Rand() >> kRingWeightShift;
+      offset.x = Between(start.x, end.x, weight);
+      offset.z = Between(start.z, end.z, weight);
+    }
+    PlaceOrigin(frame, ribbon, offset);
+  }
+  host.StoreEmissionCounter(counter, position);
+}
+}  // namespace
 
-// decomp: PLG266.BIN func_800F9AE8 (src/EFFECT/PLG266.BIN/2E8.c:2): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg266_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg266_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg266_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg266_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg266_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg266_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: EFFECT VS_PARTICLE_ORIGIN_FUNCTION (src/EFFECT/particleSetup.h:36).
+void ParticleOrigin(ParticleEmissionCounter counter, ParticleSetFrame& frame,
+                    ParticleSetHost& host) {
+  const ParticleSetDefinition& definition = frame.inputs.definition;
+  ParticleSetScratch& scratch = frame.scratch;
+  const std::int32_t age = frame.state.age;
+  scratch.position = SampleParticleRange(definition.position,
+                                         definition.curves.position, age, host);
+  switch (static_cast<ParticleAnchor>(scratch.flags & kParticleAnchorMask)) {
+    case ParticleAnchor::kEffectOrigin:
+      scratch.position =
+          math::AddVectors(scratch.position, frame.inputs.effect_origin);
+      break;
+    case ParticleAnchor::kTransform:
+      scratch.position =
+          math::AddVectors(scratch.position, frame.inputs.world.translation);
+      break;
+    case ParticleAnchor::kNone:
+    default:
+      break;
+  }
+  scratch.extent = SampleParticleRange(definition.extent,
+                                       definition.curves.extent, age, host);
+  const auto shape =
+      static_cast<ParticleShape>(scratch.flags & kParticleShapeMask);
+  if (shape == ParticleShape::kSphere) {
+    PlaceOnSphere(frame, host);
+  } else if (shape == ParticleShape::kBox) {
+    PlaceOnBox(counter, frame, host);
+  } else if (CountRing(shape, definition, scratch)) {
+    PlaceOnRing(counter, frame, host);
+  }
+}
+}  // namespace VS::Effects::Templates
 
-// decomp: PLG266.BIN func_800FB78C (src/EFFECT/PLG266.BIN/2E8.c:14): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg266_ParticleOrigin2
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg266_ParticleTarget2
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg266_ParticleControl2
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg266_ParticleLineRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg266_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg266_particleEmissionCounter2
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+namespace VS::Effects {
+// decomp: PLG045.BIN func_800F9910 (src/EFFECT/PLG045.BIN/110.c:1).
+void Plg045::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg045, frame,
+                            host);
+}
 
-// decomp: PLG300.BIN func_800FA584 (src/EFFECT/PLG300.BIN/110.c:12): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg300_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg300_mirrorSurfaceVertices
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg300_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg300_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg300_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg300_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg300_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg300_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: PLG057.BIN func_800F9AD0 (src/EFFECT/PLG057.BIN/2D0.c:2).
+void Plg057::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg057, frame,
+                            host);
+}
 
-// decomp: PLG301.BIN func_800F9910 (src/EFFECT/PLG301.BIN/110.c:8): VS_PARTICLE_ORIGIN_FUNCTION, instance of Effects/Templates/ParticleOrigin.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg301_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg301_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg301_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg301_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg301_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg301_particleEmissionCounter
-#include "Effects/Templates/ParticleOrigin.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
+// decomp: PLG065.BIN func_800FC340 (src/EFFECT/PLG065.BIN/F8.c:19).
+// decomp: PLG065.BIN func_800FC340 (src/EFFECT/PLG065.BIN/F8.c:35).
+void Plg065::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg065, frame,
+                            host);
+}
 
-}  // extern "C"
+// decomp: PLG082.BIN func_800F9928 (src/EFFECT/PLG082.BIN/128.c:8).
+void Plg082::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg082, frame,
+                            host);
+}
+
+// decomp: PLG087.BIN func_800FE168 (src/EFFECT/PLG087.BIN/1F0.c:31).
+// decomp: PLG087.BIN func_800FE168 (src/EFFECT/PLG087.BIN/1F0.c:47).
+void Plg087::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg087, frame,
+                            host);
+}
+
+// decomp: PLG114.BIN func_800F9A08 (src/EFFECT/PLG114.BIN/208.c:2).
+void Plg114::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg114, frame,
+                            host);
+}
+
+// decomp: PLG114.BIN func_800FB6AC (src/EFFECT/PLG114.BIN/208.c:14).
+// decomp: PLG114.BIN func_800FB6AC (src/EFFECT/PLG114.BIN/208.c:30).
+void Plg114::ParticleOrigin2(Templates::ParticleSetFrame& frame,
+                             Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg114Second,
+                            frame, host);
+}
+
+// decomp: PLG146.BIN func_800FB544 (src/EFFECT/PLG146.BIN/1D8.c:10).
+// decomp: PLG146.BIN func_800FB544 (src/EFFECT/PLG146.BIN/1D8.c:26).
+void Plg146::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg146, frame,
+                            host);
+}
+
+// decomp: PLG147.BIN func_800FA51C (src/EFFECT/PLG147.BIN/F8.c:6).
+// decomp: PLG147.BIN func_800FA51C (src/EFFECT/PLG147.BIN/F8.c:22).
+void Plg147::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg147, frame,
+                            host);
+}
+
+// decomp: PLG152.BIN func_800FA478 (src/EFFECT/PLG152.BIN/128.c:11).
+void Plg152::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg152, frame,
+                            host);
+}
+
+// decomp: PLG153.BIN func_800FB040 (src/EFFECT/PLG153.BIN/110.c:12).
+void Plg153::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg153, frame,
+                            host);
+}
+
+// decomp: PLG156.BIN func_800F9928 (src/EFFECT/PLG156.BIN/128.c:2).
+void Plg156::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg156, frame,
+                            host);
+}
+
+// decomp: PLG168.BIN func_800FBB10 (src/EFFECT/PLG168.BIN/1F0.c:12).
+// decomp: PLG168.BIN func_800FBB10 (src/EFFECT/PLG168.BIN/1F0.c:28).
+void Plg168::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg168, frame,
+                            host);
+}
+
+// decomp: PLG224.BIN func_800F98F8 (src/EFFECT/PLG224.BIN/F8.c:2).
+// decomp: PLG224.BIN func_800F98F8 (src/EFFECT/PLG224.BIN/F8.c:18).
+void Plg224::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg224, frame,
+                            host);
+}
+
+// decomp: PLG255.BIN func_800FBAF8 (src/EFFECT/PLG255.BIN/1D8.c:12).
+// decomp: PLG255.BIN func_800FBAF8 (src/EFFECT/PLG255.BIN/1D8.c:28).
+void Plg255::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg255, frame,
+                            host);
+}
+
+// decomp: PLG263.BIN func_800FC00C (src/EFFECT/PLG263.BIN/110.c:344).
+void Plg263::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg263, frame,
+                            host);
+}
+
+// decomp: PLG265.BIN func_800FA9E0 (src/EFFECT/PLG265.BIN/2E8.c:6).
+// decomp: PLG265.BIN func_800FA9E0 (src/EFFECT/PLG265.BIN/2E8.c:22).
+void Plg265::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg265, frame,
+                            host);
+}
+
+// decomp: PLG265.BIN func_800FE0F4 (src/EFFECT/PLG265.BIN/2E8.c:40).
+void Plg265::ParticleOrigin2(Templates::ParticleSetFrame& frame,
+                             Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg265Second,
+                            frame, host);
+}
+
+// decomp: PLG266.BIN func_800F9AE8 (src/EFFECT/PLG266.BIN/2E8.c:2).
+void Plg266::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg266, frame,
+                            host);
+}
+
+// decomp: PLG266.BIN func_800FB78C (src/EFFECT/PLG266.BIN/2E8.c:14).
+// decomp: PLG266.BIN func_800FB78C (src/EFFECT/PLG266.BIN/2E8.c:30).
+void Plg266::ParticleOrigin2(Templates::ParticleSetFrame& frame,
+                             Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg266Second,
+                            frame, host);
+}
+
+// decomp: PLG300.BIN func_800FA584 (src/EFFECT/PLG300.BIN/110.c:12).
+void Plg300::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg300, frame,
+                            host);
+}
+
+// decomp: PLG301.BIN func_800F9910 (src/EFFECT/PLG301.BIN/110.c:8).
+void Plg301::ParticleOrigin(Templates::ParticleSetFrame& frame,
+                            Templates::ParticleSetHost& host) {
+  Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg301, frame,
+                            host);
+}
+}  // namespace VS::Effects

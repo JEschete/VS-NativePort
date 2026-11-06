@@ -6,12 +6,13 @@
 #include <optional>
 #include <span>
 
-// The trail emitter behind PLG074's Radial Surge ribbons: an origin stage that
-// places the first spline point of every trail inside a sphere, box or ring,
-// and a lifecycle that creates, ticks, expires and stops the emitter. Inputs
-// are typed values and spans; randomness, trigonometry, rotation, memory and
-// the shared trail stages are reached through interfaces, so this code reads
-// no package, scratch block or PS1 address.
+// The trail emitter behind PLG074's Radial Surge ribbons and the nine-sample
+// trails of PLG049, PLG050 and the other trails9.h overlays: an origin stage
+// that places the first spline point of every trail inside a sphere, box or
+// ring, and a lifecycle that creates, ticks, expires and stops the emitter.
+// Inputs are typed values and spans; randomness, trigonometry, rotation,
+// memory and the shared trail stages are reached through interfaces, so this
+// code reads no package, scratch block or PS1 address.
 namespace VS::Effects {
 struct TrailVector {
   std::int32_t x{};
@@ -29,6 +30,9 @@ struct TrailPoint {
 
 inline constexpr std::size_t kMaxTrailsPerEmitter = 16;
 inline constexpr std::size_t kTrailTransparencySamples = 5;
+// The nine-sample emitters (trails9.h) hold at most eight trails.
+inline constexpr std::size_t kMaxNineSampleTrailsPerEmitter = 8;
+inline constexpr std::size_t kTrailNineTransparencySamples = 9;
 inline constexpr std::uint8_t kOpaqueTrailTransparency = 0x80;
 using TrailTransparency = std::array<std::uint8_t, kTrailTransparencySamples>;
 
@@ -97,11 +101,11 @@ class TrailOriginServices {
   [[nodiscard]] virtual TrailVector Rotate(TrailPoint point) = 0;
 };
 
-// Places the first spline point of every trail (trails5.h:27; PLG074
-// func_800FB414). `origins` holds one point per trail and is updated in place;
-// the "no placement" box mode leaves a point's previous value. `corner` is the
-// overlay's emission cursor shared by the box-corner and ring placements.
-// Coordinates wrap to 16 bits as the original SVECTOR stores did.
+// Places the first spline point of every trail (trails5.h:27 and trails9.h:27;
+// PLG074 func_800FB414). `origins` holds one point per trail and is updated in
+// place; the "no placement" box mode leaves a point's previous value. `corner`
+// is the overlay's emission cursor shared by the box-corner and ring
+// placements. Coordinates wrap to 16 bits as the original SVECTOR stores did.
 void GenerateTrailOrigins(const TrailOriginRequest& request,
                           std::span<TrailPoint> origins, std::int32_t& corner,
                           TrailOriginScratch& scratch,
@@ -115,20 +119,28 @@ struct TrailEmitterPlan {
 };
 [[nodiscard]] TrailEmitterPlan PlanTrailEmitter(std::int32_t packed);
 
-// The trail count for a definition's first interval bound, capped at sixteen.
-// A negative bound has no count.
-[[nodiscard]] std::optional<std::uint8_t> TrailCountFor(std::int16_t interval);
+// The trail count for a definition's first interval bound, capped at `limit`
+// (sixteen five-sample or eight nine-sample trails). A negative bound has no
+// count.
+[[nodiscard]] std::optional<std::uint8_t> TrailCountFor(
+    std::int16_t interval, std::size_t limit = kMaxTrailsPerEmitter);
 
-struct SampledTrailTransparency {
-  TrailTransparency samples{};
-  // The original fifth sample of a one-entry curve read the byte after it;
+template <std::size_t Samples>
+struct SampledTransparency {
+  std::array<std::uint8_t, Samples> samples{};
+  // The original last sample of a one-entry curve read the byte after it;
   // that read is replaced with the curve's only entry.
   bool clamped = false;
 };
+using SampledTrailTransparency = SampledTransparency<kTrailTransparencySamples>;
 // Five evenly spaced samples of a transparency curve (trails5.h:710). An
 // empty curve yields the opaque default.
 [[nodiscard]] SampledTrailTransparency SampleTrailTransparency(
     std::span<const std::uint8_t> curve);
+// Nine evenly spaced samples of a transparency curve (trails9.h:716-734),
+// with the same defaults.
+[[nodiscard]] SampledTransparency<kTrailNineTransparencySamples>
+SampleTrailNineTransparency(std::span<const std::uint8_t> curve);
 
 // A trail sample's position as a Q12 particle position, wrapping like the
 // original 32-bit products.
@@ -173,11 +185,11 @@ class TrailEmitterHost {
   virtual void ReleaseTrails() = 0;
 };
 
-// Runs one lifecycle command (trails5.h:677; PLG074 func_800FCFEC) and
-// returns whether the emitter stays attached. The trail buffer is released
-// when the lifetime runs out, on stop and on a refused tick; the emitter
-// state itself belongs to the renderer slot. A slot without state detaches on
-// its next tick.
+// Runs one lifecycle command (trails5.h:677 and trails9.h:685; PLG074
+// func_800FCFEC) and returns whether the emitter stays attached. The trail
+// buffer is released when the lifetime runs out, on stop and on a refused tick;
+// the emitter state itself belongs to the renderer slot. A slot without state
+// detaches on its next tick.
 [[nodiscard]] bool UpdateTrailEmitter(TrailEmitterCommand command,
                                       std::int32_t packed,
                                       TrailEmitterHost& host);

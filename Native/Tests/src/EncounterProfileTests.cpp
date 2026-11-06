@@ -20,7 +20,10 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Items/ItemRecordsLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Setup/Assembly.hpp"
+#include "Menu/Setup/SetupLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -33,7 +36,6 @@ extern "C" {
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Menu/Setup/Assembly.h"
 #include "State/Progress.h"
 #include "Title/NewGame.h"
 }
@@ -756,7 +758,14 @@ Items_Inventory CheckWeaponParts(const Items_Inventory& original,
   CHECK(std::tuple(blade.id, grip.id, blade.wepId, blade.category) ==
         std::tuple(blades[category - 1], grips[category - 1],
                    models[category - 1], category));
-  CHECK(Menu_Setup_IsGripCompatible(&blade, &grip) != 0);
+  const auto typed_blade = VS::Items::Live::Typed(blade);
+  const auto typed_grip = VS::Items::Live::Typed(grip);
+  CHECK(VS::Menu::Setup::RunLiveSetup([&](VS::Menu::Setup::Context& context) {
+          return VS::Menu::Setup::IsGripCompatible(context, &typed_blade,
+                                                   &typed_grip)
+                     ? 1
+                     : 0;
+        }) != 0);
   CHECK(std::tuple(blade.assembledWeaponIndex, grip.assembledWeaponIndex,
                    slot.blade, slot.grip) ==
         std::tuple(original.blades[slot.blade - 1].assembledWeaponIndex,

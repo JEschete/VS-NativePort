@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import bisect
 import collections
 import csv
 import hashlib
@@ -46,6 +47,35 @@ class Definition:
     line: int
     body: str
     assembly: bool = False
+    # Enclosing namespaces plus any qualifier written before the name.
+    scope: str = ""
+
+    @property
+    def qualified(self) -> str:
+        return f"{self.scope}::{self.name}" if self.scope else self.name
+
+
+NAMESPACE_BRACE = re.compile(r"\b(?:inline\s+)?namespace\b\s*((?:\w+\s*::\s*)*\w+)?\s*\{|[{}]")
+QUALIFIER = re.compile(r"((?:\b\w+\s*::\s*)+)$")
+
+
+def namespace_scopes(masked: str) -> tuple[list[int], list[str]]:
+    """The namespace chain in force after each brace, for bisecting by position."""
+    stack: list[list[str]] = []
+    positions = [0]
+    scopes = [""]
+    for match in NAMESPACE_BRACE.finditer(masked):
+        if match[0] == "}":
+            if stack:
+                stack.pop()
+        elif match[0] == "{":
+            stack.append([])
+        else:
+            named = match[1]
+            stack.append(re.split(r"\s*::\s*", named) if named else ["(anonymous)"])
+        positions.append(match.end())
+        scopes.append("::".join(part for parts in stack for part in parts))
+    return positions, scopes
 
 
 def mask_literals(text: str) -> str:
@@ -70,6 +100,7 @@ def closing(text: str, start: int, left: str, right: str) -> int:
 
 def definitions(text: str, wanted: set[str]) -> list[Definition]:
     masked = mask_literals(text)
+    positions, scopes = namespace_scopes(masked)
     found = []
     for match in CALL.finditer(masked):
         if match[1] not in wanted:
@@ -78,17 +109,22 @@ def definitions(text: str, wanted: set[str]) -> list[Definition]:
         tail = end + 1
         while tail < len(masked) and masked[tail].isspace():
             tail += 1
-        qualifier = re.match(r"noexcept(?:\s*\([^)]*\))?\s*", masked[tail:])
-        if qualifier:
-            tail += qualifier.end()
+        qualifier = re.match(r"(?:const\b\s*)?(?:noexcept(?:\s*\([^)]*\))?\s*)?",
+                             masked[tail:])
+        tail += qualifier.end()
         if tail >= len(masked) or masked[tail] != "{":
             continue
         body_end = closing(masked, tail, "{", "}")
         boundary = max(masked.rfind(char, 0, match.start()) for char in ";{}")
         prefix = masked[boundary + 1:match.start()]
+        written = QUALIFIER.search(prefix)
+        scope = [scopes[bisect.bisect_right(positions, match.start()) - 1]]
+        if written:
+            scope.append(re.sub(r"\s+", "", written[1]).removesuffix("::"))
         found.append(Definition(match[1], text.count("\n", 0, match.start()) + 1,
                                 text[tail + 1:body_end],
-                                bool(re.search(r"\b(?:__asm__?|asm)\b", prefix))))
+                                bool(re.search(r"\b(?:__asm__?|asm)\b", prefix)),
+                                "::".join(part for part in scope if part)))
     return found
 
 
@@ -232,6 +268,24 @@ def native_symbol(row: dict[str, str], owned: dict[str, dict[str, str]]) -> str:
     return row["final_name"].replace("::", "_")
 
 
+def native_bodies(found: list[Definition], row: dict[str, str],
+                  owned: dict[str, dict[str, str]]) -> list[Definition]:
+    """Definitions of a row; a short name shared across namespaces resolves by the registered name."""
+    bodies = [item for item in found if item.name == native_symbol(row, owned)]
+    registered = owned.get(row["id"], {}).get("name", "")
+    if len(bodies) > 1 and registered.startswith("VS::"):
+        bodies = [item for item in bodies if item.qualified == registered]
+    return bodies
+
+
+def template_row(row: dict[str, str], owned: dict[str, dict[str, str]]) -> bool:
+    """A copier-expanded template; a row promoted to a typed VS definition is audited as that definition."""
+    if owned.get(row["id"], {}).get("name", "").startswith("VS::"):
+        return False
+    return row["kind"].startswith("template") or bool(
+        re.search(r"(?:^|;)native-template:", row["notes"]))
+
+
 def native_definitions(rows: list[dict[str, str]], owned: dict[str, dict[str, str]]
                        ) -> tuple[dict[str, list[Definition]], dict[str, str]]:
     names_by_file: dict[str, set[str]] = collections.defaultdict(set)
@@ -325,8 +379,7 @@ def audit(output: Path, publish: bool = False) -> dict:
             continue
         if canonical_id(row, catalog) != row["id"]:
             continue
-        if row["kind"].startswith("template") or re.search(
-                r"(?:^|;)native-template:", row["notes"]):
+        if template_row(row, owned):
             states[row["id"]] = template_status(row)
             continue
         redirected = redirect_status(row)
@@ -334,7 +387,7 @@ def audit(output: Path, publish: bool = False) -> dict:
             states[row["id"]] = redirected
             continue
         name = native_symbol(row, owned)
-        bodies = [item for item in native[paths[row["id"]]] if item.name == name]
+        bodies = native_bodies(native[paths[row["id"]]], row, owned)
         if len(bodies) > 1:
             raise ValueError(f"Multiple native definitions for {row['id']} {name}")
         if not bodies:

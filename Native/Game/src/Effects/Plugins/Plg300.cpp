@@ -3,9 +3,9 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/CurvesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Plugins/Plg300.h"
@@ -24,10 +24,10 @@ SVECTOR Effects_Plg300_mirrorSurfaceVertices[5][16]; /* contents: module image (
 int Effects_Plg300_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FE350 (D_800FE350@EFFECT/PLG300.BIN)
-u_char Effects_Plg300_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg300_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FE370 (D_800FE370@EFFECT/PLG300.BIN)
-u_char Effects_Plg300_ringColorFactors2[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg300_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: PLG300.BIN func_800FD198 (src/EFFECT/PLG300.BIN/110.c:355)
 int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
@@ -90,7 +90,7 @@ int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* renderer_
         scratch->flags = effect->flags;
         actorMatrix = &battle->transforms[effect->transformIndex].world;
         effect = &Effects_package->block5Data->definitions[state->effect];
-        column = Effects_SampleEffectCurve(effect->innerExtentCurve, state->age);
+        column = VS::Effects::LiveSampleEffectCurve(effect->innerExtentCurve, state->age);
         fraction = VS::Core::Math::InterpolateLiveShortPair(effect->innerExtentRange, column);
         column = ((u_char*)effect)[7];
         factorBytes = ((u_char*)Effects_Plg300_ringColorFactors2) + (column & 0x1C);
@@ -98,7 +98,7 @@ int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* renderer_
         factors[1] = factorBytes[1];
         factors[2] = factorBytes[2];
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->positionRange,
-            Effects_SampleEffectCurve(effect->positionCurve, state->age), &scratch->position);
+            VS::Effects::LiveSampleEffectCurve(effect->positionCurve, state->age), &scratch->position);
         switch (scratch->flags & 7) {
         case 0:
             break;
@@ -115,17 +115,17 @@ int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* renderer_
         }
 
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->extentRange,
-            Effects_SampleEffectCurve(effect->extentCurve, state->age), &scratch->extent);
-        column = Effects_SampleEffectCurve(effect->forceCurve, state->age);
+            VS::Effects::LiveSampleEffectCurve(effect->extentCurve, state->age), &scratch->extent);
+        column = VS::Effects::LiveSampleEffectCurve(effect->forceCurve, state->age);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[2], column, &scratch->forceMin);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[3], column, &scratch->forceMax);
-        column = Effects_SampleEffectCurve(effect->accelerationCurve, state->age);
+        column = VS::Effects::LiveSampleEffectCurve(effect->accelerationCurve, state->age);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[4], column, &scratch->accelerationMin);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[5], column, &scratch->accelerationMax);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[0],
-            Effects_SampleEffectCurve(effect->directionCurve, state->age), &scratch->baseDirection);
+            VS::Effects::LiveSampleEffectCurve(effect->directionCurve, state->age), &scratch->baseDirection);
         VS::Core::Math::InterpolateLiveSevenBitPlane(effect->pairRanges[2],
-            Effects_SampleEffectCurve(effect->speedCurve, state->age), scratch->speedRange);
+            VS::Effects::LiveSampleEffectCurve(effect->speedCurve, state->age), scratch->speedRange);
         state->radiusSpeed += scratch->accelerationMin.vx;
 
         radiusValue = (state->radius += scratch->forceMin.vx + state->radiusSpeed);
@@ -182,21 +182,21 @@ int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* renderer_
 
             if (effect->rCurve) {
                 colors[drawRow].r =
-                    (factors[drawRow] * Effects_SampleEffectCurve(effect->rCurve, state->age))
+                    (factors[drawRow] * VS::Effects::LiveSampleEffectCurve(effect->rCurve, state->age))
                     / 128;
             } else {
                 colors[drawRow].r = factors[drawRow];
             }
             if (effect->gCurve) {
                 colors[drawRow].g =
-                    (factors[drawRow] * Effects_SampleEffectCurve(effect->gCurve, state->age))
+                    (factors[drawRow] * VS::Effects::LiveSampleEffectCurve(effect->gCurve, state->age))
                     / 128;
             } else {
                 colors[drawRow].g = factors[drawRow];
             }
             if (effect->bCurve) {
                 colors[drawRow].b =
-                    (factors[drawRow] * Effects_SampleEffectCurve(effect->bCurve, state->age))
+                    (factors[drawRow] * VS::Effects::LiveSampleEffectCurve(effect->bCurve, state->age))
                     / 128;
             } else {
                 colors[drawRow].b = factors[drawRow];

@@ -9,8 +9,8 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG236_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG236_H_DECLS
 
-extern CVECTOR Effects_Plg236_closedRingColorFactors[];
-extern u_char Effects_Plg236_ringColorFactors[][4];
-extern u_char Effects_Plg236_ringColorFactors2[][4];
+extern CVECTOR Effects_Plg236_closedRingColorFactors[8];
+extern u_char Effects_Plg236_ringColorFactors[8][4];
+extern u_char Effects_Plg236_ringColorFactors2[8][4];
 
 #endif // VS_EFFECTS_PLUGINS_PLG236_H_DECLS

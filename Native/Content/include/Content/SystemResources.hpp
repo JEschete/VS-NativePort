@@ -19,7 +19,7 @@ inline constexpr std::int32_t kSystemDatSector = 1387;
 inline constexpr std::uint32_t kSystemDatBytes = 188416;
 inline constexpr std::size_t kSystemDatSections = 8;
 // The interface data the battle menu uploads from its section: two 64x224
-// and one 64x158 16-bit images (Menu_Framework_InitGameInterface).
+// and one 64x158 16-bit images (VS::Menu::Framework::InitGameInterface).
 inline constexpr std::size_t kSystemDatInterfaceBytes = 0x12F00;
 
 enum class SystemDatSection : std::uint8_t {

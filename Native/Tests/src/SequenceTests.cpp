@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/MovementCommand.hpp"
@@ -10,6 +14,7 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -17,9 +22,9 @@
 extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.h"
+#include "Actors/Location.h"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
@@ -34,13 +39,16 @@ extern "C" {
 #include "Battle/TargetVolume.h"
 #include "DiscQueue.h"
 #include "Effects/Camera.h"
+#include "Effects/CameraLiveState.h"
 #include "Effects/Runtime.h"
+#include "Event/ScriptActorOpcodes.h"
 #include "Event/ScriptActors.h"
+#include "Event/ScriptEffectOpcodes.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Gimmicks.h"
-#include "Field/RoomLoading.h"
+#include "Field/RoomLoadingLiveState.h"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
 #include "ModelLoading.h"
@@ -86,6 +94,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   actor.animationId = 0xC6;
   Actors_actorRecords[kActorId] = &actor;
   Battle_specialActionPitch = 2;
+  VS::Actors::RegisterSequenceBank(bank, sizeof file);
   if (consumer == 0) {
     Battle_PlaySpecialActionAnimation(kActorId, nullptr, mode);
   } else if (consumer == 1) {
@@ -110,6 +119,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   Actors_actorRecords[kActorId] = saved_actor;
   Actors_lastResolvedSequenceIndex = saved_index;
   Battle_specialActionPitch = saved_pitch;
+  VS::Actors::ForgetSequenceBanks(bank, sizeof file);
   return passed;
 }
 
@@ -136,10 +146,13 @@ static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
   bank->headers[2] = 1;
   memcpy(reinterpret_cast<u_char*>(bank) + bank->animationData + 1, events,
          sizeof events);
+  model->groupSection = 64;
   model->vertexSection = 128;
+  model->polygonSection = 136;
   SVECTOR* vertex = VS_ONDISC(model, vertexSection, SVECTOR*);
   *vertex = (SVECTOR){11, 22, 33, 44};
   fixture->actor.instance.model = model;
+  fixture->actor.modelDataSize = sizeof fixture->model;
   fixture->actor.instance.slot = 3;
   fixture->actor.poseOverrideActive = 1;
   fixture->actor.animationId = animation;
@@ -152,6 +165,11 @@ static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
       reinterpret_cast<u_char*>(bank) + bank->animationData + 2;
   fixture->actor.blendPose.eventScript = fixture->actor.pose.eventScript;
   fixture->actor.pose.boneKeys[0] = (SVECTOR){101, 202, 303, 0};
+  VS::Actors::RegisterSequenceBank(bank, sizeof fixture->sequence);
+}
+
+static void ForgetMorphAnimation(MorphAnimationFixture* fixture) {
+  VS::Actors::ForgetSequenceBanks(fixture->sequence, sizeof fixture->sequence);
 }
 
 typedef struct MorphBindingScope {
@@ -217,10 +235,11 @@ int TestSharedSequenceRetirement(void) {
   MorphBindingScope scope;
   BeginMorphBindings(&scope);
   Actors_actorRecords[3] = &fixture.actor;
-  Actors_UnloadSharedSequence(kBank + 1);
-  const int passed =
-      MorphIsRetired(&fixture) && Actors_AnimationBattleWindowFrame(3) == 0;
+  VS::Actors::UnloadLiveSharedSequence(kBank + 1);
+  const int passed = MorphIsRetired(&fixture) &&
+                     VS::Actors::LiveAnimationBattleWindowFrame(3) == 0;
   EndMorphBindings(&scope);
+  ForgetMorphAnimation(&fixture);
   return passed;
 }
 
@@ -247,13 +266,14 @@ int TestSharedSequenceRetirementControl(int scenario) {
     (reinterpret_cast<u_char*>(bank))[bank->animationMap + 2] = 0xFF;
   }
   const intptr_t expected_header = first.actor.animationHeader;
-  if (scenario == 6) Actors_SelectSharedSequenceBank(2);
+  if (scenario == 6) VS::Actors::SelectLiveSharedSequenceBank(2);
   int status;
   if (scenario == 4) {
     u_char instruction[] = {0x82, 3};
-    status = static_cast<int>(Event_ScriptReleaseObjectModel(instruction, 0));
+    status =
+        static_cast<int>(Event_ScriptReleaseObjectModelOpcode(instruction, 0));
   } else {
-    status = Actors_UnloadSharedSequence(scenario == 3 ? 0 : 3);
+    status = VS::Actors::UnloadLiveSharedSequence(scenario == 3 ? 0 : 3);
   }
   const SVECTOR* vertex =
       VS_ONDISC(first.actor.instance.model, vertexSection, SVECTOR*);
@@ -274,6 +294,8 @@ int TestSharedSequenceRetirementControl(int scenario) {
     passed = status == 0 && MorphIsRetired(&first) && MorphIsRetired(&second);
   }
   EndMorphBindings(&scope);
+  ForgetMorphAnimation(&first);
+  ForgetMorphAnimation(&second);
   return passed;
 }
 
@@ -291,6 +313,7 @@ static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
     fixture->actor.animationHeader = (intptr_t)wide;
     fixture->actor.animationSet = 200;
     fixture->actor.sharedSequences[2] = wide;
+    VS::Actors::RegisterSequenceBank(wide, sizeof fixture->sequence * 8);
   }
   if (scenario == 2 || (scenario >= 6 && scenario <= 10)) {
     fixture->actor.commonSequence = nullptr;
@@ -359,7 +382,7 @@ int TestAnimationEventUnwind(int scenario) {
   Actors_actorRecords[kSlot] = &fixture.actor;
   Actors_sharedSequenceBankIndex = 2;
   if (scenario == 8 || scenario == 9 || scenario == 10) {
-    Actors_SelectSharedSequenceBank(2);
+    VS::Actors::SelectLiveSharedSequenceBank(2);
   }
   Actors_animationEventLengths[kMorphOpcode] = 3;
   fixture.actor.blendPose.nextEventFrame = kUnchangedFrame;
@@ -368,11 +391,12 @@ int TestAnimationEventUnwind(int scenario) {
   ArrangeUnwindScenario(&fixture, scenario, wide_sequence);
   int result = 0;
   if (scenario == 6 || scenario == 13) {
-    result = Actors_PlayActorAnimation(kSlot, 1, 0, 0);
+    result = VS::Actors::PlayLiveActorAnimation(kSlot, 1, 0, 0);
   } else if (scenario == 7) {
-    Actors_InitializeActorAnimationPose(&fixture.actor, &fixture.actor.pose);
+    VS::Actors::InitializeLiveActorAnimationPose(&fixture.actor,
+                                                 &fixture.actor.pose);
   } else {
-    result = Actors_RestartActorAnimationEvents(&fixture.actor);
+    result = VS::Actors::RestartLiveAnimationEvents(fixture.actor);
   }
   const int passed = UnwindScenarioPassed(fixture, scenario, result,
                                           expected_script, kUnchangedFrame);
@@ -380,6 +404,11 @@ int TestAnimationEventUnwind(int scenario) {
   Actors_sharedSequenceBankIndex = saved_bank;
   Actors_animationEventLengths[kMorphOpcode] = saved_length;
   Actors_lastResolvedSequenceIndex = saved_resolved;
+  ForgetMorphAnimation(&fixture);
+  if (scenario == 9) {
+    ForgetMorphAnimation(&selected);
+  }
+  VS::Actors::ForgetSequenceBanks(wide_sequence, sizeof wide_sequence);
   return passed;
 }
 
@@ -416,17 +445,17 @@ int Tests_SparseIdlePoseReset(void) {
   Actors_ActorRecord actor = {0};
   Actors_actorRecords[4] = nullptr;
   Field_gimmickInstances[4] = nullptr;
-  Actors_RestoreActorIdlePose(4);
+  VS::Actors::RestoreLiveActorIdlePose(4);
   object.mode = 0xF9;
   Field_gimmickInstances[4] = &object;
-  Actors_RestoreActorIdlePose(4);
+  VS::Actors::RestoreLiveActorIdlePose(4);
   int passed = object.mode == 0;
   actor.animationId = 0x63;
   Actors_actorRecords[4] = &actor;
-  Actors_RestoreActorIdlePose(4);
+  VS::Actors::RestoreLiveActorIdlePose(4);
   passed = passed && actor.animationId == 0x63;
   actor.animationId = 0xC7;
-  Actors_RestoreActorIdlePose(4);
+  VS::Actors::RestoreLiveActorIdlePose(4);
   passed = passed && actor.animationId == 0xC7;
   Actors_actorRecords[4] = savedActor;
   Field_gimmickInstances[4] = savedObject;
@@ -676,7 +705,7 @@ int Tests_FacialTextureBankHandoff(void) {
     ClearOTagR(ordering, 0x822);
     (reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()))
         ->primitiveCursor = &packet;
-    const int switched = Actors_SelectSharedSequenceBank(selected);
+    const int switched = VS::Actors::SelectLiveSharedSequenceBank(selected);
     passed = passed && switched == 0 &&
              Actors_sharedSequenceBankIndex == selected - 1 &&
              (reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()))
@@ -792,15 +821,12 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
 
 int Tests_RoomSpawnCountGuard(void) {
   const Field_ZoneContext saved = Field_zoneContext;
-  const int savedAlias = Field_isRoomActorSpawnEnabled;
   int sentinel = 0;
   memset(&Field_zoneContext, 0, sizeof Field_zoneContext);
-  Field_isRoomActorSpawnEnabled = 1;
   Field_zoneContext.zudData = &sentinel;
-  Field_SpawnRoomActors();
+  VS::Field::LiveSpawnRoomActors();
   const int passed = Field_zoneContext.zudData == &sentinel;
   Field_zoneContext = saved;
-  Field_isRoomActorSpawnEnabled = savedAlias;
   return passed;
 }
 
@@ -868,28 +894,28 @@ int TestOptionalMovementWrapper(int operation, int rate) {
   Actors_actorRecords[kSlot] = nullptr;
   switch (operation) {
     case 0:
-      Actors_MoveActorToPositionAtRate(kSlot, &target, rate, rate);
+      VS::Actors::MoveLiveActorToPositionAtRate(kSlot, &target, rate, rate);
       break;
     case 1:
-      Actors_MoveActorToTileAtRate(kSlot, &tile, rate, rate);
+      VS::Actors::MoveLiveActorToTileAtRate(kSlot, &tile, rate, rate);
       break;
     case 2:
-      Actors_TranslateActorToTileAtRate(kSlot, &tile, rate);
+      VS::Actors::TranslateLiveActorToTileAtRate(kSlot, &tile, rate);
       break;
     case 3:
-      Actors_TurnActorTowardTileAtRate(kSlot, &tile, rate);
+      VS::Actors::TurnLiveActorTowardTileAtRate(kSlot, &tile, rate);
       break;
     case 4:
-      Actors_TranslateActorByAtRate(kSlot, &target, rate);
+      VS::Actors::TranslateLiveActorByAtRate(kSlot, &target, rate);
       break;
     case 5:
-      Actors_TranslateActorToAtRate(kSlot, &target, rate);
+      VS::Actors::TranslateLiveActorToAtRate(kSlot, &target, rate);
       break;
     case 6:
-      Actors_TurnActorByAtRate(kSlot, 0, rate);
+      VS::Actors::TurnLiveActorByAtRate(kSlot, 0, rate);
       break;
     case 7:
-      Actors_TurnActorToAtRate(kSlot, 0, rate);
+      VS::Actors::TurnLiveActorToAtRate(kSlot, 0, rate);
       break;
     default:
       valid = 0;
@@ -913,7 +939,8 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
   actor.instance.position = (SVECTOR){100, 200, 300, 0};
   Event_skipState = skip ? 2 : 0;
   Event_scriptControlledActors[kSlot] = 0;
-  const intptr_t status = Event_ScriptSlideActorToWorldPos(instruction, 0);
+  const intptr_t status =
+      Event_ScriptSlideActorToWorldPosOpcode(instruction, 0);
   int passed = status == 0 && Event_scriptControlledActors[kSlot] == 1;
   if (present) {
     passed &= actor.moveRate == kDefaultRate;
@@ -1007,7 +1034,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
   u_char instruction[] = {0xA0, (u_char)effect, (u_char)(effect >> 8),
                           (u_char)selector, (u_char)(selector >> 8)};
   Effects_primaryPhase = 3;
-  const intptr_t result = Event_CommandPlayActorEffect(instruction, 0);
+  const intptr_t result = Event_CommandPlayActorEffectOpcode(instruction, 0);
   memcpy(request_after, &Effects_actionRequest, sizeof request_after);
   // Absent model (3) and direct slot references to an empty slot (4, 10) start
   // like the original: func_800BFE50 returns type-1 slots unchecked.
@@ -1026,12 +1053,16 @@ int TestScriptedEffectTargetBinding(int scenario) {
                 Field_gimmickInstances[slot] == nullptr;
       // The started effect's emitTo readers must leave defaults untouched.
       SVECTOR bone = {11, 22, 33, 44};
-      int placement[3] = {55, 66, 77};
+      Actors_ActorLocation placement{};
+      placement.packedTile.word = 55;
+      placement.position = {66, 77, 88, 99};
       passed &= VS::Actors::LiveActorBonePosition(slot, 0, &bone, 0) == -1 &&
                 bone.vx == 11 && bone.vy == 22 && bone.vz == 33 &&
-                Actors_ActorPlacement(slot, placement) == -1 &&
-                placement[0] == 55 && placement[1] == 66 &&
-                placement[2] == 77 && Actors_ActorStateFlags(slot) == 0;
+                VS::Actors::LiveActorPlacement(slot, &placement) == -1 &&
+                placement.packedTile.word == 55 &&
+                placement.position.vx == 66 && placement.position.vy == 77 &&
+                placement.position.vz == 88 && placement.position.pad == 99 &&
+                VS::Actors::LiveActorStateFlags(slot) == 0;
     }
   } else {
     passed &=
@@ -1620,6 +1651,12 @@ int Tests_SharedSequenceOffsets(void) {
   actor.modelId = 101;
   actor.instance.boneCount = 2;
   first->animationMap = second->animationMap = 64;
+  // Each embedded file's size word bounds the bank the parse registers.
+  const u_int first_bytes = 144 - 32 - 8;
+  const u_int second_bytes =
+      static_cast<u_int>(sizeof source - (7 * sizeof(u_int) + 144 + 8));
+  memcpy(payload + 32 + 4, &first_bytes, sizeof first_bytes);
+  memcpy(payload + 144 + 4, &second_bytes, sizeof second_bytes);
   (reinterpret_cast<u_char*>(first))[64] = 1;
   (reinterpret_cast<u_char*>(second))[64] = 0;
   request.assetKind = 8;
@@ -1637,7 +1674,7 @@ int Tests_SharedSequenceOffsets(void) {
            Actors_sharedSequenceAnimationIds[0][2] == -1 &&
            actor.sharedSequences[0] == first && actor.textureRowOffsets[0] == 5;
   if (passed) {
-    passed = Actors_FindActorAnimationHeader(&actor, 220, &header) ==
+    passed = VS::Actors::FindLiveActorAnimationHeader(&actor, 220, &header) ==
                  (intptr_t)first &&
              header == first->headers + 9 &&
              Actors_lastResolvedSequenceIndex == 1;
@@ -1650,7 +1687,7 @@ int Tests_SharedSequenceOffsets(void) {
   passed = passed && actor.sharedSequences[0] == second &&
            actor.textureRowOffsets[0] == 6;
   if (passed) {
-    passed = Actors_FindActorAnimationHeader(&actor, 220, &header) ==
+    passed = VS::Actors::FindLiveActorAnimationHeader(&actor, 220, &header) ==
                  (intptr_t)second &&
              header == second->headers && Actors_lastResolvedSequenceIndex == 0;
   }
@@ -1669,6 +1706,7 @@ int Tests_SharedSequenceOffsets(void) {
   Content_legacySequenceParseData = savedParseData;
   memcpy(Content_legacyActorAssetRequests, saved_requests,
          sizeof saved_requests);
+  VS::Actors::ForgetSequenceBanks(source, sizeof source);
   return passed;
 }
 

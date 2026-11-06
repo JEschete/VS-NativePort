@@ -27,16 +27,3 @@ typedef struct Menu_Framework_PreviewPoseState {
 _Static_assert(sizeof(Menu_Framework_PreviewPoseState) == 0x14, "Menu_Framework_PreviewPoseState must keep its PS1 layout");
 
 #endif // VS_MENU_FRAMEWORK_ACTORPREVIEW_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_FRAMEWORK_ACTORPREVIEW_H_DECLS)
-#define VS_MENU_FRAMEWORK_ACTORPREVIEW_H_DECLS
-
-void Menu_Framework_LoadActorPreview(int source_actor_slot);
-void Menu_Framework_CloneActorPreview(int source_actor_slot);
-void Menu_Framework_ResetActorPreviewPose(void);
-void Menu_Framework_ReleaseActorPreview(void);
-int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix);
-void Menu_Framework_ResetAshleyEquipmentPose(void);
-void Menu_Framework_QueueAshleyWeaponAnimations(int sequence_model_id);
-
-#endif // VS_MENU_FRAMEWORK_ACTORPREVIEW_H_DECLS

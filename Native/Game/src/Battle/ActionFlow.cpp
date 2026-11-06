@@ -1,25 +1,34 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorRosterLive.hpp"
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Battle/BattleModeLive.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Field/CameraLive.hpp"
+#include "Field/GameModeLive.hpp"
+#include "Field/MapLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "State/KillScoreLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionExecution.h"
@@ -27,7 +36,6 @@ extern "C" {
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -35,25 +43,18 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Field/Actors.h"
-#include "Field/Camera.h"
-#include "Field/GameMode.h"
 #include "Field/Interactions.h"
-#include "Field/Map.h"
-#include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/Framework/ActionSelection.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
 #include "Render/Palette.h"
-#include "State/Flags.h"
 #include "State/Progress.h"
-#include "State/Score.h"
 #include "State/Timers.h"
 
 // decomp: D_800F18EC (D_800F18EC@BATTLE/BATTLE.PRG)
@@ -97,8 +98,8 @@ void Battle_ResolveEnemyDefeat(int source_actor_slot, int actorId, int count_kil
     }
 
     if ((count_kill != 0) && (source_actor_slot == 0)) {
-        State_RecordEnemyKillScore(enemy);
-        State_UpdateWeaponKillStreak(0);
+        VS::State::RecordLiveEnemyKillScore(enemy);
+        VS::State::UpdateLiveWeaponKillStreak(0);
     }
 
     VS::Items::QueueLiveEnemyLoot(enemy);
@@ -119,7 +120,7 @@ int Battle_PlayWeaponHitSounds(int source_actor_slot)
     for (i = 0; i < queued_action->targetCount; ++i) {
         if (queued_action->targets[i].targetsPosition == 0) {
 
-            Actors_ActorPlacement(queued_action->targets[i].target.targetActor, &target_placement);
+            VS::Actors::LiveActorPlacement(queued_action->targets[i].target.targetActor, &target_placement);
 
             hit_position.vx = target_placement.location.position.vx;
             hit_position.vz = target_placement.location.position.vz;
@@ -132,59 +133,59 @@ int Battle_PlayWeaponHitSounds(int source_actor_slot)
             case 4:
                 switch (Battle_actors[source_actor_slot]->equippedWeaponCategory) {
                 case 1:
-                    Audio_PlayWorldSfx(0x7E, 0x47, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x48, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x47, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x48, &hit_position);
                     break;
 
                 case 2:
-                    Audio_PlayWorldSfx(0x7E, 0x49, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x4A, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x49, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x4A, &hit_position);
                     break;
 
                 case 3:
-                    Audio_PlayWorldSfx(0x7E, 0x4B, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x4C, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x4B, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x4C, &hit_position);
                     break;
 
                 case 4:
-                    Audio_PlayWorldSfx(0x7E, 0x50, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x51, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x50, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x51, &hit_position);
                     break;
 
                 case 5:
-                    Audio_PlayWorldSfx(0x7E, 0x52, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x53, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x52, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x53, &hit_position);
                     break;
 
                 case 6:
-                    Audio_PlayWorldSfx(0x7E, 0x4D, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x4D, &hit_position);
                     break;
 
                 case 7:
-                    Audio_PlayWorldSfx(0x7E, 0x4E, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x4F, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x4E, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x4F, &hit_position);
                     break;
 
                 case 8:
-                    Audio_PlayWorldSfx(0x7E, 0x54, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x55, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x54, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x55, &hit_position);
                     break;
 
                 case 10:
-                    Audio_PlayWorldSfx(0x7E, 0x5B, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x5C, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x5B, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x5C, &hit_position);
                     break;
 
                 case 9:
-                    Audio_PlayWorldSfx(0x7E, 0x69, &hit_position);
-                    Audio_PlayWorldSfx(0x7E, 0x6A, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x69, &hit_position);
+                    VS::Audio::LivePlayWorldSfx(0x7E, 0x6A, &hit_position);
                     break;
                 }
 
                 break;
 
             case 3:
-                Audio_PlayWorldSfx(0x7E, 0x33, &hit_position);
+                VS::Audio::LivePlayWorldSfx(0x7E, 0x33, &hit_position);
                 break;
 
             case 5:
@@ -222,7 +223,7 @@ void Battle_ApplyActionSourceEffects(int source_actor_slot, SVECTOR* arg1)
 
         case 5:
             if (source_actor_slot == 0) {
-                ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, NULL, 6);
+                VS::Actors::PlayLiveActorActionPose(0, NULL, 6);
             }
 
             break;
@@ -237,7 +238,7 @@ void Battle_WaitForPostActionMovement(void)
 {
     Field_controlMode = 12;
     Battle_actionFlowMode = 0;
-    Actors_RestoreActorIdlePose(0);
+    VS::Actors::RestoreLiveActorIdlePose(0);
 }
 
 // decomp: BATTLE.PRG func_8006FBCC (src/BATTLE/BATTLE.PRG/146C.c:3388)
@@ -247,14 +248,14 @@ void Battle_BeginPostActionRecovery(int recovery_reward_mode)
 
     for (i = 0; i < 16; ++i) {
         if ((i != Battle_actionState->selection.primaryTarget.target.targetActor)
-            && !(Actors_ActorStateFlags(i) & 0x01000000) && (Actors_ActorStateFlags(i) & 1)) {
-            Actors_RestoreActorIdlePose(i);
+            && !(VS::Actors::LiveActorStateFlags(i) & 0x01000000) && (VS::Actors::LiveActorStateFlags(i) & 1)) {
+            VS::Actors::RestoreLiveActorIdlePose(i);
         }
     }
     VS::Render::TransformLiveRoomPalettes(8, 4, 0, 0, 0);
-    Actors_FreezeAllActorAnimations();
+    VS::Actors::FreezeLiveActorAnimations();
     VS::Render::SetLiveClutAnimationEnabled(1);
-    Field_SetRoomAnimationsPaused(0);
+    VS::Field::LiveSetRoomAnimationsPaused(0);
     Battle_SetActorMarkersHidden(0);
     Battle_recoveryRewardMode = recovery_reward_mode;
     State_tickSpeed = 2;
@@ -287,7 +288,7 @@ void Battle_StartActionAnimation(void)
 
     if (((queued_action->actionId - 0x16u) < 0x20) && (queued_action->primaryTarget.targetsPosition == 0)
         && (queued_action->primaryTarget.target.targetActor == 0)) {
-        State_SetScriptFlag(0xB8, 1);
+        VS::State::SetLiveScriptFlag(0xB8, 1);
     }
 
     chain_index = Battle_actionState->queueIndex;
@@ -297,7 +298,7 @@ void Battle_StartActionAnimation(void)
             Battle_PlayMeleeAttackAnimation(
                 queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, queued_action->animationParameter);
             Battle_actionState->abilityWindow =
-                Actors_AnimationBattleWindowFrame(queued_action->primaryTarget.target.targetActor) * 2;
+                VS::Actors::LiveAnimationBattleWindowFrame(queued_action->primaryTarget.target.targetActor) * 2;
         } else {
             if (queued_action->actionId >= 0x8D) {
                 if (queued_action->actionId < 0xB8) {
@@ -326,12 +327,12 @@ void Battle_StartActionAnimation(void)
             Battle_PlayDefenseAbilityAnimation(queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 0);
         }
         Battle_actionState->abilityWindow =
-            Actors_AnimationBattleWindowFrame(queued_action->primaryTarget.target.targetActor) * 2;
+            VS::Actors::LiveAnimationBattleWindowFrame(queued_action->primaryTarget.target.targetActor) * 2;
     }
 
-    Audio_StopSfx(0x7E, 0x34);
-    Audio_StopSfx(0x7E, 0x35);
-    Audio_StopSfx(0x7E, 0x36);
+    VS::Audio::LiveStopSfx(0x7E, 0x34);
+    VS::Audio::LiveStopSfx(0x7E, 0x35);
+    VS::Audio::LiveStopSfx(0x7E, 0x36);
     Menu_ReleaseSceneNotification();
 
     Battle_actionState->chainAbilitySlot = 0;
@@ -353,7 +354,7 @@ void Battle_CommitSelectedAction(int target_selection_mode)
     u_char selected_preview;
     int var_a0;
 
-    Field_StorePreferredActionCameraDistance();
+    VS::Field::LiveStorePreferredActionCameraDistance();
     selected_preview = Battle_actionState->selectedPreview;
     ((void (*)(...))Battle_ClearSphereTargets)();
     Battle_ClearPrimarySphereVolume();
@@ -363,20 +364,20 @@ void Battle_CommitSelectedAction(int target_selection_mode)
     if (target_selection_mode != 0) {
         if (selected_preview == 0xFF) {
             if (Battle_actionState->selection.primaryTarget.target.targetActor != 0) {
-                Menu_Framework_ReleaseMenuRows();
+                VS::Menu::Framework::ReleaseLiveMenuRows();
                 VS::Battle::Ai::ResetActorAiReactionDelay(VS::Battle::Ai::BattleActorReactionDelays(), Battle_actionState->selection.primaryTarget.target.targetActor);
                 Battle_actionState->selection.actionId = 0;
                 Battle_BeginPostActionRecovery(0);
                 return;
             }
             if (!(Battle_actionDefinitions[Battle_actionState->selection.actionId].returnsToMenuOnCancel)) {
-                Menu_Framework_ReleaseMenuRows();
+                VS::Menu::Framework::ReleaseLiveMenuRows();
                 Battle_actionState->selection.actionId = 0;
                 Battle_BeginPostActionRecovery(0);
                 return;
             }
             Battle_actionState->selection.actionId = 0;
-            Battle_ReturnToBattleActionMenu();
+            VS::Battle::LiveReturnToBattleActionMenu();
             return;
         }
     }
@@ -394,13 +395,13 @@ void Battle_CommitSelectedAction(int target_selection_mode)
     } else {
         VS::Battle::Ai::DisengageLiveActorById(Battle_actionState->selection.primaryTarget.target.targetActor);
     }
-    Menu_Framework_ReleaseMenuRows();
+    VS::Menu::Framework::ReleaseLiveMenuRows();
     if (target_selection_mode == 0) {
-        Battle_CollectEnvironmentActionTargets();
+        VS::Battle::LiveCollectEnvironmentActionTargets();
     } else if (target_selection_mode == 2) {
-        Battle_SetAllActionTargets();
+        VS::Battle::LiveSetAllActionTargets();
     } else {
-        Battle_SetSingleActionTarget();
+        VS::Battle::LiveSetSingleActionTarget();
     }
 
     Battle_ResolveActionTargets(Battle_actionState->selection.actionId, Battle_actionState->queue, &Battle_actionState->selection, 1);
@@ -465,16 +466,16 @@ void Battle_CommitSelectedAction(int target_selection_mode)
 
     for (i = 0; i < 16; ++i) {
         if (i != Battle_actionState->selection.primaryTarget.target.targetActor) {
-            Actors_RestoreActorIdlePose(i);
+            VS::Actors::RestoreLiveActorIdlePose(i);
         }
     }
 
     VS::Render::SetLiveClutAnimationEnabled(1);
     VS::Render::TransformLiveSceneColors(8, 4, 0, 0, 0);
-    Actors_FreezeAllActorAnimations();
+    VS::Actors::FreezeLiveActorAnimations();
     Battle_SetActorMarkersHidden(1);
-    Field_SetMinimapVisible(0);
-    Field_SetRoomAnimationsPaused(0);
+    VS::Field::SetLiveMinimapVisible(0);
+    VS::Field::LiveSetRoomAnimationsPaused(0);
 }
 
 // decomp: BATTLE.PRG func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3906)
@@ -506,36 +507,36 @@ void Battle_StartActionPresentation(void)
         return;
     }
 
-    Actors_ActorPlacement(action->primaryTarget.target.targetActor, &actorPosition);
+    VS::Actors::LiveActorPlacement(action->primaryTarget.target.targetActor, &actorPosition);
     soundPosition.vx = actorPosition.location.position.vx;
     soundPosition.vz = actorPosition.location.position.vz;
     soundPosition.vy = actorPosition.location.position.vy;
 
     if (action->actionId < 141) {
         Battle_PlaySpellCastAnimation(action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 0);
-        Audio_PlayWorldSfx(0x7E, 0x34, &soundPosition);
+        VS::Audio::LivePlayWorldSfx(0x7E, 0x34, &soundPosition);
 
         if (!action->primaryTarget.target.targetActor) {
-            State_SetScriptFlag(0xB7, 1);
+            VS::State::SetLiveScriptFlag(0xB7, 1);
         }
 
         mode = 2;
     } else if (action->actionId < 184) {
         Battle_PlayBreakArtAnimation(action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 0);
-        Audio_PlayWorldSfx(0x7E, 0x36, &soundPosition);
+        VS::Audio::LivePlayWorldSfx(0x7E, 0x36, &soundPosition);
         mode = 3;
     } else if (action->actionId < 224) {
         Battle_PlaySpecialActionAnimation(action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 0);
-        Audio_PlayWorldSfx(0x7E, 0x34, &soundPosition);
+        VS::Audio::LivePlayWorldSfx(0x7E, 0x34, &soundPosition);
 
         if (!action->primaryTarget.target.targetActor) {
-            State_SetScriptFlag(0xB9, 1);
+            VS::State::SetLiveScriptFlag(0xB9, 1);
         }
 
         mode = 3;
     } else {
         Battle_PlaySpellCastAnimation(action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 0);
-        Audio_PlayWorldSfx(0x7E, 0x35, &soundPosition);
+        VS::Audio::LivePlayWorldSfx(0x7E, 0x35, &soundPosition);
         mode = 1;
     }
 
@@ -668,14 +669,14 @@ void Battle_BeginAshleyWeaponToggle(void)
     int i;
 
     for (i = 0; i < 16; ++i) {
-        Actors_RestoreActorIdlePose(i);
+        VS::Actors::RestoreLiveActorIdlePose(i);
     }
-    Battle_SetActorBattleMode(0, 2);
+    VS::Battle::LiveSetActorBattleMode(0, 2);
     Field_controlMode = 10;
 }
 
 // decomp: BATTLE.PRG func_8007350C (src/BATTLE/BATTLE.PRG/146C.c:4657)
-void Battle_EndAshleyWeaponToggle(void) { Field_EnterFieldExplorationMode(); }
+void Battle_EndAshleyWeaponToggle(void) { VS::Field::LiveEnterFieldExplorationMode(); }
 
 // decomp: BATTLE.PRG func_80074A20 (src/BATTLE/BATTLE.PRG/146C.c:5315)
 int Battle_BeginActorDefeatAnimation(int actor_slot)
@@ -691,8 +692,8 @@ int Battle_BeginActorDefeatAnimation(int actor_slot)
             Battle_SetActorMarker(actor_slot, 0);
             Battle_actors[actor_slot]->commandState = 0x20;
             if (Battle_actors[actor_slot]->retainAfterDefeat == 0) {
-                Actors_BeginActorDeath(actor_slot, &Battle_actionState->rangeOrigin, 1);
-                Actors_SetActorAnimationLocked(actor_slot, 1);
+                VS::Actors::BeginLiveActorDeath(actor_slot, &Battle_actionState->rangeOrigin, 1);
+                VS::Actors::SetLiveActorAnimationLocked(actor_slot, 1);
                 if ((Battle_actors[actor_slot]->roomSpawnIndex != 0x80) || (actor_slot == 0)) {
                     ret = 1;
                 }

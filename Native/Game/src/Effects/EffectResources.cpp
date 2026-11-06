@@ -1,846 +1,701 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Audio/StreamControlLive.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Content/OverlayWorkspaceLive.hpp"
-#include "Core/Math/InterpolationLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
+// Hand-maintained (tools/port/owned.csv).
+#include "Effects/EffectResources.hpp"  // NOLINT(build/include): typed API
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
+
+#include "Core/Math/Interpolation.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/TextureBindings.hpp"
-#include "Effects/TrailEmitterLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Audio/SoundBanks.h"
-#include "Content/DiscLayout.h"
-#include "Core/Overlays.h"
-#include "DiscQueue.h"
-#include "Effects/EffectResources.h"
-#include "Effects/Loading.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Plugins/Plg005.h"
-#include "Effects/Plugins/Plg052.h"
-#include "Effects/Plugins/Plg128.h"
-#include "Effects/Plugins/Plg162.h"
-#include "Effects/Plugins/Plg300.h"
-#include "Effects/PurgeTables.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/ClosedRing.h"
-#include "Effects/Templates/Grid.h"
-#include "Effects/Templates/Mesh10.h"
-#include "Effects/Templates/MirrorSurface.h"
-#include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/Ring.h"
-#include "Effects/Templates/RotatingSurface.h"
-#include "Effects/Templates/Surface.h"
-#include "Effects/Templates/TiledRing.h"
-#include "Effects/Templates/TrailDispatch.h"
-#include "Effects/Templates/TrailNineDispatch.h"
-#include "Effects/Transforms.h"
 
-// decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
-int Effects_textureLoadIndex;
+namespace VS::Effects {
+namespace {
+namespace Math = VS::Core::Math;
+constexpr int kByteBits = 8;
+constexpr std::size_t kHalfwordBytes = 2;
+constexpr std::size_t kWordBytes = 4;
+// p_file_t (6F014.c:303): the size in the low halfword, the type above it.
+constexpr std::uint32_t kBlockSizeMask = 0xFFFF;
+constexpr int kBlockTypeShift = 16;
+// pFileCurveBlock (5BF94.h:203): {u16 count, u16 data offset, u8 sizes[]}.
+constexpr std::size_t kCurveDataOffsetAt = 2;
+constexpr std::size_t kCurveSizesAt = 4;
+// pFileBlock2 (6F014.c:298): {s32 count, u16 offsets[count]}.
+constexpr std::size_t kAnimationOffsetsAt = 4;
+// pFileBlock9 (5BF94.h:177) field offsets.
+constexpr std::size_t kGravityRangeAt = 0x0;
+constexpr std::size_t kDragRangeAt = 0xC;
+constexpr std::size_t kGravityCurveAt = 0x12;
+constexpr std::size_t kDragCurveAt = 0x13;
+constexpr std::size_t kFrameCountAt = 0x14;
+constexpr std::size_t kTransformCountAt = 0x15;
+constexpr std::size_t kTimelineIdsAt = 0x16;
+// One past the last effect texture page.
+constexpr auto kPageEnd = kEffectTexturePageBase + kEffectTexturePageCount;
 
-// decomp: D_800F5638 (D_800F5638@BATTLE/BATTLE.PRG)
-Effects_TextureLoadList Effects_textureLoads;
+[[nodiscard]] std::uint32_t ReadLittleEndian(std::span<const std::byte> bytes,
+                                             std::size_t offset,
+                                             std::size_t width) noexcept {
+  std::uint32_t value = 0;
+  for (std::size_t i = 0; i < width; ++i) {
+    value |= std::to_integer<std::uint32_t>(bytes[offset + i])
+             << (i * kByteBits);
+  }
+  return value;
+}
 
-// decomp: vs_battle_pfileBuf (vs_battle_pfileBuf@BATTLE/BATTLE.PRG)
-void* Effects_packageBuffer;
+[[nodiscard]] std::uint16_t ReadHalfword(std::span<const std::byte> bytes,
+                                         std::size_t offset) noexcept {
+  return static_cast<std::uint16_t>(
+      ReadLittleEndian(bytes, offset, kHalfwordBytes));
+}
 
-// decomp: D_800F5680 (D_800F5680@BATTLE/BATTLE.PRG)
-u_int Effects_textureLoadState;
+[[nodiscard]] std::uint32_t ReadWord(std::span<const std::byte> bytes,
+                                     std::size_t offset) noexcept {
+  return ReadLittleEndian(bytes, offset, kWordBytes);
+}
 
-// decomp: D_800F5684 (D_800F5684@BATTLE/BATTLE.PRG)
-int Effects_purgeOverlayLoaded;
+[[nodiscard]] std::uint8_t ReadByte(std::span<const std::byte> bytes,
+                                    std::size_t offset) noexcept {
+  return std::to_integer<std::uint8_t>(bytes[offset]);
+}
 
-// decomp: vs_battle_pFileLoadContext (vs_battle_pFileLoadContext@BATTLE/BATTLE.PRG)
-Effects_FileLoadContext Effects_packageFile;
+template <typename T>
+[[nodiscard]] std::optional<T> TableEntry(std::span<const T> table,
+                                          std::int64_t index) noexcept {
+  if (index < 0 || static_cast<std::uint64_t>(index) >= table.size()) {
+    return std::nullopt;
+  }
+  return table[static_cast<std::size_t>(index)];
+}
 
-// decomp: D_800F568C (D_800F568C@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* Effects_resourceReadSlot;
+[[nodiscard]] Math::ScalarSpan RangeAt(std::span<const std::int16_t> range,
+                                       std::size_t pair) noexcept {
+  return {range[pair * 2], range[(pair * 2) + 1]};
+}
 
-// decomp: _plgLoadState (_plgLoadState@BATTLE/BATTLE.PRG)
-u_int Effects_pluginLoadState;
+// The VRAM rectangle of an effect texture or CLUT in `slot`, or nullopt for
+// a slot past pages 24-31 or CLUT rows 240-244.
+[[nodiscard]] std::optional<VramRect> TextureArea(
+    const TextureAsset& asset) noexcept {
+  if (asset.is_clut) {
+    if (asset.slot > static_cast<std::uint16_t>(kEffectClutRows)) {
+      return std::nullopt;
+    }
+    return VramRect{
+        .x = kEffectClutX,
+        .y = static_cast<std::int16_t>(kEffectClutFirstRow + asset.slot),
+        .w = kEffectClutWidth,
+        .h = static_cast<std::int16_t>(kEffectClutRows - asset.slot)};
+  }
+  if (asset.slot >= kEffectTexturePageCount) return std::nullopt;
+  const auto page =
+      static_cast<std::int32_t>(kEffectTexturePageBase + asset.slot);
+  return VramRect{.x = static_cast<std::int16_t>((page % kTexturePagesPerRow) *
+                                                 kTexturePageWidth),
+                  .y = static_cast<std::int16_t>((page / kTexturePagesPerRow) *
+                                                 kTexturePageHeight),
+                  .w = kTexturePageWidth,
+                  .h = kTexturePageHeight};
+}
 
-// decomp: _plgLoadContext (_plgLoadContext@BATTLE/BATTLE.PRG)
-Effects_FileLoadContext Effects_pluginFile;
+// Uploads a loaded texture asset, reserving and recording its page.
+ResourceRefusal UploadTexture(EffectResourceState& state,
+                              EffectResourceHost& host,
+                              const TextureAsset& asset) {
+  const auto area = TextureArea(asset);
+  if (!area) return ResourceRefusal::kTextureSlot;
+  if (!asset.is_clut) {
+    const std::uint32_t page = kEffectTexturePageBase + asset.slot;
+    host.ReserveTexturePage(page);
+    state.loaded_texture_pages |= 1U << page;
+  }
+  host.UploadImage(*area, state.texture_buffer.id);
+  return ResourceRefusal::kNone;
+}
 
-// decomp: D_800F56A0 (D_800F56A0@BATTLE/BATTLE.PRG)
-u_long* Effects_textureLoadBuffer;
+// func_800D7CFC's state 1: reads the current asset and, once it has loaded,
+// uploads it and moves to the next.
+ResourcePoll LoadNextTexture(EffectResourceState& state,
+                             EffectResourceHost& host) {
+  const auto index = state.texture_index;
+  if (index < 0 ||
+      static_cast<std::size_t>(index) >= state.textures.assets.size()) {
+    state.texture_state = TextureLoadState::kLoaded;
+    return {.pending = true, .refusal = ResourceRefusal::kAssetIndex};
+  }
+  const auto layout = host.DiscLayout();
+  if (state.texture_buffer.id == EffectBufferId::kNone) {
+    state.texture_buffer = host.AllocateBuffer(layout.texture_staging_bytes);
+  }
+  const auto& asset = state.textures.assets[static_cast<std::size_t>(index)];
+  const auto poll =
+      PollEffectResourceRead(state, host,
+                             {.lba = asset.file.lba + layout.package_base_lba,
+                              .size = asset.file.size},
+                             state.texture_buffer);
+  if (poll.pending) return poll;
+  const auto refusal = poll.refusal == ResourceRefusal::kNone
+                           ? UploadTexture(state, host, asset)
+                           : poll.refusal;
+  ++state.texture_index;
+  if (state.textures.asset_count == state.texture_index) {
+    SetEffectTextureLoadState(state, TextureLoadState::kLoaded);
+  }
+  return {.pending = true, .refusal = refusal};
+}
 
-// decomp: _plgEntryPointCount (_plgEntryPointCount@BATTLE/BATTLE.PRG)
-int Effects_pluginEntryPointCount;
-
-// decomp: D_800F5874 (D_800F5874@BATTLE/BATTLE.PRG)
-int Effects_loadedTextureSlots;
+void RefusePluginLoad(EffectResourceState& state) noexcept {
+  ConfigureEffectPluginLoad(state, {}, 0);
+  SetEffectPluginLoadState(state, PluginLoadState::kIdle);
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_800D7814 (src/BATTLE/BATTLE.PRG/6F014.c:446)
-void Effects_InitializeEffectResources(void)
-{
-    Effects_resourceReadSlot = NULL;
-    Effects_packageBuffer = NULL;
-    Effects_textureLoadBuffer = NULL;
-    Effects_loadedTextureSlots = 0;
-    Effects_purgeOverlayLoaded = 0;
-    Effects_secondaryPackage.curveBlock = NULL;
-    Effects_secondaryPackage.request = &Effects_secondaryRequest;
-    Effects_actionRequestPointer = &Effects_actionRequest;
-    Effects_SelectEffectResourceContext(0);
-    Effects_BindEffectPackageBlocks((Effects_PackageFile*)Effects_emptyPackage);
+void InitializeEffectResources(EffectResourceState& state,
+                               EffectResourceContext& context,
+                               EffectLifecycleHost& host) {
+  state.read = DiscReadId::kNone;
+  state.package_buffer = {};
+  state.texture_buffer = {};
+  state.loaded_texture_pages = 0;
+  state.purge_overlay_loaded = false;
+  host.ResetPackageRequests();
+  SelectEffectResourceContext(context, 0);
+  host.BindEmptyPackage(context.current);
 }
 
 // decomp: BATTLE.PRG func_800D7890 (src/BATTLE/BATTLE.PRG/6F014.c:460)
-void Effects_SelectEffectResourceContext(int use_primary_context)
-{
-    if (use_primary_context == 0) {
-        Effects_package = &Effects_secondaryPackage;
-    } else {
-        Effects_package = &Effects_actionPackage;
-    }
+void SelectEffectResourceContext(EffectResourceContext& context,
+                                 std::int32_t use_action_package) noexcept {
+  context.current =
+      use_action_package == 0 ? context.secondary : context.action;
 }
 
 // decomp: BATTLE.PRG func_800D78B8 (src/BATTLE/BATTLE.PRG/6F014.c:471)
-void Effects_SaveEffectResourceContext(void) { Effects_savedPackage = Effects_package; }
+void SaveEffectResourceContext(EffectResourceContext& context) noexcept {
+  context.saved = context.current;
+}
 
 // decomp: BATTLE.PRG func_800D78CC (src/BATTLE/BATTLE.PRG/6F014.c:473)
-void Effects_RestoreEffectResourceContext(void) { Effects_package = Effects_savedPackage; }
+void RestoreEffectResourceContext(EffectResourceContext& context) noexcept {
+  context.current = context.saved;
+}
 
 // decomp: BATTLE.PRG _parsePfileBlock5 (src/BATTLE/BATTLE.PRG/6F014.c:475)
-void Effects_BindParticleDefinitions(Effects_PackageBlock5* block) { Effects_package->block5Data = block; }
-
-// decomp: BATTLE.PRG func_800D78F0 (src/BATTLE/BATTLE.PRG/6F014.c:477)
-void Effects_UpdateParticleGravityAndDrag(void)
-{
-    VECTOR sampled_gravity;
-    int sampled_drag;
-
-    VS::Core::Math::InterpolateLiveSevenBitVector(
-        Effects_package->block9Data->gravityRange, Effects_curveSamples[Effects_package->block9Data->gravityCurve], &sampled_gravity);
-    sampled_drag = VS::Core::Math::InterpolateLiveShortPair(
-        Effects_package->block9Data->dragRange, Effects_curveSamples[Effects_package->block9Data->dragCurve]);
-    ((void (*)(VECTOR*))Effects_SetParticleGravity)(&sampled_gravity);
-    Effects_SetParticleDrag(&sampled_drag);
+void BindParticleDefinitions(EffectPackageBlocks& blocks,
+                             std::span<std::byte> block) noexcept {
+  blocks.particle_definitions = block;
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock3 (src/BATTLE/BATTLE.PRG/6F014.c:490)
-void Effects_BindEffectTimelines(void* block) { Effects_package->block3Data = (Effects_PackageBlock3 *)(block); }
+void BindEffectTimelines(EffectPackageBlocks& blocks,
+                         std::span<std::byte> block) noexcept {
+  blocks.timelines = block;
+}
 
 // decomp: BATTLE.PRG _parsePfileCurveBlock (src/BATTLE/BATTLE.PRG/6F014.c:492)
-void Effects_BindEffectCurves(Effects_CurveBlock* block)
-{
-    u_char* p;
-    int i;
-
-    Effects_package->curveBlock = block;
-    p = (u_char*)block + block->dataOffset;
-
-    for (i = 0; i < block->count; i++) {
-        Effects_package->curves[i] = p;
-        p += block->curveSizes[i];
+CurveBinding BindEffectCurves(EffectPackageBlocks& blocks,
+                              std::span<std::byte> block) noexcept {
+  blocks.curve_block = block;
+  if (block.size() < kCurveSizesAt) return {.refused = 1};
+  const std::span<const std::byte> bytes = block;
+  const std::size_t count = ReadHalfword(bytes, 0);
+  CurveBinding binding{.header_count = static_cast<std::int32_t>(count)};
+  std::size_t offset = ReadHalfword(bytes, kCurveDataOffsetAt);
+  for (std::size_t i = 0; i < count; ++i) {
+    // Curves past the capacity overran the package record in the original.
+    if (i >= blocks.curves.size()) {
+      binding.refused += static_cast<std::int32_t>(count - i);
+      break;
     }
+    // A size byte past the block leaves its curve and the rest empty, so no
+    // view of a previous package survives.
+    const std::size_t size_at = kCurveSizesAt + i;
+    if (size_at >= block.size()) {
+      blocks.curves.at(i) = {};
+      ++binding.refused;
+      continue;
+    }
+    const std::size_t size = ReadByte(bytes, size_at);
+    if (offset > block.size() || size > block.size() - offset) {
+      blocks.curves.at(i) = {};
+      ++binding.refused;
+    } else {
+      blocks.curves.at(i) = block.subspan(offset, size);
+      ++binding.bound;
+    }
+    offset += size;
+  }
+  return binding;
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock8 (src/BATTLE/BATTLE.PRG/6F014.c:506)
-void Effects_BindEffectPrograms(void* block) { Effects_package->block8Data = (char *)(block); }
+void BindEffectPrograms(EffectPackageBlocks& blocks,
+                        std::span<std::byte> block) noexcept {
+  blocks.programs = block;
+}
 
 // decomp: BATTLE.PRG _parsePfileBlock9 (src/BATTLE/BATTLE.PRG/6F014.c:508)
-void Effects_BindEffectPackageParameters(Effects_PackageBlock9* package_parameters) { Effects_package->block9Data = package_parameters; }
+void BindEffectPackageParameters(EffectPackageBlocks& blocks,
+                                 std::span<std::byte> block) noexcept {
+  blocks.parameters = block;
+}
 
 // decomp: BATTLE.PRG _parsePfileBlock10 (src/BATTLE/BATTLE.PRG/6F014.c:510)
-void Effects_BindEffectTransformDefinitions(void* block_data) { Effects_package->block10Data = (Effects_TransformDefinition *)(block_data); }
+void BindEffectTransformDefinitions(EffectPackageBlocks& blocks,
+                                    std::span<std::byte> block) noexcept {
+  blocks.transform_definitions = block;
+}
 
 // decomp: BATTLE.PRG _parsePfileBlock2 (src/BATTLE/BATTLE.PRG/6F014.c:524)
-void Effects_BindParticleAnimationTable(Effects_PackageBlock2* block)
-{
-    Effects_package->block2Count = block->animationCount;
-    Effects_package->block2Data = (u_short *)((void*)block);
+void BindParticleAnimationTable(EffectPackageBlocks& blocks,
+                                std::span<std::byte> block) noexcept {
+  blocks.animation_table = block;
+  blocks.animation_count = block.size() < kWordBytes
+                               ? 0
+                               : static_cast<std::int32_t>(ReadWord(
+                                     std::span<const std::byte>(block), 0));
 }
 
 // decomp: BATTLE.PRG func_800D7A90 (src/BATTLE/BATTLE.PRG/6F014.c:530)
-void* Effects_ParticleAnimationData(int animation_index)
-{
-    return (u_char*)Effects_package->block2Data + Effects_package->block2Data[animation_index + 2];
+std::optional<std::span<std::byte>> ParticleAnimationData(
+    const EffectPackageBlocks& blocks, std::int32_t index) noexcept {
+  const auto table = blocks.animation_table;
+  if (index < 0 || index >= blocks.animation_count) return std::nullopt;
+  const std::size_t entry =
+      kAnimationOffsetsAt + (static_cast<std::size_t>(index) * kHalfwordBytes);
+  if (entry > table.size() || table.size() - entry < kHalfwordBytes) {
+    return std::nullopt;
+  }
+  const std::size_t offset =
+      ReadHalfword(std::span<const std::byte>(table), entry);
+  if (offset > table.size()) return std::nullopt;
+  return table.subspan(offset);
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock11 (src/BATTLE/BATTLE.PRG/6F014.c:535)
-void Effects_BindEffectSoundSequences(u_char* block_data) { Effects_package->block11Data = block_data; }
+void BindEffectSoundSequences(EffectPackageBlocks& blocks,
+                              std::span<std::byte> block) noexcept {
+  blocks.sound_sequences = block;
+}
 
 // decomp: BATTLE.PRG _parsePfileBlock12 (src/BATTLE/BATTLE.PRG/6F014.c:537)
-void Effects_BindEffectSoundBank(void* sound_bank_data)
-{
-    Effects_package->block12Data = sound_bank_data;
-    Audio_BindRoomSfxBank((uintptr_t)sound_bank_data);
+void BindEffectSoundBank(EffectPackageBlocks& blocks,
+                         std::span<std::byte> block, EffectPackageHost& host) {
+  blocks.sound_bank = block;
+  host.BindSoundBank(block);
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock13 (src/BATTLE/BATTLE.PRG/6F014.c:543)
-void Effects_BindEffectAuxiliarySoundBank(void* stream_data, size_t byte_count)
-{
-    Effects_package->block13Data = stream_data;
-    Effects_package->auxiliarySoundHandle = VS::Audio::BindLiveRoomCutsceneStream(stream_data, byte_count);
+void BindEffectAuxiliarySoundBank(EffectPackageBlocks& blocks,
+                                  std::span<std::byte> block,
+                                  EffectPackageHost& host) {
+  blocks.auxiliary_sound = block;
+  blocks.auxiliary_sound_handle = host.BindAuxiliarySound(block);
+}
+
+// decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6F014.c:746)
+PackageWalk BindEffectPackageBlocks(std::span<std::byte> package,
+                                    EffectPackageBlocks& blocks,
+                                    EffectPackageHost& host) {
+  PackageWalk walk{};
+  std::size_t offset = 0;
+  while (true) {
+    if (package.size() - offset < kPackageBlockHeaderBytes) {
+      walk.status = PackageWalkStatus::kNoTerminator;
+      return walk;
+    }
+    const std::uint32_t meta =
+        ReadWord(std::span<const std::byte>(package), offset);
+    const std::uint32_t type = meta >> kBlockTypeShift;
+    const std::size_t size = meta & kBlockSizeMask;
+    if (type == 0) {
+      walk.status = PackageWalkStatus::kEnded;
+      return walk;
+    }
+    if (size < kPackageBlockHeaderBytes) {
+      walk.status = PackageWalkStatus::kShortBlock;
+      return walk;
+    }
+    if (size > package.size() - offset) {
+      walk.status = PackageWalkStatus::kLeavesPackage;
+      return walk;
+    }
+    const auto payload = package.subspan(offset + kPackageBlockHeaderBytes,
+                                         size - kPackageBlockHeaderBytes);
+    bool bound = true;
+    switch (static_cast<PackageBlockType>(type)) {
+      case PackageBlockType::kTextureTables:
+        host.BindTextureTables(payload);
+        break;
+      case PackageBlockType::kAnimationTable:
+        BindParticleAnimationTable(blocks, payload);
+        break;
+      case PackageBlockType::kTimelines:
+        BindEffectTimelines(blocks, payload);
+        break;
+      case PackageBlockType::kCurves:
+        walk.curves = BindEffectCurves(blocks, payload);
+        break;
+      case PackageBlockType::kParticleDefinitions:
+        BindParticleDefinitions(blocks, payload);
+        break;
+      case PackageBlockType::kPrograms:
+        BindEffectPrograms(blocks, payload);
+        break;
+      case PackageBlockType::kParameters:
+        BindEffectPackageParameters(blocks, payload);
+        break;
+      case PackageBlockType::kTransformDefinitions:
+        BindEffectTransformDefinitions(blocks, payload);
+        break;
+      case PackageBlockType::kSoundSequences:
+        BindEffectSoundSequences(blocks, payload);
+        break;
+      case PackageBlockType::kSoundBank:
+        BindEffectSoundBank(blocks, payload, host);
+        break;
+      case PackageBlockType::kAuxiliarySound:
+        BindEffectAuxiliarySoundBank(blocks, payload, host);
+        break;
+      default:
+        bound = false;
+        break;
+    }
+    if (bound) walk.bound_types |= 1U << type;
+    ++walk.blocks;
+    offset += size;
+  }
+}
+
+std::optional<PackageParameters> ReadPackageParameters(
+    std::span<const std::byte> block) noexcept {
+  if (block.size() < kPackageParametersRequiredBytes) return std::nullopt;
+  PackageParameters parameters{};
+  for (std::size_t i = 0; i < parameters.gravity_range.size(); ++i) {
+    parameters.gravity_range.at(i) = static_cast<std::int16_t>(
+        ReadHalfword(block, kGravityRangeAt + (i * kHalfwordBytes)));
+  }
+  for (std::size_t i = 0; i < parameters.drag_range.size(); ++i) {
+    parameters.drag_range.at(i) = static_cast<std::int16_t>(
+        ReadHalfword(block, kDragRangeAt + (i * kHalfwordBytes)));
+  }
+  parameters.gravity_curve = ReadByte(block, kGravityCurveAt);
+  parameters.drag_curve = ReadByte(block, kDragCurveAt);
+  parameters.frame_count = ReadByte(block, kFrameCountAt);
+  parameters.transform_count = ReadByte(block, kTransformCountAt);
+  for (std::size_t i = 0;
+       i < parameters.timeline_ids.size() && kTimelineIdsAt + i < block.size();
+       ++i) {
+    parameters.timeline_ids.at(i) = ReadByte(block, kTimelineIdsAt + i);
+  }
+  return parameters;
+}
+
+// decomp: BATTLE.PRG func_800D78F0 (src/BATTLE/BATTLE.PRG/6F014.c:477)
+ParticleForceStatus UpdateParticleGravityAndDrag(
+    std::span<const std::byte> parameters,
+    std::span<const std::int32_t> curve_samples, ParticleForceHost& host) {
+  const auto block = ReadPackageParameters(parameters);
+  if (!block) return ParticleForceStatus::kNoParameters;
+  const auto gravity_weight =
+      TableEntry(curve_samples, std::int64_t{block->gravity_curve});
+  const auto drag_weight =
+      TableEntry(curve_samples, std::int64_t{block->drag_curve});
+  if (!gravity_weight || !drag_weight) return ParticleForceStatus::kCurveIndex;
+  const std::span<const std::int16_t> gravity = block->gravity_range;
+  host.SetParticleGravity(Math::InterpolateSevenBitVector(
+      {RangeAt(gravity, 0), RangeAt(gravity, 1), RangeAt(gravity, 2)},
+      *gravity_weight));
+  host.SetParticleDrag(Math::InterpolateSevenBitScalar(
+      RangeAt(block->drag_range, 0), *drag_weight));
+  return ParticleForceStatus::kApplied;
 }
 
 // decomp: BATTLE.PRG _loadfile (src/BATTLE/BATTLE.PRG/6F014.c:549)
-int Effects_PollEffectResourceRead(int lba, int size, void* buf)
-{
-    Content_DiscFile cdFile;
-
-    if (Effects_resourceReadSlot == NULL) {
-        cdFile.lba = lba;
-        cdFile.size = size;
-        Effects_resourceReadSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
-        if (Effects_resourceReadSlot != NULL) {
-            VS::Content::EnqueueLiveDiscRequest(Effects_resourceReadSlot, buf);
-        } else {
-            Effects_resourceReadSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, buf);
-        }
-        return 1;
+ResourcePoll PollEffectResourceRead(EffectResourceState& state,
+                                    EffectResourceHost& host, DiscRead read,
+                                    EffectBuffer destination) {
+  if (state.read == DiscReadId::kNone) {
+    if (destination.id == EffectBufferId::kNone) {
+      return {.pending = false, .refusal = ResourceRefusal::kNoBuffer};
     }
-
-    if (Effects_resourceReadSlot->state == Content_DiscRequestState_Loaded) {
-        VS::Content::ReleaseLiveDiscRequest(Effects_resourceReadSlot);
-        Effects_resourceReadSlot = NULL;
-        return 0;
+    if (read.size < 0 ||
+        static_cast<std::size_t>(read.size) > destination.capacity) {
+      return {.pending = false, .refusal = ResourceRefusal::kReadTooLarge};
     }
-
-    return 1;
+    state.read = host.AllocateRead(read);
+    if (state.read != DiscReadId::kNone) {
+      host.EnqueueRead(state.read, destination.id);
+    } else {
+      state.read = host.CompleteRefusedRead(read, destination.id);
+    }
+    return {.pending = true};
+  }
+  if (host.ReadLoaded(state.read)) {
+    host.ReleaseRead(state.read);
+    state.read = DiscReadId::kNone;
+    return {.pending = false};
+  }
+  return {.pending = true};
 }
 
 // decomp: BATTLE.PRG vs_battle_loadEffPurge (src/BATTLE/BATTLE.PRG/6F014.c:570)
-int Effects_LoadEffectPurgeOverlay(void)
-{
-    if (Effects_purgeOverlayLoaded == 0) {
-        VS::Content::AcquireLiveOverlayWorkspace(2);
-        Effects_purgeOverlayLoaded = 1;
-    }
-
-    return Effects_PollEffectResourceRead(VS_EFFPURGE_BIN_LBA, VS_EFFPURGE_BIN_SIZE, Core_overlaySlots[3]);
+ResourcePoll LoadEffectPurgeOverlay(EffectResourceState& state,
+                                    EffectResourceHost& host) {
+  if (!state.purge_overlay_loaded) {
+    host.AcquirePurgeOverlayWorkspace();
+    state.purge_overlay_loaded = true;
+  }
+  return PollEffectResourceRead(state, host, host.DiscLayout().purge_overlay,
+                                host.PurgeOverlayBuffer());
 }
 
 // decomp: BATTLE.PRG func_800D7BF8 (src/BATTLE/BATTLE.PRG/6F014.c:580)
-int Effects_LoadEffectPackage(void)
-{
-    int _[16];
-
-    if (Effects_packageBuffer == NULL) {
-        Effects_packageBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Effects_packageFile.size);
-    }
-
-    return Effects_PollEffectResourceRead(Effects_packageFile.lba + VS_E000_P_LBA,
-        Effects_packageFile.size, Effects_packageBuffer);
+ResourcePoll LoadEffectPackage(EffectResourceState& state,
+                               EffectResourceHost& host) {
+  if (state.package_buffer.id == EffectBufferId::kNone) {
+    state.package_buffer = host.AllocateBuffer(state.package_file.size);
+  }
+  const DiscRead read{
+      .lba = state.package_file.lba + host.DiscLayout().package_base_lba,
+      .size = state.package_file.size};
+  return PollEffectResourceRead(state, host, read, state.package_buffer);
 }
 
 // decomp: BATTLE.PRG func_800D7C5C (src/BATTLE/BATTLE.PRG/6F014.c:592)
-void Effects_ReleaseEffectPackageResources(void)
-{
-    int i;
-    int bit;
-    int flags;
-
-    for (i = 24; i < 32; i++) {
-        flags = Effects_loadedTextureSlots;
-        bit = 1 << i;
-        if (flags & bit) {
-            VS::Render::RetireLiveTexturePageRange(i, 1, 2);
-            Effects_loadedTextureSlots &= ~bit;
-        }
+void ReleaseEffectPackageResources(EffectResourceState& state,
+                                   EffectResourceHost& host) {
+  for (std::uint32_t page = kEffectTexturePageBase; page < kPageEnd; ++page) {
+    const std::uint32_t bit = 1U << page;
+    if ((state.loaded_texture_pages & bit) != 0) {
+      host.RetireTexturePage(page);
+      state.loaded_texture_pages &= ~bit;
     }
-    if (Effects_packageBuffer != NULL) {
-        VS::Core::Memory::FreeLiveFromHighEnd(Effects_packageBuffer);
-        Effects_packageBuffer = NULL;
-    }
+  }
+  if (state.package_buffer.id != EffectBufferId::kNone) {
+    host.FreeBuffer(state.package_buffer.id);
+    state.package_buffer = {};
+  }
 }
 
 // decomp: BATTLE.PRG func_800D7CFC (src/BATTLE/BATTLE.PRG/6F014.c:612)
-int Effects_UpdateEffectTextureLoading(void)
-{
-    int _[16] __attribute__((unused));
-    RECT upload_rectangle;
-    u_int load_state;
-    int loading_pending;
-
-    if ((Effects_textureLoadState == 0) && (Effects_textureLoads.assetCount != 0)) {
-        Effects_textureLoadIndex = 0;
-        Effects_SetEffectTextureLoadState(1);
-    }
-
-    load_state = Effects_textureLoadState;
-
-    switch (load_state) {
-    case 1:
-        if (Effects_textureLoadBuffer == NULL) {
-            // FBT sizes are all equal
-            Effects_textureLoadBuffer = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_E000_0_FBT_SIZE));
-        }
-
-        loading_pending = Effects_PollEffectResourceRead(Effects_textureLoads.loadContexts[Effects_textureLoadIndex].lba + VS_E000_P_LBA,
-            Effects_textureLoads.loadContexts[Effects_textureLoadIndex].size, Effects_textureLoadBuffer);
-
-        if (loading_pending == 0) {
-            void* temp_v0_3 = (Effects_textureLoadIndex * 2) + &Effects_textureLoads;
-            int slot = Effects_textureLoads.slots[Effects_textureLoadIndex];
-
-            if (Effects_textureLoads.isClut[Effects_textureLoadIndex] == 0) {
-                slot += 24;
-                VS::Render::ReserveLiveTexturePageRange(slot, 1, 2);
-                Effects_loadedTextureSlots |= load_state << slot;
-                upload_rectangle.x = (slot - (slot / 16 * 16)) << 6;
-                upload_rectangle.y = slot / 16 << 8;
-                upload_rectangle.w = 64;
-                upload_rectangle.h = 256;
-                LoadImage(&upload_rectangle, Effects_textureLoadBuffer);
-            } else {
-                upload_rectangle.x = 768;
-                upload_rectangle.y = slot + 240;
-                upload_rectangle.w = 256;
-                upload_rectangle.h = 5 - slot;
-                LoadImage(&upload_rectangle, Effects_textureLoadBuffer);
-            }
-
-            ++Effects_textureLoadIndex;
-
-            if (Effects_textureLoads.assetCount == Effects_textureLoadIndex) {
-                Effects_SetEffectTextureLoadState(2);
-            }
-
-            loading_pending = 1;
-        }
-        break;
-
-    case 2:
-        if (Effects_textureLoadBuffer != NULL) {
-            VS::Core::Memory::FreeLiveFromHighEnd(Effects_textureLoadBuffer);
-            Effects_textureLoadBuffer = NULL;
-        }
-        /* fallthrough */
-
-    case 0:
-        loading_pending = 0;
-        break;
-    }
-    return loading_pending;
+ResourcePoll UpdateEffectTextureLoading(EffectResourceState& state,
+                                        EffectResourceHost& host) {
+  if (state.texture_state == TextureLoadState::kIdle &&
+      state.textures.asset_count != 0) {
+    state.texture_index = 0;
+    SetEffectTextureLoadState(state, TextureLoadState::kLoading);
+  }
+  switch (state.texture_state) {
+    case TextureLoadState::kLoading:
+      return LoadNextTexture(state, host);
+    case TextureLoadState::kLoaded:
+      if (state.texture_buffer.id != EffectBufferId::kNone) {
+        host.FreeBuffer(state.texture_buffer.id);
+        state.texture_buffer = {};
+      }
+      return {.pending = false};
+    case TextureLoadState::kIdle:
+      return {.pending = false};
+  }
+  return {.pending = false, .refusal = ResourceRefusal::kUnknownState};
 }
 
 // decomp: BATTLE.PRG func_800D7EF4 (src/BATTLE/BATTLE.PRG/6F014.c:681)
-int Effects_UpdateEffectPluginLoading(void)
-{
-    int _[16];
-    int ret;
-    u_int state = Effects_pluginLoadState;
-
-    switch (state) {
-    case 1:
-        if (Effects_purgeOverlayLoaded == 0) {
-            VS::Content::AcquireLiveOverlayWorkspace(2);
-            Effects_purgeOverlayLoaded = state;
-        }
-        // Fallthrough
-
-    case 2:
-        ret = Effects_PollEffectResourceRead(Effects_pluginFile.lba + VS_E000_P_LBA, Effects_pluginFile.size,
-            Core_overlaySlots[3]);
-        if (ret == 0) {
-            Effects_SetEffectPluginLoadState(3);
-        }
-        break;
-    case 0:
-    case 3:
-        ret = 0;
-        break;
+ResourcePoll UpdateEffectPluginLoading(EffectResourceState& state,
+                                       EffectResourceHost& host) {
+  switch (state.plugin_state) {
+    case PluginLoadState::kAcquireOverlay:
+      if (!state.purge_overlay_loaded) {
+        host.AcquirePurgeOverlayWorkspace();
+        state.purge_overlay_loaded = true;
+      }
+      [[fallthrough]];
+    case PluginLoadState::kLoading: {
+      const DiscRead read{
+          .lba = state.plugin_file.lba + host.DiscLayout().package_base_lba,
+          .size = state.plugin_file.size};
+      const auto poll =
+          PollEffectResourceRead(state, host, read, host.PurgeOverlayBuffer());
+      if (!poll.pending) {
+        SetEffectPluginLoadState(state, PluginLoadState::kLoaded);
+      }
+      return poll;
     }
-
-    return ret;
+    case PluginLoadState::kIdle:
+    case PluginLoadState::kLoaded:
+      return {.pending = false};
+  }
+  return {.pending = false, .refusal = ResourceRefusal::kUnknownState};
 }
 
 // decomp: BATTLE.PRG func_800D7FB4 (src/BATTLE/BATTLE.PRG/6F014.c:712)
-void Effects_ConfigureEffectPackageLoad(int lba, int size)
-{
-    Effects_packageFile.lba = lba;
-    Effects_packageFile.size = size;
+void ConfigureEffectPackageLoad(EffectResourceState& state,
+                                EffectFileExtent file) noexcept {
+  state.package_file = file;
 }
 
 // decomp: BATTLE.PRG vs_battle_configurePlg (src/BATTLE/BATTLE.PRG/6F014.c:718)
-void Effects_ConfigureEffectPluginLoad(int lba, int size, int entryPointCount)
-{
-    Effects_pluginFile.lba = lba;
-    Effects_pluginFile.size = size;
-    Effects_pluginEntryPointCount = entryPointCount;
+void ConfigureEffectPluginLoad(EffectResourceState& state,
+                               EffectFileExtent file,
+                               std::int32_t entry_count) noexcept {
+  state.plugin_file = file;
+  state.plugin_entry_count = entry_count;
 }
 
-// decomp: BATTLE.PRG vs_battle_setEffectExec (src/BATTLE/BATTLE.PRG/6F014.c:725)
-void Effects_SetEffectRenderer(Effects_EffectRenderer func, int index)
-{
-    Effects_effectRenderers[index] = func;
+// decomp: BATTLE.PRG vs_battle_setEffectExec
+// (src/BATTLE/BATTLE.PRG/6F014.c:725)
+bool SetEffectRenderer(EffectRendererTable& renderers, PluginEntry entry,
+                       std::int32_t index) noexcept {
+  if (index < 0 || static_cast<std::size_t>(index) >= renderers.size()) {
+    return false;
+  }
+  renderers.at(static_cast<std::size_t>(index)) = entry;
+  return true;
 }
 
 // decomp: BATTLE.PRG func_800D7FFC (src/BATTLE/BATTLE.PRG/6F014.c:730)
-void Effects_SetEffectTextureAssetCount(int asset_count) { Effects_textureLoads.assetCount = asset_count; }
+void SetEffectTextureAssetCount(EffectResourceState& state,
+                                std::int32_t asset_count) noexcept {
+  state.textures.asset_count = asset_count;
+}
 
-// decomp: BATTLE.PRG vs_battle_configureEffectFbLoad (src/BATTLE/BATTLE.PRG/6F014.c:732)
-void Effects_ConfigureEffectTextureAsset(int lba, int size, int slot, int isClut, int index)
-{
-    Effects_textureLoads.loadContexts[index].lba = lba;
-    Effects_textureLoads.loadContexts[index].size = size;
-    Effects_textureLoads.slots[index] = slot;
-    Effects_textureLoads.isClut[index] = isClut;
+// decomp: BATTLE.PRG vs_battle_configureEffectFbLoad
+// (src/BATTLE/BATTLE.PRG/6F014.c:732)
+bool ConfigureEffectTextureAsset(EffectResourceState& state,
+                                 const TextureAsset& asset,
+                                 std::int32_t index) noexcept {
+  if (index < 0 ||
+      static_cast<std::size_t>(index) >= state.textures.assets.size()) {
+    return false;
+  }
+  state.textures.assets.at(static_cast<std::size_t>(index)) = asset;
+  return true;
 }
 
 // decomp: BATTLE.PRG func_800D8038 (src/BATTLE/BATTLE.PRG/6F014.c:740)
-void Effects_SetEffectTextureLoadState(int load_state) { Effects_textureLoadState = load_state; }
+void SetEffectTextureLoadState(EffectResourceState& state,
+                               TextureLoadState load_state) noexcept {
+  state.texture_state = load_state;
+}
 
 // decomp: BATTLE.PRG func_800D8044 (src/BATTLE/BATTLE.PRG/6F014.c:742)
-u_int Effects_EffectTextureLoadState(void) { return Effects_textureLoadState; }
+TextureLoadState EffectTextureLoadState(
+    const EffectResourceState& state) noexcept {
+  return state.texture_state;
+}
 
-// decomp: BATTLE.PRG vs_battle_setPlgLoadState (src/BATTLE/BATTLE.PRG/6F014.c:744)
-void Effects_SetEffectPluginLoadState(int load_state) { Effects_pluginLoadState = load_state; }
-
-// decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6F014.c:746)
-void Effects_BindEffectPackageBlocks(Effects_PackageFile* package_block)
-{
-    VS::Effects::ForgetLivePackageExtents();
-    while (1) {
-        int meta = package_block->meta;
-
-        switch (meta & 0xFFFF0000) {
-        case 0:
-            return;
-
-        case 0x10000:
-            VS::Effects::BindLiveEffectTextureTables(std::as_writable_bytes(std::span<u_char>(
-                package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta))));
-            break;
-
-        case 0x20000:
-            Effects_BindParticleAnimationTable((Effects_PackageBlock2*)package_block->blocks);
-            break;
-
-        case 0x30000:
-            Effects_BindEffectTimelines(package_block->blocks);
-            break;
-
-        case 0x40000:
-            Effects_BindEffectCurves((Effects_CurveBlock*)package_block->blocks);
-            VS::Effects::RecordLiveEffectCurves(std::as_bytes(std::span<const u_char>(
-                package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta))));
-            break;
-
-        case 0x50000:
-            Effects_BindParticleDefinitions((Effects_PackageBlock5*)package_block->blocks);
-            VS::Effects::RecordLiveParticleDefinitions(std::as_bytes(std::span<const u_char>(
-                package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta))));
-            break;
-
-        case 0x80000:
-            Effects_BindEffectPrograms(package_block->blocks);
-            break;
-
-        case 0x90000:
-            Effects_BindEffectPackageParameters((Effects_PackageBlock9*)package_block->blocks);
-            break;
-
-        case 0xA0000:
-            Effects_BindEffectTransformDefinitions(package_block->blocks);
-            break;
-
-        case 0xB0000:
-            Effects_BindEffectSoundSequences(package_block->blocks);
-            break;
-
-        case 0xC0000:
-            Effects_BindEffectSoundBank(package_block->blocks);
-            break;
-
-        case 0xD0000:
-            Effects_BindEffectAuxiliarySoundBank(
-                package_block->blocks, (meta & 0xFFFF) - sizeof(u_int));
-            break;
-        }
-
-        package_block = (Effects_PackageFile *)(((u_char*)((void*)package_block)) + (meta & 0xFFFF));
-    }
+// decomp: BATTLE.PRG vs_battle_setPlgLoadState
+// (src/BATTLE/BATTLE.PRG/6F014.c:744)
+void SetEffectPluginLoadState(EffectResourceState& state,
+                              PluginLoadState load_state) noexcept {
+  state.plugin_state = load_state;
 }
 
 // decomp: EFFPURGE.BIN func_800F9800 (src/EFFECT/EFFPURGE.BIN/0.c:590)
-int Effects_InvokeAllPluginUpdates(Effects_RendererSlot* arg0, u_int arg1, int arg2)
-{
-    Effects_Plg005_UpdateAnalyzeGrid(NULL, 2, 0);
-    Effects_Plg044_TiledRing(NULL, 2, 0);
-    Effects_Plg045_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg047_ClosedRing(NULL, 2, 0);
-    Effects_Plg044_TiledRing(NULL, 2, 0);
-    Effects_Plg049_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg049_Ring(NULL, 2, 0);
-    Effects_Plg049_TiledRing(NULL, 2, 0);
-    Effects_Plg049_RotatingSurface(NULL, 2, 0);
-    Effects_Plg050_Ring(NULL, 2, 0);
-    Effects_Plg050_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg051_ClosedRing(NULL, 2, 0);
-    Effects_Plg052_UpdateRepeatingRing(NULL, 2, 0);
-    Effects_Plg053_Grid(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg005_UpdateAnalyzeGrid(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg005_UpdateAnalyzeGrid(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg053_Grid(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg057_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailDispatch(NULL, 2, 0);
-    Effects_Plg057_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailDispatch(NULL, 2, 0);
-    Effects_Plg057_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailDispatch(NULL, 2, 0);
-    Effects_Plg057_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg057_TrailDispatch(NULL, 2, 0);
-    Effects_Plg061_Surface(NULL, 2, 0);
-    Effects_Plg061_Grid(NULL, 2, 0);
-    Effects_Plg061_Ring(NULL, 2, 0);
-    Effects_Plg061_ClosedRing(NULL, 2, 0);
-    Effects_Plg061_Surface(NULL, 2, 0);
-    Effects_Plg061_Grid(NULL, 2, 0);
-    Effects_Plg061_Ring(NULL, 2, 0);
-    Effects_Plg061_ClosedRing(NULL, 2, 0);
-    Effects_Plg061_Surface(NULL, 2, 0);
-    Effects_Plg061_Grid(NULL, 2, 0);
-    Effects_Plg061_Ring(NULL, 2, 0);
-    Effects_Plg061_ClosedRing(NULL, 2, 0);
-    Effects_Plg061_Surface(NULL, 2, 0);
-    Effects_Plg061_Grid(NULL, 2, 0);
-    Effects_Plg061_Ring(NULL, 2, 0);
-    Effects_Plg061_ClosedRing(NULL, 2, 0);
-    Effects_Plg065_RotatingSurface(NULL, 2, 0);
-    Effects_Plg065_ClosedRing(NULL, 2, 0);
-    Effects_Plg065_Ring(NULL, 2, 0);
-    Effects_Plg065_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg065_RotatingSurface(NULL, 2, 0);
-    Effects_Plg065_ClosedRing(NULL, 2, 0);
-    Effects_Plg065_Ring(NULL, 2, 0);
-    Effects_Plg065_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg065_RotatingSurface(NULL, 2, 0);
-    Effects_Plg065_ClosedRing(NULL, 2, 0);
-    Effects_Plg065_Ring(NULL, 2, 0);
-    Effects_Plg065_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg065_RotatingSurface(NULL, 2, 0);
-    Effects_Plg065_ClosedRing(NULL, 2, 0);
-    Effects_Plg065_Ring(NULL, 2, 0);
-    Effects_Plg065_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg069_Mesh10(NULL, 2, 0);
-    Effects_Plg069_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg069_TiledRing(NULL, 2, 0);
-    Effects_Plg069_Mesh10(NULL, 2, 0);
-    Effects_Plg069_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg069_TiledRing(NULL, 2, 0);
-    Effects_Plg069_Mesh10(NULL, 2, 0);
-    Effects_Plg069_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg069_TiledRing(NULL, 2, 0);
-    Effects_Plg069_Mesh10(NULL, 2, 0);
-    Effects_Plg069_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg069_TiledRing(NULL, 2, 0);
-    Effects_Plg073_TiledRing(NULL, 2, 0);
-    Effects_Plg073_Ring(NULL, 2, 0);
-    Effects_Plg073_TrailDispatch(NULL, 2, 0);
-    Effects_Plg073_RotatingSurface(NULL, 2, 0);
-    Effects_Plg073_Grid(NULL, 2, 0);
-    Effects_Plg073_TiledRing(NULL, 2, 0);
-    Effects_Plg073_Ring(NULL, 2, 0);
-    VS::Effects::UpdateLivePlg074TrailEmitter(NULL, 2, 0);
-    Effects_Plg073_RotatingSurface(NULL, 2, 0);
-    Effects_Plg005_UpdateAnalyzeGrid(NULL, 2, 0);
-    Effects_Plg073_TiledRing(NULL, 2, 0);
-    Effects_Plg073_Ring(NULL, 2, 0);
-    Effects_Plg073_TrailDispatch(NULL, 2, 0);
-    Effects_Plg073_RotatingSurface(NULL, 2, 0);
-    Effects_Plg073_Grid(NULL, 2, 0);
-    Effects_Plg073_TiledRing(NULL, 2, 0);
-    Effects_Plg073_Ring(NULL, 2, 0);
-    Effects_Plg073_TrailDispatch(NULL, 2, 0);
-    Effects_Plg073_RotatingSurface(NULL, 2, 0);
-    Effects_Plg073_Grid(NULL, 2, 0);
-    Effects_Plg077_Mesh10(NULL, 2, 0);
-    Effects_Plg052_UpdateRepeatingRing(NULL, 2, 0);
-    Effects_Plg077_Grid(NULL, 2, 0);
-    Effects_Plg077_Surface(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg077_Mesh10(NULL, 2, 0);
-    Effects_Plg052_UpdateRepeatingRing(NULL, 2, 0);
-    Effects_Plg077_Grid(NULL, 2, 0);
-    Effects_Plg077_Surface(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg077_Mesh10(NULL, 2, 0);
-    Effects_Plg052_UpdateRepeatingRing(NULL, 2, 0);
-    Effects_Plg077_Grid(NULL, 2, 0);
-    Effects_Plg077_Surface(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg077_Mesh10(NULL, 2, 0);
-    Effects_Plg052_UpdateRepeatingRing(NULL, 2, 0);
-    Effects_Plg077_Grid(NULL, 2, 0);
-    Effects_Plg077_Surface(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg081_RotatingSurface(NULL, 2, 0);
-    Effects_Plg081_Ring(NULL, 2, 0);
-    Effects_Plg081_ClosedRing(NULL, 2, 0);
-    Effects_Plg082_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg082_Grid(NULL, 2, 0);
-    Effects_Plg082_ClosedRing(NULL, 2, 0);
-    Effects_Plg044_TiledRing(NULL, 2, 0);
-    Effects_Plg053_Grid(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg085_Grid(NULL, 2, 0);
-    Effects_Plg085_TiledRing(NULL, 2, 0);
-    Effects_Plg086_ClosedRing(NULL, 2, 0);
-    Effects_Plg086_RotatingSurface(NULL, 2, 0);
-    Effects_Plg086_Grid(NULL, 2, 0);
-    Effects_Plg086_TrailDispatch(NULL, 2, 0);
-    Effects_Plg087_Surface(NULL, 2, 0);
-    Effects_Plg087_ClosedRing(NULL, 2, 0);
-    Effects_Plg087_Grid(NULL, 2, 0);
-    Effects_Plg087_TrailDispatch(NULL, 2, 0);
-    Effects_Plg087_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg045_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg114_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg114_ParticleDispatch2(NULL, 2, 0);
-    Effects_Plg128_Surface(NULL, 2, 0);
-    Effects_Plg128_ClosedRing(NULL, 2, 0);
-    Effects_Plg128_RotatingSurface(NULL, 2, 0);
-    Effects_Plg128_Grid(NULL, 2, 0);
-    Effects_Plg128_Surface2(NULL, 2, 0);
-    Effects_Plg128_UpdateEffectCamera(NULL, 2, 0);
-    Effects_Plg128_TrailDispatch(NULL, 2, 0);
-    Effects_Plg129_Ring(NULL, 2, 0);
-    Effects_Plg129_Mesh10(NULL, 2, 0);
-    Effects_Plg129_Surface(NULL, 2, 0);
-    Effects_Plg129_Ring2(NULL, 2, 0);
-    Effects_Plg129_RotatingSurface(NULL, 2, 0);
-    Effects_Plg044_TiledRing(NULL, 2, 0);
-    Effects_Plg044_TiledRing(NULL, 2, 0);
-    Effects_Plg134_TrailDispatch(NULL, 2, 0);
-    Effects_Plg134_ClosedRing(NULL, 2, 0);
-    Effects_Plg135_ClosedRing(NULL, 2, 0);
-    Effects_Plg135_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg053_Grid(NULL, 2, 0);
-    Effects_Plg053_ClosedRing(NULL, 2, 0);
-    Effects_Plg137_Mesh10(NULL, 2, 0);
-    Effects_Plg137_TrailDispatch(NULL, 2, 0);
-    Effects_Plg137_Grid(NULL, 2, 0);
-    Effects_Plg137_TiledRing(NULL, 2, 0);
-    Effects_Plg138_RotatingSurface(NULL, 2, 0);
-    Effects_Plg138_Ring(NULL, 2, 0);
-    Effects_Plg138_Grid(NULL, 2, 0);
-    Effects_Plg138_TiledRing(NULL, 2, 0);
-    Effects_Plg139_TiledRing(NULL, 2, 0);
-    Effects_Plg139_Grid(NULL, 2, 0);
-    Effects_Plg045_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg141_TrailDispatch(NULL, 2, 0);
-    Effects_Plg142_Grid(NULL, 2, 0);
-    Effects_Plg142_ClosedRing(NULL, 2, 0);
-    Effects_Plg142_Ring(NULL, 2, 0);
-    Effects_Plg142_RotatingSurface(NULL, 2, 0);
-    Effects_Plg143_TiledRing(NULL, 2, 0);
-    Effects_Plg143_ClosedRing(NULL, 2, 0);
-    Effects_Plg044_TiledRing(NULL, 2, 0);
-    Effects_Plg044_TiledRing(NULL, 2, 0);
-    Effects_Plg146_TiledRing(NULL, 2, 0);
-    Effects_Plg146_MirrorSurface(NULL, 2, 0);
-    Effects_Plg146_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg146_Ring(NULL, 2, 0);
-    Effects_Plg146_TrailDispatch(NULL, 2, 0);
-    Effects_Plg147_Ring(NULL, 2, 0);
-    Effects_Plg147_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg148_TrailDispatch(NULL, 2, 0);
-    Effects_Plg148_TiledRing(NULL, 2, 0);
-    Effects_Plg149_Ring(NULL, 2, 0);
-    Effects_Plg150_TiledRing(NULL, 2, 0);
-    Effects_Plg150_Grid(NULL, 2, 0);
-    Effects_Plg150_Surface(NULL, 2, 0);
-    Effects_Plg150_Ring(NULL, 2, 0);
-    Effects_Plg047_ClosedRing(NULL, 2, 0);
-    Effects_Plg152_Grid(NULL, 2, 0);
-    Effects_Plg152_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg152_ClosedRing(NULL, 2, 0);
-    Effects_Plg153_Mesh10(NULL, 2, 0);
-    Effects_Plg153_Ring(NULL, 2, 0);
-    Effects_Plg153_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg154_Mesh10(NULL, 2, 0);
-    Effects_Plg154_ClosedRing(NULL, 2, 0);
-    Effects_Plg139_TiledRing(NULL, 2, 0);
-    Effects_Plg139_Grid(NULL, 2, 0);
-    Effects_Plg156_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg156_Grid(NULL, 2, 0);
-    Effects_Plg149_Ring(NULL, 2, 0);
-    Effects_Plg158_Surface(NULL, 2, 0);
-    Effects_Plg158_MirrorSurface(NULL, 2, 0);
-    Effects_Plg158_ClosedRing(NULL, 2, 0);
-    Effects_Plg158_RotatingSurface(NULL, 2, 0);
-    Effects_Plg139_TiledRing(NULL, 2, 0);
-    Effects_Plg139_Grid(NULL, 2, 0);
-    Effects_Plg160_TiledRing(NULL, 2, 0);
-    Effects_Plg160_Ring(NULL, 2, 0);
-    Effects_Plg161_RotatingSurface(NULL, 2, 0);
-    Effects_Plg161_Ring(NULL, 2, 0);
-    Effects_Plg161_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg161_Grid(NULL, 2, 0);
-    Effects_Plg161_Ring2(NULL, 2, 0);
-    Effects_Plg162_UpdateTransposedRing(NULL, 2, 0);
-    Effects_Plg162_RotatingSurface(NULL, 2, 0);
-    Effects_Plg162_Ring(NULL, 2, 0);
-    Effects_Plg162_ClosedRing(NULL, 2, 0);
-    Effects_Plg045_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg165_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg165_RotatingSurface(NULL, 2, 0);
-    Effects_Plg165_Grid(NULL, 2, 0);
-    Effects_Plg165_ClosedRing(NULL, 2, 0);
-    Effects_Plg166_RotatingSurface(NULL, 2, 0);
-    Effects_Plg166_MirrorSurface(NULL, 2, 0);
-    Effects_Plg166_ClosedRing(NULL, 2, 0);
-    Effects_Plg166_Ring(NULL, 2, 0);
-    Effects_Plg167_ClosedRing(NULL, 2, 0);
-    Effects_Plg167_RotatingSurface(NULL, 2, 0);
-    Effects_Plg167_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg168_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg168_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg168_Grid(NULL, 2, 0);
-    Effects_Plg169_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg169_Ring(NULL, 2, 0);
-    Effects_Plg169_ClosedRing(NULL, 2, 0);
-    Effects_Plg170_MirrorSurface(NULL, 2, 0);
-    Effects_Plg170_RotatingSurface(NULL, 2, 0);
-    Effects_Plg170_Ring(NULL, 2, 0);
-    Effects_Plg170_Grid(NULL, 2, 0);
-    Effects_Plg170_Surface(NULL, 2, 0);
-    Effects_Plg170_ClosedRing(NULL, 2, 0);
-    Effects_Plg198_Ring(NULL, 2, 0);
-    Effects_Plg198_Ring(NULL, 2, 0);
-    Effects_Plg139_TiledRing(NULL, 2, 0);
-    Effects_Plg139_Grid(NULL, 2, 0);
-    Effects_Plg224_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg232_TrailNineDispatch(NULL, 2, 0);
-    Effects_Plg236_ClosedRing(NULL, 2, 0);
-    Effects_Plg236_RotatingSurface(NULL, 2, 0);
-    Effects_Plg162_UpdateTransposedRing(NULL, 2, 0);
-    Effects_Plg236_Ring(NULL, 2, 0);
-    Effects_Plg224_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg224_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg242_TiledRing(NULL, 2, 0);
-    Effects_Plg242_Grid(NULL, 2, 0);
-    Effects_Plg242_TrailDispatch(NULL, 2, 0);
-    Effects_Plg141_TrailDispatch(NULL, 2, 0);
-    Effects_Plg051_ClosedRing(NULL, 2, 0);
-    Effects_Plg246_RotatingSurface(NULL, 2, 0);
-    Effects_Plg081_RotatingSurface(NULL, 2, 0);
-    Effects_Plg081_Ring(NULL, 2, 0);
-    Effects_Plg081_ClosedRing(NULL, 2, 0);
-    Effects_Plg047_ClosedRing(NULL, 2, 0);
-    Effects_Plg250_RotatingSurface(NULL, 2, 0);
-    Effects_Plg250_ClosedRing(NULL, 2, 0);
-    Effects_Plg047_ClosedRing(NULL, 2, 0);
-    Effects_Plg255_TrailDispatch(NULL, 2, 0);
-    Effects_Plg255_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg047_ClosedRing(NULL, 2, 0);
-    Effects_Plg051_ClosedRing(NULL, 2, 0);
-    Effects_Plg260_Mesh10(NULL, 2, 0);
-    Effects_Plg263_Surface(NULL, 2, 0);
-    Effects_Plg263_Ring(NULL, 2, 0);
-    Effects_Plg162_UpdateTransposedRing(NULL, 2, 0);
-    Effects_Plg263_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg265_TiledRing(NULL, 2, 0);
-    Effects_Plg265_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg265_TrailDispatch(NULL, 2, 0);
-    Effects_Plg265_ParticleDispatch2(NULL, 2, 0);
-    Effects_Plg266_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg266_ParticleDispatch2(NULL, 2, 0);
-    Effects_Plg266_TrailDispatch(NULL, 2, 0);
-    Effects_Plg141_TrailDispatch(NULL, 2, 0);
-    Effects_Plg255_TrailDispatch(NULL, 2, 0);
-    Effects_Plg255_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg272_Grid(NULL, 2, 0);
-    Effects_Plg272_ClosedRing(NULL, 2, 0);
-    Effects_Plg272_Surface(NULL, 2, 0);
-    Effects_Plg273_MirrorSurface(NULL, 2, 0);
-    Effects_Plg082_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg082_Grid(NULL, 2, 0);
-    Effects_Plg082_ClosedRing(NULL, 2, 0);
-    Effects_Plg045_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg291_TrailDispatch(NULL, 2, 0);
-    Effects_Plg291_Grid(NULL, 2, 0);
-    Effects_Plg291_ClosedRing(NULL, 2, 0);
-    Effects_Plg297_MirrorSurface(NULL, 2, 0);
-    Effects_Plg297_ClosedRing(NULL, 2, 0);
-    Effects_Plg297_Grid(NULL, 2, 0);
-    Effects_Plg297_Ring(NULL, 2, 0);
-    Effects_Plg300_MirrorSurface(NULL, 2, 0);
-    Effects_Plg300_ParticleDispatch(NULL, 2, 0);
-    Effects_Plg052_UpdateRepeatingRing(NULL, 2, 0);
-    Effects_Plg300_UpdateForegroundRepeatingRing(NULL, 2, 0);
-    Effects_Plg301_ParticleDispatch(NULL, 2, 0);
-    return Effects_Plg301_ClosedRing(NULL, 2, 0);
+PluginUpdateSweep InvokeAllPluginUpdates(PluginUpdateHost& host) {
+  PluginUpdateSweep sweep{};
+  const std::size_t count = host.EntryCount();
+  for (std::size_t entry = 0; entry < count; ++entry) {
+    if (!host.HasPluginEntry(entry)) continue;
+    sweep.result = host.UpdatePlugin(entry);
+    ++sweep.updated;
+  }
+  return sweep;
 }
 
 // decomp: EFFPURGE.BIN vs_effpurge_exec (src/EFFECT/EFFPURGE.BIN/0.c:911)
-void Effects_ConfigureEffectResources(void)
-{
-    Effects_SetEffectTextureLoadState(0);
-    Effects_ConfigureTextureLoads();
-    Effects_ConfigurePluginLoad();
-    Effects_packageFile = Effects_packageFiles[Effects_actionRequest.effectId];
-    Effects_AcquireParticlePool(255);
-    Effects_package->block9Data = NULL;
-    Effects_actionPackage.curveBlock = NULL;
-    Effects_actionPackage.block11Data = NULL;
-    Effects_actionPackage.block12Data = NULL;
-    Effects_actionPackage.block13Data = NULL;
+EffectPurgeConfiguration ConfigureEffectResources(
+    EffectResourceState& state, EffectRendererTable& renderers,
+    const EffectPurgeTables& tables, std::int32_t effect_id,
+    EffectLifecycleHost& host) {
+  EffectPurgeConfiguration configuration{};
+  SetEffectTextureLoadState(state, TextureLoadState::kIdle);
+  configuration.textures = ConfigureTextureLoads(state, tables, effect_id);
+  configuration.plugins =
+      ConfigurePluginLoad(state, renderers, tables, effect_id);
+  const auto package = TableEntry(tables.package_files, effect_id);
+  ConfigureEffectPackageLoad(state, package.value_or(EffectFileExtent{}));
+  if (!package) configuration.package = PurgeTableRefusal::kEffectId;
+  host.AcquireParticlePool(kEffectParticlePoolSize);
+  host.ClearReloadedBlocks();
+  return configuration;
 }
 
 // decomp: EFFPURGE.BIN _configureFb (src/EFFECT/EFFPURGE.BIN/0.c:925)
-void Effects_ConfigureTextureLoads(void)
-{
-    int i;
-    int texCount;
-    u_char* clut_slot_entry;
-
-    int uses_texture_assets = Effects_effectUsesTextures[Effects_actionRequest.effectId];
-    int first_texture_asset = 0;
-
-    for (i = 0; i < Effects_actionRequest.effectId; ++i) {
-        first_texture_asset += Effects_fbtCounts[i];
-    }
-
-    texCount = Effects_fbtCounts[Effects_actionRequest.effectId];
-
-    Effects_SetEffectTextureAssetCount(texCount + (uses_texture_assets != 0));
-
-    clut_slot_entry = &Effects_fbcSlots[Effects_actionRequest.effectId];
-
-    Effects_ConfigureEffectTextureAsset(Effects_fbcFiles[Effects_actionRequest.effectId].lba,
-        Effects_fbcFiles[Effects_actionRequest.effectId].size, *clut_slot_entry, 1, 0);
-
-    for (i = 0; i < texCount; ++i) {
-        Effects_ConfigureEffectTextureAsset(Effects_fbtFiles[first_texture_asset + i].lba,
-            Effects_fbtFiles[first_texture_asset + i].size, Effects_fbtSlots[first_texture_asset + i], 0, i + 1);
-    }
+PurgeTableRefusal ConfigureTextureLoads(EffectResourceState& state,
+                                        const EffectPurgeTables& tables,
+                                        std::int32_t effect_id) noexcept {
+  const auto uses = TableEntry(tables.uses_textures, effect_id);
+  const auto count = TableEntry(tables.texture_counts, effect_id);
+  const auto clut_file = TableEntry(tables.clut_files, effect_id);
+  const auto clut_slot = TableEntry(tables.clut_slots, effect_id);
+  if (!uses || !count || !clut_file || !clut_slot) {
+    SetEffectTextureAssetCount(state, 0);
+    return PurgeTableRefusal::kEffectId;
+  }
+  std::size_t first = 0;
+  for (std::size_t id = 0; id < static_cast<std::size_t>(effect_id); ++id) {
+    first += tables.texture_counts[id];
+  }
+  const std::size_t texture_count = *count;
+  // The CLUT and the FBTs take indices 0..count of the load list.
+  if (texture_count >= kTextureAssetCapacity ||
+      first + texture_count > tables.texture_files.size() ||
+      first + texture_count > tables.texture_slots.size()) {
+    SetEffectTextureAssetCount(state, 0);
+    return PurgeTableRefusal::kTextureRange;
+  }
+  SetEffectTextureAssetCount(
+      state, static_cast<std::int32_t>(texture_count) + (*uses != 0 ? 1 : 0));
+  ConfigureEffectTextureAsset(
+      state, {.file = *clut_file, .slot = *clut_slot, .is_clut = true}, 0);
+  for (std::size_t i = 0; i < texture_count; ++i) {
+    ConfigureEffectTextureAsset(state,
+                                {.file = tables.texture_files[first + i],
+                                 .slot = tables.texture_slots[first + i],
+                                 .is_clut = false},
+                                static_cast<std::int32_t>(i + 1));
+  }
+  return PurgeTableRefusal::kNone;
 }
 
 // decomp: EFFPURGE.BIN _configurePlg (src/EFFECT/EFFPURGE.BIN/0.c:953)
-void Effects_ConfigurePluginLoad(void)
-{
-    int i;
-    int firstindex = Effects_effectEntryPointIndices[Effects_actionRequest.effectId];
-    int count = Effects_effectEntryPointIndices[Effects_actionRequest.effectId + 1] - firstindex;
-
-    Effects_ConfigureEffectPluginLoad(
-        Effects_pluginFiles[Effects_actionRequest.effectId].lba, Effects_pluginFiles[Effects_actionRequest.effectId].size, count);
-
-    for (i = 0; i < count; ++i) {
-        Effects_SetEffectRenderer(Effects_effectEntryPoints[firstindex + i], i);
-    }
-
-    if (count != 0) {
-        Effects_SetEffectPluginLoadState(1);
-    } else {
-        Effects_SetEffectPluginLoadState(0);
-    }
+PurgeTableRefusal ConfigurePluginLoad(EffectResourceState& state,
+                                      EffectRendererTable& renderers,
+                                      const EffectPurgeTables& tables,
+                                      std::int32_t effect_id) noexcept {
+  const auto first = TableEntry(tables.entry_point_indices, effect_id);
+  const auto next =
+      TableEntry(tables.entry_point_indices, std::int64_t{effect_id} + 1);
+  if (!first || !next) {
+    RefusePluginLoad(state);
+    return PurgeTableRefusal::kEffectId;
+  }
+  const std::int32_t count = *next - *first;
+  // An effect without plugins never reads its plugin file, whose entry the
+  // table may lack.
+  const auto file = count == 0 ? TableEntry(tables.plugin_files, effect_id)
+                                     .value_or(EffectFileExtent{})
+                               : TableEntry(tables.plugin_files, effect_id);
+  if (count < 0 || static_cast<std::size_t>(count) > renderers.size() ||
+      std::size_t{*first} + static_cast<std::size_t>(count) >
+          tables.entry_point_count ||
+      !file) {
+    RefusePluginLoad(state);
+    return PurgeTableRefusal::kPluginRange;
+  }
+  ConfigureEffectPluginLoad(state, *file, count);
+  for (std::int32_t i = 0; i < count; ++i) {
+    SetEffectRenderer(renderers, static_cast<PluginEntry>(*first + i), i);
+  }
+  SetEffectPluginLoadState(state, count != 0 ? PluginLoadState::kAcquireOverlay
+                                             : PluginLoadState::kIdle);
+  return PurgeTableRefusal::kNone;
 }
-
-}  // extern "C"
+}  // namespace VS::Effects

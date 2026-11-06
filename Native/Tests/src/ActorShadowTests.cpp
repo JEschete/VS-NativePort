@@ -12,6 +12,7 @@
 
 #include "Actors/ModelDrawingLive.hpp"
 #include "Content/ModuleData.h"
+#include "Field/ActorCollisionLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/ModelGeometryLive.hpp"
 
@@ -22,6 +23,7 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Field/Collision.h"
+#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
@@ -49,7 +51,7 @@ struct ActorShadowFixture {
   int saved_framebuffer = Render_frameBuf;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
   u_short saved_platform = Actors_supportingPlatformLayer;
-  u_int* saved_probe = Field_collisionProbeTile;
+  VS::Field::CollisionProbe saved_probe = VS::Field::LiveCollisionProbe();
   decltype(Actors_supportingGimmickIndex) saved_gimmick_index =
       Actors_supportingGimmickIndex;
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
@@ -116,7 +118,7 @@ struct ActorShadowFixture {
     Field_roomData = saved_room;
     Actors_supportingPlatformLayer = saved_platform;
     Actors_supportingGimmickIndex = saved_gimmick_index;
-    Field_collisionProbeTile = saved_probe;
+    VS::Field::LiveCollisionProbe() = saved_probe;
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               Field_gimmickInstances);
     Render_frameScratch = saved_frame;
@@ -198,6 +200,7 @@ struct ActorShadowFixture {
         reinterpret_cast<Field_MpdCollisionHeader*>(terrain.data());
     Field_roomData.tileCells = cells.data();
     Field_roomData.header.collisionMapLength = terrain.size();
+    Field_roomData.header.tileCellsLength = sizeof cells;
     std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
     const std::int16_t coordinate = steep ? 176 : 160;
     actor.instance.position = {coordinate, 0, coordinate, 0};
@@ -424,8 +427,8 @@ TEST_CASE("Actor shadows follow actual interpolated terrain on both axes",
   ActorShadowFixture fixture;
   const bool along_z = GENERATE(false, true);
   fixture.SetTerrain(along_z, false);
-  CHECK(Field_SampleActorSupportHeight(&fixture.actor.instance.position, 0, 0,
-                                       3) == 56);
+  CHECK(VS::Field::LiveSampleActorSupportHeight(
+            &fixture.actor.instance.position, 0, 0, 3) == 56);
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
   CHECK(fixture.actor.soundPosition.vz == 1080);
@@ -442,8 +445,8 @@ TEST_CASE("Actor shadows flatten source-rejected steep terrain",
   ActorShadowFixture fixture;
   const bool along_z = GENERATE(false, true);
   fixture.SetTerrain(along_z, true);
-  CHECK(Field_SampleActorSupportHeight(&fixture.actor.instance.position, 0, 0,
-                                       3) == 64);
+  CHECK(VS::Field::LiveSampleActorSupportHeight(
+            &fixture.actor.instance.position, 0, 0, 3) == 64);
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
   CHECK(fixture.actor.soundPosition.vz == 1088);

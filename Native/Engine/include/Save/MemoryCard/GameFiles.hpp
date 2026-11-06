@@ -373,7 +373,7 @@ class TitleCardProbeHost {
   virtual bool ResourcesReady() = 0;
   virtual void WaitLoadingFrame() = 0;
   virtual void BeginCardReadiness(std::int32_t port) = 0;
-  // Title_SaveCard_AdvanceCardReadiness(0).
+  // TITLE.PRG _memcardEventHandler(0) (22C.c:457).
   virtual std::int32_t PollCardReadiness() = 0;
   virtual void WaitFrames() = 0;
   virtual bool AnyFileMatches(const CardFilename& pattern) = 0;

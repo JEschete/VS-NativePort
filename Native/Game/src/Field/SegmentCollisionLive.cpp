@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Core/Log.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/SegmentCollision.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -101,7 +102,7 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
 
   [[nodiscard]] std::uint16_t FloorHeightWord(std::int32_t x,
                                               std::int32_t z) const override {
-    return static_cast<std::uint16_t>(Field_FloorHeightAt(x, z));
+    return static_cast<std::uint16_t>(VS::Field::LiveFloorHeightAt(x, z));
   }
 };
 }  // namespace

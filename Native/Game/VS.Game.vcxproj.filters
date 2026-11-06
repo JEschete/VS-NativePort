@@ -25,6 +25,15 @@
     <Filter Include="include\Effects\ScreenDistortion">
       <UniqueIdentifier>{82C05CD2-F240-59F0-A0D1-317CD68B16FD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Effects\Templates">
+      <UniqueIdentifier>{6B73B9DB-1AB9-5F9B-889A-6F0135CE2DA7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Ending">
+      <UniqueIdentifier>{AF74BA61-44E9-53FA-AE8E-0722F3FC00C9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Ending\Credits">
+      <UniqueIdentifier>{0DB567D6-61CC-533C-8875-C34E897A6C26}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Event">
       <UniqueIdentifier>{4411CC77-D65D-53D6-B88B-DFE1F0B4D2AD}</UniqueIdentifier>
     </Filter>
@@ -40,6 +49,9 @@
     <Filter Include="include\Menu\Framework">
       <UniqueIdentifier>{EC2E19C3-730C-5083-A87C-1AC3D1CA2E85}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Menu\Setup">
+      <UniqueIdentifier>{09910199-A0A9-57B0-A127-053BA74AC746}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Save">
       <UniqueIdentifier>{D7A69607-1CF4-5C9C-B0F8-B7A2F2245DCE}</UniqueIdentifier>
     </Filter>
@@ -48,6 +60,9 @@
     </Filter>
     <Filter Include="include\State">
       <UniqueIdentifier>{5C6F0E0E-46C9-5E7B-9E34-5D22414E35BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Title">
+      <UniqueIdentifier>{801D37AE-147A-56AC-BCCA-7E5F2F01792D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{9518611B-ED3E-5EFF-86F3-2D7587897B58}</UniqueIdentifier>
@@ -138,24 +153,57 @@
     <ClInclude Include="src\Actors\ActorAllocation.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClCompile Include="src\Actors\ActorLoading.cpp">
+    <ClCompile Include="src\Actors\ActorCommands.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ActorLoading.h">
+    <ClCompile Include="src\Actors\ActorCommandsLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\ActorCommandsLiveState.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\ActorFlags.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorLifecycle.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
     <ClInclude Include="src\Actors\ActorModelSlot.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\ActorMotion.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorMotionLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorMovement.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorMovementLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorPlacement.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
     <ClInclude Include="src\Actors\ActorRecord.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClCompile Include="src\Actors\ActorState.cpp">
+    <ClCompile Include="src\Actors\ActorRoster.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ActorState.h">
+    <ClCompile Include="src\Actors\ActorRosterLive.cpp">
       <Filter>src\Actors</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorSpawning.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorSpawningLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\ActorStateLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
     <ClCompile Include="src\Actors\ActorTableLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -165,12 +213,21 @@
     <ClInclude Include="src\Actors\Animation.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClCompile Include="src\Actors\AnimationBindings.cpp">
+    <ClCompile Include="src\Actors\AnimationControl.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\AnimationBindings.h">
+    <ClCompile Include="src\Actors\AnimationControlLive.cpp">
       <Filter>src\Actors</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\Actors\AnimationEvents.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\AnimationPose.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Actors\AnimationPoseLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
     <ClCompile Include="src\Actors\Appearance.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -186,19 +243,10 @@
     <ClCompile Include="src\Actors\AppearanceTransitionLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClCompile Include="src\Actors\Ashley.cpp">
+    <ClCompile Include="src\Actors\BattleActorState.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\Ashley.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
     <ClInclude Include="src\Actors\CharacterInit.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Actors\Lifecycle.cpp">
-      <Filter>src\Actors</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Actors\Lifecycle.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClInclude Include="src\Actors\Location.h">
@@ -249,12 +297,12 @@
     <ClInclude Include="src\Actors\RoomActorCache.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClCompile Include="src\Actors\RoomState.cpp">
+    <ClCompile Include="src\Actors\RoomEnemyMemory.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\RoomState.h">
+    <ClCompile Include="src\Actors\RoomEnemyMemoryLive.cpp">
       <Filter>src\Actors</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Actors\SequencePlayback.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -294,12 +342,6 @@
     <ClInclude Include="src\Actors\Spawning.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
-    <ClCompile Include="src\Actors\Stats.cpp">
-      <Filter>src\Actors</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Actors\Stats.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
     <ClCompile Include="src\Actors\TextureAnimation.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -324,7 +366,13 @@
     <ClCompile Include="src\Battle\Abilities.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Abilities.h">
+    <ClCompile Include="src\Battle\AbilitiesLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\AbilityState.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\AbilityState.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\ActionAnimation.cpp">
@@ -546,12 +594,21 @@
     <ClInclude Include="src\Battle\AttackPrerequisites.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\AttackPrerequisitesLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\AttackPrerequisiteTable.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\AttackPrerequisiteTable.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\BattleMode.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\BattleMode.h">
+    <ClCompile Include="src\Battle\BattleModeLive.cpp">
       <Filter>src\Battle</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="src\Battle\BattleTypes.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
@@ -627,15 +684,21 @@
     <ClCompile Include="src\Battle\Targeting.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Targeting.h">
-      <Filter>src\Battle</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\TargetingDraw.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
     <ClCompile Include="src\Battle\TargetingDrawLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\TargetingLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\TargetingState.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\TargetingState.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\TargetPages.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -672,12 +735,15 @@
     <ClInclude Include="src\Boot\GameplayInit.h">
       <Filter>src\Boot</Filter>
     </ClInclude>
-    <ClCompile Include="src\Boot\Lifecycle.cpp">
+    <ClCompile Include="src\Boot\GameplayLoop.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
-    <ClInclude Include="src\Boot\Lifecycle.h">
+    <ClCompile Include="src\Boot\GameplayLoopLive.cpp">
       <Filter>src\Boot</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\Boot\GameplayOverlayLive.cpp">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
     <ClCompile Include="src\Boot\ModuleData.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
@@ -723,16 +789,25 @@
     <ClInclude Include="src\Effects\Camera.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\CameraLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\CameraLiveState.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\Curves.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Curves.h">
+    <ClCompile Include="src\Effects\CurvesLive.cpp">
       <Filter>src\Effects</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\EffectResources.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\EffectResources.h">
+    <ClCompile Include="src\Effects\EffectResourcesLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\EffectResourcesLiveState.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClInclude Include="src\Effects\Loading.h">
@@ -1188,258 +1263,87 @@
     <ClCompile Include="src\Effects\Templates\ClosedRing.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\ClosedRing.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\ClosedRing.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\Grid.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\Grid.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\Grid.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\Mesh10.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\Mesh10.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\Mesh10.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\MirrorSurface.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\MirrorSurface.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\MirrorSurface.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\ParticleControl.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\ParticleControl.h">
+    <ClCompile Include="src\Effects\Templates\ParticleCore.cpp">
       <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\ParticleControl.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\Templates\ParticleDispatch.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\ParticleDispatch.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\ParticleDispatch.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\ParticleLineRender.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\ParticleLineRender.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\ParticleLineRender.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\ParticleOrigin.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\ParticleOrigin.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\ParticleOrigin.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\ParticleRender.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\ParticleRender.h">
+    <ClCompile Include="src\Effects\Templates\ParticlesLive.cpp">
       <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\ParticleRender.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\Templates\ParticleTarget.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\ParticleTarget.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\ParticleTarget.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\Ring.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\Ring.h">
+    <ClCompile Include="src\Effects\Templates\RingCore.cpp">
       <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\Ring.inl">
+    </ClCompile>
+    <ClCompile Include="src\Effects\Templates\RingsLive.cpp">
       <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\Templates\RotatingSurface.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\RotatingSurface.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\RotatingSurface.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\Surface.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\Surface.h">
+    <ClCompile Include="src\Effects\Templates\SurfaceCore.cpp">
       <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\Surface.inl">
+    </ClCompile>
+    <ClCompile Include="src\Effects\Templates\SurfacesLive.cpp">
       <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="src\Effects\Templates\TemplateState.h">
       <Filter>src\Effects\Templates</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Templates\TiledRing.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TiledRing.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TiledRing.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\TrailControl.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailControl.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailControl.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailDispatch.cpp">
+    <ClCompile Include="src\Effects\Templates\TrailCore.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailDispatch.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailDispatch.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\TrailInit.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailInit.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailInit.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailNineControl.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailNineControl.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailNineControl.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailNineDispatch.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailNineDispatch.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailNineDispatch.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailNineInit.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailNineInit.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailNineInit.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailNineOrigin.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailNineOrigin.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailNineOrigin.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailNineRender.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailNineRender.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailNineRender.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailNineTarget.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailNineTarget.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailNineTarget.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailNineUpdate.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailNineUpdate.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailNineUpdate.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Effects\Templates\TrailOrigin.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailOrigin.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailOrigin.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\TrailRender.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailRender.h">
+    <ClCompile Include="src\Effects\Templates\TrailsLive.cpp">
       <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailRender.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\Templates\TrailTarget.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailTarget.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailTarget.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\TrailUpdate.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Templates\TrailUpdate.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Effects\Templates\TrailUpdate.inl">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\TextureBindings.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1470,6 +1374,9 @@
     <ClInclude Include="src\Effects\Transforms.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\TransformsLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\Weather.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1482,6 +1389,9 @@
     <ClInclude Include="src\Ending\ClearResults.h">
       <Filter>src\Ending</Filter>
     </ClInclude>
+    <ClCompile Include="src\Ending\ClearResultsCore.cpp">
+      <Filter>src\Ending</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ending\Credits\EmbeddedArt.cpp">
       <Filter>src\Ending\Credits</Filter>
     </ClCompile>
@@ -1494,12 +1404,18 @@
     <ClInclude Include="src\Ending\Credits\StaffRoll.h">
       <Filter>src\Ending\Credits</Filter>
     </ClInclude>
+    <ClCompile Include="src\Ending\Credits\StaffRollCore.cpp">
+      <Filter>src\Ending\Credits</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ending\Credits.cpp">
       <Filter>src\Ending</Filter>
     </ClCompile>
     <ClInclude Include="src\Ending\Credits.h">
       <Filter>src\Ending</Filter>
     </ClInclude>
+    <ClCompile Include="src\Ending\EndingLive.cpp">
+      <Filter>src\Ending</Filter>
+    </ClCompile>
     <ClCompile Include="src\Ending\Results.cpp">
       <Filter>src\Ending</Filter>
     </ClCompile>
@@ -1542,6 +1458,15 @@
     <ClInclude Include="src\Event\Script.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\ScriptActorCommands.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\ScriptActorCommandsLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptActorOpcodes.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
     <ClCompile Include="src\Event\ScriptActors.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -1554,6 +1479,15 @@
     <ClInclude Include="src\Event\ScriptAudio.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\ScriptAudioCommands.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\ScriptAudioCommandsLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptAudioOpcodes.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
     <ClCompile Include="src\Event\ScriptCamera.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -1564,6 +1498,24 @@
       <Filter>src\Event</Filter>
     </ClCompile>
     <ClInclude Include="src\Event\ScriptDialog.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptDialogCommands.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\ScriptDialogCommandsLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptDialogOpcodes.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptEffectCommands.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\ScriptEffectCommandsLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptEffectOpcodes.h">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptEffects.cpp">
@@ -1605,6 +1557,9 @@
     <ClInclude Include="src\Event\Triggers.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\TriggersLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Event\WeaponMode.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -1617,6 +1572,12 @@
     <ClInclude Include="src\Event\Weather.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\ActorCollision.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\ActorCollisionLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClInclude Include="src\Field\Actors.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -1626,10 +1587,22 @@
     <ClInclude Include="src\Field\Background.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\BackgroundLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\BackgroundLiveState.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClCompile Include="src\Field\Camera.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
     <ClInclude Include="src\Field\Camera.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\CameraLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\CameraLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Collision.cpp">
@@ -1638,6 +1611,12 @@
     <ClInclude Include="src\Field\Collision.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\CollisionMap.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\CollisionMapLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\CollisionSampling.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1653,6 +1632,9 @@
     <ClInclude Include="src\Field\DoorMatchList.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\DoorRecordLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\Doors.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1668,13 +1650,19 @@
     <ClCompile Include="src\Field\Environment.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Environment.h">
+    <ClCompile Include="src\Field\EnvironmentLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\EnvironmentLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\GameMode.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\GameMode.h">
+    <ClCompile Include="src\Field\GameModeLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\GameModeLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClInclude Include="src\Field\GimmickLookup.h">
@@ -1704,6 +1692,9 @@
     <ClInclude Include="src\Field\Interactions.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\InteractionsLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\Locations.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1722,6 +1713,9 @@
     <ClInclude Include="src\Field\Map.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\MapLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\MapProgress.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1761,28 +1755,40 @@
     <ClCompile Include="src\Field\RoomEffects.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomEffects.h">
+    <ClCompile Include="src\Field\RoomEffectsCore.cpp">
       <Filter>src\Field</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\Field\RoomEffectsLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\RoomLightingLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
     <ClCompile Include="src\Field\RoomLoading.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomLoading.h">
+    <ClCompile Include="src\Field\RoomLoadingLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomLoadingLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\RoomRendering.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomRendering.h">
+    <ClCompile Include="src\Field\RoomRenderingLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomRenderingLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\RoomState.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomState.h">
+    <ClCompile Include="src\Field\RoomStateLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomStateLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\RoomTriggerMarkers.cpp">
@@ -1803,15 +1809,18 @@
     <ClCompile Include="src\Field\Transitions.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Transitions.h">
+    <ClCompile Include="src\Field\TransitionsLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\TransitionsLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Traps.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\Traps.h">
+    <ClCompile Include="src\Field\TrapsLive.cpp">
       <Filter>src\Field</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Field\TriggerMarkers.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1923,19 +1932,31 @@
     <ClInclude Include="src\Menu\Files.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\FilesLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\FilesLiveState.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
     <ClCompile Include="src\Menu\Framework\ActorPreview.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
     <ClInclude Include="src\Menu\Framework\ActorPreview.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Framework\ActorPreviewLive.cpp">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
     <ClInclude Include="src\Menu\Framework\AshleyPreview.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Framework\EquipmentDetails.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\EquipmentDetails.h">
+    <ClCompile Include="src\Menu\Framework\EquipmentDetailsLive.cpp">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\EquipmentDetailsLiveState.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Framework\Framework.cpp">
@@ -1944,10 +1965,22 @@
     <ClInclude Include="src\Menu\Framework\Framework.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Framework\FrameworkLive.cpp">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\FrameworkLiveState.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
     <ClCompile Include="src\Menu\Framework\ItemRows.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\ItemRows.h">
+    <ClCompile Include="src\Menu\Framework\ItemRowsLive.cpp">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\ItemRowsLiveHost.hpp">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Framework\ItemRowsLiveState.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="src\Menu\Framework\MenuItems.h">
@@ -2031,13 +2064,19 @@
     <ClCompile Include="src\Menu\Options.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Options.h">
+    <ClCompile Include="src\Menu\OptionsLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\OptionsLiveState.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Rename.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Rename.h">
+    <ClCompile Include="src\Menu\RenameLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\RenameLiveState.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Results\CubePuzzle.cpp">
@@ -2079,21 +2118,15 @@
     <ClCompile Include="src\Menu\Setup\Assembly.cpp">
       <Filter>src\Menu\Setup</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Setup\Assembly.h">
-      <Filter>src\Menu\Setup</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Setup\Combination.cpp">
       <Filter>src\Menu\Setup</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Setup\Combination.h">
+    <ClCompile Include="src\Menu\Setup\SetupLive.cpp">
       <Filter>src\Menu\Setup</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Menu\Setup\SetupScreen.cpp">
       <Filter>src\Menu\Setup</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Setup\SetupScreen.h">
-      <Filter>src\Menu\Setup</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Sounds.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -2160,21 +2193,24 @@
     <ClInclude Include="src\State\Ashley.h">
       <Filter>src\State</Filter>
     </ClInclude>
-    <ClCompile Include="src\State\Flags.cpp">
+    <ClCompile Include="src\State\GameClock.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\Flags.h">
+    <ClCompile Include="src\State\GameClockLive.cpp">
       <Filter>src\State</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\State\KillScore.cpp">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClCompile Include="src\State\KillScoreLive.cpp">
+      <Filter>src\State</Filter>
+    </ClCompile>
     <ClCompile Include="src\State\Location.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
     <ClInclude Include="src\State\Location.h">
       <Filter>src\State</Filter>
     </ClInclude>
-    <ClCompile Include="src\State\PlayTime.cpp">
-      <Filter>src\State</Filter>
-    </ClCompile>
     <ClInclude Include="src\State\PlayTime.h">
       <Filter>src\State</Filter>
     </ClInclude>
@@ -2196,24 +2232,27 @@
     <ClInclude Include="src\State\RoomMemory.h">
       <Filter>src\State</Filter>
     </ClInclude>
+    <ClCompile Include="src\State\SceneTimer.cpp">
+      <Filter>src\State</Filter>
+    </ClCompile>
     <ClInclude Include="src\State\SceneTimer.h">
       <Filter>src\State</Filter>
     </ClInclude>
-    <ClCompile Include="src\State\Score.cpp">
+    <ClCompile Include="src\State\SceneTimerLive.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\Score.h">
+    <ClCompile Include="src\State\ScriptFlags.cpp">
       <Filter>src\State</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\State\ScriptFlagsLive.cpp">
+      <Filter>src\State</Filter>
+    </ClCompile>
     <ClInclude Include="src\State\Settings.h">
       <Filter>src\State</Filter>
     </ClInclude>
     <ClInclude Include="src\State\StateFlags.h">
       <Filter>src\State</Filter>
     </ClInclude>
-    <ClCompile Include="src\State\Timers.cpp">
-      <Filter>src\State</Filter>
-    </ClCompile>
     <ClInclude Include="src\State\Timers.h">
       <Filter>src\State</Filter>
     </ClInclude>
@@ -2244,7 +2283,10 @@
     <ClCompile Include="src\Title\TitleMenu.cpp">
       <Filter>src\Title</Filter>
     </ClCompile>
-    <ClInclude Include="src\Title\TitleMenu.h">
+    <ClCompile Include="src\Title\TitleMenuLive.cpp">
+      <Filter>src\Title</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Title\TitleMenuLiveState.h">
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClCompile Include="src\Title\TitleScreen.cpp">
@@ -2253,7 +2295,67 @@
     <ClInclude Include="src\Title\TitleScreen.h">
       <Filter>src\Title</Filter>
     </ClInclude>
+    <ClInclude Include="include\Actors\ActorCommands.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorCommandsLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorFlags.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorLifecycle.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorMotion.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorMotionLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorMovement.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorMovementLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorPlacement.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorRoster.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorRosterLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorSpawning.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorSpawningLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorStateLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ActorStateRecord.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="include\Actors\ActorTableLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\AnimationControl.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\AnimationControlLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\AnimationEvents.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\AnimationPose.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\AnimationPoseLive.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\Appearance.hpp">
@@ -2266,6 +2368,9 @@
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\AppearanceTransitionLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\BattleActorState.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\ModelDrawing.hpp">
@@ -2289,6 +2394,12 @@
     <ClInclude Include="include\Actors\MovementCommand.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
+    <ClInclude Include="include\Actors\RoomEnemyMemory.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\RoomEnemyMemoryLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="include\Actors\SequencePlayback.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
@@ -2309,6 +2420,12 @@
     </ClInclude>
     <ClInclude Include="include\Actors\TextureAnimationLive.hpp">
       <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Abilities.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\AbilitiesLive.hpp">
+      <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Action.h">
       <Filter>include\Battle</Filter>
@@ -2406,6 +2523,18 @@
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
+    <ClInclude Include="include\Battle\AttackPrerequisites.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\AttackPrerequisitesLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\BattleMode.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\BattleModeLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\Encounter.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
@@ -2418,10 +2547,16 @@
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
+    <ClInclude Include="include\Battle\Targeting.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\TargetingDraw.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\TargetingDrawLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\TargetingLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\TargetPages.h">
@@ -2431,6 +2566,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Boot\GameApp.hpp">
+      <Filter>include\Boot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Boot\GameplayLoop.hpp">
       <Filter>include\Boot</Filter>
     </ClInclude>
     <ClInclude Include="include\Boot\Session.hpp">
@@ -2448,6 +2586,24 @@
     <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
     </ClInclude>
+    <ClInclude Include="include\Effects\Camera.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\CameraLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Curves.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\CurvesLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\EffectResources.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\EffectResourcesLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
     <ClInclude Include="include\Effects\PackageExtents.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
@@ -2463,6 +2619,87 @@
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarpLive.hpp">
       <Filter>include\Effects\ScreenDistortion</Filter>
     </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ClosedRing.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\Grid.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\Mesh10.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\MirrorSurface.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticleControl.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticleCore.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticleDispatch.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticleLineRender.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticleOrigin.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticleRender.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticlesLive.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\ParticleTarget.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\Ring.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\RingCore.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\RingsLive.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\RotatingSurface.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\Surface.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\SurfaceCore.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\SurfacesLive.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TiledRing.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TrailControl.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TrailCore.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TrailInit.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TrailRender.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TrailsLive.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TrailTarget.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Templates\TrailUpdate.hpp">
+      <Filter>include\Effects\Templates</Filter>
+    </ClInclude>
     <ClInclude Include="include\Effects\TextureBindings.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
@@ -2472,8 +2709,77 @@
     <ClInclude Include="include\Effects\TrailEmitterLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
+    <ClInclude Include="include\Effects\Transforms.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TransformsLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Ending\ClearResultsCore.hpp">
+      <Filter>include\Ending</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Ending\Credits\StaffRollCore.hpp">
+      <Filter>include\Ending\Credits</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Ending\DisplayHost.hpp">
+      <Filter>include\Ending</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Ending\EndingLive.hpp">
+      <Filter>include\Ending</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptActorCommands.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptActorCommandsLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptAudioCommands.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptCommand.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptDialogCommands.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptEffectCommands.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptEffectCommandsLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptStep.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\TriggersLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
     <ClInclude Include="include\Event\WeaponMode.hpp">
       <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\ActorCollision.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\ActorCollisionLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\Background.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\BackgroundLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\Camera.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\CameraLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\CollisionMap.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\CollisionMapLive.hpp">
+      <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\CollisionSampling.hpp">
       <Filter>include\Field</Filter>
@@ -2482,6 +2788,33 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\DoorMatchesLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\DoorRecord.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\DoorRecordLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\Environment.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\EnvironmentLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GameMode.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GameModeLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\InteractionsLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\Map.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\MapLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\MinimapScene.hpp">
@@ -2499,7 +2832,34 @@
     <ClInclude Include="include\Field\PlatformPlacementLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
+    <ClInclude Include="include\Field\RoomEffects.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomEffectsCore.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomEffectsLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
     <ClInclude Include="include\Field\RoomLightingLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomLoading.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomLoadingLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomRendering.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomRenderingLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomState.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomStateLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\RoomTriggerMarkers.hpp">
@@ -2515,6 +2875,18 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\TerrainHeight.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\Transitions.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\TransitionsLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\Traps.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\TrapsLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Equipment.h">
@@ -2559,8 +2931,62 @@
     <ClInclude Include="include\Items\Recovery.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\Files.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\FilesLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\Framework\ActionSelection.h">
       <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\ActorPreview.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\ActorPreviewLive.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\EquipmentDetails.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\EquipmentDetailsLive.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\Framework.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\FrameworkLive.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\ItemRows.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\ItemRowsLive.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Options.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\OptionsLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Rename.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\RenameLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Setup\Assembly.hpp">
+      <Filter>include\Menu\Setup</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Setup\Combination.hpp">
+      <Filter>include\Menu\Setup</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Setup\SetupLive.hpp">
+      <Filter>include\Menu\Setup</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Setup\SetupScreen.hpp">
+      <Filter>include\Menu\Setup</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Sounds.hpp">
       <Filter>include\Menu</Filter>
@@ -2610,11 +3036,44 @@
     <ClInclude Include="include\Save\SnapshotLive.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
+    <ClInclude Include="include\State\Clock.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\GameClock.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\GameClockLive.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
     <ClInclude Include="include\State\GameTime.h">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\KillScore.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\KillScoreLive.hpp">
       <Filter>include\State</Filter>
     </ClInclude>
     <ClInclude Include="include\State\Progress.h">
       <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\SceneTimer.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\SceneTimerLive.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\ScriptFlags.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\ScriptFlagsLive.hpp">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Title\TitleMenu.hpp">
+      <Filter>include\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Title\TitleMenuLive.hpp">
+      <Filter>include\Title</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

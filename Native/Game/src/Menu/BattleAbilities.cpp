@@ -1,6 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
+#include "Battle/AbilitiesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -9,23 +12,21 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
-#include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
@@ -121,7 +122,7 @@ int Menu_BattleAbilities_UpdateBreakArtUnlock(int init)
             (char*)&Menu_BattleAbilities_battleAbilityMenuStrings[Menu_BattleAbilities_battleAbilityMenuStrings[weaponCategory]];
         Battle_stringContext.strings[1] = Battle_actionDefinitions[actionId].name;
 
-        Menu_Framework_SetInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
+        VS::Menu::Framework::SetLiveInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
                 [Text_Menu2_battleAbilitiesMenu_Offset_breakArtUnlock]);
 
         Battle_actionDefinitions[actionId].unlocked = 1;
@@ -263,13 +264,13 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
             };
 
         case Menu_BattleAbilities_RemainingAbilities_None:
-            Menu_Framework_SetInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
+            VS::Menu::Framework::SetLiveInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
                     [Text_Menu2_battleAbilitiesMenu_Offset_allAbilitiesUnlocked]);
             Menu_BattleAbilities_abilityUnlockState = Menu_BattleAbilities_AbilityUnlockState_ShowMessage;
             break;
 
         case Menu_BattleAbilities_RemainingAbilities_ChainOnly:
-            menuItem = Menu_Framework_SetMenuItem(0, 320, 18, 140, 8,
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(0, 320, 18, 140, 8,
                 (char*)&Menu_BattleAbilities_battleAbilityMenuStrings
                     [Text_Menu2_battleAbilitiesMenu_Offset_chainAbilities]);
             menuItem->state = 2;
@@ -279,7 +280,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
             break;
 
         case Menu_BattleAbilities_RemainingAbilities_DefenseOnly:
-            menuItem = Menu_Framework_SetMenuItem(1, 320, 18, 140, 8,
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(1, 320, 18, 140, 8,
                 (char*)&Menu_BattleAbilities_battleAbilityMenuStrings
                     [Text_Menu2_battleAbilitiesMenu_Offset_defenseAbilities]);
             menuItem->state = 2;
@@ -301,7 +302,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
             rowTypes[1] = 0;
             Input_settings.cursorMemory = 1;
 
-            Menu_Framework_CreateMenuRows(2, menuRowInfo(10, 1, 0), menuStrings, rowTypes);
+            VS::Menu::Framework::CreateLiveMenuRows(2, menuRowInfo(10, 1, 0), menuStrings, rowTypes);
 
             Menu_BattleAbilities_abilityUnlockState = Menu_BattleAbilities_AbilityUnlockState_BothRemaining;
             Input_settings.cursorMemory = i;
@@ -311,14 +312,14 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
         break;
 
     case Menu_BattleAbilities_AbilityUnlockState_BothRemaining:
-        i = Menu_Framework_GetSelectedRow() + 1;
+        i = VS::Menu::Framework::LiveSelectedRow() + 1;
 
         if (i != Menu_Framework_MenuSelection_Confirm) {
             if (i < 0) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
                 Menu_BattleAbilities_abilityUnlockState = Menu_BattleAbilities_AbilityUnlockState_Reinit;
             } else {
-                Menu_Framework_FlyOutRowsAndHoistSelection(i - 1, 0);
+                VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(i - 1, 0);
                 Menu_BattleAbilities_abilityUnlockState += i;
             }
         }
@@ -326,7 +327,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
         break;
 
     case Menu_BattleAbilities_AbilityUnlockState_ChainOnly:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
 
             for (i = 0; i < Menu_BattleAbilities_abilityUnlockRemainingChainAbilityCount; ++i) {
                 chainAbilityMenuStrings[i * 2] =
@@ -351,7 +352,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
                 Input_settings.cursorMemory = 1;
             }
 
-            Menu_Framework_CreateMenuRows(rowCount, menuRowInfo(11, 1, 1),
+            VS::Menu::Framework::CreateLiveMenuRows(rowCount, menuRowInfo(11, 1, 1),
                 chainAbilityMenuStrings, chainAbilityRowTypes);
 
             Input_settings.cursorMemory = i;
@@ -360,7 +361,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
         break;
 
     case Menu_BattleAbilities_AbilityUnlockState_DefenseOnly:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
 
             for (i = 0; i < Menu_BattleAbilities_abilityUnlockRemainingDefenseAbilityCount; ++i) {
                 defenseAbilityMenuStrings[i * 2] =
@@ -385,7 +386,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
                 Input_settings.cursorMemory = 1;
             }
 
-            Menu_Framework_CreateMenuRows(rowCount, menuRowInfo(12, 1, 1),
+            VS::Menu::Framework::CreateLiveMenuRows(rowCount, menuRowInfo(12, 1, 1),
                 defenseAbilityMenuStrings, defenseAbilityRowTypes);
 
             Input_settings.cursorMemory = i;
@@ -394,12 +395,12 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
         break;
 
     case Menu_BattleAbilities_AbilityUnlockState_UnlockChainAbility:
-        row = Menu_Framework_GetSelectedRow();
+        row = VS::Menu::Framework::LiveSelectedRow();
         action = row + 1;
 
         if (action != 0) {
 
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
             if (action < 0) {
                 Menu_BattleAbilities_abilityUnlockState = Menu_BattleAbilities_AbilityUnlockState_Reinit;
@@ -411,7 +412,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
             action = Menu_BattleAbilities_abilityUnlockRemainingChainAbilities[row];
             Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
 
-            Menu_Framework_SetInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
+            VS::Menu::Framework::SetLiveInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
                     [Text_Menu2_battleAbilitiesMenu_Offset_battleAbilityUnlock]);
 
             Battle_actionDefinitions[action].unlocked = 1;
@@ -420,12 +421,12 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
         break;
 
     case Menu_BattleAbilities_AbilityUnlockState_UnlockDefenseAbility:
-        row = Menu_Framework_GetSelectedRow();
+        row = VS::Menu::Framework::LiveSelectedRow();
         action = row + 1;
 
         if (action != 0) {
 
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
             if (action < 0) {
                 Menu_BattleAbilities_abilityUnlockState = Menu_BattleAbilities_AbilityUnlockState_Reinit;
@@ -437,7 +438,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
             action = Menu_BattleAbilities_abilityUnlockRemainingDefenseAbilities[row];
             Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
 
-            Menu_Framework_SetInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
+            VS::Menu::Framework::SetLiveInformationMessage((char*)&Menu_BattleAbilities_battleAbilityMenuStrings
                     [Text_Menu2_battleAbilitiesMenu_Offset_battleAbilityUnlock]);
 
             Battle_actionDefinitions[action].unlocked = 1;
@@ -455,7 +456,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
         break;
 
     case Menu_BattleAbilities_AbilityUnlockState_Reinit:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_BattleAbilities_abilityUnlockState = Menu_BattleAbilities_AbilityUnlockState_Init;
         }
         break;
@@ -471,7 +472,7 @@ int Menu_BattleAbilities_UpdateUnlockNotifications(char* state)
 
     switch (*state) {
     case Menu_BattleAbilities_UnlockNotificationState_Init:
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
         // Fallthrough
     case Menu_BattleAbilities_UnlockNotificationState_BreakArtInit:
         *state = Menu_BattleAbilities_UnlockNotificationState_AbilityInit;
@@ -522,7 +523,7 @@ void Menu_BattleAbilities_SetRiskCost(int id)
     int i;
     int cost;
 
-    Menu_Framework_SetActionCostText(1, "RISK", 8, 0);
+    VS::Menu::Framework::SetLiveActionCostText(1, "RISK", 8, 0);
 
     cost = Battle_actionDefinitions[id].cost;
     Menu_BattleAbilities_setRiskCostStringBuffer[15] = 0;
@@ -539,7 +540,7 @@ void Menu_BattleAbilities_SetRiskCost(int id)
     --i;
     Menu_BattleAbilities_setRiskCostStringBuffer[i] = '#';
 
-    Menu_Framework_SetActionCostText(0, &Menu_BattleAbilities_setRiskCostStringBuffer[i], 72, 0);
+    VS::Menu::Framework::SetLiveActionCostText(0, &Menu_BattleAbilities_setRiskCostStringBuffer[i], 72, 0);
 }
 
 // decomp: MENU2.PRG _initAbilityMenu (src/MENU/MENU2.PRG/64.c:64)
@@ -657,7 +658,7 @@ void Menu_BattleAbilities_ToggleButtonAssignment(int abilityType, int button, in
             return;
         }
 
-        Audio_PlaySfxCentered(0x7E, VS_SFX_SET);
+        VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_SET);
 
         for (i = 0; i < 3; ++i) {
             if (Input_settings.mappedChainAbilities[i] == abilityId) {
@@ -677,7 +678,7 @@ void Menu_BattleAbilities_ToggleButtonAssignment(int abilityType, int button, in
             return;
         }
 
-        Audio_PlaySfxCentered(0x7E, VS_SFX_SET);
+        VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_SET);
 
         for (i = 0; i < 3; ++i) {
             if (Input_settings.mappedDefenseAbilities[i] == abilityId) {
@@ -704,7 +705,7 @@ int Menu_BattleAbilities_UpdateAssignments(void)
 
     if (Menu_BattleAbilities_abilityMenuState < 10) {
 
-        menuItem = Menu_Framework_SetMenuItem(Menu_BattleAbilities_abilityMenuState + 20, 320,
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(Menu_BattleAbilities_abilityMenuState + 20, 320,
             (Menu_BattleAbilities_abilityMenuState * 16) + 50, 0x7E, 0,
             (char*)&Menu_BattleAbilities_abilityText[(Menu_BattleAbilities_firstAbility + Menu_BattleAbilities_abilityMenuState) * 64]);
         menuItem->state = 2;
@@ -729,13 +730,13 @@ int Menu_BattleAbilities_UpdateAssignments(void)
         return 0;
     }
 
-    Menu_Framework_MenuItem(Menu_BattleAbilities_highlightedAbility + 20);
-    Menu_Framework_SetInformationMessage(
+    VS::Menu::Framework::LiveMenuItem(Menu_BattleAbilities_highlightedAbility + 20);
+    VS::Menu::Framework::SetLiveInformationMessage(
         (char*)(Menu_BattleAbilities_abilityText + (((Menu_BattleAbilities_highlightedAbility + Menu_BattleAbilities_firstAbility) << 6) + 16)));
 
     switch (Menu_BattleAbilities_abilityMenuState) {
     case Menu_BattleAbilities_AssignmentState_WaitReady:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_BattleAbilities_abilityMenuState = Menu_BattleAbilities_AssignmentState_AbilityMenu;
         }
         break;
@@ -752,17 +753,17 @@ int Menu_BattleAbilities_UpdateAssignments(void)
                     ability = Menu_BattleAbilities_unlockedChainAbilities[i];
 
                     if (Input_settings.mappedChainAbilities[0] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Circle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedChainAbilities[1] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Triangle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedChainAbilities[2] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Square, 199, i * 16 + 48, scratch);
                     }
                 } else {
@@ -770,17 +771,17 @@ int Menu_BattleAbilities_UpdateAssignments(void)
                     ability = Menu_BattleAbilities_unlockedDefenseAbilities[i];
 
                     if (Input_settings.mappedDefenseAbilities[0] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Circle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedDefenseAbilities[1] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Triangle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedDefenseAbilities[2] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Square, 199, i * 16 + 48, scratch);
                     }
                 }
@@ -792,17 +793,17 @@ int Menu_BattleAbilities_UpdateAssignments(void)
                     ability = Menu_BattleAbilities_unlockedChainAbilities[i + Menu_BattleAbilities_firstAbility];
 
                     if (Input_settings.mappedChainAbilities[0] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Circle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedChainAbilities[1] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Triangle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedChainAbilities[2] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Square, 199, i * 16 + 48, scratch);
                     }
                 } else {
@@ -810,17 +811,17 @@ int Menu_BattleAbilities_UpdateAssignments(void)
                     ability = Menu_BattleAbilities_unlockedDefenseAbilities[i + Menu_BattleAbilities_firstAbility];
 
                     if (Input_settings.mappedDefenseAbilities[0] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Circle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedDefenseAbilities[1] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Triangle, 199, i * 16 + 48, scratch);
                     }
 
                     if (Input_settings.mappedDefenseAbilities[2] == ability) {
-                        Menu_Framework_DrawButtonIcon(
+                        VS::Menu::Framework::DrawLiveButtonIcon(
                             Menu_Framework_ButtonId_Square, 199, i * 16 + 48, scratch);
                     }
                 }
@@ -835,7 +836,7 @@ int Menu_BattleAbilities_UpdateAssignments(void)
             Menu_BattleAbilities_ToggleButtonAssignment(Menu_BattleAbilities_selectedAbilityType, 2, selectedAbility);
         }
 
-        Menu_Framework_MenuItem(Menu_BattleAbilities_highlightedAbility + 20)->selected = 0;
+        VS::Menu::Framework::LiveMenuItem(Menu_BattleAbilities_highlightedAbility + 20)->selected = 0;
 
         if (Input_buttonsPressed.allButtons & PADRdown) {
 
@@ -917,11 +918,11 @@ int Menu_BattleAbilities_UpdateAssignments(void)
 
                 for (i = 0; i < ability; ++i) {
                     abilityBuf[i + previousFirstAbility] =
-                        Menu_Framework_MenuItem(i + 20)->gradientState;
+                        VS::Menu::Framework::LiveMenuItem(i + 20)->gradientState;
                 }
 
                 for (i = 0;;) {
-                    menuItem = Menu_Framework_SetMenuItem(i + 20, 194, i * 16 + 50, 0x7E, 0,
+                    menuItem = VS::Menu::Framework::SetLiveMenuItem(i + 20, 194, i * 16 + 50, 0x7E, 0,
                         (char*)(Menu_BattleAbilities_abilityText + ((Menu_BattleAbilities_firstAbility + i) << 6)));
                     menuItem->gradientState = abilityBuf[i + Menu_BattleAbilities_firstAbility];
 
@@ -943,8 +944,8 @@ int Menu_BattleAbilities_UpdateAssignments(void)
             }
         }
 
-        Menu_Framework_MenuItem(Menu_BattleAbilities_highlightedAbility + 20)->selected = 1;
-        Menu_BattleAbilities_assignmentsCursorAnimStep = Menu_Framework_DrawMainMenuCursor(Menu_BattleAbilities_assignmentsCursorAnimStep, Menu_BattleAbilities_highlightedAbility + 2);
+        VS::Menu::Framework::LiveMenuItem(Menu_BattleAbilities_highlightedAbility + 20)->selected = 1;
+        Menu_BattleAbilities_assignmentsCursorAnimStep = VS::Menu::Framework::DrawLiveMainMenuCursor(Menu_BattleAbilities_assignmentsCursorAnimStep, Menu_BattleAbilities_highlightedAbility + 2);
 
         if (Menu_BattleAbilities_selectedAbilityType == Menu_BattleAbilities_AbilityType_Chain) {
             Menu_BattleAbilities_SetRiskCost(Menu_BattleAbilities_unlockedChainAbilities[Menu_BattleAbilities_highlightedAbility + Menu_BattleAbilities_firstAbility]);
@@ -970,7 +971,7 @@ int Menu_BattleAbilities_UpdateChainAbilityMenu(int initialize)
     int count;
 
     if (initialize != 0) {
-        Menu_Framework_FlyOutRowsAndHoistSelection(0, 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(0, 1);
 
         Menu_BattleAbilities_chainAbilityMenuState = Menu_BattleAbilities_AbilityListState_Init;
         return 0;
@@ -978,7 +979,7 @@ int Menu_BattleAbilities_UpdateChainAbilityMenu(int initialize)
 
     switch (Menu_BattleAbilities_chainAbilityMenuState) {
     case Menu_BattleAbilities_AbilityListState_Init:
-        if ((Menu_Framework_shortcutInvoked == 0) && (Menu_Framework_AreMenuRowsIdle() == 0)) {
+        if ((Menu_Framework_shortcutInvoked == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0)) {
             break;
         }
 
@@ -1004,7 +1005,7 @@ int Menu_BattleAbilities_UpdateChainAbilityMenu(int initialize)
 
     case Menu_BattleAbilities_AbilityListState_AbilityMenu:
         if (Menu_BattleAbilities_UpdateAssignments() != 0) {
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(2));
+            VS::Menu::Framework::ClearLiveMenuExcept(2);
             return 1;
         }
         break;
@@ -1025,7 +1026,7 @@ int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int reset_menu)
     int row;
 
     if (reset_menu != 0) {
-        Menu_Framework_FlyOutRowsAndHoistSelection(1, 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(1, 1);
 
         Menu_BattleAbilities_defenseAbilityMenuState = Menu_BattleAbilities_AbilityListState_Init;
         return 0;
@@ -1033,7 +1034,7 @@ int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int reset_menu)
 
     switch (Menu_BattleAbilities_defenseAbilityMenuState) {
     case Menu_BattleAbilities_AbilityListState_Init:
-        if ((Menu_Framework_shortcutInvoked == 0) && (Menu_Framework_AreMenuRowsIdle() == 0)) {
+        if ((Menu_Framework_shortcutInvoked == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0)) {
             break;
         }
 
@@ -1057,7 +1058,7 @@ int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int reset_menu)
 
     case Menu_BattleAbilities_AbilityListState_AbilityMenu:
         if (Menu_BattleAbilities_UpdateAssignments() != 0) {
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(2));
+            VS::Menu::Framework::ClearLiveMenuExcept(2);
             return 1;
         }
 
@@ -1135,17 +1136,17 @@ int Menu_BattleAbilities_Update(u_char* state)
         Menu_BattleAbilities_updateMenuAnimating = 0;
         Menu_BattleAbilities_updatePointsAnimStep = 10;
 
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
 
         if (Menu_Framework_shortcutInvoked != 0) {
 
             int type = Menu_Framework_shortcutInvoked - 7;
 
-            Menu_Framework_SetMenuItem(Menu_Framework_shortcutInvoked + 3, 0x140, 0x22, 0x8C, 8,
+            VS::Menu::Framework::SetLiveMenuItem(Menu_Framework_shortcutInvoked + 3, 0x140, 0x22, 0x8C, 8,
                 (char*)&Menu_BattleAbilities_battleAbilityStrings[Menu_BattleAbilities_battleAbilityStrings[type * 3]])
                 ->selected = 1;
 
@@ -1162,7 +1163,7 @@ int Menu_BattleAbilities_Update(u_char* state)
         // Fallthrough
 
     case Menu_BattleAbilities_BattleAbilitiesMenuState_SelectTypeInit:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
 
             menuStrings[0] =
                 (char*)&Menu_BattleAbilities_battleAbilityStrings[Text_Menu2_battleAbilities_Offset_chainAbilities];
@@ -1171,7 +1172,7 @@ int Menu_BattleAbilities_Update(u_char* state)
             rowTypes[0] = 0;
             rowTypes[1] = 0;
 
-            if (Battle_HasUnlockedBattleAbility(0) == 0) {
+            if (VS::Battle::LiveHasUnlockedBattleAbility(0) == 0) {
                 // BUG: Should be rowTypes, but flow doesn't seem to be used anyway
                 menuStrings[0] = (char*)((intptr_t)menuStrings[0] | 1);
                 menuStrings[1] = (char*)&Menu_BattleAbilities_battleAbilityStrings
@@ -1183,7 +1184,7 @@ int Menu_BattleAbilities_Update(u_char* state)
             menuStrings[3] = (char*)&Menu_BattleAbilities_battleAbilityStrings
                 [Text_Menu2_battleAbilities_Offset_defenseAbilitiesDesc];
 
-            if (Battle_HasUnlockedBattleAbility(1) == 0) {
+            if (VS::Battle::LiveHasUnlockedBattleAbility(1) == 0) {
                 rowTypes[1] |= 1;
                 menuStrings[3] = (char*)&Menu_BattleAbilities_battleAbilityStrings
                     [Text_Menu2_battleAbilities_Offset_noDefenseAbilities];
@@ -1195,7 +1196,7 @@ int Menu_BattleAbilities_Update(u_char* state)
                 Input_settings.cursorMemory = 1;
             }
 
-            Menu_Framework_CreateMenuRows(2, menuRowInfo(7, 1, 1), menuStrings, rowTypes);
+            VS::Menu::Framework::CreateLiveMenuRows(2, menuRowInfo(7, 1, 1), menuStrings, rowTypes);
 
             Input_settings.cursorMemory = val;
             *state = Menu_BattleAbilities_BattleAbilitiesMenuState_SelectType;
@@ -1204,7 +1205,7 @@ int Menu_BattleAbilities_Update(u_char* state)
 
     case Menu_BattleAbilities_BattleAbilitiesMenuState_SelectType:
         Menu_BattleAbilities_updateMenuAnimating = 1;
-        val = Menu_Framework_GetSelectedRow() + 1;
+        val = VS::Menu::Framework::LiveSelectedRow() + 1;
 
         if (val != 0) {
 
@@ -1222,7 +1223,7 @@ int Menu_BattleAbilities_Update(u_char* state)
                 break;
             }
 
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
             if (val != -2) {
                 *state = Menu_BattleAbilities_BattleAbilitiesMenuState_ExitToMainMenu;
@@ -1236,7 +1237,7 @@ int Menu_BattleAbilities_Update(u_char* state)
         if (Menu_BattleAbilities_UpdateChainAbilityMenu(0) != 0) {
             if (Menu_Framework_shortcutInvoked != 0) {
 
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
                 *state = Menu_BattleAbilities_BattleAbilitiesMenuState_ExitToBattle;
             } else {
@@ -1249,7 +1250,7 @@ int Menu_BattleAbilities_Update(u_char* state)
         if (Menu_BattleAbilities_UpdateDefenseAbilityMenu(0) != 0) {
             if (Menu_Framework_shortcutInvoked != 0) {
 
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
                 *state = Menu_BattleAbilities_BattleAbilitiesMenuState_ExitToBattle;
             } else {
@@ -1259,10 +1260,10 @@ int Menu_BattleAbilities_Update(u_char* state)
         break;
 
     case Menu_BattleAbilities_BattleAbilitiesMenuState_ExitToMainMenu:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::DismissLiveInformationBox();
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             *state = Menu_BattleAbilities_BattleAbilitiesMenuState_None;
             return 1;
         }
@@ -1270,10 +1271,10 @@ int Menu_BattleAbilities_Update(u_char* state)
         break;
 
     case Menu_BattleAbilities_BattleAbilitiesMenuState_ExitToBattle:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::DismissLiveInformationBox();
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Framework_menuState.currentMenu = 3;
             *state = Menu_BattleAbilities_BattleAbilitiesMenuState_None;
             return 1;

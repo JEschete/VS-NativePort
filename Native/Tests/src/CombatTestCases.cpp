@@ -10,24 +10,27 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Audio/SoundPlaybackLive.hpp"
+#include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
+#include "Effects/Templates/RingsLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Movement.h"
-#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/ActionEffects.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
@@ -39,12 +42,10 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/HitChance.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Core/Random.h"
-#include "Effects/EffectResources.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
-#include "Effects/Templates/Ring.h"
 #include "Field/Interactions.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
@@ -55,7 +56,8 @@ extern "C" {
 #include "Items/LootLiveState.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootInventory.h"
@@ -66,7 +68,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Flags.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
@@ -119,9 +120,8 @@ struct AbilityFixture {
       Battle_floatingLabelCount;
   decltype(Battle_abilityInputResult) saved_input_result =
       Battle_abilityInputResult;
-  u_int saved_actor_flags = Actors_stateFlagsScratch;
   int saved_tick_speed = State_tickSpeed;
-  char saved_difficulty = State_ScriptFlag(1);
+  std::uint8_t saved_difficulty = VS::State::LiveScriptFlag(1);
   Battle_ActionState action{};
   Battle_Actor actors[2]{};
   Battle_ActorStats stats[2]{};
@@ -165,7 +165,7 @@ struct AbilityFixture {
     Battle_floatingLabelCount = 0;
     Battle_abilityInputResult = 1;
     State_tickSpeed = 2;
-    State_SetScriptFlag(1, 0);
+    VS::State::SetLiveScriptFlag(1, 0);
     Prepare();
   }
 
@@ -184,9 +184,8 @@ struct AbilityFixture {
     Battle_floatingLabels = saved_labels;
     Battle_floatingLabelCount = saved_label_count;
     Battle_abilityInputResult = saved_input_result;
-    Actors_stateFlagsScratch = saved_actor_flags;
     State_tickSpeed = saved_tick_speed;
-    State_SetScriptFlag(1, saved_difficulty);
+    VS::State::SetLiveScriptFlag(1, saved_difficulty);
   }
 
   void Prepare(bool defense = false, int action_id = 1, unsigned index = 0) {
@@ -405,8 +404,8 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     // BATTLE.PRG dispatch tables at file 0x7FA34, 0x7FA54 and 0x7FB78.
     Battle_hitFunctions[1] = Battle_PreviousHitSuccessThreshold;
     Battle_hitFunctions[3] = Battle_AgilityHitChance;
-    Battle_attackPrerequisiteFunctions[1] = Battle_AcceptAttackPrerequisite;
-    Battle_attackPrerequisiteFunctions[2] = Battle_AcceptAttackPrerequisite;
+    Battle_attackPrerequisiteFunctions[1] = Battle_AcceptAttackPrerequisiteSlot;
+    Battle_attackPrerequisiteFunctions[2] = Battle_AcceptAttackPrerequisiteSlot;
     Battle_actionEffectMediators[58] =
         [](Battle_ActionDefinition* definition, Battle_HitResult* source_hit,
            Battle_HitResult* target_hit, int hit, int random) {
@@ -1092,8 +1091,6 @@ struct EquipmentStagingFixture : EnemyLootFixture {
 };
 
 struct LootPagingMenuFixture : EquipmentStagingFixture {
-  u_int* saved_sfx_offsets = Audio_Playback_soundEffectProgramOffsets;
-  u_short* saved_sfx_selectors = Audio_Playback_soundEffectBankSelectors;
   State_Settings saved_settings = Input_settings;
   decltype(Input_buttonsPressed) saved_buttons = Input_buttonsPressed;
   decltype(Input_buttonRepeat) saved_repeat = Input_buttonRepeat;
@@ -1117,6 +1114,10 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   std::array<u_long, 32> ordering{};
   std::array<u_int, 0x180> sfx_offsets{};
   std::array<u_short, 0x180> sfx_selectors{};
+  VS::Audio::Playback::ScopedLiveEffectTables sfx_tables{
+      {.program_offsets = sfx_offsets,
+       .bank_selectors = sfx_selectors,
+       .program_data = {}}};
 
   LootPagingMenuFixture() {
     Menu_Framework_menuItems = menu_rows.data();
@@ -1124,8 +1125,6 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     Menu_textBoxes[7] = {};
     Menu_InitInformationTextBox(Menu_InformationBoxHeader_Information);
     sfx_offsets.fill(UINT32_MAX);
-    Audio_Playback_soundEffectProgramOffsets = sfx_offsets.data();
-    Audio_Playback_soundEffectBankSelectors = sfx_selectors.data();
     Input_settings.information = 0;
     Menu_Loot_lootClaimed = 0;
     Menu_Loot_lootLeftEdge = 0;
@@ -1138,8 +1137,6 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   }
 
   ~LootPagingMenuFixture() {
-    Audio_Playback_soundEffectProgramOffsets = saved_sfx_offsets;
-    Audio_Playback_soundEffectBankSelectors = saved_sfx_selectors;
     Input_settings = saved_settings;
     Input_buttonsPressed = saved_buttons;
     Input_buttonRepeat = saved_repeat;
@@ -1345,7 +1342,7 @@ struct EquipmentLootFixture : LootInventoryFixture {
 };
 
 struct LootPresentationFixture : EnemyLootFixture {
-  char saved_intro = State_ScriptFlag(0xAB);
+  std::uint8_t saved_intro = VS::State::LiveScriptFlag(0xAB);
   u_int saved_control = Field_controlMode;
   u_int saved_flow = Battle_actionFlowMode;
   Actors_ActorRecord* saved_player = Actors_actorRecords[0];
@@ -1364,7 +1361,7 @@ struct LootPresentationFixture : EnemyLootFixture {
   }
 
   ~LootPresentationFixture() {
-    State_SetScriptFlag(0xAB, saved_intro);
+    VS::State::SetLiveScriptFlag(0xAB, saved_intro);
     Field_controlMode = saved_control;
     Battle_actionFlowMode = saved_flow;
     Actors_actorRecords[0] = saved_player;
@@ -1408,13 +1405,13 @@ struct AbilityUnlockFixture : AbilityFixture {
 };
 
 struct ChainCreditFixture : AbilityUnlockFixture {
-  char saved_story = State_ScriptFlag(0x82);
+  std::uint8_t saved_story = VS::State::LiveScriptFlag(0x82);
   u_int saved_flow = Battle_actionFlowMode;
   u_int saved_control = Field_controlMode;
   int saved_reward = Battle_recoveryRewardMode;
 
   ChainCreditFixture() {
-    State_SetScriptFlag(0x82, 10);
+    VS::State::SetLiveScriptFlag(0x82, 10);
     action.abilityInputSucceeded = 1;
     action.chainAbilitySlot = 1;
     stats[1].currentHp = 0;
@@ -1422,7 +1419,7 @@ struct ChainCreditFixture : AbilityUnlockFixture {
   }
 
   ~ChainCreditFixture() {
-    State_SetScriptFlag(0x82, saved_story);
+    VS::State::SetLiveScriptFlag(0x82, saved_story);
     Battle_actionFlowMode = saved_flow;
     Field_controlMode = saved_control;
     Battle_recoveryRewardMode = saved_reward;
@@ -1454,7 +1451,7 @@ enum class KillGate {
 struct BreakArtKillFixture : AbilityUnlockFixture {
   decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
       std::to_array(Battle_actionEffectMediators);
-  char saved_story = State_ScriptFlag(0x82);
+  std::uint8_t saved_story = VS::State::LiveScriptFlag(0x82);
   Battle_HitResult source{};
   Battle_HitResult target{};
   unsigned counter;
@@ -1464,7 +1461,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
   BreakArtKillFixture(unsigned category, unsigned tier)
       : counter(category % 10) {
     actors[0].equippedWeaponCategory = static_cast<u_char>(category);
-    State_SetScriptFlag(0x82, 10);
+    VS::State::SetLiveScriptFlag(0x82, 10);
     Audio_Seq_unusedArtsStatus.artsLearned[counter] = static_cast<u_char>(tier);
     Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[counter] =
         static_cast<u_short>(kBreakArtThresholds[counter][tier] - 1);
@@ -1484,7 +1481,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
   ~BreakArtKillFixture() {
     std::copy(saved_effects.begin(), saved_effects.end(),
               Battle_actionEffectMediators);
-    State_SetScriptFlag(0x82, saved_story);
+    VS::State::SetLiveScriptFlag(0x82, saved_story);
   }
 
   void Reject(KillGate gate) {
@@ -1520,7 +1517,7 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         actors[1].killCounted = 1;
         break;
       case KillGate::kStory:
-        State_SetScriptFlag(0x82, 9);
+        VS::State::SetLiveScriptFlag(0x82, 9);
         break;
       case KillGate::kFourArts:
         Audio_Seq_unusedArtsStatus.artsLearned[counter] = 4;
@@ -1617,12 +1614,13 @@ TEST_CASE("Stat item effects bind plugin-local renderers, not EFFPURGE",
       [std::size(Effects_effectEntryPointIndices) - 1];
   for (unsigned slot = 0; slot < count; ++slot) {
     CAPTURE(slot);
-    CHECK(Effects_effectEntryPoints[slot] != Effects_InvokeAllPluginUpdates);
+    CHECK(Effects_effectEntryPoints[slot] !=
+          &VS::Effects::LiveInvokeAllPluginUpdates);
   }
   CHECK(Effects_effectEntryPoints[Effects_effectEntryPointIndices[198]] ==
-        Effects_Plg198_Ring);
+        &VS::Effects::Templates::UpdateLivePlg198Ring);
   CHECK(Effects_effectEntryPoints[Effects_effectEntryPointIndices[199]] ==
-        Effects_Plg198_Ring);
+        &VS::Effects::Templates::UpdateLivePlg198Ring);
 }
 
 TEST_CASE("Ability rewards use all original cumulative thresholds",
@@ -1635,7 +1633,7 @@ TEST_CASE("Ability rewards use all original cumulative thresholds",
   progress.kills.totalKills =
       static_cast<u_short>(kAbilityThresholds[unlocked] + delta);
   const auto before = progress;
-  CHECK(Battle_PendingBattleAbilityUnlocks() == (delta >= 0 ? 1 : 0));
+  CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == (delta >= 0 ? 1 : 0));
   CheckAbilityProgress(before);
 }
 
@@ -1648,7 +1646,7 @@ TEST_CASE("Successful lethal chain timing retains ability credit",
   progress.kills.totalKills = kAbilityThresholds[unlocked] - 1;
   auto expected = progress;
   ++expected.kills.totalKills;
-  Battle_AdvanceBattleAbilitySequence();
+  VS::Battle::LiveAdvanceBattleAbilitySequence();
   CheckAbilityProgress(expected);
   fixture.CheckTerminated();
 }
@@ -1658,7 +1656,7 @@ TEST_CASE("Lethal chain credit preserves failure story and capacity gates",
   ChainCreditFixture fixture;
   const int gate = GENERATE(0, 1, 2, 3);
   if (gate == 0) fixture.action.abilityInputSucceeded = 0;
-  if (gate == 1) State_SetScriptFlag(0x82, 9);
+  if (gate == 1) VS::State::SetLiveScriptFlag(0x82, 9);
   if (gate == 2) {
     Audio_Seq_unusedArtsStatus.kills.totalKills = UINT16_MAX;
   }
@@ -1666,7 +1664,7 @@ TEST_CASE("Lethal chain credit preserves failure story and capacity gates",
     Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked = 22;
   }
   const auto before = Audio_Seq_unusedArtsStatus;
-  Battle_AdvanceBattleAbilitySequence();
+  VS::Battle::LiveAdvanceBattleAbilitySequence();
   CheckAbilityProgress(before);
   fixture.CheckTerminated();
 }
@@ -1682,7 +1680,7 @@ TEST_CASE("Pending ability rewards do not discard later chain credit",
       static_cast<u_short>(kAbilityThresholds[unlocked] + extra);
   auto expected = progress;
   ++expected.kills.totalKills;
-  Battle_AdvanceBattleAbilitySequence();
+  VS::Battle::LiveAdvanceBattleAbilitySequence();
   CheckAbilityProgress(expected);
   fixture.CheckTerminated();
 }
@@ -1693,8 +1691,8 @@ TEST_CASE("Pending chain credit alone does not trigger ability learning",
   Battle_recoveryRewardMode = GENERATE(0, 1);
   Audio_Seq_unusedArtsStatus.kills.totalKills = kAbilityThresholds[0];
   const auto before = Audio_Seq_unusedArtsStatus;
-  REQUIRE(Battle_PendingBattleAbilityUnlocks() == 1);
-  Battle_BeginPendingAbilityReward();
+  REQUIRE(VS::Battle::LivePendingBattleAbilityUnlocks() == 1);
+  VS::Battle::LiveBeginPendingAbilityReward();
   CHECK(Battle_actionFlowMode == 0);
   CheckAbilityProgress(before);
 }
@@ -1716,7 +1714,7 @@ TEST_CASE("Pending Break Arts take priority over ability rewards",
   progress.kills.totalKills = 65535;
   progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
   const auto before = progress;
-  CHECK(Battle_PendingBattleAbilityUnlocks() ==
+  CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() ==
         (delta == 0 ? 0x10000 : (unlocked < 22 ? 1 : 0)));
   CheckAbilityProgress(before);
 }
@@ -1729,7 +1727,7 @@ TEST_CASE("Ability reward cap prevents further pending unlocks",
       static_cast<u_short>(GENERATE(22, 23, 65535));
   progress.kills.totalKills = 65535;
   const auto before = progress;
-  CHECK(Battle_PendingBattleAbilityUnlocks() == 0);
+  CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == 0);
   CheckAbilityProgress(before);
 }
 
@@ -1867,83 +1865,83 @@ TEST_CASE(
 TEST_CASE("Ability eligibility requires mapped input",
           "[combat][abilities][eligibility]") {
   AbilityFixture fixture;
-  REQUIRE(Battle_CanTriggerBattleAbility(0) == 1);
-  REQUIRE(Battle_CanTriggerBattleAbility(1) == 1);
+  REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
+  REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(1) == 1);
 
   SECTION("no mapped offensive buttons") {
     std::fill_n(Input_settings.mappedChainAbilities, 3, 0);
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("no mapped defensive buttons") {
     fixture.Prepare(true);
-    REQUIRE(Battle_CanTriggerBattleAbility(0) == 1);
+    REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
     std::fill_n(Input_settings.mappedDefenseAbilities, 3, 0);
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
 }
 
 TEST_CASE("Ability eligibility requires a fresh and distinct input",
           "[combat][abilities][eligibility]") {
   AbilityFixture fixture;
-  REQUIRE(Battle_CanTriggerBattleAbility(0) == 1);
-  REQUIRE(Battle_CanTriggerBattleAbility(1) == 1);
+  REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
+  REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(1) == 1);
   SECTION("consecutive buttons must differ") {
     fixture.action.previousChainInput = 1;
-    CHECK(Battle_CanTriggerBattleAbility(1) == 0);
-    CHECK(Battle_CanTriggerBattleAbility(2) == 1);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(1) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(2) == 1);
   }
   SECTION("only one attempt per action") {
     fixture.action.abilityInputAttempted = 1;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
-    CHECK(Battle_CanTriggerBattleAbility(2) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(2) == 0);
   }
 }
 
 TEST_CASE("Ability eligibility requires real non-dummy actor targets",
           "[combat][abilities][eligibility]") {
   AbilityFixture fixture;
-  REQUIRE(Battle_CanTriggerBattleAbility(0) == 1);
+  REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
   SECTION("source is a position") {
     fixture.Request().primaryTarget.targetsPosition = 1;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("target is a position") {
     fixture.Request().targets[0].targetsPosition = 1;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("no target") {
     fixture.Request().targetCount = 0;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("training dummy") {
     fixture.actors[1].roomSpawnIndex = 0x80;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
 }
 
 TEST_CASE("Ability eligibility requires an appropriate combat relationship",
           "[combat][abilities][eligibility]") {
   AbilityFixture fixture;
-  REQUIRE(Battle_CanTriggerBattleAbility(0) == 1);
+  REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
   SECTION("self target") {
     fixture.Request().targets[0].target.targetActor = 0;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("enemy action does not target Ashley") {
     fixture.Prepare(true);
     fixture.Request().targets[0].target.targetActor = 1;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("Ashley cannot chain from magic") {
     fixture.Request().actionId = 99;
-    CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+    CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("defenses cannot continue") {
     for (int id = 40; id <= 53; ++id) {
       CAPTURE(id);
       fixture.Prepare(true);
       fixture.Request().actionId = id;
-      CHECK(Battle_CanTriggerBattleAbility(0) == 0);
+      CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
     }
   }
 }
@@ -1968,10 +1966,10 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     fixture.Prepare(defense, action_id, depth);
     constexpr std::array kButtons{PADRright, PADRup, PADRleft};
     Input_buttonsPressed.allButtons = kButtons[slot - 1];
-    State_SetScriptFlag(1, static_cast<char>(difficulty));
+    VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
     fixture.action.abilityTimer = 100 + delta;
     const auto streak = Audio_Seq_unusedScoredata.chainStreak;
-    Battle_UpdateBattleAbilityTiming();
+    VS::Battle::LiveUpdateBattleAbilityTiming();
     const bool success = delta > 0 && delta <= margin;
     const int result = delta <= -margin      ? 0
                        : delta <= 0          ? 1
@@ -1995,14 +1993,14 @@ TEST_CASE("Unarmed windows and repeated buttons cannot start an ability",
   fixture.action.abilityTimer = 102;
   SECTION("input before a timing window") {
     fixture.action.abilityWindow = 0;
-    Battle_UpdateBattleAbilityTiming();
+    VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 1);
     REQUIRE(Battle_floatingLabelCount == 1);
     CHECK(fixture.labels[0].value == 1);
   }
   SECTION("repeat previous chain button") {
     fixture.action.previousChainInput = 1;
-    Battle_UpdateBattleAbilityTiming();
+    VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 1);
     CHECK(Battle_floatingLabelCount == 0);
   }
@@ -2016,13 +2014,13 @@ TEST_CASE("Unmapped buttons and no input cannot start an ability",
   fixture.action.abilityTimer = 102;
   SECTION("unmapped button") {
     Input_settings.mappedChainAbilities[0] = 0;
-    Battle_UpdateBattleAbilityTiming();
+    VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
     CHECK(Battle_floatingLabelCount == 0);
   }
   SECTION("no button") {
     Input_buttonsPressed.allButtons = 0;
-    Battle_UpdateBattleAbilityTiming();
+    VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
     CHECK(Battle_floatingLabelCount == 0);
   }
@@ -2040,7 +2038,7 @@ TEST_CASE("Simultaneous ability buttons keep the original input priority",
   AbilityFixture fixture;
   fixture.action.abilityTimer = 102;
   Input_buttonsPressed.allButtons = buttons;
-  Battle_UpdateBattleAbilityTiming();
+  VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(1, slot);
 }
 
@@ -2053,7 +2051,7 @@ TEST_CASE("Successful defensive timing saturates rather than wraps its score",
   fixture.Prepare(true);
   fixture.action.abilityTimer = 102;
   Audio_Seq_unusedScoredata.chainStreak = before;
-  Battle_UpdateBattleAbilityTiming();
+  VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(2, 1);
   CHECK(Audio_Seq_unusedScoredata.chainStreak == after);
 }
@@ -2573,7 +2571,7 @@ TEST_CASE("Prologue progression suppresses presentation without losing loot",
   const int guaranteed = GENERATE(0, 1);
   LootPresentationFixture fixture;
   fixture.SetGuaranteed(guaranteed);
-  State_SetScriptFlag(0xAB, static_cast<char>(intro));
+  VS::State::SetLiveScriptFlag(0xAB, static_cast<char>(intro));
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   auto* const queued = Items_lootListHead;
   VS::Items::OpenLivePendingEnemyLoot();

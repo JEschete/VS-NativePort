@@ -23,6 +23,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
+#include "Actors/Movement.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Render/Display.h"

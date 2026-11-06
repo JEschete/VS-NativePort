@@ -31,16 +31,3 @@ typedef struct Audio_CutsceneStreamData {
 _Static_assert(sizeof(Audio_CutsceneStreamData) == 0xD4, "Audio_CutsceneStreamData must keep its PS1 layout");
 
 #endif // VS_AUDIO_STREAM_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_STREAM_H_DECLS)
-#define VS_AUDIO_STREAM_H_DECLS
-
-int Audio_BeginXaStream(int sector, int byteCount);
-int Audio_RequestXaStreamStop(void);
-void Audio_StopCutsceneStream(void);
-int Audio_PlayCutsceneStreamSlot(int slot_id, int pan, int volume);
-void Audio_PlayCutsceneStreamSlotCentered(int slot_id);
-int Audio_FreeCutsceneStreamSlot(int slot_id);
-void Audio_SetXaVolumeMaximum(void);
-
-#endif // VS_AUDIO_STREAM_H_DECLS

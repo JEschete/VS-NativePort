@@ -1,18 +1,25 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Audio/ActorSoundLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/ActorCollisionLive.hpp"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/RoomEffectsLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
@@ -20,12 +27,9 @@ extern "C" {
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Audio/ActorSound.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
-#include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
@@ -33,8 +37,7 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
-#include "Field/RoomEffects.h"
-#include "Field/RoomRendering.h"
+#include "Field/RoomRenderingLiveState.h"
 #include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
 #include "Items/Loot.h"
@@ -180,9 +183,9 @@ int Field_CurrentSavePointId(void)
     int collision_tile_z;
     Actors_TileTarget* ashley_tile;
 
-    Actors_ActorPlacement(0, &ashley_placement);
+    VS::Actors::LiveActorPlacement(0, &ashley_placement);
 
-    ashley_state_flags = Actors_ActorStateFlags(0);
+    ashley_state_flags = VS::Actors::LiveActorStateFlags(0);
     platform_layer_flags = ashley_state_flags & 0x70000;
     ashley_tile = &ashley_placement.location.packedTile.target;
 
@@ -196,7 +199,7 @@ int Field_CurrentSavePointId(void)
         collision_layer = ashley_tile->tileLayer;
     }
 
-    if ((Field_CollisionCellAt(collision_tile_x, collision_tile_z, collision_layer)->hasRoomTrigger & 1)
+    if ((VS::Field::LiveCollisionCellOrAbsent(collision_tile_x, collision_tile_z, collision_layer)->hasRoomTrigger & 1)
         && (!(ashley_state_flags & 0x504000))) {
         Field_MpdFloorTrigger* room = Field_RoomTriggerAtTile(ashley_tile->tileX, ashley_tile->tileZ, ashley_tile->tileLayer);
         if ((room != NULL) && (room->kind == 16)) {
@@ -304,7 +307,7 @@ void Field_InitializeMovingPlatforms(void)
         platform_count = Field_roomData.header.movingPlatformsLength / 184;
         platform_cursor = Field_roomData.movingPlatforms;
         for (i = 0; i < platform_count; ++i, ++platform_cursor) {
-            geometry_group_words = ((int* (*)(int))Field_FindRoomGeometryGroup)(platform_cursor->sceneObjectId);
+            geometry_group_words = VS::Field::LiveFindRoomGeometryGroup(platform_cursor->sceneObjectId);
             if (geometry_group_words != NULL) {
                 if (platform_cursor->isHidden) {
                     geometry_group_words[0] |= 0x100;
@@ -354,7 +357,7 @@ void Field_ResetMovingPlatformWaypoint(int platform_index, int waypoint_index)
                 platform_record->isMovingForward = 1;
                 ++platform_record->currentWaypoint;
             }
-            geometry_group_words = ((int* (*)(int))Field_FindRoomGeometryGroup)(platform_record->sceneObjectId);
+            geometry_group_words = VS::Field::LiveFindRoomGeometryGroup(platform_record->sceneObjectId);
             if (geometry_group_words != NULL) {
                 geometry_group_words[1] = platform_record->positionX / ONE;
                 geometry_group_words[2] = -(platform_record->positionY / ONE);
@@ -416,7 +419,7 @@ int Field_UpdateMovingPlatforms(void)
                         point.vx = object->positionX / ONE;
                         point.vz = object->positionZ / ONE;
 
-                        if (Field_CheckPlatformActorObstruction(i + 2, &point)) {
+                        if (VS::Field::LiveCheckPlatformActorObstruction(i + 2, &point)) {
                             object->positionX -= object->segmentVelocities[object->currentSegment].vx;
                             object->positionY -= object->segmentVelocities[object->currentSegment].vy;
                             object->positionZ -= object->segmentVelocities[object->currentSegment].vz;
@@ -461,7 +464,7 @@ int Field_UpdateMovingPlatforms(void)
                 }
             }
 
-            scene = ((int* (*)(int))Field_FindRoomGeometryGroup)(object->sceneObjectId);
+            scene = VS::Field::LiveFindRoomGeometryGroup(object->sceneObjectId);
 
             if (scene != NULL) {
                 int y;
@@ -474,7 +477,7 @@ int Field_UpdateMovingPlatforms(void)
                 scene[0] &= ~0x100;
             }
         } else {
-            scene = ((int* (*)(int))Field_FindRoomGeometryGroup)(object->sceneObjectId);
+            scene = VS::Field::LiveFindRoomGeometryGroup(object->sceneObjectId);
 
             if (scene != NULL) {
                 scene[0] |= 0x100;
@@ -505,20 +508,20 @@ void Field_DrawMovingPlatformShadows(void)
         POLY_F4* polygon;
         int depth;
         int shade;
-        Field_MpdTileCell* cell;
+        const Field_MpdTileCell* cell;
         int height;
         int coordinate;
         int y;
 
-        if (object->isHidden || ((int* (*)(int))Field_FindRoomGeometryGroup)(object->sceneObjectId) == NULL) {
+        if (object->isHidden || VS::Field::LiveFindRoomGeometryGroup(object->sceneObjectId) == NULL) {
             continue;
         }
-        cell = Field_CollisionCellAt(object->positionX / (ONE * 128), object->positionZ / (ONE * 128), 0);
+        cell = VS::Field::LiveCollisionCellOrAbsent(object->positionX / (ONE * 128), object->positionZ / (ONE * 128), 0);
         if (cell->isPit && (cell->surfaceKind < 15 || cell->surfaceKind >= 19)) {
             continue;
         }
         coordinate = object->positionX / ONE;
-        height = Field_FloorHeightAt(coordinate, object->positionZ / ONE);
+        height = VS::Field::LiveFloorHeightAt(coordinate, object->positionZ / ONE);
         height <<= 17;
         height >>= 17;
         coordinate = object->positionY;
@@ -655,16 +658,16 @@ void Field_ToggleRoomSwitch(Field_MpdLockTrigger* switch_trigger)
     Field_MpdTileCell* collision_cell;
 
     if (switch_trigger->trigger.lockState.switchValue == 0) {
-        Audio_PlaySfxCentered(0x7E, 0x3B);
-        Audio_PlaySfxCentered(0x7E, 0x3C);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x3B);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x3C);
     } else {
-        Audio_PlaySfxCentered(0x7E, 0x3D);
-        Audio_PlaySfxCentered(0x7E, 0x3E);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x3D);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x3E);
     }
-    Field_StartRoomEffect(switch_trigger->trigger.kind);
+    VS::Field::LiveStartRoomEffect(switch_trigger->trigger.kind);
     switch_trigger->trigger.markerFade = 0;
     switch_trigger->trigger.lockState.switchValue = switch_trigger->trigger.lockState.switchValue == 0;
-    collision_cell = Field_CollisionCellAt(switch_trigger->trigger.tileX, switch_trigger->trigger.tileZ, switch_trigger->trigger.floorLayer);
+    collision_cell = VS::Field::LiveCollisionCellAt(switch_trigger->trigger.tileX, switch_trigger->trigger.tileZ, switch_trigger->trigger.floorLayer);
     if (collision_cell != NULL) {
         collision_cell->doorPassability = switch_trigger->trigger.lockState.switchValue * 5;
     }
@@ -697,7 +700,7 @@ void Field_SetMovingPlatformVisibility(int platform_index, int visibility_value)
     if (platform_record != NULL) {
         platform_record = &Field_roomData.movingPlatforms[platform_index];
         platform_record->isHidden = visibility_value - 1;
-        geometry_group_words = ((int* (*)(int))Field_FindRoomGeometryGroup)(platform_record->sceneObjectId);
+        geometry_group_words = VS::Field::LiveFindRoomGeometryGroup(platform_record->sceneObjectId);
         if (geometry_group_words != NULL) {
             if (!platform_record->isHidden) {
                 *geometry_group_words &= ~0x100;
@@ -770,13 +773,13 @@ void Field_SetPlatformFreezeAppearance(int freeze_appearance_enabled)
 
         for (i = 0; i < platform_count; ++i) {
             if (platform_cursor->swapsColorsWhenFrozen) {
-                Field_SwapRoomGeometryRedGreen(platform_cursor->sceneObjectId);
+                VS::Field::LiveSwapRoomGeometryRedGreen(platform_cursor->sceneObjectId);
             }
             ++platform_cursor;
         }
         if (Field_roomData.environment != NULL) {
             if (Field_roomData.environment->freezeEffectId >= 0) {
-                Field_ToggleRoomEffectUpdates(Field_roomData.environment->freezeEffectId);
+                VS::Field::LiveToggleRoomEffectUpdates(Field_roomData.environment->freezeEffectId);
             }
         }
         Field_isPlatformFreezeTintActive = !Field_isPlatformFreezeTintActive;
@@ -887,7 +890,7 @@ exit:
     created_gimmick->reserved5F = 0;
     created_gimmick->positionX = (created_gimmick->tileX << 7) + 0x40;
     created_gimmick->positionZ = (created_gimmick->tileZ << 7) + 0x40;
-    created_gimmick->positionY = ((int (*)(short*, int, int, int))Field_SampleActorSupportHeight)(&created_gimmick->positionX, 0, 0, 1) - (asset_request->variant << 7);
+    created_gimmick->positionY = VS::Field::LiveSampleSupportHeightAt(created_gimmick->positionX, created_gimmick->positionY, created_gimmick->positionZ, 0, 0, 1) - (asset_request->variant << 7);
     Field_SetGimmickOrientation(asset_request->targetSlot, asset_request->material);
     VS::Battle::Ai::AddLiveAiTileOccupant(created_gimmick);
     created_gimmick->objectInfo.interaction = 0;
@@ -1142,7 +1145,7 @@ int Field_GimmickPlacement(int gimmick_slot, Field_GimmickSnapshot* output_snaps
 
     *(int*)&output_snapshot->placementByte0 = *(int*)&gimmick_record->tileX;
     output_snapshot->orientation = gimmick_record->objectInfo.material;
-    support_height_difference = ((int (*)(short*, int, int, int))Field_SampleActorSupportHeight)(&gimmick_record->positionX, 0, 0, 0) - gimmick_record->positionY;
+    support_height_difference = VS::Field::LiveSampleSupportHeightAt(gimmick_record->positionX, gimmick_record->positionY, gimmick_record->positionZ, 0, 0, 0) - gimmick_record->positionY;
     if (support_height_difference < 0) {
         support_height_difference += 0x7F;
     }
@@ -1240,11 +1243,11 @@ int Field_FindInteractableGimmickAhead(int actorId)
 
         direction = actor->instance.position.vy - 384;
 
-        if (direction < Field_RoomCeilingHeight(actor->instance.position.vx, actor->instance.position.vz)) {
+        if (direction < VS::Field::LiveRoomCeilingHeight(actor->instance.position.vx, actor->instance.position.vz)) {
             return -1;
         }
 
-        if (direction < Field_RoomCeilingHeight(x, z)) {
+        if (direction < VS::Field::LiveRoomCeilingHeight(x, z)) {
             return -1;
         }
 
@@ -1288,11 +1291,11 @@ int Field_FindInteractableGimmickAhead(int actorId)
     } else {
         direction = actor->instance.position.vy - 384;
 
-        if (direction < Field_RoomCeilingHeight(actor->instance.position.vx, actor->instance.position.vz)) {
+        if (direction < VS::Field::LiveRoomCeilingHeight(actor->instance.position.vx, actor->instance.position.vz)) {
             return -1;
         }
 
-        if (direction < Field_RoomCeilingHeight(x, z)) {
+        if (direction < VS::Field::LiveRoomCeilingHeight(x, z)) {
             return -1;
         }
     }
@@ -1307,7 +1310,7 @@ int Field_FindInteractableGimmickAhead(int actorId)
 // decomp: BATTLE.PRG func_800A3C00 (src/BATTLE/BATTLE.PRG/3A1A0.c:661)
 Actors_ActorRecord* Field_FindActorAboveGimmick(Field_GimmickInstance* support_gimmick, u_int occupancy_mode_or_first_actor)
 {
-    return Field_FindActorOccupyingTile(support_gimmick->tileX, support_gimmick->tileZ, support_gimmick->positionY, occupancy_mode_or_first_actor);
+    return VS::Field::LiveFindActorOccupyingTile(support_gimmick->tileX, support_gimmick->tileZ, support_gimmick->positionY, occupancy_mode_or_first_actor);
 }
 
 // decomp: BATTLE.PRG func_800A3DB4 (src/BATTLE/BATTLE.PRG/3A1A0.c:708)
@@ -1318,17 +1321,17 @@ int Field_CanPlaceGimmickAtPoint(int x, int z, int minimumHeight)
 
     *(int*)&origin.vx = 0;
     *(int*)&origin.vz = 0;
-    height = Field_SampleActorSupportHeight(&origin, x, z, 1);
+    height = VS::Field::LiveSampleActorSupportHeight(&origin, x, z, 1);
 
     if (height < minimumHeight) {
         return 0;
     }
 
-    if ((*Field_collisionProbeTile >> 20) & 1) {
+    if ((VS::Field::LiveCollisionProbeCellWord() >> 20) & 1) {
         return 0;
     }
 
-    return Field_FindActorOccupyingTile(x / 128, z / 128, height, 1) == NULL;
+    return VS::Field::LiveFindActorOccupyingTile(x / 128, z / 128, height, 1) == NULL;
 }
 
 // decomp: BATTLE.PRG func_800A3E6C (src/BATTLE/BATTLE.PRG/3A1A0.c:728)
@@ -1396,8 +1399,8 @@ int Field_BeginGimmickInteraction(int actorId)
         }
     move:
         object->velocityY = 0;
-        ((void (*)(...))Audio_PlayActorSoundPair)(actor, 0x2C, 0x2D);
-        Actors_PlayActorAnimation(actorId, height + 0x4F, 0, 4);
+        VS::Audio::LivePlayActorSoundPair(actor, 0x2C, 0x2D);
+        VS::Actors::PlayLiveActorAnimation(actorId, height + 0x4F, 0, 4);
         actor->weaponPoseActive = 1;
         VS::Battle::Ai::ReserveLiveAiDestinationTile(
             (object->positionX + object->slideX) / 128, (object->positionZ + object->slideZ) / 128);
@@ -1406,12 +1409,12 @@ int Field_BeginGimmickInteraction(int actorId)
     case 5:
     case 6:
         if (actor->actionPoseActive) {
-            Actors_PlayActorAnimation(actorId, 0x4C, 0, 4);
-            ((void (*)(...))Audio_PlayActorSoundPair)(actor, 0x2E, 0x2F);
+            VS::Actors::PlayLiveActorAnimation(actorId, 0x4C, 0, 4);
+            VS::Audio::LivePlayActorSoundPair(actor, 0x2E, 0x2F);
             actor->weaponPoseActive = 1;
         } else {
-            Actors_PlayActorAnimation(actorId, height + 0x47, 0, 4);
-            ((void (*)(...))Audio_PlayActorSoundPair)(actor, 0x2C, 0x2D);
+            VS::Actors::PlayLiveActorAnimation(actorId, height + 0x47, 0, 4);
+            VS::Audio::LivePlayActorSoundPair(actor, 0x2C, 0x2D);
             actor->weaponPoseActive = 1;
         }
         dx = 0;
@@ -1439,11 +1442,11 @@ int Field_BeginGimmickInteraction(int actorId)
     } else {
         tile.tileZ += step;
     }
-    ((void (*)(...))Actors_TurnActorTowardTileOverTime)(actorId, (Actors_TileTarget*)&tile, 4);
+    VS::Actors::TurnLiveActorTowardTileOverTime(actorId, (Actors_TileTarget*)&tile, 4);
     position.vx = (actor->instance.currentTileX << 7) + 0x40;
     position.vz = (actor->instance.currentTileZ << 7) + 0x40;
     position.vy = actor->instance.position.vy;
-    ((void (*)(...))Actors_TranslateActorToOverTime)(actorId, &position, 4);
+    VS::Actors::TranslateLiveActorToOverTime(actorId, &position, 4);
 }
 
 // decomp: BATTLE.PRG func_800A41D0 (src/BATTLE/BATTLE.PRG/3A1A0.c:842)
@@ -1504,7 +1507,7 @@ void Field_ApplyGimmickInteractionCommand(Actors_ActorRecord* actor, int mode)
     }
 
     if (object == NULL || object->motionState) {
-        Actors_PlayActorAnimation(actor->instance.slot, 1, 0, 8);
+        VS::Actors::PlayLiveActorAnimation(actor->instance.slot, 1, 0, 8);
         return;
     }
 
@@ -1652,7 +1655,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
             }
             if (Field_CanPlaceGimmickAtPoint(
                     scratch->rotation.vx, scratch->rotation.vz, object->position.vy)
-                && Field_SampleActorSupportHeight(&object->position, 0, 0, 1) == object->position.vy) {
+                && VS::Field::LiveSampleActorSupportHeight(&object->position, 0, 0, 1) == object->position.vy) {
                 object->tileX = 0xFF;
                 object->tileZ = 0xFF;
             } else {
@@ -1673,7 +1676,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
     fall:
         object->tileX = object->position.vx / 128;
         object->tileZ = object->position.vz / 128;
-        step = Field_SampleActorSupportHeight(&object->position, 0, 0, 2);
+        step = VS::Field::LiveSampleActorSupportHeight(&object->position, 0, 0, 2);
         if (object->position.vy < step) {
             object->velocityY += 3;
             object->position.vy += object->velocityY;
@@ -1699,11 +1702,11 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
                         object->frame = 0;
                         *(int*)&object->material =
                             (*(int*)&object->material & ~0x30) | 0x20;
-                        Audio_PlayWorldSfx(0x7E, 0x30, &object->position);
+                        VS::Audio::LivePlayWorldSfx(0x7E, 0x30, &object->position);
                     } else {
                         *(int*)&object->material =
                             (*(int*)&object->material & ~0x30) | 0x10;
-                        Audio_PlayWorldSfx(0x7E, 0x31, &object->position);
+                        VS::Audio::LivePlayWorldSfx(0x7E, 0x31, &object->position);
                         object->mode = 0;
                         VS::Battle::Ai::AddLiveAiTileOccupant((const Field_GimmickInstance*)object);
                         VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
@@ -1726,13 +1729,13 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
         }
         step = object->mode;
         if (step == 0xFE) {
-            Audio_PlayWorldSfx(0x7E, 0x30, &object->position);
+            VS::Audio::LivePlayWorldSfx(0x7E, 0x30, &object->position);
             object->mode = 0xFB;
             object->frame = 0;
         } else if (step == 0xFF || step == 0xF9) {
             object->mode = 0;
         } else {
-            Audio_PlayWorldSfx(0x7E, 0x30, &object->position);
+            VS::Audio::LivePlayWorldSfx(0x7E, 0x30, &object->position);
             object->mode = 0xFA;
             object->frame = 0;
         }

@@ -9,6 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG053_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG053_H_DECLS
 
-extern CVECTOR Effects_Plg053_closedRingColorFactors[];
+extern CVECTOR Effects_Plg053_closedRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG053_H_DECLS

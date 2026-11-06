@@ -17,26 +17,29 @@
 #include <utility>
 #include <vector>
 
+#include "Battle/AbilitiesLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/GameModeLive.hpp"
+#include "Field/RoomEffectsLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loot.hpp"
 #include "Items/LootLiveState.h"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Rewards.h"
 #include "Field/Collision.h"
-#include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomEffects.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Loot/Paging.h"
-#include "State/Flags.h"
 
 // decomp: _lootListHead (_lootListHead@BATTLE/BATTLE.PRG)
 Items_LootListNode* Items_lootListHead = nullptr;
@@ -130,23 +133,24 @@ class LiveLootFlowHost final : public LootFlowHost {
   // func_8006FB48.s compares the flag as an unsigned byte (andi 0xFF; sltiu
   // 3).
   std::int32_t RewardStage() override {
-    return static_cast<std::uint8_t>(State_ScriptFlag(kRewardStageFlag));
+    return static_cast<std::uint8_t>(
+        VS::State::LiveScriptFlag(kRewardStageFlag));
   }
   void OpenEnemyLootList() override {
-    Menu_Framework_OpenLootListMenu(Items_lootListHead);
+    VS::Menu::Framework::OpenLiveLootListMenu(Items_lootListHead);
     Field_controlMode = kMenuControlMode;
     Battle_actionFlowMode = kEnemyLootFlowMode;
-    Field_PauseFieldForMenu();
+    VS::Field::LivePauseFieldForMenu();
   }
   void BeginPendingAbilityReward() override {
-    Battle_BeginPendingAbilityReward();
+    VS::Battle::LiveBeginPendingAbilityReward();
   }
   void WaitForPostActionMovement() override {
     Battle_WaitForPostActionMovement();
   }
   void OpenScriptedLootList() override {
     Battle_lootMenuOpened = 1;
-    Menu_Framework_OpenLootListMenu(Items_lootListHead);
+    VS::Menu::Framework::OpenLiveLootListMenu(Items_lootListHead);
     Battle_actionFlowMode = kScriptedLootFlowMode;
     Battle_BeginRewardPause();
   }
@@ -157,15 +161,15 @@ class LiveLootFlowHost final : public LootFlowHost {
 class LiveChestStateHost final : public ChestStateHost {
  public:
   bool ScriptFlag(std::int16_t flag) override {
-    return State_ScriptFlag(flag) != 0;
+    return VS::State::LiveScriptFlag(flag) != 0;
   }
   void FinishLidRotation(std::int16_t lid_rotation_id) override {
-    Field_FinishRoomTiltRotation(lid_rotation_id);
+    VS::Field::LiveFinishRoomTiltRotation(lid_rotation_id);
   }
   // The original looked the cell up (a pure lookup) before reading the flag.
   void SetTilePassability(const TreasureChest& chest,
                           std::uint8_t passability) override {
-    auto* const cell = Field_CollisionCellAt(
+    auto* const cell = VS::Field::LiveCollisionCellAt(
         static_cast<std::uint32_t>(chest.tile_x),
         static_cast<std::uint32_t>(chest.tile_z), chest.layer);
     if (cell != nullptr) cell->doorPassability = passability;

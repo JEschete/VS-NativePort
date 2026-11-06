@@ -1,5 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/AbilitiesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/MapLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -9,17 +12,15 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/TextBoxes.h"
-#include "Field/Map.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
@@ -134,10 +135,10 @@ int Battle_SetGameplayHudHidden(int hidden)
 {
     if (hidden != 0) {
         Battle_SetHudHidden(1);
-        Field_SetMinimapVisible(0);
+        VS::Field::SetLiveMinimapVisible(0);
     } else {
         Battle_SetHudHidden(0);
-        Field_SetMinimapVisible(1);
+        VS::Field::SetLiveMinimapVisible(1);
     }
     return hidden;
 }
@@ -258,7 +259,7 @@ int Battle_LimbCondition(Battle_LimbStats* limb)
 // decomp: BATTLE.PRG func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:3197)
 int Battle_ShortcutIconBrightness(int shortcut_index)
 {
-    int restriction_flags = Menu_Framework_ActionRestrictionFlags(0);
+    int restriction_flags = VS::Menu::Framework::LiveActionRestrictionFlags(0);
     int brightness_transparency = 0x180;
 
     switch (shortcut_index) {
@@ -266,7 +267,7 @@ int Battle_ShortcutIconBrightness(int shortcut_index)
     case 1:
     case 2:
     case 3:
-        if (Battle_HasUnlockedSpellClass((0x3021 >> (shortcut_index * 4)) & 0xF) == 0) {
+        if (VS::Battle::LiveHasUnlockedSpellClass((0x3021 >> (shortcut_index * 4)) & 0xF) == 0) {
             return 0;
         }
         if (restriction_flags & 0xB7) {
@@ -280,12 +281,12 @@ int Battle_ShortcutIconBrightness(int shortcut_index)
         break;
     case 5:
     case 6:
-        if (Battle_HasUnlockedBattleAbility(6 - shortcut_index) == 0) {
+        if (VS::Battle::LiveHasUnlockedBattleAbility(6 - shortcut_index) == 0) {
             return 0;
         }
         break;
     case 7:
-        if (Battle_HasUnlockedWeaponBreakArt() == 0) {
+        if (VS::Battle::LiveHasUnlockedWeaponBreakArt() == 0) {
             return 0;
         }
         if (restriction_flags & 0x15F) {

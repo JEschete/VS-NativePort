@@ -259,6 +259,52 @@ TEST_CASE("Model polygons refuse invalid data instead of reading past it",
 }
 
 namespace {
+std::int16_t GetInt16(const std::vector<std::byte>& bytes, std::size_t offset) {
+  std::int16_t value = 0;
+  std::memcpy(&value, &bytes.at(offset), sizeof value);
+  return value;
+}
+}  // namespace
+
+TEST_CASE("Model vertex moves wrap each component within the vertex section",
+          "[render][model-geometry]") {
+  auto model = FlatTriangleModel();
+  CHECK(Render::FindModelVertexSection(kTriangleCounts, model) ==
+        Render::ModelVertexSection{.offset = kVerticesAt, .count = 3});
+
+  REQUIRE(Render::MoveModelVertex(kTriangleCounts, model, 2,
+                                  {.x = 5, .y = -20, .z = 0x7FFF}));
+  const std::size_t moved = kVerticesAt + (std::size_t{2} * 8);
+  CHECK(GetInt16(model, moved) == 15);
+  CHECK(GetInt16(model, moved + 2) == 30);
+  // 100 + 0x7FFF wraps to a negative halfword.
+  CHECK(GetInt16(model, moved + 4) == -32669);
+  CHECK(GetInt16(model, kVerticesAt) == 10);
+}
+
+TEST_CASE("Model vertex moves refuse vertices outside the vertex section",
+          "[render][model-geometry]") {
+  auto model = FlatTriangleModel();
+  const auto before = model;
+  CHECK_FALSE(
+      Render::MoveModelVertex(kTriangleCounts, model, 3, {.x = 1, .y = 1}));
+  CHECK(model == before);
+
+  auto misaligned = FlatTriangleModel();
+  Put<std::uint32_t>(misaligned, 0x38, kVerticesAt + 2);
+  CHECK_FALSE(
+      Render::FindModelVertexSection(kTriangleCounts, misaligned).has_value());
+  CHECK_FALSE(
+      Render::MoveModelVertex(kTriangleCounts, misaligned, 0, {.x = 1}));
+
+  auto truncated = FlatTriangleModel();
+  CHECK_FALSE(Render::MoveModelVertex(
+      kTriangleCounts, std::span(truncated).first(kPolygonsAt - 4), 0,
+      {.x = 1}));
+  CHECK(truncated == FlatTriangleModel());
+}
+
+namespace {
 struct ShadowFixture {
   ShadowFixture() {
     vertices[0] = static_cast<std::uint32_t>(Pack(10, 10));

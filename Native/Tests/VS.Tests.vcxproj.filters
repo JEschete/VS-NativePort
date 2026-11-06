@@ -45,16 +45,34 @@
     <ClCompile Include="src\ActorCleanupTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActorCommandQueueTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActorCommandSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ActorCommandTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActorMotionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActorMovementTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActorRosterTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActorShadowTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ActorSoundTransitionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActorSpawningTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActorStateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp">
@@ -87,19 +105,37 @@
     <ClCompile Include="src\AiSessionResetTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AnimationControlTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AnimationPoseTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AppearanceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AppearanceTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AudioControlSfxTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioMixerDriverTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioMusicStreamTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioPlaybackBanksTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AudioTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AwarenessMarkerTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BattleTargetingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\CameraConstraintTests.cpp">
@@ -165,10 +201,28 @@
     <ClCompile Include="src\DoorTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EffectParticleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EffectResourcesTransformsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EffectRingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EffectSurfaceTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EffectTextureBindingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EffectTimelineTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EffectTrailNineTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EffectTrailTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EncounterProfileTests.cpp">
@@ -178,6 +232,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EndingArtTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EndingCreditsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EndingResultsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EngagementCoreTests.cpp">
@@ -192,6 +252,18 @@
     <ClCompile Include="src\EventRetentionPredicateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventScriptActorCommandsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventScriptAudioCommandsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventScriptDialogCommandsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventScriptEffectCommandsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EventScriptTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -204,7 +276,34 @@
     <ClCompile Include="src\EventWeaponModeTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FieldActorCollisionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FieldBackgroundTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FieldCameraCoreTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FieldCollisionMapTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FieldEnvironmentTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FieldRoomLoadingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FieldRoomRenderingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FieldRoomsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\FileMenuTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FilesTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\FlightTerrainTests.cpp">
@@ -220,6 +319,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\GameFontTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameplayLoopTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\GimImagesTests.cpp">
@@ -279,7 +381,19 @@
     <ClCompile Include="src\MemoryTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MenuActorPreviewTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MenuAssetsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuFrameworkTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuRowsDetailsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MenuSetupTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\MenuSoundTests.cpp">
@@ -330,6 +444,9 @@
     <ClCompile Include="src\NavigationOverrideTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\OptionsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ParticleRenderCoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -360,6 +477,9 @@
     <ClCompile Include="src\ReactionDelayTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\RenameTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\RenderDisplayTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -379,6 +499,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\RoomDrawTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RoomEffectsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\RoomLightingTests.cpp">
@@ -465,6 +588,9 @@
     <ClCompile Include="src\SpritesTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StateRecordsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\StatusBehaviorTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -495,6 +621,9 @@
     <ClCompile Include="src\TextureRegionDrawTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TitleMenuTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TrailEmitterTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -517,6 +646,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\ScriptSteps.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">

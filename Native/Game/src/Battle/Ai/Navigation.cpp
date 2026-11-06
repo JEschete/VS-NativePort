@@ -7,6 +7,7 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 
@@ -674,7 +674,7 @@ int Battle_Ai_FindAdjacentAiGroundHeight(int tile_x, int tile_z)
         x = tile_x + Battle_Ai_directionDeltas[i * 2].dx;
         z = tile_z + Battle_Ai_directionDeltas[i * 2].dz;
         if (x < 32 && z < 32 && !(Battle_Ai_tileFlagMap[z][x] & 0x70)) {
-            return Field_FloorHeightAt(x << 7 | 0x40, z << 7 | 0x40) >> 6;
+            return VS::Field::LiveFloorHeightAt(x << 7 | 0x40, z << 7 | 0x40) >> 6;
         }
     }
     return -1;

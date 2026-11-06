@@ -1,15 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "State/SceneTimerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
@@ -19,7 +20,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Event/Triggers.h"
 #include "Field/Interactions.h"
 #include "Items/Equipment.h"
@@ -1395,11 +1396,11 @@ int Battle_UpdateActorVitals(void)
 
         if ((battle_actor != NULL) && ((battle_actor->roomSpawnIndex != 0x80) || (i == 0))) {
 
-            int actor_state_flags = Actors_ActorStateFlags(i);
+            int actor_state_flags = VS::Actors::LiveActorStateFlags(i);
 
             if (actor_state_flags & 0x01000000) {
 
-                if (((u_int (*)(int))Actors_IsActorActionAnimationBusy)(i) != 1) {
+                if (VS::Actors::IsLiveActorActionAnimationBusy(i) != 1) {
 
                     update_result = Battle_ResolveActorDefeat(0, i, 0);
 
@@ -1556,7 +1557,7 @@ int Battle_UpdateActorVitals(void)
         Battle_regeneratingLimb = (Battle_regeneratingLimb + 1) % 6;
     }
 
-    update_result = State_UpdateEventTimer();
+    update_result = VS::State::UpdateLiveSceneTimer();
 
     if (update_result != 0) {
         pending_event_result = update_result;

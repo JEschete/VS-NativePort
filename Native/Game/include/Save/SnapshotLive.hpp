@@ -7,6 +7,7 @@
 namespace VS::Save {
 // Sets State_ashleySnapshot's pending flag.
 void MarkLiveAshleySnapshotValid();
+void ClearLiveAshleySnapshotPending();
 // Captures the entry door, learned actions, Ashley's statistics and camera,
 // then stores the room actors' states and the entrance door for a reload.
 void CaptureLiveAshleySnapshot();

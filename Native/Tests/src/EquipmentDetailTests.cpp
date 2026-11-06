@@ -10,6 +10,8 @@
 
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/RenameLive.hpp"
 #include "Render/GameFontLive.hpp"
 
 extern "C" {
@@ -24,10 +26,11 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
 #include "Event/ScriptVm.h"
-#include "Menu/Framework/EquipmentDetails.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Rename.h"
+#include "Menu/RenameLiveState.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -87,6 +90,7 @@ struct ComparisonFixture {
 struct EquipmentFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* saved_ordering = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   char saved_page = Menu_Framework_itemStatPage;
@@ -107,6 +111,8 @@ struct EquipmentFixture {
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
     Render_frameScratch.primitiveCursor = storage.data() + 1;
+    // The typed UI packets only link into the frame's own ordering table.
+    Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
     Render_frameScratch.orderingTable = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
@@ -120,6 +126,7 @@ struct EquipmentFixture {
     Menu_Framework_equipmentSubtype = saved_subtype;
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_legacyOrderingTables[0] = saved_ordering;
     Render_frameBuf = saved_framebuffer;
     VS::Render::LiveFontStyle() = saved_style;
   }
@@ -168,15 +175,14 @@ struct RenameFrameFixture {
   Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
   decltype(std::to_array(Menu_Rename_renderRenameMenuStrings)) saved_strings =
       std::to_array(Menu_Rename_renderRenameMenuStrings);
-  decltype(std::to_array(Menu_Rename_stringBuf)) saved_name =
-      std::to_array(Menu_Rename_stringBuf);
-  u_char saved_action = Menu_Rename_selectedControllerAction;
-  char saved_pulse = Menu_Rename_navIconPulseRequest;
-  char saved_animation = Menu_Rename_nameNavIconAnim;
+  VS::Menu::Rename::State saved_state = VS::Menu::Rename::LiveRenameState();
+  void* saved_table = Render_legacyOrderingTables[0];
   std::array<Menu_Framework_MenuRow, 40> rows{};
 
   RenameFrameFixture() {
     Menu_Framework_menuItems = rows.data();
+    // The live chain lookups only accept the frame's own ordering table.
+    Render_legacyOrderingTables[0] = frame.ordering.data();
     Render_frameScratch.orderingTable = frame.ordering.data() + 24;
     Render_frameScratch.overlayOrderingTable = frame.ordering.data() + 8;
     std::fill_n(Menu_Rename_renderRenameMenuStrings, saved_strings.size(),
@@ -190,19 +196,18 @@ struct RenameFrameFixture {
         reinterpret_cast<unsigned char*>(Menu_Rename_renderRenameMenuStrings +
                                          Text_Menu8_rename_Offset_charTable);
     std::fill_n(grid, 15 * 9, 10);
-    std::fill_n(Menu_Rename_stringBuf, saved_name.size(), Core_TextCode_Space);
-    Menu_Rename_stringBuf[0] = 10;
-    Menu_Rename_selectedControllerAction = 0;
+    VS::Menu::Rename::State& state = VS::Menu::Rename::LiveRenameState();
+    state.name.fill(Core_TextCode_Space);
+    state.name[0] = 10;
+    state.selected_action = 0;
   }
 
   ~RenameFrameFixture() {
     Menu_Framework_menuItems = saved_rows;
+    Render_legacyOrderingTables[0] = saved_table;
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_Rename_renderRenameMenuStrings);
-    std::copy(saved_name.begin(), saved_name.end(), Menu_Rename_stringBuf);
-    Menu_Rename_selectedControllerAction = saved_action;
-    Menu_Rename_navIconPulseRequest = saved_pulse;
-    Menu_Rename_nameNavIconAnim = saved_animation;
+    VS::Menu::Rename::LiveRenameState() = saved_state;
   }
 
   std::vector<const u_long*> Packets() const {
@@ -257,7 +262,7 @@ struct EquipmentReloadFixture {
 TEST_CASE("Equipment stat pages preserve every lower UI ordering entry",
           "[render][menu][equipment][links]") {
   EquipmentFixture fixture(GENERATE(0, 1, 2));
-  Menu_Framework_DrawEquipmentStatPage(0);
+  VS::Menu::Framework::DrawLiveEquipmentStatPage(0);
   CHECK(fixture.ReachesLastEntry());
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
@@ -266,7 +271,7 @@ TEST_CASE("Equipment stat pages preserve every lower UI ordering entry",
 TEST_CASE("Equipment page headers interpret encoded font controls as controls",
           "[render][menu][equipment][text]") {
   EquipmentFixture fixture(GENERATE(0, 1, 2));
-  Menu_Framework_DrawEquipmentStatPage(0);
+  VS::Menu::Framework::DrawLiveEquipmentStatPage(0);
   CHECK(fixture.HeaderGlyphs() == 19);
 }
 
@@ -276,7 +281,7 @@ TEST_CASE("Weapon naming frame retains its grid name commands and backdrops",
   RenameFrameFixture fixture;
   REQUIRE(reinterpret_cast<std::uintptr_t>(fixture.frame.storage.data()) >
           UINT32_MAX);
-  Menu_Rename_DrawFrame(offset);
+  VS::Menu::Rename::DrawLiveFrame(offset);
   CHECK(fixture.frame.ReachesLastEntry());
   const auto packets = fixture.Packets();
   const auto glyphs =
@@ -302,7 +307,7 @@ TEST_CASE("Weapon naming frame retains its grid name commands and backdrops",
 TEST_CASE("Weapon naming selection highlight retains the lower UI chain",
           "[render][menu][equipment][rename]") {
   RenameFrameFixture fixture;
-  Menu_Rename_DrawSelectionBox(128, 76, 10, 18);
+  VS::Menu::Rename::DrawLiveSelectionBox({.x = 128, .y = 76, .w = 10, .h = 18});
   CHECK(fixture.frame.ReachesLastEntry());
   const auto packets = fixture.Packets();
   REQUIRE(packets.size() == 1);
@@ -320,7 +325,7 @@ TEST_CASE(
   const int modifier = GENERATE(-20, 0, 15);
   fixture.stats.strength = fixture.stats.intelligence = fixture.stats.agility =
       static_cast<int16_t>(100 + modifier);
-  Menu_Framework_SetActorComparisonStats(mode);
+  VS::Menu::Framework::SetLiveActorComparisonStats(mode);
   std::array<int16_t, 4> totals{};
   std::memcpy(totals.data(), Menu_Framework_comparisonStatTotals,
               sizeof totals);
@@ -343,8 +348,8 @@ TEST_CASE("Primary comparison columns apply actor and accessory values once",
   const int modifier = GENERATE(-20, 0, 15);
   fixture.stats.strength = fixture.stats.intelligence = fixture.stats.agility =
       static_cast<int16_t>(100 + modifier);
-  Menu_Framework_SetActorComparisonStats(weapon ? 16 : 0);
-  if (weapon) Menu_Framework_SetPrimaryStats(10, 1, -4, 1);
+  VS::Menu::Framework::SetLiveActorComparisonStats(weapon ? 16 : 0);
+  if (weapon) VS::Menu::Framework::SetLivePrimaryStats(10, 1, -4, 1);
   std::array<int, 3> equipped{};
   for (size_t index = 0; index < equipped.size(); ++index) {
     equipped[index] = Menu_Framework_strIntAgi[index] +

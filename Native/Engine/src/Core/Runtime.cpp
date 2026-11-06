@@ -21,7 +21,9 @@ void IgnoreDiagnostic(int code, int detail) {
 void IdleInstruction() noexcept {}
 
 // BATTLE.PRG func_8007B0FC (146C.c:8237), also 0x8007B104, 0x8007BF04 and
-// 0x8007DF40.
+// 0x8007DF40. The empty hooks func_8009D458 (30DB0.c:2069), func_8009D460
+// (30DB0.c:2071), _vsBattleNop2 (146C.c:16031, unused integer argument) and
+// INITBTL.PRG func_800F9AB0 (18.c:304) share this definition.
 void NoOperation() noexcept {}
 
 // BATTLE.PRG vs_battle_nop0 (146C.c:1354) and its copy at 0x8006C478.

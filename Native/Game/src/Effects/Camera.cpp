@@ -1,360 +1,357 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Math/InterpolationLive.hpp"
+// Hand-maintained (tools/port/owned.csv).
+#include "Effects/Camera.hpp"  // NOLINT(build/include): typed API
+
+#include <cstddef>
+#include <cstdint>
+
+#include "Core/Math/Interpolation.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Render/CameraViewLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Effects/Camera.h"
-#include "Effects/Curves.h"
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
-#include "Field/Camera.h"
-#include "Render/Camera.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include "Effects/Curves.hpp"
 
-// decomp: D_800F54B8 (D_800F54B8@BATTLE/BATTLE.PRG)
-Effects_CameraShakeChannel Effects_cameraShakeChannels[75];
+namespace VS::Effects {
+namespace {
+namespace Math = VS::Core::Math;
 
-// decomp: D_800F54D0 (D_800F54D0@BATTLE/BATTLE.PRG)
-short Effects_cameraMotionFrame;
+constexpr int kFractionBits = 12;
+// The captured roll is kept half a turn round (ONE * 8, 5BF94.c:6519).
+constexpr std::int32_t kRollBias = 0x8000;
+constexpr std::uint8_t kStoppedPhase = 0xFF;
+constexpr std::uint8_t kShapeCurveMask = 0x1F;
+// The shake angle steps in 1/128 turns (angle * 32 of 4096, 5BF94.c:6652).
+constexpr std::int32_t kShakeAngleScale = 32;
+constexpr int kShakeAmplitudeBits = 8;
+constexpr int kLateralChannel = 0;
+constexpr int kVerticalChannel = 1;
+constexpr int kDepthChannel = 2;
+constexpr int kRollChannel = 3;
 
-// decomp: D_800F54D8 (D_800F54D8@BATTLE/BATTLE.PRG)
-Effects_EffectCamera Effects_effectCamera;
+[[nodiscard]] constexpr std::int32_t Whole(std::int32_t fixed) noexcept {
+  return fixed >> kFractionBits;
+}
 
-// decomp: D_800F5518 (D_800F5518@BATTLE/BATTLE.PRG)
-char Effects_enabledShakeChannels;
+[[nodiscard]] constexpr std::int32_t Fixed(std::int32_t whole) noexcept {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(whole)
+                                   << kFractionBits);
+}
 
-// decomp: D_800F5520 (D_800F5520@BATTLE/BATTLE.PRG)
-Effects_EffectCamera Effects_cameraMotionEnds[2];
+[[nodiscard]] constexpr Math::Vec3 WholeVector(Math::Vec3 fixed) noexcept {
+  return {.x = Whole(fixed.x), .y = Whole(fixed.y), .z = Whole(fixed.z)};
+}
 
-// decomp: D_800F55A0 (D_800F55A0@BATTLE/BATTLE.PRG)
-short Effects_cameraMotionDuration;
+[[nodiscard]] constexpr Math::Vec3 FixedVector(Math::Vec3 whole) noexcept {
+  return {.x = Fixed(whole.x), .y = Fixed(whole.y), .z = Fixed(whole.z)};
+}
 
-// decomp: D_800F55A8 (D_800F55A8@BATTLE/BATTLE.PRG)
-Effects_EffectCamera Effects_savedActionCamera;
+[[nodiscard]] constexpr Math::Vec3 Add(Math::Vec3 left,
+                                       Math::Vec3 right) noexcept {
+  return {.x = Math::WrappingAdd(left.x, right.x),
+          .y = Math::WrappingAdd(left.y, right.y),
+          .z = Math::WrappingAdd(left.z, right.z)};
+}
 
-// decomp: D_800F55E8 (D_800F55E8@BATTLE/BATTLE.PRG)
-u_int Effects_cameraTransitionMode;
+[[nodiscard]] constexpr bool ChannelBit(std::uint32_t mask,
+                                        int channel) noexcept {
+  return ((mask >> channel) & 1U) != 0;
+}
+
+[[nodiscard]] constexpr std::int32_t ChannelMask(int channel) noexcept {
+  return std::int32_t{1} << channel;
+}
+
+// The fields both transitions ease between the two motion ends.
+template <typename Vector, typename Scalar>
+void InterpolatePose(EffectCameraState& state, Vector vector, Scalar scalar) {
+  const EffectCameraPose& from = state.motion_ends[0];
+  const EffectCameraPose& to = state.motion_ends[1];
+  const Math::StepProgress progress{.current = state.motion_frame,
+                                    .total = state.motion_duration};
+  EffectCameraPose& camera = state.camera;
+  camera.position = FixedVector(
+      vector(WholeVector(from.position), WholeVector(to.position), progress));
+  camera.look_at = FixedVector(
+      vector(WholeVector(from.look_at), WholeVector(to.look_at), progress));
+  camera.roll = scalar({.start = from.roll, .end = to.roll}, progress);
+  camera.far_clip =
+      scalar({.start = from.far_clip, .end = to.far_clip}, progress);
+  camera.near_clip =
+      scalar({.start = from.near_clip, .end = to.near_clip}, progress);
+}
+
+void StoreShake(EffectCameraPose& camera, int channel, std::int32_t offset) {
+  switch (channel) {
+    case kLateralChannel:
+      camera.shake_lateral = offset;
+      break;
+    case kVerticalChannel:
+      camera.shake_vertical = offset;
+      break;
+    case kDepthChannel:
+      camera.shake_depth = offset;
+      break;
+    case kRollChannel:
+      camera.shake_roll = offset >> kFractionBits;
+      break;
+    default:
+      break;
+  }
+}
+
+void BeginEasedTransition(EffectCameraState& state,
+                          std::uint8_t duration_frames) noexcept {
+  state.motion_frame = 0;
+  state.motion_duration =
+      static_cast<std::int16_t>(duration_frames == 0 ? 1 : duration_frames);
+  SetEffectCameraTransitionMode(
+      state, static_cast<std::int32_t>(CameraTransition::kCosine));
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_800D1930 (src/BATTLE/BATTLE.PRG/5BF94.c:6474)
-void Effects_ResetEffectCameraMotion(void)
-{
-    int i;
-    Effects_enabledShakeChannels = 0;
-    Effects_cameraTransitionMode = 0;
-    Effects_cameraMotionFrame = 0;
-    Effects_cameraMotionDuration = 0;
-
-    for (i = 0; i < 4; ++i) {
-        Effects_cameraShakeChannels[i].phase = 0xFF;
-    }
+void ResetEffectCameraMotion(EffectCameraState& state) noexcept {
+  state.enabled_channels = 0;
+  state.transition_mode = 0;
+  state.motion_frame = 0;
+  state.motion_duration = 0;
+  for (CameraShakeChannel& channel : state.channels) {
+    channel.phase = kStoppedPhase;
+  }
 }
 
 // decomp: BATTLE.PRG func_800D1B18 (src/BATTLE/BATTLE.PRG/5BF94.c:6516)
-void Effects_CaptureEffectCamera(Effects_EffectCamera* camera_state)
-{
-    Field_CameraPosition(&camera_state->position);
-    Field_CameraLookAt(&camera_state->lookAt);
-    camera_state->roll = Field_CameraRoll() + ONE * 8;
-    camera_state->nearClip = Render_nearClip;
-    camera_state->projectionDistance = Render_projectionDistance;
-    camera_state->farClip = Render_frameScratch.camera.farClip;
+void CaptureEffectCamera(EffectCameraHost& host, EffectCameraPose& pose) {
+  const FieldCameraSnapshot field = host.CurrentCamera();
+  pose.position = field.position;
+  pose.look_at = field.look_at;
+  pose.roll = Math::WrappingAdd(field.roll, kRollBias);
+  pose.near_clip = field.near_clip;
+  pose.projection_distance = field.projection_distance;
+  pose.far_clip = field.far_clip;
 }
 
 // decomp: BATTLE.PRG func_800D1B80 (src/BATTLE/BATTLE.PRG/5BF94.c:6526)
-void Effects_ApplyEffectCamera(Effects_EffectCamera* camera)
-{
-    VECTOR offset, position;
-    MATRIX unusedTransform;
-    SVECTOR unusedRotation;
-    int dx, dz, yaw, pitch, horizontal;
-    dx = (camera->position.vx - camera->lookAt.vx) >> 12;
-    dz = (camera->position.vz - camera->lookAt.vz) >> 12;
-    yaw = VS::Core::Math::Arctangent2(dx, dz);
-    offset.vx = VS::Core::Math::Cosine(yaw) * (camera->shakeLateral >> 12);
-    offset.vz = -VS::Core::Math::Sine(yaw) * (camera->shakeLateral >> 12);
-    pitch = VS::Core::Math::Arctangent2(
-        (camera->position.vy - camera->lookAt.vy) >> 12, VS::Core::Math::SquareRootInteger(dx * dx + dz * dz));
-    offset.vy = -VS::Core::Math::Sine(pitch) * (camera->shakeDepth >> 12);
-    horizontal = -VS::Core::Math::Cosine(pitch) * (camera->shakeDepth >> 12);
-    offset.vy += VS::Core::Math::Cosine(pitch) * (camera->shakeVertical >> 12);
-    horizontal += -VS::Core::Math::Sine(pitch) * (camera->shakeVertical >> 12);
-    offset.vx += VS::Core::Math::Sine(yaw) * (horizontal >>= 12);
-    offset.vz += VS::Core::Math::Cosine(yaw) * horizontal;
-    position.vx = camera->position.vx + offset.vx;
-    position.vy = camera->position.vy + offset.vy;
-    position.vz = camera->position.vz + offset.vz;
-    Field_SetCameraPosition(&position);
-    position.vx = camera->lookAt.vx + offset.vx;
-    position.vy = camera->lookAt.vy + offset.vy;
-    position.vz = camera->lookAt.vz + offset.vz;
-    Field_SetCameraLookAt(&position);
-    {
-        int rollOffset = camera->shakeRoll - 0x8000;
-        Field_SetCameraRoll(camera->roll + rollOffset);
-    }
-    VS::Render::SetLiveCameraNearClip(camera->nearClip);
-    VS::Render::SetLiveCameraProjectionDistance(camera->projectionDistance);
-    // #279: the original leaves the final offset.vz in a1, so it is the
-    // preserve_texture_lod argument (BATTLE func_800D1B80, 0x800D1CF8).
-    VS::Render::SetLiveCameraFarClip(camera->farClip, offset.vz);
-    VS::Render::BuildLiveCameraViewMatrix();
+void ApplyEffectCamera(const EffectCameraPose& pose, EffectCameraHost& host) {
+  const std::int32_t dx =
+      Whole(Math::WrappingSubtract(pose.position.x, pose.look_at.x));
+  const std::int32_t dz =
+      Whole(Math::WrappingSubtract(pose.position.z, pose.look_at.z));
+  const std::int32_t yaw = Math::Arctangent2(dx, dz);
+  const std::int32_t lateral = Whole(pose.shake_lateral);
+  Math::Vec3 offset{.x = Math::WrappingMultiply(Math::Cosine(yaw), lateral),
+                    .y = 0,
+                    .z = Math::WrappingMultiply(-Math::Sine(yaw), lateral)};
+  const std::int32_t pitch = Math::Arctangent2(
+      Whole(Math::WrappingSubtract(pose.position.y, pose.look_at.y)),
+      Math::SquareRootInteger(Math::WrappingAdd(
+          Math::WrappingMultiply(dx, dx), Math::WrappingMultiply(dz, dz))));
+  const std::int32_t depth = Whole(pose.shake_depth);
+  const std::int32_t vertical = Whole(pose.shake_vertical);
+  offset.y =
+      Math::WrappingAdd(Math::WrappingMultiply(-Math::Sine(pitch), depth),
+                        Math::WrappingMultiply(Math::Cosine(pitch), vertical));
+  const std::int32_t horizontal = Whole(
+      Math::WrappingAdd(Math::WrappingMultiply(-Math::Cosine(pitch), depth),
+                        Math::WrappingMultiply(-Math::Sine(pitch), vertical)));
+  offset.x = Math::WrappingAdd(
+      offset.x, Math::WrappingMultiply(Math::Sine(yaw), horizontal));
+  offset.z = Math::WrappingAdd(
+      offset.z, Math::WrappingMultiply(Math::Cosine(yaw), horizontal));
+  host.ApplyCamera({
+      .position = Add(pose.position, offset),
+      .look_at = Add(pose.look_at, offset),
+      .roll = Math::WrappingAdd(
+          pose.roll, Math::WrappingSubtract(pose.shake_roll, kRollBias)),
+      .near_clip = pose.near_clip,
+      .projection_distance = pose.projection_distance,
+      .far_clip = pose.far_clip,
+      .texture_lod_hint = offset.z,
+  });
 }
 
 // decomp: BATTLE.PRG func_800D1DE4 (src/BATTLE/BATTLE.PRG/5BF94.c:6564)
-void Effects_EnableCameraShakeChannels(int channel_mask) { Effects_enabledShakeChannels |= channel_mask; }
+void EnableCameraShakeChannels(EffectCameraState& state,
+                               std::int32_t channel_mask) noexcept {
+  state.enabled_channels = static_cast<std::uint8_t>(
+      state.enabled_channels | static_cast<std::uint32_t>(channel_mask));
+}
 
 // decomp: BATTLE.PRG func_800D1DFC (src/BATTLE/BATTLE.PRG/5BF94.c:6566)
-void Effects_DisableCameraShakeChannels(int channel_mask)
-{
-    if (channel_mask != 0) {
-        Effects_enabledShakeChannels &= ~channel_mask;
-        return;
-    }
-    Effects_enabledShakeChannels = 0;
+void DisableCameraShakeChannels(EffectCameraState& state,
+                                std::int32_t channel_mask) noexcept {
+  if (channel_mask != 0) {
+    state.enabled_channels = static_cast<std::uint8_t>(
+        state.enabled_channels & ~static_cast<std::uint32_t>(channel_mask));
+    return;
+  }
+  state.enabled_channels = 0;
 }
 
 // decomp: BATTLE.PRG func_800D1E20 (src/BATTLE/BATTLE.PRG/5BF94.c:6575)
-void Effects_SetEffectCameraTransitionMode(int transition_mode) { Effects_cameraTransitionMode = transition_mode; }
+void SetEffectCameraTransitionMode(EffectCameraState& state,
+                                   std::int32_t transition_mode) noexcept {
+  state.transition_mode = static_cast<std::uint32_t>(transition_mode);
+}
 
 // decomp: BATTLE.PRG func_800D1E2C (src/BATTLE/BATTLE.PRG/5BF94.c:6577)
-u_char Effects_CameraShakePhaseStep(Effects_CameraShakeChannel* shake_channel)
-{
-    int phase_step;
-
-    if (shake_channel->curveStep) {
-        phase_step = Effects_SampleEffectCurve(shake_channel->stepCurve, shake_channel->phase);
-    } else {
-        phase_step = shake_channel->stepCurve;
-    }
-    return phase_step;
+std::uint8_t CameraShakePhaseStep(const CameraShakeChannel& channel,
+                                  EffectCameraHost& host) {
+  if (!channel.curve_step) {
+    return channel.step_curve;
+  }
+  return static_cast<std::uint8_t>(
+      host.SampleCurve(channel.step_curve, channel.phase).value);
 }
 
 // decomp: BATTLE.PRG func_800D1E78 (src/BATTLE/BATTLE.PRG/5BF94.c:6589)
-u_char Effects_RandomCameraShakePhaseStep(Effects_CameraShakeChannel* shake_channel)
-{
-    int random_step_limit;
-
-    if (shake_channel->randomStep) {
-        random_step_limit = Effects_SampleEffectCurve(shake_channel->randomStepCurve, shake_channel->phase);
-    } else {
-        random_step_limit = shake_channel->randomStepCurve;
-    }
-
-    if (random_step_limit == 0) {
-        return 0;
-    }
-
-    return (Core_Random_Rand() % random_step_limit);
+std::uint8_t RandomCameraShakePhaseStep(const CameraShakeChannel& channel,
+                                        EffectCameraHost& host) {
+  const std::int32_t limit =
+      channel.random_step
+          ? host.SampleCurve(channel.random_step_curve, channel.phase).value
+          : channel.random_step_curve;
+  if (limit == 0) {
+    return 0;
+  }
+  return static_cast<std::uint8_t>(host.Random() % limit);
 }
 
 // decomp: BATTLE.PRG func_800D1EF0 (src/BATTLE/BATTLE.PRG/5BF94.c:6606)
-void Effects_StartCameraShakeChannels(int channel_mask, int shape_curve, int amplitude, int step_uses_curve, int step_curve_or_value, int random_step_uses_curve, int random_step_curve_or_value)
-{
-    int i;
-
-    for (i = 0; i < 4; ++i) {
-        if ((channel_mask >> i) & 1) {
-            Effects_CameraShakeChannel* p = &Effects_cameraShakeChannels[i];
-            p->shapeCurve = shape_curve;
-            p->amplitude = amplitude;
-            p->curveStep = step_uses_curve;
-            p->stepCurve = step_curve_or_value;
-            p->randomStep = random_step_uses_curve;
-            p->randomStepCurve = random_step_curve_or_value;
-            p->phase = 0;
-            p->angle = Effects_RandomCameraShakePhaseStep(p);
-            Effects_EnableCameraShakeChannels(1 << i);
-        }
+void StartCameraShakeChannels(EffectCameraState& state, EffectCameraHost& host,
+                              std::int32_t channel_mask,
+                              const CameraShakeSettings& settings) {
+  for (int i = 0; i < kCameraShakeChannels; ++i) {
+    if (!ChannelBit(static_cast<std::uint32_t>(channel_mask), i)) {
+      continue;
     }
+    CameraShakeChannel& channel = state.channels[static_cast<std::size_t>(i)];
+    channel.shape_curve =
+        static_cast<std::uint8_t>(settings.shape_curve & kShapeCurveMask);
+    channel.amplitude = static_cast<std::uint8_t>(settings.amplitude);
+    channel.curve_step = (settings.step_uses_curve & 1) != 0;
+    channel.step_curve =
+        static_cast<std::uint8_t>(settings.step_curve_or_value);
+    channel.random_step = (settings.random_step_uses_curve & 1) != 0;
+    channel.random_step_curve =
+        static_cast<std::uint8_t>(settings.random_step_curve_or_value);
+    channel.phase = 0;
+    channel.angle = RandomCameraShakePhaseStep(channel, host);
+    EnableCameraShakeChannels(state, ChannelMask(i));
+  }
 }
 
 // decomp: BATTLE.PRG func_800D1FEC (src/BATTLE/BATTLE.PRG/5BF94.c:6626)
-void Effects_StopCameraShakeChannels(int channel_mask)
-{
-    int i;
-
-    for (i = 0; i < 4; ++i) {
-        if ((channel_mask >> i) & 1) {
-            Effects_cameraShakeChannels[i].phase = 0xFF;
-            Effects_DisableCameraShakeChannels(1 << i);
-        }
+void StopCameraShakeChannels(EffectCameraState& state,
+                             std::int32_t channel_mask) noexcept {
+  for (int i = 0; i < kCameraShakeChannels; ++i) {
+    if (ChannelBit(static_cast<std::uint32_t>(channel_mask), i)) {
+      state.channels[static_cast<std::size_t>(i)].phase = kStoppedPhase;
+      DisableCameraShakeChannels(state, ChannelMask(i));
     }
+  }
 }
 
 // decomp: BATTLE.PRG func_800D206C (src/BATTLE/BATTLE.PRG/5BF94.c:6638)
-void Effects_UpdateCameraShakeChannels(void)
-{
-    int i;
-
-    for (i = 0; i < 4; ++i) {
-        int v;
-
-        if (!((Effects_enabledShakeChannels >> i) & 1)) {
-            continue;
-        }
-
-        v = Effects_SampleSegmentedEffectCurve(Effects_cameraShakeChannels[i].shapeCurve, Effects_cameraShakeChannels[i].phase);
-
-        if (v >= 0) {
-            v = ((VS::Core::Math::Sine(Effects_cameraShakeChannels[i].angle * 32) * v) * Effects_cameraShakeChannels[i].amplitude) >> 8;
-
-            switch (i) {
-            case 0:
-                Effects_effectCamera.shakeLateral = v;
-                break;
-
-            case 1:
-                Effects_effectCamera.shakeVertical = v;
-                break;
-
-            case 2:
-                Effects_effectCamera.shakeDepth = v;
-                break;
-
-            case 3:
-                Effects_effectCamera.shakeRoll = v >> 12;
-                break;
-            }
-
-            Effects_cameraShakeChannels[i].angle +=
-                Effects_CameraShakePhaseStep(&Effects_cameraShakeChannels[i]) + Effects_RandomCameraShakePhaseStep(&Effects_cameraShakeChannels[i]);
-            ++Effects_cameraShakeChannels[i].phase;
-        } else {
-            Effects_StopCameraShakeChannels(1 << i);
-        }
+void UpdateCameraShakeChannels(EffectCameraState& state,
+                               EffectCameraHost& host) {
+  for (int i = 0; i < kCameraShakeChannels; ++i) {
+    if (!ChannelBit(state.enabled_channels, i)) {
+      continue;
     }
+    CameraShakeChannel& channel = state.channels[static_cast<std::size_t>(i)];
+    const CurveSample shape =
+        host.SampleSegmentedCurve(channel.shape_curve, channel.phase);
+    // A refused shape curve ends the channel like the curve's end does.
+    if (IsCurveRefusal(shape.status) || shape.value < 0) {
+      StopCameraShakeChannels(state, ChannelMask(i));
+      continue;
+    }
+    const std::int32_t wave = Math::WrappingMultiply(
+        Math::WrappingMultiply(Math::Sine(channel.angle * kShakeAngleScale),
+                               shape.value),
+        channel.amplitude);
+    StoreShake(state.camera, i, wave >> kShakeAmplitudeBits);
+    const std::uint8_t step = CameraShakePhaseStep(channel, host);
+    const std::uint8_t random_step = RandomCameraShakePhaseStep(channel, host);
+    channel.angle =
+        static_cast<std::uint8_t>(channel.angle + step + random_step);
+    ++channel.phase;
+  }
 }
 
 // decomp: BATTLE.PRG func_800D21C0 (src/BATTLE/BATTLE.PRG/5BF94.c:6681)
-void Effects_InterpolateEffectCameraLinear(void)
-{
-    VECTOR start;
-    VECTOR end;
-    VECTOR result;
-    setVector(&start, Effects_cameraMotionEnds[0].position.vx >> 12, Effects_cameraMotionEnds[0].position.vy >> 12,
-        Effects_cameraMotionEnds[0].position.vz >> 12);
-    setVector(&end, Effects_cameraMotionEnds[1].position.vx >> 12, Effects_cameraMotionEnds[1].position.vy >> 12,
-        Effects_cameraMotionEnds[1].position.vz >> 12);
-    VS::Core::Math::InterpolateLiveTimedVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
-    setVector(&Effects_effectCamera.position, result.vx << 12, result.vy << 12, result.vz << 12);
-    setVector(&start, Effects_cameraMotionEnds[0].lookAt.vx >> 12, Effects_cameraMotionEnds[0].lookAt.vy >> 12,
-        Effects_cameraMotionEnds[0].lookAt.vz >> 12);
-    setVector(&end, Effects_cameraMotionEnds[1].lookAt.vx >> 12, Effects_cameraMotionEnds[1].lookAt.vy >> 12,
-        Effects_cameraMotionEnds[1].lookAt.vz >> 12);
-    VS::Core::Math::InterpolateLiveTimedVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
-    Effects_effectCamera.lookAt.vx = result.vx << 12;
-    Effects_effectCamera.lookAt.vy = result.vy << 12;
-    Effects_effectCamera.lookAt.vz = result.vz << 12;
-    Effects_effectCamera.roll =
-        VS::Core::Math::InterpolateLiveTimedScalar(Effects_cameraMotionEnds[0].roll, Effects_cameraMotionEnds[1].roll, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.farClip = VS::Core::Math::InterpolateLiveTimedScalar(
-        Effects_cameraMotionEnds[0].farClip, Effects_cameraMotionEnds[1].farClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.nearClip = VS::Core::Math::InterpolateLiveTimedScalar(
-        Effects_cameraMotionEnds[0].nearClip, Effects_cameraMotionEnds[1].nearClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
+void InterpolateEffectCameraLinear(EffectCameraState& state) noexcept {
+  InterpolatePose(state, Math::InterpolateTimedVector,
+                  Math::InterpolateTimedScalar);
 }
 
 // decomp: BATTLE.PRG func_800D236C (src/BATTLE/BATTLE.PRG/5BF94.c:6708)
-void Effects_InterpolateEffectCameraCosine(void)
-{
-    VECTOR start;
-    VECTOR end;
-    VECTOR result;
-    setVector(&start, Effects_cameraMotionEnds[0].position.vx >> 12, Effects_cameraMotionEnds[0].position.vy >> 12,
-        Effects_cameraMotionEnds[0].position.vz >> 12);
-    setVector(&end, Effects_cameraMotionEnds[1].position.vx >> 12, Effects_cameraMotionEnds[1].position.vy >> 12,
-        Effects_cameraMotionEnds[1].position.vz >> 12);
-    VS::Core::Math::InterpolateLiveCosineVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
-    setVector(&Effects_effectCamera.position, result.vx << 12, result.vy << 12, result.vz << 12);
-    setVector(&start, Effects_cameraMotionEnds[0].lookAt.vx >> 12, Effects_cameraMotionEnds[0].lookAt.vy >> 12,
-        Effects_cameraMotionEnds[0].lookAt.vz >> 12);
-    setVector(&end, Effects_cameraMotionEnds[1].lookAt.vx >> 12, Effects_cameraMotionEnds[1].lookAt.vy >> 12,
-        Effects_cameraMotionEnds[1].lookAt.vz >> 12);
-    VS::Core::Math::InterpolateLiveCosineVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
-    Effects_effectCamera.lookAt.vx = result.vx << 12;
-    Effects_effectCamera.lookAt.vy = result.vy << 12;
-    Effects_effectCamera.lookAt.vz = result.vz << 12;
-    Effects_effectCamera.roll =
-        VS::Core::Math::InterpolateLiveCosineScalar(Effects_cameraMotionEnds[0].roll, Effects_cameraMotionEnds[1].roll, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.farClip = VS::Core::Math::InterpolateLiveCosineScalar(
-        Effects_cameraMotionEnds[0].farClip, Effects_cameraMotionEnds[1].farClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.nearClip = VS::Core::Math::InterpolateLiveCosineScalar(
-        Effects_cameraMotionEnds[0].nearClip, Effects_cameraMotionEnds[1].nearClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
+void InterpolateEffectCameraCosine(EffectCameraState& state) noexcept {
+  InterpolatePose(state, Math::InterpolateCosineVector,
+                  Math::InterpolateCosineScalar);
 }
 
 // decomp: BATTLE.PRG func_800D2518 (src/BATTLE/BATTLE.PRG/5BF94.c:6735)
-void Effects_HoldEffectCameraStartPose(void) { Effects_effectCamera = Effects_cameraMotionEnds[0]; }
+void HoldEffectCameraStartPose(EffectCameraState& state) noexcept {
+  state.camera = state.motion_ends[0];
+}
 
 // decomp: BATTLE.PRG func_800D2560 (src/BATTLE/BATTLE.PRG/5BF94.c:6737)
-void Effects_UpdateEffectCameraMotion(void)
-{
-    int had_camera_transition = Effects_cameraTransitionMode != 0;
-
-    if (Effects_cameraMotionDuration != 0) {
-        switch (Effects_cameraTransitionMode) {
-        case 0:
-            break;
-        case 1:
-            Effects_InterpolateEffectCameraLinear();
-            break;
-        case 2:
-            Effects_InterpolateEffectCameraCosine();
-            break;
-        case 3:
-            Effects_HoldEffectCameraStartPose();
-            break;
-        }
-        if (Effects_cameraMotionFrame <= Effects_cameraMotionDuration) {
-            ++Effects_cameraMotionFrame;
-            if (Effects_cameraMotionFrame > Effects_cameraMotionDuration) {
-                Effects_cameraMotionFrame = 0;
-                Effects_cameraMotionDuration = 0;
-                Effects_SetEffectCameraTransitionMode(0);
-            }
-        }
+void UpdateEffectCameraMotion(EffectCameraState& state,
+                              EffectCameraHost& host) {
+  const bool had_transition = state.transition_mode != 0;
+  if (state.motion_duration != 0) {
+    switch (static_cast<CameraTransition>(state.transition_mode)) {
+      case CameraTransition::kLinear:
+        InterpolateEffectCameraLinear(state);
+        break;
+      case CameraTransition::kCosine:
+        InterpolateEffectCameraCosine(state);
+        break;
+      case CameraTransition::kHold:
+        HoldEffectCameraStartPose(state);
+        break;
+      case CameraTransition::kNone:
+      default:
+        break;
     }
-    if (Effects_enabledShakeChannels != 0) {
-        Effects_UpdateCameraShakeChannels();
-    } else {
-        Effects_effectCamera.shakeRoll = 0;
-        Effects_effectCamera.shakeDepth = 0;
-        Effects_effectCamera.shakeVertical = 0;
-        Effects_effectCamera.shakeLateral = 0;
+    if (state.motion_frame <= state.motion_duration) {
+      state.motion_frame = static_cast<std::int16_t>(state.motion_frame + 1);
+      if (state.motion_frame > state.motion_duration) {
+        state.motion_frame = 0;
+        state.motion_duration = 0;
+        SetEffectCameraTransitionMode(
+            state, static_cast<std::int32_t>(CameraTransition::kNone));
+      }
     }
-    if (Effects_enabledShakeChannels != 0 || had_camera_transition) {
-        Effects_ApplyEffectCamera(&Effects_effectCamera);
-    }
+  }
+  if (state.enabled_channels != 0) {
+    UpdateCameraShakeChannels(state, host);
+  } else {
+    state.camera.shake_roll = 0;
+    state.camera.shake_depth = 0;
+    state.camera.shake_vertical = 0;
+    state.camera.shake_lateral = 0;
+  }
+  if (state.enabled_channels != 0 || had_transition) {
+    ApplyEffectCamera(state.camera, host);
+  }
 }
 
 // decomp: BATTLE.PRG func_800D66FC (src/BATTLE/BATTLE.PRG/5BF94.c:8308)
-void Effects_FocusCameraOnEffectTransform(Effects_EffectInstance* effect_instance, u_char transform_index, u_char duration_frames)
-{
-    Effects_CaptureEffectCamera(Effects_cameraMotionEnds);
-    Effects_CaptureEffectCamera(&Effects_cameraMotionEnds[1]);
-    Effects_cameraMotionEnds[1].lookAt.vx = effect_instance->transforms[transform_index].world.t[0] * ONE;
-    Effects_cameraMotionEnds[1].lookAt.vy = effect_instance->transforms[transform_index].world.t[1] * ONE;
-    Effects_cameraMotionEnds[1].lookAt.vz = effect_instance->transforms[transform_index].world.t[2] * ONE;
-    Effects_cameraMotionFrame = 0;
-    if (duration_frames == 0) {
-        duration_frames = 1;
-    }
-    Effects_cameraMotionDuration = duration_frames;
-    Effects_SetEffectCameraTransitionMode(2);
+void FocusCameraOnEffectTransform(EffectCameraState& state,
+                                  EffectCameraHost& host,
+                                  Math::Vec3 transform_translation,
+                                  std::uint8_t duration_frames) {
+  CaptureEffectCamera(host, state.motion_ends[0]);
+  CaptureEffectCamera(host, state.motion_ends[1]);
+  state.motion_ends[1].look_at = FixedVector(transform_translation);
+  BeginEasedTransition(state, duration_frames);
 }
 
 // decomp: BATTLE.PRG func_800D67C4 (src/BATTLE/BATTLE.PRG/5BF94.c:8323)
-void Effects_RestoreActionEffectCamera(Effects_EffectInstance* effect_instance, u_char duration_frames)
-{
-    Effects_CaptureEffectCamera(Effects_cameraMotionEnds);
-    Effects_cameraMotionEnds[1] = Effects_savedActionCamera;
-    Effects_cameraMotionFrame = 0;
-    if (duration_frames == 0) {
-        duration_frames = 1;
-    }
-    Effects_cameraMotionDuration = duration_frames;
-    Effects_SetEffectCameraTransitionMode(2);
+void RestoreActionEffectCamera(EffectCameraState& state, EffectCameraHost& host,
+                               std::uint8_t duration_frames) {
+  CaptureEffectCamera(host, state.motion_ends[0]);
+  state.motion_ends[1] = state.saved_action_camera;
+  BeginEasedTransition(state, duration_frames);
 }
-
-}  // extern "C"
+}  // namespace VS::Effects

@@ -4,10 +4,12 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/CameraLive.hpp"
+#include "Effects/CurvesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Camera.h"
-#include "Effects/Curves.h"
+#include "Effects/CameraLiveState.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Plugins/Plg128.h"
@@ -18,7 +20,7 @@ extern "C" {
 SVECTOR Effects_Plg128_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_80100770 (D_80100770@EFFECT/PLG128.BIN)
-CVECTOR Effects_Plg128_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg128_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_80100790 (D_80100790@EFFECT/PLG128.BIN)
 SVECTOR Effects_Plg128_surfaceVertices2[5][16]; /* contents: module image (ModuleData.cpp) */
@@ -126,14 +128,14 @@ int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int
         state->lifetime = packed_parameters;
         state->mode = packed_parameters >> 16;
         state->age = 0;
-        Effects_CaptureEffectCamera(&state->startCamera);
-        Effects_CaptureEffectCamera(&state->endCamera);
+        VS::Effects::LiveCaptureEffectCamera(&state->startCamera);
+        VS::Effects::LiveCaptureEffectCamera(&state->endCamera);
         Effects_cameraMotionFrame = 0;
         Effects_cameraMotionDuration = packed_parameters & 0xFF;
         switch (state->mode) {
         case 0:
         case 1:
-            Effects_SetEffectCameraTransitionMode(2);
+            VS::Effects::LiveSetEffectCameraTransitionMode(2);
             break;
         }
         break;
@@ -142,19 +144,19 @@ int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int
         scratch->flags = effect->flags;
         curve = effect->positionCurve;
         VS::Core::Math::InterpolateLiveSevenBitVector(
-            effect->positionRange, Effects_SampleEffectCurve(curve, state->age), &scratch->position);
+            effect->positionRange, VS::Effects::LiveSampleEffectCurve(curve, state->age), &scratch->position);
         VS::Core::Math::InterpolateLiveSevenBitVector(
-            effect->extentRange, Effects_SampleEffectCurve(curve, state->age), &scratch->extent);
+            effect->extentRange, VS::Effects::LiveSampleEffectCurve(curve, state->age), &scratch->extent);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[0],
-            Effects_SampleEffectCurve(effect->directionCurve, state->age), &scratch->baseDirection);
+            VS::Effects::LiveSampleEffectCurve(effect->directionCurve, state->age), &scratch->baseDirection);
         VS::Core::Math::InterpolateLiveSevenBitPlane(effect->pairRanges[2],
-            Effects_SampleEffectCurve(effect->speedCurve, state->age), scratch->speedRange);
+            VS::Effects::LiveSampleEffectCurve(effect->speedCurve, state->age), scratch->speedRange);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[6],
-            Effects_SampleEffectCurve(effect->attractionOffsetCurve, state->age), &scratch->attractionOffset);
+            VS::Effects::LiveSampleEffectCurve(effect->attractionOffsetCurve, state->age), &scratch->attractionOffset);
         VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[7],
-            Effects_SampleEffectCurve(effect->attractionJitterCurve, state->age), &scratch->attractionJitter);
+            VS::Effects::LiveSampleEffectCurve(effect->attractionJitterCurve, state->age), &scratch->attractionJitter);
         state->nearClip = VS::Core::Math::InterpolateLiveShortPair(
-            effect->innerExtentRange, Effects_SampleEffectCurve(effect->innerExtentCurve, state->age));
+            effect->innerExtentRange, VS::Effects::LiveSampleEffectCurve(effect->innerExtentCurve, state->age));
         switch (state->mode) {
         case 0:
             Effects_Plg128_ResolveCameraEndpoints(state, scratch, battle, effect);

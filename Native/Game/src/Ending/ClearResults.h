@@ -28,24 +28,5 @@ extern int Ending_resultsAnimationFrame;
 extern int Ending_isLeavingResults;
 extern int Ending_isScoreIncrementing;
 extern int Ending_isMapCompletionIncrementing;
-void Ending_CommitClearProgress(void);
-void Ending_UpdateClearProgress(void);
-void Ending_AwardClearTitles(void);
-void Ending_ShowClearResults(void);
-int Ending_LoadClearResultsStep(void);
-int Ending_DrawClearResults(void);
-void Ending_DrawRankBackground(int fade_frame);
-void Ending_DrawCongratulations(int x, int y, int fade_frame);
-void Ending_DrawScore(int x, int y, int fade_frame, int arg3 __attribute__((unused)));
-void Ending_DrawCountingScore(
-    int x, int y, int animation_frame, int arg3 __attribute__((unused)));
-void Ending_DrawMapCompletion(
-    int x, int y, int fade_frame, int arg3 __attribute__((unused)));
-void Ending_DrawCountingMapCompletion(
-    int x, int y, int fade_frame, int arg3 __attribute__((unused)));
-void Ending_DrawRiskbreakerRankHeading(int x, int y, int timer);
-void Ending_DrawRiskbreakerRank(int x, int y, int timer);
-void Ending_DetermineRiskbreakerRank(void);
-void Ending_CalculateClearScore(void);
 
 #endif // VS_ENDING_CLEARRESULTS_H_DECLS

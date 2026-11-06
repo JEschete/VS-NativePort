@@ -53,10 +53,16 @@
     <ClCompile Include="src\ActorAttachmentTests.cpp" />
     <ClCompile Include="src\ActorCleanupCoreTests.cpp" />
     <ClCompile Include="src\ActorCleanupTests.cpp" />
+    <ClCompile Include="src\ActorCommandQueueTests.cpp" />
     <ClCompile Include="src\ActorCommandSliceTests.cpp" />
     <ClCompile Include="src\ActorCommandTests.cpp" />
+    <ClCompile Include="src\ActorMotionTests.cpp" />
+    <ClCompile Include="src\ActorMovementTests.cpp" />
+    <ClCompile Include="src\ActorRosterTests.cpp" />
     <ClCompile Include="src\ActorShadowTests.cpp" />
     <ClCompile Include="src\ActorSoundTransitionTests.cpp" />
+    <ClCompile Include="src\ActorSpawningTests.cpp" />
+    <ClCompile Include="src\ActorStateTests.cpp" />
     <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp" />
     <ClCompile Include="src\AiDecisionsTests.cpp" />
     <ClCompile Include="src\AiDecisionTests.cpp" />
@@ -67,11 +73,17 @@
     <ClCompile Include="src\AiPlanningTests.cpp" />
     <ClCompile Include="src\AiRelationsTests.cpp" />
     <ClCompile Include="src\AiSessionResetTests.cpp" />
+    <ClCompile Include="src\AnimationControlTests.cpp" />
+    <ClCompile Include="src\AnimationPoseTests.cpp" />
     <ClCompile Include="src\AppearanceTests.cpp" />
     <ClCompile Include="src\AppearanceTransitionTests.cpp" />
+    <ClCompile Include="src\AudioControlSfxTests.cpp" />
     <ClCompile Include="src\AudioMixerDriverTests.cpp" />
+    <ClCompile Include="src\AudioMusicStreamTests.cpp" />
+    <ClCompile Include="src\AudioPlaybackBanksTests.cpp" />
     <ClCompile Include="src\AudioTests.cpp" />
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />
+    <ClCompile Include="src\BattleTargetingTests.cpp" />
     <ClCompile Include="src\CameraConstraintTests.cpp" />
     <ClCompile Include="src\CdDriveTests.cpp" />
     <ClCompile Include="src\CollisionSamplingTests.cpp" />
@@ -99,6 +111,10 @@
     <ClCompile Include="src\DiscReaderTests.cpp" />
     <ClCompile Include="src\DoorMatchesSliceTests.cpp" />
     <ClCompile Include="src\DoorTransitionTests.cpp" />
+    <ClCompile Include="src\EffectParticleTests.cpp" />
+    <ClCompile Include="src\EffectResourcesTransformsTests.cpp" />
+    <ClCompile Include="src\EffectRingTests.cpp" />
+    <ClCompile Include="src\EffectSurfaceTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -107,13 +123,21 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\EffectTrailNineTests.cpp" />
+    <ClCompile Include="src\EffectTrailTests.cpp" />
     <ClCompile Include="src\EncounterProfileTests.cpp" />
     <ClCompile Include="src\EncounterTests.cpp" />
     <ClCompile Include="src\EndingArtTests.cpp" />
+    <ClCompile Include="src\EndingCreditsTests.cpp" />
+    <ClCompile Include="src\EndingResultsTests.cpp" />
     <ClCompile Include="src\EngagementCoreTests.cpp" />
     <ClCompile Include="src\EngagementTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
     <ClCompile Include="src\EventRetentionPredicateTests.cpp" />
+    <ClCompile Include="src\EventScriptActorCommandsTests.cpp" />
+    <ClCompile Include="src\EventScriptAudioCommandsTests.cpp" />
+    <ClCompile Include="src\EventScriptDialogCommandsTests.cpp" />
+    <ClCompile Include="src\EventScriptEffectCommandsTests.cpp" />
     <ClCompile Include="src\EventScriptTestCases.cpp" />
     <ClCompile Include="src\EventScriptTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -124,12 +148,22 @@
     </ClCompile>
     <ClCompile Include="src\EventSessionTests.cpp" />
     <ClCompile Include="src\EventWeaponModeTests.cpp" />
+    <ClCompile Include="src\FieldActorCollisionTests.cpp" />
+    <ClCompile Include="src\FieldBackgroundTests.cpp" />
+    <ClCompile Include="src\FieldCameraCoreTests.cpp" />
+    <ClCompile Include="src\FieldCollisionMapTests.cpp" />
+    <ClCompile Include="src\FieldEnvironmentTests.cpp" />
+    <ClCompile Include="src\FieldRoomLoadingTests.cpp" />
+    <ClCompile Include="src\FieldRoomRenderingTests.cpp" />
+    <ClCompile Include="src\FieldRoomsTests.cpp" />
     <ClCompile Include="src\FileMenuTests.cpp" />
+    <ClCompile Include="src\FilesTests.cpp" />
     <ClCompile Include="src\FlightTerrainTests.cpp" />
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\FrameTimingTests.cpp" />
     <ClCompile Include="src\FrameUpdateTests.cpp" />
     <ClCompile Include="src\GameFontTests.cpp" />
+    <ClCompile Include="src\GameplayLoopTests.cpp" />
     <ClCompile Include="src\GimImagesTests.cpp" />
     <ClCompile Include="src\GimRenderTestCases.cpp" />
     <ClCompile Include="src\GimRenderTests.cpp">
@@ -161,7 +195,11 @@
     <ClCompile Include="src\ManualRenderTests.cpp" />
     <ClCompile Include="src\MapRenderTests.cpp" />
     <ClCompile Include="src\MemoryTests.cpp" />
+    <ClCompile Include="src\MenuActorPreviewTests.cpp" />
     <ClCompile Include="src\MenuAssetsTests.cpp" />
+    <ClCompile Include="src\MenuFrameworkTests.cpp" />
+    <ClCompile Include="src\MenuRowsDetailsTests.cpp" />
+    <ClCompile Include="src\MenuSetupTests.cpp" />
     <ClCompile Include="src\MenuSoundTests.cpp" />
     <ClCompile Include="src\MinimapTests.cpp" />
     <ClCompile Include="src\ModelDrawingTests.cpp" />
@@ -178,6 +216,7 @@
     <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />
     <ClCompile Include="src\NavigationOverrideTests.cpp" />
+    <ClCompile Include="src\OptionsTests.cpp" />
     <ClCompile Include="src\ParticleRenderCoreTests.cpp" />
     <ClCompile Include="src\ParticleRenderTests.cpp" />
     <ClCompile Include="src\PlanningPrimitivesTests.cpp" />
@@ -188,6 +227,7 @@
     <ClCompile Include="src\RadialWarpSliceTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />
     <ClCompile Include="src\ReactionDelayTests.cpp" />
+    <ClCompile Include="src\RenameTests.cpp" />
     <ClCompile Include="src\RenderDisplayTests.cpp" />
     <ClCompile Include="src\RenderPaletteTests.cpp" />
     <ClCompile Include="src\RenderScreenOverlayTests.cpp" />
@@ -195,6 +235,7 @@
     <ClCompile Include="src\ResultsTextureTests.cpp" />
     <ClCompile Include="src\RoomAiMapTests.cpp" />
     <ClCompile Include="src\RoomDrawTests.cpp" />
+    <ClCompile Include="src\RoomEffectsTests.cpp" />
     <ClCompile Include="src\RoomLightingTests.cpp" />
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp" />
     <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
@@ -229,6 +270,7 @@
     <ClCompile Include="src\SphereTerrainSliceTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\SpritesTests.cpp" />
+    <ClCompile Include="src\StateRecordsTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\StreamControlTests.cpp" />
     <ClCompile Include="src\TargetingDrawSliceTests.cpp" />
@@ -239,6 +281,7 @@
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />
     <ClCompile Include="src\TexturePagesTests.cpp" />
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
+    <ClCompile Include="src\TitleMenuTests.cpp" />
     <ClCompile Include="src\TrailEmitterTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
@@ -257,6 +300,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
+    <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />
+    <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">

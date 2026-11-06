@@ -15,23 +15,25 @@
 #include <utility>
 #include <vector>
 
+#include "Actors/ActorStateLive.hpp"
+#include "Audio/SoundBanksLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/CameraLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
@@ -41,13 +43,13 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.h"
 #include "Core/Random.h"
-#include "Field/Camera.h"
-#include "Field/GameMode.h"
+#include "Field/CameraLiveState.h"
+#include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomLoading.h"
+#include "Field/RoomLoadingLiveState.h"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
@@ -56,7 +58,6 @@ extern "C" {
 #include "Items/Loadout.h"
 #include "Render/Camera.h"
 #include "Render/UiPrimitives.h"
-#include "State/Flags.h"
 #include "State/Location.h"
 #include "State/PlayTime.h"
 #include "State/RoomMemory.h"
@@ -159,11 +160,11 @@ Result ValidateAudioConsumer() {
 void SyncMonoOutput(bool mono) {
   const auto before = Audio_Driver_controlLatches.mixBehavior;
   if (((before & kMonoOutput) != 0) == mono) return;
-  // Original loaded-save apply ends with Audio_SetMonoOutput. The production
+  // Original loaded-save apply ends with vs_main_setMonoSound. The production
   // 0x80/0x81 handlers invalidate voice volumes and update the very same latch
   // consumed by native sequencer/XA/stream output. Preserve unrelated live
   // music-stack bits; only the output mode belongs to saved settings.
-  Audio_SetMonoOutput(mono ? 1 : 0);
+  VS::Audio::LiveSetMonoOutput(mono ? 1 : 0);
   Audio_Driver_controlLatches.mixBehavior |= before & ~kOutputModeMask;
 }
 
@@ -380,7 +381,7 @@ VECTOR OrbitPosition(const Snapshot& state) {
                                      state.camera.pitch, state.camera.distance,
                                      state.camera.mode};
   VECTOR position{};
-  Field_ComputeSphericalCameraPosition(&position, &look_at, &values);
+  VS::Field::LiveComputeSphericalCameraPosition(&position, &look_at, &values);
   return position;
 }
 
@@ -880,7 +881,7 @@ void ApplyCaches(const Snapshot& source) {
 void CapturePersistent(Snapshot& state, bool packed_actions = false) {
   for (std::size_t index = 0; index < state.script_flags.size(); ++index) {
     state.script_flags[index] = static_cast<unsigned char>(
-        State_ScriptFlag(static_cast<std::int16_t>(index)));
+        VS::State::LiveScriptFlag(static_cast<std::int16_t>(index)));
   }
   for (std::size_t index = 0; index < state.learned_actions.size(); ++index) {
     state.learned_actions[index] =
@@ -901,8 +902,8 @@ void CapturePersistent(Snapshot& state, bool packed_actions = false) {
 
 void ApplyPersistent(const Snapshot& state) {
   for (std::size_t index = 0; index < state.script_flags.size(); ++index) {
-    State_SetScriptFlag(static_cast<std::int16_t>(index),
-                        static_cast<char>(state.script_flags[index]));
+    VS::State::SetLiveScriptFlag(static_cast<std::int16_t>(index),
+                                 static_cast<char>(state.script_flags[index]));
   }
   std::fill_n(State_learnedActionFlags, std::size(State_learnedActionFlags), 0);
   for (std::size_t index = 0; index < state.learned_actions.size(); ++index) {
@@ -1165,8 +1166,9 @@ Result CaptureActors(Snapshot& state) {
     found->spawnSlot = static_cast<unsigned char>(spawn);
     found->isHidden = 0;
     found->aiFlags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);
-    // Same 0x01000000 projection as Actors_ActorStateFlags, without mutating
-    // its shared scratch word or touching unrelated weapon/model resources.
+    // The action animation test of StateFlag::kActionAnimating
+    // (ActorFlags.cpp), read directly so the snapshot does not compose the
+    // weapon and model state.
     const auto animation =
         Actors_actorRecords[slot]->instance.actionAnimationState;
     found->currentHp =
@@ -1182,7 +1184,7 @@ Result CaptureActors(Snapshot& state) {
     }
     found->statuses = stats.statuses;
     Actors_ActorLocationQuery placement{};
-    Actors_ActorSavedPlacement(slot, stats.movementClass, &placement);
+    VS::Actors::LiveActorSavedPlacement(slot, stats.movementClass, &placement);
     found->tileX =
         static_cast<unsigned char>(placement.location.packedTile.target.tileX);
     found->direction = static_cast<unsigned char>(
@@ -1214,7 +1216,8 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
       model.turnFrames != 0 || model.rootMotion.vx != 0 ||
       model.rootMotion.vz != 0 || actor.momentumDistance != 0;
   // supportLayer/placementLayer are platform bindings, not collision floor1.
-  // Actors_PlaceActorInRoom (3A1A0.c:274) uses ids>=2 for moving supports.
+  // VS::Actors::PlaceActorInRoom (3A1A0.c:274) uses ids>=2 for moving
+  // supports.
   if (model.currentTileLayer > 1 || model.supportLayer != 0 ||
       model.placementLayer != 0 || model.isAttached || model.movementPending ||
       model.movementMode != 0 || model.locomotionState != 0 ||
@@ -1630,8 +1633,8 @@ std::expected<void, std::string> FinishResume() {
   // Room load consumes time/random numbers and may clear zone flags. Restore
   // their exact saved values before the first room event/frame can run.
   for (std::size_t index = 0; index < state.script_flags.size(); ++index) {
-    State_SetScriptFlag(static_cast<std::int16_t>(index),
-                        static_cast<char>(state.script_flags[index]));
+    VS::State::SetLiveScriptFlag(static_cast<std::int16_t>(index),
+                                 static_cast<char>(state.script_flags[index]));
   }
   ApplyClock(state.play_ticks);
   State_sceneTimer = state.scene_timer;

@@ -39,6 +39,8 @@ int ScanLiveSaveDirectory(int port);
 int CreateLiveSaveFile(int port, int file_number);
 // `begin_port` nonzero restarts for that port; a Save_CardReadinessResult.
 int AdvanceLiveCardReadiness(int begin_port);
+// The same check with TITLE.PRG's own statics (22C.c:457 _memcardEventHandler).
+int AdvanceLiveTitleCardReadiness(int begin_port);
 // 0 when the incoming image is valid (and, when `apply`, applied); else 1.
 int ValidateAndApplyLiveLoadedSave(int apply);
 // `target_file` is zero-based.

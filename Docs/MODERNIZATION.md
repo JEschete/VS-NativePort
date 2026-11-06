@@ -13,33 +13,33 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Roadmap step and issue | Owned left | Generated left | Original lines | Under test | Characterize first | Unmeasured |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 3: #45 Owned game, session and scene state | 0 | 261 | 6,658 | 220 | 138 | 0 |
-| 4: #44 Runtime modes and logical ticks | 0 | 22 | 869 | 13 | 14 | 0 |
+| 3: #45 Owned game, session and scene state | 0 | 82 | 2,533 | 326 | 59 | 0 |
+| 4: #44 Runtime modes and logical ticks | 0 | 0 | 0 | 27 | 0 | 0 |
 | 5: #52 Logical input and typed settings | 0 | 0 | 0 | 20 | 0 | 0 |
-| 6: #47 Stable asset IDs and decoded records | 0 | 0 | 0 | 28 | 0 | 0 |
+| 6: #47 Stable asset IDs and decoded records | 0 | 0 | 0 | 30 | 0 | 0 |
 | 7: #48 Content request ownership | 0 | 0 | 0 | 16 | 0 | 0 |
 | 8: #49 Bounded P-file and effect views | 0 | 0 | 0 | 2 | 0 | 0 |
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
-| 10: #50 Render submission and frame ownership | 0 | 0 | 0 | 144 | 0 | 0 |
-| 14: #55 Actor identity and teardown | 0 | 171 | 6,573 | 170 | 68 | 0 |
+| 10: #50 Render submission and frame ownership | 0 | 0 | 0 | 145 | 0 | 0 |
+| 14: #55 Actor identity and teardown | 0 | 0 | 0 | 233 | 0 | 0 |
 | 15: #58 Item definitions and instances | 0 | 0 | 0 | 66 | 0 | 0 |
-| 23: #57 AI, navigation and collision contexts | 0 | 122 | 5,899 | 201 | 49 | 0 |
-| 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
+| 23: #57 AI, navigation and collision contexts | 0 | 89 | 4,111 | 201 | 35 | 0 |
+| 24: #56 Combat intents and results | 0 | 272 | 7,945 | 241 | 118 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
-| 26: #59 Event VM results and execution | 0 | 236 | 3,830 | 59 | 178 | 0 |
-| 30A: #253 Typed voices and owned audio playback | 0 | 188 | 2,420 | 296 | 102 | 0 |
-| 31: #61 Typed effects and playback sessions | 0 | 761 | 11,774 | 180 | 587 | 0 |
+| 26: #59 Event VM results and execution | 0 | 128 | 2,650 | 158 | 79 | 0 |
+| 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
+| 31: #61 Typed effects and playback sessions | 0 | 176 | 5,601 | 681 | 86 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
-| 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 2860 | 89,339 | 1846 | 1904 | 0 |
+| 34: #60 Menu screens and workspaces | 0 | 371 | 22,721 | 359 | 303 | 0 |
+| 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
+| **Total** | 0 | 1118 | 45,561 | 3069 | 680 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 890 |
-| todo | 2,860 |
+| done | 2,631 |
+| todo | 1,118 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 15 done, 36 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (41 done, 13 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -55,58 +55,58 @@ architecture changes rather than per-function work, so this ledger is what track
 | 10 | audio-seq-voices | done | agent:a10-audio-voices | 3 | 0 | 0 |
 | 11 | audio-seq-control | done | agent:a11-audio-seq-control | 3 | 0 | 0 |
 | 12 | audio-mixer-driver | done | agent:a12-audio-mixer | 3 | 0 | 0 |
-| 13 | audio-playback-banks | planned | - | 3 | 58 | 703 |
-| 14 | audio-control-sfx | planned | - | 3 | 80 | 1,092 |
-| 15 | audio-music-streams | planned | - | 5 | 50 | 625 |
+| 13 | audio-playback-banks | done | self | 9 | 0 | 0 |
+| 14 | audio-control-sfx | done | self | 9 | 0 | 0 |
+| 15 | audio-music-streams | done | self | 16 | 0 | 0 |
 | 16 | content | done | agent:a16-content | 6 | 0 | 0 |
-| 17 | state-boot | planned | - | 6 | 23 | 976 |
+| 17 | state-boot | done | self | 19 | 0 | 0 |
 | 18 | items | done | agent:a18-items | 6 | 0 | 0 |
-| 19 | actors-state-loading | planned | - | 6 | 63 | 1,812 |
-| 20 | actors-animation-skeleton | active | self | 2 | 50 | 1,889 |
-| 21 | actors-movement | active | agent:a21-movement | 1 | 58 | 2,872 |
+| 19 | actors-state-loading | done | self | 17 | 0 | 0 |
+| 20 | actors-animation-skeleton | done | self | 7 | 0 | 0 |
+| 21 | actors-movement | done | self | 7 | 0 | 0 |
 | 22 | actors-appearance-rendering | done | self | 3 | 0 | 0 |
-| 23 | field-collision-map | active | agent:a23-field-collision | 3 | 40 | 2,077 |
-| 24 | field-camera-background | planned | - | 3 | 56 | 1,416 |
-| 25 | field-rooms | planned | - | 5 | 73 | 1,481 |
-| 26 | field-room-effects | planned | - | 1 | 42 | 832 |
+| 23 | field-collision-map | done | self | 9 | 0 | 0 |
+| 24 | field-camera-background | done | self | 6 | 0 | 0 |
+| 25 | field-rooms | done | self | 11 | 0 | 0 |
+| 26 | field-room-effects | done | self | 3 | 0 | 0 |
 | 27 | field-gimmicks-doors | planned | - | 3 | 82 | 2,533 |
 | 28 | battle-ai | planned | - | 8 | 89 | 4,111 |
 | 29 | battle-damage-status | planned | - | 3 | 88 | 2,502 |
 | 30 | battle-actions | planned | - | 5 | 91 | 2,315 |
-| 31 | battle-targeting-prerequisites | planned | - | 4 | 83 | 2,249 |
+| 31 | battle-targeting-prerequisites | done | self | 8 | 0 | 0 |
 | 32 | battle-sphere-hud-rewards | planned | - | 4 | 93 | 3,128 |
 | 33 | event-vm-triggers | planned | - | 3 | 57 | 1,206 |
-| 34 | event-script-actors | planned | - | 1 | 51 | 681 |
+| 34 | event-script-actors | done | self | 3 | 0 | 0 |
 | 35 | event-script-camera-screen-field | planned | - | 3 | 71 | 1,444 |
-| 36 | event-script-audio-dialog-effects | planned | - | 3 | 57 | 499 |
+| 36 | event-script-audio-dialog-effects | done | self | 10 | 0 | 0 |
 | 37 | effects-runtime-vm | planned | - | 3 | 96 | 1,332 |
-| 38 | effects-resources-transforms | planned | - | 4 | 66 | 1,351 |
+| 38 | effects-resources-transforms | done | self | 8 | 0 | 0 |
 | 39 | effects-particles-screen-plugins | planned | - | 11 | 80 | 4,269 |
-| 40 | effects-particle-templates | planned | - | 6 | 166 | 811 |
-| 41 | effects-trail-templates | planned | - | 7 | 117 | 773 |
-| 42 | effects-trail-nine-templates | planned | - | 7 | 84 | 777 |
-| 43 | effects-ring-templates | planned | - | 3 | 78 | 1,199 |
-| 44 | effects-surface-templates | planned | - | 5 | 74 | 1,262 |
-| 45 | menu-framework | planned | - | 1 | 97 | 2,916 |
-| 46 | menu-framework-rows-details | planned | - | 3 | 49 | 1,856 |
+| 40 | effects-particle-templates | done | self | 8 | 0 | 0 |
+| 41 | effects-trail-templates | done | self | 11 | 0 | 0 |
+| 42 | effects-trail-nine-templates | done | self | 7 | 0 | 0 |
+| 43 | effects-ring-templates | done | self | 5 | 0 | 0 |
+| 44 | effects-surface-templates | done | self | 7 | 0 | 0 |
+| 45 | menu-framework | done | self | 2 | 0 | 0 |
+| 46 | menu-framework-rows-details | done | self | 6 | 0 | 0 |
 | 47 | menu-inventory-container | planned | - | 5 | 98 | 6,953 |
 | 48 | menu-loot-status-abilities | planned | - | 7 | 95 | 7,172 |
-| 49 | menu-setup | planned | - | 3 | 58 | 4,628 |
+| 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | planned | - | 6 | 103 | 5,020 |
-| 51 | menu-files-options | planned | - | 3 | 63 | 4,029 |
+| 51 | menu-files-options | done | self | 6 | 0 | 0 |
 | 52 | menu-map-manual-text | planned | - | 3 | 75 | 3,576 |
-| 53 | title | planned | - | 3 | 59 | 3,104 |
-| 54 | ending | planned | - | 2 | 47 | 1,868 |
+| 53 | title | done | self | 4 | 0 | 0 |
+| 54 | ending | done | self | 5 | 0 | 0 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,567 |
-| Referenced by the original-address module table | 0 | 1,582 |
-| Calls an SDK shim | 0 | 394 |
-| Signature uses SDK integer types or `void*` | 0 | 665 |
-| Compiled with relaxed settings | 0 | 2,860 |
+| Called from generated code | 0 | 274 |
+| Referenced by the original-address module table | 0 | 715 |
+| Calls an SDK shim | 0 | 78 |
+| Signature uses SDK integer types or `void*` | 0 | 169 |
+| Compiled with relaxed settings | 0 | 1,118 |
 
-Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
+Function bodies: 3,749 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 33.
 

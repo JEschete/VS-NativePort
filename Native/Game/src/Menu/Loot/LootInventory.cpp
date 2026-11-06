@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -9,11 +10,10 @@ extern "C" {
 #include "Items/InventoryLiveState.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"
-#include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
-#include "State/Flags.h"
 #include "State/StateFlags.h"
 
 // decomp: MENUB.PRG _copyBladeToInventory (src/MENU/MENUB.PRG/260.c:712)
@@ -432,7 +432,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
 void Menu_Loot_RecordClaimedKey(int item_id)
 {
     if (item_id > 457) {
-        State_SetScriptFlag(item_id + 438, 1);
+        VS::State::SetLiveScriptFlag(item_id + 438, 1);
     }
 }
 

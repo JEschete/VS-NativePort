@@ -7,6 +7,6 @@ extern "C" {
 int Effects_Plg301_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FC528 (D_800FC528@EFFECT/PLG301.BIN)
-CVECTOR Effects_Plg301_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg301_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

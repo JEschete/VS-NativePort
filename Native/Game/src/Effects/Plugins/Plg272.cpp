@@ -4,7 +4,7 @@ extern "C" {
 #include "Effects/Plugins/Plg272.h"
 
 // decomp: D_800FBE70 (D_800FBE70@EFFECT/PLG272.BIN)
-CVECTOR Effects_Plg272_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg272_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FBE90 (D_800FBE90@EFFECT/PLG272.BIN)
 SVECTOR Effects_Plg272_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */

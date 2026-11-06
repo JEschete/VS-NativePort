@@ -1,183 +1,159 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Plugins/Plg065.h"
-#include "Effects/Plugins/Plg087.h"
-#include "Effects/Plugins/Plg146.h"
-#include "Effects/Plugins/Plg147.h"
-#include "Effects/Plugins/Plg168.h"
-#include "Effects/Plugins/Plg255.h"
-#include "Effects/Plugins/Plg265.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/ClosedRing.h"
-#include "Effects/Templates/Grid.h"
-#include "Effects/Templates/MirrorSurface.h"
-#include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/ParticleLineRender.h"
-#include "Effects/Templates/Ring.h"
-#include "Effects/Templates/RotatingSurface.h"
-#include "Effects/Templates/Surface.h"
-#include "Effects/Templates/TemplateState.h"
-#include "Effects/Templates/TiledRing.h"
-#include "Effects/Templates/TrailControl.h"
-#include "Effects/Templates/TrailDispatch.h"
-#include "Effects/Templates/TrailInit.h"
-#include "Effects/Templates/TrailNineControl.h"
-#include "Effects/Templates/TrailNineDispatch.h"
-#include "Effects/Templates/TrailNineInit.h"
-#include "Effects/Templates/TrailNineOrigin.h"
-#include "Effects/Templates/TrailNineRender.h"
-#include "Effects/Templates/TrailNineTarget.h"
-#include "Effects/Templates/TrailNineUpdate.h"
-#include "Effects/Templates/TrailOrigin.h"
-#include "Effects/Templates/TrailRender.h"
-#include "Effects/Templates/TrailTarget.h"
-#include "Effects/Templates/TrailUpdate.h"
-#include "Effects/Trails.h"
-#include "Effects/Transforms.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Effects/Templates/ParticleLineRender.hpp"
 
-// decomp: PLG065.BIN func_800FD190 (src/EFFECT/PLG065.BIN/F8.c:23): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg065_RotatingSurface
-#define VS_CLOSED_RING_FUNCTION Effects_Plg065_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg065_closedRingColorFactors
-#define VS_RING_FUNCTION Effects_Plg065_Ring
-#define VS_RING_COLORS Effects_Plg065_ringColorFactors
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg065_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_PARTICLE_RENDER_FUNCTION
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
 
-// decomp: PLG087.BIN func_800FEFB8 (src/EFFECT/PLG087.BIN/1F0.c:35): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_SURFACE_FUNCTION Effects_Plg087_Surface
-#define VS_SURFACE_VERTICES Effects_Plg087_surfaceVertices
-#define VS_SURFACE_REPEAT
-#define VS_CLOSED_RING_FUNCTION Effects_Plg087_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg087_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_GRID_FUNCTION Effects_Plg087_Grid
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg087_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg087_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg087_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg087_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg087_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg087_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg087_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg087_trailEmissionCounter
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg087_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_SURFACE_REPEAT
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_GRID_FUNCTION
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_RENDER_FUNCTION
+#include "Core/Math/ScalarMath.hpp"
+#include "Effects/Templates/ParticleCore.hpp"
 
-// decomp: PLG114.BIN func_800FC4FC (src/EFFECT/PLG114.BIN/208.c:18): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg114_ParticleDispatch
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg114_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
+namespace VS::Effects::Templates {
+namespace {
+namespace math = Core::Math;
 
-// decomp: PLG146.BIN func_800FC394 (src/EFFECT/PLG146.BIN/1D8.c:14): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg146_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg146_tiledRingColorFactors
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg146_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg146_mirrorSurfaceVertices
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg146_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_PARTICLE_RENDER_FUNCTION
+// Ribbon phases step 0x600 per segment from the curve's start, 0x1000
+// before its phase 0.
+constexpr std::int32_t kSegmentPhase = 0x600;
+constexpr std::int32_t kCurveStart = 0x1000;
 
-// decomp: PLG147.BIN func_800FB36C (src/EFFECT/PLG147.BIN/F8.c:10): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_RING_FUNCTION Effects_Plg147_Ring
-#define VS_RING_COLORS Effects_Plg147_ringColorFactors
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg147_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_PARTICLE_RENDER_FUNCTION
+using RibbonScreens = std::array<ParticleProjection, kParticleProjections>;
 
-// decomp: PLG168.BIN func_800FC960 (src/EFFECT/PLG168.BIN/1F0.c:16): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg168_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg168_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg168_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg168_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg168_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg168_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg168_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg168_trailEmissionCounter
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg168_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_RENDER_FUNCTION
+// decomp: particleLineRender.h:72-76, the seven inner phases jittered within
+// `jitter` (one draw each).
+[[nodiscard]] std::array<std::int32_t, kParticleSegments - 1> LinePhases(
+    std::int32_t jitter, ParticleSetHost& host) {
+  std::array<std::int32_t, kParticleSegments - 1> phases{};
+  for (std::size_t segment = 1; segment < kParticleSegments; ++segment) {
+    const std::int32_t base = math::WrappingSubtract(
+        math::WrappingMultiply(static_cast<std::int32_t>(segment),
+                               kSegmentPhase),
+        kCurveStart);
+    phases.at(segment - 1) = math::WrappingSubtract(
+        math::WrappingAdd(base, ParticleRemainder(host.Rand(), jitter)),
+        ParticleHalf(jitter));
+  }
+  return phases;
+}
 
-// decomp: PLG224.BIN func_800FA748 (src/EFFECT/PLG224.BIN/F8.c:6): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg224_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_PARTICLE_RENDER_FUNCTION
+// decomp: particleLineRender.h:66-128, one ribbon's eight lines.
+void DrawLines(const ParticleControlSet& points, const ParticleLine& paint,
+               std::int32_t jitter, ParticleSetFrame& frame,
+               ParticleSetHost& host) {
+  const std::array<std::int32_t, kParticleSegments - 1> phases =
+      LinePhases(jitter, host);
+  RibbonScreens screens{};
+  ProjectParticleRibbon(points, phases, frame.scratch, screens, host);
+  for (std::size_t segment = 0; segment < kParticleSegments; ++segment) {
+    const ParticleProjection& from = screens.at(segment);
+    const ParticleProjection& to = screens.at(segment + 1);
+    const std::optional<std::int32_t> depth = ParticleSegmentDepth(
+        from.depth, to.depth, frame.inputs.definition.depth_bias,
+        frame.inputs.near_clip);
+    if (depth) {
+      ParticleLine line = paint;
+      line.screens = {from.screen, to.screen};
+      host.SubmitLine(line, *depth);
+    }
+  }
+}
+}  // namespace
 
-// decomp: PLG255.BIN func_800FC948 (src/EFFECT/PLG255.BIN/1D8.c:16): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg255_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg255_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg255_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg255_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg255_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg255_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg255_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg255_trailEmissionCounter
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg255_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_RENDER_FUNCTION
+// decomp: EFFECT VS_PARTICLE_RENDER_FUNCTION
+// (src/EFFECT/particleLineRender.h:13).
+void ParticleLineRender(ParticleSetFrame& frame, ParticleSetHost& host) {
+  const ParticleSetDefinition& definition = frame.inputs.definition;
+  const std::int32_t jitter = SampleRibbonJitter(frame, host);
+  const ParticleLine paint{
+      .color = SampleParticleColor(definition, frame.state.age, host),
+      .blend = definition.blend};
+  host.BeginProjection((frame.scratch.flags & kParticleEffectView) != 0);
+  const std::size_t ribbons = ParticleRibbons(frame);
+  for (std::size_t ribbon = 0; ribbon < ribbons; ++ribbon) {
+    DrawLines(frame.points.sets.at(ribbon), paint, jitter, frame, host);
+  }
+}
+}  // namespace VS::Effects::Templates
 
-// decomp: PLG265.BIN func_800FB830 (src/EFFECT/PLG265.BIN/2E8.c:10): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg265_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg265_tiledRingColorFactors
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg265_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_PARTICLE_RENDER_FUNCTION
+namespace VS::Effects {
+// decomp: PLG065.BIN func_800FD190 (src/EFFECT/PLG065.BIN/F8.c:23).
+// decomp: PLG065.BIN func_800FD190 (src/EFFECT/PLG065.BIN/F8.c:31).
+// decomp: PLG065.BIN func_800FD190 (src/EFFECT/PLG065.BIN/F8.c:39).
+void Plg065::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
 
-// decomp: PLG266.BIN func_800FC5DC (src/EFFECT/PLG266.BIN/2E8.c:18): VS_PARTICLE_RENDER_FUNCTION, instance of Effects/Templates/ParticleLineRender.inl
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg266_ParticleDispatch
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg266_ParticleLineRender
-#include "Effects/Templates/ParticleLineRender.inl"
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
+// decomp: PLG087.BIN func_800FEFB8 (src/EFFECT/PLG087.BIN/1F0.c:35).
+// decomp: PLG087.BIN func_800FEFB8 (src/EFFECT/PLG087.BIN/1F0.c:43).
+// decomp: PLG087.BIN func_800FEFB8 (src/EFFECT/PLG087.BIN/1F0.c:51).
+void Plg087::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
 
-}  // extern "C"
+// decomp: PLG114.BIN func_800FC4FC (src/EFFECT/PLG114.BIN/208.c:18).
+// decomp: PLG114.BIN func_800FC4FC (src/EFFECT/PLG114.BIN/208.c:26).
+// decomp: PLG114.BIN func_800FC4FC (src/EFFECT/PLG114.BIN/208.c:34).
+void Plg114::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+
+// decomp: PLG146.BIN func_800FC394 (src/EFFECT/PLG146.BIN/1D8.c:14).
+// decomp: PLG146.BIN func_800FC394 (src/EFFECT/PLG146.BIN/1D8.c:22).
+// decomp: PLG146.BIN func_800FC394 (src/EFFECT/PLG146.BIN/1D8.c:30).
+void Plg146::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+
+// decomp: PLG147.BIN func_800FB36C (src/EFFECT/PLG147.BIN/F8.c:10).
+// decomp: PLG147.BIN func_800FB36C (src/EFFECT/PLG147.BIN/F8.c:18).
+// decomp: PLG147.BIN func_800FB36C (src/EFFECT/PLG147.BIN/F8.c:26).
+void Plg147::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+
+// decomp: PLG168.BIN func_800FC960 (src/EFFECT/PLG168.BIN/1F0.c:16).
+// decomp: PLG168.BIN func_800FC960 (src/EFFECT/PLG168.BIN/1F0.c:24).
+// decomp: PLG168.BIN func_800FC960 (src/EFFECT/PLG168.BIN/1F0.c:32).
+void Plg168::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+
+// decomp: PLG224.BIN func_800FA748 (src/EFFECT/PLG224.BIN/F8.c:6).
+// decomp: PLG224.BIN func_800FA748 (src/EFFECT/PLG224.BIN/F8.c:14).
+// decomp: PLG224.BIN func_800FA748 (src/EFFECT/PLG224.BIN/F8.c:22).
+void Plg224::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+
+// decomp: PLG255.BIN func_800FC948 (src/EFFECT/PLG255.BIN/1D8.c:16).
+// decomp: PLG255.BIN func_800FC948 (src/EFFECT/PLG255.BIN/1D8.c:24).
+// decomp: PLG255.BIN func_800FC948 (src/EFFECT/PLG255.BIN/1D8.c:32).
+void Plg255::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+
+// decomp: PLG265.BIN func_800FB830 (src/EFFECT/PLG265.BIN/2E8.c:10).
+// decomp: PLG265.BIN func_800FB830 (src/EFFECT/PLG265.BIN/2E8.c:18).
+// decomp: PLG265.BIN func_800FB830 (src/EFFECT/PLG265.BIN/2E8.c:26).
+void Plg265::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+
+// decomp: PLG266.BIN func_800FC5DC (src/EFFECT/PLG266.BIN/2E8.c:18).
+// decomp: PLG266.BIN func_800FC5DC (src/EFFECT/PLG266.BIN/2E8.c:26).
+// decomp: PLG266.BIN func_800FC5DC (src/EFFECT/PLG266.BIN/2E8.c:34).
+void Plg266::ParticleLineRender(Templates::ParticleSetFrame& frame,
+                                Templates::ParticleSetHost& host) {
+  Templates::ParticleLineRender(frame, host);
+}
+}  // namespace VS::Effects

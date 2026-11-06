@@ -9,6 +9,7 @@
 
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Core/Random.hpp"
 #include "Legacy/Psx.h"
 
@@ -22,7 +23,7 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Field/Gimmicks.h"
 }
 
@@ -377,7 +378,7 @@ TEST_CASE(
   fixture.stats[1].currentAttackShape = 1;
   fixture.stats[1].currentAttackShapeAngle = 0;
   Battle_actionDefinitions[42].rangeX = 0xFF;
-  CHECK(Battle_CalculateActionRangeSquared(
+  CHECK(VS::Battle::LiveCalculateActionRangeSquared(
             reinterpret_cast<Battle_Ai_ActionRangeView*>(&fixture.state), 42) ==
         25600);
 }

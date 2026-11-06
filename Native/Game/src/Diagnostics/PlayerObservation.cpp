@@ -11,17 +11,21 @@
 #include <string>
 #include <utility>
 
+#include "Actors/ActorStateLive.hpp"
+#include "Battle/AbilitiesLive.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
@@ -32,7 +36,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Core/Text/TextCode.h"
 #include "Event/ScriptVm.h"
 #include "Field/Collision.h"
@@ -46,13 +50,12 @@ extern "C" {
 #include "Items/TreasureChests.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
-#include "State/Flags.h"
 #include "State/Timers.h"
 }
 
@@ -110,7 +113,7 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
                             static_cast<int>(stats.currentRangeZ) * kRangeUnit},
                            static_cast<int>(stats.currentAttackShape),
                            static_cast<int>(stats.currentAttackShapeAngle),
-                           Battle_CalculateRangeShapeExtent(&range)};
+                           VS::Battle::LiveCalculateRangeShapeExtent(&range)};
   if (const auto* ai = Battle_Ai_actorAiStates[slot]; ai != nullptr) {
     constexpr unsigned kHostileRelation = 3;
     const auto& relation = ai->relations[0];
@@ -389,8 +392,8 @@ void InspectReactionEligibility(EncounterReactionTimingState& snapshot) {
       snapshot.eligible.fill(false);
       return;
     }
-    snapshot.eligible[slot] =
-        Battle_CanTriggerBattleAbility(static_cast<int>(slot) + 1) != 0;
+    snapshot.eligible[slot] = VS::Battle::LiveCanTriggerBattleAbility(
+                                  static_cast<int>(slot) + 1) != 0;
   }
 }
 
@@ -398,7 +401,7 @@ EncounterReactionTimingState InspectReactionTiming(
     const EncounterState& state) {
   EncounterReactionTimingState snapshot;
   snapshot.tick_speed = State_tickSpeed;
-  snapshot.story_timing = State_ScriptFlag(1) != 0;
+  snapshot.story_timing = VS::State::LiveScriptFlag(1) != 0;
   for (std::size_t slot = 0; slot < snapshot.chain_actions.size(); ++slot) {
     snapshot.chain_actions[slot] =
         static_cast<unsigned char>(Input_settings.mappedChainAbilities[slot]);
@@ -458,8 +461,9 @@ void InspectRoomDoors(PlayerObservationState& state) {
          static_cast<int>(door.requiredFlagValue),
          door.doorId,
          door.hasEntryStep != 0});
-    state.door_flag_values.push_back(static_cast<unsigned char>(
-        State_ScriptFlag(static_cast<std::int16_t>(door.requiredFlagId))));
+    state.door_flag_values.push_back(
+        static_cast<unsigned char>(VS::State::LiveScriptFlag(
+            static_cast<std::int16_t>(door.requiredFlagId))));
   }
 }
 
@@ -485,8 +489,8 @@ void InspectRoomChests(PlayerObservationState& state) {
     snapshot.facing = chest.facing;
     snapshot.lock_level = chest.lockLevel;
     snapshot.opened_flag = chest.openedFlag + kChestOpenedFlagBase;
-    snapshot.opened =
-        State_ScriptFlag(static_cast<std::int16_t>(snapshot.opened_flag)) != 0;
+    snapshot.opened = VS::State::LiveScriptFlag(
+                          static_cast<std::int16_t>(snapshot.opened_flag)) != 0;
     for (std::size_t slot = 0; slot < std::size(chest.loot.misc); ++slot) {
       const auto& item = chest.loot.misc[slot];
       if (item.itemId != 0 && item.count != 0) {
@@ -499,12 +503,12 @@ void InspectRoomChests(PlayerObservationState& state) {
 }
 
 int NavigationSupportHeight(int x, int z) {
-  const int packed = Field_FloorHeightAt(x, z);
+  const int packed = VS::Field::LiveFloorHeightAt(x, z);
   if (packed < 0) return packed;
   constexpr int kTileSize = 128, kInactiveMode = 0xFE;
   constexpr int kNoSupport = 3000, kHeightMask = 0x7FFF;
   int support = kNoSupport;
-  // Field_GimmickSupportHeight, original 40564.c:317. Do not call that
+  // VS::Field::LiveGimmickSupportHeight, original 40564.c:317. Do not call that
   // gameplay query here: it writes Actors_supportingGimmickIndex.
   for (const auto* object : Field_gimmickInstances) {
     if (object != nullptr && !object->isSkipped && !object->motionState &&
@@ -524,15 +528,19 @@ bool NavigationPointClear(int x, int z, int floor_height, int body_height) {
       z >= map->height * kTileSize) {
     return false;
   }
-  const auto* cell = Field_CollisionCellAt(x / kTileSize, z / kTileSize, 0);
-  if (cell->doorPassability > kFullyBlockedPassability || cell->isPit) {
+  const auto* cell =
+      VS::Field::LiveCollisionCellAt(x / kTileSize, z / kTileSize, 0);
+  if (cell == nullptr || cell->doorPassability > kFullyBlockedPassability ||
+      cell->isPit) {
     return false;
   }
   SVECTOR point{static_cast<std::int16_t>(x), 0, static_cast<std::int16_t>(z),
                 0};
-  if (Field_FindCollisionCellAtPosition(&point, 0) == nullptr) return false;
+  if (VS::Field::FindLiveCollisionCellAtPosition(&point, 0) == nullptr) {
+    return false;
+  }
   const int floor = NavigationSupportHeight(x, z);
-  const int ceiling = Field_CeilingHeightAt(x, z);
+  const int ceiling = VS::Field::LiveCeilingHeightAt(x, z);
   const auto height = [](int packed) {
     const int value = packed & kHeightMask;
     return value & kHeightSign ? value - (kHeightMask + 1) : value;
@@ -588,7 +596,7 @@ EncounterNavigationState InspectNavigation() {
     throw std::runtime_error("invalid runtime navigation storage");
   }
   Actors_ActorLocationQuery placement{};
-  Actors_ActorPlacement(0, &placement);
+  VS::Actors::LiveActorPlacement(0, &placement);
   constexpr std::size_t kFacingTileBytes = 4;
   std::array<u_char, kFacingTileBytes> facing{};
   Field_TileInFrontOfActor(&placement, facing.data());
@@ -614,17 +622,19 @@ EncounterNavigationState InspectNavigation() {
     for (int x = 0; x < result.width; ++x) {
       const int world_x = result.origin_x + x * result.spacing;
       const int world_z = result.origin_z + z * result.spacing;
-      const auto* cell =
-          Field_CollisionCellAt(world_x / kTileSize, world_z / kTileSize, 0);
+      const auto* cell = VS::Field::LiveCollisionCellAt(world_x / kTileSize,
+                                                        world_z / kTileSize, 0);
       SVECTOR point{static_cast<std::int16_t>(world_x), 0,
                     static_cast<std::int16_t>(world_z), 0};
       const bool passable =
+          cell != nullptr &&
           cell->doorPassability <= kFullyBlockedPassability &&
-          Field_FindCollisionCellAtPosition(&point, 0) != nullptr;
+          VS::Field::FindLiveCollisionCellAtPosition(&point, 0) != nullptr;
+      const bool pit = cell != nullptr && cell->isPit;
       result.samples.push_back(
           {NavigationSupportHeight(world_x, world_z),
-           Field_CeilingHeightAt(world_x, world_z),
-           (passable ? 1 : 0) | (cell->isPit ? 2 : 0) |
+           VS::Field::LiveCeilingHeightAt(world_x, world_z),
+           (passable ? 1 : 0) | (pit ? 2 : 0) |
                (NavigationFootprintClear(world_x, world_z,
                                          result.collision_radius,
                                          result.collision_height)
@@ -738,15 +748,17 @@ nlohmann::json EncodeRoomTiles() {
     for (int x = 0; x < map->width; ++x) {
       const int world_x = x * kTileSize + kTileSize / 2;
       const int world_z = z * kTileSize + kTileSize / 2;
-      const auto* cell = Field_CollisionCellAt(x, z, 0);
+      const auto* cell = VS::Field::LiveCollisionCellAt(x, z, 0);
       SVECTOR point{static_cast<std::int16_t>(world_x), 0,
                     static_cast<std::int16_t>(world_z), 0};
       const bool passable =
+          cell != nullptr &&
           cell->doorPassability <= kFullyBlockedPassability &&
-          Field_FindCollisionCellAtPosition(&point, 0) != nullptr;
-      floors.push_back(Field_FloorHeightAt(world_x, world_z));
-      ceilings.push_back(Field_CeilingHeightAt(world_x, world_z));
-      flags.push_back((passable ? 1 : 0) | (cell->isPit ? 2 : 0));
+          VS::Field::FindLiveCollisionCellAtPosition(&point, 0) != nullptr;
+      const bool pit = cell != nullptr && cell->isPit;
+      floors.push_back(VS::Field::LiveFloorHeightAt(world_x, world_z));
+      ceilings.push_back(VS::Field::LiveCeilingHeightAt(world_x, world_z));
+      flags.push_back((passable ? 1 : 0) | (pit ? 2 : 0));
     }
   }
   return {{"width", map->width},
@@ -758,7 +770,7 @@ nlohmann::json EncodeRoomTiles() {
 
 // Live Field_gimmickInstances (D_800F45E0). Reads fields only: the gameplay
 // queries Field_FindInteractableGimmickAhead (func_800A39F8) and
-// Field_GimmickSupportHeight write interaction/support globals.
+// VS::Field::LiveGimmickSupportHeight write interaction/support globals.
 nlohmann::json EncodePlayerGimmicks() {
   auto gimmicks = nlohmann::json::array();
   const auto* ashley = Actors_actorRecords[0];

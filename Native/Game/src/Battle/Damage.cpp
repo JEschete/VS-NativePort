@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorRosterLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/Animation.h"
-#include "Actors/Lifecycle.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Action.h"
@@ -17,7 +17,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Event/Cutscene.h"
 #include "Event/Triggers.h"
 #include "Items/Equipment.h"
@@ -57,10 +57,10 @@ int Battle_ResolveActorDefeat(int source_actor_slot, int target_actor_slot, int 
                 Event_BeginQueuedCutscene();
                 ret = 1;
             } else if (Battle_actors[target_actor_slot]->retainAfterDefeat == 0) {
-                Actors_RemoveActorAtSlot(target_actor_slot, 1);
+                VS::Actors::RemoveLiveActorAtSlot(target_actor_slot, 1);
             }
         } else {
-            Actors_RestoreActorIdlePose(target_actor_slot);
+            VS::Actors::RestoreLiveActorIdlePose(target_actor_slot);
         }
     }
     return ret;

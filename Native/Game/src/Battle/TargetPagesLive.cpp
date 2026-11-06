@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include "Battle/TargetPages.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.hpp"
@@ -18,7 +19,7 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Field/Interactions.h"
 #include "Input/ControllerLiveState.h"
 }
@@ -55,7 +56,7 @@ void ApplyPage(VS::Battle::TargetPage page, bool reset) {
       static_cast<unsigned char>(sphere->selectedTarget) >= page.count) {
     sphere->selectedTarget = static_cast<char>(page.count == 0 ? -1 : 0);
   }
-  Battle_UpdateTargetSelectionMenu(nullptr);
+  VS::Battle::LiveUpdateTargetSelectionMenu(nullptr);
 }
 
 // The active battle sphere, showing pages of entries.
@@ -117,7 +118,7 @@ int Battle_AdvanceTargetPage(int direction) {
     std::abort();
   }
   if (book.pages.size() < 2 || Sphere() == nullptr) return 0;
-  Battle_UpdateTargetSelectionHighlight(1);
+  VS::Battle::LiveUpdateTargetSelectionHighlight(1);
   if (direction > 0) {
     book.current = (book.current + 1) % book.pages.size();
   } else {

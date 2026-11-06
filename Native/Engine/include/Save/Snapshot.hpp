@@ -24,7 +24,7 @@ inline constexpr std::size_t kSnapshotLimbCount = 6;
 inline constexpr std::size_t kSnapshotLimbTypeCount = 4;
 inline constexpr std::size_t kSnapshotLimbAffinityCount = 8;
 inline constexpr std::size_t kSnapshotStatusTimerCount = 8;
-// The room actors whose state the capture stores (Actors_StoreRoomActorState).
+// The room actors whose state the capture stores (VS::Actors::RememberEnemy).
 inline constexpr std::int32_t kSnapshotRoomActorCount = 16;
 
 // A Field_MpdDoorRecord's bytes.

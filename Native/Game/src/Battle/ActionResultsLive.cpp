@@ -7,12 +7,13 @@
 #include <cstdlib>
 #include <iterator>
 
+#include "Actors/AnimationControlLive.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionFlow.h"
@@ -20,7 +21,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Core/Unported.h"
 }
 
@@ -94,7 +95,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   }
 
   void PlayRecoveryPose() override {
-    Actors_PlayActorActionPose(0, nullptr, kRecoveryPose);
+    VS::Actors::PlayLiveActorActionPose(0, nullptr, kRecoveryPose);
   }
 
  private:

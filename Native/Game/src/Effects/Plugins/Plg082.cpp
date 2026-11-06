@@ -7,6 +7,6 @@ extern "C" {
 int Effects_Plg082_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FD08C (D_800FD08C@src/EFFECT/closedRings.h)
-CVECTOR Effects_Plg082_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg082_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

@@ -4,6 +4,6 @@ extern "C" {
 #include "Effects/Plugins/Plg053.h"
 
 // decomp: D_800FB2D4 (D_800FB2D4@EFFECT/PLG053.BIN)
-CVECTOR Effects_Plg053_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg053_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

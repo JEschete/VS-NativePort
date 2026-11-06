@@ -11,17 +11,18 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorMotionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -486,8 +487,8 @@ TEST_CASE(
   fixture.tile.word = 0xABCD12EF;
   fixture.route.destination.word = fixture.tile.word ^ (status == 1 ? 1u : 0u);
   if (status == 2) fixture.source.nativePointer18C = nullptr;
-  CHECK(Actors_IsScriptedActorPathFinished(7) == (status != 1));
-  CHECK(Field_ActorCollisionBypass(7) == (status == 0 ? 1 : 3));
+  CHECK(VS::Actors::IsLiveScriptedActorPathFinished(7) == (status != 1));
+  CHECK(VS::Field::LiveActorCollisionBypass(7) == (status == 0 ? 1 : 3));
 }
 
 TEST_CASE("Gimmick occupancy adjusts the height grid instead of obstacle flags",
@@ -775,7 +776,7 @@ TEST_CASE("Production scripted path request allocates a complete native route",
           "[ai][scripted-override][scripted-override-red]") {
   ScriptedOverrideFixture fixture;
   SVECTOR target{1200, 0, 1300, 0};
-  Actors_BeginScriptedActorPath(1, &target);
+  VS::Actors::BeginLiveScriptedActorPath(1, &target);
   auto* route = fixture.ActiveRoute();
   REQUIRE(route != nullptr);
   const auto capacity = VS::Core::Memory::LivePayloadCapacity(route);
@@ -785,7 +786,7 @@ TEST_CASE("Production scripted path request allocates a complete native route",
   CHECK(route->scriptedTargetXZ == (1200u | (1300u << 16)));
   CHECK(route->nativePointer18C == route);
   CHECK(route->nativePointer64 == &fixture.model.instance.currentTileX);
-  CHECK(Field_ActorCollisionBypass(1) == 2);
+  CHECK(VS::Field::LiveActorCollisionBypass(1) == 2);
 }
 
 TEST_CASE(

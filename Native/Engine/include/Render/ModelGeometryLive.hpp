@@ -30,6 +30,11 @@ void ForgetLiveModelExtent(const void* model);
 // Whether the actor's recorded model data holds every section and polygon
 // its counts claim.
 [[nodiscard]] bool ValidateLiveActorModel(const Actors_ActorRecord& geometry);
+// MoveModelVertex over the actor's model and its recorded size; false when
+// the actor has no model or the vertex lies outside its vertex section.
+[[nodiscard]] bool MoveLiveActorModelVertex(Actors_ActorRecord& actor,
+                                            std::size_t vertex,
+                                            const ModelVertex& delta);
 // Projects the actor model's vertices through `matrices` into the render
 // context; false when nothing was projected or every depth was zero.
 [[nodiscard]] bool ProjectLiveActorModel(const Actors_ActorRecord& geometry,

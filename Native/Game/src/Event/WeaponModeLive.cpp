@@ -6,22 +6,23 @@
 #include <cstdlib>
 #include <iterator>
 
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
+#include "Battle/BattleModeLive.hpp"
 #include "Event/WeaponMode.hpp"
 #include "Event/WeaponModeOpcode.h"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
-#include "Battle/Abilities.h"
-#include "Battle/BattleMode.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Damage.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
-#include "State/Flags.h"
 }
 
 namespace {
@@ -54,7 +55,7 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
     return Event_skipState == kSkipActive;
   }
   [[nodiscard]] bool WeaponModeGateOpen() const override {
-    return State_ScriptFlag(kWeaponModeGate) != 0;
+    return VS::State::LiveScriptFlag(kWeaponModeGate) != 0;
   }
   void SetBattleMode(int mode) override {
     Require(static_cast<std::size_t>(mode) < std::size(Event_weaponDrawStates),
@@ -63,26 +64,27 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
                 Battle_characterState != nullptr &&
                 Actors_actorRecords[kAshley] != nullptr,
             "Script weapon mode requires Ashley's battle and model state");
-    Battle_SetActorBattleMode(kAshley, Event_weaponDrawStates[mode]);
+    VS::Battle::LiveSetActorBattleMode(kAshley, Event_weaponDrawStates[mode]);
   }
   void PlayAnimation(int animation) override {
-    Require(Actors_PlayActorAnimation(kAshley, animation, 0, kBlendFrames) >= 0,
+    Require(VS::Actors::PlayLiveActorAnimation(kAshley, animation, 0,
+                                               kBlendFrames) >= 0,
             "Script weapon-mode animation failed");
   }
   void PlayDrawSound(int sheathe) override {
-    Actors_PlayActorWeaponDrawSound(kAshley, sheathe);
+    VS::Actors::PlayLiveActorWeaponDrawSound(kAshley, sheathe);
   }
   [[nodiscard]] bool AnimationHeld() const override {
     Require(Actors_actorRecords[kAshley] != nullptr,
             "Pending script weapon mode requires Ashley's model state");
-    return (Actors_ActorStateFlags(kAshley) & kAnimationHeld) != 0;
+    return (VS::Actors::LiveActorStateFlags(kAshley) & kAnimationHeld) != 0;
   }
   void SnapVisibility(bool drawn) override {
     Require(Actors_actorRecords[kAshley] != nullptr,
             "Script weapon visibility requires Ashley's model state");
-    auto flags = Actors_ActorStateFlags(kAshley) & kLowWord;
+    auto flags = VS::Actors::LiveActorStateFlags(kAshley) & kLowWord;
     flags = drawn ? flags | kWeaponVisibility : flags & ~kWeaponVisibility;
-    Actors_SetActorDisplayFlags(kAshley, static_cast<int>(flags));
+    VS::Actors::SetLiveActorDisplayFlags(kAshley, static_cast<int>(flags));
     VS::Actors::ResetLiveActorWeaponVisibilityBlend(kAshley);
   }
 };

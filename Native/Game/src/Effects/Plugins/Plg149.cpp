@@ -4,6 +4,6 @@ extern "C" {
 #include "Effects/Plugins/Plg149.h"
 
 // decomp: D_800FA424 (D_800FA424@src/EFFECT/rings.h)
-u_char Effects_Plg149_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg149_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

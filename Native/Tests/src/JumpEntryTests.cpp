@@ -11,8 +11,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorMovementLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Log.hpp"
+#include "Field/CollisionMapLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -27,6 +32,11 @@ extern "C" {
 
 namespace {
 using JumpEntry = void (*)(int, int*, int, int);
+// The packed-word entries the copied callers use (each also has a typed
+// overload).
+constexpr JumpEntry kTileJump = &VS::Actors::BeginLiveTileJump;
+constexpr JumpEntry kAirborneTileJump = &VS::Actors::BeginLiveAirborneTileJump;
+constexpr JumpEntry kNavigationJump = &VS::Actors::BeginLiveNavigationJump;
 using ActorBytes = std::array<std::byte, sizeof(Actors_ActorRecord)>;
 namespace Core = VS::Core;
 
@@ -129,6 +139,7 @@ struct JumpFixture {
   }
 
   ~JumpFixture() {
+    VS::Actors::ForgetSequenceBanks(sequence.data(), sizeof sequence);
     Actors_actorRecords[0] = saved_actor;
     Field_roomData = saved_room;
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
@@ -161,21 +172,20 @@ struct JumpFixture {
     actor.commonAnimationCount = 100;
     actor.instance.weaponDrawn = 0;
     actor.animationLocked = 0;
+    VS::Actors::RegisterSequenceBank(bank, sizeof sequence);
   }
 };
 
 bool Navigation(JumpEntry entry, bool jumping, bool locked) {
-  return entry == VS::Actors::BeginLiveNavigationJump ||
-         (entry == VS::Actors::BeginLiveTileJump && !jumping && locked);
+  return entry == kNavigationJump || (entry == kTileJump && !jumping && locked);
 }
 
 void PrepareExpected(Actors_ActorRecord& actor, JumpEntry entry) {
-  if (entry == VS::Actors::BeginLiveAirborneTileJump ||
-      (entry == VS::Actors::BeginLiveTileJump && actor.instance.isJumping)) {
+  if (entry == kAirborneTileJump ||
+      (entry == kTileJump && actor.instance.isJumping)) {
     actor.instance.motionLocked = 0;
     actor.instance.isJumping = 1;
-  } else if (entry == VS::Actors::BeginLiveNavigationJump ||
-             actor.instance.motionLocked) {
+  } else if (entry == kNavigationJump || actor.instance.motionLocked) {
     actor.instance.motionLocked = 1;
     actor.instance.isJumping = 1;
   } else {
@@ -193,12 +203,13 @@ ActorBytes ConsumeExpected(const Actors_ActorRecord& actor, JumpEntry entry,
   auto* saved = Actors_actorRecords[0];
   Actors_actorRecords[0] = &expected;
   if (navigation) {
-    Actors_PlayActorAnimation(0, 31, 0, 8);
+    VS::Actors::PlayLiveActorAnimation(0, 31, 0, 8);
   }
   const auto narrowed =
       std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(facing));
-  Actors_BeginActorJumpToTile(&expected, reinterpret_cast<u_char*>(target),
-                              speed, narrowed);
+  VS::Actors::BeginLiveActorJumpToTile(
+      &expected, std::bit_cast<VS::Actors::PackedTile>(*target), speed,
+      narrowed);
   Actors_actorRecords[0] = saved;
   return Bytes(expected);
 }
@@ -314,9 +325,7 @@ TEST_CASE("Grounded history preserves its anchor on supports and refreshes",
 TEST_CASE(
     "Jump entries preserve every unrelated byte and jumping wins priority",
     "[actors][jump-entry]") {
-  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
-                              &VS::Actors::BeginLiveAirborneTileJump,
-                              &VS::Actors::BeginLiveNavigationJump);
+  const auto entry = GENERATE(kTileJump, kAirborneTileJump, kNavigationJump);
   const bool jumping = GENERATE(false, true);
   const bool locked = GENERATE(false, true);
   const auto profile = GENERATE(0, 1, 2, 3);
@@ -336,9 +345,7 @@ TEST_CASE(
 TEST_CASE(
     "Only navigation entries request animation 31 with eight blend frames",
     "[actors][jump-entry]") {
-  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
-                              &VS::Actors::BeginLiveAirborneTileJump,
-                              &VS::Actors::BeginLiveNavigationJump);
+  const auto entry = GENERATE(kTileJump, kAirborneTileJump, kNavigationJump);
   const bool jumping = GENERATE(false, true);
   const bool locked = GENERATE(false, true);
   JumpFixture fixture;
@@ -357,9 +364,7 @@ TEST_CASE(
 TEST_CASE(
     "Jump entries use the actual arc consumer with full targets and facing",
     "[actors][jump-entry]") {
-  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
-                              &VS::Actors::BeginLiveAirborneTileJump,
-                              &VS::Actors::BeginLiveNavigationJump);
+  const auto entry = GENERATE(kTileJump, kAirborneTileJump, kNavigationJump);
   const auto speed = GENERATE(-10, 17, 18, 31, 32, 40, 0x10028);
   const auto facing = GENERATE(-1, 0x10003, 0x12348001, -0x7FFFFFFF - 1);
   const bool aliased = GENERATE(false, true);
@@ -377,13 +382,12 @@ TEST_CASE(
       ConsumeExpected(fixture.actor, entry, &target, speed, facing);
   auto* input =
       aliased ? reinterpret_cast<int*>(&fixture.actor.routeTarget) : &target;
-  REQUIRE(Field_ActorSupportHeight(1216, 1472) == 0);
+  REQUIRE(VS::Field::LiveActorSupportHeight(1216, 1472) == 0);
   entry(0, input, speed, facing);
   CHECK(Bytes(fixture.actor) == expected);
   CheckConsumerDestination(fixture.actor, &target);
   CheckConsumerArc(fixture.actor, speed);
-  const int animation =
-      entry == VS::Actors::BeginLiveTileJump ? 47 : (start_y < 0 ? 35 : 33);
+  const int animation = entry == kTileJump ? 47 : (start_y < 0 ? 35 : 33);
   CHECK(fixture.actor.animationId == animation);
   CHECK(fixture.actor.pose.animationId == fixture.actor.animationId);
   CHECK(fixture.actor.blendFrames == 4);
@@ -394,9 +398,7 @@ TEST_CASE(
 
 TEST_CASE("Jump reentry honors the active arc gate and production motion reset",
           "[actors][jump-entry]") {
-  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
-                              &VS::Actors::BeginLiveAirborneTileJump,
-                              &VS::Actors::BeginLiveNavigationJump);
+  const auto entry = GENERATE(kTileJump, kAirborneTileJump, kNavigationJump);
   JumpFixture fixture;
   fixture.actor.instance.movementMode = 0;
   int target = 0x000B0009;
@@ -407,7 +409,7 @@ TEST_CASE("Jump reentry honors the active arc gate and production motion reset",
   target = 0x7F0D010B;
   entry(0, &target, 18, 0x10003);
   CHECK(Bytes(fixture.actor) == Bytes(expected));
-  Actors_StopActorMotion(0);
+  VS::Actors::StopLiveActorMotion(0);
   REQUIRE(fixture.actor.instance.movementMode == 0);
   REQUIRE(fixture.actor.instance.jumpCountdown == 0);
   entry(0, &target, 18, 0x10003);

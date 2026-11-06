@@ -7,9 +7,9 @@ extern "C" {
 int Effects_Plg169_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FD594 (D_800FD594@EFFECT/PLG169.BIN)
-u_char Effects_Plg169_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg169_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FD5B4 (D_800FD5B4@EFFECT/PLG169.BIN)
-CVECTOR Effects_Plg169_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg169_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

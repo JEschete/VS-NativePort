@@ -1,10 +1,13 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -13,8 +16,7 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
@@ -27,10 +29,9 @@ extern "C" {
 #include "Items/InventoryLiveState.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
-#include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
@@ -111,7 +112,7 @@ void Menu_Inventory_SortWeapons(int stat)
 
                 VS::Items::LoadLiveInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
 
-                value = Menu_Framework_WeaponSortValue(stat, &uiWeapon);
+                value = VS::Menu::Framework::LiveWeaponSortValue(stat, &uiWeapon);
 
                 if (maxValue < value) {
                     maxValue = value;
@@ -130,7 +131,7 @@ void Menu_Inventory_SortWeapons(int stat)
 
                 VS::Items::LoadLiveInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
 
-                if (Menu_Framework_WeaponSortValue(stat, &uiWeapon) == maxValue) {
+                if (VS::Menu::Framework::LiveWeaponSortValue(stat, &uiWeapon) == maxValue) {
                     sortedIndices[sortedPos++] = index;
                     indices[i] = 0;
                 }
@@ -168,7 +169,7 @@ void Menu_Inventory_SortShields(int stat)
 
                 VS::Items::LoadLiveInventoryShieldStats(&uiShield, &shield[index - 1]);
 
-                value = Menu_Framework_ShieldSortValue(stat, &uiShield);
+                value = VS::Menu::Framework::LiveShieldSortValue(stat, &uiShield);
 
                 if (maxValue < value) {
                     maxValue = value;
@@ -187,7 +188,7 @@ void Menu_Inventory_SortShields(int stat)
 
                 VS::Items::LoadLiveInventoryShieldStats(&uiShield, &shield[index - 1]);
 
-                if (Menu_Framework_ShieldSortValue(stat, &uiShield) == maxValue) {
+                if (VS::Menu::Framework::LiveShieldSortValue(stat, &uiShield) == maxValue) {
                     sortedIndices[sortedPos++] = index;
                     indices[i] = 0;
                 }
@@ -219,7 +220,7 @@ void Menu_Inventory_SortMisc(int stat)
             index = indices[i];
 
             if (index != 0) {
-                int value = Menu_Framework_MiscSortValue(stat, &misc[index - 1]);
+                int value = VS::Menu::Framework::LiveMiscSortValue(stat, &misc[index - 1]);
 
                 if (maxValue < value) {
                     maxValue = value;
@@ -234,7 +235,7 @@ void Menu_Inventory_SortMisc(int stat)
         for (i = 0; i < 0x40; ++i) {
             index = indices[i];
 
-            if ((index != 0) && (Menu_Framework_MiscSortValue(stat, &misc[index - 1]) == maxValue)) {
+            if ((index != 0) && (VS::Menu::Framework::LiveMiscSortValue(stat, &misc[index - 1]) == maxValue)) {
                 sortedIndices[sortedPos++] = index;
                 indices[i] = 0;
             }
@@ -290,7 +291,7 @@ void Menu_Inventory_SortEquipment(int itemCategory, int stat)
 
                     Menu_Inventory_CopyEquipmentStats(&uiEquipment, itemCategory, index - 1);
 
-                    value = Menu_Framework_EquipmentSortValue(stat, &uiEquipment);
+                    value = VS::Menu::Framework::LiveEquipmentSortValue(stat, &uiEquipment);
 
                     if (maxValue < value) {
                         maxValue = value;
@@ -309,7 +310,7 @@ void Menu_Inventory_SortEquipment(int itemCategory, int stat)
 
                     Menu_Inventory_CopyEquipmentStats(&uiEquipment, itemCategory, index - 1);
 
-                    if (Menu_Framework_EquipmentSortValue(stat, &uiEquipment) == maxValue) {
+                    if (VS::Menu::Framework::LiveEquipmentSortValue(stat, &uiEquipment) == maxValue) {
                         sortedIndices[sortedPos++] = index;
                         indices[i] = 0;
                     }
@@ -350,7 +351,7 @@ int Menu_Inventory_UpdateSortMenu(int initItemCategory)
 
     switch (Menu_Inventory_sortMenuState) {
     case Menu_Inventory_SortMenuState_Init:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             u_char* categoryStats = Menu_Inventory_sortMenuSortStats[Menu_Inventory_sortMenuItemCategory];
 
             for (i = 0; i < Menu_Inventory_sortMenuSortStatSizes[Menu_Inventory_sortMenuItemCategory]; ++i) {
@@ -361,7 +362,7 @@ int Menu_Inventory_UpdateSortMenu(int initItemCategory)
                 rowTypes[i] = 0;
             }
 
-            Menu_Framework_CreateActionRows(
+            VS::Menu::Framework::CreateLiveActionRows(
                 i, Menu_Inventory_sortMenuItemCategory + Menu_Framework_ActionsMenuAction_Sort, menuText, rowTypes);
 
             Menu_Inventory_sortMenuState = 1;
@@ -369,9 +370,9 @@ int Menu_Inventory_UpdateSortMenu(int initItemCategory)
         break;
 
     case Menu_Inventory_SortMenuState_Sort:
-        Menu_Framework_UpdateActionMenu();
+        VS::Menu::Framework::UpdateLiveActionMenu();
 
-        i = Menu_Framework_ActionSelectionResult();
+        i = VS::Menu::Framework::LiveActionSelectionResult();
 
         if ((i + 1) != 0) {
             if (i >= 0) {
@@ -446,7 +447,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
         Menu_Inventory_discardMenuSelectedItem = params & 0xFF;
 
         Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                     [Menu_Inventory_discardType + Text_Menu_ITEMHELP_BIN_Index_discardConfirm]]);
 
@@ -458,7 +459,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
     switch (Menu_Inventory_discardMenuState) {
     case Menu_Inventory_DiscardMenuState_Init:
         if (Menu_textBoxes[7].flags.done) {
-            if (Menu_Framework_AreMenuRowsIdle() != 0) {
+            if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
                 Menu_Inventory_discardMenuState = ((Menu_Inventory_discardType & 1) + Menu_Inventory_DiscardMenuState_DiscardOneInit);
             }
         }
@@ -474,7 +475,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
             rowTypes[i] = 0;
         }
 
-        Menu_Framework_CreateActionRows(2, Menu_Framework_ActionsMenuAction_Discard, menuText, rowTypes);
+        VS::Menu::Framework::CreateLiveActionRows(2, Menu_Framework_ActionsMenuAction_Discard, menuText, rowTypes);
 
         Menu_Inventory_discardMenuState = Menu_Inventory_DiscardMenuState_DiscardOne;
         break;
@@ -495,7 +496,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
             Menu_Inventory_discardTemplate[i] = '0';
         }
 
-        menuItem = Menu_Framework_SetMenuItem(34, -126, 130, 126, 0, Menu_Inventory_discardTemplate);
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(34, -126, 130, 126, 0, Menu_Inventory_discardTemplate);
         menuItem->state = 5;
         menuItem->targetPosition0 = 0;
 
@@ -505,12 +506,12 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
         break;
 
     case Menu_Inventory_DiscardMenuState_DiscardOne:
-        Menu_Framework_UpdateActionMenu();
-        i = Menu_Framework_ActionSelectionResult() + 1;
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        i = VS::Menu::Framework::LiveActionSelectionResult() + 1;
 
         if (i != 0) {
             if (i == 1) {
-                Audio_PlaySfxCentered(0x7E, 28);
+                VS::Audio::LivePlaySfxCentered(0x7E, 28);
                 VS::Items::Inventory::ClearLiveItemSlot(Menu_Inventory_discardMenuItemCategory, Menu_Inventory_discardMenuSelectedItem);
             } else {
                 VS::Menu::PlayLeaveSound();
@@ -521,7 +522,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
         break;
 
     case Menu_Inventory_DiscardMenuState_ClearTemplate:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
@@ -529,7 +530,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
             Menu_Inventory_discardTemplate[i] = ' ';
         }
 
-        Menu_Framework_SetMenuItem(34, 0, 130, 126, 0, Menu_Inventory_discardTemplate);
+        VS::Menu::Framework::SetLiveMenuItem(34, 0, 130, 126, 0, Menu_Inventory_discardTemplate);
 
         Menu_Inventory_discardMenuState = Menu_Inventory_DiscardMenuState_DetermineDiscardAmount;
         // Fallthrough
@@ -546,7 +547,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
             Menu_Inventory_discardTemplate[3] = i & 0xF;
             Menu_Inventory_discardTemplate[2] = i >> 4;
 
-            Menu_Framework_SetMenuItem(34, 0, 130, 126, 0, Menu_Inventory_discardTemplate);
+            VS::Menu::Framework::SetLiveMenuItem(34, 0, 130, 126, 0, Menu_Inventory_discardTemplate);
 
             if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
@@ -634,13 +635,13 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
         VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
         VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
 
-        Menu_Inventory_discardMenuCursorBrightness = Menu_Framework_DrawCursor(
+        Menu_Inventory_discardMenuCursorBrightness = VS::Menu::Framework::DrawLiveCursor(
             Menu_Inventory_discardMenuCursorBrightness, (54 - (Menu_Inventory_discardStep * 6)) | (114 << 16));
 
         break;
 
     case Menu_Inventory_DiscardMenuState_DiscardMultipleConfirm:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
 
             char* menuText[4];
             int rowTypes[2];
@@ -653,19 +654,19 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
                 rowTypes[i] = 0;
             }
 
-            Menu_Framework_CreateActionRows(2, Menu_Framework_ActionsMenuAction_Discard, menuText, rowTypes);
+            VS::Menu::Framework::CreateLiveActionRows(2, Menu_Framework_ActionsMenuAction_Discard, menuText, rowTypes);
             Menu_Inventory_discardMenuState = Menu_Inventory_DiscardMenuState_DiscardMultiple;
         }
 
         break;
 
     case Menu_Inventory_DiscardMenuState_DiscardMultiple:
-        Menu_Framework_UpdateActionMenu();
-        i = Menu_Framework_ActionSelectionResult() + 1;
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        i = VS::Menu::Framework::LiveActionSelectionResult() + 1;
 
         if (i != 0) {
             if (i == 1) {
-                Audio_PlaySfxCentered(0x7E, 0x1C);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x1C);
 
                 if (Audio_Seq_unusedInventory.misc[Menu_Inventory_discardMenuSelectedItem - 1].count == Menu_Inventory_discardCount) {
                     VS::Items::Inventory::ClearLiveItemSlot(Menu_Inventory_discardMenuItemCategory, Menu_Inventory_discardMenuSelectedItem);
@@ -752,7 +753,7 @@ int Menu_Inventory_BuildItemRows(
 
         switch (itemCategory) {
         case Items_ItemCategory_Weapon:
-            Menu_Framework_FormatInventoryWeaponRow(&Audio_Seq_unusedInventory.weapons[index],
+            VS::Menu::Framework::FormatLiveInventoryWeaponRow(&Audio_Seq_unusedInventory.weapons[index],
                 &menuText[count * 2], &rowTypes[i], textBuf);
 
             if (Audio_Seq_unusedInventory.weapons[index].isEquipped != 0) {
@@ -761,17 +762,17 @@ int Menu_Inventory_BuildItemRows(
             break;
 
         case Items_ItemCategory_Blade:
-            Menu_Framework_FormatBladeRow(&Audio_Seq_unusedInventory.blades[index],
+            VS::Menu::Framework::FormatLiveBladeRow(&Audio_Seq_unusedInventory.blades[index],
                 &menuText[count * 2], &rowTypes[i], textBuf);
             break;
 
         case Items_ItemCategory_Grip:
-            Menu_Framework_FormatGripRow(&Audio_Seq_unusedInventory.grips[index], &menuText[count * 2],
+            VS::Menu::Framework::FormatLiveGripRow(&Audio_Seq_unusedInventory.grips[index], &menuText[count * 2],
                 &rowTypes[i], textBuf);
             break;
 
         case Items_ItemCategory_Shield:
-            Menu_Framework_FormatInventoryShieldRow(&Audio_Seq_unusedInventory.shields[index],
+            VS::Menu::Framework::FormatLiveInventoryShieldRow(&Audio_Seq_unusedInventory.shields[index],
                 &menuText[count * 2], &rowTypes[i], textBuf);
 
             if (Audio_Seq_unusedInventory.shields[index].isEquipped != 0) {
@@ -780,7 +781,7 @@ int Menu_Inventory_BuildItemRows(
             break;
 
         case Items_ItemCategory_Armor:
-            Menu_Framework_FormatInventoryArmorRow(&Audio_Seq_unusedInventory.armor[index],
+            VS::Menu::Framework::FormatLiveInventoryArmorRow(&Audio_Seq_unusedInventory.armor[index],
                 &menuText[count * 2], &rowTypes[i], textBuf);
 
             if (Audio_Seq_unusedInventory.armor[index].limb != 0) {
@@ -789,13 +790,13 @@ int Menu_Inventory_BuildItemRows(
             break;
 
         case Items_ItemCategory_Gem:
-            Menu_Framework_FormatGemRow(&Audio_Seq_unusedInventory.gems[index], &menuText[count * 2],
+            VS::Menu::Framework::FormatLiveGemRow(&Audio_Seq_unusedInventory.gems[index], &menuText[count * 2],
                 &rowTypes[i], textBuf);
             break;
 
         case Items_ItemCategory_Misc: {
             u_int actionId;
-            Menu_Framework_FormatMiscItemRow(&Audio_Seq_unusedInventory.misc[index], &menuText[count * 2],
+            VS::Menu::Framework::FormatLiveMiscItemRow(&Audio_Seq_unusedInventory.misc[index], &menuText[count * 2],
                 &rowTypes[i], textBuf);
             actionId =
                 Menu_Inventory_miscItemToActionMap[Audio_Seq_unusedInventory.misc[index].id - 323];
@@ -844,11 +845,11 @@ void Menu_Inventory_RestoreItemRows(int itemCategory)
     int i;
 
     while (Menu_Framework_itemsListRow < 16) {
-        Menu_Framework_UpdateRowSelection();
+        VS::Menu::Framework::UpdateLiveRowSelection();
     }
 
     for (i = 20; i < 40; ++i) {
-        Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(i);
+        Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::LiveMenuItem(i);
 
         if (menuItem->state == 2) {
             menuItem->state = 1;
@@ -902,7 +903,7 @@ int Menu_Inventory_UpdateItemList(int initialize)
 
 loop_1:
     if (initialize != 0) {
-        Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(3);
+        Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::LiveMenuItem(3);
 
         if (menuItem->x > 180) {
             if (menuItem->x > 204) {
@@ -970,7 +971,7 @@ loop_1:
         Menu_Inventory_itemListNoItems = rowCount == 0;
 
         if (Menu_Inventory_itemListNoItems) {
-            Menu_Framework_SetInformationMessage(
+            VS::Menu::Framework::SetLiveInformationMessage(
                 (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_noItemsInCategory]);
         } else {
 
@@ -990,7 +991,7 @@ loop_1:
                 var_a1_2 |= 0x19200;
             }
 
-            Menu_Framework_CreateMenuRows(rowCount, var_a1_2, menuText, rowTypes);
+            VS::Menu::Framework::CreateLiveMenuRows(rowCount, var_a1_2, menuText, rowTypes);
 
             if (Menu_Inventory_itemListState == Menu_Inventory_ItemListState_None) {
                 Menu_Inventory_RestoreItemRows(itemCategory);
@@ -1030,19 +1031,19 @@ loop_1:
                 Menu_Inventory_statusCommandState = rowCount + 1;
             }
 
-            Menu_Inventory_itemListSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+            Menu_Inventory_itemListSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
 
 #define offset 1
 
             if (Menu_Inventory_itemListSelectedRow == 0) {
                 if (Input_buttonsPressed.allButtons & PADRleft) {
-                    if ((Menu_Inventory_statusCommandState >= 2) && Menu_Framework_AreMenuRowsIdle()) {
+                    if ((Menu_Inventory_statusCommandState >= 2) && VS::Menu::Framework::AreLiveMenuRowsIdle()) {
 
                         VS::Menu::PlaySelectSound();
 
-                        row = Menu_Framework_CloseRowsAndRememberCursor();
+                        row = VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
 
-                        Menu_Framework_MenuItem(row >> 8)->outsetIcon = 0;
+                        VS::Menu::Framework::LiveMenuItem(row >> 8)->outsetIcon = 0;
                         Menu_Inventory_UpdateItemDetails(itemCategory | ((row + offset) << 4));
 #undef offset
                         Menu_Inventory_secondaryTitleEnabled = 0;
@@ -1071,7 +1072,7 @@ loop_1:
                 i = Input_settings.cursorMemory;
                 Input_settings.cursorMemory = 1;
 
-                Menu_Framework_CreateMenuRows(
+                VS::Menu::Framework::CreateLiveMenuRows(
                     count, (itemCategory + 30) | 0x19200, sp310, rowTypes);
 
                 Input_settings.cursorMemory = i;
@@ -1132,15 +1133,15 @@ loop_1:
 
                 if (Menu_Inventory_itemListState == 2) {
                     if (Menu_Inventory_itemListNoItems == 0) {
-                        Menu_Framework_CloseRowsAndRememberCursor();
-                        Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(3));
+                        VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
+                        VS::Menu::Framework::ClearLiveMenuExcept(3);
                     }
                     Menu_Inventory_itemListState = 3;
                 }
             }
         }
 
-        if ((Menu_Inventory_itemListState == 3) && Menu_Framework_AreMenuRowsIdle()) {
+        if ((Menu_Inventory_itemListState == 3) && VS::Menu::Framework::AreLiveMenuRowsIdle()) {
             if ((Input_buttonsState & (PADL1 | PADR1 | PADLleft | PADLright)) && row) {
                 break;
             }
@@ -1154,7 +1155,7 @@ loop_1:
     }
 
     case 4: {
-        Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(3);
+        Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::LiveMenuItem(3);
 
         if (menuItem->x > 180) {
             if (menuItem->x > 204) {
@@ -1170,7 +1171,7 @@ loop_1:
         /* fallthrough */
 
     case Menu_Inventory_ItemListState_WaitInit:
-        if (Menu_Framework_AreMenuRowsIdle()) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle()) {
             Menu_Inventory_itemListState = Menu_Inventory_ItemListState_Init;
         }
         break;
@@ -1180,7 +1181,7 @@ loop_1:
             VS::Menu::PlayInvalidSound();
         }
 
-        i = Menu_Framework_GetSelectedRow() + 1;
+        i = VS::Menu::Framework::LiveSelectedRow() + 1;
 
         if (i == 0) {
             break;
@@ -1217,7 +1218,7 @@ loop_1:
                 indices[rowCount - 1] = row;
             }
 
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(3));
+            VS::Menu::Framework::ClearLiveMenuExcept(3);
 
             Menu_Inventory_itemListState = 4;
             break;
@@ -1244,7 +1245,7 @@ loop_1:
         Menu_Inventory_secondaryTitleEnabled = 1;
 
         {
-            Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(3);
+            Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::LiveMenuItem(3);
 
             if (menuItem->x > 180) {
                 if (menuItem->x > 204) {
@@ -1379,7 +1380,7 @@ loop_1:
         ++rowCount;
         Menu_Inventory_itemListAvailableActions[rowCount] = Menu_Inventory_ItemAction_SortItems;
 
-        Menu_Framework_CreateActionRows(
+        VS::Menu::Framework::CreateLiveActionRows(
             rowCount, itemCategory + 38, sp310, Menu_Framework_rowTypeBuf);
 
         Menu_Inventory_itemListState = Menu_Inventory_ItemListState_ProcessAction;
@@ -1387,15 +1388,15 @@ loop_1:
     }
 
     case Menu_Inventory_ItemListState_ProcessAction:
-        Menu_Framework_UpdateInformationVisibility(
-            Menu_Framework_HighlightedActionRow(), Menu_Framework_actionMenuState);
+        VS::Menu::Framework::UpdateLiveInformationVisibility(
+            VS::Menu::Framework::LiveHighlightedActionRow(), Menu_Framework_actionMenuState);
 
-        Menu_Framework_UpdateActionMenu();
-        index = Menu_Framework_ActionSelectionResult() + 1;
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        index = VS::Menu::Framework::LiveActionSelectionResult() + 1;
 
         if (index != 0) {
 
-            Menu_Framework_FlyOutRowsLeftExcept(0x28);
+            VS::Menu::Framework::FlyOutLiveRowsLeftExcept(0x28);
 
             if (index > 0) {
 
@@ -1404,7 +1405,7 @@ loop_1:
 
                 switch (Menu_Inventory_itemListAvailableActions[index]) {
                 case Menu_Inventory_ItemAction_UseItem:
-                    Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+                    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
                     Items_miscItemInvoked = indices[Menu_Inventory_itemListSelectedRow - 1] - 1;
                     Menu_Framework_actionSelection.executeAbility.halves[0] =
@@ -1415,8 +1416,8 @@ loop_1:
                     return 3;
 
                 case Menu_Inventory_ItemAction_SearchItem:
-                    Menu_Framework_InitializeInformationBox();
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(3));
+                    VS::Menu::Framework::InitializeLiveInformationBox();
+                    VS::Menu::Framework::ClearLiveMenuExcept(3);
 
                     Menu_Inventory_itemListState = Menu_Inventory_ItemListState_Search;
                     break;
@@ -1443,7 +1444,7 @@ loop_1:
                     break;
 
                 case Menu_Inventory_ItemAction_SortItems:
-                    Menu_Framework_InitializeInformationBox();
+                    VS::Menu::Framework::InitializeLiveInformationBox();
                     Menu_Inventory_UpdateSortMenu(itemCategory + 1);
 
                     Menu_Inventory_itemListState = Menu_Inventory_ItemListState_Sort;
@@ -1455,12 +1456,12 @@ loop_1:
 
 
                 if (index == -2) {
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(3));
+                    VS::Menu::Framework::ClearLiveMenuExcept(3);
 
                     return -2;
                 }
 
-                Menu_Framework_InitializeInformationBox();
+                VS::Menu::Framework::InitializeLiveInformationBox();
 
                 Menu_Inventory_itemListState = Menu_Inventory_ItemListState_None;
             }
@@ -1471,7 +1472,7 @@ loop_1:
         break;
 
     case Menu_Inventory_ItemListState_Search:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
@@ -1496,9 +1497,9 @@ loop_1:
 
         if (i != 0) {
 
-            Menu_Framework_InitializeInformationBox();
-            Menu_Framework_FlyOutRowsLeftExcept(40);
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(3));
+            VS::Menu::Framework::InitializeLiveInformationBox();
+            VS::Menu::Framework::FlyOutLiveRowsLeftExcept(40);
+            VS::Menu::Framework::ClearLiveMenuExcept(3);
 
             if (i == -2) {
                 return -2;
@@ -1514,8 +1515,8 @@ loop_1:
 
         if (i != 0) {
 
-            Menu_Framework_FlyOutRowsLeftExcept(40);
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(3));
+            VS::Menu::Framework::FlyOutLiveRowsLeftExcept(40);
+            VS::Menu::Framework::ClearLiveMenuExcept(3);
 
             if (i == -2) {
                 return -2;

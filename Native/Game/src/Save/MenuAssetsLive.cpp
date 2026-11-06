@@ -3,18 +3,18 @@
 // queue, low-end heap, texture pages and the screens' text tables.
 #include "Save/MenuAssetsLive.hpp"
 
+#include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
-#include "Boot/Lifecycle.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-#include "Menu/Files.h"
+#include "Menu/FilesLiveState.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveCard.h"
@@ -61,6 +61,8 @@ const char* MisuseName(MenuAssetMisuse misuse) {
       return "release while a disc read targets the buffer";
     case MenuAssetMisuse::kNotLoaded:
       return "release with nothing loaded";
+    case MenuAssetMisuse::kAllocationRefused:
+      return "asset buffer refused; retrying on each step";
   }
   return "unknown";
 }
@@ -88,9 +90,12 @@ class LiveMenuAssets final : public MenuAssetHost {
     VS::Render::RetireLiveTexturePageRange(kSaveTexturePage, kSaveImageCount,
                                            kSaveTextureOwner);
   }
-  void AllocateAssets(MenuAssetOwner owner) override {
-    Title_memoryCardUiResource = static_cast<char*>(
+  bool AllocateAssets(MenuAssetOwner owner) override {
+    auto* const buffer = static_cast<char*>(
         VS::Core::Memory::AllocateLiveFromLowEnd(kImageBytes));
+    // #301: a refused buffer derives no views.
+    if (buffer == nullptr) return false;
+    Title_memoryCardUiResource = buffer;
     Save_MemoryCard_uiResources = reinterpret_cast<Save_CardUiResources*>(
         Title_memoryCardUiResource + kResourceOffset);
     if (owner == MenuAssetOwner::kDataMenu) {
@@ -101,11 +106,18 @@ class LiveMenuAssets final : public MenuAssetHost {
     Title_saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
     Title_cardDirectoryEntryBuffer =
         &Save_MemoryCard_uiResources->directoryEntry;
+    return true;
   }
   void FreeAssets() override {
     VS::Core::Memory::FreeLiveFromLowEnd(Title_memoryCardUiResource);
     Title_memoryCardUiResource = nullptr;
     Save_MemoryCard_uiResources = nullptr;
+    // #300: every view AllocateAssets derived pointed into the freed block, so
+    // clear them all for the readers' null guards to refuse later reads.
+    Menu_Files_textTable = nullptr;
+    Title_saveMenuText = nullptr;
+    Title_saveFileSummaries = nullptr;
+    Title_cardDirectoryEntryBuffer = nullptr;
   }
   void RequestImage() override {
     Request(VS_SPMCIMG_BIN_LBA, kImageBytes, Title_memoryCardUiResource);
@@ -127,7 +139,7 @@ class LiveMenuAssets final : public MenuAssetHost {
                                          PackedPair(kImageWidth, kImageHeight));
   }
   void SetSoftResetEnabled(bool enabled) override {
-    Boot_SetSoftResetEnabled(enabled ? 1 : 0);
+    VS::Boot::SetSoftResetEnabledLive(enabled ? 1 : 0);
   }
   void ReportMisuse(MenuAssetMisuse misuse) override {
     Core_Errorf("save.assets", "Memory-card assets: %s (phase %d)",

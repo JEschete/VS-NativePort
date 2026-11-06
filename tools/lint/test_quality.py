@@ -363,7 +363,7 @@ class BaselineTests(unittest.TestCase):
         self.assertIn("tools/test/verify_first_lever.py", python)
         self.assertIn("Native/Player/player.py", python)
         self.assertIn("Native/Player/vs_player/reaction.py", python)
-        self.assertNotIn("Native/Game/src/Battle/Targeting.cpp", native)
+        self.assertNotIn("Native/Game/src/Battle/ActionExecution.cpp", native)
         self.assertTrue(all(path.startswith("Native/") for path in native))
         self.assertFalse(
             any(

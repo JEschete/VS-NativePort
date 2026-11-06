@@ -9,10 +9,10 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Ending/Credits/EmbeddedArt.h"
+#include "Ending/EndingLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Ending/ClearResults.h"
 #include "Ending/Credits.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -83,16 +83,27 @@ struct EndingArtFixture {
 
 struct EndingFrameFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
+  std::array<void*, 2> saved_primitives =
+      std::to_array(Render_legacyPrimitiveBuffers);
+  std::array<void*, 2> saved_ordering =
+      std::to_array(Render_legacyOrderingTables);
   std::vector<u_long> packets = std::vector<u_long>(
       5 * sizeof(POLY_FT4) / sizeof(u_long) + 2, 0xDEADBEEF);
-  std::array<u_long, 0x800> ordering{};
+  // AllocateRenderBuffers' 0x2088-byte ordering table.
+  std::array<u_long, 0x822> ordering{};
 
   EndingFrameFixture() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    std::ranges::fill(Render_legacyPrimitiveBuffers, packets.data());
+    std::ranges::fill(Render_legacyOrderingTables, ordering.data());
     Render_frameScratch.primitiveCursor = packets.data() + 1;
     Render_frameScratch.orderingTable = ordering.data();
   }
-  ~EndingFrameFixture() { Render_frameScratch = saved_frame; }
+  ~EndingFrameFixture() {
+    Render_frameScratch = saved_frame;
+    std::ranges::copy(saved_primitives, Render_legacyPrimitiveBuffers);
+    std::ranges::copy(saved_ordering, Render_legacyOrderingTables);
+  }
 };
 
 void CheckRankStrip(const POLY_FT4& strip, int index, int brightness,
@@ -166,7 +177,7 @@ TEST_CASE("Clear results retain five strips in the native penultimate bucket",
   const auto original_ordering = fixture.ordering;
   auto* strips = reinterpret_cast<POLY_FT4*>(fixture.packets.data() + 1);
   void* previous = nextPrim(&fixture.ordering[0x7FE]);
-  Ending_DrawRankBackground(fade);
+  VS::Ending::LiveDrawRankBackground(fade);
   CHECK(fixture.packets.front() == 0xDEADBEEF);
   CHECK(fixture.packets.back() == 0xDEADBEEF);
   CHECK(Render_frameScratch.primitiveCursor == strips + 5);
@@ -189,7 +200,7 @@ TEST_CASE(
   EndingFrameFixture fixture;
   const auto original_ordering = fixture.ordering;
   const void* original_cursor = Render_frameScratch.primitiveCursor;
-  Ending_DrawRankBackground(fade);
+  VS::Ending::LiveDrawRankBackground(fade);
   CHECK(fixture.packets.front() == 0xDEADBEEF);
   CHECK(fixture.packets.back() == 0xDEADBEEF);
   CHECK(Render_frameScratch.primitiveCursor == original_cursor);

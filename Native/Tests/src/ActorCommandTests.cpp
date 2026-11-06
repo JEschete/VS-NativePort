@@ -22,7 +22,8 @@ extern "C" {
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
-#include "Field/RoomLoading.h"
+#include "Field/Gimmicks.h"
+#include "Field/RoomLoadingLiveState.h"
 }
 
 namespace {

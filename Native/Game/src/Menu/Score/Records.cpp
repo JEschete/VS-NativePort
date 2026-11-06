@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/String/GameTextLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -106,7 +107,7 @@ void Menu_Score_RenderTitles(int animState)
     for (i = 0; i < 32; ++i, ++row) {
         if (i == selectedRow) {
             if (row->selected == 0) {
-                Menu_Framework_SetInformationMessage(row->description);
+                VS::Menu::Framework::SetLiveInformationMessage(row->description);
             }
             row->selected = 1;
             if (row->opaque1 != 0) {
@@ -132,12 +133,12 @@ void Menu_Score_RenderTitles(int animState)
 
         if (row->selected != 0) {
             if (animState == 8) {
-                Menu_Score_titlesCursorAnimState = Menu_Framework_DrawCursor(
+                Menu_Score_titlesCursorAnimState = VS::Menu::Framework::DrawLiveCursor(
                     Menu_Score_titlesCursorAnimState, vs_getXY_2(row->x - 12, y - 8));
             }
         }
 
-        menuItem = Menu_Framework_SetMenuItem(0, row->x, y, 200, 0, row->title);
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(0, row->x, y, 200, 0, row->title);
 
         if (row->opaque1 == 0) {
             menuItem->fontColor = 3;
@@ -157,11 +158,11 @@ void Menu_Score_RenderTitles(int animState)
         if ((menuItem->isScrollable != Menu_Framework_MenuItemScroll_None) && (animState == 8)) {
             Menu_Score_RenderScrollableRow(menuItem);
         } else {
-            Menu_Framework_DrawMenuItem(menuItem);
+            VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }
     }
 
-    Menu_Framework_MenuItem(0)->state = 0;
+    VS::Menu::Framework::LiveMenuItem(0)->state = 0;
 }
 
 // decomp: MENU9.PRG _renderTitleNo (src/MENU/MENU9.PRG/238.c:1835)
@@ -240,7 +241,7 @@ void Menu_Score_RenderStatistics(int animState)
     for (i = 0; i < 23; ++i, ++row) {
         if (i == selected_record_index) {
             if (row->selected == 0) {
-                Menu_Framework_SetInformationMessage(row->description);
+                VS::Menu::Framework::SetLiveInformationMessage(row->description);
             }
             row->selected = 1;
             row->animationState = 8;
@@ -265,11 +266,11 @@ void Menu_Score_RenderStatistics(int animState)
             record_row_y = ((i * 0x10) + 0x38);
         }
         if ((row->selected != 0) && (animState == 8)) {
-            Menu_Score_statisticsCursorAnimStep = Menu_Framework_DrawCursor(
+            Menu_Score_statisticsCursorAnimStep = VS::Menu::Framework::DrawLiveCursor(
                 Menu_Score_statisticsCursorAnimStep, ((row->x - 0xC) & 0xFFFF) | ((record_row_y - 8) << 0x10));
         }
 
-        menuItem = Menu_Framework_SetMenuItem(0, row->x, record_row_y, 0x8E, 0, row->title);
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(0, row->x, record_row_y, 0x8E, 0, row->title);
         menuItem->gradientState = row->animationState;
 
         if ((i == 0) && (record_cursor_memory->recordTimePage != 0)) {
@@ -283,7 +284,7 @@ void Menu_Score_RenderStatistics(int animState)
         if ((menuItem->isScrollable != 0) && (animState == 8)) {
             Menu_Score_RenderScrollableRow(menuItem);
         } else {
-            Menu_Framework_DrawMenuItem(menuItem);
+            VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }
 
         v1 = record_cursor_memory->recordTimePage + i;
@@ -318,7 +319,7 @@ void Menu_Score_RenderStatistics(int animState)
         --value_right_edge_x;
         aligned_value_text[0] = 0xFA;
         aligned_value_text[1] = v1 - (row->x - 0x72);
-        menuItem = Menu_Framework_SetMenuItem(0, row->x + 0x8E, record_row_y, 0x8E, 0, aligned_value_text);
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(0, row->x + 0x8E, record_row_y, 0x8E, 0, aligned_value_text);
         menuItem->gradientState = 8 - row->animationState;
 
         if ((i == 0) && (record_cursor_memory->recordTimePage != 0)) {
@@ -331,11 +332,11 @@ void Menu_Score_RenderStatistics(int animState)
         if ((menuItem->isScrollable != 0) && (animState == 8)) {
             Menu_Score_RenderScrollableRow(menuItem);
         } else {
-            Menu_Framework_DrawMenuItem(menuItem);
+            VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }
     }
 
-    Menu_Framework_MenuItem(0)->state = 0;
+    VS::Menu::Framework::LiveMenuItem(0)->state = 0;
 }
 
 // decomp: MENU9.PRG _printFastestClearTime (src/MENU/MENU9.PRG/238.c:2400)
@@ -430,7 +431,7 @@ void Menu_Score_LeaveTimeTrialMenu(void)
 
     for (i = 0; i < 8; ++i, ++p) {
         if (p->animationState == 0) {
-            Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(i);
+            Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::LiveMenuItem(i);
             menuItem->state = 2;
             menuItem->targetPosition0 = 320;
         } else {
@@ -468,13 +469,13 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
     for (i = 0; i < 8; ++i, ++trial_row_cursor) {
         if (trial_row_cursor->animationState != 0) {
             if (!(--trial_row_cursor->animationState)) {
-                menuItem = Menu_Framework_SetMenuItem(
+                menuItem = VS::Menu::Framework::SetLiveMenuItem(
                     i, 0x140, 0x32 + i * 0x10, 0x88, 0, trial_row_cursor->title);
                 menuItem->unselectable = trial_row_cursor->disabled;
                 menuItem->state = 2;
                 menuItem->targetPosition0 = 0xC2;
             }
-        } else if (Menu_Framework_MenuItem(i)->state == 1) {
+        } else if (VS::Menu::Framework::LiveMenuItem(i)->state == 1) {
             ++settled_row_count;
         }
     }
@@ -487,19 +488,19 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
             continue;
         }
 
-        menuItem = Menu_Framework_MenuItem(i);
+        menuItem = VS::Menu::Framework::LiveMenuItem(i);
 
         if (i == selected_trial_index) {
 
             if (trial_row_cursor->selected == 0) {
-                Menu_Framework_SetInformationMessage(trial_row_cursor->description);
+                VS::Menu::Framework::SetLiveInformationMessage(trial_row_cursor->description);
             }
 
             trial_row_cursor->selected = 1;
             menuItem->selected = 1;
             packed_trial_cursor_position = (((selected_trial_index * 0x10) + 0x2A) << 0x10) | 0xB6;
 
-            Menu_Score_timeTrialRecordsCursorAnimStep = Menu_Framework_DrawCursor(Menu_Score_timeTrialRecordsCursorAnimStep, packed_trial_cursor_position);
+            Menu_Score_timeTrialRecordsCursorAnimStep = VS::Menu::Framework::DrawLiveCursor(Menu_Score_timeTrialRecordsCursorAnimStep, packed_trial_cursor_position);
 
             selected_trial_row = trial_row_cursor;
 

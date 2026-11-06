@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG135_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG135_H_DECLS
 
-extern CVECTOR Effects_Plg135_closedRingColorFactors[];
+extern CVECTOR Effects_Plg135_closedRingColorFactors[8];
 extern int Effects_Plg135_trailEmissionCounter;
 
 #endif // VS_EFFECTS_PLUGINS_PLG135_H_DECLS

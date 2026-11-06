@@ -6,6 +6,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -39,7 +40,6 @@ extern "C" {
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Render/Palette.h"
-#include "State/Flags.h"
 
 // decomp: D_80069BBC (D_80069BBC@BATTLE/BATTLE.PRG)
 u_int Battle_Ai_kTimedStatusFlags[344]; /* contents: module image (ModuleData.cpp) */
@@ -765,8 +765,8 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
 
     if (Battle_Ai_arenaOrbit != NULL) {
         self = state->actor;
-        if (State_ScriptFlag(0xA6) == 4 && self->commandOpcode == 24 && self->commandArg0 == 4) {
-            State_SetScriptFlag(0xA6, 5);
+        if (VS::State::LiveScriptFlag(0xA6) == 4 && self->commandOpcode == 24 && self->commandArg0 == 4) {
+            VS::State::SetLiveScriptFlag(0xA6, 5);
         }
         if (Battle_Ai_arenaOrbit->planSaved && (u_int)(self->subType - 172) < 2) {
             Battle_Ai_arenaOrbit->savedPlanCount = state->candidateCount;

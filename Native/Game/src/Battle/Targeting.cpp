@@ -1,1596 +1,1934 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/AppearanceLive.hpp"
-#include "Actors/SkeletonLive.hpp"
-#include "Battle/SphereTerrainLive.hpp"
-#include "Battle/TargetPages.hpp"
+// Hand-maintained (tools/port/owned.csv).
+#include "Battle/Targeting.hpp"  // NOLINT(build/include): typed API
+
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <optional>
+#include <vector>
+
+#include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Input/Controller.hpp"
-#include "Items/LootLive.hpp"
-#include "Menu/Sounds.hpp"
-#include "Render/EncodedTextLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/SpritesLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/Lifecycle.h"
-#include "Actors/Location.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Battle/Abilities.h"
-#include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
-#include "Battle/Ai/AiViews.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Damage.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hit.h"
-#include "Battle/Hud.h"
-#include "Battle/Sphere.h"
-#include "Battle/StatusEffects.h"
-#include "Battle/TargetVolume.h"
-#include "Battle/Targeting.h"
-#include "Battle/TextBoxes.h"
-#include "Content/StringTables.h"
-#include "Field/Camera.h"
-#include "Field/Collision.h"
-#include "Field/GameMode.h"
-#include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
-#include "Field/Map.h"
-#include "Field/Mpd.h"
-#include "Field/Platforms.h"
-#include "Field/RoomRendering.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Equipment.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
-#include "Items/Weapons.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
-#include "Render/Palette.h"
 
-// decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
-char Battle_categoryNeedsTargetSelection[96]; /* contents: module image (ModuleData.cpp) */
+namespace VS::Battle {
+namespace {
+using Core::Math::Arctangent2;
+using Core::Math::Cosine;
+using Core::Math::R3000Quotient;
+using Core::Math::Sine;
+using Core::Math::SquareRootFixed;
+using Core::Math::SquareRootInteger;
+using Core::Math::WrappingAdd;
+using Core::Math::WrappingMultiply;
+using Core::Math::WrappingSubtract;
 
-// decomp: D_800E8194 (D_800E8194@BATTLE/BATTLE.PRG)
-u_char Battle_categoryIsAreaTarget[80]; /* contents: module image (ModuleData.cpp) */
+// First-hit effects whose preview shows an amount: the HP pair and the MP
+// pair.
+constexpr int kHpAmountEffect = 0x3A;
+constexpr int kMpAmountEffect = 0x3B;
+constexpr int kHpAmountEffectAlt = 0x3E;
+constexpr int kMpAmountEffectAlt = 0x3F;
+// The status bits a preview lists as removed.
+constexpr std::uint32_t kRemovableStatusMask = 0x1FFFFFE0;
+// A hit target word's actor slot bits.
+constexpr int kActorSlotMask = 15;
 
-// decomp: D_800E81B4 (D_800E81B4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryIncludesActingActor[48]; /* contents: module image (ModuleData.cpp) */
+// Field control and action flow modes.
+constexpr int kFieldControlTargeting = 2;
+constexpr int kFieldControlActionMenu = 5;
+constexpr int kFlowTargetList = 1;
+constexpr int kFlowGroundCursor = 2;
+constexpr int kFlowAreaConfirm = 3;
+// The HUD mode bits: weapon drawn, and the action menu.
+constexpr int kHudWeaponBit = 1;
+constexpr int kHudActionMenu = 2;
+// The recovery an action that cannot return to the menu starts.
+constexpr int kNoRecoveryReward = 0;
 
-// decomp: D_800E81C4 (D_800E81C4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryTargetsBodyParts[32]; /* contents: module image (ModuleData.cpp) */
+// The targeting modes recorded as sourceActorId: ground areas (actors or
+// body parts), direct targets (actors or body parts), the area around the
+// source, and environment actions.
+constexpr int kGroundAreaMode = 0;
+constexpr int kGroundBodyPartMode = 1;
+constexpr int kDirectActorMode = 2;
+constexpr int kDirectBodyPartMode = 3;
+constexpr int kEnvironmentMode = 6;
 
-// decomp: D_800E81D4 (D_800E81D4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryTargetActorMasks[16]; /* contents: module image (ModuleData.cpp) */
+// Volume kinds of the action state.
+constexpr int kDirectRangeKind = 1;
+constexpr int kSourceAreaKind = 1;
+constexpr int kGroundRangeKind = 2;
+constexpr int kTestVolumeKind = 3;
+constexpr int kTestRangeShape = 1;
+constexpr int kTestAreaShape = 2;
+constexpr int kTestVolumeExtent = 4;
+constexpr int kTestTargetActor = 1;
+// Angles: volume angles are stored in eighths, the area pitch in sixteenths
+// above level.
+constexpr int kVolumeAngleScale = 8;
+constexpr int kAreaPitchDivisor = 16;
+constexpr int kLevelAreaPitch = 64;
+constexpr int kHalfTurn = 2048;
 
-// decomp: vs_battle_statusStrings (vs_battle_statusStrings@BATTLE/BATTLE.PRG)
-u_short Battle_statusStrings[1712]; /* contents: module image (ModuleData.cpp) */
+// Bones and tags: the source's root bone, an actor's centre and the volume
+// origin tag, and the bone-tag kinds of body parts.
+constexpr int kSourceRootBone = 0;
+constexpr int kActorCentreTag = 255;
+constexpr int kVolumeOriginTag = 250;
+constexpr int kBodyPartTagKind = 2;
+constexpr int kBoneTagKind = 0;
 
-// decomp: D_800EA984 (D_800EA984@BATTLE/BATTLE.PRG)
-char Battle_targetInfoTemplate[3140]; /* contents: module image (ModuleData.cpp) */
+// Actors a collector may target.
+constexpr std::uint32_t kTargetableStateMask = 0x3000001;
+constexpr std::uint32_t kTargetableState = 1;
+constexpr int kUntargetableActorKind = 0x8000;
+constexpr std::uint32_t kHiddenDisplayFlag = 4;
+// selectedPreview while an area waits for confirmation.
+constexpr int kAreaPendingPreview = 240;
 
-// decomp: D_800EA9B6 (D_800EA9B6@BATTLE/BATTLE.PRG)
-char Battle_targetStatusLineTemplate[3090]; /* contents: module image (ModuleData.cpp) */
+// Environment actions and their targets.
+constexpr int kTriggerActionFirst = 93;
+constexpr int kTriggerActionSecond = 241;
+constexpr int kPlatformAction = 79;
+constexpr int kInactiveTriggerKind = 16;
+constexpr int kTriggerTargetMode = 3;
+constexpr int kPlatformTargetMode = 5;
+constexpr int kTriggerTargetRadius = 128;
+constexpr int kPlatformTargetRadius = 64;
+// Position target modes of a confirmed selection.
+constexpr int kPositionTargetMode = 1;
+constexpr int kFlaggedPositionTargetMode = 4;
+constexpr int kFlaggedPositionBit = 0x10;
+// Room tiles and the floor height's 15 significant bits.
+constexpr int kTileShift = 7;
+constexpr int kTileCentre = 64;
+constexpr int kFloorHeightShift = 17;
 
-// decomp: D_800EAA54 (D_800EAA54@BATTLE/BATTLE.PRG)
-char Battle_emptyStatusString[2932]; /* contents: module image (ModuleData.cpp) */
+// Treasure chests as targets.
+constexpr int kChestCategoryBit = 0x80;
+constexpr int kChestOpenedFlagLimit = 64;
+constexpr int kChestTargetLimb = 16;
+constexpr int kChestActionKind = 10;
+constexpr std::uint32_t kFirstLockedLevel = 2;
+constexpr std::uint32_t kLockedLevelCount = 2;
+constexpr int kChestRiskBase = 150;
+constexpr int kPercent = 100;
+constexpr int kChestRiskDivisor = 256;
 
-// decomp: D_800EABAA (D_800EABAA@BATTLE/BATTLE.PRG)
-u_char Battle_targetSelectionStep; /* contents: module image (ModuleData.cpp) */
+// Pad bits (the original PADxxx values).
+constexpr std::uint32_t kPadL2 = 1u << 0;
+constexpr std::uint32_t kPadCircle = 1u << 5;
+constexpr std::uint32_t kPadCross = 1u << 6;
+constexpr std::uint32_t kPadSquare = 1u << 7;
+constexpr std::uint32_t kPadUp = 1u << 12;
+constexpr std::uint32_t kPadRight = 1u << 13;
+constexpr std::uint32_t kPadDown = 1u << 14;
+constexpr std::uint32_t kPadLeft = 1u << 15;
+constexpr std::uint32_t kPadCrossOrCircle = kPadCross | kPadCircle;
 
-// decomp: D_800F4C70 (D_800F4C70@BATTLE/BATTLE.PRG)
-u_char Battle_targetColumnEntries[2][16];
+// The targeting sphere.
+constexpr int kVolumeKindMask = 0x7F;
+constexpr int kActiveVolumeBit = 0x80;
+constexpr std::size_t kExtentRadiusByte = 1;
+constexpr int kExtentUnit = 32;
+constexpr int kPitchStickShift = 3;
+constexpr int kPitchStep = 8;
+constexpr int kDigitalStickStep = 64;
+constexpr int kRotationShift = 10;
+constexpr int kRotationRound = 512;
+constexpr int kUnitCircle = 4096;
+constexpr int kTurnMask = 0xFFF;
+constexpr int kAlignedTurnLow = 8;
+constexpr int kAlignedTurnHigh = 4087;
+constexpr int kFixedShift = 12;
+constexpr int kFixedRound = 2048;
+constexpr int kDeterminantRound = 4095;
+constexpr int kGroundLimit = -1;
+constexpr int kGroundClearance = 2;
+constexpr int kConeScale = 128;
+constexpr int kSphereVolume = 1;
+constexpr int kColumnVolume = 2;
+constexpr int kBoxVolume = 3;
+constexpr int kRisingConeVolume = 4;
+constexpr int kFallingConeVolume = 5;
+constexpr int kMapTileUnits = 8;
+constexpr int kHalfwordMask = 0xFFFF;
+constexpr int kHalfwordShift = 16;
+constexpr int kGroupShift = 4;
+constexpr int kActorGroupMask = 0xF0;
+constexpr int kAreaList = 1;
+constexpr int kTargetList = 0;
 
-// decomp: D_800F4C90 (D_800F4C90@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnGroups[8];
+// Highlight modes: clear the old one, highlight the selection, or both.
+constexpr int kClearHighlight = 1;
+constexpr int kShowHighlight = 2;
+constexpr int kMoveHighlight = 3;
+constexpr int kNeutralTint = 0x808080;
 
-// decomp: D_800F4C98 (D_800F4C98@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnGroups[8];
+// The target list: label motion states (dismissal swaps each column's),
+// row placement and the selection ring's cycle.
+constexpr int kRightLabelState = 2;
+constexpr int kLeftLabelState = 3;
+constexpr int kLabelRowHeight = 11;
+constexpr int kLabelTopRow = 32;
+constexpr int kRightLabelX = 320;
+constexpr int kLeftLabelX = -72;
+constexpr int kByteMask = 0xFF;
+constexpr int kRingSizeWrap = 0x22;
+constexpr int kRingSizeRestart = 0x12;
+constexpr int kLargestGroup = 6;
+constexpr int kReusedRangeKind = 2;
+// Target list steps: rows reveal one per step below kNoTargetsStep.
+constexpr int kNoTargetsStep = 16;
+constexpr int kNoTargetsCloseStep = 17;
+constexpr int kSettleStep = 18;
+constexpr int kChooseStep = 19;
+constexpr int kConfirmedStep = 20;
+constexpr int kCloseStep = 21;
 
-// decomp: D_800F4CA0 (D_800F4CA0@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnGroupFirstTargets[8];
+// Battle_statusStrings indices (Content/StringTables.h).
+constexpr int kStrDownText = 57;
+constexpr int kBlockerText = 18;
+constexpr int kMpTemplateText = 22;
+constexpr int kBreakableText = 24;
+constexpr int kIndestructibleText = 25;
+constexpr int kEmptyText = 40;
+constexpr int kPhysicalText = 44;
+constexpr int kHumanText = 51;
+constexpr int kEmptyStatusOffset = 246;
+constexpr int kStatusShift = 5;
+constexpr int kStatusTextCount = 24;
+constexpr int kBlockerGroupShift = 5;
+// The target information's string and integer slots.
+constexpr int kNameString = 0;
+constexpr int kDetailString = 1;
+constexpr int kActionKindString = 2;
+constexpr int kDamageTypeString = 3;
+constexpr int kEffectVariantString = 4;
+constexpr int kEnemyClassString = 5;
+constexpr int kStatusString = 6;
+constexpr int kAmountInteger = 0;
+constexpr int kHitChanceInteger = 1;
+constexpr int kObjectPreview = 5;
+constexpr int kObjectActorKind = 0x10;
 
-// decomp: D_800F4CA8 (D_800F4CA8@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnGroupFirstTargets[8];
+// Range shapes: the shapes whose reach is their z extent, the shape whose
+// reach is its y extent with a cosine, and the scale of the extents.
+constexpr std::uint32_t kZExtentShapes = 0x16;
+constexpr std::uint32_t kYCosineShapes = 0x8;
+constexpr int kRangeShapeMask = 7;
+constexpr int kRangeAngleShift = 7;
+constexpr int kRangeUnitShift = 5;
+constexpr std::uint32_t kRangeMargin = 0x20;
 
-// decomp: D_800F4CB0 (D_800F4CB0@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnEntryCount;
+// Low 32 bits of a wide product sum (the R3000's MFLO).
+[[nodiscard]] std::int32_t Low32(std::int64_t value) {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(value));
+}
 
-// decomp: D_800F4CB1 (D_800F4CB1@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnEntryCount;
+[[nodiscard]] std::int16_t Halfword(int value) {
+  return static_cast<std::int16_t>(value);
+}
 
-// decomp: D_800F4CB2 (D_800F4CB2@BATTLE/BATTLE.PRG)
-u_char Battle_secondColumnGroupCount;
+[[nodiscard]] TargetText StatusIndexText(int index) {
+  return TargetText{.source = TargetTextSource::kStatusIndex, .value = index};
+}
 
-// decomp: D_800F4CB3 (D_800F4CB3@BATTLE/BATTLE.PRG)
-u_char Battle_firstColumnGroupCount;
+[[nodiscard]] bool PreviewSlotAvailable(int count) {
+  if (count < kTargetPreviewCapacity) {
+    return true;
+  }
+  VS_LOG_ERROR("battle.targeting",
+               "target previews are full ({}); candidate dropped",
+               kTargetPreviewCapacity);
+  return false;
+}
 
-// decomp: D_800F4CB4 (D_800F4CB4@BATTLE/BATTLE.PRG)
-u_char Battle_targetColumnTopOffset;
+[[nodiscard]] int ClampedPreviewCount(const ActionTargetingHost& host) {
+  const int count = host.PreviewCount();
+  if (count <= kTargetPreviewCapacity) {
+    return count;
+  }
+  VS_LOG_ERROR("battle.targeting", "preview count {} exceeds capacity {}",
+               count, kTargetPreviewCapacity);
+  return kTargetPreviewCapacity;
+}
 
-// decomp: vs_battle_stringContext (vs_battle_stringContext@BATTLE/BATTLE.PRG)
-Menu_StringContext Battle_stringContext;
+// The 15 significant bits of a floor height, sign-extended.
+[[nodiscard]] int FloorHeightBits(int height) {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(height)
+                                   << kFloorHeightShift) >>
+         kFloorHeightShift;
+}
+
+// The centre of a room tile at floor height; pad is kept.
+[[nodiscard]] TargetPoint TileCentre(const ActionTargetingHost& host,
+                                     int tile_x, int tile_z,
+                                     TargetPoint point) {
+  const auto tile_origin = [](int tile) {
+    return static_cast<int>(static_cast<std::uint32_t>(tile) << kTileShift);
+  };
+  point.x = Halfword(tile_origin(tile_x) + kTileCentre);
+  point.z = Halfword(tile_origin(tile_z) + kTileCentre);
+  point.y = Halfword(FloorHeightBits(host.FloorHeightAt(
+      tile_origin(tile_x) | kTileCentre, tile_origin(tile_z) | kTileCentre)));
+  return point;
+}
+
+// Previews the action against one target and fills the preview from it.
+[[nodiscard]] ActionTargetPreview PreviewAgainst(ActionTargetingHost& host,
+                                                 ActionTargetPreview preview,
+                                                 int action, int target_actor,
+                                                 int limb) {
+  const ActionPreviewResult result = host.PreviewActionAgainstLimb(
+      action, host.PrimaryActor(), target_actor, limb);
+  PopulateActionTargetPreview(host, preview, result);
+  return preview;
+}
+
+// The actor scan of the collectors: the action, its source and category,
+// and the volume the candidates must fall inside.
+struct CandidateScan {
+  int action = 0;
+  int primary = 0;
+  TargetCategoryRules rules;
+  TargetingVolumeSlot slot = TargetingVolumeSlot::kRange;
+};
+
+[[nodiscard]] bool IsTargetCandidate(const CandidateScan& scan, int slot,
+                                     const TargetingActor& actor,
+                                     std::uint32_t state_flags) {
+  return (slot != scan.primary || scan.rules.includes_acting_actor) &&
+         (state_flags & kTargetableStateMask) == kTargetableState &&
+         (actor.kind & scan.rules.actor_mask) != 0 &&
+         (actor.kind & kUntargetableActorKind) == 0;
+}
+
+// The body parts of one actor that fall inside the scanned volume.
+int CollectBodyPartTargets(ActionTargetingHost& host, const CandidateScan& scan,
+                           int actor, int count) {
+  for (int limb = 0; limb < kTargetLimbCount; ++limb) {
+    const int part = host.FindBoneTag(actor, limb, kBodyPartTagKind);
+    if (part < 0) {
+      continue;
+    }
+    if (!PreviewSlotAvailable(count)) {
+      return count;
+    }
+    ActionTargetPreview preview = host.Preview(count);
+    preview.position = host.LowGroupBonePosition(actor, limb, preview.position);
+    host.SetPreview(count, preview);
+    if (!host.IsPointInVolume(scan.slot, preview.position)) {
+      continue;
+    }
+    preview.kind =
+        static_cast<std::uint8_t>(host.BoneTag(actor, part, kBoneTagKind));
+    preview.limb = static_cast<std::int8_t>(limb);
+    preview.actor_id = static_cast<std::uint8_t>(actor);
+    host.SetPreview(count,
+                    PreviewAgainst(host, preview, scan.action, actor, limb));
+    ++count;
+  }
+  return count;
+}
+
+// One actor as a whole target when its centre falls inside the volume.
+int CollectWholeActorTarget(ActionTargetingHost& host,
+                            const CandidateScan& scan, int actor,
+                            int default_limb, int count) {
+  if (!PreviewSlotAvailable(count)) {
+    return count;
+  }
+  ActionTargetPreview preview = host.Preview(count);
+  preview.position =
+      host.TaggedBonePosition(actor, kActorCentreTag, preview.position);
+  host.SetPreview(count, preview);
+  if (!host.IsPointInVolume(scan.slot, preview.position)) {
+    return count;
+  }
+  preview.kind = kWholeActorTargetKind;
+  preview.limb = kNoTargetLimb;
+  preview.actor_id = static_cast<std::uint8_t>(actor);
+  host.SetPreview(
+      count, PreviewAgainst(host, preview, scan.action, actor, default_limb));
+  return count + 1;
+}
+
+[[nodiscard]] int CollectActorTargets(ActionTargetingHost& host,
+                                      const CandidateScan& scan) {
+  int count = 0;
+  for (int slot = 0; slot < kTargetableActorSlots; ++slot) {
+    const std::uint32_t state_flags = host.ActorStateFlags(slot);
+    const std::optional<TargetingActor> actor = host.Actor(slot);
+    if (!actor || !IsTargetCandidate(scan, slot, *actor, state_flags)) {
+      continue;
+    }
+    count = scan.rules.targets_body_parts
+                ? CollectBodyPartTargets(host, scan, slot, count)
+                : CollectWholeActorTarget(host, scan, slot, actor->default_limb,
+                                          count);
+  }
+  return count;
+}
+
+// Body parts placed without a volume test (ground areas and the test
+// action).
+int PlaceBodyPartTargets(ActionTargetingHost& host, int actor, int count) {
+  for (int limb = 0; limb < kTargetLimbCount; ++limb) {
+    const int part = host.FindBoneTag(actor, limb, kBodyPartTagKind);
+    if (part < 0) {
+      continue;
+    }
+    if (!PreviewSlotAvailable(count)) {
+      return count;
+    }
+    ActionTargetPreview preview = host.Preview(count);
+    preview.position = host.LowGroupBonePosition(actor, limb, preview.position);
+    preview.kind =
+        static_cast<std::uint8_t>(host.BoneTag(actor, part, kBoneTagKind));
+    preview.limb = static_cast<std::int8_t>(limb);
+    preview.actor_id = static_cast<std::uint8_t>(actor);
+    host.SetPreview(count, preview);
+    ++count;
+  }
+  return count;
+}
+
+int PlaceWholeActorTarget(ActionTargetingHost& host, int actor, int count) {
+  if (!PreviewSlotAvailable(count)) {
+    return count;
+  }
+  // decomp: the kind byte keeps its previous value here.
+  ActionTargetPreview preview = host.Preview(count);
+  preview.position =
+      host.TaggedBonePosition(actor, kActorCentreTag, preview.position);
+  preview.limb = kNoTargetLimb;
+  preview.actor_id = static_cast<std::uint8_t>(actor);
+  host.SetPreview(count, preview);
+  return count + 1;
+}
+
+// Sets the focus behind the selection's source, when it has a placement.
+void AimSelectionBehindSource(ActionTargetingHost& host) {
+  const std::optional<TargetPoint> focus =
+      AimActionBehindSource(host, host.PrimaryActor(), host.FocusPosition());
+  if (focus) {
+    host.SetFocusPosition(*focus);
+  }
+}
+
+// One hit target from a preview: an actor and limb, or a position whose pad
+// carries the encoded id.
+void SetSelectionTargetFromPreview(ActionTargetingHost& host, int index,
+                                   const ActionTargetPreview& preview,
+                                   int position_mode) {
+  if (preview.actor_id >= kFirstPositionTargetId) {
+    TargetPoint point = preview.position;
+    point.pad = static_cast<std::int16_t>(preview.actor_id);
+    host.SetSelectionPositionTarget(index, position_mode, point);
+    return;
+  }
+  // The limb is a signed byte widened; -1 names no limb.
+  // NOLINTNEXTLINE(bugprone-signed-char-misuse)
+  int limb = preview.limb;
+  if (limb == kNoTargetLimb) {
+    const std::optional<TargetingActor> actor = host.Actor(preview.actor_id);
+    if (actor) {
+      limb = actor->default_limb;
+    } else {
+      VS_LOG_ERROR("battle.targeting",
+                   "target actor {} is absent; its default limb is unknown",
+                   preview.actor_id);
+    }
+  }
+  host.SetSelectionActorTarget(
+      index, ActorLimbTarget{.actor = preview.actor_id, .limb = limb});
+}
+
+void CancelAreaSelection(ActionTargetingHost& host) {
+  host.ClearSphereTargets();
+  host.ClearPrimarySphereVolume();
+  host.ClearSecondarySphereVolume();
+  host.FreeSphere();
+  if (!host.Action(host.SelectionActionId()).returns_to_menu_on_cancel) {
+    host.ReleaseMenuRows();
+    host.BeginPostActionRecovery(kNoRecoveryReward);
+    return;
+  }
+  ReturnToBattleActionMenu(host);
+}
+
+// A preview kept inside the area: body parts keep their record, whole
+// actors are rebuilt; none when the actor is gone.
+[[nodiscard]] std::optional<ActionTargetPreview> FilteredAreaPreview(
+    ActionTargetingHost& host, int action, bool body_parts,
+    const ActionTargetPreview& source, ActionTargetPreview kept) {
+  if (body_parts) {
+    return PreviewAgainst(host, source, action, source.actor_id, source.limb);
+  }
+  const std::optional<TargetingActor> actor = host.Actor(source.actor_id);
+  if (!actor) {
+    VS_LOG_ERROR("battle.targeting", "area target actor {} is absent",
+                 source.actor_id);
+    return std::nullopt;
+  }
+  kept.kind = kWholeActorTargetKind;
+  kept.limb = kNoTargetLimb;
+  kept.actor_id = source.actor_id;
+  kept.position = source.position;
+  return PreviewAgainst(host, kept, action, kept.actor_id, actor->default_limb);
+}
+
+// The facing and pitch of a source area aimed from origin at focus.
+void AimSourceArea(TargetingVolume& area, TargetPoint origin,
+                   TargetPoint focus) {
+  const int dx = Halfword(focus.x - origin.x);
+  const int dz = Halfword(focus.z - origin.z);
+  const int dy = Halfword(focus.y - origin.y);
+  area.facing = Arctangent2(dx, dz);
+  area.angle =
+      Arctangent2(dy, SquareRootInteger(WrappingAdd(dx * dx, dz * dz))) /
+          kAreaPitchDivisor +
+      kLevelAreaPitch;
+}
+
+[[nodiscard]] std::int16_t ChestUnlockChance(const TargetingActor& attacker,
+                                             const TargetChest& chest) {
+  const std::uint32_t lock =
+      static_cast<std::uint32_t>(static_cast<std::uint16_t>(chest.lock_level)) -
+      kFirstLockedLevel;
+  if (lock < kLockedLevelCount && !chest.is_open) {
+    return Halfword((attacker.risk + kChestRiskBase) * kPercent /
+                    kChestRiskDivisor);
+  }
+  return 0;
+}
+
+int CollectChestTargets(ActionTargetingHost& host,
+                        const TargetingActor& attacker, int count) {
+  const std::vector<TargetChest> chests = host.RoomChests();
+  for (std::size_t index = 0; index < chests.size(); ++index) {
+    if (!PreviewSlotAvailable(count)) {
+      return count;
+    }
+    const TargetChest& chest = chests[index];
+    ActionTargetPreview preview = host.Preview(count);
+    preview.position =
+        TileCentre(host, chest.tile_x, chest.tile_z, preview.position);
+    host.SetPreview(count, preview);
+    if (chest.opened_flag >= kChestOpenedFlagLimit ||
+        !host.IsPointInVolume(TargetingVolumeSlot::kRange, preview.position)) {
+      continue;
+    }
+    preview.kind = kWholeActorTargetKind;
+    preview.limb = kChestTargetLimb;
+    preview.actor_id = static_cast<std::uint8_t>(index | kChestTargetFlag);
+    preview.preview_amount = 0;
+    preview.hit_chance = ChestUnlockChance(attacker, chest);
+    preview.action_kind = kChestActionKind;
+    preview.enemy_class = 0;
+    preview.effect_variant = 0;
+    preview.damage_type = 0;
+    preview.removed_statuses = 0;
+    preview.effect = 0;
+    host.SetPreview(count, preview);
+    ++count;
+  }
+  return count;
+}
+
+// Selects the preview the source's command names: its actor and limb, or
+// failing that its actor; the last match wins.
+void SelectCommandedPreview(ActionTargetingHost& host,
+                            const TargetingActor& source, int count) {
+  for (int index = 0; index < count; ++index) {
+    const ActionTargetPreview preview = host.Preview(index);
+    if (preview.actor_id == source.command_actor &&
+        preview.limb == source.command_limb) {
+      host.SetSelectedPreview(index);
+    }
+  }
+  if (host.SelectedPreview() != kNoPreviewSelected) {
+    return;
+  }
+  for (int index = 0; index < count; ++index) {
+    if (host.Preview(index).actor_id == source.command_actor) {
+      host.SetSelectedPreview(index);
+    }
+  }
+}
+
+// The facing an actor's placement gives, or the volume's own when the actor
+// has none.
+[[nodiscard]] int PlacementFacing(const ActionTargetingHost& host, int actor,
+                                  int fallback) {
+  const std::optional<TargetPoint> placement = host.ActorPlacement(actor);
+  if (placement) {
+    return placement->pad;
+  }
+  VS_LOG_WARN("battle.targeting", "actor {} has no placement; facing kept",
+              actor);
+  return fallback;
+}
+
+[[nodiscard]] TargetingVolume TestVolume(const ActionTargetingHost& host,
+                                         TargetingVolumeSlot slot, int shape,
+                                         int actor) {
+  TargetingVolume volume = host.Volume(slot);
+  volume.shape = shape;
+  volume.kind = kTestVolumeKind;
+  volume.facing = PlacementFacing(host, actor, volume.facing);
+  volume.x = kTestVolumeExtent;
+  volume.y = kTestVolumeExtent;
+  volume.z = kTestVolumeExtent;
+  volume.angle = 0;
+  volume.origin =
+      host.TaggedBonePosition(actor, kVolumeOriginTag, volume.origin);
+  return volume;
+}
+
+// Action 0 shows fixed volumes around the first two actors and the second
+// actor's body parts.
+void ShowTestActionTargets(ActionTargetingHost& host) {
+  host.SetVolume(
+      TargetingVolumeSlot::kRange,
+      TestVolume(host, TargetingVolumeSlot::kRange, kTestRangeShape, 0));
+  host.ShowRangeVolume(false, 0);
+  host.SetVolume(TargetingVolumeSlot::kArea,
+                 TestVolume(host, TargetingVolumeSlot::kArea, kTestAreaShape,
+                            kTestTargetActor));
+  host.ShowAreaVolume();
+  const int count = PlaceBodyPartTargets(host, kTestTargetActor, 0);
+  host.SetPreviewCount(count);
+  host.ShowSphereTargets(count, 0);
+  host.SetActionFlowMode(kFlowTargetList);
+}
+
+void RevealHiddenActors(ActionTargetingHost& host, int source_slot) {
+  for (int slot = 0; slot < kTargetableActorSlots; ++slot) {
+    if (slot == source_slot) {
+      continue;
+    }
+    const std::uint32_t flags = host.ActorStateFlags(slot);
+    if ((flags & kHiddenDisplayFlag) != 0) {
+      host.SetActorDisplayFlags(slot, flags & ~kHiddenDisplayFlag);
+    }
+  }
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_8006F630 (src/BATTLE/BATTLE.PRG/146C.c:3235)
-void Battle_PopulateActionTargetPreview(Battle_TargetPreview* preview_out, Battle_ActionRequest* action_result, Battle_HitResult* hit_result)
-{
-    int effect = Battle_actionDefinitions[action_result->actionId].hits[0].effectId;
-    u_short preview_amount;
-
-    switch (effect) {
-    case 0x3A:
-    case 0x3E:
-        preview_amount = hit_result->target.hp;
-        preview_out->effect = effect;
-        preview_out->previewAmount = preview_amount;
-        break;
-    case 0x3B:
-        preview_amount = hit_result->target.mp;
-        preview_out->effect = effect;
-        preview_out->previewAmount = preview_amount;
-        break;
-    case 0x3F:
-        preview_amount = hit_result->target.mp;
-        preview_out->effect = effect;
-        preview_out->previewAmount = preview_amount;
-        break;
-    default:
-        preview_out->effect = effect;
-        break;
-    }
-
-    preview_out->hitChance = hit_result->target.hitThreshold;
-    preview_out->removedStatuses = hit_result->removeStatuses & 0x1FFFFFE0;
-    preview_out->actionKind = Battle_actionDefinitions[action_result->actionId].category;
-    preview_out->opaque15 = action_result->damageType;
-    preview_out->opaque16 = action_result->effectVariant;
-    preview_out->enemyClass = Battle_actors[hit_result->target.targetActor & 15]->stats->enemyClass;
+void PopulateActionTargetPreview(const ActionTargetingHost& host,
+                                 ActionTargetPreview& preview,
+                                 const ActionPreviewResult& result) {
+  const TargetingActionView action = host.Action(result.action_id);
+  if (action.effect == kHpAmountEffect || action.effect == kHpAmountEffectAlt) {
+    preview.preview_amount = static_cast<std::uint16_t>(result.target_hp);
+  } else if (action.effect == kMpAmountEffect ||
+             action.effect == kMpAmountEffectAlt) {
+    preview.preview_amount = static_cast<std::uint16_t>(result.target_mp);
+  }
+  preview.effect = static_cast<std::uint8_t>(action.effect);
+  preview.hit_chance = Halfword(result.hit_threshold);
+  preview.removed_statuses = result.remove_statuses & kRemovableStatusMask;
+  preview.action_kind = static_cast<std::uint8_t>(action.category);
+  preview.damage_type = static_cast<std::uint8_t>(result.damage_type);
+  preview.effect_variant = static_cast<std::uint8_t>(result.effect_variant);
+  const std::optional<TargetingActor> target =
+      host.Actor(result.target_actor & kActorSlotMask);
+  if (!target) {
+    VS_LOG_ERROR("battle.targeting",
+                 "previewed actor {} is absent; enemy class kept",
+                 result.target_actor & kActorSlotMask);
+    return;
+  }
+  preview.enemy_class = static_cast<std::uint8_t>(target->enemy_class);
 }
 
 // decomp: BATTLE.PRG func_800704D8 (src/BATTLE/BATTLE.PRG/146C.c:3578)
-void Battle_ReturnToBattleActionMenu(void)
-{
-    Field_controlMode = 5;
-    Battle_actionState->selection.actionId = 0;
-    Battle_actionFlowMode = 1;
-    Battle_SetHudBattleMode((Battle_characterState->weaponDrawn & 1) | 2);
-    Menu_Framework_ResumeAfterActionSelection();
-    Field_PauseFieldForMenu();
+void ReturnToBattleActionMenu(ActionTargetingHost& host) {
+  host.SetFieldControlMode(kFieldControlActionMenu);
+  host.SetSelectionActionId(0);
+  host.SetActionFlowMode(kFlowTargetList);
+  host.SetHudBattleMode((host.WeaponDrawn() ? kHudWeaponBit : 0) |
+                        kHudActionMenu);
+  host.ResumeAfterActionSelection();
+  host.PauseFieldForMenu();
 }
 
 // decomp: BATTLE.PRG func_8007053C (src/BATTLE/BATTLE.PRG/146C.c:3588)
-void Battle_FilterAreaActionTargets(void)
-{
-    Battle_ActionRequest result;
-    int i;
-    int kept;
-    int action;
-
-    Battle_actionState->savedAreaCenter = Battle_actionState->areaCenter;
-    Battle_ClearPrimarySphereVolume();
-
-    if (Battle_actionState->savedAreaCenter.pad) {
-        ((void (*)(...))Battle_ClearSphereTargets)();
-        Battle_ClearPrimarySphereVolume();
-        Battle_ClearSecondarySphereVolume();
-        Battle_FreeSphere();
-
-        if (!Battle_actionDefinitions[Battle_actionState->selection.actionId].returnsToMenuOnCancel) {
-            Menu_Framework_ReleaseMenuRows();
-            Battle_BeginPostActionRecovery(0);
-            return;
-        }
-
-        Battle_ReturnToBattleActionMenu();
-        return;
+void FilterAreaActionTargets(ActionTargetingHost& host) {
+  const TargetPoint saved = host.AreaCenter();
+  host.SetSavedAreaCenter(saved);
+  host.ClearPrimarySphereVolume();
+  if (saved.pad != 0) {
+    CancelAreaSelection(host);
+    return;
+  }
+  const int action = host.SelectionActionId();
+  TargetingVolume area = host.Volume(TargetingVolumeSlot::kArea);
+  area.origin = saved;
+  host.SetVolume(TargetingVolumeSlot::kArea, area);
+  if (host.IsPlayerAction()) {
+    host.ShowAreaVolume();
+  }
+  const bool body_parts =
+      host.CategoryRules(host.Action(action).category).targets_body_parts;
+  const int count = ClampedPreviewCount(host);
+  int kept = 0;
+  for (int index = 0; index < count; ++index) {
+    const ActionTargetPreview source = host.Preview(index);
+    if (!host.IsPointInVolume(TargetingVolumeSlot::kArea, source.position)) {
+      continue;
     }
-
-    action = Battle_actionState->selection.actionId;
-    Battle_actionState->areaOrigin = Battle_actionState->savedAreaCenter;
-    if (Battle_actionState->isPlayerAction != 0) {
-        ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
+    const std::optional<ActionTargetPreview> filtered = FilteredAreaPreview(
+        host, action, body_parts, source, host.Preview(kept));
+    if (filtered) {
+      host.SetPreview(kept, *filtered);
+      ++kept;
     }
-    kept = 0;
-
-    for (i = 0; i < Battle_actionState->previewCount; ++i) {
-        if (Battle_categoryTargetsBodyParts[Battle_actionDefinitions[action].category]) {
-            if (Battle_IsPointInTargetVolume(
-                    (Battle_TargetVolume *)((void*)&Battle_actionState->areaShape), (u_short *)((void*)&Battle_actionState->previews[i]))) {
-                VS::Core::Memory::CopyLiveAlignedWords(&Battle_actionState->previews[kept], &Battle_actionState->previews[i],
-                    sizeof(Battle_TargetPreview));
-                Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
-                    Battle_actionState->previews[kept].actorId, Battle_actionState->previews[kept].limb,
-                    &result);
-                Battle_PopulateActionTargetPreview(&Battle_actionState->previews[kept], &result, &result.targets[0]);
-                ++kept;
-            }
-        } else if (Battle_IsPointInTargetVolume(
-                       (Battle_TargetVolume *)((void*)&Battle_actionState->areaShape), (u_short *)((void*)&Battle_actionState->previews[i]))) {
-            Battle_actionState->previews[kept].kind = 16;
-            Battle_actionState->previews[kept].limb = -1;
-            Battle_actionState->previews[kept].actorId = Battle_actionState->previews[i].actorId;
-            Battle_actionState->previews[kept].position = Battle_actionState->previews[i].position;
-            Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
-                Battle_actionState->previews[kept].actorId,
-                Battle_actors[Battle_actionState->previews[kept].actorId]->stats->defaultTargetLimb, &result);
-            Battle_PopulateActionTargetPreview(&Battle_actionState->previews[kept], &result, &result.targets[0]);
-            ++kept;
-        }
-    }
-
-    Battle_actionState->previewCount = kept;
-    VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, kept), 1);
-    Battle_actionFlowMode = 3;
+  }
+  host.SetPreviewCount(kept);
+  host.ShowSphereTargets(kept, 1);
+  host.SetActionFlowMode(kFlowAreaConfirm);
 }
 
 // decomp: BATTLE.PRG func_8007087C (src/BATTLE/BATTLE.PRG/146C.c:3650)
-void Battle_AimActionBehindSource(Battle_ActionRequest* action_request)
-{
-    Actors_ActorLocationQuery source_placement;
-
-    Actors_ActorPlacement(action_request->primaryTarget.target.targetActor, &source_placement);
-    action_request->focusPosition.vx = source_placement.location.position.vx + VS::Core::Math::Sine(source_placement.location.position.pad + ONE / 2);
-    action_request->focusPosition.vz = source_placement.location.position.vz + VS::Core::Math::Cosine(source_placement.location.position.pad + ONE / 2);
-    action_request->focusPosition.vy = source_placement.location.position.vy;
+std::optional<TargetPoint> AimActionBehindSource(
+    const ActionTargetingHost& host, int source_actor, TargetPoint focus) {
+  const std::optional<TargetPoint> placement =
+      host.ActorPlacement(source_actor);
+  if (!placement) {
+    VS_LOG_ERROR("battle.targeting",
+                 "source actor {} has no placement; focus kept", source_actor);
+    return std::nullopt;
+  }
+  focus.x = Halfword(placement->x + Sine(placement->pad + kHalfTurn));
+  focus.z = Halfword(placement->z + Cosine(placement->pad + kHalfTurn));
+  focus.y = placement->y;
+  return focus;
 }
 
 // decomp: BATTLE.PRG func_800708EC (src/BATTLE/BATTLE.PRG/146C.c:3660)
-void Battle_SetSingleActionTarget(void)
-{
-    char encoded_target_id;
-
-    Battle_actionState->selection.targetCount = 1;
-    encoded_target_id = Battle_actionState->previews[Battle_actionState->selectedPreview].actorId;
-    if (encoded_target_id < 16) {
-        Battle_actionState->selection.targets[0].targetsPosition = 0;
-        Battle_actionState->selection.targets[0].target.targetActor =
-            Battle_actionState->previews[Battle_actionState->selectedPreview].actorId;
-        Battle_actionState->selection.targets[0].target.targetLimb =
-            Battle_actionState->previews[Battle_actionState->selectedPreview].limb;
-        if (Battle_actionState->selection.targets[0].target.targetLimb == -1) {
-            Battle_actionState->selection.targets[0].target.targetLimb =
-                Battle_actors[Battle_actionState->selection.targets[0].target.targetActor]
-                    ->stats->defaultTargetLimb;
-        }
-    } else {
-        Battle_actionState->selection.targets[0].targetsPosition = encoded_target_id & 0x10 ? 4 : 1;
-        *(SVECTOR*)&Battle_actionState->selection.targets[0].target =
-            Battle_actionState->previews[Battle_actionState->selectedPreview].position;
-        Battle_actionState->selection.targets[0].target.mp = Battle_actionState->previews[Battle_actionState->selectedPreview].actorId;
-    }
-    if (Battle_actionState->selection.primaryTarget.targetsPosition == 0) {
-        if (Battle_actionState->previews[Battle_actionState->selectedPreview].actorId
-            == Battle_actionState->selection.primaryTarget.target.targetActor) {
-            Battle_AimActionBehindSource(&Battle_actionState->selection);
-            return;
-        }
-        Battle_actionState->selection.focusPosition = Battle_actionState->previews[Battle_actionState->selectedPreview].position;
-        return;
-    }
-    Battle_actionState->selection.focusPosition = Battle_actionState->previews[Battle_actionState->selectedPreview].position;
+void SetSingleActionTarget(ActionTargetingHost& host) {
+  const int selected = host.SelectedPreview();
+  if (selected < 0 || selected >= kTargetPreviewCapacity) {
+    VS_LOG_ERROR("battle.targeting", "no preview is selected ({})", selected);
+    return;
+  }
+  host.SetSelectionTargetCount(1);
+  const ActionTargetPreview preview = host.Preview(selected);
+  SetSelectionTargetFromPreview(host, 0, preview,
+                                (preview.actor_id & kFlaggedPositionBit) != 0
+                                    ? kFlaggedPositionTargetMode
+                                    : kPositionTargetMode);
+  if (!host.PrimaryTargetsPosition() &&
+      preview.actor_id == host.PrimaryActor()) {
+    AimSelectionBehindSource(host);
+    return;
+  }
+  host.SetFocusPosition(preview.position);
 }
 
 // decomp: BATTLE.PRG func_80070B04 (src/BATTLE/BATTLE.PRG/146C.c:3695)
-void Battle_SetAllActionTargets(void)
-{
-    int i;
-
-    Battle_actionState->selection.targetCount = Battle_actionState->previewCount;
-
-    for (i = 0; i < Battle_actionState->selection.targetCount; ++i) {
-        if (Battle_actionState->previews[i].actorId < 0x10) {
-            Battle_actionState->selection.targets[i].targetsPosition = 0;
-            Battle_actionState->selection.targets[i].target.targetActor = Battle_actionState->previews[i].actorId;
-            Battle_actionState->selection.targets[i].target.targetLimb = Battle_actionState->previews[i].limb;
-
-            if (Battle_actionState->selection.targets[i].target.targetLimb == -1) {
-                Battle_actionState->selection.targets[i].target.targetLimb =
-                    Battle_actors[Battle_actionState->selection.targets[i].target.targetActor]
-                        ->stats->defaultTargetLimb;
-            }
-        } else {
-            Battle_actionState->selection.targets[i].targetsPosition = 1;
-            *(SVECTOR*)&Battle_actionState->selection.targets[i].target = Battle_actionState->previews[i].position;
-            Battle_actionState->selection.targets[i].target.mp = Battle_actionState->previews[i].actorId;
-        }
-    }
-
-    if (Battle_actionState->selection.primaryTarget.target.targetActor != 0) {
-        Battle_actionState->selection.focusPosition =
-            *(SVECTOR*)&Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->commandArg1;
-        return;
-    }
-    Battle_actionState->selection.focusPosition = Battle_actionState->savedAreaCenter;
+void SetAllActionTargets(ActionTargetingHost& host) {
+  const int count = ClampedPreviewCount(host);
+  host.SetSelectionTargetCount(count);
+  for (int index = 0; index < count; ++index) {
+    SetSelectionTargetFromPreview(host, index, host.Preview(index),
+                                  kPositionTargetMode);
+  }
+  const int primary = host.PrimaryActor();
+  if (primary == 0) {
+    host.SetFocusPosition(host.SavedAreaCenter());
+    return;
+  }
+  const std::optional<TargetingActor> source = host.Actor(primary);
+  if (!source) {
+    VS_LOG_ERROR("battle.targeting", "source actor {} is absent; focus kept",
+                 primary);
+    return;
+  }
+  host.SetFocusPosition(source->command_point);
 }
 
 // decomp: BATTLE.PRG func_80070CAC (src/BATTLE/BATTLE.PRG/146C.c:3728)
-void Battle_CollectEnvironmentActionTargets(void)
-{
-    Field_PlatformContactPoint points[4];
-    int count;
-    int i;
-    Field_MpdFloorTrigger* room;
-    Battle_EnvironmentTargetList* list = (Battle_EnvironmentTargetList*)&Battle_actionState->selection;
-
-    list->count = 0;
-
-    switch (list->action) {
-    case 93:
-    case 241:
-        room = Field_ActiveRoomTriggers(&count);
-
-        for (i = 0; i < count; ++i) {
-            if (room[i].kind != 16) {
-                list->targets[list->count].kind = 3;
-                list->targets[list->count].x = room[i].tileX * 128 + 64;
-                list->targets[list->count].y =
-                    (Field_FloorHeightAt((room[i].tileX << 7) | 64, (room[i].tileZ << 7) | 64)
-                        << 17)
-                    >> 17;
-                list->targets[list->count].z = room[i].tileZ * 128 + 64;
-                list->targets[list->count].radius = 128;
-                ++list->count;
-            }
-        }
-        break;
-
-    case 79:
-        count = Field_CollectMovingPlatformPositions(points);
-
-        for (i = 0; i < count; ++i) {
-            list->targets[list->count].kind = 5;
-            list->targets[list->count].x = points[i].x;
-            list->targets[list->count].y = points[i].height;
-            list->targets[list->count].z = points[i].z;
-            list->targets[list->count].radius = 64;
-            ++list->count;
-        }
-        break;
+void CollectEnvironmentActionTargets(ActionTargetingHost& host) {
+  host.SetSelectionTargetCount(0);
+  const int action = host.SelectionActionId();
+  int count = 0;
+  const auto add_target = [&](int mode, TargetPoint point) {
+    if (count >= kSelectionTargetCapacity) {
+      VS_LOG_ERROR("battle.targeting",
+                   "environment targets are full ({}); target dropped",
+                   kSelectionTargetCapacity);
+      return;
     }
-
-    Battle_AimActionBehindSource(&Battle_actionState->selection);
+    host.SetSelectionPositionTarget(count, mode, point);
+    ++count;
+  };
+  if (action == kTriggerActionFirst || action == kTriggerActionSecond) {
+    for (const EnvironmentTrigger& trigger : host.RoomTriggers()) {
+      if (trigger.kind != kInactiveTriggerKind) {
+        TargetPoint point{.pad = Halfword(kTriggerTargetRadius)};
+        add_target(kTriggerTargetMode,
+                   TileCentre(host, trigger.tile_x, trigger.tile_z, point));
+      }
+    }
+  } else if (action == kPlatformAction) {
+    for (const PlatformPoint& platform : host.MovingPlatformPoints()) {
+      add_target(kPlatformTargetMode,
+                 TargetPoint{.x = Halfword(platform.x),
+                             .y = Halfword(platform.height),
+                             .z = Halfword(platform.z),
+                             .pad = Halfword(kPlatformTargetRadius)});
+    }
+  }
+  host.SetSelectionTargetCount(count);
+  AimSelectionBehindSource(host);
 }
 
 // decomp: BATTLE.PRG func_800719FC (src/BATTLE/BATTLE.PRG/146C.c:4086)
-#include "Battle/TargetPages.h"
-
-void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
-{
-    SVECTOR origin;
-    Battle_ActionRequest result;
-    int action = Battle_actionState->selection.actionId;
-    int count;
-    int i;
-    Battle_ActionDefinition* action_definition;
-
-    VS::Actors::LiveActorBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 0, &origin, 0);
-    action_definition = &Battle_actionDefinitions[action];
-    Battle_actionState->areaShape = action_definition->shape;
-    Battle_actionState->areaKind = 1;
-    Battle_actionState->areaX = action_definition->rangeX;
-    Battle_actionState->areaY = action_definition->rangeY;
-    Battle_actionState->areaZ = action_definition->rangeZ;
-    if (Battle_actionState->selection.primaryTarget.target.targetActor) {
-        short dx;
-        short dz;
-        short dy;
-
-        Battle_actionState->selection.focusPosition =
-            *(SVECTOR*)&Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->commandArg1;
-        dx = Battle_actionState->selection.focusPosition.vx - origin.vx;
-        dz = Battle_actionState->selection.focusPosition.vz - origin.vz;
-        Battle_actionState->areaFacing = VS::Core::Math::Arctangent2(dx, dz);
-        dy = Battle_actionState->selection.focusPosition.vy - origin.vy;
-        Battle_actionState->areaAngle = VS::Core::Math::Arctangent2(dy, VS::Core::Math::SquareRootInteger(dx * dx + dz * dz)) / 16 + 64;
-        Battle_actionState->areaOrigin =
-            *(SVECTOR*)&Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->commandArg1;
+void CollectSourceAreaActionTargets(ActionTargetingHost& host) {
+  const int action = host.SelectionActionId();
+  const int primary = host.PrimaryActor();
+  const TargetingActionView definition = host.Action(action);
+  // decomp: the origin's pad is never written; it starts at 0 here.
+  const TargetPoint origin =
+      host.BonePosition(primary, kSourceRootBone, TargetPoint{});
+  TargetingVolume area = host.Volume(TargetingVolumeSlot::kArea);
+  area.shape = definition.range.shape;
+  area.kind = kSourceAreaKind;
+  area.x = definition.range.x;
+  area.y = definition.range.y;
+  area.z = definition.range.z;
+  area.angle = kLevelAreaPitch;
+  area.facing = 0;
+  if (primary != 0) {
+    const std::optional<TargetingActor> source = host.Actor(primary);
+    if (source) {
+      host.SetFocusPosition(source->command_point);
+      AimSourceArea(area, origin, source->command_point);
     } else {
-        Battle_actionState->areaAngle = 64;
-        Battle_actionState->areaFacing = 0;
+      VS_LOG_ERROR("battle.targeting", "source actor {} is absent; area level",
+                   primary);
     }
-    Battle_actionState->areaOrigin = origin;
-    if (Battle_actionState->isPlayerAction) {
-        ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
-    }
-    count = 0;
-    for (i = 0; i < 16; ++i) {
-        u_int status = Actors_ActorStateFlags(i);
-
-        if (Battle_actors[i]
-            && (i != Battle_actionState->selection.primaryTarget.target.targetActor
-                || Battle_categoryIncludesActingActor[Battle_actionDefinitions[action].category])
-            && (status & 0x3000001) == 1
-            && (Battle_actors[i]->kind & Battle_categoryTargetActorMasks[Battle_actionDefinitions[action].category])
-            && !(Battle_actors[i]->kind & 0x8000)) {
-            if (Battle_categoryTargetsBodyParts[Battle_actionDefinitions[action].category]) {
-                int limb;
-
-                for (limb = 0; limb < 6; ++limb) {
-                    int part = VS::Actors::FindLiveActorBoneTag(i, limb, 2);
-
-                    if (part >= 0) {
-                        VS::Actors::LiveActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
-                        if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->areaShape),
-                                (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = VS::Actors::LiveActorBoneTag(i, part, 0);
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = limb;
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
-                            Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
-                                i, limb, &result);
-                            Battle_PopulateActionTargetPreview(
-                                &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
-                            ++count;
-                        }
-                    }
-                }
-            } else {
-                VS::Actors::LiveActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
-                if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->areaShape),
-                        (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = 16;
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = -1;
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
-                    Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor, i,
-                        Battle_actors[i]->stats->defaultTargetLimb, &result);
-                    Battle_PopulateActionTargetPreview(&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
-                    ++count;
-                }
-            }
-        }
-    }
-    Battle_actionState->previewCount = count;
-    VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, count), 1);
-    Battle_actionState->selectedPreview = 240;
-    Battle_actionFlowMode = 3;
+  }
+  area.origin = origin;
+  host.SetVolume(TargetingVolumeSlot::kArea, area);
+  if (host.IsPlayerAction()) {
+    host.ShowAreaVolume();
+  }
+  const CandidateScan scan{.action = action,
+                           .primary = primary,
+                           .rules = host.CategoryRules(definition.category),
+                           .slot = TargetingVolumeSlot::kArea};
+  const int count = CollectActorTargets(host, scan);
+  host.SetPreviewCount(count);
+  host.ShowSphereTargets(count, 1);
+  host.SetSelectedPreview(kAreaPendingPreview);
+  host.SetActionFlowMode(kFlowAreaConfirm);
 }
 
 // decomp: BATTLE.PRG func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:4176)
-void Battle_CollectDirectActionTargets(int source_actor_slot)
-{
-    Actors_ActorLocationQuery state;
-    Battle_ActionRequest result;
-    int i;
-    int action = Battle_actionState->selection.actionId;
-    Battle_ActorStats* attacker;
-    Battle_ActionDefinition* action_definition;
-    int count;
-    int j;
-
-    Battle_actionState->sourceActorId = source_actor_slot;
-    Battle_actionState->rangeShape = Battle_actionDefinitions[action].shape;
-    action_definition = &Battle_actionDefinitions[action];
-    Battle_actionState->rangeKind = 1;
-    Actors_ActorPlacement(Battle_actionState->selection.primaryTarget.target.targetActor, &state);
-    Battle_actionState->rangeFacing = state.location.position.pad;
-    attacker = Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->stats;
-
-    if (action_definition->rangeX == 0xFF) {
-        Battle_actionState->rangeX = attacker->currentRange;
-        Battle_actionState->rangeY = attacker->currentRangeY;
-        Battle_actionState->rangeZ = attacker->currentRangeZ;
-        Battle_actionState->rangeAngle = attacker->currentAttackShapeAngle * 8;
-    } else {
-        Battle_actionState->rangeX = action_definition->rangeX;
-        Battle_actionState->rangeY = action_definition->rangeY;
-        Battle_actionState->rangeZ = action_definition->rangeZ;
-        Battle_actionState->rangeAngle = action_definition->angle * 8;
-    }
-
-    VS::Actors::LiveActorTaggedBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 250, &Battle_actionState->rangeOrigin, 0);
-
-    if (Battle_actionState->isPlayerAction) {
-        ((void (*)(void*, void*, int, void*))Battle_SetSphereVolumes)(&Battle_actionState->rangeShape, NULL, 0, NULL);
-    }
-
-    count = 0;
-
-    for (i = 0; i < 16; ++i) {
-        u_int status = Actors_ActorStateFlags(i);
-
-        if (Battle_actors[i]
-            && (i != Battle_actionState->selection.primaryTarget.target.targetActor
-                || Battle_categoryIncludesActingActor[Battle_actionDefinitions[action].category])
-            && (status & 0x3000001) == 1
-            && (Battle_actors[i]->kind & Battle_categoryTargetActorMasks[Battle_actionDefinitions[action].category])
-            && !(Battle_actors[i]->kind & 0x8000)) {
-            if (Battle_categoryTargetsBodyParts[Battle_actionDefinitions[action].category]) {
-                for (j = 0; j < 6; ++j) {
-                    int part = VS::Actors::FindLiveActorBoneTag(i, j, 2);
-
-                    if (part >= 0) {
-                        VS::Actors::LiveActorLowGroupBonePosition(i, j, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
-
-                        if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->rangeShape),
-                                (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = VS::Actors::LiveActorBoneTag(i, part, 0);
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = j;
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
-                            Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
-                                i, j, &result);
-                            Battle_PopulateActionTargetPreview(
-                                &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
-                            ++count;
-                        }
-                    }
-                }
-            } else {
-                VS::Actors::LiveActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
-
-                if (Battle_IsPointInTargetVolume((Battle_TargetVolume *)((void*)&Battle_actionState->rangeShape),
-                        (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = 16;
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = -1;
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
-                    Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor, i,
-                        Battle_actors[i]->stats->defaultTargetLimb, &result);
-                    Battle_PopulateActionTargetPreview(&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
-                    ++count;
-                }
-            }
-        }
-    }
-
-    if (Battle_categoryTargetActorMasks[Battle_actionDefinitions[action].category] & 0x80) {
-        Items_TreasureChest* room = VS::Items::LiveRoomTreasureChests(&i);
-
-        for (j = 0; j < i; ++j) {
-            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position.vx = room[j].tileX * 128 + 64;
-            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position.vz = room[j].tileZ * 128 + 64;
-            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position.vy =
-                (Field_FloorHeightAt((room[j].tileX << 7) | 64, (room[j].tileZ << 7) | 64) << 17)
-                >> 17;
-
-            if (room[j].openedFlag < 64
-                && Battle_IsPointInTargetVolume(
-                    (Battle_TargetVolume *)((void*)&Battle_actionState->rangeShape), (u_short *)((void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)]))) {
-                Battle_TargetPreview* target = &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)];
-
-                target->kind = 16;
-                target->limb = 16;
-                target->actorId = j | 0x20;
-                target->previewAmount = 0;
-
-                if ((u_short)room[j].lockLevel - 2 < 2u && room[j].isOpen == 0) {
-                    target->hitChance = ((attacker->risk + 150) * 100) / 256;
-                } else {
-                    target->hitChance = 0;
-                }
-
-                ++count;
-                target->actionKind = 10;
-                target->enemyClass = 0;
-                target->opaque16 = 0;
-                target->opaque15 = 0;
-                target->removedStatuses = 0;
-                target->effect = 0;
-            }
-        }
-    }
-
-    Battle_actionState->previewCount = count;
-
-    if (Battle_actionState->isPlayerAction) {
-        VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, count), 0);
-    }
-
-    if (Battle_actionState->selection.primaryTarget.target.targetActor) {
-        for (count = 0; count < Battle_actionState->previewCount; ++count) {
-            if (Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId
-                    == Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]
-                        ->commandArg1.halves[0]
-                && Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb
-                       == Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]
-                           ->commandArg1.halves[1]) {
-                Battle_actionState->selectedPreview = count;
-            }
-        }
-        if (Battle_actionState->selectedPreview == 0xFF) {
-            for (count = 0; count < Battle_actionState->previewCount; ++count) {
-                if (Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId
-                    == Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]
-                        ->commandArg1.halves[0]) {
-                    Battle_actionState->selectedPreview = count;
-                }
-            }
-        }
-    }
-
-    Battle_actionFlowMode = 1;
+void CollectDirectActionTargets(ActionTargetingHost& host, int source_slot) {
+  const int action = host.SelectionActionId();
+  const int primary = host.PrimaryActor();
+  const std::optional<TargetingActor> attacker = host.Actor(primary);
+  const std::optional<TargetPoint> placement = host.ActorPlacement(primary);
+  if (!attacker || !placement) {
+    VS_LOG_ERROR("battle.targeting",
+                 "attacker {} is absent; direct targets not collected",
+                 primary);
+    return;
+  }
+  const TargetingActionView definition = host.Action(action);
+  const TargetCategoryRules rules = host.CategoryRules(definition.category);
+  host.SetSourceActorId(source_slot);
+  TargetingVolume range = host.Volume(TargetingVolumeSlot::kRange);
+  range.shape = definition.range.shape;
+  range.kind = kDirectRangeKind;
+  range.facing = placement->pad;
+  const RangeShape& reach = definition.range.x == kWeaponRangeSentinel
+                                ? attacker->weapon_range
+                                : definition.range;
+  range.x = reach.x;
+  range.y = reach.y;
+  range.z = reach.z;
+  range.angle = reach.angle * kVolumeAngleScale;
+  range.origin =
+      host.TaggedBonePosition(primary, kVolumeOriginTag, range.origin);
+  host.SetVolume(TargetingVolumeSlot::kRange, range);
+  if (host.IsPlayerAction()) {
+    host.ShowRangeVolume(false, 0);
+  }
+  const CandidateScan scan{.action = action,
+                           .primary = primary,
+                           .rules = rules,
+                           .slot = TargetingVolumeSlot::kRange};
+  int count = CollectActorTargets(host, scan);
+  if ((rules.actor_mask & kChestCategoryBit) != 0) {
+    count = CollectChestTargets(host, *attacker, count);
+  }
+  host.SetPreviewCount(count);
+  if (host.IsPlayerAction()) {
+    host.ShowSphereTargets(count, 0);
+  }
+  if (primary != 0) {
+    SelectCommandedPreview(host, *attacker, count);
+  }
+  host.SetActionFlowMode(kFlowTargetList);
 }
 
 // decomp: BATTLE.PRG func_80072734 (src/BATTLE/BATTLE.PRG/146C.c:4329)
-void Battle_CollectGroundAreaActionTargets(int source_actor_slot)
-{
-    Actors_ActorLocationQuery state;
-    Battle_ActorStats* attacker =
-        Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->stats;
-    Battle_ActionDefinition* action_definition;
-    int action = Battle_actionState->selection.actionId;
-    int count;
-    int i;
-
-    Battle_actionState->sourceActorId = source_actor_slot;
-    Battle_actionState->rangeShape = Battle_actionDefinitions[action].shape;
-    action_definition = &Battle_actionDefinitions[action];
-    Battle_actionState->rangeKind = 2;
-    Actors_ActorPlacement(Battle_actionState->selection.primaryTarget.target.targetActor, &state);
-    Battle_actionState->rangeFacing = state.location.position.pad;
-    count = 0;
-
-    // BUG: the angle bits of the range word can never equal 0xFF
-    if ((*(u_int*)&action_definition->rangeX >> 27) == 0xFF) {
-        Battle_actionState->rangeX = attacker->currentRange;
-        Battle_actionState->rangeY = attacker->currentRangeY;
-        Battle_actionState->rangeZ = attacker->currentRangeZ;
-        Battle_actionState->rangeAngle = attacker->currentAttackShapeAngle * 8;
-    } else {
-        Battle_actionState->rangeX = action_definition->rangeX;
-        Battle_actionState->rangeY = action_definition->rangeY;
-        Battle_actionState->rangeZ = action_definition->rangeZ;
-        Battle_actionState->rangeAngle = action_definition->angle * 8;
-        Battle_actionState->areaFacing = 0;
-        Battle_actionState->areaShape = action_definition->areaShape & 7;
-        Battle_actionState->areaX = action_definition->areaRangeX;
-        Battle_actionState->areaY = action_definition->areaRangeY;
-        Battle_actionState->areaZ = action_definition->areaRangeZ;
-        Battle_actionState->areaAngle = action_definition->areaShape & 0xF8;
-
-        for (i = 0; i < 10; ++i) {
-            u_int status = Actors_ActorStateFlags(i);
-
-            if (Battle_actors[i] && (status & 0x3000001) == 1
-                && (i != Battle_actionState->selection.primaryTarget.target.targetActor
-                    || Battle_categoryIncludesActingActor[Battle_actionDefinitions[action].category])
-                && (Battle_actors[i]->kind
-                    & Battle_categoryTargetActorMasks[Battle_actionDefinitions[action].category])
-                && !(Battle_actors[i]->kind & 0x8000)) {
-                if (Battle_categoryTargetsBodyParts[Battle_actionDefinitions[action].category]) {
-                    int limb;
-
-                    for (limb = 0; limb < 6; ++limb) {
-                        int part = VS::Actors::FindLiveActorBoneTag(i, limb, 2);
-
-                        if (part >= 0) {
-                            VS::Actors::LiveActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = VS::Actors::LiveActorBoneTag(i, part, 0);
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = limb;
-                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
-                            ++count;
-                        }
-                    }
-                } else {
-                    VS::Actors::LiveActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = -1;
-                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
-                    ++count;
-                }
-            }
-        }
+void CollectGroundAreaActionTargets(ActionTargetingHost& host,
+                                    int source_slot) {
+  const int action = host.SelectionActionId();
+  const int primary = host.PrimaryActor();
+  const std::optional<TargetingActor> source = host.Actor(primary);
+  const std::optional<TargetPoint> placement = host.ActorPlacement(primary);
+  if (!source || !placement) {
+    VS_LOG_ERROR("battle.targeting",
+                 "source actor {} is absent; ground area not collected",
+                 primary);
+    return;
+  }
+  const TargetingActionView definition = host.Action(action);
+  const TargetCategoryRules rules = host.CategoryRules(definition.category);
+  host.SetSourceActorId(source_slot);
+  // decomp: the weapon-range branch tests bits that can never equal 0xFF, so
+  // the action's own range always applies.
+  TargetingVolume range = host.Volume(TargetingVolumeSlot::kRange);
+  range.shape = definition.range.shape;
+  range.kind = kGroundRangeKind;
+  range.facing = placement->pad;
+  range.x = definition.range.x;
+  range.y = definition.range.y;
+  range.z = definition.range.z;
+  range.angle = definition.range.angle * kVolumeAngleScale;
+  TargetingVolume area = host.Volume(TargetingVolumeSlot::kArea);
+  area.facing = 0;
+  area.shape = definition.area.shape;
+  area.x = definition.area.x;
+  area.y = definition.area.y;
+  area.z = definition.area.z;
+  area.angle = definition.area.angle * kVolumeAngleScale;
+  host.SetVolume(TargetingVolumeSlot::kArea, area);
+  const CandidateScan scan{
+      .action = action, .primary = primary, .rules = rules};
+  int count = 0;
+  for (int slot = 0; slot < kGroundAreaActorSlots; ++slot) {
+    const std::uint32_t state_flags = host.ActorStateFlags(slot);
+    const std::optional<TargetingActor> actor = host.Actor(slot);
+    if (!actor || !IsTargetCandidate(scan, slot, *actor, state_flags)) {
+      continue;
     }
-
-    Battle_actionState->previewCount = count;
-    VS::Actors::LiveActorTaggedBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 250, &Battle_actionState->rangeOrigin, 0);
-
-    if (Battle_actionState->selection.primaryTarget.target.targetActor) {
-        Battle_actionState->areaCenter =
-            *(SVECTOR*)&Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->commandArg1;
-        Battle_actionState->areaCenter.pad = 0;
-    }
-    if (Battle_actionState->isPlayerAction) {
-        ((void (*)(void*, void*, int, void*))Battle_SetSphereVolumes)(
-            &Battle_actionState->rangeShape, &Battle_actionState->areaShape, count, Battle_actionState->previews);
-    }
-
-    Battle_actionFlowMode = 2;
+    count = rules.targets_body_parts ? PlaceBodyPartTargets(host, slot, count)
+                                     : PlaceWholeActorTarget(host, slot, count);
+  }
+  host.SetPreviewCount(count);
+  range.origin =
+      host.TaggedBonePosition(primary, kVolumeOriginTag, range.origin);
+  host.SetVolume(TargetingVolumeSlot::kRange, range);
+  if (primary != 0) {
+    TargetPoint centre = source->command_point;
+    centre.pad = 0;
+    host.SetAreaCenter(centre);
+  }
+  if (host.IsPlayerAction()) {
+    host.ShowRangeVolume(true, count);
+  }
+  host.SetActionFlowMode(kFlowGroundCursor);
 }
 
 // decomp: BATTLE.PRG func_80072BA8 (src/BATTLE/BATTLE.PRG/146C.c:4416)
-void Battle_InitializeActionTargeting(int action)
-{
-    int _[2] __attribute__((unused));
-    Actors_ActorLocationQuery state;
-    int limb;
-    int part;
-    int count;
-    u_char category;
-
-    Battle_actionState->selection.actionId = action;
-    ((void (*)(...))Battle_ClearSphereTargets)();
-    Battle_ClearPrimarySphereVolume();
-    Battle_ClearSecondarySphereVolume();
-
-    if (action == 0) {
-        Battle_actionState->rangeShape = 1;
-        Battle_actionState->rangeKind = 3;
-        Actors_ActorPlacement(0, &state);
-        Battle_actionState->rangeFacing = state.location.position.pad;
-        Battle_actionState->rangeX = 4;
-        Battle_actionState->rangeY = 4;
-        Battle_actionState->rangeZ = 4;
-        Battle_actionState->rangeAngle = 0;
-        VS::Actors::LiveActorTaggedBonePosition(0, 250, &Battle_actionState->rangeOrigin, 0);
-        ((void (*)(void*, void*, int, void*))Battle_SetSphereVolumes)(&Battle_actionState->rangeShape, NULL, 0, NULL);
-
-        Battle_actionState->areaShape = 2;
-        Battle_actionState->areaKind = 3;
-        Actors_ActorPlacement(1, &state);
-        Battle_actionState->areaFacing = state.location.position.pad;
-        Battle_actionState->areaX = 4;
-        Battle_actionState->areaY = 4;
-        Battle_actionState->areaZ = 4;
-        Battle_actionState->areaAngle = 0;
-        VS::Actors::LiveActorTaggedBonePosition(1, 250, &Battle_actionState->areaOrigin, 0);
-        ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
-
-        for (limb = 0, count = 0; limb < 6; ++limb) {
-            part = VS::Actors::FindLiveActorBoneTag(1, limb, 2);
-            if (part >= 0) {
-                VS::Actors::LiveActorLowGroupBonePosition(1, limb, &Battle_actionState->previews[count].position, 0);
-                Battle_actionState->previews[count].kind = VS::Actors::LiveActorBoneTag(1, part, 0);
-                Battle_actionState->previews[count].limb = limb;
-                Battle_actionState->previews[count].actorId = 1;
-                ++count;
-            }
-        }
-        Battle_actionState->previewCount = count;
-        VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, count), 0);
-        Battle_actionFlowMode = 1;
-        return;
-    }
-
-    category = Battle_actionDefinitions[action].category;
-    if (Battle_categoryNeedsTargetSelection[category]) {
-        if (Battle_categoryIsAreaTarget[category]) {
-            if (!Battle_categoryTargetsBodyParts[category]) {
-                Battle_CollectGroundAreaActionTargets(0);
-            } else {
-                Battle_CollectGroundAreaActionTargets(1);
-            }
-        } else if (!Battle_categoryTargetsBodyParts[category]) {
-            Battle_CollectDirectActionTargets(2);
-        } else {
-            Battle_CollectDirectActionTargets(3);
-        }
-    } else if (Battle_categoryIsAreaTarget[category]) {
-        Battle_CollectSourceAreaActionTargets(4);
+void InitializeActionTargeting(ActionTargetingHost& host, int action_id) {
+  host.SetSelectionActionId(action_id);
+  host.ClearSphereTargets();
+  host.ClearPrimarySphereVolume();
+  host.ClearSecondarySphereVolume();
+  if (action_id == 0) {
+    ShowTestActionTargets(host);
+    return;
+  }
+  const TargetCategoryRules rules =
+      host.CategoryRules(host.Action(action_id).category);
+  if (rules.needs_target_selection) {
+    if (rules.area_target) {
+      CollectGroundAreaActionTargets(host, rules.targets_body_parts
+                                               ? kGroundBodyPartMode
+                                               : kGroundAreaMode);
     } else {
-        Battle_CommitEnvironmentAction(6);
+      CollectDirectActionTargets(host, rules.targets_body_parts
+                                           ? kDirectBodyPartMode
+                                           : kDirectActorMode);
     }
+  } else if (rules.area_target) {
+    CollectSourceAreaActionTargets(host);
+  } else {
+    host.CommitEnvironmentAction(kEnvironmentMode);
+  }
 }
 
 // decomp: BATTLE.PRG func_80072EC4 (src/BATTLE/BATTLE.PRG/146C.c:4489)
-void Battle_BeginActorActionSelection(int source_actor_slot, u_short action_id)
-{
-    int i;
-    u_int actor_state_flags;
-    Battle_Actor* source_actor;
-
-    Field_controlMode = 2;
-    VS::Core::Memory::ZeroLiveAlignedWords(&Battle_actionState->selection, sizeof Battle_actionState->selection);
-    Battle_actionState->selection.primaryTarget.targetsPosition = 0;
-    Battle_actionState->selection.primaryTarget.target.targetActor = source_actor_slot;
-    Battle_actionState->selection.actionId = action_id;
-    Field_StorePreferredActionCameraDistance();
-    Battle_ResetTargetingRiskPenaltyTimer();
-    if (source_actor_slot != 0) {
-        Battle_actionState->isPlayerAction = 0;
-    } else {
-        Battle_actionState->isPlayerAction = 1;
-    }
-    Battle_actionState->selectedPreview = Battle_actionState->cameraPreview = -1;
-    source_actor = Battle_actors[source_actor_slot];
-    Battle_actionState->previews[0].actorId = source_actor->commandArg1.bytes[0];
-    Battle_actionState->previews[0].limb = source_actor->commandArg1.bytes[2];
-    Battle_actionState->selection.targetCount = 0;
-    Battle_actionState->selectionFrames = 0;
-    Battle_actionState->chainStep = 0;
-    Actors_RestoreActorIdlePose(Battle_actionState->selection.primaryTarget.target.targetActor);
-
-    if (Battle_actionState->isPlayerAction != 0) {
-        Battle_InitSphere();
-        VS::Render::TransformLiveRoomPalettes(0xD, 4, -4, -4, 0);
-    }
-
-    Actors_FreezeAllActorAnimations();
-
-    for (i = 0; i < 16; ++i) {
-        if (i != Battle_actionState->selection.primaryTarget.target.targetActor) {
-            actor_state_flags = Actors_ActorStateFlags(i);
-            if (actor_state_flags & 4) {
-                Actors_SetActorDisplayFlags(i, actor_state_flags & ~4);
-            }
-        }
-    }
-
-    if (source_actor_slot == 0) {
-        Field_SetMinimapVisible(0);
-    }
-    Field_SetRoomAnimationsPaused(1);
-    Field_SetMovingPlatformsPaused(1);
-    if (Battle_actionState->isPlayerAction != 0) {
-        Battle_SetActorMarkersHidden(1);
-    }
-    Battle_InitializeActionTargeting(Battle_actionState->selection.actionId);
-    VS::Render::SetLiveClutAnimationEnabled(0);
+void BeginActorActionSelection(ActionTargetingHost& host, int source_slot,
+                               int action_id) {
+  const std::optional<TargetingActor> source = host.Actor(source_slot);
+  if (!source) {
+    VS_LOG_ERROR("battle.targeting",
+                 "action selection refused: actor {} is absent", source_slot);
+    return;
+  }
+  host.SetFieldControlMode(kFieldControlTargeting);
+  host.ResetSelection(source_slot, action_id);
+  host.StorePreferredCameraDistance();
+  host.ResetRiskPenaltyTimer();
+  const bool player = source_slot == 0;
+  host.SetIsPlayerAction(player);
+  host.SetSelectedPreview(kNoPreviewSelected);
+  host.SetCameraPreview(kNoPreviewSelected);
+  ActionTargetPreview first = host.Preview(0);
+  first.actor_id = static_cast<std::uint8_t>(source->command_target_byte);
+  first.limb = static_cast<std::int8_t>(source->command_limb_byte);
+  host.SetPreview(0, first);
+  host.SetSelectionTargetCount(0);
+  host.ResetSelectionTimers();
+  host.RestoreIdlePose(source_slot);
+  if (player) {
+    host.InitSphere();
+    // The room palette transform of the targeting view.
+    constexpr RoomPaletteTransform kTargetingPalette{
+        .mode = 0xD, .duration = 4, .red = -4, .green = -4, .blue = 0};
+    host.TransformRoomPalettes(kTargetingPalette);
+  }
+  host.FreezeActorAnimations();
+  RevealHiddenActors(host, source_slot);
+  if (player) {
+    host.SetMinimapVisible(false);
+  }
+  host.SetRoomAnimationsPaused(true);
+  host.SetMovingPlatformsPaused(true);
+  if (player) {
+    host.SetActorMarkersHidden(true);
+  }
+  InitializeActionTargeting(host, host.SelectionActionId());
+  host.SetClutAnimationEnabled(false);
 }
 
+namespace {
+[[nodiscard]] int VolumeRadius(const SphereVolume& volume) {
+  return volume.extents[kExtentRadiusByte];
+}
+
+// Raises or lowers the cursor (the pitch-locked mode).
+void MoveSphereCursorPitch(TargetSelectionHost& host, SphereCursor cursor,
+                           const SphereVolume& volume, StickInput stick,
+                           std::uint32_t held) {
+  const int radius = VolumeRadius(volume);
+  int pitch = stick.y >> kPitchStickShift;
+  if (pitch == 0) {
+    if ((held & kPadUp) != 0) {
+      pitch = -kPitchStep;
+    }
+    if ((held & kPadDown) != 0) {
+      pitch += kPitchStep;
+    }
+  }
+  pitch += cursor.y;
+  const auto kind = static_cast<std::uint32_t>(volume.kind & kVolumeKindMask);
+  const int ceiling = kind - 1 < 2u ? radius * kExtentUnit : 0;
+  pitch = std::max(pitch, -radius * kExtentUnit);
+  pitch = std::min(pitch, ceiling);
+  cursor.y = Halfword(pitch);
+  host.SetCursor(cursor);
+}
+
+[[nodiscard]] StickInput DigitalStick(std::uint32_t held) {
+  StickInput stick;
+  if ((held & kPadUp) != 0) {
+    stick.y = -kDigitalStickStep;
+  }
+  if ((held & kPadDown) != 0) {
+    stick.y = kDigitalStickStep;
+  }
+  if ((held & kPadLeft) != 0) {
+    stick.x = -kDigitalStickStep;
+  }
+  if ((held & kPadRight) != 0) {
+    stick.x = kDigitalStickStep;
+  }
+  return stick;
+}
+
+// Moves the cursor across the ground in camera space, keeping it inside the
+// unit circle unless it would only slide along the rim.
+void MoveSphereCursorAcross(TargetSelectionHost& host, SphereCursor cursor,
+                            const SphereVolume& volume, StickInput stick,
+                            std::uint32_t held) {
+  const int angle = -volume.angle - host.CameraYaw();
+  if (stick.x == 0 && stick.y == 0) {
+    stick = DigitalStick(held);
+  }
+  const int old_x = cursor.x;
+  const int old_z = cursor.z;
+  const int cosine = Cosine(angle);
+  const int sine = Sine(angle);
+  int x =
+      Halfword(old_x + ((-stick.x * cosine - stick.y * sine + kRotationRound) >>
+                        kRotationShift));
+  int z =
+      Halfword(old_z + ((-stick.x * sine + stick.y * cosine + kRotationRound) >>
+                        kRotationShift));
+  const int length = SquareRootInteger(WrappingAdd(x * x, z * z));
+  if (length > kUnitCircle) {
+    const int step_x = x - old_x;
+    const int step_z = z - old_z;
+    x = Halfword(x * kUnitCircle / length);
+    z = Halfword(z * kUnitCircle / length);
+    const int turn =
+        (Arctangent2(x, z) - Arctangent2(step_x, step_z)) & kTurnMask;
+    if (turn < kAlignedTurnLow || turn > kAlignedTurnHigh) {
+      x = old_x;
+      z = old_z;
+    }
+  }
+  cursor.x = x;
+  cursor.z = z;
+  host.SetCursor(cursor);
+}
+
+void LockSphereCursor(TargetSelectionHost& host) {
+  SphereCursor cursor = host.Cursor();
+  cursor.locked = 1;
+  host.SetCursor(cursor);
+  SphereVolume primary = host.Volume(0);
+  primary.kind |= kActiveVolumeBit;
+  host.SetVolume(0, primary);
+  SphereVolume secondary = host.Volume(1);
+  secondary.kind &= kVolumeKindMask;
+  host.SetVolume(1, secondary);
+}
+
+void UnlockSphereCursor(TargetSelectionHost& host) {
+  SphereVolume primary = host.Volume(0);
+  primary.kind &= kVolumeKindMask;
+  host.SetVolume(0, primary);
+  SphereVolume secondary = host.Volume(1);
+  secondary.kind |= kActiveVolumeBit;
+  host.SetVolume(1, secondary);
+  SphereCursor cursor = host.Cursor();
+  cursor.locked = 0;
+  host.SetCursor(cursor);
+  const int count = host.SecondaryTargetCount();
+  for (int index = 0; index < count; ++index) {
+    const ActionTargetPreview target = host.SphereTarget(kAreaList, index);
+    if ((target.actor_id >> kGroupShift) == 0) {
+      host.DisablePalettePulse(target.actor_id, target.limb);
+    }
+  }
+}
+
+enum class SphereButton : std::uint8_t { kNone, kCancel, kConfirm };
+
+[[nodiscard]] SphereButton HandleSphereButtons(TargetSelectionHost& host,
+                                               bool was_locked) {
+  const std::uint32_t pressed = host.ButtonsPressed();
+  if (!was_locked) {
+    if ((pressed & kPadCross) != 0) {
+      host.PlayLeaveSound();
+      return SphereButton::kCancel;
+    }
+    if ((pressed & kPadCircle) != 0) {
+      host.PlaySelectSound();
+      LockSphereCursor(host);
+    }
+    return SphereButton::kNone;
+  }
+  if ((pressed & kPadCross) != 0) {
+    host.PlayLeaveSound();
+    UnlockSphereCursor(host);
+    return SphereButton::kNone;
+  }
+  if ((pressed & kPadCircle) != 0) {
+    host.PlaySelectSound();
+    return SphereButton::kConfirm;
+  }
+  return SphereButton::kNone;
+}
+
+// How far the cursor's ground offset reaches at its height.
+[[nodiscard]] int SphereCursorScale(int kind, int radius, int pitch) {
+  switch (kind) {
+    case kSphereVolume: {
+      const int ratio = R3000Quotient(pitch * 2, radius);
+      return SquareRootFixed(
+          WrappingSubtract(kUnitCircle, WrappingMultiply(ratio, ratio)));
+    }
+    case kColumnVolume:
+    case kBoxVolume:
+      return kUnitCircle;
+    case kRisingConeVolume:
+      return R3000Quotient((radius * kExtentUnit + pitch) * kConeScale, radius);
+    case kFallingConeVolume:
+      return R3000Quotient(-pitch * kConeScale, radius);
+    default:
+      // decomp: other shapes keep a stale scale; this runs every frame, so
+      // the defined 1.0 is logged at debug level.
+      VS_LOG_DEBUG("battle.targeting",
+                   "sphere volume kind {} has no cursor scale; using 1.0",
+                   kind);
+      return kUnitCircle;
+  }
+}
+
+// Puts the target at the cursor's height, raising a cursor below ground to
+// just under it (the second pass always lands at -2).
+[[nodiscard]] int SettleSphereCursorHeight(TargetSelectionHost& host,
+                                           const SphereVolume& volume,
+                                           TargetPoint& target) {
+  const int kind = volume.kind & kVolumeKindMask;
+  const int radius = VolumeRadius(volume);
+  SphereCursor cursor = host.Cursor();
+  int scale = SphereCursorScale(kind, radius, cursor.y);
+  target.x = volume.position.x;
+  target.y = Halfword(volume.position.y + cursor.y);
+  target.z = volume.position.z;
+  if (target.y < kGroundLimit) {
+    return scale;
+  }
+  cursor.y = Halfword(-volume.position.y - kGroundClearance);
+  host.SetCursor(cursor);
+  scale = SphereCursorScale(kind, radius, cursor.y);
+  target.y = Halfword(volume.position.y + cursor.y);
+  return scale;
+}
+
+struct GroundOffset {
+  int x = 0;
+  int z = 0;
+};
+
+// The cursor's ground offset through the volume transform.
+[[nodiscard]] GroundOffset TransformedCursorOffset(const SphereCursor& cursor,
+                                                   const SphereBasis& basis,
+                                                   int scale) {
+  const int scaled_x =
+      Low32((static_cast<std::int64_t>(cursor.x) * scale) + kFixedRound) >>
+      kFixedShift;
+  const int scaled_z =
+      Low32((static_cast<std::int64_t>(cursor.z) * scale) + kFixedRound) >>
+      kFixedShift;
+  const auto combine = [&](int along_x, int along_z) {
+    return Low32((static_cast<std::int64_t>(scaled_x) * along_x) +
+                 (static_cast<std::int64_t>(scaled_z) * along_z) +
+                 kFixedRound) >>
+           kFixedShift;
+  };
+  return GroundOffset{.x = combine(basis.m00, basis.m20),
+                      .z = combine(basis.m02, basis.m22)};
+}
+
+[[nodiscard]] std::int16_t ClampToMap(int value, int size) {
+  if (value < 0) {
+    value = 0;
+  }
+  if (value >= size) {
+    value = size - 1;
+  }
+  return Halfword(value);
+}
+
+// Refits the cursor offset to a target clamped onto the map.
+void RefitSphereCursor(TargetSelectionHost& host, const SphereVolume& volume,
+                       const SphereBasis& basis, int scale,
+                       TargetPoint& target) {
+  const std::int64_t dx = target.x - volume.position.x;
+  const std::int64_t dz = target.z - volume.position.z;
+  const int determinant =
+      Low32((static_cast<std::int64_t>(basis.m00) * basis.m22) -
+            (static_cast<std::int64_t>(basis.m02) * basis.m20) +
+            kDeterminantRound) /
+      kUnitCircle;
+  SphereCursor cursor = host.Cursor();
+  if (scale != 0 && determinant != 0) {
+    const auto unproject = [&](std::int64_t sum) {
+      return Halfword(R3000Quotient(
+          WrappingMultiply(R3000Quotient(Low32(sum), determinant), kUnitCircle),
+          scale));
+    };
+    cursor.x = unproject((dx * basis.m22) - (dz * basis.m20));
+    cursor.z = unproject((-dx * basis.m02) + (dz * basis.m00));
+    host.SetCursor(cursor);
+  }
+  const GroundOffset offset = TransformedCursorOffset(cursor, basis, scale);
+  target.x = Halfword(volume.position.x + offset.x);
+  target.z = Halfword(volume.position.z + offset.z);
+}
+
+// Moves the target by the cursor's ground offset and keeps it on the map.
+void PlaceSphereTarget(TargetSelectionHost& host, const SphereVolume& volume,
+                       const SphereBasis& basis, int scale,
+                       TargetPoint& target) {
+  const GroundOffset offset =
+      TransformedCursorOffset(host.Cursor(), basis, scale);
+  target.x = Halfword(target.x + offset.x);
+  target.z = Halfword(target.z + offset.z);
+  const int dimensions = host.CollisionMapDimensions();
+  const int width = (dimensions & kHalfwordMask) * kMapTileUnits;
+  const int depth = (dimensions >> kHalfwordShift) * kMapTileUnits;
+  const auto outside = [](int value, int size) {
+    return static_cast<std::uint32_t>(value) >=
+           static_cast<std::uint32_t>(size);
+  };
+  if (!outside(target.x, width) && !outside(target.z, depth)) {
+    return;
+  }
+  target.x = ClampToMap(target.x, width);
+  target.z = ClampToMap(target.z, depth);
+  RefitSphereCursor(host, volume, basis, scale, target);
+}
+}  // namespace
+
 // decomp: BATTLE.PRG func_800C4794 (src/BATTLE/BATTLE.PRG/5BF94.c:640)
-int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
-{
-    Battle_TargetSphereLabelView* state = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere);
-    SVECTOR offset;
-    int stickX = ((VECTOR*)&state->opaque38)->vx;
-    int stickY = ((VECTOR*)&state->opaque38)->vy;
-    Battle_TargetVolumeFlags flags = state->opaque0[0].scale.flags;
-    int result;
-    int lockPitch;
-    int scale;
-    int value;
-    MATRIX* m;
-
-    ((VECTOR*)&offset)->vx = stickX;
-    ((VECTOR*)&offset)->vy = stickY;
-    target_position->pad = 0;
-    result = 0;
-
-    if (state->opaque2A != 0) {
-        setVector(
-            target_position, state->opaque0[0].position[0], state->opaque0[0].position[1], state->opaque0[0].position[2]);
-        ((void (*)(SVECTOR*, int))Battle_CacheSphereTerrainRow)((SVECTOR*)state->opaque0[0].position, state->opaque2A - 1);
-        return 0;
-    }
-
-    Battle_BuildSphereCameraBasis();
-    lockPitch = 0;
-    stickX = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickX);
-    stickY = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickY);
-    target_position->pad = 0;
-
-    if ((offset.pad == 0) || (Input_buttonsState & PADRleft)) {
-        lockPitch = 1;
-    }
-
-    if (lockPitch) {
-        stickX = stickY >> 3;
-
-        if (stickX == 0) {
-            if (Input_buttonsState & PADLup) {
-                stickX = -8;
-            }
-            if (Input_buttonsState & PADLdown) {
-                stickX += 8;
-            }
-        }
-
-        stickX += offset.vy;
-        stickY = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind & 0x7F;
-
-        if (stickY - 1 < 2u) {
-            stickY = flags.opaque1Bit0 * 32;
-        } else {
-            stickY = 0;
-        }
-        if (stickX < -flags.opaque1Bit0 * 32) {
-            stickX = -flags.opaque1Bit0 * 32;
-        }
-        if (stickY < stickX) {
-            stickX = stickY;
-        }
-
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy = stickX;
-    } else {
-        int oldX = offset.vx;
-        int oldZ = offset.vz;
-        int angle = -(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].angle - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque22;
-
-        if ((stickX == 0) && (stickY == 0)) {
-            if (Input_buttonsState & PADLup) {
-                stickY = -64;
-            }
-            if (Input_buttonsState & PADLdown) {
-                stickY = 64;
-            }
-            if (Input_buttonsState & PADLleft) {
-                stickX = -64;
-            }
-            if (Input_buttonsState & PADLright) {
-                stickX = 64;
-            }
-        }
-
-        offset.vx += (-stickX * VS::Core::Math::Cosine(angle) - stickY * VS::Core::Math::Sine(angle) + ONE / 8) >> 10;
-        offset.vz += (-stickX * VS::Core::Math::Sine(angle) + stickY * VS::Core::Math::Cosine(angle) + ONE / 8) >> 10;
-        scale = VS::Core::Math::SquareRootInteger(offset.vx * offset.vx + offset.vz * offset.vz);
-
-        if (scale > ONE) {
-            stickX = offset.vx - oldX;
-            stickY = offset.vz - oldZ;
-            offset.vx = offset.vx * ONE / scale;
-            offset.vz = offset.vz * ONE / scale;
-            scale = (VS::Core::Math::Arctangent2(offset.vx, offset.vz) - VS::Core::Math::Arctangent2(stickX, stickY)) & 0xFFF;
-
-            if (scale < 8 || scale > 4087) {
-                offset.vx = oldX;
-                offset.vz = oldZ;
-            }
-        }
-
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vx = offset.vx;
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vz = offset.vz;
-    }
-
-    if (offset.pad != 0) {
-        ((void (*)(Battle_TargetInfoLine*, int))Battle_UpdateSphereTargetHighlights)((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque44, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2E);
-    }
-
-    if (offset.pad == 0) {
-        if (Input_buttonsPressed.allButtons & PADRdown) {
-            VS::Menu::PlayLeaveSound();
-            target_position->pad = 1;
-            return 1;
-        }
-        if (Input_buttonsPressed.allButtons & PADRright) {
-            VS::Menu::PlaySelectSound();
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.pad = 1;
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind |= 0x80;
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].kind &= 0x7F;
-        }
-    } else if (Input_buttonsPressed.allButtons & PADRdown) {
-        VS::Menu::PlayLeaveSound();
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind &= 0x7F;
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].kind |= 0x80;
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.pad = 0;
-
-        for (stickX = 0; stickX < (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2E; ++stickX) {
-            Battle_TargetInfoLine* trigger = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque44[stickX];
-
-            if ((trigger->opaque9 >> 4) == 0) {
-                VS::Actors::DisableLiveModelPalettePulse(trigger->opaque9, trigger->opaqueA);
-            }
-        }
-    } else if (Input_buttonsPressed.allButtons & PADRright) {
-        VS::Menu::PlaySelectSound();
-        result = 1;
-    }
-
-    m = Battle_BuildSphereVolumeTransform((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].scale.extents, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].angle);
-    VS::Render::LoadLiveFrameViewMatrix();
-
-    for (;;) {
-        switch ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind & 0x7F) {
-        case 1:
-            scale = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy * 2) / flags.opaque1Bit0;
-            scale = VS::Core::Math::SquareRootFixed(ONE - scale * scale);
-            break;
-        case 2:
-        case 3:
-            scale = ONE;
-            break;
-        case 4:
-            scale = (flags.opaque1Bit0 * 32 + (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy) * 128 / flags.opaque1Bit0;
-            break;
-        case 5:
-            scale = -(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy * 128 / flags.opaque1Bit0;
-            break;
-        }
-
-        setVector(target_position, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0],
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[1] + (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy,
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2]);
-
-        if (target_position->vy < -1) {
-            break;
-        }
-
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy = -(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[1] - 2;
-    }
-
-    VS::Battle::DrawLiveSphereTerrainIntersection(*target_position, *m, scale);
-    stickX = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vx * scale + ONE / 2) >> 12;
-    stickY = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vz * scale + ONE / 2) >> 12;
-    target_position->vx += (stickX * m->m[0][0] + stickY * m->m[2][0] + ONE / 2) >> 12;
-    target_position->vz += (stickX * m->m[0][2] + stickY * m->m[2][2] + ONE / 2) >> 12;
-
-    value = Field_CollisionMapDimensions(0);
-
-    if (((u_int)target_position->vx >= (value & 0xFFFF) * 8)
-        || ((u_int)target_position->vz >= (value >> 16) * 8)) {
-        if (target_position->vx < 0) {
-            target_position->vx = 0;
-        }
-        if (target_position->vx >= (value & 0xFFFF) * 8) {
-            target_position->vx = (value & 0xFFFF) * 8 - 1;
-        }
-        if (target_position->vz < 0) {
-            target_position->vz = 0;
-        }
-        if (target_position->vz >= (value >> 16) * 8) {
-            target_position->vz = (value >> 16) * 8 - 1;
-        }
-
-        stickX = target_position->vx - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0];
-        stickY = target_position->vz - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2];
-        value = (m->m[0][0] * m->m[2][2] - m->m[0][2] * m->m[2][0] + ONE - 1) / ONE;
-
-        if ((scale != 0) && (value != 0)) {
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vx =
-                (stickX * m->m[2][2] - stickY * m->m[2][0]) / value * ONE / scale;
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vz =
-                (-stickX * m->m[0][2] + stickY * m->m[0][0]) / value * ONE / scale;
-        }
-
-        stickX = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vx * scale + ONE / 2) >> 12;
-        stickY = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vz * scale + ONE / 2) >> 12;
-        target_position->vx = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0]
-                 + ((stickX * m->m[0][0] + stickY * m->m[2][0] + ONE / 2) >> 12);
-        target_position->vz = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2]
-                 + ((stickX * m->m[0][2] + stickY * m->m[2][2] + ONE / 2) >> 12);
-    }
-
-    Battle_DrawSpherePositionCursor(target_position, lockPitch);
-
-    if (!((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].kind & 0x80)) {
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].opaque1 = 0;
-        stickX = ((VECTOR*)target_position)->vx;
-        stickY = ((VECTOR*)target_position)->vy;
-        ((VECTOR*)(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].position)->vx = stickX;
-        ((VECTOR*)(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].position)->vy = stickY;
-    }
-
-    if (result) {
-        ((void (*)(Battle_TargetInfoLine*, int))Battle_UpdateSphereTargetHighlights)((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque44, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2E);
-    }
-
-    return result;
+bool UpdateSphereTargetPosition(TargetSelectionHost& host,
+                                TargetPoint& target) {
+  const SphereCursor start = host.Cursor();
+  const SphereVolume volume = host.Volume(0);
+  target.pad = 0;
+  if (host.WireShape() != 0) {
+    target.x = volume.position.x;
+    target.y = volume.position.y;
+    target.z = volume.position.z;
+    host.CacheTerrainRow(host.WireShape() - 1);
+    return false;
+  }
+  host.BuildCameraBasis();
+  const StickInput stick = host.RightStick();
+  const std::uint32_t held = host.ButtonsHeld();
+  const bool was_locked = start.locked != 0;
+  const bool lock_pitch = !was_locked || (held & kPadSquare) != 0;
+  if (lock_pitch) {
+    MoveSphereCursorPitch(host, start, volume, stick, held);
+  } else {
+    MoveSphereCursorAcross(host, start, volume, stick, held);
+  }
+  if (was_locked) {
+    host.UpdateTargetHighlights();
+  }
+  const SphereButton button = HandleSphereButtons(host, was_locked);
+  if (button == SphereButton::kCancel) {
+    target.pad = 1;
+    return true;
+  }
+  const SphereBasis basis = host.BuildVolumeTransform();
+  const int scale = SettleSphereCursorHeight(host, volume, target);
+  host.DrawTerrainIntersection(target, scale);
+  PlaceSphereTarget(host, volume, basis, scale, target);
+  host.DrawPositionCursor(target, lock_pitch);
+  SphereVolume secondary = host.Volume(1);
+  if ((secondary.kind & kActiveVolumeBit) == 0) {
+    secondary.range_kind = 0;
+    secondary.position = target;
+    host.SetVolume(1, secondary);
+  }
+  const bool confirmed = button == SphereButton::kConfirm;
+  if (confirmed) {
+    host.UpdateTargetHighlights();
+  }
+  return confirmed;
 }
 
 // decomp: BATTLE.PRG func_800C513C (src/BATTLE/BATTLE.PRG/5BF94.c:869)
-void Battle_ClearTargetActorHighlight(int actor_slot, int pulse_slot)
-{
-    if (!(actor_slot & 0xF0)) {
-        VS::Actors::DisableLiveModelPalettePulse(actor_slot, pulse_slot);
-    }
+void ClearTargetActorHighlight(TargetSelectionHost& host, int actor,
+                               int pulse_slot) {
+  if ((actor & kActorGroupMask) == 0) {
+    host.DisablePalettePulse(actor, pulse_slot);
+  }
 }
 
 // decomp: BATTLE.PRG func_800C5164 (src/BATTLE/BATTLE.PRG/5BF94.c:876)
-void Battle_SetTargetActorHighlight(int actor_slot, int pulse_flags, int pulse_slot)
-{
-    if (!(actor_slot & 0xF0)) {
-        VS::Actors::EnableLiveModelPalettePulse(actor_slot, pulse_flags, pulse_slot);
-    }
+void SetTargetActorHighlight(TargetSelectionHost& host, int actor,
+                             int pulse_flags, int pulse_slot) {
+  if ((actor & kActorGroupMask) == 0) {
+    host.EnablePalettePulse(actor, pulse_flags, pulse_slot);
+  }
 }
 
 // decomp: BATTLE.PRG func_800C518C (src/BATTLE/BATTLE.PRG/5BF94.c:883)
-void Battle_SetTargetActorColorOverride(int actor_slot, void* tint)
-{
-    if (!(actor_slot & 0xF0)) {
-        VS::Actors::SetLiveActorTint(actor_slot, (Render_ColorCode *)(tint));
-    }
+void SetTargetActorColorOverride(TargetSelectionHost& host, int actor,
+                                 bool tinted) {
+  if ((actor & kActorGroupMask) == 0) {
+    host.SetActorTint(actor, tinted);
+  }
 }
 
+namespace {
+void HighlightAllTargets(TargetSelectionHost& host, int mode) {
+  if (mode == kMoveHighlight) {
+    return;
+  }
+  const int count = host.TargetCount();
+  for (int index = 0; index < count; ++index) {
+    const ActionTargetPreview target = host.SphereTarget(kTargetList, index);
+    const int group = target.actor_id;
+    if ((group >> kGroupShift) != 0) {
+      continue;
+    }
+    if (mode == kClearHighlight) {
+      ClearTargetActorHighlight(host, group, target.limb);
+      SetTargetActorColorOverride(host, group, false);
+    } else {
+      SetTargetActorHighlight(host, group, 0, target.limb);
+      SetTargetActorColorOverride(host, group, true);
+    }
+  }
+}
+}  // namespace
+
 // decomp: BATTLE.PRG func_800C51B4 (src/BATTLE/BATTLE.PRG/5BF94.c:890)
-void Battle_UpdateTargetSelectionHighlight(int mode)
-{
-    Battle_TargetInfoLine* entries = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40;
-    int i;
-    int group;
-    if ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque31) {
-        if (mode == 3) {
-            return;
-        }
-        for (i = 0; i < (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2C; ++i) {
-            void* data;
-            group = entries[i].opaque9;
-            if (group >> 4) {
-                continue;
-            }
-            if (mode == 1) {
-                Battle_ClearTargetActorHighlight(group, entries[i].opaqueA);
-                data = NULL;
-            } else {
-                Battle_SetTargetActorHighlight(group, 0, entries[i].opaqueA);
-                data = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque34;
-            }
-            Battle_SetTargetActorColorOverride(group, data);
-        }
-        return;
+void UpdateTargetSelectionHighlight(TargetSelectionHost& host, int mode) {
+  if (host.AllTargetsMode()) {
+    HighlightAllTargets(host, mode);
+    return;
+  }
+  const int selected = host.SelectedTarget();
+  if (selected == kNoPreviewSelected) {
+    return;
+  }
+  if ((mode & kClearHighlight) != 0) {
+    const HighlightedTarget old = host.Highlighted();
+    if ((old.group >> kGroupShift) == 0) {
+      ClearTargetActorHighlight(host, old.group, old.pulse_slot);
+      SetTargetActorColorOverride(host, old.group, false);
     }
-    i = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D;
-    if (i == 255) {
-        return;
-    }
-    if (mode & 1) {
-        group = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2F;
-        if (!(group >> 4)) {
-            Battle_ClearTargetActorHighlight(group, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque30);
-            Battle_SetTargetActorColorOverride(group, NULL);
-        }
-    }
-    if (mode & 2) {
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2F = entries[i].opaque9;
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque30 = entries[i].opaqueA;
-        group = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2F;
-        if (group >> 4) {
-            return;
-        }
-        Battle_SetTargetActorHighlight(group, 0, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque30);
-        Battle_SetTargetActorColorOverride(group, &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque34);
-    }
+  }
+  if ((mode & kShowHighlight) == 0) {
+    return;
+  }
+  const ActionTargetPreview target = host.SphereTarget(kTargetList, selected);
+  const HighlightedTarget now{.group = target.actor_id,
+                              .pulse_slot = target.limb};
+  host.SetHighlighted(now);
+  if ((now.group >> kGroupShift) != 0) {
+    return;
+  }
+  SetTargetActorHighlight(host, now.group, 0, now.pulse_slot);
+  SetTargetActorColorOverride(host, now.group, true);
 }
 
 // decomp: BATTLE.PRG func_800C5360 (src/BATTLE/BATTLE.PRG/5BF94.c:939)
-void Battle_AppendTargetGroupToColumn(int group)
-{
-    int first = 0;
-    int i;
-    if (Battle_firstColumnEntryCount > Battle_secondColumnEntryCount) {
-        for (i = 0; i < (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2C; ++i) {
-            if ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[i].opaque9 != group) {
-                continue;
-            }
-            if (!first) {
-                first = i + 1;
-            }
-            Battle_targetColumnEntries[1][Battle_secondColumnEntryCount++] = i;
-        }
-        Battle_secondColumnGroupFirstTargets[Battle_secondColumnGroupCount] = first - 1;
-        Battle_secondColumnGroups[Battle_secondColumnGroupCount++] = group;
-        return;
+void AppendTargetGroupToColumn(const TargetSelectionHost& host,
+                               TargetColumns& columns, int group) {
+  TargetColumn& column =
+      columns.columns[0].entry_count > columns.columns[1].entry_count
+          ? columns.columns[1]
+          : columns.columns[0];
+  if (column.group_count >= kTargetColumnGroupCapacity) {
+    VS_LOG_ERROR("battle.targeting",
+                 "target column groups are full; group {} dropped", group);
+    return;
+  }
+  int first = 0;
+  const int count = host.TargetCount();
+  for (int index = 0; index < count; ++index) {
+    if (host.SphereTarget(kTargetList, index).actor_id != group) {
+      continue;
     }
-    for (i = 0; i < (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2C; ++i) {
-        if ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[i].opaque9 != group) {
-            continue;
-        }
-        if (!first) {
-            first = i + 1;
-        }
-        Battle_targetColumnEntries[0][Battle_firstColumnEntryCount++] = i;
+    if (first == 0) {
+      first = index + 1;
     }
-    Battle_firstColumnGroupFirstTargets[Battle_firstColumnGroupCount] = first - 1;
-    Battle_firstColumnGroups[Battle_firstColumnGroupCount++] = group;
+    if (column.entry_count >= kTargetColumnCapacity) {
+      VS_LOG_ERROR("battle.targeting",
+                   "target column is full; target {} dropped", index);
+      continue;
+    }
+    column.entries[column.entry_count++] = static_cast<std::uint8_t>(index);
+  }
+  column.group_first_targets[column.group_count] =
+      static_cast<std::uint8_t>(first - 1);
+  column.groups[column.group_count++] = static_cast<std::uint8_t>(group);
 }
 
 // decomp: BATTLE.PRG func_800C553C (src/BATTLE/BATTLE.PRG/5BF94.c:970)
-void Battle_BuildTargetSelectionColumns(void)
-{
-    int size;
-    int group;
-    int i;
-    int count;
-    Battle_secondColumnEntryCount = 0;
-    Battle_firstColumnEntryCount = 0;
-    Battle_secondColumnGroupCount = 0;
-    Battle_firstColumnGroupCount = 0;
-    for (size = 6; size > 0; --size) {
-        for (group = 0; group < 16; ++group) {
-            count = 0;
-            for (i = 0; i < (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2C; ++i) {
-                if ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[i].opaque9 == group) {
-                    ++count;
-                }
-            }
-            if (count == size) {
-                Battle_AppendTargetGroupToColumn(group);
-            }
-        }
+TargetColumns BuildTargetSelectionColumns(const TargetSelectionHost& host) {
+  TargetColumns columns = host.Columns();
+  for (TargetColumn& column : columns.columns) {
+    column.entry_count = 0;
+    column.group_count = 0;
+  }
+  const int count = host.TargetCount();
+  const auto group_size = [&](int group) {
+    int size = 0;
+    for (int index = 0; index < count; ++index) {
+      if (host.SphereTarget(kTargetList, index).actor_id == group) {
+        ++size;
+      }
     }
-    for (i = 0; i < (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2C; ++i) {
-        group = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[i].opaque9;
-        if (group >> 4) {
-            Battle_AppendTargetGroupToColumn(group);
-        }
+    return size;
+  };
+  for (int size = kLargestGroup; size > 0; --size) {
+    for (int group = 0; group < kTargetGroupCount; ++group) {
+      if (group_size(group) == size) {
+        AppendTargetGroupToColumn(host, columns, group);
+      }
     }
-    i = Battle_firstColumnEntryCount;
-    if (i < Battle_secondColumnEntryCount) {
-        i = Battle_secondColumnEntryCount;
+  }
+  for (int index = 0; index < count; ++index) {
+    const int group = host.SphereTarget(kTargetList, index).actor_id;
+    if ((group >> kGroupShift) != 0) {
+      AppendTargetGroupToColumn(host, columns, group);
     }
-    Battle_targetColumnTopOffset = ((16 - i) * 11) >> 1;
+  }
+  const int longest =
+      std::max(columns.columns[0].entry_count, columns.columns[1].entry_count);
+  columns.top_offset =
+      ((kTargetColumnCapacity - longest) * kLabelRowHeight) >> 1;
+  columns.top_offset &= kByteMask;
+  return columns;
 }
 
 // decomp: BATTLE.PRG func_800C56C0 (src/BATTLE/BATTLE.PRG/5BF94.c:1006)
-void Battle_DismissTargetSelectionRows(void)
-{
-    int i;
-
-    Battle_UpdateTargetSelectionHighlight(1);
-
-    for (i = 0; i < Battle_firstColumnEntryCount; ++i) {
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[Battle_targetColumnEntries[0][i]].opaque0 = 3;
-    }
-
-    for (i = 0; i < Battle_secondColumnEntryCount; ++i) {
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[Battle_targetColumnEntries[1][i]].opaque0 = 2;
-    }
+void DismissTargetSelectionRows(TargetSelectionHost& host) {
+  UpdateTargetSelectionHighlight(host, kClearHighlight);
+  const TargetColumns columns = host.Columns();
+  const auto set_state = [&](int index, int state) {
+    TargetSelectionLabel label = host.Label(index);
+    label.state = state;
+    host.SetLabel(index, label);
+  };
+  for (int row = 0; row < columns.columns[0].entry_count; ++row) {
+    set_state(columns.columns[0].entries[row], kLeftLabelState);
+  }
+  for (int row = 0; row < columns.columns[1].entry_count; ++row) {
+    set_state(columns.columns[1].entries[row], kRightLabelState);
+  }
 }
 
 // decomp: BATTLE.PRG func_800C5798 (src/BATTLE/BATTLE.PRG/5BF94.c:1021)
-Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int target_index, int row_state, int row_index)
-{
-    int position_z_pad_word;
-    Battle_TargetSphereLabelEntry* item = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[target_index];
-    Battle_TargetInfoLine* src = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[target_index];
-
-    VS::Core::Memory::ZeroLiveWordsBackward(item, sizeof *item);
-    item->opaque0 = row_state;
-    item->opaque6 = row_index * 11 + 32;
-    position_z_pad_word = src->opaque4;
-    item->opaque8 = src->opaque0;
-    item->opaqueC = position_z_pad_word;
-
-    if (row_state == 2) {
-        item->opaque4 = 320;
-        item->limbName = Battle_limbNames[src->opaque8] + 1;
-    } else {
-        item->opaque4 = -72;
-        item->limbName = Battle_limbNames[src->opaque8];
-        item->opaque7 = 1;
-    }
-    return item;
+void InitTargetSelectionRow(TargetSelectionHost& host, int target_index,
+                            TargetListRow row) {
+  const ActionTargetPreview target =
+      host.SphereTarget(kTargetList, target_index);
+  const bool from_right = row.state == kRightLabelState;
+  TargetSelectionLabel label;
+  label.state = row.state;
+  label.offset_y = (row.index * kLabelRowHeight + kLabelTopRow) & kByteMask;
+  label.world_position = target.position;
+  label.screen_x = from_right ? kRightLabelX : kLeftLabelX;
+  label.fade = from_right ? 0 : 1;
+  host.SetLabel(target_index, label);
+  if (target.kind >= kTargetLimbNameCount) {
+    VS_LOG_ERROR("battle.targeting", "target kind {} has no limb name",
+                 target.kind);
+    return;
+  }
+  host.SetLabelText(target_index,
+                    TargetLabelText{.limb_name = target.kind,
+                                    .skip_first_character = from_right});
 }
 
 // decomp: BATTLE.PRG _getStatusString (src/BATTLE/BATTLE.PRG/5BF94.c:1045)
-char* Battle_FirstTargetStatusText(uint status_mask)
-{
-    int i;
-    status_mask >>= 5;
-    for (i = 0; i < 24; i++) {
-        if ((status_mask >> i) & 1) {
-            return (char*)&Battle_statusStrings
-                [Battle_statusStrings[Text_Battle_statusStrings_Index_strDown + i]];
-        }
+TargetText FirstTargetStatusText(std::uint32_t status_mask) {
+  const std::uint32_t statuses = status_mask >> kStatusShift;
+  for (int bit = 0; bit < kStatusTextCount; ++bit) {
+    if (((statuses >> bit) & 1u) != 0) {
+      return StatusIndexText(kStrDownText + bit);
     }
-    return (char*)&Battle_statusStrings[Text_Battle_statusStrings_Offset_empty];
+  }
+  return TargetText{.source = TargetTextSource::kStatusOffset,
+                    .value = kEmptyStatusOffset};
 }
 
-// decomp: BATTLE.PRG func_800C58F8 (src/BATTLE/BATTLE.PRG/5BF94.c:1058)
-int Battle_UpdateTargetSelectionMenu(u_char* target)
-{
-    Battle_TargetSphereLabelEntry* item;
-    Battle_TargetInfoLine* entry;
-    int i;
-    int value;
-    int prev;
-    int type;
-
-    if (target == NULL) {
-        Battle_targetSelectionStep = 0;
-        return 0;
+namespace {
+template <std::size_t N>
+[[nodiscard]] std::optional<int> FindEntry(
+    const std::array<std::uint8_t, N>& items, int count, int value) {
+  const int limit = std::min(count, static_cast<int>(N));
+  for (int index = 0; index < limit; ++index) {
+    if (items[static_cast<std::size_t>(index)] == value) {
+      return index;
     }
-    if (Battle_targetSelectionStep == 0) {
-        (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque34 = 0x808080;
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(0));
-        Battle_UpdateTargetSelectionHighlight(2);
-        Battle_BuildTargetSelectionColumns();
-        if ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2C == 0) {
-            Battle_targetSelectionStep = 16;
-        }
+  }
+  return std::nullopt;
+}
+
+// Steps through the target groups: to the next group of the same column,
+// then on to the other column's first.
+[[nodiscard]] int CycleTargetGroups(const TargetColumns& columns, int value,
+                                    int group) {
+  const TargetColumn& first = columns.columns[0];
+  const TargetColumn& second = columns.columns[1];
+  if (const std::optional<int> found =
+          FindEntry(first.groups, first.group_count, group)) {
+    const int next = *found + 1;
+    if (next != first.group_count) {
+      return first.group_first_targets[static_cast<std::size_t>(next)];
     }
+    return second.group_count == 0 ? value : second.entries[0];
+  }
+  const std::optional<int> found =
+      FindEntry(second.groups, second.group_count, group);
+  if (!found) {
+    VS_LOG_WARN("battle.targeting", "target group {} is in no column", group);
+    return value;
+  }
+  const int next = *found + 1;
+  return next == second.group_count
+             ? first.entries[0]
+             : second.group_first_targets[static_cast<std::size_t>(next)];
+}
 
-    *target = 0xFF;
-
-    if (Battle_targetSelectionStep < 16) {
-        if ((Battle_targetSelectionStep >= Battle_firstColumnEntryCount) && (Battle_targetSelectionStep >= Battle_secondColumnEntryCount)) {
-            Battle_targetSelectionStep = 18;
-        } else {
-            if (Battle_targetSelectionStep < Battle_firstColumnEntryCount) {
-                i = Battle_targetColumnEntries[0][Battle_targetSelectionStep];
-                item = Battle_InitTargetSelectionRow(i, 2, Battle_targetSelectionStep);
-                if (Battle_targetSelectionStep != 0) {
-                    prev = Battle_targetColumnEntries[0][Battle_targetSelectionStep - 1];
-                    if ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[i].opaque9 != (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[prev].opaque9) {
-                        item->opaque7 = 1 - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[prev].opaque7;
-                    } else {
-                        item->opaque7 = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[prev].opaque7;
-                    }
-                }
-            }
-            if (Battle_targetSelectionStep < Battle_secondColumnEntryCount) {
-                i = Battle_targetColumnEntries[1][Battle_targetSelectionStep];
-                item = Battle_InitTargetSelectionRow(i, 3, Battle_targetSelectionStep);
-                if (Battle_targetSelectionStep != 0) {
-                    prev = Battle_targetColumnEntries[1][Battle_targetSelectionStep - 1];
-                    if ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[i].opaque9 != (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[prev].opaque9) {
-                        item->opaque7 = 1 - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[prev].opaque7;
-                    } else {
-                        item->opaque7 = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[prev].opaque7;
-                    }
-                }
-            }
-        nextState:
-            ++Battle_targetSelectionStep;
-        }
+[[nodiscard]] int MoveInFirstColumn(const TargetColumns& columns, int row,
+                                    std::uint32_t pressed,
+                                    std::uint32_t repeated) {
+  const TargetColumn& first = columns.columns[0];
+  const TargetColumn& second = columns.columns[1];
+  if ((pressed & kPadLeft) != 0 && second.entry_count != 0) {
+    return second.entries[static_cast<std::size_t>(
+        std::min(row, second.entry_count - 1))];
+  }
+  if ((repeated & kPadUp) != 0) {
+    if (row != 0) {
+      --row;
+    } else if (second.entry_count != 0) {
+      return second.entries[static_cast<std::size_t>(second.entry_count - 1)];
     } else {
-        switch (Battle_targetSelectionStep) {
-        case 16:
-            Menu_textBoxes[7].flags.frameShape = 1;
-            Menu_SetTextBoxText(7, (char*)&Battle_doorStrings[Battle_doorStrings[0]]);
-            if (Input_buttonsPressed.allButtons & 0x60) {
-                VS::Menu::PlayLeaveSound();
-                Battle_targetSelectionStep = 17;
-            }
-            break;
-        case 17:
-            (*(char (*))&Battle_reuseSphereVolumes) = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].opaque1 == 2;
-            Battle_targetSelectionStep = 21;
-            break;
-        case 18:
-            if (Battle_AreTargetLabelsSettled() == 0) {
-                break;
-            }
-            goto nextState;
-        case 19:
-            if (Battle_HandleTargetPageButtons()) {
-                *target = 0xFF;
-                return 0;
-            }
-            if (++(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[2] == 0x22) {
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[2] = 0x12;
-            }
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[0] = 0;
-            if (Input_buttonsPressed.allButtons & 0x40) {
-                VS::Menu::PlayLeaveSound();
-                Battle_DismissTargetSelectionRows();
-                (*(char (*))&Battle_reuseSphereVolumes) = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].opaque1 == 2;
-                Battle_targetSelectionStep = 21;
-                break;
-            }
-            *target = Battle_MapTargetPageIndex((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D);
-            if (Input_buttonsPressed.allButtons & 0x20) {
-                Battle_DismissTargetSelectionRows();
-                Battle_targetSelectionStep = 20;
-                break;
-            }
-            value = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D;
-            if (Input_buttonRepeat & 1) {
-                for (i = 0; i < Battle_firstColumnGroupCount; ++i) {
-                    if (Battle_firstColumnGroups[i] == (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[value].opaque9) {
-                        break;
-                    }
-                }
-                if (i != Battle_firstColumnGroupCount) {
-                    if (++i == Battle_firstColumnGroupCount) {
-                        if (Battle_secondColumnGroupCount == 0) {
-                            goto selected;
-                        }
-                        goto firstOfRow1;
-                    }
-                    (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_firstColumnGroupFirstTargets[i];
-                    goto selected;
-                }
-                for (i = 0; i < Battle_secondColumnGroupCount; ++i) {
-                    if (Battle_secondColumnGroups[i] == (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[value].opaque9) {
-                        break;
-                    }
-                }
-                if (++i == Battle_secondColumnGroupCount) {
-                    goto firstOfRow0;
-                }
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_secondColumnGroupFirstTargets[i];
-                goto selected;
-            }
-            for (i = 0; i < Battle_firstColumnEntryCount; ++i) {
-                if (Battle_targetColumnEntries[0][i] == value) {
-                    break;
-                }
-            }
-            if (i != Battle_firstColumnEntryCount) {
-                if ((Input_buttonsPressed.allButtons & 0x8000) && (Battle_secondColumnEntryCount != 0)) {
-                    if (i >= Battle_secondColumnEntryCount) {
-                        i = Battle_secondColumnEntryCount - 1;
-                    }
-                    goto row1;
-                }
-                do {
-                    if (Input_buttonRepeat & 0x1000) {
-                        if (i == 0) {
-                            if (Battle_secondColumnEntryCount != 0) {
-                                goto lastOfRow1;
-                            }
-                            i = Battle_firstColumnEntryCount - 1;
-                        } else {
-                            --i;
-                        }
-                    }
-                } while (0);
-                if (Input_buttonRepeat & 0x4000) {
-                    if (i != Battle_firstColumnEntryCount - 1) {
-                        ++i;
-                    } else {
-                        i = 0;
-                        if (Battle_secondColumnEntryCount != 0) {
-                            goto firstOfRow1;
-                        }
-                    }
-                }
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_targetColumnEntries[0][i];
-                goto selected;
-            lastOfRow1:
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_targetColumnEntries[1][Battle_secondColumnEntryCount - 1];
-                goto selected;
-            firstOfRow1:
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_targetColumnEntries[1][0];
-                goto selected;
-            lastOfRow0:
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_targetColumnEntries[0][Battle_firstColumnEntryCount - 1];
-                goto selected;
-            firstOfRow0:
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_targetColumnEntries[0][0];
-                goto selected;
-            }
-            for (i = 0; i < Battle_secondColumnEntryCount; ++i) {
-                if (Battle_targetColumnEntries[1][i] == value) {
-                    break;
-                }
-            }
-            if (Input_buttonsPressed.allButtons & 0x2000) {
-                if (i >= Battle_firstColumnEntryCount) {
-                    i = Battle_firstColumnEntryCount - 1;
-                }
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_targetColumnEntries[0][i];
-                goto selected;
-            }
-            if (Input_buttonRepeat & 0x1000) {
-                if (i == 0) {
-                    goto lastOfRow0;
-                }
-                --i;
-            }
-            if (Input_buttonRepeat & 0x4000) {
-                if (i == Battle_secondColumnEntryCount - 1) {
-                    goto firstOfRow0;
-                }
-                ++i;
-            }
-        row1:
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D = Battle_targetColumnEntries[1][i];
-        selected:
-            (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[0] = 1;
-            if (value != (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D) {
-                (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[2] = 0;
-                VS::Menu::PlayChangeSound();
-                Battle_UpdateTargetSelectionHighlight(3);
-            }
-            entry = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D];
-            i = entry->opaque9;
-            type = entry->opaque8;
-            if (i >> 4) {
-                Battle_stringContext.strings[0] = (char*)&Battle_statusStrings
-                    [Battle_statusStrings[(i >> 5) + Text_Battle_statusStrings_Index_blocker]];
-            } else if (type == 16) {
-                Battle_stringContext.strings[0] = Battle_actors[i]->stats->name;
-            } else {
-                Battle_stringContext.strings[0] =
-                    (char*)&Battle_statusStrings[Battle_statusStrings[type]];
-            }
-            for (value = 1; value < 6; ++value) {
-                Battle_stringContext.strings[value] = Battle_emptyStatusString;
-            }
-            value = entry->opaqueB;
-            if ((type == 16) && !(i >> 4) && (Battle_actors[i]->kind & 0x10)) {
-                value = 5;
-                Battle_stringContext
-                    .strings[1] = (char*)&Battle_statusStrings[Battle_statusStrings
-                        [(u_short)entry->opaqueE == 0 ? Text_Battle_statusStrings_Index_indestructable
-                                                   : Text_Battle_statusStrings_Index__3]];
-            } else if (value == 0x3A) {
-                value = 1;
-            } else if (value == 0x3B) {
-                value = 2;
-            } else if (value == 0x3E) {
-                value = 3;
-            } else if (value == 0x3F) {
-                value = 4;
-            } else {
-                Battle_stringContext.strings[1] = Battle_targetStatusLineTemplate;
-                Battle_stringContext.strings[6] = Battle_FirstTargetStatusText(entry->opaque10);
-                value = 0;
-            }
-            Battle_stringContext.strings[2] =
-                (char*)&Battle_statusStrings[Battle_statusStrings
-                        [entry->opaque14 + Text_Battle_statusStrings_Index_indestructable]];
-            if (value != 0) {
-                if (value < 5) {
-                    Battle_stringContext.strings[1] =
-                        (char*)&Battle_statusStrings[Battle_statusStrings
-                                [Text_Battle_statusStrings_Index_mpTemplate - (value & 1)]];
-                    Battle_stringContext.strings[5] =
-                        (char*)&Battle_statusStrings[Battle_statusStrings
-                                [entry->opaque17 + Text_Battle_statusStrings_Index_human]];
-                }
-                Battle_stringContext.strings[3] =
-                    (char*)&Battle_statusStrings[Battle_statusStrings
-                            [entry->opaque15 + Text_Battle_statusStrings_Index_empty]];
-                Battle_stringContext.strings[4] =
-                    (char*)&Battle_statusStrings[Battle_statusStrings
-                            [entry->opaque16 + Text_Battle_statusStrings_Index_physical]];
-            }
-            Battle_stringContext.integers[0] = *(u_short*)&entry->opaqueC;
-            Battle_stringContext.integers[1] = (u_short)entry->opaqueE;
-            VS::Render::FormatLiveEncodedText((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->textBuffer, Battle_targetInfoTemplate);
-            Menu_SetTextBoxText(7, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->textBuffer);
-            break;
-        case 20:
-            *target = Battle_MapTargetPageIndex((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D);
-            // fallthrough
-        case 21:
-            Menu_DismissTextBox(7);
-            Battle_ClearPrimarySphereVolume();
-            return 1;
-        }
+      row = first.entry_count - 1;
     }
-    return 0;
+  }
+  if ((repeated & kPadDown) != 0) {
+    if (row != first.entry_count - 1) {
+      ++row;
+    } else {
+      row = 0;
+      if (second.entry_count != 0) {
+        return second.entries[0];
+      }
+    }
+  }
+  return first.entries[static_cast<std::size_t>(row)];
+}
+
+[[nodiscard]] int MoveInSecondColumn(const TargetColumns& columns, int row,
+                                     std::uint32_t pressed,
+                                     std::uint32_t repeated) {
+  const TargetColumn& first = columns.columns[0];
+  const TargetColumn& second = columns.columns[1];
+  if ((pressed & kPadRight) != 0) {
+    return first.entries[static_cast<std::size_t>(
+        std::min(row, first.entry_count - 1))];
+  }
+  if ((repeated & kPadUp) != 0) {
+    if (row == 0) {
+      return first.entries[static_cast<std::size_t>(first.entry_count - 1)];
+    }
+    --row;
+  }
+  if ((repeated & kPadDown) != 0) {
+    if (row == second.entry_count - 1) {
+      return first.entries[0];
+    }
+    ++row;
+  }
+  return second.entries[static_cast<std::size_t>(row)];
+}
+
+// The target the pad moves the selection to.
+[[nodiscard]] int NavigateTargets(const TargetSelectionHost& host, int value,
+                                  std::uint32_t pressed,
+                                  std::uint32_t repeated) {
+  const TargetColumns columns = host.Columns();
+  if ((repeated & kPadL2) != 0) {
+    return CycleTargetGroups(columns, value,
+                             host.SphereTarget(kTargetList, value).actor_id);
+  }
+  const TargetColumn& first = columns.columns[0];
+  const TargetColumn& second = columns.columns[1];
+  if (const std::optional<int> row =
+          FindEntry(first.entries, first.entry_count, value)) {
+    return MoveInFirstColumn(columns, *row, pressed, repeated);
+  }
+  const std::optional<int> row =
+      FindEntry(second.entries, second.entry_count, value);
+  if (!row || first.entry_count == 0) {
+    VS_LOG_WARN("battle.targeting", "target {} is in no column", value);
+    return value;
+  }
+  return MoveInSecondColumn(columns, *row, pressed, repeated);
+}
+
+[[nodiscard]] TargetText TargetNameText(int group, int kind) {
+  if ((group >> kGroupShift) != 0) {
+    return StatusIndexText((group >> kBlockerGroupShift) + kBlockerText);
+  }
+  if (kind == kWholeActorTargetKind) {
+    return TargetText{.source = TargetTextSource::kActorName, .value = group};
+  }
+  return StatusIndexText(kind);
+}
+
+// The amount line a target shows: none, one of the four HP/MP effects (odd
+// for HP), or an object's durability.
+constexpr int kNoAmountPreview = 0;
+constexpr int kHpAmountPreview = 1;
+constexpr int kMpAmountPreview = 2;
+constexpr int kHpAmountPreviewAlt = 3;
+constexpr int kMpAmountPreviewAlt = 4;
+
+[[nodiscard]] int AmountPreviewKind(int effect) {
+  switch (effect) {
+    case kHpAmountEffect:
+      return kHpAmountPreview;
+    case kMpAmountEffect:
+      return kMpAmountPreview;
+    case kHpAmountEffectAlt:
+      return kHpAmountPreviewAlt;
+    case kMpAmountEffectAlt:
+      return kMpAmountPreviewAlt;
+    default:
+      return kNoAmountPreview;
+  }
+}
+
+[[nodiscard]] bool IsObjectActor(const TargetSelectionHost& host, int actor) {
+  const std::optional<int> kind = host.ActorKind(actor);
+  if (!kind) {
+    VS_LOG_ERROR("battle.targeting", "target actor {} is absent", actor);
+    return false;
+  }
+  return (*kind & kObjectActorKind) != 0;
+}
+
+// Fills the target information box for one target.
+void DescribeTarget(TargetSelectionHost& host, int selected) {
+  const ActionTargetPreview entry = host.SphereTarget(kTargetList, selected);
+  const int group = entry.actor_id;
+  const int kind = entry.kind;
+  host.SetContextText(kNameString, TargetNameText(group, kind));
+  for (int slot = kDetailString; slot < kStatusString; ++slot) {
+    host.SetContextText(slot, TargetText{});
+  }
+  int amount = AmountPreviewKind(entry.effect);
+  if (kind == kWholeActorTargetKind && (group >> kGroupShift) == 0 &&
+      IsObjectActor(host, group)) {
+    amount = kObjectPreview;
+    host.SetContextText(
+        kDetailString,
+        StatusIndexText(static_cast<std::uint16_t>(entry.hit_chance) == 0
+                            ? kIndestructibleText
+                            : kBreakableText));
+  } else if (amount == kNoAmountPreview) {
+    host.SetContextText(
+        kDetailString,
+        TargetText{.source = TargetTextSource::kStatusLineTemplate});
+    host.SetContextText(kStatusString,
+                        FirstTargetStatusText(entry.removed_statuses));
+  }
+  host.SetContextText(kActionKindString,
+                      StatusIndexText(entry.action_kind + kIndestructibleText));
+  if (amount != kNoAmountPreview) {
+    if (amount < kObjectPreview) {
+      host.SetContextText(kDetailString,
+                          StatusIndexText(kMpTemplateText - (amount & 1)));
+      host.SetContextText(kEnemyClassString,
+                          StatusIndexText(entry.enemy_class + kHumanText));
+    }
+    host.SetContextText(kDamageTypeString,
+                        StatusIndexText(entry.damage_type + kEmptyText));
+    host.SetContextText(kEffectVariantString,
+                        StatusIndexText(entry.effect_variant + kPhysicalText));
+  }
+  host.SetContextInteger(kAmountInteger, entry.preview_amount);
+  host.SetContextInteger(kHitChanceInteger,
+                         static_cast<std::uint16_t>(entry.hit_chance));
+  host.ShowTargetInfo();
+}
+
+void StartTargetSelectionMenu(TargetSelectionHost& host) {
+  host.SetHighlightTint(kNeutralTint);
+  host.InitInformationBox();
+  UpdateTargetSelectionHighlight(host, kShowHighlight);
+  host.SetColumns(BuildTargetSelectionColumns(host));
+  if (host.TargetCount() == 0) {
+    host.SetSelectionStep(kNoTargetsStep);
+  }
+}
+
+// Shows one column's row; a row alternates its fade from the row above when
+// its group changes.
+void RevealTargetRow(TargetSelectionHost& host, const TargetColumn& column,
+                     int row, int state) {
+  const int index = column.entries[static_cast<std::size_t>(row)];
+  InitTargetSelectionRow(host, index,
+                         TargetListRow{.state = state, .index = row});
+  if (row == 0) {
+    return;
+  }
+  const int previous = column.entries[static_cast<std::size_t>(row - 1)];
+  const int previous_fade = host.Label(previous).fade;
+  TargetSelectionLabel label = host.Label(index);
+  label.fade = host.SphereTarget(kTargetList, index).actor_id !=
+                       host.SphereTarget(kTargetList, previous).actor_id
+                   ? 1 - previous_fade
+                   : previous_fade;
+  host.SetLabel(index, label);
+}
+
+void RevealTargetRows(TargetSelectionHost& host, int step) {
+  const TargetColumns columns = host.Columns();
+  const TargetColumn& first = columns.columns[0];
+  const TargetColumn& second = columns.columns[1];
+  if (step >= first.entry_count && step >= second.entry_count) {
+    host.SetSelectionStep(kSettleStep);
+    return;
+  }
+  if (step < first.entry_count) {
+    RevealTargetRow(host, first, step, kRightLabelState);
+  }
+  if (step < second.entry_count) {
+    RevealTargetRow(host, second, step, kLeftLabelState);
+  }
+  host.SetSelectionStep(step + 1);
+}
+
+void CloseTargetList(TargetSelectionHost& host) {
+  host.SetReuseSphereVolumes(host.Volume(0).range_kind == kReusedRangeKind);
+  host.SetSelectionStep(kCloseStep);
+}
+
+// The selected label pulses its ring and drops back while the pad is read.
+void PulseSelectedLabel(TargetSelectionHost& host, int selected) {
+  TargetSelectionLabel label = host.Label(selected);
+  label.ring_size = (label.ring_size + 1) & kByteMask;
+  if (label.ring_size == kRingSizeWrap) {
+    label.ring_size = kRingSizeRestart;
+  }
+  label.depth = 0;
+  host.SetLabel(selected, label);
+}
+
+void MarkSelectedLabel(TargetSelectionHost& host, int previous, int selected) {
+  TargetSelectionLabel label = host.Label(selected);
+  label.depth = 1;
+  if (previous != selected) {
+    label.ring_size = 0;
+  }
+  host.SetLabel(selected, label);
+  if (previous != selected) {
+    host.PlayChangeSound();
+    UpdateTargetSelectionHighlight(host, kMoveHighlight);
+  }
+}
+
+void ChooseTarget(TargetSelectionHost& host, int& target) {
+  if (host.HandlePageButtons()) {
+    target = kNoPreviewSelected;
+    return;
+  }
+  const int previous = host.SelectedTarget();
+  PulseSelectedLabel(host, previous);
+  const std::uint32_t pressed = host.ButtonsPressed();
+  if ((pressed & kPadCross) != 0) {
+    host.PlayLeaveSound();
+    DismissTargetSelectionRows(host);
+    CloseTargetList(host);
+    return;
+  }
+  target = host.MapPageIndex(previous);
+  if ((pressed & kPadCircle) != 0) {
+    DismissTargetSelectionRows(host);
+    host.SetSelectionStep(kConfirmedStep);
+    return;
+  }
+  const int selected =
+      NavigateTargets(host, previous, pressed, host.ButtonsRepeated());
+  host.SetSelectedTarget(selected);
+  MarkSelectedLabel(host, previous, selected);
+  DescribeTarget(host, selected);
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_800C58F8 (src/BATTLE/BATTLE.PRG/5BF94.c:1058)
+bool UpdateTargetSelectionMenu(TargetSelectionHost& host, int& target) {
+  if (host.SelectionStep() == 0) {
+    StartTargetSelectionMenu(host);
+  }
+  target = kNoPreviewSelected;
+  const int step = host.SelectionStep();
+  if (step < kNoTargetsStep) {
+    RevealTargetRows(host, step);
+    return false;
+  }
+  switch (step) {
+    case kNoTargetsStep:
+      host.ShowNoTargetsMessage();
+      if ((host.ButtonsPressed() & kPadCrossOrCircle) != 0) {
+        host.PlayLeaveSound();
+        host.SetSelectionStep(kNoTargetsCloseStep);
+      }
+      return false;
+    case kNoTargetsCloseStep:
+      CloseTargetList(host);
+      return false;
+    case kSettleStep:
+      if (host.LabelsSettled()) {
+        host.SetSelectionStep(kChooseStep);
+      }
+      return false;
+    case kChooseStep:
+      ChooseTarget(host, target);
+      return false;
+    case kConfirmedStep:
+      target = host.MapPageIndex(host.SelectedTarget());
+      [[fallthrough]];
+    case kCloseStep:
+      host.DismissInformationBox();
+      host.ClearPrimarySphereVolume();
+      return true;
+    default:
+      return false;
+  }
 }
 
 // decomp: BATTLE.PRG func_800E5568 (src/BATTLE/BATTLE.PRG/7CD68.c:437)
-int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* range_shape)
-{
-    int (*fn)(int);
-    int mask;
-    int r;
-    int v;
-
-    mask = 1 << range_shape->shape;
-    if (mask & 0x16) {
-        r = range_shape->rangeZ;
-        fn = VS::Core::Math::Cosine;
-    } else if (mask & 0x8) {
-        r = range_shape->rangeY;
-        fn = VS::Core::Math::Cosine;
-    } else {
-        r = range_shape->rangeY;
-        fn = VS::Core::Math::Sine;
-    }
-    v = fn(range_shape->angle << 7);
-    return ((r << 5) * ABS(v)) >> 12;
+int CalculateRangeShapeExtent(const RangeShape& shape) {
+  const std::uint32_t mask = 1u << (shape.shape & kRangeShapeMask);
+  int reach = shape.y;
+  bool cosine = true;
+  if ((mask & kZExtentShapes) != 0) {
+    reach = shape.z;
+  } else if ((mask & kYCosineShapes) == 0) {
+    cosine = false;
+  }
+  const int angle = shape.angle << kRangeAngleShift;
+  const int value = cosine ? Cosine(angle) : Sine(angle);
+  return ((reach << kRangeUnitShift) * std::abs(value)) >> kFixedShift;
 }
 
 // decomp: BATTLE.PRG func_800E5600 (src/BATTLE/BATTLE.PRG/7CD68.c:459)
-int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int maximum_reach)
-{
-    Battle_ActionDefinition* action = &Battle_actionDefinitions[actionId];
-    int r = 0;
-    int v;
-
-    if (action->aiFlags.radialArea << 0x1D) {
-        r = action->areaRangeY << 5;
-    } else if (action->aiFlags.shapedArea << 0x17) {
-        v = Battle_CalculateRangeShapeExtent((Battle_Ai_ActionRangeShape*)&action->areaRangeX);
-        if (v < maximum_reach) {
-            r = v;
-        }
-    }
-    return r;
+int CalculateActionAreaReach(const TargetingActionView& action,
+                             std::uint32_t maximum_reach) {
+  if (action.radial_area) {
+    return action.area.y << kRangeUnitShift;
+  }
+  if (!action.shaped_area) {
+    return 0;
+  }
+  const int reach = CalculateRangeShapeExtent(action.area);
+  return static_cast<std::uint32_t>(reach) < maximum_reach ? reach : 0;
 }
 
 // decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476)
-int Battle_CalculateActionRangeSquared(Battle_Ai_ActionRangeView* actor_range_view, int actionId)
-{
-    Battle_ActionDefinition* action = &Battle_actionDefinitions[actionId];
-    Battle_Ai_ActionRangeShape* range;
-    u_int v;
-
-    if (action->rangeX == 0xFF) {
-        range = &actor_range_view->opaque5C->opaque38;
-    } else {
-        range = (Battle_Ai_ActionRangeShape*)&action->rangeX;
-    }
-    v = Battle_CalculateRangeShapeExtent(range);
-    if (v > 0x20) {
-        v -= 0x20;
-    }
-    return v * v;
+int CalculateActionRangeSquared(const TargetingActionView& action,
+                                const RangeShape& weapon_range) {
+  const RangeShape& range =
+      action.range.x == kWeaponRangeSentinel ? weapon_range : action.range;
+  auto reach = static_cast<std::uint32_t>(CalculateRangeShapeExtent(range));
+  if (reach > kRangeMargin) {
+    reach -= kRangeMargin;
+  }
+  return static_cast<int>(reach * reach);
 }
-
-}  // extern "C"
+}  // namespace VS::Battle

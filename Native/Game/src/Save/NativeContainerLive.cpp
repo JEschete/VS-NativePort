@@ -8,6 +8,10 @@
 #include "Core/Memory/Copy.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
+#include "Menu/FilesLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Save/FileMenu.hpp"
 #include "Save/FileMenuLive.hpp"
@@ -19,13 +23,13 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.h"
-#include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/EquipmentDetails.h"
+#include "Menu/FilesLiveState.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
@@ -81,7 +85,7 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Core::Memory::ZeroWordsBackward(
         std::as_writable_bytes(std::span(&Storage(), 1)),
         static_cast<std::int32_t>(sizeof Storage()));
-    Menu_Framework_SetActorComparisonStats(kContainerComparisonActor);
+    VS::Menu::Framework::SetLiveActorComparisonStats(kContainerComparisonActor);
   }
 
   void OpenInformationBox() override {
@@ -90,22 +94,22 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   void ShowPrompt(ContainerPrompt prompt) override {
     const bool opening = prompt == ContainerPrompt::OpenContainer;
-    Menu_Files_UpdateContainerConfirmation(opening ? kConfirmContainerOpening
-                                                   : kConfirmContainerDiscard);
-    Menu_Framework_SetInformationMessage(
+    VS::Menu::Files::UpdateLiveContainerConfirmation(
+        opening ? kConfirmContainerOpening : kConfirmContainerDiscard);
+    VS::Menu::Framework::SetLiveInformationMessage(
         ContainerString(opening ? Text_Menu7_container_Offset_checkContainer
                                 : Text_Menu7_container_Offset_cancelWarning));
   }
 
   int PollPrompt() override {
-    return Menu_Files_UpdateContainerConfirmation(0);
+    return VS::Menu::Files::UpdateLiveContainerConfirmation(0);
   }
 
   void ShowContainerHeading() override {
     VS::Save::MemoryCard::StepLiveMenuResources(1);
-    Menu_Framework_SetBackgroundFade(1);
-    Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
-    Menu_Framework_MenuRow* row = Menu_Framework_SetMenuItem(
+    VS::Menu::Framework::SetLiveBackgroundFade(1);
+    VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
+    Menu_Framework_MenuRow* row = VS::Menu::Framework::SetLiveMenuItem(
         0, kContainerHeadingWidth, kContainerHeadingY, kContainerHeadingColor,
         kContainerHeadingHeight,
         ContainerString(Text_Menu7_container_Offset_container));
@@ -114,7 +118,9 @@ class LiveContainerSave final : public ContainerSaveHost {
     row->selected = 1;
   }
 
-  bool MenuRowsIdle() override { return Menu_Framework_AreMenuRowsIdle() != 0; }
+  bool MenuRowsIdle() override {
+    return VS::Menu::Framework::AreLiveMenuRowsIdle() != 0;
+  }
 
   void BeginResourceLoad() override {
     VS::Save::MemoryCard::StepLiveMenuResources(1);
@@ -125,18 +131,18 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void OpenFilePicker() override {
-    Field_SetFieldRenderingEnabled(0);
+    VS::Field::LiveSetFieldRenderingEnabled(0);
     Battle_SetHudHidden(1);
     Battle_hudSlideOffset = kContainerHiddenHudOffset;
-    Menu_Framework_SetBackgroundPriority(kContainerBackgroundPriority,
-                                         kContainerBackgroundAlpha);
-    Menu_Files_ResetElements();
+    VS::Menu::Framework::SetLiveBackgroundPriority(kContainerBackgroundPriority,
+                                                   kContainerBackgroundAlpha);
+    VS::Menu::Files::ResetLiveElements();
     Save_NativeSelectContainer(1);
   }
 
   int PollFilePicker() override { return Save_NativeSelectContainer(0); }
 
-  void DrawFiles() override { Menu_Files_DrawFrame(Render_frameBuf); }
+  void DrawFiles() override { VS::Menu::Files::DrawLiveFrame(Render_frameBuf); }
 
   void OpenContainerScreen() override {
     Menu_Container_InventoryStorage& storage = Storage();
@@ -167,9 +173,9 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   void BeginWrite() override {
     Menu_Container_InventoryStorage& storage = Storage();
-    Menu_Files_CopySelectedContainerItems(Save_NativeContainerData(),
-                                          &storage.container.items,
-                                          &storage.container.indices);
+    VS::Menu::Files::CopyLiveSelectedContainerItems(Save_NativeContainerData(),
+                                                    &storage.container.items,
+                                                    &storage.container.indices);
     UpdateLiveDataSaveMenu(kContainerSaveInit);
   }
 
@@ -189,18 +195,18 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void CloseFilePicker() override {
-    Field_SetFieldRenderingEnabled(1);
+    VS::Field::LiveSetFieldRenderingEnabled(1);
     Battle_SetHudHidden(0);
     Battle_hudSlideOffset = 0;
-    Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-    Menu_Framework_SetBackgroundPriority(kContainerRestorePriority,
-                                         kContainerBackgroundAlpha);
+    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+    VS::Menu::Framework::SetLiveBackgroundPriority(kContainerRestorePriority,
+                                                   kContainerBackgroundAlpha);
   }
 
   void DismissMenu() override {
-    Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-    Menu_Framework_DismissInformationBox();
-    Menu_Framework_SetBackgroundFade(0);
+    VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+    VS::Menu::Framework::DismissLiveInformationBox();
+    VS::Menu::Framework::SetLiveBackgroundFade(0);
   }
 
   void ReleaseResources() override {

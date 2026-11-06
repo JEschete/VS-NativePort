@@ -10,6 +10,6 @@
 #define VS_EFFECTS_PLUGINS_PLG143_H_DECLS
 
 extern CVECTOR Effects_Plg143_tiledRingColorFactors[8];
-extern CVECTOR Effects_Plg143_closedRingColorFactors[];
+extern CVECTOR Effects_Plg143_closedRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG143_H_DECLS

@@ -301,6 +301,8 @@ PoseTrackResult ApplyPoseTracks(const AnimationClip& clip, int bones,
   return result;
 }
 
+// decomp: BATTLE.PRG func_800AF960 (src/BATTLE/BATTLE.PRG/44F14.c:1225)
+// The unused original; func_800AFA28 inlines the same shadow blend step.
 void AdvanceShadowBlend(ShadowBlend& shadow) {
   if (shadow.levelFrames != 0) {
     const int delta = shadow.levelDelta / shadow.levelFrames;

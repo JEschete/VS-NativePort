@@ -3,6 +3,9 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -11,7 +14,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
-#include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -20,10 +22,10 @@ extern "C" {
 #include "Items/Weapons.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/EquipmentDetails.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
@@ -142,7 +144,7 @@ void Menu_Container_DrawCategoryIcons(int arg0, int details_view_phase)
     int selected_category_icon = (Menu_Framework_menuMemory.opaque85[0x1B] - 1) & 7;
 
     if (arg0 == 4) {
-        Menu_Framework_DrawTabNavigation(0);
+        VS::Menu::Framework::DrawLiveTabNavigation(0);
     }
 
     arg0 = (arg0 * 8) - 16;
@@ -152,7 +154,7 @@ void Menu_Container_DrawCategoryIcons(int arg0, int details_view_phase)
         int icon_x = (((i + 1) & 7) * 0x10) + 0x20;
 
         if ((i == selected_category_icon) && (details_view_phase == 1)) {
-            details_menu_row = Menu_Framework_MenuItem(0x1F);
+            details_menu_row = VS::Menu::Framework::LiveMenuItem(0x1F);
             if (icon_x >= (details_menu_row->x - 0xC)) {
                 details_menu_row->rowIcon = i + 0x18;
                 continue;
@@ -173,13 +175,13 @@ void Menu_Container_BeginDetailsTransition(int menu_row_id)
 {
     Menu_Framework_MenuRow* menuItem;
 
-    Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
-    menuItem = Menu_Framework_MenuItem(0x1F);
+    menuItem = VS::Menu::Framework::LiveMenuItem(0x1F);
     menuItem->state = 3;
     menuItem->targetPosition0 = 0x12;
 
-    menuItem = Menu_Framework_MenuItem(menu_row_id);
+    menuItem = VS::Menu::Framework::LiveMenuItem(menu_row_id);
     menuItem->state = 2;
     menuItem->targetPosition0 = 0x9B;
     menuItem->selected = 1;
@@ -192,9 +194,9 @@ void Menu_Container_InitializeDetailsLayout(int selected_menu_row_id, int stat_p
 {
     Menu_Container_categoryIconsVisible = 0;
     Menu_Container_controlsPanelMode = 0;
-    Menu_Framework_ContinueItemDetailsTransition(selected_menu_row_id);
-    Menu_Framework_UpdateEquipmentStatPages(stat_page_panel_command);
-    Menu_Framework_UpdatePrimaryStatPanel(1);
+    VS::Menu::Framework::ContinueLiveItemDetailsTransition(selected_menu_row_id);
+    VS::Menu::Framework::UpdateLiveEquipmentStatPages(stat_page_panel_command);
+    VS::Menu::Framework::UpdateLivePrimaryStatPanel(1);
 }
 
 // decomp: MENUD.PRG func_80104114 (src/MENU/MENUD.PRG/234.c:789)
@@ -209,14 +211,14 @@ int Menu_Container_SelectDetailsItem(int category_id, int category_item_index)
 void Menu_Container_ExitDetailsView(int hide_dp_pp_bars)
 {
     VS::Menu::PlayLeaveSound();
-    Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-    Menu_Framework_FlyOutRowLeft(-1);
-    Menu_Framework_UpdateEquipmentStatPages(-1);
-    Menu_Framework_UpdatePrimaryStatPanel(2);
+    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+    VS::Menu::Framework::FlyOutLiveRowLeft(-1);
+    VS::Menu::Framework::UpdateLiveEquipmentStatPages(-1);
+    VS::Menu::Framework::UpdateLivePrimaryStatPanel(2);
     Menu_Container_detailsViewPhase = 2;
     Menu_Container_detailsClosedWithTriangle = Input_buttonsPressed.allButtons & PADRup;
     if (hide_dp_pp_bars != 0) {
-        Menu_Framework_UpdateDpPpBars(4);
+        VS::Menu::Framework::UpdateLiveDpPpBars(4);
     }
 }
 
@@ -227,7 +229,7 @@ void Menu_Container_BuildWeaponRow(Items_ContainerData* container, char** rowStr
     Items_WeaponLoadout weapon;
 
     Menu_Container_BuildWeaponStats(&weapon, &container->weapons[index], container);
-    Menu_Framework_FormatWeaponRow(&weapon, rowStrings, rowTypes, buf);
+    VS::Menu::Framework::FormatLiveWeaponRow(&weapon, rowStrings, rowTypes, buf);
     rowStrings[0] = container->weapons[index].name;
 }
 
@@ -238,7 +240,7 @@ void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStr
     Items_ShieldLoadout shield;
 
     Menu_Container_BuildShieldStats(&shield, &container->shields[index], container);
-    Menu_Framework_FormatShieldRow(&shield, rowStrings, rowTypes, buf);
+    VS::Menu::Framework::FormatLiveShieldRow(&shield, rowStrings, rowTypes, buf);
 }
 
 // decomp: MENUD.PRG _weaponNavigation (src/MENU/MENUD.PRG/234.c:829)
@@ -269,11 +271,11 @@ int Menu_Container_UpdateWeaponDetails(int weaponIndex)
 
     switch (Menu_Container_weaponDetailsStep) {
     case Menu_Container_EquipmentDetailsState_Init:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_InitializeDetailsLayout(Menu_Container_weaponDetailsItemSource, 7);
-            Menu_Framework_SetWeaponStats(
+            VS::Menu::Framework::SetLiveWeaponStats(
                 Menu_Container_containerData->indices.weapons[Menu_Container_weaponDetailsSelectedWeapon]);
-            Menu_Framework_UpdateDpPpBars(3);
+            VS::Menu::Framework::UpdateLiveDpPpBars(3);
             Menu_Container_weaponDetailsStep = Menu_Container_EquipmentDetailsState_Animate;
         }
         break;
@@ -281,7 +283,7 @@ int Menu_Container_UpdateWeaponDetails(int weaponIndex)
         if (Menu_Container_weaponDetailsSlideStep < 10) {
             ++Menu_Container_weaponDetailsSlideStep;
             if (Menu_Container_weaponDetailsSlideStep < 6) {
-                Menu_Framework_CreateWeaponComponentRow(Menu_Container_weaponDetailsSlideStep,
+                VS::Menu::Framework::CreateLiveWeaponComponentRow(Menu_Container_weaponDetailsSlideStep,
                     Menu_Container_containerData->indices.weapons[Menu_Container_weaponDetailsSelectedWeapon], 1);
             }
             break;
@@ -299,18 +301,18 @@ int Menu_Container_UpdateWeaponDetails(int weaponIndex)
                 i = Menu_Container_SelectDetailsItem(0, selectedWeapon);
                 Menu_Container_BuildWeaponRow(&Menu_Container_containerData->items, text, &rowId,
                     Menu_Framework_stringBuf, i - 1);
-                Menu_Framework_SetWeaponStats(i);
+                VS::Menu::Framework::SetLiveWeaponStats(i);
 
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_weaponDetailsItemSource, text, rowId, selectedWeapon);
+                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_weaponDetailsItemSource, text, rowId, selectedWeapon);
                 for (i = 1; i < 6; ++i) {
-                    Menu_Framework_CreateWeaponComponentRow(
+                    VS::Menu::Framework::CreateLiveWeaponComponentRow(
                         i, Menu_Container_containerData->indices.weapons[selectedWeapon], 0);
                 }
             }
         }
         break;
     case Menu_Container_EquipmentDetailsState_Exit:
-        return Menu_Framework_AreMenuRowsIdle();
+        return VS::Menu::Framework::AreLiveMenuRowsIdle();
     }
     return 0;
 }
@@ -341,11 +343,11 @@ int Menu_Container_UpdateBladeDetails(int bladeIndex)
 
     switch (Menu_Container_bladeDetailsStep) {
     case Menu_Container_EquipmentDetailsState_Init:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_InitializeDetailsLayout(Menu_Container_bladeDetailsItemSource, 3);
-            Menu_Framework_SetBladeStats(
+            VS::Menu::Framework::SetLiveBladeStats(
                 Menu_Container_containerData->indices.blades[Menu_Container_bladeDetailsItemIndex]);
-            Menu_Framework_UpdateDpPpBars(3);
+            VS::Menu::Framework::UpdateLiveDpPpBars(3);
             Menu_Container_bladeDetailsStep = Menu_Container_EquipmentDetailsState_Animate;
         }
         break;
@@ -365,16 +367,16 @@ int Menu_Container_UpdateBladeDetails(int bladeIndex)
             if (selectedBlade != Menu_Container_bladeDetailsItemIndex) {
                 Menu_Container_bladeDetailsItemIndex = selectedBlade;
                 blade_id = Menu_Container_SelectDetailsItem(1, selectedBlade);
-                Menu_Framework_FormatBladeRow(
+                VS::Menu::Framework::FormatLiveBladeRow(
                     &Menu_Container_containerData->items.blades[blade_id - 1], text, &row_type,
                     Menu_Framework_stringBuf);
-                Menu_Framework_SetBladeStats(blade_id);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_bladeDetailsItemSource, text, row_type, selectedBlade);
+                VS::Menu::Framework::SetLiveBladeStats(blade_id);
+                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_bladeDetailsItemSource, text, row_type, selectedBlade);
             }
         }
         break;
     case Menu_Container_EquipmentDetailsState_Exit:
-        return Menu_Framework_AreMenuRowsIdle();
+        return VS::Menu::Framework::AreLiveMenuRowsIdle();
     }
     return 0;
 }
@@ -405,9 +407,9 @@ int Menu_Container_UpdateGripDetails(int packed_details_selection)
     }
     switch (Menu_Container_gripDetailsStep) {
     case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_InitializeDetailsLayout(Menu_Container_gripDetailsItemSource, 4);
-            Menu_Framework_SetGripStats(
+            VS::Menu::Framework::SetLiveGripStats(
                 Menu_Container_containerData->indices.grips[Menu_Container_gripDetailsItemIndex]);
             Menu_Container_gripDetailsStep = 1U;
         }
@@ -428,10 +430,10 @@ int Menu_Container_UpdateGripDetails(int packed_details_selection)
             if (selected_grip_index != Menu_Container_gripDetailsItemIndex) {
                 Menu_Container_gripDetailsItemIndex = selected_grip_index;
                 grip_id = Menu_Container_SelectDetailsItem(2, selected_grip_index);
-                Menu_Framework_FormatGripRow(&Menu_Container_containerData->items.grips[grip_id - 1],
+                VS::Menu::Framework::FormatLiveGripRow(&Menu_Container_containerData->items.grips[grip_id - 1],
                     row_text, &row_type, Menu_Framework_stringBuf);
-                Menu_Framework_SetGripStats(grip_id);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_gripDetailsItemSource, row_text, row_type, selected_grip_index);
+                VS::Menu::Framework::SetLiveGripStats(grip_id);
+                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_gripDetailsItemSource, row_text, row_type, selected_grip_index);
             }
         }
         // BUG: write to .rodata
@@ -440,12 +442,12 @@ int Menu_Container_UpdateGripDetails(int packed_details_selection)
                              .gemSlots
                          + 0x30);
 
-        Menu_Framework_DrawRowIcon(Menu_Framework_MainMenuIcon_Gem | (1 << 8), 256, 32);
+        VS::Menu::Framework::DrawLiveRowIcon(Menu_Framework_MainMenuIcon_Gem | (1 << 8), 256, 32);
         VS::Render::DrawLiveCompactText(Menu_Container_gemSlotCountText, vs_getXY(280, 36), NULL);
         break;
 
     case 3:
-        return Menu_Framework_AreMenuRowsIdle();
+        return VS::Menu::Framework::AreLiveMenuRowsIdle();
     }
 
     return 0;
@@ -477,11 +479,11 @@ int Menu_Container_UpdateShieldDetails(int packed_details_selection)
 
     switch (Menu_Container_shieldDetailsStep) {
     case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_InitializeDetailsLayout(Menu_Container_shieldDetailsItemSource, 7);
-            Menu_Framework_SetShieldStats(
+            VS::Menu::Framework::SetLiveShieldStats(
                 Menu_Container_containerData->indices.shields[Menu_Container_shieldDetailsItemIndex]);
-            Menu_Framework_UpdateDpPpBars(3);
+            VS::Menu::Framework::UpdateLiveDpPpBars(3);
             Menu_Container_shieldDetailsStep = 1;
         }
         break;
@@ -489,12 +491,12 @@ int Menu_Container_UpdateShieldDetails(int packed_details_selection)
         if (Menu_Container_shieldDetailsSlideStep < 10) {
             ++Menu_Container_shieldDetailsSlideStep;
             if (Menu_Container_shieldDetailsSlideStep < 4) {
-                Menu_Framework_CreateShieldGemRow(
+                VS::Menu::Framework::CreateLiveShieldGemRow(
                     Menu_Container_shieldDetailsSlideStep, Menu_Container_containerData->indices.shields[Menu_Container_shieldDetailsItemIndex], 1);
             }
             break;
         }
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_shieldDetailsStep = 2;
         }
         break;
@@ -509,10 +511,10 @@ int Menu_Container_UpdateShieldDetails(int packed_details_selection)
                 i = Menu_Container_SelectDetailsItem(3, selected_shield_index);
                 Menu_Container_BuildShieldRow(&Menu_Container_containerData->items, row_text, &row_type,
                     Menu_Framework_stringBuf, i - 1);
-                Menu_Framework_SetShieldStats(i);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_shieldDetailsItemSource, row_text, row_type, selected_shield_index);
+                VS::Menu::Framework::SetLiveShieldStats(i);
+                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_shieldDetailsItemSource, row_text, row_type, selected_shield_index);
                 for (i = 1; i < 4; ++i) {
-                    Menu_Framework_CreateShieldGemRow(
+                    VS::Menu::Framework::CreateLiveShieldGemRow(
                         i, Menu_Container_containerData->indices.shields[selected_shield_index], 0);
                 }
                 return 0;
@@ -520,7 +522,7 @@ int Menu_Container_UpdateShieldDetails(int packed_details_selection)
         }
         break;
     case 3:
-        return Menu_Framework_AreMenuRowsIdle();
+        return VS::Menu::Framework::AreLiveMenuRowsIdle();
     }
     return 0;
 }
@@ -549,15 +551,15 @@ int Menu_Container_UpdateArmorDetails(int packed_details_selection)
 
     switch (Menu_Container_armorDetailsStep) {
     case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_InitializeDetailsLayout(Menu_Container_armorDetailsItemSource, 7);
-            Menu_Framework_SetArmorStats(
+            VS::Menu::Framework::SetLiveArmorStats(
                 Menu_Container_containerData->indices.armor[Menu_Container_armorDetailsItemIndex]);
             if (Audio_Seq_unusedInventory
                     .armor[Menu_Container_containerData->indices.armor[Menu_Container_armorDetailsItemIndex] - 1]
                     .category
                 != 7) {
-                Menu_Framework_UpdateDpPpBars(1);
+                VS::Menu::Framework::UpdateLiveDpPpBars(1);
             }
             Menu_Container_armorDetailsStep = 1;
         }
@@ -578,16 +580,16 @@ int Menu_Container_UpdateArmorDetails(int packed_details_selection)
             if (selected_armor_index != Menu_Container_armorDetailsItemIndex) {
                 Menu_Container_armorDetailsItemIndex = selected_armor_index;
                 armor_id = Menu_Container_SelectDetailsItem(4, selected_armor_index);
-                Menu_Framework_FormatInventoryArmorRow(
+                VS::Menu::Framework::FormatLiveInventoryArmorRow(
                     &Menu_Container_containerData->items.armor[armor_id - 1], row_text, &row_type,
                     Menu_Framework_stringBuf);
-                Menu_Framework_SetArmorStats(armor_id);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_armorDetailsItemSource, row_text, row_type, selected_armor_index);
+                VS::Menu::Framework::SetLiveArmorStats(armor_id);
+                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_armorDetailsItemSource, row_text, row_type, selected_armor_index);
             }
         }
         break;
     case 3:
-        return Menu_Framework_AreMenuRowsIdle();
+        return VS::Menu::Framework::AreLiveMenuRowsIdle();
     }
     return 0;
 }
@@ -616,9 +618,9 @@ int Menu_Container_UpdateGemDetails(int packed_details_selection)
 
     switch (Menu_Container_gemDetailsStep) {
     case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_InitializeDetailsLayout(Menu_Container_gemDetailsItemSource, 3);
-            Menu_Framework_SetGemStats(Menu_Container_containerData->indices.gems[Menu_Container_gemDetailsItemIndex]);
+            VS::Menu::Framework::SetLiveGemStats(Menu_Container_containerData->indices.gems[Menu_Container_gemDetailsItemIndex]);
             Menu_Container_gemDetailsStep = 1;
         }
         break;
@@ -639,15 +641,15 @@ int Menu_Container_UpdateGemDetails(int packed_details_selection)
             if (selected_gem_index != Menu_Container_gemDetailsItemIndex) {
                 Menu_Container_gemDetailsItemIndex = selected_gem_index;
                 gem_id = Menu_Container_SelectDetailsItem(5, selected_gem_index);
-                Menu_Framework_FormatGemRow(&Menu_Container_containerData->items.gems[gem_id - 1],
+                VS::Menu::Framework::FormatLiveGemRow(&Menu_Container_containerData->items.gems[gem_id - 1],
                     row_text, &row_type, Menu_Framework_stringBuf);
-                Menu_Framework_SetGemStats(gem_id);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_gemDetailsItemSource, row_text, row_type, selected_gem_index);
+                VS::Menu::Framework::SetLiveGemStats(gem_id);
+                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_gemDetailsItemSource, row_text, row_type, selected_gem_index);
             }
         }
         break;
     case 3:
-        return Menu_Framework_AreMenuRowsIdle();
+        return VS::Menu::Framework::AreLiveMenuRowsIdle();
     }
     return 0;
 }
@@ -668,9 +670,9 @@ int Menu_Container_UpdateItemDetails(int packed_category_selection)
         Menu_Container_detailsCategory = packed_category_selection & 0xF;
         Menu_Container_detailsViewPhase = 1;
         Menu_Container_detailsClosedWithTriangle = 0;
-        Menu_Framework_ResetItemDetailCursor();
-        Menu_Framework_MenuItem(0x1F)->itemPage = packed_details_selection & 0xFF;
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::ResetLiveItemDetailCursor();
+        VS::Menu::Framework::LiveMenuItem(0x1F)->itemPage = packed_details_selection & 0xFF;
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
     }
 
     detail_handler_result = Menu_Container_kItemDetailHandlers[Menu_Container_detailsCategory](packed_details_selection);
@@ -682,11 +684,11 @@ int Menu_Container_UpdateItemDetails(int packed_category_selection)
         Menu_Container_categoryIconsVisible = 1;
         Menu_Container_detailsViewPhase = 0;
         Menu_Container_controlsPanelMode = 1;
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
-    } else if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
+    } else if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
         Menu_Framework_cursorColor = Menu_Framework_selectedStatusViewElement != 9;
-        Menu_Framework_DrawTabNavigation(1);
-        Menu_Framework_UpdateItemDetails();
+        VS::Menu::Framework::DrawLiveTabNavigation(1);
+        VS::Menu::Framework::UpdateLiveItemDetails();
     }
     return detail_handler_result;
 }
@@ -698,13 +700,13 @@ void Menu_Container_DrawCapacityCount(int capacity_limit, int packed_count_posit
     int packed_used_count_position;
 
     used_count_color = 0x808080;
-    Menu_Framework_DrawColoredInteger(capacity_limit, packed_count_position, 0x808080, 0);
+    VS::Menu::Framework::DrawLiveColoredInteger(capacity_limit, packed_count_position, 0x808080, 0);
     packed_used_count_position = packed_count_position - 0x20;
     VS::Render::DrawLiveCompactTextColor("/", packed_used_count_position, 0x808080, NULL);
     if ((occupied_count * 2) < capacity_limit) {
         used_count_color = 0x804020;
     }
-    Menu_Framework_DrawColoredInteger(occupied_count, packed_used_count_position, used_count_color, 0);
+    VS::Menu::Framework::DrawLiveColoredInteger(occupied_count, packed_used_count_position, used_count_color, 0);
 }
 
 // decomp: MENUD.PRG func_80106504 (src/MENU/MENUD.PRG/234.c:1940)
@@ -760,29 +762,29 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
                 Menu_Container_BuildWeaponRow(container, &text[i * 2], &rowTypes[i], c, itemIndex);
                 break;
             case 1:
-                Menu_Framework_FormatBladeRow(
+                VS::Menu::Framework::FormatLiveBladeRow(
                     &container->blades[itemIndex], &text[i * 2], &rowTypes[i], c);
                 break;
             case 2:
-                Menu_Framework_FormatGripRow(
+                VS::Menu::Framework::FormatLiveGripRow(
                     &container->grips[itemIndex], &text[i * 2], &rowTypes[i], c);
                 break;
             case 3:
                 Menu_Container_BuildShieldRow(container, &text[i * 2], &rowTypes[i], c, itemIndex);
                 break;
             case 4:
-                Menu_Framework_FormatInventoryArmorRow(
+                VS::Menu::Framework::FormatLiveInventoryArmorRow(
                     &container->armor[itemIndex], &text[i * 2], &rowTypes[i], c);
                 break;
             case 5:
-                Menu_Framework_FormatGemRow(
+                VS::Menu::Framework::FormatLiveGemRow(
                     &container->gems[itemIndex], &text[i * 2], &rowTypes[i], c);
                 if (Menu_Container_ParentShieldIndex(5, itemIndex, container) != 0) {
                     rowType = 0xCC01;
                 }
                 break;
             case 6:
-                Menu_Framework_FormatMiscItemRow(
+                VS::Menu::Framework::FormatLiveMiscItemRow(
                     &container->misc[itemIndex], &text[i * 2], &rowTypes[i], c);
                 break;
             }
@@ -809,7 +811,7 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
 
                 --itemIndex;
 
-                Menu_Framework_FormatMiscItemRow(
+                VS::Menu::Framework::FormatLiveMiscItemRow(
                     &Menu_Container_containerData->items.misc[itemIndex], t, r, c);
                 ++itemCount;
                 ++j;
@@ -837,12 +839,12 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
                     }
                     break;
                 case 1:
-                    Menu_Framework_FormatBladeRow(
+                    VS::Menu::Framework::FormatLiveBladeRow(
                         &Menu_Container_containerData->items.blades[itemIndex], &text[i * 2],
                         &rowTypes[i], c);
                     break;
                 case 2:
-                    Menu_Framework_FormatGripRow(&Menu_Container_containerData->items.grips[itemIndex],
+                    VS::Menu::Framework::FormatLiveGripRow(&Menu_Container_containerData->items.grips[itemIndex],
                         &text[i * 2], &rowTypes[i], c);
                     break;
                 case 3:
@@ -853,7 +855,7 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
                     }
                     break;
                 case 4:
-                    Menu_Framework_FormatInventoryArmorRow(
+                    VS::Menu::Framework::FormatLiveInventoryArmorRow(
                         &Menu_Container_containerData->items.armor[itemIndex], &text[i * 2],
                         &rowTypes[i], c);
                     if (Menu_Container_containerData->items.armor[itemIndex].limb != 0) {
@@ -861,7 +863,7 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
                     }
                     break;
                 case 5:
-                    Menu_Framework_FormatGemRow(&Menu_Container_containerData->items.gems[itemIndex],
+                    VS::Menu::Framework::FormatLiveGemRow(&Menu_Container_containerData->items.gems[itemIndex],
                         &text[i * 2], &rowTypes[i], c);
                     break;
                 }
@@ -899,12 +901,12 @@ void Menu_Container_RestoreItemRows(int category_id)
     int i;
 
     while (Menu_Framework_itemsListRow < 16) {
-        Menu_Framework_UpdateRowSelection();
+        VS::Menu::Framework::UpdateLiveRowSelection();
     }
 
     for (i = 20; i < 40; ++i) {
 
-        Menu_Framework_MenuRow* restored_menu_row = Menu_Framework_MenuItem(i);
+        Menu_Framework_MenuRow* restored_menu_row = VS::Menu::Framework::LiveMenuItem(i);
 
         if (restored_menu_row->state == 2) {
             restored_menu_row->state = 1;
@@ -947,19 +949,19 @@ int Menu_Container_UpdateTransferConfirmation(int initialize_confirmation)
             confirmation_row_types[i] = 0;
         }
 
-        Menu_Framework_CreateActionRows(2, 3, confirmation_row_text, confirmation_row_types);
+        VS::Menu::Framework::CreateLiveActionRows(2, 3, confirmation_row_text, confirmation_row_types);
         Menu_Container_transferConfirmationStep = 1;
         break;
     case 1:
-        Menu_Framework_UpdateActionMenu();
-        Menu_Container_transferConfirmationSelectedAction = Menu_Framework_ActionSelectionResult() + 1;
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        Menu_Container_transferConfirmationSelectedAction = VS::Menu::Framework::LiveActionSelectionResult() + 1;
 
         if (Menu_Container_transferConfirmationSelectedAction != 0) {
-            Menu_Framework_FlyOutRowLeft(0);
-            Menu_Framework_FlyOutRowLeft(1);
+            VS::Menu::Framework::FlyOutLiveRowLeft(0);
+            VS::Menu::Framework::FlyOutLiveRowLeft(1);
             if (Menu_Container_transferConfirmationSelectedAction == confirmation_step) {
                 VS::Menu::PlaySelectSound();
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
                 Menu_Container_SetPanelVisibility(0);
             } else {
                 VS::Menu::PlayLeaveSound();
@@ -971,7 +973,7 @@ int Menu_Container_UpdateTransferConfirmation(int initialize_confirmation)
         }
         break;
     case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             return Menu_Container_transferConfirmationSelectedAction;
         }
     }
@@ -1038,7 +1040,7 @@ loop_1:
 
     switch (Menu_Container_itemListStep) { /* switch 1 */
     case 0:
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
         /* fallthrough */
     case 1:
         temp_s1 = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00));
@@ -1054,7 +1056,7 @@ loop_1:
         temp_s2 = Menu_Container_BuildItemRows(selected_category_id, initial_row_text, initial_row_types, (char*)temp_s1);
         Menu_Container_categoryEmpty = temp_s2 == 0;
         if (Menu_Container_categoryEmpty != 0) {
-            Menu_Framework_SetInformationMessage(
+            VS::Menu::Framework::SetLiveInformationMessage(
                 (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 27 + (selected_category_id == 7) * 2]]);
         } else {
             temp_s3 = Input_settings.cursorMemory;
@@ -1062,7 +1064,7 @@ loop_1:
                 Input_settings.cursorMemory = 1;
             }
             Menu_Container_itemListFirstEntry = 0;
-            Menu_Framework_CreateMenuRows(temp_s2, (selected_category_id + 0x51) | 0x19200, initial_row_text, initial_row_types);
+            VS::Menu::Framework::CreateLiveMenuRows(temp_s2, (selected_category_id + 0x51) | 0x19200, initial_row_text, initial_row_types);
             if (Menu_Container_itemListStep == 0) {
                 Menu_Container_RestoreItemRows(selected_category_id);
             }
@@ -1088,7 +1090,7 @@ loop_1:
                     Menu_Container_itemListStep = 0xF;
                 } else {
                     Menu_Framework_menuMemory.opaqueA0[0] = 0;
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                    VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 0xD;
                 }
                 break;
@@ -1100,13 +1102,13 @@ loop_1:
             int details_index_bias = 1;
             temp_s0 = selected_category_id < 6;
             Menu_Container_controlsPanelMode = temp_s0 + 1;
-            Menu_Container_itemListSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+            Menu_Container_itemListSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
             if (Menu_Container_itemListSelectedRow == 0) {
                 if (Input_buttonsPressed.allButtons & 0x80) {
-                    if ((temp_s0 != 0) && (Menu_Framework_AreMenuRowsIdle() != 0)) {
+                    if ((temp_s0 != 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0)) {
                         VS::Menu::PlaySelectSound();
-                        temp_s0 = Menu_Framework_CloseRowsAndRememberCursor();
-                        Menu_Framework_MenuItem(temp_s0 >> 8)->outsetIcon = 0;
+                        temp_s0 = VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
+                        VS::Menu::Framework::LiveMenuItem(temp_s0 >> 8)->outsetIcon = 0;
                         Menu_Container_UpdateItemDetails(selected_category_id | ((temp_s0 + details_index_bias) * 0x10));
                         Menu_Container_categoryTitleVisible = 0;
                         Menu_Container_itemListStep = 7;
@@ -1118,7 +1120,7 @@ loop_1:
                 if (selected_category_id == 7) {
                     Menu_Container_UndoPendingTransfer(Menu_Container_itemListSelectedRow - 1);
                     Menu_Container_RefreshMiscTransferCount();
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                    VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 4;
                 } else {
                     rebuilt_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00U);
@@ -1128,7 +1130,7 @@ loop_1:
                     rebuilt_row_types[Menu_Container_itemListSelectedRow - 1] |= 8;
                     temp_s3 = Input_settings.cursorMemory;
                     Input_settings.cursorMemory = 1;
-                    Menu_Framework_CreateMenuRows(
+                    VS::Menu::Framework::CreateLiveMenuRows(
                         temp_s0, (selected_category_id + 0x51) | 0x19200, rebuilt_row_text, rebuilt_row_types);
                     Input_settings.cursorMemory = temp_s3;
                     Menu_Container_RestoreItemRows(selected_category_id);
@@ -1141,12 +1143,12 @@ loop_1:
                 return -2;
             } else {
                 if (Menu_Framework_unusedInventoryStorage->itemsToTransfer[0] == 0) {
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                    VS::Menu::Framework::ClearLiveMenuExcept(0);
                     return -1;
                 }
                 if (selected_category_id != 7) {
                     Menu_Framework_menuMemory.opaqueA0[0] = 0;
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                    VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 0xD;
                 } else {
                     Menu_Container_UpdateTransferConfirmation(1);
@@ -1186,15 +1188,15 @@ loop_1:
                 Menu_Framework_menuMemory.opaqueA0[0] = (selected_category_id + 1) & 7;
                 if (Menu_Container_itemListStep == 2) {
                     if (Menu_Container_categoryEmpty == 0) {
-                        Menu_Framework_CloseRowsAndRememberCursor();
-                        Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                        VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
+                        VS::Menu::Framework::ClearLiveMenuExcept(0);
                     }
                     Menu_Container_itemListStep = 3;
                 }
             }
         }
         if (Menu_Container_itemListStep == 3) {
-            if (Menu_Framework_AreMenuRowsIdle() != 0) {
+            if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
                 if (Input_buttonsState & 0xA00C) {
                     if (temp_s0 != 0) {
                         break;
@@ -1207,12 +1209,12 @@ loop_1:
         }
         break;
     case 4:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_itemListStep = 1;
         }
         break;
     case 5:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_itemListStep = 0;
         }
         break;
@@ -1220,7 +1222,7 @@ loop_1:
         if (Input_buttonsPressed.allButtons & 0x80) {
             VS::Menu::PlayInvalidSound();
         }
-        temp_s3 = Menu_Framework_GetSelectedRow() + 1;
+        temp_s3 = VS::Menu::Framework::LiveSelectedRow() + 1;
         if (temp_s3 != 0) {
             temp_s2 = Menu_Container_itemListSelectedRow;
             if (temp_s2 == temp_s3) {
@@ -1247,7 +1249,7 @@ loop_1:
                     temp_s1[temp_s3 - 1] = var_a2;
                     temp_s1[temp_s2 - 1] = temp_s0;
                 }
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
                 Menu_Container_itemListStep = 4;
                 break;
             }
@@ -1264,7 +1266,7 @@ loop_1:
                 return -2;
             }
             Menu_Container_categoryTitleVisible = 1;
-            category_title_row = Menu_Framework_MenuItem(0);
+            category_title_row = VS::Menu::Framework::LiveMenuItem(0);
             if (category_title_row->x >= 0xB5) {
                 if (category_title_row->x >= 0xCD) {
                     category_title_row->x = (u_short)category_title_row->x - 0x18;
@@ -1438,31 +1440,31 @@ loop_1:
         action_row_text[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x358A;
         ++temp_s2;
         Menu_Container_itemActionIds[temp_s2] = 5;
-        Menu_Framework_CreateActionRows(
+        VS::Menu::Framework::CreateLiveActionRows(
             temp_s2, selected_category_id + 0x59, (char**)&action_row_text, (int*)Menu_Framework_rowTypeBuf);
         Menu_Container_itemListStep = 9;
         break;
     case 9:
-        Menu_Framework_UpdateInformationVisibility(
-            Menu_Framework_HighlightedActionRow(), Menu_Framework_actionMenuState);
-        Menu_Framework_UpdateActionMenu();
-        temp_s3 = Menu_Framework_ActionSelectionResult() + 1;
+        VS::Menu::Framework::UpdateLiveInformationVisibility(
+            VS::Menu::Framework::LiveHighlightedActionRow(), Menu_Framework_actionMenuState);
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        temp_s3 = VS::Menu::Framework::LiveActionSelectionResult() + 1;
         if (temp_s3 != 0) {
-            Menu_Framework_FlyOutRowsLeftExcept(0x28);
+            VS::Menu::Framework::FlyOutLiveRowsLeftExcept(0x28);
             if (temp_s3 > 0) {
                 VS::Menu::PlaySelectSound();
                 switch (Menu_Container_itemActionIds[temp_s3]) {
                 case 1:
-                    Menu_Framework_InitializeInformationBox();
+                    VS::Menu::Framework::InitializeLiveInformationBox();
                     Menu_Container_StageItemTransfer(selected_category_id, Menu_Container_CategoryIndices(selected_category_id,
                                               Menu_Container_containerData)[Menu_Container_itemListSelectedRow - 1]
                                               - 1);
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                    VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 4;
                     break;
                 case 2:
-                    Menu_Framework_InitializeInformationBox();
-                    Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                    VS::Menu::Framework::InitializeLiveInformationBox();
+                    VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 10;
                     break;
                 case 3:
@@ -1481,7 +1483,7 @@ loop_1:
                     Menu_Container_itemListStep = 0xB;
                     break;
                 case 5:
-                    Menu_Framework_InitializeInformationBox();
+                    VS::Menu::Framework::InitializeLiveInformationBox();
                     Menu_Container_UpdateSortMenu(selected_category_id + 1);
                     Menu_Container_itemListStep = 0xC;
                     break;
@@ -1490,14 +1492,14 @@ loop_1:
             }
             VS::Menu::PlayLeaveSound();
             if (temp_s3 == -2) {
-                Menu_Framework_DismissInformationBox();
+                VS::Menu::Framework::DismissLiveInformationBox();
                 return -2;
             }
             Menu_Container_itemListStep = 0;
         }
         break;
     case 10:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             temp_s3 = Menu_Container_ParentWeaponIndex(
                 selected_category_id, temp_s1[Menu_Container_itemListSelectedRow - 1] - 1, &Menu_Container_containerData->items);
             if (temp_s3 != 0) {
@@ -1533,9 +1535,9 @@ loop_1:
     case 11:
         temp_s3 = Menu_Container_UpdateDiscardMenu(0);
         if (temp_s3 != 0) {
-            Menu_Framework_InitializeInformationBox();
-            Menu_Framework_FlyOutRowsLeftExcept(0x28);
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+            VS::Menu::Framework::InitializeLiveInformationBox();
+            VS::Menu::Framework::FlyOutLiveRowsLeftExcept(0x28);
+            VS::Menu::Framework::ClearLiveMenuExcept(0);
             if (temp_s3 == -2) {
                 return -2;
             }
@@ -1545,8 +1547,8 @@ loop_1:
     case 12:
         temp_s3 = Menu_Container_UpdateSortMenu(0);
         if (temp_s3 != 0) {
-            Menu_Framework_FlyOutRowsLeftExcept(0x28);
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+            VS::Menu::Framework::FlyOutLiveRowsLeftExcept(0x28);
+            VS::Menu::Framework::ClearLiveMenuExcept(0);
             if (temp_s3 == -2) {
                 return -2;
             }
@@ -1554,17 +1556,17 @@ loop_1:
         }
         break;
     case 13:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             pending_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00U);
             pending_row_text = (char **)(((u_char*)(pending_rows_allocation)) + 0x6400);
             pending_row_types = (int *)(((u_char*)(pending_rows_allocation)) + 0x6000);
             temp_s2 = Menu_Container_BuildItemRows(7, pending_row_text, pending_row_types, (char *)(pending_rows_allocation));
             Menu_Container_categoryEmpty = temp_s2 == 0;
             if (Menu_Container_categoryEmpty != 0) {
-                Menu_Framework_SetInformationMessage(
+                VS::Menu::Framework::SetLiveInformationMessage(
                     (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 0x1D]]);
             } else {
-                Menu_Framework_CreateMenuRows(
+                VS::Menu::Framework::CreateLiveMenuRows(
                     temp_s2, (selected_category_id + 0x51) | 0x19200, pending_row_text, pending_row_types);
             }
             VS::Core::Memory::FreeLiveFromHighEnd(pending_rows_allocation);
@@ -1572,8 +1574,8 @@ loop_1:
         }
         break;
     case 14:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            Menu_Framework_CloseRowsAndRememberCursor();
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
+            VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
             Menu_Container_UpdateTransferConfirmation(1);
             Menu_Container_itemListStep = 0xF;
         }
@@ -1581,7 +1583,7 @@ loop_1:
     case 15:
         temp_s3 = Menu_Container_UpdateTransferConfirmation(0);
         if (temp_s3 != 0) {
-            Menu_Framework_InitializeInformationBox();
+            VS::Menu::Framework::InitializeLiveInformationBox();
             if (temp_s3 < 0) {
                 if (temp_s3 == -2) {
                     return -2;
@@ -1611,13 +1613,13 @@ loop_1:
                 for (temp_s3 = 0; temp_s3 < 7; ++temp_s3) {
                     Menu_Container_RebuildCategoryIndices(temp_s3, Menu_Container_otherStorage);
                 }
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
                 Menu_Container_itemListStep = 17;
             }
         }
         break;
     case 17:
-        return Menu_Framework_AreMenuRowsIdle();
+        return VS::Menu::Framework::AreLiveMenuRowsIdle();
     }
     return 0;
 }
@@ -1652,24 +1654,24 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
     case 0:
     case 1:
         selected_direction_row =
-            Menu_Framework_SetMenuItem(Menu_Container_transferDirectionStep + 0xA, 0x140, (Menu_Container_transferDirectionStep * 0x10) + 0x22,
+            VS::Menu::Framework::SetLiveMenuItem(Menu_Container_transferDirectionStep + 0xA, 0x140, (Menu_Container_transferDirectionStep * 0x10) + 0x22,
                 0x7E, 0, (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_transferDirectionStep * 2 + 12]]);
         selected_direction_row->state = 2;
         selected_direction_row->targetPosition0 = 0xC2;
         ++Menu_Container_transferDirectionStep;
         break;
     case 2:
-        Menu_Container_transferDirectionStep += Menu_Framework_AreMenuRowsIdle();
+        Menu_Container_transferDirectionStep += VS::Menu::Framework::AreLiveMenuRowsIdle();
         break;
     case 3:
         selected_direction = Menu_Framework_menuMemory.opaque9E;
 
         for (i = 0; i < 2; ++i) {
-            Menu_Framework_MenuItem(i + 0xA)->selected = i == selected_direction;
+            VS::Menu::Framework::LiveMenuItem(i + 0xA)->selected = i == selected_direction;
         }
         if (Input_buttonsPressed.allButtons & 0x10) {
             VS::Menu::PlayLeaveSound();
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
             return -2;
         }
         if (Input_buttonsPressed.allButtons & 0x40) {
@@ -1684,7 +1686,7 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
         VS::Render::DrawLiveCompactTextColor("OK", 0x4200C8,
             ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
         v = 0x1A;
-        Menu_Container_transferDirectionCursorAnimation = Menu_Framework_DrawCursor(
+        Menu_Container_transferDirectionCursorAnimation = VS::Menu::Framework::DrawLiveCursor(
             Menu_Container_transferDirectionCursorAnimation, (((selected_direction * 0x10) - (((selected_direction * 2) & 4) - v)) << 0x10) | 0xB4);
         if (Input_buttonRepeat & 0x1000) {
             selected_direction += 2;
@@ -1704,7 +1706,7 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
         } else {
             direction_help_text = (char*)&Menu_Container_menuText[Text_Menud_menuText_Offset_endTransfer];
         }
-        Menu_Framework_SetInformationMessage(direction_help_text);
+        VS::Menu::Framework::SetLiveInformationMessage(direction_help_text);
         break;
     }
     Menu_Container_DrawStorageCapacities();
@@ -1738,8 +1740,8 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
 
     switch (*screen_step) {
     case 0:
-        Menu_Framework_LoadItemText(1);
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::LoadLiveItemText(1);
+        VS::Menu::Framework::InitializeLiveInformationBox();
         Menu_Container_SetPanelVisibility(0);
         VS::Core::Memory::CopyLiveHalfwordBlocks(&Menu_Framework_unusedInventoryStorage->container.items,
             &Menu_Framework_unusedInventoryStorage->storedContainer,
@@ -1753,7 +1755,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         *screen_step = 1;
         return 0;
     case 1:
-        *screen_step += Menu_Framework_LoadItemText(0);
+        *screen_step += VS::Menu::Framework::LoadLiveItemText(0);
         break;
     case 2:
         if (Menu_Container_directionReopenDelay != 0) {
@@ -1767,8 +1769,8 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         Menu_Container_screenResult = Menu_Container_UpdateTransferDirection(0);
         if (Menu_Container_screenResult != 0) {
             if (Menu_Container_screenResult < 3) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
-                Menu_Framework_SetMenuItem(0, 0xB4, 0x12, 0x8C, 8,
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
+                VS::Menu::Framework::SetLiveMenuItem(0, 0xB4, 0x12, 0x8C, 8,
                     (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_screenResult + 0xF]])
                     ->selected = 1;
                 *screen_step = 4;
@@ -1778,7 +1780,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         }
         break;
     case 4:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Container_UpdateItemList(Menu_Container_screenResult);
             *screen_step = 5;
         }
@@ -1790,7 +1792,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
             if (Menu_Container_screenResult == -2) {
                 *screen_step = 6;
             } else {
-                Menu_Framework_SetMenuItem(0, 0xB4, 0x12, 0x8C, 8,
+                VS::Menu::Framework::SetLiveMenuItem(0, 0xB4, 0x12, 0x8C, 8,
                     (char*)&Menu_Container_menuText[Text_Menud_menuText_Offset_container])
                     ->selected = 1;
                 Menu_Container_directionReopenDelay = 5;
@@ -1799,7 +1801,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         }
         break;
     case 6:
-        if (Menu_Framework_UnloadItemTextWhenReady() != 0) {
+        if (VS::Menu::Framework::UnloadLiveItemTextWhenReady() != 0) {
             Menu_Container_CommitGadgetBag();
             for (i = 0; i < 7; ++i) {
                 Menu_Container_RebuildCategoryIndices(i, &Menu_Framework_unusedInventoryStorage->container);
@@ -1811,7 +1813,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
                 }
             }
             Input_settings.containerEmpty = i == 7;
-            Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+            VS::Menu::Framework::ClearLiveMenuExcept(0);
             Menu_Framework_menuState.currentMenu = Menu_Framework_menuState.returnState;
             Menu_Framework_menuState.returnState = Menu_Container_screenResult + 2;
             *screen_step = 0;
@@ -1835,7 +1837,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         if (Menu_Container_detailsViewPhase == 0) {
             if (*screen_step != 6) {
                 int itemCategory = ((Menu_Framework_menuMemory.opaqueA0[0] - 1) & 7);
-                menuItem = Menu_Framework_SetMenuItem(0x1F, i + 0xB4, 0x22, 0x8C, 8,
+                menuItem = VS::Menu::Framework::SetLiveMenuItem(0x1F, i + 0xB4, 0x22, 0x8C, 8,
                     (char*)&Menu_Container_menuText[Menu_Container_menuText[itemCategory + 0x12
                                                 + (itemCategory == 7
                                                     && Menu_Container_browsingGadgetBag != 0)]]);
@@ -1886,12 +1888,12 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
     if (Menu_Container_controlsPanelSlideStep != 0) {
         int s3;
         i = 0x10 - i;
-        Menu_Framework_DrawButtonPromptBackground(i, 0x26, 0x90, 0xA);
-        Menu_Framework_DrawButtonPromptBackground(i, 0x36, 0x48, 0xA);
+        VS::Menu::Framework::DrawLiveButtonPromptBackground(i, 0x26, 0x90, 0xA);
+        VS::Menu::Framework::DrawLiveButtonPromptBackground(i, 0x36, 0x48, 0xA);
         control_icon_x = i - 8;
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, control_icon_x, 0x24, NULL);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Triangle, i + 0x40, 0x24, NULL);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, control_icon_x, 0x34, NULL);
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Square, control_icon_x, 0x24, NULL);
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Triangle, i + 0x40, 0x24, NULL);
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Cross, control_icon_x, 0x34, NULL);
         s3 = (i + 0xC) & 0xFFFF;
         VS::Render::DrawLiveCompactTextColor(
             "STATUS", s3 | 0x260000, 0x202020 << (Menu_Container_controlsPanelMode & 3), NULL);

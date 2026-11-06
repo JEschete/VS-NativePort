@@ -299,6 +299,33 @@ TEST_CASE("Live room lighting ignores unloaded rooms and null colours",
          color.code == 0));
 }
 
+TEST_CASE("Live room lighting samples a named layer as the original index",
+          "[render][room-lighting]") {
+  auto ceiling = PrimaryTriangle();
+  ceiling.colors = {0x806040, 0x806040, 0x806040};
+  LiveLightingFixture fixture(
+      LightingBlock(0x44332211, 1, 1, {PrimaryTriangle(), ceiling}));
+  constexpr std::uint32_t kPacked = (32U << 16) | 32U;
+  Render_ColorCode floor{9, 9, 9, 0x5A};
+  VS::Field::SampleLiveRoomLighting(kPacked, RoomLightLayer::kFloor, &floor);
+  CHECK((floor.red == 127 && floor.green == 63 && floor.blue == 63 &&
+         floor.code == 0x5A));
+  Render_ColorCode floor_index{9, 9, 9, 0x5A};
+  VS::Field::SampleLiveRoomLighting(static_cast<int>(kPacked), 0, &floor_index);
+  CHECK(std::memcmp(&floor, &floor_index, sizeof floor) == 0);
+
+  Render_ColorCode ceiling_color{9, 9, 9, 0x5A};
+  VS::Field::SampleLiveRoomLighting(kPacked, RoomLightLayer::kCeiling,
+                                    &ceiling_color);
+  CHECK((ceiling_color.red == 64 && ceiling_color.green == 96 &&
+         ceiling_color.blue == 128 && ceiling_color.code == 0x5A));
+  Render_ColorCode ceiling_index{9, 9, 9, 0x5A};
+  VS::Field::SampleLiveRoomLighting(static_cast<int>(kPacked), 1,
+                                    &ceiling_index);
+  CHECK(std::memcmp(&ceiling_color, &ceiling_index, sizeof ceiling_color) == 0);
+  VS::Field::SampleLiveRoomLighting(kPacked, RoomLightLayer::kFloor, nullptr);
+}
+
 TEST_CASE("Original room light entries have no module address",
           "[render][room-lighting]") {
   const auto symbols =
@@ -307,4 +334,7 @@ TEST_CASE("Original room light entries have no module address",
                                           0x80098B38u) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80098C3Cu) == nullptr);
+  // The retired ground colour wrapper (146C.c:16465 func_8008C458).
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008C458u) == nullptr);
 }

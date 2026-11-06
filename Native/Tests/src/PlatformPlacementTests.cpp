@@ -9,7 +9,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorMovementLive.hpp"
 #include "Core/Log.hpp"
+#include "Field/ActorCollisionLive.hpp"
 #include "Field/PlatformPlacement.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
@@ -230,8 +232,8 @@ TEST_CASE("Jump to a hidden platform is refused before any actor change",
   PlatformErrorLog log;
   auto actor = OnPlatform();
   const auto before = actor;
-  std::array<u_char, 4> target{5, kLayer, 7, 0};
-  Actors_BeginActorJumpToTile(&actor, target.data(), 32, 0);
+  const VS::Actors::PackedTile target{.x = 5, .layer = kLayer, .z = 7};
+  VS::Actors::BeginLiveActorJumpToTile(&actor, target, 32, 0);
   CHECK(Same(actor, before));
   REQUIRE(log.errors.size() == 1);
   CHECK(log.errors[0].find("layer 3") != std::string::npos);
@@ -246,8 +248,8 @@ TEST_CASE("Jump to a visible platform targets its contact position",
   actor.instance.position.vy = -600;  // the platform top is 168 above
   auto* saved = Actors_actorRecords[0];
   Actors_actorRecords[0] = &actor;
-  std::array<u_char, 4> target{5, kLayer, 7, 0};
-  Actors_BeginActorJumpToTile(&actor, target.data(), 32, 0);
+  const VS::Actors::PackedTile target{.x = 5, .layer = kLayer, .z = 7};
+  VS::Actors::BeginLiveActorJumpToTile(&actor, target, 32, 0);
   Actors_actorRecords[0] = saved;
   CHECK(log.errors.empty());
   CHECK(actor.destinationX == 1216);
@@ -261,7 +263,7 @@ TEST_CASE("Platform contact update keeps the actor when its platform is hidden",
   for (const int mode : {0, 1}) {
     auto actor = OnPlatform();
     const auto before = actor;
-    Actors_UpdateActorPlatformContact(&actor, mode);
+    VS::Actors::UpdateLiveActorPlatformContact(&actor, mode);
     CHECK(Same(actor, before));
   }
   CHECK(log.errors.size() == 2);
@@ -274,13 +276,13 @@ TEST_CASE("Platform contact update follows and anchors a visible platform",
   fixture.platforms[1].isHidden = 0;
   auto actor = OnPlatform();
   actor.platformAnchor = {1210, -768, 440, 0};
-  Actors_UpdateActorPlatformContact(&actor, 0);
+  VS::Actors::UpdateLiveActorPlatformContact(&actor, 0);
   CHECK(actor.platformOffsetX == 6);
   CHECK(actor.platformOffsetZ == 8);
   CHECK(actor.instance.position.vx == 1206);
   CHECK(actor.instance.position.vz == 448);
   auto anchored = OnPlatform();
-  Actors_UpdateActorPlatformContact(&anchored, 1);
+  VS::Actors::UpdateLiveActorPlatformContact(&anchored, 1);
   CHECK(anchored.platformAnchor.vx == 1216);
   CHECK(anchored.platformAnchor.vy == -768);
   CHECK(anchored.platformAnchor.vz == 448);
@@ -295,7 +297,7 @@ TEST_CASE("Ledge probe on a hidden platform reports no ledge unchanged",
   actor.moveFacing = 123;
   const auto before = actor;
   SVECTOR offset{1, 2, 3, 4};
-  CHECK(Field_CalcActorLedgeOffset(&actor, &offset) == 0);
+  CHECK(VS::Field::LiveCalcActorLedgeOffset(&actor, &offset) == 0);
   CHECK(Same(actor, before));
   CHECK(offset.vx == 1);
   CHECK(offset.vy == 2);

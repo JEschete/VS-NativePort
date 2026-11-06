@@ -21,7 +21,7 @@
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"

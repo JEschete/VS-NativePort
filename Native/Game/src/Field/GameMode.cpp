@@ -1,170 +1,121 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Render/PaletteAnimationLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/Lifecycle.h"
-#include "Actors/Location.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Audio/Ambience.h"
-#include "Battle/Abilities.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/Actor.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
-#include "Battle/Targeting.h"
-#include "Effects/ActionEffects.h"
-#include "Field/GameMode.h"
-#include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
-#include "Field/Map.h"
-#include "Field/RoomRendering.h"
-#include "Field/RoomState.h"
-#include "Field/Transitions.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Menu/Framework/ActionSelection.h"
-#include "Menu/Framework/Framework.h"
-#include "Render/Palette.h"
-#include "State/Flags.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Field/GameMode.hpp"
 
-// decomp: D_800F1968 (D_800F1968@BATTLE/BATTLE.PRG)
-int Field_isInteractionPaused;
+#include <cstdint>
 
-// decomp: BATTLE.PRG func_8006C2FC (src/BATTLE/BATTLE.PRG/146C.c:1866)
-void Field_PauseFieldForInteractionDialog(void)
-{
-    int i;
-
-    for (i = 1; i < 16; ++i) {
-        Actors_RestoreActorIdlePose(i);
-    }
-
-    Field_SetMinimapVisible(0);
-    Battle_SetActorMarkersHidden(1);
-
-    Field_isInteractionPaused = 1;
+namespace VS::Field {
+namespace {
+void SettleActorPoses(FieldModeHost& host) {
+  for (int actor = kFirstPausedActor; actor < kPausedActorEnd; ++actor) {
+    host.RestoreActorIdlePose(actor);
+  }
 }
 
-// decomp: BATTLE.PRG func_8006C350 (src/BATTLE/BATTLE.PRG/146C.c:1880)
-void Field_PauseFieldForObjectInteraction(void)
-{
-    int i;
-
-    for (i = 1; i < 16; ++i) {
-        Actors_RestoreActorIdlePose(i);
-    }
-
-    Battle_SetActorMarkersHidden(1);
-
-    Field_isInteractionPaused = 1;
+int HudWeaponBit(const FieldModeHost& host) {
+  return host.IsWeaponDrawn() ? kHudWeaponDrawn : 0;
 }
 
-// decomp: BATTLE.PRG func_8006C39C (src/BATTLE/BATTLE.PRG/146C.c:1893)
-void Field_PauseFieldForMenu(void)
-{
-    VS::Render::TransformLiveRoomPalettes(13, 4, -4, -4, 0);
-    VS::Render::SetLiveClutAnimationEnabled(0);
-    Actors_UnfreezeAllActorAnimations();
-    Field_SetRoomAnimationsPaused(1);
-    Field_SetMovingPlatformsPaused(1);
-    Field_SetMinimapVisible(0);
-    Audio_SetRoomAmbienceDucked(1);
-    Battle_SetActorMarkersHidden(1);
+void CastTeleport(FieldModeHost& host, const ActionMenuResult& result) {
+  host.SpawnTrapTileEffectAtAshley();
+  host.SetScriptFlag(kTeleportScriptFlag, 1);
+  host.TeleportToLocation(TeleportRequest{
+      .location_id = result.location_id,
+      .tile_x = result.tile_x,
+      .tile_z = result.tile_z,
+      .effect = kTeleportEffect,
+      .speed = kTeleportSpeed,
+  });
+  const int mp = host.AshleyMp();
+  if (mp >= result.mp_cost) {
+    host.SetAshleyMp(static_cast<std::int16_t>(mp - result.mp_cost));
+  }
+  host.PlayAshleyActionPose(kTeleportActionPose);
+}
+}  // namespace
 
-    Field_isInteractionPaused = 1;
+void PauseFieldForInteractionDialog(FieldModeHost& host) {
+  SettleActorPoses(host);
+  host.SetMinimapVisible(false);
+  host.SetActorMarkersHidden(true);
+  host.SetInteractionPaused(true);
 }
 
-// decomp: BATTLE.PRG func_8006C40C (src/BATTLE/BATTLE.PRG/146C.c:1907)
-void Field_ResumeFieldAfterMenu(void)
-{
-    VS::Render::SetLiveClutAnimationEnabled(1);
-    VS::Render::TransformLiveSceneColors(8, 4, 0, 0, 0);
-    Actors_FreezeAllActorAnimations();
-    Field_SetRoomAnimationsPaused(0);
-    Field_SetMovingPlatformsPaused(0);
-    Field_SetMinimapVisible(1);
-    Audio_SetRoomAmbienceDucked(0);
-    Battle_SetActorMarkersHidden(0);
-
-    Field_isInteractionPaused = 0;
+void PauseFieldForObjectInteraction(FieldModeHost& host) {
+  SettleActorPoses(host);
+  host.SetActorMarkersHidden(true);
+  host.SetInteractionPaused(true);
 }
 
-// decomp: BATTLE.PRG func_8006F5CC (src/BATTLE/BATTLE.PRG/146C.c:3221)
-void Field_EnterFieldExplorationMode(void)
-{
-    Field_controlMode = 1;
-    Battle_actionFlowMode = 0;
-    Field_MarkCurrentRoomVisited();
+void PauseFieldForMenu(FieldModeHost& host) {
+  host.TransformRoomPalettes(kMenuRoomPaletteTransform);
+  host.SetClutAnimationEnabled(false);
+  host.UnfreezeActorAnimations();
+  host.SetRoomAnimationsPaused(true);
+  host.SetMovingPlatformsPaused(true);
+  host.SetMinimapVisible(false);
+  host.SetRoomAmbienceDucked(true);
+  host.SetActorMarkersHidden(true);
+  host.SetInteractionPaused(true);
 }
 
-// decomp: BATTLE.PRG func_8007352C (src/BATTLE/BATTLE.PRG/146C.c:4659)
-void Field_BeginShortcutMenu(void)
-{
-    Field_controlMode = 6;
-    Field_PauseFieldForMenu();
+void ResumeFieldAfterMenu(FieldModeHost& host) {
+  host.SetClutAnimationEnabled(true);
+  host.TransformSceneColors(kResumeSceneColorTransform);
+  host.FreezeActorAnimations();
+  host.SetRoomAnimationsPaused(false);
+  host.SetMovingPlatformsPaused(false);
+  host.SetMinimapVisible(true);
+  host.SetRoomAmbienceDucked(false);
+  host.SetActorMarkersHidden(false);
+  host.SetInteractionPaused(false);
 }
 
-// decomp: BATTLE.PRG func_80073554 (src/BATTLE/BATTLE.PRG/146C.c:4665)
-void Field_EndShortcutMenu(void)
-{
-    Field_controlMode = 1;
-    Field_ResumeFieldAfterMenu();
+void EnterFieldExplorationMode(FieldModeHost& host) {
+  host.SetControlMode(FieldControlMode::kExploration);
+  host.SetActionFlowMode(kActionFlowIdle);
+  host.MarkCurrentRoomVisited();
 }
 
-// decomp: BATTLE.PRG func_8007357C (src/BATTLE/BATTLE.PRG/146C.c:4671)
-void Field_BeginBattleActionMenu(int arg0 __attribute__((unused)), int arg1 __attribute__((unused)))
-{
-    Field_controlMode = 5;
-    Battle_actionFlowMode = 1;
-    Battle_SetHudBattleMode((Battle_characterState->weaponDrawn & 1) | 2);
-    Field_PauseFieldForMenu();
+void BeginShortcutMenu(FieldModeHost& host) {
+  host.SetControlMode(FieldControlMode::kShortcutMenu);
+  PauseFieldForMenu(host);
 }
 
-// decomp: BATTLE.PRG func_800735CC (src/BATTLE/BATTLE.PRG/146C.c:4679)
-void Field_CloseBattleActionMenu(Menu_Framework_ActionSelection* action_selection)
-{
-    Menu_Framework_ReleaseMenuRows();
-    action_selection->menuStatus = 0;
-    Field_ResumeFieldAfterMenu();
+void EndShortcutMenu(FieldModeHost& host) {
+  host.SetControlMode(FieldControlMode::kExploration);
+  ResumeFieldAfterMenu(host);
 }
 
-// decomp: BATTLE.PRG func_800735F8 (src/BATTLE/BATTLE.PRG/146C.c:4686)
-void Field_DispatchBattleActionMenuResult(Menu_Framework_ActionSelection* action_selection)
-{
-    Actors_ActorLocationQuery ashley_placement;
-
-    Field_SetMinimapVisible(1);
-    Battle_SetHudBattleMode(Battle_characterState->weaponDrawn & 1);
-
-    switch (action_selection->selectionKind) {
-    case 5:
-        break;
-    case 6:
-    case 7:
-    case 8:
-        Battle_BeginActorActionSelection(0, action_selection->executeAbility.word);
-        return;
-    case 10:
-        Actors_ActorPlacement(0, &ashley_placement);
-        Effects_SpawnTrapTileEffect(&ashley_placement.location);
-        State_SetScriptFlag(0xB7, 1);
-        Field_TeleportToLocation(action_selection->executeAbility.bits.location,
-            action_selection->executeAbility.bits.tileX, action_selection->executeAbility.bits.tileZ, 0,
-            8);
-        if (Battle_characterState->stats->currentMp
-            >= action_selection->executeAbility.bits.mpCost) {
-            Battle_characterState->stats->currentMp -=
-                action_selection->executeAbility.bits.mpCost;
-        }
-        ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, NULL, 7);
-        break;
-    }
-    Field_EnterFieldExplorationMode();
-    Field_CloseBattleActionMenu(action_selection);
+void BeginBattleActionMenu(FieldModeHost& host) {
+  host.SetControlMode(FieldControlMode::kActionMenu);
+  host.SetActionFlowMode(kActionFlowInitialTargetSelection);
+  host.SetHudBattleMode(HudWeaponBit(host) | kHudActionMenu);
+  PauseFieldForMenu(host);
 }
 
-}  // extern "C"
+void CloseBattleActionMenu(FieldModeHost& host) {
+  host.ReleaseMenuRows();
+  host.ClearActionMenuStatus();
+  ResumeFieldAfterMenu(host);
+}
+
+void DispatchBattleActionMenuResult(FieldModeHost& host,
+                                    const ActionMenuResult& result) {
+  host.SetMinimapVisible(true);
+  host.SetHudBattleMode(HudWeaponBit(host));
+  switch (static_cast<ActionMenuChoice>(result.kind)) {
+    case ActionMenuChoice::kBreakArt:
+    case ActionMenuChoice::kSpell:
+    case ActionMenuChoice::kItem:
+      host.BeginActorActionSelection(0, result.action_id);
+      return;
+    case ActionMenuChoice::kTeleport:
+      CastTeleport(host, result);
+      break;
+    default:
+      break;
+  }
+  EnterFieldExplorationMode(host);
+  CloseBattleActionMenu(host);
+}
+}  // namespace VS::Field

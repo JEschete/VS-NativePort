@@ -14,10 +14,12 @@
 #include <type_traits>
 
 #include "Audio/MusicVoiceConflicts.hpp"
+#include "Audio/SampleBanksLive.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Audio/XaMixLive.hpp"
 
@@ -213,7 +215,7 @@ class LiveMusicHost final : public MusicHost {
     StoreMusicCommand(state);
     const auto flags = Same<u_int>(Audio_Seq_savedMusicConfig.statusFlags);
     for (Audio_SeqChannel& channel : Audio_Seq_savedMusicChannels) {
-      Audio_Samples_MapInstrumentToBaseBank(flags, &channel);
+      Samples::LiveMapInstrumentToBaseBank(flags, &channel);
     }
     state = LoadMusicCommand();
   }
@@ -241,7 +243,7 @@ class LiveMusicHost final : public MusicHost {
     }
     if (config == nullptr || channels == nullptr) return;
     StoreMusicCommand(state);
-    Audio_SoundEffects_InvalidateMusicChannelVolumes(config, channels);
+    SoundEffects::LiveInvalidateMusicChannelVolumes(config, channels);
     state = LoadMusicCommand();
   }
 
@@ -420,7 +422,7 @@ void LiveRestoreMusicSequence(Audio_AkaoSequenceFile* sequence,
   Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
     if ((remapped & (1U << i)) != 0) {
-      Audio_Samples_MapInstrumentToAlternateBank(
+      Samples::LiveMapInstrumentToAlternateBank(
           Same<u_int>(active->statusFlags), &Audio_Seq_musicChannels[i]);
     }
   }

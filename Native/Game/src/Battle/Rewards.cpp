@@ -1,29 +1,28 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorRosterLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+#include "Audio/AmbienceLive.hpp"
+#include "Battle/AbilitiesLive.hpp"
+#include "Field/GameModeLive.hpp"
+#include "Field/MapLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/Animation.h"
-#include "Actors/Lifecycle.h"
-#include "Audio/Ambience.h"
-#include "Battle/Abilities.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Hit.h"
 #include "Battle/Rewards.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Field/GameMode.h"
+#include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
-#include "Field/Map.h"
-#include "Field/RoomRendering.h"
-#include "Items/Loot.h"
 #include "Items/LootLiveState.h"
-#include "Menu/Framework/ActionSelection.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
-#include "State/Flags.h"
 
 // decomp: D_800F1860 (D_800F1860@BATTLE/BATTLE.PRG)
 int Battle_lootMenuOpened;
@@ -34,11 +33,11 @@ int Battle_rewardsFollowAction;
 // decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7516)
 void Battle_UpdateLootResults(void)
 {
-    Menu_Framework_UpdateMenuOverlay();
-    if (Menu_Framework_ActionSelectionState()->menuStatus != 1) {
-        Field_ResumeFieldAfterMenu();
-        Menu_Framework_ReleaseMenuRows();
-        Battle_BeginPendingAbilityReward();
+    VS::Menu::Framework::UpdateLiveMenuOverlay();
+    if (VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) {
+        VS::Field::LiveResumeFieldAfterMenu();
+        VS::Menu::Framework::ReleaseLiveMenuRows();
+        VS::Battle::LiveBeginPendingAbilityReward();
     }
 }
 
@@ -46,19 +45,19 @@ void Battle_UpdateLootResults(void)
 void Battle_UpdateAbilityUnlockDelay(void)
 {
     if (!(Effects_effectBusyFlags & 3)) {
-        Battle_GrantPendingAbilityUnlock();
+        VS::Battle::LiveGrantPendingAbilityUnlock();
     }
 }
 
 // decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7533)
 void Battle_UpdateAbilityUnlockResults(void)
 {
-    Menu_Framework_UpdateMenuOverlay();
-    if ((Menu_Framework_ActionSelectionState()->menuStatus != 1) && (Menu_IsSceneNotificationPending() == 0)) {
-        Field_ResumeFieldAfterMenu();
-        Menu_Framework_ReleaseMenuRows();
+    VS::Menu::Framework::UpdateLiveMenuOverlay();
+    if ((VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) && (Menu_IsSceneNotificationPending() == 0)) {
+        VS::Field::LiveResumeFieldAfterMenu();
+        VS::Menu::Framework::ReleaseLiveMenuRows();
         Menu_ReleaseSceneNotification();
-        Battle_BeginPendingAbilityReward();
+        VS::Battle::LiveBeginPendingAbilityReward();
     }
 }
 
@@ -67,10 +66,10 @@ void Battle_BeginRewardPause(void)
 {
     VS::Render::TransformLiveRoomPalettes(0xD, 4, -4, -4, 0);
     VS::Render::SetLiveClutAnimationEnabled(0);
-    Actors_UnfreezeAllActorAnimations();
-    Field_SetRoomAnimationsPaused(1);
-    Field_SetMinimapVisible(0);
-    Audio_SetRoomAmbienceDucked(1);
+    VS::Actors::UnfreezeLiveActorAnimations();
+    VS::Field::LiveSetRoomAnimationsPaused(1);
+    VS::Field::SetLiveMinimapVisible(0);
+    VS::Audio::LiveSetRoomAmbienceDucked(1);
     Field_isInteractionPaused = 1;
 }
 
@@ -79,9 +78,9 @@ void Battle_EndRewardPause(void)
 {
     VS::Render::SetLiveClutAnimationEnabled(1);
     VS::Render::TransformLiveSceneColors(8, 4, 0, 0, 0);
-    Actors_FreezeAllActorAnimations();
-    Field_SetRoomAnimationsPaused(0);
-    Audio_SetRoomAmbienceDucked(0);
+    VS::Actors::FreezeLiveActorAnimations();
+    VS::Field::LiveSetRoomAnimationsPaused(0);
+    VS::Audio::LiveSetRoomAmbienceDucked(0);
     Field_isInteractionPaused = 0;
 }
 
@@ -91,19 +90,19 @@ void Battle_ResumeAfterRewards(void)
     Battle_actionFlowMode = 2;
     Battle_EndRewardPause();
     if (Battle_rewardsFollowAction != 0) {
-        Actors_RestoreActorIdlePose(0);
+        VS::Actors::RestoreLiveActorIdlePose(0);
     }
 }
 
 // decomp: BATTLE.PRG func_8007B508 (src/BATTLE/BATTLE.PRG/146C.c:8317)
 void Battle_CheckRewardUnlocks(void)
 {
-    if (!(State_ScriptFlag(0xB6)) || ((State_ScriptFlag(0xB6)) == 2)
-        || ((State_ScriptFlag(0xB6)) == 3)) {
-        if (Battle_PendingBattleAbilityUnlocks() != 0) {
+    if (!(VS::State::LiveScriptFlag(0xB6)) || ((VS::State::LiveScriptFlag(0xB6)) == 2)
+        || ((VS::State::LiveScriptFlag(0xB6)) == 3)) {
+        if (VS::Battle::LivePendingBattleAbilityUnlocks() != 0) {
             Battle_actionFlowMode = 5;
             if (Battle_rewardsFollowAction != 0) {
-                ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, NULL, 6);
+                VS::Actors::PlayLiveActorActionPose(0, NULL, 6);
                 Effects_SpawnAbilityLearnedEffect();
             }
             Field_SetMovingPlatformsPaused(1);
@@ -116,7 +115,7 @@ void Battle_CheckRewardUnlocks(void)
         && (Battle_actionState->selection.primaryTarget.target.targetActor == 0)) {
         Battle_actionFlowMode = 5;
         if (Battle_rewardsFollowAction != 0) {
-            ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, NULL, 6);
+            VS::Actors::PlayLiveActorActionPose(0, NULL, 6);
             Effects_SpawnAbilityLearnedEffect();
         }
         Field_SetMovingPlatformsPaused(1);
@@ -140,18 +139,18 @@ void Battle_ShowPendingRewardUnlock(void)
         Battle_actionDefinitions[Battle_actionState->selection.actionId].unlocked = 1;
         return;
     }
-    pending_unlocks = Battle_PendingBattleAbilityUnlocks();
+    pending_unlocks = VS::Battle::LivePendingBattleAbilityUnlocks();
     Battle_actionFlowMode = 6;
     Battle_BeginRewardPause();
-    Menu_Framework_OpenAbilityUnlockMenu(pending_unlocks >> 0x10, pending_unlocks & 0xFFFF);
+    VS::Menu::Framework::OpenLiveAbilityUnlockMenu(pending_unlocks >> 0x10, pending_unlocks & 0xFFFF);
 }
 
 // decomp: BATTLE.PRG func_8007B764 (src/BATTLE/BATTLE.PRG/146C.c:8366)
 void Battle_OpenPendingLootRewards(void)
 {
-    if ((State_ScriptFlag(0xAB)) >= 3) {
+    if ((VS::State::LiveScriptFlag(0xAB)) >= 3) {
         if (Items_lootListHead != NULL) {
-            Menu_Framework_OpenLootListMenu(Items_lootListHead);
+            VS::Menu::Framework::OpenLiveLootListMenu(Items_lootListHead);
             Battle_actionFlowMode = 4;
             Battle_BeginRewardPause();
             return;
@@ -165,8 +164,8 @@ void Battle_OpenPendingLootRewards(void)
 // decomp: BATTLE.PRG func_8007B7DC (src/BATTLE/BATTLE.PRG/146C.c:8381)
 void Battle_OpenRewardResults()
 {
-    if (State_ScriptFlag(0xAB) >= 3) {
-        Menu_Framework_OpenChallengeMenu();
+    if (VS::State::LiveScriptFlag(0xAB) >= 3) {
+        VS::Menu::Framework::OpenLiveChallengeMenu();
         Battle_actionFlowMode = 3;
         Battle_BeginRewardPause();
         return;
@@ -177,10 +176,10 @@ void Battle_OpenRewardResults()
 // decomp: BATTLE.PRG func_8007B834 (src/BATTLE/BATTLE.PRG/146C.c:8392)
 void Battle_UpdateRewardResultsDialog(void)
 {
-    Menu_Framework_UpdateMenuOverlay();
-    if (Menu_Framework_ActionSelectionState()->menuStatus != 1) {
+    VS::Menu::Framework::UpdateLiveMenuOverlay();
+    if (VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) {
         Battle_EndRewardPause();
-        Menu_Framework_ReleaseMenuRows();
+        VS::Menu::Framework::ReleaseLiveMenuRows();
         Battle_OpenPendingLootRewards();
     }
 }
@@ -188,12 +187,12 @@ void Battle_UpdateRewardResultsDialog(void)
 // decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8402)
 void Battle_UpdatePendingLootDialog(void)
 {
-    Menu_Framework_UpdateMenuOverlay();
-    if (Menu_Framework_ActionSelectionState()->menuStatus != 1) {
+    VS::Menu::Framework::UpdateLiveMenuOverlay();
+    if (VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) {
         if (Battle_rewardsFollowAction != 0) {
             Battle_EndRewardPause();
         }
-        Menu_Framework_ReleaseMenuRows();
+        VS::Menu::Framework::ReleaseLiveMenuRows();
         if (Battle_lootMenuOpened != 0) {
             Battle_ResumeAfterRewards();
         } else {
@@ -213,10 +212,10 @@ void Battle_WaitForRewardUnlockEffects(void)
 // decomp: BATTLE.PRG func_8007B938 (src/BATTLE/BATTLE.PRG/146C.c:8425)
 void Battle_UpdateRewardUnlockDialog(void)
 {
-    Menu_Framework_UpdateMenuOverlay();
-    if ((Menu_Framework_ActionSelectionState()->menuStatus != 1) && (Menu_IsSceneNotificationPending() == 0)) {
+    VS::Menu::Framework::UpdateLiveMenuOverlay();
+    if ((VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) && (Menu_IsSceneNotificationPending() == 0)) {
         Battle_EndRewardPause();
-        Menu_Framework_ReleaseMenuRows();
+        VS::Menu::Framework::ReleaseLiveMenuRows();
         Menu_ReleaseSceneNotification();
         Battle_CheckRewardUnlocks();
     }

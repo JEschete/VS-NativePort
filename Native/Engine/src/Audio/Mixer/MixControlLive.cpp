@@ -22,6 +22,7 @@
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundDriverLive.hpp"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 
 extern "C" {
@@ -202,13 +203,13 @@ class LiveControlHost final : public ControlHost {
       return;
     }
     StoreCommandState(state);
-    Audio_SoundEffects_InvalidateMusicChannelVolumes(config, channels);
+    SoundEffects::LiveInvalidateMusicChannelVolumes(config, channels);
     state = LoadCommandState();
   }
 
   void InvalidateSoundEffectVolumes(CommandState& state) override {
     StoreCommandState(state);
-    Audio_SoundEffects_InvalidateSoundEffectVolumes();
+    SoundEffects::LiveInvalidateSoundEffectVolumes();
     state = LoadCommandState();
   }
 
@@ -399,10 +400,12 @@ void StoreDispatch(const DispatchState& state) {
 class LiveDispatchHost final : public DispatchHost {
  public:
   LiveDispatchHost()
-      : first_(static_cast<char*>(Audio_Driver_commandArguments.param1)),
-        second_(reinterpret_cast<char*>(
+      : LiveDispatchHost(reinterpret_cast<char*>(
             static_cast<std::intptr_t>(Audio_Driver_commandArguments.param2))) {
   }
+  explicit LiveDispatchHost(char* second_sequence)
+      : first_(static_cast<char*>(Audio_Driver_commandArguments.param1)),
+        second_(second_sequence) {}
 
   std::int32_t ReverbMode() override { return LiveReverbMode(); }
   void EnableReverb(bool enabled) override { EnableLiveReverb(enabled); }
@@ -649,6 +652,15 @@ void LiveSetReverbMode(int mode) {
 // decomp: SLUS_010.40 func_80018C30 (src/SLUS_010.40/25AC.c:3818)
 unsigned LiveDispatchCommand(unsigned command) {
   LiveDispatchHost host;
+  DispatchState state = LoadDispatch();
+  const std::uint32_t result = DispatchCommand(state, host, command);
+  StoreDispatch(state);
+  return result;
+}
+
+// LiveDispatchCommand for SoundPlaybackLive's kStartMusicPair.
+unsigned LiveDispatchCommand(unsigned command, char* second_sequence) {
+  LiveDispatchHost host(second_sequence);
   DispatchState state = LoadDispatch();
   const std::uint32_t result = DispatchCommand(state, host, command);
   StoreDispatch(state);

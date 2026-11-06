@@ -40,13 +40,3 @@ typedef struct Field_MapScene {
 _Static_assert(sizeof(Field_MapScene) == 0x4, "Field_MapScene must keep its PS1 layout");
 
 #endif // VS_FIELD_MAP_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_MAP_H_DECLS)
-#define VS_FIELD_MAP_H_DECLS
-
-int Field_SetMinimapVisible(char visible);
-void Field_RestoreSceneRoomVisits(Field_MapScene* scene);
-void Field_BuildMinimapRotation(MATRIX* output_rotation, int yaw_angle);
-int Field_MapCompletionPercent(void);
-
-#endif // VS_FIELD_MAP_H_DECLS

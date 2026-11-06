@@ -167,9 +167,10 @@ Default field-control goals and isolated combat are unchanged.
 
 The title's idle-timeout attract demos also end at the title, not in field
 control. A preset that declares `"attract_demo": 3` (cutscene 1, door 20/0) or
-`4` (cutscene 2, door 2/1) runs the original `Title_PrepareExit` cause after
-New Game data initialization and starts the game loop in that entry mode. It
-must use the original title entry: tile 4,2, elevation 2, direction 0, the
+`4` (cutscene 2, door 2/1) runs the original `_setTitleExitFlags` cause
+(`VS::Title::PrepareExit`) after New Game data initialization and starts the
+game loop in that entry mode. It must use the original title entry: tile 4,2,
+elevation 2, direction 0, the
 `prologue` profile, the `default` weapon, production room events, and no
 enemies, stat assist, story progress or direct event. Pair it with
 `"terminal": "attract_to_title"`, `confirm_dialogue: false` and no scripted

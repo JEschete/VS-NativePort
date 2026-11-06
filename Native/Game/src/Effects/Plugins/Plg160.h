@@ -10,6 +10,6 @@
 #define VS_EFFECTS_PLUGINS_PLG160_H_DECLS
 
 extern CVECTOR Effects_Plg160_tiledRingColorFactors[8];
-extern u_char Effects_Plg160_ringColorFactors[][4];
+extern u_char Effects_Plg160_ringColorFactors[8][4];
 
 #endif // VS_EFFECTS_PLUGINS_PLG160_H_DECLS

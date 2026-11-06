@@ -22,7 +22,9 @@
 #include <string_view>
 #include <utility>
 
+#include "Audio/SfxLive.hpp"
 #include "Core/Log.hpp"
+#include "Menu/FilesLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Platform/App.hpp"
 #include "Save/FileMenu.hpp"
@@ -34,12 +36,11 @@
 #include "Save/RuntimeSnapshot.hpp"
 extern "C" {
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Boot/GameLoop.h"
 #include "Core/Text/TextCode.h"
 #include "Field/Gimmicks.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/Files.h"
+#include "Menu/FilesLiveState.h"
 #include "Title/SaveFiles.h"
 }
 
@@ -55,6 +56,8 @@ using file_menu::kFileSlotCount;
 constexpr int kUppercaseGlyph = 10;
 constexpr int kLowercaseGlyph = 36;
 constexpr int kMenuChannelGroup = 0x7E;
+// VS_SFX_FILEOPCOMPLETE (MENU7.PRG 260.c and TITLE.PRG 22C.c).
+constexpr int kFileOperationCompleteSound = 8;
 // The footer fits 288 pixels of six-pixel glyphs, not a 32-byte card label.
 constexpr std::size_t kFooterTextLimit = 48;
 
@@ -335,10 +338,10 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
   void BeginScreen(FileMenuScreen screen) override {
     ForgetPicker();
     if (screen == FileMenuScreen::kTitle) {
-      Title_SaveFiles_ResetElements();
+      file_menu::ResetLiveTitleElements();
       Title_selectionCursorPosition = 0;
     } else {
-      Menu_Files_ResetElements();
+      VS::Menu::Files::ResetLiveElements();
       Menu_Files_selectCursorXy = 0;
     }
     Menu_Files_dataNotSaved = 0;
@@ -430,7 +433,8 @@ void LiveFileMenuHost::PlaySound(file_menu::FileMenuSound sound) {
       VS::Menu::PlayInvalidSound();
       break;
     case file_menu::FileMenuSound::kComplete:
-      Audio_PlaySfxCentered(kMenuChannelGroup, VS_SFX_FILEOPCOMPLETE);
+      VS::Audio::LivePlaySfxCentered(kMenuChannelGroup,
+                                     kFileOperationCompleteSound);
       break;
   }
 }
@@ -627,6 +631,7 @@ int UpdateLiveLoadMenu(int init_fadeout) {
 int UpdateLiveSaveMenu(int init_state) {
   return VS::Game::Save::RunPicker(Files::UpdateSaveMenu, init_state);
 }
+std::span<const char> LiveFileMenuFooter() { return VS::Game::Save::footer; }
 }  // namespace VS::Menu
 
 extern "C" int Save_NativeSelectContainer(int init) {

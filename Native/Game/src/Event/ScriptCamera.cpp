@@ -1,15 +1,18 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorStateLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/CameraLive.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/ActorState.h"
 #include "Actors/Location.h"
 #include "Core/Diagnostics.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
@@ -17,10 +20,7 @@ extern "C" {
 #include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptVm.h"
-#include "Field/Camera.h"
-#include "Field/Collision.h"
 #include "Render/FramebufferEffects.h"
-#include "State/Flags.h"
 #include "State/Timers.h"
 
 // decomp: D_800E9C08 (D_800E9C08@BATTLE/BATTLE.PRG)
@@ -101,8 +101,8 @@ void Event_InitializeEventCamera(void)
     Event_camera = (Event_CameraState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera));
     Event_skipNextFieldCameraRestore = 0;
 
-    Field_CameraPosition(&field_eye_position);
-    Field_CameraLookAt(&field_look_at);
+    VS::Field::LiveCameraPosition(&field_eye_position);
+    VS::Field::LiveCameraLookAt(&field_look_at);
     VS::Core::Math::CopyLiveVector(&Event_camera->eye.currentPosition, &field_eye_position);
     VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.partnerPosition, &field_eye_position);
     VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.currentPosition, &field_look_at);
@@ -193,7 +193,7 @@ void Event_UpdateEventCameraOrigin(void)
         Event_camera->originOffset.vx = 0;
         return;
     }
-    Actors_ActorPlacement(Event_camera->originActorId, &origin_actor_location);
+    VS::Actors::LiveActorPlacement(Event_camera->originActorId, &origin_actor_location);
     Event_camera->originOffset.vx = origin_actor_location.location.position.vx * ONE;
     Event_camera->originOffset.vy = origin_actor_location.location.position.vy * ONE;
     Event_camera->originOffset.vz = origin_actor_location.location.position.vz * ONE;
@@ -207,7 +207,7 @@ void Event_ApplyEventCameraState(void)
     SVECTOR* vec;
 
     if (Event_skipNextFieldCameraRestore != 0) {
-        Field_InitializeSphericalCamera(&cameraPos, &cameraLookAt, -1, -1);
+        VS::Field::LiveInitializeSphericalCamera(&cameraPos, &cameraLookAt, -1, -1);
         VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.currentPosition, &cameraLookAt);
         VS::Core::Math::CopyLiveVector(&Event_camera->eye.currentPosition, &cameraPos);
     } else {
@@ -232,10 +232,10 @@ void Event_ApplyEventCameraState(void)
         VS::Core::Math::AddLiveVectors(&cameraLookAt, &cameraLookAt, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         VS::Core::Math::AddLiveVectors(&cameraPos, &cameraPos, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8));
     }
-    Field_SetCameraLookAt(&cameraLookAt);
-    Field_SetCameraPosition(&cameraPos);
+    VS::Field::LiveSetCameraLookAt(&cameraLookAt);
+    VS::Field::LiveSetCameraPosition(&cameraPos);
     if (Event_camera->cameraRoll.hasChanged != 0) {
-        Field_SetCameraRoll(Event_camera->cameraRoll.angle);
+        VS::Field::LiveSetCameraRoll(Event_camera->cameraRoll.angle);
         Event_camera->cameraRoll.hasChanged = 0;
     }
     if (Event_camera->capturedScreenRoll.hasChanged != 0) {
@@ -268,7 +268,7 @@ void Event_RestoreEventFieldCamera(short field_facing, int field_distance_mode)
         Event_skipNextFieldCameraRestore = 0;
         return;
     }
-    Field_InitializeSphericalCamera(&field_eye_position, &field_look_at, field_facing, (short)field_distance_mode);
+    VS::Field::LiveInitializeSphericalCamera(&field_eye_position, &field_look_at, field_facing, (short)field_distance_mode);
     VS::Core::Math::CopyLiveVector(&Event_camera->eye.destination, &field_eye_position);
     VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.destination, &field_look_at);
     eye_travel_distance = VS::Core::Math::MeasureLiveFixedVector(VS::Core::Math::SubtractLiveVectors(
@@ -424,10 +424,11 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         int id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
         Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
         s->value = id;
-        Actors_ActorPlacement(id, &Event_camera->actorQueryScratch[1]);
+        Actors_ActorLocation placement{};
+        VS::Actors::LiveActorPlacement(id, &placement);
         s->actorRotation.vz = 0;
         s->actorRotation.vx = 0;
-        s->actorRotation.vy = *(short*)((char*)Event_camera + 0x1DA);
+        s->actorRotation.vy = placement.position.pad;
         VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
         Event_ReadScriptFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), script + 4);
         Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
@@ -678,12 +679,12 @@ int Event_EventCameraGroundClearance(MATRIX* camera_transform)
 
     setVector(&offset, 80, 80, 150);
     Core_Gte_RotTrans(&offset, &pos, &flag);
-    first = ((Field_FloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
+    first = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
     lowest = first;
 
     setVector(&offset, -80, 80, 150);
     Core_Gte_RotTrans(&offset, &pos, &flag);
-    second = ((Field_FloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
+    second = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
 
     if (second < first) {
         lowest = second;
@@ -691,7 +692,7 @@ int Event_EventCameraGroundClearance(MATRIX* camera_transform)
 
     setVector(&offset, 80, -80, 150);
     Core_Gte_RotTrans(&offset, &pos, &flag);
-    h = ((Field_FloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
+    h = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
 
     if (h < lowest) {
         lowest = h;
@@ -699,7 +700,7 @@ int Event_EventCameraGroundClearance(MATRIX* camera_transform)
 
     setVector(&offset, -80, -80, 150);
     Core_Gte_RotTrans(&offset, &pos, &flag);
-    h = ((Field_FloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
+    h = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
 
     if (h < lowest) {
         lowest = h;
@@ -1168,10 +1169,10 @@ void Event_StartEventCameraOrbitReturn(char orbit_side_selector)
     u_char saved_facing;
     int preceding_facing;
 
-    saved_facing = State_ScriptFlag(0xAF);
-    distance_mode_index = State_ScriptFlag(0xB0);
+    saved_facing = VS::State::LiveScriptFlag(0xAF);
+    distance_mode_index = VS::State::LiveScriptFlag(0xB0);
     preceding_facing = saved_facing - 1;
-    Field_InitializeSphericalCamera(
+    VS::Field::LiveInitializeSphericalCamera(
         &start_eye_position, &start_look_at, (preceding_facing + (orbit_side_selector * 2)) & 7, distance_mode_index + 1);
 
     start_eye_position.vy += Event_kOrbitReturnHeightOffsets[distance_mode_index] << 0xC;
@@ -1184,7 +1185,7 @@ void Event_StartEventCameraOrbitReturn(char orbit_side_selector)
 
     Event_camera->lookAt.motionMode = 0xF;
 
-    Field_InitializeSphericalCamera(&destination_eye_position, &destination_look_at, saved_facing, distance_mode_index + 1);
+    VS::Field::LiveInitializeSphericalCamera(&destination_eye_position, &destination_look_at, saved_facing, distance_mode_index + 1);
 
     VS::Core::Math::CopyLiveVector(&Event_camera->eye.destination, &destination_eye_position);
     VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.destination, &destination_look_at);

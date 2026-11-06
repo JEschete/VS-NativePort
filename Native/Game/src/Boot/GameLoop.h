@@ -15,7 +15,5 @@ extern int Boot_isSoftResetEnabled;
 extern int Boot_battleReturnStackPointer;
 extern int Boot_isClearSavePending;
 extern int Boot_isGameplayActive;
-void Boot_RunGameLoop(void);
-void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)));
 
 #endif // VS_BOOT_GAMELOOP_H_DECLS

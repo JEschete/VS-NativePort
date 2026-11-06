@@ -7,24 +7,32 @@
 #include <fstream>
 #include <span>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/OptionsLive.hpp"
+#include "Menu/Setup/Assembly.hpp"
+#include "Menu/Setup/Combination.hpp"
+#include "Menu/Setup/SetupLive.hpp"
+#include "Menu/Setup/SetupScreen.hpp"
 
 extern "C" {
-#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
@@ -34,16 +42,14 @@ extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/BreakArts.h"
-#include "Menu/Framework/EquipmentDetails.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/Options.h"
-#include "Menu/Setup/Assembly.h"
-#include "Menu/Setup/Combination.h"
-#include "Menu/Setup/SetupScreen.h"
+#include "Menu/OptionsLiveState.h"
 #include "Menu/TextBox.h"
 #include "State/StateFlags.h"
 }
@@ -100,8 +106,8 @@ struct CursorFixture {
   }
 
   void OpenRows(int count) {
-    Menu_Framework_CreateMenuRows(count, 0x100, strings.data(),
-                                  row_types.data());
+    VS::Menu::Framework::CreateLiveMenuRows(count, 0x100, strings.data(),
+                                            row_types.data());
   }
 };
 
@@ -192,7 +198,7 @@ struct BreakArtMenuFixture {
 
   int SelectRow(int row) {
     Menu_Framework_selectedRow = row;
-    Menu_Framework_CloseRowsAndRememberCursor();
+    VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
     REQUIRE(Menu_BreakArts_UpdateArtList(0) == 0);
     FinishRowAnimations();
     return Menu_BreakArts_UpdateArtList(0);
@@ -236,6 +242,22 @@ struct EquipmentGateFixture {
   }
 };
 
+namespace setup = VS::Menu::Setup;
+
+// Runs a typed workshop call over the live State and host.
+template <typename Call>
+int RunSetup(const Call& call) {
+  return setup::RunLiveSetup([&call](setup::Context& context) {
+    if constexpr (std::is_void_v<
+                      std::invoke_result_t<const Call&, setup::Context&>>) {
+      call(context);
+      return 0;
+    } else {
+      return static_cast<int>(call(context));
+    }
+  });
+}
+
 struct WorkshopGateFixture {
   CursorFixture rows;
   decltype(Audio_Seq_unusedInventory) saved_inventory =
@@ -243,17 +265,19 @@ struct WorkshopGateFixture {
   u_short* saved_text = Menu_Framework_menu12Text;
   int* saved_types = Menu_Framework_rowTypeBuf;
   Field_MpdEnvironment* saved_environment = Field_roomData.environment;
-  u_char saved_workshop = Menu_Setup_currentWorkshop;
+  u_int saved_environment_length = Field_roomData.header.environmentLength;
+  setup::State saved_state = setup::LiveSetupState();
   std::array<u_short, 1024> strings{};
   Field_MpdEnvironment environment{};
 
   WorkshopGateFixture(int workshop, int weapon_count, bool cursor_memory) {
-    Menu_Setup_SetupScreen_ResetMenucStatics();
+    setup::LiveSetupState() = {};
     std::fill(strings.begin(), strings.end(), 0xE7E7);
     std::fill_n(strings.begin(), 16, 32);
     Menu_Framework_menu12Text = strings.data();
     Menu_Framework_rowTypeBuf = rows.row_types.data();
     Field_roomData.environment = &environment;
+    Field_roomData.header.environmentLength = sizeof environment;
     Audio_Seq_unusedInventory = {};
     environment.isWorkshop = static_cast<char>(workshop);
     Input_settings.cursorMemory = static_cast<char>(cursor_memory);
@@ -266,17 +290,17 @@ struct WorkshopGateFixture {
   }
 
   ~WorkshopGateFixture() {
-    Menu_Setup_SetupScreen_ResetMenucStatics();
+    setup::LiveSetupState() = saved_state;
     Audio_Seq_unusedInventory = saved_inventory;
     Menu_Framework_menu12Text = saved_text;
     Menu_Framework_rowTypeBuf = saved_types;
     Field_roomData.environment = saved_environment;
-    Menu_Setup_currentWorkshop = saved_workshop;
+    Field_roomData.header.environmentLength = saved_environment_length;
   }
 
   const Menu_Framework_ItemText* Open() {
-    u_char state = 2;
-    REQUIRE(Menu_Setup_Update(&state) == 0);
+    std::uint8_t state = 2;
+    REQUIRE(setup::UpdateLiveSetup(state) == 0);
     REQUIRE(state == 3);
     REQUIRE(Menu_Framework_subMenuRowCount == 6);
     const auto* items = reinterpret_cast<const Menu_Framework_ItemText*>(
@@ -294,21 +318,6 @@ struct WorkshopChoicesFixture {
   decltype(Menu_Framework_itemNames) saved_names = Menu_Framework_itemNames;
   u_short* saved_help = Menu_Framework_itemHelp;
   decltype(Menu_Framework_shields) saved_shields = Menu_Framework_shields;
-  u_short* saved_list = Menu_Setup_itemsList;
-  char saved_count = Menu_Setup_itemCount;
-  int saved_selection = Menu_Setup_itemsListSelection;
-  char saved_state = Menu_Setup_itemsListState;
-  char saved_window = Menu_Setup_itemsListWindow;
-  char saved_info = Menu_Setup_rowInfoUnused;
-  u_char saved_combining_item = Menu_Setup_combiningItem;
-  decltype(std::to_array(Menu_Setup_availableItems)) saved_available =
-      std::to_array(Menu_Setup_availableItems);
-  decltype(std::to_array(Menu_Setup_combiningBladeIds)) saved_blades =
-      std::to_array(Menu_Setup_combiningBladeIds);
-  decltype(std::to_array(Menu_Setup_combiningArmorIds)) saved_armor =
-      std::to_array(Menu_Setup_combiningArmorIds);
-  decltype(std::to_array(Menu_Setup_itemsToCombine)) saved_combining =
-      std::to_array(Menu_Setup_itemsToCombine);
   std::array<u_short, 2048> strings{};
   std::array<u_short, 16384> help{};
   char names[512][24]{};
@@ -328,12 +337,8 @@ struct WorkshopChoicesFixture {
     Menu_Framework_itemNames = names;
     Menu_Framework_rowTypeBuf = types.data();
     Menu_Framework_shields = Audio_Seq_unusedInventory.shields;
-    Menu_Setup_itemsList = nullptr;
-    Menu_Setup_currentWorkshop = 6;
+    setup::LiveSetupState().combination.workshop = 6;
     Audio_Seq_unusedInventoryIndices = {};
-    std::fill_n(Menu_Setup_combiningBladeIds, saved_blades.size(), 0);
-    std::fill_n(Menu_Setup_combiningArmorIds, saved_armor.size(), 0);
-    std::fill_n(Menu_Setup_itemsToCombine, saved_combining.size(), 0);
     FillParts();
     FillProtection();
     for (int category = 1; category <= 5; ++category) {
@@ -342,29 +347,11 @@ struct WorkshopChoicesFixture {
   }
 
   ~WorkshopChoicesFixture() {
-    if (Menu_Setup_itemsList != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(Menu_Setup_itemsList);
-    }
-    Menu_Setup_itemsList = saved_list;
-    Menu_Setup_itemCount = saved_count;
-    Menu_Setup_itemsListSelection = saved_selection;
-    Menu_Setup_itemsListState = saved_state;
-    Menu_Setup_itemsListWindow = saved_window;
-    Menu_Setup_rowInfoUnused = saved_info;
-    Menu_Setup_combiningItem = saved_combining_item;
     Audio_Seq_unusedInventoryIndices = saved_indices;
     Battle_stringContext = saved_context;
     Menu_Framework_itemNames = saved_names;
     Menu_Framework_itemHelp = saved_help;
     Menu_Framework_shields = saved_shields;
-    std::copy(saved_available.begin(), saved_available.end(),
-              Menu_Setup_availableItems);
-    std::copy(saved_blades.begin(), saved_blades.end(),
-              Menu_Setup_combiningBladeIds);
-    std::copy(saved_armor.begin(), saved_armor.end(),
-              Menu_Setup_combiningArmorIds);
-    std::copy(saved_combining.begin(), saved_combining.end(),
-              Menu_Setup_itemsToCombine);
   }
 
   void FillParts() {
@@ -409,36 +396,42 @@ struct WorkshopChoicesFixture {
     return bytes;
   }
 
-  void Open(int (*select)(int), int initial, int capacity) {
-    REQUIRE(select(initial) == 0);
+  using Selector = int (*)(setup::Context&, int);
+
+  void Open(Selector select, int initial, int capacity) {
+    REQUIRE(RunSetup([&](setup::Context& c) { return select(c, initial); }) ==
+            0);
     for (auto& row : setup.rows.workspace.rows) row.state = 1;
     // InitializeHeap excludes the arena's final unit from the usable span.
     const auto slack =
         std::span(setup.rows.arena).last<VS::Core::Memory::kHeapUnitBytes>();
     const std::vector<std::byte> before(slack.begin(), slack.end());
-    REQUIRE(select(0) == 0);
+    REQUIRE(RunSetup([&](setup::Context& c) { return select(c, 0); }) == 0);
     CHECK(std::ranges::equal(before, slack));
-    REQUIRE(Menu_Setup_itemCount == capacity + 1);
-    REQUIRE(Menu_Setup_itemsList != nullptr);
+    const auto& list = setup::LiveSetupState().item_list;
+    REQUIRE(list.count == capacity + 1);
+    REQUIRE(list.open);
+  }
+
+  static const setup::ItemListState& List() {
+    return setup::LiveSetupState().item_list;
   }
 
   void CheckRows(int capacity) const {
-    const auto* items =
-        reinterpret_cast<const Menu_Framework_ItemText*>(Menu_Setup_itemsList);
-    CHECK((items[0].menuRowFlags & 1) == 1);
+    const auto& items = List().items;
+    CHECK((items[0].flags & 1) == 1);
     for (int row = 1; row <= capacity; ++row) {
       CAPTURE(row);
-      CHECK(Menu_Setup_availableItems[row] == row);
-      CHECK((items[row].menuRowFlags & 1) == 0);
-      CHECK(items[row].name[0] == 0xE70A);
+      CHECK(setup::LiveSetupState().available_items[row] == row);
+      CHECK((items[row].flags & 1) == 0);
+      CHECK(items[row].name[0] == 0x0A);
+      CHECK(items[row].name[1] == 0xE7);
     }
   }
 };
 
 struct WorkshopRepairFixture {
   WorkshopChoicesFixture setup;
-  u_int* saved_sfx_offsets = Audio_Playback_soundEffectProgramOffsets;
-  u_short* saved_sfx_selectors = Audio_Playback_soundEffectBankSelectors;
   decltype(Input_buttonsPressed) saved_pressed = Input_buttonsPressed;
   int saved_repeat = Input_buttonRepeat;
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
@@ -448,11 +441,13 @@ struct WorkshopRepairFixture {
   Battle_ActorStats stats{};
   std::array<u_int, 0x180> sfx_offsets{};
   std::array<u_short, 0x180> sfx_selectors{};
+  VS::Audio::Playback::ScopedLiveEffectTables sfx_tables{
+      {.program_offsets = sfx_offsets,
+       .bank_selectors = sfx_selectors,
+       .program_data = {}}};
 
   WorkshopRepairFixture(int missing_dp, int pp) {
     sfx_offsets.fill(UINT32_MAX);
-    Audio_Playback_soundEffectProgramOffsets = sfx_offsets.data();
-    Audio_Playback_soundEffectBankSelectors = sfx_selectors.data();
     auto& inventory = Audio_Seq_unusedInventory;
     inventory = {};
     auto initialize = [missing_dp, pp](auto& item, int id) {
@@ -479,8 +474,6 @@ struct WorkshopRepairFixture {
   }
 
   ~WorkshopRepairFixture() {
-    Audio_Playback_soundEffectProgramOffsets = saved_sfx_offsets;
-    Audio_Playback_soundEffectBankSelectors = saved_sfx_selectors;
     Input_buttonsPressed = saved_pressed;
     Input_buttonRepeat = saved_repeat;
     Menu_textBoxes[7] = saved_box;
@@ -490,7 +483,8 @@ struct WorkshopRepairFixture {
 
   int Tick() {
     for (auto& row : setup.setup.rows.workspace.rows) row.state = 1;
-    return Menu_Setup_UpdateRepair(0);
+    return RunSetup(
+        [](setup::Context& c) { return setup::UpdateRepair(c, false); });
   }
 
   void Equip() {
@@ -514,7 +508,9 @@ struct WorkshopRepairFixture {
   }
 
   void Prompt(int button) {
-    REQUIRE(Menu_Setup_UpdateRepair(1) == 0);
+    REQUIRE(RunSetup([](setup::Context& c) {
+              return setup::UpdateRepair(c, true);
+            }) == 0);
     Input_buttonsPressed.allButtons = static_cast<u_short>(button);
     for (int step = 0; step < 5; ++step) {
       CAPTURE(step);
@@ -524,40 +520,33 @@ struct WorkshopRepairFixture {
 };
 
 struct WorkshopRecipeFixture {
-  char* saved_combinations = Menu_Setup_combinationResults;
-  char* saved_materials = Menu_Setup_materialResults;
-  void* saved_blades = Menu_Setup_bladeCombinationInitData;
-  Menu_Setup_CombinedArmorRecord* saved_shields =
-      Menu_Setup_shieldCombinationInitData;
-  Menu_Setup_CombinedArmorRecord* saved_armor = Menu_Setup_combinationInitData;
-  std::array<char, sizeof(Audio_Seq_unusedMaterialModifiers)> saved_modifiers{};
-  alignas(Menu_Setup_SydHeader) std::array<unsigned char, 14000> bytes{};
-  static constexpr int kCombinations = 12;
-  static constexpr int kMaterials = 10000;
-  static constexpr int kRecords = 12000;
+  std::array<std::uint8_t, 14000> bytes{};
+  setup::MaterialBonuses bonuses{};
+  static constexpr std::uint32_t kCombinations = 12;
+  static constexpr std::uint32_t kMaterials = 10000;
+  static constexpr std::uint32_t kRecords = 12000;
 
   WorkshopRecipeFixture() {
-    std::memcpy(saved_modifiers.data(), Audio_Seq_unusedMaterialModifiers,
-                saved_modifiers.size());
-    std::memset(Audio_Seq_unusedMaterialModifiers, 0, saved_modifiers.size());
-    Menu_Setup_SydHeader header{};
-    header.combinationsOffset = kCombinations;
-    header.materialsOffset = kMaterials;
-    header.initDataOffset = kRecords;
-    std::memcpy(bytes.data(), &header, sizeof(header));
-    Audio_Seq_unusedMaterialModifiers[5][24] = 3;
-    Audio_Seq_unusedMaterialModifiers[5][26] = -2;
-    Audio_Seq_unusedMaterialModifiers[5][28] = -4;
+    const std::array<std::uint32_t, 3> header{kCombinations, kMaterials,
+                                              kRecords};
+    for (std::size_t table = 0; table < header.size(); ++table) {
+      for (std::size_t byte = 0; byte < sizeof(std::uint32_t); ++byte) {
+        bytes[(table * sizeof(std::uint32_t)) + byte] =
+            static_cast<std::uint8_t>(header[table] >> (byte * 8));
+      }
+    }
+    bonuses[5] = {.strength = 3, .intelligence = -2, .agility = -4};
   }
 
-  ~WorkshopRecipeFixture() {
-    Menu_Setup_combinationResults = saved_combinations;
-    Menu_Setup_materialResults = saved_materials;
-    Menu_Setup_bladeCombinationInitData = saved_blades;
-    Menu_Setup_shieldCombinationInitData = saved_shields;
-    Menu_Setup_combinationInitData = saved_armor;
-    std::memcpy(Audio_Seq_unusedMaterialModifiers, saved_modifiers.data(),
-                saved_modifiers.size());
+  [[nodiscard]] static setup::RecipeBook Decode(
+      setup::RecipeKind kind, std::span<const std::uint8_t> file) {
+    auto book = setup::DecodeRecipeFile(kind, file);
+    REQUIRE(book.has_value());
+    return *std::move(book);
+  }
+
+  [[nodiscard]] setup::RecipeBook Book(setup::RecipeKind kind) const {
+    return Decode(kind, bytes);
   }
 
   void ArmorRecipe(bool shield, int second_material) {
@@ -566,20 +555,29 @@ struct WorkshopRecipeFixture {
                                 : 3 * 128 + 3 * 32 + second_material * 4 + 2;
     bytes[kCombinations + combination] = 12;
     bytes[kMaterials + material] = 5;
-    const Menu_Setup_CombinedArmorRecord record{
-        0, 9, 4, 3, 10, static_cast<char>(-5), 2, 0};
-    std::memcpy(bytes.data() + kRecords + 12 * sizeof(record), &record,
-                sizeof(record));
+    const std::array<std::uint8_t, setup::kArmorRecipeBytes> record{
+        0, 9, 4, 3, 10, static_cast<std::uint8_t>(-5), 2, 0};
+    std::copy(record.begin(), record.end(),
+              bytes.begin() + kRecords + (12 * record.size()));
   }
 
-  void CheckArmor(const Items_InventoryArmor& result, bool shield) const {
-    const std::array<int, 16> actual{
-        result.id,       result.subId,     result.material,
-        result.category, result.strength,  result.intelligence,
-        result.agility,  result.maxDp,     result.currentDp,
-        result.maxPp,    result.currentPp, result.gemSlots,
-        result.wepId,    result.index,     result.limb,
-        result.types[0]};
+  void CheckArmor(const VS::Items::InventoryArmor& result, bool shield) const {
+    const std::array<int, 16> actual{result.id,
+                                     result.sub_id,
+                                     result.material,
+                                     result.category,
+                                     result.strength,
+                                     result.intelligence,
+                                     result.agility,
+                                     result.max_dp,
+                                     result.current_dp,
+                                     result.max_pp,
+                                     result.current_pp,
+                                     result.gem_slots,
+                                     result.weapon_model_id,
+                                     result.index,
+                                     result.limb,
+                                     result.types[0]};
     const std::array<int, 16> expected{138,
                                        12,
                                        5,
@@ -602,35 +600,26 @@ struct WorkshopRecipeFixture {
     }
   }
 
-  void CheckBlade(const Items_InventoryBlade& result,
+  void CheckBlade(const VS::Items::InventoryBlade& result,
                   const std::array<unsigned char, 16>& record) const {
     const std::array<int, 18> actual{
-        result.id,
-        result.subId,
-        result.wepId,
-        result.category,
-        result.material,
-        result.strength,
-        result.intelligence,
-        result.agility,
-        static_cast<unsigned char>(result.damageType) & 3,
-        static_cast<unsigned char>(result.costType) & 7,
-        result.cost,
-        result.opaque12,
-        result.maxDp,
-        result.currentDp,
-        result.maxPp,
-        result.currentPp,
-        result.index,
-        result.assembledWeaponIndex};
+        result.id,           result.sub_id,     result.weapon_model_id,
+        result.category,     result.material,   result.strength,
+        result.intelligence, result.agility,    result.DamageType(),
+        result.CostType(),   result.cost,       result.opaque12,
+        result.max_dp,       result.current_dp, result.max_pp,
+        result.current_pp,   result.index,      result.assembled_weapon_index};
     const std::array<int, 18> expected{31, 31, 35, 4,    5,    13,  4,  -2, 2,
                                        5,  7,  9,  1501, 1501, 151, 61, 7,  2};
     for (std::size_t index = 0; index < actual.size(); ++index) {
       CAPTURE(index);
       CHECK(actual[index] == expected[index]);
     }
-    CHECK(std::memcmp(&result.range, record.data() + 12,
-                      sizeof(result.range)) == 0);
+    const VS::Items::WeaponRange range{.range = record[12],
+                                       .second_range = record[13],
+                                       .third_range = record[14],
+                                       .shape_bits = record[15]};
+    CHECK(result.range == range);
   }
 };
 
@@ -653,7 +642,7 @@ std::vector<unsigned char> ReadWorkshopRecipe(std::string_view file) {
 }  // namespace
 
 TEST_CASE("Workshop repair restores DP with original rounded PP cost",
-          "[menu][equipment][workshop][repair]") {
+          "[menu][equipment][workshop][repair][menu-setup]") {
   const int missing = GENERATE(0, 1, 99, 100, 101, 9999, 10000);
   const int pp = GENERATE(0, 1, 50, 200);
   CAPTURE(missing, pp);
@@ -682,41 +671,41 @@ TEST_CASE("Workshop repair restores DP with original rounded PP cost",
 }
 
 TEST_CASE("Workshop armor recipes retain original ownership and result rules",
-          "[menu][equipment][workshop][recipes]") {
+          "[menu][equipment][workshop][recipes][menu-setup]") {
   const bool shield = GENERATE(false, true);
   const int second_material = GENERATE(3, 4);
   CAPTURE(shield, second_material);
   WorkshopRecipeFixture fixture;
   fixture.ArmorRecipe(shield, second_material);
-  Items_InventoryArmor first{}, second{}, result{};
+  VS::Items::InventoryArmor first{}, second{};
   first.id = 191;
-  first.subId = static_cast<char>(shield ? 6 : 65);
+  first.sub_id = static_cast<std::uint8_t>(shield ? 6 : 65);
   first.category = 5;
   first.material = 3;
   first.index = 7;
   first.limb = 2;
-  first.maxDp = 1001;
-  first.currentDp = 123;
-  first.maxPp = 101;
-  first.currentPp = 41;
+  first.max_dp = 1001;
+  first.current_dp = 123;
+  first.max_pp = 101;
+  first.current_pp = 41;
   first.types[0] = 7;
-  second.subId = static_cast<char>(shield ? 7 : 66);
+  second.sub_id = static_cast<std::uint8_t>(shield ? 7 : 66);
   second.category = 4;
-  second.material = static_cast<u_short>(second_material);
-  second.maxDp = 2002;
-  second.maxPp = 202;
-  second.currentPp = 82;
-  const auto saved_first = first, saved_second = second;
+  second.material = static_cast<std::uint16_t>(second_material);
+  second.max_dp = 2002;
+  second.max_pp = 202;
+  second.current_pp = 82;
   const auto build =
-      shield ? Menu_Setup_BuildCombinedShield : Menu_Setup_BuildCombinedArmor;
-  REQUIRE(build(&first, &second, &result, fixture.bytes.data()) == &result);
-  fixture.CheckArmor(result, shield);
-  CHECK(std::memcmp(&first, &saved_first, sizeof(first)) == 0);
-  CHECK(std::memcmp(&second, &saved_second, sizeof(second)) == 0);
+      shield ? setup::BuildCombinedShield : setup::BuildCombinedArmor;
+  const auto book = fixture.Book(shield ? setup::RecipeKind::kShield
+                                        : setup::RecipeKind::kArmor);
+  const auto result = build(first, second, book, fixture.bonuses);
+  REQUIRE(result.has_value());
+  fixture.CheckArmor(*result, shield);
 }
 
 TEST_CASE("Workshop repair refreshes equipped runtime DP and PP",
-          "[menu][equipment][workshop][repair]") {
+          "[menu][equipment][workshop][repair][menu-setup]") {
   const int missing = GENERATE(101, 9999);
   const int pp = GENERATE(0, 50, 200);
   WorkshopRepairFixture fixture(missing, pp);
@@ -740,7 +729,7 @@ TEST_CASE("Workshop repair refreshes equipped runtime DP and PP",
 }
 
 TEST_CASE("Workshop blade recipes use ordered IDs materials and native stats",
-          "[menu][equipment][workshop][recipes]") {
+          "[menu][equipment][workshop][recipes][menu-setup]") {
   const int second_material = GENERATE(3, 4);
   WorkshopRecipeFixture fixture;
   fixture.bytes[fixture.kCombinations + 14 * 96 + 26] = 31;
@@ -750,40 +739,37 @@ TEST_CASE("Workshop blade recipes use ordered IDs materials and native stats",
                                              10, 6,  2, 0, 1, 2, 3, 4};
   std::copy(record.begin(), record.end(),
             fixture.bytes.data() + fixture.kRecords + 31 * record.size());
-  Items_InventoryBlade first{}, second{}, result{};
+  VS::Items::InventoryBlade first{}, second{};
   first.id = 14;
   first.category = 3;
   first.material = 3;
   first.index = 7;
-  first.assembledWeaponIndex = 2;
-  first.maxDp = 1001;
-  first.currentDp = 123;
-  first.maxPp = 101;
-  first.currentPp = 41;
+  first.assembled_weapon_index = 2;
+  first.max_dp = 1001;
+  first.current_dp = 123;
+  first.max_pp = 101;
+  first.current_pp = 41;
   second.id = 26;
   second.category = 4;
-  second.material = static_cast<u_short>(second_material);
-  second.maxDp = 2002;
-  second.maxPp = 202;
-  second.currentPp = 82;
-  const auto saved_first = first, saved_second = second;
-  REQUIRE(Menu_Setup_BuildCombinedBlade(&first, &second, &result,
-                                        fixture.bytes.data()) == &result);
-  fixture.CheckBlade(result, record);
-  CHECK(std::memcmp(&first, &saved_first, sizeof(first)) == 0);
-  CHECK(std::memcmp(&second, &saved_second, sizeof(second)) == 0);
+  second.material = static_cast<std::uint16_t>(second_material);
+  second.max_dp = 2002;
+  second.max_pp = 202;
+  second.current_pp = 82;
+  const auto result = setup::BuildCombinedBlade(
+      first, second, fixture.Book(setup::RecipeKind::kBlade), fixture.bonuses);
+  REQUIRE(result.has_value());
+  fixture.CheckBlade(*result, record);
 }
 
 TEST_CASE("Workshop stat fusion preserves extrema truncation and bounds",
-          "[menu][equipment][workshop][recipes]") {
+          "[menu][equipment][workshop][recipes][menu-setup]") {
   const int different = GENERATE(0, 1);
   const int affinities = GENERATE(0, 1);
-  const std::array<signed char, 7> values{100, 99, -99, -100, 4, -4, 3};
-  auto first = values, second = values;
-  std::array<signed char, 8> result{};
+  const VS::Items::PartClasses values{100, 99, -99, -100, 4, -4, 3, 0};
+  VS::Items::PartClasses result{};
   result.fill(77);
-  Menu_Setup_CombineClassOrAffinityValues(first.data(), second.data(),
-                                          result.data(), different, affinities);
+  setup::CombineClassOrAffinityValues(values, values, result, different != 0,
+                                      affinities != 0);
   const int scaled = different ? 5 : 6;
   const std::array<int, 8> expected{
       100, 100, -100, -100, scaled, -scaled, affinities ? 4 : 77, 77};
@@ -791,56 +777,61 @@ TEST_CASE("Workshop stat fusion preserves extrema truncation and bounds",
     CAPTURE(index);
     CHECK(result[index] == expected[index]);
   }
-  CHECK(first == values);
-  CHECK(second == values);
 }
 
 TEST_CASE("Original blade recipe produces the inspected ordered result",
-          "[menu][equipment][workshop][recipes][disc]") {
+          "[menu][equipment][workshop][recipes][disc][menu-setup]") {
   WorkshopRecipeFixture fixture;
   auto bytes = ReadWorkshopRecipe("BLADE.SYD");
   REQUIRE(bytes.size() == 13264);
-  Items_InventoryBlade first{}, second{}, result{};
+  VS::Items::InventoryBlade first{}, second{};
   first.id = 14;
   first.category = 2;
   first.material = 3;
-  first.maxDp = 1001;
+  first.max_dp = 1001;
   second.id = 25;
   second.category = 3;
   second.material = 4;
-  second.maxDp = 2002;
-  REQUIRE(Menu_Setup_BuildCombinedBlade(&first, &second, &result,
-                                        bytes.data()) == &result);
+  second.max_dp = 2002;
+  const auto book =
+      WorkshopRecipeFixture::Decode(setup::RecipeKind::kBlade, bytes);
+  const auto result =
+      setup::BuildCombinedBlade(first, second, book, fixture.bonuses);
+  REQUIRE(result.has_value());
   const std::array<int, 10> actual{
-      result.id,       result.subId,    result.wepId,        result.category,
-      result.material, result.strength, result.intelligence, result.agility,
-      result.maxDp,    result.currentDp};
+      result->id,           result->sub_id,   result->weapon_model_id,
+      result->category,     result->material, result->strength,
+      result->intelligence, result->agility,  result->max_dp,
+      result->current_dp};
   const std::array<int, 10> expected{13, 13, 14, 2, 4, 5, 0, -1, 1501, 1501};
   CHECK(actual == expected);
 }
 
 TEST_CASE(
     "Original shield and armor recipes use their distinct material tables",
-    "[menu][equipment][workshop][recipes][disc]") {
+    "[menu][equipment][workshop][recipes][disc][menu-setup]") {
   const bool shield = GENERATE(false, true);
   WorkshopRecipeFixture fixture;
   auto bytes = ReadWorkshopRecipe(shield ? "SHIELD.SYD" : "ARMOR.SYD");
   REQUIRE(bytes.size() == (shield ? 504 : 5912));
-  Items_InventoryArmor first{}, second{}, result{};
-  first.subId = static_cast<u_char>(shield ? 6 : 65);
-  second.subId = static_cast<u_char>(shield ? 7 : 66);
+  VS::Items::InventoryArmor first{}, second{};
+  first.sub_id = static_cast<std::uint8_t>(shield ? 6 : 65);
+  second.sub_id = static_cast<std::uint8_t>(shield ? 7 : 66);
   first.category = second.category = 5;
-  first.material = static_cast<u_short>(shield ? 3 : 2);
-  second.material = static_cast<u_short>(shield ? 4 : 3);
-  first.maxDp = 1001;
-  second.maxDp = 2002;
+  first.material = static_cast<std::uint16_t>(shield ? 3 : 2);
+  second.material = static_cast<std::uint16_t>(shield ? 4 : 3);
+  first.max_dp = 1001;
+  second.max_dp = 2002;
   const auto build =
-      shield ? Menu_Setup_BuildCombinedShield : Menu_Setup_BuildCombinedArmor;
-  REQUIRE(build(&first, &second, &result, bytes.data()) == &result);
+      shield ? setup::BuildCombinedShield : setup::BuildCombinedArmor;
+  const auto book = WorkshopRecipeFixture::Decode(
+      shield ? setup::RecipeKind::kShield : setup::RecipeKind::kArmor, bytes);
+  const auto result = build(first, second, book, fixture.bonuses);
+  REQUIRE(result.has_value());
   const std::array<int, 9> actual{
-      result.id,       result.subId,    result.category,
-      result.material, result.strength, result.intelligence,
-      result.agility,  result.maxDp,    result.currentDp};
+      result->id,       result->sub_id,   result->category,
+      result->material, result->strength, result->intelligence,
+      result->agility,  result->max_dp,   result->current_dp};
   const std::array<int, 9> expected{shield ? 134 : 192,
                                     shield ? 8 : 66,
                                     shield ? 1 : 5,
@@ -854,15 +845,15 @@ TEST_CASE(
 }
 
 TEST_CASE("Workshop physical fusion preserves sentinel type and signed bounds",
-          "[menu][equipment][workshop][recipes]") {
+          "[menu][equipment][workshop][recipes][menu-setup]") {
   const int different = GENERATE(0, 1);
   const int same_type = GENERATE(0, 1);
-  std::array<signed char, 4> types1{7, 100, -90, 9};
-  std::array<signed char, 4> types2{8, -90, 100, -4};
+  VS::Items::PartTypes types1{7, 100, -90, 9};
+  VS::Items::PartTypes types2{8, -90, 100, -4};
   if (same_type) types2 = types1;
-  std::array<signed char, 4> types_result{77, 77, 77, 77};
-  Menu_Setup_CombinePhysicalTypeValues(types1.data(), types2.data(),
-                                       types_result.data(), different);
+  VS::Items::PartTypes types_result{77, 77, 77, 77};
+  setup::CombinePhysicalTypeValues(types1, types2, types_result,
+                                   different != 0);
   CHECK(types_result[0] == 77);
   const int factor = different ? (same_type ? 6 : 4) : (same_type ? 8 : 6);
   for (int index = 1; index < 4; ++index) {
@@ -873,13 +864,13 @@ TEST_CASE("Workshop physical fusion preserves sentinel type and signed bounds",
 }
 
 TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
-          "[menu][equipment][workshop][ownership]") {
+          "[menu][equipment][workshop][ownership][menu-setup]") {
   const int slots = GENERATE(0, 1, 2, 3);
   WorkshopChoicesFixture fixture;
   auto& inventory = Audio_Seq_unusedInventory;
   inventory.weapons[2].index = 3;
   inventory.grips[0].gemSlots = static_cast<char>(slots);
-  Menu_Setup_combiningItem = 2;
+  setup::LiveSetupState().combining_item = 2;
   auto expected = inventory;
   auto& weapon = expected.weapons[2];
   weapon.blade = weapon.grip = 1;
@@ -890,8 +881,9 @@ TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
     weapon.gems[index] = static_cast<u_char>(index + 1);
     expected.gems[index].setItemIndex = 3;
   }
+  constexpr std::array<std::uint8_t, 4> kGems{1, 2, 3, 0};
   for (int repeat = 0; repeat < 2; ++repeat) {
-    Menu_Setup_AssembleWeapon(0, 0, 0x030201);
+    RunSetup([&](setup::Context& c) { setup::AssembleWeapon(c, 0, 0, kGems); });
     CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
   }
   expected.weapons[2] = {};
@@ -901,14 +893,14 @@ TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
   for (int index = 0; index < slots; ++index) {
     expected.gems[index].setItemIndex = 0;
   }
-  Menu_Setup_DisassembleWeapon(2);
-  CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
-  Menu_Setup_DisassembleWeapon(2);
-  CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    RunSetup([](setup::Context& c) { setup::DisassembleWeapon(c, 2); });
+    CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
+  }
 }
 
 TEST_CASE("Shield disassembly releases only its attached gem ownership",
-          "[menu][equipment][workshop][ownership]") {
+          "[menu][equipment][workshop][ownership][menu-setup]") {
   const int slots = GENERATE(0, 1, 2, 3);
   WorkshopChoicesFixture fixture;
   auto& inventory = Audio_Seq_unusedInventory;
@@ -922,18 +914,19 @@ TEST_CASE("Shield disassembly releases only its attached gem ownership",
   for (int index = 0; index < slots; ++index) {
     expected.gems[index].setItemIndex = 0;
   }
-  Menu_Setup_DetachShieldGems(4);
+  RunSetup([](setup::Context& c) { setup::DetachShieldGems(c, 4); });
   CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
 }
 
 TEST_CASE("Workshop combination choices enforce original material masks",
-          "[menu][equipment][workshop][choices]") {
+          "[menu][equipment][workshop][choices][menu-setup]") {
   const int workshop = GENERATE(0, 1, 2, 3, 4, 5, 6);
   const int material = GENERATE(1, 2, 3, 4, 5, 6, 7);
   const int category = GENERATE(0, 1, 2);
   CAPTURE(workshop, material, category);
   WorkshopChoicesFixture fixture;
-  Menu_Setup_currentWorkshop = static_cast<u_char>(workshop);
+  setup::LiveSetupState().combination.workshop =
+      static_cast<std::uint8_t>(workshop);
   for (auto& blade : Audio_Seq_unusedInventory.blades) {
     blade.material = static_cast<u_short>(material);
   }
@@ -943,61 +936,58 @@ TEST_CASE("Workshop combination choices enforce original material masks",
   for (auto& armor : Audio_Seq_unusedInventory.armor) {
     armor.material = static_cast<u_short>(material);
   }
-  constexpr std::array kSelectors{Menu_Setup_SelectCombinationBlade,
-                                  Menu_Setup_SelectCombinationShield,
-                                  Menu_Setup_SelectCombinationArmor};
+  constexpr std::array<WorkshopChoicesFixture::Selector, 3> kSelectors{
+      setup::SelectCombinationBlade, setup::SelectCombinationShield,
+      setup::SelectCombinationArmor};
   const int capacity = category == 1 ? 8 : 16;
   const auto original = fixture.InventoryBytes();
   fixture.Open(kSelectors[category], 1, capacity);
   constexpr std::array kMasks{0, 0x0E, 0x18, 0x38, 0xC0, 0x3E, 0xFE};
   const bool disabled = (kMasks[workshop] & (1 << material)) == 0;
-  const auto* rows =
-      reinterpret_cast<const Menu_Framework_ItemText*>(Menu_Setup_itemsList);
+  const auto& rows = WorkshopChoicesFixture::List().items;
   for (int row = 1; row <= capacity; ++row) {
-    CHECK((rows[row].menuRowFlags & 1) == disabled);
+    CHECK((rows[row].flags & 1) == disabled);
   }
   CHECK(original == fixture.InventoryBytes());
 }
 
 TEST_CASE("Combination choices exclude the other ingredient and accessories",
-          "[menu][equipment][workshop][choices]") {
+          "[menu][equipment][workshop][choices][menu-setup]") {
   const int category = GENERATE(0, 1, 2);
   WorkshopChoicesFixture fixture;
-  Menu_Setup_combiningBladeIds[0] = Menu_Setup_combiningArmorIds[0] = 1;
-  Menu_Setup_itemsToCombine[0] = 1;
-  Menu_Setup_combiningBladeIds[1] = Menu_Setup_combiningArmorIds[1] = 2;
-  Menu_Setup_itemsToCombine[1] = 2;
+  auto& combination = setup::LiveSetupState().combination;
+  combination.blade_ids = combination.shield_ids =
+      combination.armor_ids = {1, 2};
   Audio_Seq_unusedInventory.armor[15].category = 7;
   const int capacity = category == 1 ? 6 : (category == 2 ? 13 : 14);
-  constexpr std::array kSelectors{Menu_Setup_SelectCombinationBlade,
-                                  Menu_Setup_SelectCombinationShield,
-                                  Menu_Setup_SelectCombinationArmor};
+  constexpr std::array<WorkshopChoicesFixture::Selector, 3> kSelectors{
+      setup::SelectCombinationBlade, setup::SelectCombinationShield,
+      setup::SelectCombinationArmor};
   const auto original = fixture.InventoryBytes();
   fixture.Open(kSelectors[category], 1, capacity);
-  CHECK(Menu_Setup_availableItems[0] == 1);
-  const auto* rows =
-      reinterpret_cast<const Menu_Framework_ItemText*>(Menu_Setup_itemsList);
-  CHECK((rows[0].menuRowFlags & 1) == 0);
+  const auto& available = setup::LiveSetupState().available_items;
+  CHECK(available[0] == 1);
+  CHECK((WorkshopChoicesFixture::List().items[0].flags & 1) == 0);
   for (int row = 1; row <= capacity; ++row) {
-    CHECK(Menu_Setup_availableItems[row] == row + 2);
+    CHECK(available[row] == row + 2);
   }
   CHECK(original == fixture.InventoryBytes());
 }
 
 TEST_CASE("Workshop selectors copy full stock-capacity component lists",
-          "[menu][equipment][workshop][choices]") {
+          "[menu][equipment][workshop][choices][menu-setup]") {
   struct Selector {
-    int (*select)(int);
+    WorkshopChoicesFixture::Selector select;
     int initial;
     int capacity;
   };
   constexpr std::array kSelectors{
-      Selector{Menu_Setup_SelectAssemblyBlade, 0x80, 16},
-      Selector{Menu_Setup_SelectAssemblyGrip, 0x80, 16},
-      Selector{Menu_Setup_SelectGem, 11, 48},
-      Selector{Menu_Setup_SelectCombinationBlade, 1, 16},
-      Selector{Menu_Setup_SelectCombinationShield, 1, 8},
-      Selector{Menu_Setup_SelectCombinationArmor, 1, 16}};
+      Selector{setup::SelectAssemblyBlade, 0x80, 16},
+      Selector{setup::SelectAssemblyGrip, 0x80, 16},
+      Selector{setup::SelectGem, 11, 48},
+      Selector{setup::SelectCombinationBlade, 1, 16},
+      Selector{setup::SelectCombinationShield, 1, 8},
+      Selector{setup::SelectCombinationArmor, 1, 16}};
   const auto index = GENERATE(0, 1, 2, 3, 4, 5);
   CAPTURE(index);
   const auto& selector = kSelectors[index];
@@ -1009,7 +999,7 @@ TEST_CASE("Workshop selectors copy full stock-capacity component lists",
 }
 
 TEST_CASE("Setup actions obey original workshop and weapon-capacity gates",
-          "[menu][equipment][workshop]") {
+          "[menu][equipment][workshop][menu-setup]") {
   const int workshop = GENERATE(0, 1, 2, 3, 4, 5, 6);
   const int weapon_count = GENERATE(0, 1, 7, 8);
   const bool cursor_memory = GENERATE(false, true);
@@ -1017,7 +1007,7 @@ TEST_CASE("Setup actions obey original workshop and weapon-capacity gates",
   WorkshopGateFixture fixture(workshop, weapon_count, cursor_memory);
   REQUIRE(VS::Items::Inventory::CountLiveItems(0, nullptr) == weapon_count);
   const auto* rows = fixture.Open();
-  REQUIRE(Menu_Setup_currentWorkshop == workshop);
+  REQUIRE(setup::LiveSetupState().combination.workshop == workshop);
   CHECK(Input_settings.cursorMemory == cursor_memory);
   for (int row = 0; row < 6; ++row) {
     CAPTURE(row);
@@ -1058,7 +1048,7 @@ TEST_CASE("Cursor Memory controls the actual root selection consumer",
   Input_settings.menuFlags = flags;
   for (int visit = 0; visit < 3; ++visit) {
     Menu_Framework_submenuStates[0] = 7;
-    CHECK(Menu_Framework_UpdateMainMenuSelection(2) == 0);
+    CHECK(VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0);
     CHECK(Menu_Framework_submenuStates[0] ==
           (enabled ? 7 : (flags == 0x3F8 ? 3 : 0)));
     CHECK(Input_settings.cursorMemory == enabled);
@@ -1074,16 +1064,16 @@ TEST_CASE("Cursor Memory restores shared row and scroll positions",
   Menu_Framework_menuMemory.cursorMemories[1] = 5;
   fixture.OpenRows(20);
   REQUIRE(Menu_Framework_itemsText != nullptr);
-  CHECK(Menu_Framework_HighlightedRow() == (enabled ? 8 : 0));
+  CHECK(VS::Menu::Framework::LiveHighlightedRow() == (enabled ? 8 : 0));
   Menu_Framework_selectedRow = 4;
   Menu_Framework_subMenuPage = 6;
-  Menu_Framework_CloseRowsAndRememberCursor();
+  VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
   CHECK(Menu_Framework_itemsText == nullptr);
   CHECK(Menu_Framework_menuMemory.cursorMemories[0] == 4);
   CHECK(Menu_Framework_menuMemory.cursorMemories[1] == 6);
   fixture.OpenRows(20);
   REQUIRE(Menu_Framework_itemsText != nullptr);
-  CHECK(Menu_Framework_HighlightedRow() == (enabled ? 10 : 0));
+  CHECK(VS::Menu::Framework::LiveHighlightedRow() == (enabled ? 10 : 0));
 }
 
 TEST_CASE("Cursor Memory clamps a remembered selection after rows shrink",
@@ -1094,7 +1084,7 @@ TEST_CASE("Cursor Memory clamps a remembered selection after rows shrink",
   Menu_Framework_menuMemory.cursorMemories[1] = 6;
   fixture.OpenRows(3);
   REQUIRE(Menu_Framework_itemsText != nullptr);
-  CHECK(Menu_Framework_HighlightedRow() == 0);
+  CHECK(VS::Menu::Framework::LiveHighlightedRow() == 0);
 }
 
 TEST_CASE("Options retain the real Puzzle Mode availability gate",
@@ -1103,8 +1093,8 @@ TEST_CASE("Options retain the real Puzzle Mode availability gate",
   PuzzleOptionsFixture fixture;
   Audio_Seq_unusedStateFlags.puzzleModeDisabled = disabled;
   Input_settings.cursorMemory = 0;
-  u_char state = 4;
-  CHECK(Menu_Options_Update(&state) == 0);
+  std::uint8_t state = 4;
+  CHECK(VS::Menu::Options::UpdateLiveOptions(state) == 0);
   CHECK(state == 5);
   CHECK(Input_settings.cursorMemory == 0);
   REQUIRE(Menu_Framework_itemsText != nullptr);
@@ -1137,7 +1127,7 @@ TEST_CASE(
   fixture.Open();
   REQUIRE(Menu_Framework_itemsText != nullptr);
   REQUIRE(Menu_Framework_subMenuRowCount == (shortcut ? 4 : 5));
-  REQUIRE(Menu_Framework_HighlightedRow() == (cursor_memory ? 3 : 0));
+  REQUIRE(VS::Menu::Framework::LiveHighlightedRow() == (cursor_memory ? 3 : 0));
   CHECK(Input_settings.cursorMemory == cursor_memory);
   const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
       Menu_Framework_itemsText);

@@ -19,8 +19,18 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleRenderLive.hpp"
+#include "Effects/Templates/ParticlesLive.hpp"
+#include "Effects/Templates/RingsLive.hpp"
+#include "Effects/Templates/SurfacesLive.hpp"
+#include "Effects/Templates/TrailControl.hpp"
+#include "Effects/Templates/TrailInit.hpp"
+#include "Effects/Templates/TrailRender.hpp"
+#include "Effects/Templates/TrailTarget.hpp"
+#include "Effects/Templates/TrailUpdate.hpp"
+#include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
@@ -28,31 +38,19 @@
 
 extern "C" {
 #include "Core/BiosRand.h"
-#include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
+#include "Effects/Plugins/Plg045.h"
 #include "Effects/Plugins/Plg053.h"
+#include "Effects/Plugins/Plg065.h"
 #include "Effects/Plugins/Plg073.h"
+#include "Effects/Plugins/Plg082.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
 #include "Effects/ScriptVm.h"
-#include "Effects/Templates/ClosedRing.h"
-#include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/ParticleRender.h"
-#include "Effects/Templates/Ring.h"
-#include "Effects/Templates/RotatingSurface.h"
-#include "Effects/Templates/TiledRing.h"
-#include "Effects/Templates/TrailControl.h"
-#include "Effects/Templates/TrailDispatch.h"
-#include "Effects/Templates/TrailInit.h"
-#include "Effects/Templates/TrailNineInit.h"
-#include "Effects/Templates/TrailNineRender.h"
-#include "Effects/Templates/TrailNineUpdate.h"
-#include "Effects/Templates/TrailOrigin.h"
-#include "Effects/Templates/TrailRender.h"
-#include "Effects/Templates/TrailTarget.h"
-#include "Effects/Templates/TrailUpdate.h"
+#include "Effects/Templates/TemplateState.h"
 #include "Effects/Timeline.h"
+#include "Effects/Trails.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -103,6 +101,7 @@ struct EffectTraceScope {
 struct ParticleFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* saved_ordering = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   int saved_near = Render_nearClip;
   int saved_projection = Render_projectionDistance;
@@ -133,6 +132,7 @@ struct ParticleFixture {
     package.curveBlock =
         reinterpret_cast<Effects_CurveBlock*>(curve_block.data());
     package.curves[0] = curve.data();
+    VS::Effects::RecordLiveEffectCurves(std::as_bytes(std::span(curve_block)));
     texture.u = 16;
     texture.v = 32;
     texture.w = texture.h = 8;
@@ -149,6 +149,7 @@ struct ParticleFixture {
     particle.transparency = 16;
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
       Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
@@ -167,9 +168,11 @@ struct ParticleFixture {
   ~ParticleFixture() {
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_legacyOrderingTables[0] = saved_ordering;
     Render_frameBuf = saved_framebuffer;
     Render_nearClip = saved_near;
     Render_projectionDistance = saved_projection;
+    VS::Effects::ForgetLivePackageExtents();
     Effects_package = saved_package;
     Effects_currentInstance = saved_instance;
     Effects_particlePool = saved_pool;
@@ -587,6 +590,21 @@ struct DispatchHeap {
     REQUIRE(state.controlPoints != nullptr);
   }
 };
+
+// The particle-set entries read definitions only within the package's
+// recorded block-5 extent.
+struct RecordedDefinitions {
+  explicit RecordedDefinitions(const EmissionFixture& fixture) {
+    VS::Effects::ForgetLivePackageExtents();
+    VS::Effects::RecordLiveParticleDefinitions(
+        std::as_bytes(std::span{&fixture.definitions, 1}));
+  }
+  ~RecordedDefinitions() { VS::Effects::ForgetLivePackageExtents(); }
+  RecordedDefinitions(const RecordedDefinitions&) = delete;
+  RecordedDefinitions& operator=(const RecordedDefinitions&) = delete;
+  RecordedDefinitions(RecordedDefinitions&&) = delete;
+  RecordedDefinitions& operator=(RecordedDefinitions&&) = delete;
+};
 }  // namespace
 
 TEST_CASE(
@@ -603,14 +621,16 @@ TEST_CASE(
 }
 
 TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
-          "[effects][particle-dispatch]") {
+          "[effects][particle-dispatch][effects-particles]") {
   EmissionFixture fixture;
+  const RecordedDefinitions recorded{fixture};
   DispatchHeap heap;
   Effects_RendererSlot renderer{};
   fixture.package.block1TableCount = 1;
   fixture.package.block2Count = 1;
-  const auto dispatch = GENERATE(Effects_Plg045_ParticleDispatch,
-                                 Effects_Plg265_ParticleDispatch2);
+  const auto dispatch =
+      GENERATE(&VS::Effects::Templates::UpdateLivePlg045ParticleDispatch,
+               &VS::Effects::Templates::UpdateLivePlg265ParticleDispatch2);
   REQUIRE(dispatch(&renderer, 1, 30) == 1);
   REQUIRE(renderer.rendererState != nullptr);
   const auto capacity = DispatchHeap::Capacity(renderer.rendererState);
@@ -626,11 +646,14 @@ TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
 }
 
 TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
-          "[effects][particle-dispatch]") {
+          "[effects][particle-dispatch][effects-particles]") {
   EmissionFixture fixture;
+  const RecordedDefinitions recorded{fixture};
   DispatchHeap heap;
   Effects_RendererSlot renderer{};
-  REQUIRE(Effects_Plg265_ParticleDispatch(&renderer, 1, 30) == 1);
+  const auto dispatch =
+      &VS::Effects::Templates::UpdateLivePlg265ParticleDispatch;
+  REQUIRE(dispatch(&renderer, 1, 30) == 1);
   const auto prefix = offsetof(Effects_ParticleQuadSet, textureAnimation);
   constexpr auto kUnit = VS::Core::Memory::kHeapUnitBytes;
   const auto rounded = (prefix + kUnit - 1) / kUnit * kUnit;
@@ -639,7 +662,89 @@ TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
       static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
   DispatchHeap::CheckPrefix(*state);
   CHECK(state->opaque8 == 0);
-  CHECK(Effects_Plg265_ParticleDispatch(&renderer, 4, 0) == 0);
+  CHECK(dispatch(&renderer, 4, 0) == 0);
+  VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+namespace {
+using LiveParticleDispatch = int (*)(Effects_RendererSlot*, unsigned int, int);
+
+// A particle-set entry, the GPU words and code of each segment it draws and
+// the overlay global its origin steps.
+struct LiveParticleCase {
+  LiveParticleDispatch dispatch;
+  std::size_t words;
+  u_long code;
+  int* counter;
+};
+
+// Restores an overlay's emission cursor after a test steps it.
+class SavedCounter {
+ public:
+  explicit SavedCounter(int& counter) : counter_(counter), saved_(counter) {}
+  SavedCounter(const SavedCounter&) = delete;
+  SavedCounter& operator=(const SavedCounter&) = delete;
+  SavedCounter(SavedCounter&&) = delete;
+  SavedCounter& operator=(SavedCounter&&) = delete;
+  ~SavedCounter() { counter_ = saved_; }
+
+ private:
+  int& counter_;
+  int saved_;
+};
+
+// One scene table entry and a box-corner origin at z 512 aiming at a target
+// at z 1024 on the view axis.
+void PrepareLiveCornerSet(EmissionFixture& fixture) {
+  fixture.package.block1TableCount = 1;
+  fixture.package.block2Count = 1;
+  auto& definition = fixture.definitions.entries[0];
+  definition.flags = 0x1008;
+  definition.positionRange[4] = definition.positionRange[5] = 512;
+  definition.vectorRanges[6][4] = definition.vectorRanges[6][5] = 1024;
+}
+
+// The first segment's packet opens with its draw-mode word, carries the
+// set's grey and the segment's GPU code, and closes with the reset word.
+void CheckLiveSegmentPacket(const u_long* packet,
+                            const LiveParticleCase& live) {
+  CHECK(packet[1] >> 24 == 0xE1);
+  CHECK(packet[2] == ((live.code << 24) | 0x808080));
+  CHECK(packet[live.words - 1] == 0xE1000200);
+}
+}  // namespace
+
+TEST_CASE("Live particle ticks link every ribbon segment into the scene table",
+          "[effects][particle-dispatch][effects-particles]") {
+  const auto live = GENERATE(
+      LiveParticleCase{
+          &VS::Effects::Templates::UpdateLivePlg045ParticleDispatch, 15, 0x3E,
+          &Effects_Plg045_particleEmissionCounter},
+      LiveParticleCase{
+          &VS::Effects::Templates::UpdateLivePlg065ParticleDispatch, 6, 0x42,
+          &Effects_Plg065_particleEmissionCounter},
+      LiveParticleCase{
+          &VS::Effects::Templates::UpdateLivePlg152ParticleDispatch, 15, 0x3E,
+          &Effects_Plg082_particleEmissionCounter});
+  EmissionFixture fixture;
+  const RecordedDefinitions recorded{fixture};
+  DispatchHeap heap;
+  const SavedCounter saved{*live.counter};
+  *live.counter = 3;
+  PrepareLiveCornerSet(fixture);
+  Effects_RendererSlot renderer{};
+  REQUIRE(live.dispatch(&renderer, 1, 0) == 1);
+  REQUIRE(live.dispatch(&renderer, 2, 0) == 1);
+  const auto* state =
+      static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
+  REQUIRE(state != nullptr);
+  CHECK(state->age == 1);
+  CHECK(*live.counter == 4);
+  const u_long* packet = fixture.storage.data() + 1;
+  CHECK(Render_frameScratch.primitiveCursor == packet + (8 * live.words));
+  CheckLiveSegmentPacket(packet, live);
+  CHECK(live.dispatch(&renderer, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
@@ -684,7 +789,8 @@ TEST_CASE("Effect renderer slots retain eight independent native callbacks",
   std::memcpy(package_before.data(), &Effects_actionPackage,
               package_before.size());
   for (int index = 0; index < 8; ++index) {
-    Effects_SetEffectRenderer(Effects_effectEntryPoints[index], index);
+    CHECK(VS::Effects::LiveSetEffectRenderer(
+        static_cast<VS::Effects::PluginEntry>(index), index));
   }
   for (int index = 0; index < 8; ++index) {
     CHECK(Effects_effectRenderers[index] == Effects_effectEntryPoints[index]);
@@ -716,13 +822,13 @@ TEST_CASE("Primary effect request aliases the canonical native package field",
   Effects_actionRequestPointer = &Effects_actionRequest;
   CHECK(Effects_actionPackage.request == &Effects_actionRequest);
   CHECK(&Effects_actionRequestPointer == &Effects_actionPackage.request);
-  Effects_SelectEffectResourceContext(1);
+  VS::Effects::LiveSelectEffectResourceContext(1);
   CHECK(Effects_package == &Effects_actionPackage);
   CHECK(Effects_package->request == &Effects_actionRequest);
 
   Effects_actionPackage.request = &Effects_secondaryRequest;
   CHECK(Effects_actionRequestPointer == &Effects_secondaryRequest);
-  Effects_SelectEffectResourceContext(0);
+  VS::Effects::LiveSelectEffectResourceContext(0);
   CHECK(Effects_package == &Effects_secondaryPackage);
   CHECK(Effects_package->request == &Effects_secondaryRequest);
 
@@ -755,98 +861,6 @@ TEST_CASE("Child effect tracks wait for the native outstanding child count",
     Effects_DestroyPrimaryEffectInstance(Effects_primaryInstances);
   }
   Effects_primaryInstances = saved_instances;
-}
-
-namespace {
-struct RibbonFixture : ParticleFixture {
-  static constexpr int kSegments = 8;
-  Effects_ParticleDefinition definition{};
-  Effects_ParticleEmitterScratch scratch{};
-  Effects_ParticleQuadSet ribbons{};
-  std::array<SVECTOR, 12> points{};
-
-  RibbonFixture() {
-    ribbons.controlPoints = points.data();
-    ribbons.textureAnimation = particle.textureAnimation;
-    // Keep depth independent of extrapolated spline samples.
-    Render_frameScratch.viewMatrix.t[2] = 1024;
-    for (std::size_t index = 0; index < points.size(); ++index) {
-      points[index].vx = static_cast<std::int16_t>((index % 4) * 32);
-    }
-  }
-
-  const Render_ParticleQuadPacket* CheckPackets() const {
-    const auto* packets =
-        reinterpret_cast<const Render_ParticleQuadPacket*>(storage.data() + 1);
-    const auto packet_count =
-        static_cast<std::ptrdiff_t>(ribbons.count) * kSegments;
-    REQUIRE(Render_frameScratch.primitiveCursor == packets + packet_count);
-    const void* previous_packet = ordering.data() + 16 + 255;
-    for (const auto* packet = packets; packet != packets + packet_count;
-         ++packet) {
-      CHECK(nextPrim(packet) == previous_packet);
-      previous_packet = packet;
-    }
-    CHECK(nextPrim(ordering.data() + 16 + 256) == previous_packet);
-    CHECK(storage.front() == 0xDEADBEEF);
-    CHECK(storage.back() == 0xDEADBEEF);
-    return packets;
-  }
-
-  void CheckSamples(int initial_width, int half_width) const {
-    constexpr int kCurveEnd = 0x3000;
-    const auto* packets = CheckPackets();
-    VS::Core::Rand15 expected(1234);
-    for (int ribbon = 0; ribbon < ribbons.count; ++ribbon) {
-      const int width =
-          ribbon == 0 ? (initial_width == 0 ? 1 : initial_width) : half_width;
-      int previous = 0;
-      for (int segment = 0; segment < kSegments; ++segment) {
-        int sample = kCurveEnd;
-        if (segment + 1 < kSegments) {
-          const int random = expected.Next();
-          sample = (segment + 1) * 0x600 +
-                   (width == 0 ? random : random % width) - width / 2;
-        }
-        const auto& quad = packets[ribbon * kSegments + segment].opaque4;
-        CHECK(quad.u0 == texture.u + texture.w * previous / kCurveEnd);
-        CHECK(quad.u1 == texture.u + texture.w * sample / kCurveEnd);
-        previous = sample;
-      }
-    }
-    CHECK(Core_Random_Rand() == expected.Next());
-    CHECK(ribbons.textureAnimation.frameTimer == 8);
-  }
-};
-}  // namespace
-
-TEST_CASE(
-    "Shared particle ribbons preserve original zero-width remainder and RNG",
-    "[effects][particle-ribbon]") {
-  const auto renderer =
-      GENERATE(&Effects_Plg045_ParticleRender, &Effects_Plg057_ParticleRender,
-               &Effects_Plg082_ParticleRender, &Effects_Plg114_ParticleRender,
-               &Effects_Plg152_ParticleRender, &Effects_Plg153_ParticleRender,
-               &Effects_Plg156_ParticleRender, &Effects_Plg263_ParticleRender,
-               &Effects_Plg265_ParticleRender, &Effects_Plg266_ParticleRender,
-               &Effects_Plg300_ParticleRender, &Effects_Plg301_ParticleRender);
-  const auto initial_width = GENERATE(0, 16, -16);
-  const auto half_width = GENERATE(0, 6);
-  const auto count = GENERATE(2, 1, 0, 3);
-  CAPTURE(initial_width, half_width, count);
-  RibbonFixture fixture;
-  fixture.definition.innerExtentRange[0] =
-      fixture.definition.innerExtentRange[1] =
-          static_cast<std::int16_t>(initial_width);
-  fixture.definition.vectorRanges[4][0] =
-      fixture.definition.vectorRanges[4][1] =
-          static_cast<std::int16_t>(half_width * 2);
-  fixture.ribbons.count = static_cast<std::int16_t>(count);
-  Core_Random_Seed(1234);
-  renderer(&fixture.definition, &fixture.scratch, &fixture.instance,
-           &fixture.ribbons);
-  fixture.CheckSamples(initial_width, half_width);
-  Core_Random_Seed(1);
 }
 
 TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
@@ -1059,6 +1073,27 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
     CHECK(trail.splineSampleCount == 1);
   }
 }
+
+// The five-sample stages through their live binding, in the pointer shape the
+// shared reference checks use.
+template <VS::Effects::Templates::TrailStage Stage>
+void RunTrailStage(Effects_ParticleDefinition* definition,
+                   Effects_ParticleEmitterScratch* scratch,
+                   Effects_EffectInstance* instance,
+                   Effects_TrailQuadSet* state) {
+  VS::Effects::Templates::RunLiveTrailStage(Stage, *definition, *scratch,
+                                            *instance, *state);
+}
+
+// The nine-sample stages through their live binding, in the same shape.
+template <VS::Effects::Templates::TrailNineStage Stage>
+void RunTrailNineStage(Effects_ParticleDefinition* definition,
+                       Effects_ParticleEmitterScratch* scratch,
+                       Effects_EffectInstance* instance,
+                       Effects_Trail9State* state) {
+  VS::Effects::Templates::RunLiveTrailNineStage(Stage, *definition, *scratch,
+                                                *instance, *state);
+}
 }  // namespace
 
 TEST_CASE(
@@ -1066,16 +1101,18 @@ TEST_CASE(
     "[effects][trails][reference]") {
   Effects_TrailQuadSet state{};
   state.trailcount = 2;
-  CheckTrailReferencePath<Effects_Trail>(state, Effects_Plg057_TrailInit,
-                                         Effects_Plg057_TrailUpdate);
+  CheckTrailReferencePath<Effects_Trail>(
+      state, RunTrailStage<&VS::Effects::Plg057::TrailInit>,
+      RunTrailStage<&VS::Effects::Plg057::TrailUpdate>);
 }
 
 TEST_CASE("Nine-sample trails preserve source trajectory and separate history",
           "[effects][trails][reference]") {
   Effects_Trail9State state{};
   state.trailCount = 2;
-  CheckTrailReferencePath<Effects_Trail9>(state, Effects_Plg057_TrailNineInit,
-                                          Effects_Plg057_TrailNineUpdate);
+  CheckTrailReferencePath<Effects_Trail9>(
+      state, RunTrailNineStage<&VS::Effects::Templates::TrailNineInit>,
+      RunTrailNineStage<&VS::Effects::Templates::TrailNineUpdate>);
 }
 
 namespace {
@@ -1168,6 +1205,7 @@ void CheckTrailReferenceRendering(State& state,
   const auto count = GENERATE_COPY(std::size_t{1}, std::size_t{2}, kSamples);
   const auto current = GENERATE_COPY(std::size_t{0}, kSamples - 1);
   ParticleFixture fixture;
+  fixture.package.block1TableCount = 1;
   std::array<Trail, 2> trails{};
   InitializeTrailRenderHistory(trails, count, current);
   state.trails = trails.data();
@@ -1215,7 +1253,7 @@ TEST_CASE("Five-sample trail ribbons retain source geometry and render spaces",
   storage.state.trailcount = 2;
   CheckTrailReferenceRendering<Effects_Trail, Render_EffectGouraudQuadPacket>(
       storage.state, storage.state.textureAnimation, storage.transparency,
-      Effects_Plg057_TrailRender,
+      RunTrailStage<&VS::Effects::Plg057::TrailRender>,
       [](const auto& packet) -> const POLY_GT4& { return packet.opaque4; });
 }
 
@@ -1230,7 +1268,7 @@ TEST_CASE("Nine-sample trail ribbons retain source geometry and render spaces",
   storage.state.trailCount = 2;
   CheckTrailReferenceRendering<Effects_Trail9, Render_Trail9Packet>(
       storage.state, storage.state.texture, storage.transparency,
-      Effects_Plg057_TrailNineRender,
+      RunTrailNineStage<&VS::Effects::Templates::TrailNineRender>,
       [](const auto& packet) -> const POLY_GT4& { return packet.poly; });
 }
 
@@ -1406,7 +1444,8 @@ void CheckGravityRingMaterial(const Render_ClosedRingPacket* packets) {
 
 TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
           "[effects][plg074][f01986]") {
-  const auto entry = Plg074Entry(0x800F98F8, Effects_Plg073_TiledRing);
+  const auto entry = Plg074Entry(
+      0x800F98F8, &VS::Effects::Templates::UpdateLivePlg073TiledRing);
   REQUIRE(Effects_effectEntryPoints[87] == entry);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
@@ -1427,7 +1466,8 @@ TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
 
 TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
           "[effects][plg074][f01987]") {
-  const auto entry = Plg074Entry(0x800FA7F0, Effects_Plg073_Ring);
+  const auto entry =
+      Plg074Entry(0x800FA7F0, &VS::Effects::Templates::UpdateLivePlg073Ring);
   REQUIRE(Effects_effectEntryPoints[88] == entry);
   const auto mode = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   Plg074Fixture fixture;
@@ -1480,7 +1520,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
 
 TEST_CASE("PLG074 F01989 targets world request and actor anchors",
           "[effects][plg074][f01989]") {
-  const auto entry = Plg074Entry(0x800FBBB0, Effects_Plg073_TrailTarget);
+  const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailTarget>;
   const unsigned anchor = GENERATE(0u, 0x80u, 0xC0u);
   Plg074Fixture fixture;
   auto& definition = fixture.Definition();
@@ -1503,7 +1543,7 @@ TEST_CASE("PLG074 F01989 targets world request and actor anchors",
 
 TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
           "[effects][plg074][f01990]") {
-  const auto entry = Plg074Entry(0x800FBDC8, Effects_Plg073_TrailControl);
+  const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailControl>;
   Plg074Fixture fixture;
   fixture.trail_state.trailcount = 1;
   auto& points = fixture.trails[0].splinePoints;
@@ -1581,7 +1621,7 @@ void CheckPlg074SurfacePackets(const Render_RotatingSurfacePacket* packets) {
 TEST_CASE(
     "PLG074 F01991 initializes bounded trail histories and zero durations",
     "[effects][plg074][f01991]") {
-  const auto entry = Plg074Entry(0x800FC28C, Effects_Plg073_TrailInit);
+  const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailInit>;
   const std::int16_t duration = GENERATE(0, 1, 12, 255);
   Plg074Fixture fixture;
   std::ranges::fill(fixture.Definition().pairRanges[4], duration);
@@ -1600,17 +1640,17 @@ TEST_CASE(
 
 TEST_CASE("PLG074 F01992 matches the source recurrence and tail collapse",
           "[effects][plg074][f01992]") {
-  const auto entry = Plg074Entry(0x800FC404, Effects_Plg073_TrailUpdate);
+  const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailUpdate>;
   Effects_TrailQuadSet state{};
   state.trailcount = 2;
-  CheckTrailReferencePath<Effects_Trail>(state, Effects_Plg073_TrailInit,
-                                         entry);
+  CheckTrailReferencePath<Effects_Trail>(
+      state, RunTrailStage<&VS::Effects::Plg073::TrailInit>, entry);
 }
 
 TEST_CASE(
     "PLG074 F01993 preserves ribbon packets clipping and circular history",
     "[effects][plg074][f01993]") {
-  const auto entry = Plg074Entry(0x800FC590, Effects_Plg073_TrailRender);
+  const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailRender>;
   struct Storage {
     Effects_TrailQuadSet state{};
     std::array<u_char, 5> transparency{};
@@ -1676,17 +1716,19 @@ struct LogCapture {
   }
 };
 
-// Three curves of one, four and two entries after a four-byte header and
-// three size bytes.
+// A package whose curve block (type 4, 20 bytes) holds three curves of one,
+// four and two entries after a four-byte header and three size bytes.
 struct CurveBlockStorage {
-  alignas(4) std::array<u_char, 16> bytes{3,  0,  8,  0,  1,  4, 2, 0,
-                                          90, 10, 20, 30, 40, 5, 6, 0};
+  alignas(4) std::array<u_char, 24> bytes{20, 0, 4, 0, 3,  0,  8,  0,
+                                          1,  4, 2, 0, 90, 10, 20, 30,
+                                          40, 5, 6, 0, 0,  0,  0,  0};
 
-  void Bind() {
-    Effects_BindEffectCurves(
-        reinterpret_cast<Effects_CurveBlock*>(bytes.data()));
-    VS::Effects::RecordLiveEffectCurves(
-        std::as_bytes(std::span(bytes).first(15)));
+  // Binding a package forgets the previous blocks' extents, so the caller's
+  // particle definitions are recorded again.
+  void Bind(std::span<const std::byte> definitions) {
+    REQUIRE(VS::Effects::BindLiveEffectPackage(
+        std::as_writable_bytes(std::span(bytes))));
+    VS::Effects::RecordLiveParticleDefinitions(definitions);
   }
 };
 
@@ -1710,7 +1752,9 @@ std::array<u_char, 5> CreatedTransparency(Plg074Fixture& fixture,
 
 TEST_CASE("PLG074 promoted trail functions no longer resolve as module code",
           "[effects][plg074][trail-emitter]") {
-  for (const unsigned address : {0x800FB414u, 0x800FCFECu}) {
+  for (const unsigned address :
+       {0x800FB414u, 0x800FBBB0u, 0x800FBDC8u, 0x800FC28Cu, 0x800FC404u,
+        0x800FC590u, 0x800FCFECu}) {
     CHECK(VS::Content::ResolveModuleAddress(
               {Content_moduleSymbols, Content_moduleSymbolCount},
               "EFFECT/PLG074.BIN", address) == nullptr);
@@ -1767,7 +1811,7 @@ TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
   DispatchHeap heap;
   LogCapture log;
   CurveBlockStorage curves;
-  curves.Bind();
+  curves.Bind(std::as_bytes(std::span{&fixture.definitions, 1}));
   fixture.Definition().intervalRange[0] = 1;
   CHECK(CreatedTransparency(fixture, 0) ==
         std::array<u_char, 5>{128, 128, 128, 128, 128});
@@ -1802,7 +1846,8 @@ TEST_CASE("PLG074 trail tick events stay within the package's definitions",
 
 TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
           "[effects][plg074][f01995]") {
-  const auto entry = Plg074Entry(0x800FD534, Effects_Plg073_RotatingSurface);
+  const auto entry = Plg074Entry(
+      0x800FD534, &VS::Effects::Templates::UpdateLivePlg073RotatingSurface);
   REQUIRE(Effects_effectEntryPoints[90] == entry);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
@@ -1858,8 +1903,9 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
   Effects_Plg053_closedRingColorFactors[0] = {32, 64, 96, 0};
   DispatchHeap heap;
   for (int cycle = 0; cycle < 3; ++cycle) {
-    auto* slot = Effects_AttachEffectRenderer(&fixture.instance,
-                                              Effects_Plg053_ClosedRing, 2);
+    auto* slot = Effects_AttachEffectRenderer(
+        &fixture.instance, &VS::Effects::Templates::UpdateLivePlg053ClosedRing,
+        2);
     REQUIRE(slot != nullptr);
     CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
     const auto* packets = reinterpret_cast<const Render_ClosedRingPacket*>(

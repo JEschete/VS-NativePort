@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/TargetingLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Targeting.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 
@@ -36,9 +36,9 @@ void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state)
             action = (Battle_Ai_MetadataActionView *)((void*)&Battle_actionDefinitions[id]);
             entry = &state->actionSlots[row][column];
             mask = 1 << ((action->opaque0.word >> 20) & 15);
-            entry->rangeSquared = Battle_CalculateActionRangeSquared((Battle_Ai_ActionRangeView *)((void*)state), id);
+            entry->rangeSquared = VS::Battle::LiveCalculateActionRangeSquared((Battle_Ai_ActionRangeView *)((void*)state), id);
             entry->radius =
-                Battle_CalculateActionAreaReach((intptr_t)state, id, VS::Core::Math::SquareRootInteger(entry->rangeSquared));
+                VS::Battle::LiveCalculateActionAreaReach((intptr_t)state, id, VS::Core::Math::SquareRootInteger(entry->rangeSquared));
             entry->longRange =
                 entry->rangeSquared > 0x51000 && !(action->opaqueC & 0x20000000);
             if (mask & 0x4198) {

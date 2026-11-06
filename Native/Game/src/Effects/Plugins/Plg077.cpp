@@ -10,12 +10,12 @@ SVECTOR Effects_Plg077_mesh10Vertices[10]; /* contents: module image (ModuleData
 u_char Effects_Plg077_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FD9B8 (D_800FD9B8@EFFECT/PLG077.BIN)
-u_char Effects_Plg077_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg077_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FD9D8 (D_800FD9D8@EFFECT/PLG077.BIN)
 SVECTOR Effects_Plg077_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FDC58 (D_800FDC58@EFFECT/PLG077.BIN)
-u_char Effects_Plg077_ringColorFactors2[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg077_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

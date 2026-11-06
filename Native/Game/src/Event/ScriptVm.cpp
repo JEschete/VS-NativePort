@@ -1,28 +1,33 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorSpawningLive.hpp"
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+#include "Audio/MusicLive.hpp"
+#include "Audio/SfxLive.hpp"
+#include "Battle/AbilitiesLive.hpp"
+#include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Event/ScriptActorCommandsLive.hpp"
+#include "Event/ScriptEffectCommandsLive.hpp"
+#include "Field/CameraLive.hpp"
+#include "Field/RoomEffectsLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
+#include "Field/RoomStateLive.hpp"
+#include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/UiPacketsLive.hpp"
+#include "State/SceneTimerLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/ActorLoading.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Audio/Music.h"
-#include "Audio/Sfx.h"
-#include "Battle/Abilities.h"
-#include "Battle/Actor.h"
 #include "Battle/Rewards.h"
-#include "Boot/Lifecycle.h"
 #include "Content/DiscLayout.h"
 #include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
@@ -30,10 +35,13 @@ extern "C" {
 #include "Event/Interpolation.h"
 #include "Event/Playback.h"
 #include "Event/Script.h"
+#include "Event/ScriptActorOpcodes.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
+#include "Event/ScriptAudioOpcodes.h"
 #include "Event/ScriptCamera.h"
-#include "Event/ScriptDialog.h"
+#include "Event/ScriptDialogOpcodes.h"
+#include "Event/ScriptEffectOpcodes.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptField.h"
 #include "Event/ScriptScreen.h"
@@ -42,19 +50,9 @@ extern "C" {
 #include "Event/Triggers.h"
 #include "Event/WeaponModeOpcode.h"
 #include "Event/Weather.h"
-#include "Field/Camera.h"
 #include "Field/Gimmicks.h"
-#include "Field/RoomEffects.h"
-#include "Field/RoomRendering.h"
-#include "Field/RoomState.h"
-#include "Field/Transitions.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
 #include "Menu/TextBox.h"
-#include "Render/Palette.h"
-#include "State/Flags.h"
-#include "State/Timers.h"
 
 // decomp: D_800E9BE0 (D_800E9BE0@BATTLE/BATTLE.PRG)
 char Event_skipPaletteResetCommand[336]; /* contents: module image (ModuleData.cpp) */
@@ -164,49 +162,49 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptWaitForEventFile, Event_ScriptReportInvalidOpcode, Event_ScriptWaitForSplashFile, Event_ScriptBeginSkippableCutscene, Event_ScriptEndCutsceneAndJump,
-    Event_ScriptEndCutscene, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptDismissDialogBox,
+    Event_ScriptEndCutscene, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptDismissDialogBoxOpcode,
     Event_ScriptNoOperation, Event_ScriptYieldFrame, Event_ScriptYieldFrame, Event_ScriptLoadSplashImage, Event_ScriptConfigureSplashLayer,
-    Event_ScriptTweenSplashLayer, Event_ScriptFreeSplashImage, Event_ScriptYieldFrame, Event_ScriptSetDialogInteger,
-    Event_ScriptReportInvalidOpcode, Event_ScriptSetDialogTransitionDuration, Event_ScriptResetActorGroupState, Event_ScriptStoreActorTile, Event_ScriptSpawnActor,
-    Event_ScriptNavigateActorToTile, Event_ScriptNoOperation, Event_ScriptSetActorGroupFlags, Event_ScriptSetActorSoundMix, Event_ScriptWalkActorToTile,
-    Event_ScriptWalkActorToWorldPos, Event_ScriptSlideActorToTile, Event_ScriptSlideActorToWorldPos, Event_ScriptSetActorAttachment, Event_ScriptNavigateActorToWorldPos,
-    Event_ScriptTurnActorToFacing, Event_ScriptFaceOtherActor, Event_ScriptFaceTile, Event_ScriptScaleActor, Event_ScriptRemoveActorGroup,
-    Event_ScriptYieldFrame, Event_ScriptSetActorColorOverride, Event_ScriptNoOperation, Event_ScriptRotateActorAxes, Event_ScriptSetActorHeadAngles,
-    Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptSetActorIdleAnimation, Event_ScriptLookAtActor, Event_ScriptLookAtWorldPos,
-    Event_ScriptLoadObjectModel, Event_ScriptWaitForObjectLoad, Event_ScriptReleaseObjectModel, Event_ScriptSelectObjectTextureBank, Event_ScriptSetActorOverlayPass,
-    Event_ScriptSetActorWeaponDrawn, Event_ScriptBranchOnFlagImmediate, Event_ScriptBranchOnFlagPair,
+    Event_ScriptTweenSplashLayer, Event_ScriptFreeSplashImage, Event_ScriptYieldFrame, Event_ScriptSetDialogIntegerOpcode,
+    Event_ScriptReportInvalidOpcode, Event_ScriptSetDialogTransitionDurationOpcode, Event_ScriptResetActorGroupStateOpcode, Event_ScriptStoreActorTileOpcode, Event_ScriptSpawnActorOpcode,
+    Event_ScriptNavigateActorToTileOpcode, Event_ScriptNoOperation, Event_ScriptSetActorGroupFlagsOpcode, Event_ScriptSetActorSoundMixOpcode, Event_ScriptWalkActorToTileOpcode,
+    Event_ScriptWalkActorToWorldPosOpcode, Event_ScriptSlideActorToTileOpcode, Event_ScriptSlideActorToWorldPosOpcode, Event_ScriptSetActorAttachmentOpcode, Event_ScriptNavigateActorToWorldPosOpcode,
+    Event_ScriptTurnActorToFacingOpcode, Event_ScriptFaceOtherActorOpcode, Event_ScriptFaceTileOpcode, Event_ScriptScaleActorOpcode, Event_ScriptRemoveActorGroupOpcode,
+    Event_ScriptYieldFrame, Event_ScriptSetActorColorOverrideOpcode, Event_ScriptNoOperation, Event_ScriptRotateActorAxesOpcode, Event_ScriptSetActorHeadAnglesOpcode,
+    Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptSetActorIdleAnimationOpcode, Event_ScriptLookAtActorOpcode, Event_ScriptLookAtWorldPosOpcode,
+    Event_ScriptLoadObjectModelOpcode, Event_ScriptWaitForObjectLoadOpcode, Event_ScriptReleaseObjectModelOpcode, Event_ScriptSelectObjectTextureBankOpcode, Event_ScriptSetActorOverlayPassOpcode,
+    Event_ScriptSetActorWeaponDrawnOpcode, Event_ScriptBranchOnFlagImmediate, Event_ScriptBranchOnFlagPair,
     Event_ScriptJumpForward, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptJumpForward,
     Event_ScriptCacheFlagValue, Event_ScriptBranchOnCachedFlag,
     Event_ScriptNoOperation, Event_ScriptSetLoopCounter, Event_ScriptLoopBackward, Event_ScriptJumpForward,
     Event_ScriptJumpForward, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperation, Event_ScriptApplyFlagPairOperation,
     Event_ScriptStoreInventoryItemPresence, Event_ScriptClearRoomActorCache, Event_ScriptNoOperation,
-    Event_ScriptSetNpcUpdatesEnabled, Event_ScriptStoreButtonState, Event_ScriptRestoreActorVitals, Event_ScriptSetHudVisible,
-    Event_ScriptRunMenuTransition, Event_ScriptConfigureTimer, Event_ScriptSetDialogSpeaker, Event_ScriptSetActorEquipmentModels, Event_ScriptSetActorYawOscillation,
+    Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonState, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
+    Event_ScriptRunMenuTransition, Event_ScriptConfigureTimer, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
     Event_ScriptYieldFrame, Event_ScriptConfigureEasingCurve, Event_ScriptSetGimmickVisibility, Event_ScriptOverrideDepthCueDistance, Event_ScriptSetRoomLightingMode,
-    Event_ScriptClearAshleyStatusEffects, Event_ScriptShowGeometryGroup, Event_ScriptHideGeometryGroup, Event_ScriptSwapGeometryGroupFlags, Event_ScriptSetCollisionTileMode,
+    Event_ScriptClearAshleyStatusEffectsOpcode, Event_ScriptShowGeometryGroup, Event_ScriptHideGeometryGroup, Event_ScriptSwapGeometryGroupFlags, Event_ScriptSetCollisionTileMode,
     Event_ScriptChangeRoom, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptSetWipeAngle, Event_ScriptConfigureScreenTransition,
-    Event_ScriptNoOperation, Event_ScriptYieldFrame, Event_ScriptTogglePaletteHook, Event_ScriptTransformPalettes, Event_ScriptSetActorRenderMode,
+    Event_ScriptNoOperation, Event_ScriptYieldFrame, Event_ScriptTogglePaletteHook, Event_ScriptTransformPalettes, Event_ScriptSetActorRenderModeOpcode,
     Event_ScriptSetAshleyBattleModeOpcode, Event_ScriptSetRoomBackgroundVisible, Event_ScriptLoadRoomBackground, Event_ScriptWaitForRoomBackground, Event_ScriptFreeRoomBackground,
     Event_ScriptSetEnvironmentParticles, Event_ScriptSetParticleVariationEnabled, Event_ScriptControlRoomAnimation, Event_ScriptMuteEnvironmentSound, Event_ScriptSetBackgroundOffset,
     Event_ScriptSetFirstPersonView, Event_ScriptAdjustGeometryDepthBias, Event_ScriptSetBackgroundParallax, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperation,
-    Event_ScriptNoOperation, Event_ScriptNoOperation, Event_CommandStopAllSfx, Event_CommandStopSfx,
-    Event_CommandLoadSfxSlot, Event_CommandWaitSfxSlotRelease, Event_CommandFreeSfx,
-    Event_CommandSelectSfxBank, Event_CommandLoadEventMusic,
+    Event_ScriptNoOperation, Event_ScriptNoOperation, Event_CommandStopAllSfxOpcode, Event_CommandStopSfxOpcode,
+    Event_CommandLoadSfxSlotOpcode, Event_CommandWaitSfxSlotReleaseOpcode, Event_CommandFreeSfxOpcode,
+    Event_CommandSelectSfxBankOpcode, Event_CommandLoadEventMusicOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperation,
-    Event_CommandLoadMusicSlot, Event_CommandFreeMusic, Event_ScriptNoOperation,
+    Event_CommandLoadMusicSlotOpcode, Event_CommandFreeMusicOpcode, Event_ScriptNoOperation,
     Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptNoOperation,
-    Event_ScriptNoOperation, Event_CommandWaitMusicSlotLoad, Event_ScriptYieldFrame, Event_ScriptNoOperation,
-    Event_ScriptNoOperation, Event_CommandLoadSoundFile, Event_CommandWaitSoundQueue,
-    Event_ScriptNoOperation, Event_CommandPlayActorEffect, Event_CommandAdvanceEffectStage, Event_CommandWaitEffectState, Event_CommandYieldEffectRelease,
-    Event_CommandWaitEffectContinuation, Event_CommandWaitEffectRelease, Event_CommandMarkEffectStageReady, Event_ScriptReportInvalidOpcode, Event_CommandSetMusicJumpThreshold,
-    Event_ScriptNoOperation, Event_CommandSetActorTrail, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
+    Event_ScriptNoOperation, Event_CommandWaitMusicSlotLoadOpcode, Event_ScriptYieldFrame, Event_ScriptNoOperation,
+    Event_ScriptNoOperation, Event_CommandLoadSoundFileOpcode, Event_CommandWaitSoundQueueOpcode,
+    Event_ScriptNoOperation, Event_CommandPlayActorEffectOpcode, Event_CommandAdvanceEffectStageOpcode, Event_CommandWaitEffectStateOpcode, Event_CommandYieldEffectReleaseOpcode,
+    Event_CommandWaitEffectContinuationOpcode, Event_CommandWaitEffectReleaseOpcode, Event_CommandMarkEffectStageReadyOpcode, Event_ScriptReportInvalidOpcode, Event_CommandSetMusicJumpThresholdOpcode,
+    Event_ScriptNoOperation, Event_CommandSetActorTrailOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_CommandSetEnteredDoor, Event_CommandStoreActorRangeBearing, Event_CommandSetActorActivity,
-    Event_ScriptReportInvalidOpcode, Event_CommandConsumeMiscItem, Event_CommandStoreActorDistance, Event_CommandSpecialOperation,
-    Event_CommandWaitScreenEffectLoad, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_ScriptNoOperation, Event_CommandLoadScreenEffects,
-    Event_CommandReservedScreenEffect, Event_CommandFreeScreenEffects, Event_CommandScreenTransform, Event_CommandCameraMotion, Event_CommandCameraMotion,
+    Event_ScriptReportInvalidOpcode, Event_CommandSetEnteredDoorOpcode, Event_CommandStoreActorRangeBearingOpcode, Event_CommandSetActorActivityOpcode,
+    Event_ScriptReportInvalidOpcode, Event_CommandConsumeMiscItemOpcode, Event_CommandStoreActorDistanceOpcode, Event_CommandSpecialOperation,
+    Event_CommandWaitScreenEffectLoadOpcode, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_ScriptNoOperation, Event_CommandLoadScreenEffectsOpcode,
+    Event_CommandReservedScreenEffectOpcode, Event_CommandFreeScreenEffectsOpcode, Event_CommandScreenTransform, Event_CommandCameraMotion, Event_CommandCameraMotion,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcode,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
@@ -217,7 +215,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_CommandTweenCameraRoll, Event_CommandTweenCameraRoll, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_CommandScreenTransform,
     Event_CommandScreenTransform, Event_CommandSetCameraOriginActor, Event_CommandRestoreFieldCamera, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake,
     Event_CommandCameraLensOrShake, Event_CommandScreenTransform, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake, Event_ScriptYieldFrame,
-    Event_CommandSetTickSpeed, Event_CommandPlayMenuSelectSfx, Event_CommandSetScanlineOverlay, Event_CommandWaitScriptContext,
+    Event_CommandSetTickSpeed, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContext,
     Event_CommandStartScriptContext, Event_CommandStopScriptContext, Event_CommandLoadNextEvent, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_CommandFinishEvent, Event_CommandFinishEvent };
@@ -292,14 +290,14 @@ void Event_FinishSkippedCutscene(u_char* scan_cursor)
     i = 0xF;
     while (*scan_cursor != i) {
         if (memcmp(scan_cursor, Event_kSkipSoundRestoreMarker, 4) == 0) {
-            State_SetScriptFlag(0xA8, 0);
+            VS::State::SetLiveScriptFlag(0xA8, 0);
             return;
         }
         scan_cursor = &scan_cursor[Event_kOpcodeSizes[*scan_cursor]];
     }
 
-    Field_RestartRoomEffectSound();
-    State_SetScriptFlag(0xA8, 0);
+    VS::Field::LiveRestartRoomEffectSound();
+    VS::State::SetLiveScriptFlag(0xA8, 0);
 }
 
 // decomp: BATTLE.PRG func_800B6868 (src/BATTLE/BATTLE.PRG/4A0A8.c:642)
@@ -339,7 +337,7 @@ intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_ind
 intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_index)
 {
     char flag_value =
-        State_ScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
+        VS::State::LiveScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
     char immediate_value = instruction[3];
 
     switch (instruction[1] & 0xF0) {
@@ -386,8 +384,8 @@ intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_ind
 intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index)
 {
     char left_flag_value =
-        State_ScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
-    char right_flag_value = State_ScriptFlag(instruction[3] | ((instruction[2] & 3) << 8));
+        VS::State::LiveScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
+    char right_flag_value = VS::State::LiveScriptFlag(instruction[3] | ((instruction[2] & 3) << 8));
 
     switch (instruction[1] & 0xF0) {
     case 0:
@@ -433,7 +431,7 @@ intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (src/BATTLE/BATTLE.PRG/4A0A8.c:1640)
 intptr_t Event_ScriptCacheFlagValue(u_char* instruction, short thread_index)
 {
-    Event_cachedFlagValue = State_ScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
+    Event_cachedFlagValue = VS::State::LiveScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     return 0;
 }
 
@@ -479,28 +477,28 @@ intptr_t Event_ScriptApplyImmediateFlagOperation(u_char* instruction, short thre
 
     switch (operation_and_flag_bits & 0xF0) {
     case 0x0:
-        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) + immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) + immediate_value);
         break;
     case 0x10:
-        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) - immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) - immediate_value);
         break;
     case 0x20:
-        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) * immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) * immediate_value);
         break;
     case 0x30:
-        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) / immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) / immediate_value);
         break;
     case 0x40:
-        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) % immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) % immediate_value);
         break;
     case 0x50:
-        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) & immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) & immediate_value);
         break;
     case 0x60:
-        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) | immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) | immediate_value);
         break;
     case 0x70:
-        State_SetScriptFlag(target_flag_id, immediate_value);
+        VS::State::SetLiveScriptFlag(target_flag_id, immediate_value);
         break;
     }
     return 0;
@@ -517,44 +515,44 @@ intptr_t Event_ScriptApplyFlagPairOperation(u_char* instruction, short thread_in
 
     switch (instruction[1] & 0xF0) {
     case 0x0:
-        State_SetScriptFlag(
-            flag0, State_ScriptFlag(flag0) + State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(
+            flag0, VS::State::LiveScriptFlag(flag0) + VS::State::LiveScriptFlag(flag1));
         break;
     case 0x10:
-        State_SetScriptFlag(
-            flag0, State_ScriptFlag(flag0) - State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(
+            flag0, VS::State::LiveScriptFlag(flag0) - VS::State::LiveScriptFlag(flag1));
         break;
     case 0x20:
-        State_SetScriptFlag(
-            flag0, State_ScriptFlag(flag0) * State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(
+            flag0, VS::State::LiveScriptFlag(flag0) * VS::State::LiveScriptFlag(flag1));
         break;
     case 0x30:
-        State_SetScriptFlag(
-            flag0, State_ScriptFlag(flag0) / State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(
+            flag0, VS::State::LiveScriptFlag(flag0) / VS::State::LiveScriptFlag(flag1));
         break;
     case 0x40:
-        State_SetScriptFlag(
-            flag0, State_ScriptFlag(flag0) % State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(
+            flag0, VS::State::LiveScriptFlag(flag0) % VS::State::LiveScriptFlag(flag1));
         break;
     case 0x50:
-        State_SetScriptFlag(
-            flag0, State_ScriptFlag(flag0) & State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(
+            flag0, VS::State::LiveScriptFlag(flag0) & VS::State::LiveScriptFlag(flag1));
         break;
     case 0x60:
-        State_SetScriptFlag(
-            flag0, State_ScriptFlag(flag0) | State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(
+            flag0, VS::State::LiveScriptFlag(flag0) | VS::State::LiveScriptFlag(flag1));
         break;
     case 0x70:
-        State_SetScriptFlag(flag0, State_ScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(flag0, VS::State::LiveScriptFlag(flag1));
         break;
     case 0x80:
-        tmp = State_ScriptFlag(flag0) - State_ScriptFlag(flag1);
-        State_SetScriptFlag(flag0, ABS(tmp));
+        tmp = VS::State::LiveScriptFlag(flag0) - VS::State::LiveScriptFlag(flag1);
+        VS::State::SetLiveScriptFlag(flag0, ABS(tmp));
         break;
     case 0x90:
-        prev = State_ScriptFlag(flag0);
-        State_SetScriptFlag(flag0, State_ScriptFlag(flag1));
-        State_SetScriptFlag(flag1, prev);
+        prev = VS::State::LiveScriptFlag(flag0);
+        VS::State::SetLiveScriptFlag(flag0, VS::State::LiveScriptFlag(flag1));
+        VS::State::SetLiveScriptFlag(flag1, prev);
         break;
     }
     return 0;
@@ -563,7 +561,7 @@ intptr_t Event_ScriptApplyFlagPairOperation(u_char* instruction, short thread_in
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (src/BATTLE/BATTLE.PRG/4A0A8.c:1773)
 intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index)
 {
-    State_SetScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3),
+    VS::State::SetLiveScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3),
         VS::Items::CountLiveInventoryItem(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
     return 0;
 }
@@ -572,7 +570,7 @@ intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short threa
 intptr_t Event_ScriptStoreButtonState(u_char* instruction, short thread_index)
 {
     short flag_and_button_source = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
-    State_SetScriptFlag(flag_and_button_source & 0x3FF, flag_and_button_source & 0x8000
+    VS::State::SetLiveScriptFlag(flag_and_button_source & 0x3FF, flag_and_button_source & 0x8000
                                                 ? Input_buttonsPressed.ports[0].lowByte
                                                 : Input_previousButtons);
     return 0;
@@ -582,10 +580,10 @@ intptr_t Event_ScriptStoreButtonState(u_char* instruction, short thread_index)
 intptr_t Event_ScriptConfigureTimer(u_char* instruction, short thread_index)
 {
     if (instruction[1] != 0) {
-        State_StartSceneTimer(Event_kSceneTimerModes[instruction[3]], Event_kSceneTimerResetScopes[instruction[2]],
+        VS::State::StartLiveSceneTimer(Event_kSceneTimerModes[instruction[3]], Event_kSceneTimerResetScopes[instruction[2]],
             (instruction[4] << 0x18) | (instruction[5] << 0x10) | (instruction[6] << 8));
     } else {
-        State_ResetSceneTimer();
+        VS::State::ResetLiveSceneTimer();
     }
     return 0;
 }
@@ -631,19 +629,19 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
 
     switch (instruction[1]) {
     case 0:
-        Actors_QueueAshleyModelLoad(instruction[2]);
+        VS::Actors::QueueLiveAshleyModelLoad(instruction[2]);
         break;
     case 1:
         if (Event_isMenuTransitionActive != 0) {
             if (Battle_UpdateRewardSequence() != 0) {
                 return 1;
             }
-            State_SetScriptFlag(0xB6, 0);
+            VS::State::SetLiveScriptFlag(0xB6, 0);
             Event_isMenuTransitionActive = 0;
-            Boot_RunEndingAndReturnToTitle();
+            VS::Boot::RunEndingAndReturnToTitleLive();
             break;
         }
-        State_SetScriptFlag(0xB6, 3);
+        VS::State::SetLiveScriptFlag(0xB6, 3);
         Battle_BeginEventRewardResults();
         Event_isMenuTransitionActive = 1;
         return 1;
@@ -651,18 +649,18 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         Event_isSkipForced = 1;
         break;
     case 3:
-        if (Battle_IsActionUnlocked(instruction[2]) != 0) {
-            State_SetScriptFlag(0xB1, 0);
+        if (VS::Battle::LiveIsActionUnlocked(instruction[2]) != 0) {
+            VS::State::SetLiveScriptFlag(0xB1, 0);
         } else {
-            Battle_UnlockAction(instruction[2]);
-            State_SetScriptFlag(0xB1, 1);
+            VS::Battle::LiveUnlockAction(instruction[2]);
+            VS::State::SetLiveScriptFlag(0xB1, 1);
         }
         break;
     case 4:
-        State_SetScriptFlag(0xB1, Actors_CountActorsByDisposition(4));
+        VS::State::SetLiveScriptFlag(0xB1, VS::Actors::CountLiveActorsByDisposition(4));
         break;
     case 5:
-        Event_SetEventActorActivity(instruction[2]);
+        VS::Event::SetLiveEventActorActivity(instruction[2]);
         break;
     case 6:
         VS::Core::Memory::FreeLiveFromHighEnd(Event_chainedEventBuffer);
@@ -671,13 +669,13 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         Event_SetEventFieldCameraOverride(instruction[2]);
         break;
     case 8:
-        State_SetSceneTimerPaused(instruction[2]);
+        VS::State::SetLiveSceneTimerPaused(instruction[2]);
         break;
     case 9:
         Event_StartEventCameraOrbitReturn(instruction[2]);
         break;
     case 10:
-        Field_SetCameraPitchPreset(Event_kSpecialOperationTenArguments[instruction[2]]);
+        VS::Field::LiveSetCameraPitchPreset(Event_kSpecialOperationTenArguments[instruction[2]]);
         break;
     case 11:
         Event_ScaleEventCameraDuration(instruction[2]);
@@ -686,7 +684,7 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         Field_FreezeMovingPlatforms(instruction[2]);
         break;
     case 13:
-        Field_ClearGeometryOcclusion();
+        VS::Field::LiveClearGeometryOcclusion();
         break;
     case 14:
         Field_SetMovingPlatformsPaused(instruction[2]);
@@ -698,7 +696,7 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         Event_subroutineReturnCursor = (intptr_t)(instruction + 6);
         return (intptr_t)&Event_specialSubroutineScript;
     case 17:
-        Field_CancelPendingRoomVisit();
+        VS::Field::LiveCancelPendingRoomVisit();
         break;
     default:
         sprintf(diagnostic_message, "<SPECIAL=%d> IS UNDEFINED!", instruction[1]);
@@ -727,7 +725,7 @@ intptr_t Event_CommandWaitFrames(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BB4CC (src/BATTLE/BATTLE.PRG/4A0A8.c:2815)
 intptr_t Event_CommandSetTickSpeed(u_char* instruction, short thread_index)
 {
-    State_SetTickSpeed(instruction[1]);
+    VS::State::SetLiveTickSpeed(instruction[1]);
     return 0;
 }
 
@@ -777,7 +775,7 @@ intptr_t Event_CommandFinishEvent(u_char* instruction, short thread_index)
     }
 
     if (pending_text_box_count == 0) {
-        State_SetTickSpeed(2);
+        VS::State::SetLiveTickSpeed(2);
         return 2;
     }
     return 1;
@@ -817,7 +815,7 @@ void Event_InitializeEventScriptData(u_char* data)
     Event_threadCursors[1] = Event_threadCursors[2] = Event_threadCursors[3] = 0;
     Event_skipState = 0;
     Event_isSkipForced = 0;
-    State_SetScriptFlag(168, 0);
+    VS::State::SetLiveScriptFlag(168, 0);
     Event_threadWaitFrames[1] = Event_threadWaitFrames[2] = Event_threadWaitFrames[3] = 0;
     Event_isEffectWaitPending = 0;
     Event_weaponTransitionPending = 0;
@@ -836,10 +834,10 @@ void Event_InitializeEventScriptData(u_char* data)
     }
     Event_weatherTweenDuration = 0;
     Event_splashTweens[0].durationFrames = Event_splashTweens[1].durationFrames = Event_splashTweens[2].durationFrames = 0;
-    Event_musicSlot = Audio_CurrentMusicSlot();
+    Event_musicSlot = VS::Audio::LiveCurrentMusicSlot();
     Event_eventFileDiscRequest = 0;
     for (i = 16; i < 32; ++i) {
-        State_SetScriptFlag(i, 0);
+        VS::State::SetLiveScriptFlag(i, 0);
     }
 }
 
@@ -857,7 +855,7 @@ int Event_UpdateEventPlayback(void)
             Event_playbackPhase = 2;
             Event_isStartConfirmed = 0;
             Event_InitializeEventCamera();
-            ((void (*)(...))Actors_ReturnAllActorsToIdle)();
+            VS::Actors::ReturnAllLiveActorsToIdle();
             for (i = 0; i < 17; ++i) {
                 Event_scriptControlledActors[i] = 0;
             }
@@ -915,10 +913,10 @@ int Event_UpdateEventPlayback(void)
     Event_UpdateEventCameraTracks();
     Event_UpdateEventScreenTransforms();
     Event_ApplyEventCameraState();
-    Event_UpdateEventImageTweens();
-    Event_UpdateEventWeatherTween();
+    VS::Event::UpdateLiveImageTweens();
+    VS::Event::UpdateLiveWeatherTween();
     if (Event_isScanlineOverlayEnabled != 0) {
-        Event_DrawEventScanlineOverlay();
+        VS::Event::DrawLiveScanlineOverlay();
     }
     if (Event_isMainThreadFinished != 0 && (u_char)Event_EventCameraCompletionMask() == 0xFF) {
         if (Event_isChainedEventLoaded != 0) {
@@ -955,15 +953,15 @@ short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index)
         Event_isTextBoxAwaitingClose[0] = 0;
 
         if (Event_stopsMusicOnSkip != 0) {
-            Audio_StopMusicSlotPlayback(0);
+            VS::Audio::LiveStopMusicSlotPlayback(0);
         }
 
-        Audio_StopAllSfxPlayback();
+        VS::Audio::LiveStopAllSfxPlayback();
         VS::Input::StopLiveVibrationPatterns(0, 2);
         Event_ResetCutsceneActorsToIdle();
-        Field_BeginScreenFadeOut(0, 0xFF, 0);
+        VS::Field::LiveBeginScreenFadeOut(0, 0xFF, 0);
         VS::Render::DisableLiveDisplay();
-        State_SetScriptFlag(0xA8, 1);
+        VS::State::SetLiveScriptFlag(0xA8, 1);
         Event_skipState = 2;
     }
 
@@ -1021,7 +1019,7 @@ void Event_ReleaseScriptActorControl(void)
 
     for (i = 0; i < 17; i++) {
         if ((*(unsigned char (*)[17])&Event_scriptControlledActors)[i] != 0) {
-            Actors_ResetActorMovement(i);
+            VS::Actors::ResetLiveActorMovement(i);
         }
     }
 
@@ -1036,12 +1034,13 @@ int Event_ResolveScriptActorReference(u_short actor_reference)
 {
     switch (actor_reference >> 12) {
     case 0:
-        return Actors_FindActorByModelId(actor_reference & 0xFFF);
+        return VS::Actors::FindLiveActorByModelId(actor_reference & 0xFFF);
     case 1:
         return actor_reference & 0x1F;
     case 2:
         return actor_reference;
     }
+    return actor_reference;
 }
 
 // decomp: BATTLE.PRG func_800BFEBC (src/BATTLE/BATTLE.PRG/573B8.c:168)
@@ -1119,8 +1118,8 @@ void Event_ResetCutsceneActorsToIdle(void)
     short i;
 
     for (i = 0; i < 17; ++i) {
-        if (Actors_ActorAtSlot(i) != NULL) {
-            ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(i, 1, 0, 0);
+        if (VS::Actors::LiveActorAtSlot(i) != NULL) {
+            VS::Actors::PlayLiveActorAnimation(i, 1, 0, 0);
         }
     }
 }

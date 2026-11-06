@@ -1,2236 +1,1632 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Content/CdDriveLive.hpp"
-#include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Items/EquipmentLive.hpp"
-#include "Items/InventoryLive.hpp"
-#include "Menu/Sounds.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
-#include "Content/DiscLayout.h"
-#include "Content/StringTables.h"
-#include "DiscQueue.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Inventory.h"
-#include "Items/Weapons.h"
-#include "Menu/Framework/EquipmentDetails.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
-#include "Menu/Setup/Assembly.h"
-#include "Menu/Setup/Combination.h"
-#include "Menu/Setup/SetupScreen.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Menu/Setup/Combination.hpp"  // NOLINT(build/include): typed API
 
-// decomp: local static of _combineBladeMenu, at file scope so the module reset reaches it
-static char Menu_Setup_bladeCombinationCursorAnimation = 0;
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <expected>
+#include <format>
+#include <limits>
+#include <optional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
 
-// decomp: local static of _combineShieldMenu, at file scope so the module reset reaches it
-static char Menu_Setup_shieldCombinationCursorAnimation = 0;
+#include "Items/Inventory.hpp"
+#include "Menu/Setup/Assembly.hpp"
 
-// decomp: local static of _combineArmorMenu, at file scope so the module reset reaches it
-static char Menu_Setup_armorCombinationCursorAnimation = 0;
+namespace VS::Menu::Setup {
+namespace {
+using Framework::MenuRow;
+using Framework::PackXy;
+using Framework::RowPlacement;
+using Framework::RowState;
+using Items::ItemCategory;
 
-// decomp: _1 (_1@src/MENU/MENUC.PRG/168.c)
-char Menu_Setup_layoutPadding3[2];
+// _setClassAffinities' factor choice (0-2) by the first and the second
+// ingredient's strongest class (or affinity).
+using ClassRow = std::array<std::uint8_t, Items::kClassCount>;
+using AffinityRow = std::array<std::uint8_t, Items::kAffinityCount>;
+constexpr std::array<ClassRow, Items::kClassCount> kClassFactorLookup{{
+    {2, 0, 1, 1, 1, 0},
+    {0, 2, 0, 1, 1, 1},
+    {1, 0, 2, 0, 1, 1},
+    {1, 1, 0, 2, 0, 1},
+    {1, 1, 1, 0, 2, 0},
+    {0, 1, 1, 1, 0, 2},
+}};
+constexpr std::array<AffinityRow, Items::kAffinityCount> kAffinityFactorLookup{{
+    {2, 1, 1, 1, 1, 1, 1},
+    {1, 2, 1, 0, 1, 1, 1},
+    {1, 1, 2, 1, 0, 1, 1},
+    {1, 0, 1, 2, 1, 1, 1},
+    {1, 1, 0, 1, 2, 1, 1},
+    {1, 1, 1, 1, 1, 2, 0},
+    {1, 1, 1, 1, 1, 0, 2},
+}};
+// The factors are tenths.
+constexpr int kFactorDivisor = 10;
+// _setTypeValues combines the three physical types after entry 0.
+constexpr std::size_t kFirstPhysicalType = 1;
+constexpr std::size_t kPhysicalTypeCount = 3;
 
-// decomp: _2 (_2@src/MENU/MENUC.PRG/168.c)
-char Menu_Setup_layoutPadding5[2];
+// The recipe file header's three little-endian words.
+constexpr std::size_t kRecipeTableCount = 3;
+constexpr std::size_t kWordBytes = 4;
+constexpr std::size_t kByteBits = 8;
+// BLADE.SYD's material table by both blades' material (from bronze, 3) and
+// category, and its result table by both blade ids.
+constexpr int kBladeMaterialBase = 3;
+constexpr int kBladeFirstMaterialStride = 500;
+constexpr int kBladeFirstCategoryStride = 50;
+constexpr int kBladeSecondMaterialStride = 10;
+constexpr int kBladeIdStride = 96;
+// SHIELD.SYD's by both materials and both sub ids.
+constexpr int kShieldMaterialStride = 8;
+constexpr int kShieldSubIdStride = 17;
+// ARMOR.SYD's by both materials and categories (from 2), and both sub ids
+// (from 16).
+constexpr int kArmorFirstMaterialStride = 128;
+constexpr int kArmorFirstCategoryStride = 32;
+constexpr int kArmorSecondMaterialStride = 4;
+constexpr int kArmorCategoryBase = 2;
+constexpr int kArmorSubIdBase = 16;
+constexpr int kArmorSubIdStride = 65;
+// A combined shield's or armor piece's id follows its sub id.
+constexpr int kArmorIdOffset = 126;
+// A blade recipe record's bytes (_combineBlades' info).
+constexpr std::size_t kBladeModelByte = 1;
+constexpr std::size_t kBladeCategoryByte = 2;
+constexpr std::size_t kBladeDamageTypeByte = 3;
+constexpr std::size_t kBladeCostTypeByte = 4;
+constexpr std::size_t kBladeCostByte = 5;
+constexpr std::size_t kBladeOpaqueByte = 6;
+constexpr std::size_t kBladeStrengthByte = 8;
+constexpr std::size_t kBladeIntelligenceByte = 9;
+constexpr std::size_t kBladeAgilityByte = 10;
+constexpr std::size_t kBladeRangeByte = 12;
+constexpr std::size_t kBladeSecondRangeByte = 13;
+constexpr std::size_t kBladeThirdRangeByte = 14;
+constexpr std::size_t kBladeShapeByte = 15;
+// A shield or armor recipe record's bytes (_armorInfo).
+constexpr std::size_t kArmorModelByte = 1;
+constexpr std::size_t kArmorCategoryByte = 2;
+constexpr std::size_t kArmorGemSlotsByte = 3;
+constexpr std::size_t kArmorStrengthByte = 4;
+constexpr std::size_t kArmorIntelligenceByte = 5;
+constexpr std::size_t kArmorAgilityByte = 6;
 
-// decomp: _armorBuf (_armorBuf@src/MENU/MENUC.PRG/168.c)
-Items_InventoryArmor Menu_Setup_armorBuf;
+// The screens' rows: the result (row 0) slides in to (155, 18); ingredient
+// slot s (1-2) is row 10 + s at y 18 + 16s, sliding in to x 169.
+constexpr RowPlacement kResultRow{
+    .row = kTitleRow,
+    .x = 155,
+    .y = 18,
+    .w = 165,
+    .background_width = 0,
+};
+constexpr int kOffscreenX = 320;
+constexpr int kIngredientStartX = 334;
+constexpr int kIngredientX = 169;
+constexpr int kIngredientWidth = 151;
+constexpr int kIngredientTopY = 18;
+constexpr int kRowPitch = 16;
+// The screen's rows: the result, the two ingredients and "OK".
+constexpr int kIngredientCount = 2;
+constexpr int kOkRow = 3;
+constexpr int kBothIngredients = 3;
+constexpr int kOkLabelRow = 2;
+constexpr std::uint8_t kBlinkStep = 16;
+constexpr int kInformationRowState = 16;
+// The cursor points at x 155 and y 10 + 16 a row, nudged left for the
+// result and up for "OK".
+constexpr int kCursorX = 155;
+constexpr int kCursorTopY = 10;
+constexpr int kResultCursorNudge = 14;
+constexpr int kOkCursorRaise = 4;
+// The ingredient lists mark parts in use: on an equipped weapon (or
+// equipped), or on a carried weapon.
+constexpr std::int32_t kInUseEquipped = 0xCA00;
+constexpr std::int32_t kInUseCarried = 0xCC00;
+constexpr std::uint8_t kEquippedOutset = 1;
+constexpr std::uint8_t kCarriedOutset = 2;
+constexpr std::uint8_t kShieldRowIcon = 15;
+constexpr int kArmorRowIconBase = 14;
+constexpr std::uint8_t kAccessoryCategory = 7;
+// The equipment details: the stat pages, the panel and the subtypes.
+constexpr std::size_t kClassAffinityStatRows = 16;
+constexpr std::size_t kAffinityStatBase = 16;
+constexpr std::size_t kTypeStatBase = 32;
+constexpr std::size_t kPartSlotMask = 7;
+constexpr std::size_t kStrengthValue = 4;
+constexpr std::size_t kIntelligenceValue = 5;
+constexpr std::size_t kAgilityValue = 6;
+constexpr int kBladeSubtype = 2;
+constexpr int kShieldSubtype = 8;
+constexpr int kArmorSubtype = 16;
+constexpr int kShowPanel = 1;
+constexpr int kHidePanel = 2;
+constexpr int kHideStatPages = -1;
+constexpr int kHideDpPp = 4;
+// The three-choice prompt: its "cancel combine" row and its answers.
+constexpr int kCancelRow = 2;
+constexpr int kAnswerCombine = 1;
+constexpr int kAnswerBack = 2;
+constexpr int kAnswerCancel = 3;
+// _combineTopMenu: the rows hoist from the top menu's row 5 and its title
+// returns on row 15; a category with fewer than two items reads "no items"
+// (or "one item", four entries before).
+constexpr int kCombineHoistRow = 5;
+constexpr int kCombineSubtitleRow = 15;
+constexpr int kCategoryRowInfo = 0x23D;
+constexpr int kMinimumIngredients = 2;
+constexpr int kFewItemsStride = 4;
 
-// decomp: _bladeBuf (_bladeBuf@src/MENU/MENUC.PRG/168.c)
-Items_InventoryBlade Menu_Setup_bladeBuf;
+// _combineBladeMenu's steps (the shield and armor menus share them).
+enum CombineStep : std::uint8_t {
+  kCombineHeader,
+  kCombineRows,
+  kCombineChoose,
+  kCombinePick,
+  kCombineAsk,
+  kCombineAnswer,
+  kCombineReload,
+};
+// _selectBlade's steps.
+enum IngredientStep : std::uint8_t {
+  kIngredientList,
+  kIngredientChoose,
+  kIngredientChosen,
+};
+// _combineTopMenu's steps after the choice: one per menu, then the return.
+constexpr std::uint8_t kCombineReturn = kCategoryRun + kRecipeKindCount;
 
-// decomp: _bladeCombinationInitData (_bladeCombinationInitData@src/MENU/MENUC.PRG/168.c)
-void* Menu_Setup_bladeCombinationInitData;
+// The index of the first strictly greatest value (0 when none beats -128).
+std::size_t StrongestIndex(std::span<const std::int8_t> values) {
+  std::int8_t best = std::numeric_limits<std::int8_t>::min();
+  std::size_t index = 0;
+  for (std::size_t i = 0; i < values.size(); ++i) {
+    if (best < values[i]) {
+      best = values[i];
+      index = i;
+    }
+  }
+  return index;
+}
 
-// decomp: _combinationInitData (_combinationInitData@src/MENU/MENUC.PRG/168.c)
-Menu_Setup_CombinedArmorRecord* Menu_Setup_combinationInitData;
+std::int8_t ScaledSum(int first, int second, int factor) {
+  return static_cast<std::int8_t>(
+      std::clamp(((first + second) * factor) / kFactorDivisor,
+                 -kCombinedValueLimit, kCombinedValueLimit));
+}
 
-// decomp: _combinationResults (_combinationResults@src/MENU/MENUC.PRG/168.c)
-char* Menu_Setup_combinationResults;
+// A record's base value plus its material's bonus, kept to a byte.
+std::int8_t WithBonus(std::uint8_t base, std::int8_t bonus) {
+  return static_cast<std::int8_t>(
+      static_cast<std::uint8_t>(base + static_cast<std::uint8_t>(bonus)));
+}
 
-// decomp: _combiningArmorIds (_combiningArmorIds@src/MENU/MENUC.PRG/168.c)
-char Menu_Setup_combiningArmorIds[2];
+std::expected<std::uint8_t, std::string> RecipeEntry(
+    std::span<const std::uint8_t> table, int index, std::string_view what) {
+  if (index < 0 || static_cast<std::size_t>(index) >= table.size()) {
+    return std::unexpected(
+        std::format("{} entry {} outside the recipe file", what, index));
+  }
+  return table[static_cast<std::size_t>(index)];
+}
 
-// decomp: _combiningBladeIds (_combiningBladeIds@src/MENU/MENUC.PRG/168.c)
-char Menu_Setup_combiningBladeIds[2];
+template <typename Record>
+std::expected<Record, std::string> RecipeRecord(
+    const std::vector<Record>& records, std::size_t index) {
+  if (index >= records.size()) {
+    return std::unexpected(
+        std::format("recipe record {} outside the recipe file", index));
+  }
+  return records[index];
+}
 
-// decomp: _currentWorkshop (_currentWorkshop@src/MENU/MENUC.PRG/168.c)
-u_char Menu_Setup_currentWorkshop;
+std::expected<MaterialBonus, std::string> BonusOf(
+    const MaterialBonuses& bonuses, std::size_t material) {
+  if (material >= bonuses.size()) {
+    return std::unexpected(
+        std::format("combined material {} has no stat bonus", material));
+  }
+  return bonuses[material];
+}
 
-// decomp: local static of _setClassAffinities, at file scope so the module reset reaches it
-static short Menu_Setup_combineClassOrAffinityValuesDifferentMaterialStatFactors[] = { 3, 5, 7 };
+// The combined record's material and sub id (its result record's index),
+// from the material and result table entries, and the material's bonus.
+struct RecipeResult {
+  std::uint8_t material = 0;
+  std::uint8_t sub_id = 0;
+  MaterialBonus bonus;
+};
 
-// decomp: local static of _setTypeValues, at file scope so the module reset reaches it
-static short Menu_Setup_combinePhysicalTypeValuesDifferentMaterialTypeFactors[] = { 4, 6 };
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): table entries.
+std::expected<RecipeResult, std::string> LookUpRecipe(
+    const RecipeBook& recipes, RecipeKind kind, const MaterialBonuses& bonuses,
+    int material_index, int result_index) {
+  if (recipes.kind != kind) {
+    return std::unexpected(std::format(
+        "recipe file {} decoded where file {} belongs",
+        static_cast<int>(recipes.kind) + 1, static_cast<int>(kind) + 1));
+  }
+  const auto material =
+      RecipeEntry(recipes.materials, material_index, "combined material");
+  if (!material) {
+    return std::unexpected(material.error());
+  }
+  const auto sub_id = RecipeEntry(recipes.results, result_index, "combination");
+  if (!sub_id) {
+    return std::unexpected(sub_id.error());
+  }
+  const auto bonus = BonusOf(bonuses, *material);
+  if (!bonus) {
+    return std::unexpected(bonus.error());
+  }
+  return RecipeResult{
+      .material = *material, .sub_id = *sub_id, .bonus = *bonus};
+}
 
-// decomp: _itemsToCombine (_itemsToCombine@src/MENU/MENUC.PRG/168.c)
-u_char Menu_Setup_itemsToCombine[16];
+// _combineShields' and _combineArmor's shared part: the material, ids,
+// stats, DP and values; the shield also takes the model and gem slots.
+std::expected<Items::InventoryArmor, std::string> BuildCombinedArmorPiece(
+    const Items::InventoryArmor& first, const Items::InventoryArmor& second,
+    const RecipeBook& recipes, const RecipeResult& recipe) {
+  const auto info = RecipeRecord(recipes.armor, recipe.sub_id);
+  if (!info) {
+    return std::unexpected(info.error());
+  }
+  Items::InventoryArmor result = first;
+  result.material = recipe.material;
+  result.sub_id = recipe.sub_id;
+  result.id = static_cast<std::uint8_t>(recipe.sub_id + kArmorIdOffset);
+  result.category = info->category;
+  result.strength = WithBonus(info->strength, recipe.bonus.strength);
+  result.intelligence =
+      WithBonus(info->intelligence, recipe.bonus.intelligence);
+  result.agility = WithBonus(info->agility, recipe.bonus.agility);
+  result.max_dp =
+      static_cast<std::uint16_t>((first.max_dp + second.max_dp) / 2);
+  result.current_dp = result.max_dp;
+  const bool different = first.material != second.material;
+  CombineClassOrAffinityValues(first.classes, second.classes, result.classes,
+                               different, false);
+  CombineClassOrAffinityValues(first.affinities, second.affinities,
+                               result.affinities, different, true);
+  CombinePhysicalTypeValues(first.types, second.types, result.types, different);
+  return result;
+}
 
-// decomp: _materialResults (_materialResults@src/MENU/MENUC.PRG/168.c)
-char* Menu_Setup_materialResults;
+std::uint16_t HalfSum(std::uint16_t first, std::uint16_t second) {
+  return static_cast<std::uint16_t>((first + second) >> 1);
+}
 
-// decomp: local static of _setClassAffinities, at file scope so the module reset reaches it
-static short Menu_Setup_combineClassOrAffinityValuesSameMaterialStatFactors[] = { 4, 6, 8 };
+// The equipment details' class (0-15) and affinity (16-31) entries, each
+// table repeating its eight values.
+void ShowClassesAndAffinities(Context& context,
+                              const Items::PartClasses& classes,
+                              const Items::PartAffinities& affinities) {
+  for (std::size_t i = 0; i < kClassAffinityStatRows; ++i) {
+    context.host.SetEquipmentStat(i, classes[i & kPartSlotMask]);
+    context.host.SetEquipmentStat(kAffinityStatBase + i,
+                                  affinities[i & kPartSlotMask]);
+  }
+}
 
-// decomp: local static of _setTypeValues, at file scope so the module reset reaches it
-static short Menu_Setup_combinePhysicalTypeValuesSameMaterialTypeFactors[] = { 6, 8 };
+// A shield's or armor piece's values, DP and stats as the details show them.
+void ShowArmorValues(Context& context, const Items::InventoryArmor& armor,
+                     int subtype) {
+  ShowClassesAndAffinities(context, armor.classes, armor.affinities);
+  for (std::size_t i = 0; i < armor.types.size(); ++i) {
+    context.host.SetEquipmentStat(kTypeStatBase + i, armor.types[i]);
+  }
+  context.host.SetDpPp(armor.current_dp, armor.max_dp, 0, 0);
+  context.host.SetPrimaryStats(armor.strength, armor.intelligence,
+                               armor.agility, 1);
+  context.host.SetPrimaryStatValue(kStrengthValue, armor.strength);
+  context.host.SetPrimaryStatValue(kIntelligenceValue, armor.intelligence);
+  context.host.SetPrimaryStatValue(kAgilityValue, armor.agility);
+  context.host.SetEquipmentSubtype(subtype);
+}
 
-// decomp: _shieldBuf (_shieldBuf@src/MENU/MENUC.PRG/168.c)
-Items_InventoryShield Menu_Setup_shieldBuf;
+void ClearBladeStats(Context& context) {
+  context.host.ResetEquipmentStats();
+  context.host.SetRangeAndRisk(0, 0, 0, 1);
+}
 
-// decomp: _shieldCombinationInitData (_shieldCombinationInitData@src/MENU/MENUC.PRG/168.c)
-Menu_Setup_CombinedArmorRecord* Menu_Setup_shieldCombinationInitData;
+void ClearSlot(Context& context, ItemCategory category, int slot) {
+  const Items::ItemsStatus status =
+      Items::Inventory::ClearItemSlot(category, slot, context.host.Inventory());
+  if (status != Items::ItemsStatus::kOk) {
+    context.host.Refuse(Items::Describe(status));
+  }
+}
 
-// decomp: _sydData (_sydData@src/MENU/MENUC.PRG/168.c)
-void* Menu_Setup_sydData = NULL;
+// Whether the current workshop works `material`.
+bool WorkshopWorks(Context& context, int material) {
+  const std::uint8_t workshop = context.state.combination.workshop;
+  if (workshop >= kWorkshopMaterials.size()) {
+    context.host.Refuse(std::format("workshop {} outside the table", workshop));
+    return false;
+  }
+  if (material < 0 || material >= static_cast<int>(kByteBits)) {
+    return false;
+  }
+  return ((kWorkshopMaterials[workshop] >> material) & 1) != 0;
+}
 
-// decomp: local static of _loadSyd, at file scope so the module reset reaches it
-static int Menu_Setup_loadCombinationRecipesSydLbas[] = { VS_BLADE_SYD_LBA, VS_SHIELD_SYD_LBA, VS_ARMOR_SYD_LBA };
+// The three combination screens' differences.
+struct BladeKind {
+  using Record = Items::InventoryBlade;
+  static constexpr int kItemType = 0;
+  static constexpr std::size_t kHeaderText = menu12::kCombineBlade;
+  static constexpr int kIcon = kWeaponIcon;
+  static constexpr std::size_t kEmptyText = menu12::kBlade;
+  static constexpr std::size_t kSelectText = menu12::kSelectBladeToCombine;
+  static constexpr std::size_t kInvalidMaterialText =
+      menu12::kInvalidBladeMaterial;
+  static constexpr ItemCategory kCategory = ItemCategory::kBlade;
+  static constexpr std::string_view kName = "blade";
+  static constexpr bool kReloads = true;
+  static constexpr int kReloadMode = 0;
 
-// decomp: local static of _loadSyd, at file scope so the module reset reaches it
-static int Menu_Setup_loadCombinationRecipesSydSizes[] = { VS_BLADE_SYD_SIZE, VS_SHIELD_SYD_SIZE, VS_ARMOR_SYD_SIZE };
-
-// decomp: _workshopMaterials (_workshopMaterials@src/MENU/MENUC.PRG/168.c)
-char Menu_Setup_workshopMaterials[] = { 0, 0xE, 0x18, 0x38, 0xC0, 0x3E, 0xFE };
-
-// decomp: local static of _combineTopMenu, at file scope so the module reset reaches it
-static int (*Menu_Setup_combineMenus[])(
-        int) = { Menu_Setup_UpdateBladeCombination, Menu_Setup_UpdateShieldCombination, Menu_Setup_UpdateArmorCombination };
-
-// decomp: MENUC.PRG _loadSyd (src/MENU/MENUC.PRG/168.c:2658)
-int Menu_Setup_LoadCombinationRecipes(int id)
-{
-
-    static Content_DiscQueueSlot* Menu_Setup_loadCombinationRecipesSydCdQueueSlot;
-    static char Menu_Setup_loadCombinationRecipesSydFileLoading;
-    static char Menu_Setup_loadCombinationRecipesLayoutPadding[3] __attribute__((unused));
-
-    Content_DiscFile cdFile;
-
+  static CombinationMenuState& Menu(CombinationState& state) {
+    return state.blade_menu;
+  }
+  static IngredientSelectionState& Selection(CombinationState& state) {
+    return state.blade_selection;
+  }
+  static std::array<std::uint8_t, 2>& Ids(CombinationState& state) {
+    return state.blade_ids;
+  }
+  static Record& Buffer(CombinationState& state) { return state.blade; }
+  static auto& Table(Items::InventoryContents& inventory) {
+    return inventory.blades;
+  }
+  static std::span<const std::uint8_t> Order(Items::InventoryIndices& order) {
+    return order.blades;
+  }
+  static int Id(const Record& record) { return record.id; }
+  static int Material(const Record& record) { return record.material; }
+  static bool Listable(const Record& /*record*/) { return true; }
+  static bool InUse(Context& /*context*/, const Record& record) {
+    return record.assembled_weapon_index != 0;
+  }
+  static std::int32_t InUseFlags(Context& context, const Record& record) {
+    if (record.assembled_weapon_index == 0) {
+      return 0;
+    }
+    const Items::InventoryWeapon* weapon =
+        InventorySlot(context, context.host.Inventory().weapons,
+                      record.assembled_weapon_index, "blade's weapon");
+    if (weapon == nullptr) {
+      return 0;
+    }
+    return weapon->is_equipped == 0 ? kInUseCarried : kInUseEquipped;
+  }
+  static Framework::ItemRowText Format(Context& context, const Record& record,
+                                       std::span<std::uint8_t> buffer) {
+    return Framework::FormatBladeRow(context.host.ItemRows(), record, buffer);
+  }
+  static void SetRow(Context& context, MenuRow& row, const Record& record) {
+    SetCombinationBladeRow(context, row, record);
+  }
+  static void ShowListed(Context& context, int id) {
     if (id != 0) {
-        --id;
-        Menu_Setup_sydData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Setup_loadCombinationRecipesSydSizes[id]);
-        cdFile.lba = Menu_Setup_loadCombinationRecipesSydLbas[id];
-        cdFile.size = Menu_Setup_loadCombinationRecipesSydSizes[id];
-        Menu_Setup_loadCombinationRecipesSydCdQueueSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
-        if (Menu_Setup_loadCombinationRecipesSydCdQueueSlot != NULL) {
-            VS::Content::EnqueueLiveDiscRequest(Menu_Setup_loadCombinationRecipesSydCdQueueSlot, Menu_Setup_sydData);
-        } else {
-            Menu_Setup_loadCombinationRecipesSydCdQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Menu_Setup_sydData);
-        }
-        Menu_Setup_loadCombinationRecipesSydFileLoading = 1;
-        return 0;
-    }
-    if (Menu_Setup_loadCombinationRecipesSydFileLoading == 0) {
-        return 1;
-    }
-
-    if (Menu_Setup_loadCombinationRecipesSydCdQueueSlot->state == 4) {
-        VS::Content::ReleaseLiveDiscRequest(Menu_Setup_loadCombinationRecipesSydCdQueueSlot);
-        Menu_Setup_loadCombinationRecipesSydFileLoading = 0;
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: MENUC.PRG _setItemRow (src/MENU/MENUC.PRG/168.c:2696)
-Menu_Framework_MenuRow* Menu_Setup_SetCombinationResultRow(int itemType, int index)
-{
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(0, 155, 18, 165, 0,
-        (index == 0
-                ? (char*)&Menu_Framework_menu12Text
-                      [Menu_Framework_menu12Text[itemType + Text_Menu_MENU12_BIN_Index_newBlade]]
-                : Menu_Framework_itemNames[index]));
-    menuItem->selected = 1;
-    return menuItem;
-}
-
-// decomp: MENUC.PRG _initItemRow (src/MENU/MENUC.PRG/168.c:2710)
-Menu_Framework_MenuRow* Menu_Setup_AnimateCombinationResult(int itemType, int index)
-{
-    Menu_Framework_MenuRow* menuItem;
-
-    menuItem = Menu_Setup_SetCombinationResultRow(itemType, index);
-    menuItem->state = 2;
-    menuItem->targetPosition0 = 155;
-    menuItem->x = 320;
-
-    return menuItem;
-}
-
-// decomp: MENUC.PRG _setCombineBladeUi (src/MENU/MENUC.PRG/168.c:2735)
-void Menu_Setup_PreviewBladeCombination(int preview_selection)
-{
-    int i;
-    int ingredient_presence_mask;
-    u_int selected_ingredient_index;
-    int second_blade_id;
-    Items_InventoryBlade* blade;
-
-    i = Menu_Setup_combiningBladeIds[0];
-    second_blade_id = Menu_Setup_combiningBladeIds[1];
-
-    ingredient_presence_mask = i != 0;
-    if (second_blade_id != 0) {
-        ingredient_presence_mask += 2;
-    }
-
-    switch (ingredient_presence_mask) {
-    case 0:
-        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
-        break;
-
-    case 1:
-    case 2:
-        VS::Core::Memory::CopyLiveHalfwords(
-            &Menu_Setup_bladeBuf, &Audio_Seq_unusedInventory.blades[i + second_blade_id - 1], sizeof Menu_Setup_bladeBuf);
-        break;
-
-    case 3:
-        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
-        Menu_Setup_BuildCombinedBlade(&Audio_Seq_unusedInventory.blades[i - 1],
-            &Audio_Seq_unusedInventory.blades[second_blade_id - 1], &Menu_Setup_bladeBuf, Menu_Setup_sydData);
-        break;
-    }
-
-    blade = &Menu_Setup_bladeBuf;
-    blade->assembledWeaponIndex = 0;
-
-    Menu_Framework_ResetEquipmentStats();
-    Menu_Framework_SetRangeAndRisk(0, 0, 0, 1);
-
-    selected_ingredient_index = preview_selection - 1;
-
-    if (selected_ingredient_index >= 2) {
-        if (Menu_Setup_bladeBuf.id != 0) {
-            for (i = 0; i < 16; ++i) {
-                Menu_Framework_equipmentStats[i] = blade->classes[i & 7];
-                Menu_Framework_equipmentStats[16 + i] = blade->affinities[i & 7];
-            }
-            Menu_Framework_SetDpPp(
-                blade->currentDp, blade->maxDp, blade->currentPp, blade->maxPp);
-            Menu_Framework_SetPrimaryStats(
-                blade->strength, blade->intelligence, blade->agility, 1);
-            Menu_Framework_SetRangeAndRisk(blade->range.range, blade->cost, 0, 1);
-            Menu_Framework_equipmentSubtype = 2;
-        }
-    } else if (ingredient_presence_mask & preview_selection) {
-        Menu_Framework_SetBladeStats(Menu_Setup_combiningBladeIds[selected_ingredient_index]);
-    }
-}
-
-// decomp: MENUC.PRG _selectBlade (src/MENU/MENUC.PRG/168.c:2801)
-int Menu_Setup_SelectCombinationBlade(int ingredient_slot)
-{
-    static int Menu_Setup_combinationBladeSelectedRow;
-    static char Menu_Setup_combinationBladeState;
-    static char Menu_Setup_combinationBladeSlot;
-
-    int count;
-    int i;
-    char* textBuf;
-    char* menuText[2 * 17];
-    int parent_weapon_id;
-    int itemId;
-    Items_InventoryBlade* blade = NULL;
-
-    if (ingredient_slot != 0) {
-        Menu_Setup_combinationBladeSlot = ingredient_slot;
-        Menu_Setup_AnimateItemHeader(ingredient_slot + 10);
-        Menu_Setup_combinationBladeState = 0;
-        return 0;
-    }
-
-    itemId = Menu_Setup_combiningBladeIds[Menu_Setup_combinationBladeSlot - 1];
-    if (itemId != 0) {
-        blade = &Audio_Seq_unusedInventory.blades[itemId - 1];
-    }
-
-    switch (Menu_Setup_combinationBladeState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
-            break;
-        }
-
-        textBuf = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x72C));
-
-
-        if (blade == NULL) {
-            menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_blade];
-            menuText[1] =
-                (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_selectBladeToCombine];
-            *Menu_Framework_rowTypeBuf = 1;
-        } else {
-            Menu_Framework_FormatBladeRow(blade, menuText, Menu_Framework_rowTypeBuf, textBuf);
-        }
-
-        Menu_Setup_availableItems[0] = itemId;
-        count = 1;
-
-        for (i = 0; i < 16; ++i) {
-
-            itemId = Audio_Seq_unusedInventoryIndices.blades[i];
-
-            if ((itemId != 0) && (itemId != Menu_Setup_combiningBladeIds[0])
-                && (itemId != Menu_Setup_combiningBladeIds[1])) {
-
-                int available_blade_id = itemId;
-                blade = &Audio_Seq_unusedInventory.blades[itemId - 1];
-
-                Menu_Framework_FormatBladeRow(blade, menuText + count * 2,
-                    &Menu_Framework_rowTypeBuf[count], textBuf + count * 96);
-
-                if (!((Menu_Setup_workshopMaterials[Menu_Setup_currentWorkshop] >> blade->material) & 1)) {
-                    menuText[count * 2 + 1] = (char*)&Menu_Framework_menu12Text
-                        [Text_Menu_MENU12_BIN_Offset_invalidBladeMaterial];
-                    Menu_Framework_rowTypeBuf[count] |= 1;
-                }
-
-                parent_weapon_id = blade->assembledWeaponIndex;
-
-                if (parent_weapon_id != 0) {
-                    Menu_Framework_rowTypeBuf[count] |=
-                        (Audio_Seq_unusedInventory.weapons[parent_weapon_id - 1].isEquipped == 0 ? 0xCC00
-                                                                                : 0xCA00);
-                }
-
-                Menu_Setup_availableItems[count] = available_blade_id;
-                ++count;
-            }
-        }
-
-        Menu_Setup_BuildItemList(count, menuText, Menu_Framework_rowTypeBuf);
-        VS::Core::Memory::FreeLiveFromHighEnd(textBuf);
-        Menu_Setup_combinationBladeState = 1;
-        break;
-    case 1:
-        itemId = Menu_Setup_availableItems[Menu_Setup_itemsListWindow + Menu_Setup_itemsListSelection];
-        if (itemId != 0) {
-            Menu_Framework_SetBladeStats(itemId);
-        } else {
-            Menu_Framework_ResetEquipmentStats();
-            Menu_Framework_SetRangeAndRisk(0, 0, 0, 1);
-        }
-        Menu_Framework_UpdateInformationVisibility(
-            Menu_Setup_itemsListSelection + Menu_Setup_itemsListWindow, Menu_Setup_itemsListState);
-        Menu_Setup_UpdateItemList(2);
-        Menu_Setup_combinationBladeSelectedRow = Menu_Setup_GetSelectedItemRow() + 1;
-        if (Menu_Setup_combinationBladeSelectedRow != 0) {
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            if (Menu_Setup_combinationBladeSelectedRow == -2) {
-                return -2;
-            }
-            if (Menu_Setup_combinationBladeSelectedRow > 0) {
-                Menu_Setup_combinationBladeSelectedRow = Menu_Setup_availableItems[Menu_Setup_combinationBladeSelectedRow - 1];
-            }
-            Menu_Setup_combinationBladeState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Setup_combinationBladeSelectedRow;
-        }
-        break;
-    }
-    return 0;
-}
-
-// decomp: MENUC.PRG _setBladeMenuItem (src/MENU/MENUC.PRG/168.c:2919)
-void Menu_Setup_SetCombinationBladeRow(
-    Menu_Framework_MenuRow* menuItem, Items_InventoryBlade* blade)
-{
-    int assembledWeapon;
-
-    menuItem->rowIcon = blade->category;
-    menuItem->material = blade->material;
-    assembledWeapon = blade->assembledWeaponIndex;
-    if (assembledWeapon != 0) {
-        menuItem->outsetIcon =
-            Audio_Seq_unusedInventory.weapons[assembledWeapon - 1].isEquipped == 0 ? 2 : 1;
-    }
-}
-
-// decomp: MENUC.PRG _combineBladeMenu (src/MENU/MENUC.PRG/168.c:2939)
-int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
-{
-
-    static char Menu_Setup_bladeCombinationState;
-    static char Menu_Setup_bladeCombinationRow;
-    static char Menu_Setup_bladeCombinationOkBlinkPhase;
-    static char Menu_Setup_bladeCombinationLayoutPadding[3] __attribute__((unused));
-
-    char* menuText[2];
-    int rowType;
-    int itemId;
-    int var_s1;
-    int temp_v0_2;
-    int i;
-    char* combination_help_text;
-    int i_2;
-    Items_InventoryBlade* blade;
-    Menu_Framework_MenuRow* menuItem;
-
-    if (initialize_blade_combination != 0) {
-        Menu_Setup_RecordSlotSelection(5);
-
-        *(u_short*)&Menu_Setup_combiningBladeIds = 0;
-
-        Menu_Setup_PreviewBladeCombination(0);
-
-        Menu_Setup_bladeCombinationRow = 1;
-        Menu_Setup_bladeCombinationState = 0;
-        return 0;
-    }
-
-    var_s1 = 0;
-
-    if (Menu_Setup_combiningBladeIds[0] != 0) {
-        var_s1 = Menu_Setup_combiningBladeIds[1] > 0;
-    }
-
-    Menu_Setup_bladeCombinationOkBlinkPhase += 16;
-
-    if (Menu_Setup_bladeCombinationState != 2) {
-        Menu_Setup_bladeCombinationOkBlinkPhase = 0;
-    }
-
-    switch (Menu_Setup_bladeCombinationState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
-            break;
-        }
-
-        Menu_Setup_InitializeEquipmentHeader(Text_Menu_MENU12_BIN_Offset_combineBlade, 24);
-        // Fallthrough
-
-    case 1:
-        var_s1 = Menu_Setup_bladeBuf.id;
-        menuItem = Menu_Setup_AnimateCombinationResult(0, var_s1);
-
-        if (var_s1 != 0) {
-            Menu_Setup_SetCombinationBladeRow(menuItem, &Menu_Setup_bladeBuf);
-        }
-
-        for (i = 0; i < 2; ++i) {
-
-            var_s1 = Menu_Setup_combiningBladeIds[i];
-
-            if (var_s1 != 0) {
-                blade = &Audio_Seq_unusedInventory.blades[var_s1 - 1];
-            }
-
-            menuItem = Menu_Framework_SetMenuItem(i + 11, 334, 34 + i * 16, 151, 0,
-                var_s1 == 0 ? (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_blade]
-                            : Menu_Framework_itemNames[blade->id]);
-            menuItem->state = 2;
-            menuItem->targetPosition0 = 169;
-
-            if (var_s1 == 0) {
-                menuItem->fontColor = 1;
-            } else {
-                Menu_Setup_SetCombinationBladeRow(menuItem, blade);
-            }
-        }
-
-        Menu_Setup_bladeCombinationState = 2;
-        break;
-
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle()) {
-
-            if (Input_buttonsPressed.allButtons & PADRup) {
-                return Menu_Setup_LeaveItemSelection(1);
-            }
-
-            if (var_s1 != 0) {
-                Menu_Setup_DrawConfirmationLabel(2, Menu_Setup_bladeCombinationOkBlinkPhase);
-            }
-
-            if (Input_buttonsPressed.allButtons & PADRdown) {
-
-                temp_v0_2 = Menu_Setup_PopSlotSelection(5);
-
-                if (temp_v0_2 != 0) {
-
-                    VS::Menu::PlayLeaveSound();
-
-                    Menu_Setup_bladeCombinationRow = temp_v0_2;
-                    Menu_Setup_combiningBladeIds[temp_v0_2 - 1] = 0;
-
-                    Menu_Setup_PreviewBladeCombination(temp_v0_2);
-
-                    menuItem = Menu_Framework_SetMenuItem(temp_v0_2 + 10, 169,
-                        (temp_v0_2 * 16) + 18, 151, 0,
-                        (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_blade]);
-                    menuItem->selected = 1;
-                    menuItem->fontColor = 1;
-
-                    var_s1 = Menu_Setup_bladeBuf.id;
-
-                    menuItem = Menu_Setup_SetCombinationResultRow(0, var_s1);
-
-                    if (var_s1 != 0) {
-                        Menu_Setup_SetCombinationBladeRow(menuItem, &Menu_Setup_bladeBuf);
-                    }
-
-                    break;
-                }
-
-                return Menu_Setup_LeaveItemSelection(1);
-            }
-
-            if ((Input_buttonsPressed.allButtons & PADstart) && (var_s1 != 0)) {
-
-                VS::Menu::PlaySelectSound();
-                Menu_Framework_MenuItem(Menu_Setup_bladeCombinationRow + 10)->selected = 0;
-
-                Menu_Setup_bladeCombinationRow = 3;
-                Menu_Setup_bladeCombinationState = 4;
-
-                Menu_Setup_PreviewBladeCombination(3);
-                return 0;
-            }
-
-            i_2 = Menu_Setup_bladeCombinationRow;
-
-            if (Input_buttonsPressed.allButtons & PADRright) {
-                if (i_2 == 0) {
-                    VS::Menu::PlayInvalidSound();
-                } else {
-
-                    VS::Menu::PlaySelectSound();
-
-                    if (i_2 == 3) {
-                        Menu_Setup_bladeCombinationState = 4;
-                    } else {
-                        Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                        Menu_Setup_SelectCombinationBlade(i_2);
-                        Menu_Setup_bladeCombinationState = 3;
-                    }
-
-                    break;
-                }
-            }
-
-            if (Input_buttonRepeat & PADLup) {
-                if (i_2 == 0) {
-                    i_2 = var_s1 + 2;
-                } else {
-                    --i_2;
-                }
-            }
-
-            if (Input_buttonRepeat & PADLdown) {
-                if (i_2 == (var_s1 + 2)) {
-                    i_2 = 0;
-                } else {
-                    ++i_2;
-                }
-            }
-
-            if (i_2 != Menu_Setup_bladeCombinationRow) {
-
-                VS::Menu::PlayChangeSound();
-
-                Menu_Setup_bladeCombinationRow = i_2;
-
-                Menu_Setup_PreviewBladeCombination(Menu_Setup_bladeCombinationRow);
-            }
-
-            Menu_Framework_rowTypeBuf[0] = Menu_Setup_bladeBuf.id < 1;
-
-            for (var_s1 = 1; var_s1 < 3; ++var_s1) {
-
-                Menu_Framework_MenuItem(var_s1 + 10)->selected = var_s1 == Menu_Setup_bladeCombinationRow;
-
-                Menu_Framework_rowTypeBuf[var_s1] = Menu_Setup_combiningBladeIds[var_s1 - 1] == 0;
-            }
-
-            Menu_Framework_rowTypeBuf[3] = 1;
-
-            Menu_Framework_UpdateInformationVisibility(i_2, 16);
-
-            menuText[1] =
-                (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_selectBladeToCombine];
-
-            switch (i_2) {
-            case 0:
-                if (Menu_Setup_bladeBuf.id != 0) {
-                    Menu_Framework_FormatBladeRow(
-                        &Menu_Setup_bladeBuf, menuText, &rowType, Menu_Framework_stringBuf);
-                }
-                break;
-
-            case 1:
-            case 2:
-                var_s1 = Menu_Setup_combiningBladeIds[i_2 - 1];
-                if (var_s1 != 0) {
-                    Menu_Framework_FormatBladeRow(&Audio_Seq_unusedInventory.blades[var_s1 - 1],
-                        menuText, &rowType, Menu_Framework_stringBuf);
-                }
-                break;
-
-            case 3:
-                menuText[1] =
-                    (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_pressOk];
-                break;
-            }
-
-            Menu_Framework_SetInformationMessage(menuText[1]);
-
-            var_s1 = (((i_2 * 16) + 10) << 0x10) | 0x9B;
-
-            if (i_2 == 0) {
-                var_s1 -= 14;
-            }
-
-            if (i_2 == 3) {
-                var_s1 += 0xFFFC0000;
-            }
-
-            Menu_Setup_bladeCombinationCursorAnimation = Menu_Framework_DrawCursor(Menu_Setup_bladeCombinationCursorAnimation, var_s1);
-            break;
-        }
-        Menu_Setup_bladeCombinationOkBlinkPhase = 0;
-        break;
-
-    case 3:
-        itemId = Menu_Setup_SelectCombinationBlade(0);
-
-        if (itemId == 0) {
-            break;
-        }
-
-        if (itemId == -2) {
-            return Menu_Setup_LeaveItemSelection(1);
-        }
-
-        if (itemId > 0) {
-
-            var_s1 = Menu_Setup_bladeCombinationRow - 1;
-
-            if (itemId == Menu_Setup_combiningBladeIds[Menu_Setup_bladeCombinationRow - 1]) {
-
-                Menu_Setup_combiningBladeIds[Menu_Setup_bladeCombinationRow - 1] = 0;
-
-                Menu_Setup_PopSlotSelection(var_s1);
-
-            } else {
-
-                Menu_Setup_combiningBladeIds[Menu_Setup_bladeCombinationRow - 1] = itemId;
-
-                Menu_Setup_RecordSlotSelection(var_s1);
-
-                Menu_Setup_bladeCombinationRow = (Menu_Setup_bladeCombinationRow + 1);
-
-                if (var_s1 == 1) {
-                    if (Menu_Setup_combiningBladeIds[0] == 0) {
-                        Menu_Setup_bladeCombinationRow = var_s1;
-                    }
-                }
-            }
-
-            Menu_Setup_PreviewBladeCombination(Menu_Setup_bladeCombinationRow);
-        }
-
-        Menu_Setup_bladeCombinationState = 1;
-        break;
-
-    case 4:
-        Menu_Framework_UpdatePrimaryStatPanel(2);
-        Menu_Setup_UpdateThreeChoicePrompt(2);
-
-        var_s1 = 0;
-
-        for (i = 0; i < 2; ++i) {
-            var_s1 |=
-                Audio_Seq_unusedInventory.blades[Menu_Setup_combiningBladeIds[i] - 1].assembledWeaponIndex;
-        }
-
-        if (var_s1 == 0) {
-            combination_help_text =
-                (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_attachmentConfirm];
-        } else {
-            combination_help_text =
-                (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_cancelCombineConfirm];
-        }
-
-        Menu_Framework_SetInformationMessage(combination_help_text);
-
-        Menu_Setup_bladeCombinationState = 5;
-        break;
-
-    case 5:
-        temp_v0_2 = Menu_Setup_UpdateThreeChoicePrompt(0);
-
-        if (temp_v0_2 == 0) {
-            break;
-        }
-
-        switch (temp_v0_2) {
-        case 1:
-            Audio_PlaySfxCentered(0x7E, 0x18);
-            Menu_Framework_InitializeInformationBox();
-            Menu_Framework_UpdateEquipmentStatPages(-1);
-            Menu_Framework_UpdateDpPpBars(4);
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            Menu_Framework_FlyOutRowLeft(0);
-
-            for (i = 0; i < 2; ++i) {
-
-                blade = &Audio_Seq_unusedInventory.blades[Menu_Setup_combiningBladeIds[i] - 1];
-                var_s1 = blade->assembledWeaponIndex;
-
-                if (var_s1 != 0) {
-                    if (Audio_Seq_unusedInventory.weapons[var_s1 - 1].isEquipped != 0) {
-                        VS::Items::Inventory::UnequipLiveWeapon();
-                        Menu_Setup_bladeCombinationState = 6;
-                    }
-                    Menu_Setup_DisassembleWeapon(var_s1 - 1);
-                }
-
-                VS::Items::Inventory::ClearLiveItemSlot(Items_ItemCategory_Blade, Menu_Setup_combiningBladeIds[i]);
-            }
-
-            itemId = Menu_Setup_combiningBladeIds[0];
-            blade = &Audio_Seq_unusedInventory.blades[itemId - 1];
-
-            VS::Core::Memory::CopyLiveHalfwords(blade, &Menu_Setup_bladeBuf, sizeof *blade);
-
-            blade->index = itemId;
-
-            VS::Items::Inventory::RebuildLiveDisplayIndices(1);
-
-            return Menu_Setup_bladeCombinationState != 6;
-
-        case 2:
-            VS::Menu::PlayLeaveSound();
-            Menu_Framework_UpdatePrimaryStatPanel(1);
-
-            Menu_Setup_bladeCombinationState = 2;
-            break;
-
-        case 3:
-            return Menu_Setup_LeaveItemSelection(1);
-        }
-        break;
-
-    case 6:
-        if (Menu_Setup_ReloadAshleyEquipment(0) == 0) {
-            return -1;
-        }
-        break;
-    }
-
-    return 0;
-}
-
-// decomp: MENUC.PRG _setShieldUi (src/MENU/MENUC.PRG/168.c:3317)
-void Menu_Setup_SetShieldBaseStats(Items_InventoryShield* shield)
-{
-    int i;
-    Items_InventoryArmor* base = &shield->base;
-
-    Menu_Framework_ResetEquipmentStats();
-
-    for (i = 0; i < 16; ++i) {
-        Menu_Framework_equipmentStats[i] = base->classes[i & 7];
-        Menu_Framework_equipmentStats[16 + i] = base->affinities[i & 7];
-    }
-
-    for (i = 0; i < 4; ++i) {
-        Menu_Framework_equipmentStats[32 + i] = base->types[i];
-    }
-
-    Menu_Framework_SetDpPp(base->currentDp, base->maxDp, 0, 0);
-    Menu_Framework_SetPrimaryStats(base->strength, base->intelligence, base->agility, 1);
-    Menu_Framework_strIntAgi[4] = base->strength;
-    Menu_Framework_strIntAgi[5] = base->intelligence;
-    Menu_Framework_strIntAgi[6] = base->agility;
-    Menu_Framework_equipmentSubtype = 8;
-}
-
-// decomp: MENUC.PRG _initCombineShields (src/MENU/MENUC.PRG/168.c:3353)
-void Menu_Setup_PreviewShieldCombination(int preview_selection)
-{
-    u_int selected_ingredient_index;
-    Items_InventoryShield* shield;
-
-    int first = Menu_Setup_itemsToCombine[0];
-    int second = Menu_Setup_itemsToCombine[1];
-
-    int ingredient_presence_mask = first > 0;
-
-    if (second != 0) {
-        ingredient_presence_mask += 2;
-    }
-
-    switch (ingredient_presence_mask) {
-    case 0:
-        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_shieldBuf, sizeof Menu_Setup_shieldBuf);
-        break;
-
-    case 1:
-    case 2:
-        VS::Core::Memory::CopyLiveHalfwords(&Menu_Setup_shieldBuf, &Audio_Seq_unusedInventory.shields[first + second - 1],
-            sizeof Menu_Setup_shieldBuf);
-        break;
-
-    case 3:
-        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_shieldBuf, sizeof Menu_Setup_shieldBuf);
-        Menu_Setup_BuildCombinedShield(&Audio_Seq_unusedInventory.shields[first - 1].base,
-            &Audio_Seq_unusedInventory.shields[second - 1].base, &Menu_Setup_shieldBuf.base, Menu_Setup_sydData);
-        break;
-    }
-
-    shield = &Menu_Setup_shieldBuf;
-    shield->isEquipped = 0;
-
-    Menu_Framework_ResetEquipmentStats();
-
-    selected_ingredient_index = preview_selection - 1;
-
-    if (selected_ingredient_index > 1) {
-        if (shield->base.id != 0) {
-            Menu_Setup_SetShieldBaseStats(shield);
-        }
-    } else if (ingredient_presence_mask & preview_selection) {
-        Menu_Setup_SetShieldBaseStats(&Audio_Seq_unusedInventory.shields[Menu_Setup_itemsToCombine[selected_ingredient_index] - 1]);
-    }
-}
-
-// decomp: MENUC.PRG _initUiShield (src/MENU/MENUC.PRG/168.c:3404)
-void Menu_Setup_SetShieldRowWithoutGems(
-    Items_InventoryShield* shield, char** menuText, int* rowTypes, char* stringBuf)
-{
-    int gems = *(int*)shield->gems;
-    *(int*)shield->gems = 0;
-
-    Menu_Framework_FormatInventoryShieldRow(shield, menuText, rowTypes, stringBuf);
-
-    *(int*)shield->gems = gems;
-}
-
-// decomp: MENUC.PRG _selectShields (src/MENU/MENUC.PRG/168.c:3421)
-int Menu_Setup_SelectCombinationShield(int ingredient_slot)
-{
-    static int Menu_Setup_combinationShieldSelectedRow;
-    static char Menu_Setup_combinationShieldState;
-    static char Menu_Setup_combinationShieldSlot;
-
-    char* menuText[2 * 9];
-    int rowType;
-    int i;
-    void* stringBuf;
-    int itemId;
-    Items_InventoryShield* shield;
-
-    shield = NULL;
-
-    if (ingredient_slot != 0) {
-
-        Menu_Setup_combinationShieldSlot = ingredient_slot;
-
-        Menu_Setup_AnimateItemHeader(ingredient_slot + 10);
-        Menu_Setup_combinationShieldState = 0;
-        return 0;
-    }
-
-    itemId = Menu_Setup_itemsToCombine[Menu_Setup_combinationShieldSlot - 1];
-
-    if (itemId != 0) {
-        shield = &Audio_Seq_unusedInventory.shields[itemId - 1];
-    }
-
-    switch (Menu_Setup_combinationShieldState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-
-            stringBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x3CC);
-
-
-
-            if (shield == NULL) {
-                menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_shield];
-                menuText[1] =
-                    (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_selectShield];
-                *Menu_Framework_rowTypeBuf = 1;
-            } else {
-                Menu_Setup_SetShieldRowWithoutGems(shield, menuText, Menu_Framework_rowTypeBuf, (char *)(stringBuf));
-            }
-
-            Menu_Setup_availableItems[0] = itemId;
-            rowType = 1;
-
-            for (i = 0; i < 8; ++i) {
-
-                itemId = Audio_Seq_unusedInventoryIndices.shields[i];
-
-                if ((itemId != 0) && (itemId != Menu_Setup_itemsToCombine[0])
-                    && (itemId != Menu_Setup_itemsToCombine[1])) {
-
-                    shield = &Audio_Seq_unusedInventory.shields[itemId - 1];
-
-                    Menu_Setup_SetShieldRowWithoutGems(shield, menuText + rowType * 2,
-                        &Menu_Framework_rowTypeBuf[rowType], (char *)(((u_char*)(stringBuf)) + rowType * 0x60));
-
-                    if (!((Menu_Setup_workshopMaterials[Menu_Setup_currentWorkshop] >> shield->base.material)
-                            & 1)) {
-                        menuText[rowType * 2 + 1] = (char*)&Menu_Framework_menu12Text
-                            [Text_Menu_MENU12_BIN_Offset_invalidShieldMaterial];
-                        Menu_Framework_rowTypeBuf[rowType] |= 1;
-                    }
-
-                    if (shield->isEquipped != 0) {
-                        Menu_Framework_rowTypeBuf[rowType] |= 0xCA00;
-                    }
-
-                    Menu_Setup_availableItems[rowType] = itemId;
-                    ++rowType;
-                }
-            }
-
-            Menu_Setup_BuildItemList(rowType, menuText, Menu_Framework_rowTypeBuf);
-            VS::Core::Memory::FreeLiveFromHighEnd(stringBuf);
-
-            Menu_Setup_combinationShieldState = 1;
-        }
-        break;
-
-    case 1:
-        itemId = Menu_Setup_availableItems[Menu_Setup_itemsListWindow + Menu_Setup_itemsListSelection];
-
-        if (itemId != 0) {
-            Menu_Setup_SetShieldBaseStats(&Audio_Seq_unusedInventory.shields[itemId - 1]);
-        } else {
-            Menu_Framework_ResetEquipmentStats();
-        }
-
-        Menu_Framework_UpdateInformationVisibility(
-            Menu_Setup_itemsListSelection + Menu_Setup_itemsListWindow, Menu_Setup_itemsListState);
-        Menu_Setup_UpdateItemList(2);
-
-        Menu_Setup_combinationShieldSelectedRow = Menu_Setup_GetSelectedItemRow() + 1;
-
-        if (Menu_Setup_combinationShieldSelectedRow != 0) {
-
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-
-            if (Menu_Setup_combinationShieldSelectedRow == -2) {
-                return -2;
-            }
-            if (Menu_Setup_combinationShieldSelectedRow > 0) {
-                Menu_Setup_combinationShieldSelectedRow = Menu_Setup_availableItems[Menu_Setup_combinationShieldSelectedRow - 1];
-            }
-            Menu_Setup_combinationShieldState = 2;
-        }
-        break;
-
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Setup_combinationShieldSelectedRow;
-        }
-        break;
-    }
-
-    return 0;
-}
-
-// decomp: MENUC.PRG _setShieldMenuItem (src/MENU/MENUC.PRG/168.c:3548)
-void Menu_Setup_SetCombinationShieldRow(
-    Menu_Framework_MenuRow* menuItem, Items_InventoryShield* shield)
-{
-    menuItem->rowIcon = 15;
-    menuItem->material = shield->base.material;
-    menuItem->outsetIcon = shield->isEquipped != 0;
-}
-
-// decomp: MENUC.PRG _combineShieldMenu (src/MENU/MENUC.PRG/168.c:3562)
-int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
-{
-
-    static char Menu_Setup_shieldCombinationState;
-    static char Menu_Setup_shieldCombinationRow;
-    static char Menu_Setup_shieldCombinationOkBlinkPhase;
-    static char Menu_Setup_shieldCombinationLayoutPadding[3] __attribute__((unused));
-
-    char* menuText[2];
-    int rowType;
-    int itemId_3;
-    int gem_slot_index;
-    int var_s1;
-    int i;
-    u_short* combination_help_text;
-    int temp_s1;
-    int temp_s2;
-    int shield_gem_slot_count;
-    Items_InventoryShield* shield1;
-    Items_InventoryShield* shield0;
-    Menu_Framework_MenuRow* combination_menu_row;
-
-    if (initialize_shield_combination != 0) {
-
-        Menu_Setup_RecordSlotSelection(5);
-
-        *(u_short*)Menu_Setup_itemsToCombine = 0;
-
-        Menu_Setup_PreviewShieldCombination(0);
-
-        Menu_Setup_shieldCombinationRow = 1;
-        Menu_Setup_shieldCombinationState = 0;
-        return 0;
-    }
-
-    var_s1 = 0;
-
-    if (Menu_Setup_itemsToCombine[0] != 0) {
-        var_s1 = Menu_Setup_itemsToCombine[1] > 0;
-    }
-
-    Menu_Setup_shieldCombinationOkBlinkPhase += 0x10;
-
-    if (Menu_Setup_shieldCombinationState != 2) {
-        Menu_Setup_shieldCombinationOkBlinkPhase = 0;
-    }
-
-    switch (Menu_Setup_shieldCombinationState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
-            break;
-        }
-        Menu_Setup_InitializeEquipmentHeader(Text_Menu_MENU12_BIN_Offset_combineShield, 0x1B);
-        // Fallthrough
-
-    case 1:
-        temp_s1 = Menu_Setup_shieldBuf.base.id;
-        combination_menu_row = Menu_Setup_AnimateCombinationResult(1, temp_s1);
-
-        if (temp_s1 != 0) {
-            Menu_Setup_SetCombinationShieldRow(combination_menu_row, &Menu_Setup_shieldBuf);
-        }
-
-        for (i = 0; i < 2; ++i) {
-
-            temp_s1 = Menu_Setup_itemsToCombine[i];
-
-            if (temp_s1 != 0) {
-                shield0 = &Audio_Seq_unusedInventory.shields[temp_s1 - 1];
-            }
-
-            combination_menu_row = Menu_Framework_SetMenuItem(i + 0xB, 0x14E, 0x22 + i * 0x10, 0x97, 0,
-                (temp_s1 == 0
-                        ? (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_shield]
-                        : Menu_Framework_itemNames[shield0->base.id]));
-            combination_menu_row->state = 2;
-            combination_menu_row->targetPosition0 = 0xA9;
-
-            if (temp_s1 == 0) {
-                combination_menu_row->fontColor = 1;
-            } else {
-                Menu_Setup_SetCombinationShieldRow(combination_menu_row, shield0);
-            }
-        }
-
-        Menu_Setup_shieldCombinationState = 2;
-        break;
-
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            if (!(Input_buttonsPressed.allButtons & PADRup)) {
-
-                if (var_s1 != 0) {
-                    Menu_Setup_DrawConfirmationLabel(2, Menu_Setup_shieldCombinationOkBlinkPhase);
-                }
-
-                if (Input_buttonsPressed.allButtons & PADRdown) {
-
-                    temp_s2 = Menu_Setup_PopSlotSelection(5);
-
-                    if (temp_s2 != 0) {
-
-                        VS::Menu::PlayLeaveSound();
-
-                        Menu_Setup_shieldCombinationRow = temp_s2;
-                        Menu_Setup_itemsToCombine[temp_s2 - 1] = 0;
-
-                        Menu_Setup_PreviewShieldCombination(temp_s2);
-                        combination_menu_row = Menu_Framework_SetMenuItem(temp_s2 + 0xA, 0xA9,
-                            (temp_s2 * 0x10) + 0x12, 0x97, 0,
-                            (char*)(Menu_Framework_menu12Text + 0x439));
-
-                        combination_menu_row->selected = 1;
-                        combination_menu_row->fontColor = 1;
-                        var_s1 = Menu_Setup_shieldBuf.base.id;
-                        combination_menu_row = Menu_Setup_SetCombinationResultRow(1, var_s1);
-
-                        if (var_s1 != 0) {
-                            Menu_Setup_SetCombinationShieldRow(combination_menu_row, &Menu_Setup_shieldBuf);
-                            return 0;
-                        }
-
-                        break;
-                    }
-
-                    return Menu_Setup_LeaveItemSelection(1);
-                }
-
-                if ((Input_buttonsPressed.allButtons & PADstart) && (var_s1 != 0)) {
-                    VS::Menu::PlaySelectSound();
-                    Menu_Framework_MenuItem(Menu_Setup_shieldCombinationRow + 0xA)->selected = 0;
-
-                    Menu_Setup_shieldCombinationRow = 3;
-                    Menu_Setup_shieldCombinationState = 4;
-
-                    Menu_Setup_PreviewShieldCombination(3);
-                    return 0;
-                }
-
-                temp_s2 = Menu_Setup_shieldCombinationRow;
-
-                if (Input_buttonsPressed.allButtons & PADRright) {
-
-                    if (temp_s2 == 0) {
-                        VS::Menu::PlayInvalidSound();
-                    } else {
-
-                        VS::Menu::PlaySelectSound();
-
-                        if (temp_s2 == 3) {
-                            Menu_Setup_shieldCombinationState = 4;
-                        } else {
-                            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                            Menu_Setup_SelectCombinationShield(temp_s2);
-                            Menu_Setup_shieldCombinationState = 3;
-                        }
-
-                        break;
-                    }
-                }
-
-                if (Input_buttonRepeat & PADLup) {
-                    if (temp_s2 == 0) {
-                        temp_s2 = var_s1 + 2;
-                    } else {
-                        --temp_s2;
-                    }
-                }
-
-                if (Input_buttonRepeat & PADLdown) {
-                    if (temp_s2 == (var_s1 + 2)) {
-                        temp_s2 = 0;
-                    } else {
-                        ++temp_s2;
-                    }
-                }
-
-                if (temp_s2 != Menu_Setup_shieldCombinationRow) {
-                    VS::Menu::PlayChangeSound();
-
-                    Menu_Setup_shieldCombinationRow = temp_s2;
-
-                    Menu_Setup_PreviewShieldCombination(Menu_Setup_shieldCombinationRow);
-                }
-
-                Menu_Framework_rowTypeBuf[0] = Menu_Setup_shieldBuf.base.id < 1;
-
-                for (var_s1 = 1; var_s1 < 3; ++var_s1) {
-                    Menu_Framework_MenuItem(var_s1 + 0xA)->selected = var_s1 == Menu_Setup_shieldCombinationRow;
-                    Menu_Framework_rowTypeBuf[var_s1] = Menu_Setup_itemsToCombine[var_s1 - 1] == 0;
-                }
-
-                Menu_Framework_rowTypeBuf[3] = 1;
-
-                Menu_Framework_UpdateInformationVisibility(temp_s2, 0x10);
-
-                menuText[1] =
-                    (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_selectShield];
-
-                switch (temp_s2) {
-                case 0:
-                    if (Menu_Setup_shieldBuf.base.id != 0) {
-                        Menu_Setup_SetShieldRowWithoutGems(
-                            &Menu_Setup_shieldBuf, menuText, &rowType, Menu_Framework_stringBuf);
-                    }
-                    break;
-
-                case 1:
-                case 2:
-                    var_s1 = Menu_Setup_itemsToCombine[temp_s2 - 1];
-
-                    if (var_s1 != 0) {
-
-                        shield1 = &Audio_Seq_unusedInventory.shields[var_s1 - 1];
-                        var_s1 = *(int*)shield1->gems;
-                        *(int*)shield1->gems = 0;
-
-                        Menu_Setup_SetShieldRowWithoutGems(shield1, menuText, &rowType, Menu_Framework_stringBuf);
-
-                        *(int*)shield1->gems = var_s1;
-                    }
-                    break;
-
-                case 3:
-                    menuText[1] = (char*)(Menu_Framework_menu12Text + 0x39E);
-                    break;
-                }
-
-                Menu_Framework_SetInformationMessage((char*)menuText[1]);
-
-                var_s1 = (((temp_s2 * 0x10) + 0xA) << 0x10) | 0x9B;
-
-                if (temp_s2 == 0) {
-                    var_s1 -= 0xE;
-                }
-
-                if (temp_s2 == 3) {
-                    var_s1 += 0xFFFC0000;
-                }
-
-                Menu_Setup_shieldCombinationCursorAnimation = Menu_Framework_DrawCursor(Menu_Setup_shieldCombinationCursorAnimation, var_s1);
-                break;
-            }
-
-            return Menu_Setup_LeaveItemSelection(1);
-        }
-
-        Menu_Setup_shieldCombinationOkBlinkPhase = 0;
-        break;
-
-    case 3:
-        temp_s2 = Menu_Setup_SelectCombinationShield(0);
-
-        if (temp_s2 == 0) {
-            break;
-        }
-
-        if (temp_s2 != -2) {
-            if (temp_s2 > 0) {
-                var_s1 = Menu_Setup_shieldCombinationRow - 1;
-                if (temp_s2 == Menu_Setup_itemsToCombine[Menu_Setup_shieldCombinationRow - 1]) {
-                    Menu_Setup_itemsToCombine[Menu_Setup_shieldCombinationRow - 1] = 0;
-                    Menu_Setup_PopSlotSelection(var_s1);
-                } else {
-                    Menu_Setup_itemsToCombine[Menu_Setup_shieldCombinationRow - 1] = temp_s2;
-                    Menu_Setup_RecordSlotSelection(var_s1);
-                    Menu_Setup_shieldCombinationRow = (Menu_Setup_shieldCombinationRow + 1);
-                    if (var_s1 == 1) {
-                        if (Menu_Setup_itemsToCombine[0] == 0) {
-                            Menu_Setup_shieldCombinationRow = var_s1;
-                        }
-                    }
-                }
-                Menu_Setup_PreviewShieldCombination(Menu_Setup_shieldCombinationRow);
-            }
-            Menu_Setup_shieldCombinationState = 1;
-            break;
-        }
-        return Menu_Setup_LeaveItemSelection(1);
-
-    case 4:
-        Menu_Framework_UpdatePrimaryStatPanel(2);
-        Menu_Setup_UpdateThreeChoicePrompt(2);
-
-        var_s1 = 0;
-
-        for (i = 0; i < 2; ++i) {
-
-            shield0 = &Audio_Seq_unusedInventory.shields[Menu_Setup_itemsToCombine[i] - 1];
-            shield_gem_slot_count = shield0->base.gemSlots;
-            var_s1 |= shield0->isEquipped;
-
-            for (gem_slot_index = 0; gem_slot_index < shield_gem_slot_count; ++gem_slot_index) {
-                var_s1 |= shield0->gems[gem_slot_index];
-            }
-        }
-
-        if (var_s1 == 0) {
-            combination_help_text = Menu_Framework_menu12Text + 0x42B;
-        } else {
-            combination_help_text = Menu_Framework_menu12Text + 0x4A7;
-        }
-
-        Menu_Framework_SetInformationMessage((char*)combination_help_text);
-
-        Menu_Setup_shieldCombinationState = 5;
-        break;
-
-    case 5:
-        temp_s2 = Menu_Setup_UpdateThreeChoicePrompt(0);
-
-        if (temp_s2 == 0) {
-            break;
-        }
-
-        switch (temp_s2) {
-        case 1:
-            Audio_PlaySfxCentered(0x7E, 0x18);
-            Menu_Framework_InitializeInformationBox();
-            Menu_Framework_UpdateEquipmentStatPages(-1);
-            Menu_Framework_UpdateDpPpBars(4);
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            Menu_Framework_FlyOutRowLeft(0);
-
-            for (i = 0; i < 2; ++i) {
-
-                temp_s1 = Menu_Setup_itemsToCombine[i];
-                itemId_3 = temp_s1 - 1;
-
-                if (Audio_Seq_unusedInventory.shields[itemId_3].isEquipped != 0) {
-                    VS::Items::Inventory::UnequipLiveShield();
-                    Menu_Setup_shieldCombinationState = 6;
-                }
-
-                Menu_Setup_DetachShieldGems(itemId_3);
-                VS::Items::Inventory::ClearLiveItemSlot(Items_ItemCategory_Shield, temp_s1);
-            }
-
-            temp_s2 = Menu_Setup_itemsToCombine[0];
-            shield1 = &Audio_Seq_unusedInventory.shields[temp_s2 - 1];
-
-            VS::Core::Memory::CopyLiveHalfwords(shield1, &Menu_Setup_shieldBuf, 0x30);
-
-            shield1->index = temp_s2;
-
-            VS::Items::Inventory::RebuildLiveDisplayIndices(3);
-
-            return Menu_Setup_shieldCombinationState != 6;
-
-        case 2:
-            VS::Menu::PlayLeaveSound();
-            Menu_Framework_UpdatePrimaryStatPanel(1);
-
-            Menu_Setup_shieldCombinationState = temp_s2;
-            break;
-
-        case 3:
-            return Menu_Setup_LeaveItemSelection(1);
-        }
-        break;
-
-    case 6:
-        if (Menu_Setup_ReloadAshleyEquipment(1) == 0) {
-            return -1;
-        }
-        break;
-    }
-
-    return 0;
-}
-
-// decomp: MENUC.PRG _initCombineArmor (src/MENU/MENUC.PRG/168.c:3947)
-void Menu_Setup_PreviewArmorCombination(int preview_selection)
-{
-    int var_a0;
-    u_int selected_ingredient_index;
-    Items_InventoryArmor* armor;
-
-    int i = Menu_Setup_combiningArmorIds[0];
-    int second_armor_id = Menu_Setup_combiningArmorIds[1];
-    int ingredient_presence_mask = i != 0;
-
-    if (second_armor_id != 0) {
-        ingredient_presence_mask += 2;
-    }
-
-    switch (ingredient_presence_mask) {
-    case 0:
-        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
-        break;
-
-    case 1:
-    case 2:
-        VS::Core::Memory::CopyLiveHalfwords(
-            &Menu_Setup_armorBuf, &Audio_Seq_unusedInventory.armor[i + second_armor_id - 1], sizeof Menu_Setup_armorBuf);
-        break;
-
-    case 3:
-        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
-        Menu_Setup_BuildCombinedArmor(&Audio_Seq_unusedInventory.armor[i - 1],
-            &Audio_Seq_unusedInventory.armor[second_armor_id - 1], &Menu_Setup_armorBuf, Menu_Setup_sydData);
-        break;
-    }
-
-    armor = &Menu_Setup_armorBuf;
-    armor->limb = 0;
-
-    Menu_Framework_ResetEquipmentStats();
-
-    selected_ingredient_index = preview_selection - 1;
-
-    if (selected_ingredient_index >= 2) {
-        if (Menu_Setup_armorBuf.id != 0) {
-
-            for (i = 0; i < 16; ++i) {
-                Menu_Framework_equipmentStats[i] = armor->classes[i & 7];
-                Menu_Framework_equipmentStats[16 + i] = armor->affinities[i & 7];
-            }
-
-            for (i = 0; i < 4; ++i) {
-                Menu_Framework_equipmentStats[32 + i] = armor->types[i];
-                var_a0 += 2;
-            }
-
-            Menu_Framework_SetDpPp(armor->currentDp, armor->maxDp, 0, 0);
-            Menu_Framework_SetPrimaryStats(
-                armor->strength, armor->intelligence, armor->agility, 1);
-
-            Menu_Framework_equipmentSubtype = 0x10;
-            Menu_Framework_strIntAgi[4] = armor->strength;
-            Menu_Framework_strIntAgi[5] = armor->intelligence;
-            Menu_Framework_strIntAgi[6] = armor->agility;
-        }
-    } else if (ingredient_presence_mask & preview_selection) {
-        Menu_Framework_SetArmorStats(Menu_Setup_combiningArmorIds[selected_ingredient_index]);
-    }
-}
-
-// decomp: MENUC.PRG _initUiArmor (src/MENU/MENUC.PRG/168.c:4019)
-int Menu_Setup_SelectCombinationArmor(int ingredient_slot)
-{
-    static int Menu_Setup_combinationArmorSelectedRow;
-    static char Menu_Setup_combinationArmorStep;
-    static char Menu_Setup_combinationArmorSlot;
-
-    char* armor_row_text[2 * 17];
-    int armor_row_count;
-    int i;
-    char* armor_text_allocation;
-    int itemId;
-    int s0_2;
-    Items_InventoryArmor* armor_item;
-
-    armor_item = NULL;
-    if (ingredient_slot != 0) {
-        Menu_Setup_combinationArmorSlot = ingredient_slot;
-        Menu_Setup_AnimateItemHeader(ingredient_slot + 0xA);
-        Menu_Setup_combinationArmorStep = 0;
-        return 0;
-    }
-
-    itemId = Menu_Setup_combiningArmorIds[Menu_Setup_combinationArmorSlot - 1];
-    if (itemId != 0) {
-        armor_item = &Audio_Seq_unusedInventory.armor[itemId - 1];
-    }
-
-    switch (Menu_Setup_combinationArmorStep) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            s0_2 = itemId;
-            armor_text_allocation = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x72CU));
-
-            if (armor_item == NULL) {
-                armor_row_text[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor];
-                armor_row_text[1] =
-                    (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_selectArmor];
-                *Menu_Framework_rowTypeBuf = 1;
-            } else {
-                Menu_Framework_FormatInventoryArmorRow(
-                    armor_item, armor_row_text, Menu_Framework_rowTypeBuf, armor_text_allocation);
-            }
-
-            *Menu_Setup_availableItems = s0_2;
-            armor_row_count = 1;
-
-            for (i = 0; i < 16; ++i) {
-                itemId = Audio_Seq_unusedInventoryIndices.armor[i];
-                if ((itemId != 0) && (itemId != Menu_Setup_combiningArmorIds[0])
-                    && (itemId != Menu_Setup_combiningArmorIds[1])) {
-                    armor_item = &Audio_Seq_unusedInventory.armor[itemId - 1];
-                    if (armor_item->category != 7) {
-                        Menu_Framework_FormatInventoryArmorRow(armor_item, armor_row_text + armor_row_count * 2,
-                            &Menu_Framework_rowTypeBuf[armor_row_count], armor_text_allocation + armor_row_count * 0x60);
-                        if (!((Menu_Setup_workshopMaterials[Menu_Setup_currentWorkshop] >> armor_item->material)
-                                & 1)) {
-                            armor_row_text[armor_row_count * 2 + 1] = (char*)&Menu_Framework_menu12Text
-                                [Text_Menu_MENU12_BIN_Offset_invalidArmorMaterial];
-                            Menu_Framework_rowTypeBuf[armor_row_count] |= 1;
-                        }
-                        if (armor_item->limb != 0) {
-                            Menu_Framework_rowTypeBuf[armor_row_count] |= 0xCA00;
-                        }
-                        Menu_Setup_availableItems[armor_row_count] = itemId;
-                        ++armor_row_count;
-                    }
-                }
-            }
-            Menu_Setup_BuildItemList(armor_row_count, armor_row_text, Menu_Framework_rowTypeBuf);
-            VS::Core::Memory::FreeLiveFromHighEnd(armor_text_allocation);
-            Menu_Setup_combinationArmorStep = 1;
-        }
-        break;
-    case 1:
-        itemId = Menu_Setup_availableItems[Menu_Setup_itemsListWindow + Menu_Setup_itemsListSelection];
-        if (itemId != 0) {
-            Menu_Framework_SetArmorStats(itemId);
-        } else {
-            Menu_Framework_ResetEquipmentStats();
-        }
-        Menu_Framework_UpdateInformationVisibility(
-            Menu_Setup_itemsListSelection + Menu_Setup_itemsListWindow, Menu_Setup_itemsListState);
-        Menu_Setup_UpdateItemList(2);
-        Menu_Setup_combinationArmorSelectedRow = Menu_Setup_GetSelectedItemRow() + 1;
-        if (Menu_Setup_combinationArmorSelectedRow != 0) {
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            if (Menu_Setup_combinationArmorSelectedRow == -2) {
-                return -2;
-            }
-            if (Menu_Setup_combinationArmorSelectedRow > 0) {
-                Menu_Setup_combinationArmorSelectedRow = Menu_Setup_availableItems[Menu_Setup_combinationArmorSelectedRow - 1];
-            }
-            Menu_Setup_combinationArmorStep = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Setup_combinationArmorSelectedRow;
-        }
-        break;
-    }
-    return 0;
-}
-
-// decomp: MENUC.PRG _setArmorMenuItem (src/MENU/MENUC.PRG/168.c:4126)
-void Menu_Setup_SetCombinationArmorRow(
-    Menu_Framework_MenuRow* menuItem, Items_InventoryArmor* armor)
-{
-    menuItem->rowIcon = armor->category + 14;
-    menuItem->material = armor->material;
-    menuItem->outsetIcon = armor->limb != 0;
-}
-
-// decomp: MENUC.PRG _combineArmorMenu (src/MENU/MENUC.PRG/168.c:4140)
-int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
-{
-
-    static char Menu_Setup_armorCombinationState;
-    static char Menu_Setup_armorCombinationRow;
-    static char Menu_Setup_armorCombinationOkBlinkPhase;
-
-    char* menuText[2];
-    int rowType;
-    int itemId;
-    int confirmation_result;
-    int i;
-    int var_s1;
-    char* combination_help_text;
-    int i_2;
-    Items_InventoryArmor* armor;
-    Menu_Framework_MenuRow* result_menu_row;
-    Menu_Framework_MenuRow* ingredient_menu_row;
-
-    if (initialize_armor_combination != 0) {
-        Menu_Setup_RecordSlotSelection(5);
-        *(u_short*)Menu_Setup_combiningArmorIds = 0;
-        Menu_Setup_PreviewArmorCombination(0);
-        Menu_Setup_armorCombinationRow = 1;
-        Menu_Setup_armorCombinationState = 0;
-        return 0;
-    }
-
-    var_s1 = 0;
-    if (Menu_Setup_combiningArmorIds[0] != 0) {
-        var_s1 = Menu_Setup_combiningArmorIds[1] > 0;
-    }
-
-    Menu_Setup_armorCombinationOkBlinkPhase += 16;
-
-    if (Menu_Setup_armorCombinationState != 2) {
-        Menu_Setup_armorCombinationOkBlinkPhase = 0;
-    }
-
-    switch (Menu_Setup_armorCombinationState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
-            break;
-        }
-        Menu_Setup_InitializeEquipmentHeader(Text_Menu_MENU12_BIN_Offset_combineArmor, 0x1C);
-        // Fallthrough
-    case 1:
-        var_s1 = Menu_Setup_armorBuf.id;
-        result_menu_row = Menu_Setup_AnimateCombinationResult(2, var_s1);
-        if (var_s1 != 0) {
-            Menu_Setup_SetCombinationArmorRow(result_menu_row, &Menu_Setup_armorBuf);
-        }
-
-        for (i = 0; i < 2; ++i) {
-            var_s1 = Menu_Setup_combiningArmorIds[i];
-            if (var_s1 != 0) {
-                armor = &Audio_Seq_unusedInventory.armor[var_s1 - 1];
-            }
-            ingredient_menu_row = Menu_Framework_SetMenuItem(i + 11, 334, 34 + i * 16, 151, 0,
-                var_s1 == 0 ? (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor]
-                            : Menu_Framework_itemNames[armor->id]);
-            ingredient_menu_row->state = 2;
-            ingredient_menu_row->targetPosition0 = 169;
-
-            if (var_s1 == 0) {
-                ingredient_menu_row->fontColor = 1;
-            } else {
-                Menu_Setup_SetCombinationArmorRow(ingredient_menu_row, armor);
-            }
-        }
-
-        Menu_Setup_armorCombinationState = 2;
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            if (!(Input_buttonsPressed.allButtons & PADRup)) {
-                if (var_s1 != 0) {
-                    Menu_Setup_DrawConfirmationLabel(2, Menu_Setup_armorCombinationOkBlinkPhase);
-                }
-                if (Input_buttonsPressed.allButtons & PADRdown) {
-                    int restored_ingredient_slot = Menu_Setup_PopSlotSelection(5);
-                    if (restored_ingredient_slot != 0) {
-                        VS::Menu::PlayLeaveSound();
-                        Menu_Setup_armorCombinationRow = restored_ingredient_slot;
-                        Menu_Setup_combiningArmorIds[restored_ingredient_slot - 1] = 0;
-                        Menu_Setup_PreviewArmorCombination(restored_ingredient_slot);
-                        ingredient_menu_row = Menu_Framework_SetMenuItem(restored_ingredient_slot + 10, 169,
-                            (restored_ingredient_slot * 16) + 18, 151, 0,
-                            (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor]);
-                        ingredient_menu_row->selected = 1;
-                        ingredient_menu_row->fontColor = 1;
-                        var_s1 = Menu_Setup_armorBuf.id;
-                        result_menu_row = Menu_Setup_SetCombinationResultRow(2, var_s1);
-                        if (var_s1 != 0) {
-                            Menu_Setup_SetCombinationArmorRow(result_menu_row, &Menu_Setup_armorBuf);
-                        }
-                        break;
-                    }
-                    return Menu_Setup_LeaveItemSelection(1);
-                }
-                if (Input_buttonsPressed.allButtons & PADstart) {
-                    if (var_s1 != 0) {
-                        VS::Menu::PlaySelectSound();
-                        Menu_Framework_MenuItem(Menu_Setup_armorCombinationRow + 10)->selected = 0;
-                        Menu_Setup_armorCombinationRow = 3;
-                        Menu_Setup_armorCombinationState = 4;
-                        Menu_Setup_PreviewArmorCombination(3);
-                        return 0;
-                    }
-                }
-                i_2 = Menu_Setup_armorCombinationRow;
-                if (Input_buttonsPressed.allButtons & PADRright) {
-                    if (i_2 == 0) {
-                        VS::Menu::PlayInvalidSound();
-                    } else {
-                        VS::Menu::PlaySelectSound();
-                        if (i_2 == 3) {
-                            Menu_Setup_armorCombinationState = 4;
-                        } else {
-                            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                            Menu_Setup_SelectCombinationArmor(i_2);
-                            Menu_Setup_armorCombinationState = 3;
-                        }
-                        break;
-                    }
-                }
-                if (Input_buttonRepeat & PADLup) {
-                    if (i_2 == 0) {
-                        i_2 = var_s1 + 2;
-                    } else {
-                        --i_2;
-                    }
-                }
-                if (Input_buttonRepeat & PADLdown) {
-                    if (i_2 == (var_s1 + 2)) {
-                        i_2 = 0;
-                    } else {
-                        ++i_2;
-                    }
-                }
-
-                if (i_2 != Menu_Setup_armorCombinationRow) {
-                    VS::Menu::PlayChangeSound();
-                    Menu_Setup_armorCombinationRow = i_2;
-                    Menu_Setup_PreviewArmorCombination(Menu_Setup_armorCombinationRow);
-                }
-                Menu_Framework_rowTypeBuf[0] = Menu_Setup_armorBuf.id < 1;
-
-                for (var_s1 = 1; var_s1 < 3; ++var_s1) {
-                    Menu_Framework_MenuItem(var_s1 + 10)->selected = var_s1 == Menu_Setup_armorCombinationRow;
-                    Menu_Framework_rowTypeBuf[var_s1] = Menu_Setup_combiningArmorIds[var_s1 - 1] == 0;
-                }
-
-                Menu_Framework_rowTypeBuf[3] = 1;
-                Menu_Framework_UpdateInformationVisibility(i_2, 16);
-                menuText[1] =
-                    (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_selectArmor];
-                switch (i_2) {
-                case 0:
-                    if (Menu_Setup_armorBuf.id != 0) {
-                        Menu_Framework_FormatInventoryArmorRow(
-                            &Menu_Setup_armorBuf, menuText, &rowType, Menu_Framework_stringBuf);
-                    }
-                    break;
-                case 1:
-                case 2:
-                    var_s1 = Menu_Setup_combiningArmorIds[i_2 - 1];
-                    if (var_s1 != 0) {
-                        Menu_Framework_FormatInventoryArmorRow(
-                            &Audio_Seq_unusedInventory.armor[var_s1 - 1], menuText, &rowType,
-                            Menu_Framework_stringBuf);
-                    }
-                    break;
-                case 3:
-                    menuText[1] =
-                        (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_pressOk];
-                    break;
-                }
-                Menu_Framework_SetInformationMessage((char*)menuText[1]);
-                var_s1 = (((i_2 * 16) + 10) << 0x10) | 0x9B;
-                if (i_2 == 0) {
-                    var_s1 -= 14;
-                }
-                if (i_2 == 3) {
-                    var_s1 += 0xFFFC0000;
-                }
-                Menu_Setup_armorCombinationCursorAnimation = Menu_Framework_DrawCursor(Menu_Setup_armorCombinationCursorAnimation, var_s1);
-                break;
-            }
-            return Menu_Setup_LeaveItemSelection(1);
-        }
-        Menu_Setup_armorCombinationOkBlinkPhase = 0;
-        break;
-    case 3:
-        itemId = Menu_Setup_SelectCombinationArmor(0);
-        if (itemId == 0) {
-            break;
-        }
-        if (itemId == -2) {
-            return Menu_Setup_LeaveItemSelection(1);
-        }
-        if (itemId > 0) {
-            var_s1 = Menu_Setup_armorCombinationRow - 1;
-            if (itemId == Menu_Setup_combiningArmorIds[Menu_Setup_armorCombinationRow - 1]) {
-                Menu_Setup_combiningArmorIds[Menu_Setup_armorCombinationRow - 1] = 0;
-                Menu_Setup_PopSlotSelection(var_s1);
-            } else {
-                Menu_Setup_combiningArmorIds[Menu_Setup_armorCombinationRow - 1] = itemId;
-                Menu_Setup_RecordSlotSelection(var_s1);
-                Menu_Setup_armorCombinationRow = (Menu_Setup_armorCombinationRow + 1);
-                if (var_s1 == 1) {
-                    if (Menu_Setup_combiningArmorIds[0] == 0) {
-                        Menu_Setup_armorCombinationRow = var_s1;
-                    }
-                }
-            }
-            Menu_Setup_PreviewArmorCombination(Menu_Setup_armorCombinationRow);
-        }
-        Menu_Setup_armorCombinationState = 1;
-        break;
-    case 4:
-        Menu_Framework_UpdatePrimaryStatPanel(2);
-        Menu_Setup_UpdateThreeChoicePrompt(2);
-
-        var_s1 = 0;
-
-        for (i = 0; i < 2; ++i) {
-            var_s1 |= Audio_Seq_unusedInventory.armor[Menu_Setup_combiningArmorIds[i] - 1].limb;
-        }
-        if (var_s1 == 0) {
-            combination_help_text =
-                (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_attachmentConfirm];
-        } else {
-            combination_help_text =
-                (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_cancelCombineConfirm];
-        }
-        Menu_Framework_SetInformationMessage(combination_help_text);
-        Menu_Setup_armorCombinationState = 5;
-        break;
-    case 5:
-        confirmation_result = Menu_Setup_UpdateThreeChoicePrompt(0);
-
-        if (confirmation_result == 0) {
-            break;
-        }
-
-        switch (confirmation_result) {
-        case 1:
-            Audio_PlaySfxCentered(0x7E, 0x18);
-
-            Menu_Framework_InitializeInformationBox();
-            Menu_Framework_UpdateEquipmentStatPages(-1);
-            Menu_Framework_UpdateDpPpBars(4);
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            Menu_Framework_FlyOutRowLeft(0);
-            for (i = 0; i < 2; ++i) {
-                armor = &Audio_Seq_unusedInventory.armor[Menu_Setup_combiningArmorIds[i] - 1];
-                var_s1 = armor->limb;
-                if (var_s1 != 0) {
-                    VS::Items::EquipLiveAshleyArmor(var_s1 - 1, NULL);
-                    armor->limb = 0;
-                }
-                VS::Items::Inventory::ClearLiveItemSlot(Items_ItemCategory_Armor, Menu_Setup_combiningArmorIds[i]);
-            }
-            itemId = Menu_Setup_combiningArmorIds[0];
-            armor = &Audio_Seq_unusedInventory.armor[itemId - 1];
-            VS::Core::Memory::CopyLiveHalfwords(armor, &Menu_Setup_armorBuf, sizeof *armor);
-            armor->index = itemId;
-            VS::Items::Inventory::RebuildLiveDisplayIndices(4);
-            return 1;
-        case 2:
-            VS::Menu::PlayLeaveSound();
-            Menu_Framework_UpdatePrimaryStatPanel(1);
-            Menu_Setup_armorCombinationState = confirmation_result;
-            break;
-        case 3:
-            return Menu_Setup_LeaveItemSelection(1);
-        }
-        break;
-    }
-    return 0;
-}
-
-// decomp: MENUC.PRG _countItems (src/MENU/MENUC.PRG/168.c:4428)
-int Menu_Setup_CountCombinationIngredients(int category)
-{
-    int i;
-
-    Items_InventoryArmor* armor = Audio_Seq_unusedInventory.armor;
-    int count = 0;
-
-    if (category == 2) {
-        for (i = 0; i < 16; ++i, ++armor) {
-            int is_combinable_armor = 0;
-            if (armor->id != 0) {
-                is_combinable_armor = armor->category != 7;
-            }
-            count += is_combinable_armor;
-        }
+      context.host.SetBladeStats(id);
     } else {
-        count = VS::Items::Inventory::CountLiveItems((category * 2) | 1, NULL);
+      ClearBladeStats(context);
     }
-    return count;
+  }
+  static void Preview(Context& context, int selection) {
+    PreviewBladeCombination(context, selection);
+  }
+  static int Select(Context& context, int slot) {
+    return SelectCombinationBlade(context, slot);
+  }
+  static std::expected<Record, std::string> Build(
+      const Record& first, const Record& second, const RecipeBook& recipes,
+      const MaterialBonuses& bonuses) {
+    return BuildCombinedBlade(first, second, recipes, bonuses);
+  }
+  static void Store(Record& buffer, const Record& built) { buffer = built; }
+  static void ClearInUse(Record& record) { record.assembled_weapon_index = 0; }
+  // Takes the blade off its weapon; true when Ashley's weapon came off.
+  static bool Consume(Context& context, const Record& record, int /*id*/) {
+    const int weapon = record.assembled_weapon_index;
+    if (weapon == 0) {
+      return false;
+    }
+    const Items::InventoryWeapon* owner = InventorySlot(
+        context, context.host.Inventory().weapons, weapon, "blade's weapon");
+    const bool equipped = owner != nullptr && owner->is_equipped != 0;
+    if (equipped) {
+      context.host.UnequipWeapon();
+    }
+    DisassembleWeapon(context, weapon - 1);
+    return equipped;
+  }
+};
+
+struct ShieldKind {
+  using Record = Items::InventoryShield;
+  static constexpr int kItemType = 1;
+  static constexpr std::size_t kHeaderText = menu12::kCombineShield;
+  static constexpr int kIcon = kShieldIcon;
+  static constexpr std::size_t kEmptyText = menu12::kShield;
+  static constexpr std::size_t kSelectText = menu12::kSelectShield;
+  static constexpr std::size_t kInvalidMaterialText =
+      menu12::kInvalidShieldMaterial;
+  static constexpr ItemCategory kCategory = ItemCategory::kShield;
+  static constexpr std::string_view kName = "shield";
+  static constexpr bool kReloads = true;
+  static constexpr int kReloadMode = 1;
+
+  static CombinationMenuState& Menu(CombinationState& state) {
+    return state.shield_menu;
+  }
+  static IngredientSelectionState& Selection(CombinationState& state) {
+    return state.shield_selection;
+  }
+  static std::array<std::uint8_t, 2>& Ids(CombinationState& state) {
+    return state.shield_ids;
+  }
+  static Record& Buffer(CombinationState& state) { return state.shield; }
+  static auto& Table(Items::InventoryContents& inventory) {
+    return inventory.shields;
+  }
+  static std::span<const std::uint8_t> Order(Items::InventoryIndices& order) {
+    return order.shields;
+  }
+  static int Id(const Record& record) { return record.base.id; }
+  static int Material(const Record& record) { return record.base.material; }
+  static bool Listable(const Record& /*record*/) { return true; }
+  // Equipped, or holding a gem in one of its slots.
+  static bool InUse(Context& context, const Record& record) {
+    std::size_t slots = record.base.gem_slots;
+    if (slots > record.gems.size()) {
+      context.host.Refuse(std::format("shield with {} gem slots", slots));
+      slots = record.gems.size();
+    }
+    return record.is_equipped != 0 ||
+           std::ranges::any_of(std::span(record.gems).first(slots),
+                               [](std::uint8_t gem) { return gem != 0; });
+  }
+  static std::int32_t InUseFlags(Context& /*context*/, const Record& record) {
+    return record.is_equipped != 0 ? kInUseEquipped : 0;
+  }
+  static Framework::ItemRowText Format(Context& context, const Record& record,
+                                       std::span<std::uint8_t> buffer) {
+    return SetShieldRowWithoutGems(context, record, buffer);
+  }
+  static void SetRow(Context& /*context*/, MenuRow& row, const Record& record) {
+    SetCombinationShieldRow(row, record);
+  }
+  static void ShowListed(Context& context, int id) {
+    const Record* shield =
+        id != 0 ? InventorySlot(context, context.host.Inventory().shields, id,
+                                kName)
+                : nullptr;
+    if (shield != nullptr) {
+      SetShieldBaseStats(context, *shield);
+    } else {
+      context.host.ResetEquipmentStats();
+    }
+  }
+  static void Preview(Context& context, int selection) {
+    PreviewShieldCombination(context, selection);
+  }
+  static int Select(Context& context, int slot) {
+    return SelectCombinationShield(context, slot);
+  }
+  static std::expected<Items::InventoryArmor, std::string> Build(
+      const Record& first, const Record& second, const RecipeBook& recipes,
+      const MaterialBonuses& bonuses) {
+    return BuildCombinedShield(first.base, second.base, recipes, bonuses);
+  }
+  // The preview keeps the rest of the shield empty.
+  static void Store(Record& buffer, const Items::InventoryArmor& built) {
+    buffer.base = built;
+  }
+  static void ClearInUse(Record& record) { record.is_equipped = 0; }
+  // Takes the shield off Ashley and its gems out; true when it was equipped.
+  static bool Consume(Context& context, const Record& record, int id) {
+    const bool equipped = record.is_equipped != 0;
+    if (equipped) {
+      context.host.UnequipShield();
+    }
+    DetachShieldGems(context, id - 1);
+    return equipped;
+  }
+};
+
+struct ArmorKind {
+  using Record = Items::InventoryArmor;
+  static constexpr int kItemType = 2;
+  static constexpr std::size_t kHeaderText = menu12::kCombineArmor;
+  static constexpr int kIcon = kArmorIcon;
+  static constexpr std::size_t kEmptyText = menu12::kArmor;
+  static constexpr std::size_t kSelectText = menu12::kSelectArmor;
+  static constexpr std::size_t kInvalidMaterialText =
+      menu12::kInvalidArmorMaterial;
+  static constexpr ItemCategory kCategory = ItemCategory::kArmor;
+  static constexpr std::string_view kName = "armor";
+  static constexpr bool kReloads = false;
+
+  static CombinationMenuState& Menu(CombinationState& state) {
+    return state.armor_menu;
+  }
+  static IngredientSelectionState& Selection(CombinationState& state) {
+    return state.armor_selection;
+  }
+  static std::array<std::uint8_t, 2>& Ids(CombinationState& state) {
+    return state.armor_ids;
+  }
+  static Record& Buffer(CombinationState& state) { return state.armor; }
+  static auto& Table(Items::InventoryContents& inventory) {
+    return inventory.armor;
+  }
+  static std::span<const std::uint8_t> Order(Items::InventoryIndices& order) {
+    return order.armor;
+  }
+  static int Id(const Record& record) { return record.id; }
+  static int Material(const Record& record) { return record.material; }
+  // Accessories share the table but do not combine.
+  static bool Listable(const Record& record) {
+    return record.category != kAccessoryCategory;
+  }
+  static bool InUse(Context& /*context*/, const Record& record) {
+    return record.limb != 0;
+  }
+  static std::int32_t InUseFlags(Context& /*context*/, const Record& record) {
+    return record.limb != 0 ? kInUseEquipped : 0;
+  }
+  static Framework::ItemRowText Format(Context& context, const Record& record,
+                                       std::span<std::uint8_t> buffer) {
+    return Framework::FormatInventoryArmorRow(context.host.ItemRows(), record,
+                                              buffer);
+  }
+  static void SetRow(Context& /*context*/, MenuRow& row, const Record& record) {
+    SetCombinationArmorRow(row, record);
+  }
+  static void ShowListed(Context& context, int id) {
+    if (id != 0) {
+      context.host.SetArmorStats(id);
+    } else {
+      context.host.ResetEquipmentStats();
+    }
+  }
+  static void Preview(Context& context, int selection) {
+    PreviewArmorCombination(context, selection);
+  }
+  static int Select(Context& context, int slot) {
+    return SelectCombinationArmor(context, slot);
+  }
+  static std::expected<Record, std::string> Build(
+      const Record& first, const Record& second, const RecipeBook& recipes,
+      const MaterialBonuses& bonuses) {
+    return BuildCombinedArmor(first, second, recipes, bonuses);
+  }
+  static void Store(Record& buffer, const Record& built) { buffer = built; }
+  static void ClearInUse(Record& record) { record.limb = 0; }
+  // Takes the piece off Ashley's body part; Ashley's model stays.
+  static bool Consume(Context& context, const Record& record, int id) {
+    if (record.limb != 0) {
+      context.host.EquipArmor(record.limb - 1, std::nullopt);
+      Record* worn =
+          InventorySlot(context, context.host.Inventory().armor, id, kName);
+      if (worn != nullptr) {
+        worn->limb = 0;
+      }
+    }
+    return false;
+  }
+};
+
+// The preview record: empty, the one ingredient, or (both chosen) the
+// combined record; its in-use mark cleared. Returns which ingredients are
+// chosen (bit 0 the first, bit 1 the second).
+template <typename Kind>
+int BuildPreview(Context& context) {
+  CombinationState& combination = context.state.combination;
+  const std::array<std::uint8_t, 2>& ids = Kind::Ids(combination);
+  const int mask = (ids[0] != 0 ? 1 : 0) + (ids[1] != 0 ? 2 : 0);
+  typename Kind::Record& buffer = Kind::Buffer(combination);
+  auto& table = Kind::Table(context.host.Inventory());
+  buffer = {};
+  combination.refused = false;
+  if (mask == kBothIngredients) {
+    const auto* first = InventorySlot(context, table, ids[0], Kind::kName);
+    const auto* second = InventorySlot(context, table, ids[1], Kind::kName);
+    const RecipeBook* recipes = context.host.Recipes();
+    if (first == nullptr || second == nullptr) {
+      combination.refused = true;
+    } else if (recipes == nullptr) {
+      context.host.Refuse("combination without a loaded recipe file");
+      combination.refused = true;
+    } else if (auto built = Kind::Build(*first, *second, *recipes,
+                                        context.host.Materials())) {
+      Kind::Store(buffer, *built);
+    } else {
+      context.host.Refuse(built.error());
+      combination.refused = true;
+    }
+  } else if (mask != 0) {
+    const auto* record =
+        InventorySlot(context, table, ids[0] + ids[1], Kind::kName);
+    if (record != nullptr) {
+      buffer = *record;
+    } else {
+      combination.refused = true;
+    }
+  }
+  Kind::ClearInUse(buffer);
+  return mask;
 }
 
-// decomp: MENUC.PRG _combineTopMenu (src/MENU/MENUC.PRG/168.c:4455)
-int Menu_Setup_UpdateCombinationCategory(int initialize_combination_category)
-{
-
-    static char Menu_Setup_combinationCategoryState;
-    static char Menu_Setup_combinationCategoryForceNoCursorMemory;
-
-    char* text[6];
-    int selectedRow;
-    int i;
-    int saved_cursor_memory;
-
-    if (initialize_combination_category != 0) {
-        Menu_Setup_combinationCategoryForceNoCursorMemory = 1;
-        Menu_Framework_FlyOutRowsAndHoistSelection(5, 1);
-        Menu_Setup_combinationCategoryState = 0;
-        return 0;
+// The ingredient list: row 0 holds the slot's ingredient (or its
+// placeholder), then the other listable records in display order, those
+// the workshop cannot work unselectable.
+template <typename Kind>
+void ListIngredients(Context& context, int current) {
+  CombinationState& combination = context.state.combination;
+  const std::array<std::uint8_t, 2>& ids = Kind::Ids(combination);
+  auto& table = Kind::Table(context.host.Inventory());
+  PartListRows rows;
+  const typename Kind::Record* record =
+      current != 0 ? InventorySlot(context, table, current, Kind::kName)
+                   : nullptr;
+  if (record == nullptr) {
+    AddPlaceholderRow(context, rows, Kind::kEmptyText, Kind::kSelectText);
+  } else {
+    AddPartRow(context, rows,
+               Kind::Format(context, *record, NextPartBuffer(rows)), current);
+  }
+  for (const std::uint8_t id : Kind::Order(context.host.Indices())) {
+    if (id == 0 || id == ids[0] || id == ids[1]) {
+      continue;
     }
-
-    switch (Menu_Setup_combinationCategoryState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 3; ++i) {
-                int count = Menu_Setup_CountCombinationIngredients(i);
-                text[i * 2] = (char*)&Menu_Framework_menu12Text
-                    [Menu_Framework_menu12Text[i + Text_Menu_MENU12_BIN_Index_blade]];
-                text[i * 2 + 1] =
-                    count < 2 ? (char*)&Menu_Framework_menu12Text[Menu_Framework_menu12Text
-                                        [Text_Menu_MENU12_BIN_Index_noItems - (count * 4)]]
-                              : (char*)&Menu_Framework_menu12Text[Menu_Framework_menu12Text
-                                        [i + Text_Menu_MENU12_BIN_Index_combineBlades]];
-                Menu_Framework_rowTypeBuf[i] = count < 2;
-            }
-
-            saved_cursor_memory = Input_settings.cursorMemory;
-            if (Menu_Setup_combinationCategoryForceNoCursorMemory == 0) {
-                Input_settings.cursorMemory = 1;
-            }
-            Menu_Setup_combinationCategoryForceNoCursorMemory = 0;
-            Menu_Framework_CreateMenuRows(3, 0x23D, text, Menu_Framework_rowTypeBuf);
-            Input_settings.cursorMemory = saved_cursor_memory;
-            Menu_Setup_combinationCategoryState = 1;
-        }
-        break;
-    case 1:
-        Menu_Framework_UpdateInformationVisibility(
-            Menu_Framework_HighlightedRow(), Menu_Framework_itemsListRow);
-        selectedRow = Menu_Framework_GetSelectedRow();
-        i = selectedRow + 1;
-        if (i != 0) {
-            if (i < 0) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
-                return i;
-            }
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            Menu_Setup_combineMenus[selectedRow](1);
-            Menu_Setup_LoadCombinationRecipes(i);
-            Menu_Setup_combinationCategoryState = selectedRow + 2;
-        }
-        break;
-    case 2:
-    case 3:
-    case 4:
-        if (Menu_Setup_LoadCombinationRecipes(0) != 0) {
-            i = Menu_Setup_combineMenus[Menu_Setup_combinationCategoryState - 2](0);
-            if (i != 0) {
-                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Setup_sydData);
-                Menu_Setup_sydData = NULL;
-                if (i == -1) {
-                    Menu_Setup_combinationCategoryState = 5;
-                    break;
-                }
-                return i;
-            }
-        }
-        break;
-    case 5:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            Menu_Framework_InitializeInformationBox();
-            Menu_Setup_SetTitleRow(0, Text_Menu_MENU12_BIN_Offset_setup);
-            Menu_Setup_SetTitleRow(15, Text_Menu_MENU12_BIN_Offset_combine);
-            Menu_Setup_combinationCategoryState = 0U;
-        }
-        break;
+    const typename Kind::Record* listed =
+        InventorySlot(context, table, id, Kind::kName);
+    if (listed == nullptr || !Kind::Listable(*listed)) {
+      continue;
     }
+    const std::span<std::uint8_t> buffer = NextPartBuffer(rows);
+    if (buffer.empty() ||
+        !AddPartRow(context, rows, Kind::Format(context, *listed, buffer),
+                    id)) {
+      break;
+    }
+    if (!WorkshopWorks(context, Kind::Material(*listed))) {
+      MarkLastPartInvalid(context, rows, Kind::kInvalidMaterialText);
+    }
+    rows.types[rows.count - 1] |= Kind::InUseFlags(context, *listed);
+  }
+  ShowPartList(context, rows);
+}
+
+// _selectBlade, _selectShields and _initUiArmor: a slot (1-2) opens the
+// list; then 0 while choosing, the chosen record's 1-based slot, or < 0.
+template <typename Kind>
+int SelectIngredient(Context& context, int slot) {
+  CombinationState& combination = context.state.combination;
+  IngredientSelectionState& selection = Kind::Selection(combination);
+  if (slot != 0) {
+    selection.slot = static_cast<std::uint8_t>(slot);
+    AnimateItemHeader(context, slot + kDetailRow);
+    selection.step = kIngredientList;
     return 0;
+  }
+  switch (selection.step) {
+    case kIngredientList: {
+      if (!context.host.RowsIdle()) {
+        break;
+      }
+      const std::array<std::uint8_t, 2>& ids = Kind::Ids(combination);
+      int current = 0;
+      if (CheckReference(context, selection.slot, ids.size(),
+                         "ingredient slot")) {
+        current = ids[static_cast<std::size_t>(selection.slot - 1)];
+      }
+      ListIngredients<Kind>(context, current);
+      selection.step = kIngredientChoose;
+      break;
+    }
+    case kIngredientChoose:
+      Kind::ShowListed(context, ListedPart(context));
+      return ChoosePart(context, selection.selected_row, selection.step);
+    case kIngredientChosen:
+      if (context.host.RowsIdle()) {
+        return selection.selected_row;
+      }
+      break;
+    default:
+      break;
+  }
+  return 0;
+}
+
+RowPlacement IngredientPlacement(int slot, int x) {
+  return {.row = slot + kDetailRow,
+          .x = x,
+          .y = (slot * kRowPitch) + kIngredientTopY,
+          .w = kIngredientWidth,
+          .background_width = 0};
+}
+
+// The ingredient record in slot `slot` (1-2); null when empty or refused.
+template <typename Kind>
+const typename Kind::Record* Ingredient(Context& context, int slot) {
+  const int id =
+      Kind::Ids(context.state.combination)[static_cast<std::size_t>(slot - 1)];
+  if (id == 0) {
+    return nullptr;
+  }
+  return InventorySlot(context, Kind::Table(context.host.Inventory()), id,
+                       Kind::kName);
+}
+
+// Steps 0-1: the result row and the two ingredient rows slide in.
+template <typename Kind>
+void ShowCombinationRows(Context& context) {
+  CombinationState& combination = context.state.combination;
+  const typename Kind::Record& buffer = Kind::Buffer(combination);
+  const int result_id = Kind::Id(buffer);
+  MenuRow& result =
+      AnimateCombinationResult(context, Kind::kItemType, result_id);
+  if (result_id != 0) {
+    Kind::SetRow(context, result, buffer);
+  }
+  for (int slot = 1; slot <= kIngredientCount; ++slot) {
+    const typename Kind::Record* record = Ingredient<Kind>(context, slot);
+    MenuRow& row = context.host.SetMenuItem(
+        IngredientPlacement(slot, kIngredientStartX),
+        record == nullptr ? Menu12Text(context, Kind::kEmptyText)
+                          : ItemName(context, Kind::Id(*record)));
+    row.state = RowState::kSlideX;
+    row.target0 = kIngredientX;
+    if (record == nullptr) {
+      row.font_color = 1;
+    } else {
+      Kind::SetRow(context, row, *record);
+    }
+  }
+}
+
+// Cross on the screen: the last chosen ingredient goes back (or, with none,
+// the screen closes).
+template <typename Kind>
+int ReturnIngredient(Context& context) {
+  CombinationState& combination = context.state.combination;
+  CombinationMenuState& menu = Kind::Menu(combination);
+  const int slot = PopSlotSelection(context, kSlotHistoryCount);
+  if (slot == 0) {
+    return LeaveItemSelection(context, true);
+  }
+  if (slot > kIngredientCount) {
+    context.host.Refuse(std::format("ingredient slot {} returned", slot));
+    return LeaveItemSelection(context, true);
+  }
+  context.host.PlaySound(MenuSound::kLeave);
+  menu.row = static_cast<std::uint8_t>(slot);
+  Kind::Ids(combination)[static_cast<std::size_t>(slot - 1)] = 0;
+  Kind::Preview(context, slot);
+  MenuRow& row =
+      context.host.SetMenuItem(IngredientPlacement(slot, kIngredientX),
+                               Menu12Text(context, Kind::kEmptyText));
+  row.selected = 1;
+  row.font_color = 1;
+  const typename Kind::Record& buffer = Kind::Buffer(combination);
+  const int result_id = Kind::Id(buffer);
+  MenuRow& result =
+      SetCombinationResultRow(context, Kind::kItemType, result_id);
+  if (result_id != 0) {
+    Kind::SetRow(context, result, buffer);
+  }
+  return 0;
+}
+
+// The information box's text for row `row`: the record's description, the
+// "press OK" text or the screen's prompt.
+template <typename Kind>
+std::span<const std::uint8_t> CombinationMessage(Context& context, int row) {
+  CombinationState& combination = context.state.combination;
+  std::span<const std::uint8_t> message =
+      Menu12Text(context, Kind::kSelectText);
+  const typename Kind::Record* record = nullptr;
+  if (row == 0) {
+    if (Kind::Id(Kind::Buffer(combination)) != 0) {
+      record = &Kind::Buffer(combination);
+    }
+  } else if (row == kOkRow) {
+    return Menu12Text(context, menu12::kPressOk);
+  } else if (row <= kIngredientCount) {
+    record = Ingredient<Kind>(context, row);
+  }
+  if (record != nullptr) {
+    const std::span<std::uint8_t> buffer = context.host.StringBuffer();
+    const Framework::ItemRowText text = Kind::Format(context, *record, buffer);
+    if (text.description) {
+      message = RowTextBytes(context, text.description, buffer);
+    }
+  }
+  return message;
+}
+
+// The screen's rows' marks, the information box and the cursor.
+template <typename Kind>
+void ShowCombinationChoice(Context& context, int row) {
+  CombinationState& combination = context.state.combination;
+  CombinationMenuState& menu = Kind::Menu(combination);
+  const std::array<std::uint8_t, 2>& ids = Kind::Ids(combination);
+  const std::span<std::int32_t> types = context.host.RowTypes();
+  if (types.size() <= static_cast<std::size_t>(kOkRow)) {
+    context.host.Refuse("row type buffer shorter than the combination rows");
+  } else {
+    types[0] = Kind::Id(Kind::Buffer(combination)) < 1 ? 1 : 0;
+    types[kOkRow] = 1;
+  }
+  for (int slot = 1; slot <= kIngredientCount; ++slot) {
+    context.host.MenuItem(slot + kDetailRow).selected =
+        static_cast<std::uint8_t>(slot == menu.row);
+    if (types.size() > static_cast<std::size_t>(kOkRow)) {
+      types[static_cast<std::size_t>(slot)] =
+          ids[static_cast<std::size_t>(slot - 1)] == 0 ? 1 : 0;
+    }
+  }
+  context.host.UpdateInformationVisibility(row, kInformationRowState);
+  context.host.SetInformationMessage(CombinationMessage<Kind>(context, row));
+  const int x = kCursorX - (row == 0 ? kResultCursorNudge : 0);
+  const int y =
+      (row * kRowPitch) + kCursorTopY - (row == kOkRow ? kOkCursorRaise : 0);
+  menu.cursor = static_cast<std::uint8_t>(
+      context.host.DrawCursor(menu.cursor, PackXy(x, y)));
+}
+
+// Step 2: the pad on the screen.
+template <typename Kind>
+int ChooseCombinationRow(Context& context, bool ready) {
+  CombinationMenuState& menu = Kind::Menu(context.state.combination);
+  const Framework::Buttons buttons = context.host.Input();
+  if (Pressed(buttons, pad::kTriangle)) {
+    return LeaveItemSelection(context, true);
+  }
+  if (ready) {
+    DrawConfirmationLabel(context, kOkLabelRow, menu.ok_blink);
+  }
+  if (Pressed(buttons, pad::kCross)) {
+    return ReturnIngredient<Kind>(context);
+  }
+  if (ready && Pressed(buttons, pad::kStart)) {
+    context.host.PlaySound(MenuSound::kSelect);
+    context.host.MenuItem(menu.row + kDetailRow).selected = 0;
+    menu.row = kOkRow;
+    menu.step = kCombineAsk;
+    Kind::Preview(context, kOkRow);
+    return 0;
+  }
+  int row = menu.row;
+  if (Pressed(buttons, pad::kCircle)) {
+    if (row == 0) {
+      context.host.PlaySound(MenuSound::kInvalid);
+    } else {
+      context.host.PlaySound(MenuSound::kSelect);
+      if (row == kOkRow) {
+        menu.step = kCombineAsk;
+      } else {
+        context.host.ClearMenuExcept(kNoRow);
+        Kind::Select(context, row);
+        menu.step = kCombinePick;
+      }
+      return 0;
+    }
+  }
+  const int last = (ready ? 1 : 0) + kIngredientCount;
+  if (Repeated(buttons, pad::kUp)) {
+    row = row == 0 ? last : row - 1;
+  }
+  if (Repeated(buttons, pad::kDown)) {
+    row = row == last ? 0 : row + 1;
+  }
+  if (row != menu.row) {
+    context.host.PlaySound(MenuSound::kChange);
+    menu.row = static_cast<std::uint8_t>(row);
+    Kind::Preview(context, row);
+  }
+  ShowCombinationChoice<Kind>(context, row);
+  return 0;
+}
+
+// Step 3: the list's choice fills (or, chosen again, empties) the slot.
+template <typename Kind>
+int PickIngredient(Context& context) {
+  CombinationState& combination = context.state.combination;
+  CombinationMenuState& menu = Kind::Menu(combination);
+  const int chosen = Kind::Select(context, 0);
+  if (chosen == 0) {
+    return 0;
+  }
+  if (chosen == -2) {
+    return LeaveItemSelection(context, true);
+  }
+  const int slot = menu.row - 1;
+  if (chosen > 0 && (slot < 0 || slot >= kIngredientCount)) {
+    context.host.Refuse(std::format("ingredient row {} chosen", menu.row));
+  } else if (chosen > 0) {
+    std::uint8_t& id = Kind::Ids(combination)[static_cast<std::size_t>(slot)];
+    if (chosen == id) {
+      id = 0;
+      PopSlotSelection(context, slot);
+    } else {
+      id = static_cast<std::uint8_t>(chosen);
+      RecordSlotSelection(context, slot);
+      ++menu.row;
+      if (slot == 1 && Kind::Ids(combination)[0] == 0) {
+        menu.row = static_cast<std::uint8_t>(slot);
+      }
+    }
+    Kind::Preview(context, menu.row);
+  }
+  menu.step = kCombineRows;
+  return 0;
+}
+
+// Step 4: the prompt, warning when an ingredient is in use.
+template <typename Kind>
+void AskCombination(Context& context) {
+  CombinationMenuState& menu = Kind::Menu(context.state.combination);
+  context.host.UpdatePrimaryStatPanel(kHidePanel);
+  UpdateThreeChoicePrompt(context, kCancelRow);
+  bool in_use = false;
+  for (int slot = 1; slot <= kIngredientCount; ++slot) {
+    const typename Kind::Record* record = Ingredient<Kind>(context, slot);
+    in_use = (record != nullptr && Kind::InUse(context, *record)) || in_use;
+  }
+  context.host.SetInformationMessage(
+      Menu12Text(context, in_use ? menu12::kCancelCombineConfirm
+                                 : menu12::kAttachmentConfirm));
+  menu.step = kCombineAnswer;
+}
+
+// The combination itself: both ingredients leave Ashley's equipment and the
+// inventory, and the preview record takes the first one's slot. 1 once
+// done, 0 while Ashley's model reloads.
+template <typename Kind>
+int CombineIngredients(Context& context) {
+  CombinationState& combination = context.state.combination;
+  CombinationMenuState& menu = Kind::Menu(combination);
+  const std::array<std::uint8_t, 2> ids = Kind::Ids(combination);
+  const auto capacity = Kind::Table(context.host.Inventory()).size();
+  if (combination.refused ||
+      !CheckReference(context, ids[0], capacity, Kind::kName) ||
+      !CheckReference(context, ids[1], capacity, Kind::kName)) {
+    context.host.Refuse("combination without a recipe result");
+    return LeaveItemSelection(context, true);
+  }
+  context.host.PlaySoundEffect(sfx::kCombine);
+  context.host.InitializeInformationBox();
+  context.host.UpdateEquipmentStatPages(kHideStatPages);
+  context.host.UpdateDpPpBars(kHideDpPp);
+  context.host.ClearMenuExcept(kNoRow);
+  context.host.FlyOutRowLeft(kTitleRow);
+  for (const std::uint8_t id : ids) {
+    const typename Kind::Record record =
+        Kind::Table(context.host.Inventory())[id - 1U];
+    if (Kind::Consume(context, record, id)) {
+      menu.step = kCombineReload;
+    }
+    ClearSlot(context, Kind::kCategory, id);
+  }
+  typename Kind::Record& combined =
+      Kind::Table(context.host.Inventory())[ids[0] - 1U];
+  combined = Kind::Buffer(combination);
+  combined.index = ids[0];
+  const Items::ItemsStatus status = Items::Inventory::RebuildDisplayIndices(
+      Kind::kCategory, context.host.Indices(), context.host.Inventory());
+  if (status != Items::ItemsStatus::kOk) {
+    context.host.Refuse(Items::Describe(status));
+  }
+  return menu.step != kCombineReload ? 1 : 0;
+}
+
+// Step 5: the prompt's answer.
+template <typename Kind>
+int AnswerCombination(Context& context) {
+  CombinationMenuState& menu = Kind::Menu(context.state.combination);
+  switch (UpdateThreeChoicePrompt(context, 0)) {
+    case kAnswerCombine:
+      return CombineIngredients<Kind>(context);
+    case kAnswerBack:
+      context.host.PlaySound(MenuSound::kLeave);
+      context.host.UpdatePrimaryStatPanel(kShowPanel);
+      menu.step = kCombineChoose;
+      break;
+    case kAnswerCancel:
+      return LeaveItemSelection(context, true);
+    default:
+      break;
+  }
+  return 0;
+}
+
+// _combineBladeMenu, _combineShieldMenu and _combineArmorMenu.
+template <typename Kind>
+int UpdateCombinationMenu(Context& context, bool initialize) {
+  CombinationState& combination = context.state.combination;
+  CombinationMenuState& menu = Kind::Menu(combination);
+  std::array<std::uint8_t, 2>& ids = Kind::Ids(combination);
+  if (initialize) {
+    RecordSlotSelection(context, kSlotHistoryCount);
+    ids = {};
+    Kind::Preview(context, 0);
+    menu.row = 1;
+    menu.step = kCombineHeader;
+    return 0;
+  }
+  const bool ready = ids[0] != 0 && ids[1] != 0;
+  menu.ok_blink = static_cast<std::uint8_t>(menu.ok_blink + kBlinkStep);
+  if (menu.step != kCombineChoose) {
+    menu.ok_blink = 0;
+  }
+  switch (menu.step) {
+    case kCombineHeader:
+      if (!context.host.RowsIdle()) {
+        break;
+      }
+      InitializeEquipmentHeader(context, Kind::kHeaderText, Kind::kIcon);
+      [[fallthrough]];
+    case kCombineRows:
+      ShowCombinationRows<Kind>(context);
+      menu.step = kCombineChoose;
+      break;
+    case kCombineChoose:
+      if (context.host.RowsIdle()) {
+        return ChooseCombinationRow<Kind>(context, ready);
+      }
+      menu.ok_blink = 0;
+      break;
+    case kCombinePick:
+      return PickIngredient<Kind>(context);
+    case kCombineAsk:
+      AskCombination<Kind>(context);
+      break;
+    case kCombineAnswer:
+      return AnswerCombination<Kind>(context);
+    case kCombineReload:
+      if constexpr (Kind::kReloads) {
+        if (ReloadAshleyEquipment(context, Kind::kReloadMode) == 0) {
+          return -1;
+        }
+      }
+      break;
+    default:
+      break;
+  }
+  return 0;
+}
+
+using CombinationMenu = int (*)(Context&, bool);
+constexpr std::array<CombinationMenu, kRecipeKindCount> kCombinationMenus{
+    UpdateBladeCombination,
+    UpdateShieldCombination,
+    UpdateArmorCombination,
+};
+
+void CreateCombinationRows(Context& context, CategoryState& menu) {
+  std::array<Framework::RowText, kRecipeKindCount> texts{};
+  std::array<std::int32_t, kRecipeKindCount> types{};
+  for (std::size_t i = 0; i < kRecipeKindCount; ++i) {
+    const int kind = static_cast<int>(i);
+    const int count = CountCombinationIngredients(context, kind);
+    texts[i].name = Menu12Entry(context, kind + menu12::kBladeIndex);
+    texts[i].description =
+        count < kMinimumIngredients
+            ? Menu12Entry(context,
+                          menu12::kNoItemsIndex - (count * kFewItemsStride))
+            : Menu12Entry(context, kind + menu12::kCombineBladesIndex);
+    types[i] = count < kMinimumIngredients ? 1 : 0;
+  }
+  CreateCategoryRows(context, menu, kCategoryRowInfo, texts, types);
+}
+
+int ChooseCombination(Context& context, CategoryState& menu) {
+  context.host.UpdateInformationVisibility(context.host.HighlightedRow(),
+                                           context.host.ItemsListRow());
+  const int selected = context.host.SelectedRow();
+  const int choice = selected + 1;
+  if (choice == 0) {
+    return 0;
+  }
+  if (choice < 0) {
+    context.host.ClearMenuExcept(kTitleRow);
+    return choice;
+  }
+  if (static_cast<std::size_t>(selected) >= kCombinationMenus.size()) {
+    context.host.Refuse(std::format("combination row {} chosen", selected));
+    return 0;
+  }
+  context.host.ClearMenuExcept(kNoRow);
+  kCombinationMenus[static_cast<std::size_t>(selected)](context, true);
+  LoadCombinationRecipes(context, choice);
+  menu.step = static_cast<std::uint8_t>(selected + kCategoryRun);
+  return 0;
+}
+
+int RunCombination(Context& context, CategoryState& menu) {
+  if (LoadCombinationRecipes(context, 0) == 0) {
+    return 0;
+  }
+  const int result =
+      kCombinationMenus[static_cast<std::size_t>(menu.step - kCategoryRun)](
+          context, false);
+  if (result == 0) {
+    return 0;
+  }
+  context.host.FreeRecipes();
+  if (result == -1) {
+    menu.step = kCombineReturn;
+    return 0;
+  }
+  return result;
+}
+}  // namespace
+
+BladeRecipe DecodeBladeRecipe(
+    std::span<const std::uint8_t, kBladeRecipeBytes> record) {
+  return {.model = record[kBladeModelByte],
+          .category = record[kBladeCategoryByte],
+          .damage_type = record[kBladeDamageTypeByte],
+          .cost_type = record[kBladeCostTypeByte],
+          .cost = record[kBladeCostByte],
+          .opaque = record[kBladeOpaqueByte],
+          .strength = record[kBladeStrengthByte],
+          .intelligence = record[kBladeIntelligenceByte],
+          .agility = record[kBladeAgilityByte],
+          .range = {.range = record[kBladeRangeByte],
+                    .second_range = record[kBladeSecondRangeByte],
+                    .third_range = record[kBladeThirdRangeByte],
+                    .shape_bits = record[kBladeShapeByte]}};
+}
+
+ArmorRecipe DecodeArmorRecipe(
+    std::span<const std::uint8_t, kArmorRecipeBytes> record) {
+  return {.model = record[kArmorModelByte],
+          .category = record[kArmorCategoryByte],
+          .gem_slots = record[kArmorGemSlotsByte],
+          .strength = record[kArmorStrengthByte],
+          .intelligence = record[kArmorIntelligenceByte],
+          .agility = record[kArmorAgilityByte]};
 }
 
 // decomp: MENUC.PRG _setClassAffinities (src/MENU/MENUC.PRG/168.c:4759)
-void Menu_Setup_CombineClassOrAffinityValues(signed char* first, signed char* second,
-    signed char* result, int materialsDifferent, int setAffinities)
-{
-    static char Menu_Setup_combineClassOrAffinityValuesClassFactorLookup[][6] = { { 2, 0, 1, 1, 1, 0 }, { 0, 2, 0, 1, 1, 1 },
-        { 1, 0, 2, 0, 1, 1 }, { 1, 1, 0, 2, 0, 1 }, { 1, 1, 1, 0, 2, 0 },
-        { 0, 1, 1, 1, 0, 2 } };
-
-    static char Menu_Setup_combineClassOrAffinityValuesAffinityFactorLookup[][7] = { { 2, 1, 1, 1, 1, 1, 1 },
-        { 1, 2, 1, 0, 1, 1, 1 }, { 1, 1, 2, 1, 0, 1, 1 }, { 1, 0, 1, 2, 1, 1, 1 },
-        { 1, 1, 0, 1, 2, 1, 1 }, { 1, 1, 1, 1, 1, 2, 0 }, { 1, 1, 1, 1, 1, 0, 2 } };
-
-
-    short statSum;
-    short statValue;
-    int i;
-    int nStats;
-    u_int firstMaxStat;
-    u_int secondMaxStat;
-    signed char firstMaxVal;
-    signed char secondMaxVal;
-    signed char minStatVal;
-    signed char maxStatValue;
-    short factorLookup;
-
-    nStats = 6;
-    if (setAffinities != 0) {
-        nStats = 7;
+void CombineClassOrAffinityValues(const Items::PartClasses& first,
+                                  const Items::PartClasses& second,
+                                  Items::PartClasses& result,
+                                  bool materials_different, bool affinities) {
+  const std::size_t count =
+      affinities ? Items::kAffinityCount : Items::kClassCount;
+  const std::span<const std::int8_t> ones = std::span(first).first(count);
+  const std::span<const std::int8_t> twos = std::span(second).first(count);
+  const std::size_t first_strongest = StrongestIndex(ones);
+  const std::size_t second_strongest = StrongestIndex(twos);
+  const std::int8_t greatest =
+      std::max(std::ranges::max(ones), std::ranges::max(twos));
+  const std::int8_t least =
+      std::min(std::ranges::min(ones), std::ranges::min(twos));
+  const int lookup =
+      affinities ? kAffinityFactorLookup[first_strongest][second_strongest]
+                 : kClassFactorLookup[first_strongest][second_strongest];
+  const auto& factors = materials_different ? kDifferentMaterialStatFactors
+                                            : kSameMaterialStatFactors;
+  for (std::size_t i = 0; i < count; ++i) {
+    if (ones[i] == greatest || twos[i] == greatest) {
+      result[i] = greatest;
+    } else if (ones[i] == least || twos[i] == least) {
+      result[i] = least;
+    } else {
+      result[i] = ScaledSum(ones[i], twos[i],
+                            factors[static_cast<std::size_t>(lookup)]);
     }
-    secondMaxVal = -128;
-    firstMaxVal = -128;
-    maxStatValue = -128;
-    secondMaxStat = 0;
-    firstMaxStat = 0;
-
-    for (i = 0; i < nStats; ++i) {
-        if (firstMaxVal < first[i]) {
-            firstMaxVal = first[i];
-            firstMaxStat = i;
-        }
-        if (maxStatValue < first[i]) {
-            maxStatValue = first[i];
-        }
-    }
-
-    for (i = 0; i < nStats; ++i) {
-        if (secondMaxVal < second[i]) {
-            secondMaxVal = second[i];
-            secondMaxStat = i;
-        }
-        if (maxStatValue < second[i]) {
-            maxStatValue = second[i];
-        }
-    }
-
-    minStatVal = 127;
-
-    for (i = 0; i < nStats; ++i) {
-        if (first[i] < minStatVal) {
-            minStatVal = first[i];
-        }
-    }
-
-    for (i = 0; i < nStats; ++i) {
-        if (second[i] < minStatVal) {
-            minStatVal = second[i];
-        }
-    }
-
-    for (i = 0; i < nStats; ++i) {
-        if ((first[i] == maxStatValue) || ((second[i] == maxStatValue))) {
-            result[i] = maxStatValue;
-        } else if ((first[i] == minStatVal) || (second[i] == minStatVal)) {
-            result[i] = minStatVal;
-        } else {
-            if (setAffinities == 0) {
-                factorLookup = Menu_Setup_combineClassOrAffinityValuesClassFactorLookup[firstMaxStat][secondMaxStat];
-            } else {
-                factorLookup = Menu_Setup_combineClassOrAffinityValuesAffinityFactorLookup[firstMaxStat][secondMaxStat];
-            }
-            statSum = first[i] + second[i];
-            if (materialsDifferent == 0) {
-                statValue = (statSum * Menu_Setup_combineClassOrAffinityValuesSameMaterialStatFactors[factorLookup]) / 10;
-            } else {
-                statValue =
-                    (statSum * *(factorLookup + Menu_Setup_combineClassOrAffinityValuesDifferentMaterialStatFactors)) / 10;
-            }
-            if (statValue > 100) {
-                statValue = 100;
-            } else if (statValue < -100) {
-                statValue = -100;
-            }
-            result[i] = statValue;
-        }
-    }
+  }
 }
 
 // decomp: MENUC.PRG _setTypeValues (src/MENU/MENUC.PRG/168.c:4864)
-void Menu_Setup_CombinePhysicalTypeValues(
-    signed char* first, signed char* second, signed char* result, int materialsDifferent)
-{
-
-    short typeValue;
-    short typeValueSum;
-    int sameMaxType;
-    int i;
-    u_int firstMaxType;
-    u_int secondMaxType;
-    signed char firstMaxVal;
-    signed char secondMaxVal;
-
-    secondMaxVal = -128;
-    firstMaxVal = -128;
-    secondMaxType = 1;
-    firstMaxType = 1;
-
-    for (i = 1; i < 4; ++i) {
-        if (firstMaxVal < first[i]) {
-            firstMaxVal = first[i];
-            firstMaxType = i;
-        }
-    }
-
-    for (i = 1; i < 4; ++i) {
-        if (secondMaxVal < second[i]) {
-            secondMaxVal = second[i];
-            secondMaxType = i;
-        }
-    }
-
-    for (i = 1; i < 4; ++i) {
-        sameMaxType = firstMaxType == secondMaxType;
-        typeValueSum = first[i] + second[i];
-        if (materialsDifferent == 0) {
-            typeValue = (typeValueSum * Menu_Setup_combinePhysicalTypeValuesSameMaterialTypeFactors[sameMaxType]) / 10;
-        } else {
-            typeValue = (typeValueSum * Menu_Setup_combinePhysicalTypeValuesDifferentMaterialTypeFactors[sameMaxType]) / 10;
-        }
-        if (typeValue > 100) {
-            typeValue = 100;
-        } else if (typeValue < -100) {
-            typeValue = -100;
-        }
-        result[i] = typeValue;
-    }
+void CombinePhysicalTypeValues(const Items::PartTypes& first,
+                               const Items::PartTypes& second,
+                               Items::PartTypes& result,
+                               bool materials_different) {
+  const std::size_t first_strongest = StrongestIndex(
+      std::span(first).subspan(kFirstPhysicalType, kPhysicalTypeCount));
+  const std::size_t second_strongest = StrongestIndex(
+      std::span(second).subspan(kFirstPhysicalType, kPhysicalTypeCount));
+  const auto& factors = materials_different ? kDifferentMaterialTypeFactors
+                                            : kSameMaterialTypeFactors;
+  const int factor = factors[first_strongest == second_strongest ? 1U : 0U];
+  for (std::size_t i = kFirstPhysicalType;
+       i < kFirstPhysicalType + kPhysicalTypeCount; ++i) {
+    result[i] = ScaledSum(first[i], second[i], factor);
+  }
 }
 
 // decomp: MENUC.PRG _combineBlades (src/MENU/MENUC.PRG/168.c:4934)
-Items_InventoryBlade* Menu_Setup_BuildCombinedBlade(Items_InventoryBlade* first,
-    Items_InventoryBlade* second, Items_InventoryBlade* result, void* sydData)
-{
-    struct {
-        char reserved0;
-        char wepId;
-        char category;
-        char damageType;
-        char costType;
-        char cost;
-        char opaque6;
-        char reserved7;
-        char strength;
-        char intelligence;
-        char agility;
-        char reservedB;
-        Items_WeaponRange range;
-    }* info;
-
-    Menu_Setup_combinationResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->combinationsOffset);
-    Menu_Setup_materialResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->materialsOffset);
-    Menu_Setup_bladeCombinationInitData = ((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->initDataOffset;
-
-    VS::Core::Memory::CopyLiveAlignedWords(result, first, sizeof *result);
-
-    result->material = Menu_Setup_materialResults[(first->material - 3) * 500 + first->category * 50
-                                        + (second->material - 3) * 10 + second->category];
-    result->subId = Menu_Setup_combinationResults[(first->id * 96) + second->id];
-    result->id = result->subId;
-    info = (decltype(info))(((u_char*)(Menu_Setup_bladeCombinationInitData)) + (result->id * 16));
-    result->wepId = info->wepId;
-    result->category = info->category;
-    result->cost = info->cost;
-    result->damageType = info->damageType & 3;
-    result->costType = info->costType & 7;
-    result->opaque12 = info->opaque6;
-    result->range = info->range;
-    result->strength = info->strength + Audio_Seq_unusedMaterialModifiers[result->material][24];
-    result->intelligence =
-        info->intelligence + Audio_Seq_unusedMaterialModifiers[result->material][26];
-    result->agility = info->agility + Audio_Seq_unusedMaterialModifiers[result->material][28];
-    result->maxDp = result->currentDp = (first->maxDp + second->maxDp) >> 1;
-    result->maxPp = (first->maxPp + second->maxPp) >> 1;
-    result->currentPp = (first->currentPp + second->currentPp) >> 1;
-
-    if (first->material == second->material) {
-        Menu_Setup_CombineClassOrAffinityValues(first->classes, second->classes, result->classes, 0, 0);
-        Menu_Setup_CombineClassOrAffinityValues(
-            first->affinities, second->affinities, result->affinities, 0, 1);
-    } else {
-        Menu_Setup_CombineClassOrAffinityValues(first->classes, second->classes, result->classes, 1, 0);
-        Menu_Setup_CombineClassOrAffinityValues(
-            first->affinities, second->affinities, result->affinities, 1, 1);
-    }
-    return result;
+std::expected<Items::InventoryBlade, std::string> BuildCombinedBlade(
+    const Items::InventoryBlade& first, const Items::InventoryBlade& second,
+    const RecipeBook& recipes, const MaterialBonuses& bonuses) {
+  const int material_index =
+      ((first.material - kBladeMaterialBase) * kBladeFirstMaterialStride) +
+      (first.category * kBladeFirstCategoryStride) +
+      ((second.material - kBladeMaterialBase) * kBladeSecondMaterialStride) +
+      second.category;
+  const auto recipe =
+      LookUpRecipe(recipes, RecipeKind::kBlade, bonuses, material_index,
+                   (first.id * kBladeIdStride) + second.id);
+  if (!recipe) {
+    return std::unexpected(recipe.error());
+  }
+  const auto info = RecipeRecord(recipes.blades, recipe->sub_id);
+  if (!info) {
+    return std::unexpected(info.error());
+  }
+  Items::InventoryBlade result = first;
+  result.material = recipe->material;
+  result.sub_id = recipe->sub_id;
+  result.id = recipe->sub_id;
+  result.weapon_model_id = info->model;
+  result.category = info->category;
+  result.cost = info->cost;
+  // The blade's type byte keeps its bits above the damage and cost types.
+  constexpr std::uint8_t kBladeTypeBits =
+      Items::kBladeDamageTypeMask |
+      (Items::kBladeCostTypeMask << Items::kBladeCostTypeShift);
+  result.type_bits = static_cast<std::uint8_t>(
+      (first.type_bits & ~kBladeTypeBits) |
+      (info->damage_type & Items::kBladeDamageTypeMask) |
+      ((info->cost_type & Items::kBladeCostTypeMask)
+       << Items::kBladeCostTypeShift));
+  result.opaque12 = info->opaque;
+  result.range = info->range;
+  result.strength = WithBonus(info->strength, recipe->bonus.strength);
+  result.intelligence =
+      WithBonus(info->intelligence, recipe->bonus.intelligence);
+  result.agility = WithBonus(info->agility, recipe->bonus.agility);
+  result.max_dp = HalfSum(first.max_dp, second.max_dp);
+  result.current_dp = result.max_dp;
+  result.max_pp = HalfSum(first.max_pp, second.max_pp);
+  result.current_pp = HalfSum(first.current_pp, second.current_pp);
+  const bool different = first.material != second.material;
+  CombineClassOrAffinityValues(first.classes, second.classes, result.classes,
+                               different, false);
+  CombineClassOrAffinityValues(first.affinities, second.affinities,
+                               result.affinities, different, true);
+  return result;
 }
 
 // decomp: MENUC.PRG _combineShields (src/MENU/MENUC.PRG/168.c:5012)
-Items_InventoryArmor* Menu_Setup_BuildCombinedShield(Items_InventoryArmor* first,
-    Items_InventoryArmor* second, Items_InventoryArmor* result, void* sydData)
-{
-    Menu_Setup_CombinedArmorRecord* info;
-
-    Menu_Setup_combinationResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->combinationsOffset);
-    Menu_Setup_materialResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->materialsOffset);
-    Menu_Setup_shieldCombinationInitData = (Menu_Setup_CombinedArmorRecord *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->initDataOffset);
-
-    VS::Core::Memory::CopyLiveAlignedWords(result, first, sizeof *result);
-
-    result->material = Menu_Setup_materialResults[(first->material * 8) + second->material];
-    result->subId = Menu_Setup_combinationResults[(first->subId * 17) + second->subId];
-    result->id = result->subId + 126;
-    info = &Menu_Setup_shieldCombinationInitData[result->subId];
-    result->wepId = info->wepId;
-    result->category = info->category;
-    result->gemSlots = info->gemSlots;
-    result->strength = info->strength + Audio_Seq_unusedMaterialModifiers[result->material][24];
-    result->intelligence =
-        info->intelligence + Audio_Seq_unusedMaterialModifiers[result->material][26];
-    result->agility = info->agility + Audio_Seq_unusedMaterialModifiers[result->material][28];
-    result->maxDp = result->currentDp = (first->maxDp + second->maxDp) / 2;
-    result->maxPp = ((first->maxPp + second->maxPp) >> 1);
-    result->currentPp = ((first->currentPp + second->currentPp) >> 1);
-    if (first->material == second->material) {
-        Menu_Setup_CombineClassOrAffinityValues(first->classes, second->classes, result->classes, 0, 0);
-        Menu_Setup_CombineClassOrAffinityValues(
-            first->affinities, second->affinities, result->affinities, 0, 1);
-        Menu_Setup_CombinePhysicalTypeValues(first->types, second->types, result->types, 0);
-    } else {
-        Menu_Setup_CombineClassOrAffinityValues(first->classes, second->classes, result->classes, 1, 0);
-        Menu_Setup_CombineClassOrAffinityValues(
-            first->affinities, second->affinities, result->affinities, 1, 1);
-        Menu_Setup_CombinePhysicalTypeValues(first->types, second->types, result->types, 1);
-    }
-    return result;
+std::expected<Items::InventoryArmor, std::string> BuildCombinedShield(
+    const Items::InventoryArmor& first, const Items::InventoryArmor& second,
+    const RecipeBook& recipes, const MaterialBonuses& bonuses) {
+  const auto recipe =
+      LookUpRecipe(recipes, RecipeKind::kShield, bonuses,
+                   (first.material * kShieldMaterialStride) + second.material,
+                   (first.sub_id * kShieldSubIdStride) + second.sub_id);
+  if (!recipe) {
+    return std::unexpected(recipe.error());
+  }
+  auto result = BuildCombinedArmorPiece(first, second, recipes, *recipe);
+  if (result) {
+    const ArmorRecipe& info = recipes.armor[recipe->sub_id];
+    result->weapon_model_id = info.model;
+    result->gem_slots = info.gem_slots;
+    result->max_pp = HalfSum(first.max_pp, second.max_pp);
+    result->current_pp = HalfSum(first.current_pp, second.current_pp);
+  }
+  return result;
 }
 
 // decomp: MENUC.PRG _combineArmor (src/MENU/MENUC.PRG/168.c:5061)
-Items_InventoryArmor* Menu_Setup_BuildCombinedArmor(Items_InventoryArmor* first,
-    Items_InventoryArmor* second, Items_InventoryArmor* result, void* sydData)
-{
-    Menu_Setup_CombinedArmorRecord* info;
-
-    Menu_Setup_combinationResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->combinationsOffset);
-    Menu_Setup_materialResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->materialsOffset);
-    Menu_Setup_combinationInitData = (Menu_Setup_CombinedArmorRecord *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->initDataOffset);
-
-    VS::Core::Memory::CopyLiveAlignedWords(result, first, sizeof *result);
-
-    result->material = Menu_Setup_materialResults[first->material * 128 + (first->category - 2) * 32
-                                        + second->material * 4 + (second->category - 2)];
-    result->subId = Menu_Setup_combinationResults[(first->subId - 16) * 65 + (second->subId - 16)];
-    result->id = result->subId + 126;
-    info = &Menu_Setup_combinationInitData[result->subId];
-    result->category = info->category;
-    result->strength = info->strength + Audio_Seq_unusedMaterialModifiers[result->material][24];
-    result->intelligence =
-        info->intelligence + Audio_Seq_unusedMaterialModifiers[result->material][26];
-    result->agility = info->agility + Audio_Seq_unusedMaterialModifiers[result->material][28];
-    result->maxDp = result->currentDp = (first->maxDp + second->maxDp) / 2;
-    if (first->material == second->material) {
-        Menu_Setup_CombineClassOrAffinityValues(first->classes, second->classes, result->classes, 0, 0);
-        Menu_Setup_CombineClassOrAffinityValues(
-            first->affinities, second->affinities, result->affinities, 0, 1);
-        Menu_Setup_CombinePhysicalTypeValues(first->types, second->types, result->types, 0);
-    } else {
-        Menu_Setup_CombineClassOrAffinityValues(first->classes, second->classes, result->classes, 1, 0);
-        Menu_Setup_CombineClassOrAffinityValues(
-            first->affinities, second->affinities, result->affinities, 1, 1);
-        Menu_Setup_CombinePhysicalTypeValues(first->types, second->types, result->types, 1);
-    }
-    return result;
+std::expected<Items::InventoryArmor, std::string> BuildCombinedArmor(
+    const Items::InventoryArmor& first, const Items::InventoryArmor& second,
+    const RecipeBook& recipes, const MaterialBonuses& bonuses) {
+  const int material_index =
+      (first.material * kArmorFirstMaterialStride) +
+      ((first.category - kArmorCategoryBase) * kArmorFirstCategoryStride) +
+      (second.material * kArmorSecondMaterialStride) +
+      (second.category - kArmorCategoryBase);
+  const int result_index =
+      ((first.sub_id - kArmorSubIdBase) * kArmorSubIdStride) +
+      (second.sub_id - kArmorSubIdBase);
+  const auto recipe = LookUpRecipe(recipes, RecipeKind::kArmor, bonuses,
+                                   material_index, result_index);
+  if (!recipe) {
+    return std::unexpected(recipe.error());
+  }
+  return BuildCombinedArmorPiece(first, second, recipes, *recipe);
 }
 
-// MENUC.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Setup_Combination_ResetMenucStatics(void)
-{
-    {
-        static const void* initial = NULL;
-        memcpy((void*)&Menu_Setup_sydData, &initial, sizeof Menu_Setup_sydData);
+std::expected<RecipeBook, std::string> DecodeRecipeFile(
+    RecipeKind kind, std::span<const std::uint8_t> file) {
+  if (file.size() < kRecipeHeaderBytes) {
+    return std::unexpected(
+        std::format("recipe file of {} bytes has no header", file.size()));
+  }
+  std::array<std::size_t, kRecipeTableCount> offsets{};
+  for (std::size_t table = 0; table < kRecipeTableCount; ++table) {
+    for (std::size_t byte = 0; byte < kWordBytes; ++byte) {
+      offsets[table] |=
+          static_cast<std::size_t>(file[(table * kWordBytes) + byte])
+          << (byte * kByteBits);
     }
-    {
-        static const char initial[] = { 0, 0xE, 0x18, 0x38, 0xC0, 0x3E, 0xFE };
-        memcpy((void*)&Menu_Setup_workshopMaterials, &initial, sizeof Menu_Setup_workshopMaterials);
+    if (offsets[table] > file.size()) {
+      return std::unexpected(
+          std::format("recipe table {} at {} outside the {}-byte file", table,
+                      offsets[table], file.size()));
     }
-    {
-        static const int initial[] = { VS_BLADE_SYD_LBA, VS_SHIELD_SYD_LBA, VS_ARMOR_SYD_LBA };
-        memcpy((void*)&Menu_Setup_loadCombinationRecipesSydLbas, &initial, sizeof Menu_Setup_loadCombinationRecipesSydLbas);
+  }
+  // A table ends where the next table after it starts, or with the file.
+  const auto table_bytes = [&](std::size_t table) {
+    std::size_t end = file.size();
+    for (const std::size_t offset : offsets) {
+      if (offset > offsets[table]) {
+        end = std::min(end, offset);
+      }
     }
-    {
-        static const int initial[] = { VS_BLADE_SYD_SIZE, VS_SHIELD_SYD_SIZE, VS_ARMOR_SYD_SIZE };
-        memcpy((void*)&Menu_Setup_loadCombinationRecipesSydSizes, &initial, sizeof Menu_Setup_loadCombinationRecipesSydSizes);
+    return file.subspan(offsets[table], end - offsets[table]);
+  };
+  const std::span<const std::uint8_t> results = table_bytes(0);
+  const std::span<const std::uint8_t> materials = table_bytes(1);
+  const std::span<const std::uint8_t> records = table_bytes(2);
+  RecipeBook book{};
+  book.kind = kind;
+  book.results.assign(results.begin(), results.end());
+  book.materials.assign(materials.begin(), materials.end());
+  if (kind == RecipeKind::kBlade) {
+    for (std::size_t at = 0; at + kBladeRecipeBytes <= records.size();
+         at += kBladeRecipeBytes) {
+      book.blades.push_back(
+          DecodeBladeRecipe(records.subspan(at).first<kBladeRecipeBytes>()));
     }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Setup_bladeCombinationCursorAnimation, &initial, sizeof Menu_Setup_bladeCombinationCursorAnimation);
+  } else {
+    for (std::size_t at = 0; at + kArmorRecipeBytes <= records.size();
+         at += kArmorRecipeBytes) {
+      book.armor.push_back(
+          DecodeArmorRecipe(records.subspan(at).first<kArmorRecipeBytes>()));
     }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Setup_shieldCombinationCursorAnimation, &initial, sizeof Menu_Setup_shieldCombinationCursorAnimation);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Setup_armorCombinationCursorAnimation, &initial, sizeof Menu_Setup_armorCombinationCursorAnimation);
-    }
-    {
-        static const int (*initial[])(
-        int) = { (const int (*)(int))(Menu_Setup_UpdateBladeCombination), (const int (*)(int))(Menu_Setup_UpdateShieldCombination), (const int (*)(int))(Menu_Setup_UpdateArmorCombination) };
-        memcpy((void*)&Menu_Setup_combineMenus, &initial, sizeof Menu_Setup_combineMenus);
-    }
-    {
-        static const short initial[] = { 3, 5, 7 };
-        memcpy((void*)&Menu_Setup_combineClassOrAffinityValuesDifferentMaterialStatFactors, &initial, sizeof Menu_Setup_combineClassOrAffinityValuesDifferentMaterialStatFactors);
-    }
-    {
-        static const short initial[] = { 4, 6, 8 };
-        memcpy((void*)&Menu_Setup_combineClassOrAffinityValuesSameMaterialStatFactors, &initial, sizeof Menu_Setup_combineClassOrAffinityValuesSameMaterialStatFactors);
-    }
-    {
-        static const short initial[] = { 4, 6 };
-        memcpy((void*)&Menu_Setup_combinePhysicalTypeValuesDifferentMaterialTypeFactors, &initial, sizeof Menu_Setup_combinePhysicalTypeValuesDifferentMaterialTypeFactors);
-    }
-    {
-        static const short initial[] = { 6, 8 };
-        memcpy((void*)&Menu_Setup_combinePhysicalTypeValuesSameMaterialTypeFactors, &initial, sizeof Menu_Setup_combinePhysicalTypeValuesSameMaterialTypeFactors);
-    }
+  }
+  return book;
 }
 
-}  // extern "C"
+// decomp: MENUC.PRG _loadSyd (src/MENU/MENUC.PRG/168.c:2658)
+int LoadCombinationRecipes(Context& context, int id) {
+  CombinationState& combination = context.state.combination;
+  if (id != 0) {
+    if (id < 1 || id > static_cast<int>(kRecipeKindCount)) {
+      context.host.Refuse(std::format("recipe file {} outside 1-3", id));
+      return 0;
+    }
+    context.host.StartRecipeLoad(static_cast<RecipeKind>(id - 1));
+    combination.recipes_loading = true;
+    return 0;
+  }
+  if (!combination.recipes_loading) {
+    return 1;
+  }
+  const std::optional<bool> loaded = context.host.RecipeLoaded();
+  if (!loaded) {
+    context.host.Refuse("recipe file loading without a pending read");
+    combination.recipes_loading = false;
+    return 1;
+  }
+  if (*loaded) {
+    context.host.ReleaseRecipeRequest();
+    combination.recipes_loading = false;
+    return 1;
+  }
+  return 0;
+}
+
+// decomp: MENUC.PRG _setItemRow (src/MENU/MENUC.PRG/168.c:2696)
+MenuRow& SetCombinationResultRow(Context& context, int item_type, int item_id) {
+  MenuRow& row = context.host.SetMenuItem(
+      kResultRow, item_id == 0
+                      ? Menu12Entry(context, item_type + menu12::kNewBladeIndex)
+                      : ItemName(context, item_id));
+  row.selected = 1;
+  return row;
+}
+
+// decomp: MENUC.PRG _initItemRow (src/MENU/MENUC.PRG/168.c:2710)
+MenuRow& AnimateCombinationResult(Context& context, int item_type,
+                                  int item_id) {
+  MenuRow& row = SetCombinationResultRow(context, item_type, item_id);
+  row.state = RowState::kSlideX;
+  row.target0 = static_cast<std::int16_t>(kResultRow.x);
+  row.x = kOffscreenX;
+  return row;
+}
+
+// decomp: MENUC.PRG _setCombineBladeUi (src/MENU/MENUC.PRG/168.c:2735)
+void PreviewBladeCombination(Context& context, int selection) {
+  const int mask = BuildPreview<BladeKind>(context);
+  const Items::InventoryBlade& blade = context.state.combination.blade;
+  ClearBladeStats(context);
+  const auto ingredient = static_cast<unsigned>(selection - 1);
+  if (ingredient >= static_cast<unsigned>(kIngredientCount)) {
+    if (blade.id != 0) {
+      ShowClassesAndAffinities(context, blade.classes, blade.affinities);
+      context.host.SetDpPp(blade.current_dp, blade.max_dp, blade.current_pp,
+                           blade.max_pp);
+      context.host.SetPrimaryStats(blade.strength, blade.intelligence,
+                                   blade.agility, 1);
+      context.host.SetRangeAndRisk(blade.range.range, blade.cost, 0, 1);
+      context.host.SetEquipmentSubtype(kBladeSubtype);
+    }
+  } else if ((mask & selection) != 0) {
+    context.host.SetBladeStats(context.state.combination.blade_ids[ingredient]);
+  }
+}
+
+// decomp: MENUC.PRG _selectBlade (src/MENU/MENUC.PRG/168.c:2801)
+int SelectCombinationBlade(Context& context, int slot) {
+  return SelectIngredient<BladeKind>(context, slot);
+}
+
+// decomp: MENUC.PRG _setBladeMenuItem (src/MENU/MENUC.PRG/168.c:2919)
+void SetCombinationBladeRow(Context& context, MenuRow& row,
+                            const Items::InventoryBlade& blade) {
+  row.row_icon = blade.category;
+  row.material = static_cast<std::uint8_t>(blade.material);
+  if (blade.assembled_weapon_index == 0) {
+    return;
+  }
+  const Items::InventoryWeapon* weapon =
+      InventorySlot(context, context.host.Inventory().weapons,
+                    blade.assembled_weapon_index, "blade's weapon");
+  if (weapon != nullptr) {
+    row.outset_icon =
+        weapon->is_equipped == 0 ? kCarriedOutset : kEquippedOutset;
+  }
+}
+
+// decomp: MENUC.PRG _combineBladeMenu (src/MENU/MENUC.PRG/168.c:2939)
+int UpdateBladeCombination(Context& context, bool initialize) {
+  return UpdateCombinationMenu<BladeKind>(context, initialize);
+}
+
+// decomp: MENUC.PRG _setShieldUi (src/MENU/MENUC.PRG/168.c:3317)
+void SetShieldBaseStats(Context& context,
+                        const Items::InventoryShield& shield) {
+  context.host.ResetEquipmentStats();
+  ShowArmorValues(context, shield.base, kShieldSubtype);
+}
+
+// decomp: MENUC.PRG _initCombineShields (src/MENU/MENUC.PRG/168.c:3353)
+void PreviewShieldCombination(Context& context, int selection) {
+  const int mask = BuildPreview<ShieldKind>(context);
+  const Items::InventoryShield& shield = context.state.combination.shield;
+  context.host.ResetEquipmentStats();
+  const auto ingredient = static_cast<unsigned>(selection - 1);
+  if (ingredient >= static_cast<unsigned>(kIngredientCount)) {
+    if (shield.base.id != 0) {
+      SetShieldBaseStats(context, shield);
+    }
+  } else if ((mask & selection) != 0) {
+    const Items::InventoryShield* listed =
+        Ingredient<ShieldKind>(context, selection);
+    if (listed != nullptr) {
+      SetShieldBaseStats(context, *listed);
+    }
+  }
+}
+
+// decomp: MENUC.PRG _initUiShield (src/MENU/MENUC.PRG/168.c:3404)
+Framework::ItemRowText SetShieldRowWithoutGems(
+    Context& context, const Items::InventoryShield& shield,
+    std::span<std::uint8_t> buffer) {
+  Items::InventoryShield bare = shield;
+  bare.gems = {};
+  return Framework::FormatInventoryShieldRow(context.host.ItemRows(), bare,
+                                             buffer);
+}
+
+// decomp: MENUC.PRG _selectShields (src/MENU/MENUC.PRG/168.c:3421)
+int SelectCombinationShield(Context& context, int slot) {
+  return SelectIngredient<ShieldKind>(context, slot);
+}
+
+// decomp: MENUC.PRG _setShieldMenuItem (src/MENU/MENUC.PRG/168.c:3548)
+void SetCombinationShieldRow(MenuRow& row,
+                             const Items::InventoryShield& shield) {
+  row.row_icon = kShieldRowIcon;
+  row.material = static_cast<std::uint8_t>(shield.base.material);
+  row.outset_icon = shield.is_equipped != 0 ? 1 : 0;
+}
+
+// decomp: MENUC.PRG _combineShieldMenu (src/MENU/MENUC.PRG/168.c:3562)
+int UpdateShieldCombination(Context& context, bool initialize) {
+  return UpdateCombinationMenu<ShieldKind>(context, initialize);
+}
+
+// decomp: MENUC.PRG _initCombineArmor (src/MENU/MENUC.PRG/168.c:3947)
+void PreviewArmorCombination(Context& context, int selection) {
+  const int mask = BuildPreview<ArmorKind>(context);
+  const Items::InventoryArmor& armor = context.state.combination.armor;
+  context.host.ResetEquipmentStats();
+  const auto ingredient = static_cast<unsigned>(selection - 1);
+  if (ingredient >= static_cast<unsigned>(kIngredientCount)) {
+    if (armor.id != 0) {
+      ShowArmorValues(context, armor, kArmorSubtype);
+    }
+  } else if ((mask & selection) != 0) {
+    context.host.SetArmorStats(context.state.combination.armor_ids[ingredient]);
+  }
+}
+
+// decomp: MENUC.PRG _initUiArmor (src/MENU/MENUC.PRG/168.c:4019)
+int SelectCombinationArmor(Context& context, int slot) {
+  return SelectIngredient<ArmorKind>(context, slot);
+}
+
+// decomp: MENUC.PRG _setArmorMenuItem (src/MENU/MENUC.PRG/168.c:4126)
+void SetCombinationArmorRow(MenuRow& row, const Items::InventoryArmor& armor) {
+  row.row_icon = static_cast<std::uint8_t>(armor.category + kArmorRowIconBase);
+  row.material = static_cast<std::uint8_t>(armor.material);
+  row.outset_icon = armor.limb != 0 ? 1 : 0;
+}
+
+// decomp: MENUC.PRG _combineArmorMenu (src/MENU/MENUC.PRG/168.c:4140)
+int UpdateArmorCombination(Context& context, bool initialize) {
+  return UpdateCombinationMenu<ArmorKind>(context, initialize);
+}
+
+// decomp: MENUC.PRG _countItems (src/MENU/MENUC.PRG/168.c:4428)
+int CountCombinationIngredients(Context& context, int category) {
+  const Items::InventoryContents& inventory = context.host.Inventory();
+  switch (category) {
+    case 0:
+      return Items::Inventory::CountItems(ItemCategory::kBlade, inventory);
+    case 1:
+      return Items::Inventory::CountItems(ItemCategory::kShield, inventory);
+    case 2:
+      return static_cast<int>(std::ranges::count_if(
+          inventory.armor, [](const Items::InventoryArmor& armor) {
+            return armor.id != 0 && armor.category != kAccessoryCategory;
+          }));
+    default:
+      context.host.Refuse(
+          std::format("combination category {} outside 0-2", category));
+      return 0;
+  }
+}
+
+// decomp: MENUC.PRG _combineTopMenu (src/MENU/MENUC.PRG/168.c:4455)
+int UpdateCombinationCategory(Context& context, bool initialize) {
+  CategoryState& menu = context.state.combination.category;
+  if (initialize) {
+    menu.keep_cursor = true;
+    context.host.FlyOutRowsAndHoistSelection(kCombineHoistRow, 1);
+    menu.step = kCategoryRows;
+    return 0;
+  }
+  switch (menu.step) {
+    case kCategoryRows:
+      if (context.host.RowsIdle()) {
+        CreateCombinationRows(context, menu);
+      }
+      break;
+    case kCategoryChoose:
+      return ChooseCombination(context, menu);
+    case kCombineReturn:
+      ReturnToCategory(context, menu, kCombineSubtitleRow, menu12::kCombine);
+      break;
+    default:
+      if (menu.step >= kCategoryRun && menu.step < kCombineReturn) {
+        return RunCombination(context, menu);
+      }
+      break;
+  }
+  return 0;
+}
+}  // namespace VS::Menu::Setup

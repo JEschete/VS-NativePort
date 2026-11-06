@@ -4,6 +4,10 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:99
+#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
+    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
+
 #endif // VS_MENU_MAGIC_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_MAGIC_H_DECLS)

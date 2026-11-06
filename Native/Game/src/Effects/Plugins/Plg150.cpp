@@ -10,6 +10,6 @@ CVECTOR Effects_Plg150_tiledRingColorFactors[8]; /* contents: module image (Modu
 SVECTOR Effects_Plg150_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FCCBC (D_800FCCBC@EFFECT/PLG150.BIN)
-u_char Effects_Plg150_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg150_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

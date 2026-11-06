@@ -11,11 +11,13 @@ typedef struct Effects_Trail Effects_Trail;
 #define VS_EFFECTS_TRAILS_H_SET_TYPES_ONLY
 #endif
 #include "Battle/BattleTypes.h"
-#include "Effects/Templates/ClosedRing.h"
 #ifdef VS_EFFECTS_TRAILS_H_SET_TYPES_ONLY
 #undef VS_TYPES_ONLY
 #undef VS_EFFECTS_TRAILS_H_SET_TYPES_ONLY
 #endif
+
+// decomp: src/EFFECT/trails5.h:5
+#define TRAIL_SAMPLE_COUNT 5
 
 // decomp: _trail (src/EFFECT/trails.h:16)
 typedef struct Effects_Trail {

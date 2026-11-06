@@ -13,7 +13,7 @@ SVECTOR Effects_Plg146_mirrorSurfaceVertices[5][16]; /* contents: module image (
 int Effects_Plg146_particleEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FFB20 (D_800FFB20@EFFECT/PLG146.BIN)
-u_char Effects_Plg146_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg146_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FFB40 (D_800FFB40@EFFECT/PLG146.BIN)
 int Effects_Plg146_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */

@@ -1,15 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
@@ -21,7 +22,8 @@ extern "C" {
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/TextBox.h"
@@ -707,7 +709,7 @@ void Menu_Container_SortWeapons(int stat)
             }
             Menu_Container_BuildWeaponStats(
                 &target, &sourceWeapons[sourceIndex - 1], &Menu_Container_containerData->items);
-            statValue = Menu_Framework_WeaponSortValue(stat, &target);
+            statValue = VS::Menu::Framework::LiveWeaponSortValue(stat, &target);
             if (maxStatValue < statValue) {
                 maxStatValue = statValue;
             }
@@ -724,7 +726,7 @@ void Menu_Container_SortWeapons(int stat)
             }
             Menu_Container_BuildWeaponStats(
                 &target, &sourceWeapons[sourceIndex - 1], &Menu_Container_containerData->items);
-            if (Menu_Framework_WeaponSortValue(stat, &target) == maxStatValue) {
+            if (VS::Menu::Framework::LiveWeaponSortValue(stat, &target) == maxStatValue) {
                 sortedIndices[sortedIndex++] = sourceIndex;
                 targetIndices[i] = 0;
             }
@@ -757,7 +759,7 @@ void Menu_Container_SortShields(int sort_stat_id)
             if (shield_id != 0) {
                 Menu_Container_BuildShieldStats(
                     &shield_stats, &shield_items[shield_id - 1], &Menu_Container_containerData->items);
-                shield_sort_value = Menu_Framework_ShieldSortValue(sort_stat_id, &shield_stats);
+                shield_sort_value = VS::Menu::Framework::LiveShieldSortValue(sort_stat_id, &shield_stats);
                 if (highest_remaining_sort_value < shield_sort_value) {
                     highest_remaining_sort_value = shield_sort_value;
                 }
@@ -773,7 +775,7 @@ void Menu_Container_SortShields(int sort_stat_id)
             if (shield_id != 0) {
                 Menu_Container_BuildShieldStats(
                     &shield_stats, &shield_items[shield_id - 1], &Menu_Container_containerData->items);
-                if (Menu_Framework_ShieldSortValue(sort_stat_id, &shield_stats) == highest_remaining_sort_value) {
+                if (VS::Menu::Framework::LiveShieldSortValue(sort_stat_id, &shield_stats) == highest_remaining_sort_value) {
                     sorted_shield_indices[sorted_shield_count++] = shield_id;
                     shield_indices[i] = 0;
                 }
@@ -806,7 +808,7 @@ void Menu_Container_SortMisc(int sort_stat_id)
         for (i = 0; i < 256; ++i) {
             misc_item_id = misc_indices[i];
             if (misc_item_id != 0) {
-                misc_sort_value = Menu_Framework_MiscSortValue(sort_stat_id, &item[misc_item_id - 1]);
+                misc_sort_value = VS::Menu::Framework::LiveMiscSortValue(sort_stat_id, &item[misc_item_id - 1]);
                 if (highest_remaining_sort_value < misc_sort_value) {
                     highest_remaining_sort_value = misc_sort_value;
                 }
@@ -819,7 +821,7 @@ void Menu_Container_SortMisc(int sort_stat_id)
 
         for (i = 0; i < 256; ++i) {
             misc_item_id = misc_indices[i];
-            if ((misc_item_id != 0) && (Menu_Framework_MiscSortValue(sort_stat_id, &item[misc_item_id - 1]) == highest_remaining_sort_value)) {
+            if ((misc_item_id != 0) && (VS::Menu::Framework::LiveMiscSortValue(sort_stat_id, &item[misc_item_id - 1]) == highest_remaining_sort_value)) {
                 sorted_misc_indices[sorted_misc_count++] = misc_item_id;
                 misc_indices[i] = 0;
             }
@@ -877,7 +879,7 @@ void Menu_Container_SortEquipment(int category_id, int sort_stat_id)
                 equipment_id = category_indices[i];
                 if (equipment_id != 0) {
                     Menu_Container_CopyEquipmentStats(&equipment_stats, category_id, equipment_id - 1);
-                    equipment_sort_value = Menu_Framework_EquipmentSortValue(sort_stat_id, &equipment_stats);
+                    equipment_sort_value = VS::Menu::Framework::LiveEquipmentSortValue(sort_stat_id, &equipment_stats);
                     if (highest_remaining_sort_value < equipment_sort_value) {
                         highest_remaining_sort_value = equipment_sort_value;
                     }
@@ -892,7 +894,7 @@ void Menu_Container_SortEquipment(int category_id, int sort_stat_id)
                 equipment_id = category_indices[i];
                 if (equipment_id != 0) {
                     Menu_Container_CopyEquipmentStats(&equipment_stats, category_id, equipment_id - 1);
-                    if (Menu_Framework_EquipmentSortValue(sort_stat_id, &equipment_stats) == highest_remaining_sort_value) {
+                    if (VS::Menu::Framework::LiveEquipmentSortValue(sort_stat_id, &equipment_stats) == highest_remaining_sort_value) {
                         sorted_equipment_indices[sorted_equipment_count++] = equipment_id;
                         category_indices[i] = 0;
                     }
@@ -939,7 +941,7 @@ int Menu_Container_UpdateSortMenu(int category_selection)
 
     switch (Menu_Container_sortMenuStep) {
     case Menu_Container_SortMenuState_Init:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             sort_stat_ids = Menu_Container_kSortStatLists[Menu_Container_sortCategory];
 
             for (i = 0; i < Menu_Container_kSortStatCounts[Menu_Container_sortCategory]; ++i) {
@@ -949,13 +951,13 @@ int Menu_Container_UpdateSortMenu(int category_selection)
                         [sort_stat_ids[i] * 2 + Text_Menu_ITEMHELP_BIN_Index_sortMenuDesc]];
                 sort_row_types[i] = 0;
             }
-            Menu_Framework_CreateActionRows(i, Menu_Container_sortCategory + 96, sort_row_text, sort_row_types);
+            VS::Menu::Framework::CreateLiveActionRows(i, Menu_Container_sortCategory + 96, sort_row_text, sort_row_types);
             Menu_Container_sortMenuStep = Menu_Container_SortMenuState_Display;
         }
         break;
     case Menu_Container_SortMenuState_Display:
-        Menu_Framework_UpdateActionMenu();
-        i = Menu_Framework_ActionSelectionResult();
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        i = VS::Menu::Framework::LiveActionSelectionResult();
         if ((i + 1) != 0) {
             if (i >= 0) {
                 VS::Menu::PlaySelectSound();
@@ -1026,7 +1028,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         Menu_Container_discardMenuItemCategory = (packed_discard_selection >> 0xC) & 0xF;
         Menu_Container_discardMenuSelectedItem = packed_discard_selection - 1;
         Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                     [Menu_Container_discardType + Text_Menu_ITEMHELP_BIN_Index_discardConfirm]]);
         Menu_Container_discardMenuState = Menu_Inventory_DiscardMenuState_Init;
@@ -1036,7 +1038,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
     case Menu_Inventory_DiscardMenuState_Init:
         var_v0 = 0;
         if (Menu_textBoxes[7].flags.done) {
-            if (Menu_Framework_AreMenuRowsIdle() != 0) {
+            if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
                 Menu_Container_discardMenuState = ((Menu_Container_discardType & 1) + 1);
             }
         }
@@ -1050,7 +1052,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
             discardOneRowTypes[i] = 0;
         }
 
-        Menu_Framework_CreateActionRows(
+        VS::Menu::Framework::CreateLiveActionRows(
             2, Menu_Framework_ActionsMenuAction_Discard, discardOneText, discardOneRowTypes);
         Menu_Container_discardMenuState = Menu_Inventory_DiscardMenuState_DiscardOne;
         break;
@@ -1067,7 +1069,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
             Menu_Container_discardMenuCountTemplate[i] = 0;
         }
 
-        menuItem = Menu_Framework_SetMenuItem(0x22, -0x7E, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(0x22, -0x7E, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
         menuItem->state = 5;
         menuItem->targetPosition0 = 0;
         Menu_Container_discardStep = 0;
@@ -1075,11 +1077,11 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         Menu_Container_discardMenuState = Menu_Inventory_DiscardMenuState_ClearTemplate;
         break;
     case Menu_Inventory_DiscardMenuState_DiscardOne:
-        Menu_Framework_UpdateActionMenu();
-        i = Menu_Framework_ActionSelectionResult() + 1;
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        i = VS::Menu::Framework::LiveActionSelectionResult() + 1;
         if (i != 0) {
             if (i == 1) {
-                Audio_PlaySfxCentered(0x7E, 0x1C);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x1C);
                 Menu_Container_ClearItem(
                     Menu_Container_discardMenuItemCategory, Menu_Container_discardMenuSelectedItem, &Menu_Container_containerData->items);
             } else {
@@ -1089,7 +1091,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         }
         break;
     case Menu_Inventory_DiscardMenuState_ClearTemplate:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
@@ -1099,7 +1101,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
 #pragma vsstring(end)
         }
 
-        Menu_Framework_SetMenuItem(0x22, 0, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
+        VS::Menu::Framework::SetLiveMenuItem(0x22, 0, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
         Menu_Container_discardMenuState = Menu_Inventory_DiscardMenuState_DetermineDiscardAmount;
         // Fallthrough
     case Menu_Inventory_DiscardMenuState_DetermineDiscardAmount:
@@ -1109,7 +1111,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
             i = VS::Core::Math::SplitDecimalDigit(i >> 4);
             Menu_Container_discardMenuCountTemplate[3] = i & 0xF;
             Menu_Container_discardMenuCountTemplate[2] = i >> 4;
-            Menu_Framework_SetMenuItem(0x22, 0, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
+            VS::Menu::Framework::SetLiveMenuItem(0x22, 0, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
             if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
                 VS::Menu::PlayLeaveSound();
                 if ((Input_buttonsPressed.allButtons & PADRup)) {
@@ -1182,10 +1184,10 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         VS::Render::DrawLiveVariableWidthGlyph(
             packed_discard_digits >> 4, 0x36, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));
         Menu_Container_discardMenuCursorAnimation =
-            Menu_Framework_DrawCursor(Menu_Container_discardMenuCursorAnimation, (0x36 - (Menu_Container_discardStep * 6)) | 0x720000);
+            VS::Menu::Framework::DrawLiveCursor(Menu_Container_discardMenuCursorAnimation, (0x36 - (Menu_Container_discardStep * 6)) | 0x720000);
         break;
     case Menu_Inventory_DiscardMenuState_DiscardMultipleConfirm:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             for (i = 0; i < 2; ++i) {
                 discardMultipleText[i * 2] = (char*)&Menu_Framework_itemHelp
                     [Menu_Framework_itemHelp[i + Text_Menu_ITEMHELP_BIN_Index_confirmYes]];
@@ -1194,17 +1196,17 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
                 discardMultipleRowTypes[i] = 0;
             }
 
-            Menu_Framework_CreateActionRows(
+            VS::Menu::Framework::CreateLiveActionRows(
                 2, Menu_Framework_ActionsMenuAction_Discard, discardMultipleText, discardMultipleRowTypes);
             Menu_Container_discardMenuState = Menu_Inventory_DiscardMenuState_DiscardMultiple;
         }
         break;
     case Menu_Inventory_DiscardMenuState_DiscardMultiple:
-        Menu_Framework_UpdateActionMenu();
-        i = Menu_Framework_ActionSelectionResult() + 1;
+        VS::Menu::Framework::UpdateLiveActionMenu();
+        i = VS::Menu::Framework::LiveActionSelectionResult() + 1;
         if (i != 0) {
             if (i == 1) {
-                Audio_PlaySfxCentered(0x7E, 0x1C);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x1C);
                 if (Menu_Container_containerData->items.misc[Menu_Container_discardMenuSelectedItem].count
                     == Menu_Container_discardCount) {
                     Menu_Container_ClearItem(

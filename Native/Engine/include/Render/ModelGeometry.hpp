@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <span>
 
 #include "Core/Math/ScalarMath.hpp"
@@ -83,6 +84,29 @@ struct ModelProjectionResult {
 // counts claim, with each polygon's command matching its group.
 [[nodiscard]] bool ValidateModelData(const ModelCounts& counts, bool colored,
                                      std::span<const std::byte> model);
+
+// A model's vertex section: the byte offset of its first vertex and the
+// vertices that fit before its polygon section.
+struct ModelVertexSection {
+  std::size_t offset = 0;
+  std::size_t count = 0;
+
+  friend bool operator==(const ModelVertexSection&,
+                         const ModelVertexSection&) = default;
+};
+
+// The vertex section of `model`, or nothing when its group, vertex and
+// polygon offsets are misaligned, out of order or outside `model`.
+[[nodiscard]] std::optional<ModelVertexSection> FindModelVertexSection(
+    const ModelCounts& counts, std::span<const std::byte> model);
+
+// Adds `delta` to vertex `vertex` of `model`, each component wrapping to 16
+// bits. False, with nothing changed, when the vertex lies outside the vertex
+// section.
+[[nodiscard]] bool MoveModelVertex(const ModelCounts& counts,
+                                   std::span<std::byte> model,
+                                   std::size_t vertex,
+                                   const ModelVertex& delta);
 
 struct ModelProjectionView {
   std::span<const std::int32_t> screens;
@@ -208,10 +232,13 @@ enum class ActorShadowStatus : std::uint8_t {
   kBufferFull,
 };
 
+// Screen x, screen y and depth.
+inline constexpr std::size_t kShadowAnchorComponents = 3;
+
 struct ActorShadowResult {
   ActorShadowStatus status = ActorShadowStatus::kDrawn;
-  // The first projected vertex: screen x, screen y and depth.
-  std::array<std::int16_t, 3> anchor{};
+  // The first projected vertex.
+  std::array<std::int16_t, kShadowAnchorComponents> anchor{};
 };
 
 // BATTLE.PRG func_800B4B14 (4B16C.s:1208): the ground shadow under an actor,

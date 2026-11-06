@@ -7,7 +7,7 @@ extern "C" {
 SVECTOR Effects_Plg087_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FF9DC (D_800FF9DC@EFFECT/PLG087.BIN)
-CVECTOR Effects_Plg087_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg087_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FF9FC (D_800FF9FC@EFFECT/PLG087.BIN)
 int Effects_Plg087_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */

@@ -14,6 +14,9 @@ enum class MenuAssetOwner : std::uint8_t { kTitle, kDataMenu };
 
 enum class MenuAssetPhase : std::uint8_t {
   kIdle,
+  // The asset buffer was refused; each step retries it before the image is
+  // requested (#301).
+  kAllocating,
   kLoadingImage,
   kQueueText,
   kLoadingText,
@@ -30,6 +33,9 @@ enum class MenuAssetMisuse : std::uint8_t {
   kReleaseWhileLoading,
   // A release was requested with nothing loaded.
   kNotLoaded,
+  // The asset buffer could not be allocated; nothing is queued and the load
+  // retries the allocation on each step (#301).
+  kAllocationRefused,
 };
 
 struct MenuAssetLoad {
@@ -43,8 +49,9 @@ class MenuAssetHost {
   virtual void ReserveTexturePages() = 0;
   virtual void RetireTexturePages() = 0;
   // Allocates the asset buffer and points the owner's text table, file
-  // summaries and directory entry into it.
-  virtual void AllocateAssets(MenuAssetOwner owner) = 0;
+  // summaries and directory entry into it; false when the buffer is refused,
+  // with every view left unchanged.
+  [[nodiscard]] virtual bool AllocateAssets(MenuAssetOwner owner) = 0;
   virtual void FreeAssets() = 0;
   virtual void RequestImage() = 0;
   virtual void RequestText() = 0;

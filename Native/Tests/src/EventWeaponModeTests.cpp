@@ -13,14 +13,15 @@
 #include "Content/ModuleData.h"
 #include "Event/WeaponModeOpcode.h"
 #include "Legacy/Psx.h"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Animation.h"
+#include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
-#include "State/Flags.h"
 }
 
 namespace {
@@ -58,10 +58,9 @@ struct WeaponModeFixture {
   char saved_pending = pending;
   char saved_skip = Event_skipState;
   char saved_phase = Event_playbackPhase;
-  char saved_gate = State_ScriptFlag(0xAC);
+  std::uint8_t saved_gate = VS::State::LiveScriptFlag(0xAC);
   char saved_sequence = Actors_lastResolvedSequenceIndex;
   decltype(Battle_hudBattleMode) saved_hud = Battle_hudBattleMode;
-  decltype(Actors_stateFlagsScratch) saved_flags = Actors_stateFlagsScratch;
   Actors_ActorRecord record{};
   Battle_Actor actor{};
   std::array<Actors_WeaponModel, 2> weapons{};
@@ -77,7 +76,7 @@ struct WeaponModeFixture {
     }
     Event_weaponDrawStates[0] = 0;
     Event_weaponDrawStates[1] = 1;
-    State_SetScriptFlag(0xAC, 1);
+    VS::State::SetLiveScriptFlag(0xAC, 1);
     Event_skipState = 0;
     Event_playbackPhase = 4;
     pending = 0;
@@ -108,10 +107,9 @@ struct WeaponModeFixture {
     pending = saved_pending;
     Event_skipState = saved_skip;
     Event_playbackPhase = saved_phase;
-    State_SetScriptFlag(0xAC, saved_gate);
+    VS::State::SetLiveScriptFlag(0xAC, saved_gate);
     Actors_lastResolvedSequenceIndex = saved_sequence;
     Battle_hudBattleMode = saved_hud;
-    Actors_stateFlagsScratch = saved_flags;
     VS::Actors::ForgetSequenceBanks(common.data(), sizeof common);
     VS::Actors::ForgetSequenceBanks(battle.data(), sizeof battle);
   }
@@ -233,7 +231,7 @@ TEST_CASE("Script weapon mode honors its story gate without changing actors",
           "[event][weapon-mode]") {
   WeaponModeFixture fixture;
   fixture.Prepare(1);
-  State_SetScriptFlag(0xAC, 0);
+  VS::State::SetLiveScriptFlag(0xAC, 0);
   const auto before = RecordBytes(fixture.record);
   std::array<u_char, 3> command{0, 1, 1};
   CHECK(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
@@ -304,7 +302,7 @@ TEST_CASE("Skipping an active weapon transition clears its wait without replay",
   REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   const auto animation = fixture.record.animationId;
   Event_skipState = 2;
-  State_SetScriptFlag(0xAC, 0);
+  VS::State::SetLiveScriptFlag(0xAC, 0);
   REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   fixture.CheckImmediate(mode);
   CHECK(fixture.record.animationId == animation);

@@ -1,983 +1,1583 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Memory/HeapLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
-#include "Field/Collision.h"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
-#include "Field/Map.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Field/RoomEffects.h"
-#include "Field/Zone.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
-#include "State/StateFlags.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Field/RoomEffects.hpp"
 
-// decomp: D_800E85CC (D_800E85CC@BATTLE/BATTLE.PRG)
-int (*Field_kTextureEffectHandlers[7])(Field_SwingEffectRecord*); /* contents: module image, relocated (ModulePointers.cpp) */
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
+#include <string_view>
+#include <utility>
+#include <vector>
 
-// decomp: D_800E85E8 (D_800E85E8@BATTLE/BATTLE.PRG)
-int (*Field_kRoomEffectOpcodeHandlers[13])(Field_RoomEffectObjectView*, Field_RoomEffectCommandHeader*); /* contents: module image, relocated (ModulePointers.cpp) */
+#include "Core/Log.hpp"
+#include "Field/RoomEffectsCore.hpp"
+#include "Render/RoomDraw.hpp"
 
-// decomp: D_800F1D00 (D_800F1D00@BATTLE/BATTLE.PRG)
-short Field_isRoomEffectSoundRestored;
+namespace VS::Field {
+namespace {
+using room_effects::Fits;
+using room_effects::Load;
+using room_effects::Store;
+using room_effects::WrappingAbs;
+using room_effects::WrappingAdd;
+using room_effects::WrappingNegate;
 
-// decomp: D_800F1DD8 (D_800F1DD8@BATTLE/BATTLE.PRG)
-Field_RoomEffectInstance Field_roomEffectInstances[100];
+constexpr std::string_view kChannel = "field.effects";
 
-// decomp: D_800F2258 (D_800F2258@BATTLE/BATTLE.PRG)
-short Field_roomEffectSoundId;
+// Positions are kept in sixteenths of a geometry unit; angles in 4096ths of
+// a turn (ONE).
+constexpr std::int32_t kSubunitScale = 16;
+constexpr std::uint32_t kAngleMask = 0xFFF;
+constexpr std::uint32_t kHalfTurn = 0x800;
+constexpr std::uint32_t kFullTurn = 0x1000;
 
-// decomp: D_800F225A (D_800F225A@BATTLE/BATTLE.PRG)
-char Field_textureEffectCount;
+// The group words a swing writes: the flags and the three rotation words.
+constexpr std::size_t kRotationXWord = room_effects::kGroupRotationWord;
+constexpr std::size_t kRotationYWord = kRotationXWord + 1;
+constexpr std::size_t kRotationZWord = kRotationXWord + 2;
+constexpr std::size_t kSwingGroupWords = kRotationZWord + 1;
 
-// decomp: D_800F225B (D_800F225B@BATTLE/BATTLE.PRG)
-char Field_roomEffectScriptCount;
+std::uint32_t GroupWord(std::span<const std::byte> geometry,
+                        std::size_t group_offset, std::size_t word) {
+  return Load<std::uint32_t>(
+      geometry, group_offset + word * room_effects::kGroupWordBytes);
+}
+
+void SetGroupWord(std::span<std::byte> geometry, std::size_t group_offset,
+                  std::size_t word, std::uint32_t value) {
+  Store(geometry, group_offset + word * room_effects::kGroupWordBytes, value);
+}
+
+// Clears then sets flag bits in a group's first word.
+bool UpdateGroupFlags(std::span<std::byte> geometry, int group_index,
+                      std::uint32_t clear_bits, std::uint32_t set_bits) {
+  const auto group = FindRoomGeometryGroup(geometry, group_index);
+  if (!group) {
+    return false;
+  }
+  const std::uint32_t flags = GroupWord(geometry, *group, 0);
+  SetGroupWord(geometry, *group, 0, (flags & ~clear_bits) | set_bits);
+  return true;
+}
+
+void SwapColorPairs(std::span<std::byte> polygon, std::size_t corners) {
+  for (std::size_t corner = 0; corner < corners; ++corner) {
+    const std::size_t red = room_effects::kPolygonRedOffsets.at(corner);
+    std::swap(polygon[red], polygon[red + 1]);
+  }
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_8009195C (src/BATTLE/BATTLE.PRG/2842C.c:550)
-void* Field_FindRoomGeometryGroup(int group_index)
-{
-    if (Field_roomData.geometry != NULL) {
-        int group_count = *Field_roomData.geometry;
-        int* groups = Field_roomData.geometry + 1;
-        if ((group_index >= 0) && (group_index < group_count)) {
-            return groups + (group_index * 16);
-        }
-    }
-    return NULL;
+std::optional<std::size_t> FindRoomGeometryGroup(
+    std::span<const std::byte> geometry, int group_index) {
+  if (geometry.empty()) {
+    return std::nullopt;
+  }
+  if (!Fits(geometry.size(), 0, room_effects::kGeometryCountBytes)) {
+    VS_LOG_WARN(kChannel, "Room geometry of {} bytes has no group count",
+                geometry.size());
+    return std::nullopt;
+  }
+  const auto group_count = Load<std::int32_t>(geometry, 0);
+  if (group_index < 0 || group_index >= group_count) {
+    return std::nullopt;
+  }
+  const std::size_t offset =
+      room_effects::kGeometryCountBytes +
+      (static_cast<std::size_t>(group_index) * room_effects::kGroupRecordBytes);
+  if (!Fits(geometry.size(), offset, room_effects::kGroupRecordBytes)) {
+    VS_LOG_WARN(kChannel,
+                "Geometry group {} refused: its record at {} leaves the {} "
+                "byte geometry",
+                group_index, offset, geometry.size());
+    return std::nullopt;
+  }
+  return offset;
 }
 
 // decomp: BATTLE.PRG func_80091998 (src/BATTLE/BATTLE.PRG/2842C.c:562)
-int Field_ShowRoomGeometryGroup(int group_index)
-{
-    int* group = (int *)(Field_FindRoomGeometryGroup(group_index));
-    if (group != NULL) {
-        *group &= ~0x100;
-        return 1;
-    }
-    return 0;
+bool ShowRoomGeometryGroup(std::span<std::byte> geometry, int group_index) {
+  return UpdateGroupFlags(geometry, group_index, room_effects::kGroupHiddenFlag,
+                          0);
 }
 
 // decomp: BATTLE.PRG func_800919D8 (src/BATTLE/BATTLE.PRG/2842C.c:572)
-int Field_HideRoomGeometryGroup(int group_index)
-{
-    int* group = (int *)(Field_FindRoomGeometryGroup(group_index));
-    if (group != NULL) {
-        *group |= 0x100;
-        return 1;
-    }
-    return 0;
+bool HideRoomGeometryGroup(std::span<std::byte> geometry, int group_index) {
+  return UpdateGroupFlags(geometry, group_index, 0,
+                          room_effects::kGroupHiddenFlag);
 }
 
 // decomp: BATTLE.PRG func_80091A1C (src/BATTLE/BATTLE.PRG/2842C.c:582)
-int Field_SwapRoomGeometryGroupFlags(int first_group_index, int second_group_index)
-{
-    int* first_group = (int *)(Field_FindRoomGeometryGroup(first_group_index));
-    int* second_group = (int *)(Field_FindRoomGeometryGroup(second_group_index));
-
-    if ((first_group != NULL) && (second_group != NULL)) {
-        int saved_flags = *first_group;
-        *first_group = *second_group;
-        *second_group = saved_flags;
-        return 1;
-    }
-    return 0;
+bool SwapRoomGeometryGroupFlags(std::span<std::byte> geometry,
+                                int first_group_index, int second_group_index) {
+  const auto first = FindRoomGeometryGroup(geometry, first_group_index);
+  const auto second = FindRoomGeometryGroup(geometry, second_group_index);
+  if (!first || !second) {
+    return false;
+  }
+  const std::uint32_t first_flags = GroupWord(geometry, *first, 0);
+  SetGroupWord(geometry, *first, 0, GroupWord(geometry, *second, 0));
+  SetGroupWord(geometry, *second, 0, first_flags);
+  return true;
 }
 
 // decomp: BATTLE.PRG func_80091A78 (src/BATTLE/BATTLE.PRG/2842C.c:596)
-int Field_AddRoomGeometryDepthBias(int group_index, int depth_bias)
-{
-    u_short* group_halfwords = (u_short *)(Field_FindRoomGeometryGroup(group_index));
-    if (group_halfwords != NULL) {
-        group_halfwords[1] = (u_short)(group_halfwords[1] + depth_bias);
-        return 1;
-    }
-    return 0;
+bool AddRoomGeometryDepthBias(std::span<std::byte> geometry, int group_index,
+                              int depth_bias) {
+  const auto group = FindRoomGeometryGroup(geometry, group_index);
+  if (!group) {
+    return false;
+  }
+  const std::size_t offset = *group + room_effects::kGroupDepthBiasOffset;
+  const auto bias = Load<std::uint16_t>(geometry, offset);
+  Store(geometry, offset,
+        static_cast<std::uint16_t>(static_cast<std::uint32_t>(bias) +
+                                   static_cast<std::uint32_t>(depth_bias)));
+  return true;
 }
 
 // decomp: BATTLE.PRG func_80091AC0 (src/BATTLE/BATTLE.PRG/2842C.c:606)
-int Field_DisableRoomGeometryGroup(int group_index)
-{
-    int* group = (int *)(Field_FindRoomGeometryGroup(group_index));
-    if (group != NULL) {
-        *group |= 0x1000;
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80091B04 (src/BATTLE/BATTLE.PRG/2842C.c:616)
-void Field_UpdateRoomEffects(void)
-{
-    int i;
-
-    for (i = 0; i < Field_textureEffectCount; ++i) {
-        if ((Field_roomEffectInstances[i].isActive != 0) && (Field_roomEffectInstances[i].kindOrObjectCount < 7)
-            && (Field_roomEffectInstances[i].isUpdateEnabled != 0)) {
-            Field_roomEffectInstances[i].isActive = Field_kTextureEffectHandlers[Field_roomEffectInstances[i].kindOrObjectCount](Field_roomEffectInstances[i].currentData);
-        }
-    }
-
-    for (i = 0; i < Field_roomEffectScriptCount; ++i) {
-        if ((Field_roomEffectInstances[i + 64].isActive != 0) && (Field_roomEffectInstances[i + 64].isUpdateEnabled != 0)) {
-            Field_roomEffectInstances[i + 64].isActive =
-                Field_ExecuteRoomEffectCommands((Field_RoomEffectObjectView*)Field_roomEffectInstances[i + 64].currentData,
-                    Field_roomEffectInstances[i + 64].kindOrObjectCount, &Field_roomEffectInstances[i + 64]);
-            if (Field_roomEffectInstances[i + 64].isActive == 0) {
-                VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[i + 64].currentData);
-                Field_roomEffectInstances[i + 64].currentData = Field_roomEffectInstances[i + 64].originalData;
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_80091C6C (src/BATTLE/BATTLE.PRG/2842C.c:640)
-int Field_AdvanceRoomTextureFrames(Field_TextureFrameEffect* texture_frame_effect)
-{
-    Field_TextureFrameEffect* quad = texture_frame_effect;
-    void* base = Field_roomData.geometry;
-
-    if (++texture_frame_effect->tick > texture_frame_effect->delay) {
-        int u;
-        int v;
-        Field_MpdPolygonUvView* polygon;
-
-        texture_frame_effect->tick = 0;
-
-        if (++texture_frame_effect->frame >= texture_frame_effect->frameCount) {
-            texture_frame_effect->frame = 0;
-        }
-
-        u = texture_frame_effect->baseU + texture_frame_effect->frameWidth * (texture_frame_effect->frame % texture_frame_effect->columns);
-        v = texture_frame_effect->baseV + texture_frame_effect->frameHeight * (texture_frame_effect->frame / texture_frame_effect->columns);
-        polygon = (Field_MpdPolygonUvView *)(((u_char*)(base)) + texture_frame_effect->geometryOffset);
-
-        if ((polygon->type & 0x3C) == 0x34) {
-            polygon->u0 = texture_frame_effect->u[0] + u;
-            polygon->u1 = texture_frame_effect->u[1] + u;
-            polygon->u2 = texture_frame_effect->u[2] + u;
-            polygon->v0 = texture_frame_effect->v[0] + v;
-            polygon->v1 = texture_frame_effect->v[1] + v;
-            polygon->v2 = texture_frame_effect->v[2] + v;
-        } else {
-            polygon->u0 = quad->u[0] + u;
-            polygon->u1 = quad->u[1] + u;
-            polygon->u2 = quad->u[2] + u;
-            polygon->u3 = quad->u[3] + u;
-            polygon->v0 = quad->v[0] + v;
-            polygon->v1 = quad->v[1] + v;
-            polygon->v2 = quad->v[2] + v;
-            polygon->v3 = quad->v[3] + v;
-        }
-    }
-
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_80091E10 (src/BATTLE/BATTLE.PRG/2842C.c:682)
-int Field_ScrollRoomTextureCoordinates(Field_TextureScrollEffect* texture_scroll_effect)
-{
-    Field_TextureScrollEffect* quad = texture_scroll_effect;
-    void* base = Field_roomData.geometry;
-
-    if (++texture_scroll_effect->tick > texture_scroll_effect->delay) {
-        int u = texture_scroll_effect->currentU;
-        int v = texture_scroll_effect->currentV;
-        Field_MpdPolygonUvView* polygon;
-
-        u += texture_scroll_effect->stepU;
-        v += texture_scroll_effect->stepV;
-        texture_scroll_effect->tick = 0;
-
-        if (u < texture_scroll_effect->baseU) {
-            u = texture_scroll_effect->baseU + texture_scroll_effect->width - texture_scroll_effect->windowWidth;
-        }
-
-        if (v < texture_scroll_effect->baseV) {
-            v = texture_scroll_effect->baseV + texture_scroll_effect->height - texture_scroll_effect->windowHeight;
-        }
-
-        if (texture_scroll_effect->baseU + texture_scroll_effect->width < u + texture_scroll_effect->windowWidth) {
-            u = texture_scroll_effect->baseU;
-        }
-
-        if (texture_scroll_effect->baseV + texture_scroll_effect->height < v + texture_scroll_effect->windowHeight) {
-            v = texture_scroll_effect->baseV;
-        }
-
-        texture_scroll_effect->currentU = u;
-        texture_scroll_effect->currentV = v;
-        polygon = (Field_MpdPolygonUvView *)(((u_char*)(base)) + texture_scroll_effect->geometryOffset);
-
-        if ((polygon->type & 0x3C) == 0x34) {
-            polygon->u0 = texture_scroll_effect->u[0] + u;
-            polygon->u1 = texture_scroll_effect->u[1] + u;
-            polygon->u2 = texture_scroll_effect->u[2] + u;
-            polygon->v0 = texture_scroll_effect->v[0] + v;
-            polygon->v1 = texture_scroll_effect->v[1] + v;
-            polygon->v2 = texture_scroll_effect->v[2] + v;
-        } else {
-            polygon->u0 = quad->u[0] + u;
-            polygon->u1 = quad->u[1] + u;
-            polygon->u2 = quad->u[2] + u;
-            polygon->u3 = quad->u[3] + u;
-            polygon->v0 = quad->v[0] + v;
-            polygon->v1 = quad->v[1] + v;
-            polygon->v2 = quad->v[2] + v;
-            polygon->v3 = quad->v[3] + v;
-        }
-    }
-
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_80091FE8 (src/BATTLE/BATTLE.PRG/2842C.c:738)
-int Field_AnimateRoomTextureImages(Field_TextureRegionScrollEffect* texture_region_effect)
-{
-    RECT source;
-    RECT halfSource;
-
-    if (++texture_region_effect->tick > texture_region_effect->delay) {
-        int destX;
-        int destY;
-        int halfDestX;
-        int halfSourceX;
-
-        texture_region_effect->rect.x -= 320;
-        texture_region_effect->rect.y += 256;
-        texture_region_effect->tick = 0;
-
-        if (texture_region_effect->scrollStep == 0) {
-            if (++texture_region_effect->frame > texture_region_effect->frameCount) {
-                texture_region_effect->frame = 1;
-            }
-
-            setRECT(&source, texture_region_effect->rect.x + texture_region_effect->rect.w * (texture_region_effect->frame % texture_region_effect->columns),
-                texture_region_effect->rect.y + texture_region_effect->rect.h * (texture_region_effect->frame / texture_region_effect->columns), texture_region_effect->rect.w,
-                texture_region_effect->rect.h);
-        } else {
-            texture_region_effect->frame += texture_region_effect->scrollStep;
-
-            if (texture_region_effect->frame >= texture_region_effect->rect.h) {
-                texture_region_effect->frame = 0;
-            }
-
-            setRECT(&source, texture_region_effect->rect.x + texture_region_effect->rect.w / 2, texture_region_effect->rect.y + texture_region_effect->frame,
-                texture_region_effect->rect.w / 2, texture_region_effect->rect.h - texture_region_effect->frame);
-        }
-
-        halfDestX = (texture_region_effect->rect.x % 64) / 2 - 64;
-        destX = halfDestX + (texture_region_effect->rect.x & 0x3C0);
-        destY = (texture_region_effect->rect.y % 256) / 2 + (texture_region_effect->rect.y & 0x100);
-        halfSourceX = (source.x % 64) / 2 - 64;
-        setRECT(&halfSource, halfSourceX + (source.x & 0x3C0),
-            (source.y % 256) / 2 + (source.y & 0x100), source.w / 2, source.h / 2);
-        MoveImage(&source, texture_region_effect->rect.x, texture_region_effect->rect.y);
-        MoveImage(&halfSource, destX, destY);
-
-        if (texture_region_effect->scrollStep != 0 && texture_region_effect->frame != 0) {
-            int wrapY;
-
-            source.y = texture_region_effect->rect.y;
-            source.h = texture_region_effect->frame;
-            wrapY = texture_region_effect->rect.y + texture_region_effect->rect.h - texture_region_effect->frame;
-            destY = (wrapY % 256) / 2 + (wrapY & 0x100);
-            halfSource.y = (source.y % 256) / 2 + (source.y & 0x100);
-            halfSource.h = source.h / 2;
-            MoveImage(&source, texture_region_effect->rect.x, wrapY);
-            MoveImage(&halfSource, destX, destY);
-        }
-
-        texture_region_effect->rect.x += 320;
-        texture_region_effect->rect.y -= 256;
-    }
-
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800923F8 (src/BATTLE/BATTLE.PRG/2842C.c:801)
-int Field_UpdateRoomRotationEffect(Field_SwingEffectRecord* swing_effect)
-{
-    int* base = Field_roomData.geometry;
-    int* p;
-    int delta;
-    int ret = 1;
-
-    if (swing_effect->needsReset != 0) {
-        swing_effect->needsReset = 0;
-        swing_effect->angle = swing_effect->startAngle;
-        swing_effect->angularVelocity = swing_effect->initialVelocity;
-    }
-
-    swing_effect->angle += swing_effect->angularVelocity;
-    swing_effect->angularVelocity += swing_effect->acceleration * 8;
-    delta = (swing_effect->angle - swing_effect->restAngle) & 0xFFF;
-
-    if (delta > ONE / 2) {
-        delta = ONE - delta;
-    }
-
-    if (delta < ABS(swing_effect->angularVelocity)) {
-        swing_effect->angularVelocity = -(swing_effect->angularVelocity >> swing_effect->dampingShift);
-
-        if (ABS(swing_effect->angularVelocity) < 0x21) {
-            swing_effect->angle = swing_effect->restAngle;
-            ret = 0;
-        }
-    }
-
-    p = (int *)(((u_char*)((void*)base)) + swing_effect->geometryOffset);
-
-    if (swing_effect->axis == 1) {
-        p[5] = swing_effect->angle;
-        p[0] |= 0x6000;
-    } else if (swing_effect->axis == 2) {
-        p[4] = swing_effect->angle;
-    } else {
-        p[6] = swing_effect->angle;
-    }
-
-    if (ret != 0) {
-        return 1;
-    }
-
-    delta = swing_effect->startAngle;
-    swing_effect->initialVelocity = -swing_effect->initialVelocity;
-    swing_effect->angularVelocity = swing_effect->initialVelocity;
-    swing_effect->startAngle = swing_effect->restAngle;
-    swing_effect->restAngle = delta;
-    swing_effect->acceleration = -swing_effect->acceleration;
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80092540 (src/BATTLE/BATTLE.PRG/2842C.c:855)
-int Field_SkipRoomEffectCommand(void) { return 0; }
-
-// decomp: BATTLE.PRG func_80092548 (src/BATTLE/BATTLE.PRG/2842C.c:857)
-void Field_InitializeRoomEffects(void)
-{
-    int sizes[] = { 24, 20, 32, 0, 0, 0, 36 };
-    void* data;
-    int count;
-    int length;
-    int index;
-    int consumed;
-
-    Field_roomEffectSoundId = -1;
-    Field_isRoomEffectSoundRestored = 0;
-    Field_textureEffectCount = 0;
-
-    if ((int)Field_roomData.header.textureEffectsLength > 0) {
-        data = Field_roomData.textureEffects;
-        length = Field_roomData.header.textureEffectsLength;
-        consumed = 0;
-        count = 0;
-
-        while (consumed < length) {
-            Field_SwingEffectRecord* effect = (Field_SwingEffectRecord *)(data);
-
-            if (effect->kind < 7 && sizes[effect->kind] != 0) {
-                Field_roomEffectInstances[count].currentData = effect;
-                Field_roomEffectInstances[count].isActive = effect->startsInactive == 0;
-                Field_roomEffectInstances[count].isUpdateEnabled = 1;
-                Field_roomEffectInstances[count].reserved03 = 0;
-                Field_roomEffectInstances[count].kindOrObjectCount = effect->kind;
-                effect->needsReset = 1;
-                consumed += sizes[effect->kind];
-                data = (u_char*)(data) + (sizes[effect->kind]);
-                ++count;
-            } else {
-                consumed = length;
-            }
-        }
-
-        Field_textureEffectCount = count;
-    }
-
-    Field_roomEffectScriptCount = 0;
-
-    if ((int)Field_roomData.header.effectScriptsLength <= 0) {
-        return;
-    }
-
-    data = Field_roomData.effectScripts;
-    count = Field_roomData.header.effectScriptsLength;
-    length = 0;
-
-    for (index = 64; length < count; ++index) {
-        Field_RoomEffectScriptHeader* script = (Field_RoomEffectScriptHeader *)(data);
-        Field_RoomEffectInstance* entry = &Field_roomEffectInstances[index];
-        Field_RoomEffectChunkHeader* chunk;
-        int size;
-
-        entry->isActive = script->isActive;
-        entry->kindOrObjectCount = script->objectCount;
-        entry->isUpdateEnabled = 1;
-        entry->reserved03 = 0;
-        entry->currentData = (Field_SwingEffectRecord *)(data);
-        entry->originalData = (Field_SwingEffectRecord *)(data);
-
-        if (entry->isActive != 0) {
-            Field_CreateRoomEffectObjects(entry);
-        }
-
-        size = entry->kindOrObjectCount + 4;
-
-        if ((entry->kindOrObjectCount & 3) != 0) {
-            int alignedSize = entry->kindOrObjectCount + 8;
-
-            size = alignedSize - (entry->kindOrObjectCount & 3);
-        }
-
-        data = (u_char*)(data) + (size);
-        length += size;
-
-        chunk = (Field_RoomEffectChunkHeader *)(data);
-        size = chunk->type == 11 ? 4 : chunk->size;
-
-        while (size != 0) {
-            data = (u_char*)(data) + (size);
-            length += size;
-            chunk = (Field_RoomEffectChunkHeader *)(data);
-            size = chunk->type == 11 ? 4 : chunk->size;
-        }
-
-        length += 4;
-        data = (u_char*)(data) + (4);
-        ++Field_roomEffectScriptCount;
-    }
-}
-
-// decomp: BATTLE.PRG func_800927AC (src/BATTLE/BATTLE.PRG/2842C.c:951)
-void Field_CreateRoomEffectObjects(Field_RoomEffectInstance* effect_instance)
-{
-    int _[32] __attribute__((unused));
-    int i;
-    signed char* script;
-    Field_RoomEffectObject* elem = (Field_RoomEffectObject *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount));
-    signed char* ids = (signed char*)effect_instance->currentData;
-
-    effect_instance->currentData = (Field_SwingEffectRecord*)elem;
-    ids += 4;
-    script = ids + effect_instance->kindOrObjectCount;
-
-    if (effect_instance->kindOrObjectCount % 4) {
-        script = &script[4 - effect_instance->kindOrObjectCount % 4];
-    }
-
-    for (i = 0; i < effect_instance->kindOrObjectCount; ++i, ++elem, ++ids) {
-        elem->objectId = *ids;
-        elem->scriptCursor = script;
-        if (elem->objectId >= 0) {
-            int* entry = (int *)(Field_FindRoomGeometryGroup(elem->objectId));
-            elem->sceneEntry = entry;
-            if (entry != NULL) {
-                setVector(&elem->position, entry[1] * 16, entry[2] * 16, entry[3] * 16);
-                setVector(&elem->rotation, entry[4], entry[5], entry[6]);
-            }
-        } else {
-            elem->sceneEntry = NULL;
-        }
-        elem->position.pad = 0;
-        elem->rotation.pad = 0;
-        if (elem->sceneEntry == NULL) {
-            elem->objectId = -1;
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_80092914 (src/BATTLE/BATTLE.PRG/2842C.c:988)
-void Field_FinishRoomEffectSetup(void) { }
-
-// decomp: BATTLE.PRG func_8009291C (src/BATTLE/BATTLE.PRG/2842C.c:990)
-int Field_StartRoomEffect(int effect_index)
-{
-    if (effect_index < Field_textureEffectCount) {
-        Field_roomEffectInstances[effect_index].isActive = 1;
-        return 1;
-    }
-    if (effect_index < 0x40) {
-        return 0;
-    }
-    if (effect_index < Field_roomEffectScriptCount + 0x40) {
-        if ((Field_roomEffectInstances[effect_index].isActive != 0)
-            || (Field_roomEffectInstances[effect_index].currentData != Field_roomEffectInstances[effect_index].originalData)) {
-            VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[effect_index].currentData);
-        }
-        Field_roomEffectInstances[effect_index].isActive = 1;
-        Field_roomEffectInstances[effect_index].currentData = Field_roomEffectInstances[effect_index].originalData;
-        Field_CreateRoomEffectObjects(&Field_roomEffectInstances[effect_index]);
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80092A18 (src/BATTLE/BATTLE.PRG/2842C.c:1012)
-int Field_ReleaseRoomEffects(void)
-{
-    int i;
-
-    if (Field_roomEffectScriptCount == 0) {
-        return 0;
-    }
-
-    for (i = 0; i < Field_roomEffectScriptCount; ++i) {
-        if ((Field_roomEffectInstances[i + 64].isActive != 0)
-            || (Field_roomEffectInstances[i + 64].currentData != Field_roomEffectInstances[i + 64].originalData)) {
-            Field_roomEffectInstances[i + 64].isActive = 0;
-            VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[i + 64].currentData);
-        }
-    }
-
-    if (Field_roomEffectSoundId != -1) {
-        if (Field_roomData.soundData != NULL) {
-            Audio_StopBankSfx(0x200, (int *)(Field_roomData.soundData), Field_roomEffectSoundId);
-            Field_roomEffectSoundId = -1;
-        }
-    }
-    Field_roomEffectScriptCount = 0;
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_80092B04 (src/BATTLE/BATTLE.PRG/2842C.c:1038)
-int Field_ExecuteRoomEffectCommands(Field_RoomEffectObjectView* effect_object_cursor, int object_count, Field_RoomEffectInstance* arg2)
-{
-    int i;
-    int idle = 0;
-
-    for (i = 0; i < object_count; ++i, ++effect_object_cursor) {
-        if (effect_object_cursor->scriptCursor != NULL) {
-            while (1) {
-                Field_RoomEffectCommandHeader* command_header = (Field_RoomEffectCommandHeader *)(effect_object_cursor->scriptCursor);
-
-                if ((command_header->size != 0) && (command_header->opcode < 0xD)) {
-                    if (Audio_Seq_unusedStateFlags.opaqueA8 != 0) {
-                        if (command_header->opcode == 0xB) {
-                            break;
-                        }
-                        while (Field_kRoomEffectOpcodeHandlers[command_header->opcode](effect_object_cursor, command_header) != 0) { }
-                    } else if (Field_kRoomEffectOpcodeHandlers[command_header->opcode](effect_object_cursor, command_header) != 0) {
-                        break;
-                    }
-                    effect_object_cursor->scriptCursor = (char*)effect_object_cursor->scriptCursor + command_header->size;
-                } else {
-                    effect_object_cursor->scriptCursor = NULL;
-                    break;
-                }
-            }
-        } else {
-            ++idle;
-        }
-    }
-    return idle != object_count;
-}
-
-// decomp: BATTLE.PRG func_80092C68 (src/BATTLE/BATTLE.PRG/2842C.c:1070)
-int Field_SetRoomEffectRadialVelocity(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
-{
-    int x = effect_object->position.vx / 16 - effect_command->operands[0].signedHalves[0];
-    int y;
-    int z;
-    int d;
-
-    effect_object->velocity.vx = effect_command->operands[1].unsignedHalves[1] - ABS(x);
-    y = effect_object->position.vy / 16 - effect_command->operands[0].signedHalves[1];
-    effect_object->velocity.vy = effect_command->operands[1].unsignedHalves[1] - ABS(y);
-    z = effect_object->position.vz / 16;
-    z -= effect_command->operands[1].signedHalves[0];
-    effect_object->velocity.vz = effect_command->operands[1].unsignedHalves[1] - ABS(z);
-
-    d = effect_object->velocity.vx;
-
-    if (d > 0) {
-        z = effect_object->position.vx - (effect_command->operands[0].signedHalves[0] << 4);
-        if (z < 0) {
-            effect_object->velocity.vx = -d;
-        }
-    } else {
-        effect_object->velocity.vx = 0;
-    }
-
-    d = effect_object->velocity.vy;
-
-    if (d > 0) {
-        if (effect_object->position.vy - (effect_command->operands[0].signedHalves[1] << 4) < 0) {
-            effect_object->velocity.vy = -d;
-        }
-    } else {
-        effect_object->velocity.vy = 0;
-    }
-
-    d = effect_object->velocity.vz;
-
-    if (d > 0) {
-        if (effect_object->position.vz - (effect_command->operands[1].signedHalves[0] << 4) < 0) {
-            effect_object->velocity.vz = -d;
-        }
-    } else {
-        effect_object->velocity.vz = 0;
-    }
-
-    applyVector(&effect_object->velocity, 4, 4, 4, /=);
-    effect_object->velocity.pad = effect_command->operands[2].unsignedHalves[0] + 1;
-    setVector(
-        &effect_object->angularVelocity, (effect_object->velocity.vx & 0x1F) - 16, (effect_object->velocity.vy & 0x3F) - 32, 0);
-    effect_object->angularVelocity.pad = 0;
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80092E14 (src/BATTLE/BATTLE.PRG/2842C.c:1123)
-int Field_SetRoomEffectVelocity(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
-{
-    setVector(
-        &effect_object->velocity, effect_command->operands[0].unsignedHalves[0], effect_command->operands[0].unsignedHalves[1], effect_command->operands[1].unsignedHalves[0]);
-    effect_object->velocity.pad = effect_command->operands[1].unsignedHalves[1];
-    setVector(
-        &effect_object->angularVelocity, effect_command->operands[2].unsignedHalves[0], effect_command->operands[2].unsignedHalves[1], effect_command->operands[3].unsignedHalves[0]);
-    effect_object->angularVelocity.pad = effect_command->operands[3].unsignedHalves[1];
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80092E7C (src/BATTLE/BATTLE.PRG/2842C.c:1134)
-int Field_SetRoomEffectTransform(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
-{
-    setVector(&effect_object->position, effect_command->operands[0].word, effect_command->operands[1].word, effect_command->operands[2].word);
-    setVector(&effect_object->rotation, effect_command->operands[3].word, effect_command->extraOperandOne, effect_command->extraOperandTwo);
-    Field_WriteRoomEffectTransform(effect_object);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80092EDC (src/BATTLE/BATTLE.PRG/2842C.c:1142)
-void Field_WriteRoomEffectTransform(Field_RoomEffectObject* effect_object)
-{
-    if (effect_object->objectId >= 0) {
-        int* geometry_group_words = effect_object->sceneEntry;
-        geometry_group_words[1] = effect_object->position.vx / 16;
-        geometry_group_words[2] = effect_object->position.vy / 16;
-        geometry_group_words[3] = effect_object->position.vz / 16;
-
-        geometry_group_words[4] = effect_object->rotation.vx;
-        geometry_group_words[5] = effect_object->rotation.vy;
-        geometry_group_words[6] = effect_object->rotation.vz;
-    }
-}
-
-// decomp: BATTLE.PRG func_80092F74 (src/BATTLE/BATTLE.PRG/2842C.c:1162)
-int Field_HideRoomEffectObject(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* arg1 __attribute__((unused)))
-{
-    if (effect_object->objectId >= 0) {
-        *effect_object->sceneEntry = 0x100;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80092F98 (src/BATTLE/BATTLE.PRG/2842C.c:1170)
-int Field_ExecuteRoomEffectShowGroup(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
-{
-    Field_ShowRoomGeometryGroup(effect_command->operands[0].word);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80092FBC (src/BATTLE/BATTLE.PRG/2842C.c:1176)
-int Field_AdvanceRoomEffectMotion(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
-{
-    int motion_still_active = 0;
-    Field_RoomEffectCommand* motion_command = effect_command;
-
-    if (motion_command->operands[0].unsignedHalves[1] == 1) {
-        motion_still_active = Field_StepRoomEffectGravity(effect_object);
-    } else if (motion_command->operands[0].unsignedHalves[1] == 2) {
-        motion_still_active = Field_StepRoomEffectDampedMotion(effect_object);
-    }
-
-    if (motion_command->operands[0].unsignedHalves[0] == 0x8000) {
-        if (motion_still_active == 0) {
-            return 0;
-        }
-    } else {
-        ++effect_object->position.pad;
-        if (effect_object->position.pad >= motion_command->operands[0].unsignedHalves[0]) {
-            effect_object->position.pad = 0;
-            return 0;
-        }
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_8009306C (src/BATTLE/BATTLE.PRG/2842C.c:1201)
-int Field_StepRoomEffectGravity(Field_RoomEffectObject* effect_object)
-{
-    int height;
-
-    addVector(&effect_object->position, &effect_object->velocity);
-    addVector(&effect_object->rotation, &effect_object->angularVelocity);
-    applyVector(&effect_object->rotation, 0xFFF, 0xFFF, 0xFFF, &=);
-
-    height = Field_FloorHeightAt(effect_object->position.vx / 16, effect_object->position.vz / 16) << 17;
-    height >>= 17;
-
-    if (height < effect_object->position.vy / 16) {
-        ++effect_object->rotation.pad;
-
-        if ((effect_object->rotation.pad < 3) && (effect_object->velocity.pad > 0)) {
-            int velocity;
-
-            effect_object->position.vy = height * 16;
-            velocity = effect_object->velocity.vy / -(ABS(effect_object->velocity.pad) + 2);
-            effect_object->velocity.vx /= 2;
-            effect_object->velocity.vz /= 2;
-            applyVector(&effect_object->angularVelocity, 2, 2, 2, /=);
-            effect_object->velocity.vy = velocity;
-        } else {
-            effect_object->rotation.pad = 0;
-            return 0;
-        }
-    }
-
-    if (effect_object->velocity.pad != 0) {
-        effect_object->velocity.vx -= (effect_object->velocity.vx * effect_object->velocity.pad) / 16;
-        effect_object->velocity.vz -= (effect_object->velocity.vz * effect_object->velocity.pad) / 16;
-    }
-
-    effect_object->velocity.vy += 16;
-
-    if (effect_object->angularVelocity.pad != 0) {
-        applyVector(&effect_object->angularVelocity, (effect_object->angularVelocity.vx * effect_object->angularVelocity.pad) / 16,
-            (effect_object->angularVelocity.vy * effect_object->angularVelocity.pad) / 16,
-            (effect_object->angularVelocity.vz * effect_object->angularVelocity.pad) / 16, -=);
-    }
-
-    Field_WriteRoomEffectTransform(effect_object);
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_80093364 (src/BATTLE/BATTLE.PRG/2842C.c:1247)
-int Field_StepRoomEffectDampedMotion(Field_RoomEffectObject* effect_object)
-{
-    addVector(&effect_object->position, &effect_object->velocity);
-    addVector(&effect_object->rotation, &effect_object->angularVelocity);
-    applyVector(&effect_object->rotation, 0xFFF, 0xFFF, 0xFFF, &=);
-
-    if (effect_object->velocity.pad != 0) {
-        applyVector(&effect_object->velocity, (effect_object->velocity.vx * effect_object->velocity.pad) / 16,
-            (effect_object->velocity.vy * effect_object->velocity.pad) / 16,
-            (effect_object->velocity.vz * effect_object->velocity.pad) / 16, -=);
-    }
-
-    if (effect_object->angularVelocity.pad != 0) {
-        applyVector(&effect_object->angularVelocity, (effect_object->angularVelocity.vx * effect_object->angularVelocity.pad) / 16,
-            (effect_object->angularVelocity.vy * effect_object->angularVelocity.pad) / 16,
-            (effect_object->angularVelocity.vz * effect_object->angularVelocity.pad) / 16, -=);
-    }
-
-    Field_WriteRoomEffectTransform(effect_object);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_8009352C (src/BATTLE/BATTLE.PRG/2842C.c:1269)
-int Field_ExecuteRoomEffectPlaySound(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
-{
-    if (Field_roomData.soundData != NULL) {
-        if ((effect_command->operands[0].unsignedHalves[0] == 0) || (Field_isRoomEffectSoundRestored != 0)) {
-            Audio_PlayBankSfxCentered(0x200, (int *)(Field_roomData.soundData), effect_command->operands[0].unsignedHalves[1]);
-        } else {
-            Audio_PlayBankSfx(
-                0x200, Field_roomData.soundData, effect_command->operands[0].unsignedHalves[1], 0x80, 0);
-        }
-        Field_roomEffectSoundId = effect_command->operands[0].unsignedHalves[1];
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800935B8 (src/BATTLE/BATTLE.PRG/2842C.c:1283)
-int Field_ExecuteRoomEffectStopSound(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
-{
-    if (Field_roomData.soundData != NULL) {
-        Audio_StopBankSfx(0x200, (int *)(Field_roomData.soundData), effect_command->operands[0].unsignedHalves[1]);
-        Field_roomEffectSoundId = -1;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800935F8 (src/BATTLE/BATTLE.PRG/2842C.c:1292)
-int Field_ExecuteRoomEffectStartEffect(Field_RoomEffectObject* arg0 __attribute__((unused)), Field_RoomEffectCommand* effect_command)
-{
-    Field_StartRoomEffect(effect_command->operands[0].word);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_8009361C (src/BATTLE/BATTLE.PRG/2842C.c:1298)
-int Field_ExecuteRoomEffectHideGroup(Field_RoomEffectObject* unk0 __attribute__((unused)), Field_RoomEffectCommand* effect_command)
-{
-    Field_HideRoomGeometryGroup(effect_command->operands[0].word);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80093640 (src/BATTLE/BATTLE.PRG/2842C.c:1304)
-int Field_ExecuteRoomEffectStopScript(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
-{
-    if (Field_roomEffectInstances[effect_command->operands[0].word + 0x40].isActive != 0) {
-        VS::Core::Memory::FreeLiveFromLowEnd(Field_roomEffectInstances[effect_command->operands[0].word + 0x40].currentData);
-        Field_roomEffectInstances[effect_command->operands[0].word + 0x40].currentData =
-            Field_roomEffectInstances[effect_command->operands[0].word + 0x40].originalData;
-        Field_roomEffectInstances[effect_command->operands[0].word + 0x40].isActive = 0;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800936F8 (src/BATTLE/BATTLE.PRG/2842C.c:1321)
-int Field_ToggleRoomEffectUpdates(int effect_index)
-{
-    if (effect_index < Field_textureEffectCount) {
-        Field_roomEffectInstances[effect_index].isUpdateEnabled = Field_roomEffectInstances[effect_index].isUpdateEnabled < 1U;
-        return 1;
-    }
-    if ((effect_index >= 0x40) && (effect_index < (Field_roomEffectScriptCount + 0x40))) {
-        Field_roomEffectInstances[effect_index].isUpdateEnabled = Field_roomEffectInstances[effect_index].isUpdateEnabled < 1U;
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80093764 (src/BATTLE/BATTLE.PRG/2842C.c:1334)
-int Field_IsRoomEffectActive(int effect_index) { return Field_roomEffectInstances[effect_index].isActive; }
-
-// decomp: BATTLE.PRG func_80093788 (src/BATTLE/BATTLE.PRG/2842C.c:1336)
-void Field_FinishRoomDoorRotation(int effect_index)
-{
-    Field_SwingEffectRecord* swing_effect;
-    int previous_start_angle;
-    int reversed_initial_velocity;
-    int* geometry_group_words;
-
-    if (effect_index < 0x40) {
-        void* room_geometry_base;
-        if (Field_roomEffectInstances[effect_index].kindOrObjectCount == 6) {
-            swing_effect = Field_roomEffectInstances[effect_index].currentData;
-            room_geometry_base = (void*)Field_roomData.geometry;
-            if (Field_roomEffectInstances[effect_index].isActive != 0) {
-                geometry_group_words = (int *)(((u_char*)(room_geometry_base)) + swing_effect->geometryOffset);
-                geometry_group_words[5] = swing_effect->restAngle;
-                geometry_group_words[0] = (geometry_group_words[0] | 0x6000);
-                reversed_initial_velocity = -swing_effect->initialVelocity;
-                previous_start_angle = swing_effect->startAngle;
-                swing_effect->initialVelocity = reversed_initial_velocity;
-                swing_effect->angularVelocity = reversed_initial_velocity;
-                swing_effect->startAngle = swing_effect->restAngle;
-                swing_effect->restAngle = previous_start_angle;
-                swing_effect->acceleration = -swing_effect->acceleration;
-                Field_roomEffectInstances[effect_index].isActive = 0;
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_80093824 (src/BATTLE/BATTLE.PRG/2842C.c:1365)
-void Field_FinishRoomTiltRotation(int effect_index)
-{
-    int previous_start_angle;
-    Field_SwingEffectRecord* swing_effect;
-    int reversed_initial_velocity;
-    int* geometry_group_words;
-
-    swing_effect = (Field_SwingEffectRecord*)Field_roomEffectInstances[effect_index].currentData;
-    geometry_group_words = (int *)(((u_char*)((void*)Field_roomData.geometry)) + swing_effect->geometryOffset);
-
-    if (swing_effect->axis == 2) {
-        geometry_group_words[4] = swing_effect->restAngle;
-    } else {
-        geometry_group_words[6] = swing_effect->restAngle;
-    }
-    reversed_initial_velocity = -swing_effect->initialVelocity;
-    previous_start_angle = swing_effect->startAngle;
-    swing_effect->initialVelocity = reversed_initial_velocity;
-    swing_effect->angularVelocity = reversed_initial_velocity;
-    swing_effect->startAngle = swing_effect->restAngle;
-    swing_effect->restAngle = previous_start_angle;
-    swing_effect->acceleration = -swing_effect->acceleration;
-}
-
-// decomp: BATTLE.PRG func_800938AC (src/BATTLE/BATTLE.PRG/2842C.c:1389)
-void Field_DuckRoomEffectSound(int duck_enabled)
-{
-    if ((Field_roomEffectSoundId != -1) && (Field_roomData.soundData != NULL)) {
-        if (duck_enabled != 0) {
-            Audio_FadeBankSfxVolume(0x200, (int *)(Field_roomData.soundData), Field_roomEffectSoundId, 0x20, 8);
-        } else {
-            Audio_FadeBankSfxVolume(0x200, (int *)(Field_roomData.soundData), Field_roomEffectSoundId, 0x7F, 8);
-        }
-    }
+bool DisableRoomGeometryGroup(std::span<std::byte> geometry, int group_index) {
+  return UpdateGroupFlags(geometry, group_index, 0,
+                          room_effects::kGroupDisabledFlag);
 }
 
 // decomp: BATTLE.PRG func_80093914 (src/BATTLE/BATTLE.PRG/2842C.c:1400)
-void Field_SwapRoomGeometryRedGreen(int geometry_group_id)
-{
-    int* base = Field_roomData.geometry;
-    int* entry = (int *)(Field_FindRoomGeometryGroup(geometry_group_id));
-    int* block;
-    int n0;
-    int n1;
-    Field_MpdTriangleColorView* t;
-    Field_MpdQuadColorView* q;
-    int i;
-    u_char tmp;
+void SwapRoomGeometryRedGreen(std::span<std::byte> geometry, int group_index) {
+  const auto group = FindRoomGeometryGroup(geometry, group_index);
+  if (!group) {
+    return;
+  }
+  const auto block = static_cast<std::int32_t>(
+      GroupWord(geometry, *group, room_effects::kGroupPolygonBlockWord));
+  if (block < 0 || !Fits(geometry.size(), static_cast<std::size_t>(block),
+                         room_effects::kPolygonBlockCountsBytes)) {
+    VS_LOG_WARN(kChannel,
+                "Red-green swap of group {} refused: its polygon block at {} "
+                "leaves the {} byte geometry",
+                group_index, block, geometry.size());
+    return;
+  }
+  const auto block_offset = static_cast<std::size_t>(block);
+  const auto triangles = static_cast<std::uint64_t>(
+      std::max(Load<std::int32_t>(geometry, block_offset), 0));
+  const auto quads = static_cast<std::uint64_t>(std::max(
+      Load<std::int32_t>(geometry, block_offset + sizeof(std::int32_t)), 0));
+  const std::size_t first =
+      block_offset + room_effects::kPolygonBlockCountsBytes;
+  const std::uint64_t triangle_bytes =
+      triangles * Render::kRoomTriangleRecordBytes;
+  const std::uint64_t extent =
+      triangle_bytes + (quads * Render::kRoomQuadRecordBytes);
+  if (extent > geometry.size() - first) {
+    VS_LOG_WARN(kChannel,
+                "Red-green swap of group {} refused: {} triangles and {} quads "
+                "at {} leave the {} byte geometry",
+                group_index, triangles, quads, first, geometry.size());
+    return;
+  }
+  const auto polygons = geometry.subspan(first);
+  for (std::size_t index = 0; index < triangles; ++index) {
+    SwapColorPairs(polygons.subspan(index * Render::kRoomTriangleRecordBytes),
+                   room_effects::kTriangleCorners);
+  }
+  const auto quad_polygons =
+      polygons.subspan(static_cast<std::size_t>(triangle_bytes));
+  for (std::size_t index = 0; index < quads; ++index) {
+    SwapColorPairs(quad_polygons.subspan(index * Render::kRoomQuadRecordBytes),
+                   kRoomEffectUvCorners);
+  }
+}
 
-    if (entry == NULL) {
-        return;
+namespace {
+// The polygon a texture effect rewrites.
+struct PolygonUv {
+  std::size_t offset = 0;
+  bool triangle = false;
+};
+
+// The polygon at a texture effect's geometry offset, refused when its UV
+// bytes leave the geometry.
+std::optional<PolygonUv> CheckedPolygon(std::span<const std::byte> geometry,
+                                        std::int32_t geometry_offset,
+                                        std::string_view effect) {
+  const auto offset = static_cast<std::size_t>(geometry_offset);
+  if (geometry_offset < 0 ||
+      !Fits(geometry.size(), offset, room_effects::kPolygonTypeOffset + 1)) {
+    VS_LOG_WARN(kChannel,
+                "{} effect stopped: its polygon at {} leaves the {} byte "
+                "geometry",
+                effect, geometry_offset, geometry.size());
+    return std::nullopt;
+  }
+  const auto type =
+      Load<std::uint8_t>(geometry, offset + room_effects::kPolygonTypeOffset);
+  const bool triangle = (type & room_effects::kPolygonShapeMask) ==
+                        room_effects::kPolygonTriangleShape;
+  const std::size_t extent =
+      triangle ? room_effects::kTriangleUvExtent : room_effects::kQuadUvExtent;
+  if (!Fits(geometry.size(), offset, extent)) {
+    VS_LOG_WARN(kChannel,
+                "{} effect stopped: its polygon's UVs at {} leave the {} byte "
+                "geometry",
+                effect, geometry_offset, geometry.size());
+    return std::nullopt;
+  }
+  return PolygonUv{offset, triangle};
+}
+
+// Writes each corner's UV offset plus the cell origin; a triangle has three
+// corners, a quad four.
+template <class Effect>
+void WritePolygonUv(std::span<std::byte> geometry, const PolygonUv& polygon,
+                    const Effect& effect, std::uint32_t cell_u,
+                    std::uint32_t cell_v) {
+  const std::size_t corners =
+      polygon.triangle ? room_effects::kTriangleCorners : kRoomEffectUvCorners;
+  for (std::size_t corner = 0; corner < corners; ++corner) {
+    Store(geometry, polygon.offset + room_effects::kPolygonUOffsets.at(corner),
+          static_cast<std::uint8_t>(effect.u.at(corner) + cell_u));
+    Store(geometry, polygon.offset + room_effects::kPolygonVOffsets.at(corner),
+          static_cast<std::uint8_t>(effect.v.at(corner) + cell_v));
+  }
+}
+
+// Advances an effect's delay counter; true when the delay has passed and
+// the counter restarts.
+bool TickPassed(std::uint8_t& tick, std::uint8_t delay) {
+  tick = static_cast<std::uint8_t>(tick + 1);
+  if (tick <= delay) {
+    return false;
+  }
+  tick = 0;
+  return true;
+}
+
+// The frame's cell in a sheet of columns, as the R3000's divu leaves it.
+room_effects::UnsignedDivision DivideCell(std::uint8_t frame,
+                                          std::uint8_t columns,
+                                          std::string_view effect) {
+  if (columns == 0) {
+    VS_LOG_WARN(kChannel,
+                "{} effect has no columns; frame {} uses the hardware's "
+                "divide-by-zero result",
+                effect, frame);
+  }
+  return room_effects::DivideUnsigned(frame, columns);
+}
+
+// Wraps a scrolled coordinate inside [base, base + extent - window]: below
+// the base it jumps to the far edge, past the far edge back to the base.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the record's fields
+int WrapScroll(int position, int base, int extent, int window) {
+  if (position < base) {
+    position = base + extent - window;
+  }
+  if (base + extent < position + window) {
+    position = base;
+  }
+  return position;
+}
+
+// The VRAM sheet keeps its texture pages 320 columns right of and 256 rows
+// above the copy targets; each target also has a half-size copy.
+constexpr int kImageSheetColumnOffset = 320;
+constexpr int kImageSheetRowOffset = 256;
+constexpr int kHalfImageColumnSpan = 64;
+constexpr int kHalfImageColumnMask = 0x3C0;
+constexpr int kHalfImageRowSpan = 256;
+constexpr int kHalfImageRowMask = 0x100;
+
+int HalfImageX(int x) {
+  return ((x % kHalfImageColumnSpan) / 2) - kHalfImageColumnSpan +
+         (x & kHalfImageColumnMask);
+}
+
+int HalfImageY(int y) {
+  return ((y % kHalfImageRowSpan) / 2) + (y & kHalfImageRowMask);
+}
+
+std::int16_t Short(std::int64_t value) {
+  return static_cast<std::int16_t>(value);
+}
+
+// The next animation cell: frames run 1 to frame_count.
+RoomImageRect NextImageCell(TextureImageEffect& effect,
+                            const RoomImageRect& sheet) {
+  effect.frame = static_cast<std::uint8_t>(effect.frame + 1);
+  if (effect.frame > effect.frame_count) {
+    effect.frame = 1;
+  }
+  const auto cell = DivideCell(effect.frame, effect.columns, "Texture image");
+  const std::uint32_t x =
+      static_cast<std::uint32_t>(sheet.x) +
+      (static_cast<std::uint32_t>(sheet.w) * cell.remainder);
+  const std::uint32_t y = static_cast<std::uint32_t>(sheet.y) +
+                          (static_cast<std::uint32_t>(sheet.h) * cell.quotient);
+  return {static_cast<std::int16_t>(x), static_cast<std::int16_t>(y), sheet.w,
+          sheet.h};
+}
+
+// The next band of a scrolling sheet: the right half from the scroll row
+// down.
+RoomImageRect NextImageBand(TextureImageEffect& effect,
+                            const RoomImageRect& sheet) {
+  effect.frame =
+      static_cast<std::uint8_t>(static_cast<std::uint32_t>(effect.frame) +
+                                static_cast<std::uint32_t>(effect.scroll_step));
+  if (effect.frame >= sheet.h) {
+    effect.frame = 0;
+  }
+  return {Short(sheet.x + (sheet.w / 2)), Short(sheet.y + effect.frame),
+          Short(sheet.w / 2), Short(sheet.h - effect.frame)};
+}
+
+// A swing's geometry group, refused when its rotation words leave the
+// geometry.
+std::optional<std::size_t> CheckedSwingGroup(
+    std::span<const std::byte> geometry, std::int32_t geometry_offset,
+    std::string_view effect) {
+  const auto offset = static_cast<std::size_t>(geometry_offset);
+  if (geometry_offset < 0 ||
+      !Fits(geometry.size(), offset,
+            kSwingGroupWords * room_effects::kGroupWordBytes)) {
+    VS_LOG_WARN(kChannel,
+                "{} refused: its group at {} leaves the {} byte geometry",
+                effect, geometry_offset, geometry.size());
+    return std::nullopt;
+  }
+  return offset;
+}
+
+// Axis 1 turns the group about Y and marks its rotation for the renderer;
+// axis 2 turns it about X; any other about Z.
+constexpr std::uint8_t kSwingAxisY = 1;
+constexpr std::uint8_t kSwingAxisX = 2;
+
+void WriteSwingAngle(std::span<std::byte> geometry, std::size_t group,
+                     std::uint8_t axis, std::int32_t angle) {
+  const auto value = static_cast<std::uint32_t>(angle);
+  if (axis == kSwingAxisY) {
+    SetGroupWord(geometry, group, kRotationYWord, value);
+    SetGroupWord(
+        geometry, group, 0,
+        GroupWord(geometry, group, 0) | room_effects::kGroupSwingRotationFlags);
+  } else if (axis == kSwingAxisX) {
+    SetGroupWord(geometry, group, kRotationXWord, value);
+  } else {
+    SetGroupWord(geometry, group, kRotationZWord, value);
+  }
+}
+
+// The swing heads back the other way next time it starts.
+void ReverseSwing(SwingEffect& effect) {
+  const std::int32_t previous_start = effect.start_angle;
+  effect.initial_velocity = WrappingNegate(effect.initial_velocity);
+  effect.angular_velocity = effect.initial_velocity;
+  effect.start_angle = effect.rest_angle;
+  effect.rest_angle = previous_start;
+  effect.acceleration = WrappingNegate(effect.acceleration);
+}
+
+constexpr std::uint32_t kSwingAccelerationScale = 8;
+constexpr std::uint32_t kSwingShiftMask = 31;
+constexpr std::int32_t kSwingRestSpeed = 0x21;
+}  // namespace
+
+// decomp: BATTLE.PRG func_80091C6C (src/BATTLE/BATTLE.PRG/2842C.c:640)
+bool AdvanceRoomTextureFrames(TextureFrameEffect& effect,
+                              std::span<std::byte> geometry) {
+  const auto polygon =
+      CheckedPolygon(geometry, effect.geometry_offset, "Texture frame");
+  if (!polygon) {
+    return false;
+  }
+  if (!TickPassed(effect.tick, effect.delay)) {
+    return true;
+  }
+  effect.frame = static_cast<std::uint8_t>(effect.frame + 1);
+  if (effect.frame >= effect.frame_count) {
+    effect.frame = 0;
+  }
+  const auto cell = DivideCell(effect.frame, effect.columns, "Texture frame");
+  const std::uint32_t cell_u =
+      effect.base_u +
+      (static_cast<std::uint32_t>(effect.frame_width) * cell.remainder);
+  const std::uint32_t cell_v =
+      effect.base_v +
+      (static_cast<std::uint32_t>(effect.frame_height) * cell.quotient);
+  WritePolygonUv(geometry, *polygon, effect, cell_u, cell_v);
+  return true;
+}
+
+// decomp: BATTLE.PRG func_80091E10 (src/BATTLE/BATTLE.PRG/2842C.c:682)
+bool ScrollRoomTextureCoordinates(TextureScrollEffect& effect,
+                                  std::span<std::byte> geometry) {
+  const auto polygon =
+      CheckedPolygon(geometry, effect.geometry_offset, "Texture scroll");
+  if (!polygon) {
+    return false;
+  }
+  if (!TickPassed(effect.tick, effect.delay)) {
+    return true;
+  }
+  const int u = WrapScroll(effect.current_u + effect.step_u, effect.base_u,
+                           effect.width, effect.window_width);
+  const int v = WrapScroll(effect.current_v + effect.step_v, effect.base_v,
+                           effect.height, effect.window_height);
+  effect.current_u = static_cast<std::uint8_t>(u);
+  effect.current_v = static_cast<std::uint8_t>(v);
+  WritePolygonUv(geometry, *polygon, effect, static_cast<std::uint32_t>(u),
+                 static_cast<std::uint32_t>(v));
+  return true;
+}
+
+// decomp: BATTLE.PRG func_80091FE8 (src/BATTLE/BATTLE.PRG/2842C.c:738)
+bool AnimateRoomTextureImages(TextureImageEffect& effect,
+                              RoomEffectHost& host) {
+  if (!TickPassed(effect.tick, effect.delay)) {
+    return true;
+  }
+  const RoomImageRect sheet{Short(effect.rect.x - kImageSheetColumnOffset),
+                            Short(effect.rect.y + kImageSheetRowOffset),
+                            effect.rect.w, effect.rect.h};
+  RoomImageRect source = effect.scroll_step == 0 ? NextImageCell(effect, sheet)
+                                                 : NextImageBand(effect, sheet);
+  const int half_x = HalfImageX(sheet.x);
+  RoomImageRect half_source{Short(HalfImageX(source.x)),
+                            Short(HalfImageY(source.y)), Short(source.w / 2),
+                            Short(source.h / 2)};
+  host.MoveImage(source, sheet.x, sheet.y);
+  host.MoveImage(half_source, half_x, HalfImageY(sheet.y));
+  if (effect.scroll_step != 0 && effect.frame != 0) {
+    // The rows scrolled off the top wrap to the band's foot.
+    source.y = sheet.y;
+    source.h = effect.frame;
+    const int wrap_y = sheet.y + sheet.h - effect.frame;
+    half_source.y = Short(HalfImageY(source.y));
+    half_source.h = Short(source.h / 2);
+    host.MoveImage(source, sheet.x, wrap_y);
+    host.MoveImage(half_source, half_x, HalfImageY(wrap_y));
+  }
+  return true;
+}
+
+// decomp: BATTLE.PRG func_800923F8 (src/BATTLE/BATTLE.PRG/2842C.c:801)
+bool UpdateRoomRotationEffect(SwingEffect& effect,
+                              std::span<std::byte> geometry) {
+  const auto group =
+      CheckedSwingGroup(geometry, effect.geometry_offset, "Swing effect");
+  if (!group) {
+    return false;
+  }
+  if (effect.needs_reset != 0) {
+    effect.needs_reset = 0;
+    effect.angle = effect.start_angle;
+    effect.angular_velocity = effect.initial_velocity;
+  }
+  effect.angle = WrappingAdd(effect.angle, effect.angular_velocity);
+  effect.angular_velocity =
+      WrappingAdd(effect.angular_velocity,
+                  static_cast<std::int32_t>(
+                      static_cast<std::uint32_t>(effect.acceleration) *
+                      kSwingAccelerationScale));
+  std::uint32_t delta = (static_cast<std::uint32_t>(effect.angle) -
+                         static_cast<std::uint32_t>(effect.rest_angle)) &
+                        kAngleMask;
+  if (delta > kHalfTurn) {
+    delta = kFullTurn - delta;
+  }
+  bool at_rest = false;
+  if (static_cast<std::int32_t>(delta) < WrappingAbs(effect.angular_velocity)) {
+    const auto shift =
+        static_cast<std::uint32_t>(effect.damping_shift) & kSwingShiftMask;
+    effect.angular_velocity = WrappingNegate(effect.angular_velocity >> shift);
+    if (WrappingAbs(effect.angular_velocity) < kSwingRestSpeed) {
+      effect.angle = effect.rest_angle;
+      at_rest = true;
     }
-    block = (int*)((u_char*)base + entry[7]);
-    n0 = block[0];
-    n1 = block[1];
-    block += 2;
-    t = (Field_MpdTriangleColorView*)block;
-    for (i = 0; i < n0; ++i, ++t) {
-        tmp = t->red1;
-        t->red1 = t->green1;
-        t->green1 = tmp;
-        tmp = t->red2;
-        t->red2 = t->green2;
-        t->green2 = tmp;
-        tmp = t->red3;
-        t->red3 = t->green3;
-        t->green3 = tmp;
+  }
+  WriteSwingAngle(geometry, *group, effect.axis, effect.angle);
+  if (!at_rest) {
+    return true;
+  }
+  ReverseSwing(effect);
+  return false;
+}
+
+// decomp: BATTLE.PRG func_80092540 (src/BATTLE/BATTLE.PRG/2842C.c:855),
+// func_80092F6C (2842C.c:1156) and func_800936F0 (2842C.c:1315) share this
+// machine code.
+bool SkipRoomEffectCommand() { return false; }
+
+namespace {
+// The record codec for each texture effect kind.
+template <class Record>
+struct RecordCodec;
+
+template <>
+struct RecordCodec<TextureFrameEffect> {
+  static constexpr std::size_t kBytes = room_effects::kTextureFrameEffectBytes;
+  static constexpr auto kDecode = &room_effects::DecodeTextureFrameEffect;
+  static constexpr auto kEncode = &room_effects::EncodeTextureFrameEffect;
+};
+
+template <>
+struct RecordCodec<TextureImageEffect> {
+  static constexpr std::size_t kBytes = room_effects::kTextureImageEffectBytes;
+  static constexpr auto kDecode = &room_effects::DecodeTextureImageEffect;
+  static constexpr auto kEncode = &room_effects::EncodeTextureImageEffect;
+};
+
+template <>
+struct RecordCodec<TextureScrollEffect> {
+  static constexpr std::size_t kBytes = room_effects::kTextureScrollEffectBytes;
+  static constexpr auto kDecode = &room_effects::DecodeTextureScrollEffect;
+  static constexpr auto kEncode = &room_effects::EncodeTextureScrollEffect;
+};
+
+template <>
+struct RecordCodec<SwingEffect> {
+  static constexpr std::size_t kBytes = room_effects::kSwingEffectBytes;
+  static constexpr auto kDecode = &room_effects::DecodeSwingEffect;
+  static constexpr auto kEncode = &room_effects::EncodeSwingEffect;
+};
+
+// Decodes the texture effect record at offset, runs step on it and stores
+// it back; a record outside the section is refused and reported stopped.
+template <class Record, class Step>
+bool StepRecord(std::span<std::byte> records, std::size_t offset, Step step) {
+  using Codec = RecordCodec<Record>;
+  if (!Fits(records.size(), offset, Codec::kBytes)) {
+    VS_LOG_WARN(kChannel,
+                "Texture effect record at {} refused: it leaves the {} byte "
+                "section",
+                offset, records.size());
+    return false;
+  }
+  const auto bytes = records.subspan(offset).template first<Codec::kBytes>();
+  Record record = Codec::kDecode(bytes);
+  const bool running = step(record);
+  Codec::kEncode(record, bytes);
+  return running;
+}
+
+// D_800E85CC: runs one texture effect; false stops it.
+bool RunTextureEffect(const RoomEffectInstance& instance,
+                      RoomEffectHost& host) {
+  const auto records = host.TextureEffects();
+  const std::size_t offset = instance.data_offset;
+  switch (static_cast<RoomTextureEffectKind>(instance.kind_or_object_count)) {
+    case RoomTextureEffectKind::kFrames:
+      return StepRecord<TextureFrameEffect>(
+          records, offset, [&host](TextureFrameEffect& effect) {
+            return AdvanceRoomTextureFrames(effect, host.Geometry());
+          });
+    case RoomTextureEffectKind::kImages:
+      return StepRecord<TextureImageEffect>(
+          records, offset, [&host](TextureImageEffect& effect) {
+            return AnimateRoomTextureImages(effect, host);
+          });
+    case RoomTextureEffectKind::kScroll:
+      return StepRecord<TextureScrollEffect>(
+          records, offset, [&host](TextureScrollEffect& effect) {
+            return ScrollRoomTextureCoordinates(effect, host.Geometry());
+          });
+    case RoomTextureEffectKind::kSwing:
+      return StepRecord<SwingEffect>(
+          records, offset, [&host](SwingEffect& effect) {
+            return UpdateRoomRotationEffect(effect, host.Geometry());
+          });
+    default:
+      return SkipRoomEffectCommand();
+  }
+}
+
+constexpr auto kScriptSlots = kRoomEffectSlotCount - kRoomEffectScriptSlotBase;
+
+// The slot counts, held to the slots that exist.
+std::size_t TextureSlotCount(const RoomEffectState& state) {
+  return std::min(state.texture_effect_count, kRoomEffectScriptSlotBase);
+}
+
+std::size_t ScriptSlotCount(const RoomEffectState& state) {
+  return std::min(state.script_count, kScriptSlots);
+}
+
+std::size_t ReportedSlotCount(std::size_t count, std::size_t limit,
+                              std::string_view what) {
+  if (count > limit) {
+    VS_LOG_WARN(kChannel, "{} count {} held to the {} slots", what, count,
+                limit);
+    return limit;
+  }
+  return count;
+}
+
+// Frees a script's objects (FreeLiveFromLowEnd in the original).
+void ReleaseObjects(RoomEffectInstance& instance, RoomEffectHost& host) {
+  if (instance.storage != RoomEffectStorageId::kNone) {
+    host.ReleaseObjectStorage(instance.storage);
+    instance.storage = RoomEffectStorageId::kNone;
+  }
+  instance.objects.clear();
+  ++instance.generation;
+}
+
+// Walks the texture effect section into the first slots; returns the count.
+std::size_t SetUpTextureEffects(RoomEffectState& state,
+                                std::span<std::byte> effects) {
+  std::size_t consumed = 0;
+  std::size_t count = 0;
+  while (consumed < effects.size()) {
+    if (!Fits(effects.size(), consumed, room_effects::kEffectKindOffset + 1)) {
+      VS_LOG_WARN(kChannel,
+                  "Texture effect at {} refused: its kind leaves the {} byte "
+                  "section",
+                  consumed, effects.size());
+      break;
     }
-    q = (Field_MpdQuadColorView*)t;
-    for (i = 0; i < n1; ++i, ++q) {
-        tmp = q->red1;
-        q->red1 = q->green1;
-        q->green1 = tmp;
-        tmp = q->red2;
-        q->red2 = q->green2;
-        q->green2 = tmp;
-        tmp = q->red3;
-        q->red3 = q->green3;
-        q->green3 = tmp;
-        tmp = q->red4;
-        q->red4 = q->green4;
-        q->green4 = tmp;
+    const auto kind =
+        Load<std::uint8_t>(effects, consumed + room_effects::kEffectKindOffset);
+    if (kind >= kRoomTextureEffectKindCount ||
+        room_effects::kTextureEffectStrides.at(kind) == 0) {
+      break;
     }
+    if (count >= kRoomEffectScriptSlotBase) {
+      VS_LOG_WARN(kChannel, "Texture effects past slot {} refused",
+                  kRoomEffectScriptSlotBase);
+      break;
+    }
+    if (!Fits(effects.size(), consumed,
+              room_effects::kTextureEffectRecordBytes.at(kind))) {
+      VS_LOG_WARN(kChannel,
+                  "Texture effect at {} refused: its kind {} record leaves "
+                  "the {} byte section",
+                  consumed, kind, effects.size());
+      break;
+    }
+    RoomEffectInstance& instance = state.instances.at(count);
+    instance.data_offset = consumed;
+    instance.active =
+        Load<std::uint8_t>(
+            effects, consumed + room_effects::kEffectStartsInactiveOffset) == 0
+            ? 1
+            : 0;
+    instance.update_enabled = 1;
+    instance.kind_or_object_count = kind;
+    Store<std::uint8_t>(effects,
+                        consumed + room_effects::kEffectNeedsResetOffset, 1);
+    consumed += room_effects::kTextureEffectStrides.at(kind);
+    ++count;
+  }
+  return count;
+}
+
+// The bytes one effect script takes: its preamble, its commands (a jump
+// counts as its header) and the zero-size terminator; none when it leaves
+// the section.
+std::optional<std::size_t> MeasureEffectScript(
+    std::span<const std::byte> scripts, std::size_t start) {
+  if (!Fits(scripts.size(), start, room_effects::kScriptHeaderBytes)) {
+    VS_LOG_WARN(kChannel,
+                "Effect script at {} refused: its header leaves the "
+                "{} byte section",
+                start, scripts.size());
+    return std::nullopt;
+  }
+  std::size_t offset = start + room_effects::ScriptPreambleBytes(
+                                   Load<std::uint8_t>(scripts, start));
+  while (true) {
+    if (!Fits(scripts.size(), offset, kRoomEffectCommandHeaderBytes)) {
+      VS_LOG_WARN(kChannel,
+                  "Effect script at {} refused: its command at {} leaves the "
+                  "{} byte section",
+                  start, offset, scripts.size());
+      return std::nullopt;
+    }
+    const auto opcode = static_cast<RoomEffectOpcode>(Load<std::int16_t>(
+        scripts, offset + room_effects::kCommandOpcodeOffset));
+    const int size = opcode == RoomEffectOpcode::kJump
+                         ? static_cast<int>(kRoomEffectCommandHeaderBytes)
+                         : Load<std::int16_t>(scripts, offset);
+    if (size == 0) {
+      break;
+    }
+    if (size < 0) {
+      VS_LOG_WARN(kChannel,
+                  "Effect script at {} refused: its command at {} has size {}",
+                  start, offset, size);
+      return std::nullopt;
+    }
+    offset += static_cast<std::size_t>(size);
+  }
+  return offset + kRoomEffectCommandHeaderBytes - start;
+}
+
+void SetUpEffectScript(RoomEffectInstance& instance, RoomEffectHost& host,
+                       std::span<const std::byte> scripts, std::size_t start) {
+  instance.active =
+      Load<std::uint8_t>(scripts, start + room_effects::kScriptActiveOffset);
+  instance.kind_or_object_count = Load<std::uint8_t>(scripts, start);
+  instance.update_enabled = 1;
+  instance.data_offset = start;
+  if (instance.storage != RoomEffectStorageId::kNone) {
+    // The original overwrites the pointer without freeing it.
+    VS_LOG_WARN(kChannel,
+                "Effect script at {} replaces objects that were never "
+                "released; leaving them to the heap",
+                start);
+    instance.storage = RoomEffectStorageId::kNone;
+  }
+  instance.objects.clear();
+  ++instance.generation;
+  if (instance.active != 0) {
+    CreateRoomEffectObjects(instance, host);
+  }
+}
+
+// One script object as func_800927AC fills it in from its group id.
+RoomEffectObject MakeEffectObject(std::span<const std::byte> geometry,
+                                  std::int8_t group_id, std::size_t cursor) {
+  RoomEffectObject object;
+  object.cursor = cursor;
+  const auto group =
+      group_id >= 0 ? FindRoomGeometryGroup(geometry, group_id) : std::nullopt;
+  if (!group) {
+    return object;
+  }
+  const auto scaled = [&](std::size_t word) {
+    return static_cast<std::int32_t>(GroupWord(geometry, *group, word) *
+                                     static_cast<std::uint32_t>(kSubunitScale));
+  };
+  const auto angle = [&](std::size_t word) {
+    return static_cast<std::int16_t>(GroupWord(geometry, *group, word));
+  };
+  // The id is the script's signed char widened; negative ids stop above.
+  // NOLINTNEXTLINE(bugprone-signed-char-misuse)
+  object.object_id = group_id;
+  object.group_offset = *group;
+  object.position = {scaled(room_effects::kGroupPositionWord),
+                     scaled(room_effects::kGroupPositionWord + 1),
+                     scaled(room_effects::kGroupPositionWord + 2)};
+  object.rotation = {angle(kRotationXWord), angle(kRotationYWord),
+                     angle(kRotationZWord)};
+  return object;
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_80091B04 (src/BATTLE/BATTLE.PRG/2842C.c:616)
+void UpdateRoomEffects(RoomEffectState& state, RoomEffectHost& host) {
+  const std::size_t texture_count = ReportedSlotCount(
+      state.texture_effect_count, kRoomEffectScriptSlotBase, "Texture effect");
+  for (std::size_t index = 0; index < texture_count; ++index) {
+    RoomEffectInstance& instance = state.instances.at(index);
+    if (instance.active != 0 &&
+        instance.kind_or_object_count < kRoomTextureEffectKindCount &&
+        instance.update_enabled != 0) {
+      instance.active = RunTextureEffect(instance, host) ? 1 : 0;
+    }
+  }
+  const std::size_t script_count =
+      ReportedSlotCount(state.script_count, kScriptSlots, "Effect script");
+  for (std::size_t index = 0; index < script_count; ++index) {
+    const std::size_t slot = kRoomEffectScriptSlotBase + index;
+    if (state.instances.at(slot).active == 0 ||
+        state.instances.at(slot).update_enabled == 0) {
+      continue;
+    }
+    const bool running = ExecuteRoomEffectCommands(state, host, slot);
+    RoomEffectInstance& instance = state.instances.at(slot);
+    instance.active = running ? 1 : 0;
+    if (!running) {
+      ReleaseObjects(instance, host);
+    }
+  }
+}
+
+// decomp: BATTLE.PRG func_80092548 (src/BATTLE/BATTLE.PRG/2842C.c:857)
+void InitializeRoomEffects(RoomEffectState& state, RoomEffectHost& host) {
+  state.sound_id = -1;
+  state.sound_restored = false;
+  state.texture_effect_count =
+      SetUpTextureEffects(state, host.TextureEffects());
+  state.script_count = 0;
+  const auto scripts = host.EffectScripts();
+  std::size_t consumed = 0;
+  while (consumed < scripts.size()) {
+    const std::size_t slot = kRoomEffectScriptSlotBase + state.script_count;
+    if (slot >= kRoomEffectSlotCount) {
+      VS_LOG_WARN(kChannel, "Effect scripts past slot {} refused",
+                  kRoomEffectSlotCount);
+      return;
+    }
+    const auto extent = MeasureEffectScript(scripts, consumed);
+    if (!extent) {
+      return;
+    }
+    SetUpEffectScript(state.instances.at(slot), host, scripts, consumed);
+    consumed += *extent;
+    ++state.script_count;
+  }
+}
+
+// decomp: BATTLE.PRG func_800927AC (src/BATTLE/BATTLE.PRG/2842C.c:951)
+void CreateRoomEffectObjects(RoomEffectInstance& instance,
+                             RoomEffectHost& host) {
+  instance.objects.clear();
+  ++instance.generation;
+  if (instance.storage != RoomEffectStorageId::kNone) {
+    VS_LOG_WARN(kChannel,
+                "Effect script at {} rebuilt its objects without releasing "
+                "them; releasing them now",
+                instance.data_offset);
+    host.ReleaseObjectStorage(instance.storage);
+    instance.storage = RoomEffectStorageId::kNone;
+  }
+  const auto scripts = host.EffectScripts();
+  const std::uint8_t count = instance.kind_or_object_count;
+  const std::size_t preamble = room_effects::ScriptPreambleBytes(count);
+  if (!Fits(scripts.size(), instance.data_offset, preamble)) {
+    VS_LOG_WARN(kChannel,
+                "Effect script at {} refused: its {} group ids leave the {} "
+                "byte section",
+                instance.data_offset, count, scripts.size());
+    return;
+  }
+  const auto storage =
+      host.ReserveObjectStorage(count * kRoomEffectObjectRecordBytes);
+  if (!storage) {
+    VS_LOG_WARN(kChannel, "Effect script at {}: the heap refused {} objects",
+                instance.data_offset, count);
+    return;
+  }
+  instance.storage = *storage;
+  const auto geometry = host.Geometry();
+  const std::size_t ids =
+      instance.data_offset + room_effects::kScriptHeaderBytes;
+  const std::size_t cursor = instance.data_offset + preamble;
+  instance.objects.reserve(count);
+  for (std::size_t index = 0; index < count; ++index) {
+    instance.objects.push_back(MakeEffectObject(
+        geometry, Load<std::int8_t>(scripts, ids + index), cursor));
+  }
+}
+
+// decomp: BATTLE.PRG func_80092914 (src/BATTLE/BATTLE.PRG/2842C.c:988)
+void FinishRoomEffectSetup() {}
+
+// decomp: BATTLE.PRG func_8009291C (src/BATTLE/BATTLE.PRG/2842C.c:990)
+bool StartRoomEffect(RoomEffectState& state, RoomEffectHost& host,
+                     int effect_index) {
+  if (effect_index < 0) {
+    VS_LOG_WARN(kChannel, "Room effect {} refused: it is negative",
+                effect_index);
+    return false;
+  }
+  const auto index = static_cast<std::size_t>(effect_index);
+  if (index < TextureSlotCount(state)) {
+    state.instances.at(index).active = 1;
+    return true;
+  }
+  if (index < kRoomEffectScriptSlotBase ||
+      index >= kRoomEffectScriptSlotBase + ScriptSlotCount(state)) {
+    return false;
+  }
+  RoomEffectInstance& instance = state.instances.at(index);
+  ReleaseObjects(instance, host);
+  instance.active = 1;
+  CreateRoomEffectObjects(instance, host);
+  return true;
+}
+
+// decomp: BATTLE.PRG func_80092A18 (src/BATTLE/BATTLE.PRG/2842C.c:1012)
+bool ReleaseRoomEffects(RoomEffectState& state, RoomEffectHost& host) {
+  if (state.script_count == 0) {
+    return false;
+  }
+  const std::size_t script_count = ScriptSlotCount(state);
+  for (std::size_t index = 0; index < script_count; ++index) {
+    RoomEffectInstance& instance =
+        state.instances.at(kRoomEffectScriptSlotBase + index);
+    if (instance.active != 0 ||
+        instance.storage != RoomEffectStorageId::kNone) {
+      instance.active = 0;
+      ReleaseObjects(instance, host);
+    }
+  }
+  if (state.sound_id != -1 && host.HasSoundBank()) {
+    host.StopSound(state.sound_id);
+    state.sound_id = -1;
+  }
+  state.script_count = 0;
+  return true;
+}
+
+namespace {
+// The most handler calls one object may make in one pass; past it the
+// script is taken to loop without waiting and is ended.
+constexpr std::size_t kHandlerCallLimit = std::size_t{1} << 20U;
+
+// One pass over a script slot's objects.
+struct ScriptRun {
+  RoomEffectState& state;
+  RoomEffectHost& host;
+  std::size_t slot = 0;
+  std::uint32_t generation = 0;
+  std::size_t handler_calls = 0;
+};
+
+RoomEffectObject& RunObject(ScriptRun& run, std::size_t object_index) {
+  return run.state.instances.at(run.slot).objects.at(object_index);
+}
+
+// D_800E85E8: the handler for each opcode.
+RoomEffectCommandResult Dispatch(ScriptRun& run, std::size_t object_index,
+                                 const RoomEffectCommand& command) {
+  RoomEffectState& state = run.state;
+  RoomEffectHost& host = run.host;
+  RoomEffectObject& object = RunObject(run, object_index);
+  switch (command.opcode) {
+    case RoomEffectOpcode::kRadialVelocity:
+      return SetRoomEffectRadialVelocity(object, command);
+    case RoomEffectOpcode::kVelocity:
+      return SetRoomEffectVelocity(object, command);
+    case RoomEffectOpcode::kHideObject:
+      return HideRoomEffectObject(object, host.Geometry());
+    case RoomEffectOpcode::kShowGroup:
+      return ExecuteRoomEffectShowGroup(command, host.Geometry());
+    case RoomEffectOpcode::kAdvanceMotion:
+      return AdvanceRoomEffectMotion(object, command, host);
+    case RoomEffectOpcode::kPlaySound:
+      return ExecuteRoomEffectPlaySound(command, state, host);
+    case RoomEffectOpcode::kStopSound:
+      return ExecuteRoomEffectStopSound(command, state, host);
+    case RoomEffectOpcode::kSetTransform:
+      return SetRoomEffectTransform(object, command, host.Geometry());
+    case RoomEffectOpcode::kStartEffect:
+      return ExecuteRoomEffectStartEffect(command, state, host);
+    case RoomEffectOpcode::kHideGroup:
+      return ExecuteRoomEffectHideGroup(command, host.Geometry());
+    case RoomEffectOpcode::kStopScript:
+      return ExecuteRoomEffectStopScript(command, state, host);
+    case RoomEffectOpcode::kSkip:
+    case RoomEffectOpcode::kJump:
+      break;
+  }
+  return SkipRoomEffectCommand() ? RoomEffectCommandResult::kWait
+                                 : RoomEffectCommandResult::kAdvance;
+}
+
+enum class CommandOutcome : std::uint8_t {
+  kAdvance,
+  // The object waits on the command until the next pass.
+  kYield,
+  // The object's script ended.
+  kEnded,
+  // A handler rebuilt or released this slot's objects.
+  kInstanceChanged,
+};
+
+// Runs one command's handler, repeating a waiting handler while the scripts
+// fast-forward.
+CommandOutcome RunCommand(ScriptRun& run, std::size_t object_index,
+                          const RoomEffectCommand& command, bool fast_forward) {
+  while (true) {
+    if (++run.handler_calls > kHandlerCallLimit) {
+      VS_LOG_WARN(kChannel,
+                  "Effect script slot {} object {} ended: {} handler calls "
+                  "without waiting",
+                  run.slot, object_index, kHandlerCallLimit);
+      RunObject(run, object_index).cursor.reset();
+      return CommandOutcome::kEnded;
+    }
+    const RoomEffectCommandResult result = Dispatch(run, object_index, command);
+    if (run.state.instances.at(run.slot).generation != run.generation) {
+      VS_LOG_WARN(kChannel,
+                  "Effect script slot {} rebuilt its own objects; ending the "
+                  "pass",
+                  run.slot);
+      return CommandOutcome::kInstanceChanged;
+    }
+    if (result == RoomEffectCommandResult::kAdvance) {
+      return CommandOutcome::kAdvance;
+    }
+    if (!fast_forward) {
+      return CommandOutcome::kYield;
+    }
+  }
+}
+
+// Steps one object's script until it waits or ends; false when a handler
+// rebuilt the slot's objects.
+bool RunObjectScript(ScriptRun& run, std::size_t object_index) {
+  run.handler_calls = 0;
+  while (true) {
+    const std::size_t cursor = *RunObject(run, object_index).cursor;
+    const auto decoded =
+        room_effects::DecodeCommand(run.host.EffectScripts(), cursor);
+    if (decoded.status != room_effects::CommandStatus::kDecoded) {
+      if (decoded.status != room_effects::CommandStatus::kEnd) {
+        VS_LOG_WARN(kChannel,
+                    "Effect script slot {} object {} ended: command at {} "
+                    "(size {}, opcode {}) refused",
+                    run.slot, object_index, cursor, decoded.command.size,
+                    static_cast<int>(decoded.command.opcode));
+      }
+      RunObject(run, object_index).cursor.reset();
+      return true;
+    }
+    const bool fast_forward = run.host.FastForwarding();
+    if (fast_forward && decoded.command.opcode == RoomEffectOpcode::kJump) {
+      return true;
+    }
+    switch (RunCommand(run, object_index, decoded.command, fast_forward)) {
+      case CommandOutcome::kAdvance:
+        break;
+      case CommandOutcome::kYield:
+      case CommandOutcome::kEnded:
+        return true;
+      case CommandOutcome::kInstanceChanged:
+        return false;
+    }
+    const std::int64_t next =
+        static_cast<std::int64_t>(cursor) + decoded.command.size;
+    if (next < 0) {
+      VS_LOG_WARN(kChannel,
+                  "Effect script slot {} object {} ended: the command at {} "
+                  "jumps before the section",
+                  run.slot, object_index, cursor);
+      RunObject(run, object_index).cursor.reset();
+      return true;
+    }
+    RunObject(run, object_index).cursor = static_cast<std::size_t>(next);
+  }
+}
+
+// The command operands' byte offsets (Field_RoomEffectCommand, 2842C.c:34).
+// One-operand commands read the word at 4; the sound and motion commands
+// read two halfwords there.
+constexpr std::size_t kWordOperand = 4;
+constexpr std::size_t kFirstHalfOperand = 4;
+constexpr std::size_t kSecondHalfOperand = 6;
+// func_80092C68: the centre, the speed and the damping.
+constexpr std::size_t kRadialCentreX = 4;
+constexpr std::size_t kRadialCentreY = 6;
+constexpr std::size_t kRadialCentreZ = 8;
+constexpr std::size_t kRadialSpeed = 0xA;
+constexpr std::size_t kRadialDamping = 0xC;
+// func_80092E14: the velocity, its damping, the spin and its damping.
+constexpr std::size_t kVelocityX = 4;
+constexpr std::size_t kVelocityY = 6;
+constexpr std::size_t kVelocityZ = 8;
+constexpr std::size_t kVelocityDamping = 0xA;
+constexpr std::size_t kSpinX = 0xC;
+constexpr std::size_t kSpinY = 0xE;
+constexpr std::size_t kSpinZ = 0x10;
+constexpr std::size_t kSpinDamping = 0x12;
+// func_80092E7C: the position words, then the rotation's low halfwords.
+constexpr std::size_t kTransformX = 4;
+constexpr std::size_t kTransformY = 8;
+constexpr std::size_t kTransformZ = 0xC;
+constexpr std::size_t kTransformRotationX = 0x10;
+constexpr std::size_t kTransformRotationY = 0x14;
+constexpr std::size_t kTransformRotationZ = 0x18;
+
+// One axis of a radial push: the speed less the distance from the centre,
+// pointing away from it, or nothing past the speed's reach.
+std::int16_t RadialAxisVelocity(std::int32_t position, std::int16_t centre,
+                                std::uint16_t speed) {
+  const std::int32_t distance = (position / kSubunitScale) - centre;
+  const auto velocity = static_cast<std::int16_t>(
+      static_cast<std::int32_t>(speed) - WrappingAbs(distance));
+  if (velocity <= 0) {
+    return 0;
+  }
+  const std::int32_t relative = WrappingAdd(
+      position, -(static_cast<std::int32_t>(centre) * kSubunitScale));
+  return relative < 0 ? static_cast<std::int16_t>(-velocity) : velocity;
+}
+
+constexpr std::int32_t kRadialVelocityDivisor = 4;
+constexpr std::int32_t kRadialSpinXMask = 0x1F;
+constexpr std::int32_t kRadialSpinXBias = 16;
+constexpr std::int32_t kRadialSpinYMask = 0x3F;
+constexpr std::int32_t kRadialSpinYBias = 32;
+}  // namespace
+
+// decomp: BATTLE.PRG func_80092B04 (src/BATTLE/BATTLE.PRG/2842C.c:1038)
+bool ExecuteRoomEffectCommands(RoomEffectState& state, RoomEffectHost& host,
+                               std::size_t instance_index) {
+  if (instance_index >= kRoomEffectSlotCount) {
+    VS_LOG_WARN(kChannel, "Effect script slot {} refused: there are {}",
+                instance_index, kRoomEffectSlotCount);
+    return false;
+  }
+  ScriptRun run{state, host, instance_index,
+                state.instances.at(instance_index).generation, 0};
+  const std::size_t object_count =
+      state.instances.at(instance_index).objects.size();
+  std::size_t idle = 0;
+  for (std::size_t index = 0; index < object_count; ++index) {
+    if (!RunObject(run, index).cursor) {
+      ++idle;
+      continue;
+    }
+    if (!RunObjectScript(run, index)) {
+      return state.instances.at(instance_index).active != 0;
+    }
+  }
+  return idle != object_count;
+}
+
+// decomp: BATTLE.PRG func_80092C68 (src/BATTLE/BATTLE.PRG/2842C.c:1070)
+RoomEffectCommandResult SetRoomEffectRadialVelocity(
+    RoomEffectObject& object, const RoomEffectCommand& command) {
+  const std::uint16_t speed = command.Half(kRadialSpeed);
+  object.velocity.x = RadialAxisVelocity(
+      object.position.x, command.SignedHalf(kRadialCentreX), speed);
+  object.velocity.y = RadialAxisVelocity(
+      object.position.y, command.SignedHalf(kRadialCentreY), speed);
+  object.velocity.z = RadialAxisVelocity(
+      object.position.z, command.SignedHalf(kRadialCentreZ), speed);
+  object.velocity.x =
+      static_cast<std::int16_t>(object.velocity.x / kRadialVelocityDivisor);
+  object.velocity.y =
+      static_cast<std::int16_t>(object.velocity.y / kRadialVelocityDivisor);
+  object.velocity.z =
+      static_cast<std::int16_t>(object.velocity.z / kRadialVelocityDivisor);
+  object.velocity_damping =
+      static_cast<std::int16_t>(command.Half(kRadialDamping) + 1);
+  object.angular_velocity = {
+      static_cast<std::int16_t>((object.velocity.x & kRadialSpinXMask) -
+                                kRadialSpinXBias),
+      static_cast<std::int16_t>((object.velocity.y & kRadialSpinYMask) -
+                                kRadialSpinYBias),
+      0};
+  object.angular_damping = 0;
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_80092E14 (src/BATTLE/BATTLE.PRG/2842C.c:1123)
+RoomEffectCommandResult SetRoomEffectVelocity(
+    RoomEffectObject& object, const RoomEffectCommand& command) {
+  object.velocity = {command.SignedHalf(kVelocityX),
+                     command.SignedHalf(kVelocityY),
+                     command.SignedHalf(kVelocityZ)};
+  object.velocity_damping = command.SignedHalf(kVelocityDamping);
+  object.angular_velocity = {command.SignedHalf(kSpinX),
+                             command.SignedHalf(kSpinY),
+                             command.SignedHalf(kSpinZ)};
+  object.angular_damping = command.SignedHalf(kSpinDamping);
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_80092E7C (src/BATTLE/BATTLE.PRG/2842C.c:1134)
+RoomEffectCommandResult SetRoomEffectTransform(RoomEffectObject& object,
+                                               const RoomEffectCommand& command,
+                                               std::span<std::byte> geometry) {
+  object.position = {command.Word(kTransformX), command.Word(kTransformY),
+                     command.Word(kTransformZ)};
+  object.rotation = {command.SignedHalf(kTransformRotationX),
+                     command.SignedHalf(kTransformRotationY),
+                     command.SignedHalf(kTransformRotationZ)};
+  WriteRoomEffectTransform(object, geometry);
+  return RoomEffectCommandResult::kAdvance;
+}
+
+namespace {
+// The group record an object moves, refused when it leaves the geometry.
+std::optional<std::size_t> ObjectGroup(const RoomEffectObject& object,
+                                       std::span<const std::byte> geometry) {
+  if (object.object_id < 0) {
+    return std::nullopt;
+  }
+  if (!Fits(geometry.size(), object.group_offset,
+            room_effects::kGroupRecordBytes)) {
+    VS_LOG_WARN(kChannel,
+                "Effect object {} refused: its group at {} leaves the {} byte "
+                "geometry",
+                object.object_id, object.group_offset, geometry.size());
+    return std::nullopt;
+  }
+  return object.group_offset;
+}
+
+constexpr std::uint16_t kGravityMotion = 1;
+constexpr std::uint16_t kDampedMotion = 2;
+constexpr std::uint16_t kUntilStill = 0x8000;
+constexpr std::uint32_t kFloorHeightShift = 17;
+constexpr std::int16_t kMaxBounces = 3;
+constexpr std::int32_t kBounceDampingBias = 2;
+constexpr std::int32_t kGravityStep = 16;
+constexpr std::int32_t kDampingScale = 16;
+
+std::int16_t Damp(std::int16_t value, std::int16_t damping) {
+  return static_cast<std::int16_t>(value - ((value * damping) / kDampingScale));
+}
+
+void DampVector(RoomEffectVector& vector, std::int16_t damping) {
+  if (damping == 0) {
+    return;
+  }
+  vector.x = Damp(vector.x, damping);
+  vector.y = Damp(vector.y, damping);
+  vector.z = Damp(vector.z, damping);
+}
+
+std::int16_t TurnAngle(std::int16_t angle, std::int16_t turn) {
+  return static_cast<std::int16_t>(static_cast<std::uint32_t>(angle + turn) &
+                                   kAngleMask);
+}
+
+// addVector on the position and the rotation, the rotation kept in a turn.
+void MoveObject(RoomEffectObject& object) {
+  object.position.x = WrappingAdd(object.position.x, object.velocity.x);
+  object.position.y = WrappingAdd(object.position.y, object.velocity.y);
+  object.position.z = WrappingAdd(object.position.z, object.velocity.z);
+  object.rotation.x = TurnAngle(object.rotation.x, object.angular_velocity.x);
+  object.rotation.y = TurnAngle(object.rotation.y, object.angular_velocity.y);
+  object.rotation.z = TurnAngle(object.rotation.z, object.angular_velocity.z);
+}
+
+// Lands the object on the floor and throws it back up, slower.
+void Bounce(RoomEffectObject& object, std::int32_t floor_height) {
+  object.position.y = floor_height * kSubunitScale;
+  const std::int32_t bounce_velocity =
+      object.velocity.y /
+      -(WrappingAbs(object.velocity_damping) + kBounceDampingBias);
+  object.velocity.x = static_cast<std::int16_t>(object.velocity.x / 2);
+  object.velocity.z = static_cast<std::int16_t>(object.velocity.z / 2);
+  object.angular_velocity.x =
+      static_cast<std::int16_t>(object.angular_velocity.x / 2);
+  object.angular_velocity.y =
+      static_cast<std::int16_t>(object.angular_velocity.y / 2);
+  object.angular_velocity.z =
+      static_cast<std::int16_t>(object.angular_velocity.z / 2);
+  object.velocity.y = static_cast<std::int16_t>(bounce_velocity);
+}
+
+bool HasSound(const RoomEffectState& state, RoomEffectHost& host) {
+  return state.sound_id != -1 && host.HasSoundBank();
+}
+
+constexpr std::int32_t kCentredPan = 0x80;
+constexpr std::int32_t kSilentVolume = 0;
+constexpr std::int32_t kFullVolume = 0x7F;
+constexpr std::int32_t kDuckedVolume = 0x20;
+constexpr std::int32_t kDuckFadeTicks = 8;
+constexpr auto kSwingKind = std::to_underlying(RoomTextureEffectKind::kSwing);
+}  // namespace
+
+// decomp: BATTLE.PRG func_80092EDC (src/BATTLE/BATTLE.PRG/2842C.c:1142)
+void WriteRoomEffectTransform(const RoomEffectObject& object,
+                              std::span<std::byte> geometry) {
+  const auto group = ObjectGroup(object, geometry);
+  if (!group) {
+    return;
+  }
+  const auto& position = object.position;
+  const auto& rotation = object.rotation;
+  const auto word = [&](std::size_t index, std::int32_t value) {
+    SetGroupWord(geometry, *group, index, static_cast<std::uint32_t>(value));
+  };
+  word(room_effects::kGroupPositionWord, position.x / kSubunitScale);
+  word(room_effects::kGroupPositionWord + 1, position.y / kSubunitScale);
+  word(room_effects::kGroupPositionWord + 2, position.z / kSubunitScale);
+  word(kRotationXWord, rotation.x);
+  word(kRotationYWord, rotation.y);
+  word(kRotationZWord, rotation.z);
+}
+
+// decomp: BATTLE.PRG func_80092F74 (src/BATTLE/BATTLE.PRG/2842C.c:1162)
+RoomEffectCommandResult HideRoomEffectObject(const RoomEffectObject& object,
+                                             std::span<std::byte> geometry) {
+  const auto group = ObjectGroup(object, geometry);
+  if (group) {
+    SetGroupWord(geometry, *group, 0, room_effects::kGroupHiddenFlag);
+  }
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_80092F98 (src/BATTLE/BATTLE.PRG/2842C.c:1170)
+RoomEffectCommandResult ExecuteRoomEffectShowGroup(
+    const RoomEffectCommand& command, std::span<std::byte> geometry) {
+  ShowRoomGeometryGroup(geometry, command.Word(kWordOperand));
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_80092FBC (src/BATTLE/BATTLE.PRG/2842C.c:1176)
+RoomEffectCommandResult AdvanceRoomEffectMotion(
+    RoomEffectObject& object, const RoomEffectCommand& command,
+    RoomEffectHost& host) {
+  const std::uint16_t duration = command.Half(kFirstHalfOperand);
+  const std::uint16_t motion = command.Half(kSecondHalfOperand);
+  bool moving = false;
+  if (motion == kGravityMotion) {
+    moving = StepRoomEffectGravity(object, host);
+  } else if (motion == kDampedMotion) {
+    moving = StepRoomEffectDampedMotion(object, host.Geometry());
+  }
+  if (duration == kUntilStill) {
+    return moving ? RoomEffectCommandResult::kWait
+                  : RoomEffectCommandResult::kAdvance;
+  }
+  object.elapsed = WrappingAdd(object.elapsed, 1);
+  if (object.elapsed >= duration) {
+    object.elapsed = 0;
+    return RoomEffectCommandResult::kAdvance;
+  }
+  return RoomEffectCommandResult::kWait;
+}
+
+// decomp: BATTLE.PRG func_8009306C (src/BATTLE/BATTLE.PRG/2842C.c:1201)
+bool StepRoomEffectGravity(RoomEffectObject& object, RoomEffectHost& host) {
+  MoveObject(object);
+  const std::uint16_t floor_code = host.FloorHeightCode(
+      object.position.x / kSubunitScale, object.position.z / kSubunitScale);
+  // The low 15 bits hold the signed height.
+  const std::int32_t floor_height =
+      static_cast<std::int32_t>(static_cast<std::uint32_t>(floor_code)
+                                << kFloorHeightShift) >>
+      kFloorHeightShift;
+  if (floor_height < object.position.y / kSubunitScale) {
+    object.bounces = static_cast<std::int16_t>(object.bounces + 1);
+    if (object.bounces >= kMaxBounces || object.velocity_damping <= 0) {
+      object.bounces = 0;
+      return false;
+    }
+    Bounce(object, floor_height);
+  }
+  if (object.velocity_damping != 0) {
+    object.velocity.x = Damp(object.velocity.x, object.velocity_damping);
+    object.velocity.z = Damp(object.velocity.z, object.velocity_damping);
+  }
+  object.velocity.y =
+      static_cast<std::int16_t>(object.velocity.y + kGravityStep);
+  DampVector(object.angular_velocity, object.angular_damping);
+  WriteRoomEffectTransform(object, host.Geometry());
+  return true;
+}
+
+// decomp: BATTLE.PRG func_80093364 (src/BATTLE/BATTLE.PRG/2842C.c:1247)
+bool StepRoomEffectDampedMotion(RoomEffectObject& object,
+                                std::span<std::byte> geometry) {
+  MoveObject(object);
+  DampVector(object.velocity, object.velocity_damping);
+  DampVector(object.angular_velocity, object.angular_damping);
+  WriteRoomEffectTransform(object, geometry);
+  return false;
+}
+
+// decomp: BATTLE.PRG func_8009352C (src/BATTLE/BATTLE.PRG/2842C.c:1269)
+RoomEffectCommandResult ExecuteRoomEffectPlaySound(
+    const RoomEffectCommand& command, RoomEffectState& state,
+    RoomEffectHost& host) {
+  if (!host.HasSoundBank()) {
+    return RoomEffectCommandResult::kAdvance;
+  }
+  const std::uint16_t sound = command.Half(kSecondHalfOperand);
+  if (command.Half(kFirstHalfOperand) == 0 || state.sound_restored) {
+    host.PlayCenteredSound(sound);
+  } else {
+    host.PlaySound(sound, kCentredPan, kSilentVolume);
+  }
+  state.sound_id = static_cast<std::int16_t>(sound);
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_800935B8 (src/BATTLE/BATTLE.PRG/2842C.c:1283)
+RoomEffectCommandResult ExecuteRoomEffectStopSound(
+    const RoomEffectCommand& command, RoomEffectState& state,
+    RoomEffectHost& host) {
+  if (host.HasSoundBank()) {
+    host.StopSound(command.Half(kSecondHalfOperand));
+    state.sound_id = -1;
+  }
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_800935F8 (src/BATTLE/BATTLE.PRG/2842C.c:1292)
+RoomEffectCommandResult ExecuteRoomEffectStartEffect(
+    const RoomEffectCommand& command, RoomEffectState& state,
+    RoomEffectHost& host) {
+  StartRoomEffect(state, host, command.Word(kWordOperand));
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_8009361C (src/BATTLE/BATTLE.PRG/2842C.c:1298)
+RoomEffectCommandResult ExecuteRoomEffectHideGroup(
+    const RoomEffectCommand& command, std::span<std::byte> geometry) {
+  HideRoomGeometryGroup(geometry, command.Word(kWordOperand));
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_80093640 (src/BATTLE/BATTLE.PRG/2842C.c:1304)
+RoomEffectCommandResult ExecuteRoomEffectStopScript(
+    const RoomEffectCommand& command, RoomEffectState& state,
+    RoomEffectHost& host) {
+  const std::int64_t slot =
+      static_cast<std::int64_t>(command.Word(kWordOperand)) +
+      static_cast<std::int64_t>(kRoomEffectScriptSlotBase);
+  if (slot < static_cast<std::int64_t>(kRoomEffectScriptSlotBase) ||
+      slot >= static_cast<std::int64_t>(kRoomEffectSlotCount)) {
+    VS_LOG_WARN(kChannel,
+                "Stopping effect script {} refused: it is not a script slot",
+                command.Word(kWordOperand));
+    return RoomEffectCommandResult::kAdvance;
+  }
+  RoomEffectInstance& instance =
+      state.instances.at(static_cast<std::size_t>(slot));
+  if (instance.active != 0) {
+    ReleaseObjects(instance, host);
+    instance.active = 0;
+  }
+  return RoomEffectCommandResult::kAdvance;
+}
+
+// decomp: BATTLE.PRG func_800936F8 (src/BATTLE/BATTLE.PRG/2842C.c:1321)
+bool ToggleRoomEffectUpdates(RoomEffectState& state, int effect_index) {
+  if (effect_index < 0) {
+    VS_LOG_WARN(kChannel, "Toggling room effect {} refused: it is negative",
+                effect_index);
+    return false;
+  }
+  const auto index = static_cast<std::size_t>(effect_index);
+  const bool texture = index < TextureSlotCount(state);
+  const bool script =
+      index >= kRoomEffectScriptSlotBase &&
+      index < kRoomEffectScriptSlotBase + ScriptSlotCount(state);
+  if (!texture && !script) {
+    return false;
+  }
+  RoomEffectInstance& instance = state.instances.at(index);
+  instance.update_enabled = instance.update_enabled == 0 ? 1 : 0;
+  return true;
+}
+
+// decomp: BATTLE.PRG func_80093764 (src/BATTLE/BATTLE.PRG/2842C.c:1334)
+std::uint8_t IsRoomEffectActive(const RoomEffectState& state,
+                                int effect_index) {
+  if (effect_index < 0 ||
+      static_cast<std::size_t>(effect_index) >= kRoomEffectSlotCount) {
+    VS_LOG_WARN(kChannel, "Room effect {} refused: there are {} slots",
+                effect_index, kRoomEffectSlotCount);
+    return 0;
+  }
+  return state.instances.at(static_cast<std::size_t>(effect_index)).active;
+}
+
+// decomp: BATTLE.PRG func_80093788 (src/BATTLE/BATTLE.PRG/2842C.c:1336)
+void FinishRoomDoorRotation(RoomEffectState& state, RoomEffectHost& host,
+                            int effect_index) {
+  if (effect_index < 0) {
+    VS_LOG_WARN(kChannel, "Door rotation {} refused: it is negative",
+                effect_index);
+    return;
+  }
+  const auto index = static_cast<std::size_t>(effect_index);
+  if (index >= kRoomEffectScriptSlotBase) {
+    return;
+  }
+  RoomEffectInstance& instance = state.instances.at(index);
+  if (instance.kind_or_object_count != kSwingKind || instance.active == 0) {
+    return;
+  }
+  if (index >= TextureSlotCount(state)) {
+    VS_LOG_WARN(kChannel,
+                "Door rotation {} refused: the room has {} texture effects",
+                effect_index, state.texture_effect_count);
+    return;
+  }
+  const bool finished = StepRecord<SwingEffect>(
+      host.TextureEffects(), instance.data_offset, [&host](SwingEffect& swing) {
+        const auto geometry = host.Geometry();
+        const auto group =
+            CheckedSwingGroup(geometry, swing.geometry_offset, "Door rotation");
+        if (group) {
+          WriteSwingAngle(geometry, *group, kSwingAxisY, swing.rest_angle);
+        }
+        ReverseSwing(swing);
+        return true;
+      });
+  if (finished) {
+    instance.active = 0;
+  }
+}
+
+// decomp: BATTLE.PRG func_80093824 (src/BATTLE/BATTLE.PRG/2842C.c:1365)
+void FinishRoomTiltRotation(const RoomEffectState& state, RoomEffectHost& host,
+                            int effect_index) {
+  if (effect_index < 0 ||
+      static_cast<std::size_t>(effect_index) >= TextureSlotCount(state)) {
+    VS_LOG_WARN(kChannel,
+                "Tilt rotation {} refused: the room has {} texture effects",
+                effect_index, state.texture_effect_count);
+    return;
+  }
+  const RoomEffectInstance& instance =
+      state.instances.at(static_cast<std::size_t>(effect_index));
+  if (instance.kind_or_object_count != kSwingKind) {
+    VS_LOG_WARN(kChannel, "Tilt rotation {} refused: it is a kind {} effect",
+                effect_index, instance.kind_or_object_count);
+    return;
+  }
+  StepRecord<SwingEffect>(
+      host.TextureEffects(), instance.data_offset, [&host](SwingEffect& swing) {
+        const auto geometry = host.Geometry();
+        const auto group =
+            CheckedSwingGroup(geometry, swing.geometry_offset, "Tilt rotation");
+        if (group) {
+          SetGroupWord(
+              geometry, *group,
+              swing.axis == kSwingAxisX ? kRotationXWord : kRotationZWord,
+              static_cast<std::uint32_t>(swing.rest_angle));
+        }
+        ReverseSwing(swing);
+        return true;
+      });
+}
+
+// decomp: BATTLE.PRG func_800938AC (src/BATTLE/BATTLE.PRG/2842C.c:1389)
+void DuckRoomEffectSound(const RoomEffectState& state, RoomEffectHost& host,
+                         bool ducked) {
+  if (HasSound(state, host)) {
+    host.FadeSound(state.sound_id, ducked ? kDuckedVolume : kFullVolume,
+                   kDuckFadeTicks);
+  }
 }
 
 // decomp: BATTLE.PRG func_80093A14 (src/BATTLE/BATTLE.PRG/2842C.c:1448)
-void Field_RestoreRoomEffectSoundVolume(void)
-{
-    Field_isRoomEffectSoundRestored = 1;
-    if ((Field_roomEffectSoundId != -1) && (Field_roomData.soundData != NULL)) {
-        Audio_FadeBankSfxVolume(0x200, (int *)(Field_roomData.soundData), Field_roomEffectSoundId, 0x7F, 0);
-    }
+void RestoreRoomEffectSoundVolume(RoomEffectState& state,
+                                  RoomEffectHost& host) {
+  state.sound_restored = true;
+  if (HasSound(state, host)) {
+    host.FadeSound(state.sound_id, kFullVolume, 0);
+  }
 }
 
 // decomp: BATTLE.PRG func_80093A70 (src/BATTLE/BATTLE.PRG/2842C.c:1456)
-void Field_RestartRoomEffectSound(void)
-{
-    if (Field_roomEffectSoundId != -1) {
-        if (Field_roomData.soundData != 0) {
-            Audio_PlayBankSfxCentered(0x200, (int *)(Field_roomData.soundData), Field_roomEffectSoundId);
-        }
-    }
+void RestartRoomEffectSound(const RoomEffectState& state,
+                            RoomEffectHost& host) {
+  if (HasSound(state, host)) {
+    host.PlayCenteredSound(state.sound_id);
+  }
 }
 
-}  // extern "C"
+// decomp: BATTLE.PRG func_80098B1C (src/BATTLE/BATTLE.PRG/2EA3C.s:1770): a
+// tail jump to the code 0x14 bytes into section E.
+bool CallRoomEntryPoint(RoomEffectHost& host) {
+  const auto section = host.EntryPointSection();
+  if (section.size() <= room_effects::kEntryPointHeaderBytes) {
+    VS_LOG_WARN(kChannel,
+                "Room entry point refused: section E has {} bytes and no code",
+                section.size());
+    return false;
+  }
+  return host.RunRoomEntryPoint(
+      section.subspan(room_effects::kEntryPointHeaderBytes));
+}
+}  // namespace VS::Field

@@ -10,12 +10,12 @@
 #include "Content/SystemResources.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 
 extern "C" {
 #include "Content/DiscLayout.h"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
 #include "SystemResources.h"
 }
 
@@ -68,7 +68,8 @@ class LiveSystemResourcesHost final : public SystemResourcesHost {
   }
   void InitializeGameInterface(std::span<const std::byte> data) override {
     // The menu only uploads the interface images from it.
-    Menu_Framework_InitGameInterface(const_cast<std::byte*>(data.data()));
+    VS::Menu::Framework::InitLiveGameInterface(
+        const_cast<std::byte*>(data.data()));
   }
 };
 }  // namespace

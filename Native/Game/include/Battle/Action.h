@@ -14,7 +14,7 @@ typedef struct Battle_ActionState Battle_ActionState;
 #define VS_BATTLE_ACTION_H_SET_TYPES_ONLY
 #endif
 #include "Battle/Hit.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #ifdef VS_BATTLE_ACTION_H_SET_TYPES_ONLY
 #undef VS_TYPES_ONLY
 #undef VS_BATTLE_ACTION_H_SET_TYPES_ONLY

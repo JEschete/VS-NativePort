@@ -17,11 +17,14 @@ struct Content_SequenceBuffer;
 // refuse, is counted and warned about on the "content" channel. A loader
 // read the disc queue refuses (#282) is read before the loader returns.
 namespace VS::Content {
+struct ActorAssetRequest;
 
 int FindLiveFreeActorAssetRequest();
 // Copies `request` into the first free queue slot; -1 when the queue is
 // full or `request` is null.
 int QueueLiveActorAssetRequest(const Content_ActorAssetRequest* request);
+// The typed request's entry for promoted callers; the same result.
+int QueueLiveActorAsset(const ActorAssetRequest& request);
 int UpdateLiveActorAssetQueue();
 // Adds the texture offsets to the UVs of `count` polygons in a game heap
 // block; polygons running past the block are refused.

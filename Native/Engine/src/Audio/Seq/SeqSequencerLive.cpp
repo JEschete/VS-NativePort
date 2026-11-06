@@ -18,6 +18,7 @@
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/XaMixLive.hpp"
 
@@ -500,8 +501,8 @@ class LivePlaybackHost final : public PlaybackHost {
     const LiveMusicGroup music = MusicGroupOf(group);
     if (music.config == nullptr || music.channels == nullptr) return;
     StorePlayback(state);
-    Audio_SoundEffects_InvalidateMusicChannelVolumes(music.config,
-                                                     music.channels);
+    SoundEffects::LiveInvalidateMusicChannelVolumes(music.config,
+                                                    music.channels);
     LoadPlayback(state);
   }
 

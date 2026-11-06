@@ -7,13 +7,15 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Log.hpp"
+#include "Field/CameraLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
+#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Render/Render.h"
@@ -35,7 +37,10 @@ struct CameraConstraintFixture {
     Field_roomData = {};
     Field_roomData.collisionMap = &header;
     Field_roomData.tileCells = cells.data();
+    Field_roomData.header.collisionMapLength = sizeof header;
+    Field_roomData.header.tileCellsLength = sizeof cells;
     Field_roomData.geometry = geometry.data();
+    Field_roomData.header.geometryLength = sizeof geometry;
     geometry[0] = 1;
     geometry[1] = 0x1000;
     Actors_actorRecords[0] = &actor;
@@ -61,7 +66,7 @@ TEST_CASE("Camera queries outside authored collision have no tile occlusion",
   Actors_TileTarget target{};
   target.tileX = 1;
   target.tileZ = coordinate;
-  Field_UpdateCameraTileConstraint(0, &target);
+  VS::Field::LiveUpdateCameraTileConstraint(0, &target);
   CHECK((fixture.geometry[1] & 0x1000) == 0);
   REQUIRE(fixture.warnings.size() == 1);
   CHECK(fixture.warnings[0].find("collision") != std::string::npos);
@@ -75,7 +80,7 @@ TEST_CASE("Valid camera cells without authored occlusion retain clearing",
   Actors_TileTarget target{};
   target.tileX = 1;
   target.tileZ = 1;
-  Field_UpdateCameraTileConstraint(0, &target);
+  VS::Field::LiveUpdateCameraTileConstraint(0, &target);
   CHECK((fixture.geometry[1] & 0x1000) == 0);
   CHECK(fixture.warnings.empty());
 }
@@ -101,7 +106,7 @@ TEST_CASE("Valid authored view triggers still hide the selected geometry group",
   Actors_TileTarget target{};
   target.tileX = 1;
   target.tileZ = 1;
-  Field_UpdateCameraTileConstraint(0, &target);
+  VS::Field::LiveUpdateCameraTileConstraint(0, &target);
   CHECK((fixture.geometry[1] & 0x1000) != 0);
   CHECK(fixture.warnings.empty());
   Render_frameScratch.camera.angles.vy = saved_yaw;

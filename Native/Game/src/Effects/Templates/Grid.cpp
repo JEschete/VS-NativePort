@@ -1,426 +1,451 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Plugins/Plg061.h"
-#include "Effects/Plugins/Plg073.h"
-#include "Effects/Plugins/Plg077.h"
-#include "Effects/Plugins/Plg082.h"
-#include "Effects/Plugins/Plg085.h"
-#include "Effects/Plugins/Plg086.h"
-#include "Effects/Plugins/Plg087.h"
-#include "Effects/Plugins/Plg128.h"
-#include "Effects/Plugins/Plg137.h"
-#include "Effects/Plugins/Plg138.h"
-#include "Effects/Plugins/Plg150.h"
-#include "Effects/Plugins/Plg156.h"
-#include "Effects/Plugins/Plg161.h"
-#include "Effects/Plugins/Plg165.h"
-#include "Effects/Plugins/Plg168.h"
-#include "Effects/Plugins/Plg170.h"
-#include "Effects/Plugins/Plg242.h"
-#include "Effects/Plugins/Plg291.h"
-#include "Effects/Plugins/Plg297.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/ClosedRing.h"
-#include "Effects/Templates/Grid.h"
-#include "Effects/Templates/Mesh10.h"
-#include "Effects/Templates/MirrorSurface.h"
-#include "Effects/Templates/ParticleControl.h"
-#include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/ParticleLineRender.h"
-#include "Effects/Templates/ParticleOrigin.h"
-#include "Effects/Templates/ParticleRender.h"
-#include "Effects/Templates/ParticleTarget.h"
-#include "Effects/Templates/Ring.h"
-#include "Effects/Templates/RotatingSurface.h"
-#include "Effects/Templates/Surface.h"
-#include "Effects/Templates/TemplateState.h"
-#include "Effects/Templates/TiledRing.h"
-#include "Effects/Templates/TrailControl.h"
-#include "Effects/Templates/TrailDispatch.h"
-#include "Effects/Templates/TrailInit.h"
-#include "Effects/Templates/TrailNineControl.h"
-#include "Effects/Templates/TrailNineDispatch.h"
-#include "Effects/Templates/TrailNineInit.h"
-#include "Effects/Templates/TrailNineOrigin.h"
-#include "Effects/Templates/TrailNineRender.h"
-#include "Effects/Templates/TrailNineTarget.h"
-#include "Effects/Templates/TrailNineUpdate.h"
-#include "Effects/Templates/TrailOrigin.h"
-#include "Effects/Templates/TrailRender.h"
-#include "Effects/Templates/TrailTarget.h"
-#include "Effects/Templates/TrailUpdate.h"
-#include "Effects/Trails.h"
-#include "Effects/Transforms.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Effects/Templates/Grid.hpp"
 
-// decomp: PLG053.BIN func_800F9818 (src/EFFECT/PLG053.BIN/18.c:8): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_GRID_FUNCTION Effects_Plg053_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_GRID_FUNCTION
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
 
-// decomp: PLG061.BIN func_800FA3B0 (src/EFFECT/PLG061.BIN/18.c:12): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_SURFACE_FUNCTION Effects_Plg061_Surface
-#define VS_SURFACE_VERTICES Effects_Plg061_surfaceVertices
-#define VS_GRID_FUNCTION Effects_Plg061_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_GRID_FUNCTION
+#include "Core/Math/Interpolation.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Effects/Templates/RingCore.hpp"
+#include "Effects/Templates/SurfaceCore.hpp"
 
-// decomp: PLG073.BIN func_800FE3EC (src/EFFECT/PLG073.BIN/F8.c:23): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg073_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg073_tiledRingColorFactors
-#define VS_RING_FUNCTION Effects_Plg073_Ring
-#define VS_RING_COLORS Effects_Plg073_ringColorFactors
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg073_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg073_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg073_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg073_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg073_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg073_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg073_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg073_trailEmissionCounter
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg073_RotatingSurface
-#define VS_GRID_FUNCTION Effects_Plg073_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_GRID_FUNCTION
+namespace VS::Effects::Templates {
+namespace {
+namespace math = Core::Math;
+using math::Vec3;
 
-// decomp: PLG077.BIN func_800FB294 (src/EFFECT/PLG077.BIN/18.c:341): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_MESH10_FUNCTION Effects_Plg077_Mesh10
-#define VS_MESH10_VERTICES Effects_Plg077_mesh10Vertices
-#define VS_MESH10_FACES Effects_Plg077_mesh10Faces
-#define VS_GRID_FUNCTION Effects_Plg077_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_MESH10_FUNCTION
-#undef VS_MESH10_VERTICES
-#undef VS_MESH10_FACES
-#undef VS_GRID_FUNCTION
+constexpr std::size_t kGridCentre = kGridLines / 2;
+constexpr std::size_t kGridSpans = kGridLines - 1;
+constexpr std::int32_t kGridSpanDivisor = static_cast<std::int32_t>(kGridSpans);
+constexpr std::int32_t kGridQuadDivisor = 4;
+// The texture page's blend mode bits and the base page and CLUT words
+// (decomp grids.h:68-70).
+constexpr unsigned kBlendShift = 5;
+constexpr std::uint8_t kLowBits = 7;
+constexpr std::uint16_t kGridPageBase = 0x18;
+constexpr unsigned kClutRowShift = 6;
+constexpr std::uint16_t kGridClutBase = 0x3C30;
+// GridDepthMode slots: the farthest scene slot, three slots in front of the
+// scene, and the step a nudged quad moves nearer.
+constexpr std::int32_t kFarthestSlot = 0x7FE;
+constexpr std::int32_t kFront15Slot = -15;
+constexpr std::int32_t kFront13Slot = -13;
+constexpr std::int32_t kFront11Slot = -11;
+constexpr std::int32_t kNudge = 16;
+// POLY_FT4 below the packet's link word: the length, the flat colour code
+// and where each corner's two words start.
+constexpr std::uint32_t kGridPacketLength = 0x0B000000;
+constexpr std::uint8_t kGridQuadCode = 0x2E;
+constexpr std::size_t kColorWord = 2;
+constexpr std::size_t kFirstCornerWord = 3;
+constexpr std::size_t kGridCornerWords = 2;
+constexpr std::size_t kGridRestoreWord = 11;
 
-// decomp: PLG082.BIN func_800FB5CC (src/EFFECT/PLG082.BIN/128.c:20): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg082_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg082_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg082_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg082_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg082_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg082_particleEmissionCounter
-#define VS_GRID_FUNCTION Effects_Plg082_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
-#undef VS_GRID_FUNCTION
+[[nodiscard]] constexpr std::int16_t Halfword(std::int32_t value) noexcept {
+  return math::WrapSigned16(static_cast<std::uint32_t>(value));
+}
 
-// decomp: PLG085.BIN func_800F9818 (src/EFFECT/PLG085.BIN/18.c:2): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_GRID_FUNCTION Effects_Plg085_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_GRID_FUNCTION
+// What a grid tick computes before its points: the advanced state, the
+// scratch values, the depth mode and the first line spacing and phase of
+// each axis.
+struct GridFrame {
+  SurfaceTickInputs inputs{};
+  GridState state{};
+  SurfaceScratch scratch{};
+  std::int32_t depth_mode{};
+  std::int32_t x_spacing{};
+  std::int32_t z_spacing{};
+};
 
-// decomp: PLG086.BIN func_800FB720 (src/EFFECT/PLG086.BIN/F8.c:16): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_CLOSED_RING_FUNCTION Effects_Plg086_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg086_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg086_RotatingSurface
-#define VS_GRID_FUNCTION Effects_Plg086_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_GRID_FUNCTION
+// decomp: grids.h:113-120 (the spacing accumulators and the phases).
+void AdvanceGridMotion(GridFrame& frame, const SurfaceForces& forces,
+                       Vec3 jitter) noexcept {
+  GridState& state = frame.state;
+  const Vec3 extent = frame.scratch.extent;
+  state.x_speed = Halfword(state.x_speed + forces.acceleration_min.x);
+  state.x_spacing =
+      Halfword(state.x_spacing + forces.force_min.x + state.x_speed);
+  frame.x_spacing = math::WrappingAdd(extent.x, state.x_spacing);
+  state.z_speed = Halfword(state.z_speed + forces.acceleration_min.y);
+  state.z_spacing =
+      Halfword(state.z_spacing + forces.force_min.y + state.z_speed);
+  frame.z_spacing = math::WrappingAdd(extent.y, state.z_spacing);
+  state.x_phase = Halfword(math::WrappingAdd(state.x_phase, jitter.x));
+  state.z_phase = Halfword(math::WrappingAdd(state.z_phase, jitter.y));
+}
 
-// decomp: PLG087.BIN func_800FB4F8 (src/EFFECT/PLG087.BIN/1F0.c:18): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_SURFACE_FUNCTION Effects_Plg087_Surface
-#define VS_SURFACE_VERTICES Effects_Plg087_surfaceVertices
-#define VS_SURFACE_REPEAT
-#define VS_CLOSED_RING_FUNCTION Effects_Plg087_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg087_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_GRID_FUNCTION Effects_Plg087_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_SURFACE_REPEAT
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_GRID_FUNCTION
+// decomp: grids.h:75-112 (the definition sampled at the grid's age).
+std::optional<GridFrame> BeginGridTick(GridHost& host) {
+  std::optional<GridFrame> opened = OpenSurfaceTick<GridFrame>(host);
+  if (!opened.has_value()) {
+    return std::nullopt;
+  }
+  GridFrame& frame = *opened;
+  const SurfaceDefinition& definition = frame.inputs.definition;
+  const SurfaceCurves& curves = definition.curves;
+  const std::int32_t age = frame.state.age;
+  SurfaceScratch& scratch = frame.scratch;
+  const SurfaceForces forces = SampleSurfaceForces(definition, age, host);
+  scratch.forces = forces;
+  scratch.base_direction =
+      SampleSurfaceRange(definition.direction, curves.direction, age, host);
+  const Vec3 jitter = SampleSurfaceRange(definition.direction_jitter,
+                                         curves.direction_jitter, age, host);
+  scratch.direction_jitter = jitter;
+  scratch.speed = math::InterpolateSevenBitPlane(
+      definition.speed, host.SampleCurve(curves.speed, age));
+  scratch.mass = math::InterpolateSevenBitPlane(
+      definition.mass, host.SampleCurve(curves.mass, age));
+  scratch.gravity = math::InterpolateSevenBitPlane(
+      definition.gravity, host.SampleCurve(curves.gravity, age));
+  frame.depth_mode = math::InterpolateSevenBitScalar(
+      definition.inner_extent, host.SampleCurve(curves.inner_extent, age));
+  AdvanceGridMotion(frame, forces, jitter);
+  return opened;
+}
 
-// decomp: PLG128.BIN func_800FC2BC (src/EFFECT/PLG128.BIN/F8.c:58): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define TRAIL_SAMPLE_COUNT 5
-#define VS_SURFACE_FUNCTION Effects_Plg128_Surface
-#define VS_SURFACE_VERTICES Effects_Plg128_surfaceVertices
-#define VS_SURFACE_REPEAT
-#define VS_CLOSED_RING_FUNCTION Effects_Plg128_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg128_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_ROTATING_SURFACE_REPEAT
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg128_RotatingSurface
-#define VS_GRID_FUNCTION Effects_Plg128_Grid
-#include "Effects/Templates/Grid.inl"
-#undef TRAIL_SAMPLE_COUNT
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_SURFACE_REPEAT
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_ROTATING_SURFACE_REPEAT
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_GRID_FUNCTION
+// decomp: grids.h:121-136: the nine lines of one axis, mirrored about
+// `origin`, the gap growing by `force` plus an accumulating `acceleration`.
+std::array<std::int32_t, kGridLines> GridLines(
+    std::int32_t origin, std::int32_t spacing, std::int32_t force,
+    std::int32_t acceleration) noexcept {
+  std::array<std::int32_t, kGridLines> lines{};
+  std::int32_t offset = 0;
+  std::int32_t growth = 0;
+  for (std::size_t step = 0; step <= kGridCentre; ++step) {
+    lines.at(kGridCentre - step) = math::WrappingSubtract(origin, offset);
+    lines.at(kGridCentre + step) = math::WrappingAdd(offset, origin);
+    offset = math::WrappingAdd(offset, spacing);
+    spacing = math::WrappingAdd(spacing, math::WrappingAdd(growth, force));
+    growth = math::WrappingAdd(growth, acceleration);
+  }
+  return lines;
+}
 
-// decomp: PLG137.BIN func_800FC524 (src/EFFECT/PLG137.BIN/F8.c:17): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_MESH10_FUNCTION Effects_Plg137_Mesh10
-#define VS_MESH10_VERTICES Effects_Plg137_mesh10Vertices
-#define VS_MESH10_FACES Effects_Plg137_mesh10Faces
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg137_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg137_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg137_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg137_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg137_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg137_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg137_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg137_trailEmissionCounter
-#define VS_GRID_FUNCTION Effects_Plg137_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_MESH10_FUNCTION
-#undef VS_MESH10_VERTICES
-#undef VS_MESH10_FACES
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_GRID_FUNCTION
+// decomp: grids.h:137-152: every point sways along x by the sine of its
+// row's x phase and along z by the cosine of its z phase.
+std::array<RingPoint, kGridPoints> GridPoints(const GridFrame& frame) {
+  const SurfaceScratch& scratch = frame.scratch;
+  const SurfaceForces forces = scratch.forces.value_or(SurfaceForces{});
+  const Vec3 sway = scratch.base_direction.value_or(Vec3{});
+  const Vec3 jitter = scratch.direction_jitter.value_or(Vec3{});
+  const math::Vec2 speed = scratch.speed.value_or(math::Vec2{});
+  const std::array<std::int32_t, kGridLines> columns =
+      GridLines(scratch.position.x, frame.x_spacing, forces.force_max.x,
+                forces.acceleration_max.x);
+  const std::array<std::int32_t, kGridLines> rows =
+      GridLines(scratch.position.z, frame.z_spacing, forces.force_max.y,
+                forces.acceleration_max.y);
+  const std::int16_t height = Halfword(scratch.position.y);
+  std::int32_t row_x_phase = frame.state.x_phase;
+  std::int32_t row_z_phase = frame.state.z_phase;
+  std::array<RingPoint, kGridPoints> points{};
+  for (std::size_t row = 0; row < kGridLines; ++row) {
+    std::int32_t x_angle = row_x_phase;
+    std::int32_t z_angle = row_z_phase;
+    row_x_phase = math::WrappingAdd(row_x_phase, speed.x);
+    row_z_phase = math::WrappingAdd(row_z_phase, speed.y);
+    for (std::size_t column = 0; column < kGridLines; ++column) {
+      const std::int32_t x = math::WrappingAdd(
+          columns.at(column), RingFixed(math::Sine(x_angle), sway.x));
+      const std::int32_t z = math::WrappingAdd(
+          rows.at(row), RingFixed(math::Cosine(z_angle), sway.y));
+      points.at((row * kGridLines) + column) = {Halfword(x), height,
+                                                Halfword(z)};
+      x_angle = math::WrappingAdd(x_angle, jitter.x);
+      z_angle = math::WrappingAdd(z_angle, jitter.y);
+    }
+  }
+  return points;
+}
 
-// decomp: PLG138.BIN func_800FB2F4 (src/EFFECT/PLG138.BIN/18.c:9): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg138_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg138_Ring
-#define VS_RING_COLORS Effects_Plg138_ringColorFactors
-#define VS_GRID_FUNCTION Effects_Plg138_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_GRID_FUNCTION
+// decomp: grids.h:183-194: the nine texture coordinates of one axis from
+// the scroll before this tick; the scroll advances by `step` modulo `size`.
+std::array<std::uint8_t, kGridLines> GridCoordinates(
+    std::uint8_t origin, std::uint8_t& scroll, std::int32_t step,
+    std::int32_t size) noexcept {
+  const std::int32_t previous = scroll;
+  scroll = static_cast<std::uint8_t>(
+      SurfaceRemainder(math::WrappingAdd(previous, step), size));
+  const std::int32_t start = origin + previous;
+  std::array<std::uint8_t, kGridLines> coordinates{};
+  for (std::size_t line = 0; line < kGridLines; ++line) {
+    const auto fraction =
+        (size * static_cast<std::int32_t>(line)) / kGridSpanDivisor;
+    coordinates.at(line) = static_cast<std::uint8_t>(start + fraction);
+  }
+  return coordinates;
+}
 
-// decomp: PLG139.BIN func_800FA710 (src/EFFECT/PLG139.BIN/18.c:6): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg139_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg085_tiledRingColorFactors
-#define VS_GRID_FUNCTION Effects_Plg139_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_GRID_FUNCTION
+// decomp: grids.h:153-260: the colour, the texture coordinates, projection and
+// the eight by eight quads.
+void DrawGrid(GridFrame& frame,
+              const std::array<RingPoint, kGridPoints>& points,
+              GridHost& host) {
+  const SurfaceDefinition& definition = frame.inputs.definition;
+  const std::int32_t age = frame.state.age;
+  const RingColor color{
+      .r = DoubledCurveChannel(definition.curves.color[0], age, host),
+      .g = DoubledCurveChannel(definition.curves.color[1], age, host),
+      .b = DoubledCurveChannel(definition.curves.color[2], age, host)};
+  const math::Vec2 scroll = frame.scratch.gravity.value_or(math::Vec2{});
+  GridState& state = frame.state;
+  const std::array<std::uint8_t, kGridLines> u =
+      GridCoordinates(state.u, state.u_scroll, scroll.x, definition.grid_width);
+  const std::array<std::uint8_t, kGridLines> v = GridCoordinates(
+      state.v, state.v_scroll, scroll.y, definition.grid_height);
+  host.BeginProjection((definition.flags & kRingEffectView) != 0);
+  std::array<RingProjection, kGridPoints> projected{};
+  for (std::size_t point = 0; point < kGridPoints; ++point) {
+    projected.at(point) = host.Project(points.at(point));
+  }
+  for (std::size_t row = 0; row < kGridSpans; ++row) {
+    for (std::size_t column = 0; column < kGridSpans; ++column) {
+      const std::size_t first = (row * kGridLines) + column;
+      const std::array<std::size_t, kRingQuadCorners> corners = {
+          first, first + 1, first + kGridLines, first + kGridLines + 1};
+      GridQuad quad{.color = color,
+                    .uvs = {RingUv{u.at(column), v.at(row)},
+                            RingUv{u.at(column + 1), v.at(row)},
+                            RingUv{u.at(column), v.at(row + 1)},
+                            RingUv{u.at(column + 1), v.at(row + 1)}},
+                    .clut = state.clut,
+                    .tpage = state.tpage};
+      std::int32_t total = 0;
+      for (std::size_t corner = 0; corner < kRingQuadCorners; ++corner) {
+        const RingProjection& at = projected.at(corners.at(corner));
+        total += at.depth;
+        quad.screens.at(corner) = at.screen;
+      }
+      const std::int32_t depth =
+          math::WrappingAdd(total / kGridQuadDivisor, frame.scratch.extent.z);
+      if (SurfaceDepthVisible(depth, frame.inputs.near_clip)) {
+        host.Submit(EncodeGridPacket(quad),
+                    GridDepth(depth, frame.depth_mode, frame.inputs.near_clip));
+      }
+    }
+  }
+}
+}  // namespace
 
-// decomp: PLG142.BIN func_800F9818 (src/EFFECT/PLG142.BIN/18.c:8): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_GRID_FUNCTION Effects_Plg142_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_GRID_FUNCTION
+// decomp: grids.h:59-74 (the create command).
+GridState CreateGridState(RingPlan plan,
+                          const SurfaceDefinition& definition) noexcept {
+  const auto blend = static_cast<std::uint16_t>(
+      (definition.transparency_curve & kLowBits) << kBlendShift);
+  const auto page =
+      static_cast<std::uint16_t>((definition.ring_segments & kLowBits) | blend);
+  const auto clut_row = static_cast<std::uint16_t>(
+      (definition.ring_positions & kLowBits) << kClutRowShift);
+  return {.lifetime = plan.lifetime,
+          .definition_index = plan.definition_index,
+          .u = definition.grid_u,
+          .v = definition.grid_v,
+          .tpage = static_cast<std::uint16_t>(page + kGridPageBase),
+          .clut = static_cast<std::uint16_t>(clut_row | kGridClutBase)};
+}
 
-// decomp: PLG150.BIN func_800FA710 (src/EFFECT/PLG150.BIN/18.c:6): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg150_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg150_tiledRingColorFactors
-#define VS_GRID_FUNCTION Effects_Plg150_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_GRID_FUNCTION
+std::int32_t GridDepth(std::int32_t depth, std::int32_t mode,
+                       std::int32_t near_clip) noexcept {
+  switch (static_cast<GridDepthMode>(mode)) {
+    case GridDepthMode::kFarthest:
+      return kFarthestSlot;
+    case GridDepthMode::kFront15:
+      return kFront15Slot;
+    case GridDepthMode::kFront13:
+      return kFront13Slot;
+    case GridDepthMode::kFront11:
+      return kFront11Slot;
+    case GridDepthMode::kNudged:
+      return depth - kNudge > near_clip ? depth - kNudge : depth;
+    case GridDepthMode::kSorted:
+    default:
+      return depth;
+  }
+}
 
-// decomp: PLG152.BIN func_800F9928 (src/EFFECT/PLG152.BIN/128.c:8): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_GRID_FUNCTION Effects_Plg152_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_GRID_FUNCTION
+std::array<std::uint32_t, kGridPacketWords> EncodeGridPacket(
+    const GridQuad& quad) noexcept {
+  std::array<std::uint32_t, kGridPacketWords> words{};
+  words[0] = kGridPacketLength;
+  words[1] = kRingDrawModeWord;
+  words[kColorWord] = SurfaceColorWord(quad.color, kGridQuadCode);
+  // Only the first two corners' texture words carry the CLUT and the page.
+  const std::array<std::uint16_t, kRingQuadCorners> high = {quad.clut,
+                                                            quad.tpage, 0, 0};
+  for (std::size_t corner = 0; corner < kRingQuadCorners; ++corner) {
+    const std::size_t word = kFirstCornerWord + (corner * kGridCornerWords);
+    words.at(word) = quad.screens.at(corner);
+    words.at(word + 1) = SurfaceUvWord(quad.uvs.at(corner), high.at(corner));
+  }
+  words[kGridRestoreWord] = kRingRestoreModeWord;
+  return words;
+}
 
-// decomp: PLG156.BIN func_800FB5CC (src/EFFECT/PLG156.BIN/128.c:14): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg156_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg156_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg156_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg156_ParticleRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg156_ParticleDispatch
-#define VS_PARTICLE_CORNER_STATE Effects_Plg156_particleEmissionCounter
-#define VS_GRID_FUNCTION Effects_Plg156_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_CORNER_STATE
-#undef VS_GRID_FUNCTION
+// decomp: EFFECT VS_GRID_FUNCTION (src/EFFECT/grids.h:23).
+bool Grid(SurfaceCommand command, std::int32_t packed, GridHost& host) {
+  const auto create = [&host](RingPlan plan,
+                              const SurfaceDefinition& definition) {
+    host.Create(CreateGridState(plan, definition), std::nullopt);
+  };
+  const auto tick = [&host] {
+    std::optional<GridFrame> frame = BeginGridTick(host);
+    if (!frame.has_value()) {
+      return false;
+    }
+    const std::array<RingPoint, kGridPoints> points = GridPoints(*frame);
+    DrawGrid(*frame, points, host);
+    host.PublishScratch(frame->scratch);
+    return FinishSurfaceTick(frame->state, host);
+  };
+  return RunSurfaceCommand(command, packed, host, create, tick);
+}
+}  // namespace VS::Effects::Templates
 
-// decomp: PLG161.BIN func_800FD4F4 (src/EFFECT/PLG161.BIN/F8.c:20): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg161_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg161_Ring
-#define VS_RING_COLORS Effects_Plg161_ringColorFactors
-#define VS_RING_TRANSPOSED
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg161_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg161_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg161_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg161_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg161_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg161_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg161_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg161_trailEmissionCounter
-#define VS_GRID_FUNCTION Effects_Plg161_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_GRID_FUNCTION
+namespace VS::Effects {
+// decomp: PLG053.BIN func_800F9818 (src/EFFECT/PLG053.BIN/18.c:8).
+bool Plg053::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-// decomp: PLG165.BIN func_800FC8D0 (src/EFFECT/PLG165.BIN/F8.c:21): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg165_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg165_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg165_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg165_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg165_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg165_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg165_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg165_trailEmissionCounter
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg165_RotatingSurface
-#define VS_GRID_FUNCTION Effects_Plg165_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_GRID_FUNCTION
+// decomp: PLG061.BIN func_800FA3B0 (src/EFFECT/PLG061.BIN/18.c:12).
+bool Plg061::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-// decomp: PLG168.BIN func_800FD104 (src/EFFECT/PLG168.BIN/1F0.c:36): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg168_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg168_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg168_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg168_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg168_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg168_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg168_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg168_trailEmissionCounter
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg168_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg168_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg168_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg168_ParticleLineRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg168_ParticleDispatch
-#define VS_PARTICLE_UNTEXTURED
-#define VS_GRID_FUNCTION Effects_Plg168_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_UNTEXTURED
-#undef VS_GRID_FUNCTION
+// decomp: PLG073.BIN func_800FE3EC (src/EFFECT/PLG073.BIN/F8.c:23).
+bool Plg073::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-// decomp: PLG170.BIN func_800FBF6C (src/EFFECT/PLG170.BIN/18.c:21): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg170_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg170_mirrorSurfaceVertices
-#define VS_ROTATING_SURFACE_REPEAT
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg170_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg170_Ring
-#define VS_RING_COLORS Effects_Plg170_ringColorFactors
-#define VS_RING_TRANSPOSED
-#define VS_GRID_FUNCTION Effects_Plg170_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_ROTATING_SURFACE_REPEAT
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
-#undef VS_GRID_FUNCTION
+// decomp: PLG077.BIN func_800FB294 (src/EFFECT/PLG077.BIN/18.c:341).
+bool Plg077::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-// decomp: PLG242.BIN func_800FA7F0 (src/EFFECT/PLG242.BIN/F8.c:6): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg242_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg242_tiledRingColorFactors
-#define VS_GRID_FUNCTION Effects_Plg242_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_GRID_FUNCTION
+// decomp: PLG082.BIN func_800FB5CC (src/EFFECT/PLG082.BIN/128.c:20).
+bool Plg082::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-// decomp: PLG272.BIN func_800F9818 (src/EFFECT/PLG272.BIN/18.c:8): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_GRID_FUNCTION Effects_Plg272_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_GRID_FUNCTION
+// decomp: PLG085.BIN func_800F9818 (src/EFFECT/PLG085.BIN/18.c:2).
+bool Plg085::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-// decomp: PLG291.BIN func_800FBA18 (src/EFFECT/PLG291.BIN/F8.c:18): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg291_TrailOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg291_TrailTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg291_TrailControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg291_TrailInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg291_TrailUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg291_TrailRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg291_TrailDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg291_trailEmissionCounter
-#define VS_GRID_FUNCTION Effects_Plg291_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_GRID_FUNCTION
+// decomp: PLG086.BIN func_800FB720 (src/EFFECT/PLG086.BIN/F8.c:16).
+bool Plg086::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-// decomp: PLG297.BIN func_800FB3FC (src/EFFECT/PLG297.BIN/18.c:17): VS_GRID_FUNCTION, instance of Effects/Templates/Grid.inl
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg297_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg297_mirrorSurfaceVertices
-#define VS_CLOSED_RING_FUNCTION Effects_Plg297_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg297_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_GRID_FUNCTION Effects_Plg297_Grid
-#include "Effects/Templates/Grid.inl"
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_GRID_FUNCTION
+// decomp: PLG087.BIN func_800FB4F8 (src/EFFECT/PLG087.BIN/1F0.c:18).
+bool Plg087::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
 
-}  // extern "C"
+// decomp: PLG128.BIN func_800FC2BC (src/EFFECT/PLG128.BIN/F8.c:58).
+bool Plg128::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG137.BIN func_800FC524 (src/EFFECT/PLG137.BIN/F8.c:17).
+bool Plg137::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG138.BIN func_800FB2F4 (src/EFFECT/PLG138.BIN/18.c:9).
+bool Plg138::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG139.BIN func_800FA710 (src/EFFECT/PLG139.BIN/18.c:6).
+bool Plg139::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG142.BIN func_800F9818 (src/EFFECT/PLG142.BIN/18.c:8).
+bool Plg142::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG150.BIN func_800FA710 (src/EFFECT/PLG150.BIN/18.c:6).
+bool Plg150::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG152.BIN func_800F9928 (src/EFFECT/PLG152.BIN/128.c:8).
+bool Plg152::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG156.BIN func_800FB5CC (src/EFFECT/PLG156.BIN/128.c:14).
+bool Plg156::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG161.BIN func_800FD4F4 (src/EFFECT/PLG161.BIN/F8.c:20).
+bool Plg161::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG165.BIN func_800FC8D0 (src/EFFECT/PLG165.BIN/F8.c:21).
+bool Plg165::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG168.BIN func_800FD104 (src/EFFECT/PLG168.BIN/1F0.c:36).
+bool Plg168::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG170.BIN func_800FBF6C (src/EFFECT/PLG170.BIN/18.c:21).
+bool Plg170::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG242.BIN func_800FA7F0 (src/EFFECT/PLG242.BIN/F8.c:6).
+bool Plg242::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG272.BIN func_800F9818 (src/EFFECT/PLG272.BIN/18.c:8).
+bool Plg272::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG291.BIN func_800FBA18 (src/EFFECT/PLG291.BIN/F8.c:18).
+bool Plg291::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+
+// decomp: PLG297.BIN func_800FB3FC (src/EFFECT/PLG297.BIN/18.c:17).
+bool Plg297::Grid(Templates::SurfaceCommand command, std::int32_t packed,
+                  Templates::GridHost& host) {
+  return Templates::Grid(command, packed, host);
+}
+}  // namespace VS::Effects

@@ -104,8 +104,7 @@ TEST_CASE("Actor facial texture frames retain 4-bit and 8-bit copy geometry",
 }
 
 TEST_CASE(
-    "Room actor spawning uses the owning MPD count rather than a detached "
-    "alias",
+    "Room actor spawning uses the owning MPD count with no stale spawn flag",
     "[actors][loading]") {
   REQUIRE(Tests_RoomSpawnCountGuard() == 1);
 }

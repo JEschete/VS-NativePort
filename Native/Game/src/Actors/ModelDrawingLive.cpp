@@ -11,8 +11,11 @@
 #include <span>
 #include <type_traits>
 
+#include "Actors/AnimationPoseLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/RoomLightingLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
+#include "Render/RoomLighting.hpp"
 extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
@@ -33,7 +36,6 @@ extern "C" {
 #include "Field/Actors.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
-#include "Field/RoomRendering.h"
 #include "Legacy/Psx.h"
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
@@ -244,8 +246,8 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
     const Actors_ShpBone* joint = &model->bones[bone];
     MATRIX matrix = root;
     if (bone != 0 && joint->poseLockSlot != 0) {
-      Actors_ApplyLockedBoneTransform(actor, camera, static_cast<int>(bone),
-                                      joint->poseLockSlot);
+      VS::Actors::ApplyLiveLockedBoneTransform(
+          actor, camera, static_cast<int>(bone), joint->poseLockSlot);
       cumulative[bone][0] = cumulative[bone][1] = cumulative[bone][2] =
           kPoseScaleOne;
       continue;
@@ -300,6 +302,9 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
                                    Actors_ActorRecord* geometry,
                                    ModelDrawRole role,
                                    const SVECTOR* root_offset) {
+  // The ground colour is the room's floor light at the actor's position,
+  // whatever tile layer it stands on: the original called func_8008C458
+  // (146C.c:16465), which samples layer 0 for every caller.
   if (!geometry->instance.uvLayout &&
       role != ModelDrawRole::kCompanionOverlay) {
     if (!actor->customTint) {
@@ -309,9 +314,8 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
             (static_cast<unsigned>(
                  static_cast<uint16_t>(actor->instance.position.vz))
              << 16);
-        Field_SampleRoomGroundColor(static_cast<int>(packed),
-                                    actor->instance.currentTileLayer,
-                                    &actor->instance.tint);
+        VS::Field::SampleLiveRoomLighting(
+            packed, VS::Render::RoomLightLayer::kFloor, &actor->instance.tint);
       } else {
         actor->instance.tint.red = actor->instance.tint.green =
             actor->instance.tint.blue = kNeutralModelColor;
@@ -335,9 +339,9 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
     const unsigned packed =
         static_cast<uint16_t>(root_offset->vx) |
         (static_cast<unsigned>(static_cast<uint16_t>(root_offset->vz)) << 16);
-    Render_ColorCode ground;
-    Field_SampleRoomGroundColor(static_cast<int>(packed),
-                                actor->instance.currentTileLayer, &ground);
+    Render_ColorCode ground{};
+    VS::Field::SampleLiveRoomLighting(
+        packed, VS::Render::RoomLightLayer::kFloor, &ground);
     unsigned char* shadow_color =
         reinterpret_cast<unsigned char*>(&actor->shadowBlend.reserved0);
     shadow_color[0] = GroundShadowChannel(ground.red);

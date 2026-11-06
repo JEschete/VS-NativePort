@@ -1,909 +1,407 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Input/ControllerLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
-#include "Battle/TextBoxes.h"
-#include "Content/StringTables.h"
-#include "DiscQueue.h"
-#include "Input/ControllerLiveState.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Framework/MenuMemory.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/Options.h"
-#include "Menu/TextBox.h"
-#include "State/StateFlags.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Menu/Options.hpp"
 
-// decomp: _2 (_2@src/MENU/MENU8.PRG/21A0.c)
-char Menu_Options_layoutPadding1[2];
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <format>
+#include <span>
 
-// decomp: _3 (_3@src/MENU/MENU8.PRG/21A0.c)
-char Menu_Options_layoutPadding2[8];
+namespace VS::Menu::Options {
+namespace {
+// A choice's rows, the _menuStrings index of its first row's name (the
+// description follows it) and the row_info word its rows open with.
+struct ChoiceSpec {
+  int rows;
+  int first_text;
+  int row_info;
+};
+// decomp: MENU8.PRG _simpleMapOptionMenu .. _vibrationOptionMenu
+// (src/MENU/MENU8.PRG/88.c:20-486), Text_Menu8_menu_Index_frame ..
+// Text_Menu8_menu_Index_vibrationOn.
+constexpr std::array<ChoiceSpec, kChoiceCount> kChoiceSpecs{{
+    {.rows = 3, .first_text = 20, .row_info = 0x246},
+    {.rows = 2, .first_text = 26, .row_info = 0x247},
+    {.rows = 2, .first_text = 30, .row_info = 0x248},
+    {.rows = 2, .first_text = 34, .row_info = 0x249},
+    {.rows = 2, .first_text = 38, .row_info = 0x24A},
+    {.rows = 2, .first_text = 42, .row_info = 0x24B},
+    {.rows = 2, .first_text = 46, .row_info = 0x24C},
+    {.rows = 2, .first_text = 50, .row_info = 0x24D},
+    {.rows = 2, .first_text = 54, .row_info = 0x24E},
+}};
+// decomp: _simpleMapValues (src/MENU/MENU8.PRG/88.c): the simple map setting
+// each of its rows selects.
+constexpr std::array<std::uint8_t, kMaxChoiceRows> kSimpleMapValues{3, 1, 0};
 
-// decomp: _menuStrings (_menuStrings@src/MENU/MENU8.PRG/88.c)
-u_short Menu_Options_menuStrings[1070]; /* contents: disc string table (ModuleData.cpp) */
+// The settings list.
+constexpr int kSettingsRowInfo = 0x145;
+constexpr std::size_t kPuzzleModeRow = 6;
+// Text_Menu8_menu_Offset_puzzleModeSettingDisabled.
+constexpr std::uint16_t kPuzzleModeDisabledText = 999;
+// The row type that greys a row out and the bit that marks a current value.
+constexpr std::int32_t kDisabledRowType = 1;
+constexpr std::int32_t kCurrentValueRowType = 4;
+// The settings row a choice keeps while the others fly out.
+constexpr int kChoiceTitleRow = 7;
+// The selection results: -1 cancels, -2 leaves for the battle.
+constexpr int kLeaveForBattle = -2;
+// The information text box (Menu_textBoxes[7]) shown over a disabled row.
+constexpr int kTextBoxShown = 0xB;
+constexpr int kTextBoxHidden = 0;
+constexpr int kNoCommand = 0;
+constexpr int kVibrationTestPreset = 0;
 
-// decomp: _simpleMapValues (_simpleMapValues@src/MENU/MENU8.PRG/88.c)
-char Menu_Options_simpleMapValues[] = { 3, 1, 0 };
+enum ChoiceStep : std::uint8_t { kCreateRows, kAwaitSelection, kAwaitIdle };
 
-// decomp: local static of _abilityTimingOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_abilityTimingChoiceSelectedRow = 0;
+constexpr std::size_t Index(Choice choice) {
+  return static_cast<std::size_t>(choice);
+}
 
-// decomp: local static of _armorStatusOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_armorStatusChoiceSelectedRow = 0;
+// Reads `out.size()` rows' name and description offsets from _menuStrings,
+// starting at index `first`; refuses an index or offset past the table.
+bool ReadRowTexts(Context& ctx, std::size_t first, std::span<RowText> out) {
+  const std::span<const std::uint16_t> strings = ctx.host.MenuStrings();
+  for (std::size_t row = 0; row < out.size(); ++row) {
+    const std::size_t index = first + (row * 2);
+    if (index + 1 >= strings.size() || strings[index] >= strings.size() ||
+        strings[index + 1] >= strings.size()) {
+      ctx.host.Refuse(std::format(
+          "options text index {} lies outside the {}-halfword string table",
+          index, strings.size()));
+      return false;
+    }
+    out[row] = {.name = strings[index], .description = strings[index + 1]};
+  }
+  return true;
+}
 
-// decomp: local static of _cursorMemoryOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_cursorMemoryChoiceSelectedRow = 0;
+// The row a two-row choice marks as the current setting.
+int CurrentRow(Choice choice, const Settings& settings) {
+  switch (choice) {
+    case Choice::kAbilityTiming:
+      return settings.ability_timing ? 0 : 1;
+    case Choice::kWeaponStatus:
+      return settings.weapon_status ? 0 : 1;
+    case Choice::kArmorStatus:
+      return settings.armor_status ? 0 : 1;
+    case Choice::kCursorMemory:
+      return 1 - settings.cursor_memory;
+    case Choice::kInformation:
+      return 1 - settings.information;
+    case Choice::kPuzzleMode:
+      return settings.puzzle_mode_off ? 1 : 0;
+    case Choice::kSound:
+      return settings.mono_sound;
+    case Choice::kVibration:
+      return 1 - settings.vibration_on;
+    case Choice::kSimpleMap:
+      break;
+  }
+  return -1;
+}
 
-// decomp: local static of _informationOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_informationChoiceSelectedRow = 0;
+void MarkCurrentRows(Context& ctx, Choice choice, int rows,
+                     std::span<std::int32_t> row_types) {
+  const Settings settings = ctx.host.LoadSettings();
+  if (choice == Choice::kSimpleMap) {
+    for (std::size_t row = 0; row < kSimpleMapValues.size(); ++row) {
+      if (settings.simple_map == kSimpleMapValues[row]) {
+        row_types[row] |= kCurrentValueRowType;
+      }
+    }
+    return;
+  }
+  const int row = CurrentRow(choice, settings);
+  if (row < 0 || row >= rows) {
+    // The original indexes its stack array with the setting's value.
+    ctx.host.Refuse(
+        std::format("options choice {} setting row {} lies outside its {} rows",
+                    Index(choice), row, rows));
+    return;
+  }
+  row_types[static_cast<std::size_t>(row)] |= kCurrentValueRowType;
+}
 
-// decomp: local static of _puzzleModeOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_puzzleModeChoiceSelectedRow = 0;
+bool CreateChoiceRows(Context& ctx, Choice choice) {
+  const ChoiceSpec& spec = kChoiceSpecs[Index(choice)];
+  const auto rows = static_cast<std::size_t>(spec.rows);
+  std::array<RowText, kMaxChoiceRows> texts{};
+  std::array<std::int32_t, kMaxChoiceRows> row_types{};
+  if (!ReadRowTexts(ctx, static_cast<std::size_t>(spec.first_text),
+                    std::span(texts).first(rows))) {
+    return false;
+  }
+  MarkCurrentRows(ctx, choice, spec.rows, row_types);
+  ctx.host.CreateRows(spec.rows, spec.row_info, std::span(texts).first(rows),
+                      std::span(row_types).first(rows));
+  return true;
+}
 
-// decomp: local static of _simpleMapOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_simpleMapChoiceSelectedRow = 0;
+// decomp: MENU8.PRG _simpleMapOptionMenu (src/MENU/MENU8.PRG/88.c:20) and its
+// eight siblings share this body; the vibration choice tests the motor.
+int UpdateChoice(Context& ctx, Choice choice, int init) {
+  ChoiceState& local = ctx.state.choices[Index(choice)];
+  if (init != 0) {
+    local.step = kCreateRows;
+    return 0;
+  }
+  switch (local.step) {
+    case kCreateRows:
+      if (ctx.host.RowsIdle() && CreateChoiceRows(ctx, choice)) {
+        local.step = kAwaitSelection;
+      }
+      break;
+    case kAwaitSelection:
+      local.selected_row = ctx.host.SelectedRow() + 1;
+      if (local.selected_row == 0) {
+        break;
+      }
+      if (local.selected_row == kLeaveForBattle) {
+        ctx.host.ClearRowsExcept(Framework::kNoRow);
+        ctx.host.DismissInformationBox();
+        ctx.host.SetCommandLabel(kNoCommand);
+      } else {
+        if (choice == Choice::kVibration && local.selected_row == 1) {
+          ctx.host.PlayVibrationPreset(kVibrationTestPreset);
+        }
+        ctx.host.ClearRowsExcept(kChoiceTitleRow);
+      }
+      local.step = kAwaitIdle;
+      break;
+    case kAwaitIdle:
+      if (ctx.host.RowsIdle()) {
+        return local.selected_row;
+      }
+      break;
+    default:
+      break;
+  }
+  return 0;
+}
 
-// decomp: local static of _soundOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_soundChoiceSelectedRow = 0;
+// decomp: vs_menu8_exec's Init state (src/MENU/MENU8.PRG/88.c:579).
+void OpenSettingsRows(Context& ctx, std::uint8_t& step) {
+  std::array<RowText, kChoiceCount> texts{};
+  std::array<std::int32_t, kChoiceCount> row_types{};
+  if (!ReadRowTexts(ctx, 0, texts)) {
+    return;
+  }
+  if (ctx.host.PuzzleModeDisabled()) {
+    texts[kPuzzleModeRow].description = kPuzzleModeDisabledText;
+    row_types[kPuzzleModeRow] = kDisabledRowType;
+  }
+  // Reopening the list after a choice keeps the cursor on that row.
+  Settings settings = ctx.host.LoadSettings();
+  const std::uint8_t cursor_memory = settings.cursor_memory;
+  if (step != static_cast<std::uint8_t>(Step::kWaitReady)) {
+    settings.cursor_memory = 1;
+    ctx.host.StoreSettings(settings);
+  }
+  ctx.host.CreateRows(static_cast<int>(kChoiceCount), kSettingsRowInfo, texts,
+                      row_types);
+  settings.cursor_memory = cursor_memory;
+  ctx.host.StoreSettings(settings);
+  step = static_cast<std::uint8_t>(Step::kHandleInput);
+}
 
-// decomp: local static of _vibrationOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_vibrationChoiceSelectedRow = 0;
+// decomp: vs_menu8_exec's HandleInput state (src/MENU/MENU8.PRG/88.c:605).
+void HandleSettingsInput(Context& ctx, std::uint8_t& step) {
+  const int selected = ctx.host.SelectedRow();
+  const int result = selected + 1;
+  if (result > 0) {
+    ctx.host.FlyOutRowsAndHoistSelection(ctx.host.RememberedRow(), 1);
+    if (static_cast<std::size_t>(selected) < kChoiceCount) {
+      step = static_cast<std::uint8_t>(static_cast<int>(Step::kSimpleMap) +
+                                       selected);
+      UpdateChoice(ctx, static_cast<Choice>(selected), 1);
+    }
+    return;
+  }
+  if (result < 0) {
+    ctx.host.ClearRowsExcept(Framework::kNoRow);
+    step = static_cast<std::uint8_t>(
+        result == kLeaveForBattle ? Step::kExitToBattle : Step::kExitToMenu);
+    return;
+  }
+  if (!ctx.host.PuzzleModeDisabled()) {
+    return;
+  }
+  if (ctx.host.HighlightedRow() == static_cast<int>(kPuzzleModeRow)) {
+    ctx.host.InitInformationTextBox(Framework::InformationHeader::kCaution);
+    ctx.host.SetInformationTextBoxState(kTextBoxShown);
+  } else if (ctx.host.LoadSettings().information != 0) {
+    ctx.host.InitInformationTextBox(Framework::InformationHeader::kInformation);
+    ctx.host.SetInformationTextBoxState(kTextBoxShown);
+  } else {
+    ctx.host.SetInformationTextBoxState(kTextBoxHidden);
+  }
+}
 
-// decomp: local static of _weaponStatusOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_weaponStatusChoiceSelectedRow = 0;
+// The chosen row of a two-row choice: the first row turns the setting on.
+std::uint8_t OnForFirstRow(int result) {
+  return static_cast<std::uint8_t>(2 - result);
+}
 
-// decomp: local static of _abilityTimingOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_abilityTimingChoiceState = 0;
+// decomp: vs_menu8_exec's choice states (src/MENU/MENU8.PRG/88.c:671-805).
+void ApplySetting(Context& ctx, Choice choice, int result) {
+  Settings settings = ctx.host.LoadSettings();
+  switch (choice) {
+    case Choice::kSimpleMap:
+      if (static_cast<std::size_t>(result - 1) >= kSimpleMapValues.size()) {
+        // The original reads past the three-byte _simpleMapValues.
+        ctx.host.Refuse(std::format(
+            "options simple map row {} lies outside its 3 values", result));
+        return;
+      }
+      settings.simple_map =
+          kSimpleMapValues[static_cast<std::size_t>(result - 1)];
+      break;
+    case Choice::kAbilityTiming:
+      settings.ability_timing = (OnForFirstRow(result) & 1U) != 0;
+      break;
+    case Choice::kWeaponStatus:
+      settings.weapon_status = (OnForFirstRow(result) & 1U) != 0;
+      break;
+    case Choice::kArmorStatus:
+      settings.armor_status = (OnForFirstRow(result) & 1U) != 0;
+      break;
+    case Choice::kCursorMemory:
+      settings.cursor_memory = OnForFirstRow(result);
+      break;
+    case Choice::kInformation:
+      settings.information = OnForFirstRow(result);
+      ctx.host.StoreSettings(settings);
+      ctx.host.InitializeInformationBox();
+      return;
+    case Choice::kPuzzleMode:
+      settings.puzzle_mode_off = ((result - 1) & 1) != 0;
+      ctx.host.StoreSettings(settings);
+      ctx.host.SetPuzzleMode(!settings.puzzle_mode_off);
+      return;
+    case Choice::kSound:
+      settings.mono_sound = static_cast<std::uint8_t>(result - 1);
+      ctx.host.StoreSettings(settings);
+      ctx.host.SetMonoOutput(settings.mono_sound);
+      return;
+    case Choice::kVibration:
+      settings.vibration_on = OnForFirstRow(result);
+      break;
+  }
+  ctx.host.StoreSettings(settings);
+}
 
-// decomp: local static of _armorStatusOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_armorStatusChoiceState = 0;
+void RunChoice(Context& ctx, std::uint8_t& step) {
+  const auto choice =
+      static_cast<Choice>(step - static_cast<std::uint8_t>(Step::kSimpleMap));
+  const int result = UpdateChoice(ctx, choice, 0);
+  if (result == 0) {
+    return;
+  }
+  if (result == kLeaveForBattle) {
+    step = static_cast<std::uint8_t>(Step::kExitToBattle);
+    return;
+  }
+  if (result > 0) {
+    ApplySetting(ctx, choice, result);
+  }
+  step = static_cast<std::uint8_t>(Step::kInit);
+}
 
-// decomp: local static of _cursorMemoryOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_cursorMemoryChoiceState = 0;
-
-// decomp: local static of _informationOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_informationChoiceState = 0;
-
-// decomp: local static of _puzzleModeOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_puzzleModeChoiceState = 0;
-
-// decomp: local static of _simpleMapOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_simpleMapChoiceState = 0;
-
-// decomp: local static of _soundOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_soundChoiceState = 0;
-
-// decomp: local static of _vibrationOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_vibrationChoiceState = 0;
-
-// decomp: local static of _weaponStatusOptionMenu, at file scope so the module reset reaches it
-static int Menu_Options_weaponStatusChoiceState = 0;
+// decomp: vs_menu8_exec's ExitToMenu and ExitToBattle states
+// (src/MENU/MENU8.PRG/88.c:806-822).
+int CloseScreen(Context& ctx, std::uint8_t& step, bool to_battle) {
+  ctx.host.DismissInformationBox();
+  ctx.host.SetCommandLabel(kNoCommand);
+  if (!ctx.host.RowsIdle()) {
+    return 0;
+  }
+  if (to_battle) {
+    ctx.host.ReturnToBattle();
+  }
+  step = static_cast<std::uint8_t>(Step::kNone);
+  return 1;
+}
+}  // namespace
 
 // decomp: MENU8.PRG _simpleMapOptionMenu (src/MENU/MENU8.PRG/88.c:20)
-int Menu_Options_UpdateSimpleMapChoice(int init)
-{
-
-    char* menuStrings[6];
-    int rowTypes[3];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_simpleMapChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_simpleMapChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 3; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_frame]];
-                menuStrings[i * 2 + 1] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_frameDesc]];
-                rowTypes[i] = 0;
-            }
-            for (i = 0; i < 3; ++i) {
-                if (Input_settings.simpleMap == Menu_Options_simpleMapValues[i]) {
-                    rowTypes[i] |= 4;
-                }
-            }
-            Menu_Framework_CreateMenuRows(3, 0x246, menuStrings, rowTypes);
-            Menu_Options_simpleMapChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_simpleMapChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_simpleMapChoiceSelectedRow != 0) {
-            if (Menu_Options_simpleMapChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_simpleMapChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_simpleMapChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateSimpleMapChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kSimpleMap, init);
 }
 
 // decomp: MENU8.PRG _abilityTimingOptionMenu (src/MENU/MENU8.PRG/88.c:80)
-int Menu_Options_UpdateAbilityTimingChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_abilityTimingChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_abilityTimingChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_abilityTimingOn]];
-                menuStrings[i * 2 + 1] = (char*)&Menu_Options_menuStrings
-                    [Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_abilityTimingOnDesc]];
-                rowTypes[i] = 0;
-            }
-            i = 1 - ((*(u_int*)&Input_settings >> 5) & 1);
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x247, menuStrings, rowTypes);
-            Menu_Options_abilityTimingChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_abilityTimingChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_abilityTimingChoiceSelectedRow != 0) {
-            if (Menu_Options_abilityTimingChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_abilityTimingChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_abilityTimingChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateAbilityTimingChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kAbilityTiming, init);
 }
 
 // decomp: MENU8.PRG _weaponStatusOptionMenu (src/MENU/MENU8.PRG/88.c:138)
-int Menu_Options_UpdateWeaponStatusChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_weaponStatusChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_weaponStatusChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_weaponStatusOn]];
-                menuStrings[i * 2 + 1] = (char*)&Menu_Options_menuStrings
-                    [Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_weaponStatusOnDesc]];
-                rowTypes[i] = 0;
-            }
-            i = 1 - Input_settings.weaponStatChange;
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x248, menuStrings, rowTypes);
-            Menu_Options_weaponStatusChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_weaponStatusChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_weaponStatusChoiceSelectedRow != 0) {
-            if (Menu_Options_weaponStatusChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_weaponStatusChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_weaponStatusChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateWeaponStatusChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kWeaponStatus, init);
 }
 
 // decomp: MENU8.PRG _armorStatusOptionMenu (src/MENU/MENU8.PRG/88.c:196)
-int Menu_Options_UpdateArmorStatusChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_armorStatusChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_armorStatusChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_armorStatusOn]];
-                menuStrings[i * 2 + 1] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_armorStatusOnDesc]];
-                rowTypes[i] = 0;
-            }
-            i = 1 - Input_settings.armorStatChange;
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x249, menuStrings, rowTypes);
-            Menu_Options_armorStatusChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_armorStatusChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_armorStatusChoiceSelectedRow != 0) {
-            if (Menu_Options_armorStatusChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_armorStatusChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_armorStatusChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateArmorStatusChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kArmorStatus, init);
 }
 
 // decomp: MENU8.PRG _cursorMemoryOptionMenu (src/MENU/MENU8.PRG/88.c:255)
-int Menu_Options_UpdateCursorMemoryChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_cursorMemoryChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_cursorMemoryChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_cursorMemoryOn]];
-                menuStrings[i * 2 + 1] = (char*)&Menu_Options_menuStrings
-                    [Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_cursorMemoryOnDesc]];
-                rowTypes[i] = 0;
-            }
-            i = 1 - Input_settings.cursorMemory;
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x24A, menuStrings, rowTypes);
-            Menu_Options_cursorMemoryChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_cursorMemoryChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_cursorMemoryChoiceSelectedRow != 0) {
-            if (Menu_Options_cursorMemoryChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_cursorMemoryChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_cursorMemoryChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateCursorMemoryChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kCursorMemory, init);
 }
 
 // decomp: MENU8.PRG _informationOptionMenu (src/MENU/MENU8.PRG/88.c:313)
-int Menu_Options_UpdateInformationChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_informationChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_informationChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_infoOn]];
-                menuStrings[i * 2 + 1] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_infoOnDesc]];
-                rowTypes[i] = 0;
-            }
-            i = 1 - Input_settings.information;
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x24B, menuStrings, rowTypes);
-            Menu_Options_informationChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_informationChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_informationChoiceSelectedRow != 0) {
-            if (Menu_Options_informationChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_informationChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_informationChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateInformationChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kInformation, init);
 }
 
 // decomp: MENU8.PRG _puzzleModeOptionMenu (src/MENU/MENU8.PRG/88.c:370)
-int Menu_Options_UpdatePuzzleModeChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_puzzleModeChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_puzzleModeChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_puzzleModeOn]];
-                menuStrings[i * 2 + 1] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_puzzleModeOnDesc]];
-                rowTypes[i] = 0;
-            }
-            i = ((*(u_int*)&Input_settings) >> 3) & 1;
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x24C, menuStrings, rowTypes);
-            Menu_Options_puzzleModeChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_puzzleModeChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_puzzleModeChoiceSelectedRow != 0) {
-            if (Menu_Options_puzzleModeChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_puzzleModeChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_puzzleModeChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdatePuzzleModeChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kPuzzleMode, init);
 }
 
 // decomp: MENU8.PRG _soundOptionMenu (src/MENU/MENU8.PRG/88.c:429)
-int Menu_Options_UpdateSoundChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-
-    if (init != 0) {
-        Menu_Options_soundChoiceState = 0;
-        return 0;
-    }
-    switch (Menu_Options_soundChoiceState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_stereo]];
-                menuStrings[i * 2 + 1] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_stereoDesc]];
-                rowTypes[i] = 0;
-            }
-            i = Input_settings.monoSound;
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x24D, menuStrings, rowTypes);
-            Menu_Options_soundChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_soundChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_soundChoiceSelectedRow != 0) {
-            if (Menu_Options_soundChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_soundChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_soundChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateSoundChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kSound, init);
 }
 
 // decomp: MENU8.PRG _vibrationOptionMenu (src/MENU/MENU8.PRG/88.c:486)
-int Menu_Options_UpdateVibrationChoice(int init)
-{
-
-    char* menuStrings[4];
-    int rowTypes[2];
-    int i;
-    int currentState;
-
-    if (init != 0) {
-        Menu_Options_vibrationChoiceState = 0;
-        return 0;
-    }
-    currentState = Menu_Options_vibrationChoiceState;
-    switch (currentState) {
-    case 0:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            for (i = 0; i < 2; ++i) {
-                menuStrings[i * 2] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + Text_Menu8_menu_Index_vibrationOn]];
-                menuStrings[i * 2 + 1] =
-                    (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2
-                                                      + Text_Menu8_menu_Index_vibrationOnDesc]];
-                rowTypes[i] = 0;
-            }
-            i = 1 - Input_settings.vibrationOn;
-            rowTypes[i] |= 4;
-            Menu_Framework_CreateMenuRows(2, 0x24E, menuStrings, rowTypes);
-            Menu_Options_vibrationChoiceState = 1;
-        }
-        break;
-    case 1:
-        Menu_Options_vibrationChoiceSelectedRow = Menu_Framework_GetSelectedRow() + 1;
-        if (Menu_Options_vibrationChoiceSelectedRow != 0) {
-            if (Menu_Options_vibrationChoiceSelectedRow == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            } else {
-                if (Menu_Options_vibrationChoiceSelectedRow == currentState) {
-                    VS::Input::PlayLiveVibrationPreset(0);
-                }
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
-            }
-            Menu_Options_vibrationChoiceState = 2;
-        }
-        break;
-    case 2:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            return Menu_Options_vibrationChoiceSelectedRow;
-        }
-        break;
-    }
-    return 0;
+int UpdateVibrationChoice(Context& ctx, int init) {
+  return UpdateChoice(ctx, Choice::kVibration, init);
 }
 
 // decomp: MENU8.PRG vs_menu8_exec (src/MENU/MENU8.PRG/88.c:551)
-int Menu_Options_Update(u_char* state)
-{
-    enum Menu_Options_OptionsMenuState {
-        Menu_Options_OptionsMenuState_None,
-        Menu_Options_OptionsMenuState_WaitReady = 3,
-        Menu_Options_OptionsMenuState_Init,
-        Menu_Options_OptionsMenuState_HandleInput,
-        Menu_Options_OptionsMenuState_SimpleMap,
-        Menu_Options_OptionsMenuState_AbilityTiming,
-        Menu_Options_OptionsMenuState_WeaponStatus,
-        Menu_Options_OptionsMenuState_ArmorStatus,
-        Menu_Options_OptionsMenuState_CursorMemory,
-        Menu_Options_OptionsMenuState_Information,
-        Menu_Options_OptionsMenuState_PuzzleMode,
-        Menu_Options_OptionsMenuState_Sound,
-        Menu_Options_OptionsMenuState_Vibration,
-        Menu_Options_OptionsMenuState_ExitToMenu,
-        Menu_Options_OptionsMenuState_ExitToBattle
-    };
-
-    char* menuStrings[18];
-    int rowTypes[9];
-    int selectedRow;
-    int i;
-    int updated_settings_word;
-    u_int settings_with_puzzle_mode;
-
-    switch (*state) {
-    case Menu_Options_OptionsMenuState_WaitReady:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
-            break;
-        }
-        Menu_Framework_InitializeInformationBox();
-        // Fallthrough
-    case Menu_Options_OptionsMenuState_Init:
-        for (i = 0; i < 9; ++i) {
-            menuStrings[i * 2] = (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2]];
-            menuStrings[i * 2 + 1] = (char*)&Menu_Options_menuStrings[Menu_Options_menuStrings[i * 2 + 1]];
-            rowTypes[i] = 0;
-        }
-
-        if (Audio_Seq_unusedStateFlags.puzzleModeDisabled != 0) {
-            menuStrings[13] =
-                (char*)&Menu_Options_menuStrings[Text_Menu8_menu_Offset_puzzleModeSettingDisabled];
-            rowTypes[6] = 1;
-        }
-        i = Input_settings.cursorMemory;
-        if (*state != Menu_Options_OptionsMenuState_WaitReady) {
-            Input_settings.cursorMemory = 1;
-        }
-        Menu_Framework_CreateMenuRows(9, 0x145, menuStrings, rowTypes);
-        Input_settings.cursorMemory = i;
-        *state = 5;
+int Update(Context& ctx, std::uint8_t& step) {
+  switch (static_cast<Step>(step)) {
+    case Step::kWaitReady:
+      if (!ctx.host.RowsIdle()) {
         break;
-    case Menu_Options_OptionsMenuState_HandleInput:
-        selectedRow = Menu_Framework_GetSelectedRow();
-        i = selectedRow + 1;
-        if (i != 0) {
-            if (i > 0) {
-                Menu_Framework_FlyOutRowsAndHoistSelection(Menu_Framework_menuMemory.opaque85[5], 1);
-                switch (selectedRow) {
-                case 0:
-                    *state = Menu_Options_OptionsMenuState_SimpleMap;
-                    Menu_Options_UpdateSimpleMapChoice(1);
-                    return 0;
-                case 1:
-                    *state = Menu_Options_OptionsMenuState_AbilityTiming;
-                    Menu_Options_UpdateAbilityTimingChoice(1);
-                    return 0;
-                case 2:
-                    *state = Menu_Options_OptionsMenuState_WeaponStatus;
-                    Menu_Options_UpdateWeaponStatusChoice(1);
-                    return 0;
-                case 3:
-                    *state = Menu_Options_OptionsMenuState_ArmorStatus;
-                    Menu_Options_UpdateArmorStatusChoice(1);
-                    return 0;
-                case 4:
-                    *state = Menu_Options_OptionsMenuState_CursorMemory;
-                    Menu_Options_UpdateCursorMemoryChoice(1);
-                    return 0;
-                case 5:
-                    *state = Menu_Options_OptionsMenuState_Information;
-                    Menu_Options_UpdateInformationChoice(1);
-                    return 0;
-                case 6:
-                    *state = Menu_Options_OptionsMenuState_PuzzleMode;
-                    Menu_Options_UpdatePuzzleModeChoice(1);
-                    return 0;
-                case 7:
-                    *state = Menu_Options_OptionsMenuState_Sound;
-                    Menu_Options_UpdateSoundChoice(1);
-                    return 0;
-                case 8:
-                    *state = Menu_Options_OptionsMenuState_Vibration;
-                    Menu_Options_UpdateVibrationChoice(1);
-                    return 0;
-                }
-            } else if (i == -2) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            } else {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                *state = Menu_Options_OptionsMenuState_ExitToMenu;
-            }
-        } else {
-            if (Audio_Seq_unusedStateFlags.puzzleModeDisabled != 0) {
-                if (Menu_Framework_HighlightedRow() == 6) {
-                    Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-                    Menu_textBoxes[7].state = 0xB;
-                } else if (Input_settings.information != 0) {
-                    Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(2));
-                    Menu_textBoxes[7].state = 0xB;
-                } else {
-                    Menu_textBoxes[7].state = 0;
-                }
-            }
-            break;
-        }
-        break;
-    case Menu_Options_OptionsMenuState_SimpleMap:
-        i = Menu_Options_UpdateSimpleMapChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            Input_settings.simpleMap = Menu_Options_simpleMapValues[i - 1];
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_AbilityTiming:
-        i = Menu_Options_UpdateAbilityTimingChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            updated_settings_word = *(int*)&Input_settings & ~0x20;
-            updated_settings_word |= ((2 - i) & 1) << 5;
-            *(int*)&Input_settings = updated_settings_word;
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_WeaponStatus:
-        i = Menu_Options_UpdateWeaponStatusChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            updated_settings_word = *(int*)&Input_settings & ~0x40;
-            updated_settings_word |= (((2 - i) & 1) << 6);
-            *(int*)&Input_settings = updated_settings_word;
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_ArmorStatus:
-        i = Menu_Options_UpdateArmorStatusChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            updated_settings_word = *(int*)&Input_settings & ~0x80;
-            updated_settings_word |= (((2 - i) & 1) << 7);
-            *(int*)&Input_settings = updated_settings_word;
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_CursorMemory:
-        i = Menu_Options_UpdateCursorMemoryChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            Input_settings.cursorMemory = 2 - i;
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_Information:
-        i = Menu_Options_UpdateInformationChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            Input_settings.information = 2 - i;
-            Menu_Framework_InitializeInformationBox();
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_PuzzleMode:
-        i = Menu_Options_UpdatePuzzleModeChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            settings_with_puzzle_mode = (*(int*)&Input_settings & ~8) | (((i - 1) & 1) * 8);
-            *(int*)&Input_settings = settings_with_puzzle_mode;
-            Audio_Seq_unusedStateFlags.puzzleMode = ~(settings_with_puzzle_mode >> 3) & 1;
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_Sound:
-        i = Menu_Options_UpdateSoundChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            Input_settings.monoSound = i - 1;
-            Audio_SetMonoOutput(Input_settings.monoSound);
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_Vibration:
-        i = Menu_Options_UpdateVibrationChoice(0);
-        if (i == 0) {
-            break;
-        }
-        if (i == -2) {
-            *state = Menu_Options_OptionsMenuState_ExitToBattle;
-            break;
-        }
-        if (i > 0) {
-            Input_settings.vibrationOn = 2 - i;
-        }
-        *state = Menu_Options_OptionsMenuState_Init;
-        break;
-    case Menu_Options_OptionsMenuState_ExitToMenu:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            *state = Menu_Options_OptionsMenuState_None;
-            return 1;
-        }
-        break;
-    case Menu_Options_OptionsMenuState_ExitToBattle:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            Menu_Framework_menuState.currentMenu = 8;
-            *state = Menu_Options_OptionsMenuState_None;
-            return 1;
-        }
-        break;
-    }
-    return 0;
+      }
+      ctx.host.InitializeInformationBox();
+      [[fallthrough]];
+    case Step::kInit:
+      OpenSettingsRows(ctx, step);
+      break;
+    case Step::kHandleInput:
+      HandleSettingsInput(ctx, step);
+      break;
+    case Step::kSimpleMap:
+    case Step::kAbilityTiming:
+    case Step::kWeaponStatus:
+    case Step::kArmorStatus:
+    case Step::kCursorMemory:
+    case Step::kInformation:
+    case Step::kPuzzleMode:
+    case Step::kSound:
+    case Step::kVibration:
+      RunChoice(ctx, step);
+      break;
+    case Step::kExitToMenu:
+      return CloseScreen(ctx, step, false);
+    case Step::kExitToBattle:
+      return CloseScreen(ctx, step, true);
+    case Step::kNone:
+      break;
+  }
+  return 0;
 }
-
-// MENU8.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Options_ResetMenu8Statics(void)
-{
-    {
-        static const char initial[] = { 3, 1, 0 };
-        memcpy((void*)&Menu_Options_simpleMapValues, &initial, sizeof Menu_Options_simpleMapValues);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_simpleMapChoiceSelectedRow, &initial, sizeof Menu_Options_simpleMapChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_simpleMapChoiceState, &initial, sizeof Menu_Options_simpleMapChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_abilityTimingChoiceSelectedRow, &initial, sizeof Menu_Options_abilityTimingChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_abilityTimingChoiceState, &initial, sizeof Menu_Options_abilityTimingChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_weaponStatusChoiceSelectedRow, &initial, sizeof Menu_Options_weaponStatusChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_weaponStatusChoiceState, &initial, sizeof Menu_Options_weaponStatusChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_armorStatusChoiceSelectedRow, &initial, sizeof Menu_Options_armorStatusChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_armorStatusChoiceState, &initial, sizeof Menu_Options_armorStatusChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_cursorMemoryChoiceSelectedRow, &initial, sizeof Menu_Options_cursorMemoryChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_cursorMemoryChoiceState, &initial, sizeof Menu_Options_cursorMemoryChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_informationChoiceSelectedRow, &initial, sizeof Menu_Options_informationChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_informationChoiceState, &initial, sizeof Menu_Options_informationChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_puzzleModeChoiceSelectedRow, &initial, sizeof Menu_Options_puzzleModeChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_puzzleModeChoiceState, &initial, sizeof Menu_Options_puzzleModeChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_soundChoiceSelectedRow, &initial, sizeof Menu_Options_soundChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_soundChoiceState, &initial, sizeof Menu_Options_soundChoiceState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_vibrationChoiceSelectedRow, &initial, sizeof Menu_Options_vibrationChoiceSelectedRow);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Options_vibrationChoiceState, &initial, sizeof Menu_Options_vibrationChoiceState);
-    }
-}
-
-}  // extern "C"
+}  // namespace VS::Menu::Options

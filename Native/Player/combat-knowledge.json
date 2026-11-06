@@ -95,7 +95,7 @@
   },
   "semantics_provenance": "Native action IDs/names/costs: SLUS_010.40 table0x3C1DC,52-byte stride. Status parameter indices: production StatusEffects.c mediators; resolve actual bitmasks from observed status_masks (the historical enum is not runtime-mask authority). Reflection/scaling: Damage.c11686/11703/12156/12191/12208 and ActionEffects.c12606 onward, verified by ability-effects tests. Menus filter current learned actions. Timing acceptance is not proof of useful effects.",
   "reactions": {
-    "source": "Battle_UpdateBattleAbilityTiming, original BATTLE/146C.c:7147; Battle_CanTriggerBattleAbility",
+    "source": "VS::Battle::UpdateBattleAbilityTiming, original BATTLE/146C.c:7147; VS::Battle::CanTriggerBattleAbility",
     "slot_buttons": {"1": "Circle", "2": "Triangle", "3": "Square"},
     "success": "The evaluated pre-increment timer must be strictly greater than abilityWindow and at most abilityWindow plus margin.",
     "margin": "Start at8 when story flag1 is set, otherwise10; incoming action IDs54+ add4. Subtract queueIndex/3 and clamp to at least2.",

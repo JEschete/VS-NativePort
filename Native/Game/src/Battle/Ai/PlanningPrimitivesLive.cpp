@@ -14,8 +14,8 @@
 #include <span>
 #include <type_traits>
 
+#include "Actors/ActorStateLive.hpp"
 extern "C" {
-#include "Actors/ActorState.h"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
@@ -104,7 +104,8 @@ class LiveTargetMemory final : public TargetMemoryHost {
       unsigned target) const override {
     if (Actors_actorRecords[target] == nullptr) return std::nullopt;
     Actors_ActorLocationQuery placement{};
-    if (Actors_ActorPlacement(static_cast<int>(target), &placement) != 0) {
+    if (VS::Actors::LiveActorPlacement(static_cast<int>(target), &placement) !=
+        0) {
       return std::nullopt;
     }
     return static_cast<std::uint32_t>(placement.location.packedTile.word);

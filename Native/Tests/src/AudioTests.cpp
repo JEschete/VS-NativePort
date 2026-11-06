@@ -44,13 +44,13 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 }
 
-extern "C" int TestsZoneMusicStateAliases(void);
+extern "C" int TestsZoneMusicCanonicalState(void);
 extern "C" void TestsNativeNoiseChannel(void);
 extern "C" void TestsNativeMonoOutput(int enabled);
 extern "C" int TestsMenuSoundDispatch(void);
 extern "C" void TestsPrepareStreamPlayback(void);
 extern "C" void TestsRestoreStreamPlayback(void);
-extern "C" int TestsBindEffectStream(void* bytes);
+extern "C" int TestsBindEffectStream(void* bytes, size_t size);
 extern "C" int TestsPlayStreamSlot(int slot, int pan, int volume);
 extern "C" void TestsAdvanceStreamTick(void);
 extern "C" void TestsStreamControl(int command, int value, int target);
@@ -116,16 +116,15 @@ TEST_CASE("In-game menu sounds dispatch original IDs and channel tags",
   }
 }
 
-TEST_CASE("Zone music consumers share the initialized canonical state",
+TEST_CASE("Zone music consumers read the initialized canonical zone state",
           "[audio][music-state]") {
-  const int result = TestsZoneMusicStateAliases();
+  const int result = TestsZoneMusicCanonicalState();
   CHECK((result & 1) != 0);
   CHECK((result & 2) != 0);
   CHECK((result & 4) != 0);
   CHECK((result & 8) != 0);
   CHECK((result & 16) != 0);
   CHECK((result & 32) != 0);
-  CHECK((result & 64) != 0);
 }
 
 namespace {
@@ -380,7 +379,7 @@ struct StreamFixture {
   ~StreamFixture() { TestsRestoreStreamPlayback(); }
 
   void BindAndPlay(int pan = 128) {
-    REQUIRE(TestsBindEffectStream(package.data()) == 3);
+    REQUIRE(TestsBindEffectStream(package.data(), package.size()) == 3);
     REQUIRE_FALSE(TestsStreamSlotIsEmpty());
     REQUIRE(TestsPlayStreamSlot(3, pan, 127) == 1);
     REQUIRE(TestsStreamVoiceMask() == 0xC00000);
@@ -997,7 +996,8 @@ TEST_CASE(
   for (const bool stereo : {false, true}) {
     StreamFixture fixture(stereo);
     fixture.BindAndPlay();
-    CHECK(TestsBindEffectStream(fixture.package.data()) == 0);
+    CHECK(TestsBindEffectStream(fixture.package.data(),
+                                fixture.package.size()) == 0);
     CheckStreamPauseToCompletion();
     CHECK_FALSE(TestsStreamSlotIsEmpty());
     REQUIRE(TestsPlayStreamSlot(3, 128, 127) == 1);

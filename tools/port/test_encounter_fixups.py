@@ -1,6 +1,5 @@
 """Regressions for native source adaptations, without game assets."""
 
-import collections
 import csv
 import re
 import runpy
@@ -24,30 +23,174 @@ class EncounterFixupTests(unittest.TestCase):
     def test_texture_animations_use_the_callers_overlay_atlas(self):
         copier = object.__new__(copy_to_native.Copier)
         copier.used_fixups = set()
-        for namespace, atlas in (
-            ("Ending::", "Ending_resultAtlasRegions"),
-            ("Menu::Results::", "Menu_Results_disMap"),
-        ):
-            for animation in ("TintFade", "FlashFade", "Wipe"):
-                with self.subTest(namespace=namespace, animation=animation):
-                    name = f"VS::Render::DrawTexture{animation}"
-                    live = f"VS::Render::DrawLiveTexture{animation}"
-                    arguments = "x, y, texId, colors"
-                    if animation == "Wipe":
-                        arguments += ", wipe_edge_x"
-                    row = {"id": "test", "final_name": namespace + "DrawHeading"}
-                    for whitespace in ("", "\n    "):
-                        source = f"{name}({whitespace}{arguments});"
-                        self.assertEqual(
-                            copier.apply_fixups(row, source),
-                            f"{live}({atlas}, {arguments});",
-                        )
+        atlas = "Menu_Results_disMap"
+        for animation in ("TintFade", "FlashFade", "Wipe"):
+            with self.subTest(animation=animation):
+                name = f"VS::Render::DrawTexture{animation}"
+                live = f"VS::Render::DrawLiveTexture{animation}"
+                arguments = "x, y, texId, colors"
+                if animation == "Wipe":
+                    arguments += ", wipe_edge_x"
+                row = {"id": "test", "final_name": "Menu::Results::DrawHeading"}
+                for whitespace in ("", "\n    "):
+                    source = f"{name}({whitespace}{arguments});"
+                    self.assertEqual(
+                        copier.apply_fixups(row, source),
+                        f"{live}({atlas}, {arguments});",
+                    )
+
+    def test_promoted_ending_slice_leaves_no_copier_adaptations(self):
+        # #276 row 54: the ENDING.PRG results and staff roll are typed C++ (Ending/ClearResultsCore.cpp,
+        # Ending/Credits/StaffRollCore.cpp), so no copier text edit may still target them.
+        with (Path(__file__).parent / "owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"]: row["name"] for row in csv.DictReader(table)}
+        ending = {fid: name for fid, name in owned.items() if name.startswith("VS::Ending::")}
+        self.assertEqual(len(ending), 47)
+        for fid, name in ending.items():
+            with self.subTest(fid=fid):
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                final_name = name.removeprefix("VS::")
+                self.assertEqual(
+                    [row for row, *_ in copy_fixups.REGEX_FIXES if row and re.search(row, final_name)], [])
+        adaptations = (Path(__file__).parent / "cpp_adaptations.json").read_text(encoding="utf-8")
+        self.assertNotIn("ClearResults.cpp", adaptations)
+        self.assertNotIn("StaffRoll.cpp", adaptations)
+
+    def test_promoted_script_actor_opcodes_leave_no_copier_adaptations(self):
+        # #276 row 34: the 47 actor opcode handlers and their 4 helpers are typed C++ (Event/ScriptActorCommands.cpp);
+        # each opcode table slot holds the C binding at the handler's module-image address.
+        with (Path(__file__).parent / "owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table)
+                     if row["path"] == r"Native\Game\src\Event\ScriptActorCommands.cpp"}
+        self.assertEqual(len(owned), 51)
+        opcodes = {fid: (address, name) for fid, address, name in copy_fixups.EVENT_SCRIPT_ACTOR_OPCODES}
+        self.assertEqual(len(opcodes), 47)
+        self.assertEqual(set(owned) - set(opcodes), set(copy_fixups.EVENT_SCRIPT_ACTOR_LIVE_BINDINGS))
+        for fid, row in owned.items():
+            with self.subTest(fid=fid):
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                final_name = row["name"].removeprefix("VS::")
+                self.assertEqual(
+                    [r for r, *_ in copy_fixups.REGEX_FIXES if r and re.search(r, final_name)],
+                    [r"^Event::(?:Script|Command)"] * 2 if fid in opcodes else [])
+                if fid in opcodes:
+                    address, name = opcodes[fid]
+                    binding = f"Event_{name}Opcode"
+                    self.assertEqual(copy_fixups.EVENT_OPCODE_BINDINGS[fid], binding)
+                    self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                    self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                                     r"Native\Game\src\Event\ScriptActorOpcodes.h")
+                else:
+                    live = copy_fixups.OWNED_CALL_BINDINGS[fid]
+                    self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                                     r"Native\Game\include\Event\ScriptActorCommandsLive.hpp")
+        adaptations = (Path(__file__).parent / "cpp_adaptations.json").read_text(encoding="utf-8")
+        self.assertNotIn("ScriptActors.cpp", adaptations)
+
+    def test_promoted_script_media_opcodes_leave_no_copier_adaptations(self):
+        # #276 row 36: the 53 sound, dialog and effect opcode handlers and their 4 helpers are typed C++
+        # (Event/Script{Audio,Dialog,Effect}Commands.cpp); each opcode table slot holds the C binding at the
+        # handler's module-image address, and the script VM's frame updates call the effect Live helpers.
+        cores = {
+            r"Native\Game\src\Event\ScriptAudioCommands.cpp": 29,
+            r"Native\Game\src\Event\ScriptDialogCommands.cpp": 10,
+            r"Native\Game\src\Event\ScriptEffectCommands.cpp": 18,
+        }
+        with (Path(__file__).parent / "owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table) if row["path"] in cores}
+        self.assertEqual(len(owned), sum(cores.values()))
+        opcodes = {fid: (address, name) for fid, address, name in copy_fixups.EVENT_SCRIPT_MEDIA_OPCODES}
+        self.assertEqual(len(opcodes), 53)
+        headers = {f"Event_{name}Opcode": header for header, rows in copy_fixups.EVENT_SCRIPT_MEDIA_OPCODE_HEADERS
+                   for _, _, name in rows}
+        self.assertEqual(set(owned) - set(opcodes),
+                         set(copy_fixups.EVENT_SCRIPT_EFFECT_LIVE_BINDINGS) | {"F01039"})
+        for fid, row in owned.items():
+            with self.subTest(fid=fid):
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                final_name = row["name"].removeprefix("VS::")
+                self.assertEqual(
+                    [r for r, *_ in copy_fixups.REGEX_FIXES if r and re.search(r, final_name)],
+                    [r"^Event::(?:Script|Command)"] * 2 if fid in opcodes else [])
+                if fid in opcodes:
+                    address, name = opcodes[fid]
+                    binding = f"Event_{name}Opcode"
+                    self.assertEqual(copy_fixups.EVENT_OPCODE_BINDINGS[fid], binding)
+                    self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                    self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding], headers[binding])
+                elif fid != "F01039":
+                    live = copy_fixups.OWNED_CALL_BINDINGS[fid]
+                    self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                                     r"Native\Game\include\Event\ScriptEffectCommandsLive.hpp")
+        # The placement helper's only caller (opcode 0x13) is promoted, so it needs no call binding.
+        self.assertNotIn("F01039", copy_fixups.OWNED_CALL_BINDINGS)
+        adaptations = (Path(__file__).parent / "cpp_adaptations.json").read_text(encoding="utf-8")
+        for generated in ("ScriptAudio.cpp", "ScriptDialog.cpp", "ScriptEffects.cpp"):
+            self.assertNotIn(generated, adaptations)
+
+    def test_promoted_battle_targeting_prerequisites_leave_no_copier_adaptations(self):
+        # #276 row 31: the 83 targeting, attack prerequisite, battle ability and battle mode functions are typed C++
+        # (Battle/{Targeting,AttackPrerequisites,Abilities,BattleMode}.cpp); generated callers reach them through
+        # the *Live.hpp bindings and each prerequisite table slot holds a Battle_*Slot C binding.
+        cores = {
+            r"Native\Game\src\Battle\Targeting.cpp": 26,
+            r"Native\Game\src\Battle\AttackPrerequisites.cpp": 43,
+            r"Native\Game\src\Battle\Abilities.cpp": 12,
+            r"Native\Game\src\Battle\BattleMode.cpp": 2,
+        }
+        with (Path(__file__).parent / "owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table) if row["path"] in cores}
+        self.assertEqual(len(owned), sum(cores.values()))
+        slots = {fid: (address, name) for fid, address, name in copy_fixups.BATTLE_ATTACK_PREREQUISITE_SLOTS}
+        self.assertEqual(len(slots), 40)
+        live = {fid: (header, name) for header, bindings in copy_fixups.BATTLE_TARGETING_PREREQUISITE_LIVE_HEADERS
+                for fid, name in bindings.items()}
+        self.assertEqual(len(live), 23)
+        names = {row["name"].removeprefix("VS::Battle::") for row in owned.values()}
+        for _, pattern, *_ in copy_fixups.REGEX_FIXES:
+            for name in names:
+                self.assertNotRegex(pattern, rf"\b(?:Battle_|VS::Battle::){name}\b")
+        for fid, row in owned.items():
+            with self.subTest(fid=fid):
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                self.assertTrue(row["name"].startswith("VS::Battle::"))
+                final_name = row["name"].removeprefix("VS::")
+                # Only the family-wide Battle:: rewrites of other promoted helpers apply to these rows.
+                self.assertEqual({r for r, *_ in copy_fixups.REGEX_FIXES if r and re.search(r, final_name)},
+                                 {r"^Battle::"})
+                if fid in slots:
+                    address, name = slots[fid]
+                    binding = f"Battle_{name}Slot"
+                    self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                    self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                                     r"Native\Game\src\Battle\AttackPrerequisites.h")
+                    self.assertNotIn(fid, copy_fixups.OWNED_CALL_BINDINGS)
+                if fid in live:
+                    header, name = live[fid]
+                    self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[fid], f"VS::Battle::{name}")
+                    self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[f"VS::Battle::{name}"], header)
+        self.assertTrue(set(live) <= set(owned))
+        self.assertFalse(set(live) & set(slots))
+        adaptations = (Path(__file__).parent / "cpp_adaptations.json").read_text(encoding="utf-8")
+        for generated in ("Battle\\\\Targeting.cpp", "Battle\\\\Abilities.cpp", "Battle\\\\AttackPrerequisites.cpp",
+                          "Battle\\\\BattleMode.cpp", "Battle_CheckActionHitPrerequisite(",
+                          "Battle_CalculateActionRangeSquared("):
+            self.assertNotIn(generated, adaptations)
+
+    def test_script_actor_reference_resolver_returns_unhandled_references(self):
+        # #303: 573B8.c:156 falls off the end of its switch; the PS1 epilogue returns the reference in v0.
+        fixes = copy_fixups.FIXES["F01275"]
+        source = ("int Event_ResolveScriptActorReference(u_short arg0)\n{\n    switch (arg0 >> 12) {\n"
+                  "    case 2:\n        return arg0;\n    }\n}")
+        for old, new, _ in fixes:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertTrue(source.endswith("    }\n    return arg0;\n}"))
 
     def test_texture_pop_ins_pass_bounded_color_pairs(self):
         copier = object.__new__(copy_to_native.Copier)
         copier.used_fixups = set()
         for namespace, colors in (
-            ("Ending::", "Ending_congratulationsTint"),
             ("Menu::Results::", "Menu_Results_foodChainColors"),
             ("Menu::Results::", "Menu_Results_timeAttackHeadingColors"),
         ):
@@ -62,11 +205,6 @@ class EncounterFixupTests(unittest.TestCase):
             copier.apply_fixups(row, "Tint(&Menu_Results_timeAttackStartColors[1]);"),
             "Tint(&Menu_Results_timeAttackStartColors[1]);",
         )
-        row = {"id": "test", "final_name": "Ending::DrawScore"}
-        self.assertEqual(
-            copier.apply_fixups(row, "{\n    extern CVECTOR Ending_scoreTint[];\n    x();\n}"),
-            "{\n    x();\n}",
-        )
 
     def test_absent_model_effect_targets_empty_slot_without_deferred_proof(self):
         for fixup_id in ("F01433", "F01438"):
@@ -75,27 +213,75 @@ class EncounterFixupTests(unittest.TestCase):
         for _, new, why in copy_fixups.FIXES.get("F01425", []):
             self.assertIn("#282", why)
             self.assertNotIn("Deferred", new)
-        command = copy_fixups.FIXES["F01170"][0][1]
-        self.assertIn("(unsigned)actor < 16 && target == NULL", command)
-        self.assertIn("Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL;", command)
-        self.assertIn("empty_slot && (referenceType == 1 || actor == 1)", command)
-        self.assertIn("if (!unresolved_model && ", command)
-        self.assertTrue(command.rstrip().endswith(
-            "Effects_StartScriptedActorEffect(effect, actor);"))
-        self.assertNotIn("Deferred", command)
+        # #276 row 36: opcode 0xA0 (F01170) is typed C++; a slot reference, or a model no actor has, targets the
+        # empty slot and starts, as func_800BFE50 and func_8007BE20 did.
+        self.assertNotIn("F01170", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Event\ScriptEffectCommands.cpp").read_text(encoding="utf-8")
+        start = core.index("ScriptStep CommandPlayActorEffect(")
+        handler = core[start:core.index("\n}\n", start)]
+        self.assertIn("in_range && !slot.battle_actor && !slot.occupied &&", handler)
+        self.assertIn("(reference_type == kSlotReference || actor == kModelNotFoundSlot);", handler)
+        self.assertIn("if (!absent_model && unavailable) {", handler)
+        self.assertTrue(handler.rstrip().endswith(
+            "host.StartActorEffect(effect, actor);\n  return ScriptStep::kAdvance;"))
+        live = (root / r"Native\Game\src\Event\ScriptEffectCommandsLive.cpp").read_text(encoding="utf-8")
+        self.assertRegex(live, r"\.occupied = Actors_actorRecords\[actor\] != nullptr \|\|\s+"
+                               r"Field_gimmickInstances\[actor\] != nullptr")
+        self.assertNotIn("Deferred", handler + live)
         self.assertNotIn("Deferred", "".join(copy_fixups.NATIVE_HELPER_HEADERS))
 
-    def test_camera_constraint_checks_the_nullable_collision_query(self):
-        source = (
-            "if (Field_CollisionCellAt(var_a0, var_a1, var_a2)"
-            "->occlusionAndFloorFlags & 1) {"
-        )
-        for old, new, _ in copy_fixups.FIXES.get("F00157", []):
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertIn("camera_cell != NULL &&", source)
-        self.assertIn('Core_Warnf("field.camera"', source)
-        self.assertNotIn("Field_CollisionCellAt(var_a0, var_a1, var_a2)->", source)
+    def test_promoted_field_camera_slice_leaves_no_copier_adaptations(self):
+        # #276 field-camera-background: the camera, room background and weather are typed VS::Field cores
+        # (Field/Camera.cpp, Background.cpp, Environment.cpp); the camera core refuses a tile with no authored
+        # collision cell itself (CameraHost::CollisionCellFlags), so no copier text edit may still target them.
+        with (Path(__file__).parent / "owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table)}
+        paths = {rf"Native\Game\src\Field\{name}.cpp" for name in ("Camera", "Background", "Environment")}
+        promoted = {fid: row["name"] for fid, row in owned.items()
+                    if row["kind"] == "function" and row["path"] in paths}
+        self.assertEqual(len(promoted), 56)
+        generic = {row for row, *_ in copy_fixups.REGEX_FIXES if row and re.search(row, "Field::NotPromoted")}
+        for fid, name in promoted.items():
+            with self.subTest(fid=fid):
+                self.assertTrue(name.startswith("VS::Field::"))
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                self.assertEqual(
+                    [row for row, *_ in copy_fixups.REGEX_FIXES
+                     if row and row not in generic and re.search(row, name.removeprefix("VS::"))], [])
+        adaptations = (Path(__file__).parent / "cpp_adaptations.json").read_text(encoding="utf-8")
+        for name in ("Camera", "Background", "Environment"):
+            self.assertNotIn(rf"Field\\{name}.cpp", adaptations)
+        for fid, name in copy_fixups.FIELD_CAMERA_LIVE_BINDINGS.items():
+            self.assertIn(fid, promoted)
+            self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[f"VS::Field::{name}"],
+                             r"Native\Game\include\Field\CameraLive.hpp")
+        self.assertNotIn("F00661", copy_fixups.OWNED_CALL_BINDINGS)
+        self.assertNotIn("F00668", copy_fixups.OWNED_CALL_BINDINGS)
+
+    def test_unchecked_cell_readers_read_an_absent_cell(self):
+        sources = {
+            "F00158": "    Field_MpdTileCell* tile;\n"
+                      "        tile = VS::Field::LiveCollisionCellAt(0, 0, floorOverride >> 16);\n"
+                      "        tile = VS::Field::LiveCollisionCellAt(position[0],\n",
+            "F00159": "    Field_MpdTileCell* temp_s4;\n"
+                      "        temp_s4 = VS::Field::LiveCollisionCellAt(0, 0, temp_a2 >> 0x10);\n"
+                      "        temp_s4 = VS::Field::LiveCollisionCellAt(arg1->packedTile.target.tileX,\n",
+            "F00547": "    if ((VS::Field::LiveCollisionCellAt(var_a0, var_a1, var_a2)->hasRoomTrigger & 1)\n",
+            "F00596": "        Field_MpdTileCell* cell;\n"
+                      "        cell = VS::Field::LiveCollisionCellAt(object->positionX / (ONE * 128), "
+                      "object->positionZ / (ONE * 128), 0);\n",
+            "F01308": "            Field_MpdTileCell* room = VS::Field::LiveCollisionCellAt(x, z, 0);\n",
+        }
+        for function_id, source in sources.items():
+            with self.subTest(function_id):
+                for old, new, why in copy_fixups.FIXES[function_id]:
+                    self.assertIn(old, source)
+                    self.assertIn("#288", why)
+                    source = source.replace(old, new)
+                self.assertNotIn("LiveCollisionCellAt(", source)
+                self.assertIn("VS::Field::LiveCollisionCellOrAbsent(", source)
+                self.assertNotRegex(source, r"(?<!const )Field_MpdTileCell\*")
 
     def test_action_plan_selection_counts_start_at_zero(self):
         source = "    int quotas[3] = { 10, 3, 3 };\n    int selected[3];\n    int row;\n"
@@ -119,39 +305,22 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("value = Field_FindGimmickForActorSlot(actor_id);", actual)
         self.assertIn("if (Field_FindGimmickForActorSlot(actor_id) == NULL)", actual)
 
-    def test_sfx_reference_signatures_preserve_native_pointers(self):
-        copier = object.__new__(copy_to_native.Copier)
-        copier.sig_retype = {}
-        copier.report = collections.defaultdict(list)
-        declarations = (
-            ("F03520", "Audio_ResolveSfxProgram",
-             "int Audio_ResolveSfxProgram(int group, int effect);",
-             "intptr_t Audio_ResolveSfxProgram(int group, int effect);"),
-            ("F03097", "Audio_Playback_SoundEffectIdForTag",
-             "int Audio_Playback_SoundEffectIdForTag(int tag);",
-             "intptr_t Audio_Playback_SoundEffectIdForTag(int tag);"),
-            ("F03203", "Audio_SoundEffects_ReleaseMatchingVoices",
-             "void Audio_SoundEffects_ReleaseMatchingVoices(int selector, int mask);",
-             "void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t selector, int mask);"),
-            ("F03150", "Audio_Control_SoundEffectChannelIds",
-             "u_int Audio_Control_SoundEffectChannelIds(u_int* ids);",
-             "u_int Audio_Control_SoundEffectChannelIds(intptr_t* ids);"),
-            *(
-                (function_id, name,
-                 f"void {name}(int selector, int mask, int ticks, int value);",
-                 f"void {name}(intptr_t selector, int mask, int ticks, int value);")
-                for function_id, name in (
-                    ("F03108", "Audio_Control_FadeSoundEffectVolume"),
-                    ("F03112", "Audio_Control_FadeSoundEffectPan"),
-                    ("F03116", "Audio_Control_FadeSoundEffectPitch"),
-                )
-            ),
-        )
-        for function_id, name, original, expected in declarations:
+    def test_sfx_reference_carriers_left_the_copier_for_owned_cores(self):
+        # #276 audio-control-sfx: the resolver, release, channel-ID and fade carriers are typed in the owned
+        # cores (EffectSelector, std::intptr_t), so no generated signature is widened any more.
+        owned = self.owned_items()
+        for function_id, path in (
+            ("F03520", r"Native\Engine\src\Audio\SfxCore.cpp"),
+            ("F03203", r"Native\Engine\src\Audio\SoundEffects\SoundEffectProgramsCore.cpp"),
+            ("F03150", r"Native\Engine\src\Audio\Control\SoundControlCore.cpp"),
+            ("F03108", r"Native\Engine\src\Audio\Control\SoundControlCore.cpp"),
+            ("F03112", r"Native\Engine\src\Audio\Control\SoundControlCore.cpp"),
+            ("F03116", r"Native\Engine\src\Audio\Control\SoundControlCore.cpp"),
+        ):
             with self.subTest(function_id=function_id):
-                self.assertEqual(
-                    copier.retype_signature(function_id, original, name), expected
-                )
+                self.assertNotIn(function_id, copy_fixups.NATIVE_SIGNATURE_REWRITES)
+                self.assertNotIn(function_id, copy_fixups.FIXES)
+                self.assertEqual(owned[function_id]["path"], path)
 
     def test_native_pointer_fields_cannot_widen_serialized_records(self):
         copier = object.__new__(copy_to_native.Copier)
@@ -163,134 +332,81 @@ class EncounterFixupTests(unittest.TestCase):
         ):
             copier.load_hazards()
 
-    def test_ending_credits_prepare_complete_art_before_all_twelve_uploads(self):
-        names = ("One", "Two", "Three", "Four", "Five", "Six",
-                 "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
-        source = "Ending_Credits_AllocateRenderBuffers();\n" + "\n".join(
-            f"Ending_Credits_UploadTexture(&Ending_Credits_embeddedTexture{name});"
-            for name in names
-        )
-        for old, new, why in copy_fixups.FIXES["F02418"]:
-            if "#282" in why:
-                continue
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertIn("if (!Ending_Credits_PrepareEmbeddedArt()) abort();", source)
-        self.assertEqual(source.count("Ending_Credits_UploadTexture("), 12)
-        for index in range(12):
-            self.assertIn(f"Ending_Credits_EmbeddedArt({index})", source)
-        self.assertNotIn("&Ending_Credits_embeddedTexture", source)
-
-    def test_ending_credits_present_the_typed_native_ordering_table(self):
-        source = (
-            "Ending_Credits_PresentFrame("
-            "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"
-        )
-        for old, new, _ in copy_fixups.FIXES["F02420"]:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertEqual(
-            source,
-            "Ending_Credits_PresentFrame("
-            "(u_long*)Render_frameScratch.orderingTable + 0x7FF);",
-        )
-        self.assertNotIn("Core_ScratchBase", source)
-
     def test_room_retention_predicate_uses_the_declared_byte_return(self):
-        fixups = copy_fixups.FIXES["F01261"]
-        old, new, _ = next(item for item in fixups if "Actors_IsActorRetainedAfterDefeat" in item[0])
-        self.assertIn("int (*)(int)", old)
-        self.assertEqual(new, "Actors_IsActorRetainedAfterDefeat(actorId)")
-
-    def test_ending_results_both_phases_present_the_native_ordering_table(self):
-        source = "\n".join(
-            ["Ending_Credits_PresentFrame("
-             "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"] * 2
-        )
-        for old, new, _ in copy_fixups.FIXES["F02441"]:
-            self.assertEqual(source.count(old), 2)
-            source = source.replace(old, new)
-        self.assertEqual(source.count(
-            "(u_long*)Render_frameScratch.orderingTable + 0x7FF"), 2)
-        self.assertNotIn("Core_ScratchBase", source)
-
-    def test_ending_rank_background_uses_the_original_penultimate_bucket(self):
-        source = (
-            "poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);\n"
-            "AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) "
-            "+ 0x1FF8, poly++);\n"
-            "*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;"
-        )
-        for old, new, _ in copy_fixups.FIXES["F02444"]:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertIn("poly = Render_frameScratch.primitiveCursor;", source)
-        self.assertIn(
-            "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
-            source,
-        )
-        self.assertIn("Render_frameScratch.primitiveCursor = poly;", source)
-        self.assertNotIn("Core_ScratchBase", source)
-
-    def test_ending_completion_formatters_own_a_full_signed_integer_string(self):
-        for function_id, variable, value in (
-            ("F02448", "sp10", "Ending_mapCompletion"),
-            ("F02449", "sp18", "Ending_displayedMapCompletion"),
-        ):
-            with self.subTest(function_id=function_id):
-                formatting = f'sprintf({variable}, "%03d", {value});'
-                source = f"char {variable}[2];\n" + formatting
-                for old, new, _ in copy_fixups.FIXES.get(function_id, []):
-                    self.assertEqual(source.count(old), 1)
-                    source = source.replace(old, new)
-                self.assertIn(f"char {variable}[12];", source)
-                self.assertIn(formatting, source)
+        # #276 slice 19b: the predicate is owned; the Live adapter returns 0 or 1 through its declared char, so the
+        # generated caller needs no function-pointer cast fixup.
+        self.assertNotIn("F01261", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as file:
+            owned = {row["id"]: row for row in csv.DictReader(file)}
+        self.assertEqual(owned["F00296"]["name"], "VS::Actors::IsActorRetainedAfterDefeat")
+        live = (root / r"Native\Game\include\Actors\ActorStateLive.hpp").read_text(encoding="utf-8")
+        self.assertIn("char IsLiveActorRetainedAfterDefeat(int actor_id);", live)
+        triggers = (root / r"Native\Game\src\Event\Triggers.cpp").read_text(encoding="utf-8")
+        self.assertIn("VS::Actors::IsLiveActorRetainedAfterDefeat(actorId) != 0", triggers)
+        self.assertNotIn("int (*)(int)", triggers)
 
     def test_animation_unwind_uses_the_bound_clip_without_suppressing_failures(self):
-        fixups = copy_fixups.FIXES["F00998"]
-        binding = next(new for old, new, _ in fixups if "Actors_FindActorAnimationHeader" in old)
-        validation = next(new for old, new, _ in fixups if "u_char* temp_a3 = *v0" in old)
-        self.assertIn("Actors_FindBoundAnimationHeader", binding)
-        self.assertIn("sp10[2] == 0 && arg0->poseOverrideActive", validation)
-        self.assertIn("return -1;", validation)
-        retirement = copy_fixups.FIXES["F00279"][0][1]
-        self.assertIn("Actors_FindBoundAnimationHeader(actor, &entry)", retirement)
-        self.assertIn("entry == NULL || entry[2] == 0", retirement)
-        self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS["Actors_FindBoundAnimationHeader"],
-            r"Native\Game\src\Actors\AnimationBindings.h",
-        )
+        # #276 slice 20c: the unwind is owned; the Live adapter looks the old clip up in the bank the record bound,
+        # not the shared slot selected for the next clip, and reports unavailable events with -1.
+        self.assertNotIn("F00998", copy_fixups.FIXES)
+        self.assertNotIn("Actors_FindBoundAnimationHeader", copy_fixups.NATIVE_HELPER_HEADERS)
+        root = Path(__file__).resolve().parents[2]
+        self.assertFalse((root / r"Native\Game\src\Actors\AnimationBindings.h").exists())
+        live = (root / r"Native\Game\src\Actors\AnimationPoseLive.cpp").read_text(encoding="utf-8")
+        start = live.index("int RestartLiveAnimationEvents(Actors_ActorRecord& actor) {")
+        restart = live[start:live.index("\n}\n", start)]
+        self.assertIn("FindLiveBoundClip(actor)", restart)
+        self.assertIn("EventRestart::kUnavailable", restart)
+        self.assertIn("return -1;", restart)
+        self.assertIn("BankHandle(actor.sharedSequences[slot]) == actor.animationHeader", live)
+        # #276 slice 20b: shared-bank retirement is owned; the Live host asks whether the bound clip has events.
+        control = (root / r"Native\Game\src\Actors\AnimationControlLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("BoundLiveAnimationClip(record)", control)
+        self.assertIn("FindClipEvents(*bound).status == ClipEventsStatus::kStarts", control)
+        self.assertNotIn("F00279", copy_fixups.FIXES)
 
     def test_platform_lookup_callers_check_for_a_missing_platform(self):
         root = Path(__file__).resolve().parents[2]
         movement = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(encoding="utf-8")
         collision = (root / r"Native\Game\src\Field\Collision.cpp").read_text(encoding="utf-8")
         self.assertNotIn("Field_FindMovingPlatformById", movement + collision)
-        for source, name, guards in (
-            (movement, "Actors_BeginActorJumpToTile", 1),
-            (movement, "Actors_UpdateActorPlatformContact", 2),
-            (collision, "Field_CalcActorLedgeOffset", 1),
-        ):
+        # #276 slice 21 (actors-movement): the tile jump and platform contact are owned; the typed core refuses a
+        # missing platform before any actor change (#257).
+        for name in ("Actors_BeginActorJumpToTile", "Actors_UpdateActorPlatformContact"):
             with self.subTest(name=name):
-                start = source.index(f"\n{name}(") if f"\n{name}(" in source else source.index(f" {name}(")
-                body = source[start:source.index("\n}\n", start)]
-                lookups = re.findall(r"(\w+) = VS::Field::FindLiveMovingPlatformById\(", body)
-                self.assertEqual(len(lookups), guards)
-                for variable in lookups:
-                    self.assertIn(f"std::optional<Field_PlatformContactPoint> {variable};", body)
-                    self.assertIn(f"if (!{variable})", body)
-                self.assertEqual(body.count('Core_Errorf("field.platform"'), guards)
+                self.assertNotIn(f"\n{name}(", movement)
+                self.assertNotIn(f" {name}(", movement)
+        core = (root / r"Native\Game\src\Actors\ActorMovement.cpp").read_text(encoding="utf-8")
+        for message in ("jump target platform layer {} is not visible", "actor {} rides invisible platform layer {}",
+                        "actor {} anchors to invisible platform layer {}"):
+            with self.subTest(message=message):
+                self.assertIn(message, core)
+        # The ledge offset is the typed core (#276): an invisible support platform reports no ledge before the facing
+        # changes (#257).
+        typed = (root / r"Native\Game\src\Field\ActorCollision.cpp").read_text(encoding="utf-8")
+        ledge = typed[typed.index("\nbool CalcActorLedgeOffset("):]
+        guard, facing = ledge.index("if (!platform)"), ledge.index("actor.move_facing =")
+        self.assertLess(guard, facing)
+        self.assertIn('VS_LOG_ERROR("field.platform"', ledge[guard:facing])
+        self.assertIn("return false;", ledge[guard:facing])
 
     def test_platform_placement_uses_an_owned_authored_contact(self):
-        fixups = copy_fixups.FIXES["F00901"]
-        declaration = next(new for old, new, _ in fixups if "int* anchor" in old)
-        body = next(new for old, new, _ in fixups if "anchor =" in old)
-        self.assertIn("std::optional<Field_PlatformContactPoint> platform_contact", declaration)
-        self.assertIn("VS::Field::LiveMovingPlatformPlacement", body)
-        self.assertIn("abort();", body)
-        self.assertNotIn("anchor[", body)
-        self.assertNotIn("isHidden =", body)
-        self.assertNotIn("State_SetScriptFlag", body)
+        # #276 slice 19b: room placement is owned; the typed core asks the host for the platform contact and keeps
+        # the floor placement when the platform is missing, instead of the old fixup's abort.
+        self.assertNotIn("F00901", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as file:
+            owned = {row["id"]: row for row in csv.DictReader(file)}
+        self.assertEqual(owned["F00901"]["name"], "VS::Actors::PlaceActorInRoom")
+        core = (root / r"Native\Game\src\Actors\ActorPlacement.cpp").read_text(encoding="utf-8")
+        self.assertIn("host.MovingPlatformContact(layer)", core)
+        self.assertIn("is placed on missing moving platform layer", core)
+        for legacy in ("abort();", "anchor[", "isHidden =", "State_SetScriptFlag"):
+            with self.subTest(legacy=legacy):
+                self.assertNotIn(legacy, core)
+        live = (root / r"Native\Game\src\Actors\ActorStateLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Field::LiveMovingPlatformPlacement(support_layer)", live)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["VS::Field::LiveMovingPlatformPlacement"],
             r"Native\Game\include\Field\PlatformPlacementLive.hpp",
@@ -311,15 +427,16 @@ class EncounterFixupTests(unittest.TestCase):
         )
 
     def test_title_stages_clear_game_before_consuming_ending_provenance(self):
-        fixups = copy_fixups.FIXES["F03670"]
-        old, new, _ = next(
-            item for item in fixups if "Boot_isClearSavePending = 0;" in item[0]
-        )
-        self.assertIn("Boot_isClearSavePending = 0;", old)
-        self.assertLess(
-            new.index("Save_NativeStageClearGame();"),
-            new.index("Boot_isClearSavePending = 0;"),
-        )
+        # #276 slice 53: _titleMenu (F03670) is the typed VS::Title::Run, which stages the clear game
+        # through its host before clearing the pending flag; TitleMenuLive.cpp binds both.
+        self.assertNotIn("F03670", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Title\TitleMenu.cpp").read_text(encoding="utf-8")
+        self.assertTrue(core.startswith("// Hand-maintained (tools/port/owned.csv)."))
+        self.assertLess(core.index("host.StageClearGame();"), core.index("host.ClearPendingClearSave();"))
+        live = (root / r"Native\Game\src\Title\TitleMenuLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("void StageClearGame() override { Save_NativeStageClearGame(); }", live)
+        self.assertIn("void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }", live)
 
     def test_event_dispatch_audit_includes_owned_opcode_headers(self):
         manifest = {
@@ -407,18 +524,19 @@ class EncounterFixupTests(unittest.TestCase):
         )
 
     def test_texture_binding_receives_its_payload_extent(self):
-        fixups = copy_fixups.FIXES["F01626"]
-        self.assertTrue(any(
-            "VS::Effects::BindLiveEffectTextureTables(" in new
-            and "arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta)" in new
-            for _, new, _ in fixups
-        ))
-        self.assertTrue(any(
-            "Effects_BindEffectAuxiliarySoundBank(" in new
-            for _, new, _ in fixups
-        ))
+        # #276 slice 38: the package walk is owned; its typed binder hands each block its payload extent.
+        self.assertNotIn("F01626", copy_fixups.FIXES)
+        owned = self.owned_items()
         self.assertEqual(
-            self.owned_items()["F01606"]["path"],
+            owned["F01626"]["path"], r"Native\Game\src\Effects\EffectResources.cpp"
+        )
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Effects\EffectResourcesLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("BindLiveEffectTextureTables(", live)
+        self.assertEqual(
+            owned["F01606"]["path"],
             r"Native\Game\src\Effects\TextureBindings.cpp",
         )
 
@@ -642,11 +760,37 @@ class EncounterFixupTests(unittest.TestCase):
                     )
                     self.assertTrue(self.owned_items()[identity]["name"].startswith("VS::Effects::"))
                     self.assertNotIn("native-template:", row["notes"])
-                else:
+                elif offset in (0, 1, 9):
+                    # #276: the tiled and open rings and the rotating surface are typed template instances; the
+                    # overlay image's entry addresses resolve to PLG073's live slot bindings, which PLG074 shares
+                    # byte for byte.
+                    live = {
+                        0: "UpdateLivePlg073TiledRing",
+                        1: "UpdateLivePlg073Ring",
+                        9: "UpdateLivePlg073RotatingSurface",
+                    }[offset]
                     self.assertIn(
+                        ("EFFECT/PLG074.BIN", address, f"VS::Effects::Templates::{live}"),
+                        copy_fixups.MODULE_BINDING_ENTRIES,
+                    )
+                    self.assertNotIn(
                         ("EFFECT/PLG074.BIN", address, identity),
                         copy_fixups.MODULE_FUNCTION_ENTRIES,
                     )
+                    self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[identity],
+                                     f"VS::Effects::Templates::{live}")
+                    self.assertEqual(
+                        audit_assembly_gaps.canonical_id(row, catalog),
+                        f"F{1975 + offset:05}",
+                    )
+                elif offset in (3, 4, 5, 6, 7):
+                    # #276: the trail stages are typed VS::Effects::Plg073 stages; PLG074's emitter calls them
+                    # directly with its own cursor and no image stores their addresses.
+                    self.assertNotIn(
+                        ("EFFECT/PLG074.BIN", address, identity),
+                        copy_fixups.MODULE_FUNCTION_ENTRIES,
+                    )
+                    self.assertTrue(self.owned_items()[identity]["name"].startswith("VS::Effects::Plg073::Trail"))
                     self.assertEqual(
                         audit_assembly_gaps.canonical_id(row, catalog),
                         f"F{1975 + offset:05}",
@@ -888,9 +1032,11 @@ class EncounterFixupTests(unittest.TestCase):
             self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
             self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
             self.assertIn(f'0x{address:08X}u, 0u, (void*)&{binding},', pointers)
-        loop = (root / r"Native\Game\src\Boot\GameLoop.cpp").read_text(encoding="utf-8")
+        loop = (root / r"Native\Game\src\Boot\GameplayLoopLive.cpp").read_text(encoding="utf-8")
         self.assertIn("VS::Battle::Ai::RunLiveActorAiUpdateStages();", loop)
         self.assertNotIn("Battle_Ai_RunActorAiUpdateStages", loop)
+        generated = (root / r"Native\Game\src\Boot\GameLoop.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Battle_Ai_RunActorAiUpdateStages", generated)
 
     def test_segment_trace_owns_typed_geometry_and_the_live_boolean_consumer(self):
         root = Path(__file__).resolve().parents[2]
@@ -1229,19 +1375,15 @@ class EncounterFixupTests(unittest.TestCase):
         definitions, paths = audit_assembly_gaps.native_definitions(rows, owned)
         for row in rows:
             with self.subTest(id=row["id"]):
-                if row["kind"].startswith("template:") or re.search(
-                    r"(?:^|;)native-template:", row["notes"]
-                ):
+                if audit_assembly_gaps.template_row(row, owned):
                     status, _ = audit_assembly_gaps.template_status(row)
                     self.assertIn(
                         status, ("template-instance", "stub", "partial-unported")
                     )
                 else:
-                    bodies = [
-                        body
-                        for body in definitions[paths[row["id"]]]
-                        if body.name == audit_assembly_gaps.native_symbol(row, owned)
-                    ]
+                    bodies = audit_assembly_gaps.native_bodies(
+                        definitions[paths[row["id"]]], row, owned
+                    )
                     self.assertEqual(len(bodies), 1)
                     status = audit_assembly_gaps.native_status(bodies[0].body)
                     self.assertIn(status, ("implemented", "stub", "partial-unported"))
@@ -1394,18 +1536,22 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertFalse(
-            "((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)"
-            in source,
-            "Tile-translation callers must not narrow the int actor-ID ABI",
+        self.assertNotIn(
+            "Actors_TranslateActorToTileAtRate",
+            source,
+            "Tile-translation callers must use the int actor-ID Live adapter",
         )
+        # #276 slice 21 (actors-movement): the teleport, cancel and travel callers are owned and translate the typed
+        # motion record directly, so no actor ID narrows on the way.
+        self.assertNotIn("TranslateLiveActorToTileAtRate", source)
+        core = (root / r"Native\Game\src\Actors\ActorMovement.cpp").read_text(encoding="utf-8")
         self.assertEqual(
-            source.count(
-                "Actors_TranslateActorToTileAtRate(actor->instance.slot, "
-                "(Actors_TileTarget*)&"
-            ),
-            3,
+            " ".join(core.split()).count("TranslateActorToTileAtRate(host.Terrain(), "), 3
         )
+        header = (root / r"Native\Game\include\Actors\ActorMotionLive.hpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("void TranslateLiveActorToTileAtRate(int actor_id,", header)
 
     def test_navigation_leaves_own_typed_entries_and_forward_the_actor_id(self):
         owned = self.owned_items()
@@ -1420,10 +1566,11 @@ class EncounterFixupTests(unittest.TestCase):
                 r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
             )
         root = Path(__file__).resolve().parents[2]
-        caller = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
+        # #276 row 21: the scripted-path host polls the override for its actor.
+        caller = (root / r"Native\Game\src\Actors\ActorMotionLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("VS::Battle::Ai::LiveActorNavigationOverrideStatus(actor_id);", caller)
+        self.assertIn("Battle::Ai::LiveActorNavigationOverrideStatus(id_);", caller)
         self.assertNotIn("LiveActorNavigationOverrideStatus();", caller)
 
     def test_vignette_producers_publish_one_encoded_ordering_word(self):
@@ -1462,6 +1609,10 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
             encoding="utf-8"
         )
+        # The command queue (row 21's commands phase) owns the callers now.
+        commands = (root / r"Native\Game\src\Actors\ActorCommandsLive.cpp").read_text(
+            encoding="utf-8"
+        )
         for identifier, (c_name, core, live) in names.items():
             self.assertEqual(owned[identifier]["name"], f"VS::Actors::{core}")
             self.assertEqual(
@@ -1469,7 +1620,8 @@ class EncounterFixupTests(unittest.TestCase):
             )
             self.assertNotIn(f"void {c_name}(", source)
             self.assertNotIn(c_name, source)
-            self.assertIn(f"VS::Actors::{live}(", source)
+            self.assertNotIn(c_name, commands)
+            self.assertIn(f"{live}(actor_id, target, facing);", commands)
             self.assertEqual(
                 copy_fixups.NATIVE_HELPER_HEADERS[f"VS::Actors::{live}"],
                 r"Native\Game\include\Actors\MotionRequestsLive.hpp",
@@ -1505,20 +1657,27 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01025"]["name"], "VS::Actors::QueueNavigationTileTarget"
         )
         root = Path(__file__).resolve().parents[2]
-        adapter = "VS::Actors::ActorRecordMovementRequests(), "
+        adapter = re.compile(r"VS::Actors::SetDirectMovement\((?:VS::Actors::)?ActorRecordMovementRequests\(\), ")
+        # #276 slice 21 (actors-movement): the jump redirect's host owns the movement-module caller.
         for path in (
-            r"Native\Game\src\Actors\Movement.cpp",
-            r"Native\Game\src\Boot\GameLoop.cpp",
+            r"Native\Game\src\Actors\ActorMovementLive.cpp",
+            r"Native\Game\src\Boot\GameplayLoopLive.cpp",
         ):
-            source = (root / path).read_text(encoding="utf-8")
+            source = " ".join((root / path).read_text(encoding="utf-8").split())
             self.assertIn('#include "Actors/MovementCommand.hpp"', source)
-            self.assertIn("VS::Actors::SetDirectMovement(" + adapter, source)
+            self.assertRegex(source, adapter)
             self.assertNotIn("Actors_SetDirectMovement(", source)
             self.assertNotIn("Actors_QueueNavigationTileTarget(", source)
-        movement = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
-            encoding="utf-8"
+        commands = " ".join(
+            (root / r"Native\Game\src\Actors\ActorCommandsLive.cpp")
+            .read_text(encoding="utf-8")
+            .split()
         )
-        self.assertIn("VS::Actors::QueueNavigationTileTarget(" + adapter, movement)
+        self.assertIn('#include "Actors/MovementCommand.hpp"', commands)
+        self.assertIn(
+            "QueueNavigationTileTarget(ActorRecordMovementRequests(), ", commands
+        )
+        self.assertNotIn("Actors_QueueNavigationTileTarget(", commands)
 
     def test_condition_snapshot_binds_an_explicit_planner_row_span(self):
         owned = self.owned_items()
@@ -1549,12 +1708,17 @@ class EncounterFixupTests(unittest.TestCase):
         collision = (root / r"Native\Game\src\Field\Collision.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn('#include "Field/CollisionSampling.hpp"', collision)
-        self.assertEqual(
-            collision.count("VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), "),
-            7,
-        )
         self.assertNotIn("Field_SampleCollisionHeightCode(", collision)
+        # #276 row 23: the floor and ceiling readers moved to the typed collision map core, which samples through
+        # the owned sampler; its Live binding hands the cores the current room's map as bytes.
+        field = root / r"Native\Game\src\Field"
+        core = (field / "CollisionMap.cpp").read_text(encoding="utf-8")
+        self.assertIn('#include "Field/CollisionSampling.hpp"', core)
+        self.assertIn("SampleCollisionHeightCode(map, ", core)
+        live = (field / "CollisionMapLive.cpp").read_text(encoding="utf-8")
+        for reader in ("InterpolatedFloorHeight", "FloorHeightAt", "CeilingHeightAt", "FloorAndCeilingHeightsAt",
+                       "RoomCeilingHeight"):
+            self.assertIn(f" {reader}(LiveRoomCollisionMap(), world_x, world_z);", live)
 
     def test_saved_music_voice_release_uses_the_live_sequencer_binding(self):
         owned = self.owned_items()
@@ -1588,29 +1752,39 @@ class EncounterFixupTests(unittest.TestCase):
             r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp",
         )
 
+    @staticmethod
+    def battle_ability_function(name: str) -> str:
+        # #276 row 31: Battle_AdvanceBattleAbilitySequence (F00099) is typed C++ in Battle/Abilities.cpp.
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Battle/Abilities.cpp").read_text(encoding="utf-8")
+        start = source.index(f"void {name}(")
+        return source[start:source.index("\n}\n", start)]
+
     def test_lethal_chain_success_keeps_credit_without_continuing(self):
-        old, new, _ = copy_fixups.FIXES["F00099"][0]
-        self.assertIn("abilityInputSucceeded == 1)", new.splitlines()[0])
-        self.assertIn("currentHp != 0", new.splitlines()[1])
-        self.assertIn(
-            "} else {\n            Battle_FinishBattleAbilitySequence();", new
-        )
+        self.assertNotIn("F00099", copy_fixups.FIXES)
+        chain = flat(self.battle_ability_function("ContinueChain"))
+        self.assertIn("if (host.ActorHp(action.first_target_actor) != 0 && ValidAbilitySlot(slot)) {", chain)
+        self.assertIn("} else {", chain)
         for operation in (
-            "++Battle_actionState->chainStep;",
-            "++Battle_actionState->queueIndex;",
-            "Battle_QueueChainCount(Battle_actionState->queueIndex);",
+            "host.SetChainStep(host.ChainStep() + 1);",
+            "host.SetQueueIndex(host.QueueIndex() + 1);",
+            "host.QueueChainCount(static_cast<int>(host.QueueIndex()));",
+            "host.FinishBattleAbilitySequence();",
         ):
-            self.assertEqual(old.count(operation), 1)
-            self.assertEqual(new.count(operation), 1)
-        self.assertNotIn("kills.totalKills", old)
-        self.assertNotIn("kills.totalKills", new)
+            self.assertEqual(chain.count(operation), 1)
+        # The kill credit follows the branch, so a lethal step still banks it without continuing.
+        self.assertGreater(chain.index("CountChainKill(host);"), chain.index("host.FinishBattleAbilitySequence();"))
 
     def test_both_credit_paths_bank_points_beyond_pending_thresholds(self):
-        old, new, _ = copy_fixups.FIXES["F00099"][1]
-        source = old + "\n" + old
-        source = source.replace(old, new)
-        self.assertEqual(source.count("kills.totalKills < 0xFFFF"), 2)
-        self.assertNotIn("Battle_battleAbilityPointRequirements", source)
+        self.assertNotIn("F00099", copy_fixups.FIXES)
+        credit = flat(self.battle_ability_function("CountChainKill"))
+        self.assertIn("host.TotalKills() < kMaxKills", credit)
+        self.assertNotIn("PointRequirements", credit)
+        self.assertIn("CountChainKill(host);", self.battle_ability_function("ContinueChain"))
+        self.assertIn("CountChainKill(host);", self.battle_ability_function("ContinueDefense"))
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Battle/Abilities.cpp").read_text(encoding="utf-8")
+        self.assertIn("constexpr int kMaxKills = 0xFFFF;", source)
 
     def test_music_cancellation_clears_the_native_pointer_field(self):
         self.assertNotIn("F03246", copy_fixups.FIXES)
@@ -1811,50 +1985,58 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F00989"]["header"],
             r"Native\Game\include\Actors\MotionRequests.hpp",
         )
-        landing = copy_fixups.FIXES["F00988"][0]
-        self.assertIn("Field_GimmickInstance", landing[0])
-        self.assertEqual(landing[1], "VS::Actors::SaveActorGroundedTransform(actor)")
-        motion = copy_fixups.FIXES["F04130"][0]
-        self.assertIn("instance.previousTileX", motion[0])
-        self.assertIn("actor->savedPlacement", motion[0])
-        self.assertEqual(motion[1], "        VS::Actors::SaveActorGroundedTransform(actor);")
-        live = landing[1]
-        for row_rx, pattern, replacement, _reason in copy_fixups.REGEX_FIXES:
-            if row_rx == "":
-                live = re.sub(pattern, replacement, live)
-        self.assertEqual(live, "VS::Actors::SaveLiveActorGroundedTransform(actor)")
+        # #276 slice 21 (actors-movement): the landing is owned; its typed core snapshots through the typed history API.
+        self.assertNotIn("F00988", copy_fixups.FIXES)
+        self.assertEqual(owned["F00988"]["header"], r"Native\Game\include\Actors\ActorMovement.hpp")
+        core = (Path(__file__).resolve().parents[2] / owned["F00988"]["path"]).read_text(encoding="utf-8")
+        self.assertIn("SaveActorGroundedTransform(", core)
+        self.assertNotIn("Field_GimmickInstance", core)
+        # #276 slice 20c: the motion update is owned; its Live host saves through the same grounded history API
+        # under the original motion-state guard.
+        self.assertNotIn("F04130", copy_fixups.FIXES)
+        self.assertEqual(owned["F04130"]["header"], r"Native\Game\include\Actors\AnimationPose.hpp")
+        pose = (Path(__file__).resolve().parents[2] / owned["F04130"]["path"]).read_text(encoding="utf-8")
+        self.assertIn("host.SaveGroundedTransform()", pose)
+        live = (Path(__file__).resolve().parents[2] / r"Native\Game\src\Actors\AnimationPoseLive.cpp").read_text(
+            encoding="utf-8")
+        self.assertIn("SaveLiveActorGroundedTransform(&actor_);", live)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["VS::Actors::SaveLiveActorGroundedTransform"],
             r"Native\Game\include\Actors\MotionRequestsLive.hpp",
         )
 
     def test_native_file_cards_draw_after_footer_and_before_fade(self):
-        for fid, prefix, title in (("F02757", "Menu_Files", 0), ("F03624", "Title", 1)):
-            with self.subTest(fid=fid):
-                old, new, _ = copy_fixups.FIXES[fid][0]
-                fade = f"    if ({prefix}_fileMenuScreenFade != 0) {{"
-                self.assertEqual(old, fade)
-                self.assertEqual(
-                    new,
-                    f"    Save_NativeDrawFileOverlay({title});\n{fade}",
-                )
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["Save_NativeDrawFileOverlay"],
             r"Native\Game\include\Save\NativeMenu.h",
         )
+        # #276 slices 51 and 53: MENU7's _drawFileMenu and its TITLE.PRG copy (F03624) are the typed
+        # Menu::Files core, which asks its host for the cards after the footer and before the fade;
+        # FilesLive.cpp's hosts draw them with Save_NativeDrawFileOverlay(0) and (1).
+        self.assertNotIn("F02757", copy_fixups.FIXES)
+        self.assertNotIn("F03624", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Menu\Files.cpp").read_text(encoding="utf-8")
+        self.assertTrue(core.startswith("// Hand-maintained (tools/port/owned.csv)."))
+        frame = core.split("host.DrawFileOverlay();", 1)
+        self.assertEqual(len(frame), 2)
+        self.assertIn("state.screen_fade", frame[1].split("\n", 2)[1])
+        live = (root / r"Native\Game\src\Menu\FilesLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("void DrawFileOverlay() override { Save_NativeDrawFileOverlay(0); }", live)
+        self.assertIn("void DrawFileOverlay() override { Save_NativeDrawFileOverlay(1); }", live)
 
     def test_file_pickers_promote_to_typed_core_with_live_callers(self):
         owned = self.owned_items()
         root = Path(__file__).resolve().parents[2]
         sources = {
             path: (root / path).read_text(encoding="utf-8")
-            for path in (r"Native\Game\src\Menu\Files.cpp", r"Native\Game\src\Title\TitleMenu.cpp")
+            for path in (r"Native\Game\src\Menu\FilesLive.cpp", r"Native\Game\src\Title\TitleMenuLive.cpp")
         }
         for identifier, core, live, path in (
-            ("F02764", "UpdateDataSaveMenu", "UpdateLiveDataSaveMenu", r"Native\Game\src\Menu\Files.cpp"),
-            ("F02767", "UpdateDataLoadMenu", "UpdateLiveDataLoadMenu", r"Native\Game\src\Menu\Files.cpp"),
-            ("F03628", "UpdateLoadMenu", "UpdateLiveLoadMenu", r"Native\Game\src\Title\TitleMenu.cpp"),
-            ("F03634", "UpdateSaveMenu", "UpdateLiveSaveMenu", r"Native\Game\src\Title\TitleMenu.cpp"),
+            ("F02764", "UpdateDataSaveMenu", "UpdateLiveDataSaveMenu", r"Native\Game\src\Menu\FilesLive.cpp"),
+            ("F02767", "UpdateDataLoadMenu", "UpdateLiveDataLoadMenu", r"Native\Game\src\Menu\FilesLive.cpp"),
+            ("F03628", "UpdateLoadMenu", "UpdateLiveLoadMenu", r"Native\Game\src\Title\TitleMenuLive.cpp"),
+            ("F03634", "UpdateSaveMenu", "UpdateLiveSaveMenu", r"Native\Game\src\Title\TitleMenuLive.cpp"),
         ):
             with self.subTest(identifier=identifier):
                 self.assertEqual(owned[identifier]["name"], f"VS::Menu::Files::{core}")
@@ -1864,7 +2046,8 @@ class EncounterFixupTests(unittest.TestCase):
                     copy_fixups.NATIVE_HELPER_HEADERS[f"VS::Menu::{live}"],
                     r"Native\Game\include\Save\FileMenuLive.hpp",
                 )
-                self.assertIn(f"VS::Menu::{live}(", sources[path])
+                # TitleMenuLive.cpp calls the binding from inside namespace VS.
+                self.assertRegex(sources[path], rf"\b(VS::)?Menu::{live}\(")
                 self.assertNotIn(f"Menu_Files_{core}", sources[path])
                 self.assertNotIn(f"VS::Menu::Files::{core}(", sources[path])
                 matches = [(pattern, replacement) for _, pattern, replacement, _ in copy_fixups.REGEX_FIXES
@@ -1900,22 +2083,34 @@ class EncounterFixupTests(unittest.TestCase):
         )
 
     def test_native_resume_hooks_precede_event_and_reset_mutation(self):
-        finishes = [
-            item for item in copy_fixups.FIXES["F00543"]
-            if "Save_NativeFinishResume" in item[1]
-        ]
-        self.assertEqual(len(finishes), 1)
-        finish = finishes[0]
-        self.assertIn("VS::Boot::JumpToLiveTitle()", finish[1])
-        self.assertLess(
-            finish[1].index("Save_NativeFinishResume"), finish[1].index("if ((temp_s4")
-        )
-        zone = copy_fixups.FIXES["F00533"][0]
-        self.assertTrue(zone[1].startswith("    if (!Save_NativeResumePending())"))
-        for fid in ("F03423", "F03437", "F03673"):
+        # #276 slice 25c: the zone and room loads (F00533, F00543) are the typed VS::Field::FinishZoneLoad and
+        # FinishRoomLoad; the resume hooks are RoomLoadHost/ZoneLoadHost calls in the core.
+        self.assertNotIn("F00533", copy_fixups.FIXES)
+        self.assertNotIn("F00543", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        loading = (root / r"Native\Game\src\Field\RoomLoading.cpp").read_text(encoding="utf-8")
+        room = loading.split("void FinishRoomLoad(RoomLoadHost& host, int room_id) {", 1)[1]
+        self.assertLess(room.index("host.FinishNativeResume()"), room.index("StartRoomPlay("))
+        self.assertLess(room.index("StartRoomCamera("), room.index("host.FinishNativeResume()"))
+        self.assertIn("host.JumpToTitle();", room.split("StartRoomPlay(", 1)[0])
+        zone = loading.split("void FinishZoneLoad(ZoneLoadHost& host, int zone_id) {", 1)[1]
+        zone = zone.split("\n}\n", 1)[0]
+        self.assertIn("if (!host.NativeResumePending()) {\n    host.ResetZoneScriptFlags(", zone)
+        room_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("return Save_NativeFinishResume() != 0;", room_live)
+        self.assertIn("void JumpToTitle() override { Boot::JumpToLiveTitle(); }", room_live)
+        for fid in ("F03423", "F03437"):
             with self.subTest(fid=fid):
                 reset = copy_fixups.FIXES[fid][-1]
                 self.assertIn("{\n    Save_NativeResetSession();", reset[1])
+        # #276 slice 53: TITLE.PRG's _initGameData (F03673) is the typed VS::Title::InitializeNewGameData,
+        # which resets the session through its host before any state write.
+        self.assertNotIn("F03673", copy_fixups.FIXES)
+        core = (root / r"Native\Game\src\Title\TitleMenu.cpp").read_text(encoding="utf-8")
+        body = core.split("void InitializeNewGameData(Host& host) {", 1)[1]
+        self.assertTrue(body.lstrip().startswith("host.ResetSession();"))
+        live = (root / r"Native\Game\src\Title\TitleMenuLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("void ResetSession() override { Save_NativeResetSession(); }", live)
         for name in (
             "Save_NativeResumePending",
             "Save_NativeFinishResume",
@@ -2071,10 +2266,33 @@ class EncounterFixupTests(unittest.TestCase):
     def test_camera_track_diagnostics_preserve_duration_and_update_order(self):
         source = "        c->durationFrames = script[2];"
         for old, new, _ in copy_fixups.FIXES["F01221"]:
+            if "durationFrames" not in old:
+                continue
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertTrue(source.startswith("        c->durationFrames = script[2];"))
         self.assertIn("Core_Debugf", source)
+        # #276 slice 19b: case 10 reads the actor's facing from a typed local placement, not camera offset 0x1DA.
+        old, new, _ = next(item for item in copy_fixups.FIXES["F01221"] if "actorQueryScratch" in item[0])
+        self.assertIn("*(short*)((char*)Event_camera + 0x1DA)", old)
+        self.assertIn("Actors_ActorLocation placement{};", new)
+        self.assertIn("VS::Actors::LiveActorPlacement(id, &placement);", new)
+        self.assertIn("s->actorRotation.vy = placement.position.pad;", new)
+        self.assertNotIn("Event_camera", new)
+
+    def test_script_actor_tile_store_reads_a_typed_placement(self):
+        # #276 slice 19b, then row 34: the tile bytes come from the typed placement view, not a 12-byte stack buffer.
+        self.assertNotIn("F01052", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Event\ScriptActorCommands.cpp").read_text(encoding="utf-8")
+        start = core.index("ScriptStep ScriptStoreActorTile(")
+        handler = core[start:core.index("\n}\n", start)]
+        self.assertIn("const PackedTile tile = PlacementOf(host, actor).tile;", handler)
+        for flag, field in (("flag", "x"), ("flag + 1", "layer"), ("flag + 2", "z")):
+            with self.subTest(field=field):
+                self.assertIn(f"host.SetFlag({flag}, tile.{field});", handler)
+        generated = (root / r"Native\Game\src\Event\ScriptActors.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("u_char position[12];", generated)
         source = "    if (c->motionMode != 11) {"
         for old, new, _ in copy_fixups.FIXES["F01223"]:
             self.assertIn(old, source)
@@ -2083,28 +2301,65 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("return", source)
         self.assertTrue(source.endswith("    if (c->motionMode != 11) {"))
 
-    def test_particle_dispatch_preserves_native_prefix_and_textured_variant(self):
-        source = "temp_s1 = VS::Core::Memory::AllocateFromHighEnd(0x10);"
-        for old, new, _ in copy_fixups.FIXES["F01865"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertIn("offsetof(Effects_ParticleQuadSet, textureAnimation)", source)
-        source = (
-            "#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg265_ParticleDispatch2\n"
-            "#define VS_PARTICLE_UNTEXTURED\n"
-            '#include "Effects/Templates/ParticleDispatch.inl"\n'
-            "#undef VS_PARTICLE_UNTEXTURED\n"
-        )
-        for old, new, _ in copy_fixups.FIXES["F02351"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertNotIn("VS_PARTICLE_UNTEXTURED", source)
-        self.assertIn("Effects_Plg265_ParticleDispatch2", source)
+    def test_template_instances_apply_fixups_without_option_overrides(self):
+        # The textured PLG265 dispatcher no longer needs a fixup: the template
+        # header's own #undef ends the option (#290).
+        self.assertNotIn("F02351", copy_fixups.FIXES)
         copier = Path(__file__).with_name("copy_to_native.py").read_text()
         templates = copier.split("    def copy_templates(", 1)[1].split("    # ---", 1)[
             0
         ]
         self.assertIn("block = self.apply_fixups(r, block)", templates)
+
+    def test_template_instances_drop_options_their_header_undefines(self):
+        sources = {
+            "src/EFFECT/PLG.BIN/0.c": (
+                "#define VS_RING_FUNCTION first\n"
+                "#define VS_RING_TRANSPOSED\n"
+                '#include "src/EFFECT/rings.h"\n'
+                "#define VS_PARTICLE_UNTEXTURED\n"
+                '#include "src/EFFECT/particleDispatch.h"\n'
+                "#define KEPT 5\n"
+                "#define VS_RING_FUNCTION second\n"
+                '#include "src/EFFECT/rings.h"\n'
+                '#include "src/EFFECT/particleDispatch.h"\n'
+            ),
+            "src/EFFECT/rings.h": (
+                "#ifdef VS_RING_TRANSPOSED\n#endif\n"
+                "#undef VS_RING_FUNCTION\n#undef VS_RING_TRANSPOSED\n"
+            ),
+            "src/EFFECT/particleDispatch.h": "  #undef VS_PARTICLE_UNTEXTURED\n",
+        }
+        copier = object.__new__(copy_to_native.Copier)
+        copier.src = mock.Mock()
+        copier.src.load.side_effect = lambda rel: sources[rel].encode()
+        rel = "src/EFFECT/PLG.BIN/0.c"
+        includes = copier.plugin_includes(rel)
+        self.assertEqual(
+            includes,
+            [
+                (3, "rings", [f"{rel}:1", f"{rel}:2"]),
+                (5, "particleDispatch", [f"{rel}:4"]),
+                (8, "rings", [f"{rel}:6", f"{rel}:7"]),
+                (9, "particleDispatch", [f"{rel}:6"]),
+            ],
+        )
+
+    def test_plg128_second_surface_does_not_repeat_its_texture(self):
+        surface = (
+            Path(__file__).resolve().parents[2]
+            / "Native/Game/src/Effects/Templates/Surface.cpp"
+        ).read_text(encoding="utf-8")
+        blocks = {
+            name: surface.split(f"bool Plg128::{name}(", 1)[1].split("\n}\n", 1)[0]
+            for name in ("Surface", "Surface2")
+        }
+        # PLG128 F8.c:44 sets VS_SURFACE_REPEAT; surfaces.h:275 ends it before
+        # the second surface at F8.c:61 (#290). The owned instances keep that
+        # as the texture span each passes to the typed template.
+        self.assertIn("SurfaceTextureSpan::kFourColumns", blocks["Surface"])
+        self.assertNotIn("kFourColumns", blocks["Surface2"])
+        self.assertIn("SurfaceTextureSpan::kSixteenColumns", blocks["Surface2"])
 
     def test_texture_reset_uses_the_complete_native_state(self):
         source = "\n".join(f"    arg0[{index}] = 0;" for index in range(8))
@@ -2165,115 +2420,87 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertEqual(source, expected)
 
     def test_shared_bank_retirement_unwinds_before_detaching_and_freeing(self):
-        source = "void Actors_UnloadSharedSequence(int arg0) { VS::Content::ReleaseLiveActorSequence(arg0, 1); }"
-        for old, new, _ in copy_fixups.FIXES["F00279"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertTrue(source.startswith("int Actors_UnloadSharedSequence"))
-        self.assertLess(
-            source.index("Actors_RestartActorAnimationEvents"),
-            source.index("actor->animationHeader = 0"),
-        )
-        self.assertLess(
-            source.index("actor->blendPose.eventScript = NULL"),
-            source.index("VS::Content::ReleaseLiveActorSequence"),
-        )
+        # #276 slice 20b: UnloadSharedSequence (F00279) is the typed core; generated callers bind the Live adapter.
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Actors\AnimationControl.cpp").read_text(encoding="utf-8")
+        start = core.index("int UnloadSharedSequence(AnimationControlHost& host, int bank) {")
+        source = core[start:core.index("\n}\n", start)]
+        self.assertLess(source.index("host.CanUnwindBoundAnimation(*actor)"),
+                        source.index("host.RestartAnimationEvents(*actor) < 0"))
+        self.assertLess(source.index("host.RestartAnimationEvents(*actor) < 0"),
+                        source.index("actor->animation_header = SequenceHandle::kNone"))
+        self.assertLess(source.index("actor->blend_pose = actor->pose"),
+                        source.index("host.ReleaseSharedSequence(bank)"))
         self.assertIn("return -1;", source)
         self.assertIn("return result;", source)
+        self.assertNotIn("F00279", copy_fixups.FIXES)
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F00279"], "VS::Actors::UnloadLiveSharedSequence")
 
     def test_animation_event_unwind_has_an_explicit_nullable_contract(self):
-        source = """void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0)
-{
-    u_char** v0 = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(arg0, arg0->animationId, &sp10);
-    u_char* temp_a3 = *v0;
-    ((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);
-}
-"""
-        for old, new, _ in copy_fixups.FIXES["F00998"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertTrue(source.startswith("int Actors_RestartActorAnimationEvents"))
-        self.assertLess(
-            source.index("v0 == NULL || sp10 == NULL"), source.index("VS_ONDISC")
+        # #276 slice 20c: the unwind and the pose start are owned. The typed restart refuses a moved model whose
+        # events are unavailable; the Live pose start returns before resetting a pose it could not unwind.
+        self.assertNotIn("F00998", copy_fixups.FIXES)
+        self.assertNotIn("F00992", copy_fixups.FIXES)
+        # Row 34: opcode 0x3C (F01081) holds the script rather than advancing after a failed shared-bank retirement.
+        self.assertNotIn("F01081", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        script = (root / r"Native\Game\src\Event\ScriptActorCommands.cpp").read_text(encoding="utf-8")
+        self.assertIn("host.UnloadSharedSequence(static_cast<int>(selector)) < 0) {\n    return ScriptStep::kHold;",
+                      script)
+        events = (root / r"Native\Game\src\Actors\AnimationEvents.cpp").read_text(encoding="utf-8")
+        self.assertIn("EventRestart::kUnavailable", events)
+        live = (root / r"Native\Game\src\Actors\AnimationPoseLive.cpp").read_text(encoding="utf-8")
+        start = live.index("void InitializeLiveActorAnimationPose(")
+        init = live[start:live.index("\n}\n", start)]
+        self.assertLess(init.index("RestartLiveAnimationEvents(*actor) < 0"), init.index("actor->poseOverrideActive = 0;"))
+        self.assertIn("Core_Errorf", live)
+        # #276 slice 20b: PlayActorAnimation (F00856) is owned and keeps the override when the unwind fails.
+        core = (root / r"Native\Game\src\Actors\AnimationControl.cpp").read_text(encoding="utf-8")
+        self.assertIn(
+            "if (actor->pose_override_active && host.RestartAnimationEvents(*actor) < 0) {\n    return -1;\n  }\n"
+            "  actor->animation_event_flag = false;\n  actor->pose_override_active = false;",
+            core,
         )
-        self.assertIn("return -1;", source)
-        self.assertIn("return 0;", source)
-        self.assertIn("Core_Errorf", source)
-        for fid in ("F00856", "F00992", "F01081"):
-            self.assertTrue(
-                any(
-                    "return -1;" in new or "return 1;" in new or "return;" in new
-                    for _, new, _ in copy_fixups.FIXES[fid]
-                )
-            )
-
-    def test_unwind_callers_match_pre_normalization_flag_expressions(self):
-        for fid, expression in (
-            ("F00856", "((*(int*)((char*)actor + 0x5AC)) & 0x800000)"),
-            ("F00992", "(*(int*)((u_char*)actor + 0x5AC) & 0x800000)"),
-        ):
-            guard = f"    if {expression} {{\n"
-            source = (
-                ("    actor->animationEventFlag = 0;\n" if fid == "F00856" else "")
-                + guard
-                + "        Actors_RestartActorAnimationEvents(actor);\n"
-                "    }\n"
-                + ("    actor->poseOverrideActive = 0;" if fid == "F00856" else "")
-            )
-            replacements = [
-                (old, new)
-                for old, new, _ in copy_fixups.FIXES[fid]
-                if "Actors_RestartActorAnimationEvents" in old
-            ]
-            self.assertEqual(len(replacements), 1)
-            old, new = replacements[0]
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-            self.assertIn("Actors_RestartActorAnimationEvents(actor) < 0", source)
 
     def test_scripted_effect_requires_its_actor_before_starting_playback(self):
-        source = """    Effects_StartScriptedActorEffect(
-        VS::Core::Memory::ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(VS::Core::Memory::ReadUnalignedShort(arg0 + 3)));
-    return 0;
-"""
-        for old, new, _ in copy_fixups.FIXES["F01170"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertLess(
-            source.index("(unsigned)actor < 16 && target == NULL"),
-            source.index("Actors_actorRecords[actor]"),
-        )
-        self.assertLess(
-            source.index("(unsigned)actor >= 16"),
-            source.rindex("Actors_actorRecords[actor]"),
-        )
-        self.assertLess(
-            source.index("return 1;"), source.index("Effects_StartScriptedActorEffect")
-        )
-        self.assertIn("Field_gimmickInstances[actor] == NULL", source)
-        self.assertIn("referenceType <= 1 ? Event_ResolveScriptActorReference", source)
-        self.assertIn("target->modelId != selector", source)
-        self.assertIn("Core_Errorf", source)
+        # #276 row 36: the typed handler refuses an unavailable actor through its host (Core_Errorf) and holds the
+        # script before any playback starts; a model reference must match the actor's model.
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Event\ScriptEffectCommands.cpp").read_text(encoding="utf-8")
+        start = core.index("ScriptStep CommandPlayActorEffect(")
+        handler = core[start:core.index("\n}\n", start)]
+        self.assertIn("reference_type <= kSlotReference ? host.ResolveActor(selector) : kNoActor", handler)
+        self.assertIn("(!slot.battle_actor || slot.model_id != selector)", handler)
+        self.assertLess(handler.index("!in_range ||"), handler.index("!slot.occupied;"))
+        self.assertLess(handler.index("return ScriptStep::kHold;"), handler.index("host.StartActorEffect"))
+        live = (root / r"Native\Game\src\Event\ScriptEffectCommandsLive.cpp").read_text(encoding="utf-8")
+        start = live.index("void ReportUnavailableActor(")
+        self.assertIn("Core_Errorf", live[start:live.index("\n  }\n", start)])
 
-    def test_sfx_selection_is_checked_before_pointer_table_lookup(self):
-        source = """    case 0xFF000:
-        var_s0_2 = Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];
-    case 0xF00000:
-        var_s0_2 = Audio_soundState.sfxBankData[2];
-"""
-        for old, new, _ in copy_fixups.FIXES["F03515"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertLess(
-            source.index("currentSfxBank == 0"), source.index("currentSfxBank - 1]")
-        )
-        self.assertIn("Core_Warnf", source)
-        self.assertIn("Core_Errorf", source)
-        self.assertIn("var_s0_2 == NULL", source)
-        self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS["Core_Errorf"],
-            r"Native\Engine\include\Core\Diagnostics.h",
-        )
+    def test_sound_effect_commands_bind_their_handler_table_addresses(self):
+        # #276 audio-control-sfx: Audio_Mixer_kCommandHandlers (SLUS_010.40 0x800301E0) stores these 13 handler
+        # addresses; every other owned control/SFX address left the module symbols.
+        handlers = {
+            0x80017208: "LivePlayInterfaceProgramPair", 0x80017254: "LivePlayInterfaceProgram",
+            0x800172D4: "LivePlaySharedProgram", 0x8001733C: "LivePlayBlobPrograms",
+            0x8001746C: "LiveStopPrograms", 0x80017870: "LiveSetProgramVolume",
+            0x80017958: "LiveFadeProgramVolume", 0x80017AD8: "LiveSetSceneVolume",
+            0x80017B54: "LiveFadeSceneVolume", 0x80017C1C: "LiveSetProgramPan",
+            0x80017CFC: "LiveFadeProgramPan", 0x80017E74: "LiveSetScenePan",
+            0x80017EEC: "LiveFadeScenePan",
+        }
+        root = Path(__file__).resolve().parents[2]
+        pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        for address, name in handlers.items():
+            with self.subTest(name=name):
+                binding = f"VS::Audio::SoundEffects::{name}"
+                self.assertIn(("SLUS_010.40", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                                 r"Native\Engine\include\Audio\SoundEffectProgramsLive.hpp")
+                self.assertIn(f"0x{address:08X}u, 0u, (void*)&{binding},", pointers)
+        for retired in ("Audio_PlaySfx,", "Audio_ResolveSfxProgram,", "Audio_Control_SetMusicVolume,",
+                        "Audio_SoundEffects_PlayProgramPair,"):
+            self.assertNotIn(f"(void*)&{retired}", pointers)
 
     def test_empty_stack_top_is_checked_after_remaining_member_updates(self):
         source = """    UpdateRemainingMembers();
@@ -2380,17 +2607,19 @@ d = VS::Core::Math::SquaredDistanceWithHeightOffsets((short*)&state->position,
         self.assertNotIn("Field_gimmickInstances[", live)
 
     def test_room_lifetimes_revoke_diagnostic_readiness(self):
-        for key, header in (
-            ("F00543", "void Field_FinishRoomLoad(int arg0)\n{"),
-            ("F00545", "void Field_UnloadCurrentRoom(void)\n{"),
+        # #276 slice 25c: both room lifetimes revoke the inspection first, through their typed hosts.
+        root = Path(__file__).resolve().parents[2]
+        loading = (root / r"Native\Game\src\Field\RoomLoading.cpp").read_text(encoding="utf-8")
+        for header in (
+            "void FinishRoomLoad(RoomLoadHost& host, int room_id) {",
+            "void UnloadCurrentRoom(RoomUnloadHost& host) {",
         ):
-            source = header + "\n    OriginalRoomWork();\n}"
-            for old, new, _ in copy_fixups.FIXES[key]:
-                source = source.replace(old, new)
-            self.assertLess(
-                source.index("Boot_ResetGameplayInspection();"),
-                source.index("OriginalRoomWork();"),
-            )
+            with self.subTest(header=header):
+                body = loading.split(header, 1)[1]
+                self.assertTrue(body.startswith("\n  host.ResetGameplayInspection();\n"))
+        room_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
+        self.assertEqual(
+            room_live.count("void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }"), 2)
 
     def test_gimmick_palette_matches_ledger_element_width_without_growth(self):
         source = "u_char pulsedPalette[32];"
@@ -2455,7 +2684,67 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         enqueue = re.compile(r"VS::Content::EnqueueLive(?:Priority)?DiscRequest\((.+?), ")
         guarded = [(fid, old, new) for fid, fixes in copy_fixups.FIXES.items()
                    for old, new, why in fixes if "#282" in why]
-        self.assertGreaterEqual(len(guarded), 35)
+        # F03526 and F03547 left the copier for the owned SoundBanksCore.cpp StartLoad (#276 row 13), which
+        # reads the bank without the queue when no request is free. F03496 left it for the owned MusicCore.cpp
+        # LoadMusicSlot (#276 audio-music-streams), which reads the music the same way. F02442 (two reads) and
+        # F02418 left it for the owned Ending cores (#276 row 54), whose EndingLive disc read completes a
+        # refused request without the queue when no request is free. F01342 left it for the owned Framework.cpp
+        # LoadMenuOverlay (#276 row 45), whose FrameworkLive.cpp BeginOverlayLoad keeps the guard below. F02769
+        # left it for the owned Files.cpp LoadGameOverAssetsStep (#276 row 51), whose FilesLive.cpp
+        # BeginGameOverLoad keeps the guard below. F01612 left it for the owned EffectResources.cpp
+        # PollEffectResourceRead (#276 row 38), which completes a refused read through the host's
+        # CompleteRefusedRead (EffectResourcesLive.cpp). F00176 left it for the owned ActorSpawning.cpp
+        # SpawnRoomEnemy (#276 row 19c), whose ActorSpawningLive.cpp BeginZudRead keeps the guard below. F02503
+        # left it for the owned ItemRows.cpp LoadItemText (#276 row 46), whose ItemRowsLive.cpp StartItemTextLoad
+        # keeps the guard below. F00645 (two reads) left it for the owned Background.cpp QueueTiledBackgroundLoad
+        # (#276 row 24), which completes a refused read through the host's CompleteRefusedRead (BackgroundLive.cpp).
+        # F02899 left it for the owned Combination.cpp LoadCombinationRecipes (#276 row 49), whose SetupLive.cpp
+        # StartRecipeLoad keeps the guard below. F00532 and F00542 left it for the owned RoomLoading.cpp
+        # QueueZoneLoad and QueueRoomLoad (#276 row 25c), whose RoomLoadingLive.cpp BeginRead keeps the guard
+        # below.
+        self.assertGreaterEqual(len(guarded), 20)
+        owned = self.owned_items()
+        self.assertEqual(owned["F03526"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
+        self.assertEqual(owned["F03547"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
+        self.assertEqual(owned["F03496"]["path"], r"Native\Engine\src\Audio\MusicCore.cpp")
+        self.assertEqual(owned["F02442"]["path"], r"Native\Game\src\Ending\ClearResultsCore.cpp")
+        self.assertEqual(owned["F02418"]["path"], r"Native\Game\src\Ending\Credits\StaffRollCore.cpp")
+        self.assertEqual(owned["F01342"]["path"], r"Native\Game\src\Menu\Framework\Framework.cpp")
+        self.assertEqual(owned["F02769"]["path"], r"Native\Game\src\Menu\Files.cpp")
+        self.assertEqual(owned["F01612"]["path"], r"Native\Game\src\Effects\EffectResources.cpp")
+        self.assertEqual(owned["F00176"]["path"], r"Native\Game\src\Actors\ActorSpawning.cpp")
+        self.assertEqual(owned["F02503"]["path"], r"Native\Game\src\Menu\Framework\ItemRows.cpp")
+        self.assertEqual(owned["F00645"]["path"], r"Native\Game\src\Field\Background.cpp")
+        self.assertEqual(owned["F02899"]["path"], r"Native\Game\src\Menu\Setup\Combination.cpp")
+        self.assertEqual(owned["F00532"]["path"], r"Native\Game\src\Field\RoomLoading.cpp")
+        self.assertEqual(owned["F00542"]["path"], r"Native\Game\src\Field\RoomLoading.cpp")
+        root = Path(__file__).resolve().parents[2]
+        background = "".join((root / r"Native\Game\src\Field\Background.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("state.texture_read=host.CompleteRefusedRead(section->texture,state.tim_buffer);", background)
+        self.assertIn("state.layout_read=host.CompleteRefusedRead(section->layout,state.layout);", background)
+        background_live = (root / r"Native\Game\src\Field\BackgroundLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Content::CompleteLiveRefusedDiscRequest(", background_live)
+        room_loading_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("request = Content::CompleteLiveRefusedDiscRequest(&disc_file, data);", room_loading_live)
+        background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
+        self.assertIn('"CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"', background_tests)
+        effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("}else{state.read=host.CompleteRefusedRead(read,destination.id);}", effects)
+        effects_live = (root / r"Native\Game\src\Effects\EffectResourcesLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Content::CompleteLiveRefusedDiscRequest(", effects_live)
+        effects_tests = (root / r"Native\Tests\src\EffectResourcesTransformsTests.cpp").read_text(encoding="utf-8")
+        self.assertIn("Effect resource reads complete a read the queue refuses", effects_tests)
+        core = (root / r"Native\Engine\src\Audio\SoundBanksCore.cpp").read_text(encoding="utf-8")
+        self.assertIn("host.CompleteRefusedRequest(file, slot.data)", core)
+        music = (root / r"Native\Engine\src\Audio\MusicCore.cpp").read_text(encoding="utf-8")
+        self.assertIn("host.CompleteRefusedRequest(*file, music.data)", music)
+        ending = "".join((root / r"Native\Game\src\Ending\EndingLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("if(slot_==nullptr){slot_=Content::CompleteLiveRefusedDiscRequest(&file_,buffer);}else", ending)
+        tests = (root / r"Native\Tests\src\AudioPlaybackBanksTests.cpp").read_text(encoding="utf-8")
+        self.assertIn("A full disc queue reads the sound-effect bank without it", tests)
+        self.assertIn("A full disc queue reads the wave bank without it", tests)
+        music_tests = (root / r"Native\Tests\src\AudioMusicStreamTests.cpp").read_text(encoding="utf-8")
+        self.assertIn("A music read the disc queue refuses still completes into the music buffer", music_tests)
         for fid, old, new in guarded:
             with self.subTest(fid=fid):
                 old, new = "".join(old.split()), "".join(new.split())
@@ -2476,7 +2765,38 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
                     sites += 1
                     previous = next(text.strip() for text in reversed(lines[:index]) if text.strip())
                     self.assertEqual(previous, f"if ({match.group(1)} != NULL) {{", f"{path}:{index + 1}")
-        self.assertGreaterEqual(sites, 35)
+        # #276 rows 17 and 13 moved six sites into owned code: Lifecycle.cpp's four overlay loads became the one
+        # guarded SessionLive.cpp load, and SoundBanks.cpp's two bank loads became SoundBanksCore.cpp StartLoad.
+        # The audio-music-streams row moved Music.cpp's music load into MusicCore.cpp LoadMusicSlot. Row 54 moved
+        # ClearResults.cpp's two results reads and StaffRoll.cpp's illustration read into EndingLive.cpp LiveDiscRead,
+        # and row 45 moved the menu overlay load into FrameworkLive.cpp BeginOverlayLoad. Row 51 moved Files.cpp's
+        # game-over artwork load into FilesLive.cpp BeginGameOverLoad. Row 38 moved EffectResources.cpp's resource
+        # read into the owned PollEffectResourceRead. Row 19c moved ActorLoading.cpp's ZUD read into
+        # ActorSpawningLive.cpp BeginZudRead, and row 46 moved ItemRows.cpp's item text load into
+        # ItemRowsLive.cpp StartItemTextLoad. Row 24 moved Background.cpp's tiled TIM and layout reads into the
+        # owned QueueTiledBackgroundLoad, whose BackgroundLive.cpp EnqueueRead runs only for an allocated read.
+        # Row 49 moved Combination.cpp's recipe read into SetupLive.cpp StartRecipeLoad. Row 25c moved
+        # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead.
+        self.assertGreaterEqual(sites, 15)
+        session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
+        self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)
+        menu = (root / r"Native\Game\src\Menu\Framework\FrameworkLive.cpp").read_text(encoding="utf-8")
+        menu = "".join(menu.split())
+        self.assertIn("if(control.cdQueue!=nullptr){VS::Content::EnqueueLiveDiscRequest(control.cdQueue,", menu)
+        self.assertIn("}else{control.cdQueue=VS::Content::CompleteLiveRefusedDiscRequest(", menu)
+        files = "".join((root / r"Native\Game\src\Menu\FilesLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("if(g_game_over_request!=nullptr){Content::EnqueueLiveDiscRequest(g_game_over_request,", files)
+        self.assertIn("}else{g_game_over_request=Content::CompleteLiveRefusedDiscRequest(&file,", files)
+        spawning = "".join((root / r"Native\Game\src\Actors\ActorSpawningLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("if(request!=nullptr){Content::EnqueueLivePriorityDiscRequest(request,", spawning)
+        self.assertIn("}else{request=Content::CompleteLiveRefusedDiscRequest(&disc,Field_zoneContext.zudData);}", spawning)
+        items = "".join((root / r"Native\Game\src\Menu\Framework\ItemRowsLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("if(g_item_text_request!=nullptr){Content::EnqueueLiveDiscRequest(g_item_text_request,", items)
+        self.assertIn("}else{g_item_text_request=Content::CompleteLiveRefusedDiscRequest(&file,block);}", items)
+        setup = "".join((root / r"Native\Game\src\Menu\Setup\SetupLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("if(g_recipes.request!=nullptr){Content::EnqueueLiveDiscRequest(g_recipes.request,data);}", setup)
+        self.assertIn("}else{g_recipes.request=Content::CompleteLiveRefusedDiscRequest(&request,data);}", setup)
 
     def test_heap_callers_use_the_live_binding_and_disc_ring_is_bytes(self):
         names = ("AllocateFromLowEnd", "AllocateFromHighEnd", "FreeFromLowEnd", "FreeFromHighEnd")
@@ -2575,32 +2895,39 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         live = " ".join((root / r"Native\Content\src\ActorAssetsLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("Actors::RegisterSequenceBankCopy(Pointer(destination), Pointer(source),", live)
 
-    def test_audio_names_preserve_distinct_bank_and_output_bindings(self):
-        examples = {
-            "Audio::PlayRandomActorImpactSound": (
-                "Play(arg0, arg1, arg2);",
-                "Play(sound_bank, pan, volume);",
-            ),
-            "Audio::ActorSoundPanAndVolume": (
-                "temp_s0 = actors[arg0]; *arg1 = temp_v0 >> 16; "
-                "if (arg2) *arg2 = temp_v0 & 65535;",
-                "actor = actors[actor_index]; "
-                "*output_pan = packed_pan_volume >> 16; "
-                "if (output_volume) *output_volume = "
-                "packed_pan_volume & 65535;",
-            ),
-        }
-        for name, (original, expected) in examples.items():
-            with self.subTest(name=name):
-                source = original
-                unrelated = original
-                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
-                        source = re.sub(pattern, replacement, source)
-                    if re.search(row, "Content::Unrelated"):
-                        unrelated = re.sub(pattern, replacement, unrelated)
-                self.assertEqual(source, expected)
-                self.assertEqual(unrelated, original)
+    def test_audio_music_stream_names_left_the_copier_for_owned_cores(self):
+        # #276 audio-music-streams: the typed cores name these parameters, so no generated rename or disc-request
+        # fixup remains, and the generated callers reach the live bindings.
+        owned = self.owned_items()
+        audio = r"Native\Engine\src\Audio"
+        rows = {row for row, *_ in copy_fixups.REGEX_FIXES}
+        for function_id, name, path in (
+            ("F00063", "PlayRandomActorImpactSound", rf"{audio}\ActorSoundCore.cpp"),
+            ("F00994", "ActorSoundPanAndVolume", rf"{audio}\ActorSoundCore.cpp"),
+            ("F03496", "LoadMusicSlot", rf"{audio}\MusicCore.cpp"),
+            ("F03381", "Cutscene::UploadSecondMonoBuffer", rf"{audio}\Cutscene\StreamBuffersCore.cpp"),
+            ("F03542", "PlayCutsceneStreamSlot", rf"{audio}\StreamCore.cpp"),
+            ("F00626", "SetRoomAmbienceDucked", rf"{audio}\AmbienceCore.cpp"),
+        ):
+            with self.subTest(function_id=function_id):
+                self.assertEqual(owned[function_id]["name"], f"VS::Audio::{name}")
+                self.assertEqual(owned[function_id]["path"], path)
+                self.assertNotIn(function_id, copy_fixups.FIXES)
+                self.assertNotIn(rf"^Audio::{name}$", rows)
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F00994"], "VS::Audio::LiveActorSoundPanAndVolume")
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01001"], "VS::Audio::LivePlayActorSoundPair")
+
+    def test_actor_sound_pan_and_volume_caller_drops_the_unread_argument(self):
+        # #276 audio-music-streams: 30DB0.c passes func_800AD62C a fourth argument it never reads (40564.c:2789).
+        # #276 slice 20b: the caller (F00843) is owned; its Live host passes the actor index and the two outputs.
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Actors\AnimationControlLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Audio::LiveActorSoundPanAndVolume(id, &result.pan, &result.volume);", live)
+        self.assertNotIn("F00843", copy_fixups.FIXES)
+        for function_id in ("F00926", "F00913"):
+            with self.subTest(function_id=function_id):
+                self.assertFalse([old for old, *_ in copy_fixups.FIXES.get(function_id, [])
+                                  if "LivePlayActorSoundPair" in old])
 
     def test_remaining_event_names_preserve_snapshot_and_retained_bindings(self):
         examples = {
@@ -2678,29 +3005,6 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             encoding="utf-8"
         )
 
-    def test_room_load_names_preserve_shadowed_pointer_and_offset_bindings(self):
-        names = {
-            "cleared_section_address": r"\barg0\b",
-            "reset_tail_words": r"\bv0\b",
-        }
-        prepared = []
-        for name, pattern in names.items():
-            matches = [
-                (old, new) for old, new, _ in copy_fixups.FIXES["F00543"]
-                if name in new
-            ]
-            self.assertEqual(len(matches), 1)
-            old, new = matches[0]
-            self.assertEqual(new, re.sub(pattern, name, old))
-            prepared.append(new)
-        source = "void Load(int arg0) { int v0 = 0;\n" + "\n".join(prepared) + "}"
-        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-            if re.search(row, "Field::FinishRoomLoad"):
-                source = re.sub(pattern, replacement, source)
-        self.assertIn("void Load(int requested_room_id) { int mpd_section_offset = 0;", source)
-        self.assertIn("cleared_section_address", source)
-        self.assertIn("reset_tail_words", source)
-
     def test_menu_names_preserve_choice_arithmetic_and_retained_speed_member(self):
         examples = {
             "Menu::SelectTextBoxChoice": (
@@ -2761,22 +3065,6 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             (original + "; " + original).replace(*matches[0]),
             expected + "; " + expected,
         )
-
-    def test_ending_score_separator_keeps_its_own_shadowed_position_binding(self):
-        matches = [
-            (old, new) for old, new, _ in copy_fixups.FIXES["F02446"]
-            if "padded_separator_x" in new
-        ]
-        self.assertEqual(len(matches), 1)
-        old, new = matches[0]
-        self.assertEqual(new, re.sub(r"\bv0\b", "padded_separator_x", old))
-        source = "int v0 = arg0 + 1;\n" + new
-        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-            if re.search(row, "Ending::DrawScore"):
-                source = re.sub(pattern, replacement, source)
-        self.assertIn("int padded_prefix_x = x + 1;", source)
-        self.assertIn("int padded_separator_x;", source)
-        self.assertIn("x = padded_separator_x + Ending_resultAtlasRegions[10].w;", source)
 
     def test_effect_shared_body_names_supply_instance_prototypes(self):
         source = (
@@ -2867,33 +3155,27 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
                 self.assertEqual(source, retained)
 
     def test_loaded_save_validation_names_preserve_true_means_apply(self):
-        for name, old in (
-            ("Title::SaveCard::ValidateAndApplyLoadedSave", "verifyOnly"),
-        ):
-            with self.subTest(name=name):
-                source = f"int Validate(int {old}) {{ if ({old}) Apply(); return 0; }}"
-                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
-                        source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
-                self.assertEqual(
-                    source,
-                    "int Validate(int apply_loaded_state) { if (apply_loaded_state) Apply(); return 0; }",
-                )
+        # #276 slice 53: TITLE.PRG's _applyLoadedSaveFile (F03600) is the typed
+        # VS::Save::MemoryCard::ValidateAndApplyLoadedSave, whose flag is named for its true meaning.
+        owned = self.owned_items()
+        self.assertEqual(owned["F03600"]["name"], "VS::Save::MemoryCard::ValidateAndApplyLoadedSave")
+        self.assertNotIn("F03600", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        header = (root / r"Native\Engine\include\Save\MemoryCard\GameFiles.hpp").read_text(encoding="utf-8")
+        self.assertRegex(header, r"ValidateAndApplyLoadedSave\(\s*SaveStateHost& state, SaveImage incoming, bool apply\)")
+        self.assertNotIn("verifyOnly", header)
 
     def test_lifecycle_scoped_names_preserve_exact_declaration_shapes(self):
-        for identity, old, new in (
-            ("F03602", "int new_var = 320;", "int progress_target_x = 320;"),
-            ("F03623", "int v0;", "int location_texture_page;"),
-            ("F03626", "int new_var;", "int card_and_partial_read_flags;"),
-            ("F03663", "int new_var = j + menuState[i].textPosition;",
-             "int text_scanline_position = j + menuState[i].textPosition;"),
-        ):
+        # #276 slice 53 promoted the TITLE.PRG functions these declaration renames applied to
+        # (F03602, F03623, F03626 and F03663) to owned typed C++; no generated copy remains to rename.
+        owned = self.owned_items()
+        for identity in ("F03602", "F03623", "F03626", "F03663"):
             with self.subTest(identity=identity):
-                self.assertIn(
-                    (old, new),
-                    [(before.strip(), after.strip())
-                     for before, after, _ in copy_fixups.FIXES[identity]],
-                )
+                self.assertNotIn(identity, copy_fixups.FIXES)
+                self.assertIn(identity, owned)
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Title\TitleMenu.cpp").read_text(encoding="utf-8")
+        self.assertIn("const int scanline = line + item.text_position;", core)
 
     def test_save_format_field_names_keep_original_identity_and_storage(self):
         root = Path(__file__).resolve().parents[2]
@@ -3029,10 +3311,12 @@ int arg01 = arg0;'''
         self.assertIn("func_800B91C4", source)
         self.assertIn("Event_ScriptClearRoomActorCache", source)
         self.assertNotIn("Event_ScriptPreloadRoom", source)
+        # F00231 duplicates ForgetRoomEnemies, so the copy calls the typed core.
         self.assertIn(
-            "Field_ClearSavedRoomEnemies(instruction[2], instruction[1]);",
+            "VS::Actors::ForgetLiveRoomEnemies(instruction[2], instruction[1]);",
             source,
         )
+        self.assertNotIn("Field_ClearSavedRoomEnemies", source)
 
     def test_event_parameter_scope_matches_registered_opcode_handlers(self):
         root = Path(__file__).resolve().parents[2]
@@ -3218,35 +3502,45 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
                     self.assertNotIn("Core_Scratch", source)
 
     def test_npc_area_filter_keeps_geometry_without_creating_player_ui(self):
-        source = """    Battle_actionState->areaOrigin = Battle_actionState->savedAreaCenter;
-    ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
-    kept = 0;
-    Battle_IsPointInTargetVolume(&Battle_actionState->areaShape, position);
-"""
-        for old, new, _ in copy_fixups.FIXES["F00103"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertIn("if (Battle_actionState->isPlayerAction != 0)", source)
-        self.assertIn("Battle_SetSecondarySphereVolume", source)
-        self.assertIn("    kept = 0;\n    Battle_IsPointInTargetVolume", source)
-        self.assertNotIn("Battle_InitSphere", source)
-        self.assertNotIn("return;", source)
+        # #276 row 31: Battle_FilterAreaActionTargets (F00103) is typed C++ in Battle/Targeting.cpp.
+        self.assertNotIn("F00103", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Battle/Targeting.cpp").read_text(encoding="utf-8")
+        start = source.index("void FilterAreaActionTargets(ActionTargetingHost& host) {")
+        body = flat(source[start:source.index("\n}\n", start)])
+        self.assertIn("host.SetVolume(TargetingVolumeSlot::kArea, area); if (host.IsPlayerAction()) { "
+                      "host.ShowAreaVolume(); }", body)
+        self.assertIn("int kept = 0;", body)
+        self.assertIn("host.IsPointInVolume(TargetingVolumeSlot::kArea, source.position)", body)
+        self.assertNotIn("InitSphere", body)
+        live = (root / "Native/Game/src/Battle/TargetingLive.cpp").read_text(encoding="utf-8")
+        start = live.index("void ShowAreaVolume() override {")
+        self.assertIn("Battle_SetSecondarySphereVolume(&area);", live[start:live.index("\n  }\n", start)])
 
     def test_native_target_capacity_is_not_a_ps1_allocation_or_visible_limit(self):
         root = Path(__file__).resolve().parents[2]
         action = (root / "Native/Game/include/Battle/Action.h").read_text()
         self.assertIn("Battle_TargetPreview previews[255];", action)
         self.assertIn("Battle_HitResult targets[255];", action)
-        boot = (root / "Native/Game/src/Boot/GameLoop.cpp").read_text()
-        self.assertIn("AllocateLiveFromHighEnd(sizeof *Battle_actionState)", boot)
+        boot = (root / "Native/Game/src/Boot/GameplayOverlayLive.cpp").read_text()
+        self.assertIn("AllocateLiveFromHighEnd(sizeof(Battle_ActionState))", boot)
         self.assertNotIn("0x2C10", boot)
-        targeting = (root / "Native/Game/src/Battle/Targeting.cpp").read_text()
-        self.assertIn("sizeof Battle_actionState->selection", targeting)
-        self.assertNotIn("0x84C", targeting)
-        self.assertIn("Battle_ValidateTargetPreviewIndex(count)", targeting)
-        self.assertIn("Battle_MapTargetPageIndex(", targeting)
-        self.assertIn("Battle_HandleTargetPageButtons()", targeting)
-        self.assertNotIn("sphere-cursor", targeting)
+        self.assertNotIn("0x2C10", (root / "Native/Game/src/Boot/GameLoop.cpp").read_text())
+        # #276 row 31: the targeting is typed C++ (Battle/Targeting.cpp) bound by Battle/TargetingLive.cpp.
+        api = (root / "Native/Game/include/Battle/Targeting.hpp").read_text(encoding="utf-8")
+        self.assertIn("inline constexpr int kTargetPreviewCapacity = 255;", api)
+        self.assertIn("inline constexpr int kSelectionTargetCapacity = 255;", api)
+        core = (root / "Native/Game/src/Battle/Targeting.cpp").read_text(encoding="utf-8")
+        self.assertIn("if (!PreviewSlotAvailable(count)) {", core)
+        live = flat((root / "Native/Game/src/Battle/TargetingLive.cpp").read_text(encoding="utf-8"))
+        self.assertIn("static_assert(std::extent_v<decltype(Battle_ActionState::previews)> == "
+                      "static_cast<std::size_t>(battle::kTargetPreviewCapacity));", live)
+        self.assertIn("state_.selection = {};", live)
+        self.assertIn("Battle_MapTargetPageIndex(", live)
+        self.assertIn("Battle_HandleTargetPageButtons()", live)
+        for targeting in (core, live):
+            self.assertNotIn("0x84C", targeting)
+            self.assertNotIn("sphere-cursor", targeting)
 
     def test_ai_planning_owns_the_full_native_action_result(self):
         root = Path(__file__).resolve().parents[2]
@@ -3260,7 +3554,8 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertNotIn("int Battle_Ai_RebuildActorActionPlans(", source)
         for offset in ("0x1ECC", "0x9CC", "0xD8C", "0x1D8C"):
             self.assertNotIn(offset, source)
-        spawning = (root / "Native/Game/src/Actors/ActorLoading.cpp").read_text()
+        self.assertFalse((root / "Native/Game/src/Actors/ActorLoading.cpp").exists())
+        spawning = (root / "Native/Game/src/Actors/ActorSpawningLive.cpp").read_text(encoding="utf-8")
         self.assertNotIn("spawn137", spawning)
 
     def test_ai_plan_rebuild_reads_the_queued_action_request(self):
@@ -3274,10 +3569,12 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         execution = (root / "Native/Game/src/Battle/ActionExecution.cpp").read_text(encoding="utf-8")
         self.assertIn("VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[", execution)
         self.assertIn('#include "Battle/Ai/PlanningWorkspaceLive.hpp"', execution)
-        for path in ("Actors/ActorState.cpp", "Battle/Ai/ActorState.cpp", "Boot/GameLoop.cpp", "Event/Cutscene.cpp"):
+        for path in ("Actors/ActorStateLive.cpp", "Battle/Ai/ActorState.cpp", "Boot/GameplayLoopLive.cpp",
+                     "Event/Cutscene.cpp"):
             text = (root / "Native/Game/src" / path).read_text(encoding="utf-8")
             self.assertNotIn("Battle_Ai_RebuildActorActionPlans(", text, path)
-            self.assertIn("VS::Battle::Ai::RebuildLiveActorActionPlans(", text, path)
+            # ActorStateLive.cpp sits inside namespace VS, so it names Battle::Ai without the VS:: prefix.
+            self.assertIn("Battle::Ai::RebuildLiveActorActionPlans(", text, path)
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x800DEC88u", table)
 
@@ -3373,42 +3670,44 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertNotIn("records[0]", owned_header)
 
     def test_weapon_naming_draw_links_use_native_handles(self):
+        # #276 slice 51: the naming screen is the typed Menu::Rename core; its frame and selection box hand
+        # complete packets to the host instead of linking 24-bit truncated pointers.
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Rename.cpp").read_text()
-        for function, variable in (
-            ("DrawFrame", "prim"),
-            ("DrawSelectionBox", "selection_box_primitive"),
-        ):
+        source = (root / "Native/Game/src/Menu/Rename.cpp").read_text(encoding="utf-8")
+        self.assertTrue(source.startswith("// Hand-maintained (tools/port/owned.csv)."))
+        self.assertNotIn("<< 8) >> 8", source)
+        self.assertNotIn("Legacy/", source)
+        self.assertNotIn("LegacyGpu_Handle", source)
+        for function, identifier in (("DrawFrame", "F02781"), ("DrawSelectionBox", "F02782")):
             with self.subTest(function=function):
-                body = source.split(f"void Menu_Rename_{function}(", 1)[1]
-                body = body.split("\n}\n", 1)[0]
-                self.assertNotIn(f"((u_long){variable} << 8) >> 8", body)
-                self.assertIn(f"LegacyGpu_Handle({variable})", body)
+                self.assertNotIn(identifier, copy_fixups.FIXES)
+                self.assertIn(f"void {function}(", source)
 
-    def test_workshop_choices_use_native_pointer_arrays(self):
+    def test_workshop_choices_are_owned_typed_part_lists(self):
+        # #276 slice 49: the six MENUC part lists are hand-maintained; they build their rows in a bounded
+        # PartListRows instead of pointer arrays carved out of the PS1-sized text allocation.
+        owned = self.owned_items()
         root = Path(__file__).resolve().parents[2]
         root = root / "Native" / "Game" / "src" / "Menu" / "Setup"
         selectors = (
-            ("Assembly.cpp", "SelectAssemblyBlade", "menuText", 17),
-            ("Assembly.cpp", "SelectAssemblyGrip", "menuText", 17),
-            ("Assembly.cpp", "SelectGem", "menuText", 49),
-            ("Combination.cpp", "SelectCombinationBlade", "menuText", 17),
-            ("Combination.cpp", "SelectCombinationShield", "menuText", 9),
-            ("Combination.cpp", "SelectCombinationArmor", "armor_row_text", 17),
+            ("F02886", "Assembly.cpp", "SelectAssemblyBlade"),
+            ("F02887", "Assembly.cpp", "SelectAssemblyGrip"),
+            ("F02888", "Assembly.cpp", "SelectGem"),
+            ("F02903", "Combination.cpp", "SelectCombinationBlade"),
+            ("F02909", "Combination.cpp", "SelectCombinationShield"),
+            ("F02913", "Combination.cpp", "SelectCombinationArmor"),
         )
-        for filename, function, variable, rows in selectors:
+        for fid, filename, function in selectors:
             with self.subTest(function=function):
-                source = (root / filename).read_text()
-                body = source.split(f"int Menu_Setup_{function}(", 1)[1]
-                body = body.split("\n}\n", 1)[0]
-                self.assertTrue(
-                    f"char* {variable}[2 * {rows}];" in body,
-                    f"{function} needs aligned native pointer storage",
-                )
-                self.assertNotIn(f"char** {variable};", body)
-                self.assertNotRegex(body, rf"{variable}\s*=\s*.*0x(?:6A4|384|1324)")
-                self.assertIn("Menu_Setup_BuildItemList(", body)
-                self.assertIn("VS::Core::Memory::FreeLiveFromHighEnd(", body)
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                self.assertEqual(owned[fid]["name"], f"VS::Menu::Setup::{function}")
+                self.assertEqual(owned[fid]["path"], rf"Native\Game\src\Menu\Setup\{filename}")
+                source = (root / filename).read_text(encoding="utf-8")
+                self.assertIn(f"int {function}(Context& context, int ", source)
+                self.assertNotIn("char**", source)
+                self.assertNotRegex(source, r"0x(?:6A4|384|1324)\b")
+        screen = (root / "SetupScreen.cpp").read_text(encoding="utf-8")
+        self.assertIn("void ShowPartList(Context& context, const PartListRows& rows)", screen)
 
     def test_loot_staging_uses_last_slots_and_preflights_composites(self):
         root = Path(__file__).resolve().parents[2]
@@ -3489,25 +3788,14 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertEqual(new.count("/ scratch->extent.vy;"), 2)
         self.assertNotIn("Core_Random_Rand", new)
 
-    def test_particle_ribbon_preserves_original_zero_divisor_remainder(self):
-        old, new, _ = copy_fixups.FIXES["F01867"][0]
-        root = Path(__file__).resolve().parents[2]
-        source = (
-            root / "Native/Game/src/Effects/Templates/ParticleRender.inl"
-        ).read_text()
-        self.assertIn(new, source)
-        self.assertNotIn(old, source)
-        self.assertEqual(new.count("Core_Random_Rand()"), 1)
-        self.assertIn("if (width != 0) {\n                sampleJitter %= width;", new)
-        self.assertIn("0x800FAA74", new)
-
     def test_ashley_spawn_initializes_materials_for_empty_equipment_slots(self):
+        # 18.c:func_800F9CCC passes both materials even when their model IDs are zero (#276 slice 19c).
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Actors/Ashley.cpp").read_text()
-        spawn = source.split("void Actors_SpawnAshleyWithEquipment(void)", 1)[1]
-        spawn = spawn.split("\n}\n", 1)[0]
-        self.assertIn("int bladeMaterial = 0;", spawn)
-        self.assertIn("int shieldMaterial = 0;", spawn)
+        self.assertFalse((root / "Native/Game/src/Actors/Ashley.cpp").exists())
+        header = (root / "Native/Game/include/Actors/ActorSpawning.hpp").read_text(encoding="utf-8")
+        equipment = header.split("struct AshleyEquipment {", 1)[1].split("\n};", 1)[0]
+        self.assertIn("std::uint16_t blade_material = 0;", equipment)
+        self.assertIn("std::uint16_t shield_material = 0;", equipment)
 
     def test_misc_shortcut_label_is_encoded_before_reset_capture(self):
         old, new, _ = copy_fixups.FIXES["F02553"][0]
@@ -3528,12 +3816,19 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertNotIn(r'"MISC\00000|0xF8|"', source)
 
     def test_title_settings_retains_original_defaults_in_shared_helper(self):
-        old, new, _ = copy_fixups.FIXES["F03669"][0]
-        self.assertIn("Input_settings.menuFlags = 0x2D8;", old)
-        self.assertEqual(new.strip(), "Boot_InitializePlayerSettings();")
+        # #276 slice 53: _initEnvironment (F03669) is the typed VS::Title::InitializeSettings, whose
+        # host restores the original defaults (menuFlags 0x2D8, ...) through the shared helper.
+        self.assertNotIn("F03669", copy_fixups.FIXES)
         self.assertIn(
             "Boot_InitializePlayerSettings", copy_fixups.NATIVE_HELPER_HEADERS
         )
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Title\TitleMenu.cpp").read_text(encoding="utf-8")
+        self.assertIn("host.ResetPlayerSettings();", core)
+        live = (root / r"Native\Game\src\Title\TitleMenuLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("void ResetPlayerSettings() override { Boot_InitializePlayerSettings(); }", live)
+        helper = (root / r"Native\Game\src\Boot\PlayerSettings.cpp").read_text(encoding="utf-8")
+        self.assertIn("0x2D8", helper)
 
     def test_misc_shortcut_reserves_all_native_text_pointers(self):
         root = Path(__file__).resolve().parents[2]
@@ -3552,8 +3847,8 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
             "Effects_EffectRenderer Effects_effectEntryPoints[] = {", 1
         )[1]
         table = table.split("};", 1)[0]
-        self.assertNotIn("Effects_InvokeAllPluginUpdates", table)
-        self.assertIn("Effects_Plg198_Ring", table)
+        self.assertNotIn("InvokeAllPluginUpdates", table)
+        self.assertIn("VS::Effects::Templates::UpdateLivePlg198Ring", table)
 
     def test_rank_menu_preserves_native_packet_link(self):
         root = Path(__file__).resolve().parents[2]
@@ -3582,24 +3877,34 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertNotIn("state.source_actor = action.sourceActorId;", inspect)
 
     def test_secondary_body_uses_the_live_zone_character_table(self):
+        # 146C.c:6676 reads the body model from the zone enemy record; #276 slice 19c bounds it by zndEnemyCount.
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Actors/ActorLoading.cpp").read_text()
-        spawn = source.split("Battle_Actor* Actors_SpawnRoomEnemy(", 1)[1]
-        spawn = spawn.split("\n}\n", 1)[0]
-        self.assertIn(
-            "object.modelId = (u_char)Field_zoneContext.zndEnemies[zudIndex].recordBytes[2] + 1;",
-            spawn,
-        )
-        self.assertNotIn("Actors_zoneCharacterInitData[", spawn)
+        core = (root / "Native/Game/src/Actors/ActorSpawning.cpp").read_text(encoding="utf-8")
+        self.assertIn("const std::uint8_t body_model = host.ZoneEnemyModel(zud);", core)
+        self.assertIn("request.model_id = static_cast<std::int16_t>(body_model + 1);", core)
+        live = (root / "Native/Game/src/Actors/ActorSpawningLive.cpp").read_text(encoding="utf-8")
+        model = live.split("std::uint8_t ZoneEnemyModel(int zud) const override {", 1)[1].split("\n  }\n", 1)[0]
+        self.assertIn("zud >= ZoneEnemyCount()", model)
+        self.assertIn("Field_zoneContext.zndEnemies[zud].recordBytes[kZoneEnemyModelByte]", model)
+        for text in (core, live):
+            self.assertNotIn("Actors_zoneCharacterInitData", text)
 
     def test_preview_weapon_alias_uses_real_model_slots(self):
         root = Path(__file__).resolve().parents[2]
+        # #276 row 46 promoted func_800F9CB0 (F02465) to the owned ActorPreview.cpp ResetActorPreviewPose, which
+        # attaches the preview actor's weapon models (slots 2 and 3) through ActorPreviewLive.cpp.
+        self.assertEqual(self.owned_items()["F02465"]["path"], r"Native\Game\src\Menu\Framework\ActorPreview.cpp")
+        header = (root / "Native/Game/include/Menu/Framework/ActorPreview.hpp").read_text()
+        self.assertIn("inline constexpr int kPreviewWeaponModelSlot = 2;", header)
         preview = (root / "Native/Game/src/Menu/Framework/ActorPreview.cpp").read_text()
-        reset = preview.split("void Menu_Framework_ResetActorPreviewPose(", 1)[1]
-        reset = reset.split("void Menu_Framework_ReleaseActorPreview(", 1)[0]
-        self.assertIn("Actors_weaponModels[i + 2] != NULL", reset)
-        self.assertIn("Actors_weaponModels[i + 2]->reserved08Bit4 = 1;", reset)
-        self.assertNotIn("Battle_unusedGlobal1", reset)
+        reset = preview.split("void ResetActorPreviewPose(ActorPreviewHost& host) {", 1)[1]
+        reset = reset.split("\n}\n", 1)[0]
+        self.assertIn("const int slot = kPreviewWeaponModelSlot + weapon;", reset)
+        self.assertIn("host.SetWeaponAttached(slot);", reset)
+        live = (root / "Native/Game/src/Menu/Framework/ActorPreviewLive.cpp").read_text()
+        self.assertIn("return Actors_weaponModels[slot];", live)
+        self.assertIn("model->reserved08Bit4 = 1;", live)
+        self.assertNotIn("Battle_unusedGlobal1", preview + live)
         inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
         self.assertIn("Actors_weaponModels[i + 2]->reserved11 = 0;", inventory)
         self.assertNotIn("Battle_unusedGlobal1", inventory)

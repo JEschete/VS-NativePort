@@ -12,6 +12,7 @@
 #include "Core/RandomLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "State/GameClockLive.hpp"
 
 extern "C" {
 #include "Core/Diagnostics.h"
@@ -117,7 +118,7 @@ class LiveFieldFrame final : public FieldFrameHost {
     return State_tickSpeed;
   }
   std::int32_t UpdatePlayTime(std::int32_t ticks) override {
-    return State_UpdatePlayTimeAndLoading(ticks);
+    return VS::State::UpdateLivePlayTimeAndLoading(ticks);
   }
   [[nodiscard]] bool FrameStepPaused() const override {
     return Render_isFrameStepPaused != 0;

@@ -10,9 +10,9 @@
 #define VS_EFFECTS_PLUGINS_PLG162_H_DECLS
 #include "Effects/Runtime.h"
 
-extern u_char Effects_Plg162_ringColorFactors[][4];
-extern u_char Effects_Plg162_ringColorFactors2[][4];
-extern CVECTOR Effects_Plg162_closedRingColorFactors[];
+extern u_char Effects_Plg162_ringColorFactors[8][4];
+extern u_char Effects_Plg162_ringColorFactors2[8][4];
+extern CVECTOR Effects_Plg162_closedRingColorFactors[8];
 int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_PLUGINS_PLG162_H_DECLS

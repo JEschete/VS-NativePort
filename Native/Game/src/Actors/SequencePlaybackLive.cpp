@@ -7,10 +7,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <span>
 #include <type_traits>
 #include <vector>
 
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -47,6 +50,7 @@ std::vector<BankExtent>& Banks() {
 
 enum class Problem : std::uint8_t {
   kUnregisteredBank,
+  kMapOutsideBank,
   kHeaderOutsideBank,
   kMotionOutsideBank,
   kTrackOverrun,
@@ -56,6 +60,8 @@ const char* Describe(Problem problem) {
   switch (problem) {
     case Problem::kUnregisteredBank:
       return "has no recorded extent";
+    case Problem::kMapOutsideBank:
+      return "has a map entry outside its bank";
     case Problem::kHeaderOutsideBank:
       return "has a header outside its bank";
     case Problem::kMotionOutsideBank:
@@ -80,8 +86,8 @@ void Report(const void* bank, int animation, Problem problem) {
     return;
   }
   last = {bank, animation, problem};
-  Core_Errorf(kChannel, "SEQ bank %p animation %d %s; playback skipped it",
-              bank, animation, Describe(problem));
+  Core_Errorf(kChannel, "SEQ bank %p animation %d %s; skipped", bank, animation,
+              Describe(problem));
 }
 
 PoseVector FromLive(const SVECTOR& vector) {
@@ -108,53 +114,24 @@ void StoreKeys(const PoseKeyArray& keys,
   }
 }
 
-PoseKeys LoadPoseKeys(const Actors_AnimationPose& pose) {
-  PoseKeys keys;
-  LoadKeys(pose.boneKeys, keys.rotations);
-  LoadKeys(pose.scaleKeys, keys.scales);
-  return keys;
-}
-
-// The byte offset of `address` within `bank`, if it lies inside it.
-bool OffsetInBank(std::span<const std::uint8_t> bank, std::uintptr_t address,
-                  std::size_t& offset) {
-  const auto begin = reinterpret_cast<std::uintptr_t>(bank.data());
-  if (address < begin || address - begin > bank.size()) {
-    return false;
-  }
-  offset = address - begin;
-  return true;
-}
-
 // Resolves the actor's current clip within its registered bank.
-bool ResolveClip(Actors_ActorRecord& actor, AnimationClip& clip,
+bool ResolveClip(const Actors_ActorRecord& actor, AnimationClip& clip,
                  const void*& bank_address) {
-  u_short* header = nullptr;
-  const intptr_t found =
-      Actors_FindActorAnimationHeader(&actor, actor.animationId, &header);
-  bank_address = reinterpret_cast<const void*>(found);
-  if (found == 0 || header == nullptr) {
+  const AnimationHeader header =
+      FindLiveAnimationHeader(actor, actor.animationId);
+  bank_address = header.bank.data();
+  if (header.status != AnimationHeaderStatus::kFound) {
     return false;
   }
-  const std::span<const std::uint8_t> bank = SequenceBankBytes(bank_address);
-  if (bank.size() < sizeof(Actors_SeqAnimationBank)) {
-    Report(bank_address, actor.animationId, Problem::kUnregisteredBank);
-    return false;
-  }
-  std::size_t header_offset = 0;
-  if (!OffsetInBank(bank, reinterpret_cast<std::uintptr_t>(header),
-                    header_offset)) {
-    Report(bank_address, actor.animationId, Problem::kHeaderOutsideBank);
-    return false;
-  }
-  const int motion =
-      static_cast<const Actors_SeqAnimationBank*>(bank_address)->animationData;
-  if (motion < 0 || static_cast<std::size_t>(motion) > bank.size()) {
+  // A found header lies past the bank's motion and map offsets.
+  std::int32_t motion = 0;
+  std::memcpy(&motion, header.bank.data(), sizeof motion);
+  if (motion < 0 || static_cast<std::size_t>(motion) > header.bank.size()) {
     Report(bank_address, actor.animationId, Problem::kMotionOutsideBank);
     return false;
   }
-  clip = {.header = bank.subspan(header_offset),
-          .motion = bank.subspan(static_cast<std::size_t>(motion))};
+  clip = {.header = header.bank.subspan(header.header_offset),
+          .motion = header.bank.subspan(static_cast<std::size_t>(motion))};
   return true;
 }
 
@@ -165,16 +142,10 @@ void ApplyLivePoseTracks(Actors_ActorRecord& actor, Actors_AnimationPose& pose,
   if (!ResolveClip(actor, clip, bank)) {
     return;
   }
-  SkeletalPose typed;
-  typed.keys = LoadPoseKeys(pose);
-  LoadKeys(pose.reserved2A0, typed.rotationDeltas);
-  LoadKeys(pose.trackStates, typed.scaleDeltas);
+  SkeletalPose typed = LoadLiveSkeletalPose(pose);
   const PoseTrackResult result =
       ApplyPoseTracks(clip, actor.instance.boneCount, frames, typed);
-  StoreKeys(typed.keys.rotations, pose.boneKeys);
-  StoreKeys(typed.keys.scales, pose.scaleKeys);
-  StoreKeys(typed.rotationDeltas, pose.reserved2A0);
-  StoreKeys(typed.scaleDeltas, pose.trackStates);
+  StoreLiveSkeletalPose(typed, pose);
   if (result.moved) {
     SVECTOR& position = actor.instance.position;
     position.vx = WrapSigned16(static_cast<std::uint32_t>(position.vx) +
@@ -214,9 +185,9 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
     if (actor_.queuedAnimation == 0) {
       return false;
     }
-    Actors_PlayActorAnimationAtFrame(
-        actor_.instance.slot, actor_.queuedAnimation, actor_.queuedParameterA,
-        actor_.queuedParameterB);
+    PlayLiveActorAnimationAtFrame(actor_.instance.slot, actor_.queuedAnimation,
+                                  actor_.queuedParameterA,
+                                  actor_.queuedParameterB);
     actor_.queuedAnimation = 0;
     return true;
   }
@@ -225,7 +196,7 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
            actor_.pose.nextEventFrame == actor_.pose.frame;
   }
   void RunEvents() override {
-    Actors_RunAnimationEvents(&actor_, &actor_.pose, mode_);
+    static_cast<void>(RunLiveAnimationEvents(actor_, actor_.pose, mode_));
   }
   bool HoldingLastFrame() const override {
     return actor_.pose.holdingLastFrame != 0;
@@ -292,6 +263,81 @@ std::span<const std::uint8_t> SequenceBankBytes(const void* bank) {
   return {static_cast<const std::uint8_t*>(bank), found->bytes};
 }
 
+std::optional<SequenceBankLocation> LocateInSequenceBank(const void* address) {
+  if (address == nullptr) {
+    return std::nullopt;
+  }
+  const auto at = reinterpret_cast<std::uintptr_t>(address);
+  // A cursor at one bank's end can be the next bank's start; the bank that
+  // holds a byte there wins.
+  const BankExtent* holder = nullptr;
+  for (const BankExtent& known : Banks()) {
+    if (at < known.begin || at - known.begin > known.bytes) {
+      continue;
+    }
+    if (at - known.begin < known.bytes) {
+      holder = &known;
+      break;
+    }
+    holder = holder == nullptr ? &known : holder;
+  }
+  if (holder == nullptr) {
+    return std::nullopt;
+  }
+  const std::size_t offset = at - holder->begin;
+  return SequenceBankLocation{
+      .bank = {static_cast<const std::uint8_t*>(address) - offset,
+               holder->bytes},
+      .offset = offset};
+}
+
+void ReportLiveAnimationHeader(const void* bank, int animation,
+                               AnimationHeaderStatus status) {
+  switch (status) {
+    case AnimationHeaderStatus::kUnregisteredBank:
+      Report(bank, animation, Problem::kUnregisteredBank);
+      return;
+    case AnimationHeaderStatus::kMapOutsideBank:
+      Report(bank, animation, Problem::kMapOutsideBank);
+      return;
+    case AnimationHeaderStatus::kHeaderOutsideBank:
+      Report(bank, animation, Problem::kHeaderOutsideBank);
+      return;
+    case AnimationHeaderStatus::kFound:
+    case AnimationHeaderStatus::kNoClip:
+    case AnimationHeaderStatus::kNoEntry:
+    case AnimationHeaderStatus::kNoBank:
+      return;
+  }
+}
+
+PoseKeys LoadLivePoseKeys(const Actors_AnimationPose& pose) {
+  PoseKeys keys;
+  LoadKeys(pose.boneKeys, keys.rotations);
+  LoadKeys(pose.scaleKeys, keys.scales);
+  return keys;
+}
+
+void StoreLivePoseKeys(const PoseKeys& keys, Actors_AnimationPose& pose) {
+  StoreKeys(keys.rotations, pose.boneKeys);
+  StoreKeys(keys.scales, pose.scaleKeys);
+}
+
+SkeletalPose LoadLiveSkeletalPose(const Actors_AnimationPose& pose) {
+  SkeletalPose typed;
+  typed.keys = LoadLivePoseKeys(pose);
+  LoadKeys(pose.reserved2A0, typed.rotationDeltas);
+  LoadKeys(pose.trackStates, typed.scaleDeltas);
+  return typed;
+}
+
+void StoreLiveSkeletalPose(const SkeletalPose& typed,
+                           Actors_AnimationPose& pose) {
+  StoreLivePoseKeys(typed.keys, pose);
+  StoreKeys(typed.rotationDeltas, pose.reserved2A0);
+  StoreKeys(typed.scaleDeltas, pose.trackStates);
+}
+
 ShadowBlend LoadLiveShadowBlend(const Actors_ShadowBlend& live) {
   return {.levelFrames = live.levelFrames,
           .radiusFrames = live.radiusFrames,
@@ -322,18 +368,19 @@ void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode) {
 void BlendLiveActorPose(Actors_AnimationPose& destination,
                         Actors_AnimationPose& source, int bones, int frame,
                         int frames) {
-  PoseKeys keys = LoadPoseKeys(destination);
-  switch (BlendActorPose(keys, LoadPoseKeys(source), bones, frame, frames)) {
+  PoseKeys keys = LoadLivePoseKeys(destination);
+  const PoseKeys from = LoadLivePoseKeys(source);
+  switch (BlendActorPose(keys, from, bones, frame, frames)) {
     case PoseBlend::CopySource:
       destination = source;
       return;
     case PoseBlend::Halfway:
-      Actors_BlendActorPoseHalfway(&destination, &source,
-                                   static_cast<int>(PoseBoneCount(bones)));
+      keys = LoadLivePoseKeys(destination);
+      BlendActorPoseHalfway(keys, from, bones);
+      StoreLivePoseKeys(keys, destination);
       return;
     case PoseBlend::Weighted:
-      StoreKeys(keys.rotations, destination.boneKeys);
-      StoreKeys(keys.scales, destination.scaleKeys);
+      StoreLivePoseKeys(keys, destination);
       return;
     case PoseBlend::Skipped:
       Core_Errorf(kChannel,

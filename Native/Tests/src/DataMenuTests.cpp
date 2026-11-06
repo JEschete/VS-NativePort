@@ -10,20 +10,22 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/FilesLive.hpp"
 
 extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/WeaponModel.h"
-#include "Audio/Playback/SoundPlayback.h"
 #include "Core/Random.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/Files.h"
+#include "Menu/FilesLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "ModelLoading.h"
@@ -38,21 +40,29 @@ extern "C" {
 }
 
 namespace {
+namespace files = VS::Menu::Files;
+
+files::Context LiveFiles() {
+  return {.state = files::LiveFilesState(), .host = files::LiveFilesHost()};
+}
+
 struct EmptySlotsFixture {
-  u_int* saved_sfx_offsets = Audio_Playback_soundEffectProgramOffsets;
-  u_short* saved_sfx_selectors = Audio_Playback_soundEffectBankSelectors;
   decltype(Input_buttonsPressed) saved_pressed = Input_buttonsPressed;
   decltype(Input_buttonRepeat) saved_repeat = Input_buttonRepeat;
   Save_CardFileInfoRecord* saved_summaries = Title_saveFileSummaries;
   u_short* saved_table = Menu_Files_textTable;
   char* saved_message = Menu_Files_memoryCardMessage;
   int saved_cursor = Menu_Files_selectCursorXy;
-  std::array<Menu_Files_FileMenuElement, 10> saved_elements =
-      std::to_array(Menu_Files_fileMenuElements);
+  std::array<files::Element, files::kElementCount> saved_elements =
+      files::LiveFilesState().elements;
   std::array<Save_CardFileInfoRecord, 5> summaries{};
   std::array<u_short, 2048> text{};
   std::array<u_int, 0x180> sfx_offsets{};
   std::array<u_short, 0x180> sfx_selectors{};
+  VS::Audio::Playback::ScopedLiveEffectTables sfx_tables{
+      {.program_offsets = sfx_offsets,
+       .bank_selectors = sfx_selectors,
+       .program_data = {}}};
 
   EmptySlotsFixture() {
     for (auto& summary : summaries) {
@@ -62,33 +72,29 @@ struct EmptySlotsFixture {
     Menu_Files_textTable = text.data();
     // Input feedback needs a bound bank, even when no sound programs exist.
     sfx_offsets.fill(UINT32_MAX);
-    Audio_Playback_soundEffectProgramOffsets = sfx_offsets.data();
-    Audio_Playback_soundEffectBankSelectors = sfx_selectors.data();
     Input_buttonsPressed.allButtons = 0;
     Input_buttonRepeat = 0;
   }
 
   ~EmptySlotsFixture() {
-    std::copy(saved_elements.begin(), saved_elements.end(),
-              Menu_Files_fileMenuElements);
+    files::LiveFilesState().elements = saved_elements;
     Title_saveFileSummaries = saved_summaries;
     Menu_Files_textTable = saved_table;
     Menu_Files_memoryCardMessage = saved_message;
     Menu_Files_selectCursorXy = saved_cursor;
-    Audio_Playback_soundEffectProgramOffsets = saved_sfx_offsets;
-    Audio_Playback_soundEffectBankSelectors = saved_sfx_selectors;
     Input_buttonsPressed = saved_pressed;
     Input_buttonRepeat = saved_repeat;
   }
 
   void CheckEmptySlotInput() const {
+    files::Context context = LiveFiles();
     for (size_t index = 0; index < summaries.size(); ++index) {
       Input_buttonsPressed.allButtons = PADRright;
-      CHECK(Menu_Files_UpdateLoadFiles(0) == 0);
+      CHECK(files::UpdateLoadFiles(context, 0) == 0);
       CHECK(Menu_Files_selectCursorXy != 0);
       Input_buttonsPressed.allButtons = 0;
       Input_buttonRepeat = PADLdown;
-      CHECK(Menu_Files_UpdateLoadFiles(0) == 0);
+      CHECK(files::UpdateLoadFiles(context, 0) == 0);
       Input_buttonRepeat = 0;
     }
   }
@@ -97,6 +103,7 @@ struct EmptySlotsFixture {
 struct ClockFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* saved_table = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   State_PlayTime saved_time = State_playTime;
   u_int saved_random = Core_interfaceRandomState;
@@ -121,6 +128,8 @@ struct ClockFixture {
     }
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    // The live chain lookups only accept the frame's own ordering table.
+    Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch.orderingTable = ordering.data() + 18;
     Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
     Core_interfaceRandomState = 0;
@@ -136,6 +145,7 @@ struct ClockFixture {
               Render_compactGlyphIndices);
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_legacyOrderingTables[0] = saved_table;
     Render_frameBuf = saved_framebuffer;
     State_playTime = saved_time;
     Core_interfaceRandomState = saved_random;
@@ -182,14 +192,15 @@ TEST_CASE("Data play time uses mutable digits and retains overflow formatting",
   const auto saved = State_playTime.all;
   const auto expected =
       hours >= 100 ? "100:00:00:00" : std::format("{:02}:34:56:00", hours);
-  Menu_Files_DrawPlayTime();
+  files::Context context = LiveFiles();
+  files::DrawPlayTime(context);
   CHECK(fixture.Clock() == expected);
   CHECK(State_playTime.all == saved);
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
-  Menu_Files_ResetMenu7Statics();
+  files::ResetLiveFilesStatics();
   fixture.ResetPackets();
-  Menu_Files_DrawPlayTime();
+  files::DrawPlayTime(context);
   CHECK(fixture.Clock() == expected);
   CHECK(State_playTime.all == saved);
 }
@@ -198,20 +209,21 @@ TEST_CASE("Game Over fade links packets through native handles",
           "[render][menu][game-over]") {
   ClockFixture render;
   EmptySlotsFixture input;
-  Menu_Files_UpdateGameOverChoices(1);
+  files::Context context = LiveFiles();
+  files::UpdateGameOverChoices(context, true);
   for (int frame = 0; frame < 16; ++frame) {
     Input_buttonsPressed.allButtons = 0;
-    CHECK(Menu_Files_UpdateGameOverChoices(0) == 0);
+    CHECK(files::UpdateGameOverChoices(context, false) == 0);
   }
 
   Input_buttonsPressed.allButtons = PADstart;
-  CHECK(Menu_Files_UpdateGameOverChoices(0) == 0);
+  CHECK(files::UpdateGameOverChoices(context, false) == 0);
   Input_buttonsPressed.allButtons = 0;
   const auto* fade_packet = Render_frameScratch.primitiveCursor;
-  CHECK(Menu_Files_UpdateGameOverChoices(0) == 0);
+  CHECK(files::UpdateGameOverChoices(context, false) == 0);
   CHECK(nextPrim(render.ordering.data() + 2) == fade_packet);
   CHECK(getaddr(render.ordering.data() + 2) == LegacyGpu_Handle(fade_packet));
-  Menu_Files_UpdateGameOverChoices(1);
+  files::UpdateGameOverChoices(context, true);
   (void)input;
 }
 
@@ -219,14 +231,15 @@ TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
           "[menu][data][empty]") {
   EmptySlotsFixture fixture;
   const int port = GENERATE(1, 2);
-  CHECK(Menu_Files_UpdateLoadFiles(port) == 0);
-  CHECK(Menu_Files_UpdateLoadFiles(0) == 0);
+  files::Context context = LiveFiles();
+  CHECK(files::UpdateLoadFiles(context, port) == 0);
+  CHECK(files::UpdateLoadFiles(context, 0) == 0);
   for (size_t index = 0; index < fixture.summaries.size(); ++index) {
-    CHECK(Menu_Files_fileMenuElements[index + 5].slotUnavailable);
+    CHECK(files::LiveFilesState().elements[index + 5].slot_unavailable != 0);
   }
   fixture.CheckEmptySlotInput();
   Input_buttonsPressed.allButtons = PADRdown;
-  CHECK(Menu_Files_UpdateLoadFiles(0) == -1);
+  CHECK(files::UpdateLoadFiles(context, 0) == -1);
   CHECK(Menu_Files_selectCursorXy == 0);
 }
 

@@ -7,6 +7,15 @@ typedef struct Menu_Manual_AnimationState Menu_Manual_AnimationState;
 typedef struct Menu_Manual_BackgroundChunkWidths Menu_Manual_BackgroundChunkWidths;
 typedef struct Menu_Manual_BackgroundTransparencies Menu_Manual_BackgroundTransparencies;
 
+// decomp: src/SLUS_010.40/sfx.h:3
+#define VS_SFX_MENUCHANGE 4
+
+// decomp: src/SLUS_010.40/sfx.h:4
+#define VS_SFX_MENUSELECT 5
+
+// decomp: src/SLUS_010.40/sfx.h:5
+#define VS_SFX_MENULEAVE 6
+
 // decomp: src/include/lbaMacros.h:9
 #define mkHfoPair(file) mkCdFile(file##_HF1), mkCdFile(file##_HF0)
 

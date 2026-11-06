@@ -12,8 +12,12 @@
 #include <iterator>
 #include <span>
 
+#include "Actors/ActorMovementLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/ActorCollisionLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -227,20 +231,20 @@ class LiveActorAppearance final : public ActorAppearance {
   void SettleDeathMotion() override {
     const int diagonal = VS::Core::Math::Sine(kCollisionDiagonalAngle) *
                          actor_.collisionRadius / kFixedOne;
-    Field_SampleActorCollisionPerimeter(&actor_, diagonal);
-    Field_ApplyActorWallRepulsion(&actor_, &actor_.instance.rootMotion);
+    VS::Field::LiveSampleActorCollisionPerimeter(&actor_, diagonal);
+    VS::Field::LiveApplyActorWallRepulsion(&actor_,
+                                           &actor_.instance.rootMotion);
     actor_.instance.rootMotion.vx /= 2;
     actor_.instance.rootMotion.vz /= 2;
-    Actors_UpdateActorJumpAndFall(actor_.instance.slot, &actor_);
+    UpdateLiveActorJumpAndFall(actor_.instance.slot, &actor_);
   }
 
   void PlayFallingDeathAnimation() override {
-    u_short* header = nullptr;
-    Actors_FindActorAnimationHeader(&actor_, kDeathAnimationProbe, &header);
-    if (header != nullptr) {
+    if (FindLiveAnimationHeader(actor_, kDeathAnimationProbe).status ==
+        AnimationHeaderStatus::kFound) {
       actor_.animationLocked = 0;
-      Actors_PlayActorAnimation(actor_.instance.slot, kFallingDeathAnimation, 0,
-                                kDeathBlendFrames);
+      PlayLiveActorAnimation(actor_.instance.slot, kFallingDeathAnimation, 0,
+                             kDeathBlendFrames);
       actor_.animationLocked = 1;
     }
   }

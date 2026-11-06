@@ -14,6 +14,7 @@
 #include <string_view>
 
 #include "Actors/TextureAnimationLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/DisplayControl.hpp"
 #include "Render/EncodedText.hpp"
@@ -24,8 +25,7 @@
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
-#include "Audio/Sfx.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
@@ -235,7 +235,7 @@ void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
     }
   }
   if (result.sound != 0) {
-    Audio_PlaySfxCentered(kTextSoundGroup, result.sound);
+    VS::Audio::LivePlaySfxCentered(kTextSoundGroup, result.sound);
   }
   if (result.reset_speaker) {
     VS::Actors::SetLiveActorTextureAnimation(view.speaker_texture, 0, 0, 0);

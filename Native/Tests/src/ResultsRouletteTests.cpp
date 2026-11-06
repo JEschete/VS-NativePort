@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Core/BiosRand.h"
 #include "Legacy/Psx.h"
 #include "Render/TexturePagesLive.hpp"
@@ -15,9 +16,8 @@
 extern "C" {
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Sfx.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
@@ -47,21 +47,21 @@ struct RouletteFixture {
   VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
   decltype(std::to_array(Audio_Mixer_kCommandHandlers)) saved_handlers =
       std::to_array(Audio_Mixer_kCommandHandlers);
-  u_int* saved_offsets = Audio_Playback_soundEffectProgramOffsets;
-  u_short* saved_selectors = Audio_Playback_soundEffectBankSelectors;
   Audio_CommandArguments saved_arguments = Audio_Driver_commandArguments;
   Audio_CommandParams saved_parameters = Audio_Mixer_commandParams;
   int saved_channel = Audio_nextSfxChannelGroup7E;
   std::array<u_int, 256> offsets{};
   std::array<u_short, 256> selectors{};
+  VS::Audio::Playback::ScopedLiveEffectTables sound_tables{
+      {.program_offsets = offsets,
+       .bank_selectors = selectors,
+       .program_data = {}}};
 
   RouletteFixture() {
     std::memset(&stats, 0, sizeof stats);
     actor.stats = &stats;
     Battle_characterState = &actor;
     selectors.fill(0x8000);
-    Audio_Playback_soundEffectProgramOffsets = offsets.data();
-    Audio_Playback_soundEffectBankSelectors = selectors.data();
     std::fill(std::begin(Audio_Mixer_kCommandHandlers),
               std::end(Audio_Mixer_kCommandHandlers), IgnoreAudio);
     Audio_nextSfxChannelGroup7E = 2;
@@ -85,8 +85,6 @@ struct RouletteFixture {
     VS::Render::LiveTexturePages() = saved_pages;
     std::copy(saved_handlers.begin(), saved_handlers.end(),
               Audio_Mixer_kCommandHandlers);
-    Audio_Playback_soundEffectProgramOffsets = saved_offsets;
-    Audio_Playback_soundEffectBankSelectors = saved_selectors;
     Audio_Driver_commandArguments = saved_arguments;
     Audio_Mixer_commandParams = saved_parameters;
     Audio_nextSfxChannelGroup7E = saved_channel;

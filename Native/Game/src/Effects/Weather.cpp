@@ -1,18 +1,19 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/EnvironmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Weather.h"
-#include "Field/Background.h"
-#include "Field/Collision.h"
+#include "Field/BackgroundLiveState.h"
 #include "Field/Doors.h"
-#include "Field/Environment.h"
+#include "Field/EnvironmentLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomRendering.h"
+#include "Field/RoomRenderingLiveState.h"
 #include "Field/Weather.h"
 #include "Field/Zone.h"
 #include "Items/Loot.h"
@@ -39,9 +40,9 @@ int Effects_InitializeRoomWeather(int suppress_rain)
         Field_MpdEnvironment* selected_environment = room_environment;
         room_environment = Field_roomData.environment;
         if ((suppress_rain == 0) || (selected_environment->weatherKind != 1)) {
-            ((int (*)(int))Field_SetRoomWeather)(selected_environment->weatherKind);
+            VS::Field::LiveSetRoomWeather(selected_environment->weatherKind);
         } else {
-            ((int (*)(int))Field_SetRoomWeather)(0);
+            VS::Field::LiveSetRoomWeather(0);
         }
         return 1;
     }
@@ -145,12 +146,12 @@ void Effects_DrawRainParticles(void)
             }
             if (particle->position.vy > 0) {
                 if ((particle->fallShift == 0) && (i & 1)) {
-                    cell = Field_CollisionCellAt(
+                    cell = VS::Field::LiveCollisionCellAt(
                         particle->position.vx / 128, particle->position.vz / 128, 0);
                     if ((cell != NULL) && (cell->surfaceKind != 31)) {
                         particle->opaqueC = 1;
                         projection =
-                            (Field_FloorHeightAt(particle->position.vx, particle->position.vz)
+                            (VS::Field::LiveFloorHeightAt(particle->position.vx, particle->position.vz)
                                 << 17)
                             >> 17;
                         particle->position.vy = projection;
@@ -376,7 +377,7 @@ void Effects_DrawSnowParticles(void)
                     particle->opaqueC = 1;
                     particle->swayPhase = 0;
                     projection =
-                        (Field_FloorHeightAt(particle->position.vx, particle->position.vz)
+                        (VS::Field::LiveFloorHeightAt(particle->position.vx, particle->position.vz)
                             << 17)
                         >> 17;
                     particle->position.vy = projection;

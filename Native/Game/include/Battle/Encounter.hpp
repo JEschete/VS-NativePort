@@ -163,7 +163,7 @@ struct EncounterSetup {
   // after a pass. Applied with the other declared start state.
   std::vector<int> crossed_puzzles;
   // Title idle-timeout exit cause (3 = attract cutscene 1, 4 = cutscene 2).
-  // Starts through the original Title_PrepareExit and entry mode, so the
+  // Starts through the original VS::Title::PrepareExit and entry mode, so the
   // original game loop returns to title when the demo ends or on any button.
   std::optional<int> attract_demo;
   // Declared predecessor music id whose mapped wave bank the original route

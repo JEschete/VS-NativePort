@@ -1,14 +1,18 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Menu/Framework/ActorPreviewLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
@@ -23,7 +27,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
-#include "Menu/Framework/ActorPreview.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/Inventory.h"
@@ -207,10 +210,10 @@ static char Menu_Score_enemyListCursorAnimStep = 0;
 void Menu_Score_ShowEnemyDescription(void)
 {
     if (Menu_Score_monBinData[Menu_Score_selectedEnemy].unlocked != 0) {
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Score_enemyDescriptions[Menu_Score_enemyDescriptions[Menu_Score_selectedEnemy]]);
     } else {
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Score_miscInfo[Menu_Score_miscInfo[Text_Menu9_miscInfo_Index_enemyNotDefeated]]);
     }
 }
@@ -319,10 +322,10 @@ void Menu_Score_RenderEnemyList(int animState)
 
             if (enemy->selected == 0) {
                 if (enemy->unlocked != 0) {
-                    Menu_Framework_SetInformationMessage(
+                    VS::Menu::Framework::SetLiveInformationMessage(
                         (char*)&Menu_Score_enemyDescriptions[Menu_Score_enemyDescriptions[i]]);
                 } else {
-                    Menu_Framework_SetInformationMessage(
+                    VS::Menu::Framework::SetLiveInformationMessage(
                         (char*)&Menu_Score_miscInfo[Menu_Score_miscInfo[Text_Menu9_miscInfo_Index_enemyNotDefeated]]);
                 }
             }
@@ -363,13 +366,13 @@ void Menu_Score_RenderEnemyList(int animState)
 
         if ((enemy->selected != 0) && (animState == 8)) {
             Menu_Score_enemyListCursorAnimStep =
-                Menu_Framework_DrawCursor(Menu_Score_enemyListCursorAnimStep, ((y - 8) << 0x10) | 48);
+                VS::Menu::Framework::DrawLiveCursor(Menu_Score_enemyListCursorAnimStep, ((y - 8) << 0x10) | 48);
         }
 
         if (enemy->unlocked != 0) {
-            menuItem = Menu_Framework_SetMenuItem(0, x, y, 200, 0, enemy->name);
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(0, x, y, 200, 0, enemy->name);
         } else {
-            menuItem = Menu_Framework_SetMenuItem(0, x, y, 0xC8, 0,
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(0, x, y, 0xC8, 0,
                 (char*)&Menu_Score_miscInfo[Menu_Score_miscInfo[Text_Menu9_miscInfo_Index_enemyNameNone]]);
             menuItem->fontColor = 3;
         }
@@ -390,11 +393,11 @@ void Menu_Score_RenderEnemyList(int animState)
         if ((menuItem->isScrollable != 0) && (animState == 8)) {
             Menu_Score_RenderScrollableRow(menuItem);
         } else {
-            Menu_Framework_DrawMenuItem(menuItem);
+            VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }
     }
 
-    Menu_Framework_MenuItem(0)->state = 0;
+    VS::Menu::Framework::LiveMenuItem(0)->state = 0;
 }
 
 // decomp: MENU9.PRG _renderEnemyDetailScreen (src/MENU/MENU9.PRG/238.c:2069)
@@ -430,7 +433,7 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
 
         VS::Render::SetLiveProjectionScreenOffset(viewer_projection_offset);
         Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
-        Menu_Framework_DrawActorPreview(&viewer_camera_matrix);
+        VS::Menu::Framework::DrawLiveActorPreview(&viewer_camera_matrix);
         VS::Render::SetLiveProjectionScreenOffset(saved_projection_offset);
     }
 
@@ -441,14 +444,14 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
     if (Menu_Score_hideUi == 0) {
         name_panel_slide_x = (8 - animState) * 16;
 
-        Menu_Framework_DrawMenuItem(Menu_Framework_SetMenuItem(
+        VS::Menu::Framework::DrawLiveMenuItem(VS::Menu::Framework::SetLiveMenuItem(
             0, name_panel_slide_x + 184, 166, 256, 0, &Menu_Score_monBinData[Menu_Score_selectedEnemy].name[2]));
-        Menu_Framework_MenuItem(0)->state = 0;
+        VS::Menu::Framework::LiveMenuItem(0)->state = 0;
 
         controls_slide_x = animState * 16;
         scratch = (void**)Core_ScratchAddr(0);
 
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, (u_long *)(((u_char*)(scratch[1])) + 24));
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, (u_long *)(((u_char*)(scratch[1])) + 24));
 
         control_label_x = (controls_slide_x - 100) & 0xFFFF;
 
@@ -458,7 +461,7 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
         control_banner_x = controls_slide_x - 112;
 
         Menu_Score_DrawEnemyBanner(control_banner_x, 18, 96, 12, 3);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, (u_long *)(((u_char*)(scratch[1])) + 24));
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, (u_long *)(((u_char*)(scratch[1])) + 24));
         VS::Render::DrawLiveCompactTextColor(
             "ZOOM", control_label_x | (36 << 16), Menu_Score_zoomColor, (u_long *)(((u_char*)(scratch[1])) + 24));
         Menu_Score_DrawEnemyBanner(control_banner_x, 36, 78, 12, 3);
@@ -549,11 +552,11 @@ int Menu_Score_LoadEnemyPreview(int zudId)
         break;
 
     case 2:
-        Menu_Framework_ResetActorPreviewPose();
+        VS::Menu::Framework::ResetLiveActorPreviewPose();
 
         Actors_actorRecords[1]->instance.weaponDrawn = 1;
 
-        Actors_PlayActorAnimation(1, 1, 0, 0);
+        VS::Actors::PlayLiveActorAnimation(1, 1, 0, 0);
 
         Menu_Inventory_equipmentModelLoadStep = 0;
         return 0;
@@ -578,9 +581,9 @@ void Menu_Score_InitializeAshleyPreviewPose(void)
     p->animationId = 33;
     p->instance.weaponDrawn = 0;
 
-    Actors_InitializeActorAnimationPose(p, &p->blendPose);
-    Actors_SetActorDisplayFlags(1, 3);
-    Actors_SetActorCompanion(1, 0, NULL, NULL);
+    VS::Actors::InitializeLiveActorAnimationPose(p, &p->blendPose);
+    VS::Actors::SetLiveActorDisplayFlags(1, 3);
+    VS::Actors::SetLiveActorCompanion(1, 0, NULL, NULL);
 }
 
 // decomp: MENU9.PRG vs_menu9_loadZudFile (src/MENU/MENU9.PRG/592C.c:171)

@@ -1,3412 +1,3401 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Content/ActorAssetsLive.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Content/OverlayWorkspaceLive.hpp"
+// Hand-maintained (tools/port/owned.csv).
+#include "Menu/Framework/Framework.hpp"  // NOLINT(build/include): native C++ interface.
+
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <format>
+#include <limits>
+#include <optional>
+#include <span>
+#include <string_view>
+#include <vector>
+
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Items/InventoryLive.hpp"
-#include "Menu/Sounds.hpp"
-#include "Render/CameraViewLive.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/GimImagesLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/TexturePagesLive.hpp"
+#include "Render/GameFont.hpp"
+#include "Render/Sprites.hpp"
 #include "Render/UiPackets.hpp"
-#include "Render/UiPacketsLive.hpp"
-#include "Save/NativeContainerLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
-#include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hud.h"
-#include "Battle/Sphere.h"
-#include "Battle/StatusEffects.h"
-#include "Battle/TargetVolume.h"
-#include "Battle/Targeting.h"
-#include "Battle/TextBoxes.h"
-#include "Boot/Lifecycle.h"
-#include "Boot/OverlayReset.h"
-#include "Content/DiscLayout.h"
-#include "Core/Overlays.h"
-#include "Core/Text/TextCode.h"
-#include "DiscQueue.h"
-#include "Effects/ScreenEffects.h"
-#include "Field/RoomLoading.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Equipment.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Loot.h"
-#include "Items/Weapons.h"
-#include "Menu/BattleAbilities.h"
-#include "Menu/BreakArts.h"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
-#include "Menu/Files.h"
-#include "Menu/Framework/ActionSelection.h"
-#include "Menu/Framework/ActorPreview.h"
-#include "Menu/Framework/AshleyPreview.h"
-#include "Menu/Framework/EquipmentDetails.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Framework/MenuItems.h"
-#include "Menu/Framework/MenuMemory.h"
-#include "Menu/Framework/MenuRows.h"
-#include "Menu/Framework/Menus.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemList.h"
-#include "Menu/Loot/LootScreen.h"
-#include "Menu/Magic.h"
-#include "Menu/Manual.h"
-#include "Menu/Map.h"
-#include "Menu/Options.h"
-#include "Menu/Rename.h"
-#include "Menu/Results/Results.h"
-#include "Menu/Score/ScoreScreen.h"
-#include "Menu/Setup/SetupScreen.h"
-#include "Menu/Status/ActorStatus.h"
-#include "Menu/TextBox.h"
-#include "Render/Camera.h"
-#include "Render/Display.h"
-#include "Render/LegacyPackets.h"
-#include "Render/Palette.h"
-#include "Render/Render.h"
-#include "Render/Text/VariableFont.h"
-#include "Render/UiPrimitives.h"
-#include "State/StateFlags.h"
 
-// decomp: _loadedSubMenu (_loadedSubMenu@BATTLE/BATTLE.PRG)
-signed char Menu_Framework_loadedSubMenu; /* contents: module image (ModuleData.cpp) */
-
-// decomp: vs_battle_menuItems (vs_battle_menuItems@BATTLE/BATTLE.PRG)
-Menu_Framework_MenuRow* Menu_Framework_menuItems; /* data: contents loaded in Step 5 */
-
-// decomp: D_800EB9C4 (D_800EB9C4@BATTLE/BATTLE.PRG)
-Items_LootListNode* Menu_Framework_lootLists; /* data: contents loaded in Step 5 */
-
-// decomp: D_800EB9C8 (D_800EB9C8@BATTLE/BATTLE.PRG)
-Items_BattleLoot* Menu_Framework_lootEntry; /* data: contents loaded in Step 5 */
-
-// decomp: D_800EB9CE (D_800EB9CE@BATTLE/BATTLE.PRG)
-char Menu_textBoxBufferIndex; /* contents: module image (ModuleData.cpp) */
-
-// decomp: _menuBgUnpackedBuf (_menuBgUnpackedBuf@BATTLE/BATTLE.PRG)
-u_int* Menu_Framework_menuBackgroundBuffer; /* data: contents loaded in Step 5 */
-
-// decomp: D_800EBA78 (D_800EBA78@BATTLE/BATTLE.PRG)
-char Menu_Framework_kMainMenuHelpText[336]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800F4CC0 (D_800F4CC0@BATTLE/BATTLE.PRG)
-int Menu_Framework_mainMenuCursorAnimation;
-
-// decomp: D_800F4CD0 (D_800F4CD0@BATTLE/BATTLE.PRG)
-u_long Menu_textBoxOrderingTables[102];
-
-// decomp: vs_battle_shortcutInvoked (vs_battle_shortcutInvoked@BATTLE/BATTLE.PRG)
-char Menu_Framework_shortcutInvoked;
-
-// decomp: D_800F4E6B (D_800F4E6B@BATTLE/BATTLE.PRG)
-char Menu_saveLocationId;
-
-// decomp: vs_battle_submenuStates (vs_battle_submenuStates@BATTLE/BATTLE.PRG)
-char Menu_Framework_submenuStates[16];
-
-// decomp: vs_battle_rowTypeBuf (vs_battle_rowTypeBuf@BATTLE/BATTLE.PRG)
-int* Menu_Framework_rowTypeBuf;
-
-// decomp: vs_battle_unlockedBreakArt (vs_battle_unlockedBreakArt@BATTLE/BATTLE.PRG)
-char Menu_Framework_unlockedBreakArt;
-
-// decomp: vs_battle_stringBuf (vs_battle_stringBuf@BATTLE/BATTLE.PRG)
-char* Menu_Framework_stringBuf;
-
-// decomp: D_800F4E98 (D_800F4E98@BATTLE/BATTLE.PRG)
-Menu_Framework_ActionSelection Menu_Framework_actionSelection;
-
-// decomp: D_800F4EA0 (D_800F4EA0@BATTLE/BATTLE.PRG)
-int Menu_Framework_actionRestrictions;
-
-// decomp: D_800F4ED4 (D_800F4ED4@BATTLE/BATTLE.PRG)
-int Menu_Framework_unusedInterfaceFlag;
-
-// decomp: D_800F4EE8 (D_800F4EE8@BATTLE/BATTLE.PRG)
-Menu_Framework_MenuMemory Menu_Framework_menuMemory;
-
-// decomp: vs_battle_unlockedBattleAbility (vs_battle_unlockedBattleAbility@BATTLE/BATTLE.PRG)
-char Menu_Framework_unlockedBattleAbility;
-
-// decomp: D_800F4FDB (D_800F4FDB@BATTLE/BATTLE.PRG)
-char Menu_Framework_openedWithoutMainMenu;
-
-// decomp: vs_battle_menuState (vs_battle_menuState@BATTLE/BATTLE.PRG)
-Menu_Framework_MenuControlState Menu_Framework_menuState;
-
-// decomp: _menuLbas (_menuLbas@BATTLE/BATTLE.PRG)
-int Menu_Framework_menuLbas[] = { squashLba(VS_MAINMENU_PRG) + (VS_MENUBG_BIN_SIZE >> 11),
-    squashLba(VS_MENU0_PRG), squashLba(VS_MENU1_PRG), squashLba(VS_MENU2_PRG),
-    squashLba(VS_MENU3_PRG), squashLba(VS_MENU4_PRG), squashLba(VS_MENU5_PRG),
-    squashLba(VS_MENU7_PRG), squashLba(VS_MENU8_PRG), squashLba(VS_MENU9_PRG),
-    squashLba(VS_MENUE_PRG), squashLbaVal(VS_MENUA_PRG_LBA, 0), squashLba(VS_MENUB_PRG),
-    squashLba(VS_MENUC_PRG), squashLba(VS_MENUD_PRG), squashLba(VS_MENUF_PRG) };
-
-// decomp: _actionsSubMenuId (_actionsSubMenuId@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_actionsSubMenuId = 0;
-
-// decomp: _backgroundBrightness (_backgroundBrightness@src/MENU/MAINMENU.PRG/58EC.c)
-short Menu_Framework_backgroundBrightness = 128;
-
-// decomp: _backgroundFadeState (_backgroundFadeState@MENU/MAINMENU.PRG)
-char Menu_Framework_backgroundFadeState = 0;
-
-// decomp: _backgroundOtOffset (_backgroundOtOffset@src/MENU/MAINMENU.PRG/58EC.c)
-short Menu_Framework_backgroundOtOffset = -4;
-
-// decomp: _itemActionCount (_itemActionCount@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_itemActionCount = 0;
-
-// decomp: _itemActionListOffset (_itemActionListOffset@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_itemActionListOffset = 0;
-
-// decomp: _itemsText (_itemsText@src/MENU/MAINMENU.PRG/58EC.c)
-u_short* Menu_Framework_itemsText = NULL;
-
-// decomp: _menuActionCurrent (_menuActionCurrent@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_menuActionCurrent = 0;
-
-// decomp: _menuActionNext (_menuActionNext@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_menuActionNext = 0;
-
-// decomp: _menuActionsPageOffset (_menuActionsPageOffset@MENU/MAINMENU.PRG)
-char Menu_Framework_menuActionsPageOffset;
-
-// decomp: _menuRowYOffset (_menuRowYOffset@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_menuRowYOffset = 0;
-
-// decomp: _selectedItemAction (_selectedItemAction@src/MENU/MAINMENU.PRG/58EC.c)
-int Menu_Framework_selectedItemAction = 0;
-
-// decomp: _selectedRow (_selectedRow@src/MENU/MAINMENU.PRG/58EC.c)
-int Menu_Framework_selectedRow = 0;
-
-// decomp: _sortItemsTextBuf (_sortItemsTextBuf@src/MENU/MAINMENU.PRG/58EC.c)
-u_short* Menu_Framework_sortItemsTextBuf = NULL;
-
-// decomp: _subMenuId (_subMenuId@src/MENU/MAINMENU.PRG/58EC.c)
-u_char Menu_Framework_subMenuId = 0;
-
-// decomp: _subMenuPage (_subMenuPage@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_subMenuPage = 0;
-
-// decomp: _subMenuRowCount (_subMenuRowCount@src/MENU/MAINMENU.PRG/58EC.c)
-u_short Menu_Framework_subMenuRowCount = 0;
-
-// decomp: _subMenuRowInfo (_subMenuRowInfo@src/MENU/MAINMENU.PRG/58EC.c)
-char Menu_Framework_subMenuRowInfo = 0;
-
-// decomp: _textHeaders (_textHeaders@MENU/MAINMENU.PRG)
-Menu_Framework_TextHeader Menu_Framework_textHeaders[2];
-
-// decomp: local static of _renderMenuCommand, at file scope so the module reset reaches it
-static int Menu_Framework_commandLabelActionYPos = 0;
-
-// decomp: local static of _renderAbilityCost, at file scope so the module reset reaches it
-static u_char Menu_Framework_actionCostPanelAnimState = 8;
-
-// decomp: local static of _renderScrollableRow, at file scope so the module reset reaches it
-static char Menu_Framework_scrollableRowAnimState = 0;
-
-// decomp: local static of vs_mainMenu_renderTabNavigation, at file scope so the module reset reaches it
-static char Menu_Framework_tabNavigationArrowAnimState = 11;
-
-// decomp: bss_3 (bss_3@MENU/MAINMENU.PRG)
-char Menu_Framework_unusedBss3[6];
-
-// decomp: bss_4 (bss_4@MENU/MAINMENU.PRG)
-char Menu_Framework_unusedBss4[18];
-
-// decomp: bss_7 (bss_7@MENU/MAINMENU.PRG)
-char Menu_Framework_unusedBss7[2];
-
-// decomp: local static of vs_mainMenu_renderTabNavigation, at file scope so the module reset reaches it
-static int Menu_Framework_tabNavigationControlPositions[] = { vs_getXY(216, 8), vs_getXY(210, 8),
-        vs_getXY(288, 8), vs_getXY(282, 8) };
-
-// decomp: local static of vs_mainMenu_renderItemActionMenu, at file scope so the module reset reaches it
-static char Menu_Framework_actionMenuCursorAnimStep = 0;
-
-// decomp: local static of vs_mainMenu_renderItemsList, at file scope so the module reset reaches it
-static char Menu_Framework_rowSelectionCursorAnimStep = 0;
-
-// decomp: local static of _quitDelay, at file scope so the module reset reaches it
-static int Menu_Framework_quitDelay = 0;
-
-// decomp: local static of _renderMenuCommand, at file scope so the module reset reaches it
-static u_short Menu_Framework_commandLabelMenuActionUvs[] = { vs_getUV(0, 0), vs_getUV(0, 64), vs_getUV(64, 64),
-        vs_getUV(100, 64), vs_getUV(132, 64), vs_getUV(188, 64), vs_getUV(0, 74) };
-
-// decomp: local static of _renderScrollableRow, at file scope so the module reset reaches it
-static char Menu_Framework_scrollableRowPreviousFrameBuf = 0;
-
-// decomp: local static of vs_mainMenu_unpackMenubg, at file scope so the module reset reaches it
-static RECT Menu_Framework_loadBackgroundTextureRects[] = { { 640, 256, 32, 240 }, { 768, 256, 32, 240 } };
-
-// decomp: vs_mainMenu_actionMenuState (vs_mainMenu_actionMenuState@MENU/MAINMENU.PRG)
-char Menu_Framework_actionMenuState = 0;
-
-// decomp: vs_mainMenu_backgroundFadeStep (vs_mainMenu_backgroundFadeStep@MENU/MAINMENU.PRG)
-int Menu_Framework_backgroundFadeStep = 0;
-
-// decomp: vs_mainMenu_containerEmptyBackup (vs_mainMenu_containerEmptyBackup@MENU/MAINMENU.PRG)
-char Menu_Framework_unusedContainerEmptyBackup;
-
-// decomp: vs_mainMenu_cursorColor (vs_mainMenu_cursorColor@MENU/MAINMENU.PRG)
-char Menu_Framework_cursorColor = 0;
-
-// decomp: vs_mainMenu_displayActionCost (vs_mainMenu_displayActionCost@MENU/MAINMENU.PRG)
-char Menu_Framework_displayActionCost = 0;
-
-// decomp: vs_mainMenu_hideMenu (vs_mainMenu_hideMenu@MENU/MAINMENU.PRG)
-char Menu_Framework_hideMenu = 0;
-
-// decomp: vs_mainMenu_itemsListRow (vs_mainMenu_itemsListRow@MENU/MAINMENU.PRG)
-char Menu_Framework_itemsListRow = 0;
-
-// decomp: vs_menu_inventoryStorage (vs_menu_inventoryStorage@MENU/MAINMENU.PRG)
-Menu_Container_InventoryStorage* Menu_Framework_unusedInventoryStorage;
-
-// decomp: local static of _renderAshley, at file scope so the module reset reaches it
-static int Menu_Framework_ashleyRender = 0;
-
-// decomp: local static of _renderAshley, at file scope so the module reset reaches it
-static char Menu_Framework_ashleySkipFrame = 0;
-
-// decomp: BATTLE.PRG vs_battle_loadMenuPrg (src/BATTLE/BATTLE.PRG/5BF94.c:2576)
-int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
-{
-    Menu_Framework_MenuControlState* state = &Menu_Framework_menuState;
-    int subMenu = packed_menu_state & 0x1F;
-
-    if (subMenu == 31) {
-        return 1;
-    }
-
-    if (subMenu == 0 && Menu_Framework_loadedSubMenu > 0) {
-        return 1;
-    }
-
-    if (Menu_Framework_loadedSubMenu != subMenu) {
-        void* overlaySlot;
-        Content_DiscFile file;
-        u_int fileData;
-
-        Menu_Framework_loadedSubMenu = subMenu;
-        state->loading = 1;
-
-        if (Menu_Framework_shortcutInvoked != 5) {
-            fileData = Menu_Framework_menuLbas[subMenu];
-        } else {
-            fileData = VS_MAINMENU_PRG_LBA << 8 | VS_MAINMENU_PRG_SIZE >> 11;
-        }
-
-        file.lba = fileData >> 8;
-        file.size = (fileData & 0xFF) << 11;
-        state->cdQueue = VS::Content::AllocateLiveDiscRequest(&file);
-
-        if (subMenu == 0) {
-            overlaySlot = Core_overlaySlots[1];
-        } else {
-            overlaySlot = Core_overlaySlots[2];
-        }
-
-        if (state->cdQueue != NULL) {
-            VS::Content::EnqueueLiveDiscRequest(state->cdQueue, overlaySlot);
-        } else {
-            state->cdQueue = VS::Content::CompleteLiveRefusedDiscRequest(&file, overlaySlot);
-        }
-    }
-
-    if (state->loading == 0) {
-        if (Menu_Framework_menuBackgroundBuffer != NULL) {
-
-            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_menuBackgroundBuffer);
-
-            Menu_Framework_menuBackgroundBuffer = NULL;
-
-            VS::Items::Inventory::StoreLiveEquippedStats();
-        }
-
-        return 1;
-    }
-
-    if (state->cdQueue->state == Content_DiscRequestState_Loaded) {
-
-        VS::Content::ReleaseLiveDiscRequest(state->cdQueue);
-        Boot_WaitForOverlayReady();
-        if (subMenu == 0) {
-            Boot_ResetMainMenuStatics();
-        }
-
-        state->loading = 0;
-
-        if (Menu_Framework_openedWithoutMainMenu != 0) {
-            if (Menu_Framework_shortcutInvoked == 5) {
-                Menu_Inventory_UpdateMiscItemShortcut(1);
-                return 0;
-            }
-            return 1;
-        }
-
-        if (subMenu == 0) {
-            Menu_Framework_menuBackgroundBuffer = (u_int*)VS::Core::Memory::AllocateLiveFromHighEnd(0xB400);
-            Menu_Framework_LoadBackgroundTexture(Menu_Framework_menuBackgroundBuffer);
-        }
-    }
-
-    return 0;
+namespace VS::Menu::Framework {
+namespace {
+// Core_TextCode and the row text's end.
+constexpr std::uint8_t kTextNonPrinting = 0xE5;
+constexpr std::uint8_t kTextTerminator = 0xE7;
+constexpr std::uint8_t kTextChunkSize = 0xF8;
+constexpr std::uint8_t kTextSpacing = 0xFA;
+constexpr std::uint8_t kRowTextEnd = 0xFF;
+// A text chunk opens with its code and a zero byte.
+constexpr std::size_t kChunkHeaderBytes = 2;
+constexpr auto kDescriptionEnd = kChunkHeaderBytes + kRowDescriptionCopyBytes;
+constexpr auto kMessageEnd = kChunkHeaderBytes + kInformationMessageCopyBytes;
+
+// The pad bits the menus read (PADLup, PADLdown, PADRup, PADRright,
+// PADRdown).
+constexpr std::uint32_t kPadLUp = 0x1000;
+constexpr std::uint32_t kPadLDown = 0x4000;
+constexpr std::uint32_t kPadRUp = 0x10;
+constexpr std::uint32_t kPadRRight = 0x20;
+constexpr std::uint32_t kPadRDown = 0x40;
+
+// GPU packet words: primitive codes and the draw modes the menus set
+// (vs_getTpage over texture page, depth, blend and dithering).
+constexpr int kCommandShift = 24;
+constexpr std::uint32_t kPolyG4 = 0x38;
+constexpr std::uint32_t kLineG2 = 0x50;
+constexpr std::uint32_t kLineG2SemiTransparent = 0x52;
+constexpr std::uint32_t kTileCommand = 0x60000000;
+constexpr std::uint32_t kDrawModeDithered = 0xE1000200;
+constexpr std::uint32_t kDrawModePlain = 0xE1000000;
+constexpr std::uint32_t kDrawModeAddDithered = 0xE1000220;
+constexpr std::uint32_t kDrawModeAdd = 0xE1000020;
+// Page (768, 0) and (832, 0), 4-bit, additive.
+constexpr std::uint32_t kCommandLabelDrawMode = 0xE100002C;
+constexpr std::uint32_t kRowGlyphDrawMode = 0xE100002D;
+// Pages (768, 256) and (640, 256), 8-bit, additive.
+constexpr std::uint32_t kBackgroundRightDrawMode = 0xE10000BC;
+constexpr std::uint32_t kBackgroundLeftDrawMode = 0xE10000BA;
+// A 15-bit page with additive blending; its column is x >> 6.
+constexpr std::uint32_t kFramePageDrawMode = 0xE1000120;
+constexpr int kPageColumnShift = 6;
+constexpr std::size_t kGradientQuadWords = 11;
+constexpr std::size_t kGradientLineWords = 7;
+
+// The ordering-table slots the framework links into.
+constexpr Layer kOverlayFront{.base = LayerBase::kOverlay, .slot = 0};
+constexpr Layer kRowIconLayer{.base = LayerBase::kOverlay, .slot = 1};
+constexpr Layer kRowLayer{.base = LayerBase::kOverlay, .slot = 2};
+constexpr Layer kRowShadowLayer{.base = LayerBase::kOverlay, .slot = 3};
+constexpr Layer kActionCostLayer{.base = LayerBase::kScene, .slot = -1};
+constexpr Layer kButtonPromptLayer{.base = LayerBase::kScene, .slot = -3};
+
+// Row geometry and colours.
+constexpr int kScreenWidth = 320;
+constexpr int kRowHeight = 12;
+constexpr int kRowSpacing = 16;
+constexpr int kFirstRowY = 18;
+constexpr int kRowTextIndent = 6;
+constexpr int kIconRowTextIndent = 22;
+constexpr unsigned kTextIndentingIcons = 23;
+constexpr int kRowFontPaletteBase = 4;
+constexpr int kUnselectablePalette = 3;
+constexpr int kGradientStops = 8;
+constexpr int kFullBrightness = 128;
+constexpr int kShadowOffset = 2;
+constexpr int kSubTextIndent = 10;
+constexpr std::uint8_t kBackgroundWidthStepMask = 7;
+constexpr std::uint8_t kBackgroundWidthMask = 0xF;
+constexpr int kIconSize = 16;
+constexpr std::uint32_t kStepMask = 0xF;
+
+// _getMenuItemGradientColor: the first nine stops blend these colours.
+constexpr std::uint32_t kBlendedGradientStops = 9;
+constexpr std::uint32_t kGradientTopFrom = 0x6B4100;
+constexpr std::uint32_t kGradientTopTo = 0x6C8219;
+constexpr std::uint32_t kGradientBottomFrom = 0x330500;
+constexpr std::uint32_t kGradientBottomTo = 0x262801;
+constexpr int kGradientTableShift = 3;
+constexpr std::int64_t kGradientTableBias = 2;
+
+// The rows' slide steps (rowAnimationSteps) are searched over 1..15.
+constexpr int kSlideSteps = 16;
+constexpr int kSlideJump = 32;
+
+// A row type's icon (bits 26..31) and material (bits 16..18).
+constexpr int kRowIconShift = 26;
+constexpr int kMaterialShift = 16;
+constexpr std::uint32_t kMaterialMask = 7;
+
+[[nodiscard]] std::uint32_t TagWord(std::uint32_t link, std::size_t words) {
+  return (link & Render::kPacketLinkMask) |
+         (static_cast<std::uint32_t>(words - 1) << Render::kPacketLengthShift);
 }
+
+[[nodiscard]] std::uint32_t Command(std::uint32_t code, std::uint32_t rgb) {
+  return (code << kCommandShift) | rgb;
+}
+
+// vs_battle_setSprite and its texture-page variant with the words the
+// callers overwrite.
+struct Sprite {
+  std::uint32_t draw_mode = Render::kDefaultSpriteDrawMode;
+  int brightness = Render::kDefaultSpriteBrightness;
+  std::uint32_t position = 0;
+  std::uint32_t size = 0;
+  std::uint32_t texture = 0;
+};
+
+void EmitSprite(Context& ctx, Layer layer, const Sprite& sprite) {
+  Render::PacketQueue& queue = ctx.host.Queue(layer);
+  Render::SpritePacket packet = Render::BuildSpritePacket(
+      {.draw_mode = sprite.draw_mode,
+       .brightness_transparency = sprite.brightness,
+       .packed_position = static_cast<int>(sprite.position),
+       .packed_size = static_cast<int>(sprite.size)},
+      queue.ChainLink());
+  packet[Render::kSpriteTextureWord] = sprite.texture;
+  queue.Emit(packet);
+}
+
+template <std::size_t N>
+void EmitPacket(Render::PacketQueue& queue,
+                std::array<std::uint32_t, N>& packet) {
+  packet[0] = TagWord(queue.ChainLink(), N);
+  queue.Emit(packet);
+}
+
+void DrawTile(Context& ctx, Layer layer, std::uint32_t position,
+              std::uint32_t size) {
+  Render::InsertThreeWordPrimitive(
+      ctx.host.Queue(layer),
+      {.color_command = kTileCommand, .position = position, .size = size});
+}
+
+[[nodiscard]] std::uint32_t Word(int value) {
+  return static_cast<std::uint32_t>(value);
+}
+
+[[nodiscard]] int AnimationStep(Context& ctx, int index) {
+  const auto steps = ctx.tables.row_animation_steps;
+  if (index < 0 || static_cast<std::size_t>(index) >= steps.size()) {
+    ctx.host.Refuse(
+        std::format("row animation step {} outside the table", index));
+    return 0;
+  }
+  return steps[static_cast<std::size_t>(index)];
+}
+
+// _renderMenuItems: a row above its target lands on the step before the
+// first one (1..15) at which it would reach the target.
+[[nodiscard]] int StepDownTo(Context& ctx, int target, int origin) {
+  int step = 1;
+  while (step < kSlideSteps && target + AnimationStep(ctx, step) < origin) {
+    ++step;
+  }
+  return target + AnimationStep(ctx, step - 1);
+}
+
+[[nodiscard]] int StepUpTo(Context& ctx, int target, int origin) {
+  int step = 1;
+  while (step < kSlideSteps && origin < target - AnimationStep(ctx, step)) {
+    ++step;
+  }
+  return target - AnimationStep(ctx, step - 1);
+}
+
+// Menu_menuStrings: halfword offsets (in halfwords) to the strings.
+[[nodiscard]] std::span<const std::uint8_t> MenuString(Context& ctx,
+                                                       int index) {
+  const auto strings = ctx.tables.menu_strings;
+  const auto at = static_cast<std::size_t>(index) * 2;
+  if (index < 0 || at + 1 >= strings.size()) {
+    ctx.host.Refuse(std::format("menu string {} outside the table", index));
+    return {};
+  }
+  const std::size_t offset =
+      static_cast<std::size_t>(strings[at] | (strings[at + 1] << CHAR_BIT)) * 2;
+  if (offset >= strings.size()) {
+    ctx.host.Refuse(std::format("menu string {} past the table", index));
+    return {};
+  }
+  return strings.subspan(offset);
+}
+
+// The cursor memory of a menu: the row and page a list reopens at.
+struct CursorMemory {
+  int row = 0;
+  int page = 0;
+};
+
+[[nodiscard]] std::optional<std::size_t> MemoryIndex(Context& ctx, int menu) {
+  const auto at = static_cast<std::size_t>(menu) * 2;
+  if (menu < 0 || at + 1 >= ctx.host.MenuMemory().size()) {
+    ctx.host.Refuse(std::format("cursor memory {} outside the record", menu));
+    return std::nullopt;
+  }
+  return at;
+}
+
+[[nodiscard]] CursorMemory RecalledCursor(Context& ctx, int menu) {
+  const auto at = MemoryIndex(ctx, menu);
+  if (!at) {
+    return {};
+  }
+  const auto memory = ctx.host.MenuMemory();
+  return {.row = memory[*at], .page = memory[*at + 1]};
+}
+
+void RememberCursor(Context& ctx, int menu, const CursorMemory& cursor) {
+  const auto at = MemoryIndex(ctx, menu);
+  if (!at) {
+    return;
+  }
+  const auto memory = ctx.host.MenuMemory();
+  memory[*at] = static_cast<std::uint8_t>(cursor.row);
+  memory[*at + 1] = static_cast<std::uint8_t>(cursor.page);
+}
+
+// vs_mainMenu_addMenuActions and vs_mainmenu_setMenuRows: each entry keeps
+// 26 name bytes and 92 description bytes, each closed by two terminators.
+void FillItems(std::span<ItemText> items, std::span<const RowText> texts,
+               std::span<const std::int32_t> row_types) {
+  for (std::size_t i = 0; i < items.size(); ++i) {
+    ItemText& item = items[i];
+    item.flags = row_types[i];
+    const RowText& text = texts[i];
+    if (!text.name.empty()) {
+      const std::size_t count = std::min(text.name.size(), kRowNameCopyBytes);
+      std::copy_n(text.name.begin(), count, item.name.begin());
+      item.name[kRowNameCopyBytes] = kTextTerminator;
+      item.name[kRowNameCopyBytes + 1] = kTextTerminator;
+    } else {
+      item.name[0] = kTextTerminator;
+      item.name[1] = kTextTerminator;
+    }
+    if (!text.description.empty()) {
+      item.description[0] = kTextChunkSize;
+      item.description[1] = 0;
+      const std::size_t count =
+          std::min(text.description.size(), kRowDescriptionCopyBytes);
+      std::copy_n(text.description.begin(), count,
+                  item.description.begin() + kChunkHeaderBytes);
+      item.description[kDescriptionEnd] = kTextTerminator;
+      item.description[kDescriptionEnd + 1] = kTextTerminator;
+    } else {
+      item.description[0] = kTextTerminator;
+      item.description[1] = kTextTerminator;
+    }
+  }
+}
+
+// The entry `index` of a list, or null when the list is shorter.
+[[nodiscard]] ItemText* ListItem(Context& ctx, ItemList list, int index) {
+  const auto items = ctx.host.Items(list);
+  if (index < 0 || static_cast<std::size_t>(index) >= items.size()) {
+    ctx.host.Refuse(std::format("item {} outside the list", index));
+    return nullptr;
+  }
+  return &items[static_cast<std::size_t>(index)];
+}
+
+[[nodiscard]] std::span<const std::uint8_t> ItemName(Context& ctx,
+                                                     ItemList list, int index) {
+  const ItemText* item = ListItem(ctx, list, index);
+  return item != nullptr ? std::span<const std::uint8_t>(item->name)
+                         : std::span<const std::uint8_t>();
+}
+
+[[nodiscard]] std::int32_t ItemFlags(Context& ctx, ItemList list, int index) {
+  const ItemText* item = ListItem(ctx, list, index);
+  return item != nullptr ? item->flags : 0;
+}
+
+void ShowItemDescription(Context& ctx, ItemList list, int index) {
+  const ItemText* item = ListItem(ctx, list, index);
+  if (item != nullptr) {
+    SetInformationMessage(ctx, item->description);
+  }
+}
+
+// The glyphs of a row's text up to its end; 0xFA moves the pen.
+void DrawRowGlyphs(Context& ctx, const MenuRow& row, int pen) {
+  std::size_t i = 0;
+  while (true) {
+    if (i >= row.text.size()) {
+      ctx.host.Refuse("menu row text without an end");
+      return;
+    }
+    const std::uint8_t c = row.text[i++];
+    if (c == kRowTextEnd) {
+      return;
+    }
+    if (c == kTextSpacing) {
+      if (i >= row.text.size()) {
+        ctx.host.Refuse("menu row text without an end");
+        return;
+      }
+      pen += row.text[i++];
+    } else {
+      pen = Render::DrawVariableWidthGlyph(
+          ctx.host.Queue(kRowLayer), ctx.host.FontStyle(),
+          ctx.tables.glyph_widths, c, pen, row.y);
+    }
+  }
+}
+
+// The row loops refuse a missing table once rather than per row.
+[[nodiscard]] bool HasRowTable(Context& ctx) {
+  if (ctx.host.Rows().empty()) {
+    ctx.host.Refuse("menu rows without the menu table");
+    return false;
+  }
+  return true;
+}
+}  // namespace
 
 // decomp: BATTLE.PRG vs_battle_getMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2658)
-Menu_Framework_MenuRow* Menu_Framework_MenuItem(int id) { return Menu_Framework_menuItems + id; }
+MenuRow& MenuItem(Context& ctx, int row) {
+  const auto rows = ctx.host.Rows();
+  if (row < 0 || static_cast<std::size_t>(row) >= rows.size()) {
+    ctx.host.Refuse(std::format("menu row {} outside the table", row));
+    ctx.state.discard_row = MenuRow{};
+    return ctx.state.discard_row;
+  }
+  return rows[static_cast<std::size_t>(row)];
+}
 
 // decomp: BATTLE.PRG vs_battle_setMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2660)
-Menu_Framework_MenuRow* Menu_Framework_SetMenuItem(
-    int row, int x, int y, int w, int backgroundWidth, char* text)
-{
-    Menu_Framework_MenuRow* menuItem;
-    Menu_Framework_MenuRow* text_destination_row;
-    int i;
-    u_int c;
+MenuRow& SetMenuItem(Context& ctx, const RowPlacement& placement,
+                     std::span<const std::uint8_t> text) {
+  MenuRow& row = MenuItem(ctx, placement.row);
+  const MenuRow cleared;
+  row.state = RowState::kIdle;
+  row.w = static_cast<std::uint8_t>(placement.w);
+  row.background_width = static_cast<std::uint8_t>(placement.background_width);
+  // The original zeroed the record from gradientState through subText.
+  row.gradient_state = cleared.gradient_state;
+  row.is_scrollable = cleared.is_scrollable;
+  row.selected = cleared.selected;
+  row.unselectable = cleared.unselectable;
+  row.button_id = cleared.button_id;
+  row.row_icon = cleared.row_icon;
+  row.font_color = cleared.font_color;
+  row.invert_gradient = cleared.invert_gradient;
+  row.material = cleared.material;
+  row.outset_icon = cleared.outset_icon;
+  row.item_page = cleared.item_page;
+  row.count = cleared.count;
+  row.max = cleared.max;
+  row.target0 = cleared.target0;
+  row.target1 = cleared.target1;
+  row.text = cleared.text;
+  row.sub_text = cleared.sub_text;
+  row.x = static_cast<std::int16_t>(placement.x);
+  row.y = static_cast<std::int16_t>(placement.y);
 
-    menuItem = &Menu_Framework_menuItems[row];
-    menuItem->state = 1;
-    menuItem->w = w;
-    menuItem->backgroundWidth = backgroundWidth;
-
-    VS::Core::Memory::ZeroLiveWordsBackward(&menuItem->gradientState, 0x3C);
-
-    text_destination_row = menuItem;
-    menuItem->x = x;
-    menuItem->y = y;
-
-    for (i = 0; i < 31;) {
-
-        c = *text++;
-        if (c == Core_TextCode_Spacing) {
-            text_destination_row->text[i++] = c;
-            c = *text++;
-        } else if (c == Core_TextCode_Terminator) {
-            text_destination_row->text[i] = 0xFF;
-            break;
-        } else if (c >= Core_TextCode_NonPrinting) {
-            continue;
-        }
-
-        text_destination_row->text[i++] = c;
+  std::size_t source = 0;
+  const auto next = [&]() -> std::optional<std::uint8_t> {
+    if (source >= text.size()) {
+      return std::nullopt;
     }
-
-    return menuItem;
-}
-
-// decomp: BATTLE.PRG vs_battle_uiGradientStop (src/BATTLE/BATTLE.PRG/5BF94.c:2721)
-int Menu_Framework_GradientStopColor(u_int gradient, u_int colorIndex, int brightness)
-{
-    u_int color0;
-    u_int color1;
-
-    if (colorIndex < 9) {
-        color0 = VS::Render::BlendRgbWithBrightness(0x6B4100, 0x6C8219, 0x80, colorIndex);
-        color1 = VS::Render::BlendRgbWithBrightness(0x330500, 0x262801, 0x80, colorIndex);
-    } else {
-        color0 = Menu_Framework_gradientTopColors[((colorIndex >> 3) - 2)];
-        color1 = Menu_Framework_gradientBottomColors[((colorIndex >> 3) - 2)];
+    return text[source++];
+  };
+  for (std::size_t i = 0; i < kRowTextCharacters;) {
+    std::optional<std::uint8_t> c = next();
+    if (!c) {
+      ctx.host.Refuse("menu row source text without an end");
+      row.text[i] = kRowTextEnd;
+      break;
     }
-
-    return VS::Render::BlendRgbWithBrightness(color0, color1, brightness, gradient);
-}
-
-// decomp: BATTLE.PRG vs_battle_renderMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2737)
-void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
-{
-
-    int y = menuItem->gradientState;
-    u_long* scratch = (u_long*)Render_frameScratch.overlayOrderingTable + 2;
-    int w = menuItem->w;
-    int bgWidth = menuItem->backgroundWidth;
-    char* text = menuItem->text;
-
-    if (menuItem->state != 0) {
-        int row_left_x;
-        int x;
-        int c;
-        int var_s2;
-        char* pText;
-        int color;
-        u_long* prim;
-        char** v;
-
-        if ((menuItem->selected | menuItem->invertGradient) && !menuItem->unselectable) {
-            y = 8;
-        }
-
-        color = menuItem->fontColor;
-
-        if (color == 0) {
-            color = menuItem->unselectable * 3;
-        }
-
-        VS::Render::SetLiveMenuFontStyle(color + 4);
-
-        row_left_x = menuItem->x;
-        var_s2 = row_left_x + 6;
-
-        if ((menuItem->rowIcon - 1) < 23u) {
-            var_s2 = row_left_x + 22;
-        }
-
-        c = text[0];
-        pText = text + 1;
-
-        while (c != 0xFF) {
-            if (c == Core_TextCode_Spacing) {
-                var_s2 += *pText++;
-            } else {
-                var_s2 = VS::Render::DrawLiveVariableWidthGlyph(
-                    c, var_s2, menuItem->y, scratch - 3);
-            }
-            c = *pText++;
-        }
-
-        c = Menu_Framework_GradientStopColor(8 - y, bgWidth, 128);
-        var_s2 = Menu_Framework_GradientStopColor(y, bgWidth, 128);
-
-        if (bgWidth & 7) {
-            menuItem->backgroundWidth = (bgWidth + 1) & 0xF;
-        }
-
-        if (y != 0) {
-            menuItem->gradientState = y - 1;
-        }
-
-        x = *(int*)&menuItem->x;
-        y = x >> 0x10;
-        x &= 0xFFFF;
-
-        VS::Render::InsertLiveThreeWordPrimitive(scratch + 1, 0x60000000, vs_getXY_2(x + 2, y + 2), w | 0xC0000);
-
-        prim = (u_long *)(Render_frameScratch.primitiveCursor);
-
-        prim[0] = ((*scratch & 0xFFFFFF) | 0x0A000000);
-        prim[1] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_On);
-        prim[2] = vs_getRGB0Raw(Render_LegacyPrimitiveCode_PolyG4, c);
-        prim[3] = (x | (y << 0x10));
-        prim[4] = var_s2;
-        prim[5] = (((x + w) & 0xFFFF) | (y << 0x10));
-        prim[6] = c;
-        prim[7] = (x | ((y + 12) << 0x10));
-        prim[8] = var_s2;
-        prim[9] = (((x + w) & 0xFFFF) | ((y + 12) << 0x10));
-        prim[10] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
-
-        *scratch = LegacyGpu_Handle(prim);
-        Render_frameScratch.primitiveCursor = prim + 11;
-
-        v = &menuItem->subText;
-        if (*v != NULL) {
-            VS::Render::DrawLiveCompactText(*v, (x - 10) | ((y + 1) << 0x10), scratch);
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800C930C (src/BATTLE/BATTLE.PRG/5BF94.c:2829)
-int Menu_Framework_UpdateMainMenuSelection(int mode)
-{
-    u_int selected = Menu_Framework_submenuStates[0];
-    Menu_Framework_MenuRow* items = Menu_Framework_menuItems;
-    u_int enabled = Input_settings.menuFlags;
-    u_int mask;
-
-    if (mode) {
-        if (mode == 2 && !Input_settings.cursorMemory) {
-            selected = 0;
-        }
-
-        while (!((enabled >> selected) & 1)) {
-            selected = (selected + 1) % 10;
-        }
-
-        Menu_Framework_submenuStates[0] = selected;
-        VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_menuItems, sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
-        mask = 9;
-
-        for (mode = 0; mode < 10; ++mode) {
-            if ((enabled >> mode) & 1) {
-                items[mode].animationStep = mask++;
-            }
-        }
-
-        Menu_Framework_mainMenuCursorAnimation = -mask;
-        return 0;
-    }
-
-    if (Menu_Framework_mainMenuCursorAnimation < 0) {
-        ++Menu_Framework_mainMenuCursorAnimation;
-
-        for (selected = 0, mode = 0; mode < 10; ++mode) {
-            u_char step;
-
-            if (!((enabled >> mode) & 1)) {
-                continue;
-            }
-
-            step = items[mode].animationStep;
-
-            if (step != 0) {
-                items[mode].animationStep = --step;
-            }
-
-            Menu_Framework_SetMenuItem(mode, Menu_Framework_rowAnimationSteps[step] + 194,
-                selected * 16 + 18, 126, mode == 10 ? 24 : 0,
-                (char*)&Menu_menuStrings[Menu_menuStrings[mode]]);
-            ++selected;
-            mask = Menu_Framework_actionRestrictions;
-            items[0].unselectable = (mask & 0xB7) != 0;
-            items[1].unselectable = (mask & 0x15F) != 0;
-            items[3].unselectable = (mask & 7) != 0;
-            items[5].unselectable = Field_CurrentSceneId() == 0;
-        }
-
-        return 0;
-    }
-
-    if (Input_buttonsPressed.allButtons & PADRright) {
-        VS::Menu::PlaySelectSound();
-        items[selected].backgroundWidth = items[selected].selected = 1;
-        Menu_textBoxes[7].state = 0;
-        return selected + 1;
-    }
-
-    items[selected].selected = 0;
-
-    if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-        VS::Menu::PlayLeaveSound();
-        Menu_textBoxes[7].state = 0;
-        return -1;
-    }
-
-    if (Input_buttonRepeat & PADLup) {
-        do {
-            selected = (selected + 9) % 10;
-        } while (!((enabled >> selected) & 1));
-    }
-
-    if (Input_buttonRepeat & PADLdown) {
-        selected = (selected + 1) % 10;
-    }
-    while (!((enabled >> selected) & 1)) {
-        selected = (selected + 1) % 10;
-    }
-
-    if (selected != Menu_Framework_submenuStates[0]) {
-        VS::Menu::PlayChangeSound();
-        Menu_Framework_submenuStates[0] = selected;
-    }
-
-    items[selected].selected = 1;
-    Menu_Framework_mainMenuCursorAnimation = Menu_Framework_DrawMainMenuCursor(Menu_Framework_mainMenuCursorAnimation, (items[selected].y >> 4) - 1);
-
-    if (items[selected].unselectable) {
-        u_int conditions;
-
-        if (Input_buttonsState & (PADLup | PADLdown)) {
-            return 0;
-        }
-
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_textBoxes[7].state = 11;
-        Menu_SetTextBoxText(7, Menu_Framework_kMainMenuHelpText);
-        mask = 0;
-
-        if (selected == 0) {
-            mask = 0xB7;
-        }
-
-        if (selected == 1) {
-            mask = 0x15F;
-        }
-
-        if (selected == 3) {
-            mask = 7;
-        }
-
-        conditions = Menu_Framework_actionRestrictions & mask;
-
-        for (mode = 0; mode < 9; ++mode) {
-            if (conditions & (1 << mode)) {
-                break;
-            }
-        }
-
-        Battle_stringContext.strings[0] =
-            (char*)&Menu_menuStrings[Menu_menuStrings[mode + 12]];
-    } else {
-        Menu_textBoxes[7].state = 0;
-    }
-
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800C97BC (src/BATTLE/BATTLE.PRG/5BF94.c:2966)
-void Menu_Framework_UpdateMenuOverlay(void)
-{
-    Menu_Framework_MenuRow* menu_row_cursor;
-    int selected_menu_id;
-    int miscIndex;
-    int i;
-    int packed_menu_state;
-
-    menu_row_cursor = Menu_Framework_menuItems;
-    packed_menu_state = Menu_Framework_menuState.currentMenu;
-
-    if (packed_menu_state == 0x7F) {
-        Menu_Framework_actionSelection.menuStatus = 2;
-        Menu_Framework_menuState.currentMenu = 0x3F;
-    }
-
-    selected_menu_id = packed_menu_state & 0x3F;
-
-    if (selected_menu_id != 0x3F) {
-        if (Menu_Framework_LoadMenuOverlay(0) != 0) {
-
-            if (Menu_Framework_shortcutInvoked == 5) {
-                Menu_Inventory_UpdateMiscItemShortcut(0);
-                return;
-            }
-
-            Menu_Framework_UpdateMainMenu(packed_menu_state);
-            return;
-        }
-
-        if (selected_menu_id == 0) {
-
-            miscIndex = Menu_Framework_UpdateMainMenuSelection(0);
-
-            if (miscIndex != 0) {
-
-                packed_menu_state = 0x1F;
-
-                if (miscIndex > 0) {
-                    packed_menu_state = miscIndex | 0x40;
-                }
-
-                Menu_Framework_menuState.currentMenu = packed_menu_state;
-            }
-        }
-
-        if ((packed_menu_state >= 0x1F) || (selected_menu_id == 0)) {
-            for (i = 0; i < 10; ++i) {
-                Menu_Framework_DrawMenuItem(menu_row_cursor);
-                ++menu_row_cursor;
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800CA9C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3484)
-void Menu_Framework_InitGameInterface(void* interface_texture_data)
-{
-    (*(char (*))&Battle_reuseSphereVolumes) = 0;
-    Menu_Framework_loadedSubMenu = 0;
-    Battle_hudStatusIconsHidden = 0;
-    Battle_hudSlideOffset = 0;
-    Menu_Framework_unusedInterfaceFlag = 0;
-    Effects_screenEffectOverlay = NULL;
-    (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere) = NULL;
-    VS::Render::ForgetLiveGimImages();
-    Menu_Framework_menuItems = 0;
-    Menu_textBoxBufferIndex = 0;
-    Battle_lowerScreenUiState = 0;
-    Battle_hudHidden = 0;
-    Battle_hudBattleMode = 0;
-    Battle_battleModeIndicatorStep = 0;
-    Battle_statusIconCarousel.word = 0xFFFFFF;
-    Menu_Framework_menuBackgroundBuffer = NULL;
-    Menu_sceneNotificationBuffer = 0;
-    Effects_ResetScreenEffectState();
-    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Framework_menuState, sizeof(Menu_Framework_MenuControlState));
-    Menu_Framework_menuState.currentMenu = 0x3F;
-    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);
-    Battle_actionSelection = Menu_Framework_ActionSelectionState();
-    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_textBoxes[0], sizeof Menu_textBoxes[0]);
-    VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates);
-    Menu_Framework_menuMemory = (Menu_Framework_MenuMemory) { { 0 } };
-    Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
-    VS::Render::UploadLiveImageRectangle(0x340, interface_texture_data, 0xE00040);
-    VS::Render::UploadLiveImageRectangle(0x380, ((u_char*)(interface_texture_data)) + 0x7000, 0xE00040);
-    VS::Render::UploadLiveImageRectangle(0x4203C0, ((u_char*)(interface_texture_data)) + 0xE000, 0x9E0040);
-    ClearOTag(Menu_activeTextBoxOrderingTable, 0x22);
-}
-
-// decomp: BATTLE.PRG func_800CAB40 (src/BATTLE/BATTLE.PRG/5BF94.c:3518)
-void Menu_Framework_ResumeAfterActionSelection(void)
-{
-    Menu_Framework_actionSelection.selectionKind = 0;
-    Menu_Framework_actionSelection.menuStatus = 1;
-    if (Menu_Framework_shortcutInvoked == 5) {
-        Menu_Framework_menuState.currentMenu = 4;
-        Menu_Inventory_UpdateMiscItemShortcut(2);
-    } else {
-        Menu_Framework_menuState.currentMenu = Menu_Framework_menuState.returnState;
-        Menu_Framework_submenuStates[Menu_Framework_menuState.returnState & 0xF] =
-            Menu_Framework_menuState.executeAbilityType;
-    }
-    if (Menu_Framework_openedWithoutMainMenu == 0) {
-        VS::Render::ReserveLiveTexturePageRange(0x1A, 3, 6);
-    }
-}
-
-// decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3535)
-int Menu_Framework_ActionRestrictionFlags(int menu_invocation_mode)
-{
-    int ret;
-    Battle_ActorStats* actor = Battle_characterState->stats;
-    int ashley_state_flags = Actors_ActorStateFlags(0);
-    int actor_restriction_flags = ((ashley_state_flags & 0x80000) != 0) * 2;
-
-    if ((ashley_state_flags & 0x40100000) == 0x100000) {
-        actor_restriction_flags |= 4;
-    }
-
-    if (!(Battle_characterState->model->weaponDrawn)) {
-        actor_restriction_flags |= 8;
-    }
-
-    ret = actor_restriction_flags;
-
-    if (actor->currentMp == 0) {
-        ret |= 0x20;
-    }
-
-    if (actor->currentHp == 0) {
-        ret |= 0x40;
-    }
-
-    if (actor->statuses & (Battle_StatusFlag_Regen | Battle_StatusFlag_StrDown)) {
-        ret |= 0x80;
-    }
-
-    if (actor->statuses & Battle_StatusFlag_Ward) {
-        ret |= 0x100;
-    }
-
-    if (menu_invocation_mode == 2) {
-        ret |= 0x200;
-    }
-
-    return ret;
-}
-
-// decomp: BATTLE.PRG func_800CACD0 (src/BATTLE/BATTLE.PRG/5BF94.c:3575)
-int Menu_Framework_OpenGameMenu(int menuState, int menu_invocation_mode)
-{
-    int i;
-    u_short enabled_menu_flags;
-    int ability_action_id;
-    void* miscIndex;
-
-    if (Menu_Framework_menuState.currentMenu == 0x3F) {
-        Menu_Framework_shortcutInvoked = 0;
-        Menu_Framework_openedWithoutMainMenu = 0;
-        Menu_Framework_actionRestrictions = Menu_Framework_ActionRestrictionFlags(menu_invocation_mode);
-        Menu_Framework_actionSelection.selectionKind = 0;
-        Menu_Framework_menuState.currentMenu = menuState;
-        Menu_Framework_actionSelection.menuStatus = 1;
-
-        if (menu_invocation_mode == 0) {
-            VS::Menu::PlayOpenSound();
-        }
-
-        if (Menu_Framework_menuItems == 0) {
-            Menu_Framework_loadedSubMenu = -1;
-
-            VS::Content::AcquireLiveOverlayWorkspace(6);
-
-            miscIndex = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
-            enabled_menu_flags = Input_settings.menuFlags;
-            Menu_Framework_stringBuf = (char*)((Menu_Framework_MenuRow*)miscIndex + 40);
-            Menu_Framework_menuItems = (Menu_Framework_MenuRow *)(miscIndex);
-            Menu_Framework_rowTypeBuf = (int*)(Menu_Framework_stringBuf + 0x60);
-
-            for (i = 0; i < 3; ++i) {
-                for (ability_action_id = Menu_Framework_abilityGroupActionRanges[i * 2]; ability_action_id < Menu_Framework_abilityGroupActionRanges[i * 2 + 1];
-                    ++ability_action_id) {
-                    if (Battle_actionDefinitions[ability_action_id].unlocked) {
-                        enabled_menu_flags |= 1 << i;
-                        break;
-                    }
-                }
-            }
-
-            if (Audio_Seq_unusedStateFlags.opaqueB5 != 0) {
-                enabled_menu_flags |= 1;
-            }
-            if (Audio_Seq_unusedStateFlags.introState >= 3) {
-                enabled_menu_flags |= 0x120;
-            }
-            Input_settings.menuFlags = enabled_menu_flags;
-            Menu_Framework_UpdateMainMenuSelection(2);
-        }
-        return 1;
-    }
-
-    VS::Menu::PlayInvalidSound();
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_validateShortcutSelection (src/BATTLE/BATTLE.PRG/5BF94.c:3673)
-int Menu_Framework_OpenShortcutMenu(int shortcut)
-{
-    int noneUnlocked = 0;
-    int menuState = 0;
-
-    switch (shortcut) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-        noneUnlocked = Battle_HasUnlockedSpellClass(shortcut - 1) == 0;
-        menuState = 1;
+    if (*c == kTextSpacing) {
+      row.text[i++] = *c;
+      c = next();
+      if (!c) {
+        ctx.host.Refuse("menu row source text without an end");
+        row.text[i] = kRowTextEnd;
         break;
-    case 5:
-        menuState = 4;
-        break;
-    case 6:
-        noneUnlocked = Battle_HasUnlockedWeaponBreakArt() == 0;
-        menuState = 2;
-        break;
-    case 7:
-    case 8:
-        noneUnlocked = Battle_HasUnlockedBattleAbility(shortcut - 7) == 0;
-        menuState = 3;
-        break;
+      }
+    } else if (*c == kTextTerminator) {
+      row.text[i] = kRowTextEnd;
+      break;
+    } else if (*c >= kTextNonPrinting) {
+      continue;
     }
-
-    if (noneUnlocked) {
-        VS::Menu::PlayInvalidSound();
-        menuState = 0;
-        Menu_Framework_actionSelection.selectionKind = 0;
-        Menu_Framework_actionSelection.menuStatus = 2;
-    } else {
-        menuState = Menu_Framework_OpenGameMenu(menuState, 0);
-        Menu_Framework_shortcutInvoked = shortcut;
-        Menu_Framework_openedWithoutMainMenu = 1;
-    }
-
-    return menuState;
+    row.text[i++] = *c;
+  }
+  return row;
 }
 
-// decomp: BATTLE.PRG func_800CB114 (src/BATTLE/BATTLE.PRG/5BF94.c:3714)
-void Menu_Framework_ReleaseMenuRows(void)
-{
-    if (Menu_Framework_menuItems != 0) {
-        VS::Content::ReleaseLiveOverlayWorkspace(6);
-        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_menuItems);
-        Menu_Framework_menuItems = 0;
+// decomp: BATTLE.PRG vs_battle_uiGradientStop
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2721)
+std::uint32_t GradientStopColor(Context& ctx, std::uint32_t gradient,
+                                std::uint32_t color_index, int brightness) {
+  std::uint32_t color0 = 0;
+  std::uint32_t color1 = 0;
+  if (color_index < kBlendedGradientStops) {
+    const auto blend = static_cast<std::int32_t>(color_index);
+    color0 = Render::BlendRgbWithBrightness(kGradientTopFrom, kGradientTopTo,
+                                            kFullBrightness, blend);
+    color1 = Render::BlendRgbWithBrightness(
+        kGradientBottomFrom, kGradientBottomTo, kFullBrightness, blend);
+  } else {
+    const std::int64_t table =
+        static_cast<std::int64_t>(color_index >> kGradientTableShift) -
+        kGradientTableBias;
+    const auto window = ctx.tables.gradient_colors;
+    const std::int64_t top =
+        table + static_cast<std::int64_t>(kGradientWindowTop);
+    const std::int64_t bottom =
+        table + static_cast<std::int64_t>(kGradientWindowBottom);
+    if (bottom >= static_cast<std::int64_t>(window.size())) {
+      ctx.host.Refuse(
+          std::format("gradient colour {} outside the tables", color_index));
+      return 0;
     }
+    color0 = window[static_cast<std::size_t>(top)];
+    color1 = window[static_cast<std::size_t>(bottom)];
+  }
+  return Render::BlendRgbWithBrightness(color0, color1, brightness,
+                                        static_cast<std::int32_t>(gradient));
 }
 
-// decomp: BATTLE.PRG func_800CB158 (src/BATTLE/BATTLE.PRG/5BF94.c:3723)
-void Menu_Framework_OpenLootListMenu(Items_LootListNode* loot_list_head)
-{
-    Menu_Framework_lootLists = loot_list_head;
-    Menu_Framework_lootEntry = NULL;
-    Menu_Framework_OpenGameMenu(0xC, 2);
+// decomp: BATTLE.PRG vs_battle_renderMenuItem
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2737)
+void DrawMenuItem(Context& ctx, MenuRow& row) {
+  int y = row.gradient_state;
+  const int w = row.w;
+  const int background_width = row.background_width;
+  if (row.state == RowState::kInactive) {
+    return;
+  }
+  if ((row.selected | row.invert_gradient) != 0 && row.unselectable == 0) {
+    y = kGradientStops;
+  }
+  int color = row.font_color;
+  if (color == 0) {
+    color = row.unselectable * kUnselectablePalette;
+  }
+  Render::SetMenuFontStyle(
+      ctx.host.FontStyle(),
+      static_cast<std::uint8_t>(color + kRowFontPaletteBase));
+  int pen = row.x + kRowTextIndent;
+  if (static_cast<unsigned>(row.row_icon - 1) < kTextIndentingIcons) {
+    pen = row.x + kIconRowTextIndent;
+  }
+  DrawRowGlyphs(ctx, row, pen);
+
+  const auto bg = static_cast<std::uint32_t>(background_width);
+  const std::uint32_t color0 =
+      GradientStopColor(ctx, Word(kGradientStops - y), bg, kFullBrightness);
+  const std::uint32_t color1 =
+      GradientStopColor(ctx, Word(y), bg, kFullBrightness);
+  if ((background_width & kBackgroundWidthStepMask) != 0) {
+    row.background_width = static_cast<std::uint8_t>((background_width + 1) &
+                                                     kBackgroundWidthMask);
+  }
+  if (y != 0) {
+    row.gradient_state = static_cast<std::uint8_t>(y - 1);
+  }
+
+  const int x = static_cast<std::uint16_t>(row.x);
+  const int top = row.y;
+  DrawTile(ctx, kRowShadowLayer, PackXy(x + kShadowOffset, top + kShadowOffset),
+           PackXy(w, kRowHeight));
+  Render::PacketQueue& queue = ctx.host.Queue(kRowLayer);
+  std::array<std::uint32_t, kGradientQuadWords> packet{
+      0,
+      kDrawModeDithered,
+      Command(kPolyG4, color0),
+      PackXy(x, top),
+      color1,
+      PackXy(x + w, top),
+      color0,
+      PackXy(x, top + kRowHeight),
+      color1,
+      PackXy(x + w, top + kRowHeight),
+      kDrawModePlain};
+  EmitPacket(queue, packet);
+
+  if (row.sub_text != nullptr) {
+    ctx.host.DrawCompactText(
+        kRowLayer, row.sub_text,
+        Word(x - kSubTextIndent) | (Word(top + 1) << kHalfwordShift),
+        Render::kCompactTextGray);
+  }
 }
 
-// decomp: BATTLE.PRG func_800CB18C (src/BATTLE/BATTLE.PRG/5BF94.c:3730)
-void Menu_Framework_OpenLootEntryMenu(Items_BattleLoot* loot_entry)
-{
-    Menu_Framework_lootEntry = loot_entry;
-    Menu_Framework_lootLists = NULL;
-    Menu_Framework_OpenGameMenu(0xC, 2);
+// decomp: MAINMENU.PRG vs_mainMenu_deactivateMenuItem
+// (src/MENU/MAINMENU.PRG/58EC.c:458)
+void DeactivateRow(Context& ctx, int row) {
+  MenuItem(ctx, row).state = RowState::kInactive;
 }
 
-// decomp: BATTLE.PRG func_800CB1C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3737)
-void Menu_Framework_OpenChestStorageMenu(int chest_location_id)
-{
-    Menu_Framework_OpenGameMenu(7, 2);
-    Menu_saveLocationId = chest_location_id + 0x40;
-    Menu_Framework_actionRestrictions |= 0x400;
+// decomp: MAINMENU.PRG vs_mainMenu_menuItemFlyoutLeft
+// (src/MENU/MAINMENU.PRG/C48.c:226)
+void FlyOutRowLeft(Context& ctx, int row) {
+  MenuRow& item = MenuItem(ctx, row + kActionRowBase);
+  if (item.state != RowState::kInactive) {
+    item.state = RowState::kDismiss;
+    item.target0 = static_cast<std::int16_t>(-item.w);
+  }
 }
 
-// decomp: BATTLE.PRG _setArtAndAbilityToUnlock (src/BATTLE/BATTLE.PRG/5BF94.c:3744)
-void Menu_Framework_OpenAbilityUnlockMenu(int art, int battleAbility)
-{
-    Menu_Framework_unlockedBreakArt = art;
-    Menu_Framework_unlockedBattleAbility = battleAbility;
-    Menu_Framework_OpenGameMenu(3, 2);
+// decomp: MAINMENU.PRG vs_mainMenu_flyoutLeftExcept
+// (src/MENU/MAINMENU.PRG/C48.c:236)
+void FlyOutRowsLeftExcept(Context& ctx, int row) {
+  constexpr int kActionRows = 8;
+  if (!HasRowTable(ctx)) {
+    return;
+  }
+  for (int i = 0; i < kActionRows; ++i) {
+    if (i != row) {
+      FlyOutRowLeft(ctx, i);
+    }
+  }
 }
 
-// decomp: BATTLE.PRG func_800CB23C (src/BATTLE/BATTLE.PRG/5BF94.c:3751)
-void Menu_Framework_OpenChallengeMenu(void)
-{
-    Menu_Framework_OpenGameMenu(0xF, 2);
-    Menu_Framework_openedWithoutMainMenu = 1;
+// decomp: MAINMENU.PRG vs_mainMenu_menuItemFlyoutRight
+// (src/MENU/MAINMENU.PRG/C48.c:247)
+void FlyOutRowRight(Context& ctx, int row) {
+  MenuRow& item = MenuItem(ctx, row);
+  if (item.state != RowState::kInactive) {
+    item.state = RowState::kSlideX;
+    item.target0 = kScreenWidth;
+  }
 }
 
-// decomp: BATTLE.PRG func_800CB66C (src/BATTLE/BATTLE.PRG/5BF94.c:3871)
-Menu_Framework_ActionSelection* Menu_Framework_ActionSelectionState(void) { return &Menu_Framework_actionSelection; }
-
-// decomp: BATTLE.PRG vs_battle_drawCursor (src/BATTLE/BATTLE.PRG/5BF94.c:4523)
-int Menu_Framework_DrawMainMenuCursor(int animStep, int position)
-{
-    VS::Render::QueueLiveSpriteWithTexturePage(Menu_Framework_cursorBrightnessAnimation[animStep],
-        (((position * 0x10) + 0xA) << 0x10) | 0xB4, 0x100010, (u_long *)(Render_frameScratch.overlayOrderingTable))[4] =
-        0x37F83020;
-    return (animStep + 1) & 0xF;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_addMenuActions (src/MENU/MAINMENU.PRG/58EC.c:51)
-void Menu_Framework_CreateActionRows(
-    int rowCount, int subMenuId, char* menuText[], int rowTypes[])
-{
-    int scrollableRows;
-
-    int i = 0;
-    int scrollOffset = 0;
-    Menu_Framework_menuActionsPageOffset = rowCount >> 8;
-    rowCount &= 0xFF;
-
-    if (!Menu_Framework_menuActionsPageOffset) {
-        if (rowCount < 7) {
-            Menu_Framework_menuActionsPageOffset = 10 - rowCount;
-        } else {
-            Menu_Framework_menuActionsPageOffset = 3;
-        }
-    }
-
-    Menu_Framework_actionsSubMenuId = subMenuId;
-
-    if (subMenuId == Menu_Framework_ActionsMenuAction_Discard) {
-        i = 1;
-    } else if ((Input_settings.cursorMemory != 0) && (subMenuId != 3)) {
-        i = Menu_Framework_menuMemory.cursorMemories[subMenuId * 2];
-        scrollOffset = Menu_Framework_menuMemory.cursorMemories[subMenuId * 2 + 1];
-    }
-
-    scrollableRows = rowCount - 7;
-
-    if (scrollableRows < 0) {
-
-        i += scrollOffset;
-        scrollOffset = 0;
-
-        if (i >= rowCount) {
-            i = 0;
-        }
-
-    } else if (scrollableRows < scrollOffset) {
-
-        if ((i + scrollOffset) >= rowCount) {
-            i = 0;
-            scrollOffset = 0;
-        } else {
-            i += scrollOffset - scrollableRows;
-            scrollOffset = scrollableRows;
-        }
-    }
-
-    if ((scrollOffset > 0) && (i == 0)) {
-        i = 1;
-        --scrollOffset;
-    }
-
-    if ((scrollOffset < scrollableRows) && (i == 6)) {
-        i = 5;
-        ++scrollOffset;
-    }
-
-    Menu_Framework_selectedItemAction = i;
-    Menu_Framework_itemActionListOffset = scrollOffset;
-    Menu_Framework_itemActionCount = rowCount;
-    Menu_Framework_actionMenuState = 0;
-
-    Menu_Framework_sortItemsTextBuf = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128));
-
-    for (i = 0; i < rowCount; ++i) {
-        char* text;
-
-        ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[i].menuRowFlags = rowTypes[i];
-
-        if (menuText[i * 2] != NULL) {
-            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_sortItemsTextBuf[i * 64], menuText[i * 2], 26);
-
-            Menu_Framework_sortItemsTextBuf[(i * 64) + 13] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        } else {
-            Menu_Framework_sortItemsTextBuf[i * 64] = Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        }
-
-        text = menuText[i * 2 + 1];
-
-        if (text != NULL) {
-            ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[i].description[0] = Core_TextCode_ChunkSize;
-
-            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_sortItemsTextBuf[(i * 64) + 17], text, 92);
-
-            ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[i].description[47] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        } else {
-            ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[i].description[0] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_getSelectedAction (src/MENU/MAINMENU.PRG/58EC.c:147)
-int Menu_Framework_HighlightedActionRow(void)
-{
-    return Menu_Framework_selectedItemAction + Menu_Framework_itemActionListOffset;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_actionInputProcessed (src/MENU/MAINMENU.PRG/58EC.c:152)
-int Menu_Framework_ActionSelectionResult(void)
-{
-    return Menu_Framework_sortItemsTextBuf == NULL ? Menu_Framework_selectedItemAction : -1;
-}
-
-// decomp: MAINMENU.PRG _renderActionRow (src/MENU/MAINMENU.PRG/58EC.c:162)
-Menu_Framework_MenuRow* Menu_Framework_CreateActionRow(int row, int x)
-{
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(row + 32, x,
-        ((row + Menu_Framework_menuActionsPageOffset) * 16) + 18, 126, 0,
-        (char*)((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[Menu_Framework_itemActionListOffset + row].name);
-
-    int flags =
-        ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[Menu_Framework_itemActionListOffset + row].menuRowFlags;
-
-    menuItem->unselectable = flags & 1;
-
-    if ((row == 0) && (Menu_Framework_itemActionListOffset != 0)) {
-        menuItem->isScrollable = Menu_Framework_MenuItemScroll_Up;
-    }
-
-    return menuItem;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderItemActionMenu (src/MENU/MAINMENU.PRG/58EC.c:180)
-void Menu_Framework_UpdateActionMenu(void)
-{
-
-    int selectedAction;
-    int i;
-    int previousOffset;
-    Menu_Framework_MenuRow* menuItem;
-
-    if (Menu_Framework_actionMenuState < 10) {
-        menuItem = Menu_Framework_CreateActionRow(Menu_Framework_actionMenuState, -194);
-        menuItem->state = 5;
-        menuItem->targetPosition0 = 0;
-
-        ++Menu_Framework_actionMenuState;
-
-        if (Menu_Framework_actionMenuState == Menu_Framework_itemActionCount) {
-            Menu_Framework_actionMenuState = 16;
-        }
-
-        if (Menu_Framework_actionMenuState == 7) {
-
-            if ((Menu_Framework_actionMenuState + Menu_Framework_itemActionListOffset)
-                < Menu_Framework_itemActionCount) {
-                menuItem->isScrollable = 2;
-            }
-
-            Menu_Framework_actionMenuState = 16;
-        }
-
-    } else {
-
-        menuItem = Menu_Framework_MenuItem(Menu_Framework_selectedItemAction + 32);
-
-        Menu_Framework_SetInformationMessage(
-            (char*)(Menu_Framework_sortItemsTextBuf
-                    + (((Menu_Framework_selectedItemAction + Menu_Framework_itemActionListOffset) * 64) + 16)));
-
-        switch (Menu_Framework_actionMenuState) {
-        case 16:
-            if (Menu_Framework_AreMenuRowsIdle() != 0) {
-                Menu_Framework_actionMenuState = 17;
-            }
-            break;
-
-        case 17:
-            selectedAction = Menu_Framework_selectedItemAction + Menu_Framework_itemActionListOffset;
-            previousOffset = Menu_Framework_itemActionListOffset;
-
-            if (Input_buttonsPressed.allButtons & PADRup) {
-
-                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_sortItemsTextBuf);
-
-                Menu_Framework_sortItemsTextBuf = NULL;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2] = Menu_Framework_selectedItemAction;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2 + 1] =
-                    Menu_Framework_itemActionListOffset;
-                Menu_Framework_selectedItemAction = -3;
-                break;
-            }
-
-            if (Input_buttonsPressed.allButtons & PADRright) {
-                if (menuItem->unselectable == 0) {
-                    menuItem->selected = 1;
-                    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_sortItemsTextBuf);
-                    Menu_Framework_sortItemsTextBuf = NULL;
-                    Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2] =
-                        Menu_Framework_selectedItemAction;
-                    Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2 + 1] =
-                        Menu_Framework_itemActionListOffset;
-                    Menu_Framework_selectedItemAction = selectedAction;
-                    break;
-                }
-                VS::Menu::PlayInvalidSound();
-            }
-
-            menuItem->selected = 0;
-
-            if (Input_buttonsPressed.allButtons & PADRdown) {
-                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_sortItemsTextBuf);
-                Menu_Framework_sortItemsTextBuf = NULL;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2] = Menu_Framework_selectedItemAction;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_actionsSubMenuId * 2 + 1] =
-                    Menu_Framework_itemActionListOffset;
-                Menu_Framework_selectedItemAction = -2;
-                break;
-            }
-
-            if (Input_buttonRepeat & PADLup) {
-                if (Menu_Framework_itemActionCount < 8) {
-                    if (Menu_Framework_selectedItemAction == 0) {
-                        Menu_Framework_selectedItemAction = Menu_Framework_itemActionCount - 1;
-                    } else {
-                        --Menu_Framework_selectedItemAction;
-                    }
-                } else if (Menu_Framework_itemActionListOffset == 0) {
-                    if (Menu_Framework_selectedItemAction == 0) {
-                        if (Input_buttonsPressed.allButtons & PADLup) {
-                            Menu_Framework_selectedItemAction = 6;
-                            Menu_Framework_itemActionListOffset = Menu_Framework_itemActionCount - 7;
-                        }
-                    } else {
-                        --Menu_Framework_selectedItemAction;
-                    }
-                } else if (Menu_Framework_selectedItemAction == 1) {
-                    --Menu_Framework_itemActionListOffset;
-                } else {
-                    --Menu_Framework_selectedItemAction;
-                }
-            }
-
-            if (Input_buttonRepeat & PADLdown) {
-                if (Menu_Framework_itemActionCount < 8) {
-                    if (Menu_Framework_selectedItemAction == (Menu_Framework_itemActionCount - 1)) {
-                        Menu_Framework_selectedItemAction = 0;
-                    } else {
-                        ++Menu_Framework_selectedItemAction;
-                    }
-                } else if (Menu_Framework_itemActionListOffset == (Menu_Framework_itemActionCount - 7)) {
-                    if (Menu_Framework_selectedItemAction == 6) {
-                        if (Input_buttonsPressed.allButtons & PADLdown) {
-                            Menu_Framework_selectedItemAction = 0;
-                            Menu_Framework_itemActionListOffset = 0;
-                        }
-                    } else {
-                        ++Menu_Framework_selectedItemAction;
-                    }
-                } else if (Menu_Framework_selectedItemAction == 5) {
-                    Menu_Framework_itemActionListOffset = Menu_Framework_itemActionListOffset + 1;
-                } else {
-                    Menu_Framework_selectedItemAction += 1;
-                }
-            }
-
-            if (selectedAction != (Menu_Framework_selectedItemAction + Menu_Framework_itemActionListOffset)) {
-                VS::Menu::PlayChangeSound();
-
-                if (Menu_Framework_itemActionListOffset != previousOffset) {
-                    int actionCount;
-
-                    char gradientStates[Menu_Framework_itemActionCount];
-
-                    for (i = 0; i < Menu_Framework_itemActionCount; ++i) {
-                        gradientStates[i] = 0;
-                    }
-
-                    actionCount = Menu_Framework_itemActionCount;
-
-                    if (actionCount > 7u) {
-                        actionCount = 7;
-                    }
-
-                    for (i = 0; i < actionCount; ++i) {
-                        gradientStates[i + previousOffset] =
-                            Menu_Framework_MenuItem(i + 32)->gradientState;
-                    }
-
-                    for (i = 0;;) {
-                        menuItem = Menu_Framework_CreateActionRow(i, 0);
-                        menuItem->gradientState =
-                            gradientStates[i + Menu_Framework_itemActionListOffset];
-                        ++i;
-
-                        if (i == Menu_Framework_itemActionCount) {
-                            break;
-                        }
-
-                        if (i == 7) {
-                            if ((Menu_Framework_itemActionListOffset + 7) < Menu_Framework_itemActionCount) {
-                                menuItem->isScrollable = 2;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            menuItem = Menu_Framework_MenuItem(Menu_Framework_selectedItemAction + 32);
-            menuItem->selected = 1;
-            Menu_Framework_actionMenuCursorAnimStep =
-                Menu_Framework_DrawCursor(Menu_Framework_actionMenuCursorAnimStep, vs_getXY(0, menuItem->y - 8));
-
-            break;
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_printInformation (src/MENU/MAINMENU.PRG/58EC.c:367)
-void Menu_Framework_UpdateInformationVisibility(int sourceRow, int actionMenuState)
-{
-    if (actionMenuState < 16) {
-        return;
-    }
-
-    if (Menu_Framework_rowTypeBuf[sourceRow] & 1) {
-
-        if ((Input_settings.information == 0)
-            && (Input_buttonsState & (PADLup | PADLdown))) {
-            return;
-        }
-
-        Menu_InitInformationTextBox(Menu_InformationBoxHeader_Caution);
-
-        Menu_textBoxes[7].state = 11;
-
-    } else if (Input_settings.information != 0) {
-
-        Menu_InitInformationTextBox(Menu_InformationBoxHeader_Information);
-
-        Menu_textBoxes[7].state = 11;
-
-    } else {
-        Menu_textBoxes[7].state = 0;
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_setMenuCommand (src/MENU/MAINMENU.PRG/58EC.c:405)
-void Menu_Framework_SetCommandLabel(enum Menu_Framework_MenuCommand action)
-{
-    Menu_Framework_menuActionNext = action;
-}
-
-// decomp: MAINMENU.PRG _renderMenuCommand (src/MENU/MAINMENU.PRG/58EC.c:413)
-void Menu_Framework_DrawCommandLabel(void)
-{
-    static int Menu_Framework_commandLabelMenuActionRenderPostitions[] = { vs_getXY(0, 0), vs_getXY(62, 10),
-        vs_getXY(36, 10), vs_getXY(30, 10), vs_getXY(56, 10), vs_getXY(30, 10),
-        vs_getXY(32, 10), vs_getXY(0, 0) };
-
-    u_long* prim;
-    int action = Menu_Framework_menuActionCurrent;
-    int y = Menu_Framework_commandLabelActionYPos;
-
-    if (action != Menu_Framework_menuActionNext) {
-        if (y == 0) {
-            Menu_Framework_menuActionCurrent = Menu_Framework_menuActionNext;
-            return;
-        }
-        y -= 2;
-    } else if (y < 12) {
-        y += 2;
-    }
-
-    Menu_Framework_commandLabelActionYPos = y;
-
-    if (action != 0) {
-        prim = VS::Render::QueueLiveSprite((1 << 8) | 128,
-            (312 - (Menu_Framework_commandLabelMenuActionRenderPostitions[action] & 0xFF))
-                | ((Menu_Framework_commandLabelActionYPos - 4) << 16),
-            Menu_Framework_commandLabelMenuActionRenderPostitions[action], (u_long *)(Render_frameScratch.overlayOrderingTable));
-        prim[1] = vs_getTpage(768, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
-        prim[4] = Menu_Framework_commandLabelMenuActionUvs[action] | vs_getUV0Clut(0, 0, 848, 223);
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_toggleBackgroundFade (src/MENU/MAINMENU.PRG/58EC.c:448)
-void Menu_Framework_SetBackgroundFade(int fadeState)
-{
-    if (fadeState != 0) {
-        Menu_Framework_backgroundOtOffset = -4;
-        Menu_Framework_backgroundBrightness = 128;
-    }
-
-    Menu_Framework_backgroundFadeState = fadeState;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_deactivateMenuItem (src/MENU/MAINMENU.PRG/58EC.c:458)
-void Menu_Framework_DeactivateRow(int row)
-{
-    Menu_Framework_MenuRow* menuItem = &Menu_Framework_menuItems[row];
-    menuItem->state = Menu_Framework_MenuItemState_Inactive;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_dismissInformationBox (src/MENU/MAINMENU.PRG/58EC.c:464)
-void Menu_Framework_DismissInformationBox(void) { Menu_DismissTextBox(7); }
-
-// decomp: MAINMENU.PRG vs_mainMenu_initInformationBox (src/MENU/MAINMENU.PRG/58EC.c:466)
-void Menu_Framework_InitializeInformationBox(void)
-{
-    if (Input_settings.information != 0) {
-        Menu_InitInformationTextBox(Menu_InformationBoxHeader_Information);
-    } else {
-        Menu_Framework_DismissInformationBox();
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainmenu_setInformationMessage (src/MENU/MAINMENU.PRG/58EC.c:475)
-void Menu_Framework_SetInformationMessage(char* message)
-{
-#pragma vsstring(start)
-    static char Menu_Framework_setInformationMessageInfoMessage[] =
-        { [0] = Core_TextCode_ChunkSize, [98] = Core_TextCode_Terminator,
-          [99] = Core_TextCode_Terminator, [100] = 0 };
-#pragma vsstring(end)
-
-    VS::Core::Memory::CopyLiveHalfwordBlocks(&Menu_Framework_setInformationMessageInfoMessage[2], message, 96);
-    Menu_textBoxes[7].flags.speakerTexture = 32;
-    Menu_SetTextBoxText(7, Menu_Framework_setInformationMessageInfoMessage);
-}
-
-// decomp: MAINMENU.PRG vs_mainmenu_renderButton (src/MENU/MAINMENU.PRG/58EC.c:487)
-void Menu_Framework_DrawButtonIcon(
-    enum Menu_Framework_ButtonId buttonId, int x, int y, u_long* before)
-{
-    if (before == NULL) {
-        before = (u_long *)(Render_frameScratch.overlayOrderingTable);
-    }
-
-    VS::Render::QueueLiveSpriteWithTexturePage(
-        128, vs_getXY_2(x, y), vs_getWH(16, 16), before)[4] =
-        vs_getUV0Clut((buttonId & 3) * 16, ((buttonId & 4) * 4) + 128, 944, 223);
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderCursor (src/MENU/MAINMENU.PRG/58EC.c:499)
-int Menu_Framework_DrawCursor(u_int animStep, int xy)
-{
-    int clut;
-    int cursorAnimStep = animStep >> (Menu_Framework_cursorColor * 8);
-
-    u_long* prim = VS::Render::QueueLiveSpriteWithTexturePage(
-        Menu_Framework_cursorBrightnessAnimation[cursorAnimStep], xy, vs_getWH(16, 16),
-        (u_long *)(Render_frameScratch.overlayOrderingTable));
-
-    if (Menu_Framework_cursorColor == 0) {
-        clut = vs_getUV0Clut(32, 48, 896, 223);
-    } else {
-        clut = vs_getUV0Clut(32, 48, 928, 223);
-    }
-
-    prim[4] = clut;
-    Menu_Framework_cursorColor = 0;
-
-    return (cursorAnimStep + 1) & 0xF;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderIntColor (src/MENU/MAINMENU.PRG/58EC.c:520)
-int Menu_Framework_DrawColoredInteger(int value, int xy, int color, u_long* before)
-{
-    int buf;
-    int bcd = value;
-
-    if (value < 0) {
-        bcd = -value;
-    }
-
-    do {
-        bcd = VS::Core::Math::SplitDecimalDigit(bcd);
-        buf = ((bcd & 0xF) << 8) | ('0' << 8) | '#';
-
-        VS::Render::DrawLiveCompactTextColor((char*)&buf, xy, color, before);
-
-        bcd >>= 4;
-        xy -= 8;
-    } while (bcd != 0);
-
-    if (value < 0) {
-        buf = ('-' << 8) | '#';
-        VS::Render::DrawLiveCompactTextColor((char*)&buf, xy + 1, color, before);
-    }
-
-    return xy;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderIntWithThreshold (src/MENU/MAINMENU.PRG/58EC.c:547)
-int Menu_Framework_DrawComparedInteger(int value, int xy, int threshold, u_long* before)
-{
-    int color = vs_getRGB888(128, 128, 128);
-
-    if (threshold < value) {
-        color = vs_getRGB888(32, 64, 128);
-    }
-
-    if (value < threshold) {
-        color = vs_getRGB888(128, 64, 32);
-    }
-
-    return Menu_Framework_DrawColoredInteger(value, xy, color, before);
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderIntColorDefault (src/MENU/MAINMENU.PRG/58EC.c:562)
-void Menu_Framework_DrawNeutralInteger(int value, int xy, u_long* before)
-{
-    Menu_Framework_DrawColoredInteger(value, xy, vs_getRGB888(128, 128, 128), before);
-}
-
-// decomp: MAINMENU.PRG _renderFeatheredIcon (src/MENU/MAINMENU.PRG/58EC.c:571)
-void Menu_Framework_DrawFeatheredRowIcon(int direction, int xy, int uvClut, u_long* before)
-{
-    int i = 0;
-
-    if (direction < 0) {
-        xy += vs_getXY(0, 15);
-        uvClut += vs_getUV0Clut(0, 15, 0, 0);
-    }
-
-    do {
-        ++i;
-
-        VS::Render::QueueLiveSpriteWithTexturePage(
-            (i * 8) | (1 << 8), xy, vs_getWH(16, 1), before)[4] = uvClut;
-
-        xy += vs_getXY(0, direction);
-        uvClut += vs_getUV0Clut(0, direction, 0, 0);
-    } while (i < 16);
-}
-
-// decomp: MAINMENU.PRG _renderItemMaterial (src/MENU/MAINMENU.PRG/58EC.c:594)
-void Menu_Framework_DrawMaterialIndicator(int materialId, int xy)
-{
-    u_long* prim = VS::Render::QueueLiveDefaultSprite(vs_getWH(7, 7), xy);
-    int uv = (((materialId / 3) * 8) + 216) | ((((materialId % 3) * 8) + 200) << 8);
-
-    if (materialId == 2) {
-        prim[4] = uv | (getClut(928, 223) << 16);
-    } else {
-        prim[4] = uv | (getClut(912, 223) << 16);
-    }
-}
-
-// decomp: MAINMENU.PRG _renderOutsetIcon (src/MENU/MAINMENU.PRG/58EC.c:609)
-void Menu_Framework_DrawEquipmentStateIcon(int icon, int xy)
-{
-    VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), xy)[4] =
-        vs_getUV0Clut(96 - (icon * 16), 128, 976, 223);
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderMenuRowIcon (src/MENU/MAINMENU.PRG/58EC.c:615)
-void Menu_Framework_DrawRowIcon(int icon, int x, int y)
-{
-    static u_short Menu_Framework_rowIconUvs[] = { vs_getUV(80, 96), vs_getUV(144, 96), vs_getUV(160, 96),
-        vs_getUV(112, 96), vs_getUV(128, 96), vs_getUV(176, 96), vs_getUV(208, 96),
-        vs_getUV(96, 96), vs_getUV(48, 112), vs_getUV(128, 112), vs_getUV(0, 112),
-        vs_getUV(16, 112), vs_getUV(32, 112), vs_getUV(224, 96), vs_getUV(64, 112),
-        vs_getUV(80, 112), vs_getUV(96, 112), vs_getUV(112, 112), vs_getUV(128, 112),
-        vs_getUV(144, 112), vs_getUV(160, 112), vs_getUV(32, 96), vs_getUV(176, 112),
-        vs_getUV(120, 128), vs_getUV(136, 128), vs_getUV(152, 128), vs_getUV(168, 128),
-        vs_getUV(184, 128), vs_getUV(200, 128), vs_getUV(216, 128), vs_getUV(232, 128),
-        vs_getUV(96, 128), vs_getUV(80, 128) };
-
-    int fade = icon >> 16;
-    int brightness = (icon >> 8) & 1;
-    icon = (icon - 1) & 0xFF;
-
-    if (fade == 0) {
-        u_long* prim = VS::Render::QueueLiveSpriteWithTexturePage(
-            64 << brightness, vs_getXY_2(x, y), vs_getWH(16, 16), (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 4));
-
-        prim[4] = vs_getUV0Clut(Menu_Framework_rowIconUvs[icon], 0, 992, 223);
-
-        if (icon >= 23) {
-            prim[3] -= 12;
-            prim[4] = vs_getUV0Clut(Menu_Framework_rowIconUvs[icon], 0, 976, 223);
-        }
-
-    } else {
-        if (fade == 2) {
-            fade = -1;
-        }
-
-        Menu_Framework_DrawFeatheredRowIcon(fade, vs_getXY_2(x, y),
-            vs_getUV0Clut(Menu_Framework_rowIconUvs[icon], 0, 992, 223), (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 4));
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainmenu_setActionCost (src/MENU/MAINMENU.PRG/58EC.c:652)
-void Menu_Framework_SetActionCostText(int index, char const* text, int xOffset, int disabled)
-{
-    Menu_Framework_displayActionCost = 1;
-
-    VS::Core::Memory::CopyLiveBytesBackward(&Menu_Framework_textHeaders[index], text, 14);
-
-    Menu_Framework_textHeaders[index].disabled = disabled;
-    Menu_Framework_textHeaders[index].x = xOffset;
-}
-
-// decomp: MAINMENU.PRG _renderAbilityCost (src/MENU/MAINMENU.PRG/58EC.c:665)
-void Menu_Framework_DrawActionCostPanel(void)
-{
-
-    u_long* scratch = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4);
-
-    if (Menu_Framework_displayActionCost != 0) {
-        if (Menu_Framework_actionCostPanelAnimState != 0) {
-            --Menu_Framework_actionCostPanelAnimState;
-        }
-    } else {
-        if (Menu_Framework_actionCostPanelAnimState < 5) {
-            Menu_Framework_actionCostPanelAnimState = 5;
-        } else if (Menu_Framework_actionCostPanelAnimState < 8) {
-            ++Menu_Framework_actionCostPanelAnimState;
-        }
-    }
-
-    if (Menu_Framework_actionCostPanelAnimState < 8) {
-        int i;
-        u_long* poly;
-        int x0;
-        int x1 = -Menu_Framework_rowAnimationSteps[Menu_Framework_actionCostPanelAnimState];
-
-        for (i = 0; i < 2; ++i) {
-            VS::Render::DrawLiveCompactTextColor(Menu_Framework_textHeaders[i].text,
-                ((x1 + Menu_Framework_textHeaders[i].x) & 0xFFFF) | (160 << 16),
-                vs_getRGB888(128, 128, 128) >> Menu_Framework_textHeaders[i].disabled, NULL);
-        }
-
-        x0 = x1 & 0xFFFF;
-        poly = (u_long *)(Render_frameScratch.primitiveCursor);
-
-        poly[0] = (*scratch & 0xFFFFFF) | 0x0A000000;
-        poly[1] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_On);
-        poly[2] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyG4, 8, 8, 32);
-        poly[3] = x0 | (160 << 16);
-        poly[4] = vs_getRGB888(64, 48, 102);
-        poly[5] = (x1 + 80) | (160 << 16);
-        poly[6] = vs_getRGB888(8, 8, 32);
-        poly[7] = x0 | (171 << 16);
-        poly[8] = vs_getRGB888(64, 48, 102);
-        poly[9] = (x1 + 80) | (171 << 16);
-        poly[10] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
-
-        *scratch = LegacyGpu_Handle(poly);
-        Render_frameScratch.primitiveCursor = poly + 11;
-
-        VS::Render::InsertLiveThreeWordPrimitive(
-            scratch, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), x0 | (162 << 16), vs_getWH(82, 11));
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainmenu_renderButtonBackground (src/MENU/MAINMENU.PRG/58EC.c:718)
-void Menu_Framework_DrawButtonPromptBackground(int x, int y, int w, int h)
-{
-    int i;
-    u_long* background_primitive_cursor = (u_long *)(Render_frameScratch.primitiveCursor);
-    u_long* background_ordering_table = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC);
-
-    for (i = 0; i < h; ++i) {
-        background_primitive_cursor[0] = vs_getTag(u_long[6], background_ordering_table[0]);
-        background_primitive_cursor[1] = vs_getTpage(0, 0, 0, 0, Render_Dithering_On);
-        background_primitive_cursor[2] = vs_getRGB0(Render_LegacyPrimitiveCode_LineG2, 64, 56, 32);
-        background_primitive_cursor[3] = ((x & 0xFFFF) | ((y + i) << 0x10));
-        background_primitive_cursor[4] = vs_getRGB888(16, 16, 8);
-        background_primitive_cursor[5] = vs_getXY_2((x + w) - i, y + i);
-        background_primitive_cursor[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
-        background_ordering_table[0] = (LegacyGpu_Handle(background_primitive_cursor));
-        background_primitive_cursor += 7;
-    }
-
-    Render_frameScratch.primitiveCursor = background_primitive_cursor;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_setBackgroundRenderPriority (src/MENU/MAINMENU.PRG/58EC.c:739)
-void Menu_Framework_SetBackgroundPriority(int otOffset, int brightness)
-{
-    if (otOffset > 0) {
-        Battle_lowerScreenUiState |= 2;
-    } else {
-        Battle_lowerScreenUiState &= 1;
-    }
-
-    Menu_Framework_backgroundOtOffset = otOffset;
-    Menu_Framework_backgroundBrightness = brightness;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_unpackMenubg (src/MENU/MAINMENU.PRG/58EC.c:751)
-void Menu_Framework_LoadBackgroundTexture(u_int* buf)
-{
-
-    int decoded_word_index;
-    int i;
-    u_int run_words_remaining;
-    void* data = Core_overlaySlots[2];
-    u_int* encoded_texture_words = (u_int *)(((u_char*)(data)) + 0x200);
-
-    for (i = 0, decoded_word_index = 0; i < 0x1780;) {
-
-        u_int packed_run_lengths = encoded_texture_words[i++];
-
-        for (run_words_remaining = packed_run_lengths & 0xFFFF; run_words_remaining != 0; --run_words_remaining) {
-            buf[decoded_word_index++] = 0;
-        }
-
-        for (run_words_remaining = packed_run_lengths >> 16; run_words_remaining != 0; --run_words_remaining) {
-            buf[decoded_word_index++] = encoded_texture_words[i++];
-        }
-    }
-
-    VS::Render::ReserveLiveTexturePageRange(0x1A, 3, 6);
-    ClearImage(&Menu_Framework_loadBackgroundTextureRects[0], 0, 0, 0);
-    ClearImage(&Menu_Framework_loadBackgroundTextureRects[1], 0, 0, 0);
-
-    if (((Menu_Framework_menuState.currentMenu & 0x3F) == 7) && (Menu_Framework_actionRestrictions & 0x200)
-        && (Audio_Seq_unusedStateFlags.gameOver == 1)) {
-        VS::Render::UploadLiveImageRectangle(vs_getXY(640, 511), data, vs_getWH(256, 1));
-    } else {
-        VS::Render::LoadLiveClutColors((u_short*)data, 3, 0, 256);
-    }
-
-    VS::Render::UploadLiveImageRectangle(vs_getXY(672, 256), buf, vs_getWH(96, 240));
-    Menu_Framework_SetBackgroundPriority(-4, 128);
-}
-
-// decomp: MAINMENU.PRG vs_mainmenu_setMenuRows (src/MENU/MAINMENU.PRG/58EC.c:798)
-void Menu_Framework_CreateMenuRows(int rowCount, int rowInfo, char* strings[], int rowTypes[])
-{
-    int maximum_page_offset;
-    int has_following_page;
-    u_int var_a0;
-
-    int i = 0;
-    int page = 0;
-    int subMenuId = rowInfo & 0xFF;
-    Menu_Framework_menuRowYOffset = (rowInfo >> 0xC);
-    Menu_Framework_subMenuId = subMenuId;
-    rowInfo = (rowInfo >> 8) & 0xF;
-
-    if (Input_settings.cursorMemory != 0) {
-        i = Menu_Framework_menuMemory.cursorMemories[subMenuId * 2];
-        page = Menu_Framework_menuMemory.cursorMemories[subMenuId * 2 + 1];
-    }
-
-    maximum_page_offset = 10;
-    maximum_page_offset = rowCount - maximum_page_offset + rowInfo;
-
-    if (maximum_page_offset < 0) {
-        i += page;
-        page = 0;
-        if (i >= rowCount) {
-            i = 0;
-        }
-    } else {
-        if (maximum_page_offset < page) {
-            if ((i + page) >= rowCount) {
-                i = 0;
-                page = 0;
-            } else {
-                i += page - maximum_page_offset;
-                page = maximum_page_offset;
-            }
-        }
-
-        has_following_page = page < maximum_page_offset;
-
-        if ((page > 0) && (i == 0)) {
-            i = 1;
-            page -= 1;
-            has_following_page = page < maximum_page_offset;
-        }
-
-        if (has_following_page != 0) {
-            var_a0 = rowCount << 7;
-            if (i == (9 - rowInfo)) {
-                i -= 1;
-                page += 1;
-                ;
-            }
-        }
-    }
-
-    Menu_Framework_selectedRow = i;
-
-    Menu_Framework_subMenuPage = page;
-    Menu_Framework_subMenuRowCount = rowCount;
-    Menu_Framework_subMenuRowInfo = rowInfo;
-    Menu_Framework_itemsListRow = 0;
-
-    Menu_Framework_itemsText = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(rowCount * 128));
-
-    for (i = 0; i < rowCount; ++i) {
-        char* text;
-
-        ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[i].menuRowFlags = rowTypes[i];
-
-        if (strings[i * 2] != NULL) {
-            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_itemsText[i * 64], strings[i * 2], 26);
-
-            Menu_Framework_itemsText[(i * 64) + 13] = Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        } else {
-            Menu_Framework_itemsText[i * 64] = Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        }
-
-        text = strings[i * 2 + 1];
-
-        if (text != NULL) {
-            ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[i].description[0] = Core_TextCode_ChunkSize;
-
-            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_itemsText[(i * 64) + 17], text, 92);
-
-            ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[i].description[47] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        } else {
-            ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[i].description[0] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_storeCursor (src/MENU/MAINMENU.PRG/58EC.c:892)
-int Menu_Framework_CloseRowsAndRememberCursor(void)
-{
-    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
-
-    Menu_Framework_itemsText = NULL;
-    Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;
-    Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2 + 1] = Menu_Framework_subMenuPage;
-
-    return (Menu_Framework_selectedRow + Menu_Framework_subMenuPage) | ((Menu_Framework_selectedRow + (Menu_Framework_subMenuRowInfo * 10)) << 8);
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_getConfirmedRow (src/MENU/MAINMENU.PRG/58EC.c:903)
-int Menu_Framework_HighlightedRow(void) { return Menu_Framework_selectedRow + Menu_Framework_subMenuPage; }
-
-// decomp: MAINMENU.PRG vs_mainmenu_getSelectedRow (src/MENU/MAINMENU.PRG/58EC.c:905)
-int Menu_Framework_GetSelectedRow(void) { return Menu_Framework_itemsText != NULL ? -1 : Menu_Framework_selectedRow; }
-
-// decomp: MAINMENU.PRG _initItemRow (src/MENU/MAINMENU.PRG/58EC.c:910)
-Menu_Framework_MenuRow* Menu_Framework_CreateListRow(int row, int x)
-{
-    int invert_gradient_flag;
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(row + (Menu_Framework_subMenuRowInfo * 10),
-        x, ((row + Menu_Framework_subMenuRowInfo) * 16) + 18, Menu_Framework_menuRowYOffset + 126, 0,
-        (char*)((Menu_Framework_ItemText*)Menu_Framework_itemsText)[Menu_Framework_subMenuPage + row].name);
-
-    int flags = ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[Menu_Framework_subMenuPage + row].menuRowFlags;
-
-    menuItem->unselectable = flags & 1;
-    menuItem->backgroundWidth += (flags & 2) * 12;
-
-    invert_gradient_flag = (flags >> 3) & 1;
-
-    menuItem->invertGradient = invert_gradient_flag;
-    menuItem->fontColor = invert_gradient_flag | ((flags >> 2) & 1);
-    menuItem->rowIcon = (flags >> 26);
-
-    if ((row == 0) && (Menu_Framework_subMenuPage != 0)) {
-        menuItem->isScrollable = Menu_Framework_MenuItemScroll_Up;
-    }
-
-    row = (flags >> 9) & 0x7F;
-
-    if (row <= 100) {
-        menuItem->count = row;
-    } else if (row <= 102) {
-        menuItem->outsetIcon = row - 100;
-    } else {
-        menuItem->subText = Battle_limbNames[row - 103];
-    }
-
-    menuItem->material = (flags >> 16) & 7;
-    menuItem->max = (flags >> 19) & 0x7F;
-    return menuItem;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderItemsList (src/MENU/MAINMENU.PRG/58EC.c:947)
-void Menu_Framework_UpdateRowSelection(void)
-{
-
-    int absRow;
-    int visible_row_capacity;
-    int i;
-    int visible_row_count;
-    int page;
-    Menu_Framework_MenuRow* menuItem;
-
-    if (Menu_Framework_subMenuRowCount == 0) {
-
-        if (Menu_Framework_itemsText != NULL) {
-            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
-            Menu_Framework_itemsText = NULL;
-        }
-
-        Menu_Framework_selectedRow = -2;
-        return;
-    }
-
-    if (Menu_Framework_itemsListRow < 10) {
-
-        menuItem = Menu_Framework_CreateListRow(Menu_Framework_itemsListRow, 320);
-
-        menuItem->state = Menu_Framework_MenuItemState_SlideX;
-        ++Menu_Framework_itemsListRow;
-        menuItem->targetPosition0 = 194 - Menu_Framework_menuRowYOffset;
-
-        if (Menu_Framework_itemsListRow == Menu_Framework_subMenuRowCount) {
-            Menu_Framework_itemsListRow = 16;
-        }
-
-        if (Menu_Framework_itemsListRow == (10 - Menu_Framework_subMenuRowInfo)) {
-
-            if ((Menu_Framework_itemsListRow + Menu_Framework_subMenuPage) < Menu_Framework_subMenuRowCount) {
-                menuItem->isScrollable = Menu_Framework_MenuItemScroll_Down;
-            }
-
-            Menu_Framework_itemsListRow = 16;
-        }
-    } else {
-
-        menuItem = Menu_Framework_MenuItem(Menu_Framework_selectedRow + (Menu_Framework_subMenuRowInfo * 10));
-        Menu_Framework_SetInformationMessage(
-            (char*)(Menu_Framework_itemsText + (((Menu_Framework_selectedRow + Menu_Framework_subMenuPage) * 64) + 16)));
-
-        switch (Menu_Framework_itemsListRow) {
-        case 16:
-            if (Menu_Framework_AreMenuRowsIdle()) {
-                Menu_Framework_itemsListRow = 17;
-            }
-            return;
-
-        case 17:
-            absRow = Menu_Framework_selectedRow + Menu_Framework_subMenuPage;
-            page = Menu_Framework_subMenuPage;
-
-            if (Input_buttonsPressed.allButtons & PADRup) {
-
-                VS::Menu::PlayLeaveSound();
-                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
-
-                Menu_Framework_itemsText = NULL;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2 + 1] = Menu_Framework_subMenuPage;
-                Menu_Framework_selectedRow = -3;
-
-                return;
-            }
-
-            if (Input_buttonsPressed.allButtons & PADRright) {
-                if (menuItem->unselectable == 0) {
-
-                    menuItem->selected = 1;
-
-                    VS::Menu::PlaySelectSound();
-                    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
-
-                    Menu_Framework_itemsText = NULL;
-                    Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;
-                    Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2 + 1] = Menu_Framework_subMenuPage;
-                    Menu_Framework_selectedRow = absRow;
-
-                    return;
-                }
-
-                VS::Menu::PlayInvalidSound();
-            }
-
-            menuItem->selected = 0;
-
-            if (Input_buttonsPressed.allButtons & PADRdown) {
-
-                VS::Menu::PlayLeaveSound();
-                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
-
-                Menu_Framework_itemsText = NULL;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2] = Menu_Framework_selectedRow;
-                Menu_Framework_menuMemory.cursorMemories[Menu_Framework_subMenuId * 2 + 1] = Menu_Framework_subMenuPage;
-                Menu_Framework_selectedRow = -2;
-
-                return;
-            }
-
-            if (Input_buttonRepeat & PADLup) {
-
-                if (Menu_Framework_subMenuRowCount <= (10 - Menu_Framework_subMenuRowInfo)) {
-
-                    if (Menu_Framework_selectedRow == 0) {
-                        Menu_Framework_selectedRow = Menu_Framework_subMenuRowCount - 1;
-                    } else {
-                        --Menu_Framework_selectedRow;
-                    }
-
-                } else if (Menu_Framework_subMenuPage == 0) {
-
-                    if (Menu_Framework_selectedRow == 0) {
-                        if (Input_buttonsPressed.allButtons & PADLup) {
-                            Menu_Framework_selectedRow = 9 - Menu_Framework_subMenuRowInfo;
-                            Menu_Framework_subMenuPage = Menu_Framework_subMenuRowInfo + (Menu_Framework_subMenuRowCount + 246);
-                        }
-                    } else {
-                        --Menu_Framework_selectedRow;
-                    }
-
-                } else if (Menu_Framework_selectedRow == 1) {
-                    --Menu_Framework_subMenuPage;
-                } else {
-                    --Menu_Framework_selectedRow;
-                }
-            }
-
-            if (Input_buttonRepeat & PADLdown) {
-
-                if (Menu_Framework_subMenuRowCount <= (10 - Menu_Framework_subMenuRowInfo)) {
-
-                    if (Menu_Framework_selectedRow == (Menu_Framework_subMenuRowCount - 1)) {
-                        Menu_Framework_selectedRow = 0;
-                    } else {
-                        ++Menu_Framework_selectedRow;
-                    }
-
-                } else if (Menu_Framework_subMenuPage == (Menu_Framework_subMenuRowCount + (Menu_Framework_subMenuRowInfo - 10))) {
-
-                    if (Menu_Framework_selectedRow == (9 - Menu_Framework_subMenuRowInfo)) {
-
-                        if (Input_buttonsPressed.allButtons & PADLdown) {
-                            Menu_Framework_selectedRow = 0;
-                            Menu_Framework_subMenuPage = 0;
-                        }
-
-                    } else {
-                        ++Menu_Framework_selectedRow;
-                    }
-
-                } else if (Menu_Framework_selectedRow == (8 - Menu_Framework_subMenuRowInfo)) {
-                    ++Menu_Framework_subMenuPage;
-                } else {
-                    ++Menu_Framework_selectedRow;
-                }
-            }
-
-            if (absRow != (Menu_Framework_selectedRow + Menu_Framework_subMenuPage)) {
-
-                VS::Menu::PlayChangeSound();
-
-                if (Menu_Framework_subMenuPage != page) {
-
-                    char gradientStates[Menu_Framework_subMenuRowCount];
-
-                    for (i = 0; i < Menu_Framework_subMenuRowCount; ++i) {
-                        gradientStates[i] = 0;
-                    }
-
-                    visible_row_count = Menu_Framework_subMenuRowCount;
-                    visible_row_capacity = 10 - Menu_Framework_subMenuRowInfo;
-
-                    if (visible_row_capacity < visible_row_count) {
-                        visible_row_count = visible_row_capacity;
-                    }
-
-                    for (i = 0; i < visible_row_count; ++i) {
-                        gradientStates[i + page] =
-                            Menu_Framework_MenuItem(i + (Menu_Framework_subMenuRowInfo * 10))
-                                ->gradientState;
-                    }
-
-                    for (i = 0;;) {
-                        menuItem = Menu_Framework_CreateListRow(i, 194 - Menu_Framework_menuRowYOffset);
-                        menuItem->gradientState = gradientStates[i + Menu_Framework_subMenuPage];
-                        i += 1;
-
-                        if (i == Menu_Framework_subMenuRowCount) {
-                            break;
-                        }
-
-                        if (i == (10 - Menu_Framework_subMenuRowInfo)) {
-                            if ((i + Menu_Framework_subMenuPage) < Menu_Framework_subMenuRowCount) {
-                                menuItem->isScrollable = Menu_Framework_MenuItemScroll_Down;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            Menu_Framework_MenuItem(Menu_Framework_selectedRow + (Menu_Framework_subMenuRowInfo * 10))->selected = 1;
-
-            Menu_Framework_rowSelectionCursorAnimStep = Menu_Framework_DrawCursor(Menu_Framework_rowSelectionCursorAnimStep,
-                (180 - Menu_Framework_menuRowYOffset)
-                    | ((((Menu_Framework_selectedRow + Menu_Framework_subMenuRowInfo) * 16) + 10) << 0x10));
-
-            break;
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG _renderBackground (src/MENU/MAINMENU.PRG/58EC.c:1172)
-void Menu_Framework_DrawBackground(int brightness)
-{
-    int opaque;
-    u_long* prim;
-
-    int uCoord = 0;
-    u_long* before = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + Menu_Framework_backgroundOtOffset * 4);
-
-    if (Render_frameBuf == 0) {
-        uCoord = 320;
-    }
-
-    brightness *= 8;
-    opaque = brightness == 128;
-
-    if (opaque) {
-        brightness = Menu_Framework_backgroundBrightness;
-    } else {
-        brightness |= 256;
-    }
-
-    prim = VS::Render::QueueLiveSprite(brightness, 256, vs_getWH(64, 240), before);
-    prim[1] = vs_getTpage(768, 256, Render_TextureFormat_Palette8Bit, Render_BlendMode_Add, Render_Dithering_Off);
-    prim[4] = vs_getUV0Clut(0, 0, 768, 227);
-
-    prim = VS::Render::QueueLiveSprite(brightness, 0, vs_getWH(256, 240), before);
-    prim[1] = vs_getTpage(640, 256, Render_TextureFormat_Palette8Bit, Render_BlendMode_Add, Render_Dithering_Off);
-    prim[4] = vs_getUV0Clut(0, 0, 768, 227);
-
-    if (!opaque) {
-        int background_texture_page_flags = 288;
-        brightness = (256 | 128) - brightness;
-
-        VS::Render::QueueLiveSprite(brightness, 0, vs_getWH(256, 240), before)[1] =
-            (((u_int)uCoord >> 6) | background_texture_page_flags
-                | vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off));
-        VS::Render::QueueLiveSprite(brightness, 256, vs_getWH(64, 240), before)[1] =
-            (((uCoord + 256) >> 6) | background_texture_page_flags
-                | vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off));
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderRowLabel (src/MENU/MAINMENU.PRG/58EC.c:1215)
-int Menu_Framework_DrawFeatheredRowCharacter(
-    u_int character, int x, Menu_Framework_MenuRow* menuItem, u_long* before)
-{
-    int i;
-    int uvClut;
-    u_long* prim;
-    int non_printing_character_threshold;
-
-    int scroll_direction_sign = character >> 0x1F;
-    character &= 0xFFFF;
-    non_printing_character_threshold = Core_TextCode_NonPrinting;
-
-    if ((character < non_printing_character_threshold) && (character == ' ')) {
-        do {
-            do {
-                return x + 6;
-            } while (0);
-        } while (0);
-    }
-
-    i = menuItem->fontColor * 16;
-
-    if (menuItem->fontColor == 0) {
-        i = menuItem->unselectable * 48;
-    }
-
-    uvClut = (((character & 0x1FF) % 21) * 0xC) | (((character & 0x1FF) / 21) * 0xC00)
-           | (getClut(i + 896, 222) << 16);
-
-    for (i = 0; i < 12; ++i) {
-
-        prim = VS::Render::QueueLiveSprite(scroll_direction_sign == 0 ? (i * 8) + 264 : 352 - (i * 8),
-            vs_getXY_2(x, menuItem->y + i), vs_getWH(12, 1), before);
-        prim[4] = uvClut;
-        prim[1] = vs_getTpage(832, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0);
-        uvClut += 256;
-    }
-
-    return x + Render_variableFontGlyphWidths[character];
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderTabNavigation (src/MENU/MAINMENU.PRG/58EC.c:1259)
-void Menu_Framework_DrawTabNavigation(int mode)
-{
-    static char const* Menu_Framework_kTabNavigationControls[] = { "1", "L", "1", "R" };
-    int i;
-    int color;
-    int clut;
-    u_int xy;
-
-    clut = vs_getUV0Clut(0, 0, 912, 223);
-    color = vs_getRGB888(64, 64, 64);
-
-    if ((Menu_Inventory_freezeTabArrows != 0) || (Menu_Framework_tabNavigationArrowAnimState != 11)) {
-
-        clut = vs_getUV0Clut(0, 0, 896, 223);
-        ++Menu_Framework_tabNavigationArrowAnimState;
-        color = vs_getRGB888(128, 128, 128);
-
-        if (Menu_Framework_tabNavigationArrowAnimState >= 12) {
-            Menu_Framework_tabNavigationArrowAnimState = 0;
-        }
-    }
-
-    xy = Menu_Framework_tabNavigationArrowAnimState >> 2;
-
-    if (mode != 0) {
-        for (i = 0; i < 4; ++i) {
-            VS::Render::DrawLiveCompactTextColor(Menu_Framework_kTabNavigationControls[i], Menu_Framework_tabNavigationControlPositions[i], color, NULL);
-        }
-        i = vs_getXY(200, 5);
-    } else {
-        i = vs_getXY(16, 16);
-    }
-
-    VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), i - xy)[4] = clut | vs_getUV(0, 48);
-
-    i = vs_getXY(162, 17);
-
-    if (mode != 0) {
-        i = vs_getXY(292, 6);
-    }
-
-    VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), i + xy)[4] = clut | vs_getUV(16, 48);
-}
-
-// decomp: MAINMENU.PRG _renderScrollableRow (src/MENU/MAINMENU.PRG/58EC.c:1309)
-void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
-{
-
-    int wh;
-    u_int texture_bank_x;
-    int gradientState;
-    int backgroundWidth;
-    int scroll;
-    int texture_u;
-    int i;
-    u_long* prim;
-    int var_s3;
-    u_int xy;
-    int texture_v;
-    u_long* before;
-
-    char* ptr = &menuItem->text[0];
-    texture_bank_x = 0;
-
-    if (Render_frameBuf == 0) {
-        texture_bank_x = 320;
-    }
-
-    xy = *(int*)&menuItem->x;
-    before = (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 8);
-    wh = menuItem->w;
-    gradientState = menuItem->gradientState;
-    scroll = menuItem->isScrollable - 1;
-    backgroundWidth = menuItem->backgroundWidth;
-
-    if (Render_frameBuf != Menu_Framework_scrollableRowPreviousFrameBuf) {
-
-        ++Menu_Framework_scrollableRowAnimState;
-        Menu_Framework_scrollableRowPreviousFrameBuf = Render_frameBuf;
-
-        if (Menu_Framework_scrollableRowAnimState >= 12) {
-            Menu_Framework_scrollableRowAnimState = 0;
-        }
-    }
-
-    var_s3 = Menu_Framework_scrollableRowAnimState >> 2;
-    var_s3 = scroll == 0 ? var_s3 - 5 : 1 - var_s3;
-
-    if (menuItem->x == 0) {
-
-        for (i = 32; i < 40; ++i) {
-            if (Menu_Framework_MenuItem(i)->state >= 2) {
-                break;
-            }
-        }
-
-        if (i == 40) {
-            prim = before - 2;
-            VS::Render::QueueLiveSpriteWithTexturePage(128, vs_getXY_2(126, menuItem->y + var_s3),
-                vs_getWH(16, 16), prim)[4] = vs_getUV0Clut(scroll * 16, 48, 912, 223);
-        }
-
-    } else {
-
-        for (i = 0; i < 32; ++i) {
-            if (Menu_Framework_MenuItem(i)->state >= 2) {
-                break;
-            }
-        }
-
-        if (i == 32) {
-            VS::Render::QueueLiveSpriteWithTexturePage(128,
-                vs_getXY_2(menuItem->x - 14, menuItem->y + var_s3), vs_getWH(16, 16),
-                before - 2)[4] = vs_getUV0Clut(scroll * 16, 48, 912, 223);
-        }
-    }
-
-    i = menuItem->x + 6;
-
-    if (menuItem->rowIcon != 0) {
-        i = menuItem->x + 22;
-    }
-
-    while ((var_s3 = *ptr++) != 0xFF) {
-        if (var_s3 == Core_TextCode_Spacing) {
-            i += *ptr++;
-        } else {
-            i = Menu_Framework_DrawFeatheredRowCharacter(
-                var_s3 | (scroll << 0x1F), i, menuItem, before);
-        }
-    }
-
-    if (wh != 0) {
-        prim = (u_long *)(Render_frameScratch.primitiveCursor);
-
-        for (i = 0; i < 12; ++i) {
-
-            if (scroll == 0) {
-                var_s3 = i * 8 + 32;
-            } else {
-                var_s3 = 120 - i * 8;
-            }
-
-            prim[0] = vs_getTag(u_long[6], *before);
-            prim[1] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_On);
-            prim[2] = Menu_Framework_GradientStopColor(8 - gradientState, backgroundWidth, var_s3)
-                    | 0x52000000;
-            prim[3] = xy;
-            prim[4] = Menu_Framework_GradientStopColor(gradientState, backgroundWidth, var_s3);
-            prim[5] = ((xy + wh - 1) & 0xFFFF) | ((xy >> 0x10) << 0x10);
-            prim[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
-
-            *before = LegacyGpu_Handle(prim);
-            prim += 7;
-            xy += vs_getXY(0, 1);
-        }
-
-        Render_frameScratch.primitiveCursor = prim;
-
-        if (scroll == 0) {
-            VS::Render::InsertLiveThreeWordPrimitive(before, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0),
-                vs_getXY_2(xy + 2, xy >> 16), wh | vs_getWH(0, 2));
-        }
-
-        if (gradientState != 0) {
-            menuItem->gradientState = gradientState - 1;
-        }
-
-        xy = xy + 0xFFF40000;
-
-        wh |= vs_getWH(0, 1);
-        var_s3 = ((menuItem->x < 0x80) ^ 1) << 7;
-
-        for (i = 0; i < 12; ++i) {
-            prim = VS::Render::QueueLiveSprite(
-                scroll == 0 ? 120 - i * 8 : i * 8 + 32, xy, wh, before);
-            texture_u = (xy - var_s3);
-            texture_v = xy >> 0x10;
-            xy += vs_getXY(0, 1);
-            prim[1] = ((texture_bank_x + var_s3) >> 6)
-                    | vs_getTpage(0, 0, Render_BlendMode_Subtract, Render_BlendMode_Add,
-                        Render_Dithering_Off);
-            prim[4] = texture_u & 0xFF;
-            prim[4] = prim[4] | (texture_v << 8);
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG _renderMenuItems (src/MENU/MAINMENU.PRG/58EC.c:1454)
-void Menu_Framework_UpdateAndDrawRows(void)
-{
-    int i;
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_menuItems;
-
-    for (i = 0; i < 40; ++i, ++menuItem) {
-        int row_marker_x;
-        u_long* before;
-        int target;
-        int origin;
-        int temp_a1;
-
-        int j = menuItem->state;
-
-        if (j == 0) {
-            continue;
-        }
-
-        switch (j) {
-        case 1:
-            break;
-
-        case 2:
-            origin = menuItem->x;
-            target = menuItem->targetPosition0;
-
-            if (origin < target) {
-
-                origin += 32;
-
-                if (target < origin) {
-                    origin = target;
-                }
-            } else {
-                if (target < origin) {
-
-                    for (j = 1; j < 16; ++j) {
-                        if ((target + Menu_Framework_rowAnimationSteps[j]) >= origin) {
-                            break;
-                        }
-                    }
-
-                    origin = target + Menu_Framework_rowAnimationSteps[j - 1];
-
-                    if ((target >= 155) && (menuItem->w < (320 - origin))) {
-
-                        menuItem->w = 64 - origin;
-
-                        if ((320 - origin) > 165) {
-                            menuItem->w = 165;
-                        }
-                    }
-                }
-            }
-
-            menuItem->x = origin;
-
-            if (origin == target) {
-                menuItem->state = 1;
-            }
-
-            break;
-
-        case 3:
-            origin = menuItem->y;
-            target = menuItem->targetPosition0;
-
-            if (origin < target) {
-
-                for (j = 1; j < 16; ++j) {
-                    if (origin >= (target - Menu_Framework_rowAnimationSteps[j])) {
-                        break;
-                    }
-                }
-
-                origin = target - Menu_Framework_rowAnimationSteps[j - 1];
-
-            } else if (target < origin) {
-
-                for (j = 1; j < 16; ++j) {
-                    if ((target + Menu_Framework_rowAnimationSteps[j]) >= origin) {
-                        break;
-                    }
-                }
-
-                origin = target + Menu_Framework_rowAnimationSteps[j - 1];
-            }
-
-            menuItem->y = origin;
-
-            if (origin == target) {
-                menuItem->state = 1;
-            }
-
-            break;
-
-        case 4:
-            origin = menuItem->x;
-            target = menuItem->targetPosition0;
-
-            if (origin != target) {
-
-                for (j = 1; j < 16; ++j) {
-                    if ((target + Menu_Framework_rowAnimationSteps[j]) >= origin) {
-                        break;
-                    }
-                }
-
-                menuItem->x = Menu_Framework_rowAnimationSteps[j - 1] + target;
-
-                if (menuItem->w < (320 - menuItem->x)) {
-                    menuItem->w = (64 - menuItem->x);
-                }
-
-            } else {
-
-                origin = menuItem->y;
-                target = menuItem->targetPosition1;
-
-                if (origin != target) {
-                    for (j = 1; j < 16; ++j) {
-                        if ((target + Menu_Framework_rowAnimationSteps[j]) >= origin) {
-                            break;
-                        }
-                    }
-                    menuItem->y = Menu_Framework_rowAnimationSteps[j - 1] + target;
-                }
-
-                if (menuItem->y == target) {
-                    menuItem->state = 1;
-                }
-            }
-            break;
-
-        case 5:
-            origin = menuItem->x;
-            target = menuItem->targetPosition0;
-
-            if (target < origin) {
-
-                origin -= 32;
-
-                if (origin < target) {
-                    origin = target;
-                }
-
-                if (-menuItem->w >= origin) {
-                    menuItem->state = 0;
-                }
-
-            } else {
-                if (origin < target) {
-
-                    for (j = 1; j < 16; ++j) {
-                        if (origin >= (target - Menu_Framework_rowAnimationSteps[j])) {
-                            break;
-                        }
-                    }
-
-                    origin = target - Menu_Framework_rowAnimationSteps[j - 1];
-                }
-            }
-
-            menuItem->x = origin;
-
-            if (origin == target) {
-                if (origin < 0) {
-                    menuItem->state = 0;
-                } else {
-                    menuItem->state = 1;
-                }
-            }
-            break;
-        }
-
-        if (Menu_Framework_hideMenu) {
-            continue;
-        }
-
-        j = menuItem->max;
-        before = (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 8);
-
-        if (j != 0) {
-            int xy;
-
-            if (menuItem->w == 126) {
-                row_marker_x = menuItem->x + 116;
-                origin = row_marker_x | ((menuItem->y + 1) << 0x10);
-            } else {
-                row_marker_x = (((menuItem->x * 19) >> 4) + 96) & 0xFFFF;
-                origin = row_marker_x | ((menuItem->y + 1) << 0x10);
-            }
-
-            Menu_Framework_DrawNeutralInteger(j, origin, before);
-
-            xy = origin - 30;
-
-            VS::Render::DrawLiveCompactText("/", xy, before);
-            Menu_Framework_DrawNeutralInteger(menuItem->count, xy, before);
-
-            if ((menuItem->y == 18) && (menuItem->x < 96)) {
-                Menu_Framework_DrawNeutralInteger(
-                    menuItem->itemPage, origin + 32, before);
-                VS::Render::DrawLiveCompactText("-", origin, before);
-            }
-
-        } else {
-
-            j = menuItem->count;
-
-            if (j != 0) {
-                VS::Render::DrawLiveIntegerRightAligned(0,
-                    ((menuItem->x + menuItem->w) - 16) | ((menuItem->y + 3) << 0x10), j,
-                    before);
-            }
-        }
-
-        if (menuItem->x < 320) {
-
-            if (menuItem->isScrollable != 0) {
-                Menu_Framework_DrawScrollableRow(menuItem);
-            } else {
-                Menu_Framework_DrawMenuItem(menuItem);
-            }
-
-            j = menuItem->outsetIcon;
-
-            if (j != 0) {
-                Menu_Framework_DrawEquipmentStateIcon(
-                    j - 1, (menuItem->x - 24) | ((menuItem->y - 3) << 0x10));
-            }
-        }
-
-        j = menuItem->buttonId;
-
-        if (j != 0) {
-            Menu_Framework_DrawButtonIcon((enum Menu_Framework_ButtonId)(j - 1), menuItem->x + 5, menuItem->y - 2, NULL);
-        }
-
-        j = menuItem->rowIcon;
-
-        if (j != 0) {
-            Menu_Framework_DrawRowIcon(
-                (menuItem->isScrollable << 0x10) | (menuItem->selected << 8) | j,
-                menuItem->x, menuItem->y - 2);
-        }
-
-        j = menuItem->material;
-
-        if (j != 0) {
-            Menu_Framework_DrawMaterialIndicator(j - 1, (menuItem->x + 13) | ((menuItem->y - 3) << 0x10));
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_renderScreen (src/MENU/MAINMENU.PRG/58EC.c:1709)
-void Menu_Framework_UpdateScreen(void)
-{
-    int fadeStep = Menu_Framework_backgroundFadeStep;
-
-    if (Menu_Framework_itemsText != NULL) {
-        Menu_Framework_UpdateRowSelection();
-    }
-
-    if (Menu_Framework_backgroundFadeState != 0) {
-
-        fadeStep += 2;
-
-        if (fadeStep >= 17) {
-            fadeStep = 16;
-        }
-    } else {
-        fadeStep -= 2;
-
-        if (fadeStep < 0) {
-            fadeStep = 0;
-        }
-    }
-
-    Menu_Framework_backgroundFadeStep = fadeStep;
-
-    if (fadeStep != 0) {
-        Menu_Framework_DrawBackground(fadeStep);
-    }
-
-    if (Menu_Framework_shortcutInvoked == 0) {
-        Menu_Framework_DrawCommandLabel();
-    }
-
-    if (Menu_Framework_menuItems != 0) {
-        Menu_Framework_UpdateAndDrawRows();
-    }
-
-    Menu_Framework_DrawActionCostPanel();
-    Menu_Framework_UpdateEquipmentStatPages(0);
-    Menu_Framework_UpdatePrimaryStatPanel(0);
-    Menu_Framework_UpdateDpPpBars(0);
-}
-
-// decomp: MAINMENU.PRG _nop (src/MENU/MAINMENU.PRG/C48.c:73)
-void Menu_Framework_NoOperation(void) { }
-
-// decomp: MAINMENU.PRG _getNextEmptyObjectDataSlot (src/MENU/MAINMENU.PRG/C48.c:81)
-int Menu_Framework_NextFreeActorAssetRequest(void)
-{
-    VS::Content::UpdateLiveActorAssetQueue();
-    return VS::Content::FindLiveFreeActorAssetRequest();
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_menuItemFlyoutLeft (src/MENU/MAINMENU.PRG/C48.c:226)
-void Menu_Framework_FlyOutRowLeft(int row)
-{
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(row + 32);
-
-    if (menuItem->state != Menu_Framework_MenuItemState_Inactive) {
-        menuItem->state = Menu_Framework_MenuItemState_Dismiss;
-        menuItem->targetPosition0 = -menuItem->w;
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_flyoutLeftExcept (src/MENU/MAINMENU.PRG/C48.c:236)
-void Menu_Framework_FlyOutRowsLeftExcept(int row)
-{
-    int i;
-
-    for (i = 0; i < 8; ++i) {
-        if (i != row) {
-            Menu_Framework_FlyOutRowLeft(i);
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_menuItemFlyoutRight (src/MENU/MAINMENU.PRG/C48.c:247)
-void Menu_Framework_FlyOutRowRight(int row)
-{
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(row);
-
-    if (menuItem->state != Menu_Framework_MenuItemState_Inactive) {
-        menuItem->state = Menu_Framework_MenuItemState_SlideX;
-        menuItem->targetPosition0 = 320;
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_clearMenuExcept (src/MENU/MAINMENU.PRG/C48.c:257)
-void Menu_Framework_ClearMenuExcept(enum Menu_Framework_MenuItemId id)
-{
-    int i;
-
-    for (i = 0; i < 32; ++i) {
-        if (i != id) {
-            Menu_Framework_FlyOutRowRight(i);
-        }
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_flyoutMenuRightAndHoistSelection (src/MENU/MAINMENU.PRG/C48.c:268)
-void Menu_Framework_FlyOutRowsAndHoistSelection(int row, int offset)
-{
-    Menu_Framework_MenuRow* menuItem;
-    int i;
-
-    for (i = offset * 10; i < 30; ++i) {
-        Menu_Framework_FlyOutRowRight(i);
-    }
-
-    menuItem = Menu_Framework_MenuItem(row + (offset * 10));
-    menuItem->state = 4;
-    menuItem->targetPosition0 = 180;
-    menuItem->targetPosition1 = (offset * 16) + 18;
-
-    if (menuItem->backgroundWidth == 0) {
-        menuItem->backgroundWidth = 1;
-    }
-}
-
-// decomp: MAINMENU.PRG vs_mainmenu_ready (src/MENU/MAINMENU.PRG/C48.c:287)
-int Menu_Framework_AreMenuRowsIdle(void)
-{
-    int i;
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(0);
-
-    for (i = 0; i < 40; ++i) {
-        if (menuItem->state > 1) {
-            return 0;
-        }
-        ++menuItem;
-    }
-    return 1;
-}
-
-// decomp: MAINMENU.PRG _quitDelay (src/MENU/MAINMENU.PRG/C48.c:305)
-int Menu_Framework_QuitDelay(void)
-{
-
-    int ret = ++Menu_Framework_quitDelay;
-
-    Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-
-    return ret == 5;
-}
-
-// decomp: MAINMENU.PRG func_800FAA5C (src/MENU/MAINMENU.PRG/C48.c:316)
-int Menu_Framework_ReturnFromSubmenu(int packed_menu_state)
-{
-    if (packed_menu_state & Menu_Framework_MenuState_OpenedFromMainMenu) {
-        Menu_Framework_menuState.currentMenu = 0;
-
-        Menu_Framework_UpdateMainMenuSelection(1);
-
-        return 0;
-    }
-
-    if (Menu_Framework_openedWithoutMainMenu == 0) {
-        VS::Render::RetireLiveTexturePageRange(26, 3, 6);
-    }
-
-    Menu_Framework_menuState.currentMenu = 0x7F;
-    return 1;
-}
-
-// decomp: MAINMENU.PRG vs_mainMenu_exec (src/MENU/MAINMENU.PRG/C48.c:334)
-void Menu_Framework_UpdateMainMenu(int packed_menu_state)
-{
-    static int (*Menu_Framework_mainMenuSubmenuEntrypoints[])(u_char*) = { Menu_Magic_Update, Menu_BreakArts_Update,
-        Menu_BattleAbilities_Update, Menu_Inventory_Update, Menu_Status_Update, Menu_Map_UpdateScreen, Menu_Files_UpdateDataMenu,
-        Menu_Options_Update, Menu_Score_UpdateScreen, Menu_Manual_UpdateScreen };
-
-    int selectedMenu;
-    int menuLoaded;
-    int state;
-    char* submenuState;
-    Menu_Framework_MenuControlState* menuState = &Menu_Framework_menuState;
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem((packed_menu_state - 1) & 0xF);
-    int submenuReturn = 0;
-    Items_Inventory* inventory = &Audio_Seq_unusedInventory;
-
-    Menu_Framework_weapons = inventory->weapons;
-    Menu_Framework_blades = inventory->blades;
-    Menu_Framework_grips = inventory->grips;
-    Menu_Framework_shields = inventory->shields;
-    Menu_Framework_armor = inventory->armor;
-    Menu_Framework_gems = inventory->gems;
-
-    submenuState = &Menu_Framework_submenuStates[packed_menu_state & 0xF];
-    menuLoaded = Menu_Framework_LoadMenuOverlay(packed_menu_state);
-    selectedMenu = packed_menu_state & 0x3F;
-
-    if (selectedMenu != 0) {
-        if (selectedMenu == 31) {
-            submenuReturn = Menu_Framework_QuitDelay();
-        } else if (Menu_Framework_actionRestrictions & 0x200) {
-            if (menuLoaded) {
-                if (selectedMenu == 15) {
-                    submenuReturn = Menu_Results_UpdateScreen((u_char *)(submenuState));
-                } else if (selectedMenu == 3) {
-                    submenuReturn = Menu_BattleAbilities_UpdateUnlockNotifications(submenuState);
-                } else if (selectedMenu == 14) {
-                    submenuReturn = Menu_Container_UpdateScreen((u_char *)(submenuState));
-                } else if (selectedMenu == 8) {
-                    submenuReturn = Menu_Rename_Update(submenuState);
-                } else if (selectedMenu == 13) {
-                    submenuReturn = Menu_Setup_Update((u_char *)(submenuState));
-                } else if (selectedMenu == 12) {
-                    submenuReturn = Menu_Loot_Update((u_char *)(submenuState));
-                } else if (selectedMenu == 7 && (Menu_Framework_actionRestrictions & 0x400)) {
-                    submenuReturn = VS::Menu::Files::UpdateLiveContainerSave(*submenuState);
-                } else if (selectedMenu == 7 && Audio_Seq_unusedStateFlags.gameOver == 1) {
-                    submenuReturn = Menu_Files_UpdateGameOver((u_char *)(submenuState));
-                } else {
-                    Menu_Framework_actionRestrictions = 0;
-                }
-            }
-        } else {
-
-            switch (*submenuState) {
-            case 0:
-                if (!(packed_menu_state & 0x40)) {
-
-                    state = 0;
-
-                    if (selectedMenu == 1) {
-                        state = (Menu_Framework_actionRestrictions & 0xB7) != 0;
-                    }
-
-                    if (selectedMenu == 2) {
-                        state = (Menu_Framework_actionRestrictions & 0x15F) != 0;
-                    }
-
-                    Menu_Framework_SetMenuItem(selectedMenu - 1, 320, 18, 140, 8,
-                        (char*)&Menu_menuStrings[Menu_menuStrings[selectedMenu
-                                                                            - 1]])
-                        ->unselectable = state;
-                }
-
-                if (((selectedMenu - 4) < 2U) || (selectedMenu == 7)
-                    || (selectedMenu == 9)) {
-                    Menu_Framework_SetBackgroundFade(1);
-                }
-
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(selectedMenu - 1));
-
-                menuItem->state = Menu_Framework_MenuItemState_SlideX;
-                menuItem->targetPosition0 = 180;
-                menuItem->selected = 1;
-
-                if (selectedMenu == 5) {
-
-                    Menu_Framework_SetBackgroundPriority(-2, 128);
-
-                    menuItem->targetPosition0 = 320;
-                }
-
-                *submenuState = 1;
-                break;
-
-            case 1:
-                state = menuItem->state;
-
-                if (state != 1) {
-                    break;
-                }
-
-                menuItem->state = Menu_Framework_MenuItemState_SlideY;
-                menuItem->targetPosition0 = 18;
-
-                if (selectedMenu == 5) {
-                    menuItem = Menu_Framework_SetMenuItem(
-                        4, 320, 18, 140, 8, Battle_characterState->stats->name);
-                    menuItem->state = 2;
-                    menuItem->targetPosition0 = 0xB4;
-                    menuItem->selected = state;
-                }
-
-                *submenuState = 3;
-                // Fallthrough
-
-            default:
-                if (menuLoaded) {
-                    submenuReturn = Menu_Framework_mainMenuSubmenuEntrypoints[selectedMenu - 1]((u_char *)(submenuState));
-                }
-
-                break;
-            }
-        }
-    } else {
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Command);
-
-        state = Menu_Framework_UpdateMainMenuSelection(0);
-
-        if (state != 0) {
-            if (state > 0) {
-                state |= Menu_Framework_MenuState_OpenedFromMainMenu;
-            } else {
-                state = Menu_Framework_MenuState_NoneClosing;
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            }
-
-            menuState->currentMenu = state;
-        }
-    }
-
-    if ((submenuReturn == 0) || (Menu_Framework_ReturnFromSubmenu(menuState->currentMenu) == 0)) {
-        Menu_Framework_UpdateScreen();
-    }
-}
-
-// decomp: MENU5.PRG _setNextAction (src/MENU/MENU5.PRG/4D8.c:90)
-void Menu_Framework_SetMenuVisible(int display)
-{
-    if (display != 0) {
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
-        Menu_Framework_hideMenu = 0;
-        return;
-    }
-
-    Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-    Menu_Framework_hideMenu = 1;
+// decomp: MAINMENU.PRG vs_mainMenu_clearMenuExcept
+// (src/MENU/MAINMENU.PRG/C48.c:257)
+void ClearMenuExcept(Context& ctx, int row) {
+  if (!HasRowTable(ctx)) {
+    return;
+  }
+  for (int i = 0; i < kActionRowBase; ++i) {
+    if (i != row) {
+      FlyOutRowRight(ctx, i);
+    }
+  }
 }
 
 // decomp: MENU5.PRG _clearMenu (src/MENU/MENU5.PRG/4D8.c:201)
-void Menu_Framework_ClearMenuExceptTitle(void) { Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(5)); }
-
-// decomp: MENU5.PRG _buildYawMatrix (src/MENU/MENU5.PRG/4D8.c:1756)
-void Menu_Framework_BuildYawMatrix(MATRIX* camera_matrix, short angle)
-{
-    int sine = VS::Core::Math::Sine(-angle);
-    int cosine = VS::Core::Math::Cosine(-angle);
-
-    camera_matrix->m[0][0] = cosine;
-    camera_matrix->m[0][1] = 0;
-    camera_matrix->m[0][2] = -sine;
-    camera_matrix->m[1][0] = 0;
-    camera_matrix->m[1][1] = 0x1000;
-    camera_matrix->m[1][2] = 0;
-    camera_matrix->m[2][0] = sine;
-    camera_matrix->m[2][1] = 0;
-    camera_matrix->m[2][2] = cosine;
+void ClearMenuExceptTitle(Context& ctx) {
+  constexpr int kTitleRow = 5;
+  ClearMenuExcept(ctx, kTitleRow);
 }
 
-// decomp: MENU5.PRG _buildPitchMatrix (src/MENU/MENU5.PRG/4D8.c:1772)
-void Menu_Framework_BuildPitchMatrix(MATRIX* pitch_matrix, short angle)
-{
-    int sine = VS::Core::Math::Sine(angle);
-    int cosine = VS::Core::Math::Cosine(angle);
+// decomp: MAINMENU.PRG vs_mainMenu_flyoutMenuRightAndHoistSelection
+// (src/MENU/MAINMENU.PRG/C48.c:268)
+void FlyOutRowsAndHoistSelection(Context& ctx, int row, int offset) {
+  constexpr int kRowsPerPanel = 10;
+  constexpr int kPanelRows = 30;
+  constexpr int kHoistX = 180;
+  if (!HasRowTable(ctx)) {
+    return;
+  }
+  for (int i = offset * kRowsPerPanel; i < kPanelRows; ++i) {
+    FlyOutRowRight(ctx, i);
+  }
+  MenuRow& item = MenuItem(ctx, row + (offset * kRowsPerPanel));
+  item.state = RowState::kSlideXy;
+  item.target0 = kHoistX;
+  item.target1 = static_cast<std::int16_t>((offset * kRowSpacing) + kFirstRowY);
+  if (item.background_width == 0) {
+    item.background_width = 1;
+  }
+}
 
-    pitch_matrix->m[0][0] = 0x1000;
-    pitch_matrix->m[0][1] = 0;
-    pitch_matrix->m[0][2] = 0;
-    pitch_matrix->m[1][0] = 0;
-    pitch_matrix->m[1][1] = cosine;
-    pitch_matrix->m[1][2] = -sine;
-    pitch_matrix->m[2][0] = 0;
-    pitch_matrix->m[2][1] = sine;
-    pitch_matrix->m[2][2] = cosine;
+// decomp: MAINMENU.PRG vs_mainmenu_ready (src/MENU/MAINMENU.PRG/C48.c:287)
+bool AreMenuRowsIdle(Context& ctx) {
+  if (!HasRowTable(ctx)) {
+    return true;
+  }
+  for (int i = 0; i < static_cast<int>(kRowCount); ++i) {
+    if (MenuItem(ctx, i).state > RowState::kIdle) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // decomp: MENU9.PRG _setMenuRow10 (src/MENU/MENU9.PRG/238.c:244)
-void Menu_Framework_ShowSecondaryTitle(char* text)
-{
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(10, 320, 34, 140, 9, text);
-    menuItem->state = Menu_Framework_MenuItemState_SlideX;
-    menuItem->targetPosition0 = 180;
-    menuItem->selected = 1;
-    menuItem->fontColor = 1;
-}
-
-// decomp: MENU _renderAshley (src/MENU/_renderAshley.h:27)
-void Menu_Framework_RenderAshley(int mode)
-{
-
-    static int Menu_Framework_ashleyProjectionDistance;
-    static int Menu_Framework_ashleyLayoutPadding[3] __attribute__((unused));
-    static MATRIX Menu_Framework_ashleyViewMatrixBackup;
-    static Render_Camera Menu_Framework_ashleyCameraBackup;
-
-    int yOffset;
-    Render_Camera* camera = &Render_frameScratch.camera;
-
-    switch (mode) {
-    case Menu_Framework_AshleyRenderMode_Render:
-        yOffset = Menu_Inventory_ashleyYOffset;
-
-        switch (Menu_Inventory_ashleyRenderState) {
-        case 0:
-            if (yOffset < 10) {
-                Menu_Inventory_ashleyYOffset = ++yOffset;
-            }
-
-            yOffset = 128 - Menu_Framework_rowAnimationSteps[10 - yOffset];
-            break;
-
-        case 1:
-            if (yOffset > 0) {
-                Menu_Inventory_ashleyYOffset = --yOffset;
-            }
-
-            yOffset = Menu_Framework_rowAnimationSteps[yOffset];
-            break;
-
-        case 2:
-            if (yOffset < 10) {
-                Menu_Inventory_ashleyYOffset = ++yOffset;
-            } else {
-                Menu_Inventory_ashleyRenderState = 0;
-            }
-
-            yOffset = Menu_Framework_rowAnimationSteps[10 - yOffset] + 128;
-            break;
-
-        case 3:
-            if (yOffset > 0) {
-                Menu_Inventory_ashleyYOffset = --yOffset;
-            }
-
-            yOffset = 608 - yOffset * 48;
-            break;
-        }
-
-        if (Menu_Framework_ashleySkipFrame != 0) {
-            Menu_Framework_ashleySkipFrame = 0;
-            return;
-        }
-
-        if (Menu_Framework_ashleyRender != 0) {
-            int scaledDistance;
-            int offsetX;
-            int offsetZ;
-            int cameraDistance = Actors_actorRecords[1]->menuCameraDistance;
-
-            setVector(&camera->lookAt, ((-VS::Core::Math::Sine(0xB00) * yOffset) >> 8) * cameraDistance,
-                -(Actors_actorRecords[1]->collisionHeight << 0xB),
-                ((VS::Core::Math::Cosine(0xB00) * yOffset) >> 8) * cameraDistance);
-
-            scaledDistance = cameraDistance * 4;
-            offsetX = VS::Core::Math::Cosine(0xB00) * scaledDistance;
-
-            camera->position.vx = camera->lookAt.vx + offsetX;
-            camera->position.vy = camera->lookAt.vy;
-
-            offsetZ = VS::Core::Math::Sine(0xB00) * scaledDistance;
-
-            setVector(&camera->angles, 0, 0, 0);
-            camera->farClip = 0x1000;
-            camera->position.vz = camera->lookAt.vz + offsetZ;
-
-            VS::Render::BuildLiveCameraViewMatrix();
-            Menu_Framework_DrawActorPreview(&Render_frameScratch.viewMatrix);
-        }
-        break;
-
-    case Menu_Framework_AshleyRenderMode_Init:
-        if (Menu_Framework_ashleyRender == 0) {
-            Menu_Inventory_ashleyYOffset = 0;
-            Menu_Inventory_ashleyRenderState = 2;
-            Menu_Framework_ashleySkipFrame = 1;
-            Menu_Framework_ashleyRender = 1;
-            Menu_Framework_ashleyProjectionDistance = Render_projectionDistance;
-
-            VS::Render::SetLiveCameraProjectionDistance(512);
-
-            Menu_Framework_ashleyViewMatrixBackup = ((Render_FrameScratch*)(((u_char*)((void*)camera)) - 0x34))->viewMatrix;
-            Menu_Framework_ashleyCameraBackup = *camera;
-            setVector(&camera->angles, 0, 0, 0);
-            camera->farClip = 0x1000;
-
-            VS::Render::BuildLiveCameraViewMatrix();
-            Menu_Framework_SetBackgroundPriority(2046, 128);
-            Menu_Framework_LoadActorPreview(0);
-        }
-        break;
-
-    case Menu_Framework_AshleyRenderMode_Restore:
-        if (Menu_Framework_ashleyRender != 0) {
-
-            Menu_Framework_ReleaseActorPreview();
-            Menu_Framework_SetBackgroundPriority(-4, 128);
-            VS::Render::SetLiveCameraProjectionDistance(Menu_Framework_ashleyProjectionDistance);
-
-            ((Render_FrameScratch*)(((u_char*)((void*)camera)) - 0x34))->viewMatrix = Menu_Framework_ashleyViewMatrixBackup;
-            *camera = Menu_Framework_ashleyCameraBackup;
-            Menu_Framework_ashleyRender = 0;
-        }
-
-        break;
-    }
+void ShowSecondaryTitle(Context& ctx, std::span<const std::uint8_t> text) {
+  constexpr int kSecondaryTitleRow = 10;
+  constexpr int kSecondaryTitleY = 34;
+  constexpr int kTitleWidth = 140;
+  constexpr int kSecondaryTitleBackground = 9;
+  constexpr int kTitleX = 180;
+  MenuRow& row = SetMenuItem(ctx,
+                             {.row = kSecondaryTitleRow,
+                              .x = kScreenWidth,
+                              .y = kSecondaryTitleY,
+                              .w = kTitleWidth,
+                              .background_width = kSecondaryTitleBackground},
+                             text);
+  row.state = RowState::kSlideX;
+  row.target0 = kTitleX;
+  row.selected = 1;
+  row.font_color = 1;
 }
 
 // decomp: MENU _continueMenuTransition (src/MENU/items0.h:107)
-void Menu_Framework_ContinueItemDetailsTransition(int id)
-{
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(31);
-    menuItem->state = Menu_Framework_MenuItemState_SlideX;
-    menuItem->targetPosition0 = 16;
-    menuItem->w = 164;
-
-    menuItem = Menu_Framework_MenuItem(id);
-    menuItem->state = Menu_Framework_MenuItemState_SlideY;
-    menuItem->targetPosition0 = 18;
+void ContinueItemDetailsTransition(Context& ctx, int row) {
+  constexpr int kDetailsRow = 31;
+  constexpr int kDetailsX = 16;
+  constexpr int kDetailsWidth = 164;
+  MenuRow& details = MenuItem(ctx, kDetailsRow);
+  details.state = RowState::kSlideX;
+  details.target0 = kDetailsX;
+  details.w = kDetailsWidth;
+  MenuRow& item = MenuItem(ctx, row);
+  item.state = RowState::kSlideY;
+  item.target0 = kFirstRowY;
 }
 
 // decomp: MENU _switchItemStatusPage (src/MENU/items1.h:35)
-void Menu_Framework_UpdateItemDetailsSelection(int row, char* text[], u_int rowType, int page)
-{
-    Menu_Framework_MenuRow* menuItem;
+void UpdateItemDetailsSelection(Context& ctx, int row, const RowText& text,
+                                std::uint32_t row_type, int page) {
+  constexpr int kDetailsRow = 31;
+  constexpr int kDetailsX = 155;
+  constexpr int kDetailsWidth = 165;
+  ctx.host.PlaySound(MenuSound::kChange);
+  MenuRow& item = SetMenuItem(
+      ctx, {.row = row, .x = kDetailsX, .y = kFirstRowY, .w = kDetailsWidth},
+      text.name);
+  item.selected = 1;
+  item.row_icon = static_cast<std::uint8_t>(row_type >> kRowIconShift);
+  item.material =
+      static_cast<std::uint8_t>((row_type >> kMaterialShift) & kMaterialMask);
+  SetInformationMessage(ctx, text.description);
+  MenuItem(ctx, kDetailsRow).item_page = static_cast<std::uint16_t>(page + 1);
+}
+namespace {
+// vs_battle_menuState_t's currentMenu (Menu_Framework_MenuState_*): the low
+// five bits name the overlay and 0x40 marks a screen the main menu opened.
+constexpr int kMenuClosing = 0x1F;
+constexpr int kMenuClosed = 0x3F;
+constexpr int kMenuReturning = 0x7F;
+constexpr int kOpenedFromMainMenu = 0x40;
+constexpr int kSubMenuMask = 0x1F;
+constexpr int kMenuMask = 0x3F;
+constexpr int kStateIndexMask = 0xF;
+constexpr int kQuitMenu = 31;
+// The screens opened without the main menu.
+constexpr int kItemsMenu = 4;
+constexpr int kDataMenu = 7;
+constexpr int kLootMenu = 12;
+constexpr int kChallengeMenu = 15;
+constexpr int kUnlockMenu = 3;
+// Menu_Framework_actionSelection.menuStatus.
+constexpr std::int16_t kMenuOpen = 1;
+constexpr std::int16_t kMenuDone = 2;
+// The item shortcut runs MAINMENU.PRG's item screen alone.
+constexpr std::uint8_t kItemShortcut = 5;
 
-    VS::Menu::PlayChangeSound();
+// The main menu's ten entries and their enabled bits.
+constexpr int kMainMenuEntries = 10;
+constexpr std::uint32_t kEntryCount = 10;
+constexpr std::uint32_t kMainMenuEntryBits = 0x3FF;
+constexpr std::uint32_t kShiftCountMask = 31;
+constexpr int kOpenMainMenu = 2;
+constexpr int kFirstSlideStep = 9;
+constexpr int kMainMenuX = 194;
+constexpr int kMainMenuWidth = 126;
+constexpr int kRowSpacingShift = 4;
+constexpr int kEntryTitleX = 180;
+constexpr int kEntryTitleWidth = 140;
+constexpr int kEntryTitleBackground = 8;
+// The restrictions that disable an entry and the strings naming them.
+constexpr std::int32_t kMagicRestrictions = 0xB7;
+constexpr std::int32_t kBreakArtRestrictions = 0x15F;
+constexpr std::int32_t kInventoryRestrictions = 7;
+constexpr int kRestrictionReasons = 9;
+constexpr int kRestrictionStrings = 12;
+// The action restrictions: opened by an event, and the container save.
+constexpr std::int32_t kOpenedByEvent = 0x200;
+constexpr std::int32_t kContainerSave = 0x400;
+// Menu_textBoxes[7].state.
+constexpr std::uint8_t kInformationBoxShown = 11;
+constexpr std::uint8_t kInformationBoxHidden = 0;
+// _renderMenuCommand's labels (Menu_Framework_MenuCommand).
+constexpr int kLabelNone = 0;
+constexpr int kLabelCommand = 1;
+constexpr int kLabelMenu = 2;
+constexpr int kFadeLimit = 16;
+constexpr int kFadeStep = 2;
+constexpr int kStatusBackgroundOt = -2;
+constexpr int kMenuBackgroundOt = -4;
+// vs_battle_drawCursor's cursor beside the main menu.
+constexpr int kMainCursorX = 180;
+constexpr int kMainCursorY = 10;
+constexpr int kClutRow = 223;
+constexpr int kCursorUvU = 32;
+constexpr int kCursorUvV = 48;
+constexpr int kCursorClut = 896;
+constexpr int kAlternateCursorClut = 928;
 
-    menuItem = Menu_Framework_SetMenuItem(row, 155, 18, 165, 0, text[0]);
-    menuItem->selected = 1;
-    menuItem->rowIcon = (rowType >> 0x1A);
-    menuItem->material = (rowType >> 0x10) & 7;
-
-    Menu_Framework_SetInformationMessage(text[1]);
-    Menu_Framework_MenuItem(31)->itemPage = page + 1;
+[[nodiscard]] constexpr int Entry(Submenu submenu) {
+  return static_cast<int>(submenu);
 }
 
-// decomp: MENU _getWeaponStatValue (src/MENU/items1.h:695)
-int Menu_Framework_WeaponSortValue(int stat, Items_WeaponLoadout* weapon)
-{
-    switch (stat) {
-    case 0:
-        return -weapon->blade.category;
-    case 1:
-        return -weapon->blade.material;
-    case 2:
-        return weapon->range.range;
-    case 3:
-        return -weapon->damageType;
-    case 4:
-        return weapon->currentDp;
-    case 5:
-        return weapon->maxDp;
-    case 6:
-        return weapon->currentPp;
-    case 7:
-        return weapon->maxPp;
-    case 8:
-        return weapon->currentStr;
-    case 9:
-        return weapon->currentInt;
-    case 10:
-        return weapon->currentAgility;
-    default:
-        if (stat >= 17) {
-            return weapon->classAffinityCurrent.affinities[0][stat - 17];
-        }
-        return weapon->classAffinityCurrent.classes[0][stat - 11];
+[[nodiscard]] int CursorBrightness(Context& ctx, int step) {
+  const auto table = ctx.tables.cursor_brightness;
+  if (step < 0 || static_cast<std::size_t>(step) >= table.size()) {
+    ctx.host.Refuse(std::format("cursor step {} outside the table", step));
+    return 0;
+  }
+  return table[static_cast<std::size_t>(step)];
+}
+
+// The MIPS shift takes the low five bits of its count.
+[[nodiscard]] bool IsEntryEnabled(std::uint32_t enabled, std::uint32_t entry) {
+  return ((enabled >> (entry & kShiftCountMask)) & 1U) != 0;
+}
+
+// The first enabled entry from `entry` on, wrapping over the ten entries.
+[[nodiscard]] std::optional<std::uint32_t> NextEnabledEntry(
+    Context& ctx, std::uint32_t enabled, std::uint32_t entry) {
+  if (!IsEntryEnabled(enabled, entry) && (enabled & kMainMenuEntryBits) == 0) {
+    ctx.host.Refuse("main menu without an enabled entry");
+    return std::nullopt;
+  }
+  while (!IsEntryEnabled(enabled, entry)) {
+    entry = (entry + 1) % kEntryCount;
+  }
+  return entry;
+}
+
+[[nodiscard]] std::optional<std::uint32_t> PreviousEnabledEntry(
+    Context& ctx, std::uint32_t enabled, std::uint32_t entry) {
+  if ((enabled & kMainMenuEntryBits) == 0) {
+    ctx.host.Refuse("main menu without an enabled entry");
+    return std::nullopt;
+  }
+  do {
+    entry = (entry + kEntryCount - 1) % kEntryCount;
+  } while (!IsEntryEnabled(enabled, entry));
+  return entry;
+}
+
+[[nodiscard]] std::int32_t EntryRestrictions(int entry) {
+  if (entry == Entry(Submenu::kMagic)) {
+    return kMagicRestrictions;
+  }
+  if (entry == Entry(Submenu::kBreakArts)) {
+    return kBreakArtRestrictions;
+  }
+  if (entry == Entry(Submenu::kInventory)) {
+    return kInventoryRestrictions;
+  }
+  return 0;
+}
+
+void MarkRestrictedEntries(Context& ctx) {
+  const std::int32_t restrictions = ctx.state.action_restrictions;
+  for (const Submenu entry :
+       {Submenu::kMagic, Submenu::kBreakArts, Submenu::kInventory}) {
+    MenuItem(ctx, Entry(entry)).unselectable = static_cast<std::uint8_t>(
+        (restrictions & EntryRestrictions(Entry(entry))) != 0);
+  }
+  MenuItem(ctx, Entry(Submenu::kMap)).unselectable =
+      static_cast<std::uint8_t>(ctx.host.CurrentSceneId() == 0);
+}
+
+// UpdateMainMenuSelection(1 or 2): the menu table cleared and the enabled
+// entries' slide steps set.
+void PrepareMainMenu(Context& ctx, int mode, const Settings& settings) {
+  std::uint32_t selected = ctx.state.submenu_states[0];
+  if (mode == kOpenMainMenu && settings.cursor_memory == 0) {
+    selected = 0;
+  }
+  const auto first = NextEnabledEntry(ctx, settings.menu_flags, selected);
+  if (!first) {
+    return;
+  }
+  ctx.state.submenu_states[0] = static_cast<std::uint8_t>(*first);
+  std::ranges::fill(ctx.host.Rows(), MenuRow{});
+  std::ranges::fill(ctx.host.Strings(), std::uint8_t{0});
+  std::ranges::fill(ctx.host.RowTypes(), 0);
+  int step = kFirstSlideStep;
+  for (int entry = 0; entry < kMainMenuEntries; ++entry) {
+    if (IsEntryEnabled(settings.menu_flags, Word(entry))) {
+      MenuItem(ctx, entry).animation_step = static_cast<std::uint8_t>(step++);
     }
+  }
+  ctx.state.main_menu_cursor_animation = -step;
+}
+
+void SlideInMainMenu(Context& ctx, std::uint32_t enabled) {
+  ++ctx.state.main_menu_cursor_animation;
+  int shown = 0;
+  for (int entry = 0; entry < kMainMenuEntries; ++entry) {
+    if (!IsEntryEnabled(enabled, Word(entry))) {
+      continue;
+    }
+    MenuRow& row = MenuItem(ctx, entry);
+    int step = row.animation_step;
+    if (step != 0) {
+      --step;
+      row.animation_step = static_cast<std::uint8_t>(step);
+    }
+    SetMenuItem(ctx,
+                {.row = entry,
+                 .x = AnimationStep(ctx, step) + kMainMenuX,
+                 .y = (shown * kRowSpacing) + kFirstRowY,
+                 .w = kMainMenuWidth},
+                MenuString(ctx, entry));
+    ++shown;
+    MarkRestrictedEntries(ctx);
+  }
+}
+
+// The caution for a disabled entry: its first restriction names the reason.
+void ExplainRestriction(Context& ctx, std::uint32_t entry, std::uint32_t held) {
+  if ((held & (kPadLUp | kPadLDown)) != 0) {
+    return;
+  }
+  ctx.host.InitInformationBox(InformationHeader::kCaution);
+  ctx.host.SetInformationBoxState(kInformationBoxShown);
+  ctx.host.SetInformationText(ctx.tables.main_menu_help_text);
+  const std::int32_t conditions = ctx.state.action_restrictions &
+                                  EntryRestrictions(static_cast<int>(entry));
+  int reason = 0;
+  while (reason < kRestrictionReasons && (conditions & (1 << reason)) == 0) {
+    ++reason;
+  }
+  ctx.host.SetStringArgument(MenuString(ctx, reason + kRestrictionStrings));
+}
+
+int SelectMainMenuEntry(Context& ctx, std::uint32_t enabled) {
+  const Buttons buttons = ctx.host.Input();
+  std::uint32_t selected = ctx.state.submenu_states[0];
+  MenuRow& previous_row = MenuItem(ctx, static_cast<int>(selected));
+  if ((buttons.pressed & kPadRRight) != 0) {
+    ctx.host.PlaySound(MenuSound::kSelect);
+    previous_row.selected = 1;
+    previous_row.background_width = 1;
+    ctx.host.SetInformationBoxState(kInformationBoxHidden);
+    return static_cast<int>(selected) + 1;
+  }
+  previous_row.selected = 0;
+  if ((buttons.pressed & (kPadRUp | kPadRDown)) != 0) {
+    ctx.host.PlaySound(MenuSound::kLeave);
+    ctx.host.SetInformationBoxState(kInformationBoxHidden);
+    return -1;
+  }
+  if ((buttons.repeat & kPadLUp) != 0) {
+    const auto previous = PreviousEnabledEntry(ctx, enabled, selected);
+    if (!previous) {
+      return 0;
+    }
+    selected = *previous;
+  }
+  if ((buttons.repeat & kPadLDown) != 0) {
+    selected = (selected + 1) % kEntryCount;
+  }
+  const auto next = NextEnabledEntry(ctx, enabled, selected);
+  if (!next) {
+    return 0;
+  }
+  selected = *next;
+  if (selected != ctx.state.submenu_states[0]) {
+    ctx.host.PlaySound(MenuSound::kChange);
+    ctx.state.submenu_states[0] = static_cast<std::uint8_t>(selected);
+  }
+  MenuRow& row = MenuItem(ctx, static_cast<int>(selected));
+  row.selected = 1;
+  ctx.state.main_menu_cursor_animation =
+      DrawMainMenuCursor(ctx, ctx.state.main_menu_cursor_animation,
+                         (row.y >> kRowSpacingShift) - 1);
+  if (row.unselectable != 0) {
+    ExplainRestriction(ctx, selected, buttons.held);
+  } else {
+    ctx.host.SetInformationBoxState(kInformationBoxHidden);
+  }
+  return 0;
+}
+
+// The screens a menu opened without the main menu runs (restriction 0x200).
+struct EventScreen {
+  int menu = 0;
+  Submenu submenu = Submenu::kResults;
+};
+
+constexpr std::array<EventScreen, 6> kEventScreens{{
+    {.menu = kChallengeMenu, .submenu = Submenu::kResults},
+    {.menu = kUnlockMenu, .submenu = Submenu::kUnlockNotifications},
+    {.menu = 14, .submenu = Submenu::kContainer},
+    {.menu = 8, .submenu = Submenu::kRename},
+    {.menu = 13, .submenu = Submenu::kSetup},
+    {.menu = kLootMenu, .submenu = Submenu::kLoot},
+}};
+
+[[nodiscard]] std::optional<Submenu> EventSubmenu(Context& ctx, int menu) {
+  for (const EventScreen& screen : kEventScreens) {
+    if (screen.menu == menu) {
+      return screen.submenu;
+    }
+  }
+  if (menu == kDataMenu) {
+    if ((ctx.state.action_restrictions & kContainerSave) != 0) {
+      return Submenu::kContainerSave;
+    }
+    if (ctx.host.Story().game_over == 1) {
+      return Submenu::kGameOver;
+    }
+  }
+  return std::nullopt;
+}
+
+[[nodiscard]] int RunEventScreen(Context& ctx, int menu, int state_index,
+                                 bool loaded) {
+  if (!loaded) {
+    return 0;
+  }
+  const auto submenu = EventSubmenu(ctx, menu);
+  if (!submenu) {
+    ctx.state.action_restrictions = 0;
+    return 0;
+  }
+  return ctx.host.RunSubmenu(*submenu, state_index);
+}
+
+// vs_mainMenu_exec's first step: the entry's title slides to the top right.
+void OpenMainMenuEntry(Context& ctx, int packed_menu_state, int row) {
+  const int entry = (packed_menu_state & kMenuMask) - 1;
+  if ((packed_menu_state & kOpenedFromMainMenu) == 0) {
+    int unselectable = 0;
+    if (entry == Entry(Submenu::kMagic) ||
+        entry == Entry(Submenu::kBreakArts)) {
+      unselectable = static_cast<int>(
+          (ctx.state.action_restrictions & EntryRestrictions(entry)) != 0);
+    }
+    SetMenuItem(ctx,
+                {.row = entry,
+                 .x = kScreenWidth,
+                 .y = kFirstRowY,
+                 .w = kEntryTitleWidth,
+                 .background_width = kEntryTitleBackground},
+                MenuString(ctx, entry))
+        .unselectable = static_cast<std::uint8_t>(unselectable);
+  }
+  if (entry == Entry(Submenu::kInventory) || entry == Entry(Submenu::kStatus) ||
+      entry == Entry(Submenu::kData) || entry == Entry(Submenu::kScore)) {
+    SetBackgroundFade(ctx, 1);
+  }
+  SetCommandLabel(ctx, kLabelMenu);
+  ClearMenuExcept(ctx, entry);
+  MenuRow& title = MenuItem(ctx, row);
+  title.state = RowState::kSlideX;
+  title.target0 = kEntryTitleX;
+  title.selected = 1;
+  if (entry == Entry(Submenu::kStatus)) {
+    SetBackgroundPriority(ctx, kStatusBackgroundOt, kFullBrightness);
+    title.target0 = kScreenWidth;
+  }
+}
+
+// The second step: the title rises once idle; the status screen also
+// slides in Ashley's name.
+[[nodiscard]] bool RaiseMainMenuEntry(Context& ctx, int packed_menu_state,
+                                      int row) {
+  const int entry = (packed_menu_state & kMenuMask) - 1;
+  MenuRow& title = MenuItem(ctx, row);
+  if (title.state != RowState::kIdle) {
+    return false;
+  }
+  title.state = RowState::kSlideY;
+  title.target0 = kFirstRowY;
+  if (entry == Entry(Submenu::kStatus)) {
+    MenuRow& name = SetMenuItem(ctx,
+                                {.row = Entry(Submenu::kStatus),
+                                 .x = kScreenWidth,
+                                 .y = kFirstRowY,
+                                 .w = kEntryTitleWidth,
+                                 .background_width = kEntryTitleBackground},
+                                ctx.host.AshleyName());
+    name.state = RowState::kSlideX;
+    name.target0 = kEntryTitleX;
+    name.selected = 1;
+  }
+  return true;
+}
+
+[[nodiscard]] int RunMainMenuEntry(Context& ctx, int packed_menu_state,
+                                   bool loaded) {
+  const int menu = packed_menu_state & kMenuMask;
+  const int state_index = packed_menu_state & kStateIndexMask;
+  const int row = (packed_menu_state - 1) & kStateIndexMask;
+  std::uint8_t& submenu_state =
+      ctx.state.submenu_states[static_cast<std::size_t>(state_index)];
+  if (submenu_state == 0) {
+    OpenMainMenuEntry(ctx, packed_menu_state, row);
+    submenu_state = 1;
+    return 0;
+  }
+  if (submenu_state == 1) {
+    if (!RaiseMainMenuEntry(ctx, packed_menu_state, row)) {
+      return 0;
+    }
+    constexpr std::uint8_t kEntryRunning = 3;
+    submenu_state = kEntryRunning;
+  }
+  if (!loaded) {
+    return 0;
+  }
+  if (menu > kMainMenuEntries) {
+    ctx.host.Refuse(std::format("main menu entry {} has no screen", menu));
+    return 0;
+  }
+  return ctx.host.RunSubmenu(static_cast<Submenu>(menu - 1), state_index);
+}
+
+void SelectFromMainMenu(Context& ctx) {
+  SetCommandLabel(ctx, kLabelCommand);
+  int state = UpdateMainMenuSelection(ctx, 0);
+  if (state == 0) {
+    return;
+  }
+  if (state > 0) {
+    state |= kOpenedFromMainMenu;
+  } else {
+    state = kMenuClosing;
+    SetCommandLabel(ctx, kLabelNone);
+  }
+  ctx.state.control.current_menu = static_cast<std::uint8_t>(state);
+}
+}  // namespace
+
+// decomp: BATTLE.PRG vs_battle_loadMenuPrg (src/BATTLE/BATTLE.PRG/5BF94.c:2576)
+int LoadMenuOverlay(Context& ctx, int packed_menu_state) {
+  const int sub_menu = packed_menu_state & kSubMenuMask;
+  if (sub_menu == kQuitMenu) {
+    return 1;
+  }
+  if (sub_menu == 0 && ctx.state.loaded_sub_menu > 0) {
+    return 1;
+  }
+  if (ctx.state.loaded_sub_menu != sub_menu) {
+    ctx.state.loaded_sub_menu = static_cast<std::int8_t>(sub_menu);
+    ctx.state.control.loading = 1;
+    ctx.host.BeginOverlayLoad(sub_menu,
+                              ctx.state.shortcut_invoked == kItemShortcut);
+  }
+  if (ctx.state.control.loading == 0) {
+    if (ctx.host.ReleaseBackgroundBuffer()) {
+      ctx.host.StoreEquippedStats();
+    }
+    return 1;
+  }
+  if (!ctx.host.IsOverlayLoaded()) {
+    return 0;
+  }
+  ctx.host.FinishOverlayLoad();
+  if (sub_menu == 0) {
+    ctx.state.main_menu = MainMenuStatics{};
+    ctx.host.ResetMainMenuOverlay();
+  }
+  ctx.state.control.loading = 0;
+  if (ctx.state.opened_without_main_menu != 0) {
+    if (ctx.state.shortcut_invoked == kItemShortcut) {
+      ctx.host.UpdateMiscItemShortcut(1);
+      return 0;
+    }
+    return 1;
+  }
+  if (sub_menu == 0) {
+    LoadBackgroundTexture(ctx, ctx.host.AllocateBackgroundBuffer());
+  }
+  return 0;
+}
+
+// decomp: BATTLE.PRG func_800C930C (src/BATTLE/BATTLE.PRG/5BF94.c:2829)
+int UpdateMainMenuSelection(Context& ctx, int mode) {
+  const Settings settings = ctx.host.MenuSettings();
+  if (mode != 0) {
+    PrepareMainMenu(ctx, mode, settings);
+    return 0;
+  }
+  if (ctx.state.main_menu_cursor_animation < 0) {
+    SlideInMainMenu(ctx, settings.menu_flags);
+    return 0;
+  }
+  return SelectMainMenuEntry(ctx, settings.menu_flags);
+}
+
+// decomp: BATTLE.PRG func_800C97BC (src/BATTLE/BATTLE.PRG/5BF94.c:2966)
+void UpdateMenuOverlay(Context& ctx) {
+  int packed_menu_state = ctx.state.control.current_menu;
+  if (packed_menu_state == kMenuReturning) {
+    ctx.state.action_selection.menu_status = kMenuDone;
+    ctx.state.control.current_menu = kMenuClosed;
+  }
+  const int selected = packed_menu_state & kMenuMask;
+  if (selected == kMenuClosed) {
+    return;
+  }
+  if (LoadMenuOverlay(ctx, 0) != 0) {
+    if (ctx.state.shortcut_invoked == kItemShortcut) {
+      ctx.host.UpdateMiscItemShortcut(0);
+      return;
+    }
+    UpdateMainMenu(ctx, packed_menu_state);
+    return;
+  }
+  if (selected == 0) {
+    const int result = UpdateMainMenuSelection(ctx, 0);
+    if (result != 0) {
+      packed_menu_state =
+          result > 0 ? (result | kOpenedFromMainMenu) : kMenuClosing;
+      ctx.state.control.current_menu =
+          static_cast<std::uint8_t>(packed_menu_state);
+    }
+  }
+  if (packed_menu_state >= kMenuClosing || selected == 0) {
+    for (int i = 0; i < kMainMenuEntries; ++i) {
+      DrawMenuItem(ctx, MenuItem(ctx, i));
+    }
+  }
+}
+
+// decomp: BATTLE.PRG vs_battle_drawCursor (src/BATTLE/BATTLE.PRG/5BF94.c:4523)
+int DrawMainMenuCursor(Context& ctx, int step, int position) {
+  EmitSprite(
+      ctx, kOverlayFront,
+      {.brightness = CursorBrightness(ctx, step),
+       .position =
+           (Word((position * kRowSpacing) + kMainCursorY) << kHalfwordShift) |
+           Word(kMainCursorX),
+       .size = PackXy(kIconSize, kIconSize),
+       .texture = PackUvClut(kCursorUvU, kCursorUvV, kCursorClut, kClutRow)});
+  return (step + 1) & static_cast<int>(kStepMask);
+}
+
+// decomp: MAINMENU.PRG _quitDelay (src/MENU/MAINMENU.PRG/C48.c:305)
+int QuitDelay(Context& ctx) {
+  constexpr int kQuitFrames = 5;
+  const int frames = ++ctx.state.main_menu.quit_delay;
+  ClearMenuExcept(ctx, kNoRow);
+  return static_cast<int>(frames == kQuitFrames);
+}
+
+// decomp: MAINMENU.PRG func_800FAA5C (src/MENU/MAINMENU.PRG/C48.c:316)
+int ReturnFromSubmenu(Context& ctx, int packed_menu_state) {
+  if ((packed_menu_state & kOpenedFromMainMenu) != 0) {
+    ctx.state.control.current_menu = 0;
+    UpdateMainMenuSelection(ctx, 1);
+    return 0;
+  }
+  if (ctx.state.opened_without_main_menu == 0) {
+    ctx.host.RetireMenuTexturePages();
+  }
+  ctx.state.control.current_menu = kMenuReturning;
+  return 1;
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_exec (src/MENU/MAINMENU.PRG/C48.c:334)
+void UpdateMainMenu(Context& ctx, int packed_menu_state) {
+  ctx.host.BindInventoryViews();
+  const int state_index = packed_menu_state & kStateIndexMask;
+  const bool loaded = LoadMenuOverlay(ctx, packed_menu_state) != 0;
+  const int selected = packed_menu_state & kMenuMask;
+  int submenu_return = 0;
+  if (selected == 0) {
+    SelectFromMainMenu(ctx);
+  } else if (selected == kQuitMenu) {
+    submenu_return = QuitDelay(ctx);
+  } else if ((ctx.state.action_restrictions & kOpenedByEvent) != 0) {
+    submenu_return = RunEventScreen(ctx, selected, state_index, loaded);
+  } else {
+    submenu_return = RunMainMenuEntry(ctx, packed_menu_state, loaded);
+  }
+  if (submenu_return == 0 ||
+      ReturnFromSubmenu(ctx, ctx.state.control.current_menu) == 0) {
+    UpdateScreen(ctx);
+  }
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderScreen
+// (src/MENU/MAINMENU.PRG/58EC.c:1709)
+void UpdateScreen(Context& ctx) {
+  int fade = ctx.state.main_menu.background_fade_step;
+  if (ctx.host.HasItems(ItemList::kRows)) {
+    UpdateRowSelection(ctx);
+  }
+  if (ctx.state.main_menu.background_fade_state != 0) {
+    fade = std::min(fade + kFadeStep, kFadeLimit);
+  } else {
+    fade = std::max(fade - kFadeStep, 0);
+  }
+  ctx.state.main_menu.background_fade_step = fade;
+  if (fade != 0) {
+    DrawBackground(ctx, fade);
+  }
+  if (ctx.state.shortcut_invoked == 0) {
+    DrawCommandLabel(ctx);
+  }
+  if (!ctx.host.Rows().empty()) {
+    UpdateAndDrawRows(ctx);
+  }
+  DrawActionCostPanel(ctx);
+  ctx.host.UpdateStatPanels();
+}
+
+// decomp: MENU5.PRG _setNextAction (src/MENU/MENU5.PRG/4D8.c:90)
+void SetMenuVisible(Context& ctx, int display) {
+  if (display != 0) {
+    SetCommandLabel(ctx, kLabelMenu);
+    ctx.state.main_menu.hide_menu = 0;
+    return;
+  }
+  SetCommandLabel(ctx, kLabelNone);
+  ctx.state.main_menu.hide_menu = 1;
+}
+namespace {
+// InitGameInterface's three images: position, source offset and size.
+struct InterfaceImage {
+  std::uint32_t position = 0;
+  std::size_t offset = 0;
+  std::uint32_t size = 0;
+};
+
+constexpr std::array<InterfaceImage, 3> kInterfaceImages{{
+    {.position = PackXy(832, 0), .offset = 0, .size = PackXy(64, 224)},
+    {.position = PackXy(896, 0), .offset = 0x7000, .size = PackXy(64, 224)},
+    {.position = PackXy(960, 66), .offset = 0xE000, .size = PackXy(64, 158)},
+}};
+constexpr std::size_t kBytesPerPixel = 2;
+
+[[nodiscard]] constexpr std::size_t ImageBytes(std::uint32_t size) {
+  return static_cast<std::size_t>(size & kHalfwordMask) *
+         (size >> kHalfwordShift) * kBytesPerPixel;
+}
+
+// VS::Actors::LiveActorStateFlags(0) and Ashley's statuses
+// (Battle_StatusFlag_*).
+constexpr std::uint32_t kStateLocked = 0x80000;
+constexpr std::uint32_t kStateLimitMask = 0x40100000;
+constexpr std::uint32_t kStateLimited = 0x100000;
+constexpr std::uint32_t kStatusStrDown = 1U << 0;
+constexpr std::uint32_t kStatusRegen = 1U << 12;
+constexpr std::uint32_t kStatusWard = 1U << 13;
+// The restriction bits ActionRestrictionFlags returns.
+constexpr std::int32_t kRestrictionLocked = 2;
+constexpr std::int32_t kRestrictionLimited = 4;
+constexpr std::int32_t kRestrictionSheathed = 8;
+constexpr std::int32_t kRestrictionNoMp = 0x20;
+constexpr std::int32_t kRestrictionNoHp = 0x40;
+constexpr std::int32_t kRestrictionRegenOrStrDown = 0x80;
+constexpr std::int32_t kRestrictionWard = 0x100;
+constexpr int kEventMode = 2;
+
+// The ability groups the main menu enables (magic, break arts, battle
+// abilities) and the story's extra entries.
+constexpr int kAbilityGroups = 3;
+constexpr int kIntroDone = 3;
+constexpr std::uint32_t kStoryEntries = 0x120;
+// The shortcuts: spell classes 1..4, the items, break arts, abilities 7..8.
+constexpr int kLastSpellShortcut = 4;
+constexpr int kBreakArtShortcut = 6;
+constexpr int kFirstAbilityShortcut = 7;
+constexpr int kLastAbilityShortcut = 8;
+constexpr int kChestLocationBase = 0x40;
+
+void PrepareWorkspace(Context& ctx) {
+  ctx.state.loaded_sub_menu = -1;
+  if (!ctx.host.AllocateWorkspace()) {
+    ctx.host.Refuse("menu workspace allocation failed");
+    return;
+  }
+  auto flags = static_cast<std::uint16_t>(ctx.host.MenuSettings().menu_flags);
+  const auto ranges = ctx.tables.ability_group_action_ranges;
+  for (int group = 0; group < kAbilityGroups; ++group) {
+    const auto at = static_cast<std::size_t>(group) * 2;
+    if (at + 1 >= ranges.size()) {
+      ctx.host.Refuse("ability group outside the table");
+      break;
+    }
+    for (int action = ranges[at]; action < ranges[at + 1]; ++action) {
+      if (ctx.host.IsActionUnlocked(action)) {
+        flags = static_cast<std::uint16_t>(flags | (1U << group));
+        break;
+      }
+    }
+  }
+  const StoryFlags story = ctx.host.Story();
+  if (story.opaque_b5 != 0) {
+    flags = static_cast<std::uint16_t>(flags | 1U);
+  }
+  if (story.intro_state >= kIntroDone) {
+    flags = static_cast<std::uint16_t>(flags | kStoryEntries);
+  }
+  ctx.host.SetMenuFlags(flags);
+  UpdateMainMenuSelection(ctx, kOpenMainMenu);
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_800CA9C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3484)
+void InitGameInterface(Context& ctx,
+                       std::span<const std::byte> interface_texture) {
+  ctx.host.ResetBattleInterface();
+  ctx.state.loaded_sub_menu = 0;
+  ctx.state.unused_interface_flag = 0;
+  ctx.host.ForgetWorkspace();
+  ctx.host.ForgetBackgroundBuffer();
+  ctx.state.control = MenuControl{};
+  ctx.host.ForgetOverlayLoad();
+  ctx.state.control.current_menu = kMenuClosed;
+  ctx.state.action_selection = ActionSelection{};
+  ctx.state.submenu_states = {};
+  std::ranges::fill(ctx.host.MenuMemory(), std::uint8_t{0});
+  if (interface_texture.size() < kInterfaceTextureBytes) {
+    ctx.host.Refuse("interface texture shorter than its three images");
+    return;
+  }
+  for (const InterfaceImage& image : kInterfaceImages) {
+    ctx.host.UploadImage(
+        image.position,
+        interface_texture.subspan(image.offset, ImageBytes(image.size)),
+        image.size);
+  }
+}
+
+// decomp: BATTLE.PRG func_800CAB40 (src/BATTLE/BATTLE.PRG/5BF94.c:3518)
+void ResumeAfterActionSelection(Context& ctx) {
+  ctx.state.action_selection.selection_kind = 0;
+  ctx.state.action_selection.menu_status = kMenuOpen;
+  if (ctx.state.shortcut_invoked == kItemShortcut) {
+    ctx.state.control.current_menu = kItemsMenu;
+    ctx.host.UpdateMiscItemShortcut(2);
+  } else {
+    const std::uint8_t return_state = ctx.state.control.return_state;
+    ctx.state.control.current_menu = return_state;
+    ctx.state.submenu_states[static_cast<std::size_t>(return_state &
+                                                      kStateIndexMask)] =
+        ctx.state.control.execute_ability_type;
+  }
+  if (ctx.state.opened_without_main_menu == 0) {
+    ctx.host.ReserveMenuTexturePages();
+  }
+}
+
+// decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3535)
+std::int32_t RestrictionFlagsOf(const RestrictionInputs& inputs, int mode) {
+  std::int32_t flags = 0;
+  if ((inputs.state_flags & kStateLocked) != 0) {
+    flags = kRestrictionLocked;
+  }
+  if ((inputs.state_flags & kStateLimitMask) == kStateLimited) {
+    flags |= kRestrictionLimited;
+  }
+  if (!inputs.weapon_drawn) {
+    flags |= kRestrictionSheathed;
+  }
+  if (inputs.mp == 0) {
+    flags |= kRestrictionNoMp;
+  }
+  if (inputs.hp == 0) {
+    flags |= kRestrictionNoHp;
+  }
+  if ((inputs.statuses & (kStatusRegen | kStatusStrDown)) != 0) {
+    flags |= kRestrictionRegenOrStrDown;
+  }
+  if ((inputs.statuses & kStatusWard) != 0) {
+    flags |= kRestrictionWard;
+  }
+  if (mode == kEventMode) {
+    flags |= kOpenedByEvent;
+  }
+  return flags;
+}
+
+// decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3535)
+std::int32_t ActionRestrictionFlags(Context& ctx, int mode) {
+  const auto inputs = ctx.host.Restrictions();
+  if (!inputs) {
+    ctx.host.Refuse("action restrictions without Ashley");
+    return mode == kEventMode ? kOpenedByEvent : 0;
+  }
+  return RestrictionFlagsOf(*inputs, mode);
+}
+
+// decomp: BATTLE.PRG func_800CACD0 (src/BATTLE/BATTLE.PRG/5BF94.c:3575)
+int OpenGameMenu(Context& ctx, int menu_state, int mode) {
+  if (ctx.state.control.current_menu != kMenuClosed) {
+    ctx.host.PlaySound(MenuSound::kInvalid);
+    return 0;
+  }
+  ctx.state.shortcut_invoked = 0;
+  ctx.state.opened_without_main_menu = 0;
+  ctx.state.action_restrictions = ActionRestrictionFlags(ctx, mode);
+  ctx.state.action_selection.selection_kind = 0;
+  ctx.state.control.current_menu = static_cast<std::uint8_t>(menu_state);
+  ctx.state.action_selection.menu_status = kMenuOpen;
+  if (mode == 0) {
+    ctx.host.PlaySound(MenuSound::kOpen);
+  }
+  if (ctx.host.Rows().empty()) {
+    PrepareWorkspace(ctx);
+  }
+  return 1;
+}
+
+// decomp: BATTLE.PRG vs_battle_validateShortcutSelection
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3673)
+int OpenShortcutMenu(Context& ctx, int shortcut) {
+  bool none_unlocked = false;
+  int menu_state = 0;
+  if (shortcut >= 1 && shortcut <= kLastSpellShortcut) {
+    none_unlocked = !ctx.host.HasUnlockedSpellClass(shortcut - 1);
+    menu_state = Entry(Submenu::kMagic) + 1;
+  } else if (shortcut == kItemShortcut) {
+    menu_state = kItemsMenu;
+  } else if (shortcut == kBreakArtShortcut) {
+    none_unlocked = !ctx.host.HasUnlockedWeaponBreakArt();
+    menu_state = Entry(Submenu::kBreakArts) + 1;
+  } else if (shortcut >= kFirstAbilityShortcut &&
+             shortcut <= kLastAbilityShortcut) {
+    none_unlocked =
+        !ctx.host.HasUnlockedBattleAbility(shortcut - kFirstAbilityShortcut);
+    menu_state = Entry(Submenu::kBattleAbilities) + 1;
+  }
+  if (none_unlocked) {
+    ctx.host.PlaySound(MenuSound::kInvalid);
+    ctx.state.action_selection.selection_kind = 0;
+    ctx.state.action_selection.menu_status = kMenuDone;
+    return 0;
+  }
+  const int opened = OpenGameMenu(ctx, menu_state, 0);
+  ctx.state.shortcut_invoked = static_cast<std::uint8_t>(shortcut);
+  ctx.state.opened_without_main_menu = 1;
+  return opened;
+}
+
+// decomp: BATTLE.PRG func_800CB114 (src/BATTLE/BATTLE.PRG/5BF94.c:3714)
+void ReleaseMenuRows(Context& ctx) {
+  if (!ctx.host.Rows().empty()) {
+    ctx.host.ReleaseWorkspace();
+  }
+}
+
+// decomp: BATTLE.PRG func_800CB158 (src/BATTLE/BATTLE.PRG/5BF94.c:3723)
+void OpenLootListMenu(Context& ctx, LootListId lists) {
+  ctx.state.loot_lists = lists;
+  ctx.state.loot_entry = LootEntryId{};
+  OpenGameMenu(ctx, kLootMenu, kEventMode);
+}
+
+// decomp: BATTLE.PRG func_800CB18C (src/BATTLE/BATTLE.PRG/5BF94.c:3730)
+void OpenLootEntryMenu(Context& ctx, LootEntryId entry) {
+  ctx.state.loot_entry = entry;
+  ctx.state.loot_lists = LootListId{};
+  OpenGameMenu(ctx, kLootMenu, kEventMode);
+}
+
+// decomp: BATTLE.PRG func_800CB1C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3737)
+void OpenChestStorageMenu(Context& ctx, int location) {
+  OpenGameMenu(ctx, kDataMenu, kEventMode);
+  ctx.state.save_location_id =
+      static_cast<std::uint8_t>(location + kChestLocationBase);
+  ctx.state.action_restrictions |= kContainerSave;
+}
+
+// decomp: BATTLE.PRG _setArtAndAbilityToUnlock
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3744)
+void OpenAbilityUnlockMenu(Context& ctx, int art, int ability) {
+  ctx.state.unlocked_break_art = static_cast<std::uint8_t>(art);
+  ctx.state.unlocked_battle_ability = static_cast<std::uint8_t>(ability);
+  OpenGameMenu(ctx, kUnlockMenu, kEventMode);
+}
+
+// decomp: BATTLE.PRG func_800CB23C (src/BATTLE/BATTLE.PRG/5BF94.c:3751)
+void OpenChallengeMenu(Context& ctx) {
+  OpenGameMenu(ctx, kChallengeMenu, kEventMode);
+  ctx.state.opened_without_main_menu = 1;
+}
+
+// decomp: BATTLE.PRG func_800CB66C (src/BATTLE/BATTLE.PRG/5BF94.c:3871)
+ActionSelection& ActionSelectionState(Context& ctx) {
+  return ctx.state.action_selection;
+}
+
+namespace {
+// The action menu's seven visible rows and its page offset below the menu.
+constexpr int kVisibleActions = 7;
+constexpr int kListRows = 10;
+constexpr int kLongActionListOffset = 3;
+constexpr int kCountMask = 0xFF;
+constexpr int kDiscardActions = 4;
+constexpr int kActionsWithoutMemory = 3;
+constexpr int kActionSlideX = -kMainMenuX;
+constexpr int kCursorRaise = 8;
+// vs_battle_menuItem_t's isScrollable (Menu_Framework_MenuItemScroll_*).
+constexpr std::uint8_t kScrollUp = 1;
+constexpr std::uint8_t kScrollDown = 2;
+// The list states after the rows are built: sliding in, then ready.
+constexpr std::uint8_t kListBuilt = 16;
+constexpr std::uint8_t kListReady = 17;
+// The results of a closed list: Rup (back) and Rdown (cancel).
+constexpr int kListBack = -3;
+constexpr int kListCancelled = -2;
+
+// The cursor of a list: the selected row, its page offset, the item count
+// and the visible rows.
+struct ListCursor {
+  std::int32_t& selected;
+  std::uint8_t& page;
+  int count = 0;
+  int visible = 0;
+};
+
+void MoveCursorUp(const ListCursor& cursor, std::uint32_t pressed) {
+  if (cursor.count <= cursor.visible) {
+    cursor.selected =
+        cursor.selected == 0 ? cursor.count - 1 : cursor.selected - 1;
+    return;
+  }
+  if (cursor.page == 0) {
+    if (cursor.selected != 0) {
+      --cursor.selected;
+    } else if ((pressed & kPadLUp) != 0) {
+      cursor.selected = cursor.visible - 1;
+      cursor.page = static_cast<std::uint8_t>(cursor.count - cursor.visible);
+    }
+  } else if (cursor.selected == 1) {
+    --cursor.page;
+  } else {
+    --cursor.selected;
+  }
+}
+
+void MoveCursorDown(const ListCursor& cursor, std::uint32_t pressed) {
+  if (cursor.count <= cursor.visible) {
+    cursor.selected =
+        cursor.selected == cursor.count - 1 ? 0 : cursor.selected + 1;
+    return;
+  }
+  if (cursor.page == cursor.count - cursor.visible) {
+    if (cursor.selected != cursor.visible - 1) {
+      ++cursor.selected;
+    } else if ((pressed & kPadLDown) != 0) {
+      cursor.selected = 0;
+      cursor.page = 0;
+    }
+  } else if (cursor.selected == cursor.visible - 2) {
+    ++cursor.page;
+  } else {
+    ++cursor.selected;
+  }
+}
+
+// A scrolled page: the rows are rebuilt and keep their items' gradients.
+struct Relayout {
+  int count = 0;
+  int visible = 0;
+  int row_base = 0;
+  int previous_page = 0;
+  int page = 0;
+};
+
+template <typename CreateRow>
+void RelayoutRows(Context& ctx, const Relayout& layout,
+                  const CreateRow& create_row) {
+  std::vector<std::uint8_t> gradients(static_cast<std::size_t>(layout.count));
+  const auto gradient = [&](int item) -> std::uint8_t* {
+    if (item < 0 || item >= layout.count) {
+      ctx.host.Refuse(
+          std::format("gradient of item {} outside the list", item));
+      return nullptr;
+    }
+    return &gradients[static_cast<std::size_t>(item)];
+  };
+  const int shown = std::min(layout.count, layout.visible);
+  for (int i = 0; i < shown; ++i) {
+    if (std::uint8_t* state = gradient(i + layout.previous_page)) {
+      *state = MenuItem(ctx, i + layout.row_base).gradient_state;
+    }
+  }
+  for (int i = 0;;) {
+    MenuRow& row = create_row(i);
+    const std::uint8_t* state = gradient(i + layout.page);
+    row.gradient_state = state != nullptr ? *state : 0;
+    ++i;
+    if (i == layout.count) {
+      break;
+    }
+    if (i == layout.visible) {
+      if (layout.page + layout.visible < layout.count) {
+        row.is_scrollable = kScrollDown;
+      }
+      break;
+    }
+  }
+}
+
+[[nodiscard]] CursorMemory PlaceActionCursor(CursorMemory cursor, int count) {
+  const int scrollable = count - kVisibleActions;
+  if (scrollable < 0) {
+    cursor.row += cursor.page;
+    cursor.page = 0;
+    if (cursor.row >= count) {
+      cursor.row = 0;
+    }
+  } else if (scrollable < cursor.page) {
+    if (cursor.row + cursor.page >= count) {
+      cursor = {};
+    } else {
+      cursor.row += cursor.page - scrollable;
+      cursor.page = scrollable;
+    }
+  }
+  if (cursor.page > 0 && cursor.row == 0) {
+    cursor.row = 1;
+    --cursor.page;
+  }
+  if (cursor.page < scrollable && cursor.row == kVisibleActions - 1) {
+    cursor.row = kVisibleActions - 2;
+    ++cursor.page;
+  }
+  return cursor;
+}
+
+// The texts and row types of a new list, or a refusal when they are short.
+void FillList(Context& ctx, ItemList list, int count,
+              std::span<const RowText> texts,
+              std::span<const std::int32_t> row_types) {
+  const auto needed = static_cast<std::size_t>(std::max(count, 0));
+  if (texts.size() < needed || row_types.size() < needed) {
+    ctx.host.Refuse("menu list shorter than its row count");
+    return;
+  }
+  const std::span<ItemText> items = ctx.host.AllocateItems(list, count);
+  const std::size_t filled = std::min(items.size(), needed);
+  FillItems(items.first(filled), texts.first(filled), row_types.first(filled));
+}
+
+void CloseActions(Context& ctx, int result) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  ctx.host.FreeItems(ItemList::kActions);
+  RememberCursor(
+      ctx, menu.actions_sub_menu_id,
+      {.row = menu.selected_item_action, .page = menu.item_action_list_offset});
+  menu.selected_item_action = result;
+}
+
+void BuildNextActionRow(Context& ctx) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  MenuRow& row = CreateActionRow(ctx, menu.action_menu_state, kActionSlideX);
+  row.state = RowState::kDismiss;
+  row.target0 = 0;
+  ++menu.action_menu_state;
+  if (menu.action_menu_state == menu.item_action_count) {
+    menu.action_menu_state = kListBuilt;
+  }
+  if (menu.action_menu_state == kVisibleActions) {
+    if (menu.action_menu_state + menu.item_action_list_offset <
+        menu.item_action_count) {
+      row.is_scrollable = kScrollDown;
+    }
+    menu.action_menu_state = kListBuilt;
+  }
+}
+
+void NavigateActions(Context& ctx, MenuRow& row) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  const Buttons buttons = ctx.host.Input();
+  const int highlighted =
+      menu.selected_item_action + menu.item_action_list_offset;
+  const int previous_page = menu.item_action_list_offset;
+  if ((buttons.pressed & kPadRUp) != 0) {
+    CloseActions(ctx, kListBack);
+    return;
+  }
+  if ((buttons.pressed & kPadRRight) != 0) {
+    if (row.unselectable == 0) {
+      row.selected = 1;
+      CloseActions(ctx, highlighted);
+      return;
+    }
+    ctx.host.PlaySound(MenuSound::kInvalid);
+  }
+  row.selected = 0;
+  if ((buttons.pressed & kPadRDown) != 0) {
+    CloseActions(ctx, kListCancelled);
+    return;
+  }
+  const ListCursor cursor{.selected = menu.selected_item_action,
+                          .page = menu.item_action_list_offset,
+                          .count = menu.item_action_count,
+                          .visible = kVisibleActions};
+  if ((buttons.repeat & kPadLUp) != 0) {
+    MoveCursorUp(cursor, buttons.pressed);
+  }
+  if ((buttons.repeat & kPadLDown) != 0) {
+    MoveCursorDown(cursor, buttons.pressed);
+  }
+  if (highlighted != menu.selected_item_action + menu.item_action_list_offset) {
+    ctx.host.PlaySound(MenuSound::kChange);
+    if (menu.item_action_list_offset != previous_page) {
+      RelayoutRows(
+          ctx,
+          {.count = menu.item_action_count,
+           .visible = kVisibleActions,
+           .row_base = kActionRowBase,
+           .previous_page = previous_page,
+           .page = menu.item_action_list_offset},
+          [&](int i) -> MenuRow& { return CreateActionRow(ctx, i, 0); });
+    }
+  }
+  MenuRow& current = MenuItem(ctx, menu.selected_item_action + kActionRowBase);
+  current.selected = 1;
+  menu.action_menu_cursor_step = static_cast<std::uint8_t>(DrawCursor(
+      ctx, menu.action_menu_cursor_step, PackXy(0, current.y - kCursorRaise)));
+}
+}  // namespace
+
+// decomp: MAINMENU.PRG vs_mainMenu_addMenuActions
+// (src/MENU/MAINMENU.PRG/58EC.c:51)
+void CreateActionRows(Context& ctx, int row_count, int sub_menu_id,
+                      std::span<const RowText> texts,
+                      std::span<const std::int32_t> row_types) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  ctx.state.menu_actions_page_offset =
+      static_cast<std::uint8_t>(row_count >> kByteShift);
+  const int count = row_count & kCountMask;
+  if (ctx.state.menu_actions_page_offset == 0) {
+    ctx.state.menu_actions_page_offset = static_cast<std::uint8_t>(
+        count < kVisibleActions ? kListRows - count : kLongActionListOffset);
+  }
+  menu.actions_sub_menu_id = static_cast<std::uint8_t>(sub_menu_id);
+  CursorMemory cursor;
+  if (sub_menu_id == kDiscardActions) {
+    cursor.row = 1;
+  } else if (ctx.host.MenuSettings().cursor_memory != 0 &&
+             sub_menu_id != kActionsWithoutMemory) {
+    cursor = RecalledCursor(ctx, sub_menu_id);
+  }
+  cursor = PlaceActionCursor(cursor, count);
+  menu.selected_item_action = cursor.row;
+  menu.item_action_list_offset = static_cast<std::uint8_t>(cursor.page);
+  menu.item_action_count = static_cast<std::uint8_t>(count);
+  menu.action_menu_state = 0;
+  FillList(ctx, ItemList::kActions, count, texts, row_types);
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_getSelectedAction
+// (src/MENU/MAINMENU.PRG/58EC.c:147)
+int HighlightedActionRow(Context& ctx) {
+  return ctx.state.main_menu.selected_item_action +
+         ctx.state.main_menu.item_action_list_offset;
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_actionInputProcessed
+// (src/MENU/MAINMENU.PRG/58EC.c:152)
+int ActionSelectionResult(Context& ctx) {
+  return ctx.host.HasItems(ItemList::kActions)
+             ? -1
+             : ctx.state.main_menu.selected_item_action;
+}
+
+// decomp: MAINMENU.PRG _renderActionRow (src/MENU/MAINMENU.PRG/58EC.c:162)
+MenuRow& CreateActionRow(Context& ctx, int row, int x) {
+  const MainMenuStatics& menu = ctx.state.main_menu;
+  const int item = menu.item_action_list_offset + row;
+  MenuRow& action = SetMenuItem(
+      ctx,
+      {.row = row + kActionRowBase,
+       .x = x,
+       .y = ((row + ctx.state.menu_actions_page_offset) * kRowSpacing) +
+            kFirstRowY,
+       .w = kMainMenuWidth},
+      ItemName(ctx, ItemList::kActions, item));
+  action.unselectable =
+      static_cast<std::uint8_t>(ItemFlags(ctx, ItemList::kActions, item) & 1);
+  if (row == 0 && menu.item_action_list_offset != 0) {
+    action.is_scrollable = kScrollUp;
+  }
+  return action;
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderItemActionMenu
+// (src/MENU/MAINMENU.PRG/58EC.c:180)
+void UpdateActionMenu(Context& ctx) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  if (menu.action_menu_state < kListRows) {
+    BuildNextActionRow(ctx);
+    return;
+  }
+  MenuRow& row = MenuItem(ctx, menu.selected_item_action + kActionRowBase);
+  ShowItemDescription(ctx, ItemList::kActions,
+                      menu.selected_item_action + menu.item_action_list_offset);
+  if (menu.action_menu_state == kListBuilt) {
+    if (AreMenuRowsIdle(ctx)) {
+      menu.action_menu_state = kListReady;
+    }
+  } else if (menu.action_menu_state == kListReady) {
+    NavigateActions(ctx, row);
+  }
+}
+
+namespace {
+// vs_mainmenu_setMenuRows' row info: the menu id, the rows above the list
+// (bits 8..11) and the width added to its rows (bits 12..).
+constexpr int kRowYOffsetShift = 12;
+// The list row flags.
+constexpr std::int32_t kWideRowFlag = 2;
+constexpr int kWideRowBackground = 24;
+constexpr int kFontColorShift = 2;
+constexpr int kInvertShift = 3;
+constexpr int kRowValueShift = 9;
+constexpr std::int32_t kRowValueMask = 0x7F;
+constexpr int kRowMaxShift = 19;
+constexpr int kMaxRowCount = 100;
+constexpr int kLastOutsetIcon = 102;
+constexpr int kFirstLimbName = 103;
+constexpr int kListCursorX = 180;
+constexpr int kListCursorY = 10;
+
+[[nodiscard]] CursorMemory PlaceListCursor(CursorMemory cursor, int count,
+                                           int info) {
+  const int max_page = count - kListRows + info;
+  if (max_page < 0) {
+    cursor.row += cursor.page;
+    cursor.page = 0;
+    if (cursor.row >= count) {
+      cursor.row = 0;
+    }
+    return cursor;
+  }
+  if (max_page < cursor.page) {
+    if (cursor.row + cursor.page >= count) {
+      cursor = {};
+    } else {
+      cursor.row += cursor.page - max_page;
+      cursor.page = max_page;
+    }
+  }
+  bool following = cursor.page < max_page;
+  if (cursor.page > 0 && cursor.row == 0) {
+    cursor.row = 1;
+    --cursor.page;
+    following = cursor.page < max_page;
+  }
+  if (following && cursor.row == kListRows - 1 - info) {
+    --cursor.row;
+    ++cursor.page;
+  }
+  return cursor;
+}
+
+void CloseRows(Context& ctx, int result) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  ctx.host.FreeItems(ItemList::kRows);
+  RememberCursor(ctx, menu.sub_menu_id,
+                 {.row = menu.selected_row, .page = menu.sub_menu_page});
+  menu.selected_row = result;
+}
+
+void BuildNextListRow(Context& ctx) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  MenuRow& row = CreateListRow(ctx, menu.items_list_row, kScreenWidth);
+  row.state = RowState::kSlideX;
+  ++menu.items_list_row;
+  row.target0 = static_cast<std::int16_t>(kMainMenuX - menu.menu_row_y_offset);
+  if (menu.items_list_row == menu.sub_menu_row_count) {
+    menu.items_list_row = kListBuilt;
+  }
+  if (menu.items_list_row == kListRows - menu.sub_menu_row_info) {
+    if (menu.items_list_row + menu.sub_menu_page < menu.sub_menu_row_count) {
+      row.is_scrollable = kScrollDown;
+    }
+    menu.items_list_row = kListBuilt;
+  }
+}
+
+void NavigateRows(Context& ctx, MenuRow& row) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  const Buttons buttons = ctx.host.Input();
+  const int highlighted = menu.selected_row + menu.sub_menu_page;
+  const int previous_page = menu.sub_menu_page;
+  if ((buttons.pressed & kPadRUp) != 0) {
+    ctx.host.PlaySound(MenuSound::kLeave);
+    CloseRows(ctx, kListBack);
+    return;
+  }
+  if ((buttons.pressed & kPadRRight) != 0) {
+    if (row.unselectable == 0) {
+      row.selected = 1;
+      ctx.host.PlaySound(MenuSound::kSelect);
+      CloseRows(ctx, highlighted);
+      return;
+    }
+    ctx.host.PlaySound(MenuSound::kInvalid);
+  }
+  row.selected = 0;
+  if ((buttons.pressed & kPadRDown) != 0) {
+    ctx.host.PlaySound(MenuSound::kLeave);
+    CloseRows(ctx, kListCancelled);
+    return;
+  }
+  const int info = menu.sub_menu_row_info;
+  const ListCursor cursor{.selected = menu.selected_row,
+                          .page = menu.sub_menu_page,
+                          .count = menu.sub_menu_row_count,
+                          .visible = kListRows - info};
+  if ((buttons.repeat & kPadLUp) != 0) {
+    MoveCursorUp(cursor, buttons.pressed);
+  }
+  if ((buttons.repeat & kPadLDown) != 0) {
+    MoveCursorDown(cursor, buttons.pressed);
+  }
+  if (highlighted != menu.selected_row + menu.sub_menu_page) {
+    ctx.host.PlaySound(MenuSound::kChange);
+    if (menu.sub_menu_page != previous_page) {
+      const int x = kMainMenuX - menu.menu_row_y_offset;
+      RelayoutRows(ctx,
+                   {.count = menu.sub_menu_row_count,
+                    .visible = kListRows - info,
+                    .row_base = info * kListRows,
+                    .previous_page = previous_page,
+                    .page = menu.sub_menu_page},
+                   [&](int i) -> MenuRow& { return CreateListRow(ctx, i, x); });
+    }
+  }
+  MenuItem(ctx, menu.selected_row + (info * kListRows)).selected = 1;
+  menu.row_selection_cursor_step = static_cast<std::uint8_t>(DrawCursor(
+      ctx, menu.row_selection_cursor_step,
+      Word(kListCursorX - menu.menu_row_y_offset) |
+          (Word(((menu.selected_row + info) * kRowSpacing) + kListCursorY)
+           << kHalfwordShift)));
+}
+}  // namespace
+
+// decomp: MAINMENU.PRG vs_mainmenu_setMenuRows
+// (src/MENU/MAINMENU.PRG/58EC.c:798)
+void CreateMenuRows(Context& ctx, int row_count, int row_info,
+                    std::span<const RowText> texts,
+                    std::span<const std::int32_t> row_types) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  const int sub_menu_id = row_info & kCountMask;
+  menu.menu_row_y_offset =
+      static_cast<std::uint8_t>(row_info >> kRowYOffsetShift);
+  menu.sub_menu_id = static_cast<std::uint8_t>(sub_menu_id);
+  const int info = (row_info >> kByteShift) & kStateIndexMask;
+  CursorMemory cursor;
+  if (ctx.host.MenuSettings().cursor_memory != 0) {
+    cursor = RecalledCursor(ctx, sub_menu_id);
+  }
+  cursor = PlaceListCursor(cursor, row_count, info);
+  menu.selected_row = cursor.row;
+  menu.sub_menu_page = static_cast<std::uint8_t>(cursor.page);
+  menu.sub_menu_row_count = static_cast<std::uint16_t>(row_count);
+  menu.sub_menu_row_info = static_cast<std::uint8_t>(info);
+  menu.items_list_row = 0;
+  FillList(ctx, ItemList::kRows, row_count, texts, row_types);
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_storeCursor
+// (src/MENU/MAINMENU.PRG/58EC.c:892)
+int CloseRowsAndRememberCursor(Context& ctx) {
+  const MainMenuStatics& menu = ctx.state.main_menu;
+  ctx.host.FreeItems(ItemList::kRows);
+  RememberCursor(ctx, menu.sub_menu_id,
+                 {.row = menu.selected_row, .page = menu.sub_menu_page});
+  return (menu.selected_row + menu.sub_menu_page) |
+         ((menu.selected_row + (menu.sub_menu_row_info * kListRows))
+          << kByteShift);
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_getConfirmedRow
+// (src/MENU/MAINMENU.PRG/58EC.c:903)
+int HighlightedRow(Context& ctx) {
+  return ctx.state.main_menu.selected_row + ctx.state.main_menu.sub_menu_page;
+}
+
+// decomp: MAINMENU.PRG vs_mainmenu_getSelectedRow
+// (src/MENU/MAINMENU.PRG/58EC.c:905)
+int GetSelectedRow(Context& ctx) {
+  return ctx.host.HasItems(ItemList::kRows) ? -1
+                                            : ctx.state.main_menu.selected_row;
+}
+
+// decomp: MAINMENU.PRG _initItemRow (src/MENU/MAINMENU.PRG/58EC.c:910)
+MenuRow& CreateListRow(Context& ctx, int row, int x) {
+  const MainMenuStatics& menu = ctx.state.main_menu;
+  const int info = menu.sub_menu_row_info;
+  const int item = menu.sub_menu_page + row;
+  MenuRow& entry = SetMenuItem(ctx,
+                               {.row = row + (info * kListRows),
+                                .x = x,
+                                .y = ((row + info) * kRowSpacing) + kFirstRowY,
+                                .w = menu.menu_row_y_offset + kMainMenuWidth},
+                               ItemName(ctx, ItemList::kRows, item));
+  const std::int32_t flags = ItemFlags(ctx, ItemList::kRows, item);
+  entry.unselectable = static_cast<std::uint8_t>(flags & 1);
+  if ((flags & kWideRowFlag) != 0) {
+    entry.background_width =
+        static_cast<std::uint8_t>(entry.background_width + kWideRowBackground);
+  }
+  const int invert = (flags >> kInvertShift) & 1;
+  entry.invert_gradient = static_cast<std::uint8_t>(invert);
+  entry.font_color =
+      static_cast<std::uint8_t>(invert | ((flags >> kFontColorShift) & 1));
+  entry.row_icon = static_cast<std::uint8_t>(flags >> kRowIconShift);
+  if (row == 0 && menu.sub_menu_page != 0) {
+    entry.is_scrollable = kScrollUp;
+  }
+  const int value = (flags >> kRowValueShift) & kRowValueMask;
+  if (value <= kMaxRowCount) {
+    entry.count = static_cast<std::uint16_t>(value);
+  } else if (value <= kLastOutsetIcon) {
+    entry.outset_icon = static_cast<std::uint8_t>(value - kMaxRowCount);
+  } else {
+    entry.sub_text = ctx.host.LimbName(value - kFirstLimbName);
+  }
+  entry.material = static_cast<std::uint8_t>(
+      (static_cast<std::uint32_t>(flags) >> kMaterialShift) & kMaterialMask);
+  entry.max =
+      static_cast<std::uint16_t>((flags >> kRowMaxShift) & kRowValueMask);
+  return entry;
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderItemsList
+// (src/MENU/MAINMENU.PRG/58EC.c:947)
+void UpdateRowSelection(Context& ctx) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  if (menu.sub_menu_row_count == 0) {
+    if (ctx.host.HasItems(ItemList::kRows)) {
+      ctx.host.FreeItems(ItemList::kRows);
+    }
+    menu.selected_row = kListCancelled;
+    return;
+  }
+  if (menu.items_list_row < kListRows) {
+    BuildNextListRow(ctx);
+    return;
+  }
+  MenuRow& row =
+      MenuItem(ctx, menu.selected_row + (menu.sub_menu_row_info * kListRows));
+  ShowItemDescription(ctx, ItemList::kRows,
+                      menu.selected_row + menu.sub_menu_page);
+  if (menu.items_list_row == kListBuilt) {
+    if (AreMenuRowsIdle(ctx)) {
+      menu.items_list_row = kListReady;
+    }
+  } else if (menu.items_list_row == kListReady) {
+    NavigateRows(ctx, row);
+  }
+}
+namespace {
+// vs_mainMenu_printInformation: a row type's caution bit and the text box
+// state that shows the box.
+constexpr std::int32_t kCautionRow = 1;
+constexpr int kInformationRowState = 16;
+
+// _renderMenuCommand: the label slides 2 pixels a frame to 12.
+constexpr int kLabelStep = 2;
+constexpr int kLabelHeight = 12;
+constexpr int kLabelRight = 312;
+constexpr int kLabelRaise = 4;
+constexpr std::uint32_t kLabelWidthMask = 0xFF;
+constexpr int kLabelBrightness = 0x180;
+// The labels' sizes (their widths also place them) and texture positions.
+constexpr std::array<std::uint32_t, 8> kLabelSizes{
+    PackXy(0, 0),   PackXy(62, 10), PackXy(36, 10), PackXy(30, 10),
+    PackXy(56, 10), PackXy(30, 10), PackXy(32, 10), PackXy(0, 0),
+};
+constexpr std::array<std::uint32_t, 7> kLabelUvs{
+    PackUv(0, 0),    PackUv(0, 64),   PackUv(64, 64), PackUv(100, 64),
+    PackUv(132, 64), PackUv(188, 64), PackUv(0, 74),
+};
+constexpr int kLabelClutX = 848;
+
+// The action cost panel: the two headers over a gradient bar.
+constexpr std::uint8_t kCostPanelShown = 5;
+constexpr int kCostPanelY = 160;
+constexpr int kCostPanelBottom = 171;
+constexpr int kCostPanelWidth = 80;
+constexpr int kCostTileY = 162;
+constexpr int kCostTileWidth = 82;
+constexpr int kCostTileHeight = 11;
+constexpr std::uint32_t kCostPanelDark = 0x200808;
+constexpr std::uint32_t kCostPanelLight = 0x663040;
+constexpr std::uint32_t kGray = 0x808080;
+constexpr std::uint32_t kDisabledShiftMask = 31;
+
+// The compact digits: "#" selects the digit glyphs.
+constexpr char kDigitPrefix = '#';
+constexpr int kDigitAdvance = 8;
+constexpr std::int32_t kDigitMask = 0xF;
+constexpr int kDigitShift = 4;
+// SplitDecimalDigit's shifted quotient wraps from here, and the original
+// never terminated.
+constexpr std::int32_t kLargestDrawnInteger = 1342177280;
+constexpr std::uint32_t kGreaterColor = 0x804020;
+constexpr std::uint32_t kLesserColor = 0x204080;
+
+// The button icons, the cursor and the row icons.
+constexpr std::uint32_t kButtonColumnMask = 3;
+constexpr std::uint32_t kButtonRowMask = 4;
+constexpr int kButtonRowStride = 4;
+constexpr int kButtonV = 128;
+constexpr int kButtonClutX = 944;
+constexpr int kCursorColorShift = 8;
+constexpr std::uint32_t kFeatherSteps = 16;
+constexpr int kFeatherBrightnessStep = 8;
+constexpr int kSemiTransparent = 0x100;
+constexpr int kFeatherFlipRows = 15;
+constexpr int kMaterialSize = 7;
+constexpr int kMaterialsPerColumn = 3;
+constexpr int kMaterialCell = 8;
+constexpr int kMaterialU = 216;
+constexpr int kMaterialV = 200;
+constexpr int kGoldMaterial = 2;
+constexpr int kMaterialClutX = 912;
+constexpr int kGoldMaterialClutX = 928;
+constexpr int kOutsetIconU = 96;
+constexpr int kOutsetIconV = 128;
+constexpr int kOutsetIconClutX = 976;
+constexpr int kRowIconClutX = 992;
+constexpr int kRowIconFadeShift = 16;
+constexpr int kRowIconBrightShift = 8;
+constexpr std::uint32_t kRowIconMask = 0xFF;
+constexpr int kRowIconBrightness = 64;
+constexpr std::size_t kFirstWideIcon = 23;
+constexpr std::uint32_t kWideIconShift = 12;
+constexpr int kFadeUp = 2;
+// vs_mainMenu_renderMenuRowIcon's icon texture positions.
+constexpr std::array<std::uint16_t, 33> kRowIconUvs{
+    PackUv(80, 96),   PackUv(144, 96),  PackUv(160, 96),  PackUv(112, 96),
+    PackUv(128, 96),  PackUv(176, 96),  PackUv(208, 96),  PackUv(96, 96),
+    PackUv(48, 112),  PackUv(128, 112), PackUv(0, 112),   PackUv(16, 112),
+    PackUv(32, 112),  PackUv(224, 96),  PackUv(64, 112),  PackUv(80, 112),
+    PackUv(96, 112),  PackUv(112, 112), PackUv(128, 112), PackUv(144, 112),
+    PackUv(160, 112), PackUv(32, 96),   PackUv(176, 112), PackUv(120, 128),
+    PackUv(136, 128), PackUv(152, 128), PackUv(168, 128), PackUv(184, 128),
+    PackUv(200, 128), PackUv(216, 128), PackUv(232, 128), PackUv(96, 128),
+    PackUv(80, 128),
+};
+
+// The button prompt background's lines.
+constexpr std::uint32_t kPromptLineColor = 0x203840;
+constexpr std::uint32_t kPromptLineFade = 0x081010;
+
+// vs_mainMenu_renderTabNavigation.
+constexpr std::uint8_t kTabArrowSteps = 12;
+constexpr int kAnimationShift = 2;
+constexpr std::uint32_t kDimColor = 0x404040;
+constexpr int kTabClutX = 896;
+constexpr int kTabIdleClutX = 912;
+constexpr std::array<std::string_view, 4> kTabControls{"1", "L", "1", "R"};
+constexpr std::array<std::uint32_t, 4> kTabControlPositions{
+    PackXy(216, 8),
+    PackXy(210, 8),
+    PackXy(288, 8),
+    PackXy(282, 8),
+};
+// The arrows beside the menu tabs, and beside the tab controls (mode 1).
+constexpr std::uint32_t kTabArrowLeft = PackXy(16, 16);
+constexpr std::uint32_t kTabArrowRight = PackXy(162, 17);
+constexpr std::uint32_t kControlArrowLeft = PackXy(200, 5);
+constexpr std::uint32_t kControlArrowRight = PackXy(292, 6);
+
+// vs_mainMenu_renderRowLabel: a glyph drawn as twelve fading lines.
+constexpr std::uint32_t kTextSpace = 0x20;
+constexpr std::uint32_t kGlyphIndexMask = 0x1FF;
+constexpr std::uint32_t kGlyphCell = 12;
+constexpr std::uint32_t kGlyphRowStep = 12U << kByteShift;
+constexpr int kGlyphLines = 12;
+constexpr int kGlyphClutX = 896;
+constexpr int kGlyphClutY = 222;
+constexpr int kPaletteStride = 16;
+constexpr int kFeatherInBrightness = 264;
+constexpr int kFeatherOutBrightness = 352;
+constexpr std::uint32_t kLineStep = 1U << kByteShift;
+constexpr int kReversedShift = 31;
+
+// _renderScrollableRow.
+constexpr std::uint8_t kScrollArrowSteps = 12;
+constexpr int kScrollArrowRise = 5;
+constexpr int kScrollArrowX = 126;
+constexpr int kScrollArrowIndent = 14;
+constexpr int kArrowClutX = 912;
+constexpr int kScrollLines = 12;
+constexpr int kScrollFadeBase = 32;
+constexpr int kScrollFadeTop = 120;
+constexpr std::uint32_t kNextLine = 1U << kHalfwordShift;
+constexpr std::uint32_t kShadowGap = 2;
+constexpr std::uint32_t kShineHalf = 128;
+constexpr std::uint32_t kTextureCoordinateMask = 0xFF;
+
+[[nodiscard]] std::uint32_t LowHalf(std::uint32_t word) {
+  return word & kHalfwordMask;
+}
+
+[[nodiscard]] std::uint32_t HighHalf(std::uint32_t word) {
+  return (word >> kHalfwordShift) << kHalfwordShift;
+}
+
+// Whether any of the rows [first, last) is still moving.
+[[nodiscard]] bool AnyRowMoving(Context& ctx, int first, int last) {
+  for (int i = first; i < last; ++i) {
+    if (MenuItem(ctx, i).state > RowState::kIdle) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void DrawScrollArrow(Context& ctx, const MenuRow& row, int scroll, int bob) {
+  std::uint32_t position = 0;
+  if (row.x == 0) {
+    if (AnyRowMoving(ctx, kActionRowBase, static_cast<int>(kRowCount))) {
+      return;
+    }
+    position = PackXy(kScrollArrowX, row.y + bob);
+  } else {
+    if (AnyRowMoving(ctx, 0, kActionRowBase)) {
+      return;
+    }
+    position = PackXy(row.x - kScrollArrowIndent, row.y + bob);
+  }
+  EmitSprite(ctx, kOverlayFront,
+             {.brightness = kFullBrightness,
+              .position = position,
+              .size = PackXy(kIconSize, kIconSize),
+              .texture = PackUvClut(scroll * kIconSize, kCursorUvV, kArrowClutX,
+                                    kClutRow)});
+}
+
+void DrawScrollableGlyphs(Context& ctx, const MenuRow& row, int scroll) {
+  int pen = row.x + (row.row_icon != 0 ? kIconRowTextIndent : kRowTextIndent);
+  const std::uint32_t reversed = Word(scroll) << kReversedShift;
+  std::size_t i = 0;
+  while (true) {
+    if (i >= row.text.size()) {
+      ctx.host.Refuse("menu row text without an end");
+      return;
+    }
+    const std::uint8_t c = row.text[i++];
+    if (c == kRowTextEnd) {
+      return;
+    }
+    if (c == kTextSpacing) {
+      if (i >= row.text.size()) {
+        ctx.host.Refuse("menu row text without an end");
+        return;
+      }
+      pen += row.text[i++];
+    } else {
+      pen = DrawFeatheredRowCharacter(ctx, c | reversed, pen, row, kRowLayer);
+    }
+  }
+}
+
+// The gradient lines, the shadow and the reflection under a scrolling row.
+void DrawScrollableBackground(Context& ctx, MenuRow& row, int scroll,
+                              std::uint32_t xy) {
+  const int w = row.w;
+  const int gradient = row.gradient_state;
+  const auto background = static_cast<std::uint32_t>(row.background_width);
+  for (int i = 0; i < kScrollLines; ++i) {
+    const int level = scroll == 0
+                          ? (i * kFeatherBrightnessStep) + kScrollFadeBase
+                          : kScrollFadeTop - (i * kFeatherBrightnessStep);
+    std::array<std::uint32_t, kGradientLineWords> packet{
+        0,
+        kDrawModeAddDithered,
+        Command(kLineG2SemiTransparent,
+                GradientStopColor(ctx, Word(kGradientStops - gradient),
+                                  background, level)),
+        xy,
+        GradientStopColor(ctx, Word(gradient), background, level),
+        LowHalf(xy + Word(w) - 1) | HighHalf(xy),
+        kDrawModeAdd};
+    EmitPacket(ctx.host.Queue(kRowLayer), packet);
+    xy += kNextLine;
+  }
+  if (scroll == 0) {
+    DrawTile(ctx, kRowLayer, LowHalf(xy + kShadowGap) | HighHalf(xy),
+             Word(w) | (kShadowGap << kHalfwordShift));
+  }
+  if (gradient != 0) {
+    row.gradient_state = static_cast<std::uint8_t>(gradient - 1);
+  }
+  xy -= Word(kScrollLines) << kHalfwordShift;
+  const std::uint32_t bank =
+      ctx.host.FrameBufferIndex() == 0 ? kScreenWidth : 0;
+  const std::uint32_t shine =
+      row.x < static_cast<int>(kShineHalf) ? 0 : kShineHalf;
+  for (int i = 0; i < kScrollLines; ++i) {
+    const int brightness = scroll == 0
+                               ? kScrollFadeTop - (i * kFeatherBrightnessStep)
+                               : (i * kFeatherBrightnessStep) + kScrollFadeBase;
+    EmitSprite(
+        ctx, kRowLayer,
+        {.draw_mode = kFramePageDrawMode | ((bank + shine) >> kPageColumnShift),
+         .brightness = brightness,
+         .position = xy,
+         .size = Word(w) | kNextLine,
+         .texture = ((xy - shine) & kTextureCoordinateMask) |
+                    ((xy >> kHalfwordShift) << kByteShift)});
+    xy += kNextLine;
+  }
+}
+}  // namespace
+
+// decomp: MAINMENU.PRG vs_mainMenu_printInformation
+// (src/MENU/MAINMENU.PRG/58EC.c:367)
+void UpdateInformationVisibility(Context& ctx, int source_row,
+                                 int action_menu_state) {
+  if (action_menu_state < kInformationRowState) {
+    return;
+  }
+  const auto row_types = ctx.host.RowTypes();
+  if (source_row < 0 ||
+      static_cast<std::size_t>(source_row) >= row_types.size()) {
+    ctx.host.Refuse(std::format("row type {} outside the table", source_row));
+    return;
+  }
+  const Settings settings = ctx.host.MenuSettings();
+  if ((row_types[static_cast<std::size_t>(source_row)] & kCautionRow) != 0) {
+    if (settings.information == 0 &&
+        (ctx.host.Input().held & (kPadLUp | kPadLDown)) != 0) {
+      return;
+    }
+    ctx.host.InitInformationBox(InformationHeader::kCaution);
+    ctx.host.SetInformationBoxState(kInformationBoxShown);
+  } else if (settings.information != 0) {
+    ctx.host.InitInformationBox(InformationHeader::kInformation);
+    ctx.host.SetInformationBoxState(kInformationBoxShown);
+  } else {
+    ctx.host.SetInformationBoxState(kInformationBoxHidden);
+  }
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_setMenuCommand
+// (src/MENU/MAINMENU.PRG/58EC.c:405)
+void SetCommandLabel(Context& ctx, int action) {
+  ctx.state.main_menu.menu_action_next = static_cast<std::uint8_t>(action);
+}
+
+// decomp: MAINMENU.PRG _renderMenuCommand (src/MENU/MAINMENU.PRG/58EC.c:413)
+void DrawCommandLabel(Context& ctx) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  const int action = menu.menu_action_current;
+  int y = menu.command_label_y;
+  if (action != menu.menu_action_next) {
+    if (y == 0) {
+      menu.menu_action_current = menu.menu_action_next;
+      return;
+    }
+    y -= kLabelStep;
+  } else if (y < kLabelHeight) {
+    y += kLabelStep;
+  }
+  menu.command_label_y = y;
+  if (action == 0) {
+    return;
+  }
+  if (static_cast<std::size_t>(action) >= kLabelUvs.size()) {
+    ctx.host.Refuse(std::format("command label {} outside the table", action));
+    return;
+  }
+  const std::uint32_t size = kLabelSizes[static_cast<std::size_t>(action)];
+  EmitSprite(ctx, kOverlayFront,
+             {.draw_mode = kCommandLabelDrawMode,
+              .brightness = kLabelBrightness,
+              .position =
+                  Word(kLabelRight - static_cast<int>(size & kLabelWidthMask)) |
+                  (Word(y - kLabelRaise) << kHalfwordShift),
+              .size = size,
+              .texture = kLabelUvs[static_cast<std::size_t>(action)] |
+                         (PackClut(kLabelClutX, kClutRow) << kHalfwordShift)});
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_dismissInformationBox
+// (src/MENU/MAINMENU.PRG/58EC.c:464)
+void DismissInformationBox(Context& ctx) { ctx.host.DismissInformationBox(); }
+
+// decomp: MAINMENU.PRG vs_mainMenu_initInformationBox
+// (src/MENU/MAINMENU.PRG/58EC.c:466)
+void InitializeInformationBox(Context& ctx) {
+  if (ctx.host.MenuSettings().information != 0) {
+    ctx.host.InitInformationBox(InformationHeader::kInformation);
+  } else {
+    DismissInformationBox(ctx);
+  }
+}
+
+// decomp: MAINMENU.PRG vs_mainmenu_setInformationMessage
+// (src/MENU/MAINMENU.PRG/58EC.c:475)
+void SetInformationMessage(Context& ctx,
+                           std::span<const std::uint8_t> message) {
+  auto& buffer = ctx.state.information_message;
+  buffer[0] = kTextChunkSize;
+  buffer[1] = 0;
+  std::copy_n(message.begin(),
+              std::min(message.size(), kInformationMessageCopyBytes),
+              buffer.begin() + kChunkHeaderBytes);
+  buffer[kMessageEnd] = kTextTerminator;
+  buffer[kMessageEnd + 1] = kTextTerminator;
+  buffer[kMessageEnd + 2] = 0;
+  ctx.host.ShowInformationMessage(buffer);
+}
+
+// decomp: MAINMENU.PRG vs_mainmenu_setActionCost
+// (src/MENU/MAINMENU.PRG/58EC.c:652)
+void SetActionCostText(Context& ctx, int index,
+                       std::span<const std::uint8_t> text, int x_offset,
+                       int disabled) {
+  ctx.state.main_menu.display_action_cost = 1;
+  if (index < 0 || static_cast<std::size_t>(index) >= kTextHeaderCount) {
+    ctx.host.Refuse(
+        std::format("action cost header {} outside the table", index));
+    return;
+  }
+  TextHeader& header = ctx.state.text_headers[static_cast<std::size_t>(index)];
+  std::copy_n(text.begin(), std::min(text.size(), kTextHeaderBytes),
+              header.text.begin());
+  header.disabled = static_cast<std::uint8_t>(disabled);
+  header.x = static_cast<std::uint8_t>(x_offset);
+}
+
+// decomp: MAINMENU.PRG _renderAbilityCost (src/MENU/MAINMENU.PRG/58EC.c:665)
+void DrawActionCostPanel(Context& ctx) {
+  std::uint8_t& step = ctx.state.main_menu.action_cost_panel_step;
+  if (ctx.state.main_menu.display_action_cost != 0) {
+    if (step != 0) {
+      --step;
+    }
+  } else if (step < kCostPanelShown) {
+    step = kCostPanelShown;
+  } else if (step < kActionCostPanelHidden) {
+    ++step;
+  }
+  if (step >= kActionCostPanelHidden) {
+    return;
+  }
+  const int x1 = -AnimationStep(ctx, step);
+  for (const TextHeader& header : ctx.state.text_headers) {
+    const auto* begin = reinterpret_cast<const char*>(header.text.data());
+    const std::string_view text(
+        begin,
+        std::ranges::find(header.text, std::uint8_t{0}) - header.text.begin());
+    ctx.host.DrawCompactText(
+        kOverlayFront, text,
+        LowHalf(Word(x1 + header.x)) | (Word(kCostPanelY) << kHalfwordShift),
+        kGray >> (header.disabled & kDisabledShiftMask));
+  }
+  const std::uint32_t x0 = LowHalf(Word(x1));
+  const std::uint32_t x_end = Word(x1 + kCostPanelWidth);
+  std::array<std::uint32_t, kGradientQuadWords> packet{
+      0,
+      kDrawModeDithered,
+      Command(kPolyG4, kCostPanelDark),
+      x0 | (Word(kCostPanelY) << kHalfwordShift),
+      kCostPanelLight,
+      x_end | (Word(kCostPanelY) << kHalfwordShift),
+      kCostPanelDark,
+      x0 | (Word(kCostPanelBottom) << kHalfwordShift),
+      kCostPanelLight,
+      x_end | (Word(kCostPanelBottom) << kHalfwordShift),
+      kDrawModePlain};
+  EmitPacket(ctx.host.Queue(kActionCostLayer), packet);
+  DrawTile(ctx, kActionCostLayer, x0 | (Word(kCostTileY) << kHalfwordShift),
+           PackXy(kCostTileWidth, kCostTileHeight));
+}
+
+// decomp: MAINMENU.PRG vs_mainmenu_renderButton
+// (src/MENU/MAINMENU.PRG/58EC.c:487)
+void DrawButtonIcon(Context& ctx, int button_id, int x, int y, Layer layer) {
+  const auto id = static_cast<std::uint32_t>(button_id);
+  EmitSprite(ctx, layer,
+             {.brightness = kFullBrightness,
+              .position = PackXy(x, y),
+              .size = PackXy(kIconSize, kIconSize),
+              .texture = PackUvClut(
+                  static_cast<int>((id & kButtonColumnMask) * kIconSize),
+                  static_cast<int>((id & kButtonRowMask) * kButtonRowStride) +
+                      kButtonV,
+                  kButtonClutX, kClutRow)});
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderCursor
+// (src/MENU/MAINMENU.PRG/58EC.c:499)
+int DrawCursor(Context& ctx, std::uint32_t step, std::uint32_t position) {
+  std::uint8_t& color = ctx.state.main_menu.cursor_color;
+  // The MIPS shift takes the low five bits of its count.
+  const auto cursor_step = static_cast<int>(
+      step >>
+      ((static_cast<unsigned>(color) * kCursorColorShift) & kShiftCountMask));
+  EmitSprite(ctx, kOverlayFront,
+             {.brightness = CursorBrightness(ctx, cursor_step),
+              .position = position,
+              .size = PackXy(kIconSize, kIconSize),
+              .texture = PackUvClut(
+                  kCursorUvU, kCursorUvV,
+                  color == 0 ? kCursorClut : kAlternateCursorClut, kClutRow)});
+  color = 0;
+  return (cursor_step + 1) & static_cast<int>(kStepMask);
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderIntColor
+// (src/MENU/MAINMENU.PRG/58EC.c:520)
+std::uint32_t DrawColoredInteger(Context& ctx, const NumberText& number,
+                                 Layer layer) {
+  std::uint32_t position = number.position;
+  if (number.value == std::numeric_limits<std::int32_t>::min() ||
+      std::abs(number.value) >= kLargestDrawnInteger) {
+    ctx.host.Refuse(std::format("integer {} too large to draw", number.value));
+    return position;
+  }
+  std::int32_t digits = number.value < 0 ? -number.value : number.value;
+  do {
+    digits = Core::Math::SplitDecimalDigit(digits);
+    const std::array<char, 2> glyph{
+        kDigitPrefix, static_cast<char>('0' + (digits & kDigitMask))};
+    ctx.host.DrawCompactText(layer,
+                             std::string_view(glyph.data(), glyph.size()),
+                             position, number.color);
+    digits >>= kDigitShift;
+    position -= kDigitAdvance;
+  } while (digits != 0);
+  if (number.value < 0) {
+    ctx.host.DrawCompactText(layer, "#-", position + 1, number.color);
+  }
+  return position;
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderIntWithThreshold
+// (src/MENU/MAINMENU.PRG/58EC.c:547)
+std::uint32_t DrawComparedInteger(Context& ctx, std::int32_t value,
+                                  std::uint32_t position,
+                                  std::int32_t threshold, Layer layer) {
+  std::uint32_t color = kGray;
+  if (threshold < value) {
+    color = kGreaterColor;
+  }
+  if (value < threshold) {
+    color = kLesserColor;
+  }
+  return DrawColoredInteger(
+      ctx, {.value = value, .position = position, .color = color}, layer);
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderIntColorDefault
+// (src/MENU/MAINMENU.PRG/58EC.c:562)
+void DrawNeutralInteger(Context& ctx, std::int32_t value,
+                        std::uint32_t position, Layer layer) {
+  DrawColoredInteger(
+      ctx, {.value = value, .position = position, .color = kGray}, layer);
+}
+
+// decomp: MAINMENU.PRG _renderFeatheredIcon (src/MENU/MAINMENU.PRG/58EC.c:571)
+void DrawFeatheredRowIcon(Context& ctx, int direction, std::uint32_t position,
+                          std::uint32_t uv_clut, Layer layer) {
+  if (direction < 0) {
+    position += Word(kFeatherFlipRows) << kHalfwordShift;
+    uv_clut += Word(kFeatherFlipRows) << kByteShift;
+  }
+  for (std::uint32_t i = 1; i <= kFeatherSteps; ++i) {
+    EmitSprite(ctx, layer,
+               {.brightness = static_cast<int>(i * kFeatherBrightnessStep) |
+                              kSemiTransparent,
+                .position = position,
+                .size = PackXy(kIconSize, 1),
+                .texture = uv_clut});
+    position += Word(direction) << kHalfwordShift;
+    uv_clut += Word(direction) << kByteShift;
+  }
+}
+
+// decomp: MAINMENU.PRG _renderItemMaterial (src/MENU/MAINMENU.PRG/58EC.c:594)
+void DrawMaterialIndicator(Context& ctx, int material, std::uint32_t position) {
+  const std::uint32_t uv =
+      Word(((material / kMaterialsPerColumn) * kMaterialCell) + kMaterialU) |
+      (Word(((material % kMaterialsPerColumn) * kMaterialCell) + kMaterialV)
+       << kByteShift);
+  const int clut_x =
+      material == kGoldMaterial ? kGoldMaterialClutX : kMaterialClutX;
+  EmitSprite(ctx, kOverlayFront,
+             {.position = position,
+              .size = PackXy(kMaterialSize, kMaterialSize),
+              .texture = uv | (PackClut(clut_x, kClutRow) << kHalfwordShift)});
+}
+
+// decomp: MAINMENU.PRG _renderOutsetIcon (src/MENU/MAINMENU.PRG/58EC.c:609)
+void DrawEquipmentStateIcon(Context& ctx, int icon, std::uint32_t position) {
+  EmitSprite(ctx, kOverlayFront,
+             {.position = position,
+              .size = PackXy(kIconSize, kIconSize),
+              .texture = PackUvClut(kOutsetIconU - (icon * kIconSize),
+                                    kOutsetIconV, kOutsetIconClutX, kClutRow)});
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderMenuRowIcon
+// (src/MENU/MAINMENU.PRG/58EC.c:615)
+void DrawRowIcon(Context& ctx, int icon, int x, int y) {
+  int fade = icon >> kRowIconFadeShift;
+  const int bright = (icon >> kRowIconBrightShift) & 1;
+  const std::size_t index = static_cast<std::uint32_t>(icon - 1) & kRowIconMask;
+  if (index >= kRowIconUvs.size()) {
+    ctx.host.Refuse(std::format("row icon {} outside the table", index + 1));
+    return;
+  }
+  const std::uint32_t uv = kRowIconUvs[index];
+  if (fade != 0) {
+    if (fade == kFadeUp) {
+      fade = -1;
+    }
+    DrawFeatheredRowIcon(
+        ctx, fade, PackXy(x, y),
+        uv | (PackClut(kRowIconClutX, kClutRow) << kHalfwordShift),
+        kRowIconLayer);
+    return;
+  }
+  const bool wide = index >= kFirstWideIcon;
+  EmitSprite(
+      ctx, kRowIconLayer,
+      {.brightness = kRowIconBrightness << bright,
+       .position = PackXy(x, y) - (wide ? kWideIconShift : 0),
+       .size = PackXy(kIconSize, kIconSize),
+       .texture =
+           uv | (PackClut(wide ? kOutsetIconClutX : kRowIconClutX, kClutRow)
+                 << kHalfwordShift)});
+}
+
+// decomp: MAINMENU.PRG vs_mainmenu_renderButtonBackground
+// (src/MENU/MAINMENU.PRG/58EC.c:718)
+void DrawButtonPromptBackground(Context& ctx, const Box& box) {
+  for (int i = 0; i < box.h; ++i) {
+    std::array<std::uint32_t, kGradientLineWords> packet{
+        0,
+        kDrawModeDithered,
+        Command(kLineG2, kPromptLineColor),
+        LowHalf(Word(box.x)) | (Word(box.y + i) << kHalfwordShift),
+        kPromptLineFade,
+        PackXy(box.x + box.w - i, box.y + i),
+        kDrawModePlain};
+    EmitPacket(ctx.host.Queue(kButtonPromptLayer), packet);
+  }
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderTabNavigation
+// (src/MENU/MAINMENU.PRG/58EC.c:1259)
+void DrawTabNavigation(Context& ctx, int mode) {
+  std::uint8_t& step = ctx.state.main_menu.tab_arrow_step;
+  std::uint32_t clut = PackClut(kTabIdleClutX, kClutRow) << kHalfwordShift;
+  std::uint32_t color = kDimColor;
+  if (ctx.host.TabArrowsFrozen() || step != kTabArrowAnimationStart) {
+    clut = PackClut(kTabClutX, kClutRow) << kHalfwordShift;
+    ++step;
+    color = kGray;
+    if (step >= kTabArrowSteps) {
+      step = 0;
+    }
+  }
+  const std::uint32_t bob = Word(step) >> kAnimationShift;
+  std::uint32_t left = kTabArrowLeft;
+  std::uint32_t right = kTabArrowRight;
+  if (mode != 0) {
+    for (std::size_t i = 0; i < kTabControls.size(); ++i) {
+      ctx.host.DrawCompactText(kOverlayFront, kTabControls[i],
+                               kTabControlPositions[i], color);
+    }
+    left = kControlArrowLeft;
+    right = kControlArrowRight;
+  }
+  const std::uint32_t size = PackXy(kIconSize, kIconSize);
+  EmitSprite(ctx, kOverlayFront,
+             {.position = left - bob,
+              .size = size,
+              .texture = clut | PackUv(0, kCursorUvV)});
+  EmitSprite(ctx, kOverlayFront,
+             {.position = right + bob,
+              .size = size,
+              .texture = clut | PackUv(kIconSize, kCursorUvV)});
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_renderRowLabel
+// (src/MENU/MAINMENU.PRG/58EC.c:1215)
+int DrawFeatheredRowCharacter(Context& ctx, std::uint32_t character, int x,
+                              const MenuRow& row, Layer layer) {
+  const bool reversed = (character >> kReversedShift) != 0;
+  character &= kHalfwordMask;
+  if (character == kTextSpace) {
+    return x + Render::kVariableFontSpaceAdvance;
+  }
+  int palette = row.font_color * kPaletteStride;
+  if (row.font_color == 0) {
+    palette = row.unselectable * kUnselectablePalette * kPaletteStride;
+  }
+  const std::uint32_t glyph = character & kGlyphIndexMask;
+  std::uint32_t uv_clut =
+      ((glyph % Render::kVariableFontGlyphsPerRow) * kGlyphCell) |
+      ((glyph / Render::kVariableFontGlyphsPerRow) * kGlyphRowStep) |
+      (PackClut(palette + kGlyphClutX, kGlyphClutY) << kHalfwordShift);
+  for (int i = 0; i < kGlyphLines; ++i) {
+    EmitSprite(
+        ctx, layer,
+        {.draw_mode = kRowGlyphDrawMode,
+         .brightness =
+             reversed ? kFeatherOutBrightness - (i * kFeatherBrightnessStep)
+                      : (i * kFeatherBrightnessStep) + kFeatherInBrightness,
+         .position = PackXy(x, row.y + i),
+         .size = PackXy(static_cast<int>(kGlyphCell), 1),
+         .texture = uv_clut});
+    uv_clut += kLineStep;
+  }
+  const auto widths = ctx.tables.glyph_widths;
+  if (character >= widths.size()) {
+    ctx.host.Refuse(std::format("glyph {} outside the width table", character));
+    return x;
+  }
+  return x + widths[character];
+}
+
+// decomp: MAINMENU.PRG _renderScrollableRow (src/MENU/MAINMENU.PRG/58EC.c:1309)
+void DrawScrollableRow(Context& ctx, MenuRow& row) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  const int scroll = row.is_scrollable - 1;
+  const int frame = ctx.host.FrameBufferIndex();
+  if (frame != menu.scrollable_row_frame) {
+    ++menu.scrollable_row_step;
+    menu.scrollable_row_frame = static_cast<std::uint8_t>(frame);
+    if (menu.scrollable_row_step >= kScrollArrowSteps) {
+      menu.scrollable_row_step = 0;
+    }
+  }
+  const int phase = menu.scrollable_row_step >> kAnimationShift;
+  DrawScrollArrow(ctx, row, scroll,
+                  scroll == 0 ? phase - kScrollArrowRise : 1 - phase);
+  DrawScrollableGlyphs(ctx, row, scroll);
+  if (row.w != 0) {
+    DrawScrollableBackground(ctx, row, scroll,
+                             Word(static_cast<std::uint16_t>(row.x)) |
+                                 (Word(row.y) << kHalfwordShift));
+  }
+}
+namespace {
+// _renderMenuItems.
+constexpr int kWideSlideTarget = 155;
+// The width byte keeps 320 - x modulo 256.
+constexpr int kWidthWrap = 64;
+constexpr std::uint8_t kMaxSlideWidth = 165;
+constexpr int kCounterIndent = 116;
+constexpr int kCounterScale = 19;
+constexpr int kCounterScaleShift = 4;
+constexpr int kCounterBase = 96;
+constexpr std::uint32_t kCounterSeparator = 30;
+constexpr std::uint32_t kPageNumberOffset = 32;
+constexpr int kPagedRowMaxX = 96;
+constexpr int kCountIndent = 16;
+constexpr int kCountDrop = 3;
+constexpr int kOutsetIconIndent = 24;
+constexpr int kIconRaise = 3;
+constexpr int kButtonIndent = 5;
+constexpr int kRowIconRaise = 2;
+constexpr int kMaterialIndent = 13;
+constexpr int kScrollFlagShift = 16;
+constexpr int kSelectedShift = 8;
+
+// _renderBackground: the left 256 and right 64 columns of the picture.
+constexpr int kBackgroundBrightnessScale = 8;
+constexpr int kBackgroundSplit = 256;
+constexpr int kBackgroundRightWidth = 64;
+constexpr int kBackgroundHeight = 240;
+constexpr int kBackgroundClutX = 768;
+constexpr int kBackgroundClutY = 227;
+
+// vs_mainMenu_unpackMenubg: a 256-colour CLUT, then run-length words.
+constexpr std::size_t kBackgroundClutBytes = 0x200;
+constexpr std::size_t kBackgroundEncodedWords = 0x1780;
+constexpr std::size_t kWordBytes = sizeof(std::uint32_t);
+constexpr std::array kBackgroundClearRects{
+    ImageRect{.x = 640, .y = 256, .w = 32, .h = 240},
+    ImageRect{.x = 768, .y = 256, .w = 32, .h = 240},
+};
+constexpr std::uint32_t kGameOverClutPosition = PackXy(640, 511);
+constexpr std::uint32_t kGameOverClutSize = PackXy(256, 1);
+constexpr std::uint32_t kBackgroundPosition = PackXy(672, 256);
+constexpr std::uint32_t kBackgroundSize = PackXy(96, 240);
+constexpr int kStoryGameOver = 1;
+
+void SlideRowX(Context& ctx, MenuRow& row) {
+  int origin = row.x;
+  const int target = row.target0;
+  if (origin < target) {
+    origin = std::min(origin + kSlideJump, target);
+  } else if (target < origin) {
+    origin = StepDownTo(ctx, target, origin);
+    if (target >= kWideSlideTarget && row.w < kScreenWidth - origin) {
+      row.w = static_cast<std::uint8_t>(kWidthWrap - origin);
+      if (kScreenWidth - origin > kMaxSlideWidth) {
+        row.w = kMaxSlideWidth;
+      }
+    }
+  }
+  row.x = static_cast<std::int16_t>(origin);
+  if (origin == target) {
+    row.state = RowState::kIdle;
+  }
+}
+
+void SlideRowY(Context& ctx, MenuRow& row) {
+  int origin = row.y;
+  const int target = row.target0;
+  if (origin < target) {
+    origin = StepUpTo(ctx, target, origin);
+  } else if (target < origin) {
+    origin = StepDownTo(ctx, target, origin);
+  }
+  row.y = static_cast<std::int16_t>(origin);
+  if (origin == target) {
+    row.state = RowState::kIdle;
+  }
+}
+
+void SlideRowXy(Context& ctx, MenuRow& row) {
+  if (row.x != row.target0) {
+    row.x = static_cast<std::int16_t>(StepDownTo(ctx, row.target0, row.x));
+    if (row.w < kScreenWidth - row.x) {
+      row.w = static_cast<std::uint8_t>(kWidthWrap - row.x);
+    }
+    return;
+  }
+  if (row.y != row.target1) {
+    row.y = static_cast<std::int16_t>(StepDownTo(ctx, row.target1, row.y));
+  }
+  if (row.y == row.target1) {
+    row.state = RowState::kIdle;
+  }
+}
+
+void DismissRow(Context& ctx, MenuRow& row) {
+  int origin = row.x;
+  const int target = row.target0;
+  if (target < origin) {
+    origin = std::max(origin - kSlideJump, target);
+    if (-row.w >= origin) {
+      row.state = RowState::kInactive;
+    }
+  } else if (origin < target) {
+    origin = StepUpTo(ctx, target, origin);
+  }
+  row.x = static_cast<std::int16_t>(origin);
+  if (origin == target) {
+    row.state = origin < 0 ? RowState::kInactive : RowState::kIdle;
+  }
+}
+
+void MoveRow(Context& ctx, MenuRow& row) {
+  switch (row.state) {
+    case RowState::kSlideX:
+      SlideRowX(ctx, row);
+      break;
+    case RowState::kSlideY:
+      SlideRowY(ctx, row);
+      break;
+    case RowState::kSlideXy:
+      SlideRowXy(ctx, row);
+      break;
+    case RowState::kDismiss:
+      DismissRow(ctx, row);
+      break;
+    default:
+      break;
+  }
+}
+
+// A list row's "count/max" (with the page on the first row) or its count.
+void DrawRowCounters(Context& ctx, const MenuRow& row) {
+  if (row.max != 0) {
+    const std::uint32_t x =
+        row.w == kMainMenuWidth
+            ? Word(row.x + kCounterIndent)
+            : Word(((row.x * kCounterScale) >> kCounterScaleShift) +
+                   kCounterBase) &
+                  kHalfwordMask;
+    const std::uint32_t origin = x | (Word(row.y + 1) << kHalfwordShift);
+    DrawNeutralInteger(ctx, row.max, origin, kRowLayer);
+    const std::uint32_t separator = origin - kCounterSeparator;
+    ctx.host.DrawCompactText(kRowLayer, "/", separator,
+                             Render::kCompactTextGray);
+    DrawNeutralInteger(ctx, row.count, separator, kRowLayer);
+    if (row.y == kFirstRowY && row.x < kPagedRowMaxX) {
+      DrawNeutralInteger(ctx, row.item_page, origin + kPageNumberOffset,
+                         kRowLayer);
+      ctx.host.DrawCompactText(kRowLayer, "-", origin,
+                               Render::kCompactTextGray);
+    }
+  } else if (row.count != 0) {
+    Render::DrawIntegerRightAligned(
+        ctx.host.Queue(kRowLayer),
+        {.font = 0,
+         .position = static_cast<std::int32_t>(
+             Word(row.x + row.w - kCountIndent) |
+             (Word(row.y + kCountDrop) << kHalfwordShift)),
+         .value = row.count});
+  }
+}
+
+void DrawRowParts(Context& ctx, MenuRow& row) {
+  if (row.x < kScreenWidth) {
+    if (row.is_scrollable != 0) {
+      DrawScrollableRow(ctx, row);
+    } else {
+      DrawMenuItem(ctx, row);
+    }
+    if (row.outset_icon != 0) {
+      DrawEquipmentStateIcon(ctx, row.outset_icon - 1,
+                             Word(row.x - kOutsetIconIndent) |
+                                 (Word(row.y - kIconRaise) << kHalfwordShift));
+    }
+  }
+  if (row.button_id != 0) {
+    DrawButtonIcon(ctx, row.button_id - 1, row.x + kButtonIndent,
+                   row.y - kRowIconRaise, kOverlayFront);
+  }
+  if (row.row_icon != 0) {
+    DrawRowIcon(ctx,
+                (row.is_scrollable << kScrollFlagShift) |
+                    (row.selected << kSelectedShift) | row.row_icon,
+                row.x, row.y - kRowIconRaise);
+  }
+  if (row.material != 0) {
+    DrawMaterialIndicator(ctx, row.material - 1,
+                          Word(row.x + kMaterialIndent) |
+                              (Word(row.y - kIconRaise) << kHalfwordShift));
+  }
+}
+
+// The background's run-length words: zeros, then copied words.
+[[nodiscard]] bool UnpackBackground(Context& ctx,
+                                    std::span<const std::uint8_t> encoded,
+                                    std::span<std::uint32_t> buffer) {
+  const std::size_t available = encoded.size() / kWordBytes;
+  auto read = [&](std::size_t index, std::uint32_t& word) {
+    if (index >= available) {
+      ctx.host.Refuse("menu background shorter than its runs");
+      return false;
+    }
+    std::memcpy(&word, encoded.data() + (index * kWordBytes), kWordBytes);
+    return true;
+  };
+  std::size_t out = 0;
+  for (std::size_t i = 0; i < kBackgroundEncodedWords;) {
+    std::uint32_t runs = 0;
+    if (!read(i++, runs)) {
+      return false;
+    }
+    const std::size_t zeros = runs & kHalfwordMask;
+    const std::size_t copies = runs >> kHalfwordShift;
+    if (zeros + copies > buffer.size() - out) {
+      ctx.host.Refuse("menu background runs past its buffer");
+      return false;
+    }
+    std::fill_n(buffer.begin() + static_cast<std::ptrdiff_t>(out), zeros, 0U);
+    out += zeros;
+    for (std::size_t n = 0; n < copies; ++n) {
+      if (!read(i++, buffer[out++])) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+}  // namespace
+
+// decomp: MAINMENU.PRG vs_mainMenu_toggleBackgroundFade
+// (src/MENU/MAINMENU.PRG/58EC.c:448)
+void SetBackgroundFade(Context& ctx, int fade_state) {
+  MainMenuStatics& menu = ctx.state.main_menu;
+  if (fade_state != 0) {
+    menu.background_ot_offset = kMenuBackgroundOt;
+    menu.background_brightness = kFullBrightness;
+  }
+  menu.background_fade_state = static_cast<std::uint8_t>(fade_state);
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_setBackgroundRenderPriority
+// (src/MENU/MAINMENU.PRG/58EC.c:739)
+void SetBackgroundPriority(Context& ctx, int ot_offset, int brightness) {
+  ctx.host.SetBackgroundRaised(ot_offset > 0);
+  ctx.state.main_menu.background_ot_offset =
+      static_cast<std::int16_t>(ot_offset);
+  ctx.state.main_menu.background_brightness =
+      static_cast<std::int16_t>(brightness);
+}
+
+// decomp: MAINMENU.PRG vs_mainMenu_unpackMenubg
+// (src/MENU/MAINMENU.PRG/58EC.c:751)
+void LoadBackgroundTexture(Context& ctx, std::span<std::uint32_t> buffer) {
+  const std::span<const std::uint8_t> source = ctx.host.BackgroundSource();
+  if (source.size() < kBackgroundClutBytes ||
+      buffer.size() < kBackgroundWords) {
+    ctx.host.Refuse("menu background without its palette or buffer");
+    return;
+  }
+  if (!UnpackBackground(ctx, source.subspan(kBackgroundClutBytes), buffer)) {
+    return;
+  }
+  ctx.host.ReserveMenuTexturePages();
+  for (const ImageRect& rect : kBackgroundClearRects) {
+    ctx.host.ClearImage(rect);
+  }
+  const std::span<const std::uint8_t> palette =
+      source.first(kBackgroundClutBytes);
+  if ((ctx.state.control.current_menu & kMenuMask) == kDataMenu &&
+      (ctx.state.action_restrictions & kOpenedByEvent) != 0 &&
+      ctx.host.Story().game_over == kStoryGameOver) {
+    ctx.host.UploadImage(kGameOverClutPosition, std::as_bytes(palette),
+                         kGameOverClutSize);
+  } else {
+    ctx.host.LoadBackgroundClut(palette);
+  }
+  ctx.host.UploadImage(kBackgroundPosition,
+                       std::as_bytes(buffer.first(kBackgroundWords)),
+                       kBackgroundSize);
+  SetBackgroundPriority(ctx, kMenuBackgroundOt, kFullBrightness);
+}
+
+// decomp: MAINMENU.PRG _renderBackground (src/MENU/MAINMENU.PRG/58EC.c:1172)
+void DrawBackground(Context& ctx, int brightness) {
+  const Layer layer{.base = LayerBase::kScene,
+                    .slot = ctx.state.main_menu.background_ot_offset};
+  const std::uint32_t bank =
+      ctx.host.FrameBufferIndex() == 0 ? kScreenWidth : 0;
+  brightness *= kBackgroundBrightnessScale;
+  const bool opaque = brightness == kFullBrightness;
+  if (opaque) {
+    brightness = ctx.state.main_menu.background_brightness;
+  } else {
+    brightness |= kSemiTransparent;
+  }
+  const std::uint32_t texture = PackClut(kBackgroundClutX, kBackgroundClutY)
+                                << kHalfwordShift;
+  const std::uint32_t right_size =
+      PackXy(kBackgroundRightWidth, kBackgroundHeight);
+  const std::uint32_t left_size = PackXy(kBackgroundSplit, kBackgroundHeight);
+  EmitSprite(ctx, layer,
+             {.draw_mode = kBackgroundRightDrawMode,
+              .brightness = brightness,
+              .position = kBackgroundSplit,
+              .size = right_size,
+              .texture = texture});
+  EmitSprite(ctx, layer,
+             {.draw_mode = kBackgroundLeftDrawMode,
+              .brightness = brightness,
+              .position = 0,
+              .size = left_size,
+              .texture = texture});
+  if (opaque) {
+    return;
+  }
+  brightness = (kSemiTransparent | kFullBrightness) - brightness;
+  EmitSprite(ctx, layer,
+             {.draw_mode = kFramePageDrawMode | (bank >> kPageColumnShift),
+              .brightness = brightness,
+              .position = 0,
+              .size = left_size,
+              .texture = 0});
+  EmitSprite(ctx, layer,
+             {.draw_mode = kFramePageDrawMode |
+                           ((bank + kBackgroundSplit) >> kPageColumnShift),
+              .brightness = brightness,
+              .position = kBackgroundSplit,
+              .size = right_size,
+              .texture = 0});
+}
+
+// decomp: MAINMENU.PRG _renderMenuItems (src/MENU/MAINMENU.PRG/58EC.c:1454)
+void UpdateAndDrawRows(Context& ctx) {
+  for (int i = 0; i < static_cast<int>(kRowCount); ++i) {
+    MenuRow& row = MenuItem(ctx, i);
+    if (row.state == RowState::kInactive) {
+      continue;
+    }
+    MoveRow(ctx, row);
+    if (ctx.state.main_menu.hide_menu != 0) {
+      continue;
+    }
+    DrawRowCounters(ctx, row);
+    DrawRowParts(ctx, row);
+  }
+}
+namespace {
+// Menu_Framework_AshleyRenderMode.
+constexpr int kAshleyRender = 0;
+constexpr int kAshleyInit = 1;
+constexpr int kAshleyRestore = 2;
+
+// Menu_Inventory_ashleyRenderState: the preview slides in (2) and then
+// holds (0), or slides out (1) or drops away (3).
+constexpr std::int32_t kPreviewShown = 0;
+constexpr std::int32_t kPreviewLeaving = 1;
+constexpr std::int32_t kPreviewEntering = 2;
+constexpr std::int32_t kPreviewDropping = 3;
+constexpr std::int32_t kPreviewSteps = 10;
+constexpr std::int32_t kPreviewRaised = 128;
+constexpr std::int32_t kPreviewDropBase = 608;
+constexpr std::int32_t kPreviewDropStep = 48;
+constexpr std::int32_t kPreviewCameraAngle = 0xB00;
+constexpr int kPreviewScaleShift = 8;
+constexpr int kCollisionHeightShift = 11;
+constexpr std::int64_t kPreviewDistanceScale = 4;
+constexpr int kPreviewBackgroundOt = 2046;
+
+constexpr std::int16_t kMatrixOne = 0x1000;
+
+// The original's 32-bit arithmetic.
+[[nodiscard]] std::int32_t Wrap(std::int64_t value) {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(value));
+}
+
+// The preview's slide offset for this frame.
+[[nodiscard]] std::int32_t AdvanceAshleyPreview(Context& ctx) {
+  AshleyPreviewState preview = ctx.host.AshleyPreview();
+  std::int32_t y = preview.y_offset;
+  switch (preview.render_state) {
+    case kPreviewShown:
+      if (y < kPreviewSteps) {
+        preview.y_offset = ++y;
+      }
+      y = kPreviewRaised - AnimationStep(ctx, kPreviewSteps - y);
+      break;
+    case kPreviewLeaving:
+      if (y > 0) {
+        preview.y_offset = --y;
+      }
+      y = AnimationStep(ctx, y);
+      break;
+    case kPreviewEntering:
+      if (y < kPreviewSteps) {
+        preview.y_offset = ++y;
+      } else {
+        preview.render_state = kPreviewShown;
+      }
+      y = AnimationStep(ctx, kPreviewSteps - y) + kPreviewRaised;
+      break;
+    case kPreviewDropping:
+      if (y > 0) {
+        preview.y_offset = --y;
+      }
+      y = kPreviewDropBase - (y * kPreviewDropStep);
+      break;
+    default:
+      break;
+  }
+  ctx.host.SetAshleyPreview(preview);
+  return y;
+}
+
+// The camera looks at Ashley from the menu's angle, offset by the slide.
+void DrawAshley(Context& ctx, std::int32_t y_offset) {
+  const std::optional<AshleyMetrics> ashley = ctx.host.Ashley();
+  if (!ashley) {
+    ctx.host.Refuse("the Ashley preview without Ashley's actor");
+    return;
+  }
+  const std::int64_t distance = ashley->camera_distance;
+  const std::int64_t sine = Core::Math::Sine(kPreviewCameraAngle);
+  const std::int64_t cosine = Core::Math::Cosine(kPreviewCameraAngle);
+  const Core::Math::Vec3 look_at{
+      .x = Wrap(static_cast<std::int64_t>(Wrap(-sine * y_offset) >>
+                                          kPreviewScaleShift) *
+                distance),
+      .y = Wrap(-static_cast<std::int64_t>(
+          Wrap(static_cast<std::int64_t>(ashley->collision_height)
+               << kCollisionHeightShift))),
+      .z = Wrap(static_cast<std::int64_t>(Wrap(cosine * y_offset) >>
+                                          kPreviewScaleShift) *
+                distance)};
+  const std::int64_t scaled = Wrap(distance * kPreviewDistanceScale);
+  const Core::Math::Vec3 position{
+      .x = Wrap(look_at.x + static_cast<std::int64_t>(Wrap(cosine * scaled))),
+      .y = look_at.y,
+      .z = Wrap(look_at.z + static_cast<std::int64_t>(Wrap(sine * scaled)))};
+  ctx.host.DrawAshleyPreview(look_at, position);
+}
+}  // namespace
+
+// decomp: MENU _renderAshley (src/MENU/_renderAshley.h:27)
+void RenderAshley(Context& ctx, int mode) {
+  AshleyPreviewStatics& ashley = ctx.state.ashley;
+  switch (mode) {
+    case kAshleyRender: {
+      const std::int32_t y_offset = AdvanceAshleyPreview(ctx);
+      if (ashley.skip_frame != 0) {
+        ashley.skip_frame = 0;
+        return;
+      }
+      if (ashley.render != 0) {
+        DrawAshley(ctx, y_offset);
+      }
+      break;
+    }
+    case kAshleyInit:
+      if (ashley.render == 0) {
+        ctx.host.SetAshleyPreview(
+            {.y_offset = 0, .render_state = kPreviewEntering});
+        ashley.skip_frame = 1;
+        ashley.render = 1;
+        ctx.host.BeginAshleyPreview();
+        SetBackgroundPriority(ctx, kPreviewBackgroundOt, kFullBrightness);
+        ctx.host.LoadActorPreview();
+      }
+      break;
+    case kAshleyRestore:
+      if (ashley.render != 0) {
+        ctx.host.ReleaseActorPreview();
+        SetBackgroundPriority(ctx, kMenuBackgroundOt, kFullBrightness);
+        ctx.host.EndAshleyPreview();
+        ashley.render = 0;
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+// decomp: MENU5.PRG _buildYawMatrix (src/MENU/MENU5.PRG/4D8.c:1756)
+Core::Math::Mat3 BuildYawMatrix(std::int16_t angle) {
+  const auto sine = static_cast<std::int16_t>(Core::Math::Sine(-angle));
+  const auto cosine = static_cast<std::int16_t>(Core::Math::Cosine(-angle));
+  const auto negative_sine = static_cast<std::int16_t>(-sine);
+  return {
+      .m = {
+          {{cosine, 0, negative_sine}, {0, kMatrixOne, 0}, {sine, 0, cosine}}}};
+}
+
+// decomp: MENU5.PRG _buildPitchMatrix (src/MENU/MENU5.PRG/4D8.c:1772)
+Core::Math::Mat3 BuildPitchMatrix(std::int16_t angle) {
+  const auto sine = static_cast<std::int16_t>(Core::Math::Sine(angle));
+  const auto cosine = static_cast<std::int16_t>(Core::Math::Cosine(angle));
+  const auto negative_sine = static_cast<std::int16_t>(-sine);
+  return {
+      .m = {
+          {{kMatrixOne, 0, 0}, {0, cosine, negative_sine}, {0, sine, cosine}}}};
+}
+
+// decomp: MAINMENU.PRG _getNextEmptyObjectDataSlot
+// (src/MENU/MAINMENU.PRG/C48.c:81)
+int NextFreeActorAssetRequest(Context& ctx) {
+  ctx.host.UpdateActorAssetQueue();
+  return ctx.host.FindFreeActorAssetRequest();
+}
+
+// decomp: MAINMENU.PRG _nop (src/MENU/MAINMENU.PRG/C48.c:73)
+void NoOperation() {}
+
+namespace {
+// The sort keys' stat numbers.
+constexpr int kSortCategory = 0;
+constexpr int kSortMaterial = 1;
+constexpr int kSortRange = 2;
+constexpr int kSortDamageType = 3;
+constexpr int kSortCurrentDp = 4;
+constexpr int kSortMaxDp = 5;
+constexpr int kSortCurrentPp = 6;
+constexpr int kSortMaxPp = 7;
+constexpr int kSortStrength = 8;
+constexpr int kSortIntelligence = 9;
+constexpr int kSortAgility = 10;
+constexpr int kSortFirstClass = 11;
+constexpr int kSortFirstAffinity = 17;
+constexpr int kSortLastAffinity = 23;
+constexpr int kShieldFirstClass = 27;
+constexpr int kShieldFirstAffinity = 33;
+constexpr int kShieldLastAffinity = 39;
+// Equipment stats past the shield's class numbers fold onto the weapon's.
+constexpr int kEquipmentFoldedStats = 16;
+
+template <std::size_t N>
+[[nodiscard]] std::int32_t SortElement(
+    Context& ctx, const std::array<std::int32_t, N>& values, int index) {
+  if (index < 0 || static_cast<std::size_t>(index) >= N) {
+    ctx.host.Refuse(
+        std::format("sort key element {} outside its array", index));
+    return 0;
+  }
+  return values[static_cast<std::size_t>(index)];
+}
+
+// The stats every equipment sort key reads the same way.
+[[nodiscard]] std::optional<std::int32_t> CommonSortValue(
+    int stat, const SortStats& stats) {
+  switch (stat) {
+    case kSortCurrentDp:
+      return stats.current_dp;
+    case kSortMaxDp:
+      return stats.max_dp;
+    case kSortCurrentPp:
+      return stats.current_pp;
+    case kSortMaxPp:
+      return stats.max_pp;
+    case kSortStrength:
+      return stats.strength;
+    case kSortIntelligence:
+      return stats.intelligence;
+    case kSortAgility:
+      return stats.agility;
+    default:
+      return std::nullopt;
+  }
+}
+
+// The weapon and part keys' identity stats, negated to sort ascending.
+[[nodiscard]] std::optional<std::int32_t> IdentitySortValue(
+    int stat, const SortStats& stats) {
+  switch (stat) {
+    case kSortCategory:
+      return -stats.category;
+    case kSortMaterial:
+      return -stats.material;
+    case kSortRange:
+      return stats.range;
+    case kSortDamageType:
+      return -stats.damage_type;
+    default:
+      return CommonSortValue(stat, stats);
+  }
+}
+}  // namespace
+
+// decomp: MENU _getWeaponStatValue (src/MENU/items1.h:695)
+std::int32_t WeaponSortValue(Context& ctx, int stat, const SortStats& weapon) {
+  if (const auto value = IdentitySortValue(stat, weapon)) {
+    return *value;
+  }
+  if (stat >= kSortFirstAffinity) {
+    return SortElement(ctx, weapon.affinities, stat - kSortFirstAffinity);
+  }
+  return SortElement(ctx, weapon.classes, stat - kSortFirstClass);
 }
 
 // decomp: MENU _getShieldStatValue (src/MENU/items1.h:792)
-int Menu_Framework_ShieldSortValue(int stat, Items_ShieldLoadout* shield)
-{
-    switch (stat) {
-    case 1:
-        return -shield->base.material;
-    case 4:
-        return shield->currentDp;
-    case 5:
-        return shield->maxDp;
-    case 6:
-        return shield->currentPp;
-    case 7:
-        return shield->maxPp;
-    case 8:
-        return shield->currentStr;
-    case 9:
-        return shield->currentInt;
-    case 10:
-        return shield->currentAgility;
-    default:
-        if (stat < 33) {
-            return shield->classAffinityCurrent.classes[0][stat - 27];
-        }
-
-        if (stat > 39) {
-            return shield->types[stat - 39];
-        }
-
-        return shield->classAffinityCurrent.affinities[0][stat - 33];
-    }
+std::int32_t ShieldSortValue(Context& ctx, int stat, const SortStats& shield) {
+  if (stat == kSortMaterial) {
+    return -shield.material;
+  }
+  if (const auto value = CommonSortValue(stat, shield)) {
+    return *value;
+  }
+  if (stat < kShieldFirstAffinity) {
+    return SortElement(ctx, shield.classes, stat - kShieldFirstClass);
+  }
+  if (stat > kShieldLastAffinity) {
+    return SortElement(ctx, shield.types, stat - kShieldLastAffinity);
+  }
+  return SortElement(ctx, shield.affinities, stat - kShieldFirstAffinity);
 }
 
 // decomp: MENU _getMiscStatValue (src/MENU/items1.h:888)
-int Menu_Framework_MiscSortValue(int stat, Items_InventoryMisc* misc)
-{
-    if (stat == 0) {
-        return -misc->id;
-    }
-    return misc->count;
+std::int32_t MiscSortValue(int stat, const MiscSortStats& misc) {
+  if (stat == kSortCategory) {
+    return -misc.id;
+  }
+  return misc.count;
 }
 
 // decomp: MENU _getEquipmentStatValue (src/MENU/items1.h:949)
-int Menu_Framework_EquipmentSortValue(int stat, Items_EquipmentPartStats* equipment)
-{
-    switch (stat) {
-    case 0:
-        return -equipment->category;
-    case 1:
-        return -equipment->material;
-    case 2:
-        return equipment->range.range;
-    case 3:
-        return -equipment->damageType;
-    case 4:
-        return equipment->currentDp;
-    case 5:
-        return equipment->maxDp;
-    case 6:
-        return equipment->currentPp;
-    case 7:
-        return equipment->maxPp;
-    case 8:
-        return equipment->strength;
-    case 9:
-        return equipment->intelligence;
-    case 10:
-        return equipment->agility;
-    default:
-        if (stat >= 27) {
-            stat -= 16;
-        }
-
-        if (stat < 17) {
-            return equipment->classes[stat - 11];
-        }
-
-        if (stat > 23) {
-            return equipment->types[stat - 23];
-        }
-
-        return equipment->affinities[stat - 17];
-    }
+std::int32_t EquipmentSortValue(Context& ctx, int stat,
+                                const SortStats& equipment) {
+  if (const auto value = IdentitySortValue(stat, equipment)) {
+    return *value;
+  }
+  if (stat >= kShieldFirstClass) {
+    stat -= kEquipmentFoldedStats;
+  }
+  if (stat < kSortFirstAffinity) {
+    return SortElement(ctx, equipment.classes, stat - kSortFirstClass);
+  }
+  if (stat > kSortLastAffinity) {
+    return SortElement(ctx, equipment.types, stat - kSortLastAffinity);
+  }
+  return SortElement(ctx, equipment.affinities, stat - kSortFirstAffinity);
 }
-
-// MAINMENU.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Framework_ResetMainMenuStatics(void)
-{
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_actionsSubMenuId, &initial, sizeof Menu_Framework_actionsSubMenuId);
-    }
-    {
-        static const short initial = 128;
-        memcpy((void*)&Menu_Framework_backgroundBrightness, &initial, sizeof Menu_Framework_backgroundBrightness);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_backgroundFadeState, &initial, sizeof Menu_Framework_backgroundFadeState);
-    }
-    {
-        static const short initial = -4;
-        memcpy((void*)&Menu_Framework_backgroundOtOffset, &initial, sizeof Menu_Framework_backgroundOtOffset);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_itemActionCount, &initial, sizeof Menu_Framework_itemActionCount);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_itemActionListOffset, &initial, sizeof Menu_Framework_itemActionListOffset);
-    }
-    {
-        static const u_short* initial = NULL;
-        memcpy((void*)&Menu_Framework_itemsText, &initial, sizeof Menu_Framework_itemsText);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_menuActionCurrent, &initial, sizeof Menu_Framework_menuActionCurrent);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_menuActionNext, &initial, sizeof Menu_Framework_menuActionNext);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_menuRowYOffset, &initial, sizeof Menu_Framework_menuRowYOffset);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Framework_selectedItemAction, &initial, sizeof Menu_Framework_selectedItemAction);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Framework_selectedRow, &initial, sizeof Menu_Framework_selectedRow);
-    }
-    {
-        static const u_short* initial = NULL;
-        memcpy((void*)&Menu_Framework_sortItemsTextBuf, &initial, sizeof Menu_Framework_sortItemsTextBuf);
-    }
-    {
-        static const u_char initial = 0;
-        memcpy((void*)&Menu_Framework_subMenuId, &initial, sizeof Menu_Framework_subMenuId);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_subMenuPage, &initial, sizeof Menu_Framework_subMenuPage);
-    }
-    {
-        static const u_short initial = 0;
-        memcpy((void*)&Menu_Framework_subMenuRowCount, &initial, sizeof Menu_Framework_subMenuRowCount);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_subMenuRowInfo, &initial, sizeof Menu_Framework_subMenuRowInfo);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_actionMenuState, &initial, sizeof Menu_Framework_actionMenuState);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Framework_backgroundFadeStep, &initial, sizeof Menu_Framework_backgroundFadeStep);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_cursorColor, &initial, sizeof Menu_Framework_cursorColor);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_displayActionCost, &initial, sizeof Menu_Framework_displayActionCost);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_hideMenu, &initial, sizeof Menu_Framework_hideMenu);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_itemsListRow, &initial, sizeof Menu_Framework_itemsListRow);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_actionMenuCursorAnimStep, &initial, sizeof Menu_Framework_actionMenuCursorAnimStep);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Framework_commandLabelActionYPos, &initial, sizeof Menu_Framework_commandLabelActionYPos);
-    }
-    {
-        static const u_short initial[] = { vs_getUV(0, 0), vs_getUV(0, 64), vs_getUV(64, 64),
-        vs_getUV(100, 64), vs_getUV(132, 64), vs_getUV(188, 64), vs_getUV(0, 74) };
-        memcpy((void*)&Menu_Framework_commandLabelMenuActionUvs, &initial, sizeof Menu_Framework_commandLabelMenuActionUvs);
-    }
-    {
-        static const u_char initial = 8;
-        memcpy((void*)&Menu_Framework_actionCostPanelAnimState, &initial, sizeof Menu_Framework_actionCostPanelAnimState);
-    }
-    {
-        static const RECT initial[] = { { 640, 256, 32, 240 }, { 768, 256, 32, 240 } };
-        memcpy((void*)&Menu_Framework_loadBackgroundTextureRects, &initial, sizeof Menu_Framework_loadBackgroundTextureRects);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_rowSelectionCursorAnimStep, &initial, sizeof Menu_Framework_rowSelectionCursorAnimStep);
-    }
-    {
-        static const char initial = 11;
-        memcpy((void*)&Menu_Framework_tabNavigationArrowAnimState, &initial, sizeof Menu_Framework_tabNavigationArrowAnimState);
-    }
-    {
-        static const int initial[] = { vs_getXY(216, 8), vs_getXY(210, 8),
-        vs_getXY(288, 8), vs_getXY(282, 8) };
-        memcpy((void*)&Menu_Framework_tabNavigationControlPositions, &initial, sizeof Menu_Framework_tabNavigationControlPositions);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_scrollableRowAnimState, &initial, sizeof Menu_Framework_scrollableRowAnimState);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_scrollableRowPreviousFrameBuf, &initial, sizeof Menu_Framework_scrollableRowPreviousFrameBuf);
-    }
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Framework_quitDelay, &initial, sizeof Menu_Framework_quitDelay);
-    }
-}
-
-// MENU3.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Framework_ResetMenu3Statics(void)
-{
-    {
-        static const int initial = 0;
-        memcpy((void*)&Menu_Framework_ashleyRender, &initial, sizeof Menu_Framework_ashleyRender);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Framework_ashleySkipFrame, &initial, sizeof Menu_Framework_ashleySkipFrame);
-    }
-}
-
-}  // extern "C"
+}  // namespace VS::Menu::Framework

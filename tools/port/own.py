@@ -54,7 +54,7 @@ def main() -> int:
     to = a.to.replace("/", "\\")
     if not to.startswith("Native\\") or not to.endswith(".cpp"):
         raise SystemExit("--to must be a Native\\...\\File.cpp path")
-    header = to[:-2] + ".h"
+    header = str(Path(to).with_suffix(".h")).replace("/", "\\")
     cp = ct.Copier()
     if a.id in cp.owned:
         raise SystemExit(f"{a.id} is already owned: {cp.owned[a.id]['path']}")
@@ -94,18 +94,17 @@ def main() -> int:
         s = head + "".join(x + "\n" for x in add_inc) + rest.rstrip("\n") + "\n\n" + item.text
         src_file.write_text(s, encoding="utf-8")
 
-    rows = []
-    if ct.OWNED.exists():
-        with ct.OWNED.open(encoding="utf-8", newline="") as fh:
-            rows = list(csv.DictReader(fh))
-    rows.append({"id": a.id, "kind": kind, "name": item.name, "path": to if kind != "type" else header,
-                 "header": header, "since": datetime.date.today().isoformat(),
-                 "notes": f"from {src_path}"})
-    with ct.OWNED.open("w", encoding="utf-8", newline="") as fh:
+    row = {"id": a.id, "kind": kind, "name": item.name,
+           "path": to if kind != "type" else header, "header": header,
+           "since": datetime.date.today().isoformat(),
+           "notes": f"from {src_path}"}
+    append = ct.OWNED.exists() and ct.OWNED.stat().st_size > 0
+    with ct.OWNED.open("a" if append else "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=FIELDS)
-        w.writeheader()
-        w.writerows(rows)
-    print(f"{a.id} {item.name}: owned in {rows[-1]['path']} (declared in {header})")
+        if not append:
+            w.writeheader()
+        w.writerow(row)
+    print(f"{a.id} {item.name}: owned in {row['path']} (declared in {header})")
     if not a.no_copy:
         sys.argv = [sys.argv[0]]
         return ct.main()

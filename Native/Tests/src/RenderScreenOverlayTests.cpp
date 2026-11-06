@@ -18,8 +18,8 @@
 #include "Render/ScreenOverlayLive.hpp"
 extern "C" {
 #include "Core/Gte.h"
-#include "Field/RoomLoading.h"
-#include "Field/Transitions.h"
+#include "Field/RoomLoadingLiveState.h"
+#include "Field/TransitionsLiveState.h"
 #include "Render/Display.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/ScreenTransition.h"

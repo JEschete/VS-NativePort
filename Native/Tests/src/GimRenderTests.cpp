@@ -4,6 +4,7 @@ extern "C" {
 #include <string.h>
 
 extern "C++" {
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/ScaledFont.hpp"
@@ -11,7 +12,7 @@ extern "C++" {
 #include "Render/UiPacketsLive.hpp"
 }
 #include "Actors/Spawning.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Boot/OverlayReset.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
@@ -22,6 +23,7 @@ extern "C++" {
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
@@ -269,18 +271,23 @@ int CheckMenuRowNativeLinks(int scrolling) {
     kPacketWords = 256,
     kRowPacketWords = 21,
     kScrollingPacketWords = 238,
-    kScrollingPackets = 38
+    kScrollingPackets = 38,
+    kFrameTableWords = 0x822
   };
   const u_long guard = 0xDEADBEEF;
   const Render_FrameScratch saved_frame = Render_frameScratch;
   const int saved_framebuffer = Render_frameBuf;
   void* const saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* const saved_table = Render_legacyOrderingTables[0];
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   const char saved_width = Render_variableFontGlyphWidths[5];
   Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
   Menu_Framework_MenuRow rows[40] = {0};
-  u_long overlay[kOrderingWords];
-  u_long scene[kOrderingWords];
+  // The Live menu links only into the current frame's ordering table, which
+  // holds the overlay and scene tables as in the game loop.
+  u_long frame_table[kFrameTableWords];
+  u_long* const overlay = frame_table;
+  u_long* const scene = frame_table + kOrderingWords;
   u_long expected_scene[kOrderingWords];
   u_long storage[kPacketWords];
   Menu_Framework_MenuRow row = {0};
@@ -293,7 +300,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
   row.isScrollable = 1;
   ClearOTagR(overlay, kOrderingWords);
   ClearOTagR(scene, kOrderingWords);
-  memcpy(expected_scene, scene, sizeof scene);
+  memcpy(expected_scene, scene, sizeof expected_scene);
   for (int index = 0; index < kPacketWords; ++index) {
     storage[index] = guard;
   }
@@ -302,13 +309,14 @@ int CheckMenuRowNativeLinks(int scrolling) {
   Render_frameScratch.primitiveCursor = storage + 1;
   Render_frameBuf = 0;
   Render_legacyPrimitiveBuffers[0] = storage + 1;
+  Render_legacyOrderingTables[0] = frame_table;
   Render_variableFontGlyphWidths[5] = 7;
   Menu_Framework_menuItems = rows;
 
   if (scrolling) {
-    Menu_Framework_DrawScrollableRow(&row);
+    VS::Menu::Framework::DrawLiveScrollableRow(&row);
   } else {
-    Menu_Framework_DrawMenuItem(&row);
+    VS::Menu::Framework::DrawLiveMenuItem(&row);
   }
 
   u_long* glyph = storage + 1;
@@ -319,7 +327,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
       nextPrim(glyph) == overlay + 5 && nextPrim(overlay + 7) == shadow &&
       Render_frameScratch.primitiveCursor == storage + 1 + kRowPacketWords &&
       storage[0] == guard && storage[1 + kRowPacketWords] == guard &&
-      memcmp(scene, expected_scene, sizeof scene) == 0;
+      memcmp(scene, expected_scene, sizeof expected_scene) == 0;
   if (scrolling) {
     int count = 0;
     void* packet = overlay + kOrderingWords - 1;
@@ -333,11 +341,12 @@ int CheckMenuRowNativeLinks(int scrolling) {
                  storage + 1 + kScrollingPacketWords &&
              storage[0] == guard &&
              storage[1 + kScrollingPacketWords] == guard &&
-             memcmp(scene, expected_scene, sizeof scene) == 0;
+             memcmp(scene, expected_scene, sizeof expected_scene) == 0;
   }
   Render_frameScratch = saved_frame;
   Render_frameBuf = saved_framebuffer;
   Render_legacyPrimitiveBuffers[0] = saved_buffer;
+  Render_legacyOrderingTables[0] = saved_table;
   VS::Render::LiveFontStyle() = saved_style;
   Render_variableFontGlyphWidths[5] = saved_width;
   Menu_Framework_menuItems = saved_items;
@@ -345,7 +354,12 @@ int CheckMenuRowNativeLinks(int scrolling) {
 }
 
 int CheckMenuWorkspaceReset(void) {
-  enum { kRows = 40, kScratchBytes = 0x124, kGuardBytes = 16 };
+  enum {
+    kRows = 40,
+    kScratchBytes = 0x124,
+    kStringBytes = 0x60,
+    kGuardBytes = 16
+  };
   const unsigned char guard = 0xA5;
   const size_t workspace_bytes =
       sizeof(Menu_Framework_MenuRow) * kRows + kScratchBytes;
@@ -357,17 +371,25 @@ int CheckMenuWorkspaceReset(void) {
   }
   memset(storage, guard, allocation_bytes);
   Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
+  char* const saved_strings = Menu_Framework_stringBuf;
+  int* const saved_types = Menu_Framework_rowTypeBuf;
   const u_short saved_flags = Input_settings.menuFlags;
   const unsigned int saved_memory = Input_settings.cursorMemory;
   const char saved_selection = Menu_Framework_submenuStates[0];
   const int saved_cursor = Menu_Framework_mainMenuCursorAnimation;
   Menu_Framework_menuItems =
       reinterpret_cast<Menu_Framework_MenuRow*>((storage + kGuardBytes));
+  // The workspace layout the menu's allocation sets: the string buffer, then
+  // the row types, after the rows.
+  Menu_Framework_stringBuf =
+      reinterpret_cast<char*>(Menu_Framework_menuItems + kRows);
+  Menu_Framework_rowTypeBuf =
+      reinterpret_cast<int*>(Menu_Framework_stringBuf + kStringBytes);
   Input_settings.menuFlags = 1;
   Input_settings.cursorMemory = 0;
   Menu_Framework_submenuStates[0] = 0;
 
-  int passed = Menu_Framework_UpdateMainMenuSelection(2) == 0 &&
+  int passed = VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0 &&
                Menu_Framework_menuItems[kRows - 1].subText == nullptr;
   const unsigned char* tail =
       reinterpret_cast<const unsigned char*>(Menu_Framework_menuItems + kRows);
@@ -379,6 +401,8 @@ int CheckMenuWorkspaceReset(void) {
              storage[kGuardBytes + workspace_bytes + index] == guard;
   }
   Menu_Framework_menuItems = saved_items;
+  Menu_Framework_stringBuf = saved_strings;
+  Menu_Framework_rowTypeBuf = saved_types;
   Input_settings.menuFlags = saved_flags;
   Input_settings.cursorMemory = saved_memory;
   Menu_Framework_submenuStates[0] = saved_selection;
@@ -401,6 +425,7 @@ int CheckMenuReloadClosingDelay(void) {
   const Content_DiscQueueSlot saved_slot = *request;
   int passed = 1;
   Boot_ResetMainMenuStatics();
+  VS::Menu::Framework::ResetLiveMainMenuStatics();
   Menu_Framework_menuItems = rows;
   Menu_Framework_menuBackgroundBuffer = nullptr;
   Menu_Framework_loadedSubMenu = 0;
@@ -411,16 +436,17 @@ int CheckMenuReloadClosingDelay(void) {
   for (int visit = 0; visit < kVisits; ++visit) {
     request->state = Content_DiscRequestState_Loaded;
     Menu_Framework_menuState.loading = 1;
-    passed &= Menu_Framework_LoadMenuOverlay(0) == 1 &&
+    passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1 &&
               request->state == Content_DiscRequestState_Free &&
               Menu_Framework_menuState.loading == 0;
     for (int tick = 1; tick <= kClosingTicks; ++tick) {
-      passed &= Menu_Framework_LoadMenuOverlay(0) == 1;
-      passed &= Menu_Framework_QuitDelay() == (tick == kClosingTicks);
+      passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1;
+      passed &= VS::Menu::Framework::LiveQuitDelay() == (tick == kClosingTicks);
     }
   }
 
   Boot_ResetMainMenuStatics();
+  VS::Menu::Framework::ResetLiveMainMenuStatics();
   Menu_Framework_menuState = saved_state;
   Menu_Framework_menuItems = saved_items;
   Menu_Framework_menuBackgroundBuffer = saved_background;
@@ -507,13 +533,16 @@ int CheckMenuPromptPanelLinks(void) {
   Render_frameScratch.overlayOrderingTable = ordering + 2;
   Menu_Framework_displayActionCost = 1;
   memset(Menu_Framework_textHeaders, 0, sizeof saved_headers);
-  // The typed HUD packets reserve their words in the current frame's buffer.
+  // The typed HUD packets reserve their words in the current frame's buffer
+  // and link only into the current frame's ordering table.
   void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  void* const saved_table = Render_legacyOrderingTables[Render_frameBuf & 1];
   Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage + 1;
+  Render_legacyOrderingTables[Render_frameBuf & 1] = ordering;
 
-  Menu_Framework_DrawButtonPromptBackground(20, 160, 80, 3);
+  VS::Menu::Framework::DrawLiveButtonPromptBackground(20, 160, 80, 3);
   for (int frame = 0; frame < kAnimationFrames; ++frame) {
-    Menu_Framework_DrawActionCostPanel();
+    VS::Menu::Framework::DrawLiveActionCostPanel();
   }
 
   int count = 0;
@@ -531,6 +560,7 @@ int CheckMenuPromptPanelLinks(void) {
   Menu_Framework_displayActionCost = saved_display;
   Render_frameScratch = saved_frame;
   Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
+  Render_legacyOrderingTables[Render_frameBuf & 1] = saved_table;
   return passed;
 }
 

@@ -1,16 +1,18 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_PLAYTIME_H_TYPES
-#define VS_STATE_PLAYTIME_H_TYPES
-#include "Legacy/Psx.h"
+#pragma once
+// Hand-maintained (tools/port/owned.csv).
+// The legacy play time record. GameClockLive.cpp defines it and advances it
+// with the typed rules (State/GameClock.hpp); the menus and save files still
+// read it directly.
 
-
-#endif // VS_STATE_PLAYTIME_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_STATE_PLAYTIME_H_DECLS)
-#define VS_STATE_PLAYTIME_H_DECLS
 #include "State/GameTime.h"
 
-extern State_PlayTime State_playTime;
-int State_UpdatePlayTimeAndLoading(int vsync);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // VS_STATE_PLAYTIME_H_DECLS
+// decomp: vs_main_gametime (SLUS_010.40 main.h:173 vs_Gametime_t)
+extern State_PlayTime State_playTime;
+
+#ifdef __cplusplus
+}
+#endif

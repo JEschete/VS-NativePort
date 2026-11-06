@@ -6,10 +6,6 @@ extern "C" {
 #include "Menu/BreakArts.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Files.h"
-#include "Menu/Framework/EquipmentDetails.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
@@ -17,26 +13,18 @@ extern "C" {
 #include "Menu/Magic.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
-#include "Menu/Options.h"
-#include "Menu/Rename.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Menu/Setup/Assembly.h"
-#include "Menu/Setup/Combination.h"
-#include "Menu/Setup/SetupScreen.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
 
 // Call where the original loads MAINMENU.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMainMenuStatics(void)
 {
-    Menu_Framework_EquipmentDetails_ResetMainMenuStatics();
-    Menu_Framework_ResetMainMenuStatics();
-    Menu_Framework_ItemRows_ResetMainMenuStatics();
     Menu_Inventory_ResetMainMenuStatics();
     Menu_Inventory_ItemList_ResetMainMenuStatics();
 }
@@ -62,7 +50,6 @@ void Boot_ResetMenu2Statics(void)
 // Call where the original loads MENU3.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenu3Statics(void)
 {
-    Menu_Framework_ResetMenu3Statics();
     Menu_Inventory_ResetMenu3Statics();
     Menu_Inventory_ItemDetails_ResetMenu3Statics();
     Menu_Inventory_ItemList_ResetMenu3Statics();
@@ -81,19 +68,6 @@ void Boot_ResetMenu5Statics(void)
     Menu_Map_ResetMenu5Statics();
 }
 
-// Call where the original loads MENU7.PRG: restores the statics its reload re-read from the disc.
-void Boot_ResetMenu7Statics(void)
-{
-    Menu_Files_ResetMenu7Statics();
-}
-
-// Call where the original loads MENU8.PRG: restores the statics its reload re-read from the disc.
-void Boot_ResetMenu8Statics(void)
-{
-    Menu_Options_ResetMenu8Statics();
-    Menu_Rename_ResetMenu8Statics();
-}
-
 // Call where the original loads MENU9.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenu9Statics(void)
 {
@@ -107,14 +81,6 @@ void Boot_ResetMenubStatics(void)
 {
     Menu_Inventory_ResetMenubStatics();
     Menu_Loot_LootScreen_ResetMenubStatics();
-}
-
-// Call where the original loads MENUC.PRG: restores the statics its reload re-read from the disc.
-void Boot_ResetMenucStatics(void)
-{
-    Menu_Setup_Assembly_ResetMenucStatics();
-    Menu_Setup_Combination_ResetMenucStatics();
-    Menu_Setup_SetupScreen_ResetMenucStatics();
 }
 
 // Call where the original loads MENUD.PRG: restores the statics its reload re-read from the disc.

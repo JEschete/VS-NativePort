@@ -12,15 +12,8 @@ so a stale fix is noticed.
 """
 from __future__ import annotations
 
-NATIVE_SIGNATURE_REWRITES = {
-    "F03520": {"ret": "intptr_t"},
-    "F03108": {0: "intptr_t"},
-    "F03112": {0: "intptr_t"},
-    "F03116": {0: "intptr_t"},
-    "F03203": {0: "intptr_t"},
-    "F03097": {"ret": "intptr_t"},
-    "F03150": {0: "intptr_t"},
-}
+# Function id -> {parameter index or "ret": native type} for promoted carriers (none outstanding).
+NATIVE_SIGNATURE_REWRITES: dict[str, dict] = {}
 
 # FSoundChannel.effectId carries either a built-in ID or a native program pointer.
 NATIVE_POINTER_FIELDS = {"T00278.012"}
@@ -131,7 +124,7 @@ _RENDER_LIVE = {
 # #276 slice 8 (save-memory-card): the C-shaped bindings over the typed VS::Save::MemoryCard game-file core and the
 # VS::Save snapshot core, by binding name and the rows whose generated callers reach them (OWNED_CALL_BINDINGS).
 # PollEvents, ClearEvents, ReadSaveSummary and HasSaveSuffix have no generated callers left, and AnySaveFileExists'
-# only caller (F03670) calls the typed function through its fixup.
+# only caller (F03670) is the typed VS::Title::Run (#276 slice 53), whose host picks the native initial selection.
 _SAVE_MEMORY_CARD_LIVE = {
     "BuildLiveSaveFilename": ("F02720", "F03587"),
     "BuildLiveTemporaryFilename": ("F02721", "F03588"),
@@ -228,6 +221,124 @@ _ACTORS_SKELETON_LIVE = {
         ("LiveActorBoneEndpointPosition", "F00887"), ("LiveActorBoneViewTransform", "F00888"),
         ("BuildLiveActorPoseAtMatrix", "F00918")),
 }
+# #276 row 21 (actors-movement): the Live adapter each generated caller of an actor motion rule uses instead, in the
+# original argument order. F01011 has no callers (its body is AdvanceShadowBlend).
+_ACTORS_MOVEMENT_LIVE = {
+    r"Native\Game\include\Actors\ActorMotionLive.hpp": (
+        ("BeginLiveScriptedActorPath", "F00297"), ("IsLiveScriptedActorPathFinished", "F00298"),
+        ("ResetLiveActorMovement", "F00302"), ("StopLiveActorMotion", "F00815"),
+        ("ClearLiveActorMovementModes", "F00816"), ("LiveActorFacingDeltaToPoint", "F00821"),
+        ("ResetLiveActorRunMomentum", "F00868"), ("SetLiveActorWalkRunSpeeds", "F00869"),
+        ("SetLiveActorTravelStepCounts", "F00870"), ("LiveActorTravelStepCounts", "F00871"),
+        ("StepLiveActorTransitionDisplacement", "F00899"), ("SetLiveActorFallDestination", "F00900"),
+        ("ClearLiveActorMovementRequest", "F00925"), ("MoveLiveActorToTileAtRate", "F00946"),
+        ("MoveLiveActorToPositionAtRate", "F00947"), ("TranslateLiveActorToTileAtRate", "F00948"),
+        ("TurnLiveActorTowardTileAtRate", "F00949"), ("TranslateLiveActorByAtRate", "F00950"),
+        ("TranslateLiveActorToAtRate", "F00951"), ("TurnLiveActorByAtRate", "F00952"),
+        ("TurnLiveActorToAtRate", "F00953"), ("RotateLiveActorByAtRate", "F00954"),
+        ("RotateLiveActorToAtRate", "F00955"), ("MoveLiveActorToTileOverTime", "F00956"),
+        ("TranslateLiveActorToTileOverTime", "F00957"), ("SetLiveActorTileTranslation", "F00958"),
+        ("TurnLiveActorTowardTileOverTime", "F00959"), ("SetLiveActorTileTurn", "F00960"),
+        ("SetLiveActorMotion", "F00961"), ("TranslateLiveActorToOverTime", "F00962"),
+        ("SetLiveActorTranslation", "F00963"), ("SetLiveActorYawMotion", "F00964"),
+        ("TurnLiveActorToOverTime", "F00965"), ("TurnLiveActorToAtAngularSpeed", "F00966"),
+        ("SetLiveActorYawTurn", "F00967"), ("SetLiveActorRotationMotion", "F00968"),
+        ("SetLiveActorRotation", "F00969"), ("ScaleLiveActorToOverTime", "F00970"),
+        ("UpdateLiveActorRoute", "F00986"), ("LiveActorJumpAnimationProfile", "F00987")),
+    # F00889 (tile jump) and the internal movement steps have no generated callers outside the promoted file.
+    r"Native\Game\include\Actors\ActorMovementLive.hpp": (
+        ("CancelLiveActorTeleportTransition", "F00897"), ("BeginLiveActorJumpMovement", "F00919"),
+        ("UpdateLiveActorPlatformContact", "F00921"), ("UpdateLiveRoomActorMovement", "F00922"),
+        ("UpdateLiveActorMovement", "F00923"), ("UpdateLiveActorJumpAndFall", "F00988")),
+}
+# #276 row 20b (actors-animation-control): the Live adapter each generated caller of an animation control rule uses
+# instead, in the original argument order. No module image stores any of these addresses.
+_ACTORS_ANIMATION_LIVE = {
+    r"Native\Game\include\Actors\AnimationControlLive.hpp": (
+        ("QueueLiveActorBaseSequenceLoad", "F00170"), ("QueueLiveActorWeaponSequenceLoad", "F00172"),
+        ("InterruptLiveActorAction", "F00255"), ("QueueLiveSharedSequenceLoad", "F00278"),
+        ("UnloadLiveSharedSequence", "F00279"), ("QueueLiveSharedSequenceWithTextures", "F00280"),
+        ("QueueLiveSequenceEffectTextures", "F00281"), ("ReleaseLiveSequenceEffectTextures", "F00282"),
+        ("SetLiveSharedSequenceBank", "F00283"), ("ReadLiveSharedSequenceBank", "F00284"),
+        ("ReturnLiveActorToIdle", "F00291"), ("ReturnAllLiveActorsToIdle", "F00292"),
+        ("SelectLiveSharedSequenceBank", "F00801"), ("LiveSharedSequenceBankId", "F00802"),
+        ("RequestLiveActorAnimationAdvance", "F00811"), ("SetLiveActorWeaponDrawn", "F00813"),
+        ("PlayLiveActorWeaponDrawSound", "F00814"), ("PlayLiveActorActionPose", "F00820"),
+        ("IsLiveAshleyTransitionPose", "F00824"), ("IsLiveActorActionAnimationBusy", "F00825"),
+        ("RestoreLiveActorIdlePose", "F00826"), ("RestoreLiveActorNeutralPose", "F00827"),
+        ("RestoreLiveActorBasePose", "F00829"), ("LiveAnimationBattleWindowFrame", "F00840"),
+        ("SetLiveActorSoundOverrides", "F00842"), ("ApplyLiveActorSoundOverrides", "F00843"),
+        ("SetLiveActorTravelAnimation", "F00845"), ("LiveActorTravelAnimation", "F00846"),
+        ("QueueLiveActorAnimation", "F00855"), ("PlayLiveActorAnimation", "F00856"),
+        ("PlayLiveActorAnimationAtFrame", "F00857"), ("SetLiveActorTransitionMode", "F00863"),
+        ("SetLiveActorAnimationLocked", "F00865"), ("PlayLiveActorTurnAnimation", "F00890"),
+        ("UpdateLiveActorLocomotionAnimation", "F00930"), ("SetLiveActorBonePoseLock", "F00984"),
+        ("ClearLiveActorBonePoseLocks", "F00985")),
+}
+# #276 row 20c (actors-animation-pose): the Live adapter each generated caller of an animation pose rule uses
+# instead, in the original argument order. No module image stores any of these addresses.
+_ACTORS_ANIMATION_POSE_LIVE = {
+    r"Native\Game\include\Actors\AnimationPoseLive.hpp": (
+        ("FindLiveActorAnimationHeader", "F00993"), ("InitializeLiveActorAnimationPose", "F00992"),
+        ("UpdateLiveActorAnimationBlend", "F01009"), ("UpdateLiveMotionAndLookAt", "F04130")),
+}
+
+# #276 row 17 (state-boot): the Live adapter each generated caller of a State record rule uses instead, in the
+# original argument order.
+_STATE_LIVE = {
+    r"Native\Game\include\State\ScriptFlagsLive.hpp": (
+        ("ResetLiveZoneScriptFlags", "F01256"), ("LiveScriptFlag", "F01258"), ("SetLiveScriptFlag", "F01259")),
+    r"Native\Game\include\State\GameClockLive.hpp": (("UpdateLivePlayTimeAndLoading", "F03426"),),
+    r"Native\Game\include\State\SceneTimerLive.hpp": (
+        ("StartLiveSceneTimer", "F00232"), ("ResetLiveSceneTimer", "F00233"), ("SetLiveSceneTimerPaused", "F00234"),
+        ("SetLiveTickSpeed", "F00256"), ("UpdateLiveSceneTimer", "F00524")),
+    r"Native\Game\include\State\KillScoreLive.hpp": (
+        ("RecordLiveEnemyKillScore", "F00046"), ("UpdateLiveWeaponKillStreak", "F00047")),
+}
+
+# #276 row 17 (state-boot): generated Boot callers use the Live lifecycle boundary.
+_BOOT_LIVE = {
+    r"Native\Game\include\Boot\SessionLive.hpp": (
+        ("LoadBattleOverlaysLive", "F03417"), ("LoadTitleOverlayLive", "F03418"),
+        ("LoadEndingOverlayLive", "F03419"), ("ResetToTitleLive", "F03423"),
+        ("EnterBattleLive", "F03424"), ("RunEndingAndReturnToTitleLive", "F03425"),
+        ("InitializePlatformServicesLive", "F03436"), ("InitializeTitleSessionLive", "F03437"),
+        ("InitializeGameplayOverlayLive", "F01858"), ("RunGameplayLoopLive", "F00199"),
+        ("WaitForOverlayReadyLive", "F03440"), ("SetSoftResetEnabledLive", "F03441")),
+}
+
+# #276 row 23 (field-collision-map): the Live adapter each generated caller of a room collision map, map progress or
+# trap rule uses instead, in the original argument order.
+_FIELD_COLLISION_MAP_LIVE = {
+    r"Native\Game\include\Field\CollisionMapLive.hpp": (
+        ("LiveRoomCollisionCells", "F00571"), ("LiveCollisionMapDimensions", "F00573"),
+        ("LiveRoomCameraBounds", "F00574"), ("LiveCollisionCellAt", "F00575"),
+        ("SetLiveCollisionCellBlocked", "F00576"), ("LiveInterpolatedFloorHeight", "F00612"),
+        ("LiveFloorHeightAt", "F00613"), ("LiveCeilingHeightAt", "F00614"),
+        ("LiveFloorAndCeilingHeightsAt", "F00615"), ("SetLiveActorCollisionBypass", "F00866"),
+        ("LiveActorCollisionBypass", "F00867"), ("LiveActorSupportHeight", "F00904"),
+        ("SnapLiveRoomActorsToSupport", "F00905"), ("LiveRoomCeilingHeight", "F00909"),
+        ("LiveIsPointOnMovingPlatform", "F00924"), ("FindLiveCollisionCellAtPosition", "F00939"),
+        ("LiveGimmickSupportHeight", "F00943"), ("LiveMovingPlatformContactHeight", "F00944"),
+        ("LiveGimmickSupportHeightBelow", "F01015")),
+    r"Native\Game\include\Field\MapLive.hpp": (
+        ("SetLiveMinimapVisible", "F00566"), ("RestoreLiveSceneRoomVisits", "F00567"),
+        ("BuildLiveMinimapRotation", "F00569"), ("LiveMapCompletionPercent", "F00630")),
+    r"Native\Game\include\Field\TrapsLive.hpp": (
+        ("RollLiveRiskLockBreak", "F00350"), ("CalculateLiveTrapPanelDamage", "F00420"),
+        ("CalculateLiveHealingPanelRecovery", "F00422")),
+}
+
+# #276 row 23 remainder (field-actor-collision): the Live bindings each generated caller of an actor terrain collision
+# rule uses instead, in the original argument order. The other five rows have no callers outside the typed core.
+_FIELD_ACTOR_COLLISION_LIVE = {
+    r"Native\Game\include\Field\ActorCollisionLive.hpp": (
+        ("LiveFindActorOccupyingTile", "F00911"), ("LiveCheckPlatformActorObstruction", "F00915"),
+        ("LiveCanActorHangFromLedge", "F00928"), ("LiveHasActorLedgeSideSupport", "F00929"),
+        ("LiveSampleActorSupportHeight", "F00931"), ("LiveSampleActorCollisionPerimeter", "F00932"),
+        ("LiveApplyActorWallRepulsion", "F00933"), ("LiveResolveActorTerrainMotion", "F00934"),
+        ("LiveCalcActorLedgeOffset", "F00945")),
+}
 
 # #276 slice 16 (content): Live adapters keeping the original call shape over the typed VS::Content cores, by header
 # and owned row. Rows absent here have no generated callers outside their own cores (the asset loaders, sharing
@@ -262,7 +373,16 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_TEXTURE_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_MODEL_RENDERING_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_SKELETON_LIVE.items() for name, _ in rows},
+    **{f"VS::Actors::{name}": header for header, rows in _ACTORS_MOVEMENT_LIVE.items() for name, _ in rows},
+    **{f"VS::Actors::{name}": header for header, rows in _ACTORS_ANIMATION_LIVE.items() for name, _ in rows},
+    **{f"VS::Actors::{name}": header for header, rows in _ACTORS_ANIMATION_POSE_LIVE.items() for name, _ in rows},
     **{f"VS::Content::{name}": header for header, rows in _CONTENT_LIVE.items() for name, _ in rows},
+    **{f"VS::State::{name}": header for header, rows in _STATE_LIVE.items() for name, _ in rows},
+    **{f"VS::Boot::{name}": header for header, rows in _BOOT_LIVE.items() for name, _ in rows},
+    **{f"VS::Field::{name}": header for header, rows in _FIELD_COLLISION_MAP_LIVE.items() for name, _ in rows},
+    **{f"VS::Field::{name}": header for header, rows in _FIELD_ACTOR_COLLISION_LIVE.items() for name, _ in rows},
+    **{f"VS::Field::{name}": r"Native\Game\include\Field\ActorCollisionLive.hpp"
+       for name in ("LiveCollisionProbeCellWord", "LiveSampleSupportHeightAt")},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
        for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
@@ -415,8 +535,6 @@ NATIVE_HELPER_HEADERS = {
        for name in (
            "Ending_Credits_PrepareEmbeddedArt", "Ending_Credits_EmbeddedArt",
        )},
-    "Actors_FindBoundAnimationHeader":
-        r"Native\Game\src\Actors\AnimationBindings.h",
     **{name: r"Native\Game\include\Diagnostics\SceneTrace.h"
        for name in (
            "Diagnostics_RecordSceneCommand", "Diagnostics_RecordSceneResult",
@@ -633,6 +751,162 @@ NATIVE_HELPER_HEADERS = {
            "IgnoreCommand",
            "DispatchCommand",
        )},
+    **{f"VS::Audio::Playback::Live{name}": r"Native\Engine\include\Audio\SoundPlaybackLive.hpp"
+       for name in (
+           "Initialize",
+           "Shutdown",
+           "BindSoundEffectPrograms",
+           "MusicVolume",
+           "PackedMusicSampleBankIds",
+           "MusicPosition",
+           "StartMusic",
+           "StopMusic",
+           "SaveMusicState",
+           "InvalidateSavedMusicId",
+           "CrossfadeMusic",
+           "QueueMusicTransition",
+           "PlaySoundEffect",
+           "PlaySoundEffectBlob",
+           "StopSoundEffects",
+           "SoundEffectIdForTag",
+           "SharedEffectUsesTags",
+           "ProgramUsesTags",
+           "SetMonoOutput",
+       )},
+    **{f"VS::Audio::Samples::Live{name}": r"Native\Engine\include\Audio\SampleBanksLive.hpp"
+       for name in (
+           "LoadBank",
+           "TransferStatus",
+           "ClearMusicBankIds",
+           "LoadMusicBank",
+           "LoadSoundEffectBank",
+           "SequenceMagicDifference",
+           "MapInstrumentToAlternateBank",
+           "MapInstrumentToBaseBank",
+           "SoundEffectBankSlot",
+       )},
+    **{f"VS::Audio::Live{name}": r"Native\Engine\include\Audio\SoundBanksLive.hpp"
+       for name in (
+           "LoadSfxBankSlot",
+           "LoadSfxBankIntoFreeSlot",
+           "PollSfxBankSlotLoad",
+           "PollSfxBankLoads",
+           "LoadSfxBankBlocking",
+           "SelectSfxBankSlot",
+           "FreeSfxBankSlot",
+           "BindRoomSfxBank",
+           "UnbindRoomSfxBank",
+           "LoadWaveBankFile",
+           "LoadMappedWaveBank",
+           "UpdateWaveBankLoad",
+           "LoadWaveBankBlocking",
+           "SetMonoOutput",
+           "InitializeMenuSoundBanks",
+           "ResetSoundSlots",
+       )},
+    **{f"VS::Audio::Live{name}": r"Native\Engine\include\Audio\SfxLive.hpp"
+       for name in (
+           "PlaySfx",
+           "PlaySfxCentered",
+           "SfxPanAndVolume",
+           "PlayWorldSfx",
+           "ResolveSfxProgram",
+           "FadeSfxVolume",
+           "FadeSfxPitch",
+           "FadeSfxPan",
+           "StopSfx",
+           "StopAllSfxPlayback",
+           "PlayBankSfx",
+           "PlayBankSfxCentered",
+           "StopBankSfx",
+           "FadeBankSfxVolume",
+       )},
+    **{f"VS::Audio::Control::Live{name}": r"Native\Engine\include\Audio\SoundControlLive.hpp"
+       for name in (
+           "SetMusicBranchThreshold",
+           "SetMusicVolume",
+           "FadeMusicVolume",
+           "FadeSoundEffectVolume",
+           "FadeSoundEffectPan",
+           "FadeSoundEffectPitch",
+           "SetDiscVolume",
+           "FadeDiscVolume",
+           "FadeDiscVolumeFrom",
+           "FadeMusicTempoScale",
+           "FadeMusicPitchScale",
+           "StopAllMusic",
+           "StopSceneSoundEffects",
+           "StartCutsceneStream",
+           "StopCutsceneStream",
+           "SetCutsceneVolume",
+           "FadeCutsceneVolume",
+           "SetCutscenePan",
+           "SoundEffectChannelIds",
+       )},
+    **{f"VS::Audio::SoundEffects::Live{name}": r"Native\Engine\include\Audio\SoundEffectProgramsLive.hpp"
+       for name in (
+           "ReleaseMatchingVoices",
+           "PlayProgramPair",
+           "InvalidateMusicChannelVolumes",
+           "InvalidateSoundEffectVolumes",
+           "PlayInterfaceProgramPair",
+           "PlayInterfaceProgram",
+           "PlaySharedProgram",
+           "PlayBlobPrograms",
+           "StopPrograms",
+           "SetProgramVolume",
+           "FadeProgramVolume",
+           "SetSceneVolume",
+           "FadeSceneVolume",
+           "SetProgramPan",
+           "FadeProgramPan",
+           "SetScenePan",
+           "FadeScenePan",
+       )},
+    **{f"VS::Audio::Live{name}": r"Native\Engine\include\Audio\MusicLive.hpp"
+       for name in (
+           "SetZoneMusicSwitchEnabled",
+           "MusicBeatPosition",
+           "SaveMusicPlaybackState",
+           "SetMusicJumpThreshold",
+           "StopMusicSlotPlayback",
+           "ResumeMusicSlot",
+           "CrossfadeMusicSlot",
+           "PlayMusicSlot",
+           "CurrentMusicSlot",
+           "CurrentMusicId",
+           "LoadMusicSlot",
+           "PollMusicSlotLoad",
+           "PollMusicLoads",
+           "LoadMusicSlotBlocking",
+           "FreeMusicSlot",
+           "MusicSlotVolume",
+           "QueryMusicSlotVolume",
+           "FadeMusicSlotVolume",
+           "FadeMusicSlotTempo",
+           "FadeMusicSlotPitch",
+           "StopAndFreeCurrentMusic",
+       )},
+    **{f"VS::Audio::Live{name}": r"Native\Engine\include\Audio\StreamLive.hpp"
+       for name in (
+           "BeginXaStream",
+           "RequestXaStreamStop",
+           "PlayCutsceneStreamSlotCentered",
+       )},
+    **{f"VS::Audio::Live{name}": r"Native\Engine\include\Audio\ActorSoundLive.hpp"
+       for name in (
+           "ActorSoundPanAndVolume",
+           "PlayActorModelSound",
+           "PlayActorModelSoundVariant",
+           "PlayActorSoundPair",
+           "PlayGimmickSoundPair",
+           "PlayActorSurfaceContactSound",
+           "PlayActorScriptSound",
+       )},
+    **{f"VS::Audio::Live{name}": r"Native\Engine\include\Audio\AmbienceLive.hpp"
+       for name in (
+           "SetRoomAmbienceDucked",
+       )},
     **{f"VS::Audio::Driver::Live{name}": r"Native\Engine\include\Audio\SoundDriverLive.hpp"
        for name in (
            "Start",
@@ -746,7 +1020,17 @@ OWNED_CALL_BINDINGS = {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_TEXTURE_LIVE.values() for name, fid in rows} | {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_MODEL_RENDERING_LIVE.values() for name, fid in rows} | {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_SKELETON_LIVE.values() for name, fid in rows} | {
-    fid: f"VS::Content::{name}" for rows in _CONTENT_LIVE.values() for name, fid in rows
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_MOVEMENT_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_ANIMATION_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_ANIMATION_POSE_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Content::{name}" for rows in _CONTENT_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::State::{name}" for rows in _STATE_LIVE.values() for name, fid in rows
+} | {
+    fid: f"VS::Boot::{name}" for rows in _BOOT_LIVE.values() for name, fid in rows
+} | {
+    fid: f"VS::Field::{name}" for rows in _FIELD_COLLISION_MAP_LIVE.values() for name, fid in rows
+} | {
+    fid: f"VS::Field::{name}" for rows in _FIELD_ACTOR_COLLISION_LIVE.values() for name, fid in rows
 }
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
@@ -801,6 +1085,1184 @@ OWNED_CALL_BINDINGS |= {
     )
 }
 
+# #276 audio-playback-banks: generated music, sound-effect, script and menu callers keep the original sequence,
+# program and bank pointer call shapes; the live bindings load the typed records and hosts and store back.
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Audio::{name}"
+    for fid, name in (
+        ("F03074", "Playback::LiveInitialize"),
+        ("F03075", "Playback::LiveShutdown"),
+        ("F03076", "Playback::LiveBindSoundEffectPrograms"),
+        ("F03078", "Playback::LiveMusicVolume"),
+        ("F03079", "Playback::LivePackedMusicSampleBankIds"),
+        ("F03081", "Playback::LiveMusicPosition"),
+        ("F03082", "Playback::LiveStartMusic"),
+        ("F03083", "Playback::LiveStopMusic"),
+        ("F03084", "Playback::LiveSaveMusicState"),
+        ("F03085", "Playback::LiveInvalidateSavedMusicId"),
+        ("F03087", "Playback::LiveCrossfadeMusic"),
+        ("F03089", "Playback::LiveQueueMusicTransition"),
+        ("F03092", "Playback::LivePlaySoundEffect"),
+        ("F03093", "Playback::LivePlaySoundEffectBlob"),
+        ("F03094", "Playback::LiveStopSoundEffects"),
+        ("F03097", "Playback::LiveSoundEffectIdForTag"),
+        ("F03098", "Playback::LiveProgramUsesTags"),
+        ("F03099", "Playback::LiveSetMonoOutput"),
+        ("F03134", "Samples::LiveLoadBank"),
+        ("F03135", "Samples::LiveTransferStatus"),
+        ("F03139", "Samples::LiveClearMusicBankIds"),
+        ("F03142", "Samples::LiveLoadMusicBank"),
+        ("F03143", "Samples::LiveLoadSoundEffectBank"),
+        ("F03152", "Samples::LiveSequenceMagicDifference"),
+        ("F03196", "Samples::LiveMapInstrumentToAlternateBank"),
+        ("F03197", "Samples::LiveMapInstrumentToBaseBank"),
+        ("F03211", "Samples::LiveSoundEffectBankSlot"),
+        ("F03526", "LiveLoadSfxBankSlot"),
+        ("F03527", "LiveLoadSfxBankIntoFreeSlot"),
+        ("F03528", "LivePollSfxBankSlotLoad"),
+        ("F03529", "LivePollSfxBankLoads"),
+        ("F03530", "LiveLoadSfxBankBlocking"),
+        ("F03531", "LiveSelectSfxBankSlot"),
+        ("F03532", "LiveFreeSfxBankSlot"),
+        ("F03533", "LiveBindRoomSfxBank"),
+        ("F03534", "LiveUnbindRoomSfxBank"),
+        ("F03547", "LiveLoadWaveBankFile"),
+        ("F03548", "LiveLoadMappedWaveBank"),
+        ("F03549", "LiveUpdateWaveBankLoad"),
+        ("F03550", "LiveLoadWaveBankBlocking"),
+        ("F03551", "LiveSetMonoOutput"),
+        ("F03553", "LiveInitializeMenuSoundBanks"),
+        ("F03554", "LiveResetSoundSlots"),
+    )
+}
+
+# #276 effects-ring-templates: the ring, closed-ring and tiled-ring instances keep the renderer-slot entry shape
+# (slot, command, packed parameter) in generated renderer tables and plugin updates; each live binding passes its
+# overlay's palette to the typed instance and binds the slot, package, scratch, GTE and frame to RingHost.
+# Duplicate catalog rows bind to their canonical instance.
+EFFECT_RING_LIVE_BINDINGS = {
+    "F01894": "UpdateLivePlg044TiledRing",
+    "F01900": "UpdateLivePlg047ClosedRing",
+    "F01908": "UpdateLivePlg049Ring",
+    "F01909": "UpdateLivePlg049TiledRing",
+    "F01911": "UpdateLivePlg050Ring",
+    "F01919": "UpdateLivePlg051ClosedRing",
+    "F01925": "UpdateLivePlg053ClosedRing",
+    "F01927": "UpdateLivePlg053ClosedRing",
+    "F01929": "UpdateLivePlg053ClosedRing",
+    "F01951": "UpdateLivePlg061Ring",
+    "F01952": "UpdateLivePlg061ClosedRing",
+    "F01954": "UpdateLivePlg065ClosedRing",
+    "F01955": "UpdateLivePlg065Ring",
+    "F01974": "UpdateLivePlg069TiledRing",
+    "F01975": "UpdateLivePlg073TiledRing",
+    "F01976": "UpdateLivePlg073Ring",
+    "F01986": "UpdateLivePlg073TiledRing",
+    "F01987": "UpdateLivePlg073Ring",
+    "F02001": "UpdateLivePlg053ClosedRing",
+    "F02003": "UpdateLivePlg081Ring",
+    "F02004": "UpdateLivePlg081ClosedRing",
+    "F02011": "UpdateLivePlg082ClosedRing",
+    "F02013": "UpdateLivePlg085TiledRing",
+    "F02014": "UpdateLivePlg086ClosedRing",
+    "F02025": "UpdateLivePlg087ClosedRing",
+    "F02060": "UpdateLivePlg128ClosedRing",
+    "F02076": "UpdateLivePlg129Ring",
+    "F02079": "UpdateLivePlg129Ring2",
+    "F02088": "UpdateLivePlg134ClosedRing",
+    "F02089": "UpdateLivePlg135ClosedRing",
+    "F02106": "UpdateLivePlg137TiledRing",
+    "F02108": "UpdateLivePlg138Ring",
+    "F02110": "UpdateLivePlg138TiledRing",
+    "F02111": "UpdateLivePlg139TiledRing",
+    "F02121": "UpdateLivePlg142ClosedRing",
+    "F02122": "UpdateLivePlg142Ring",
+    "F02124": "UpdateLivePlg143TiledRing",
+    "F02125": "UpdateLivePlg143ClosedRing",
+    "F02126": "UpdateLivePlg146TiledRing",
+    "F02138": "UpdateLivePlg146Ring",
+    "F02146": "UpdateLivePlg147Ring",
+    "F02164": "UpdateLivePlg148TiledRing",
+    "F02165": "UpdateLivePlg149Ring",
+    "F02166": "UpdateLivePlg150TiledRing",
+    "F02169": "UpdateLivePlg150Ring",
+    "F02176": "UpdateLivePlg152ClosedRing",
+    "F02178": "UpdateLivePlg153Ring",
+    "F02185": "UpdateLivePlg154ClosedRing",
+    "F02194": "UpdateLivePlg158ClosedRing",
+    "F02196": "UpdateLivePlg160TiledRing",
+    "F02197": "UpdateLivePlg160Ring",
+    "F02199": "UpdateLivePlg161Ring",
+    "F02208": "UpdateLivePlg161Ring2",
+    "F02211": "UpdateLivePlg162Ring",
+    "F02212": "UpdateLivePlg162ClosedRing",
+    "F02222": "UpdateLivePlg165ClosedRing",
+    "F02225": "UpdateLivePlg166ClosedRing",
+    "F02226": "UpdateLivePlg166Ring",
+    "F02227": "UpdateLivePlg167ClosedRing",
+    "F02261": "UpdateLivePlg169Ring",
+    "F02262": "UpdateLivePlg169ClosedRing",
+    "F02265": "UpdateLivePlg170Ring",
+    "F02268": "UpdateLivePlg170ClosedRing",
+    "F02269": "UpdateLivePlg198Ring",
+    "F02287": "UpdateLivePlg236ClosedRing",
+    "F02290": "UpdateLivePlg236Ring",
+    "F02291": "UpdateLivePlg242TiledRing",
+    "F02302": "UpdateLivePlg250ClosedRing",
+    "F02322": "UpdateLivePlg263Ring",
+    "F02329": "UpdateLivePlg265TiledRing",
+    "F02375": "UpdateLivePlg272ClosedRing",
+    "F02386": "UpdateLivePlg291ClosedRing",
+    "F02388": "UpdateLivePlg297ClosedRing",
+    "F02390": "UpdateLivePlg297Ring",
+    "F02404": "UpdateLivePlg301ClosedRing",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Effects::Templates::{name}" for fid, name in EFFECT_RING_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::Templates::{name}": r"Native\Game\include\Effects\Templates\RingsLive.hpp"
+    for name in EFFECT_RING_LIVE_BINDINGS.values()
+}
+
+# #276 effects-particle-templates: the particle-set dispatchers keep the renderer-slot entry shape (slot, command,
+# packed parameter) in generated renderer tables and plugin updates; each live binding passes its overlay's typed
+# dispatch options (origin, target, control and render stages, texturing and counter) and binds the slot, package,
+# scratch, control points, GTE and frame to ParticleSetHost.
+EFFECT_PARTICLE_LIVE_BINDINGS = {
+    "F01899": "UpdateLivePlg045ParticleDispatch",
+    "F01934": "UpdateLivePlg057ParticleDispatch",
+    "F01965": "UpdateLivePlg065ParticleDispatch",
+    "F02009": "UpdateLivePlg082ParticleDispatch",
+    "F02043": "UpdateLivePlg087ParticleDispatch",
+    "F02048": "UpdateLivePlg114ParticleDispatch",
+    "F02058": "UpdateLivePlg114ParticleDispatch2",
+    "F02137": "UpdateLivePlg146ParticleDispatch",
+    "F02156": "UpdateLivePlg147ParticleDispatch",
+    "F02175": "UpdateLivePlg152ParticleDispatch",
+    "F02183": "UpdateLivePlg153ParticleDispatch",
+    "F02190": "UpdateLivePlg156ParticleDispatch",
+    "F02252": "UpdateLivePlg168ParticleDispatch",
+    "F02279": "UpdateLivePlg224ParticleDispatch",
+    "F02319": "UpdateLivePlg255ParticleDispatch",
+    "F02328": "UpdateLivePlg263ParticleDispatch",
+    "F02339": "UpdateLivePlg265ParticleDispatch",
+    "F02351": "UpdateLivePlg265ParticleDispatch2",
+    "F02356": "UpdateLivePlg266ParticleDispatch",
+    "F02366": "UpdateLivePlg266ParticleDispatch2",
+    "F02396": "UpdateLivePlg300ParticleDispatch",
+    "F02403": "UpdateLivePlg301ParticleDispatch",
+}
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Effects::Templates::{name}" for fid, name in EFFECT_PARTICLE_LIVE_BINDINGS.items()
+}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::Templates::{name}": r"Native\Game\include\Effects\Templates\ParticlesLive.hpp"
+    for name in EFFECT_PARTICLE_LIVE_BINDINGS.values()
+}
+
+# #276 effects-trail-templates: each overlay's five-sample trail dispatch instance keeps the renderer-slot entry shape
+# in generated renderer tables and plugin updates; its live binding runs the typed emitter lifecycle
+# (TrailEmitter.cpp) with that overlay's emission cursor and typed target, control, init, update and render stages.
+# PLG074's dispatch (F01994) keeps its own binding, UpdateLivePlg074TrailEmitter.
+EFFECT_TRAIL_LIVE_BINDINGS = {
+    "F01948": "UpdateLivePlg057Trail",
+    "F01983": "UpdateLivePlg073Trail",
+    "F02023": "UpdateLivePlg086Trail",
+    "F02033": "UpdateLivePlg087Trail",
+    "F02075": "UpdateLivePlg128Trail",
+    "F02087": "UpdateLivePlg134Trail",
+    "F02104": "UpdateLivePlg137Trail",
+    "F02119": "UpdateLivePlg141Trail",
+    "F02145": "UpdateLivePlg146Trail",
+    "F02163": "UpdateLivePlg148Trail",
+    "F02299": "UpdateLivePlg242Trail",
+    "F02309": "UpdateLivePlg255Trail",
+    "F02346": "UpdateLivePlg265Trail",
+    "F02373": "UpdateLivePlg266Trail",
+    "F02384": "UpdateLivePlg291Trail",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Effects::Templates::{name}" for fid, name in EFFECT_TRAIL_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::Templates::{name}": r"Native\Game\include\Effects\Templates\TrailsLive.hpp"
+    for name in EFFECT_TRAIL_LIVE_BINDINGS.values()
+}
+
+# #276 effects-surface-templates: the grid, ten-vertex mesh, surface, mirrored-surface and rotating-surface instances
+# keep the renderer-slot entry shape (slot, command, packed parameter) in generated renderer tables and plugin updates;
+# each live binding passes its overlay's profile or mesh model to the typed instance and binds the slot, package,
+# scratch, GTE, heap and frame to SurfaceHost. Duplicate catalog rows bind to their canonical instance.
+EFFECT_SURFACE_LIVE_BINDINGS = {
+    "F01910": "UpdateLivePlg049RotatingSurface",
+    "F01924": "UpdateLivePlg053Grid",
+    "F01949": "UpdateLivePlg061Surface",
+    "F01950": "UpdateLivePlg061Grid",
+    "F01953": "UpdateLivePlg065RotatingSurface",
+    "F01966": "UpdateLivePlg069Mesh10",
+    "F01984": "UpdateLivePlg073RotatingSurface",
+    "F01985": "UpdateLivePlg073Grid",
+    "F01995": "UpdateLivePlg073RotatingSurface",
+    "F01997": "UpdateLivePlg077Mesh10",
+    "F01999": "UpdateLivePlg077Grid",
+    "F02000": "UpdateLivePlg077Surface",
+    "F02002": "UpdateLivePlg081RotatingSurface",
+    "F02010": "UpdateLivePlg082Grid",
+    "F02012": "UpdateLivePlg085Grid",
+    "F02015": "UpdateLivePlg086RotatingSurface",
+    "F02016": "UpdateLivePlg086Grid",
+    "F02024": "UpdateLivePlg087Surface",
+    "F02026": "UpdateLivePlg087Grid",
+    "F02059": "UpdateLivePlg128Surface",
+    "F02061": "UpdateLivePlg128RotatingSurface",
+    "F02062": "UpdateLivePlg128Grid",
+    "F02063": "UpdateLivePlg128Surface2",
+    "F02077": "UpdateLivePlg129Mesh10",
+    "F02078": "UpdateLivePlg129Surface",
+    "F02080": "UpdateLivePlg129RotatingSurface",
+    "F02097": "UpdateLivePlg137Mesh10",
+    "F02105": "UpdateLivePlg137Grid",
+    "F02107": "UpdateLivePlg138RotatingSurface",
+    "F02109": "UpdateLivePlg138Grid",
+    "F02112": "UpdateLivePlg139Grid",
+    "F02120": "UpdateLivePlg142Grid",
+    "F02123": "UpdateLivePlg142RotatingSurface",
+    "F02127": "UpdateLivePlg146MirrorSurface",
+    "F02167": "UpdateLivePlg150Grid",
+    "F02168": "UpdateLivePlg150Surface",
+    "F02170": "UpdateLivePlg152Grid",
+    "F02177": "UpdateLivePlg153Mesh10",
+    "F02184": "UpdateLivePlg154Mesh10",
+    "F02191": "UpdateLivePlg156Grid",
+    "F02192": "UpdateLivePlg158Surface",
+    "F02193": "UpdateLivePlg158MirrorSurface",
+    "F02195": "UpdateLivePlg158RotatingSurface",
+    "F02198": "UpdateLivePlg161RotatingSurface",
+    "F02207": "UpdateLivePlg161Grid",
+    "F02210": "UpdateLivePlg162RotatingSurface",
+    "F02220": "UpdateLivePlg165RotatingSurface",
+    "F02221": "UpdateLivePlg165Grid",
+    "F02223": "UpdateLivePlg166RotatingSurface",
+    "F02224": "UpdateLivePlg166MirrorSurface",
+    "F02228": "UpdateLivePlg167RotatingSurface",
+    "F02253": "UpdateLivePlg168Grid",
+    "F02263": "UpdateLivePlg170MirrorSurface",
+    "F02264": "UpdateLivePlg170RotatingSurface",
+    "F02266": "UpdateLivePlg170Grid",
+    "F02267": "UpdateLivePlg170Surface",
+    "F02288": "UpdateLivePlg236RotatingSurface",
+    "F02292": "UpdateLivePlg242Grid",
+    "F02300": "UpdateLivePlg246RotatingSurface",
+    "F02301": "UpdateLivePlg250RotatingSurface",
+    "F02320": "UpdateLivePlg260Mesh10",
+    "F02321": "UpdateLivePlg263Surface",
+    "F02374": "UpdateLivePlg272Grid",
+    "F02376": "UpdateLivePlg272Surface",
+    "F02377": "UpdateLivePlg273MirrorSurface",
+    "F02385": "UpdateLivePlg291Grid",
+    "F02387": "UpdateLivePlg297MirrorSurface",
+    "F02389": "UpdateLivePlg297Grid",
+    "F02391": "UpdateLivePlg300MirrorSurface",
+}
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Effects::Templates::{name}" for fid, name in EFFECT_SURFACE_LIVE_BINDINGS.items()
+}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::Templates::{name}": r"Native\Game\include\Effects\Templates\SurfacesLive.hpp"
+    for name in EFFECT_SURFACE_LIVE_BINDINGS.values()
+}
+
+# #276 slice 38 (effects-resources-transforms): the generated effect runtime, timeline, script and PLG callers keep
+# the original curve-sampling call shapes (5BF94.c:6314-6365); the live bindings sample the current package's bound
+# curve block and block-11 table into Effects_curveSamples.
+EFFECT_CURVES_LIVE_BINDINGS = {
+    "F01472": "LiveSampleAllEffectCurves",
+    "F01473": "LiveSampleEffectCurve",
+    "F01475": "LiveSegmentedEffectCurveDuration",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Effects::{name}" for fid, name in EFFECT_CURVES_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::{name}": r"Native\Game\include\Effects\CurvesLive.hpp"
+    for name in EFFECT_CURVES_LIVE_BINDINGS.values()
+}
+
+# #276 slice 38 (effects-resources-transforms): the generated effect runtime, timeline and PLG128 callers keep the
+# original camera call shapes (5BF94.c:6474-8323); the live bindings load the owned camera globals into the typed
+# EffectCameraState, run the camera core over the field and render cameras, and store the state back.
+EFFECT_CAMERA_LIVE_BINDINGS = {
+    "F01488": "LiveResetEffectCameraMotion",
+    "F01490": "LiveCaptureEffectCamera",
+    "F01494": "LiveSetEffectCameraTransitionMode",
+    "F01497": "LiveStartCameraShakeChannels",
+    "F01503": "LiveUpdateEffectCameraMotion",
+    "F01584": "LiveFocusCameraOnEffectTransform",
+    "F01585": "LiveRestoreActionEffectCamera",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Effects::{name}" for fid, name in EFFECT_CAMERA_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::{name}": r"Native\Game\include\Effects\CameraLive.hpp"
+    for name in EFFECT_CAMERA_LIVE_BINDINGS.values()
+}
+
+# #276 slice 38 (effects-resources-transforms): the generated effect script keeps the original transform call shapes
+# (5BF94.c:5940, 6227); the live bindings decode the current package's bound block 10 and run the typed transforms
+# over the instance's records.
+EFFECT_TRANSFORMS_LIVE_BINDINGS = {
+    "F01471": "LiveUpdateEffectTransforms",
+    "F04134": "LiveInitializeTransformStates",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Effects::{name}" for fid, name in EFFECT_TRANSFORMS_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::{name}": r"Native\Game\include\Effects\TransformsLive.hpp"
+    for name in EFFECT_TRANSFORMS_LIVE_BINDINGS.values()
+}
+
+# #276 slice 38 (effects-resources-transforms): the generated effect runtime and timeline keep the original loader,
+# context and package-walk call shapes (6F014.c:446-746, EFFPURGE 0.c:911); the live bindings load the owned loader
+# globals into the typed EffectResourceState, run the resource core over the disc queue, heap, overlay arena and VRAM,
+# store the state back and publish the bound package's legacy block pointers.
+EFFECT_RESOURCES_LIVE_BINDINGS = {
+    "F01595": "LiveInitializeEffectResources",
+    "F01596": "LiveSelectEffectResourceContext",
+    "F01597": "LiveSaveEffectResourceContext",
+    "F01598": "LiveRestoreEffectResourceContext",
+    "F01600": "LiveUpdateParticleGravityAndDrag",
+    "F01613": "LiveLoadEffectPurgeOverlay",
+    "F01614": "LiveLoadEffectPackage",
+    "F01615": "LiveReleaseEffectPackageResources",
+    "F01616": "LiveUpdateEffectTextureLoading",
+    "F01617": "LiveUpdateEffectPluginLoading",
+    "F01626": "LiveBindEffectPackageBlocks",
+    "F01890": "LiveConfigureEffectResources",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Effects::{name}" for fid, name in EFFECT_RESOURCES_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::{name}": r"Native\Game\include\Effects\EffectResourcesLive.hpp"
+    for name in EFFECT_RESOURCES_LIVE_BINDINGS.values()
+}
+
+# #276 field-room-effects: generated room loading, rendering, gimmick, door, event script and cutscene callers keep the
+# original index-and-flag call shapes (2842C.c:550-1456); the live bindings run the typed room effects over the owned
+# RoomEffectState and bind the loaded room's sections, sound bank, heap and floor query.
+FIELD_ROOM_EFFECTS_LIVE_BINDINGS = {
+    "F00670": "LiveFindRoomGeometryGroup",
+    "F00671": "LiveShowRoomGeometryGroup",
+    "F00672": "LiveHideRoomGeometryGroup",
+    "F00673": "LiveSwapRoomGeometryGroupFlags",
+    "F00674": "LiveAddRoomGeometryDepthBias",
+    "F00675": "LiveDisableRoomGeometryGroup",
+    "F00676": "LiveUpdateRoomEffects",
+    "F00682": "LiveInitializeRoomEffects",
+    "F00685": "LiveStartRoomEffect",
+    "F00686": "LiveReleaseRoomEffects",
+    "F00704": "LiveToggleRoomEffectUpdates",
+    "F00705": "LiveIsRoomEffectActive",
+    "F00706": "LiveFinishRoomDoorRotation",
+    "F00707": "LiveFinishRoomTiltRotation",
+    "F00708": "LiveDuckRoomEffectSound",
+    "F00709": "LiveSwapRoomGeometryRedGreen",
+    "F00710": "LiveRestoreRoomEffectSoundVolume",
+    "F00711": "LiveRestartRoomEffectSound",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Field::{name}" for fid, name in FIELD_ROOM_EFFECTS_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Field::{name}": r"Native\Game\include\Field\RoomEffectsLive.hpp"
+    for name in FIELD_ROOM_EFFECTS_LIVE_BINDINGS.values()
+}
+
+# #276 field-camera-background: generated battle, interaction, room loading, event script, cutscene and sphere callers
+# keep the original camera, room background and weather call shapes (146C.c:776-9106, 146C.c:17431-17710,
+# 2842C.c:266-547); the live bindings load the owned camera, background and weather globals into the typed
+# FieldCameraState, RoomBackgroundState and RoomWeatherState, run the VS::Field cores and store them back. The other
+# camera rules, RoomBackgroundColors (F00642), DrawRoomBackground (F00644) and DuckWeatherAmbientSound (F00669) have
+# only hand callers, and ApplyWeatherIntensity (F00661) and DrawRoomBackgroundTiles (F00668) only core callers, so they
+# have no binding.
+FIELD_CAMERA_LIVE_BINDINGS = {
+    "F00073": "LiveClampCameraLookAtToZone",
+    "F00074": "LiveComputeCameraTrackingStep",
+    "F00075": "LiveStepCameraLookAtTowardTarget",
+    "F00082": "LiveStorePreferredActionCameraDistance",
+    "F00157": "LiveUpdateCameraTileConstraint",
+    "F00177": "LiveIsCameraLookAtOnAshley",
+    "F00201": "LiveSyncCameraAnglesFromPosition",
+    "F00203": "LiveSetCameraPositionFromAngles",
+    "F00205": "LiveCameraPosition",
+    "F00206": "LiveSetCameraPosition",
+    "F00207": "LiveCameraLookAt",
+    "F00208": "LiveSetCameraLookAt",
+    "F00209": "LiveSetCameraRoll",
+    "F00236": "LiveSetFirstPersonViewDisabled",
+    "F00289": "LiveInitializeSphericalCamera",
+    "F00290": "LiveSetCameraPitchPreset",
+}
+FIELD_BACKGROUND_LIVE_BINDINGS = {
+    "F00635": "LiveInitializeRoomBackground",
+    "F00637": "LiveInitializeRoomBackgroundColors",
+    "F00639": "LiveSetBackgroundParallaxScale",
+    "F00640": "LiveSetTiledBackgroundEnabled",
+    "F00643": "LiveSetRoomBackgroundColors",
+    "F00645": "LiveQueueTiledBackgroundLoad",
+    "F00646": "LiveFinishTiledBackgroundLoad",
+    "F00647": "LiveReleaseTiledBackground",
+}
+FIELD_ENVIRONMENT_LIVE_BINDINGS = {
+    "F00658": "LiveSetRoomWeather",
+    "F00659": "LiveUpdateRoomWeather",
+    "F00662": "LiveSetWeatherVariationEnabled",
+    "F00663": "LiveSetWeatherIntensity",
+    "F00664": "LiveSetWeatherWindAngles",
+    "F00665": "LiveReleaseWeatherParticles",
+    "F00666": "LiveSetWeatherAmbientSound",
+    "F00667": "LiveSetRoomBackgroundOffset",
+}
+for _bindings, _header in (
+    (FIELD_CAMERA_LIVE_BINDINGS, r"Native\Game\include\Field\CameraLive.hpp"),
+    (FIELD_BACKGROUND_LIVE_BINDINGS, r"Native\Game\include\Field\BackgroundLive.hpp"),
+    (FIELD_ENVIRONMENT_LIVE_BINDINGS, r"Native\Game\include\Field\EnvironmentLive.hpp"),
+):
+    OWNED_CALL_BINDINGS |= {fid: f"VS::Field::{name}" for fid, name in _bindings.items()}
+    NATIVE_HELPER_HEADERS |= {f"VS::Field::{name}": _header for name in _bindings.values()}
+
+# #276 slice 25a (field-rooms state, mode and transitions): the generated room loading, interaction, battle, effect,
+# script, cutscene and menu callers keep the original transition, door, room visit and field mode call shapes
+# (146C.c:1866-4686, 8509-8912, 15756-15765; 18.c:468-595); the live bindings load the transition globals and pending
+# door, the visit records, the loaded room's display and the battle action selection into the typed Transitions,
+# RoomState and GameMode cores and store them back. ClearSavedRoomEnemies (F00231) is the same rule as
+# ForgetRoomEnemies (F00004) and binds to its live adapter.
+FIELD_TRANSITIONS_LIVE_BINDINGS = {
+    "F00257": "LiveScreenTransitionPhase",
+    "F00260": "LiveConfigureScreenTransition",
+    "F00261": "LiveSetTransitionWipeAngle",
+    "F00262": "LiveBeginScreenFadeOut",
+    "F00263": "LiveBeginScreenFadeIn",
+    "F00265": "LiveBeginRoomTransition",
+    "F00266": "LiveBeginScriptedRoomTransition",
+    "F00267": "LiveBeginZoneTransition",
+    "F00268": "LiveBeginScriptedZoneTransition",
+    "F00269": "LiveTeleportToLocation",
+    "F01857": "LiveInitializeRoomTransitionPrimitives",
+}
+FIELD_ROOM_STATE_LIVE_BINDINGS = {
+    "F00087": "LiveMarkCurrentRoomVisited",
+    "F00243": "LiveShowPrimaryRoomGeometry",
+    "F00244": "LiveHidePrimaryRoomGeometry",
+    "F00264": "LiveCancelPendingRoomVisit",
+    "F00270": "LiveFindLocationId",
+    "F00271": "LiveCurrentRoomId",
+    "F00553": "LiveEnableOwnedRoomRendering",
+    "F00554": "LiveDisableOwnedRoomRendering",
+    "F01859": "LiveInitializeRoomRuntimeState",
+}
+FIELD_GAME_MODE_LIVE_BINDINGS = {
+    "F00051": "LivePauseFieldForInteractionDialog",
+    "F00052": "LivePauseFieldForObjectInteraction",
+    "F00053": "LivePauseFieldForMenu",
+    "F00054": "LiveResumeFieldAfterMenu",
+    "F00088": "LiveEnterFieldExplorationMode",
+    "F00123": "LiveBeginShortcutMenu",
+    "F00124": "LiveEndShortcutMenu",
+    "F00125": "LiveBeginBattleActionMenu",
+    "F00126": "LiveCloseBattleActionMenu",
+    "F00127": "LiveDispatchBattleActionMenuResult",
+}
+for _bindings, _header in (
+    (FIELD_TRANSITIONS_LIVE_BINDINGS, r"Native\Game\include\Field\TransitionsLive.hpp"),
+    (FIELD_ROOM_STATE_LIVE_BINDINGS, r"Native\Game\include\Field\RoomStateLive.hpp"),
+    (FIELD_GAME_MODE_LIVE_BINDINGS, r"Native\Game\include\Field\GameModeLive.hpp"),
+):
+    OWNED_CALL_BINDINGS |= {fid: f"VS::Field::{name}" for fid, name in _bindings.items()}
+    NATIVE_HELPER_HEADERS |= {f"VS::Field::{name}": _header for name in _bindings.values()}
+OWNED_CALL_BINDINGS["F00231"] = "VS::Actors::ForgetLiveRoomEnemies"
+
+# #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
+# original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
+# room record, the pending door and the session state into the typed RoomLoading core and store them back.
+FIELD_ROOM_LOADING_LIVE_BINDINGS = {
+    "F00532": "LiveQueueZoneLoad",
+    "F00533": "LiveFinishZoneLoad",
+    "F00534": "LiveReleaseZoneData",
+    "F00535": "LiveZoneSoundFileId",
+    "F00536": "LiveSpawnRoomActors",
+    "F00542": "LiveQueueRoomLoad",
+    "F00543": "LiveFinishRoomLoad",
+    "F00545": "LiveUnloadCurrentRoom",
+    "F00598": "LiveIsCurrentRoomWorkshop",
+    "F00600": "LiveCurrentSceneId",
+    "F00601": "LiveRoomFallDestination",
+    "F00625": "LiveIsRoomAudioSequenceAbsent",
+    "F00627": "LiveRoomEnvironmentParameter",
+    "F00628": "LiveRoomTrapLevel",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Field::{name}" for fid, name in FIELD_ROOM_LOADING_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Field::{name}": r"Native\Game\include\Field\RoomLoadingLive.hpp"
+    for name in FIELD_ROOM_LOADING_LIVE_BINDINGS.values()
+}
+
+# #276 slice 25b (field-rooms rendering): the generated menu, battle flow, room loading and script callers keep the
+# original field rendering, room scene, tint, palette, texture id and occlusion call shapes (146C.c:15521-16449);
+# the live bindings load the room rendering globals, the loaded room's geometry, view triggers and palettes into the
+# typed RoomRendering core and store them back. The room load (row 25c) clears the tint through
+# LiveClearRoomTint. The ground colour wrapper (F00589, 146C.c:16465) is retired: its only callers, the model
+# drawing's, sample the floor layer through VS::Field::SampleLiveRoomLighting.
+FIELD_ROOM_RENDERING_LIVE_BINDINGS = {
+    "F00546": "LiveSetFieldRenderingEnabled",
+    "F00556": "LiveDrawRoomScene",
+    "F00557": "LiveDrawRoomGeometry",
+    "F00558": "LiveAdvanceRoomAnimationClock",
+    "F00559": "LiveSetRoomRenderingEnabled",
+    "F00560": "LiveCopyZonePaletteRow",
+    "F00561": "LiveUploadRoomPalettes",
+    "F00562": "LiveOffsetRoomTextureIds",
+    "F00563": "LiveSetRoomTint",
+    "F00564": "LiveClearRoomTint",
+    "F00565": "LiveSetRoomAnimationsPaused",
+    "F00587": "LiveApplyCameraGeometryOcclusion",
+    "F00588": "LiveClearGeometryOcclusion",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Field::{name}" for fid, name in FIELD_ROOM_RENDERING_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Field::{name}": r"Native\Game\include\Field\RoomRenderingLive.hpp"
+    for name in FIELD_ROOM_RENDERING_LIVE_BINDINGS.values()
+}
+
+# #276 actors-room-memory: generated room loading, actor loading, battle flow and gimmick callers keep the original
+# actor id, actor pointer and map/zone call shapes (146C.c:783-946, 1842-1864, 6028); the live bindings load the saved
+# room records (State_recentRoomEnemyStates) or Battle_actors, run the typed RoomEnemyMemory and ActorRoster cores and
+# store the records back. FindRememberedEnemy (F00005), AcquireRememberedEnemy (F00006) and CombatLimbIndex (F01711)
+# have no generated callers; the spawn and room restore sites read the memory through the FIXES-only bindings below.
+ACTORS_ROOM_MEMORY_LIVE_BINDINGS = {
+    "F00003": "ClearLiveRoomEnemyMemory",
+    "F00004": "ForgetLiveRoomEnemies",
+    "F00007": "StoreLiveRoomActorState",
+}
+ACTORS_ROOM_MEMORY_FIXES_BINDINGS = (
+    "IsLiveRememberedRoom",
+    "CopyLiveRememberedEnemy",
+    "SetLiveRememberedEnemyHidden",
+    "LiveRememberedEnemyHidden",
+)
+ACTOR_ROSTER_LIVE_BINDINGS = {
+    "F00008": "LinkLiveActorAfterAshley",
+    "F00009": "UnlinkLiveActorFromRoomList",
+    "F00010": "RemoveLiveActorAtSlot",
+    "F00049": "FreezeLiveActorAnimations",
+    "F00050": "UnfreezeLiveActorAnimations",
+    "F00164": "InitializeLivePlaceholderActor",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Actors::{name}" for fid, name in ACTORS_ROOM_MEMORY_LIVE_BINDINGS.items()}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Actors::{name}" for fid, name in ACTOR_ROSTER_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Actors::{name}": r"Native\Game\include\Actors\RoomEnemyMemoryLive.hpp"
+    for name in (*ACTORS_ROOM_MEMORY_LIVE_BINDINGS.values(), *ACTORS_ROOM_MEMORY_FIXES_BINDINGS)
+}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Actors::{name}": r"Native\Game\include\Actors\ActorRosterLive.hpp"
+    for name in ACTOR_ROSTER_LIVE_BINDINGS.values()
+}
+
+# #276 slice 19c (actors-spawning): the generated room loading, script and Ashley callers keep the original actor,
+# spawn record, character template and placement call shapes; each live binding decodes the legacy records into the
+# typed ActorSpawning records and runs the core over the LiveActorSpawnHost. The internal spawn steps (F00166-F00169,
+# F00171, F00173, F00174) have no generated callers outside the promoted files; F00273 and F01853 are
+# VS::Core::ReturnZero and VS::Core::NoOperation; F00285 and F01854 are the asset queue's free-slot probe.
+ACTOR_SPAWNING_LIVE_BINDINGS = {
+    "F00165": "CreateLiveAuxiliaryActor",
+    "F00175": "CreateLiveActorWithEquipment",
+    "F00176": "SpawnLiveRoomEnemy",
+    "F00274": "QueueLiveAshleyModelLoad",
+    "F00275": "QueueLiveScriptedActorSpawn",
+    "F00276": "LoadLiveActorEquipmentModels",
+    "F00277": "RefreshLiveActorEquipmentModels",
+    "F00305": "RemoveLiveScriptedActor",
+    "F01855": "RestoreLiveAshleyRuntimeState",
+    "F01856": "SpawnLiveAshleyWithEquipment",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Actors::{name}" for fid, name in ACTOR_SPAWNING_LIVE_BINDINGS.items()}
+OWNED_CALL_BINDINGS |= {fid: "VS::Content::FindLiveFreeActorAssetRequest" for fid in ("F00285", "F01854")}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Actors::{name}": r"Native\Game\include\Actors\ActorSpawningLive.hpp"
+    for name in ACTOR_SPAWNING_LIVE_BINDINGS.values()
+}
+
+# #276 actors-state: the generated battle, script and movement callers keep the original slot-id and record call
+# shapes; each live binding resolves the id through the actor record, battle actor, gimmick and weapon tables into the
+# typed ActorStateHost or BattleActorHost and runs the core from ActorFlags, BattleActorState, ActorLifecycle or
+# ActorPlacement. F00806 and F00807 (the empty placement hooks) need no adapter: callers use VS::Core::NoOperation.
+ACTOR_STATE_LIVE_BINDINGS = {
+    "F00245": "EnableLiveActorModel",
+    "F00246": "EnableAllLiveActorModels",
+    "F00247": "DisableLiveActorModel",
+    "F00248": "DisableAllLiveActorModels",
+    "F00251": "SetLiveActorHostile",
+    "F00252": "LiveActorHpPercentage",
+    "F00253": "RestoreLiveActorVitals",
+    "F00293": "FindLiveActorByModelId",
+    "F00294": "LiveActorAtSlot",
+    "F00295": "CountLiveActorsByDisposition",
+    "F00296": "IsLiveActorRetainedAfterDefeat",
+    "F00299": "SetLiveActorLogicEnabled",
+    "F00300": "SetOtherLiveActorLogicEnabled",
+    "F00301": "SetLiveActorDetached",
+    "F00808": "ResetLiveActorMotionState",
+    "F00809": "ResetAllLiveActorMovement",
+    "F00835": "BeginLiveActorDeath",
+    "F00841": "SetLiveActorCompanion",
+    "F00851": "AttachLiveActorToParentBone",
+    "F00852": "ReleaseLiveActorAttachmentLock",
+    "F00864": "SetLiveActorDisplayFlags",
+    "F00872": "LiveActorStateFlags",
+    "F00873": "LiveActorPlacement",
+    "F00901": "PlaceLiveActorInRoom",
+    "F00902": "FindLiveActorAtFlightPosition",
+    "F00903": "SeparateLiveActorFlightPlacement",
+    "F00906": "LiveActorSavedPlacement",
+    "F00907": "FindLiveNearestActorAhead",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Actors::{name}" for fid, name in ACTOR_STATE_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Actors::{name}": r"Native\Game\include\Actors\ActorStateLive.hpp"
+    for name in ACTOR_STATE_LIVE_BINDINGS.values()
+}
+
+# #276 effects-trail-nine-templates: each overlay's nine-sample trail dispatch instance (trails9.h:685) keeps the
+# renderer-slot entry shape in generated renderer tables; its live binding runs the same typed emitter lifecycle over
+# Effects_Trail9State with that overlay's emission cursor and the shared nine-sample stages (TrailNineTarget ...
+# TrailNineRender).
+EFFECT_TRAIL_NINE_LIVE_BINDINGS = {
+    "F01907": "UpdateLivePlg049TrailNine",
+    "F01918": "UpdateLivePlg050TrailNine",
+    "F01941": "UpdateLivePlg057TrailNine",
+    "F01973": "UpdateLivePlg069TrailNine",
+    "F02096": "UpdateLivePlg135TrailNine",
+    "F02206": "UpdateLivePlg161TrailNine",
+    "F02219": "UpdateLivePlg165TrailNine",
+    "F02235": "UpdateLivePlg167TrailNine",
+    "F02242": "UpdateLivePlg168TrailNine",
+    "F02260": "UpdateLivePlg169TrailNine",
+    "F02286": "UpdateLivePlg232TrailNine",
+}
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Effects::Templates::{name}" for fid, name in EFFECT_TRAIL_NINE_LIVE_BINDINGS.items()
+}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Effects::Templates::{name}": r"Native\Game\include\Effects\Templates\TrailsLive.hpp"
+    for name in EFFECT_TRAIL_NINE_LIVE_BINDINGS.values()
+}
+
+# #276 menu-framework: the generated menus, battle flow and MENU*.PRG overlays keep the original row, text, ordering
+# table and record call shapes; each live binding loads the framework's variables into the typed State, runs the
+# Menu::Framework function over the workspace, ordering tables, disc queue, text boxes and submenus, and stores the
+# State back. Overlay copies of one routine bind to the same entry. NoOperation (F02552, F02842, F03062, F03063,
+# F03065) needs no adapter: callers use the typed name from Framework.hpp.
+MENU_FRAMEWORK_LIVE_BINDINGS = {
+    "F01342": "LoadLiveMenuOverlay",
+    "F01344": "LiveMenuItem",
+    "F01345": "SetLiveMenuItem",
+    "F01347": "LiveGradientStopColor",
+    "F01348": "DrawLiveMenuItem",
+    "F01349": "UpdateLiveMainMenuSelection",
+    "F01350": "UpdateLiveMenuOverlay",
+    "F01364": "InitLiveGameInterface",
+    "F01365": "ResumeLiveAfterActionSelection",
+    "F01366": "LiveActionRestrictionFlags",
+    "F01367": "OpenLiveGameMenu",
+    "F01371": "OpenLiveShortcutMenu",
+    "F01372": "ReleaseLiveMenuRows",
+    "F01373": "OpenLiveLootListMenu",
+    "F01374": "OpenLiveLootEntryMenu",
+    "F01375": "OpenLiveChestStorageMenu",
+    "F01376": "OpenLiveAbilityUnlockMenu",
+    "F01377": "OpenLiveChallengeMenu",
+    "F01387": "LiveActionSelectionState",
+    "F01407": "DrawLiveMainMenuCursor",
+    "F02512": "CreateLiveActionRows",
+    "F02513": "LiveHighlightedActionRow",
+    "F02514": "LiveActionSelectionResult",
+    "F02515": "CreateLiveActionRow",
+    "F02516": "UpdateLiveActionMenu",
+    "F02517": "UpdateLiveInformationVisibility",
+    "F02518": "SetLiveCommandLabel",
+    "F02519": "DrawLiveCommandLabel",
+    "F02520": "SetLiveBackgroundFade",
+    "F02521": "DeactivateLiveRow",
+    "F02522": "DismissLiveInformationBox",
+    "F02523": "InitializeLiveInformationBox",
+    "F02524": "SetLiveInformationMessage",
+    "F02525": "DrawLiveButtonIcon",
+    "F02526": "DrawLiveCursor",
+    "F02527": "DrawLiveColoredInteger",
+    "F02528": "DrawLiveComparedInteger",
+    "F02529": "DrawLiveNeutralInteger",
+    "F02530": "DrawLiveFeatheredRowIcon",
+    "F02531": "DrawLiveMaterialIndicator",
+    "F02532": "DrawLiveEquipmentStateIcon",
+    "F02533": "DrawLiveRowIcon",
+    "F02534": "SetLiveActionCostText",
+    "F02535": "DrawLiveActionCostPanel",
+    "F02536": "DrawLiveButtonPromptBackground",
+    "F02537": "SetLiveBackgroundPriority",
+    "F02538": "LoadLiveBackgroundTexture",
+    "F02539": "CreateLiveMenuRows",
+    "F02540": "CloseLiveRowsAndRememberCursor",
+    "F02541": "LiveHighlightedRow",
+    "F02542": "LiveSelectedRow",
+    "F02543": "CreateLiveListRow",
+    "F02544": "UpdateLiveRowSelection",
+    "F02545": "DrawLiveBackground",
+    "F02546": "DrawLiveFeatheredRowCharacter",
+    "F02547": "DrawLiveTabNavigation",
+    "F02548": "DrawLiveScrollableRow",
+    "F02549": "UpdateAndDrawLiveRows",
+    "F02550": "UpdateLiveScreen",
+    "F02565": "RenderLiveAshley",
+    "F02570": "ContinueLiveItemDetailsTransition",
+    "F02572": "UpdateLiveItemDetailsSelection",
+    "F02582": "LiveWeaponSortValue",
+    "F02584": "LiveShieldSortValue",
+    "F02586": "LiveMiscSortValue",
+    "F02588": "LiveEquipmentSortValue",
+    "F02683": "SetLiveMenuVisible",
+    "F02688": "ClearLiveMenuExceptTitle",
+    "F02697": "BuildLiveYawMatrix",
+    "F02698": "BuildLivePitchMatrix",
+    "F02798": "SetLiveMenuVisible",
+    "F02802": "ShowLiveSecondaryTitle",
+    "F02808": "BuildLiveYawMatrix",
+    "F02809": "BuildLivePitchMatrix",
+    "F02946": "ContinueLiveItemDetailsTransition",
+    "F02948": "UpdateLiveItemDetailsSelection",
+    "F02960": "LiveWeaponSortValue",
+    "F02962": "LiveShieldSortValue",
+    "F02964": "LiveMiscSortValue",
+    "F02966": "LiveEquipmentSortValue",
+    "F02988": "SetLiveMenuVisible",
+    "F02990": "ShowLiveSecondaryTitle",
+    "F04136": "LiveNextFreeActorAssetRequest",
+    "F04138": "FlyOutLiveRowLeft",
+    "F04139": "FlyOutLiveRowsLeftExcept",
+    "F04140": "FlyOutLiveRowRight",
+    "F04141": "ClearLiveMenuExcept",
+    "F04142": "FlyOutLiveRowsAndHoistSelection",
+    "F04143": "AreLiveMenuRowsIdle",
+    "F04144": "LiveQuitDelay",
+    "F04145": "ReturnLiveFromSubmenu",
+    "F04146": "UpdateLiveMainMenu",
+}
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Menu::Framework::{name}" for fid, name in MENU_FRAMEWORK_LIVE_BINDINGS.items()
+}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Menu::Framework::{name}": r"Native\Game\include\Menu\Framework\FrameworkLive.hpp"
+    for name in MENU_FRAMEWORK_LIVE_BINDINGS.values()
+}
+
+# #276 menu-files-options: the generated title screen (TitleMenu.cpp, SaveFiles.cpp) keeps the TITLE.PRG call shapes of
+# the file screens' shared drawing and display routines; FilesLive.cpp binds them to the typed VS::Menu::Files core
+# over the title screen's text table, elements and display buffers. DecimalDigitCount keeps its shape and is called
+# by its typed name. The MENU7.PRG and MENU8.PRG screens have only hand-maintained callers.
+MENU_FILES_LIVE_BINDINGS = {
+    "F02741": "DrawLiveInteger",
+    "F03608": "DrawLiveInteger",
+    "F02753": "DrawLiveText",
+    "F03620": "DrawLiveText",
+    "F02755": "LiveElementBackgroundColor",
+    "F03622": "LiveElementBackgroundColor",
+    "F02758": "DrawLiveBackground",
+    "F03625": "DrawLiveBackground",
+    "F03635": "InitializeLiveDisplay",
+    "F03636": "SwapLiveBuffers",
+    "F03639": "UpdateLiveClearSaveReminder",
+    "F03640": "DrawLiveExitFade",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Menu::Files::{name}" for fid, name in MENU_FILES_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Menu::Files::{name}": r"Native\Game\include\Menu\FilesLive.hpp"
+    for name in MENU_FILES_LIVE_BINDINGS.values()
+}
+
+# #276 menu-framework-rows-details: the generated menus keep the MAINMENU.PRG call shapes of the item rows, the
+# equipment details and the actor preview; ItemRowsLive.cpp, EquipmentDetailsLive.cpp and ActorPreviewLive.cpp bind
+# them to the typed VS::Menu::Framework cores over the menu rows, the item tables and the actor records.
+ITEM_ROWS_LIVE_BINDINGS = {
+    "F02472": "CreateLiveWeaponComponentRow",
+    "F02473": "CreateLiveShieldGemRow",
+    "F02474": "FormatLiveWeaponRow",
+    "F02475": "FormatLiveInventoryWeaponRow",
+    "F02476": "FormatLiveBladeRow",
+    "F02477": "FormatLiveGripRow",
+    "F02478": "FormatLiveShieldRow",
+    "F02479": "FormatLiveInventoryShieldRow",
+    "F02480": "FormatLiveArmorRow",
+    "F02481": "FormatLiveInventoryArmorRow",
+    "F02482": "FormatLiveGemRow",
+    "F02483": "FormatLiveMiscItemRow",
+    "F02503": "LoadLiveItemText",
+    "F02504": "UnloadLiveItemTextWhenReady",
+}
+EQUIPMENT_DETAILS_LIVE_BINDINGS = {
+    "F02484": "ResetLiveEquipmentStats",
+    "F02485": "SetLiveWeaponStats",
+    "F02486": "SetLiveBladeStats",
+    "F02487": "SetLiveGripStats",
+    "F02488": "SetLiveShieldStats",
+    "F02489": "SetLiveArmorStats",
+    "F02490": "SetLiveGemStats",
+    "F02497": "ResetLiveItemDetailCursor",
+    "F02499": "UpdateLiveItemDetails",
+    "F02555": "DrawLiveEquipmentStatPage",
+    "F02557": "SetLiveEnabledStatPages",
+    "F02558": "UpdateLiveEquipmentStatPages",
+    "F02559": "SetLiveRangeAndRisk",
+    "F02560": "SetLivePrimaryStats",
+    "F02561": "SetLiveActorComparisonStats",
+    "F02562": "UpdateLivePrimaryStatPanel",
+    "F02563": "SetLiveDpPp",
+    "F02564": "UpdateLiveDpPpBars",
+}
+ACTOR_PREVIEW_LIVE_BINDINGS = {
+    "F02463": "LoadLiveActorPreview",
+    "F02464": "CloneLiveActorPreview",
+    "F02465": "ResetLiveActorPreviewPose",
+    "F02466": "ReleaseLiveActorPreview",
+    "F02467": "DrawLiveActorPreview",
+    "F02470": "ResetLiveAshleyEquipmentPose",
+    "F02471": "QueueLiveAshleyWeaponAnimations",
+}
+for _bindings, _header in ((ITEM_ROWS_LIVE_BINDINGS, "ItemRowsLive.hpp"),
+                           (EQUIPMENT_DETAILS_LIVE_BINDINGS, "EquipmentDetailsLive.hpp"),
+                           (ACTOR_PREVIEW_LIVE_BINDINGS, "ActorPreviewLive.hpp")):
+    OWNED_CALL_BINDINGS |= {fid: f"VS::Menu::Framework::{name}" for fid, name in _bindings.items()}
+    NATIVE_HELPER_HEADERS |= {
+        f"VS::Menu::Framework::{name}": "Native\\Game\\include\\Menu\\Framework\\" + _header
+        for name in _bindings.values()
+    }
+del _bindings, _header
+
+# Owned globals whose contents are a disc string table: the hand-maintained Live binding defines the storage and
+# ModuleData.cpp still fills it from the module image at start-up.
+OWNED_MODULE_STRING_TABLES = {
+    "G01269",  # Menu_Files_containerStrings (MENU7.PRG _containerStrings), FilesLive.cpp
+    "G01393",  # Menu_Options_menuStrings (MENU8.PRG _menuStrings), OptionsLive.cpp
+    "G01396",  # Menu_Rename_renderRenameMenuStrings (MENU8.PRG _renderRenameMenuStrings), RenameLive.cpp
+}
+
+# #276 audio-control-sfx: generated music, stream, cutscene, actor, field, event and menu callers keep the original
+# group/ID, bank pointer, SVECTOR and request call shapes; the live bindings load the tag cursors and bank slots,
+# dispatch through the mixer and store the cursors back.
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Audio::{name}"
+    for fid, name in (
+        ("F03101", "Control::LiveSetMusicBranchThreshold"),
+        ("F03118", "Control::LiveFadeMusicVolume"),
+        ("F03120", "Control::LiveSetDiscVolume"),
+        ("F03124", "Control::LiveFadeMusicTempoScale"),
+        ("F03127", "Control::LiveFadeMusicPitchScale"),
+        ("F03132", "Control::LiveStopAllMusic"),
+        ("F03145", "Control::LiveStartCutsceneStream"),
+        ("F03146", "Control::LiveStopCutsceneStream"),
+        ("F03148", "Control::LiveFadeCutsceneVolume"),
+        ("F03203", "SoundEffects::LiveReleaseMatchingVoices"),
+        ("F03515", "LivePlaySfx"),
+        ("F03516", "LivePlaySfxCentered"),
+        ("F03517", "LiveSfxPanAndVolume"),
+        ("F03519", "LivePlayWorldSfx"),
+        ("F03521", "LiveFadeSfxVolume"),
+        ("F03522", "LiveFadeSfxPitch"),
+        ("F03523", "LiveFadeSfxPan"),
+        ("F03524", "LiveStopSfx"),
+        ("F03525", "LiveStopAllSfxPlayback"),
+        ("F03535", "LivePlayBankSfx"),
+        ("F03536", "LivePlayBankSfxCentered"),
+        ("F03539", "LiveStopBankSfx"),
+        ("F03540", "LiveFadeBankSfxVolume"),
+    )
+}
+
+# #276 audio-music-streams: generated script, room, menu, credits, effect, actor and gimmick callers keep the original
+# slot/ID, drive, actor record, model instance and gimmick call shapes; the live bindings read the sound state and
+# legacy records, run the typed cores and store the state back.
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Audio::Live{name}"
+    for fid, name in (
+        ("F00237", "SetZoneMusicSwitchEnabled"),
+        ("F00272", "PlayActorScriptSound"),
+        ("F00626", "SetRoomAmbienceDucked"),
+        ("F00994", "ActorSoundPanAndVolume"),
+        ("F00999", "PlayActorModelSound"),
+        ("F01000", "PlayActorModelSoundVariant"),
+        ("F01001", "PlayActorSoundPair"),
+        ("F01002", "PlayGimmickSoundPair"),
+        ("F01003", "PlayActorSurfaceContactSound"),
+        ("F03477", "BeginXaStream"),
+        ("F03478", "RequestXaStreamStop"),
+        ("F03487", "MusicBeatPosition"),
+        ("F03488", "SaveMusicPlaybackState"),
+        ("F03489", "SetMusicJumpThreshold"),
+        ("F03490", "StopMusicSlotPlayback"),
+        ("F03491", "ResumeMusicSlot"),
+        ("F03492", "CrossfadeMusicSlot"),
+        ("F03493", "PlayMusicSlot"),
+        ("F03494", "CurrentMusicSlot"),
+        ("F03495", "CurrentMusicId"),
+        ("F03496", "LoadMusicSlot"),
+        ("F03498", "PollMusicSlotLoad"),
+        ("F03499", "PollMusicLoads"),
+        ("F03500", "LoadMusicSlotBlocking"),
+        ("F03502", "FreeMusicSlot"),
+        ("F03504", "MusicSlotVolume"),
+        ("F03505", "QueryMusicSlotVolume"),
+        ("F03506", "FadeMusicSlotVolume"),
+        ("F03507", "FadeMusicSlotTempo"),
+        ("F03508", "FadeMusicSlotPitch"),
+        ("F03511", "StopAndFreeCurrentMusic"),
+        ("F03543", "PlayCutsceneStreamSlotCentered"),
+    )
+}
+
+# #276 row 34 (event script actor opcodes): the 47 BATTLE.PRG actor opcode handlers of 4A0A8.c are typed C++
+# (Event/ScriptActorCommands.cpp) behind a ScriptActorHost. Each opcode table slot holds a C binding with the dispatch
+# ABI (Event/ScriptActorOpcodes.h) at the handler's module-image address. The generated script VM, screen and dialog
+# callers of the selection, activity and dialog-anchor helpers keep the original call shapes through
+# ScriptActorCommandsLive.hpp.
+EVENT_SCRIPT_ACTOR_OPCODES = (
+    ("F01051", 0x800B7428, "ScriptResetActorGroupState"),
+    ("F01052", 0x800B7490, "ScriptStoreActorTile"),
+    ("F01053", 0x800B7574, "ScriptSpawnActor"),
+    ("F01054", 0x800B75F4, "ScriptNavigateActorToTile"),
+    ("F01055", 0x800B76A8, "ScriptPlayActorAnimation"),
+    ("F01056", 0x800B770C, "ScriptSetActorGroupFlags"),
+    ("F01057", 0x800B77DC, "ScriptSetActorSoundMix"),
+    ("F01058", 0x800B784C, "ScriptWalkActorToTile"),
+    ("F01059", 0x800B792C, "ScriptWalkActorToWorldPos"),
+    ("F01060", 0x800B7A98, "ScriptSlideActorToTile"),
+    ("F01061", 0x800B7B58, "ScriptSlideActorToWorldPos"),
+    ("F01062", 0x800B7C90, "ScriptSetActorAttachment"),
+    ("F01063", 0x800B7D10, "ScriptNavigateActorToWorldPos"),
+    ("F01064", 0x800B7DC4, "ScriptTurnActorToFacing"),
+    ("F01065", 0x800B7EF0, "ScriptFaceOtherActor"),
+    ("F01066", 0x800B7F84, "ScriptFaceTile"),
+    ("F01067", 0x800B804C, "ScriptScaleActor"),
+    ("F01068", 0x800B80B4, "ScriptRemoveActorGroup"),
+    ("F01069", 0x800B810C, "ScriptWaitForActorFlags"),
+    ("F01070", 0x800B81A0, "ScriptSetActorColorOverride"),
+    ("F01071", 0x800B822C, "ScriptQueueActorAnimation"),
+    ("F01072", 0x800B8290, "ScriptRotateActorAxes"),
+    ("F01073", 0x800B8360, "ScriptSetActorHeadAngles"),
+    ("F01074", 0x800B83D4, "ScriptPlayActorAnimationAtFrame"),
+    ("F01075", 0x800B8438, "ScriptQueueActorAnimationAtFrame"),
+    ("F01076", 0x800B849C, "ScriptSetActorIdleAnimation"),
+    ("F01077", 0x800B8510, "ScriptLookAtActor"),
+    ("F01078", 0x800B8590, "ScriptLookAtWorldPos"),
+    ("F01079", 0x800B860C, "ScriptLoadObjectModel"),
+    ("F01080", 0x800B86E8, "ScriptWaitForObjectLoad"),
+    ("F01081", 0x800B8708, "ScriptReleaseObjectModel"),
+    ("F01082", 0x800B8764, "ScriptSelectObjectTextureBank"),
+    ("F01083", 0x800B8788, "ScriptSetActorOverlayPass"),
+    ("F01084", 0x800B884C, "ScriptSetActorWeaponDrawn"),
+    ("F01100", 0x800B91F0, "ScriptPlayActorAnimationSound"),
+    ("F01101", 0x800B9230, "ScriptSetNpcUpdatesEnabled"),
+    ("F01103", 0x800B92A0, "ScriptRestoreActorVitals"),
+    ("F01108", 0x800B9608, "ScriptSetActorEquipmentModels"),
+    ("F01109", 0x800B9670, "ScriptSetActorYawOscillation"),
+    ("F01115", 0x800B97F8, "ScriptClearAshleyStatusEffects"),
+    ("F01129", 0x800B9D74, "ScriptSetActorRenderMode"),
+    ("F01180", 0x800BAC38, "CommandSetEnteredDoor"),
+    ("F01181", 0x800BAC5C, "CommandStoreActorRangeBearing"),
+    ("F01182", 0x800BAD78, "CommandSetActorActivity"),
+    ("F01183", 0x800BADE0, "CommandAwardMiscLoot"),
+    ("F01184", 0x800BAE74, "CommandConsumeMiscItem"),
+    ("F01185", 0x800BAEA0, "CommandStoreActorDistance"),
+)
+NATIVE_HELPER_HEADERS |= {
+    f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptActorOpcodes.h" for _, _, name in EVENT_SCRIPT_ACTOR_OPCODES
+}
+EVENT_SCRIPT_ACTOR_LIVE_BINDINGS = {
+    "F01186": "SetLiveEventActorActivity",
+    "F01208": "BuildLiveScriptActorSelection",
+    "F01209": "NextLiveScriptSelectedActor",
+    "F01210": "LiveActorDialogAnchor",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Event::{name}" for fid, name in EVENT_SCRIPT_ACTOR_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Event::{name}": r"Native\Game\include\Event\ScriptActorCommandsLive.hpp"
+    for name in EVENT_SCRIPT_ACTOR_LIVE_BINDINGS.values()
+}
+
+# #276 row 36 (event script audio, dialog and effects): the 53 BATTLE.PRG sound, music, dialog box, effect and
+# screen effect opcode handlers of 4A0A8.c are typed C++ (Event/Script{Audio,Dialog,Effect}Commands.cpp) behind
+# ScriptAudioHost, ScriptDialogHost and ScriptEffectHost. Each opcode table slot holds a C binding with the dispatch
+# ABI at the handler's module-image address. The dialog placement helper's only caller is promoted; the script VM's
+# per-frame scanline, splash tween and weather tween updates keep their call shapes through
+# ScriptEffectCommandsLive.hpp.
+EVENT_SCRIPT_AUDIO_OPCODES = (
+    ("F01143", 0x800BA2E0, "ScriptPlaySoundCommand"),
+    ("F01144", 0x800BA35C, "CommandPlayActorSfx"),
+    ("F01145", 0x800BA39C, "CommandSlideSfxVolume"),
+    ("F01146", 0x800BA3E4, "CommandStopAllSfx"),
+    ("F01147", 0x800BA404, "CommandStopSfx"),
+    ("F01148", 0x800BA444, "CommandLoadSfxSlot"),
+    ("F01149", 0x800BA470, "CommandWaitSfxSlotRelease"),
+    ("F01150", 0x800BA494, "CommandFreeSfx"),
+    ("F01151", 0x800BA4C8, "CommandSelectSfxBank"),
+    ("F01152", 0x800BA4EC, "CommandLoadEventMusic"),
+    ("F01153", 0x800BA52C, "CommandCrossfadeMusic"),
+    ("F01154", 0x800BA588, "CommandLoadMusicSlot"),
+    ("F01155", 0x800BA5B4, "CommandFreeMusic"),
+    ("F01156", 0x800BA5E8, "CommandPlayMusic"),
+    ("F01157", 0x800BA61C, "CommandSlideMusicVolume"),
+    ("F01158", 0x800BA650, "CommandSlideMusicTempo"),
+    ("F01159", 0x800BA684, "CommandSlideMusicPitch"),
+    ("F01160", 0x800BA6B8, "CommandStopMusic"),
+    ("F01161", 0x800BA6E0, "CommandWaitMusicSlot"),
+    ("F01162", 0x800BA72C, "CommandPushMusicState"),
+    ("F01163", 0x800BA74C, "CommandWaitMusicSlotLoad"),
+    ("F01164", 0x800BA774, "CommandLoadSoundFile"),
+    ("F01165", 0x800BA798, "CommandWaitSoundQueue"),
+    ("F01166", 0x800BA7BC, "CommandWaitMusicTimer"),
+    ("F01167", 0x800BA800, "CommandSlideSfxPitch"),
+    ("F01168", 0x800BA848, "CommandSlideSfxPan"),
+    ("F01169", 0x800BA890, "CommandResumeMusicSlot"),
+    ("F01177", 0x800BAAF0, "CommandSetMusicJumpThreshold"),
+    ("F01207", 0x800BB668, "CommandPlayMenuSelectSfx"),
+)
+EVENT_SCRIPT_DIALOG_OPCODES = (
+    ("F01036", 0x800B6908, "ScriptInitDialogBox"),
+    ("F01037", 0x800B6AB0, "ScriptShowDialogText"),
+    ("F01038", 0x800B6B74, "ScriptDismissDialogBox"),
+    ("F01040", 0x800B6D48, "ScriptInitActorDialogBox"),
+    ("F01041", 0x800B6F8C, "ScriptWaitForDialogDismissal"),
+    ("F01048", 0x800B7218, "ScriptSetDialogInteger"),
+    ("F01049", 0x800B7358, "ScriptSetDialogTransitionDuration"),
+    ("F01050", 0x800B7398, "ScriptSelectDialogChoice"),
+    ("F01107", 0x800B9564, "ScriptSetDialogSpeaker"),
+)
+EVENT_SCRIPT_EFFECT_OPCODES = (
+    ("F01170", 0x800BA8BC, "CommandPlayActorEffect"),
+    ("F01171", 0x800BA90C, "CommandAdvanceEffectStage"),
+    ("F01172", 0x800BA94C, "CommandWaitEffectState"),
+    ("F01173", 0x800BAA04, "CommandYieldEffectRelease"),
+    ("F01174", 0x800BAA34, "CommandWaitEffectContinuation"),
+    ("F01175", 0x800BAA58, "CommandWaitEffectRelease"),
+    ("F01176", 0x800BAACC, "CommandMarkEffectStageReady"),
+    ("F01178", 0x800BAB14, "CommandPlayVibrationPattern"),
+    ("F01179", 0x800BABCC, "CommandSetActorTrail"),
+    ("F01188", 0x800BB288, "CommandWaitScreenEffectLoad"),
+    ("F01189", 0x800BB2B8, "CommandSetScreenDistortion"),
+    ("F01190", 0x800BB2E4, "CommandLoadScreenEffects"),
+    ("F01191", 0x800BB304, "CommandReservedScreenEffect"),
+    ("F01192", 0x800BB30C, "CommandFreeScreenEffects"),
+    ("F01201", 0x800BB4F0, "CommandSetScanlineOverlay"),
+)
+EVENT_SCRIPT_MEDIA_OPCODE_HEADERS = (
+    (r"Native\Game\src\Event\ScriptAudioOpcodes.h", EVENT_SCRIPT_AUDIO_OPCODES),
+    (r"Native\Game\src\Event\ScriptDialogOpcodes.h", EVENT_SCRIPT_DIALOG_OPCODES),
+    (r"Native\Game\src\Event\ScriptEffectOpcodes.h", EVENT_SCRIPT_EFFECT_OPCODES),
+)
+EVENT_SCRIPT_MEDIA_OPCODES = EVENT_SCRIPT_AUDIO_OPCODES + EVENT_SCRIPT_DIALOG_OPCODES + EVENT_SCRIPT_EFFECT_OPCODES
+NATIVE_HELPER_HEADERS |= {
+    f"Event_{name}Opcode": header for header, rows in EVENT_SCRIPT_MEDIA_OPCODE_HEADERS for _, _, name in rows
+}
+EVENT_SCRIPT_EFFECT_LIVE_BINDINGS = {
+    "F01211": "DrawLiveScanlineOverlay",
+    "F01212": "UpdateLiveImageTweens",
+    "F01213": "UpdateLiveWeatherTween",
+}
+OWNED_CALL_BINDINGS |= {fid: f"VS::Event::{name}" for fid, name in EVENT_SCRIPT_EFFECT_LIVE_BINDINGS.items()}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Event::{name}": r"Native\Game\include\Event\ScriptEffectCommandsLive.hpp"
+    for name in EVENT_SCRIPT_EFFECT_LIVE_BINDINGS.values()
+}
+
+# #276 row 31 (battle targeting and prerequisites): the 83 BATTLE.PRG target collection, sphere target menu,
+# attack prerequisite, battle ability and battle mode functions are typed C++ (Battle/{Targeting,AttackPrerequisites,
+# Abilities,BattleMode}.cpp) behind ActionTargetingHost, TargetSelectionHost, PrerequisiteTarget, AbilityHost and
+# BattleModeHost. Generated callers keep their call shapes through the *Live.hpp bindings; each attack prerequisite
+# table slot holds a Battle_*Slot C binding with the table ABI at the rule's module-image address.
+BATTLE_TARGETING_LIVE_BINDINGS = {
+    "F00102": "LiveReturnToBattleActionMenu",
+    "F00103": "LiveFilterAreaActionTargets",
+    "F00105": "LiveSetSingleActionTarget",
+    "F00106": "LiveSetAllActionTargets",
+    "F00107": "LiveCollectEnvironmentActionTargets",
+    "F00115": "LiveInitializeActionTargeting",
+    "F00116": "LiveBeginActorActionSelection",
+    "F01313": "LiveUpdateSphereTargetPosition",
+    "F01323": "LiveUpdateTargetSelectionMenu",
+    "F01808": "LiveCalculateActionAreaReach",
+    "F01809": "LiveCalculateActionRangeSquared",
+}
+BATTLE_ABILITIES_LIVE_BINDINGS = {
+    "F00000": "LiveArmDefenseAbilityTimingWindow",
+    "F00091": "LivePendingBattleAbilityUnlocks",
+    "F00093": "LiveBeginPendingAbilityReward",
+    "F00094": "LiveGrantPendingAbilityUnlock",
+    "F00303": "LiveIsActionUnlocked",
+    "F00304": "LiveUnlockAction",
+    "F01368": "LiveHasUnlockedSpellClass",
+    "F01369": "LiveHasUnlockedWeaponBreakArt",
+    "F01370": "LiveHasUnlockedBattleAbility",
+}
+BATTLE_ATTACK_PREREQUISITES_LIVE_BINDINGS = {"F00393": "LiveCheckActionHitPrerequisite"}
+BATTLE_MODE_LIVE_BINDINGS = {"F00249": "LiveIsActorWeaponDrawn", "F00250": "LiveSetActorBattleMode"}
+BATTLE_TARGETING_PREREQUISITE_LIVE_HEADERS = (
+    (r"Native\Game\include\Battle\TargetingLive.hpp", BATTLE_TARGETING_LIVE_BINDINGS),
+    (r"Native\Game\include\Battle\AbilitiesLive.hpp", BATTLE_ABILITIES_LIVE_BINDINGS),
+    (r"Native\Game\include\Battle\AttackPrerequisitesLive.hpp", BATTLE_ATTACK_PREREQUISITES_LIVE_BINDINGS),
+    (r"Native\Game\include\Battle\BattleModeLive.hpp", BATTLE_MODE_LIVE_BINDINGS),
+)
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Battle::{name}" for _, bindings in BATTLE_TARGETING_PREREQUISITE_LIVE_HEADERS
+    for fid, name in bindings.items()
+}
+NATIVE_HELPER_HEADERS |= {
+    f"VS::Battle::{name}": header for header, bindings in BATTLE_TARGETING_PREREQUISITE_LIVE_HEADERS
+    for name in bindings.values()
+}
+BATTLE_ATTACK_PREREQUISITE_SLOTS = (
+    ("F00353", 0x8007F548, "RejectAttackPrerequisite"),
+    ("F00354", 0x8007F550, "AcceptAttackPrerequisite"),
+    ("F00355", 0x8007F558, "AcceptAttackPrerequisite"),
+    ("F00356", 0x8007F560, "AcceptAttackPrerequisite"),
+    ("F00357", 0x8007F568, "IsAttackTargetUndead"),
+    ("F00358", 0x8007F58C, "IsAttackTargetLiving"),
+    ("F00359", 0x8007F5B0, "RejectAttackPrerequisite"),
+    ("F00360", 0x8007F5B8, "RejectAttackPrerequisite"),
+    ("F00361", 0x8007F5C0, "RejectAttackPrerequisite"),
+    ("F00362", 0x8007F5C8, "CanApplyStrengthDown"),
+    ("F00363", 0x8007F5E8, "CanApplyIntelligenceDown"),
+    ("F00364", 0x8007F608, "CanApplyAgilityDown"),
+    ("F00365", 0x8007F628, "CanApplyEquipmentDown"),
+    ("F00366", 0x8007F6D8, "CanApplyHalfMovement"),
+    ("F00367", 0x8007F6F8, "CanApplyStrengthUp"),
+    ("F00368", 0x8007F718, "CanApplyIntelligenceUp"),
+    ("F00369", 0x8007F738, "CanApplyAgilityUp"),
+    ("F00370", 0x8007F758, "CanApplyEquipmentUp"),
+    ("F00371", 0x8007F808, "CanApplyQuicken"),
+    ("F00372", 0x8007F828, "CanApplySilence"),
+    ("F00373", 0x8007F848, "CanApplyMagicWard"),
+    ("F00374", 0x8007F868, "CanApplyRegeneration"),
+    ("F00375", 0x8007F888, "CanApplyParalysis"),
+    ("F00376", 0x8007F8A8, "CanApplyPoison"),
+    ("F00377", 0x8007F8C8, "CanApplyNumbness"),
+    ("F00378", 0x8007F8E8, "CanApplyCurse"),
+    ("F00379", 0x8007F908, "CanApplyAirAttackUp"),
+    ("F00380", 0x8007F96C, "CanApplyFireAttackUp"),
+    ("F00381", 0x8007F9D0, "CanApplyEarthAttackUp"),
+    ("F00382", 0x8007FA34, "CanApplyWaterAttackUp"),
+    ("F00383", 0x8007FA98, "CanApplyAirDefenseUp"),
+    ("F00384", 0x8007FB34, "CanApplyFireDefenseUp"),
+    ("F00385", 0x8007FBD0, "CanApplyEarthDefenseUp"),
+    ("F00386", 0x8007FC6C, "CanApplyWaterDefenseUp"),
+    ("F00387", 0x8007FD08, "CanApplyBanish"),
+    ("F00388", 0x8007FD28, "CanApplyExorcise"),
+    ("F00389", 0x8007FD74, "CanApplyDrain"),
+    ("F00390", 0x8007FDC0, "IgnoreAttackPrerequisite"),
+    ("F00391", 0x8007FDC8, "IgnoreAttackPrerequisite"),
+    ("F00392", 0x8007FDD0, "IgnoreAttackPrerequisite"),
+)
+NATIVE_HELPER_HEADERS |= {
+    f"Battle_{name}Slot": r"Native\Game\src\Battle\AttackPrerequisites.h"
+    for _, _, name in BATTLE_ATTACK_PREREQUISITE_SLOTS
+}
+
 POINTER_FREE_TYPES = {
     "T00629": "vs_action_t: two inline 32-bit hit words, no pointers; main.h:74-107",
 }
@@ -829,6 +2291,8 @@ MODULE_DATA_BLOBS = (
      "4B16C.s:1208 twenty-four triangles with byte offsets into projected shadow vertices"),
     ("BATTLE/BATTLE.PRG", 0x88F58, 0x800F1758, 4, "Content_battleAiHesitationLengths",
      "7B5DC.s:func_800E4180 indexed hesitation lengths; native module-owned data"),
+    ("BATTLE/BATTLE.PRG", 0x83278, 0x800EBA78, 320, "Content_battleMainMenuHelpText",
+     "5BF94.c:2934 D_800EBA78 main menu help text; bytes 316..319 open the gradient window"),
     ("BATTLE/BATTLE.PRG", 0x1060, 0x80069860, 0x98, "Content_battleLimbNameBytes",
      "58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8"),
     ("BATTLE/BATTLE.PRG", 0x80B0C, 0x800E930C, 0x71C, "Content_battleGimmickTemplateBytes",
@@ -837,6 +2301,9 @@ MODULE_DATA_BLOBS = (
      "5BF94.c:textbox frame vertices; nine styles precede D_800EB588"),
     ("BATTLE/BATTLE.PRG", 0x7FD48, 0x800E8548, 116, "Content_battleTriggerMarkerBytes",
      "146C.c:func_8008E19C complete one-group/one-quad marker definition; G00039-G00041 are interior aliases"),
+    ("BATTLE/BATTLE.PRG", 0x41C, 0x80068C1C, 664, "Content_battleSkyDome",
+     "146C.c:17537 D_80068C1C sky dome: 34 twelve-byte vertices (colour word 2) and 64 four-byte faces; "
+     "SetRoomBackgroundColors patches the vertex colours"),
     ("SLUS_010.40", 0x800, 0x80010000, 0x52000, "Content_residentLfoSamples",
      "25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code"),
 )
@@ -850,7 +2317,18 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("SLUS_010.40", 0x80042364, "VS::Boot::ResetToTitleLive"),  # F03423
+    ("SLUS_010.40", 0x80042420, "VS::Boot::EnterBattleLive"),  # F03424
+    ("SLUS_010.40", 0x800424E4, "VS::Boot::RunEndingAndReturnToTitleLive"),  # F03425
+    ("SLUS_010.40", 0x80042C74, "VS::Boot::WaitForOverlayReadyLive"),  # F03440
+    ("SLUS_010.40", 0x80042C94, "VS::Boot::SetSoftResetEnabledLive"),  # F03441
     ("BATTLE/BATTLE.PRG", 0x800B9DB4, "Event_ScriptSetAshleyBattleModeOpcode"),  # F01130 opcode table
+    # #276 row 34 opcode table slots
+    *(("BATTLE/BATTLE.PRG", address, f"Event_{name}Opcode") for _, address, name in EVENT_SCRIPT_ACTOR_OPCODES),
+    # #276 row 36 opcode table slots
+    *(("BATTLE/BATTLE.PRG", address, f"Event_{name}Opcode") for _, address, name in EVENT_SCRIPT_MEDIA_OPCODES),
+    # #276 row 31 attack prerequisite table slots
+    *(("BATTLE/BATTLE.PRG", address, f"Battle_{name}Slot") for _, address, name in BATTLE_ATTACK_PREREQUISITE_SLOTS),
     ("BATTLE/BATTLE.PRG", 0x800E6BA0, "VS::Field::IsLivePointOutsideSolidVolumes"),  # F01833
     ("BATTLE/BATTLE.PRG", 0x800E6C34, "VS::Field::TraceLiveActorAndTerrainCollision"),  # F01834
     ("BATTLE/BATTLE.PRG", 0x800E65DC, "VS::Battle::Ai::CacheLiveActorAiWorkingState"),  # F01819
@@ -1032,6 +2510,20 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x80018984, "VS::Audio::Mixer::LivePauseWorldSoundEffects"),  # F03255 command 0x9D
     ("SLUS_010.40", 0x80018AA0, "VS::Audio::Mixer::LiveResumeWorldSoundEffects"),  # F03256 command 0x9C
     ("SLUS_010.40", 0x80018BD8, "VS::Audio::Mixer::LiveIgnoreCommand"),  # F03259 204 unused commands
+    # #276 audio-control-sfx: Audio_Mixer_kCommandHandlers holds the sound-effect program commands.
+    ("SLUS_010.40", 0x80017208, "VS::Audio::SoundEffects::LivePlayInterfaceProgramPair"),  # F03217 command 0x34
+    ("SLUS_010.40", 0x80017254, "VS::Audio::SoundEffects::LivePlayInterfaceProgram"),  # F03218 command 0x30
+    ("SLUS_010.40", 0x800172D4, "VS::Audio::SoundEffects::LivePlaySharedProgram"),  # F03219 command 0x20
+    ("SLUS_010.40", 0x8001733C, "VS::Audio::SoundEffects::LivePlayBlobPrograms"),  # F03220 command 0x24
+    ("SLUS_010.40", 0x8001746C, "VS::Audio::SoundEffects::LiveStopPrograms"),  # F03221 command 0x21
+    ("SLUS_010.40", 0x80017870, "VS::Audio::SoundEffects::LiveSetProgramVolume"),  # F03228 command 0xA0
+    ("SLUS_010.40", 0x80017958, "VS::Audio::SoundEffects::LiveFadeProgramVolume"),  # F03229 command 0xA1
+    ("SLUS_010.40", 0x80017AD8, "VS::Audio::SoundEffects::LiveSetSceneVolume"),  # F03230 command 0xA8
+    ("SLUS_010.40", 0x80017B54, "VS::Audio::SoundEffects::LiveFadeSceneVolume"),  # F03231 command 0xA9
+    ("SLUS_010.40", 0x80017C1C, "VS::Audio::SoundEffects::LiveSetProgramPan"),  # F03232 command 0xA2
+    ("SLUS_010.40", 0x80017CFC, "VS::Audio::SoundEffects::LiveFadeProgramPan"),  # F03233 command 0xA3
+    ("SLUS_010.40", 0x80017E74, "VS::Audio::SoundEffects::LiveSetScenePan"),  # F03234 command 0xAA
+    ("SLUS_010.40", 0x80017EEC, "VS::Audio::SoundEffects::LiveFadeScenePan"),  # F03235 command 0xAB
     # #276 Core runtime: the original addresses of the empty handlers, copies, random draws and keystream.
     *(("BATTLE/BATTLE.PRG", address, "VS::Core::IgnoreLiveActorCallback")  # F00023, F00055
       for address in (0x8006B20C, 0x8006C478)),
@@ -1060,32 +2552,18 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x800427A8, "VS::Core::NextLiveRandomBounded"),  # F03434
     ("SLUS_010.40", 0x80042860, "VS::Core::NextLiveRandomAveraged"),  # F03435
     ("BATTLE/BATTLE.PRG", 0x80083430, "VS::Items::CalculateLiveItemRecovery"),  # F00423 Battle_statCalculators[15]
+    ("BATTLE/BATTLE.PRG", 0x8008255C, "VS::Field::CalculateLiveTrapPanelDamage"),  # F00420 Battle_statCalculators[12]
+    ("BATTLE/BATTLE.PRG", 0x80082FF4, "VS::Field::CalculateLiveHealingPanelRecovery"),  # F00422 [14]
+    ("EFFECT/PLG074.BIN", 0x800F98F8, "VS::Effects::Templates::UpdateLivePlg073TiledRing"),  # F01986
+    ("EFFECT/PLG074.BIN", 0x800FA7F0, "VS::Effects::Templates::UpdateLivePlg073Ring"),  # F01987
+    ("EFFECT/PLG074.BIN", 0x800FD534, "VS::Effects::Templates::UpdateLivePlg073RotatingSurface"),  # F01995
 )
 
-MODULE_FUNCTION_ENTRIES = (
-    ("EFFECT/PLG074.BIN", 0x800F98F8, "F01986"),
-    ("EFFECT/PLG074.BIN", 0x800FA7F0, "F01987"),
-    ("EFFECT/PLG074.BIN", 0x800FBBB0, "F01989"),
-    ("EFFECT/PLG074.BIN", 0x800FBDC8, "F01990"),
-    ("EFFECT/PLG074.BIN", 0x800FC28C, "F01991"),
-    ("EFFECT/PLG074.BIN", 0x800FC404, "F01992"),
-    ("EFFECT/PLG074.BIN", 0x800FC590, "F01993"),
-    ("EFFECT/PLG074.BIN", 0x800FD534, "F01995"),
-)
+# #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
+# the emitter calls; no image stores their addresses, so they no longer have module entries.
+MODULE_FUNCTION_ENTRIES: tuple[tuple[str, int, str], ...] = ()
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
-    "F00157": [
-        ("if (Field_CollisionCellAt(var_a0, var_a1, var_a2)->occlusionAndFloorFlags & 1)",
-         "Field_MpdTileCell* camera_cell = Field_CollisionCellAt(var_a0, var_a1, var_a2);\n"
-         "    if (camera_cell == NULL) {\n"
-         "        Core_Warnf(\"field.camera\", \"camera tile has no authored collision cell: x=%d z=%d layer=%d\", (int)var_a0, (int)var_a1, var_a2);\n"
-         "    }\n"
-         "    if (camera_cell != NULL && (camera_cell->occlusionAndFloorFlags & 1))",
-         "146C.c:5339 camera occlusion consumes the nullable cell lookup; "
-         "original scene motion can end outside the authored grid. Explicitly "
-         "report that query and retain existing no-occlusion clearing without "
-         "changing collision, actor placement or any valid view-trigger branch"),
-    ],
     "F01716": [
         ("    int selected[3];\n",
          "    int selected[3] = { 0, 0, 0 };\n",
@@ -1123,21 +2601,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "&Effects_screenEffectDefaults",
          "Default controller storage is a native overlay object including its widened request pointer"),
     ],
-    "F00896": [
-        ("((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->routeTarget, 0);",
-         "Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, 0);",
-         "40564.c:661 takes an int actor ID; the conflicting narrow 3A1A0.c prototype leaves upper argument bits undefined on x64"),
-    ],
-    "F00897": [
-        ("((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->sharedSequences[4], 0);",
-         "Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->sharedSequences[4], 0);",
-         "Cancellation must use the same full-width typed tile-translation ABI as the actual implementation"),
-    ],
-    "F00898": [
-        ("((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->routeTarget, -1);",
-         "Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, -1);",
-         "Travel must promote the slot to the actual int parameter rather than call through an incompatible u_char function pointer"),
-    ],
     "F00298": [
         ("VS::Battle::Ai::ActorNavigationOverrideStatus()",
          "VS::Battle::Ai::ActorNavigationOverrideStatus(arg0)",
@@ -1160,46 +2623,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("*temp_s4 = (void*)(((uintptr_t)var_s2 << 8) >> 8);",
          "*temp_s4 = LegacyGpu_Handle(var_s2);",
          "ring packets must publish encoded 32-bit links, never raw x64 addresses"),
-    ],
-    "F00099": [
-        ("""    if ((Battle_actionState->abilityInputSucceeded == 1)
-        && (Battle_actors[action->targets[0].target.targetActor]->stats->currentHp != 0)) {
-        ((void (*)(Battle_ActionRequest*))Battle_Ai_NotifyActionRelationshipChanges)(action);
-        Battle_actionFlowMode = 8;
-        ++Battle_actionState->chainStep;
-        ++Battle_actionState->queueIndex;
-        Battle_ResolveActionTargets(Input_settings.mappedChainAbilities[Battle_actionState->chainAbilitySlot - 1],
-            &Battle_actionState->queue[Battle_actionState->queueIndex & 3], &Battle_actionState->selection, 1);
-        Battle_QueueChainCount(Battle_actionState->queueIndex);
-        if (Audio_Seq_unusedScoredata.maxChain < Battle_actionState->queueIndex) {
-            Audio_Seq_unusedScoredata.maxChain = Battle_actionState->queueIndex;
-        }""",
-         """    if (Battle_actionState->abilityInputSucceeded == 1) {
-        if (Battle_actors[action->targets[0].target.targetActor]->stats->currentHp != 0) {
-            ((void (*)(Battle_ActionRequest*))Battle_Ai_NotifyActionRelationshipChanges)(action);
-            Battle_actionFlowMode = 8;
-            ++Battle_actionState->chainStep;
-            ++Battle_actionState->queueIndex;
-            Battle_ResolveActionTargets(Input_settings.mappedChainAbilities[Battle_actionState->chainAbilitySlot - 1],
-                &Battle_actionState->queue[Battle_actionState->queueIndex & 3], &Battle_actionState->selection, 1);
-            Battle_QueueChainCount(Battle_actionState->queueIndex);
-            if (Audio_Seq_unusedScoredata.maxChain < Battle_actionState->queueIndex) {
-                Audio_Seq_unusedScoredata.maxChain = Battle_actionState->queueIndex;
-            }
-        } else {
-            Battle_FinishBattleAbilitySequence();
-        }""",
-         "Owner rule #183: accepted lethal chain timing earns the existing point, but never queues an attack on a corpse; defense and kill-gated learning stay unchanged"),
-        ("""(Audio_Seq_unusedArtsStatus.kills.totalKills
-                < Battle_battleAbilityPointRequirements[Audio_Seq_unusedArtsStatus.kills
-                        .battleAbilitiesUnlocked])""",
-         "(Audio_Seq_unusedArtsStatus.kills.totalKills < 0xFFFF)",
-         "Owner rule #183 banks every successful chain/defense toward later abilities while learning waits for a death; saturate the persistent ushort instead of discarding threshold overflow"),
-    ],
-    "F00545": [
-        ("void Field_UnloadCurrentRoom(void)\n{",
-         "void Field_UnloadCurrentRoom(void)\n{\n    Boot_ResetGameplayInspection();",
-         "146C.c:15489 revoke diagnostic readiness before any teardown yield/free"),
     ],
     "F00782": [
         ("memset(s1, 0, 0x178);",
@@ -1383,65 +2806,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("sizeof *Menu_Loot_lootList * 160", "sizeof *Menu_Loot_lootList * kMenuLootRowCapacity",
          "Consolidation restoration includes every supported row."),
     ],
-    "F01867": [
-        ("            curveSamples[segment] = segment * 0x600 + Core_Random_Rand() % width - width / 2;",
-         """            int sampleJitter = Core_Random_Rand();
-            // PLG045 func_800FA760, 0x800FAA74: DIV by zero leaves the dividend in HI.
-            if (width != 0) {
-                sampleJitter %= width;
-            }
-            curveSamples[segment] = segment * 0x600 + sampleJitter - width / 2;""",
-         "Preserve the original nontrapping remainder and RNG consumption when the "
-         "width reused from the previous ribbon becomes zero; do not clamp or reload it."),
-    ],
-    "F01856": [
-        ("    int bladeMaterial;\n    int shieldMaterial;",
-         "    int bladeMaterial = 0;\n    int shieldMaterial = 0;",
-         "INITBTL/18.c:func_800F9CCC passes both materials even when their "
-         "model IDs are zero; initialize empty slots without changing equipped ones."),
-    ],
-    "F02438": [
-        (" // Partial playback?", "",
-         "the XA request argument is initial CD volume rather than a byte count"),
-    ],
-    "F01611": [
-        ("(void* arg0)", "(void* arg0, size_t byte_count)",
-         "carry the containing effect block extent into stream validation"),
-        ("VS::Audio::BindRoomCutsceneStream((uintptr_t)arg0)",
-         "VS::Audio::BindLiveRoomCutsceneStream(arg0, byte_count)",
-         "bind native stream assets instead of a PS1 array-offset alias; F03545 #46 typed promotion: the "
-         "stream binding validates the block's AKAO stream and exported channel assets"),
-    ],
-    "F01626": [
-        ("VS::Effects::BindEffectTextureTables((Effects_PackageBlock1*)arg0->blocks);",
-         "VS::Effects::BindLiveEffectTextureTables(std::as_writable_bytes(std::span<u_char>(\n"
-         "                arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta))));",
-         "F01606 #46 typed promotion: the live binding validates the actual block payload extent "
-         "as bytes before publishing the package's material tables"),
-        ("Effects_BindEffectAuxiliarySoundBank(arg0->blocks);",
-         "Effects_BindEffectAuxiliarySoundBank(\n"
-         "                arg0->blocks, (meta & 0xFFFF) - sizeof(u_int));",
-         "the stream payload excludes the four-byte package block header"),
-        ("{\n    while (1) {\n        int meta = arg0->meta;",
-         "{\n    VS::Effects::ForgetLivePackageExtents();\n    while (1) {\n        int meta = arg0->meta;",
-         "F01994 #271: a rebound package starts without recorded definition and curve extents"),
-        ("Effects_BindEffectCurves((Effects_CurveBlock*)arg0->blocks);",
-         "Effects_BindEffectCurves((Effects_CurveBlock*)arg0->blocks);\n"
-         "            VS::Effects::RecordLiveEffectCurves(std::as_bytes(std::span<const u_char>(\n"
-         "                arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta))));",
-         "F01994 #271: record how many curves the curve block's payload actually contains"),
-        ("Effects_BindParticleDefinitions((Effects_PackageBlock5*)arg0->blocks);",
-         "Effects_BindParticleDefinitions((Effects_PackageBlock5*)arg0->blocks);\n"
-         "            VS::Effects::RecordLiveParticleDefinitions(std::as_bytes(std::span<const u_char>(\n"
-         "                arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta))));",
-         "F01994 #271: record how many particle definitions the block's payload holds"),
-    ],
-    "F03554": [
-        ("void Audio_ResetSoundSlots(void)\n{",
-         "void Audio_ResetSoundSlots(void)\n{\n"
-         "    Audio_Native_ResetCutsceneStream();",
-         "slot reset must release native voices and borrowed stream bindings"),
-    ],
     "F01563": [
         ("(*(u_int*)((char*)arg0 + 0x14) & 0xF800) == 0",
          "arg0->childCount == 0",
@@ -1516,127 +2880,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F00731": [
         ("*ot = ((u_long)prim << 8) >> 8;", "*ot = LegacyGpu_Handle(prim);",
          "overhead awareness frame links must retain native packet ownership, not truncated addresses"),
-    ],
-    "F02418": [
-        ("Ending_Credits_AllocateRenderBuffers();",
-         "Ending_Credits_AllocateRenderBuffers();\n"
-         "    if (!Ending_Credits_PrepareEmbeddedArt()) abort();",
-         "D4.c:999 needs complete owned embedded TIM payloads and the original "
-         "TIM8 workspace alias before any upload or illustration decode"),
-        *[
-            (f"&Ending_Credits_embeddedTexture{name}",
-             f"Ending_Credits_EmbeddedArt({index})",
-             "Preserve the complete original TIM palette/pixels, not only its header")
-            for index, name in enumerate((
-                "One", "Two", "Three", "Four", "Five", "Six",
-                "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
-            ))
-        ],
-    ],
-    "F02420": [
-        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
-         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
-         "D4.c:1081 credits presentation consumes the ordering table established "
-         "by BeginFrame; PS1 byte4 overlaps the native primitive pointer after "
-         "pointer widening. Preserve the original final ordering bucket."),
-    ],
-    "F02441": [
-        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
-         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
-         "D4.c:1677 results loading and display both consume BeginFrame's native "
-         "ordering table, not a pointer read from PS1 scratch byte4"),
-    ],
-    "F02444": [
-        ("poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);",
-         "poly = Render_frameScratch.primitiveCursor;",
-         "D4.c:1887 results background borrows the typed native frame cursor"),
-        ("AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) + 0x1FF8, poly++);",
-         "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
-         "PS1 byte offset0x1FF8 is ordering bucket0x7FE; retain that bucket "
-         "without reading a native pointer at scratch byte4"),
-        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;",
-         "Render_frameScratch.primitiveCursor = poly;",
-         "publish all five native background primitives to the frame owner"),
-    ],
-    "F02448": [
-        ("char sp10[2];", "char sp10[12];",
-         "D4.c:2070 formats at least three digits plus NUL; own enough native "
-         "storage for the full signed32 string without changing format or drawing"),
-    ],
-    "F02449": [
-        ("char sp18[2];", "char sp18[12];",
-         "D4.c:2113 counting completion has the same undersized decomp buffer; "
-         "preserve counting/audio/format behavior with a complete native string"),
-    ],
-    "F03520": [
-        ("temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];",
-         "if (Audio_soundState.currentSfxBank == 0 ||\n"
-         "            Audio_soundState.currentSfxBank >\n"
-         "                sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {\n"
-         "            Core_Errorf(\"audio.sfx\", \"cannot resolve banked SFX group=0x%X id=%d bank=%u\", arg0, arg1, Audio_soundState.currentSfxBank);\n"
-         "            return -1;\n"
-         "        }\n"
-         "        temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];\n"
-         "        if (temp_v1 == 0 || arg1 < 0 || (u_int)arg1 >= ((u_int*)temp_v1)[0]) {\n"
-         "            Core_Errorf(\"audio.sfx\", \"unavailable bank or invalid SFX id=%d bank=%u\", arg1, Audio_soundState.currentSfxBank);\n"
-         "            return -1;\n"
-         "        }",
-         "main.c:9950 must reject an unselected/null bank and out-of-table IDs "
-         "before indexing; -1 is failure, not the built-in zero selector"),
-        ("temp_v1 = (int)temp_v1 + (arg1 + (int*)temp_v1)[1];",
-         "{\n"
-         "            int program_offset = ((int*)temp_v1)[(size_t)arg1 + 1];\n"
-         "            if (program_offset < 0 ||\n"
-         "                (size_t)program_offset < ((size_t)((u_int*)temp_v1)[0] + 1) * sizeof(u_int)) {\n"
-         "                Core_Errorf(\"audio.sfx\", \"invalid banked SFX offset=%d id=%d\", program_offset, arg1);\n"
-         "                return -1;\n"
-         "            }\n"
-         "            temp_v1 += program_offset;\n"
-         "        }",
-         "retain the complete host pointer while adding the serialized relative offset"),
-    ],
-    **{
-        function_id: [
-            ("int temp_v0;", "intptr_t temp_v0;",
-             "banked SFX selectors must survive in the caller's full-width carrier"),
-            ("temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);",
-             "temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);\n"
-             "        if (temp_v0 == -1) return;",
-             "a rejected bank binding must not become a built-in-ID fallback"),
-        ]
-        for function_id in ("F03521", "F03522")
-    },
-    "F03523": [
-        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
-         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
-         "        if (program_address == -1) return;",
-         "preserve the original group parameter and a separate native pointer carrier"),
-        ("if (arg0 != 0)", "if (program_address != 0)",
-         "only built-in categories use the zero resolver result"),
-        ("Audio_Control_FadeSoundEffectPan(arg0, 0,",
-         "Audio_Control_FadeSoundEffectPan(program_address, 0,",
-         "dispatch the entire resolved bank pointer without narrowing through the group"),
-    ],
-    "F03524": [
-        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
-         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
-         "        if (program_address == -1) return;",
-         "main.c:10028 must not narrow a program pointer into the integer group parameter"),
-        ("if (arg0 != 0)", "if (program_address != 0)",
-         "preserve the built-in category discriminator"),
-        ("Audio_Playback_StopSoundEffects(arg0, 0);",
-         "Audio_Playback_StopSoundEffects(program_address, 0);",
-         "stop the exact native bank program, not a truncated pointer or fallback ID"),
-    ],
-    "F03203": [
-        ("pChannel->effectId < 0",
-         "(uintptr_t)pChannel->effectId >= 0x80000000U",
-         "the existing program-selector domain used by UsesSoundEffectTags is not "
-         "the sign of a native x64 pointer; preserve the -1 banked-program release mode"),
-    ],
-    "F02771": [
-        ("*nextPrim = ((u_long)prim << 8) >> 8;", "*nextPrim = LegacyGpu_Handle(prim);",
-         "260.c:3504 game-over fade links must store the native packet handle, not a truncated host address"),
     ],
     "F02799": [
         ("*before = ((u_long)prim << 8) >> 8;",
@@ -1717,47 +2960,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
          "C48.c:546 scratch ends with 128 text pointers; reserve native pointer width, not the PS1 512 bytes"),
     ],
-    "F03669": [
-        ("    memset(&Input_settings, 0, sizeof Input_settings);\n"
-         "    Input_settings.menuFlags = 0x2D8;\n"
-         "    Input_settings.information = 1;\n"
-         "    Input_settings.simpleMap = 3;\n"
-         "    Input_settings.containerEmpty = 1;\n"
-         "    Input_settings.abilityTimingDisplay = 1;\n"
-         "    Input_settings.cursorMemory = 1;",
-         "    Boot_InitializePlayerSettings();",
-         "22C.c:4463 share real settings defaults with direct native sessions without title presentation"),
-    ],
-    "F00199": [
-        ("                    ot = Render_legacyOrderingTables[Render_frameBuf];",
-         "                    Boot_EncounterPollStop();\n"
-         "                    ot = Render_legacyOrderingTables[Render_frameBuf];",
-         "native encounter hosts can stop at a production frame boundary; inactive for normal sessions"),
-        ("if ((Render_framebufferEffectState == 1) || (Render_framebufferEffectState == 2)) {",
-         "if (VS::Render::IsLiveFramebufferEffectShowing()) {",
-         "#276 slice A5: 22C.c reads the effect's state word for starting (1) or drawing (2); the typed "
-         "ScreenOverlay state answers it"),
-    ],
-    "F00077": [
-        ("void Field_UpdateCameraOrbitInput(void)",
-         '#include "Battle/TargetPages.h"\n\nvoid Field_UpdateCameraOrbitInput(void)',
-         "Paged target lists explicitly own shoulder buttons while the ordinary field camera remains unchanged"),
-        ("    if (Field_sphericalCamera.delta.yaw == 0) {\n        if (!CAMERA_INPUT_LOCKED()) {",
-         "    if (Field_sphericalCamera.delta.yaw == 0) {\n"
-         "        if (!CAMERA_INPUT_LOCKED() && !Battle_TargetPagesUseShoulders()) {",
-         "Do not initiate orbit rotation from a target-page command"),
-        ("&& !CAMERA_INPUT_LOCKED())", "&& !CAMERA_INPUT_LOCKED() && !Battle_TargetPagesUseShoulders())",
-         "Do not extend an existing orbit from held page-navigation buttons"),
-    ],
-    "F00112": [
-        ("previews[count]", "previews[Battle_ValidateTargetPreviewIndex(count)]",
-         "Check native candidate capacity before every direct actor/limb/chest preview write"),
-    ],
-    "F00116": [
-        ("&Battle_actionState->selection, 0x84C",
-         "&Battle_actionState->selection, sizeof Battle_actionState->selection",
-         "Clear the complete native action request after widening native target capacity"),
-    ],
     "F00508": [
         ("arg0, 0x84C", "arg0, sizeof(Battle_ActionRequest)",
          "Clear the complete native action result including all supported targets"),
@@ -1771,29 +2973,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
            "Read the native particle target rather than texture-animation pointer bytes")
           for index, axis in enumerate("XYZ")],
     ],
-    "F00111": [
-        ("void Battle_CollectSourceAreaActionTargets(",
-         '#include "Battle/TargetPages.h"\n\nvoid Battle_CollectSourceAreaActionTargets(',
-         "Expose the shared native target-capacity and paging API to the target collector translation unit"),
-        ("previews[count]", "previews[Battle_ValidateTargetPreviewIndex(count)]",
-         "Check native candidate capacity before source-area preview writes"),
-    ],
-    "F00113": [
-        ("previews[count]", "previews[Battle_ValidateTargetPreviewIndex(count)]",
-         "Check native candidate capacity before ground-area preview writes"),
-    ],
-    "F01323": [
-        ("        case 19:",
-         "        case 19:\n"
-         "            if (Battle_HandleTargetPageButtons()) {\n"
-         "                *target = 0xFF;\n"
-         "                return 0;\n"
-         "            }",
-         "L1/R1 change whole-actor pages only after the original target-list animation has settled"),
-        ("*target = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D;",
-         "*target = Battle_MapTargetPageIndex((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D);",
-         "Return the absolute preview index while each original visible page keeps local indices"),
-    ],
     "F01279": [
         ("void Battle_InitSphere(void)",
          '#include "Battle/TargetPages.h"\n\nvoid Battle_InitSphere(void)',
@@ -1806,66 +2985,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    Battle_ResetTargetPages();\n    if (Battle_targetSphere != NULL) {",
          "Free/re-entry cannot retain a borrowed page pointer into an old action state"),
     ],
-    "F00103": [
-        ("    ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);",
-         "    if (Battle_actionState->isPlayerAction != 0) {\n"
-         "        ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);\n"
-         "    }",
-         "NPC area filtering retains action geometry without requiring the optional player sphere renderer"),
-    ],
     "F01297": [
         ("    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",
          "    Battle_ResetTargetPages();\n    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",
          "Clearing target selection invalidates the native page view"),
-    ],
-    "F00539": [
-        ("    if (dataLen != 0) {",
-         "    Boot_EncounterRoomPlacements(&data, &dataLen);\n"
-         "    if (dataLen != 0) {",
-         "explicit encounter definitions replace room placements before the production spawn/cache lifecycle"),
-    ],
-    "F00543": [
-        ("void Field_FinishRoomLoad(int arg0)\n{",
-         "void Field_FinishRoomLoad(int arg0)\n{\n    Boot_ResetGameplayInspection();",
-         "146C.c:15272 do not inspect partially replaced room actors/sections"),
-        ("        temp_s4 = Event_LoadRoomEventSections((void*)(arg0),",
-         "        if (!Boot_EncounterUsesRoomEvents()) {\n"
-         "            temp_s4 = Boot_EncounterLoadRoomEvents();\n"
-         "        } else {\n"
-         "        temp_s4 = Event_LoadRoomEventSections((void*)(arg0),",
-         "isolated encounters declare an empty story/door-event set; normal room loading remains unchanged"),
-        ("            Boot_gameEntryMode == new_var);",
-         "            Boot_gameEntryMode == new_var);\n        }",
-         "close the explicit room-event policy branch"),
-        ("    if ((temp_s4 << 0x10) != 0) {",
-         "    if (Save_NativeResumePending() && !Save_NativeFinishResume()) {\n"
-         "        VS::Boot::JumpToLiveTitle();\n"
-         "        return;\n"
-         "    }\n\n"
-         "    if ((temp_s4 << 0x10) != 0) {",
-         "146C.c:15272 restore the native checkpoint after camera/display setup, before event dispatch"),
-    ],
-    "F00533": [
-        ("    if (Boot_gameEntryMode == 1) {\n"
-         "        State_ResetZoneScriptFlags(1);\n"
-         "    } else {\n"
-         "        State_ResetZoneScriptFlags(0);\n"
-         "    }",
-         "    if (!Save_NativeResumePending()) {\n"
-         "        if (Boot_gameEntryMode == 1) {\n"
-         "            State_ResetZoneScriptFlags(1);\n"
-         "        } else {\n"
-         "            State_ResetZoneScriptFlags(0);\n"
-         "        }\n"
-         "    }",
-         "146C.c:14826 preserve restored zone flags only during the initial native resume"),
-    ],
-    "F02777": [
-        ('static char* Menu_Files_playTime = "00:00:00:00";',
-         'static char Menu_Files_playTime[] = "00:00:00:00";',
-         "260.c:4157 the clock overwrites its digit positions; own mutable storage rather than a read-only literal"),
-        ("        // BUG: invalid write to .rodata\n", "",
-         "the native clock buffer is now mutable and reset by value"),
     ],
     "F02703": [
         ("*(int**)Core_ScratchAddr(1) + 7",
@@ -1937,24 +3060,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "          [99] = Core_TextCode_Terminator, [100] = 0 }",
          "58EC.c:475 pragma vsstring encodes |!0| as F8 00; retain 96-byte payload and both E7 guards"),
     ],
-    "F00551": [
-        ("VS::Field::ResolveSceneRoomData(Field_roomData.minimapScene);",
-         "VS::Field::ResolveLiveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
-         "bound scene decoding to its MPD subsection, retaining 12-byte room records"),
-    ],
-    "F00556": [
-        ("VS::Field::DrawMinimapScene(Field_roomData.minimapScene);",
-         "VS::Field::DrawLiveMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
-         "bound minimap vertices and primitive tables to the loaded scene"),
-        ("    Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n    drawArea =",
-         "    Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n"
-         "    Core_Gte_SetTransMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n    drawArea =",
-         "restore the field transform after the minimap's explicit translation"),
-    ],
     **{fid: [
         ("VS::Field::ResolveSceneRoomData(Battle_unusedSceneBuffer)",
          "VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
          "bound ARM scene decoding to its loaded file extent"),
+        ("VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer)",
+         "VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
+         "bound the room visit restore to the loaded ARM file extent"),
         ("*(u_short*)Core_ScratchAddr(22)",
          "(u_short)Render_frameScratch.camera.angles.vy",
          "map camera initialization/reset must follow native yaw, not original scratch byte88"),
@@ -1965,22 +3077,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "INITBTL.PRG 18.c pragma vsstring default actor name; original encode_raw glyphs spacing and terminator"),
         (r'"Fandango\0"', r'"\x0F\x24\x31\x27\x24\x31\x2A\x32\xE7"',
          "INITBTL.PRG 18.c pragma vsstring default weapon name; preserve original encoded text"),
-    ],
-    "F01342": [
-        ("        Boot_WaitForOverlayReady();",
-         "        Boot_WaitForOverlayReady();\n"
-         "        if (subMenu == 0) {\n"
-         "            Boot_ResetMainMenuStatics();\n"
-         "        }",
-         "5BF94.c:vs_battle_loadMenuPrg MAINMENU reload restores C48.c:_quitDelay and other initialized menu statics"),
-    ],
-    "F02535": [
-        ("((u_long)poly << 8) >> 8", "LegacyGpu_Handle(poly)",
-         "action-cost panel packets retain native handles"),
-    ],
-    "F02536": [
-        ("((uintptr_t)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
-         "button-prompt background at ordering entry15 must preserve traversal to submenu labels below it"),
     ],
     "F02604": [
         ("((u_int)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
@@ -2018,13 +3114,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "            if (preview_ready) {",
          "enable Status drawing only after the actor-switch producer has loaded its native preview"),
     ],
-    "F03533": [
-        ("Audio_soundState.musicHandles[16]", "Audio_soundState.sfxBankData[2]",
-         "main.c:10161 indexes unk14 beyond its array to alias sfxData[2] at PS1 offset 0x54; use the native field"),
-        ("Audio_soundState.sfxBankData[2] = arg0;",
-         "Audio_soundState.sfxBankData[2] = (void*)arg0;",
-         "the room sound bank is an externally owned native pointer, not a 32-bit music handle"),
-    ],
     "F02467": [
         ("        int* p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);\n", "",
          "use the native frame ordering table"),
@@ -2057,66 +3146,11 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
          "D_800F4590 aliases vs_battle_wepModels[2], including its second preview slot"),
     ],
-    "F02781": [
-        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "MENU8/21A0.c rename commands and backdrops must preserve native packet links"),
-    ],
-    "F02782": [
-        ("((u_long)temp_t0 << 8) >> 8", "LegacyGpu_Handle(temp_t0)",
-         "MENU8/21A0.c name and grid highlights must preserve the lower UI chain"),
-    ],
-    "F02886": [
-        ("char** menuText;", "char* menuText[2 * 17];",
-         "MENUC assembly blade choices need two native pointers per stock slot plus the current row"),
-        ("            menuText = textBuf + 0x6A4;", "",
-         "Keep native pointers out of the unaligned PS1-sized temporary text allocation"),
-    ],
-    "F02887": [
-        ("char** menuText;", "char* menuText[2 * 17];",
-         "MENUC assembly grip choices need two native pointers per stock slot plus the current row"),
-        ("            menuText = textBuf + 0x6A4;", "",
-         "Keep native pointers out of the unaligned PS1-sized temporary text allocation"),
-    ],
-    "F02888": [
-        ("char** menuText;", "char* menuText[2 * 49];",
-         "MENUC gem choices need two native pointers per stock slot plus the current row"),
-        ("            menuText = textBuf + 0x1324;", "",
-         "BuildItemList copies gem text before this native pointer array leaves scope"),
-    ],
-    "F02903": [
-        ("char** menuText;", "char* menuText[2 * 17];",
-         "MENUC combination blade choices need a native pointer array for all stock slots"),
-        ("        menuText = (char**)(textBuf + 0x6A4);", "",
-         "BuildItemList copies text before the native pointer array leaves scope"),
-    ],
-    "F02909": [
-        ("char** menuText;", "char* menuText[2 * 9];",
-         "MENUC combination shield choices need a native pointer array for all stock slots"),
-        ("            menuText = stringBuf + 0x384;", "",
-         "BuildItemList copies text before the native pointer array leaves scope"),
-    ],
-    "F02913": [
-        ("char** sp10;", "char* sp10[2 * 17];",
-         "MENUC combination armor choices need a native pointer array for all stock slots"),
-        ("            sp10 = (char**)(temp_v0 + 0x6A4);", "",
-         "BuildItemList copies text before the native pointer array leaves scope"),
-    ],
     "F00195": [
         ("Battle_cameraEaseMode", "Field_sphericalCamera.delta.mode",
          "D_800F19EC aliases the spherical camera mode at +0x1C"),
         ("Battle_settledCameraDistance", "Field_sphericalCamera.values.distance",
          "D_800F19D8 aliases the spherical camera distance at +0x8"),
-    ],
-    "F00190": [
-        ("    abilityTimer = Battle_actionState->abilityTimer;",
-         "    abilityTimer = Battle_actionState->abilityTimer;\n"
-         "    const Actors_ActorRecord* actingActor = Actors_actorRecords[temp_s3->primaryTarget.target.targetActor];\n"
-         '    Core_Debugf("combat-flow", "animation id=%u state=%u active=%u held=%u timer=%d window=%u effects=%u action=%u",\n'
-         "        (unsigned)actingActor->animationId, (unsigned)actingActor->instance.actionAnimationState,\n"
-         "        (unsigned)actingActor->instance.currentAnimation, (unsigned)actingActor->pose.holdingLastFrame,\n"
-         "        abilityTimer, (unsigned)Battle_actionState->abilityWindow,\n"
-         "        (unsigned)Effects_effectBusyFlags, (unsigned)temp_s3->actionId);",
-         "temporary action animation completion trace"),
     ],
     "F00186": [
         ("    VECTOR sp30;",
@@ -2126,18 +3160,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "        Field_sphericalCamera.delta.yaw, Field_sphericalCamera.values.distance,\n"
          "        (unsigned)Battle_actionState->selection.actionId, (unsigned)Battle_actionState->selection.targetCount);",
          "temporary combat camera gate trace"),
-        ("Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);",
-         "Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);\n"
+        ("VS::Field::LiveComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);",
+         "VS::Field::LiveComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);\n"
          '                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);',
          "temporary camera convergence trace"),
-    ],
-    "F00826": [
-        ("    if ((Actors_actorRecords[arg0]->animationId != 0x63)\n"
-         "        && (Actors_actorRecords[arg0]->animationId != 0xC7)) {",
-         "    if (Actors_actorRecords[arg0] == NULL\n"
-         "        || ((Actors_actorRecords[arg0]->animationId != 0x63)\n"
-         "            && (Actors_actorRecords[arg0]->animationId != 0xC7))) {",
-         "all-slot pose resets must reach the base helper's empty-actor and gimmick handling"),
     ],
     "F01364": [
         ("    VS::Core::Memory::ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);",
@@ -2183,24 +3209,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("Effects_PackageFile Effects_emptyPackage", "u_int Effects_emptyPackage[0x5200 / sizeof(u_int)]",
          "D_800EC4BC contains nine tagged blocks and the terminator at +0x51FC, not just a header"),
     ],
-    "F01595": [
-        ("Effects_BindEffectPackageBlocks(&Effects_emptyPackage);",
-         "Effects_BindEffectPackageBlocks((Effects_PackageFile*)Effects_emptyPackage);",
-         "bind the full embedded package stored at original address 0x800EC4BC"),
-    ],
-    "F00589": [("void Field_SampleRoomGroundColor(int arg0) { VS::Render::SampleRoomLighting(arg0, 0); }",
-                 "void Field_SampleRoomGroundColor(int arg0, int layer, Render_ColorCode* color)\n"
-                 "{\n    (void)layer;\n    VS::Field::SampleLiveRoomLighting(arg0, 0, color);\n}",
-                 "preserve the output-color argument consumed by the original assembly")],
     "G00582": [("int Battle_Ai_roomHasWaypoints", "void* Battle_Ai_roomHasWaypoints",
                  "func_800E6F9C stores the room auxiliary-data pointer, not a boolean")],
-    "F00801": [
-        ("*((u_char*)temp_s0 + Actors_sharedSequenceBankIndex + 0x183E)",
-         "temp_s0->textureRowOffsets[Actors_sharedSequenceBankIndex]",
-         "func_8009CE9C: active facial bank row through the native actor layout"),
-        ("*((u_char*)temp_s0 + arg0 + 0x183D)", "temp_s0->textureRowOffsets[arg0 - 1]",
-         "func_8009CE9C: restore frame zero before selecting an unavailable facial bank"),
-    ],
     "F01221": [
         ("        c->durationFrames = script[2];",
          "        c->durationFrames = script[2];\n"
@@ -2209,6 +3219,24 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "            (unsigned)c->motionMode, (unsigned)c->easingPrimary,\n"
          "            (unsigned)c->durationFrames);",
          "record actual camera-track producers when investigating zero-duration interpolation"),
+        ("        VS::Actors::LiveActorPlacement(id, &Event_camera->actorQueryScratch[1]);\n"
+         "        s->actorRotation.vz = 0;\n"
+         "        s->actorRotation.vx = 0;\n"
+         "        s->actorRotation.vy = *(short*)((char*)Event_camera + 0x1DA);",
+         "        Actors_ActorLocation placement{};\n"
+         "        VS::Actors::LiveActorPlacement(id, &placement);\n"
+         "        s->actorRotation.vz = 0;\n"
+         "        s->actorRotation.vx = 0;\n"
+         "        s->actorRotation.vy = placement.position.pad;",
+         "#276 slice 19b: the original staged the placement in the camera's actorQueryScratch[1..3] (no other "
+         "reader) and read the facing back from camera offset 0x1DA, its position.pad; a typed local replaces "
+         "both, and an empty slot now gives facing 0 instead of the previous call's stale bytes"),
+    ],
+    "F01275": [
+        ("    case 2:\n        return arg0;\n    }\n}",
+         "    case 2:\n        return arg0;\n    }\n    return arg0;\n}",
+         "#303: 573B8.c:156 has no return after the switch; the PS1 epilogue (func_800BFE50) returns the reference "
+         "in v0 unchanged for types 3-15, so the native path returns it instead of an indeterminate value"),
     ],
     "F01223": [
         ("    if (c->motionMode != 11) {",
@@ -2270,17 +3298,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    }\n    arg0->textureIndex = textureIndex;",
          "record unavailable texture-group provenance before investigating malformed frames; no fallback or changed playback"),
     ],
-    "F01865": [
-        ("VS::Core::Memory::AllocateFromHighEnd(0x10)",
-         "VS::Core::Memory::AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation))",
-         "particleDispatch.h: allocate the complete native untextured prefix instead of its PS1 byte extent"),
-    ],
-    "F02351": [
-        ("#define VS_PARTICLE_UNTEXTURED\n", "",
-         "PLG265 original 0x800FFB7C allocates 0x30 and initializes texture state; do not inherit the preceding line dispatcher's option"),
-        ("#undef VS_PARTICLE_UNTEXTURED\n", "",
-         "remove the matching inherited option cleanup from the textured PLG265 instance"),
-    ],
     "F01861": [
         ("        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);",
          "        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);\n"
@@ -2316,56 +3333,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "            arg0->textureInfo =",
          "capture an unavailable frame table at consumption time to distinguish context changes from initial binding"),
     ],
-    "F00279": [
-        ("void Actors_UnloadSharedSequence(int arg0) { VS::Content::ReleaseLiveActorSequence(arg0, 1); }",
-         """int Actors_UnloadSharedSequence(int bankId)
-{
-    int slot;
-    int result;
-    if (bankId < 1 || bankId > 3) {
-        Core_Errorf("actors.sequence", "invalid shared bank retirement=%d", bankId);
-        return -1;
-    }
-    for (slot = 0; slot < 17; ++slot) {
-        Actors_ActorRecord* actor = Actors_actorRecords[slot];
-        u_short* entry;
-        if (actor == NULL || actor->sharedSequences[bankId - 1] == NULL ||
-            actor->animationHeader != (intptr_t)actor->sharedSequences[bankId - 1] ||
-            !actor->poseOverrideActive) {
-            continue;
-        }
-        if (Actors_FindBoundAnimationHeader(actor, &entry) != actor->animationHeader ||
-            entry == NULL || entry[2] == 0) {
-            Core_Errorf("actors.sequence", "bank=%d cannot unwind actor=%d animation=%d",
-                bankId, slot, actor->animationId);
-            return -1;
-        }
-    }
-    for (slot = 0; slot < 17; ++slot) {
-        Actors_ActorRecord* actor = Actors_actorRecords[slot];
-        if (actor == NULL || actor->sharedSequences[bankId - 1] == NULL ||
-            actor->animationHeader != (intptr_t)actor->sharedSequences[bankId - 1]) {
-            continue;
-        }
-        if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {
-            return -1;
-        }
-        actor->poseOverrideActive = 0;
-        actor->animationHeader = 0;
-        actor->animationSet = 0xFF;
-        actor->pose.eventScript = NULL;
-        actor->pose.nextEventFrame = 0xFFFF;
-        actor->blendPose.eventScript = NULL;
-        actor->blendPose.nextEventFrame = 0xFFFF;
-    }
-    result = VS::Content::ReleaseLiveActorSequence(bankId, 1);
-    if (result < 0) {
-        Core_Errorf("actors.sequence", "shared bank=%d retirement failed status=%d", bankId, result);
-    }
-    return result;
-}""",
-         "func_8007CBBC: undo live vertex edits and retire borrowed event/cache bindings before releasing a shared bank; retain the skeletal pose"),
-    ],
     "F00836": [
         ("    i = 0;\n\n    while ((temp_v0_2 = Field_FindActorAboveGimmick",
          "    if (Field_gimmickInstances[temp_s4] == NULL) {\n"
@@ -2374,42 +3341,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    while ((temp_v0_2 = Field_FindActorAboveGimmick",
          "the top search can have no object; retain preceding stack updates before ending the actor scan"),
     ],
-    "F01170": [
-        ("    Effects_StartScriptedActorEffect(\n"
-         "        VS::Core::Memory::ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(VS::Core::Memory::ReadUnalignedShort(arg0 + 3)));",
-         "    const int effect = VS::Core::Memory::ReadUnalignedShort(arg0 + 1);\n"
-         "    const u_short selector = VS::Core::Memory::ReadUnalignedShort(arg0 + 3);\n"
-         "    const unsigned referenceType = selector >> 12;\n"
-         "    const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;\n"
-         "    const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;\n"
-         "    const int empty_slot = (unsigned)actor < 16 && target == NULL &&\n"
-         "        Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL;\n"
-         "    const int unresolved_model = empty_slot && (referenceType == 1 || actor == 1);\n"
-         "    if (!unresolved_model && ((unsigned)actor >= 16 ||\n"
-         "        (referenceType == 0 && (target == NULL || target->modelId != selector)) ||\n"
-         "        (Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL))) {\n"
-         '        Core_Errorf("event", "effect=%d awaits unavailable actor selector=0x%04X slot=%d",\n'
-         "            effect, (unsigned)selector, actor);\n"
-         "        return 1;\n"
-         "    }\n"
-         "    if (unresolved_model) {\n"
-         "        // func_8007CF18 (146C.c) returns slot 1 for an absent model, func_800BFE50\n"
-         "        // returns a direct slot reference unchecked, and func_8007BE20 starts the\n"
-         "        // effect at once. Empty-slot geometry reads (func_800A1C10, func_800A1108,\n"
-         "        // func_800A0BE0) return without writing, so target-dependent tracks keep defaults.\n"
-         "        Core_Debugf(\"event\", \"effect=%d absent actor selector=0x%04X targets empty slot %d\", effect, (unsigned)selector, actor);\n"
-         "    }\n"
-         "    Effects_StartScriptedActorEffect(effect, actor);",
-         "func_800BA8BC: preserve invalid-kind/literal/mismatched-owner waits; "
-         "an actually absent original model sentinel or empty direct slot starts "
-         "against that empty slot like the original, whose actor readers tolerate it"),
-    ],
-    "F00536": [("Field_isRoomActorSpawnEnabled", "Field_zoneContext.mpdEnemyCount",
-                 "D_800F18E0 aliases _zoneContext +0x60 (mpdEnemyCount), not an independent enable flag")],
-    "F00275": [("    if (arg0 < 16) {",
-                 '    Core_Debugf("actors", "script spawn actor=%u model=%d existing=%p", arg0, arg1,\n'
-                 "        arg0 < 16 ? (void*)Battle_actors[arg0] : NULL);\n    if (arg0 < 16) {",
-                 "script-spawn selection and duplicate gate diagnostics")],
     "F00947": [("    Actors_ActorRecord* actor = Actors_actorRecords[id];",
                  "    Actors_ActorRecord* actor = Actors_actorRecords[id];\n"
                  "    if (actor == NULL) {\n"
@@ -2477,32 +3408,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "7EE98.c:506 discards this result; the original call only left GTE MAC registers that nothing reads, "
          "and the promoted pure function has no native effect"),
     ],
-    "F03515": [
-        ("    case 0xFF000:\n"
-         "        var_s0_2 = Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];",
-         "    case 0xFF000:\n"
-         "        if (Audio_soundState.currentSfxBank == 0) {\n"
-         '            Core_Warnf("audio.sfx", "private SFX id=%ld skipped: no selected bank", id);\n'
-         "            return;\n        }\n"
-         "        if (Audio_soundState.currentSfxBank >\n"
-         "            sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {\n"
-         '            Core_Errorf("audio.sfx", "invalid selected SFX bank=%u", Audio_soundState.currentSfxBank);\n'
-         "            return;\n        }\n"
-         "        var_s0_2 = Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];\n"
-         "        if (var_s0_2 == NULL || id < 0) {\n"
-         '            Core_Errorf("audio.sfx", "unavailable SFX bank=%u or invalid id=%ld", Audio_soundState.currentSfxBank, id);\n'
-         "            return;\n        }",
-         "no selection is an optional disabled state; validate selection before unsigned indexing and report inconsistent banks"),
-        ("    case 0xF00000:\n        var_s0_2 = Audio_soundState.sfxBankData[2];",
-         "    case 0xF00000:\n        var_s0_2 = Audio_soundState.sfxBankData[2];\n"
-         "        if (var_s0_2 == NULL) {\n"
-         '            Core_Warnf("audio.sfx", "room SFX id=%ld skipped: no room bank", id);\n'
-         "            return;\n        }\n"
-         "        if (id < 0) {\n"
-         '            Core_Errorf("audio.sfx", "invalid room SFX id=%ld", id);\n'
-         "            return;\n        }",
-         "room banks are optional and must be present before dereferencing their serialized program offsets"),
-    ],
     "F01353": [("((u_long)primBuf << 8) >> 8", "LegacyGpu_Handle(primBuf)", "stat-gauge native packet link")],
     "F01348": [
         ("*(void**)((uintptr_t)Core_ScratchBase() + 0x008) + 8",
@@ -2549,210 +3454,29 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "void Boot_ResetToTitle(void)\n{\n    Save_NativeResetSession();",
          "main.c:8119 cancel staged native resume before resetting live services"),
     ],
-    "F03673": [
-        ("void Title_InitializeNewGameData(void)\n{",
-         "void Title_InitializeNewGameData(void)\n{\n    Save_NativeResetSession();",
-         "22C.c:4698 New Game abandons any staged native resume"),
-    ],
-    "F03670": [
-        ("        Boot_isClearSavePending = 0;",
-         "        Save_NativeStageClearGame();\n"
-         "        Boot_isClearSavePending = 0;",
-         "22C.c:4508 stage original ending inputs before consuming clear-save provenance"),
-        ("    menuItem = VS::Save::MemoryCard::AnySaveFileExists();",
-         "    menuItem = Save_NativeInitialTitleSelection();",
-         "22C.c:4491 choose title focus from native slots without probing card BIOS"),
-        ("VS::Movie::Intro::Start();", "VS::Movie::Intro::StartLive();",
-         "F03650 typed core takes an Host; the generated caller uses the live binding"),
-        ("VS::Movie::Intro::Play();", "VS::Movie::Intro::PlayLive();",
-         "F03653 typed core takes an Host; the generated caller uses the live binding"),
-        ("VS::Movie::Intro::Stop();", "VS::Movie::Intro::StopLive();",
-         "F03651 typed core takes an Host; the generated caller uses the live binding"),
-    ],
-    "F03664": [
-        ("VS::Movie::Intro::StopAfterAudioTail();", "VS::Movie::Intro::StopLiveAfterAudioTail();",
-         "F03652 typed core takes an Host; the generated caller uses the live binding"),
-    ],
-    "F02757": [
-        ("    if (Menu_Files_fileMenuScreenFade != 0) {",
-         "    Save_NativeDrawFileOverlay(0);\n"
-         "    if (Menu_Files_fileMenuScreenFade != 0) {",
-         "260.c:1951 draw typed native file cards after the message background and before the screen fade"),
-    ],
-    "F03624": [
-        ("    if (Title_fileMenuScreenFade != 0) {",
-         "    Save_NativeDrawFileOverlay(1);\n"
-         "    if (Title_fileMenuScreenFade != 0) {",
-         "22C.c:1784 Continue shares native cards without installing memory-card save headers"),
-    ],
-    "F00988": [
-        ("VS::Actors::SaveActorGroundedTransform((Field_GimmickInstance*)actor)",
-         "VS::Actors::SaveActorGroundedTransform(actor)",
-         "40564.c:2519 landing snapshots use the typed actor history API rather than a gimmick view"),
-    ],
-    "F00901": [
-        ("    int* anchor;",
-         "    std::optional<Field_PlatformContactPoint> platform_contact;",
-         "3A1A0.c:274 platform placement owns its contact value instead of borrowing a returned stack address"),
-        ("                anchor = (int*)VS::Field::FindMovingPlatformById((u_char)placement->direction);\n"
-         "                *(int*)&actor->instance.position.vx = anchor[0];\n"
-         "                *(int*)&actor->instance.position.vz = anchor[1];\n"
-         "                *(int*)&actor->platformAnchor.vx = anchor[0];\n"
-         "                *(int*)&actor->platformAnchor.vz = anchor[1];",
-         "                platform_contact = VS::Field::LiveMovingPlatformPlacement((u_char)placement->direction);\n"
-         "                if (!platform_contact) {\n"
-         "                    abort();\n"
-         "                }\n"
-         "                actor->instance.position.vx = platform_contact->x;\n"
-         "                actor->instance.position.vy = platform_contact->height;\n"
-         "                actor->instance.position.vz = platform_contact->z;\n"
-         "                actor->instance.position.pad = platform_contact->platformIndex;\n"
-         "                actor->platformAnchor.vx = platform_contact->x;\n"
-         "                actor->platformAnchor.vy = platform_contact->height;\n"
-         "                actor->platformAnchor.vz = platform_contact->z;",
-         "800A3224 and event31/104:402 request an authored platform before its visibility command; read its actual transform without changing visibility or collision, and surface absent/invalid support instead of dereferencing null"),
-    ],
-    "F00889": [
-        ("    SVECTOR* anchor;",
-         "    std::optional<Field_PlatformContactPoint> platform;",
-         "38C1C.c:450 a platform jump target is the typed contact, not an SVECTOR read through a retyped call (#257)"),
-        ("    actor->instance.jumpCountdown = 6;\n",
-         "    if (target[1] >= 2) {\n"
-         "        platform = VS::Field::FindMovingPlatformById(target[1]);\n"
-         "        if (!platform) {\n"
-         "            Core_Errorf(\"field.platform\", \"jump target platform layer %d is not visible\", target[1]);\n"
-         "            return;\n"
-         "        }\n"
-         "    }\n"
-         "\n"
-         "    actor->instance.jumpCountdown = 6;\n",
-         "38C1C.c:526 the original reads a missing platform through NULL (PS1 address 0); refuse the jump before any "
-         "actor state changes (#257)"),
-        ("        anchor = VS::Field::FindMovingPlatformById(target[1]);\n"
-         "        x = anchor->vx;\n"
-         "        y = anchor->vy;\n"
-         "        z = anchor->vz;",
-         "        x = platform->x;\n"
-         "        y = platform->height;\n"
-         "        z = platform->z;",
-         "38C1C.c:526 SVECTOR vx/vy/vz are the contact x/height/z (#257)"),
-    ],
-    "F00921": [
-        ("    Field_PlatformContactPoint* contact;\n",
-         "    std::optional<Field_PlatformContactPoint> contact;\n",
-         "3A1A0.c:1107 the platform contact is a value; the original borrowed func_800A4A24's stack array"),
-        ("        contact = func_800A4A24(actor->instance.supportLayer);\n"
-         "        actor->platformOffsetX",
-         "        contact = VS::Field::FindLiveMovingPlatformById(actor->instance.supportLayer);\n"
-         "        if (!contact) {\n"
-         "            Core_Errorf(\"field.platform\", \"actor %d rides invisible platform layer %d\", actor->instance.slot,\n"
-         "                        actor->instance.supportLayer);\n"
-         "            return;\n"
-         "        }\n"
-         "        actor->platformOffsetX",
-         "3A1A0.c:1107 mode 0 follows the platform; a missing one leaves the actor in place instead of reading NULL (#257)"),
-        ("        contact = func_800A4A24(actor->instance.supportLayer);\n"
-         "        break;",
-         "        contact = VS::Field::FindLiveMovingPlatformById(actor->instance.supportLayer);\n"
-         "        if (!contact) {\n"
-         "            Core_Errorf(\"field.platform\", \"actor %d anchors to invisible platform layer %d\",\n"
-         "                        actor->instance.slot, actor->instance.supportLayer);\n"
-         "            return;\n"
-         "        }\n"
-         "        break;",
-         "3A1A0.c:1107 mode 1 anchors to the platform; a missing one keeps the previous anchor (#257)"),
-    ],
-    "F00945": [
-        ("    actor->moveFacing = direction * (ONE / 4);\n"
-         "\n"
-         "    if (actor->instance.supportLayer) {\n"
-         "        Field_PlatformContactPoint* platform = VS::Field::FindMovingPlatformById(actor->instance.supportLayer);\n"
-         "\n",
-         "    std::optional<Field_PlatformContactPoint> platform;\n"
-         "\n"
-         "    if (actor->instance.supportLayer) {\n"
-         "        platform = VS::Field::FindMovingPlatformById(actor->instance.supportLayer);\n"
-         "        if (!platform) {\n"
-         "            Core_Errorf(\"field.platform\", \"ledge probe on invisible platform layer %d\",\n"
-         "                        actor->instance.supportLayer);\n"
-         "            return 0;\n"
-         "        }\n"
-         "    }\n"
-         "\n"
-         "    actor->moveFacing = direction * (ONE / 4);\n"
-         "\n"
-         "    if (actor->instance.supportLayer) {\n",
-         "40564.c:432 the ledge edge comes from the support platform; a missing one reports no ledge (0, as for a wall) "
-         "before the facing changes, instead of reading NULL (#257)"),
-    ],
-    "F01261": [
-        ("((int (*)(int))Actors_IsActorRetainedAfterDefeat)(actorId)",
-         "Actors_IsActorRetainedAfterDefeat(actorId)",
-         "4A0A8.c:4302-4584 predicate16 consumes the declared char result; an int-return cast reads stale upper return bits and enters HP predicates for absent actors on native x64"),
-    ],
-    "F04130": [
-        ("        *(int*)&actor->instance.previousTileX = *(int*)&actor->instance.currentTileX;\n"
-         "        *(Core_IntPair*)&actor->instance.supportOffset = *(Core_IntPair*)&actor->instance.position;\n"
-         "        if (actor->instance.supportLayer == 0) {\n"
-         "            *(int*)&actor->savedPlacement = *(int*)&actor->instance.currentTileX;\n"
-         "        }\n"
-         "        actor->instance.previousFacing = actor->instance.facing;",
-         "        VS::Actors::SaveActorGroundedTransform(actor);",
-         "44F14.c:1565-1571 reuse the same native grounded history contract under the original motion-state guard"),
-    ],
     "G00497": [("u_long Menu_textBoxOrderingTables", "u_long Menu_textBoxOrderingTables[102]",
                  "5BF94.c:4044-4046; three 34-word textbox ordering tables")],
     # D4.c:1955 declares two colors, but D4.c:1970 draws from &D_800DBA7C[1], which reads a third. The data
     # runs 12 bytes to D_800DBA88 (G00810) and holds {128,96,64} there; issue #259.
     "G00809": [("CVECTOR Ending_congratulationsTint[2]", "CVECTOR Ending_congratulationsTint[3]",
                  "D4.c:1970 reads D_800DBA7C[2]; 12 bytes to G00810 (issue #259)")],
-    "F02445": [("extern CVECTOR Ending_congratulationsTint[2]", "extern CVECTOR Ending_congratulationsTint[3]",
-                 "D4.c:1955 block declaration; the pop-in draw reads three colors (issue #259)")],
     "G01780": [("Render_TextureRegion Menu_Results_disMap[]", "Render_TextureRegion Menu_Results_disMap[127]",
                  "3B8.c:1162 _texture_t[127]; the typed texture draws take bounds-checked atlas spans")],
-    "F00557": [
-        ("    Core_Gte_SetRotMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014));",
-         "    if (!VS::Render::ValidateLiveRoomGeometry(arg0, Field_roomData.header.geometryLength)) {\n"
-         '        Core_Debugf("render", "Invalid room geometry extent");\n'
-         "        return;\n    }\n"
-         "    Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);",
-         "146C.c:15926; validate the MPD section and use the native frame matrix"),
-        ("(MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014)", "&Render_frameScratch.viewMatrix", "native frame translation source"),
-        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000)", "Render_frameScratch.primitiveCursor", "native primitive cursor"),
-    ],
-    # _removeActorAtIndex / 146C.c:926: the linked list is stored in a sparse actor slot table.
-    "F00010": [("if (Battle_actors[i]->next == actor)",
-                "if (Battle_actors[i] != NULL && Battle_actors[i]->next == actor)",
-                "ignore empty slots when unlinking a removed actor")],
     # Animation-header outputs are native pointers, not PS1-sized integers.
     "F00819": [
         ("    int sp10[2];", "    u_short* sp10;", "native animation-header output"),
-        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(temp_s2, var_s0, sp10);",
-         "Actors_FindActorAnimationHeader(temp_s2, var_s0, &sp10);", "use the declared output contract"),
+        ("VS::Actors::FindLiveActorAnimationHeader(temp_s2, var_s0, sp10);",
+         "VS::Actors::FindLiveActorAnimationHeader(temp_s2, var_s0, &sp10);", "use the declared output contract"),
         ("if (sp10[0] == 0)", "if (sp10 == NULL)", "test the complete native pointer"),
     ],
     "F00823": [
         ("    int sp20;", "    u_short* sp20;", "native animation-header output"),
-        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, &sp20);",
-         "Actors_FindActorAnimationHeader(actor, anim, &sp20);", "avoid overwriting a four-byte stack local"),
     ],
     "F00833": [
         ("    int animation;", "    u_short* animation;", "native animation-header output"),
-        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)",
-         "Actors_FindActorAnimationHeader", "both special-action stages use the declared output contract"),
     ],
     "F00834": [
         ("    int sp10;", "    u_short* sp10;", "native animation-header output"),
-        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)",
-         "Actors_FindActorAnimationHeader", "avoid overwriting a four-byte stack local"),
-    ],
-    "F00835": [
-        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xABU, (int*)&animation);",
-         "Actors_FindActorAnimationHeader(actor, 0xABU, &animation);", "preserve the declared native pointer output"),
-    ],
-    "F00930": [
-        ("((intptr_t (*)())Actors_FindActorAnimationHeader)",
-         "Actors_FindActorAnimationHeader", "type-check the native locomotion header output"),
     ],
     "F02995": [
         ("    char buffer[1024];", "    static char buffer[1024];",
@@ -2807,74 +3531,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("*(void**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "native diagram cursor handoff"),
         ("*(void**)Core_ScratchAddr(1)", "Render_frameScratch.orderingTable", "native diagram ordering"),
     ],
-    # func_800A0204 / 30DB0.c:3725 caches a native SEQ bank, not a 32-bit guest address.
-    "F00856": [
-        ("    int found;", "    intptr_t found;", "preserve the resolved bank pointer"),
-        ("found = ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, (int*)&frames);",
-         "found = Actors_FindActorAnimationHeader(actor, anim, &frames);", "use the declared header output type"),
-        ("    actor->animationEventFlag = 0;\n"
-         "    if ((*(int*)((char*)actor + 0x5AC)) & 0x800000) {\n"
-         "        Actors_RestartActorAnimationEvents(actor);\n"
-         "    }\n    actor->poseOverrideActive = 0;",
-         "    if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {\n"
-         "        return -1;\n    }\n"
-         "    actor->animationEventFlag = 0;\n    actor->poseOverrideActive = 0;",
-         "do not erase the outstanding vertex-override obligation when its event stream cannot be restored"),
-    ],
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
     "F04146": [
         ("VS::Menu::Files::UpdateContainerSave(submenuState);",
          "VS::Menu::Files::UpdateLiveContainerSave(*submenuState);",
          "C48.c:334 the container save submenu runs through its typed live binding"),
     ],
-    "F04127": [
-        ("VS::Actors::UploadLiveActorTextureOverlay(id, script);",
-         "VS::Actors::UploadLiveActorTextureOverlay(\n"
-         "            id, {.overlay = script[1], .source_x = script[2], .source_y = script[3]});",
-         "#276 row 22: event 44's overlay, source x and source y bytes as the typed overlay copy (40564.c:1502)"),
-    ],
         "F01006": [("*(MATRIX*)&source", "*source", "44F14.c:853; copy the supplied camera matrix, not pointer-stack bytes")],
-    # func_800AE47C / 44F14.c:610: the SEQ header starts with offsets, not a native pointer.
-    "F00840": [
-        ("    temp_s1 = s0->nextEventFrame;",
-         "    if (s0->eventScript == NULL) {\n        return 0;\n    }\n"
-         "    temp_s1 = s0->nextEventFrame;",
-         "a pose whose bank was retired has no battle timing marker to scan"),
-    ],
-    "F00992": [
-        ("    if (*(int*)((u_char*)actor + 0x5AC) & 0x800000) {\n"
-         "        Actors_RestartActorAnimationEvents(actor);\n    }",
-         "    if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {\n"
-         "        return;\n    }",
-         "keep the original pose and vertex-override obligation when event unwind is unavailable"),
-    ],
-    "F01081": [
-        ("        Actors_UnloadSharedSequence(arg0[1]);",
-         "        if (Actors_UnloadSharedSequence(arg0[1]) < 0) {\n"
-         "            return 1;\n        }",
-         "yield rather than advancing the script after a failed shared-bank retirement"),
-    ],
-    "F00998": [
-        ("void Actors_RestartActorAnimationEvents(",
-         "int Actors_RestartActorAnimationEvents(",
-         "native event-unwind failure is explicit to all three callers"),
-        ("u_char** v0 = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(arg0, arg0->animationId, &sp10);",
-         "Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindBoundAnimationHeader(arg0, &sp10);",
-         "44F14.c:610 unwind the actor-owned old clip, not a different shared bank selected for its next animation"),
-        ("u_char* temp_a3 = *v0;",
-         "u_char* temp_a3;\n"
-         "    if (v0 == NULL || sp10 == NULL || (sp10[2] == 0 && arg0->poseOverrideActive)) {\n"
-         '        Core_Errorf("actors.sequence", "cannot unwind actor=%u animation=%u: unavailable events",\n'
-         "            (unsigned)arg0->instance.slot, (unsigned)arg0->animationId);\n"
-         "        return -1;\n    }\n"
-         "    if (sp10[2] == 0) {\n        return 0;\n    }\n"
-         "    temp_a3 = VS_ONDISC(v0, animationData, u_char*);",
-         "validate the nullable lookup before resolving the event stream's on-disc offset"),
-        ("((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);",
-         "((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);\n"
-         "    return 0;",
-         "report successful event unwind without changing its original decoder mode"),
-    ],
     # #276 row 6 (render GIM images): the event scripts reach the typed GIM set (GimImagesLive.hpp) instead of
     # viewing its PS1 layer records. 4A0A8.c:609 read the pending bit through a possibly missing set.
     "F01031": [
@@ -2931,24 +3594,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "start scale (with the scene-order flag, as the original's halfword) from the typed placement"),
         ("(temp_a1->startBrightness = ((char*)temp_a3)[3])", "(temp_a1->startBrightness = splash_layer->brightness)",
          "the original read the layer's unsigned brightness byte (offset 3)"),
-    ],
-    # 4A0A8.c:2971-2993: the eased placements go to the typed set, which ignores them without one.
-    "F01212": [
-        ("    Event_SplashLayerView* var_s1 = Render_gimLayers;\n\n"
-         "    for (i = 0; i < 3; ++i, ++var_s0, ++var_s1) {",
-         "\n    for (i = 0; i < 3; ++i, ++var_s0) {",
-         "the tweens index the typed set's layers instead of walking its PS1 records"),
-        ("            if (Render_gimLayers != NULL) {\n"
-         "                var_s1->offsetX = (var_s0->startX + ((var_s0->deltaX * temp_a0) >> 0xC));\n"
-         "                var_s1->offsetY = (var_s0->startY + ((var_s0->deltaY * temp_a0) >> 0xC));\n"
-         "                var_s1->scaleFixed12 = (var_s0->startScaleFixed12 + ((var_s0->deltaScaleFixed12 * temp_a0) >> 0xC));\n"
-         "                var_s1->brightness = (var_s0->startBrightness + ((var_s0->deltaBrightness * temp_a0) >> 0xC));\n"
-         "            }",
-         "            VS::Render::PlaceLiveGimLayer(i, var_s0->startX + ((var_s0->deltaX * temp_a0) >> 0xC),\n"
-         "                                          var_s0->startY + ((var_s0->deltaY * temp_a0) >> 0xC),\n"
-         "                                          var_s0->startScaleFixed12 + ((var_s0->deltaScaleFixed12 * temp_a0) >> 0xC),\n"
-         "                                          var_s0->startBrightness + ((var_s0->deltaBrightness * temp_a0) >> 0xC));",
-         "the eased placement is stored, truncated as the original's fields were, through the typed set"),
     ],
     # F01818 / BATTLE 7CD68.c:934: runtime views are rebased by native_views.py, not on-disc structs.
     "F01818": [
@@ -3061,10 +3706,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "146C.c:_canPerformAttack; US table has forty functions before the hit-factor words"),
         ("G00032", "Battle_actionEffectMediators", 70,
          "146C.c:func_80085390; US table ends after the seventy effect mediators"),
-        ("G00044", "Field_kTextureEffectHandlers", 7,
-         "2842C.c:texture effect dispatch; seven handlers precede D_800E85E8"),
-        ("G00045", "Field_kRoomEffectOpcodeHandlers", 13,
-         "2842C.c:room effect dispatch; thirteen handlers precede numeric room-effect data"),
         ("G00138", "Battle_limbNames", 20,
          "5BF94.h:limb-name strings; twenty US addresses precede signed coordinate pairs"),
         ("G00222", "Effects_scriptRenderers", 2,
@@ -3125,11 +3766,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "(*Battle_Ai_TerrainRegionCell(state->goal.tile.tileX, state->goal.tile.tileZ))",
          "771A8.c:1638 validate wander direction access against the authored payload"),
     ],
-    # TITLE 22C.c _applyLoadedSaveFile: the same blocks copied back from the loaded save (22C.c:596).
-    "F03600": [
-        ("spmcimg[1].inventory,", "&spmcimg[1].inventory,", "array view of the inventory block (22C.c)"),
-        ("spmcimg[1].inventoryIndices,", "&spmcimg[1].inventoryIndices,", "array view of the inventory indices (22C.c)"),
-    ],
     # BATTLE 5BF94.c:1332 func_800C64D0 walks and splices an ordering-table list by raw 24-bit addresses (mask kept
     # in a variable, so the hazard index cannot see them as links): links are handles (Legacy/Render/LibGpu.h).
     "F01324": [
@@ -3143,7 +3779,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # game heap is reset over Core's arena (Core/Arena.h, HeapLive.hpp).
     **{fid: [("VS::Core::Memory::InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000)",
               "VS::Core::Memory::ResetLiveGameHeap()", "F03467 #276 the live game heap spans Core's arena")]
-       for fid in ("F01858", "F02435", "F03437")},
+       for fid in ("F01858", "F03437")},
     # vs_overlay_slots (overlay.c) holds the PS1 load addresses of the overlay modules; natively they are offsets in
     # Core's overlay block (Core/Arena.h), which keeps the slots that overlap overlapping.
     "G02018": [(f"(void*)0x{a:08X}", f"Core_OverlayAddress(0x{a:08X}u)", "overlay load address")
@@ -3152,29 +3788,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # asset in the module image); natively the pixels are their own global, filled from the same bytes.
     "F03421": [("(u_long*)&Render_legacyLoadingImageHeader + 1", "Render_loadingScreenPixels",
                 "pixels follow the size header")],
-    # 146C.c:6480 reads the actor's weapon category as byte 37 of a char view of the Battle_Actor.
-    "F00172": [("sp10.modelId = arg0[37];", "sp10.modelId = ((Battle_Actor*)arg0)->equippedWeaponCategory;",
-                "Battle_Actor byte 37")],
-    # 146C.c:6578 lays out an enemy as one block by PS1 offsets: Battle_Actor, its stats, the model record at
-    # 0x9B4 and two weapon model slots (0x22B4, 0x289C), or a second body record at 0x22B4. That block is
-    # Actors::ActorAllocation; the spawn settings are the 8 bytes at 0x30 (a 32-bit flag run and reserved34).
-    "F00176": [("actor = VS::Core::Memory::AllocateFromLowEnd(0x3BB4);",
-                "actor = VS::Core::Memory::AllocateFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) "
-                "+ sizeof(Actors_ActorRecord));", "allocation with a second body record"),
-               ("actor = VS::Core::Memory::AllocateFromLowEnd(0x2E84);",
-                "actor = VS::Core::Memory::AllocateFromLowEnd(sizeof(Actors_ActorAllocation));", "allocation"),
-               ("actor->model = (void*)((char*)actor + 0x9B4);",
-                "actor->model = (void*)&((Actors_ActorAllocation*)actor)->core.model;", "model record"),
-               ("actor->equipmentModels[0] = (void*)((char*)actor + 0x22B4);",
-                "actor->equipmentModels[0] = (void*)((Actors_ActorAllocation*)actor)->modelSlots;", "first slot"),
-               ("actor->equipmentModels[1] = (void*)((char*)actor + 0x289C);",
-                "actor->equipmentModels[1] = (void*)&((Actors_ActorAllocation*)actor)->modelSlots[1];",
-                "second slot"),
-               ("Actors_zoneCharacterInitData[zudIndex].characterKind",
-                "Field_zoneContext.zndEnemies[zudIndex].recordBytes[2]",
-                "D_800F188C aliases _zoneContext+0xC; use the same live table as the primary body"),
-               ("*(Actors_SpawnSettings*)((char*)actor + 0x30) =",
-                "*(Actors_SpawnSettings*)((char*)&actor->reserved34 - 4) =", "spawn settings at 0x30")],
     # 40564.c:1769 reads a gimmick instance through raw PS1 offsets: the flag byte at 8 (bit 7 transitionFlag), the
     # palettes at 0x12C/0x14C, and a 4-byte clear at 0x34 (slideX and velocityY).
     "F00980": [("flags = *(u_int*)((char*)arg0 + 8);", "flags = arg0->transitionFlag ? 0x80 : 0;", "flag byte at 8"),
@@ -3203,6 +3816,40 @@ FIXES.setdefault("F01229", []).append(
     ("VS::Render::ReadLiveFramebufferEffectScale(&values.x)", "VS::Render::ReadLiveFramebufferEffectScale(&values)",
      "#276 slice A5: 4A0A8.c passes the record's first word for the three-word scale getter; the binding takes the "
      "record"))
+
+# #276 row 23 remainder (field-actor-collision): the probe cell is a typed CollisionCellRef the Live layer reads back
+# as one word, and the gimmick samples pass their three-halfword position by value.
+_PROBE_CELL_WORD = "VS::Field::LiveCollisionProbeCellWord()"
+FIXES.setdefault("F00912", []).append(
+    ("if ((*Field_collisionProbeTile >> 20) & 1) {",
+     f"if (({_PROBE_CELL_WORD} >> 20) & 1) {{",
+     "3A1A0.c:708 reads bit 20 of the cell the last support sample found"))
+FIXES["F00782"] = FIXES.get("F00782", []) + [
+    ("VS::Field::LiveSampleActorSupportHeight(&s1->positionX, 0, 0, 1)",
+     "VS::Field::LiveSampleSupportHeightAt(s1->positionX, s1->positionY, s1->positionZ, 0, 0, 1)",
+     "30DB0.c:373 samples from the gimmick's three position halfwords through a short* prototype"),
+]
+FIXES.setdefault("F00853", []).append(
+    ("VS::Field::LiveSampleActorSupportHeight(&temp_s0->positionX, 0, 0, 0)",
+     "VS::Field::LiveSampleSupportHeightAt(temp_s0->positionX, temp_s0->positionY, temp_s0->positionZ, 0, 0, 0)",
+     "30DB0.c:3680 samples from the gimmick's three position halfwords through a short* prototype"))
+
+# #288: these readers dereference func_8008B764's result unchecked, so off the grid, without a cell table or on a
+# missing platform layer the original reads PS1 RAM word 0. They read a never-null cell that is kAbsentCellWord then.
+_CELL_OR_ABSENT = ("VS::Field::LiveCollisionCellAt(", "VS::Field::LiveCollisionCellOrAbsent(")
+for _row, _decl, _where in (
+        ("F00158", ("    Field_MpdTileCell* tile;\n", "    const Field_MpdTileCell* tile;\n"),
+         "146C.c:5390 reads hasEventTrigger and hasRoomTrigger"),
+        ("F00159", ("    Field_MpdTileCell* temp_s4;\n", "    const Field_MpdTileCell* temp_s4;\n"),
+         "146C.c:5531 reads hasRoomTrigger"),
+        ("F00547", None, "146C.c:15556 reads hasRoomTrigger"),
+        ("F00596", ("        Field_MpdTileCell* cell;\n", "        const Field_MpdTileCell* cell;\n"),
+         "146C.c:16717 reads isPit and surfaceKind"),
+        ("F01308", ("Field_MpdTileCell* room = ", "const Field_MpdTileCell* room = "),
+         "58578.c:1060 reads blocksSphereTerrain, doorPassability and occlusionAndFloorFlags")):
+    _evidence = f"#288: {_where} of the cell lookup without a NULL check"
+    FIXES.setdefault(_row, []).extend(
+        ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
 
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
                         "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")
@@ -3658,11 +4305,11 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
             ("F01799", "DispatchAiLocomotionMode", "DispatchLiveAiLocomotionMode", _GROUND_BINDING),
         )
     ),
-    (r"^(Actors::RestoreActorBasePose|Field::RefreshAshleyInteractionTile)$",
+    (r"^(Field::RefreshAshleyInteractionTile)$",
      r"\b(VS::Battle::Ai::ReleaseLiveAiDestinationTile\([^,;()]+,[^,;()]+),[^,;()]+,[^,;()]+\);",
      r"\1);",
-     "F00828/F00829 call func_800E4C28 with four arguments, but 7BDD4.s reads only a0/a1 (tile X/Z); the extra "
-     "offsets were dead registers, so the typed two-argument release drops them"),
+     "F00828 calls func_800E4C28 with four arguments, but 7BDD4.s reads only a0/a1 (tile X/Z); the extra "
+     "offsets were dead registers, so the typed two-argument release drops them (F00829 is promoted in row 20b)"),
     (r"", r"\bVS::Effects::ScreenDistortion::WarpPolygonVertices\(\s*\)",
      r"VS::Effects::ScreenDistortion::WarpLivePolygonVertices()",
      "F02458 #46 typed promotion: the warp binding supplies the overlay warp words, the resident root table and a "
@@ -3697,22 +4344,21 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Event::ScriptSetAshleyBattleMode\b",
      r"Event_ScriptSetAshleyBattleModeOpcode",
      "F01130 #46 typed promotion: the event VM opcode slot holds the adapter that decodes the command bytes"),
-    (r"^Ending::", r"\bVS::Render::DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
-     r"VS::Render::DrawLiveTexture\1(Ending_resultAtlasRegions, ",
-     "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6). "
-     "#46 typed promotion: the binding takes the atlas and colors as spans."),
+    (r"", rf"\bVS::Event::({'|'.join(name for _, _, name in EVENT_SCRIPT_ACTOR_OPCODES)})\b", r"Event_\1Opcode",
+     "#276 row 34 typed promotion: each actor opcode slot holds the C binding that decodes the command bytes and runs "
+     "the typed handler over the live host"),
+    (r"", rf"\bVS::Event::({'|'.join(name for _, _, name in EVENT_SCRIPT_MEDIA_OPCODES)})\b", r"Event_\1Opcode",
+     "#276 row 36 typed promotion: each sound, dialog and effect opcode slot holds the C binding that decodes the "
+     "command bytes and runs the typed handler over the live host"),
     (r"^Menu::Results::", r"\bVS::Render::DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"VS::Render::DrawLiveTexture\1(Menu_Results_disMap, ",
      "MENUF uses its own _disMap G01780 (3B8.c:26), not the shorter ENDING table; issue #244."),
-    (r"^(Ending|Menu::Results)::",
-     r"&(Ending_congratulationsTint|Menu_Results_(?:foodChain|evolveOrDie|congratulations|timeAttackHeading)Colors)"
+    (r"^Menu::Results::",
+     r"&(Menu_Results_(?:foodChain|evolveOrDie|congratulations|timeAttackHeading)Colors)"
      r"\[1\]",
      r"std::span(\1).subspan(1)",
-     "D4.c:1970 and the MENUF pop-ins pass the second of three colors onward; a subspan keeps the pair's extent "
+     "The MENUF pop-ins pass the second of three colors onward; a subspan keeps the pair's extent "
      "checked (issue #259)"),
-    (r"^Ending::", r"[ \t]*extern CVECTOR Ending_\w+Tint\[\];[ \t]*\n",
-     r"",
-     "D4.c block declarations without a bound hide the sized ClearResults.h arrays from the span draws"),
     (r"^Actors::", r"\bField_gimmickInstances\[([A-Za-z_]\w*)\](?!\s*=(?!=))",
      r"Field_FindGimmickForActorSlot(\1)",
      "renderer slots and gimmick slots are distinct domains; reserved renderer16 "
@@ -3752,9 +4398,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
                        ("i", "variantIndex"))],
     (r"^Menu::Score::LoadEnemyModelParts$", r"\bslot\b", "request",
      "592C.c:203 the local is an asset request, not a queue slot"),
-    *[(r"^Field::ClearSavedRoomEnemies$", rf"\b{old}\b", new,
-       "146C.c:8509 forwards room and zone to the matching actor-state cache clear at146C.c:789")
-      for old, new in (("arg0", "mapId"), ("arg1", "zoneId"))],
     *[(r"^Event::(?:Script|Command)", rf"\b{old}\b", new,
        "573B8.c:67-142 dispatches the current instruction and thread index through both opcode tables")
       for old, new in (("arg0", "instruction"), ("arg1", "thread_index"))],
@@ -3849,18 +4492,6 @@ ONDISC_OFFSETS: dict[str, str] = {
     "T00474.000": "SEQ animation data (the first section, through Actors::SeqAnimationBank)",
     "T00474.001": "SEQ animation map (Actors::SeqAnimationBank views a SEQ buffer)",
 }
-
-FIXES["F01858"].append(
-    ("0x2C10", "sizeof *Battle_actionState",
-     "Allocate and initialize the actual native action state rather than its PS1 byte count")
-)
-
-FIXES["F01858"].append(
-    ("    VS::Render::InitializeLiveTexturePages();\n",
-     "    VS::Render::InitializeLiveTexturePages();\n"
-     "    Content_overlayWorkspaceOwner = 0;\n",
-     "#276 row 6: the original page init (146C.c:9480) also freed the overlay workspace, which Content owns")
-)
 
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.cpp.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
@@ -3988,10 +4619,6 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("    int targetList0;", "    Battle_TargetPreview* targetList0;", "native target-list pointer"),
         ("    int targetList1;", "    Battle_TargetPreview* targetList1;", "native secondary target-list pointer"),
     ],
-    "T00456": [("int* reserved00;", "unsigned int reserved00;",
-                 "room-effect commands begin with a four-byte size/opcode header, not a native pointer")],
-    "T00453": [("int sceneEntry;", "int* sceneEntry;",
-                 "runtime room-effect view shares the canonical native geometry pointer")],
     "T00237": [("u_char workArea[0x1FD0];",
                  "int projectedVertices[768];\n    int vertexDepths[768];\n"
                  "    unsigned projectedVertexCount;\n    u_char reserved1804[0x7CC];",
@@ -4054,49 +4681,13 @@ def _refused_disc_request(indent: str, slot: str, destination: str, disc_file: s
 
 _EVENT_FILE_REQUEST = "(*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest)"
 for _row, _fixup in (
-    ("F03496", _refused_disc_request(
-        " " * 16, "Audio_soundState.musicRequests[slot]", "Audio_soundState.musicData[slot]", "&cdFile",
-        enqueue=" " * 16 + "VS::Content::EnqueueLiveDiscRequest(Audio_soundState.musicRequests[slot],\n"
-        + " " * 20 + "Audio_soundState.musicData[slot]);")),
-    ("F03526", _refused_disc_request(
-        " " * 12, "Audio_soundState.sfxBankRequests[index]", "Audio_soundState.sfxBankData[index]", "&cdFile",
-        enqueue=" " * 12 + "VS::Content::EnqueueLiveDiscRequest(\n"
-        + " " * 16 + "Audio_soundState.sfxBankRequests[index], Audio_soundState.sfxBankData[index]);")),
-    ("F03547", _refused_disc_request(
-        " " * 4, "Audio_soundState.waveBankRequest", "Audio_soundState.waveBankData", "&cdFile")),
     ("F03417", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
     ("F03417", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[1]", "&cdFile", priority=True)),
     ("F03418", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
     ("F03419", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
-    ("F01612", _refused_disc_request(" " * 8, "Effects_resourceReadSlot", "buf", "&cdFile")),
     ("F01388", _refused_disc_request(" " * 8, "p->slot", "*new_var", "&file")),
-    ("F02442", _refused_disc_request(
-        " " * 8, "Ending_resultsDiscReadSlot", "Ending_resultsTimBuffer", "Ending_resultsDiscFiles",
-        prefix=" " * 8 + "Ending_resultsDiscReadSlot = "
-        "VS::Content::AllocateLiveDiscRequest(Ending_resultsDiscFiles);\n\n")),
-    ("F02442", _refused_disc_request(
-        " " * 8, "Ending_resultsDiscReadSlot", "Ending_resultsTimBuffer",
-        "&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1]",
-        prefix=" " * 8 + "Ending_resultsDiscReadSlot = "
-        "VS::Content::AllocateLiveDiscRequest(&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1]);\n")),
-    ("F02418", _refused_disc_request(
-        " " * 8, "slot", "Ending_Credits_illustrationResources[i]", "&file", priority=True)),
     ("F01277", _refused_disc_request(
         " " * 4, _EVENT_FILE_REQUEST, "arg1", "&Event_eventFileDiscLocation")),
-    ("F00645", _refused_disc_request(
-        " " * 12, "Field_backgroundTextureDiscRequest", "Field_legacyBackgroundTimBuffer", "texture_disc_file")),
-    ("F00645", _refused_disc_request(
-        " " * 12, "Field_backgroundLayoutDiscRequest", "Field_loadedBackgroundLayout", "layout_disc_file")),
-    ("F00532", _refused_disc_request(
-        " " * 4, "Field_zoneContext.zndDiscRequest", "Field_zoneContext.zndData", "&cdFile", priority=True)),
-    ("F00542", _refused_disc_request(
-        " " * 4, "Field_zoneContext.mpdDiscRequest", "Field_zoneContext.mpdData", "&file", priority=True)),
-    ("F00176", _refused_disc_request(
-        " " * 12, "Field_zoneContext.zudDiscRequest", "Field_zoneContext.zudData", "&file", priority=True)),
-    ("F02769", _refused_disc_request(
-        " " * 8, "Menu_Files_loadGameOverAssetsStepQueueSlot", "Menu_Files_loadGameOverAssetsStepGameOverBin",
-        "&cdFile")),
-    ("F01342", _refused_disc_request(" " * 8, "state->cdQueue", "overlaySlot", "&file")),
     ("F02503", _refused_disc_request(
         " " * 8, "Menu_Framework_loadItemTextItemNamesCdQueueSlot", "Menu_Framework_itemNames", "&cdFile")),
     ("F04163", _refused_disc_request(
@@ -4131,8 +4722,6 @@ for _row, _fixup in (
         " " * 4, "Menu_Score_zudCdSlot", "Menu_Score_zudData", "&sourceFile", priority=True)),
     ("F02803", _refused_disc_request(
         " " * 12, "Menu_Score_monBinCdQueueSlot", "Menu_Score_monBinData", "&Menu_Score_kMonBinFile")),
-    ("F02899", _refused_disc_request(
-        " " * 8, "Menu_Setup_loadCombinationRecipesSydCdQueueSlot", "Menu_Setup_sydData", "&cdFile")),
 ):
     FIXES.setdefault(_row, []).append(_fixup)
 
@@ -4191,8 +4780,6 @@ TYPE_FIXES["T00329"] = [(f"    int {m};", f"    void* {m}; /* a section pointer 
                                                     "section16", "section17")]
 # Accessors that return those section pointers as int.
 SIG_RETYPE: dict[str, dict] = {
-    "F00572": {"ret": "intptr_t"},
-    "F00590": {"ret": "intptr_t"},
     "F01281": {3: "Battle_TargetPreview*"},
 }
 
@@ -4206,400 +4793,24 @@ SIG_RETYPE.update({fid: {"ret": "intptr_t"} for fid in EVENT_OPCODE_HANDLERS})
 # header is in NATIVE_HELPER_HEADERS and MODULE_BINDING_ENTRIES maps the module-image address to it.
 EVENT_OPCODE_BINDINGS: dict[str, str] = {
     "F01130": "Event_ScriptSetAshleyBattleModeOpcode",
+    **{fid: f"Event_{name}Opcode" for fid, _, name in EVENT_SCRIPT_ACTOR_OPCODES},
+    **{fid: f"Event_{name}Opcode" for fid, _, name in EVENT_SCRIPT_MEDIA_OPCODES},
 }
 
-# These normal-only handlers omit their unused thread argument in 4A0A8.c. They have no direct C callers,
+# This normal-only handler omits its unused thread argument in 4A0A8.c. It has no direct C callers,
 # but the dispatch ABI still requires both arguments (check_event_dispatch.py checks all table targets).
-for fid in ("F01055", "F01069", "F01071", "F01074", "F01075", "F01122", "F01143", "F01153", "F01178", "F01183"):
+for fid in ("F01122",):
     FIXES.setdefault(fid, []).append(("(u_char* arg0)", "(u_char* arg0, short arg1)", "consistent opcode signature"))
 
 # The MPD section E header (Field::MpdSectionE, 146C.c:15700): two array pointers into its own payload, set by
-# _loadMpdRoomSection and read only by assembly-era code; offsets from the header natively.
+# the room section load (VS::Field::LoadRoomSections) and read only by assembly-era code; offsets from the header natively.
 ONDISC_OFFSETS.update({"T00337.003": "MPD section E first array", "T00337.004": "MPD section E second array"})
-FIXES["F00551"] += [
-    ("VS_ONDISC(sectionE, firstArray, int *) = (int*)(sectionE + 1);",
-     "sectionE->firstArray = sizeof(*sectionE);", "offset of the payload"),
-    ("VS_ONDISC(sectionE, secondArray, int *) = (int*)(sectionE + 1);",
-     "sectionE->secondArray = sizeof(*sectionE);", "offset of the payload"),
-    ("VS_ONDISC(sectionE, secondArray, int *) += sectionE->secondArrayOffset >> 2;",
-     "sectionE->secondArray += (sectionE->secondArrayOffset >> 2) * sizeof(int);", "int-sized steps"),
-    ("VS_ONDISC(sectionE, secondArray, int *) = NULL;", "sectionE->secondArray = 0;", "no second array"),
-]
 
 
-# Individually reviewed audio bindings; structural fixups run first.
-REGEX_FIXES += [
-    (rf"^{name}$", rf"\b{old}\b", new, evidence)
-    for name, bindings, evidence in (
-        ("Audio::PlayRandomActorImpactSound",
-         (('arg0', 'sound_bank'), ('arg1', 'pan'), ('arg2', 'volume')),
-         "F00063 146C.c:2144 forwards the model sound-section bank to func_800461CC, selects entries 8..10, and forwards pan/volume; 44F14.c:637 and main.c:10178 establish bank count/offset table and the two scalar meanings."),
-        ("Audio::ActorSoundPanAndVolume",
-         (('arg0', 'actor_index'), ('arg1', 'output_pan'), ('arg2', 'output_volume'), ('temp_s0', 'actor'), ('temp_v0', 'packed_pan_volume')),
-         "F00994 40564.c:2789 indexes D_800F4538, projects its sound position, splits computeSfxPan's high/low halves into pan/volume and applies per-actor overrides; the volume output is nullable. main.c:9879 proves the packing."),
-        ("Audio::PlayActorModelSound",
-         (('arg0', 'model_instance'), ('arg1', 'sound_index')),
-         "F00999 44F14.c:637 reads instance position, slot and model AKAO section; arg1 becomes type and selects a bank entry, with special randomized indices 4 and 8. This does not rename existing actor/type locals."),
-        ("Audio::PlayActorModelSoundVariant",
-         (('arg0', 'actor_index'), ('arg1', 'variant_index')),
-         "F01000 44F14.c:685 indexes D_800F4538 and adds four to the requested bank sound variant before func_800AE4FC."),
-        ("Audio::PlayActorSoundPair",
-         (('arg0', 'source_actor'), ('arg1', 'first_effect_id'), ('arg2', 'second_effect_id'), ('sp10', 'pan_volume'), ('temp_s0', 'actor'), ('temp_v0', 'packed_pan_volume')),
-         "F01001 44F14.c:690 resolves the actor by source instance slot, projects sound position, unpacks pan/volume into sp10[0]/[1], and plays one or two effect IDs; zero second ID suppresses that second call."),
-        ("Audio::PlayGimmickSoundPair",
-         (('arg0', 'gimmick'), ('arg1', 'first_effect_id'), ('arg2', 'second_effect_id'), ('temp_s0', 'sound_position')),
-         "F01002 44F14.c:728 takes the SVECTOR at gimmick +0x1C and supplies the same position to one or two vs_main_panSfx calls. No assumption about ownership or pointer layout is added. Caller Actors/ActorState.c:375-380 obtains the object from Field_gimmickInstances[actorId], confirming the gimmick binding rather than assuming it from the function name."),
-        ("Audio::PlayActorSurfaceContactSound",
-         (('arg0', 'actor_index'), ('arg1', 'actor'), ('arg2', 'contact_sound_code'), ('sp10', 'weather_kind'), ('sp14', 'weather_intensity')),
-         "F01003 44F14.c:739 reads actor tile/contact/surface, suppresses actor index 1, and selects banks by codes 0x41/0x42. Callers Animation.c:1524 (id,actor,op) and Movement.c:3121/3126 establish actor index and event/contact code. func_8008EB04 at 146C.c:17525 writes weather kind then intensity, used for the wet-surface +8 variant."),
-        ("Audio::SetRoomAmbienceDucked",
-         (('arg0', 'duck_enabled'),),
-         "F00626 146C.c:17323 forwards the same duck flag to room-effect and weather-ambient controls; GameMode.c and Rewards.c pair 1 on entry with 0 on exit."),
-        ("Audio::Control::SetMusicMuteMask",
-         (('arg0', 'mute_mask'),),
-         "F03100 25AC.c:459 writes the mask into command argument 1 and dispatches 0x90; its handler at 3648 assigns mutedMusicChannels and invalidates each channel volume. Preserve the void* legacy carrier."),
-        ("Audio::Control::SetMusicBranchThreshold",
-         (('arg0', 'jump_threshold'),),
-         "F03101 25AC.c:465 dispatches 0x92 with argument 1; handler at 3660 stores the music jump comparison threshold, consumed by conditional bytecode jumps."),
-        ("Audio::Control::PausePlaybackGroup",
-         (('arg0', 'playback_group'),),
-         "F03102 25AC.c:471 maps selector 1/2/3 to music/world-effects/cutscene pause commands 0x9B/0x9D/0x9F, defaulting to all groups 0x99."),
-        ("Audio::Control::ResumePlaybackGroup",
-         (('arg0', 'playback_group'),),
-         "F03103 25AC.c:489 maps selector 1/2/3 to music/world-effects/cutscene resume commands 0x9A/0x9C/0x9E, defaulting to all groups 0x98."),
-        ("Audio::Control::SetMixOptionLatch",
-         (('arg0', 'enabled'),),
-         "F03104 25AC.c:507 uses only zero/nonzero to clear/set mixBehavior bit 0x10. The deliberately neutral enable name does not assert an unverified option interpretation."),
-        ("Audio::Control::SetSceneSoundEffectVolume",
-         (('arg0', 'volume'),),
-         "F03105 25AC.c:517 masks argument to 7-bit volume and dispatches 0xA8; handler 3302 stores scene-channel effectVolume at Q8 scale."),
-        ("Audio::Control::FadeSceneSoundEffectVolume",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_volume')),
-         "F03106 25AC.c:523 sends duration then 7-bit target to 0xA9; handler 3318 uses parameter 1 (or one) as divisor/remaining duration and parameter 2 as target effectVolume."),
-        ("Audio::Control::SetSoundEffectVolume",
-         (('arg0', 'effect_selector'), ('arg1', 'effect_tag_mask'), ('arg2', 'volume')),
-         "F03107 25AC.c:530 sends selector, 24-bit tag mask and 7-bit volume to 0xA0; handler 3250 selects by intersecting tags or exact effectId, including pointer-valued IDs for blobs."),
-        ("Audio::Control::FadeSoundEffectVolume",
-         (('arg0', 'effect_selector'), ('arg1', 'effect_tag_mask'), ('arg2', 'fade_ticks'), ('arg3', 'target_volume')),
-         "F03108 25AC.c:538 dispatches 0xA1; handler 3276 matches tags or effectId, uses parameter 3 as duration, and scales parameter 4 to target effectVolume."),
-        ("Audio::Control::SetSceneSoundEffectPan",
-         (('arg0', 'pan'),),
-         "F03109 25AC.c:547 masks the byte sent to 0xAA; handler 3391 converts it through char to effectPan and invalidates volume. No signedness change is proposed."),
-        ("Audio::Control::FadeSceneSoundEffectPan",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_pan')),
-         "F03110 25AC.c:553 sends duration and masked pan byte to 0xAB; handler 3407 computes the effectPan slide with duration parameter 1 and signed-byte target parameter 2."),
-        ("Audio::Control::SetSoundEffectPan",
-         (('arg0', 'effect_selector'), ('arg1', 'effect_tag_mask'), ('arg2', 'pan')),
-         "F03111 25AC.c:560 sends ID/blob selector, 24-bit tag mask and pan byte to 0xA2; handler 3339 matches tags or ID and sets effectPan."),
-        ("Audio::Control::FadeSoundEffectPan",
-         (('arg0', 'effect_selector'), ('arg1', 'effect_tag_mask'), ('arg2', 'fade_ticks'), ('arg3', 'target_pan')),
-         "F03112 25AC.c:568 dispatches 0xA3; handler 3365 matches tags or ID, then uses parameter 3 duration and parameter 4 signed-byte pan target."),
-        ("Audio::Control::SetSceneSoundEffectPitch",
-         (('arg0', 'pitch_scale'),),
-         "F03113 25AC.c:577 dispatches the masked pitch byte to 0xAC; handler 3481 sets effectPitchScale (not absolute note pitch) on non-interface channels."),
-        ("Audio::Control::FadeSceneSoundEffectPitch",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_pitch_scale')),
-         "F03114 25AC.c:583 sends duration and target byte to 0xAD; handler 3494 computes the non-interface-channel pitch-scale slide."),
-        ("Audio::Control::SetSoundEffectPitch",
-         (('arg0', 'effect_selector'), ('arg1', 'effect_tag_mask'), ('arg2', 'pitch_scale')),
-         "F03115 25AC.c:590 dispatches 0xA4; handler 3427 matches tags or exact effectId and sets signed-char Q8 effectPitchScale."),
-        ("Audio::Control::FadeSoundEffectPitch",
-         (('arg0', 'effect_selector'), ('arg1', 'effect_tag_mask'), ('arg2', 'fade_ticks'), ('arg3', 'target_pitch_scale')),
-         "F03116 25AC.c:598 dispatches 0xA5; handler 3453 matches tags or ID and divides target-minus-current pitch scale by duration parameter 3."),
-        ("Audio::Control::SetMusicVolume",
-         (('arg0', 'music_id'), ('arg1', 'volume')),
-         "F03117 25AC.c:607 dispatches 0xC0; handler 3123 chooses active or secondary configuration by musicId (zero means active), then sets 7-bit masterVolume at Q16 scale."),
-        ("Audio::Control::FadeMusicVolume",
-         (('arg0', 'music_id'), ('arg1', 'fade_ticks'), ('arg2', 'target_volume')),
-         "F03118 25AC.c:614 dispatches 0xC1; handler 3147 matches musicId, uses parameter 2 duration and parameter 3 target volume."),
-        ("Audio::Control::FadeMusicVolumeFrom",
-         (('arg0', 'music_id'), ('arg1', 'fade_ticks'), ('arg2', 'start_volume'), ('arg3', 'target_volume')),
-         "F03119 25AC.c:622 dispatches 0xC2; handler 3184 resolves the selected music, writes parameter 3 as initial Q16 masterVolume and calculates the step toward parameter 4 over parameter 2 ticks."),
-        ("Audio::Control::SetDiscVolume",
-         (('arg0', 'volume'),),
-         "F03120 25AC.c:631 dispatches 0xC8; handler 3216 clears the CD fade duration and stores the low 16-bit volume at Q16 scale before writing disc volume."),
-        ("Audio::Control::FadeDiscVolume",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_volume')),
-         "F03121 25AC.c:637 dispatches 0xC9; handler 3223 uses parameter 1 as duration and parameter 2 low half as the target CD volume."),
-        ("Audio::Control::FadeDiscVolumeFrom",
-         (('arg0', 'fade_ticks'), ('arg1', 'start_volume'), ('arg2', 'target_volume')),
-         "F03122 25AC.c:644 dispatches 0xCA; handler 3237 writes parameter 2 as initial discVolume and computes a step toward parameter 3 over parameter 1 ticks."),
-        ("Audio::Control::SetMusicTempoScale",
-         (('arg0', 'tempo_scale'),),
-         "F03123 25AC.c:652 dispatches masked byte through 0xD0; handler 3515 reads that byte signed and sets tempoScale shifted by 16, cancelling any slide."),
-        ("Audio::Control::FadeMusicTempoScale",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_tempo_scale')),
-         "F03124 25AC.c:658 dispatches 0xD1; handler 3521 uses duration parameter 1 and signed-byte target parameter 2."),
-        ("Audio::Control::FadeMusicTempoScaleFrom",
-         (('arg0', 'fade_ticks'), ('arg1', 'start_tempo_scale'), ('arg2', 'target_tempo_scale')),
-         "F03125 25AC.c:665 dispatches 0xD2; handler 3532 sets scale from parameter 2 and step toward parameter 3. Its existing parameter-2 conditional for selecting the duration is preserved, not repaired."),
-        ("Audio::Control::SetMusicPitchScale",
-         (('arg0', 'pitch_scale'),),
-         "F03126 25AC.c:673 dispatches masked byte through 0xD4; handler 3546 sets the signed-byte Q16 master pitch scale and clears its slide duration."),
-        ("Audio::Control::FadeMusicPitchScale",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_pitch_scale')),
-         "F03127 25AC.c:679 returns dispatch 0xD5; handler 3552 uses duration parameter 1 and signed-byte pitch-scale target parameter 2."),
-        ("Audio::Control::FadeMusicPitchScaleFrom",
-         (('arg0', 'fade_ticks'), ('arg1', 'start_pitch_scale'), ('arg2', 'target_pitch_scale')),
-         "F03128 25AC.c:686 dispatches 0xD6; handler 3568 sets initial master pitch scale from parameter 2 and step toward parameter 3, preserving its existing duration-selection condition."),
-        ("Audio::Control::SetMusicTempoAndPitch",
-         (('arg0', 'tempo_pitch_scale'),),
-         "F03129 25AC.c:694 dispatches 0xD8; dispatcher 3818 forwards the same byte to both 0xD0 tempo and 0xD4 pitch scale handlers."),
-        ("Audio::Control::FadeMusicTempoAndPitch",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_tempo_pitch_scale')),
-         "F03130 25AC.c:700 dispatches 0xD9; dispatcher 3818 copies the duration and target into both tempo (0xD1) and pitch (0xD5) slide handlers."),
-        ("Audio::Control::FadeMusicTempoAndPitchFrom",
-         (('arg0', 'fade_ticks'), ('arg1', 'start_tempo_pitch_scale'), ('arg2', 'target_tempo_pitch_scale')),
-         "F03131 25AC.c:707 dispatches 0xDA; dispatcher 3818 forwards duration/start/target to tempo ramp 0xD2 and pitch ramp 0xD6 without changing either handler's existing behavior."),
-        ("Audio::Control::StartCutsceneStream",
-         (('arg0', 'stream_data'), ('arg1', 'pan'), ('arg2', 'reverb_enabled')),
-         "F03145 25AC.c:928 checks AKAO magic and sends the stream pointer, pan byte shifted by 8 and third argument to 0xE0. Original StartStream at 6294 and native Cutscene::StartStream in Audio/Cutscene/StreamControl.cpp prove the third argument controls reverb, not looping or stereo format."),
-        ("Audio::Control::SetCutsceneVolume",
-         (('arg0', 'volume'),),
-         "F03147 25AC.c:940 sends 7-bit volume shifted by 8 to 0xE4; original consumer 6513 and native SetStreamVolume assign the stream volume and cancel its fade."),
-        ("Audio::Control::FadeCutsceneVolume",
-         (('arg0', 'fade_ticks'), ('arg1', 'target_volume')),
-         "F03148 25AC.c:946 sends duration and 7-bit target shifted by 8 to 0xE5; consumer 6525 uses duration (or one) as divisor and remaining ticks."),
-        ("Audio::Control::SetCutscenePan",
-         (('arg0', 'pan'),),
-         "F03149 25AC.c:953 sends pan byte shifted by 8 to 0xE6; consumer 6537 writes the stream pan word. Native StreamPlayback preserves this packed-pan interface."),
-        ("Audio::Control::SoundEffectChannelIds",
-         (('arg0', 'output_effect_ids'), ('var_a1', 'channel')),
-         "F03150 25AC.c:959 walks exactly twelve D_80035910 channels, stores each effectId through the incremented output pointer, and returns the scheduler active-voice mask. Field ledger T00278.012 identifies the IDs."),
-        ("Audio::Cutscene::UploadSecondMonoBuffer",
-         (('temp_s0', 'second_buffer_data'),),
-         "F03381 25AC.c:6284 takes currentChunk+0x800 and writes exactly 0x800 bytes to sample address 0x2100 before the mono-start callback; the pointer is the second mono-buffer payload, not a voice index."),
-        ("Audio::Cutscene::BeginStreamPlayback",
-         (('var_s2', 'irq_sample_address'),),
-         "F03384 25AC.c:6404 initializes the local from in_SampleAddr, substitutes silence address 0x1030 at end of data, and originally calls SpuSetIRQAddr(local+8). Native IRQ retirement leaves its assignments unused; name follows the proven original role, not a claim that the native dead local drives playback."),
-        ("Audio::SetZoneMusicSwitchEnabled",
-         (('arg0', 'enabled'),),
-         "F00237 146C.c:8579 directly assigns the zone-music-switch latch; Event/ScriptField.c passes the enable bit extracted from instruction[7]."),
-        ("Audio::PlayActorScriptSound",
-         (('arg0', 'actor_index'), ('arg1', 'sound_index')),
-         "F00272 146C.c:8917 indexes vs_battle_actors, checks the index against 16, and passes its model plus the requested sound index to func_800AE4FC."),
-        ("Audio::SetMusicJumpThreshold",
-         (('arg0', 'jump_threshold'),),
-         "F03489 main.c:9494 forwards the value to func_80012468; 25AC.c:465 dispatches command 0x92, whose handler at 3660 stores JumpThresholdValue (T00279.030)."),
-        ("Audio::StopMusicSlotPlayback",
-         (('new_var', 'empty_music_handle'), ('var_a1', 'slot_index')),
-         "F03490 main.c:9496 uses 0xFFFF as the empty handle sentinel and walks the four music-handle slots from 3 to 0; all other stores clear the selected/current slot state."),
-        ("Audio::ResumeMusicSlot",
-         (('temp_v0', 'music_handle'),),
-         "F03491 main.c:9525 queues the selected slot's sequence through func_800120E8 and stores its nonzero sequence ID result in the slot handle and playing handle (G01954/T00603)."),
-        ("Audio::CrossfadeMusicSlot",
-         (('arg1', 'target_volume'), ('arg2', 'fade_ticks'), ('temp_v0', 'music_handle')),
-         "F03492 main.c:9545 passes data, arg2, arg1 to func_80012080. 25AC.c:318 and dispatcher 3818 move them to extParam1 duration/extParam2 target used at 3001; result is the sequence ID stored as a handle."),
-        ("Audio::PlayMusicSlot",
-         (('arg1', 'target_volume'), ('arg2', 'fade_ticks'), ('temp_v0', 'music_handle')),
-         "F03493 main.c:9565 calls volume fade with (0,arg2,arg1), starts the slot sequence, stores its handle, and repeats the fade. 25AC.c:614/3147 prove ticks versus volume."),
-        ("Audio::MusicSlotVolume",
-         (('arg0', 'slot_id'),),
-         "F03504 main.c:9733 subtracts one from a nonzero public slot ID, rejects the 0xFFFF handle, and queries its volume."),
-        ("Audio::QueryMusicSlotVolume",
-         (('arg0', 'slot_id'),),
-         "F03505 main.c:9743 is a direct wrapper around func_800454B8; its sole argument remains the same one-based slot selector."),
-        ("Audio::FadeMusicSlotVolume",
-         (('arg1', 'target_volume'), ('arg2', 'fade_ticks')),
-         "F03506 main.c:9745 checks the current slot and calls func_800128A0(playingHandle,arg2,arg1); the command consumer at 3147 divides target-current volume by duration."),
-        ("Audio::FadeMusicSlotTempo",
-         (('arg1', 'target_tempo_scale'), ('arg2', 'fade_ticks')),
-         "F03507 main.c:9754 calls func_800129D0(arg2,arg1); 25AC.c:658/3521 proves duration first and signed-byte tempo scale second."),
-        ("Audio::FadeMusicSlotPitch",
-         (('arg1', 'target_pitch_scale'), ('arg2', 'fade_ticks')),
-         "F03508 main.c:9763 calls func_80012A6C(arg2,arg1); 25AC.c:679/3552 proves duration first and signed-byte pitch scale second."),
-        ("Audio::Playback::ActivePlaybackFlags",
-         (('var_v1', 'playback_flags'),),
-         "F03077 25AC.c:223 accumulates active primary/secondary music, queued music, SFX and cutscene flags (1,2,0x10,0x100,0x10000) and returns that bitset."),
-        ("Audio::Playback::MusicVolume",
-         (('arg0', 'music_id'), ('var_v1', 'music_config'), ('var_a1', 'volume')),
-         "F03078 25AC.c:243 searches active then secondary configuration by musicId; only the selected config's Q16 masterVolume high half is returned, or zero when absent."),
-        ("Audio::Playback::LongestMusicFade",
-         (('arg0', 'fade_selector_mask'), ('var_a1', 'longest_fade_ticks')),
-         "F03080 25AC.c:261 bits 1/2/4 select master-volume, tempo-scale and pitch-scale fades; the local retains the maximum remaining duration among selected fades."),
-        ("Audio::Playback::StartMusic",
-         (('arg0', 'sequence_data'),),
-         "F03082 25AC.c:286 dispatches pointer through command 0x10; dispatcher 3818 validates its AKAO header and returns sequenceId, while the handler loads the sequence."),
-        ("Audio::Playback::StopMusic",
-         (('arg0', 'music_id'),),
-         "F03083 25AC.c:292 sends ID through 0x11; StopMatchingMusic calls Sound_KillMusicConfig at 2506, where zero matches all and other values compare against musicId."),
-        ("Audio::Playback::StartLayeredMusic",
-         (('arg0', 'sequence_data'), ('arg1', 'volume'), ('temp_v0', 'music_id')),
-         "F03086 25AC.c:308 starts via command 0x19, applies func_8001286C to the returned sequence ID with arg1 volume, and returns that ID. Do not repair the separate existing extended-parameter behavior."),
-        ("Audio::Playback::CrossfadeMusic",
-         (('arg0', 'sequence_data'), ('arg1', 'fade_ticks'), ('arg2', 'target_volume')),
-         "F03087 25AC.c:318 supplies sequence, duration and 7-bit target to 0x1A. Dispatcher maps duration/target to extended parameters consumed by the crossfade handler at 3001."),
-        ("Audio::Playback::StartMusicAtLoop",
-         (('arg0', 'sequence_data'), ('arg1', 'loop_count')),
-         "F03088 25AC.c:326 dispatches 0x12; dispatcher stores argument 2 as parameter 4, and handler 3034 derives musicLoopsRemaining from loop_count minus one when nonzero."),
-        ("Audio::Playback::QueueMusicTransition",
-         (('arg0', 'sequence_data'),),
-         "F03089 25AC.c:333 queues a pointer through 0x14; dispatcher validates AKAO, marks pending music and returns its sequence ID."),
-        ("Audio::Playback::StartMusicPair",
-         (('arg0', 'primary_sequence'), ('arg1', 'secondary_sequence_address'), ('v0', 'packed_music_ids')),
-         "F03090 25AC.c:339 command 0x16 consumes two sequence addresses; dispatcher 3818 loads the second into saved music and the first into active music, replaces both arguments with sequence IDs, and this wrapper packs secondary ID high / primary ID low. Preserve the legacy int and void* carriers."),
-        ("Audio::Playback::PlaySoundEffect",
-         (('arg0', 'effect_id'), ('arg1', 'effect_tag'), ('arg2', 'pan'), ('arg3', 'volume'), ('temp_s0', 'program_offset')),
-         "F03092 25AC.c:352 masks effect ID to 10 bits, reads its program-offset entry, rejects -1, then dispatches tag/pan/volume masked to 24/8/7 bits through 0x20. The returned local remains the original offset, not a playback handle."),
-        ("Audio::Playback::PlaySoundEffectBlob",
-         (('arg0', 'program_blob'), ('arg1', 'effect_tag'), ('arg2', 'pan'), ('arg3', 'volume'), ('var_v0', 'program_or_failure')),
-         "F03093 25AC.c:365 initializes return pointer to -1, validates AKAO, dispatches blob/tag/pan/volume through 0x24 and returns the original blob on success. Native uintptr_t preserves the same sentinel/address role."),
-        ("Audio::Playback::StopSoundEffects",
-         (('arg0', 'effect_selector'), ('arg1', 'effect_tag_mask')),
-         "F03094 25AC.c:381 dispatches selector and 24-bit mask through 0x21; consumer 3118 forwards them to Sound_EvictSfxVoice. Selector can be ID, blob address, zero or special sentinel; effect_selector deliberately does not narrow that contract."),
-        ("Audio::Playback::PlayInterfaceSound",
-         (('arg0', 'effect_id'),),
-         "F03095 25AC.c:388 masks the built-in effect ID to 10 bits and dispatches 0x30, which resolves its two program counters and applies fixed interface pan/volume."),
-        ("Audio::Playback::ActiveSoundEffectTags",
-         (('var_a0', 'empty_or_effect_tags'), ('var_a1', 'channel'), ('var_v1', 'voice_bit')),
-         "F03096 25AC.c:394 first uses var_a0 for the no-active-voices early-exit test, then resets it to zero to OR effectTags from active SFX channels. var_v1 walks bits 12..23 alongside the channel pointer. The compound name preserves both lifetimes."),
-        ("Audio::Playback::SoundEffectIdForTag",
-         (('arg0', 'effect_tag'), ('var_a1', 'channel'), ('var_v1', 'voice_bit'), ('a2', 'active_voice_mask')),
-         "F03097 25AC.c:421 snapshots active voices, walks the twelve SFX channels and tests exact tag equality, returning their effectId. It is not a tag-intersection mask API."),
-        ("Audio::Playback::UsesSoundEffectTags",
-         (('arg0', 'program_or_effect_id'),),
-         "F03098 25AC.c:439 interprets a legacy high address as an SFX header and reads byte-9 bit 7, otherwise indexes metadata by numeric ID and reads bit 15. Name preserves the dual pointer/ID contract; no native pointer-threshold fix is claimed."),
-        ("Audio::Playback::SetMonoOutput",
-         (('arg0', 'mono_enabled'),),
-         "F03099 25AC.c:450 dispatches mono 0x81 only for value 1, otherwise stereo 0x80; new name does not change this exact equality test."),
-        ("Audio::Samples::LoadBank",
-         (('arg0', 'bank_data'), ('arg1', 'wait_for_transfer')),
-         "F03134 25AC.c:719 repeatedly calls the declared-bank loader with the same bank pointer and wait flag. The consumer func_800135D8 at 1033 forwards that flag to _waitTransferAvailable; native SequencerOutput keeps but ignores wait without changing the signature."),
-        ("Audio::Samples::ChooseMusicBankDestination",
-         (('arg0', 'bank_header'), ('arg1', 'output_first_instrument'), ('arg2', 'output_sample_address'), ('var_a3', 'use_alternate_bank')),
-         "F03136 25AC.c:727 reads bank ID/header counts and sample length, selects primary or alternate music memory (instrument 0x40/0x60; sample address 0x35100/0x55100), writes the two outputs, updates T00201 IDs and returns the alternate-bank choice. All four bindings have distinct roles."),
-        ("Audio::Samples::ChooseSoundEffectBankDestination",
-         (('arg0', 'bank_header'), ('arg1', 'output_first_instrument'), ('arg2', 'output_sample_address'), ('arg3', 'bank_slot')),
-         "F03137 25AC.c:768 removes duplicate bank IDs, chooses one of three SFX slots, writes instrument bases 0x80/0xA0/0xC0 and sample addresses 0xB100/0x13100/0x1B100, then returns the requested slot. Default handling remains unchanged."),
-        ("Audio::Samples::SelectMusicBank",
-         (('arg0', 'bank_id'),),
-         "F03138 25AC.c:797 compares the requested ID against primary and alternate music bank IDs and adjusts mixBehavior bit 0x10000 accordingly."),
-        ("Audio::Samples::LoadMusicBank",
-         (('arg0', 'bank_data'), ('arg1', 'wait_for_transfer'), ('sp10', 'first_instrument'), ('sp14', 'sample_address'), ('temp_s0', 'alternate_bank_selected')),
-         "F03142 25AC.c:894 obtains instrument/sample destinations from func_80012C14, forwards those and the wait flag to func_800135D8, and returns the saved alternate-bank selector. Native bank upload ownership changes do not change these bindings."),
-        ("Audio::Samples::LoadSoundEffectBank",
-         (('arg0', 'bank_data'), ('arg1', 'bank_slot'), ('arg2', 'wait_for_transfer'), ('sp10', 'first_instrument'), ('sp14', 'sample_address')),
-         "F03143 25AC.c:903 obtains destinations using arg1 SFX bank slot, then uploads arg0 with arg2 wait flag and the two output destinations. This differs from LoadMusicBank's arg1 meaning."),
-        ("Audio::Samples::LoadDeclaredBank",
-         (('arg0', 'bank_data'), ('arg1', 'wait_for_transfer')),
-         "F03158 25AC.c:1023 validates AKAO magic and uploads using header words 6/4 as instrument/sample destinations. Original upload at 1033 establishes arg1 wait semantics; returns 0/-1 independently of that flag."),
-        ("Audio::Samples::SoundEffectBankSlot",
-         (('var_v1', 'bank_slot'),),
-         "F03211 25AC.c:2941 removes the metadata high bit, compares the ID against SFX bank IDs 1 and 2, and returns slot 0/1/2; the local is not a voice or instrument index."),
-        ("Audio::PlaySfxOnPrimaryChannel",
-         (('arg0', 'effect_id'),),
-         "F03512 main.c:9785 masks the effect ID to 16 bits before passing it with group-1 tag, centered pan and maximum volume to func_8001217C."),
-        ("Audio::PlayBuiltInSfxChannel",
-         (('arg1', 'effect_tag'), ('arg2', 'pan'), ('arg3', 'volume')),
-         "F03513 main.c:9794 compares tag 0x200's current effect ID to suppress a duplicate; all playback branches pass tag, pan and volume to 25AC.c:352, where those fields are masked to 24,8,7 bits respectively."),
-        ("Audio::PlaySfxProgramChannel",
-         (('arg1', 'effect_tag'), ('arg2', 'pan'), ('arg3', 'volume')),
-         "F03514 main.c:9805 performs the same tag-0x200 identity check for a blob address, then forwards tag/pan/volume to func_800121F0 at 25AC.c:365."),
-        ("Audio::PlaySfx",
-         (('arg0', 'channel_group'), ('arg2', 'pan'), ('arg3', 'volume'), ('var_s0_2', 'bank_program')),
-         "F03515 main.c:9816 switches group masks and rotates tags. For private/room groups the local first receives the bank base then advances by its indexed relative offset to the program. Native null/range guards do not change these roles. Pan/volume reach 25AC.c:352/365."),
-        ("Audio::PlaySfxCentered",
-         (('arg0', 'channel_group'),),
-         "F03516 main.c:9877 forwards the group and ID with constant pan 0x80 and volume 0x7F."),
-        ("Audio::SfxPanAndVolume",
-         (('v0', 'coordinate_or_attenuation_work'), ('v1', 'depth_or_volume_limit'), ('new_var2', 'attenuated_volume')),
-         "F03517 main.c:9879 uses v0 first for the signed packed-coordinate high half, then for distance attenuation shifted by 5; v1 first holds clamped z-768 and finally the maximum-volume constant 127. The compound names preserve these exact merged lifetimes, rather than incorrectly naming either variable solely pan or depth. new_var2 is 127 minus attenuation, returned in the low half."),
-        ("Audio::PlayProjectedSfx",
-         (('arg0', 'channel_group'), ('arg1', 'effect_id')),
-         "F03518 main.c:9927 unpacks computed pan/volume from projected coordinates and forwards the unchanged group/effect ID only when volume is positive."),
-        ("Audio::PlayWorldSfx",
-         (('arg0', 'channel_group'), ('arg1', 'effect_id')),
-         "F03519 main.c:9937 projects the supplied SVECTOR through the view matrix then calls _do_panSfx with unchanged group/effect ID."),
-        ("Audio::ResolveSfxProgram",
-         (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('temp_v1', 'program_address')),
-         "F03520 main.c:9950 returns zero for built-in groups and resolves both banked masks through the selected bank. Registered native bounds/offset checks reject with logged -1; return/local/callers preserve full pointers rather than original int casts."),
-        ("Audio::FadeSfxVolume",
-         (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('arg2', 'target_volume'), ('arg3', 'fade_ticks'), ('temp_v0', 'program_address')),
-         "F03521 main.c:9975 resolves a bank program if possible, otherwise uses the built-in ID, or selects by group when ID is zero. func_8001264C receives duration before target volume, verified at 25AC.c:538/3276."),
-        ("Audio::FadeSfxPitch",
-         (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('arg2', 'target_pitch_scale'), ('arg3', 'fade_ticks'), ('temp_v0', 'program_address')),
-         "F03522 main.c:9994 resolves program address or built-in ID, or selects a whole group; func_80012824 receives duration then target signed-byte pitch scale (25AC.c:598/3453)."),
-        ("Audio::FadeSfxPan",
-         (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('arg2', 'target_pan'), ('arg3', 'fade_ticks')),
-         "F03523 main.c:10012 originally reused arg0 for a program pointer; the registered native adaptation now keeps a separate full-width program_address. func_80012738 receives duration and target pan (25AC.c:568/3365)."),
-        ("Audio::StopSfx",
-         (('arg0', 'channel_group'), ('arg1', 'effect_id')),
-         "F03524 main.c:10028 originally reused arg0 for a program pointer; the registered native adaptation preserves the group and keeps a separate full-width program_address. Rejected bank resolution never falls back to a built-in ID."),
-        ("Audio::PlayBankSfx",
-         (('arg0', 'channel_group'), ('arg1', 'sound_bank'), ('arg2', 'sound_index'), ('arg3', 'pan'), ('arg4', 'volume'), ('var_s0', 'effect_tag'), ('temp_s1', 'bank_program')),
-         "F03535 main.c:10178 checks the bank's count, resolves bank-relative offset[index+1], selects/rotates a group tag, and calls func_800456EC(program,tag,pan,volume). The local bank_program initially holds the base, then the selected entry."),
-        ("Audio::PlayBankSfxCentered",
-         (('arg0', 'channel_group'), ('arg1', 'sound_bank'), ('arg2', 'sound_index')),
-         "F03536 main.c:10215 is the count/offset-table bank playback wrapper with constant pan 0x80 and volume 0x7F."),
-        ("Audio::PlayProjectedBankSfx",
-         (('arg0', 'channel_group'), ('arg1', 'sound_bank'), ('arg2', 'sound_index'), ('arg3', 'projection_or_pan'), ('arg4', 'projected_depth'), ('temp_t0', 'depth_or_volume'), ('var_v0', 'pan_work'), ('var_v1', 'coordinate_or_depth_work')),
-         "F03537 main.c:10220: arg3 changes from packed screen coordinate to horizontal-coordinate-derived pan; var_v0 carries rounded high-half removal and the half-X calculation. var_v1 starts as packed coordinates and is reused for rounded depth. temp_t0 clamps depth to 0..1024 then becomes 127-depth/8. Compound names deliberately cover all uses before func_800461CC."),
-        ("Audio::PlayWorldBankSfx",
-         (('arg0', 'channel_group'), ('arg1', 'sound_bank'), ('arg2', 'sound_index')),
-         "F03538 main.c:10272 projects a world SVECTOR and forwards group/bank/index unchanged to the projected bank playback helper."),
-        ("Audio::StopBankSfx",
-         (('arg0', 'channel_group'), ('arg1', 'sound_bank'), ('arg2', 'sound_index'), ('var_a0', 'program_address'), ('var_a1', 'effect_tag_mask')),
-         "F03539 main.c:10285 computes the bank-relative program pointer; nonzero index selects by that pointer with zero tag mask, while zero index clears the pointer and uses the supplied group as mask."),
-        ("Audio::FadeBankSfxVolume",
-         (('arg0', 'channel_group'), ('arg1', 'sound_bank'), ('arg2', 'sound_index'), ('arg3', 'target_volume'), ('arg4', 'fade_ticks'), ('a0', 'program_address')),
-         "F03540 main.c:10299 computes the bank-relative program address. Index zero selects the whole group; otherwise the address is used. func_8001264C receives arg4 low byte as duration and arg3 as target volume."),
-        ("Audio::BindRoomSfxBank",
-         (('arg0', 'bank_address'),),
-         "F03533 main.c:10161 stores the address in the room-bank slot. Native copy fix corrects the original unk14[16] alias to sfxBankData[2]; no change to uintptr_t or ownership is proposed."),
-        ("Audio::LoadWaveBankFile",
-         (('temp_v1', 'packed_bank_ids'), ('var_a0', 'alternate_bank_id'), ('new_var', 'packed_ids_or_unused_one')),
-         "F03547 main.c:10359 obtains packed current/alternate bank IDs from func_80011F08, extracts the signed-rounded upper half and compares both IDs before queueing. new_var first copies the packed IDs then receives an unused 1; compound name documents both lifetimes without removing that dead assignment."),
-        ("Audio::UpdateWaveBankLoad",
-         (('temp_v0', 'transfer_status'),),
-         "F03549 main.c:10396 reads vs_sound_spuTransferring only in the dispatched state; 0 releases successful load resources, -1 releases failed load resources, and other values remain pending. No state/reset behavior changes."),
-        ("Audio::SoundEffects::PlayInterfaceProgramPair",
-         (('arg0', 'command'), ('temp_a1', 'first_program'), ('temp_a2', 'second_program')),
-         "F03217 25AC.c:3046 saves two program pointers from command params 1/2, replaces those fields with the interface ID/tag and fixed pan/volume, then starts the saved pair. Both locals retain distinct bytecode starts throughout."),
-        ("Audio::SoundEffects::PlayInterfaceProgram",
-         (('arg0', 'command'), ('sp10', 'first_program'), ('sp14', 'second_program')),
-         "F03218 25AC.c:3061 resolves two program counters for the requested effect through Sound_GetProgramCounters (2777), adds interface tag/fixed pan-volume and sample-bank slot, and starts that pair."),
-        ("Audio::SoundEffects::PlaySharedProgram",
-         (('arg0', 'command'),),
-         "F03219 25AC.c:3074 reads effect ID from the command, resolves both shared program counters and bank metadata, and forwards the same command record to Sound_PlaySfxProgram."),
-        ("Audio::SoundEffects::StopPrograms",
-         (('arg0', 'command'),),
-         "F03221 25AC.c:3118 forwards command params 1/2 as effect selector and tag mask to Sound_EvictSfxVoice. Existing selector/sentinel behavior is preserved."),
-        ("Audio::SoundEffects::SetProgramVolume",
-         (('arg0', 'command'), ('var_a1', 'channel'), ('var_a3', 'voice_bit')),
-         "F03228 25AC.c:3250 both tag-mask and exact-ID branches walk twelve SFX channels with bits 12..23, set Q8 effectVolume from parameter 3, clear its fade and dirty voice volume. This binding was reviewed independently from pan and pitch handlers."),
-        ("Audio::SoundEffects::FadeProgramVolume",
-         (('arg0', 'command'), ('var_a2', 'channel'), ('var_t0', 'voice_bit')),
-         "F03229 25AC.c:3276 walks both selector branches identically, using parameter 3 or one as duration and parameter 4 low seven bits as target effectVolume; channel and voice-bit cursors always advance together."),
-        ("Audio::SoundEffects::SetSceneVolume",
-         (('arg0', 'command'), ('var_a1', 'channel'), ('var_a3', 'voice_bit')),
-         "F03230 25AC.c:3302 tests active SFX bits and excludes interface tag 0x02000000 before setting parameter-1 scene volume. Channel pointer and physical voice bit walk the twelve entries."),
-        ("Audio::SoundEffects::FadeSceneVolume",
-         (('arg0', 'command'), ('var_a1', 'fade_ticks'), ('var_a2', 'channel'), ('var_t0', 'voice_bit')),
-         "F03231 25AC.c:3318 walks active non-interface effects; var_a1 is command duration or one and feeds both the volume-step divisor and slide length, not a channel pointer as in SetSceneVolume."),
-        ("Audio::SoundEffects::SetProgramPan",
-         (('arg0', 'command'), ('var_a1', 'channel'), ('var_a3', 'voice_bit')),
-         "F03232 25AC.c:3339 selects active effects by tag intersection or exact ID, sets signed-char Q8 effectPan from parameter 3 and cancels its fade; both branches establish the same channel/bit roles."),
-        ("Audio::SoundEffects::FadeProgramPan",
-         (('arg0', 'command'), ('var_a2', 'channel'), ('var_t0', 'voice_bit')),
-         "F03233 25AC.c:3365 selects active effects in both tag/ID branches and computes effectPanSlideStep from signed-byte parameter 4 over parameter 3 duration (or one)."),
-        ("Audio::SoundEffects::SetScenePan",
-         (('arg0', 'command'), ('var_a1', 'channel'), ('var_a3', 'voice_bit')),
-         "F03234 25AC.c:3391 sets parameter-1 pan on active non-interface channels; var_a3 walks bits 12..23 while var_a1 walks SFX records."),
-        ("Audio::SoundEffects::FadeScenePan",
-         (('arg0', 'command'), ('var_a1', 'fade_ticks'), ('var_a2', 'channel'), ('var_t0', 'voice_bit')),
-         "F03235 25AC.c:3407 computes scene pan fades only for active non-interface SFX channels; var_a1 is the checked duration, var_a2 the channel pointer and var_t0 the corresponding physical voice bit."),
-        ("Audio::PlayCutsceneStreamSlot",
-         (('arg0', 'slot_id'), ('arg1', 'pan'), ('arg2', 'volume')),
-         "F03542 main.c:10312 validates a one-based slot (1..3), applies immediate volume, and starts its bound stream at the supplied pan with reverb enabled; 25AC.c:928/946 and 6294 confirm the parameter roles."),
-        ("Audio::PlayCutsceneStreamSlotCentered",
-         (('arg0', 'slot_id'),),
-         "F03543 main.c:10324 forwards the one-based stream slot with pan 0x80 and volume 0x7F."),
-        ("Audio::FreeCutsceneStreamSlot",
-         (('arg0', 'slot_id'),),
-         "F03544 main.c:10326 validates slot 1..3, stops the stream, frees its buffer and clears that same slot."),
-    )
-    for old, new in bindings
-]
+# 146C.c:4810-4816 (func_800738E4) resumes the room's music slot through the D_800F18AC view of the zone context;
+# #276 slice 25c retired the view, so the slot is read from the zone context directly.
+FIXES.setdefault("F00131", []).append(
+    ("Field_roomMusicSlot", "Field_zoneContext.musicSlot", "D_800F18AC aliases _zoneContext.musicSlot (146C.h:719)"))
 
 
 # Individually reviewed event bindings; structural fixups run first.
@@ -4621,99 +4832,12 @@ REGEX_FIXES += [
         ("Event::ScriptEndCutscene",
          (('temp_v1', 'previous_skip_state'),),
          "F01035 4A0A8.c:653-662 separately snapshots D_800F4C2C into temp_v1, clears global, and uses old state to choose cleanup/yield versus normal completion. This binding was individually reviewed, not assumed equivalent merely from F01034 spelling."),
-        ("Event::ScriptInitDialogBox",
-         (('temp_v0_4', 'speaker_reference'),),
-         "F01036 4A0A8.c:672-701 reads temp_v0_4 from script+8 and, when<0x2000, resolves it into box->unk0.unk0_24. FIELD_LEDGER T00672.006 names that speakerTexture; F01107 has matching explicit-none handling. This is the encoded reference before resolution, not already a portrait index."),
-        ("Event::ScriptShowDialogText",
-         (('temp_v0', 'text_result'),),
-         "F01037 4A0A8.c:707-728 assigns temp_v0 from vs_battle_setTextBox(boxId,0). Negative values keep waiting, nonnegative finish, positive values are copied to textBoxSelection. text_result covers both pending/completion status and a selected result; not bool or always a selection."),
         ("Event::ScriptConfigureSplashLayer",
          (('new_var', 'splash_tween'),),
          "F01044 4A0A8.c:857-877 early-outs without a GIM set, clears the encoded layer's D_800F4B30 tween duration for immediate configuration, then sets the layer's routine/offset/scale/brightness and activates it. #276 row 6 moved the layer writes to VS::Render::ConfigureLiveGimLayer; new_var only survives if the tween pointer is reintroduced."),
         ("Event::ScriptTweenSplashLayer",
          (('temp_a1', 'splash_tween'), ('temp_a2', 'layer_index')),
          "F01045 4A0A8.c:879-903 derives temp_a2=byte5>>6 and chooses temp_a1 in the tween array; #276 row 6 reads the layer's typed placement (splash_layer) instead of offsetting a PS1 record. It waits for idle tween, captures start/delta values from the placement, and resets elapsed."),
-        ("Event::ScriptSetDialogInteger",
-         (('temp_s0', 'source_flag_id'),),
-         "F01048 4A0A8.c:916-939 masks short+2 with0x3FF into temp_s0, then fetches that flag or adjacent pair into the selected dialog integer slot with explicit signedness. Only the source flag id changes name; integer slot and casts remain intact."),
-        ("Event::ScriptSelectDialogChoice",
-         (('temp_v0', 'selected_choice'),),
-         "F01050 4A0A8.c:947-965 calls vs_battle_selectTextBox into temp_v0 while selection is active. Nonzero short result is stored in script flag0x10 and clears pending. Initial call and skip-mode return remain unchanged; this binding is the returned choice including zero-pending."),
-        ("Event::ScriptResetActorGroupState",
-         (('sp10', 'actor_selection'), ('temp_a0', 'actor_id')),
-         "F01051 4A0A8.c:967-980 constructs sp10 through func_800BB68C and advances it with func_800BB788; temp_a0 is the returned actor, tested against sentinel 1 and passed to func_8007C348. F01208/F01209 independently establish the selection producer and cursor contract."),
-        ("Event::ScriptSpawnActor",
-         (('sp10', 'spawn_placement'),),
-         "F01053 4A0A8.c:1009-1020 copies bytes 5..8 into sp10[0..3] and passes the buffer as vs_battle_objectData_flags to func_8007C928. Native Actors_QueueScriptedActorSpawn takes Field_ActorPlacement. The larger byte buffer and untouched tail are preserved, not retyped or initialized. Original146C.c:8936-8958 forwards this placement argument into actor initialization after allocation/model queueing."),
-        ("Event::ScriptNavigateActorToTile",
-         (('sp10', 'destination_position'), ('temp_v0', 'actor_id')),
-         "F01054 4A0A8.c:1022-1038 sets sp10 to X/Z tile centers (operand<<7)+0x40 with zero Y. temp_v0 is func_800BFE50 output used by path/skip translation, movement-mode clearing, and D_800F4B70 indexing. Both normal and skip paths use this actor and destination."),
-        ("Event::ScriptSetActorGroupFlags",
-         (('sp10', 'actor_selection'), ('temp_s0', 'actor_id'), ('temp_v0', 'actor_state_flags'), ('var_s2', 'equipment_slot0_visibility'), ('var_s1', 'equipment_slot1_visibility'), ('a1', 'flag_options')),
-         "F01056 4A0A8.c:1047-1078 builds/advances sp10; temp_s0 is the selected actor, temp_v0 its func_800A0BE0 flags, a1 the packed fourth operand. var_s2 preserves/overrides bit11 and var_s1 bit12 before func_800A087C. Consumer 30DB0.c:3950-3984 applies these to vs_battle_wepModels[actorId*2] and [+1]. Slot names avoid guessing weapon/shield identities. F01208/F01209 establish selection lifetime."),
-        ("Event::ScriptSetActorSoundMix",
-         (('sp10', 'sound_overrides'), ('var_a0', 'actor_selector')),
-         "F01057 4A0A8.c:1080-1095 fills sp10.unk0..unk3 from bytes3..6; var_a0 is the resolved reference with 0x2001 converted to -1. Consumer func_8009F990 at 30DB0.c:3401-3412 applies sp10 to one actor or every actor for -1. Special-selector conversion and packed layout stay intact."),
-        ("Event::ScriptWalkActorToTile",
-         (('sp10', 'destination_tile'), ('temp_v0', 'actor_id')),
-         "F01058 4A0A8.c:1097-1114 packs bytes3..6 into sp10, passed as func_8006EBF8_t_fields to func_800A97EC. temp_v0 is the resolved actor in both normal/skip calls, movement-mode clearing and script-control indexing. Keep the existing buffer size and four initialized bytes."),
-        ("Event::ScriptWalkActorToWorldPos",
-         (('sp10', 'destination_location'), ('temp_s4', 'actor_id'), ('temp_s1', 'x_operand'), ('temp_s2', 'y_operand'), ('temp_s3', 'z_operand')),
-         "F01059 4A0A8.c:1116-1146 resolves temp_s4 from +1. temp_s1 is short +3 shifted right one; temp_s2/temp_s3 are shorts +5/+7. sp10 is first filled by func_800A1108 only for relative mode; these operands are then added to or assigned into its position. The result and optional facing feed func_800A9988; cleanup/control writes use temp_s4. Operand names cover absolute coordinates and offsets."),
-        ("Event::ScriptSlideActorToTile",
-         (('sp10', 'destination_tile'), ('temp_s0', 'actor_id')),
-         "F01060 4A0A8.c:1148-1165 packs tile bytes3..5 into sp10 and writes the existing 0xFF facing sentinel. temp_s0 is the resolved actor in both func_800A9C54 calls, mode clearing, and D_800F4B70 indexing. No buffer/initialization change is proposed."),
-        ("Event::ScriptSlideActorToWorldPos",
-         (('sp10', 'destination_location'), ('temp_s2', 'actor_id'), ('temp_s1', 'x_operand'), ('temp_s3', 'y_operand'), ('temp_s4', 'z_operand')),
-         "F01061 4A0A8.c:1167-1198 resolves temp_s2 and decodes temp_s1/temp_s3/temp_s4 from +3/+5/+7. sp10 receives current placement plus these operands for relative mode, or the direct destination for absolute mode; pad stays -0x8000. Both func_800A9D90 paths and control bookkeeping use temp_s2. Operand names cover both modes."),
-        ("Event::ScriptSetActorAttachment",
-         (('temp_s1', 'actor_id'), ('temp_a1', 'attachment_reference')),
-         "F01062 4A0A8.c:1200-1210 resolves the first actor into temp_s1 and second reference into temp_a1 masked to16bits. temp_a1>=0x2000 goes to func_8009FFA8 (release mode); otherwise it is the parent passed to func_8009FF08 with bone/options. attachment_reference covers both special release and parent."),
-        ("Event::ScriptNavigateActorToWorldPos",
-         (('sp10', 'destination_position'), ('temp_s1', 'actor_id')),
-         "F01063 4A0A8.c:1212-1228 writes signed X/Z operands into sp10, forces Y=0, and supplies the same destination to pathfinding or skip translation. temp_s1 is the resolved actor and indexes the script-control marker. No assumption that the encoded input is already a slot."),
-        ("Event::ScriptTurnActorToFacing",
-         (('sp10', 'actor_location'), ('temp_s1', 'actor_id'), ('var_s2', 'turn_rate'), ('var_a1', 'yaw_delta')),
-         "F01064 4A0A8.c:1230-1263 resolves temp_s1; sp10 is filled by func_800A1108 for relative yaw calculation. var_a1 subtracts current facing, wraps by ONE, and applies direction policy. var_s2 is byte5 or -1 passed to relative/absolute rate wrappers. Consumers 40564.c:728-772 temporarily override unk5C0 and restore it; -1 selects default. Do not copy the older ledger description calling this a duration."),
-        ("Event::ScriptFaceOtherActor",
-         (('sp10', 'target_location'), ('temp_s0', 'resolved_actor'), ('temp_s0_2', 'actor_id'), ('var_a2', 'turn_rate')),
-         "F01065 4A0A8.c:1266-1283 resolves temp_s0, masks it to temp_s0_2, and queries the other actor into sp10. var_a2 is -1 or byte5 and reaches func_800A9CDC. Original 40564.c:676-685 selects default unk5C0 or supplied turn rate. The actor temporaries remain distinct, without merging or narrowing changes."),
-        ("Event::ScriptFaceTile",
-         (('sp10', 'target_tile'), ('temp_s0', 'actor_id')),
-         "F01066 4A0A8.c:1285-1297 fills sp10 tile X/layer/Z from bytes3..5. temp_s0 is the resolved-and-masked actor passed to func_800A9CDC and indexed in D_800F4B70. The consumer receives a tile object, not a world-space vector."),
-        ("Event::ScriptScaleActor",
-         (('sp10', 'scale_components'),),
-         "F01067 4A0A8.c:1299-1307 fills sp10 with short operands +3/+5/+7 and supplies it to func_800AABD0 with actor and byte9 time. F01067 ledger and native Actors_ScaleActorToOverTime corroborate model scale components; no coordinate/rate meaning is assigned to this vector. Consumer40564.c:1244-1270 either assigns three scale components immediately or stores component deltas and duration."),
-        ("Event::ScriptRemoveActorGroup",
-         (('sp10', 'actor_selection'), ('temp_a0', 'actor_id')),
-         "F01068 4A0A8.c:1309-1322 builds sp10 with func_800BB68C, consumes it through func_800BB788, and sends temp_a0 to func_8007D340 until sentinel1. Selection production/exhaustion are independently reviewed in F01208/F01209."),
-        ("Event::ScriptWaitForActorFlags",
-         (('temp_s2', 'actor_id'), ('temp_s3', 'wait_flags'), ('temp_v0', 'wait_mask'), ('var_v0', 'matched_wait_flags')),
-         "F01069 4A0A8.c:1324-1342 resolves/masks temp_s2. temp_s3 starts as actor flags XOR0x81 and conditionally includes unfinished-path bit1. temp_v0 is the requested short mask; var_v0 is its final intersection with temp_s3, tested for nonzero. wait_flags covers transformed, not raw, actor state."),
-        ("Event::ScriptSetActorColorOverride",
-         (('sp10', 'color_override'),),
-         "F01070 4A0A8.c:1344-1358 fills three sp10 channels from bytes3..5 and passes it to func_800A07FC, or null if all three are zero. Native Render_ColorCode red/green/blue corroborate this. The untouched code byte remains untouched."),
-        ("Event::ScriptRotateActorAxes",
-         (('sp10', 'rotation_components'), ('temp_s2', 'actor_id'), ('var_s1', 'turn_rate')),
-         "F01072 4A0A8.c:1367-1388 resolves temp_s2, sets var_s1 to byte10 or -1, and fills sp10 from signed +4/+6/+8 operands. Byte3 selects relative func_800A9F64 or absolute func_800A9FD0. Original consumers 40564.c:774 onward temporarily override the actor turn-rate member for a supplied rate. rotation_components covers angles and relative deltas."),
-        ("Event::ScriptSetActorHeadAngles",
-         (('sp10', 'head_angles'), ('temp_v0', 'actor_id'), ('var_a3', 'tracking_rate')),
-         "F01073 4A0A8.c:1390-1406 sets sp10 X/Y from +3/+5 and Z=0, resolves temp_v0, and passes var_a3=0x1000 or byte7 to func_8009FC60(temp_v0,-4,&sp10,var_a3). Consumer 30DB0.c:3512-3540 stores target/vector and supplied angular-rate limit in unk17F4.pad. Explicit-angle selector/default remain unchanged."),
-        ("Event::ScriptSetActorIdleAnimation",
-         (('temp_a0', 'actor_id'),),
-         "F01076 4A0A8.c:1422-1432 resolves temp_a0 once and passes it to func_8009FBD8 in both byte4==0xFF default and animation-bank cases. Only the actor binding changes; existing animation names and behavior stay intact."),
-        ("Event::ScriptLookAtActor",
-         (('temp_s0', 'resolved_target'), ('temp_a0', 'actor_id'), ('var_a1', 'tracking_target'), ('var_a3', 'tracking_rate')),
-         "F01077 4A0A8.c:1434-1452 resolves temp_s0 from +3 and temp_a0 from +1. var_a1 starts at -2 and becomes temp_s0 except for 0x2000; var_a3 is 0x1000 or byte5. Consumer 30DB0.c:3512-3540 stores target/rate. The resolved reference and sentinel-normalized target deliberately remain separate."),
-        ("Event::ScriptLookAtWorldPos",
-         (('sp10', 'target_position'), ('temp_v0', 'actor_id'), ('var_a3', 'tracking_rate')),
-         "F01078 4A0A8.c:1454-1469 decodes a world point into sp10, actor into temp_v0, and var_a3 as 0x1000 or byte9. func_8009FC60 receives target mode -1, &sp10, and rate. Original 30DB0.c:3512-3540 copies the supplied vector and stores the angular-rate limit."),
-        ("Event::ScriptSetActorOverlayPass",
-         (('sp10', 'overlay_parameters'),),
-         "F01083 4A0A8.c:1506-1524 uses sp10[0] for the nonzero color/enable test and supplies &sp10[2] and &sp10[0] to func_8009F940. The records carry different overlay parameters, not merely one color. Keep all six elements, indices, and byte assignments. Consumer30DB0.c:3388-3399 copies the two separate arguments into unk6F4 and unk6F8 when the companion/pass selector is nonzero."),
-        ("Event::ScriptSetActorWeaponDrawn",
-         (('sp10', 'actor_selection'), ('temp_a0', 'actor_id')),
-         "F01084 4A0A8.c:1526-1541 builds/advances sp10 using F01208/F01209. temp_a0 is tested against sentinel1 and passed to func_8007C0AC with D_800E9B4C[byte3]. Only these selection bindings change; opcode parameters and weapon-state names remain intact."),
         ("Event::ScriptBranchOnFlagImmediate",
          (('temp_a0', 'flag_value'), ('temp_a1', 'immediate_value')),
          "F01085 4A0A8.c:1543-1587 gets temp_a0 from the packed flag index and temp_a1 from byte3. Every compare/bit-test uses these same operands; true comparison returns0, other path returns the relative target. Preserve char signedness and branch polarity; names do not endorse older ledger wording about which condition branches."),
@@ -4726,12 +4850,6 @@ REGEX_FIXES += [
         ("Event::ScriptStoreButtonState",
          (('temp_v0', 'flag_and_button_source'),),
          "F01102 4A0A8.c:1798-1805 reads temp_v0 as short+1, uses low10bits as destination flag and bit15 to choose current pressed low byte or prior button state. Name covers both parts rather than falsely treating all bits as flag id."),
-        ("Event::ScriptSetDialogSpeaker",
-         (('temp_s0', 'speaker_reference'), ('temp_s1', 'text_box'), ('var_a0', 'speaker_texture')),
-         "F01107 4A0A8.c:1897-1914 decodes temp_s0 from+2 and obtains temp_s1 using the low box-id nibble. var_a0 is the resolved actor for reference<0x2000, otherwise0x20, assigned to the speaker field. FIELD_LEDGER T00672.006 confirms speakerTexture/0x20-none; the opaque2E update remains unrelated."),
-        ("Event::ScriptSetActorEquipmentModels",
-         (('temp_a0', 'actor_id'),),
-         "F01108 4A0A8.c:1916-1926 resolves temp_a0 from +1. Both the 0xFE equipment-refresh path and explicit model-load path pass that actor to their consumer. It is not a model or equipment identifier."),
         ("Event::ScriptConfigureEasingCurve",
          (('new_var', 'curve_table'), ('temp_a1', 'curve_bytes'), ('var_v1', 'encoded_power')),
          "F01111 4A0A8.c:1948-1964 assigns the u_short table base to new_var and derives temp_a1 by adding the two-bit curve index before casting to bytes. It stores family in byte0 and var_v1 (low3bits, optionally OR0xF8) in byte1. Original573B8.c:168-220 reads byte1 as signed power; TYPE_LEDGER T00256 establishes two-byte InterpolationCurve. Stride and encoded sign extension remain unchanged."),
@@ -4750,33 +4868,6 @@ REGEX_FIXES += [
         ("Event::ScriptControlRoomAnimation",
          (('temp_s0', 'room_effect_id'),),
          "F01138 4A0A8.c:2238-2254 reads temp_s0 from byte2. Start mode optionally finishes an active effect while skipping, then starts that effect; toggle mode passes the same id to func_800936F8. Native room-effect consumers interpret it as selected room effect, not animation frame."),
-        ("Event::CommandLoadEventMusic",
-         (('temp_v0', 'zone_sound_file_id'),),
-         "F01152 4A0A8.c:2339-2345 obtains temp_v0 from func_80089104 and passes it to vs_main_loadMusicSlot(...,3) and vs_main_loadSoundFile. Native Field_ZoneSoundFileId and F01152 ledger corroborate that one file id supplies both loads."),
-        ("Event::CommandWaitMusicSlot",
-         (('temp_s0', 'music_slot'),),
-         "F01161 4A0A8.c:2396-2406 reads temp_s0 from byte1 and uses it consistently in func_8004550C, func_800454B8 and func_80044DF4. Native consumers query/fetch volume and stop playback for that slot; it is not the global current slot binding."),
-        ("Event::CommandWaitMusicTimer",
-         (('temp_s1', 'music_timer_count'),),
-         "F01166 4A0A8.c:2430-2434 sets temp_s1 to func_80044D94()>>16 and compares it with the requested short at +1. Native Audio_MusicBeatPosition supplies the value. This names the high-word timer count without claiming a unit finer than the source proves."),
-        ("Event::CommandPlayVibrationPattern",
-         (('a0', 'pattern_selector'),),
-         "F01178 4A0A8.c:2519-2535 uses a0=byte1:0xFF stops owner2 patterns, bit3 selects a copied pattern from a0&7, otherwise a0 indexes the original table. Start/StopVibrationPatterns contracts are already published. pattern_selector covers index, copy flag and stop sentinel, not merely an index."),
-        ("Event::CommandSetActorTrail",
-         (('temp_v0', 'actor_id'),),
-         "F01179 4A0A8.c:2537-2547 resolves temp_v0 from short+2, then supplies it to func_8006C480 or func_8006C4A4 depending on byte1. Native consumers start/fade the actor trail. Byte4 remains a separate consumer argument."),
-        ("Event::CommandStoreActorRangeBearing",
-         (('sp10', 'first_actor_location'), ('sp20', 'second_actor_location'), ('temp_s3', 'result_flag_id'), ('temp_v0', 'delta_x'), ('temp_v0_2', 'delta_z'), ('temp_lo', 'scaled_distance')),
-         "F01181 4A0A8.c:2555-2573 fills sp10/sp20 from first/second actor references. temp_v0/temp_v0_2 are first-minus-second X/Z differences. temp_lo is their square-root horizontal magnitude divided by byte5. temp_s3 is the short flag operand at +6; it stores distance and temp_s3+1 stores atan2 bearing. Retain signed-short narrowing, saturation and division."),
-        ("Event::CommandSetActorActivity",
-         (('sp10', 'actor_selection'), ('temp_a0', 'actor_id')),
-         "F01182 4A0A8.c:2575-2588 builds/advances sp10 with F01208/F01209 and passes each temp_a0 to func_8007D08C with byte3. Sentinel1 and iterator lifetime stay unchanged."),
-        ("Event::CommandStoreActorDistance",
-         (('sp10', 'first_actor_location'), ('sp20', 'second_actor_location'), ('temp_s0', 'delta_x'), ('temp_s1', 'delta_z'), ('temp_s0_2', 'distance_flag_id'), ('var_v0', 'horizontal_distance')),
-         "F01185 4A0A8.c:2612-2632 queries two locations into sp10/sp20. temp_s0/temp_s1 are X/Z differences, temp_s0_2 is the flag destination at +5, and var_v0 is sqrt(dx*dx+dz*dz), including its negative-rounding adjustment before >>7. The name covers that adjusted intermediate without deleting the branch."),
-        ("Event::SetEventActorActivity",
-         (('arg0', 'activity_enabled'),),
-         "F01186 4A0A8.c:2634-2649 tests arg0 to set/clear display bit0 for loaded non-player slots, then passes it to func_8007D15C. Caller is special operation5 at 2683-2685. Enabled sense is corroborated by 30DB0.c:3950 onward: display bit0 becomes the inverse skip bit."),
         ("Event::CommandSpecialOperation",
          (('sp10', 'diagnostic_message'),),
          "F01187 4A0A8.c:2651-2731 declares sp10[32] and uses it only as sprintf destination for the undefined-special-operation diagnostic. Other switch branches never access it. This names an existing diagnostic staging role without adding output or changing side effects."),
@@ -4789,24 +4880,6 @@ REGEX_FIXES += [
         ("Event::CommandFinishEvent",
          (('var_s1', 'pending_text_box_count'),),
          "F01206 4A0A8.c:2854-2872 initializes var_s1=0, increments for each nonzero dismissal result among eight boxes, and only restores tick speed/returns VM completion when zero. This counts boxes still pending dismissal, not total boxes or a generic boolean."),
-        ("Event::BuildScriptActorSelection",
-         (('arg0', 'actor_selector'), ('arg1', 'selection'), ('temp_v0', 'actor'), ('var_a0', 'kind_filter'), ('var_s3', 'write_index')),
-         "F01208 4A0A8.c:2880-2908 clears arg1 count/cursor. arg0 selects one reference or a group; 0x2003 sets var_a0=4, otherwise -1 accepts any kind. temp_v0 is func_8007CF64(i), tested for existence/kind. var_s3 advances the output actor-id index independently of remainingCount. F01209 consumes these reset fields."),
-        ("Event::NextScriptSelectedActor",
-         (('arg0', 'selection'),),
-         "F01209 4A0A8.c:2910-2918 checks arg0->unk0, returns sentinel1 when empty, otherwise decrements remainingCount and postincrements cursor to read the actor-id array. F01208 produces/resets these fields; the reviewed selection opcodes pass the same object by address."),
-        ("Event::ActorDialogAnchor",
-         (('arg0', 'actor_id'), ('arg1', 'dialog_anchor'), ('sp10', 'tagged_bone_matrix'), ('sp30', 'anchor_projection_workspace')),
-         "F01210 4A0A8.c:2920-2935 seeds arg1 with an upward local vector, fills sp10 from bone tag1, and uses sp30[0] as packed projected XY, [2] as bone length, [3]/[4] as GTE outputs. It projects the tagged endpoint into arg1 and overwrites vz with atan2 direction. 30DB0.c:4200-4222 confirms matrix/length output; 4224 onward confirms endpoint projection. Names cover staging/final representations and all workspace roles. arg0 is the actor identifier passed unchanged to both tagged-bone matrix and endpoint-projection consumers."),
-        ("Event::DrawEventScanlineOverlay",
-         (('var_s3', 'primitive_cursor'), ('temp_v0_2', 'scanline_intensity')),
-         "F01211 4A0A8.c:2937-2969 gets var_s3 from scratch primitive storage, emits/increments LINE_F2 packets, reuses it for the draw-tpage packet, and writes back the next storage address. temp_v0_2 is alternating parity<<5 (0 or32), used as draw predicate and RGB intensity through v. primitive_cursor covers the later reinterpretation instead of claiming it always denotes one line."),
-        ("Event::UpdateEventImageTweens",
-         (('temp_a0', 'eased_fraction'), ('var_s0', 'splash_tween')),
-         "F01212 4A0A8.c:2971-2993 advances var_s0 across three tween entries. temp_a0 is the curve result multiplying each delta before>>12. var_s0 also owns completion; #276 row 6 passes the eased X/Y/scale/brightness to VS::Render::PlaceLiveGimLayer, which ignores them without a GIM set as the original's null check did."),
-        ("Event::UpdateEventWeatherTween",
-         (('temp_lo', 'elapsed_fraction'),),
-         "F01213 4A0A8.c:2995-3009 computes temp_lo=(++elapsed<<12)/duration and uses it for wind direction, strength, intensity interpolation before weather consumers. The same branch clears duration on equality. This is linear Q12 elapsed fraction, not F01212 eased fraction."),
         ("Event::InitializeEventCamera",
          (('sp20', 'field_eye_position'), ('sp30', 'field_look_at')),
          "F01214 4A0A8.c:3014-3080 fills sp20 through vs_battle_getCameraPosition and sp30 through vs_battle_getCameraLookAt. Each is copied into its own current position and the opposite track target/partner position before resets. The unused underscore vector is outside the inventory and unchanged."),
@@ -4881,52 +4954,9 @@ REGEX_FIXES += [
 ]
 
 
-
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
     for name, bindings, evidence in (
-        ("Actors::CreateAuxiliaryActor",
-         (('arg2', 'placement'), ('temp_v0', 'actor_core'), ('var_v1_2', 'texture_slot_dividend')),
-         "F00165 Placement is copied into objectData.unkC; its high direction nibble selects variant. Allocated actor_dat2 backs the actor, stats and model. actorId plus 0xFF for negative values is the signed-division-by-256 dividend feeding objData.unk11. Original lines 6064-6126; arg4 appears only in the signature."),
-        ("Actors::ApplyActorInitialStats",
-         (('arg0', 'actor_id'), ('arg3', 'randomize_stats'), ('var_s0', 'initial_stat_value')),
-         "F00166 Original 6128 onward assigns arg0 to unk957 (actorId); arg3 gates the -10 + smoothed_random(21) perturbation for HP/MP/strength/intelligence/agility. var_s0 is reused for each clamped initial stat, not exclusively HP."),
-        ("Actors::InitializeActorDefaults",
-         (('arg1', 'model_id'), ('arg2', 'blade_id'), ('arg3', 'shield_id'), ('arg4', 'spawn_flags'), ('temp_s0', 'stats'), ('temp_s1', 'actor')),
-         "F00167 Original 6292-6365: vs_battle_actors[id] and actor->unk3C supply actor/stats; unk18/unk2A/unk2B are model/blade/shield. arg4 low two bits select kind/weapon drawn and 0x1C selects interaction flags."),
-        ("Actors::InitializeActorFromTemplate",
-         (('arg1', 'character_init'), ('arg2', 'blade_id'), ('arg3', 'shield_id'), ('arg4', 'spawn_flags'), ('arg5', 'randomize_stats'), ('temp_s0', 'actor'), ('temp_s4', 'stats'), ('temp_v1', 'actor_kind')),
-         "F00168 Original 6367-6421: character init provides model/subtype and initial stats; arg4 selects kind, interaction flags and 0x80 retention. arg5 forwards to F00166 randomization gate. temp_v1 is the kind value 2 in actor slot 1."),
-        ("Actors::QueueActorModelLoad",
-         (('arg0', 'actor'), ('arg3', 'placement'), ('arg4', 'load_flags'), ('sp10', 'asset_request')),
-         "F00169 Original 6423-6442 assembles objectData for model load: destination is actor->unk44, placement is copied, flag 0x80 enables subkind/texture-slot nibbles. QueueActorAssetRequest consumes the request."),
-        ("Actors::QueueEquipmentModelLoad",
-         (('sp10', 'asset_request'), ('temp_s0', 'equipment_slot')),
-         "F00171 Original 6455-6478: (actorId*2)+isShield is the weapon model slot passed to release and request.index; request carries equipmentModels[isShield], wepId, material and F0/F1 texture slot."),
-        ("Actors::AllocateActorWithEquipment",
-         (('arg0', 'actor_id'), ('arg1', 'model_id'), ('arg6', 'placement'), ('arg7', 'load_flags'), ('temp_v0', 'allocation')),
-         "F00173 Original 6493-6534 allocates actor_dat with stats, main model and two equipment model slots; actor id indexes vs_battle_actors. Model, placement and flags flow to F00169; flags also gate weapon sequences."),
-        ("Actors::RegisterLoadedActor",
-         (('arg0', 'actor'), ('arg1', 'actor_id'), ('arg2', 'model_id'), ('arg3', 'blade_id'), ('arg4', 'shield_id'), ('arg5', 'spawn_flags')),
-         "F00174 Original 6536-6560 registers pointer in vs_battle_actors[arg1] then forwards five numeric fields in F00167 order; actor is linked after Ashley and AI initialized."),
-        ("Actors::CreateActorWithEquipment",
-         (('arg0', 'actor_id'), ('arg1', 'model_id'), ('arg6', 'placement'), ('arg7', 'spawn_flags'), ('temp_v0', 'actor')),
-         "F00175 Original 6562-6576 forwards parameters to F00173, waits for asset queue, then passes pointer/id/model/blade/shield/flags to F00174."),
-        ("Actors::QueueAshleyModelLoad",
-         (('arg0', 'model_id'), ('sp10', 'asset_request')),
-         "F00274 Original 8926-8934 sets request.modelId=arg0, dataType=1 and slot=0 (Ashley), returns request queue result + 1."),
-        ("Actors::QueueScriptedActorSpawn",
-         (('arg0', 'actor_id'), ('arg1', 'model_id'), ('arg2', 'placement'), ('temp_v0', 'allocation'), ('temp_s1', 'actor_slot'), ('s0', 'load_request_index')),
-         "F00275 Original 8936-8960 uses actor id to address the global slot; allocation owns actor/stats/models; model id initializes defaults; placement feeds model load. s0 is model-load queue return, exposed as s0+1."),
-        ("Actors::LoadActorEquipmentModels",
-         (('temp_s0', 'actor'),),
-         "F00276 Original 8962-8969 looks up vs_battle_actors[actorId] and passes it to both blade and shield model loaders."),
-        ("Actors::RefreshActorEquipmentModels",
-         (('arg0', 'actor_id'), ('temp_s1', 'actor'), ('temp_s0', 'stats')),
-         "F00277 Original 8971-9000 loads actor from global slots and stats from unk3C; weapon/shield wepId/material flow into F00171, or model id zero clears absent equipment."),
-        ("Actors::RemoveScriptedActor",
-         (('arg0', 'actor_id'),),
-         "F00305 Direct forwarding to Actors_RemoveActorAtSlot(arg0,0), original func_8007D340 in 146C.c:9256; first argument identifies actor slot."),
         ("Actors::EnableActorModel",
          (('arg0', 'actor_id'),),
          "F00245 146C.c:8623: arg0 indexes vs_battle_actors and forwards to display flag getter/setter; enables bit 0."),
@@ -5092,24 +5122,6 @@ REGEX_FIXES += [
         ("Actors::UpdateMotionAndLookAt",
          (('arg1', 'skip_motion_update'),),
          "F04130 44F14.c:1486,1507-1537 onward: nonzero arg1 skips the scale/turn/root-motion countdown advancement block while root-offset and look-at handling remain; no inference that it disables all animation."),
-        ("Actors::RestoreAshleyRuntimeState",
-         (('temp_s0', 'runtime_stats'), ('s1', 'saved_stats')),
-         "F01855 INITBTL.PRG/18.c:310: runtime stats from vs_battle_characterState->unk3C; saved stats from D_80060068.unk0. Copies vitals, statuses, limbs, weapon drawn and camera restoration from saved producer into runtime consumers."),
-        ("Actors::SpawnAshleyWithEquipment",
-         (('sp20', 'spawn_placement'),),
-         "F01856 INITBTL.PRG/18.c:361: placement initialized tileX4,tileZ2,direction0,height128 and passed to CreateActorWithEquipment for Ashley slot/model0."),
-        ("Actors::RemoveActorAtSlot",
-         (('arg1', 'hidden_in_cache'),),
-         "F00010 146C.c:926 passes arg1 unchanged to StoreRoomActorState before freeing actor. That function writes cached isHidden in both death-state branches; not a generic deallocation option."),
-        ("Actors::FreezeAllActorAnimations",
-         (('temp_v0', 'state_flags'),),
-         "F00049 146C.c:1842 reads ActorStateFlags then conditionally ORs4 into display flags for each slot."),
-        ("Actors::UnfreezeAllActorAnimations",
-         (('temp_v0', 'state_flags'),),
-         "F00050 146C.c:1854 reads ActorStateFlags then conditionally clears4 in display flags for each slot."),
-        ("Actors::InitializePlaceholderActorStats",
-         (('arg0', 'actor_id'), ('arg1', 'auxiliary_actor_id'), ('temp_s1', 'actor'), ('temp_s0', 'stats')),
-         "F00164 146C.c:6028 obtains actor/stats, clears and initializes placeholder vitals, then low byte of arg1 controls hit cancellation. F00165 passes its auxiliary actorId (also source of subkind/texture slot), so name distinguishes actual array actor slot arg0."),
         ("Actors::UpdateAshleyMovementInput",
          (('unksp10', 'placement'), ('temp_a0', 'stick_y'), ('temp_a1', 'stick_x'), ('temp_s0', 'stats'), ('temp_s1', 'state_flags')),
          "F00079 146C.c:2837-2894: placement comes from ActorPlacement and feeds camera tile constraint; stats from Ashley actor; state flags gate carrying/jump movement. Analog rStickX/Y subtract midpoint128 then deadzone64; axes written into move-input slots1/3, with X negated."),
@@ -5254,33 +5266,12 @@ REGEX_FIXES += [
         ("Actors::UpdateActorAuxiliaryMotion",
          (('arg0', 'gimmick'), ('a2', 'shadow_blend'), ('temp_lo', 'blend_step')),
          "F01011 44F14.c:1225-1250: gimmick shadow blend state at unk1864; quotient temp_lo reused for level/expand/shrink residual divided by remaining frames, updates value and decrements associated countdown."),
-        ("Actors::FindCachedRoomActorState",
-         (('arg0', 'spawn_index'), ('var_a3', 'cached_state')),
-         "F00005 146C.c:800 scans8 records for first byte==spawn_index+1 and returns matching record (last match if duplicates). Do not change search semantics."),
-        ("Actors::AcquireCachedRoomActorState",
-         (('arg0', 'spawn_index'), ('var_a3', 'cached_state')),
-         "F00006 146C.c:813-838 searches room cache by spawn+1; otherwise picks and advances rotating nextSlot modulo8."),
-        ("Actors::StoreRoomActorState",
-         (('arg0', 'actor_id'), ('arg1', 'hidden_in_cache'), ('sp10', 'placement'), ('temp_s0', 'actor'), ('temp_s1', 'stats'), ('temp_v0', 'cached_state')),
-         "F00007 146C.c:840-882 caches actor stats/limbs/statuses/AI and placement by roomSpawnIndex; arg1 writes isHidden regardless of action/death flag, with death-state HP forced1. Placement query is filled then saved placement overrides packed tile."),
     )
     for old, new in bindings
 ]
 
 
 # Individually reviewed field bindings; structural fixups run first.
-# Separate shadowed locals and cast-prototype parameters before naming outer bindings.
-for identifier, old, new, evidence in (
-    ("F00543",
-     "    {\n        u_short arg5;\n        intptr_t arg2;\n        int new_var;\n        intptr_t arg4;\n        intptr_t arg0 = ((Field_MpdHeader*)mpdHeader)->clearedSectionOffset;\n        arg0 += (intptr_t)mpdHeader;\n        arg2 = ((Field_MpdHeader*)mpdHeader)->scriptSectionOffset;\n        arg2 += ((intptr_t)mpdHeader);\n        arg4 = ((Field_MpdHeader*)mpdHeader)->doorSectionOffset;\n        arg4 += ((intptr_t)mpdHeader);\n        arg5 = ((Field_MpdHeader*)mpdHeader)->doorSectionSize;\n        new_var = 1;\n        if (!Boot_EncounterUsesRoomEvents()) {\n            temp_s4 = Boot_EncounterLoadRoomEvents();\n        } else {\n        temp_s4 = Event_LoadRoomEventSections((void*)(arg0),\n            ((Field_MpdHeader*)mpdHeader)->clearedSectionSize, (void*)(arg2),\n            ((Field_MpdHeader*)mpdHeader)->scriptSectionSize, (void*)(arg4), arg5,\n            Boot_gameEntryMode == new_var);\n        }\n    }\n",
-     "    {\n        u_short arg5;\n        intptr_t arg2;\n        int new_var;\n        intptr_t arg4;\n        intptr_t cleared_section_address = ((Field_MpdHeader*)mpdHeader)->clearedSectionOffset;\n        cleared_section_address += (intptr_t)mpdHeader;\n        arg2 = ((Field_MpdHeader*)mpdHeader)->scriptSectionOffset;\n        arg2 += ((intptr_t)mpdHeader);\n        arg4 = ((Field_MpdHeader*)mpdHeader)->doorSectionOffset;\n        arg4 += ((intptr_t)mpdHeader);\n        arg5 = ((Field_MpdHeader*)mpdHeader)->doorSectionSize;\n        new_var = 1;\n        if (!Boot_EncounterUsesRoomEvents()) {\n            temp_s4 = Boot_EncounterLoadRoomEvents();\n        } else {\n        temp_s4 = Event_LoadRoomEventSections((void*)(cleared_section_address),\n            ((Field_MpdHeader*)mpdHeader)->clearedSectionSize, (void*)(arg2),\n            ((Field_MpdHeader*)mpdHeader)->scriptSectionSize, (void*)(arg4), arg5,\n            Boot_gameEntryMode == new_var);\n        }\n    }\n",
-     "F00543 F00543:arg0:2: Outer arg0 queues room load. Outer int v0 sequentially stores room/loot/enemy section offsets; inner short* v0 clears reset-block tail. Inner intptr_t arg0 is cleared-event section pointer, distinct from formal. Event block also builds script/door pointers and size, constant1 compares entry mode; loader result controls cutscene/weather path. var_a0 first scene id then packed map dimensions. Placement-derived fixed-point vector initializes camera."),
-    ("F00543",
-     "    {\n        short* v0;\n        Field_roomLoadResetBlock.reserved00 = 0;\n        v0 = &Field_roomLoadResetBlock.reserved08;\n        Field_roomLoadResetBlock.reserved02 = 0;\n        Field_roomLoadResetBlock.reserved04 = 0;\n        Field_roomLoadResetBlock.reserved08 = 0;\n        v0[1] = 0;\n        v0[2] = 0;\n    }\n",
-     "    {\n        short* reset_tail_words;\n        Field_roomLoadResetBlock.reserved00 = 0;\n        reset_tail_words = &Field_roomLoadResetBlock.reserved08;\n        Field_roomLoadResetBlock.reserved02 = 0;\n        Field_roomLoadResetBlock.reserved04 = 0;\n        Field_roomLoadResetBlock.reserved08 = 0;\n        reset_tail_words[1] = 0;\n        reset_tail_words[2] = 0;\n    }\n",
-     "F00543 F00543:v0:2: Outer arg0 queues room load. Outer int v0 sequentially stores room/loot/enemy section offsets; inner short* v0 clears reset-block tail. Inner intptr_t arg0 is cleared-event section pointer, distinct from formal. Event block also builds script/door pointers and size, constant1 compares entry mode; loader result controls cutscene/weather path. var_a0 first scene id then packed map dimensions. Placement-derived fixed-point vector initializes camera."),
-):
-    FIXES.setdefault(identifier, []).append((old, new, evidence))
 
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
@@ -5291,30 +5282,6 @@ REGEX_FIXES += [
         ("Field::ApplyUnlockEffectToRoomObject",
          (('arg0', 'target_position'), ('sp10', 'room_object_count'), ('temp_v0', 'door_records'), ('temp_v0_2', 'chest_records'), ('new_var2', 'lock_level_upper_exclusive'), ('new_var3', 'minimum_breakable_lock_level')),
          "F00067 Input position.pad encodes object class/index. Door/chest tables return count through one stack integer; lock levels2..3 can be broken by risk roll, upper bound4 exclusive."),
-        ("Field::ComputeCameraTrackingStep",
-         (('temp_a0', 'projected_y'), ('new_var', 'dead_zone_bottom_y')),
-         "F00074 Projection sxy is split by 0x10000; its Y component is compared against 60 and 180 while X is checked inside the horizontal dead zone."),
-        ("Field::TrackCameraLookAtWithinDeadZone",
-         (('arg0', 'target_position'), ('sp10', 'target_and_displacement'), ('new_var', 'negative_axis_threshold')),
-         "F00076 Clamps input world position to zone; position/lookAt fields of the stack pair hold clamped target and displacement. The same integer is assigned negative 0x12000 X/Z step limits and negative 0x60000 Y dead-zone limit."),
-        ("Field::TrackActionCameraTarget",
-         (('arg0', 'tracked_actor_index'), ('sp10', 'tracked_actor_placement')),
-         "F00078 Actor id selects ActorPlacement and camera tile constraint; returned placement feeds target position and action-preview overrides."),
-        ("Field::UpdateAshleyFollowCamera",
-         (('sp10', 'ashley_placement'),),
-         "F00080 ActorPlacement(0) produces Ashley's location used to update follow-camera target with a vertical offset."),
-        ("Field::UpdateFirstPersonCamera",
-         (('sp10', 'ashley_placement'), ('temp_a1', 'pitch_stick_offset'), ('var_a0', 'yaw_stick_offset')),
-         "F00081 Right-stick X/Y are centered around 128, adjusted outside the 64..192 dead zone, and divided by 3 into yaw/pitch. ActorPlacement(0) supplies eye position."),
-        ("Field::BeginFirstPersonView",
-         (('sp10', 'eye_position_fixed12'), ('sp20', 'ashley_placement')),
-         "F00117 ActorPlacement(0) supplies facing and eye position at vy-180; the fixed-point vector is passed to the first-person transition builder."),
-        ("Field::CloseBattleActionMenu",
-         (('arg0', 'action_selection'),),
-         "F00126 Releases menu rows, clears input selection.menuStatus, then resumes field."),
-        ("Field::DispatchBattleActionMenuResult",
-         (('arg0', 'action_selection'), ('sp18', 'ashley_placement')),
-         "F00127 SelectionKind dispatches ability execution or teleport packed fields; ActorPlacement(0) supplies trap effect origin; finishes by closing same action selection."),
         ("Field::InteractWithLockedRoomObject",
          (('arg0', 'door_trigger'), ('sp10', 'interaction_target_position')),
          "F00134 Lock-trigger record drives inventory key/sigil handling and notifications; short vector's X/Z are tile centers passed to actor pose5."),
@@ -5348,9 +5315,6 @@ REGEX_FIXES += [
         ("Field::UpdateChestContentsSelection",
          (('temp_v0', 'action_selection'),),
          "F00148 ActionSelectionState result supplies menuStatus and selectionKind, determining opened flag or switch toggle."),
-        ("Field::CheckFirstPersonViewExit",
-         (('sp10', 'ashley_placement'),),
-         "F00150 ActorPlacement(0) is queried before restoring camera tile occlusion and spherical transition state."),
         ("Field::TileInFrontOfActor",
          (('arg0', 'actor_placement'), ('arg1', 'output_facing_tile'), ('var_v1', 'rounded_facing_or_quadrant')),
          "F00152 Actor placement facing is rounded by0x200, masked, shifted10 into quadrant; output byte order is X/layer/Z and one coordinate is stepped."),
@@ -5363,54 +5327,9 @@ REGEX_FIXES += [
         ("Field::FindFacingUnlootedChest",
          (('arg0', 'actor_index'), ('sp10', 'actor_placement'), ('sp20', 'facing_tile'), ('s1', 'facing_tile_bytes'), ('temp_s2', 'facing_quadrant'), ('temp_v0', 'facing_chest')),
          "F00155 Facing query returns quadrant and tile; matches chest facing, unlooted state and exact floor+96 height before return."),
-        ("Field::UpdateCameraTileConstraint",
-         (('arg0', 'actor_index'), ('arg1', 'actor_tile'), ('temp_v0', 'platform_layer_flags'), ('var_a0', 'collision_tile_x'), ('var_a1', 'collision_tile_z'), ('var_a2', 'collision_layer')),
-         "F00157 ActorStateFlags & 0x70000 overrides tile coordinates to 0,0 and layer flags>>16; otherwise reads the provided tile target. Collision-cell occlusion bit drives ApplyCameraGeometryOcclusion."),
         ("Field::CheckActorTrapAndFallTriggers",
          (('arg0', 'actor_index'), ('arg1', 'actor_location'), ('s2', 'location_alias'), ('temp_v0', 'actor_state_flags'), ('temp_a2', 'platform_layer_flags'), ('temp_s3', 'trigger_tile_mode'), ('temp_s4', 'collision_cell'), ('temp_s0', 'battle_actor'), ('temp_v0_2', 'floor_trigger')),
          "F00159 Actor id/location feed tile-state and trap/fall checks. State bit14 is cached trigger tile mode; bits16..18 override collision layer. Pointers distinguish location alias, battle actor, collision tile, and floor trigger."),
-        ("Field::IsCameraLookAtOnAshley",
-         (('sp10', 'target_and_current_look_at'), ('sp30', 'ashley_placement')),
-         "F00177 Builds Ashley's zone-clamped fixed-point camera target then compares its three coordinates with the current rounded look-at position."),
-        ("Field::SyncCameraAnglesFromPosition",
-         (('arg0', 'output_spherical_camera'),),
-         "F00201 Optional output receives values.yaw, values.pitch and derived distance after normalizing camera-position minus look-at."),
-        ("Field::SetCameraRoll",
-         (('arg0', 'roll_angle'),),
-         "F00209 Direct store to Render_frameScratch.camera.angles.vz."),
-        ("Field::SetFirstPersonViewDisabled",
-         (('arg0', 'disabled'),),
-         "F00236 Clears geometry occlusion and stores (~argument & 1) into first-person enabled state."),
-        ("Field::ConfigureScreenTransition",
-         (('arg0', 'transition_effect'), ('arg1', 'transition_speed'), ('arg2', 'wipe_angle')),
-         "F00260 Direct stores of transition effect, speed and wipe angle."),
-        ("Field::SetTransitionWipeAngle",
-         (('arg0', 'wipe_angle'),),
-         "F00261 Direct transition wipe-angle store."),
-        ("Field::BeginScreenFadeIn",
-         (('arg1', 'transition_speed'), ('arg2', 'wipe_angle')),
-         "F00263 Fade-in parameters store transition speed and wipe angle."),
-        ("Field::BeginRoomTransition",
-         (('arg0', 'destination_door'),),
-         "F00265 Door copied to pending destination, destinationRoomId queued while zone forced current; speed stored in transition state."),
-        ("Field::BeginScriptedRoomTransition",
-         (('arg0', 'destination_door'), ('arg1', 'transition_effect'), ('arg2', 'transition_speed'), ('sp10', 'ashley_placement')),
-         "F00266 Door/effect/speed forwarded to BeginRoomTransition; Ashley placement locates nearest entrance record."),
-        ("Field::BeginZoneTransition",
-         (('arg0', 'destination_door'),),
-         "F00267 Door copied to pending destination and destinationZoneId queued; speed stored in transition state."),
-        ("Field::BeginScriptedZoneTransition",
-         (('arg0', 'destination_door'), ('arg1', 'transition_effect'), ('arg2', 'transition_speed'), ('sp10', 'ashley_placement')),
-         "F00268 Door/effect/speed forwarded to BeginZoneTransition; Ashley placement locates nearest entrance record."),
-        ("Field::TeleportToLocation",
-         (('arg0', 'location_id'), ('arg1', 'destination_tile_x'), ('arg2', 'destination_tile_z'), ('sp10', 'ashley_placement'), ('temp_v1_2', 'rounded_facing_angle'), ('var_a0', 'wrapped_facing_for_quadrant')),
-         "F00269 Location id selects zone/map pair, input X/Z become entry tiles. Ashley facing+0x200 is wrapped byONE then signed-division-adjusted for quadrant stored in entryElevation."),
-        ("Field::InitializeSphericalCamera",
-         (('sp10', 'ashley_placement'), ('var_v0', 'facing_division_numerator')),
-         "F00289 Signed division-by-eight correction uses facing+7 for negative values before deriving yaw remainder. ActorPlacement(0) supplies look-at. The old yaw is loaded into temp_v0 but never read."),
-        ("Field::SetCameraPitchPreset",
-         (('arg0', 'requested_pitch'),),
-         "F00290 Accepts pitch -0x300 or -0x80, otherwise writes default -0x180."),
         ("Field::RollRiskLockBreak",
          (('var_s0', 'risk_derived_percent'),),
          "F00350 Risk-derived percent=(risk+150)*100/256, capped100, then used with+20 against bounded random100."),
@@ -5420,57 +5339,9 @@ REGEX_FIXES += [
         ("Field::CalculateHealingPanelRecovery",
          (('sp10', 'recovery_calculation'), ('new_var2', 'panel_attack_value')),
          "F00422 Healing-panel calculation uses same damage-calculation factors, cached attackStat minus defense and optional random modifier; second formal unused."),
-        ("Field::LoadZoneRoomFileTable",
-         (('arg0', 'room_file_table_data'),),
-         "F00530 Input buffer is copied to newly allocated zone MPD-file table using supplied size."),
-        ("Field::QueueZoneLoad",
-         (('temp_s0', 'zone_music_id'),),
-         "F00532 Zone id indexes zoneMusicIds; requested zone track compared with current music before fade."),
-        ("Field::PlaceAshleyAtRoomEntrance",
-         (('sp10', 'entry_step_offset'), ('sp28', 'entrance_placement')),
-         "F00537 Placement record populated from pending door and supplied to PlaceActorInRoom. Optional entry step vector is translated. ActorPlacement output is queried but not consumed afterward."),
-        ("Field::RestoreRoomEnemyCache",
-         (('var_s4', 'found_cached_room'), ('temp_s2', 'enemy_spawn'), ('temp_v0', 'cached_actor_state')),
-         "F00538 Flag records cache hit among four room states. Each enemy spawn gets hidden state from found cached actor byte1; cache miss chooses least-recent slot."),
-        ("Field::FinishRoomLoad",
-         (('arg0', 'requested_room_id'), ('v0', 'mpd_section_offset'), ('arg2', 'script_section_address'), ('arg4', 'door_section_address'), ('arg5', 'door_section_bytes'), ('new_var', 'initial_entry_mode'), ('temp_s4', 'room_event_load_result'), ('var_a0', 'scene_id_or_packed_dimensions'), ('sp20', 'initial_camera_target_fixed12'), ('sp40', 'ashley_placement')),
-         "F00543 Outer arg0 queues room load. Outer int v0 sequentially stores room/loot/enemy section offsets; inner short* v0 clears reset-block tail. Inner intptr_t arg0 is cleared-event section pointer, distinct from formal. Event block also builds script/door pointers and size, constant1 compares entry mode; loader result controls cutscene/weather path. var_a0 first scene id then packed map dimensions. Placement-derived fixed-point vector initializes camera."),
-        ("Field::SetFieldRenderingEnabled",
-         (('arg0', 'enabled'),),
-         "F00546 Booleanizes input to global field rendering enable flag."),
         ("Field::CurrentSavePointId",
          (('sp10', 'ashley_placement'), ('temp_a2', 'platform_layer_flags'), ('temp_v0_2', 'ashley_state_flags'), ('var_a0', 'collision_tile_x'), ('var_a1', 'collision_tile_z'), ('var_a2', 'collision_layer'), ('s0', 'ashley_tile')),
          "F00547 Ashley placement supplies target tile. Actor state &0x70000 selects platform layer and zero coordinates, else tile target coordinates. Flags also guard trigger kind16 save point."),
-        ("Field::LoadRoomSections",
-         (('arg0', 'owner_room_index'), ('temp_v0', 'room_section_allocation'), ('var_s0', 'room_record')),
-         "F00551 Input owner index is written to roomData.roomIndex; allocator result is base for all section pointers; record alias receives geometry-through-section pointer table."),
-        ("Field::EnableOwnedRoomRendering",
-         (('arg0', 'owner_room_index'),),
-         "F00553 Owner index must match loaded room; enables displayFlag."),
-        ("Field::DisableOwnedRoomRendering",
-         (('arg0', 'owner_room_index'),),
-         "F00554 Owner index must match loaded room; clears displayFlag."),
-        ("Field::ReleaseOwnedRoomSections",
-         (('arg0', 'owner_room_index'),),
-         "F00555 Only releases loaded room sections when owner index matches roomData.roomIndex; clears all room state after dependent releases."),
-        ("Field::DrawRoomGeometry",
-         (('arg0', 'room_geometry'),),
-         "F00557 Geometry pointer is validated, transformed and drawn; primitive range then optionally tinted."),
-        ("Field::SetRoomRenderingEnabled",
-         (('arg0', 'enabled'),),
-         "F00559 Writes loaded room display flag from input."),
-        ("Field::CopyZonePaletteRow",
-         (('arg0', 'source_colors'), ('arg1', 'palette_row'), ('arg2', 'first_color'), ('arg3', 'color_count')),
-         "F00560 Copies colorCount*2 bytes from source into palette row*256+firstColor."),
-        ("Field::OffsetRoomTextureIds",
-         (('arg0', 'texture_id_offset'), ('arg1', 'geometry_words'), ('var_a1', 'group_word_cursor'), ('temp_t3', 'group_count'), ('temp_v1', 'polygon_block_cursor'), ('temp_t0', 'triangle_count'), ('temp_t2', 'quad_count')),
-         "F00562 Geometry begins with group count then16-word group records; word7 points to triangle/quad count block. Cursor advances32/40-byte primitives and adds texture-id offset to halfword at0x1E."),
-        ("Field::SetRoomTint",
-         (('arg0', 'tint_color'), ('arg1', 'tint_strength')),
-         "F00563 Input RGB and strength populate roomTint; all zero disables tint."),
-        ("Field::SetRoomAnimationsPaused",
-         (('arg0', 'paused'),),
-         "F00565 Direct room animation/update pause flag store."),
         ("Field::SetMinimapVisible",
          (('arg0', 'visible'),),
          "F00566 Direct stores and returns minimap visibility flag."),
@@ -5510,18 +5381,6 @@ REGEX_FIXES += [
         ("Field::FinishDoorAnimation",
          (('arg0', 'door_trigger'),),
          "F00586 Waits for room effect, toggles collision/open/triggered flags including linked door, then reports completion."),
-        ("Field::ApplyCameraGeometryOcclusion",
-         (('arg0', 'query_tile_x'), ('arg1', 'query_tile_z'), ('arg2', 'query_floor_layer'), ('arg3', 'camera_distance_mode'), ('var_a1', 'view_trigger_cursor'), ('new_var', 'view_trigger'), ('s1', 'effect_id_cursor')),
-         "F00587 Tile X/Z/layer and camera distance mode match packed view trigger together with yaw octant; variable-length cursor advances aligned effect-id list, whose entries disable geometry groups."),
-        ("Field::ClearGeometryOcclusion",
-         (('temp_a1', 'geometry_group_count'), ('var_a0', 'geometry_group_cursor')),
-         "F00588 Room geometry word0 is group count; cursor starts atword1 and advances16, clearing each group's occlusion bit0x1000."),
-        ("Field::SampleRoomGroundColor",
-         (('arg0', 'packed_world_position'),),
-         "F00589 Input is forwarded unchanged to Render_SampleRoomLighting packed_position; actor producers pack world X/Z and layer argument is ignored. Original callee2EA3C.s:1799..1805 extracts signed high/low16 halves from a0;1782..1853 uses them in light-cell bounds tests and a2 as output color."),
-        ("Field::RoomSupplementalRecord",
-         (('arg0', 'supplemental_record_index'),),
-         "F00590 Returns section7 base plus index*8 or0 if no section. No stronger record semantics inferred."),
         ("Field::SetMovingPlatformActor",
          (('arg0', 'platform_index'), ('arg1', 'platform_control_state')),
          "F00591 Platform table index selects controlState; nonnegative controller input resets bounce frames when not frozen."),
@@ -5600,48 +5459,6 @@ REGEX_FIXES += [
         ("Field::IsRoomSigilDoorUnlocked",
          (('arg0', 'zone_id'), ('arg1', 'map_id'), ('arg2', 'sigil_index')),
          "F00634 Zone/map arguments compare both endpoint pairs; sigil argument selects index range then returns unlock bit."),
-        ("Field::InitializeRoomBackgroundColors",
-         (('temp_s0', 'environment_record'),),
-         "F00637 Original sectionB supplies the five background colors and weather rectangle; Native Field_roomData.environment is the same record."),
-        ("Field::SetBackgroundParallaxScale",
-         (('arg0', 'parallax_scale_x_fixed12'), ('arg1', 'parallax_scale_y_fixed12')),
-         "F00639 Direct stores into background X and Y parallax scales; DrawRoomBackground multiplies camera angles by these 12-bit fixed scales."),
-        ("Field::SetTiledBackgroundEnabled",
-         (('arg0', 'enabled'),),
-         "F00640 Direct tiled-background enable store consumed by DrawRoomBackground."),
-        ("Field::SetRoomBackgroundColors",
-         (('arg0', 'gradient_color_cursor'), ('var_a0', 'gradient_packet_word_cursor')),
-         "F00643 Copies five colors then advances the input color pointer through 1/8/16/8/1 gradient vertices. Output cursor advances through packed primitive color words."),
-        ("Field::DrawRoomBackground",
-         (('arg0', 'background_rotation_override'),),
-         "F00644 Optional input overrides the environment backgroundRotation, with reference-vector fallback, passed as angles to room-view matrix construction."),
-        ("Field::QueueTiledBackgroundLoad",
-         (('arg0', 'texture_page'), ('temp_s0', 'background_section_words'), ('new_var', 'disc_sector_bytes'), ('temp_s2', 'texture_disc_file'), ('temp_s3', 'layout_disc_file'), ('var_a0', 'texture_allocation_bytes'), ('var_s0', 'layout_allocation_bytes')),
-         "F00645 Room section10 begins with a texture reservation id, with TIM and layout disc records at halfword offsets 0x20 and 0x42. Their sizes round up to 0x800-byte sectors before high-end allocation; both requests are enqueued and reset on no-load path."),
-        ("Field::SetRoomWeather",
-         (('arg0', 'weather_kind'),),
-         "F00658 Weather kind stored globally and dispatched0..4 to particle initialization; environment supplies intensity, wind and area."),
-        ("Field::SetWeatherVariationEnabled",
-         (('arg0', 'enabled'),),
-         "F00662 Direct weather-variation-enabled store."),
-        ("Field::SetWeatherIntensity",
-         (('arg0', 'intensity'),),
-         "F00663 Stores intensity then reapplies intensity and recalculates weather velocity."),
-        ("Field::SetWeatherWindAngles",
-         (('arg0', 'wind_azimuth_angle'), ('arg1', 'wind_elevation_angle')),
-         "F00664 Stores weather parameter5 and4. Original146C.c:18221..18254 / Effects_RecalculateWeatherVelocity uses sin/cos(parameter5) for horizontal azimuth, cos(parameter4) for X/Z and sin(parameter4) for Y; parameter6 is magnitude. Thus arg1 is an elevation angle despite producer/field-ledger windStrength spelling; no field-ledger edit is included."),
-        ("Field::SetWeatherAmbientSound",
-         (('arg0', 'sound_id'), ('temp_s3', 'previous_sound_id')),
-         "F00666 Saves previous ambient sound id for return; stores requested id, starts/stops it based on intensity volume and fades current sound."),
-        ("Field::SetRoomBackgroundOffset",
-         (('arg0', 'offset_x'), ('arg1', 'offset_y')),
-         "F00667 Direct stores to backgroundOffsetX/Y consumed by DrawRoomBackground."),
-        ("Field::DrawRoomBackgroundTiles",
-         (('arg0', 'background_layout'), ('arg1', 'horizontal_offset'), ('arg2', 'vertical_offset'), ('arg3', 'base_texture_page')),
-         "F00668 Layout supplies tile grid. X offset wraps across1024 pixels; Y offset subtracts from rows. Texture-page argument ORs per-tile blend bits into packet tpage."),
-        ("Field::DuckWeatherAmbientSound",
-         (('arg0', 'duck_enabled'),),
-         "F00669 Nonzero input fades weather volume to one quarter; zero restores full intensity-based volume."),
         ("Field::AdvanceRoomTextureFrames",
          (('arg0', 'texture_frame_effect'),),
          "F00677 Texture-frame record advances frame/delay and writes UV coordinates into polygon UV view at geometryOffset."),
@@ -5801,9 +5618,6 @@ REGEX_FIXES += [
         ("Field::GimmickSupportHeightBelow",
          (('arg0', 'query_tile_x'), ('arg1', 'query_tile_z'), ('arg2', 'reference_height'), ('temp_v1', 'gimmick_record'), ('temp_v1_2', 'gimmick_height'), ('var_a3', 'minimum_gimmick_y_or_support_height')),
          "F01015 X/Z tile match; accepts gimmick Y strictly greater than reference height and below current minimum. Subtracts 128 then clamps at zero."),
-        ("Field::InitializeRoomTransitionPrimitives",
-         (('sp18', 'texture_window_rect'),),
-         "F01857 Zero RECT is passed to SetDrawMode as texture-window rectangle while transition primitive sets are initialized."),
         ("Field::MeasureTileStack",
          (('arg0', 'query_tile_x'), ('arg1', 'query_tile_z'), ('arg2', 'output_stack_height'), ('var_t2', 'stack_height'), ('var_t0', 'gimmick_table'), ('temp_v1', 'gimmick_record')),
          "F02468 Filters stationary visible gimmicks at tile; interaction2 sets return flag, other matches decrement output stack height by128. Table alias and per-record pointer are separate."),
@@ -6493,9 +6307,6 @@ for identifier, old, new, evidence in (
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
     for name, bindings, evidence in (
-        ("Battle::ArmDefenseAbilityTimingWindow",
-         (('arg0', 'target_actor_slot'), ('new_var2', 'queued_source_hit')),
-         "F00000 F00000 Battle::ArmDefenseAbilityTimingWindow: original func_80069C6C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:735 (function lines 735-759). arg0 -> target_actor_slot (target actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:735-739. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:60-64. new_var2 -> queued_source_hit (queued source hit). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:737-750. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:62-75. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),
         ("Battle::ResolveEnemyDefeat",
          (('arg0', 'source_actor_slot'), ('arg2', 'count_kill')),
          "F00048 F00048 Battle::ResolveEnemyDefeat: original _enemyDefeated at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:1824 (function lines 1824-1840). arg0 -> source_actor_slot (source actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:1824-1832. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:87-95. arg2 -> count_kill (count kill). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:1824-1832. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:87-95. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
@@ -6505,12 +6316,6 @@ REGEX_FIXES += [
         ("Battle::ApplyActionSourceEffects",
          (('arg0', 'source_actor_slot'), ('temp_s0', 'queued_action')),
          "F00061 F00061 Battle::ApplyActionSourceEffects: original func_8006CA20 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:2106 (function lines 2106-2139). arg0 -> source_actor_slot (source actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:2106-2130. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:196-220. arg1 intentionally retained: Original func_8006CA20 SVECTOR formal has no reads/writes. Effects Timeline forwards NULL or an effect source position, but the callback ignores it. Retain unused interface slot rather than impose an active role. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:2106. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:196. temp_s0 -> queued_action (queued action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:2108-2137. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:198-227. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
-        ("Battle::PopulateActionTargetPreview",
-         (('arg0', 'preview_out'), ('arg1', 'action_result'), ('arg2', 'hit_result'), ('var_v0', 'preview_amount')),
-         "F00090 F00090 Battle::PopulateActionTargetPreview: original func_8006F630 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3235 (function lines 3235-3268). arg0 -> preview_out (preview out). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3235-3267. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:123-155. arg1 -> action_result (action result). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3235-3266. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:123-154. arg2 -> hit_result (hit result). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3235-3267. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:123-155. var_v0 -> preview_amount (preview amount). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3238-3255. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:126-143. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::GrantPendingAbilityUnlock",
-         (('temp_v0_2', 'pending_unlocks'),),
-         "F00094 F00094 Battle::GrantPendingAbilityUnlock: original func_8006FA20 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3352 (function lines 3352-3370). temp_v0_2 -> pending_unlocks (pending unlocks). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3354-3369. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:159-174. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),
         ("Battle::BeginPostActionRecovery",
          (('arg0', 'recovery_reward_mode'),),
          "F00096 F00096 Battle::BeginPostActionRecovery: original func_8006FBCC at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3388 (function lines 3388-3406). arg0 -> recovery_reward_mode (recovery reward mode). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3388-3403. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:240-255. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
@@ -6520,27 +6325,9 @@ REGEX_FIXES += [
         ("Battle::StartActionAnimation",
          (('temp_s0', 'queued_action'), ('temp_a3', 'chain_index')),
          "F00100 F00100 Battle::StartActionAnimation: original func_80070278 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3510 (function lines 3510-3570). temp_a3 -> chain_index (chain index). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3513-3555. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:278-320. temp_s0 -> queued_action (queued action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3512-3560. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:277-325. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
-        ("Battle::AimActionBehindSource",
-         (('arg0', 'action_request'), ('sp10', 'source_placement')),
-         "F00104 F00104 Battle::AimActionBehindSource: original func_8007087C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3650 (function lines 3650-3658). arg0 -> action_request (action request). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3650-3657. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:235-242. sp10 -> source_placement (source placement). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3652-3657. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:237-242. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::SetSingleActionTarget",
-         (('temp_v1', 'encoded_target_id'),),
-         "F00105 F00105 Battle::SetSingleActionTarget: original func_800708EC at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3660 (function lines 3660-3693). temp_v1 -> encoded_target_id (encoded target id). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3662-3678. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:248-264. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
         ("Battle::CommitSelectedAction",
          (('arg0', 'target_selection_mode'), ('temp_s0', 'selected_preview'), ('temp_v1_2', 'action_id')),
          "F00108 F00108 Battle::CommitSelectedAction: original func_80070F28 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3775 (function lines 3775-3904). arg0 -> target_selection_mode (target selection mode). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3775-3826. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:345-396. temp_s0 -> selected_preview (selected preview). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3779-3790. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:349-360. temp_v1_2 -> action_id (action id). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3778-3836. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:348-406. var_a0 intentionally retained: Original func_80070F28 and native definition contain only int var_a0; no initializer, read or write. Unused decompiler declaration has no proven runtime role. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:3780. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:350. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
-        ("Battle::CollectSourceAreaActionTargets",
-         (('spec', 'action_definition'),),
-         "F00111 F00111 Battle::CollectSourceAreaActionTargets: original func_800719FC at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4086 (function lines 4086-4174). arg0 intentionally retained: Original func_800719FC formal is unused; source-area targets use selection.primaryTarget and globals instead. Retain discarded legacy call slot. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4086. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:365. spec -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4093-4101. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:372-380. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::CollectDirectActionTargets",
-         (('arg0', 'source_actor_slot'), ('spec', 'action_definition')),
-         "F00112 F00112 Battle::CollectDirectActionTargets: original func_80071F68 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4176 (function lines 4176-4327). arg0 -> source_actor_slot (source actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4176-4187. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:456-467. spec -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4183-4204. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:463-484. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::CollectGroundAreaActionTargets",
-         (('arg0', 'source_actor_slot'), ('spec', 'action_definition')),
-         "F00113 F00113 Battle::CollectGroundAreaActionTargets: original func_80072734 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4329 (function lines 4329-4412). arg0 -> source_actor_slot (source actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4329-4339. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:610-620. spec -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4334-4363. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:615-644. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::BeginActorActionSelection",
-         (('arg0', 'source_actor_slot'), ('arg1', 'action_id'), ('temp_v0', 'actor_state_flags'), ('temp_a0', 'source_actor')),
-         "F00116 F00116 Battle::BeginActorActionSelection: original func_80072EC4 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4489 (function lines 4489-4542). arg0 -> source_actor_slot (source actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4489-4532. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:770-813. arg1 -> action_id (action id). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4489-4499. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:770-780. temp_a0 -> source_actor (source actor). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4493-4510. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:774-791. temp_v0 -> actor_state_flags (actor state flags). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:4492-4527. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:773-808. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
         ("Battle::BeginActorDefeatAnimation",
          (('arg0', 'actor_slot'),),
          "F00156 F00156 Battle::BeginActorDefeatAnimation: original func_80074A20 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:5315 (function lines 5315-5337). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:5315-5330. Native references: Native\\Game\\src\\Battle\\ActionFlow.cpp:677-692. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
@@ -6562,12 +6349,6 @@ REGEX_FIXES += [
         ("Battle::WaitForActionEffectReady",
          (('temp_s0', 'queued_action'),),
          "F00187 F00187 Battle::WaitForActionEffectReady: original func_80078748 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7025 (function lines 7025-7033). temp_s0 -> queued_action (queued action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7027-7029. Native references: Native\\Game\\src\\Battle\\ActionExecution.cpp:258-260. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
-        ("Battle::CanTriggerBattleAbility",
-         (('arg0', 'ability_input_slot'), ('temp_s1', 'queued_action')),
-         "F00189 F00189 Battle::CanTriggerBattleAbility: original func_80078828 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7043 (function lines 7043-7145). arg0 -> ability_input_slot (ability input slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7043-7132. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:268-357. temp_s1 -> queued_action (queued action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7045-7118. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:270-343. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),
-        ("Battle::UpdateBattleAbilityTiming",
-         (('new_var', 'pressed_buttons'), ('temp_s3', 'queued_action'), ('var_a0', 'timing_result')),
-         "F00190 F00190 Battle::UpdateBattleAbilityTiming: original func_80078AB4 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7147 (function lines 7147-7352). new_var -> pressed_buttons (pressed buttons). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7155-7197. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:381-429. temp_s3 -> queued_action (queued action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7157-7345. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:383-577. var_a0 -> timing_result (timing result). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7149-7305. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:375-537. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),
         ("Battle::WaitForTargetRecovery",
          (('var_s3', 'queued_action'),),
          "F00193 F00193 Battle::WaitForTargetRecovery: original func_800790BC at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7364 (function lines 7364-7411). var_s3 -> queued_action (queued action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7366-7405. Native references: Native\\Game\\src\\Battle\\ActionExecution.cpp:290-329. var_s4 intentionally retained: Intentionally merged original local: initially boolean all target animations idle, then recovery/reward mode 0/1/2 sent to BeginPostActionRecovery after defeat processing. Preserve one binding; do not falsely name both phases as one boolean or split lifetime. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:7369-7409. Native references: Native\\Game\\src\\Battle\\ActionExecution.cpp:293-333. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
@@ -6580,18 +6361,6 @@ REGEX_FIXES += [
         ("Battle::SetGameplayHudHidden",
          (('arg0', 'hidden'),),
          "F00235 F00235 Battle::SetGameplayHudHidden: original func_8007BD8C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:8561 (function lines 8561-8571). arg0 -> hidden (hidden). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:8561-8570. Native references: Native\\Game\\src\\Battle\\Hud.cpp:131-140. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
-        ("Battle::IsActorWeaponDrawn",
-         (('arg0', 'actor_slot'),),
-         "F00249 F00249 Battle::IsActorWeaponDrawn: original func_8007C088 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:8655 (function lines 8655-8655). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:8655. Native references: Native\\Game\\src\\Battle\\BattleMode.cpp:17. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
-        ("Battle::SetActorBattleMode",
-         (('arg0', 'actor_slot'), ('arg1', 'battle_mode')),
-         "F00250 F00250 Battle::SetActorBattleMode: original func_8007C0AC at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:8657 (function lines 8657-8684). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:8657-8681. Native references: Native\\Game\\src\\Battle\\BattleMode.cpp:20-44. arg1 -> battle_mode (battle mode). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:8657-8679. Native references: Native\\Game\\src\\Battle\\BattleMode.cpp:20-42. Review context: Reviewed complete candidate use chains against original function. Names follow queue access, actor/stat indices, result output writes, geometry differences and the actual called helper contracts; no split local lifetimes or behavioral edits."),
-        ("Battle::IsActionUnlocked",
-         (('arg0', 'action_id'),),
-         "F00303 F00303 Battle::IsActionUnlocked: original vs_battle_isActionUnlocked at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9241 (function lines 9241-9247). arg0 -> action_id (action id). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9241-9244. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:587-590. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),
-        ("Battle::UnlockAction",
-         (('arg0', 'action_id'),),
-         "F00304 F00304 Battle::UnlockAction: original vs_battle_setActionUnlocked at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9249 (function lines 9249-9254). arg0 -> action_id (action id). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9249-9252. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:596-599. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),
         ("Battle::IgnoreHitCallback",
          (('arg0', 'action_definition'), ('arg1', 'source_hit'), ('arg2', 'target_hit'), ('arg3', 'hit_index'), ('arg4', 'execute_action')),
          "F00341 F00341 Battle::IgnoreHitCallback: original _invalidHitFunction at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9860 (function lines 9860-9865). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9860. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:174. arg1 -> source_hit (source hit). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9861. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:175. arg2 -> target_hit (target hit). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9862. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:176. arg3 -> hit_index (hit index). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9862. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:176. arg4 -> execute_action (execute action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:9863. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:177. Review context: Original individual callback body and dispatch reviewed. CalculateActionStatChange and RollActionHit pass definition/source/target/hit index/execution flag; that flag enables variance and execution-only rating updates. Formula locals hold the actual damage/healing calculation record, scaled amount, or chance-minus-five prior to adding uniform variance. Existing types, signedness and unused interface slots preserved."),
@@ -6616,114 +6385,6 @@ REGEX_FIXES += [
         ("Battle::ChainHitChance",
          (('arg0', 'action_definition'), ('arg1', 'source_hit'), ('arg3', 'hit_index'), ('arg4', 'execute_action')),
          "F00348 F00348 Battle::ChainHitChance: original _getChainEvasionModifier at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10057 (function lines 10057-10073). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10057. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:378. arg1 -> source_hit (source hit). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10058. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:379. arg3 -> hit_index (hit index). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10059. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:380. arg4 -> execute_action (execute action). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10059. Native references: Native\\Game\\src\\Battle\\HitChance.cpp:380. Review context: Original individual callback body and dispatch reviewed. CalculateActionStatChange and RollActionHit pass definition/source/target/hit index/execution flag; that flag enables variance and execution-only rating updates. Formula locals hold the actual damage/healing calculation record, scaled amount, or chance-minus-five prior to adding uniform variance. Existing types, signedness and unused interface slots preserved."),
-        ("Battle::IsStatusEffectBlocked",
-         (('arg1', 'target_result_bytes'), ('temp_a1', 'target_stats')),
-         "F00351 F00351 Battle::IsStatusEffectBlocked: original _hitPrerequisiteCanApplyEffect at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10133 (function lines 10133-10142). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10133-10136. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:22-25. temp_a1 -> target_stats (target stats). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10136-10138. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:25-27. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::TargetEnemyClass",
-         (('arg0', 'target_result_bytes'),),
-         "F00352 F00352 Battle::TargetEnemyClass: original _getEnemyClass at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10144 (function lines 10144-10144). arg0 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10144. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:34. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::RejectAttackPrerequisite",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00353 F00353 Battle::RejectAttackPrerequisite: original _hitPrerequisiteNever0 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10146 (function lines 10146-10150). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10147. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:38. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10147. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:38. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::AcceptAttackPrerequisite",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00354 F00354 Battle::AcceptAttackPrerequisite: original _hitPrerequisiteAlways0 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10152 (function lines 10152-10156). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10153. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:45. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10153. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:45. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::IsAttackTargetUndead",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00357 F00357 Battle::IsAttackTargetUndead: original _hitPrerequisiteUndead at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10170 (function lines 10170-10173). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10170. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:51. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10170-10172. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:51-53. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::IsAttackTargetLiving",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00358 F00358 Battle::IsAttackTargetLiving: original _hitPrerequisiteNotUndead at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10175 (function lines 10175-10178). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10175. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:57. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10175-10177. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:57-59. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyStrengthDown",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00362 F00362 Battle::CanApplyStrengthDown: original _hitPrerequisiteCanApplyStrDown at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10198 (function lines 10198-10202). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10199. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:64. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10199-10201. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:64-66. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyIntelligenceDown",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00363 F00363 Battle::CanApplyIntelligenceDown: original _hitPrerequisiteCanApplyIntDown at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10204 (function lines 10204-10208). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10205. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:71. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10205-10207. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:71-73. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyAgilityDown",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00364 F00364 Battle::CanApplyAgilityDown: original _hitPrerequisiteCanApplyAglDown at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10210 (function lines 10210-10214). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10211. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:78. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10211-10213. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:78-80. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyEquipmentDown",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00365 F00365 Battle::CanApplyEquipmentDown: original _hitPrerequisiteCanApplyEquipDown at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10216 (function lines 10216-10248). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10216. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:84. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10216-10227. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:84-95. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyHalfMovement",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00366 F00366 Battle::CanApplyHalfMovement: original _hitPrerequisiteCanApplyHalfMove at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10250 (function lines 10250-10254). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10251. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:120. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10251-10253. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:120-122. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyStrengthUp",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00367 F00367 Battle::CanApplyStrengthUp: original _hitPrerequisiteCanApplyStrUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10256 (function lines 10256-10259). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10256. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:126. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10256-10258. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:126-128. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyIntelligenceUp",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00368 F00368 Battle::CanApplyIntelligenceUp: original _hitPrerequisiteCanApplyIntUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10261 (function lines 10261-10264). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10261. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:132. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10261-10263. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:132-134. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyAgilityUp",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00369 F00369 Battle::CanApplyAgilityUp: original _hitPrerequisiteCanApplyAglUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10266 (function lines 10266-10269). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10266. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:138. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10266-10268. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:138-140. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyEquipmentUp",
-         (('arg0', 'action_definition'), ('arg1', 'target_result_bytes')),
-         "F00370 F00370 Battle::CanApplyEquipmentUp: original _hitPrerequisiteCanApplyEquipUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10271 (function lines 10271-10303). arg0 -> action_definition (action definition). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10271. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:144. arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10271-10282. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:144-155. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyQuicken",
-         (('arg1', 'target_result_bytes'),),
-         "F00371 F00371 Battle::CanApplyQuicken: original _hitPrerequisiteCanApplyQuicken at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10305 (function lines 10305-10309). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10306-10308. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:180-182. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplySilence",
-         (('arg1', 'target_result_bytes'),),
-         "F00372 F00372 Battle::CanApplySilence: original _hitPrerequisiteCanApplySilence at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10311 (function lines 10311-10315). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10312-10314. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:187-189. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyMagicWard",
-         (('arg1', 'target_result_bytes'),),
-         "F00373 F00373 Battle::CanApplyMagicWard: original _hitPrerequisiteCanApplyMagicWard at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10317 (function lines 10317-10321). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10318-10320. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:194-196. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyRegeneration",
-         (('arg1', 'target_result_bytes'),),
-         "F00374 F00374 Battle::CanApplyRegeneration: original _hitPrerequisiteCanApplyRegen at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10323 (function lines 10323-10327). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10324-10326. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:201-203. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyParalysis",
-         (('arg1', 'target_result_bytes'),),
-         "F00375 F00375 Battle::CanApplyParalysis: original _hitPrerequisiteCanApplyParalysis at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10329 (function lines 10329-10333). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10330-10332. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:208-210. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyPoison",
-         (('arg1', 'target_result_bytes'),),
-         "F00376 F00376 Battle::CanApplyPoison: original _hitPrerequisiteCanApplyPoison at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10335 (function lines 10335-10339). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10336-10338. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:215-217. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyNumbness",
-         (('arg1', 'target_result_bytes'),),
-         "F00377 F00377 Battle::CanApplyNumbness: original _hitPrerequisiteCanApplyNumbness at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10341 (function lines 10341-10345). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10342-10344. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:222-224. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyCurse",
-         (('arg1', 'target_result_bytes'),),
-         "F00378 F00378 Battle::CanApplyCurse: original _hitPrerequisiteCanApplyCurse at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10347 (function lines 10347-10351). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10348-10350. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:229-231. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyAirAttackUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00379 F00379 Battle::CanApplyAirAttackUp: original _hitPrerequisiteCanApplyAirAttackUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10353 (function lines 10353-10361). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10354-10357. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:236-239. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyFireAttackUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00380 F00380 Battle::CanApplyFireAttackUp: original _hitPrerequisiteCanApplyFireAttackUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10363 (function lines 10363-10371). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10364-10367. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:247-250. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyEarthAttackUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00381 F00381 Battle::CanApplyEarthAttackUp: original _hitPrerequisiteCanApplyEarthAttackUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10373 (function lines 10373-10381). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10374-10377. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:258-261. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyWaterAttackUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00382 F00382 Battle::CanApplyWaterAttackUp: original _hitPrerequisiteCanApplyWaterAttackUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10383 (function lines 10383-10391). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10384-10387. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:269-272. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyAirDefenseUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00383 F00383 Battle::CanApplyAirDefenseUp: original _hitPrerequisiteCanApplyAirDefenseUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10393 (function lines 10393-10416). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10394-10399. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:280-285. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyFireDefenseUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00384 F00384 Battle::CanApplyFireDefenseUp: original _hitPrerequisiteCanApplyFireDefenseUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10418 (function lines 10418-10440). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10419-10424. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:306-311. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyEarthDefenseUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00385 F00385 Battle::CanApplyEarthDefenseUp: original _hitPrerequisiteCanApplyEarthDefenseUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10442 (function lines 10442-10464). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10443-10448. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:331-336. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyWaterDefenseUp",
-         (('arg1', 'target_result_bytes'),),
-         "F00386 F00386 Battle::CanApplyWaterDefenseUp: original _hitPrerequisiteCanApplyWaterDefenseUp at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10466 (function lines 10466-10489). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10467-10472. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:356-361. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyBanish",
-         (('arg1', 'target_result_bytes'),),
-         "F00387 F00387 Battle::CanApplyBanish: original _hitPrerequisiteCanApplyBanish at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10491 (function lines 10491-10495). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10492-10494. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:382-384. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyExorcise",
-         (('arg1', 'target_result_bytes'),),
-         "F00388 F00388 Battle::CanApplyExorcise: original _hitPrerequisiteCanApplyExorcise at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10497 (function lines 10497-10505). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10498-10501. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:389-392. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CanApplyDrain",
-         (('arg1', 'target_result_bytes'),),
-         "F00389 F00389 Battle::CanApplyDrain: original _hitPrerequisiteCanApplyDrain at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10507 (function lines 10507-10515). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10508-10511. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:400-403. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::IgnoreAttackPrerequisite",
-         (('arg1', 'target_result_bytes'),),
-         "F00390 F00390 Battle::IgnoreAttackPrerequisite: original _hitPrerequisiteUnused0 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10517 (function lines 10517-10517). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10517. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:410. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
-        ("Battle::CheckActionHitPrerequisite",
-         (('arg1', 'target_result_bytes'),),
-         "F00393 F00393 Battle::CheckActionHitPrerequisite: original _canPerformAttack at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10523 (function lines 10523-10532). arg1 -> target_result_bytes (target result bytes). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10523-10531. Native references: Native\\Game\\src\\Battle\\AttackPrerequisites.cpp:413-421. Review context: Individually read original prerequisite body and dispatcher. ResolveActionTargets passes (char*)entry; CheckActionHitPrerequisite reads byte 3 (impact kind), dispatches (action, bytes), and class/immunity/equipment predicates use byte 0 as actor index. This is a result-record byte view, not just a scalar slot pointer. Constant/empty callbacks keep the same positional ABI."),
         ("Battle::ApplyDamageGemMultiplier",
          (('arg1', 'damage_amount'), ('arg2', 'source_stats'), ('arg3', 'target_stats'), ('var_a0', 'has_modifier_gem'), ('var_t0', 'damage_percent')),
          "F00394 F00394 Battle::ApplyDamageGemMultiplier: original func_8007FE5C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10534 (function lines 10534-10592). arg1 -> damage_amount (damage amount). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10535-10591. Native references: Native\\Game\\src\\Battle\\Damage.cpp:70-126. arg2 -> source_stats (source stats). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10535-10569. Native references: Native\\Game\\src\\Battle\\Damage.cpp:70-104. arg3 -> target_stats (target stats). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10535-10581. Native references: Native\\Game\\src\\Battle\\Damage.cpp:70-116. var_a0 -> has_modifier_gem (has modifier gem). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10537-10587. Native references: Native\\Game\\src\\Battle\\Damage.cpp:72-122. var_t0 -> damage_percent (damage percent). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\146C.c:10538-10591. Native references: Native\\Game\\src\\Battle\\Damage.cpp:73-126. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
@@ -7156,24 +6817,6 @@ REGEX_FIXES += [
         ("Battle::UpdateSphereTargetHighlights",
          (('arg0', 'target_lines'), ('arg1', 'target_count')),
          "F01310 F01310 Battle::UpdateSphereTargetHighlights: original func_800C4650 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BE50.c:65 (function lines 65-80). arg0 -> target_lines (target lines). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BE50.c:65-76. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:1365-1376. arg1 -> target_count (target count). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BE50.c:65-70. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:1365-1370. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::UpdateSphereTargetPosition",
-         (('arg0', 'target_position'),),
-         "F01313 F01313 Battle::UpdateSphereTargetPosition: original func_800C4794 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:640 (function lines 640-867). arg0 -> target_position (target position). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:640-857. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:826-1043. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::ClearTargetActorHighlight",
-         (('arg0', 'actor_slot'), ('arg1', 'pulse_slot')),
-         "F01314 F01314 Battle::ClearTargetActorHighlight: original func_800C513C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:869 (function lines 869-874). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:869-872. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1056-1059. arg1 -> pulse_slot (pulse slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:869-872. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1056-1059. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::SetTargetActorHighlight",
-         (('arg0', 'actor_slot'), ('arg1', 'pulse_flags'), ('arg2', 'pulse_slot')),
-         "F01315 F01315 Battle::SetTargetActorHighlight: original func_800C5164 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:876 (function lines 876-881). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:876-879. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1064-1067. arg1 -> pulse_flags (pulse flags). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:876-879. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1064-1067. arg2 -> pulse_slot (pulse slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:876-879. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1064-1067. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::SetTargetActorColorOverride",
-         (('arg0', 'actor_slot'), ('arg1', 'tint')),
-         "F01316 F01316 Battle::SetTargetActorColorOverride: original func_800C518C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:883 (function lines 883-888). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:883-886. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1072-1075. arg1 -> tint (tint). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:883-886. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1072-1075. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::InitTargetSelectionRow",
-         (('arg0', 'target_index'), ('arg1', 'row_state'), ('arg2', 'row_index'), ('temp_v1', 'position_z_pad_word')),
-         "F01321 F01321 Battle::InitTargetSelectionRow: original func_800C5798 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:1021 (function lines 1021-1043). arg0 -> target_index (target index). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:1021-1025. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1215-1219. arg1 -> row_state (row state). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:1021-1034. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1215-1228. arg2 -> row_index (row index). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:1021-1029. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1215-1223. temp_v1 -> position_z_pad_word (position z pad word). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:1023-1032. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1217-1226. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change. T00487.001/T00486.006 mark field meaning unresolved; checked actual shared views instead: TargetPreview.position is initial SVECTOR in 0x18-byte record (Targeting.h:9-23), populated by ActorLowGroupBonePosition in CollectSourceAreaActionTargets. TargetSphereLabelEntry opaque8/C occupies SphereTargetLabel.worldPosition (TargetVolume.h:108-118). Copy second word is therefore z+pad, not a guessed status or pointer; preserve genuine SVECTOR padding."),
-        ("Battle::FirstTargetStatusText",
-         (('arg0', 'status_mask'),),
-         "F01322 F01322 Battle::FirstTargetStatusText: original _getStatusString at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:1045 (function lines 1045-1056). arg0 -> status_mask (status mask). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:1045-1050. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1240-1245. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
         ("Battle::DrawSlidingStatusIcon",
          (('arg0', 'status_icon_id'), ('arg1', 'slide_offset'), ('var_s1', 'clipped_width'), ('var_s2', 'texture_offset'), ('temp_a0', 'sprite_packet')),
          "F01355 F01355 Battle::DrawSlidingStatusIcon: original func_800C9CB4 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3112 (function lines 3112-3156). arg0 -> status_icon_id (status icon id). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3112-3148. Native references: Native\\Game\\src\\Battle\\Hud.cpp:169-205. arg1 -> slide_offset (slide offset). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3112-3128. Native references: Native\\Game\\src\\Battle\\Hud.cpp:169-185. arg2 intentionally retained: Original func_800C9CB4 incoming icon slot is multiplied by 16 and biased by 160, then clipped/shifted as screen X. Retain the explicitly reviewed merged slot/pixel binding; do not split lifetime or mislabel the original formal. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3112-3152. Native references: Native\\Game\\src\\Battle\\Hud.cpp:169-209. temp_a0 -> sprite_packet (sprite packet). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3116-3134. Native references: Native\\Game\\src\\Battle\\Hud.cpp:173-191. v0: independent scoped binding(s); exact mappings are listed below. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3143-3149. Native references: Native\\Game\\src\\Battle\\Hud.cpp:200-206. var_s1 -> clipped_width (clipped width). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3114-3152. Native references: Native\\Game\\src\\Battle\\Hud.cpp:171-209. var_s2 -> texture_offset (texture offset). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3115-3153. Native references: Native\\Game\\src\\Battle\\Hud.cpp:172-210. scoped_renames at Native\\Game\\src\\Battle\\Hud.cpp:200-201: v0 -> clipped_icon_left. First block v0 is arg2-8, a temporary left screen X used to anchor the clipped lower strip. scoped_renames at Native\\Game\\src\\Battle\\Hud.cpp:205-206: v0 -> overlay_texture_end. Separate block v0 is atlas packed UV endpoint (arg0&3)*8+0x3070; subtracting clipped_width chooses strip UV. Not the screen-X local above. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
@@ -7189,9 +6832,6 @@ REGEX_FIXES += [
         ("Battle::DrawShortcutHud",
          (('temp_s3', 'panel_x_offset'), ('temp_v0', 'icon_brightness_transparency'), ('temp_v0_2', 'sprite_packet')),
          "F01361 F01361 Battle::DrawShortcutHud: original func_800C9FE8 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3249 (function lines 3249-3304). temp_s3 -> panel_x_offset (panel x offset). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3251-3299. Native references: Native\\Game\\src\\Battle\\Hud.cpp:314-362. temp_v0 -> icon_brightness_transparency (icon brightness transparency). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3252-3292. Native references: Native\\Game\\src\\Battle\\Hud.cpp:315-355. temp_v0_2 -> sprite_packet (sprite packet). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3254-3297. Native references: Native\\Game\\src\\Battle\\Hud.cpp:317-360. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names. Consumer Render_QueueSpriteWithTexturePage has packed brightness_transparency argument: low byte grayscale, bit8 semi-transparency. Original 573B8.c:291-299 masks a0 by 0xFF and separately extracts (a0>>7)&2. Retain the flags in the name, not merely brightness; values 0x180/0x140 preserve transparency."),
-        ("Battle::HasUnlockedBattleAbility",
-         (('v0', 'action_definitions'),),
-         "F01370 F01370 Battle::HasUnlockedBattleAbility: original vs_battle_chainAbilitiesUnlocked at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3657 (function lines 3657-3671). v0 -> action_definitions (action definitions). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3660-3664. Native references: Native\\Game\\src\\Battle\\Abilities.cpp:635-639. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),
         ("Battle::DrawPuzzleTimer",
          (('sp10', 'timer_components'),),
          "F01384 F01384 Battle::DrawPuzzleTimer: original _renderTimer at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3844 (function lines 3844-3865). sp10 -> timer_components (timer components). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BF94.c:3846-3859. Native references: Native\\Game\\src\\Battle\\Hud.cpp:549-561. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names. sp10 contains numeric time components {hundredths,seconds,minutes,hours}, not individual decimal digits. The loop later splits each component into BCD digits. Preserve char widths and clamp behavior."),
@@ -7267,15 +6907,6 @@ REGEX_FIXES += [
         ("Battle::Ai::ForgetAiActionTarget",
          (('arg0', 'ai_state'),),
          "F01793 F01793 Battle::Ai::ForgetAiActionTarget: original func_800E4CE8 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7C4E8.c:407 (function lines 407-407). arg0 -> ai_state (ai state). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7C4E8.c:407. Native references: Native\\Game\\src\\Battle\\Ai\\ActionSelection.cpp:20. Review context: Original individual AI function reviewed against current body and actual callers. Names describe actor-state/candidate/result ownership, simulation threshold/delay, geometry, gate index and packed tile roles. SelectActorVerticalMovementStep returns walk/run step and command 9/10; SetTemporaryAwarenessIndicator writes marker and duration fields (FIELD_LEDGER T00532.090/T00399.045)."),
-        ("Battle::CalculateRangeShapeExtent",
-         (('arg0', 'range_shape'),),
-         "F01807 F01807 Battle::CalculateRangeShapeExtent: original func_800E5568 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:437 (function lines 437-457). arg0 -> range_shape (range shape). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:437-455. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1533-1551. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::CalculateActionAreaReach",
-         (('arg2', 'maximum_reach'),),
-         "F01808 F01808 Battle::CalculateActionAreaReach: original func_800E5600 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:459 (function lines 459-474). arg0 intentionally retained: Original func_800E5600 ignores first context argument; native caller passes state but body uses only actionId, action definition and range limit. Preserve ignored ABI slot without suggesting an active state read. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:459. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1556. arg2 -> maximum_reach (maximum reach). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:459-469. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1556-1566. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::CalculateActionRangeSquared",
-         (('arg0', 'actor_range_view'),),
-         "F01809 F01809 Battle::CalculateActionRangeSquared: original func_800E5698 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:476 (function lines 476-492). arg0 -> actor_range_view (actor range view). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:476-483. Native references: Native\\Game\\src\\Battle\\Targeting.cpp:1574-1581. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
         ("Battle::Ai::ApplySavedAiSettingsFlags",
          (('arg0', 'settings_word'), ('arg1', 'saved_settings')),
          "F01812 F01812 Battle::Ai::ApplySavedAiSettingsFlags: original func_800E5A74 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:595 (function lines 595-598). arg0 -> settings_word (settings word). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:595-597. Native references: Native\\Game\\src\\Battle\\Ai\\ActorState.cpp:87-89. arg1 -> saved_settings (saved settings). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\7CD68.c:595-597. Native references: Native\\Game\\src\\Battle\\Ai\\ActorState.cpp:87-89. Review context: Original individual AI function reviewed against current body and actual callers. Names describe actor-state/candidate/result ownership, simulation threshold/delay, geometry, gate index and packed tile roles. SelectActorVerticalMovementStep returns walk/run step and command 9/10; SetTemporaryAwarenessIndicator writes marker and duration fields (FIELD_LEDGER T00532.090/T00399.045)."),
@@ -7299,16 +6930,6 @@ REGEX_FIXES += [
 ]
 
 
-# Individually reviewed ancillary bindings; structural fixups run first.
-# Separate shadowed locals and cast-prototype parameters before naming outer bindings.
-for identifier, old, new, evidence in (
-    ("F02446",
-     "            if ((i == 2) || (i == 5)) {\n                int v0;\n                VS::Render::DrawTextureTintFade(arg0, arg1 + 0xE, 0xA, Ending_scoreTint);\n                v0 = arg0 + 3;\n                arg0 = v0 + Ending_resultAtlasRegions[10].w;\n            }",
-     "            if ((i == 2) || (i == 5)) {\n                int padded_separator_x;\n                VS::Render::DrawTextureTintFade(arg0, arg1 + 0xE, 0xA, Ending_scoreTint);\n                padded_separator_x = arg0 + 3;\n                arg0 = padded_separator_x + Ending_resultAtlasRegions[10].w;\n            }",
-     "Original _renderScore at D4.c:1983-1987 declares a new int v0 inside the thousands-separator branch, shadowing outer v0. This exact native block has three occurrences of the inner binding; rename those first, before outer v0/arg0/arg1 mappings. The replacement changes identifier tokens only."),
-):
-    FIXES.setdefault(identifier, []).append((old, new, evidence))
-
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
     for name, bindings, evidence in (
@@ -7330,84 +6951,6 @@ REGEX_FIXES += [
         ("State::ScriptFlag",
          (('arg0', 'flag_id'),),
          "F01258 Original vs_battle_getStateFlag at 4A0A8.c:4275 casts the entire state-flags object to char* and indexes it with the short parameter. The adjacent setter already calls that same index id. Preserve signedness, bounds behavior and the byte-backed field layout."),
-        ("Ending::Credits::DrawFinCaption",
-         (('arg0', 'element'), ('temp_v0', 'fade_in_frame'), ('temp_a0', 'fade_out_frame'), ('var_s0', 'brightness'), ('new_var', 'primitive_cursor_slot')),
-         "F02407 Original _renderFin at D4.c:325 advances element phase through 60-frame fade-in, 240-frame hold and 60-frame fade-out. temp_v0/temp_a0 capture pre-increment frames for brightness; the sprite receives var_s0 in RGB. new_var is assigned zero and indexes scratch slot zero when publishing the primitive cursor and texture-page result; scratch slot one is the ordering table."),
-        ("Ending::Credits::DrawScrollingTitleLogo",
-         (('var_fp', 'brightness'), ('s0', 'frame_scratch_slots'), ('new_var', 'primitive_cursor_slot')),
-         "F02408 Original _renderVagrantStory at D4.c:390 uses background brightness scaled by animation frame, holds then scrolls the title element. s0 is the scratch pointer-slot base, [1] supplies ordering-table links and [new_var=0] publishes primitive allocations. Both title sprites use var_fp as RGB. Existing element remains unchanged."),
-        ("Ending::Credits::DistanceFromScreenCenter",
-         (('arg0', 'x'), ('arg1', 'y')),
-         "F02409 Original _inverseDistanceFromScreencenter at D4.c:468 subtracts screen center (160,112) and returns sqrt(x*x+y*y). ApplyRadialVertexFade supplies each vertex's screen X/Y. Existing native function name correctly describes distance, not the original misleading inverse prefix."),
-        ("Ending::Credits::ApplyRadialVertexFade",
-         (('arg0', 'quad'), ('arg1', 'fade_step'), ('arg2', 'fade_out'), ('temp_s0', 'base_brightness'), ('v0', 'vertex_brightness')),
-         "F02410 Original func_80069388 at D4.c:475 (definition follows its unused prototype) accesses four screen-coordinate/RGB vertices of func_80069388_t. Zero arg2 computes arg1*128/80 plus the radial term, nonzero computes (80-arg1)*128/80 minus it; v0 is clamped per vertex before RGB assignment. This v0 is an unqualified local, unlike SDK poly->v0 in the other renderers. The existing typed view and padding remain unchanged."),
-        ("Ending::Credits::MeasureTextWidth",
-         (('new_var', 'printable_character_base'),),
-         "F02411 Original _creditsStrWidth at D4.c:672 handles control codes 1/2/31 and for printable bytes indexes glyphWidths[charTableOffset-(new_var=32)+c]-1. new_var is the assigned printable-code base 32; retain that assignment expression and existing short width/len variables."),
-        ("Ending::Credits::DrawScrollingCopyright",
-         (('arg0', 'element'), ('new_var', 'primitive_cursor_slot')),
-         "F02413 Original _renderCopyright at D4.c:831 initializes element X/Y, scrolls it until offscreen and emits the copyright sprite. new_var=0 indexes the scratch primitive-cursor slot; p[1] remains the ordering-table pointer. Existing p/sprt and fields are untouched."),
-        ("Ending::Credits::DrawBackground",
-         (('arg0', 'element'),),
-         "F02414 Original _renderBackground at D4.c:865 declares an unused _creditsElement* callback argument. _addRenderer/_renderElements install and invoke it with the current element; the body itself draws the global background and edge masks. element describes this verified callback type/producer while preserving __attribute__((unused))."),
-        ("Ending::Credits::FadeOutBackground",
-         (('arg0', 'element'),),
-         "F02416 Original _backgroundFadeOut at D4.c:954 uses the callback element's state/currentStep/width to start a 128-frame fade, optionally finish the roll, and retire the element. _parseCreditsScript reserves the main slot with this renderer and sets width=0. Existing width field remains unchanged despite its overloaded completion use."),
-        ("Ending::Credits::FadeOutForSkip",
-         (('s2', 'frame_scratch_slots'), ('temp_s0', 'fade_tile')),
-         "F02417 Original func_8006A4D8 at D4.c:972 takes the current primitive cursor from scratch slot zero, emits a semitransparent screen-sized TILE with eased brightness, links it through ordering-table slot one and publishes the advanced cursor/texture page back to slot zero. At frame 128 it finishes the credits."),
-        ("Ending::Credits::UploadTexture",
-         (('arg0', 'tim'),),
-         "F02422 Original func_8006A9C0 at D4.c:1115 walks a TIM header: optional palette block when mode&8, then pixel block, uploading each RECT/data pair. RunStaffRoll and DrawIllustration supply embedded/decoded TIM data. Keep existing block pointer p, mode bits, byte stride and LoadImage contract."),
-        ("Ending::Credits::DrawElements",
-         (('var_s3', 'active_element_count'),),
-         "F02424 Original _renderElements at D4.c:1146 visits 32 element slots, resets negative phases to zero, increments var_s3 and invokes render(element) for positive phases, then returns that short count. ResetElements/AddElement/ReserveMainElement establish the phase/callback lifecycle."),
-        ("Ending::Credits::QueueIllustrationDecode",
-         (('arg0', 'tim_destination'), ('arg1', 'compressed_image')),
-         "F02429 Original func_8006AF44 at D4.c:1307 sets decode phase one and stores arg1 as queued input and arg0 as output. The following func_8006AF64 initializes decode cursors from them, expands literal/run/backreference opcodes and clears phase at 0x7F. DrawIllustration supplies the workspace and next resource."),
-        ("Ending::Credits::DrawSmallText",
-         (('arg0', 'x'), ('arg1', 'y'), ('arg2', 'palette_row_offset'), ('arg3', 'text'), ('temp_v0', 'character_offset'), ('var_v1_2', 'glyph_index'), ('var_v1', 'character'), ('var_a2', 'glyph_sprite'), ('t4', 'frame_scratch_slots')),
-         "F02431 Original func_8006B324 at D4.c:1390 reads a zero-terminated byte string, subtracts 32, skips unsupported/blank glyphs, maps 60 to 15 and folds indices >64 by -32. It emits SPRT_8 at X/Y with CLUT(960,arg2+32), advances X by 7 and publishes through scratch. The int character_offset and u_char glyph_index are distinct width-sensitive stages; no narrowing or table change is proposed."),
-        ("Ending::Credits::InitializeDisplay",
-         (('arg0', 'screen_width'), ('arg1', 'screen_height'), ('arg2', 'projection_distance'), ('arg3', 'background_red'), ('arg4', 'background_green'), ('arg5', 'background_blue'), ('temp_s1', 'viewport_height')),
-         "F02432 Original func_8006B450 at D4.c:1438 centers GTE on half supplied width/height, sets projection distance, derives visible height as arg1-0x10, configures paired draw/display buffers and applies the supplied RGB background. AllocateRenderBuffers passes 320,240,512,0,0,0. Native omitted original debug-font setup already; this review leaves that existing difference untouched."),
-        ("Ending::Credits::PresentFrame",
-         (('arg0', 'ordering_table'), ('temp_s1', 'vsync_result')),
-         "F02433 Original _drawScreen at D4.c:1480 flips frame buffer, obtains the return of vs_main_gametimeUpdate(0), updates display/draw environments, draws the supplied ordering table, increments the XA-resume frame count and returns that timing result. State_UpdatePlayTimeAndLoading obtains the result from VSync. Native already omits DrawSync; no behavioral change is proposed."),
-        ("Ending::Credits::BeginFrame",
-         (('temp_a0', 'ordering_table_base'),),
-         "F02437 Original func_8006B930 at D4.c:1551 chooses the current frame ordering-table allocation, sets overlay/main scratch tables at +8/+0x48, clears 0x822 entries and selects the current primitive buffer. The candidate denotes the unoffset allocation base, not either published subtable."),
-        ("Ending::AwardClearTitles",
-         (('t1', 'room_bit_base'),),
-         "F02440 Original _updateTitles at D4.c:1570 sets t1=1 inside each room word and counts roomFlags[i]&countableRoomBits[i]&(t1<<j). This is the base bit for the 32-room membership scan. Existing i/j/count and all title thresholds remain unchanged."),
-        ("Ending::ShowClearResults",
-         (('temp_s0', 'phase_complete'),),
-         "F02441 Original func_8006BD78 at D4.c:1677 first loops until the load-step result is nonzero, then until the results-renderer result is nonzero, presenting every frame. The same int holds completion of two successive phases, not only a disc-loaded result."),
-        ("Ending::LoadClearResultsStep",
-         (('sp10', 'tim_image'), ('var_a1', 'visited_room_count'), ('var_v1', 'opened_chest_count')),
-         "F02442 Original func_8006BE04 at D4.c:1698 parses TIM blocks into sp10 and uses their pixel/palette addresses/RECTs for LoadImage. During phase two it counts room flags against the countable-room mask and nonzero opened-chest flags, updates maxima and calculates the rank. Disc requests and buffers are released in subsequent phases; no cleanup or count arithmetic changes."),
-        ("Ending::DrawRankBackground",
-         (('arg0', 'fade_frame'), ('temp_s4', 'brightness')),
-         "F02444 Original func_8006C3CC at D4.c:1887 clamps the supplied frame to 0..64, doubles it for POLY_FT4 RGB and emits five 64-pixel background strips. The current native body differs only by established scratch relocation/names; the unused var_s2 is explicitly retained."),
-        ("Ending::DrawCongratulations",
-         (('arg0', 'x'), ('arg1', 'y'), ('arg2', 'fade_frame')),
-         "F02445 Original _renderCongratulations at D4.c:1925 clamps frame 0..64, writes both tint cd values, centers the two atlas pieces on X and emits them at Y. DrawClearResults supplies center 160,Y40 and animation/fade-out frame."),
-        ("Ending::DrawScore",
-         (('arg0', 'x'), ('arg1', 'y'), ('arg2', 'fade_frame'), ('sp10', 'score_digits'), ('v0', 'padded_prefix_x'), ('v1', 'label_width')),
-         "F02446 Original _renderScore at D4.c:1946 formats nine digits, centers with widths of label/atlas-region-26 prefix/suffix atlas pieces, advances past the atlas-region-26 prefix using its position plus two pixels in outer v0 and emits two separator glyphs using a distinct shadowed v0 (position plus three pixels). Scoped separator replacement must precede outer mappings. Keep char[10], sprintf format, widths and SDK contracts."),
-        ("Ending::DrawCountingScore",
-         (('arg0', 'x'), ('arg1', 'y'), ('arg2', 'animation_frame'), ('sp18', 'score_digits'), ('temp_s2', 'wipe_boundary_x'), ('var_s1', 'fade_frame'), ('v0', 'padded_prefix_x'), ('v1', 'label_width')),
-         "F02447 Original _renderIncrementalScore at D4.c:1996 clamps a local copy of animation frame, derives X+frame*8 for _renderTextureWipe, counts the displayed score after frame32, emits sound transitions and formats nine digits. v1 sums label widths and v0 is the atlas-region-26 prefix position plus two pixels before adding its width. Unlike static DrawScore there is no inner v0 declaration."),
-        ("Ending::DrawMapCompletion",
-         (('arg0', 'x'), ('arg1', 'y'), ('arg2', 'fade_frame'), ('sp10', 'completion_digits'), ('v0', 'padded_prefix_x')),
-         "F02448 Original _renderMapCompletion at D4.c:2070 formats three completion digits, centers the label/atlas-region-26 prefix/percent pieces, advances through v0 (atlas-region-26 prefix position plus two pixels) and emits fixed digit spacing. Preserve the existing char sp10[2] extent and sprintf behavior; this is strictly an identifier review, not a buffer fix."),
-        ("Ending::DrawCountingMapCompletion",
-         (('arg0', 'x'), ('arg1', 'y'), ('arg2', 'fade_frame'), ('sp18', 'completion_digits'), ('temp_s4', 'wipe_boundary_x'), ('v0', 'padded_prefix_x')),
-         "F02449 Original _renderIncrementalMapCompletion at D4.c:2113 clamps the frame, derives X+frame*8 for the wipe, updates displayed completion after frame32, emits sound transitions and formats three digits. v0 is the atlas-region-26 prefix position plus two pixels before adding its width. Preserve the existing char[2] extent and all unusual count/format behavior, without treating this naming pass as defect repair."),
-        ("Ending::Credits::DrawIllustration",
-         (('temp_v0', 'phase_index'), ('var_a0', 'next_phase')),
-         "F04135 Original _renderllustration (double-l spelling) at D4.c:583 computes state-1 for switch dispatch and chooses state3 or final-hold state5 after fade-in. It prequeues later compressed illustrations, advances palette/page coordinates and uploads decoded TIM on transitions. Preserve the exact ledger identity F04135 rather than inventing an alias for the original misspelling."),
     )
     for old, new in bindings
 ]
@@ -8173,82 +7716,6 @@ REGEX_FIXES += [
         ("Render::CaptureRoomBackgroundColors",
          (('var_v1', 'packed_room_colors'),),
          "F03564 main.c:11604-11619 reads five packed RGB words and expands each channel into base/Q16 state."),
-    )
-    for old, new in bindings
-]
-
-
-# Individually reviewed lifecycle bindings; structural fixups run first.
-# Separate shadowed locals and cast-prototype parameters before naming outer bindings.
-for identifier, old, new, evidence in (
-    ("F03602",
-     "        int new_var = 320;",
-     "        int progress_target_x = 320;",
-     "F03602 original TITLE/22C.c:745-824 independently assigns new_var=320 as progress target x in its Init case. This is the TITLE function's binding, not F02735's separate local."),
-    ("F03623",
-     "                int v0;",
-     "                int location_texture_page;",
-     "F03623 original TITLE/22C.c:1696-1704 derives v0 from location page x shifted right six and combines it with fade/texture flags for _drawSprt. This preimage is only the nonnegative-location block's declaration."),
-    ("F03623",
-     "                    int new_var3 = 0x140;",
-     "                    int progress_target_x = 0x140;",
-     "F03623 original TITLE/22C.c:1768-1776 assigns 0x140 only in the positive-transfer-progress block and uses it as terminal interpolation x. Other new_var bindings in this function have different roles."),
-    ("F03626",
-     "                int new_var;",
-     "                int card_and_partial_read_flags;",
-     "F03626 original TITLE/22C.c:2024-2026 assigns ((port-1)<<16)|256 inside the packed reader argument; selected-slot+1 supplies the low bits. Preserve those exact shifts and the separate declaration binding."),
-    ("F03663",
-     "            int new_var = j + menuState[i].textPosition;",
-     "            int text_scanline_position = j + menuState[i].textPosition;",
-     "F03663 original TITLE/22C.c:4140-4174 adds the scanline index to textPos, then uses the result for fade bands and y+240. Rename only this inner-loop declaration before the function map handles the same binding's uses."),
-):
-    FIXES.setdefault(identifier, []).append((old, new, evidence))
-
-REGEX_FIXES += [
-    (rf"^{name}$", rf"\b{old}\b", new, evidence)
-    for name, bindings, evidence in (
-        ("Title::SaveCard::ValidateAndApplyLoadedSave",
-         (('verifyOnly', 'apply_loaded_state'), ('spmcimg', 'save_image_workspace'), ('s4', 'loaded_save_image'), ('unk180', 'cipher_header')),
-         "F03600 Independently read TITLE _applyLoadedSaveFile: verifyOnly!=0 chooses 32 checksum blocks and applies runtime state; verifyOnly==0 validates 92 blocks and returns without applying. The original name is misleading, as the catalog already notes. spmcimg is workspace base, s4 is workspace slot 1 and unk180 is its protected cipher header. TITLE's differently represented payload fields do not change those pointer roles."),
-        ("Title::SaveCard::ReadSaveStep",
-         (('temp_s2', 'loaded_save_buffer'), ('new_var', 'progress_target_x')),
-         "F03602 TITLE _loadSaveData separately confirms temp_s2 as workspace slot-1 read/clear destination and new_var=320 as progress x target. It uses its own statics and named O_NOWAIT|O_RDONLY constants; the original padding is a short rather than MENU7's char[2]. Preserve these differences and reset semantics."),
-        ("Title::SaveCard::WriteSaveStep",
-         (('temp_v1_2', 'progress_x_delta'), ('temp_s3', 'io_result_or_saved_progress')),
-         "F03603 TITLE _saveFile independently uses temp_v1_2 for progress x advance and temp_s3 for card event, temporary saved previous-progress value around reader initialization, then read result. Its own fd/errors/rename state and Title progress counter distinguish this variant from F02736. Byte-for-byte verification and final staging rename are untouched."),
-        ("Title::SaveFiles::DrawHpMpSummary",
-         (('new_var4', 'number_right_offset'),),
-         "F03610 _drawHPMP assigns new_var4=55 then computes xy=(xy-(current-digit-width-55))-(max-digit-count*5), positioning the decimal current/max pair. It is the number-layout right offset, not a stat value, color or glyph divisor. Existing currentValueDigits is intentionally reused first as the 0..64 bar extent and then the actual decimal digit count; retaining its existing name does not assert a digit count throughout."),
-        ("Title::SaveFiles::DrawTransferProgress",
-         (('new_var', 'saving_flag_alias'),),
-         "F03611 _fileProcessingAnim assigns &_isSaving to the unused char* new_var, while the actual saving flag chooses gradient color. The pointer's exact pointee is established even though it is unused; rename only, retaining the unused attribute and assignment."),
-        ("Title::SaveFiles::DrawElement",
-         (('new_var', 'location_texture_page_x'), ('v0', 'location_texture_page'), ('var_a3', 'location_fade_texture_flags'), ('new_var3', 'progress_target_x'), ('var1', 'left_color_text_index_or_stat'), ('var2', 'right_color_glyph_or_slot')),
-         "F03623 _drawFileMenuElement uses new_var for the location page x coordinate, block-local v0 for x>>6 texture-page bits, and var_a3 for fade bits OR 0x90 passed to _drawSprt. The nested positive-progress block's new_var3=0x140 is progress target x. var1 and var2 are each single outer bindings reused across drawing stages: var1 holds left color, text index, slot state, map percent and hours; var2 holds right color, glyph code and slot index. The deliberately compound proposed names preserve that reuse rather than inventing independent locals."),
-        ("Title::SaveFiles::DrawFrame",
-         (('new_var', 'strip_width_and_texture_mode'),),
-         "F03624 _drawFileMenu assigns new_var=256 in the three scanline-strip loop. The same 0x100 is both the x offset to the second screen strip and the direct-color texture-mode bit ORed into each page word. Preserve the reused constant, x/64 calculations and high fade bits. Original int _[2] is a declaration-only stack artifact, not render storage."),
-        ("Title::SaveFiles::UpdateLoadFiles",
-         (('new_var', 'card_and_partial_read_flags'),),
-         "F03626 _showLoadFilesMenu's StartLoad branch assigns new_var=((port-1)<<16)|256 inside the packed reader argument; selected-slot+1 supplies the low bits. The name describes card/partial-read flags, without normalizing the historical <<16 caller versus >>12 reader convention. The block local is not a buffer, status or another function's new_var."),
-        ("Title::SaveFiles::UpdateConfirmation",
-         (('arg0', 'initialize'), ('temp_v0', 'confirmation_element')),
-         "F03629 _promptConfirm treats nonzero arg0 as reset-to-yes-initialization and zero as advancement. temp_v0 is the yes/no option returned by _initFileMenuElement(state+3); its state and target position start the slide-in. Overwrite/format callers explicitly call 1 once and then poll with 0."),
-        ("Title::ShowPublisherAndDeveloper",
-         (('var_a3', 'publisher_fade_attenuation'), ('var_a3_2', 'developer_fade_attenuation')),
-         "F03649 _displayPublisherAndDeveloper has separate 364-frame loops. var_a3 controls the publisher logo fade; var_a3_2 controls the developer logo fade (whose middle interval can be skipped). Both are passed in tpage>>16 to _drawSprt, which converts fade attenuation to 0x80-value intensity. They are separate locals, not a shadowed pair or texture addresses."),
-        ("Title::ReleaseMenuCapture",
-         (('arg0', 'menu_capture'),),
-         "F03658 _freeHeap forwards arg0 to vs_main_freeHeap. Its title caller passes menuData returned by _initMenu's low-end allocation after copyright/background blending. Name the allocation being released, without asserting a different ownership API."),
-        ("Title::BlendCopyright",
-         (('arg0', 'menu_capture'),),
-         "F03660 _fadeInMenuCopyright derives src=arg0+0xF000 and dst=src+180*24 within the allocation returned by _initMenu; it blends copyright pixels with captured background and uploads 180x24. arg0 is the menu-capture base, not the copyright asset itself. Original halfword pointer arithmetic and RGB masks stay unchanged."),
-        ("Title::DrawMenuItems",
-         (('new_var', 'text_scanline_position'),),
-         "F03663 _drawTitleMenuItems computes block-local new_var=j+menuState[i].textPos for each of 32 scanlines; its bands select attenuation and new_var+240 is the rendered y coordinate. It is the moving text scanline position, not a sprite index. Existing prim/menuState/textUv variables already reflect packet/table roles."),
-        ("Title::InitializeNewGameData",
-         (('v0', 'state_flags_cursor'),),
-         "F03673 _initGameData initializes v0 to the last byte (0x43F) of vs_main_stateFlags and zeroes bytes backward. It then copies learned actions/inventory templates and clears snapshot-related stores. v0 is a byte-clear cursor, not a count or Ashley pointer. Existing Save_NativeResetSession and all default data/layout remain untouched."),
     )
     for old, new in bindings
 ]

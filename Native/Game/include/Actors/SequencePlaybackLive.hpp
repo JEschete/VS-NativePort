@@ -3,8 +3,10 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <span>
 
+#include "Actors/AnimationPose.hpp"
 #include "Actors/SequencePlayback.hpp"
 
 struct Actors_ActorRecord;
@@ -30,6 +32,29 @@ void RegisterEmbeddedSequenceBank(const void* file);
 void ForgetSequenceBanks(const void* memory, std::size_t bytes);
 // The registered bytes of the bank at `bank`, or an empty span.
 std::span<const std::uint8_t> SequenceBankBytes(const void* bank);
+
+// A registered bank and an address's offset in it.
+struct SequenceBankLocation {
+  std::span<const std::uint8_t> bank;
+  std::size_t offset = 0;
+};
+// The registered bank that holds `address`, which may be the bank's end; an
+// event script cursor is kept as an address into its bank.
+[[nodiscard]] std::optional<SequenceBankLocation> LocateInSequenceBank(
+    const void* address);
+// Reports a lookup of `animation` in the bank at `bank` whose status is a
+// bank problem (an unregistered bank, or a map entry or header outside it);
+// other statuses are not problems. Repeats are reported once.
+void ReportLiveAnimationHeader(const void* bank, int animation,
+                               AnimationHeaderStatus status);
+
+// The pose's keys as the typed PoseKeys and SkeletalPose, and their stores.
+[[nodiscard]] PoseKeys LoadLivePoseKeys(const Actors_AnimationPose& pose);
+void StoreLivePoseKeys(const PoseKeys& keys, Actors_AnimationPose& pose);
+[[nodiscard]] SkeletalPose LoadLiveSkeletalPose(
+    const Actors_AnimationPose& pose);
+void StoreLiveSkeletalPose(const SkeletalPose& typed,
+                           Actors_AnimationPose& pose);
 
 void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode);
 void BlendLiveActorPose(Actors_AnimationPose& destination,

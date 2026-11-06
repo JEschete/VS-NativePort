@@ -12,12 +12,12 @@
 #include <optional>
 #include <span>
 
+#include "Boot/SessionLive.hpp"
 #include "Input/Controller.hpp"
 #include "Legacy/Input/LibPad.h"
 
 extern "C" {
 #include "Boot/GameLoop.h"
-#include "Boot/Lifecycle.h"
 #include "Core/Diagnostics.h"
 #include "Input/ControllerLiveState.h"
 #include "Input/Vibration.h"
@@ -414,7 +414,7 @@ void PlayLiveVibrationPreset(int index) {
 // main.c:8872-8876: a soft reset restarts at the title and does not return.
 int UpdateLiveControllers() {
   if (PollLiveControllers() == ControllerFrame::kSoftReset) {
-    Boot_ResetToTitle();
+    VS::Boot::ResetToTitleLive();
   }
   return 1;
 }

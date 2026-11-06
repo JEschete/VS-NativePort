@@ -12,7 +12,7 @@
 extern CVECTOR Effects_Plg146_tiledRingColorFactors[8];
 extern SVECTOR Effects_Plg146_mirrorSurfaceVertices[5][16];
 extern int Effects_Plg146_particleEmissionCounter;
-extern u_char Effects_Plg146_ringColorFactors[][4];
+extern u_char Effects_Plg146_ringColorFactors[8][4];
 extern int Effects_Plg146_trailEmissionCounter;
 
 #endif // VS_EFFECTS_PLUGINS_PLG146_H_DECLS

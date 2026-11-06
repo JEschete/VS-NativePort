@@ -14,7 +14,7 @@
 #include "Render/EncodedText.hpp"
 
 extern "C" {
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
 #include "Render/Text/VariableFont.h"
 }

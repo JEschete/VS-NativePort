@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
+#include "State/SceneTimerLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -264,13 +265,13 @@ TEST_CASE("Scene timer pause and reset preserve HUD visibility and clock state",
   State_sceneTimer.mode = 1;
   State_sceneTimer.minutes = 1;
   State_sceneTimer.seconds = 2;
-  State_SetSceneTimerPaused(1);
+  VS::State::SetLiveSceneTimerPaused(1);
   fixture.CheckClockState(0, 0, 1, 2);
   fixture.DrawCurrent(56);
   fixture.CheckRendering("01:02:56");
-  State_SetSceneTimerPaused(0);
+  VS::State::SetLiveSceneTimerPaused(0);
   fixture.CheckClockState(1, 1, 1, 2);
-  State_ResetSceneTimer();
+  VS::State::ResetLiveSceneTimer();
   fixture.CheckClockState(0, 0, 0, 0);
   fixture.DrawCurrent(0);
   fixture.CheckRendering("00:00:00");

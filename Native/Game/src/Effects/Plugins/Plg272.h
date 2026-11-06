@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG272_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG272_H_DECLS
 
-extern CVECTOR Effects_Plg272_closedRingColorFactors[];
+extern CVECTOR Effects_Plg272_closedRingColorFactors[8];
 extern SVECTOR Effects_Plg272_surfaceVertices[5][16];
 
 #endif // VS_EFFECTS_PLUGINS_PLG272_H_DECLS

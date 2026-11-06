@@ -42,30 +42,11 @@ _Static_assert(sizeof(Audio_Instrument) == 0x10, "Audio_Instrument must keep its
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_SAMPLES_SAMPLEBANKS_H_DECLS)
 #define VS_AUDIO_SAMPLES_SAMPLEBANKS_H_DECLS
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
 
 extern Audio_MusicSampleBankIds Audio_Samples_musicSampleBankIds;
 extern Audio_Instrument Audio_Samples_instruments[256];
 extern int Audio_Samples_soundEffectBankIds[3];
 extern int Audio_Samples_bankChunkHeader[16];
 extern Audio_BankStreamState Audio_Samples_bankStream;
-void Audio_Samples_LoadBank(void* bank_data, int wait_for_transfer);
-int Audio_Samples_TransferStatus(void);
-int Audio_Samples_ChooseMusicBankDestination(int* bank_header, int* output_first_instrument, int* output_sample_address);
-int Audio_Samples_ChooseSoundEffectBankDestination(int* bank_header, int* output_first_instrument, int* output_sample_address, int bank_slot);
-int Audio_Samples_SelectMusicBank(int bank_id);
-int Audio_Samples_ClearMusicBankIds(void);
-int Audio_Samples_BeginBankStream(void);
-int Audio_Samples_UploadBankChunk(int* in_Data, u_int in_Size, int in_Slot, int in_Wait);
-int Audio_Samples_LoadMusicBank(void* bank_data, int wait_for_transfer);
-int Audio_Samples_LoadSoundEffectBank(void* bank_data, int bank_slot, int wait_for_transfer);
-void Audio_Samples_CopyRelocatedInstruments(Audio_Instrument* in_A,
-    Audio_Instrument* in_B, int in_AddrOffset, int in_Count);
-int Audio_Samples_SequenceMagicDifference(int* data);
-int Audio_Samples_LoadDeclaredBank(void* bank_data, int wait_for_transfer);
-u_short Audio_Samples_MapInstrumentToAlternateBank(u_int in_Flags, Audio_SeqChannel* in_pChannel);
-u_short Audio_Samples_MapInstrumentToBaseBank(u_int in_Flags, Audio_SeqChannel* in_Channel);
-int Audio_Samples_SoundEffectBankSlot(int flags);
 
 #endif // VS_AUDIO_SAMPLES_SAMPLEBANKS_H_DECLS

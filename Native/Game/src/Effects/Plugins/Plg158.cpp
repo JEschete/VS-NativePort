@@ -10,6 +10,6 @@ SVECTOR Effects_Plg158_surfaceVertices[5][16]; /* contents: module image (Module
 SVECTOR Effects_Plg158_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FD338 (D_800FD338@EFFECT/PLG158.BIN)
-CVECTOR Effects_Plg158_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg158_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

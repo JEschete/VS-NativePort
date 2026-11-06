@@ -11,7 +11,7 @@
 
 extern SVECTOR Effects_Plg153_mesh10Vertices[10];
 extern u_char Effects_Plg153_mesh10Faces[16][6];
-extern u_char Effects_Plg153_ringColorFactors[][4];
+extern u_char Effects_Plg153_ringColorFactors[8][4];
 extern int Effects_Plg153_particleEmissionCounter;
 
 #endif // VS_EFFECTS_PLUGINS_PLG153_H_DECLS

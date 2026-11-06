@@ -8,12 +8,13 @@
 #include <span>
 #include <vector>
 
+#include "Field/CollisionMapLive.hpp"
 #include "Field/RoomTriggerMarkers.hpp"
 #include "Render/RoomDrawLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -61,7 +62,8 @@ class LiveTriggerMarkerRenderer final
  public:
   [[nodiscard]] std::uint16_t FloorHeightCode(int world_x,
                                               int world_z) override {
-    return static_cast<std::uint16_t>(Field_FloorHeightAt(world_x, world_z));
+    return static_cast<std::uint16_t>(
+        VS::Field::LiveFloorHeightAt(world_x, world_z));
   }
 
   void ShowAnimationFrame(

@@ -5,6 +5,9 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/CameraLive.hpp"
+#include "Field/CollisionMapLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -19,14 +22,12 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Core/Math/FixedPoint.h"
 #include "Field/Camera.h"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Menus.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
@@ -909,8 +910,8 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* label)
         gradient = 8;
     }
     color0 = 8 - gradient;
-    color0 = Menu_Framework_GradientStopColor(color0, label->fade * 8, 0x80);
-    color1 = Menu_Framework_GradientStopColor(gradient, label->fade * 8, 0x80);
+    color0 = VS::Menu::Framework::LiveGradientStopColor(color0, label->fade * 8, 0x80);
+    color1 = VS::Menu::Framework::LiveGradientStopColor(gradient, label->fade * 8, 0x80);
 
     xy = label->screenX;
     isLeft = xy < 160;
@@ -1213,7 +1214,7 @@ void* Battle_BuildSphereCameraBasis(void)
     int yaw_cosine;
     int yaw;
     short* p = (short*)((uintptr_t)Core_ScratchBase() + 0x350);
-    Field_SyncCameraAnglesFromPosition(&camera);
+    VS::Field::LiveSyncCameraAnglesFromPosition(&camera);
     yaw = camera.values.yaw;
     yaw_cosine = VS::Core::Math::Cosine(yaw);
     yaw_sine = VS::Core::Math::Sine(yaw);
@@ -1289,7 +1290,7 @@ void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row)
         return;
     }
     memset(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)->terrainRowFlags[row * 9], 0, 9);
-    column = Field_CollisionMapDimensions(0);
+    column = VS::Field::LiveCollisionMapDimensions(0);
     width = (column & 0xFFFF) >> 4;
     height = column >> 20;
 
@@ -1303,7 +1304,7 @@ void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row)
         int value = 0x10000;
 
         if ((x < width) & (z < height)) {
-            Field_MpdTileCell* room = Field_CollisionCellAt(x, z, 0);
+            const Field_MpdTileCell* room = VS::Field::LiveCollisionCellOrAbsent(x, z, 0);
 
             if (room->blocksSphereTerrain) {
                 value = 0xF0800000;
@@ -1332,7 +1333,7 @@ void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row)
                 top = -0x4000;
                 for (dz = 0; dz < 0x80; dz += 0x20) {
                     for (dx = 0; dx < 0x80; dx += 0x20) {
-                        int sample = Field_FloorAndCeilingHeightsAt(x + dx, z + dz);
+                        int sample = VS::Field::LiveFloorAndCeilingHeightsAt(x + dx, z + dz);
                         int level = (sample << 17) >> 17;
 
                         level += offset;

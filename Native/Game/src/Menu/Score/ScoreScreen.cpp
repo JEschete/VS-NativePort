@@ -1,8 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
+#include "Menu/Framework/ActorPreviewLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -17,7 +21,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
@@ -27,14 +30,13 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
 #include "Field/MapProgress.h"
-#include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/BattleAbilities.h"
-#include "Menu/Files.h"
-#include "Menu/Framework/ActorPreview.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
+#include "Menu/Magic.h"
+#include "Menu/Manual.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
@@ -210,7 +212,7 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
         if (var_s0 == Core_TextCode_Spacing) {
             i += *menuText++;
         } else {
-            i = Menu_Framework_DrawFeatheredRowCharacter(
+            i = VS::Menu::Framework::DrawLiveFeatheredRowCharacter(
                 var_s0 | (isScrollable << 0x1F), i, menuItem, before);
         }
     }
@@ -231,10 +233,10 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
 
         prim[0] = (*before & 0xFFFFFF) | (6 << 24);
         prim[1] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_On);
-        prim[2] = Menu_Framework_GradientStopColor(8 - animState, bgWidth, var_s0)
+        prim[2] = VS::Menu::Framework::LiveGradientStopColor(8 - animState, bgWidth, var_s0)
                 | vs_getRGB0(Render_LegacyPrimitiveCode_LineG2SemiTrans, 0, 0, 0);
         prim[3] = xy;
-        prim[4] = Menu_Framework_GradientStopColor(animState, bgWidth, var_s0);
+        prim[4] = VS::Menu::Framework::LiveGradientStopColor(animState, bgWidth, var_s0);
         prim[5] = ((xy + w - 1) & 0xFFFF) | ((xy >> 0x10) << 0x10);
         prim[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
 
@@ -304,7 +306,7 @@ void Menu_Score_RestoreTopMenuCursor(int rowCount, int absoluteRow, char* text[]
     cursorBackup = Input_settings.cursorMemory;
     Input_settings.cursorMemory = 1;
 
-    Menu_Framework_CreateMenuRows(rowCount, menuRowInfo(1, 0, 1), text, rowTypes);
+    VS::Menu::Framework::CreateLiveMenuRows(rowCount, menuRowInfo(1, 0, 1), text, rowTypes);
 
     Input_settings.cursorMemory = cursorBackup;
 }
@@ -312,22 +314,22 @@ void Menu_Score_RestoreTopMenuCursor(int rowCount, int absoluteRow, char* text[]
 // decomp: MENU9.PRG _getSelectedRow (src/MENU/MENU9.PRG/238.c:228)
 int Menu_Score_GetSelectedTopMenuRow(void)
 {
-    int row = Menu_Framework_GetSelectedRow();
+    int row = VS::Menu::Framework::LiveSelectedRow();
 
     if (row < -1) {
-        Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(5));
+        VS::Menu::Framework::ClearLiveMenuExcept(5);
     } else if (row >= 0) {
-        Menu_Framework_FlyOutRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[2], 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[2], 1);
     }
 
     return row;
 }
 
 // decomp: MENU9.PRG _clearMenuExceptRow8 (src/MENU/MENU9.PRG/238.c:258)
-void Menu_Score_ClearMenuExceptRow8(void) { Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(8)); }
+void Menu_Score_ClearMenuExceptRow8(void) { VS::Menu::Framework::ClearLiveMenuExcept(8); }
 
 // decomp: MENU9.PRG _menuReady (src/MENU/MENU9.PRG/238.c:264)
-void Menu_Score_PollMenuReady(void) { Menu_Framework_AreMenuRowsIdle(); }
+void Menu_Score_PollMenuReady(void) { VS::Menu::Framework::AreLiveMenuRowsIdle(); }
 
 // decomp: MENU9.PRG vs_menu9_exec (src/MENU/MENU9.PRG/238.c:269)
 int Menu_Score_UpdateScreen(u_char* state)
@@ -344,7 +346,7 @@ int Menu_Score_UpdateScreen(u_char* state)
 
     switch (*state) {
     case Menu_Score_ScoreOverlayState_Init:
-        Menu_Framework_SetBackgroundFade(1);
+        VS::Menu::Framework::SetLiveBackgroundFade(1);
         Menu_Score_screenInitDelay = 8;
         Menu_Score_screenCalculateProgressComplete = 0;
         *state = Menu_Score_ScoreOverlayState_InitData;
@@ -364,7 +366,7 @@ int Menu_Score_UpdateScreen(u_char* state)
             break;
         }
 
-        Field_SetFieldRenderingEnabled(0);
+        VS::Field::LiveSetFieldRenderingEnabled(0);
         Battle_SetHudHidden(1);
 
         Battle_hudSlideOffset = 0x200000;
@@ -372,7 +374,7 @@ int Menu_Score_UpdateScreen(u_char* state)
         // Fallthrough
 
     case Menu_Score_ScoreOverlayState_WaitMenuReady:
-        *state += Menu_Framework_AreMenuRowsIdle();
+        *state += VS::Menu::Framework::AreLiveMenuRowsIdle();
         break;
 
     case 6:
@@ -380,21 +382,21 @@ int Menu_Score_UpdateScreen(u_char* state)
 
         if (Menu_Score_screenSelectedRow != 0) {
 
-            Menu_Framework_SetBackgroundPriority(-4, 128);
+            VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
             Battle_SetHudHidden(0);
 
             Battle_hudSlideOffset = 0;
 
-            Field_SetFieldRenderingEnabled(1);
-            Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Field::LiveSetFieldRenderingEnabled(1);
+            VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
             *state = 7;
         }
         break;
 
     case 7:
-        Menu_Framework_SetBackgroundFade(0);
+        VS::Menu::Framework::SetLiveBackgroundFade(0);
         *state = 8;
         break;
 
@@ -494,13 +496,13 @@ int Menu_Score_Update(void)
 
     switch (Menu_Score_menuState) {
     case Menu_Score_ScoreMenuState_Init:
-        Menu_Framework_SetBackgroundPriority(2047, 128);
+        VS::Menu::Framework::SetLiveBackgroundPriority(2047, 128);
 
         ++Menu_Score_menuState;
         break;
 
     case Menu_Score_ScoreMenuState_InitData:
-        Menu_Framework_LoadActorPreview(0);
+        VS::Menu::Framework::LoadLiveActorPreview(0);
         Menu_Score_InitializeAshleyPreviewPose();
 
         Menu_Score_cameraDistance = 0x150;
@@ -577,7 +579,7 @@ int Menu_Score_Update(void)
             break;
         }
 
-        Menu_Framework_ReleaseActorPreview();
+        VS::Menu::Framework::ReleaseLiveActorPreview();
 
         if (Menu_Score_nextState == 0) {
             Menu_Score_menuState = (Battle_unusedMenu9CursorMemory.gazetteRow * 3) + 4;
@@ -589,7 +591,7 @@ int Menu_Score_Update(void)
         return Menu_Score_nextState;
 
     case 4:
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
         Menu_Score_CreateTitleRows();
 
         Menu_Score_updateMenuAnimState = 0;
@@ -601,7 +603,7 @@ int Menu_Score_Update(void)
             && (Battle_unusedMenu9CursorMemory.titlePage == 0)
             && (Input_buttonsPressed.allButtons & PADLup)) {
 
-            Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+            VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             Battle_unusedMenu9CursorMemory.titlePage = 0x18;
             Battle_unusedMenu9CursorMemory.titleRow = 7;
 
@@ -609,7 +611,7 @@ int Menu_Score_Update(void)
                    && (Battle_unusedMenu9CursorMemory.titlePage == 24)
                    && (Input_buttonsPressed.allButtons & PADLdown)) {
 
-            Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+            VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             Battle_unusedMenu9CursorMemory.titlePage = 0;
             Battle_unusedMenu9CursorMemory.titleRow = 0;
 
@@ -617,19 +619,19 @@ int Menu_Score_Update(void)
             if (Input_buttonRepeat & PADLup) {
                 if (Battle_unusedMenu9CursorMemory.titleRow >= 2) {
 
-                    Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                    VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
                     --Battle_unusedMenu9CursorMemory.titleRow;
 
                 } else {
                     if (Battle_unusedMenu9CursorMemory.titlePage != 0) {
 
                         --Battle_unusedMenu9CursorMemory.titlePage;
-                        Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                        VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
 
                     } else if (Battle_unusedMenu9CursorMemory.titleRow != 0) {
 
                         --Battle_unusedMenu9CursorMemory.titleRow;
-                        Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                        VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
                     }
                 }
             } else if (Input_buttonRepeat & PADLdown) {
@@ -638,26 +640,26 @@ int Menu_Score_Update(void)
                     if (Battle_unusedMenu9CursorMemory.titlePage < 0x18U) {
 
                         ++Battle_unusedMenu9CursorMemory.titlePage;
-                        Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                        VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
 
                     } else {
                         if (Battle_unusedMenu9CursorMemory.titleRow < 7) {
 
                             ++Battle_unusedMenu9CursorMemory.titleRow;
-                            Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                            VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
                         }
                     }
 
                 } else {
                     ++Battle_unusedMenu9CursorMemory.titleRow;
-                    Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
+                    VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
                 }
             }
         }
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 6);
-            Menu_Framework_DismissInformationBox();
+            VS::Audio::LivePlaySfxCentered(0x7E, 6);
+            VS::Menu::Framework::DismissLiveInformationBox();
 
             ++Menu_Score_menuState;
 
@@ -694,7 +696,7 @@ int Menu_Score_Update(void)
         break;
 
     case 7:
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
         Menu_Score_CreateStatisticRows();
 
         Menu_Score_updateMenuAnimState = 0;
@@ -706,7 +708,7 @@ int Menu_Score_Update(void)
             && (Battle_unusedMenu9CursorMemory.recordTimePage == 0)
             && (Input_buttonsPressed.allButtons & PADLup)) {
 
-            Audio_PlaySfxCentered(0x7E, 4);
+            VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
             Battle_unusedMenu9CursorMemory.recordTimePage = 0xF;
             Battle_unusedMenu9CursorMemory.recordTimeRow = 7;
@@ -715,7 +717,7 @@ int Menu_Score_Update(void)
                    && (Battle_unusedMenu9CursorMemory.recordTimePage == 0xF)
                    && (Input_buttonsPressed.allButtons & PADLdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 4);
+            VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
             Battle_unusedMenu9CursorMemory.recordTimePage = 0;
             Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
@@ -724,7 +726,7 @@ int Menu_Score_Update(void)
             if (Input_buttonRepeat & PADLup) {
                 if (Battle_unusedMenu9CursorMemory.recordTimeRow >= 2) {
 
-                    Audio_PlaySfxCentered(0x7E, 4);
+                    VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
                     --Battle_unusedMenu9CursorMemory.recordTimeRow;
 
@@ -733,13 +735,13 @@ int Menu_Score_Update(void)
 
                         --Battle_unusedMenu9CursorMemory.recordTimePage;
 
-                        Audio_PlaySfxCentered(0x7E, 4);
+                        VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
                     } else if (Battle_unusedMenu9CursorMemory.recordTimeRow != 0) {
 
                         --Battle_unusedMenu9CursorMemory.recordTimeRow;
 
-                        Audio_PlaySfxCentered(0x7E, 4);
+                        VS::Audio::LivePlaySfxCentered(0x7E, 4);
                     }
                 }
             } else if (Input_buttonRepeat & PADLdown) {
@@ -748,27 +750,27 @@ int Menu_Score_Update(void)
 
                         ++Battle_unusedMenu9CursorMemory.recordTimePage;
 
-                        Audio_PlaySfxCentered(0x7E, 4);
+                        VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
                     } else {
                         if (Battle_unusedMenu9CursorMemory.recordTimeRow < 7) {
 
                             ++Battle_unusedMenu9CursorMemory.recordTimeRow;
 
-                            Audio_PlaySfxCentered(0x7E, 4);
+                            VS::Audio::LivePlaySfxCentered(0x7E, 4);
                         }
                     }
                 } else {
                     ++Battle_unusedMenu9CursorMemory.recordTimeRow;
 
-                    Audio_PlaySfxCentered(0x7E, 4);
+                    VS::Audio::LivePlaySfxCentered(0x7E, 4);
                 }
             }
         }
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 6);
-            Menu_Framework_DismissInformationBox();
+            VS::Audio::LivePlaySfxCentered(0x7E, 6);
+            VS::Menu::Framework::DismissLiveInformationBox();
 
             ++Menu_Score_menuState;
 
@@ -802,7 +804,7 @@ int Menu_Score_Update(void)
         break;
 
     case 10:
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
         Menu_Score_CreateTimeTrialRows();
 
         ++Menu_Score_menuState;
@@ -811,14 +813,14 @@ int Menu_Score_Update(void)
     case 11:
         if (Input_buttonRepeat & PADLup) {
 
-            Audio_PlaySfxCentered(0x7E, 4);
+            VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
             Battle_unusedMenu9CursorMemory.gazettePage =
                 (Battle_unusedMenu9CursorMemory.gazettePage - 1) & 7;
         } else {
             if (Input_buttonRepeat & PADLdown) {
 
-                Audio_PlaySfxCentered(0x7E, 4);
+                VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
                 Battle_unusedMenu9CursorMemory.gazettePage =
                     (Battle_unusedMenu9CursorMemory.gazettePage + 1) & 7;
@@ -827,8 +829,8 @@ int Menu_Score_Update(void)
 
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 6);
-            Menu_Framework_DismissInformationBox();
+            VS::Audio::LivePlaySfxCentered(0x7E, 6);
+            VS::Menu::Framework::DismissLiveInformationBox();
             Menu_Score_LeaveTimeTrialMenu();
 
             ++Menu_Score_menuState;
@@ -858,7 +860,7 @@ int Menu_Score_Update(void)
         for (Menu_Score_updateMenuAnimState = 0, gazette_row_cursor = Menu_Score_gazetteRows; Menu_Score_updateMenuAnimState < 8;
             ++Menu_Score_updateMenuAnimState, ++gazette_row_cursor) {
             if (gazette_row_cursor->animationState == 0) {
-                Menu_Framework_DeactivateRow(Menu_Score_updateMenuAnimState);
+                VS::Menu::Framework::DeactivateLiveRow(Menu_Score_updateMenuAnimState);
             }
         }
 
@@ -879,7 +881,7 @@ int Menu_Score_Update(void)
 
             Menu_Score_enemyDescriptions = (u_short*)(Menu_Score_monBinData + 150);
 
-            Menu_Framework_InitializeInformationBox();
+            VS::Menu::Framework::InitializeLiveInformationBox();
             Menu_Score_InitializeEnemyList();
 
             Menu_Score_updateMenuAnimState = 0;
@@ -892,7 +894,7 @@ int Menu_Score_Update(void)
             && (Battle_unusedMenu9CursorMemory.encyclopaediaPage == 0)
             && (Input_buttonsPressed.allButtons & PADLup)) {
 
-            Audio_PlaySfxCentered(0x7E, 4);
+            VS::Audio::LivePlaySfxCentered(0x7E, 4);
             Battle_unusedMenu9CursorMemory.encyclopaediaPage = 0x46;
             Battle_unusedMenu9CursorMemory.encyclopaediaRow = 7;
 
@@ -900,21 +902,21 @@ int Menu_Score_Update(void)
                    && (Battle_unusedMenu9CursorMemory.encyclopaediaPage == 0x46)
                    && (Input_buttonsPressed.allButtons & PADLdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 4);
+            VS::Audio::LivePlaySfxCentered(0x7E, 4);
             Battle_unusedMenu9CursorMemory.encyclopaediaPage = 0;
             Battle_unusedMenu9CursorMemory.encyclopaediaRow = 0;
 
         } else if (Input_buttonRepeat & PADLup) {
 
             if (Battle_unusedMenu9CursorMemory.encyclopaediaRow > 1) {
-                Audio_PlaySfxCentered(0x7E, 4);
+                VS::Audio::LivePlaySfxCentered(0x7E, 4);
                 --Battle_unusedMenu9CursorMemory.encyclopaediaRow;
             } else if (Battle_unusedMenu9CursorMemory.encyclopaediaPage != 0) {
                 --Battle_unusedMenu9CursorMemory.encyclopaediaPage;
-                Audio_PlaySfxCentered(0x7E, 4);
+                VS::Audio::LivePlaySfxCentered(0x7E, 4);
             } else if (Battle_unusedMenu9CursorMemory.encyclopaediaRow != 0) {
                 --Battle_unusedMenu9CursorMemory.encyclopaediaRow;
-                Audio_PlaySfxCentered(0x7E, 4);
+                VS::Audio::LivePlaySfxCentered(0x7E, 4);
             }
 
         } else if (Input_buttonRepeat & PADLdown) {
@@ -922,18 +924,18 @@ int Menu_Score_Update(void)
                 if (Battle_unusedMenu9CursorMemory.encyclopaediaPage < 0x46) {
 
                     ++Battle_unusedMenu9CursorMemory.encyclopaediaPage;
-                    Audio_PlaySfxCentered(0x7E, 4);
+                    VS::Audio::LivePlaySfxCentered(0x7E, 4);
 
                 } else {
                     if (Battle_unusedMenu9CursorMemory.encyclopaediaRow < 7) {
 
                         ++Battle_unusedMenu9CursorMemory.encyclopaediaRow;
-                        Audio_PlaySfxCentered(0x7E, 4);
+                        VS::Audio::LivePlaySfxCentered(0x7E, 4);
                     }
                 }
             } else {
                 ++Battle_unusedMenu9CursorMemory.encyclopaediaRow;
-                Audio_PlaySfxCentered(0x7E, 4);
+                VS::Audio::LivePlaySfxCentered(0x7E, 4);
             }
         }
         if (Input_buttonsPressed.allButtons & PADRright) {
@@ -942,7 +944,7 @@ int Menu_Score_Update(void)
                     .unlocked
                 != 0) {
 
-                Audio_PlaySfxCentered(0x7E, 5);
+                VS::Audio::LivePlaySfxCentered(0x7E, 5);
                 Menu_Score_LoadEnemyPreview(
                     Menu_Score_monBinData[Battle_unusedMenu9CursorMemory.encyclopaediaPage
                                 + Battle_unusedMenu9CursorMemory.encyclopaediaRow]
@@ -952,13 +954,13 @@ int Menu_Score_Update(void)
                 Menu_Score_nextState = 2;
 
             } else {
-                Audio_PlaySfxCentered(0x7E, 7);
+                VS::Audio::LivePlaySfxCentered(0x7E, 7);
             }
 
         } else if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 6);
-            Menu_Framework_DismissInformationBox();
+            VS::Audio::LivePlaySfxCentered(0x7E, 6);
+            VS::Menu::Framework::DismissLiveInformationBox();
 
             ++Menu_Score_menuState;
 
@@ -1026,7 +1028,7 @@ int Menu_Score_Update(void)
                            + Battle_unusedMenu9CursorMemory.encyclopaediaRow;
 
             Menu_Score_ShowEnemyDescription();
-            Menu_Framework_SetMenuVisible(Menu_Score_hideUi == 0);
+            VS::Menu::Framework::SetLiveMenuVisible(Menu_Score_hideUi == 0);
 
             ++Menu_Score_menuState;
         }
@@ -1042,16 +1044,16 @@ int Menu_Score_Update(void)
 
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 6);
+            VS::Audio::LivePlaySfxCentered(0x7E, 6);
 
             if (Menu_Score_hideUi != 0) {
-                Menu_Framework_SetMenuVisible(1);
+                VS::Menu::Framework::SetLiveMenuVisible(1);
             }
 
             ++Menu_Score_menuState;
 
             if (Input_buttonsPressed.allButtons & PADRup) {
-                Menu_Framework_DismissInformationBox();
+                VS::Menu::Framework::DismissLiveInformationBox();
                 Menu_Score_nextState = 1;
             } else {
                 Menu_Score_nextState = 0;
@@ -1172,7 +1174,7 @@ int Menu_Score_Update(void)
         }
 
         if (Input_buttonsPressed.allButtons & PADselect) {
-            Menu_Framework_SetMenuVisible(Menu_Score_hideUi);
+            VS::Menu::Framework::SetLiveMenuVisible(Menu_Score_hideUi);
             Menu_Score_hideUi ^= 1;
         }
 
@@ -1186,7 +1188,7 @@ int Menu_Score_Update(void)
                 if (Menu_Score_enemySkipDelay == 0) {
                     if (Menu_Score_monBinData[Menu_Score_selectedEnemy].next != Menu_Score_selectedEnemy) {
 
-                        Audio_PlaySfxCentered(0x7E, 11);
+                        VS::Audio::LivePlaySfxCentered(0x7E, 11);
 
                         Menu_Score_selectedEnemy = Menu_Score_monBinData[Menu_Score_selectedEnemy].next;
                         Menu_Score_buttonHeld = PADR1;
@@ -1201,7 +1203,7 @@ int Menu_Score_Update(void)
                 if (Menu_Score_enemySkipDelay == 0) {
                     if (Menu_Score_monBinData[Menu_Score_selectedEnemy].prev != Menu_Score_selectedEnemy) {
 
-                        Audio_PlaySfxCentered(0x7E, 11);
+                        VS::Audio::LivePlaySfxCentered(0x7E, 11);
 
                         Menu_Score_selectedEnemy = Menu_Score_monBinData[Menu_Score_selectedEnemy].prev;
                         Menu_Score_buttonHeld = PADL1;
@@ -1266,7 +1268,7 @@ int Menu_Score_Update(void)
         Menu_Score_selectedEnemy = Battle_unusedMenu9CursorMemory.encyclopaediaPage
                        + Battle_unusedMenu9CursorMemory.encyclopaediaRow;
 
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Score_enemyDescriptions[Menu_Score_enemyDescriptions[Menu_Score_selectedEnemy]]);
 
         Menu_Score_menuState = 0xE;
@@ -1407,8 +1409,8 @@ void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix)
     scratch->camera.angles.vy = Menu_Score_cameraAngles.vy;
     scratch->camera.angles.vz = Menu_Score_cameraAngles.vz;
 
-    Menu_Framework_BuildYawMatrix(cameraMatrix, Menu_Score_cameraAngles.vy);
-    Menu_Framework_BuildPitchMatrix(&pitchMatrix, Menu_Score_cameraAngles.vx);
+    VS::Menu::Framework::BuildLiveYawMatrix(cameraMatrix, Menu_Score_cameraAngles.vy);
+    VS::Menu::Framework::BuildLivePitchMatrix(&pitchMatrix, Menu_Score_cameraAngles.vx);
     VS::Core::Math::ApplyMultiplyMatrixIntoRight(pitchMatrix, *cameraMatrix);
 
     applyVector(&negPosition, position.vx, position.vy, position.vz, = -);
@@ -1550,7 +1552,7 @@ void Menu_Score_RenderOverview(int animStep)
 
     VS::Render::SetLiveProjectionScreenOffset(overview_projection_offset);
     Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
-    Menu_Framework_DrawActorPreview(&viewer_camera_matrix);
+    VS::Menu::Framework::DrawLiveActorPreview(&viewer_camera_matrix);
     VS::Render::SetLiveProjectionScreenOffset(saved_projection_offset);
 
     sprintf(score_text, "#%ld", Menu_Score_score);

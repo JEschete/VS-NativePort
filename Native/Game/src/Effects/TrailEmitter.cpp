@@ -22,7 +22,6 @@ constexpr int kRingInterpolationShift = 3;
 constexpr std::int32_t kStoppedLifetime = 1;
 constexpr std::int32_t kLifetimeMask = 0xFF;
 constexpr int kDefinitionShift = 8;
-constexpr std::size_t kTransparencyQuarters = 4;
 
 enum class BoxFace : std::int32_t {
   kPositiveX,
@@ -211,9 +210,63 @@ bool ConfigureRing(const TrailOriginRequest& request,
       return false;
   }
 }
+
+// `Samples` evenly spaced entries of a transparency curve: sample j reads
+// entry j * (length - 1) / (Samples - 1), the original's
+// (j * trail) / (TRAIL_SAMPLE_COUNT - 1) with `trail` the curve's length less
+// one (left at one for a one-entry curve).
+template <std::size_t Samples>
+SampledTransparency<Samples> SampleTransparency(
+    std::span<const std::uint8_t> curve) {
+  SampledTransparency<Samples> result;
+  if (curve.empty()) {
+    result.samples.fill(kOpaqueTrailTransparency);
+    return result;
+  }
+  const std::size_t span = curve.size() > 1 ? curve.size() - 1 : curve.size();
+  for (std::size_t sample = 0; sample < Samples; ++sample) {
+    std::size_t index = (sample * span) / (Samples - 1);
+    if (index >= curve.size()) {
+      index = curve.size() - 1;
+      result.clamped = true;
+    }
+    result.samples.at(sample) = curve[index];
+  }
+  return result;
+}
 }  // namespace
 
+// decomp: EFFECT VS_TRAIL_ORIGIN_FUNCTION (src/EFFECT/trails5.h:27).
 // decomp: PLG074 func_800FB414 (src/EFFECT/trails5.h:27).
+// decomp: PLG057.BIN func_800FD894 (src/EFFECT/PLG057.BIN/2D0.c:24).
+// decomp: PLG073.BIN func_800FB414 (src/EFFECT/PLG073.BIN/F8.c:10).
+// decomp: PLG086.BIN func_800FC270 (src/EFFECT/PLG086.BIN/F8.c:19).
+// decomp: PLG087.BIN func_800FC048 (src/EFFECT/PLG087.BIN/1F0.c:21).
+// decomp: PLG128.BIN func_800FE3D0 (src/EFFECT/PLG128.BIN/F8.c:252).
+// decomp: PLG134.BIN func_800F98E0 (src/EFFECT/PLG134.BIN/E0.c:8).
+// decomp: PLG137.BIN func_800FA404 (src/EFFECT/PLG137.BIN/F8.c:7).
+// decomp: PLG141.BIN func_800F98E0 (src/EFFECT/PLG141.BIN/E0.c:2).
+// decomp: PLG146.BIN func_800FD75C (src/EFFECT/PLG146.BIN/1D8.c:39).
+// decomp: PLG148.BIN func_800F98E0 (src/EFFECT/PLG148.BIN/E0.c:2).
+// decomp: PLG242.BIN func_800FB340 (src/EFFECT/PLG242.BIN/F8.c:9).
+// decomp: PLG255.BIN func_800F99D8 (src/EFFECT/PLG255.BIN/1D8.c:2).
+// decomp: PLG265.BIN func_800FBFD4 (src/EFFECT/PLG265.BIN/2E8.c:30).
+// decomp: PLG266.BIN func_800FCD80 (src/EFFECT/PLG266.BIN/2E8.c:38).
+// decomp: PLG291.BIN func_800F98F8 (src/EFFECT/PLG291.BIN/F8.c:8).
+// decomp: EFFECT VS_TRAIL_ORIGIN_FUNCTION (src/EFFECT/trails9.h:27).
+// decomp: PLG049.BIN func_800F98E0 (src/EFFECT/PLG049.BIN/E0.c:1).
+// decomp: PLG050.BIN func_800FA504 (src/EFFECT/PLG050.BIN/E0.c:6).
+// decomp: PLG057.BIN func_800FB774 (src/EFFECT/PLG057.BIN/2D0.c:14).
+// decomp: PLG069.BIN func_800FA3EC (src/EFFECT/PLG069.BIN/E0.c:7).
+// decomp: PLG135.BIN func_800FA84C (src/EFFECT/PLG135.BIN/E0.c:12).
+// decomp: PLG161.BIN func_800FB3D4 (src/EFFECT/PLG161.BIN/F8.c:10).
+// decomp: PLG165.BIN func_800F98F8 (src/EFFECT/PLG165.BIN/F8.c:8).
+// decomp: PLG167.BIN func_800FB704 (src/EFFECT/PLG167.BIN/E0.c:15).
+// decomp: PLG168.BIN func_800F99F0 (src/EFFECT/PLG168.BIN/1F0.c:2).
+// decomp: PLG169.BIN func_800F98E0 (src/EFFECT/PLG169.BIN/E0.c:8).
+// decomp: PLG232.BIN func_800F98E0 (src/EFFECT/PLG232.BIN/E0.c:2).
+// The nine-sample origin stage is the five-sample one over a nine-sample
+// state; only the trail record type differs.
 void GenerateTrailOrigins(const TrailOriginRequest& request,
                           std::span<TrailPoint> origins, std::int32_t& corner,
                           TrailOriginScratch& scratch,
@@ -252,30 +305,23 @@ TrailEmitterPlan PlanTrailEmitter(std::int32_t packed) {
       static_cast<std::uint8_t>((packed >> kDefinitionShift) & kLifetimeMask)};
 }
 
-std::optional<std::uint8_t> TrailCountFor(std::int16_t interval) {
+std::optional<std::uint8_t> TrailCountFor(std::int16_t interval,
+                                          std::size_t limit) {
   if (interval < 0) return std::nullopt;
-  return static_cast<std::uint8_t>(std::min<std::size_t>(
-      static_cast<std::size_t>(interval), kMaxTrailsPerEmitter));
+  return static_cast<std::uint8_t>(
+      std::min<std::size_t>(static_cast<std::size_t>(interval), limit));
 }
 
 // decomp: trails5.h:710-722 (setup samples of the transparency curve).
 SampledTrailTransparency SampleTrailTransparency(
     std::span<const std::uint8_t> curve) {
-  SampledTrailTransparency result;
-  if (curve.empty()) {
-    result.samples.fill(kOpaqueTrailTransparency);
-    return result;
-  }
-  const std::size_t span = curve.size() > 1 ? curve.size() - 1 : curve.size();
-  for (std::size_t sample = 0; sample < kTrailTransparencySamples; ++sample) {
-    std::size_t index = (sample * span) / kTransparencyQuarters;
-    if (index >= curve.size()) {
-      index = curve.size() - 1;
-      result.clamped = true;
-    }
-    result.samples.at(sample) = curve[index];
-  }
-  return result;
+  return SampleTransparency<kTrailTransparencySamples>(curve);
+}
+
+// decomp: trails9.h:716-734 (setup samples of the transparency curve).
+SampledTransparency<kTrailNineTransparencySamples> SampleTrailNineTransparency(
+    std::span<const std::uint8_t> curve) {
+  return SampleTransparency<kTrailNineTransparencySamples>(curve);
 }
 
 TrailVector TrailEventPosition(TrailVector point) {
@@ -283,7 +329,38 @@ TrailVector TrailEventPosition(TrailVector point) {
           WrapMul(point.z, kOne)};
 }
 
+// decomp: EFFECT VS_TRAIL_DISPATCH_FUNCTION (src/EFFECT/trails5.h:677).
 // decomp: PLG074 func_800FCFEC (src/EFFECT/trails5.h:677).
+// decomp: PLG057.BIN func_800FF46C (src/EFFECT/PLG057.BIN/2D0.c:31).
+// decomp: PLG073.BIN func_800FCFEC (src/EFFECT/PLG073.BIN/F8.c:17).
+// decomp: PLG086.BIN func_800FDE48 (src/EFFECT/PLG086.BIN/F8.c:26).
+// decomp: PLG087.BIN func_800FDC20 (src/EFFECT/PLG087.BIN/1F0.c:28).
+// decomp: PLG128.BIN func_800FFFA8 (src/EFFECT/PLG128.BIN/F8.c:259).
+// decomp: PLG134.BIN func_800FB4B8 (src/EFFECT/PLG134.BIN/E0.c:15).
+// decomp: PLG137.BIN func_800FBFDC (src/EFFECT/PLG137.BIN/F8.c:14).
+// decomp: PLG141.BIN func_800FB4B8 (src/EFFECT/PLG141.BIN/E0.c:9).
+// decomp: PLG146.BIN func_800FF334 (src/EFFECT/PLG146.BIN/1D8.c:46).
+// decomp: PLG148.BIN func_800FB4B8 (src/EFFECT/PLG148.BIN/E0.c:9).
+// decomp: PLG242.BIN func_800FCF18 (src/EFFECT/PLG242.BIN/F8.c:16).
+// decomp: PLG255.BIN func_800FB5B0 (src/EFFECT/PLG255.BIN/1D8.c:9).
+// decomp: PLG265.BIN func_800FDBAC (src/EFFECT/PLG265.BIN/2E8.c:37).
+// decomp: PLG266.BIN func_800FE958 (src/EFFECT/PLG266.BIN/2E8.c:45).
+// decomp: PLG291.BIN func_800FB4D0 (src/EFFECT/PLG291.BIN/F8.c:15).
+// decomp: EFFECT VS_TRAIL_DISPATCH_FUNCTION (src/EFFECT/trails9.h:685).
+// decomp: PLG049.BIN vs_spiritSurge_renderTrails
+// (src/EFFECT/PLG049.BIN/E0.c:7). decomp: PLG050.BIN func_800FC0E4
+// (src/EFFECT/PLG050.BIN/E0.c:13). decomp: PLG057.BIN func_800FD354
+// (src/EFFECT/PLG057.BIN/2D0.c:21). decomp: PLG069.BIN func_800FBFCC
+// (src/EFFECT/PLG069.BIN/E0.c:14). decomp: PLG135.BIN func_800FC42C
+// (src/EFFECT/PLG135.BIN/E0.c:19). decomp: PLG161.BIN func_800FCFB4
+// (src/EFFECT/PLG161.BIN/F8.c:17). decomp: PLG165.BIN func_800FB4D8
+// (src/EFFECT/PLG165.BIN/F8.c:15). decomp: PLG167.BIN func_800FD2E4
+// (src/EFFECT/PLG167.BIN/E0.c:22). decomp: PLG168.BIN func_800FB5D0
+// (src/EFFECT/PLG168.BIN/1F0.c:9). decomp: PLG169.BIN func_800FB4C0
+// (src/EFFECT/PLG169.BIN/E0.c:15). decomp: PLG232.BIN func_800FB4C0
+// (src/EFFECT/PLG232.BIN/E0.c:9). The nine-sample lifecycle differs only in
+// what the host allocates: at most eight trails and nine transparency samples
+// (TrailEmitterLive.cpp).
 bool UpdateTrailEmitter(TrailEmitterCommand command, std::int32_t packed,
                         TrailEmitterHost& host) {
   switch (command) {

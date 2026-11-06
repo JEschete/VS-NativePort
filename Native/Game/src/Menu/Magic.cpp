@@ -1,5 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/AbilitiesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/RoomStateLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -9,7 +12,7 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
@@ -17,16 +20,12 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Content/StringTables.h"
-#include "DiscQueue.h"
 #include "Field/Gimmicks.h"
-#include "Field/RoomState.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Menu/Files.h"
-#include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
 #include "Render/LegacyPackets.h"
@@ -124,7 +123,7 @@ int Menu_Magic_UpdateTeleportMenu(int init)
     int savePointState;
 
     if (init != 0) {
-        Menu_Framework_FlyOutRowsAndHoistSelection(4, 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(4, 1);
         Menu_Magic_teleportMenuState = Menu_Magic_TeleportMenuState_InitTeleport;
         Menu_Magic_teleportMenuCurrentMp = Battle_characterState->stats->currentMp;
         return 0;
@@ -132,7 +131,7 @@ int Menu_Magic_UpdateTeleportMenu(int init)
 
     switch (Menu_Magic_teleportMenuState) {
     case Menu_Magic_TeleportMenuState_InitTeleport:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
         rowCount = 0;
@@ -179,31 +178,31 @@ int Menu_Magic_UpdateTeleportMenu(int init)
         }
         savePointState = Input_settings.cursorMemory;
         Input_settings.cursorMemory = 1;
-        Menu_Framework_CreateMenuRows(rowCount, (2 << 8) | 11, menuStrings, rowTypes);
+        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 11, menuStrings, rowTypes);
         Menu_Magic_teleportMenuState = Menu_Magic_TeleportMenuState_HandleInput;
         Input_settings.cursorMemory = savePointState;
         break;
 
     case Menu_Magic_TeleportMenuState_HandleInput:
-        Menu_Magic_teleportMenuSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+        Menu_Magic_teleportMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
         if (Menu_Magic_teleportMenuSelectedRow != 0) {
             Menu_Framework_displayActionCost = 0;
             if (Menu_Magic_teleportMenuSelectedRow == (-1)) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
             } else {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::DismissLiveInformationBox();
+                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
             }
             Menu_Magic_teleportMenuState = Menu_Magic_TeleportMenuState_ReturnIfReady;
         } else {
-            i = Menu_Magic_teleportCosts[Menu_Framework_HighlightedRow()];
+            i = Menu_Magic_teleportCosts[VS::Menu::Framework::LiveHighlightedRow()];
             Menu_Magic_SetTeleportMpCost(i, Menu_Magic_teleportMenuCurrentMp < i);
         }
         break;
 
     case Menu_Magic_TeleportMenuState_ReturnIfReady:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             if (Menu_Magic_teleportMenuSelectedRow > 0) {
                 int v1;
                 int packed_location_and_tile_x;
@@ -234,13 +233,13 @@ void Menu_Magic_CreateHeader(void)
 {
     Menu_Framework_MenuRow* menuItem;
 
-    menuItem = Menu_Framework_SetMenuItem(0, 320, 18, 0x8C, 8,
+    menuItem = VS::Menu::Framework::SetLiveMenuItem(0, 320, 18, 0x8C, 8,
         (char*)&Menu_menuStrings[Menu_menuStrings[Text_Battle_menuStrings_Index_magic]]);
     menuItem->state = 2;
     menuItem->targetPosition0 = 180;
     menuItem->selected = 1;
-    Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
-    Menu_Framework_InitializeInformationBox();
+    VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
+    VS::Menu::Framework::InitializeLiveInformationBox();
 }
 
 // decomp: MENU0.PRG vs_menu0_exec (src/MENU/MENU0.PRG/15AC.c:166)
@@ -273,17 +272,17 @@ int Menu_Magic_Update(u_char* state)
 
     switch (*state) {
     case Menu_Magic_MagicMenuState_HandleShortcut:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
 
         i = Menu_Framework_shortcutInvoked;
 
         if (i != 0) {
             enum Menu_Magic_ShortcutMagicMenu { Menu_Magic_ShortcutMagicMenu_Warlock = 1, Menu_Magic_ShortcutMagicMenu_Shaman, Menu_Magic_ShortcutMagicMenu_Sorcerer, Menu_Magic_ShortcutMagicMenu_Enchanter };
-            Menu_Framework_SetMenuItem(i + 9, 0x140, 0x22, 0x8C, 8,
+            VS::Menu::Framework::SetLiveMenuItem(i + 9, 0x140, 0x22, 0x8C, 8,
                 (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[(i * 3) - 3]])
                 ->selected = 1;
             switch (i) {
@@ -316,7 +315,7 @@ int Menu_Magic_Update(u_char* state)
                 (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[i * 3 + Text_Menu0_magic_Index_warlockDesc]];
             rowTypes[i] = 0;
 
-            if (Battle_HasUnlockedSpellClass(i) == 0) {
+            if (VS::Battle::LiveHasUnlockedSpellClass(i) == 0) {
                 rowTypes[i] |= 1;
                 menuStrings[i * 2 + 1] =
                     (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[i * 3
@@ -357,14 +356,14 @@ int Menu_Magic_Update(u_char* state)
             Input_settings.cursorMemory = 1;
         }
 
-        Menu_Framework_CreateMenuRows(i, (1 << 8) | 5, menuStrings, rowTypes);
+        VS::Menu::Framework::CreateLiveMenuRows(i, (1 << 8) | 5, menuStrings, rowTypes);
         Input_settings.cursorMemory = j;
         *state = Menu_Magic_MagicMenuState_HandleSubmenu;
 
         break;
 
     case Menu_Magic_MagicMenuState_HandleSubmenu:
-        selectedRow = Menu_Framework_GetSelectedRow();
+        selectedRow = VS::Menu::Framework::LiveSelectedRow();
         i = selectedRow + 1;
 
         if (i == 0) {
@@ -397,10 +396,10 @@ int Menu_Magic_Update(u_char* state)
             }
         } else {
             if (i == Menu_Framework_MenuSelection_Quit) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
                 *state = Menu_Magic_MagicMenuState_Exit;
             } else {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
                 *state = Menu_Magic_MagicMenuState_ExitToMainMenu;
             }
         }
@@ -409,7 +408,7 @@ int Menu_Magic_Update(u_char* state)
 
     case Menu_Magic_MagicMenuState_InitWarlockMenu:
         Menu_Magic_CreateHeader();
-        Menu_Framework_SetMenuItem(
+        VS::Menu::Framework::SetLiveMenuItem(
             0xA, 0x140, 0x22, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_warlock))
             ->selected = 1;
         Menu_Magic_UpdateWarlockMenu(2);
@@ -440,7 +439,7 @@ int Menu_Magic_Update(u_char* state)
 
     case Menu_Magic_MagicMenuState_InitShamanMenu:
         Menu_Magic_CreateHeader();
-        Menu_Framework_SetMenuItem(
+        VS::Menu::Framework::SetLiveMenuItem(
             11, 320, 34, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_shaman))
             ->selected = 1;
         Menu_Magic_UpdateShamanMenu(2);
@@ -471,7 +470,7 @@ int Menu_Magic_Update(u_char* state)
 
     case Menu_Magic_MagicMenuState_InitSorcererMenu:
         Menu_Magic_CreateHeader();
-        Menu_Framework_SetMenuItem(
+        VS::Menu::Framework::SetLiveMenuItem(
             12, 320, 34, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_sorcerer))
             ->selected = 1;
         Menu_Magic_UpdateSorcererMenu(2);
@@ -502,7 +501,7 @@ int Menu_Magic_Update(u_char* state)
 
     case Menu_Magic_MagicMenuState_InitEnchanterMenu:
         Menu_Magic_CreateHeader();
-        Menu_Framework_SetMenuItem(
+        VS::Menu::Framework::SetLiveMenuItem(
             13, 320, 34, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_enchanter))
             ->selected = 1;
         Menu_Magic_UpdateEnchanterMenu(2);
@@ -553,10 +552,10 @@ int Menu_Magic_Update(u_char* state)
         break;
 
     case Menu_Magic_MagicMenuState_ExitToMainMenu:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::DismissLiveInformationBox();
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             *state = Menu_Magic_MagicMenuState_None;
             return 1;
         }
@@ -564,7 +563,7 @@ int Menu_Magic_Update(u_char* state)
         break;
 
     case Menu_Magic_MagicMenuState_ExecuteMagic:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Framework_actionSelection.selectionKind = 7;
             Menu_Framework_menuState.returnState = Menu_Framework_menuState.currentMenu;
             Menu_Framework_menuState.currentMenu = 1;
@@ -575,10 +574,10 @@ int Menu_Magic_Update(u_char* state)
         break;
 
     case Menu_Magic_MagicMenuState_Exit:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::DismissLiveInformationBox();
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Framework_menuState.currentMenu = 1;
             *state = Menu_Magic_MagicMenuState_None;
             return 1;
@@ -603,7 +602,7 @@ void Menu_Magic_SetSpellMpCost(int id)
     }
 
     flags = Battle_ActorActionRestrictionFlags(0, id);
-    Menu_Framework_SetActionCostText(1, "MP", 8, (flags >> 1) & 1);
+    VS::Menu::Framework::SetLiveActionCostText(1, "MP", 8, (flags >> 1) & 1);
 
     cost = Battle_actionDefinitions[id].cost;
     Menu_Magic_mpCostTextBuffer[15] = NULL;
@@ -627,7 +626,7 @@ void Menu_Magic_SetSpellMpCost(int id)
 
     Menu_Magic_mpCostTextBuffer[--i] = '#';
 
-    Menu_Framework_SetActionCostText(
+    VS::Menu::Framework::SetLiveActionCostText(
         0, (const char *)(&Menu_Magic_mpCostTextBuffer[i]), variableCost * 4 + 72, (flags >> 1) & 1);
 }
 
@@ -637,7 +636,7 @@ void Menu_Magic_SetTeleportMpCost(int costDecimal, int disabled)
     int cost;
     int i;
 
-    Menu_Framework_SetActionCostText(1, "MP", 8, disabled);
+    VS::Menu::Framework::SetLiveActionCostText(1, "MP", 8, disabled);
 
     cost = costDecimal;
     i = 15;
@@ -651,7 +650,7 @@ void Menu_Magic_SetTeleportMpCost(int costDecimal, int disabled)
 
     Menu_Magic_mpCostDirectTextBuffer[--i] = '#';
 
-    Menu_Framework_SetActionCostText(0, &Menu_Magic_mpCostDirectTextBuffer[i], 72, disabled);
+    VS::Menu::Framework::SetLiveActionCostText(0, &Menu_Magic_mpCostDirectTextBuffer[i], 72, disabled);
 }
 
 // decomp: MENU0.PRG _getTeleportCost (src/MENU/MENU0.PRG/84.c:117)
@@ -661,7 +660,7 @@ int Menu_Magic_TeleportMpCost(int targetSavePointId)
     int j;
     int cost;
     int closestSavePointId;
-    int roomId = Field_CurrentRoomId();
+    int roomId = VS::Field::LiveCurrentRoomId();
 
     do {
         for (i = 0; i < 48; ++i) {
@@ -706,7 +705,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
         Menu_Magic_warlockMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
 
-        Menu_Framework_FlyOutRowsAndHoistSelection(0, 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(0, 1);
 
         Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_Init;
         return 0;
@@ -717,7 +716,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         char* menuStrings[36];
         int rowTypes[18];
 
-        if (!Menu_Framework_shortcutInvoked && !Menu_Framework_AreMenuRowsIdle()) {
+        if (!Menu_Framework_shortcutInvoked && !VS::Menu::Framework::AreLiveMenuRowsIdle()) {
             break;
         }
 
@@ -755,7 +754,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
             Input_settings.cursorMemory = 1;
         }
 
-        Menu_Framework_CreateMenuRows(rowCount, (2 << 8) | 7, menuStrings, rowTypes);
+        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 7, menuStrings, rowTypes);
 
         Input_settings.cursorMemory = i;
         Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_HandleInput;
@@ -763,7 +762,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
     }
     case Menu_Magic_WarlockMenuState_HandleInput:
 
-        Menu_Magic_warlockMenuSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+        Menu_Magic_warlockMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
 
         if (Menu_Magic_warlockMenuSelectedRow != 0) {
 
@@ -774,7 +773,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
             }
 
             if (Menu_Magic_warlockMenuSelectedRow == -1) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
 
                 Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
                 break;
@@ -788,7 +787,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                     if ((Menu_Magic_warlockMenuSelectedRow == Menu_Magic_warlockMenuLevelledSpells[rowCount])
                         && (Battle_actionDefinitions[Menu_Magic_warlockMenuSelectedRow + 1].unlocked)) {
 
-                        Menu_Framework_FlyOutRowsAndHoistSelection(
+                        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(
                             Menu_Framework_menuMemory.cursorMemories[14], 2);
 
                         Menu_Framework_displayActionCost = 1;
@@ -801,15 +800,15 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                 }
             }
 
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            Menu_Framework_DismissInformationBox();
-            Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Menu::Framework::DismissLiveInformationBox();
+            VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
             Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
 
         } else {
 
-            i = Menu_Magic_availableWarlockSpells[Menu_Framework_HighlightedRow()];
+            i = Menu_Magic_availableWarlockSpells[VS::Menu::Framework::LiveHighlightedRow()];
 
             for (rowCount = 0; rowCount < 7; ++rowCount) {
                 if (i == Menu_Magic_warlockMenuLevelledSpells[rowCount]) {
@@ -826,13 +825,13 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         break;
 
     case Menu_Magic_WarlockMenuState_ReturnIfReady:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             return Menu_Magic_warlockMenuSelectedRow;
         }
         break;
 
     case Menu_Magic_WarlockMenuState_LevelledSpellInit:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
@@ -870,9 +869,9 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
             Menu_Framework_displayActionCost = 0;
 
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-            Menu_Framework_DismissInformationBox();
-            Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Menu::Framework::DismissLiveInformationBox();
+            VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
             Menu_Magic_warlockMenuSelectedRow = -2;
             Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
@@ -884,7 +883,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
             VS::Menu::PlayLeaveSound();
 
             for (i = 20; i < 30; ++i) {
-                Menu_Framework_FlyOutRowRight(i);
+                VS::Menu::Framework::FlyOutLiveRowRight(i);
             }
 
             Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_Init;
@@ -898,9 +897,9 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
                 Menu_Framework_displayActionCost = 0;
 
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::DismissLiveInformationBox();
+                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
                 Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
                 Menu_Magic_warlockMenuSelectedRow += i;
@@ -1038,14 +1037,14 @@ int Menu_Magic_UpdateShamanMenu(u_int initShortcutInvoked)
 
     if (initShortcutInvoked != 0) {
         Menu_Magic_shamanMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
-        Menu_Framework_FlyOutRowsAndHoistSelection(1, 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(1, 1);
         Menu_Magic_shamanMenuState = Menu_Magic_ShamanMenuState_Init;
         return 0;
     }
 
     switch (Menu_Magic_shamanMenuState) {
     case Menu_Magic_ShamanMenuState_Init:
-        if ((Menu_Framework_shortcutInvoked == 0) && (Menu_Framework_AreMenuRowsIdle() == 0)) {
+        if ((Menu_Framework_shortcutInvoked == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0)) {
             break;
         }
 
@@ -1076,34 +1075,34 @@ int Menu_Magic_UpdateShamanMenu(u_int initShortcutInvoked)
         if (Menu_Magic_shamanMenuShortcutInvoked != 0) {
             Input_settings.cursorMemory = 1;
         }
-        Menu_Framework_CreateMenuRows(rowCount, (2 << 8) | 8, menuStrings, rowTypes);
+        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 8, menuStrings, rowTypes);
         Input_settings.cursorMemory = i;
         Menu_Magic_shamanMenuState = Menu_Magic_ShamanMenuState_HandleInput;
         break;
     case Menu_Magic_ShamanMenuState_HandleInput:
-        Menu_Magic_shamanMenuSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+        Menu_Magic_shamanMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
         if (Menu_Magic_shamanMenuSelectedRow != 0) {
             Menu_Framework_displayActionCost = 0;
             if ((Menu_Framework_shortcutInvoked != 0) && (Menu_Magic_shamanMenuSelectedRow == -1)) {
                 Menu_Magic_shamanMenuSelectedRow = -2;
             }
             if (Menu_Magic_shamanMenuSelectedRow == -1) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
             } else {
                 if (Menu_Magic_shamanMenuSelectedRow > 0) {
                     Menu_Magic_shamanMenuSelectedRow = Menu_Magic_availableShamanSpells[Menu_Magic_shamanMenuSelectedRow - 1];
                 }
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::DismissLiveInformationBox();
+                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
             }
             Menu_Magic_shamanMenuState = Menu_Magic_ShamanMenuState_ReturnIfReady;
         } else {
-            Menu_Magic_SetSpellMpCost(Menu_Magic_availableShamanSpells[Menu_Framework_HighlightedRow()]);
+            Menu_Magic_SetSpellMpCost(Menu_Magic_availableShamanSpells[VS::Menu::Framework::LiveHighlightedRow()]);
         }
         break;
     case Menu_Magic_ShamanMenuState_ReturnIfReady:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             return Menu_Magic_shamanMenuSelectedRow;
         }
         break;
@@ -1128,14 +1127,14 @@ int Menu_Magic_UpdateSorcererMenu(u_int initShortcutInvoked)
 
     if (initShortcutInvoked != 0) {
         Menu_Magic_sorcererMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
-        Menu_Framework_FlyOutRowsAndHoistSelection(2, 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(2, 1);
         Menu_Magic_sorcererMenuState = Menu_Magic_SpellListMenuState_Init;
         return 0;
     }
 
     switch (Menu_Magic_sorcererMenuState) {
     case Menu_Magic_SpellListMenuState_Init:
-        if (!Menu_Framework_shortcutInvoked && !Menu_Framework_AreMenuRowsIdle()) {
+        if (!Menu_Framework_shortcutInvoked && !VS::Menu::Framework::AreLiveMenuRowsIdle()) {
             break;
         }
         rowCount = 0;
@@ -1166,34 +1165,34 @@ int Menu_Magic_UpdateSorcererMenu(u_int initShortcutInvoked)
         if (Menu_Magic_sorcererMenuShortcutInvoked != 0) {
             Input_settings.cursorMemory = 1;
         }
-        Menu_Framework_CreateMenuRows(rowCount, (2 << 8) | 9, menuStrings, rowTypes);
+        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 9, menuStrings, rowTypes);
         Input_settings.cursorMemory = i;
         Menu_Magic_sorcererMenuState = Menu_Magic_SpellListMenuState_HandleInput;
         break;
     case Menu_Magic_SpellListMenuState_HandleInput:
-        Menu_Magic_sorcererMenuSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+        Menu_Magic_sorcererMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
         if (Menu_Magic_sorcererMenuSelectedRow != 0) {
             Menu_Framework_displayActionCost = 0;
             if (Menu_Framework_shortcutInvoked && (Menu_Magic_sorcererMenuSelectedRow == -1)) {
                 Menu_Magic_sorcererMenuSelectedRow = -2;
             }
             if (Menu_Magic_sorcererMenuSelectedRow == -1) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
             } else {
                 if (Menu_Magic_sorcererMenuSelectedRow > 0) {
                     Menu_Magic_sorcererMenuSelectedRow = Menu_Magic_availableSorcererSpells[Menu_Magic_sorcererMenuSelectedRow - 1];
                 }
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::DismissLiveInformationBox();
+                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
             }
             Menu_Magic_sorcererMenuState = Menu_Magic_SpellListMenuState_ReturnIfready;
         } else {
-            Menu_Magic_SetSpellMpCost(Menu_Magic_availableSorcererSpells[Menu_Framework_HighlightedRow()]);
+            Menu_Magic_SetSpellMpCost(Menu_Magic_availableSorcererSpells[VS::Menu::Framework::LiveHighlightedRow()]);
         }
         break;
     case Menu_Magic_SpellListMenuState_ReturnIfready:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             return Menu_Magic_sorcererMenuSelectedRow;
         }
         break;
@@ -1217,14 +1216,14 @@ int Menu_Magic_UpdateEnchanterMenu(u_int initShortcutInvoked)
 
     if (initShortcutInvoked != 0) {
         Menu_Magic_enchanterMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
-        Menu_Framework_FlyOutRowsAndHoistSelection(3, 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(3, 1);
         Menu_Magic_enchanterMenuState = Menu_Magic_SpellListMenuState_Init;
         return 0;
     }
 
     switch (Menu_Magic_enchanterMenuState) {
     case Menu_Magic_SpellListMenuState_Init:
-        if ((Menu_Framework_shortcutInvoked == 0) && (Menu_Framework_AreMenuRowsIdle() == 0)) {
+        if ((Menu_Framework_shortcutInvoked == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0)) {
             break;
         }
         rowCount = 0;
@@ -1254,34 +1253,34 @@ int Menu_Magic_UpdateEnchanterMenu(u_int initShortcutInvoked)
         if (Menu_Magic_enchanterMenuShortcutInvoked != 0) {
             Input_settings.cursorMemory = 1;
         }
-        Menu_Framework_CreateMenuRows(rowCount, (2 << 8) | 10, menuStrings, rowTypes);
+        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 10, menuStrings, rowTypes);
         Input_settings.cursorMemory = i;
         Menu_Magic_enchanterMenuState = Menu_Magic_SpellListMenuState_HandleInput;
         break;
     case Menu_Magic_SpellListMenuState_HandleInput:
-        Menu_Magic_enchanterMenuSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+        Menu_Magic_enchanterMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
         if (Menu_Magic_enchanterMenuSelectedRow != 0) {
             Menu_Framework_displayActionCost = 0;
             if ((Menu_Framework_shortcutInvoked != 0) && (Menu_Magic_enchanterMenuSelectedRow == -1)) {
                 Menu_Magic_enchanterMenuSelectedRow = -2;
             }
             if (Menu_Magic_enchanterMenuSelectedRow == -1) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
+                VS::Menu::Framework::ClearLiveMenuExcept(0);
             } else {
                 if (Menu_Magic_enchanterMenuSelectedRow > 0) {
                     Menu_Magic_enchanterMenuSelectedRow = Menu_Magic_availableEnchanterSpells[Menu_Magic_enchanterMenuSelectedRow - 1];
                 }
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::DismissLiveInformationBox();
+                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
             }
             Menu_Magic_enchanterMenuState = Menu_Magic_SpellListMenuState_ReturnIfready;
         } else {
-            Menu_Magic_SetSpellMpCost(Menu_Magic_availableEnchanterSpells[Menu_Framework_HighlightedRow()]);
+            Menu_Magic_SetSpellMpCost(Menu_Magic_availableEnchanterSpells[VS::Menu::Framework::LiveHighlightedRow()]);
         }
         break;
     case Menu_Magic_SpellListMenuState_ReturnIfready:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             return Menu_Magic_enchanterMenuSelectedRow;
         }
         break;

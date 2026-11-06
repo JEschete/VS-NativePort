@@ -1,10 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Field/GameModeLive.hpp"
+#include "Field/MapLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/Animation.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
@@ -17,13 +19,11 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Hud.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Effects/Trails.h"
-#include "Field/GameMode.h"
 #include "Field/Interactions.h"
-#include "Field/Map.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -128,7 +128,7 @@ int Effects_QueueActionImpactEffects(int attacker_index)
 }
 
 // decomp: BATTLE.PRG func_8006CDB8 (src/BATTLE/BATTLE.PRG/146C.c:2149)
-void Effects_SignalActorEffectAnimation(int actor_index) { Actors_RequestActorAnimationAdvance(actor_index); }
+void Effects_SignalActorEffectAnimation(int actor_index) { VS::Actors::RequestLiveActorAnimationAdvance(actor_index); }
 
 // decomp: BATTLE.PRG func_8006D028 (src/BATTLE/BATTLE.PRG/146C.c:2211)
 void Effects_TintActionActorRed(int actor_index, int unused __attribute__((unused)))
@@ -218,16 +218,16 @@ void Effects_BeginAshleyStandaloneEffect(int effect_id)
     Effects_BeginActionEffect(&request, 0, 0);
     State_tickSpeed = 4;
     Battle_SetHudHidden(1);
-    Field_SetMinimapVisible(0);
+    VS::Field::SetLiveMinimapVisible(0);
 }
 
 // decomp: BATTLE.PRG func_80073484 (src/BATTLE/BATTLE.PRG/146C.c:4638)
 void Effects_EndAshleyStandaloneEffect(void)
 {
-    Field_EnterFieldExplorationMode();
+    VS::Field::LiveEnterFieldExplorationMode();
     State_tickSpeed = 2;
     Battle_SetHudHidden(0);
-    Field_SetMinimapVisible(1);
+    VS::Field::SetLiveMinimapVisible(1);
 }
 
 // decomp: BATTLE.PRG func_80074294 (src/BATTLE/BATTLE.PRG/146C.c:5064)

@@ -18,12 +18,13 @@
 #include "Diagnostics/SceneTrace.h"
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
@@ -35,7 +36,6 @@ extern "C" {
 #include "Core/BiosRand.h"
 #include "Event/ScriptVm.h"
 #include "Field/Collision.h"
-#include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
@@ -43,7 +43,7 @@ extern "C" {
 #include "Items/Loot.h"
 #include "Items/LootLiveState.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
@@ -51,7 +51,6 @@ extern "C" {
 #include "Menu/Magic.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
-#include "State/Flags.h"
 #include "State/Timers.h"
 }
 
@@ -408,7 +407,7 @@ TEST_CASE(
     "flags",
     "[scenes][diagnostics][trace]") {
   TraceScope scope;
-  const auto saved_flag = State_ScriptFlag(180);
+  const auto saved_flag = VS::State::LiveScriptFlag(180);
   {
     VS::Game::GameplayTrace trace(scope.parent);
     scope.run = trace.Directory();
@@ -418,9 +417,9 @@ TEST_CASE(
     CHECK(Diagnostics_RecordSceneCommand(80, 2, 0, nullptr, nullptr, 999, 0) ==
           0);
     Diagnostics_RecordSceneResult(0, 3);
-    State_SetScriptFlag(180, 17);
-    CHECK(State_ScriptFlag(180) == 17);
-    State_SetScriptFlag(180, saved_flag);
+    VS::State::SetLiveScriptFlag(180, 17);
+    CHECK(VS::State::LiveScriptFlag(180) == 17);
+    VS::State::SetLiveScriptFlag(180, saved_flag);
     CHECK(trace.Errors() == 0);
     CHECK_FALSE(trace.Failed());
   }
@@ -1215,10 +1214,10 @@ TEST_CASE("Player observations expose original room chests and opened flags",
   ReactionInspectionFixture fixture;
   struct RoomGuard {
     decltype(Field_roomData) room = Field_roomData;
-    int flag = State_ScriptFlag(0x3C6);
+    int flag = VS::State::LiveScriptFlag(0x3C6);
     ~RoomGuard() {
       Field_roomData = room;
-      State_SetScriptFlag(0x3C6, static_cast<char>(flag));
+      VS::State::SetLiveScriptFlag(0x3C6, static_cast<char>(flag));
     }
   } guard;
   std::array<Items_TreasureChest, 2> chests{};
@@ -1233,7 +1232,7 @@ TEST_CASE("Player observations expose original room chests and opened flags",
   chests[1].openedFlag = 6;
   Field_roomData.containers = chests.data();
   Field_roomData.header.containersLength = sizeof(chests);
-  State_SetScriptFlag(0x3C6, 1);
+  VS::State::SetLiveScriptFlag(0x3C6, 1);
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   REQUIRE(state.chests.size() == 2);

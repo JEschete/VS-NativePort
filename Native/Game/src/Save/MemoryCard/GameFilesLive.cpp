@@ -15,15 +15,16 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/SoundBanksLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Field/MapLive.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
 #include "Save/SnapshotLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
@@ -32,8 +33,9 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
-#include "Menu/Files.h"
+#include "Menu/FilesLiveState.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
 #include "State/Ashley.h"
@@ -352,12 +354,14 @@ class LiveSaveState final : public SaveStateHost {
     State_playTime.all = play_time;
   }
   void CaptureSnapshot() override { VS::Save::CaptureLiveAshleySnapshot(); }
-  void SetMonoOutput(std::int32_t mono) override { Audio_SetMonoOutput(mono); }
+  void SetMonoOutput(std::int32_t mono) override {
+    VS::Audio::LiveSetMonoOutput(mono);
+  }
   std::uint8_t SaveLocation() override {
     return static_cast<std::uint8_t>(Menu_saveLocationId);
   }
   std::uint8_t MapCompletion() override {
-    return static_cast<std::uint8_t>(Field_MapCompletionPercent());
+    return static_cast<std::uint8_t>(VS::Field::LiveMapCompletionPercent());
   }
   bool KeepsContainerData() override {
     return (Menu_Framework_actionRestrictions & kKeepContainerRestriction) != 0;
@@ -449,6 +453,7 @@ class LiveIntroHost final : public IntroSnapshotHost {
 
 LiveCardHost live_card;
 CardReadinessState live_readiness;
+CardReadinessState live_title_readiness;
 SaveReadState live_read;
 SaveWriteState live_write;
 LiveIntroHost live_intro;
@@ -566,6 +571,11 @@ int CreateLiveSaveFile(int port, int file_number) {
 int AdvanceLiveCardReadiness(int begin_port) {
   return static_cast<int>(
       AdvanceCardReadiness(live_readiness, live_card, begin_port));
+}
+
+int AdvanceLiveTitleCardReadiness(int begin_port) {
+  return static_cast<int>(
+      AdvanceCardReadiness(live_title_readiness, live_card, begin_port));
 }
 
 int ValidateAndApplyLiveLoadedSave(int apply) {

@@ -99,21 +99,3 @@ typedef struct Effects_AnimatedLocalTransform {
 _Static_assert(sizeof(Effects_AnimatedLocalTransform) == 0x74, "Effects_AnimatedLocalTransform must keep its PS1 layout");
 
 #endif // VS_EFFECTS_TRANSFORMS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_TRANSFORMS_H_DECLS)
-#define VS_EFFECTS_TRANSFORMS_H_DECLS
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-
-void Effects_InitializeTransformStates(Effects_EffectInstance* effect_instance);
-void Effects_InterpolateTransformPosition(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
-void Effects_InterpolateTransformSpline(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
-void Effects_AdvanceTransformMotion(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
-void Effects_BuildTransformSplineControls(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
-void Effects_BuildCameraAttachment(Effects_EffectInstance* effect_instance, Effects_TransformMotionView* transform_motion, int offset_toward_camera);
-void Effects_BuildEffectOriginAttachment(MATRIX* attachment_matrix);
-void Effects_BuildAnimatedLocalTransform(Effects_TransformDefinition* transform_definition, SVECTOR* rotation_angles, Effects_AnimatedLocalTransform* local_transform);
-void Effects_ResolveTransformAttachment(Effects_EffectInstance* effect_instance, Effects_TransformMotionView* transform_motion);
-void Effects_UpdateEffectTransforms(Effects_EffectInstance* effect_instance);
-
-#endif // VS_EFFECTS_TRANSFORMS_H_DECLS

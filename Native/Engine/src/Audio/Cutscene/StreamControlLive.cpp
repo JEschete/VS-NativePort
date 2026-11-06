@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "Audio/SequencerOutput.h"
+#include "Audio/StreamBuffersLive.hpp"
 #include "Audio/StreamControl.hpp"
 #include "Audio/StreamPlayback.h"
 #include "Audio/VoiceOutputLive.hpp"
@@ -41,6 +42,7 @@ constexpr int kMaximumVolume = static_cast<int>(Cutscene::kMaximumStreamVolume);
 
 struct BoundStream {
   void* source = nullptr;
+  std::size_t byte_count = 0;
   VS::Content::AudioStreamInfo info;
   std::array<std::string, Cutscene::kStreamChannelCount> instruments;
 };
@@ -59,7 +61,8 @@ int g_fade_target = kMaximumVolume;
 // voice scheduler and the room stream slot of Audio_soundState.
 class LiveStreamHost final : public Cutscene::StreamHost {
  public:
-  explicit LiveStreamHost(void* data = nullptr) : data_(data) {}
+  explicit LiveStreamHost(void* data = nullptr, std::size_t byte_count = 0)
+      : data_(data), byte_count_(byte_count) {}
 
   [[nodiscard]] Cutscene::StreamVoices Voices() const override {
     const auto& state = Audio_Cutscene_streamState;
@@ -88,7 +91,7 @@ class LiveStreamHost final : public Cutscene::StreamHost {
   }
 
   std::optional<std::int32_t> FindFreeVoicePair() override {
-    const int voice = Audio_Cutscene_FindFreeVoicePair();
+    const int voice = Cutscene::LiveFindFreeVoicePair();
     if (voice < 0) return std::nullopt;
     return voice;
   }
@@ -184,7 +187,7 @@ class LiveStreamHost final : public Cutscene::StreamHost {
 
   void BindSlot(const VS::Content::AudioStreamInfo& info) override {
     const auto* store = VS::Content::DataStore::Get();
-    BoundStream binding{data_, info, {}};
+    BoundStream binding{data_, byte_count_, info, {}};
     for (std::size_t channel = 0; channel < binding.instruments.size();
          ++channel) {
       binding.instruments[channel] =
@@ -206,6 +209,7 @@ class LiveStreamHost final : public Cutscene::StreamHost {
 
  private:
   void* data_;
+  std::size_t byte_count_;
 };
 
 const char* StatusText(Cutscene::StreamStatus status) {
@@ -302,6 +306,11 @@ void SetLiveStreamPan(Audio_CommandParams* params) {
   Report("stream pan", SetStreamPan(host, CommandWord(params->param1)),
          params->param1, 0);
 }
+
+std::span<std::uint8_t> LiveBoundStreamBytes() {
+  if (!g_bound) return {};
+  return {static_cast<std::uint8_t*>(g_bound->source), g_bound->byte_count};
+}
 }  // namespace VS::Audio::Cutscene
 
 namespace VS::Audio {
@@ -310,7 +319,7 @@ int BindLiveRoomCutsceneStream(void* data, std::size_t byte_count) {
     VS_LOG_ERROR("audio", "stream binding requires data");
     return 0;
   }
-  LiveStreamHost host(data);
+  LiveStreamHost host(data, byte_count);
   const auto result = BindRoomCutsceneStream(
       host, {static_cast<const std::uint8_t*>(data), byte_count});
   switch (result.status) {

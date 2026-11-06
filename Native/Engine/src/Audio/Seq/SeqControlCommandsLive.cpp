@@ -11,6 +11,7 @@
 
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/VoiceOutput.hpp"
 
 extern "C" {
@@ -108,7 +109,7 @@ void StartEmbeddedSoundEffect(Audio_SeqChannel& channel,
   params.param2 = 0;
   params.param3 = effect.pan;
   params.param4 = effect.volume;
-  Audio_SoundEffects_PlayProgramPair(
+  SoundEffects::LivePlayProgramPair(
       &params, ProgramPointer(memory, effect.first_program),
       ProgramPointer(memory, effect.second_program), 0);
   const std::optional<LiveProgramMemory> rest = LiveChannelProgram(channel);

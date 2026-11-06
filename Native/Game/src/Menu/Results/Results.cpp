@@ -1,6 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/MusicLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Menu/Framework/Framework.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -10,11 +13,9 @@ extern "C" {
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
-#include "Audio/Music.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
@@ -299,7 +299,7 @@ int Menu_Results_InitializeScreen(void)
 
     case 3:
         Menu_Results_ApplyHealingScoreBonus();
-        Menu_Framework_NoOperation();
+        VS::Menu::Framework::NoOperation();
 
         ret = 1;
         break;
@@ -377,14 +377,14 @@ int Menu_Results_InitializeGameClear(void)
 
             ++Battle_unusedSubmenuState;
         }
-    } else if (Audio_PollMusicLoads() == 0) {
+    } else if (VS::Audio::LivePollMusicLoads() == 0) {
         int strength;
         int intelligence;
         int agility;
         int mapCompletion;
         u_int chestsOpened;
 
-        Audio_PlayMusicSlot(2, 0x7F, 0);
+        VS::Audio::LivePlayMusicSlot(2, 0x7F, 0);
         VS::Core::Memory::FreeLiveFromHighEnd(Menu_Results_initializeGameClearTimData);
 
         Menu_Results_onScreenMapCompletion = 0;
@@ -464,9 +464,9 @@ void Menu_Results_QueueResultsMusic(void)
 {
     if ((Audio_soundState.currentMusicId != 7)
         && (((Audio_soundState.currentMusicId - 31) < 9) || ((Audio_soundState.currentMusicId - 45) < 5))) {
-        Audio_LoadMusicSlot(Audio_soundState.currentMusicId + 100, 2);
+        VS::Audio::LiveLoadMusicSlot(Audio_soundState.currentMusicId + 100, 2);
     } else {
-        Audio_LoadMusicSlot(128, 2);
+        VS::Audio::LiveLoadMusicSlot(128, 2);
     }
 }
 
@@ -516,8 +516,8 @@ int Menu_Results_UpdateGameClear(void)
 
     if (Menu_Results_screenState != 3) {
         if (Menu_Results_screenTimer == 208) {
-            Audio_PlaySfxCentered(0x7E, 0x77);
-            Audio_PlaySfxCentered(0x7E, 0x78);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x77);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x78);
         }
 
         Menu_Results_DrawCongratulations(160, 40, Menu_Results_screenTimer);
@@ -533,8 +533,8 @@ int Menu_Results_UpdateGameClear(void)
         if ((Menu_Results_screenTimer - 272) > 0) {
 
             if (Menu_Results_elementAnimationState == 8) {
-                Audio_PlaySfxCentered(0x7E, 0x74);
-                Audio_PlaySfxCentered(0x7E, 0x75);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x74);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x75);
             }
 
             if (Menu_Results_elementAnimationState < 48) {
@@ -548,23 +548,23 @@ int Menu_Results_UpdateGameClear(void)
                 if ((Input_buttonsPressed.allButtons & PADRright) || Menu_Results_screenTimer > 2072) {
 
                     if (Input_buttonsPressed.allButtons & PADRright) {
-                        Audio_PlaySfxCentered(0x7E, 0x76);
+                        VS::Audio::LivePlaySfxCentered(0x7E, 0x76);
                     }
 
                     Menu_Results_screenState = 1;
                     Menu_Results_gameClearStateTimer = 0;
 
-                    Audio_FadeSfxVolume(0x7E, 0x74, 0x40, 0x30);
-                    Audio_FadeSfxVolume(0x7E, 0x75, 0x40, 0x30);
-                    Audio_FadeSfxPitch(0x7E, 0x74, -0x10, 0x30);
-                    Audio_FadeSfxPitch(0x7E, 0x75, -0x10, 0x30);
+                    VS::Audio::LiveFadeSfxVolume(0x7E, 0x74, 0x40, 0x30);
+                    VS::Audio::LiveFadeSfxVolume(0x7E, 0x75, 0x40, 0x30);
+                    VS::Audio::LiveFadeSfxPitch(0x7E, 0x74, -0x10, 0x30);
+                    VS::Audio::LiveFadeSfxPitch(0x7E, 0x75, -0x10, 0x30);
                 }
 
                 Menu_Results_DrawPressButtonPrompt(214, 187, 48, Menu_Results_screenTimer);
             }
         } else if (Input_buttonsPressed.allButtons & PADRright) {
 
-            Audio_StopSfx(0x7E, 0);
+            VS::Audio::LiveStopSfx(0x7E, 0);
 
             Menu_Results_screenTimer = 272;
             Menu_Results_incrementingScore = 0;
@@ -591,10 +591,10 @@ int Menu_Results_UpdateGameClear(void)
 
         if ((updated_reel_phase == 8) && (Menu_Results_elementAnimationState == updated_reel_phase)) {
 
-            Audio_StopSfx(0x7E, 0x74);
-            Audio_StopSfx(0x7E, 0x75);
-            Audio_PlaySfxCentered(0x7E, 0x77);
-            Audio_PlaySfxCentered(0x7E, 0x78);
+            VS::Audio::LiveStopSfx(0x7E, 0x74);
+            VS::Audio::LiveStopSfx(0x7E, 0x75);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x77);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x78);
 
             Menu_Results_screenState = 2;
             Menu_Results_gameClearStateTimer = 0;
@@ -639,7 +639,7 @@ int Menu_Results_UpdateGameClear(void)
             }
 
             VS::Render::RetireLiveTexturePageRange(0x1D, 3, 5);
-            Menu_Framework_NoOperation();
+            VS::Menu::Framework::NoOperation();
 
             return 1;
         }
@@ -754,15 +754,15 @@ void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribut
 
             Menu_Results_incrementingScore = 1;
 
-            Audio_PlaySfxCentered(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x72);
         }
 
         if ((Menu_Results_onScreenScore == Menu_Results_score) && (Menu_Results_incrementingScore != 0)) {
 
             Menu_Results_incrementingScore = 0;
 
-            Audio_StopSfx(0x7E, 0x72);
-            Audio_PlaySfxCentered(0x7E, 0x73);
+            VS::Audio::LiveStopSfx(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
         }
     }
 
@@ -873,15 +873,15 @@ void Menu_Results_DrawCountingMapCompletion(
         if (Menu_Results_onScreenMapCompletion == 0) {
             Menu_Results_incrementingMapCompletion = 1;
 
-            Audio_PlaySfxCentered(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x72);
         }
 
         if ((Menu_Results_onScreenMapCompletion == Menu_Results_mapCompletion)
             && (Menu_Results_incrementingMapCompletion != 0)) {
             Menu_Results_incrementingMapCompletion = 0;
 
-            Audio_StopSfx(0x7E, 0x72);
-            Audio_PlaySfxCentered(0x7E, 0x73);
+            VS::Audio::LiveStopSfx(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
         }
     }
 

@@ -14,7 +14,9 @@
 #include <span>
 #include <type_traits>
 
+#include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorTableLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
@@ -220,14 +222,14 @@ class LiveRoomModelPass final : public RoomModelPassHost {
     Actors_ActorRecord* actor = RoomActor(slot);
     if (actor == nullptr) return;
     if (actor->routePhase != 0) {
-      Actors_UpdateActorRoute(static_cast<int>(slot), actor);
+      UpdateLiveActorRoute(static_cast<int>(slot), actor);
       actor = RoomActor(slot);
       if (actor == nullptr) return;
     }
     if (State_tickSpeed == kSlowedTickSpeed) {
       actor->framesPerStep = static_cast<u_char>(actor->framesPerStep * 2);
     }
-    Actors_UpdateActorAnimationBlend(actor);
+    UpdateLiveActorAnimationBlend(actor);
     actor->framesPerStep = static_cast<u_char>(actor->fastAnimation + 1);
   }
 
@@ -267,7 +269,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   void UpdateMotionAndLookAt(std::size_t slot,
                              std::uint8_t companion) override {
     if (Actors_ActorRecord* actor = RoomActor(slot)) {
-      Actors_UpdateMotionAndLookAt(actor, companion);
+      UpdateLiveMotionAndLookAt(actor, companion);
     }
   }
 

@@ -1,327 +1,439 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+// Hand-maintained (tools/port/owned.csv).
+#include "Field/Environment.hpp"  // NOLINT(build/include): typed API
+
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <string_view>
+
+#include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Audio/Sfx.h"
-#include "Effects/Weather.h"
-#include "Field/Background.h"
-#include "Field/Doors.h"
-#include "Field/Environment.h"
-#include "Field/Gimmicks.h"
-#include "Field/Map.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Field/RoomRendering.h"
-#include "Field/Weather.h"
-#include "Field/Zone.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
-#include "Render/Render.h"
 
-// decomp: D_800F1D98 (D_800F1D98@BATTLE/BATTLE.PRG)
-short Field_weatherParameters[632];
+namespace VS::Field {
+namespace {
+namespace Math = Core::Math;
 
-// decomp: D_800F1DA4 (D_800F1DA4@BATTLE/BATTLE.PRG)
-short Field_weatherIntensityScale;
+constexpr std::string_view kChannel = "field.environment";
 
-// decomp: D_800F1DBC (D_800F1DBC@BATTLE/BATTLE.PRG)
-short Field_weatherAmbientSoundId;
+// func_80090C2C: one particle per four (embers: two) 128-unit cells of the
+// weather area, 4..128 of them.
+constexpr std::int32_t kWeatherCellUnits = 128;
+constexpr std::int32_t kCellsPerParticle = 4;
+constexpr std::int32_t kCellsPerEmber = 2;
+constexpr std::int32_t kMinParticles = 4;
+constexpr std::int32_t kMaxParticles = 128;
 
-// decomp: D_800F1DC0 (D_800F1DC0@BATTLE/BATTLE.PRG)
-short Field_weatherParticleCount;
+// func_80090EEC: the drift intervals' frame masks, the clock offsets that
+// keep the three drifts on different frames, and the 3-in-8 chance that a
+// drift turns back.
+constexpr std::array<std::int32_t, 4> kIntervalMasks = {0xF, 0x1F, 0x3F, 0x7F};
+constexpr std::int32_t kStrengthClockOffset = 30;
+constexpr std::int32_t kIntensityClockOffset = 60;
+constexpr std::int32_t kRandomEighthMask = 7;
+constexpr std::int32_t kTurnBackEighths = 3;
+constexpr std::int32_t kAngleMask = 0xFFF;
 
-// decomp: D_800F1DC2 (D_800F1DC2@BATTLE/BATTLE.PRG)
-short Field_weatherParticleCapacity;
+// func_8009121C: eight particles per intensity level, at least four; the
+// scale is 1.75 x (6 per level, 12..90).
+constexpr std::int32_t kParticlesPerLevel = 8;
+constexpr std::int32_t kMinActiveParticles = 4;
+constexpr std::int32_t kScalePerLevel = 6;
+constexpr std::int32_t kMinScale = 12;
+constexpr std::int32_t kMaxScale = 90;
+constexpr std::int32_t kSoundFadeTicks = 8;
+// func_800918E8: the ducked volume is a quarter.
+constexpr std::int32_t kDuckShift = 2;
 
-// decomp: D_800F1DC4 (D_800F1DC4@BATTLE/BATTLE.PRG)
-short Field_weatherIntensity;
+// func_8009147C: the picture is 1024 pixels around in 32-pixel cells and is
+// drawn while a cell's corner is within 64 pixels of the 320x240 screen.
+constexpr std::int32_t kFixedOne = 4096;
+constexpr std::int32_t kCellPixels = 32;
+constexpr std::int32_t kPictureWidth = 1024;
+constexpr std::int32_t kPictureWrapMask = kPictureWidth - 1;
+constexpr std::int32_t kPictureHalfWidth = kPictureWidth / 2;
+constexpr std::int32_t kScreenMargin = 64;
+constexpr std::int16_t kScreenWidth = 320;
+constexpr std::int16_t kScreenHeight = 240;
+constexpr std::int32_t kMarginRight = kScreenWidth + kScreenMargin;
+constexpr std::int32_t kMarginBottom = kScreenHeight + kScreenMargin;
+constexpr std::int32_t kVisibleLeft = -kScreenMargin * kFixedOne;
+constexpr std::int32_t kVisibleTop = -kScreenMargin * kFixedOne;
+constexpr std::int32_t kVisibleRight = kMarginRight * kFixedOne;
+constexpr std::int32_t kVisibleBottom = kMarginBottom * kFixedOne;
+constexpr std::uint16_t kTileClut = 0x3BB0;
+constexpr std::int32_t kSemiTransparencyShift = 7;
 
-// decomp: D_800F1DCA (D_800F1DCA@BATTLE/BATTLE.PRG)
-char Field_roomWeatherKind;
+[[nodiscard]] std::int16_t Half(std::int32_t value) {
+  return Math::WrapSigned16(static_cast<std::uint32_t>(value));
+}
 
-// decomp: D_800F1DCB (D_800F1DCB@BATTLE/BATTLE.PRG)
-char Field_isWeatherVariationEnabled;
+[[nodiscard]] std::int16_t ParticleCount(const WeatherArea& area,
+                                         std::int32_t cells_per_particle) {
+  const std::int32_t cells =
+      (area.extent_x / kWeatherCellUnits) * (area.extent_z / kWeatherCellUnits);
+  return Math::ClampSignedShort(Half(cells / cells_per_particle), kMinParticles,
+                                kMaxParticles);
+}
 
-// decomp: D_800F1DD4 (D_800F1DD4@BATTLE/BATTLE.PRG)
-Field_WeatherParticle* Field_weatherParticles;
+// The volume for an intensity; the original reads past its 16-entry table
+// for any other value, which is refused.
+[[nodiscard]] std::optional<std::int32_t> VolumeAt(std::int16_t intensity,
+                                                   std::string_view entry) {
+  if (intensity < 0 ||
+      static_cast<std::size_t>(intensity) >= kWeatherVolumeByIntensity.size()) {
+    VS_LOG_WARN(kChannel,
+                "{}: weather intensity {} is outside the volume table; the "
+                "ambient sound is left unchanged",
+                entry, intensity);
+    return std::nullopt;
+  }
+  return kWeatherVolumeByIntensity.at(static_cast<std::size_t>(intensity));
+}
 
-// decomp: D_80068EB4 (D_80068EB4@src/BATTLE/BATTLE.PRG/2842C.c)
-char const Field_kWeatherVolumeByIntensity[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x40, 0x5E,
-    0x67, 0x6E, 0x74, 0x79, 0x7C, 0x7E, 0x7F };
+// The frame mask for a drift interval; the original reads its stack past the
+// 4-entry table for any other value, which is refused.
+[[nodiscard]] std::optional<std::int32_t> IntervalMask(std::int16_t interval,
+                                                       std::string_view drift) {
+  if (interval < 0 ||
+      static_cast<std::size_t>(interval) >= kIntervalMasks.size()) {
+    VS_LOG_WARN(kChannel,
+                "UpdateRoomWeather: {} interval {} is outside the mask table; "
+                "the {} does not drift this frame",
+                drift, interval, drift);
+    return std::nullopt;
+  }
+  return kIntervalMasks.at(static_cast<std::size_t>(interval));
+}
+
+// Whether the drift on `clock`'s frame is due, and if so, whether the step
+// turns back first.
+[[nodiscard]] bool DriftDue(std::int32_t clock, std::int16_t interval,
+                            std::string_view drift) {
+  const std::optional<std::int32_t> mask = IntervalMask(interval, drift);
+  return mask && (clock & *mask) == 0;
+}
+
+void MaybeTurnBack(WeatherHost& host, std::int16_t& step) {
+  if ((host.Random() & kRandomEighthMask) < kTurnBackEighths) {
+    step = Half(Math::WrappingNegate(step));
+  }
+}
+
+[[nodiscard]] std::int16_t ScreenAxis(std::int32_t value) {
+  return Half(value / kFixedOne);
+}
+
+[[nodiscard]] PrimitiveColor ColorOf(const TileCorner& corner) {
+  return {.red = corner.red, .green = corner.green, .blue = corner.blue};
+}
+
+[[nodiscard]] std::array<PrimitiveColor, kQuadCorners> ColorsOf(
+    const std::array<TileCorner, kQuadCorners>& corners) {
+  std::array<PrimitiveColor, kQuadCorners> colors{};
+  std::ranges::transform(corners, colors.begin(), ColorOf);
+  return colors;
+}
+
+[[nodiscard]] std::uint8_t Texel(std::int32_t value) {
+  return static_cast<std::uint8_t>(value);
+}
+
+// The layout's cells must cover every row drawn; the original indexes past
+// them otherwise, and divides by a zero width.
+[[nodiscard]] bool CellsCoverRows(const BackgroundLayout& layout,
+                                  std::int32_t row_end) {
+  if (row_end <= 0) return true;
+  if (layout.width <= 0) return false;
+  const std::uint64_t rows =
+      (static_cast<std::uint64_t>(row_end) + kCellPixels - 1) / kCellPixels;
+  return rows * static_cast<std::uint64_t>(layout.width) <= layout.tiles.size();
+}
+
+[[nodiscard]] TexturedQuad TileQuad(const BackgroundTile& tile,
+                                    std::int32_t screen_x,
+                                    std::int32_t screen_y,
+                                    std::int32_t cosine_step,
+                                    std::int32_t sine_step,
+                                    std::uint16_t base_texture_page) {
+  const std::int32_t right_x = Math::WrappingAdd(screen_x, cosine_step);
+  const std::int32_t right_y = Math::WrappingAdd(screen_y, sine_step);
+  const TextureRect& texture = tile.texture;
+  const std::int32_t far_u = texture.x + texture.width;
+  const std::int32_t far_v = texture.y + texture.height;
+  const auto& corners = tile.corners;
+  return {
+      .corners = {{{.x = ScreenAxis(screen_x), .y = ScreenAxis(screen_y)},
+                   {.x = ScreenAxis(right_x), .y = ScreenAxis(right_y)},
+                   {.x =
+                        ScreenAxis(Math::WrappingSubtract(screen_x, sine_step)),
+                    .y = ScreenAxis(Math::WrappingAdd(screen_y, cosine_step))},
+                   {.x = ScreenAxis(Math::WrappingSubtract(right_x, sine_step)),
+                    .y = ScreenAxis(Math::WrappingAdd(right_y, cosine_step))}}},
+      .texels = {{{.u = Texel(texture.x), .v = Texel(texture.y)},
+                  {.u = Texel(far_u), .v = Texel(texture.y)},
+                  {.u = Texel(texture.x), .v = Texel(far_v)},
+                  {.u = Texel(far_u), .v = Texel(far_v)}}},
+      .colors = ColorsOf(corners),
+      .texture_page = static_cast<std::uint16_t>(
+          base_texture_page | (corners[1].code << kSemiTransparencyShift)),
+      .clut = kTileClut};
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_80090C2C (src/BATTLE/BATTLE.PRG/2842C.c:266)
-void Field_SetRoomWeather(int weather_kind)
-{
-    Field_MpdEnvironment* room = Field_roomData.environment;
-
-    if (room != NULL) {
-        int sound = -2;
-
-        Field_weatherParameters[7] = 1;
-        Field_weatherParameters[9] = 1;
-        Field_weatherParameters[8] = 1;
-        Field_weatherParameters[4] = room->windStrength;
-        Field_weatherParameters[5] = room->windDirection;
-        Field_roomWeatherKind = weather_kind;
-        Field_weatherIntensity = room->weatherIntensity;
-        Field_ApplyWeatherIntensity();
-        Effects_RecalculateWeatherVelocity();
-
-        switch (weather_kind) {
-        case 0:
-            break;
-        case 1:
-            Effects_InitializeFallingWeatherParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
-                                              * (room->weatherArea[1].halves[1] / 128) / 4,
-                              4, 128),
-                weather_kind);
-            sound = 21;
-            break;
-        case 2:
-            Effects_InitializeFallingWeatherParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
-                                              * (room->weatherArea[1].halves[1] / 128) / 4,
-                              4, 128),
-                weather_kind);
-            break;
-        case 3:
-            Effects_InitializeScreenWeatherParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
-                                              * (room->weatherArea[1].halves[1] / 128) / 4,
-                              4, 128),
-                weather_kind);
-            break;
-        case 4:
-            Effects_InitializeRisingEmberParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
-                                              * (room->weatherArea[1].halves[1] / 128) / 2,
-                              4, 128),
-                weather_kind);
-            break;
-        }
-
-        if (Field_weatherAmbientSoundId != -1) {
-            if ((Field_weatherAmbientSoundId >= 0) && (Field_weatherAmbientSoundId != sound)) {
-                Audio_StopSfx(0x200, Field_weatherAmbientSoundId);
-            }
-            if (sound >= 0) {
-                Audio_PlaySfxCentered(0x200, sound);
-            }
-
-            Field_weatherAmbientSoundId = sound;
-        }
-    } else if (Field_weatherAmbientSoundId >= 0) {
-        Audio_StopSfx(0x200, Field_weatherAmbientSoundId);
-        Field_weatherAmbientSoundId = -2;
+void SetRoomWeather(WeatherHost& host, RoomWeatherState& state,
+                    std::int32_t kind) {
+  const std::optional<RoomEnvironment> environment = host.Environment();
+  if (!environment) {
+    if (state.ambient_sound_id >= 0) {
+      host.StopSound(state.ambient_sound_id);
+      state.ambient_sound_id = kNoAmbientSound;
     }
+    return;
+  }
+
+  std::int32_t sound = kNoAmbientSound;
+  state.direction_step = 1;
+  state.strength_step = 1;
+  state.intensity_step = 1;
+  state.wind_strength = environment->wind_strength;
+  state.wind_direction = environment->wind_direction;
+  state.kind = static_cast<std::uint8_t>(kind);
+  state.intensity = environment->weather_intensity;
+  ApplyWeatherIntensity(host, state);
+  host.RecalculateWeatherVelocity();
+
+  const WeatherArea& area = environment->weather_area;
+  switch (kind) {
+    case kRainWeather:
+      host.InitializeFallingParticles(ParticleCount(area, kCellsPerParticle),
+                                      kind);
+      sound = kRainAmbientSound;
+      break;
+    case kSnowWeather:
+      host.InitializeFallingParticles(ParticleCount(area, kCellsPerParticle),
+                                      kind);
+      break;
+    case kScreenWeather:
+      host.InitializeScreenParticles(ParticleCount(area, kCellsPerParticle),
+                                     kind);
+      break;
+    case kEmberWeather:
+      host.InitializeRisingEmberParticles(ParticleCount(area, kCellsPerEmber),
+                                          kind);
+      break;
+    default:
+      break;
+  }
+
+  if (state.ambient_sound_id != kAmbientSoundHeld) {
+    if (state.ambient_sound_id >= 0 && state.ambient_sound_id != sound) {
+      host.StopSound(state.ambient_sound_id);
+    }
+    if (sound >= 0) host.PlaySoundCentered(sound);
+    state.ambient_sound_id = Half(sound);
+  }
 }
 
 // decomp: BATTLE.PRG func_80090EEC (src/BATTLE/BATTLE.PRG/2842C.c:329)
-void Field_UpdateRoomWeather(void)
-{
-    int masks[] = { 0xF, 0x1F, 0x3F, 0x7F };
-    Field_MpdEnvironment* room = Field_roomData.environment;
+void UpdateRoomWeather(WeatherHost& host, RoomWeatherState& state) {
+  const std::optional<RoomEnvironment> environment = host.Environment();
+  if (!environment || state.kind == kNoWeather) return;
 
-    if ((room == NULL) || (Field_roomWeatherKind == 0)) {
-        return;
+  if (!host.AreRoomUpdatesPaused() && state.variation_enabled != 0) {
+    const std::int32_t ticks = host.RoomAnimationTicks();
+    bool changed = false;
+    if (DriftDue(ticks, environment->wind_direction_interval,
+                 "wind direction")) {
+      MaybeTurnBack(host, state.direction_step);
+      const std::int32_t direction =
+          (state.wind_direction + state.direction_step) & kAngleMask;
+      state.wind_direction =
+          Math::ClampSignedShort(Half(direction), environment->wind_direction,
+                                 environment->wind_direction_limit);
+      changed = true;
     }
-
-    if ((Field_areRoomUpdatesPaused == 0) && (Field_isWeatherVariationEnabled != 0)) {
-        int changed = 0;
-
-        if ((Field_roomAnimationTicks & masks[room->windDirectionInterval]) == 0) {
-            if ((Core_Random_Rand() & 7) < 3) {
-                Field_weatherParameters[7] *= -1;
-            }
-
-            Field_weatherParameters[5] += Field_weatherParameters[7];
-            Field_weatherParameters[5] &= 0xFFF;
-            Field_weatherParameters[5] = VS::Core::Math::ClampSignedShort(Field_weatherParameters[5], room->windDirection, room->windDirectionLimit);
-            changed = 1;
-        }
-        if (((Field_roomAnimationTicks + 30) & masks[room->windStrengthInterval]) == 0) {
-            if ((Core_Random_Rand() & 7) < 3) {
-                Field_weatherParameters[9] *= -1;
-            }
-
-            Field_weatherParameters[4] += Field_weatherParameters[9];
-            Field_weatherParameters[4] = VS::Core::Math::ClampSignedShort(Field_weatherParameters[4], room->windStrength, room->windStrengthLimit);
-            changed = 1;
-        }
-        if (((Field_roomAnimationTicks + 60) & masks[room->weatherIntensityInterval]) == 0) {
-            if ((Core_Random_Rand() & 7) < 3) {
-                Field_weatherParameters[8] *= -1;
-            }
-
-            Field_weatherIntensity += Field_weatherParameters[8];
-            Field_weatherIntensity = VS::Core::Math::ClampSignedShort(Field_weatherIntensity, room->weatherIntensity, room->weatherIntensityLimit);
-            Field_ApplyWeatherIntensity();
-            changed = 1;
-        }
-        if (changed != 0) {
-            Effects_RecalculateWeatherVelocity();
-        }
+    if (DriftDue(ticks + kStrengthClockOffset,
+                 environment->wind_strength_interval, "wind strength")) {
+      MaybeTurnBack(host, state.strength_step);
+      state.wind_strength = Math::ClampSignedShort(
+          Half(state.wind_strength + state.strength_step),
+          environment->wind_strength, environment->wind_strength_limit);
+      changed = true;
     }
-    switch (Field_roomWeatherKind) {
-    case 1:
-        Effects_DrawRainParticles();
-        break;
-    case 2:
-        Effects_DrawSnowParticles();
-        break;
-    case 3:
-        Effects_DrawScreenWeatherParticles();
-        break;
-    case 4:
-        Effects_DrawRisingEmberParticles();
-        break;
+    if (DriftDue(ticks + kIntensityClockOffset,
+                 environment->weather_intensity_interval, "intensity")) {
+      MaybeTurnBack(host, state.intensity_step);
+      state.intensity = Math::ClampSignedShort(
+          Half(state.intensity + state.intensity_step),
+          environment->weather_intensity, environment->weather_intensity_limit);
+      ApplyWeatherIntensity(host, state);
+      changed = true;
     }
+    if (changed) host.RecalculateWeatherVelocity();
+  }
+
+  switch (state.kind) {
+    case kRainWeather:
+      host.DrawRainParticles();
+      break;
+    case kSnowWeather:
+      host.DrawSnowParticles();
+      break;
+    case kScreenWeather:
+      host.DrawScreenWeatherParticles();
+      break;
+    case kEmberWeather:
+      host.DrawRisingEmberParticles();
+      break;
+    default:
+      break;
+  }
 }
 
 // decomp: BATTLE.PRG func_8009121C (src/BATTLE/BATTLE.PRG/2842C.c:411)
-void Field_ApplyWeatherIntensity(void)
-{
-    short scale;
-
-    Field_weatherParticleCount = VS::Core::Math::ClampSignedShort(Field_weatherIntensity * 8, 4, Field_weatherParticleCapacity);
-    if (Field_weatherAmbientSoundId >= 0) {
-        if (Field_kWeatherVolumeByIntensity[Field_weatherIntensity] != 0) {
-            Audio_PlaySfxCentered(0x200, Field_weatherAmbientSoundId);
-            Audio_FadeSfxVolume(0x200, Field_weatherAmbientSoundId, Field_kWeatherVolumeByIntensity[Field_weatherIntensity], 8);
-        } else {
-            Audio_StopSfx(0x200, Field_weatherAmbientSoundId);
-        }
+void ApplyWeatherIntensity(WeatherHost& host, RoomWeatherState& state) {
+  state.particle_count =
+      Math::ClampSignedShort(Half(state.intensity * kParticlesPerLevel),
+                             kMinActiveParticles, state.particle_capacity);
+  if (state.ambient_sound_id >= 0) {
+    if (const std::optional<std::int32_t> volume =
+            VolumeAt(state.intensity, "ApplyWeatherIntensity")) {
+      if (*volume != 0) {
+        host.PlaySoundCentered(state.ambient_sound_id);
+        host.FadeSoundVolume(state.ambient_sound_id, *volume, kSoundFadeTicks);
+      } else {
+        host.StopSound(state.ambient_sound_id);
+      }
     }
-    scale = VS::Core::Math::ClampSignedShort((Field_weatherIntensity * 4) + (Field_weatherIntensity * 2), 12, 90);
-    Field_weatherIntensityScale = scale + (scale >> 1) + (scale >> 2);
+  }
+  const std::int16_t scale = Math::ClampSignedShort(
+      Half(state.intensity * kScalePerLevel), kMinScale, kMaxScale);
+  state.intensity_scale = Half(scale + (scale >> 1) + (scale >> 2));
 }
 
 // decomp: BATTLE.PRG func_80091314 (src/BATTLE/BATTLE.PRG/2842C.c:428)
-void Field_SetWeatherVariationEnabled(int enabled) { Field_isWeatherVariationEnabled = enabled; }
+void SetWeatherVariationEnabled(RoomWeatherState& state, std::int32_t enabled) {
+  state.variation_enabled = static_cast<std::uint8_t>(enabled);
+}
 
 // decomp: BATTLE.PRG func_80091320 (src/BATTLE/BATTLE.PRG/2842C.c:430)
-void Field_SetWeatherIntensity(int intensity)
-{
-    Field_weatherIntensity = intensity;
-    Field_ApplyWeatherIntensity();
-    Effects_RecalculateWeatherVelocity();
+void SetWeatherIntensity(WeatherHost& host, RoomWeatherState& state,
+                         std::int32_t intensity) {
+  state.intensity = Half(intensity);
+  ApplyWeatherIntensity(host, state);
+  host.RecalculateWeatherVelocity();
 }
 
 // decomp: BATTLE.PRG func_8009134C (src/BATTLE/BATTLE.PRG/2842C.c:437)
-void Field_SetWeatherWindAngles(int wind_azimuth_angle, int wind_elevation_angle)
-{
-    Field_weatherParameters[5] = wind_azimuth_angle;
-    Field_weatherParameters[4] = wind_elevation_angle;
-    Effects_RecalculateWeatherVelocity();
+void SetWeatherWindAngles(WeatherHost& host, RoomWeatherState& state,
+                          std::int32_t azimuth, std::int32_t elevation) {
+  state.wind_direction = Half(azimuth);
+  state.wind_strength = Half(elevation);
+  host.RecalculateWeatherVelocity();
 }
 
 // decomp: BATTLE.PRG func_80091378 (src/BATTLE/BATTLE.PRG/2842C.c:444)
-void Field_ReleaseWeatherParticles(void)
-{
-    Field_weatherParticleCount = 0;
-    Field_weatherParticleCapacity = 0;
-    if ((*(void* (*))&Field_weatherParticles) != NULL) {
-        VS::Core::Memory::FreeLiveFromLowEnd((*(void* (*))&Field_weatherParticles));
-    }
-    (*(void* (*))&Field_weatherParticles) = NULL;
+void ReleaseWeatherParticles(WeatherHost& host, RoomWeatherState& state) {
+  state.particle_count = 0;
+  state.particle_capacity = 0;
+  if (state.particles != WeatherParticlesId::kNone) {
+    host.FreeWeatherParticles(state.particles);
+  }
+  state.particles = WeatherParticlesId::kNone;
 }
 
 // decomp: BATTLE.PRG func_800913BC (src/BATTLE/BATTLE.PRG/2842C.c:454)
-int Field_SetWeatherAmbientSound(int sound_id)
-{
-    int previous_sound_id;
-
-    previous_sound_id = Field_weatherAmbientSoundId;
-    Field_weatherAmbientSoundId = sound_id;
-
-    if (sound_id >= 0) {
-        if (Field_kWeatherVolumeByIntensity[Field_weatherIntensity] != 0) {
-            Audio_PlaySfxCentered(0x200, (short)sound_id);
-            Audio_FadeSfxVolume(0x200, Field_weatherAmbientSoundId, Field_kWeatherVolumeByIntensity[Field_weatherIntensity], 8);
-        } else {
-            Audio_StopSfx(0x200, (short)sound_id);
-        }
+std::int32_t SetWeatherAmbientSound(WeatherHost& host, RoomWeatherState& state,
+                                    std::int32_t sound) {
+  const std::int32_t previous = state.ambient_sound_id;
+  state.ambient_sound_id = Half(sound);
+  if (sound >= 0) {
+    if (const std::optional<std::int32_t> volume =
+            VolumeAt(state.intensity, "SetWeatherAmbientSound")) {
+      if (*volume != 0) {
+        host.PlaySoundCentered(Half(sound));
+        host.FadeSoundVolume(state.ambient_sound_id, *volume, kSoundFadeTicks);
+      } else {
+        host.StopSound(Half(sound));
+      }
     }
-    return previous_sound_id;
+  }
+  return previous;
 }
 
 // decomp: BATTLE.PRG func_80091468 (src/BATTLE/BATTLE.PRG/2842C.c:472)
-void Field_SetRoomBackgroundOffset(int offset_x, int offset_y)
-{
-    Field_backgroundOffsetX = offset_x;
-    Field_backgroundOffsetY = offset_y;
+void SetRoomBackgroundOffset(RoomBackgroundState& state, std::int32_t offset_x,
+                             std::int32_t offset_y) {
+  state.offset_x = Half(offset_x);
+  state.offset_y = Half(offset_y);
 }
 
 // decomp: BATTLE.PRG func_8009147C (src/BATTLE/BATTLE.PRG/2842C.c:478)
-void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* background_layout, int horizontal_offset, int vertical_offset, int base_texture_page)
-{
-    void* buffer = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;
-    Field_BackgroundTile* tiles = background_layout->tiles;
-    int cosStep = VS::Core::Math::Cosine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
-    int sinStep = VS::Core::Math::Sine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
-    int row;
-    int col;
-    TILE* background;
+void DrawRoomBackgroundTiles(BackgroundHost& host,
+                             const BackgroundLayout& layout,
+                             std::int32_t horizontal_offset,
+                             std::int32_t vertical_offset,
+                             std::uint16_t base_texture_page) {
+  const ViewCamera camera = host.FrameCamera();
+  const std::int32_t cosine = Math::Cosine(camera.angles.z);
+  const std::int32_t sine = Math::Sine(camera.angles.z);
+  const std::int32_t cosine_step = cosine * kCellPixels;
+  const std::int32_t sine_step = sine * kCellPixels;
+  const std::int32_t row_end =
+      Math::WrappingMultiply(layout.height, kCellPixels);
 
-    for (row = 0; row < background_layout->height * 32; row += 32) {
-        int y = row - vertical_offset;
-        POLY_GT4* prim = (POLY_GT4 *)(buffer);
-
-        for (col = 0; col < 1024; col += 32) {
-            int x = ((col + horizontal_offset) & 1023) - 512;
-            int screenX = VS::Core::Math::Cosine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
-                        - VS::Core::Math::Sine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * y;
-            int screenY = VS::Core::Math::Sine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
-                        + VS::Core::Math::Cosine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * y;
-            Field_BackgroundTile* tile;
-
-            if ((screenX < -64 * ONE) || (screenX > 384 * ONE) || (screenY < -64 * ONE)
-                || (screenY > 304 * ONE)) {
-                continue;
-            }
-
-            tile = &tiles[(row / 32) * background_layout->width + (col / 32) % background_layout->width];
-
-            if ((tile->textureRect.w == 0) && (tile->textureRect.h == 0)) {
-                continue;
-            }
-
-            setPolyGT4(prim);
-            setXY4(prim, screenX / ONE, screenY / ONE, (screenX + cosStep) / ONE,
-                (screenY + sinStep) / ONE, (screenX - sinStep) / ONE,
-                (screenY + cosStep) / ONE, (screenX + cosStep - sinStep) / ONE,
-                (screenY + sinStep + cosStep) / ONE);
-            setRGB0(prim, tile->cornerColors[0].r, tile->cornerColors[0].g, tile->cornerColors[0].b);
-            setRGB1(prim, tile->cornerColors[1].r, tile->cornerColors[1].g, tile->cornerColors[1].b);
-            setRGB2(prim, tile->cornerColors[2].r, tile->cornerColors[2].g, tile->cornerColors[2].b);
-            setRGB3(prim, tile->cornerColors[3].r, tile->cornerColors[3].g, tile->cornerColors[3].b);
-            setUV4(prim, tile->textureRect.x, tile->textureRect.y, tile->textureRect.x + tile->textureRect.w, tile->textureRect.y,
-                tile->textureRect.x, tile->textureRect.y + tile->textureRect.h, tile->textureRect.x + tile->textureRect.w,
-                tile->textureRect.y + tile->textureRect.h);
-            prim->tpage = base_texture_page | (tile->cornerColors[1].cd << 7);
-            prim->clut = getClut(768, 238);
-            buffer = (u_char*)(buffer) + (sizeof(POLY_GT4));
-            AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) + 0x1FFC, prim++);
+  if (!CellsCoverRows(layout, row_end)) {
+    VS_LOG_WARN(kChannel,
+                "DrawRoomBackgroundTiles: a {}x{} layout has {} cells; only "
+                "the backdrop fill is drawn",
+                layout.width, layout.height, layout.tiles.size());
+  } else {
+    for (std::int32_t row = 0; row < row_end; row += kCellPixels) {
+      const std::int32_t y = Math::WrappingSubtract(row, vertical_offset);
+      const auto row_start = static_cast<std::size_t>(row / kCellPixels) *
+                             static_cast<std::size_t>(layout.width);
+      for (std::int32_t column = 0; column < kPictureWidth;
+           column += kCellPixels) {
+        const std::int32_t x =
+            (Math::WrappingAdd(column, horizontal_offset) & kPictureWrapMask) -
+            kPictureHalfWidth;
+        const std::int32_t screen_x = Math::WrappingSubtract(
+            Math::WrappingMultiply(cosine, x), Math::WrappingMultiply(sine, y));
+        const std::int32_t screen_y = Math::WrappingAdd(
+            Math::WrappingMultiply(sine, x), Math::WrappingMultiply(cosine, y));
+        if (screen_x < kVisibleLeft || screen_x > kVisibleRight ||
+            screen_y < kVisibleTop || screen_y > kVisibleBottom) {
+          continue;
         }
+        const std::size_t cell =
+            row_start +
+            static_cast<std::size_t>((column / kCellPixels) % layout.width);
+        const BackgroundTile& tile = layout.tiles[cell];
+        if (tile.texture.width == 0 && tile.texture.height == 0) continue;
+        host.AddShadedTexturedQuad(TileQuad(tile, screen_x, screen_y,
+                                            cosine_step, sine_step,
+                                            base_texture_page));
+      }
     }
-
-    background = (TILE *)(buffer);
-    setTile(background);
-    setRGB0(background, 0, 0, 0);
-    setXY0(background, 0, 0);
-    setWH(background, 320, 240);
-    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) + 0x1FFC, background);
-    ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = background + 1;
+  }
+  host.AddFill({.color = {},
+                .position = {.x = 0, .y = 0},
+                .width = kScreenWidth,
+                .height = kScreenHeight});
 }
 
 // decomp: BATTLE.PRG func_800918E8 (src/BATTLE/BATTLE.PRG/2842C.c:539)
-void Field_DuckWeatherAmbientSound(int duck_enabled)
-{
-    if (Field_weatherAmbientSoundId >= 0) {
-        if (duck_enabled != 0) {
-            Audio_FadeSfxVolume(0x200, Field_weatherAmbientSoundId, Field_kWeatherVolumeByIntensity[Field_weatherIntensity] >> 2, 8);
-        } else {
-            Audio_FadeSfxVolume(0x200, Field_weatherAmbientSoundId, Field_kWeatherVolumeByIntensity[Field_weatherIntensity], 8);
-        }
-    }
+void DuckWeatherAmbientSound(WeatherHost& host, const RoomWeatherState& state,
+                             std::int32_t ducked) {
+  if (state.ambient_sound_id < 0) return;
+  const std::optional<std::int32_t> volume =
+      VolumeAt(state.intensity, "DuckWeatherAmbientSound");
+  if (!volume) return;
+  host.FadeSoundVolume(state.ambient_sound_id,
+                       ducked != 0 ? (*volume >> kDuckShift) : *volume,
+                       kSoundFadeTicks);
 }
-
-}  // extern "C"
+}  // namespace VS::Field

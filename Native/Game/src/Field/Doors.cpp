@@ -1,16 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/RoomEffectsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
-#include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomEffects.h"
 #include "Field/Zone.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
@@ -153,23 +153,23 @@ void Field_ToggleDoorCollision(Field_MpdLockTrigger* door_trigger)
 {
     Field_MpdTileCell* collision_cell;
 
-    collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
+    collision_cell = VS::Field::LiveCollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
     if (collision_cell != NULL) {
         collision_cell->doorPassability ^= 5;
     }
     collision_cell = NULL;
     switch (door_trigger->trigger.kind - 4) {
     case 0:
-        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ - 1, door_trigger->trigger.floorLayer);
+        collision_cell = VS::Field::LiveCollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ - 1, door_trigger->trigger.floorLayer);
         break;
     case 1:
-        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX + 1, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
+        collision_cell = VS::Field::LiveCollisionCellAt(door_trigger->trigger.tileX + 1, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
         break;
     case 2:
-        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ + 1, door_trigger->trigger.floorLayer);
+        collision_cell = VS::Field::LiveCollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ + 1, door_trigger->trigger.floorLayer);
         break;
     case 3:
-        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX - 1, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
+        collision_cell = VS::Field::LiveCollisionCellAt(door_trigger->trigger.tileX - 1, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
         break;
     }
     if ((door_trigger->trigger.kind >= 4) && (collision_cell != NULL)) {
@@ -203,20 +203,20 @@ int Field_StartDoorAnimation(Field_MpdLockTrigger* door_trigger)
     Field_MpdLockTrigger* lock_trigger_table;
 
     if (door_trigger->isOpen == 0) {
-        Audio_PlaySfxCentered(0x7E, 0x1D);
-        Audio_PlaySfxCentered(0x7E, 0x1E);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x1D);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x1E);
     } else {
-        Audio_PlaySfxCentered(0x7E, 0x16);
-        Audio_PlaySfxCentered(0x7E, 0x17);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x16);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x17);
     }
-    Field_StartRoomEffect(door_trigger->trigger.lockState.lock.roomEffect);
+    VS::Field::LiveStartRoomEffect(door_trigger->trigger.lockState.lock.roomEffect);
     if (door_trigger->isOpen != 0) {
         Field_ToggleDoorCollision(door_trigger);
     }
     if (door_trigger->linkedLockIndex != -1) {
         lock_trigger_table = Field_roomData.lockTriggers;
         if (lock_trigger_table[door_trigger->linkedLockIndex].trigger.activation != 0) {
-            Field_StartRoomEffect(lock_trigger_table[door_trigger->linkedLockIndex].trigger.lockState.lock.roomEffect);
+            VS::Field::LiveStartRoomEffect(lock_trigger_table[door_trigger->linkedLockIndex].trigger.lockState.lock.roomEffect);
             if (lock_trigger_table[door_trigger->linkedLockIndex].isOpen != 0) {
                 Field_ToggleDoorCollision(&lock_trigger_table[door_trigger->linkedLockIndex]);
             }
@@ -230,7 +230,7 @@ int Field_StartDoorAnimation(Field_MpdLockTrigger* door_trigger)
 // decomp: BATTLE.PRG func_8008C1C8 (src/BATTLE/BATTLE.PRG/146C.c:16389)
 int Field_FinishDoorAnimation(Field_MpdLockTrigger* door_trigger)
 {
-    if (Field_IsRoomEffectActive(door_trigger->trigger.lockState.lock.roomEffect) != 0) {
+    if (VS::Field::LiveIsRoomEffectActive(door_trigger->trigger.lockState.lock.roomEffect) != 0) {
         return 0;
     }
     if (door_trigger->isOpen == 0) {

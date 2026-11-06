@@ -10,7 +10,7 @@
 #define VS_EFFECTS_PLUGINS_PLG061_H_DECLS
 
 extern SVECTOR Effects_Plg061_surfaceVertices[5][16];
-extern u_char Effects_Plg061_ringColorFactors[][4];
-extern CVECTOR Effects_Plg061_closedRingColorFactors[];
+extern u_char Effects_Plg061_ringColorFactors[8][4];
+extern CVECTOR Effects_Plg061_closedRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG061_H_DECLS

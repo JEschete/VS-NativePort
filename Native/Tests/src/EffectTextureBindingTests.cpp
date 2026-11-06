@@ -12,13 +12,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.h"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/TextureBindings.hpp"
+#include "Effects/TransformsLive.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 
 extern "C" {
-#include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -281,31 +282,55 @@ TEST_CASE("Effect origin is the canonical primary request focus position",
   Effects_actionRequest = saved;
 }
 
-TEST_CASE(
-    "Authored Gravity origin attachment projects the actual request target",
-    "[effects][gravity-placement][placement-red]") {
-  TextureBindingFixture fixture;
-  const auto saved_request = Effects_actionRequest;
-  const auto saved_view = Render_frameScratch.viewMatrix;
+namespace {
+// One transform attached to the request origin (actor 0x12) at unit scale:
+// block 9 (padded to a word) and block 10, then the terminator.
+std::vector<std::byte> GravityOriginPackage() {
   Effects_PackageBlock9 parameters{};
   parameters.transformCount = 1;
   Effects_TransformDefinition definition{};
   definition.flags = 7;
   definition.attachActor = 0x12;
   for (auto& value : definition.scaleRange) value = 4096;
-  Effects_actionPackage.block9Data = &parameters;
-  Effects_actionPackage.block10Data = &definition;
+  constexpr std::size_t kParametersBlock = 4 + 0x1C;
+  constexpr std::size_t kDefinitionsBlock = 4 + sizeof definition;
+  static_assert(sizeof parameters <= kParametersBlock - 4);
+  std::vector<std::byte> package(kParametersBlock + kDefinitionsBlock + 4);
+  const auto put_word = [&package](std::size_t at, std::uint32_t word) {
+    std::memcpy(package.data() + at, &word, sizeof word);
+  };
+  put_word(0, static_cast<std::uint32_t>(kParametersBlock) | (9U << 16));
+  std::memcpy(package.data() + 4, &parameters, sizeof parameters);
+  put_word(kParametersBlock,
+           static_cast<std::uint32_t>(kDefinitionsBlock) | (0xAU << 16));
+  std::memcpy(package.data() + kParametersBlock + 4, &definition,
+              sizeof definition);
+  return package;
+}
+
+// An identity rotation with the given translation.
+void SetTranslatedViewMatrix(const std::array<std::int32_t, 3>& translation) {
+  Render_frameScratch.viewMatrix = {};
+  for (std::size_t axis = 0; axis < translation.size(); ++axis) {
+    Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+    Render_frameScratch.viewMatrix.t[axis] = translation[axis];
+  }
+}
+}  // namespace
+
+TEST_CASE(
+    "Authored Gravity origin attachment projects the actual request target",
+    "[effects][gravity-placement][placement-red]") {
+  TextureBindingFixture fixture;
+  const auto saved_request = Effects_actionRequest;
+  const auto saved_view = Render_frameScratch.viewMatrix;
+  auto package = GravityOriginPackage();
+  REQUIRE(VS::Effects::BindLiveEffectPackage(package));
   Effects_EffectInstance instance{};
   Effects_actionRequest.position = {1200, -384, 900, 0};
-  Render_frameScratch.viewMatrix = {};
-  for (int axis = 0; axis < 3; ++axis) {
-    Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
-  }
-  Render_frameScratch.viewMatrix.t[0] = -100;
-  Render_frameScratch.viewMatrix.t[1] = 200;
-  Render_frameScratch.viewMatrix.t[2] = 600;
-  Effects_InitializeTransformStates(&instance);
-  Effects_UpdateEffectTransforms(&instance);
+  SetTranslatedViewMatrix({-100, 200, 600});
+  VS::Effects::LiveInitializeTransformStates(&instance);
+  VS::Effects::LiveUpdateEffectTransforms(&instance);
   CHECK(instance.transforms[0].world.t[0] == 1200);
   CHECK(instance.transforms[0].world.t[1] == -384);
   CHECK(instance.transforms[0].world.t[2] == 900);

@@ -48,18 +48,12 @@ _Static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTi
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_ACTORS_MOVEMENT_H_DECLS)
 #define VS_ACTORS_MOVEMENT_H_DECLS
-#include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
-#include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Battle/Actor.h"
-#include "Field/Gimmicks.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
 #include "Render/Palette.h"
 
 extern u_char Actors_kJumpHangFrames[3204];
@@ -74,69 +68,10 @@ extern u_char Actors_kAirTimerEndAnimations[2632];
 extern u_char Actors_kSoftLandingAnimations[2624];
 extern u_char Actors_kHardLandingAnimations[2616];
 extern u_char Actors_kLandingRecoveryAnimations[2608];
-extern int Actors_ashleyMoveInput[12];
 extern Actors_ActorRecord* Actors_actorRecords[17];
 extern u_short Actors_supportingPlatformLayer;
 extern u_char Actors_supportingGimmickIndex;
 extern char Actors_isActorUpdateComplete;
 extern u_char Actors_pushedGimmickIndex;
-int Actors_UpdateAshleyMovementInput(void);
-void Actors_ConsumeActorMovementOffset(Battle_Actor* actor, SVECTOR* offset_out);
-int Actors_ExecuteQueuedActorCommands(void);
-void Actors_BeginScriptedActorPath(int actor_id, SVECTOR* target_position);
-int Actors_IsScriptedActorPathFinished(int actor_id);
-void Actors_ResetActorMovement(int actor_id);
-void Actors_StopActorMotion(int actor_id);
-void Actors_ClearActorMovementModes(int actor_id);
-int Actors_ActorFacingDeltaToPoint(Actors_ActorRecord* actor, SVECTOR* target_point);
-void Actors_ResetActorRunMomentum(int actor_id);
-void Actors_SetActorWalkRunSpeeds(int actor_id, int walk_speed_fixed, int run_speed_fixed);
-void Actors_SetActorTravelStepCounts(int actor_id, int move_steps_per_tile, int turn_steps_per_revolution);
-void Actors_ActorTravelStepCounts(int actor_id, int* move_steps_per_tile_out, int* turn_steps_per_revolution_out);
-void Actors_BeginActorJumpToTile(Actors_ActorRecord* actor, u_char* target, int speed, short facing);
-void Actors_ApplyActorGroundOffset(Actors_ActorRecord* actor);
-void Actors_ApplyActorFlightMovement(Actors_ActorRecord* actor);
-void Actors_ApplyActorMovementVector(Actors_ActorRecord* actor);
-void Actors_UpdateActorTeleportTransition(Actors_ActorRecord* actor);
-void Actors_CancelActorTeleportTransition(Actors_ActorRecord* actor);
-void Actors_UpdateActorTravelTransition(Actors_ActorRecord* actor);
-void Actors_StepActorTransitionDisplacement(Actors_ActorRecord* actor);
-void Actors_SetActorFallDestination(Actors_ActorRecord* actor, Actors_FallDirection* fall_direction);
-void Actors_BeginActorJumpMovement(int index, int direction, int distance);
-void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode);
-void Actors_UpdateRoomActorMovement(void);
-void Actors_UpdateActorMovement(int actorId);
-void Actors_ClearActorMovementRequest(Actors_ActorRecord* actor);
-int Actors_MoveActorWithCollision(int index, int direction, int distance, SVECTOR* input);
-void Actors_UpdateActorSteering(Actors_ActorRecord* actor, int target_facing, Actors_TurnRequest* turn_request);
-void Actors_MoveActorToTileAtRate(int actor_id, Actors_TileTarget* tile_target, int move_steps_per_tile, int turn_steps_per_revolution);
-void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int move_steps_per_tile, int turn_steps_per_revolution);
-void Actors_TranslateActorToTileAtRate(int actor_id, Actors_TileTarget* tile_target, int move_steps_per_tile);
-void Actors_TurnActorTowardTileAtRate(int actor_id, Actors_TileTarget* tile_target, int turn_steps_per_revolution);
-void Actors_TranslateActorByAtRate(int actor_id, SVECTOR* translation, int move_steps_per_tile);
-void Actors_TranslateActorToAtRate(int actor_id, SVECTOR* target_position, int move_steps_per_tile);
-void Actors_TurnActorByAtRate(int actor_id, short yaw_delta, int turn_steps_per_revolution);
-void Actors_TurnActorToAtRate(int actor_id, short target_yaw, int turn_steps_per_revolution);
-void Actors_RotateActorByAtRate(int actor_id, SVECTOR* rotation_delta, int turn_steps_per_revolution);
-void Actors_RotateActorToAtRate(int actor_id, SVECTOR* target_rotation, int turn_steps_per_revolution);
-void Actors_MoveActorToTileOverTime(int actor_id, Actors_TileTarget* tile_target, int move_steps, int turn_steps);
-void Actors_TranslateActorToTileOverTime(int actor_id, Actors_TileTarget* tile_target, int move_steps);
-void Actors_SetActorTileTranslation(int actor_id, Actors_TileTarget* tile_target, int move_steps, int move_steps_per_tile);
-void Actors_TurnActorTowardTileOverTime(int actor_id, Actors_TileTarget* tile_target, int turn_steps);
-void Actors_SetActorTileTurn(int actor_id, Actors_TileTarget* tile_target, int turn_steps, int turn_steps_per_revolution);
-void Actors_SetActorMotion(int actor_id, SVECTOR* translation, int move_steps);
-void Actors_TranslateActorToOverTime(int actor_id, SVECTOR* target_position, int move_steps);
-void Actors_SetActorTranslation(int actor_id, SVECTOR* translation, int move_steps);
-void Actors_SetActorYawMotion(int actor_id, short yaw_delta, int turn_steps);
-void Actors_TurnActorToOverTime(int actor_id, u_short target_yaw, int turn_steps);
-void Actors_TurnActorToAtAngularSpeed(int actor_id, short target_yaw, int angular_speed);
-void Actors_SetActorYawTurn(int actor_id, short yaw_delta, int turn_steps);
-void Actors_SetActorRotationMotion(int actor_id, SVECTOR* rotation_delta, int turn_steps);
-void Actors_SetActorRotation(int actor_id, SVECTOR* rotation_delta, int turn_steps);
-void Actors_ScaleActorToOverTime(int actor_id, SVECTOR* target_scale, int scale_steps);
-void Actors_UpdateActorRoute(int actor_id, Actors_ActorRecord* actor);
-int Actors_ActorJumpAnimationProfile(Actors_ActorRecord* actor);
-void Actors_UpdateActorJumpAndFall(int actor_id, Actors_ActorRecord* actor);
-void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* gimmick);
 
 #endif // VS_ACTORS_MOVEMENT_H_DECLS

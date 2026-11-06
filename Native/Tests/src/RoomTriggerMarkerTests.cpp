@@ -18,7 +18,7 @@
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/TriggerMarkers.h"

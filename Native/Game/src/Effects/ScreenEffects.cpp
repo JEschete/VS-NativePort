@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Boot/Lifecycle.h"
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
@@ -48,7 +48,7 @@ void Effects_LoadScreenEffectOverlay(int begin_load)
     if (p->slot->state == 4) {
         VS::Content::ReleaseLiveDiscRequest(p->slot);
         p->loading = 0;
-        Boot_WaitForOverlayReady();
+        VS::Boot::WaitForOverlayReadyLive();
     }
 }
 

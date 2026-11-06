@@ -1,23 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorStateLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
 #include "Actors/Location.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Battle/Actor.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Render/Palette.h"
-#include "State/Flags.h"
 
 // decomp: D_800F4BA8 (D_800F4BA8@BATTLE/BATTLE.PRG)
 char Event_isDirectEventRequest;
@@ -36,11 +29,11 @@ int Event_LoadRoomEventSections(void* clearedSection, u_short clearedSectionLen,
     void* scriptSection, u_short scriptSectionLen, void* doorSection,
     u_short doorSectionLen, int startState)
 {
-    State_SetScriptFlag(0xA9, 0);
+    VS::State::SetLiveScriptFlag(0xA9, 0);
     if (startState == 0) {
         short i;
         for (i = 32; i < 64; ++i) {
-            State_SetScriptFlag(i, 0);
+            VS::State::SetLiveScriptFlag(i, 0);
         }
     }
 
@@ -171,7 +164,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 Event_isDirectEventRequest = 0;
                 return 1;
             case 1:
-                Actors_ActorPlacement(0, &position);
+                VS::Actors::LiveActorPlacement(0, &position);
                 if (position.location.packedTile.target.tileX == p[1]
                     && position.location.packedTile.target.tileZ == p[2]) {
                     result = 1;
@@ -179,7 +172,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 3;
                 break;
             case 2:
-                Actors_ActorPlacement(0, &position);
+                VS::Actors::LiveActorPlacement(0, &position);
                 if (position.location.packedTile.target.tileX >= p[1]
                     && position.location.packedTile.target.tileX < p[1] + p[3]
                     && position.location.packedTile.target.tileZ >= p[2]
@@ -189,12 +182,12 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 5;
                 break;
             case 3:
-                left = State_ScriptFlag(((p[1] & 0xF) << 6) | (p[2] >> 2));
+                left = VS::State::LiveScriptFlag(((p[1] & 0xF) << 6) | (p[2] >> 2));
                 right = p[3];
                 goto compare;
             case 15:
-                left = State_ScriptFlag(((p[1] & 0xF) << 6) | (p[2] >> 2));
-                right = State_ScriptFlag(((p[2] & 3) << 8) | p[3]);
+                left = VS::State::LiveScriptFlag(((p[1] & 0xF) << 6) | (p[2] >> 2));
+                right = VS::State::LiveScriptFlag(((p[2] & 3) << 8) | p[3]);
             compare:
                 switch (p[1] & 0xF0) {
                 case 0x00:
@@ -233,19 +226,19 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
             case 4:
                 left = VS::Core::Memory::ReadLiveUnalignedShort(p + 1);
                 if (left & 0x1000) {
-                    if (Actors_ActorAtSlot(left & 0x1F) != NULL) {
+                    if (VS::Actors::LiveActorAtSlot(left & 0x1F) != NULL) {
                         result = 1;
                     }
-                } else if (Actors_FindActorByModelId(left) != 1) {
+                } else if (VS::Actors::FindLiveActorByModelId(left) != 1) {
                     result = 1;
                 }
                 p += 3;
                 break;
             case 5:
-                left = flagValue = Actors_CountActorsByDisposition(p[1]);
+                left = flagValue = VS::Actors::CountLiveActorsByDisposition(p[1]);
                 flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 2);
                 if (flagId != 0) {
-                    State_SetScriptFlag(flagId, flagValue);
+                    VS::State::SetLiveScriptFlag(flagId, flagValue);
                     result = 1;
                 } else if (left != 0) {
                     result = 1;
@@ -269,10 +262,10 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                     negate = 0;
                     break;
                 }
-                left = flagValue = Actors_ActorHpPercentage(actorId);
+                left = flagValue = VS::Actors::LiveActorHpPercentage(actorId);
                 flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 3);
                 if (flagId != 0) {
-                    State_SetScriptFlag(flagId, flagValue);
+                    VS::State::SetLiveScriptFlag(flagId, flagValue);
                     result = 1;
                 } else if (left != 0) {
                     result = 1;
@@ -287,7 +280,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 3;
                 break;
             case 9:
-                if (!(Actors_ActorStateFlags(0) & 0x104000)) {
+                if (!(VS::Actors::LiveActorStateFlags(0) & 0x104000)) {
                     result = 1;
                 }
                 p += 1;
@@ -297,7 +290,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                     VS::Items::CountLiveInventoryItem(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
                 flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 3);
                 if (flagId != 0) {
-                    State_SetScriptFlag(flagId, flagValue);
+                    VS::State::SetLiveScriptFlag(flagId, flagValue);
                     result = 1;
                 } else if (left != 0) {
                     result = 1;
@@ -316,10 +309,10 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 6;
                 break;
             case 12:
-                left = flagValue = -Field_GimmickSupportHeight(p[1], p[2]) / 128;
+                left = flagValue = -VS::Field::LiveGimmickSupportHeight(p[1], p[2]) / 128;
                 flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 3);
                 if (flagId != 0) {
-                    State_SetScriptFlag(flagId, flagValue);
+                    VS::State::SetLiveScriptFlag(flagId, flagValue);
                     result = 1;
                 } else if (left != 0) {
                     result = 1;
@@ -332,7 +325,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                     negate = 0;
                     break;
                 }
-                Actors_ActorPlacement(actorId, &position);
+                VS::Actors::LiveActorPlacement(actorId, &position);
                 if (position.location.packedTile.target.tileX == p[3]
                     && position.location.packedTile.target.tileZ == p[4]) {
                     result = 1;
@@ -345,7 +338,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                     negate = 0;
                     break;
                 }
-                Actors_ActorPlacement(actorId, &position);
+                VS::Actors::LiveActorPlacement(actorId, &position);
                 if (position.location.packedTile.target.tileX >= p[3]
                     && position.location.packedTile.target.tileX < p[3] + p[5]
                     && position.location.packedTile.target.tileZ >= p[4]
@@ -360,7 +353,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                     negate = 0;
                     break;
                 }
-                if (Actors_IsActorRetainedAfterDefeat(actorId) != 0) {
+                if (VS::Actors::IsLiveActorRetainedAfterDefeat(actorId) != 0) {
                     result = 1;
                 }
                 p += 3;

@@ -12,7 +12,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 }
 
 namespace {

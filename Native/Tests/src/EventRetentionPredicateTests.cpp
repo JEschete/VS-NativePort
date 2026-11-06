@@ -4,19 +4,20 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorStateLive.hpp"
 #include "Battle/Encounter.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Actors/ActorState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
 }
 
-static_assert(std::is_same_v<decltype(&Actors_IsActorRetainedAfterDefeat),
-                             char (*)(int)>);
+static_assert(
+    std::is_same_v<decltype(&VS::Actors::IsLiveActorRetainedAfterDefeat),
+                   char (*)(int)>);
 
 namespace {
 constexpr int kActorSlot = 2;
@@ -74,7 +75,7 @@ struct RetentionPredicateFixture {
 TEST_CASE("Absent actor cannot satisfy a retained-actor room trigger",
           "[events][retention-predicate]") {
   RetentionPredicateFixture fixture;
-  CHECK(Actors_IsActorRetainedAfterDefeat(kActorSlot) == 0);
+  CHECK(VS::Actors::IsLiveActorRetainedAfterDefeat(kActorSlot) == 0);
   CHECK(Event_EvaluateRoomEventTriggers(8, 0, nullptr, 0) == 0);
   CHECK(Event_playbackPhase == 0);
 }

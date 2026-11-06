@@ -18,7 +18,7 @@
 #include "Items/ItemRecords.hpp"
 
 extern "C" {
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"

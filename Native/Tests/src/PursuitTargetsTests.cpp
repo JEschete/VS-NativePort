@@ -14,6 +14,7 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
+#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 }

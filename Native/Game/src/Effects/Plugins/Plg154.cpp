@@ -10,6 +10,6 @@ SVECTOR Effects_Plg154_mesh10Vertices[10]; /* contents: module image (ModuleData
 u_char Effects_Plg154_mesh10Faces[16][6]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FB34C (D_800FB34C@EFFECT/PLG154.BIN)
-CVECTOR Effects_Plg154_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg154_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

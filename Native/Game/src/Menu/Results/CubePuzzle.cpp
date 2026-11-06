@@ -1,15 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Menu/Framework/Framework.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Battle/StatusEffects.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
@@ -175,7 +175,7 @@ int Menu_Results_InitializeCubePuzzleStart(void)
         Menu_Results_buffReelSelection = 0;
         Battle_unusedSubmenuState = 0;
 
-        Menu_Framework_NoOperation();
+        VS::Menu::Framework::NoOperation();
         return 1;
     }
 
@@ -273,11 +273,11 @@ int Menu_Results_UpdateCubePuzzleStart(void)
     }
 
     if (Menu_Results_screenTimer == 0) {
-        Audio_PlaySfxCentered(0x7E, 0x7D);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
     }
 
     if (Menu_Results_screenTimer == 30) {
-        Audio_PlaySfxCentered(0x7E, 0x7D);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
     }
 
     Menu_Results_DrawEvolveOrDie(160, 64, Menu_Results_screenTimer);
@@ -292,13 +292,13 @@ int Menu_Results_UpdateCubePuzzleStart(void)
     if (Input_buttonsPressed.allButtons & PADRright) {
         if (Menu_Results_screenTimer >= 78) {
 
-            Audio_StopSfx(126, 0);
+            VS::Audio::LiveStopSfx(126, 0);
             VS::Render::RetireLiveTexturePageRange(29, 2, 5);
 
             return 1;
         }
 
-        Audio_StopSfx(126, 0);
+        VS::Audio::LiveStopSfx(126, 0);
 
         Menu_Results_screenTimer = 78;
     }
@@ -342,24 +342,24 @@ int Menu_Results_UpdateCubePuzzleResults(void)
         }
 
         if (Menu_Results_screenTimer == 16) {
-            Audio_PlaySfxCentered(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x72);
         }
 
         if (Menu_Results_screenTimer == 64) {
-            Audio_StopSfx(0x7E, 0x72);
-            Audio_PlaySfxCentered(0x7E, 0x73);
+            VS::Audio::LiveStopSfx(0x7E, 0x72);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
         }
 
         if (Menu_Results_screenTimer == 67) {
-            Audio_PlaySfxCentered(0x7E, 0x7D);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
         }
 
         if (Menu_Results_screenTimer == 75) {
-            Audio_PlaySfxCentered(0x7E, 0x7D);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
         }
 
         if (Menu_Results_screenTimer == 90) {
-            Audio_PlaySfxCentered(0x7E, 0x7D);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
         }
 
         Menu_Results_DrawCountingCubePuzzleTime(88, 64, Menu_Results_screenTimer);
@@ -374,17 +374,17 @@ int Menu_Results_UpdateCubePuzzleResults(void)
         if (Input_buttonsPressed.allButtons & PADRright) {
             if (Menu_Results_screenTimer >= 138) {
 
-                Audio_StopSfx(0x7E, 0);
+                VS::Audio::LiveStopSfx(0x7E, 0);
                 VS::Render::RetireLiveTexturePageRange(0x1D, 2, 5);
 
                 Audio_Seq_unusedScoredata.miscScore += Menu_Results_cubePuzzleResultsPuzzleModeRankPoints[rank];
 
-                Menu_Framework_NoOperation();
+                VS::Menu::Framework::NoOperation();
 
                 return 1;
             }
 
-            Audio_StopSfx(0x7E, 0);
+            VS::Audio::LiveStopSfx(0x7E, 0);
 
             Menu_Results_screenTimer = 138;
         }
@@ -405,11 +405,11 @@ int Menu_Results_UpdateCubePuzzleQuit(void)
     }
 
     if (Menu_Results_screenTimer == 0) {
-        Audio_PlaySfxCentered(0x7E, 0x7A);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x7A);
     }
 
     if (Menu_Results_screenTimer == 15) {
-        Audio_PlaySfxCentered(0x7E, 0x7A);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0x7A);
     }
 
     Menu_Results_DrawGivingUp(64, Menu_Results_screenTimer);
@@ -423,16 +423,16 @@ int Menu_Results_UpdateCubePuzzleQuit(void)
     if (Input_buttonsPressed.allButtons & PADRright) {
         if (Menu_Results_screenTimer > 62) {
 
-            Audio_StopSfx(0x7E, 0);
+            VS::Audio::LiveStopSfx(0x7E, 0);
             VS::Render::RetireLiveTexturePageRange(0x1D, 1, 5);
-            Menu_Framework_NoOperation();
+            VS::Menu::Framework::NoOperation();
 
             return 1;
         }
 
         Menu_Results_screenTimer = 63;
 
-        Audio_StopSfx(0x7E, 0);
+        VS::Audio::LiveStopSfx(0x7E, 0);
     }
 
     return 0;

@@ -11,6 +11,7 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -19,6 +20,7 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Sphere.h"
+#include "Battle/TargetingState.h"
 #include "Field/Interactions.h"
 #include "Input/ControllerLiveState.h"
 #include "Render/Display.h"
@@ -491,7 +493,7 @@ TEST_CASE("NPC area filtering does not require a player targeting sphere",
   action.storage.areaX = 4;
   action.storage.areaY = 6;
   action.storage.areaZ = 8;
-  Battle_FilterAreaActionTargets();
+  VS::Battle::LiveFilterAreaActionTargets();
   CHECK(Battle_targetSphere == nullptr);
   CHECK(action.storage.previewCount == 0);
   CHECK(Battle_actionFlowMode == 3);

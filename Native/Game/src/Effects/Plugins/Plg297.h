@@ -10,7 +10,7 @@
 #define VS_EFFECTS_PLUGINS_PLG297_H_DECLS
 
 extern SVECTOR Effects_Plg297_mirrorSurfaceVertices[5][16];
-extern CVECTOR Effects_Plg297_closedRingColorFactors[];
-extern u_char Effects_Plg297_ringColorFactors[][4];
+extern CVECTOR Effects_Plg297_closedRingColorFactors[8];
+extern u_char Effects_Plg297_ringColorFactors[8][4];
 
 #endif // VS_EFFECTS_PLUGINS_PLG297_H_DECLS

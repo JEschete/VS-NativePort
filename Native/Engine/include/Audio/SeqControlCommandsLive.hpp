@@ -36,7 +36,8 @@ void LiveRepeatLoopForever(Audio_SeqChannel* channel, int channel_bit);
 void LiveSetTimerDivisors(Audio_SeqChannel* channel, int channel_bit);
 void LiveSetTimerCount(Audio_SeqChannel* channel, int channel_bit);
 // Also starts the two sound-effect programs FE0B names
-// (Audio_SoundEffects_PlayProgramPair) and steps past its operands.
+// (SoundEffectProgramsLive.hpp LivePlayProgramPair) and steps past its
+// operands.
 void LivePlayEmbeddedSoundEffect(Audio_SeqChannel* channel, int channel_bit);
 void LiveSelectNoteRemapTable(Audio_SeqChannel* channel, int channel_bit);
 void LiveMarkChannelKeyed(Audio_SeqChannel* channel, int channel_bit);

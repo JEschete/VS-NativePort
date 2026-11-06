@@ -1,9 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
+#include "Effects/TransformsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/ActionEffects.h"
-#include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -115,7 +116,7 @@ int Effects_TickEffectRenderers(Effects_EffectInstance* effect_instance)
 // decomp: BATTLE.PRG func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:7596)
 int Effects_TickEffectTransforms(Effects_EffectInstance* effect_instance)
 {
-    Effects_UpdateEffectTransforms(effect_instance);
+    VS::Effects::LiveUpdateEffectTransforms(effect_instance);
     return 1;
 }
 
@@ -140,7 +141,7 @@ int Effects_SetActionEffectVerticalOffset(Effects_EffectInstance* effect_instanc
 // decomp: BATTLE.PRG func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:7619)
 int Effects_InitializeScriptEffectTransforms(Effects_EffectInstance* effect_instance)
 {
-    Effects_InitializeTransformStates(effect_instance);
+    VS::Effects::LiveInitializeTransformStates(effect_instance);
     return 1;
 }
 
@@ -188,7 +189,7 @@ int Effects_EmitParticlesFromScriptRegister(Effects_EffectInstance* effect_insta
 // decomp: BATTLE.PRG func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:7691)
 int Effects_RefreshScriptParticleEnvironment(Effects_EffectInstance* effect_instance __attribute__((unused)))
 {
-    Effects_UpdateParticleGravityAndDrag();
+    VS::Effects::LiveUpdateParticleGravityAndDrag();
     return 1;
 }
 

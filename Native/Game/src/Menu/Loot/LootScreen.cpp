@@ -1,31 +1,32 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/InventoryLiveState.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"
-#include "Menu/Framework/ActionSelection.h"
-#include "Menu/Framework/EquipmentDetails.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
@@ -121,14 +122,14 @@ int Menu_Loot_UpdateInventoryTransition(int category)
 
     switch (Menu_Loot_inventoryTransitionState) {
     case Menu_Framework_InitOnlyState_Init:
-        if (!Menu_Framework_AreMenuRowsIdle()) {
+        if (!VS::Menu::Framework::AreLiveMenuRowsIdle()) {
             break;
         }
 
-        Menu_Framework_SetBackgroundFade(1);
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
+        VS::Menu::Framework::SetLiveBackgroundFade(1);
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
 
-        menuItem = Menu_Framework_SetMenuItem(3, 320, 18, 0x7E, 8,
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(3, 320, 18, 0x7E, 8,
             (char*)&Menu_menuStrings
                 [Menu_menuStrings[Text_Battle_menuStrings_Index_items]]);
         menuItem->state = 2;
@@ -145,11 +146,11 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         Menu_Inventory_statusCommandAnimationStep = 0;
         Menu_Inventory_selectedItemCategoryIconOnTop = 0;
 
-        if (!Menu_Framework_AreMenuRowsIdle()) {
+        if (!VS::Menu::Framework::AreLiveMenuRowsIdle()) {
             break;
         }
 
-        Field_SetFieldRenderingEnabled(0);
+        VS::Field::LiveSetFieldRenderingEnabled(0);
 
         Menu_Loot_hudWasHidden = Battle_hudHidden;
 
@@ -158,7 +159,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
             Battle_hudSlideOffset = 0x200000;
         }
 
-        Menu_Framework_RenderAshley(1);
+        VS::Menu::Framework::RenderLiveAshley(1);
         Menu_Inventory_UpdateItemList(1);
 
         Menu_Loot_inventoryTransitionState = 2;
@@ -170,29 +171,29 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         }
 
         Menu_Inventory_SetPanelVisibility(0);
-        Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-        Field_SetFieldRenderingEnabled(1);
+        VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+        VS::Field::LiveSetFieldRenderingEnabled(1);
 
         if (Menu_Loot_hudWasHidden == 0) {
             Battle_SetHudHidden(0);
             Battle_hudSlideOffset = 0;
         }
 
-        Menu_Framework_RenderAshley(2);
+        VS::Menu::Framework::RenderLiveAshley(2);
 
         Menu_Loot_inventoryTransitionState = 3;
 
         if (Input_settings.information == 0) {
-            Menu_Framework_DismissInformationBox();
+            VS::Menu::Framework::DismissLiveInformationBox();
         }
 
         break;
 
     case 3:
-        Menu_Framework_SetBackgroundFade(0);
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::SetLiveBackgroundFade(0);
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Loot_showInventory = 1;
             Menu_Loot_showLoot = 1;
             return 1;
@@ -218,7 +219,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         int itemCategory = (Menu_Framework_menuMemory.opaque3A.currentCategory - 1) & 7;
 
         Menu_Framework_MenuRow* menuItem =
-            Menu_Framework_SetMenuItem(31, stepValue + 180, 34, 140, 8,
+            VS::Menu::Framework::SetLiveMenuItem(31, stepValue + 180, 34, 140, 8,
                 (char*)&Menu_Inventory_menuText[Menu_Inventory_menuText[itemCategory + Text_Menub_menuText_Index_weapons]]);
         menuItem->selected = 1;
 
@@ -228,7 +229,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         }
     }
 
-    Menu_Framework_RenderAshley(0);
+    VS::Menu::Framework::RenderLiveAshley(0);
 
     if (Menu_Inventory_itemCategoryIconsEnabled != 0) {
         if (Menu_Inventory_itemCategoryIconsAnimationStep < 4) {
@@ -253,8 +254,8 @@ int Menu_Loot_UpdateInventoryTransition(int category)
     }
 
     if (Menu_Inventory_statusCommandAnimationStep != 0) {
-        Menu_Framework_DrawButtonPromptBackground(0x10 - stepValue, 0x26, 0x58, 10);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8 - stepValue, 0x24, NULL);
+        VS::Menu::Framework::DrawLiveButtonPromptBackground(0x10 - stepValue, 0x26, 0x58, 10);
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Square, 8 - stepValue, 0x24, NULL);
         VS::Render::DrawLiveCompactTextColor("STATUS", ((0x1C - stepValue) & 0xFFFF) | 0x260000,
             0x202020 << Menu_Inventory_statusCommandState, NULL);
     }
@@ -360,7 +361,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
         break;
 
     case Menu_Loot_DisassemblyState_InitOptionYes:
-        menuItem = Menu_Framework_SetMenuItem(
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(
             0x1E, 0x140, 0x92, 0x7E, 0, (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_optionYes]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 0xC2;
@@ -368,7 +369,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
         break;
 
     case Menu_Loot_DisassemblyState_InitOptionNo:
-        menuItem = Menu_Framework_SetMenuItem(
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(
             0x1F, 0x140, 0xA2, 0x7E, 0, (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_optionNo]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 0xC2;
@@ -377,32 +378,32 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
                 ? Menu_Loot_inventory->weapons[i].name
                 : Menu_Framework_itemNames[Menu_Loot_inventory->shields[i].base.id];
         Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_disassembleConfirm]);
         Menu_Loot_disassemblyState = Menu_Loot_DisassemblyState_WaitInit;
         break;
 
     case Menu_Loot_DisassemblyState_WaitInit:
-        Menu_Loot_disassemblyState += Menu_Framework_AreMenuRowsIdle();
+        Menu_Loot_disassemblyState += VS::Menu::Framework::AreLiveMenuRowsIdle();
         break;
 
     case Menu_Loot_DisassemblyState_ProcessCommand:
-        Menu_Framework_MenuItem(30 + Menu_Loot_disassemblyYesNoChoice)->selected = 1;
-        Menu_Framework_MenuItem(31 - Menu_Loot_disassemblyYesNoChoice)->selected = 0;
+        VS::Menu::Framework::LiveMenuItem(30 + Menu_Loot_disassemblyYesNoChoice)->selected = 1;
+        VS::Menu::Framework::LiveMenuItem(31 - Menu_Loot_disassemblyYesNoChoice)->selected = 0;
 
         if (Input_buttonsPressed.allButtons & (PADRright | PADRdown)) {
-            Menu_Framework_FlyOutRowRight(30);
-            Menu_Framework_FlyOutRowRight(31);
+            VS::Menu::Framework::FlyOutLiveRowRight(30);
+            VS::Menu::Framework::FlyOutLiveRowRight(31);
             Menu_Loot_showLoot = 0;
             if ((Menu_Loot_disassemblyYesNoChoice != 0) || (Input_buttonsPressed.allButtons & PADRdown)) {
                 VS::Menu::PlayLeaveSound();
                 Menu_Loot_disassemblyState = Menu_Loot_DisassemblyState_Finalize;
             } else {
-                Audio_PlaySfxCentered(0x7E, 0x19);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x19);
                 Menu_Loot_disassemblyState = Menu_Loot_DisassemblyState_Disassemble;
             }
             if (Input_settings.information == 0) {
-                Menu_Framework_DismissInformationBox();
+                VS::Menu::Framework::DismissLiveInformationBox();
             }
             break;
         }
@@ -412,7 +413,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
             Menu_Loot_disassemblyYesNoChoice = (1 - Menu_Loot_disassemblyYesNoChoice);
         }
 
-        Menu_Loot_disassemblyCursorMemory = Menu_Framework_DrawMainMenuCursor(Menu_Loot_disassemblyCursorMemory, Menu_Loot_disassemblyYesNoChoice + 8);
+        Menu_Loot_disassemblyCursorMemory = VS::Menu::Framework::DrawLiveMainMenuCursor(Menu_Loot_disassemblyCursorMemory, Menu_Loot_disassemblyYesNoChoice + 8);
         break;
 
     case Menu_Loot_DisassemblyState_Disassemble:
@@ -596,7 +597,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
         break;
 
     case 1:
-        menuItem = Menu_Framework_SetMenuItem(
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(
             30, 320, 146, 0x7E, 0, (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_optionYes]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 194;
@@ -604,31 +605,31 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
         break;
 
     case 2:
-        menuItem = Menu_Framework_SetMenuItem(
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(
             31, 320, 162, 0x7E, 0, (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_optionNo]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 194;
         Battle_stringContext.strings[0] = Menu_Framework_itemNames[Menu_Loot_stackConsolidationItemId];
 
         Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_organizeConfirm]);
 
         Menu_Loot_stackConsolidationState = 3;
         break;
 
     case 3:
-        Menu_Loot_stackConsolidationState += Menu_Framework_AreMenuRowsIdle();
+        Menu_Loot_stackConsolidationState += VS::Menu::Framework::AreLiveMenuRowsIdle();
         break;
 
     case 4:
-        Menu_Framework_MenuItem(30 + Menu_Loot_stackConsolidationYesNoChoice)->selected = 1;
-        Menu_Framework_MenuItem(31 - Menu_Loot_stackConsolidationYesNoChoice)->selected = 0;
+        VS::Menu::Framework::LiveMenuItem(30 + Menu_Loot_stackConsolidationYesNoChoice)->selected = 1;
+        VS::Menu::Framework::LiveMenuItem(31 - Menu_Loot_stackConsolidationYesNoChoice)->selected = 0;
 
         if (Input_buttonsPressed.allButtons & 0x60) {
 
-            Menu_Framework_FlyOutRowRight(30);
-            Menu_Framework_FlyOutRowRight(31);
+            VS::Menu::Framework::FlyOutLiveRowRight(30);
+            VS::Menu::Framework::FlyOutLiveRowRight(31);
 
             Menu_Loot_showLoot = 0;
 
@@ -643,7 +644,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
             var_v0 = 0;
 
             if (Input_settings.information == 0) {
-                Menu_Framework_DismissInformationBox();
+                VS::Menu::Framework::DismissLiveInformationBox();
             }
 
             break;
@@ -654,7 +655,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
             Menu_Loot_stackConsolidationYesNoChoice = 1 - Menu_Loot_stackConsolidationYesNoChoice;
         }
 
-        Menu_Loot_stackConsolidationCursorMemory = Menu_Framework_DrawMainMenuCursor(Menu_Loot_stackConsolidationCursorMemory, Menu_Loot_stackConsolidationYesNoChoice + 8);
+        Menu_Loot_stackConsolidationCursorMemory = VS::Menu::Framework::DrawLiveMainMenuCursor(Menu_Loot_stackConsolidationCursorMemory, Menu_Loot_stackConsolidationYesNoChoice + 8);
         break;
 
     case 5:
@@ -778,7 +779,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
         VS::Render::DrawLiveCompactTextColor("/", itemCountPos | y, color, NULL);
         VS::Render::DrawLiveCompactTextColor(
             Menu_Loot_itemCategoryHeaders[i], (edgeX + 192) | y, color, NULL);
-        Menu_Framework_DrawColoredInteger(capacity, (edgeX + 296) | y, color, NULL);
+        VS::Menu::Framework::DrawLiveColoredInteger(capacity, (edgeX + 296) | y, color, NULL);
 
         if (((u_int)color >> 23) != 0) {
 
@@ -793,16 +794,16 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
             }
         }
 
-        Menu_Framework_DrawColoredInteger(itemCount, itemCountPos | y, color, NULL);
+        VS::Menu::Framework::DrawLiveColoredInteger(itemCount, itemCountPos | y, color, NULL);
     }
 
     buttonBgPos = edgeX + 184;
 
-    Menu_Framework_DrawButtonPromptBackground(buttonBgPos, 112, 112, 10);
-    Menu_Framework_DrawButtonPromptBackground(buttonBgPos, 128, 64, 10);
+    VS::Menu::Framework::DrawLiveButtonPromptBackground(buttonBgPos, 112, 112, 10);
+    VS::Menu::Framework::DrawLiveButtonPromptBackground(buttonBgPos, 128, 64, 10);
     VS::Render::DrawLiveCompactTextColor("GET", (edgeX + 196) | (112 << 16),
         vs_getRGB(64, 64, 64) << Menu_Loot_controlsEnabled, NULL);
-    Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, edgeX + 176, 110, NULL);
+    VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Circle, edgeX + 176, 110, NULL);
 
     str = "ALL";
     xy = (edgeX + 252) | (112 << 16);
@@ -814,10 +815,10 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
     }
 
     VS::Render::DrawLiveCompactTextColor(str, xy, all_command_color, NULL);
-    Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, edgeX + 232, 110, NULL);
+    VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Square, edgeX + 232, 110, NULL);
     VS::Render::DrawLiveCompactTextColor("END", (edgeX + 196) | (128 << 16),
         vs_getRGB(64, 64, 64) << Menu_Loot_controlsEnabled, NULL);
-    Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, edgeX + 176, 126, NULL);
+    VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Cross, edgeX + 176, 126, NULL);
 }
 
 // decomp: MENUB.PRG _displayCurrentLoot (src/MENU/MENUB.PRG/260.c:1192)
@@ -835,7 +836,7 @@ void Menu_Loot_RenderLootRows(int x)
     VS::Core::Memory::ZeroLiveWordsBackward(&gradientStates, sizeof gradientStates);
 
     for (i = 0; i < 8; ++i) {
-        menuItem = Menu_Framework_MenuItem(i + 32);
+        menuItem = VS::Menu::Framework::LiveMenuItem(i + 32);
         gradientStates[i + Menu_Loot_gradientStateIndex] = menuItem->gradientState;
         menuItem->state = 0;
     }
@@ -846,21 +847,21 @@ void Menu_Loot_RenderLootRows(int x)
 
     for (i = 0; i < count;) {
         index = loot->itemIndex;
-        menuItem = Menu_Framework_MenuItem(32 + i);
+        menuItem = VS::Menu::Framework::LiveMenuItem(32 + i);
 
         switch (loot->itemCategory) {
         case Items_ItemCategory_Weapon: {
             Items_InventoryWeapon* weapon = &Menu_Loot_inventory->weapons[index];
             Items_InventoryBlade* blade = &Menu_Loot_inventory->blades[weapon->blade - 1];
             menuItem =
-                Menu_Framework_SetMenuItem(32 + i, 24 - x, 50 + i * 16, 152, 0, weapon->name);
+                VS::Menu::Framework::SetLiveMenuItem(32 + i, 24 - x, 50 + i * 16, 152, 0, weapon->name);
             menuItem->rowIcon = blade->category;
             menuItem->material = blade->material;
             break;
         }
         case Items_ItemCategory_Blade: {
             Items_InventoryBlade* blade2 = &Menu_Loot_inventory->blades[index];
-            menuItem = Menu_Framework_SetMenuItem(
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(
                 32 + i, 24 - x, 50 + i * 16, 152, 0, Menu_Framework_itemNames[blade2->id]);
             menuItem->rowIcon = blade2->category;
             menuItem->material = blade2->material;
@@ -868,14 +869,14 @@ void Menu_Loot_RenderLootRows(int x)
         }
         case Items_ItemCategory_Grip: {
             Items_InventoryGrip* grip = &Menu_Loot_inventory->grips[index];
-            menuItem = Menu_Framework_SetMenuItem(
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(
                 32 + i, 24 - x, 50 + i * 16, 152, 0, Menu_Framework_itemNames[grip->id]);
             menuItem->rowIcon = grip->category + 10;
             break;
         }
         case Items_ItemCategory_Shield: {
             Items_InventoryShield* shield = &Menu_Loot_inventory->shields[index];
-            menuItem = Menu_Framework_SetMenuItem(32 + i, 24 - x, 50 + i * 16, 152, 0,
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(32 + i, 24 - x, 50 + i * 16, 152, 0,
                 Menu_Framework_itemNames[shield->base.id]);
             menuItem->rowIcon = 15;
             menuItem->material = shield->base.material;
@@ -883,7 +884,7 @@ void Menu_Loot_RenderLootRows(int x)
         }
         case Items_ItemCategory_Armor: {
             Items_InventoryArmor* armor = &Menu_Loot_inventory->armor[index];
-            menuItem = Menu_Framework_SetMenuItem(
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(
                 32 + i, 24 - x, 50 + i * 16, 152, 0, Menu_Framework_itemNames[armor->id]);
             menuItem->rowIcon = armor->category + 0xE;
             menuItem->material = armor->material;
@@ -891,14 +892,14 @@ void Menu_Loot_RenderLootRows(int x)
         }
         case Items_ItemCategory_Gem: {
             Items_InventoryGem* gem = &Menu_Loot_inventory->gems[index];
-            menuItem = Menu_Framework_SetMenuItem(
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(
                 32 + i, 24 - x, 50 + i * 16, 152, 0, Menu_Framework_itemNames[gem->id]);
             menuItem->rowIcon = 22;
             break;
         }
         case Items_ItemCategory_Misc: {
             Items_InventoryMisc* misc = &Menu_Loot_inventory->misc[index];
-            menuItem = Menu_Framework_SetMenuItem(
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(
                 32 + i, 24 - x, 50 + i * 16, 152, 0, Menu_Framework_itemNames[misc->id]);
             menuItem->count = misc->count;
             menuItem->fontColor = (misc->id < 458) ^ 1;
@@ -956,42 +957,42 @@ void Menu_Loot_ShowLootDescription(int lootIndex)
 
     switch (Menu_Loot_lootList[lootIndex].itemCategory) {
     case Items_ItemCategory_Weapon:
-        Menu_Framework_FormatInventoryWeaponRow(&Audio_Seq_unusedInventory.weapons[itemIndex],
+        VS::Menu::Framework::FormatLiveInventoryWeaponRow(&Audio_Seq_unusedInventory.weapons[itemIndex],
             menuText, &rowType, Menu_Framework_stringBuf);
         break;
 
     case Items_ItemCategory_Blade:
-        Menu_Framework_FormatBladeRow(&Audio_Seq_unusedInventory.blades[itemIndex], menuText, &rowType,
+        VS::Menu::Framework::FormatLiveBladeRow(&Audio_Seq_unusedInventory.blades[itemIndex], menuText, &rowType,
             Menu_Framework_stringBuf);
         break;
 
     case Items_ItemCategory_Grip:
-        Menu_Framework_FormatGripRow(
+        VS::Menu::Framework::FormatLiveGripRow(
             &Audio_Seq_unusedInventory.grips[itemIndex], menuText, &rowType, Menu_Framework_stringBuf);
         break;
 
     case Items_ItemCategory_Shield:
-        Menu_Framework_FormatInventoryShieldRow(&Audio_Seq_unusedInventory.shields[itemIndex],
+        VS::Menu::Framework::FormatLiveInventoryShieldRow(&Audio_Seq_unusedInventory.shields[itemIndex],
             menuText, &rowType, Menu_Framework_stringBuf);
         break;
 
     case Items_ItemCategory_Armor:
-        Menu_Framework_FormatInventoryArmorRow(
+        VS::Menu::Framework::FormatLiveInventoryArmorRow(
             &Audio_Seq_unusedInventory.armor[itemIndex], menuText, &rowType, Menu_Framework_stringBuf);
         break;
 
     case Items_ItemCategory_Gem:
-        Menu_Framework_FormatGemRow(
+        VS::Menu::Framework::FormatLiveGemRow(
             &Audio_Seq_unusedInventory.gems[itemIndex], menuText, &rowType, Menu_Framework_stringBuf);
         break;
 
     case Items_ItemCategory_Misc:
-        Menu_Framework_FormatMiscItemRow(
+        VS::Menu::Framework::FormatLiveMiscItemRow(
             &Audio_Seq_unusedInventory.misc[itemIndex], menuText, &rowType, Menu_Framework_stringBuf);
         break;
     }
 
-    Menu_Framework_SetInformationMessage(menuText[1]);
+    VS::Menu::Framework::SetLiveInformationMessage(menuText[1]);
     VS::Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory, Menu_Loot_inventoryBackup, sizeof Audio_Seq_unusedInventory);
 }
 
@@ -1035,7 +1036,7 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
 
     switch (Menu_Loot_leaveConfirmationState) {
     case 0:
-        menuItem = Menu_Framework_SetMenuItem(
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(
             30, 0x140, 0x92, 0x7E, 0, (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_optionYes]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 0xC2;
@@ -1043,38 +1044,38 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
         break;
 
     case 1:
-        menuItem = Menu_Framework_SetMenuItem(
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(
             31, 0x140, 0xA2, 0x7E, 0, (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_optionNo]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 0xC2;
 
         Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             Menu_Loot_lootClaimed == 0 ? (char*)(&Menu_Inventory_menuText[Text_Menub_menuText_Offset_discardAllConfirm])
                               : (char*)(&Menu_Inventory_menuText[Text_Menub_menuText_Offset_itemsRemaining]));
         Menu_Loot_leaveConfirmationState = 2;
         break;
 
     case 2:
-        Menu_Loot_leaveConfirmationState = (Menu_Loot_leaveConfirmationState + Menu_Framework_AreMenuRowsIdle());
+        Menu_Loot_leaveConfirmationState = (Menu_Loot_leaveConfirmationState + VS::Menu::Framework::AreLiveMenuRowsIdle());
         break;
 
     case 3:
-        Menu_Framework_MenuItem(30 + Menu_Loot_leaveConfirmationYesNoChoice)->selected = 1;
-        Menu_Framework_MenuItem(31 - Menu_Loot_leaveConfirmationYesNoChoice)->selected = 0;
+        VS::Menu::Framework::LiveMenuItem(30 + Menu_Loot_leaveConfirmationYesNoChoice)->selected = 1;
+        VS::Menu::Framework::LiveMenuItem(31 - Menu_Loot_leaveConfirmationYesNoChoice)->selected = 0;
 
         if (Input_buttonsPressed.allButtons & (PADRright | PADRdown)) {
 
-            Menu_Framework_FlyOutRowRight(30);
-            Menu_Framework_FlyOutRowRight(31);
+            VS::Menu::Framework::FlyOutLiveRowRight(30);
+            VS::Menu::Framework::FlyOutLiveRowRight(31);
 
             if (Input_settings.information == 0) {
-                Menu_Framework_DismissInformationBox();
+                VS::Menu::Framework::DismissLiveInformationBox();
             }
 
             if ((Menu_Loot_leaveConfirmationYesNoChoice == 0) && !(Input_buttonsPressed.allButtons & PADRdown)) {
                 int leave_confirmation_result;
-                Audio_PlaySfxCentered(0x7E, 0x1C);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0x1C);
                 leave_confirmation_result = 1;
                 if (Menu_Loot_lootClaimed == 0) {
                     leave_confirmation_result = 2;
@@ -1092,7 +1093,7 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
             Menu_Loot_leaveConfirmationYesNoChoice = (1 - Menu_Loot_leaveConfirmationYesNoChoice);
         }
 
-        Menu_Loot_leaveConfirmationCursorAnimStep = Menu_Framework_DrawMainMenuCursor(Menu_Loot_leaveConfirmationCursorAnimStep, Menu_Loot_leaveConfirmationYesNoChoice + 8);
+        Menu_Loot_leaveConfirmationCursorAnimStep = VS::Menu::Framework::DrawLiveMainMenuCursor(Menu_Loot_leaveConfirmationCursorAnimStep, Menu_Loot_leaveConfirmationYesNoChoice + 8);
         break;
 
     case 4:
@@ -1103,7 +1104,7 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
         Battle_stringContext.strings[0] = Menu_Loot_leaveConfirmationItemName;
 
         Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_Framework_SetInformationMessage(
+        VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_invalidDiscard]);
 
         Menu_Loot_leaveConfirmationState = 7;
@@ -1132,7 +1133,7 @@ int Menu_Loot_UpdateOrganizationMenu(Menu_Loot_LootListItem* loot)
     Menu_Framework_MenuRow* menuItem;
 
     if (loot != NULL) {
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
 
         Menu_Loot_organizationMenuItemCategory = loot->itemCategory;
         Menu_Loot_organizationMenuState = 0;
@@ -1151,7 +1152,7 @@ int Menu_Loot_UpdateOrganizationMenu(Menu_Loot_LootListItem* loot)
         }
 
         if (Menu_Loot_organizationMenuAvailableAction != 0) {
-            menuItem = Menu_Framework_SetMenuItem(30, 0x140, 0x92, 0x7E, 0,
+            menuItem = VS::Menu::Framework::SetLiveMenuItem(30, 0x140, 0x92, 0x7E, 0,
                 (char*)&Menu_Inventory_menuText[Menu_Inventory_menuText[(Menu_Loot_organizationMenuAvailableAction + 4) * 2]]);
             menuItem->state = 2;
             menuItem->targetPosition0 = 0xC2;
@@ -1162,7 +1163,7 @@ int Menu_Loot_UpdateOrganizationMenu(Menu_Loot_LootListItem* loot)
 
     switch (Menu_Loot_organizationMenuState) {
     case 0:
-        menuItem = Menu_Framework_SetMenuItem(31, 0x140, 0xA2, 0x7E, 0,
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(31, 0x140, 0xA2, 0x7E, 0,
             (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_organizeInventory]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 0xC2;
@@ -1170,17 +1171,17 @@ int Menu_Loot_UpdateOrganizationMenu(Menu_Loot_LootListItem* loot)
         break;
 
     case 1:
-        Menu_Loot_organizationMenuState += Menu_Framework_AreMenuRowsIdle();
+        Menu_Loot_organizationMenuState += VS::Menu::Framework::AreLiveMenuRowsIdle();
         break;
 
     case 2:
-        Menu_Framework_MenuItem(30 + Menu_Loot_organizationMenuSelectedRow)->selected = 1;
-        Menu_Framework_MenuItem(31 - Menu_Loot_organizationMenuSelectedRow)->selected = 0;
+        VS::Menu::Framework::LiveMenuItem(30 + Menu_Loot_organizationMenuSelectedRow)->selected = 1;
+        VS::Menu::Framework::LiveMenuItem(31 - Menu_Loot_organizationMenuSelectedRow)->selected = 0;
 
         if (Input_buttonsPressed.allButtons & (PADRright | PADRdown)) {
 
-            Menu_Framework_FlyOutRowRight(30);
-            Menu_Framework_FlyOutRowRight(31);
+            VS::Menu::Framework::FlyOutLiveRowRight(30);
+            VS::Menu::Framework::FlyOutLiveRowRight(31);
 
             if (Input_buttonsPressed.allButtons & PADRdown) {
                 VS::Menu::PlayLeaveSound();
@@ -1204,17 +1205,17 @@ int Menu_Loot_UpdateOrganizationMenu(Menu_Loot_LootListItem* loot)
         }
 
         if (Menu_Loot_organizationMenuSelectedRow != 0) {
-            Menu_Framework_SetInformationMessage(
+            VS::Menu::Framework::SetLiveInformationMessage(
                 (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_organizeInventoryInfo]);
         } else if (Menu_Loot_organizationMenuAvailableAction == 1) {
-            Menu_Framework_SetInformationMessage(
+            VS::Menu::Framework::SetLiveInformationMessage(
                 (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_disassembleInfo]);
         } else {
-            Menu_Framework_SetInformationMessage(
+            VS::Menu::Framework::SetLiveInformationMessage(
                 (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_organizeInfo]);
         }
 
-        Menu_Loot_organizationMenuCursorAnimState = Menu_Framework_DrawMainMenuCursor(Menu_Loot_organizationMenuCursorAnimState, Menu_Loot_organizationMenuSelectedRow + 8);
+        Menu_Loot_organizationMenuCursorAnimState = VS::Menu::Framework::DrawLiveMainMenuCursor(Menu_Loot_organizationMenuCursorAnimState, Menu_Loot_organizationMenuSelectedRow + 8);
         break;
     }
     return 0;
@@ -1254,11 +1255,11 @@ int Menu_Loot_UpdateLootSelection(int initialize)
 
     switch (Menu_Loot_lootSelectionState) {
     case Menu_Loot_LootSelectionState_Init:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
 
         Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_ProcessInput;
         // Fallthrough
@@ -1304,7 +1305,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
 
             if (temp_s2 != Menu_Loot_lootClaimed) {
 
-                Audio_PlaySfxCentered(0x7E, 0xD);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0xD);
 
                 Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_UpdateLoot;
                 break;
@@ -1328,7 +1329,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
                 Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_Organize;
             } else {
 
-                Audio_PlaySfxCentered(0x7E, 0xD);
+                VS::Audio::LivePlaySfxCentered(0x7E, 0xD);
 
                 if (loot->itemCategory == Items_ItemCategory_Misc) {
 
@@ -1406,7 +1407,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
 
             Menu_Loot_ShowLootDescription(Menu_Loot_selectedLoot + Menu_Loot_lootListOffset);
 
-            Menu_Loot_lootSelectionCursorMemory = Menu_Framework_DrawCursor(
+            Menu_Loot_lootSelectionCursorMemory = VS::Menu::Framework::DrawLiveCursor(
                 Menu_Loot_lootSelectionCursorMemory, (((Menu_Loot_selectedLoot * 0x10) + 0x2A) << 0x10) | 0xA);
         }
         break;
@@ -1562,7 +1563,7 @@ int Menu_Loot_Update(u_char* state)
     case 0:
 
         VS::Menu::PlayOpenSound();
-        Menu_Framework_SetActorComparisonStats(16);
+        VS::Menu::Framework::SetLiveActorComparisonStats(16);
 
         for (i = 0; i < 7; ++i) {
             VS::Items::Inventory::RebuildLiveDisplayIndices(i);
@@ -1581,7 +1582,7 @@ int Menu_Loot_Update(u_char* state)
         Menu_Loot_lootListOffset = 0;
         Menu_Loot_updateLayoutPadding = 0;
 
-        Menu_Framework_LoadItemText(1);
+        VS::Menu::Framework::LoadLiveItemText(1);
         Menu_Loot_BuildStagedInventory(Menu_Framework_lootLists);
 
         Menu_Loot_controlsEnabled = 0;
@@ -1593,27 +1594,27 @@ int Menu_Loot_Update(u_char* state)
         break;
 
     case 1:
-        if (Menu_Framework_LoadItemText(0) != 0) {
+        if (VS::Menu::Framework::LoadLiveItemText(0) != 0) {
 
             Menu_Loot_showLoot = 1;
 
             if (Menu_Loot_lootListCount == 0) {
 
                 Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-                Menu_Framework_SetInformationMessage(
+                VS::Menu::Framework::SetLiveInformationMessage(
                     (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_emptyChest]);
 
                 *state = 4;
 
             } else {
-                Menu_Framework_InitializeInformationBox();
+                VS::Menu::Framework::InitializeLiveInformationBox();
                 *state = 2;
             }
         }
         break;
 
     case 2:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
@@ -1646,7 +1647,7 @@ int Menu_Loot_Update(u_char* state)
         Menu_Loot_showLoot = 0;
 
         if ((Menu_DismissTextBox(7) != 0)
-            || (Menu_Framework_UnloadItemTextWhenReady() == 0)) {
+            || (VS::Menu::Framework::UnloadLiveItemTextWhenReady() == 0)) {
             break;
         }
 
@@ -1694,7 +1695,7 @@ int Menu_Loot_Update(u_char* state)
         Menu_Loot_RenderLootRows(i);
 
         if (Menu_Loot_previewedLoot & 0xF) {
-            Menu_Framework_MenuItem(Menu_Loot_previewedLoot + 31)->selected = 1;
+            VS::Menu::Framework::LiveMenuItem(Menu_Loot_previewedLoot + 31)->selected = 1;
         }
     }
 

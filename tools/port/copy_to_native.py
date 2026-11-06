@@ -648,6 +648,22 @@ class Copier:
         self.report["owned"].append(f"{rid} {name} -> {o['path']}")
         return True
 
+    def load_owned_string_table(self, r: dict, name: str) -> None:
+        """An owned global whose contents are a disc string table (cf.OWNED_MODULE_STRING_TABLES): the hand
+        definition keeps the storage and the module data table still fills it from the module image."""
+        d = self.pick_decl(r["id"], kind="var", definition=True)
+        original = "" if d is None else self.src.load(d["file"])[d["start"]:d["end"]].decode("utf-8")
+        found = re.search(r'#\s*include\s+"build/assets/([^"]+)\.vsString"', original)
+        if found is None:
+            raise ValueError(f"{r['id']}: owned module string table {name} has no disc string asset")
+        asset = Path(found[1])
+        module = asset.parent.as_posix()
+        extent = self.string_asset_extents.get((module, asset.name))
+        if extent is None or extent[1] <= 0:
+            raise ValueError(f"{r['id']}: unresolved disc string asset {asset}")
+        self.string_asset_sources[r["id"]] = (module, extent[0])
+        self.module_data.append((r, name, extent[1]))
+
     def owned_vs_name(self, rid: str) -> str | None:
         """The qualified C++ name an owned function row is promoted to, if it is in the VS namespace."""
         o = self.owned.get(rid)
@@ -1201,6 +1217,8 @@ class Copier:
             loc = r["final_location"].strip()
             name = c_name(r["final_name"])
             if self.take_owned(r["id"], name):
+                if r["id"] in cf.OWNED_MODULE_STRING_TABLES:
+                    self.load_owned_string_table(r, name)
                 continue
             if r["id"] == SCRATCH_GLOBAL:
                 tname = c_name(self.type_by_id[self.canon_type(r["type_id"])]["final_name"])
@@ -1649,7 +1667,8 @@ class Copier:
     # ------------------------------------------------------------------------------------------------- templates
     def plugin_includes(self, rel: str) -> list[tuple[int, str, list[str]]]:
         """(line, template stem, active macro keys) for every `#include "src/EFFECT/<stem>.h"` of a plugin file,
-        with the macros defined (and not #undef'd) in that file before it."""
+        with the macros defined (and not #undef'd) in that file before it. A template header ends by #undef'ing its
+        options, so they do not carry into the plugin's next instance of that template (#290)."""
         lines = self.src.load(rel).decode("utf-8", errors="replace").splitlines()
         active: dict[str, str] = {}
         out = []
@@ -1662,7 +1681,14 @@ class Copier:
             m = re.match(r'\s*#include\s+"src/EFFECT/(\w+)\.h"', line)
             if m:
                 out.append((i, m[1], list(active.values())))
+                for name in self.template_undefs(m[1]):
+                    active.pop(name, None)
         return out
+
+    def template_undefs(self, stem: str) -> set[str]:
+        """The macros a template header #undefs: its options and bindings end with it."""
+        text = self.src.load(f"src/EFFECT/{stem}.h").decode("utf-8", errors="replace")
+        return set(re.findall(r"^\s*#\s*undef\s+(\w+)", text, re.M))
 
     def macro_text(self, key: str) -> str:
         m = self.macro_defs[key]
@@ -1679,6 +1705,8 @@ class Copier:
         for r in self.cat:
             if r["kind"] != "template-body":
                 continue
+            if self.take_owned(r["id"], c_name(r["final_name"])):
+                continue  # a typed template body (owned.csv) replaces the shared .inl
             hdr = "src/" + r["file"]
             d = next((x for x in self.decls if x["file"] == hdr and x["kind"] == "function" and x["def"] and
                       x["line"] == int(r["line"])), None)

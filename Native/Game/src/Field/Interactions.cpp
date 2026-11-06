@@ -1,18 +1,26 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Field/CameraLive.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/DoorMatchesLive.hpp"
+#include "Field/GameModeLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
+#include "Field/TransitionsLive.hpp"
+#include "Field/TrapsLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Audio/Sfx.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
@@ -21,26 +29,19 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
-#include "Battle/Targeting.h"
-#include "DiscQueue.h"
+#include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/Cutscene.h"
 #include "Event/Triggers.h"
-#include "Field/Camera.h"
-#include "Field/Collision.h"
 #include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
-#include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interaction.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Field/RoomLoading.h"
-#include "Field/Transitions.h"
-#include "Field/Traps.h"
-#include "Field/Znd.h"
-#include "Field/Zone.h"
+#include "Field/RoomLoadingLiveState.h"
+#include "Field/TransitionsLiveState.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/KeyItems.h"
@@ -48,10 +49,8 @@ extern "C" {
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
 #include "Menu/Framework/ActionSelection.h"
-#include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
 #include "Render/Palette.h"
-#include "State/Flags.h"
 #include "State/Timers.h"
 
 // decomp: D_800F1910 (D_800F1910@BATTLE/BATTLE.PRG)
@@ -75,12 +74,12 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
 
         if ((door_records[target_position->pad & 0xF].trigger.lockState.lock.state < lock_level_upper_exclusive)
             && (door_records[target_position->pad & 0xF].trigger.lockState.lock.state >= minimum_breakable_lock_level)
-            && (Field_RollRiskLockBreak() != 0)) {
+            && (VS::Field::RollLiveRiskLockBreak() != 0)) {
 
             door_records[target_position->pad & 0xF].trigger.lockState.lock.state = 0;
 
-            Audio_PlaySfxCentered(0x7E, 0x3F);
-            Audio_PlaySfxCentered(0x7E, 0x40);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x3F);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x40);
 
         } else {
             ((void (*)(void*))Battle_QueueWorldLockedLabel)(target_position);
@@ -94,13 +93,13 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
 
         if ((chest_records[target_position->pad & 0xF].lockLevel < lock_level_upper_exclusive)
             && (chest_records[target_position->pad & 0xF].lockLevel >= 2)
-            && !State_ScriptFlag(chest_records[target_position->pad & 0xF].openedFlag + 0x3C0)
-            && (Field_RollRiskLockBreak() != 0)) {
+            && !VS::State::LiveScriptFlag(chest_records[target_position->pad & 0xF].openedFlag + 0x3C0)
+            && (VS::Field::RollLiveRiskLockBreak() != 0)) {
 
             chest_records[target_position->pad & 0xF].lockLevel = 0;
 
-            Audio_PlaySfxCentered(0x7E, 0x3F);
-            Audio_PlaySfxCentered(0x7E, 0x40);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x3F);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x40);
 
         } else {
             ((void (*)(void*))Battle_QueueWorldLockedLabel)(target_position);
@@ -113,15 +112,15 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
 void Field_BeginObjectInteractionWait(void)
 {
     Field_controlMode = 0xB;
-    Field_PauseFieldForObjectInteraction();
+    VS::Field::LivePauseFieldForObjectInteraction();
 }
 
 // decomp: BATTLE.PRG func_80073ACC (src/BATTLE/BATTLE.PRG/146C.c:4829)
 void Field_EndObjectInteractionWait(void)
 {
     Menu_ReleaseSceneNotification();
-    Field_ResumeFieldAfterMenu();
-    Field_EnterFieldExplorationMode();
+    VS::Field::LiveResumeFieldAfterMenu();
+    VS::Field::LiveEnterFieldExplorationMode();
 }
 
 // decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836)
@@ -146,12 +145,12 @@ int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* door_trigger)
             case 3:
                 if (VS::Items::CountLiveInventoryItem(door_trigger->keyOrSigil) != 0) {
                     if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
-                        State_SetScriptFlag(door_trigger->keyOrSigil + 0x1B6, 2);
+                        VS::State::SetLiveScriptFlag(door_trigger->keyOrSigil + 0x1B6, 2);
                         VS::Items::ConsumeLiveMiscItem(door_trigger->keyOrSigil);
                     }
                     door_trigger->trigger.lockState.lock.state = 0;
                     action = 2;
-                } else if (State_ScriptFlag(door_trigger->keyOrSigil + 0x1B6)) {
+                } else if (VS::State::LiveScriptFlag(door_trigger->keyOrSigil + 0x1B6)) {
                     door_trigger->trigger.lockState.lock.state = 0;
                     action = 3;
                 }
@@ -166,7 +165,7 @@ int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* door_trigger)
                     }
                     Menu_ShowSceneNotification(template_, door_trigger->keyOrSigil, 1);
                 }
-                ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 5);
+                VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 5);
                 Field_BeginDoorToggle(door_trigger);
                 return 0;
             }
@@ -189,9 +188,9 @@ int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* door_trigger)
                 Menu_ShowSceneNotification(template_, door_trigger->keyOrSigil, 1);
             }
 
-            Audio_PlaySfxCentered(0x7E, 0x65);
-            Audio_PlaySfxCentered(0x7E, 0x66);
-            Actors_RestoreActorIdlePose(0);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x65);
+            VS::Audio::LivePlaySfxCentered(0x7E, 0x66);
+            VS::Actors::RestoreLiveActorIdlePose(0);
             return 0;
         }
     }
@@ -242,11 +241,11 @@ void Field_TryOpenChest(Field_MpdLockTrigger* chest_trigger, int arg1)
         break;
     case 1:
     case 3:
-        if (!State_ScriptFlag(chest_trigger->isOpen + 0x1B6)) {
+        if (!VS::State::LiveScriptFlag(chest_trigger->isOpen + 0x1B6)) {
             if (VS::Items::CountLiveInventoryItem(chest_trigger->isOpen) == 0) {
                 break;
             }
-            State_SetScriptFlag(chest_trigger->isOpen + 0x1B6, 1);
+            VS::State::SetLiveScriptFlag(chest_trigger->isOpen + 0x1B6, 1);
             if (chest_trigger->isOpen >= 0x1D2) {
                 VS::Items::ConsumeLiveMiscItem(chest_trigger->isOpen);
             }
@@ -257,11 +256,11 @@ void Field_TryOpenChest(Field_MpdLockTrigger* chest_trigger, int arg1)
         break;
     }
     if (can_open != 0) {
-        ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 2);
+        VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 2);
         Field_BeginSwitchToggle(chest_trigger);
         return;
     }
-    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 3);
+    VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 3);
 }
 
 // decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4973)
@@ -271,12 +270,12 @@ void Field_BeginTrapInteraction(Field_MpdLockTrigger* trap_trigger, Actors_Actor
 
     Field_controlMode = 8;
     Battle_actionFlowMode = 1;
-    Field_StorePreferredActionCameraDistance();
+    VS::Field::LiveStorePreferredActionCameraDistance();
     Field_interactionFocus.triggerRecord = trap_trigger;
     Field_interactionFocus.actorQuery.location = *victim_location;
     Field_interactionFocus.actorQuery.actorIndex = victim_actor_index;
     for (i = 0; i < 16; ++i) {
-        Actors_RestoreActorIdlePose(i);
+        VS::Actors::RestoreLiveActorIdlePose(i);
     }
     if (Input_settings.information != 0) {
         Menu_ShowSceneNotification(0xB, trap_trigger->trigger.kind + 6, 1);
@@ -294,20 +293,20 @@ void Field_BeginChestInteraction(Field_MpdLockTrigger* chest_trigger, int intera
 
     Field_controlMode = 9;
     Battle_actionFlowMode = 1;
-    Field_StorePreferredActionCameraDistance();
+    VS::Field::LiveStorePreferredActionCameraDistance();
     Field_interactionFocus.triggerRecord = chest_trigger;
-    Actors_ActorPlacement(interacting_actor_index, &Field_interactionFocus.actorQuery);
+    VS::Actors::LiveActorPlacement(interacting_actor_index, &Field_interactionFocus.actorQuery);
     Field_interactionFocus.actorQuery.actorIndex = interacting_actor_index;
 
     for (i = 0; i < 16; ++i) {
-        Actors_RestoreActorIdlePose(i);
+        VS::Actors::RestoreLiveActorIdlePose(i);
     }
 
     target_tile_coordinate = chest_trigger->trigger.tileX;
     interaction_target_position[0] = (target_tile_coordinate << 7) + 0x40;
     target_tile_coordinate = chest_trigger->trigger.tileZ;
     interaction_target_position[2] = (target_tile_coordinate << 7) + 0x40;
-    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 1);
+    VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 1);
     Battle_actionState->chainStep = 0;
     Battle_actionState->selection.actionId = 0;
 }
@@ -321,8 +320,8 @@ int Field_WaitForChestCameraFocus(void)
     interaction_camera_target.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
     interaction_camera_target.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
 
-    if ((Field_StepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28) == 0)
-        && (((Actors_ActorStateFlags(0) & 0x08000000) != 0))) {
+    if ((VS::Field::LiveStepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28) == 0)
+        && (((VS::Actors::LiveActorStateFlags(0) & 0x08000000) != 0))) {
         return 0;
     }
     return 1;
@@ -336,7 +335,7 @@ int Field_StepTrapCameraFocus(void)
     interaction_camera_target.vx = (u_short)Field_interactionFocus.actorQuery.location.position.vx;
     interaction_camera_target.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
     interaction_camera_target.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
-    return Field_StepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28);
+    return VS::Field::LiveStepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28);
 }
 
 // decomp: BATTLE.PRG func_800741D4 (src/BATTLE/BATTLE.PRG/146C.c:5044)
@@ -355,7 +354,7 @@ void Field_DispatchTrapOrChestInteraction(void)
 int Field_IsChestAnimationReady(void)
 {
     int ret = 0;
-    if (Actors_ActorStateFlags(0) & 0x08000000) {
+    if (VS::Actors::LiveActorStateFlags(0) & 0x08000000) {
         ret = Menu_IsSceneNotificationPending() == 0;
     }
     return ret;
@@ -372,7 +371,7 @@ void Field_FinishChestInteraction(void)
     v = 7;
     interaction_target_position[0] = (Field_interactionFocus.triggerRecord->trigger.tileX << v) + 0x40;
     interaction_target_position[2] = (Field_interactionFocus.triggerRecord->trigger.tileZ << v) + 0x40;
-    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 4);
+    VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 4);
     Menu_ReleaseSceneNotification();
 }
 
@@ -393,13 +392,13 @@ int Field_TrackInteractionCameraToAshley(void)
     short ashley_placement_words[6];
     int camera_tracking_speed;
 
-    Actors_ActorPlacement(0, (Actors_ActorLocationQuery*)ashley_placement_words);
+    VS::Actors::LiveActorPlacement(0, (Actors_ActorLocationQuery*)ashley_placement_words);
     ashley_camera_target.vx = ashley_placement_words[2];
     ashley_camera_target.vz = ashley_placement_words[4];
     ashley_camera_target.vy = ashley_placement_words[3] - 0x5A;
-    camera_tracking_speed = Field_StepCameraLookAtTowardTarget(&ashley_camera_target, 1, 0x28);
+    camera_tracking_speed = VS::Field::LiveStepCameraLookAtTowardTarget(&ashley_camera_target, 1, 0x28);
 
-    if (Actors_IsAshleyTransitionPose() != 0) {
+    if (VS::Actors::IsLiveAshleyTransitionPose() != 0) {
         return 0;
     }
     return camera_tracking_speed;
@@ -426,15 +425,15 @@ void Field_OpenChestContents()
             break;
         }
         Menu_ShowSceneNotification(notification_template, Field_interactionFocus.triggerRecord->isOpen, 1);
-        Field_PauseFieldForInteractionDialog();
+        VS::Field::LivePauseFieldForInteractionDialog();
     } else {
         short loot_or_storage_index = Field_interactionFocus.triggerRecord->linkedLockIndex;
         if (loot_or_storage_index < 0x40) {
-            Menu_Framework_OpenLootEntryMenu((Items_BattleLoot*)(Field_interactionFocus.triggerRecord + 1));
+            VS::Menu::Framework::OpenLiveLootEntryMenu((Items_BattleLoot*)(Field_interactionFocus.triggerRecord + 1));
         } else {
-            Menu_Framework_OpenChestStorageMenu(loot_or_storage_index - 0x40);
+            VS::Menu::Framework::OpenLiveChestStorageMenu(loot_or_storage_index - 0x40);
         }
-        Field_PauseFieldForMenu();
+        VS::Field::LivePauseFieldForMenu();
     }
 }
 
@@ -447,21 +446,21 @@ int Field_UpdateChestContentsSelection(void)
         if (Menu_IsSceneNotificationPending() != 0) {
             return 1;
         }
-        Field_ResumeFieldAfterMenu();
+        VS::Field::LiveResumeFieldAfterMenu();
         return 0;
     }
-    Menu_Framework_UpdateMenuOverlay();
-    action_selection = Menu_Framework_ActionSelectionState();
+    VS::Menu::Framework::UpdateLiveMenuOverlay();
+    action_selection = VS::Menu::Framework::LiveActionSelectionState();
     if (action_selection->menuStatus == 1) {
         return 1;
     }
     if (action_selection->selectionKind != 0) {
-        State_SetScriptFlag((Field_interactionFocus.triggerRecord->linkedLockIndex + 0x3C0), 1);
+        VS::State::SetLiveScriptFlag((Field_interactionFocus.triggerRecord->linkedLockIndex + 0x3C0), 1);
     } else {
         Field_BeginSwitchToggle(Field_interactionFocus.triggerRecord);
     }
-    Menu_Framework_ReleaseMenuRows();
-    Field_ResumeFieldAfterMenu();
+    VS::Menu::Framework::ReleaseLiveMenuRows();
+    VS::Field::LiveResumeFieldAfterMenu();
     return 0;
 }
 
@@ -500,7 +499,7 @@ int Field_TryTriggerFacingTileEvent(int actor_index)
     Actors_ActorLocationQuery actor_placement;
     u_char facing_tile[4];
 
-    Actors_ActorPlacement(actor_index, &actor_placement);
+    VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
     Field_TileInFrontOfActor(&actor_placement, facing_tile);
     // BUG: arg2 should be an actor ID?
     return Event_EvaluateRoomEventTriggers(4, 0, facing_tile, 1) == 1;
@@ -514,10 +513,10 @@ Field_MpdLockTrigger* Field_FindFacingRoomObject(int actor_index)
     Field_MpdLockTrigger* facing_door;
     u_char* facing_tile_bytes = facing_tile;
 
-    Actors_ActorPlacement(actor_index, &actor_placement);
+    VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
     Field_TileInFrontOfActor(&actor_placement, facing_tile);
     facing_door = Field_InteractiveDoorAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
-    if (((((Field_FloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11) >> 0x11)
+    if (((((VS::Field::LiveFloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11) >> 0x11)
              - actor_placement.location.position.vy)
             + 0x3F)
         >= 0x7FU) {
@@ -535,13 +534,13 @@ Items_TreasureChest* Field_FindFacingUnlootedChest(int actor_index)
     int facing_quadrant;
     u_char* facing_tile_bytes = facing_tile;
 
-    Actors_ActorPlacement(actor_index, &actor_placement);
+    VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
     facing_quadrant = Field_TileInFrontOfActor(&actor_placement, facing_tile);
     facing_chest = VS::Items::FindLiveTreasureChestAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
 
     if ((facing_chest != NULL) && (facing_chest->facing == facing_quadrant)) {
-        if (!State_ScriptFlag((facing_chest->openedFlag + 0x3C0))) {
-            int v = ((Field_FloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11)
+        if (!VS::State::LiveScriptFlag((facing_chest->openedFlag + 0x3C0))) {
+            int v = ((VS::Field::LiveFloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11)
                         >> 0x11)
                   + 0x60;
             if (actor_placement.location.position.vy == v) {
@@ -559,7 +558,7 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
     Field_MpdDoorRecord destination;
     Actors_ActorLocation* coordinates;
     Field_MpdFloorTrigger* roomTrigger;
-    Field_MpdTileCell* tile;
+    const Field_MpdTileCell* tile;
     Field_DoorMatchList* doors;
     Field_MpdDoorRecord* door;
     Battle_Actor* actor;
@@ -572,15 +571,15 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
     int doorIndex;
     int handled = 0;
 
-    phaseValue = Actors_ActorStateFlags(actorId);
+    phaseValue = VS::Actors::LiveActorStateFlags(actorId);
     tileMode = (u_int)phaseValue >> 14;
     tileMode &= 1;
     floorOverride = phaseValue & 0x70000;
     coordinates = (Actors_ActorLocation*)position;
     if (floorOverride != 0) {
-        tile = Field_CollisionCellAt(0, 0, floorOverride >> 16);
+        tile = VS::Field::LiveCollisionCellOrAbsent(0, 0, floorOverride >> 16);
     } else {
-        tile = Field_CollisionCellAt(position[0],
+        tile = VS::Field::LiveCollisionCellOrAbsent(position[0],
             position[2], position[1]);
     }
 
@@ -605,7 +604,7 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
                         Effects_SpawnTrapTileEffect(coordinates);
                     }
                 }
-                Actors_ResetActorRunMomentum(actorId);
+                VS::Actors::ResetLiveActorRunMomentum(actorId);
                 return 1;
             }
 
@@ -639,13 +638,13 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
                 if (doors != NULL) {
                     for (doorIndex = 0; doorIndex < doors->count; ++doorIndex) {
                         door = doors->records[doorIndex];
-                        if ((u_char)State_ScriptFlag(door->requiredFlagId) >= door->requiredFlagValue) {
+                        if ((u_char)VS::State::LiveScriptFlag(door->requiredFlagId) >= door->requiredFlagValue) {
                             if (door->destinationZoneId == Field_zoneContext.zndId) {
-                                Field_BeginRoomTransition(door, 0, 8);
+                                VS::Field::LiveBeginRoomTransition(door, 0, 8);
                             } else {
-                                Field_BeginZoneTransition(door, 0, 8);
+                                VS::Field::LiveBeginZoneTransition(door, 0, 8);
                             }
-                            Actors_ResetActorRunMomentum(actorId);
+                            VS::Actors::ResetLiveActorRunMomentum(actorId);
                             Field_SetEntranceDoorRecord((char (*)[12])doors->records[doorIndex]);
                             return 1;
                         }
@@ -661,7 +660,7 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
     }
 
     if (handled == 0 && tile->isPit && coordinates->position.vy > 16) {
-        phaseValue = Field_RoomFallDestination();
+        phaseValue = VS::Field::LiveRoomFallDestination();
         if (phaseValue != -1 && phaseValue != 0) {
             destination.destinationZoneId = phaseValue / 65536;
             destination.destinationRoomId = phaseValue - (phaseValue / 65536) * 65536;
@@ -673,11 +672,11 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
             destination.hasEntryStep = 0;
             destination.reserved06Bit15 = 0;
             if (destination.destinationZoneId == Field_zoneContext.zndId) {
-                Field_BeginRoomTransition(&destination, 0, 8);
+                VS::Field::LiveBeginRoomTransition(&destination, 0, 8);
             } else {
-                Field_BeginZoneTransition(&destination, 0, 8);
+                VS::Field::LiveBeginZoneTransition(&destination, 0, 8);
             }
-            Actors_ResetActorRunMomentum(actorId);
+            VS::Actors::ResetLiveActorRunMomentum(actorId);
             Field_SetEntranceDoorRecord(NULL);
             return 0;
         }
@@ -693,9 +692,9 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
 
         actor->stats->currentHp -= 20;
         Field_StoreEntranceDoorForReload();
-        Field_BeginRoomTransition(&Field_pendingDestinationDoor, 0, 8);
+        VS::Field::LiveBeginRoomTransition(&Field_pendingDestinationDoor, 0, 8);
         ((void (*)(int arg0, int arg1, u_int arg2, int arg3))Battle_QueueActorValueLabel)(actor->stats->actorId, 0, 0x80000014, 0);
-        Actors_ResetActorRunMomentum(actorId);
+        VS::Actors::ResetLiveActorRunMomentum(actorId);
         Field_SetEntranceDoorRecord((char (*)[12])&Field_pendingDestinationDoor);
         return 1;
     }
@@ -706,7 +705,7 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
 int Field_CheckActorTrapAndFallTriggers(int actor_index, Actors_ActorLocation* actor_location)
 {
     Field_MpdFloorTrigger* floor_trigger;
-    Field_MpdTileCell* collision_cell;
+    const Field_MpdTileCell* collision_cell;
     int trigger_tile_mode;
     u_int platform_layer_flags;
     u_int actor_state_flags;
@@ -714,15 +713,15 @@ int Field_CheckActorTrapAndFallTriggers(int actor_index, Actors_ActorLocation* a
     Actors_ActorLocation* location_alias = actor_location;
     int _[4] __attribute__((unused));
 
-    actor_state_flags = Actors_ActorStateFlags(actor_index);
+    actor_state_flags = VS::Actors::LiveActorStateFlags(actor_index);
     platform_layer_flags = actor_state_flags & 0x70000;
     trigger_tile_mode = (actor_state_flags >> 0xE);
     trigger_tile_mode &= 1;
 
     if (platform_layer_flags != 0) {
-        collision_cell = Field_CollisionCellAt(0, 0, platform_layer_flags >> 0x10);
+        collision_cell = VS::Field::LiveCollisionCellOrAbsent(0, 0, platform_layer_flags >> 0x10);
     } else {
-        collision_cell = Field_CollisionCellAt(actor_location->packedTile.target.tileX, actor_location->packedTile.target.tileZ,
+        collision_cell = VS::Field::LiveCollisionCellOrAbsent(actor_location->packedTile.target.tileX, actor_location->packedTile.target.tileZ,
             actor_location->packedTile.target.tileLayer);
     }
 

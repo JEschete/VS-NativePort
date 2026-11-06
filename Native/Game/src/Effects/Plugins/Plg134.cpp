@@ -7,6 +7,6 @@ extern "C" {
 int Effects_Plg134_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FC970 (D_800FC970@EFFECT/PLG134.BIN)
-CVECTOR Effects_Plg134_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg134_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

@@ -770,6 +770,41 @@ bool ValidateModelData(const ModelCounts& counts, bool colored,
   return true;
 }
 
+std::optional<ModelVertexSection> FindModelVertexSection(
+    const ModelCounts& counts, std::span<const std::byte> model) {
+  const std::optional<ModelSections> sections = ReadSections(counts, model);
+  if (!sections.has_value()) {
+    return std::nullopt;
+  }
+  return ModelVertexSection{
+      .offset = sections->vertices,
+      .count = (sections->polygons - sections->vertices) / kVertexBytes};
+}
+
+// The animation events' vertex moves (BATTLE.PRG func_800AD714 ops 36-39)
+// wrote through the model pointer with no bound; here the move stays inside
+// the vertex section.
+bool MoveModelVertex(const ModelCounts& counts, std::span<std::byte> model,
+                     std::size_t vertex, const ModelVertex& delta) {
+  const std::optional<ModelVertexSection> section =
+      FindModelVertexSection(counts, model);
+  if (!section.has_value() || vertex >= section->count) {
+    return false;
+  }
+  const std::size_t at = section->offset + (vertex * kVertexBytes);
+  const std::array<std::int16_t, 3> moves{delta.x, delta.y, delta.z};
+  for (std::size_t axis = 0; axis < moves.size(); ++axis) {
+    const std::span<std::byte> field =
+        model.subspan(at + (axis * sizeof(std::int16_t)), sizeof(std::int16_t));
+    std::int16_t value = 0;
+    std::memcpy(&value, field.data(), sizeof value);
+    value = Math::WrapSigned16(static_cast<std::uint32_t>(value) +
+                               static_cast<std::uint32_t>(moves.at(axis)));
+    std::memcpy(field.data(), &value, sizeof value);
+  }
+  return true;
+}
+
 std::uint32_t ModelAppearanceMaterial(std::uint32_t state) {
   if (state == 0) {
     return 0;

@@ -15,6 +15,7 @@
 
 #include "Content/DataStore.hpp"
 #include "Field/MinimapScene.hpp"
+#include "Menu/FilesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
@@ -26,6 +27,7 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 #include "Menu/Files.h"
+#include "Menu/FilesLiveState.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveFiles.h"
 }
@@ -279,29 +281,21 @@ class Frontend {
   explicit Frontend(bool title) : title_(title) {}
 
   int Glyph(unsigned glyph, Point position, int clut = 0) const {
-    return title_
-               ? Title_SaveFiles_DrawGlyph(glyph, position.x, position.y, clut)
-               : Menu_Files_DrawGlyph(glyph, position.x, position.y, clut);
+    // TITLE.PRG's file-screen drawing is the MENU7.PRG code over the same
+    // VRAM, so both screens draw through the one binding.
+    return VS::Menu::Files::DrawLiveGlyph(glyph, position.x, position.y, clut);
   }
 
   void Sprite(Point position, SpriteAsset asset) const {
     const int xy = vs_getXY(position.x, position.y);
-    if (title_) {
-      Title_SaveFiles_DrawImmediateSprite(xy, asset.uv_clut, asset.size,
-                                          asset.page);
-    } else {
-      VS::Render::DrawLiveImmediateSprite(xy, asset.uv_clut, asset.size,
-                                          asset.page);
-    }
+    VS::Render::DrawLiveImmediateSprite(xy, asset.uv_clut, asset.size,
+                                        asset.page);
   }
 
   void Label(Point position, Menu_Files_FileMenuUiId label) const {
     const int xy = vs_getXY(position.x, position.y);
-    if (title_) {
-      Title_SaveFiles_DrawSummaryLabel(xy, label);
-    } else {
-      Menu_Files_DrawSummaryLabel(xy, label);
-    }
+    VS::Menu::Files::DrawLiveSummaryLabel(
+        xy, static_cast<VS::Menu::Files::Label>(label));
   }
 
   void HpMp(Point position, Menu_Files_StatType stat, int current,
@@ -310,11 +304,8 @@ class Frontend {
         std::clamp(maximum, 0, static_cast<int>(kMaximumStat));
     const unsigned value = std::clamp(current, 0, static_cast<int>(limit));
     const int xy = vs_getXY(position.x, position.y);
-    if (title_) {
-      Title_SaveFiles_DrawHpMpSummary(xy, stat, value, limit);
-    } else {
-      Menu_Files_DrawHpMpSummary(xy, stat, value, limit);
-    }
+    VS::Menu::Files::DrawLiveHpMpSummary(
+        xy, static_cast<VS::Menu::Files::Stat>(stat), value, limit);
   }
 
   void Panel(Point position, Extent size, bool selected,
@@ -331,10 +322,11 @@ class Frontend {
     element.h = size.height;
     element.selected = static_cast<char>(selected);
     element.innertextBlendFactor = breadcrumb ? kSelectedBlend : 0;
+    auto typed = std::bit_cast<VS::Menu::Files::Element>(element);
     if (title_) {
-      Title_SaveFiles_DrawElement(&element);
+      VS::Menu::Files::DrawLiveTitleElement(typed);
     } else {
-      Menu_Files_DrawElement(&element);
+      VS::Menu::Files::DrawLiveElement(typed);
     }
   }
 
@@ -388,7 +380,8 @@ std::span<const char> OriginalText(std::size_t offset) {
 }
 
 void Integer(Point position, unsigned value, unsigned divisor) {
-  Menu_Files_DrawInteger(vs_getXY(position.x, position.y), value, divisor);
+  VS::Menu::Files::DrawLiveInteger(vs_getXY(position.x, position.y), value,
+                                   divisor);
 }
 
 unsigned MapPercent(const State_RoomVisitFlags& visits) {

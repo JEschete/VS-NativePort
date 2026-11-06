@@ -7,9 +7,9 @@ extern "C" {
 SVECTOR Effects_Plg297_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FCDF0 (D_800FCDF0@EFFECT/PLG297.BIN)
-CVECTOR Effects_Plg297_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg297_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FCE10 (D_800FCE10@EFFECT/PLG297.BIN)
-u_char Effects_Plg297_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg297_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

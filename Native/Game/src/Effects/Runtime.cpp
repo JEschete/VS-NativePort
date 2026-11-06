@@ -1,19 +1,20 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SoundBanksLive.hpp"
 #include "Audio/StreamControlLive.hpp"
+#include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/OverlayFiles.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/CameraLive.hpp"
+#include "Effects/CurvesLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Audio/SoundBanks.h"
-#include "Boot/Lifecycle.h"
 #include "DiscQueue.h"
-#include "Effects/Camera.h"
-#include "Effects/Curves.h"
-#include "Effects/EffectResources.h"
-#include "Effects/Loading.h"
+#include "Effects/CameraLiveState.h"
+#include "Effects/EffectResourcesLiveState.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -123,7 +124,7 @@ int Effects_IgnoreRuntimeDiagnostic(int diagnostic_code __attribute__((unused)))
 void Effects_InitEffectRuntime(void)
 {
     Effects_ResetEffectInstances();
-    Effects_InitializeEffectResources();
+    VS::Effects::LiveInitializeEffectResources();
     Effects_ResetParticlePoolReferences();
 }
 
@@ -266,9 +267,9 @@ int Effects_UpdatePrimaryEffects(void)
         break;
 
     case 6:
-        if (Effects_LoadEffectPurgeOverlay() == 0) {
-            Boot_WaitForOverlayReady();
-            Effects_ConfigureEffectResources();
+        if (VS::Effects::LiveLoadEffectPurgeOverlay() == 0) {
+            VS::Boot::WaitForOverlayReadyLive();
+            VS::Effects::LiveConfigureEffectResources();
             if ((Effects_actionRequest.effectId != 0) && (Effects_packageFile.lba == 0)) {
                 Effects_SetPrimaryEffectPhase(4);
                 Effects_trackCount = 0;
@@ -284,21 +285,21 @@ int Effects_UpdatePrimaryEffects(void)
         break;
 
     case 2:
-        if (Effects_UpdateEffectTextureLoading() == 0) {
+        if (VS::Effects::LiveUpdateEffectTextureLoading() == 0) {
             Effects_SetPrimaryEffectPhase(8);
         }
         break;
 
     case 8:
-        if (Effects_UpdateEffectPluginLoading() == 0) {
+        if (VS::Effects::LiveUpdateEffectPluginLoading() == 0) {
             Effects_SetPrimaryEffectPhase(3);
-            Boot_WaitForOverlayReady();
+            VS::Boot::WaitForOverlayReadyLive();
         }
         break;
 
     case 3:
-        if (Effects_LoadEffectPackage() == 0) {
-            ((void (*)(void*))Effects_BindEffectPackageBlocks)(Effects_packageBuffer);
+        if (VS::Effects::LiveLoadEffectPackage() == 0) {
+            VS::Effects::LiveBindEffectPackageBlocks(Effects_packageBuffer);
             Effects_SetPrimaryEffectPhase(5);
 
             Effects_trackCount = Effects_package->block9Data->frameCount;
@@ -325,10 +326,10 @@ int Effects_UpdatePrimaryEffects(void)
             Effects_currentInstance = instance_cursor;
 
             if (Effects_package->curveBlock != NULL) {
-                Effects_SampleAllEffectCurves(instance_cursor->frame);
+                VS::Effects::LiveSampleAllEffectCurves(instance_cursor->frame);
             }
 
-            Effects_UpdateParticleGravityAndDrag();
+            VS::Effects::LiveUpdateParticleGravityAndDrag();
 
             if (Effects_RunEffectScript(instance_cursor) == 0) {
                 Effects_DestroyPrimaryEffectInstance(instance_cursor);
@@ -346,7 +347,7 @@ int Effects_UpdatePrimaryEffects(void)
         if (Effects_trackCount <= Effects_startedTrackCount) {
 
             if (Effects_package->block12Data != 0) {
-                Audio_UnbindRoomSfxBank();
+                VS::Audio::LiveUnbindRoomSfxBank();
                 Effects_package->block12Data = NULL;
             }
 
@@ -357,7 +358,7 @@ int Effects_UpdatePrimaryEffects(void)
             }
 
             VS::Input::StopLiveVibrationPatterns(0, 1);
-            Effects_ReleaseEffectPackageResources();
+            VS::Effects::LiveReleaseEffectPackageResources();
             Effects_ReleaseParticlePool();
             Effects_ReleaseEffectToken(Effects_primaryToken);
 
@@ -369,7 +370,7 @@ int Effects_UpdatePrimaryEffects(void)
                 Effects_purgeOverlayLoaded = 0;
             }
 
-            Effects_ResetEffectCameraMotion();
+            VS::Effects::LiveResetEffectCameraMotion();
             Effects_SetPrimaryEffectPhase(9);
         } else {
             Effects_SetPrimaryEffectPhase(5);
@@ -426,10 +427,10 @@ int Effects_UpdateSecondaryEffects(void)
             break;
         case 4:
             if (Effects_package->curveBlock != NULL) {
-                Effects_SampleAllEffectCurves(instance_cursor->frame);
+                VS::Effects::LiveSampleAllEffectCurves(instance_cursor->frame);
             }
 
-            Effects_UpdateParticleGravityAndDrag();
+            VS::Effects::LiveUpdateParticleGravityAndDrag();
 
             renderer_cursor = instance_cursor->context.renderer;
 
@@ -490,7 +491,7 @@ int Effects_StartEffectTrack(int track_index)
     Effects_EffectSpawnRequest spawn_request;
     int v;
 
-    Effects_SelectEffectResourceContext(1);
+    VS::Effects::LiveSelectEffectResourceContext(1);
     v = Effects_CanStartEffectTrack();
     if (v != 0) {
         if (Effects_pendingTracks & (1 << track_index)) {
@@ -520,13 +521,13 @@ int Effects_UpdateEffectRuntime(void)
     int primary_busy;
 
     Effects_effectBufferIndex = 1 - Effects_effectBufferIndex;
-    Effects_SelectEffectResourceContext(1);
+    VS::Effects::LiveSelectEffectResourceContext(1);
     primary_busy = Effects_UpdatePrimaryEffects();
-    Effects_SelectEffectResourceContext(0);
+    VS::Effects::LiveSelectEffectResourceContext(0);
     secondary_busy_bits = Effects_UpdateSecondaryEffects();
-    Effects_SelectEffectResourceContext(1);
+    VS::Effects::LiveSelectEffectResourceContext(1);
     if (Effects_primaryPhase == 4) {
-        Effects_UpdateEffectCameraMotion();
+        VS::Effects::LiveUpdateEffectCameraMotion();
     }
     return primary_busy | secondary_busy_bits;
 }
@@ -542,9 +543,9 @@ int Effects_BeginActionEffect(Effects_ActionEffectRequest* effect_request, int a
     }
 
     Effects_primaryToken = ((int (*)(...))Effects_AllocateEffectToken)();
-    Effects_SelectEffectResourceContext(1);
-    Effects_CaptureEffectCamera(&Effects_savedActionCamera);
-    Effects_CaptureEffectCamera(&Effects_effectCamera);
+    VS::Effects::LiveSelectEffectResourceContext(1);
+    VS::Effects::LiveCaptureEffectCamera(&Effects_savedActionCamera);
+    VS::Effects::LiveCaptureEffectCamera(&Effects_effectCamera);
     Effects_SetPrimaryEffectPhase(6);
 
     return Effects_primaryToken;
@@ -626,9 +627,9 @@ char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* effect_request, 
 int Effects_BeginSecondaryEffects(Effects_ActionEffectRequest* effect_request, int renderer_parameters)
 {
     int _[4] __attribute__((unused));
-    Effects_SelectEffectResourceContext(0);
-    Effects_CaptureEffectCamera(&Effects_savedActionCamera);
-    Effects_CaptureEffectCamera(&Effects_effectCamera);
+    VS::Effects::LiveSelectEffectResourceContext(0);
+    VS::Effects::LiveCaptureEffectCamera(&Effects_savedActionCamera);
+    VS::Effects::LiveCaptureEffectCamera(&Effects_effectCamera);
     return Effects_SpawnSecondaryEffects(effect_request, 0, renderer_parameters);
 }
 

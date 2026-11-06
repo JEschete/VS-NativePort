@@ -10,7 +10,7 @@
 #define VS_BATTLE_ACTIONFLOW_H_DECLS
 #include "Battle/Action.h"
 #include "Battle/Hit.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Menu/Framework/ActionSelection.h"
 
 extern Menu_Framework_ActionSelection* Battle_actionSelection;

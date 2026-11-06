@@ -4,6 +4,7 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
-#include "State/Flags.h"
 
 // decomp: D_800F17DC (D_800F17DC@BATTLE/BATTLE.PRG)
 short Battle_Ai_radialRetreatPath[36][2]; /* contents: module image (ModuleData.cpp) */
@@ -266,7 +266,7 @@ int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* ai_state)
         VS::Battle::Ai::TryEngageLiveActor(ai_state);
     }
 
-    state = State_ScriptFlag(0xA6);
+    state = VS::State::LiveScriptFlag(0xA6);
     orbit_state = Battle_Ai_arenaOrbit;
 
     if (orbit_state->cooldown > 0) {
@@ -327,7 +327,7 @@ int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* ai_state)
         break;
     }
 
-    State_SetScriptFlag(0xA6, state);
+    VS::State::SetLiveScriptFlag(0xA6, state);
     return 1;
 }
 

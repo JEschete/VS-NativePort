@@ -3,7 +3,7 @@
 #include "Battle/ActionResultsLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
+#include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"

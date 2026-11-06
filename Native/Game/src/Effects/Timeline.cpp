@@ -1,22 +1,22 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ActorStateLive.hpp"
 #include "Actors/AppearanceLive.hpp"
+#include "Audio/ActorSoundLive.hpp"
+#include "Audio/SfxLive.hpp"
+#include "Audio/StreamLive.hpp"
+#include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Content/PFileLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/CameraLive.hpp"
+#include "Effects/CurvesLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/ActorState.h"
-#include "Audio/ActorSound.h"
-#include "Audio/Sfx.h"
-#include "Audio/Stream.h"
-#include "Battle/Abilities.h"
 #include "Battle/ActionFlow.h"
 #include "Effects/ActionEffects.h"
-#include "Effects/Camera.h"
-#include "Effects/Curves.h"
-#include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -85,7 +85,7 @@ void Effects_InitializeParticleTimelineKey(Effects_TimelineTrack* timeline_track
 void Effects_InitializeShakeTimelineKey(Effects_TimelineTrack* timeline_track)
 {
     timeline_track->keyTimer =
-        Effects_SegmentedEffectCurveDuration((((Effects_ShakeTrackKey*)&timeline_track->keys[timeline_track->keyIndex * 2 + 1])->curve));
+        VS::Effects::LiveSegmentedEffectCurveDuration((((Effects_ShakeTrackKey*)&timeline_track->keys[timeline_track->keyIndex * 2 + 1])->curve));
 }
 
 // decomp: BATTLE.PRG func_800D5780 (src/BATTLE/BATTLE.PRG/5BF94.c:7933)
@@ -117,7 +117,7 @@ int Effects_TickParticleEmissionTrack(Effects_EffectInstance* effect_instance, E
     if (cur < key) {
         return ret;
     }
-    Effects_SampleAllEffectCurves(timeline_track->curveFrame);
+    VS::Effects::LiveSampleAllEffectCurves(timeline_track->curveFrame);
     Effects_EmitParticleEvent(
         effect_instance, e[timeline_track->keyIndex].opaque2Bit4, e[timeline_track->keyIndex].opaque3Bit2, e[timeline_track->keyIndex].opaque2Bit0, NULL);
     ++timeline_track->curveFrame;
@@ -144,19 +144,19 @@ int Effects_TickEffectSoundTrack(Effects_EffectInstance* effect_instance, Effect
 
     if (((command >> 18) & 3) == 2) {
         if (Effects_package->auxiliarySoundHandle != 0) {
-            Audio_PlayCutsceneStreamSlotCentered(Effects_package->auxiliarySoundHandle);
+            VS::Audio::LivePlayCutsceneStreamSlotCentered(Effects_package->auxiliarySoundHandle);
         }
     } else {
         int bank = ((command >> 18) & 3) == 0 ? 0x7E : 0xF00000;
 
         if (((command >> 20) & 3) == 0) {
-            Audio_PlaySfxCentered(bank, (command >> 9) & 0x1FF);
+            VS::Audio::LivePlaySfxCentered(bank, (command >> 9) & 0x1FF);
         } else {
             setVector(&position,
                 effect_instance->transforms[(commands[timeline_track->keyIndex] >> 22) & 63].world.t[0],
                 effect_instance->transforms[(commands[timeline_track->keyIndex] >> 22) & 63].world.t[1],
                 effect_instance->transforms[(commands[timeline_track->keyIndex] >> 22) & 63].world.t[2]);
-            Audio_PlayWorldSfx(bank, (commands[timeline_track->keyIndex] >> 9) & 0x1FF, &position);
+            VS::Audio::LivePlayWorldSfx(bank, (commands[timeline_track->keyIndex] >> 9) & 0x1FF, &position);
         }
     }
 
@@ -296,7 +296,7 @@ int Effects_TickSourceActorColorTrack(Effects_EffectInstance* effect_instance, E
 
     if (color_key->frame == effect_instance->context.timeline->frame) {
         if ((effect_instance->context.emitFrom.type == 4)
-            && (Actors_ActorStateFlags(effect_instance->context.emitFrom.value.actor.actor) & 2)) {
+            && (VS::Actors::LiveActorStateFlags(effect_instance->context.emitFrom.value.actor.actor) & 2)) {
             VS::Render::TransformLiveActorColors(color_key->mode, color_key->duration,
                 effect_instance->context.emitFrom.value.actor.actor, color_key->red - 0x80,
                 color_key->green - 0x80, color_key->blue - 0x80);
@@ -321,14 +321,14 @@ int Effects_TickTargetActorColorTrack(Effects_EffectInstance* effect_instance, E
 
         for (i = 0; i < Effects_actionRequest.count; ++i) {
             if ((effect->targets[i].type == 4)
-                && (Actors_ActorStateFlags(effect->targets[i].value.actor.actor) & 2)) {
+                && (VS::Actors::LiveActorStateFlags(effect->targets[i].value.actor.actor) & 2)) {
                 VS::Render::TransformLiveActorColors(entry->mode, entry->duration,
                     effect->targets[i].value.actor.actor, entry->red - 128,
                     entry->green - 128, entry->blue - 128);
             }
         }
     } else if ((effect_instance->context.emitTo.type == 4)
-               && (Actors_ActorStateFlags(effect_instance->context.emitTo.value.actor.actor) & 2)) {
+               && (VS::Actors::LiveActorStateFlags(effect_instance->context.emitTo.value.actor.actor) & 2)) {
         VS::Render::TransformLiveActorColors(entry->mode, entry->duration, effect_instance->context.emitTo.value.actor.actor,
             entry->red - 128, entry->green - 128, entry->blue - 128);
     }
@@ -343,7 +343,7 @@ int Effects_TickOtherActorColorTrack(Effects_EffectInstance* effect_instance, Ef
 
     if (color_key->frame == effect_instance->context.timeline->frame) {
         for (i = 0; i < Effects_actionRequest.otherCount; ++i) {
-            if (Actors_ActorStateFlags(Effects_actionRequest.others[i]) & 2) {
+            if (VS::Actors::LiveActorStateFlags(Effects_actionRequest.others[i]) & 2) {
                 VS::Render::TransformLiveActorColors(color_key->mode, color_key->duration, Effects_actionRequest.others[i],
                     color_key->red - 0x80, (color_key->green - 0x80), (color_key->blue - 0x80));
             }
@@ -412,9 +412,9 @@ void Effects_ActivateTargetRoomTile(Effects_EffectInstance* effect_instance)
 // decomp: BATTLE.PRG func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240)
 void Effects_SpawnTransformWeaponTrail(Effects_EffectInstance* effect_instance, u_char transform_index, u_char packed_trail_style)
 {
-    Effects_SaveEffectResourceContext();
+    VS::Effects::LiveSaveEffectResourceContext();
     Effects_SpawnBoneTrail(effect_instance->transforms[transform_index].actor, effect_instance->transforms[transform_index].bone, packed_trail_style % 10, packed_trail_style / 10);
-    Effects_RestoreEffectResourceContext();
+    VS::Effects::LiveRestoreEffectResourceContext();
 }
 
 // decomp: BATTLE.PRG func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:8247)
@@ -469,12 +469,12 @@ void Effects_PlaySourceActorReactionSound(Effects_EffectInstance* effect_instanc
 
     if (effect_instance->context.emitFrom.type == 4) {
         if (reaction_sound_variant < 4) {
-            Audio_PlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, reaction_sound_variant);
+            VS::Audio::LivePlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, reaction_sound_variant);
         } else {
             do {
                 var = Core_Random_Rand() % 3;
             } while (var == Effects_lastReactionSoundVariant);
-            Audio_PlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, Effects_lastReactionSoundVariant = var);
+            VS::Audio::LivePlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, Effects_lastReactionSoundVariant = var);
         }
     }
 }
@@ -491,7 +491,7 @@ void Effects_ActivateTargetGimmick(Effects_EffectInstance* effect_instance)
 void Effects_PrepareAshleyTargetImpact(Effects_EffectInstance* effect_instance)
 {
     if (effect_instance->context.emitTo.type == 4) {
-        Battle_ArmDefenseAbilityTimingWindow(effect_instance->context.emitTo.value.actor.actor);
+        VS::Battle::LiveArmDefenseAbilityTimingWindow(effect_instance->context.emitTo.value.actor.actor);
     }
 }
 
@@ -558,11 +558,11 @@ int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effe
             break;
 
         case 13:
-            Effects_FocusCameraOnEffectTransform(effect_instance, control_operand0, control_operand1);
+            VS::Effects::LiveFocusCameraOnEffectTransform(effect_instance, control_operand0, control_operand1);
             break;
 
         case 14:
-            Effects_RestoreActionEffectCamera(effect_instance, control_operand0);
+            VS::Effects::LiveRestoreActionEffectCamera(effect_instance, control_operand0);
             break;
 
         case 15:
@@ -588,7 +588,7 @@ int Effects_TickCameraShakeTrack(Effects_EffectInstance* effect_instance, Effect
         return ret;
     }
     if (key == cur) {
-        Effects_StartCameraShakeChannels(e->opaque4Bit0, e->opaque4Bit4, e->opaque5Bit1, e->opaque6Bit0, e->opaque6Bit1, e->opaque7Bit0,
+        VS::Effects::LiveStartCameraShakeChannels(e->opaque4Bit0, e->opaque4Bit4, e->opaque5Bit1, e->opaque6Bit0, e->opaque6Bit1, e->opaque7Bit0,
             e->opaque7Bit1);
     }
     if (--timeline_track->keyTimer == 0) {

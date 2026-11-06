@@ -9,6 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG149_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG149_H_DECLS
 
-extern u_char Effects_Plg149_ringColorFactors[][4];
+extern u_char Effects_Plg149_ringColorFactors[8][4];
 
 #endif // VS_EFFECTS_PLUGINS_PLG149_H_DECLS

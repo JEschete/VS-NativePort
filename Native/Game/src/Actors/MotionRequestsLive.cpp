@@ -9,6 +9,10 @@
 #include <iterator>
 #include <memory>
 
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorMovementLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
+
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -124,13 +128,12 @@ class LiveMotionActor final : public MotionActor {
     actor_.jumpProfile = static_cast<u_char>(profile);
   }
   void PlayAnimation(int animation, int blend_frames) override {
-    Actors_PlayActorAnimation(id_, animation, 0, blend_frames);
+    PlayLiveActorAnimation(id_, animation, 0, blend_frames);
   }
   void JumpToTile(JumpEntry entry, PackedTile target, int speed,
                   std::int16_t facing) override {
     LogJumpRequest(actor_, entry, target, speed, facing);
-    auto bytes = std::bit_cast<std::array<u_char, sizeof(target)>>(target);
-    Actors_BeginActorJumpToTile(&actor_, bytes.data(), speed, facing);
+    BeginLiveActorJumpToTile(&actor_, target, speed, facing);
     LogJumpResult(actor_);
   }
 
@@ -170,13 +173,13 @@ class LiveMotionActor final : public MotionActor {
     return actor_.collisionRadius;
   }
   void TurnAtRate(std::int16_t facing, int rate) override {
-    Actors_TurnActorToAtRate(id_, facing, rate);
+    TurnLiveActorToAtRate(id_, facing, rate);
   }
   void TurnAtAngularSpeed(std::int16_t facing, int speed) override {
-    Actors_TurnActorToAtAngularSpeed(id_, facing, speed);
+    TurnLiveActorToAtAngularSpeed(id_, facing, speed);
   }
   void PlayTurnAnimation(int facing) override {
-    Actors_PlayActorTurnAnimation(id_, facing);
+    PlayLiveActorTurnAnimation(id_, facing);
   }
 
  private:
@@ -214,61 +217,98 @@ void SaveLiveActorGroundedTransform(Actors_ActorRecord* actor) {
 
 // decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4A0A8.c:340)
 void BeginLiveTileJump(int actor_id, int* target, int speed, int facing) {
+  BeginLiveTileJump(actor_id, Tile(target), speed, facing);
+}
+
+void BeginLiveTileJump(int actor_id, PackedTile target, int speed, int facing) {
   LiveMotionActor actor(actor_id);
-  BeginTileJump(actor, Tile(target), speed, facing);
+  BeginTileJump(actor, target, speed, facing);
 }
 
 // decomp: BATTLE.PRG func_800B6404 (src/BATTLE/BATTLE.PRG/4A0A8.c:368)
 void BeginLiveAirborneTileJump(int actor_id, int* target, int speed,
                                int facing) {
+  BeginLiveAirborneTileJump(actor_id, Tile(target), speed, facing);
+}
+
+void BeginLiveAirborneTileJump(int actor_id, PackedTile target, int speed,
+                               int facing) {
   LiveMotionActor actor(actor_id);
-  BeginAirborneTileJump(actor, Tile(target), speed, facing);
+  BeginAirborneTileJump(actor, target, speed, facing);
 }
 
 // decomp: BATTLE.PRG func_800B6438 (src/BATTLE/BATTLE.PRG/4A0A8.c:383)
 void BeginLiveNavigationJump(int actor_id, int* target, int speed, int facing) {
+  BeginLiveNavigationJump(actor_id, Tile(target), speed, facing);
+}
+
+void BeginLiveNavigationJump(int actor_id, PackedTile target, int speed,
+                             int facing) {
   LiveMotionActor actor(actor_id);
-  BeginNavigationJump(actor, Tile(target), speed, facing);
+  BeginNavigationJump(actor, target, speed, facing);
 }
 
 // decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4A0A8.c:490)
 void BeginLiveTeleport(int actor_id, int* target, int facing) {
+  BeginLiveTeleport(actor_id, Tile(target), facing);
+}
+
+void BeginLiveTeleport(int actor_id, PackedTile target, int facing) {
   LiveMotionActor actor(actor_id);
-  BeginTeleport(actor, Tile(target), facing);
+  BeginTeleport(actor, target, facing);
 }
 
 // decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:522)
 void BeginLiveTileTravel(int actor_id, int* target, int facing) {
+  BeginLiveTileTravel(actor_id, Route(target), facing);
+}
+
+void BeginLiveTileTravel(int actor_id, const MotionVector& route, int facing) {
   LiveMotionActor actor(actor_id);
-  BeginTileTravel(actor, Route(target), facing);
+  BeginTileTravel(actor, route, facing);
 }
 
 // decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:531)
 void BeginLiveTimedTravel(int actor_id, int* target, int facing) {
+  BeginLiveTimedTravel(actor_id, Route(target), facing);
+}
+
+void BeginLiveTimedTravel(int actor_id, const MotionVector& route, int facing) {
   LiveMotionActor actor(actor_id);
-  BeginTimedTravel(actor, Route(target), facing);
+  BeginTimedTravel(actor, route, facing);
 }
 
 // decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4A0A8.c:445)
 void QueueLiveGroundOffset(int actor_id, SVECTOR* step) {
-  const auto value = Step(step);
+  QueueLiveGroundOffset(actor_id, Step(step));
+}
+
+void QueueLiveGroundOffset(int actor_id, const MotionVector& step) {
   LiveMotionActor actor(actor_id);
-  QueueGroundOffset(actor, value);
+  QueueGroundOffset(actor, step);
 }
 
 // decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4A0A8.c:459)
 void QueueLiveMovementVector(int actor_id, SVECTOR* step, int facing) {
-  const auto value = Step(step);
+  QueueLiveMovementVector(actor_id, Step(step), facing);
+}
+
+void QueueLiveMovementVector(int actor_id, const MotionVector& step,
+                             int facing) {
   LiveMotionActor actor(actor_id);
-  QueueMovementVector(actor, value, facing);
+  QueueMovementVector(actor, step, facing);
 }
 
 // decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4A0A8.c:467)
 void QueueLiveFlightMovement(int actor_id, SVECTOR* step, int speed,
                              int facing) {
-  const auto value = Step(step);
+  QueueLiveFlightMovement(actor_id, Step(step), speed, facing);
+}
+
+void QueueLiveFlightMovement(int actor_id, const MotionVector& step, int speed,
+                             int facing) {
   LiveMotionActor actor(actor_id);
-  QueueFlightMovement(actor, value, speed, facing);
+  QueueFlightMovement(actor, step, speed, facing);
 }
 
 // decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4A0A8.c:551)

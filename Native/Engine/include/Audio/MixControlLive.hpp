@@ -46,4 +46,7 @@ void LiveSetReverbMode(int mode);
 // (SeqRecordsLive.hpp LiveProgramRegion); D_800378C0.param2 holds the
 // second sequence of command 0x16 as a 32-bit address.
 unsigned LiveDispatchCommand(unsigned command);
+// func_80018C30 with the second sequence (command 0x16's) passed as a
+// pointer rather than as D_800378C0.param2's 32-bit address.
+unsigned LiveDispatchCommand(unsigned command, char* second_sequence);
 }  // namespace VS::Audio::Mixer

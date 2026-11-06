@@ -7,6 +7,6 @@ extern "C" {
 CVECTOR Effects_Plg143_tiledRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FB684 (D_800FB684@EFFECT/PLG143.BIN)
-CVECTOR Effects_Plg143_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg143_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

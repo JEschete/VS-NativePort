@@ -40,7 +40,7 @@ _Static_assert(sizeof(Effects_Plg128_CameraEffectState) == 0xD0, "Effects_Plg128
 #include "Effects/Transforms.h"
 
 extern SVECTOR Effects_Plg128_surfaceVertices[5][16];
-extern CVECTOR Effects_Plg128_closedRingColorFactors[];
+extern CVECTOR Effects_Plg128_closedRingColorFactors[8];
 extern SVECTOR Effects_Plg128_surfaceVertices2[5][16];
 extern int Effects_Plg128_trailEmissionCounter;
 void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* camera_effect, VECTOR* translation);

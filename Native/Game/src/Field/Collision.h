@@ -3,26 +3,10 @@
 #define VS_FIELD_COLLISION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Field_CollisionSampleScratch Field_CollisionSampleScratch;
-typedef struct Field_GimmickInstance Field_GimmickInstance;
 typedef struct Field_SavedPositionWords Field_SavedPositionWords;
 
 // decomp: D_800F4B0A (D_800F4B0A@BATTLE/BATTLE.PRG): a view into another global
 #define Field_collisionProbeHeight (*(short*)((u_char*)&Field_collisionProbePosition + 2))
-
-// decomp: D_1F8003BC_t (src/BATTLE/BATTLE.PRG/3A1A0.h:646)
-typedef struct Field_CollisionSampleScratch {
-    int searchFloor;
-    u_char excluded[17];
-    u_char pad15[3];
-    Field_GimmickInstance* movingActor;
-    short sampleHeights[8];
-    u_char blocked[8];
-    u_char attributes[8];
-    u_char centerAttribute;
-    u_char pad3D[3];
-    int searchCeiling;
-} Field_CollisionSampleScratch;
 
 // decomp: func_800A6798_t (src/BATTLE/BATTLE.PRG/3A1A0.c:29)
 typedef struct Field_SavedPositionWords {
@@ -34,55 +18,10 @@ _Static_assert(sizeof(Field_SavedPositionWords) == 0x8, "Field_SavedPositionWord
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_COLLISION_H_DECLS)
 #define VS_FIELD_COLLISION_H_DECLS
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Field/Mpd.h"
-#include "Field/Zone.h"
-#include "Render/Palette.h"
 
 extern u_char Field_kTileSurfaceIds[2744];
-extern u_int* Field_collisionProbeTile;
 extern u_char Field_collisionProbeDirection;
 extern short Field_platformContactSearchDepth;
 extern SVECTOR Field_collisionProbePosition;
-Field_MpdTileCell* Field_RoomCollisionCells(void);
-int Field_CollisionMapDimensions(int arg0 __attribute__((unused)));
-Field_ZoneBounds* Field_RoomCameraBounds(int arg0 __attribute__((unused)));
-Field_MpdTileCell* Field_CollisionCellAt(u_int width, u_int height, int collision_layer);
-int Field_SetCollisionCellBlocked(int tile_x, int tile_z, int collision_layer, int blocked_passability);
-short Field_InterpolatedFloorHeight(int world_x_or_sample_x, int world_z_or_sample_z);
-short Field_FloorHeightAt(int world_x, int world_z);
-short Field_CeilingHeightAt(int world_x, int world_z);
-int Field_FloorAndCeilingHeightsAt(int world_x, int world_z);
-void Field_SetActorCollisionBypass(int actor_index, int collision_bypass_flags);
-int Field_ActorCollisionBypass(int actor_index);
-int Field_RelativeCollisionSampleHeight(
-    Field_CollisionSampleScratch* samples, int sector, int offset, int y);
-int Field_ActorSupportHeight(int world_x, int world_z);
-void Field_SnapRoomActorsToSupport(void);
-int Field_RoomCeilingHeight(int world_x, int world_z);
-Actors_ActorRecord* Field_FindActorOccupyingTile(int query_tile_x, int query_tile_z, int minimum_actor_height, int occupancy_mode_or_first_actor);
-int Field_CheckPlatformActorObstruction(int contact, SVECTOR* point);
-int Field_IsHangingActorObstructed(Actors_ActorRecord* actor);
-int Field_IsPointOnMovingPlatform(int platform_layer_or_index, SVECTOR* world_position);
-int Field_CanActorHangFromLedge(Actors_ActorRecord* actor, SVECTOR* offset, SVECTOR* motion);
-int Field_HasActorLedgeSideSupport(Actors_ActorRecord* actor_record);
-int Field_SampleActorSupportHeight(SVECTOR* origin_position, int offset_x, int offset_z, int support_probe_mode);
-void Field_SampleActorCollisionPerimeter(Actors_ActorRecord* actor, int diagonal);
-void Field_ApplyActorWallRepulsion(Actors_ActorRecord* actor, SVECTOR* motion);
-int Field_ResolveActorTerrainMotion(Actors_ActorRecord* actor, SVECTOR* motion, int* result, int probeOnly);
-int Field_ClassifyActorTerrainProbe(SVECTOR* probe_position, int sample_sector);
-Field_MpdTileCell* Field_FindCollisionCellAtPosition(SVECTOR* world_position, int collision_layer);
-int Field_IsActorPositionUnoccupied(Actors_ActorRecord* actor, SVECTOR* position);
-int Field_CanActorSeparateFromOverlaps(Actors_ActorRecord* actor, SVECTOR* motion);
-int Field_GimmickSupportHeight(int query_tile_x, int query_tile_z);
-int Field_MovingPlatformContactHeight(int world_x, int world_y, int world_z, int contact_search_mode);
-int Field_CalcActorLedgeOffset(Actors_ActorRecord* actor, SVECTOR* offset);
-int Field_GimmickSupportHeightBelow(int query_tile_x, int query_tile_z, int reference_height);
 
 #endif // VS_FIELD_COLLISION_H_DECLS

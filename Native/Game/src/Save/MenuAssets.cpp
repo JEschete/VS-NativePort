@@ -3,16 +3,25 @@
 
 namespace VS::Save::MemoryCard {
 namespace {
+// The image is requested only into an allocated buffer (#301).
+bool Allocate(MenuAssetLoad& load, MenuAssetHost& host) {
+  if (!host.AllocateAssets(load.owner)) return false;
+  host.RequestImage();
+  load.phase = MenuAssetPhase::kLoadingImage;
+  return true;
+}
+
 bool Begin(MenuAssetLoad& load, MenuAssetHost& host, MenuAssetOwner owner) {
   if (load.phase != MenuAssetPhase::kIdle) {
     host.ReportMisuse(MenuAssetMisuse::kAlreadyActive);
     return false;
   }
   if (owner == MenuAssetOwner::kDataMenu) host.ReserveTexturePages();
-  host.AllocateAssets(owner);
-  host.RequestImage();
   load.owner = owner;
-  load.phase = MenuAssetPhase::kLoadingImage;
+  load.phase = MenuAssetPhase::kAllocating;
+  if (!Allocate(load, host)) {
+    host.ReportMisuse(MenuAssetMisuse::kAllocationRefused);
+  }
   return false;
 }
 
@@ -23,6 +32,10 @@ bool Step(MenuAssetLoad& load, MenuAssetHost& host) {
   switch (load.phase) {
     case MenuAssetPhase::kIdle:
       host.ReportMisuse(MenuAssetMisuse::kNotStarted);
+      return false;
+    case MenuAssetPhase::kAllocating:
+      // The refusal was reported once when the load began.
+      static_cast<void>(Allocate(load, host));
       return false;
     case MenuAssetPhase::kLoadingImage:
       if (host.RequestLoaded()) {
@@ -53,6 +66,12 @@ bool Step(MenuAssetLoad& load, MenuAssetHost& host) {
 void Release(MenuAssetLoad& load, MenuAssetHost& host) {
   if (load.phase == MenuAssetPhase::kIdle) {
     host.ReportMisuse(MenuAssetMisuse::kNotLoaded);
+    return;
+  }
+  if (load.phase == MenuAssetPhase::kAllocating) {
+    // No buffer was allocated and no read queued (#301).
+    if (load.owner == MenuAssetOwner::kDataMenu) host.RetireTexturePages();
+    load.phase = MenuAssetPhase::kIdle;
     return;
   }
   if (load.phase != MenuAssetPhase::kReady) {

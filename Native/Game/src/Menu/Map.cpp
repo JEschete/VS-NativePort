@@ -1,9 +1,14 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SfxLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -13,7 +18,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
@@ -27,14 +31,12 @@ extern "C" {
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomLoading.h"
-#include "Field/RoomRendering.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/MenuMemory.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Map.h"
 #include "Menu/TextBox.h"
@@ -258,7 +260,7 @@ void Menu_Map_ConfigureAreaList(int rowCount, int currentMap, char* menuText[])
     cursorMemory = Input_settings.cursorMemory;
     Input_settings.cursorMemory = 1;
 
-    Menu_Framework_CreateMenuRows(rowCount, 256, menuText, rowTypes);
+    VS::Menu::Framework::CreateLiveMenuRows(rowCount, 256, menuText, rowTypes);
 
     Input_settings.cursorMemory = cursorMemory;
 }
@@ -266,12 +268,12 @@ void Menu_Map_ConfigureAreaList(int rowCount, int currentMap, char* menuText[])
 // decomp: MENU5.PRG _mapSelection (src/MENU/MENU5.PRG/4D8.c:175)
 int Menu_Map_PollAreaSelection(void)
 {
-    int row = Menu_Framework_GetSelectedRow();
+    int row = VS::Menu::Framework::LiveSelectedRow();
 
     if (row < -1) {
-        Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(5));
+        VS::Menu::Framework::ClearLiveMenuExcept(5);
     } else if (row >= 0) {
-        Menu_Framework_FlyOutRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[0], 1);
+        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[0], 1);
     }
 
     return row;
@@ -280,7 +282,7 @@ int Menu_Map_PollAreaSelection(void)
 // decomp: MENU5.PRG _setMenuItemMapName (src/MENU/MENU5.PRG/4D8.c:188)
 void Menu_Map_ShowAreaName(char* mapName, char fontColor)
 {
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(10, 320, 34, 0x8C, 8, mapName);
+    Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::SetLiveMenuItem(10, 320, 34, 0x8C, 8, mapName);
 
     menuItem->state = 2;
     menuItem->targetPosition0 = 0xB4;
@@ -289,7 +291,7 @@ void Menu_Map_ShowAreaName(char* mapName, char fontColor)
 }
 
 // decomp: MENU5.PRG _menuReady (src/MENU/MENU5.PRG/4D8.c:204)
-void Menu_Map_PollMenuReady(void) { Menu_Framework_AreMenuRowsIdle(); }
+void Menu_Map_PollMenuReady(void) { VS::Menu::Framework::AreLiveMenuRowsIdle(); }
 
 // decomp: MENU5.PRG _loadMapBackground (src/MENU/MENU5.PRG/4D8.c:206)
 int Menu_Map_LoadBackground(int begin_background_load)
@@ -318,7 +320,7 @@ int Menu_Map_LoadBackground(int begin_background_load)
             VS::Content::ReleaseLiveDiscRequest(Menu_Map_loadBackgroundSlot);
             VS::Render::LoadLiveClutColors(Menu_Map_backgroundImage, 3, 0, 256);
             VS::Render::UploadLiveImageRectangle(vs_getXY(640, 256), Menu_Map_backgroundImage + 256, vs_getWH(160, 240));
-            Menu_Framework_SetBackgroundPriority(-4, 128);
+            VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
             Menu_Map_loadBackgroundState = 1;
         }
         return 0;
@@ -368,7 +370,7 @@ int Menu_Map_UpdateScreen(u_char* state)
 
         *state = 5;
 
-        Menu_Framework_SetBackgroundFade(1);
+        VS::Menu::Framework::SetLiveBackgroundFade(1);
 
         Menu_Map_screenArmfileLoadDelay = 8;
         Menu_Map_screenArmFileLoaded = 0;
@@ -383,7 +385,7 @@ int Menu_Map_UpdateScreen(u_char* state)
             --Menu_Map_screenArmfileLoadDelay;
             break;
         } else if (Menu_Map_screenArmFileLoaded) {
-            Field_SetFieldRenderingEnabled(0);
+            VS::Field::LiveSetFieldRenderingEnabled(0);
             Battle_SetHudHidden(1);
 
             Battle_hudSlideOffset = 0x200000;
@@ -395,21 +397,21 @@ int Menu_Map_UpdateScreen(u_char* state)
         // Fallthrough
 
     case 6:
-        *state += Menu_Framework_AreMenuRowsIdle();
+        *state += VS::Menu::Framework::AreLiveMenuRowsIdle();
         break;
 
     case 7:
         Menu_Map_menuResult = Menu_Map_UpdateMapMenu();
 
         if (Menu_Map_menuResult != 0) {
-            Menu_Framework_SetBackgroundPriority(-4, 128);
+            VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
             Battle_SetHudHidden(0);
 
             Battle_hudSlideOffset = 0;
 
-            Field_SetFieldRenderingEnabled(1);
-            Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
-            Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
+            VS::Field::LiveSetFieldRenderingEnabled(1);
+            VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
+            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
 
             Menu_Map_screenArmfileLoadDelay = 10;
             *state = 8;
@@ -418,7 +420,7 @@ int Menu_Map_UpdateScreen(u_char* state)
         break;
 
     case 8:
-        Menu_Framework_SetBackgroundFade(0);
+        VS::Menu::Framework::SetLiveBackgroundFade(0);
         *state = 9;
         break;
 
@@ -481,7 +483,7 @@ int Menu_Map_LoadSceneMap(void)
         Menu_Map_currentRoomIndex = 0;
         Menu_Map_cameraAngles.vz = Menu_Map_cameraAngles.vy = 2048 - (u_short)Render_frameScratch.camera.angles.vy;
 
-        Menu_Map_currentScene = Field_CurrentSceneId();
+        Menu_Map_currentScene = VS::Field::LiveCurrentSceneId();
 
         if (Menu_Map_currentScene >= 32) {
             Menu_Map_currentScene = 0;
@@ -520,7 +522,7 @@ int Menu_Map_LoadSceneMap(void)
 
     Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
-    Field_RestoreSceneRoomVisits((Field_MapScene *)(Battle_unusedSceneBuffer));
+    VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
     Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
 
     Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
@@ -559,9 +561,9 @@ int Menu_Map_UpdateMapMenu(void)
     }
 
     if (Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene] != 0) {
-        Menu_Framework_SetBackgroundPriority(2046, 128);
+        VS::Menu::Framework::SetLiveBackgroundPriority(2046, 128);
     } else {
-        Menu_Framework_SetBackgroundPriority(2046, (Menu_Map_backgroundBrightness + 128) / 2);
+        VS::Menu::Framework::SetLiveBackgroundPriority(2046, (Menu_Map_backgroundBrightness + 128) / 2);
     }
 
     if (Menu_Map_menuState != 1) {
@@ -587,26 +589,26 @@ int Menu_Map_UpdateMapMenu(void)
 
         if (Menu_Map_triggerHideUi != Menu_Map_hideUi) {
             Menu_Map_hideUi = Menu_Map_triggerHideUi;
-            Menu_Framework_SetMenuVisible(Menu_Map_triggerHideUi == 0);
+            VS::Menu::Framework::SetLiveMenuVisible(Menu_Map_triggerHideUi == 0);
         }
 
         if (Input_buttonsPressed.allButtons & PADRright) {
             controls_state = 5;
 
-            Audio_PlaySfxCentered(0x7E, 5);
+            VS::Audio::LivePlaySfxCentered(0x7E, 5);
 
             Menu_Map_menuState = Menu_Map_MapMenuState_DisplayMapMenu;
 
             if (Menu_Map_hideUi != 0) {
                 Menu_Map_hideUi = 0;
-                Menu_Framework_SetMenuVisible(1);
+                VS::Menu::Framework::SetLiveMenuVisible(1);
             }
 
             Menu_Map_UpdateAreaSelection(1);
 
         } else if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-            Audio_PlaySfxCentered(0x7E, 6);
+            VS::Audio::LivePlaySfxCentered(0x7E, 6);
 
             if (Input_buttonsPressed.allButtons & PADRup) {
                 Menu_Map_quitState = 2;
@@ -876,7 +878,7 @@ int Menu_Map_UpdateMapMenu(void)
 
             Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
-            Field_RestoreSceneRoomVisits((Field_MapScene *)(Battle_unusedSceneBuffer));
+            VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
             Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
 
             Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
@@ -963,8 +965,8 @@ void Menu_Map_ApplyCamera(void)
         / ONE;
     Menu_Map_cameraPos.vy = (VS::Core::Math::Sine(Menu_Map_cameraAngles.vx) * -Menu_Map_cameraDistance) / ONE;
 
-    Menu_Framework_BuildYawMatrix(&view_rotation, Menu_Map_cameraAngles.vy);
-    Menu_Framework_BuildPitchMatrix(&sp38, Menu_Map_cameraAngles.vx);
+    VS::Menu::Framework::BuildLiveYawMatrix(&view_rotation, Menu_Map_cameraAngles.vy);
+    VS::Menu::Framework::BuildLivePitchMatrix(&sp38, Menu_Map_cameraAngles.vx);
     VS::Core::Math::ApplyMultiplyMatrixIntoRight(sp38, view_rotation);
 
     applyVector(&negative_camera_position, Menu_Map_cameraPos.vx, Menu_Map_cameraPos.vy, Menu_Map_cameraPos.vz, = -);
@@ -1827,7 +1829,7 @@ void Menu_Map_SelectAdjacentVisitedRoom(int searchForward)
     } while (room[Menu_Map_currentRoomIndex].visited == 0);
 
     if (currentIndex != Menu_Map_currentRoomIndex) {
-        Audio_PlaySfxCentered(0x7E, 0xB);
+        VS::Audio::LivePlaySfxCentered(0x7E, 0xB);
     }
 }
 
@@ -1986,11 +1988,11 @@ void Menu_Map_DrawControls(void)
         int index = Menu_Map_controlsUiXOffset;
         void** legacy_button_render_scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L1, index + 8, 15, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R1, Menu_Map_controlsUiXOffset + 64, 15, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L2, Menu_Map_controlsUiXOffset + 8, 33, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R2, Menu_Map_controlsUiXOffset + 8, 52, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, Menu_Map_controlsUiXOffset + 8, 70, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L1, index + 8, 15, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R1, Menu_Map_controlsUiXOffset + 64, 15, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L2, Menu_Map_controlsUiXOffset + 8, 33, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, Menu_Map_controlsUiXOffset + 8, 52, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
+        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Circle, Menu_Map_controlsUiXOffset + 8, 70, (u_long *)(((u_char*)(legacy_button_render_scratch[1])) + 24));
 
         switch (Menu_Map_menuCommandsState) {
         case 0: {
@@ -2198,13 +2200,13 @@ void Menu_Map_DrawDoorLabel(int x, int y, int doorId)
     Menu_Map_AppendLabelLine(linePivotX, Menu_Map_mapLabelY + 8, 194, Menu_Map_mapLabelY + 8);
 
     menuItem =
-        Menu_Framework_SetMenuItem(0, 194, Menu_Map_mapLabelY, 128, 0, (char*)&Menu_Map_doors[Menu_Map_doors[doorId]]);
+        VS::Menu::Framework::SetLiveMenuItem(0, 194, Menu_Map_mapLabelY, 128, 0, (char*)&Menu_Map_doors[Menu_Map_doors[doorId]]);
     menuItem->backgroundWidth = 16;
 
     Menu_Map_mapLabelY -= 16;
 
-    Menu_Framework_DrawMenuItem(menuItem);
-    Menu_Framework_MenuItem(0)->state = 0;
+    VS::Menu::Framework::DrawLiveMenuItem(menuItem);
+    VS::Menu::Framework::LiveMenuItem(0)->state = 0;
 }
 
 // decomp: MENU5.PRG _insertLine (src/MENU/MENU5.PRG/4D8.c:2258)
@@ -2381,14 +2383,14 @@ void Menu_Map_DrawConnectingAreaLabel(int x, int y, int mapId)
         mapId = Text_Menu5_connectingMaps_Index_notVisited;
     }
 
-    menuItem = Menu_Framework_SetMenuItem(
+    menuItem = VS::Menu::Framework::SetLiveMenuItem(
         0, 178, Menu_Map_mapLabelY, 144, 0, (char*)&Menu_Map_connectingMaps[Menu_Map_connectingMaps[mapId]]);
     menuItem->backgroundWidth = 8;
 
     Menu_Map_mapLabelY -= 16;
 
-    Menu_Framework_DrawMenuItem(menuItem);
-    Menu_Framework_MenuItem(0)->state = 0;
+    VS::Menu::Framework::DrawLiveMenuItem(menuItem);
+    VS::Menu::Framework::LiveMenuItem(0)->state = 0;
 }
 
 // decomp: MENU5.PRG _addMapLabel (src/MENU/MENU5.PRG/4D8.c:2441)

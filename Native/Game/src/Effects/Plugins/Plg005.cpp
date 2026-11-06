@@ -3,9 +3,9 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/CurvesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Plugins/Plg005.h"
@@ -75,7 +75,7 @@ int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int 
         emitter_scratch->flags = particle_definition->flags;
         m = &effect_instance->transforms[particle_definition->transformIndex].world;
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->positionRange,
-            Effects_SampleEffectCurve(particle_definition->positionCurve, fp->curveSampleDistance), &emitter_scratch->position);
+            VS::Effects::LiveSampleEffectCurve(particle_definition->positionCurve, fp->curveSampleDistance), &emitter_scratch->position);
         switch (emitter_scratch->flags & 7) {
         case 0:
             break;
@@ -90,27 +90,27 @@ int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int 
         j = 0;
         k = 0;
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->extentRange,
-            Effects_SampleEffectCurve(particle_definition->extentCurve, fp->curveSampleDistance), &emitter_scratch->extent);
-        temp = Effects_SampleEffectCurve(particle_definition->forceCurve, fp->curveSampleDistance);
+            VS::Effects::LiveSampleEffectCurve(particle_definition->extentCurve, fp->curveSampleDistance), &emitter_scratch->extent);
+        temp = VS::Effects::LiveSampleEffectCurve(particle_definition->forceCurve, fp->curveSampleDistance);
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[2], temp, &emitter_scratch->forceMin);
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[3], temp, &emitter_scratch->forceMax);
-        temp = Effects_SampleEffectCurve(particle_definition->accelerationCurve, fp->curveSampleDistance);
+        temp = VS::Effects::LiveSampleEffectCurve(particle_definition->accelerationCurve, fp->curveSampleDistance);
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[4], temp, &emitter_scratch->accelerationMin);
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[5], temp, &emitter_scratch->accelerationMax);
 
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[0],
-            Effects_SampleEffectCurve(particle_definition->directionCurve, fp->curveSampleDistance), &emitter_scratch->baseDirection);
+            VS::Effects::LiveSampleEffectCurve(particle_definition->directionCurve, fp->curveSampleDistance), &emitter_scratch->baseDirection);
         VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[1],
-            Effects_SampleEffectCurve(particle_definition->directionJitterCurve, fp->curveSampleDistance), &emitter_scratch->directionJitter);
+            VS::Effects::LiveSampleEffectCurve(particle_definition->directionJitterCurve, fp->curveSampleDistance), &emitter_scratch->directionJitter);
         VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[2],
-            Effects_SampleEffectCurve(particle_definition->speedCurve, fp->curveSampleDistance), emitter_scratch->speedRange);
+            VS::Effects::LiveSampleEffectCurve(particle_definition->speedCurve, fp->curveSampleDistance), emitter_scratch->speedRange);
         VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[0],
-            Effects_SampleEffectCurve(particle_definition->massCurve, fp->curveSampleDistance), emitter_scratch->massRange);
+            VS::Effects::LiveSampleEffectCurve(particle_definition->massCurve, fp->curveSampleDistance), emitter_scratch->massRange);
         VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[1],
-            Effects_SampleEffectCurve(particle_definition->gravityScaleCurve, fp->curveSampleDistance), emitter_scratch->gravityScaleRange);
+            VS::Effects::LiveSampleEffectCurve(particle_definition->gravityScaleCurve, fp->curveSampleDistance), emitter_scratch->gravityScaleRange);
 
         depthMode = VS::Core::Math::InterpolateLiveShortPair(
-            particle_definition->innerExtentRange, Effects_SampleEffectCurve(particle_definition->innerExtentCurve, fp->curveSampleDistance));
+            particle_definition->innerExtentRange, VS::Effects::LiveSampleEffectCurve(particle_definition->innerExtentCurve, fp->curveSampleDistance));
 
         fp->opaqueC += emitter_scratch->accelerationMin.vx;
         fp->opaqueA += emitter_scratch->forceMin.vx + fp->opaqueC;
@@ -156,21 +156,21 @@ int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int 
         }
 
         if (particle_definition->rCurve != 0) {
-            temp = Effects_SampleEffectCurve(particle_definition->rCurve, fp->curveSampleDistance) * 2;
+            temp = VS::Effects::LiveSampleEffectCurve(particle_definition->rCurve, fp->curveSampleDistance) * 2;
             color.r = temp >= 0x100 ? 0xFF : temp;
         } else {
             color.r = 0x80;
         }
 
         if (particle_definition->gCurve != 0) {
-            temp = Effects_SampleEffectCurve(particle_definition->gCurve, fp->curveSampleDistance) * 2;
+            temp = VS::Effects::LiveSampleEffectCurve(particle_definition->gCurve, fp->curveSampleDistance) * 2;
             color.g = temp >= 0x100 ? 0xFF : temp;
         } else {
             color.g = 0x80;
         }
 
         if (particle_definition->bCurve != 0) {
-            temp = Effects_SampleEffectCurve(particle_definition->bCurve, fp->curveSampleDistance) * 2;
+            temp = VS::Effects::LiveSampleEffectCurve(particle_definition->bCurve, fp->curveSampleDistance) * 2;
             color.b = temp >= 0x100 ? 0xFF : temp;
         } else {
             color.b = 0x80;

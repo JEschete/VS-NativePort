@@ -5,22 +5,30 @@
 
 #include <array>
 #include <cstddef>
+#include <span>
 
 #include "Audio/MixControlLive.hpp"
+#include "Audio/MusicLive.hpp"
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/PlaybackResetLive.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqSequencerLive.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
+#include "Audio/SoundBanksLive.hpp"
+#include "Audio/SoundControlLive.hpp"
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/StreamControlLive.hpp"
+#include "Audio/StreamLive.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/RoomLightingLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Menu/Sounds.hpp"
 
 extern "C" {
@@ -30,9 +38,7 @@ extern "C" {
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Music.h"
 #include "Audio/MusicState.h"
-#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
@@ -41,7 +47,6 @@ extern "C" {
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "DiscQueue.h"
-#include "Effects/EffectResources.h"
 #include "Effects/Runtime.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
@@ -49,8 +54,7 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomEffects.h"
-#include "Field/RoomLoading.h"
+#include "Field/RoomLoadingLiveState.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.h"
 
@@ -405,21 +409,20 @@ void TestsRestoreXaPlayback(void) {
 int TestsXaCommand(int command, int first, int second, int third) {
   switch (command) {
     case 0:
-      return Audio_BeginXaStream(first, second);
+      return VS::Audio::LiveBeginXaStream(first, second);
     case 1:
       VS::Content::UpdateLiveDiscCommands();
       return Content_discDriveState.state;
     case 2:
-      return Audio_RequestXaStreamStop();
+      return VS::Audio::LiveRequestXaStreamStop();
     case 3:
-      Audio_Control_SetDiscVolume(first);
+      VS::Audio::Control::LiveSetDiscVolume(first);
       break;
     case 4:
-      Audio_Control_FadeDiscVolume(first, second);
+      VS::Audio::Control::LiveFadeDiscVolume(first, second);
       break;
     case 5:
-      Audio_Control_FadeDiscVolumeFrom(reinterpret_cast<void*>((intptr_t)first),
-                                       second, third);
+      VS::Audio::Control::LiveFadeDiscVolumeFrom(first, second, third);
       break;
     case 6:
       return Audio_Seq_discVolumeLevel;
@@ -470,18 +473,18 @@ void TestsRestoreStreamPlayback(void) {
   }
 }
 
-int TestsBindEffectStream(void* bytes) {
+int TestsBindEffectStream(void* bytes, size_t size) {
   Effects_EffectPackage package = {0};
   Effects_EffectPackage* saved = Effects_package;
   Effects_package = &package;
-  Effects_BindEffectPackageBlocks(
-      reinterpret_cast<Effects_PackageFile*>(bytes));
+  static_cast<void>(VS::Effects::BindLiveEffectPackage(
+      std::span(static_cast<std::byte*>(bytes), size)));
   Effects_package = saved;
   return package.auxiliarySoundHandle;
 }
 
 int TestsPlayStreamSlot(int slot, int pan, int volume) {
-  return Audio_PlayCutsceneStreamSlot(slot, pan, volume);
+  return VS::Audio::LivePlayCutsceneStreamSlot(slot, pan, volume);
 }
 
 void TestsAdvanceStreamTick(void) {
@@ -493,25 +496,25 @@ void TestsAdvanceStreamTick(void) {
 void TestsStreamControl(int command, int value, int target) {
   switch (command) {
     case 0:
-      Audio_Control_SetCutsceneVolume(value);
+      VS::Audio::Control::LiveSetCutsceneVolume(value);
       break;
     case 1:
-      Audio_Control_FadeCutsceneVolume(value, target);
+      VS::Audio::Control::LiveFadeCutsceneVolume(value, target);
       break;
     case 2:
-      Audio_Control_SetCutscenePan(value);
+      VS::Audio::Control::LiveSetCutscenePan(value);
       break;
     case 3:
       VS::Audio::Mixer::LiveDispatchCommand(value ? 0x9F : 0x9E);
       break;
     case 4:
-      Audio_Control_StopCutsceneStream();
+      VS::Audio::Control::LiveStopCutsceneStream();
       break;
     case 5:
       VS::Audio::Driver::ResetLivePlaybackState();
       break;
     case 6:
-      Audio_ResetSoundSlots();
+      VS::Audio::LiveResetSoundSlots();
       break;
     default:
       fprintf(stderr, "unexpected stream test command: %d\n", command);
@@ -537,8 +540,6 @@ static void CaptureMenuSound(Audio_CommandParams* params) {
 int TestsMenuSoundDispatch(void) {
   u_int offsets[12] = {0};
   u_short selectors[12] = {0};
-  u_int* saved_offsets = Audio_Playback_soundEffectProgramOffsets;
-  u_short* saved_selectors = Audio_Playback_soundEffectBankSelectors;
   const Audio_CommandHandler saved_handler = Audio_Mixer_kCommandHandlers[0x20];
   const Audio_CommandArguments saved_arguments = Audio_Driver_commandArguments;
   const Audio_CommandParams saved_params = Audio_Mixer_commandParams;
@@ -550,8 +551,10 @@ int TestsMenuSoundDispatch(void) {
   const int ids[] = {10, 7, 6, 5, 4};
   int result = 0;
   int index;
-  Audio_Playback_soundEffectProgramOffsets = offsets;
-  Audio_Playback_soundEffectBankSelectors = selectors;
+  const VS::Audio::Playback::ScopedLiveEffectTables tables{
+      {.program_offsets = offsets,
+       .bank_selectors = selectors,
+       .program_data = {}}};
   Audio_Mixer_kCommandHandlers[0x20] = CaptureMenuSound;
   Audio_nextSfxChannelGroup7E = 2;
   for (index = 0; index < 5; ++index) {
@@ -565,8 +568,6 @@ int TestsMenuSoundDispatch(void) {
       result |= 1 << index;
     }
   }
-  Audio_Playback_soundEffectProgramOffsets = saved_offsets;
-  Audio_Playback_soundEffectBankSelectors = saved_selectors;
   Audio_Mixer_kCommandHandlers[0x20] = saved_handler;
   Audio_Driver_commandArguments = saved_arguments;
   Audio_Mixer_commandParams = saved_params;
@@ -603,30 +604,25 @@ void TestsNativeMonoOutput(int enabled) {
   Audio_Native_Tick();
 }
 
-int TestsZoneMusicStateAliases(void) {
+int TestsZoneMusicCanonicalState(void) {
   const int saved_id = Field_zoneContext.musicId;
   const int saved_slot = Field_zoneContext.musicSlot;
   const int saved_enabled = Field_zoneContext.isMusicFadeEnabled;
-  const int saved_alias_id = Field_zoneSoundFileId;
-  const int saved_alias_slot = Field_roomMusicSlot;
-  const int saved_alias_enabled = Audio_zoneMusicSwitchEnabled;
   int passed = 0;
-  if (&Field_zoneSoundFileId == &Field_zoneContext.musicId) passed |= 1;
-  if (&Field_roomMusicSlot == &Field_zoneContext.musicSlot) passed |= 2;
-  if (&Audio_zoneMusicSwitchEnabled == &Field_zoneContext.isMusicFadeEnabled) {
-    passed |= 4;
-  }
   Field_zoneContext.musicId = 16;
   Field_zoneContext.musicSlot = 3;
   Field_zoneContext.isMusicFadeEnabled = 1;
-  if (Field_ZoneSoundFileId() == 16) passed |= 8;
-  if (Field_roomMusicSlot == 3) passed |= 16;
-  if (Audio_zoneMusicSwitchEnabled == 1) passed |= 32;
-  Audio_SetZoneMusicSwitchEnabled(0);
-  if (Field_zoneContext.isMusicFadeEnabled == 0) passed |= 64;
-  Field_zoneSoundFileId = saved_alias_id;
-  Field_roomMusicSlot = saved_alias_slot;
-  Audio_zoneMusicSwitchEnabled = saved_alias_enabled;
+  if (VS::Field::LiveZoneSoundFileId() == 16) passed |= 1;
+  Field_zoneContext.musicId = 17;
+  if (VS::Field::LiveZoneSoundFileId() == 17) passed |= 2;
+  if (Field_zoneContext.musicSlot == 3) passed |= 4;
+  VS::Audio::LiveSetZoneMusicSwitchEnabled(0);
+  if (Field_zoneContext.isMusicFadeEnabled == 0) passed |= 8;
+  VS::Audio::LiveSetZoneMusicSwitchEnabled(1);
+  if (Field_zoneContext.isMusicFadeEnabled == 1) passed |= 16;
+  if (Field_zoneContext.musicId == 17 && Field_zoneContext.musicSlot == 3) {
+    passed |= 32;
+  }
   Field_zoneContext.musicId = saved_id;
   Field_zoneContext.musicSlot = saved_slot;
   Field_zoneContext.isMusicFadeEnabled = saved_enabled;
@@ -668,38 +664,6 @@ int Tests_RoomLightingSamples(void) {
   passed =
       passed && color.red == 128 && color.green == 128 && color.blue == 128;
   Field_roomData = saved;
-  return passed;
-}
-
-_Static_assert(sizeof(Field_RoomEffectCommand) == 28,
-               "room-effect command disk size");
-_Static_assert(offsetof(Field_RoomEffectCommand, operands) == 4,
-               "room-effect operands follow the disk header");
-_Static_assert(sizeof(Field_RoomEffectObjectView) ==
-                   sizeof(Field_RoomEffectObject),
-               "room-effect runtime stride");
-_Static_assert(offsetof(Field_RoomEffectObjectView, scriptCursor) ==
-                   offsetof(Field_RoomEffectObject, scriptCursor),
-               "room-effect runtime cursor view");
-
-int Tests_RoomEffectCommandLayout(void) {
-  int geometry[16] = {0};
-  Field_RoomEffectObject object = {nullptr};
-  object.sceneEntry = geometry;
-  int transform[7] = {28, 160, -320, 480, 1024, 2048, 3072};
-  Field_SetRoomEffectTransform(
-      &object, reinterpret_cast<Field_RoomEffectCommand*>(transform));
-  int passed = object.position.vx == 160 && object.position.vy == -320 &&
-               object.position.vz == 480 && geometry[1] == 10 &&
-               geometry[2] == -20 && geometry[3] == 30 && geometry[4] == 1024 &&
-               geometry[5] == 2048 && geometry[6] == 3072;
-  unsigned velocity[5] = {20, 0x0020FFF0, 0x00070030, 0x00020001, 0x00040003};
-  Field_SetRoomEffectVelocity(
-      &object, reinterpret_cast<Field_RoomEffectCommand*>(velocity));
-  passed = passed && object.velocity.vx == -16 && object.velocity.vy == 32 &&
-           object.velocity.vz == 48 && object.velocity.pad == 7 &&
-           object.angularVelocity.vx == 1 && object.angularVelocity.vy == 2 &&
-           object.angularVelocity.vz == 3 && object.angularVelocity.pad == 4;
   return passed;
 }
 

@@ -1,76 +1,86 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_ATTACKPREREQUISITES_H_TYPES
-#define VS_BATTLE_ATTACKPREREQUISITES_H_TYPES
+#pragma once
+// Hand-maintained (tools/port/owned.csv).
+// The attack prerequisite table slots of the typed rules
+// (Battle/AttackPrerequisites.hpp). Battle_attackPrerequisiteFunctions and the
+// BATTLE.PRG module image hold these bindings; each runs its rule on the
+// target actor named by the hit's target result bytes
+// (AttackPrerequisitesLive.cpp).
 #include "Legacy/Psx.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // VS_BATTLE_ATTACKPREREQUISITES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_ATTACKPREREQUISITES_H_DECLS)
-#define VS_BATTLE_ATTACKPREREQUISITES_H_DECLS
 #include "Battle/Action.h"
+#include "Battle/AttackPrerequisiteTable.h"
 
-extern int (*Battle_attackPrerequisiteFunctions[40])(Battle_ActionDefinition*, u_char*);
-int Battle_IsStatusEffectBlocked(int debuff, u_char* target_result_bytes);
-int Battle_TargetEnemyClass(u_char* target_result_bytes);
-int Battle_RejectAttackPrerequisite(
-    Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes __attribute__((unused)));
-int Battle_AcceptAttackPrerequisite(
-    Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes __attribute__((unused)));
-int Battle_IsAttackTargetUndead(Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_IsAttackTargetLiving(Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyStrengthDown(
-    Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyIntelligenceDown(
-    Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyAgilityDown(
-    Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyEquipmentDown(Battle_ActionDefinition* action_definition, u_char* target_result_bytes);
-int Battle_CanApplyHalfMovement(
-    Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyStrengthUp(Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyIntelligenceUp(Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyAgilityUp(Battle_ActionDefinition* action_definition __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyEquipmentUp(Battle_ActionDefinition* action_definition, u_char* target_result_bytes);
-int Battle_CanApplyQuicken(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplySilence(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyMagicWard(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyRegeneration(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyParalysis(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyPoison(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyNumbness(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyCurse(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyAirAttackUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyFireAttackUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyEarthAttackUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyWaterAttackUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyAirDefenseUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyFireDefenseUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyEarthDefenseUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyWaterDefenseUp(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyBanish(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyExorcise(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CanApplyDrain(
-    Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_IgnoreAttackPrerequisite(Battle_ActionDefinition* action __attribute__((unused)), u_char* target_result_bytes);
-int Battle_CheckActionHitPrerequisite(Battle_ActionDefinition* action, u_char* target_result_bytes, int hitNumber);
+int Battle_RejectAttackPrerequisiteSlot(Battle_ActionDefinition* action,
+                                        u_char* target_result_bytes);
+int Battle_AcceptAttackPrerequisiteSlot(Battle_ActionDefinition* action,
+                                        u_char* target_result_bytes);
+int Battle_IsAttackTargetUndeadSlot(Battle_ActionDefinition* action,
+                                    u_char* target_result_bytes);
+int Battle_IsAttackTargetLivingSlot(Battle_ActionDefinition* action,
+                                    u_char* target_result_bytes);
+int Battle_CanApplyStrengthDownSlot(Battle_ActionDefinition* action,
+                                    u_char* target_result_bytes);
+int Battle_CanApplyIntelligenceDownSlot(Battle_ActionDefinition* action,
+                                        u_char* target_result_bytes);
+int Battle_CanApplyAgilityDownSlot(Battle_ActionDefinition* action,
+                                   u_char* target_result_bytes);
+int Battle_CanApplyEquipmentDownSlot(Battle_ActionDefinition* action,
+                                     u_char* target_result_bytes);
+int Battle_CanApplyHalfMovementSlot(Battle_ActionDefinition* action,
+                                    u_char* target_result_bytes);
+int Battle_CanApplyStrengthUpSlot(Battle_ActionDefinition* action,
+                                  u_char* target_result_bytes);
+int Battle_CanApplyIntelligenceUpSlot(Battle_ActionDefinition* action,
+                                      u_char* target_result_bytes);
+int Battle_CanApplyAgilityUpSlot(Battle_ActionDefinition* action,
+                                 u_char* target_result_bytes);
+int Battle_CanApplyEquipmentUpSlot(Battle_ActionDefinition* action,
+                                   u_char* target_result_bytes);
+int Battle_CanApplyQuickenSlot(Battle_ActionDefinition* action,
+                               u_char* target_result_bytes);
+int Battle_CanApplySilenceSlot(Battle_ActionDefinition* action,
+                               u_char* target_result_bytes);
+int Battle_CanApplyMagicWardSlot(Battle_ActionDefinition* action,
+                                 u_char* target_result_bytes);
+int Battle_CanApplyRegenerationSlot(Battle_ActionDefinition* action,
+                                    u_char* target_result_bytes);
+int Battle_CanApplyParalysisSlot(Battle_ActionDefinition* action,
+                                 u_char* target_result_bytes);
+int Battle_CanApplyPoisonSlot(Battle_ActionDefinition* action,
+                              u_char* target_result_bytes);
+int Battle_CanApplyNumbnessSlot(Battle_ActionDefinition* action,
+                                u_char* target_result_bytes);
+int Battle_CanApplyCurseSlot(Battle_ActionDefinition* action,
+                             u_char* target_result_bytes);
+int Battle_CanApplyAirAttackUpSlot(Battle_ActionDefinition* action,
+                                   u_char* target_result_bytes);
+int Battle_CanApplyFireAttackUpSlot(Battle_ActionDefinition* action,
+                                    u_char* target_result_bytes);
+int Battle_CanApplyEarthAttackUpSlot(Battle_ActionDefinition* action,
+                                     u_char* target_result_bytes);
+int Battle_CanApplyWaterAttackUpSlot(Battle_ActionDefinition* action,
+                                     u_char* target_result_bytes);
+int Battle_CanApplyAirDefenseUpSlot(Battle_ActionDefinition* action,
+                                    u_char* target_result_bytes);
+int Battle_CanApplyFireDefenseUpSlot(Battle_ActionDefinition* action,
+                                     u_char* target_result_bytes);
+int Battle_CanApplyEarthDefenseUpSlot(Battle_ActionDefinition* action,
+                                      u_char* target_result_bytes);
+int Battle_CanApplyWaterDefenseUpSlot(Battle_ActionDefinition* action,
+                                      u_char* target_result_bytes);
+int Battle_CanApplyBanishSlot(Battle_ActionDefinition* action,
+                              u_char* target_result_bytes);
+int Battle_CanApplyExorciseSlot(Battle_ActionDefinition* action,
+                                u_char* target_result_bytes);
+int Battle_CanApplyDrainSlot(Battle_ActionDefinition* action,
+                             u_char* target_result_bytes);
+int Battle_IgnoreAttackPrerequisiteSlot(Battle_ActionDefinition* action,
+                                        u_char* target_result_bytes);
 
-#endif // VS_BATTLE_ATTACKPREREQUISITES_H_DECLS
+#ifdef __cplusplus
+}
+#endif

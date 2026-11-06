@@ -19,6 +19,8 @@ extern "C" {
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
 
 extern "C" {
 #include "Actors/ActorAllocation.h"
@@ -46,7 +48,7 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
-#include "Field/RoomLoading.h"
+#include "Field/RoomLoadingLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
@@ -85,7 +87,7 @@ void ClearRoomAiBindings() {
 }
 
 std::optional<std::uint32_t> CollisionCell(TileCoordinate tile) {
-  const Field_MpdTileCell* cell = Field_CollisionCellAt(
+  const Field_MpdTileCell* cell = VS::Field::LiveCollisionCellAt(
       static_cast<u_int>(tile.x), static_cast<u_int>(tile.z), 0);
   if (cell == nullptr) return std::nullopt;
   std::uint32_t bits = 0;
@@ -115,11 +117,11 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     }
     source.collision_cell = CollisionCell;
     source.floor_height = [](int world_x, int world_z) {
-      return static_cast<int>(Field_FloorHeightAt(world_x, world_z));
+      return static_cast<int>(VS::Field::LiveFloorHeightAt(world_x, world_z));
     };
     source.floor_trigger = FloorTrigger;
     if (Field_roomData.environment != nullptr) {
-      source.environment_parameter = Field_RoomEnvironmentParameter();
+      source.environment_parameter = VS::Field::LiveRoomEnvironmentParameter();
     }
     if (Field_roomData.section6 != nullptr) {
       source.auxiliary = std::span<const std::byte>(

@@ -19,10 +19,12 @@
 #include <tuple>
 #include <type_traits>
 
+#include "Actors/ActorStateLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -36,7 +38,6 @@ extern "C" {
 #include "ActorAssets.h"
 #include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.h"
 #include "Actors/ModelInstance.h"
@@ -46,7 +47,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
-#include "Audio/Sfx.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
@@ -1032,20 +1032,21 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return static_cast<std::int16_t>(Actors_roomActorScale.vx);
   }
   void ResetActorMotion(int slot) override {
-    Actors_ResetActorMotionState(slot, 0);
+    VS::Actors::ResetLiveActorMotionState(slot, 0);
   }
   void ClearActorPaletteFade(int slot) override {
     VS::Actors::SetLiveActorPaletteFade(slot, 0);
   }
   void PlaceActorInRoom(int slot, std::uint32_t placement, int mode) override {
     Field_ActorPlacement value = Placement(placement);
-    Actors_PlaceActorInRoom(slot, &value, 0, mode);
+    VS::Actors::PlaceLiveActorInRoom(slot, &value, 0, mode);
   }
   void AttachActorToParentBone(int slot, int parent, int bone) override {
-    Actors_AttachActorToParentBone(slot, parent, bone, 0);
+    VS::Actors::AttachLiveActorToParentBone(slot, parent, bone, 0);
   }
   void StopModelSounds(AssetAddress sound_bank) override {
-    Audio_StopBankSfx(kModelSoundChannels, Pointer<int>(sound_bank), 0);
+    VS::Audio::LiveStopBankSfx(kModelSoundChannels, Pointer<int>(sound_bank),
+                               0);
   }
 
   // Shared sequence banks.
@@ -1223,6 +1224,11 @@ int QueueLiveActorAssetRequest(const Content_ActorAssetRequest* request) {
   }
   LiveActorAssetHost host;
   return QueueActorAssetRequest(host, LoadRequest(*request));
+}
+
+int QueueLiveActorAsset(const ActorAssetRequest& request) {
+  LiveActorAssetHost host;
+  return QueueActorAssetRequest(host, request);
 }
 
 int UpdateLiveActorAssetQueue() {

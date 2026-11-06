@@ -12,17 +12,17 @@
 #include <span>
 #include <type_traits>
 
+#include "Actors/ActorStateLive.hpp"
+#include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Save/Snapshot.hpp"
 
 extern "C" {
-#include "Actors/ActorState.h"
 #include "Actors/Location.h"
-#include "Actors/RoomState.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
@@ -129,7 +129,7 @@ class LiveSnapshotHost final : public SnapshotHost {
   }
   TilePlacement AshleyPlacement() override {
     Actors_ActorLocationQuery query{};
-    Actors_ActorPlacement(0, &query);
+    VS::Actors::LiveActorPlacement(0, &query);
     const Actors_TileTarget& target = query.location.packedTile.target;
     return TilePlacement{
         .tile_x = static_cast<std::uint8_t>(target.tileX),
@@ -191,7 +191,7 @@ class LiveSnapshotHost final : public SnapshotHost {
     stored.cameraDistance = snapshot.camera.distance;
   }
   void StoreRoomActorState(std::int32_t actor) override {
-    Actors_StoreRoomActorState(actor, 0);
+    VS::Actors::StoreLiveRoomActorState(actor, 0);
   }
   void StoreEntranceDoorForReload() override {
     Field_StoreEntranceDoorForReload();
@@ -201,6 +201,10 @@ class LiveSnapshotHost final : public SnapshotHost {
 
 void MarkLiveAshleySnapshotValid() {
   MarkAshleySnapshotValid(BytesOf(State_ashleySnapshot));
+}
+
+void ClearLiveAshleySnapshotPending() {
+  State_ashleySnapshot.stats.isPending = 0;
 }
 
 void CaptureLiveAshleySnapshot() {

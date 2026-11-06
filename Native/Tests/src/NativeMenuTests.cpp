@@ -16,9 +16,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
+#include "Ending/EndingLive.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/NativeContainerLive.hpp"
 #include "Save/NativeFilePresentation.hpp"
@@ -29,17 +31,16 @@
 extern "C" {
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Boot/GameLoop.h"
-#include "Ending/ClearResults.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
 #include "Menu/Files.h"
+#include "Menu/FilesLiveState.h"
 #include "State/Ashley.h"
 #include "State/Location.h"
 #include "State/PlayTime.h"
@@ -69,8 +70,10 @@ struct MenuFixture {
   int repeat = Input_buttonRepeat;
   std::array<u_int, 12> sound_offsets{};
   std::array<u_short, 12> sound_selectors{};
-  u_int* saved_offsets = Audio_Playback_soundEffectProgramOffsets;
-  u_short* saved_selectors = Audio_Playback_soundEffectBankSelectors;
+  VS::Audio::Playback::ScopedLiveEffectTables sound_tables{
+      {.program_offsets = sound_offsets,
+       .bank_selectors = sound_selectors,
+       .program_data = {}}};
   Audio_CommandHandler sound_handler = Audio_Mixer_kCommandHandlers[0x20];
   Audio_CommandArguments sound_arguments = Audio_Driver_commandArguments;
   Audio_CommandParams sound_params = Audio_Mixer_commandParams;
@@ -92,8 +95,6 @@ struct MenuFixture {
     Input_buttonsPressed.allButtons = 0;
     Input_buttonRepeat = 0;
     sound_selectors.fill(0x8000);
-    Audio_Playback_soundEffectProgramOffsets = sound_offsets.data();
-    Audio_Playback_soundEffectBankSelectors = sound_selectors.data();
     Audio_Mixer_kCommandHandlers[0x20] = CountSound;
     Audio_nextSfxChannelGroup7E = 2;
     sound_calls = &sounds;
@@ -106,8 +107,6 @@ struct MenuFixture {
       Boot_isGameplayActive = active;
       Input_buttonsPressed.allButtons = pressed;
       Input_buttonRepeat = repeat;
-      Audio_Playback_soundEffectProgramOffsets = saved_offsets;
-      Audio_Playback_soundEffectBankSelectors = saved_selectors;
       Audio_Mixer_kCommandHandlers[0x20] = sound_handler;
       Audio_Driver_commandArguments = sound_arguments;
       Audio_Mixer_commandParams = sound_params;
@@ -633,7 +632,7 @@ struct ClearInputsFixture {
     Input_settings.currentGameSaveCount = 7;
     Input_settings.cumulativeSaveCount = 19;
     Input_settings.saveFileGeneration = 3;
-    Ending_CommitClearProgress();
+    VS::Ending::LiveCommitClearProgress();
     Boot_isClearSavePending = 1;
     Save_NativeStageClearGame();
     Boot_isClearSavePending = 0;

@@ -9,8 +9,8 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG065_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG065_H_DECLS
 
-extern CVECTOR Effects_Plg065_closedRingColorFactors[];
-extern u_char Effects_Plg065_ringColorFactors[][4];
+extern CVECTOR Effects_Plg065_closedRingColorFactors[8];
+extern u_char Effects_Plg065_ringColorFactors[8][4];
 extern int Effects_Plg065_particleEmissionCounter;
 
 #endif // VS_EFFECTS_PLUGINS_PLG065_H_DECLS

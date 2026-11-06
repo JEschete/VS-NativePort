@@ -1,441 +1,339 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Plugins/Plg049.h"
-#include "Effects/Plugins/Plg050.h"
-#include "Effects/Plugins/Plg061.h"
-#include "Effects/Plugins/Plg065.h"
-#include "Effects/Plugins/Plg073.h"
-#include "Effects/Plugins/Plg081.h"
-#include "Effects/Plugins/Plg129.h"
-#include "Effects/Plugins/Plg138.h"
-#include "Effects/Plugins/Plg142.h"
-#include "Effects/Plugins/Plg146.h"
-#include "Effects/Plugins/Plg147.h"
-#include "Effects/Plugins/Plg149.h"
-#include "Effects/Plugins/Plg150.h"
-#include "Effects/Plugins/Plg153.h"
-#include "Effects/Plugins/Plg160.h"
-#include "Effects/Plugins/Plg161.h"
-#include "Effects/Plugins/Plg162.h"
-#include "Effects/Plugins/Plg166.h"
-#include "Effects/Plugins/Plg169.h"
-#include "Effects/Plugins/Plg170.h"
-#include "Effects/Plugins/Plg236.h"
-#include "Effects/Plugins/Plg263.h"
-#include "Effects/Plugins/Plg297.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/ClosedRing.h"
-#include "Effects/Templates/Grid.h"
-#include "Effects/Templates/Mesh10.h"
-#include "Effects/Templates/MirrorSurface.h"
-#include "Effects/Templates/ParticleControl.h"
-#include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/ParticleLineRender.h"
-#include "Effects/Templates/ParticleOrigin.h"
-#include "Effects/Templates/ParticleTarget.h"
-#include "Effects/Templates/Ring.h"
-#include "Effects/Templates/RotatingSurface.h"
-#include "Effects/Templates/Surface.h"
-#include "Effects/Templates/TemplateState.h"
-#include "Effects/Templates/TiledRing.h"
-#include "Effects/Templates/TrailNineControl.h"
-#include "Effects/Templates/TrailNineDispatch.h"
-#include "Effects/Templates/TrailNineInit.h"
-#include "Effects/Templates/TrailNineOrigin.h"
-#include "Effects/Templates/TrailNineRender.h"
-#include "Effects/Templates/TrailNineTarget.h"
-#include "Effects/Templates/TrailNineUpdate.h"
-#include "Effects/Transforms.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Effects/Templates/Ring.hpp"
 
-// decomp: PLG049.BIN func_800FBA00 (src/EFFECT/PLG049.BIN/E0.c:10): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg049_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg049_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg049_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg049_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg049_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg049_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg049_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg049_trailEmissionCounter
-#define VS_RING_FUNCTION Effects_Plg049_Ring
-#define VS_RING_COLORS Effects_Plg049_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
 
-// decomp: PLG050.BIN func_800F98E0 (src/EFFECT/PLG050.BIN/E0.c:2): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_RING_FUNCTION Effects_Plg050_Ring
-#define VS_RING_COLORS Effects_Plg050_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+#include "Core/Math/ScalarMath.hpp"
+#include "Effects/Templates/RingCore.hpp"
 
-// decomp: PLG061.BIN func_800FAF00 (src/EFFECT/PLG061.BIN/18.c:15): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_SURFACE_FUNCTION Effects_Plg061_Surface
-#define VS_SURFACE_VERTICES Effects_Plg061_surfaceVertices
-#define VS_GRID_FUNCTION Effects_Plg061_Grid
-#define VS_RING_FUNCTION Effects_Plg061_Ring
-#define VS_RING_COLORS Effects_Plg061_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_GRID_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+namespace VS::Effects::Templates {
+namespace {
+namespace math = Core::Math;
 
-// decomp: PLG065.BIN func_800FB71C (src/EFFECT/PLG065.BIN/F8.c:15): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg065_RotatingSurface
-#define VS_CLOSED_RING_FUNCTION Effects_Plg065_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg065_closedRingColorFactors
-#define VS_RING_FUNCTION Effects_Plg065_Ring
-#define VS_RING_COLORS Effects_Plg065_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+constexpr std::int32_t kJitterCentre = 2;
+}  // namespace
 
-// decomp: PLG073.BIN func_800FA7F0 (src/EFFECT/PLG073.BIN/F8.c:6): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg073_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg073_tiledRingColorFactors
-#define VS_RING_FUNCTION Effects_Plg073_Ring
-#define VS_RING_COLORS Effects_Plg073_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+std::array<RingPoint, kRingRows * kOpenRingColumns> OpenRingPoints(
+    const RingFrame& frame) {
+  std::array<RingPoint, kRingRows * kOpenRingColumns> points{};
+  const math::Vec3 origin = frame.scratch.position;
+  const math::Vec3 jitter =
+      frame.scratch.direction_jitter.value_or(math::Vec3{});
+  const auto segments = static_cast<std::int32_t>(kOpenRingSegments);
+  // decomp: rings.h angleB, (-jitter.vy) / 2 truncated toward zero.
+  const std::int32_t spread_start =
+      math::R3000Quotient(math::WrappingNegate(jitter.y), kJitterCentre);
+  for (std::size_t column = 0; column < kOpenRingColumns; ++column) {
+    const auto step = static_cast<std::int32_t>(column);
+    const std::int32_t along = math::WrappingAdd(
+        frame.state.angle,
+        math::R3000Quotient(math::WrappingMultiply(jitter.x, step), segments));
+    const std::int32_t spread = math::WrappingAdd(
+        spread_start,
+        math::R3000Quotient(math::WrappingMultiply(jitter.y, step), segments));
+    const std::int32_t angle = math::WrappingAdd(along, spread);
+    const std::int32_t cosine = math::Cosine(angle);
+    const std::int32_t sine = math::Sine(angle);
+    for (std::size_t row = 0; row < kRingRows; ++row) {
+      const std::int32_t radius = frame.radius.at(row);
+      points.at((row * kOpenRingColumns) + column) =
+          RingPointAt({math::WrappingAdd(origin.x, RingFixed(radius, cosine)),
+                       math::WrappingAdd(frame.height.at(row), origin.y),
+                       math::WrappingAdd(origin.z, RingFixed(radius, sine))});
+    }
+  }
+  return points;
+}
 
-// decomp: PLG081.BIN func_800FA6B8 (src/EFFECT/PLG081.BIN/0.c:11): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg081_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg081_Ring
-#define VS_RING_COLORS Effects_Plg081_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+RingQuadCorners OpenRingCorners(RingOrientation orientation, std::size_t band,
+                                std::size_t column) noexcept {
+  if (orientation == RingOrientation::kTransposed) {
+    return {RingCorner{band, column}, RingCorner{band + 1, column},
+            RingCorner{band, column + 1}, RingCorner{band + 1, column + 1}};
+  }
+  return {RingCorner{band, column}, RingCorner{band, column + 1},
+          RingCorner{band + 1, column}, RingCorner{band + 1, column + 1}};
+}
 
-// decomp: PLG129.BIN func_800F9800 (src/EFFECT/PLG129.BIN/0.c:2): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_RING_FUNCTION Effects_Plg129_Ring
-#define VS_RING_COLORS Effects_Plg129_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+RingQuadUvs OpenRingUvs(RingOrientation orientation, const RingTexture& texture,
+                        std::int32_t fraction, std::size_t band,
+                        std::size_t column) noexcept {
+  RingQuadUvs uvs{};
+  if (band >= kRingBands || column >= kOpenRingSegments) {
+    return uvs;
+  }
+  const bool transposed = orientation == RingOrientation::kTransposed;
+  // The coordinate along the ring steps through eighths of the texture; the
+  // one across it takes the row's edge or inner-extent fraction.
+  const std::array<std::uint8_t, kRingRows> across =
+      transposed ? RingRowCoordinates(texture.u, texture.w, fraction)
+                 : RingRowCoordinates(texture.v, texture.h, fraction);
+  const RingQuadCorners corners = OpenRingCorners(orientation, band, column);
+  for (std::size_t corner = 0; corner < kRingQuadCorners; ++corner) {
+    const RingCorner at = corners[corner];
+    if (transposed) {
+      uvs[corner] = {.u = across[at.row],
+                     .v = RingTextureStep(texture.v, texture.h, at.column,
+                                          kOpenRingSegments)};
+    } else {
+      uvs[corner] = {.u = RingTextureStep(texture.u, texture.w, at.column,
+                                          kOpenRingSegments),
+                     .v = across[at.row]};
+    }
+  }
+  return uvs;
+}
 
-// decomp: PLG129.BIN func_800FBAC8 (src/EFFECT/PLG129.BIN/0.c:17): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_RING_FUNCTION Effects_Plg129_Ring2
-#define VS_RING_COLORS Effects_Plg129_ringColorFactors2
-#define VS_RING_TRANSPOSED
-#define VS_MESH10_FUNCTION Effects_Plg129_Mesh10
-#define VS_MESH10_VERTICES Effects_Plg129_mesh10Vertices
-#define VS_MESH10_FACES Effects_Plg129_mesh10Faces
-#define VS_SURFACE_FUNCTION Effects_Plg129_Surface
-#define VS_SURFACE_VERTICES Effects_Plg129_surfaceVertices
-#define VS_SURFACE_REPEAT
-#include "Effects/Templates/Ring.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
-#undef VS_MESH10_FUNCTION
-#undef VS_MESH10_VERTICES
-#undef VS_MESH10_FACES
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_SURFACE_REPEAT
+// decomp: EFFECT vs_ring (src/EFFECT/rings.h:26).
+bool Ring(RingOrientation orientation, RingCommand command, std::int32_t packed,
+          std::span<const RingPaletteEntry> palette, RingHost& host) {
+  if (command != RingCommand::kTick) {
+    return ApplyRingCommand(command, packed,
+                            RingTextureSource::kTextureAndAnimation, host);
+  }
+  std::optional<RingFrame> frame = BeginRingTick(palette, host);
+  if (!frame) {
+    return false;
+  }
+  const RingDefinition& definition = frame->inputs.definition;
+  frame->scratch.direction_jitter = SampleRingRange(
+      definition.direction_jitter, definition.curves.direction_jitter,
+      frame->state.age, host);
+  const std::array<RingPoint, kRingRows * kOpenRingColumns> points =
+      OpenRingPoints(*frame);
+  std::array<RingProjection, kRingRows * kOpenRingColumns> projections{};
+  ProjectRingPoints(*frame, points, projections, host);
+  if (const std::optional<RingTexture> texture = host.AdvanceTexture()) {
+    const RingProjectedGrid grid{.points = projections,
+                                 .columns = kOpenRingColumns};
+    for (std::size_t band = 0; band < kRingBands; ++band) {
+      for (std::size_t column = 0; column < kOpenRingSegments; ++column) {
+        SubmitRingQuad(
+            *frame, grid, OpenRingCorners(orientation, band, column),
+            OpenRingUvs(orientation, *texture, frame->fraction, band, column),
+            *texture, host);
+      }
+    }
+  }
+  return FinishRingTick(*frame, host);
+}
+}  // namespace VS::Effects::Templates
 
-// decomp: PLG138.BIN func_800FA6D0 (src/EFFECT/PLG138.BIN/18.c:5): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg138_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg138_Ring
-#define VS_RING_COLORS Effects_Plg138_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+namespace VS::Effects {
+// decomp: PLG049.BIN func_800FBA00 (src/EFFECT/PLG049.BIN/E0.c:10).
+bool Plg049::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG142.BIN func_800FB2D8 (src/EFFECT/PLG142.BIN/18.c:16): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_GRID_FUNCTION Effects_Plg142_Grid
-#define VS_CLOSED_RING_FUNCTION Effects_Plg142_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg142_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_RING_FUNCTION Effects_Plg142_Ring
-#define VS_RING_COLORS Effects_Plg142_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_GRID_FUNCTION
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+// decomp: PLG050.BIN func_800F98E0 (src/EFFECT/PLG050.BIN/E0.c:2).
+bool Plg050::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG146.BIN func_800FCB38 (src/EFFECT/PLG146.BIN/1D8.c:34): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg146_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg146_tiledRingColorFactors
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg146_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg146_mirrorSurfaceVertices
-#define VS_PARTICLE_ORIGIN_FUNCTION Effects_Plg146_ParticleOrigin
-#define VS_PARTICLE_TARGET_FUNCTION Effects_Plg146_ParticleTarget
-#define VS_PARTICLE_CONTROL_FUNCTION Effects_Plg146_ParticleControl
-#define VS_PARTICLE_RENDER_FUNCTION Effects_Plg146_ParticleLineRender
-#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg146_ParticleDispatch
-#define VS_PARTICLE_UNTEXTURED
-#define VS_RING_FUNCTION Effects_Plg146_Ring
-#define VS_RING_COLORS Effects_Plg146_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_PARTICLE_ORIGIN_FUNCTION
-#undef VS_PARTICLE_TARGET_FUNCTION
-#undef VS_PARTICLE_CONTROL_FUNCTION
-#undef VS_PARTICLE_RENDER_FUNCTION
-#undef VS_PARTICLE_DISPATCH_FUNCTION
-#undef VS_PARTICLE_UNTEXTURED
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG061.BIN func_800FAF00 (src/EFFECT/PLG061.BIN/18.c:15).
+bool Plg061::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG147.BIN func_800F98F8 (src/EFFECT/PLG147.BIN/F8.c:2): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_RING_FUNCTION Effects_Plg147_Ring
-#define VS_RING_COLORS Effects_Plg147_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+// decomp: PLG065.BIN func_800FB71C (src/EFFECT/PLG065.BIN/F8.c:15).
+bool Plg065::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG149.BIN func_800F9800 (src/EFFECT/PLG149.BIN/0.c:2): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_RING_FUNCTION Effects_Plg149_Ring
-#define VS_RING_COLORS Effects_Plg149_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+// decomp: PLG073.BIN func_800FA7F0 (src/EFFECT/PLG073.BIN/F8.c:6).
+// decomp: PLG074.BIN func_800FA7F0 (src/EFFECT/PLG074.BIN/F8.c:5).
+bool Plg073::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG150.BIN func_800FBDF8 (src/EFFECT/PLG150.BIN/18.c:13): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg150_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg150_tiledRingColorFactors
-#define VS_GRID_FUNCTION Effects_Plg150_Grid
-#define VS_SURFACE_FUNCTION Effects_Plg150_Surface
-#define VS_SURFACE_VERTICES Effects_Plg150_surfaceVertices
-#define VS_RING_FUNCTION Effects_Plg150_Ring
-#define VS_RING_COLORS Effects_Plg150_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_GRID_FUNCTION
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG081.BIN func_800FA6B8 (src/EFFECT/PLG081.BIN/0.c:11).
+bool Plg081::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG153.BIN func_800FA41C (src/EFFECT/PLG153.BIN/110.c:7): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_MESH10_FUNCTION Effects_Plg153_Mesh10
-#define VS_MESH10_VERTICES Effects_Plg153_mesh10Vertices
-#define VS_MESH10_FACES Effects_Plg153_mesh10Faces
-#define VS_RING_FUNCTION Effects_Plg153_Ring
-#define VS_RING_COLORS Effects_Plg153_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_MESH10_FUNCTION
-#undef VS_MESH10_VERTICES
-#undef VS_MESH10_FACES
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG129.BIN func_800F9800 (src/EFFECT/PLG129.BIN/0.c:2).
+bool Plg129::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
 
-// decomp: PLG160.BIN func_800FA6F8 (src/EFFECT/PLG160.BIN/0.c:6): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_TILED_RING_FUNCTION Effects_Plg160_TiledRing
-#define VS_TILED_RING_COLORS Effects_Plg160_tiledRingColorFactors
-#define VS_RING_FUNCTION Effects_Plg160_Ring
-#define VS_RING_COLORS Effects_Plg160_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_TILED_RING_FUNCTION
-#undef VS_TILED_RING_COLORS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+// decomp: PLG129.BIN func_800FBAC8 (src/EFFECT/PLG129.BIN/0.c:17).
+// rings.h:323 undefines VS_RING_TRANSPOSED before this second instance is
+// compiled, so it draws upright (the generated copy transposed it).
+bool Plg129::Ring2(Templates::RingCommand command, std::int32_t packed,
+                   std::span<const Templates::RingPaletteEntry> palette,
+                   Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG161.BIN func_800FA7B0 (src/EFFECT/PLG161.BIN/F8.c:5): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg161_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg161_Ring
-#define VS_RING_COLORS Effects_Plg161_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG138.BIN func_800FA6D0 (src/EFFECT/PLG138.BIN/18.c:5).
+bool Plg138::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG161.BIN func_800FE044 (src/EFFECT/PLG161.BIN/F8.c:23): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg161_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg161_Ring2
-#define VS_RING_COLORS Effects_Plg161_ringColorFactors2
-#define VS_RING_TRANSPOSED
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg161_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg161_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg161_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg161_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg161_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg161_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg161_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg161_trailEmissionCounter
-#define VS_GRID_FUNCTION Effects_Plg161_Grid
-#include "Effects/Templates/Ring.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_GRID_FUNCTION
+// decomp: PLG142.BIN func_800FB2D8 (src/EFFECT/PLG142.BIN/18.c:16).
+bool Plg142::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG162.BIN func_800FB5F8 (src/EFFECT/PLG162.BIN/0.c:339): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg162_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg162_Ring
-#define VS_RING_COLORS Effects_Plg162_ringColorFactors2
-#include "Effects/Templates/Ring.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+// decomp: PLG146.BIN func_800FCB38 (src/EFFECT/PLG146.BIN/1D8.c:34).
+bool Plg146::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
 
-// decomp: PLG166.BIN func_800FC29C (src/EFFECT/PLG166.BIN/0.c:20): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg166_RotatingSurface
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg166_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg166_mirrorSurfaceVertices
-#define VS_CLOSED_RING_FUNCTION Effects_Plg166_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg166_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_RING_FUNCTION Effects_Plg166_Ring
-#define VS_RING_COLORS Effects_Plg166_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG147.BIN func_800F98F8 (src/EFFECT/PLG147.BIN/F8.c:2).
+bool Plg147::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG169.BIN func_800FBA00 (src/EFFECT/PLG169.BIN/E0.c:18): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg169_TrailNineOrigin
-#define VS_TRAIL_TARGET_FUNCTION Effects_Plg169_TrailNineTarget
-#define VS_TRAIL_CONTROL_FUNCTION Effects_Plg169_TrailNineControl
-#define VS_TRAIL_INIT_FUNCTION Effects_Plg169_TrailNineInit
-#define VS_TRAIL_UPDATE_FUNCTION Effects_Plg169_TrailNineUpdate
-#define VS_TRAIL_RENDER_FUNCTION Effects_Plg169_TrailNineRender
-#define VS_TRAIL_DISPATCH_FUNCTION Effects_Plg169_TrailNineDispatch
-#define VS_TRAIL_CORNER_STATE Effects_Plg169_trailEmissionCounter
-#define VS_RING_FUNCTION Effects_Plg169_Ring
-#define VS_RING_COLORS Effects_Plg169_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_TRAIL_ORIGIN_FUNCTION
-#undef VS_TRAIL_TARGET_FUNCTION
-#undef VS_TRAIL_CONTROL_FUNCTION
-#undef VS_TRAIL_INIT_FUNCTION
-#undef VS_TRAIL_UPDATE_FUNCTION
-#undef VS_TRAIL_RENDER_FUNCTION
-#undef VS_TRAIL_DISPATCH_FUNCTION
-#undef VS_TRAIL_CORNER_STATE
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+// decomp: PLG149.BIN func_800F9800 (src/EFFECT/PLG149.BIN/0.c:2).
+bool Plg149::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG170.BIN func_800FB348 (src/EFFECT/PLG170.BIN/18.c:16): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg170_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg170_mirrorSurfaceVertices
-#define VS_ROTATING_SURFACE_REPEAT
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg170_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg170_Ring
-#define VS_RING_COLORS Effects_Plg170_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_ROTATING_SURFACE_REPEAT
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG150.BIN func_800FBDF8 (src/EFFECT/PLG150.BIN/18.c:13).
+bool Plg150::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
 
-// decomp: PLG198.BIN func_800F9800 (src/EFFECT/PLG198.BIN/0.c:2): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_RING_FUNCTION Effects_Plg198_Ring
-#define VS_RING_COLORS Effects_Plg149_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG153.BIN func_800FA41C (src/EFFECT/PLG153.BIN/110.c:7).
+bool Plg153::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
 
-// decomp: PLG236.BIN func_800FC56C (src/EFFECT/PLG236.BIN/0.c:345): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_CLOSED_RING_FUNCTION Effects_Plg236_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg236_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_ROTATING_SURFACE_REPEAT
-#define VS_ROTATING_SURFACE_FUNCTION Effects_Plg236_RotatingSurface
-#define VS_RING_FUNCTION Effects_Plg236_Ring
-#define VS_RING_COLORS Effects_Plg236_ringColorFactors2
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_ROTATING_SURFACE_REPEAT
-#undef VS_ROTATING_SURFACE_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG160.BIN func_800FA6F8 (src/EFFECT/PLG160.BIN/0.c:6).
+bool Plg160::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-// decomp: PLG263.BIN func_800FA4A8 (src/EFFECT/PLG263.BIN/110.c:6): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_SURFACE_FUNCTION Effects_Plg263_Surface
-#define VS_SURFACE_VERTICES Effects_Plg263_surfaceVertices
-#define VS_RING_FUNCTION Effects_Plg263_Ring
-#define VS_RING_COLORS Effects_Plg263_ringColorFactors
-#include "Effects/Templates/Ring.inl"
-#undef VS_SURFACE_FUNCTION
-#undef VS_SURFACE_VERTICES
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
+// decomp: PLG161.BIN func_800FA7B0 (src/EFFECT/PLG161.BIN/F8.c:5).
+bool Plg161::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
 
-// decomp: PLG297.BIN func_800FBF4C (src/EFFECT/PLG297.BIN/18.c:20): VS_RING_FUNCTION, instance of Effects/Templates/Ring.inl
-#define VS_MIRROR_SURFACE_FUNCTION Effects_Plg297_MirrorSurface
-#define VS_MIRROR_SURFACE_VERTICES Effects_Plg297_mirrorSurfaceVertices
-#define VS_CLOSED_RING_FUNCTION Effects_Plg297_ClosedRing
-#define VS_CLOSED_RING_COLORS Effects_Plg297_closedRingColorFactors
-#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
-#define VS_GRID_FUNCTION Effects_Plg297_Grid
-#define VS_RING_FUNCTION Effects_Plg297_Ring
-#define VS_RING_COLORS Effects_Plg297_ringColorFactors
-#define VS_RING_TRANSPOSED
-#include "Effects/Templates/Ring.inl"
-#undef VS_MIRROR_SURFACE_FUNCTION
-#undef VS_MIRROR_SURFACE_VERTICES
-#undef VS_CLOSED_RING_FUNCTION
-#undef VS_CLOSED_RING_COLORS
-#undef VS_CLOSED_RING_TEXTURE_COLUMNS
-#undef VS_GRID_FUNCTION
-#undef VS_RING_FUNCTION
-#undef VS_RING_COLORS
-#undef VS_RING_TRANSPOSED
+// decomp: PLG161.BIN func_800FE044 (src/EFFECT/PLG161.BIN/F8.c:23).
+// rings.h:323 undefines VS_RING_TRANSPOSED before this second instance is
+// compiled, so it draws upright (the generated copy transposed it).
+bool Plg161::Ring2(Templates::RingCommand command, std::int32_t packed,
+                   std::span<const Templates::RingPaletteEntry> palette,
+                   Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
 
-}  // extern "C"
+// decomp: PLG162.BIN func_800FB5F8 (src/EFFECT/PLG162.BIN/0.c:339).
+bool Plg162::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
+
+// decomp: PLG166.BIN func_800FC29C (src/EFFECT/PLG166.BIN/0.c:20).
+bool Plg166::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
+
+// decomp: PLG169.BIN func_800FBA00 (src/EFFECT/PLG169.BIN/E0.c:18).
+bool Plg169::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
+
+// decomp: PLG170.BIN func_800FB348 (src/EFFECT/PLG170.BIN/18.c:16).
+bool Plg170::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
+
+// decomp: PLG198.BIN func_800F9800 (src/EFFECT/PLG198.BIN/0.c:2).
+bool Plg198::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
+
+// decomp: PLG236.BIN func_800FC56C (src/EFFECT/PLG236.BIN/0.c:345).
+bool Plg236::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
+
+// decomp: PLG263.BIN func_800FA4A8 (src/EFFECT/PLG263.BIN/110.c:6).
+bool Plg263::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kUpright, command, packed,
+                         palette, host);
+}
+
+// decomp: PLG297.BIN func_800FBF4C (src/EFFECT/PLG297.BIN/18.c:20).
+bool Plg297::Ring(Templates::RingCommand command, std::int32_t packed,
+                  std::span<const Templates::RingPaletteEntry> palette,
+                  Templates::RingHost& host) {
+  return Templates::Ring(Templates::RingOrientation::kTransposed, command,
+                         packed, palette, host);
+}
+}  // namespace VS::Effects

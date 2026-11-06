@@ -11,6 +11,6 @@
 
 extern CVECTOR Effects_Plg150_tiledRingColorFactors[8];
 extern SVECTOR Effects_Plg150_surfaceVertices[5][16];
-extern u_char Effects_Plg150_ringColorFactors[][4];
+extern u_char Effects_Plg150_ringColorFactors[8][4];
 
 #endif // VS_EFFECTS_PLUGINS_PLG150_H_DECLS

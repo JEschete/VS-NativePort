@@ -5,12 +5,15 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Legacy/Psx.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 
 extern "C" {
 #include "Core/Text/TextCode.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -30,10 +33,13 @@ struct InformationFixture {
   char saved_setting = Input_settings.information;
   int saved_buttons = Input_buttonsState;
   int* saved_rows = Menu_Framework_rowTypeBuf;
+  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
   std::array<unsigned char, 0x20010> memory{};
   std::array<u_long, 34> ordering{};
   std::array<char, 96> message{};
-  int row_type = 0;
+  // The row types live in the open menu's workspace, beside its rows.
+  std::array<Menu_Framework_MenuRow, VS::Menu::Framework::kRowCount> rows{};
+  std::array<int, VS::Menu::Framework::kRowTypeCount> row_types{};
 
   InformationFixture() {
     memory.fill(0xA5);
@@ -44,7 +50,8 @@ struct InformationFixture {
     Render_legacyPrimitiveBuffers[0] = memory.data() + 8;
     Render_frameBuf = 0;
     Menu_activeTextBoxOrderingTable = ordering.data();
-    Menu_Framework_rowTypeBuf = &row_type;
+    Menu_Framework_menuItems = rows.data();
+    Menu_Framework_rowTypeBuf = row_types.data();
     Input_buttonsState = 0;
     Menu_textBoxes[7] = {};
     Menu_InitInformationTextBox(Menu_InformationBoxHeader_Information);
@@ -61,6 +68,7 @@ struct InformationFixture {
     Input_settings.information = saved_setting;
     Input_buttonsState = saved_buttons;
     Menu_Framework_rowTypeBuf = saved_rows;
+    Menu_Framework_menuItems = saved_items;
   }
 
   void ResetPackets() {
@@ -73,7 +81,7 @@ struct InformationFixture {
 TEST_CASE("Information messages preserve the original encoded instant prefix",
           "[render][text][information]") {
   InformationFixture fixture;
-  Menu_Framework_SetInformationMessage(fixture.message.data());
+  VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
   const auto* encoded =
       reinterpret_cast<const unsigned char*>(Menu_textBoxes[7].string);
   CHECK(encoded[0] == Core_TextCode_ChunkSize);
@@ -93,7 +101,7 @@ TEST_CASE(
   InformationFixture fixture;
   const auto updates = GENERATE(1, 8);
   for (int update = 0; update < updates; ++update) {
-    Menu_Framework_SetInformationMessage(fixture.message.data());
+    VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
     fixture.ResetPackets();
     VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
     CHECK(Menu_textBoxes[7].flags.done);
@@ -102,7 +110,7 @@ TEST_CASE(
           fixture.memory.data() + 8 + sizeof(u_long) * 3 * 6);
   }
   fixture.message[0] = static_cast<char>(Core_TextCode_Terminator);
-  Menu_Framework_SetInformationMessage(fixture.message.data());
+  VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
   fixture.ResetPackets();
   VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
   CHECK(Menu_textBoxes[7].flags.done);
@@ -135,17 +143,17 @@ TEST_CASE("Information toggles hide normal help but retain required cautions",
           "[render][text][information]") {
   InformationFixture fixture;
   Input_settings.information = 1;
-  Menu_Framework_UpdateInformationVisibility(0, 16);
+  VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
   CHECK(Menu_textBoxes[7].state == 11);
   CHECK(Menu_textBoxes[7].flags.kind == 4);
   Input_settings.information = 0;
-  Menu_Framework_UpdateInformationVisibility(0, 16);
+  VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
   CHECK(Menu_textBoxes[7].state == 0);
-  fixture.row_type = 1;
-  Menu_Framework_UpdateInformationVisibility(0, 16);
+  fixture.row_types[0] = 1;
+  VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
   CHECK(Menu_textBoxes[7].state == 11);
-  fixture.row_type = 0;
+  fixture.row_types[0] = 0;
   Input_settings.information = 1;
-  Menu_Framework_UpdateInformationVisibility(0, 16);
+  VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
   CHECK(Menu_textBoxes[7].state == 11);
 }

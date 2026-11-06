@@ -12,7 +12,7 @@ extern "C" {
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionMenu.h"
@@ -29,7 +29,7 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Random.h"
@@ -38,12 +38,14 @@ extern "C" {
 #include "Effects/Plugins/Plg045.h"
 #include "Effects/Plugins/Plg049.h"
 #include "Effects/Plugins/Plg050.h"
+#include "Effects/Plugins/Plg053.h"
 #include "Effects/Plugins/Plg057.h"
 #include "Effects/Plugins/Plg061.h"
 #include "Effects/Plugins/Plg065.h"
 #include "Effects/Plugins/Plg069.h"
 #include "Effects/Plugins/Plg073.h"
 #include "Effects/Plugins/Plg077.h"
+#include "Effects/Plugins/Plg081.h"
 #include "Effects/Plugins/Plg082.h"
 #include "Effects/Plugins/Plg085.h"
 #include "Effects/Plugins/Plg086.h"
@@ -56,10 +58,12 @@ extern "C" {
 #include "Effects/Plugins/Plg137.h"
 #include "Effects/Plugins/Plg138.h"
 #include "Effects/Plugins/Plg141.h"
+#include "Effects/Plugins/Plg142.h"
 #include "Effects/Plugins/Plg143.h"
 #include "Effects/Plugins/Plg146.h"
 #include "Effects/Plugins/Plg147.h"
 #include "Effects/Plugins/Plg148.h"
+#include "Effects/Plugins/Plg149.h"
 #include "Effects/Plugins/Plg150.h"
 #include "Effects/Plugins/Plg153.h"
 #include "Effects/Plugins/Plg154.h"
@@ -67,6 +71,7 @@ extern "C" {
 #include "Effects/Plugins/Plg158.h"
 #include "Effects/Plugins/Plg160.h"
 #include "Effects/Plugins/Plg161.h"
+#include "Effects/Plugins/Plg162.h"
 #include "Effects/Plugins/Plg165.h"
 #include "Effects/Plugins/Plg166.h"
 #include "Effects/Plugins/Plg167.h"
@@ -75,7 +80,9 @@ extern "C" {
 #include "Effects/Plugins/Plg170.h"
 #include "Effects/Plugins/Plg224.h"
 #include "Effects/Plugins/Plg232.h"
+#include "Effects/Plugins/Plg236.h"
 #include "Effects/Plugins/Plg242.h"
+#include "Effects/Plugins/Plg250.h"
 #include "Effects/Plugins/Plg255.h"
 #include "Effects/Plugins/Plg260.h"
 #include "Effects/Plugins/Plg263.h"
@@ -100,7 +107,6 @@ extern "C" {
 #include "Event/ScriptField.h"
 #include "Event/ScriptVm.h"
 #include "Event/Sound.h"
-#include "Field/Background.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -113,16 +119,15 @@ extern "C" {
 #include "Menu/BattleAbilities.h"
 #include "Menu/BreakArts.h"
 #include "Menu/Container/ItemView.h"
-#include "Menu/Files.h"
-#include "Menu/Framework/Framework.h"
+#include "Menu/FilesLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Magic.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
-#include "Menu/Options.h"
-#include "Menu/Rename.h"
+#include "Menu/OptionsLiveState.h"
+#include "Menu/RenameLiveState.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Menu/Status/ActorStatus.h"
@@ -150,6 +155,8 @@ unsigned int Content_battleShadowVertices[18];
 unsigned int Content_battleShadowFaces[24];
 // decomp: BATTLE/BATTLE.PRG 7B5DC.s:func_800E4180 indexed hesitation lengths; native module-owned data
 unsigned int Content_battleAiHesitationLengths[1];
+// decomp: BATTLE/BATTLE.PRG 5BF94.c:2934 D_800EBA78 main menu help text; bytes 316..319 open the gradient window
+unsigned int Content_battleMainMenuHelpText[80];
 // decomp: BATTLE/BATTLE.PRG 58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8
 unsigned int Content_battleLimbNameBytes[38];
 // decomp: BATTLE/BATTLE.PRG 30DB0.c:_loadGimmick; three 16-byte headers plus modelDataSize payloads
@@ -158,11 +165,12 @@ unsigned int Content_battleGimmickTemplateBytes[455];
 unsigned int Content_battleTextboxFrameBytes[631];
 // decomp: BATTLE/BATTLE.PRG 146C.c:func_8008E19C complete one-group/one-quad marker definition; G00039-G00041 are interior aliases
 unsigned int Content_battleTriggerMarkerBytes[29];
+// decomp: BATTLE/BATTLE.PRG 146C.c:17537 D_80068C1C sky dome: 34 twelve-byte vertices (colour word 2) and 64 four-byte faces; SetRoomBackgroundColors patches the vertex colours
+unsigned int Content_battleSkyDome[166];
 // decomp: SLUS_010.40 25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code
 short Content_residentLfoSamples[167936];
 
 const Content_ModuleDataEntry Content_moduleData[] = {
-    {"BATTLE/BATTLE.PRG", 0x41C, sizeof Field_legacyBackgroundGradientPackets, &Field_legacyBackgroundGradientPackets, sizeof Field_legacyBackgroundGradientPackets}, // G00012 D_80068C1C
     {"BATTLE/BATTLE.PRG", 0x13BC, sizeof Battle_Ai_kTimedStatusFlags, &Battle_Ai_kTimedStatusFlags, sizeof Battle_Ai_kTimedStatusFlags}, // G00013 D_80069BBC
     {"BATTLE/BATTLE.PRG", 0x1418, sizeof Battle_Ai_kSettingsBits30Values, &Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values}, // G00014 D_80069C18
     {"BATTLE/BATTLE.PRG", 0x141C, sizeof Battle_Ai_kPerceptionRangesSquared, &Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared}, // G00015 D_80069C1C
@@ -292,15 +300,12 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83010, sizeof Render_variableFontGlyphWidths, &Render_variableFontGlyphWidths, sizeof Render_variableFontGlyphWidths}, // G00152 vs_battle_characterWidths
     {"BATTLE/BATTLE.PRG", 0x8318C, sizeof Render_kGlyphPixelExpansion, &Render_kGlyphPixelExpansion, sizeof Render_kGlyphPixelExpansion}, // G00153 D_800EB98C
     {"BATTLE/BATTLE.PRG", 0x831AC, sizeof Battle_reuseSphereVolumes, &Battle_reuseSphereVolumes, sizeof Battle_reuseSphereVolumes}, // G00154 D_800EB9AC
-    {"BATTLE/BATTLE.PRG", 0x831AD, sizeof Menu_Framework_loadedSubMenu, &Menu_Framework_loadedSubMenu, sizeof Menu_Framework_loadedSubMenu}, // G00155 _loadedSubMenu
     {"BATTLE/BATTLE.PRG", 0x831AE, sizeof Battle_hudStatusIconsHidden, &Battle_hudStatusIconsHidden, sizeof Battle_hudStatusIconsHidden}, // G00156 D_800EB9AE
     {"BATTLE/BATTLE.PRG", 0x831AF, sizeof Battle_hudHidden, &Battle_hudHidden, sizeof Battle_hudHidden}, // G00157 D_800EB9AF
     {"BATTLE/BATTLE.PRG", 0x831B0, sizeof Battle_hudSlideOffset, &Battle_hudSlideOffset, sizeof Battle_hudSlideOffset}, // G00158 D_800EB9B0
     {"BATTLE/BATTLE.PRG", 0x831CC, sizeof Battle_hudBattleMode, &Battle_hudBattleMode, sizeof Battle_hudBattleMode}, // G00165 D_800EB9CC
     {"BATTLE/BATTLE.PRG", 0x831CD, sizeof Battle_battleModeIndicatorStep, &Battle_battleModeIndicatorStep, sizeof Battle_battleModeIndicatorStep}, // G00166 D_800EB9CD
-    {"BATTLE/BATTLE.PRG", 0x831CE, sizeof Menu_textBoxBufferIndex, &Menu_textBoxBufferIndex, sizeof Menu_textBoxBufferIndex}, // G00167 D_800EB9CE
     {"BATTLE/BATTLE.PRG", 0x831DC, sizeof Menu_menuStrings, &Menu_menuStrings, sizeof Menu_menuStrings}, // G00171 vs_battle_menuStrings
-    {"BATTLE/BATTLE.PRG", 0x83278, sizeof Menu_Framework_kMainMenuHelpText, &Menu_Framework_kMainMenuHelpText, sizeof Menu_Framework_kMainMenuHelpText}, // G00172 D_800EBA78
     {"BATTLE/BATTLE.PRG", 0x833B8, sizeof Menu_Framework_gradientTopColors, &Menu_Framework_gradientTopColors, sizeof Menu_Framework_gradientTopColors}, // G00173 D_800EBBB8
     {"BATTLE/BATTLE.PRG", 0x833C0, sizeof Menu_Framework_gradientBottomColors, &Menu_Framework_gradientBottomColors, sizeof Menu_Framework_gradientBottomColors}, // G00174 D_800EBBC0
     {"BATTLE/BATTLE.PRG", 0x833C8, sizeof Menu_Framework_rowAnimationSteps, &Menu_Framework_rowAnimationSteps, sizeof Menu_Framework_rowAnimationSteps}, // G00175 vs_battle_rowAnimationSteps
@@ -361,12 +366,19 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x88FDC, sizeof Battle_Ai_radialRetreatPath, &Battle_Ai_radialRetreatPath, sizeof Battle_Ai_radialRetreatPath}, // G00237 D_800F17DC
     {"EFFECT/PLG045.BIN", 0x1DB4, sizeof Effects_Plg045_particleEmissionCounter, &Effects_Plg045_particleEmissionCounter, sizeof Effects_Plg045_particleEmissionCounter}, // G00634 D_800FB5B4
     {"EFFECT/PLG049.BIN", 0x4BD4, sizeof Effects_Plg049_trailEmissionCounter, &Effects_Plg049_trailEmissionCounter, sizeof Effects_Plg049_trailEmissionCounter}, // G00637 D_800FE3D4
+    {"EFFECT/PLG049.BIN", 0x4BD8, sizeof Effects_Plg049_ringColorFactors, &Effects_Plg049_ringColorFactors, sizeof Effects_Plg049_ringColorFactors}, // G00638 D_800FE3D8
     {"EFFECT/PLG049.BIN", 0x4BF8, sizeof Effects_Plg049_tiledRingColorFactors, &Effects_Plg049_tiledRingColorFactors, sizeof Effects_Plg049_tiledRingColorFactors}, // G00639 D_800FE3F8
+    {"EFFECT/PLG050.BIN", 0x2E24, sizeof Effects_Plg050_ringColorFactors, &Effects_Plg050_ringColorFactors, sizeof Effects_Plg050_ringColorFactors}, // G00640 D_800FC624
     {"EFFECT/PLG050.BIN", 0x2E44, sizeof Effects_Plg050_trailEmissionCounter, &Effects_Plg050_trailEmissionCounter, sizeof Effects_Plg050_trailEmissionCounter}, // G00641 D_800FC644
+    {"EFFECT/PLG053.BIN", 0x1AD4, sizeof Effects_Plg053_closedRingColorFactors, &Effects_Plg053_closedRingColorFactors, sizeof Effects_Plg053_closedRingColorFactors}, // G00644 D_800FB2D4
     {"EFFECT/PLG057.BIN", 0x61B4, sizeof Effects_Plg057_particleEmissionCounter, &Effects_Plg057_particleEmissionCounter, sizeof Effects_Plg057_particleEmissionCounter}, // G00645 D_800FF9B4
     {"EFFECT/PLG057.BIN", 0x61B8, sizeof Effects_Plg057_trailEmissionCounter, &Effects_Plg057_trailEmissionCounter, sizeof Effects_Plg057_trailEmissionCounter}, // G00646 D_800FF9B8
     {"EFFECT/PLG057.BIN", 0x61BC, sizeof Effects_Plg057_trailEmissionCounter2, &Effects_Plg057_trailEmissionCounter2, sizeof Effects_Plg057_trailEmissionCounter2}, // G00647 D_800FF9BC
     {"EFFECT/PLG061.BIN", 0x3290, sizeof Effects_Plg061_surfaceVertices, &Effects_Plg061_surfaceVertices, sizeof Effects_Plg061_surfaceVertices}, // G00648 D_800FCA90
+    {"EFFECT/PLG061.BIN", 0x3510, sizeof Effects_Plg061_ringColorFactors, &Effects_Plg061_ringColorFactors, sizeof Effects_Plg061_ringColorFactors}, // G00649 D_800FCD10
+    {"EFFECT/PLG061.BIN", 0x3530, sizeof Effects_Plg061_closedRingColorFactors, &Effects_Plg061_closedRingColorFactors, sizeof Effects_Plg061_closedRingColorFactors}, // G00650 D_800FCD30
+    {"EFFECT/PLG065.BIN", 0x4134, sizeof Effects_Plg065_closedRingColorFactors, &Effects_Plg065_closedRingColorFactors, sizeof Effects_Plg065_closedRingColorFactors}, // G00651 D_800FD934
+    {"EFFECT/PLG065.BIN", 0x4154, sizeof Effects_Plg065_ringColorFactors, &Effects_Plg065_ringColorFactors, sizeof Effects_Plg065_ringColorFactors}, // G00652 D_800FD954
     {"EFFECT/PLG065.BIN", 0x4174, sizeof Effects_Plg065_particleEmissionCounter, &Effects_Plg065_particleEmissionCounter, sizeof Effects_Plg065_particleEmissionCounter}, // G00653 D_800FD974
     {"EFFECT/PLG069.BIN", 0x3C24, sizeof Effects_Plg069_mesh10Vertices, &Effects_Plg069_mesh10Vertices, sizeof Effects_Plg069_mesh10Vertices}, // G00654 D_800FD424
     {"EFFECT/PLG069.BIN", 0x3C74, sizeof Effects_Plg069_mesh10Faces, &Effects_Plg069_mesh10Faces, sizeof Effects_Plg069_mesh10Faces}, // G00655 D_800FD474
@@ -377,66 +389,108 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"EFFECT/PLG073.BIN", 0x577C, sizeof Effects_Plg073_trailEmissionCounter, &Effects_Plg073_trailEmissionCounter, sizeof Effects_Plg073_trailEmissionCounter}, // G00660 D_800FEF7C
     {"EFFECT/PLG077.BIN", 0x4108, sizeof Effects_Plg077_mesh10Vertices, &Effects_Plg077_mesh10Vertices, sizeof Effects_Plg077_mesh10Vertices}, // G00661 D_800FD908
     {"EFFECT/PLG077.BIN", 0x4158, sizeof Effects_Plg077_mesh10Faces, &Effects_Plg077_mesh10Faces, sizeof Effects_Plg077_mesh10Faces}, // G00662 D_800FD958
+    {"EFFECT/PLG077.BIN", 0x41B8, sizeof Effects_Plg077_ringColorFactors, &Effects_Plg077_ringColorFactors, sizeof Effects_Plg077_ringColorFactors}, // G00663 D_800FD9B8
     {"EFFECT/PLG077.BIN", 0x41D8, sizeof Effects_Plg077_surfaceVertices, &Effects_Plg077_surfaceVertices, sizeof Effects_Plg077_surfaceVertices}, // G00664 D_800FD9D8
+    {"EFFECT/PLG077.BIN", 0x4458, sizeof Effects_Plg077_ringColorFactors2, &Effects_Plg077_ringColorFactors2, sizeof Effects_Plg077_ringColorFactors2}, // G00665 D_800FDC58
+    {"EFFECT/PLG081.BIN", 0x2A4C, sizeof Effects_Plg081_ringColorFactors, &Effects_Plg081_ringColorFactors, sizeof Effects_Plg081_ringColorFactors}, // G00666 D_800FC24C
+    {"EFFECT/PLG081.BIN", 0x2A6C, sizeof Effects_Plg081_closedRingColorFactors, &Effects_Plg081_closedRingColorFactors, sizeof Effects_Plg081_closedRingColorFactors}, // G00667 D_800FC26C
     {"EFFECT/PLG082.BIN", 0x3888, sizeof Effects_Plg082_particleEmissionCounter, &Effects_Plg082_particleEmissionCounter, sizeof Effects_Plg082_particleEmissionCounter}, // G00668 D_800FD088
+    {"EFFECT/PLG082.BIN", 0x388C, sizeof Effects_Plg082_closedRingColorFactors, &Effects_Plg082_closedRingColorFactors, sizeof Effects_Plg082_closedRingColorFactors}, // G00669 D_800FD08C
     {"EFFECT/PLG085.BIN", 0x1A60, sizeof Effects_Plg085_tiledRingColorFactors, &Effects_Plg085_tiledRingColorFactors, sizeof Effects_Plg085_tiledRingColorFactors}, // G00670 D_800FB260
+    {"EFFECT/PLG086.BIN", 0x4B90, sizeof Effects_Plg086_closedRingColorFactors, &Effects_Plg086_closedRingColorFactors, sizeof Effects_Plg086_closedRingColorFactors}, // G00671 D_800FE390
     {"EFFECT/PLG086.BIN", 0x4BB0, sizeof Effects_Plg086_trailEmissionCounter, &Effects_Plg086_trailEmissionCounter, sizeof Effects_Plg086_trailEmissionCounter}, // G00672 D_800FE3B0
     {"EFFECT/PLG087.BIN", 0x5F5C, sizeof Effects_Plg087_surfaceVertices, &Effects_Plg087_surfaceVertices, sizeof Effects_Plg087_surfaceVertices}, // G00673 D_800FF75C
+    {"EFFECT/PLG087.BIN", 0x61DC, sizeof Effects_Plg087_closedRingColorFactors, &Effects_Plg087_closedRingColorFactors, sizeof Effects_Plg087_closedRingColorFactors}, // G00674 D_800FF9DC
     {"EFFECT/PLG087.BIN", 0x61FC, sizeof Effects_Plg087_trailEmissionCounter, &Effects_Plg087_trailEmissionCounter, sizeof Effects_Plg087_trailEmissionCounter}, // G00675 D_800FF9FC
     {"EFFECT/PLG087.BIN", 0x6200, sizeof Effects_Plg087_particleEmissionCounter, &Effects_Plg087_particleEmissionCounter, sizeof Effects_Plg087_particleEmissionCounter}, // G00676 D_800FFA00
     {"EFFECT/PLG114.BIN", 0x34A0, sizeof Effects_Plg114_particleEmissionCounter, &Effects_Plg114_particleEmissionCounter, sizeof Effects_Plg114_particleEmissionCounter}, // G00677 D_800FCCA0
     {"EFFECT/PLG114.BIN", 0x34A4, sizeof Effects_Plg114_particleEmissionCounter2, &Effects_Plg114_particleEmissionCounter2, sizeof Effects_Plg114_particleEmissionCounter2}, // G00678 D_800FCCA4
     {"EFFECT/PLG128.BIN", 0x6CF0, sizeof Effects_Plg128_surfaceVertices, &Effects_Plg128_surfaceVertices, sizeof Effects_Plg128_surfaceVertices}, // G00679 D_801004F0
+    {"EFFECT/PLG128.BIN", 0x6F70, sizeof Effects_Plg128_closedRingColorFactors, &Effects_Plg128_closedRingColorFactors, sizeof Effects_Plg128_closedRingColorFactors}, // G00680 D_80100770
     {"EFFECT/PLG128.BIN", 0x6F90, sizeof Effects_Plg128_surfaceVertices2, &Effects_Plg128_surfaceVertices2, sizeof Effects_Plg128_surfaceVertices2}, // G00681 D_80100790
     {"EFFECT/PLG128.BIN", 0x7210, sizeof Effects_Plg128_trailEmissionCounter, &Effects_Plg128_trailEmissionCounter, sizeof Effects_Plg128_trailEmissionCounter}, // G00682 D_80100A10
+    {"EFFECT/PLG129.BIN", 0x3DA8, sizeof Effects_Plg129_ringColorFactors, &Effects_Plg129_ringColorFactors, sizeof Effects_Plg129_ringColorFactors}, // G00683 D_800FD5A8
     {"EFFECT/PLG129.BIN", 0x3DE8, sizeof Effects_Plg129_mesh10Vertices, &Effects_Plg129_mesh10Vertices, sizeof Effects_Plg129_mesh10Vertices}, // G00684 D_800FD5E8
     {"EFFECT/PLG129.BIN", 0x3E38, sizeof Effects_Plg129_mesh10Faces, &Effects_Plg129_mesh10Faces, sizeof Effects_Plg129_mesh10Faces}, // G00685 D_800FD638
     {"EFFECT/PLG129.BIN", 0x3E98, sizeof Effects_Plg129_surfaceVertices, &Effects_Plg129_surfaceVertices, sizeof Effects_Plg129_surfaceVertices}, // G00686 D_800FD698
+    {"EFFECT/PLG129.BIN", 0x4118, sizeof Effects_Plg129_ringColorFactors2, &Effects_Plg129_ringColorFactors2, sizeof Effects_Plg129_ringColorFactors2}, // G00687 D_800FD918
     {"EFFECT/PLG134.BIN", 0x316C, sizeof Effects_Plg134_trailEmissionCounter, &Effects_Plg134_trailEmissionCounter, sizeof Effects_Plg134_trailEmissionCounter}, // G00688 D_800FC96C
+    {"EFFECT/PLG134.BIN", 0x3170, sizeof Effects_Plg134_closedRingColorFactors, &Effects_Plg134_closedRingColorFactors, sizeof Effects_Plg134_closedRingColorFactors}, // G00689 D_800FC970
+    {"EFFECT/PLG135.BIN", 0x316C, sizeof Effects_Plg135_closedRingColorFactors, &Effects_Plg135_closedRingColorFactors, sizeof Effects_Plg135_closedRingColorFactors}, // G00690 D_800FC96C
     {"EFFECT/PLG135.BIN", 0x318C, sizeof Effects_Plg135_trailEmissionCounter, &Effects_Plg135_trailEmissionCounter, sizeof Effects_Plg135_trailEmissionCounter}, // G00691 D_800FC98C
     {"EFFECT/PLG137.BIN", 0x478C, sizeof Effects_Plg137_mesh10Vertices, &Effects_Plg137_mesh10Vertices, sizeof Effects_Plg137_mesh10Vertices}, // G00692 D_800FDF8C
     {"EFFECT/PLG137.BIN", 0x47DC, sizeof Effects_Plg137_mesh10Faces, &Effects_Plg137_mesh10Faces, sizeof Effects_Plg137_mesh10Faces}, // G00693 D_800FDFDC
     {"EFFECT/PLG137.BIN", 0x483C, sizeof Effects_Plg137_trailEmissionCounter, &Effects_Plg137_trailEmissionCounter, sizeof Effects_Plg137_trailEmissionCounter}, // G00694 D_800FE03C
     {"EFFECT/PLG137.BIN", 0x4840, sizeof Effects_Plg137_tiledRingColorFactors, &Effects_Plg137_tiledRingColorFactors, sizeof Effects_Plg137_tiledRingColorFactors}, // G00695 D_800FE040
+    {"EFFECT/PLG138.BIN", 0x353C, sizeof Effects_Plg138_ringColorFactors, &Effects_Plg138_ringColorFactors, sizeof Effects_Plg138_ringColorFactors}, // G00696 D_800FCD3C
     {"EFFECT/PLG138.BIN", 0x355C, sizeof Effects_Plg138_tiledRingColorFactors, &Effects_Plg138_tiledRingColorFactors, sizeof Effects_Plg138_tiledRingColorFactors}, // G00697 D_800FCD5C
     {"EFFECT/PLG141.BIN", 0x2200, sizeof Effects_Plg141_trailEmissionCounter, &Effects_Plg141_trailEmissionCounter, sizeof Effects_Plg141_trailEmissionCounter}, // G00698 D_800FBA00
+    {"EFFECT/PLG142.BIN", 0x35B8, sizeof Effects_Plg142_closedRingColorFactors, &Effects_Plg142_closedRingColorFactors, sizeof Effects_Plg142_closedRingColorFactors}, // G00699 D_800FCDB8
+    {"EFFECT/PLG142.BIN", 0x35D8, sizeof Effects_Plg142_ringColorFactors, &Effects_Plg142_ringColorFactors, sizeof Effects_Plg142_ringColorFactors}, // G00700 D_800FCDD8
     {"EFFECT/PLG143.BIN", 0x1E64, sizeof Effects_Plg143_tiledRingColorFactors, &Effects_Plg143_tiledRingColorFactors, sizeof Effects_Plg143_tiledRingColorFactors}, // G00701 D_800FB664
+    {"EFFECT/PLG143.BIN", 0x1E84, sizeof Effects_Plg143_closedRingColorFactors, &Effects_Plg143_closedRingColorFactors, sizeof Effects_Plg143_closedRingColorFactors}, // G00702 D_800FB684
     {"EFFECT/PLG146.BIN", 0x607C, sizeof Effects_Plg146_tiledRingColorFactors, &Effects_Plg146_tiledRingColorFactors, sizeof Effects_Plg146_tiledRingColorFactors}, // G00703 D_800FF87C
     {"EFFECT/PLG146.BIN", 0x609C, sizeof Effects_Plg146_mirrorSurfaceVertices, &Effects_Plg146_mirrorSurfaceVertices, sizeof Effects_Plg146_mirrorSurfaceVertices}, // G00704 D_800FF89C
     {"EFFECT/PLG146.BIN", 0x631C, sizeof Effects_Plg146_particleEmissionCounter, &Effects_Plg146_particleEmissionCounter, sizeof Effects_Plg146_particleEmissionCounter}, // G00705 D_800FFB1C
+    {"EFFECT/PLG146.BIN", 0x6320, sizeof Effects_Plg146_ringColorFactors, &Effects_Plg146_ringColorFactors, sizeof Effects_Plg146_ringColorFactors}, // G00706 D_800FFB20
     {"EFFECT/PLG146.BIN", 0x6340, sizeof Effects_Plg146_trailEmissionCounter, &Effects_Plg146_trailEmissionCounter, sizeof Effects_Plg146_trailEmissionCounter}, // G00707 D_800FFB40
+    {"EFFECT/PLG147.BIN", 0x2310, sizeof Effects_Plg147_ringColorFactors, &Effects_Plg147_ringColorFactors, sizeof Effects_Plg147_ringColorFactors}, // G00708 D_800FBB10
     {"EFFECT/PLG147.BIN", 0x2330, sizeof Effects_Plg147_particleEmissionCounter, &Effects_Plg147_particleEmissionCounter, sizeof Effects_Plg147_particleEmissionCounter}, // G00709 D_800FBB30
     {"EFFECT/PLG148.BIN", 0x30F8, sizeof Effects_Plg148_trailEmissionCounter, &Effects_Plg148_trailEmissionCounter, sizeof Effects_Plg148_trailEmissionCounter}, // G00710 D_800FC8F8
     {"EFFECT/PLG148.BIN", 0x30FC, sizeof Effects_Plg148_tiledRingColorFactors, &Effects_Plg148_tiledRingColorFactors, sizeof Effects_Plg148_tiledRingColorFactors}, // G00711 D_800FC8FC
+    {"EFFECT/PLG149.BIN", 0xC24, sizeof Effects_Plg149_ringColorFactors, &Effects_Plg149_ringColorFactors, sizeof Effects_Plg149_ringColorFactors}, // G00712 D_800FA424
     {"EFFECT/PLG150.BIN", 0x321C, sizeof Effects_Plg150_tiledRingColorFactors, &Effects_Plg150_tiledRingColorFactors, sizeof Effects_Plg150_tiledRingColorFactors}, // G00713 D_800FCA1C
     {"EFFECT/PLG150.BIN", 0x323C, sizeof Effects_Plg150_surfaceVertices, &Effects_Plg150_surfaceVertices, sizeof Effects_Plg150_surfaceVertices}, // G00714 D_800FCA3C
+    {"EFFECT/PLG150.BIN", 0x34BC, sizeof Effects_Plg150_ringColorFactors, &Effects_Plg150_ringColorFactors, sizeof Effects_Plg150_ringColorFactors}, // G00715 D_800FCCBC
     {"EFFECT/PLG153.BIN", 0x3504, sizeof Effects_Plg153_mesh10Vertices, &Effects_Plg153_mesh10Vertices, sizeof Effects_Plg153_mesh10Vertices}, // G00716 D_800FCD04
     {"EFFECT/PLG153.BIN", 0x3554, sizeof Effects_Plg153_mesh10Faces, &Effects_Plg153_mesh10Faces, sizeof Effects_Plg153_mesh10Faces}, // G00717 D_800FCD54
+    {"EFFECT/PLG153.BIN", 0x35B4, sizeof Effects_Plg153_ringColorFactors, &Effects_Plg153_ringColorFactors, sizeof Effects_Plg153_ringColorFactors}, // G00718 D_800FCDB4
     {"EFFECT/PLG153.BIN", 0x35D4, sizeof Effects_Plg153_particleEmissionCounter, &Effects_Plg153_particleEmissionCounter, sizeof Effects_Plg153_particleEmissionCounter}, // G00719 D_800FCDD4
     {"EFFECT/PLG154.BIN", 0x1A9C, sizeof Effects_Plg154_mesh10Vertices, &Effects_Plg154_mesh10Vertices, sizeof Effects_Plg154_mesh10Vertices}, // G00720 D_800FB29C
     {"EFFECT/PLG154.BIN", 0x1AEC, sizeof Effects_Plg154_mesh10Faces, &Effects_Plg154_mesh10Faces, sizeof Effects_Plg154_mesh10Faces}, // G00721 D_800FB2EC
+    {"EFFECT/PLG154.BIN", 0x1B4C, sizeof Effects_Plg154_closedRingColorFactors, &Effects_Plg154_closedRingColorFactors, sizeof Effects_Plg154_closedRingColorFactors}, // G00722 D_800FB34C
     {"EFFECT/PLG156.BIN", 0x291C, sizeof Effects_Plg156_particleEmissionCounter, &Effects_Plg156_particleEmissionCounter, sizeof Effects_Plg156_particleEmissionCounter}, // G00723 D_800FC11C
     {"EFFECT/PLG158.BIN", 0x3638, sizeof Effects_Plg158_surfaceVertices, &Effects_Plg158_surfaceVertices, sizeof Effects_Plg158_surfaceVertices}, // G00724 D_800FCE38
     {"EFFECT/PLG158.BIN", 0x38B8, sizeof Effects_Plg158_mirrorSurfaceVertices, &Effects_Plg158_mirrorSurfaceVertices, sizeof Effects_Plg158_mirrorSurfaceVertices}, // G00725 D_800FD0B8
+    {"EFFECT/PLG158.BIN", 0x3B38, sizeof Effects_Plg158_closedRingColorFactors, &Effects_Plg158_closedRingColorFactors, sizeof Effects_Plg158_closedRingColorFactors}, // G00726 D_800FD338
     {"EFFECT/PLG160.BIN", 0x1B1C, sizeof Effects_Plg160_tiledRingColorFactors, &Effects_Plg160_tiledRingColorFactors, sizeof Effects_Plg160_tiledRingColorFactors}, // G00727 D_800FB31C
+    {"EFFECT/PLG160.BIN", 0x1B3C, sizeof Effects_Plg160_ringColorFactors, &Effects_Plg160_ringColorFactors, sizeof Effects_Plg160_ringColorFactors}, // G00728 D_800FB33C
+    {"EFFECT/PLG161.BIN", 0x5468, sizeof Effects_Plg161_ringColorFactors, &Effects_Plg161_ringColorFactors, sizeof Effects_Plg161_ringColorFactors}, // G00729 D_800FEC68
     {"EFFECT/PLG161.BIN", 0x5488, sizeof Effects_Plg161_trailEmissionCounter, &Effects_Plg161_trailEmissionCounter, sizeof Effects_Plg161_trailEmissionCounter}, // G00730 D_800FEC88
+    {"EFFECT/PLG161.BIN", 0x548C, sizeof Effects_Plg161_ringColorFactors2, &Effects_Plg161_ringColorFactors2, sizeof Effects_Plg161_ringColorFactors2}, // G00731 D_800FEC8C
+    {"EFFECT/PLG162.BIN", 0x398C, sizeof Effects_Plg162_ringColorFactors, &Effects_Plg162_ringColorFactors, sizeof Effects_Plg162_ringColorFactors}, // G00732 D_800FD18C
+    {"EFFECT/PLG162.BIN", 0x39AC, sizeof Effects_Plg162_ringColorFactors2, &Effects_Plg162_ringColorFactors2, sizeof Effects_Plg162_ringColorFactors2}, // G00733 D_800FD1AC
+    {"EFFECT/PLG162.BIN", 0x39CC, sizeof Effects_Plg162_closedRingColorFactors, &Effects_Plg162_closedRingColorFactors, sizeof Effects_Plg162_closedRingColorFactors}, // G00734 D_800FD1CC
     {"EFFECT/PLG165.BIN", 0x4B8C, sizeof Effects_Plg165_trailEmissionCounter, &Effects_Plg165_trailEmissionCounter, sizeof Effects_Plg165_trailEmissionCounter}, // G00735 D_800FE38C
     {"EFFECT/PLG166.BIN", 0x36C0, sizeof Effects_Plg166_mirrorSurfaceVertices, &Effects_Plg166_mirrorSurfaceVertices, sizeof Effects_Plg166_mirrorSurfaceVertices}, // G00736 D_800FCEC0
+    {"EFFECT/PLG166.BIN", 0x3940, sizeof Effects_Plg166_closedRingColorFactors, &Effects_Plg166_closedRingColorFactors, sizeof Effects_Plg166_closedRingColorFactors}, // G00737 D_800FD140
+    {"EFFECT/PLG166.BIN", 0x3960, sizeof Effects_Plg166_ringColorFactors, &Effects_Plg166_ringColorFactors, sizeof Effects_Plg166_ringColorFactors}, // G00738 D_800FD160
+    {"EFFECT/PLG167.BIN", 0x4024, sizeof Effects_Plg167_closedRingColorFactors, &Effects_Plg167_closedRingColorFactors, sizeof Effects_Plg167_closedRingColorFactors}, // G00739 D_800FD824
     {"EFFECT/PLG167.BIN", 0x4044, sizeof Effects_Plg167_trailEmissionCounter, &Effects_Plg167_trailEmissionCounter, sizeof Effects_Plg167_trailEmissionCounter}, // G00740 D_800FD844
     {"EFFECT/PLG168.BIN", 0x4454, sizeof Effects_Plg168_trailEmissionCounter, &Effects_Plg168_trailEmissionCounter, sizeof Effects_Plg168_trailEmissionCounter}, // G00741 D_800FDC54
     {"EFFECT/PLG168.BIN", 0x4458, sizeof Effects_Plg168_particleEmissionCounter, &Effects_Plg168_particleEmissionCounter, sizeof Effects_Plg168_particleEmissionCounter}, // G00742 D_800FDC58
     {"EFFECT/PLG169.BIN", 0x3D90, sizeof Effects_Plg169_trailEmissionCounter, &Effects_Plg169_trailEmissionCounter, sizeof Effects_Plg169_trailEmissionCounter}, // G00743 D_800FD590
+    {"EFFECT/PLG169.BIN", 0x3D94, sizeof Effects_Plg169_ringColorFactors, &Effects_Plg169_ringColorFactors, sizeof Effects_Plg169_ringColorFactors}, // G00744 D_800FD594
+    {"EFFECT/PLG169.BIN", 0x3DB4, sizeof Effects_Plg169_closedRingColorFactors, &Effects_Plg169_closedRingColorFactors, sizeof Effects_Plg169_closedRingColorFactors}, // G00745 D_800FD5B4
     {"EFFECT/PLG170.BIN", 0x4DC4, sizeof Effects_Plg170_mirrorSurfaceVertices, &Effects_Plg170_mirrorSurfaceVertices, sizeof Effects_Plg170_mirrorSurfaceVertices}, // G00746 D_800FE5C4
+    {"EFFECT/PLG170.BIN", 0x5044, sizeof Effects_Plg170_ringColorFactors, &Effects_Plg170_ringColorFactors, sizeof Effects_Plg170_ringColorFactors}, // G00747 D_800FE844
     {"EFFECT/PLG170.BIN", 0x5064, sizeof Effects_Plg170_surfaceVertices, &Effects_Plg170_surfaceVertices, sizeof Effects_Plg170_surfaceVertices}, // G00748 D_800FE864
+    {"EFFECT/PLG170.BIN", 0x52E4, sizeof Effects_Plg170_closedRingColorFactors, &Effects_Plg170_closedRingColorFactors, sizeof Effects_Plg170_closedRingColorFactors}, // G00749 D_800FEAE4
     {"EFFECT/PLG224.BIN", 0x16EC, sizeof Effects_Plg224_particleEmissionCounter, &Effects_Plg224_particleEmissionCounter, sizeof Effects_Plg224_particleEmissionCounter}, // G00750 D_800FAEEC
     {"EFFECT/PLG232.BIN", 0x2200, sizeof Effects_Plg232_trailEmissionCounter, &Effects_Plg232_trailEmissionCounter, sizeof Effects_Plg232_trailEmissionCounter}, // G00751 D_800FBA00
+    {"EFFECT/PLG236.BIN", 0x3990, sizeof Effects_Plg236_closedRingColorFactors, &Effects_Plg236_closedRingColorFactors, sizeof Effects_Plg236_closedRingColorFactors}, // G00752 D_800FD190
+    {"EFFECT/PLG236.BIN", 0x39B0, sizeof Effects_Plg236_ringColorFactors, &Effects_Plg236_ringColorFactors, sizeof Effects_Plg236_ringColorFactors}, // G00753 D_800FD1B0
+    {"EFFECT/PLG236.BIN", 0x39D0, sizeof Effects_Plg236_ringColorFactors2, &Effects_Plg236_ringColorFactors2, sizeof Effects_Plg236_ringColorFactors2}, // G00754 D_800FD1D0
     {"EFFECT/PLG242.BIN", 0x3C60, sizeof Effects_Plg242_tiledRingColorFactors, &Effects_Plg242_tiledRingColorFactors, sizeof Effects_Plg242_tiledRingColorFactors}, // G00755 D_800FD460
     {"EFFECT/PLG242.BIN", 0x3C80, sizeof Effects_Plg242_trailEmissionCounter, &Effects_Plg242_trailEmissionCounter, sizeof Effects_Plg242_trailEmissionCounter}, // G00756 D_800FD480
+    {"EFFECT/PLG250.BIN", 0x1E28, sizeof Effects_Plg250_closedRingColorFactors, &Effects_Plg250_closedRingColorFactors, sizeof Effects_Plg250_closedRingColorFactors}, // G00757 D_800FB628
     {"EFFECT/PLG255.BIN", 0x38EC, sizeof Effects_Plg255_trailEmissionCounter, &Effects_Plg255_trailEmissionCounter, sizeof Effects_Plg255_trailEmissionCounter}, // G00758 D_800FD0EC
     {"EFFECT/PLG255.BIN", 0x38F0, sizeof Effects_Plg255_particleEmissionCounter, &Effects_Plg255_particleEmissionCounter, sizeof Effects_Plg255_particleEmissionCounter}, // G00759 D_800FD0F0
     {"EFFECT/PLG260.BIN", 0xB2C, sizeof Effects_Plg260_mesh10Vertices, &Effects_Plg260_mesh10Vertices, sizeof Effects_Plg260_mesh10Vertices}, // G00760 D_800FA32C
     {"EFFECT/PLG260.BIN", 0xB7C, sizeof Effects_Plg260_mesh10Faces, &Effects_Plg260_mesh10Faces, sizeof Effects_Plg260_mesh10Faces}, // G00761 D_800FA37C
     {"EFFECT/PLG263.BIN", 0x44B0, sizeof Effects_Plg263_surfaceVertices, &Effects_Plg263_surfaceVertices, sizeof Effects_Plg263_surfaceVertices}, // G00762 D_800FDCB0
+    {"EFFECT/PLG263.BIN", 0x4730, sizeof Effects_Plg263_ringColorFactors, &Effects_Plg263_ringColorFactors, sizeof Effects_Plg263_ringColorFactors}, // G00763 D_800FDF30
+    {"EFFECT/PLG263.BIN", 0x4750, sizeof Effects_Plg263_ringColorFactors2, &Effects_Plg263_ringColorFactors2, sizeof Effects_Plg263_ringColorFactors2}, // G00764 D_800FDF50
     {"EFFECT/PLG263.BIN", 0x4770, sizeof Effects_Plg263_particleEmissionCounter, &Effects_Plg263_particleEmissionCounter, sizeof Effects_Plg263_particleEmissionCounter}, // G00765 D_800FDF70
     {"EFFECT/PLG265.BIN", 0x6598, sizeof Effects_Plg265_tiledRingColorFactors, &Effects_Plg265_tiledRingColorFactors, sizeof Effects_Plg265_tiledRingColorFactors}, // G00766 D_800FFD98
     {"EFFECT/PLG265.BIN", 0x65B8, sizeof Effects_Plg265_particleEmissionCounter, &Effects_Plg265_particleEmissionCounter, sizeof Effects_Plg265_particleEmissionCounter}, // G00767 D_800FFDB8
@@ -445,13 +499,20 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"EFFECT/PLG266.BIN", 0x56A0, sizeof Effects_Plg266_particleEmissionCounter, &Effects_Plg266_particleEmissionCounter, sizeof Effects_Plg266_particleEmissionCounter}, // G00770 D_800FEEA0
     {"EFFECT/PLG266.BIN", 0x56A4, sizeof Effects_Plg266_particleEmissionCounter2, &Effects_Plg266_particleEmissionCounter2, sizeof Effects_Plg266_particleEmissionCounter2}, // G00771 D_800FEEA4
     {"EFFECT/PLG266.BIN", 0x56A8, sizeof Effects_Plg266_trailEmissionCounter, &Effects_Plg266_trailEmissionCounter, sizeof Effects_Plg266_trailEmissionCounter}, // G00772 D_800FEEA8
+    {"EFFECT/PLG272.BIN", 0x2670, sizeof Effects_Plg272_closedRingColorFactors, &Effects_Plg272_closedRingColorFactors, sizeof Effects_Plg272_closedRingColorFactors}, // G00773 D_800FBE70
     {"EFFECT/PLG272.BIN", 0x2690, sizeof Effects_Plg272_surfaceVertices, &Effects_Plg272_surfaceVertices, sizeof Effects_Plg272_surfaceVertices}, // G00774 D_800FBE90
     {"EFFECT/PLG273.BIN", 0xC74, sizeof Effects_Plg273_mirrorSurfaceVertices, &Effects_Plg273_mirrorSurfaceVertices, sizeof Effects_Plg273_mirrorSurfaceVertices}, // G00775 D_800FA474
     {"EFFECT/PLG291.BIN", 0x3CD8, sizeof Effects_Plg291_trailEmissionCounter, &Effects_Plg291_trailEmissionCounter, sizeof Effects_Plg291_trailEmissionCounter}, // G00776 D_800FD4D8
+    {"EFFECT/PLG291.BIN", 0x3CDC, sizeof Effects_Plg291_closedRingColorFactors, &Effects_Plg291_closedRingColorFactors, sizeof Effects_Plg291_closedRingColorFactors}, // G00777 D_800FD4DC
     {"EFFECT/PLG297.BIN", 0x3370, sizeof Effects_Plg297_mirrorSurfaceVertices, &Effects_Plg297_mirrorSurfaceVertices, sizeof Effects_Plg297_mirrorSurfaceVertices}, // G00778 D_800FCB70
+    {"EFFECT/PLG297.BIN", 0x35F0, sizeof Effects_Plg297_closedRingColorFactors, &Effects_Plg297_closedRingColorFactors, sizeof Effects_Plg297_closedRingColorFactors}, // G00779 D_800FCDF0
+    {"EFFECT/PLG297.BIN", 0x3610, sizeof Effects_Plg297_ringColorFactors, &Effects_Plg297_ringColorFactors, sizeof Effects_Plg297_ringColorFactors}, // G00780 D_800FCE10
     {"EFFECT/PLG300.BIN", 0x48CC, sizeof Effects_Plg300_mirrorSurfaceVertices, &Effects_Plg300_mirrorSurfaceVertices, sizeof Effects_Plg300_mirrorSurfaceVertices}, // G00781 D_800FE0CC
     {"EFFECT/PLG300.BIN", 0x4B4C, sizeof Effects_Plg300_particleEmissionCounter, &Effects_Plg300_particleEmissionCounter, sizeof Effects_Plg300_particleEmissionCounter}, // G00782 D_800FE34C
+    {"EFFECT/PLG300.BIN", 0x4B50, sizeof Effects_Plg300_ringColorFactors, &Effects_Plg300_ringColorFactors, sizeof Effects_Plg300_ringColorFactors}, // G00783 D_800FE350
+    {"EFFECT/PLG300.BIN", 0x4B70, sizeof Effects_Plg300_ringColorFactors2, &Effects_Plg300_ringColorFactors2, sizeof Effects_Plg300_ringColorFactors2}, // G00784 D_800FE370
     {"EFFECT/PLG301.BIN", 0x2D24, sizeof Effects_Plg301_particleEmissionCounter, &Effects_Plg301_particleEmissionCounter, sizeof Effects_Plg301_particleEmissionCounter}, // G00785 D_800FC524
+    {"EFFECT/PLG301.BIN", 0x2D28, sizeof Effects_Plg301_closedRingColorFactors, &Effects_Plg301_closedRingColorFactors, sizeof Effects_Plg301_closedRingColorFactors}, // G00786 D_800FC528
     {"ENDING/ENDING.PRG", 0x5BFC, sizeof Ending_Credits_scriptBytes, &Ending_Credits_scriptBytes, sizeof Ending_Credits_scriptBytes}, // G00787 D_8006E3FC
     {"ENDING/ENDING.PRG", 0x777C, sizeof Ending_Credits_glyphWidths, &Ending_Credits_glyphWidths, sizeof Ending_Credits_glyphWidths}, // G00788 _glyphWidths
     {"ENDING/ENDING.PRG", 0x785C, sizeof Ending_Credits_embeddedTextureOne, &Ending_Credits_embeddedTextureOne, sizeof Ending_Credits_embeddedTextureOne}, // G00789 D_8007005C
@@ -543,10 +604,12 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x81268, 72u, Content_battleShadowVertices, sizeof Content_battleShadowVertices},
     {"BATTLE/BATTLE.PRG", 0x812D4, 96u, Content_battleShadowFaces, sizeof Content_battleShadowFaces},
     {"BATTLE/BATTLE.PRG", 0x88F58, 4u, Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths},
+    {"BATTLE/BATTLE.PRG", 0x83278, 320u, Content_battleMainMenuHelpText, sizeof Content_battleMainMenuHelpText},
     {"BATTLE/BATTLE.PRG", 0x1060, 152u, Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes},
     {"BATTLE/BATTLE.PRG", 0x80B0C, 1820u, Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes},
     {"BATTLE/BATTLE.PRG", 0x823AC, 2524u, Content_battleTextboxFrameBytes, sizeof Content_battleTextboxFrameBytes},
     {"BATTLE/BATTLE.PRG", 0x7FD48, 116u, Content_battleTriggerMarkerBytes, sizeof Content_battleTriggerMarkerBytes},
+    {"BATTLE/BATTLE.PRG", 0x41C, 664u, Content_battleSkyDome, sizeof Content_battleSkyDome},
     {"SLUS_010.40", 0x800, 335872u, Content_residentLfoSamples, sizeof Content_residentLfoSamples},
 };
 const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];

@@ -46,12 +46,13 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Audio\Ambience.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Audio\ActorSoundCore.cpp" />
+    <ClCompile Include="src\Audio\ActorSoundLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Audio\AmbienceCore.cpp" />
+    <ClCompile Include="src\Audio\AmbienceLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\AudioDevice.cpp" />
     <ClCompile Include="src\Audio\Control\SoundControl.cpp">
@@ -61,12 +62,20 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Audio\Control\SoundControlCore.cpp" />
+    <ClCompile Include="src\Audio\Control\SoundControlLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Audio\Cutscene\Stream.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Cutscene\StreamBuffersCore.cpp" />
+    <ClCompile Include="src\Audio\Cutscene\StreamBuffersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\Cutscene\StreamControl.cpp" />
     <ClCompile Include="src\Audio\Cutscene\StreamControlLive.cpp">
@@ -120,14 +129,11 @@
     <ClCompile Include="src\Audio\Mixer\VoiceMixerLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Audio\Music.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Audio\MusicCore.cpp" />
     <ClCompile Include="src\Audio\MusicLayers.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Audio\MusicLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\MusicState.cpp" />
@@ -138,6 +144,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Audio\Playback\SoundPlaybackCore.cpp" />
+    <ClCompile Include="src\Audio\Playback\SoundPlaybackLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Audio\Reverb.cpp" />
     <ClCompile Include="src\Audio\Samples\SampleBanks.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -145,6 +155,10 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Samples\SampleBanksCore.cpp" />
+    <ClCompile Include="src\Audio\Samples\SampleBanksLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\Seq\Channel.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -188,12 +202,24 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Audio\SfxCore.cpp" />
+    <ClCompile Include="src\Audio\SfxLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Audio\SoundBanks.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Audio\SoundBanksCore.cpp" />
+    <ClCompile Include="src\Audio\SoundBanksLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Audio\SoundEffects\SoundEffectProgramsCore.cpp" />
+    <ClCompile Include="src\Audio\SoundEffects\SoundEffectProgramsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\SoundEffects\SoundEffects.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -205,12 +231,12 @@
     <ClCompile Include="src\Audio\SoundEffectsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Audio\Stream.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Audio\SoundSlotsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Audio\StreamCore.cpp" />
+    <ClCompile Include="src\Audio\StreamLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\VoiceEngine.cpp" />
     <ClCompile Include="src\Audio\XaMix.cpp" />
@@ -488,7 +514,6 @@
   <ItemGroup>
     <ClInclude Include="src\Audio\ActorSound.h" />
     <ClInclude Include="src\Audio\Akao.h" />
-    <ClInclude Include="src\Audio\Ambience.h" />
     <ClInclude Include="src\Audio\Control\SoundControl.h" />
     <ClInclude Include="src\Audio\Cutscene\Stream.h" />
     <ClInclude Include="src\Audio\Driver\SoundDriver.h" />
@@ -496,7 +521,6 @@
     <ClInclude Include="src\Audio\LegacyFiles.h" />
     <ClInclude Include="src\Audio\Mixer\MixControl.h" />
     <ClInclude Include="src\Audio\Mixer\VoiceMixer.h" />
-    <ClInclude Include="src\Audio\Music.h" />
     <ClInclude Include="src\Audio\Playback\SoundPlayback.h" />
     <ClInclude Include="src\Audio\Samples\SampleBanks.h" />
     <ClInclude Include="src\Audio\Seq\AkaoFormat.h" />
@@ -535,15 +559,23 @@
     <ClInclude Include="src\Render\UiPrimitives.h" />
     <ClInclude Include="src\Save\MemoryCard\GameFiles.h" />
     <ClInclude Include="src\Save\MemoryCard\Resources.h" />
+    <ClInclude Include="include\Audio\ActorSound.hpp" />
+    <ClInclude Include="include\Audio\ActorSoundLive.hpp" />
+    <ClInclude Include="include\Audio\Ambience.hpp" />
+    <ClInclude Include="include\Audio\AmbienceLive.hpp" />
     <ClInclude Include="include\Audio\AudioDevice.hpp" />
     <ClInclude Include="include\Audio\LfoWaveforms.h" />
     <ClInclude Include="include\Audio\MixControl.hpp" />
     <ClInclude Include="include\Audio\MixControlLive.hpp" />
+    <ClInclude Include="include\Audio\Music.hpp" />
+    <ClInclude Include="include\Audio\MusicLive.hpp" />
     <ClInclude Include="include\Audio\MusicState.h" />
     <ClInclude Include="include\Audio\MusicVoiceConflicts.hpp" />
     <ClInclude Include="include\Audio\PlaybackReset.hpp" />
     <ClInclude Include="include\Audio\PlaybackResetLive.hpp" />
     <ClInclude Include="include\Audio\Reverb.hpp" />
+    <ClInclude Include="include\Audio\SampleBanks.hpp" />
+    <ClInclude Include="include\Audio\SampleBanksLive.hpp" />
     <ClInclude Include="include\Audio\SeqChannelCommands.hpp" />
     <ClInclude Include="include\Audio\SeqControlCommands.hpp" />
     <ClInclude Include="include\Audio\SeqControlCommandsLive.hpp" />
@@ -557,11 +589,26 @@
     <ClInclude Include="include\Audio\SequencerOutput.h" />
     <ClInclude Include="include\Audio\SeqVoiceCommands.hpp" />
     <ClInclude Include="include\Audio\SeqVoiceCommandsLive.hpp" />
+    <ClInclude Include="include\Audio\Sfx.hpp" />
+    <ClInclude Include="include\Audio\SfxLive.hpp" />
+    <ClInclude Include="include\Audio\SoundBanks.hpp" />
+    <ClInclude Include="include\Audio\SoundBanksLive.hpp" />
+    <ClInclude Include="include\Audio\SoundControl.hpp" />
+    <ClInclude Include="include\Audio\SoundControlLive.hpp" />
     <ClInclude Include="include\Audio\SoundDriver.hpp" />
     <ClInclude Include="include\Audio\SoundDriverLive.hpp" />
+    <ClInclude Include="include\Audio\SoundEffectPrograms.hpp" />
+    <ClInclude Include="include\Audio\SoundEffectProgramsLive.hpp" />
     <ClInclude Include="include\Audio\SoundEffects.hpp" />
+    <ClInclude Include="include\Audio\SoundPlayback.hpp" />
+    <ClInclude Include="include\Audio\SoundPlaybackLive.hpp" />
+    <ClInclude Include="include\Audio\SoundSlotsLive.hpp" />
+    <ClInclude Include="include\Audio\Stream.hpp" />
+    <ClInclude Include="include\Audio\StreamBuffers.hpp" />
+    <ClInclude Include="include\Audio\StreamBuffersLive.hpp" />
     <ClInclude Include="include\Audio\StreamControl.hpp" />
     <ClInclude Include="include\Audio\StreamControlLive.hpp" />
+    <ClInclude Include="include\Audio\StreamLive.hpp" />
     <ClInclude Include="include\Audio\StreamPlayback.h" />
     <ClInclude Include="include\Audio\VoiceEngine.hpp" />
     <ClInclude Include="include\Audio\VoiceMixer.hpp" />

@@ -14,7 +14,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Event/Camera.h"
 #include "Event/Script.h"
 #include "Event/ScriptAudio.h"

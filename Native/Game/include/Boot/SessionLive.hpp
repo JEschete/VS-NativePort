@@ -16,6 +16,20 @@ int RunLiveTitleAndBattle();
 void RunLiveGame();
 [[noreturn]] void JumpToLiveTitle();
 [[noreturn]] void JumpToLiveGameLoop();
+void LoadBattleOverlaysLive();
+void LoadTitleOverlayLive();
+void LoadEndingOverlayLive();
+void WaitForOverlayReadyLive();
+void ResetToTitleLive();
+void EnterBattleLive();
+void RunEndingAndReturnToTitleLive();
+void InitializePlatformServicesLive();
+void InitializeTitleSessionLive();
+void InitializeGameplayOverlayLive(int start_state);
+// Runs the gameplay loop over the live field, battle and render state; it
+// is left only by a session transition.
+void RunGameplayLoopLive();
+void SetSoftResetEnabledLive(int enabled);
 
 // Held by scopes that bind globals to stack storage; a session transition
 // requested meanwhile is reported and stops the process instead of leaving

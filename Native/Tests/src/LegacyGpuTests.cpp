@@ -7,6 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Field/RoomRenderingLive.hpp"
 #include "Legacy/Render/LibGpu.h"
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
@@ -15,9 +16,9 @@
 
 extern "C" {
 #include "Core/Scratch.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Gimmicks.h"
-#include "Field/RoomRendering.h"
+#include "Field/RoomRenderingLiveState.h"
 #include "Render/Render.h"
 }
 
@@ -296,9 +297,9 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   Field_roomData.header.geometryLength = sizeof geometry;
   Field_roomGeometryDrawMode = 0;
   Render_ColorCode tint{1, 2, 3, 0};
-  Field_SetRoomTint(&tint, 0);
+  VS::Field::LiveSetRoomTint(&tint, 0);
   StoreGroup(geometry, 0, group);
-  Field_DrawRoomGeometry(&geometry);
+  VS::Field::LiveDrawRoomGeometry(&geometry);
   auto* tinted = reinterpret_cast<POLY_GT3*>(buffer);
   CHECK(Field_roomPrimitiveRangeStart == buffer);
   CHECK(Field_roomPrimitiveRangeEnd == buffer + sizeof(POLY_GT3));

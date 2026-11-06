@@ -42,21 +42,5 @@ typedef struct Audio_SoundState {
 extern u_short Audio_menuSoundEffects[11264];
 extern Audio_SoundState Audio_soundState;
 extern char Audio_waveBankFileMap[];
-int Audio_LoadSfxBankSlot(int id, u_int slot);
-int Audio_LoadSfxBankIntoFreeSlot(int id);
-int Audio_PollSfxBankSlotLoad(u_int slot);
-int Audio_PollSfxBankLoads(void);
-int Audio_LoadSfxBankBlocking(int id);
-int Audio_SelectSfxBankSlot(int id);
-int Audio_FreeSfxBankSlot(u_int id);
-int Audio_BindRoomSfxBank(uintptr_t bank_address);
-int Audio_UnbindRoomSfxBank(void);
-void Audio_LoadWaveBankFile(int file);
-void Audio_LoadMappedWaveBank(int id);
-int Audio_UpdateWaveBankLoad(void);
-void Audio_LoadWaveBankBlocking(int id);
-void Audio_SetMonoOutput(int set);
-void Audio_InitializeMenuSoundBanks(void);
-void Audio_ResetSoundSlots(void);
 
 #endif // VS_AUDIO_SOUNDBANKS_H_DECLS

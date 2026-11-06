@@ -1,35 +1,35 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/AttackPrerequisitesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/AttackPrerequisites.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/HitChance.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Render/Palette.h"
-#include "State/Flags.h"
 #include "State/Progress.h"
 
 // decomp: D_800E8200 (D_800E8200@BATTLE/BATTLE.PRG)
@@ -270,7 +270,7 @@ void Battle_ApplyActionHitEffect(
         int weapon_category;
         Battle_actors[target_hit->target.targetActor]->killCounted = 1;
         weapon_category = Battle_characterState->equippedWeaponCategory % 10;
-        if ((State_ScriptFlag(0x82) >= 0xA)
+        if ((VS::State::LiveScriptFlag(0x82) >= 0xA)
             && (Audio_Seq_unusedArtsStatus.artsLearned[weapon_category] < 4)
             && (Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[weapon_category]
                 < Battle_breakArtPointRequirements[weapon_category][Audio_Seq_unusedArtsStatus
@@ -594,7 +594,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
                     continue;
                 }
                 stats = Battle_actors[entry->target.targetActor]->stats;
-                Battle_hitPrerequisiteResult = Battle_CheckActionHitPrerequisite(action_definition, (u_char *)((char*)entry), hit);
+                Battle_hitPrerequisiteResult = VS::Battle::LiveCheckActionHitPrerequisite(action_definition, (u_char *)((char*)entry), hit);
                 if (Battle_hitPrerequisiteResult != 0) {
                     Battle_previousHitResult = Battle_RollActionHit(action_definition, user, entry, hit, execute_action);
                     if ((Battle_previousHitResult != 0) || (execute_action == 0)) {

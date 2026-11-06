@@ -4,9 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/SLUS_010.40/sfx.h:4
-#define VS_SFX_MENUSELECT 5
-
 #endif // VS_EVENT_SCRIPTAUDIO_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EVENT_SCRIPTAUDIO_H_DECLS)
@@ -15,34 +12,5 @@
 extern char Event_isAmbientSoundSuspended;
 extern short Event_suspendedAmbientSoundId;
 extern char Event_musicSlot;
-intptr_t Event_ScriptPlaySoundCommand(u_char* instruction, short thread_index);
-intptr_t Event_CommandPlayActorSfx(u_char* instruction, short thread_index);
-intptr_t Event_CommandSlideSfxVolume(u_char* instruction, short thread_index);
-intptr_t Event_CommandStopAllSfx(u_char* instruction, short thread_index);
-intptr_t Event_CommandStopSfx(u_char* instruction, short thread_index);
-intptr_t Event_CommandLoadSfxSlot(u_char* instruction, short thread_index);
-intptr_t Event_CommandWaitSfxSlotRelease(u_char* instruction, short thread_index);
-intptr_t Event_CommandFreeSfx(u_char* instruction, short thread_index);
-intptr_t Event_CommandSelectSfxBank(u_char* instruction, short thread_index);
-intptr_t Event_CommandLoadEventMusic(u_char* instruction, short thread_index);
-intptr_t Event_CommandCrossfadeMusic(u_char* instruction, short thread_index);
-intptr_t Event_CommandLoadMusicSlot(u_char* instruction, short thread_index);
-intptr_t Event_CommandFreeMusic(u_char* instruction, short thread_index);
-intptr_t Event_CommandPlayMusic(u_char* instruction, short thread_index);
-intptr_t Event_CommandSlideMusicVolume(u_char* instruction, short thread_index);
-intptr_t Event_CommandSlideMusicTempo(u_char* instruction, short thread_index);
-intptr_t Event_CommandSlideMusicPitch(u_char* instruction, short thread_index);
-intptr_t Event_CommandStopMusic(u_char* instruction, short thread_index);
-intptr_t Event_CommandWaitMusicSlot(u_char* instruction, short thread_index);
-intptr_t Event_CommandPushMusicState(u_char* instruction, short thread_index);
-intptr_t Event_CommandWaitMusicSlotLoad(u_char* instruction, short thread_index);
-intptr_t Event_CommandLoadSoundFile(u_char* instruction, short thread_index);
-intptr_t Event_CommandWaitSoundQueue(u_char* instruction, short thread_index);
-intptr_t Event_CommandWaitMusicTimer(u_char* instruction, short thread_index);
-intptr_t Event_CommandSlideSfxPitch(u_char* instruction, short thread_index);
-intptr_t Event_CommandSlideSfxPan(u_char* instruction, short thread_index);
-intptr_t Event_CommandResumeMusicSlot(u_char* instruction, short thread_index);
-intptr_t Event_CommandSetMusicJumpThreshold(u_char* instruction, short thread_index);
-intptr_t Event_CommandPlayMenuSelectSfx(u_char* instruction, short thread_index);
 
 #endif // VS_EVENT_SCRIPTAUDIO_H_DECLS

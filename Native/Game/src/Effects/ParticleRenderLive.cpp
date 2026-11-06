@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "Core/Log.hpp"
+#include "Effects/CurvesLive.hpp"
 #include "Effects/ParticleRender.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
@@ -23,7 +24,6 @@
 #include "nlohmann/json.hpp"
 
 extern "C" {
-#include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -121,7 +121,7 @@ std::optional<std::uint32_t> ColorSample(unsigned curve, unsigned age) {
               block->curveSizes[curve - 1] != 0 &&
               Effects_package->curves[curve - 1] != nullptr,
           "Particle color references an invalid effect curve");
-  return static_cast<std::uint32_t>(Effects_SampleEffectCurve(
+  return static_cast<std::uint32_t>(VS::Effects::LiveSampleEffectCurve(
       static_cast<int>(curve), static_cast<int>(age)));
 }
 

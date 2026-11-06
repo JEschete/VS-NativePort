@@ -407,7 +407,7 @@ class CombatController:
             return self._action(frame, (reaction.button,), 2,
                                 f"{reaction.kind}:slot{reaction.slot}", True)
         if ending_results_waiting(frame) and frame.tick - self.last_action_tick >= self.input_gap:
-            # Never Start: Ending_Credits_RunFrames treats it as a credits skip request.
+            # Never Start: VS::Ending::Credits::RunFrames treats it as a credits skip request.
             if frame.tick % 30 < 2:
                 return self._action(frame, ("Circle",), 2, "leave the native clear-results screen")
             return None

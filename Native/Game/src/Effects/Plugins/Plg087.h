@@ -10,7 +10,7 @@
 #define VS_EFFECTS_PLUGINS_PLG087_H_DECLS
 
 extern SVECTOR Effects_Plg087_surfaceVertices[5][16];
-extern CVECTOR Effects_Plg087_closedRingColorFactors[];
+extern CVECTOR Effects_Plg087_closedRingColorFactors[8];
 extern int Effects_Plg087_trailEmissionCounter;
 extern int Effects_Plg087_particleEmissionCounter;
 

@@ -2,6 +2,8 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <cstddef>
+#include <cstdint>
+#include <span>
 
 struct Audio_CommandParams;
 
@@ -18,6 +20,8 @@ void StopLiveStream(Audio_CommandParams* params);
 void SetLiveStreamVolume(Audio_CommandParams* params);
 void SlideLiveStreamVolume(Audio_CommandParams* params);
 void SetLiveStreamPan(Audio_CommandParams* params);
+// The bytes of the stream bound to the room stream slot; empty when none is.
+std::span<std::uint8_t> LiveBoundStreamBytes();
 }  // namespace VS::Audio::Cutscene
 
 namespace VS::Audio {

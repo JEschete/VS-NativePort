@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -7,19 +8,18 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Content/StringTables.h"
-#include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/BreakArts.h"
-#include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Render/Palette.h"
 #include "State/Progress.h"
@@ -63,7 +63,7 @@ void Menu_BreakArts_SetHpCost(int id)
     int cost;
 
     flags = Battle_ActorActionRestrictionFlags(0, id);
-    Menu_Framework_SetActionCostText(1, "HP", 8, (flags >> 1) & 1);
+    VS::Menu::Framework::SetLiveActionCostText(1, "HP", 8, (flags >> 1) & 1);
 
     cost = Battle_actionDefinitions[id].cost;
     Menu_BreakArts_setHpCostDigitBuffer[15] = 0;
@@ -79,7 +79,7 @@ void Menu_BreakArts_SetHpCost(int id)
     --i;
     Menu_BreakArts_setHpCostDigitBuffer[i] = '#';
 
-    Menu_Framework_SetActionCostText(0, &Menu_BreakArts_setHpCostDigitBuffer[i], 72, (flags >> 1) & 1);
+    VS::Menu::Framework::SetLiveActionCostText(0, &Menu_BreakArts_setHpCostDigitBuffer[i], 72, (flags >> 1) & 1);
 }
 
 // decomp: MENU1.PRG _setNextArtUnlockPointsRemaining (src/MENU/MENU1.PRG/30.c:45)
@@ -148,7 +148,7 @@ int Menu_BreakArts_UpdateArtList(int typeCursorMem)
         Menu_BreakArts_artListForceCursorMemory = typeCursorMem >> 4;
         typeCursorMem &= 0xF;
         Menu_BreakArts_artListWeaponType = typeCursorMem;
-        menuItem = Menu_Framework_SetMenuItem(
+        menuItem = VS::Menu::Framework::SetLiveMenuItem(
             10, 320, 34, 0x7E, 8, (char*)&Menu_BreakArts_strings[Menu_BreakArts_strings[(Menu_BreakArts_artListWeaponType - 1) * 3]]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 180;
@@ -165,7 +165,7 @@ int Menu_BreakArts_UpdateArtList(int typeCursorMem)
         int rowCount;
         int cursorMemory;
 
-        if ((Menu_Framework_shortcutInvoked == 0) && (Menu_Framework_AreMenuRowsIdle() == 0)) {
+        if ((Menu_Framework_shortcutInvoked == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0)) {
             break;
         }
 
@@ -213,7 +213,7 @@ int Menu_BreakArts_UpdateArtList(int typeCursorMem)
             Menu_BreakArts_artListForceCursorMemory = 0;
         }
 
-        Menu_Framework_CreateMenuRows(
+        VS::Menu::Framework::CreateLiveMenuRows(
             rowCount, (Menu_BreakArts_artListWeaponType + 11) | 0x200, menuStrings, rowTypes);
 
         Input_settings.cursorMemory = cursorMemory;
@@ -230,7 +230,7 @@ int Menu_BreakArts_UpdateArtList(int typeCursorMem)
         }
 
         Menu_BreakArts_artListIsLastRow = Menu_BreakArts_artListRemainingRows == 0;
-        Menu_BreakArts_artListSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+        Menu_BreakArts_artListSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
         Menu_Framework_displayActionCost = 0;
 
         if (Menu_BreakArts_artListSelectedRow != Menu_Framework_MenuSelection_Confirm) {
@@ -244,16 +244,16 @@ int Menu_BreakArts_UpdateArtList(int typeCursorMem)
             }
 
             if (Menu_BreakArts_artListSelectedRow == 0xFFFF) {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(1));
+                VS::Menu::Framework::ClearLiveMenuExcept(1);
             } else {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::DismissLiveInformationBox();
+                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
             }
 
             Menu_BreakArts_artListState = Menu_BreakArts_ArtSelectionState_ReturnSelection;
         } else {
-            i = Menu_BreakArts_artListActionIds[Menu_Framework_HighlightedRow()];
+            i = Menu_BreakArts_artListActionIds[VS::Menu::Framework::LiveHighlightedRow()];
             if (i != 0xFFFF) {
                 Menu_BreakArts_SetHpCost(i);
             }
@@ -261,7 +261,7 @@ int Menu_BreakArts_UpdateArtList(int typeCursorMem)
         break;
 
     case Menu_BreakArts_ArtSelectionState_ReturnSelection:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             return Menu_BreakArts_artListSelectedRow;
         }
         break;
@@ -289,7 +289,7 @@ int Menu_BreakArts_UpdateWeaponCategories(int initialize)
     static int Menu_BreakArts_weaponCategoriesState = Menu_BreakArts_ArtSelectionState_Init;
 
     if (initialize != 0) {
-        Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(
+        Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::SetLiveMenuItem(
             10, 320, 34, 0x7E, 8, (char*)&Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArts]);
         menuItem->state = 2;
         menuItem->targetPosition0 = 180;
@@ -305,7 +305,7 @@ int Menu_BreakArts_UpdateWeaponCategories(int initialize)
         int i;
         int j;
 
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
@@ -326,29 +326,29 @@ int Menu_BreakArts_UpdateWeaponCategories(int initialize)
             }
         }
 
-        Menu_Framework_CreateMenuRows(10, (2 << 8) | 22, menuStrings, rowTypes);
+        VS::Menu::Framework::CreateLiveMenuRows(10, (2 << 8) | 22, menuStrings, rowTypes);
 
         Menu_BreakArts_weaponCategoriesState = Menu_BreakArts_ArtSelectionState_WaitForSelection;
         break;
     }
 
     case Menu_BreakArts_ArtSelectionState_WaitForSelection:
-        Menu_BreakArts_weaponCategoriesSelectedRow = Menu_Framework_GetSelectedRow() + 1;
+        Menu_BreakArts_weaponCategoriesSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
 
         if (Menu_BreakArts_weaponCategoriesSelectedRow != Menu_Framework_MenuSelection_Confirm) {
             if (Menu_BreakArts_weaponCategoriesSelectedRow == Menu_Framework_MenuSelection_Quit) {
-                Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                Menu_Framework_DismissInformationBox();
-                Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
+                VS::Menu::Framework::DismissLiveInformationBox();
+                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
             } else {
-                Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(1));
+                VS::Menu::Framework::ClearLiveMenuExcept(1);
             }
             Menu_BreakArts_weaponCategoriesState = Menu_BreakArts_ArtSelectionState_ReturnSelection;
         }
         break;
 
     case Menu_BreakArts_ArtSelectionState_ReturnSelection:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             return Menu_BreakArts_weaponCategoriesSelectedRow;
         }
         break;
@@ -359,7 +359,7 @@ int Menu_BreakArts_UpdateWeaponCategories(int initialize)
 // decomp: MENU1.PRG _setMenuHeader (src/MENU/MENU1.PRG/30.c:344)
 void Menu_BreakArts_CreateHeader(void)
 {
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(1, 320, 18, 0x8C, 8,
+    Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::SetLiveMenuItem(1, 320, 18, 0x8C, 8,
         (char*)&Menu_menuStrings
             [Menu_menuStrings[Text_Battle_menuStrings_Index_breakArts]]);
 
@@ -367,8 +367,8 @@ void Menu_BreakArts_CreateHeader(void)
     menuItem->targetPosition0 = 180;
     menuItem->selected = 1;
 
-    Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
-    Menu_Framework_InitializeInformationBox();
+    VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
+    VS::Menu::Framework::InitializeLiveInformationBox();
 }
 
 // decomp: MENU1.PRG vs_menu1_exec (src/MENU/MENU1.PRG/30.c:358)
@@ -389,11 +389,11 @@ int Menu_BreakArts_Update(u_char* state)
 
     switch (*state) {
     case Menu_BreakArts_BreakArtsMenuState_Init:
-        if (Menu_Framework_AreMenuRowsIdle() == 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
             break;
         }
 
-        Menu_Framework_InitializeInformationBox();
+        VS::Menu::Framework::InitializeLiveInformationBox();
 
         Menu_BreakArts_updateWeaponType = Battle_characterState->equippedWeaponCategory;
         // Fallthrough
@@ -455,10 +455,10 @@ int Menu_BreakArts_Update(u_char* state)
     }
 
     case Menu_BreakArts_BreakArtsMenuState_ExitToMainMenu:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::DismissLiveInformationBox();
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             *state = Menu_BreakArts_BreakArtsMenuState_None;
             return 1;
         }
@@ -466,7 +466,7 @@ int Menu_BreakArts_Update(u_char* state)
         break;
 
     case Menu_BreakArts_BreakArtsMenuState_ExecuteArt:
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Framework_actionSelection.selectionKind = 6;
             Menu_Framework_menuState.returnState = Menu_Framework_menuState.currentMenu;
             Menu_Framework_menuState.currentMenu = 2;
@@ -477,10 +477,10 @@ int Menu_BreakArts_Update(u_char* state)
         break;
 
     case Menu_BreakArts_BreakArtsMenuState_Exit:
-        Menu_Framework_DismissInformationBox();
-        Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
+        VS::Menu::Framework::DismissLiveInformationBox();
+        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
-        if (Menu_Framework_AreMenuRowsIdle() != 0) {
+        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             Menu_Framework_menuState.currentMenu = 2;
             *state = Menu_BreakArts_BreakArtsMenuState_None;
             return 1;

@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/ActorCollisionLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -173,8 +174,8 @@ class LiveShadowGround final : public ShadowGround {
   explicit LiveShadowGround(SVECTOR& position) : position_(position) {}
 
   std::int32_t SupportHeight(std::int32_t dx, std::int32_t dz) override {
-    return Field_SampleActorSupportHeight(&position_, dx, dz,
-                                          kShadowSupportMode);
+    return VS::Field::LiveSampleActorSupportHeight(&position_, dx, dz,
+                                                   kShadowSupportMode);
   }
   [[nodiscard]] bool OnPlatform() const override {
     return static_cast<std::int8_t>(Actors_supportingPlatformLayer) > 0;
@@ -358,6 +359,17 @@ bool ValidateLiveActorModel(const Actors_ActorRecord& geometry) {
   return ValidateModelData(CountsOf(geometry.instance),
                            geometry.instance.uvLayout != 0,
                            ActorModelBytes(geometry));
+}
+
+bool MoveLiveActorModelVertex(Actors_ActorRecord& actor, std::size_t vertex,
+                              const ModelVertex& delta) {
+  if (actor.instance.model == nullptr) {
+    return false;
+  }
+  return MoveModelVertex(
+      CountsOf(actor.instance),
+      {reinterpret_cast<std::byte*>(actor.instance.model), actor.modelDataSize},
+      vertex, delta);
 }
 
 bool ProjectLiveActorModel(const Actors_ActorRecord& geometry,

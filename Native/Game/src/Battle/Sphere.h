@@ -17,7 +17,7 @@
 #define VS_BATTLE_SPHERE_H_DECLS
 #include "Battle/BattleTypes.h"
 #include "Battle/TargetVolume.h"
-#include "Battle/Targeting.h"
+#include "Battle/TargetingState.h"
 
 extern short Battle_sphereArcBases[502];
 extern short Battle_sphereMirroredVertices[430];

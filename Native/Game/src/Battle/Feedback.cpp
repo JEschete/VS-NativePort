@@ -10,7 +10,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
 #include "Field/Gimmicks.h"
-#include "Field/RoomRendering.h"
+#include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Primitives.h"

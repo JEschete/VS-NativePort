@@ -20,7 +20,6 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Actors/ActorLoading.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/Spawning.h"
 #include "Audio/SoundBanks.h"
@@ -336,7 +335,7 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
 }
 
 bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source) {
-  // Field_SpawnRoomActors (146C.c:14901): facing 2 selects hostile AI;
+  // VS::Field::SpawnRoomActors (146C.c:14901): facing 2 selects hostile AI;
   // actorStateByte instead controls retention after defeat, not activation.
   return source.kind == 0 && source.facing == 2;
 }
@@ -406,7 +405,8 @@ std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   placement.tileZ = static_cast<u_char>(position.z);
   placement.height = static_cast<u_char>(position.elevation);
   placement.direction = static_cast<u_char>(position.direction);
-  // Field_SpawnRoomActors (146C.c:14901) allocates slots when slot is zero.
+  // VS::Field::SpawnRoomActors (146C.c:14901) allocates slots when slot is
+  // zero.
   // Membership is explicit, not story-gated. AI, hostility, loot and variant
   // remain from the source record; no progression flags are modified.
   placement.slot = 0;
@@ -646,7 +646,8 @@ std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
     if (!enemy->unavailable_reason.empty()) {
       errors.push_back(enemy->unavailable_reason);
     }
-    // Mirrors Field_SpawnRoomActors' primary and secondary slot reservations.
+    // Mirrors VS::Field::SpawnRoomActors' primary and secondary slot
+    // reservations.
     int slot = kFirstEnemySlot;
     for (; slot < kEnemySlotEnd; ++slot) {
       if (!slots[slot] &&

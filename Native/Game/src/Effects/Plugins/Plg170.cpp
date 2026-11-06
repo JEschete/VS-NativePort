@@ -7,12 +7,12 @@ extern "C" {
 SVECTOR Effects_Plg170_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FE844 (D_800FE844@EFFECT/PLG170.BIN)
-u_char Effects_Plg170_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+u_char Effects_Plg170_ringColorFactors[8][4]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FE864 (D_800FE864@EFFECT/PLG170.BIN)
 SVECTOR Effects_Plg170_surfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800FEAE4 (D_800FEAE4@EFFECT/PLG170.BIN)
-CVECTOR Effects_Plg170_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+CVECTOR Effects_Plg170_closedRingColorFactors[8]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"

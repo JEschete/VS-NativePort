@@ -16,26 +16,6 @@ typedef struct Menu_Files_PrimitiveBuffer Menu_Files_PrimitiveBuffer;
 #undef VS_MENU_FILES_H_SET_TYPES_ONLY
 #endif
 
-// decomp: src/SLUS_010.40/sfx.h:3
-#define VS_SFX_MENUCHANGE 4
-
-// decomp: src/SLUS_010.40/sfx.h:5
-#define VS_SFX_MENULEAVE 6
-
-// decomp: src/SLUS_010.40/sfx.h:6
-#define VS_SFX_INVALID 7
-
-// decomp: src/SLUS_010.40/sfx.h:7
-#define VS_SFX_FILEOPCOMPLETE 8
-
-// decomp: src/include/gpu.h:99
-#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
-    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
-
-// decomp: src/include/gpu.h:106
-#define vs_getRGB5551(r, g, b, a)                                                        \
-    (((r) & 0x1F) | (((g) & 0x1F) << 5) | (((b) & 0x1F) << 10) | (((a) & 0x1) << 15))
-
 // decomp: fileMenuElementState_e (src/MENU/MENU7.PRG/260.c:110)
 enum Menu_Files_ElementState {
     Menu_Files_ElementState_Inactive = 0,
@@ -103,75 +83,3 @@ typedef struct Menu_Files_PrimitiveBuffer {
 } Menu_Files_PrimitiveBuffer;
 
 #endif // VS_MENU_FILES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_FILES_H_DECLS)
-#define VS_MENU_FILES_H_DECLS
-#include "Items/Inventory.h"
-#include "Items/Weapons.h"
-#include "Save/MemoryCard/GameFiles.h"
-
-extern char Menu_Files_layoutPadding1[4];;
-extern char Menu_Files_layoutPadding2[1];;
-extern char Menu_Files_layoutPadding3[8];;
-extern char Menu_Files_backupMainSetting;;
-extern char Menu_Files_containerDataEmpty;;
-extern u_short Menu_Files_containerItemCapacities[];
-extern u_short Menu_Files_containerStrings[895]; /* contents: disc string table (ModuleData.cpp) */;
-extern signed char Menu_Files_cursorFileOpSaturation[];
-extern char Menu_Files_dataNotSaved;;
-extern Menu_Files_FileMenuElement Menu_Files_fileMenuElements[10];;
-extern char Menu_Files_fileMenuScreenFade;;
-extern int Menu_Files_fileProgressCounter;;
-extern char Menu_Files_isSaving;;
-extern char* Menu_Files_memoryCardMessage;;
-extern char Menu_Files_menuElementStops[];
-extern u_short Menu_Files_menuItemTextClut[][16];
-extern Menu_Files_PrimitiveBuffer Menu_Files_primBuf;;
-extern u_char Menu_Files_selectCursorColor;;
-extern int Menu_Files_selectCursorXy;;
-extern u_short* Menu_Files_textTable;;
-extern char Menu_Files_frameBuf;;
-void Menu_Files_DrawSummaryLabel(int xy, enum Menu_Files_FileMenuUiId id);
-void Menu_Files_DrawInteger(int xy, u_int value, u_int placeDivisor);
-int Menu_Files_DecimalDigitCount(int val);
-void Menu_Files_DrawHpMpSummary(int xy, enum Menu_Files_StatType stat, u_int currentValue, u_int maxValue);
-void Menu_Files_DrawTransferProgress(int x, int y);
-void Menu_Files_DrawTransferComplete(int colour, int y);
-void Menu_Files_ResetElements(void);
-Menu_Files_FileMenuElement* Menu_Files_InitializeElement(int id, int xy, int wh, char* text);
-void Menu_Files_ClearElement(int id);
-int Menu_Files_AreAnimationsComplete(void);
-int Menu_Files_DrawGlyph(u_int c, int x, int y, int clut);
-int Menu_Files_FindCurrentDataSaveStep(int init);
-enum Save_MaskedHandlerResult Menu_Files_CheckCardStep(int portMask);
-void Menu_Files_DrawText(char* text, int x, int y, int clut);
-u_int Menu_Files_ElementBackgroundColor(u_int outerFactor, u_int innerFactor);
-void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element);
-void Menu_Files_DrawFrame(int framebuf);
-void Menu_Files_DrawBackground(void);
-int Menu_Files_UpdateConfirmation(int initialize_confirmation);
-int Menu_Files_UpdateOverwritePrompt(int initialize_overwrite_prompt);
-int Menu_Files_UpdateFormatPrompt(int initPort);
-int Menu_Files_UpdateSaveFiles(int initPort);
-int Menu_Files_UpdateSaveCard(int initPort);
-int Menu_Files_UpdateLoadFiles(int initPort);
-long Menu_Files_UpdateLoadCard(int initPort);
-int Menu_Files_LoadGameOverAssetsStep(int begin_asset_load);
-void Menu_Files_BlendGameOverTextClut(
-    short* clut, int textBlendFactor, u_short* clut0, u_short* clut1);
-int Menu_Files_UpdateGameOverChoices(int init);
-int Menu_Files_UpdateGameOver(u_char* state);
-int Menu_Files_UpdateContainerConfirmation(int initParams);
-void* Menu_Files_ContainerIndexSection(int section, Items_ContainerIndices* indices);
-void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_ContainerData* source,
-    Items_ContainerIndices* toCopy);
-void Menu_Files_DrawPlayTime(void);
-int Menu_Files_UpdateDataMenu(u_char* state);
-int Menu_Files_FindCurrentSaveStep(int init);
-void Menu_Files_InitializeDisplay(void);
-void Menu_Files_SwapBuffers(void);
-int Menu_Files_UpdateClearSaveReminder(int init);
-void Menu_Files_DrawExitFade(void);
-void Menu_Files_ResetMenu7Statics(void);
-
-#endif // VS_MENU_FILES_H_DECLS

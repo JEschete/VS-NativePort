@@ -10,6 +10,6 @@
 #define VS_EFFECTS_PLUGINS_PLG082_H_DECLS
 
 extern int Effects_Plg082_particleEmissionCounter;
-extern CVECTOR Effects_Plg082_closedRingColorFactors[];
+extern CVECTOR Effects_Plg082_closedRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG082_H_DECLS

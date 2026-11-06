@@ -2,6 +2,8 @@
 // Hand-maintained (tools/port/owned.csv).
 #include <cstdint>
 
+#include "Event/ScriptStep.hpp"
+
 namespace VS::Event {
 
 // Operands of the script opcode that draws or sheathes Ashley's weapon.
@@ -9,8 +11,6 @@ struct WeaponModeCommand {
   std::uint8_t mode = 0;        // index into the weapon draw-state table
   std::uint8_t transition = 0;  // 0 = snap; otherwise animation variant + 1
 };
-
-enum class ScriptStep : std::uint8_t { kAdvance = 0, kHold = 1 };
 
 // The world the opcode reads and changes: the event VM's wait/skip state,
 // Ashley's battle mode, her animation and her weapon visibility.

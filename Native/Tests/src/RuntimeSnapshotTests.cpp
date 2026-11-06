@@ -20,26 +20,29 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Audio/MixControlLive.hpp"
+#include "Audio/SoundBanksLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
+#include "Ending/EndingLive.hpp"
+#include "Field/CameraLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Save/RuntimeSnapshot.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
-#include "Actors/Ashley.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
-#include "Battle/Abilities.h"
+#include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
@@ -48,15 +51,14 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.h"
 #include "Core/Random.h"
-#include "Ending/ClearResults.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
-#include "Field/GameMode.h"
+#include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomLoading.h"
+#include "Field/RoomLoadingLiveState.h"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
@@ -65,7 +67,6 @@ extern "C" {
 #include "Items/Loadout.h"
 #include "Render/Camera.h"
 #include "Render/UiPrimitives.h"
-#include "State/Flags.h"
 #include "State/Location.h"
 #include "State/PlayTime.h"
 #include "State/RoomMemory.h"
@@ -277,7 +278,6 @@ struct RuntimeFixture {
   unsigned control_mode = Field_controlMode;
   int interaction_paused = Field_isInteractionPaused;
   Field_CameraTransition* transition = Field_cameraTransition;
-  unsigned scratch = Actors_stateFlagsScratch;
   Audio_DriverFlags audio_flags = Audio_Driver_controlLatches;
   Audio_CommandArguments audio_arguments = Audio_Driver_commandArguments;
   Audio_CommandParams audio_params = Audio_Mixer_commandParams;
@@ -308,8 +308,9 @@ struct RuntimeFixture {
     Battle_actors[0] = &player;
     Actors_actorRecords[0] = &player_model;
     // The three-byte textureRowOffsets union member does not initialize the
-    // high byte of momentumDistance. Match Actors_PlaceActorInRoom's reset.
-    Actors_ResetActorRunMomentum(0);
+    // high byte of momentumDistance. Match VS::Actors::PlaceActorInRoom's
+    // reset.
+    VS::Actors::ResetLiveActorRunMomentum(0);
     player.stats = &player_stats;
     player.model = &player_model.instance;
     player.roomSpawnIndex = 0x80;
@@ -357,9 +358,9 @@ struct RuntimeFixture {
 
   void SetProgress() {
     Audio_Seq_unusedStateFlags = {};
-    State_SetScriptFlag(0x43F, static_cast<char>(0xAB));
-    State_SetScriptFlag(64, 99);
-    State_SetScriptFlag(161, 17);
+    VS::State::SetLiveScriptFlag(0x43F, static_cast<char>(0xAB));
+    VS::State::SetLiveScriptFlag(64, 99);
+    VS::State::SetLiveScriptFlag(161, 17);
     Input_settings = {};
     Input_settings.mappedChainAbilities[3] = static_cast<char>(255);
     State_roomVisitProgress = {};
@@ -390,6 +391,7 @@ struct RuntimeFixture {
     Field_roomData = {};
     Field_roomData.isLoaded = 1;
     Field_roomData.environment = &environment;
+    Field_roomData.header.environmentLength = sizeof environment;
     Field_sphericalCamera = {};
     Field_sphericalCamera.values.yaw = 1027;
     Field_sphericalCamera.values.pitch = -384;
@@ -407,7 +409,7 @@ struct RuntimeFixture {
   }
 
   void UpdateOrbitPosition() {
-    Field_SetCameraPositionFromAngles(&Field_sphericalCamera.values);
+    VS::Field::LiveSetCameraPositionFromAngles(&Field_sphericalCamera.values);
   }
 
   void SetAudio() {
@@ -417,7 +419,7 @@ struct RuntimeFixture {
     Audio_Mixer_kCommandHandlers[0x80] =
         VS::Audio::Mixer::LiveEnableStereoOutput;
     Audio_Mixer_kCommandHandlers[0x81] = VS::Audio::Mixer::LiveEnableMonoOutput;
-    Audio_SetMonoOutput(0);
+    VS::Audio::LiveSetMonoOutput(0);
   }
 
   void SetClocksAndCaches() {
@@ -441,7 +443,6 @@ struct RuntimeFixture {
     State_recentRoomEnemyStates[0].recency = 4;
     State_recentRoomEnemyStates[0].nextSlot = 7;
     Boot_isGameplayActive = 1;
-    Actors_stateFlagsScratch = 0x456789;
   }
 
   void SetStorage() {
@@ -590,7 +591,7 @@ struct RuntimeFixture {
     Input_settings.cumulativeSaveCount = 19;
     Input_settings.menuFlags = 0xFFFF;
     Input_settings.reserved0Bit0 = 8;
-    Ending_CommitClearProgress();
+    VS::Ending::LiveCommitClearProgress();
     Boot_isGameplayActive = 0;
     Boot_isClearSavePending = 1;
     const auto document = Save::CaptureClearGame();
@@ -640,7 +641,6 @@ struct RuntimeFixture {
     Field_controlMode = control_mode;
     Field_isInteractionPaused = interaction_paused;
     Field_cameraTransition = transition;
-    Actors_stateFlagsScratch = scratch;
     Audio_Driver_controlLatches = audio_flags;
     Audio_Driver_commandArguments = audio_arguments;
     Audio_Mixer_commandParams = audio_params;
@@ -699,7 +699,6 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, Core_randomShuffleIndex);
   Append(bytes, Battle_Ai_savedMovementRandomState);
   Append(bytes, Battle_Ai_FrameState()->randomState);
-  Append(bytes, Actors_stateFlagsScratch);
   Append(bytes, Audio_Driver_controlLatches.mixBehavior);
   return bytes;
 }
@@ -1007,7 +1006,7 @@ void InvalidateSnapshot(Save::Snapshot& state, int defect) {
 
 void CheckStagedInputs() {
   CHECK(Save::ResumePending());
-  CHECK(static_cast<unsigned char>(State_ScriptFlag(64)) == 177);
+  CHECK(static_cast<unsigned char>(VS::State::LiveScriptFlag(64)) == 177);
   CHECK(State_savedEntryDoor.requiredFlagId == 37);
   CHECK(State_savedEntryDoor.destinationZoneId == 9);
   CHECK(State_savedEntryDoor.entryTileX == 1);
@@ -1275,7 +1274,7 @@ TEST_CASE(
   auto state = fixture.Capture();
   const bool mono = GENERATE(false, true);
   Input_settings.monoSound = static_cast<char>(!mono);
-  Audio_SetMonoOutput(mono ? 0 : 1);
+  VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
   Audio_Driver_controlLatches.mixBehavior |= 0x10;
   const auto before = LiveFingerprint(fixture);
   state.settings.monoSound = static_cast<char>(mono);
@@ -1287,7 +1286,7 @@ TEST_CASE(
   CHECK(LiveFingerprint(fixture) == before);
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
   State_ashleySnapshot.stats.isPending = 0;
-  Audio_SetMonoOutput(mono ? 0 : 1);
+  VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
   Audio_Driver_controlLatches.mixBehavior |= 0x10;
   REQUIRE(Save::FinishResume().has_value());
   CheckAudioSettings(mono);
@@ -1363,7 +1362,7 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   Core_randomShuffleIndex = 0;
   Battle_Ai_savedMovementRandomState = 1;
   Battle_Ai_FrameState()->randomState = 1;
-  State_SetScriptFlag(64, 0);
+  VS::State::SetLiveScriptFlag(64, 0);
   State_recentRoomEnemyStates[0].nextSlot = 3;
 }
 
@@ -1404,7 +1403,7 @@ void CheckRestoredRandom(const Save::Snapshot& state) {
 }
 
 void CheckRestoredCacheFlags() {
-  CHECK(static_cast<unsigned char>(State_ScriptFlag(64)) == 99);
+  CHECK(static_cast<unsigned char>(VS::State::LiveScriptFlag(64)) == 99);
   CHECK(State_recentRoomEnemyStates[0].nextSlot == 0);
   CHECK(static_cast<unsigned char>(State_recentRoomEnemyStates[3].zoneId) ==
         12);
@@ -1641,7 +1640,7 @@ void CheckResumeCancels(RuntimeFixture& fixture,
 void CheckResumeRestoresAshley(RuntimeFixture& fixture) {
   // Component setup only: the production spawn restoration consumes the
   // actual persistent Ashley data; this is not an ending playthrough.
-  Actors_RestoreAshleyRuntimeState();
+  VS::Actors::RestoreLiveAshleyRuntimeState();
   CHECK(fixture.player_stats.currentHp == 123);
   CHECK(fixture.player_stats.currentMp == 31);
   CHECK(State_ashleySnapshot.stats.isPending == 0);

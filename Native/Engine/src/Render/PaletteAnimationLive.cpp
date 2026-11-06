@@ -11,11 +11,11 @@
 
 #include "Actors/AppearanceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/BackgroundLive.hpp"
+#include "Field/RoomRenderingLive.hpp"
 
 extern "C" {
 #include "Core/Diagnostics.h"
-#include "Field/Background.h"
-#include "Field/RoomRendering.h"
 #include "Render/Palette.h"
 }
 
@@ -77,12 +77,11 @@ class LivePaletteHost final : public PaletteHost {
            rows.front().data());
   }
   void SetRoomBackgroundColors(const BackgroundColors& colors) override {
-    BackgroundColors words = colors;
-    Field_SetRoomBackgroundColors(words.data());
+    VS::Field::LiveSetRoomBackgroundColors(colors.data());
   }
   void SetRoomTint(const TintCode& tint, std::int32_t blend) override {
     Render_ColorCode code = CodeOf(tint);
-    Field_SetRoomTint(&code, blend);
+    VS::Field::LiveSetRoomTint(&code, blend);
   }
   void SetActorTint(std::uint32_t actor, const TintCode& tint) override {
     Render_ColorCode code = CodeOf(tint);
@@ -154,7 +153,7 @@ void UpdateLiveClutTransitions() {
 }
 
 void CaptureLiveRoomBackgroundColors() {
-  const int* room = Field_RoomBackgroundColors();
+  const int* room = VS::Field::LiveRoomBackgroundColors();
   if (room == nullptr) {
     ReportRefusal("null room background colours");
     return;

@@ -14,18 +14,25 @@
 #include <utility>
 #include <vector>
 
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorStateLive.hpp"
+#include "Audio/SoundBanksLive.hpp"
 #include "Battle/TargetPages.h"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
+#include "Field/RoomRenderingLive.hpp"
+#include "Field/TransitionsLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
+#include "Title/TitleMenuLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
@@ -44,7 +51,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
 #include "Boot/GameLoop.h"
-#include "Boot/Lifecycle.h"
 #include "Boot/PlayerSettings.h"
 #include "Content/DiscLayout.h"
 #include "Core/BiosRand.h"
@@ -58,14 +64,13 @@ extern "C" {
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
-#include "Field/Camera.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
-#include "Field/GameMode.h"
+#include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Field/RoomLoading.h"
-#include "Field/RoomRendering.h"
-#include "Field/Transitions.h"
+#include "Field/RoomLoadingLiveState.h"
+#include "Field/TransitionsLiveState.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
@@ -74,17 +79,16 @@ extern "C" {
 #include "Items/Loot.h"
 #include "Items/LootLiveState.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/ItemRows.h"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Flags.h"
 #include "State/Location.h"
 #include "State/Progress.h"
-#include "Title/TitleMenu.h"
 }
 
 namespace VS::Game {
@@ -122,7 +126,7 @@ int pending_door_room = 0;
 
 int ResumeEncounter() {
   Boot_isGameplayActive = 1;
-  Boot_RunGameLoop();
+  VS::Boot::RunGameplayLoopLive();
   return 0;
 }
 
@@ -131,12 +135,12 @@ int EnterOrFinishEncounter() {
   entered = true;
   // Reuse _sysReinit and _initGameData rather than manufacturing player stats.
   // Provenance: SLUS main.c:8309; TITLE/22C.c:4698.
-  Boot_InitializeTitleSession();
+  VS::Boot::InitializeTitleSessionLive();
   Boot_InitializePlayerSettings();
-  Title_InitializeNewGameData();
-  // Title_Run follows _initGameData with _initEnvironment (TITLE.PRG
-  // 22C.c:4463, Title_InitializeSettings), whose state writes are applied
-  // here without its publisher screens or audio setup.
+  VS::Title::InitializeLiveNewGameData();
+  // VS::Title::Run follows _initGameData with _initEnvironment (TITLE.PRG
+  // 22C.c:4463, VS::Title::InitializeSettings), whose state writes are
+  // applied here without its publisher screens or audio setup.
   Audio_Seq_unusedStateFlags.difficulty = 1;
   Audio_Seq_unusedStateFlags.puzzleMode = 1;
   State_savedEntryDoor.destinationZoneId = configuration.zone;
@@ -149,24 +153,24 @@ int EnterOrFinishEncounter() {
   Boot_gameEntryMode = 0;
   RestoreBootEventSelector();
   if (configuration.attract_demo) {
-    // Title_Run's idle timeout: _setTitleExitFlags (TITLE.PRG 22C.c:4741)
+    // VS::Title::Run's idle timeout: _setTitleExitFlags (TITLE.PRG 22C.c:4741)
     // sets the demo flags and door; its cause becomes vs_battle_exec's entry
     // mode (SLUS main.c:8344), which returns to title (146C.c:7558).
-    Title_PrepareExit(*configuration.attract_demo);
+    VS::Title::PrepareLiveExit(*configuration.attract_demo);
     Boot_gameEntryMode = *configuration.attract_demo;
   }
   Boot_isClearSavePending = 0;
-  Boot_LoadBattleOverlays();
+  VS::Boot::LoadBattleOverlaysLive();
   InitializeEncounterPlayerWeapon(configuration.weapon);
   InitializeEncounterPlayerProfile(configuration.profile);
   if (configuration.story_progress) {
     // Script flag 0x82 is the campaign progress counter tested by MPD enemy
-    // placements (Field_SpawnRoomActors, BATTLE.PRG func_80089114,
+    // placements (VS::Field::SpawnRoomActors, BATTLE.PRG func_80089114,
     // 146C.c:14901). Declared Lab fixture state, written before any room
     // loads; never changed during play.
     constexpr std::int16_t kStoryProgressFlag = 0x82;
-    State_SetScriptFlag(kStoryProgressFlag,
-                        static_cast<char>(*configuration.story_progress));
+    VS::State::SetLiveScriptFlag(
+        kStoryProgressFlag, static_cast<char>(*configuration.story_progress));
     VS_LOG_INFO("encounter", "declared story progress={}",
                 *configuration.story_progress);
   }
@@ -185,7 +189,7 @@ int EnterOrFinishEncounter() {
     // Persistent puzzle time-trial unlock flags (e.g. MAP241 entry sets 223
     // when flag 286 == 2, after a MAP291 pass). Declared Lab fixture state,
     // written before any room loads; never changed during play.
-    State_SetScriptFlag(static_cast<std::int16_t>(flag), 1);
+    VS::State::SetLiveScriptFlag(static_cast<std::int16_t>(flag), 1);
     VS_LOG_INFO("encounter", "declared crossed puzzle flag={}", flag);
   }
   if (configuration.inherited_music) {
@@ -194,7 +198,7 @@ int EnterOrFinishEncounter() {
     // declared predecessor's mapped bank with the original
     // vs_main_loadAndWaitSoundSlot (SLUS main.c:10439); no music slot is
     // loaded or played.
-    Audio_LoadWaveBankBlocking(*configuration.inherited_music);
+    VS::Audio::LiveLoadWaveBankBlocking(*configuration.inherited_music);
     VS_LOG_INFO("encounter", "declared inherited music={} wave bank={}",
                 *configuration.inherited_music,
                 static_cast<int>(
@@ -240,10 +244,10 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.weapon_grip = stats.weapon.grip.id;
   snapshot.weapon_model = static_cast<unsigned char>(stats.weapon.wepId);
   snapshot.shield_model = static_cast<unsigned char>(stats.shield.wepId);
-  snapshot.actor_flags = Actors_ActorStateFlags(slot);
+  snapshot.actor_flags = VS::Actors::LiveActorStateFlags(slot);
   snapshot.recovery = stats.actionRecoveryTimer;
   Actors_ActorLocationQuery location{};
-  Actors_ActorPlacement(slot, &location);
+  VS::Actors::LiveActorPlacement(slot, &location);
   snapshot.x = location.location.position.vx;
   snapshot.y = location.location.position.vy;
   snapshot.z = location.location.position.vz;
@@ -736,7 +740,7 @@ void RunEncounter() {
     return;
   }
   active = true;
-  Boot_InitializePlatformServices();
+  VS::Boot::InitializePlatformServicesLive();
   VS::Boot::RunLiveSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
   Battle_ResetTargetPages();
   active = false;
@@ -855,12 +859,13 @@ EncounterState InspectGameplay() {
   state.room = Field_zoneContext.mapId;
   state.control_mode = Field_controlMode;
   state.game_over = Audio_Seq_unusedStateFlags.gameOver != 0;
-  state.field_rendering_enabled = Field_isFieldRenderingEnabled != 0;
+  state.field_rendering_enabled =
+      VS::Field::LiveRoomRenderState().field_rendering_enabled;
   state.menu_state =
       static_cast<unsigned char>(Menu_Framework_menuState.currentMenu);
   if (state.menu_state != Menu_Framework_MenuState_NoneClosed &&
       Menu_Framework_itemsText != nullptr) {
-    state.menu_highlighted_row = Menu_Framework_HighlightedRow();
+    state.menu_highlighted_row = VS::Menu::Framework::LiveHighlightedRow();
   }
   state.roulette = InspectRoulette(state.menu_state);
   if (constexpr int kResultsMenu = 15; state.menu_state == kResultsMenu) {
@@ -875,7 +880,8 @@ EncounterState InspectGameplay() {
   InspectLearnedActions(state);
   constexpr int kLootFlag = 0xAB;
   constexpr int kLootAvailable = 3;
-  state.rewards_available = State_ScriptFlag(kLootFlag) >= kLootAvailable;
+  state.rewards_available =
+      VS::State::LiveScriptFlag(kLootFlag) >= kLootAvailable;
   if (Battle_actionState != nullptr) {
     InspectTargeting(state, *Battle_actionState);
   }
@@ -1002,7 +1008,7 @@ EncounterDoorRequest CheckDoorRequest(int index) {
             "original-room session required"};
   }
   if (!gameplay_inspection_ready || !room_prepared || Field_controlMode != 1 ||
-      Event_playbackPhase != 0 || Field_ScreenTransitionPhase() != 0 ||
+      Event_playbackPhase != 0 || VS::Field::LiveScreenTransitionPhase() != 0 ||
       Actors_actorRecords[0] == nullptr) {
     return {EncounterDoorRequestStatus::kBusy,
             "source event/transition still active"};
@@ -1015,8 +1021,8 @@ EncounterDoorRequest CheckDoorRequest(int index) {
             "door index/storage does not match inventory"};
   }
   auto& door = Field_roomData.doors[index];
-  const auto value = static_cast<unsigned char>(
-      State_ScriptFlag(static_cast<std::int16_t>(door.requiredFlagId)));
+  const auto value = static_cast<unsigned char>(VS::State::LiveScriptFlag(
+      static_cast<std::int16_t>(door.requiredFlagId)));
   if (value < door.requiredFlagValue) {
     return {EncounterDoorRequestStatus::kBlocked,
             std::format("flag {} is {} but requires {}",
@@ -1050,11 +1056,11 @@ void ApplyPendingDoorRequest() {
   // Same handoff as Field_CheckActorTriggers (146C.c), after its door gate.
   constexpr int kTransitionSpeed = 8;
   if (door.destinationZoneId == Field_zoneContext.zndId) {
-    Field_BeginRoomTransition(&door, 0, kTransitionSpeed);
+    VS::Field::LiveBeginRoomTransition(&door, 0, kTransitionSpeed);
   } else {
-    Field_BeginZoneTransition(&door, 0, kTransitionSpeed);
+    VS::Field::LiveBeginZoneTransition(&door, 0, kTransitionSpeed);
   }
-  Actors_ResetActorRunMomentum(0);
+  VS::Actors::ResetLiveActorRunMomentum(0);
   Field_SetEntranceDoorRecord(reinterpret_cast<char (*)[sizeof(door)]>(&door));
 }
 }  // namespace
@@ -1118,7 +1124,7 @@ extern "C" void Boot_EncounterPollStop() {
     VS::Game::room_prepared = true;
     if (VS::Game::stop_requested.load()) {
       VS::Game::pending_door = -1;
-      Boot_ResetToTitle();
+      VS::Boot::ResetToTitleLive();
     } else {
       VS::Game::ApplyPendingDoorRequest();
       if (VS::Game::configuration.external_event &&

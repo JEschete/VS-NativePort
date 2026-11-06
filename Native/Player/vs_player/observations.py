@@ -154,7 +154,7 @@ class ReactionTiming:
 
     @property
     def margin(self) -> int:
-        # Battle_UpdateBattleAbilityTiming, original BATTLE/146C.c:7147.
+        # VS::Battle::UpdateBattleAbilityTiming, original BATTLE/146C.c:7147.
         initial = 8 if self.story_timing else 10
         if self.source_actor != 0 and self.action >= 54:
             initial += 4

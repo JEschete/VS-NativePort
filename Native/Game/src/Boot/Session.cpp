@@ -76,4 +76,137 @@ void RunGame(GameHost& host) {
 }
 
 void DelayAfterOverlayLoad() {}
+
+void WaitForOverlayReady() { DelayAfterOverlayLoad(); }
+
+void LoadBattleOverlays(OverlayLoadHost& host) {
+  host.Load(
+      {.program = OverlayProgram::kBattle, .slot = OverlaySlot::kPrimary});
+  host.Load({.program = OverlayProgram::kBattleInitialization,
+             .slot = OverlaySlot::kSecondary});
+  DelayAfterOverlayLoad();
+}
+
+void LoadTitleOverlay(OverlayLoadHost& host) {
+  host.Load({.program = OverlayProgram::kTitle, .slot = OverlaySlot::kPrimary});
+  DelayAfterOverlayLoad();
+}
+
+void LoadEndingOverlay(OverlayLoadHost& host) {
+  host.Load(
+      {.program = OverlayProgram::kEnding, .slot = OverlaySlot::kPrimary});
+  DelayAfterOverlayLoad();
+}
+
+void SetSoftResetEnabled(SoftResetState& state, bool enabled) noexcept {
+  state.enabled = enabled;
+}
+
+void ResetToTitle(TransitionHost& host) {
+  host.ResetNativeSession();
+  host.HideDisplay();
+  host.StopControllerMotors();
+  host.RefreshControllers();
+  host.ShutdownAudio();
+  host.WaitForVerticalSync(10);
+  host.JumpToTitle();
+}
+
+void EnterBattle(TransitionHost& host, OverlayLoadHost& overlays) {
+  host.HideDisplay();
+  host.StopControllerMotors();
+  host.RefreshControllers();
+  host.StopAllMusic();
+  host.StopSceneSoundEffects();
+  host.InvalidateSavedMusicId();
+  host.ClearMusicBankIds();
+  host.ShowLoadingScreen();
+  LoadBattleOverlays(overlays);
+  host.SetGameEntryMode(1);
+  host.JumpToGameLoop();
+}
+
+void RunEndingAndReturnToTitle(TransitionHost& host,
+                               OverlayLoadHost& overlays) {
+  host.SetGameplayActive(false);
+  host.HideDisplay();
+  host.StopControllerMotors();
+  host.RefreshControllers();
+  host.StopAllMusic();
+  host.StopSceneSoundEffects();
+  host.CaptureAshleySnapshot();
+  LoadEndingOverlay(overlays);
+  host.RunStaffRoll();
+  host.HideDisplay();
+  host.StopControllerMotors();
+  host.RefreshControllers();
+  host.ShutdownAudio();
+  host.SetClearSavePending(true);
+  host.JumpToTitle();
+}
+
+void InitializePlatformServices(SoftResetState& reset_state,
+                                PlatformServicesHost& host) {
+  host.SelectNtscVideoMode();
+  host.HideDisplay();
+  host.InitializeMemoryCard();
+  host.StartMemoryCard();
+  host.InitializeControllers();
+  host.StartControllerCommunication();
+  host.UnlockAnalogModeSwitch();
+  host.ResetVibrationPatterns();
+  host.SetReverbEnabled(false);
+  host.InitializeDiscDrive();
+  host.InitializeRandomShuffleTable();
+  SetSoftResetEnabled(reset_state, true);
+  host.StoreSoftResetEnabled(reset_state.enabled);
+  host.ClearPendingClearSave();
+}
+
+void InitializeTitleSession(TitleSessionInitHost& host) {
+  host.ResetNativeSession();
+  host.ClearFramebuffer();
+  host.ShowLoadingScreen();
+  host.EnableReverb();
+  host.RegisterVSyncCallback();
+  host.ResetGameHeap();
+  host.InvalidateAiBindings();
+  host.InitializeDiscQueue();
+  host.ResetDiscDrive();
+  host.InitializeMenuSoundBanks();
+  host.ResetVibrationPatterns();
+  host.SetGameplayActive(false);
+  host.UnlockAnalogModeSwitch();
+  host.ResetButtonHeldFrames();
+  host.ResetPlayTime();
+  host.ClearAshleySnapshotPending();
+}
+
+void InitializeGameplayOverlay(GameplayOverlayHost& host) {
+  const GameplayOverlayDefaults defaults{};
+  host.ResetAudioSlots();
+  host.ResetGameHeap();
+  host.InitializeOrderingTables(defaults);
+  host.InitializePaletteAnimation();
+  host.InitializeRoomTransitionPrimitives();
+  host.InitializeFramebufferEffect();
+  host.InitializeScriptOpcodeTable();
+  host.InitializeEffectRuntime();
+  host.InitializeRoomRuntimeState();
+  host.InitializeActorModelResources();
+  host.InitializeTexturePages();
+  host.ResetOverlayWorkspaceOwner();
+  host.LoadSystemResources();
+  host.InitializeActorAiHook();
+  host.ResetVibrationPatterns();
+  host.ApplyLearnedActionUnlocks();
+  host.ApplyGameplayDefaults(defaults);
+  host.SetRoomActorScale(defaults.room_actor_scale);
+  host.ClearActorSlots(defaults.actor_slot_count);
+  host.SpawnAshleyWithEquipment();
+  host.AllocateBattleActionState();
+  host.SetFieldRenderingEnabled(defaults.field_rendering_enabled);
+  host.ResetGameplayResetWordTwo();
+  host.ConfigureFieldDisplay(defaults);
+}
 }  // namespace VS::Boot

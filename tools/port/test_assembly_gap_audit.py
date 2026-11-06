@@ -162,6 +162,18 @@ extern "C" int target(int (*callback)(int)) noexcept {
         self.assertEqual(len(found), 1)
         self.assertIn("callback(1)", found[0].body)
 
+    def test_cpp_const_member_definitions(self):
+        text = '''
+std::uint8_t Flags::target(int id) const noexcept {
+  return bytes_[id];
+}
+bool Flags::target(int id) const { return id != 0; }
+'''
+        found = definitions(text, {"target"})
+        self.assertEqual(len(found), 2)
+        self.assertIn("bytes_[id]", found[0].body)
+        self.assertIn("id != 0", found[1].body)
+
     def test_native_stub_and_partial_are_distinguished(self):
         self.assertEqual(native_status('VS_UNPORTED("gap"); return 0;'), "stub")
         self.assertEqual(native_status('VS_UNPORTED("gap");'), "stub")
@@ -227,6 +239,31 @@ extern "C" int target(int (*callback)(int)) noexcept {
                 )
                 with self.assertRaisesRegex(ValueError, "Missing template binding"):
                     template_status(row)
+
+    def test_typed_template_promotions_resolve_by_their_registered_namespace(self):
+        source = (
+            "namespace VS::Effects {\nnamespace Plg049 {\n"
+            "bool Ring(int command) { return command != 4; }\n}  // namespace Plg049\n"
+            "namespace Plg053 {\nbool Ring(int command) { return command == 3; }\n}\n"
+            "namespace {\nbool Ring(int) { return false; }\n}\n}  // namespace VS::Effects\n"
+            "bool VS::Effects::Templates::Ring(int) { return true; }\n"
+            'extern "C" int Ring(int) { return 0; }\n'
+        )
+        found = definitions(source, {"Ring"})
+        self.assertEqual(
+            [item.qualified for item in found],
+            ["VS::Effects::Plg049::Ring", "VS::Effects::Plg053::Ring",
+             "VS::Effects::(anonymous)::Ring", "VS::Effects::Templates::Ring", "Ring"],
+        )
+        owned = {"F2": {"name": "VS::Effects::Plg053::Ring"},
+                 "F3": {"name": "VS::Effects::Templates::Ring"}}
+        row = {"id": "F2", "kind": "template:rings:VS_RING_FUNCTION", "notes": "",
+               "final_name": "Effects::Plg053::Ring"}
+        self.assertFalse(audit_module.template_row(row, owned))
+        self.assertEqual([item.line for item in audit_module.native_bodies(found, row, owned)], [6])
+        body = {"id": "F3", "kind": "template-body", "notes": "", "final_name": "Effects::Templates::Ring"}
+        self.assertEqual([item.line for item in audit_module.native_bodies(found, body, owned)], [12])
+        self.assertTrue(audit_module.template_row(dict(row, id="F4"), owned))
 
     def test_probe_mocks_are_excluded_from_production_c_availability(self):
         with tempfile.TemporaryDirectory() as directory:

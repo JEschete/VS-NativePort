@@ -1,105 +1,91 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/RoomState.h"
-#include "Battle/Feedback.h"
-#include "Battle/StatusEffects.h"
-#include "Battle/ValueLabels.h"
-#include "DiscQueue.h"
-#include "Field/Background.h"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
-#include "Field/Locations.h"
-#include "Field/Manual.h"
-#include "Field/Map.h"
-#include "Field/Minimap.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Field/RoomLoading.h"
-#include "Field/RoomRendering.h"
-#include "Field/RoomState.h"
-#include "Field/Znd.h"
-#include "Field/Zone.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
-#include "Menu/Score/ScoreScreen.h"
-#include "State/Progress.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Field/RoomState.hpp"
 
-// decomp: D_800F19A0 (D_800F19A0@BATTLE/BATTLE.PRG)
-int Field_isRoomVisitPending;
+#include <cstddef>
+#include <cstdint>
+#include <span>
 
-// decomp: BATTLE.PRG _setRoomSeen (src/BATTLE/BATTLE.PRG/146C.c:3205)
-void Field_MarkCurrentRoomVisited(void)
-{
-    u_int scene;
-    u_int room;
+namespace VS::Field {
+namespace {
+// Sets `id`'s bit; false when the bitset has no such bit.
+bool MarkVisited(std::span<std::uint32_t> words, int id) {
+  if (id < 0 || static_cast<std::size_t>(id) >= words.size() * kVisitWordBits) {
+    return false;
+  }
+  const auto bit = static_cast<std::size_t>(id);
+  words[bit / kVisitWordBits] |= std::uint32_t{1} << (bit % kVisitWordBits);
+  return true;
+}
 
-    if (Field_isRoomVisitPending == 0) {
-        return;
+bool SetOwnedRoomDisplayed(RoomDisplay& display, int owner_room_index,
+                           bool displayed) {
+  if (!display.loaded || display.owner_room_index != owner_room_index) {
+    return false;
+  }
+  display.displayed = displayed;
+  return true;
+}
+}  // namespace
+
+int FindLocationId(std::span<const LocationDestination> locations, int zone_id,
+                   int room_id) {
+  for (std::size_t id = 0; id < locations.size(); ++id) {
+    if (zone_id == locations[id].zone_id && room_id == locations[id].room_id) {
+      return static_cast<int>(id);
     }
-
-    scene = Field_CurrentSceneId();
-    State_roomVisitProgress.areaFlags[scene >> 5] |= 1 << (scene & 0x1F);
-    room = Field_CurrentRoomId();
-    Field_isRoomVisitPending = 0;
-    State_roomVisitProgress.roomFlags[room >> 5] |= 1 << (room & 0x1F);
+  }
+  return kUnknownLocationId;
 }
 
-// decomp: BATTLE.PRG func_8007BBB8 (src/BATTLE/BATTLE.PRG/146C.c:8509)
-void Field_ClearSavedRoomEnemies(int mapId, int zoneId) { Actors_ClearCachedRoomActorStates(mapId, zoneId); }
-
-// decomp: BATTLE.PRG func_8007BF2C (src/BATTLE/BATTLE.PRG/146C.c:8619)
-void Field_ShowPrimaryRoomGeometry(void) { Field_EnableOwnedRoomRendering(0); }
-
-// decomp: BATTLE.PRG func_8007BF4C (src/BATTLE/BATTLE.PRG/146C.c:8621)
-void Field_HidePrimaryRoomGeometry(void) { Field_DisableOwnedRoomRendering(0); }
-
-// decomp: BATTLE.PRG func_8007C4D4 (src/BATTLE/BATTLE.PRG/146C.c:8803)
-void Field_CancelPendingRoomVisit(void) { Field_isRoomVisitPending = 0; }
-
-// decomp: BATTLE.PRG _getLocationId (src/BATTLE/BATTLE.PRG/146C.c:8899)
-int Field_FindLocationId(int zoneId, int mapId)
-{
-    int i;
-
-    for (i = 0; i < 512; ++i) {
-        if (zoneId == Field_locationDestinations[i * 2]
-            && mapId == Field_locationDestinations[i * 2 + 1]) {
-            return i;
-        }
-    }
-    return 0;
+int CurrentRoomId(std::span<const LocationDestination> locations,
+                  const CurrentRoom& room) {
+  return FindLocationId(locations, room.zone_id, room.room_id);
 }
 
-// decomp: BATTLE.PRG vs_battle_getCurrentRoomId (src/BATTLE/BATTLE.PRG/146C.c:8912)
-int Field_CurrentRoomId(void)
-{
-    return Field_FindLocationId(Field_zoneContext.zndId, Field_zoneContext.mapId);
+void MarkCurrentRoomVisited(RoomVisitState& state, RoomVisitHost& host) {
+  if (!state.pending) {
+    return;
+  }
+  const int scene = host.CurrentSceneId();
+  if (!MarkVisited(state.visited.areas, scene)) {
+    host.ReportRefusedVisit("area", scene);
+  }
+  const int room = host.CurrentRoomId();
+  state.pending = false;
+  if (!MarkVisited(state.visited.rooms, room)) {
+    host.ReportRefusedVisit("room", room);
+  }
 }
 
-// decomp: INITBTL.PRG func_800FA6B8 (src/BATTLE/INITBTL.PRG/18.c:595)
-void Field_InitializeRoomRuntimeState(void)
-{
-    VS::Core::Memory::ZeroLiveAlignedWords(Field_backgroundReferenceVectors, sizeof Field_backgroundReferenceVectors);
-    VS::Core::Memory::ZeroLiveAlignedWords(&Field_roomData, sizeof Field_roomData);
-    VS::Core::Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
-    VS::Core::Memory::ZeroLiveAlignedWords(&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory);
-    VS::Core::Memory::ZeroLiveAlignedWords(&Field_manualDisplayState, sizeof Field_manualDisplayState);
-    Field_roomPalettes = (u_short *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x800));
-    Battle_floatingLabels = (Battle_FloatingLabel (*)[32])(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_floatingLabels));
-    Battle_placedLabelPositions = (DVECTOR *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x80));
-    Field_enteredDoorId = -1;
-    Field_areRoomUpdatesPaused = 0;
-    Field_isRoomTintActive = 0;
-    Battle_unusedSubmenuState = 0;
-    Battle_unusedSceneBuffer = NULL;
-    Field_isMinimapVisible = 1;
-    Field_minimapSlideFrame = 8;
-    Field_InitializeRoomBackground();
-    Field_ResetGimmickAnimationQueue();
-    Field_SetRoomBackgroundColors((int*)Field_backgroundReferenceVectors);
+void CancelPendingRoomVisit(RoomVisitState& state) { state.pending = false; }
+
+bool EnableOwnedRoomRendering(RoomDisplay& display, int owner_room_index) {
+  return SetOwnedRoomDisplayed(display, owner_room_index, true);
 }
 
-}  // extern "C"
+bool DisableOwnedRoomRendering(RoomDisplay& display, int owner_room_index) {
+  return SetOwnedRoomDisplayed(display, owner_room_index, false);
+}
+
+bool ShowPrimaryRoomGeometry(RoomDisplay& display) {
+  return EnableOwnedRoomRendering(display, kPrimaryRoomOwner);
+}
+
+bool HidePrimaryRoomGeometry(RoomDisplay& display) {
+  return DisableOwnedRoomRendering(display, kPrimaryRoomOwner);
+}
+
+void InitializeRoomRuntimeState(RoomRuntimeHost& host,
+                                const RoomRuntimeDefaults& defaults) {
+  for (const RoomRecord record : kClearedRoomRecords) {
+    host.Clear(record);
+  }
+  for (const RoomBuffer buffer : kRoomBuffers) {
+    host.Allocate(buffer);
+  }
+  host.ApplyDefaults(defaults);
+  host.InitializeRoomBackground();
+  host.ResetGimmickAnimationQueue();
+  host.ApplyBackgroundReferenceColors();
+}
+}  // namespace VS::Field
