@@ -799,6 +799,10 @@ void StartEventScript(ScriptVmHost& host) {
       }
       break;
     case EventSource::kDoorScript: {
+      if (!host.BindRoomDoorSource()) {
+        host.Refuse(ScriptVmRefusal::kDoorScript, host.EventId());
+        break;
+      }
       const ScriptLocation door = DoorScript(host);
       if (door.Present() && InitializeEventScriptData(door, host)) {
         host.SetPhase(PlaybackPhase::kRunning);

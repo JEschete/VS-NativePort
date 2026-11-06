@@ -13,6 +13,30 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- The concrete `ScriptVmLive` adapter now compiles and has direct runtime
+  controls: typed cursors/returns and opcode flow, persistent source/data
+  owners, private main/chained disc destinations, publication only after
+  completion, and cancellation before storage release. Disc allocation
+  generations distinguish slot reuse even when cancellation clears the
+  destination. New door events bind the current room; ongoing door execution
+  keeps its previous source. The real Boot session boundary resets native
+  state after invalidating UI borrows and abandons retained uses immediately
+  before `longjmp`; a native-dispatch-to-title control verifies owner release.
+- Verification on `f600c1a9` plus the runtime, queue, startup, session and
+  scaffold changes: **14 new cases / 121 assertions**. Debug/Release selection
+  `[event-vm-live],[event-vm],[script-sources],[room-triggers],[disc-queue],[session-reset]`
+  passes **220 cases / 3,605 assertions**. Both full suites pass **4,580 cases /
+  7,905,687 assertions**; all 4,566 previous names and complete replay objects
+  are unchanged. Full builds, scoped quality/clang-tidy and gates pass; two
+  generations preserve all **1,662** source/project hashes.
+  Evidence: `VR-EVENT-NATIVE-RUNTIME`, `build\owner-checkpoint\script-vm-live-*`
+  and `script-door-binding-*`.
+- This is **not the production VM switchover**. The generated VM and trigger
+  evaluator still drive gameplay. The native opcode table/callers, room hosts,
+  dialog/frame/vibration consumers and fixtures still need migration before
+  row-33 promotion. Native file publication tests complete synthetic request
+  destinations; they do not prove retail EVT playback. Allocation/generation
+  exhaustion injection is not claimed. No new promotion or retirement credit.
 - Source publication can now be prepared before the room host's nonallocating
   commit boundary. Move-only tokens preserve the current mount until
   publication, belong to their originating mount set, and can be consumed
@@ -26,14 +50,15 @@ verification of the current worktree.
   Evidence: `VR-EVENT-SOURCE-PUBLICATION`,
   `build\owner-checkpoint\script-source-publication-*`. This prepares the
   integration contract; the production VM and room host are still unwired.
+  Published as `f600c1a9`; exact Source Quality `42213631606` succeeded.
 - `ScriptSourceMounts` now owns the three versioned source mounts and retains
   every exposed generation through explicit nested use boundaries. Repeated
   reads retain a generation only once; ordinary reset invalidates mounts but
   leaves active byte views alive. Abandonment is separate and only valid once
   users have unwound or immediately before a non-returning transfer. The
-  serial survives both operations. This is **not yet wired to production**;
-  the Live VM must bracket reads, propagate retention errors, keep leases for
-  UI consumers, and abandon uses at the actual session boundary.
+  serial survives both operations. The native adapter now brackets reads and
+  the actual session boundary abandons uses; production VM/UI migration is
+  still pending as described above.
 - Mount verification on `55c7da02` plus the three ScriptSources source/test
   files: nine new cases / 185 assertions, including an actual `setjmp` /
   `longjmp` control with ownership in persistent heap state and no automatic

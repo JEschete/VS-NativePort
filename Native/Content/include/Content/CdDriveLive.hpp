@@ -23,6 +23,11 @@ struct Content_DiscQueueSlot;
 namespace VS::Content {
 
 Content_DiscQueueSlot* AllocateLiveDiscRequest(const Content_DiscFile* file);
+// Allocation identity, independent of the slot's address and destination.
+// Zero means unallocated/released/reset. Reusing a queue or fallback record
+// issues a fresh nonzero generation; clients can reject stale raw handles.
+[[nodiscard]] std::uint64_t LiveDiscRequestGeneration(
+    const Content_DiscQueueSlot* request);
 void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request);
 // Game-thread cancellation for pending writes starting at destination.data().
 // Stops the deferred command before marking matching requests Error. The owner

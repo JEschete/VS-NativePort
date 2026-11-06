@@ -917,6 +917,67 @@ TEST_CASE("Live cancellation prevents a deferred destination write",
   CHECK(Content::LiveDiscState() == Content_DiscDriveState_Idle);
 }
 
+TEST_CASE("Live request generations distinguish reused queue slots",
+          "[content][disc-queue][disc-lifetime]") {
+  const LiveDiscQueueFixture fixture;
+  const Content_DiscFile file{.lba = 0, .size = 0};
+  auto* first = Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(first != nullptr);
+  const auto generation = Content::LiveDiscRequestGeneration(first);
+  REQUIRE(generation != 0);
+  Content::ReleaseLiveDiscRequest(first);
+  CHECK(Content::LiveDiscRequestGeneration(first) == 0);
+  auto* next = Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(next == first);
+  CHECK(Content::LiveDiscRequestGeneration(next) > generation);
+}
+
+TEST_CASE("Live request generations survive targeted destination cancellation",
+          "[content][disc-queue][disc-lifetime]") {
+  const LiveDiscQueueFixture fixture;
+  const Content_DiscFile file{.lba = -1, .size = 8};
+  std::array<std::byte, 8> bytes{};
+  auto* request = QueueLiveRead(file, bytes);
+  const auto generation = Content::LiveDiscRequestGeneration(request);
+  REQUIRE(generation != 0);
+  REQUIRE(Content::CancelLiveDiscWrites(bytes));
+  CHECK(request->state == Content_DiscRequestState_Error);
+  CHECK(request->vram == nullptr);
+  CHECK(Content::LiveDiscRequestGeneration(request) == generation);
+}
+
+TEST_CASE("Live request generations do not repeat across queue resets",
+          "[content][disc-queue][disc-lifetime]") {
+  const LiveDiscQueueFixture fixture;
+  const Content_DiscFile file{.lba = 0, .size = 0};
+  auto* first = Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(first != nullptr);
+  const auto generation = Content::LiveDiscRequestGeneration(first);
+  REQUIRE(generation != 0);
+  Content::InitializeLiveDiscQueue();
+  CHECK(Content::LiveDiscRequestGeneration(first) == 0);
+  auto* next = Content::AllocateLiveDiscRequest(&file);
+  REQUIRE(next == first);
+  CHECK(Content::LiveDiscRequestGeneration(next) > generation);
+}
+
+TEST_CASE("Live fallback request generations distinguish stable record reuse",
+          "[content][disc-queue][disc-lifetime]") {
+  const LiveDiscQueueFixture fixture;
+  const Content_DiscFile file{.lba = 0, .size = 0};
+  std::array<std::byte, 1> bytes{};
+  auto* first = Content::CompleteLiveRefusedDiscRequest(&file, bytes.data());
+  REQUIRE(first != nullptr);
+  const auto generation = Content::LiveDiscRequestGeneration(first);
+  REQUIRE(generation != 0);
+  Content::ReleaseLiveDiscRequest(first);
+  CHECK(Content::LiveDiscRequestGeneration(first) == 0);
+  auto* next = Content::CompleteLiveRefusedDiscRequest(&file, bytes.data());
+  REQUIRE(next == first);
+  CHECK(Content::LiveDiscRequestGeneration(next) > generation);
+  Content::ReleaseLiveDiscRequest(next);
+}
+
 TEST_CASE("Live blocking reads report completion rather than acceptance",
           "[content][disc-queue][disc-failure]") {
   const LiveDiscQueueFixture fixture;

@@ -1,8 +1,12 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
+#include <initializer_list>
 #include <iterator>
+#include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -11,12 +15,14 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Battle/TargetingState.h"
 #include "Event/Camera.h"
 #include "Event/Script.h"
+#include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptEffects.h"
@@ -50,6 +56,11 @@ struct EventSessionFixture {
       std::to_array(Event_threadCursors);
   decltype(std::to_array(Event_threadWaitFrames)) saved_waits =
       std::to_array(Event_threadWaitFrames);
+  decltype(std::to_array(Event_kOpcodeHandlers)) saved_handlers =
+      std::to_array(Event_kOpcodeHandlers);
+  decltype(std::to_array(Event_kOpcodeSizes)) saved_sizes =
+      std::to_array(Event_kOpcodeSizes);
+  char saved_skip = Event_skipState;
 
   ~EventSessionFixture() {
     Event_playbackPhase = saved_phase;
@@ -62,6 +73,10 @@ struct EventSessionFixture {
     Event_legacySkipHandlerCopy = saved_dispatch;
     std::copy(saved_threads.begin(), saved_threads.end(), Event_threadCursors);
     std::copy(saved_waits.begin(), saved_waits.end(), Event_threadWaitFrames);
+    std::copy(saved_handlers.begin(), saved_handlers.end(),
+              Event_kOpcodeHandlers);
+    std::copy(saved_sizes.begin(), saved_sizes.end(), Event_kOpcodeSizes);
+    Event_skipState = saved_skip;
   }
 };
 
@@ -235,6 +250,49 @@ int EnterUiBattle() {
   VS::Boot::JumpToLiveTitle();
   return -1;
 }
+
+std::weak_ptr<const std::vector<std::uint8_t>> script_session_owner;
+int script_title_entries = 0;
+int script_fallthrough = 0;
+
+void PrepareSessionScript() {
+  const auto source = std::make_shared<const std::vector<std::uint8_t>>(
+      std::initializer_list<std::uint8_t>{0xFE});
+  script_session_owner = source;
+  REQUIRE(VS::Event::MountLiveScriptSource(
+              VS::Event::ScriptRegion::kEventScript, source)
+              .has_value());
+  const auto start =
+      VS::Event::LeaseLiveScriptSource(VS::Event::ScriptRegion::kEventScript)
+          .value()
+          .At(0);
+  if (!start) {
+    throw std::logic_error("Session test script has no first instruction");
+  }
+  VS::Event::LiveScriptVm().SetThreadCursor(0, *start);
+}
+
+VS::Event::ScriptFlow TransferScriptToTitle(const VS::Event::ScriptInstruction&,
+                                            VS::Event::ScriptVmHost&) {
+  CHECK_FALSE(script_session_owner.expired());
+  VS::Boot::JumpToLiveTitle();
+}
+
+std::intptr_t SessionTransferOpcode(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return VS::Event::DispatchLiveScriptControlOpcode(instruction, thread,
+                                                    TransferScriptToTitle);
+}
+
+int EnterScriptTitle() {
+  if (++script_title_entries > 1) {
+    return script_session_owner.expired() && SessionUiIsClear() ? 41 : -1;
+  }
+  PrepareSessionScript();
+  static_cast<void>(VS::Event::ExecuteLiveScriptThread(0));
+  ++script_fallthrough;
+  return -1;
+}
 }  // namespace
 
 TEST_CASE(
@@ -323,6 +381,24 @@ TEST_CASE("Native title and battle jumps invalidate interrupted scene UI",
   CHECK(VS::Boot::RunLiveSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
   CHECK(ui_title_entries == (ui_return_to_title ? 2 : 1));
   CHECK(SessionUiIsClear());
+}
+
+TEST_CASE("Native session transfer abandons the active owned VM source",
+          "[event-vm-live][session-reset][session-ui]") {
+  const EventSessionFixture vm_fixture;
+  const UiSessionFixture ui_fixture;
+  script_title_entries = 0;
+  script_fallthrough = 0;
+  Event_skipState = 0;
+  Event_kOpcodeHandlers[0xFE] = SessionTransferOpcode;
+  Event_kOpcodeSizes[0xFE] = 1;
+  CHECK(VS::Boot::RunLiveSessionLoop(EnterScriptTitle, EnterScriptTitle) == 41);
+  CHECK(script_title_entries == 2);
+  CHECK(script_fallthrough == 0);
+  CHECK(script_session_owner.expired());
+  CHECK_FALSE(
+      VS::Event::LeaseLiveScriptSource(VS::Event::ScriptRegion::kEventScript)
+          .has_value());
 }
 
 TEST_CASE("Retired stack capture and room code jumps have no native bindings",

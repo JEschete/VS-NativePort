@@ -19,6 +19,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Ending/EndingLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Save/SnapshotLive.hpp"
@@ -74,6 +75,7 @@ class LiveSessionHost final : public SessionHost {
     Menu_sceneNotificationBuffer = nullptr;
     Menu_sceneNotificationTimer = 0;
     Menu_sceneNotificationTimed = 0;
+    Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }
   void ResetNativeSession() override { Save_NativeResetSession(); }
@@ -81,6 +83,7 @@ class LiveSessionHost final : public SessionHost {
   [[noreturn]] void Transfer(SessionDestination destination) override {
     Core_Debugf("boot", "native session transition: %s",
                 destination == SessionDestination::kTitle ? "title" : "battle");
+    Event::AbandonLiveScriptUses();
     // NOLINTNEXTLINE(cert-err52-cpp): the copied call graph is extern "C" and
     // cannot carry an exception (#267); the barrier guards the frames.
     std::longjmp(session_boundary, static_cast<int>(destination));

@@ -1551,6 +1551,9 @@
     <ClInclude Include="src\Event\ScriptVm.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\ScriptVmLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Event\Sound.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -2773,6 +2776,9 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\ScriptVm.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptVmLive.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\TriggersLive.hpp">

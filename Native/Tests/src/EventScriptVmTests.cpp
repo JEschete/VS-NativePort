@@ -2,8 +2,10 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -14,6 +16,7 @@
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptDialogCommands.hpp"
+#include "Event/ScriptSources.hpp"
 #include "Event/ScriptVm.hpp"
 
 namespace {
@@ -51,6 +54,10 @@ class RecordingHost final : public event::ScriptVmHost {
   bool chained_allocates = true;
   bool adoption_succeeds = true;
   bool owns_chained = false;
+  bool door_binding_succeeds = true;
+  int door_bindings = 0;
+  event::ScriptSourceMounts* source_mounts = nullptr;
+  event::RoomEventLease current_room;
   std::int16_t event_id = 0;
   std::int16_t room_change = 0;
   bool confirmed = false;
@@ -121,9 +128,15 @@ class RecordingHost final : public event::ScriptVmHost {
   std::span<const std::uint8_t> Region(
       event::ScriptRegion region) const override {
     region_reads.push_back(region);
+    if (source_mounts != nullptr) {
+      return source_mounts->Borrow(region).value();
+    }
     return regions.at(static_cast<std::size_t>(region));
   }
   std::uint64_t RegionGeneration(event::ScriptRegion region) const override {
+    if (source_mounts != nullptr) {
+      return source_mounts->Lease(region).value().Generation();
+    }
     return generations.at(static_cast<std::size_t>(region));
   }
   std::span<const std::uint8_t> OpcodeSizes() const override { return sizes; }
@@ -229,6 +242,16 @@ class RecordingHost final : public event::ScriptVmHost {
     return controlled.at(static_cast<std::size_t>(actor));
   }
   void ClearScriptControlledActors() override { controlled.fill(false); }
+  bool BindRoomDoorSource() override {
+    ++door_bindings;
+    if (!door_binding_succeeds) {
+      return false;
+    }
+    return source_mounts == nullptr ||
+           source_mounts
+               ->MountRoom(event::ScriptRegion::kDoorEvents, current_room)
+               .has_value();
+  }
   event::EventFileStatus EventFile() const override { return file; }
   bool QueueEventFileLoad(int id, event::EventBuffer destination) override {
     CHECK(id == event_id);
@@ -1793,5 +1816,104 @@ TEST_CASE("VM playback starts each script from its mounted generation",
   host.phase = event::PlaybackPhase::kStarting;
   CHECK(event::UpdateEventPlayback(host) == 2);
   CHECK(host.cursors[0] == At(16, Region::kDoorEvents, 9));
+  CHECK(host.refusals.empty());
+}
+
+namespace {
+void CheckDoorPlaybackStep(RecordingHost& host, event::PlaybackPhase phase,
+                           int bindings) {
+  CHECK(event::UpdateEventPlayback(host) == 2);
+  CHECK(host.phase == phase);
+  CHECK(host.door_bindings == bindings);
+}
+
+void CheckStoppedDoorStartup(const RecordingHost& host) {
+  CHECK_FALSE(host.confirmed);
+  CHECK_FALSE(host.return_to.Present());
+  CHECK(std::ranges::all_of(host.cursors,
+                            [](Location cursor) { return !cursor.Present(); }));
+  CHECK(std::ranges::all_of(host.waits, [](int wait) { return wait == 0; }));
+}
+
+void RequireSourceChange(std::expected<void, event::ScriptSourceError> result) {
+  REQUIRE(result.has_value());
+}
+
+void CheckDoorInstruction(RecordingHost& host, Location cursor,
+                          std::uint64_t generation, std::uint8_t opcode) {
+  CHECK(cursor == At(16, Region::kDoorEvents, generation));
+  CHECK(host.Region(Region::kDoorEvents)[cursor.offset] == opcode);
+}
+}  // namespace
+
+TEST_CASE("VM door binding failure stops startup before reading the old source",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  Header(host);
+  host.regions[2] = host.regions[1];
+  host.source = event::EventSource::kDoorScript;
+  host.phase = event::PlaybackPhase::kStarting;
+  host.door_binding_succeeds = false;
+  host.cursors[0] = At(16, Region::kDoorEvents);
+  host.return_to = At(16, Region::kDoorEvents);
+  host.confirmed = true;
+  host.waits.fill(4);
+  CheckDoorPlaybackStep(host, event::PlaybackPhase::kIdle, 1);
+  CHECK(host.region_reads.empty());
+  CheckStoppedDoorStartup(host);
+  CHECK(host.refusals ==
+        std::vector<std::pair<Refusal, int>>{{Refusal::kDoorScript, 0}});
+}
+
+TEST_CASE("VM door source binding is not used for room entry or file startup",
+          "[event-vm][event-vm-lifetime]") {
+  RecordingHost host;
+  Header(host);
+  host.door_binding_succeeds = false;
+  host.source = event::EventSource::kRoomEntryScript;
+  host.phase = event::PlaybackPhase::kStarting;
+  CheckDoorPlaybackStep(host, event::PlaybackPhase::kRunning, 0);
+  host.source = event::EventSource::kEventFile;
+  host.phase = event::PlaybackPhase::kStarting;
+  CheckDoorPlaybackStep(host, event::PlaybackPhase::kLoading, 0);
+  host.source = event::EventSource::kDoorScript;
+  host.phase = event::PlaybackPhase::kStarting;
+  CheckDoorPlaybackStep(host, event::PlaybackPhase::kIdle, 0);
+  CHECK(host.refusals ==
+        std::vector<std::pair<Refusal, int>>{{Refusal::kEventFileBusy, 0}});
+}
+
+TEST_CASE("VM keeps executing old room doors until a new door event starts",
+          "[event-vm][event-vm-lifetime][script-sources]") {
+  RecordingHost host;
+  Header(host);
+  auto doors = host.regions[1];
+  doors[16] = 0x22;
+  auto old_room = event::RoomEventSections::Copy({.doors = doors}).value();
+  const std::weak_ptr<const event::RoomEventSections> old_owner = old_room;
+  event::ScriptSourceMounts mounts;
+  RequireSourceChange(mounts.MountRoom(Region::kDoorEvents, old_room));
+  const auto old_generation =
+      mounts.Lease(Region::kDoorEvents).value().Generation();
+  old_room.reset();
+  doors[16] = 0x33;
+  host.current_room = event::RoomEventSections::Copy({.doors = doors}).value();
+  host.source_mounts = &mounts;
+  host.source = event::EventSource::kDoorScript;
+  host.phase = event::PlaybackPhase::kRunning;
+  host.cursors[0] = At(16, Region::kDoorEvents, old_generation);
+  host.dispatch = [&](Location cursor, int) {
+    CheckDoorInstruction(host, cursor, old_generation, 0x22);
+    return Flow::Of(Kind::kHold);
+  };
+  RequireSourceChange(mounts.BeginUse());
+  CheckDoorPlaybackStep(host, event::PlaybackPhase::kRunning, 0);
+  CHECK_FALSE(old_owner.expired());
+  host.phase = event::PlaybackPhase::kStarting;
+  CheckDoorPlaybackStep(host, event::PlaybackPhase::kRunning, 1);
+  CheckDoorInstruction(host, host.cursors[0], old_generation + 1, 0x33);
+  CHECK_FALSE(old_owner.expired());
+  RequireSourceChange(mounts.EndUse());
+  CHECK(old_owner.expired());
   CHECK(host.refusals.empty());
 }

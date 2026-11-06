@@ -273,6 +273,9 @@
     <ClCompile Include="src\EventScriptTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventScriptVmLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EventScriptVmTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

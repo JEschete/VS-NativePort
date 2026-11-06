@@ -327,6 +327,10 @@ class ScriptVmHost {
   virtual void ClearScriptControlledActors() = 0;
 
   // Event files and the script buffers.
+  // Select the current room's door source only when starting a new door
+  // event. Room replacement must not rebind an already executing source.
+  // Failure preserves the previous mount.
+  [[nodiscard]] virtual bool BindRoomDoorSource() = 0;
   [[nodiscard]] virtual EventFileStatus EventFile() const = 0;
   // False leaves no request or outstanding write to the destination.
   [[nodiscard]] virtual bool QueueEventFileLoad(int event_id,

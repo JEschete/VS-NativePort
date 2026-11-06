@@ -5,11 +5,13 @@
 #include "Content/CdDriveLive.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <span>
@@ -70,27 +72,41 @@ constexpr int kSectorWords = kSectorBytes / 4;
 constexpr std::uint32_t kRefusedReadWaitFrames = 60 * 60;
 
 std::uint64_t refused_requests = 0;
+std::uint64_t request_serial = 0;
+std::array<std::uint64_t, kDiscRequestCapacity> request_generations{};
+
+struct RefusedRecord {
+  Content_DiscQueueSlot slot{};
+  std::uint64_t generation = 0;
+};
 // #282: completed records for refused requests, outside the request array.
 // A released record returns to Free and is reused, as the array's slots are,
 // so a caller's stale pointer stays readable (each record is allocated on
 // its own, so its address stays put).
-std::vector<std::unique_ptr<Content_DiscQueueSlot>> refused_records;
+std::vector<std::unique_ptr<RefusedRecord>> refused_records;
 
-Content_DiscQueueSlot* FindRefusedRecord(const Content_DiscQueueSlot* request) {
+RefusedRecord* FindRefusedRecord(const Content_DiscQueueSlot* request) {
   const auto record = std::ranges::find_if(
       refused_records,
-      [request](const auto& candidate) { return candidate.get() == request; });
+      [request](const auto& candidate) { return &candidate->slot == request; });
   return record == refused_records.end() ? nullptr : record->get();
 }
 
-Content_DiscQueueSlot& FreeRefusedRecord() {
+RefusedRecord& FreeRefusedRecord() {
   const auto record =
       std::ranges::find_if(refused_records, [](const auto& candidate) {
-        return candidate->state == Content_DiscRequestState_Free;
+        return candidate->slot.state == Content_DiscRequestState_Free;
       });
   if (record != refused_records.end()) return **record;
-  return *refused_records.emplace_back(
-      std::make_unique<Content_DiscQueueSlot>());
+  return *refused_records.emplace_back(std::make_unique<RefusedRecord>());
+}
+
+std::uint64_t NextRequestGeneration() {
+  if (request_serial == std::numeric_limits<std::uint64_t>::max()) {
+    Core_Warnf("content", "Disc request generation exhausted");
+    return 0;
+  }
+  return ++request_serial;
 }
 
 DiscDestination Destination(void* pointer) {
@@ -301,8 +317,28 @@ Content_DiscQueueSlot* AllocateLiveDiscRequest(const Content_DiscFile* file) {
     }
     return nullptr;
   }
+  const auto generation = NextRequestGeneration();
+  if (generation == 0) {
+    return nullptr;
+  }
   CommitQueue(queue);
+  request_generations[*index] = generation;
   return &Content_discRequestSlots[*index];
+}
+
+std::uint64_t LiveDiscRequestGeneration(const Content_DiscQueueSlot* request) {
+  if (const auto index = IndexOf(request)) {
+    return request->state == Content_DiscRequestState_Free
+               ? 0
+               : request_generations[*index];
+  }
+  if (const auto* record = FindRefusedRecord(request)) {
+    return record->slot.state == Content_DiscRequestState_Free
+               ? 0
+               : record->generation;
+  }
+  WarnForeignRequest("DiscRequestGeneration", request);
+  return 0;
 }
 
 void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request) {
@@ -310,11 +346,11 @@ void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request) {
   if (request == nullptr) return;
   const std::optional<std::size_t> index = IndexOf(request);
   if (!index) {
-    Content_DiscQueueSlot* record = FindRefusedRecord(request);
+    RefusedRecord* record = FindRefusedRecord(request);
     if (record == nullptr) {
       WarnForeignRequest("ReleaseDiscRequest", request);
     } else {
-      record->state = Content_DiscRequestState_Free;
+      record->slot.state = Content_DiscRequestState_Free;
     }
     return;
   }
@@ -344,8 +380,14 @@ Content_DiscQueueSlot* CompleteLiveRefusedDiscRequest(
     Core_Warnf("content", "CompleteRefusedDiscRequest refused: null file");
     return nullptr;
   }
+  const auto generation = NextRequestGeneration();
+  if (generation == 0) {
+    return nullptr;
+  }
   const bool read = ReadLiveRefusedDiscFile(file, destination) != 0;
-  Content_DiscQueueSlot& record = FreeRefusedRecord();
+  RefusedRecord& owner = FreeRefusedRecord();
+  Content_DiscQueueSlot& record = owner.slot;
+  owner.generation = generation;
   record = Content_DiscQueueSlot{};
   record.state = static_cast<std::int16_t>(
       read ? Content_DiscRequestState_Loaded : Content_DiscRequestState_Error);
@@ -357,7 +399,7 @@ Content_DiscQueueSlot* CompleteLiveRefusedDiscRequest(
 std::size_t LiveRefusedDiscRecordsInUse() noexcept {
   return static_cast<std::size_t>(
       std::ranges::count_if(refused_records, [](const auto& record) {
-        return record->state != Content_DiscRequestState_Free;
+        return record->slot.state != Content_DiscRequestState_Free;
       }));
 }
 
@@ -388,9 +430,11 @@ void InitializeLiveDiscQueue() {
   DiscRequestQueue queue = LoadQueue();
   InitializeDiscQueue(queue);
   CommitQueue(queue);
+  request_generations.fill(0);
   // The records are freed like the array's slots but never deallocated.
   for (const auto& record : refused_records) {
-    record->state = Content_DiscRequestState_Free;
+    record->slot.state = Content_DiscRequestState_Free;
+    record->generation = 0;
   }
 }
 

@@ -1234,6 +1234,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Event\ScriptVmLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Event\Sound.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2224,6 +2227,7 @@
     <ClInclude Include="include\Event\ScriptSources.hpp" />
     <ClInclude Include="include\Event\ScriptStep.hpp" />
     <ClInclude Include="include\Event\ScriptVm.hpp" />
+    <ClInclude Include="include\Event\ScriptVmLive.hpp" />
     <ClInclude Include="include\Event\TriggersLive.hpp" />
     <ClInclude Include="include\Event\WeaponMode.hpp" />
     <ClInclude Include="include\Field\ActorCollision.hpp" />
