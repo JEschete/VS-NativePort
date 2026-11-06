@@ -2,6 +2,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -13,11 +14,14 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Event/ScriptVmLive.hpp"
+#include "Event/TriggersLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "DiscQueue.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
+#include "Event/Triggers.h"
 }
 
 namespace {
@@ -68,10 +72,41 @@ struct LiveVmFixture {
   LiveVmFixture& operator=(LiveVmFixture&&) = delete;
 };
 
-event::ScriptLocation MountScript(Bytes bytes) {
-  REQUIRE(event::MountLiveScriptSource(
-              event::ScriptRegion::kEventScript,
-              std::make_shared<const Bytes>(std::move(bytes)))
+struct LiveRoomFixture {
+  LiveVmFixture vm;
+  std::int16_t change = Event_roomChangeState;
+  std::int16_t entry = Event_hasRoomEntryScript;
+  std::array<std::uint8_t, 32> flags{};
+  std::uint8_t loading = VS::State::LiveScriptFlag(0xA9);
+
+  LiveRoomFixture() {
+    for (std::size_t index = 0; index < flags.size(); ++index) {
+      flags[index] = VS::State::LiveScriptFlag(32 + static_cast<int>(index));
+    }
+    Event_roomChangeState = 0;
+    Event_hasRoomEntryScript = 0;
+  }
+  ~LiveRoomFixture() {
+    Event_roomChangeState = change;
+    Event_hasRoomEntryScript = entry;
+    for (std::size_t index = 0; index < flags.size(); ++index) {
+      VS::State::SetLiveScriptFlag(32 + static_cast<int>(index), flags[index]);
+    }
+    VS::State::SetLiveScriptFlag(0xA9, loading);
+  }
+  LiveRoomFixture(const LiveRoomFixture&) = delete;
+  LiveRoomFixture& operator=(const LiveRoomFixture&) = delete;
+  LiveRoomFixture(LiveRoomFixture&&) = delete;
+  LiveRoomFixture& operator=(LiveRoomFixture&&) = delete;
+};
+
+event::ScriptLocation MountScript(
+    Bytes bytes, std::weak_ptr<const Bytes>* lifetime = nullptr) {
+  const auto owner = std::make_shared<const Bytes>(std::move(bytes));
+  if (lifetime != nullptr) {
+    *lifetime = owner;
+  }
+  REQUIRE(event::MountLiveScriptSource(event::ScriptRegion::kEventScript, owner)
               .has_value());
   const auto start =
       event::LeaseLiveScriptSource(event::ScriptRegion::kEventScript)
@@ -136,6 +171,101 @@ std::intptr_t StopBridge(std::uint8_t* instruction, std::int16_t thread) {
 }
 
 std::intptr_t PointerResult(std::uint8_t*, std::int16_t) { return 0x12345678; }
+
+void BindTestData(event::ScriptLocation start) {
+  auto& host = event::LiveScriptVm();
+  host.SetDialogStrings(start);
+  ++start.offset;
+  host.SetTextBoxFrameStyle(9, start);
+  ++start.offset;
+  host.SetVibrationPattern(7, start);
+}
+
+void CheckDataBytes(const event::ScriptDataLease& lease, std::uint8_t first,
+                    std::size_t length) {
+  const auto bytes = lease.Bytes();
+  if (!bytes || bytes->empty()) {
+    FAIL("Test data lease has no bytes");
+    return;
+  }
+  CHECK(bytes->size() == length);
+  CHECK(bytes->front() == first);
+}
+
+void CheckDataError(
+    const std::expected<event::ScriptDataLease, event::ScriptSourceError>& data,
+    event::ScriptSourceError error) {
+  REQUIRE_FALSE(data.has_value());
+  if (!data) {
+    CHECK(data.error() == error);
+  }
+}
+
+bool nested_finished = false;
+std::intptr_t NestedJumpBridge(std::uint8_t* instruction, std::int16_t thread) {
+  nested_finished = !event::ExecuteLiveScriptThread(1);
+  return event::DispatchLiveScriptControlOpcode(instruction, thread,
+                                                event::ScriptJumpForward);
+}
+
+void MarkRoomStopPending() {
+  auto& host = event::LiveScriptVm();
+  host.SetRoomChangeState(3);
+  host.SetPhase(event::PlaybackPhase::kRunning);
+  host.SetStartConfirmed(true);
+  VS::State::SetLiveScriptFlag(32, 0x55);
+  VS::State::SetLiveScriptFlag(0xA9, 0x66);
+}
+
+void CheckRoomEntryState(event::PlaybackPhase phase, std::int16_t change,
+                         bool confirmed) {
+  auto& host = event::LiveScriptVm();
+  CHECK(host.RoomChangeState() == change);
+  CHECK(host.Phase() == phase);
+  CHECK(host.StartConfirmed() == confirmed);
+  CHECK(Event_hasRoomEntryScript == 1);
+}
+
+void CheckContinuingRoomSources(std::uint64_t main_generation,
+                                std::uint64_t door_generation) {
+  const auto room = event::LiveRoomScriptSections();
+  REQUIRE(room);
+  if (room) {
+    CHECK(room->EntryScript().empty());
+  }
+  CheckMountedByte(0x11, main_generation);
+  CHECK(event::LeaseLiveScriptSource(event::ScriptRegion::kDoorEvents)
+            .value()
+            .Generation() == door_generation);
+}
+
+struct MountedRoomSources {
+  std::weak_ptr<const event::RoomEventSections> room;
+  std::uint64_t main_generation;
+  std::uint64_t door_generation;
+};
+
+MountedRoomSources ImportTestRoomSources() {
+  Bytes entry{0x11};
+  const Bytes doors{0x22};
+  VS::State::SetLiveScriptFlag(32, 0x7F);
+  REQUIRE(event::ImportLiveRoomScripts(
+              {.entry_script = entry, .doors = doors, .first_entry = true}) ==
+          event::RoomEventLoadResult::kReady);
+  CHECK(VS::State::LiveScriptFlag(32) == 0x7F);
+  const auto main_generation =
+      event::LeaseLiveScriptSource(event::ScriptRegion::kEventScript)
+          .value()
+          .Generation();
+  entry.front() = 0x99;
+  CheckMountedByte(0x11, main_generation);
+  REQUIRE(event::LiveScriptVm().BindRoomDoorSource());
+  const auto door_generation =
+      event::LeaseLiveScriptSource(event::ScriptRegion::kDoorEvents)
+          .value()
+          .Generation();
+  return {event::LiveRoomScriptSections(), main_generation, door_generation};
+}
 }  // namespace
 
 TEST_CASE("Live VM dispatch carries typed jumps without pointer results",
@@ -230,4 +360,164 @@ TEST_CASE("Live VM chained storage publishes only after completed adoption",
   CheckMountedByte(0x55, start.generation);
   REQUIRE(host.AdoptChainedEvent());
   CheckMountedByte(0x77, start.generation + 1);
+}
+
+TEST_CASE("Live VM data leases retain exact bytes across rebinding and reset",
+          "[event-vm-live][script-sources]") {
+  const LiveVmFixture fixture;
+  std::weak_ptr<const Bytes> old_lifetime;
+  BindTestData(MountScript({0x11, 0x22, 0x33}, &old_lifetime));
+  std::array leases{event::LeaseLiveDialogStrings().value(),
+                    event::LeaseLiveTextBoxFrame(9).value(),
+                    event::LeaseLiveVibrationPattern(7).value()};
+  std::weak_ptr<const Bytes> new_lifetime;
+  BindTestData(MountScript({0x44, 0x55, 0x66}, &new_lifetime));
+  CheckDataBytes(event::LeaseLiveDialogStrings().value(), 0x44, 3);
+  CheckDataBytes(event::LeaseLiveTextBoxFrame(9).value(), 0x55, 2);
+  CheckDataBytes(event::LeaseLiveVibrationPattern(7).value(), 0x66, 1);
+  event::ResetLiveScriptRuntime();
+  CHECK(new_lifetime.expired());
+  CHECK_FALSE(old_lifetime.expired());
+  CheckDataBytes(leases[0], 0x11, 3);
+  CheckDataBytes(leases[1], 0x22, 2);
+  CheckDataBytes(leases[2], 0x33, 1);
+  leases = {};
+  CHECK(old_lifetime.expired());
+}
+
+TEST_CASE("Live VM data access rejects absent slots and invalid indices",
+          "[event-vm-live][script-sources]") {
+  const LiveVmFixture fixture;
+  CheckDataError(event::LeaseLiveDialogStrings(),
+                 event::ScriptSourceError::kMissingOwner);
+  CheckDataError(event::LeaseLiveTextBoxFrame(9),
+                 event::ScriptSourceError::kMissingOwner);
+  CheckDataError(event::LeaseLiveVibrationPattern(7),
+                 event::ScriptSourceError::kMissingOwner);
+  for (const int style : {-1, event::kTextBoxFrameStyleCount}) {
+    CheckDataError(event::LeaseLiveTextBoxFrame(style),
+                   event::ScriptSourceError::kExtent);
+  }
+  for (const int pattern : {-1, event::kVibrationPatternSlots}) {
+    CheckDataError(event::LeaseLiveVibrationPattern(pattern),
+                   event::ScriptSourceError::kExtent);
+  }
+}
+
+TEST_CASE("Live VM data bindings reject stale and out of range locations",
+          "[event-vm-live][script-sources]") {
+  const LiveVmFixture fixture;
+  auto location = MountScript({0x11, 0x22, 0x33});
+  BindTestData(location);
+  auto lease = event::LeaseLiveDialogStrings().value();
+  ++location.generation;
+  event::LiveScriptVm().SetDialogStrings(location);
+  CheckDataError(event::LeaseLiveDialogStrings(),
+                 event::ScriptSourceError::kMissingOwner);
+  CheckDataBytes(lease, 0x11, 3);
+  lease.location = location;
+  CHECK_FALSE(lease.Bytes().has_value());
+  --location.generation;
+  location.offset = 3;
+  event::LiveScriptVm().SetTextBoxFrameStyle(9, location);
+  CheckDataError(event::LeaseLiveTextBoxFrame(9),
+                 event::ScriptSourceError::kMissingOwner);
+  lease.location = location;
+  CHECK_FALSE(lease.Bytes().has_value());
+  event::LiveScriptVm().SetVibrationPattern(7, {});
+  CheckDataError(event::LeaseLiveVibrationPattern(7),
+                 event::ScriptSourceError::kMissingOwner);
+}
+
+TEST_CASE("Live VM restores the outer typed invocation after nested dispatch",
+          "[event-vm-live]") {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0x42, 3, 0, 0xF0, 0xF0});
+  observations = 0;
+  nested_finished = false;
+  Event_kOpcodeHandlers[0x42] = NestedJumpBridge;
+  Event_kOpcodeHandlers[0xF0] = StopBridge;
+  Event_kOpcodeSizes[0x42] = 3;
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  host.SetThreadCursor(1, {start.region, 4, start.generation});
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(nested_finished);
+  CHECK(observations == 2);
+  CHECK(observed[0] ==
+        event::ScriptLocation{start.region, 4, start.generation});
+  CHECK(observed[1] ==
+        event::ScriptLocation{start.region, 3, start.generation});
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+  CHECK_FALSE(host.ThreadCursor(1).Present());
+}
+
+TEST_CASE("Live room import owns entry data and preserves ongoing room scripts",
+          "[event-vm-live][room-triggers][script-sources]") {
+  const LiveRoomFixture fixture;
+  const auto mounted = ImportTestRoomSources();
+  Event_roomChangeState = 1;
+  const Bytes ignored_entry(event::kEventScriptBytes + 1, 0x55);
+  const Bytes next_doors{0x33};
+  REQUIRE(event::ImportLiveRoomScripts(
+              {.entry_script = ignored_entry, .doors = next_doors}) ==
+          event::RoomEventLoadResult::kContinuingEvent);
+  CHECK(VS::State::LiveScriptFlag(32) == 0);
+  CheckRoomEntryState(event::PlaybackPhase::kIdle, 2, false);
+  const std::weak_ptr new_room = event::LiveRoomScriptSections();
+  CheckContinuingRoomSources(mounted.main_generation, mounted.door_generation);
+  event::FreeLiveRoomScripts();
+  CHECK_FALSE(event::LiveRoomScriptSections());
+  CHECK(new_room.expired());
+  CHECK_FALSE(mounted.room.expired());
+  event::ResetLiveScriptRuntime();
+  CHECK(mounted.room.expired());
+}
+
+TEST_CASE("Live room import rejects invalid entry before changing state",
+          "[event-vm-live][room-triggers][script-sources]") {
+  const LiveRoomFixture fixture;
+  const Bytes entry{0x11};
+  REQUIRE(event::ImportLiveRoomScripts({.entry_script = entry}) ==
+          event::RoomEventLoadResult::kReady);
+  const auto room = event::LiveRoomScriptSections();
+  const auto generation =
+      event::LeaseLiveScriptSource(event::ScriptRegion::kEventScript)
+          .value()
+          .Generation();
+  MarkRoomStopPending();
+  const Bytes oversized(event::kEventScriptBytes + 1, 0);
+  const auto refused =
+      event::ImportLiveRoomScripts({.entry_script = oversized});
+  REQUIRE_FALSE(refused.has_value());
+  if (!refused) {
+    CHECK(refused.error().reason ==
+          event::RoomEventRefusal::kEntryScriptExtent);
+  }
+  CHECK(event::LiveRoomScriptSections() == room);
+  CheckMountedByte(0x11, generation);
+  CheckRoomEntryState(event::PlaybackPhase::kRunning, 3, true);
+  CHECK(VS::State::LiveScriptFlag(32) == 0x55);
+  CHECK(VS::State::LiveScriptFlag(0xA9) == 0x66);
+}
+
+TEST_CASE("Live room import commits stop transitions and accepts empty rooms",
+          "[event-vm-live][room-triggers][script-sources]") {
+  const LiveRoomFixture fixture;
+  std::weak_ptr<const Bytes> previous;
+  const auto old_source = MountScript({0x11}, &previous);
+  MarkRoomStopPending();
+  const Bytes entry{0x22};
+  REQUIRE(event::ImportLiveRoomScripts({.entry_script = entry}) ==
+          event::RoomEventLoadResult::kReady);
+  CHECK(previous.expired());
+  CheckMountedByte(0x22, old_source.generation + 1);
+  CheckRoomEntryState(event::PlaybackPhase::kIdle, 0, false);
+  CHECK(VS::State::LiveScriptFlag(32) == 0);
+  CHECK(VS::State::LiveScriptFlag(0xA9) == 0);
+  REQUIRE(event::ImportLiveRoomScripts({}) ==
+          event::RoomEventLoadResult::kReady);
+  CHECK_FALSE(event::LiveRoomScriptSections());
+  CHECK(Event_hasRoomEntryScript == 0);
+  CheckMountedByte(0x22, old_source.generation + 1);
 }

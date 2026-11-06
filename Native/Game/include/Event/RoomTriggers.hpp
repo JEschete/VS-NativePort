@@ -25,6 +25,7 @@ enum class RoomEventRefusal : std::uint8_t {
   kEntryScriptExtent,
   kDoorExtent,
   kAllocation,
+  kSourcePreparation,
 };
 
 struct RoomEventLoadError {

@@ -67,11 +67,6 @@ constexpr std::size_t kSceneTimerModeCount = 2;
 constexpr std::size_t kSceneTimerScopeCount = 4;
 constexpr std::size_t kCameraPitchPresetCount = 4;
 
-struct DataBinding {
-  ScriptSource source;
-  ScriptLocation location;
-};
-
 struct OpcodeInvocation {
   ScriptInstruction instruction{};
   ScriptFlow result = ScriptFlow::Of(ScriptFlowKind::kStop);
@@ -88,9 +83,9 @@ class LiveVmHost final : public ScriptVmHost {
   RoomEventLease room;
   std::array<ScriptLocation, kScriptThreadCount> cursors{};
   ScriptLocation return_to;
-  DataBinding strings;
-  std::array<DataBinding, kTextBoxFrameStyleCount> frames{};
-  std::array<DataBinding, kVibrationPatternSlots> patterns{};
+  ScriptDataLease strings;
+  std::array<ScriptDataLease, kTextBoxFrameStyleCount> frames{};
+  std::array<ScriptDataLease, kVibrationPatternSlots> patterns{};
   std::array<EasingCurve, kCustomEasingCurveCount> curves{};
   OpcodeInvocation invocation;
 
@@ -411,7 +406,7 @@ class LiveVmHost final : public ScriptVmHost {
   }
 
  private:
-  void BindData(DataBinding& binding, ScriptLocation location) {
+  void BindData(ScriptDataLease& binding, ScriptLocation location) {
     if (!location.Present()) {
       binding = {};
       return;
@@ -755,6 +750,17 @@ auto WithSourceUse(Operation operation) -> decltype(operation()) {
   return result;
 }
 
+std::expected<ScriptDataLease, ScriptSourceError> LeaseData(
+    const ScriptDataLease& binding) {
+  if (!binding.location.Present()) {
+    return std::unexpected(ScriptSourceError::kMissingOwner);
+  }
+  if (!binding.Bytes()) {
+    return std::unexpected(ScriptSourceError::kExtent);
+  }
+  return binding;
+}
+
 }  // namespace
 
 ScriptVmHost& LiveScriptVm() { return live_host; }
@@ -778,6 +784,26 @@ std::intptr_t DispatchLiveScriptControlOpcode(std::uint8_t* instruction,
 std::expected<ScriptSource, ScriptSourceError> LeaseLiveScriptSource(
     ScriptRegion region) {
   return live_host.sources.Lease(region);
+}
+
+std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveDialogStrings() {
+  return LeaseData(live_host.strings);
+}
+
+std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveTextBoxFrame(
+    int style) {
+  if (style < 0 || style >= kTextBoxFrameStyleCount) {
+    return std::unexpected(ScriptSourceError::kExtent);
+  }
+  return LeaseData(live_host.frames[static_cast<std::size_t>(style)]);
+}
+
+std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveVibrationPattern(
+    int pattern) {
+  if (pattern < 0 || pattern >= kVibrationPatternSlots) {
+    return std::unexpected(ScriptSourceError::kExtent);
+  }
+  return LeaseData(live_host.patterns[static_cast<std::size_t>(pattern)]);
 }
 
 std::expected<void, ScriptSourceError> MountLiveScriptSource(

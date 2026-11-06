@@ -13,6 +13,25 @@ verification of the current worktree.
   milestones. #276 remains active. Current promotion: **2,635 / 3,749 done,
   1,114 remaining**; 41 / 54 plan rows done. Row 33 has 4 / 57 functions
   promoted and remains planned. The pause-era counts below are historical.
+- Native dialog/frame/vibration data now has checked, owner-backed lease
+  accessors. Rebinding or resetting the VM does not revoke a consumer's old
+  bytes; absent slots and invalid indices/locations are refused. The native
+  room importer prepares an entry-source token before changing flags or room
+  state, then publishes without allocation. Continuing room transitions keep
+  the old event/door sources; freeing the current room does not revoke them.
+  Nested opcode dispatch also has a direct invocation-restoration control.
+  Seven new cases / 103 assertions pass on `812be6c5` plus these changes.
+  Debug/Release focused selection passes **227 / 3,708**; full suites pass
+  **4,587 / 7,905,790**, retaining all 4,580 previous names and unchanged
+  complete replay objects. Evidence: `VR-EVENT-DATA-OWNERS`,
+  `build\owner-checkpoint\script-data-leases-*`. Source quality/clang-tidy and
+  the final factored test scope are clean; no assertions were removed to meet
+  test complexity limits.
+  **The new importer and data accessors are not yet gameplay callers.**
+  Existing production room loading still delegates to the generated VM.
+  Dialog/frame payload validation, UI retention and vibration consumers remain
+  unwired; no allocation/generation-exhaustion injection, retail native-VM
+  playback, promotion or compatibility-retirement credit is claimed.
 - The concrete `ScriptVmLive` adapter now compiles and has direct runtime
   controls: typed cursors/returns and opcode flow, persistent source/data
   owners, private main/chained disc destinations, publication only after
@@ -31,6 +50,7 @@ verification of the current worktree.
   generations preserve all **1,662** source/project hashes.
   Evidence: `VR-EVENT-NATIVE-RUNTIME`, `build\owner-checkpoint\script-vm-live-*`
   and `script-door-binding-*`.
+  Published as `812be6c5`; exact Source Quality `42219789329` succeeded.
 - This is **not the production VM switchover**. The generated VM and trigger
   evaluator still drive gameplay. The native opcode table/callers, room hosts,
   dialog/frame/vibration consumers and fixtures still need migration before
