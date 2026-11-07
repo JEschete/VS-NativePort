@@ -1312,6 +1312,10 @@
     <ClCompile Include="src\Field\GameModeLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Field\GimmickAnimationQueue.cpp" />
+    <ClCompile Include="src\Field\GimmickAnimationQueueLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\GimmickPlacement.cpp" />
     <ClCompile Include="src\Field\GimmickPlacementLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2001,6 +2005,7 @@
     <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />
     <ClInclude Include="src\Field\EnvironmentLiveState.h" />
     <ClInclude Include="src\Field\GameModeLiveState.h" />
+    <ClInclude Include="src\Field\GimmickAnimationQueueLive.h" />
     <ClInclude Include="src\Field\GimmickLookup.h" />
     <ClInclude Include="src\Field\GimmickMotion.h" />
     <ClInclude Include="src\Field\GimmickPlacementLive.h" />
@@ -2268,6 +2273,7 @@
     <ClInclude Include="include\Field\EnvironmentLive.hpp" />
     <ClInclude Include="include\Field\GameMode.hpp" />
     <ClInclude Include="include\Field\GameModeLive.hpp" />
+    <ClInclude Include="include\Field\GimmickAnimationQueue.hpp" />
     <ClInclude Include="include\Field\GimmickPlacement.hpp" />
     <ClInclude Include="include\Field\InteractionsLive.hpp" />
     <ClInclude Include="include\Field\Map.hpp" />

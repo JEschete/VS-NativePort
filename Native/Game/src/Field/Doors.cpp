@@ -7,6 +7,7 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Field/Doors.h"
+#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
@@ -188,7 +189,7 @@ int Field_BeginDoorToggle(Field_MpdLockTrigger* door_trigger)
         }
         if (door_trigger->isOpen == 0) {
             door_trigger->delayFrames = 8;
-            Field_QueueGimmickAnimation(3, door_trigger);
+            Field_QueueGimmickAnimationEntry(3, door_trigger);
             return 1;
         }
         Field_StartDoorAnimation(door_trigger);
@@ -223,7 +224,7 @@ int Field_StartDoorAnimation(Field_MpdLockTrigger* door_trigger)
             lock_trigger_table[door_trigger->linkedLockIndex].isTriggered = 1;
         }
     }
-    Field_QueueGimmickAnimation(1, door_trigger);
+    Field_QueueGimmickAnimationEntry(1, door_trigger);
     return 1;
 }
 

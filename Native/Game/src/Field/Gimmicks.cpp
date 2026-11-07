@@ -31,6 +31,7 @@ extern "C" {
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
 #include "Field/Doors.h"
+#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
@@ -216,22 +217,6 @@ void Field_ResetGimmickAnimationQueue(void)
     Field_pendingGimmickAnimationCount = 0;
     Field_triggerMarkerFrameTicks = 0;
     VS::Core::Memory::ZeroLiveAlignedWords(Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue);
-}
-
-// decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338)
-void Field_QueueGimmickAnimation(int queued_job_kind, Field_MpdLockTrigger* lock_trigger)
-{
-    int i;
-
-    ++Field_pendingGimmickAnimationCount;
-
-    for (i = 0; i < 8; ++i) {
-        if (Field_gimmickAnimationQueue[i].jobKind == 0) {
-            Field_gimmickAnimationQueue[i].jobKind = queued_job_kind;
-            Field_gimmickAnimationQueue[i].trigger = lock_trigger;
-            return;
-        }
-    }
 }
 
 // decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16353)
@@ -646,7 +631,7 @@ void Field_BeginSwitchToggle(Field_MpdLockTrigger* switch_trigger)
         switch_trigger->trigger.markerFade = 1;
         if (switch_trigger->trigger.lockState.switchValue == 0) {
             switch_trigger->trigger.activation = 0x14;
-            Field_QueueGimmickAnimation(2, switch_trigger);
+            Field_QueueGimmickAnimationEntry(2, switch_trigger);
             return;
         }
         Field_ToggleRoomSwitchEntry(switch_trigger);

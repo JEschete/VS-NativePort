@@ -148,6 +148,7 @@ extern "C" {
 #include "Field/Doors.h"
 #include "Field/EnvironmentLiveState.h"
 #include "Field/GameModeLiveState.h"
+#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/GimmickMotion.h"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
@@ -487,7 +488,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008BD74u, 0u, (void*)&Field_ToggleDoorCollision, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008BEBCu, 0u, (void*)&Field_BeginDoorToggle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008BF48u, 0u, (void*)&Field_StartDoorAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008C070u, 0u, (void*)&Field_QueueGimmickAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008C0C0u, 0u, (void*)&Field_UpdateGimmickAnimationQueue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008C1C8u, 0u, (void*)&Field_FinishDoorAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008C49Cu, 0u, (void*)&Field_SetMovingPlatformActor, 0u, 0u, 0u},
@@ -1509,6 +1509,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x8008C070u, 0u, (void*)&Field_QueueGimmickAnimationEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D658u, 0u, (void*)&Field_ToggleRoomSwitchEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A0024u, 0u, (void*)&Field_GimmickPlacementEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurveEntry, 0u, 0u, 0u},

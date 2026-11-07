@@ -1692,6 +1692,15 @@
     <ClInclude Include="src\Field\GameModeLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\GimmickAnimationQueue.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\GimmickAnimationQueueLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\GimmickAnimationQueueLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClInclude Include="src\Field\GimmickLookup.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -2881,6 +2890,9 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\GameModeLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickAnimationQueue.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\GimmickPlacement.hpp">

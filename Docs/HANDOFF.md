@@ -7,6 +7,41 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Gimmick Queue Admission Accounting (#318, #276 Row 27)
+
+- #318 was logged before fixing: original/current F00584 increments pending at
+  `8008C08C` before searching the eight slots. Original 20 MIPS words
+  `8008C070-8008C0BC` confirm the count-before-refusal order. On source
+  `5fb63815` plus only the new regression, a ninth request leaves eight slots
+  intact but pending nine: one case / 18 assertions, 17 pass and `9 == 8` fails.
+- Actual strict `VS::Field::QueueGimmickAnimation` validates typed kind/target,
+  selects the first free bounded slot and publishes occupancy count only after
+  the store commits. Full/refused/invalid requests cannot write slots/count.
+  Required native C/header/original `8008C070` and existing raw queue/update
+  target ABI remain in the Live host; alignment is not lifetime validation.
+  #287 and complete typed queue/interaction ownership remain open.
+- Same original capacity/slot assertions now pass unchanged. Six focused cases
+  / 165 assertions also cover invalid kinds/null/misalignment, repeated full
+  refusals, store refusal, module resolution, admitted eight switch jobs
+  draining to zero and supported-kind resets. Completion isolates refused
+  effect/cell/audio paths, not physical chest/lock Combat Lab acceptance.
+- Complete final Debug/Release 4,704 / 8,634,363, zero failures/skips; both
+  canonical replays unchanged. 191 copier / nine extent controls and editor
+  diagnostics pass; quality five existing / zero new. One oversized scenario
+  test was split into local helpers without assertion/baseline weakening.
+- Source `5fb63815` has exact green CI `42355536122`. Current fixing source and
+  #318 closure are pending publication/exact CI; row 27 / #287 remain open.
+  Logs: `build/owner-checkpoint/gimmick-queue-accounting-*-regression.log`.
+- Supported ownership was recorded before output filtering interrupted the
+  producer; supported copy generation was completed instead of repeating
+  ownership. No reference/generated manual patch, asset upload or baseline
+  refresh was used. Original rejected-request behavior is deliberately fixed,
+  not relabeled as exact original parity or general gameplay completion.
+- Final repeat copier/project generation preserves tracked and new Native/
+  project/manifest bytes. Unchanged gates derive 2,692 promoted / one separate
+  frame `wip`, 240 behavior records and zero violations; old admission symbol
+  consumers are zero, while existing raw queue/target/update ABI stays tracked.
+
 ### Native Room Switch Core (#276 Row 27)
 
 - F00607 now targets strict `VS::Field::ToggleRoomSwitch` over a typed host/state

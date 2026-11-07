@@ -16,6 +16,8 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
+#include "Field/GimmickAnimationQueue.hpp"
+#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/GimmickPlacement.hpp"
 #include "Field/RoomSwitches.hpp"
 #include "Field/RoomSwitchesLive.h"
@@ -157,6 +159,88 @@ void CheckTypedGimmickPlacement(RecordingGimmickHost& host,
 
 namespace {
 
+struct RecordingAnimationQueueHost final
+    : VS::Field::GimmickAnimationQueueHost {
+  bool target = true;
+  bool refuse_store = false;
+  VS::Field::GimmickAnimationOccupancy slots{};
+  mutable std::size_t reads = 0;
+  std::size_t stores = 0;
+  std::size_t count_writes = 0;
+  std::size_t pending = 0;
+  std::optional<std::size_t> stored_slot;
+
+  bool HasRequestedTarget() const override { return target; }
+  VS::Field::GimmickAnimationOccupancy Occupancy() const override {
+    ++reads;
+    return slots;
+  }
+  bool StoreRequestedJob(std::size_t slot,
+                         VS::Field::GimmickAnimationKind) override {
+    if (refuse_store) {
+      return false;
+    }
+    ++stores;
+    stored_slot = slot;
+    slots.at(slot) = true;
+    return true;
+  }
+  void SetPendingCount(std::size_t count) override {
+    ++count_writes;
+    pending = count;
+  }
+};
+
+struct AnimationQueueFixture {
+  static constexpr std::size_t kSlots = 8;
+  std::array<Field_GimmickAnimationJob, kSlots> saved{};
+  std::int16_t pending = Field_pendingGimmickAnimationCount;
+  std::uint16_t marker_ticks = Field_triggerMarkerFrameTicks;
+
+  AnimationQueueFixture() {
+    std::ranges::copy(Field_gimmickAnimationQueue, saved.begin());
+    Field_ResetGimmickAnimationQueue();
+  }
+  ~AnimationQueueFixture() {
+    std::ranges::copy(saved, Field_gimmickAnimationQueue);
+    Field_pendingGimmickAnimationCount = pending;
+    Field_triggerMarkerFrameTicks = marker_ticks;
+  }
+  AnimationQueueFixture(const AnimationQueueFixture&) = delete;
+  AnimationQueueFixture& operator=(const AnimationQueueFixture&) = delete;
+};
+
+void QueueOneFrameSwitchJobs(std::span<Field_MpdLockTrigger> targets) {
+  for (std::size_t slot = 0; slot < AnimationQueueFixture::kSlots; ++slot) {
+    auto& target = targets[slot];
+    target.trigger.tileX = -1;
+    target.trigger.tileZ = -1;
+    target.trigger.floorLayer = -1;
+    target.trigger.kind = -1;
+    target.trigger.activation = 1;
+    Field_QueueGimmickAnimationEntry(2, &target);
+  }
+  Field_QueueGimmickAnimationEntry(2, &targets.back());
+}
+
+void CheckDrainedSwitchJobs(std::span<const Field_MpdLockTrigger> targets) {
+  for (std::size_t slot = 0; slot < AnimationQueueFixture::kSlots; ++slot) {
+    CHECK(targets[slot].trigger.activation == 0);
+    CHECK(targets[slot].trigger.lockState.switchValue == 1);
+    CHECK(Field_gimmickAnimationQueue[slot].jobKind == 0);
+    CHECK(Field_gimmickAnimationQueue[slot].trigger == nullptr);
+  }
+}
+
+void CheckAnimationKindResets(Field_MpdLockTrigger& target) {
+  for (const auto kind : {1, 2, 3}) {
+    Field_QueueGimmickAnimationEntry(kind, &target);
+    CHECK(Field_pendingGimmickAnimationCount == 1);
+    Field_ResetGimmickAnimationQueue();
+    CHECK(Field_pendingGimmickAnimationCount == 0);
+  }
+}
+
 enum class SwitchCallKind { kSound, kEffect, kStore, kCell };
 
 struct SwitchCall {
@@ -202,6 +286,108 @@ struct RecordingSwitchHost final : VS::Field::RoomSwitchHost {
 };
 
 }  // namespace
+
+TEST_CASE("Typed gimmick admission rejects invalid requests before slot reads",
+          "[gimmick-animation-queue-core][field]") {
+  RecordingAnimationQueueHost host;
+  for (const auto kind :
+       {-1, 0, 4, 257, std::numeric_limits<std::int32_t>::max()}) {
+    CHECK_FALSE(VS::Field::QueueGimmickAnimation(
+        static_cast<VS::Field::GimmickAnimationKind>(kind), host));
+  }
+  host.target = false;
+  CHECK_FALSE(VS::Field::QueueGimmickAnimation(
+      VS::Field::GimmickAnimationKind::kFinishDoor, host));
+  CHECK(host.reads == 0);
+  CHECK(host.stores == 0);
+  CHECK(host.count_writes == 0);
+}
+
+TEST_CASE("Typed gimmick admission counts only committed first-free slots",
+          "[gimmick-animation-queue-core][field]") {
+  RecordingAnimationQueueHost host;
+  host.slots[0] = true;
+  host.slots[2] = true;
+  REQUIRE(VS::Field::QueueGimmickAnimation(
+      VS::Field::GimmickAnimationKind::kToggleSwitch, host));
+  CHECK(host.stored_slot == 1);
+  CHECK(host.pending == 3);
+  host.refuse_store = true;
+  CHECK_FALSE(VS::Field::QueueGimmickAnimation(
+      VS::Field::GimmickAnimationKind::kStartDoor, host));
+  CHECK(host.pending == 3);
+  CHECK(host.count_writes == 1);
+}
+
+TEST_CASE("Typed gimmick admission cannot drift when a full queue refuses",
+          "[gimmick-animation-queue-core][field]") {
+  RecordingAnimationQueueHost host;
+  for (std::size_t slot = 0; slot < VS::Field::kGimmickAnimationSlots; ++slot) {
+    REQUIRE(VS::Field::QueueGimmickAnimation(
+        VS::Field::GimmickAnimationKind::kFinishDoor, host));
+    CHECK(host.stored_slot == slot);
+    CHECK(host.pending == slot + 1);
+  }
+  const auto before = host.slots;
+  for (int refusal = 0; refusal < 16; ++refusal) {
+    CHECK_FALSE(VS::Field::QueueGimmickAnimation(
+        VS::Field::GimmickAnimationKind::kFinishDoor, host));
+    CHECK(host.pending == 8);
+    CHECK(host.slots == before);
+  }
+  CHECK(host.stores == 8);
+  CHECK(host.count_writes == 8);
+}
+
+TEST_CASE("Gimmick animation queue does not count a refused ninth job",
+          "[gimmick-animation-queue][field]") {
+  const AnimationQueueFixture fixture;
+  std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots + 1> targets{};
+  for (std::size_t slot = 0; slot < AnimationQueueFixture::kSlots; ++slot) {
+    Field_QueueGimmickAnimationEntry(1, &targets[slot]);
+  }
+  REQUIRE(Field_pendingGimmickAnimationCount == 8);
+  Field_QueueGimmickAnimationEntry(1, &targets.back());
+  CHECK(Field_pendingGimmickAnimationCount == 8);
+  for (std::size_t slot = 0; slot < AnimationQueueFixture::kSlots; ++slot) {
+    CHECK(Field_gimmickAnimationQueue[slot].jobKind == 1);
+    CHECK(Field_gimmickAnimationQueue[slot].trigger == &targets[slot]);
+  }
+}
+
+TEST_CASE("Native gimmick admission refuses invalid calls and preserves module",
+          "[gimmick-animation-queue][field]") {
+  const AnimationQueueFixture fixture;
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008C070) ==
+        reinterpret_cast<const void*>(&Field_QueueGimmickAnimationEntry));
+  Field_MpdLockTrigger target{};
+  for (const auto kind :
+       {-1, 0, 4, 257, std::numeric_limits<std::int32_t>::max()}) {
+    Field_QueueGimmickAnimationEntry(kind, &target);
+  }
+  Field_QueueGimmickAnimationEntry(1, nullptr);
+  Field_QueueGimmickAnimationEntry(
+      1, reinterpret_cast<Field_MpdLockTrigger*>(std::uintptr_t{1}));
+  CHECK(Field_pendingGimmickAnimationCount == 0);
+  for (const auto& job : Field_gimmickAnimationQueue) {
+    CHECK(job.jobKind == 0);
+    CHECK(job.trigger == nullptr);
+  }
+}
+
+TEST_CASE("Native gimmick admission drains accepted jobs and resets cleanly",
+          "[gimmick-animation-queue][field]") {
+  const AnimationQueueFixture fixture;
+  std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots + 1> targets{};
+  QueueOneFrameSwitchJobs(targets);
+  REQUIRE(Field_pendingGimmickAnimationCount == 8);
+  Field_UpdateGimmickAnimationQueue();
+  CHECK(Field_pendingGimmickAnimationCount == 0);
+  CheckDrainedSwitchJobs(targets);
+  CheckAnimationKindResets(targets.back());
+}
 
 TEST_CASE("Room switches preserve original sounds and normalized state order",
           "[room-switches][field]") {
