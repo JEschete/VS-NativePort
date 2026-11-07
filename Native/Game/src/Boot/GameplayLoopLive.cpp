@@ -211,7 +211,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
 
   std::int32_t EvaluateRoomEventTriggers(std::int32_t request) override {
-    return Event_EvaluateRoomEventTriggers(request, 0, nullptr, 0);
+    return Event_EvaluateRoomEventTriggersEntry(request, 0, nullptr, 0);
   }
   bool EvaluateActorRoomEventTrigger(int slot) override {
     return VS::Event::EvaluateLiveActorRoomEventTrigger(slot);

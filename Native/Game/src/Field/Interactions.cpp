@@ -502,7 +502,7 @@ int Field_TryTriggerFacingTileEvent(int actor_index)
     VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
     Field_TileInFrontOfActor(&actor_placement, facing_tile);
     // BUG: arg2 should be an actor ID?
-    return Event_EvaluateRoomEventTriggers(4, 0, facing_tile, 1) == 1;
+    return Event_EvaluateRoomEventTriggersEntry(4, 0, facing_tile, 1) == 1;
 }
 
 // decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271)
@@ -593,7 +593,7 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
     if ((*(u_int*)position & tileMask) != (actor->lastTriggerTile.word & tileMask)
         || tileMode != actor->lastTriggerTile.bytes[3] || (phaseValue & 0x70000)) {
         if (Field_controlMode != 3) {
-            if (tile->hasEventTrigger && Event_EvaluateRoomEventTriggers(2, 0, NULL, 0) == 1) {
+            if (tile->hasEventTrigger && Event_EvaluateRoomEventTriggersEntry(2, 0, NULL, 0) == 1) {
                 VS::Event::BeginLiveQueuedCutscene();
                 actor->lastTriggerTile.word = *(u_int*)position;
                 actor->lastTriggerTile.bytes[3] = tileMode;
@@ -754,7 +754,7 @@ int Field_CheckActorTrapAndFallTriggers(int actor_index, Actors_ActorLocation* a
                 if (actor_location->position.vy >= 0x11) {
                     Battle_actors[actor_index]->stats->currentHp = 0;
                     Battle_ResolveActorDefeat(0, actor_index, 0);
-                    if (Event_EvaluateRoomEventTriggers(0xC, 0, NULL, 0) == 1) {
+                    if (Event_EvaluateRoomEventTriggersEntry(0xC, 0, NULL, 0) == 1) {
                         return 1;
                     }
                     return 2;

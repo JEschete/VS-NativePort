@@ -412,7 +412,7 @@ void Battle_FinishActionSequence(void)
     if (Field_controlMode == 3) {
         return;
     }
-    if (Event_EvaluateRoomEventTriggers(12, 0, 0, 0) == 1) {
+    if (Event_EvaluateRoomEventTriggersEntry(12, 0, 0, 0) == 1) {
         VS::Event::BeginLiveQueuedCutscene();
         return;
     }

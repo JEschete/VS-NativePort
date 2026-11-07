@@ -1181,7 +1181,7 @@ class LiveRoomLoadHost final
   void JumpToTitle() override { Boot::JumpToLiveTitle(); }
 
   [[nodiscard]] bool RoomEventTriggered() override {
-    return Event_EvaluateRoomEventTriggers(1, 0, nullptr, 0) == 1;
+    return Event_EvaluateRoomEventTriggersEntry(1, 0, nullptr, 0) == 1;
   }
 
   void RequestEventStart() override {

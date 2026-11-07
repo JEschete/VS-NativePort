@@ -438,6 +438,25 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("void StageClearGame() override { Save_NativeStageClearGame(); }", live)
         self.assertIn("void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }", live)
 
+    def test_owned_native_core_keeps_retained_c_binding_header(self):
+        for identifier, c_name, core_name, core_header in (
+            ("F01261", "Event_EvaluateRoomEventTriggersEntry", "VS::Event::EvaluateRoomEventTriggers",
+             r"Native\Game\include\Event\RoomTriggers.hpp"),
+            ("F01276", "Event_EvaluateInterpolationCurveEntry", "VS::Event::EvaluateInterpolationCurve",
+             r"Native\Game\include\Event\ScriptVm.hpp"),
+        ):
+            with self.subTest(identifier=identifier):
+                copier = object.__new__(copy_to_native.Copier)
+                copier.owned = {identifier: {"kind": "function", "name": core_name,
+                                              "header": core_header, "path": "owned"}}
+                copier.provider = {}
+                copier.public_headers = set()
+                copier.item_row = {}
+                copier.report = {"owned": []}
+                self.assertTrue(copier.take_owned(identifier, c_name))
+                self.assertEqual(copier.provider[c_name], copy_fixups.NATIVE_HELPER_HEADERS[c_name])
+                self.assertEqual(copier.provider[core_name], core_header)
+
     def test_event_dispatch_audit_includes_owned_opcode_headers(self):
         manifest = {
             r"Native\Game\src\Event\ScriptVm.h": "generated",
@@ -939,7 +958,15 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(identity, owned)
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
-                self.assertTrue(header.endswith("Live.hpp"), header)
+                retained_c = {
+                    "F01261": ("Event_EvaluateRoomEventTriggersEntry", r"Native\Game\src\Event\RoomTriggerEntryLive.h"),
+                    "F01276": ("Event_EvaluateInterpolationCurveEntry", r"Native\Game\src\Event\InterpolationCurveLive.h"),
+                }
+                if identity in retained_c:
+                    self.assertEqual((binding, header), retained_c[identity])
+                else:
+                    self.assertTrue(binding.startswith("VS::"), binding)
+                    self.assertTrue(header.endswith("Live.hpp"), header)
         root = Path(__file__).resolve().parents[2]
         for binding, header in copy_fixups.NATIVE_HELPER_HEADERS.items():
             if not binding.startswith(("VS::Core::Math::", "VS::Render::")):

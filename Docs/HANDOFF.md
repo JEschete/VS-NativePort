@@ -7,6 +7,44 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Trigger/Interpolation Cores (#276 Row 33)
+
+- F01261/F01276 ownership now targets actual strict typed bounded trigger and
+  interpolation cores, not their pure C forwarding adapters. Required C caller/
+  header/module mappings remain explicit and intact. This is native core promotion,
+  not global ABI/EC/table retirement. Provider selection now gives retained C
+  symbols their C binding headers and qualified native symbols their core headers;
+  a targeted copier regression prevents C++ headers leaking into C-linkage callers.
+- Fresh unchanged-original trigger harness: 100,000 comparisons, seed `7A1663`,
+  zero mismatches/all thirteen callback categories; all six planted deviations
+  detected in bounded diagnostic copies. Callback stand-ins/valid bounded records
+  only, not unsafe original extent/indices or visual/audio/retail comparison.
+  Native entry/trigger/retention/gimmick gate: 60 / 884, including module resolution, typed status/
+  direct-request state and interpolation built-in/custom/invalid/zero-duration
+  entry equality. Entry equality is not a self-referential original oracle.
+- On `096b58f3` plus this slice, complete Debug/Release builds and regressions
+  pass 4,690 cases / 8,633,604 assertions, zero failures/skips and both canonical
+  fingerprints unchanged. Two new cases add 192; no baseline refresh. Changed
+  quality: five existing / zero new; 191 copier/nine extent/Pylance syntax gates
+  pass. Comparison sample/explicit narrowing helpers preserve all assertions.
+  Evidence: `VR-EVENT-FINAL-CORE-PROMOTION`, existing original trigger harness logs
+  and `build\owner-checkpoint\native-trigger-easing-cores-*-regression.log`.
+  Required C bindings/global retirement remain open and existing generated
+  StatusEffects/ScriptCamera warnings remain visible; no suppression or baseline
+  change. Queue/init predecessor `096b58f3` is green on exact CI `42346621904`.
+- Unchanged consumer gate required old entry symbols to retire. Adopted native
+  binding names `Event_EvaluateRoomEventTriggersEntry` and
+  `Event_EvaluateInterpolationCurveEntry` across definitions/headers/generated/
+  maintained/test callers and original module addresses. Signatures and required
+  ABI remain; no gate relaxed and no global EC retirement claim. Source promotion
+  now derives for all 57 row identities, pending this exact pushed revision's CI.
+- Repeat generation preserves all tracked Native/project/manifest bytes,
+  including native entry symbols and generated/maintained caller adoption.
+  Unmodified gates derive 2,689 promoted / two separate compatibility `wip`
+  (frame/gimmick entries); row 33 is 57/57 source-promoted with exact new CI
+  pending. Required native C/module bindings and all EC retirement gates remain
+  tracked separately; this is not whole-game or global compatibility retirement.
+
 ### Native Queue/Initialization Helpers (#276 Row 33)
 
 - F01277/F01850 register existing strict typed owned queue/init cores. No C

@@ -84,7 +84,7 @@ TEST_CASE("Absent actor cannot satisfy a retained-actor room trigger",
           "[events][retention-predicate]") {
   RetentionPredicateFixture fixture;
   CHECK(VS::Actors::IsLiveActorRetainedAfterDefeat(kActorSlot) == 0);
-  CHECK(Event_EvaluateRoomEventTriggers(8, 0, nullptr, 0) == 0);
+  CHECK(Event_EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
   CHECK(Event_playbackPhase == 0);
 }
 
@@ -92,11 +92,11 @@ TEST_CASE("Room death predicates reject absent and nonretained actors",
           "[events][retention-predicate]") {
   RetentionPredicateFixture fixture(true);
   SECTION("No combat actor") {
-    CHECK(Event_EvaluateRoomEventTriggers(8, 0, nullptr, 0) == 0);
+    CHECK(Event_EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
   }
   SECTION("Existing actor without retention") {
     Battle_actors[kActorSlot] = &fixture.actor;
-    CHECK(Event_EvaluateRoomEventTriggers(8, 0, nullptr, 0) == 0);
+    CHECK(Event_EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
   }
   CHECK(Event_playbackPhase == 0);
 }
@@ -107,7 +107,7 @@ TEST_CASE("Room death predicates distinguish retained dead and living actors",
   fixture.actor.retainAfterDefeat = 1;
   Battle_actors[kActorSlot] = &fixture.actor;
   SECTION("Retained dead actor activates the original local event") {
-    CHECK(Event_EvaluateRoomEventTriggers(8, 0, nullptr, 0) == 1);
+    CHECK(Event_EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 1);
     CHECK(Event_playbackPhase == 1);
     CHECK(Event_eventSource == 2);
     CHECK(Event_eventId == 0);
@@ -115,7 +115,7 @@ TEST_CASE("Room death predicates distinguish retained dead and living actors",
   SECTION("A living one-percent actor is not dead") {
     fixture.stats.currentHp = 1;
     fixture.stats.maxHp = 1000;
-    CHECK(Event_EvaluateRoomEventTriggers(8, 0, nullptr, 0) == 0);
+    CHECK(Event_EvaluateRoomEventTriggersEntry(8, 0, nullptr, 0) == 0);
     CHECK(Event_playbackPhase == 0);
   }
 }
@@ -126,7 +126,7 @@ TEST_CASE("Room-entry scenes keep the event id; Lab entry restores boot value",
   const auto saved_entry = Event_hasRoomEntryScript;
   Event_eventId = 8;
   Event_hasRoomEntryScript = 1;
-  CHECK(Event_EvaluateRoomEventTriggers(1, 0, nullptr, 0) == 1);
+  CHECK(Event_EvaluateRoomEventTriggersEntry(1, 0, nullptr, 0) == 1);
   CHECK(Event_eventSource == 1);
   CHECK(Event_eventId == 8);
   VS::Game::RestoreBootEventSelector();

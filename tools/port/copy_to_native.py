@@ -640,7 +640,9 @@ class Copier:
         hdr = o["header"].strip()
         if not (REPO / hdr).exists():
             raise SystemExit(f"owned.csv: {rid} {name}: header {hdr} does not exist")
-        self.provide(name, hdr)
+        binding = cf.OWNED_CALL_BINDINGS.get(rid)
+        symbol_header = cf.NATIVE_HELPER_HEADERS.get(binding, hdr) if binding == name else hdr
+        self.provide(name, symbol_header)
         typed = self.owned_vs_name(rid)
         if typed:
             self.provide(typed, hdr)  # a call binding's header comes from cf.NATIVE_HELPER_HEADERS instead

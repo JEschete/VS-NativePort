@@ -364,6 +364,8 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Event_EvaluateInterpolationCurveEntry": r"Native\Game\src\Event\InterpolationCurveLive.h",
+    "Event_EvaluateRoomEventTriggersEntry": r"Native\Game\src\Event\RoomTriggerEntryLive.h",
     "VS::Event::ResolveLiveScriptActorReference": r"Native\Game\include\Event\ScriptVmLive.hpp",
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
@@ -1033,6 +1035,8 @@ OWNED_CALL_BINDINGS = {
     fid: f"VS::Field::{name}" for rows in _FIELD_ACTOR_COLLISION_LIVE.values() for name, fid in rows
 }
 OWNED_CALL_BINDINGS["F01275"] = "VS::Event::ResolveLiveScriptActorReference"
+OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
+OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -2371,6 +2375,8 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x800BFEBC, "Event_EvaluateInterpolationCurveEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800BEC58, "Event_EvaluateRoomEventTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BFE50, "VS::Event::ResolveLiveScriptActorReference"),
     ("SLUS_010.40", 0x80042364, "VS::Boot::ResetToTitleLive"),  # F03423
     ("SLUS_010.40", 0x80042420, "VS::Boot::EnterBattleLive"),  # F03424

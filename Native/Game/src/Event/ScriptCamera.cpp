@@ -511,14 +511,14 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
     switch (c->motionMode) {
     case 2:
         ((Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088))->value =
-            ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingPrimary, c->elapsedFrames, c->durationFrames);
+            ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames);
         VS::Core::Math::ScaleLiveFixedVector(
             (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->displacement, ((Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088))->value);
         VS::Core::Math::AddLiveVectors(&c->computedPosition, &c->startPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         break;
     case 3: {
         Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        s->value = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingPrimary, c->elapsedFrames, c->durationFrames);
+        s->value = ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames);
         VS::Core::Math::ScaleLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->displacement, s->value);
         VS::Core::Math::AddLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->startPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->partnerPosition);
@@ -527,7 +527,7 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
             VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->partnerPosition, &c->destination));
         s->value = c->motionScalar
                  + VS::Core::Math::MultiplyFixed(s->distance - c->motionScalar,
-                     ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingPrimary, c->elapsedFrames, c->durationFrames));
+                     ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames));
         VS::Core::Math::ScaleLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), s->value);
         VS::Core::Math::AddLiveVectors(&c->computedPosition, &c->partnerPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         break;
@@ -538,17 +538,17 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         s->rotation.vx = 0;
         s->rotation.vy =
             c->orbitAngle
-            + ((c->orbitAngleDelta * ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingPrimary, c->elapsedFrames, c->durationFrames)) >> 12);
+            + ((c->orbitAngleDelta * ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames)) >> 12);
         VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
         s->currentOffset.vz =
             c->motionScalar
-            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
+            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
         s->currentOffset.vx = 0;
         s->currentOffset.vy = 0;
         Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         s->currentOffset.vy = c->heightOffset.vy
                  + VS::Core::Math::MultiplyFixed(
-                     c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
+                     c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
         VS::Core::Math::AddLiveVectors(&c->computedPosition, &c->startPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         break;
     }
@@ -558,11 +558,11 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         s->rotation.vx = 0;
         s->rotation.vy =
             c->orbitAngle
-            + ((c->orbitAngleDelta * ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingPrimary, c->elapsedFrames, c->durationFrames)) >> 12);
+            + ((c->orbitAngleDelta * ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames)) >> 12);
         VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
         s->currentOffset.vz =
             c->motionScalar
-            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
+            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
         s->currentOffset.vx = 0;
         s->currentOffset.vy = 0;
         Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
@@ -570,7 +570,7 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         c->computedPosition.vz = c->destination.vz + s->currentOffset.vz;
         c->computedPosition.vy = c->startPosition.vy
                        + VS::Core::Math::MultiplyFixed(
-                           c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
+                           c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
         break;
     }
     case 8:
@@ -591,7 +591,7 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         int fraction;
         Event_CameraTrackScratch* s;
         VS::Core::Math::AddLiveVectors(&c->followPosition, &c->followPosition, &c->followDelta);
-        fraction = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(1, c->elapsedFrames, c->durationFrames);
+        fraction = ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(1, c->elapsedFrames, c->durationFrames);
         s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
         s->value = fraction;
         VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->computedPosition, &c->followPosition);
@@ -765,7 +765,7 @@ void Event_UpdateEventAngleTween(Event_AngleTween* angle_tween)
         angle_tween->elapsedFrames += State_tickSpeed >> 1;
 
         angle_tween->angle = (angle_tween->startAngle
-                      + ((angle_tween->deltaAngle * ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(angle_tween->easingMode, angle_tween->elapsedFrames, angle_tween->durationFrames))
+                      + ((angle_tween->deltaAngle * ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(angle_tween->easingMode, angle_tween->elapsedFrames, angle_tween->durationFrames))
                           >> 0xC));
 
         if (angle_tween->elapsedFrames >= angle_tween->durationFrames) {
@@ -965,7 +965,7 @@ int Event_UpdateEventTripleTween(Event_TripleTween* triple_tween)
 
     triple_tween->elapsedFrames = triple_tween->elapsedFrames + (State_tickSpeed >> 1);
 
-    eased_fraction = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(triple_tween->easingMode, triple_tween->elapsedFrames, triple_tween->durationFrames);
+    eased_fraction = ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(triple_tween->easingMode, triple_tween->elapsedFrames, triple_tween->durationFrames);
     fraction_scratch = (Event_EasedFractionScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
     fraction_scratch->easedFraction = eased_fraction;
     triple_tween->currentValue0 = (triple_tween->startValue0 + ((triple_tween->deltaValue0 * fraction_scratch->easedFraction) >> 0xC));
@@ -1053,7 +1053,7 @@ void Event_UpdateEventLensTween(Event_LensTween* lens_tween)
         if (lens_tween->durationFrames < lens_tween->elapsedFrames) {
             lens_tween->elapsedFrames = lens_tween->durationFrames;
         }
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(lens_tween->easingMode, lens_tween->elapsedFrames, lens_tween->durationFrames);
+        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(lens_tween->easingMode, lens_tween->elapsedFrames, lens_tween->durationFrames);
         delta_value_ptr = &lens_tween->deltaValue;
         lens_tween->value = lens_tween->startValue + ((*delta_value_ptr * *(int*)((uintptr_t)Core_ScratchBase() + 0x088)) >> 0xC);
         if (lens_tween->elapsedFrames == lens_tween->durationFrames) {

@@ -1151,7 +1151,7 @@ extern "C" void Boot_EncounterPollStop() {
           Field_controlMode == 1) {
         const int event = *VS::Game::configuration.external_event;
         // Original 4A0A8.c:4302 direct-event request; no story flag mutation.
-        const int result = Event_EvaluateRoomEventTriggers(
+        const int result = Event_EvaluateRoomEventTriggersEntry(
             VS::Game::kDirectEventTrigger, event, nullptr, 0);
         if (result != 1) {
           Core_Errorf("encounter.event",

@@ -200,8 +200,8 @@ TEST_CASE(
   TriggerFixture fixture;
   PublishTrigger({4, 0, 255, 255, 4, 12, 0, 8, 7, 9, 255});
   std::array<std::uint8_t, 4> tile{7, 0, 9, 0};
-  CHECK(Event_EvaluateRoomEventTriggers(4, 0, tile.data(), 1) == 1);
+  CHECK(Event_EvaluateRoomEventTriggersEntry(4, 0, tile.data(), 1) == 1);
   CHECK(VS::Event::LiveScriptVm().EventId() == 12);
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
-  CHECK(Event_EvaluateRoomEventTriggers(4, 0, nullptr, 1) == 0);
+  CHECK(Event_EvaluateRoomEventTriggersEntry(4, 0, nullptr, 1) == 0);
 }

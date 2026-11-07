@@ -25,6 +25,7 @@
 extern "C" {
 #include "Battle/Hud.h"
 #include "DiscQueue.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
@@ -111,6 +112,7 @@ struct LiveVmFixture {
   char timer_hud = Battle_lowerScreenUiState;
   std::int16_t event_id = Event_eventId;
   std::uint16_t event_source = Event_eventSource;
+  char direct_event = Event_isDirectEventRequest;
 
   LiveVmFixture() {
     std::ranges::copy(Content_discRequestSlots, slots.begin());
@@ -154,6 +156,7 @@ struct LiveVmFixture {
     Battle_lowerScreenUiState = timer_hud;
     Event_eventId = event_id;
     Event_eventSource = event_source;
+    Event_isDirectEventRequest = direct_event;
   }
   LiveVmFixture(const LiveVmFixture&) = delete;
   LiveVmFixture& operator=(const LiveVmFixture&) = delete;
@@ -2368,6 +2371,68 @@ TEST_CASE("Native opcode initialization cancels staging and resets all threads",
   }
 }
 
+namespace {
+struct InterpolationEntrySample {
+  int mode = 0;
+  int frame = 0;
+  int duration = 0;
+};
+
+void CheckRetainedInterpolationEntry(InterpolationEntrySample sample,
+                                     event::ScriptVmHost& host) {
+  const auto curve_mode = static_cast<std::int16_t>(sample.mode);
+  const auto curve_frame = static_cast<std::int16_t>(sample.frame);
+  const auto curve_duration = static_cast<std::int16_t>(sample.duration);
+  CHECK(Event_EvaluateInterpolationCurveEntry(curve_mode, curve_frame,
+                                              curve_duration) ==
+        event::EvaluateInterpolationCurve(curve_mode, curve_frame,
+                                          curve_duration, host));
+}
+}  // namespace
+
+TEST_CASE("Retained interpolation entry resolves and matches the typed core",
+          "[event-vm-live][event-native-entries]") {
+  const LiveVmFixture fixture;
+  auto& host = event::LiveScriptVm();
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BFEBC) ==
+      reinterpret_cast<const void*>(&Event_EvaluateInterpolationCurveEntry));
+  for (int slot = 0; slot < 4; ++slot) {
+    host.SetCustomEasingCurve(slot,
+                              {.family = static_cast<std::uint8_t>(slot),
+                               .power = static_cast<std::int8_t>(slot - 2)});
+  }
+  for (const int mode : {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8}) {
+    for (const int frame : {-1, 0, 1, 3, 30, 100}) {
+      for (const int duration : {0, 2, 30}) {
+        CheckRetainedInterpolationEntry({mode, frame, duration}, host);
+      }
+    }
+  }
+}
+
+TEST_CASE(
+    "Retained room trigger entry preserves typed status and direct requests",
+    "[event-vm-live][event-native-entries]") {
+  const LiveVmFixture fixture;
+  auto& host = event::LiveScriptVm();
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BEC58) ==
+      reinterpret_cast<const void*>(&Event_EvaluateRoomEventTriggersEntry));
+  for (int phase = 0; phase < 5; ++phase) {
+    host.SetPhase(static_cast<event::PlaybackPhase>(phase));
+    CHECK(Event_EvaluateRoomEventTriggersEntry(0xFF, 0, nullptr, 0) ==
+          (phase == 0 ? 0 : 2));
+  }
+  CHECK(Event_EvaluateRoomEventTriggersEntry(0x40, 0x1234, nullptr, 0) == 1);
+  CHECK(host.EventId() == 0x1234);
+  CHECK(host.Source() == event::EventSource::kEventFile);
+  CHECK(host.Phase() == event::PlaybackPhase::kRequested);
+  CHECK(Event_isDirectEventRequest == 1);
+}
+
 TEST_CASE("Native button store bindings preserve selectors and input bytes",
           "[event-vm-live][control-opcode]") {
   for (const int skip : {0, 2}) {
@@ -2514,7 +2579,7 @@ TEST_CASE("Legacy easing entry reads the native owned custom curve",
   const LiveVmFixture fixture;
   Event_customEasingCurves[0] = 0;
   event::LiveScriptVm().SetCustomEasingCurve(0, {0, 1});
-  CHECK(Event_EvaluateInterpolationCurve(4, 1, 2) == 1024);
+  CHECK(Event_EvaluateInterpolationCurveEntry(4, 1, 2) == 1024);
 }
 
 TEST_CASE("Live VM refuses pointer results and detached control adapters",

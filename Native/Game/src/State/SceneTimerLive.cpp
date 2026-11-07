@@ -94,8 +94,8 @@ int UpdateLiveSceneTimer() {
       AdvanceSceneTimer(timer, State_tickSpeed, flags, host);
   StoreLiveSceneTimer(timer);
   if (!expiry_due) return 0;
-  return Event_EvaluateRoomEventTriggers(kSceneTimerExpiryTrigger, 0, nullptr,
-                                         0) == kExpiryTriggerFired
+  return Event_EvaluateRoomEventTriggersEntry(kSceneTimerExpiryTrigger, 0,
+                                              nullptr, 0) == kExpiryTriggerFired
              ? 1
              : 0;
 }

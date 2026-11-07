@@ -124,12 +124,13 @@ class LiveCutsceneHost final : public CutsceneHost {
     Battle::Ai::UpdateLiveRouteGateAvailability();
   }
   bool EvaluateFollowOnTrigger() override {
-    return Event_EvaluateRoomEventTriggers(kFollowOnTrigger, 0, nullptr, 0) ==
-           1;
+    return Event_EvaluateRoomEventTriggersEntry(kFollowOnTrigger, 0, nullptr,
+                                                0) == 1;
   }
   bool SceneTimerActive() override { return State_sceneTimer.mode != 0; }
   bool EvaluateTimerTrigger() override {
-    return Event_EvaluateRoomEventTriggers(kTimerTrigger, 0, nullptr, 0) == 1;
+    return Event_EvaluateRoomEventTriggersEntry(kTimerTrigger, 0, nullptr, 0) ==
+           1;
   }
   void ClearActorSoundOverrides() override {
     Actors::SetLiveActorSoundOverrides(-1, Actors::SoundEffectSlot{});

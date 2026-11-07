@@ -275,7 +275,7 @@ class LiveScanlineCanvas final : public event::ScanlineCanvas {
 class LiveImageTweenHost final : public event::ImageTweenHost {
  public:
   [[nodiscard]] int EaseFraction(int mode, int frame, int duration) override {
-    return Event_EvaluateInterpolationCurve(
+    return Event_EvaluateInterpolationCurveEntry(
         static_cast<std::int16_t>(mode), static_cast<std::int16_t>(frame),
         static_cast<std::int16_t>(duration));
   }

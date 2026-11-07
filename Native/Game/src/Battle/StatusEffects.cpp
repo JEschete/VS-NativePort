@@ -1405,7 +1405,7 @@ int Battle_UpdateActorVitals(void)
                     update_result = Battle_ResolveActorDefeat(0, i, 0);
 
                     if ((update_result == 0) && (i != 0)) {
-                        if (Event_EvaluateRoomEventTriggers(0xC, 0, NULL, 0) == 1) {
+                        if (Event_EvaluateRoomEventTriggersEntry(0xC, 0, NULL, 0) == 1) {
                             update_result = 1;
                         } else {
                             update_result = 2;
@@ -1529,7 +1529,7 @@ int Battle_UpdateActorVitals(void)
                                 update_result = Battle_ResolveActorDefeat(0, i, 0);
 
                                 if ((update_result == 0) && (i != 0)) {
-                                    if (Event_EvaluateRoomEventTriggers(0xC, 0, NULL, 0) == 1) {
+                                    if (Event_EvaluateRoomEventTriggersEntry(0xC, 0, NULL, 0) == 1) {
                                         update_result = 1;
                                     } else {
                                         update_result = 2;

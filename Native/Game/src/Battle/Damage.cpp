@@ -53,7 +53,7 @@ int Battle_ResolveActorDefeat(int source_actor_slot, int target_actor_slot, int 
             Battle_ResolveEnemyDefeat(source_actor_slot, target_actor_slot, count_kill);
             if (target_actor_slot == 0) {
                 Battle_SuppressAshleyStatusLabels();
-                Event_EvaluateRoomEventTriggers(0x40, 0, NULL, 0);
+                Event_EvaluateRoomEventTriggersEntry(0x40, 0, NULL, 0);
                 VS::Event::BeginLiveQueuedCutscene();
                 ret = 1;
             } else if (Battle_actors[target_actor_slot]->retainAfterDefeat == 0) {

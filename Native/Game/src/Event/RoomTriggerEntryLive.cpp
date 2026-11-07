@@ -27,10 +27,10 @@ VS::Event::RoomTriggerContext TriggerContext(int actor,
 }  // namespace
 
 // decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4A0A8.c:4302).
-int16_t Event_EvaluateRoomEventTriggers(int trigger_request,
-                                        int event_or_actor_id,
-                                        uint8_t* trigger_context,
-                                        int context_kind) {
+int16_t Event_EvaluateRoomEventTriggersEntry(int trigger_request,
+                                             int event_or_actor_id,
+                                             uint8_t* trigger_context,
+                                             int context_kind) {
   const VS::Event::RoomTriggerQuery query{
       static_cast<VS::Event::RoomTriggerRequest>(
           static_cast<std::uint16_t>(trigger_request)),
