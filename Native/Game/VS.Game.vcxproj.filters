@@ -1827,6 +1827,15 @@
     <ClInclude Include="src\Field\RoomStateLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\RoomSwitches.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\RoomSwitchesLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomSwitchesLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClCompile Include="src\Field\RoomTriggerMarkers.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2929,6 +2938,9 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\RoomStateLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomSwitches.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\RoomTriggerMarkers.hpp">

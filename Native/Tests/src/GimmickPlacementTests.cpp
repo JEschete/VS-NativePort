@@ -17,6 +17,8 @@
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/GimmickPlacement.hpp"
+#include "Field/RoomSwitches.hpp"
+#include "Field/RoomSwitchesLive.h"
 
 extern "C" {
 #include "Event/Triggers.h"
@@ -152,6 +154,133 @@ void CheckTypedGimmickPlacement(RecordingGimmickHost& host,
 }
 
 }  // namespace
+
+namespace {
+
+enum class SwitchCallKind { kSound, kEffect, kStore, kCell };
+
+struct SwitchCall {
+  SwitchCallKind kind = SwitchCallKind::kSound;
+  std::int32_t value = 0;
+  friend bool operator==(const SwitchCall&, const SwitchCall&) = default;
+};
+
+struct RecordingSwitchHost final : VS::Field::RoomSwitchHost {
+  std::optional<VS::Field::RoomSwitchState> state;
+  std::optional<VS::Field::RoomSwitchState> after_effect;
+  bool remove_after_sound = false;
+  std::vector<SwitchCall> calls;
+  std::array<std::int32_t, 3> cell_query{};
+
+  std::optional<VS::Field::RoomSwitchState> State() const override {
+    return state;
+  }
+  void PlaySound(std::int32_t sound) override {
+    calls.push_back({SwitchCallKind::kSound, sound});
+    if (remove_after_sound) {
+      state.reset();
+    }
+  }
+  void StartEffect(std::int32_t kind) override {
+    calls.push_back({SwitchCallKind::kEffect, kind});
+    if (after_effect) {
+      state = after_effect;
+    }
+  }
+  void StoreSwitch(std::uint16_t value, std::uint8_t marker_fade) override {
+    calls.push_back({SwitchCallKind::kStore, value});
+    if (state) {
+      state->switch_value = value;
+      state->marker_fade = marker_fade;
+    }
+  }
+  void SetCellPassability(const VS::Field::RoomSwitchState& query,
+                          std::uint8_t passability) override {
+    calls.push_back({SwitchCallKind::kCell, passability});
+    cell_query = {query.tile_x, query.tile_z, query.floor_layer};
+  }
+};
+
+}  // namespace
+
+TEST_CASE("Room switches preserve original sounds and normalized state order",
+          "[room-switches][field]") {
+  for (const auto value : {0, 1, 2, 65535}) {
+    RecordingSwitchHost host;
+    host.state = VS::Field::RoomSwitchState{
+        .switch_value = static_cast<std::uint16_t>(value),
+        .marker_fade = 0xFF,
+        .effect_kind = 7,
+        .tile_x = 3,
+        .tile_z = 9,
+        .floor_layer = -1};
+    REQUIRE(VS::Field::ToggleRoomSwitch(host));
+    const std::vector<SwitchCall> expected{
+        {SwitchCallKind::kSound, value == 0 ? 0x3B : 0x3D},
+        {SwitchCallKind::kSound, value == 0 ? 0x3C : 0x3E},
+        {SwitchCallKind::kEffect, 7},
+        {SwitchCallKind::kStore, value == 0 ? 1 : 0},
+        {SwitchCallKind::kCell, value == 0 ? 5 : 0}};
+    CHECK(host.calls == expected);
+    if (!host.state) {
+      FAIL("Room switch state must remain valid after a completed toggle");
+      return;
+    }
+    CHECK(host.state->marker_fade == 0);
+    CHECK(host.cell_query == std::array<std::int32_t, 3>{3, 9, -1});
+  }
+}
+
+TEST_CASE("Room switches use state after effect callbacks",
+          "[room-switches][field]") {
+  RecordingSwitchHost host;
+  host.state = VS::Field::RoomSwitchState{.effect_kind = 7};
+  host.after_effect = VS::Field::RoomSwitchState{.switch_value = 2,
+                                                 .marker_fade = 5,
+                                                 .tile_x = 11,
+                                                 .tile_z = 12,
+                                                 .floor_layer = 3};
+  REQUIRE(VS::Field::ToggleRoomSwitch(host));
+  const std::vector<SwitchCall> expected{{SwitchCallKind::kSound, 0x3B},
+                                         {SwitchCallKind::kSound, 0x3C},
+                                         {SwitchCallKind::kEffect, 7},
+                                         {SwitchCallKind::kStore, 0},
+                                         {SwitchCallKind::kCell, 0}};
+  CHECK(host.calls == expected);
+  CHECK(host.cell_query == std::array<std::int32_t, 3>{11, 12, 3});
+}
+
+TEST_CASE("Room switches refuse absent and invalidated targets",
+          "[room-switches][field]") {
+  RecordingSwitchHost host;
+  CHECK_FALSE(VS::Field::ToggleRoomSwitch(host));
+  CHECK(host.calls.empty());
+  host.state = VS::Field::RoomSwitchState{};
+  host.remove_after_sound = true;
+  CHECK_FALSE(VS::Field::ToggleRoomSwitch(host));
+  CHECK(host.calls.size() == 2);
+}
+
+TEST_CASE("Native switch entry preserves original module and signed word state",
+          "[room-switches][room-switches-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008D658) ==
+        reinterpret_cast<const void*>(&Field_ToggleRoomSwitchEntry));
+  Field_ToggleRoomSwitchEntry(nullptr);
+  for (const auto value : {0, 1, 2, -1, -32768, 32767}) {
+    Field_MpdLockTrigger record{};
+    record.trigger.tileX = -1;
+    record.trigger.tileZ = -1;
+    record.trigger.floorLayer = -1;
+    record.trigger.kind = -1;
+    record.trigger.lockState.switchValue = static_cast<std::int16_t>(value);
+    record.trigger.markerFade = -1;
+    Field_ToggleRoomSwitchEntry(&record);
+    CHECK(record.trigger.lockState.switchValue == (value == 0 ? 1 : 0));
+    CHECK(record.trigger.markerFade == 0);
+  }
+}
 
 TEST_CASE(
     "Native gimmick placement entry preserves the original module address",

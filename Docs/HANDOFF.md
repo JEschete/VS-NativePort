@@ -7,6 +7,41 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Room Switch Core (#276 Row 27)
+
+- F00607 now targets strict `VS::Field::ToggleRoomSwitch` over a typed host/state
+  interface. Sound selection, effect dispatch, post-callback state reread,
+  marker/switch normalization and collision passability order are native core
+  rules; Live alone touches original records, audio/effect/collision bindings.
+- Supported `own.py F00607 --to Native\Game\src\Field\RoomSwitchesLive.cpp`
+  first removed the generated implementation. Ownership now points at actual
+  core/public header; exact native C/header/module mappings preserve original
+  `8008D658`. Only this Live adapter gets the existing legacy-include policy;
+  the core stays strict and legacy-free, with no warning/gate relaxation.
+- Source `67740e21` plus current slice: complete Debug/Release 4,698 / 8,634,198,
+  zero failures/skips, both canonical replays unchanged. Focused switch/gimmick
+  12 / 759 (switch-only four / 36); original 46 MIPS words `8008D658-8008D70C`
+  confirm signed loads, callback order and masked passability stores. Actual
+  native entry/module/signed state tests isolate refusal paths for effect/cell/
+  audio inputs; they are not physical or Combat Lab chest/lock acceptance.
+- 191 copier / nine extent controls and editor diagnostics pass; changed
+  quality five existing / zero new. Original signed short/char conversions are
+  explicit only at the Live boundary. Required `Field_ToggleRoomSwitchEntry`
+  ABI/old-record interface remains; the old symbol's three Native definition/
+  header/module consumer files retire, not all Gimmicks.h or global EC state.
+- Previous snapshot source `67740e21` has exact green CI `42353262369`.
+  Current F00607 source is pending publication/exact CI; row 27 / #287 remain
+  open. Their queue/typed chest/trap target, producers/readers and reset paths
+  still require completion. Logs: `build/owner-checkpoint/room-switches-core-*-regression.log`.
+- Recompilation exposes existing generated Gimmicks return mismatches,
+  ActionAnimation/Ai Movement shifts, ActionAnimation/Magic uninitialized locals,
+  Sphere pointer-width casts, Map VLA and SequenceTests bit-field warnings.
+  No suppression, unrelated fix or baseline refresh was used.
+- Final repeat copier/project generation preserves tracked and new Native/
+  project/manifest bytes; unchanged gates derive 2,691 promoted / one separate
+  frame `wip`, 239 behavior records and zero violations. F00607's old symbol has
+  zero current consumers; required native C/record/module ABI remains tracked.
+
 ### Native Gimmick Placement Core (#276 Row 27)
 
 - F00853 now targets strict `VS::Field::GimmickPlacement` over typed host/state/

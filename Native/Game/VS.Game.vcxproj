@@ -1407,6 +1407,10 @@
     <ClCompile Include="src\Field\RoomStateLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Field\RoomSwitches.cpp" />
+    <ClCompile Include="src\Field\RoomSwitchesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\RoomTriggerMarkers.cpp" />
     <ClCompile Include="src\Field\RoomTriggerMarkersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2015,6 +2019,7 @@
     <ClInclude Include="src\Field\RoomLoadingLiveState.h" />
     <ClInclude Include="src\Field\RoomRenderingLiveState.h" />
     <ClInclude Include="src\Field\RoomStateLiveState.h" />
+    <ClInclude Include="src\Field\RoomSwitchesLive.h" />
     <ClInclude Include="src\Field\TransitionsLiveState.h" />
     <ClInclude Include="src\Field\TriggerMarkers.h" />
     <ClInclude Include="src\Field\Weather.h" />
@@ -2282,6 +2287,7 @@
     <ClInclude Include="include\Field\RoomRenderingLive.hpp" />
     <ClInclude Include="include\Field\RoomState.hpp" />
     <ClInclude Include="include\Field\RoomStateLive.hpp" />
+    <ClInclude Include="include\Field\RoomSwitches.hpp" />
     <ClInclude Include="include\Field\RoomTriggerMarkers.hpp" />
     <ClInclude Include="include\Field\RoomTriggerMarkersLive.hpp" />
     <ClInclude Include="include\Field\SegmentCollision.hpp" />

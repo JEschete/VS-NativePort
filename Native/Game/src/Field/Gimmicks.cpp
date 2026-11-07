@@ -38,6 +38,7 @@ extern "C" {
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomSwitchesLive.h"
 #include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
 #include "Items/Loot.h"
@@ -253,7 +254,7 @@ void Field_UpdateGimmickAnimationQueue(void)
         } else if (Field_gimmickAnimationQueue[i].jobKind == 2) {
             queued_trigger = Field_gimmickAnimationQueue[i].trigger;
             if ((--queued_trigger->trigger.activation << 0x18) <= 0) {
-                Field_ToggleRoomSwitch(queued_trigger);
+                Field_ToggleRoomSwitchEntry(queued_trigger);
                 Field_gimmickAnimationQueue[i].jobKind = 0;
                 Field_gimmickAnimationQueue[i].trigger = NULL;
                 --Field_pendingGimmickAnimationCount;
@@ -648,28 +649,7 @@ void Field_BeginSwitchToggle(Field_MpdLockTrigger* switch_trigger)
             Field_QueueGimmickAnimation(2, switch_trigger);
             return;
         }
-        Field_ToggleRoomSwitch(switch_trigger);
-    }
-}
-
-// decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16883)
-void Field_ToggleRoomSwitch(Field_MpdLockTrigger* switch_trigger)
-{
-    Field_MpdTileCell* collision_cell;
-
-    if (switch_trigger->trigger.lockState.switchValue == 0) {
-        VS::Audio::LivePlaySfxCentered(0x7E, 0x3B);
-        VS::Audio::LivePlaySfxCentered(0x7E, 0x3C);
-    } else {
-        VS::Audio::LivePlaySfxCentered(0x7E, 0x3D);
-        VS::Audio::LivePlaySfxCentered(0x7E, 0x3E);
-    }
-    VS::Field::LiveStartRoomEffect(switch_trigger->trigger.kind);
-    switch_trigger->trigger.markerFade = 0;
-    switch_trigger->trigger.lockState.switchValue = switch_trigger->trigger.lockState.switchValue == 0;
-    collision_cell = VS::Field::LiveCollisionCellAt(switch_trigger->trigger.tileX, switch_trigger->trigger.tileZ, switch_trigger->trigger.floorLayer);
-    if (collision_cell != NULL) {
-        collision_cell->doorPassability = switch_trigger->trigger.lockState.switchValue * 5;
+        Field_ToggleRoomSwitchEntry(switch_trigger);
     }
 }
 

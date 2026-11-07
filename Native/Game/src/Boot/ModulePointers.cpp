@@ -165,6 +165,7 @@ extern "C" {
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Field/RoomStateLiveState.h"
+#include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLiveState.h"
 #include "Field/TriggerMarkers.h"
 #include "Field/Weather.h"
@@ -500,7 +501,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008D594u, 0u, (void*)&Field_SetMovingPlatformsPaused, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D5A0u, 0u, (void*)&Field_FreezeMovingPlatforms, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D5FCu, 0u, (void*)&Field_BeginSwitchToggle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D658u, 0u, (void*)&Field_ToggleRoomSwitch, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D880u, 0u, (void*)&Field_SceneDoorId, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D948u, 0u, (void*)&Field_MarkEntranceDoorOnSceneMap, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabled, 0u, 0u, 0u},
@@ -1509,6 +1509,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x8008D658u, 0u, (void*)&Field_ToggleRoomSwitchEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A0024u, 0u, (void*)&Field_GimmickPlacementEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurveEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BEC58u, 0u, (void*)&Event_EvaluateRoomEventTriggersEntry, 0u, 0u, 0u},
