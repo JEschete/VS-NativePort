@@ -7,6 +7,23 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Event VM Source Promotion Complete (#276 Row 33)
+
+- Final source `7172dfae50be38b95b0f1e4826d9cf1e2e8e2af2` is pushed and exact
+  Source Quality CI `42350522025` completed successfully. Row 33 is now done for
+  all 57 source identities; #276 remains open for its remaining rows.
+- `Event-native-vm-triggers-slice` records the remaining 53 identities and 50
+  historical C symbols outside the four separately recorded cutscene identities.
+  Historical `2ed487e1` yields 31 Native code consumer files using unchanged
+  `gates.strip_source`/`IDENTIFIER`; current gates require zero. Comments/strings
+  are excluded in both measurements; no source or retirement gate was relaxed.
+- Required native C entries, opcode/module tables, global bindings and all wider
+  EC retirement/behavior gates remain separate. This is source promotion, not a
+  retail-wide gameplay or complete compatibility retirement claim.
+- Next ordered remaining #276 row is 27, field gimmicks/doors/interactions,
+  including #287's typed chest interaction target. Metadata reconciliation does
+  not change the freshly verified source or require a replay baseline refresh.
+
 ### Native Trigger/Interpolation Cores (#276 Row 33)
 
 - F01261/F01276 ownership now targets actual strict typed bounded trigger and
