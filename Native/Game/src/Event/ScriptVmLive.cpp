@@ -80,10 +80,11 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptNoOperationOpcode, ScriptNoOperation},
     ControlBinding{Event_ScriptYieldFrameOpcode, ScriptYieldFrame},
     ControlBinding{Event_ScriptWaitForEventFile, ScriptWaitForEventFile},
-    ControlBinding{Event_ScriptBeginSkippableCutscene,
+    ControlBinding{Event_ScriptBeginSkippableCutsceneOpcode,
                    ScriptBeginSkippableCutscene},
-    ControlBinding{Event_ScriptEndCutsceneAndJump, ScriptEndCutsceneAndJump},
-    ControlBinding{Event_ScriptEndCutscene, ScriptEndCutscene},
+    ControlBinding{Event_ScriptEndCutsceneAndJumpOpcode,
+                   ScriptEndCutsceneAndJump},
+    ControlBinding{Event_ScriptEndCutsceneOpcode, ScriptEndCutscene},
     ControlBinding{Event_ScriptWaitForButtonAndYield,
                    ScriptWaitForButtonAndYield},
     ControlBinding{Event_ScriptBranchOnFlagImmediateOpcode,
@@ -1072,4 +1073,25 @@ std::intptr_t Event_ScriptStoreButtonStateOpcode(std::uint8_t* instruction,
                                                  std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptStoreButtonState);
+}
+
+// decomp: BATTLE.PRG func_800B6744 (4A0A8.c:611).
+std::intptr_t Event_ScriptBeginSkippableCutsceneOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptBeginSkippableCutscene);
+}
+
+// decomp: BATTLE.PRG func_800B6868 (4A0A8.c:642).
+std::intptr_t Event_ScriptEndCutsceneAndJumpOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptEndCutsceneAndJump);
+}
+
+// decomp: BATTLE.PRG func_800B68C4 (4A0A8.c:653).
+std::intptr_t Event_ScriptEndCutsceneOpcode(std::uint8_t* instruction,
+                                            std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptEndCutscene);
 }

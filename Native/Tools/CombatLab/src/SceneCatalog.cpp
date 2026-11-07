@@ -79,7 +79,7 @@ SceneOpcodes ProductionOpcodes() {
     } else if (handler == Event_ScriptBranchOnCachedFlagOpcode) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = 2;
-    } else if (handler == Event_ScriptEndCutsceneAndJump) {
+    } else if (handler == Event_ScriptEndCutsceneAndJumpOpcode) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = 1;
     } else if (handler == Event_ScriptJumpForwardOpcode) {

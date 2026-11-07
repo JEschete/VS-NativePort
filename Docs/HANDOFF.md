@@ -7,6 +7,34 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Cutscene Control Slots (#276 Row 33)
+
+- F01032/F01034/F01035 now register the strict typed begin/jump-end/plain-end
+  cores with guarded native module/normal/skip identities. Original opcode C
+  bodies/prototypes retire via the copier; Combat Lab branch discovery follows
+  the new identity. The F01033 cleanup helper's original C body/binding remains
+  separately unpromoted; production already uses bounded native cleanup/scanning.
+- ASM `800B6760/800B6764` confirms operand bit 0 music policy; `800B6768`
+  treats every nonzero force byte alike. Both end routines snapshot then clear
+  skip state and compare the old byte to 2. Live direct/guarded normal/skip tests
+  observe music policy, exact retained yield cursors, signed targets, skip/A8
+  state and actual cleanup texture-packet emission with no drops/guard damage.
+  The interpreter Boolean reports completion, not yield; fixture expectations
+  were corrected against native control flow and a real bounded overlay queue.
+- On `90aceeaf` plus this slice, full Debug/Release builds and regressions pass
+  4,661 cases / 8,227,405 assertions with zero failures/skips and both canonical
+  fingerprints unchanged. Two new cases add 21,130; six binding checks add six.
+  Focused controls pass 18 / 82,046. Broad quality has 32 existing / zero new
+  findings; 190 copier/nine extent controls pass. No baseline refresh.
+  Evidence: `VR-EVENT-CONTROL-CUTSCENE` and
+  `build\owner-checkpoint\native-control-cutscene-*-regression.log`.
+  Packet presence/state tests do not establish visual/audio or physical-controller
+  parity. Remaining controls/cleanup ownership/C-entry/table ABI/global EC debt
+  stays explicit; this is not whole-row completion.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,668 promoted / four compatibility `wip`; row 33 is
+  now 36/57. Store predecessor `90aceeaf` is green on exact CI `42325918506`.
+
 ### Native Inventory/Input Store Slots (#276 Row 33)
 
 - F01098/F01102 now register the strict typed inventory-count and button-state

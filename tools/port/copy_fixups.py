@@ -2017,6 +2017,9 @@ OWNED_CALL_BINDINGS |= {
 }
 
 EVENT_SCRIPT_CONTROL_OPCODES = (
+    ("F01032", 0x800B6744, "ScriptBeginSkippableCutscene"),
+    ("F01034", 0x800B6868, "ScriptEndCutsceneAndJump"),
+    ("F01035", 0x800B68C4, "ScriptEndCutscene"),
     ("F01028", 0x800B66E4, "ScriptNoOperation"),
     ("F01029", 0x800B66EC, "ScriptYieldFrame"),
     ("F01085", 0x800B88D4, "ScriptBranchOnFlagImmediate"),

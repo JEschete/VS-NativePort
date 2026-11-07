@@ -44,6 +44,12 @@ intptr_t Event_ScriptStoreInventoryItemPresenceOpcode(uint8_t* instruction,
                                                       int16_t thread_index);
 intptr_t Event_ScriptStoreButtonStateOpcode(uint8_t* instruction,
                                             int16_t thread_index);
+intptr_t Event_ScriptBeginSkippableCutsceneOpcode(uint8_t* instruction,
+                                                  int16_t thread_index);
+intptr_t Event_ScriptEndCutsceneAndJumpOpcode(uint8_t* instruction,
+                                              int16_t thread_index);
+intptr_t Event_ScriptEndCutsceneOpcode(uint8_t* instruction,
+                                       int16_t thread_index);
 
 #ifdef __cplusplus
 }

@@ -18,6 +18,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Input/ControllerLiveState.h"
+#include "Render/UiPacketsLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
@@ -26,6 +27,10 @@ extern "C" {
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
+#include "Render/Render.h"
+#include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 }
 
@@ -63,6 +68,9 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B8C44, Event_ScriptReturnToSavedAddressOpcode},
     {0x800B9170, Event_ScriptStoreInventoryItemPresenceOpcode},
     {0x800B9254, Event_ScriptStoreButtonStateOpcode},
+    {0x800B6744, Event_ScriptBeginSkippableCutsceneOpcode},
+    {0x800B6868, Event_ScriptEndCutsceneAndJumpOpcode},
+    {0x800B68C4, Event_ScriptEndCutsceneOpcode},
 });
 
 struct LiveVmFixture {
@@ -85,6 +93,8 @@ struct LiveVmFixture {
   char skip = Event_skipState;
   Input_PressedButtonsView pressed = Input_buttonsPressed;
   int previous = Input_previousButtons;
+  char forced = Event_isSkipForced;
+  char stops_music = Event_stopsMusicOnSkip;
 
   LiveVmFixture() {
     std::ranges::copy(Content_discRequestSlots, slots.begin());
@@ -122,6 +132,8 @@ struct LiveVmFixture {
     Event_skipState = skip;
     Input_buttonsPressed = pressed;
     Input_previousButtons = previous;
+    Event_isSkipForced = forced;
+    Event_stopsMusicOnSkip = stops_music;
   }
   LiveVmFixture(const LiveVmFixture&) = delete;
   LiveVmFixture& operator=(const LiveVmFixture&) = delete;
@@ -654,6 +666,132 @@ std::intptr_t NativeReturnSlotBridge(std::uint8_t* instruction,
 std::intptr_t ButtonStoreSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
   return Event_ScriptStoreButtonStateOpcode(instruction, thread);
+}
+
+std::intptr_t BeginCutsceneSlotBridge(std::uint8_t* instruction,
+                                      std::int16_t thread) {
+  return Event_ScriptBeginSkippableCutsceneOpcode(instruction, thread);
+}
+
+std::intptr_t EndCutsceneJumpSlotBridge(std::uint8_t* instruction,
+                                        std::int16_t thread) {
+  return Event_ScriptEndCutsceneAndJumpOpcode(instruction, thread);
+}
+
+std::intptr_t EndCutsceneSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_ScriptEndCutsceneOpcode(instruction, thread);
+}
+
+void CheckLiveCutsceneBegin(bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      guarded ? BeginCutsceneSlotBridge
+              : Event_ScriptBeginSkippableCutsceneOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = 2;
+  auto& host = event::LiveScriptVm();
+  for (int value = 0; value < 256; ++value) {
+    for (const int force : {0, 1, 128, 255}) {
+      const auto location =
+          MountScript({0xE9, static_cast<std::uint8_t>(value), 0xE6});
+      Event_skipState = static_cast<char>(skip);
+      Event_isSkipForced = static_cast<char>(force);
+      host.SetThreadCursor(0, location);
+      CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+      CHECK(host.ThreadCursor(0) ==
+            (force != 0 ? event::ScriptLocation{location.region, 2,
+                                                location.generation}
+                        : event::ScriptLocation{}));
+      CHECK(host.SkipState() == event::CutsceneSkip::kSkippable);
+      CHECK(host.StopsMusicOnSkip() == ((value & 1) == 0));
+    }
+  }
+}
+
+struct CutsceneEndScenario {
+  int previous = 0;
+  int displacement = 0;
+  bool guarded = false;
+  bool jump = false;
+};
+
+struct CutsceneFrameFixture {
+  Render_FrameScratch saved = Render_frameScratch;
+  void* saved_ordering = Render_legacyCurrentOrderingTable;
+  void* saved_primitives = Render_legacyPrimitiveBuffers[0];
+  int saved_framebuffer = Render_frameBuf;
+  std::array<u_long, 0x2088 / sizeof(u_long)> ordering{};
+  std::array<u_long, 18> storage{};
+  std::uint64_t dropped = VS::Render::DroppedLiveUiPacketCount();
+
+  CutsceneFrameFixture() {
+    storage.fill(0xDEADBEEF);
+    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    Render_frameBuf = 0;
+    Render_legacyCurrentOrderingTable = ordering.data();
+    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    Render_frameScratch.primitiveCursor = storage.data() + 1;
+  }
+  ~CutsceneFrameFixture() {
+    Render_frameScratch = saved;
+    Render_legacyCurrentOrderingTable = saved_ordering;
+    Render_legacyPrimitiveBuffers[0] = saved_primitives;
+    Render_frameBuf = saved_framebuffer;
+  }
+  void CheckEmission(bool emitted) const {
+    CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped);
+    CHECK((Render_frameScratch.primitiveCursor != storage.data() + 1) ==
+          emitted);
+    CHECK(storage.front() == 0xDEADBEEF);
+    CHECK(storage.back() == 0xDEADBEEF);
+  }
+};
+
+void CheckLiveCutsceneEnd(CutsceneEndScenario scenario) {
+  const LiveVmFixture fixture;
+  const FlagDifferentialFixture flags;
+  const CutsceneFrameFixture frame;
+  Bytes bytes(64, 0x0F);
+  bytes[32] = 0xE9;
+  bytes[33] = static_cast<std::uint8_t>(scenario.displacement);
+  bytes[34] = static_cast<std::uint8_t>(
+      static_cast<std::uint16_t>(scenario.displacement) >> 8);
+  const int target = scenario.jump ? 32 + scenario.displacement : 33;
+  bytes[static_cast<std::size_t>(target)] = 0xE6;
+  auto start = MountScript(std::move(bytes));
+  start.offset = 32;
+  const Handler handler =
+      scenario.jump ? (scenario.guarded ? EndCutsceneJumpSlotBridge
+                                        : Event_ScriptEndCutsceneAndJumpOpcode)
+                    : (scenario.guarded ? EndCutsceneSlotBridge
+                                        : Event_ScriptEndCutsceneOpcode);
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] = handler;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] = StopBridge;
+  Event_kOpcodeSizes[0xE9] = scenario.jump ? 3 : 1;
+  Event_skipState = static_cast<char>(scenario.previous);
+  observations = 0;
+  auto& host = event::LiveScriptVm();
+  host.SetFlag(0xA8, 1);
+  host.SetThreadCursor(0, start);
+  const bool skipping = scenario.previous == 2;
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(host.SkipState() == event::CutsceneSkip::kNone);
+  CHECK(host.Flag(0xA8) == (skipping ? 0 : 1));
+  CHECK(observations == (skipping ? 0 : 1));
+  frame.CheckEmission(skipping);
+  if (skipping) {
+    CHECK(host.ThreadCursor(0) ==
+          event::ScriptLocation{
+              start.region, static_cast<std::uint32_t>(scenario.jump ? 35 : 33),
+              start.generation});
+  } else {
+    CHECK_FALSE(host.ThreadCursor(0).Present());
+    CHECK(observed[0] == event::ScriptLocation{
+                             start.region, static_cast<std::uint32_t>(target),
+                             start.generation});
+  }
 }
 
 void CheckLiveButtonStore(int operand, bool guarded, int skip) {
@@ -1437,6 +1575,27 @@ TEST_CASE("Native button store bindings preserve selectors and input bytes",
            {0, 511, 1023, 0x7FFF, 0x8000, 0x81FF, 0x83FF, 0xFFFF}) {
         CheckLiveButtonStore(operand, guarded, skip);
       }
+    }
+  }
+}
+
+TEST_CASE("Native cutscene begin bindings preserve music bits and forced yield",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      CheckLiveCutsceneBegin(guarded, skip);
+    }
+  }
+}
+
+TEST_CASE("Native cutscene end bindings preserve skip snapshots and targets",
+          "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    for (const int previous : {0, 1, 2, 3, 128, 255}) {
+      for (const int displacement : {-32, -1, 3, 31}) {
+        CheckLiveCutsceneEnd({previous, displacement, guarded, true});
+      }
+      CheckLiveCutsceneEnd({previous, 0, guarded, false});
     }
   }
 }

@@ -25,7 +25,6 @@ extern "C" {
 #include "Event/Playback.h"
 #include "Event/Script.h"
 #include "Event/ScriptActorOpcodes.h"
-#include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptAudioOpcodes.h"
 #include "Event/ScriptCamera.h"
@@ -148,8 +147,8 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptWaitForEventFile, Event_ScriptReportInvalidOpcode, Event_ScriptWaitForSplashFile, Event_ScriptBeginSkippableCutscene, Event_ScriptEndCutsceneAndJump,
-    Event_ScriptEndCutscene, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptDismissDialogBoxOpcode,
+    Event_ScriptWaitForEventFile, Event_ScriptReportInvalidOpcode, Event_ScriptWaitForSplashFile, Event_ScriptBeginSkippableCutsceneOpcode, Event_ScriptEndCutsceneAndJumpOpcode,
+    Event_ScriptEndCutsceneOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptDismissDialogBoxOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptLoadSplashImage, Event_ScriptConfigureSplashLayer,
     Event_ScriptTweenSplashLayer, Event_ScriptFreeSplashImage, Event_ScriptYieldFrameOpcode, Event_ScriptSetDialogIntegerOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptSetDialogTransitionDurationOpcode, Event_ScriptResetActorGroupStateOpcode, Event_ScriptStoreActorTileOpcode, Event_ScriptSpawnActorOpcode,
@@ -248,14 +247,6 @@ intptr_t Event_ScriptWaitForEventFile(u_char* instruction, short thread_index)
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800B6744 (src/BATTLE/BATTLE.PRG/4A0A8.c:611)
-intptr_t Event_ScriptBeginSkippableCutscene(u_char* instruction, short thread_index)
-{
-    Event_skipState = 1;
-    Event_stopsMusicOnSkip = !(instruction[1] & 1);
-    return (Event_isSkipForced != 0) * 4;
-}
-
 // decomp: BATTLE.PRG func_800B6778 (src/BATTLE/BATTLE.PRG/4A0A8.c:618)
 void Event_FinishSkippedCutscene(u_char* scan_cursor)
 {
@@ -279,30 +270,6 @@ void Event_FinishSkippedCutscene(u_char* scan_cursor)
 
     VS::Field::LiveRestartRoomEffectSound();
     VS::State::SetLiveScriptFlag(0xA8, 0);
-}
-
-// decomp: BATTLE.PRG func_800B6868 (src/BATTLE/BATTLE.PRG/4A0A8.c:642)
-intptr_t Event_ScriptEndCutsceneAndJump(u_char* instruction, short thread_index)
-{
-    char previous_skip_state = Event_skipState;
-    Event_skipState = 0;
-    if (previous_skip_state == 2) {
-        Event_FinishSkippedCutscene(instruction);
-        return 4;
-    }
-    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)];
-}
-
-// decomp: BATTLE.PRG func_800B68C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:653)
-intptr_t Event_ScriptEndCutscene(u_char* instruction, short thread_index)
-{
-    char previous_skip_state = Event_skipState;
-    Event_skipState = 0;
-    if (previous_skip_state == 2) {
-        Event_FinishSkippedCutscene(instruction);
-        return 4;
-    }
-    return 0;
 }
 
 // decomp: BATTLE.PRG vs_battle_script_buttonPressed (src/BATTLE/BATTLE.PRG/4A0A8.c:843)

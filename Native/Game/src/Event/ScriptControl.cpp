@@ -931,6 +931,7 @@ ScriptFlow ScriptWaitForEventFile(const ScriptInstruction& /*instruction*/,
   return host.EventFile() == EventFileStatus::kLoading ? Hold() : Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:611, 800B6744; low-bit music policy/forced yield.
 ScriptFlow ScriptBeginSkippableCutscene(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -953,6 +954,7 @@ void FinishSkippedCutscene(ScriptLocation scan, ScriptVmHost& host) {
   host.SetFlag(kSkipActiveFlag, 0);
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:642, 800B6868; skip snapshot before clearing.
 ScriptFlow ScriptEndCutsceneAndJump(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -963,6 +965,7 @@ ScriptFlow ScriptEndCutsceneAndJump(const ScriptInstruction& instruction,
       ScriptFlow::JumpBy(OperandHalf(Bytes(instruction), kFirstOperand)), host);
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:653, 800B68C4; independently reviewed plain end.
 ScriptFlow ScriptEndCutscene(const ScriptInstruction& instruction,
                              ScriptVmHost& host) {
   return EndCutscene(instruction, Advance(), host);
