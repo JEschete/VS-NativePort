@@ -378,6 +378,38 @@ struct ButtonWaitExpected {
   std::uint32_t buttons = 0;
 };
 
+bool CompareOriginalEasing(std::uint8_t operand,
+                           std::array<std::uint64_t, 2>& fingerprints,
+                           std::uint8_t mutation = 0) {
+  std::array<std::uint8_t, 2> command{0, operand};
+  auto& host = event::LiveScriptVm();
+  std::ranges::fill(Event_customEasingCurves, 0xFC03);
+  for (int slot = 0; slot < event::kCustomEasingCurveCount; ++slot) {
+    host.SetCustomEasingCurve(slot, {.family = 3, .power = -4});
+  }
+  const auto original = Event_ScriptConfigureEasingCurve(command.data(), 0);
+  std::array<std::uint16_t, event::kCustomEasingCurveCount> expected{};
+  std::copy_n(Event_customEasingCurves, expected.size(), expected.begin());
+  command[1] ^= mutation;
+  const auto native = event::ScriptConfigureEasingCurve({command, {}, 0}, host);
+  AddResultDigest(fingerprints[0], static_cast<std::uint32_t>(original));
+  AddResultDigest(fingerprints[1],
+                  static_cast<std::uint32_t>(WaitResultCode(native)));
+  bool equal = original == WaitResultCode(native);
+  for (int slot = 0; slot < event::kCustomEasingCurveCount; ++slot) {
+    const auto curve = host.CustomEasingCurve(slot);
+    const auto value = static_cast<std::uint16_t>(
+        curve.family |
+        (static_cast<std::uint16_t>(static_cast<std::uint8_t>(curve.power))
+         << 8));
+    const auto original_value = expected[static_cast<std::size_t>(slot)];
+    AddResultDigest(fingerprints[0], original_value);
+    AddResultDigest(fingerprints[1], value);
+    equal = equal && original_value == value;
+  }
+  return equal;
+}
+
 ButtonWaitExpected FrozenButtonWaitResult(const ButtonWaitSample& sample) {
   ButtonWaitExpected result{1, sample.remaining, sample.buttons};
   const bool pressed = (sample.buttons & sample.mask) != 0;
@@ -1794,6 +1826,29 @@ TEST_CASE(
         CheckLiveTimeoutCounters(guarded, skip, thread);
       }
     }
+  }
+}
+
+TEST_CASE("Native easing configuration matches every original packed byte",
+          "[event-vm-live][event-easing-differential]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
+  for (int operand = 0; operand < 256; ++operand) {
+    REQUIRE(CompareOriginalEasing(static_cast<std::uint8_t>(operand),
+                                  fingerprints));
+  }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == 0x9DB56A489D7AD325);
+}
+
+TEST_CASE("Original easing differential detects slot family and sign mutants",
+          "[event-vm-live][event-easing-differential]") {
+  const LiveVmFixture fixture;
+  for (const std::uint8_t mutation : {0x40, 0x10, 0x08}) {
+    std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                              0xCBF29CE484222325};
+    CHECK_FALSE(CompareOriginalEasing(0x8D, fingerprints, mutation));
   }
 }
 

@@ -7,6 +7,27 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Original Easing Configuration Frozen (#276 Row 33)
+
+- Before retiring F01111, captured the actual retained original C setter's
+  return and all four two-byte curve records for every encoded operand, with
+  sentinel family 3 / power -4 in untouched slots. Snapshot original records
+  before native execution. Original/native digest: `9DB56A489D7AD325`.
+- ASM `800B9730` selects slot by bits 6-7, `800B973C/800B9740` selects family
+  bits 4-5, and `800B9750-800B9760` sign-extends the low nibble. All 256 operands /
+  1,024 slot comparisons match; three planted slot/family/sign deviations are
+  detected. Focused gate: two cases / 261 assertions.
+- On `d7836622` plus these tests, full Debug/Release builds and regressions pass
+  4,670 cases / 8,429,121 assertions with zero failures/skips and both unchanged
+  canonical fingerprints. Two new cases add 261; no baseline refresh. Changed
+  quality reports five existing / zero new findings. Evidence:
+  `VR-EVENT-EASING-ORIGINAL-FREEZE` and
+  `build\owner-checkpoint\original-easing-freeze-*-regression.log`.
+  Original C setter/module/table identities remain. Ownership stays 2,671
+  promoted / four compatibility `wip`, row 33 39/57. This preserves an oracle,
+  not interpolation/gameplay/visual parity or ownership/ABI/EC retirement.
+  Wait predecessor `d7836622` is green on exact CI `42331913207`.
+
 ### Native Button-Wait Control Slots (#276 Row 33)
 
 - F01042/F01110 now register strict native yield/timeout cores and guarded native
