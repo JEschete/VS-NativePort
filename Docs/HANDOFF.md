@@ -7,6 +7,32 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Opcode-Size Helper (#276 Row 33)
+
+- F01274 registers the existing strict native byte-indexed size lookup through
+  a bounded span. No C callers remained; unused C body/prototype/module binding
+  `800BFE34` retires through the copier. ASM `800BFE38/800BFE44` uses unsigned
+  byte opcode/size. Native parser and skip-scan zero-size refusal remains intact.
+- Exhaustive tests cover all 256 byte indices against spans of 0/1/17/255/256
+  entries, including zero encoded size and absent entry refusal. The existing
+  recording fixture keeps its full-table default. Retired address resolves null.
+  Focused gate: two cases / 1,294 assertions.
+- On `76f7a6bf` plus this slice, full Debug/Release builds and regressions pass
+  4,684 cases / 8,440,846 assertions with zero failures/skips and both unchanged
+  canonical fingerprints. New exhaustive checks1,280/null1 minus two removed
+  per-symbol assertions gives net1,279. No baseline refresh. Changed quality:
+  five existing / zero new; 190 copier/nine extent controls pass. Evidence:
+  `VR-EVENT-OPCODE-SIZE-PROMOTION` and
+  `build\owner-checkpoint\native-opcode-size-*-regression.log`.
+  Native short/absent span safety is not unsafe original bounds parity. Remaining
+  actor-reference/queue/init/trigger/easing C-entry/table/global EC helpers stay
+  separate; no whole-row/retail claim. Cleanup predecessor `76f7a6bf` is green
+  on exact CI `42341345494`.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,684 promoted / four compatibility `wip`; row 33 is
+  now 52/57. Remaining actor-reference/queue/init/trigger/easing/table/global
+  retirement requirements remain open.
+
 ### Native Texture/Actor Cleanup Helpers (#276 Row 33)
 
 - F00972/F01278 register existing strict native fixed texture restore and

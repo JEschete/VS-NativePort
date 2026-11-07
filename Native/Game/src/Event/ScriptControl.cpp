@@ -1542,6 +1542,7 @@ void ReleaseScriptActorControl(ScriptVmHost& host) {
   host.FreeEventCamera();
 }
 
+// decomp: BATTLE.PRG 573B8.c:154, 800BFE34; byte-indexed instruction lengths.
 int OpcodeSize(std::uint8_t opcode, const ScriptVmHost& host) {
   const std::span<const std::uint8_t> sizes = host.OpcodeSizes();
   return opcode < sizes.size() ? sizes[opcode] : 0;

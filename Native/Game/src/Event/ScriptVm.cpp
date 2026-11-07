@@ -188,9 +188,6 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandFinishEventOpcode, Event_CommandFinishEventOpcode };
 
-// decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)
-int Event_OpcodeSize(u_char* instruction) { return Event_kOpcodeSizes[instruction[0]]; }
-
 // decomp: BATTLE.PRG func_800BFE50 (src/BATTLE/BATTLE.PRG/573B8.c:156)
 int Event_ResolveScriptActorReference(u_short actor_reference)
 {

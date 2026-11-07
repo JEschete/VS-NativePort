@@ -35,6 +35,7 @@ class RecordingHost final : public event::ScriptVmHost {
   std::array<std::uint64_t, 4> generations{};
   mutable std::vector<event::ScriptRegion> region_reads;
   std::array<std::uint8_t, 256> sizes{};
+  std::size_t size_table_extent = sizes.size();
   std::function<Flow(Location, int)> dispatch;
   std::vector<std::pair<Refusal, int>> refusals;
   std::vector<std::string> calls;
@@ -140,7 +141,9 @@ class RecordingHost final : public event::ScriptVmHost {
     }
     return generations.at(static_cast<std::size_t>(region));
   }
-  std::span<const std::uint8_t> OpcodeSizes() const override { return sizes; }
+  std::span<const std::uint8_t> OpcodeSizes() const override {
+    return std::span{sizes}.first(size_table_extent);
+  }
   Flow RunOpcode(Location location, int thread) override {
     instructions.emplace_back(location, thread);
     return dispatch(location, thread);
@@ -938,6 +941,21 @@ TEST_CASE("VM subroutines share typed return locations", "[event-vm]") {
   CHECK(host.return_to == At(13));
   CHECK(Run(event::ScriptReturnToSavedAddress, host, {0}) ==
         Flow::JumpTo(At(13)));
+}
+
+TEST_CASE("VM opcode sizes preserve byte values and refuse absent entries",
+          "[event-vm][event-opcode-size]") {
+  RecordingHost host;
+  for (std::size_t opcode = 0; opcode < host.sizes.size(); ++opcode) {
+    host.sizes[opcode] = static_cast<std::uint8_t>(opcode);
+  }
+  for (const std::size_t extent : {0U, 1U, 17U, 255U, 256U}) {
+    host.size_table_extent = extent;
+    for (int opcode = 0; opcode < 256; ++opcode) {
+      CHECK(event::OpcodeSize(static_cast<std::uint8_t>(opcode), host) ==
+            (static_cast<std::size_t>(opcode) < extent ? opcode : 0));
+    }
+  }
 }
 
 TEST_CASE("VM texture restore preserves its exact fixed rectangle",

@@ -656,7 +656,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BE5A4u, 0u, (void*)&Event_ScaleEventCameraDuration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE7B8u, 0u, (void*)&Event_ReadScriptFixedVector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BEC58u, 0u, (void*)&Event_EvaluateRoomEventTriggers, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BFE34u, 0u, (void*)&Event_OpcodeSize, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFE50u, 0u, (void*)&Event_ResolveScriptActorReference, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurve, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C00E8u, 0u, (void*)&Event_QueueEventScriptLoad, 0u, 0u, 0u},
