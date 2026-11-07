@@ -101,9 +101,9 @@ constexpr std::array kControlBindings{
                    ScriptApplyImmediateFlagOperation},
     ControlBinding{Event_ScriptApplyFlagPairOperationOpcode,
                    ScriptApplyFlagPairOperation},
-    ControlBinding{Event_ScriptStoreInventoryItemPresence,
+    ControlBinding{Event_ScriptStoreInventoryItemPresenceOpcode,
                    ScriptStoreInventoryItemPresence},
-    ControlBinding{Event_ScriptStoreButtonState, ScriptStoreButtonState},
+    ControlBinding{Event_ScriptStoreButtonStateOpcode, ScriptStoreButtonState},
     ControlBinding{Event_ScriptConfigureTimer, ScriptConfigureTimer},
     ControlBinding{Event_ScriptWaitForButtonOrTimeout,
                    ScriptWaitForButtonOrTimeout},
@@ -1058,4 +1058,18 @@ std::intptr_t Event_ScriptReturnToSavedAddressOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptReturnToSavedAddress);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (4A0A8.c:1773).
+std::intptr_t Event_ScriptStoreInventoryItemPresenceOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptStoreInventoryItemPresence);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_setFlagIfButton (4A0A8.c:1798).
+std::intptr_t Event_ScriptStoreButtonStateOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptStoreButtonState);
 }

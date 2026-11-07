@@ -2032,6 +2032,8 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01093", 0x800B8C7C, "ScriptLoopBackward"),
     ("F01096", 0x800B8D50, "ScriptApplyImmediateFlagOperation"),
     ("F01097", 0x800B8EDC, "ScriptApplyFlagPairOperation"),
+    ("F01098", 0x800B9170, "ScriptStoreInventoryItemPresence"),
+    ("F01102", 0x800B9254, "ScriptStoreButtonState"),
     ("F01199", 0x800BB474, "CommandWaitFrames"),
     ("F01200", 0x800BB4CC, "CommandSetTickSpeed"),
     ("F01202", 0x800BB504, "CommandWaitScriptContext"),

@@ -13,7 +13,6 @@
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
-#include "Items/InventoryLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -166,8 +165,8 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForwardOpcode,
     Event_ScriptJumpForwardOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperationOpcode, Event_ScriptApplyFlagPairOperationOpcode,
-    Event_ScriptStoreInventoryItemPresence, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
-    Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonState, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
+    Event_ScriptStoreInventoryItemPresenceOpcode, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
+    Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonStateOpcode, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
     Event_ScriptRunMenuTransition, Event_ScriptConfigureTimer, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
     Event_ScriptYieldFrameOpcode, Event_ScriptConfigureEasingCurve, Event_ScriptSetGimmickVisibility, Event_ScriptOverrideDepthCueDistance, Event_ScriptSetRoomLightingMode,
     Event_ScriptClearAshleyStatusEffectsOpcode, Event_ScriptShowGeometryGroup, Event_ScriptHideGeometryGroup, Event_ScriptSwapGeometryGroupFlags, Event_ScriptSetCollisionTileMode,
@@ -313,24 +312,6 @@ intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_ind
         return 4;
     }
     return 1;
-}
-
-// decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (src/BATTLE/BATTLE.PRG/4A0A8.c:1773)
-intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index)
-{
-    VS::State::SetLiveScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3),
-        VS::Items::CountLiveInventoryItem(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_script_setFlagIfButton (src/BATTLE/BATTLE.PRG/4A0A8.c:1798)
-intptr_t Event_ScriptStoreButtonState(u_char* instruction, short thread_index)
-{
-    short flag_and_button_source = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
-    VS::State::SetLiveScriptFlag(flag_and_button_source & 0x3FF, flag_and_button_source & 0x8000
-                                                ? Input_buttonsPressed.ports[0].lowByte
-                                                : Input_previousButtons);
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800B94D8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1886)

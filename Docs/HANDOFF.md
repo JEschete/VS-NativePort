@@ -7,6 +7,33 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Inventory/Input Store Slots (#276 Row 33)
+
+- F01098/F01102 now register the strict typed inventory-count and button-state
+  cores with guarded native module/normal/skip identities. Original C bodies and
+  prototypes retire through the supported copier. Inventory stores a byte-narrowed
+  count, not a Boolean; ASM `800B9194/800B91A0` sign-extends flag/item and
+  `800B91AC` masks the count. Button ASM `800B9264/800B9268` selects low ten flag
+  bits and high-bit current/previous source; both sources use unsigned byte loads.
+- Live normal/skip/direct/guarded button selectors cover all 256 input bytes,
+  boundary flag ids and ignored selector bits. Recording-host count tests cover
+  signed item ids and byte widths; the existing Items fixture separately verifies
+  actual inventory count propagation. Module addresses and detached guards pass.
+  Focused controls: 16 cases / 60,910 assertions. Surrounding VM/inventory:
+  264 / 270,573. Physical-controller parity is not claimed.
+- On `24fcca63` plus this slice, complete Debug/Release builds and regressions pass
+  4,659 cases / 8,206,269 assertions with zero failures/skips and both unchanged
+  canonical fingerprints. Two new cases add 24,824; eight actual-inventory and
+  four module/detached checks add twelve more. No baseline refresh. Broad quality
+  reports 32 existing / zero new findings; 190 copier/nine extent controls pass.
+  Evidence: `VR-EVENT-CONTROL-STORES` and
+  `build\owner-checkpoint\native-control-stores-*-regression.log`.
+  Required table ABI and remaining controls/C-entry/global EC debt stay open.
+- Repeat copying preserves all tracked Native/project/manifest bytes; old store
+  names have no Native references and editor diagnostics are clear. Unmodified
+  gates derive 2,665 promoted / four compatibility `wip`; row 33 is now 33/57.
+  Jump/return predecessor `24fcca63` has exact green CI `42323181412`.
+
 ### Native Jump/Return Control Slots (#276 Row 33)
 
 - F01087/F01088/F01094/F01095 share the existing strict signed operand1 jump

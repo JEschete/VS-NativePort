@@ -1156,6 +1156,7 @@ ScriptFlow ScriptApplyFlagPairOperation(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:1773, 800B9170; count is narrowed at 800B91AC.
 ScriptFlow ScriptStoreInventoryItemPresence(
     const ScriptInstruction& instruction, ScriptVmHost& host) {
   if (!Fits(instruction, kFourOperandBytes, host)) {
@@ -1169,6 +1170,7 @@ ScriptFlow ScriptStoreInventoryItemPresence(
   return Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:1798, 800B9254; packed selector at 800B9264.
 ScriptFlow ScriptStoreButtonState(const ScriptInstruction& instruction,
                                   ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {

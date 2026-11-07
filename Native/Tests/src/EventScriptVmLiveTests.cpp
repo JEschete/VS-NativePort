@@ -17,6 +17,7 @@
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
+#include "Input/ControllerLiveState.h"
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
@@ -60,6 +61,8 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B8CE8, Event_ScriptJumpForwardOpcode},
     {0x800B8D1C, Event_ScriptJumpForwardOpcode},
     {0x800B8C44, Event_ScriptReturnToSavedAddressOpcode},
+    {0x800B9170, Event_ScriptStoreInventoryItemPresenceOpcode},
+    {0x800B9254, Event_ScriptStoreButtonStateOpcode},
 });
 
 struct LiveVmFixture {
@@ -80,6 +83,8 @@ struct LiveVmFixture {
   std::int16_t finished = Event_isMainThreadFinished;
   std::int16_t chained = Event_isChainedEventLoaded;
   char skip = Event_skipState;
+  Input_PressedButtonsView pressed = Input_buttonsPressed;
+  int previous = Input_previousButtons;
 
   LiveVmFixture() {
     std::ranges::copy(Content_discRequestSlots, slots.begin());
@@ -115,6 +120,8 @@ struct LiveVmFixture {
     Event_isMainThreadFinished = finished;
     Event_isChainedEventLoaded = chained;
     Event_skipState = skip;
+    Input_buttonsPressed = pressed;
+    Input_previousButtons = previous;
   }
   LiveVmFixture(const LiveVmFixture&) = delete;
   LiveVmFixture& operator=(const LiveVmFixture&) = delete;
@@ -642,6 +649,36 @@ std::intptr_t NativeJumpSlotBridge(std::uint8_t* instruction,
 std::intptr_t NativeReturnSlotBridge(std::uint8_t* instruction,
                                      std::int16_t thread) {
   return Event_ScriptReturnToSavedAddressOpcode(instruction, thread);
+}
+
+std::intptr_t ButtonStoreSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_ScriptStoreButtonStateOpcode(instruction, thread);
+}
+
+void CheckLiveButtonStore(int operand, bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  const FlagDifferentialFixture flags;
+  const auto start =
+      MountScript({0xE9, static_cast<std::uint8_t>(operand),
+                   static_cast<std::uint8_t>(operand >> 8), 0xE6});
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      guarded ? ButtonStoreSlotBridge : Event_ScriptStoreButtonStateOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = 3;
+  Event_skipState = static_cast<char>(skip);
+  auto& host = event::LiveScriptVm();
+  for (int value = 0; value < 256; ++value) {
+    Input_previousButtons = 0x345600 | value;
+    Input_buttonsPressed.allButtons = 0xABCD0000 | (value ^ 0x80);
+    host.SetFlag(operand & 1023, 0x55);
+    host.SetThreadCursor(0, start);
+    CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+    CHECK_FALSE(host.ThreadCursor(0).Present());
+    CHECK(host.Flag(operand & 1023) ==
+          ((operand & 0x8000) == 0 ? value : (value ^ 0x80)));
+  }
 }
 
 void CheckNativeJumpTarget(int displacement, bool guarded, int skip) {
@@ -1387,6 +1424,18 @@ TEST_CASE("Native shared jump binding preserves signed target boundaries",
     for (const bool guarded : {false, true}) {
       for (const int displacement : {-32, -17, -1, 3, 17, 31}) {
         CheckNativeJumpTarget(displacement, guarded, skip);
+      }
+    }
+  }
+}
+
+TEST_CASE("Native button store bindings preserve selectors and input bytes",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (const int operand :
+           {0, 511, 1023, 0x7FFF, 0x8000, 0x81FF, 0x83FF, 0xFFFF}) {
+        CheckLiveButtonStore(operand, guarded, skip);
       }
     }
   }

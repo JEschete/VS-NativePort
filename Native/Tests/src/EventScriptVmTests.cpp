@@ -1555,6 +1555,34 @@ TEST_CASE("VM button and inventory stores retain their encoded flag selectors",
         Kind::kAdvanceAndYield);
 }
 
+namespace {
+void CheckInventoryCountStore(int count, int item, int flag) {
+  RecordingHost host;
+  host.inventory_count = count;
+  CHECK(Run(event::ScriptStoreInventoryItemPresence, host,
+            {0, static_cast<std::uint8_t>(item),
+             static_cast<std::uint8_t>(item >> 8),
+             static_cast<std::uint8_t>(flag),
+             static_cast<std::uint8_t>(flag >> 8)}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.inventory_item ==
+        static_cast<std::int16_t>(static_cast<std::uint16_t>(item)));
+  CHECK(host.flags[static_cast<std::size_t>(flag)] ==
+        static_cast<std::uint8_t>(count));
+}
+}  // namespace
+
+TEST_CASE("VM inventory count stores retain signed ids and byte widths",
+          "[event-vm]") {
+  for (const int count : {0, 1, 255, 256, 511, -1}) {
+    for (const int item : {0, 0x7FFF, 0x8000, 0xFFFF}) {
+      for (const int flag : {0, 511, 1023}) {
+        CheckInventoryCountStore(count, item, flag);
+      }
+    }
+  }
+}
+
 TEST_CASE("VM end-cutscene opcodes retain branches unless finishing a skip",
           "[event-vm]") {
   RecordingHost host;

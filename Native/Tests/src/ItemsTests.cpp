@@ -14,6 +14,7 @@
 
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/EquipmentStats.hpp"
@@ -28,6 +29,7 @@
 #include "Items/LootLiveState.h"
 #include "Items/Recovery.hpp"
 #include "Legacy/Psx.h"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -2562,6 +2564,17 @@ TEST_CASE("Ashley's live inventory counts item ids", "[items-slice][items]") {
   CHECK(items::CountLiveInventoryItem(8) == 0);
   CHECK(items::CountLiveInventoryItem(55) == 9);
   CHECK(items::CountLiveInventoryItem(85) == 0);
+  const auto saved = VS::State::LiveScriptFlag(1023);
+  for (const auto [id, count] :
+       {std::pair{7, 1}, std::pair{8, 0}, std::pair{55, 9}, std::pair{85, 0}}) {
+    const std::array<std::uint8_t, 5> command{0, static_cast<std::uint8_t>(id),
+                                              0, 0xFF, 3};
+    CHECK(VS::Event::ScriptStoreInventoryItemPresence({command, {}, 0},
+                                                      VS::Event::LiveScriptVm())
+              .kind == VS::Event::ScriptFlowKind::kAdvance);
+    CHECK(VS::State::LiveScriptFlag(1023) == count);
+  }
+  VS::State::SetLiveScriptFlag(1023, saved);
 }
 
 TEST_CASE("Ashley's live inventory consumes misc items from the invoked slot",
