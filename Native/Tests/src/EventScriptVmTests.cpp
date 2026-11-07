@@ -940,6 +940,36 @@ TEST_CASE("VM subroutines share typed return locations", "[event-vm]") {
         Flow::JumpTo(At(13)));
 }
 
+TEST_CASE("VM texture restore preserves its exact fixed rectangle",
+          "[event-vm][event-cleanup]") {
+  RecordingHost host;
+  event::RestoreScriptTextureRectangle(host);
+  REQUIRE(host.moves.size() == 1);
+  CHECK(host.moves[0] == event::TextureMove{470, 384, 18, 36, 16, 400});
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("VM cutscene idle cleanup preserves every loaded actor slot",
+          "[event-vm][event-cleanup]") {
+  RecordingHost host;
+  event::ResetCutsceneActorsToIdle(host);
+  CHECK(host.idle_actors.empty());
+  for (int actor = 0; actor < event::kScriptControlledActorCount; ++actor) {
+    host.actors.fill(false);
+    host.actors[static_cast<std::size_t>(actor)] = true;
+    host.idle_actors.clear();
+    event::ResetCutsceneActorsToIdle(host);
+    CHECK(host.idle_actors == std::vector{actor});
+  }
+  host.actors.fill(true);
+  host.idle_actors.clear();
+  event::ResetCutsceneActorsToIdle(host);
+  REQUIRE(host.idle_actors.size() == event::kScriptControlledActorCount);
+  for (int actor = 0; actor < event::kScriptControlledActorCount; ++actor) {
+    CHECK(host.idle_actors[static_cast<std::size_t>(actor)] == actor);
+  }
+}
+
 TEST_CASE("VM skip completion restores the three palettes and texture",
           "[event-vm]") {
   RecordingHost host;

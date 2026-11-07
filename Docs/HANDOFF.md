@@ -7,6 +7,33 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Texture/Actor Cleanup Helpers (#276 Row 33)
+
+- F00972/F01278 register existing strict native fixed texture restore and
+  seventeen-slot loaded-actor idle cleanup. No C callers remained; unused
+  scratch/C bodies/prototypes/module bindings retire through the copier. This
+  removes the dead decompiler artifact by ownership, not a naming-only cleanup.
+  Actual texture image identity remains unresolved; catalog confidence stays low.
+- ASM verifies source `(470,384,18,36)` to `(16,400)` and one `0x18` move packet,
+  plus loaded-actor checks/idle callbacks over all slots 0-16. Direct tests cover
+  exact rectangle, none/all/every individual actor and callback order. Existing
+  live end-skip cleanup packet/cursor checks remain. Retired addresses resolve
+  null. Focused gate: four cases / 702 assertions.
+- On `e1b37ce9` plus this slice, full Debug/Release builds and regressions pass
+  4,683 cases / 8,439,567 assertions with zero failures/skips and both unchanged
+  canonical fingerprints. New direct checks39/null2 minus four removed per-symbol
+  assertions gives net37; no baseline refresh. Changed quality: five existing /
+  zero new findings; 190 copier/nine extent controls pass. Evidence:
+  `VR-EVENT-CLEANUP-HELPERS` and
+  `build\owner-checkpoint\native-cleanup-helpers-*-regression.log`.
+  Remaining actor-reference/opcode-size/queue/init/trigger/easing C-entry/table/
+  global EC obligations stay open; no whole-row or actual-image visual parity claim.
+  Playback predecessor `e1b37ce9` is green on exact CI `42340089266`.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,683 promoted / four compatibility `wip`; row 33 is
+  now 51/57. Remaining actor-reference/opcode-size/queue/init/trigger/easing and
+  table/global retirement obligations remain explicit.
+
 ### Native Playback Query Helpers (#276 Row 33)
 
 - F01253/F01254/F01260 register the existing strict typed playback-phase query,

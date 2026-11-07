@@ -1,10 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/AnimationControlLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
@@ -190,28 +188,6 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandFinishEventOpcode, Event_CommandFinishEventOpcode };
 
-// decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)
-void Event_RestoreScriptTextureRectangle(void)
-{
-    void* new_var;
-    RECT source_rectangle;
-    DR_MOVE* move_primitive;
-
-    source_rectangle.x = 470;
-    source_rectangle.y = 384;
-    source_rectangle.w = 18;
-    source_rectangle.h = 36;
-
-    new_var = (void*)((uintptr_t)Core_ScratchBase() + 0x000);
-    move_primitive = *((DR_MOVE**)((uintptr_t)Core_ScratchBase() + 0x000));
-    new_var = (void*)0x10;
-
-    SetDrawMove(move_primitive, &source_rectangle, 16, 400);
-    VS::Render::AppendLiveOverlayPrimitive(move_primitive);
-
-    *((void**)((uintptr_t)Core_ScratchBase() + 0x000)) = (DR_MOVE*)(move_primitive + 1);
-}
-
 // decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)
 int Event_OpcodeSize(u_char* instruction) { return Event_kOpcodeSizes[instruction[0]]; }
 
@@ -239,18 +215,6 @@ void Event_QueueEventScriptLoad(int arg0, void* destination_buffer)
         VS::Content::EnqueueLiveDiscRequest((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest), destination_buffer);
     } else {
         (*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) = VS::Content::CompleteLiveRefusedDiscRequest(&Event_eventFileDiscLocation, destination_buffer);
-    }
-}
-
-// decomp: BATTLE.PRG func_800C0150 (src/BATTLE/BATTLE.PRG/573B8.c:231)
-void Event_ResetCutsceneActorsToIdle(void)
-{
-    short i;
-
-    for (i = 0; i < 17; ++i) {
-        if (VS::Actors::LiveActorAtSlot(i) != NULL) {
-            VS::Actors::PlayLiveActorAnimation(i, 1, 0, 0);
-        }
     }
 }
 

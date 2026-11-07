@@ -900,6 +900,8 @@ void RunEventFrame(ScriptVmHost& host) {
 
 }  // namespace
 
+// decomp: BATTLE.PRG 40564.c:1280, 800AACDC; fixed source/destination
+// rectangle.
 void RestoreScriptTextureRectangle(ScriptVmHost& host) {
   host.MoveTextureRectangle(kSkipTextureMove);
 }
@@ -1597,6 +1599,7 @@ bool QueueEventScriptLoad(EventBuffer destination, ScriptVmHost& host) {
   return true;
 }
 
+// decomp: BATTLE.PRG 573B8.c:231, 800C0150; all 17 loaded actor slots.
 void ResetCutsceneActorsToIdle(ScriptVmHost& host) {
   for (int actor = 0; actor < kScriptControlledActorCount; ++actor) {
     if (host.ActorPresent(actor)) {
