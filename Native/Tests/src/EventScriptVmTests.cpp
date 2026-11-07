@@ -955,6 +955,23 @@ TEST_CASE("VM skip completion restores the three palettes and texture",
   CHECK(host.refusals.empty());
 }
 
+TEST_CASE("VM skip marker scans match only at opcode boundaries",
+          "[event-vm]") {
+  for (const bool aligned : {false, true}) {
+    RecordingHost host;
+    host.sizes[1] = 5;
+    host.regions[1] =
+        aligned ? std::vector<std::uint8_t>{1, 0, 0, 0, 0, 0x82, 5, 0, 0, 0x0F}
+                : std::vector<std::uint8_t>{1, 0x82, 5, 0, 0, 0x0F};
+    host.flags[0xA8] = 7;
+    event::FinishSkippedCutscene(At(0), host);
+    CHECK(host.calls == (aligned ? std::vector<std::string>{}
+                                 : std::vector<std::string>{"RoomSound"}));
+    CHECK(host.flags[0xA8] == 0);
+    CHECK(host.refusals.empty());
+  }
+}
+
 TEST_CASE("VM skip sound scans stop at the end opcode or invalid extent",
           "[event-vm]") {
   RecordingHost host;

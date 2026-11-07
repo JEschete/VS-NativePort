@@ -409,9 +409,9 @@ TEST_CASE("Native session transfer abandons the active owned VM source",
 TEST_CASE("Retired event lifecycle entries have no native module bindings",
           "[event-vm-live][content][module][retired-entry]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  constexpr std::array<std::uint32_t, 7> kEntries{
+  constexpr std::array<std::uint32_t, 8> kEntries{
       0x800BE98C, 0x800BEB34, 0x800BEBEC, 0x800BF5F0,
-      0x800BF850, 0x800BFBB8, 0x800BFD9C};
+      0x800BF850, 0x800BFBB8, 0x800BFD9C, 0x800B6778};
   for (const auto address : kEntries) {
     CAPTURE(address);
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

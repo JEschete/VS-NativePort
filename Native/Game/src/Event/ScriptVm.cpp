@@ -10,7 +10,6 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -245,31 +244,6 @@ intptr_t Event_ScriptWaitForEventFile(u_char* instruction, short thread_index)
         return 1;
     }
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800B6778 (src/BATTLE/BATTLE.PRG/4A0A8.c:618)
-void Event_FinishSkippedCutscene(u_char* scan_cursor)
-{
-    short i;
-
-    for (i = 0; i < 3; ++i) {
-        Event_skipPaletteResetCommand[1] = (i << 4) | 8;
-        Event_ScriptTransformPalettes((u_char *)(Event_skipPaletteResetCommand), 0);
-    }
-
-    Event_RestoreScriptTextureRectangle();
-
-    i = 0xF;
-    while (*scan_cursor != i) {
-        if (memcmp(scan_cursor, Event_kSkipSoundRestoreMarker, 4) == 0) {
-            VS::State::SetLiveScriptFlag(0xA8, 0);
-            return;
-        }
-        scan_cursor = &scan_cursor[Event_kOpcodeSizes[*scan_cursor]];
-    }
-
-    VS::Field::LiveRestartRoomEffectSound();
-    VS::State::SetLiveScriptFlag(0xA8, 0);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_buttonPressed (src/BATTLE/BATTLE.PRG/4A0A8.c:843)

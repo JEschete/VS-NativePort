@@ -7,6 +7,36 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Skip Cleanup Helper (#276 Row 33)
+
+- F01033 now registers the strict native generation-owned cleanup core; no C
+  callers remained after the cutscene opcode retirement. Its unused raw-pointer
+  C body/prototype/module binding retires through the copier. Only the obsolete
+  palette-call cast adaptation inside that retired body was removed; the unrelated
+  skip-table allocation adaptation remains intact.
+- ASM `800B67E4` tests end opcode `0x0F` before `800B6800` compares the four-byte
+  sound marker; `800B681C` reads unsigned stride, and both branches clear A8.
+  Existing native palette/texture, end/invalid extent and stale-generation tests
+  remain. Added tests prove a marker in operand bytes is ignored while a marker
+  at an instruction boundary matches, and address `800B6778` now resolves null.
+  Actual native end cleanup retains correct cursors and emits a guarded texture
+  packet. Focused gate: six cases / 676 assertions.
+- On `f6f0f9d1` plus this slice, full Debug/Release builds and regressions pass
+  4,662 cases / 8,227,410 assertions with zero failures/skips and both canonical
+  fingerprints unchanged. Seven marker/null assertions were added; two per-symbol
+  assertions disappear with the unused binding, for net five. No baseline refresh.
+  Changed quality/tidy reports five existing / zero new findings; 190 copier/nine
+  extent controls pass. Evidence: `VR-EVENT-SKIP-CLEANUP-PROMOTION` and
+  `build\owner-checkpoint\native-control-skip-cleanup-*-regression.log`.
+  Source/range/zero-stride refusal is native safety behavior, not an unsafe-original
+  comparison. Remaining controls/C-entry/table ABI/global EC debt stays separate;
+  state/packet checks do not claim full visual/audio/retail parity.
+  Predecessor `f6f0f9d1` has exact green CI `42327744063`.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,669 promoted / four compatibility `wip`; row 33 is
+  now 37/57. The unused raw-pointer cleanup module boundary is retired, while
+  remaining control-table and compatibility retirement gates stay open.
+
 ### Native Cutscene Control Slots (#276 Row 33)
 
 - F01032/F01034/F01035 now register the strict typed begin/jump-end/plain-end

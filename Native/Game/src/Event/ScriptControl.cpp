@@ -943,6 +943,8 @@ ScriptFlow ScriptBeginSkippableCutscene(const ScriptInstruction& instruction,
   return host.SkipForced() ? Yield() : Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:618, 800B6778; end/marker/stride at
+// 800B67DC-800B6830.
 void FinishSkippedCutscene(ScriptLocation scan, ScriptVmHost& host) {
   ResetSkippedPalettes(host);
   RestoreScriptTextureRectangle(host);

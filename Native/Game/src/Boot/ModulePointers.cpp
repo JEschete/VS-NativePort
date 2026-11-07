@@ -588,7 +588,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B66A8u, 0u, (void*)&Event_ScriptReportInvalidOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66F4u, 0u, (void*)&Event_ScriptWaitForEventFile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6724u, 0u, (void*)&Event_ScriptWaitForSplashFile, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B6778u, 0u, (void*)&Event_FinishSkippedCutscene, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6FB0u, 0u, (void*)&Event_ScriptWaitForButtonAndYield, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6FD8u, 0u, (void*)&Event_ScriptLoadSplashImage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7014u, 0u, (void*)&Event_ScriptConfigureSplashLayer, 0u, 0u, 0u},

@@ -50,7 +50,6 @@ extern intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short);
 void Event_RestoreScriptTextureRectangle(void);
 intptr_t Event_ScriptReportInvalidOpcode(u_char* instruction, short thread_index);
 intptr_t Event_ScriptWaitForEventFile(u_char* instruction, short thread_index);
-void Event_FinishSkippedCutscene(u_char* scan_cursor);
 intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_index);
 intptr_t Event_ScriptConfigureTimer(u_char* instruction, short thread_index);
 intptr_t Event_ScriptWaitForButtonOrTimeout(u_char* instruction, short thread_index);

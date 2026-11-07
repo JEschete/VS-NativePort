@@ -2285,15 +2285,6 @@
 ],
 "Native\\Game\\src\\Event\\ScriptVm.cpp": [
 [
-284,
-[
-"        Event_ScriptTransformPalettes(Event_skipPaletteResetCommand, 0);"
-],
-[
-"        Event_ScriptTransformPalettes((u_char *)(Event_skipPaletteResetCommand), 0);"
-]
-],
-[
 1133,
 [
 "    Event_legacySkipHandlerCopy = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers));"
