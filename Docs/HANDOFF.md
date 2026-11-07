@@ -7,6 +7,34 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Actor-Reference Helper (#276 Row 33)
+
+- F01275 registers the strict typed actor-reference core. Maintained actor/audio/
+  dialog/effect hosts and generated camera calls migrate through a typed native
+  live adapter; original C body/prototype retire via the copier. Module address
+  `800BFE50` resolves to that native adapter. Core, not the forwarding adapter,
+  is the promotion destination; required caller/module ABI remains explicit.
+- ASM verifies unsigned halfword input, nibble-0 model lookup, nibble-1 low-five
+  direct slot, and unchanged special references for nibbles 2-15. Exhaustive core
+  test checks all 65,536 values and model-host calls; live slot/special test and
+  original five real lookup expectations remain. Focused gate: 3 / 192,518.
+- On `5bd88fa0` plus this slice, full Debug/Release builds and regressions pass
+  4,686 cases / 8,633,359 assertions with zero failures/skips and both unchanged
+  canonical fingerprints. Two new cases add 192,513; existing case expectations
+  unchanged. No baseline refresh. Broad quality: 32 existing / zero new; 190
+  copier/nine extent/Pylance syntax controls pass. Generator helper header path
+  corrected to workspace spelling without changing semantics. Evidence:
+  `VR-EVENT-ACTOR-REFERENCE-PROMOTION` and
+  `build\owner-checkpoint\native-actor-reference-*-regression.log`.
+  Model-host corpus is not all-actor/visual parity; special references are not
+  guessed as pointers. Remaining queue/init/trigger/easing/table/global debt stays
+  separate; no whole-row or global ABI retirement claim. Opcode-size predecessor
+  `5bd88fa0` is green on exact CI `42342552787`.
+- Repeat generation preserves all tracked Native/project/manifest bytes,
+  including maintained/generated caller and native module adapter mappings.
+  Unmodified gates derive 2,685 promoted / four compatibility `wip`; row 33 is
+  now 53/57. Queue/init and trigger/easing/table/global gates remain open.
+
 ### Native Opcode-Size Helper (#276 Row 33)
 
 - F01274 registers the existing strict native byte-indexed size lookup through

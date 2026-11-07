@@ -12,6 +12,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Event/ScriptAudioCommands.hpp"
 #include "Event/ScriptAudioOpcodes.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 
 extern "C" {
@@ -56,7 +57,7 @@ class LiveScriptAudioHost final : public event::ScriptAudioHost {
   }
 
   [[nodiscard]] int ResolveActor(std::uint16_t reference) override {
-    return Event_ResolveScriptActorReference(reference);
+    return VS::Event::ResolveLiveScriptActorReference(reference);
   }
   [[nodiscard]] bool SkipActive() const override {
     return Event_skipState == kSkipActive;

@@ -1548,6 +1548,7 @@ int OpcodeSize(std::uint8_t opcode, const ScriptVmHost& host) {
   return opcode < sizes.size() ? sizes[opcode] : 0;
 }
 
+// decomp: BATTLE.PRG 573B8.c:156, 800BFE50; model/slot/special reference forms.
 int ResolveScriptActorReference(std::uint16_t reference, ScriptVmHost& host) {
   switch (reference >> kReferenceKindShift) {
     case kModelReference:

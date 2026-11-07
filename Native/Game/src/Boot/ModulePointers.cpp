@@ -18,6 +18,7 @@
 #include "Core/RuntimeLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TrapsLive.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -656,7 +657,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BE5A4u, 0u, (void*)&Event_ScaleEventCameraDuration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE7B8u, 0u, (void*)&Event_ReadScriptFixedVector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BEC58u, 0u, (void*)&Event_EvaluateRoomEventTriggers, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BFE50u, 0u, (void*)&Event_ResolveScriptActorReference, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurve, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C00E8u, 0u, (void*)&Event_QueueEventScriptLoad, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C031Cu, 0u, (void*)&Battle_InitSphere, 0u, 0u, 0u},
@@ -1513,6 +1513,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800BFE50u, 0u, (void*)&VS::Event::ResolveLiveScriptActorReference, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042364u, 0u, (void*)&VS::Boot::ResetToTitleLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042420u, 0u, (void*)&VS::Boot::EnterBattleLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800424E4u, 0u, (void*)&VS::Boot::RunEndingAndReturnToTitleLive, 0u, 0u, 0u},

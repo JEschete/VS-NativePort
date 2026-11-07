@@ -2285,6 +2285,20 @@ TEST_CASE("Native pending selectors preserve source and halfword bits",
   }
 }
 
+TEST_CASE("Native actor reference adapter preserves slot and special selectors",
+          "[event-vm-live][event-actor-reference]") {
+  const LiveVmFixture fixture;
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BFE50) ==
+      reinterpret_cast<const void*>(&event::ResolveLiveScriptActorReference));
+  for (int reference = 0x1000; reference < 65536; ++reference) {
+    const int expected = (reference >> 12) == 1 ? reference & 31 : reference;
+    CHECK(event::ResolveLiveScriptActorReference(
+              static_cast<std::uint16_t>(reference)) == expected);
+  }
+}
+
 TEST_CASE("Native button store bindings preserve selectors and input bytes",
           "[event-vm-live][control-opcode]") {
   for (const int skip : {0, 2}) {

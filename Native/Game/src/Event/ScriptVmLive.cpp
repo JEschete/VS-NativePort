@@ -942,6 +942,11 @@ void AbandonLiveScriptUses() {
   live_host.sources.AbandonUses();
 }
 
+// decomp: BATTLE.PRG func_800BFE50 (573B8.c:156).
+int ResolveLiveScriptActorReference(std::uint16_t reference) {
+  return ResolveScriptActorReference(reference, live_host);
+}
+
 }  // namespace VS::Event
 
 // decomp: BATTLE.PRG func_800B66E4 (4A0A8.c:597).

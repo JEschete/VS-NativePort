@@ -23,6 +23,7 @@ struct ScriptDataLease {
 
 // Native cursor and source state lives outside resettable module images.
 [[nodiscard]] ScriptVmHost& LiveScriptVm();
+[[nodiscard]] int ResolveLiveScriptActorReference(std::uint16_t reference);
 using ScriptControlOpcode = ScriptFlow (*)(const ScriptInstruction&,
                                            ScriptVmHost&);
 // C-table adapters return a status only; typed jumps remain in the active

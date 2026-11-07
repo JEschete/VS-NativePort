@@ -1215,6 +1215,22 @@ TEST_CASE(
   }
 }
 
+TEST_CASE("VM actor reference resolution preserves every encoded halfword",
+          "[event-vm][event-actor-reference]") {
+  RecordingHost host;
+  for (int reference = 0; reference < 65536; ++reference) {
+    host.model_result = (reference & 15) - 1;
+    host.requested_model = -1;
+    const int kind = reference >> 12;
+    const int expected = kind == 0   ? host.model_result
+                         : kind == 1 ? reference & 31
+                                     : reference;
+    CHECK(event::ResolveScriptActorReference(
+              static_cast<std::uint16_t>(reference), host) == expected);
+    CHECK(host.requested_model == (kind == 0 ? reference : -1));
+  }
+}
+
 TEST_CASE("VM special operations preserve reward phases", "[event-vm]") {
   RecordingHost host;
   CHECK(Run(event::CommandSpecialOperation, host, {0, 1, 0}).kind ==

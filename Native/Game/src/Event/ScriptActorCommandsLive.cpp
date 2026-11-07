@@ -22,6 +22,7 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptActorOpcodes.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -123,7 +124,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   }
 
   [[nodiscard]] int ResolveActor(std::uint16_t reference) override {
-    return Event_ResolveScriptActorReference(reference);
+    return event::ResolveLiveScriptActorReference(reference);
   }
   [[nodiscard]] bool SkipActive() const override {
     return Event_skipState == kSkipActive;

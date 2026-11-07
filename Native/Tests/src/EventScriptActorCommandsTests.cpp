@@ -16,6 +16,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptActorCommands.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -868,11 +869,11 @@ TEST_CASE("Script loot presents once, holds, then yields when dismissed",
 
 TEST_CASE("Event script actor references resolve every selector nibble",
           "[event][event-script-actors][live]") {
-  CHECK(Event_ResolveScriptActorReference(0x0123) ==
+  CHECK(event::ResolveLiveScriptActorReference(0x0123) ==
         VS::Actors::FindLiveActorByModelId(0x123));
-  CHECK(Event_ResolveScriptActorReference(0x1025) == 5);
-  CHECK(Event_ResolveScriptActorReference(0x2003) == 0x2003);
+  CHECK(event::ResolveLiveScriptActorReference(0x1025) == 5);
+  CHECK(event::ResolveLiveScriptActorReference(0x2003) == 0x2003);
   // Selectors 3 and up fall through unhandled and return the reference (#303).
-  CHECK(Event_ResolveScriptActorReference(0x3005) == 0x3005);
-  CHECK(Event_ResolveScriptActorReference(0xF00F) == 0xF00F);
+  CHECK(event::ResolveLiveScriptActorReference(0x3005) == 0x3005);
+  CHECK(event::ResolveLiveScriptActorReference(0xF00F) == 0xF00F);
 }

@@ -140,7 +140,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
   }
 
   [[nodiscard]] int ResolveActor(std::uint16_t reference) override {
-    return Event_ResolveScriptActorReference(reference);
+    return VS::Event::ResolveLiveScriptActorReference(reference);
   }
   [[nodiscard]] bool SkipActive() const override {
     return Event_skipState == kSkipActive;

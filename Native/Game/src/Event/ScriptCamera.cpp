@@ -6,6 +6,7 @@
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -66,7 +67,7 @@ intptr_t Event_CommandSetCameraFollowing(u_char* instruction, short thread_index
 // decomp: BATTLE.PRG func_800BB38C (src/BATTLE/BATTLE.PRG/4A0A8.c:2774)
 intptr_t Event_CommandSetCameraOriginActor(u_char* instruction, short thread_index)
 {
-    Event_SetEventCameraOriginActor(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
+    Event_SetEventCameraOriginActor(VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
     return 0;
 }
 
@@ -398,7 +399,7 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         return 0;
     }
     case 7:
-        VS::Actors::LiveActorTaggedBonePosition(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1)), script[3],
+        VS::Actors::LiveActorTaggedBonePosition(VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1)), script[3],
             (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), 2);
         VS::Core::Math::WidenLiveShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8));
         Event_ReadScriptFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), script + 4);
@@ -409,7 +410,7 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         return 0;
     case 8:
         c->motionMode = 8;
-        c->motionScalar = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
+        c->motionScalar = VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
         c->motionScalarDelta = script[3];
         c->elapsedFrames = 0;
         c->durationFrames = script[10];
@@ -422,7 +423,7 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         VS::Core::Math::SubtractLiveVectors(&c->displacement, &c->currentPosition, &c->partnerPosition);
         return 0;
     case 10: {
-        int id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
+        int id = VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
         Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
         s->value = id;
         Actors_ActorLocation placement{};
