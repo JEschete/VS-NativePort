@@ -28,6 +28,10 @@ intptr_t Event_ScriptSetLoopCounterOpcode(uint8_t* instruction,
                                           int16_t thread_index);
 intptr_t Event_ScriptLoopBackwardOpcode(uint8_t* instruction,
                                         int16_t thread_index);
+intptr_t Event_ScriptApplyImmediateFlagOperationOpcode(uint8_t* instruction,
+                                                       int16_t thread_index);
+intptr_t Event_ScriptApplyFlagPairOperationOpcode(uint8_t* instruction,
+                                                  int16_t thread_index);
 
 #ifdef __cplusplus
 }

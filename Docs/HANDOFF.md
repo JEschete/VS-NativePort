@@ -7,6 +7,31 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Arithmetic Control Slots (#276 Row 33)
+
+- F01096/F01097 now register strict native immediate/pair arithmetic cores with
+  guarded table identities. Original C bodies/names/prototypes retire only after
+  independent actual-original digests `41C1AFD9493A9DAF` / `593182F1F2B16919` were
+  captured in `16fd680c`. Every safe per-case/byte/alias/operation/model/mutant check
+  remains and normalized native results must match those unchanged originals.
+  Unsafe original zero-divisor execution stays excluded; native R3000 results are
+  tested separately rather than invoking original traps.
+- Live normal/skip/direct/guarded operation nibbles 0-15 cover aliases, byte results,
+  copy/difference/swap, unknown no-op operations and zero-divisor native bytes.
+  Control/arithmetic selection passes 15 cases / 97,588 assertions. Scenario loop
+  extraction preserves every check below strict nesting limits.
+- On `daa632dd` plus this slice, complete Debug/Release builds and regressions pass
+  4,654 cases / 8,177,175 assertions and both unchanged canonical replays. Two new
+  cases/four binding checks add 1,324; no baseline changes. Broad quality/tidy has
+  zero new findings; 190 copier/nine extent controls and Python syntax pass.
+  Repeat copying preserves tracked Native/project/manifest bytes; old arithmetic
+  names have no Native reference. Evidence: `VR-EVENT-CONTROL-ARITHMETIC` and
+  `build\owner-checkpoint\native-control-arithmetic-*-regression.log`.
+  Only these cores are reviewed; required ABI and remaining control/C-entry/global
+  EC debt remain. Loop predecessor `daa632dd` is green on exact CI `42315217179`.
+  Unmodified gates derive 2,656 promoted / four compatibility `wip`; row 33 is
+  now 24/57. Original digests and required table bindings remain explicit.
+
 ### Native Loop Control Slots (#276 Row 33)
 
 - F01092/F01093 register strict native counter-store/backward-loop cores with

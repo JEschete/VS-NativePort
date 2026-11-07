@@ -165,7 +165,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptCacheFlagValueOpcode, Event_ScriptBranchOnCachedFlagOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForward,
     Event_ScriptJumpForward, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperation, Event_ScriptApplyFlagPairOperation,
+    Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperationOpcode, Event_ScriptApplyFlagPairOperationOpcode,
     Event_ScriptStoreInventoryItemPresence, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
     Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonState, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
     Event_ScriptRunMenuTransition, Event_ScriptConfigureTimer, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
@@ -412,96 +412,6 @@ intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index)
 
 // decomp: BATTLE.PRG func_800B8C44 (src/BATTLE/BATTLE.PRG/4A0A8.c:1654)
 intptr_t Event_ScriptReturnToSavedAddress(u_char* instruction, short thread_index) { return Event_subroutineReturnCursor; }
-
-// decomp: BATTLE.PRG vs_battle_script_setFlagImm (src/BATTLE/BATTLE.PRG/4A0A8.c:1685)
-intptr_t Event_ScriptApplyImmediateFlagOperation(u_char* instruction, short thread_index)
-{
-    int operation_and_flag_bits = instruction[1];
-    short immediate_value = instruction[3];
-    int target_flag_id = (instruction[2] >> 2) + ((operation_and_flag_bits & 0xF) << 6);
-
-    switch (operation_and_flag_bits & 0xF0) {
-    case 0x0:
-        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) + immediate_value);
-        break;
-    case 0x10:
-        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) - immediate_value);
-        break;
-    case 0x20:
-        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) * immediate_value);
-        break;
-    case 0x30:
-        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) / immediate_value);
-        break;
-    case 0x40:
-        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) % immediate_value);
-        break;
-    case 0x50:
-        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) & immediate_value);
-        break;
-    case 0x60:
-        VS::State::SetLiveScriptFlag(target_flag_id, VS::State::LiveScriptFlag(target_flag_id) | immediate_value);
-        break;
-    case 0x70:
-        VS::State::SetLiveScriptFlag(target_flag_id, immediate_value);
-        break;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_script_setFlag (src/BATTLE/BATTLE.PRG/4A0A8.c:1720)
-intptr_t Event_ScriptApplyFlagPairOperation(u_char* instruction, short thread_index)
-{
-    int tmp;
-    char prev;
-
-    int flag0 = (instruction[2] >> 2) + ((instruction[1] & 0xF) << 6);
-    int flag1 = instruction[3] + ((instruction[2] & 3) << 8);
-
-    switch (instruction[1] & 0xF0) {
-    case 0x0:
-        VS::State::SetLiveScriptFlag(
-            flag0, VS::State::LiveScriptFlag(flag0) + VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x10:
-        VS::State::SetLiveScriptFlag(
-            flag0, VS::State::LiveScriptFlag(flag0) - VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x20:
-        VS::State::SetLiveScriptFlag(
-            flag0, VS::State::LiveScriptFlag(flag0) * VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x30:
-        VS::State::SetLiveScriptFlag(
-            flag0, VS::State::LiveScriptFlag(flag0) / VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x40:
-        VS::State::SetLiveScriptFlag(
-            flag0, VS::State::LiveScriptFlag(flag0) % VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x50:
-        VS::State::SetLiveScriptFlag(
-            flag0, VS::State::LiveScriptFlag(flag0) & VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x60:
-        VS::State::SetLiveScriptFlag(
-            flag0, VS::State::LiveScriptFlag(flag0) | VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x70:
-        VS::State::SetLiveScriptFlag(flag0, VS::State::LiveScriptFlag(flag1));
-        break;
-    case 0x80:
-        tmp = VS::State::LiveScriptFlag(flag0) - VS::State::LiveScriptFlag(flag1);
-        VS::State::SetLiveScriptFlag(flag0, ABS(tmp));
-        break;
-    case 0x90:
-        prev = VS::State::LiveScriptFlag(flag0);
-        VS::State::SetLiveScriptFlag(flag0, VS::State::LiveScriptFlag(flag1));
-        VS::State::SetLiveScriptFlag(flag1, prev);
-        break;
-    }
-    return 0;
-}
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (src/BATTLE/BATTLE.PRG/4A0A8.c:1773)
 intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index)

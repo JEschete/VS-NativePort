@@ -97,9 +97,9 @@ constexpr std::array kControlBindings{
                    ScriptReturnToSavedAddress},
     ControlBinding{Event_ScriptSetLoopCounterOpcode, ScriptSetLoopCounter},
     ControlBinding{Event_ScriptLoopBackwardOpcode, ScriptLoopBackward},
-    ControlBinding{Event_ScriptApplyImmediateFlagOperation,
+    ControlBinding{Event_ScriptApplyImmediateFlagOperationOpcode,
                    ScriptApplyImmediateFlagOperation},
-    ControlBinding{Event_ScriptApplyFlagPairOperation,
+    ControlBinding{Event_ScriptApplyFlagPairOperationOpcode,
                    ScriptApplyFlagPairOperation},
     ControlBinding{Event_ScriptStoreInventoryItemPresence,
                    ScriptStoreInventoryItemPresence},
@@ -1016,4 +1016,18 @@ std::intptr_t Event_ScriptLoopBackwardOpcode(std::uint8_t* instruction,
                                              std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptLoopBackward);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_setFlagImm (4A0A8.c:1685).
+std::intptr_t Event_ScriptApplyImmediateFlagOperationOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptApplyImmediateFlagOperation);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_setFlag (4A0A8.c:1720).
+std::intptr_t Event_ScriptApplyFlagPairOperationOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptApplyFlagPairOperation);
 }

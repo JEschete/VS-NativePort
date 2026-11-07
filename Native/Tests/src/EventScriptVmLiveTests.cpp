@@ -51,6 +51,8 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B8BF8, Event_ScriptBranchOnCachedFlagOpcode},
     {0x800B8C54, Event_ScriptSetLoopCounterOpcode},
     {0x800B8C7C, Event_ScriptLoopBackwardOpcode},
+    {0x800B8D50, Event_ScriptApplyImmediateFlagOperationOpcode},
+    {0x800B8EDC, Event_ScriptApplyFlagPairOperationOpcode},
 });
 
 struct LiveVmFixture {
@@ -153,17 +155,38 @@ void InitializeFlagSample(const FlagComparison& sample) {
 
 void AddResultDigest(std::uint64_t& digest, std::uint32_t value);
 
-bool CompareOriginalFlagOperation(
+std::array<std::uint8_t, 2> FrozenFlagResult(const FlagComparison& sample) {
+  const int first = VS::State::LiveScriptFlag(sample.first);
+  const auto second = VS::State::LiveScriptFlag(sample.second);
+  const int operand = sample.pair ? second : sample.right;
+  const int difference = first - operand;
+  const std::array<int, 10> results{first + operand,
+                                    first - operand,
+                                    first * operand,
+                                    operand == 0 ? -1 : first / operand,
+                                    operand == 0 ? first : first % operand,
+                                    first & operand,
+                                    first | operand,
+                                    operand,
+                                    difference < 0 ? -difference : difference,
+                                    operand};
+  const auto operation = static_cast<std::size_t>(sample.operation >> 4);
+  const bool supported = operation < (sample.pair ? 10 : 8);
+  const auto result =
+      static_cast<std::uint8_t>(supported ? results[operation] : first);
+  const auto other =
+      sample.pair && operation == 9 ? static_cast<std::uint8_t>(first) : second;
+  return {result, sample.first == sample.second ? result : other};
+}
+
+bool CompareFrozenFlagOperation(
     const FlagComparison& sample, int mutation = 0,
     std::array<std::uint64_t, 2>* fingerprints = nullptr) {
   auto command = FlagCommand(sample);
   InitializeFlagSample(sample);
-  const auto original =
-      sample.pair ? Event_ScriptApplyFlagPairOperation(command.data(), 0)
-                  : Event_ScriptApplyImmediateFlagOperation(command.data(), 0);
-  const auto first = VS::State::LiveScriptFlag(sample.first);
-  const auto second = VS::State::LiveScriptFlag(sample.second);
-  InitializeFlagSample(sample);
+  const auto expected = FrozenFlagResult(sample);
+  const auto first = expected[0];
+  const auto second = expected[1];
   if (mutation == 1) command[1] ^= 0x10;
   if (mutation == 2) command[2] ^= 4;
   if (mutation == 3) ++command[3];
@@ -185,7 +208,7 @@ bool CompareOriginalFlagOperation(
     AddResultDigest((*fingerprints)[0], expected_value);
     AddResultDigest((*fingerprints)[1], native_value);
   }
-  return original == 0 && result.kind == event::ScriptFlowKind::kAdvance &&
+  return result.kind == event::ScriptFlowKind::kAdvance &&
          VS::State::LiveScriptFlag(sample.first) == first &&
          VS::State::LiveScriptFlag(sample.second) == second;
 }
@@ -212,7 +235,7 @@ void CompareFlagCorpus(bool pair) {
           (right == 0 || (pair && first == second && left == 0))) {
         right = 1;
       }
-      REQUIRE(CompareOriginalFlagOperation(
+      REQUIRE(CompareFrozenFlagOperation(
           {first, second, left, right,
            static_cast<std::uint8_t>(operation << 4), pair},
           0, &fingerprints));
@@ -563,6 +586,59 @@ std::intptr_t LoopBackSlotBridge(std::uint8_t* instruction,
   return Event_ScriptLoopBackwardOpcode(instruction, thread);
 }
 
+std::intptr_t ImmediateFlagSlotBridge(std::uint8_t* instruction,
+                                      std::int16_t thread) {
+  return Event_ScriptApplyImmediateFlagOperationOpcode(instruction, thread);
+}
+
+std::intptr_t PairFlagSlotBridge(std::uint8_t* instruction,
+                                 std::int16_t thread) {
+  return Event_ScriptApplyFlagPairOperationOpcode(instruction, thread);
+}
+
+void CheckLiveFlagOperation(FlagComparison sample, bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  FlagDifferentialFixture flags;
+  auto command = FlagCommand(sample);
+  command[0] = 0xED;
+  Bytes bytes(command.begin(), command.end());
+  bytes.push_back(0xE6);
+  const auto start = MountScript(std::move(bytes));
+  InitializeFlagSample(sample);
+  const auto expected = FrozenFlagResult(sample);
+  const Handler handler =
+      sample.pair ? (guarded ? PairFlagSlotBridge
+                             : Event_ScriptApplyFlagPairOperationOpcode)
+                  : (guarded ? ImmediateFlagSlotBridge
+                             : Event_ScriptApplyImmediateFlagOperationOpcode);
+  Event_skipState = static_cast<char>(skip);
+  Event_kSkipOpcodeHandlers[0xED] = Event_kOpcodeHandlers[0xED] = handler;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xED] = 4;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+  CHECK(VS::State::LiveScriptFlag(sample.first) == expected[0]);
+  CHECK(VS::State::LiveScriptFlag(sample.second) == expected[1]);
+}
+
+struct LiveFlagScenario {
+  int skip;
+  bool guarded;
+  bool pair;
+  bool alias;
+};
+
+void CheckAllLiveFlagOperations(LiveFlagScenario scenario) {
+  for (int operation = 0; operation < 16; ++operation) {
+    CheckLiveFlagOperation(
+        {1023, scenario.alias ? 1023 : 511, 255, 17,
+         static_cast<std::uint8_t>(operation << 4), scenario.pair},
+        scenario.guarded, scenario.skip);
+  }
+}
+
 struct LoopScenario {
   int skip;
   bool guarded;
@@ -884,9 +960,9 @@ TEST_CASE(
     "[event-vm-live][event-differential]") {
   FlagDifferentialFixture fixture;
   const FlagComparison sample{32, 33, 5, 3, 0, false};
-  REQUIRE(CompareOriginalFlagOperation(sample));
+  REQUIRE(CompareFrozenFlagOperation(sample));
   for (int mutation = 1; mutation <= 3; ++mutation) {
-    CHECK_FALSE(CompareOriginalFlagOperation(sample, mutation));
+    CHECK_FALSE(CompareFrozenFlagOperation(sample, mutation));
   }
 }
 
@@ -1148,6 +1224,31 @@ TEST_CASE("Native loop sentinel never touches the bounded counter bank",
       CheckThreadCursorMatches(0, back);
       for (int counter = 0; counter < event::kLoopCounterCount; ++counter) {
         CheckLoopResult(static_cast<std::uint8_t>(counter), 0x55, false);
+      }
+    }
+  }
+}
+
+TEST_CASE("Native arithmetic bindings preserve all operations and aliasing",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (const bool pair : {false, true}) {
+        for (const bool alias : {false, true}) {
+          CheckAllLiveFlagOperations({skip, guarded, pair, alias});
+        }
+      }
+    }
+  }
+}
+
+TEST_CASE("Native arithmetic bindings keep R3000 zero divisor byte results",
+          "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    for (const bool pair : {false, true}) {
+      for (const std::uint8_t operation : {0x30, 0x40}) {
+        CheckLiveFlagOperation({1023, 511, 255, 0, operation, pair}, guarded,
+                               0);
       }
     }
   }

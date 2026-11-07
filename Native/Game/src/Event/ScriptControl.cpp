@@ -1089,6 +1089,7 @@ ScriptFlow ScriptLoopBackward(const ScriptInstruction& instruction,
   return remaining != 0 ? back : Advance();
 }
 
+// decomp: BATTLE.PRG vs_battle_script_setFlagImm (4A0A8.c:1685).
 ScriptFlow ScriptApplyImmediateFlagOperation(
     const ScriptInstruction& instruction, ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {
@@ -1112,6 +1113,7 @@ ScriptFlow ScriptApplyImmediateFlagOperation(
   return Advance();
 }
 
+// decomp: BATTLE.PRG vs_battle_script_setFlag (4A0A8.c:1720).
 ScriptFlow ScriptApplyFlagPairOperation(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {

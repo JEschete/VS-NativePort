@@ -59,8 +59,6 @@ intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_ind
 intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index);
 intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index);
 intptr_t Event_ScriptReturnToSavedAddress(u_char* instruction, short thread_index);
-intptr_t Event_ScriptApplyImmediateFlagOperation(u_char* instruction, short thread_index);
-intptr_t Event_ScriptApplyFlagPairOperation(u_char* instruction, short thread_index);
 intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index);
 intptr_t Event_ScriptStoreButtonState(u_char* instruction, short thread_index);
 intptr_t Event_ScriptConfigureTimer(u_char* instruction, short thread_index);
