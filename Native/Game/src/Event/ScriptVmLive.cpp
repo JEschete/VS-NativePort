@@ -89,11 +89,11 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptBranchOnFlagImmediateOpcode,
                    ScriptBranchOnFlagImmediate},
     ControlBinding{Event_ScriptBranchOnFlagPairOpcode, ScriptBranchOnFlagPair},
-    ControlBinding{Event_ScriptJumpForward, ScriptJumpForward},
+    ControlBinding{Event_ScriptJumpForwardOpcode, ScriptJumpForward},
     ControlBinding{Event_ScriptCacheFlagValueOpcode, ScriptCacheFlagValue},
     ControlBinding{Event_ScriptBranchOnCachedFlagOpcode,
                    ScriptBranchOnCachedFlag},
-    ControlBinding{Event_ScriptReturnToSavedAddress,
+    ControlBinding{Event_ScriptReturnToSavedAddressOpcode,
                    ScriptReturnToSavedAddress},
     ControlBinding{Event_ScriptSetLoopCounterOpcode, ScriptSetLoopCounter},
     ControlBinding{Event_ScriptLoopBackwardOpcode, ScriptLoopBackward},
@@ -1044,4 +1044,18 @@ std::intptr_t Event_ScriptBranchOnFlagPairOpcode(std::uint8_t* instruction,
                                                  std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptBranchOnFlagPair);
+}
+
+// decomp: BATTLE.PRG jumpFwd aliases (4A0A8.c:1630/1635/1675/1680).
+std::intptr_t Event_ScriptJumpForwardOpcode(std::uint8_t* instruction,
+                                            std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptJumpForward);
+}
+
+// decomp: BATTLE.PRG func_800B8C44 (4A0A8.c:1654).
+std::intptr_t Event_ScriptReturnToSavedAddressOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptReturnToSavedAddress);
 }

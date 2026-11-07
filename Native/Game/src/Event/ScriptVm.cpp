@@ -161,10 +161,10 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetActorIdleAnimationOpcode, Event_ScriptLookAtActorOpcode, Event_ScriptLookAtWorldPosOpcode,
     Event_ScriptLoadObjectModelOpcode, Event_ScriptWaitForObjectLoadOpcode, Event_ScriptReleaseObjectModelOpcode, Event_ScriptSelectObjectTextureBankOpcode, Event_ScriptSetActorOverlayPassOpcode,
     Event_ScriptSetActorWeaponDrawnOpcode, Event_ScriptBranchOnFlagImmediateOpcode, Event_ScriptBranchOnFlagPairOpcode,
-    Event_ScriptJumpForward, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptJumpForward,
+    Event_ScriptJumpForwardOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptJumpForwardOpcode,
     Event_ScriptCacheFlagValueOpcode, Event_ScriptBranchOnCachedFlagOpcode,
-    Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForward,
-    Event_ScriptJumpForward, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
+    Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForwardOpcode,
+    Event_ScriptJumpForwardOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperationOpcode, Event_ScriptApplyFlagPairOperationOpcode,
     Event_ScriptStoreInventoryItemPresence, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
     Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonState, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
@@ -314,15 +314,6 @@ intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_ind
     }
     return 1;
 }
-
-// decomp: BATTLE.PRG vs_battle_script_jumpFwd (src/BATTLE/BATTLE.PRG/4A0A8.c:1630)
-intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index)
-{
-    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)];
-}
-
-// decomp: BATTLE.PRG func_800B8C44 (src/BATTLE/BATTLE.PRG/4A0A8.c:1654)
-intptr_t Event_ScriptReturnToSavedAddress(u_char* instruction, short thread_index) { return Event_subroutineReturnCursor; }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (src/BATTLE/BATTLE.PRG/4A0A8.c:1773)
 intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index)

@@ -806,9 +806,9 @@ int Tests_EventScriptNativeBranches(int skip) {
                                          sizeof skipCopy);
   passed = memcmp(skipCopy, Event_kSkipOpcodeHandlers, sizeof skipCopy) == 0;
   skipCopy[0] = Event_kSkipOpcodeHandlers[0] = Event_kOpcodeHandlers[0] =
-      Event_ScriptJumpForward;
+      Event_ScriptJumpForwardOpcode;
   skipCopy[1] = Event_kSkipOpcodeHandlers[1] = Event_kOpcodeHandlers[1] =
-      Event_ScriptReturnToSavedAddress;
+      Event_ScriptReturnToSavedAddressOpcode;
   skipCopy[2] = Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
       Event_ScriptYieldFrameOpcode;
   skipCopy[3] = Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =

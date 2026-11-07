@@ -1007,6 +1007,7 @@ ScriptFlow ScriptBranchOnFlagPair(const ScriptInstruction& instruction,
   return ScriptFlow::JumpBy(OperandHalf(command, kFourthOperand));
 }
 
+// decomp: BATTLE.PRG jumpFwd aliases (4A0A8.c:1630/1635/1675/1680).
 ScriptFlow ScriptJumpForward(const ScriptInstruction& instruction,
                              ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1040,6 +1041,7 @@ ScriptFlow ScriptBranchOnCachedFlag(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG func_800B8C44 (4A0A8.c:1654).
 ScriptFlow ScriptReturnToSavedAddress(const ScriptInstruction& /*instruction*/,
                                       ScriptVmHost& host) {
   const ScriptLocation saved = host.SubroutineReturn();

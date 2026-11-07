@@ -55,6 +55,11 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B8EDC, Event_ScriptApplyFlagPairOperationOpcode},
     {0x800B88D4, Event_ScriptBranchOnFlagImmediateOpcode},
     {0x800B8A10, Event_ScriptBranchOnFlagPairOpcode},
+    {0x800B8B5C, Event_ScriptJumpForwardOpcode},
+    {0x800B8B90, Event_ScriptJumpForwardOpcode},
+    {0x800B8CE8, Event_ScriptJumpForwardOpcode},
+    {0x800B8D1C, Event_ScriptJumpForwardOpcode},
+    {0x800B8C44, Event_ScriptReturnToSavedAddressOpcode},
 });
 
 struct LiveVmFixture {
@@ -627,6 +632,41 @@ std::intptr_t ImmediateBranchSlotBridge(std::uint8_t* instruction,
 std::intptr_t PairBranchSlotBridge(std::uint8_t* instruction,
                                    std::int16_t thread) {
   return Event_ScriptBranchOnFlagPairOpcode(instruction, thread);
+}
+
+std::intptr_t NativeJumpSlotBridge(std::uint8_t* instruction,
+                                   std::int16_t thread) {
+  return Event_ScriptJumpForwardOpcode(instruction, thread);
+}
+
+std::intptr_t NativeReturnSlotBridge(std::uint8_t* instruction,
+                                     std::int16_t thread) {
+  return Event_ScriptReturnToSavedAddressOpcode(instruction, thread);
+}
+
+void CheckNativeJumpTarget(int displacement, bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  Bytes bytes(64, 0xE6);
+  bytes[32] = 0xE7;
+  bytes[33] = static_cast<std::uint8_t>(displacement);
+  bytes[34] =
+      static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
+  auto start = MountScript(std::move(bytes));
+  start.offset = 32;
+  Event_skipState = static_cast<char>(skip);
+  Event_kSkipOpcodeHandlers[0xE7] = Event_kOpcodeHandlers[0xE7] =
+      guarded ? NativeJumpSlotBridge : Event_ScriptJumpForwardOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] = StopBridge;
+  Event_kOpcodeSizes[0xE7] = 3;
+  observations = 0;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(observations == 1);
+  CHECK(observed[0] ==
+        event::ScriptLocation{start.region,
+                              static_cast<std::uint32_t>(32 + displacement),
+                              start.generation});
+  CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
 }
 
 void CheckLiveFlagBranch(FlagComparison sample, bool guarded, int skip) {
@@ -1341,6 +1381,43 @@ TEST_CASE("Native flag branch bindings preserve all unsigned comparison modes",
   }
 }
 
+TEST_CASE("Native shared jump binding preserves signed target boundaries",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (const int displacement : {-32, -17, -1, 3, 17, 31}) {
+        CheckNativeJumpTarget(displacement, guarded, skip);
+      }
+    }
+  }
+}
+
+TEST_CASE("Native saved return binding preserves missing and stale locations",
+          "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    for (const int mode : {0, 1, 2}) {
+      const LiveVmFixture fixture;
+      const auto start = MountScript({0xE8, 0xE3, 4, 0xE6});
+      Event_kOpcodeHandlers[0xE8] =
+          guarded ? NativeReturnSlotBridge
+                  : Event_ScriptReturnToSavedAddressOpcode;
+      Event_kOpcodeHandlers[0xE3] = Event_CommandSetTickSpeedOpcode;
+      Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
+      Event_kOpcodeSizes[0xE3] = 2;
+      State_tickSpeed = 2;
+      auto& host = event::LiveScriptVm();
+      if (mode != 0) {
+        host.SetSubroutineReturn(
+            {start.region, 3, start.generation + (mode == 2 ? 1 : 0)});
+      }
+      host.SetThreadCursor(0, start);
+      CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+      CHECK_FALSE(host.ThreadCursor(0).Present());
+      CHECK(State_tickSpeed == (mode == 0 ? 4 : 2));
+    }
+  }
+}
+
 TEST_CASE("Live VM dispatch carries typed jumps without pointer results",
           "[event-vm-live]") {
   const LiveVmFixture fixture;
@@ -1363,7 +1440,7 @@ TEST_CASE("Live VM routes the original control handler through typed dispatch",
   const LiveVmFixture fixture;
   const auto start = MountScript({0x42, 3, 0, 0xF0});
   observations = 0;
-  Event_kOpcodeHandlers[0x42] = Event_ScriptJumpForward;
+  Event_kOpcodeHandlers[0x42] = Event_ScriptJumpForwardOpcode;
   Event_kOpcodeHandlers[0xF0] = StopBridge;
   Event_kOpcodeSizes[0x42] = 3;
   event::LiveScriptVm().SetThreadCursor(0, start);
@@ -1380,7 +1457,7 @@ TEST_CASE("Live VM selects typed control handlers from the skip table",
   observations = 0;
   Event_skipState = 2;
   Event_kOpcodeHandlers[0x42] = PointerResult;
-  Event_kSkipOpcodeHandlers[0x42] = Event_ScriptJumpForward;
+  Event_kSkipOpcodeHandlers[0x42] = Event_ScriptJumpForwardOpcode;
   Event_kSkipOpcodeHandlers[0xF0] = StopBridge;
   Event_kOpcodeSizes[0x42] = 3;
   event::LiveScriptVm().SetThreadCursor(0, start);
@@ -1411,7 +1488,7 @@ TEST_CASE("Live VM original return handler uses the owned native location",
   const auto start = MountScript({0xE1, 0xF3, 0xF0});
   observations = 0;
   Event_subroutineReturnCursor = 0;
-  Event_kOpcodeHandlers[0xE1] = Event_ScriptReturnToSavedAddress;
+  Event_kOpcodeHandlers[0xE1] = Event_ScriptReturnToSavedAddressOpcode;
   Event_kOpcodeHandlers[0xF3] = StopBridge;
   Event_kOpcodeHandlers[0xF0] = StopBridge;
   auto& host = event::LiveScriptVm();

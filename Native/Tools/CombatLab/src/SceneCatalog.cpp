@@ -82,7 +82,7 @@ SceneOpcodes ProductionOpcodes() {
     } else if (handler == Event_ScriptEndCutsceneAndJump) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = 1;
-    } else if (handler == Event_ScriptJumpForward) {
+    } else if (handler == Event_ScriptJumpForwardOpcode) {
       opcode.flow = SceneFlow::kJump;
       opcode.branch_operand = 1;
     } else if (handler == Event_ScriptLoopBackwardOpcode) {
@@ -91,7 +91,7 @@ SceneOpcodes ProductionOpcodes() {
     } else if (handler == Event_CommandStartScriptContextOpcode) {
       opcode.flow = SceneFlow::kThread;
       opcode.branch_operand = 2;
-    } else if (handler == Event_ScriptReturnToSavedAddress) {
+    } else if (handler == Event_ScriptReturnToSavedAddressOpcode) {
       opcode.flow = SceneFlow::kReturn;
     } else if (handler == Event_CommandFinishEvent ||
                handler == Event_CommandStopScriptContextOpcode) {

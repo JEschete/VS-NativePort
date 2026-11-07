@@ -36,6 +36,10 @@ intptr_t Event_ScriptBranchOnFlagImmediateOpcode(uint8_t* instruction,
                                                  int16_t thread_index);
 intptr_t Event_ScriptBranchOnFlagPairOpcode(uint8_t* instruction,
                                             int16_t thread_index);
+intptr_t Event_ScriptJumpForwardOpcode(uint8_t* instruction,
+                                       int16_t thread_index);
+intptr_t Event_ScriptReturnToSavedAddressOpcode(uint8_t* instruction,
+                                                int16_t thread_index);
 
 #ifdef __cplusplus
 }

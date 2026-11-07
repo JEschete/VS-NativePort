@@ -7,6 +7,30 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Jump/Return Control Slots (#276 Row 33)
+
+- F01087/F01088/F01094/F01095 share the existing strict signed operand1 jump
+  core/binding; all four original ASM bodies are identical in operation and each
+  original address resolves to that shared native identity. F01091 now owns typed
+  generation-aware saved return. Old C bodies/names/prototypes/parser/branch/live
+  consumers retire; required table ABI remains explicitly guarded.
+- Observed direct/guarded normal/skip jump targets cover signed bounds within source;
+  saved return present/missing/stale-generation cases preserve advance/jump/refusal.
+  Fifteen control cases pass 36,298 assertions; surrounding consumers pass 178 /
+  245,121. No exit-code proxy is used for target correctness.
+- On `e3d73dc9` plus this slice, complete Debug/Release builds and regressions pass
+  4,657 cases / 8,181,433 assertions and both unchanged canonical replays. Two new
+  cases/ten binding checks add 154; no baseline change. Broad quality/tidy reports
+  zero new findings; 190 copier/nine extent controls and Python syntax pass.
+  Repeat copying preserves tracked Native/project/manifest bytes; old jump/return
+  names have no Native reference. Evidence: `VR-EVENT-CONTROL-JUMP-RETURN` and
+  `build\owner-checkpoint\native-control-jump-return-*-regression.log`.
+  Five catalog identities mean two logic implementations, not fabricated duplicate
+  code. Remaining controls/C-entry/table ABI/global EC debt stays separate.
+  Branch predecessor `e3d73dc9` is green on exact CI `42321098884`.
+  Unmodified gates derive 2,663 promoted / four compatibility `wip`; row 33 is
+  now 31/57. Shared alias identities preserve one real jump implementation.
+
 ### Native Flag-Branch Control Slots (#276 Row 33)
 
 - F01085/F01086 now register strict native unsigned immediate/pair comparison and
