@@ -7,6 +7,22 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Branch Original Oracle Preservation (#276)
+
+- Existing immediate/pair flag corpora captured normalized FNV64 directly from
+  still-present original C handlers: `E1BCD4375C206433` / `C89571B1A7F86BCD`.
+  Digests retain taken/fall-through and signed relative offset, not ASLR pointers.
+  Every 65,536 safe per-case comparison and existing mutant remains; original C
+  functions still run. Both digest/native equality and frozen constants are checked.
+- Debug/Release focused branch coverage passes six cases / 131,088 assertions;
+  full suites on `005fd14f` plus this test-only slice pass 4,654 / 8,177,179 and
+  both unchanged canonical replays. Four added assertions; no case/baseline/
+  promotion/retirement changes. Scoped quality/tidy is clean; temporary prints
+  removed. Evidence: `VR-EVENT-BRANCH-ORIGINAL-FREEZE` and
+  `build\owner-checkpoint\branch-oracle-freeze-*-regression.log`.
+  Arithmetic predecessor `005fd14f` is green on exact CI `42317614201`. Keep these
+  oracles independent when original branch handlers retire.
+
 ### Native Arithmetic Control Slots (#276 Row 33)
 
 - F01096/F01097 now register strict native immediate/pair arithmetic cores with

@@ -255,8 +255,9 @@ bool SameBranchResult(std::intptr_t original, event::ScriptFlow native,
              reinterpret_cast<std::intptr_t>(instruction) + native.displacement;
 }
 
-bool CompareOriginalFlagBranch(const FlagComparison& sample,
-                               std::int16_t displacement, int mutation = 0) {
+bool CompareOriginalFlagBranch(
+    const FlagComparison& sample, std::int16_t displacement, int mutation = 0,
+    std::array<std::uint64_t, 2>* fingerprints = nullptr) {
   std::array<std::uint8_t, 64> storage{};
   auto* command = storage.data() + 32;
   std::ranges::copy(FlagCommand(sample), command);
@@ -275,11 +276,27 @@ bool CompareOriginalFlagBranch(const FlagComparison& sample,
                                         instruction, event::LiveScriptVm())
                                   : event::ScriptBranchOnFlagImmediate(
                                         instruction, event::LiveScriptVm());
+  if (fingerprints != nullptr) {
+    const auto expected_offset = static_cast<std::uint16_t>(
+        original == 0 ? 0
+                      : original - reinterpret_cast<std::intptr_t>(command));
+    const bool native_jump = native.kind == event::ScriptFlowKind::kJumpBy;
+    AddResultDigest((*fingerprints)[0],
+                    static_cast<std::uint32_t>(original != 0) |
+                        (static_cast<std::uint32_t>(expected_offset) << 16));
+    AddResultDigest((*fingerprints)[1],
+                    static_cast<std::uint32_t>(native_jump) |
+                        (static_cast<std::uint32_t>(static_cast<std::uint16_t>(
+                             native_jump ? native.displacement : 0))
+                         << 16));
+  }
   return SameBranchResult(original, native, command);
 }
 
 void CompareFlagBranchCorpus(bool pair) {
   FlagDifferentialFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
   std::uint32_t random = 0xB8A10;
   for (std::uint8_t operation = 0; operation < 16; ++operation) {
     for (int iteration = 0; iteration < 2048; ++iteration) {
@@ -289,9 +306,11 @@ void CompareFlagBranchCorpus(bool pair) {
           {first, second, static_cast<std::uint8_t>(NextFlagSample(random)),
            static_cast<std::uint8_t>(NextFlagSample(random)),
            static_cast<std::uint8_t>(operation << 4), pair},
-          static_cast<std::int16_t>((iteration & 63) - 32)));
+          static_cast<std::int16_t>((iteration & 63) - 32), 0, &fingerprints));
     }
   }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == (pair ? 0xC89571B1A7F86BCD : 0xE1BCD4375C206433));
 }
 
 void AddResultDigest(std::uint64_t& digest, std::uint32_t value) {
