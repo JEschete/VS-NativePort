@@ -54,6 +54,10 @@ intptr_t Event_ScriptWaitForButtonAndYieldOpcode(uint8_t* instruction,
                                                  int16_t thread_index);
 intptr_t Event_ScriptWaitForButtonOrTimeoutOpcode(uint8_t* instruction,
                                                   int16_t thread_index);
+intptr_t Event_ScriptConfigureTimerOpcode(uint8_t* instruction,
+                                          int16_t thread_index);
+intptr_t Event_ScriptConfigureEasingCurveOpcode(uint8_t* instruction,
+                                                int16_t thread_index);
 
 #ifdef __cplusplus
 }

@@ -7,6 +7,34 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Timer/Easing Configuration Slots (#276 Row 33)
+
+- F01106/F01111 register strict typed timer/easing cores and guarded native
+  module/normal/skip identities. Original C bodies/prototypes retire via the
+  copier. Easing original `9DB56A489D7AD325` was captured/published in `c2a90621`
+  before retirement, exact green CI `42333102131`; current independent model/
+  native all-slot corpus and slot/family/sign mutants keep that unchanged oracle.
+- Live direct/guarded normal/skip timer selectors and packed times observe actual
+  timer record/HUD/A0-A3 publication. Invalid selectors preserve state before
+  callbacks; reset ignores unused selectors and preserves paused mode/scope.
+  All 256 encoded easing operands and untouched slots preserve family/signed
+  power. Fixtures restore timer/HUD/flags. Three new cases add 8,378 assertions;
+  four module/detached checks add four. Combined gate: 25 / 94,753.
+- On `c2a90621` plus this slice, full Debug/Release builds and regressions pass
+  4,673 cases / 8,437,503 assertions with zero failures/skips and both unchanged
+  canonical fingerprints. No baseline refresh. Broad quality has 32 existing /
+  zero new findings; expected-state/flag/matrix helper factoring preserves every
+  sample/assertion. All 190 copier/nine extent controls pass. Evidence:
+  `VR-EVENT-CONTROL-TIMER-EASING` and
+  `build\owner-checkpoint\native-control-timer-easing-*-regression.log`.
+  Timer packing is ASM-backed and tested through its existing native callback;
+  unsafe original table selectors were never executed. Required table ABI and
+  remaining special/I/O/C-entry/global EC debt remain separate; not full curve
+  interpolation/controller/visual or whole-row parity.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,673 promoted / four compatibility `wip`; row 33 is
+  now 41/57. Original curve digest and actual timer callback state remain intact.
+
 ### Original Easing Configuration Frozen (#276 Row 33)
 
 - Before retiring F01111, captured the actual retained original C setter's

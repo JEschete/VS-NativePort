@@ -105,10 +105,10 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptStoreInventoryItemPresenceOpcode,
                    ScriptStoreInventoryItemPresence},
     ControlBinding{Event_ScriptStoreButtonStateOpcode, ScriptStoreButtonState},
-    ControlBinding{Event_ScriptConfigureTimer, ScriptConfigureTimer},
+    ControlBinding{Event_ScriptConfigureTimerOpcode, ScriptConfigureTimer},
     ControlBinding{Event_ScriptWaitForButtonOrTimeoutOpcode,
                    ScriptWaitForButtonOrTimeout},
-    ControlBinding{Event_ScriptConfigureEasingCurve,
+    ControlBinding{Event_ScriptConfigureEasingCurveOpcode,
                    ScriptConfigureEasingCurve},
     ControlBinding{Event_CommandSpecialOperation, CommandSpecialOperation},
     ControlBinding{Event_CommandWaitFramesOpcode, CommandWaitFrames},
@@ -1108,4 +1108,18 @@ std::intptr_t Event_ScriptWaitForButtonOrTimeoutOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForButtonOrTimeout);
+}
+
+// decomp: BATTLE.PRG func_800B94D8 (4A0A8.c:1886).
+std::intptr_t Event_ScriptConfigureTimerOpcode(std::uint8_t* instruction,
+                                               std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptConfigureTimer);
+}
+
+// decomp: BATTLE.PRG func_800B9724 (4A0A8.c:1948).
+std::intptr_t Event_ScriptConfigureEasingCurveOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptConfigureEasingCurve);
 }

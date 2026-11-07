@@ -19,9 +19,11 @@
 #include "Event/TriggersLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Render/UiPacketsLive.hpp"
+#include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
+#include "Battle/Hud.h"
 #include "DiscQueue.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptControlOpcodes.h"
@@ -31,6 +33,7 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
+#include "State/SceneTimer.h"
 #include "State/Timers.h"
 }
 
@@ -73,6 +76,8 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B68C4, Event_ScriptEndCutsceneOpcode},
     {0x800B6FB0, Event_ScriptWaitForButtonAndYieldOpcode},
     {0x800B96B0, Event_ScriptWaitForButtonOrTimeoutOpcode},
+    {0x800B94D8, Event_ScriptConfigureTimerOpcode},
+    {0x800B9724, Event_ScriptConfigureEasingCurveOpcode},
 });
 
 struct LiveVmFixture {
@@ -97,6 +102,8 @@ struct LiveVmFixture {
   int previous = Input_previousButtons;
   char forced = Event_isSkipForced;
   char stops_music = Event_stopsMusicOnSkip;
+  State_SceneTimer timer = State_sceneTimer;
+  char timer_hud = Battle_lowerScreenUiState;
 
   LiveVmFixture() {
     std::ranges::copy(Content_discRequestSlots, slots.begin());
@@ -136,6 +143,8 @@ struct LiveVmFixture {
     Input_previousButtons = previous;
     Event_isSkipForced = forced;
     Event_stopsMusicOnSkip = stops_music;
+    State_sceneTimer = timer;
+    Battle_lowerScreenUiState = timer_hud;
   }
   LiveVmFixture(const LiveVmFixture&) = delete;
   LiveVmFixture& operator=(const LiveVmFixture&) = delete;
@@ -378,18 +387,21 @@ struct ButtonWaitExpected {
   std::uint32_t buttons = 0;
 };
 
-bool CompareOriginalEasing(std::uint8_t operand,
-                           std::array<std::uint64_t, 2>& fingerprints,
-                           std::uint8_t mutation = 0) {
+bool CompareFrozenEasing(std::uint8_t operand,
+                         std::array<std::uint64_t, 2>& fingerprints,
+                         std::uint8_t mutation = 0) {
   std::array<std::uint8_t, 2> command{0, operand};
   auto& host = event::LiveScriptVm();
-  std::ranges::fill(Event_customEasingCurves, 0xFC03);
   for (int slot = 0; slot < event::kCustomEasingCurveCount; ++slot) {
     host.SetCustomEasingCurve(slot, {.family = 3, .power = -4});
   }
-  const auto original = Event_ScriptConfigureEasingCurve(command.data(), 0);
+  const int original = 0;
   std::array<std::uint16_t, event::kCustomEasingCurveCount> expected{};
-  std::copy_n(Event_customEasingCurves, expected.size(), expected.begin());
+  expected.fill(0xFC03);
+  const auto power = static_cast<std::uint8_t>(
+      (operand & 8) != 0 ? (operand & 7) | 0xF8 : operand & 7);
+  expected[operand >> 6] = static_cast<std::uint16_t>(
+      ((operand >> 4) & 3) | (static_cast<std::uint16_t>(power) << 8));
   command[1] ^= mutation;
   const auto native = event::ScriptConfigureEasingCurve({command, {}, 0}, host);
   AddResultDigest(fingerprints[0], static_cast<std::uint32_t>(original));
@@ -801,6 +813,133 @@ std::intptr_t ButtonYieldSlotBridge(std::uint8_t* instruction,
 std::intptr_t ButtonTimeoutSlotBridge(std::uint8_t* instruction,
                                       std::int16_t thread) {
   return Event_ScriptWaitForButtonOrTimeoutOpcode(instruction, thread);
+}
+
+std::intptr_t TimerConfigSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_ScriptConfigureTimerOpcode(instruction, thread);
+}
+
+std::intptr_t EasingConfigSlotBridge(std::uint8_t* instruction,
+                                     std::int16_t thread) {
+  return Event_ScriptConfigureEasingCurveOpcode(instruction, thread);
+}
+
+void CheckLiveEasingConfiguration(bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      guarded ? EasingConfigSlotBridge : Event_ScriptConfigureEasingCurveOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = 2;
+  auto& host = event::LiveScriptVm();
+  for (int operand = 0; operand < 256; ++operand) {
+    for (int slot = 0; slot < event::kCustomEasingCurveCount; ++slot) {
+      host.SetCustomEasingCurve(slot, {.family = 3, .power = -4});
+    }
+    const auto start =
+        MountScript({0xE9, static_cast<std::uint8_t>(operand), 0xE6});
+    Event_skipState = static_cast<char>(skip);
+    host.SetThreadCursor(0, start);
+    CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+    CHECK_FALSE(host.ThreadCursor(0).Present());
+    for (int slot = 0; slot < event::kCustomEasingCurveCount; ++slot) {
+      const int power = operand & 15;
+      const event::EasingCurve expected =
+          slot == (operand >> 6)
+              ? event::EasingCurve{.family = static_cast<std::uint8_t>(
+                                       (operand >> 4) & 3),
+                                   .power = static_cast<std::int8_t>(
+                                       power >= 8 ? power - 16 : power)}
+              : event::EasingCurve{.family = 3, .power = -4};
+      CHECK(host.CustomEasingCurve(slot) == expected);
+    }
+  }
+}
+
+struct TimerConfigScenario {
+  std::uint8_t mode = 0;
+  std::uint8_t scope = 0;
+  std::uint32_t time = 0;
+  bool reset = false;
+  bool guarded = false;
+  int skip = 0;
+};
+
+VS::State::SceneTimer ExpectedTimerConfiguration(TimerConfigScenario scenario,
+                                                 bool valid,
+                                                 event::ScriptVmHost& host) {
+  auto expected = VS::State::LiveSceneTimer();
+  if (scenario.reset) {
+    expected.mode = 0;
+    expected.time = {};
+  } else if (valid) {
+    expected.mode =
+        static_cast<std::uint8_t>(host.SceneTimerModes()[scenario.mode]);
+    expected.reset_scope =
+        static_cast<std::uint16_t>(host.SceneTimerScopes()[scenario.scope]);
+    expected.time = expected.mode == VS::State::kSceneTimerCountsUp
+                        ? VS::State::SceneTime{}
+                        : VS::State::UnpackSceneTime(
+                              static_cast<std::int32_t>(scenario.time));
+  }
+  return expected;
+}
+
+void CheckTimerFlags(event::ScriptVmHost& host, VS::State::SceneTime time) {
+  CHECK(host.Flag(0xA0) == static_cast<std::uint8_t>(time.frames));
+  CHECK(host.Flag(0xA1) == static_cast<std::uint8_t>(time.seconds));
+  CHECK(host.Flag(0xA2) == static_cast<std::uint8_t>(time.minutes));
+  CHECK(host.Flag(0xA3) == static_cast<std::uint8_t>(time.hours));
+}
+
+void CheckLiveTimerConfiguration(TimerConfigScenario scenario) {
+  const LiveVmFixture fixture;
+  const FlagDifferentialFixture flags;
+  const auto start = MountScript(
+      {0xE9, static_cast<std::uint8_t>(scenario.reset ? 0 : 1), scenario.scope,
+       scenario.mode, static_cast<std::uint8_t>(scenario.time >> 24),
+       static_cast<std::uint8_t>(scenario.time >> 16),
+       static_cast<std::uint8_t>(scenario.time >> 8), 0xE6});
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      scenario.guarded ? TimerConfigSlotBridge
+                       : Event_ScriptConfigureTimerOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = 7;
+  Event_skipState = static_cast<char>(scenario.skip);
+  State_sceneTimer = {.mode = 2,
+                      .pausedMode = 1,
+                      .resetScope = 0x1234,
+                      .frames = 12,
+                      .seconds = 3,
+                      .minutes = 4,
+                      .hours = 5};
+  Battle_lowerScreenUiState = 1;
+  auto& host = event::LiveScriptVm();
+  const bool valid = scenario.mode < host.SceneTimerModes().size() &&
+                     scenario.scope < host.SceneTimerScopes().size();
+  const auto expected = ExpectedTimerConfiguration(scenario, valid, host);
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+  CHECK(VS::State::LiveSceneTimer() == expected);
+  CHECK(Battle_lowerScreenUiState == (scenario.reset ? 0 : 1));
+  if (scenario.reset || valid) {
+    CheckTimerFlags(host, expected.time);
+  }
+}
+
+void CheckTimerConfigurationMatrix(bool guarded, int skip) {
+  for (const std::uint32_t time : {0U, 0x01234500U, 0x81234500U, 0xFFFFFF00U}) {
+    for (int mode = 0; mode < 2; ++mode) {
+      for (int scope = 0; scope < 4; ++scope) {
+        CheckLiveTimerConfiguration({static_cast<std::uint8_t>(mode),
+                                     static_cast<std::uint8_t>(scope), time,
+                                     false, guarded, skip});
+      }
+    }
+  }
 }
 
 void CheckLiveButtonWait(ButtonWaitSample sample, bool guarded, int skip) {
@@ -1835,8 +1974,8 @@ TEST_CASE("Native easing configuration matches every original packed byte",
   std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
                                             0xCBF29CE484222325};
   for (int operand = 0; operand < 256; ++operand) {
-    REQUIRE(CompareOriginalEasing(static_cast<std::uint8_t>(operand),
-                                  fingerprints));
+    REQUIRE(
+        CompareFrozenEasing(static_cast<std::uint8_t>(operand), fingerprints));
   }
   CHECK(fingerprints[0] == fingerprints[1]);
   CHECK(fingerprints[0] == 0x9DB56A489D7AD325);
@@ -1848,7 +1987,38 @@ TEST_CASE("Original easing differential detects slot family and sign mutants",
   for (const std::uint8_t mutation : {0x40, 0x10, 0x08}) {
     std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
                                               0xCBF29CE484222325};
-    CHECK_FALSE(CompareOriginalEasing(0x8D, fingerprints, mutation));
+    CHECK_FALSE(CompareFrozenEasing(0x8D, fingerprints, mutation));
+  }
+}
+
+TEST_CASE("Native easing configuration bindings preserve all encoded slots",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      CheckLiveEasingConfiguration(guarded, skip);
+    }
+  }
+}
+
+TEST_CASE("Native timer configuration bindings publish bounded timer records",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      CheckTimerConfigurationMatrix(guarded, skip);
+    }
+  }
+}
+
+TEST_CASE(
+    "Native timer configuration bindings refuse invalid selectors before "
+    "callbacks",
+    "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    CheckLiveTimerConfiguration({2, 0, 0x01020300U, false, guarded, 0});
+    CheckLiveTimerConfiguration({255, 0, 0x01020300U, false, guarded, 2});
+    CheckLiveTimerConfiguration({0, 4, 0x01020300U, false, guarded, 0});
+    CheckLiveTimerConfiguration({0, 255, 0x01020300U, false, guarded, 2});
+    CheckLiveTimerConfiguration({255, 255, 0x01020300U, true, guarded, 0});
   }
 }
 

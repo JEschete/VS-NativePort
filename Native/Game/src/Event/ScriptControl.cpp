@@ -1192,6 +1192,7 @@ ScriptFlow ScriptStoreButtonState(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:1886, 800B94D8; packed bytes occupy bits 8-31.
 ScriptFlow ScriptConfigureTimer(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kSixOperandBytes, host)) {
@@ -1236,6 +1237,7 @@ ScriptFlow ScriptWaitForButtonOrTimeout(const ScriptInstruction& instruction,
   return flow;
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:1948, 800B9724; two-byte slot and signed nibble.
 ScriptFlow ScriptConfigureEasingCurve(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {

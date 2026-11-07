@@ -164,8 +164,8 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperationOpcode, Event_ScriptApplyFlagPairOperationOpcode,
     Event_ScriptStoreInventoryItemPresenceOpcode, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
     Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonStateOpcode, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
-    Event_ScriptRunMenuTransition, Event_ScriptConfigureTimer, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
-    Event_ScriptYieldFrameOpcode, Event_ScriptConfigureEasingCurve, Event_ScriptSetGimmickVisibility, Event_ScriptOverrideDepthCueDistance, Event_ScriptSetRoomLightingMode,
+    Event_ScriptRunMenuTransition, Event_ScriptConfigureTimerOpcode, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
+    Event_ScriptYieldFrameOpcode, Event_ScriptConfigureEasingCurveOpcode, Event_ScriptSetGimmickVisibility, Event_ScriptOverrideDepthCueDistance, Event_ScriptSetRoomLightingMode,
     Event_ScriptClearAshleyStatusEffectsOpcode, Event_ScriptShowGeometryGroup, Event_ScriptHideGeometryGroup, Event_ScriptSwapGeometryGroupFlags, Event_ScriptSetCollisionTileMode,
     Event_ScriptChangeRoom, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetWipeAngle, Event_ScriptConfigureScreenTransition,
     Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptTogglePaletteHook, Event_ScriptTransformPalettes, Event_ScriptSetActorRenderModeOpcode,
@@ -242,37 +242,6 @@ intptr_t Event_ScriptWaitForEventFile(u_char* instruction, short thread_index)
     if ((Event_eventFileDiscRequest != 0) && (*Event_eventFileDiscRequest != 4)) {
         return 1;
     }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B94D8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1886)
-intptr_t Event_ScriptConfigureTimer(u_char* instruction, short thread_index)
-{
-    if (instruction[1] != 0) {
-        VS::State::StartLiveSceneTimer(Event_kSceneTimerModes[instruction[3]], Event_kSceneTimerResetScopes[instruction[2]],
-            (instruction[4] << 0x18) | (instruction[5] << 0x10) | (instruction[6] << 8));
-    } else {
-        VS::State::ResetLiveSceneTimer();
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9724 (src/BATTLE/BATTLE.PRG/4A0A8.c:1948)
-intptr_t Event_ScriptConfigureEasingCurve(u_char* instruction, short thread_index)
-{
-    int encoded_power;
-    u_char* curve_bytes;
-    u_short* curve_table;
-
-    curve_table = Event_customEasingCurves;
-    curve_bytes = (u_char*)((instruction[1] >> 6) + curve_table);
-    curve_bytes[0] = ((instruction[1] >> 4) & 3);
-
-    encoded_power = instruction[1] & 7;
-    if (instruction[1] & 8) {
-        encoded_power |= 0xF8;
-    }
-    curve_bytes[1] = encoded_power;
     return 0;
 }
 
