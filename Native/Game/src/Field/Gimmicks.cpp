@@ -219,43 +219,6 @@ void Field_ResetGimmickAnimationQueue(void)
     VS::Core::Memory::ZeroLiveAlignedWords(Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue);
 }
 
-// decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16353)
-void Field_UpdateGimmickAnimationQueue(void)
-{
-    Field_MpdLockTrigger* queued_trigger;
-    int i;
-
-    if (Field_pendingGimmickAnimationCount <= 0) {
-        return 0;
-    }
-
-    for (i = 0; i < 8; ++i) {
-        if (Field_gimmickAnimationQueue[i].jobKind == 1) {
-            if (Field_FinishDoorAnimation(Field_gimmickAnimationQueue[i].trigger) != 0) {
-                Field_gimmickAnimationQueue[i].jobKind = 0;
-                Field_gimmickAnimationQueue[i].trigger = NULL;
-                --Field_pendingGimmickAnimationCount;
-            }
-        } else if (Field_gimmickAnimationQueue[i].jobKind == 2) {
-            queued_trigger = Field_gimmickAnimationQueue[i].trigger;
-            if ((--queued_trigger->trigger.activation << 0x18) <= 0) {
-                Field_ToggleRoomSwitchEntry(queued_trigger);
-                Field_gimmickAnimationQueue[i].jobKind = 0;
-                Field_gimmickAnimationQueue[i].trigger = NULL;
-                --Field_pendingGimmickAnimationCount;
-            }
-        } else if (Field_gimmickAnimationQueue[i].jobKind == 3) {
-            queued_trigger = Field_gimmickAnimationQueue[i].trigger;
-            if (!(--queued_trigger->delayFrames)) {
-                Field_StartDoorAnimation(queued_trigger);
-                Field_gimmickAnimationQueue[i].jobKind = 0;
-                Field_gimmickAnimationQueue[i].trigger = NULL;
-                --Field_pendingGimmickAnimationCount;
-            }
-        }
-    }
-}
-
 // decomp: BATTLE.PRG func_8008C49C (src/BATTLE/BATTLE.PRG/146C.c:16475)
 int Field_SetMovingPlatformActor(int platform_index, int platform_control_state)
 {
@@ -378,7 +341,7 @@ int Field_UpdateMovingPlatforms(void)
             Field_platformFreezeFrames = 0;
         }
 
-        return;
+        return 0;
     }
 
     object = Field_roomData.movingPlatforms;

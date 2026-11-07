@@ -26,6 +26,7 @@ extern "C" {
 #include "Core/Gte.h"
 #include "Core/Scratch.h"
 #include "Field/CameraLiveState.h"
+#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Minimap.h"
 #include "Field/Mpd.h"
@@ -262,7 +263,7 @@ class LiveSceneHost final : public RoomSceneHost {
   void DrawTriggerMarkers() override { DrawLiveRoomTriggerMarkers(); }
   void DrawActorMarkers() override { Battle_DrawActorMarkers(); }
   void UpdateGimmickAnimations() override {
-    Field_UpdateGimmickAnimationQueue();
+    Field_UpdateGimmickAnimationQueueEntry();
   }
   void UpdateRoomEffects() override { LiveUpdateRoomEffects(); }
   void DrawPlatformShadows() override { Field_DrawMovingPlatformShadows(); }

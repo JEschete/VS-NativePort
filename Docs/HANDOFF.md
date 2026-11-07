@@ -7,6 +7,41 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Saturated Door Continuation (#319, #276 Row 27)
+
+- #319 logged before fixing: source `ba227890` plus only the new regression
+  fills eight delayed door jobs, starts callbacks before old slots clear, and
+  loses the first finish continuation. Pending seven versus eight and missing
+  first target are two failures in ten assertions. Original 66 MIPS words
+  `8008C0C0-8008C1C4` plus callback tail `8008C040-8008C06C` confirm that order.
+- F00585 now targets strict native `UpdateGimmickAnimationQueue`. It preserves
+  original signed-switch/unsigned-door byte countdown behavior and regular
+  unsaturated callback order. Only a full completed delayed-door slot retires
+  before its callback; all eight finish jobs survive and drain next tick.
+- Private Live job serials and captured target checks prevent post-callback
+  cleanup from clearing an admitted replacement job. They guard queue reuse,
+  not pointee/room lifetime: raw target/update ABI and #287 remain tracked.
+  Required native C/header/original `8008C0C0` and actual room-rendering caller
+  are adopted explicitly; no generated output was manually patched.
+- Original pending/target assertions pass unchanged. Thirteen focused cases /
+  1,632 assertions include #318; seven dispatcher/continuation cases / 1,467
+  cover all 512 byte/kind combinations, callback replacement, saturated and
+  unsaturated timing, module/refusal and next-tick draining. Native Live tests
+  isolate refused cell/effect/audio inputs, not physical or Combat Lab parity.
+- Complete final Debug/Release 4,711 / 8,635,830, zero failures/skips and both
+  canonical replays unchanged. 191 copier / nine extent controls, editor
+  diagnostics and scoped quality five existing / zero new pass. Per-byte
+  scenario helper extraction retained all samples/assertions; no baseline or
+  gate was weakened. Logs: `build/owner-checkpoint/gimmick-door-continuation-*-regression.log`.
+- #318 is closed with `ba2278900eef22249aac683fc51d7aaa6fa6fd6a` and exact
+  successful CI `42358122654`; #319 fixing source/closure are pending new
+  publication/exact CI. Row 27 / #287 and global ABI/physical acceptance remain
+  open; this does not relabel the original saturated bug as exact parity.
+- Final repeat copier/project generation preserves tracked/new Native/project/
+  manifest bytes. Unchanged gates derive 2,693 promoted / one separate frame
+  `wip`, 241 behavior records and zero violations; old dispatcher consumers are
+  zero. Raw target/room lifetime and native C/module/update obligations remain.
+
 ### Gimmick Queue Admission Accounting (#318, #276 Row 27)
 
 - #318 was logged before fixing: original/current F00584 increments pending at

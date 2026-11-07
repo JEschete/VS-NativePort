@@ -440,6 +440,8 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00585", "Field_UpdateGimmickAnimationQueueEntry", "VS::Field::UpdateGimmickAnimationQueue",
+             r"Native\Game\include\Field\GimmickAnimationQueue.hpp"),
             ("F00584", "Field_QueueGimmickAnimationEntry", "VS::Field::QueueGimmickAnimation",
              r"Native\Game\include\Field\GimmickAnimationQueue.hpp"),
             ("F00607", "Field_ToggleRoomSwitchEntry", "VS::Field::ToggleRoomSwitch",
@@ -965,6 +967,7 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00585": ("Field_UpdateGimmickAnimationQueueEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),
                     "F00584": ("Field_QueueGimmickAnimationEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),
                     "F00607": ("Field_ToggleRoomSwitchEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
                     "F00853": ("Field_GimmickPlacementEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
