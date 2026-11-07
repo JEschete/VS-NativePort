@@ -348,6 +348,65 @@ void AddResultDigest(std::uint64_t& digest, std::uint32_t value) {
   }
 }
 
+int WaitResultCode(event::ScriptFlow flow) {
+  switch (flow.kind) {
+    case event::ScriptFlowKind::kAdvance:
+      return 0;
+    case event::ScriptFlowKind::kHold:
+      return 1;
+    case event::ScriptFlowKind::kAdvanceAndYield:
+      return 4;
+    default:
+      return -1;
+  }
+}
+
+struct ButtonWaitSample {
+  std::uint8_t mask = 0;
+  std::uint8_t duration = 0;
+  std::int16_t remaining = 0;
+  std::uint32_t buttons = 0;
+  int thread = 0;
+  bool timeout = false;
+};
+
+bool CompareOriginalButtonWait(const ButtonWaitSample& sample,
+                               std::array<std::uint64_t, 2>& fingerprints,
+                               int mutation = 0) {
+  std::array<std::uint8_t, 3> command{0, sample.mask, sample.duration};
+  Event_threadWaitFrames[sample.thread] = sample.remaining;
+  Input_buttonsPressed.allButtons = sample.buttons;
+  const auto original =
+      sample.timeout
+          ? Event_ScriptWaitForButtonOrTimeout(
+                command.data(), static_cast<std::int16_t>(sample.thread))
+          : Event_ScriptWaitForButtonAndYield(
+                command.data(), static_cast<std::int16_t>(sample.thread));
+  const auto expected_wait = Event_threadWaitFrames[sample.thread];
+  const auto expected_buttons = Input_buttonsPressed.allButtons;
+  Event_threadWaitFrames[sample.thread] = sample.remaining;
+  Input_buttonsPressed.allButtons = sample.buttons;
+  if (mutation == 1) command[1] ^= 4;
+  if (mutation == 2) ++Event_threadWaitFrames[sample.thread];
+  const event::ScriptInstruction instruction{command, {}, sample.thread};
+  const auto native = sample.timeout ? event::ScriptWaitForButtonOrTimeout(
+                                           instruction, event::LiveScriptVm())
+                                     : event::ScriptWaitForButtonAndYield(
+                                           instruction, event::LiveScriptVm());
+  const auto result = WaitResultCode(native);
+  const auto wait = Event_threadWaitFrames[sample.thread];
+  if (mutation == 3) Input_buttonsPressed.allButtons = sample.buttons;
+  const auto buttons = Input_buttonsPressed.allButtons;
+  AddResultDigest(fingerprints[0], static_cast<std::uint32_t>(original));
+  AddResultDigest(fingerprints[0], static_cast<std::uint16_t>(expected_wait));
+  AddResultDigest(fingerprints[0], expected_buttons);
+  AddResultDigest(fingerprints[1], static_cast<std::uint32_t>(result));
+  AddResultDigest(fingerprints[1], static_cast<std::uint16_t>(wait));
+  AddResultDigest(fingerprints[1], buttons);
+  return original == result && wait == expected_wait &&
+         buttons == expected_buttons;
+}
+
 bool CompareFrozenCachedBranch(
     std::uint8_t value, std::uint8_t operand,
     std::array<std::uint64_t, 2>* fingerprints = nullptr, int mutation = 0) {
@@ -1565,6 +1624,76 @@ TEST_CASE("Native shared jump binding preserves signed target boundaries",
       }
     }
   }
+}
+
+TEST_CASE("Native button yields match all original mask and byte pairs",
+          "[event-vm-live][event-button-differential]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
+  for (int mask = 0; mask < 256; ++mask) {
+    for (int value = 0; value < 256; ++value) {
+      REQUIRE(CompareOriginalButtonWait(
+          {static_cast<std::uint8_t>(mask), 0, 17,
+           0xA5CD0000U | static_cast<std::uint32_t>(value), mask & 3, false},
+          fingerprints));
+    }
+  }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == 0x45DB1AECCD72B51C);
+}
+
+TEST_CASE("Native button timeouts match every original halfword counter",
+          "[event-vm-live][event-button-differential]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
+  for (int remaining = 0; remaining < 65536; ++remaining) {
+    for (const bool pressed : {false, true}) {
+      REQUIRE(CompareOriginalButtonWait(
+          {4, 255,
+           static_cast<std::int16_t>(static_cast<std::uint16_t>(remaining)),
+           0xA5CD0000U | (pressed ? 4U : 0U), remaining & 3, true},
+          fingerprints));
+    }
+  }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == 0x3E94AE9F58CCF5A6);
+}
+
+TEST_CASE("Native button timeouts match original initialization for every byte",
+          "[event-vm-live][event-button-differential]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
+  for (int duration = 0; duration < 256; ++duration) {
+    for (const std::uint32_t buttons : {0U, 4U, 255U}) {
+      REQUIRE(
+          CompareOriginalButtonWait({4, static_cast<std::uint8_t>(duration), 0,
+                                     0xA5CD0000U | buttons, duration & 3, true},
+                                    fingerprints));
+    }
+  }
+  CHECK(fingerprints[0] == fingerprints[1]);
+  CHECK(fingerprints[0] == 0x482D3AE966711625);
+}
+
+TEST_CASE(
+    "Original button wait differential detects mask counter and clear mutants",
+    "[event-vm-live][event-button-differential]") {
+  const LiveVmFixture fixture;
+  for (const auto& sample : {ButtonWaitSample{4, 3, 3, 0xA5CD0004U, 0, false},
+                             ButtonWaitSample{4, 3, 3, 0xA5CD0004U, 3, true}}) {
+    std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                              0xCBF29CE484222325};
+    CHECK_FALSE(CompareOriginalButtonWait(sample, fingerprints, 1));
+  }
+  std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
+                                            0xCBF29CE484222325};
+  CHECK_FALSE(CompareOriginalButtonWait({4, 3, 3, 0xA5CD0000U, 1, true},
+                                        fingerprints, 2));
+  CHECK_FALSE(CompareOriginalButtonWait({4, 3, 1, 0xA5CD0004U, 2, true},
+                                        fingerprints, 3));
 }
 
 TEST_CASE("Native button store bindings preserve selectors and input bytes",

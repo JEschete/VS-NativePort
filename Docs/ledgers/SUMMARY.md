@@ -59,7 +59,7 @@ generator-managed output.
 | `strict_clean` | 2673 |
 | `behavior_evidence` | 2669 |
 
-Promotion records: 2673; derived `cpp=x`: 2669, `cpp=wip`: 4. Verification records: 225; `verified=x` markers: 49.
+Promotion records: 2673; derived `cpp=x`: 2669, `cpp=wip`: 4. Verification records: 226; `verified=x` markers: 49.
 
 <!-- gates:end -->
 

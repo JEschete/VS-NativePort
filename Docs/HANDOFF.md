@@ -7,6 +7,32 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Original Button-Wait Results Frozen (#276 Row 33)
+
+- Before retiring F01042/F01110, captured actual retained original C outcomes,
+  halfword waits and entire pressed-input words against native typed cores. The
+  original/native host shares globals, so each original output is snapshotted
+  and identical inputs restored before native execution. No raw pointers hashed.
+- All 65,536 mask/input-byte pairs, all 65,536 halfword counters with both input
+  states, and all 256 initialization bytes with three input values match. Frozen
+  digests: yield `45DB1AECCD72B51C`, timeout `3E94AE9F58CCF5A6`, initialization
+  `482D3AE966711625`. Four planted native mask/counter/input-clear deviations
+  are detected. Focused gate: four cases / 197,386 assertions.
+- ASM confirms initialization before consumption, byte mask over word input,
+  halfword decrement/wrap then signed comparison, and clearing the entire pressed
+  word. Valid threads/bounded commands only; unsafe original indices are never
+  executed. Original C bodies and module/table identities remain in this freeze.
+  Ownership stays 2,669 promoted / four compatibility `wip`, row 33 37/57.
+- On `dedb5300` plus these tests, complete Debug/Release builds and regressions
+  pass 4,666 cases / 8,424,796 assertions and both unchanged canonical replays,
+  zero failures/skips. Four new cases add 197,386; no baseline refresh. Quality
+  reports five existing / zero new findings. Evidence:
+  `VR-EVENT-BUTTON-WAIT-ORIGINAL-FREEZE` and
+  `build\owner-checkpoint\original-button-wait-freeze-*-regression.log`.
+  This checkpoint preserves an independent oracle; it does not promote code,
+  retire ABI/EC debt or establish physical-controller/full-game parity.
+  Cleanup predecessor `dedb5300` is green on exact CI `42329062089`.
+
 ### Native Skip Cleanup Helper (#276 Row 33)
 
 - F01033 now registers the strict native generation-owned cleanup core; no C
