@@ -27,7 +27,9 @@
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/PFile.hpp"
 #include "Core/Log.hpp"
+#include "Effects/EffectResources.hpp"
 #include "Effects/TrailEmitterLive.hpp"
+#include "Effects/Transforms.hpp"
 #include "Legacy/Psx.h"
 #include "Movie/MoviePlayer.h"
 #include "Render/PageSpace.hpp"
@@ -39,6 +41,7 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Battle/Damage.h"
+#include "Content/DiscLayout.h"
 #include "Effects/Package.h"
 #include "Effects/Plugins/Plg044.h"
 #include "Effects/Plugins/Plg049.h"
@@ -59,6 +62,7 @@ extern "C" {
 #include "Effects/Plugins/Plg242.h"
 #include "Effects/Plugins/Plg260.h"
 #include "Effects/Plugins/Plg265.h"
+#include "Effects/PurgeTables.h"
 #include "Field/MapProgress.h"
 #include "ModelLoading.h"
 #include "OverlayWorkspaceLiveState.h"
@@ -404,6 +408,83 @@ TEST_CASE(
     const auto& table = Content_modulePointers[index];
     INFO(table.module << " offset " << table.offset);
     CHECK(table.count <= table.capacity);
+  }
+}
+
+namespace {
+
+constexpr std::size_t kTrapAuditTransformCapacity = 64;
+
+struct TrapPackageAuditHost final : VS::Effects::EffectPackageHost {
+  void BindTextureTables(std::span<std::byte>) override {}
+  void BindSoundBank(std::span<std::byte>) override {}
+  std::int32_t BindAuxiliarySound(std::span<std::byte>) override { return 0; }
+};
+
+void CheckTrapSourcePointIndependence(
+    std::span<const VS::Effects::TransformDefinition> definitions) {
+  std::array<VS::Effects::TransformState, kTrapAuditTransformCapacity> first{};
+  std::array<VS::Effects::TransformState, kTrapAuditTransformCapacity> second{};
+  VS::Effects::TransformEndpoints endpoints{
+      .emit_from = {.type = 5, .position = {123, 234, 345, 0}},
+      .emit_to = {.type = 4, .actor = 0, .part = 0xFD}};
+  CHECK(VS::Effects::InitializeTransformStates(definitions, endpoints, first) ==
+        definitions.size());
+  endpoints.emit_from.position = {-321, -432, -543, 0};
+  CHECK(VS::Effects::InitializeTransformStates(definitions, endpoints,
+                                               second) == definitions.size());
+  for (std::size_t index = 0; index < definitions.size(); ++index) {
+    INFO("definition " << index << " flags " << definitions[index].flags);
+    CHECK(first[index] == second[index]);
+  }
+}
+
+void CheckTrapPackageSourcePoints(const Content::DataStore& store,
+                                  std::uint16_t effect_id,
+                                  std::string_view path) {
+  INFO(path);
+  const auto* entry = store.Find(path);
+  REQUIRE(entry != nullptr);
+  REQUIRE(entry->size <= 65535);
+  CHECK(entry->lba == VS_E000_P_LBA + Effects_packageFiles[effect_id].lba);
+  CHECK(entry->SectorCount() * Content::DataStore::kDataSectorBytes ==
+        Effects_packageFiles[effect_id].size);
+  auto bytes = store.ReadAll(*entry);
+  REQUIRE(bytes);
+  TrapPackageAuditHost host;
+  VS::Effects::EffectPackageBlocks blocks;
+  const auto walk = VS::Effects::BindEffectPackageBlocks(
+      std::as_writable_bytes(std::span(*bytes)), blocks, host);
+  REQUIRE(walk.status == VS::Effects::PackageWalkStatus::kEnded);
+  std::array<VS::Effects::TransformDefinition, kTrapAuditTransformCapacity>
+      definitions{};
+  const auto count = VS::Effects::ReadTransformDefinitions(
+      blocks.transform_definitions, definitions);
+  REQUIRE(blocks.transform_definitions.size() %
+              VS::Effects::kTransformDefinitionBytes ==
+          0);
+  REQUIRE(count == blocks.transform_definitions.size() /
+                       VS::Effects::kTransformDefinitionBytes);
+  CheckTrapSourcePointIndependence(std::span(definitions).first(count));
+}
+
+}  // namespace
+
+TEST_CASE("Initial trap packages do not select their unwritten source point",
+          "[content][trap-source-audit][disc]") {
+  const auto cue = FindRepoDisc();
+  if (cue.empty()) {
+    SKIP("Repository disc location is unavailable");
+  }
+  const auto root = cue.parent_path().parent_path() / "Native" / "data";
+  Content::DataStore::ScopedOverride restore;
+  REQUIRE(Content::DataStore::Open(root).has_value());
+  const auto* store = Content::DataStore::Get();
+  REQUIRE(store != nullptr);
+  constexpr std::array<std::pair<std::uint16_t, std::string_view>, 3> kPackages{
+      {{6, "EFFECT/E006.P"}, {7, "EFFECT/E007.P"}, {8, "EFFECT/E008.P"}}};
+  for (const auto& [effect_id, path] : kPackages) {
+    CheckTrapPackageSourcePoints(*store, effect_id, path);
   }
 }
 

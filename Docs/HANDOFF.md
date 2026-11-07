@@ -7,6 +7,52 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Next Trap Producer Dependency (#322, #276 Row 27)
+
+- Published source `16730c33d06105a0d4b988d5ce01e8be66ff3883` has exact
+  successful Source Quality `42380807184`. #287 is closed with its own fixing
+  revision/evidence; the wait and ordinary-lock milestones below are verified.
+  #321, remaining row27/#276 and global compatibility acceptance stay open.
+- F00135 `Field_TriggerActorTrap` remains generated/unmodified. Its local
+  `Effects_ActionEffectRequest` is uninitialized. Original 64 MIPS words
+  `80073D30-80073E2C` write the request tag5 at `sp+0x14`, target tag4 at
+  `sp+0x20`, actor at `sp+0x24`, partFD at `sp+0x26`, but no source position
+  payload at `sp+0x18/+0x1A/+0x1C/+0x1E`. Resolver `80085B10` runs before
+  secondary-effect entry `800CF3F8`.
+- This is logged before any fix as #322: native secondary spawning copies the
+  complete request; the transform adapter extracts endpoint positions; non4
+  endpoints resolve as positions. Type5 must not be called an actor. Actual
+  affected trap package selectors and intended source coordinates remain
+  unresolved; no reproduced retail/native failure or original parity claim.
+- PartFD is resolved separately: actual original 39 words `800A1720-800A17B8`
+  and the skeleton consumer select bone0 for ground-anchor253, then replace
+  matrix translationY with the actor's placed Y. It is not an all-limbs label.
+- Existing bounded APIs for the next observation are `BindLiveEffectPackage`,
+  `LiveBoundPackageBlock(kTransformDefinitions)`, `ReadTransformDefinitions`
+  and the transform endpoint selectors. Inspect the actual trap package/data
+  selectors and reference behavior before assigning a source point. If those
+  consumers select the unwritten source, an explicit native undefined-source
+  policy must be distinguished from original behavior; do not silently choose
+  zero or Ashley's position and call it parity. Keep #322 acceptance intact.
+- The native `_pFiles` table uses `P(006)` / `P(007)` / `P(008)` macros that
+  resolve the initial package filenames through their disc layout extents;
+  ID-to-filename equality is verified there, not inferred from ID labels.
+  The bounded `[trap-source-audit]` content check reads those actual files via
+  `DataStore`, uses the maintained package/transform parsers, and compares all
+  decoded transform states under two different source points. All three initial
+  packages ignore that point during transform initialization. This is not an
+  audit of every trap kind, selected script path or source-impact callback.
+  Their compiled LBA mappings and sector-rounded read extents also match the
+  extracted file metadata; logical file lengths are not the rounded extents.
+  `[trap-source-audit]` passes one case / 36 assertions in Debug and Release;
+  complete suites pass 4,746 / 8,636,067 with zero failures/skips/regressions
+  and unchanged canonical fingerprints. Audit quality is eight existing /
+  zero new; no baseline or gate was relaxed. Package parsing keeps reads under
+  65,536 bytes and checks that every whole definition fits the 64-slot audit.
+- No trap implementation, generator or promotion edit was made for this
+  investigation. The content audit and dependency handoff are the only local
+  changes. Details and original instruction evidence are on #322.
+
 ### Ordinary Room-Object Locks (#276 Row 27)
 
 - F00134 now uses the existing strict interaction core with a typed snapshot/
