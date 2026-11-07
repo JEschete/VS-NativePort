@@ -38,6 +38,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GameModeLive.hpp"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
@@ -533,6 +534,7 @@ class LiveSections : public Host {
     if (block == nullptr) {
       return false;
     }
+    InvalidateLiveInteractionTargets();
     std::memcpy(&Field_roomData.header, layout.lengths.data(),
                 sizeof layout.lengths);
     std::ranges::copy(
@@ -617,6 +619,7 @@ class LiveSections : public Host {
   // the geometry and leaked the block of a room without one. A section the
   // heap did not give (a test's own record) is not freed.
   void FreeRoomSections() override {
+    InvalidateLiveInteractionTargets();
     for (std::size_t index = 0; index < kRoomSectionCount; ++index) {
       void* data = SectionData(static_cast<RoomSectionId>(index));
       if (data == nullptr) {
@@ -1295,6 +1298,7 @@ void LiveFinishZoneLoad(int zone_id) {
 }
 
 void LiveReleaseZoneData() {
+  InvalidateLiveInteractionTargets();
   LiveZoneReleaseHost host;
   ReleaseZoneData(host);
 }
@@ -1317,6 +1321,7 @@ bool LiveFinishRoomLoad(int room_id) {
 }
 
 void LiveUnloadCurrentRoom() {
+  InvalidateLiveInteractionTargets();
   LiveRoomUnloadHost host;
   UnloadCurrentRoom(host);
 }

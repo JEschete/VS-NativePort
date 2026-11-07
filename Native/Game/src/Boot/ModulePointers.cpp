@@ -143,6 +143,7 @@ extern "C" {
 #include "Field/Actors.h"
 #include "Field/BackgroundLiveState.h"
 #include "Field/CameraLiveState.h"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/Collision.h"
 #include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
@@ -153,7 +154,7 @@ extern "C" {
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Input.h"
-#include "Field/Interaction.h"
+#include "Field/InteractionFocusLive.h"
 #include "Field/Interactions.h"
 #include "Field/Locations.h"
 #include "Field/Manual.h"
@@ -286,19 +287,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80073ACCu, 0u, (void*)&Field_EndObjectInteractionWait, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073AFCu, 0u, (void*)&Field_InteractWithLockedRoomObject, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073D30u, 0u, (void*)&Field_TriggerActorTrap, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80073E30u, 0u, (void*)&Field_TryOpenChest, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80073F7Cu, 0u, (void*)&Field_BeginTrapInteraction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80074050u, 0u, (void*)&Field_BeginChestInteraction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074120u, 0u, (void*)&Field_WaitForChestCameraFocus, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007418Cu, 0u, (void*)&Field_StepTrapCameraFocus, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800741D4u, 0u, (void*)&Field_DispatchTrapOrChestInteraction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007424Cu, 0u, (void*)&Field_IsChestAnimationReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&Effects_ActionEffectBusyFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800742A4u, 0u, (void*)&Field_FinishChestInteraction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80074314u, 0u, (void*)&Field_FinishTrapInteraction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074374u, 0u, (void*)&Field_TrackInteractionCameraToAshley, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800743E0u, 0u, (void*)&Field_OpenChestContents, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800744B8u, 0u, (void*)&Field_UpdateChestContentsSelection, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074798u, 0u, (void*)&Field_TileInFrontOfActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074860u, 0u, (void*)&Field_TryTriggerFacingTileEvent, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800748B8u, 0u, (void*)&Field_FindFacingRoomObject, 0u, 0u, 0u},
@@ -1506,6 +1499,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800741D4u, 0u, (void*)&Field_DispatchTrapOrChestInteractionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80073F7Cu, 0u, (void*)&Field_BeginTrapInteractionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80074314u, 0u, (void*)&Field_FinishTrapInteractionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80074050u, 0u, (void*)&Field_BeginChestInteractionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800742A4u, 0u, (void*)&Field_FinishChestInteractionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800743E0u, 0u, (void*)&Field_OpenChestContentsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800744B8u, 0u, (void*)&Field_UpdateChestContentsSelectionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80073E30u, 0u, (void*)&Field_TryOpenChestEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D5FCu, 0u, (void*)&Field_BeginSwitchToggleEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008B6B4u, 0u, (void*)&Field_ResetGimmickAnimationQueueEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008C0C0u, 0u, (void*)&Field_UpdateGimmickAnimationQueueEntry, 0u, 0u, 0u},

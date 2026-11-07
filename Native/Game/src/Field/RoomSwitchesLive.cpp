@@ -3,16 +3,19 @@
 #include "Audio/SfxLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickAnimationQueueLive.h"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomSwitches.hpp"
 
 extern "C" {
 #include "Field/Mpd.h"
+#include "Items/TreasureChests.h"
 }
 
 namespace {
 
 constexpr int kSwitchSoundGroup = 0x7E;
+constexpr unsigned kMarkerByteShift = 8;
 
 class LiveRoomSwitchHost final : public VS::Field::RoomSwitchHost {
  public:
@@ -99,7 +102,82 @@ class LiveRoomSwitchStartHost final : public VS::Field::RoomSwitchStartHost {
   Field_MpdLockTrigger* trigger_ = nullptr;
 };
 
+class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
+                                  public VS::Field::RoomSwitchStartHost {
+ public:
+  explicit LiveChestSwitchHost(VS::Field::ChestTarget target)
+      : target_(target) {}
+  std::optional<VS::Field::RoomSwitchState> State() const override {
+    const auto* chest = VS::Field::ResolveLiveChestTarget(target_);
+    if (chest == nullptr) {
+      return std::nullopt;
+    }
+    const auto bytes = static_cast<std::uint16_t>(chest->reservedA);
+    return VS::Field::RoomSwitchState{
+        .switch_value = static_cast<std::uint16_t>(chest->isOpen),
+        .marker_fade = static_cast<std::uint8_t>(bytes >> kMarkerByteShift),
+        .activation = static_cast<std::uint8_t>(bytes),
+        .effect_kind = chest->lidRotationId,
+        .tile_x = chest->tileX,
+        .tile_z = chest->tileZ,
+        .floor_layer = chest->layer};
+  }
+  void PlaySound(std::int32_t sound) override {
+    VS::Audio::LivePlaySfxCentered(kSwitchSoundGroup, sound);
+  }
+  void StartEffect(std::int32_t kind) override {
+    VS::Field::LiveStartRoomEffect(kind);
+  }
+  void StoreSwitch(std::uint16_t value, std::uint8_t marker) override {
+    auto* chest = VS::Field::ResolveLiveChestTarget(target_);
+    if (chest == nullptr) {
+      return;
+    }
+    chest->isOpen = static_cast<std::int16_t>(value);
+    const auto activation = static_cast<std::uint8_t>(chest->reservedA);
+    chest->reservedA = static_cast<std::int16_t>(
+        (static_cast<std::uint16_t>(marker) << kMarkerByteShift) | activation);
+  }
+  void SetCellPassability(const VS::Field::RoomSwitchState& state,
+                          std::uint8_t passability) override {
+    auto* cell = VS::Field::LiveCollisionCellAt(state.tile_x, state.tile_z,
+                                                state.floor_layer);
+    if (cell != nullptr) {
+      cell->doorPassability = passability;
+    }
+  }
+  bool StoreStartState(std::uint8_t marker, std::uint8_t activation) override {
+    auto* chest = VS::Field::ResolveLiveChestTarget(target_);
+    if (chest == nullptr) {
+      return false;
+    }
+    chest->reservedA = static_cast<std::int16_t>(
+        (static_cast<std::uint16_t>(marker) << kMarkerByteShift) | activation);
+    return true;
+  }
+  bool QueueToggle() override {
+    return VS::Field::QueueLiveGimmickAnimation(2, target_);
+  }
+  bool ToggleImmediately() override {
+    return VS::Field::ToggleRoomSwitch(*this);
+  }
+
+ private:
+  VS::Field::ChestTarget target_;
+};
+
 }  // namespace
+
+namespace VS::Field {
+bool BeginLiveChestSwitch(ChestTarget target) {
+  LiveChestSwitchHost host(target);
+  return BeginSwitchToggle(host);
+}
+bool ToggleLiveChestSwitch(ChestTarget target) {
+  LiveChestSwitchHost host(target);
+  return ToggleRoomSwitch(host);
+}
+}  // namespace VS::Field
 
 // decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16883).
 void Field_ToggleRoomSwitchEntry(Field_MpdLockTrigger* switch_trigger) {

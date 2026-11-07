@@ -1632,6 +1632,15 @@
     <ClInclude Include="src\Field\CameraLiveState.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\ChestInteractions.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\ChestInteractionsLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\ChestInteractionsLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClCompile Include="src\Field\Collision.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1728,7 +1737,7 @@
     <ClInclude Include="src\Field\Input.h">
       <Filter>src\Field</Filter>
     </ClInclude>
-    <ClInclude Include="src\Field\Interaction.h">
+    <ClInclude Include="src\Field\InteractionFocusLive.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Interactions.cpp">
@@ -1738,6 +1747,9 @@
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\InteractionsLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\InteractionTargetLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
     <ClCompile Include="src\Field\Locations.cpp">
@@ -2859,6 +2871,9 @@
     <ClInclude Include="include\Field\CameraLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
+    <ClInclude Include="include\Field\ChestInteractions.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
     <ClInclude Include="include\Field\CollisionMap.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
@@ -2899,6 +2914,12 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\InteractionsLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\InteractionTarget.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\InteractionTargetLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\Map.hpp">

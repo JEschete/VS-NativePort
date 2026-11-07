@@ -16,19 +16,148 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
+#include "Field/ChestInteractions.hpp"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/GimmickAnimationQueue.hpp"
 #include "Field/GimmickAnimationQueueLive.h"
 #include "Field/GimmickPlacement.hpp"
+#include "Field/InteractionTarget.hpp"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomSwitches.hpp"
 #include "Field/RoomSwitchesLive.h"
 
 extern "C" {
+#include "Battle/ActionFlow.h"
 #include "Event/Triggers.h"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
+#include "Field/Interactions.h"
 }
 
 namespace {
+
+struct RecordingChestInteractionHost final : VS::Field::ChestInteractionHost {
+  std::optional<VS::Field::ChestLockState> chest{VS::Field::ChestLockState{}};
+  bool flag = false;
+  bool item = false;
+  std::vector<std::int32_t> calls;
+  std::optional<VS::Field::ChestTarget> selected;
+  bool notification_pending = false;
+  VS::Field::ChestSelectionResult contents_result =
+      VS::Field::ChestSelectionResult::kPending;
+
+  std::optional<VS::Field::ChestLockState> Chest(
+      VS::Field::ChestTarget) const override {
+    return chest;
+  }
+  bool ScriptFlag(std::int32_t) override { return flag; }
+  bool HasItem(std::int16_t) override { return item; }
+  void SetScriptFlag(std::int32_t value) override {
+    calls.push_back(value);
+    flag = true;
+  }
+  void ConsumeItem(std::int16_t value) override { calls.push_back(value); }
+  bool Unlock(VS::Field::ChestTarget) override {
+    if (!chest) {
+      return false;
+    }
+    chest->lock_level = 0;
+    calls.push_back(1000);
+    return true;
+  }
+  void ShowUnlocked(std::int16_t) override { calls.push_back(1001); }
+  void PlayPose(const VS::Field::ChestLockState&, std::uint8_t pose) override {
+    calls.push_back(pose);
+  }
+  bool StartAnimation(VS::Field::ChestTarget) override {
+    calls.push_back(1002);
+    return true;
+  }
+  bool SelectChest(VS::Field::ChestTarget target, std::int32_t) override {
+    selected = target;
+    return true;
+  }
+  std::optional<VS::Field::ChestTarget> SelectedChest() const override {
+    return selected;
+  }
+  void BeginChestFlow() override { calls.push_back(1010); }
+  void FinishChestFlow() override { calls.push_back(1011); }
+  void RestoreIdlePoses() override { calls.push_back(1012); }
+  void ResetActionSelection() override { calls.push_back(1013); }
+  void ReleaseNotification() override { calls.push_back(1014); }
+  void ShowLocked(std::int32_t kind, std::int16_t) override {
+    calls.push_back(kind);
+  }
+  void OpenChestLoot(VS::Field::ChestTarget) override { calls.push_back(1015); }
+  void OpenChestStorage(std::int32_t storage) override {
+    calls.push_back(storage);
+  }
+  void PauseForDialog() override { calls.push_back(1016); }
+  void PauseForMenu() override { calls.push_back(1017); }
+  bool NotificationPending() override { return notification_pending; }
+  VS::Field::ChestSelectionResult UpdateContentsSelection() override {
+    return contents_result;
+  }
+  void ReleaseContentsRows() override { calls.push_back(1018); }
+  void ResumeField() override { calls.push_back(1019); }
+};
+
+struct RecordingInteractionDispatchHost final
+    : VS::Field::InteractionDispatchHost {
+  VS::Field::InteractionTarget target;
+  bool trap_mode = false;
+  std::vector<int> calls;
+  VS::Field::InteractionTarget Target() const override { return target; }
+  bool TrapMode() const override { return trap_mode; }
+  void BeginDispatch() override { calls.push_back(0); }
+  bool DispatchTrap(VS::Field::TrapTarget) override {
+    calls.push_back(1);
+    return true;
+  }
+  bool DispatchChest(VS::Field::ChestTarget) override {
+    calls.push_back(2);
+    return true;
+  }
+};
+
+struct RecordingTrapInteractionHost final : VS::Field::TrapSelectionHost,
+                                            VS::Field::TrapFinishHost {
+  bool valid = true;
+  bool disable_succeeds = true;
+  std::optional<VS::Field::TrapTarget> selected;
+  std::optional<VS::Field::TrapTarget> disabled;
+  std::int32_t selected_actor = -1;
+  std::vector<std::int32_t> calls;
+
+  bool Valid(VS::Field::TrapTarget, std::int32_t) const override {
+    return valid;
+  }
+  void BeginFlow() override { calls.push_back(1000); }
+  void Select(VS::Field::TrapTarget target, std::int32_t actor) override {
+    selected = target;
+    selected_actor = actor;
+    calls.push_back(1001);
+  }
+  void RestoreIdle(std::int32_t actor) override { calls.push_back(actor); }
+  void ShowInformation(VS::Field::TrapTarget) override {
+    calls.push_back(1002);
+  }
+  void ResetActionSelection() override { calls.push_back(1003); }
+  std::optional<VS::Field::TrapTarget> Target() const override {
+    return selected;
+  }
+  void FinishFlow() override { calls.push_back(1004); }
+  void ReleaseNotification() override { calls.push_back(1005); }
+  bool DisableTrap(VS::Field::TrapTarget target) override {
+    disabled = target;
+    calls.push_back(1006);
+    return disable_succeeds;
+  }
+  void ClearTarget() override {
+    selected.reset();
+    calls.push_back(1007);
+  }
+};
 
 using SnapshotBytes = std::array<std::byte, sizeof(Field_GimmickSnapshot)>;
 
@@ -294,6 +423,32 @@ struct AnimationQueueFixture {
   AnimationQueueFixture& operator=(const AnimationQueueFixture&) = delete;
 };
 
+struct ChestTargetFixture {
+  Field_RoomRecord saved = Field_roomData;
+  std::uint32_t control_mode = Field_controlMode;
+  decltype(Battle_actionFlowMode) action_flow = Battle_actionFlowMode;
+  Actors_ActorLocationQuery actor_query = Field_interactionFocus.actor_query;
+  AnimationQueueFixture queue;
+  std::array<Items_TreasureChest, 1> chests{};
+
+  ChestTargetFixture() {
+    Field_roomData.containers = chests.data();
+    Field_roomData.header.containersLength = 0x234;
+    VS::Field::InvalidateLiveInteractionTargets();
+    chests[0].tileX = -1;
+    chests[0].tileZ = -1;
+    chests[0].layer = -1;
+    chests[0].lidRotationId = -1;
+  }
+  ~ChestTargetFixture() {
+    Field_roomData = saved;
+    VS::Field::InvalidateLiveInteractionTargets();
+    Field_controlMode = control_mode;
+    Battle_actionFlowMode = action_flow;
+    Field_interactionFocus.actor_query = actor_query;
+  }
+};
+
 void ConfigureOneFrameDelayedDoor(Field_MpdLockTrigger& target) {
   target.trigger.tileX = -1;
   target.trigger.tileZ = -1;
@@ -426,7 +581,271 @@ void CheckOriginalCountdownByte(VS::Field::GimmickAnimationKind kind,
   }
 }
 
+void CheckChestOpenAndBlockedRules(VS::Field::ChestTarget target) {
+  RecordingChestInteractionHost open;
+  CHECK(VS::Field::TryOpenChest(target, open));
+  CHECK(open.calls == std::vector<std::int32_t>{2, 1002});
+  RecordingChestInteractionHost blocked;
+  blocked.chest = VS::Field::ChestLockState{.lock_level = 2};
+  CHECK_FALSE(VS::Field::TryOpenChest(target, blocked));
+  CHECK(blocked.calls == std::vector<std::int32_t>{3});
+  blocked.chest.reset();
+  CHECK_FALSE(VS::Field::TryOpenChest(target, blocked));
+}
+
+void CheckChestLockedItemRules(VS::Field::ChestTarget target) {
+  RecordingChestInteractionHost locked;
+  locked.chest =
+      VS::Field::ChestLockState{.lock_level = 1, .required_item = 0x1D2};
+  CHECK_FALSE(VS::Field::TryOpenChest(target, locked));
+  CHECK(locked.calls == std::vector<std::int32_t>{3});
+  locked.item = true;
+  locked.calls.clear();
+  CHECK(VS::Field::TryOpenChest(target, locked));
+  CHECK(locked.calls ==
+        std::vector<std::int32_t>{0x388, 0x1D2, 1000, 1001, 2, 1002});
+}
+
+void CheckChestBeginFinishRules(RecordingChestInteractionHost& host,
+                                VS::Field::ChestTarget target) {
+  CHECK(VS::Field::BeginChestInteraction(target, 0, host));
+  CHECK(host.selected == target);
+  CHECK(host.calls == std::vector<std::int32_t>{1010, 1012, 1, 1013});
+  host.calls.clear();
+  CHECK(VS::Field::FinishChestInteraction(host));
+  CHECK(host.calls == std::vector<std::int32_t>{1011, 4, 1014});
+  host.calls.clear();
+}
+
+void CheckChestContentsRules(RecordingChestInteractionHost& host) {
+  CHECK(VS::Field::OpenChestContents(host));
+  CHECK(host.calls == std::vector<std::int32_t>{1015, 1017});
+  host.calls.clear();
+  host.chest = VS::Field::ChestLockState{.lock_level = 3, .required_item = 9};
+  CHECK(VS::Field::OpenChestContents(host));
+  CHECK(host.calls == std::vector<std::int32_t>{3, 1016});
+  host.calls.clear();
+  host.chest = VS::Field::ChestLockState{.opened_flag = 67};
+  CHECK(VS::Field::OpenChestContents(host));
+  CHECK(host.calls == std::vector<std::int32_t>{3, 1017});
+  host.selected.reset();
+  CHECK_FALSE(VS::Field::OpenChestContents(host));
+}
+
+void CheckTargetKindSelection(VS::Field::InteractionTargetState& state) {
+  state.Select(VS::Field::ChestTarget{3, 7});
+  CHECK(state.Trap() == nullptr);
+  REQUIRE(state.Chest());
+  CHECK(*state.Chest() == VS::Field::ChestTarget{3, 7});
+  state.Select(VS::Field::TrapTarget{4, 8});
+  CHECK(state.Chest() == nullptr);
+  REQUIRE(state.Trap());
+  CHECK(*state.Trap() == VS::Field::TrapTarget{4, 8});
+}
+
+void CheckTargetDomainBounds(VS::Field::InteractionTargetDomain domain) {
+  CHECK(VS::Field::ResolveTrapTarget({1, 7}, domain) == 1);
+  CHECK_FALSE(VS::Field::ResolveTrapTarget({2, 7}, domain));
+  CHECK_FALSE(VS::Field::ResolveTrapTarget({0, 6}, domain));
+  CHECK(VS::Field::ResolveChestTarget({2, 7}, domain) == 2);
+  CHECK_FALSE(VS::Field::ResolveChestTarget({3, 7}, domain));
+  CHECK_FALSE(VS::Field::ResolveChestTarget({0, 8}, domain));
+}
+
+void CheckSelectedTargetDomain(VS::Field::InteractionTargetDomain domain) {
+  VS::Field::InteractionTargetState state;
+  state.Select(VS::Field::ChestTarget{2, 7});
+  CHECK(state.Chest(domain) != nullptr);
+  CHECK(state.Trap(domain) == nullptr);
+  CHECK(state.Chest({8, 2, 3}) == nullptr);
+  CHECK(state.Chest({7, 2, 2}) == nullptr);
+}
+
 }  // namespace
+
+TEST_CASE("Typed chest interaction keeps lock item and pose rules separate",
+          "[chest-interaction-core][field]") {
+  const VS::Field::ChestTarget target{0, 1};
+  CheckChestOpenAndBlockedRules(target);
+  CheckChestLockedItemRules(target);
+}
+
+TEST_CASE("Typed chest flow owns selected begin finish and contents decisions",
+          "[chest-interaction-core][field]") {
+  RecordingChestInteractionHost host;
+  const VS::Field::ChestTarget target{0, 1};
+  CheckChestBeginFinishRules(host, target);
+  CheckChestContentsRules(host);
+}
+
+TEST_CASE("Typed chest selection preserves accepted and cancelled outcomes",
+          "[chest-interaction-core][field]") {
+  RecordingChestInteractionHost host;
+  host.selected = VS::Field::ChestTarget{0, 1};
+  host.chest = VS::Field::ChestLockState{.opened_flag = 7};
+  CHECK(VS::Field::UpdateChestContentsSelection(host));
+  host.contents_result = VS::Field::ChestSelectionResult::kAccepted;
+  CHECK_FALSE(VS::Field::UpdateChestContentsSelection(host));
+  CHECK(host.calls == std::vector<std::int32_t>{0x3C7, 1018, 1019});
+  host.calls.clear();
+  host.contents_result = VS::Field::ChestSelectionResult::kCancelled;
+  CHECK_FALSE(VS::Field::UpdateChestContentsSelection(host));
+  CHECK(host.calls == std::vector<std::int32_t>{1002, 1018, 1019});
+}
+
+TEST_CASE("Interaction dispatch refuses mismatched chest and trap modes",
+          "[interaction-target][field]") {
+  RecordingInteractionDispatchHost host;
+  host.target = VS::Field::ChestTarget{0, 1};
+  CHECK(VS::Field::DispatchTrapOrChestInteraction(host));
+  CHECK(host.calls == std::vector<int>{0, 2});
+  host.calls.clear();
+  host.trap_mode = true;
+  CHECK_FALSE(VS::Field::DispatchTrapOrChestInteraction(host));
+  CHECK(host.calls.empty());
+  host.target = VS::Field::TrapTarget{0, 1};
+  CHECK(VS::Field::DispatchTrapOrChestInteraction(host));
+  CHECK(host.calls == std::vector<int>{0, 1});
+}
+
+TEST_CASE("Typed trap begin preserves actor capture and original reset order",
+          "[interaction-target][field]") {
+  RecordingTrapInteractionHost host;
+  const VS::Field::TrapTarget target{2, 7};
+  REQUIRE(VS::Field::BeginTrapInteraction(target, 3, host));
+  CHECK(host.selected == target);
+  CHECK(host.selected_actor == 3);
+  CHECK(host.calls == std::vector<std::int32_t>{
+                          1000, 1001, 0,  1,  2,  3,  4,  5,  6,    7,
+                          8,    9,    10, 11, 12, 13, 14, 15, 1002, 1003});
+}
+
+TEST_CASE("Typed trap begin refuses invalid capture before side effects",
+          "[interaction-target][field]") {
+  RecordingTrapInteractionHost host;
+  host.valid = false;
+  CHECK_FALSE(VS::Field::BeginTrapInteraction({2, 7}, 3, host));
+  CHECK(host.calls.empty());
+  CHECK_FALSE(host.selected);
+}
+
+TEST_CASE("Typed trap finish disables only its selected target then clears it",
+          "[interaction-target][field]") {
+  RecordingTrapInteractionHost host;
+  const VS::Field::TrapTarget target{2, 7};
+  host.selected = target;
+  CHECK(VS::Field::FinishTrapInteraction(host));
+  CHECK(host.disabled == target);
+  CHECK_FALSE(host.selected);
+  CHECK(host.calls == std::vector<std::int32_t>{1004, 1005, 1006, 1007});
+  host.calls.clear();
+  CHECK_FALSE(VS::Field::FinishTrapInteraction(host));
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("Typed trap finish clears a target refused during disable",
+          "[interaction-target][field]") {
+  RecordingTrapInteractionHost host;
+  host.selected = VS::Field::TrapTarget{2, 7};
+  host.disable_succeeds = false;
+  CHECK_FALSE(VS::Field::FinishTrapInteraction(host));
+  CHECK_FALSE(host.selected);
+  CHECK(host.calls == std::vector<std::int32_t>{1004, 1005, 1006, 1007});
+}
+
+TEST_CASE(
+    "Interaction target state cannot expose a chest through the trap kind",
+    "[interaction-target][field]") {
+  VS::Field::InteractionTargetState state;
+  CHECK(state.Trap() == nullptr);
+  CHECK(state.Chest() == nullptr);
+  CheckTargetKindSelection(state);
+  state.Clear();
+  CHECK(state.Trap() == nullptr);
+  CHECK(state.Chest() == nullptr);
+}
+
+TEST_CASE("Interaction target domain refuses stale and out-of-range identities",
+          "[interaction-target][field]") {
+  const VS::Field::InteractionTargetDomain domain{7, 2, 3};
+  CheckTargetDomainBounds(domain);
+  CheckSelectedTargetDomain(domain);
+}
+
+TEST_CASE("Live interaction target indexes refuse room-generation replacement",
+          "[interaction-target][field]") {
+  const auto saved = Field_roomData;
+  struct RestoreRoom {
+    Field_RoomRecord record;
+    ~RestoreRoom() {
+      Field_roomData = record;
+      VS::Field::InvalidateLiveInteractionTargets();
+    }
+  } restore{saved};
+  std::array<Field_MpdFloorTrigger, 2> traps{};
+  std::array<Items_TreasureChest, 2> chests{};
+  Field_roomData.floorTriggers = traps.data();
+  Field_roomData.header.floorTriggersLength = 24;
+  Field_roomData.containers = chests.data();
+  Field_roomData.header.containersLength = 0x468;
+  const auto trap = VS::Field::FindLiveTrapTarget(&traps[1]);
+  const auto chest = VS::Field::FindLiveChestTarget(&chests[1]);
+  REQUIRE(trap);
+  REQUIRE(chest);
+  CHECK(VS::Field::ResolveLiveTrapTarget(*trap) == &traps[1]);
+  CHECK(VS::Field::ResolveLiveChestTarget(*chest) == &chests[1]);
+  CHECK_FALSE(VS::Field::FindLiveTrapTarget(nullptr));
+  CHECK_FALSE(VS::Field::FindLiveChestTarget(nullptr));
+  VS::Field::InvalidateLiveInteractionTargets();
+  CHECK(VS::Field::ResolveLiveTrapTarget(*trap) == nullptr);
+  CHECK(VS::Field::ResolveLiveChestTarget(*chest) == nullptr);
+}
+
+TEST_CASE("Typed chest animation never stores a lock-record alias",
+          "[interaction-target][field]") {
+  ChestTargetFixture fixture;
+  const auto target = VS::Field::FindLiveChestTarget(&fixture.chests[0]);
+  REQUIRE(target);
+  REQUIRE(VS::Field::BeginLiveChestSwitch(*target));
+  CHECK(Field_pendingGimmickAnimationCount == 1);
+  CHECK(Field_gimmickAnimationQueue[0].jobKind == 2);
+  CHECK(Field_gimmickAnimationQueue[0].trigger == nullptr);
+  CHECK(static_cast<std::uint16_t>(fixture.chests[0].reservedA) == 0x0114);
+  fixture.chests[0].reservedA = 0x0101;
+  Field_UpdateGimmickAnimationQueueEntry();
+  CHECK(fixture.chests[0].isOpen == 1);
+  CHECK(fixture.chests[0].reservedA == 0);
+  CHECK(Field_pendingGimmickAnimationCount == 0);
+}
+
+TEST_CASE("Typed chest animation refuses a stale room-generation target",
+          "[interaction-target][field]") {
+  ChestTargetFixture fixture;
+  const auto target = VS::Field::FindLiveChestTarget(&fixture.chests[0]);
+  REQUIRE(target);
+  REQUIRE(VS::Field::BeginLiveChestSwitch(*target));
+  VS::Field::InvalidateLiveInteractionTargets();
+  const auto before = fixture.chests[0].reservedA;
+  Field_UpdateGimmickAnimationQueueEntry();
+  CHECK(Field_pendingGimmickAnimationCount == 0);
+  CHECK(fixture.chests[0].reservedA == before);
+  CHECK_FALSE(VS::Field::BeginLiveChestSwitch(*target));
+}
+
+TEST_CASE("Native chest focus selects typed record and refuses stale dispatch",
+          "[interaction-target][field]") {
+  ChestTargetFixture fixture;
+  const auto target = VS::Field::FindLiveChestTarget(&fixture.chests[0]);
+  REQUIRE(target);
+  CHECK(VS::Field::BeginLiveChestInteraction(*target, 0));
+  const auto* selected = VS::Field::LiveInteractionTargetState().Chest(
+      VS::Field::LiveInteractionTargetDomain());
+  REQUIRE(selected);
+  CHECK(*selected == *target);
+  CHECK(VS::Field::LiveInteractionTargetState().Trap() == nullptr);
+  VS::Field::InvalidateLiveInteractionTargets();
+  CHECK_FALSE(VS::Field::TryOpenLiveChest(*target));
+}
 
 TEST_CASE("Typed switch start restores state on refused delayed admission",
           "[gimmick-switch-admission-core][field]") {

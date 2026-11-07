@@ -364,6 +364,14 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Field_DispatchTrapOrChestInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_BeginTrapInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_FinishTrapInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_BeginChestInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_FinishChestInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_OpenChestContentsEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_UpdateChestContentsSelectionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_TryOpenChestEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_BeginSwitchToggleEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
     "Field_ResetGimmickAnimationQueueEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.h",
     "Field_UpdateGimmickAnimationQueueEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.h",
@@ -1049,6 +1057,14 @@ OWNED_CALL_BINDINGS["F00584"] = "Field_QueueGimmickAnimationEntry"
 OWNED_CALL_BINDINGS["F00585"] = "Field_UpdateGimmickAnimationQueueEntry"
 OWNED_CALL_BINDINGS["F00570"] = "Field_ResetGimmickAnimationQueueEntry"
 OWNED_CALL_BINDINGS["F00606"] = "Field_BeginSwitchToggleEntry"
+OWNED_CALL_BINDINGS["F00136"] = "Field_TryOpenChestEntry"
+OWNED_CALL_BINDINGS["F00138"] = "Field_BeginChestInteractionEntry"
+OWNED_CALL_BINDINGS["F00144"] = "Field_FinishChestInteractionEntry"
+OWNED_CALL_BINDINGS["F00147"] = "Field_OpenChestContentsEntry"
+OWNED_CALL_BINDINGS["F00148"] = "Field_UpdateChestContentsSelectionEntry"
+OWNED_CALL_BINDINGS["F00141"] = "Field_DispatchTrapOrChestInteractionEntry"
+OWNED_CALL_BINDINGS["F00137"] = "Field_BeginTrapInteractionEntry"
+OWNED_CALL_BINDINGS["F00145"] = "Field_FinishTrapInteractionEntry"
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -2387,6 +2403,14 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x800741D4, "Field_DispatchTrapOrChestInteractionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80073F7C, "Field_BeginTrapInteractionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80074314, "Field_FinishTrapInteractionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80074050, "Field_BeginChestInteractionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800742A4, "Field_FinishChestInteractionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800743E0, "Field_OpenChestContentsEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800744B8, "Field_UpdateChestContentsSelectionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80073E30, "Field_TryOpenChestEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D5FC, "Field_BeginSwitchToggleEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008B6B4, "Field_ResetGimmickAnimationQueueEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008C0C0, "Field_UpdateGimmickAnimationQueueEntry"),
@@ -3909,6 +3933,17 @@ FIXES["F00782"] = FIXES.get("F00782", []) + [
      "VS::Field::LiveSampleSupportHeightAt(s1->positionX, s1->positionY, s1->positionZ, 0, 0, 1)",
      "30DB0.c:373 samples from the gimmick's three position halfwords through a short* prototype"),
 ]
+FIXES.setdefault("F00139", []).extend([
+    ("Field_interactionFocus.actorQuery.location.position.vx", "Field_interactionFocus.actor_query.location.position.vx", "287 owned actor observation naming"),
+    ("Field_interactionFocus.actorQuery.location.position.vy", "Field_interactionFocus.actor_query.location.position.vy", "287 owned actor observation naming"),
+    ("Field_interactionFocus.actorQuery.location.position.vz", "Field_interactionFocus.actor_query.location.position.vz", "287 owned actor observation naming"),
+])
+FIXES.setdefault("F00140", []).extend([
+    ("Field_interactionFocus.actorQuery.location.position.vx", "Field_interactionFocus.actor_query.location.position.vx", "287 owned actor observation naming"),
+    ("Field_interactionFocus.actorQuery.location.position.vy", "Field_interactionFocus.actor_query.location.position.vy", "287 owned actor observation naming"),
+    ("Field_interactionFocus.actorQuery.location.position.vz", "Field_interactionFocus.actor_query.location.position.vz", "287 owned actor observation naming"),
+])
+
 FIXES.setdefault("F00853", []).append(
     ("VS::Field::LiveSampleActorSupportHeight(&temp_s0->positionX, 0, 0, 0)",
      "VS::Field::LiveSampleSupportHeightAt(temp_s0->positionX, temp_s0->positionY, temp_s0->positionZ, 0, 0, 0)",

@@ -1,11 +1,66 @@
 # Current handoff
 
-Updated 2026-11-06. This is a short entry point, not another work tracker.
+Updated 2026-11-07. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
 
 ## Work order and current state
+
+### Typed Interaction Targets (#287, #276 Row 27)
+
+- Current slice is based on `fff7ebcabfd956fe59be474374f5914bf8b08aa6` plus
+  the scoped changes below. #320 is closed at that revision with exact green
+  Source Quality `42363616728`; older pending-publication notes below describe
+  their earlier checkpoints, not current issue status.
+- Eight functions F00136/F00137/F00138/F00141/F00144/F00145/F00147/F00148
+  now have strict typed chest/trap selection, dispatch, finish and contents
+  cores. `InteractionTarget` distinguishes floor traps from actual treasure
+  chests by index and room generation. Live adapters read each record's own
+  fields; gameplay chest casts and the shared lock-view focus pointer are gone.
+- Chest animation payloads carry `ChestTarget`, leaving the legacy queue's
+  trigger pointer null. Room release/unload and successful section publication
+  invalidate target identity and clear actor observation. Stale jobs retire
+  without reading the replacement chest. This is not general room pinning.
+- Original BATTLE.PRG MIPS halfword accesses and JAL consumers were read at
+  `80073E30`, `80073F7C`, `80074050`, `800741D4`, `800742A4`, `80074314`,
+  `800743E0`, `800744B8`: chest tile X/Z, lock/item/flag and inline loot map
+  to `+0/+2`, `+0xC/+0xE/+0x10`, `+0x14`; trap kind remains `+6`.
+  No exhaustive original-executable or malformed-field parity is claimed.
+- Complete Debug/Release solutions build. Both final regression checks pass
+  4,734 tests / 8,635,991 assertions, zero failures/skips/regressions; both
+  2,400-frame `silver_wolves` and 900-frame `first_lever_room` fingerprints
+  remain unchanged. Focused `[interaction-target],[chest-interaction-core]`
+  passes 14 cases / 96 assertions in each configuration.
+- `quality-native.cmd --changed --tidy`: six existing / zero new; format,
+  cpplint, Ruff and clones zero. Copier 191 / extent nine controls pass. Two
+  measured supported copier/project generations preserve all 1,732 Native,
+  manifest and ownership path hashes. Manifest SHA256:
+  `4365720AD549354629E76E8D295D7FADEE79AA1BBCEEA04FDB5793F5982E2913`.
+- Real controller controls use original MAP124 chest and MAP247 lock fixtures,
+  seed one, `all-items-b`, unchanged isolated room-event policy and solo Ashley.
+  MAP124 `120:Down,180:Cross,600:Cross` unlocks, preserves Chest Key465 at ten
+  and cancels the ready loot menu back to field mode one / phase zero.
+  Opposite-facing and `all-items-a` missing-key controls refuse unlocking.
+  MAP247 `120:Up,180:Cross` faces `[3,15,0]`, preserves key458 at ten and
+  visibly opens the doorway; opposite facing is a separate control.
+- Local evidence: Debug chest cancellation `1794053656316376-0`, chest
+  opposite-facing `1794053076238422-0`, lock `1794053965353507-0` under
+  `build/Debug/combat-lab/runs`; Release chest cancellation
+  `1794054453730507-0`, lock `1794054473047855-0`, missing key
+  `1794054521272535-0` under `build/Release/combat-lab/runs`.
+  Private fixtures/captures live under `build/owner-checkpoint/interaction-*`;
+  none are committed or uploaded.
+- #321 separately records an active but invisible chest loot panel in Debug
+  run `1794053759826123-0`; Square transfers no loot there. Capacity and cause
+  remain unresolved. Cancellation is not successful loot acceptance, and this
+  source-promotion milestone does not close #321 or complete all chest gameplay.
+- Unchanged gates derive 2,703 promoted / one separate frame `wip`, 244 behavior
+  records and zero violations. `VR-INTERACTION-TARGETS` and its four-to-zero
+  historical code-consumer slice retain required native C/module entries,
+  actor-query observation and raw lock/door queue jobs as compatibility debt.
+  Publication/closure require exact-revision CI; record the fixing revision in
+  #287/#276. Continue remaining row 27 before later owning rows and #217.
 
 ### Switch-Start Admission Transaction (#320, #276 Row 27)
 

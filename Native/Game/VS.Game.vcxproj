@@ -1272,6 +1272,10 @@
     <ClCompile Include="src\Field\CameraLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Field\ChestInteractions.cpp" />
+    <ClCompile Include="src\Field\ChestInteractionsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Collision.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1342,6 +1346,9 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Field\InteractionsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Field\InteractionTargetLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Field\Locations.cpp">
@@ -1999,6 +2006,7 @@
     <ClInclude Include="src\Field\BackgroundLiveState.h" />
     <ClInclude Include="src\Field\Camera.h" />
     <ClInclude Include="src\Field\CameraLiveState.h" />
+    <ClInclude Include="src\Field\ChestInteractionsLive.h" />
     <ClInclude Include="src\Field\Collision.h" />
     <ClInclude Include="src\Field\DoorMatchList.h" />
     <ClInclude Include="src\Field\Doors.h" />
@@ -2011,7 +2019,7 @@
     <ClInclude Include="src\Field\GimmickPlacementLive.h" />
     <ClInclude Include="src\Field\Gimmicks.h" />
     <ClInclude Include="src\Field\Input.h" />
-    <ClInclude Include="src\Field\Interaction.h" />
+    <ClInclude Include="src\Field\InteractionFocusLive.h" />
     <ClInclude Include="src\Field\Interactions.h" />
     <ClInclude Include="src\Field\Locations.h" />
     <ClInclude Include="src\Field\Manual.h" />
@@ -2262,6 +2270,7 @@
     <ClInclude Include="include\Field\BackgroundLive.hpp" />
     <ClInclude Include="include\Field\Camera.hpp" />
     <ClInclude Include="include\Field\CameraLive.hpp" />
+    <ClInclude Include="include\Field\ChestInteractions.hpp" />
     <ClInclude Include="include\Field\CollisionMap.hpp" />
     <ClInclude Include="include\Field\CollisionMapLive.hpp" />
     <ClInclude Include="include\Field\CollisionSampling.hpp" />
@@ -2276,6 +2285,8 @@
     <ClInclude Include="include\Field\GimmickAnimationQueue.hpp" />
     <ClInclude Include="include\Field\GimmickPlacement.hpp" />
     <ClInclude Include="include\Field\InteractionsLive.hpp" />
+    <ClInclude Include="include\Field\InteractionTarget.hpp" />
+    <ClInclude Include="include\Field\InteractionTargetLive.hpp" />
     <ClInclude Include="include\Field\Map.hpp" />
     <ClInclude Include="include\Field\MapLive.hpp" />
     <ClInclude Include="include\Field\MinimapScene.hpp" />

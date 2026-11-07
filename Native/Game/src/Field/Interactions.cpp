@@ -3,7 +3,6 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -14,7 +13,6 @@
 #include "Field/TrapsLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -34,25 +32,22 @@ extern "C" {
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/RoomTriggerEntryLive.h"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
-#include "Field/Interaction.h"
+#include "Field/InteractionFocusLive.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLiveState.h"
-#include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLiveState.h"
-#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/KeyItems.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
-#include "Menu/Framework/ActionSelection.h"
 #include "Menu/TextBox.h"
 #include "Render/Palette.h"
-#include "State/Timers.h"
 
 // decomp: D_800F1910 (D_800F1910@BATTLE/BATTLE.PRG)
 Field_InteractionFocus Field_interactionFocus;
@@ -225,101 +220,14 @@ void Field_TriggerActorTrap(Field_MpdLockTrigger* trap_trigger, Actors_ActorLoca
     Effects_BeginSecondaryEffects(&request, 0);
 }
 
-// decomp: BATTLE.PRG func_80073E30 (src/BATTLE/BATTLE.PRG/146C.c:4935)
-void Field_TryOpenChest(Field_MpdLockTrigger* chest_trigger, int arg1)
-{
-    short interaction_target_position[4];
-    int can_open;
-    int shift = 7;
-
-    interaction_target_position[0] = (chest_trigger->trigger.tileX << shift) + 0x40;
-    interaction_target_position[2] = (chest_trigger->trigger.tileZ << shift) + 0x40;
-    can_open = 0;
-
-    switch (chest_trigger->keyOrSigil) {
-    case 0:
-        can_open = 1;
-        break;
-    case 1:
-    case 3:
-        if (!VS::State::LiveScriptFlag(chest_trigger->isOpen + 0x1B6)) {
-            if (VS::Items::CountLiveInventoryItem(chest_trigger->isOpen) == 0) {
-                break;
-            }
-            VS::State::SetLiveScriptFlag(chest_trigger->isOpen + 0x1B6, 1);
-            if (chest_trigger->isOpen >= 0x1D2) {
-                VS::Items::ConsumeLiveMiscItem(chest_trigger->isOpen);
-            }
-        }
-        chest_trigger->keyOrSigil = 0;
-        Menu_ShowSceneNotification(4, chest_trigger->isOpen, 1);
-        can_open = 1;
-        break;
-    }
-    if (can_open != 0) {
-        VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 2);
-        Field_BeginSwitchToggleEntry(chest_trigger);
-        return;
-    }
-    VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 3);
-}
-
-// decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4973)
-void Field_BeginTrapInteraction(Field_MpdLockTrigger* trap_trigger, Actors_ActorLocation* victim_location, int victim_actor_index)
-{
-    int i;
-
-    Field_controlMode = 8;
-    Battle_actionFlowMode = 1;
-    VS::Field::LiveStorePreferredActionCameraDistance();
-    Field_interactionFocus.triggerRecord = trap_trigger;
-    Field_interactionFocus.actorQuery.location = *victim_location;
-    Field_interactionFocus.actorQuery.actorIndex = victim_actor_index;
-    for (i = 0; i < 16; ++i) {
-        VS::Actors::RestoreLiveActorIdlePose(i);
-    }
-    if (Input_settings.information != 0) {
-        Menu_ShowSceneNotification(0xB, trap_trigger->trigger.kind + 6, 1);
-    }
-    Battle_actionState->chainStep = 0;
-    Battle_actionState->selection.actionId = 0;
-}
-
-// decomp: BATTLE.PRG func_80074050 (src/BATTLE/BATTLE.PRG/146C.c:4993)
-void Field_BeginChestInteraction(Field_MpdLockTrigger* chest_trigger, int interacting_actor_index)
-{
-    short interaction_target_position[4];
-    int i;
-    int target_tile_coordinate;
-
-    Field_controlMode = 9;
-    Battle_actionFlowMode = 1;
-    VS::Field::LiveStorePreferredActionCameraDistance();
-    Field_interactionFocus.triggerRecord = chest_trigger;
-    VS::Actors::LiveActorPlacement(interacting_actor_index, &Field_interactionFocus.actorQuery);
-    Field_interactionFocus.actorQuery.actorIndex = interacting_actor_index;
-
-    for (i = 0; i < 16; ++i) {
-        VS::Actors::RestoreLiveActorIdlePose(i);
-    }
-
-    target_tile_coordinate = chest_trigger->trigger.tileX;
-    interaction_target_position[0] = (target_tile_coordinate << 7) + 0x40;
-    target_tile_coordinate = chest_trigger->trigger.tileZ;
-    interaction_target_position[2] = (target_tile_coordinate << 7) + 0x40;
-    VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 1);
-    Battle_actionState->chainStep = 0;
-    Battle_actionState->selection.actionId = 0;
-}
-
 // decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019)
 int Field_WaitForChestCameraFocus(void)
 {
     SVECTOR interaction_camera_target;
 
-    interaction_camera_target.vx = (u_short)Field_interactionFocus.actorQuery.location.position.vx;
-    interaction_camera_target.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
-    interaction_camera_target.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
+    interaction_camera_target.vx = (u_short)Field_interactionFocus.actor_query.location.position.vx;
+    interaction_camera_target.vy = (u_short)Field_interactionFocus.actor_query.location.position.vy;
+    interaction_camera_target.vz = (u_short)Field_interactionFocus.actor_query.location.position.vz;
 
     if ((VS::Field::LiveStepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28) == 0)
         && (((VS::Actors::LiveActorStateFlags(0) & 0x08000000) != 0))) {
@@ -333,22 +241,10 @@ int Field_StepTrapCameraFocus(void)
 {
     SVECTOR interaction_camera_target;
 
-    interaction_camera_target.vx = (u_short)Field_interactionFocus.actorQuery.location.position.vx;
-    interaction_camera_target.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
-    interaction_camera_target.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
+    interaction_camera_target.vx = (u_short)Field_interactionFocus.actor_query.location.position.vx;
+    interaction_camera_target.vy = (u_short)Field_interactionFocus.actor_query.location.position.vy;
+    interaction_camera_target.vz = (u_short)Field_interactionFocus.actor_query.location.position.vz;
     return VS::Field::LiveStepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28);
-}
-
-// decomp: BATTLE.PRG func_800741D4 (src/BATTLE/BATTLE.PRG/146C.c:5044)
-void Field_DispatchTrapOrChestInteraction(void)
-{
-    Battle_actionFlowMode = 2;
-    if (Field_controlMode == 8) {
-        State_tickSpeed = 4;
-        Field_TriggerActorTrap(Field_interactionFocus.triggerRecord, &Field_interactionFocus.actorQuery, Field_interactionFocus.actorQuery.actorIndex);
-        return;
-    }
-    Field_TryOpenChest(Field_interactionFocus.triggerRecord, Field_interactionFocus.actorQuery.actorIndex);
 }
 
 // decomp: BATTLE.PRG func_8007424C (src/BATTLE/BATTLE.PRG/146C.c:5055)
@@ -359,31 +255,6 @@ int Field_IsChestAnimationReady(void)
         ret = Menu_IsSceneNotificationPending() == 0;
     }
     return ret;
-}
-
-// decomp: BATTLE.PRG func_800742A4 (src/BATTLE/BATTLE.PRG/146C.c:5066)
-void Field_FinishChestInteraction(void)
-{
-    short interaction_target_position[4];
-    int v;
-
-    Battle_actionFlowMode = 4;
-    State_tickSpeed = 2;
-    v = 7;
-    interaction_target_position[0] = (Field_interactionFocus.triggerRecord->trigger.tileX << v) + 0x40;
-    interaction_target_position[2] = (Field_interactionFocus.triggerRecord->trigger.tileZ << v) + 0x40;
-    VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 4);
-    Menu_ReleaseSceneNotification();
-}
-
-// decomp: BATTLE.PRG func_80074314 (src/BATTLE/BATTLE.PRG/146C.c:5080)
-void Field_FinishTrapInteraction(void)
-{
-    Battle_actionFlowMode = 4;
-    State_tickSpeed = 2;
-    Menu_ReleaseSceneNotification();
-    Field_SetRoomTriggerEnabled(&Field_interactionFocus.triggerRecord->trigger, 1);
-    VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(Field_interactionFocus.triggerRecord->trigger.tileX, Field_interactionFocus.triggerRecord->trigger.tileZ);
 }
 
 // decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089)
@@ -403,66 +274,6 @@ int Field_TrackInteractionCameraToAshley(void)
         return 0;
     }
     return camera_tracking_speed;
-}
-
-// decomp: BATTLE.PRG func_800743E0 (src/BATTLE/BATTLE.PRG/146C.c:5107)
-void Field_OpenChestContents()
-{
-    int chest_lock_state = Field_interactionFocus.triggerRecord->keyOrSigil;
-    int notification_template;
-
-    Battle_actionFlowMode = 3;
-
-    if (chest_lock_state != 0) {
-        switch (chest_lock_state) {
-        case 1:
-            notification_template = 2;
-            break;
-        case 2:
-            notification_template = 1;
-            break;
-        case 3:
-            notification_template = 3;
-            break;
-        }
-        Menu_ShowSceneNotification(notification_template, Field_interactionFocus.triggerRecord->isOpen, 1);
-        VS::Field::LivePauseFieldForInteractionDialog();
-    } else {
-        short loot_or_storage_index = Field_interactionFocus.triggerRecord->linkedLockIndex;
-        if (loot_or_storage_index < 0x40) {
-            VS::Menu::Framework::OpenLiveLootEntryMenu((Items_BattleLoot*)(Field_interactionFocus.triggerRecord + 1));
-        } else {
-            VS::Menu::Framework::OpenLiveChestStorageMenu(loot_or_storage_index - 0x40);
-        }
-        VS::Field::LivePauseFieldForMenu();
-    }
-}
-
-// decomp: BATTLE.PRG func_800744B8 (src/BATTLE/BATTLE.PRG/146C.c:5139)
-int Field_UpdateChestContentsSelection(void)
-{
-    Menu_Framework_ActionSelection* action_selection;
-
-    if (Field_interactionFocus.triggerRecord->keyOrSigil != 0) {
-        if (Menu_IsSceneNotificationPending() != 0) {
-            return 1;
-        }
-        VS::Field::LiveResumeFieldAfterMenu();
-        return 0;
-    }
-    VS::Menu::Framework::UpdateLiveMenuOverlay();
-    action_selection = VS::Menu::Framework::LiveActionSelectionState();
-    if (action_selection->menuStatus == 1) {
-        return 1;
-    }
-    if (action_selection->selectionKind != 0) {
-        VS::State::SetLiveScriptFlag((Field_interactionFocus.triggerRecord->linkedLockIndex + 0x3C0), 1);
-    } else {
-        Field_BeginSwitchToggleEntry(Field_interactionFocus.triggerRecord);
-    }
-    VS::Menu::Framework::ReleaseLiveMenuRows();
-    VS::Field::LiveResumeFieldAfterMenu();
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232)
@@ -614,7 +425,7 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
                     position[2], position[1]);
                 if (roomTrigger != NULL) {
                     if (roomTrigger->kind != 0x10) {
-                        Field_BeginTrapInteraction((Field_MpdLockTrigger*)roomTrigger, coordinates, actorId);
+                        Field_BeginTrapInteractionEntry((Field_MpdLockTrigger*)roomTrigger, coordinates, actorId);
                         actor->lastTriggerTile.word = *(u_int*)position;
                         actor->lastTriggerTile.bytes[3] = tileMode;
                         return 1;
@@ -738,7 +549,7 @@ int Field_CheckActorTrapAndFallTriggers(int actor_index, Actors_ActorLocation* a
                             floor_trigger = Field_RoomTriggerAtTile(location_alias->packedTile.target.tileX,
                                 location_alias->packedTile.target.tileZ, location_alias->packedTile.target.tileLayer);
                             if ((floor_trigger != NULL) && (floor_trigger->kind != 0x10)) {
-                                Field_BeginTrapInteraction((Field_MpdLockTrigger*)floor_trigger, actor_location, actor_index);
+                                Field_BeginTrapInteractionEntry((Field_MpdLockTrigger*)floor_trigger, actor_location, actor_index);
                                 battle_actor->lastTriggerTile.word = location_alias->packedTile.word;
                                 battle_actor->lastTriggerTile.bytes[3] = trigger_tile_mode;
                                 return 3;

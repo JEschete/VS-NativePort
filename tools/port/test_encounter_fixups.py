@@ -440,6 +440,22 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00137", "Field_BeginTrapInteractionEntry", "VS::Field::BeginTrapInteraction",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00141", "Field_DispatchTrapOrChestInteractionEntry", "VS::Field::DispatchTrapOrChestInteraction",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00145", "Field_FinishTrapInteractionEntry", "VS::Field::FinishTrapInteraction",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00138", "Field_BeginChestInteractionEntry", "VS::Field::BeginChestInteraction",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00144", "Field_FinishChestInteractionEntry", "VS::Field::FinishChestInteraction",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00147", "Field_OpenChestContentsEntry", "VS::Field::OpenChestContents",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00148", "Field_UpdateChestContentsSelectionEntry", "VS::Field::UpdateChestContentsSelection",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00136", "Field_TryOpenChestEntry", "VS::Field::TryOpenChest",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00606", "Field_BeginSwitchToggleEntry", "VS::Field::BeginSwitchToggle",
              r"Native\Game\include\Field\RoomSwitches.hpp"),
             ("F00570", "Field_ResetGimmickAnimationQueueEntry", "VS::Field::ResetGimmickAnimationQueue",
@@ -971,6 +987,14 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00141": ("Field_DispatchTrapOrChestInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00137": ("Field_BeginTrapInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00145": ("Field_FinishTrapInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00138": ("Field_BeginChestInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00144": ("Field_FinishChestInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00147": ("Field_OpenChestContentsEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00148": ("Field_UpdateChestContentsSelectionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00136": ("Field_TryOpenChestEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00606": ("Field_BeginSwitchToggleEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
                     "F00570": ("Field_ResetGimmickAnimationQueueEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),
                     "F00585": ("Field_UpdateGimmickAnimationQueueEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),

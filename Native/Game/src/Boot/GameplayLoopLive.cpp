@@ -25,7 +25,9 @@
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/GameModeLive.hpp"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/InteractionsLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -82,15 +84,6 @@ extern "C" {
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 }
-
-// #287: a facing chest is passed to Field_BeginChestInteraction through the
-// lock-trigger view, which reads only the shared tile coordinates. The cast is
-// confined to this host until the interaction target is typed.
-static_assert(offsetof(Items_TreasureChest, tileX) ==
-              offsetof(Field_MpdLockTrigger, trigger.tileX));
-static_assert(offsetof(Items_TreasureChest, tileZ) ==
-              offsetof(Field_MpdLockTrigger, trigger.tileZ));
-static_assert(sizeof(Items_TreasureChest) >= sizeof(Field_MpdLockTrigger));
 
 namespace VS::Boot {
 namespace {
@@ -279,8 +272,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     if (facing_chest_ == nullptr) {
       return;
     }
-    Field_BeginChestInteraction(
-        reinterpret_cast<Field_MpdLockTrigger*>(facing_chest_), slot);
+    const auto target = VS::Field::FindLiveChestTarget(facing_chest_);
+    if (target) {
+      static_cast<void>(VS::Field::BeginLiveChestInteraction(*target, slot));
+    }
   }
   void BeginObjectInteractionWait() override {
     Field_BeginObjectInteractionWait();
@@ -368,20 +363,22 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return Field_WaitForChestCameraFocus() != 0;
   }
   void DispatchTrapOrChestInteraction() override {
-    Field_DispatchTrapOrChestInteraction();
+    Field_DispatchTrapOrChestInteractionEntry();
   }
   [[nodiscard]] bool IsActionEffectBusy() override {
     return Effects_ActionEffectBusyFlags() != 0;
   }
-  void FinishTrapInteraction() override { Field_FinishTrapInteraction(); }
+  void FinishTrapInteraction() override { Field_FinishTrapInteractionEntry(); }
   [[nodiscard]] bool IsChestAnimationReady() override {
     return Field_IsChestAnimationReady() != 0;
   }
-  void OpenChestContents() override { Field_OpenChestContents(); }
+  void OpenChestContents() override { Field_OpenChestContentsEntry(); }
   bool UpdateChestContentsSelection() override {
-    return Field_UpdateChestContentsSelection() != 0;
+    return Field_UpdateChestContentsSelectionEntry() != 0;
   }
-  void FinishChestInteraction() override { Field_FinishChestInteraction(); }
+  void FinishChestInteraction() override {
+    Field_FinishChestInteractionEntry();
+  }
   void RebuildActorActionPlans() override {
     static_cast<void>(VS::Battle::Ai::RebuildLiveActorActionPlans(
         &Battle_actionState->queue[0]));
