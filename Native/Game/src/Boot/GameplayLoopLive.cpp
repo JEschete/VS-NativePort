@@ -262,7 +262,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
   bool InteractWithFacingRoomObject() override {
     return facing_room_object_ == nullptr ||
-           Field_InteractWithLockedRoomObject(facing_room_object_) != 0;
+           Field_InteractWithLockedRoomObjectEntry(facing_room_object_) != 0;
   }
   bool FindFacingUnlootedChest(int slot) override {
     facing_chest_ = Field_FindFacingUnlootedChest(slot);

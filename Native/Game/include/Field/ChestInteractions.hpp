@@ -106,4 +106,35 @@ class ObjectInteractionWaitHost {
 void BeginObjectInteractionWait(ObjectInteractionWaitHost& host);
 void EndObjectInteractionWait(ObjectInteractionWaitHost& host);
 
+struct RoomObjectLockState {
+  std::int16_t tile_x = 0;
+  std::int16_t tile_z = 0;
+  std::int16_t required_item = 0;
+  std::uint8_t lock_state = 0;
+  bool is_open = false;
+  bool is_triggered = false;
+};
+
+enum class RoomObjectInteractionResult { kWait, kBusy, kRefused };
+
+class RoomObjectInteractionHost {
+ public:
+  virtual ~RoomObjectInteractionHost() = default;
+  virtual std::optional<RoomObjectLockState> State() const = 0;
+  virtual bool HasItem(std::int16_t item) = 0;
+  virtual bool PreviousUnlockFlag(std::int32_t flag) = 0;
+  virtual void SetUnlockFlag(std::int32_t flag, std::int16_t value) = 0;
+  virtual void ConsumeItem(std::int16_t item) = 0;
+  virtual bool Unlock() = 0;
+  virtual void ShowNotification(std::int32_t kind, std::int16_t item) = 0;
+  virtual void PlayPose(const RoomObjectLockState& state,
+                        std::uint8_t pose) = 0;
+  virtual void BeginToggle() = 0;
+  virtual void PlaySound(std::int32_t sound) = 0;
+  virtual void RestoreIdle(std::int32_t actor) = 0;
+};
+
+RoomObjectInteractionResult InteractWithLockedRoomObject(
+    RoomObjectInteractionHost& host);
+
 }  // namespace VS::Field

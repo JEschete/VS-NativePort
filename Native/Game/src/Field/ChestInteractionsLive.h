@@ -7,6 +7,8 @@ struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 void Field_BeginObjectInteractionWaitEntry(void);
 void Field_EndObjectInteractionWaitEntry(void);
+int Field_InteractWithLockedRoomObjectEntry(
+    struct Field_MpdLockTrigger* address);
 void Field_TryOpenChestEntry(struct Field_MpdLockTrigger* address, int actor);
 void Field_BeginChestInteractionEntry(struct Field_MpdLockTrigger* address,
                                       int actor);

@@ -179,6 +179,68 @@ struct RecordingObjectInteractionWaitHost final
   }
 };
 
+struct RecordingRoomObjectInteractionHost final
+    : VS::Field::RoomObjectInteractionHost {
+  std::optional<VS::Field::RoomObjectLockState> state{
+      VS::Field::RoomObjectLockState{}};
+  bool has_item = false;
+  bool previous_flag = false;
+  bool unlock_succeeds = true;
+  std::int16_t flag_value = 0;
+  std::vector<std::int32_t> calls;
+
+  std::optional<VS::Field::RoomObjectLockState> State() const override {
+    return state;
+  }
+  bool HasItem(std::int16_t) override {
+    calls.push_back(0);
+    return has_item;
+  }
+  bool PreviousUnlockFlag(std::int32_t) override {
+    calls.push_back(1);
+    return previous_flag;
+  }
+  void SetUnlockFlag(std::int32_t flag, std::int16_t value) override {
+    calls.push_back(flag);
+    flag_value = value;
+  }
+  void ConsumeItem(std::int16_t item) override { calls.push_back(item); }
+  bool Unlock() override {
+    calls.push_back(1000);
+    if (unlock_succeeds && state) {
+      state->lock_state = 0;
+    }
+    return unlock_succeeds;
+  }
+  void ShowNotification(std::int32_t kind, std::int16_t) override {
+    calls.push_back(kind);
+  }
+  void PlayPose(const VS::Field::RoomObjectLockState&,
+                std::uint8_t pose) override {
+    calls.push_back(pose);
+  }
+  void BeginToggle() override { calls.push_back(1001); }
+  void PlaySound(std::int32_t sound) override { calls.push_back(sound); }
+  void RestoreIdle(std::int32_t actor) override {
+    CHECK(actor == 0);
+    calls.push_back(1002);
+  }
+};
+
+struct RoomObjectRecordFixture {
+  Field_RoomRecord saved = Field_roomData;
+  std::array<Field_MpdLockTrigger, 2> locks{};
+
+  RoomObjectRecordFixture() {
+    Field_roomData.lockTriggers = locks.data();
+    Field_roomData.header.lockTriggersLength = 0x28;
+  }
+  ~RoomObjectRecordFixture() {
+    Field_roomData = saved;
+    VS::Field::InvalidateLiveInteractionTargets();
+  }
+};
+
 struct SnapshotFixture {
   std::array<Field_GimmickInstance*, 16> saved{};
   std::unique_ptr<Field_GimmickInstance> object =
@@ -717,6 +779,120 @@ TEST_CASE("Object interaction wait keeps both original module bindings",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80073ACC) ==
         reinterpret_cast<const void*>(&Field_EndObjectInteractionWaitEntry));
+}
+
+TEST_CASE("Room object interaction keeps reusable keys and consumed sigils",
+          "[room-object-interaction-core][field]") {
+  RecordingRoomObjectInteractionHost key;
+  key.state =
+      VS::Field::RoomObjectLockState{.required_item = 458, .lock_state = 1};
+  key.has_item = true;
+  CHECK(VS::Field::InteractWithLockedRoomObject(key) ==
+        VS::Field::RoomObjectInteractionResult::kWait);
+  CHECK(key.calls == std::vector<std::int32_t>{0, 1000, 7, 5, 1001});
+  CHECK(key.state->lock_state == 0);
+  RecordingRoomObjectInteractionHost sigil;
+  sigil.state =
+      VS::Field::RoomObjectLockState{.required_item = 466, .lock_state = 3};
+  sigil.has_item = true;
+  CHECK(VS::Field::InteractWithLockedRoomObject(sigil) ==
+        VS::Field::RoomObjectInteractionResult::kWait);
+  CHECK(sigil.calls ==
+        std::vector<std::int32_t>{0, 0x388, 466, 1000, 9, 5, 1001});
+  CHECK(sigil.flag_value == 2);
+}
+
+TEST_CASE("Room object prior unlock opens silently and busy records do nothing",
+          "[room-object-interaction-core][field]") {
+  RecordingRoomObjectInteractionHost host;
+  host.state =
+      VS::Field::RoomObjectLockState{.required_item = 458, .lock_state = 1};
+  host.previous_flag = true;
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kWait);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 1000, 5, 1001});
+  host.calls.clear();
+  host.state->is_open = true;
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kBusy);
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("Room object rejection preserves notification sounds and idle order",
+          "[room-object-interaction-core][field]") {
+  RecordingRoomObjectInteractionHost host;
+  host.state = VS::Field::RoomObjectLockState{.lock_state = 2};
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kWait);
+  CHECK(host.calls == std::vector<std::int32_t>{5, 0x65, 0x66, 1002});
+  host.calls.clear();
+  host.state = VS::Field::RoomObjectLockState{.lock_state = 3};
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kWait);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 10, 0x65, 0x66, 1002});
+}
+
+TEST_CASE("Room object busy and invalid targets perform no item reads",
+          "[room-object-interaction-core][field]") {
+  RecordingRoomObjectInteractionHost host;
+  host.state = VS::Field::RoomObjectLockState{.is_triggered = true};
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kBusy);
+  CHECK(host.calls.empty());
+  host.state.reset();
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kRefused);
+  CHECK(host.calls.empty());
+  host.state = VS::Field::RoomObjectLockState{.lock_state = 4};
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kRefused);
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("Room object refused unlock cannot start pose or toggle",
+          "[room-object-interaction-core][field]") {
+  RecordingRoomObjectInteractionHost host;
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kWait);
+  CHECK(host.calls == std::vector<std::int32_t>{5, 1001});
+  host.calls.clear();
+  host.state =
+      VS::Field::RoomObjectLockState{.required_item = 458, .lock_state = 1};
+  host.has_item = true;
+  host.unlock_succeeds = false;
+  CHECK(VS::Field::InteractWithLockedRoomObject(host) ==
+        VS::Field::RoomObjectInteractionResult::kRefused);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1000});
+  CHECK(host.state->lock_state == 1);
+}
+
+TEST_CASE("Native room object entry refuses null and foreign record addresses",
+          "[room-object-interaction-live][field]") {
+  RoomObjectRecordFixture fixture;
+  Field_MpdLockTrigger foreign{};
+  CHECK(Field_InteractWithLockedRoomObjectEntry(nullptr) == 1);
+  CHECK(Field_InteractWithLockedRoomObjectEntry(&foreign) == 1);
+  CHECK(Field_InteractWithLockedRoomObjectEntry(
+            reinterpret_cast<Field_MpdLockTrigger*>(std::uintptr_t{1})) == 1);
+}
+
+TEST_CASE("Native room object entry reads only its present busy lock record",
+          "[room-object-interaction-live][field]") {
+  RoomObjectRecordFixture fixture;
+  fixture.locks[1].isOpen = 1;
+  CHECK(Field_InteractWithLockedRoomObjectEntry(&fixture.locks[1]) == 1);
+  fixture.locks[1].isOpen = 0;
+  fixture.locks[1].isTriggered = 1;
+  CHECK(Field_InteractWithLockedRoomObjectEntry(&fixture.locks[1]) == 1);
+}
+
+TEST_CASE("Native room object interaction keeps its original module binding",
+          "[room-object-interaction-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x80073AFC) ==
+      reinterpret_cast<const void*>(&Field_InteractWithLockedRoomObjectEntry));
 }
 
 TEST_CASE("Typed chest flow owns selected begin finish and contents decisions",

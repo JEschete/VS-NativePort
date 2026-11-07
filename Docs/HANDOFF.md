@@ -7,6 +7,40 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Ordinary Room-Object Locks (#276 Row 27)
+
+- F00134 now uses the existing strict interaction core with a typed snapshot/
+  result/host. Live accepts only a present room lock-record address and rechecks
+  room generation/index before access. No chest or floor-record alias is read.
+- Held keys unlock without consumption; held sigils set flag value two before
+  consumption; prior nonzero flags open silently. Busy records return without
+  item reads; rejection retains notification, sounds `0x65/0x66`, actor0 idle.
+  The existing raw asynchronous door-toggle producer is unchanged migration
+  debt, not a new native ownership destination or a general pinning guarantee.
+- Original 141 MIPS words `80073AFC-80073D2C` confirm open/triggered/item/lock
+  accesses `+0xE/+0x12/+0xC/+8`, threshold `0x1D2`, setter value two and call
+  order. Required native C/module `80073AFC` remains; supported copier adoption
+  retires the old body/prototype. Its nine obsolete function-local `template`
+  keyword adaptations were removed after strict matching failed; other
+  adaptation records and matching requirements were preserved.
+- Complete Debug/Release 4,745 / 8,636,031, zero failures/skips/regressions and
+  canonical fingerprints unchanged. Eight focused cases / 33 assertions;
+  coupled 25 / 136. Quality five existing / zero new; 191 copier / nine extent
+  controls, Pylance syntax and editor diagnostics pass. Two measured generations
+  preserve 1,733 Native/manifest/ownership/adaptation hashes. Manifest:
+  `1D1F9D30FFF8465E1B35C93D8D476CD4C0882291C65333CF5C12587B02A02D56`.
+- Current original MAP247 key458 runs: Debug `1794059543651132-0`, Release
+  `1794059562842773-0`; each has 138 wait-mode11 frames then field1/phase0 and
+  reusable count10. Original MAP013 Chamomile Sigil466 runs: Debug
+  `1794059161959422-0`, Release `1794059468038790-0`; count10 becomes9, the
+  visible unlock notification is confirmed once at600, then field1/phase0.
+  Private captures/fixtures remain in existing ignored diagnostic directories.
+- `VR-ROOM-OBJECT-INTERACTION` records the bounded source promotion. This is
+  representative controller evidence, not a fresh all31 original-lock matrix.
+  Required C/module/raw jobs, other row27 functions, #321 and global retirement
+  stay open. Source is `a0f53f60` plus this scoped slice; publish and verify its
+  exact new CI before claiming the next checkpoint complete.
+
 ### Object Interaction Wait (#276 Row 27)
 
 - #287 is closed at `47efa7c71d0f886ade12ac9e426bb2f9172e923d`, exact green

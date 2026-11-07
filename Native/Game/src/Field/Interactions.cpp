@@ -10,7 +10,6 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TrapsLive.hpp"
-#include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -41,7 +40,6 @@ extern "C" {
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/TransitionsLiveState.h"
 #include "Items/Inventory.h"
-#include "Items/KeyItems.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
@@ -101,80 +99,6 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
         }
         break;
     }
-}
-
-// decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836)
-int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* door_trigger)
-{
-    short interaction_target_position[4];
-    int action;
-    int template_;
-
-    if (door_trigger->isOpen == 0) {
-        if (door_trigger->isTriggered == 0) {
-            int v = 7;
-            interaction_target_position[0] = (door_trigger->trigger.tileX << v) + 0x40;
-            interaction_target_position[2] = (door_trigger->trigger.tileZ << v) + 0x40;
-            action = 0;
-
-            switch (door_trigger->trigger.lockState.lock.state) {
-            case 0:
-                action = 1;
-                break;
-            case 1:
-            case 3:
-                if (VS::Items::CountLiveInventoryItem(door_trigger->keyOrSigil) != 0) {
-                    if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
-                        VS::State::SetLiveScriptFlag(door_trigger->keyOrSigil + 0x1B6, 2);
-                        VS::Items::ConsumeLiveMiscItem(door_trigger->keyOrSigil);
-                    }
-                    door_trigger->trigger.lockState.lock.state = 0;
-                    action = 2;
-                } else if (VS::State::LiveScriptFlag(door_trigger->keyOrSigil + 0x1B6)) {
-                    door_trigger->trigger.lockState.lock.state = 0;
-                    action = 3;
-                }
-                break;
-            }
-
-            if (action != 0) {
-                if (action == 2) {
-                    template_ = 7; // Unlocked with key
-                    if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
-                        template_ = 9; // Unlocked with sigil
-                    }
-                    Menu_ShowSceneNotification(template_, door_trigger->keyOrSigil, 1);
-                }
-                VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 5);
-                Field_BeginDoorToggle(door_trigger);
-                return 0;
-            }
-
-            if (door_trigger->trigger.lockState.lock.state != 0) {
-                switch (door_trigger->trigger.lockState.lock.state) {
-                case 1:
-                    template_ = 6; // Locked with key
-                    if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
-                        template_ = 8; // Locked with sigil
-                    }
-                    break;
-                case 2:
-                    template_ = 5; // Magic lock (chest)
-                    break;
-                case 3:
-                    template_ = 10; // Unconditionally locked
-                    break;
-                }
-                Menu_ShowSceneNotification(template_, door_trigger->keyOrSigil, 1);
-            }
-
-            VS::Audio::LivePlaySfxCentered(0x7E, 0x65);
-            VS::Audio::LivePlaySfxCentered(0x7E, 0x66);
-            VS::Actors::RestoreLiveActorIdlePose(0);
-            return 0;
-        }
-    }
-    return 1;
 }
 
 // decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909)

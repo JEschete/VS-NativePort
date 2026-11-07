@@ -2,9 +2,14 @@
 
 #include <array>
 #include <bit>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
 
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
+#include "Audio/SfxLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractions.hpp"
@@ -21,6 +26,7 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionFocusLive.h"
 #include "Field/Interactions.h"
@@ -44,6 +50,99 @@ constexpr std::int32_t kTrapNotification = 0xB;
 constexpr std::int32_t kTrapActionOffset = 6;
 constexpr std::int32_t kTrapTickSpeed = 4;
 constexpr std::size_t kPoseWords = 4;
+constexpr std::size_t kOriginalLockRecordBytes = 0x14;
+constexpr std::int32_t kRoomObjectSoundGroup = 0x7E;
+
+class LiveRoomObjectInteractionHost final
+    : public VS::Field::RoomObjectInteractionHost {
+ public:
+  explicit LiveRoomObjectInteractionHost(const void* address)
+      : generation_(VS::Field::LiveInteractionTargetDomain().generation) {
+    const auto records = Records();
+    for (std::size_t index = 0; index < records.size(); ++index) {
+      if (static_cast<const void*>(&records[index]) == address) {
+        index_ = index;
+        break;
+      }
+    }
+  }
+  std::optional<VS::Field::RoomObjectLockState> State() const override {
+    const auto* record = Record();
+    if (record == nullptr) {
+      return std::nullopt;
+    }
+    return VS::Field::RoomObjectLockState{
+        .tile_x = record->trigger.tileX,
+        .tile_z = record->trigger.tileZ,
+        .required_item = record->keyOrSigil,
+        .lock_state =
+            static_cast<std::uint8_t>(record->trigger.lockState.lock.state),
+        .is_open = record->isOpen != 0,
+        .is_triggered = record->isTriggered != 0};
+  }
+  bool HasItem(std::int16_t item) override {
+    return VS::Items::CountLiveInventoryItem(item) != 0;
+  }
+  bool PreviousUnlockFlag(std::int32_t flag) override {
+    return VS::State::LiveScriptFlag(flag) != 0;
+  }
+  void SetUnlockFlag(std::int32_t flag, std::int16_t value) override {
+    VS::State::SetLiveScriptFlag(flag, value);
+  }
+  void ConsumeItem(std::int16_t item) override {
+    VS::Items::ConsumeLiveMiscItem(item);
+  }
+  bool Unlock() override {
+    auto* record = Record();
+    if (record == nullptr) {
+      return false;
+    }
+    record->trigger.lockState.lock.state = 0;
+    return true;
+  }
+  void ShowNotification(std::int32_t kind, std::int16_t item) override {
+    Menu_ShowSceneNotification(kind, item, 1);
+  }
+  void PlayPose(const VS::Field::RoomObjectLockState& state,
+                std::uint8_t pose) override {
+    const auto x = static_cast<std::uint16_t>(
+        static_cast<std::int32_t>(state.tile_x) * 128 + 64);
+    const auto z = static_cast<std::uint16_t>(
+        static_cast<std::int32_t>(state.tile_z) * 128 + 64);
+    std::array<std::int16_t, kPoseWords> position{
+        std::bit_cast<std::int16_t>(x), 0, std::bit_cast<std::int16_t>(z), 0};
+    VS::Actors::PlayLiveActorActionPose(0, position.data(), pose);
+  }
+  void BeginToggle() override {
+    if (auto* record = Record()) {
+      Field_BeginDoorToggle(record);
+    }
+  }
+  void PlaySound(std::int32_t sound) override {
+    VS::Audio::LivePlaySfxCentered(kRoomObjectSoundGroup, sound);
+  }
+  void RestoreIdle(std::int32_t actor) override {
+    VS::Actors::RestoreLiveActorIdlePose(actor);
+  }
+
+ private:
+  std::span<Field_MpdLockTrigger> Records() const {
+    if (generation_ != VS::Field::LiveInteractionTargetDomain().generation ||
+        Field_roomData.lockTriggers == nullptr) {
+      return {};
+    }
+    return {
+        Field_roomData.lockTriggers,
+        Field_roomData.header.lockTriggersLength / kOriginalLockRecordBytes};
+  }
+  Field_MpdLockTrigger* Record() const {
+    const auto records = Records();
+    return index_ && *index_ < records.size() ? &records[*index_] : nullptr;
+  }
+
+  std::uint64_t generation_ = 0;
+  std::optional<std::size_t> index_;
+};
 
 class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
  public:
@@ -361,4 +460,13 @@ void Field_BeginObjectInteractionWaitEntry() {
 void Field_EndObjectInteractionWaitEntry() {
   LiveObjectInteractionWaitHost host;
   VS::Field::EndObjectInteractionWait(host);
+}
+
+// decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836).
+int Field_InteractWithLockedRoomObjectEntry(Field_MpdLockTrigger* address) {
+  LiveRoomObjectInteractionHost host(address);
+  return VS::Field::InteractWithLockedRoomObject(host) ==
+                 VS::Field::RoomObjectInteractionResult::kWait
+             ? 0
+             : 1;
 }

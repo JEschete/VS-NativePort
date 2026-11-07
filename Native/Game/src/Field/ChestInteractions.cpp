@@ -14,6 +14,26 @@ constexpr std::uint8_t kClosingPose = 4;
 constexpr std::int32_t kStorageFlagFirst = 0x40;
 constexpr std::int32_t kOpenedFlagBase = 0x3C0;
 constexpr std::int32_t kIdleActorCount = 16;
+constexpr std::uint8_t kSpecialRoomLock = 3;
+constexpr std::uint8_t kRoomObjectPose = 5;
+constexpr std::int32_t kRoomKeyUnlocked = 7;
+constexpr std::int32_t kRoomSigilUnlocked = 9;
+constexpr std::int32_t kRoomKeyLocked = 6;
+constexpr std::int32_t kRoomSigilLocked = 8;
+constexpr std::int32_t kRoomMagicLocked = 5;
+constexpr std::int32_t kRoomSpecialLocked = 10;
+constexpr std::int32_t kRoomRejectedSoundFirst = 0x65;
+constexpr std::int32_t kRoomRejectedSoundSecond = 0x66;
+constexpr std::int16_t kRoomSigilUnlockFlagValue = 2;
+
+std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
+  if (state.lock_state == kKeyLock) {
+    return state.required_item >= kConsumedSigilFirst ? kRoomSigilLocked
+                                                      : kRoomKeyLocked;
+  }
+  return state.lock_state == kBreakableLock ? kRoomMagicLocked
+                                            : kRoomSpecialLocked;
+}
 
 }  // namespace
 
@@ -192,6 +212,53 @@ void EndObjectInteractionWait(ObjectInteractionWaitHost& host) {
   host.ReleaseNotification();
   host.ResumeField();
   host.EnterExploration();
+}
+
+// decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836).
+RoomObjectInteractionResult InteractWithLockedRoomObject(
+    RoomObjectInteractionHost& host) {
+  const auto state = host.State();
+  if (!state) {
+    return RoomObjectInteractionResult::kRefused;
+  }
+  if (state->is_open || state->is_triggered) {
+    return RoomObjectInteractionResult::kBusy;
+  }
+  if (state->lock_state > kSpecialRoomLock) {
+    return RoomObjectInteractionResult::kRefused;
+  }
+  bool toggle = state->lock_state == 0;
+  if (state->lock_state == kKeyLock || state->lock_state == kSpecialRoomLock) {
+    const bool has_item = host.HasItem(state->required_item);
+    const auto flag = state->required_item + kItemUnlockFlagBase;
+    if (has_item || host.PreviousUnlockFlag(flag)) {
+      if (has_item && state->required_item >= kConsumedSigilFirst) {
+        host.SetUnlockFlag(flag, kRoomSigilUnlockFlagValue);
+        host.ConsumeItem(state->required_item);
+      }
+      if (!host.Unlock()) {
+        return RoomObjectInteractionResult::kRefused;
+      }
+      if (has_item) {
+        host.ShowNotification(state->required_item >= kConsumedSigilFirst
+                                  ? kRoomSigilUnlocked
+                                  : kRoomKeyUnlocked,
+                              state->required_item);
+      }
+      toggle = true;
+    }
+  }
+  if (toggle) {
+    host.PlayPose(*state, kRoomObjectPose);
+    host.BeginToggle();
+    return RoomObjectInteractionResult::kWait;
+  }
+  host.ShowNotification(RoomObjectLockedNotification(*state),
+                        state->required_item);
+  host.PlaySound(kRoomRejectedSoundFirst);
+  host.PlaySound(kRoomRejectedSoundSecond);
+  host.RestoreIdle(0);
+  return RoomObjectInteractionResult::kWait;
 }
 
 }  // namespace VS::Field
