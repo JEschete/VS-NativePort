@@ -78,6 +78,10 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B96B0, Event_ScriptWaitForButtonOrTimeoutOpcode},
     {0x800B94D8, Event_ScriptConfigureTimerOpcode},
     {0x800B9724, Event_ScriptConfigureEasingCurveOpcode},
+    {0x800B66A8, Event_ScriptReportInvalidOpcodeOpcode},
+    {0x800B66F4, Event_ScriptWaitForEventFileOpcode},
+    {0x800BB5AC, Event_CommandLoadNextEventOpcode},
+    {0x800BB604, Event_CommandFinishEventOpcode},
 });
 
 struct LiveVmFixture {
@@ -104,6 +108,7 @@ struct LiveVmFixture {
   char stops_music = Event_stopsMusicOnSkip;
   State_SceneTimer timer = State_sceneTimer;
   char timer_hud = Battle_lowerScreenUiState;
+  std::int16_t event_id = Event_eventId;
 
   LiveVmFixture() {
     std::ranges::copy(Content_discRequestSlots, slots.begin());
@@ -145,6 +150,7 @@ struct LiveVmFixture {
     Event_stopsMusicOnSkip = stops_music;
     State_sceneTimer = timer;
     Battle_lowerScreenUiState = timer_hud;
+    Event_eventId = event_id;
   }
   LiveVmFixture(const LiveVmFixture&) = delete;
   LiveVmFixture& operator=(const LiveVmFixture&) = delete;
@@ -823,6 +829,90 @@ std::intptr_t TimerConfigSlotBridge(std::uint8_t* instruction,
 std::intptr_t EasingConfigSlotBridge(std::uint8_t* instruction,
                                      std::int16_t thread) {
   return Event_ScriptConfigureEasingCurveOpcode(instruction, thread);
+}
+
+std::intptr_t InvalidOpcodeSlotBridge(std::uint8_t* instruction,
+                                      std::int16_t thread) {
+  return Event_ScriptReportInvalidOpcodeOpcode(instruction, thread);
+}
+
+std::intptr_t FileWaitSlotBridge(std::uint8_t* instruction,
+                                 std::int16_t thread) {
+  return Event_ScriptWaitForEventFileOpcode(instruction, thread);
+}
+
+std::intptr_t LoadEventSlotBridge(std::uint8_t* instruction,
+                                  std::int16_t thread) {
+  return Event_CommandLoadNextEventOpcode(instruction, thread);
+}
+
+std::intptr_t FinishEventSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_CommandFinishEventOpcode(instruction, thread);
+}
+
+void CheckLiveFileWait(bool guarded, int skip, int state) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE9, 0xE3, 4, 0xE6});
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      guarded ? FileWaitSlotBridge : Event_ScriptWaitForEventFileOpcode;
+  Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
+      Event_CommandSetTickSpeedOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE3] = 2;
+  Event_skipState = static_cast<char>(skip);
+  State_tickSpeed = 2;
+  auto& host = event::LiveScriptVm();
+  if (state != 0) {
+    REQUIRE(host.QueueEventFileLoad(0, event::EventBuffer::kScript));
+    if (state == 2) CompleteSyntheticFile(0xAA);
+    if (state == 3) PendingRequest().state = Content_DiscRequestState_Error;
+  }
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(host.ThreadCursor(0) == (state == 1 ? start : event::ScriptLocation{}));
+  CHECK(State_tickSpeed == ((state == 0 || state == 2) ? 4 : 2));
+  CheckMountedByte(0xE9, start.generation);
+}
+
+void CheckLiveChainedLoad(bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE9, 1, 0, 0xE6});
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      guarded ? LoadEventSlotBridge : Event_CommandLoadNextEventOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = 3;
+  Event_skipState = static_cast<char>(skip);
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+  CHECK(host.EventId() == 1);
+  CHECK(host.ChainedEventLoaded());
+  CHECK(host.EventFile() == event::EventFileStatus::kLoading);
+  CheckMountedByte(0xE9, start.generation);
+  CHECK_FALSE(host.AdoptChainedEvent());
+  CompleteSyntheticFile(0x77);
+  host.ReleaseEventFile();
+  CheckMountedByte(0xE9, start.generation);
+  REQUIRE(host.AdoptChainedEvent());
+  CheckMountedByte(0x77, start.generation + 1);
+}
+
+void CheckLiveFinishEvent(bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE9});
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      guarded ? FinishEventSlotBridge : Event_CommandFinishEventOpcode;
+  Event_skipState = static_cast<char>(skip);
+  State_tickSpeed = 4;
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  CHECK(event::ExecuteLiveScriptThread(0));
+  CHECK(State_tickSpeed == 2);
+  CHECK(host.ThreadCursor(0) == start);
 }
 
 void CheckLiveEasingConfiguration(bool guarded, int skip) {
@@ -2019,6 +2109,56 @@ TEST_CASE(
     CheckLiveTimerConfiguration({0, 4, 0x01020300U, false, guarded, 0});
     CheckLiveTimerConfiguration({0, 255, 0x01020300U, false, guarded, 2});
     CheckLiveTimerConfiguration({255, 255, 0x01020300U, true, guarded, 0});
+  }
+}
+
+TEST_CASE(
+    "Native file wait bindings preserve pending ready and failed transitions",
+    "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (int state = 0; state < 4; ++state) {
+        CheckLiveFileWait(guarded, skip, state);
+      }
+    }
+  }
+}
+
+TEST_CASE(
+    "Native chained load bindings retain staging until completed adoption",
+    "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      CheckLiveChainedLoad(guarded, skip);
+    }
+  }
+}
+
+TEST_CASE("Native finish bindings report completion and restore field ticks",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      CheckLiveFinishEvent(guarded, skip);
+    }
+  }
+}
+
+TEST_CASE("Native invalid opcode bindings preserve diagnostic continuation",
+          "[event-vm-live][control-opcode]") {
+  for (const bool guarded : {false, true}) {
+    const LiveVmFixture fixture;
+    const auto start = MountScript({0xE9, 0xE3, 4, 0xE6});
+    Event_kOpcodeHandlers[0xE9] = guarded
+                                      ? InvalidOpcodeSlotBridge
+                                      : Event_ScriptReportInvalidOpcodeOpcode;
+    Event_kOpcodeHandlers[0xE3] = Event_CommandSetTickSpeedOpcode;
+    Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
+    Event_kOpcodeSizes[0xE3] = 2;
+    State_tickSpeed = 2;
+    event::LiveScriptVm().SetThreadCursor(0, start);
+    CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+    CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+    CHECK(State_tickSpeed == 4);
   }
 }
 

@@ -58,6 +58,14 @@ intptr_t Event_ScriptConfigureTimerOpcode(uint8_t* instruction,
                                           int16_t thread_index);
 intptr_t Event_ScriptConfigureEasingCurveOpcode(uint8_t* instruction,
                                                 int16_t thread_index);
+intptr_t Event_ScriptReportInvalidOpcodeOpcode(uint8_t* instruction,
+                                               int16_t thread_index);
+intptr_t Event_ScriptWaitForEventFileOpcode(uint8_t* instruction,
+                                            int16_t thread_index);
+intptr_t Event_CommandLoadNextEventOpcode(uint8_t* instruction,
+                                          int16_t thread_index);
+intptr_t Event_CommandFinishEventOpcode(uint8_t* instruction,
+                                        int16_t thread_index);
 
 #ifdef __cplusplus
 }

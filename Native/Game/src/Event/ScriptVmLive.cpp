@@ -76,10 +76,11 @@ struct ControlBinding {
 // decomp: INITBTL.PRG _initScriptFunctionTable (12AC.c:69), BATTLE.PRG
 // control handlers in 4A0A8.c and 573B8.c. Match the selected table's target.
 constexpr std::array kControlBindings{
-    ControlBinding{Event_ScriptReportInvalidOpcode, ScriptReportInvalidOpcode},
+    ControlBinding{Event_ScriptReportInvalidOpcodeOpcode,
+                   ScriptReportInvalidOpcode},
     ControlBinding{Event_ScriptNoOperationOpcode, ScriptNoOperation},
     ControlBinding{Event_ScriptYieldFrameOpcode, ScriptYieldFrame},
-    ControlBinding{Event_ScriptWaitForEventFile, ScriptWaitForEventFile},
+    ControlBinding{Event_ScriptWaitForEventFileOpcode, ScriptWaitForEventFile},
     ControlBinding{Event_ScriptBeginSkippableCutsceneOpcode,
                    ScriptBeginSkippableCutscene},
     ControlBinding{Event_ScriptEndCutsceneAndJumpOpcode,
@@ -119,8 +120,8 @@ constexpr std::array kControlBindings{
                    CommandStartScriptContext},
     ControlBinding{Event_CommandStopScriptContextOpcode,
                    CommandStopScriptContext},
-    ControlBinding{Event_CommandLoadNextEvent, CommandLoadNextEvent},
-    ControlBinding{Event_CommandFinishEvent, CommandFinishEvent},
+    ControlBinding{Event_CommandLoadNextEventOpcode, CommandLoadNextEvent},
+    ControlBinding{Event_CommandFinishEventOpcode, CommandFinishEvent},
 };
 
 ScriptControlOpcode NativeControl(OpcodeHandler handler) {
@@ -1122,4 +1123,32 @@ std::intptr_t Event_ScriptConfigureEasingCurveOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptConfigureEasingCurve);
+}
+
+// decomp: BATTLE.PRG vs_battle_invalidOpcode (4A0A8.c:588).
+std::intptr_t Event_ScriptReportInvalidOpcodeOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptReportInvalidOpcode);
+}
+
+// decomp: BATTLE.PRG func_800B66F4 (4A0A8.c:601).
+std::intptr_t Event_ScriptWaitForEventFileOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptWaitForEventFile);
+}
+
+// decomp: BATTLE.PRG func_800BB5AC (4A0A8.c:2845).
+std::intptr_t Event_CommandLoadNextEventOpcode(std::uint8_t* instruction,
+                                               std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandLoadNextEvent);
+}
+
+// decomp: BATTLE.PRG func_800BB604 (4A0A8.c:2854).
+std::intptr_t Event_CommandFinishEventOpcode(std::uint8_t* instruction,
+                                             std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandFinishEvent);
 }

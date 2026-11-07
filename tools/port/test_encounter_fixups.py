@@ -471,10 +471,14 @@ class EncounterFixupTests(unittest.TestCase):
                 {header: "generated"},
                 {
                     "F01131": {"header": f" \t{header}\t "},
-                    "F01027": {"header": header},
+                    "F01031": {"header": header},
                 },
             ),
             [header],
+        )
+        self.assertEqual(
+            check_event_dispatch.event_headers({}, {"F01027": {"header": header}}),
+            [copy_fixups.NATIVE_HELPER_HEADERS[copy_fixups.EVENT_OPCODE_BINDINGS["F01027"]]],
         )
 
     def test_event_dispatch_audit_uses_promoted_opcode_bindings(self):

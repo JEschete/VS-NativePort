@@ -7,6 +7,36 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native File/Lifecycle Control Slots (#276 Row 33)
+
+- F01027/F01030/F01205/F01206 register strict native diagnostic/wait/chained-load/
+  finish cores and guarded native module/normal/skip identities. Original C bodies/
+  prototypes retire via the copier; Combat Lab diagnostic/finish/load comparisons
+  follow native identities. ASM confirms continuation, complete-state wait release,
+  allocate/queue before chain flag, and eight-dialog dismissal before completion.
+- Live guard/table tests observe pending/ready/failed wait cursor/tick/source state,
+  old generation retained until completed chained adoption, actual completion with
+  field-tick restore and retained finish cursor, and diagnostic continuation to a
+  real subsequent action. Existing rollback/busy/queue/cancellation/reused-slot/
+  pending-dialog tests remain. Fixture now restores mutated event id. Four new
+  cases add 244 assertions; eight module/detached checks add eight. Focused
+  lifecycle/lifetime/Combat Lab gate: 40 / 94,878.
+- On `3996780c` plus this slice, full Debug/Release builds and regressions pass
+  4,677 cases / 8,437,755 assertions, zero failures/skips and both canonical
+  fingerprints unchanged. No baseline refresh. Broad quality: 32 existing / zero
+  new findings; 190 copier/nine extent/Pylance syntax controls pass. Header dedup
+  fixture moves to unpromoted F01031 and separately proves promoted F01027 uses
+  its registered header; no audit requirement weakened. Evidence:
+  `VR-EVENT-CONTROL-FILE-LIFECYCLE` and
+  `build\owner-checkpoint\native-control-file-lifecycle-*-regression.log`.
+  Native failure/rollback/refusal safety is outside unchecked original behavior;
+  required table ABI, special control/C-entry/global EC debt remain separate.
+  No whole-row/retail/physical/visual parity claim.
+  Configuration predecessor `3996780c` is green on exact CI `42335100514`.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,677 promoted / four compatibility `wip`; row 33 is
+  now 45/57. Diagnostic/file wait/load/finish identity and state checks are intact.
+
 ### Native Timer/Easing Configuration Slots (#276 Row 33)
 
 - F01106/F01111 register strict typed timer/easing cores and guarded native

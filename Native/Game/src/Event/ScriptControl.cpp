@@ -904,6 +904,7 @@ void RestoreScriptTextureRectangle(ScriptVmHost& host) {
   host.MoveTextureRectangle(kSkipTextureMove);
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:588, 800B66A8; report then continue.
 ScriptFlow ScriptReportInvalidOpcode(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
   host.NoteInvalidOpcode(instruction);
@@ -922,6 +923,7 @@ ScriptFlow ScriptYieldFrame(const ScriptInstruction& /*instruction*/,
   return Yield();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:601, 800B66F4; completion state 4 releases wait.
 ScriptFlow ScriptWaitForEventFile(const ScriptInstruction& /*instruction*/,
                                   ScriptVmHost& host) {
   if (host.EventFile() == EventFileStatus::kFailed) {
@@ -1367,6 +1369,8 @@ ScriptFlow CommandStopScriptContext(const ScriptInstruction& /*instruction*/,
   return {.kind = ScriptFlowKind::kStop};
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:2845, 800BB5AC; allocate/queue before chained
+// flag.
 ScriptFlow CommandLoadNextEvent(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1392,6 +1396,8 @@ ScriptFlow CommandLoadNextEvent(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:2854, 800BB604; all eight dismissals precede
+// finish.
 ScriptFlow CommandFinishEvent(const ScriptInstruction& /*instruction*/,
                               ScriptVmHost& host) {
   int open_text_boxes = 0;

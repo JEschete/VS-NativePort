@@ -70,7 +70,8 @@ SceneOpcodes ProductionOpcodes() {
     auto& opcode = result[index];
     opcode.size = Event_kOpcodeSizes[index];
     const auto handler = Event_kOpcodeHandlers[index];
-    if (handler == Event_ScriptReportInvalidOpcode || handler == nullptr) {
+    if (handler == Event_ScriptReportInvalidOpcodeOpcode ||
+        handler == nullptr) {
       opcode.size = 0;
     } else if (handler == Event_ScriptBranchOnFlagImmediateOpcode ||
                handler == Event_ScriptBranchOnFlagPairOpcode) {
@@ -93,13 +94,13 @@ SceneOpcodes ProductionOpcodes() {
       opcode.branch_operand = 2;
     } else if (handler == Event_ScriptReturnToSavedAddressOpcode) {
       opcode.flow = SceneFlow::kReturn;
-    } else if (handler == Event_CommandFinishEvent ||
+    } else if (handler == Event_CommandFinishEventOpcode ||
                handler == Event_CommandStopScriptContextOpcode) {
       opcode.flow = SceneFlow::kFinish;
     } else if (handler == Event_CommandSpecialOperation) {
       opcode.flow = SceneFlow::kSpecial;
     }
-    if (handler == Event_CommandLoadNextEvent) {
+    if (handler == Event_CommandLoadNextEventOpcode) {
       opcode.operation = SceneOperation::kChainEvent;
     } else if (handler == Event_ScriptChangeRoom) {
       opcode.operation = SceneOperation::kChangeRoom;

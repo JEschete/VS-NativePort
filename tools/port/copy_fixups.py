@@ -2017,6 +2017,10 @@ OWNED_CALL_BINDINGS |= {
 }
 
 EVENT_SCRIPT_CONTROL_OPCODES = (
+    ("F01027", 0x800B66A8, "ScriptReportInvalidOpcode"),
+    ("F01030", 0x800B66F4, "ScriptWaitForEventFile"),
+    ("F01205", 0x800BB5AC, "CommandLoadNextEvent"),
+    ("F01206", 0x800BB604, "CommandFinishEvent"),
     ("F01106", 0x800B94D8, "ScriptConfigureTimer"),
     ("F01111", 0x800B9724, "ScriptConfigureEasingCurve"),
     ("F01042", 0x800B6FB0, "ScriptWaitForButtonAndYield"),

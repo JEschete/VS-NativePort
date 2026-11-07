@@ -5,7 +5,6 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
@@ -36,7 +35,6 @@ extern "C" {
 #include "Event/ScriptVm.h"
 #include "Event/WeaponModeOpcode.h"
 #include "Field/Gimmicks.h"
-#include "Menu/TextBox.h"
 
 // decomp: D_800E9BE0 (D_800E9BE0@BATTLE/BATTLE.PRG)
 char Event_skipPaletteResetCommand[336]; /* contents: module image (ModuleData.cpp) */
@@ -141,15 +139,15 @@ char Event_isSkipForced;
 char Event_isScriptBackdropEnabled;
 
 // decomp: D_800FAF7C (D_800FAF7C@src/BATTLE/INITBTL.PRG/12AC.c)
-intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptWaitForEventFile, Event_ScriptReportInvalidOpcode, Event_ScriptWaitForSplashFile, Event_ScriptBeginSkippableCutsceneOpcode, Event_ScriptEndCutsceneAndJumpOpcode,
+intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptWaitForEventFileOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptWaitForSplashFile, Event_ScriptBeginSkippableCutsceneOpcode, Event_ScriptEndCutsceneAndJumpOpcode,
     Event_ScriptEndCutsceneOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptDismissDialogBoxOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptLoadSplashImage, Event_ScriptConfigureSplashLayer,
     Event_ScriptTweenSplashLayer, Event_ScriptFreeSplashImage, Event_ScriptYieldFrameOpcode, Event_ScriptSetDialogIntegerOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptSetDialogTransitionDurationOpcode, Event_ScriptResetActorGroupStateOpcode, Event_ScriptStoreActorTileOpcode, Event_ScriptSpawnActorOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptSetDialogTransitionDurationOpcode, Event_ScriptResetActorGroupStateOpcode, Event_ScriptStoreActorTileOpcode, Event_ScriptSpawnActorOpcode,
     Event_ScriptNavigateActorToTileOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetActorGroupFlagsOpcode, Event_ScriptSetActorSoundMixOpcode, Event_ScriptWalkActorToTileOpcode,
     Event_ScriptWalkActorToWorldPosOpcode, Event_ScriptSlideActorToTileOpcode, Event_ScriptSlideActorToWorldPosOpcode, Event_ScriptSetActorAttachmentOpcode, Event_ScriptNavigateActorToWorldPosOpcode,
     Event_ScriptTurnActorToFacingOpcode, Event_ScriptFaceOtherActorOpcode, Event_ScriptFaceTileOpcode, Event_ScriptScaleActorOpcode, Event_ScriptRemoveActorGroupOpcode,
@@ -160,8 +158,8 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptJumpForwardOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptJumpForwardOpcode,
     Event_ScriptCacheFlagValueOpcode, Event_ScriptBranchOnCachedFlagOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForwardOpcode,
-    Event_ScriptJumpForwardOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptApplyImmediateFlagOperationOpcode, Event_ScriptApplyFlagPairOperationOpcode,
+    Event_ScriptJumpForwardOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptApplyImmediateFlagOperationOpcode, Event_ScriptApplyFlagPairOperationOpcode,
     Event_ScriptStoreInventoryItemPresenceOpcode, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
     Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonStateOpcode, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
     Event_ScriptRunMenuTransition, Event_ScriptConfigureTimerOpcode, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
@@ -171,38 +169,38 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptTogglePaletteHook, Event_ScriptTransformPalettes, Event_ScriptSetActorRenderModeOpcode,
     Event_ScriptSetAshleyBattleModeOpcode, Event_ScriptSetRoomBackgroundVisible, Event_ScriptLoadRoomBackground, Event_ScriptWaitForRoomBackground, Event_ScriptFreeRoomBackground,
     Event_ScriptSetEnvironmentParticles, Event_ScriptSetParticleVariationEnabled, Event_ScriptControlRoomAnimation, Event_ScriptMuteEnvironmentSound, Event_ScriptSetBackgroundOffset,
-    Event_ScriptSetFirstPersonView, Event_ScriptAdjustGeometryDepthBias, Event_ScriptSetBackgroundParallax, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperationOpcode,
+    Event_ScriptSetFirstPersonView, Event_ScriptAdjustGeometryDepthBias, Event_ScriptSetBackgroundParallax, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptNoOperationOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_CommandStopAllSfxOpcode, Event_CommandStopSfxOpcode,
     Event_CommandLoadSfxSlotOpcode, Event_CommandWaitSfxSlotReleaseOpcode, Event_CommandFreeSfxOpcode,
     Event_CommandSelectSfxBankOpcode, Event_CommandLoadEventMusicOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperationOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptNoOperationOpcode,
     Event_CommandLoadMusicSlotOpcode, Event_CommandFreeMusicOpcode, Event_ScriptNoOperationOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode,
     Event_ScriptNoOperationOpcode, Event_CommandWaitMusicSlotLoadOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptNoOperationOpcode,
     Event_ScriptNoOperationOpcode, Event_CommandLoadSoundFileOpcode, Event_CommandWaitSoundQueueOpcode,
     Event_ScriptNoOperationOpcode, Event_CommandPlayActorEffectOpcode, Event_CommandAdvanceEffectStageOpcode, Event_CommandWaitEffectStateOpcode, Event_CommandYieldEffectReleaseOpcode,
-    Event_CommandWaitEffectContinuationOpcode, Event_CommandWaitEffectReleaseOpcode, Event_CommandMarkEffectStageReadyOpcode, Event_ScriptReportInvalidOpcode, Event_CommandSetMusicJumpThresholdOpcode,
-    Event_ScriptNoOperationOpcode, Event_CommandSetActorTrailOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_CommandSetEnteredDoorOpcode, Event_CommandStoreActorRangeBearingOpcode, Event_CommandSetActorActivityOpcode,
-    Event_ScriptReportInvalidOpcode, Event_CommandConsumeMiscItemOpcode, Event_CommandStoreActorDistanceOpcode, Event_CommandSpecialOperation,
+    Event_CommandWaitEffectContinuationOpcode, Event_CommandWaitEffectReleaseOpcode, Event_CommandMarkEffectStageReadyOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandSetMusicJumpThresholdOpcode,
+    Event_ScriptNoOperationOpcode, Event_CommandSetActorTrailOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandSetEnteredDoorOpcode, Event_CommandStoreActorRangeBearingOpcode, Event_CommandSetActorActivityOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandConsumeMiscItemOpcode, Event_CommandStoreActorDistanceOpcode, Event_CommandSpecialOperation,
     Event_CommandWaitScreenEffectLoadOpcode, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_ScriptNoOperationOpcode, Event_CommandLoadScreenEffectsOpcode,
     Event_CommandReservedScreenEffectOpcode, Event_CommandFreeScreenEffectsOpcode, Event_CommandScreenTransform, Event_CommandCameraMotion, Event_CommandCameraMotion,
-    Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcode,
+    Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcodeOpcode,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion,
-    Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcode, Event_CommandCameraMotion, Event_CommandCameraMotion,
-    Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_CommandStopCameraMotion, Event_CommandSetCameraFollowing, Event_ScriptYieldFrameOpcode, Event_CommandSetScreenCapture,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion,
+    Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandCameraMotion, Event_CommandCameraMotion,
+    Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandStopCameraMotion, Event_CommandSetCameraFollowing, Event_ScriptYieldFrameOpcode, Event_CommandSetScreenCapture,
     Event_CommandTweenCameraRoll, Event_CommandTweenCameraRoll, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_CommandScreenTransform,
     Event_CommandScreenTransform, Event_CommandSetCameraOriginActor, Event_CommandRestoreFieldCamera, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake,
     Event_CommandCameraLensOrShake, Event_CommandScreenTransform, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake, Event_ScriptYieldFrameOpcode,
     Event_CommandSetTickSpeedOpcode, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContextOpcode,
-    Event_CommandStartScriptContextOpcode, Event_CommandStopScriptContextOpcode, Event_CommandLoadNextEvent, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
-    Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_CommandFinishEvent, Event_CommandFinishEvent };
+    Event_CommandStartScriptContextOpcode, Event_CommandStopScriptContextOpcode, Event_CommandLoadNextEventOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandFinishEventOpcode, Event_CommandFinishEventOpcode };
 
 // decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)
 void Event_RestoreScriptTextureRectangle(void)
@@ -224,25 +222,6 @@ void Event_RestoreScriptTextureRectangle(void)
     VS::Render::AppendLiveOverlayPrimitive(move_primitive);
 
     *((void**)((uintptr_t)Core_ScratchBase() + 0x000)) = (DR_MOVE*)(move_primitive + 1);
-}
-
-// decomp: BATTLE.PRG vs_battle_invalidOpcode (src/BATTLE/BATTLE.PRG/4A0A8.c:588)
-intptr_t Event_ScriptReportInvalidOpcode(u_char* instruction, short thread_index)
-{
-    char buf[64];
-
-    sprintf(buf, "unknown code detected:%d,$%08x,$%02x", thread_index, (u_int)instruction, *instruction);
-    // Debug printing presumably ifdef'd out
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B66F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:601)
-intptr_t Event_ScriptWaitForEventFile(u_char* instruction, short thread_index)
-{
-    if ((Event_eventFileDiscRequest != 0) && (*Event_eventFileDiscRequest != 4)) {
-        return 1;
-    }
-    return 0;
 }
 
 // decomp: BATTLE.PRG vs_battle_script_specialOp (src/BATTLE/BATTLE.PRG/4A0A8.c:2651)
@@ -326,37 +305,6 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         break;
     }
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800BB5AC (src/BATTLE/BATTLE.PRG/4A0A8.c:2845)
-intptr_t Event_CommandLoadNextEvent(u_char* instruction, short thread_index)
-{
-    Event_eventId = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
-    Event_chainedEventBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(0x1800);
-    Event_QueueEventScriptLoad(Event_eventId, Event_chainedEventBuffer);
-    Event_isChainedEventLoaded = 1;
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BB604 (src/BATTLE/BATTLE.PRG/4A0A8.c:2854)
-intptr_t Event_CommandFinishEvent(u_char* instruction, short thread_index)
-{
-    int i;
-    int pending_text_box_count;
-
-    pending_text_box_count = 0;
-
-    for (i = 0; i < 8; ++i) {
-        if (Menu_DismissTextBox(i) != 0) {
-            ++pending_text_box_count;
-        }
-    }
-
-    if (pending_text_box_count == 0) {
-        VS::State::SetLiveTickSpeed(2);
-        return 2;
-    }
-    return 1;
 }
 
 // decomp: BATTLE.PRG func_800BEB00 (src/BATTLE/BATTLE.PRG/4A0A8.c:4246)
