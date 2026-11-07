@@ -18,6 +18,7 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Field/BackgroundLiveState.h"
 #include "Field/Doors.h"
+#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
 #include "Field/Manual.h"
@@ -176,7 +177,7 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
   }
   void InitializeRoomBackground() override { LiveInitializeRoomBackground(); }
   void ResetGimmickAnimationQueue() override {
-    Field_ResetGimmickAnimationQueue();
+    Field_ResetGimmickAnimationQueueEntry();
   }
   // The original hands the cleared reference vectors' first five words to
   // the background as its gradient colours (18.c:595).

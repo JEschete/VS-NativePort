@@ -345,7 +345,6 @@ extern short const Field_kPlatformBounceOffsets[];
 void Field_DisableTrapAtPosition(SVECTOR* trap_position);
 void Field_FreezeRoomGimmicksTemporarily(void);
 int Field_CurrentSavePointId(void);
-void Field_ResetGimmickAnimationQueue(void);
 int Field_SetMovingPlatformActor(int platform_index, int platform_control_state);
 void Field_ClearMovingPlatformActor(int platform_index);
 void Field_InitializeMovingPlatforms(void);

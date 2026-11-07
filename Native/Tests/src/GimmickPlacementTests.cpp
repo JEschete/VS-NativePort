@@ -199,6 +199,7 @@ struct RecordingAnimationDispatchHost final
   std::vector<std::int32_t> calls;
   bool finish_ready = true;
   bool replace_during_finish = false;
+  bool reset_during_finish = false;
 
   std::int32_t PendingCount() const override {
     return static_cast<std::int32_t>(std::ranges::count_if(
@@ -234,6 +235,11 @@ struct RecordingAnimationDispatchHost final
   bool FinishDoor(std::size_t slot,
                   const VS::Field::GimmickAnimationJobSnapshot&) override {
     calls.push_back(1);
+    if (reset_during_finish) {
+      for (auto& job : jobs) {
+        job.reset();
+      }
+    }
     if (replace_during_finish) {
       if (auto& job = jobs.at(slot)) {
         ++job->serial;
@@ -261,6 +267,14 @@ struct RecordingAnimationDispatchHost final
   }
 };
 
+struct RecordingAnimationResetHost final
+    : VS::Field::GimmickAnimationResetHost {
+  std::vector<std::size_t> calls;
+  void ClearPendingCount() override { calls.push_back(8); }
+  void ClearMarkerTicks() override { calls.push_back(9); }
+  void ClearJob(std::size_t slot) override { calls.push_back(slot); }
+};
+
 struct AnimationQueueFixture {
   static constexpr std::size_t kSlots = 8;
   std::array<Field_GimmickAnimationJob, kSlots> saved{};
@@ -269,7 +283,7 @@ struct AnimationQueueFixture {
 
   AnimationQueueFixture() {
     std::ranges::copy(Field_gimmickAnimationQueue, saved.begin());
-    Field_ResetGimmickAnimationQueue();
+    Field_ResetGimmickAnimationQueueEntry();
   }
   ~AnimationQueueFixture() {
     std::ranges::copy(saved, Field_gimmickAnimationQueue);
@@ -316,7 +330,7 @@ void CheckAnimationKindResets(Field_MpdLockTrigger& target) {
   for (const auto kind : {1, 2, 3}) {
     Field_QueueGimmickAnimationEntry(kind, &target);
     CHECK(Field_pendingGimmickAnimationCount == 1);
-    Field_ResetGimmickAnimationQueue();
+    Field_ResetGimmickAnimationQueueEntry();
     CHECK(Field_pendingGimmickAnimationCount == 0);
   }
 }
@@ -384,6 +398,52 @@ void CheckOriginalCountdownByte(VS::Field::GimmickAnimationKind kind,
 }
 
 }  // namespace
+
+TEST_CASE("Typed animation reset preserves original count tick and slot order",
+          "[gimmick-animation-reset-core][field]") {
+  RecordingAnimationResetHost host;
+  VS::Field::ResetGimmickAnimationQueue(host);
+  CHECK(host.calls == std::vector<std::size_t>{8, 9, 0, 1, 2, 3, 4, 5, 6, 7});
+  host.calls.clear();
+  VS::Field::ResetGimmickAnimationQueue(host);
+  CHECK(host.calls == std::vector<std::size_t>{8, 9, 0, 1, 2, 3, 4, 5, 6, 7});
+}
+
+TEST_CASE(
+    "Native animation reset clears every slot counters and module binding",
+    "[gimmick-animation-reset-core][field]") {
+  const AnimationQueueFixture fixture;
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008B6B4) ==
+        reinterpret_cast<const void*>(&Field_ResetGimmickAnimationQueueEntry));
+  std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots> targets{};
+  for (auto& target : targets) {
+    Field_QueueGimmickAnimationEntry(1, &target);
+  }
+  Field_triggerMarkerFrameTicks = 0xFFFF;
+  Field_ResetGimmickAnimationQueueEntry();
+  CHECK(Field_pendingGimmickAnimationCount == 0);
+  CHECK(Field_triggerMarkerFrameTicks == 0);
+  for (const auto& job : Field_gimmickAnimationQueue) {
+    CHECK(job.jobKind == 0);
+    CHECK(job.trigger == nullptr);
+  }
+  Field_ResetGimmickAnimationQueueEntry();
+  CHECK(Field_pendingGimmickAnimationCount == 0);
+  CHECK(Field_triggerMarkerFrameTicks == 0);
+}
+
+TEST_CASE("Typed animation dispatch tolerates a reset inside its callback",
+          "[gimmick-animation-reset-core][field]") {
+  RecordingAnimationDispatchHost host;
+  host.jobs[0] = VS::Field::GimmickAnimationJobSnapshot{
+      VS::Field::GimmickAnimationKind::kFinishDoor, 0, 1, true};
+  host.reset_during_finish = true;
+  CHECK(VS::Field::UpdateGimmickAnimationQueue(host) == 0);
+  CHECK(host.PendingCount() == 0);
+  CHECK(host.calls == std::vector<std::int32_t>{1});
+}
 
 TEST_CASE("Typed animation dispatch preserves every original countdown byte",
           "[gimmick-animation-dispatch-core][field]") {

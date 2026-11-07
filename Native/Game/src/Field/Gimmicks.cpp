@@ -211,14 +211,6 @@ int Field_CurrentSavePointId(void)
     return 0;
 }
 
-// decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:16052)
-void Field_ResetGimmickAnimationQueue(void)
-{
-    Field_pendingGimmickAnimationCount = 0;
-    Field_triggerMarkerFrameTicks = 0;
-    VS::Core::Memory::ZeroLiveAlignedWords(Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue);
-}
-
 // decomp: BATTLE.PRG func_8008C49C (src/BATTLE/BATTLE.PRG/146C.c:16475)
 int Field_SetMovingPlatformActor(int platform_index, int platform_control_state)
 {

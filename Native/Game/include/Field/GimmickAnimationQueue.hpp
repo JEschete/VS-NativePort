@@ -58,4 +58,14 @@ class GimmickAnimationDispatchHost {
 
 std::size_t UpdateGimmickAnimationQueue(GimmickAnimationDispatchHost& host);
 
+class GimmickAnimationResetHost {
+ public:
+  virtual ~GimmickAnimationResetHost() = default;
+  virtual void ClearPendingCount() = 0;
+  virtual void ClearMarkerTicks() = 0;
+  virtual void ClearJob(std::size_t slot) = 0;
+};
+
+void ResetGimmickAnimationQueue(GimmickAnimationResetHost& host);
+
 }  // namespace VS::Field

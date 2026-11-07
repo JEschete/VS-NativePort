@@ -80,6 +80,7 @@ extern "C" {
 #include "Field/Actors.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
+#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
 #include "Field/Map.h"
@@ -586,7 +587,7 @@ class LiveSections : public Host {
 
   // decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15735-15743)
   void InitializeRoomSystems() override {
-    Field_ResetGimmickAnimationQueue();
+    Field_ResetGimmickAnimationQueueEntry();
     LiveInitializeRoomEffects();
     Items::RestoreLiveRoomChestStates();
     Field_InitializeMovingPlatforms();

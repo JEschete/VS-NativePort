@@ -19,6 +19,12 @@ static_assert(std::size(Field_gimmickAnimationQueue) ==
 
 std::array<std::uint64_t, VS::Field::kGimmickAnimationSlots> job_serials{};
 
+void InvalidateJobSerial(std::size_t slot) {
+  if (++job_serials[slot] == 0) {
+    ++job_serials[slot];
+  }
+}
+
 bool ValidTarget(const Field_MpdLockTrigger* target) {
   return target != nullptr && reinterpret_cast<std::uintptr_t>(target) %
                                       alignof(Field_MpdLockTrigger) ==
@@ -52,9 +58,7 @@ class LiveAnimationQueueHost final
     }
     Field_gimmickAnimationQueue[slot] = {static_cast<std::int32_t>(kind),
                                          target_};
-    if (++job_serials[slot] == 0) {
-      ++job_serials[slot];
-    }
+    InvalidateJobSerial(slot);
     return true;
   }
   void SetPendingCount(std::size_t count) override {
@@ -158,6 +162,17 @@ class LiveAnimationDispatchHost final
       targets_{};
 };
 
+class LiveAnimationResetHost final
+    : public VS::Field::GimmickAnimationResetHost {
+ public:
+  void ClearPendingCount() override { Field_pendingGimmickAnimationCount = 0; }
+  void ClearMarkerTicks() override { Field_triggerMarkerFrameTicks = 0; }
+  void ClearJob(std::size_t slot) override {
+    Field_gimmickAnimationQueue[slot] = {};
+    InvalidateJobSerial(slot);
+  }
+};
+
 }  // namespace
 
 // decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338).
@@ -172,4 +187,10 @@ void Field_QueueGimmickAnimationEntry(int queued_job_kind,
 void Field_UpdateGimmickAnimationQueueEntry() {
   LiveAnimationDispatchHost host;
   static_cast<void>(VS::Field::UpdateGimmickAnimationQueue(host));
+}
+
+// decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:16052).
+void Field_ResetGimmickAnimationQueueEntry() {
+  LiveAnimationResetHost host;
+  VS::Field::ResetGimmickAnimationQueue(host);
 }

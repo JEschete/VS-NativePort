@@ -7,6 +7,36 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Queue Reset (#276 Row 27)
+
+- F00570 now targets strict native reset core: pending count, marker ticks,
+  then all eight slots clear in the original order. Live increments private job
+  serials for each clear, so supported reset/reuse invalidates captured jobs.
+  This guards queued work, not raw pointee/room lifetime; #287 remains open.
+- Supported ownership removed original reset implementation; native C/header/
+  original module `8008B6B4`, loading/state callers and tests adopt the native
+  reset entry. Original 14 MIPS words `8008B6B4-8008B6E8` confirm both counter
+  clears before the 64-byte original queue zeroing. Native no longer assumes
+  original pointer stride/layout for slot reset.
+- Source `e3514aa0` plus current slice: complete Debug/Release 4,714 / 8,635,856,
+  zero failures/skips and both canonical replays unchanged. Sixteen focused
+  cases / 1,658 assertions include #318/#319; reset-only three / 26 cover typed
+  order/repeat, actual C/module/filled queue/count/ticks and callback-reset
+  host model. Model callback evidence is not an instrumented physical callback
+  or Combat Lab chest/lock parity claim.
+- 191 copier / nine extent controls and editor diagnostics pass; scoped quality
+  five existing / zero new. Required native C/module/raw target/update ABI and
+  overall row 27 / #287 remain; no baseline/gate or physical acceptance relaxed.
+  Logs: `build/owner-checkpoint/gimmick-queue-reset-*-regression.log`.
+- #319 closed with `e3514aa03a181e3ff09e94f531cea7e4c4514aef` and exact green
+  CI `42360550780`; #318 remains closed at its own fixing revision/CI. Current
+  reset source is pending publication/exact CI; continue typed targets and
+  owning interaction/door/gimmick paths rather than treating this as row done.
+- Final repeat copier/project generation preserves tracked/new Native/project/
+  manifest bytes. Unchanged gates derive 2,694 promoted / one separate frame
+  `wip`, 242 behavior records and zero violations; old reset consumers are zero.
+  Required native C/module/raw target/room lifetime obligations stay tracked.
+
 ### Saturated Door Continuation (#319, #276 Row 27)
 
 - #319 logged before fixing: source `ba227890` plus only the new regression

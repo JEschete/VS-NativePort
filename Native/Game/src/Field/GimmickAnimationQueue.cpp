@@ -91,4 +91,13 @@ std::size_t UpdateGimmickAnimationQueue(GimmickAnimationDispatchHost& host) {
   return retired;
 }
 
+// decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:16052).
+void ResetGimmickAnimationQueue(GimmickAnimationResetHost& host) {
+  host.ClearPendingCount();
+  host.ClearMarkerTicks();
+  for (std::size_t slot = 0; slot < kGimmickAnimationSlots; ++slot) {
+    host.ClearJob(slot);
+  }
+}
+
 }  // namespace VS::Field
