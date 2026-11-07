@@ -355,7 +355,6 @@ int Field_CollectMovingPlatformPositions(Field_PlatformContactPoint output_conta
 Field_MpdFloorTrigger* Field_RoomTriggerAtTile(int query_tile_x, int query_tile_z, int query_floor_layer);
 void Field_SetMovingPlatformsPaused(int paused);
 void Field_FreezeMovingPlatforms(int freeze_frames);
-void Field_BeginSwitchToggle(Field_MpdLockTrigger* switch_trigger);
 void Field_SetRoomTriggerEnabled(Field_MpdFloorTrigger* selected_trigger, int activation_value);
 void Field_SetMovingPlatformVisibility(int platform_index, int visibility_value);
 void* Field_MovingPlatformTargetWaypoint(int platform_index);

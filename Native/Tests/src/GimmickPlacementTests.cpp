@@ -379,6 +379,35 @@ struct RecordingSwitchHost final : VS::Field::RoomSwitchHost {
   }
 };
 
+struct RecordingSwitchStartHost final : VS::Field::RoomSwitchStartHost {
+  std::optional<VS::Field::RoomSwitchState> state{VS::Field::RoomSwitchState{}};
+  bool refuse = false;
+  bool refuse_store = false;
+  std::vector<std::int32_t> calls;
+
+  std::optional<VS::Field::RoomSwitchState> State() const override {
+    return state;
+  }
+  bool StoreStartState(std::uint8_t marker, std::uint8_t activation) override {
+    if (refuse_store || !state) {
+      return false;
+    }
+    state->marker_fade = marker;
+    state->activation = activation;
+    calls.push_back(marker);
+    calls.push_back(activation);
+    return true;
+  }
+  bool QueueToggle() override {
+    calls.push_back(2);
+    return !refuse;
+  }
+  bool ToggleImmediately() override {
+    calls.push_back(3);
+    return !refuse;
+  }
+};
+
 void CheckOriginalCountdownByte(VS::Field::GimmickAnimationKind kind,
                                 int byte) {
   RecordingAnimationDispatchHost host;
@@ -398,6 +427,44 @@ void CheckOriginalCountdownByte(VS::Field::GimmickAnimationKind kind,
 }
 
 }  // namespace
+
+TEST_CASE("Typed switch start restores state on refused delayed admission",
+          "[gimmick-switch-admission-core][field]") {
+  RecordingSwitchStartHost host;
+  host.state = VS::Field::RoomSwitchState{.activation = 7};
+  host.refuse = true;
+  CHECK_FALSE(VS::Field::BeginSwitchToggle(host));
+  REQUIRE(host.state);
+  CHECK(host.state->marker_fade == 0);
+  CHECK(host.state->activation == 7);
+  CHECK(host.calls == std::vector<std::int32_t>{1, 20, 2, 0, 7});
+  host.refuse = false;
+  CHECK(VS::Field::BeginSwitchToggle(host));
+  CHECK(host.state->marker_fade == 1);
+  CHECK(host.state->activation == 20);
+}
+
+TEST_CASE("Typed switch start preserves immediate and busy behavior",
+          "[gimmick-switch-admission-core][field]") {
+  RecordingSwitchStartHost host;
+  host.state = VS::Field::RoomSwitchState{.switch_value = 2, .activation = 7};
+  CHECK(VS::Field::BeginSwitchToggle(host));
+  CHECK(host.calls == std::vector<std::int32_t>{1, 7, 3});
+  const auto before = host.calls;
+  CHECK_FALSE(VS::Field::BeginSwitchToggle(host));
+  CHECK(host.calls == before);
+  host.state.reset();
+  CHECK_FALSE(VS::Field::BeginSwitchToggle(host));
+  CHECK(host.calls == before);
+}
+
+TEST_CASE("Typed switch start cannot dispatch after a refused state store",
+          "[gimmick-switch-admission-core][field]") {
+  RecordingSwitchStartHost host;
+  host.refuse_store = true;
+  CHECK_FALSE(VS::Field::BeginSwitchToggle(host));
+  CHECK(host.calls.empty());
+}
 
 TEST_CASE("Typed animation reset preserves original count tick and slot order",
           "[gimmick-animation-reset-core][field]") {
@@ -654,6 +721,67 @@ TEST_CASE(
   Field_UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 0);
+}
+
+TEST_CASE("Refused switch start leaves its busy marker retryable",
+          "[gimmick-switch-admission][field]") {
+  const AnimationQueueFixture fixture;
+  std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots> occupied{};
+  for (auto& target : occupied) {
+    Field_QueueGimmickAnimationEntry(1, &target);
+  }
+  Field_MpdLockTrigger rejected{};
+  rejected.trigger.activation = 7;
+  Field_BeginSwitchToggleEntry(&rejected);
+  CHECK(Field_pendingGimmickAnimationCount == 8);
+  CHECK(rejected.trigger.markerFade == 0);
+  CHECK(rejected.trigger.activation == 7);
+}
+
+TEST_CASE("Native switch start retries after queue capacity is freed",
+          "[gimmick-switch-admission][field]") {
+  const AnimationQueueFixture fixture;
+  std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots> occupied{};
+  for (auto& target : occupied) {
+    Field_QueueGimmickAnimationEntry(1, &target);
+  }
+  Field_MpdLockTrigger target{};
+  target.trigger.activation = 7;
+  Field_BeginSwitchToggleEntry(&target);
+  REQUIRE(target.trigger.markerFade == 0);
+  Field_ResetGimmickAnimationQueueEntry();
+  Field_BeginSwitchToggleEntry(&target);
+  CHECK(Field_pendingGimmickAnimationCount == 1);
+  CHECK(target.trigger.markerFade == 1);
+  CHECK(target.trigger.activation == 20);
+  CHECK(Field_gimmickAnimationQueue[0].jobKind == 2);
+  CHECK(Field_gimmickAnimationQueue[0].trigger == &target);
+  Field_BeginSwitchToggleEntry(&target);
+  CHECK(Field_pendingGimmickAnimationCount == 1);
+}
+
+TEST_CASE("Native switch start preserves immediate state and original module",
+          "[gimmick-switch-admission][field]") {
+  const AnimationQueueFixture fixture;
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008D5FC) ==
+        reinterpret_cast<const void*>(&Field_BeginSwitchToggleEntry));
+  Field_BeginSwitchToggleEntry(nullptr);
+  Field_BeginSwitchToggleEntry(
+      reinterpret_cast<Field_MpdLockTrigger*>(std::uintptr_t{1}));
+  for (const auto value : {-1, 1, 32767, -32768}) {
+    Field_MpdLockTrigger target{};
+    target.trigger.lockState.switchValue = static_cast<std::int16_t>(value);
+    target.trigger.kind = -1;
+    target.trigger.tileX = -1;
+    target.trigger.tileZ = -1;
+    target.trigger.floorLayer = -1;
+    Field_BeginSwitchToggleEntry(&target);
+    CHECK(Field_pendingGimmickAnimationCount == 0);
+    CHECK(target.trigger.lockState.switchValue == 0);
+    CHECK(target.trigger.markerFade == 0);
+  }
 }
 
 TEST_CASE("Room switches preserve original sounds and normalized state order",

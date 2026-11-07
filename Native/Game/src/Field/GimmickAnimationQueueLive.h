@@ -10,4 +10,9 @@ void Field_UpdateGimmickAnimationQueueEntry(void);
 void Field_ResetGimmickAnimationQueueEntry(void);
 #ifdef __cplusplus
 }
+extern "C++" {
+namespace VS::Field {
+bool QueueLiveGimmickAnimation(int kind, Field_MpdLockTrigger* target);
+}
+}
 #endif

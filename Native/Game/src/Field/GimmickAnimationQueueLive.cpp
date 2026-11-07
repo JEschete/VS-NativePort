@@ -175,12 +175,18 @@ class LiveAnimationResetHost final
 
 }  // namespace
 
+namespace VS::Field {
+bool QueueLiveGimmickAnimation(int kind, Field_MpdLockTrigger* target) {
+  LiveAnimationQueueHost host(target);
+  return QueueGimmickAnimation(static_cast<GimmickAnimationKind>(kind), host);
+}
+}  // namespace VS::Field
+
 // decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338).
 void Field_QueueGimmickAnimationEntry(int queued_job_kind,
                                       Field_MpdLockTrigger* lock_trigger) {
-  LiveAnimationQueueHost host(lock_trigger);
-  static_cast<void>(VS::Field::QueueGimmickAnimation(
-      static_cast<VS::Field::GimmickAnimationKind>(queued_job_kind), host));
+  static_cast<void>(
+      VS::Field::QueueLiveGimmickAnimation(queued_job_kind, lock_trigger));
 }
 
 // decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16353).

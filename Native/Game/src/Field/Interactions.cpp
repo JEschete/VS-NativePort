@@ -41,6 +41,7 @@ extern "C" {
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLiveState.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
@@ -257,7 +258,7 @@ void Field_TryOpenChest(Field_MpdLockTrigger* chest_trigger, int arg1)
     }
     if (can_open != 0) {
         VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 2);
-        Field_BeginSwitchToggle(chest_trigger);
+        Field_BeginSwitchToggleEntry(chest_trigger);
         return;
     }
     VS::Actors::PlayLiveActorActionPose(0, interaction_target_position, 3);
@@ -457,7 +458,7 @@ int Field_UpdateChestContentsSelection(void)
     if (action_selection->selectionKind != 0) {
         VS::State::SetLiveScriptFlag((Field_interactionFocus.triggerRecord->linkedLockIndex + 0x3C0), 1);
     } else {
-        Field_BeginSwitchToggle(Field_interactionFocus.triggerRecord);
+        Field_BeginSwitchToggleEntry(Field_interactionFocus.triggerRecord);
     }
     VS::Menu::Framework::ReleaseLiveMenuRows();
     VS::Field::LiveResumeFieldAfterMenu();

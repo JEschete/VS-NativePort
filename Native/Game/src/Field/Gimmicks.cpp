@@ -31,7 +31,6 @@ extern "C" {
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
 #include "Field/Doors.h"
-#include "Field/GimmickAnimationQueueLive.h"
 #include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
@@ -39,7 +38,6 @@ extern "C" {
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/RoomRenderingLiveState.h"
-#include "Field/RoomSwitchesLive.h"
 #include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
 #include "Items/Loot.h"
@@ -576,20 +574,6 @@ void Field_FreezeMovingPlatforms(int freeze_frames)
             Field_SetPlatformFreezeAppearance(0);
         }
         Field_platformFreezeFrames = freeze_frames;
-    }
-}
-
-// decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16870)
-void Field_BeginSwitchToggle(Field_MpdLockTrigger* switch_trigger)
-{
-    if ((signed char)switch_trigger->trigger.markerFade == 0) {
-        switch_trigger->trigger.markerFade = 1;
-        if (switch_trigger->trigger.lockState.switchValue == 0) {
-            switch_trigger->trigger.activation = 0x14;
-            Field_QueueGimmickAnimationEntry(2, switch_trigger);
-            return;
-        }
-        Field_ToggleRoomSwitchEntry(switch_trigger);
     }
 }
 

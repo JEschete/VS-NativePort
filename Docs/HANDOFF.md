@@ -7,6 +7,36 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Switch-Start Admission Transaction (#320, #276 Row 27)
+
+- #320 logged before fixing: source `be6f0560` plus only the reproduction calls
+  original F00606 against a full queue. Count eight is preserved but marker
+  becomes one and activation seven becomes twenty without an admitted job;
+  two of three assertions fail and the marker prevents retries. Original 23
+  MIPS words `8008D5FC-8008D654` confirm stores before queue admission.
+- Actual strict typed `BeginSwitchToggle` now preserves/reverts prior marker/
+  countdown on refused delayed admission, while accepted marker1/delay20/kind2,
+  busy suppression and immediate nonzero switch toggling remain original.
+  Native Live Boolean admission is explicitly C++-linked when its C header is
+  included under `extern C`; required C/module `8008D5FC` ABI remains.
+- Original count/marker/countdown assertions pass unchanged. Six focused cases
+  / 39 assertions cover retry after capacity is freed, admitted job/busy state,
+  signed immediate values, invalid/store refusal and actual module resolution.
+  Live immediate tests isolate refused effect/cell/audio inputs, not physical
+  switch/chest gameplay. Raw target/room lifetime and #287 remain open.
+- Complete Debug/Release 4,720 / 8,635,895, zero failures/skips; both canonical
+  replays unchanged. 191 copier / nine extent controls, editor diagnostics and
+  quality five existing / zero new pass; no baseline/gate was weakened.
+  Logs: `build/owner-checkpoint/switch-start-admission-*-regression.log`.
+- Source `be6f0560dc306b4ccee2396346fb649685249fbe` has exact green reset CI
+  `42361923743`. Current #320 fixing source/closure are pending publication/
+  new exact CI; #318/#319 remain closed with their own verified gates. Row 27,
+  #287 and global compatibility/physical acceptance remain independently open.
+- Final repeat copier/project generation preserves tracked/new Native/project/
+  manifest bytes. Unchanged gates derive 2,695 promoted / one separate frame
+  `wip`, 243 behavior records and zero violations; old switch-start consumers
+  are zero while required C/module/raw target lifetime stays tracked.
+
 ### Native Queue Reset (#276 Row 27)
 
 - F00570 now targets strict native reset core: pending count, marker ticks,
