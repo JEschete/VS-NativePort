@@ -2017,6 +2017,8 @@ OWNED_CALL_BINDINGS |= {
 }
 
 EVENT_SCRIPT_CONTROL_OPCODES = (
+    ("F01042", 0x800B6FB0, "ScriptWaitForButtonAndYield"),
+    ("F01110", 0x800B96B0, "ScriptWaitForButtonOrTimeout"),
     ("F01032", 0x800B6744, "ScriptBeginSkippableCutscene"),
     ("F01034", 0x800B6868, "ScriptEndCutsceneAndJump"),
     ("F01035", 0x800B68C4, "ScriptEndCutscene"),

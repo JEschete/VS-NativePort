@@ -7,6 +7,33 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Button-Wait Control Slots (#276 Row 33)
+
+- F01042/F01110 now register strict native yield/timeout cores and guarded native
+  module/normal/skip identities. Original C bodies/prototypes retire via the
+  copier. The independent original result models must match unchanged digests
+  `45DB1AECCD72B51C` / `3E94AE9F58CCF5A6` / `482D3AE966711625`, captured with
+  actual originals before retirement in `88d88251`, exact green CI `42330375280`.
+  All 197,376 per-case comparisons and four planted deviations remain; no new
+  binding is used as its own original oracle.
+- Live normal/skip/direct/guarded byte masks and timeout initialization/expiry/
+  full-word input clearing preserve exact per-thread held/yielded/advanced cursors,
+  including zero duration and negative/wrapped counters in all four valid threads.
+  Two new cases add 4,060 assertions; four module/detached checks add four.
+  Combined controls/original gate: 24 cases / 283,496 assertions.
+- On `88d88251` plus this slice, complete Debug/Release builds and regressions
+  pass 4,668 cases / 8,428,860 assertions, zero failures/skips and both unchanged
+  canonical fingerprints. No baseline refresh. Broad quality reports 32 existing
+  / zero new findings; explicit bounded test narrowing fixed without changing
+  samples. All 190 copier/nine extent controls pass. Evidence:
+  `VR-EVENT-CONTROL-BUTTON-WAITS` and
+  `build\owner-checkpoint\native-control-button-waits-*-regression.log`.
+  Required table ABI and remaining controls/C-entry/global EC debt stay explicit;
+  this is not whole-row or physical-controller/full-game completion.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,671 promoted / four compatibility `wip`; row 33 is
+  now 39/57. Frozen original constants and all live wait states remain intact.
+
 ### Original Button-Wait Results Frozen (#276 Row 33)
 
 - Before retiring F01042/F01110, captured actual retained original C outcomes,

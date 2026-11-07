@@ -36,7 +36,6 @@ extern "C" {
 #include "Event/ScriptVm.h"
 #include "Event/WeaponModeOpcode.h"
 #include "Field/Gimmicks.h"
-#include "Input/ControllerLiveState.h"
 #include "Menu/TextBox.h"
 
 // decomp: D_800E9BE0 (D_800E9BE0@BATTLE/BATTLE.PRG)
@@ -246,15 +245,6 @@ intptr_t Event_ScriptWaitForEventFile(u_char* instruction, short thread_index)
     return 0;
 }
 
-// decomp: BATTLE.PRG vs_battle_script_buttonPressed (src/BATTLE/BATTLE.PRG/4A0A8.c:843)
-intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_index)
-{
-    if (Input_buttonsPressed.allButtons & instruction[1]) {
-        return 4;
-    }
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800B94D8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1886)
 intptr_t Event_ScriptConfigureTimer(u_char* instruction, short thread_index)
 {
@@ -265,21 +255,6 @@ intptr_t Event_ScriptConfigureTimer(u_char* instruction, short thread_index)
         VS::State::ResetLiveSceneTimer();
     }
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800B96B0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1934)
-intptr_t Event_ScriptWaitForButtonOrTimeout(u_char* instruction, short thread_index)
-{
-    if (Event_threadWaitFrames[thread_index] == 0) {
-        Event_threadWaitFrames[thread_index] = instruction[2];
-        return 1;
-    }
-    if ((Input_buttonsPressed.allButtons & instruction[1]) || (--Event_threadWaitFrames[thread_index] <= 0)) {
-        Event_threadWaitFrames[thread_index] = 0;
-        Input_buttonsPressed.allButtons = 0;
-        return 0;
-    }
-    return 1;
 }
 
 // decomp: BATTLE.PRG func_800B9724 (src/BATTLE/BATTLE.PRG/4A0A8.c:1948)

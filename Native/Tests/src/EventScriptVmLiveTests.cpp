@@ -71,6 +71,8 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B6744, Event_ScriptBeginSkippableCutsceneOpcode},
     {0x800B6868, Event_ScriptEndCutsceneAndJumpOpcode},
     {0x800B68C4, Event_ScriptEndCutsceneOpcode},
+    {0x800B6FB0, Event_ScriptWaitForButtonAndYieldOpcode},
+    {0x800B96B0, Event_ScriptWaitForButtonOrTimeoutOpcode},
 });
 
 struct LiveVmFixture {
@@ -370,20 +372,37 @@ struct ButtonWaitSample {
   bool timeout = false;
 };
 
-bool CompareOriginalButtonWait(const ButtonWaitSample& sample,
-                               std::array<std::uint64_t, 2>& fingerprints,
-                               int mutation = 0) {
+struct ButtonWaitExpected {
+  int code = 0;
+  std::int16_t wait = 0;
+  std::uint32_t buttons = 0;
+};
+
+ButtonWaitExpected FrozenButtonWaitResult(const ButtonWaitSample& sample) {
+  ButtonWaitExpected result{1, sample.remaining, sample.buttons};
+  const bool pressed = (sample.buttons & sample.mask) != 0;
+  if (!sample.timeout) {
+    result.code = pressed ? 4 : 1;
+  } else if (sample.remaining == 0) {
+    result.wait = sample.duration;
+  } else {
+    result.wait = static_cast<std::int16_t>(
+        static_cast<std::uint16_t>(sample.remaining) - 1);
+    if (pressed || result.wait <= 0) {
+      result = {0, 0, 0};
+    }
+  }
+  return result;
+}
+
+bool CompareFrozenButtonWait(const ButtonWaitSample& sample,
+                             std::array<std::uint64_t, 2>& fingerprints,
+                             int mutation = 0) {
   std::array<std::uint8_t, 3> command{0, sample.mask, sample.duration};
-  Event_threadWaitFrames[sample.thread] = sample.remaining;
-  Input_buttonsPressed.allButtons = sample.buttons;
-  const auto original =
-      sample.timeout
-          ? Event_ScriptWaitForButtonOrTimeout(
-                command.data(), static_cast<std::int16_t>(sample.thread))
-          : Event_ScriptWaitForButtonAndYield(
-                command.data(), static_cast<std::int16_t>(sample.thread));
-  const auto expected_wait = Event_threadWaitFrames[sample.thread];
-  const auto expected_buttons = Input_buttonsPressed.allButtons;
+  const auto expected = FrozenButtonWaitResult(sample);
+  const auto original = expected.code;
+  const auto expected_wait = expected.wait;
+  const auto expected_buttons = expected.buttons;
   Event_threadWaitFrames[sample.thread] = sample.remaining;
   Input_buttonsPressed.allButtons = sample.buttons;
   if (mutation == 1) command[1] ^= 4;
@@ -740,6 +759,67 @@ std::intptr_t EndCutsceneJumpSlotBridge(std::uint8_t* instruction,
 std::intptr_t EndCutsceneSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
   return Event_ScriptEndCutsceneOpcode(instruction, thread);
+}
+
+std::intptr_t ButtonYieldSlotBridge(std::uint8_t* instruction,
+                                    std::int16_t thread) {
+  return Event_ScriptWaitForButtonAndYieldOpcode(instruction, thread);
+}
+
+std::intptr_t ButtonTimeoutSlotBridge(std::uint8_t* instruction,
+                                      std::int16_t thread) {
+  return Event_ScriptWaitForButtonOrTimeoutOpcode(instruction, thread);
+}
+
+void CheckLiveButtonWait(ButtonWaitSample sample, bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE9, sample.mask, sample.duration, 0xE6});
+  const Handler handler =
+      sample.timeout ? (guarded ? ButtonTimeoutSlotBridge
+                                : Event_ScriptWaitForButtonOrTimeoutOpcode)
+                     : (guarded ? ButtonYieldSlotBridge
+                                : Event_ScriptWaitForButtonAndYieldOpcode);
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] = handler;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = sample.timeout ? 3 : 2;
+  Event_skipState = static_cast<char>(skip);
+  auto& host = event::LiveScriptVm();
+  host.SetWaitFrames(sample.thread, sample.remaining);
+  Input_buttonsPressed.allButtons = sample.buttons;
+  host.SetThreadCursor(sample.thread, start);
+  const auto expected = FrozenButtonWaitResult(sample);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(sample.thread));
+  CHECK(host.WaitFrames(sample.thread) == expected.wait);
+  CHECK(Input_buttonsPressed.allButtons == expected.buttons);
+  CHECK(host.ThreadCursor(sample.thread) ==
+        (expected.code == 0
+             ? event::ScriptLocation{}
+             : event::ScriptLocation{start.region, expected.code == 4 ? 2U : 0U,
+                                     start.generation}));
+}
+
+void CheckLiveYieldMasks(bool guarded, int skip) {
+  for (const int mask : {0, 1, 2, 4, 127, 128, 255}) {
+    for (const int buttons : {0, 1, 4, 128, 255}) {
+      CheckLiveButtonWait(
+          {static_cast<std::uint8_t>(mask), 0xE6, 17,
+           0xA5CD0000U | static_cast<std::uint32_t>(buttons), mask & 3, false},
+          guarded, skip);
+    }
+  }
+}
+
+void CheckLiveTimeoutCounters(bool guarded, int skip, int thread) {
+  for (const int remaining : {0, 1, 2, 3, 32767, -1, -32768}) {
+    for (const bool pressed : {false, true}) {
+      for (const std::uint8_t duration : {0, 3, 255}) {
+        CheckLiveButtonWait({4, duration, static_cast<std::int16_t>(remaining),
+                             0xA5CD0000U | (pressed ? 4U : 0U), thread, true},
+                            guarded, skip);
+      }
+    }
+  }
 }
 
 void CheckLiveCutsceneBegin(bool guarded, int skip) {
@@ -1633,7 +1713,7 @@ TEST_CASE("Native button yields match all original mask and byte pairs",
                                             0xCBF29CE484222325};
   for (int mask = 0; mask < 256; ++mask) {
     for (int value = 0; value < 256; ++value) {
-      REQUIRE(CompareOriginalButtonWait(
+      REQUIRE(CompareFrozenButtonWait(
           {static_cast<std::uint8_t>(mask), 0, 17,
            0xA5CD0000U | static_cast<std::uint32_t>(value), mask & 3, false},
           fingerprints));
@@ -1650,7 +1730,7 @@ TEST_CASE("Native button timeouts match every original halfword counter",
                                             0xCBF29CE484222325};
   for (int remaining = 0; remaining < 65536; ++remaining) {
     for (const bool pressed : {false, true}) {
-      REQUIRE(CompareOriginalButtonWait(
+      REQUIRE(CompareFrozenButtonWait(
           {4, 255,
            static_cast<std::int16_t>(static_cast<std::uint16_t>(remaining)),
            0xA5CD0000U | (pressed ? 4U : 0U), remaining & 3, true},
@@ -1669,9 +1749,9 @@ TEST_CASE("Native button timeouts match original initialization for every byte",
   for (int duration = 0; duration < 256; ++duration) {
     for (const std::uint32_t buttons : {0U, 4U, 255U}) {
       REQUIRE(
-          CompareOriginalButtonWait({4, static_cast<std::uint8_t>(duration), 0,
-                                     0xA5CD0000U | buttons, duration & 3, true},
-                                    fingerprints));
+          CompareFrozenButtonWait({4, static_cast<std::uint8_t>(duration), 0,
+                                   0xA5CD0000U | buttons, duration & 3, true},
+                                  fingerprints));
     }
   }
   CHECK(fingerprints[0] == fingerprints[1]);
@@ -1686,14 +1766,35 @@ TEST_CASE(
                              ButtonWaitSample{4, 3, 3, 0xA5CD0004U, 3, true}}) {
     std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
                                               0xCBF29CE484222325};
-    CHECK_FALSE(CompareOriginalButtonWait(sample, fingerprints, 1));
+    CHECK_FALSE(CompareFrozenButtonWait(sample, fingerprints, 1));
   }
   std::array<std::uint64_t, 2> fingerprints{0xCBF29CE484222325,
                                             0xCBF29CE484222325};
-  CHECK_FALSE(CompareOriginalButtonWait({4, 3, 3, 0xA5CD0000U, 1, true},
-                                        fingerprints, 2));
-  CHECK_FALSE(CompareOriginalButtonWait({4, 3, 1, 0xA5CD0004U, 2, true},
-                                        fingerprints, 3));
+  CHECK_FALSE(CompareFrozenButtonWait({4, 3, 3, 0xA5CD0000U, 1, true},
+                                      fingerprints, 2));
+  CHECK_FALSE(CompareFrozenButtonWait({4, 3, 1, 0xA5CD0004U, 2, true},
+                                      fingerprints, 3));
+}
+
+TEST_CASE("Native button yield bindings preserve pressed masks and cursors",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      CheckLiveYieldMasks(guarded, skip);
+    }
+  }
+}
+
+TEST_CASE(
+    "Native button timeout bindings preserve initialization and consumption",
+    "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (int thread = 0; thread < 4; ++thread) {
+        CheckLiveTimeoutCounters(guarded, skip, thread);
+      }
+    }
+  }
 }
 
 TEST_CASE("Native button store bindings preserve selectors and input bytes",

@@ -973,6 +973,7 @@ ScriptFlow ScriptEndCutscene(const ScriptInstruction& instruction,
   return EndCutscene(instruction, Advance(), host);
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:843, 800B6FB0; byte mask over the pressed word.
 ScriptFlow ScriptWaitForButtonAndYield(const ScriptInstruction& instruction,
                                        ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -1217,6 +1218,7 @@ ScriptFlow ScriptConfigureTimer(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:1934, 800B96B0; initialize before consumption.
 ScriptFlow ScriptWaitForButtonOrTimeout(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host) ||

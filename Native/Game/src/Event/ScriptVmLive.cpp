@@ -85,7 +85,7 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptEndCutsceneAndJumpOpcode,
                    ScriptEndCutsceneAndJump},
     ControlBinding{Event_ScriptEndCutsceneOpcode, ScriptEndCutscene},
-    ControlBinding{Event_ScriptWaitForButtonAndYield,
+    ControlBinding{Event_ScriptWaitForButtonAndYieldOpcode,
                    ScriptWaitForButtonAndYield},
     ControlBinding{Event_ScriptBranchOnFlagImmediateOpcode,
                    ScriptBranchOnFlagImmediate},
@@ -106,7 +106,7 @@ constexpr std::array kControlBindings{
                    ScriptStoreInventoryItemPresence},
     ControlBinding{Event_ScriptStoreButtonStateOpcode, ScriptStoreButtonState},
     ControlBinding{Event_ScriptConfigureTimer, ScriptConfigureTimer},
-    ControlBinding{Event_ScriptWaitForButtonOrTimeout,
+    ControlBinding{Event_ScriptWaitForButtonOrTimeoutOpcode,
                    ScriptWaitForButtonOrTimeout},
     ControlBinding{Event_ScriptConfigureEasingCurve,
                    ScriptConfigureEasingCurve},
@@ -1094,4 +1094,18 @@ std::intptr_t Event_ScriptEndCutsceneOpcode(std::uint8_t* instruction,
                                             std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptEndCutscene);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_buttonPressed (4A0A8.c:843).
+std::intptr_t Event_ScriptWaitForButtonAndYieldOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptWaitForButtonAndYield);
+}
+
+// decomp: BATTLE.PRG func_800B96B0 (4A0A8.c:1934).
+std::intptr_t Event_ScriptWaitForButtonOrTimeoutOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptWaitForButtonOrTimeout);
 }
