@@ -13,6 +13,7 @@
 
 #include "Actors/AnimationPoseLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/RoomLighting.hpp"
@@ -363,7 +364,8 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
   int Height() const override { return actor_.instance.position.vy; }
   bool IsLeader() const override { return actor_.instance.slot == 0; }
   bool IsEventPlaying() const override {
-    return Event_EventPlaybackState() == kEventPlaybackActive;
+    return static_cast<int>(VS::Event::EventPlaybackState(
+               VS::Event::LiveScriptVm())) == kEventPlaybackActive;
   }
   bool SelectGeometry(int slot) override {
     if (slot == 0) {

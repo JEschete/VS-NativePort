@@ -24,6 +24,7 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
+#include "Event/ScriptVmLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -297,7 +298,8 @@ class LiveAnimationHost final : public AnimationControlHost {
   int TickSpeed() override { return State_tickSpeed; }
   int EventPlaybackState() override {
     const Synced synced(registry_);
-    return Event_EventPlaybackState();
+    return static_cast<int>(
+        VS::Event::EventPlaybackState(VS::Event::LiveScriptVm()));
   }
   std::optional<AnimationGimmick> GimmickForActorSlot(int slot) override {
     const Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(slot);

@@ -110,6 +110,7 @@ struct LiveVmFixture {
   State_SceneTimer timer = State_sceneTimer;
   char timer_hud = Battle_lowerScreenUiState;
   std::int16_t event_id = Event_eventId;
+  std::uint16_t event_source = Event_eventSource;
 
   LiveVmFixture() {
     std::ranges::copy(Content_discRequestSlots, slots.begin());
@@ -152,6 +153,7 @@ struct LiveVmFixture {
     State_sceneTimer = timer;
     Battle_lowerScreenUiState = timer_hud;
     Event_eventId = event_id;
+    Event_eventSource = event_source;
   }
   LiveVmFixture(const LiveVmFixture&) = delete;
   LiveVmFixture& operator=(const LiveVmFixture&) = delete;
@@ -2250,6 +2252,35 @@ TEST_CASE(
     for (const bool guarded : {false, true}) {
       CheckLiveSpecialTimer(guarded, skip);
       CheckLiveSpecialDiscard(guarded, skip);
+    }
+  }
+}
+
+TEST_CASE("Native playback queries preserve every phase and start latch",
+          "[event-vm-live][event-query]") {
+  const LiveVmFixture fixture;
+  auto& host = event::LiveScriptVm();
+  for (int phase = 0; phase < 256; ++phase) {
+    Event_playbackPhase = static_cast<char>(phase);
+    for (const bool confirmed : {false, true}) {
+      Event_isStartConfirmed = static_cast<char>(confirmed);
+      CHECK(static_cast<int>(event::EventPlaybackState(host)) == phase);
+      CHECK(event::RequestEventStart(host) == 1);
+      CHECK(host.StartConfirmed() == (confirmed || phase == 1));
+    }
+  }
+}
+
+TEST_CASE("Native pending selectors preserve source and halfword bits",
+          "[event-vm-live][event-query]") {
+  const LiveVmFixture fixture;
+  auto& host = event::LiveScriptVm();
+  for (int source = 0; source < 16; ++source) {
+    for (const int id : {0, 1, 0xFFF, 0x1000, 0x7FFF, 0x8000, 0xFFFF}) {
+      Event_eventSource = static_cast<std::uint16_t>(source);
+      Event_eventId = static_cast<std::int16_t>(static_cast<std::uint16_t>(id));
+      CHECK(static_cast<std::uint16_t>(event::PendingEventSelector(host)) ==
+            static_cast<std::uint16_t>((source << 12) | id));
     }
   }
 }

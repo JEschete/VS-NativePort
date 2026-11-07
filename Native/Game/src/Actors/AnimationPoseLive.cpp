@@ -24,6 +24,7 @@
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
@@ -327,8 +328,8 @@ class LiveEventTables {
 };
 
 bool EventPlaybackRunning() {
-  return static_cast<std::int16_t>(Event_EventPlaybackState()) ==
-         kEventPlaybackRunning;
+  return static_cast<std::int16_t>(VS::Event::EventPlaybackState(
+             VS::Event::LiveScriptVm())) == kEventPlaybackRunning;
 }
 
 // The record and pose an event run acts on. The script cursor is kept as an

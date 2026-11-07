@@ -31,6 +31,7 @@
 #include "Core/Runtime.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggers.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -1184,7 +1185,7 @@ class LiveRoomLoadHost final
   }
 
   void RequestEventStart() override {
-    static_cast<void>(Event_RequestEventStart());
+    static_cast<void>(VS::Event::RequestEventStart(VS::Event::LiveScriptVm()));
   }
 
   void InitializeWeather(bool event_running) override {

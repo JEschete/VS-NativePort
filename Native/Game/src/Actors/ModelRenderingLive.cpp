@@ -28,6 +28,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 
@@ -459,8 +460,8 @@ void DrawWeaponForOwner(const Actors_WeaponModel& weapon,
   const bool leader = instance.slot == 0;
   const bool event_playing =
       visible && height >= kHiddenActorHeight && !leader &&
-      static_cast<std::int16_t>(Event_EventPlaybackState()) ==
-          kEventPlaybackActive;
+      static_cast<std::int16_t>(VS::Event::EventPlaybackState(
+          VS::Event::LiveScriptVm())) == kEventPlaybackActive;
   if (!OwnerShowsWeapon(visible, height, leader, event_playing)) return;
   if (!Render::ProjectLiveWeaponModel(weapon)) return;
   if (weapon.textureSlot >= kWeaponTextureSlots ||

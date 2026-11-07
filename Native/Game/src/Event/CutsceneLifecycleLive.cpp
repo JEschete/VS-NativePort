@@ -9,6 +9,7 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Event/CutsceneLifecycle.hpp"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
@@ -108,9 +109,12 @@ class LiveCutsceneHost final : public CutsceneHost {
   void PauseMovingPlatforms(bool paused) override {
     Field_SetMovingPlatformsPaused(paused ? 1 : 0);
   }
-  void RequestEventStart() override { Event_RequestEventStart(); }
+  void RequestEventStart() override {
+    VS::Event::RequestEventStart(VS::Event::LiveScriptVm());
+  }
   std::uint16_t PendingEventSelector() override {
-    return static_cast<std::uint16_t>(Event_PendingEventSelector());
+    return static_cast<std::uint16_t>(
+        VS::Event::PendingEventSelector(VS::Event::LiveScriptVm()));
   }
   void DisableFirstPersonView() override { Field_isFirstPersonViewEnabled = 0; }
   void RebuildActionPlans() override {

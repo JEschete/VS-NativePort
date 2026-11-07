@@ -1414,10 +1414,12 @@ ScriptFlow CommandFinishEvent(const ScriptInstruction& /*instruction*/,
   return ScriptFlow::Of(ScriptFlowKind::kFinish);
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:4246, 800BEB00; playback byte query.
 PlaybackPhase EventPlaybackState(const ScriptVmHost& host) {
   return host.Phase();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:4248, 800BEB10; source nibble/event halfword.
 std::int16_t PendingEventSelector(const ScriptVmHost& host) {
   constexpr unsigned kSourceShift = 12;
   return static_cast<std::int16_t>(
@@ -1425,6 +1427,7 @@ std::int16_t PendingEventSelector(const ScriptVmHost& host) {
       static_cast<std::uint16_t>(host.EventId()));
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:4287, 800BEC30; requested phase latches start.
 int RequestEventStart(ScriptVmHost& host) {
   if (host.Phase() == PlaybackPhase::kRequested) {
     host.SetStartConfirmed(true);

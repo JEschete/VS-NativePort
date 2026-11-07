@@ -7,6 +7,34 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Playback Query Helpers (#276 Row 33)
+
+- F01253/F01254/F01260 register the existing strict typed playback-phase query,
+  packed pending selector and requested-phase start latch. Maintained actor pose/
+  model/animation, cutscene and room callers directly use the native live host
+  API; no new compatibility wrapper. Unused C bodies/prototypes/module bindings
+  retire via the copier and addresses resolve null.
+- ASM `800BEB04` reads unsigned phase; `800BEB18/800BEB1C` read halfwords before
+  selector packing/truncation; `800BEC3C/800BEC48` latch only requested phase.
+  Tests cover all 256 phases/two confirmation states, 16 source nibbles/seven
+  boundary event halfwords and retained confirmation. Query/null gate: 3 / 1,659.
+  Actual actor/cutscene/model tags pass 118 / 4,764; unmatched initial guessed
+  tags are not claimed as coverage. Fixture now restores source and event id.
+- On `7685f016` plus this slice, full Debug/Release builds and regressions pass
+  4,681 cases / 8,439,530 assertions, zero failures/skips and both unchanged
+  canonical fingerprints. New query checks add 1,648/null checks three; removal
+  of three unused symbols removes six per-symbol assertions, net 1,645. No
+  baseline refresh. Changed quality: five existing / zero new; 190 copier/nine
+  extent controls pass. Evidence: `VR-EVENT-PLAYBACK-QUERY-PROMOTION` and
+  `build\owner-checkpoint\native-playback-query-*-regression.log`.
+  Remaining VM queue/init/actor/texture/trigger/easing C-entry/table/global EC
+  helpers still require their own gates; no whole-row or visual parity claim.
+  Special predecessor `7685f016` is green on exact CI `42338479772`.
+- Repeat generation preserves all tracked Native/project/manifest bytes including
+  owned actor/cutscene/room caller migrations. Unmodified gates derive 2,681
+  promoted / four compatibility `wip`; row 33 is now 49/57. Remaining helper/
+  C-entry/table/global retirement obligations stay open.
+
 ### Native Special Control Slot (#276 Row 33)
 
 - F01187 registers the final strict typed special-control core and guarded native

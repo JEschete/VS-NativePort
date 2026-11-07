@@ -212,22 +212,6 @@ void Event_RestoreScriptTextureRectangle(void)
     *((void**)((uintptr_t)Core_ScratchBase() + 0x000)) = (DR_MOVE*)(move_primitive + 1);
 }
 
-// decomp: BATTLE.PRG func_800BEB00 (src/BATTLE/BATTLE.PRG/4A0A8.c:4246)
-int Event_EventPlaybackState(void) { return Event_playbackPhase; }
-
-// decomp: BATTLE.PRG func_800BEB10 (src/BATTLE/BATTLE.PRG/4A0A8.c:4248)
-short Event_PendingEventSelector(void) { return (Event_eventSource << 0xC) | Event_eventId; }
-
-// decomp: BATTLE.PRG func_800BEC30 (src/BATTLE/BATTLE.PRG/4A0A8.c:4287)
-int Event_RequestEventStart(void)
-{
-    if (Event_playbackPhase == 1) {
-        Event_isStartConfirmed = Event_playbackPhase;
-        return 1;
-    }
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)
 int Event_OpcodeSize(u_char* instruction) { return Event_kOpcodeSizes[instruction[0]]; }
 
