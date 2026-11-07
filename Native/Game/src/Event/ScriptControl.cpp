@@ -1589,6 +1589,7 @@ int EvaluateInterpolationCurve(std::int16_t mode, std::int16_t frame,
                  RaiseFraction(ratio(kOne), easing.power));
 }
 
+// decomp: BATTLE.PRG 573B8.c:223, 800C00E8; queue into owned selected buffer.
 bool QueueEventScriptLoad(EventBuffer destination, ScriptVmHost& host) {
   if (host.EventFile() != EventFileStatus::kNone) {
     host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
@@ -1610,6 +1611,8 @@ void ResetCutsceneActorsToIdle(ScriptVmHost& host) {
   }
 }
 
+// decomp: INITBTL.PRG 12AC.c:69, 800FAAAC; reset and allocate event work
+// buffers.
 bool InitializeScriptOpcodeTable(ScriptVmHost& host) {
   if (host.EventFile() != EventFileStatus::kNone) {
     host.CancelEventFile();

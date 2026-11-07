@@ -1,21 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Content/DiscLayout.h"
-#include "DiscQueue.h"
-#include "Event/Playback.h"
-#include "Event/Script.h"
 #include "Event/ScriptActorOpcodes.h"
-#include "Event/ScriptAudio.h"
 #include "Event/ScriptAudioOpcodes.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptEffectOpcodes.h"
-#include "Event/ScriptEffects.h"
 #include "Event/ScriptField.h"
 #include "Event/ScriptScreen.h"
 #include "Event/ScriptVm.h"
@@ -186,34 +177,5 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_CommandStartScriptContextOpcode, Event_CommandStopScriptContextOpcode, Event_CommandLoadNextEventOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandFinishEventOpcode, Event_CommandFinishEventOpcode };
-
-// decomp: BATTLE.PRG func_800C00E8 (src/BATTLE/BATTLE.PRG/573B8.c:223)
-void Event_QueueEventScriptLoad(int arg0, void* destination_buffer)
-{
-    Event_eventFileDiscLocation.size = VS_0000_EVT_SIZE;
-    Event_eventFileDiscLocation.lba = (Event_eventId * 3) + VS_0000_EVT_LBA; // .EVT files must be sequential
-    (*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) = VS::Content::AllocateLiveDiscRequest(&Event_eventFileDiscLocation);
-    if ((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) != NULL) {
-        VS::Content::EnqueueLiveDiscRequest((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest), destination_buffer);
-    } else {
-        (*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) = VS::Content::CompleteLiveRefusedDiscRequest(&Event_eventFileDiscLocation, destination_buffer);
-    }
-}
-
-// decomp: INITBTL.PRG _initScriptFunctionTable (src/BATTLE/INITBTL.PRG/12AC.c:69)
-void Event_InitializeScriptOpcodeTable(void)
-{
-    Event_isAmbientSoundSuspended = 0;
-    Event_playbackPhase = 0;
-    Event_isStartConfirmed = 0;
-    Event_isMainThreadFinished = 0;
-    VS::Core::Memory::ZeroLiveAlignedWords(Event_threadCursors, sizeof Event_threadCursors);
-    VS::Core::Memory::ZeroLiveAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);
-    Event_roomChangeState = 0;
-    Event_scriptBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x1800);
-    Event_vibrationPatternBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x80);
-    Event_legacySkipHandlerCopy = (intptr_t (**)(u_char *, short))(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers)));
-    VS::Core::Memory::CopyLiveAlignedWords(Event_legacySkipHandlerCopy, Event_kSkipOpcodeHandlers, sizeof(Event_kSkipOpcodeHandlers));
-}
 
 }  // extern "C"

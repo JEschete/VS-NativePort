@@ -7,6 +7,38 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Queue/Initialization Helpers (#276 Row 33)
+
+- F01277/F01850 register existing strict typed owned queue/init cores. No C
+  callers remained; raw destination queue C/module and heap-allocation initializer
+  bodies/prototypes retire through the copier. Only the obsolete initializer
+  pointer-cast adaptation was removed. Native startup already uses this initializer.
+- Queue ASM verifies `0x1800` bytes and event id * three sectors plus EVT LBA.
+  Reference build has no INITBTL matching ASM; exact 27 words were instead read
+  from the existing overlay, SHA-1 `D7EA16EF957179CAD6E3B02727BB714713CFCC32`
+  matching config, offset `0x12AC`, CPU `800FAAAC..800FAB14`: two clears,
+  three allocation calls for `0x1800/0x80/0x400`, and `0x400` copy from `800FAF7C`.
+  No read-only reference output was generated or edited.
+- Actual live tests cover script/chained owned destinations, busy refusal without
+  replacing staging, completed publication/adoption, initializer cancellation and
+  state/return/all-thread/wait reset. Existing failure controls remain. Focused
+  gate: 3 / 69. Full-queue control retains 15 routes: 14 generated plus explicitly
+  validated native allocation guard/refused fallback, not a lowered threshold.
+- On `c9bd38a5` plus this slice, full Debug/Release builds and regressions pass
+  4,688 cases / 8,633,412 assertions, zero failures/skips and both canonical
+  fingerprints unchanged. New cases54/null1 minus2per-symbol gives net53; no
+  baseline refresh. Changed quality: five existing / zero new; 190 copier/nine
+  extent/Pylance syntax controls pass. Assertion-only complexity factoring keeps
+  every check. Evidence: `VR-EVENT-QUEUE-INIT-PROMOTION` and
+  `build\owner-checkpoint\native-queue-init-*-regression.log`.
+  Native owner/cancel/failure safety is not unchecked-original parity; required
+  table/global retirement and trigger/easing C entries remain separate. Actor
+  predecessor `c9bd38a5` is green on exact CI `42344203422`.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,687 promoted / four compatibility `wip`; row 33 is
+  now 55/57. All selected generated VM helper bodies are retired; trigger/easing
+  C-entry and table/global EC gates remain separate and open.
+
 ### Native Actor-Reference Helper (#276 Row 33)
 
 - F01275 registers the strict typed actor-reference core. Maintained actor/audio/

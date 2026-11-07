@@ -2788,6 +2788,18 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # owned QueueTiledBackgroundLoad, whose BackgroundLive.cpp EnqueueRead runs only for an allocated read.
         # Row 49 moved Combination.cpp's recipe read into SetupLive.cpp StartRecipeLoad. Row 25c moved
         # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead.
+        event_source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(encoding="utf-8")
+        event = "".join(re.sub(r"//[^\n]*", "", event_source).split())
+        self.assertIn(
+            "if(request_!=nullptr){request_generation_=Content::LiveDiscRequestGeneration(request_);"
+            "Content::EnqueueLiveDiscRequest(request_,pending_buffer_->data());",
+            event,
+        )
+        self.assertIn(
+            "}else{request_=Content::CompleteLiveRefusedDiscRequest(&pending_file_,pending_buffer_->data());",
+            event,
+        )
+        sites += 1
         self.assertGreaterEqual(sites, 15)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)

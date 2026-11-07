@@ -2299,6 +2299,75 @@ TEST_CASE("Native actor reference adapter preserves slot and special selectors",
   }
 }
 
+TEST_CASE("Native queue helper preserves owned destinations and busy staging",
+          "[event-vm-live][event-queue-init]") {
+  for (const auto destination :
+       {event::EventBuffer::kScript, event::EventBuffer::kChained}) {
+    const LiveVmFixture fixture;
+    const auto start = MountScript({0x55});
+    auto& host = event::LiveScriptVm();
+    host.SetEventId(1);
+    if (destination == event::EventBuffer::kChained) {
+      REQUIRE(host.AllocateChainedEventBuffer());
+    }
+    REQUIRE(event::QueueEventScriptLoad(destination, host));
+    auto& request = PendingRequest();
+    void* const owner_buffer = request.vram;
+    CHECK(host.EventFile() == event::EventFileStatus::kLoading);
+    CHECK_FALSE(event::QueueEventScriptLoad(destination, host));
+    CHECK(PendingRequest().vram == owner_buffer);
+    CheckMountedByte(0x55, start.generation);
+    CompleteSyntheticFile(0xAA);
+    host.ReleaseEventFile();
+    if (destination == event::EventBuffer::kChained) {
+      REQUIRE(host.AdoptChainedEvent());
+    }
+    CheckMountedByte(0xAA, start.generation + 1);
+  }
+}
+
+namespace {
+void CheckInitializedLiveScriptState(event::ScriptVmHost& host,
+                                     const Content_DiscQueueSlot& request) {
+  CHECK(request.state == Content_DiscRequestState_Free);
+  CHECK(host.EventFile() == event::EventFileStatus::kNone);
+  CHECK(host.Phase() == event::PlaybackPhase::kIdle);
+  CHECK_FALSE(host.StartConfirmed());
+  CHECK_FALSE(host.MainThreadFinished());
+  CHECK_FALSE(host.ChainedEventLoaded());
+  CHECK_FALSE(host.SubroutineReturn().Present());
+}
+
+void CheckInitializedLiveThread(event::ScriptVmHost& host, int thread) {
+  CHECK_FALSE(host.ThreadCursor(thread).Present());
+  CHECK(host.WaitFrames(thread) == 0);
+}
+}  // namespace
+
+TEST_CASE("Native opcode initialization cancels staging and resets all threads",
+          "[event-vm-live][event-queue-init]") {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0x55});
+  auto& host = event::LiveScriptVm();
+  REQUIRE(host.AllocateChainedEventBuffer());
+  REQUIRE(host.QueueEventFileLoad(1, event::EventBuffer::kChained));
+  auto& request = PendingRequest();
+  host.SetPhase(event::PlaybackPhase::kRunning);
+  host.SetStartConfirmed(true);
+  host.SetMainThreadFinished(true);
+  host.SetChainedEventLoaded(true);
+  host.SetSubroutineReturn(start);
+  for (int thread = 0; thread < 4; ++thread) {
+    host.SetThreadCursor(thread, start);
+    host.SetWaitFrames(thread, 17);
+  }
+  REQUIRE(event::InitializeLiveScriptOpcodeTable());
+  CheckInitializedLiveScriptState(host, request);
+  for (int thread = 0; thread < 4; ++thread) {
+    CheckInitializedLiveThread(host, thread);
+  }
+}
+
 TEST_CASE("Native button store bindings preserve selectors and input bytes",
           "[event-vm-live][control-opcode]") {
   for (const int skip : {0, 2}) {

@@ -2283,17 +2283,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Event\\ScriptVm.cpp": [
-[
-1133,
-[
-"    Event_legacySkipHandlerCopy = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers));"
-],
-[
-"    Event_legacySkipHandlerCopy = (intptr_t (**)(u_char *, short))(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Event_kSkipOpcodeHandlers)));"
-]
-]
-],
 "Native\\Game\\src\\Field\\Gimmicks.cpp": [
 [
 374,

@@ -658,7 +658,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BE7B8u, 0u, (void*)&Event_ReadScriptFixedVector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BEC58u, 0u, (void*)&Event_EvaluateRoomEventTriggers, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurve, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C00E8u, 0u, (void*)&Event_QueueEventScriptLoad, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C031Cu, 0u, (void*)&Battle_InitSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05B4u, 0u, (void*)&Battle_FreeSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05ECu, 0u, (void*)&Battle_SetSphereVolumes, 0u, 0u, 0u},

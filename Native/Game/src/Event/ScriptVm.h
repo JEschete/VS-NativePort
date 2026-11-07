@@ -47,7 +47,5 @@ extern uintptr_t Event_subroutineReturnCursor;
 extern char Event_isSkipForced;
 extern char Event_isScriptBackdropEnabled;
 extern intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short);
-void Event_QueueEventScriptLoad(int arg0, void* destination_buffer);
-void Event_InitializeScriptOpcodeTable(void);
 
 #endif // VS_EVENT_SCRIPTVM_H_DECLS
