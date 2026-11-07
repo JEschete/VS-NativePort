@@ -72,8 +72,8 @@ SceneOpcodes ProductionOpcodes() {
     const auto handler = Event_kOpcodeHandlers[index];
     if (handler == Event_ScriptReportInvalidOpcode || handler == nullptr) {
       opcode.size = 0;
-    } else if (handler == Event_ScriptBranchOnFlagImmediate ||
-               handler == Event_ScriptBranchOnFlagPair) {
+    } else if (handler == Event_ScriptBranchOnFlagImmediateOpcode ||
+               handler == Event_ScriptBranchOnFlagPairOpcode) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = kFlagBranchOperand;
     } else if (handler == Event_ScriptBranchOnCachedFlagOpcode) {

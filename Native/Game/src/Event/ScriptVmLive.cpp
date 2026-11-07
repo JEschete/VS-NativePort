@@ -86,9 +86,9 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptEndCutscene, ScriptEndCutscene},
     ControlBinding{Event_ScriptWaitForButtonAndYield,
                    ScriptWaitForButtonAndYield},
-    ControlBinding{Event_ScriptBranchOnFlagImmediate,
+    ControlBinding{Event_ScriptBranchOnFlagImmediateOpcode,
                    ScriptBranchOnFlagImmediate},
-    ControlBinding{Event_ScriptBranchOnFlagPair, ScriptBranchOnFlagPair},
+    ControlBinding{Event_ScriptBranchOnFlagPairOpcode, ScriptBranchOnFlagPair},
     ControlBinding{Event_ScriptJumpForward, ScriptJumpForward},
     ControlBinding{Event_ScriptCacheFlagValueOpcode, ScriptCacheFlagValue},
     ControlBinding{Event_ScriptBranchOnCachedFlagOpcode,
@@ -1030,4 +1030,18 @@ std::intptr_t Event_ScriptApplyFlagPairOperationOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptApplyFlagPairOperation);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag (4A0A8.c:1543).
+std::intptr_t Event_ScriptBranchOnFlagImmediateOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptBranchOnFlagImmediate);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (4A0A8.c:1589).
+std::intptr_t Event_ScriptBranchOnFlagPairOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptBranchOnFlagPair);
 }

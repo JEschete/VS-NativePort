@@ -977,6 +977,7 @@ ScriptFlow ScriptWaitForButtonAndYield(const ScriptInstruction& instruction,
   return (host.HeldButtons() & buttons) != 0 ? Yield() : Hold();
 }
 
+// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag (4A0A8.c:1543).
 ScriptFlow ScriptBranchOnFlagImmediate(const ScriptInstruction& instruction,
                                        ScriptVmHost& host) {
   if (!Fits(instruction, kFiveOperandBytes, host)) {
@@ -991,6 +992,7 @@ ScriptFlow ScriptBranchOnFlagImmediate(const ScriptInstruction& instruction,
   return ScriptFlow::JumpBy(OperandHalf(command, kFourthOperand));
 }
 
+// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (4A0A8.c:1589).
 ScriptFlow ScriptBranchOnFlagPair(const ScriptInstruction& instruction,
                                   ScriptVmHost& host) {
   if (!Fits(instruction, kFiveOperandBytes, host)) {

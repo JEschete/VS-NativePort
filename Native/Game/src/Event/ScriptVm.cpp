@@ -160,7 +160,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptYieldFrameOpcode, Event_ScriptSetActorColorOverrideOpcode, Event_ScriptNoOperationOpcode, Event_ScriptRotateActorAxesOpcode, Event_ScriptSetActorHeadAnglesOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetActorIdleAnimationOpcode, Event_ScriptLookAtActorOpcode, Event_ScriptLookAtWorldPosOpcode,
     Event_ScriptLoadObjectModelOpcode, Event_ScriptWaitForObjectLoadOpcode, Event_ScriptReleaseObjectModelOpcode, Event_ScriptSelectObjectTextureBankOpcode, Event_ScriptSetActorOverlayPassOpcode,
-    Event_ScriptSetActorWeaponDrawnOpcode, Event_ScriptBranchOnFlagImmediate, Event_ScriptBranchOnFlagPair,
+    Event_ScriptSetActorWeaponDrawnOpcode, Event_ScriptBranchOnFlagImmediateOpcode, Event_ScriptBranchOnFlagPairOpcode,
     Event_ScriptJumpForward, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptJumpForward,
     Event_ScriptCacheFlagValueOpcode, Event_ScriptBranchOnCachedFlagOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForward,
@@ -313,95 +313,6 @@ intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_ind
         return 4;
     }
     return 1;
-}
-
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag (src/BATTLE/BATTLE.PRG/4A0A8.c:1543)
-intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_index)
-{
-    char flag_value =
-        VS::State::LiveScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
-    char immediate_value = instruction[3];
-
-    switch (instruction[1] & 0xF0) {
-    case 0:
-        if (immediate_value >= flag_value) {
-            return (int)NULL;
-        }
-        break;
-    case 16:
-        if (flag_value >= immediate_value) {
-            return (int)NULL;
-        }
-        break;
-    case 32:
-        if (flag_value == immediate_value) {
-            return (int)NULL;
-        }
-        break;
-    case 48:
-        if (flag_value != immediate_value) {
-            return (int)NULL;
-        }
-        break;
-    case 64:
-        if (flag_value < immediate_value) {
-            return (int)NULL;
-        }
-        break;
-    case 80:
-        if (immediate_value < flag_value) {
-            return (int)NULL;
-        }
-        break;
-    case 96:
-        if (flag_value & immediate_value) {
-            return (int)NULL;
-        }
-        break;
-    }
-    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 4)];
-}
-
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (src/BATTLE/BATTLE.PRG/4A0A8.c:1589)
-intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index)
-{
-    char left_flag_value =
-        VS::State::LiveScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
-    char right_flag_value = VS::State::LiveScriptFlag(instruction[3] | ((instruction[2] & 3) << 8));
-
-    switch (instruction[1] & 0xF0) {
-    case 0:
-        if (left_flag_value <= right_flag_value) {
-            return (int)NULL;
-        }
-        break;
-    case 16:
-        if (left_flag_value >= right_flag_value) {
-            return (int)NULL;
-        }
-        break;
-    case 32:
-        if (left_flag_value == right_flag_value) {
-            return (int)NULL;
-        }
-        break;
-    case 48:
-        if (left_flag_value != right_flag_value) {
-            return (int)NULL;
-        }
-        break;
-    case 64:
-        if (left_flag_value < right_flag_value) {
-            return (int)NULL;
-        }
-        break;
-    case 80:
-        if (left_flag_value > right_flag_value) {
-            return (int)NULL;
-        }
-        break;
-    }
-    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 4)];
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwd (src/BATTLE/BATTLE.PRG/4A0A8.c:1630)

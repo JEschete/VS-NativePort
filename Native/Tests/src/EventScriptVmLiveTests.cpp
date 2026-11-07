@@ -53,6 +53,8 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B8C7C, Event_ScriptLoopBackwardOpcode},
     {0x800B8D50, Event_ScriptApplyImmediateFlagOperationOpcode},
     {0x800B8EDC, Event_ScriptApplyFlagPairOperationOpcode},
+    {0x800B88D4, Event_ScriptBranchOnFlagImmediateOpcode},
+    {0x800B8A10, Event_ScriptBranchOnFlagPairOpcode},
 });
 
 struct LiveVmFixture {
@@ -245,17 +247,19 @@ void CompareFlagCorpus(bool pair) {
   CHECK(fingerprints[0] == (pair ? 0x593182F1F2B16919 : 0x41C1AFD9493A9DAF));
 }
 
-bool SameBranchResult(std::intptr_t original, event::ScriptFlow native,
-                      const std::uint8_t* instruction) {
-  if (original == 0) {
-    return native.kind == event::ScriptFlowKind::kAdvance;
-  }
-  return native.kind == event::ScriptFlowKind::kJumpBy &&
-         original ==
-             reinterpret_cast<std::intptr_t>(instruction) + native.displacement;
+bool FrozenFlagBranchHolds(const FlagComparison& sample) {
+  const int left = VS::State::LiveScriptFlag(sample.first);
+  const int right =
+      sample.pair ? VS::State::LiveScriptFlag(sample.second) : sample.right;
+  const std::array<bool, 7> holds{
+      left <= right,           left >= right,
+      left == right,           left != right,
+      left<right, left> right, !sample.pair && (left & right) != 0};
+  const auto operation = static_cast<std::size_t>(sample.operation >> 4);
+  return operation < holds.size() && holds[operation];
 }
 
-bool CompareOriginalFlagBranch(
+bool CompareFrozenFlagBranch(
     const FlagComparison& sample, std::int16_t displacement, int mutation = 0,
     std::array<std::uint64_t, 2>* fingerprints = nullptr) {
   std::array<std::uint8_t, 64> storage{};
@@ -265,9 +269,10 @@ bool CompareOriginalFlagBranch(
   command[5] =
       static_cast<std::uint8_t>(static_cast<std::uint16_t>(displacement) >> 8);
   InitializeFlagSample(sample);
-  const auto original = sample.pair
-                            ? Event_ScriptBranchOnFlagPair(command, 0)
-                            : Event_ScriptBranchOnFlagImmediate(command, 0);
+  const bool expected_jump = !FrozenFlagBranchHolds(sample);
+  const auto expected_flow =
+      expected_jump ? event::ScriptFlow::JumpBy(displacement)
+                    : event::ScriptFlow::Of(event::ScriptFlowKind::kAdvance);
   if (mutation == 1) command[1] ^= 0x10;
   if (mutation == 2) ++command[4];
   if (mutation == 3) command[3] ^= 0x80;
@@ -277,12 +282,11 @@ bool CompareOriginalFlagBranch(
                                   : event::ScriptBranchOnFlagImmediate(
                                         instruction, event::LiveScriptVm());
   if (fingerprints != nullptr) {
-    const auto expected_offset = static_cast<std::uint16_t>(
-        original == 0 ? 0
-                      : original - reinterpret_cast<std::intptr_t>(command));
+    const auto expected_offset =
+        static_cast<std::uint16_t>(expected_jump ? displacement : 0);
     const bool native_jump = native.kind == event::ScriptFlowKind::kJumpBy;
     AddResultDigest((*fingerprints)[0],
-                    static_cast<std::uint32_t>(original != 0) |
+                    static_cast<std::uint32_t>(expected_jump) |
                         (static_cast<std::uint32_t>(expected_offset) << 16));
     AddResultDigest((*fingerprints)[1],
                     static_cast<std::uint32_t>(native_jump) |
@@ -290,7 +294,7 @@ bool CompareOriginalFlagBranch(
                              native_jump ? native.displacement : 0))
                          << 16));
   }
-  return SameBranchResult(original, native, command);
+  return native == expected_flow;
 }
 
 void CompareFlagBranchCorpus(bool pair) {
@@ -302,7 +306,7 @@ void CompareFlagBranchCorpus(bool pair) {
     for (int iteration = 0; iteration < 2048; ++iteration) {
       const int first = iteration & 1023;
       const int second = (iteration & 1) == 0 ? first : (iteration * 13) & 1023;
-      REQUIRE(CompareOriginalFlagBranch(
+      REQUIRE(CompareFrozenFlagBranch(
           {first, second, static_cast<std::uint8_t>(NextFlagSample(random)),
            static_cast<std::uint8_t>(NextFlagSample(random)),
            static_cast<std::uint8_t>(operation << 4), pair},
@@ -615,6 +619,64 @@ std::intptr_t PairFlagSlotBridge(std::uint8_t* instruction,
   return Event_ScriptApplyFlagPairOperationOpcode(instruction, thread);
 }
 
+std::intptr_t ImmediateBranchSlotBridge(std::uint8_t* instruction,
+                                        std::int16_t thread) {
+  return Event_ScriptBranchOnFlagImmediateOpcode(instruction, thread);
+}
+
+std::intptr_t PairBranchSlotBridge(std::uint8_t* instruction,
+                                   std::int16_t thread) {
+  return Event_ScriptBranchOnFlagPairOpcode(instruction, thread);
+}
+
+void CheckLiveFlagBranch(FlagComparison sample, bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  FlagDifferentialFixture flags;
+  auto command = FlagCommand(sample);
+  command[0] = 0xEF;
+  Bytes bytes(command.begin(), command.end());
+  bytes.insert(bytes.end(), {8, 0, 0xE3, 4, 0xE6});
+  const auto start = MountScript(std::move(bytes));
+  InitializeFlagSample(sample);
+  const bool fallthrough = FrozenFlagBranchHolds(sample);
+  const Handler handler =
+      sample.pair ? (guarded ? PairBranchSlotBridge
+                             : Event_ScriptBranchOnFlagPairOpcode)
+                  : (guarded ? ImmediateBranchSlotBridge
+                             : Event_ScriptBranchOnFlagImmediateOpcode);
+  Event_skipState = static_cast<char>(skip);
+  State_tickSpeed = 2;
+  Event_kSkipOpcodeHandlers[0xEF] = Event_kOpcodeHandlers[0xEF] = handler;
+  Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
+      Event_CommandSetTickSpeedOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xEF] = 6;
+  Event_kOpcodeSizes[0xE3] = 2;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+  CHECK(State_tickSpeed == (fallthrough ? 4 : 2));
+}
+
+struct LiveFlagScenario {
+  int skip;
+  bool guarded;
+  bool pair;
+  bool alias;
+};
+
+void CheckLiveBranchOperations(LiveFlagScenario scenario) {
+  for (int operation = 0; operation < 16; ++operation) {
+    for (const std::uint8_t value : {0, 127, 128, 255}) {
+      CheckLiveFlagBranch(
+          {1023, scenario.alias ? 1023 : 511, value, 128,
+           static_cast<std::uint8_t>(operation << 4), scenario.pair},
+          scenario.guarded, scenario.skip);
+    }
+  }
+}
+
 void CheckLiveFlagOperation(FlagComparison sample, bool guarded, int skip) {
   const LiveVmFixture fixture;
   FlagDifferentialFixture flags;
@@ -641,13 +703,6 @@ void CheckLiveFlagOperation(FlagComparison sample, bool guarded, int skip) {
   CHECK(VS::State::LiveScriptFlag(sample.first) == expected[0]);
   CHECK(VS::State::LiveScriptFlag(sample.second) == expected[1]);
 }
-
-struct LiveFlagScenario {
-  int skip;
-  bool guarded;
-  bool pair;
-  bool alias;
-};
 
 void CheckAllLiveFlagOperations(LiveFlagScenario scenario) {
   for (int operation = 0; operation < 16; ++operation) {
@@ -1032,9 +1087,9 @@ TEST_CASE(
     "[event-vm-live][event-branch-differential]") {
   FlagDifferentialFixture fixture;
   const FlagComparison sample{32, 33, 0x80, 0x7F, 0, false};
-  REQUIRE(CompareOriginalFlagBranch(sample, 6));
+  REQUIRE(CompareFrozenFlagBranch(sample, 6));
   for (int mutation = 1; mutation <= 3; ++mutation) {
-    CHECK_FALSE(CompareOriginalFlagBranch(sample, 6, mutation));
+    CHECK_FALSE(CompareFrozenFlagBranch(sample, 6, mutation));
   }
 }
 
@@ -1268,6 +1323,19 @@ TEST_CASE("Native arithmetic bindings keep R3000 zero divisor byte results",
       for (const std::uint8_t operation : {0x30, 0x40}) {
         CheckLiveFlagOperation({1023, 511, 255, 0, operation, pair}, guarded,
                                0);
+      }
+    }
+  }
+}
+
+TEST_CASE("Native flag branch bindings preserve all unsigned comparison modes",
+          "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (const bool pair : {false, true}) {
+        for (const bool alias : {false, true}) {
+          CheckLiveBranchOperations({skip, guarded, pair, alias});
+        }
       }
     }
   }

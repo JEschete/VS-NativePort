@@ -55,8 +55,6 @@ void Event_FinishSkippedCutscene(u_char* scan_cursor);
 intptr_t Event_ScriptEndCutsceneAndJump(u_char* instruction, short thread_index);
 intptr_t Event_ScriptEndCutscene(u_char* instruction, short thread_index);
 intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_index);
-intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_index);
-intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index);
 intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index);
 intptr_t Event_ScriptReturnToSavedAddress(u_char* instruction, short thread_index);
 intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index);

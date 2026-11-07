@@ -7,6 +7,29 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Flag-Branch Control Slots (#276 Row 33)
+
+- F01085/F01086 now register strict native unsigned immediate/pair comparison and
+  typed signed relative flow. Original C bodies/names/prototypes/parser consumers
+  retire after actual-original digests `E1BCD4375C206433` / `C89571B1A7F86BCD`
+  were captured in `7a49f59b`, green exact CI `42319048643`. Every safe per-case/
+  comparison/alias/bit-test/unknown-operation/model/mutant check and both unchanged
+  original constants remain; no new binding is used as the original oracle.
+- Live normal/skip/direct/guarded all comparison nibbles and unsigned boundary
+  values preserve targets/tick outcomes. Control/branch selection passes 19 cases /
+  167,232 assertions; helper type-order correction preserves every expectation.
+- On `7a49f59b` plus this slice, complete Debug/Release builds and regressions pass
+  4,655 cases / 8,181,279 assertions and both unchanged canonical replays. One new
+  case/four contract checks add 4,100; no baseline changes. Broad quality/tidy has
+  zero new findings; 190 copier/nine extent controls and Python syntax pass.
+  Repeat copying preserves tracked Native/project/manifest bytes; old branch names
+  have no Native reference. Evidence: `VR-EVENT-CONTROL-FLAG-BRANCHES` and
+  `build\owner-checkpoint\native-control-flag-branches-*-regression.log`.
+  Only these cores are reviewed; required ABI and remaining jumps/controls/C-entry/
+  global EC debt stay explicit, not whole-row completion.
+  Unmodified gates derive 2,658 promoted / four compatibility `wip`; row 33 is
+  now 26/57. Original branch digests and required table ABI remain explicit.
+
 ### Branch Original Oracle Preservation (#276)
 
 - Existing immediate/pair flag corpora captured normalized FNV64 directly from
