@@ -278,9 +278,11 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     }
   }
   void BeginObjectInteractionWait() override {
-    Field_BeginObjectInteractionWait();
+    Field_BeginObjectInteractionWaitEntry();
   }
-  void EndObjectInteractionWait() override { Field_EndObjectInteractionWait(); }
+  void EndObjectInteractionWait() override {
+    Field_EndObjectInteractionWaitEntry();
+  }
   [[nodiscard]] bool IsSceneNotificationPending() override {
     return Menu_IsSceneNotificationPending() != 0;
   }

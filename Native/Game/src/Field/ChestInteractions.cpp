@@ -181,4 +181,17 @@ bool BeginTrapInteraction(TrapTarget target, std::int32_t actor,
   return true;
 }
 
+// decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).
+void BeginObjectInteractionWait(ObjectInteractionWaitHost& host) {
+  host.SetControlMode(FieldControlMode::kObjectInteractionWait);
+  host.PauseField();
+}
+
+// decomp: BATTLE.PRG func_80073ACC (src/BATTLE/BATTLE.PRG/146C.c:4829).
+void EndObjectInteractionWait(ObjectInteractionWaitHost& host) {
+  host.ReleaseNotification();
+  host.ResumeField();
+  host.EnterExploration();
+}
+
 }  // namespace VS::Field

@@ -364,6 +364,8 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Field_BeginObjectInteractionWaitEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_EndObjectInteractionWaitEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_DispatchTrapOrChestInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_BeginTrapInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_FinishTrapInteractionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
@@ -1057,6 +1059,8 @@ OWNED_CALL_BINDINGS["F00584"] = "Field_QueueGimmickAnimationEntry"
 OWNED_CALL_BINDINGS["F00585"] = "Field_UpdateGimmickAnimationQueueEntry"
 OWNED_CALL_BINDINGS["F00570"] = "Field_ResetGimmickAnimationQueueEntry"
 OWNED_CALL_BINDINGS["F00606"] = "Field_BeginSwitchToggleEntry"
+OWNED_CALL_BINDINGS["F00132"] = "Field_BeginObjectInteractionWaitEntry"
+OWNED_CALL_BINDINGS["F00133"] = "Field_EndObjectInteractionWaitEntry"
 OWNED_CALL_BINDINGS["F00136"] = "Field_TryOpenChestEntry"
 OWNED_CALL_BINDINGS["F00138"] = "Field_BeginChestInteractionEntry"
 OWNED_CALL_BINDINGS["F00144"] = "Field_FinishChestInteractionEntry"
@@ -2403,6 +2407,8 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x80073AA4, "Field_BeginObjectInteractionWaitEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80073ACC, "Field_EndObjectInteractionWaitEntry"),
     ("BATTLE/BATTLE.PRG", 0x800741D4, "Field_DispatchTrapOrChestInteractionEntry"),
     ("BATTLE/BATTLE.PRG", 0x80073F7C, "Field_BeginTrapInteractionEntry"),
     ("BATTLE/BATTLE.PRG", 0x80074314, "Field_FinishTrapInteractionEntry"),

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "Field/GameMode.hpp"
 #include "Field/InteractionTarget.hpp"
 
 namespace VS::Field {
@@ -91,5 +92,18 @@ class TrapSelectionHost {
 
 bool BeginTrapInteraction(TrapTarget target, std::int32_t actor,
                           TrapSelectionHost& host);
+
+class ObjectInteractionWaitHost {
+ public:
+  virtual ~ObjectInteractionWaitHost() = default;
+  virtual void SetControlMode(FieldControlMode mode) = 0;
+  virtual void PauseField() = 0;
+  virtual void ReleaseNotification() = 0;
+  virtual void ResumeField() = 0;
+  virtual void EnterExploration() = 0;
+};
+
+void BeginObjectInteractionWait(ObjectInteractionWaitHost& host);
+void EndObjectInteractionWait(ObjectInteractionWaitHost& host);
 
 }  // namespace VS::Field

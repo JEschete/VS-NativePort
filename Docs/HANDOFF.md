@@ -7,6 +7,33 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Object Interaction Wait (#276 Row 27)
+
+- #287 is closed at `47efa7c71d0f886ade12ac9e426bb2f9172e923d`, exact green
+  Source Quality `42374393222`. #321 remains open independently.
+- F00132/F00133 now use the existing strict interaction core and narrow Live
+  adapter: set typed mode11 before pausing; release notification, resume field
+  presentation, then enter exploration. Existing field services are reused.
+  Original 22 MIPS words `80073AA4-80073AF8` confirm the mode store in the
+  pause-call delay slot and the three finish JALs in that order.
+- Actual native C bindings/module addresses `80073AA4` / `80073ACC` remain.
+  Supported registration/copier adoption removes original bodies/prototypes
+  and updates gameplay/module callers, not manual generated source edits.
+- Three focused cases / seven assertions and coupled 37 / 210 pass in both
+  configurations. Complete Debug/Release 4,737 / 8,635,998, zero failures/skips/
+  regressions; both canonical replay fingerprints remain unchanged. Quality
+  five existing / zero new; 191 copier / nine extent controls, Pylance syntax
+  and editor diagnostics pass. Both measured generations preserve 1,732 path
+  hashes; manifest `2C81051A67022099A2E0207FE5E552509D109834672A44AC07736242341B5E46`.
+- Current original MAP247 controller runs, `120:Up,180:Cross`, enter mode11 at
+  tick180 for 138 frames each, then field1/phase0 with key458 at ten. Evidence:
+  Debug `1794057094760040-0`, Release `1794057118286130-0` under their existing
+  `combat-lab/runs` directories. Private fixtures/captures are not committed.
+- `VR-OBJECT-INTERACTION-WAIT` records this bounded behavior. Old code-symbol
+  consumers reduce four to zero; required C/module/global services, remaining
+  row27 functions and #321 are not retired or completed by this slice.
+  Publish the scoped pair and verify its new exact CI before the next checkpoint.
+
 ### Typed Interaction Targets (#287, #276 Row 27)
 
 - Current slice is based on `fff7ebcabfd956fe59be474374f5914bf8b08aa6` plus

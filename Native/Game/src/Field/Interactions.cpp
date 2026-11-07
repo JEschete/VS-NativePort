@@ -7,7 +7,6 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorMatchesLive.hpp"
-#include "Field/GameModeLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TrapsLive.hpp"
@@ -102,21 +101,6 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
         }
         break;
     }
-}
-
-// decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823)
-void Field_BeginObjectInteractionWait(void)
-{
-    Field_controlMode = 0xB;
-    VS::Field::LivePauseFieldForObjectInteraction();
-}
-
-// decomp: BATTLE.PRG func_80073ACC (src/BATTLE/BATTLE.PRG/146C.c:4829)
-void Field_EndObjectInteractionWait(void)
-{
-    Menu_ReleaseSceneNotification();
-    VS::Field::LiveResumeFieldAfterMenu();
-    VS::Field::LiveEnterFieldExplorationMode();
 }
 
 // decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836)

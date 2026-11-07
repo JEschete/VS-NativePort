@@ -161,6 +161,24 @@ struct RecordingTrapInteractionHost final : VS::Field::TrapSelectionHost,
 
 using SnapshotBytes = std::array<std::byte, sizeof(Field_GimmickSnapshot)>;
 
+struct RecordingObjectInteractionWaitHost final
+    : VS::Field::ObjectInteractionWaitHost {
+  VS::Field::FieldControlMode mode = VS::Field::FieldControlMode::kNone;
+  std::vector<int> calls;
+
+  void SetControlMode(VS::Field::FieldControlMode value) override {
+    mode = value;
+    calls.push_back(0);
+  }
+  void PauseField() override { calls.push_back(1); }
+  void ReleaseNotification() override { calls.push_back(2); }
+  void ResumeField() override { calls.push_back(3); }
+  void EnterExploration() override {
+    mode = VS::Field::FieldControlMode::kExploration;
+    calls.push_back(4);
+  }
+};
+
 struct SnapshotFixture {
   std::array<Field_GimmickInstance*, 16> saved{};
   std::unique_ptr<Field_GimmickInstance> object =
@@ -668,6 +686,37 @@ TEST_CASE("Typed chest interaction keeps lock item and pose rules separate",
   const VS::Field::ChestTarget target{0, 1};
   CheckChestOpenAndBlockedRules(target);
   CheckChestLockedItemRules(target);
+}
+
+TEST_CASE("Object interaction wait selects its mode before pausing",
+          "[object-interaction-wait-core][field]") {
+  RecordingObjectInteractionWaitHost host;
+  VS::Field::BeginObjectInteractionWait(host);
+  CHECK(host.mode == VS::Field::FieldControlMode::kObjectInteractionWait);
+  CHECK(host.calls == std::vector<int>{0, 1});
+  VS::Field::BeginObjectInteractionWait(host);
+  CHECK(host.calls == std::vector<int>{0, 1, 0, 1});
+}
+
+TEST_CASE("Object interaction wait releases and resumes before exploration",
+          "[object-interaction-wait-core][field]") {
+  RecordingObjectInteractionWaitHost host;
+  VS::Field::BeginObjectInteractionWait(host);
+  host.calls.clear();
+  VS::Field::EndObjectInteractionWait(host);
+  CHECK(host.mode == VS::Field::FieldControlMode::kExploration);
+  CHECK(host.calls == std::vector<int>{2, 3, 4});
+}
+
+TEST_CASE("Object interaction wait keeps both original module bindings",
+          "[object-interaction-wait-core][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80073AA4) ==
+        reinterpret_cast<const void*>(&Field_BeginObjectInteractionWaitEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80073ACC) ==
+        reinterpret_cast<const void*>(&Field_EndObjectInteractionWaitEntry));
 }
 
 TEST_CASE("Typed chest flow owns selected begin finish and contents decisions",

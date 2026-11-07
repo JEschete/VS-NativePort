@@ -264,6 +264,22 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
   Actors_ActorLocation* location_ = nullptr;
 };
 
+class LiveObjectInteractionWaitHost final
+    : public VS::Field::ObjectInteractionWaitHost {
+ public:
+  void SetControlMode(VS::Field::FieldControlMode mode) override {
+    Field_controlMode = static_cast<std::uint32_t>(mode);
+  }
+  void PauseField() override {
+    VS::Field::LivePauseFieldForObjectInteraction();
+  }
+  void ReleaseNotification() override { Menu_ReleaseSceneNotification(); }
+  void ResumeField() override { VS::Field::LiveResumeFieldAfterMenu(); }
+  void EnterExploration() override {
+    VS::Field::LiveEnterFieldExplorationMode();
+  }
+};
+
 }  // namespace
 
 namespace VS::Field {
@@ -333,4 +349,16 @@ void Field_BeginTrapInteractionEntry(Field_MpdLockTrigger* address,
 void Field_FinishTrapInteractionEntry() {
   LiveTrapFinishHost host;
   static_cast<void>(VS::Field::FinishTrapInteraction(host));
+}
+
+// decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).
+void Field_BeginObjectInteractionWaitEntry() {
+  LiveObjectInteractionWaitHost host;
+  VS::Field::BeginObjectInteractionWait(host);
+}
+
+// decomp: BATTLE.PRG func_80073ACC (src/BATTLE/BATTLE.PRG/146C.c:4829).
+void Field_EndObjectInteractionWaitEntry() {
+  LiveObjectInteractionWaitHost host;
+  VS::Field::EndObjectInteractionWait(host);
 }

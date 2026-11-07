@@ -17,8 +17,6 @@
 extern Field_InteractionFocus Field_interactionFocus;
 extern u_int Field_controlMode;
 void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position);
-void Field_BeginObjectInteractionWait(void);
-void Field_EndObjectInteractionWait(void);
 int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* door_trigger);
 void Field_TriggerActorTrap(Field_MpdLockTrigger* trap_trigger, Actors_ActorLocationQuery* victim_placement, int targetActor);
 int Field_WaitForChestCameraFocus(void);

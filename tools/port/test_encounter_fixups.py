@@ -440,6 +440,10 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00132", "Field_BeginObjectInteractionWaitEntry", "VS::Field::BeginObjectInteractionWait",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00133", "Field_EndObjectInteractionWaitEntry", "VS::Field::EndObjectInteractionWait",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00137", "Field_BeginTrapInteractionEntry", "VS::Field::BeginTrapInteraction",
              r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00141", "Field_DispatchTrapOrChestInteractionEntry", "VS::Field::DispatchTrapOrChestInteraction",
@@ -987,6 +991,8 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00132": ("Field_BeginObjectInteractionWaitEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00133": ("Field_EndObjectInteractionWaitEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00141": ("Field_DispatchTrapOrChestInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00137": ("Field_BeginTrapInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00145": ("Field_FinishTrapInteractionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),

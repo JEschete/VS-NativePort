@@ -5,6 +5,8 @@ extern "C" {
 #endif
 struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
+void Field_BeginObjectInteractionWaitEntry(void);
+void Field_EndObjectInteractionWaitEntry(void);
 void Field_TryOpenChestEntry(struct Field_MpdLockTrigger* address, int actor);
 void Field_BeginChestInteractionEntry(struct Field_MpdLockTrigger* address,
                                       int actor);
