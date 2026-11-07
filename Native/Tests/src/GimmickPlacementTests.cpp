@@ -3,15 +3,20 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
+#include <optional>
+#include <span>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/ModuleData.h"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
+#include "Field/GimmickPlacement.hpp"
 
 extern "C" {
 #include "Event/Triggers.h"
@@ -83,7 +88,7 @@ std::uint8_t ExpectedHeight(const Field_GimmickInstance& object) {
 void CheckValidSnapshot(int slot, const Field_GimmickInstance& object) {
   const auto expected_height = ExpectedHeight(object);
   auto output = SentinelSnapshot();
-  REQUIRE(Field_GimmickPlacement(slot, &output) == 0);
+  REQUIRE(Field_GimmickPlacementEntry(slot, &output) == 0);
   CHECK(output.placementByte0 == 5);
   CHECK(output.placementByte2 == 9);
   CHECK(output.orientation == 3);
@@ -94,7 +99,123 @@ void CheckValidSnapshot(int slot, const Field_GimmickInstance& object) {
   CHECK(std::bit_cast<std::uint32_t>(output.positionZ) == 0x13570929);
 }
 
+struct RecordingGimmickHost final : VS::Field::GimmickPlacementHost {
+  static constexpr std::size_t kSlots = 16;
+  std::array<std::optional<VS::Field::GimmickPlacementState>, kSlots> states{};
+  mutable std::size_t reads = 0;
+  std::size_t support_calls = 0;
+  std::int32_t support_height = 0;
+
+  std::size_t GimmickSlots() const override { return states.size(); }
+  std::optional<VS::Field::GimmickPlacementState> Gimmick(
+      std::size_t slot) const override {
+    ++reads;
+    return states.at(slot);
+  }
+  std::int32_t SupportHeight(const VS::Field::GimmickPlacementState&) override {
+    ++support_calls;
+    return support_height;
+  }
+};
+
+std::uint8_t OriginalGimmickHeight(std::int32_t support_height,
+                                   std::int16_t position_y) {
+  // CPU 800A00BC subu, 800A00C0 bgez, 800A00C8 addiu127, 800A00CC sra7.
+  const auto difference =
+      static_cast<std::int64_t>(support_height) - position_y;
+  const auto wrapped =
+      std::bit_cast<std::int32_t>(static_cast<std::uint32_t>(difference));
+  const auto rounded =
+      wrapped < 0 ? static_cast<std::int64_t>(wrapped) + 127 : wrapped;
+  return static_cast<std::uint8_t>(static_cast<std::uint32_t>(rounded) >> 7);
+}
+
+void CheckTypedGimmickPlacement(RecordingGimmickHost& host,
+                                const VS::Field::GimmickPlacementState& state) {
+  const auto snapshot = VS::Field::GimmickPlacement(0, host);
+  if (!snapshot) {
+    FAIL("Stationary gimmick placement must produce a snapshot");
+    return;
+  }
+  REQUIRE(snapshot);
+  CHECK(snapshot->tile_x == 0xFF);
+  CHECK(snapshot->tile_z == 9);
+  CHECK(snapshot->orientation == 0x81);
+  CHECK(snapshot->height_above_ground ==
+        OriginalGimmickHeight(host.support_height, state.position_y));
+  CHECK(
+      std::bit_cast<std::uint32_t>(snapshot->position_xy) ==
+      (0x0000FB2E |
+       (static_cast<std::uint32_t>(static_cast<std::uint16_t>(state.position_y))
+        << 16)));
+  CHECK(std::bit_cast<std::uint32_t>(snapshot->position_z_tail) == 0xFEDC0929);
+}
+
 }  // namespace
+
+TEST_CASE(
+    "Native gimmick placement entry preserves the original module address",
+    "[gimmick-placement][gimmick-placement-core][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800A0024) ==
+        reinterpret_cast<const void*>(&Field_GimmickPlacementEntry));
+}
+
+TEST_CASE("Typed gimmick placement refuses slots before record access",
+          "[gimmick-placement][gimmick-placement-core][field]") {
+  RecordingGimmickHost host;
+  for (const auto slot : {std::numeric_limits<std::int32_t>::min(), -1, 16,
+                          std::numeric_limits<std::int32_t>::max()}) {
+    CHECK_FALSE(VS::Field::GimmickPlacement(slot, host));
+  }
+  CHECK(host.reads == 0);
+  CHECK(host.support_calls == 0);
+  for (const auto slot : {0, 15}) {
+    CHECK_FALSE(VS::Field::GimmickPlacement(slot, host));
+  }
+  CHECK(host.reads == 2);
+  CHECK(host.support_calls == 0);
+}
+
+TEST_CASE("Typed gimmick placement refuses motion before support sampling",
+          "[gimmick-placement][gimmick-placement-core][field]") {
+  RecordingGimmickHost host;
+  for (const auto mode : {0, 1, -1, 32767, -32768}) {
+    VS::Field::GimmickPlacementState state{
+        .attached = mode == 0,
+        .movement_mode = static_cast<std::int16_t>(mode)};
+    host.states[0] = state;
+    CHECK_FALSE(VS::Field::GimmickPlacement(0, host));
+  }
+  host.states[0] = VS::Field::GimmickPlacementState{.falling = true};
+  CHECK_FALSE(VS::Field::GimmickPlacement(0, host));
+  CHECK(host.support_calls == 0);
+}
+
+TEST_CASE("Typed gimmick placement matches original word stores and rounding",
+          "[gimmick-placement][gimmick-placement-core][field]") {
+  RecordingGimmickHost host;
+  VS::Field::GimmickPlacementState state{
+      .tile_x = 0xFF,
+      .tile_z = 9,
+      .orientation = 0x81,
+      .position_x = -1234,
+      .position_z = 2345,
+      .position_tail = std::bit_cast<std::int16_t>(std::uint16_t{0xFEDC})};
+  for (const auto support :
+       {std::numeric_limits<std::int32_t>::min(), -3000, -1, 0, 1, 3000,
+        std::numeric_limits<std::int32_t>::max()}) {
+    host.support_height = support;
+    for (const auto height :
+         {-32768, -129, -128, -127, -1, 0, 1, 127, 128, 129, 32767}) {
+      state.position_y = static_cast<std::int16_t>(height);
+      host.states[0] = state;
+      CheckTypedGimmickPlacement(host, state);
+    }
+  }
+  CHECK(host.support_calls == 77);
+}
 
 TEST_CASE("Gimmick snapshots refuse invalid and absent slots without writing",
           "[gimmick-placement][field]") {
@@ -102,11 +223,11 @@ TEST_CASE("Gimmick snapshots refuse invalid and absent slots without writing",
   auto output = SentinelSnapshot();
   const auto before = std::bit_cast<SnapshotBytes>(output);
   for (int slot = -2; slot < 18; ++slot) {
-    CHECK(Field_GimmickPlacement(slot, &output) == -1);
+    CHECK(Field_GimmickPlacementEntry(slot, &output) == -1);
     CHECK(std::bit_cast<SnapshotBytes>(output) == before);
   }
   Field_gimmickInstances[0] = fixture.object.get();
-  CHECK(Field_GimmickPlacement(0, nullptr) == -1);
+  CHECK(Field_GimmickPlacementEntry(0, nullptr) == -1);
 }
 
 TEST_CASE("Gimmick snapshots reject attached falling and moving records",
@@ -119,7 +240,7 @@ TEST_CASE("Gimmick snapshots reject attached falling and moving records",
     fixture.object->parent = refusal == 0 ? 0 : 0xFF;
     fixture.object->objectInfo.isFalling = refusal == 1;
     fixture.object->mode = static_cast<std::int16_t>(refusal == 2);
-    CHECK(Field_GimmickPlacement(0, &output) == -1);
+    CHECK(Field_GimmickPlacementEntry(0, &output) == -1);
     CHECK(std::bit_cast<SnapshotBytes>(output) == before);
   }
 }

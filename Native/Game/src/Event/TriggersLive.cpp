@@ -90,7 +90,7 @@ class LiveRoomTriggerHost final : public RoomTriggerHost {
   }
   std::optional<TriggerPlacement> GimmickPlacement(int gimmick) override {
     Field_GimmickSnapshot snapshot{};
-    if (Field_GimmickPlacement(gimmick, &snapshot) < 0) {
+    if (Field_GimmickPlacementEntry(gimmick, &snapshot) < 0) {
       return std::nullopt;
     }
     constexpr unsigned kHalfwordBits = 16;

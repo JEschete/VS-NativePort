@@ -364,6 +364,7 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Field_GimmickPlacementEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
     "Event_EvaluateInterpolationCurveEntry": r"Native\Game\src\Event\InterpolationCurveLive.h",
     "Event_EvaluateRoomEventTriggersEntry": r"Native\Game\src\Event\RoomTriggerEntryLive.h",
     "VS::Event::ResolveLiveScriptActorReference": r"Native\Game\include\Event\ScriptVmLive.hpp",
@@ -1037,6 +1038,7 @@ OWNED_CALL_BINDINGS = {
 OWNED_CALL_BINDINGS["F01275"] = "VS::Event::ResolveLiveScriptActorReference"
 OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
 OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
+OWNED_CALL_BINDINGS["F00853"] = "Field_GimmickPlacementEntry"
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -2375,6 +2377,7 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x800A0024, "Field_GimmickPlacementEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BFEBC, "Event_EvaluateInterpolationCurveEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BEC58, "Event_EvaluateRoomEventTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BFE50, "VS::Event::ResolveLiveScriptActorReference"),

@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 2,689 | 0 | 1,518 |
-| `cpp` | 2,689 | 2 (`wip`) | 1,516 |
+| `modernized` | 2,690 | 0 | 1,517 |
+| `cpp` | 2,690 | 1 (`wip`) | 1,516 |
 | `verified` | 49 | 0 | 4,158 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 2691 |
-| `vs_namespace` | 2689 |
-| `typed_interface` | 2689 |
-| `no_bridge` | 2689 |
+| `vs_namespace` | 2690 |
+| `typed_interface` | 2690 |
+| `no_bridge` | 2690 |
 | `strict_clean` | 2691 |
-| `behavior_evidence` | 2689 |
+| `behavior_evidence` | 2690 |
 
-Promotion records: 2691; derived `cpp=x`: 2689, `cpp=wip`: 2. Verification records: 237; `verified=x` markers: 49.
+Promotion records: 2691; derived `cpp=x`: 2690, `cpp=wip`: 1. Verification records: 238; `verified=x` markers: 49.
 
 <!-- gates:end -->
 

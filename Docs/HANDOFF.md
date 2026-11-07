@@ -7,6 +7,37 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Gimmick Placement Core (#276 Row 27)
+
+- F00853 now targets strict `VS::Field::GimmickPlacement` over typed host/state/
+  snapshot values. Legacy record reads and terrain binding stay in the Live
+  adapter; invalid full-width slots refuse before reads, stationary refusals
+  before support sampling, and output is published only after a valid snapshot.
+- Required `Field_GimmickPlacementEntry` C output/header and original module
+  `800A0024` remain explicit. The old symbol's five Native definition/header/
+  trigger/module/test consumer files retire through the unchanged gate; this is
+  not required ABI/global EC retirement or completion of row 27 / #287.
+- Source `5cf7c848` plus current owned slice: full Debug/Release 4,694 tests /
+  8,634,162 assertions, zero failures/skips, both canonical replays unchanged.
+  Focused gimmick 8 / 723; independent checked-MIPS height/packing model covers
+  77 signed/wrapping samples. Exact original 56 words `800A0024-800A0100` read
+  from verified overlay SHA1 `D53AACCC3B3A2FC057D05E0DCEA92F7182BC72A9`;
+  inherited uninitialized check is prior #316 evidence, not safely executed as
+  an original whole-function oracle. No reference files or assets changed.
+- 191 copier / nine extent controls pass, editor diagnostics clean; quality
+  five existing / zero new. Explicit optional refusal and final newlines fixed
+  the eight new local findings without baseline/expectation weakening. Repeat
+  copier/project generation preserves all tracked and new Native/project/
+  manifest bytes. Logs: `build/owner-checkpoint/gimmick-placement-core-*-regression.log`.
+- Row-33 metadata `5cf7c848` also has exact green CI `42350966202`. This partial
+  row-27 source milestone is pending publication/exact CI; next work remains
+  the owning gimmick/door/interaction paths, including #287's typed target.
+- Final Live host preserves original eligibility read order before placement
+  fields are copied; focused/full Debug/Release and scoped quality were rerun
+  after that review repair with unchanged results. Reviewed modernization plus
+  unchanged gate derivation now yields 2,690 promoted / one separate frame `wip`,
+  238 behavior records and zero violations; no gate or baseline was relaxed.
+
 ### Event VM Source Promotion Complete (#276 Row 33)
 
 - Final source `7172dfae50be38b95b0f1e4826d9cf1e2e8e2af2` is pushed and exact

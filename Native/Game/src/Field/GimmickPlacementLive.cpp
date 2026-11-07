@@ -1,12 +1,11 @@
 #include "Field/GimmickPlacementLive.h"
 
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 
-#include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
+#include "Field/GimmickPlacement.hpp"
 
 extern "C" {
 #include "Core/Diagnostics.h"
@@ -16,23 +15,51 @@ extern "C" {
 namespace {
 
 constexpr std::uint8_t kNoParent = 0xFF;
-constexpr int kHeightUnit = 128;
 
-std::int32_t PackPosition(std::int16_t low, std::int16_t high) {
-  constexpr unsigned kHalfwordBits = 16;
-  const std::uint32_t word =
-      static_cast<std::uint16_t>(low) |
-      (static_cast<std::uint32_t>(static_cast<std::uint16_t>(high))
-       << kHalfwordBits);
-  return std::bit_cast<std::int32_t>(word);
-}
+class LiveGimmickPlacementHost final : public VS::Field::GimmickPlacementHost {
+ public:
+  std::size_t GimmickSlots() const override {
+    return std::size(Field_gimmickInstances);
+  }
+
+  std::optional<VS::Field::GimmickPlacementState> Gimmick(
+      std::size_t slot) const override {
+    if (slot >= GimmickSlots() || Field_gimmickInstances[slot] == nullptr) {
+      return std::nullopt;
+    }
+    const auto& gimmick = *Field_gimmickInstances[slot];
+    if (gimmick.parent != kNoParent) {
+      return VS::Field::GimmickPlacementState{.attached = true};
+    }
+    if (gimmick.objectInfo.isFalling != 0) {
+      return VS::Field::GimmickPlacementState{.falling = true};
+    }
+    if (gimmick.mode != 0) {
+      return VS::Field::GimmickPlacementState{.movement_mode = gimmick.mode};
+    }
+    return VS::Field::GimmickPlacementState{
+        .tile_x = static_cast<std::uint8_t>(gimmick.tileX),
+        .tile_z = static_cast<std::uint8_t>(gimmick.tileZ),
+        .orientation = static_cast<std::uint8_t>(gimmick.objectInfo.material),
+        .position_x = gimmick.positionX,
+        .position_y = gimmick.positionY,
+        .position_z = gimmick.positionZ,
+        .position_tail = gimmick.reserved22};
+  }
+
+  std::int32_t SupportHeight(
+      const VS::Field::GimmickPlacementState& state) override {
+    return VS::Field::LiveSampleSupportHeightAt(
+        state.position_x, state.position_y, state.position_z, 0, 0, 0);
+  }
+};
 
 }  // namespace
 
 // decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3654).
 // Original 800A0034 tests inherited s0 before the slot load at 800A004C.
-int Field_GimmickPlacement(int gimmick_slot,
-                           Field_GimmickSnapshot* output_snapshot) {
+int Field_GimmickPlacementEntry(int gimmick_slot,
+                                Field_GimmickSnapshot* output_snapshot) {
   if (output_snapshot == nullptr || gimmick_slot < 0 ||
       static_cast<std::size_t>(gimmick_slot) >=
           std::size(Field_gimmickInstances)) {
@@ -40,22 +67,13 @@ int Field_GimmickPlacement(int gimmick_slot,
                gimmick_slot, static_cast<void*>(output_snapshot));
     return -1;
   }
-  const auto* gimmick = Field_gimmickInstances[gimmick_slot];
-  if (gimmick == nullptr || gimmick->parent != kNoParent ||
-      gimmick->objectInfo.isFalling != 0 || gimmick->mode != 0) {
+  LiveGimmickPlacementHost host;
+  const auto snapshot = VS::Field::GimmickPlacement(gimmick_slot, host);
+  if (!snapshot) {
     return -1;
   }
-  const int support = VS::Field::LiveSampleSupportHeightAt(
-      gimmick->positionX, gimmick->positionY, gimmick->positionZ, 0, 0, 0);
-  const auto difference = VS::Core::Math::WrappingAdd(
-      support, -static_cast<std::int32_t>(gimmick->positionY));
-  const Field_GimmickSnapshot snapshot{
-      static_cast<std::uint8_t>(gimmick->tileX),
-      static_cast<std::uint8_t>(difference / kHeightUnit),
-      static_cast<std::uint8_t>(gimmick->tileZ),
-      static_cast<std::uint8_t>(gimmick->objectInfo.material),
-      PackPosition(gimmick->positionX, gimmick->positionY),
-      PackPosition(gimmick->positionZ, gimmick->reserved22)};
-  *output_snapshot = snapshot;
+  *output_snapshot = {snapshot->tile_x,      snapshot->height_above_ground,
+                      snapshot->tile_z,      snapshot->orientation,
+                      snapshot->position_xy, snapshot->position_z_tail};
   return 0;
 }

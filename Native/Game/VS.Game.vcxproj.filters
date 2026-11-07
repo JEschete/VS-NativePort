@@ -1698,6 +1698,9 @@
     <ClInclude Include="src\Field\GimmickMotion.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\GimmickPlacement.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\GimmickPlacementLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2869,6 +2872,9 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\GameModeLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickPlacement.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\InteractionsLive.hpp">
