@@ -111,7 +111,8 @@ constexpr std::array kControlBindings{
                    ScriptWaitForButtonOrTimeout},
     ControlBinding{Event_ScriptConfigureEasingCurveOpcode,
                    ScriptConfigureEasingCurve},
-    ControlBinding{Event_CommandSpecialOperation, CommandSpecialOperation},
+    ControlBinding{Event_CommandSpecialOperationOpcode,
+                   CommandSpecialOperation},
     ControlBinding{Event_CommandWaitFramesOpcode, CommandWaitFrames},
     ControlBinding{Event_CommandSetTickSpeedOpcode, CommandSetTickSpeed},
     ControlBinding{Event_CommandWaitScriptContextOpcode,
@@ -1151,4 +1152,11 @@ std::intptr_t Event_CommandFinishEventOpcode(std::uint8_t* instruction,
                                              std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandFinishEvent);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_specialOp (4A0A8.c:2651).
+std::intptr_t Event_CommandSpecialOperationOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::CommandSpecialOperation);
 }

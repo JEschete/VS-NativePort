@@ -7,6 +7,34 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Native Special Control Slot (#276 Row 33)
+
+- F01187 registers the final strict typed special-control core and guarded native
+  module/normal/skip identity; C body/prototype retire via the copier and Combat
+  Lab uses the native special identity. ASM `800BB040` bounds selectors 0-17,
+  jump table `8006967C` identifies every branch, and `800BB240` saves six-byte
+  subroutine continuation. Existing reward/unlock/count/camera/subroutine/typed
+  forwarding checks remain rather than guessing selector meanings.
+- Live direct/guarded normal/skip tests observe force and undefined continuation,
+  real timer pause/resume, pending chained request cancellation/free and refused
+  adoption with current source retained. Selector 6 frees storage without clearing
+  the original chained flag; the new fixture expectation was corrected against
+  `800BB168` without removing ownership/refusal checks. Two new cases add 128;
+  two module/detached checks add two. Focused control/Combat Lab: 34 / 94,943.
+- On `1da322cc` plus this slice, full Debug/Release builds and regressions pass
+  4,679 cases / 8,437,885 assertions, zero failures/skips and both unchanged
+  canonical fingerprints. No baseline refresh. Broad quality: 32 existing / zero
+  new findings; 190 copier/nine extent controls pass. Evidence:
+  `VR-EVENT-CONTROL-SPECIAL` and
+  `build\owner-checkpoint\native-control-special-*-regression.log`.
+  Required table ABI and remaining VM/trigger/C-entry/global EC helper debt stay
+  separate. Live callbacks are not full reward/ending/render/UI or whole-row parity.
+  Lifecycle predecessor `1da322cc` is green on exact CI `42337079495`.
+- Repeat generation preserves all tracked Native/project/manifest bytes.
+  Unmodified gates derive 2,678 promoted / four compatibility `wip`; row 33 is
+  now 46/57. All selected control identities are native; remaining VM/trigger/
+  easing C-entry/table/global retirement helpers still need their own gates.
+
 ### Native File/Lifecycle Control Slots (#276 Row 33)
 
 - F01027/F01030/F01205/F01206 register strict native diagnostic/wait/chained-load/

@@ -97,7 +97,7 @@ SceneOpcodes ProductionOpcodes() {
     } else if (handler == Event_CommandFinishEventOpcode ||
                handler == Event_CommandStopScriptContextOpcode) {
       opcode.flow = SceneFlow::kFinish;
-    } else if (handler == Event_CommandSpecialOperation) {
+    } else if (handler == Event_CommandSpecialOperationOpcode) {
       opcode.flow = SceneFlow::kSpecial;
     }
     if (handler == Event_CommandLoadNextEventOpcode) {

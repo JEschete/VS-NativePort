@@ -66,6 +66,8 @@ intptr_t Event_CommandLoadNextEventOpcode(uint8_t* instruction,
                                           int16_t thread_index);
 intptr_t Event_CommandFinishEventOpcode(uint8_t* instruction,
                                         int16_t thread_index);
+intptr_t Event_CommandSpecialOperationOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
 
 #ifdef __cplusplus
 }

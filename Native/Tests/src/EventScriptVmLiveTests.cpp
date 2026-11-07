@@ -82,6 +82,7 @@ constexpr auto kControlEntries = std::to_array<ControlEntry>({
     {0x800B66F4, Event_ScriptWaitForEventFileOpcode},
     {0x800BB5AC, Event_CommandLoadNextEventOpcode},
     {0x800BB604, Event_CommandFinishEventOpcode},
+    {0x800BB028, Event_CommandSpecialOperationOpcode},
 });
 
 struct LiveVmFixture {
@@ -849,6 +850,73 @@ std::intptr_t LoadEventSlotBridge(std::uint8_t* instruction,
 std::intptr_t FinishEventSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
   return Event_CommandFinishEventOpcode(instruction, thread);
+}
+
+std::intptr_t SpecialSlotBridge(std::uint8_t* instruction,
+                                std::int16_t thread) {
+  return Event_CommandSpecialOperationOpcode(instruction, thread);
+}
+
+void BindLiveSpecialSlot(bool guarded, int skip) {
+  Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
+      guarded ? SpecialSlotBridge : Event_CommandSpecialOperationOpcode;
+  Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
+      Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0xE9] = 3;
+  Event_skipState = static_cast<char>(skip);
+}
+
+void CheckLiveSpecialSelector(bool guarded, int skip, std::uint8_t selector) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE9, selector, 255, 0xE6});
+  BindLiveSpecialSlot(guarded, skip);
+  Event_isSkipForced = 0;
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+  CHECK(host.SkipForced() == (selector == 2));
+}
+
+void CheckLiveSpecialTimer(bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE9, 8, 1, 0xE9, 8, 0, 0xE6});
+  BindLiveSpecialSlot(guarded, skip);
+  State_sceneTimer = {.mode = 2,
+                      .pausedMode = 0,
+                      .resetScope = 3,
+                      .frames = 12,
+                      .seconds = 3,
+                      .minutes = 4,
+                      .hours = 5};
+  Battle_lowerScreenUiState = 1;
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+  CHECK(State_sceneTimer.mode == 2);
+  CHECK(State_sceneTimer.pausedMode == 2);
+  CHECK(State_sceneTimer.seconds == 3);
+  CHECK(Battle_lowerScreenUiState == 1);
+}
+
+void CheckLiveSpecialDiscard(bool guarded, int skip) {
+  const LiveVmFixture fixture;
+  const auto start = MountScript({0xE9, 6, 0, 0xE6});
+  BindLiveSpecialSlot(guarded, skip);
+  auto& host = event::LiveScriptVm();
+  REQUIRE(host.AllocateChainedEventBuffer());
+  REQUIRE(host.QueueEventFileLoad(1, event::EventBuffer::kChained));
+  auto& request = PendingRequest();
+  host.SetChainedEventLoaded(true);
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+  CHECK(host.EventFile() == event::EventFileStatus::kNone);
+  CHECK(host.ChainedEventLoaded());
+  CHECK(request.state == Content_DiscRequestState_Free);
+  CHECK_FALSE(host.AdoptChainedEvent());
+  CheckMountedByte(0xE9, start.generation);
 }
 
 void CheckLiveFileWait(bool guarded, int skip, int state) {
@@ -2159,6 +2227,30 @@ TEST_CASE("Native invalid opcode bindings preserve diagnostic continuation",
     CHECK_FALSE(event::ExecuteLiveScriptThread(0));
     CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
     CHECK(State_tickSpeed == 4);
+  }
+}
+
+TEST_CASE(
+    "Native special bindings preserve force and undefined selector "
+    "continuation",
+    "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      for (const std::uint8_t selector : {2, 18, 255}) {
+        CheckLiveSpecialSelector(guarded, skip, selector);
+      }
+    }
+  }
+}
+
+TEST_CASE(
+    "Native special bindings retain timer and chained ownership callbacks",
+    "[event-vm-live][control-opcode]") {
+  for (const int skip : {0, 2}) {
+    for (const bool guarded : {false, true}) {
+      CheckLiveSpecialTimer(guarded, skip);
+      CheckLiveSpecialDiscard(guarded, skip);
+    }
   }
 }
 

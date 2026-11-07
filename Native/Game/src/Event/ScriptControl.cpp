@@ -1258,6 +1258,7 @@ ScriptFlow ScriptConfigureEasingCurve(const ScriptInstruction& instruction,
   return Advance();
 }
 
+// decomp: BATTLE.PRG 4A0A8.c:2651, 800BB028; selectors 0-17 at 8006967C.
 ScriptFlow CommandSpecialOperation(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {

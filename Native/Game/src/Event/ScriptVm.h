@@ -48,7 +48,6 @@ extern char Event_isSkipForced;
 extern char Event_isScriptBackdropEnabled;
 extern intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short);
 void Event_RestoreScriptTextureRectangle(void);
-intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index);
 int Event_EventPlaybackState(void);
 short Event_PendingEventSelector(void);
 int Event_RequestEventStart(void);

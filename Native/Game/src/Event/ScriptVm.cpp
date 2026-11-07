@@ -1,25 +1,14 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Battle/AbilitiesLive.hpp"
-#include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Event/ScriptActorCommandsLive.hpp"
-#include "Field/CameraLive.hpp"
-#include "Field/RoomRenderingLive.hpp"
-#include "Field/RoomStateLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/SceneTimerLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Battle/Rewards.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Playback.h"
 #include "Event/Script.h"
 #include "Event/ScriptActorOpcodes.h"
@@ -34,7 +23,6 @@ extern "C" {
 #include "Event/ScriptScreen.h"
 #include "Event/ScriptVm.h"
 #include "Event/WeaponModeOpcode.h"
-#include "Field/Gimmicks.h"
 
 // decomp: D_800E9BE0 (D_800E9BE0@BATTLE/BATTLE.PRG)
 char Event_skipPaletteResetCommand[336]; /* contents: module image (ModuleData.cpp) */
@@ -184,7 +172,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptNoOperationOpcode, Event_CommandSetActorTrailOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_CommandSetEnteredDoorOpcode, Event_CommandStoreActorRangeBearingOpcode, Event_CommandSetActorActivityOpcode,
-    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandConsumeMiscItemOpcode, Event_CommandStoreActorDistanceOpcode, Event_CommandSpecialOperation,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandConsumeMiscItemOpcode, Event_CommandStoreActorDistanceOpcode, Event_CommandSpecialOperationOpcode,
     Event_CommandWaitScreenEffectLoadOpcode, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_ScriptNoOperationOpcode, Event_CommandLoadScreenEffectsOpcode,
     Event_CommandReservedScreenEffectOpcode, Event_CommandFreeScreenEffectsOpcode, Event_CommandScreenTransform, Event_CommandCameraMotion, Event_CommandCameraMotion,
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcodeOpcode,
@@ -222,89 +210,6 @@ void Event_RestoreScriptTextureRectangle(void)
     VS::Render::AppendLiveOverlayPrimitive(move_primitive);
 
     *((void**)((uintptr_t)Core_ScratchBase() + 0x000)) = (DR_MOVE*)(move_primitive + 1);
-}
-
-// decomp: BATTLE.PRG vs_battle_script_specialOp (src/BATTLE/BATTLE.PRG/4A0A8.c:2651)
-intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
-{
-    char diagnostic_message[32];
-
-    switch (instruction[1]) {
-    case 0:
-        VS::Actors::QueueLiveAshleyModelLoad(instruction[2]);
-        break;
-    case 1:
-        if (Event_isMenuTransitionActive != 0) {
-            if (Battle_UpdateRewardSequence() != 0) {
-                return 1;
-            }
-            VS::State::SetLiveScriptFlag(0xB6, 0);
-            Event_isMenuTransitionActive = 0;
-            VS::Boot::RunEndingAndReturnToTitleLive();
-            break;
-        }
-        VS::State::SetLiveScriptFlag(0xB6, 3);
-        Battle_BeginEventRewardResults();
-        Event_isMenuTransitionActive = 1;
-        return 1;
-    case 2:
-        Event_isSkipForced = 1;
-        break;
-    case 3:
-        if (VS::Battle::LiveIsActionUnlocked(instruction[2]) != 0) {
-            VS::State::SetLiveScriptFlag(0xB1, 0);
-        } else {
-            VS::Battle::LiveUnlockAction(instruction[2]);
-            VS::State::SetLiveScriptFlag(0xB1, 1);
-        }
-        break;
-    case 4:
-        VS::State::SetLiveScriptFlag(0xB1, VS::Actors::CountLiveActorsByDisposition(4));
-        break;
-    case 5:
-        VS::Event::SetLiveEventActorActivity(instruction[2]);
-        break;
-    case 6:
-        VS::Core::Memory::FreeLiveFromHighEnd(Event_chainedEventBuffer);
-        break;
-    case 7:
-        Event_SetEventFieldCameraOverride(instruction[2]);
-        break;
-    case 8:
-        VS::State::SetLiveSceneTimerPaused(instruction[2]);
-        break;
-    case 9:
-        Event_StartEventCameraOrbitReturn(instruction[2]);
-        break;
-    case 10:
-        VS::Field::LiveSetCameraPitchPreset(Event_kSpecialOperationTenArguments[instruction[2]]);
-        break;
-    case 11:
-        Event_ScaleEventCameraDuration(instruction[2]);
-        break;
-    case 12:
-        Field_FreezeMovingPlatforms(instruction[2]);
-        break;
-    case 13:
-        VS::Field::LiveClearGeometryOcclusion();
-        break;
-    case 14:
-        Field_SetMovingPlatformsPaused(instruction[2]);
-        break;
-    case 15:
-        Effects_ScreenDistortion_SetVignetteEnabled(instruction[2]);
-        break;
-    case 16:
-        Event_subroutineReturnCursor = (intptr_t)(instruction + 6);
-        return (intptr_t)&Event_specialSubroutineScript;
-    case 17:
-        VS::Field::LiveCancelPendingRoomVisit();
-        break;
-    default:
-        sprintf(diagnostic_message, "<SPECIAL=%d> IS UNDEFINED!", instruction[1]);
-        break;
-    }
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800BEB00 (src/BATTLE/BATTLE.PRG/4A0A8.c:4246)
