@@ -3,6 +3,7 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -51,6 +52,125 @@ extern "C" {
 }
 
 namespace {
+
+struct RecordingAshleyFallHost final : VS::Field::AshleyFallHost {
+  std::optional<VS::Field::ScriptedFallDestination> destination;
+  std::optional<std::int16_t> hp = 21;
+  VS::Field::DoorRecord reload{.destination_zone_id = 9,
+                               .destination_room_id = 4};
+  std::optional<VS::Field::DoorRecord> transition;
+  std::optional<VS::Field::DoorRecord> entrance;
+  VS::Field::AshleyTransitionRoute route =
+      VS::Field::AshleyTransitionRoute::kRoom;
+  std::vector<std::int32_t> calls;
+
+  std::optional<VS::Field::ScriptedFallDestination> ScriptedDestination()
+      override {
+    calls.push_back(0);
+    return destination;
+  }
+  std::optional<std::int16_t> CurrentHp(std::int32_t) override {
+    calls.push_back(1);
+    return hp;
+  }
+  void ShowFallDamage(std::int32_t) override { calls.push_back(2); }
+  void SetHp(std::int32_t, std::int16_t value) override {
+    calls.push_back(3);
+    hp = value;
+  }
+  void BeginDefeat(std::int32_t) override { calls.push_back(4); }
+  VS::Field::DoorRecord StoreEntranceForReload() override {
+    calls.push_back(5);
+    return reload;
+  }
+  std::uint8_t CurrentZoneId() const override { return 9; }
+  void BeginTransition(const VS::Field::DoorRecord& door,
+                       VS::Field::AshleyTransitionRoute value) override {
+    calls.push_back(6);
+    transition = door;
+    route = value;
+  }
+  void ResetRunMomentum(std::int32_t) override { calls.push_back(7); }
+  void SetEntrance(const std::optional<VS::Field::DoorRecord>& door) override {
+    calls.push_back(8);
+    entrance = door;
+  }
+};
+
+struct RecordingAshleyTileHost final : VS::Field::AshleyTileTriggerHost {
+  RecordingAshleyFallHost fall;
+  std::uint32_t flags = 0;
+  VS::Field::AshleyTileTriggerCell cell{};
+  std::optional<VS::Actors::PackedTile> last{VS::Actors::PackedTile{}};
+  VS::Actors::PackedTile collision_tile{};
+  VS::Actors::PackedTile doors_tile{};
+  bool transitioning = false;
+  bool event_control = false;
+  bool event_started = false;
+  bool stored_location = false;
+  std::optional<VS::Field::ActorTileTrap> trap;
+  std::vector<VS::Field::DoorRecord> doors;
+  std::uint8_t flag_value = 0;
+
+  std::uint32_t StateFlags(std::int32_t) override {
+    fall.calls.push_back(10);
+    return flags;
+  }
+  VS::Field::AshleyTileTriggerCell Collision(
+      const VS::Actors::PackedTile& tile) override {
+    fall.calls.push_back(11);
+    collision_tile = tile;
+    return cell;
+  }
+  bool TransitionInProgress() override {
+    fall.calls.push_back(12);
+    return transitioning;
+  }
+  std::optional<VS::Actors::PackedTile> LastTriggerTile(std::int32_t) override {
+    fall.calls.push_back(13);
+    return last;
+  }
+  bool EventOwnsControl() override {
+    fall.calls.push_back(14);
+    return event_control;
+  }
+  bool TriggerPlayerTileEvent() override {
+    fall.calls.push_back(15);
+    return event_started;
+  }
+  void BeginQueuedCutscene() override { fall.calls.push_back(16); }
+  std::optional<VS::Field::ActorTileTrap> Trap(
+      const VS::Actors::PackedTile&) override {
+    fall.calls.push_back(17);
+    return trap;
+  }
+  void SpawnTrapTileEffect(const VS::Actors::ActorPlacementView&) override {
+    fall.calls.push_back(18);
+  }
+  void BeginTrap(VS::Field::TrapTarget, const VS::Actors::ActorPlacementView&,
+                 std::int32_t) override {
+    fall.calls.push_back(19);
+  }
+  void StoreTriggerTile(std::int32_t, const VS::Actors::PackedTile& tile,
+                        std::uint8_t mode, bool store_location) override {
+    fall.calls.push_back(20);
+    stored_location = store_location;
+    auto next = store_location ? tile : last.value_or(VS::Actors::PackedTile{});
+    next.spare = mode;
+    last = next;
+  }
+  std::vector<VS::Field::DoorRecord> DoorsAt(
+      const VS::Actors::PackedTile& tile) override {
+    fall.calls.push_back(21);
+    doors_tile = tile;
+    return doors;
+  }
+  std::uint8_t ScriptFlag(std::uint16_t) override {
+    fall.calls.push_back(22);
+    return flag_value;
+  }
+  VS::Field::AshleyFallHost& FallHost() override { return fall; }
+};
 
 struct RecordingActorTileTriggerHost final : VS::Field::ActorTileTriggerHost {
   std::uint32_t flags = 0;
@@ -1358,6 +1478,263 @@ TEST_CASE("Facing event uses requested actor and computed adjacent tile",
   CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(3, host));
 }
 
+TEST_CASE("Ashley tile event wins before trap door and fatal pit",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  host.cell = {.actor = {.room_trigger = true, .pit = true},
+               .event_trigger = true,
+               .docked_door = true};
+  host.event_started = true;
+  host.trap = VS::Field::ActorTileTrap{.target = {1, 2}, .kind = 16};
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 1, .z = 1, .spare = 192};
+  placement.position.y = 17;
+  CHECK(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls ==
+        std::vector<std::int32_t>{10, 11, 12, 13, 14, 15, 16, 20, 17, 18, 7});
+  CHECK(host.last == VS::Actors::PackedTile{.x = 1, .z = 1});
+}
+
+TEST_CASE("Ashley trigger collision precedes transition and disabled refusal",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  VS::Actors::ActorPlacementView placement{};
+  CHECK_FALSE(VS::Field::CheckAshleyTileTriggers(-1, placement, host));
+  CHECK(host.fall.calls.empty());
+  host.flags = 0x30000;
+  host.transitioning = true;
+  CHECK_FALSE(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls == std::vector<std::int32_t>{10, 11, 12});
+  CHECK(host.collision_tile == VS::Actors::PackedTile{.layer = 3});
+  host.fall.calls.clear();
+  host.transitioning = false;
+  host.flags = 0x01000000;
+  CHECK_FALSE(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls == std::vector<std::int32_t>{10, 11, 12});
+}
+
+TEST_CASE("Ashley ordinary trap wins before door and fatal pit",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  host.cell = {.actor = {.room_trigger = true, .pit = true},
+               .event_trigger = true,
+               .docked_door = true};
+  host.trap = VS::Field::ActorTileTrap{.target = {1, 2}, .kind = 3};
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 1, .z = 1};
+  placement.position.y = 17;
+  CHECK(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls ==
+        std::vector<std::int32_t>{10, 11, 12, 13, 14, 15, 17, 19, 20});
+  CHECK(host.last == placement.tile);
+  CHECK(host.fall.hp == 21);
+}
+
+TEST_CASE("Ashley effect-only trap continues to physical-layer zone door",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  host.flags = 0x20000000;
+  host.cell = {.actor = {.room_trigger = true}, .docked_door = true};
+  host.trap = VS::Field::ActorTileTrap{.target = {1, 2}, .kind = 16};
+  host.doors = {{.destination_zone_id = 10,
+                 .destination_room_id = 4,
+                 .required_flag_value = 1}};
+  host.flag_value = 1;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 1, .layer = 2, .z = 1};
+  CHECK(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls ==
+        std::vector<std::int32_t>{10, 11, 12, 13, 14, 17, 18, 21, 22, 6, 7, 8});
+  CHECK(host.doors_tile == placement.tile);
+  CHECK(host.fall.route == VS::Field::AshleyTransitionRoute::kZone);
+  CHECK(host.fall.entrance == host.doors.front());
+}
+
+TEST_CASE("Ashley forced-layer door lookup obeys its separate suppression bit",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  host.flags = 0x20030000;
+  host.cell.docked_door = true;
+  host.doors = {{.destination_zone_id = 9, .destination_room_id = 4}};
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 1, .layer = 2, .z = 1};
+  CHECK_FALSE(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls == std::vector<std::int32_t>{10, 11, 12, 13, 14, 20});
+  CHECK(host.collision_tile == VS::Actors::PackedTile{.layer = 3});
+  CHECK(host.last == placement.tile);
+  host.flags = 0x30000;
+  host.fall.calls.clear();
+  CHECK(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.doors_tile == VS::Actors::PackedTile{.layer = 3});
+  CHECK(host.fall.route == VS::Field::AshleyTransitionRoute::kRoom);
+}
+
+TEST_CASE("Ashley door chooses the first flag-accepted record",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  host.cell.docked_door = true;
+  host.doors = {{.destination_room_id = 1, .required_flag_value = 2},
+                {.destination_zone_id = 9,
+                 .destination_room_id = 2,
+                 .required_flag_value = 1}};
+  host.flag_value = 1;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 1, .z = 1};
+  CHECK(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls ==
+        std::vector<std::int32_t>{10, 11, 12, 13, 14, 21, 22, 22, 6, 7, 8});
+  CHECK(host.fall.transition == host.doors[1]);
+  CHECK(host.fall.entrance == host.doors[1]);
+}
+
+TEST_CASE("Ashley event-owned control caches before still handling a pit",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  host.event_control = true;
+  host.cell = {.actor = {.room_trigger = true, .pit = true},
+               .event_trigger = true,
+               .docked_door = true};
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 1, .z = 1};
+  placement.position.y = 17;
+  CHECK(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls == std::vector<std::int32_t>{10, 11, 12, 13, 14, 20, 0,
+                                                     1, 3, 5, 6, 2, 7, 8});
+  CHECK(host.fall.hp == 1);
+  CHECK(host.last == placement.tile);
+}
+
+TEST_CASE("Ashley cached tile ignores input spare without refreshing cache",
+          "[ashley-tile-core][field]") {
+  RecordingAshleyTileHost host;
+  host.last = VS::Actors::PackedTile{.x = 1, .z = 1};
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 1, .z = 1, .spare = 192};
+  CHECK_FALSE(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+  CHECK(host.fall.calls == std::vector<std::int32_t>{10, 11, 12, 13});
+  CHECK(host.last == VS::Actors::PackedTile{.x = 1, .z = 1});
+}
+
+TEST_CASE("Ashley trap suppression retains original held-location mode writes",
+          "[ashley-tile-core][field]") {
+  constexpr std::array<std::uint32_t, 3> kSuppression{0x4000, 0x100000,
+                                                      0x400000};
+  for (const auto flags : kSuppression) {
+    RecordingAshleyTileHost host;
+    host.flags = flags;
+    host.cell.actor.room_trigger = true;
+    VS::Actors::ActorPlacementView placement{};
+    placement.tile = {.x = 1, .z = 1, .spare = 192};
+    CHECK_FALSE(VS::Field::CheckAshleyTileTriggers(2, placement, host));
+    CHECK(host.fall.calls == std::vector<std::int32_t>{10, 11, 12, 13, 14, 20});
+    auto expected =
+        (flags & 0x104000) == 0 ? placement.tile : VS::Actors::PackedTile{};
+    expected.spare = static_cast<std::uint8_t>((flags >> 14) & 1);
+    CHECK(host.last == expected);
+  }
+}
+
+TEST_CASE("Ashley fall refuses invalid actors nonpits and height sixteen",
+          "[ashley-fall-core][field]") {
+  RecordingAshleyFallHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = 17;
+  CHECK(VS::Field::CheckAshleyFall(-1, placement, true, host) ==
+        VS::Field::AshleyFallResult::kNone);
+  CHECK(VS::Field::CheckAshleyFall(17, placement, true, host) ==
+        VS::Field::AshleyFallResult::kNone);
+  CHECK(VS::Field::CheckAshleyFall(2, placement, false, host) ==
+        VS::Field::AshleyFallResult::kNone);
+  placement.position.y = 16;
+  CHECK(VS::Field::CheckAshleyFall(2, placement, true, host) ==
+        VS::Field::AshleyFallResult::kNone);
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("Ashley scripted fall transitions without reading HP",
+          "[ashley-fall-core][field]") {
+  RecordingAshleyFallHost host;
+  host.destination = VS::Field::ScriptedFallDestination{9, 3};
+  host.hp.reset();
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = 17;
+  placement.tile = {.x = 1, .z = 1, .spare = 192};
+  CHECK(VS::Field::CheckAshleyFall(2, placement, true, host) ==
+        VS::Field::AshleyFallResult::kScriptedTransition);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 6, 7, 8});
+  CHECK(host.transition ==
+        VS::Field::BuildScriptedFallDoor({9, 3}, placement.tile));
+  CHECK_FALSE(host.entrance);
+}
+
+TEST_CASE("Ashley fatal fall keeps signed halfword HP and label ordering",
+          "[ashley-fall-core][field]") {
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = 17;
+  constexpr std::array<std::int16_t, 4> kFatalHp{-32768, -1, 1, 20};
+  for (const auto hp : kFatalHp) {
+    RecordingAshleyFallHost host;
+    host.hp = hp;
+    CHECK(VS::Field::CheckAshleyFall(2, placement, true, host) ==
+          VS::Field::AshleyFallResult::kHandled);
+    CHECK(host.hp == 0);
+    CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 4});
+  }
+}
+
+TEST_CASE("Ashley zero HP fall defeats without another value label",
+          "[ashley-fall-core][field]") {
+  RecordingAshleyFallHost host;
+  host.hp = 0;
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = 17;
+  CHECK(VS::Field::CheckAshleyFall(2, placement, true, host) ==
+        VS::Field::AshleyFallResult::kHandled);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 3, 4});
+}
+
+TEST_CASE("Ashley HP twenty-one loses twenty before reload transition",
+          "[ashley-fall-core][field]") {
+  RecordingAshleyFallHost host;
+  host.reload.destination_zone_id = 10;
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = 17;
+  CHECK(VS::Field::CheckAshleyFall(2, placement, true, host) ==
+        VS::Field::AshleyFallResult::kHandled);
+  CHECK(host.hp == 1);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 3, 5, 6, 2, 7, 8});
+  CHECK(host.transition == host.reload);
+  CHECK(host.entrance == host.reload);
+  CHECK(host.route == VS::Field::AshleyTransitionRoute::kRoom);
+}
+
+TEST_CASE("Ashley fall refuses absent HP before damage or transition",
+          "[ashley-fall-core][field]") {
+  RecordingAshleyFallHost host;
+  host.hp.reset();
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = 17;
+  CHECK(VS::Field::CheckAshleyFall(2, placement, true, host) ==
+        VS::Field::AshleyFallResult::kNone);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1});
+}
+
+TEST_CASE("Scripted fall door values preserve original packed field widths",
+          "[ashley-fall-core][field]") {
+  const auto door = VS::Field::BuildScriptedFallDoor(
+      {.zone_id = 9, .room_id = 3},
+      {.x = 255, .layer = 255, .z = 254, .spare = 255});
+  CHECK(door == VS::Field::DoorRecord{.destination_zone_id = 9,
+                                      .destination_room_id = 3,
+                                      .tile_x = 31,
+                                      .tile_z = 30,
+                                      .floor_layer = 7,
+                                      .entry_direction = 7,
+                                      .entry_tile_x = 31,
+                                      .entry_tile_z = 30,
+                                      .entry_elevation = 3});
+}
+
 TEST_CASE("Scripted fall producer initializes the complete transition door",
           "[fall-door-initialization][field]") {
   ScriptedFallDoorFixture fixture;
@@ -1376,7 +1753,7 @@ TEST_CASE("Scripted fall producer initializes the complete transition door",
   location.packedTile.word =
       std::bit_cast<std::int32_t>(std::uint32_t{0xC0010001});
   location.position.vy = 17;
-  CHECK(Field_CheckAshleyTileTriggers(
+  CHECK(Field_CheckAshleyTileTriggersEntry(
             2, reinterpret_cast<unsigned char*>(&location)) == 0);
   CHECK(Field_screenTransitionStep == (destination_zone == 9 ? 1 : 2));
   const auto transition = VS::Field::LoadLiveRoomTransition();
@@ -1528,6 +1905,43 @@ TEST_CASE("Actor disabled tile trigger refuses before actor cache access",
   CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
         VS::Field::ActorTileTriggerResult::kNone);
   CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 8});
+}
+
+TEST_CASE("Ashley native entry preserves unaligned input and cached tile bytes",
+          "[ashley-tile-live][field]") {
+  ActorTileTriggerLiveFixture fixture;
+  fixture.actor->lastTriggerTile.word = 0x01070809;
+  Actors_ActorLocation location{};
+  location.packedTile.target = {
+      .tileX = 3, .tileLayer = 2, .tileZ = 4, .facing = 255};
+  std::array<unsigned char, sizeof(Actors_ActorLocation) + 1> bytes{};
+  std::memcpy(bytes.data() + 1, &location, sizeof location);
+  const auto before = bytes;
+  CHECK(Field_CheckAshleyTileTriggersEntry(2, bytes.data() + 1) == 0);
+  CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
+  CHECK(bytes == before);
+  CHECK(Field_CheckAshleyTileTriggersEntry(2, bytes.data() + 1) == 0);
+  CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
+  Battle_actors[2] = nullptr;
+  CHECK(Field_CheckAshleyTileTriggersEntry(2, bytes.data() + 1) == 0);
+  CHECK(bytes == before);
+}
+
+TEST_CASE("Ashley native entry refuses null and out of range actors",
+          "[ashley-tile-live][field]") {
+  CHECK(Field_CheckAshleyTileTriggersEntry(2, nullptr) == 0);
+  Actors_ActorLocation location{};
+  auto* input = reinterpret_cast<unsigned char*>(&location);
+  CHECK(Field_CheckAshleyTileTriggersEntry(-1, input) == 0);
+  CHECK(Field_CheckAshleyTileTriggersEntry(17, input) == 0);
+}
+
+TEST_CASE("Ashley native entry retains original module address",
+          "[ashley-tile-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80074BAC) ==
+        reinterpret_cast<const void*>(&Field_CheckAshleyTileTriggersEntry));
 }
 
 TEST_CASE("Actor tile trigger C boundary retains module and refuses bad input",

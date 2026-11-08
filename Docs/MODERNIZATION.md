@@ -13,7 +13,7 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Roadmap step and issue | Owned left | Generated left | Original lines | Under test | Characterize first | Unmeasured |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 3: #45 Owned game, session and scene state | 0 | 55 | 1,974 | 349 | 36 | 0 |
+| 3: #45 Owned game, session and scene state | 0 | 54 | 1,827 | 349 | 36 | 0 |
 | 4: #44 Runtime modes and logical ticks | 0 | 0 | 0 | 27 | 0 | 0 |
 | 5: #52 Logical input and typed settings | 0 | 0 | 0 | 20 | 0 | 0 |
 | 6: #47 Stable asset IDs and decoded records | 0 | 0 | 0 | 30 | 0 | 0 |
@@ -28,16 +28,16 @@ architecture changes rather than per-function work, so this ledger is what track
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
 | 26: #59 Event VM results and execution | 0 | 71 | 1,444 | 188 | 49 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
-| 31: #61 Typed effects and playback sessions | 0 | 176 | 5,601 | 681 | 86 | 0 |
+| 31: #61 Typed effects and playback sessions | 0 | 176 | 5,601 | 682 | 85 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 1 | 370 | 22,721 | 359 | 303 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 1 | 1033 | 43,796 | 3122 | 627 | 0 |
+| **Total** | 1 | 1032 | 43,649 | 3123 | 626 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 2,715 |
-| todo | 1,034 |
+| done | 2,716 |
+| todo | 1,033 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 42 done, 11 planned); open functions in no slice: 0.
 
@@ -69,7 +69,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 24 | field-camera-background | done | self | 6 | 0 | 0 |
 | 25 | field-rooms | done | self | 11 | 0 | 0 |
 | 26 | field-room-effects | done | self | 3 | 0 | 0 |
-| 27 | field-gimmicks-doors | active | self | 17 | 55 | 1,974 |
+| 27 | field-gimmicks-doors | active | self | 17 | 54 | 1,827 |
 | 28 | battle-ai | planned | - | 8 | 89 | 4,111 |
 | 29 | battle-damage-status | planned | - | 3 | 88 | 2,502 |
 | 30 | battle-actions | planned | - | 5 | 91 | 2,315 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 246 |
-| Referenced by the original-address module table | 1 | 631 |
+| Called from generated code | 1 | 242 |
+| Referenced by the original-address module table | 1 | 630 |
 | Calls an SDK shim | 0 | 76 |
-| Signature uses SDK integer types or `void*` | 0 | 126 |
-| Compiled with relaxed settings | 0 | 1,033 |
+| Signature uses SDK integer types or `void*` | 0 | 125 |
+| Compiled with relaxed settings | 0 | 1,032 |
 
 Function bodies: 3,749 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 1 open owned functions have generated callers.
 

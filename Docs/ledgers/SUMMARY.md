@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 2717 | owned functions |
-| 2717 | owned functions in C++ sources |
-| 1033 | generated function rows |
+| 2718 | owned functions |
+| 2718 | owned functions in C++ sources |
+| 1032 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 2,716 | 0 | 1,491 |
-| `cpp` | 2,716 | 1 (`wip`) | 1,490 |
+| `modernized` | 2,717 | 0 | 1,490 |
+| `cpp` | 2,717 | 1 (`wip`) | 1,489 |
 | `verified` | 49 | 0 | 4,158 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 2717 |
-| `vs_namespace` | 2716 |
-| `typed_interface` | 2716 |
-| `no_bridge` | 2716 |
-| `strict_clean` | 2717 |
-| `behavior_evidence` | 2716 |
+| `source_cpp` | 2718 |
+| `vs_namespace` | 2717 |
+| `typed_interface` | 2717 |
+| `no_bridge` | 2717 |
+| `strict_clean` | 2718 |
+| `behavior_evidence` | 2717 |
 
-Promotion records: 2717; derived `cpp=x`: 2716, `cpp=wip`: 1. Verification records: 252; `verified=x` markers: 49.
+Promotion records: 2718; derived `cpp=x`: 2717, `cpp=wip`: 1. Verification records: 254; `verified=x` markers: 49.
 
 <!-- gates:end -->
 
@@ -100,8 +100,8 @@ read the global game state named in each slice's limits, and those compatibility
 ### Generated-function cohort (#276)
 
 The original cohort is the 3,479 `copy=yes` rows without `cpp` at `04d47338`.
-At the 2026-11-07 NPC-trigger reconciliation published at `4d918907`, 2,434
-derive `cpp=x`, 11 are retired, 1,033 remain generated/unpromoted and one owned
+At the 2026-11-07 Ashley-trigger reconciliation over published `afdc0adc`, 2,435
+derive `cpp=x`, 11 are retired, 1,032 remain generated/unpromoted and one owned
 textbox-frame entry (F01416) remains `wip`.
 This is about 70% resolved; the total promoted count above also includes functions
 outside that original cohort and must not be divided by 3,479.
@@ -127,12 +127,23 @@ evidence. That checkpoint's full Debug/Release each passed 4,788 tests / 8,902,1
 both canonical fingerprints and two 1,735-path/hash generations are unchanged.
 The core and Live provider use the existing interaction ownership boundary;
 the completed trap slice retains its original files and dependencies.
-Row 27 still has 55 generated functions. The NPC checkpoint is published at
+Row 27 has 54 generated functions after the locally verified Ashley slice.
+The NPC checkpoint is published at
 `4d918907`, exact successful CI `42445155609`; this source promotion is not
 all-scene trap/fatal-fall parity. The subsequent #323 scripted-fall door safety
-fix passes 4,789 tests / 8,902,162 assertions in each configuration with unchanged
-canonical replays; its publication/CI gate is pending. It does not promote F00158
-or change the cohort counts above.
+fix passed 4,789 tests / 8,902,162 assertions in each configuration with unchanged
+canonical replays and is closed at `afdc0adc`, exact successful CI `42448832713`.
+That safety fix alone did not promote F00158. The subsequent full Ashley
+event/trap/door/cache/fall core and checked Live/C-module/wrapper adoption are now
+locally verified against all387original instructions, 20focused103assertions,
+actual native cache/module/input cases and representative original trap/lock
+controller workflows. Current complete Debug/Release pass4,809tests /
+8,902,264assertions with unchanged canonical fingerprints, zero-new serial
+quality and two stable1,738-path/hash generations. New dependency #324 has a
+registered initialization correction and actual copied-request regression;
+this milestone's publication/exactCI and #324 closure remain pending. Neither
+source promotion nor native zero-initialization establishes all-scene/fatal-fall
+or effect renderer parity, and required compatibility/lifetime gates stay open.
 #321 tracks the invisible active chest loot panel separately.
 Remaining row-27 functions, later planned slices and the final closing-revision
 Debug/Release, replay, generation, quality and CI gates are still required.

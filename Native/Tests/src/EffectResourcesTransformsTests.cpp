@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -15,6 +16,7 @@
 #include "Content/ModuleData.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/Curves.hpp"
@@ -26,6 +28,9 @@
 #include "Effects/TransformsLive.hpp"
 
 extern "C" {
+#include "Actors/Location.h"
+#include "Effects/ActionEffects.h"
+#include "Effects/CameraLiveState.h"
 #include "Effects/Package.h"
 #include "Effects/Runtime.h"
 }
@@ -357,7 +362,77 @@ struct LivePackageScope {
     std::ranges::copy(saved_samples, Effects::LiveEffectCurveSamples().begin());
   }
 };
+
+struct TrapTileProducerScope {
+  LivePackageScope package;
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, std::size_t{256} * 1024> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  decltype(Effects_secondaryPackage) saved_secondary = Effects_secondaryPackage;
+  decltype(Effects_secondaryRequest) saved_request = Effects_secondaryRequest;
+  decltype(Effects_savedActionCamera) saved_camera = Effects_savedActionCamera;
+  decltype(Effects_effectCamera) saved_effect_camera = Effects_effectCamera;
+  Effects_EffectInstance* saved_instances = Effects_secondaryInstances;
+  int saved_busy = Effects_effectBusyFlags;
+  decltype(std::to_array(Effects_tokenBitmaps)) saved_tokens =
+      std::to_array(Effects_tokenBitmaps);
+  std::array<char, 256> script{};
+
+  TrapTileProducerScope() {
+    Effects_secondaryPackage = {};
+    Effects_secondaryPackage.block8Data = script.data();
+    Effects_secondaryRequest = {};
+    Effects_secondaryInstances = nullptr;
+    Effects_effectBusyFlags = 0;
+    std::ranges::fill(Effects_tokenBitmaps, 0);
+  }
+  ~TrapTileProducerScope() {
+    Effects_secondaryPackage = saved_secondary;
+    Effects_secondaryRequest = saved_request;
+    Effects_savedActionCamera = saved_camera;
+    Effects_effectCamera = saved_effect_camera;
+    Effects_secondaryInstances = saved_instances;
+    Effects_effectBusyFlags = saved_busy;
+    std::ranges::copy(saved_tokens, Effects_tokenBitmaps);
+  }
+};
+
+void CheckTrapTileRequestHeader(const Effects_ActionEffectRequest& request) {
+  CHECK(request.effectId == 33);
+  CHECK(request.count == 1);
+  CHECK(request.otherCount == 0);
+  CHECK(request.source.type == 4);
+  CHECK(request.source.value.actor.actor == 0);
+  CHECK(request.source.value.actor.part == 0);
+}
+
+void CheckTrapTileTarget(const Effects_ActionEffectTarget& target) {
+  CHECK(target.type == 5);
+  CHECK(target.value.position.vx == 320);
+  CHECK(target.value.position.vz == 448);
+  CHECK(target.value.position.vy == -12);
+  CHECK(target.value.position.pad == 0);
+}
 }  // namespace
+
+TEST_CASE("Trap tile producer initializes copied actor endpoint and busy gate",
+          "[trap-tile-initialization][effects]") {
+  TrapTileProducerScope fixture;
+  Actors_ActorLocation location{};
+  location.packedTile.target = {
+      .tileX = 2, .tileLayer = 0, .tileZ = 3, .facing = 0};
+  location.position.vy = -12;
+  using LocationBytes = std::array<std::byte, sizeof(Actors_ActorLocation)>;
+  const auto before = std::bit_cast<LocationBytes>(location);
+  Effects_SpawnTrapTileEffect(&location);
+  CheckTrapTileRequestHeader(Effects_secondaryRequest);
+  CheckTrapTileTarget(Effects_secondaryRequest.targets[0]);
+  CHECK(std::bit_cast<LocationBytes>(location) == before);
+  Effects_effectBusyFlags = 2;
+  Effects_secondaryRequest.effectId = 77;
+  Effects_SpawnTrapTileEffect(&location);
+  CHECK(Effects_secondaryRequest.effectId == 77);
+}
 
 TEST_CASE("Effect curves sample by id",
           "[effects][effects-resources-transforms]") {

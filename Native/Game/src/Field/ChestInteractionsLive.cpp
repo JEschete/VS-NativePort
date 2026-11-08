@@ -4,19 +4,28 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <optional>
 #include <span>
+#include <vector>
 
+#include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractions.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/DoorMatchesLive.hpp"
+#include "Field/DoorRecordLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomSwitchesLive.h"
+#include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
@@ -30,6 +39,8 @@ extern "C" {
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/Feedback.h"
+#include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Field/Doors.h"
@@ -37,6 +48,7 @@ extern "C" {
 #include "Field/InteractionFocusLive.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
+#include "Field/RoomLoadingLiveState.h"
 #include "Field/TransitionsLiveState.h"
 #include "Items/TreasureChests.h"
 #include "Menu/Framework/ActionSelection.h"
@@ -58,6 +70,7 @@ constexpr std::int32_t kTrapActionOffset = 6;
 constexpr std::int32_t kTrapTickSpeed = 4;
 constexpr std::size_t kPoseWords = 4;
 constexpr std::size_t kOriginalLockRecordBytes = 0x14;
+constexpr std::size_t kOriginalDoorRecordBytes = sizeof(Field_MpdDoorRecord);
 constexpr std::int32_t kRoomObjectSoundGroup = 0x7E;
 constexpr std::int32_t kTrapPrimaryTargetPosition = 3;
 constexpr std::uint16_t kTrapSourcePointType = 5;
@@ -138,6 +151,154 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
     return Event_EvaluateRoomEventTriggersEntry(kActorFallEventRequest, 0,
                                                 nullptr, 0) == 1;
   }
+};
+
+class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
+ public:
+  std::optional<VS::Field::ScriptedFallDestination> ScriptedDestination()
+      override {
+    const auto destination = VS::Field::LiveRoomFallDestination();
+    if (destination == 0 || destination == -1) return std::nullopt;
+    constexpr unsigned kZoneShift = 16;
+    const auto packed = static_cast<std::uint32_t>(destination);
+    return VS::Field::ScriptedFallDestination{
+        .zone_id = static_cast<std::uint8_t>(packed >> kZoneShift),
+        .room_id = static_cast<std::uint8_t>(packed)};
+  }
+  std::optional<std::int16_t> CurrentHp(std::int32_t actor) override {
+    const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
+    if (record == nullptr || record->stats == nullptr) return std::nullopt;
+    return std::bit_cast<std::int16_t>(
+        static_cast<std::uint16_t>(record->stats->currentHp));
+  }
+  void ShowFallDamage(std::int32_t actor) override {
+    const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
+    if (record == nullptr || record->stats == nullptr) return;
+    constexpr std::uint32_t kFallValueLabel = 0x80000014;
+    Battle_QueueActorValueLabel(record->stats->actorId, 0, kFallValueLabel, 0);
+  }
+  void SetHp(std::int32_t actor, std::int16_t hp) override {
+    auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
+    if (record == nullptr || record->stats == nullptr) return;
+    record->stats->currentHp = hp;
+  }
+  void BeginDefeat(std::int32_t actor) override {
+    const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
+    if (record == nullptr || record->stats == nullptr) return;
+    Battle_BeginActorDefeatAnimation(record->stats->actorId);
+  }
+  VS::Field::DoorRecord StoreEntranceForReload() override {
+    Field_StoreEntranceDoorForReload();
+    return VS::Field::LoadLiveRoomTransition().pending_door;
+  }
+  std::uint8_t CurrentZoneId() const override {
+    return static_cast<std::uint8_t>(Field_zoneContext.zndId);
+  }
+  void BeginTransition(const VS::Field::DoorRecord& door,
+                       VS::Field::AshleyTransitionRoute route) override {
+    Field_MpdDoorRecord record{};
+    VS::Field::StoreDoorRecord(door, record);
+    constexpr std::int32_t kFallTransitionSpeed = 8;
+    if (route == VS::Field::AshleyTransitionRoute::kRoom) {
+      VS::Field::LiveBeginRoomTransition(&record, 0, kFallTransitionSpeed);
+    } else {
+      VS::Field::LiveBeginZoneTransition(&record, 0, kFallTransitionSpeed);
+    }
+  }
+  void ResetRunMomentum(std::int32_t actor) override {
+    VS::Actors::ResetLiveActorRunMomentum(actor);
+  }
+  void SetEntrance(const std::optional<VS::Field::DoorRecord>& door) override {
+    if (!door) {
+      Field_SetEntranceDoorRecord(nullptr);
+      return;
+    }
+    Field_MpdDoorRecord record{};
+    VS::Field::StoreDoorRecord(*door, record);
+    Field_SetEntranceDoorRecord(
+        reinterpret_cast<char (*)[kOriginalDoorRecordBytes]>(&record));
+  }
+};
+
+class LiveAshleyTileHost final : public VS::Field::AshleyTileTriggerHost {
+ public:
+  std::uint32_t StateFlags(std::int32_t actor) override {
+    return actor_.StateFlags(actor);
+  }
+  VS::Field::AshleyTileTriggerCell Collision(
+      const VS::Actors::PackedTile& tile) override {
+    const auto* cell =
+        VS::Field::LiveCollisionCellOrAbsent(tile.x, tile.z, tile.layer);
+    return {.actor = {.room_trigger = cell->hasRoomTrigger != 0,
+                      .pit = cell->isPit != 0},
+            .event_trigger = cell->hasEventTrigger != 0,
+            .docked_door = cell->isPlatformDocked != 0};
+  }
+  bool TransitionInProgress() override { return actor_.TransitionInProgress(); }
+  std::optional<VS::Actors::PackedTile> LastTriggerTile(
+      std::int32_t actor) override {
+    return actor_.LastTriggerTile(actor);
+  }
+  bool EventOwnsControl() override { return actor_.EventOwnsControl(); }
+  bool TriggerPlayerTileEvent() override {
+    constexpr std::int32_t kPlayerTileEvent = 2;
+    return Event_EvaluateRoomEventTriggersEntry(kPlayerTileEvent, 0, nullptr,
+                                                0) == 1;
+  }
+  void BeginQueuedCutscene() override { VS::Event::BeginLiveQueuedCutscene(); }
+  std::optional<VS::Field::ActorTileTrap> Trap(
+      const VS::Actors::PackedTile& tile) override {
+    return actor_.Trap(tile);
+  }
+  void SpawnTrapTileEffect(
+      const VS::Actors::ActorPlacementView& placement) override {
+    Actors_ActorLocation location{};
+    location.packedTile.target.tileX = placement.tile.x;
+    location.packedTile.target.tileLayer = placement.tile.layer;
+    location.packedTile.target.tileZ = placement.tile.z;
+    location.packedTile.target.facing = placement.tile.spare;
+    location.position.vx = placement.position.x;
+    location.position.vy = placement.position.y;
+    location.position.vz = placement.position.z;
+    location.position.pad = placement.position.w;
+    Effects_SpawnTrapTileEffect(&location);
+  }
+  void BeginTrap(VS::Field::TrapTarget target,
+                 const VS::Actors::ActorPlacementView& placement,
+                 std::int32_t actor) override {
+    actor_.BeginTrap(target, placement, actor);
+  }
+  void StoreTriggerTile(std::int32_t actor, const VS::Actors::PackedTile& tile,
+                        std::uint8_t mode, bool store_location) override {
+    actor_.StoreTriggerTile(actor, tile, mode, store_location);
+  }
+  std::vector<VS::Field::DoorRecord> DoorsAt(
+      const VS::Actors::PackedTile& tile) override {
+    const auto* matches =
+        VS::Field::TransitionLiveDoorsAtTile(tile.x, tile.z, tile.layer);
+    std::vector<VS::Field::DoorRecord> doors;
+    if (matches == nullptr || matches->records == nullptr ||
+        matches->count <= 0) {
+      return doors;
+    }
+    const auto count = static_cast<std::size_t>(matches->count);
+    if (count >
+        Field_roomData.header.doorsLength / sizeof(Field_MpdDoorRecord)) {
+      return doors;
+    }
+    for (const auto* record : std::span(matches->records, count)) {
+      if (record != nullptr) doors.push_back(VS::Field::DoorRecordOf(*record));
+    }
+    return doors;
+  }
+  std::uint8_t ScriptFlag(std::uint16_t flag) override {
+    return VS::State::LiveScriptFlag(flag);
+  }
+  VS::Field::AshleyFallHost& FallHost() override { return fall_; }
+
+ private:
+  LiveActorTileTriggerHost actor_;
+  LiveAshleyFallHost fall_;
 };
 
 class LiveFacingEventHost final : public VS::Field::FacingEventHost {
@@ -615,6 +776,12 @@ class LiveObjectInteractionWaitHost final
 }  // namespace
 
 namespace VS::Field {
+bool CheckLiveAshleyTileTriggers(std::int32_t actor,
+                                 const Actors::ActorPlacementView& placement) {
+  LiveAshleyTileHost host;
+  return CheckAshleyTileTriggers(actor, placement, host);
+}
+
 ActorTileTriggerResult CheckLiveActorTrapAndFallTriggers(
     std::int32_t actor, const Actors::ActorPlacementView& placement) {
   LiveActorTileTriggerHost host;
@@ -838,6 +1005,22 @@ int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
 
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
 // decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
+int Field_CheckAshleyTileTriggersEntry(int actor, unsigned char* input) {
+  if (input == nullptr) return 0;
+  Actors_ActorLocation location{};
+  std::memcpy(&location, input, sizeof location);
+  const VS::Actors::ActorPlacementView placement{
+      .tile = {.x = location.packedTile.target.tileX,
+               .layer = location.packedTile.target.tileLayer,
+               .z = location.packedTile.target.tileZ,
+               .spare = location.packedTile.target.facing},
+      .position = {.x = location.position.vx,
+                   .y = location.position.vy,
+                   .z = location.position.vz,
+                   .w = location.position.pad}};
+  return VS::Field::CheckLiveAshleyTileTriggers(actor, placement) ? 1 : 0;
+}
+
 int Field_CheckActorTrapAndFallTriggersEntry(int actor,
                                              Actors_ActorLocation* location) {
   if (location == nullptr) return 0;

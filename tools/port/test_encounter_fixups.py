@@ -268,6 +268,15 @@ class EncounterFixupTests(unittest.TestCase):
             source = source.replace(old, new)
         self.assertEqual(source, "    Field_MpdDoorRecord destination{};\n")
 
+    def test_trap_tile_effect_initializes_actor_endpoint_fields(self):
+        source = "    Effects_ActionEffectRequest request;\n"
+        edits = [edit for edit in copy_fixups.FIXES["F00086"] if "#324" in edit[2]]
+        self.assertEqual(len(edits), 1)
+        for old, new, _ in edits:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(source, "    Effects_ActionEffectRequest request{};\n")
+
     def test_unchecked_cell_readers_read_an_absent_cell(self):
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["VS::Field::LiveCollisionCellOrAbsent"],
@@ -455,6 +464,8 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00158", "Field_CheckAshleyTileTriggersEntry", "VS::Field::CheckAshleyTileTriggers",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00159", "Field_CheckActorTrapAndFallTriggersEntry", "VS::Field::CheckActorTrapAndFallTriggers",
              r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00153", "Field_TryTriggerFacingTileEventEntry", "VS::Field::TryTriggerFacingTileEvent",
@@ -1028,6 +1039,7 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00158": ("Field_CheckAshleyTileTriggersEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00159": ("Field_CheckActorTrapAndFallTriggersEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00153": ("Field_TryTriggerFacingTileEventEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00154": ("Field_FindFacingRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
@@ -3801,11 +3813,17 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertEqual(owned["F00579"]["name"], "VS::Field::TransitionDoorsAtTile")
         self.assertEqual(owned["F00579"]["header"], r"Native\Game\include\Field\DoorMatches.hpp")
         source = (root / "Native/Game/src/Field/Doors.cpp").read_text()
-        caller = (root / "Native/Game/src/Field/Interactions.cpp").read_text()
-        self.assertIn('"Field/DoorMatchList.h"', caller)
+        caller = (root / "Native/Game/src/Field/ChestInteractionsLive.cpp").read_text()
+        live_header = (root / "Native/Game/include/Field/DoorMatchesLive.hpp").read_text()
+        self.assertIn('"Field/DoorMatchList.h"', live_header)
         self.assertIn('#include "Field/DoorMatchesLive.hpp"', caller)
         self.assertNotIn("Field_TransitionDoorsAtTile(", caller)
-        self.assertEqual(caller.count("VS::Field::TransitionLiveDoorsAtTile("), 2)
+        self.assertEqual(caller.count("VS::Field::TransitionLiveDoorsAtTile("), 1)
+        self.assertIn("std::span(matches->records, count)", caller)
+        self.assertRegex(
+            caller,
+            r"count\s*>\s*Field_roomData\.header\.doorsLength\s*/\s*sizeof\(Field_MpdDoorRecord\)",
+        )
         core = (root / "Native/Game/src/Field/DoorMatches.cpp").read_text()
         self.assertNotIn("Legacy/", core)
         self.assertNotIn("Field_roomData", core)

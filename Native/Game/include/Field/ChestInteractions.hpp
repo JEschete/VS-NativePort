@@ -2,12 +2,45 @@
 
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 #include "Actors/ActorPlacement.hpp"
+#include "Field/DoorRecord.hpp"
 #include "Field/GameMode.hpp"
 #include "Field/InteractionTarget.hpp"
 
 namespace VS::Field {
+
+struct ScriptedFallDestination {
+  std::uint8_t zone_id = 0;
+  std::uint8_t room_id = 0;
+};
+
+DoorRecord BuildScriptedFallDoor(const ScriptedFallDestination& destination,
+                                 const Actors::PackedTile& tile);
+
+enum class AshleyFallResult { kNone, kScriptedTransition, kHandled };
+enum class AshleyTransitionRoute { kRoom, kZone };
+
+class AshleyFallHost {
+ public:
+  virtual ~AshleyFallHost() = default;
+  virtual std::optional<ScriptedFallDestination> ScriptedDestination() = 0;
+  virtual std::optional<std::int16_t> CurrentHp(std::int32_t actor) = 0;
+  virtual void ShowFallDamage(std::int32_t actor) = 0;
+  virtual void SetHp(std::int32_t actor, std::int16_t hp) = 0;
+  virtual void BeginDefeat(std::int32_t actor) = 0;
+  virtual DoorRecord StoreEntranceForReload() = 0;
+  virtual std::uint8_t CurrentZoneId() const = 0;
+  virtual void BeginTransition(const DoorRecord& door,
+                               AshleyTransitionRoute route) = 0;
+  virtual void ResetRunMomentum(std::int32_t actor) = 0;
+  virtual void SetEntrance(const std::optional<DoorRecord>& door) = 0;
+};
+
+AshleyFallResult CheckAshleyFall(std::int32_t actor,
+                                 const Actors::ActorPlacementView& placement,
+                                 bool pit, AshleyFallHost& host);
 
 enum class ActorTileTriggerResult : std::int32_t {
   kNone = 0,
@@ -25,6 +58,41 @@ struct ActorTileTrap {
   TrapTarget target{};
   std::int16_t kind = 0;
 };
+
+struct AshleyTileTriggerCell {
+  ActorTileTriggerCell actor{};
+  bool event_trigger = false;
+  bool docked_door = false;
+};
+
+class AshleyTileTriggerHost {
+ public:
+  virtual ~AshleyTileTriggerHost() = default;
+  virtual std::uint32_t StateFlags(std::int32_t actor) = 0;
+  virtual AshleyTileTriggerCell Collision(const Actors::PackedTile& tile) = 0;
+  virtual bool TransitionInProgress() = 0;
+  virtual std::optional<Actors::PackedTile> LastTriggerTile(
+      std::int32_t actor) = 0;
+  virtual bool EventOwnsControl() = 0;
+  virtual bool TriggerPlayerTileEvent() = 0;
+  virtual void BeginQueuedCutscene() = 0;
+  virtual std::optional<ActorTileTrap> Trap(const Actors::PackedTile& tile) = 0;
+  virtual void SpawnTrapTileEffect(
+      const Actors::ActorPlacementView& placement) = 0;
+  virtual void BeginTrap(TrapTarget target,
+                         const Actors::ActorPlacementView& placement,
+                         std::int32_t actor) = 0;
+  virtual void StoreTriggerTile(std::int32_t actor,
+                                const Actors::PackedTile& tile,
+                                std::uint8_t mode, bool store_location) = 0;
+  virtual std::vector<DoorRecord> DoorsAt(const Actors::PackedTile& tile) = 0;
+  virtual std::uint8_t ScriptFlag(std::uint16_t flag) = 0;
+  virtual AshleyFallHost& FallHost() = 0;
+};
+
+bool CheckAshleyTileTriggers(std::int32_t actor,
+                             const Actors::ActorPlacementView& placement,
+                             AshleyTileTriggerHost& host);
 
 class ActorTileTriggerHost {
  public:

@@ -164,7 +164,7 @@ void Effects_SpawnGroundPlaneImpactEffect(u_short* world_position_components)
 // decomp: BATTLE.PRG func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:3187)
 void Effects_SpawnTrapTileEffect(Actors_ActorLocation* actor_location)
 {
-    Effects_ActionEffectRequest request;
+    Effects_ActionEffectRequest request{};
 
     request.effectId = 33;
     request.count = 1;

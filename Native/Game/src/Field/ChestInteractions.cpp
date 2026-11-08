@@ -67,6 +67,176 @@ std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
 
 }  // namespace
 
+// decomp: scripted-fall door in BATTLE.PRG func_80074BAC (146C.c:5365).
+DoorRecord BuildScriptedFallDoor(const ScriptedFallDestination& destination,
+                                 const Actors::PackedTile& tile) {
+  constexpr unsigned kFallElevationShift = 6;
+  constexpr std::uint8_t kFallEntryDirection = 7;
+  return {.destination_zone_id = destination.zone_id,
+          .destination_room_id = destination.room_id,
+          .tile_x = static_cast<std::uint8_t>(tile.x & kDoorTileMask),
+          .tile_z = static_cast<std::uint8_t>(tile.z & kDoorTileMask),
+          .floor_layer =
+              static_cast<std::uint8_t>(tile.layer & kDoorFloorLayerMask),
+          .entry_direction = kFallEntryDirection,
+          .entry_tile_x = static_cast<std::uint8_t>(tile.x & kDoorTileMask),
+          .entry_tile_z = static_cast<std::uint8_t>(tile.z & kDoorTileMask),
+          .entry_elevation =
+              static_cast<std::uint8_t>(tile.spare >> kFallElevationShift)};
+}
+
+// decomp: fall tail of BATTLE.PRG func_80074BAC (146C.c:5365), 800750CC-75184.
+AshleyFallResult CheckAshleyFall(std::int32_t actor,
+                                 const Actors::ActorPlacementView& placement,
+                                 bool pit, AshleyFallHost& host) {
+  constexpr std::int16_t kPitHeightThreshold = 16;
+  constexpr std::int16_t kDefeatHpThreshold = 21;
+  constexpr std::int16_t kFallDamage = 20;
+  if (actor < 0 || actor >= kTrapActorSlots || !pit ||
+      placement.position.y <= kPitHeightThreshold) {
+    return AshleyFallResult::kNone;
+  }
+  if (const auto destination = host.ScriptedDestination()) {
+    const auto door = BuildScriptedFallDoor(*destination, placement.tile);
+    host.BeginTransition(door, door.destination_zone_id == host.CurrentZoneId()
+                                   ? AshleyTransitionRoute::kRoom
+                                   : AshleyTransitionRoute::kZone);
+    host.ResetRunMomentum(actor);
+    host.SetEntrance(std::nullopt);
+    return AshleyFallResult::kScriptedTransition;
+  }
+  const auto hp = host.CurrentHp(actor);
+  if (!hp) {
+    return AshleyFallResult::kNone;
+  }
+  if (*hp < kDefeatHpThreshold) {
+    if (*hp != 0) {
+      host.ShowFallDamage(actor);
+    }
+    host.SetHp(actor, 0);
+    host.BeginDefeat(actor);
+    return AshleyFallResult::kHandled;
+  }
+  host.SetHp(actor, static_cast<std::int16_t>(*hp - kFallDamage));
+  const auto door = host.StoreEntranceForReload();
+  host.BeginTransition(door, AshleyTransitionRoute::kRoom);
+  host.ShowFallDamage(actor);
+  host.ResetRunMomentum(actor);
+  host.SetEntrance(door);
+  return AshleyFallResult::kHandled;
+}
+
+namespace {
+constexpr std::int16_t kAshleyEffectOnlyTrapKind = 0x10;
+
+bool TryAshleyTileEvent(std::int32_t actor,
+                        const Actors::ActorPlacementView& placement,
+                        const AshleyTileTriggerCell& cell, std::uint8_t mode,
+                        AshleyTileTriggerHost& host) {
+  if (!cell.event_trigger || !host.TriggerPlayerTileEvent()) {
+    return false;
+  }
+  host.BeginQueuedCutscene();
+  host.StoreTriggerTile(actor, placement.tile, mode, true);
+  if (cell.actor.room_trigger) {
+    const auto trap = host.Trap(placement.tile);
+    if (trap && trap->kind == kAshleyEffectOnlyTrapKind) {
+      host.SpawnTrapTileEffect(placement);
+    }
+  }
+  host.FallHost().ResetRunMomentum(actor);
+  return true;
+}
+
+bool TryAshleyTileTrap(std::int32_t actor,
+                       const Actors::ActorPlacementView& placement,
+                       const AshleyTileTriggerCell& cell, std::uint32_t flags,
+                       std::uint8_t mode, AshleyTileTriggerHost& host) {
+  constexpr std::uint32_t kTrapSuppressionMask = 0x504000;
+  if (!cell.actor.room_trigger || (flags & kTrapSuppressionMask) != 0) {
+    return false;
+  }
+  const auto trap = host.Trap(placement.tile);
+  if (!trap) {
+    return false;
+  }
+  if (trap->kind == kAshleyEffectOnlyTrapKind) {
+    host.SpawnTrapTileEffect(placement);
+    return false;
+  }
+  host.BeginTrap(trap->target, placement, actor);
+  host.StoreTriggerTile(actor, placement.tile, mode, true);
+  return true;
+}
+
+bool TryAshleyTileDoor(std::int32_t actor, const Actors::PackedTile& lookup,
+                       const AshleyTileTriggerCell& cell, std::uint32_t flags,
+                       bool forced_layer, AshleyTileTriggerHost& host) {
+  constexpr std::uint32_t kDoorSuppressionFlag = 0x4000;
+  constexpr std::uint32_t kForcedDoorSuppressionFlag = 0x20000000;
+  if (!cell.docked_door || (flags & kDoorSuppressionFlag) != 0 ||
+      (forced_layer && (flags & kForcedDoorSuppressionFlag) != 0)) {
+    return false;
+  }
+  for (const auto& door : host.DoorsAt(lookup)) {
+    if (host.ScriptFlag(door.required_flag_id) >= door.required_flag_value) {
+      auto& fall = host.FallHost();
+      fall.BeginTransition(door,
+                           door.destination_zone_id == fall.CurrentZoneId()
+                               ? AshleyTransitionRoute::kRoom
+                               : AshleyTransitionRoute::kZone);
+      fall.ResetRunMomentum(actor);
+      fall.SetEntrance(door);
+      return true;
+    }
+  }
+  return false;
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_80074BAC (src/BATTLE/BATTLE.PRG/146C.c:5365).
+bool CheckAshleyTileTriggers(std::int32_t actor,
+                             const Actors::ActorPlacementView& placement,
+                             AshleyTileTriggerHost& host) {
+  constexpr std::uint32_t kHeldLocationMask = 0x104000;
+  if (actor < 0 || actor >= kTrapActorSlots) {
+    return false;
+  }
+  const auto flags = host.StateFlags(actor);
+  const auto layer = static_cast<std::uint8_t>((flags & kTriggerLayerMask) >>
+                                               kTriggerLayerShift);
+  const auto lookup =
+      layer != 0 ? Actors::PackedTile{.layer = layer} : placement.tile;
+  const auto cell = host.Collision(lookup);
+  if (host.TransitionInProgress() || (flags & kActorTriggerDisabled) != 0) {
+    return false;
+  }
+  const auto last = host.LastTriggerTile(actor);
+  if (!last) {
+    return false;
+  }
+  const auto mode = static_cast<std::uint8_t>((flags >> kTriggerModeShift) & 1);
+  const auto& tile = placement.tile;
+  const bool changed = tile.x != last->x || tile.layer != last->layer ||
+                       tile.z != last->z || mode != last->spare || layer != 0;
+  if (changed) {
+    if (!host.EventOwnsControl()) {
+      if (TryAshleyTileEvent(actor, placement, cell, mode, host)) {
+        return true;
+      }
+      if (TryAshleyTileTrap(actor, placement, cell, flags, mode, host)) {
+        return true;
+      }
+      if (TryAshleyTileDoor(actor, lookup, cell, flags, layer != 0, host)) {
+        return true;
+      }
+    }
+    host.StoreTriggerTile(actor, tile, mode, (flags & kHeldLocationMask) == 0);
+  }
+  return CheckAshleyFall(actor, placement, cell.actor.pit, host.FallHost()) ==
+         AshleyFallResult::kHandled;
+}
+
 // decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
 ActorTileTriggerResult CheckActorTrapAndFallTriggers(
     std::int32_t actor, const Actors::ActorPlacementView& placement,

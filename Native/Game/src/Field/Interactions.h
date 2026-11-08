@@ -13,6 +13,5 @@
 extern Field_InteractionFocus Field_interactionFocus;
 extern u_int Field_controlMode;
 void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position);
-int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition);
 
 #endif // VS_FIELD_INTERACTIONS_H_DECLS

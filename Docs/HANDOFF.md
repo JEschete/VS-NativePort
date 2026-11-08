@@ -7,6 +7,48 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Ashley Tile Dispatch (#276 Row 27, #324)
+
+- F00158 is a strict typed event/trap/door/cache/fall core in the existing
+  interaction ownership boundary. Event, trap and door phases retain priority;
+  the Live host rechecks actor/stats, copies borrowed doors as values and takes
+  unaligned C input through a copy. Required native module80074BAC is retained.
+- All387original MIPS words `80074BAC-800751B4` were audited in bounded reads
+  of extracted BATTLE.PRG, SHA1
+  `D53AACCC3B3A2FC057D05E0DCEA92F7182BC72A9`. Tests preserve cache/forced-layer
+  and suppression masks, signedHP20/21/zero, label/defeat/reload ordering,
+  room-only nonfatal reload and 5-bit destination entry tiles. Two initial
+  typed discrepancies were caught by discriminating tests and repaired; neither
+  was published or accepted by changing expected behavior.
+- Twenty focused cases / 103 assertions; Debug coupled70cases / 526assertions.
+  Full Debug/Release each pass4,809tests / 8,902,264assertions, zero failures,
+  skips or regressions and unchanged canonical2,400/900-frame fingerprints.
+  Actual original MAP015 trap Debug `1794117204283499-0`, Release
+  `1794119632430485-0`:132mode8frames,HP250to196,triggeractivation1,field1phase0.
+  MAP247 lock Debug `1794117323021575-0`, Release `1794119683672030-0`:
+  138mode11frames,key458count10,field1phase0. Zero engine errors/intact traces.
+  These representative paths are not all-scene/controller fatal-fall parity;
+  damage stability or original-game parity is not inferred from one HP result.
+- Dependency #324 was logged before fixing: generated F00086's trap-tile
+  request left source.actor.part unassigned, while the transform consumer reads
+  it. Registered request initialization preserves effect33/busy gate/coordinates.
+  The actual copied-request fixture passes13assertions; coupled effect/Ashley
+  selection93cases550assertions. Zero storage is an explicit native safety
+  correction, not inferred retail endpoint values or renderer acceptance.
+- Copier193 / extent9 / modernization44 pass. Quality uses `--jobs 1`, five
+  existing / zero new; CPU-count default tidy parallelism is a concrete memory
+  risk, not a confirmed diagnosis of the earlier VS Code OOM. Builds use `/m:1`;
+  traces are streamed into small summaries. Two supported generations preserve
+  all1,738source/configuration/adoption paths and hashes; manifest
+  `57F8AE997CEE46B5C90A1DA1C595359DDE2E003C93CBB4AE5C7D3D186BD6FFFE`.
+- `VR-ASHLEY-TILE-TRIGGERS`, `VR-TRAP-TILE-ENDPOINT-INITIALIZATION` and the
+  five-to-zero old-symbol slice record bounded evidence. Unchanged gates derive
+  2,717promoted/oneframewip/254verification records, zero violations; tracker
+  reconciled; row27stillactive with54generated functions. This milestone's
+  publication/exactCI and324closure remain pending. #276/#321 and required
+  C/module/current-room/actor/event/effect globals/raw door/lifetime retirement
+  remain open; do not stop at this checkpoint.
+
 ### Scripted Fall Door (#323)
 
 - Registered copier initialization defines every field of F00158's local
@@ -18,7 +60,7 @@ verification of the current worktree.
   complete pending-door value. The fixture uses a bounded 256 KiB scoped heap,
   sizes saved actor tables from their actual declarations (42 battle entries,
   17 actor records), and releases only its own pending read/allocation.
-- Current complete Debug/Release each pass 4,789 tests / 8,902,162 assertions,
+- That fixing checkpoint's complete Debug/Release each passed 4,789 tests / 8,902,162 assertions,
   zero failures/skips/regressions and unchanged canonical 2,400/900-frame
   fingerprints. Debug coupled40cases/367assertions, copier192/extent9 and
   quality five existing / zero new pass. Both generations preserve all1,735
@@ -27,9 +69,10 @@ verification of the current worktree.
 - `VR-SCRIPTED-FALL-DOOR-INITIALIZATION` records only this safety contract.
   The minimal fixture's unsupported room3 produces an expected loader refusal;
   successful destination loading and controller fatal-fall/reference parity
-  are not claimed. F00158 remains generated and unpromoted. #323 remains open
-  pending scoped publication and exact fixing-revision CI; #276/#321 and
-  remaining Ashley/global compatibility/lifetime requirements remain open.
+  are not claimed. #323 is closed at fixing `afdc0adc`, exact successful CI
+  `42448832713`. Its initialization policy is retained by the subsequent typed
+  Ashley core above; this safety correction alone was not source promotion.
+  #276/#321 and global compatibility/lifetime requirements remain open.
 
 ### Non-Player Tile Triggers (#276 Row 27)
 

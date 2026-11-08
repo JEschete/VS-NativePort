@@ -364,6 +364,7 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Field_CheckAshleyTileTriggersEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_CheckActorTrapAndFallTriggersEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "VS::Field::LiveCollisionCellOrAbsent": r"Native\Game\include\Field\CollisionMapLive.hpp",
     "Field_TryTriggerFacingTileEventEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
@@ -1083,6 +1084,7 @@ OWNED_CALL_BINDINGS["F00152"] = "Field_TileInFrontOfActorEntry"
 OWNED_CALL_BINDINGS["F00153"] = "Field_TryTriggerFacingTileEventEntry"
 OWNED_CALL_BINDINGS["F00154"] = "Field_FindFacingRoomObjectEntry"
 OWNED_CALL_BINDINGS["F00155"] = "Field_FindFacingUnlootedChestEntry"
+OWNED_CALL_BINDINGS["F00158"] = "Field_CheckAshleyTileTriggersEntry"
 OWNED_CALL_BINDINGS["F00159"] = "Field_CheckActorTrapAndFallTriggersEntry"
 OWNED_CALL_BINDINGS["F00136"] = "Field_TryOpenChestEntry"
 OWNED_CALL_BINDINGS["F00138"] = "Field_BeginChestInteractionEntry"
@@ -2430,6 +2432,7 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x80074BAC, "Field_CheckAshleyTileTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x800751B8, "Field_CheckActorTrapAndFallTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x80074860, "Field_TryTriggerFacingTileEventEntry"),
     ("BATTLE/BATTLE.PRG", 0x800748B8, "Field_FindFacingRoomObjectEntry"),
@@ -3993,6 +3996,11 @@ FIXES.setdefault("F00158", []).append(
     ("    Field_MpdDoorRecord destination;\n",
      "    Field_MpdDoorRecord destination{};\n",
      "#323: the scripted-fall producer leaves unlock/id/reserved fields unassigned, but DoorRecordOf copies them"))
+
+FIXES.setdefault("F00086", []).append(
+    ("    Effects_ActionEffectRequest request;\n",
+     "    Effects_ActionEffectRequest request{};\n",
+     "#324: the trap-tile producer leaves actor endpoint part/padding unassigned, but EndpointOf reads and copies them"))
 
 # #288: these readers dereference func_8008B764's result unchecked, so off the grid, without a cell table or on a
 # missing platform layer the original reads PS1 RAM word 0. They read a never-null cell that is kAbsentCellWord then.
