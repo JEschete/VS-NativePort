@@ -3989,6 +3989,11 @@ FIXES.setdefault("F00853", []).append(
      "VS::Field::LiveSampleSupportHeightAt(temp_s0->positionX, temp_s0->positionY, temp_s0->positionZ, 0, 0, 0)",
      "30DB0.c:3680 samples from the gimmick's three position halfwords through a short* prototype"))
 
+FIXES.setdefault("F00158", []).append(
+    ("    Field_MpdDoorRecord destination;\n",
+     "    Field_MpdDoorRecord destination{};\n",
+     "#323: the scripted-fall producer leaves unlock/id/reserved fields unassigned, but DoorRecordOf copies them"))
+
 # #288: these readers dereference func_8008B764's result unchecked, so off the grid, without a cell table or on a
 # missing platform layer the original reads PS1 RAM word 0. They read a never-null cell that is kAbsentCellWord then.
 _CELL_OR_ABSENT = ("VS::Field::LiveCollisionCellAt(", "VS::Field::LiveCollisionCellOrAbsent(")

@@ -96,7 +96,7 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
 int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
 {
     u_char* position = inputPosition;
-    Field_MpdDoorRecord destination;
+    Field_MpdDoorRecord destination{};
     Actors_ActorLocation* coordinates;
     Field_MpdFloorTrigger* roomTrigger;
     const Field_MpdTileCell* tile;

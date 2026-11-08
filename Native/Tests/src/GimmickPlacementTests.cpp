@@ -3,6 +3,7 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -11,20 +12,25 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/CdDriveLive.hpp"
 #include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/ChestInteractions.hpp"
 #include "Field/ChestInteractionsLive.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickAnimationQueue.hpp"
 #include "Field/GimmickAnimationQueueLive.h"
 #include "Field/GimmickPlacement.hpp"
 #include "Field/InteractionTarget.hpp"
 #include "Field/InteractionTargetLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomSwitches.hpp"
 #include "Field/RoomSwitchesLive.h"
+#include "Field/TransitionsLive.hpp"
 #include "Field/Traps.hpp"
 
 extern "C" {
@@ -35,9 +41,13 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Effects/Runtime.h"
 #include "Event/Triggers.h"
+#include "Field/Doors.h"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
+#include "Field/Mpd.h"
+#include "Field/RoomLoadingLiveState.h"
+#include "Field/TransitionsLiveState.h"
 }
 
 namespace {
@@ -479,6 +489,61 @@ struct ActorTileTriggerLiveFixture {
     Actors_actorRecords[2] = saved_record;
     Field_roomData = saved_room;
     Field_controlMode = saved_control;
+  }
+};
+
+struct ScriptedFallDoorFixture {
+  ActorTileTriggerLiveFixture actors;
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, std::size_t{256} * 1024> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  std::array<Battle_Actor*, std::size(Battle_actors)> saved_actors{};
+  std::array<Actors_ActorRecord*, std::size(Actors_actorRecords)>
+      saved_records{};
+  VS::Field::RoomTransitionState saved_transition =
+      VS::Field::LoadLiveRoomTransition();
+  Field_MpdDoorRecord saved_entrance = Field_entranceDoorRecord;
+  decltype(Field_zoneContext) saved_zone = Field_zoneContext;
+  Field_MpdCollisionHeader collision{
+      .width = 2, .height = 2, .heightOrigin = 0, .cellCount = 4};
+  std::array<Field_MpdTileCell, 4> cells{};
+  Field_MpdEnvironment environment{};
+
+  ScriptedFallDoorFixture() {
+    REQUIRE(saved_zone.zndData == nullptr);
+    REQUIRE(saved_zone.zndDiscRequest == nullptr);
+    std::ranges::copy(Battle_actors, saved_actors.begin());
+    std::ranges::copy(Actors_actorRecords, saved_records.begin());
+    std::ranges::fill(Battle_actors, nullptr);
+    std::ranges::fill(Actors_actorRecords, nullptr);
+    Battle_actors[2] = actors.actor.get();
+    Actors_actorRecords[2] = actors.record.get();
+    VS::Field::StoreLiveRoomTransition({});
+    Field_zoneContext = {};
+    Field_zoneContext.zndId = 9;
+    cells[3].isPit = 1;
+    environment.fallDestinationZone = 9;
+    environment.fallDestinationRoom = 3;
+    Field_roomData.collisionMap = &collision;
+    Field_roomData.tileCells = cells.data();
+    Field_roomData.environment = &environment;
+    Field_roomData.header.collisionMapLength = sizeof collision;
+    Field_roomData.header.tileCellsLength = sizeof cells;
+    Field_roomData.header.environmentLength = sizeof environment;
+  }
+  ~ScriptedFallDoorFixture() {
+    if (Field_zoneContext.zndDiscRequest != nullptr) {
+      VS::Content::ReleaseLiveDiscRequest(Field_zoneContext.zndDiscRequest);
+    }
+    if (Field_zoneContext.zndData != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zndData);
+    }
+    VS::Field::StoreLiveRoomTransition(saved_transition);
+    Field_entranceDoorRecord = saved_entrance;
+    Field_zoneContext = saved_zone;
+    Field_roomData = actors.saved_room;
+    std::ranges::copy(saved_actors, Battle_actors);
+    std::ranges::copy(saved_records, Actors_actorRecords);
   }
 };
 
@@ -1291,6 +1356,39 @@ TEST_CASE("Facing event uses requested actor and computed adjacent tile",
   CHECK(host.evaluated->layer == 2);
   host.result = false;
   CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(3, host));
+}
+
+TEST_CASE("Scripted fall producer initializes the complete transition door",
+          "[fall-door-initialization][field]") {
+  ScriptedFallDoorFixture fixture;
+  std::uint8_t destination_zone = 9;
+  SECTION("Same-zone fall retains original room transition") {
+    destination_zone = 9;
+  }
+  SECTION("Cross-zone fall retains original zone transition") {
+    destination_zone = 10;
+  }
+  fixture.environment.fallDestinationZone = destination_zone;
+  REQUIRE(VS::Field::LiveRoomFallDestination() ==
+          static_cast<int>(destination_zone) * 65536 + 3);
+  REQUIRE(VS::Field::LiveCollisionCellOrAbsent(1, 1, 0)->isPit == 1);
+  Actors_ActorLocation location{};
+  location.packedTile.word =
+      std::bit_cast<std::int32_t>(std::uint32_t{0xC0010001});
+  location.position.vy = 17;
+  CHECK(Field_CheckAshleyTileTriggers(
+            2, reinterpret_cast<unsigned char*>(&location)) == 0);
+  CHECK(Field_screenTransitionStep == (destination_zone == 9 ? 1 : 2));
+  const auto transition = VS::Field::LoadLiveRoomTransition();
+  CHECK(transition.pending_door ==
+        VS::Field::DoorRecord{.destination_zone_id = destination_zone,
+                              .destination_room_id = 3,
+                              .tile_x = 1,
+                              .tile_z = 1,
+                              .entry_direction = 7,
+                              .entry_tile_x = 1,
+                              .entry_tile_z = 1,
+                              .entry_elevation = 3});
 }
 
 TEST_CASE("Actor tile triggers preserve collision before transition refusal",

@@ -7,6 +7,30 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Scripted Fall Door (#323)
+
+- Registered copier initialization defines every field of F00158's local
+  transition door before its existing assigned-field stores. The native consumer
+  copies unlock, id and reserved fields that were previously indeterminate.
+  This is a defined native zero-initialization policy, not inferred retail data.
+- The actual generated producer passes same-zone and cross-zone cases: 14
+  assertions verify pit/destination decoding, return0, transition1/2 and the
+  complete pending-door value. The fixture uses a bounded 256 KiB scoped heap,
+  sizes saved actor tables from their actual declarations (42 battle entries,
+  17 actor records), and releases only its own pending read/allocation.
+- Current complete Debug/Release each pass 4,789 tests / 8,902,162 assertions,
+  zero failures/skips/regressions and unchanged canonical 2,400/900-frame
+  fingerprints. Debug coupled40cases/367assertions, copier192/extent9 and
+  quality five existing / zero new pass. Both generations preserve all1,735
+  paths/hashes; manifest
+  `58DED5105801030C0B1A1E44AA5D2EDA43195F3224071B84AB539CEB546DF727`.
+- `VR-SCRIPTED-FALL-DOOR-INITIALIZATION` records only this safety contract.
+  The minimal fixture's unsupported room3 produces an expected loader refusal;
+  successful destination loading and controller fatal-fall/reference parity
+  are not claimed. F00158 remains generated and unpromoted. #323 remains open
+  pending scoped publication and exact fixing-revision CI; #276/#321 and
+  remaining Ashley/global compatibility/lifetime requirements remain open.
+
 ### Non-Player Tile Triggers (#276 Row 27)
 
 - F00159 uses the existing strict typed interaction core with value placement/collision,
@@ -36,8 +60,9 @@ verification of the current worktree.
   `6563B67DCC66521C9426A98D6E7DB4C3D3BB2182E7F19A62FF63C057538CD397`.
   `VR-ACTOR-TILE-TRIGGERS` and four-to-zero old code-consumer slice track only this
   source promotion overd25d8d69. Unchanged gates derive2,716promoted/oneframewip,
-  zero violations; row27 has55generated functions. Exact NPC publication/CI evidence
-  is recorded on276 before issue completion. Continue ordered row27 work.
+  zero violations; row27 has55generated functions. Published NPC revision
+  `4d918907` has exact successful CI `42445155609`, recorded on276.
+  Continue ordered row27 work.
 - The preceding three-query milestone is publishedd25d8d69 with exact successful
   CI42440898460. #276/#321 and required C/module/current-room/actor/event/trap globals,
   raw asynchronous door jobs and broader lifetime/retirement gates remain open.

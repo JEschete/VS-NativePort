@@ -259,6 +259,15 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("F00661", copy_fixups.OWNED_CALL_BINDINGS)
         self.assertNotIn("F00668", copy_fixups.OWNED_CALL_BINDINGS)
 
+    def test_scripted_fall_door_initializes_unassigned_fields(self):
+        source = "    Field_MpdDoorRecord destination;\n"
+        edits = [edit for edit in copy_fixups.FIXES["F00158"] if "#323" in edit[2]]
+        self.assertEqual(len(edits), 1)
+        for old, new, _ in edits:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(source, "    Field_MpdDoorRecord destination{};\n")
+
     def test_unchecked_cell_readers_read_an_absent_cell(self):
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["VS::Field::LiveCollisionCellOrAbsent"],
@@ -279,7 +288,9 @@ class EncounterFixupTests(unittest.TestCase):
         }
         for function_id, source in sources.items():
             with self.subTest(function_id):
-                for old, new, why in copy_fixups.FIXES[function_id]:
+                edits = [edit for edit in copy_fixups.FIXES[function_id] if "#288" in edit[2]]
+                self.assertEqual(len(edits), 1 if function_id == "F00547" else 2)
+                for old, new, why in edits:
                     self.assertIn(old, source)
                     self.assertIn("#288", why)
                     source = source.replace(old, new)

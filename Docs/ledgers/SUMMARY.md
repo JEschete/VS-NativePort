@@ -59,7 +59,7 @@ generator-managed output.
 | `strict_clean` | 2717 |
 | `behavior_evidence` | 2716 |
 
-Promotion records: 2717; derived `cpp=x`: 2716, `cpp=wip`: 1. Verification records: 251; `verified=x` markers: 49.
+Promotion records: 2717; derived `cpp=x`: 2716, `cpp=wip`: 1. Verification records: 252; `verified=x` markers: 49.
 
 <!-- gates:end -->
 
@@ -100,7 +100,7 @@ read the global game state named in each slice's limits, and those compatibility
 ### Generated-function cohort (#276)
 
 The original cohort is the 3,479 `copy=yes` rows without `cpp` at `04d47338`.
-At the 2026-11-07 NPC-trigger reconciliation over published `d25d8d69`, 2,434
+At the 2026-11-07 NPC-trigger reconciliation published at `4d918907`, 2,434
 derive `cpp=x`, 11 are retired, 1,033 remain generated/unpromoted and one owned
 textbox-frame entry (F01416) remains `wip`.
 This is about 70% resolved; the total promoted count above also includes functions
@@ -123,12 +123,16 @@ The query checkpoint passed 4,777 tests / 8,902,094 assertions in each configura
 and is published at `d25d8d69`, exact successful CI `42440898460`. F00159 now has a
 strict typed non-player cached-tile/trap/fall core, checked Live adapter and direct
 typed actor-command placement, with original 144-instruction and actual cache/module
-evidence. Current full Debug/Release each pass 4,788 tests / 8,902,148 assertions;
+evidence. That checkpoint's full Debug/Release each passed 4,788 tests / 8,902,148 assertions;
 both canonical fingerprints and two 1,735-path/hash generations are unchanged.
 The core and Live provider use the existing interaction ownership boundary;
 the completed trap slice retains its original files and dependencies.
-Row 27 still has 55 generated functions. Exact NPC publication/CI evidence is
-tracked on #276; this source promotion is not all-scene trap/fatal-fall parity.
+Row 27 still has 55 generated functions. The NPC checkpoint is published at
+`4d918907`, exact successful CI `42445155609`; this source promotion is not
+all-scene trap/fatal-fall parity. The subsequent #323 scripted-fall door safety
+fix passes 4,789 tests / 8,902,162 assertions in each configuration with unchanged
+canonical replays; its publication/CI gate is pending. It does not promote F00158
+or change the cohort counts above.
 #321 tracks the invisible active chest loot panel separately.
 Remaining row-27 functions, later planned slices and the final closing-revision
 Debug/Release, replay, generation, quality and CI gates are still required.
