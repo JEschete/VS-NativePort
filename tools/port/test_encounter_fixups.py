@@ -444,6 +444,8 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00159", "Field_CheckActorTrapAndFallTriggersEntry", "VS::Field::CheckActorTrapAndFallTriggers",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00153", "Field_TryTriggerFacingTileEventEntry", "VS::Field::TryTriggerFacingTileEvent",
              r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00154", "Field_FindFacingRoomObjectEntry", "VS::Field::FindFacingRoomObject",
@@ -1015,6 +1017,7 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00159": ("Field_CheckActorTrapAndFallTriggersEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00153": ("Field_TryTriggerFacingTileEventEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00154": ("Field_FindFacingRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00155": ("Field_FindFacingUnlootedChestEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),

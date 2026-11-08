@@ -9,6 +9,47 @@
 
 namespace VS::Field {
 
+enum class ActorTileTriggerResult : std::int32_t {
+  kNone = 0,
+  kFallEvent = 1,
+  kDefeated = 2,
+  kTrap = 3,
+};
+
+struct ActorTileTriggerCell {
+  bool room_trigger = false;
+  bool pit = false;
+};
+
+struct ActorTileTrap {
+  TrapTarget target{};
+  std::int16_t kind = 0;
+};
+
+class ActorTileTriggerHost {
+ public:
+  virtual ~ActorTileTriggerHost() = default;
+  virtual std::uint32_t StateFlags(std::int32_t actor) = 0;
+  virtual ActorTileTriggerCell Collision(const Actors::PackedTile& tile) = 0;
+  virtual bool TransitionInProgress() = 0;
+  virtual std::optional<Actors::PackedTile> LastTriggerTile(
+      std::int32_t actor) = 0;
+  virtual bool EventOwnsControl() = 0;
+  virtual std::optional<ActorTileTrap> Trap(const Actors::PackedTile& tile) = 0;
+  virtual void BeginTrap(TrapTarget target,
+                         const Actors::ActorPlacementView& placement,
+                         std::int32_t actor) = 0;
+  virtual void StoreTriggerTile(std::int32_t actor,
+                                const Actors::PackedTile& tile,
+                                std::uint8_t mode, bool store_location) = 0;
+  virtual bool DefeatForFall(std::int32_t actor) = 0;
+  virtual bool TriggerFallEvent() = 0;
+};
+
+ActorTileTriggerResult CheckActorTrapAndFallTriggers(
+    std::int32_t actor, const Actors::ActorPlacementView& placement,
+    ActorTileTriggerHost& host);
+
 struct ChestLockState {
   std::int16_t tile_x = 0;
   std::int16_t tile_z = 0;

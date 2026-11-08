@@ -24,6 +24,7 @@
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
+#include "Actors/Location.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
@@ -36,6 +37,7 @@ extern "C" {
 #include "Field/InteractionFocusLive.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
+#include "Field/TransitionsLiveState.h"
 #include "Items/TreasureChests.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/TextBox.h"
@@ -64,6 +66,79 @@ constexpr std::int32_t kFacingInteractionMode = 4;
 constexpr std::size_t kFacingPositionBytes = 4;
 constexpr std::int32_t kFacingTileUnits = 128;
 constexpr std::int32_t kFacingTileCenter = 64;
+constexpr std::uint32_t kActorEventControlMode = 3;
+constexpr std::int32_t kActorFallEventRequest = 0xC;
+constexpr std::size_t kTriggerModeByte = 3;
+
+Battle_Actor* TileTriggerActor(std::size_t index) {
+  const std::span actors(Battle_actors);
+  return index < actors.size() ? actors[index] : nullptr;
+}
+
+class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
+ public:
+  std::uint32_t StateFlags(std::int32_t actor) override {
+    return VS::Actors::LiveActorStateFlags(actor);
+  }
+  VS::Field::ActorTileTriggerCell Collision(
+      const VS::Actors::PackedTile& tile) override {
+    const auto* cell =
+        VS::Field::LiveCollisionCellOrAbsent(tile.x, tile.z, tile.layer);
+    return {.room_trigger = cell->hasRoomTrigger != 0, .pit = cell->isPit != 0};
+  }
+  bool TransitionInProgress() override {
+    return Field_screenTransitionStep != 0;
+  }
+  std::optional<VS::Actors::PackedTile> LastTriggerTile(
+      std::int32_t actor) override {
+    const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
+    if (record == nullptr) return std::nullopt;
+    const auto& bytes = record->lastTriggerTile.bytes;
+    return VS::Actors::PackedTile{.x = bytes[0],
+                                  .layer = bytes[1],
+                                  .z = bytes[2],
+                                  .spare = bytes[kTriggerModeByte]};
+  }
+  bool EventOwnsControl() override {
+    return Field_controlMode == kActorEventControlMode;
+  }
+  std::optional<VS::Field::ActorTileTrap> Trap(
+      const VS::Actors::PackedTile& tile) override {
+    const auto* record = Field_RoomTriggerAtTile(tile.x, tile.z, tile.layer);
+    const auto target = VS::Field::FindLiveTrapTarget(record);
+    if (!target || record == nullptr) return std::nullopt;
+    return VS::Field::ActorTileTrap{.target = *target, .kind = record->kind};
+  }
+  void BeginTrap(VS::Field::TrapTarget target,
+                 const VS::Actors::ActorPlacementView& placement,
+                 std::int32_t actor) override {
+    static_cast<void>(
+        VS::Field::BeginLiveTrapInteraction(target, placement, actor));
+  }
+  void StoreTriggerTile(std::int32_t actor, const VS::Actors::PackedTile& tile,
+                        std::uint8_t mode, bool store_location) override {
+    auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
+    if (record == nullptr) return;
+    auto& bytes = record->lastTriggerTile.bytes;
+    if (store_location) {
+      bytes[0] = tile.x;
+      bytes[1] = tile.layer;
+      bytes[2] = tile.z;
+    }
+    bytes[kTriggerModeByte] = mode;
+  }
+  bool DefeatForFall(std::int32_t actor) override {
+    auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
+    if (record == nullptr || record->stats == nullptr) return false;
+    record->stats->currentHp = 0;
+    Battle_ResolveActorDefeat(0, actor, 0);
+    return true;
+  }
+  bool TriggerFallEvent() override {
+    return Event_EvaluateRoomEventTriggersEntry(kActorFallEventRequest, 0,
+                                                nullptr, 0) == 1;
+  }
+};
 
 class LiveFacingEventHost final : public VS::Field::FacingEventHost {
  public:
@@ -540,6 +615,12 @@ class LiveObjectInteractionWaitHost final
 }  // namespace
 
 namespace VS::Field {
+ActorTileTriggerResult CheckLiveActorTrapAndFallTriggers(
+    std::int32_t actor, const Actors::ActorPlacementView& placement) {
+  LiveActorTileTriggerHost host;
+  return CheckActorTrapAndFallTriggers(actor, placement, host);
+}
+
 Field_MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target) {
   if (target.generation != LiveInteractionTargetDomain().generation ||
       Field_roomData.lockTriggers == nullptr ||
@@ -590,6 +671,21 @@ bool TryOpenLiveChest(ChestTarget target) {
 bool BeginLiveChestInteraction(ChestTarget target, std::int32_t actor) {
   LiveChestInteractionHost host;
   return BeginChestInteraction(target, actor, host);
+}
+bool BeginLiveTrapInteraction(TrapTarget target,
+                              const Actors::ActorPlacementView& placement,
+                              std::int32_t actor) {
+  Actors_ActorLocation location{};
+  location.packedTile.target.tileX = placement.tile.x;
+  location.packedTile.target.tileLayer = placement.tile.layer;
+  location.packedTile.target.tileZ = placement.tile.z;
+  location.packedTile.target.facing = placement.tile.spare;
+  location.position = {.vx = placement.position.x,
+                       .vy = placement.position.y,
+                       .vz = placement.position.z,
+                       .pad = placement.position.w};
+  LiveTrapSelectionHost host(&location);
+  return BeginTrapInteraction(target, actor, host);
 }
 bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
                           std::int32_t actor) {
@@ -741,6 +837,23 @@ int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
 }
 
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
+// decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
+int Field_CheckActorTrapAndFallTriggersEntry(int actor,
+                                             Actors_ActorLocation* location) {
+  if (location == nullptr) return 0;
+  const VS::Actors::ActorPlacementView placement{
+      .tile = {.x = location->packedTile.target.tileX,
+               .layer = location->packedTile.target.tileLayer,
+               .z = location->packedTile.target.tileZ,
+               .spare = location->packedTile.target.facing},
+      .position = {.x = location->position.vx,
+                   .y = location->position.vy,
+                   .z = location->position.vz,
+                   .w = location->position.pad}};
+  return static_cast<int>(
+      VS::Field::CheckLiveActorTrapAndFallTriggers(actor, placement));
+}
+
 int Field_TryTriggerFacingTileEventEntry(int actor) {
   LiveFacingEventHost host;
   return VS::Field::TryTriggerFacingTileEvent(actor, host) ? 1 : 0;

@@ -7,6 +7,41 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Non-Player Tile Triggers (#276 Row 27)
+
+- F00159 uses the existing strict typed interaction core with value placement/collision,
+  typed trap identity and a checked actor/room/event Live host. ActorCommandsLive
+  now passes typed placement directly; the native trap begin factory introduces
+  no trap-to-lock record alias. Original C/module800751B8 remains a separate boundary.
+  Core/Live ownership is in ChestInteractions, preserving the completed trap
+  slice's files and avoiding overlapping promotion-plan ownership.
+- Original144MIPS words `800751B8-800753F4` verify collision-before-transition
+  refusal, low24tile/cache-mode checks, forced-layer lookup, every trap-suppression
+  bit, event-owned trap hold, trap-before-pit order, held-location/mode stores,
+  signed17pit threshold, HP-zero before defeat and signed-halfword event-result==1
+  producing original distinct results0/1/2/3. Native guards refuse absent actors,
+  stats, targets and invalid input instead of dereferencing them.
+- Eleven focused cases / 54 assertions include actual original packed cache-byte
+  writes, caller-input preservation, repeat-entry/missing-actor and original module
+  resolution with restored live actor/record/room fixtures. Release coupled50cases /
+  416assertions pass. Full Debug/Release4,788tests / 8,902,148assertions each, zero
+  failures/skips/regressions; both canonical2400/900-frame fingerprints unchanged.
+  Fixtures are not controller combat, an original-scene event/fatal-fall replay or
+  all-scene reference parity; those broader requirements are not narrowed.
+- Copier191 / extent9/modernization44/editor pass; quality five existing / zero new.
+  After relocation, both rebuilt configurations and the recorded coupled selection
+  pass the totals above. Two supported generations preserve all1,735paths/hashes
+  including owned source/fixtures, generated projects/manifest/ownership/adaptations,
+  root solution and build properties; manifest
+  `6563B67DCC66521C9426A98D6E7DB4C3D3BB2182E7F19A62FF63C057538CD397`.
+  `VR-ACTOR-TILE-TRIGGERS` and four-to-zero old code-consumer slice track only this
+  source promotion overd25d8d69. Unchanged gates derive2,716promoted/oneframewip,
+  zero violations; row27 has55generated functions. Exact NPC publication/CI evidence
+  is recorded on276 before issue completion. Continue ordered row27 work.
+- The preceding three-query milestone is publishedd25d8d69 with exact successful
+  CI42440898460. #276/#321 and required C/module/current-room/actor/event/trap globals,
+  raw asynchronous door jobs and broader lifetime/retirement gates remain open.
+
 ### Facing Queries (#276 Row 27)
 
 - F00153/F00154/F00155 use the published typed adjacent tile, strict typed

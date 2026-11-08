@@ -21,6 +21,7 @@
 #include "Battle/TargetingLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/CameraLive.hpp"
+#include "Field/ChestInteractionsLive.h"
 
 extern "C" {
 #include "Actors/Animation.h"
@@ -71,19 +72,6 @@ PackedTile TileOf(const Actors_TileTarget& tile) {
           .layer = static_cast<std::uint8_t>(tile.tileLayer),
           .z = static_cast<std::uint8_t>(tile.tileZ),
           .spare = static_cast<std::uint8_t>(tile.facing)};
-}
-
-Actors_ActorLocation LocationOf(const CommandPlacement& placement) {
-  Actors_ActorLocation location{};
-  location.packedTile.target.tileX = placement.tile.x;
-  location.packedTile.target.tileLayer = placement.tile.layer;
-  location.packedTile.target.tileZ = placement.tile.z;
-  location.packedTile.target.facing = placement.tile.spare;
-  location.position = SVECTOR{.vx = placement.position.x,
-                              .vy = placement.position.y,
-                              .vz = placement.position.z,
-                              .pad = placement.position.w};
-  return location;
 }
 
 SVECTOR NativeVector(const MotionVector& value) {
@@ -160,8 +148,8 @@ class LiveCommandHost final : public ActorCommandHost {
   }
   int CheckTrapAndFallTriggers(int actor_id,
                                const CommandPlacement& placement) override {
-    Actors_ActorLocation location = LocationOf(placement);
-    return Field_CheckActorTrapAndFallTriggers(actor_id, &location);
+    return static_cast<int>(VS::Field::CheckLiveActorTrapAndFallTriggers(
+        actor_id, {.tile = placement.tile, .position = placement.position}));
   }
 
   void PlayModelSound(int actor_id, int sound) override {

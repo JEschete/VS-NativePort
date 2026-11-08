@@ -8,6 +8,8 @@ struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Effects_ActionEffectRequest;
 struct Items_TreasureChest;
+int Field_CheckActorTrapAndFallTriggersEntry(
+    int actor, struct Actors_ActorLocation* location);
 struct Field_MpdLockTrigger* Field_FindFacingRoomObjectEntry(int actor);
 struct Items_TreasureChest* Field_FindFacingUnlootedChestEntry(int actor);
 int Field_TryTriggerFacingTileEventEntry(int actor);
@@ -41,8 +43,13 @@ extern "C++" {
 #include "Field/ChestInteractions.hpp"
 #include "Field/InteractionTarget.hpp"
 namespace VS::Field {
+ActorTileTriggerResult CheckLiveActorTrapAndFallTriggers(
+    std::int32_t actor, const Actors::ActorPlacementView& placement);
 bool TryOpenLiveChest(ChestTarget target);
 bool BeginLiveChestInteraction(ChestTarget target, std::int32_t actor);
+bool BeginLiveTrapInteraction(TrapTarget target,
+                              const Actors::ActorPlacementView& placement,
+                              std::int32_t actor);
 bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
                           std::int32_t actor);
 Effects_ActionEffectRequest LiveTrapEffectRecord(

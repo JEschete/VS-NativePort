@@ -41,6 +41,14 @@ constexpr std::uint32_t kFacingFloorSign = 0x4000;
 constexpr std::int32_t kFacingRoomHeightBias = 0x3F;
 constexpr std::int32_t kFacingRoomHeightWindow = 0x7F;
 constexpr std::int32_t kFacingChestHeightOffset = 0x60;
+constexpr std::uint32_t kTriggerLayerMask = 0x70000;
+constexpr unsigned kTriggerLayerShift = 16;
+constexpr unsigned kTriggerModeShift = 14;
+constexpr std::uint32_t kActorTriggerDisabled = 0x01000000;
+constexpr std::uint32_t kActorTrapSuppressed = 0x16704000;
+constexpr std::uint32_t kTriggerLocationHeld = 0x504000;
+constexpr std::int16_t kEffectOnlyTrap = 0x10;
+constexpr std::int16_t kFatalPitHeight = 0x11;
 
 std::int32_t FacingFloorHeight(std::int32_t height) {
   const auto low = static_cast<std::uint32_t>(height) & kFacingFloorMask;
@@ -58,6 +66,52 @@ std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
 }
 
 }  // namespace
+
+// decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
+ActorTileTriggerResult CheckActorTrapAndFallTriggers(
+    std::int32_t actor, const Actors::ActorPlacementView& placement,
+    ActorTileTriggerHost& host) {
+  if (actor < 0 || actor >= kTrapActorSlots) {
+    return ActorTileTriggerResult::kNone;
+  }
+  const auto flags = host.StateFlags(actor);
+  const auto layer_flags = flags & kTriggerLayerMask;
+  const auto mode = static_cast<std::uint8_t>((flags >> kTriggerModeShift) & 1);
+  const auto collision_tile =
+      layer_flags != 0
+          ? Actors::PackedTile{.layer = static_cast<std::uint8_t>(
+                                   layer_flags >> kTriggerLayerShift)}
+          : placement.tile;
+  const auto cell = host.Collision(collision_tile);
+  if (host.TransitionInProgress() || (flags & kActorTriggerDisabled) != 0) {
+    return ActorTileTriggerResult::kNone;
+  }
+  const auto last = host.LastTriggerTile(actor);
+  if (!last) {
+    return ActorTileTriggerResult::kNone;
+  }
+  if (last->x != placement.tile.x || last->z != placement.tile.z ||
+      last->layer != placement.tile.layer || last->spare != mode ||
+      layer_flags != 0) {
+    if (!host.EventOwnsControl() && cell.room_trigger &&
+        (flags & kActorTrapSuppressed) == 0) {
+      const auto trap = host.Trap(placement.tile);
+      if (trap && trap->kind != kEffectOnlyTrap) {
+        host.BeginTrap(trap->target, placement, actor);
+        host.StoreTriggerTile(actor, placement.tile, mode, true);
+        return ActorTileTriggerResult::kTrap;
+      }
+    }
+    host.StoreTriggerTile(actor, placement.tile, mode,
+                          (flags & kTriggerLocationHeld) == 0);
+  }
+  if (cell.pit && placement.position.y >= kFatalPitHeight &&
+      host.DefeatForFall(actor)) {
+    return host.TriggerFallEvent() ? ActorTileTriggerResult::kFallEvent
+                                   : ActorTileTriggerResult::kDefeated;
+  }
+  return ActorTileTriggerResult::kNone;
+}
 
 // decomp: BATTLE.PRG func_80073E30 (src/BATTLE/BATTLE.PRG/146C.c:4935).
 bool TryOpenChest(ChestTarget target, ChestInteractionHost& host) {

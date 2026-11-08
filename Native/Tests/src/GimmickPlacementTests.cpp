@@ -25,9 +25,14 @@
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomSwitches.hpp"
 #include "Field/RoomSwitchesLive.h"
+#include "Field/Traps.hpp"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/Actor.h"
+#include "Battle/Damage.h"
 #include "Effects/Runtime.h"
 #include "Event/Triggers.h"
 #include "Field/GimmickPlacementLive.h"
@@ -36,6 +41,66 @@ extern "C" {
 }
 
 namespace {
+
+struct RecordingActorTileTriggerHost final : VS::Field::ActorTileTriggerHost {
+  std::uint32_t flags = 0;
+  VS::Field::ActorTileTriggerCell cell{};
+  bool transition = false;
+  bool event_control = false;
+  bool defeat = true;
+  bool fall_event = false;
+  std::optional<VS::Actors::PackedTile> last{VS::Actors::PackedTile{}};
+  std::optional<VS::Field::ActorTileTrap> trap;
+  VS::Actors::PackedTile collision_tile{};
+  std::vector<std::int32_t> calls;
+
+  std::uint32_t StateFlags(std::int32_t) override {
+    calls.push_back(0);
+    return flags;
+  }
+  VS::Field::ActorTileTriggerCell Collision(
+      const VS::Actors::PackedTile& tile) override {
+    calls.push_back(1);
+    collision_tile = tile;
+    return cell;
+  }
+  bool TransitionInProgress() override {
+    calls.push_back(2);
+    return transition;
+  }
+  std::optional<VS::Actors::PackedTile> LastTriggerTile(std::int32_t) override {
+    calls.push_back(3);
+    return last;
+  }
+  bool EventOwnsControl() override {
+    calls.push_back(4);
+    return event_control;
+  }
+  std::optional<VS::Field::ActorTileTrap> Trap(
+      const VS::Actors::PackedTile&) override {
+    calls.push_back(5);
+    return trap;
+  }
+  void BeginTrap(VS::Field::TrapTarget, const VS::Actors::ActorPlacementView&,
+                 std::int32_t) override {
+    calls.push_back(6);
+  }
+  void StoreTriggerTile(std::int32_t, const VS::Actors::PackedTile& tile,
+                        std::uint8_t mode, bool store_location) override {
+    calls.push_back(7);
+    if (!last) return;
+    if (store_location) *last = tile;
+    last->spare = mode;
+  }
+  bool DefeatForFall(std::int32_t) override {
+    calls.push_back(8);
+    return defeat;
+  }
+  bool TriggerFallEvent() override {
+    calls.push_back(9);
+    return fall_event;
+  }
+};
 
 struct RecordingChestInteractionHost final : VS::Field::ChestInteractionHost {
   std::optional<VS::Field::ChestLockState> chest{VS::Field::ChestLockState{}};
@@ -392,6 +457,29 @@ struct SnapshotFixture {
     object->parent = 0xFF;
   }
   ~SnapshotFixture() { std::ranges::copy(saved, Field_gimmickInstances); }
+};
+
+struct ActorTileTriggerLiveFixture {
+  Battle_Actor* saved_actor = Battle_actors[2];
+  Actors_ActorRecord* saved_record = Actors_actorRecords[2];
+  decltype(Field_roomData) saved_room = Field_roomData;
+  decltype(Field_controlMode) saved_control = Field_controlMode;
+  std::unique_ptr<Battle_Actor> actor = std::make_unique<Battle_Actor>();
+  std::unique_ptr<Actors_ActorRecord> record =
+      std::make_unique<Actors_ActorRecord>();
+
+  ActorTileTriggerLiveFixture() {
+    Battle_actors[2] = actor.get();
+    Actors_actorRecords[2] = record.get();
+    Field_roomData = {};
+    Field_controlMode = 3;
+  }
+  ~ActorTileTriggerLiveFixture() {
+    Battle_actors[2] = saved_actor;
+    Actors_actorRecords[2] = saved_record;
+    Field_roomData = saved_room;
+    Field_controlMode = saved_control;
+  }
 };
 
 struct TriggerFixture {
@@ -1203,6 +1291,174 @@ TEST_CASE("Facing event uses requested actor and computed adjacent tile",
   CHECK(host.evaluated->layer == 2);
   host.result = false;
   CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(3, host));
+}
+
+TEST_CASE("Actor tile triggers preserve collision before transition refusal",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  host.flags = 0x50000;
+  host.transition = true;
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2});
+  CHECK(host.collision_tile.x == 0);
+  CHECK(host.collision_tile.z == 0);
+  CHECK(host.collision_tile.layer == 5);
+  host.calls.clear();
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(-1, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("Actor new tile starts trap before checking a fatal pit",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 3, .layer = 2, .z = 4};
+  placement.position.y = 100;
+  host.cell = {.room_trigger = true, .pit = true};
+  host.trap = VS::Field::ActorTileTrap{.target = {1, 7}, .kind = 3};
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kTrap);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 4, 5, 6, 7});
+  CHECK(host.last == placement.tile);
+}
+
+TEST_CASE("Actor fatal pit defeats before requesting its event",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  host.cell.pit = true;
+  placement.position.y = 16;
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3});
+  placement.position.y = 17;
+  host.calls.clear();
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kDefeated);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 8, 9});
+  host.fall_event = true;
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kFallEvent);
+}
+
+TEST_CASE("Actor cached tile ignores placement spare and skips trap reads",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile.spare = 255;
+  host.cell.room_trigger = true;
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3});
+  host.last.reset();
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+}
+
+TEST_CASE("Actor trigger location held flags still replace cached mode",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile = {.x = 3, .layer = 2, .z = 4};
+  host.last = VS::Actors::PackedTile{.x = 9, .layer = 8, .z = 7};
+  host.flags = 0x4000;
+  host.cell.room_trigger = true;
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.last ==
+        VS::Actors::PackedTile{.x = 9, .layer = 8, .z = 7, .spare = 1});
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 4, 7});
+}
+
+TEST_CASE("Actor effect-only trap falls through to original pit result",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile.x = 3;
+  placement.position.y = 17;
+  host.cell = {.room_trigger = true, .pit = true};
+  host.trap = VS::Field::ActorTileTrap{.kind = 16};
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kDefeated);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 4, 5, 7, 8, 9});
+}
+
+TEST_CASE("Actor tile trap suppression bits never read the trap record",
+          "[actor-tile-trigger-core][field]") {
+  for (const auto flags : {0x4000U, 0x100000U, 0x200000U, 0x400000U, 0x2000000U,
+                           0x4000000U, 0x10000000U}) {
+    RecordingActorTileTriggerHost host;
+    VS::Actors::ActorPlacementView placement{};
+    placement.tile.x = 3;
+    host.flags = flags;
+    host.cell.room_trigger = true;
+    CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+          VS::Field::ActorTileTriggerResult::kNone);
+    CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 4, 7});
+  }
+}
+
+TEST_CASE("Actor event control holds traps but still remembers the tile",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile.x = 3;
+  host.cell.room_trigger = true;
+  host.event_control = true;
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 4, 7});
+  CHECK(host.last == placement.tile);
+}
+
+TEST_CASE("Actor disabled tile trigger refuses before actor cache access",
+          "[actor-tile-trigger-core][field]") {
+  RecordingActorTileTriggerHost host;
+  VS::Actors::ActorPlacementView placement{};
+  host.flags = 0x01000000;
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2});
+  host.flags = 0;
+  host.cell.pit = true;
+  host.defeat = false;
+  placement.position.y = 17;
+  host.calls.clear();
+  CHECK(VS::Field::CheckActorTrapAndFallTriggers(2, placement, host) ==
+        VS::Field::ActorTileTriggerResult::kNone);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 1, 2, 3, 8});
+}
+
+TEST_CASE("Actor tile trigger C boundary retains module and refuses bad input",
+          "[actor-tile-trigger-live][field]") {
+  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, nullptr) == 0);
+  Actors_ActorLocation location{};
+  CHECK(Field_CheckActorTrapAndFallTriggersEntry(-1, &location) == 0);
+  CHECK(Field_CheckActorTrapAndFallTriggersEntry(17, &location) == 0);
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800751B8) ==
+      reinterpret_cast<const void*>(&Field_CheckActorTrapAndFallTriggersEntry));
+}
+
+TEST_CASE("Actor native tile trigger stores packed location and computed mode",
+          "[actor-tile-trigger-live][field]") {
+  ActorTileTriggerLiveFixture fixture;
+  fixture.actor->lastTriggerTile.word = 0x01070809;
+  Actors_ActorLocation location{};
+  location.packedTile.target = {
+      .tileX = 3, .tileLayer = 2, .tileZ = 4, .facing = 255};
+  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
+  CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
+  CHECK(std::bit_cast<std::uint32_t>(location.packedTile.word) == 0xFF040203);
+  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
+  CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
+  Battle_actors[2] = nullptr;
+  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
 }
 
 TEST_CASE("Facing event refuses invalid actor and absent placement",

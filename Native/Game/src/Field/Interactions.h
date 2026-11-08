@@ -8,13 +8,11 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_INTERACTIONS_H_DECLS)
 #define VS_FIELD_INTERACTIONS_H_DECLS
-#include "Actors/Location.h"
 #include "Field/InteractionFocusLive.h"
 
 extern Field_InteractionFocus Field_interactionFocus;
 extern u_int Field_controlMode;
 void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position);
 int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition);
-int Field_CheckActorTrapAndFallTriggers(int actor_index, Actors_ActorLocation* actor_location);
 
 #endif // VS_FIELD_INTERACTIONS_H_DECLS
