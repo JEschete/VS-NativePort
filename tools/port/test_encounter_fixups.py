@@ -440,6 +440,8 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00152", "Field_TileInFrontOfActorEntry", "VS::Field::TileInFrontOfActor",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00139", "Field_WaitForChestCameraFocusEntry", "VS::Field::WaitForChestCameraFocus",
              r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00140", "Field_StepTrapCameraFocusEntry", "VS::Field::StepTrapCameraFocus",
@@ -1003,6 +1005,7 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00152": ("Field_TileInFrontOfActorEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00139": ("Field_WaitForChestCameraFocusEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00140": ("Field_StepTrapCameraFocusEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00142": ("Field_IsChestAnimationReadyEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),

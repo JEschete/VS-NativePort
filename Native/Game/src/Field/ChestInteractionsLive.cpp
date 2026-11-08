@@ -624,3 +624,24 @@ int Field_TrackInteractionCameraToAshleyEntry() {
   LiveInteractionCameraHost host;
   return VS::Field::TrackInteractionCameraToAshley(host).value_or(0);
 }
+
+// decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232).
+int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
+                                  unsigned char* output) {
+  if (actor == nullptr || output == nullptr) {
+    return -1;
+  }
+  VS::Actors::ActorPlacementView view{};
+  view.tile.x =
+      static_cast<std::uint8_t>(actor->location.packedTile.target.tileX);
+  view.tile.z =
+      static_cast<std::uint8_t>(actor->location.packedTile.target.tileZ);
+  view.tile.layer =
+      static_cast<std::uint8_t>(actor->location.packedTile.target.tileLayer);
+  view.position.w = actor->location.position.pad;
+  const auto tile = VS::Field::TileInFrontOfActor(view);
+  output[0] = tile.x;
+  output[1] = tile.layer;
+  output[2] = tile.z;
+  return static_cast<int>(tile.direction);
+}

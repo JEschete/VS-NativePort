@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "Actors/ActorPlacement.hpp"
 #include "Field/GameMode.hpp"
 #include "Field/InteractionTarget.hpp"
 
@@ -145,6 +146,22 @@ std::optional<std::int32_t> StepTrapCameraFocus(InteractionCameraHost& host);
 bool IsChestAnimationReady(InteractionCameraHost& host);
 std::optional<std::int32_t> TrackInteractionCameraToAshley(
     InteractionCameraHost& host);
+
+enum class CardinalFacing : std::uint8_t {
+  kNegativeZ,
+  kNegativeX,
+  kPositiveZ,
+  kPositiveX,
+};
+
+struct FacingTile {
+  std::uint8_t x = 0;
+  std::uint8_t z = 0;
+  std::uint8_t layer = 0;
+  CardinalFacing direction = CardinalFacing::kNegativeZ;
+};
+
+FacingTile TileInFrontOfActor(const VS::Actors::ActorPlacementView& actor);
 
 class ObjectInteractionWaitHost {
  public:

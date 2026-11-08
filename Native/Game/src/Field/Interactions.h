@@ -17,7 +17,6 @@
 extern Field_InteractionFocus Field_interactionFocus;
 extern u_int Field_controlMode;
 void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position);
-int Field_TileInFrontOfActor(Actors_ActorLocationQuery* actor_placement, u_char* output_facing_tile);
 int Field_TryTriggerFacingTileEvent(int actor_index);
 Field_MpdLockTrigger* Field_FindFacingRoomObject(int actor_index);
 Items_TreasureChest* Field_FindFacingUnlootedChest(int actor_index);

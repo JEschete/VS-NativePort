@@ -7,6 +7,8 @@ struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Effects_ActionEffectRequest;
+int Field_TileInFrontOfActorEntry(struct Actors_ActorLocationQuery* actor,
+                                  unsigned char* output);
 int Field_WaitForChestCameraFocusEntry(void);
 int Field_StepTrapCameraFocusEntry(void);
 int Field_IsChestAnimationReadyEntry(void);

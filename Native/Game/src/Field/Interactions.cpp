@@ -92,35 +92,6 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
     }
 }
 
-// decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232)
-int Field_TileInFrontOfActor(Actors_ActorLocationQuery* actor_placement, u_char* output_facing_tile)
-{
-    int rounded_facing_or_quadrant = (actor_placement->location.position.pad + 0x200) & 0xFFF;
-    if (rounded_facing_or_quadrant < 0) {
-        rounded_facing_or_quadrant += 0x3FF;
-    }
-    output_facing_tile[0] = actor_placement->location.packedTile.target.tileX;
-    output_facing_tile[2] = actor_placement->location.packedTile.target.tileZ;
-    output_facing_tile[1] = actor_placement->location.packedTile.target.tileLayer;
-
-    rounded_facing_or_quadrant = rounded_facing_or_quadrant >> 0xA;
-    switch (rounded_facing_or_quadrant) {
-    case 0:
-        --output_facing_tile[2];
-        break;
-    case 1:
-        --output_facing_tile[0];
-        break;
-    case 2:
-        ++output_facing_tile[2];
-        break;
-    default:
-        ++output_facing_tile[0];
-        break;
-    }
-    return rounded_facing_or_quadrant;
-}
-
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260)
 int Field_TryTriggerFacingTileEvent(int actor_index)
 {
@@ -128,7 +99,7 @@ int Field_TryTriggerFacingTileEvent(int actor_index)
     u_char facing_tile[4];
 
     VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
-    Field_TileInFrontOfActor(&actor_placement, facing_tile);
+    Field_TileInFrontOfActorEntry(&actor_placement, facing_tile);
     // BUG: arg2 should be an actor ID?
     return Event_EvaluateRoomEventTriggersEntry(4, 0, facing_tile, 1) == 1;
 }
@@ -142,7 +113,7 @@ Field_MpdLockTrigger* Field_FindFacingRoomObject(int actor_index)
     u_char* facing_tile_bytes = facing_tile;
 
     VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
-    Field_TileInFrontOfActor(&actor_placement, facing_tile);
+    Field_TileInFrontOfActorEntry(&actor_placement, facing_tile);
     facing_door = Field_InteractiveDoorAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
     if (((((VS::Field::LiveFloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11) >> 0x11)
              - actor_placement.location.position.vy)
@@ -163,7 +134,7 @@ Items_TreasureChest* Field_FindFacingUnlootedChest(int actor_index)
     u_char* facing_tile_bytes = facing_tile;
 
     VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
-    facing_quadrant = Field_TileInFrontOfActor(&actor_placement, facing_tile);
+    facing_quadrant = Field_TileInFrontOfActorEntry(&actor_placement, facing_tile);
     facing_chest = VS::Items::FindLiveTreasureChestAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
 
     if ((facing_chest != NULL) && (facing_chest->facing == facing_quadrant)) {

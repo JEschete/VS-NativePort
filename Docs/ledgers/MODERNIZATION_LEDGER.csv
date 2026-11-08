@@ -151,7 +151,7 @@ F00148,VS::Field::UpdateChestContentsSelection,Field::UpdateChestContentsSelecti
 F00149,VS::Field::UpdateFirstPersonViewEntry,Field::UpdateFirstPersonViewEntry,Native\Game\src\Field\Camera.cpp,owned,done,45,3,12,strict,found,x,x,x,x,x,x,x,0,3,2,,,,,no,no,0,VR-FIELD-CAMERA-BACKGROUND,recorded,
 F00150,VS::Field::CheckFirstPersonViewExit,Field::CheckFirstPersonViewExit,Native\Game\src\Field\Camera.cpp,owned,done,45,3,41,strict,found,x,x,x,x,x,x,x,0,3,2,,,,,no,no,0,VR-FIELD-CAMERA-BACKGROUND,recorded,
 F00151,VS::Field::UpdateFirstPersonViewExit,Field::UpdateFirstPersonViewExit,Native\Game\src\Field\Camera.cpp,owned,done,45,3,8,strict,found,x,x,x,x,x,x,x,0,3,2,,,,,no,no,0,VR-FIELD-CAMERA-BACKGROUND,recorded,
-F00152,Field_TileInFrontOfActor,Field::TileInFrontOfActor,Native\Game\src\Field\Interactions.cpp,generated,todo,45,3,26,relaxed,found,x,,,,,,,0,1,0,x,,x,,yes,no,50,,executed,
+F00152,VS::Field::TileInFrontOfActor,Field::TileInFrontOfActor,Native\Game\src\Field\ChestInteractions.cpp,owned,done,45,3,26,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,no,50,VR-FACING-TILE-CORE,recorded,
 F00153,Field_TryTriggerFacingTileEvent,Field::TryTriggerFacingTileEvent,Native\Game\src\Field\Interactions.cpp,generated,todo,45,3,9,relaxed,found,x,,,,,,,0,1,0,x,,,,no,no,0,,characterize-first,
 F00154,Field_FindFacingRoomObject,Field::FindFacingRoomObject,Native\Game\src\Field\Interactions.cpp,generated,todo,45,3,17,relaxed,found,x,,,,,,,0,1,0,x,,,,no,no,0,,characterize-first,
 F00155,Field_FindFacingUnlootedChest,Field::FindFacingUnlootedChest,Native\Game\src\Field\Interactions.cpp,generated,todo,45,3,23,relaxed,found,x,,,,,,,0,1,0,x,,,,no,no,0,,characterize-first,

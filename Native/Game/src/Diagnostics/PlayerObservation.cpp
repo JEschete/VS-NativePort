@@ -39,6 +39,7 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Core/Text/TextCode.h"
 #include "Event/ScriptVm.h"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -599,7 +600,7 @@ EncounterNavigationState InspectNavigation() {
   VS::Actors::LiveActorPlacement(0, &placement);
   constexpr std::size_t kFacingTileBytes = 4;
   std::array<u_char, kFacingTileBytes> facing{};
-  Field_TileInFrontOfActor(&placement, facing.data());
+  Field_TileInFrontOfActorEntry(&placement, facing.data());
   result.facing_tile = {facing[0], facing[2], facing[1]};
   result.collision_radius = player->collisionRadius;
   result.collision_height = player->collisionHeight;

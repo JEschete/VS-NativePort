@@ -1068,6 +1068,62 @@ TEST_CASE("Interaction camera entries refuse an absent target focus",
   VS::Field::LiveInteractionTargetState() = saved;
 }
 
+TEST_CASE("Facing tile rounds every heading into original cardinal quadrants",
+          "[facing-tile-core][field]") {
+  VS::Actors::ActorPlacementView actor{};
+  actor.tile.x = 17;
+  actor.tile.z = 23;
+  actor.tile.layer = 2;
+  for (std::uint32_t heading = 0; heading < 65536; ++heading) {
+    actor.position.w =
+        std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(heading));
+    const auto tile = VS::Field::TileInFrontOfActor(actor);
+    const auto expected = ((heading + 0x200) & 0xFFF) >> 10;
+    CHECK(static_cast<std::uint8_t>(tile.direction) == expected);
+    CHECK(tile.layer == 2);
+    CHECK(tile.x == (expected == 1 ? 16 : expected == 3 ? 18 : 17));
+    CHECK(tile.z == (expected == 0 ? 22 : expected == 2 ? 24 : 23));
+  }
+}
+
+TEST_CASE("Facing tile preserves original byte wrapping at room boundaries",
+          "[facing-tile-core][field]") {
+  VS::Actors::ActorPlacementView actor{};
+  CHECK(VS::Field::TileInFrontOfActor(actor).z == 255);
+  actor.position.w = 1024;
+  CHECK(VS::Field::TileInFrontOfActor(actor).x == 255);
+  actor.tile.x = 255;
+  actor.tile.z = 255;
+  actor.position.w = 2048;
+  CHECK(VS::Field::TileInFrontOfActor(actor).z == 0);
+  actor.position.w = 3072;
+  CHECK(VS::Field::TileInFrontOfActor(actor).x == 0);
+}
+
+TEST_CASE("Facing tile entry preserves X layer Z and untouched fourth byte",
+          "[facing-tile-live][field]") {
+  Actors_ActorLocationQuery actor{};
+  actor.location.packedTile.target.tileX = 17;
+  actor.location.packedTile.target.tileZ = 23;
+  actor.location.packedTile.target.tileLayer = 2;
+  actor.location.position.pad = 1024;
+  std::array<std::uint8_t, 4> output{0xA1, 0xA2, 0xA3, 0xA4};
+  CHECK(Field_TileInFrontOfActorEntry(&actor, output.data()) == 1);
+  CHECK(output == std::array<std::uint8_t, 4>{16, 2, 23, 0xA4});
+  const auto saved = output;
+  CHECK(Field_TileInFrontOfActorEntry(nullptr, output.data()) == -1);
+  CHECK(output == saved);
+  CHECK(Field_TileInFrontOfActorEntry(&actor, nullptr) == -1);
+}
+
+TEST_CASE("Facing tile entry retains original module address",
+          "[facing-tile-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80074798) ==
+        reinterpret_cast<const void*>(&Field_TileInFrontOfActorEntry));
+}
+
 TEST_CASE("Object interaction wait selects its mode before pausing",
           "[object-interaction-wait-core][field]") {
   RecordingObjectInteractionWaitHost host;

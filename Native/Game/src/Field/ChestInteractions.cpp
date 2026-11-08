@@ -33,6 +33,9 @@ constexpr std::uint16_t kTrapActionBase = 6;
 constexpr std::uint32_t kInteractionAnimationReady = 0x08000000;
 constexpr std::int32_t kInteractionCameraSpeed = 0x28;
 constexpr std::int32_t kInteractionCameraReturnOffset = 0x5A;
+constexpr std::uint16_t kFacingRoundBias = 0x200;
+constexpr std::uint16_t kFacingHeadingMask = 0xFFF;
+constexpr unsigned kFacingQuadrantShift = 10;
 
 std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
   if (state.lock_state == kKeyLock) {
@@ -272,6 +275,33 @@ std::optional<std::int32_t> TrackInteractionCameraToAshley(
   point->y = std::bit_cast<std::int16_t>(y);
   const auto speed = host.StepLookAt(*point, 1, kInteractionCameraSpeed);
   return host.AshleyTransitionPose() ? 0 : speed;
+}
+
+// decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232).
+FacingTile TileInFrontOfActor(const VS::Actors::ActorPlacementView& actor) {
+  const auto rounded = static_cast<std::uint16_t>(
+      (static_cast<std::uint16_t>(actor.position.w) + kFacingRoundBias) &
+      kFacingHeadingMask);
+  FacingTile tile{.x = actor.tile.x,
+                  .z = actor.tile.z,
+                  .layer = actor.tile.layer,
+                  .direction = static_cast<CardinalFacing>(
+                      rounded >> kFacingQuadrantShift)};
+  switch (tile.direction) {
+    case CardinalFacing::kNegativeZ:
+      tile.z = static_cast<std::uint8_t>(tile.z - 1);
+      break;
+    case CardinalFacing::kNegativeX:
+      tile.x = static_cast<std::uint8_t>(tile.x - 1);
+      break;
+    case CardinalFacing::kPositiveZ:
+      tile.z = static_cast<std::uint8_t>(tile.z + 1);
+      break;
+    case CardinalFacing::kPositiveX:
+      tile.x = static_cast<std::uint8_t>(tile.x + 1);
+      break;
+  }
+  return tile;
 }
 
 // decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).

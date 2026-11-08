@@ -7,6 +7,32 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Adjacent Facing Tile (#276 Row 27)
+
+- F00152 uses existing typed actor placement with `FacingTile`/`CardinalFacing`:
+  bias0200, mask0FFF, shift10, then one byte-wrapping tile step. Original50MIPS
+  words `80074798-8007485C` verify those operations and writes only0/1/2.
+  Native C output retains X/layer/Z and untouched fourth byte; null refuses.
+  Module `80074798` remains a required native binding.
+- Four focused cases / 262,154 assertions exhaust all65,536heading patterns,
+  byte-boundary wraps, output layout/null refusal and actual module resolution.
+  Coupled21cases / 262,252assertions; complete Debug/Release4,765 / 8,902,028
+  each, zero failures/skips/regressions and unchanged canonical fingerprints.
+- Current original MAP124 chest Debug `1794103443974395-0`, Release
+  `1794103493591254-0`: facing2,7,0, lock0/key465count10/cancel-returnfield1.
+  MAP247 lock Debug `1794103512962024-0`, Release `1794103543599636-0`:
+  facing3,15,0,138waitframes,key458count10/field1. No complete loot acceptance.
+- Copier191 / extent9 controls and editor/quality five existing / zero new
+  pass. Two measured generations preserve1,733path hashes; manifest
+  `86E7636D1480C35C50822CE287C10FE55B9BCE4AE78E9C7B696B8F451753611D`.
+  Three larger generated query callers adopt via copier; maintained
+  PlayerObservation's old call was found by compile and migrated explicitly.
+- `VR-FACING-TILE-CORE` and four-to-zero old code-consumer slice record the
+  bounded leaf promotion. Current gates2,712promoted/oneframewip, zero
+  violations; per-function tracker is reconciled. Publish and verify exact CI.
+  Larger queries/remaining row27/#276/#321 and required C/module/output/global
+  compatibility remain open; source promotion is not all-scene reference parity.
+
 ### Interaction Camera Waits (#276 Row 27)
 
 - F00139/F00140/F00142/F00146 are strict typed focus/readiness/return-camera
@@ -35,8 +61,8 @@ verification of the current worktree.
   `VR-INTERACTION-CAMERA-WAITS` and four-to-zero old code-consumer slice record
   this bounded source promotion. Current gates2,711promoted/oneframewip,
   zero violations; modernized function tracker is reconciled, not stale.
-- #322 is closed at525d182e with exact green42433562058. Publish this four-row
-  slice and verify its exact CI. Remaining row27/#276/#321, required C/module/
+- #322 is closed at525d182e with exact green42433562058. This four-row camera
+  slice is published at3d995b77 with exact green42436301250. Remaining row27/#276/#321, required C/module/
   camera globals and broader compatibility retirement stay open.
 
 ### Trap Action Initialization (#322, #276 Row 27)
