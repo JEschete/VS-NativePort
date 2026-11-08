@@ -551,7 +551,7 @@ F00548,Battle_ActorActionRestrictionFlags,Battle::ActorActionRestrictionFlags,Na
 F00549,VS::Items::ClearRoomLootList,Items::ClearRoomLootList,Native\Game\src\Items\Loot.cpp,owned,done,58,15,10,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,no,100,VR-ITEMS-SLICE,recorded,
 F00550,VS::Field::UploadZoneTextures,Field::UploadZoneTextures,Native\Game\src\Field\RoomLoading.cpp,owned,done,45,3,53,strict,found,x,x,x,x,x,x,x,0,0,1,,,,ptr_cast,no,yes,100,VR-FIELD-ROOMS-LOADING,recorded,
 F00551,VS::Field::LoadRoomSections,Field::LoadRoomSections,Native\Game\src\Field\RoomLoading.cpp,owned,done,45,3,86,strict,found,x,x,x,x,x,x,x,0,0,1,,,,,no,yes,80,VR-FIELD-ROOMS-LOADING,recorded,
-F00552,Field_StoreEntranceDoorForReload,Field::StoreEntranceDoorForReload,Native\Game\src\Field\Doors.cpp,generated,todo,45,3,3,relaxed,found,x,,,,,,,0,2,0,x,,,,no,no,0,,characterize-first,
+F00552,VS::Field::EnteredDoorReloadByte,Field::EnteredDoorReloadByte,Native\Game\src\Field\ChestInteractions.cpp,owned,done,45,3,3,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,no,no,0,VR-ENTRANCE-RELOAD-BYTE,recorded,
 F00553,VS::Field::EnableOwnedRoomRendering,Field::EnableOwnedRoomRendering,Native\Game\src\Field\RoomState.cpp,owned,done,45,3,7,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,no,yes,83,VR-FIELD-ROOMS-STATE,recorded,
 F00554,VS::Field::DisableOwnedRoomRendering,Field::DisableOwnedRoomRendering,Native\Game\src\Field\RoomState.cpp,owned,done,45,3,7,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,no,no,0,VR-FIELD-ROOMS-STATE,recorded,
 F00555,VS::Field::ReleaseOwnedRoomSections,Field::ReleaseOwnedRoomSections,Native\Game\src\Field\RoomLoading.cpp,owned,done,45,3,15,strict,found,x,x,x,x,x,x,x,0,0,1,,,,,no,no,0,VR-FIELD-ROOMS-LOADING,recorded,

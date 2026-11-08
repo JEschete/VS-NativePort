@@ -23,6 +23,7 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Field/CameraLiveState.h"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
@@ -194,7 +195,7 @@ class LiveSnapshotHost final : public SnapshotHost {
     VS::Actors::StoreLiveRoomActorState(actor, 0);
   }
   void StoreEntranceDoorForReload() override {
-    Field_StoreEntranceDoorForReload();
+    Field_StoreEntranceDoorForReloadEntry();
   }
 };
 }  // namespace

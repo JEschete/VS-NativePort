@@ -12,6 +12,8 @@
 
 namespace VS::Field {
 
+std::uint8_t EnteredDoorReloadByte(std::int16_t entered_door_id);
+
 struct EntranceDoorState {
   DoorRecord door{};
   std::int16_t entered_door_id = -1;

@@ -34,12 +34,6 @@ short Field_enteredDoorId;
 // decomp: D_800F1CC8 (D_800F1CC8@BATTLE/BATTLE.PRG)
 Field_MpdDoorRecord Field_entranceDoorRecord;
 
-// decomp: BATTLE.PRG vs_battle_setDoorEntered (src/BATTLE/BATTLE.PRG/146C.c:15751)
-void Field_StoreEntranceDoorForReload(void)
-{
-    Audio_Seq_unusedStateFlags.doorEntered = Field_enteredDoorId + 1;
-}
-
 // decomp: BATTLE.PRG func_8008BC04 (src/BATTLE/BATTLE.PRG/146C.c:16215)
 Field_MpdLockTrigger* Field_InteractiveDoorAtTile(int query_tile_x, int query_tile_z, int query_floor_layer)
 {

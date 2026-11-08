@@ -7,6 +7,25 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Entrance Reload Byte (#276 Row 27)
+
+- F00552 is an existing strict interaction core encoding the entered-door low
+  byte plus one modulo256. Original6MIPS `8008AB68-8008AB7C` confirms LBU/add1/SB.
+  The actual native entry writes only the packed persistent byte and preserves
+  the entered ID; maintained save snapshot callback adopts its retained C entry.
+- Three focused cases / 65,540 assertions include every halfword input pattern,
+  full neighboring-state-byte preservation, no-door wrap and original module
+  binding. Coupled33cases / 65,684assertions pass bothconfigurations. Full
+  Debug/Release each pass4,822tests / 8,967,841assertions, zero failures/skips/
+  regressions and unchanged canonical2,400/900-frame fingerprints.
+- Copier193/extent9 and quality five existing / zero new atjobs1 pass.
+  Two supported generations preserve all1,738source/configuration/adoption hashes;
+  manifest `100441176ADBEAE893C208C6D6471FE5311B4F46B30EA7F8D503987EC84ABC77`.
+  `VR-ENTRANCE-RELOAD-BYTE` and five-to-zero old-symbol slice record only this
+  source promotion; packed-state/global and broader save/load/lifetime acceptance
+  remain open. Unchanged gates2,720promoted/oneframewip, zero violations;
+  publication/exactCI pending. Row27remainsactive with51generated functions.
+
 ### Entrance Door State (#276 Row 27)
 
 - F00577/F00578 now use existing strict interaction cores for complete entrance
@@ -27,7 +46,8 @@ verification of the current worktree.
   manifest `BA26FF34A7FC3175F66BEE117412181ABCCAEF6928496CEF9BFB7DB92D2D50A7`.
 - `VR-ENTRANCE-DOOR-STATE` and the six-file-to-zero old-symbol slice record
   bounded source promotion. Unchanged gates derive2,719promoted/oneframewip,
-  zero violations; publication/exactCI remains pending. Raw scene-table/getter,
+  zero violations; published25dc258a has exactsuccessfulCI42460001662.
+  Raw scene-table/getter,
   current-room/global/lifetime and controller/all-scene/reference acceptance
   remain open. Row27continues with52generated functions; not whole-row completion.
 - Prior Ashley revision `6c63d9fc` has exact successful CI `42456492346`,

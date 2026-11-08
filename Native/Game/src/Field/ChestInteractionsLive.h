@@ -9,6 +9,7 @@ struct Actors_ActorLocationQuery;
 struct Effects_ActionEffectRequest;
 struct Items_TreasureChest;
 enum { kFieldEntranceRecordBytes = 12 };
+void Field_StoreEntranceDoorForReloadEntry(void);
 void Field_SetEntranceDoorRecordEntry(
     char (*record)[kFieldEntranceRecordBytes]);
 void Field_FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer);

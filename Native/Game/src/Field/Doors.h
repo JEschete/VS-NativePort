@@ -37,7 +37,6 @@ extern Field_DoorFlagIdWord Field_snapshotDoorFlagSource;
 extern Field_MpdDoorRecord Field_pendingDestinationDoor;
 extern short Field_enteredDoorId;
 extern Field_MpdDoorRecord Field_entranceDoorRecord;
-void Field_StoreEntranceDoorForReload(void);
 Field_MpdLockTrigger* Field_InteractiveDoorAtTile(int query_tile_x, int query_tile_z, int query_floor_layer);
 void Field_ToggleDoorCollision(Field_MpdLockTrigger* door_trigger);
 int Field_BeginDoorToggle(Field_MpdLockTrigger* door_trigger);

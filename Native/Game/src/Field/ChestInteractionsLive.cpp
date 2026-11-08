@@ -34,6 +34,7 @@
 
 extern "C" {
 #include "Actors/Location.h"
+#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
@@ -53,6 +54,7 @@ extern "C" {
 #include "Items/TreasureChests.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/TextBox.h"
+#include "State/StateFlags.h"
 #include "State/Timers.h"
 }
 
@@ -197,7 +199,7 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
     Battle_BeginActorDefeatAnimation(record->stats->actorId);
   }
   VS::Field::DoorRecord StoreEntranceForReload() override {
-    Field_StoreEntranceDoorForReload();
+    Field_StoreEntranceDoorForReloadEntry();
     return VS::Field::LoadLiveRoomTransition().pending_door;
   }
   std::uint8_t CurrentZoneId() const override {
@@ -1033,6 +1035,11 @@ int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
 
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
 // decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
+void Field_StoreEntranceDoorForReloadEntry(void) {
+  const auto encoded = VS::Field::EnteredDoorReloadByte(Field_enteredDoorId);
+  Audio_Seq_unusedStateFlags.doorEntered = std::bit_cast<char>(encoded);
+}
+
 void Field_SetEntranceDoorRecordEntry(
     char (*input)[kFieldEntranceRecordBytes]) {
   if (input == nullptr) {

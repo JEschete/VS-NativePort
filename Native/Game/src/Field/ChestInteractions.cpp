@@ -67,6 +67,12 @@ std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
 
 }  // namespace
 
+// decomp: BATTLE.PRG vs_battle_setDoorEntered (146C.c:15751), 8008AB68-AB7C.
+std::uint8_t EnteredDoorReloadByte(std::int16_t entered_door_id) {
+  return static_cast<std::uint8_t>(static_cast<std::int32_t>(entered_door_id) +
+                                   1);
+}
+
 // decomp: BATTLE.PRG func_8008B8F8 (src/BATTLE/BATTLE.PRG/146C.c:16127).
 void SetEntranceDoorRecord(EntranceDoorState& state,
                            const std::optional<DoorRecord>& door,

@@ -37,6 +37,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Audio/Seq/Channel.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -49,9 +50,35 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/TransitionsLiveState.h"
+#include "State/StateFlags.h"
 }
 
 namespace {
+struct ReloadDoorStoreFixture {
+  decltype(Audio_Seq_unusedStateFlags) saved = Audio_Seq_unusedStateFlags;
+  decltype(Field_enteredDoorId) saved_id = Field_enteredDoorId;
+  ~ReloadDoorStoreFixture() {
+    Audio_Seq_unusedStateFlags = saved;
+    Field_enteredDoorId = saved_id;
+  }
+};
+
+TEST_CASE("Reload door native store writes only its packed state byte",
+          "[entrance-reload-live][field]") {
+  ReloadDoorStoreFixture fixture;
+  auto expected = Audio_Seq_unusedStateFlags;
+  Field_enteredDoorId = 254;
+  expected.doorEntered = std::bit_cast<char>(std::uint8_t{255});
+  Field_StoreEntranceDoorForReloadEntry();
+  using FlagBytes = std::array<std::byte, sizeof(expected)>;
+  CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
+        std::bit_cast<FlagBytes>(expected));
+  CHECK(Field_enteredDoorId == 254);
+  Field_enteredDoorId = -1;
+  Field_StoreEntranceDoorForReloadEntry();
+  CHECK(std::bit_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.doorEntered) ==
+        0);
+}
 
 struct RecordingEntranceDoorHost final : VS::Field::EntranceDoorHost {
   std::optional<std::uint8_t> scene_id;
@@ -1505,6 +1532,24 @@ TEST_CASE("Facing event uses requested actor and computed adjacent tile",
   CHECK(host.evaluated->layer == 2);
   host.result = false;
   CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(3, host));
+}
+
+TEST_CASE("Reload door byte preserves original low-byte plus-one wrap",
+          "[entrance-reload-core][field]") {
+  for (std::uint32_t bits = 0; bits <= 65535; ++bits) {
+    const auto id =
+        std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
+    const auto expected = static_cast<std::uint8_t>((bits & 255) + 1);
+    CHECK(VS::Field::EnteredDoorReloadByte(id) == expected);
+  }
+}
+
+TEST_CASE("Reload door native store retains original module address",
+          "[entrance-reload-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008AB68) ==
+        reinterpret_cast<const void*>(&Field_StoreEntranceDoorForReloadEntry));
 }
 
 TEST_CASE("Entrance state copies complete door and unsigned scene identifier",
