@@ -28,6 +28,7 @@
 
 extern "C" {
 #include "Battle/ActionFlow.h"
+#include "Effects/Runtime.h"
 #include "Event/Triggers.h"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
@@ -160,6 +161,44 @@ struct RecordingTrapInteractionHost final : VS::Field::TrapSelectionHost,
 };
 
 using SnapshotBytes = std::array<std::byte, sizeof(Field_GimmickSnapshot)>;
+
+struct RecordingTrapActionHost final : VS::Field::TrapActionHost {
+  bool action_state = true;
+  bool stage_succeeds = true;
+  bool resolve_succeeds = true;
+  bool remove_during_resolve = false;
+  bool change_during_resolve = false;
+  mutable std::optional<std::int16_t> kind = 0;
+  std::optional<VS::Field::TrapActionInput> staged;
+  std::optional<VS::Field::TrapEffectRequest> effect;
+  std::vector<std::int32_t> calls;
+
+  bool HasActionState(const VS::Field::TrapActionInput&) const override {
+    return action_state;
+  }
+  std::optional<std::int16_t> Kind(VS::Field::TrapTarget) const override {
+    return kind;
+  }
+  bool StageVictim(const VS::Field::TrapActionInput& input) override {
+    calls.push_back(1000);
+    staged = input;
+    return stage_succeeds;
+  }
+  bool ResolveAction(std::uint16_t action_id) override {
+    calls.push_back(action_id);
+    if (remove_during_resolve) {
+      kind.reset();
+    } else if (change_during_resolve) {
+      kind = 1;
+    }
+    return resolve_succeeds;
+  }
+  bool BeginEffect(const VS::Field::TrapEffectRequest& request) override {
+    calls.push_back(1001);
+    effect = request;
+    return true;
+  }
+};
 
 struct RecordingObjectInteractionWaitHost final
     : VS::Field::ObjectInteractionWaitHost {
@@ -748,6 +787,161 @@ TEST_CASE("Typed chest interaction keeps lock item and pose rules separate",
   const VS::Field::ChestTarget target{0, 1};
   CheckChestOpenAndBlockedRules(target);
   CheckChestLockedItemRules(target);
+}
+
+namespace {
+
+void CheckStagedTrapVictim(const RecordingTrapActionHost& host,
+                           const VS::Field::TrapActionInput& input) {
+  if (!host.staged) {
+    FAIL("Trap action must retain staged victim values");
+    return;
+  }
+  REQUIRE(host.staged);
+  CHECK(host.staged->actor == 3);
+  CHECK(host.staged->default_limb == 7);
+  CHECK(host.staged->position == input.position);
+}
+
+void CheckStagedTrapEffect(const RecordingTrapActionHost& host) {
+  if (!host.effect) {
+    FAIL("Trap action must retain initialized effect values");
+    return;
+  }
+  REQUIRE(host.effect);
+  CHECK(host.effect->effect_id == 6);
+  CHECK(host.effect->actor == 3);
+  CHECK(host.effect->ground_anchor == 0xFD);
+  CHECK_FALSE(host.effect->source_position);
+}
+
+void CheckTrapCompatibilitySource(const Effects_ActionEffectRequest& request) {
+  CHECK(request.source.type == 5);
+  CHECK(request.source.colorPreset == 0);
+  CHECK(request.source.value.position.vx == 0);
+  CHECK(request.source.value.position.vy == 0);
+  CHECK(request.source.value.position.vz == 0);
+  CHECK(request.source.value.position.pad == 0);
+}
+
+void CheckTrapCompatibilityVictim(const Effects_ActionEffectRequest& request) {
+  CHECK(request.targets[0].type == 4);
+  CHECK(request.targets[0].colorPreset == 0);
+  CHECK(request.targets[0].value.actor.actor == 3);
+  CHECK(request.targets[0].value.actor.part == 0xFD);
+  CHECK(request.targets[0].value.actor.eventActorSlot == 0);
+  CHECK(request.targets[0].value.actor.reserved3 == 0);
+}
+
+void CheckInvalidTrapActors(RecordingTrapActionHost& host) {
+  for (const auto actor : {-1, 17}) {
+    CHECK_FALSE(VS::Field::TriggerActorTrap({0, 1}, {.actor = actor}, host));
+    CHECK(host.calls.empty());
+  }
+}
+
+void CheckInvalidTrapKinds(RecordingTrapActionHost& host) {
+  for (const auto kind : {-1, 16}) {
+    host.kind = static_cast<std::int16_t>(kind);
+    CHECK_FALSE(VS::Field::TriggerActorTrap({0, 1}, {.actor = 0}, host));
+    CHECK(host.calls.empty());
+  }
+}
+
+}  // namespace
+
+TEST_CASE("Trap action stages victim then resolves before initialized effect",
+          "[trap-action-core][field]") {
+  RecordingTrapActionHost host;
+  const VS::Field::TrapActionInput input{
+      .actor = 3, .default_limb = 7, .position = {123, -234, 345}};
+  REQUIRE(VS::Field::TriggerActorTrap({0, 1}, input, host));
+  CHECK(host.calls == std::vector<std::int32_t>{1000, 6, 1001});
+  CheckStagedTrapVictim(host, input);
+  CheckStagedTrapEffect(host);
+}
+
+TEST_CASE("Trap effect compatibility record initializes every supplied field",
+          "[trap-action-live][field]") {
+  const auto request = VS::Field::LiveTrapEffectRecord(
+      {.effect_id = 6, .actor = 3, .source_position = std::nullopt});
+  CHECK(request.effectId == 6);
+  CHECK(request.count == 1);
+  CHECK(request.otherCount == 0);
+  CheckTrapCompatibilitySource(request);
+  CheckTrapCompatibilityVictim(request);
+  CHECK(request.targets[1].type == 0);
+  CHECK(request.others[0] == 0);
+  CHECK(request.position.vx == 0);
+  CHECK(request.position.vy == 0);
+  CHECK(request.position.vz == 0);
+}
+
+TEST_CASE("Trap effect compatibility record retains explicitly supplied source",
+          "[trap-action-live][field]") {
+  const auto request = VS::Field::LiveTrapEffectRecord(
+      {.effect_id = 9, .actor = 0, .source_position = {{123, -234, 345}}});
+  CHECK(request.source.value.position.vx == 123);
+  CHECK(request.source.value.position.vy == -234);
+  CHECK(request.source.value.position.vz == 345);
+}
+
+TEST_CASE("Trap action refuses invalid actor state or kind before mutation",
+          "[trap-action-core][field]") {
+  RecordingTrapActionHost host;
+  CheckInvalidTrapActors(host);
+  CheckInvalidTrapKinds(host);
+  host.kind = 0;
+  host.action_state = false;
+  CHECK_FALSE(VS::Field::TriggerActorTrap({0, 1}, {.actor = 0}, host));
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("Trap action reobserves target after resolver callback",
+          "[trap-action-core][field]") {
+  RecordingTrapActionHost host;
+  host.change_during_resolve = true;
+  REQUIRE(VS::Field::TriggerActorTrap({0, 1}, {.actor = 0}, host));
+  if (!host.effect) {
+    FAIL("Resolver must publish the reobserved trap effect");
+    return;
+  }
+  REQUIRE(host.effect);
+  CHECK(host.effect->effect_id == 7);
+  RecordingTrapActionHost removed;
+  removed.remove_during_resolve = true;
+  CHECK_FALSE(VS::Field::TriggerActorTrap({0, 1}, {.actor = 0}, removed));
+  CHECK(removed.calls == std::vector<std::int32_t>{1000, 6});
+  CHECK_FALSE(removed.effect);
+}
+
+TEST_CASE("Trap action stops on refused staging or resolution",
+          "[trap-action-core][field]") {
+  RecordingTrapActionHost staged;
+  staged.stage_succeeds = false;
+  CHECK_FALSE(VS::Field::TriggerActorTrap({0, 1}, {.actor = 0}, staged));
+  CHECK(staged.calls == std::vector<std::int32_t>{1000});
+  RecordingTrapActionHost resolved;
+  resolved.resolve_succeeds = false;
+  CHECK_FALSE(VS::Field::TriggerActorTrap({0, 1}, {.actor = 0}, resolved));
+  CHECK(resolved.calls == std::vector<std::int32_t>{1000, 6});
+  CHECK_FALSE(resolved.effect);
+}
+
+TEST_CASE("Native trap action preserves its original module binding",
+          "[trap-action-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80073D30) ==
+        reinterpret_cast<const void*>(&Field_TriggerActorTrapEntry));
+}
+
+TEST_CASE("Native trap action refuses invalid actor or stale target",
+          "[trap-action-live][field]") {
+  CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, -1));
+  CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, 17));
+  CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, 0));
+  Field_TriggerActorTrapEntry(nullptr, nullptr, -1);
 }
 
 TEST_CASE("Object interaction wait selects its mode before pausing",

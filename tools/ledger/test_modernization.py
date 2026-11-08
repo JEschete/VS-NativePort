@@ -399,6 +399,23 @@ class ModernizationTests(unittest.TestCase):
         )
         self.assertEqual(rules, {"plan-done-open", "plan-done-unrecorded"})
 
+    def test_done_slice_accepts_each_record_in_a_gate_list(self) -> None:
+        rows = [{"status": "done", "path": "Native/Game/src/Battle/Done.cpp", "lines": "1"}]
+        plan = [plan_row("1", "done", "Native/Game/src/Battle/Done.cpp", status="done",
+                         gate_slice="First-slice;Second-slice")]
+        self.assertEqual(modernization.plan_issues(rows, plan, {"First-slice", "Second-slice"}), [])
+
+    def test_done_slice_rejects_missing_or_empty_gate_list_members(self) -> None:
+        rows = [{"status": "done", "path": "Native/Game/src/Battle/Done.cpp", "lines": "1"}]
+        for gate_slice in ("First-slice;Missing-slice", "First-slice;", ""):
+            with self.subTest(gate_slice=gate_slice):
+                plan = [plan_row("1", "done", "Native/Game/src/Battle/Done.cpp", status="done",
+                                 gate_slice=gate_slice)]
+                self.assertEqual(
+                    {issue.rule for issue in modernization.plan_issues(rows, plan, {"First-slice"})},
+                    {"plan-done-unrecorded"},
+                )
+
     def test_a_slice_with_nothing_left_must_be_marked_done(self) -> None:
         rules = self.replan(
             plan_row("1", "battle-plan", GENERATED, OWNED), plan_row("2", "audio", AUDIO),

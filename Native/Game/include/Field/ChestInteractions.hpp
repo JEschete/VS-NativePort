@@ -93,6 +93,41 @@ class TrapSelectionHost {
 bool BeginTrapInteraction(TrapTarget target, std::int32_t actor,
                           TrapSelectionHost& host);
 
+struct TrapPosition {
+  std::int16_t x = 0;
+  std::int16_t y = 0;
+  std::int16_t z = 0;
+  friend bool operator==(const TrapPosition&, const TrapPosition&) = default;
+};
+
+struct TrapActionInput {
+  std::int32_t actor = -1;
+  std::uint8_t default_limb = 0;
+  TrapPosition position{};
+};
+
+inline constexpr std::uint8_t kTrapGroundAnchor = 0xFD;
+
+struct TrapEffectRequest {
+  std::uint16_t effect_id = 0;
+  std::int32_t actor = -1;
+  std::uint8_t ground_anchor = kTrapGroundAnchor;
+  std::optional<TrapPosition> source_position{};
+};
+
+class TrapActionHost {
+ public:
+  virtual ~TrapActionHost() = default;
+  virtual bool HasActionState(const TrapActionInput& input) const = 0;
+  virtual std::optional<std::int16_t> Kind(TrapTarget target) const = 0;
+  virtual bool StageVictim(const TrapActionInput& input) = 0;
+  virtual bool ResolveAction(std::uint16_t action_id) = 0;
+  virtual bool BeginEffect(const TrapEffectRequest& request) = 0;
+};
+
+bool TriggerActorTrap(TrapTarget target, const TrapActionInput& input,
+                      TrapActionHost& host);
+
 class ObjectInteractionWaitHost {
  public:
   virtual ~ObjectInteractionWaitHost() = default;

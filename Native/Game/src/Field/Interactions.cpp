@@ -18,17 +18,11 @@ extern "C" {
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
-#include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
-#include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Battle/Hit.h"
-#include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
-#include "Effects/Runtime.h"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/DoorMatchList.h"
@@ -99,33 +93,6 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
         }
         break;
     }
-}
-
-// decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909)
-void Field_TriggerActorTrap(Field_MpdLockTrigger* trap_trigger, Actors_ActorLocationQuery* victim_placement, int targetActor)
-{
-    Effects_ActionEffectRequest request;
-
-    Battle_actionState->selection.primaryTarget.targetsPosition = 3;
-    Battle_actionState->selection.targetCount = 1;
-    Battle_actionState->selection.targets[0].targetsPosition = 0;
-    Battle_actionState->selection.targets[0].target.targetActor = targetActor;
-    Battle_actionState->selection.targets[0].target.targetLimb =
-        Battle_actors[targetActor]->stats->defaultTargetLimb;
-    Battle_actionState->chainStep = 1;
-    Battle_actionState->queueIndex = 0;
-    Battle_actionState->rangeOrigin.vx = victim_placement->location.position.vx;
-    Battle_actionState->rangeOrigin.vy = victim_placement->location.position.vy;
-    Battle_actionState->rangeOrigin.vz = victim_placement->location.position.vz;
-    Battle_ResolveActionTargets(trap_trigger->trigger.kind + 6, &Battle_actionState->queue[0], &Battle_actionState->selection, 1);
-    request.effectId = trap_trigger->trigger.kind + 6;
-    request.source.type = 5;
-    request.targets[0].type = 4;
-    request.count = 1;
-    request.otherCount = 0;
-    request.targets[0].value.actor.actor = targetActor;
-    request.targets[0].value.actor.part = 0xFD;
-    Effects_BeginSecondaryEffects(&request, 0);
 }
 
 // decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019)

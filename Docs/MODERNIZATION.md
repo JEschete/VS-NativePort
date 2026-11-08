@@ -13,7 +13,7 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Roadmap step and issue | Owned left | Generated left | Original lines | Under test | Characterize first | Unmeasured |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 3: #45 Owned game, session and scene state | 0 | 82 | 2,533 | 326 | 59 | 0 |
+| 3: #45 Owned game, session and scene state | 0 | 64 | 2,154 | 342 | 43 | 0 |
 | 4: #44 Runtime modes and logical ticks | 0 | 0 | 0 | 27 | 0 | 0 |
 | 5: #52 Logical input and typed settings | 0 | 0 | 0 | 20 | 0 | 0 |
 | 6: #47 Stable asset IDs and decoded records | 0 | 0 | 0 | 30 | 0 | 0 |
@@ -26,20 +26,20 @@ architecture changes rather than per-function work, so this ledger is what track
 | 23: #57 AI, navigation and collision contexts | 0 | 89 | 4,111 | 201 | 35 | 0 |
 | 24: #56 Combat intents and results | 0 | 272 | 7,945 | 241 | 118 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
-| 26: #59 Event VM results and execution | 0 | 124 | 2,555 | 160 | 77 | 0 |
+| 26: #59 Event VM results and execution | 0 | 71 | 1,444 | 188 | 49 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 176 | 5,601 | 681 | 86 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 0 | 371 | 22,721 | 359 | 303 | 0 |
+| 34: #60 Menu screens and workspaces | 1 | 370 | 22,721 | 359 | 303 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 0 | 1114 | 45,466 | 3071 | 678 | 0 |
+| **Total** | 1 | 1042 | 43,976 | 3115 | 634 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 2,635 |
-| todo | 1,114 |
+| done | 2,706 |
+| todo | 1,043 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (41 done, 13 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 42 done, 11 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -69,13 +69,13 @@ architecture changes rather than per-function work, so this ledger is what track
 | 24 | field-camera-background | done | self | 6 | 0 | 0 |
 | 25 | field-rooms | done | self | 11 | 0 | 0 |
 | 26 | field-room-effects | done | self | 3 | 0 | 0 |
-| 27 | field-gimmicks-doors | planned | - | 3 | 82 | 2,533 |
+| 27 | field-gimmicks-doors | active | self | 17 | 64 | 2,154 |
 | 28 | battle-ai | planned | - | 8 | 89 | 4,111 |
 | 29 | battle-damage-status | planned | - | 3 | 88 | 2,502 |
 | 30 | battle-actions | planned | - | 5 | 91 | 2,315 |
 | 31 | battle-targeting-prerequisites | done | self | 8 | 0 | 0 |
 | 32 | battle-sphere-hud-rewards | planned | - | 4 | 93 | 3,128 |
-| 33 | event-vm-triggers | planned | self | 5 | 53 | 1,111 |
+| 33 | event-vm-triggers | done | self | 9 | 0 | 0 |
 | 34 | event-script-actors | done | self | 3 | 0 | 0 |
 | 35 | event-script-camera-screen-field | planned | - | 3 | 71 | 1,444 |
 | 36 | event-script-audio-dialog-effects | done | self | 10 | 0 | 0 |
@@ -94,19 +94,19 @@ architecture changes rather than per-function work, so this ledger is what track
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | planned | - | 6 | 103 | 5,020 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
-| 52 | menu-map-manual-text | planned | - | 3 | 75 | 3,576 |
+| 52 | menu-map-manual-text | planned | - | 4 | 75 | 3,576 |
 | 53 | title | done | self | 4 | 0 | 0 |
 | 54 | ending | done | self | 5 | 0 | 0 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 271 |
-| Referenced by the original-address module table | 0 | 711 |
-| Calls an SDK shim | 0 | 78 |
-| Signature uses SDK integer types or `void*` | 0 | 169 |
-| Compiled with relaxed settings | 0 | 1,114 |
+| Called from generated code | 1 | 247 |
+| Referenced by the original-address module table | 1 | 640 |
+| Calls an SDK shim | 0 | 76 |
+| Signature uses SDK integer types or `void*` | 0 | 127 |
+| Compiled with relaxed settings | 0 | 1,042 |
 
-Function bodies: 3,749 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 0 of 0 open owned functions have generated callers.
+Function bodies: 3,749 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 1 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 33.
 

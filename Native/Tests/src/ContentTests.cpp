@@ -30,6 +30,7 @@
 #include "Effects/EffectResources.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Transforms.hpp"
+#include "Field/RoomLoading.hpp"
 #include "Legacy/Psx.h"
 #include "Movie/MoviePlayer.h"
 #include "Render/PageSpace.hpp"
@@ -414,6 +415,101 @@ TEST_CASE(
 namespace {
 
 constexpr std::size_t kTrapAuditTransformCapacity = 64;
+constexpr std::size_t kTrapAuditRoomCapacity = 1024;
+constexpr std::size_t kTrapAuditRoomBytes = std::size_t{8} * 1024 * 1024;
+constexpr std::size_t kFloorTriggerRecordBytes = 12;
+constexpr std::size_t kFloorTriggerKindOffset = 6;
+constexpr std::uint16_t kNonTrapFloorTriggerKind = 0x10;
+
+std::uint32_t TrapAuditWord(std::span<const std::byte> bytes,
+                            std::size_t offset) {
+  return std::to_integer<std::uint8_t>(bytes[offset]) |
+         (static_cast<std::uint32_t>(
+              std::to_integer<std::uint8_t>(bytes[offset + 1]))
+          << 8) |
+         (static_cast<std::uint32_t>(
+              std::to_integer<std::uint8_t>(bytes[offset + 2]))
+          << 16) |
+         (static_cast<std::uint32_t>(
+              std::to_integer<std::uint8_t>(bytes[offset + 3]))
+          << 24);
+}
+
+std::span<const std::byte> TrapAuditFloorRecords(
+    std::span<const std::byte> file, std::size_t& empty_rooms) {
+  const auto layout = VS::Field::DecodeRoomFile(file);
+  if (!layout) {
+    FAIL("Room file must have bounded section ranges");
+    return {};
+  }
+  REQUIRE(layout);
+  if (layout->room_sections.bytes == 0) {
+    ++empty_rooms;
+    return {};
+  }
+  const auto declared_bytes = TrapAuditWord(file, 4);
+  REQUIRE(declared_bytes <= layout->room_sections.bytes);
+  const auto room = file.subspan(layout->room_sections.offset, declared_bytes);
+  if (room.size() < VS::Field::kRoomSectionHeaderBytes) {
+    REQUIRE(std::ranges::all_of(
+        room, [](std::byte value) { return value == std::byte{}; }));
+    ++empty_rooms;
+    return {};
+  }
+  const auto sections = VS::Field::DecodeRoomSectionLayout(room);
+  if (!sections) {
+    FAIL("Nonempty room sections must be bounded");
+    return {};
+  }
+  REQUIRE(sections);
+  const auto section =
+      static_cast<std::size_t>(VS::Field::RoomSectionId::kFloorTriggers);
+  const auto records = room.subspan(
+      VS::Field::kRoomSectionHeaderBytes + sections->offsets[section],
+      sections->lengths[section]);
+  REQUIRE(records.size() % kFloorTriggerRecordBytes == 0);
+  return records;
+}
+
+void CollectRoomTrapKinds(const Content::DataStore& store,
+                          const Content::DataStore::Entry& entry,
+                          std::vector<std::uint16_t>& kinds,
+                          std::size_t& empty_rooms) {
+  INFO(entry.path);
+  REQUIRE(entry.size <= kTrapAuditRoomBytes);
+  const auto bytes = store.ReadAll(entry);
+  REQUIRE(bytes);
+  const auto records =
+      TrapAuditFloorRecords(std::as_bytes(std::span(*bytes)), empty_rooms);
+  for (std::size_t offset = 0; offset < records.size();
+       offset += kFloorTriggerRecordBytes) {
+    const auto kind = static_cast<std::uint16_t>(
+        std::to_integer<std::uint8_t>(
+            records[offset + kFloorTriggerKindOffset]) |
+        (static_cast<std::uint16_t>(std::to_integer<std::uint8_t>(
+             records[offset + kFloorTriggerKindOffset + 1]))
+         << 8));
+    if (kind != kNonTrapFloorTriggerKind &&
+        std::ranges::find(kinds, kind) == kinds.end()) {
+      kinds.push_back(kind);
+    }
+  }
+}
+
+void CollectOriginalTrapKinds(const Content::DataStore& store,
+                              std::vector<std::uint16_t>& kinds) {
+  std::size_t rooms = 0;
+  std::size_t empty_rooms = 0;
+  for (const auto& entry : store.Entries()) {
+    if (entry.path.starts_with("MAP/") && entry.path.ends_with(".MPD")) {
+      REQUIRE(++rooms <= kTrapAuditRoomCapacity);
+      CollectRoomTrapKinds(store, entry, kinds, empty_rooms);
+    }
+  }
+  REQUIRE(rooms != 0);
+  REQUIRE(empty_rooms < rooms);
+  REQUIRE_FALSE(kinds.empty());
+}
 
 struct TrapPackageAuditHost final : VS::Effects::EffectPackageHost {
   void BindTextureTables(std::span<std::byte>) override {}
@@ -485,6 +581,31 @@ TEST_CASE("Initial trap packages do not select their unwritten source point",
       {{6, "EFFECT/E006.P"}, {7, "EFFECT/E007.P"}, {8, "EFFECT/E008.P"}}};
   for (const auto& [effect_id, path] : kPackages) {
     CheckTrapPackageSourcePoints(*store, effect_id, path);
+  }
+}
+
+TEST_CASE("Original room trap kinds have bounded source-package mappings",
+          "[content][trap-kind-audit][disc]") {
+  const auto cue = FindRepoDisc();
+  if (cue.empty()) {
+    SKIP("Repository disc location is unavailable");
+  }
+  Content::DataStore::ScopedOverride restore;
+  REQUIRE(Content::DataStore::Open(cue.parent_path().parent_path() / "Native" /
+                                   "data")
+              .has_value());
+  const auto* store = Content::DataStore::Get();
+  REQUIRE(store != nullptr);
+  std::vector<std::uint16_t> kinds;
+  CollectOriginalTrapKinds(*store, kinds);
+  for (const auto kind : kinds) {
+    INFO("trap kind " << kind);
+    REQUIRE(kind < kNonTrapFloorTriggerKind);
+    const auto effect = static_cast<std::uint16_t>(kind + 6);
+    const auto* file =
+        store->FindBySector(VS_E000_P_LBA + Effects_packageFiles[effect].lba);
+    REQUIRE(file != nullptr);
+    CheckTrapPackageSourcePoints(*store, effect, file->path);
   }
 }
 

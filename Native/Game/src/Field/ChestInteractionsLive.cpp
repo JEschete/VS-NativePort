@@ -24,8 +24,10 @@
 extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Effects/Runtime.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionFocusLive.h"
@@ -52,6 +54,59 @@ constexpr std::int32_t kTrapTickSpeed = 4;
 constexpr std::size_t kPoseWords = 4;
 constexpr std::size_t kOriginalLockRecordBytes = 0x14;
 constexpr std::int32_t kRoomObjectSoundGroup = 0x7E;
+constexpr std::int32_t kTrapPrimaryTargetPosition = 3;
+constexpr std::uint16_t kTrapSourcePointType = 5;
+constexpr std::uint16_t kTrapActorTargetType = 4;
+
+class LiveTrapActionHost final : public VS::Field::TrapActionHost {
+ public:
+  bool HasActionState(const VS::Field::TrapActionInput& input) const override {
+    return Battle_actionState != nullptr && input.actor >= 0 &&
+           input.actor < kActorSlots && Battle_actors[input.actor] != nullptr &&
+           Battle_actors[input.actor]->stats != nullptr;
+  }
+  std::optional<std::int16_t> Kind(
+      VS::Field::TrapTarget target) const override {
+    const auto* record = VS::Field::ResolveLiveTrapTarget(target);
+    return record ? std::optional<std::int16_t>{record->kind} : std::nullopt;
+  }
+  bool StageVictim(const VS::Field::TrapActionInput& input) override {
+    if (!HasActionState(input)) {
+      return false;
+    }
+    auto& action = *Battle_actionState;
+    action.selection.primaryTarget.targetsPosition = kTrapPrimaryTargetPosition;
+    action.selection.targetCount = 1;
+    action.selection.targets[0].targetsPosition = 0;
+    action.selection.targets[0].target.targetActor =
+        static_cast<std::uint8_t>(input.actor);
+    action.selection.targets[0].target.targetLimb =
+        std::bit_cast<std::int8_t>(input.default_limb);
+    action.chainStep = 1;
+    action.queueIndex = 0;
+    action.rangeOrigin.vx = input.position.x;
+    action.rangeOrigin.vy = input.position.y;
+    action.rangeOrigin.vz = input.position.z;
+    return true;
+  }
+  bool ResolveAction(std::uint16_t action_id) override {
+    if (Battle_actionState == nullptr) {
+      return false;
+    }
+    auto& action = *Battle_actionState;
+    Battle_ResolveActionTargets(action_id, &action.queue[0], &action.selection,
+                                1);
+    return true;
+  }
+  bool BeginEffect(const VS::Field::TrapEffectRequest& effect) override {
+    if (!HasActionState({.actor = effect.actor})) {
+      return false;
+    }
+    auto request = VS::Field::LiveTrapEffectRecord(effect);
+    static_cast<void>(Effects_BeginSecondaryEffects(&request, 0));
+    return true;
+  }
+};
 
 class LiveRoomObjectInteractionHost final
     : public VS::Field::RoomObjectInteractionHost {
@@ -284,16 +339,14 @@ class LiveInteractionDispatchHost final
     const auto* trap = VS::Field::ResolveLiveTrapTarget(target);
     const int actor = Field_interactionFocus.actor_query.actorIndex;
     if (trap == nullptr || actor < 0 || actor >= kActorSlots ||
-        Battle_actors[actor] == nullptr ||
+        Battle_actionState == nullptr || Battle_actors[actor] == nullptr ||
         Battle_actors[actor]->stats == nullptr) {
       return false;
     }
-    Field_MpdLockTrigger effect_record{};
-    effect_record.trigger.kind = trap->kind;
+    const auto& point = Field_interactionFocus.actor_query.location.position;
     State_tickSpeed = kTrapTickSpeed;
-    Field_TriggerActorTrap(&effect_record, &Field_interactionFocus.actor_query,
-                           actor);
-    return true;
+    return VS::Field::TriggerLiveActorTrap(
+        target, {.x = point.vx, .y = point.vy, .z = point.vz}, actor);
   }
 };
 
@@ -382,6 +435,24 @@ class LiveObjectInteractionWaitHost final
 }  // namespace
 
 namespace VS::Field {
+Effects_ActionEffectRequest LiveTrapEffectRecord(
+    const TrapEffectRequest& effect) {
+  Effects_ActionEffectRequest request{};
+  request.effectId = effect.effect_id;
+  request.count = 1;
+  request.source.type = kTrapSourcePointType;
+  if (effect.source_position) {
+    request.source.value.position.vx = effect.source_position->x;
+    request.source.value.position.vy = effect.source_position->y;
+    request.source.value.position.vz = effect.source_position->z;
+  }
+  request.targets[0].type = kTrapActorTargetType;
+  request.targets[0].value.actor.actor =
+      static_cast<std::uint8_t>(effect.actor);
+  request.targets[0].value.actor.part = effect.ground_anchor;
+  return request;
+}
+
 bool TryOpenLiveChest(ChestTarget target) {
   LiveChestInteractionHost host;
   return TryOpenChest(target, host);
@@ -389,6 +460,17 @@ bool TryOpenLiveChest(ChestTarget target) {
 bool BeginLiveChestInteraction(ChestTarget target, std::int32_t actor) {
   LiveChestInteractionHost host;
   return BeginChestInteraction(target, actor, host);
+}
+bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
+                          std::int32_t actor) {
+  LiveTrapActionHost host;
+  TrapActionInput input{.actor = actor, .position = point};
+  if (!host.HasActionState(input)) {
+    return false;
+  }
+  input.default_limb =
+      static_cast<std::uint8_t>(Battle_actors[actor]->stats->defaultTargetLimb);
+  return TriggerActorTrap(target, input, host);
 }
 }  // namespace VS::Field
 
@@ -469,4 +551,16 @@ int Field_InteractWithLockedRoomObjectEntry(Field_MpdLockTrigger* address) {
                  VS::Field::RoomObjectInteractionResult::kWait
              ? 0
              : 1;
+}
+
+// decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909).
+void Field_TriggerActorTrapEntry(Field_MpdLockTrigger* address,
+                                 Actors_ActorLocationQuery* location,
+                                 int actor) {
+  const auto target = VS::Field::FindLiveTrapTargetAddress(address);
+  if (target && location != nullptr) {
+    const auto& point = location->location.position;
+    static_cast<void>(VS::Field::TriggerLiveActorTrap(
+        *target, {.x = point.vx, .y = point.vy, .z = point.vz}, actor));
+  }
 }

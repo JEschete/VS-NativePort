@@ -7,33 +7,33 @@ verification of the current worktree.
 
 ## Work order and current state
 
-### Next Trap Producer Dependency (#322, #276 Row 27)
+### Trap Action Initialization (#322, #276 Row 27)
 
-- Published source `16730c33d06105a0d4b988d5ce01e8be66ff3883` has exact
-  successful Source Quality `42380807184`. #287 is closed with its own fixing
+- Latest published audit `6e17239902b0767893aefa6bc231a94f7c308c5d` has exact
+  successful Source Quality `42385331538`; its ordinary-lock implementation
+  base `16730c33` has exact successful CI `42380807184`. #287 is closed with its own fixing
   revision/evidence; the wait and ordinary-lock milestones below are verified.
   #321, remaining row27/#276 and global compatibility acceptance stay open.
-- F00135 `Field_TriggerActorTrap` remains generated/unmodified. Its local
-  `Effects_ActionEffectRequest` is uninitialized. Original 64 MIPS words
+- Original F00135 `Field_TriggerActorTrap` declared an uninitialized local
+  `Effects_ActionEffectRequest`. Original 64 MIPS words
   `80073D30-80073E2C` write the request tag5 at `sp+0x14`, target tag4 at
   `sp+0x20`, actor at `sp+0x24`, partFD at `sp+0x26`, but no source position
   payload at `sp+0x18/+0x1A/+0x1C/+0x1E`. Resolver `80085B10` runs before
   secondary-effect entry `800CF3F8`.
-- This is logged before any fix as #322: native secondary spawning copies the
+- This was logged before fixing as #322: native secondary spawning copies the
   complete request; the transform adapter extracts endpoint positions; non4
-  endpoints resolve as positions. Type5 must not be called an actor. Actual
-  affected trap package selectors and intended source coordinates remain
-  unresolved; no reproduced retail/native failure or original parity claim.
+  endpoints resolve as positions. Type5 must not be called an actor. The native
+  correction represents an absent source explicitly and value-initializes the
+  C-shaped request; zero compatibility storage is a defined correction to
+  formerly undefined fields, not an inference of original source coordinates.
 - PartFD is resolved separately: actual original 39 words `800A1720-800A17B8`
   and the skeleton consumer select bone0 for ground-anchor253, then replace
   matrix translationY with the actor's placed Y. It is not an all-limbs label.
-- Existing bounded APIs for the next observation are `BindLiveEffectPackage`,
-  `LiveBoundPackageBlock(kTransformDefinitions)`, `ReadTransformDefinitions`
-  and the transform endpoint selectors. Inspect the actual trap package/data
-  selectors and reference behavior before assigning a source point. If those
-  consumers select the unwritten source, an explicit native undefined-source
-  policy must be distinguished from original behavior; do not silently choose
-  zero or Ashley's position and call it parity. Keep #322 acceptance intact.
+- The typed producer validates actor/action state and real floor target, stages
+  original target/limb/range/chain/queue fields, resolves the action, reobserves
+  kind after that callback, then submits the initialized effect. The Live
+  dispatch no longer manufactures a lock record for a floor trap. Required
+  native C/module `80073D30` and generated effect runtime remain migration debt.
 - The native `_pFiles` table uses `P(006)` / `P(007)` / `P(008)` macros that
   resolve the initial package filenames through their disc layout extents;
   ID-to-filename equality is verified there, not inferred from ID labels.
@@ -49,9 +49,31 @@ verification of the current worktree.
   and unchanged canonical fingerprints. Audit quality is eight existing /
   zero new; no baseline or gate was relaxed. Package parsing keeps reads under
   65,536 bytes and checks that every whole definition fits the 64-slot audit.
-- No trap implementation, generator or promotion edit was made for this
-  investigation. The content audit and dependency handoff are the only local
-  changes. Details and original instruction evidence are on #322.
+- The extended bounded inventory uses the maintained room decoders and actual
+  declared resource spans. Short all-zero empty resources are counted explicitly
+  instead of reading the following section as room lengths. All original trap
+  kinds0-15 are present and all mapped transform definitions ignore source
+  point during initialization. This is not exhaustive source-impact/script or
+  original undefined-coordinate parity; the native policy above stays explicit.
+- Original MAP015 kind3 at tile15,9 is reached by actual Right input from14,9.
+  Debug `1794098965381322-0`, Release `1794099097920197-0`: mode8 starts128,
+  lasts132frames, HP250 becomes196, triggeractivation1, final mode1/phase0;
+  zero engine-error/trace-failure records. Private fixture/captures remain ignored.
+- Current complete Debug/Release builds and full checks pass 4,755 tests /
+  8,639,846 assertions each with zero failures/skips/regressions and unchanged
+  2,400/900-frame canonical fingerprints. Trap cases eight / 59; combined
+  trap/package selection ten / 3,815. Copier191 / extent9 controls and 44
+  modernization controls pass. Two measured generations preserve1,733 Native/
+  manifest/ownership/adaptation hashes; manifest
+  `B31446B01752F6B0A04938F5C143169F6947BCA389526469C6376A22E74C9B36`.
+  Quality eight existing / zero new; no baseline or gate was relaxed.
+- Stale summary, row27 publication notes and per-function modernization records
+  are reconciled. Plan gate lists now require every referenced record, including
+  rejection of missing/empty members; F01416 is tracked in its existing row52.
+  `VR-TRAP-ACTION-INITIALIZATION` and its four-to-zero code-consumer slice support
+  source promotion. Current gates derive2,707 promoted / one framewip with zero
+  violations. Publish this fixing slice and confirm its exact CI before closing
+  #322; remaining row27/#276/#321 and global retirement stay open.
 
 ### Ordinary Room-Object Locks (#276 Row 27)
 
@@ -84,8 +106,8 @@ verification of the current worktree.
 - `VR-ROOM-OBJECT-INTERACTION` records the bounded source promotion. This is
   representative controller evidence, not a fresh all31 original-lock matrix.
   Required C/module/raw jobs, other row27 functions, #321 and global retirement
-  stay open. Source is `a0f53f60` plus this scoped slice; publish and verify its
-  exact new CI before claiming the next checkpoint complete.
+  stay open. Published implementation is `16730c33`, exact successful Source
+  Quality `42380807184`; the test evidence above is that bounded checkpoint.
 
 ### Object Interaction Wait (#276 Row 27)
 
@@ -112,12 +134,13 @@ verification of the current worktree.
 - `VR-OBJECT-INTERACTION-WAIT` records this bounded behavior. Old code-symbol
   consumers reduce four to zero; required C/module/global services, remaining
   row27 functions and #321 are not retired or completed by this slice.
-  Publish the scoped pair and verify its new exact CI before the next checkpoint.
+  Published pair is `a0f53f60`, exact successful Source Quality `42376304098`.
 
 ### Typed Interaction Targets (#287, #276 Row 27)
 
-- Current slice is based on `fff7ebcabfd956fe59be474374f5914bf8b08aa6` plus
-  the scoped changes below. #320 is closed at that revision with exact green
+- Published target slice is `47efa7c7`, exact successful Source Quality
+  `42374393222`; #287 is closed with that revision and the evidence below.
+  #320 is closed at `fff7ebcabfd956fe59be474374f5914bf8b08aa6` with exact green
   Source Quality `42363616728`; older pending-publication notes below describe
   their earlier checkpoints, not current issue status.
 - Eight functions F00136/F00137/F00138/F00141/F00144/F00145/F00147/F00148
@@ -166,8 +189,8 @@ verification of the current worktree.
   records and zero violations. `VR-INTERACTION-TARGETS` and its four-to-zero
   historical code-consumer slice retain required native C/module entries,
   actor-query observation and raw lock/door queue jobs as compatibility debt.
-  Publication/closure require exact-revision CI; record the fixing revision in
-  #287/#276. Continue remaining row 27 before later owning rows and #217.
+  The fixing revision and exact successful CI are recorded on #287/#276.
+  Continue remaining row 27 before later owning rows and #217.
 
 ### Switch-Start Admission Transaction (#320, #276 Row 27)
 

@@ -470,9 +470,11 @@ def plan_issues(rows: list[dict[str, str]], plan: list[dict[str, str]], recorded
         if status == "done":
             if remaining:
                 found.append(issue("plan-done-open", name, f"{remaining} functions on its files are still open"))
-            if entry["gate_slice"] not in recorded:
+            required_slices = {value.strip() for value in entry["gate_slice"].split(";")}
+            missing_slices = required_slices - recorded
+            if missing_slices:
                 found.append(issue("plan-done-unrecorded", name,
-                                   f"gate_slice {entry['gate_slice']!r} is not a GATE_SLICES.csv slice"))
+                                   f"gate_slice records missing from GATE_SLICES.csv: {sorted(missing_slices)!r}"))
         elif files and not remaining:
             found.append(issue("plan-finished-not-done", name,
                                "no open function remains on its files: mark it done or correct the file list"))

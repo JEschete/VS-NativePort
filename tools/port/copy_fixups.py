@@ -364,6 +364,7 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Field_TriggerActorTrapEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_InteractWithLockedRoomObjectEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_BeginObjectInteractionWaitEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_EndObjectInteractionWaitEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
@@ -1063,6 +1064,7 @@ OWNED_CALL_BINDINGS["F00606"] = "Field_BeginSwitchToggleEntry"
 OWNED_CALL_BINDINGS["F00132"] = "Field_BeginObjectInteractionWaitEntry"
 OWNED_CALL_BINDINGS["F00133"] = "Field_EndObjectInteractionWaitEntry"
 OWNED_CALL_BINDINGS["F00134"] = "Field_InteractWithLockedRoomObjectEntry"
+OWNED_CALL_BINDINGS["F00135"] = "Field_TriggerActorTrapEntry"
 OWNED_CALL_BINDINGS["F00136"] = "Field_TryOpenChestEntry"
 OWNED_CALL_BINDINGS["F00138"] = "Field_BeginChestInteractionEntry"
 OWNED_CALL_BINDINGS["F00144"] = "Field_FinishChestInteractionEntry"
@@ -2409,6 +2411,7 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x80073D30, "Field_TriggerActorTrapEntry"),
     ("BATTLE/BATTLE.PRG", 0x80073AFC, "Field_InteractWithLockedRoomObjectEntry"),
     ("BATTLE/BATTLE.PRG", 0x80073AA4, "Field_BeginObjectInteractionWaitEntry"),
     ("BATTLE/BATTLE.PRG", 0x80073ACC, "Field_EndObjectInteractionWaitEntry"),

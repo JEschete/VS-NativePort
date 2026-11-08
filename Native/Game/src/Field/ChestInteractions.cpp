@@ -25,6 +25,9 @@ constexpr std::int32_t kRoomSpecialLocked = 10;
 constexpr std::int32_t kRoomRejectedSoundFirst = 0x65;
 constexpr std::int32_t kRoomRejectedSoundSecond = 0x66;
 constexpr std::int16_t kRoomSigilUnlockFlagValue = 2;
+constexpr std::int32_t kTrapActorSlots = 17;
+constexpr std::int16_t kTrapKindLimit = 0x10;
+constexpr std::uint16_t kTrapActionBase = 6;
 
 std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
   if (state.lock_state == kKeyLock) {
@@ -199,6 +202,30 @@ bool BeginTrapInteraction(TrapTarget target, std::int32_t actor,
   host.ShowInformation(target);
   host.ResetActionSelection();
   return true;
+}
+
+// decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909).
+bool TriggerActorTrap(TrapTarget target, const TrapActionInput& input,
+                      TrapActionHost& host) {
+  if (input.actor < 0 || input.actor >= kTrapActorSlots ||
+      !host.HasActionState(input)) {
+    return false;
+  }
+  const auto kind = host.Kind(target);
+  if (!kind || *kind < 0 || *kind >= kTrapKindLimit ||
+      !host.StageVictim(input) ||
+      !host.ResolveAction(
+          static_cast<std::uint16_t>(*kind + kTrapActionBase))) {
+    return false;
+  }
+  const auto effect_kind = host.Kind(target);
+  if (!effect_kind || *effect_kind < 0 || *effect_kind >= kTrapKindLimit) {
+    return false;
+  }
+  return host.BeginEffect(TrapEffectRequest{
+      .effect_id = static_cast<std::uint16_t>(*effect_kind + kTrapActionBase),
+      .actor = input.actor,
+      .source_position = std::nullopt});
 }
 
 // decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).
