@@ -7,6 +7,10 @@ struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Effects_ActionEffectRequest;
+struct Items_TreasureChest;
+struct Field_MpdLockTrigger* Field_FindFacingRoomObjectEntry(int actor);
+struct Items_TreasureChest* Field_FindFacingUnlootedChestEntry(int actor);
+int Field_TryTriggerFacingTileEventEntry(int actor);
 int Field_TileInFrontOfActorEntry(struct Actors_ActorLocationQuery* actor,
                                   unsigned char* output);
 int Field_WaitForChestCameraFocusEntry(void);
@@ -43,6 +47,10 @@ bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
                           std::int32_t actor);
 Effects_ActionEffectRequest LiveTrapEffectRecord(
     const TrapEffectRequest& effect);
+std::optional<RoomObjectTarget> FindLiveFacingRoomObject(std::int32_t actor);
+std::optional<ChestTarget> FindLiveFacingUnlootedChest(std::int32_t actor);
+Field_MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target);
+RoomObjectInteractionResult InteractLiveRoomObject(RoomObjectTarget target);
 }  // namespace VS::Field
 }
 #endif

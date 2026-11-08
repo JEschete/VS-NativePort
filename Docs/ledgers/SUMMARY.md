@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 2713 | owned functions |
-| 2713 | owned functions in C++ sources |
-| 1037 | generated function rows |
+| 2716 | owned functions |
+| 2716 | owned functions in C++ sources |
+| 1034 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 2,712 | 0 | 1,495 |
-| `cpp` | 2,712 | 1 (`wip`) | 1,494 |
+| `modernized` | 2,715 | 0 | 1,492 |
+| `cpp` | 2,715 | 1 (`wip`) | 1,491 |
 | `verified` | 49 | 0 | 4,158 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 2713 |
-| `vs_namespace` | 2712 |
-| `typed_interface` | 2712 |
-| `no_bridge` | 2712 |
-| `strict_clean` | 2713 |
-| `behavior_evidence` | 2712 |
+| `source_cpp` | 2716 |
+| `vs_namespace` | 2715 |
+| `typed_interface` | 2715 |
+| `no_bridge` | 2715 |
+| `strict_clean` | 2716 |
+| `behavior_evidence` | 2715 |
 
-Promotion records: 2713; derived `cpp=x`: 2712, `cpp=wip`: 1. Verification records: 249; `verified=x` markers: 49.
+Promotion records: 2716; derived `cpp=x`: 2715, `cpp=wip`: 1. Verification records: 250; `verified=x` markers: 49.
 
 <!-- gates:end -->
 
@@ -100,8 +100,8 @@ read the global game state named in each slice's limits, and those compatibility
 ### Generated-function cohort (#276)
 
 The original cohort is the 3,479 `copy=yes` rows without `cpp` at `04d47338`.
-At the 2026-11-07 facing-tile reconciliation over published `3d995b77`, 2,430
-derive `cpp=x`, 11 are retired, 1,037 remain generated/unpromoted and one owned
+At the 2026-11-07 three-query reconciliation over published `770c8fa2`, 2,433
+derive `cpp=x`, 11 are retired, 1,034 remain generated/unpromoted and one owned
 textbox-frame entry (F01416) remains `wip`.
 This is about 70% resolved; the total promoted count above also includes functions
 outside that original cohort and must not be divided by 3,479.
@@ -115,8 +115,13 @@ all-room-kind package initialization audit and actual Debug/Release trap damage
 and return evidence. #322 is closed at fixing `525d182e`, exact successful CI
 `42433562058`. The four interaction camera/wait functions are published at
 `3d995b77`, exact successful CI `42436301250`. The adjacent-tile F00152 leaf
-is now locally promoted with exhaustive heading/output and full dual-configuration/
-replay/workflow evidence; its publication/CI gate is pending.
+is published at `770c8fa2`, exact successful CI `42438146863`. Its three
+dependent queries F00153/F00154/F00155 now have typed cores and generation-checked
+gameplay caches, original instruction/read-order/width evidence, actual native
+event start/refusal tests and original chest/lock/opposite-facing controls.
+Full Debug/Release each pass 4,777 tests / 8,902,094 assertions; both canonical
+fingerprints and two 1,733-path/hash generations are unchanged. Row 27 still
+has 56 generated functions. Exact query publication/CI evidence is tracked on #276.
 #321 tracks the invisible active chest loot panel separately.
 Remaining row-27 functions, later planned slices and the final closing-revision
 Debug/Release, replay, generation, quality and CI gates are still required.

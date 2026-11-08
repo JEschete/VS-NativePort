@@ -364,6 +364,10 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "VS::Field::LiveCollisionCellOrAbsent": r"Native\Game\include\Field\CollisionMapLive.hpp",
+    "Field_TryTriggerFacingTileEventEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_FindFacingRoomObjectEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_FindFacingUnlootedChestEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_TileInFrontOfActorEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_WaitForChestCameraFocusEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_StepTrapCameraFocusEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
@@ -1075,6 +1079,9 @@ OWNED_CALL_BINDINGS["F00140"] = "Field_StepTrapCameraFocusEntry"
 OWNED_CALL_BINDINGS["F00142"] = "Field_IsChestAnimationReadyEntry"
 OWNED_CALL_BINDINGS["F00146"] = "Field_TrackInteractionCameraToAshleyEntry"
 OWNED_CALL_BINDINGS["F00152"] = "Field_TileInFrontOfActorEntry"
+OWNED_CALL_BINDINGS["F00153"] = "Field_TryTriggerFacingTileEventEntry"
+OWNED_CALL_BINDINGS["F00154"] = "Field_FindFacingRoomObjectEntry"
+OWNED_CALL_BINDINGS["F00155"] = "Field_FindFacingUnlootedChestEntry"
 OWNED_CALL_BINDINGS["F00136"] = "Field_TryOpenChestEntry"
 OWNED_CALL_BINDINGS["F00138"] = "Field_BeginChestInteractionEntry"
 OWNED_CALL_BINDINGS["F00144"] = "Field_FinishChestInteractionEntry"
@@ -2421,6 +2428,9 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x80074860, "Field_TryTriggerFacingTileEventEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800748B8, "Field_FindFacingRoomObjectEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80074950, "Field_FindFacingUnlootedChestEntry"),
     ("BATTLE/BATTLE.PRG", 0x80074798, "Field_TileInFrontOfActorEntry"),
     ("BATTLE/BATTLE.PRG", 0x80074120, "Field_WaitForChestCameraFocusEntry"),
     ("BATTLE/BATTLE.PRG", 0x8007418C, "Field_StepTrapCameraFocusEntry"),

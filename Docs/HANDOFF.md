@@ -7,6 +7,44 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Facing Queries (#276 Row 27)
+
+- F00153/F00154/F00155 use the published typed adjacent tile, strict typed
+  event/resource hosts and generation-checked room-object/chest targets.
+  Gameplay caches those identities instead of raw lock/chest record pointers;
+  compatibility C entries resolve records only at their original boundary.
+- Original22/38/52 MIPS words at `80074860-800748B4`, `800748B8-8007494C`
+  and `80074950-80074A1C` confirm mode4/source0/context-kind1 event arguments,
+  lookup-before-floor order including missing locks, low15 floor sign extension,
+  unsigned height+63<127 lock window, chest-facing/flag/floor order, signed-halfword
+  collection-flag argument wrap and exact floor+96 chest height.
+- Twelve focused cases / 66 assertions cover those boundaries and three original
+  module entries, stale/out-of-range targets and actual native event12 dispatch,
+  direct-event busy refusal and mismatch. Release coupled selection passes
+  65 cases / 262,722 assertions. Full Debug/Release each pass 4,777 tests /
+  8,902,094 assertions, zero failures/skips/regressions; canonical2400/900-frame
+  fingerprints remain unchanged. Native event fixture is not a sourced scene replay.
+- Original MAP124 matching chest runs: Debug `1794105683130125-0`, Release
+  `1794106004055339-0`:486mode9frames, lock0/key465count10, cancel-returnfield1phase0.
+  Original MAP247 lock: Debug `1794105771270134-0`, Release `1794106026205314-0`:
+  138mode11frames/key458count10/field1phase0. Opposite-facing MAP124: Debug
+  `1794105801206528-0`, Release `1794106052208753-0`:facing2,9,0, no chest/lock
+  interaction, original lock1, field1. All exact traces are intact with zero engine
+  errors. Commands reuse original private fixtures and production controller input;
+  no HP/event/record edits or complete loot acceptance (#321).
+- Copier191 / extent9 and editor checks pass; quality five existing / zero new.
+  Two supported generations preserve all1,733path hashes, including owned source,
+  projects, manifest/ownership/adaptations; manifest
+  `52EEE34CF9157A47BC8364DABFDD4D83FD653EEAC569FA163ECB50DBBAD4FC8A`.
+  Removed query bodies exposed an incidental generated absent-cell include;
+  concrete compile errors were logged on276 before registered helper/control repair.
+- `VR-FACING-QUERIES` and four-to-zero old code-consumer slice record this bounded
+  promotion over770c8fa2. Unchanged gates derive2,715promoted/oneframewip with zero
+  violations; row27 still has56generated functions. Exact publication/CI evidence
+  is recorded on276 before issue completion. Required C/module/current-room/global
+  and raw asynchronous door-job retirement remain open, as do #276/#321 and broader
+  scene/reference parity. Continue row27; this checkpoint is not a stopping point.
+
 ### Adjacent Facing Tile (#276 Row 27)
 
 - F00152 uses existing typed actor placement with `FacingTile`/`CardinalFacing`:
@@ -29,7 +67,8 @@ verification of the current worktree.
   PlayerObservation's old call was found by compile and migrated explicitly.
 - `VR-FACING-TILE-CORE` and four-to-zero old code-consumer slice record the
   bounded leaf promotion. Current gates2,712promoted/oneframewip, zero
-  violations; per-function tracker is reconciled. Publish and verify exact CI.
+  violations; per-function tracker is reconciled. Published at770c8fa2 with exact
+  successful CI42438146863; larger-query continuation is recorded above.
   Larger queries/remaining row27/#276/#321 and required C/module/output/global
   compatibility remain open; source promotion is not all-scene reference parity.
 

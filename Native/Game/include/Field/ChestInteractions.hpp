@@ -163,6 +163,39 @@ struct FacingTile {
 
 FacingTile TileInFrontOfActor(const VS::Actors::ActorPlacementView& actor);
 
+class FacingEventHost {
+ public:
+  virtual ~FacingEventHost() = default;
+  virtual std::optional<VS::Actors::ActorPlacementView> Placement(
+      std::int32_t actor) const = 0;
+  virtual bool EvaluateInteraction(const FacingTile& tile) = 0;
+};
+
+bool TryTriggerFacingTileEvent(std::int32_t actor, FacingEventHost& host);
+
+struct FacingChestState {
+  ChestTarget target{};
+  std::int16_t facing = 0;
+  std::int16_t opened_flag = 0;
+};
+
+class FacingResourceHost {
+ public:
+  virtual ~FacingResourceHost() = default;
+  virtual std::optional<VS::Actors::ActorPlacementView> Placement(
+      std::int32_t actor) const = 0;
+  virtual std::optional<RoomObjectTarget> RoomObject(
+      const FacingTile& tile) = 0;
+  virtual std::optional<FacingChestState> Chest(const FacingTile& tile) = 0;
+  virtual std::int32_t FloorHeight(const FacingTile& tile) = 0;
+  virtual bool ScriptFlag(std::int32_t flag) = 0;
+};
+
+std::optional<RoomObjectTarget> FindFacingRoomObject(std::int32_t actor,
+                                                     FacingResourceHost& host);
+std::optional<ChestTarget> FindFacingUnlootedChest(std::int32_t actor,
+                                                   FacingResourceHost& host);
+
 class ObjectInteractionWaitHost {
  public:
   virtual ~ObjectInteractionWaitHost() = default;

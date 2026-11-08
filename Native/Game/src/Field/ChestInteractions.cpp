@@ -36,6 +36,17 @@ constexpr std::int32_t kInteractionCameraReturnOffset = 0x5A;
 constexpr std::uint16_t kFacingRoundBias = 0x200;
 constexpr std::uint16_t kFacingHeadingMask = 0xFFF;
 constexpr unsigned kFacingQuadrantShift = 10;
+constexpr std::uint32_t kFacingFloorMask = 0x7FFF;
+constexpr std::uint32_t kFacingFloorSign = 0x4000;
+constexpr std::int32_t kFacingRoomHeightBias = 0x3F;
+constexpr std::int32_t kFacingRoomHeightWindow = 0x7F;
+constexpr std::int32_t kFacingChestHeightOffset = 0x60;
+
+std::int32_t FacingFloorHeight(std::int32_t height) {
+  const auto low = static_cast<std::uint32_t>(height) & kFacingFloorMask;
+  return static_cast<std::int32_t>(low ^ kFacingFloorSign) -
+         static_cast<std::int32_t>(kFacingFloorSign);
+}
 
 std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
   if (state.lock_state == kKeyLock) {
@@ -302,6 +313,65 @@ FacingTile TileInFrontOfActor(const VS::Actors::ActorPlacementView& actor) {
       break;
   }
   return tile;
+}
+
+// decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
+bool TryTriggerFacingTileEvent(std::int32_t actor, FacingEventHost& host) {
+  if (actor < 0 || actor >= kTrapActorSlots) {
+    return false;
+  }
+  const auto placement = host.Placement(actor);
+  if (!placement) {
+    return false;
+  }
+  const auto tile = TileInFrontOfActor(*placement);
+  return host.EvaluateInteraction(tile);
+}
+
+// decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271).
+std::optional<RoomObjectTarget> FindFacingRoomObject(std::int32_t actor,
+                                                     FacingResourceHost& host) {
+  if (actor < 0 || actor >= kTrapActorSlots) {
+    return std::nullopt;
+  }
+  const auto placement = host.Placement(actor);
+  if (!placement) {
+    return std::nullopt;
+  }
+  const auto tile = TileInFrontOfActor(*placement);
+  const auto object = host.RoomObject(tile);
+  const auto difference = FacingFloorHeight(host.FloorHeight(tile)) -
+                          placement->position.y + kFacingRoomHeightBias;
+  if (static_cast<std::uint32_t>(difference) >= kFacingRoomHeightWindow) {
+    return std::nullopt;
+  }
+  return object;
+}
+
+// decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5290).
+std::optional<ChestTarget> FindFacingUnlootedChest(std::int32_t actor,
+                                                   FacingResourceHost& host) {
+  if (actor < 0 || actor >= kTrapActorSlots) {
+    return std::nullopt;
+  }
+  const auto placement = host.Placement(actor);
+  if (!placement) {
+    return std::nullopt;
+  }
+  const auto tile = TileInFrontOfActor(*placement);
+  const auto chest = host.Chest(tile);
+  if (!chest || chest->facing != static_cast<std::int16_t>(tile.direction)) {
+    return std::nullopt;
+  }
+  const auto flag = std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(
+      static_cast<std::int32_t>(chest->opened_flag) + kOpenedFlagBase));
+  if (host.ScriptFlag(flag)) {
+    return std::nullopt;
+  }
+  const auto height =
+      FacingFloorHeight(host.FloorHeight(tile)) + kFacingChestHeightOffset;
+  return placement->position.y == height ? std::optional{chest->target}
+                                         : std::nullopt;
 }
 
 // decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).

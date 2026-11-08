@@ -214,7 +214,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
                                                   ashley_placement_.location);
   }
   bool TryTriggerFacingTileEvent(int slot) override {
-    return Field_TryTriggerFacingTileEvent(slot) != 0;
+    return Field_TryTriggerFacingTileEventEntry(slot) != 0;
   }
   void BeginQueuedCutscene() override { Event::BeginLiveQueuedCutscene(); }
   void StartPreparedCutscene() override { Event::StartLivePreparedCutscene(); }
@@ -257,25 +257,24 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
                                                  vertical_reach);
   }
   bool FindFacingRoomObject(int slot) override {
-    facing_room_object_ = Field_FindFacingRoomObject(slot);
-    return facing_room_object_ != nullptr;
+    facing_room_object_ = VS::Field::FindLiveFacingRoomObject(slot);
+    return facing_room_object_.has_value();
   }
   bool InteractWithFacingRoomObject() override {
-    return facing_room_object_ == nullptr ||
-           Field_InteractWithLockedRoomObjectEntry(facing_room_object_) != 0;
+    return !facing_room_object_ ||
+           VS::Field::InteractLiveRoomObject(*facing_room_object_) !=
+               VS::Field::RoomObjectInteractionResult::kWait;
   }
   bool FindFacingUnlootedChest(int slot) override {
-    facing_chest_ = Field_FindFacingUnlootedChest(slot);
-    return facing_chest_ != nullptr;
+    facing_chest_ = VS::Field::FindLiveFacingUnlootedChest(slot);
+    return facing_chest_.has_value();
   }
   void BeginFacingChestInteraction(int slot) override {
-    if (facing_chest_ == nullptr) {
+    if (!facing_chest_) {
       return;
     }
-    const auto target = VS::Field::FindLiveChestTarget(facing_chest_);
-    if (target) {
-      static_cast<void>(VS::Field::BeginLiveChestInteraction(*target, slot));
-    }
+    static_cast<void>(
+        VS::Field::BeginLiveChestInteraction(*facing_chest_, slot));
   }
   void BeginObjectInteractionWait() override {
     Field_BeginObjectInteractionWaitEntry();
@@ -521,8 +520,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
 
   u_long* ordering_table_ = nullptr;
   Actors_ActorLocationQuery ashley_placement_{};
-  Field_MpdLockTrigger* facing_room_object_ = nullptr;
-  Items_TreasureChest* facing_chest_ = nullptr;
+  std::optional<VS::Field::RoomObjectTarget> facing_room_object_;
+  std::optional<VS::Field::ChestTarget> facing_chest_;
   Menu_Framework_ActionSelection* action_menu_ = nullptr;
 };
 }  // namespace

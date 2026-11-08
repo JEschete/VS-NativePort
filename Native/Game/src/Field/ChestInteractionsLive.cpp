@@ -13,11 +13,13 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractions.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
+#include "Items/LootLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -28,6 +30,7 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Effects/Runtime.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionFocusLive.h"
@@ -57,6 +60,72 @@ constexpr std::int32_t kRoomObjectSoundGroup = 0x7E;
 constexpr std::int32_t kTrapPrimaryTargetPosition = 3;
 constexpr std::uint16_t kTrapSourcePointType = 5;
 constexpr std::uint16_t kTrapActorTargetType = 4;
+constexpr std::int32_t kFacingInteractionMode = 4;
+constexpr std::size_t kFacingPositionBytes = 4;
+constexpr std::int32_t kFacingTileUnits = 128;
+constexpr std::int32_t kFacingTileCenter = 64;
+
+class LiveFacingEventHost final : public VS::Field::FacingEventHost {
+ public:
+  std::optional<VS::Actors::ActorPlacementView> Placement(
+      std::int32_t actor) const override {
+    return VS::Actors::LiveActorPlacementView(actor);
+  }
+  bool EvaluateInteraction(const VS::Field::FacingTile& tile) override {
+    std::array<std::uint8_t, kFacingPositionBytes> position{tile.x, tile.layer,
+                                                            tile.z, 0};
+    return Event_EvaluateRoomEventTriggersEntry(kFacingInteractionMode, 0,
+                                                position.data(), 1) == 1;
+  }
+};
+
+class LiveFacingResourceHost final : public VS::Field::FacingResourceHost {
+ public:
+  std::optional<VS::Actors::ActorPlacementView> Placement(
+      std::int32_t actor) const override {
+    return VS::Actors::LiveActorPlacementView(actor);
+  }
+  std::optional<VS::Field::RoomObjectTarget> RoomObject(
+      const VS::Field::FacingTile& tile) override {
+    const auto* record =
+        Field_InteractiveDoorAtTile(tile.x, tile.z, tile.layer);
+    if (record == nullptr || Field_roomData.lockTriggers == nullptr) {
+      return std::nullopt;
+    }
+    const auto count =
+        Field_roomData.header.lockTriggersLength / kOriginalLockRecordBytes;
+    for (std::size_t index = 0; index < count; ++index) {
+      if (&Field_roomData.lockTriggers[index] == record) {
+        return VS::Field::RoomObjectTarget{
+            static_cast<std::uint32_t>(index),
+            VS::Field::LiveInteractionTargetDomain().generation};
+      }
+    }
+    return std::nullopt;
+  }
+  std::optional<VS::Field::FacingChestState> Chest(
+      const VS::Field::FacingTile& tile) override {
+    const auto* record =
+        VS::Items::FindLiveTreasureChestAtTile(tile.x, tile.z, tile.layer);
+    const auto target = VS::Field::FindLiveChestTarget(record);
+    if (!target || record == nullptr) {
+      return std::nullopt;
+    }
+    return VS::Field::FacingChestState{.target = *target,
+                                       .facing = record->facing,
+                                       .opened_flag = record->openedFlag};
+  }
+  std::int32_t FloorHeight(const VS::Field::FacingTile& tile) override {
+    return VS::Field::LiveFloorHeightAt(
+        static_cast<std::int32_t>(tile.x) * kFacingTileUnits +
+            kFacingTileCenter,
+        static_cast<std::int32_t>(tile.z) * kFacingTileUnits +
+            kFacingTileCenter);
+  }
+  bool ScriptFlag(std::int32_t flag) override {
+    return VS::State::LiveScriptFlag(flag) != 0;
+  }
+};
 
 class LiveInteractionCameraHost final
     : public VS::Field::InteractionCameraHost {
@@ -471,6 +540,31 @@ class LiveObjectInteractionWaitHost final
 }  // namespace
 
 namespace VS::Field {
+Field_MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target) {
+  if (target.generation != LiveInteractionTargetDomain().generation ||
+      Field_roomData.lockTriggers == nullptr ||
+      target.index >=
+          Field_roomData.header.lockTriggersLength / kOriginalLockRecordBytes) {
+    return nullptr;
+  }
+  return &Field_roomData.lockTriggers[target.index];
+}
+
+std::optional<RoomObjectTarget> FindLiveFacingRoomObject(std::int32_t actor) {
+  LiveFacingResourceHost host;
+  return FindFacingRoomObject(actor, host);
+}
+
+std::optional<ChestTarget> FindLiveFacingUnlootedChest(std::int32_t actor) {
+  LiveFacingResourceHost host;
+  return FindFacingUnlootedChest(actor, host);
+}
+
+RoomObjectInteractionResult InteractLiveRoomObject(RoomObjectTarget target) {
+  LiveRoomObjectInteractionHost host(ResolveLiveRoomObjectTarget(target));
+  return InteractWithLockedRoomObject(host);
+}
+
 Effects_ActionEffectRequest LiveTrapEffectRecord(
     const TrapEffectRequest& effect) {
   Effects_ActionEffectRequest request{};
@@ -644,4 +738,22 @@ int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
   output[1] = tile.layer;
   output[2] = tile.z;
   return static_cast<int>(tile.direction);
+}
+
+// decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
+int Field_TryTriggerFacingTileEventEntry(int actor) {
+  LiveFacingEventHost host;
+  return VS::Field::TryTriggerFacingTileEvent(actor, host) ? 1 : 0;
+}
+
+// decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271).
+Field_MpdLockTrigger* Field_FindFacingRoomObjectEntry(int actor) {
+  const auto target = VS::Field::FindLiveFacingRoomObject(actor);
+  return target ? VS::Field::ResolveLiveRoomObjectTarget(*target) : nullptr;
+}
+
+// decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5290).
+Items_TreasureChest* Field_FindFacingUnlootedChestEntry(int actor) {
+  const auto target = VS::Field::FindLiveFacingUnlootedChest(actor);
+  return target ? VS::Field::ResolveLiveChestTarget(*target) : nullptr;
 }

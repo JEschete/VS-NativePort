@@ -92,64 +92,6 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
     }
 }
 
-// decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260)
-int Field_TryTriggerFacingTileEvent(int actor_index)
-{
-    Actors_ActorLocationQuery actor_placement;
-    u_char facing_tile[4];
-
-    VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
-    Field_TileInFrontOfActorEntry(&actor_placement, facing_tile);
-    // BUG: arg2 should be an actor ID?
-    return Event_EvaluateRoomEventTriggersEntry(4, 0, facing_tile, 1) == 1;
-}
-
-// decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271)
-Field_MpdLockTrigger* Field_FindFacingRoomObject(int actor_index)
-{
-    Actors_ActorLocationQuery actor_placement;
-    u_char facing_tile[4];
-    Field_MpdLockTrigger* facing_door;
-    u_char* facing_tile_bytes = facing_tile;
-
-    VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
-    Field_TileInFrontOfActorEntry(&actor_placement, facing_tile);
-    facing_door = Field_InteractiveDoorAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
-    if (((((VS::Field::LiveFloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11) >> 0x11)
-             - actor_placement.location.position.vy)
-            + 0x3F)
-        >= 0x7FU) {
-        facing_door = NULL;
-    }
-    return facing_door;
-}
-
-// decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5290)
-Items_TreasureChest* Field_FindFacingUnlootedChest(int actor_index)
-{
-    Actors_ActorLocationQuery actor_placement;
-    u_char facing_tile[4];
-    Items_TreasureChest* facing_chest;
-    int facing_quadrant;
-    u_char* facing_tile_bytes = facing_tile;
-
-    VS::Actors::LiveActorPlacement(actor_index, &actor_placement);
-    facing_quadrant = Field_TileInFrontOfActorEntry(&actor_placement, facing_tile);
-    facing_chest = VS::Items::FindLiveTreasureChestAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
-
-    if ((facing_chest != NULL) && (facing_chest->facing == facing_quadrant)) {
-        if (!VS::State::LiveScriptFlag((facing_chest->openedFlag + 0x3C0))) {
-            int v = ((VS::Field::LiveFloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11)
-                        >> 0x11)
-                  + 0x60;
-            if (actor_placement.location.position.vy == v) {
-                return facing_chest;
-            }
-        }
-    }
-    return NULL;
-}
-
 // decomp: BATTLE.PRG func_80074BAC (src/BATTLE/BATTLE.PRG/146C.c:5365)
 int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
 {

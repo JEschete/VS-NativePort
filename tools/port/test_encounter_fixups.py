@@ -260,6 +260,10 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("F00668", copy_fixups.OWNED_CALL_BINDINGS)
 
     def test_unchecked_cell_readers_read_an_absent_cell(self):
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["VS::Field::LiveCollisionCellOrAbsent"],
+            r"Native\Game\include\Field\CollisionMapLive.hpp",
+        )
         sources = {
             "F00158": "    Field_MpdTileCell* tile;\n"
                       "        tile = VS::Field::LiveCollisionCellAt(0, 0, floorOverride >> 16);\n"
@@ -440,6 +444,12 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00153", "Field_TryTriggerFacingTileEventEntry", "VS::Field::TryTriggerFacingTileEvent",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00154", "Field_FindFacingRoomObjectEntry", "VS::Field::FindFacingRoomObject",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00155", "Field_FindFacingUnlootedChestEntry", "VS::Field::FindFacingUnlootedChest",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00152", "Field_TileInFrontOfActorEntry", "VS::Field::TileInFrontOfActor",
              r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00139", "Field_WaitForChestCameraFocusEntry", "VS::Field::WaitForChestCameraFocus",
@@ -1005,6 +1015,9 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00153": ("Field_TryTriggerFacingTileEventEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00154": ("Field_FindFacingRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00155": ("Field_FindFacingUnlootedChestEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00152": ("Field_TileInFrontOfActorEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00139": ("Field_WaitForChestCameraFocusEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00140": ("Field_StepTrapCameraFocusEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),

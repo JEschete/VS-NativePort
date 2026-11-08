@@ -19,6 +19,13 @@ struct ChestTarget {
   friend bool operator==(const ChestTarget&, const ChestTarget&) = default;
 };
 
+struct RoomObjectTarget {
+  std::uint32_t index = 0;
+  std::uint64_t generation = 0;
+  friend bool operator==(const RoomObjectTarget&,
+                         const RoomObjectTarget&) = default;
+};
+
 using InteractionTarget = std::variant<std::monostate, TrapTarget, ChestTarget>;
 
 struct InteractionTargetDomain {

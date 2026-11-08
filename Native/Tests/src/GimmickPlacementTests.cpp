@@ -244,6 +244,63 @@ struct RecordingInteractionCameraHost final : VS::Field::InteractionCameraHost {
   }
 };
 
+struct RecordingFacingEventHost final : VS::Field::FacingEventHost {
+  std::optional<VS::Actors::ActorPlacementView> placement{
+      VS::Actors::ActorPlacementView{}};
+  mutable std::int32_t observed_actor = -1;
+  mutable std::size_t reads = 0;
+  bool result = false;
+  std::optional<VS::Field::FacingTile> evaluated;
+
+  std::optional<VS::Actors::ActorPlacementView> Placement(
+      std::int32_t actor) const override {
+    ++reads;
+    observed_actor = actor;
+    return placement;
+  }
+  bool EvaluateInteraction(const VS::Field::FacingTile& tile) override {
+    evaluated = tile;
+    return result;
+  }
+};
+
+struct RecordingFacingResourceHost final : VS::Field::FacingResourceHost {
+  std::optional<VS::Actors::ActorPlacementView> placement{
+      VS::Actors::ActorPlacementView{}};
+  std::optional<VS::Field::RoomObjectTarget> object{
+      VS::Field::RoomObjectTarget{2, 7}};
+  std::optional<VS::Field::FacingChestState> chest{
+      VS::Field::FacingChestState{.target = {3, 7}, .opened_flag = 9}};
+  std::int32_t floor = 0;
+  bool collected = false;
+  std::vector<std::int32_t> calls;
+  std::int32_t observed_flag = -1;
+
+  std::optional<VS::Actors::ActorPlacementView> Placement(
+      std::int32_t) const override {
+    return placement;
+  }
+  std::optional<VS::Field::RoomObjectTarget> RoomObject(
+      const VS::Field::FacingTile&) override {
+    calls.push_back(0);
+    return object;
+  }
+  std::optional<VS::Field::FacingChestState> Chest(
+      const VS::Field::FacingTile&) override {
+    calls.push_back(1);
+    return chest;
+  }
+  std::int32_t FloorHeight(const VS::Field::FacingTile&) override {
+    calls.push_back(2);
+    return floor;
+  }
+  bool ScriptFlag(std::int32_t flag) override {
+    calls.push_back(3);
+    observed_flag = flag;
+    return collected;
+  }
+};
+
 struct RecordingObjectInteractionWaitHost final
     : VS::Field::ObjectInteractionWaitHost {
   VS::Field::FieldControlMode mode = VS::Field::FieldControlMode::kNone;
@@ -1122,6 +1179,168 @@ TEST_CASE("Facing tile entry retains original module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80074798) ==
         reinterpret_cast<const void*>(&Field_TileInFrontOfActorEntry));
+}
+
+TEST_CASE("Facing event uses requested actor and computed adjacent tile",
+          "[facing-event-core][field]") {
+  RecordingFacingEventHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.tile.x = 17;
+  placement.tile.z = 23;
+  placement.tile.layer = 2;
+  placement.position.w = 1024;
+  host.placement = placement;
+  host.result = true;
+  CHECK(VS::Field::TryTriggerFacingTileEvent(3, host));
+  CHECK(host.observed_actor == 3);
+  if (!host.evaluated) {
+    FAIL("Facing interaction must receive the adjacent tile");
+    return;
+  }
+  REQUIRE(host.evaluated);
+  CHECK(host.evaluated->x == 16);
+  CHECK(host.evaluated->z == 23);
+  CHECK(host.evaluated->layer == 2);
+  host.result = false;
+  CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(3, host));
+}
+
+TEST_CASE("Facing event refuses invalid actor and absent placement",
+          "[facing-event-core][field]") {
+  RecordingFacingEventHost host;
+  CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(-1, host));
+  CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(17, host));
+  CHECK(host.reads == 0);
+  CHECK_FALSE(host.evaluated);
+  host.placement.reset();
+  CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(0, host));
+  CHECK(host.reads == 1);
+  CHECK_FALSE(host.evaluated);
+}
+
+TEST_CASE("Facing room query keeps unsigned height window boundaries",
+          "[facing-resource-core][field]") {
+  RecordingFacingResourceHost host;
+  for (const auto height : {-64, -63, 0, 63, 64}) {
+    host.floor = height;
+    host.calls.clear();
+    CHECK(VS::Field::FindFacingRoomObject(0, host).has_value() ==
+          (height >= -63 && height <= 63));
+    CHECK(host.calls == std::vector<std::int32_t>{0, 2});
+  }
+  host.floor = 0x800000;
+  CHECK(VS::Field::FindFacingRoomObject(0, host) == host.object);
+}
+
+TEST_CASE("Facing chest query gates facing flag and exact raised floor",
+          "[facing-resource-core][field]") {
+  RecordingFacingResourceHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = 96;
+  host.placement = placement;
+  CHECK(VS::Field::FindFacingUnlootedChest(0, host) ==
+        VS::Field::ChestTarget{3, 7});
+  CHECK(host.calls == std::vector<std::int32_t>{1, 3, 2});
+  CHECK(host.observed_flag == 0x3C9);
+  host.calls.clear();
+  host.chest = VS::Field::FacingChestState{
+      .target = {3, 7}, .facing = 1, .opened_flag = 9};
+  CHECK_FALSE(VS::Field::FindFacingUnlootedChest(0, host));
+  CHECK(host.calls == std::vector<std::int32_t>{1});
+  host.chest = VS::Field::FacingChestState{.target = {3, 7}, .opened_flag = 9};
+  host.collected = true;
+  host.calls.clear();
+  CHECK_FALSE(VS::Field::FindFacingUnlootedChest(0, host));
+  CHECK(host.calls == std::vector<std::int32_t>{1, 3});
+}
+
+TEST_CASE("Facing resource query refuses missing actor or object state",
+          "[facing-resource-core][field]") {
+  RecordingFacingResourceHost host;
+  host.placement.reset();
+  CHECK_FALSE(VS::Field::FindFacingRoomObject(0, host));
+  CHECK_FALSE(VS::Field::FindFacingUnlootedChest(0, host));
+  CHECK(host.calls.empty());
+  CHECK_FALSE(VS::Field::FindFacingRoomObject(-1, host));
+  CHECK_FALSE(VS::Field::FindFacingUnlootedChest(17, host));
+}
+
+TEST_CASE(
+    "Facing chest query rejects absent record without flag or floor reads",
+    "[facing-resource-core][field]") {
+  RecordingFacingResourceHost host;
+  host.chest.reset();
+  CHECK_FALSE(VS::Field::FindFacingUnlootedChest(0, host));
+  CHECK(host.calls == std::vector<std::int32_t>{1});
+  host.object.reset();
+  host.calls.clear();
+  CHECK_FALSE(VS::Field::FindFacingRoomObject(0, host));
+  CHECK(host.calls == std::vector<std::int32_t>{0, 2});
+}
+
+TEST_CASE("Facing resource floor uses original low fifteen bit sign extension",
+          "[facing-resource-core][field]") {
+  RecordingFacingResourceHost host;
+  VS::Actors::ActorPlacementView placement{};
+  placement.position.y = -16384;
+  host.placement = placement;
+  host.floor = 0x4000;
+  CHECK(VS::Field::FindFacingRoomObject(0, host) == host.object);
+  placement.position.y = -16288;
+  host.placement = placement;
+  CHECK(VS::Field::FindFacingUnlootedChest(0, host) ==
+        VS::Field::ChestTarget{3, 7});
+  placement.position.y = -16289;
+  host.placement = placement;
+  CHECK_FALSE(VS::Field::FindFacingUnlootedChest(0, host));
+}
+
+TEST_CASE("Facing chest collection flag keeps original halfword argument wrap",
+          "[facing-resource-core][field]") {
+  RecordingFacingResourceHost host;
+  host.chest =
+      VS::Field::FacingChestState{.target = {3, 7}, .opened_flag = 32767};
+  host.collected = true;
+  CHECK_FALSE(VS::Field::FindFacingUnlootedChest(0, host));
+  CHECK(host.observed_flag == -31809);
+}
+
+TEST_CASE("Facing query C entries refuse invalid actor indices",
+          "[facing-query-live][field]") {
+  CHECK(Field_TryTriggerFacingTileEventEntry(-1) == 0);
+  CHECK(Field_TryTriggerFacingTileEventEntry(17) == 0);
+  CHECK(Field_FindFacingRoomObjectEntry(-1) == nullptr);
+  CHECK(Field_FindFacingRoomObjectEntry(17) == nullptr);
+  CHECK(Field_FindFacingUnlootedChestEntry(-1) == nullptr);
+  CHECK(Field_FindFacingUnlootedChestEntry(17) == nullptr);
+}
+
+TEST_CASE("Facing queries retain all original module entries",
+          "[facing-query-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80074860) ==
+        reinterpret_cast<const void*>(&Field_TryTriggerFacingTileEventEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800748B8) ==
+        reinterpret_cast<const void*>(&Field_FindFacingRoomObjectEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80074950) ==
+        reinterpret_cast<const void*>(&Field_FindFacingUnlootedChestEntry));
+}
+
+TEST_CASE("Room object query target refuses stale and out of range resolution",
+          "[facing-query-live][field]") {
+  RoomObjectRecordFixture fixture;
+  const auto domain = VS::Field::LiveInteractionTargetDomain();
+  const VS::Field::RoomObjectTarget target{1, domain.generation};
+  CHECK(VS::Field::ResolveLiveRoomObjectTarget(target) == &fixture.locks[1]);
+  CHECK(VS::Field::ResolveLiveRoomObjectTarget({2, domain.generation}) ==
+        nullptr);
+  VS::Field::InvalidateLiveInteractionTargets();
+  CHECK(VS::Field::ResolveLiveRoomObjectTarget(target) == nullptr);
+  CHECK(VS::Field::InteractLiveRoomObject(target) ==
+        VS::Field::RoomObjectInteractionResult::kRefused);
 }
 
 TEST_CASE("Object interaction wait selects its mode before pausing",
@@ -2053,4 +2272,26 @@ TEST_CASE(
   CHECK(VS::Event::LiveScriptVm().EventId() == 12);
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
   CHECK(Event_EvaluateRoomEventTriggersEntry(4, 0, nullptr, 1) == 0);
+}
+
+TEST_CASE("Facing event entry dispatches adjacent tile through native triggers",
+          "[facing-query-live][room-triggers][event-vm-live]") {
+  TriggerFixture fixture;
+  auto& object = *fixture.snapshots.object;
+  object.tileX = 7;
+  object.tileZ = 10;
+  Field_gimmickInstances[0] = &object;
+  PublishTrigger({4, 0, 255, 255, 4, 12, 0, 8, 7, 9, 255});
+  CHECK(Field_TryTriggerFacingTileEventEntry(0) == 1);
+  CHECK(VS::Event::LiveScriptVm().EventId() == 12);
+  CHECK(VS::Event::LiveScriptVm().Phase() ==
+        VS::Event::PlaybackPhase::kRequested);
+  VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kRunning);
+  Event_isDirectEventRequest = 1;
+  CHECK(Field_TryTriggerFacingTileEventEntry(0) == 0);
+  VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
+  Event_isDirectEventRequest = 0;
+  object.tileZ = 11;
+  CHECK(Field_TryTriggerFacingTileEventEntry(0) == 0);
+  CHECK(VS::Event::LiveScriptVm().Phase() == VS::Event::PlaybackPhase::kIdle);
 }
