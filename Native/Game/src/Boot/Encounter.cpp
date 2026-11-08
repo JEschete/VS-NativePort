@@ -25,6 +25,8 @@
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
+#include "Field/ChestInteractionsLive.h"
+#include "Field/DoorRecordLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLive.hpp"
@@ -1078,7 +1080,7 @@ void ApplyPendingDoorRequest() {
     VS::Field::LiveBeginZoneTransition(&door, 0, kTransitionSpeed);
   }
   VS::Actors::ResetLiveActorRunMomentum(0);
-  Field_SetEntranceDoorRecord(reinterpret_cast<char (*)[sizeof(door)]>(&door));
+  VS::Field::SetLiveEntranceDoor(VS::Field::DoorRecordOf(door));
 }
 }  // namespace
 

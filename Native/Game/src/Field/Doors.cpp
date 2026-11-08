@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/SfxLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 extern "C" {
@@ -39,66 +38,6 @@ Field_MpdDoorRecord Field_entranceDoorRecord;
 void Field_StoreEntranceDoorForReload(void)
 {
     Audio_Seq_unusedStateFlags.doorEntered = Field_enteredDoorId + 1;
-}
-
-// decomp: BATTLE.PRG func_8008B8F8 (src/BATTLE/BATTLE.PRG/146C.c:16127)
-void Field_SetEntranceDoorRecord(char (*entrance_record)[12])
-{
-    if (entrance_record != NULL) {
-        int doorId;
-        VS::Core::Memory::CopyLiveAlignedWords(&Field_entranceDoorRecord, entrance_record, sizeof Field_entranceDoorRecord);
-        doorId = Field_SceneDoorId((*entrance_record)[8]);
-        Field_enteredDoorId = doorId;
-    } else {
-        VS::Core::Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
-        Field_enteredDoorId = -1;
-    }
-}
-
-// decomp: BATTLE.PRG func_8008B960 (src/BATTLE/BATTLE.PRG/146C.c:16140)
-void Field_FindEntranceDoorNearTile(int query_tile_x, int query_tile_z, int query_floor_layer)
-{
-    int door_count_or_scene_door_id;
-    int j;
-    Field_MpdDoorRecord* entrance_door_cursor;
-    int i;
-
-    if (Field_roomData.doors != 0) {
-        door_count_or_scene_door_id = Field_roomData.header.doorsLength / 12;
-        entrance_door_cursor = Field_roomData.doors;
-        for (i = 0; i < door_count_or_scene_door_id; ++i, ++entrance_door_cursor) {
-            if ((query_floor_layer >= 2) && ((&entrance_door_cursor->tileLocation)->floorLayer == query_floor_layer)) {
-                break;
-            }
-            if ((&entrance_door_cursor->tileLocation)->floorLayer == query_floor_layer) {
-                for (j = 0; j < 9; ++j) {
-                    int neighbor_tile_radius = 1;
-                    if (((&entrance_door_cursor->tileLocation)->tileX
-                            == ((query_tile_x - neighbor_tile_radius) + (j - ((j / 3) * 3))))
-                        && ((&entrance_door_cursor->tileLocation)->tileZ == ((query_tile_z - neighbor_tile_radius) + (j / 3)))) {
-                        break;
-                    }
-                }
-                if (j != 9) {
-                    break;
-                }
-            }
-        }
-        if (i == door_count_or_scene_door_id) {
-            entrance_door_cursor = NULL;
-        }
-    } else {
-        entrance_door_cursor = NULL;
-    }
-
-    if (entrance_door_cursor != NULL) {
-        VS::Core::Memory::CopyLiveAlignedWords(&Field_entranceDoorRecord, entrance_door_cursor, sizeof Field_entranceDoorRecord);
-        door_count_or_scene_door_id = Field_SceneDoorId(entrance_door_cursor->doorId);
-        Field_enteredDoorId = door_count_or_scene_door_id;
-    } else {
-        VS::Core::Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
-        Field_enteredDoorId = -1;
-    }
 }
 
 // decomp: BATTLE.PRG func_8008BC04 (src/BATTLE/BATTLE.PRG/146C.c:16215)

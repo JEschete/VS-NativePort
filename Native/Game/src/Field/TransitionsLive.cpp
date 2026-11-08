@@ -10,6 +10,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Core/Log.hpp"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorRecordLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
@@ -96,10 +97,10 @@ class LiveTransitionHost final : public TransitionHost {
   void BypassAshleyCollision() override {
     SetLiveActorCollisionBypass(kAshley, kBypassCollision);
   }
-  void ClearEntranceDoor() override { Field_SetEntranceDoorRecord(nullptr); }
+  void ClearEntranceDoor() override { SetLiveEntranceDoor(std::nullopt); }
   void FindEntranceDoorNearTile(int tile_x, int tile_z,
                                 int floor_layer) override {
-    Field_FindEntranceDoorNearTile(tile_x, tile_z, floor_layer);
+    FindLiveEntranceDoorNearTile(tile_x, tile_z, floor_layer);
   }
   void ReportRefusedLocation(int location_id) override {
     VS_LOG_WARN(kChannel, "teleport to location {} outside the {} locations",

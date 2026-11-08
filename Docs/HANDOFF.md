@@ -7,6 +7,33 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Entrance Door State (#276 Row 27)
+
+- F00577/F00578 now use existing strict interaction cores for complete entrance
+  record copy/clear and file-order door selection. Layer2+ selects by layer alone;
+  lower layers use the one-tile square. Native adapters copy door values, refuse
+  partial byte spans and retain original C/module8008B8F8/8008B960 bindings.
+  Existing transition and encounter callers adopt the typed APIs.
+- Original26MIPS `8008B8F8-8008B95C`, 90MIPS `8008B960-8008BAC4` and
+  50MIPS resolver `8008D880-8008D944` confirm record extent, unsigned byte8/result,
+  layer/neighbor selection and copy/clear ordering. Suspected generated signedness
+  was disconfirmed by actual native byte128-to254 tests; no speculative fix or
+  bug tracker was introduced.
+- Ten focused cases / 37 assertions; coupled50cases / 247assertions in both
+  configurations. Full Debug/Release each pass4,819tests / 8,902,301assertions,
+  zero failures/skips/regressions and unchanged canonical2,400/900frames.
+  Copier193/extent9 and quality five existing / zero new atjobs1 pass; two
+  supported generations preserve all1,738source/configuration/adoption hashes,
+  manifest `BA26FF34A7FC3175F66BEE117412181ABCCAEF6928496CEF9BFB7DB92D2D50A7`.
+- `VR-ENTRANCE-DOOR-STATE` and the six-file-to-zero old-symbol slice record
+  bounded source promotion. Unchanged gates derive2,719promoted/oneframewip,
+  zero violations; publication/exactCI remains pending. Raw scene-table/getter,
+  current-room/global/lifetime and controller/all-scene/reference acceptance
+  remain open. Row27continues with52generated functions; not whole-row completion.
+- Prior Ashley revision `6c63d9fc` has exact successful CI `42456492346`,
+  and #324 is closed at that fixing revision. The initialization policy remains
+  a native safety correction, not effect renderer or retail-value parity.
+
 ### Ashley Tile Dispatch (#276 Row 27, #324)
 
 - F00158 is a strict typed event/trap/door/cache/fall core in the existing
@@ -45,7 +72,8 @@ verification of the current worktree.
   five-to-zero old-symbol slice record bounded evidence. Unchanged gates derive
   2,717promoted/oneframewip/254verification records, zero violations; tracker
   reconciled; row27stillactive with54generated functions. This milestone's
-  publication/exactCI and324closure remain pending. #276/#321 and required
+  source promotion is published at6c63d9fc/exactsuccessfulCI42456492346 and324closed.
+  #276/#321 and required
   C/module/current-room/actor/event/effect globals/raw door/lifetime retirement
   remain open; do not stop at this checkpoint.
 

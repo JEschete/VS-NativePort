@@ -364,6 +364,8 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Field_SetEntranceDoorRecordEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_FindEntranceDoorNearTileEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_CheckAshleyTileTriggersEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_CheckActorTrapAndFallTriggersEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "VS::Field::LiveCollisionCellOrAbsent": r"Native\Game\include\Field\CollisionMapLive.hpp",
@@ -1085,6 +1087,8 @@ OWNED_CALL_BINDINGS["F00153"] = "Field_TryTriggerFacingTileEventEntry"
 OWNED_CALL_BINDINGS["F00154"] = "Field_FindFacingRoomObjectEntry"
 OWNED_CALL_BINDINGS["F00155"] = "Field_FindFacingUnlootedChestEntry"
 OWNED_CALL_BINDINGS["F00158"] = "Field_CheckAshleyTileTriggersEntry"
+OWNED_CALL_BINDINGS["F00577"] = "Field_SetEntranceDoorRecordEntry"
+OWNED_CALL_BINDINGS["F00578"] = "Field_FindEntranceDoorNearTileEntry"
 OWNED_CALL_BINDINGS["F00159"] = "Field_CheckActorTrapAndFallTriggersEntry"
 OWNED_CALL_BINDINGS["F00136"] = "Field_TryOpenChestEntry"
 OWNED_CALL_BINDINGS["F00138"] = "Field_BeginChestInteractionEntry"
@@ -2432,6 +2436,8 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x8008B8F8, "Field_SetEntranceDoorRecordEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008B960, "Field_FindEntranceDoorNearTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x80074BAC, "Field_CheckAshleyTileTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x800751B8, "Field_CheckActorTrapAndFallTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x80074860, "Field_TryTriggerFacingTileEventEntry"),

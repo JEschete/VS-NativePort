@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <vector>
 
 #include "Actors/ActorPlacement.hpp"
@@ -10,6 +11,25 @@
 #include "Field/InteractionTarget.hpp"
 
 namespace VS::Field {
+
+struct EntranceDoorState {
+  DoorRecord door{};
+  std::int16_t entered_door_id = -1;
+};
+
+class EntranceDoorHost {
+ public:
+  virtual ~EntranceDoorHost() = default;
+  virtual std::optional<std::uint8_t> SceneDoorId(std::uint8_t door_id) = 0;
+};
+
+void SetEntranceDoorRecord(EntranceDoorState& state,
+                           const std::optional<DoorRecord>& door,
+                           EntranceDoorHost& host);
+
+std::optional<DoorRecord> FindEntranceDoorNearTile(
+    std::span<const DoorRecord> doors, std::int32_t tile_x, std::int32_t tile_z,
+    std::int32_t floor_layer);
 
 struct ScriptedFallDestination {
   std::uint8_t zone_id = 0;

@@ -53,6 +53,15 @@ extern "C" {
 
 namespace {
 
+struct RecordingEntranceDoorHost final : VS::Field::EntranceDoorHost {
+  std::optional<std::uint8_t> scene_id;
+  std::optional<std::uint8_t> observed_id;
+  std::optional<std::uint8_t> SceneDoorId(std::uint8_t door_id) override {
+    observed_id = door_id;
+    return scene_id;
+  }
+};
+
 struct RecordingAshleyFallHost final : VS::Field::AshleyFallHost {
   std::optional<VS::Field::ScriptedFallDestination> destination;
   std::optional<std::int16_t> hp = 21;
@@ -609,6 +618,26 @@ struct ActorTileTriggerLiveFixture {
     Actors_actorRecords[2] = saved_record;
     Field_roomData = saved_room;
     Field_controlMode = saved_control;
+  }
+};
+
+struct SceneDoorIdFixture {
+  decltype(Field_roomData) saved_room = Field_roomData;
+  Field_MpdDoorRecord saved_entrance = Field_entranceDoorRecord;
+  decltype(Field_enteredDoorId) saved_id = Field_enteredDoorId;
+  std::array<std::uint32_t, 136> scene{};
+
+  SceneDoorIdFixture() {
+    scene[6] = 129;
+    scene[135] = 0xFE00;
+    Field_roomData = {};
+    Field_roomData.minimapScene =
+        reinterpret_cast<decltype(Field_roomData.minimapScene)>(scene.data());
+  }
+  ~SceneDoorIdFixture() {
+    Field_roomData = saved_room;
+    Field_entranceDoorRecord = saved_entrance;
+    Field_enteredDoorId = saved_id;
   }
 };
 
@@ -1476,6 +1505,141 @@ TEST_CASE("Facing event uses requested actor and computed adjacent tile",
   CHECK(host.evaluated->layer == 2);
   host.result = false;
   CHECK_FALSE(VS::Field::TryTriggerFacingTileEvent(3, host));
+}
+
+TEST_CASE("Entrance state copies complete door and unsigned scene identifier",
+          "[entrance-door-core][field]") {
+  RecordingEntranceDoorHost host;
+  host.scene_id = 254;
+  VS::Field::EntranceDoorState state;
+  const VS::Field::DoorRecord door{.destination_zone_id = 9,
+                                   .destination_room_id = 3,
+                                   .required_flag_value = 7,
+                                   .required_flag_id = 321,
+                                   .door_id = 128,
+                                   .reserved = {1, 2, 3}};
+  VS::Field::SetEntranceDoorRecord(state, door, host);
+  CHECK(state.door == door);
+  CHECK(state.entered_door_id == 254);
+  CHECK(host.observed_id == 128);
+}
+
+TEST_CASE("Entrance state clears absent records without scene lookup",
+          "[entrance-door-core][field]") {
+  RecordingEntranceDoorHost host;
+  VS::Field::EntranceDoorState state;
+  state.door.door_id = 128;
+  state.entered_door_id = 254;
+  VS::Field::SetEntranceDoorRecord(state, std::nullopt, host);
+  CHECK(state.door == VS::Field::DoorRecord{});
+  CHECK(state.entered_door_id == -1);
+  CHECK_FALSE(host.observed_id);
+}
+
+TEST_CASE("Entrance state preserves record when scene mapping is absent",
+          "[entrance-door-core][field]") {
+  RecordingEntranceDoorHost host;
+  VS::Field::EntranceDoorState state;
+  const VS::Field::DoorRecord door{.door_id = 128};
+  VS::Field::SetEntranceDoorRecord(state, door, host);
+  CHECK(state.door == door);
+  CHECK(state.entered_door_id == -1);
+  CHECK(host.observed_id == 128);
+}
+
+TEST_CASE("Scene door native resolver keeps original unsigned map byte",
+          "[scene-door-byte][field]") {
+  SceneDoorIdFixture fixture;
+  CHECK(Field_SceneDoorId(128) == 254);
+  CHECK(Field_SceneDoorId(-1) == -1);
+  CHECK(Field_SceneDoorId(129) == -1);
+}
+
+TEST_CASE("Entrance native setter keeps original unsigned door index byte",
+          "[scene-door-byte][field]") {
+  SceneDoorIdFixture fixture;
+  Field_MpdDoorRecord door{};
+  door.doorId = 128;
+  Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
+  CHECK(Field_enteredDoorId == 254);
+  CHECK(Field_entranceDoorRecord.doorId == 128);
+  Field_SetEntranceDoorRecordEntry(nullptr);
+  CHECK(Field_enteredDoorId == -1);
+}
+
+TEST_CASE("Typed entrance native setter preserves complete record and clear",
+          "[entrance-door-live][field]") {
+  SceneDoorIdFixture fixture;
+  Field_MpdDoorRecord door{};
+  door.doorId = 128;
+  door.requiredFlagId = 321;
+  door.requiredFlagValue = 7;
+  Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
+  CHECK(Field_enteredDoorId == 254);
+  CHECK(Field_entranceDoorRecord.doorId == 128);
+  CHECK(Field_entranceDoorRecord.requiredFlagId == 321);
+  CHECK(Field_entranceDoorRecord.requiredFlagValue == 7);
+  Field_SetEntranceDoorRecordEntry(nullptr);
+  CHECK(Field_enteredDoorId == -1);
+  CHECK(Field_entranceDoorRecord.doorId == 0);
+}
+
+TEST_CASE("Typed entrance live lookup keeps order upper layers and byte bounds",
+          "[entrance-door-live][field]") {
+  SceneDoorIdFixture fixture;
+  std::array<Field_MpdDoorRecord, 2> doors{};
+  doors[0].tileLocation.tileX = 2;
+  doors[0].tileLocation.tileZ = 3;
+  doors[0].doorId = 128;
+  doors[1].tileLocation.tileX = 7;
+  doors[1].tileLocation.tileZ = 7;
+  doors[1].tileLocation.floorLayer = 2;
+  Field_roomData.doors = doors.data();
+  Field_roomData.header.doorsLength = sizeof doors;
+  Field_FindEntranceDoorNearTileEntry(3, 3, 0);
+  CHECK(Field_enteredDoorId == 254);
+  CHECK(Field_entranceDoorRecord.tileLocation.tileX == 2);
+  Field_FindEntranceDoorNearTileEntry(50, 50, 2);
+  CHECK(Field_enteredDoorId == 0);
+  CHECK(Field_entranceDoorRecord.tileLocation.tileX == 7);
+  Field_roomData.header.doorsLength = sizeof doors - 1;
+  Field_FindEntranceDoorNearTileEntry(3, 3, 0);
+  CHECK(Field_enteredDoorId == -1);
+  CHECK(Field_entranceDoorRecord.doorId == 0);
+}
+
+TEST_CASE("Entrance native entries retain original module addresses",
+          "[entrance-door-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008B8F8) ==
+        reinterpret_cast<const void*>(&Field_SetEntranceDoorRecordEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008B960) ==
+        reinterpret_cast<const void*>(&Field_FindEntranceDoorNearTileEntry));
+}
+
+TEST_CASE("Entrance lookup preserves file order and one-tile boundaries",
+          "[entrance-door-core][field]") {
+  const std::array<VS::Field::DoorRecord, 3> doors{
+      VS::Field::DoorRecord{.tile_x = 3, .tile_z = 3, .floor_layer = 1},
+      VS::Field::DoorRecord{.tile_x = 2, .tile_z = 3},
+      VS::Field::DoorRecord{.tile_x = 3, .tile_z = 3}};
+  CHECK(VS::Field::FindEntranceDoorNearTile(doors, 3, 3, 0) == doors[1]);
+  CHECK_FALSE(VS::Field::FindEntranceDoorNearTile(doors, 5, 3, 0));
+  CHECK(VS::Field::FindEntranceDoorNearTile(doors, 4, 4, 0) == doors[2]);
+  CHECK_FALSE(VS::Field::FindEntranceDoorNearTile({}, 3, 3, 0));
+  CHECK_FALSE(VS::Field::FindEntranceDoorNearTile(doors, 3, 3, -1));
+}
+
+TEST_CASE("Entrance lookup upper layers ignore coordinates but keep layer",
+          "[entrance-door-core][field]") {
+  const std::array<VS::Field::DoorRecord, 2> doors{
+      VS::Field::DoorRecord{.tile_x = 3, .tile_z = 3, .floor_layer = 3},
+      VS::Field::DoorRecord{.tile_x = 7, .tile_z = 7, .floor_layer = 2}};
+  CHECK(VS::Field::FindEntranceDoorNearTile(doors, 100, 100, 2) == doors[1]);
+  CHECK(VS::Field::FindEntranceDoorNearTile(doors, -100, -100, 3) == doors[0]);
+  CHECK_FALSE(VS::Field::FindEntranceDoorNearTile(doors, 3, 3, 4));
 }
 
 TEST_CASE("Ashley tile event wins before trap door and fatal pit",

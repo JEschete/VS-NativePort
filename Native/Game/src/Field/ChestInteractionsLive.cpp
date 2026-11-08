@@ -153,6 +153,15 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
   }
 };
 
+class LiveEntranceDoorHost final : public VS::Field::EntranceDoorHost {
+ public:
+  std::optional<std::uint8_t> SceneDoorId(std::uint8_t door_id) override {
+    const auto scene_id = Field_SceneDoorId(door_id);
+    if (scene_id < 0) return std::nullopt;
+    return static_cast<std::uint8_t>(scene_id);
+  }
+};
+
 class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
  public:
   std::optional<VS::Field::ScriptedFallDestination> ScriptedDestination()
@@ -209,14 +218,7 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
     VS::Actors::ResetLiveActorRunMomentum(actor);
   }
   void SetEntrance(const std::optional<VS::Field::DoorRecord>& door) override {
-    if (!door) {
-      Field_SetEntranceDoorRecord(nullptr);
-      return;
-    }
-    Field_MpdDoorRecord record{};
-    VS::Field::StoreDoorRecord(*door, record);
-    Field_SetEntranceDoorRecord(
-        reinterpret_cast<char (*)[kOriginalDoorRecordBytes]>(&record));
+    VS::Field::SetLiveEntranceDoor(door);
   }
 };
 
@@ -776,6 +778,32 @@ class LiveObjectInteractionWaitHost final
 }  // namespace
 
 namespace VS::Field {
+void SetLiveEntranceDoor(const std::optional<DoorRecord>& door) {
+  EntranceDoorState state;
+  LiveEntranceDoorHost host;
+  SetEntranceDoorRecord(state, door, host);
+  StoreDoorRecord(state.door, Field_entranceDoorRecord);
+  Field_enteredDoorId = state.entered_door_id;
+}
+
+void FindLiveEntranceDoorNearTile(std::int32_t tile_x, std::int32_t tile_z,
+                                  std::int32_t layer) {
+  std::vector<DoorRecord> doors;
+  if (Field_roomData.doors != nullptr) {
+    const auto bytes = Field_roomData.header.doorsLength;
+    if (bytes % kOriginalDoorRecordBytes != 0) {
+      SetLiveEntranceDoor(std::nullopt);
+      return;
+    }
+    const auto count =
+        static_cast<std::size_t>(bytes / kOriginalDoorRecordBytes);
+    for (const auto& record : std::span(Field_roomData.doors, count)) {
+      doors.push_back(DoorRecordOf(record));
+    }
+  }
+  SetLiveEntranceDoor(FindEntranceDoorNearTile(doors, tile_x, tile_z, layer));
+}
+
 bool CheckLiveAshleyTileTriggers(std::int32_t actor,
                                  const Actors::ActorPlacementView& placement) {
   LiveAshleyTileHost host;
@@ -1005,6 +1033,21 @@ int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
 
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
 // decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
+void Field_SetEntranceDoorRecordEntry(
+    char (*input)[kFieldEntranceRecordBytes]) {
+  if (input == nullptr) {
+    VS::Field::SetLiveEntranceDoor(std::nullopt);
+    return;
+  }
+  Field_MpdDoorRecord record{};
+  std::memcpy(&record, input, sizeof record);
+  VS::Field::SetLiveEntranceDoor(VS::Field::DoorRecordOf(record));
+}
+
+void Field_FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer) {
+  VS::Field::FindLiveEntranceDoorNearTile(tile_x, tile_z, layer);
+}
+
 int Field_CheckAshleyTileTriggersEntry(int actor, unsigned char* input) {
   if (input == nullptr) return 0;
   Actors_ActorLocation location{};

@@ -8,6 +8,10 @@ struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Effects_ActionEffectRequest;
 struct Items_TreasureChest;
+enum { kFieldEntranceRecordBytes = 12 };
+void Field_SetEntranceDoorRecordEntry(
+    char (*record)[kFieldEntranceRecordBytes]);
+void Field_FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer);
 int Field_CheckAshleyTileTriggersEntry(int actor, unsigned char* location);
 int Field_CheckActorTrapAndFallTriggersEntry(
     int actor, struct Actors_ActorLocation* location);
@@ -44,6 +48,9 @@ extern "C++" {
 #include "Field/ChestInteractions.hpp"
 #include "Field/InteractionTarget.hpp"
 namespace VS::Field {
+void SetLiveEntranceDoor(const std::optional<DoorRecord>& door);
+void FindLiveEntranceDoorNearTile(std::int32_t tile_x, std::int32_t tile_z,
+                                  std::int32_t layer);
 bool CheckLiveAshleyTileTriggers(std::int32_t actor,
                                  const Actors::ActorPlacementView& placement);
 ActorTileTriggerResult CheckLiveActorTrapAndFallTriggers(
