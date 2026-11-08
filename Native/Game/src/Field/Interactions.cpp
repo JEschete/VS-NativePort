@@ -1,10 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorMatchesLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
@@ -37,7 +35,6 @@ extern "C" {
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
-#include "Menu/TextBox.h"
 #include "Render/Palette.h"
 
 // decomp: D_800F1910 (D_800F1910@BATTLE/BATTLE.PRG)
@@ -93,62 +90,6 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
         }
         break;
     }
-}
-
-// decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019)
-int Field_WaitForChestCameraFocus(void)
-{
-    SVECTOR interaction_camera_target;
-
-    interaction_camera_target.vx = (u_short)Field_interactionFocus.actor_query.location.position.vx;
-    interaction_camera_target.vy = (u_short)Field_interactionFocus.actor_query.location.position.vy;
-    interaction_camera_target.vz = (u_short)Field_interactionFocus.actor_query.location.position.vz;
-
-    if ((VS::Field::LiveStepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28) == 0)
-        && (((VS::Actors::LiveActorStateFlags(0) & 0x08000000) != 0))) {
-        return 0;
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_8007418C (src/BATTLE/BATTLE.PRG/146C.c:5034)
-int Field_StepTrapCameraFocus(void)
-{
-    SVECTOR interaction_camera_target;
-
-    interaction_camera_target.vx = (u_short)Field_interactionFocus.actor_query.location.position.vx;
-    interaction_camera_target.vy = (u_short)Field_interactionFocus.actor_query.location.position.vy;
-    interaction_camera_target.vz = (u_short)Field_interactionFocus.actor_query.location.position.vz;
-    return VS::Field::LiveStepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28);
-}
-
-// decomp: BATTLE.PRG func_8007424C (src/BATTLE/BATTLE.PRG/146C.c:5055)
-int Field_IsChestAnimationReady(void)
-{
-    int ret = 0;
-    if (VS::Actors::LiveActorStateFlags(0) & 0x08000000) {
-        ret = Menu_IsSceneNotificationPending() == 0;
-    }
-    return ret;
-}
-
-// decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089)
-int Field_TrackInteractionCameraToAshley(void)
-{
-    SVECTOR ashley_camera_target;
-    short ashley_placement_words[6];
-    int camera_tracking_speed;
-
-    VS::Actors::LiveActorPlacement(0, (Actors_ActorLocationQuery*)ashley_placement_words);
-    ashley_camera_target.vx = ashley_placement_words[2];
-    ashley_camera_target.vz = ashley_placement_words[4];
-    ashley_camera_target.vy = ashley_placement_words[3] - 0x5A;
-    camera_tracking_speed = VS::Field::LiveStepCameraLookAtTowardTarget(&ashley_camera_target, 1, 0x28);
-
-    if (VS::Actors::IsLiveAshleyTransitionPose() != 0) {
-        return 0;
-    }
-    return camera_tracking_speed;
 }
 
 // decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232)

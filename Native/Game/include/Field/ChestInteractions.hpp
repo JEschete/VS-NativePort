@@ -128,6 +128,24 @@ class TrapActionHost {
 bool TriggerActorTrap(TrapTarget target, const TrapActionInput& input,
                       TrapActionHost& host);
 
+class InteractionCameraHost {
+ public:
+  virtual ~InteractionCameraHost() = default;
+  virtual std::optional<TrapPosition> Focus() const = 0;
+  virtual std::optional<TrapPosition> AshleyPosition() const = 0;
+  virtual std::int32_t StepLookAt(const TrapPosition& point, std::int32_t mode,
+                                  std::int32_t speed) = 0;
+  virtual std::uint32_t AshleyStateFlags() const = 0;
+  virtual bool NotificationPending() = 0;
+  virtual bool AshleyTransitionPose() = 0;
+};
+
+bool WaitForChestCameraFocus(InteractionCameraHost& host);
+std::optional<std::int32_t> StepTrapCameraFocus(InteractionCameraHost& host);
+bool IsChestAnimationReady(InteractionCameraHost& host);
+std::optional<std::int32_t> TrackInteractionCameraToAshley(
+    InteractionCameraHost& host);
+
 class ObjectInteractionWaitHost {
  public:
   virtual ~ObjectInteractionWaitHost() = default;

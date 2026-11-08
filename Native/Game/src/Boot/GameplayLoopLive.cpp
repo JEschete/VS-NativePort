@@ -352,17 +352,17 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Field::LiveUpdateFirstPersonViewExit();
   }
   bool TrackInteractionCameraToAshley() override {
-    return Field_TrackInteractionCameraToAshley() != 0;
+    return Field_TrackInteractionCameraToAshleyEntry() != 0;
   }
   [[nodiscard]] bool IsCameraLookAtOnAshley() override {
     return VS::Field::LiveIsCameraLookAtOnAshley() != 0;
   }
 
   bool StepTrapCameraFocus() override {
-    return Field_StepTrapCameraFocus() != 0;
+    return Field_StepTrapCameraFocusEntry() != 0;
   }
   bool WaitForChestCameraFocus() override {
-    return Field_WaitForChestCameraFocus() != 0;
+    return Field_WaitForChestCameraFocusEntry() != 0;
   }
   void DispatchTrapOrChestInteraction() override {
     Field_DispatchTrapOrChestInteractionEntry();
@@ -372,7 +372,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
   void FinishTrapInteraction() override { Field_FinishTrapInteractionEntry(); }
   [[nodiscard]] bool IsChestAnimationReady() override {
-    return Field_IsChestAnimationReady() != 0;
+    return Field_IsChestAnimationReadyEntry() != 0;
   }
   void OpenChestContents() override { Field_OpenChestContentsEntry(); }
   bool UpdateChestContentsSelection() override {

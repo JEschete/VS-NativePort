@@ -200,6 +200,50 @@ struct RecordingTrapActionHost final : VS::Field::TrapActionHost {
   }
 };
 
+struct RecordingInteractionCameraHost final : VS::Field::InteractionCameraHost {
+  std::optional<VS::Field::TrapPosition> focus{
+      VS::Field::TrapPosition{1, 2, 3}};
+  std::optional<VS::Field::TrapPosition> ashley{
+      VS::Field::TrapPosition{4, 5, 6}};
+  std::int32_t speed = 0;
+  std::uint32_t flags = 0;
+  bool pending = false;
+  bool transition = false;
+  std::vector<std::int32_t> calls;
+  mutable std::size_t flag_reads = 0;
+  VS::Field::TrapPosition stepped{};
+  std::int32_t mode = -1;
+  std::int32_t requested_speed = 0;
+
+  std::optional<VS::Field::TrapPosition> Focus() const override {
+    return focus;
+  }
+  std::optional<VS::Field::TrapPosition> AshleyPosition() const override {
+    return ashley;
+  }
+  std::int32_t StepLookAt(const VS::Field::TrapPosition& point,
+                          std::int32_t step_mode,
+                          std::int32_t step_speed) override {
+    stepped = point;
+    mode = step_mode;
+    requested_speed = step_speed;
+    calls.push_back(0);
+    return speed;
+  }
+  std::uint32_t AshleyStateFlags() const override {
+    ++flag_reads;
+    return flags;
+  }
+  bool NotificationPending() override {
+    calls.push_back(1);
+    return pending;
+  }
+  bool AshleyTransitionPose() override {
+    calls.push_back(2);
+    return transition;
+  }
+};
+
 struct RecordingObjectInteractionWaitHost final
     : VS::Field::ObjectInteractionWaitHost {
   VS::Field::FieldControlMode mode = VS::Field::FieldControlMode::kNone;
@@ -942,6 +986,86 @@ TEST_CASE("Native trap action refuses invalid actor or stale target",
   CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, 17));
   CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, 0));
   Field_TriggerActorTrapEntry(nullptr, nullptr, -1);
+}
+
+TEST_CASE("Interaction camera focus wait preserves actor gate short circuit",
+          "[interaction-camera-core][field]") {
+  RecordingInteractionCameraHost host;
+  CHECK(VS::Field::WaitForChestCameraFocus(host));
+  host.flags = 0x08000000;
+  CHECK_FALSE(VS::Field::WaitForChestCameraFocus(host));
+  host.speed = 7;
+  const auto reads = host.flag_reads;
+  CHECK(VS::Field::WaitForChestCameraFocus(host));
+  CHECK(host.flag_reads == reads);
+  CHECK(host.mode == 0);
+  CHECK(host.requested_speed == 0x28);
+}
+
+TEST_CASE("Interaction camera missing focus performs no camera step",
+          "[interaction-camera-core][field]") {
+  RecordingInteractionCameraHost host;
+  host.focus.reset();
+  CHECK(VS::Field::WaitForChestCameraFocus(host));
+  CHECK_FALSE(VS::Field::StepTrapCameraFocus(host));
+  CHECK(host.calls.empty());
+  CHECK(host.flag_reads == 0);
+}
+
+TEST_CASE("Chest animation readiness observes notification only after actor",
+          "[interaction-camera-core][field]") {
+  RecordingInteractionCameraHost host;
+  CHECK_FALSE(VS::Field::IsChestAnimationReady(host));
+  CHECK(host.calls.empty());
+  host.flags = 0x08000000;
+  CHECK(VS::Field::IsChestAnimationReady(host));
+  host.pending = true;
+  CHECK_FALSE(VS::Field::IsChestAnimationReady(host));
+  CHECK(host.calls == std::vector<std::int32_t>{1, 1});
+}
+
+TEST_CASE("Interaction camera returns from Ashley with original halfword wrap",
+          "[interaction-camera-core][field]") {
+  RecordingInteractionCameraHost host;
+  host.ashley = VS::Field::TrapPosition{123, -32768, -234};
+  host.speed = 9;
+  CHECK(VS::Field::TrackInteractionCameraToAshley(host) == 9);
+  CHECK(host.stepped == VS::Field::TrapPosition{123, 32678, -234});
+  CHECK(host.mode == 1);
+  CHECK(host.calls == std::vector<std::int32_t>{0, 2});
+  host.transition = true;
+  CHECK(VS::Field::TrackInteractionCameraToAshley(host) == 0);
+  host.ashley.reset();
+  host.calls.clear();
+  CHECK_FALSE(VS::Field::TrackInteractionCameraToAshley(host));
+  CHECK(host.calls.empty());
+}
+
+TEST_CASE("Interaction camera entries retain all original module addresses",
+          "[interaction-camera-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80074120) ==
+        reinterpret_cast<const void*>(&Field_WaitForChestCameraFocusEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8007418C) ==
+        reinterpret_cast<const void*>(&Field_StepTrapCameraFocusEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8007424C) ==
+        reinterpret_cast<const void*>(&Field_IsChestAnimationReadyEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80074374) ==
+        reinterpret_cast<const void*>(
+            &Field_TrackInteractionCameraToAshleyEntry));
+}
+
+TEST_CASE("Interaction camera entries refuse an absent target focus",
+          "[interaction-camera-live][field]") {
+  const auto saved = VS::Field::LiveInteractionTargetState();
+  VS::Field::LiveInteractionTargetState().Clear();
+  CHECK(Field_WaitForChestCameraFocusEntry() == 1);
+  CHECK(Field_StepTrapCameraFocusEntry() == 0);
+  VS::Field::LiveInteractionTargetState() = saved;
 }
 
 TEST_CASE("Object interaction wait selects its mode before pausing",

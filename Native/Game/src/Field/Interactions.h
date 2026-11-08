@@ -17,10 +17,6 @@
 extern Field_InteractionFocus Field_interactionFocus;
 extern u_int Field_controlMode;
 void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position);
-int Field_WaitForChestCameraFocus(void);
-int Field_StepTrapCameraFocus(void);
-int Field_IsChestAnimationReady(void);
-int Field_TrackInteractionCameraToAshley(void);
 int Field_TileInFrontOfActor(Actors_ActorLocationQuery* actor_placement, u_char* output_facing_tile);
 int Field_TryTriggerFacingTileEvent(int actor_index);
 Field_MpdLockTrigger* Field_FindFacingRoomObject(int actor_index);

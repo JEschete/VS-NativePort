@@ -7,6 +7,10 @@ struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Effects_ActionEffectRequest;
+int Field_WaitForChestCameraFocusEntry(void);
+int Field_StepTrapCameraFocusEntry(void);
+int Field_IsChestAnimationReadyEntry(void);
+int Field_TrackInteractionCameraToAshleyEntry(void);
 void Field_TriggerActorTrapEntry(struct Field_MpdLockTrigger* address,
                                  struct Actors_ActorLocationQuery* location,
                                  int actor);

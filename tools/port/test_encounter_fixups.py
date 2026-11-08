@@ -440,6 +440,14 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+            ("F00139", "Field_WaitForChestCameraFocusEntry", "VS::Field::WaitForChestCameraFocus",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00140", "Field_StepTrapCameraFocusEntry", "VS::Field::StepTrapCameraFocus",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00142", "Field_IsChestAnimationReadyEntry", "VS::Field::IsChestAnimationReady",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
+            ("F00146", "Field_TrackInteractionCameraToAshleyEntry", "VS::Field::TrackInteractionCameraToAshley",
+             r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00135", "Field_TriggerActorTrapEntry", "VS::Field::TriggerActorTrap",
              r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00134", "Field_InteractWithLockedRoomObjectEntry", "VS::Field::InteractWithLockedRoomObject",
@@ -995,6 +1003,10 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00139": ("Field_WaitForChestCameraFocusEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00140": ("Field_StepTrapCameraFocusEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00142": ("Field_IsChestAnimationReadyEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00146": ("Field_TrackInteractionCameraToAshleyEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00135": ("Field_TriggerActorTrapEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00134": ("Field_InteractWithLockedRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00132": ("Field_BeginObjectInteractionWaitEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),

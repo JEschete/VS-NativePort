@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 2708 | owned functions |
-| 2708 | owned functions in C++ sources |
-| 1042 | generated function rows |
+| 2712 | owned functions |
+| 2712 | owned functions in C++ sources |
+| 1038 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 2,707 | 0 | 1,500 |
-| `cpp` | 2,707 | 1 (`wip`) | 1,499 |
+| `modernized` | 2,711 | 0 | 1,496 |
+| `cpp` | 2,711 | 1 (`wip`) | 1,495 |
 | `verified` | 49 | 0 | 4,158 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 2708 |
-| `vs_namespace` | 2707 |
-| `typed_interface` | 2707 |
-| `no_bridge` | 2707 |
-| `strict_clean` | 2708 |
-| `behavior_evidence` | 2707 |
+| `source_cpp` | 2712 |
+| `vs_namespace` | 2711 |
+| `typed_interface` | 2711 |
+| `no_bridge` | 2711 |
+| `strict_clean` | 2712 |
+| `behavior_evidence` | 2711 |
 
-Promotion records: 2708; derived `cpp=x`: 2707, `cpp=wip`: 1. Verification records: 247; `verified=x` markers: 49.
+Promotion records: 2712; derived `cpp=x`: 2711, `cpp=wip`: 1. Verification records: 248; `verified=x` markers: 49.
 
 <!-- gates:end -->
 
@@ -100,8 +100,8 @@ read the global game state named in each slice's limits, and those compatibility
 ### Generated-function cohort (#276)
 
 The original cohort is the 3,479 `copy=yes` rows without `cpp` at `04d47338`.
-At the 2026-11-07 trap-action reconciliation over published `6e172399`, 2,425
-derive `cpp=x`, 11 are retired, 1,042 remain generated/unpromoted and one owned
+At the 2026-11-07 camera/wait reconciliation over published `525d182e`, 2,429
+derive `cpp=x`, 11 are retired, 1,038 remain generated/unpromoted and one owned
 textbox-frame entry (F01416) remains `wip`.
 This is about 70% resolved; the total promoted count above also includes functions
 outside that original cohort and must not be divided by 3,479.
@@ -112,8 +112,10 @@ object-wait and ordinary-lock milestones are published with exact successful CI.
 #287 and #318/#319/#320 are closed. The F00135/#322 slice now has a typed action
 contract, fully initialized compatibility request, original module binding,
 all-room-kind package initialization audit and actual Debug/Release trap damage
-and return evidence. #322 remains open until its fixing revision is published
-with successful exact-revision CI. #321 tracks the invisible active chest loot panel separately.
+and return evidence. #322 is closed at fixing `525d182e`, exact successful CI
+`42433562058`. The four interaction camera/wait functions are now locally
+promoted with full dual-configuration/replay/workflow evidence; their new
+publication/CI gate is pending. #321 tracks the invisible active chest loot panel separately.
 Remaining row-27 functions, later planned slices and the final closing-revision
 Debug/Release, replay, generation, quality and CI gates are still required.
 

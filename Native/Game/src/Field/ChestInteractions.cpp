@@ -1,5 +1,7 @@
 #include "Field/ChestInteractions.hpp"
 
+#include <bit>
+
 namespace VS::Field {
 namespace {
 
@@ -28,6 +30,9 @@ constexpr std::int16_t kRoomSigilUnlockFlagValue = 2;
 constexpr std::int32_t kTrapActorSlots = 17;
 constexpr std::int16_t kTrapKindLimit = 0x10;
 constexpr std::uint16_t kTrapActionBase = 6;
+constexpr std::uint32_t kInteractionAnimationReady = 0x08000000;
+constexpr std::int32_t kInteractionCameraSpeed = 0x28;
+constexpr std::int32_t kInteractionCameraReturnOffset = 0x5A;
 
 std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
   if (state.lock_state == kKeyLock) {
@@ -226,6 +231,47 @@ bool TriggerActorTrap(TrapTarget target, const TrapActionInput& input,
       .effect_id = static_cast<std::uint16_t>(*effect_kind + kTrapActionBase),
       .actor = input.actor,
       .source_position = std::nullopt});
+}
+
+// decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019).
+bool WaitForChestCameraFocus(InteractionCameraHost& host) {
+  const auto focus = host.Focus();
+  if (!focus) {
+    return true;
+  }
+  return host.StepLookAt(*focus, 0, kInteractionCameraSpeed) != 0 ||
+         (host.AshleyStateFlags() & kInteractionAnimationReady) == 0;
+}
+
+// decomp: BATTLE.PRG func_8007418C (src/BATTLE/BATTLE.PRG/146C.c:5034).
+std::optional<std::int32_t> StepTrapCameraFocus(InteractionCameraHost& host) {
+  const auto focus = host.Focus();
+  if (!focus) {
+    return std::nullopt;
+  }
+  return host.StepLookAt(*focus, 0, kInteractionCameraSpeed);
+}
+
+// decomp: BATTLE.PRG func_8007424C (src/BATTLE/BATTLE.PRG/146C.c:5055).
+bool IsChestAnimationReady(InteractionCameraHost& host) {
+  if ((host.AshleyStateFlags() & kInteractionAnimationReady) == 0) {
+    return false;
+  }
+  return !host.NotificationPending();
+}
+
+// decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089).
+std::optional<std::int32_t> TrackInteractionCameraToAshley(
+    InteractionCameraHost& host) {
+  auto point = host.AshleyPosition();
+  if (!point) {
+    return std::nullopt;
+  }
+  const auto y = static_cast<std::uint16_t>(
+      static_cast<std::int32_t>(point->y) - kInteractionCameraReturnOffset);
+  point->y = std::bit_cast<std::int16_t>(y);
+  const auto speed = host.StepLookAt(*point, 1, kInteractionCameraSpeed);
+  return host.AshleyTransitionPose() ? 0 : speed;
 }
 
 // decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).

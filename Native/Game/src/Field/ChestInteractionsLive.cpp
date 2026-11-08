@@ -58,6 +58,42 @@ constexpr std::int32_t kTrapPrimaryTargetPosition = 3;
 constexpr std::uint16_t kTrapSourcePointType = 5;
 constexpr std::uint16_t kTrapActorTargetType = 4;
 
+class LiveInteractionCameraHost final
+    : public VS::Field::InteractionCameraHost {
+ public:
+  std::optional<VS::Field::TrapPosition> Focus() const override {
+    const auto domain = VS::Field::LiveInteractionTargetDomain();
+    const auto& target = VS::Field::LiveInteractionTargetState();
+    if (target.Trap(domain) == nullptr && target.Chest(domain) == nullptr) {
+      return std::nullopt;
+    }
+    const auto& point = Field_interactionFocus.actor_query.location.position;
+    return VS::Field::TrapPosition{point.vx, point.vy, point.vz};
+  }
+  std::optional<VS::Field::TrapPosition> AshleyPosition() const override {
+    const auto actor = VS::Actors::LiveActorPlacementView(0);
+    if (!actor) {
+      return std::nullopt;
+    }
+    return VS::Field::TrapPosition{actor->position.x, actor->position.y,
+                                   actor->position.z};
+  }
+  std::int32_t StepLookAt(const VS::Field::TrapPosition& point,
+                          std::int32_t mode, std::int32_t speed) override {
+    SVECTOR target{point.x, point.y, point.z, 0};
+    return VS::Field::LiveStepCameraLookAtTowardTarget(&target, mode, speed);
+  }
+  std::uint32_t AshleyStateFlags() const override {
+    return VS::Actors::LiveActorStateFlags(0);
+  }
+  bool NotificationPending() override {
+    return Menu_IsSceneNotificationPending() != 0;
+  }
+  bool AshleyTransitionPose() override {
+    return VS::Actors::IsLiveAshleyTransitionPose() != 0;
+  }
+};
+
 class LiveTrapActionHost final : public VS::Field::TrapActionHost {
  public:
   bool HasActionState(const VS::Field::TrapActionInput& input) const override {
@@ -563,4 +599,28 @@ void Field_TriggerActorTrapEntry(Field_MpdLockTrigger* address,
     static_cast<void>(VS::Field::TriggerLiveActorTrap(
         *target, {.x = point.vx, .y = point.vy, .z = point.vz}, actor));
   }
+}
+
+// decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019).
+int Field_WaitForChestCameraFocusEntry() {
+  LiveInteractionCameraHost host;
+  return VS::Field::WaitForChestCameraFocus(host) ? 1 : 0;
+}
+
+// decomp: BATTLE.PRG func_8007418C (src/BATTLE/BATTLE.PRG/146C.c:5034).
+int Field_StepTrapCameraFocusEntry() {
+  LiveInteractionCameraHost host;
+  return VS::Field::StepTrapCameraFocus(host).value_or(0);
+}
+
+// decomp: BATTLE.PRG func_8007424C (src/BATTLE/BATTLE.PRG/146C.c:5055).
+int Field_IsChestAnimationReadyEntry() {
+  LiveInteractionCameraHost host;
+  return VS::Field::IsChestAnimationReady(host) ? 1 : 0;
+}
+
+// decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089).
+int Field_TrackInteractionCameraToAshleyEntry() {
+  LiveInteractionCameraHost host;
+  return VS::Field::TrackInteractionCameraToAshley(host).value_or(0);
 }

@@ -7,6 +7,38 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Interaction Camera Waits (#276 Row 27)
+
+- F00139/F00140/F00142/F00146 are strict typed focus/readiness/return-camera
+  cores. Live uses checked current target identity and typed actor placement;
+  the old short-array actor-query alias is removed. Original C/module entries
+  `80074120`, `8007418C`, `8007424C`, `80074374` remain required bindings.
+- Original instruction ranges confirm unsigned halfword copies, negative90
+  adjustment followed by halfword store, camera-before-actor wait gate and
+  camera-before-transition-pose order. Six focused / 28 assertions and coupled
+  28 / 183 pass in Debug/Release; final full 4,761 / 8,639,874 each, zero
+  failures/skips/regressions; both canonical fingerprints unchanged.
+- Current original MAP124 chest unlock/cancel/return runs Debug
+  `1794101435674508-0`, Release `1794101499012482-0`: 486 mode9 frames,
+  lock0/key465count10, finalfield1phase0. This is not complete loot claiming.
+  MAP015 trap runs Debug `1794101217528954-0`, Release `1794101518481790-0`
+  activate the trigger, spend132frames in mode8 and return tofield1phase0.
+- Trap damage is not run-stable under the fixture's setup seed: identical
+  current fixed-counter Debug diagnostics ended HP195 and190, both with the
+  same mode transitions. Encounter setup seeds shuffle/interface while combat
+  calls its real RNG. These observations do not prove a camera regression or
+  deterministic damage parity; original math/order tests and unchanged
+  canonical fingerprints remain the regression gates. No baseline was changed.
+- Copier191 / extent9 controls, editor diagnostics and quality five existing /
+  zero new pass. Two measured generations preserve1,733path hashes; manifest
+  `42B717F74E2AA51C48FBE5FD4EBD17B185F7AE25D1595772B957F77B028F3349`.
+  `VR-INTERACTION-CAMERA-WAITS` and four-to-zero old code-consumer slice record
+  this bounded source promotion. Current gates2,711promoted/oneframewip,
+  zero violations; modernized function tracker is reconciled, not stale.
+- #322 is closed at525d182e with exact green42433562058. Publish this four-row
+  slice and verify its exact CI. Remaining row27/#276/#321, required C/module/
+  camera globals and broader compatibility retirement stay open.
+
 ### Trap Action Initialization (#322, #276 Row 27)
 
 - Latest published audit `6e17239902b0767893aefa6bc231a94f7c308c5d` has exact
@@ -72,8 +104,8 @@ verification of the current worktree.
   rejection of missing/empty members; F01416 is tracked in its existing row52.
   `VR-TRAP-ACTION-INITIALIZATION` and its four-to-zero code-consumer slice support
   source promotion. Current gates derive2,707 promoted / one framewip with zero
-  violations. Publish this fixing slice and confirm its exact CI before closing
-  #322; remaining row27/#276/#321 and global retirement stay open.
+  violations. Published fixing slice is `525d182e`, exact successful CI
+  `42433562058`; #322 is closed. Remaining row27/#276/#321 and global retirement stay open.
 
 ### Ordinary Room-Object Locks (#276 Row 27)
 
