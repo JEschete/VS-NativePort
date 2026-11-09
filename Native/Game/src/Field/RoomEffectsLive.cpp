@@ -225,6 +225,12 @@ int LiveHideRoomGeometryGroup(int group_index) {
   return Flag(HideRoomGeometryGroup(host.Geometry(), group_index));
 }
 
+bool LiveSetRoomGeometryGroupPosition(int group_index,
+                                      const RoomEffectPosition& position) {
+  LiveHost host;
+  return SetRoomGeometryGroupPosition(host.Geometry(), group_index, position);
+}
+
 int LiveSwapRoomGeometryGroupFlags(int first_group_index,
                                    int second_group_index) {
   LiveHost host;

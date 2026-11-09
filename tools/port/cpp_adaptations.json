@@ -466,10 +466,10 @@
 [
 161,
 [
-"    i = Field_CollectMovingPlatformPositions((void*)points);"
+"    i = Field_CollectMovingPlatformPositionsEntry((void*)points);"
 ],
 [
-"    i = Field_CollectMovingPlatformPositions((Field_PlatformContactPoint *)((void*)points));"
+"    i = Field_CollectMovingPlatformPositionsEntry((Field_PlatformContactPoint *)((void*)points));"
 ]
 ],
 [
@@ -2280,125 +2280,6 @@
 ],
 [
 "    Event_camera = (Event_CameraState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera));"
-]
-]
-],
-"Native\\Game\\src\\Field\\Gimmicks.cpp": [
-[
-374,
-[
-"        return;"
-],
-[
-"        return 0;"
-]
-],
-[
-387,
-[
-"        return;"
-],
-[
-"        return 0;"
-]
-],
-[
-529,
-[
-"        polygon = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"        polygon = (POLY_F4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-816,
-[
-"    created_gimmick = Field_gimmickInstances[asset_request->targetSlot] = asset_request->destination;"
-],
-[
-"    created_gimmick = Field_gimmickInstances[asset_request->targetSlot] = (Field_GimmickInstance *)(asset_request->destination);"
-]
-],
-[
-837,
-[
-"        template_or_polygon_section = Field_gimmickModelTemplates[Field_gimmickTemplateIndices[asset_request->subKind]];"
-],
-[
-"        template_or_polygon_section = (Field_GimmickTemplate *)(Field_gimmickModelTemplates[Field_gimmickTemplateIndices[asset_request->subKind]]);"
-]
-],
-[
-841,
-[
-"        created_gimmick->model = VS::Content::CopyLiveModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize);"
-],
-[
-"        created_gimmick->model = (Actors_ShpModel *)(VS::Content::CopyLiveModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize));"
-]
-],
-[
-848,
-[
-"        template_or_polygon_section = VS_ONDISC(created_gimmick->model, polygonSection, void *);"
-],
-[
-"        template_or_polygon_section = (Field_GimmickTemplate *)(VS_ONDISC(created_gimmick->model, polygonSection, void *));"
-]
-],
-[
-1579,
-[
-"    Render_ModelScratchpadAnglesView* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);"
-],
-[
-"    Render_ModelScratchpadAnglesView* scratch = (Render_ModelScratchpadAnglesView *)((void*)((uintptr_t)Core_ScratchBase() + 0x35C));"
-]
-],
-[
-1661,
-[
-"        if (!((int (*)())Field_UpdateGimmickReactionAnimation)(object)) {"
-],
-[
-"        if (!((int (*)(...))Field_UpdateGimmickReactionAnimation)(object)) {"
-]
-],
-[
-1737,
-[
-"            child = (void*)Field_gimmickInstances[step];"
-],
-[
-"            child = (Field_GimmickPhysicsView *)((void*)Field_gimmickInstances[step]);"
-]
-],
-[
-1750,
-[
-"        ((int (*)())Field_UpdateGimmickReactionAnimation)(object);"
-],
-[
-"        ((int (*)(...))Field_UpdateGimmickReactionAnimation)(object);"
-]
-],
-[
-1753,
-[
-"        if (((int (*)())Field_UpdateGimmickReactionAnimation)(object)) {"
-],
-[
-"        if (((int (*)(...))Field_UpdateGimmickReactionAnimation)(object)) {"
-]
-],
-[
-1761,
-[
-"        ((int (*)())Field_UpdateGimmickReactionAnimation)(object);"
-],
-[
-"        ((int (*)(...))Field_UpdateGimmickReactionAnimation)(object);"
 ]
 ]
 ],

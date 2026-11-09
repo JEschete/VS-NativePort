@@ -65,6 +65,38 @@ class EncounterFixupTests(unittest.TestCase):
                         self.assertNotIn(None, row)
                         self.assertNotIn(None, row.values())
 
+    def test_sigil_coordinate_accessor_is_retired_without_module_consumers(self):
+        with (copy_to_native.LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8", newline="") as table:
+            row = next(row for row in csv.DictReader(table) if row["id"] == "F00632")
+        self.assertEqual((row["copy"], row["copied"]), ("no", "retired"))
+        self.assertIn("retired-by:VS::Field::SigilDoorRoomPair", row["notes"])
+        self.assertFalse(any(identifier == "F00632" for _, _, identifier in copy_fixups.MODULE_FUNCTION_ENTRIES))
+        self.assertNotIn("F00632", copy_fixups.OWNED_CALL_BINDINGS)
+
+    def test_room_door_getter_retires_after_typed_unlock_consumer_adoption(self):
+        with (copy_to_native.LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8", newline="") as table:
+            row = next(row for row in csv.DictReader(table) if row["id"] == "F00623")
+        self.assertEqual((row["copy"], row["copied"]), ("no", "retired"))
+        self.assertFalse(any(identifier == "F00623" for _, _, identifier in copy_fixups.MODULE_FUNCTION_ENTRIES))
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F00067"], "Field_ApplyUnlockEffectToRoomObjectEntry")
+
+    def test_active_trigger_getter_retires_after_typed_targeting_adoption(self):
+        with (copy_to_native.LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8", newline="") as table:
+            row = next(row for row in csv.DictReader(table) if row["id"] == "F00624")
+        self.assertEqual((row["copy"], row["copied"]), ("no", "retired"))
+        self.assertFalse(any(identifier == "F00624" for _, _, identifier in copy_fixups.MODULE_FUNCTION_ENTRIES))
+        self.assertNotIn("F00624", copy_fixups.OWNED_CALL_BINDINGS)
+        source = (copy_to_native.REPO / "Native/Game/src/Battle/TargetingLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("LiveActiveRoomTriggerInfo()", source)
+        self.assertNotIn("Field_ActiveRoomTriggers(", source)
+
+    def test_unused_platform_clear_alias_retires_without_module_binding(self):
+        with (copy_to_native.LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8", newline="") as table:
+            row = next(row for row in csv.DictReader(table) if row["id"] == "F00592")
+        self.assertEqual((row["copy"], row["copied"]), ("no", "retired"))
+        self.assertFalse(any(identifier == "F00592" for _, _, identifier in copy_fixups.MODULE_FUNCTION_ENTRIES))
+        self.assertNotIn("F00592", copy_fixups.OWNED_CALL_BINDINGS)
+
     def test_texture_animations_use_the_callers_overlay_atlas(self):
         copier = object.__new__(copy_to_native.Copier)
         copier.used_fixups = set()
@@ -509,12 +541,100 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
+              ("F00782", "Field_CreateGimmickInstanceEntry", "VS::Field::CreateGimmickInstance",
+               r"Native\Game\include\Field\GimmickResources.hpp"),
+              ("F00837", "Field_FindGimmickBelowEntry", "VS::Field::FindGimmickBelow",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00838", "Field_GimmickSubtypeEntry", "VS::Field::GimmickSubtype",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00917", "Field_AreGimmicksMovingEntry", "VS::Field::AreGimmicksMoving",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F02468", "Field_MeasureTileStackEntry", "VS::Field::MeasureTileStack",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F02469", "Field_IsGimmickWithinHeightBandEntry", "VS::Field::IsGimmickWithinHeightBand",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00854", "Field_SetGimmickOrientationEntry", "VS::Field::SetGimmickOrientation",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00912", "Field_CanPlaceGimmickAtPointEntry", "VS::Field::CanPlaceGimmickAtPoint",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00836", "Field_DropUnsupportedGimmickStackEntry", "VS::Field::DropUnsupportedGimmickStack",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00908", "Field_FindInteractableGimmickAheadEntry", "VS::Field::FindInteractableGimmickAhead",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00913", "Field_BeginGimmickInteractionEntry", "VS::Field::BeginGimmickInteraction",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00914", "Field_ApplyGimmickInteractionCommandEntry", "VS::Field::ApplyGimmickInteractionCommand",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F01014", "Field_UpdateGimmickReactionAnimationEntry", "VS::Field::UpdateGimmickReactionAnimation",
+               r"Native\Game\include\Field\GimmickReactions.hpp"),
+              ("F01013", "Field_UpdateGimmickMotionEntry", "VS::Field::UpdateGimmickMotion",
+               r"Native\Game\include\Field\GimmickDynamics.hpp"),
+              ("F00065", "Field_DisableTrapAtPositionEntry", "VS::Field::DisableTrapAtPosition",
+               r"Native\Game\include\Field\InteractionTarget.hpp"),
+              ("F00602", "Field_RoomTriggerAtTileEntry", "VS::Field::FindRoomTriggerAtTile",
+               r"Native\Game\include\Field\InteractionTarget.hpp"),
+              ("F00616", "Field_SetRoomTriggerEnabledEntry", "VS::Field::SetRoomTriggerEnabled",
+               r"Native\Game\include\Field\InteractionTarget.hpp"),
+              ("F00942", "Field_FindTopGimmickAtTileEntry", "VS::Field::FindTopGimmickAtTile",
+               r"Native\Game\include\Field\GimmickPlacement.hpp"),
+              ("F00783", "Field_ReleaseGimmickInstanceEntry", "VS::Field::ReleaseGimmickInstance",
+               r"Native\Game\include\Field\GimmickResources.hpp"),
+              ("F00780", "Field_FindSharedGimmickModelEntry", "VS::Field::FindSharedGimmickModel",
+               r"Native\Game\include\Field\GimmickResources.hpp"),
+              ("F00781", "Field_SetGimmickPaletteTableEntry", "VS::Field::SetGimmickPaletteTable",
+               r"Native\Game\include\Field\GimmickResources.hpp"),
+            ("F00620", "Field_MovingPlatformTargetWaypointEntry", "VS::Field::MovingPlatformTargetWaypoint",
+             r"Native\Game\include\Field\PlatformPlacement.hpp"),
+            ("F00629", "Field_SetPlatformFreezeAppearanceEntry", "VS::Field::SetPlatformFreezeAppearance",
+             r"Native\Game\include\Field\PlatformPlacement.hpp"),
+            ("F00596", "Field_DrawMovingPlatformShadowsEntry", "VS::Field::DrawMovingPlatformShadows",
+             r"Native\Game\include\Field\PlatformPlacement.hpp"),
+            ("F00595", "Field_UpdateMovingPlatformsEntry", "VS::Field::UpdateMovingPlatforms",
+             r"Native\Game\include\Field\PlatformPlacement.hpp"),
+            ("F00597", "Field_CollectMovingPlatformPositionsEntry", "VS::Field::CollectMovingPlatformPositions",
+             r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00593", "Field_InitializeMovingPlatformsEntry", "VS::Field::InitializeMovingPlatforms",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00594", "Field_ResetMovingPlatformWaypointEntry", "VS::Field::ResetMovingPlatformWaypoint",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00591", "Field_SetMovingPlatformActorEntry", "VS::Field::SetMovingPlatformActor",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00604", "Field_SetMovingPlatformsPausedEntry", "VS::Field::SetMovingPlatformsPaused",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00605", "Field_FreezeMovingPlatformsEntry", "VS::Field::FreezeMovingPlatforms",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00066", "Field_FreezeRoomGimmicksTemporarilyEntry", "VS::Field::FreezeRoomGimmicksTemporarily",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00619", "Field_SetMovingPlatformVisibilityEntry", "VS::Field::SetMovingPlatformVisibility",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00621", "Field_MovingPlatformDwellTicksEntry", "VS::Field::MovingPlatformDwellTicks",
+               r"Native\Game\include\Field\PlatformPlacement.hpp"),
+              ("F00067", "Field_ApplyUnlockEffectToRoomObjectEntry", "VS::Field::ApplyUnlockEffectToRoomObject",
+               r"Native\Game\include\Field\ChestInteractions.hpp"),
+              ("F00581", "Field_ToggleDoorCollisionEntry", "VS::Field::ToggleDoorCollision",
+               r"Native\Game\include\Field\RoomSwitches.hpp"),
+              ("F00582", "Field_BeginDoorToggleEntry", "VS::Field::BeginDoorToggle",
+               r"Native\Game\include\Field\RoomSwitches.hpp"),
+              ("F00583", "Field_StartDoorAnimationEntry", "VS::Field::StartDoorAnimation",
+               r"Native\Game\include\Field\RoomSwitches.hpp"),
+              ("F00586", "Field_FinishDoorAnimationEntry", "VS::Field::FinishDoorAnimation",
+               r"Native\Game\include\Field\RoomSwitches.hpp"),
+            ("F00580", "Field_InteractiveDoorAtTileEntry", "VS::Field::InteractiveDoorAtTile",
+             r"Native\Game\include\Field\RoomSwitches.hpp"),
+            ("F00633", "Field_MarkSigilDoorUnlockedEntry", "VS::Field::MarkSigilDoorUnlocked",
+             r"Native\Game\include\Field\RoomSwitches.hpp"),
+            ("F00634", "Field_IsRoomSigilDoorUnlockedEntry", "VS::Field::RoomSigilDoorUnlockByte",
+             r"Native\Game\include\Field\RoomSwitches.hpp"),
+            ("F00610", "Field_SceneDoorIdEntry", "VS::Field::SceneDoorId",
+             r"Native\Game\include\Field\MinimapScene.hpp"),
+            ("F00611", "Field_MarkEntranceDoorOnSceneMapEntry", "VS::Field::MarkEntranceDoorOnSceneMap",
+             r"Native\Game\include\Field\MinimapScene.hpp"),
             ("F00552", "Field_StoreEntranceDoorForReloadEntry", "VS::Field::EnteredDoorReloadByte",
-             r"Native\Game\include\Field\ChestInteractions.hpp"),
+             r"Native\Game\include\Field\Transitions.hpp"),
             ("F00577", "Field_SetEntranceDoorRecordEntry", "VS::Field::SetEntranceDoorRecord",
-             r"Native\Game\include\Field\ChestInteractions.hpp"),
+             r"Native\Game\include\Field\Transitions.hpp"),
             ("F00578", "Field_FindEntranceDoorNearTileEntry", "VS::Field::FindEntranceDoorNearTile",
-             r"Native\Game\include\Field\ChestInteractions.hpp"),
+             r"Native\Game\include\Field\Transitions.hpp"),
             ("F00158", "Field_CheckAshleyTileTriggersEntry", "VS::Field::CheckAshleyTileTriggers",
              r"Native\Game\include\Field\ChestInteractions.hpp"),
             ("F00159", "Field_CheckActorTrapAndFallTriggersEntry", "VS::Field::CheckActorTrapAndFallTriggers",
@@ -1090,6 +1210,50 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
+                    "F00782": ("Field_CreateGimmickInstanceEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
+                    "F00837": ("Field_FindGimmickBelowEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00838": ("Field_GimmickSubtypeEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00917": ("Field_AreGimmicksMovingEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F02468": ("Field_MeasureTileStackEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F02469": ("Field_IsGimmickWithinHeightBandEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00854": ("Field_SetGimmickOrientationEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00912": ("Field_CanPlaceGimmickAtPointEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00836": ("Field_DropUnsupportedGimmickStackEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00908": ("Field_FindInteractableGimmickAheadEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00913": ("Field_BeginGimmickInteractionEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00914": ("Field_ApplyGimmickInteractionCommandEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F01014": ("Field_UpdateGimmickReactionAnimationEntry", r"Native\Game\src\Field\GimmickReactionsLive.h"),
+                    "F01013": ("Field_UpdateGimmickMotionEntry", r"Native\Game\src\Field\GimmickDynamicsLive.h"),
+                    "F00065": ("Field_DisableTrapAtPositionEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
+                    "F00602": ("Field_RoomTriggerAtTileEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
+                    "F00616": ("Field_SetRoomTriggerEnabledEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
+                    "F00942": ("Field_FindTopGimmickAtTileEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
+                    "F00783": ("Field_ReleaseGimmickInstanceEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
+                    "F00780": ("Field_FindSharedGimmickModelEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
+                    "F00781": ("Field_SetGimmickPaletteTableEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
+                    "F00620": ("Field_MovingPlatformTargetWaypointEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00629": ("Field_SetPlatformFreezeAppearanceEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00596": ("Field_DrawMovingPlatformShadowsEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00595": ("Field_UpdateMovingPlatformsEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00597": ("Field_CollectMovingPlatformPositionsEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00593": ("Field_InitializeMovingPlatformsEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00594": ("Field_ResetMovingPlatformWaypointEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00591": ("Field_SetMovingPlatformActorEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00604": ("Field_SetMovingPlatformsPausedEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00605": ("Field_FreezeMovingPlatformsEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00066": ("Field_FreezeRoomGimmicksTemporarilyEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00619": ("Field_SetMovingPlatformVisibilityEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00621": ("Field_MovingPlatformDwellTicksEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
+                    "F00067": ("Field_ApplyUnlockEffectToRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
+                    "F00581": ("Field_ToggleDoorCollisionEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
+                    "F00582": ("Field_BeginDoorToggleEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
+                    "F00583": ("Field_StartDoorAnimationEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
+                    "F00586": ("Field_FinishDoorAnimationEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
+                    "F00580": ("Field_InteractiveDoorAtTileEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
+                    "F00633": ("Field_MarkSigilDoorUnlockedEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
+                    "F00634": ("Field_IsRoomSigilDoorUnlockedEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
+                    "F00610": ("Field_SceneDoorIdEntry", r"Native\Game\src\Field\MinimapSceneLive.h"),
+                    "F00611": ("Field_MarkEntranceDoorOnSceneMapEntry", r"Native\Game\src\Field\MinimapSceneLive.h"),
                     "F00552": ("Field_StoreEntranceDoorForReloadEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00577": ("Field_SetEntranceDoorRecordEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00578": ("Field_FindEntranceDoorNearTileEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
@@ -1392,12 +1556,17 @@ class EncounterFixupTests(unittest.TestCase):
             return (root / path).read_text(encoding="utf-8")
 
         gimmicks = generated(r"Native\Game\src\Field\Gimmicks.cpp")
+        gimmick_resources = generated(r"Native\Game\src\Field\GimmickResourcesLive.cpp")
         rendering = generated(r"Native\Game\src\Actors\ModelRenderingLive.cpp")
         assets = " ".join(generated(r"Native\Content\src\ActorAssets.cpp").split())
         assets_live = " ".join(generated(r"Native\Content\src\ActorAssetsLive.cpp").split())
         # Each loader records the bytes it owns and forgets them before release (#269).
-        self.assertIn("VS::Render::RecordLiveModelExtent(created_gimmick->model,", gimmicks)
-        self.assertIn("VS::Render::ForgetLiveModelExtent(released_gimmick->model);", gimmicks)
+        self.assertEqual(owned["F00782"]["path"], r"Native\Game\src\Field\GimmickResources.cpp")
+        self.assertEqual(owned["F00783"]["path"], r"Native\Game\src\Field\GimmickResources.cpp")
+        self.assertIn("VS::Render::RecordLiveModelExtent(record.model, model_bytes);", gimmick_resources)
+        self.assertIn("VS::Render::ForgetLiveModelExtent(record_->model);", gimmick_resources)
+        self.assertLess(gimmick_resources.index("VS::Render::ForgetLiveModelExtent(record_->model);"),
+                gimmick_resources.index("VS::Core::Memory::FreeLiveFromLowEnd(record_->model);"))
         self.assertIn("host.RecordModelCopy(model.geometry, original, kWeaponGeometryBytes);", assets)
         self.assertIn("host.ForgetModelGeometry(model.geometry);", assets)
         self.assertIn("Render::RecordLiveModelCopy(Pointer(destination), Pointer(source),", assets_live)
@@ -1411,7 +1580,7 @@ class EncounterFixupTests(unittest.TestCase):
             "Render::DrawLiveWeaponFlatPolygons(weapon, color);",
         ):
             self.assertIn(call, rendering)
-        for source in (gimmicks, rendering, assets):
+        for source in (gimmicks, gimmick_resources, rendering, assets):
             self.assertNotIn("ProjectModelVertices(", source)
             self.assertNotIn("Render_DrawModel", source)
 
@@ -2706,7 +2875,7 @@ class EncounterFixupTests(unittest.TestCase):
         source = """    UpdateRemainingMembers();
     i = 0;
 
-    while ((temp_v0_2 = Field_FindActorAboveGimmick(object, i))) {}
+    while ((temp_v0_2 = func_800A3C00(Field_gimmickInstances[temp_s4], i))) {}
 """
         for old, new, _ in copy_fixups.FIXES["F00836"]:
             self.assertIn(old, source)
@@ -3636,6 +3805,48 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         )
         self.assertNotIn("sizeof(Field_GimmickInstance)", source)
         self.assertNotIn("0x178", source)
+
+    def test_gimmick_actor_above_alias_callers_use_original_scalar_loads(self):
+        cases = {
+            "F00836": "Field_FindActorAboveGimmick(Field_gimmickInstances[temp_s4], i)",
+            "F00908": "func_800A3C00(object, 1)",
+        }
+        for identity, source in cases.items():
+            with self.subTest(identity=identity):
+                matches = [(old, new) for old, new, _ in copy_fixups.FIXES[identity]
+                           if old == source]
+                self.assertEqual(len(matches), 1)
+                old, replacement = matches[0]
+                self.assertIn(old, source)
+                self.assertIn("VS::Field::LiveFindActorOccupyingTile(", replacement)
+                self.assertIn("->positionY", replacement)
+                self.assertEqual(replacement.count("(u_char)"), 2)
+                self.assertNotIn("Field_FindActorAboveGimmick", replacement)
+        root = Path(__file__).resolve().parents[2]
+        generated = (root / r"Native\Game\src\Field\Gimmicks.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Field_FindActorAboveGimmick", generated)
+        self.assertNotIn("int Field_FindInteractableGimmickAhead(", generated)
+        self.assertNotIn("int Field_BeginGimmickInteraction(", generated)
+        self.assertNotIn("void Field_ApplyGimmickInteractionCommand(", generated)
+        live = (root / r"Native\Game\src\Field\GimmickPlacementLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("static_cast<std::uint8_t>(support.tile_word)", live)
+        self.assertIn("support.position_y, first_actor", live)
+        self.assertIn("support.position_y, 1", " ".join(live.split()))
+        self.assertIn("FindLiveInteractableGimmickAhead(slot)", live)
+
+    def test_gimmick_reaction_generated_calls_keep_typed_retained_entry(self):
+        root = Path(__file__).resolve().parents[2]
+        generated = (root / r"Native\Game\src\Field\Gimmicks.cpp").read_text(encoding="utf-8")
+        call = "Field_UpdateGimmickReactionAnimationEntry((Field_GimmickMotionView*)object)"
+        self.assertEqual(generated.count(call), 0)
+        self.assertNotIn("int Field_UpdateGimmickReactionAnimation(", generated)
+        self.assertNotIn("void Field_UpdateGimmickMotion(", generated)
+        self.assertNotRegex(generated, r"\(\(int\s*\(\*\).*?\)Field_UpdateGimmickReactionAnimationEntry")
+        live = (root / r"Native\Game\src\Field\GimmickDynamicsLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("UpdateLiveGimmickReactionAnimation(record_)", live)
+        owned = self.owned_items()
+        self.assertEqual(owned["F01014"]["path"], r"Native\Game\src\Field\GimmickReactions.cpp")
+        self.assertEqual(owned["F01013"]["path"], r"Native\Game\src\Field\GimmickDynamics.cpp")
 
     def test_score_viewer_banner_uses_native_frame_pointers(self):
         source = """    void** scratch = (void**)Core_ScratchAddr(0);

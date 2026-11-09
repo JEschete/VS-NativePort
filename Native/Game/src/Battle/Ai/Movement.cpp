@@ -31,8 +31,7 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Field/Gimmicks.h"
-#include "Field/Platforms.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -159,7 +158,7 @@ int Battle_Ai_IsFlightDirectionObstructed(Battle_Ai_ObstructionView* state, int 
     x = state->position.x + ahead * (state->maxRange * OBSTRUCTION_DIRECTIONS[direction].dx);
     y = state->position.y;
     z = state->position.z + ahead * (state->maxRange * OBSTRUCTION_DIRECTIONS[direction].dz);
-    i = Field_CollectMovingPlatformPositions((Field_PlatformContactPoint *)((void*)points));
+    i = Field_CollectMovingPlatformPositionsEntry((Field_PlatformContactPoint *)((void*)points));
     for (i = i - 1; i != -1; i--) {
         dx = points[i].x - x;
         dy = points[i].y - y;

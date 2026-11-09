@@ -25,6 +25,7 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Core/Math/FixedPoint.h"
 #include "Field/Camera.h"
+#include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.h"
@@ -1317,9 +1318,9 @@ void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row)
                 int dx;
                 int dz;
 
-                Field_MeasureTileStack(x, z, &offset);
+                Field_MeasureTileStackEntry(x, z, &offset);
                 if (offset != 0) {
-                    if (Field_gimmickInstances[Field_FindTopGimmickAtTile(x, z, 0)]->objectInfo.objectId < 2) {
+                    if (Field_gimmickInstances[Field_FindTopGimmickAtTileEntry(x, z, 0)]->objectInfo.objectId < 2) {
                         value = 0;
                         offset += 0x20;
                     } else {

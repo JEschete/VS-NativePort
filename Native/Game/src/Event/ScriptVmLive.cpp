@@ -54,6 +54,7 @@ extern "C" {
 #include "Event/ScriptVm.h"
 #include "Event/Weather.h"
 #include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/TextBox.h"
 }
@@ -740,13 +741,13 @@ void LiveVmHost::ApplySpecialOperation(SpecialOperation operation,
       Event_ScaleEventCameraDuration(static_cast<std::int16_t>(argument));
       break;
     case SpecialOperation::kFreezeMovingPlatforms:
-      Field_FreezeMovingPlatforms(argument);
+      Field_FreezeMovingPlatformsEntry(argument);
       break;
     case SpecialOperation::kClearGeometryOcclusion:
       Field::LiveClearGeometryOcclusion();
       break;
     case SpecialOperation::kPauseMovingPlatforms:
-      Field_SetMovingPlatformsPaused(argument);
+      Field_SetMovingPlatformsPausedEntry(argument);
       break;
     case SpecialOperation::kSetVignette:
       Effects_ScreenDistortion_SetVignetteEnabled(argument);

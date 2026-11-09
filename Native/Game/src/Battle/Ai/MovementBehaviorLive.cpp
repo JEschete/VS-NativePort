@@ -17,6 +17,7 @@
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 
 extern "C" {
 #include "Actors/Movement.h"
@@ -289,14 +290,12 @@ class LiveMovementHost final : public MovementHost {
   }
   [[nodiscard]] std::optional<RouteGate> PlatformRouteGate(
       int group) const override {
-    const auto* waypoint =
-        static_cast<const VECTOR*>(Field_MovingPlatformTargetWaypoint(group));
-    if (waypoint == nullptr || Battle_Ai_routeGates == nullptr) {
+    const auto waypoint = Field::LiveMovingPlatformTargetWaypoint(group);
+    if (!waypoint || Battle_Ai_routeGates == nullptr) {
       return std::nullopt;
     }
     Battle_Ai_RouteGateTile gate{};
-    Battle_Ai_FindNearestRouteGateEntry(group, waypoint->vx, waypoint->vz,
-                                        &gate);
+    Battle_Ai_FindNearestRouteGateEntry(group, waypoint->x, waypoint->z, &gate);
     return RouteGate{.x = gate.opaque0, .z = gate.opaque2};
   }
   [[nodiscard]] std::optional<ActorRoster> BattleActors() const override {

@@ -31,6 +31,7 @@ extern "C" {
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Field/RoomSwitchesLive.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
@@ -2430,7 +2431,7 @@ int Menu_Map_ShouldDrawDoorStateMarker(int door_state_id, int zone_id, int map_i
 {
     u_int sigil_door_kind = door_state_id - 0x41;
 
-    if ((sigil_door_kind < 7) && ((Field_IsRoomSigilDoorUnlocked(zone_id, map_id, sigil_door_kind) != 0))) {
+    if ((sigil_door_kind < 7) && ((Field_IsRoomSigilDoorUnlockedEntry(zone_id, map_id, sigil_door_kind) != 0))) {
         return 0;
     }
     return Audio_Seq_unusedStateFlags.opaque33F[door_state_id] < 2;

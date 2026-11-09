@@ -27,7 +27,9 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/MapLive.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/Controller.hpp"
 #include "Items/LootLive.hpp"
@@ -60,6 +62,7 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.h"
@@ -326,15 +329,14 @@ std::vector<battle::PlatformPoint> CollectPlatformPoints() {
                  capacity);
     return {};
   }
-  std::vector<Field_PlatformContactPoint> contacts(capacity);
-  const int collected = Field_CollectMovingPlatformPositions(contacts.data());
-  if (collected < 0 || static_cast<std::size_t>(collected) > capacity) {
+  const auto contacts = VS::Field::CollectLiveMovingPlatformPositions();
+  if (contacts.size() > capacity) {
     VS_LOG_ERROR("battle.targeting",
-                 "moving platform collector returned {} of {}", collected,
+                 "moving platform collector returned {} of {}", contacts.size(),
                  capacity);
     return {};
   }
-  std::size_t kept = static_cast<std::size_t>(collected);
+  std::size_t kept = contacts.size();
   if (kept > kPlatformPointLimit) {
     VS_LOG_WARN("battle.targeting",
                 "{} moving platform points; the first {} are targets", kept,
@@ -343,7 +345,7 @@ std::vector<battle::PlatformPoint> CollectPlatformPoints() {
   }
   std::vector<battle::PlatformPoint> points;
   points.reserve(kept);
-  for (const Field_PlatformContactPoint& contact :
+  for (const VS::Field::PlatformContact& contact :
        std::span(contacts).first(kept)) {
     points.push_back({contact.x, contact.height, contact.z});
   }
@@ -569,23 +571,13 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
 
   [[nodiscard]] std::vector<battle::EnvironmentTrigger> RoomTriggers()
       const override {
-    int count = 0;
-    const Field_MpdFloorTrigger* triggers = Field_ActiveRoomTriggers(&count);
-    if (count <= 0) {
-      return {};
-    }
-    if (triggers == nullptr) {
-      VS_LOG_ERROR("battle.targeting", "{} room triggers without a table",
-                   count);
-      return {};
-    }
+    const auto triggers = VS::Field::LiveActiveRoomTriggerInfo();
     std::vector<battle::EnvironmentTrigger> result;
-    result.reserve(static_cast<std::size_t>(count));
-    for (const Field_MpdFloorTrigger& trigger :
-         std::span(triggers, static_cast<std::size_t>(count))) {
+    result.reserve(triggers.size());
+    for (const auto& trigger : triggers) {
       result.push_back({.kind = trigger.kind,
-                        .tile_x = trigger.tileX,
-                        .tile_z = trigger.tileZ});
+                        .tile_x = trigger.tile_x,
+                        .tile_z = trigger.tile_z});
     }
     return result;
   }
@@ -705,7 +697,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     VS::Field::LiveSetRoomAnimationsPaused(paused ? 1 : 0);
   }
   void SetMovingPlatformsPaused(bool paused) override {
-    Field_SetMovingPlatformsPaused(paused ? 1 : 0);
+    Field_SetMovingPlatformsPausedEntry(paused ? 1 : 0);
   }
   void SetActorMarkersHidden(bool hidden) override {
     Battle_SetActorMarkersHidden(hidden ? 1 : 0);

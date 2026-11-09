@@ -27,8 +27,10 @@
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/GameModeLive.hpp"
+#include "Field/GimmickPlacementLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/InteractionsLive.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLive.hpp"
@@ -195,7 +197,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     AddPrim(ordering_table_, &Render_legacyMaskBitOffPackets[Render_frameBuf]);
   }
   void UpdateMovingPlatforms() override {
-    static_cast<void>(Field_UpdateMovingPlatforms());
+    static_cast<void>(VS::Field::UpdateLiveMovingPlatforms());
   }
   void CaptureAshleyPlacement() override {
     // Left unchanged when Ashley has no record, as the original's stack slot.
@@ -243,13 +245,14 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Field::LiveEnterFieldExplorationMode();
   }
   int FindInteractableGimmickAhead(int slot) override {
-    return Field_FindInteractableGimmickAhead(slot);
+    const auto result = VS::Field::FindLiveInteractableGimmickAhead(slot);
+    return result ? static_cast<int>(*result) : -1;
   }
   void BeginGimmickInteraction(int slot) override {
-    static_cast<void>(Field_BeginGimmickInteraction(slot));
+    static_cast<void>(VS::Field::BeginLiveGimmickInteraction(slot));
   }
   [[nodiscard]] bool AreGimmicksMoving() override {
-    return Field_AreGimmicksMoving() != 0;
+    return VS::Field::AreLiveGimmicksMoving();
   }
   int FindNearestActorAhead(int slot, int horizontal_reach,
                             int vertical_reach) override {

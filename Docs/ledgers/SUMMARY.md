@@ -34,32 +34,32 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 2721 | owned functions |
-| 2721 | owned functions in C++ sources |
-| 1029 | generated function rows |
-| 12 | retired function rows |
+| 2765 | owned functions |
+| 2765 | owned functions in C++ sources |
+| 980 | generated function rows |
+| 17 | retired function rows |
 | 445 | excluded function rows |
 
 | Column | `x` | Other non-blank | Blank |
 | --- | ---: | ---: | ---: |
-| `copied` | 3,749 | 13 (`retired`) | 445 |
-| `compiles` | 3,749 | 0 | 458 |
+| `copied` | 3,744 | 18 (`retired`) | 445 |
+| `compiles` | 3,748 | 0 | 459 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 2,720 | 0 | 1,487 |
-| `cpp` | 2,720 | 1 (`wip`) | 1,486 |
+| `modernized` | 2,764 | 1 (`wip`) | 1,442 |
+| `cpp` | 2,764 | 1 (`wip`) | 1,442 |
 | `verified` | 49 | 0 | 4,158 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 2721 |
-| `vs_namespace` | 2720 |
-| `typed_interface` | 2720 |
-| `no_bridge` | 2720 |
-| `strict_clean` | 2721 |
-| `behavior_evidence` | 2720 |
+| `source_cpp` | 2765 |
+| `vs_namespace` | 2764 |
+| `typed_interface` | 2764 |
+| `no_bridge` | 2764 |
+| `strict_clean` | 2765 |
+| `behavior_evidence` | 2764 |
 
-Promotion records: 2721; derived `cpp=x`: 2720, `cpp=wip`: 1. Verification records: 256; `verified=x` markers: 49.
+Promotion records: 2765; derived `cpp=x`: 2764, `cpp=wip`: 1. Verification records: 292; `verified=x` markers: 49.
 
 <!-- gates:end -->
 
@@ -100,8 +100,8 @@ read the global game state named in each slice's limits, and those compatibility
 ### Generated-function cohort (#276)
 
 The original cohort is the 3,479 `copy=yes` rows without `cpp` at `04d47338`.
-At the 2026-11-07 reload-byte reconciliation over published `25dc258a`, 2,438
-derive `cpp=x`, 11 are retired, 1,029 remain generated/unpromoted and one owned
+At the 2026-11-07 NPC-trigger reconciliation published at `4d918907`, 2,434
+derive `cpp=x`, 11 are retired, 1,033 remain generated/unpromoted and one owned
 textbox-frame entry (F01416) remains `wip`.
 This is about 70% resolved; the total promoted count above also includes functions
 outside that original cohort and must not be divided by 3,479.
@@ -127,36 +127,12 @@ evidence. That checkpoint's full Debug/Release each passed 4,788 tests / 8,902,1
 both canonical fingerprints and two 1,735-path/hash generations are unchanged.
 The core and Live provider use the existing interaction ownership boundary;
 the completed trap slice retains its original files and dependencies.
-Row 27 has 51 generated functions after the locally verified reload-byte slice.
-The NPC checkpoint is published at
+Row 27 still has 55 generated functions. The NPC checkpoint is published at
 `4d918907`, exact successful CI `42445155609`; this source promotion is not
 all-scene trap/fatal-fall parity. The subsequent #323 scripted-fall door safety
-fix passed 4,789 tests / 8,902,162 assertions in each configuration with unchanged
-canonical replays and is closed at `afdc0adc`, exact successful CI `42448832713`.
-That safety fix alone did not promote F00158. The subsequent full Ashley
-event/trap/door/cache/fall core and checked Live/C-module/wrapper adoption are now
-locally verified against all387original instructions, 20focused103assertions,
-actual native cache/module/input cases and representative original trap/lock
-controller workflows. Current complete Debug/Release pass4,809tests /
-8,902,264assertions with unchanged canonical fingerprints, zero-new serial
-quality and two stable1,738-path/hash generations. New dependency #324 has a
-registered initialization correction and actual copied-request regression;
-that milestone is published at6c63d9fc/exactsuccessfulCI42456492346 and324closed. Neither
-source promotion nor native zero-initialization establishes all-scene/fatal-fall
-or effect renderer parity, and required compatibility/lifetime gates stay open.
-The subsequent F00577/F00578 entrance-state copy/clear/selection slice is now
-locally verified with original26/90MIPS, native unsigned-byte/copy/bounds/module
-tests, 50coupled cases/247assertions and fullDebug/Release4,819tests/8,902,301
-assertions each. Canonical replays and two1,738-path/hash generations are unchanged;
-serial quality has zero new findings. This slice's publication/exactCI gate is
-pending, and raw scene/getter/global/lifetime and broader door gameplay acceptance
-remain open.
-The subsequent F00552 typed reload-byte core/live/module/save-callback slice
-passes3focusedcases/65,540assertions and fullDebug/Release4,822tests/
-8,967,841assertions each, with unchanged canonical fingerprints and stable
-two-pass1,738-path/hash generations. Its source promotion is locally verified;
-publication/exactCI remains pending. Packed-state/global and broader save/load
-acceptance remain distinct.
+fix passes 4,789 tests / 8,902,162 assertions in each configuration with unchanged
+canonical replays; its publication/CI gate is pending. It does not promote F00158
+or change the cohort counts above.
 #321 tracks the invisible active chest loot panel separately.
 Remaining row-27 functions, later planned slices and the final closing-revision
 Debug/Release, replay, generation, quality and CI gates are still required.

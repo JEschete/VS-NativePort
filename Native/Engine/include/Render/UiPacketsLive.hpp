@@ -1,6 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstddef>
 #include <cstdint>
 #include <span>
 
@@ -19,6 +20,7 @@ class LivePacketQueue final : public PacketQueue {
   explicit LivePacketQueue(u_long* chain) : chain_(chain) {}
 
   [[nodiscard]] std::uint32_t ChainLink() const override;
+  [[nodiscard]] bool CanEmit(std::size_t words) const;
   bool Emit(std::span<const std::uint32_t> packet) override;
 
  private:

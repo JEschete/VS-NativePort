@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <span>
 #include <vector>
 
 #include "Actors/ActorPlacement.hpp"
@@ -11,27 +10,6 @@
 #include "Field/InteractionTarget.hpp"
 
 namespace VS::Field {
-
-std::uint8_t EnteredDoorReloadByte(std::int16_t entered_door_id);
-
-struct EntranceDoorState {
-  DoorRecord door{};
-  std::int16_t entered_door_id = -1;
-};
-
-class EntranceDoorHost {
- public:
-  virtual ~EntranceDoorHost() = default;
-  virtual std::optional<std::uint8_t> SceneDoorId(std::uint8_t door_id) = 0;
-};
-
-void SetEntranceDoorRecord(EntranceDoorState& state,
-                           const std::optional<DoorRecord>& door,
-                           EntranceDoorHost& host);
-
-std::optional<DoorRecord> FindEntranceDoorNearTile(
-    std::span<const DoorRecord> doors, std::int32_t tile_x, std::int32_t tile_z,
-    std::int32_t floor_layer);
 
 struct ScriptedFallDestination {
   std::uint8_t zone_id = 0;
@@ -367,6 +345,29 @@ class RoomObjectInteractionHost {
   virtual void PlaySound(std::int32_t sound) = 0;
   virtual void RestoreIdle(std::int32_t actor) = 0;
 };
+
+using UnlockEffectTarget = std::variant<RoomObjectTarget, ChestTarget>;
+
+struct UnlockEffectState {
+  std::int16_t lock_level = 0;
+  std::uint16_t opened_flag = 0;
+};
+
+class UnlockEffectHost {
+ public:
+  virtual ~UnlockEffectHost() = default;
+  virtual std::optional<UnlockEffectState> State(
+      const UnlockEffectTarget& target) const = 0;
+  virtual bool ChestOpened(std::int16_t flag) const = 0;
+  virtual bool RollLockBreak() = 0;
+  virtual bool ClearLock(const UnlockEffectTarget& target) = 0;
+  virtual void PlaySound(std::int32_t sound) = 0;
+  virtual void ShowLockedLabel(const TrapPosition& point) = 0;
+};
+
+bool ApplyUnlockEffectToRoomObject(
+    const std::optional<UnlockEffectTarget>& target, const TrapPosition& point,
+    UnlockEffectHost& host);
 
 RoomObjectInteractionResult InteractWithLockedRoomObject(
     RoomObjectInteractionHost& host);

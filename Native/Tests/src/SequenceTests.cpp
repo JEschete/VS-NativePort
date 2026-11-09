@@ -14,6 +14,7 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Field/GimmickPlacementLive.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -865,7 +866,7 @@ int TestGimmickStackTop(int scenario) {
     actor.instance.rootMotion = (SVECTOR){1, 2, 3, 4};
     Actors_actorRecords[2] = &actor;
   }
-  Field_DropUnsupportedGimmickStack(kRoot);
+  Field_DropUnsupportedGimmickStackEntry(kRoot);
   int passed = root.objectInfo.isFalling == 1;
   if (has_actor) {
     passed &= actor.instance.movementMode == 3 &&

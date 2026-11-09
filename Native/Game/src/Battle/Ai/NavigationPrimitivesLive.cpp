@@ -21,6 +21,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -115,18 +116,15 @@ std::uint32_t LiveVisiblePlatformMask() {
           bytes / sizeof(Field_MpdMovingPlatform) <= kOriginalPlatformCapacity,
       "Route availability: moving-platform count exceeds the original "
       "bounded buffer");
-  std::array<Field_PlatformContactPoint, kOriginalPlatformCapacity> points{};
-  const int count = Field_CollectMovingPlatformPositions(points.data());
-  Require(count >= 0 && static_cast<std::size_t>(count) <= points.size(),
+  const auto points = VS::Field::CollectLiveMovingPlatformPositions();
+  Require(points.size() <= kOriginalPlatformCapacity,
           "Route availability: moving-platform producer returned an invalid "
           "count");
   std::array<std::int16_t, kOriginalPlatformCapacity> indices{};
-  for (std::size_t index = 0; index < static_cast<std::size_t>(count);
-       ++index) {
-    indices[index] = points[index].platformIndex;
+  for (std::size_t index = 0; index < points.size(); ++index) {
+    indices[index] = points[index].platform_index;
   }
-  return VisiblePlatformMask(
-      std::span(indices).first(static_cast<std::size_t>(count)));
+  return VisiblePlatformMask(std::span(indices).first(points.size()));
 }
 
 std::array<RouteGateEnd, kRouteGateEndCount> LiveRouteGateEnds() {

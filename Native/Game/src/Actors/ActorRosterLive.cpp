@@ -19,6 +19,8 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/GimmickPlacementLive.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 extern "C" {
 #include "Actors/Spawning.h"
 #include "Battle/AbilityState.h"
@@ -73,8 +75,10 @@ class LiveRemovalHost final : public ActorRemovalHost {
     StoreLiveRoomActorState(static_cast<int>(slot), hidden);
   }
   void ReleaseGimmick(std::size_t slot) override {
-    Field_DropUnsupportedGimmickStack(static_cast<int>(slot));
-    Field_ReleaseGimmickInstance(static_cast<int>(slot));
+    static_cast<void>(VS::Field::DropLiveUnsupportedGimmickStack(
+        static_cast<std::int32_t>(slot)));
+    static_cast<void>(
+        VS::Field::ReleaseLiveGimmickInstance(static_cast<int>(slot)));
   }
   void ReleaseModel(std::size_t model_slot) override {
     VS::Content::ReleaseLiveActorModel(static_cast<int>(model_slot));

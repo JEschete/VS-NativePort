@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <vector>
 
 #include "Field/InteractionTarget.hpp"
 
@@ -9,6 +10,13 @@ struct Field_MpdFloorTrigger;
 struct Items_TreasureChest;
 
 namespace VS::Field {
+
+std::vector<RoomTriggerInfo> LiveActiveRoomTriggerInfo();
+std::optional<TrapTarget> FindLiveRoomTriggerAtTile(
+    const RoomTriggerTile& tile);
+bool SetLiveRoomTriggerEnabled(std::optional<TrapTarget> target,
+                               std::int32_t activation);
+bool DisableLiveTrapAtPosition(TrapWorldPosition position);
 
 std::optional<TrapTarget> FindLiveTrapTarget(
     const Field_MpdFloorTrigger* record);

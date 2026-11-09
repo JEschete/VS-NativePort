@@ -1710,6 +1710,15 @@
     <ClInclude Include="src\Field\GimmickAnimationQueueLive.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\GimmickDynamics.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\GimmickDynamicsLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\GimmickDynamicsLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClInclude Include="src\Field\GimmickLookup.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -1723,6 +1732,24 @@
       <Filter>src\Field</Filter>
     </ClCompile>
     <ClInclude Include="src\Field\GimmickPlacementLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\GimmickReactions.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\GimmickReactionsLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\GimmickReactionsLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\GimmickResources.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Field\GimmickResourcesLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\GimmickResourcesLive.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Gimmicks.cpp">
@@ -1749,9 +1776,15 @@
     <ClCompile Include="src\Field\InteractionsLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
+    <ClCompile Include="src\Field\InteractionTarget.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\InteractionTargetLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
+    <ClInclude Include="src\Field\InteractionTargetLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClCompile Include="src\Field\Locations.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1791,6 +1824,9 @@
     <ClCompile Include="src\Field\MinimapSceneLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
+    <ClInclude Include="src\Field\MinimapSceneLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClInclude Include="src\Field\Mpd.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -1800,6 +1836,9 @@
     <ClCompile Include="src\Field\PlatformPlacementLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
+    <ClInclude Include="src\Field\PlatformPlacementLive.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClInclude Include="src\Field\Platforms.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -2910,7 +2949,28 @@
     <ClInclude Include="include\Field\GimmickAnimationQueue.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
+    <ClInclude Include="include\Field\GimmickDynamics.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickDynamicsLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
     <ClInclude Include="include\Field\GimmickPlacement.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickPlacementLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickReactions.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickReactionsLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickResources.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\GimmickResourcesLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\InteractionsLive.hpp">

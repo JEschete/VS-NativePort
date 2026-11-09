@@ -179,6 +179,14 @@ std::uint32_t LivePacketQueue::ChainLink() const {
   return chain_ != nullptr ? static_cast<std::uint32_t>(*chain_) : 0;
 }
 
+bool LivePacketQueue::CanEmit(std::size_t words) const {
+  if (chain_ == nullptr || ReserveLivePrimitiveWords(words) == nullptr) {
+    ReportDropped();
+    return false;
+  }
+  return true;
+}
+
 bool LivePacketQueue::Emit(std::span<const std::uint32_t> packet) {
   u_long* slot =
       chain_ != nullptr ? ReserveLivePrimitiveWords(packet.size()) : nullptr;

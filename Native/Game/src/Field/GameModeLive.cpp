@@ -29,6 +29,7 @@ extern "C" {
 #include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActionSelection.h"
 
@@ -90,7 +91,7 @@ class LiveFieldModeHost final : public FieldModeHost {
     LiveSetRoomAnimationsPaused(Flag(paused));
   }
   void SetMovingPlatformsPaused(bool paused) override {
-    Field_SetMovingPlatformsPaused(Flag(paused));
+    Field_SetMovingPlatformsPausedEntry(Flag(paused));
   }
   void SetRoomAmbienceDucked(bool ducked) override {
     Audio::LiveSetRoomAmbienceDucked(Flag(ducked));

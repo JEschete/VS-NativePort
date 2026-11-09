@@ -21,7 +21,7 @@ extern "C" {
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
-#include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Field/Platforms.h"
 
 // decomp: D_800F16EC (D_800F16EC@BATTLE/BATTLE.PRG)
@@ -214,7 +214,7 @@ int Battle_Ai_FindRouteGateAtTile(intptr_t arg0, u_int packed_tile, int match_en
     int i;
     int j;
 
-    Field_CollectMovingPlatformPositions(platform_positions);
+    Field_CollectMovingPlatformPositionsEntry(platform_positions);
     for (i = 0; i < 8; ++i) {
         Battle_Ai_RouteGateEnd* e = &Battle_Ai_routeGates[i * 2];
         j = i >> 1;
@@ -295,7 +295,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
                 continue;
             }
             result = Battle_Ai_FindRouteGateAtTile((intptr_t)state, position.word, 1);
-            if (result >= 0 && ((int (*)(int))Field_MovingPlatformDwellTicks)(i = result >> 1) >= 0) {
+            if (result >= 0 && ((int (*)(int))Field_MovingPlatformDwellTicksEntry)(i = result >> 1) >= 0) {
                 candidate.tile.tag = i + 2;
                 if (!((((Battle_Ai_RouteGateView*)Battle_Ai_roomAiState)->closedGates >> candidate.tile.tag)
                         & 1)) {

@@ -4,6 +4,7 @@
 #include <array>
 #include <iterator>
 
+#include "Field/ChestInteractionsLive.h"
 #include "Field/GimmickAnimationQueue.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomSwitchesLive.h"
@@ -23,6 +24,9 @@ std::array<std::uint64_t, VS::Field::kGimmickAnimationSlots> job_serials{};
 using ChestPayload = std::optional<VS::Field::ChestTarget>;
 using ChestJobs = std::array<ChestPayload, VS::Field::kGimmickAnimationSlots>;
 ChestJobs chest_jobs{};
+using RoomPayload = std::optional<VS::Field::RoomObjectTarget>;
+using RoomJobs = std::array<RoomPayload, VS::Field::kGimmickAnimationSlots>;
+RoomJobs room_jobs{};
 
 void InvalidateJobSerial(std::size_t slot) {
   if (++job_serials[slot] == 0) {
@@ -51,8 +55,13 @@ class LiveAnimationQueueHost final
       : target_(target) {}
   explicit LiveAnimationQueueHost(VS::Field::ChestTarget target)
       : chest_target_(target) {}
+  explicit LiveAnimationQueueHost(VS::Field::RoomObjectTarget target)
+      : room_target_(target) {}
 
   bool HasRequestedTarget() const override {
+    if (room_target_) {
+      return VS::Field::ResolveLiveRoomObjectTarget(*room_target_) != nullptr;
+    }
     return chest_target_
                ? VS::Field::ResolveLiveChestTarget(*chest_target_) != nullptr
                : ValidTarget(target_);
@@ -67,9 +76,13 @@ class LiveAnimationQueueHost final
         !HasRequestedTarget()) {
       return false;
     }
+    auto* target = room_target_
+                       ? VS::Field::ResolveLiveRoomObjectTarget(*room_target_)
+                       : target_;
     Field_gimmickAnimationQueue[slot] = {static_cast<std::int32_t>(kind),
-                                         target_};
+                                         target};
     chest_jobs[slot] = chest_target_;
+    room_jobs[slot] = room_target_;
     InvalidateJobSerial(slot);
     return true;
   }
@@ -80,6 +93,7 @@ class LiveAnimationQueueHost final
  private:
   Field_MpdLockTrigger* target_ = nullptr;
   std::optional<VS::Field::ChestTarget> chest_target_;
+  std::optional<VS::Field::RoomObjectTarget> room_target_;
 };
 
 class LiveAnimationDispatchHost final
@@ -100,6 +114,7 @@ class LiveAnimationDispatchHost final
     const auto& entry = Field_gimmickAnimationQueue[slot];
     targets_[slot] = entry.trigger;
     chest_targets_[slot] = chest_jobs[slot];
+    room_targets_[slot] = room_jobs[slot];
     const auto kind =
         static_cast<VS::Field::GimmickAnimationKind>(entry.jobKind);
     std::uint8_t countdown = 0;
@@ -115,7 +130,12 @@ class LiveAnimationDispatchHost final
       return VS::Field::GimmickAnimationJobSnapshot{
           kind, countdown, job_serials[slot], valid_chest};
     }
-    const bool valid = ValidTarget(entry.trigger);
+    const auto room = room_targets_[slot];
+    const bool valid =
+        room
+            ? entry.trigger != nullptr &&
+                  VS::Field::ResolveLiveRoomObjectTarget(*room) == entry.trigger
+            : ValidTarget(entry.trigger);
     if (valid && kind == VS::Field::GimmickAnimationKind::kToggleSwitch) {
       countdown = static_cast<std::uint8_t>(entry.trigger->trigger.activation);
     } else if (valid && kind == VS::Field::GimmickAnimationKind::kStartDoor) {
@@ -150,7 +170,10 @@ class LiveAnimationDispatchHost final
   }
   bool FinishDoor(std::size_t slot,
                   const VS::Field::GimmickAnimationJobSnapshot& job) override {
-    return Matches(slot, job) && Field_FinishDoorAnimation(targets_[slot]) != 0;
+    if (!Matches(slot, job)) return false;
+    const auto room = room_targets_[slot];
+    return room ? VS::Field::FinishLiveDoorAnimation(*room)
+                : Field_FinishDoorAnimationEntry(targets_[slot]) != 0;
   }
   void ToggleSwitch(
       std::size_t slot,
@@ -167,7 +190,12 @@ class LiveAnimationDispatchHost final
   void StartDoor(std::size_t slot,
                  const VS::Field::GimmickAnimationJobSnapshot& job) override {
     if (CapturedValid(slot, job)) {
-      static_cast<void>(Field_StartDoorAnimation(targets_[slot]));
+      const auto room = room_targets_[slot];
+      if (room) {
+        static_cast<void>(VS::Field::StartLiveDoorAnimation(*room));
+      } else {
+        static_cast<void>(Field_StartDoorAnimationEntry(targets_[slot]));
+      }
     }
   }
   bool RetireJob(std::size_t slot,
@@ -175,13 +203,16 @@ class LiveAnimationDispatchHost final
     if (slot >= targets_.size() || job_serials[slot] != job.serial ||
         Field_gimmickAnimationQueue[slot].jobKind !=
             static_cast<std::int32_t>(job.kind) ||
-        (chest_targets_[slot]
-             ? chest_jobs[slot] != chest_targets_[slot]
+        (chest_targets_[slot] ? chest_jobs[slot] != chest_targets_[slot]
+         : room_targets_[slot]
+             ? room_jobs[slot] != room_targets_[slot] ||
+                   Field_gimmickAnimationQueue[slot].trigger != targets_[slot]
              : Field_gimmickAnimationQueue[slot].trigger != targets_[slot])) {
       return false;
     }
     Field_gimmickAnimationQueue[slot] = {};
     chest_jobs[slot].reset();
+    room_jobs[slot].reset();
     const auto occupied = QueueOccupancy();
     Field_pendingGimmickAnimationCount =
         static_cast<std::int16_t>(std::ranges::count(occupied, true));
@@ -194,6 +225,10 @@ class LiveAnimationDispatchHost final
     if (slot >= targets_.size() || job_serials[slot] != job.serial) {
       return false;
     }
+    if (const auto room = room_targets_[slot]) {
+      return targets_[slot] != nullptr &&
+             VS::Field::ResolveLiveRoomObjectTarget(*room) == targets_[slot];
+    }
     return chest_targets_[slot]
                ? VS::Field::ResolveLiveChestTarget(*chest_targets_[slot]) !=
                      nullptr
@@ -204,8 +239,11 @@ class LiveAnimationDispatchHost final
     return CapturedValid(slot, job) &&
            Field_gimmickAnimationQueue[slot].jobKind ==
                static_cast<std::int32_t>(job.kind) &&
-           (chest_targets_[slot]
-                ? chest_jobs[slot] == chest_targets_[slot]
+           (chest_targets_[slot] ? chest_jobs[slot] == chest_targets_[slot]
+            : room_targets_[slot]
+                ? room_jobs[slot] == room_targets_[slot] &&
+                      Field_gimmickAnimationQueue[slot].trigger ==
+                          targets_[slot]
                 : Field_gimmickAnimationQueue[slot].trigger == targets_[slot]);
   }
   mutable std::array<Field_MpdLockTrigger*, VS::Field::kGimmickAnimationSlots>
@@ -213,6 +251,7 @@ class LiveAnimationDispatchHost final
   mutable std::array<std::optional<VS::Field::ChestTarget>,
                      VS::Field::kGimmickAnimationSlots>
       chest_targets_{};
+  mutable RoomJobs room_targets_{};
 };
 
 class LiveAnimationResetHost final
@@ -223,6 +262,7 @@ class LiveAnimationResetHost final
   void ClearJob(std::size_t slot) override {
     Field_gimmickAnimationQueue[slot] = {};
     chest_jobs[slot].reset();
+    room_jobs[slot].reset();
     InvalidateJobSerial(slot);
   }
 };
@@ -238,6 +278,10 @@ bool QueueLiveGimmickAnimation(int kind, ChestTarget target) {
   if (kind != static_cast<int>(GimmickAnimationKind::kToggleSwitch)) {
     return false;
   }
+  LiveAnimationQueueHost host(target);
+  return QueueGimmickAnimation(static_cast<GimmickAnimationKind>(kind), host);
+}
+bool QueueLiveGimmickAnimation(int kind, RoomObjectTarget target) {
   LiveAnimationQueueHost host(target);
   return QueueGimmickAnimation(static_cast<GimmickAnimationKind>(kind), host);
 }

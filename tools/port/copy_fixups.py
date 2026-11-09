@@ -364,6 +364,33 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Field_CreateGimmickInstanceEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
+    "Field_ReleaseGimmickInstanceEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
+    "Field_FindSharedGimmickModelEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
+    "Field_SetGimmickPaletteTableEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
+    "Field_MovingPlatformTargetWaypointEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_SetPlatformFreezeAppearanceEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_DrawMovingPlatformShadowsEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_UpdateMovingPlatformsEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_CollectMovingPlatformPositionsEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_InitializeMovingPlatformsEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_ResetMovingPlatformWaypointEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_SetMovingPlatformActorEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_SetMovingPlatformsPausedEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_FreezeMovingPlatformsEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_FreezeRoomGimmicksTemporarilyEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_SetMovingPlatformVisibilityEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_MovingPlatformDwellTicksEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
+    "Field_ApplyUnlockEffectToRoomObjectEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
+    "Field_ToggleDoorCollisionEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
+    "Field_BeginDoorToggleEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
+    "Field_StartDoorAnimationEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
+    "Field_FinishDoorAnimationEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
+    "Field_InteractiveDoorAtTileEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
+    "Field_MarkSigilDoorUnlockedEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
+    "Field_IsRoomSigilDoorUnlockedEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
+    "Field_SceneDoorIdEntry": r"Native\Game\src\Field\MinimapSceneLive.h",
+    "Field_MarkEntranceDoorOnSceneMapEntry": r"Native\Game\src\Field\MinimapSceneLive.h",
     "Field_StoreEntranceDoorForReloadEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_SetEntranceDoorRecordEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_FindEntranceDoorNearTileEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
@@ -396,6 +423,23 @@ NATIVE_HELPER_HEADERS = {
     "Field_QueueGimmickAnimationEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.h",
     "Field_ToggleRoomSwitchEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
     "Field_GimmickPlacementEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_FindGimmickBelowEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_GimmickSubtypeEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_AreGimmicksMovingEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_MeasureTileStackEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_IsGimmickWithinHeightBandEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_SetGimmickOrientationEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_CanPlaceGimmickAtPointEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_DropUnsupportedGimmickStackEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_FindInteractableGimmickAheadEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_BeginGimmickInteractionEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_ApplyGimmickInteractionCommandEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
+    "Field_UpdateGimmickReactionAnimationEntry": r"Native\Game\src\Field\GimmickReactionsLive.h",
+    "Field_UpdateGimmickMotionEntry": r"Native\Game\src\Field\GimmickDynamicsLive.h",
+    "Field_DisableTrapAtPositionEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
+    "Field_RoomTriggerAtTileEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
+    "Field_SetRoomTriggerEnabledEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
+    "Field_FindTopGimmickAtTileEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
     "Event_EvaluateInterpolationCurveEntry": r"Native\Game\src\Event\InterpolationCurveLive.h",
     "Event_EvaluateRoomEventTriggersEntry": r"Native\Game\src\Event\RoomTriggerEntryLive.h",
     "VS::Event::ResolveLiveScriptActorReference": r"Native\Game\include\Event\ScriptVmLive.hpp",
@@ -1070,6 +1114,23 @@ OWNED_CALL_BINDINGS["F01275"] = "VS::Event::ResolveLiveScriptActorReference"
 OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
 OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
 OWNED_CALL_BINDINGS["F00853"] = "Field_GimmickPlacementEntry"
+OWNED_CALL_BINDINGS["F00837"] = "Field_FindGimmickBelowEntry"
+OWNED_CALL_BINDINGS["F00838"] = "Field_GimmickSubtypeEntry"
+OWNED_CALL_BINDINGS["F00917"] = "Field_AreGimmicksMovingEntry"
+OWNED_CALL_BINDINGS["F02468"] = "Field_MeasureTileStackEntry"
+OWNED_CALL_BINDINGS["F02469"] = "Field_IsGimmickWithinHeightBandEntry"
+OWNED_CALL_BINDINGS["F00854"] = "Field_SetGimmickOrientationEntry"
+OWNED_CALL_BINDINGS["F00912"] = "Field_CanPlaceGimmickAtPointEntry"
+OWNED_CALL_BINDINGS["F00836"] = "Field_DropUnsupportedGimmickStackEntry"
+OWNED_CALL_BINDINGS["F00908"] = "Field_FindInteractableGimmickAheadEntry"
+OWNED_CALL_BINDINGS["F00913"] = "Field_BeginGimmickInteractionEntry"
+OWNED_CALL_BINDINGS["F00914"] = "Field_ApplyGimmickInteractionCommandEntry"
+OWNED_CALL_BINDINGS["F01014"] = "Field_UpdateGimmickReactionAnimationEntry"
+OWNED_CALL_BINDINGS["F01013"] = "Field_UpdateGimmickMotionEntry"
+OWNED_CALL_BINDINGS["F00065"] = "Field_DisableTrapAtPositionEntry"
+OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
+OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
+OWNED_CALL_BINDINGS["F00942"] = "Field_FindTopGimmickAtTileEntry"
 OWNED_CALL_BINDINGS["F00607"] = "Field_ToggleRoomSwitchEntry"
 OWNED_CALL_BINDINGS["F00584"] = "Field_QueueGimmickAnimationEntry"
 OWNED_CALL_BINDINGS["F00585"] = "Field_UpdateGimmickAnimationQueueEntry"
@@ -1091,6 +1152,33 @@ OWNED_CALL_BINDINGS["F00158"] = "Field_CheckAshleyTileTriggersEntry"
 OWNED_CALL_BINDINGS["F00577"] = "Field_SetEntranceDoorRecordEntry"
 OWNED_CALL_BINDINGS["F00552"] = "Field_StoreEntranceDoorForReloadEntry"
 OWNED_CALL_BINDINGS["F00578"] = "Field_FindEntranceDoorNearTileEntry"
+OWNED_CALL_BINDINGS["F00610"] = "Field_SceneDoorIdEntry"
+OWNED_CALL_BINDINGS["F00611"] = "Field_MarkEntranceDoorOnSceneMapEntry"
+OWNED_CALL_BINDINGS["F00580"] = "Field_InteractiveDoorAtTileEntry"
+OWNED_CALL_BINDINGS["F00633"] = "Field_MarkSigilDoorUnlockedEntry"
+OWNED_CALL_BINDINGS["F00634"] = "Field_IsRoomSigilDoorUnlockedEntry"
+OWNED_CALL_BINDINGS["F00581"] = "Field_ToggleDoorCollisionEntry"
+OWNED_CALL_BINDINGS["F00582"] = "Field_BeginDoorToggleEntry"
+OWNED_CALL_BINDINGS["F00583"] = "Field_StartDoorAnimationEntry"
+OWNED_CALL_BINDINGS["F00586"] = "Field_FinishDoorAnimationEntry"
+OWNED_CALL_BINDINGS["F00067"] = "Field_ApplyUnlockEffectToRoomObjectEntry"
+OWNED_CALL_BINDINGS["F00591"] = "Field_SetMovingPlatformActorEntry"
+OWNED_CALL_BINDINGS["F00604"] = "Field_SetMovingPlatformsPausedEntry"
+OWNED_CALL_BINDINGS["F00605"] = "Field_FreezeMovingPlatformsEntry"
+OWNED_CALL_BINDINGS["F00066"] = "Field_FreezeRoomGimmicksTemporarilyEntry"
+OWNED_CALL_BINDINGS["F00619"] = "Field_SetMovingPlatformVisibilityEntry"
+OWNED_CALL_BINDINGS["F00621"] = "Field_MovingPlatformDwellTicksEntry"
+OWNED_CALL_BINDINGS["F00593"] = "Field_InitializeMovingPlatformsEntry"
+OWNED_CALL_BINDINGS["F00595"] = "Field_UpdateMovingPlatformsEntry"
+OWNED_CALL_BINDINGS["F00596"] = "Field_DrawMovingPlatformShadowsEntry"
+OWNED_CALL_BINDINGS["F00629"] = "Field_SetPlatformFreezeAppearanceEntry"
+OWNED_CALL_BINDINGS["F00620"] = "Field_MovingPlatformTargetWaypointEntry"
+OWNED_CALL_BINDINGS["F00780"] = "Field_FindSharedGimmickModelEntry"
+OWNED_CALL_BINDINGS["F00781"] = "Field_SetGimmickPaletteTableEntry"
+OWNED_CALL_BINDINGS["F00782"] = "Field_CreateGimmickInstanceEntry"
+OWNED_CALL_BINDINGS["F00783"] = "Field_ReleaseGimmickInstanceEntry"
+OWNED_CALL_BINDINGS["F00597"] = "Field_CollectMovingPlatformPositionsEntry"
+OWNED_CALL_BINDINGS["F00594"] = "Field_ResetMovingPlatformWaypointEntry"
 OWNED_CALL_BINDINGS["F00159"] = "Field_CheckActorTrapAndFallTriggersEntry"
 OWNED_CALL_BINDINGS["F00136"] = "Field_TryOpenChestEntry"
 OWNED_CALL_BINDINGS["F00138"] = "Field_BeginChestInteractionEntry"
@@ -2438,6 +2526,33 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x8009998C, "Field_CreateGimmickInstanceEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80099D6C, "Field_ReleaseGimmickInstanceEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80099900, "Field_FindSharedGimmickModelEntry"),
+    ("BATTLE/BATTLE.PRG", 0x80099960, "Field_SetGimmickPaletteTableEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008E2D4, "Field_MovingPlatformTargetWaypointEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008E4DC, "Field_SetPlatformFreezeAppearanceEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008CEB0, "Field_DrawMovingPlatformShadowsEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008C8A8, "Field_UpdateMovingPlatformsEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008D2C0, "Field_CollectMovingPlatformPositionsEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008C538, "Field_InitializeMovingPlatformsEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008C6B4, "Field_ResetMovingPlatformWaypointEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008C49C, "Field_SetMovingPlatformActorEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008D594, "Field_SetMovingPlatformsPausedEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008D5A0, "Field_FreezeMovingPlatformsEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8006CE50, "Field_FreezeRoomGimmicksTemporarilyEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008E224, "Field_SetMovingPlatformVisibilityEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008E320, "Field_MovingPlatformDwellTicksEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8006CE70, "Field_ApplyUnlockEffectToRoomObjectEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008BD74, "Field_ToggleDoorCollisionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008BEBC, "Field_BeginDoorToggleEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008BF48, "Field_StartDoorAnimationEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008C1C8, "Field_FinishDoorAnimationEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008BC04, "Field_InteractiveDoorAtTileEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008E6DC, "Field_MarkSigilDoorUnlockedEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008E7BC, "Field_IsRoomSigilDoorUnlockedEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008D880, "Field_SceneDoorIdEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008D948, "Field_MarkEntranceDoorOnSceneMapEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008AB68, "Field_StoreEntranceDoorForReloadEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008B8F8, "Field_SetEntranceDoorRecordEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008B960, "Field_FindEntranceDoorNearTileEntry"),
@@ -2469,6 +2584,23 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8008C070, "Field_QueueGimmickAnimationEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D658, "Field_ToggleRoomSwitchEntry"),
     ("BATTLE/BATTLE.PRG", 0x800A0024, "Field_GimmickPlacementEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8009F794, "Field_FindGimmickBelowEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8009F858, "Field_GimmickSubtypeEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800A47C4, "Field_AreGimmicksMovingEntry"),
+    ("MENU/MAINMENU.PRG", 0x800FA188, "Field_MeasureTileStackEntry"),
+    ("MENU/MAINMENU.PRG", 0x800FA238, "Field_IsGimmickWithinHeightBandEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800A0104, "Field_SetGimmickOrientationEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800A3DB4, "Field_CanPlaceGimmickAtPointEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8009F530, "Field_DropUnsupportedGimmickStackEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800A38E0, "Field_FindInteractableGimmickAheadEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800A3E6C, "Field_BeginGimmickInteractionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800A41D0, "Field_ApplyGimmickInteractionCommandEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800B101C, "Field_UpdateGimmickReactionAnimationEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800B0908, "Field_UpdateGimmickMotionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8006CDD8, "Field_DisableTrapAtPositionEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
+    ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800A91DC, "Field_FindTopGimmickAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BFEBC, "Event_EvaluateInterpolationCurveEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BEC58, "Event_EvaluateRoomEventTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BFE50, "VS::Event::ResolveLiveScriptActorReference"),
@@ -3490,7 +3622,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "capture an unavailable frame table at consumption time to distinguish context changes from initial binding"),
     ],
     "F00836": [
-        ("    i = 0;\n\n    while ((temp_v0_2 = Field_FindActorAboveGimmick",
+        ("    i = 0;\n\n    while ((temp_v0_2 = func_800A3C00",
          "    if (Field_gimmickInstances[temp_s4] == NULL) {\n"
          '        Core_Debugf("gimmick", "no eligible stack top while removing slot=%d", arg0);\n'
          "        return;\n    }\n\n    i = 0;\n\n"
@@ -3980,6 +4112,18 @@ FIXES.setdefault("F00912", []).append(
     ("if ((*Field_collisionProbeTile >> 20) & 1) {",
      f"if (({_PROBE_CELL_WORD} >> 20) & 1) {{",
      "3A1A0.c:708 reads bit 20 of the cell the last support sample found"))
+FIXES.setdefault("F00836", []).append(
+    ("Field_FindActorAboveGimmick(Field_gimmickInstances[temp_s4], i)",
+     "VS::Field::LiveFindActorOccupyingTile("
+     "(u_char)Field_gimmickInstances[temp_s4]->tileX, "
+     "(u_char)Field_gimmickInstances[temp_s4]->tileZ, "
+     "Field_gimmickInstances[temp_s4]->positionY, i)",
+     "F00910 forwarding alias retirement: original LBU X/Z and LH support height at caller"))
+FIXES.setdefault("F00908", []).append(
+    ("func_800A3C00(object, 1)",
+     "VS::Field::LiveFindActorOccupyingTile((u_char)object->tileX, "
+     "(u_char)object->tileZ, object->positionY, 1)",
+     "F00910 forwarding alias retirement: original LBU X/Z and LH support height at caller"))
 FIXES["F00782"] = FIXES.get("F00782", []) + [
     ("VS::Field::LiveSampleActorSupportHeight(&s1->positionX, 0, 0, 1)",
      "VS::Field::LiveSampleSupportHeightAt(s1->positionX, s1->positionY, s1->positionZ, 0, 0, 1)",

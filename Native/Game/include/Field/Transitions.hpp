@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <span>
 
 #include "Actors/ActorPlacement.hpp"
 #include "Field/DoorRecord.hpp"
@@ -15,6 +16,25 @@
 // with. The rules keep the transition and the pending door as values; the
 // host queues the loads and performs the actor and door effects.
 namespace VS::Field {
+struct EntranceDoorState {
+  DoorRecord door{};
+  std::int16_t entered_door_id = -1;
+};
+
+class EntranceDoorHost {
+ public:
+  virtual ~EntranceDoorHost() = default;
+  virtual std::optional<std::uint8_t> SceneDoorId(std::uint8_t door_id) = 0;
+};
+
+std::uint8_t EnteredDoorReloadByte(std::int16_t entered_door_id);
+void SetEntranceDoorRecord(EntranceDoorState& state,
+                           const std::optional<DoorRecord>& door,
+                           EntranceDoorHost& host);
+std::optional<DoorRecord> FindEntranceDoorNearTile(
+    std::span<const DoorRecord> doors, std::int32_t tile_x, std::int32_t tile_z,
+    std::int32_t floor_layer);
+
 // The screen transition's progress (Field_screenTransitionStep).
 enum class TransitionStep : std::uint32_t {
   kIdle = 0,

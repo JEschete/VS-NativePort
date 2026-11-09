@@ -28,6 +28,8 @@ struct PursuitFixture {
   Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
   decltype(Field_roomData.movingPlatforms) saved_platforms =
       Field_roomData.movingPlatforms;
+  decltype(Field_roomData.header.movingPlatformsLength) saved_platform_bytes =
+      Field_roomData.header.movingPlatformsLength;
   decltype(Battle_Ai_routeGates) saved_gates = Battle_Ai_routeGates;
   std::array<Actors_ActorRecord, 2> models{};
   std::array<Battle_Actor, 2> actors{};
@@ -51,6 +53,7 @@ struct PursuitFixture {
           reinterpret_cast<Battle_Ai_AiModelView*>(&models[index]);
     }
     Field_roomData.movingPlatforms = platforms.data();
+    Field_roomData.header.movingPlatformsLength = sizeof platforms;
     Battle_Ai_routeGates = gates.data();
     auto& model = models[1].instance;
     model.currentTileX = 4;
@@ -71,6 +74,7 @@ struct PursuitFixture {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     *Battle_Ai_FrameState() = saved_frame;
     Field_roomData.movingPlatforms = saved_platforms;
+    Field_roomData.header.movingPlatformsLength = saved_platform_bytes;
     Battle_Ai_routeGates = saved_gates;
   }
 

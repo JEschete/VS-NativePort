@@ -17,7 +17,7 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Battle/ActionAnimation.h"
 #include "Effects/ActionEffects.h"
-#include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Render/Palette.h"
 
 // decomp: D_800E8E80 (D_800E8E80@BATTLE/BATTLE.PRG)
@@ -312,7 +312,7 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
 
         if (actor->instance.locomotionState == 2) {
             if (actor->instance.supportLayer) {
-                ((void (*)(int, int))Field_SetMovingPlatformActor)(actor->instance.supportLayer - 2, -1);
+                ((void (*)(int, int))Field_SetMovingPlatformActorEntry)(actor->instance.supportLayer - 2, -1);
                 actor->instance.supportLayer = 0;
             }
             var_s0 = 0x3B;

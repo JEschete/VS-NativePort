@@ -7,9 +7,11 @@ struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Effects_ActionEffectRequest;
+struct SVECTOR;
 struct Items_TreasureChest;
 enum { kFieldEntranceRecordBytes = 12 };
 void Field_StoreEntranceDoorForReloadEntry(void);
+void Field_ApplyUnlockEffectToRoomObjectEntry(struct SVECTOR* target_position);
 void Field_SetEntranceDoorRecordEntry(
     char (*record)[kFieldEntranceRecordBytes]);
 void Field_FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer);

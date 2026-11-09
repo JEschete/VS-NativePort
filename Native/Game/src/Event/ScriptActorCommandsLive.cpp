@@ -23,6 +23,7 @@
 #include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptActorOpcodes.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Field/MinimapSceneLive.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -368,7 +369,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   }
   void PreserveAshleyStatuses() override { Battle_PreserveAshleyStatuses(); }
   void MarkEnteredDoor(int door) override {
-    Field_MarkEntranceDoorOnSceneMap(door);
+    Field_MarkEntranceDoorOnSceneMapEntry(door);
   }
   [[nodiscard]] bool MenuTransitionActive() const override {
     return Event_isMenuTransitionActive != 0;

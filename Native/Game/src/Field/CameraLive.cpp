@@ -39,6 +39,7 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
@@ -342,7 +343,7 @@ void LiveCameraHost::SetMinimapVisible(bool visible) {
 }
 
 void LiveCameraHost::SetMovingPlatformsPaused(bool paused) {
-  Escape([paused] { Field_SetMovingPlatformsPaused(paused ? 1 : 0); });
+  Escape([paused] { Field_SetMovingPlatformsPausedEntry(paused ? 1 : 0); });
 }
 
 void LiveCameraHost::EnterFieldExploration() {

@@ -16,6 +16,7 @@
 #include "Audio/SoundSlotsLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/GimmickPlacementLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -185,14 +186,12 @@ class LiveActorSoundHost final : public ActorSoundHost {
 
   std::optional<std::uint8_t> TopGimmickObject(std::uint8_t tile_x,
                                                std::uint8_t tile_z) override {
-    const int index =
-        Field_FindTopGimmickAtTile(tile_x, tile_z, kRequireIdleGimmick);
-    if (index < 0 || static_cast<std::size_t>(index) >= kGimmickCount) {
-      return std::nullopt;
-    }
-    const Field_GimmickInstance* gimmick = Field_gimmickInstances[index];
-    if (gimmick == nullptr) return std::nullopt;
-    return static_cast<std::uint8_t>(gimmick->objectInfo.objectId);
+    const auto index = Field::FindLiveTopGimmickAtTile({tile_x, tile_z},
+                                                       kRequireIdleGimmick != 0)
+                           .value_or(0);
+    const auto gimmick = Field::LiveGimmickQueryState(index);
+    if (!gimmick) return std::nullopt;
+    return gimmick->object_id;
   }
 
   std::optional<std::uint8_t> TileSurfaceKind(std::uint8_t tile_x,

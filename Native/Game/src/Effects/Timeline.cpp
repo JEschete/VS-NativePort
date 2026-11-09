@@ -23,8 +23,9 @@ extern "C" {
 #include "Effects/Timeline.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
-#include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
+#include "Field/ChestInteractionsLive.h"
+#include "Field/InteractionTargetLive.h"
+#include "Field/PlatformPlacementLive.h"
 #include "PFile.h"
 
 // decomp: BATTLE.PRG func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
@@ -405,7 +406,7 @@ void Effects_ApplySourceActionImpact(Effects_EffectInstance* effect_instance)
 void Effects_ActivateTargetRoomTile(Effects_EffectInstance* effect_instance)
 {
     if (effect_instance->context.target.type == 5) {
-        Field_DisableTrapAtPosition(&effect_instance->context.target.value.position);
+        Field_DisableTrapAtPositionEntry(&effect_instance->context.target.value.position);
     }
 }
 
@@ -431,7 +432,7 @@ void Effects_ResumeEffectTransformMotion(Effects_TransformControlView* transform
 void Effects_HoldEffectTimelineFrame(Effects_EffectInstance* effect_instance) { effect_instance->context.timeline->flags |= 1; }
 
 // decomp: BATTLE.PRG func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
-void Effects_PauseMovingRoomObjects(void) { Field_FreezeRoomGimmicksTemporarily(); }
+void Effects_PauseMovingRoomObjects(void) { Field_FreezeRoomGimmicksTemporarilyEntry(); }
 
 // decomp: BATTLE.PRG func_800D6574 (src/BATTLE/BATTLE.PRG/5BF94.c:8259)
 void Effects_SignalSourceActorFromTimeline(Effects_EffectInstance* effect_instance)
@@ -483,7 +484,7 @@ void Effects_PlaySourceActorReactionSound(Effects_EffectInstance* effect_instanc
 void Effects_ActivateTargetGimmick(Effects_EffectInstance* effect_instance)
 {
     if (effect_instance->context.target.type == 5) {
-        Field_ApplyUnlockEffectToRoomObject(&effect_instance->context.target.value.position);
+        Field_ApplyUnlockEffectToRoomObjectEntry(&effect_instance->context.target.value.position);
     }
 }
 

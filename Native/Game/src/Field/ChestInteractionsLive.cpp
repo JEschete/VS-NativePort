@@ -23,9 +23,11 @@
 #include "Field/DoorRecordLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
+#include "Field/MinimapSceneLive.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLive.hpp"
+#include "Field/TrapsLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
@@ -71,6 +73,7 @@ constexpr std::int32_t kTrapNotification = 0xB;
 constexpr std::int32_t kTrapActionOffset = 6;
 constexpr std::int32_t kTrapTickSpeed = 4;
 constexpr std::size_t kPoseWords = 4;
+constexpr std::size_t kWorldLabelCoordinates = 3;
 constexpr std::size_t kOriginalLockRecordBytes = 0x14;
 constexpr std::size_t kOriginalDoorRecordBytes = sizeof(Field_MpdDoorRecord);
 constexpr std::int32_t kRoomObjectSoundGroup = 0x7E;
@@ -119,8 +122,10 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
   }
   std::optional<VS::Field::ActorTileTrap> Trap(
       const VS::Actors::PackedTile& tile) override {
-    const auto* record = Field_RoomTriggerAtTile(tile.x, tile.z, tile.layer);
-    const auto target = VS::Field::FindLiveTrapTarget(record);
+    const auto target =
+        VS::Field::FindLiveRoomTriggerAtTile({tile.x, tile.z, tile.layer});
+    const auto* record =
+        target ? VS::Field::ResolveLiveTrapTarget(*target) : nullptr;
     if (!target || record == nullptr) return std::nullopt;
     return VS::Field::ActorTileTrap{.target = *target, .kind = record->kind};
   }
@@ -158,7 +163,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
 class LiveEntranceDoorHost final : public VS::Field::EntranceDoorHost {
  public:
   std::optional<std::uint8_t> SceneDoorId(std::uint8_t door_id) override {
-    const auto scene_id = Field_SceneDoorId(door_id);
+    const auto scene_id = Field_SceneDoorIdEntry(door_id);
     if (scene_id < 0) return std::nullopt;
     return static_cast<std::uint8_t>(scene_id);
   }
@@ -327,21 +332,8 @@ class LiveFacingResourceHost final : public VS::Field::FacingResourceHost {
   }
   std::optional<VS::Field::RoomObjectTarget> RoomObject(
       const VS::Field::FacingTile& tile) override {
-    const auto* record =
-        Field_InteractiveDoorAtTile(tile.x, tile.z, tile.layer);
-    if (record == nullptr || Field_roomData.lockTriggers == nullptr) {
-      return std::nullopt;
-    }
-    const auto count =
-        Field_roomData.header.lockTriggersLength / kOriginalLockRecordBytes;
-    for (std::size_t index = 0; index < count; ++index) {
-      if (&Field_roomData.lockTriggers[index] == record) {
-        return VS::Field::RoomObjectTarget{
-            static_cast<std::uint32_t>(index),
-            VS::Field::LiveInteractionTargetDomain().generation};
-      }
-    }
-    return std::nullopt;
+    return VS::Field::FindLiveInteractiveDoorAtTile(
+        {.tile_x = tile.x, .tile_z = tile.z, .floor_layer = tile.layer});
   }
   std::optional<VS::Field::FacingChestState> Chest(
       const VS::Field::FacingTile& tile) override {
@@ -453,6 +445,56 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
   }
 };
 
+class LiveUnlockEffectHost final : public VS::Field::UnlockEffectHost {
+ public:
+  std::optional<VS::Field::UnlockEffectState> State(
+      const VS::Field::UnlockEffectTarget& target) const override {
+    if (const auto* door = std::get_if<VS::Field::RoomObjectTarget>(&target)) {
+      const auto* record = VS::Field::ResolveLiveRoomObjectTarget(*door);
+      return record ? std::optional{VS::Field::UnlockEffectState{
+                          .lock_level = std::bit_cast<std::uint8_t>(
+                              record->trigger.lockState.lock.state)}}
+                    : std::nullopt;
+    }
+    const auto* record = VS::Field::ResolveLiveChestTarget(
+        std::get<VS::Field::ChestTarget>(target));
+    return record ? std::optional{VS::Field::UnlockEffectState{
+                        .lock_level = record->lockLevel,
+                        .opened_flag =
+                            std::bit_cast<std::uint16_t>(record->openedFlag)}}
+                  : std::nullopt;
+  }
+  bool ChestOpened(std::int16_t flag) const override {
+    return VS::State::LiveScriptFlag(flag);
+  }
+  bool RollLockBreak() override {
+    return VS::Field::RollLiveRiskLockBreak() != 0;
+  }
+  bool ClearLock(const VS::Field::UnlockEffectTarget& target) override {
+    if (const auto* door = std::get_if<VS::Field::RoomObjectTarget>(&target)) {
+      auto* record = VS::Field::ResolveLiveRoomObjectTarget(*door);
+      if (record == nullptr) return false;
+      record->trigger.lockState.lock.state = 0;
+      return true;
+    }
+    auto* record = VS::Field::ResolveLiveChestTarget(
+        std::get<VS::Field::ChestTarget>(target));
+    if (record == nullptr) return false;
+    record->lockLevel = 0;
+    return true;
+  }
+  void PlaySound(std::int32_t sound) override {
+    VS::Audio::LivePlaySfxCentered(kRoomObjectSoundGroup, sound);
+  }
+  void ShowLockedLabel(const VS::Field::TrapPosition& point) override {
+    std::array<std::uint16_t, kWorldLabelCoordinates> words{
+        std::bit_cast<std::uint16_t>(point.x),
+        std::bit_cast<std::uint16_t>(point.y),
+        std::bit_cast<std::uint16_t>(point.z)};
+    static_cast<void>(Battle_QueueWorldLockedLabel(words.data()));
+  }
+};
+
 class LiveRoomObjectInteractionHost final
     : public VS::Field::RoomObjectInteractionHost {
  public:
@@ -515,7 +557,7 @@ class LiveRoomObjectInteractionHost final
   }
   void BeginToggle() override {
     if (auto* record = Record()) {
-      Field_BeginDoorToggle(record);
+      static_cast<void>(Field_BeginDoorToggleEntry(record));
     }
   }
   void PlaySound(std::int32_t sound) override {
@@ -703,11 +745,11 @@ class LiveTrapFinishHost final : public VS::Field::TrapFinishHost {
     return target ? std::optional{*target} : std::nullopt;
   }
   bool DisableTrap(VS::Field::TrapTarget target) override {
+    if (!VS::Field::SetLiveRoomTriggerEnabled(target, 1)) return false;
     auto* trap = VS::Field::ResolveLiveTrapTarget(target);
     if (trap == nullptr) {
       return false;
     }
-    Field_SetRoomTriggerEnabled(trap, 1);
     VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(trap->tileX, trap->tileZ);
     return true;
   }
@@ -821,6 +863,11 @@ ActorTileTriggerResult CheckLiveActorTrapAndFallTriggers(
 Field_MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target) {
   if (target.generation != LiveInteractionTargetDomain().generation ||
       Field_roomData.lockTriggers == nullptr ||
+      Field_roomData.header.lockTriggersLength % kOriginalLockRecordBytes !=
+          0 ||
+      reinterpret_cast<std::uintptr_t>(Field_roomData.lockTriggers) %
+              alignof(Field_MpdLockTrigger) !=
+          0 ||
       target.index >=
           Field_roomData.header.lockTriggersLength / kOriginalLockRecordBytes) {
     return nullptr;
@@ -1035,6 +1082,35 @@ int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
 
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
 // decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
+void Field_ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position) {
+  if (target_position == nullptr) return;
+  SVECTOR position{};
+  std::memcpy(&position, target_position, sizeof(position));
+  const auto packed = std::bit_cast<std::uint16_t>(position.pad);
+  constexpr std::uint16_t kTargetKindMask = 0x1F0;
+  constexpr std::uint16_t kTargetIndexMask = 0xF;
+  constexpr std::uint16_t kDoorKind = 0x10;
+  constexpr std::uint16_t kChestKind = 0x20;
+  constexpr std::uint16_t kOtherChestKind = 0x100;
+  const auto index = static_cast<std::uint32_t>(packed & kTargetIndexMask);
+  const auto generation = VS::Field::LiveInteractionTargetDomain().generation;
+  std::optional<VS::Field::UnlockEffectTarget> target;
+  switch (packed & kTargetKindMask) {
+    case kDoorKind:
+      target = VS::Field::RoomObjectTarget{index, generation};
+      break;
+    case kChestKind:
+    case kOtherChestKind:
+      target = VS::Field::ChestTarget{index, generation};
+      break;
+    default:
+      return;
+  }
+  LiveUnlockEffectHost host;
+  static_cast<void>(VS::Field::ApplyUnlockEffectToRoomObject(
+      target, {position.vx, position.vy, position.vz}, host));
+}
+
 void Field_StoreEntranceDoorForReloadEntry(void) {
   const auto encoded = VS::Field::EnteredDoorReloadByte(Field_enteredDoorId);
   Audio_Seq_unusedStateFlags.doorEntered = std::bit_cast<char>(encoded);

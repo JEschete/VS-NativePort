@@ -57,6 +57,7 @@ extern "C" {
 #include "Field/Actors.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Field/Platforms.h"
 #include "Render/Palette.h"
 }
@@ -474,7 +475,8 @@ class LiveActorStateHost final : public ActorStateHost {
   }
   void ReleaseMovingPlatform(int platform) override {
     const Synced synced(*this);
-    static_cast<void>(Field_SetMovingPlatformActor(platform, kNoPlatformRider));
+    static_cast<void>(
+        Field_SetMovingPlatformActorEntry(platform, kNoPlatformRider));
   }
   int SupportHeight(int x, int z) override {
     const Synced synced(*this);

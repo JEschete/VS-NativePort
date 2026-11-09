@@ -28,6 +28,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
+#include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"

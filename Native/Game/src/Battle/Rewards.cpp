@@ -20,7 +20,7 @@ extern "C" {
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Field/GameModeLiveState.h"
-#include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Items/LootLiveState.h"
 #include "Menu/TextBox.h"
 
@@ -105,7 +105,7 @@ void Battle_CheckRewardUnlocks(void)
                 VS::Actors::PlayLiveActorActionPose(0, NULL, 6);
                 Effects_SpawnAbilityLearnedEffect();
             }
-            Field_SetMovingPlatformsPaused(1);
+            Field_SetMovingPlatformsPausedEntry(1);
             return;
         }
     }
@@ -118,7 +118,7 @@ void Battle_CheckRewardUnlocks(void)
             VS::Actors::PlayLiveActorActionPose(0, NULL, 6);
             Effects_SpawnAbilityLearnedEffect();
         }
-        Field_SetMovingPlatformsPaused(1);
+        Field_SetMovingPlatformsPausedEntry(1);
         return;
     }
     Battle_ResumeAfterRewards();

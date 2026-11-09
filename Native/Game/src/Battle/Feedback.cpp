@@ -9,7 +9,7 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
-#include "Field/Gimmicks.h"
+#include "Field/GimmickPlacementLive.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
 #include "Render/LegacyPackets.h"
@@ -1172,7 +1172,7 @@ void Battle_DrawActorMarker(int actor, int kind)
             position.vx -= 8;
             position.vy -= 8;
             xy = *(int*)&position;
-            depth = Field_GimmickSubtype(actor);
+            depth = Field_GimmickSubtypeEntry(actor);
 
             if (depth >= 0) {
                 if (depth == 0) {

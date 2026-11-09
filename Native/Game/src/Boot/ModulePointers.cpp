@@ -150,19 +150,23 @@ extern "C" {
 #include "Field/EnvironmentLiveState.h"
 #include "Field/GameModeLiveState.h"
 #include "Field/GimmickAnimationQueueLive.h"
-#include "Field/GimmickMotion.h"
+#include "Field/GimmickDynamicsLive.h"
 #include "Field/GimmickPlacementLive.h"
+#include "Field/GimmickReactionsLive.h"
+#include "Field/GimmickResourcesLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Input.h"
 #include "Field/InteractionFocusLive.h"
+#include "Field/InteractionTargetLive.h"
 #include "Field/Interactions.h"
 #include "Field/Locations.h"
 #include "Field/Manual.h"
 #include "Field/Map.h"
 #include "Field/MapProgress.h"
 #include "Field/Minimap.h"
+#include "Field/MinimapSceneLive.h"
 #include "Field/Mpd.h"
-#include "Field/Platforms.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Field/Room.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/RoomRenderingLiveState.h"
@@ -261,9 +265,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006C84Cu, 0u, (void*)&Effects_QueueActionImpactEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CA20u, 0u, (void*)&Battle_ApplyActionSourceEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&Effects_SignalActorEffectAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006CDD8u, 0u, (void*)&Field_DisableTrapAtPosition, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006CE50u, 0u, (void*)&Field_FreezeRoomGimmicksTemporarily, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006CE70u, 0u, (void*)&Field_ApplyUnlockEffectToRoomObject, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006D028u, 0u, (void*)&Effects_TintActionActorRed, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006D064u, 0u, (void*)&Effects_RestoreActionActorTint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006F450u, 0u, (void*)&Effects_SpawnGroundPlaneImpactEffect, 0u, 0u, 0u},
@@ -459,32 +460,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80088CA0u, 0u, (void*)&Battle_ResetTargetingRiskPenaltyTimer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A4FCu, 0u, (void*)&Field_CurrentSavePointId, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A5D0u, 0u, (void*)&Battle_ActorActionRestrictionFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008BC04u, 0u, (void*)&Field_InteractiveDoorAtTile, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008BD74u, 0u, (void*)&Field_ToggleDoorCollision, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008BEBCu, 0u, (void*)&Field_BeginDoorToggle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008BF48u, 0u, (void*)&Field_StartDoorAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008C1C8u, 0u, (void*)&Field_FinishDoorAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008C49Cu, 0u, (void*)&Field_SetMovingPlatformActor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008C518u, 0u, (void*)&Field_ClearMovingPlatformActor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008C538u, 0u, (void*)&Field_InitializeMovingPlatforms, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008C6B4u, 0u, (void*)&Field_ResetMovingPlatformWaypoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008C8A8u, 0u, (void*)&Field_UpdateMovingPlatforms, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008CEB0u, 0u, (void*)&Field_DrawMovingPlatformShadows, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D2C0u, 0u, (void*)&Field_CollectMovingPlatformPositions, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D438u, 0u, (void*)&Field_RoomTriggerAtTile, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D594u, 0u, (void*)&Field_SetMovingPlatformsPaused, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D5A0u, 0u, (void*)&Field_FreezeMovingPlatforms, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D880u, 0u, (void*)&Field_SceneDoorId, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D948u, 0u, (void*)&Field_MarkEntranceDoorOnSceneMap, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabled, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E224u, 0u, (void*)&Field_SetMovingPlatformVisibility, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E2D4u, 0u, (void*)&Field_MovingPlatformTargetWaypoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E320u, 0u, (void*)&Field_MovingPlatformDwellTicks, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E3B8u, 0u, (void*)&Field_RoomInteractiveDoors, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E400u, 0u, (void*)&Field_ActiveRoomTriggers, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E4DCu, 0u, (void*)&Field_SetPlatformFreezeAppearance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E6DCu, 0u, (void*)&Field_MarkSigilDoorUnlocked, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E7BCu, 0u, (void*)&Field_IsRoomSigilDoorUnlocked, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E8F8u, 0u, (void*)&Effects_AllocateWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EA90u, 0u, (void*)&Effects_InitializeRoomWeather, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EB04u, 0u, (void*)&Effects_RoomWeatherState, 0u, 0u, 0u},
@@ -529,10 +504,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800970BCu, 0u, (void*)&Battle_DrawAbilityTimingCue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800971D4u, 0u, (void*)&Battle_CommitEquipmentStatChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009722Cu, 0u, (void*)&Battle_SuppressAshleyStatusLabels, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80099900u, 0u, (void*)&Field_FindSharedGimmickModel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80099960u, 0u, (void*)&Field_SetGimmickPaletteTable, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009998Cu, 0u, (void*)&Field_CreateGimmickInstance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80099D6Cu, 0u, (void*)&Field_ReleaseGimmickInstance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009DD00u, 0u, (void*)&Battle_PlayMeleeAttackAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009DDF4u, 0u, (void*)&Battle_PlayDefenseAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009DF3Cu, 0u, (void*)&Battle_SetEnemyCombatPose, 0u, 0u, 0u},
@@ -543,20 +514,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009EE9Cu, 0u, (void*)&Battle_PlayDefenseAbilityAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009EFECu, 0u, (void*)&Battle_PlaySpecialActionAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009F298u, 0u, (void*)&Battle_PlayBreakArtAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009F530u, 0u, (void*)&Field_DropUnsupportedGimmickStack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009F794u, 0u, (void*)&Field_FindGimmickBelow, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009F858u, 0u, (void*)&Field_GimmickSubtype, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A0104u, 0u, (void*)&Field_SetGimmickOrientation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A2574u, 0u, (void*)&Battle_FinishEnemyCombatPose, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A38E0u, 0u, (void*)&Field_FindInteractableGimmickAhead, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A3C00u, 0u, (void*)&Field_FindActorAboveGimmick, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A3DB4u, 0u, (void*)&Field_CanPlaceGimmickAtPoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A3E6Cu, 0u, (void*)&Field_BeginGimmickInteraction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A41D0u, 0u, (void*)&Field_ApplyGimmickInteractionCommand, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A47C4u, 0u, (void*)&Field_AreGimmicksMoving, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A91DCu, 0u, (void*)&Field_FindTopGimmickAtTile, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&Field_UpdateGimmickMotion, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B101Cu, 0u, (void*)&Field_UpdateGimmickReactionAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6724u, 0u, (void*)&Event_ScriptWaitForSplashFile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6FD8u, 0u, (void*)&Event_ScriptLoadSplashImage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7014u, 0u, (void*)&Event_ScriptConfigureSplashLayer, 0u, 0u, 0u},
@@ -1482,6 +1440,33 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x8009998Cu, 0u, (void*)&Field_CreateGimmickInstanceEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80099D6Cu, 0u, (void*)&Field_ReleaseGimmickInstanceEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80099900u, 0u, (void*)&Field_FindSharedGimmickModelEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80099960u, 0u, (void*)&Field_SetGimmickPaletteTableEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008E2D4u, 0u, (void*)&Field_MovingPlatformTargetWaypointEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008E4DCu, 0u, (void*)&Field_SetPlatformFreezeAppearanceEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008CEB0u, 0u, (void*)&Field_DrawMovingPlatformShadowsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008C8A8u, 0u, (void*)&Field_UpdateMovingPlatformsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008D2C0u, 0u, (void*)&Field_CollectMovingPlatformPositionsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008C538u, 0u, (void*)&Field_InitializeMovingPlatformsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008C6B4u, 0u, (void*)&Field_ResetMovingPlatformWaypointEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008C49Cu, 0u, (void*)&Field_SetMovingPlatformActorEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008D594u, 0u, (void*)&Field_SetMovingPlatformsPausedEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008D5A0u, 0u, (void*)&Field_FreezeMovingPlatformsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006CE50u, 0u, (void*)&Field_FreezeRoomGimmicksTemporarilyEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008E224u, 0u, (void*)&Field_SetMovingPlatformVisibilityEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008E320u, 0u, (void*)&Field_MovingPlatformDwellTicksEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006CE70u, 0u, (void*)&Field_ApplyUnlockEffectToRoomObjectEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008BD74u, 0u, (void*)&Field_ToggleDoorCollisionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008BEBCu, 0u, (void*)&Field_BeginDoorToggleEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008BF48u, 0u, (void*)&Field_StartDoorAnimationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008C1C8u, 0u, (void*)&Field_FinishDoorAnimationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008BC04u, 0u, (void*)&Field_InteractiveDoorAtTileEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008E6DCu, 0u, (void*)&Field_MarkSigilDoorUnlockedEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008E7BCu, 0u, (void*)&Field_IsRoomSigilDoorUnlockedEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008D880u, 0u, (void*)&Field_SceneDoorIdEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008D948u, 0u, (void*)&Field_MarkEntranceDoorOnSceneMapEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008AB68u, 0u, (void*)&Field_StoreEntranceDoorForReloadEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008B8F8u, 0u, (void*)&Field_SetEntranceDoorRecordEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008B960u, 0u, (void*)&Field_FindEntranceDoorNearTileEntry, 0u, 0u, 0u},
@@ -1513,6 +1498,23 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008C070u, 0u, (void*)&Field_QueueGimmickAnimationEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D658u, 0u, (void*)&Field_ToggleRoomSwitchEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A0024u, 0u, (void*)&Field_GimmickPlacementEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009F794u, 0u, (void*)&Field_FindGimmickBelowEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009F858u, 0u, (void*)&Field_GimmickSubtypeEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800A47C4u, 0u, (void*)&Field_AreGimmicksMovingEntry, 0u, 0u, 0u},
+    {"MENU/MAINMENU.PRG", 0x800FA188u, 0u, (void*)&Field_MeasureTileStackEntry, 0u, 0u, 0u},
+    {"MENU/MAINMENU.PRG", 0x800FA238u, 0u, (void*)&Field_IsGimmickWithinHeightBandEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800A0104u, 0u, (void*)&Field_SetGimmickOrientationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800A3DB4u, 0u, (void*)&Field_CanPlaceGimmickAtPointEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009F530u, 0u, (void*)&Field_DropUnsupportedGimmickStackEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800A38E0u, 0u, (void*)&Field_FindInteractableGimmickAheadEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800A3E6Cu, 0u, (void*)&Field_BeginGimmickInteractionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800A41D0u, 0u, (void*)&Field_ApplyGimmickInteractionCommandEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B101Cu, 0u, (void*)&Field_UpdateGimmickReactionAnimationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&Field_UpdateGimmickMotionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006CDD8u, 0u, (void*)&Field_DisableTrapAtPositionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008D438u, 0u, (void*)&Field_RoomTriggerAtTileEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabledEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800A91DCu, 0u, (void*)&Field_FindTopGimmickAtTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurveEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BEC58u, 0u, (void*)&Event_EvaluateRoomEventTriggersEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFE50u, 0u, (void*)&VS::Event::ResolveLiveScriptActorReference, 0u, 0u, 0u},

@@ -20,6 +20,7 @@ extern "C" {
 #include "Core/Math/Distance.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 
 extern "C" {
@@ -97,8 +98,9 @@ std::optional<std::uint32_t> CollisionCell(TileCoordinate tile) {
 
 std::optional<VS::Battle::Ai::RoomFloorTrigger> FloorTrigger(
     TileCoordinate tile) {
-  const Field_MpdFloorTrigger* trigger =
-      Field_RoomTriggerAtTile(tile.x, tile.z, 0);
+  const auto target = VS::Field::FindLiveRoomTriggerAtTile({tile.x, tile.z, 0});
+  const auto* trigger =
+      target ? VS::Field::ResolveLiveTrapTarget(*target) : nullptr;
   if (trigger == nullptr) return std::nullopt;
   return VS::Battle::Ai::RoomFloorTrigger{
       static_cast<std::uint16_t>(trigger->kind),

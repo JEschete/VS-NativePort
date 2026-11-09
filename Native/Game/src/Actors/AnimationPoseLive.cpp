@@ -26,6 +26,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/GimmickPlacementLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -521,7 +522,8 @@ class LiveEventHost final : public AnimationEventHost {
   }
   void SpawnSourceEffect() override { Effects_SpawnSourceActorEffect(); }
   void ApplyGimmickInteraction(int command) override {
-    Field_ApplyGimmickInteractionCommand(&actor_, command);
+    static_cast<void>(
+        VS::Field::ApplyLiveGimmickInteractionCommand(&actor_, command));
   }
 
   void ReportEventProblem(AnimationEventStatus status,

@@ -37,16 +37,5 @@ extern Field_DoorFlagIdWord Field_snapshotDoorFlagSource;
 extern Field_MpdDoorRecord Field_pendingDestinationDoor;
 extern short Field_enteredDoorId;
 extern Field_MpdDoorRecord Field_entranceDoorRecord;
-Field_MpdLockTrigger* Field_InteractiveDoorAtTile(int query_tile_x, int query_tile_z, int query_floor_layer);
-void Field_ToggleDoorCollision(Field_MpdLockTrigger* door_trigger);
-int Field_BeginDoorToggle(Field_MpdLockTrigger* door_trigger);
-int Field_StartDoorAnimation(Field_MpdLockTrigger* door_trigger);
-int Field_FinishDoorAnimation(Field_MpdLockTrigger* door_trigger);
-int Field_SceneDoorId(int door);
-void Field_MarkEntranceDoorOnSceneMap(int entered_door_index);
-Field_MpdLockTrigger* Field_RoomInteractiveDoors(int* output_door_count);
-char Field_SigilDoorEndpointCoordinate(int door_pair_index, int endpoint_component);
-void Field_MarkSigilDoorUnlocked(int sigil_index);
-int Field_IsRoomSigilDoorUnlocked(int zone_id, int map_id, u_int sigil_index);
 
 #endif // VS_FIELD_DOORS_H_DECLS

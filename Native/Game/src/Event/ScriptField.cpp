@@ -24,8 +24,8 @@ extern "C" {
 #include "Event/Weather.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
-#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacementLive.h"
 
 // decomp: D_800E9BF0 (D_800E9BF0@BATTLE/BATTLE.PRG)
 u_char Event_kMenuTransitionModes[320]; /* contents: module image (ModuleData.cpp) */
@@ -118,7 +118,7 @@ intptr_t Event_ScriptRunMenuTransition(u_char* script, short thread_index)
 // decomp: BATTLE.PRG func_800B9770 (src/BATTLE/BATTLE.PRG/4A0A8.c:1966)
 intptr_t Event_ScriptSetGimmickVisibility(u_char* instruction, short thread_index)
 {
-    Field_SetMovingPlatformVisibility(instruction[1], instruction[2]);
+    Field_SetMovingPlatformVisibilityEntry(instruction[1], instruction[2]);
     return 0;
 }
 

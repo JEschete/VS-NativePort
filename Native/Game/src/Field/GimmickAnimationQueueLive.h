@@ -15,6 +15,7 @@ extern "C++" {
 namespace VS::Field {
 bool QueueLiveGimmickAnimation(int kind, Field_MpdLockTrigger* target);
 bool QueueLiveGimmickAnimation(int kind, ChestTarget target);
+bool QueueLiveGimmickAnimation(int kind, RoomObjectTarget target);
 }  // namespace VS::Field
 }
 #endif

@@ -40,7 +40,9 @@
 #include "Field/GameModeLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/MapLive.hpp"
+#include "Field/MinimapSceneLive.h"
 #include "Field/MinimapSceneLive.hpp"
+#include "Field/PlatformPlacementLive.h"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -584,7 +586,7 @@ class LiveSections : public Host {
   }
 
   void MarkEntranceDoor(int door) override {
-    Field_MarkEntranceDoorOnSceneMap(door);
+    Field_MarkEntranceDoorOnSceneMapEntry(door);
   }
 
   // decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15735-15743)
@@ -592,7 +594,7 @@ class LiveSections : public Host {
     Field_ResetGimmickAnimationQueueEntry();
     LiveInitializeRoomEffects();
     Items::RestoreLiveRoomChestStates();
-    Field_InitializeMovingPlatforms();
+    Field_InitializeMovingPlatformsEntry();
     Battle_ResetFloatingLabels();
     Effects_AllocateWeatherParticles();
     LiveInitializeRoomBackgroundColors();

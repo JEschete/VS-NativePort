@@ -30,6 +30,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -745,10 +746,12 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     Content_ActorAssetRequest& head = Content_legacyActorAssetRequests[0];
-    if (kind == ActorAssetKind::kGimmick) {
-      return Field_CreateGimmickInstance(&head);
-    }
     ActorAssetRequest request = LoadRequest(head);
+    if (kind == ActorAssetKind::kGimmick) {
+      const auto result = VS::Field::CreateLiveGimmickInstance(request);
+      StoreRequestFields(request, head);
+      return result;
+    }
     ActorAssetLoadState state = LoadState();
     active_state_ = &state;
     const int result = RunLoader(*this, state, request, kind);

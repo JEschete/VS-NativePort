@@ -1320,8 +1320,20 @@
     <ClCompile Include="src\Field\GimmickAnimationQueueLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Field\GimmickDynamics.cpp" />
+    <ClCompile Include="src\Field\GimmickDynamicsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\GimmickPlacement.cpp" />
     <ClCompile Include="src\Field\GimmickPlacementLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Field\GimmickReactions.cpp" />
+    <ClCompile Include="src\Field\GimmickReactionsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Field\GimmickResources.cpp" />
+    <ClCompile Include="src\Field\GimmickResourcesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Field\Gimmicks.cpp">
@@ -1348,6 +1360,7 @@
     <ClCompile Include="src\Field\InteractionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Field\InteractionTarget.cpp" />
     <ClCompile Include="src\Field\InteractionTargetLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -2014,19 +2027,25 @@
     <ClInclude Include="src\Field\EnvironmentLiveState.h" />
     <ClInclude Include="src\Field\GameModeLiveState.h" />
     <ClInclude Include="src\Field\GimmickAnimationQueueLive.h" />
+    <ClInclude Include="src\Field\GimmickDynamicsLive.h" />
     <ClInclude Include="src\Field\GimmickLookup.h" />
     <ClInclude Include="src\Field\GimmickMotion.h" />
     <ClInclude Include="src\Field\GimmickPlacementLive.h" />
+    <ClInclude Include="src\Field\GimmickReactionsLive.h" />
+    <ClInclude Include="src\Field\GimmickResourcesLive.h" />
     <ClInclude Include="src\Field\Gimmicks.h" />
     <ClInclude Include="src\Field\Input.h" />
     <ClInclude Include="src\Field\InteractionFocusLive.h" />
     <ClInclude Include="src\Field\Interactions.h" />
+    <ClInclude Include="src\Field\InteractionTargetLive.h" />
     <ClInclude Include="src\Field\Locations.h" />
     <ClInclude Include="src\Field\Manual.h" />
     <ClInclude Include="src\Field\Map.h" />
     <ClInclude Include="src\Field\MapProgress.h" />
     <ClInclude Include="src\Field\Minimap.h" />
+    <ClInclude Include="src\Field\MinimapSceneLive.h" />
     <ClInclude Include="src\Field\Mpd.h" />
+    <ClInclude Include="src\Field\PlatformPlacementLive.h" />
     <ClInclude Include="src\Field\Platforms.h" />
     <ClInclude Include="src\Field\Room.h" />
     <ClInclude Include="src\Field\RoomLoadingLiveState.h" />
@@ -2283,7 +2302,14 @@
     <ClInclude Include="include\Field\GameMode.hpp" />
     <ClInclude Include="include\Field\GameModeLive.hpp" />
     <ClInclude Include="include\Field\GimmickAnimationQueue.hpp" />
+    <ClInclude Include="include\Field\GimmickDynamics.hpp" />
+    <ClInclude Include="include\Field\GimmickDynamicsLive.hpp" />
     <ClInclude Include="include\Field\GimmickPlacement.hpp" />
+    <ClInclude Include="include\Field\GimmickPlacementLive.hpp" />
+    <ClInclude Include="include\Field\GimmickReactions.hpp" />
+    <ClInclude Include="include\Field\GimmickReactionsLive.hpp" />
+    <ClInclude Include="include\Field\GimmickResources.hpp" />
+    <ClInclude Include="include\Field\GimmickResourcesLive.hpp" />
     <ClInclude Include="include\Field\InteractionsLive.hpp" />
     <ClInclude Include="include\Field\InteractionTarget.hpp" />
     <ClInclude Include="include\Field\InteractionTargetLive.hpp" />

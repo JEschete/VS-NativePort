@@ -281,6 +281,9 @@ class RoomEffectHost {
     std::span<const std::byte> geometry, int group_index);
 bool ShowRoomGeometryGroup(std::span<std::byte> geometry, int group_index);
 bool HideRoomGeometryGroup(std::span<std::byte> geometry, int group_index);
+bool SetRoomGeometryGroupPosition(std::span<std::byte> geometry,
+                                  int group_index,
+                                  const RoomEffectPosition& position);
 bool SwapRoomGeometryGroupFlags(std::span<std::byte> geometry,
                                 int first_group_index, int second_group_index);
 bool AddRoomGeometryDepthBias(std::span<std::byte> geometry, int group_index,

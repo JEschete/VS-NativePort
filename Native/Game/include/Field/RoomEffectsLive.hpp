@@ -18,6 +18,8 @@ namespace VS::Field {
 [[nodiscard]] int* LiveFindRoomGeometryGroup(int group_index);
 int LiveShowRoomGeometryGroup(int group_index);
 int LiveHideRoomGeometryGroup(int group_index);
+bool LiveSetRoomGeometryGroupPosition(int group_index,
+                                      const RoomEffectPosition& position);
 int LiveSwapRoomGeometryGroupFlags(int first_group_index,
                                    int second_group_index);
 int LiveAddRoomGeometryDepthBias(int group_index, int depth_bias);

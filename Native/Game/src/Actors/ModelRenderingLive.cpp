@@ -29,6 +29,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLive.hpp"
+#include "Field/GimmickDynamicsLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 
@@ -320,12 +321,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   void UpdateGimmickMotion(std::size_t index) override {
     Field_GimmickInstance* object = Field_gimmickInstances[index];
     if (object == nullptr) return;
-    // Field_UpdateGimmickMotion (unpromoted) still takes the decomp's
-    // objectAnimationState view of the gimmick record; its own promotion
-    // retires the view.
-    Field_UpdateGimmickMotion(
-        reinterpret_cast<Field_GimmickPhysicsView*>(object),
-        State_tickSpeed / 2);
+    static_cast<void>(VS::Field::UpdateLiveGimmickMotion(object));
   }
 
   // decomp: 44F14.c:1108-1113.

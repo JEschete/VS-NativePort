@@ -49,6 +49,44 @@ std::uint8_t FacingQuadrant(std::int16_t facing) {
 }
 }  // namespace
 
+// decomp: BATTLE.PRG vs_battle_setDoorEntered (146C.c:15751), 8008AB68-AB7C.
+std::uint8_t EnteredDoorReloadByte(std::int16_t entered_door_id) {
+  return static_cast<std::uint8_t>(static_cast<std::int32_t>(entered_door_id) +
+                                   1);
+}
+
+// decomp: BATTLE.PRG func_8008B8F8 (src/BATTLE/BATTLE.PRG/146C.c:16127).
+void SetEntranceDoorRecord(EntranceDoorState& state,
+                           const std::optional<DoorRecord>& door,
+                           EntranceDoorHost& host) {
+  state.door = door.value_or(DoorRecord{});
+  if (!door) {
+    state.entered_door_id = -1;
+    return;
+  }
+  const auto scene_id = host.SceneDoorId(door->door_id);
+  state.entered_door_id = scene_id ? static_cast<std::int16_t>(*scene_id) : -1;
+}
+
+// decomp: BATTLE.PRG func_8008B960 (src/BATTLE/BATTLE.PRG/146C.c:16140).
+std::optional<DoorRecord> FindEntranceDoorNearTile(
+    std::span<const DoorRecord> doors, std::int32_t tile_x, std::int32_t tile_z,
+    std::int32_t floor_layer) {
+  constexpr std::int32_t kLayerOnlyFirst = 2;
+  constexpr std::int64_t kNeighborRadius = 1;
+  for (const auto& door : doors) {
+    if (door.floor_layer != floor_layer) continue;
+    const auto difference_x = static_cast<std::int64_t>(door.tile_x) - tile_x;
+    const auto difference_z = static_cast<std::int64_t>(door.tile_z) - tile_z;
+    if (floor_layer >= kLayerOnlyFirst ||
+        (difference_x >= -kNeighborRadius && difference_x <= kNeighborRadius &&
+         difference_z >= -kNeighborRadius && difference_z <= kNeighborRadius)) {
+      return door;
+    }
+  }
+  return std::nullopt;
+}
+
 TransitionPhase ScreenTransitionPhase(TransitionStep step) {
   switch (step) {
     case TransitionStep::kRoomExit:

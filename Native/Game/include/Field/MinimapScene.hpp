@@ -8,6 +8,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <span>
 
 namespace VS::Field {
@@ -84,6 +85,21 @@ class MinimapRenderer {
 };
 
 [[nodiscard]] bool IsValidMapScene(std::span<const std::byte> scene);
+
+struct SceneRoomAddress {
+  std::int16_t zone_id = 0;
+  std::int16_t map_id = 0;
+  friend bool operator==(const SceneRoomAddress&,
+                         const SceneRoomAddress&) = default;
+};
+
+[[nodiscard]] std::optional<SceneRoomAddress> CurrentSceneRoomAddress(
+    std::span<const std::byte> scene);
+
+[[nodiscard]] std::optional<std::uint8_t> SceneDoorId(
+    std::span<const std::byte> scene, std::int32_t door_index);
+bool MarkEntranceDoorOnSceneMap(std::span<std::byte> scene,
+                                std::int32_t door_index);
 
 // Validates an unresolved scene, rewrites its room payload lengths as
 // record-relative offsets and returns the byte offset of the room names.

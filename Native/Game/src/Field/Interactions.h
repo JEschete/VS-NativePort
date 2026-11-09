@@ -12,6 +12,5 @@
 
 extern Field_InteractionFocus Field_interactionFocus;
 extern u_int Field_controlMode;
-void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position);
 
 #endif // VS_FIELD_INTERACTIONS_H_DECLS

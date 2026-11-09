@@ -42,6 +42,7 @@ extern "C" {
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -201,7 +202,9 @@ class LiveAbilityHost final : public battle::AbilityHost {
   void SpawnAbilityLearnedEffect() override {
     Effects_SpawnAbilityLearnedEffect();
   }
-  void PauseMovingPlatforms() override { Field_SetMovingPlatformsPaused(1); }
+  void PauseMovingPlatforms() override {
+    Field_SetMovingPlatformsPausedEntry(1);
+  }
   void PauseFieldForMenu() override { VS::Field::LivePauseFieldForMenu(); }
   void ShowActionLearnedNotification(int action_id) override {
     Menu_ShowSceneNotification(kActionLearnedNotification, action_id, 1);

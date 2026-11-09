@@ -31,6 +31,7 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Input.h"
 #include "Field/Interactions.h"
+#include "Field/PlatformPlacementLive.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "State/Timers.h"
 }
@@ -107,7 +108,7 @@ class LiveCutsceneHost final : public CutsceneHost {
   }
   void ClearMenuRequest() override { Field_isMenuRequestQueued = 0; }
   void PauseMovingPlatforms(bool paused) override {
-    Field_SetMovingPlatformsPaused(paused ? 1 : 0);
+    Field_SetMovingPlatformsPausedEntry(paused ? 1 : 0);
   }
   void RequestEventStart() override {
     VS::Event::RequestEventStart(VS::Event::LiveScriptVm());

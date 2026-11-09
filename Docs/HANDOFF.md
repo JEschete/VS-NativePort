@@ -1,101 +1,1208 @@
 # Current handoff
 
-Updated 2026-11-07. This is a short entry point, not another work tracker.
+Updated 2026-11-09. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
 
 ## Work order and current state
 
-### Entrance Reload Byte (#276 Row 27)
+### Current Platform Policies
 
-- F00552 is an existing strict interaction core encoding the entered-door low
-  byte plus one modulo256. Original6MIPS `8008AB68-8008AB7C` confirms LBU/add1/SB.
-  The actual native entry writes only the packed persistent byte and preserves
-  the entered ID; maintained save snapshot callback adopts its retained C entry.
-- Three focused cases / 65,540 assertions include every halfword input pattern,
-  full neighboring-state-byte preservation, no-door wrap and original module
-  binding. Coupled33cases / 65,684assertions pass bothconfigurations. Full
-  Debug/Release each pass4,822tests / 8,967,841assertions, zero failures/skips/
-  regressions and unchanged canonical2,400/900-frame fingerprints.
-- Copier193/extent9 and quality five existing / zero new atjobs1 pass.
-  Two supported generations preserve all1,738source/configuration/adoption hashes;
-  manifest `100441176ADBEAE893C208C6D6471FE5311B4F46B30EA7F8D503987EC84ABC77`.
-  `VR-ENTRANCE-RELOAD-BYTE` and five-to-zero old-symbol slice record only this
-  source promotion; packed-state/global and broader save/load/lifetime acceptance
-  remain open. Unchanged gates2,720promoted/oneframewip, zero violations;
-  publication/exactCI pending. Row27remainsactive with51generated functions.
+- F00066 FreezeRoomGimmicksTemporarily and F00619 SetMovingPlatformVisibility
+  are promoted in the existing PlatformPlacement core/native adapter.
+  The former reuses the owned freeze service with exactly180ticks; the latter
+  stores the wrapped one-bit hidden state before geometry lookup and rereads
+  it afterward. Original C/module entries8006CE50/8008E224 and generated
+  callers are retained. Native bounds cover whole aligned records, including
+  the fifth record, and captured room/geometry identity checks stop stale writes.
+- Original8MIPS8006CE50-CE6C SHA256
+  `82b15b6ac1f14a5dc1dcb5fbb5c76ca576532d7d9d53606031caf34d63d70de5`
+  and44MIPS8008E224-E2D0 SHA256
+  `6f91c0d7be766da9b1072c9b76a5c455c764c3252c167ec1b6e67d3a21e12951`
+  match actualBATTLE bytes. Exhaustive lowword inputs, signedword extremes,
+  appearance/store/lookup ordering, callback rereads, exact packed-byte and
+  geometry-bit preservation, malformed tables and original modules are checked.
+- Full rebuilt Debug/Release each pass5128cases/11,935,773assertions with
+  zero failures/skips/regressions and unchanged2400/900canonical replay frames.
+  Combined platform policy/control20cases786594assertions and all202copier
+  controls pass. Source-scoped quality is0/0; the full header-aware gate passes
+  109existing/zero new with actualexit0. Both independent ledgers pass zero
+  violations: repository2764promoted/oneframewip; modernization2763done/981todo.
+  Original3479cohort2482promoted/16retired/980generated/oneframewip is
+  2498resolved/981remaining, forty-nine additional since6c8ac0b9.
+- Two pre-status generations preserved1760reviewedpaths/rawhashes; manifest
+  `cdea13c840c0f6457482ebb194b0f1b3da353a89d7dba67bad7ddc016ec4aed8`.
+  Final post-status generations also preserve all1760paths/rawhashes and the
+  same manifest. This C++ milestone's publication/CI remain pending gates.
+  Row27 now has44promoted/five retired/two generated
+  primary IDs; remaining F00547/F00828 stay ordered. Controller/reference/
+  allscene visual and borrowed global/lifetime retirement are not claimed.
+- Workflow checkpoint: the isolated #325 ledger-integrity fix is published
+  as b801734c5842a12713cf591a44585c3f8680dcf2; exact SourceQuality42687546097
+  succeeded. Supported marking preserves842unique type IDs and the complete
+  T00542 notes/retired status; #325 is closed with that fixing revision and
+  acceptance evidence. C++ work remains uncommitted; unrelated edits
+  are preserved. No issue closure is implied by these local promotion counts.
 
-### Entrance Door State (#276 Row 27)
+### Current Room Trigger Operations
 
-- F00577/F00578 now use existing strict interaction cores for complete entrance
-  record copy/clear and file-order door selection. Layer2+ selects by layer alone;
-  lower layers use the one-tile square. Native adapters copy door values, refuse
-  partial byte spans and retain original C/module8008B8F8/8008B960 bindings.
-  Existing transition and encounter callers adopt the typed APIs.
-- Original26MIPS `8008B8F8-8008B95C`, 90MIPS `8008B960-8008BAC4` and
-  50MIPS resolver `8008D880-8008D944` confirm record extent, unsigned byte8/result,
-  layer/neighbor selection and copy/clear ordering. Suspected generated signedness
-  was disconfirmed by actual native byte128-to254 tests; no speculative fix or
-  bug tracker was introduced.
-- Ten focused cases / 37 assertions; coupled50cases / 247assertions in both
-  configurations. Full Debug/Release each pass4,819tests / 8,902,301assertions,
-  zero failures/skips/regressions and unchanged canonical2,400/900frames.
-  Copier193/extent9 and quality five existing / zero new atjobs1 pass; two
-  supported generations preserve all1,738source/configuration/adoption hashes,
-  manifest `BA26FF34A7FC3175F66BEE117412181ABCCAEF6928496CEF9BFB7DB92D2D50A7`.
-- `VR-ENTRANCE-DOOR-STATE` and the six-file-to-zero old-symbol slice record
-  bounded source promotion. Unchanged gates derive2,719promoted/oneframewip,
-  zero violations; published25dc258a has exactsuccessfulCI42460001662.
-  Raw scene-table/getter,
-  current-room/global/lifetime and controller/all-scene/reference acceptance
-  remain open. Row27continues with52generated functions; not whole-row completion.
-- Prior Ashley revision `6c63d9fc` has exact successful CI `42456492346`,
-  and #324 is closed at that fixing revision. The initialization policy remains
-  a native safety correction, not effect renderer or retail-value parity.
+- F00065 DisableTrapAtPosition, F00602 RoomTriggerAtTile and F00616
+  SetRoomTriggerEnabled are promoted in InteractionTarget core/native
+  binding. The preexisting header-only target owner now has a strict core
+  implementation; C wrappers retain original pointer and null-all shapes.
+  AI RoomState and ChestInteractionsLive adopt typed generation targets;
+  generated effect/save-point callers bind the retained entries.
+- Original30words8006CDD8-CE4C SHA256
+  `2b95144922fc623f2491e177f5883a2d7e7a13dadd3d5f3871429fc96038bae2`,
+  52words8008D438-D504 SHA256
+  `e711275dda7b2921be52e7ebae2838cc6eb01f7e2b15e1d42d59a3104ab4dc9f`,
+  26words8008DEAC-DF10 SHA256
+  `802aba4d53f944ddb8e887b004715b6b989d8d2fb0d23ec968d7a4ccc5dcc7a1`
+  all match actualBATTLE bytes. Lookup keeps signedhalfwords/fullquerywords,
+  first matching record and immediate suppression for signedkind<16 when
+  either unsigned opaque20/40 byte is nonzero. Activation keeps only low8
+  input bits for one target or all records in order. Disable keeps signed
+  world/128 truncation/layer0/activation1 before rereading tile for obstacle.
+- Focused new/existing query/activation/disable/view/module16cases196732
+  assertions pass, including all65536signedposition values, callback tile
+  mutation, exact byte-only native stores, firstduplicate suppression,
+  stale/partial/foreign targets and actual AI flag0x80->0x480. Existing whole
+  twelve-byte/alignment domain guards stay intact; captured generation/base/
+  extent prevent later writes on replacement. Original malformed tails were
+  not verified accepted inputs; domain safety remains stricter there.
+- Initial FullDebugRelease each5115cases/11,542,461assertions pass with zero failures,
+  skips or regressions; canonical2400/900frames stay unchanged. Scopedtenfile
+  quality0findings/0new after nine brace-only repairs with all assertions kept
+  and no baseline/suppression edits. Generation first added only the new
+  C header's project/filter metadata; unchanged fail-closed check then passes
+  both runs with1,760reviewedpaths/rawhashes unchanged. ManifestSHA256
+  `0d05af2441451496192a5b497fedadd70258752da9450f927daf0cc440c16ff7`.
+  Owner-authorized recovery subsequently restored232missing maintained cases
+  without dropping current edits; delayed-door fixtures bind their actual
+  room records and packed fall coordinates retain31/30. The two new bounded
+  scene-reader cases for #331 remain intact. Fresh rebuilt Debug/Release each
+  pass5117cases/11,739,089assertions with unchanged canonical replays and zero
+  failures/skips/regressions. Focused recovered60cases461203assertions and
+  minimap30cases343714assertions pass; focused quality0/0 and wider quality
+  109existing/zero new with actualexit0. All202copiercontrols pass actualexit0.
+  VR-ROOM-TRIGGER-OPERATIONS/CPP/MOD are recorded; both ledgers pass zero
+  violations. Repository2762promoted/oneframewip; modernization2761done/983todo.
+  Original3479cohort2480promoted/16retired/982generated/oneframewip gives
+  2496resolved/983remaining; forty-seven additional since6c8ac0b9. All current
+  work remains uncommitted; publication/exact-revision CI and issue closures
+  remain separate. Final post-status generations preserve all1760reviewed
+  paths/rawhashes and the same manifest. Recovery-only scratch files are
+  removed; the bounded generation/quality verifier is reused for the next
+  row27 batch.
+- Published-baseline primary-file ID audit found51currentmatches:39promoted,
+  five retired and seven remaining copied bodies (not moved completions).
+  This slice addresses three; remaining F00066/F00547/F00619/F00828 stay in
+  orderedrow27. The current primary cohort is42promoted/five retired/four
+  generated. Do not mark the row done from final-path searches alone.
+  Borrowed pointer/controller/reference/allscene/lifetime/publication limits
+  remain separate.
 
-### Ashley Tile Dispatch (#276 Row 27, #324)
+### Current Gimmick Dynamics
 
-- F00158 is a strict typed event/trap/door/cache/fall core in the existing
-  interaction ownership boundary. Event, trap and door phases retain priority;
-  the Live host rechecks actor/stats, copies borrowed doors as values and takes
-  unaligned C input through a copy. Required native module80074BAC is retained.
-- All387original MIPS words `80074BAC-800751B4` were audited in bounded reads
-  of extracted BATTLE.PRG, SHA1
-  `D53AACCC3B3A2FC057D05E0DCEA92F7182BC72A9`. Tests preserve cache/forced-layer
-  and suppression masks, signedHP20/21/zero, label/defeat/reload ordering,
-  room-only nonfatal reload and 5-bit destination entry tiles. Two initial
-  typed discrepancies were caught by discriminating tests and repaired; neither
-  was published or accepted by changing expected behavior.
-- Twenty focused cases / 103 assertions; Debug coupled70cases / 526assertions.
-  Full Debug/Release each pass4,809tests / 8,902,264assertions, zero failures,
-  skips or regressions and unchanged canonical2,400/900-frame fingerprints.
-  Actual original MAP015 trap Debug `1794117204283499-0`, Release
-  `1794119632430485-0`:132mode8frames,HP250to196,triggeractivation1,field1phase0.
-  MAP247 lock Debug `1794117323021575-0`, Release `1794119683672030-0`:
-  138mode11frames,key458count10,field1phase0. Zero engine errors/intact traces.
-  These representative paths are not all-scene/controller fatal-fall parity;
-  damage stability or original-game parity is not inferred from one HP result.
-- Dependency #324 was logged before fixing: generated F00086's trap-tile
-  request left source.actor.part unassigned, while the transform consumer reads
-  it. Registered request initialization preserves effect33/busy gate/coordinates.
-  The actual copied-request fixture passes13assertions; coupled effect/Ashley
-  selection93cases550assertions. Zero storage is an explicit native safety
-  correction, not inferred retail endpoint values or renderer acceptance.
-- Copier193 / extent9 / modernization44 pass. Quality uses `--jobs 1`, five
-  existing / zero new; CPU-count default tidy parallelism is a concrete memory
-  risk, not a confirmed diagnosis of the earlier VS Code OOM. Builds use `/m:1`;
-  traces are streamed into small summaries. Two supported generations preserve
-  all1,738source/configuration/adoption paths and hashes; manifest
-  `57F8AE997CEE46B5C90A1DA1C595359DDE2E003C93CBB4AE5C7D3D186BD6FFFE`.
-- `VR-ASHLEY-TILE-TRIGGERS`, `VR-TRAP-TILE-ENDPOINT-INITIALIZATION` and the
-  five-to-zero old-symbol slice record bounded evidence. Unchanged gates derive
-  2,717promoted/oneframewip/254verification records, zero violations; tracker
-  reconciled; row27stillactive with54generated functions. This milestone's
-  source promotion is published at6c63d9fc/exactsuccessfulCI42456492346 and324closed.
-  #276/#321 and required
-  C/module/current-room/actor/event/effect globals/raw door/lifetime retirement
-  remain open; do not stop at this checkpoint.
+- F01013 UpdateGimmickMotion is promoted in GimmickDynamics core/native
+  adapter, using the owned reaction API. ActorMovementLive keeps its Synced
+  scope around the typed call; ModelRenderingLive adopts the same record API.
+  Originalunused ticks stayunused and C/module800B0908 is retained. The old
+  generated body and its six scratch/child/reaction adaptations are removed;
+  no scratchpad or variadic calls remain in maintained dynamics.
+- All453MIPS800B0908-1018 match actualBATTLE bytes, SHA256
+  `10cd7e3fa21a67223e92e714bf1440b95e56fc5914413ad219077eb3db4480e3`.
+  Typed rules preserve delay-first byte countdown, signed rotation division/
+  wrapped remainders and angle masks, mode255 damped slide versus254 next-point
+  wrapped probe, reaction-specific dispatch, generic signed motion countdown,
+  fall/gravity/landing/stack reaction and durability, and sixteen carrier
+  records. Final durability break skips child propagation as in the source.
+  State publication precedes service calls and fresh values are read afterward.
+- Core/native/module19cases262236assertions pass; with reactions35cases262355.
+  Every nonzero signed-halfword slide, parent-held countdown, support/occupancy
+  callback mutations and stackkind dispatch/refusal are checked. Actual room,
+  separate flag/height maps, owned reaction, carrier gravity, durability and
+  next-point probes pass natively. Canonical/physics-view offsets, generation/
+  captured pointer prefixes and original physical occupancy offset preflight
+  ground the adapter. Outside-arena borrowed records/allscene lifetime remain
+  separate; native SFX dispatch doesnotclaim audible output with fixture banks.
+- FullDebugRelease each5102cases/11,345,744assertions pass with zero failures,
+  skips or regressions; canonical2400/900frames stay unchanged. Scoped eleven
+  file dynamics/caller/tooling quality is0findings/0new after ten local guard/
+  fixture-access repairs without removed assertions/suppressions/baseline
+  changes. Copier controls follow the old four reaction calls into their
+  final retirement by the owned dynamics host. Two supportedgenerations
+  preserve1,758reviewedpaths/rawhashes; manifestSHA256
+  `c9d4da0f196602ca8cbda3510132678fa8c1f317c720b37e67791e64788787ba`.
+  Wider quality passes109existing/zero new with actualexit0. Independent
+  VR-GIMMICK-DYNAMICS/CPP/MOD status are recorded; both ledgers pass zero
+  violations. Repository2,759promoted/oneframewip; modernization2,758done/
+  986todo. Final two generations preserve all1,758paths/rawhashes; ignored
+  verifier removed and disk absence checked separately. Original3,479cohort
+  2,477promoted/16retired/985generated/oneframewip is2,493resolved/986remaining,
+  forty-four additional since6c8ac0b9.
+  Continue orderedrow27 after this gate; controller/reference/allscene and
+  publication/lifetime acceptance remain separate.
+
+### Current Gimmick Reactions
+
+- F01014 UpdateGimmickReactionAnimation is promoted in the new
+  GimmickReactions core and native adapter. This is F01013 motion's existing
+  reaction dependency, not a reordered gameplay priority. The core stays
+  legacy-free; its adapter uses the established native build profile.
+  Original C/module800B101C is retained. Four generated motion calls are
+  typed through registered adaptations; the old variadic casts/body are gone.
+- Source236MIPS800B101C-13C8 match actualBATTLE bytes, SHA256
+  `d34a69093f27f62d9542bd418290d2b48d05f5651b82b7a974dd6ea93a912d1c`.
+  Fourteen logical tables800E91AC-9277 total204bytes, SHA256
+  `c5e6885f77e4b5661f5a0eed36273bac6ce554da307ee7a71023aa89c95adc15`.
+  Typed rows retain signed spin/tilt/bounce/squash/displacement samples but
+  unsigned roll angles. Frames normalize0->1, advance nonterminal cursors,
+  and retain terminal cursor while completing. Palette restore/motion12 at
+  break9, release at40, orientation callback atroll14 and callback rereads
+  preserve original order. Refusal is not C completion.
+- Core/native/module16cases119assertions pass for width/bounds/frame/order,
+  exact32-byte palette copy and neighboring flags, reused orientation reset,
+  real heap-model release and null/short record refusal. Canonical/view
+  layout assertions ground the old pointer boundary. Native callbacks retain
+  ignored original return statuses while checking record identity/readability;
+  released model/slot and surviving record are distinguished. Outside-arena
+  borrowed records/global scene lifetime remain separate limits.
+- FullDebugRelease each5083cases/11,083,508assertions pass with zero failures,
+  skips or regressions; canonical2400/900frames stay unchanged. Scoped
+  reaction/native/copier/scaffolder quality is0findings/0new after header-name,
+  EOF, guards and explicit signed-extension repairs with all assertions kept.
+  All202copier controls pass actualexit0, including four typed generated call
+  shapes. Two supportedgenerations preserve1,753reviewedpaths/rawhashes;
+  manifestSHA256
+  `ded8a3fdedf1c486ff993fc2f125639ef29e60b4c8256e4503c4caf47e7783cc`.
+  Wider quality passes109existing/zero new with actualexit0. Independent
+  VR-GIMMICK-REACTIONS/CPP/MOD status are recorded; both ledgers pass zero
+  violations. Repository2,758promoted/oneframewip; modernization2,757done/
+  987todo. Final two generations preserve all1,753paths/rawhashes; ignored
+  verifier removed and disk absence checked separately. Original3,479cohort
+  2,476promoted/16retired/986generated/oneframewip is2,492resolved/987remaining,
+  forty-three additional since6c8ac0b9.
+  Continue F01013 motion after this dependency; controller/reference/allscene
+  and publication acceptance remain separate.
+
+### Current Gimmick Interaction Commands
+
+- F00914 ApplyGimmickInteractionCommand is promoted in GimmickPlacement.
+  The production AnimationPoseLive callback adopts the typed API; original
+  void C/module800A41D0 is retained. All177MIPS words800A41D0-4490 match the
+  actualBATTLE image, SHA256
+  `be298b822504dca2ab5d54a8e849a2af4a5065ff5753a9ab3aee20f351d4fb16`.
+- Typed dispatch preserves mode2 kind-specific motion/support reset before
+  occupancy removal, mode1 full-width adjacent tile/world/yaw stores before
+  F0/F1 parent-bone queries then signed truncating average+60/drop state,
+  and other modes' missing/motion-nibble idle fallback or unsigned tile
+  reservation release/removal (twice interaction2), wrapped slide/cardinal
+  yaw/attachment/carry updates. Direction, object and actor values are
+  reread across callbacks; source low-byte selected-slot attachment stays
+  distinct from the captured object pointer. No stale whole-record stores.
+- Core/native/module14cases131171assertions pass, including all65536yaw
+  values, callback mutation/refusal, real separate occupancy+flag maps,
+  registered two-tag parent bone data (-1/0 yields60), byte/halfword stores,
+  actor alignment and module binding. Captured record/room identities,
+  gimmick prefix/known heap actor extents, grid and missing-bone checks add
+  refusal safety. Outside-arena borrowed actor storage remains trusted debt;
+  missing tagged output now refuses rather than reading uninitialized data.
+- FullDebugRelease each5067cases/11,083,389assertions pass with zero failures,
+  skips or regressions; canonical2400/900frames stay unchanged. Scoped
+  nine-file command/production-callback quality is0findings/0new after seven
+  local guard/Catch-size repairs with all assertions retained and no
+  baseline/suppression edits. Two supportedgenerations preserve1,748paths
+  and rawhashes on both runs; manifestSHA256
+  `b28596aac5e5b61590f210255c571bb163d60e51635b3d4cd62d2ab59879a9aa`.
+  Wider quality passes109existing/zero new with actualexit0; current command
+  behavior was rechecked after reported intervening edits. Independent
+  VR-GIMMICK-INTERACTION-COMMAND/CPP/MOD status are recorded; both ledgers pass
+  zero violations. Repository2,757promoted/oneframewip; modernization
+  2,756done/988todo. Final two generations preserve all1,748paths/rawhashes;
+  ignored verifier removed and disk absence checked separately. Original
+  3,479cohort2,475promoted/16retired/987generated/oneframewip is
+  2,491resolved/988remaining, forty-two additional since6c8ac0b9.
+  Continue row27 with F01013 motion (F00915 obstruction is already owned);
+  controller/reference/allscene/lifetime/publication remain separate.
+
+### Current Gimmick Interaction Initiation
+
+- F00913 BeginGimmickInteraction is promoted in GimmickPlacement.
+  GameplayLoopLive adopts its typed result and ignores it as before; retained
+  C/module800A3E6C returns0 after successful dispatch and -1 on refusal. The
+  original accepted-path integer result was unspecified and unused, not a
+  source-verified zero. Reference remains read-only; generated output changes
+  through the copier. Manual edits apply to maintained code and registered
+  copier controls.
+- Typed stages preserve weapon-pose gate, selected-object orientation and
+  publication, signed difference/64 truncation then+1, initial slide clear,
+  kinds0-1 material roll, kinds0-2 full-tile slide/kind3 quarter-tile slide,
+  sound-before-animation pushes versus animation-before-sound carry/place,
+  busy flag and reservation, then turn/recenter. Actors, objects and direction
+  are reread after callbacks rather than overwritten from stale snapshots.
+  Packed tile byte/spare preservation differs from full-width reservation
+  arithmetic; world centers and signed height use original halfword stores.
+- Original217instructions800A3E6C-41CC and seven-way table80069460 match
+  actualBATTLE bytes; codeSHA256
+  `9f4784b3d8c8342b9e846e680f586312c8db1f546f0a1c1c0ce079b71722c876`,
+  dispatchSHA256
+  `c8f3c45d783e1833f05a2ff5e1befdbfdd2b6edb5665b8b33089a1074f42b234`.
+  Original96-byte roll table800E8FD0 has domain0-23 and SHA256
+  `76ac98a3d4fa01c9b91ba940043a95b2332a46fd9a3e8ddf6dc6d735067a222d`.
+  Oversized3424-byte backing does not expand the24x4logical table.
+- Core/native/module12cases391assertions pass, including actual reserved
+  flag preservation, nontrivial four-step turn, native roll/refusal and
+  callback-mutated actor/object/direction inputs. Captured room/actor/gimmick
+  identities/prefix bounds and grid preflight prevent stale writes/fatal
+  absent-grid calls. Native audio banks are unbound in these fixtures: sound
+  dispatch/order/refusal is checked, not audible output. Original ignored
+  animation/sound status remains ignored; no allscene/controller claim.
+- FullDebugRelease each5053cases/10,952,218assertions pass with zero failures,
+  skips or regressions; canonical2400/900frames remain unchanged. Scoped
+  nine-file quality is0findings/0new after twelve local style/test-size
+  repairs with every assertion retained and no baseline/suppression changes.
+  Two supportedgenerations preserve1,748paths/rawhashes on both runs;
+  manifestSHA256
+  `f82f3d313b5391810df9482d010e6a2e775e20c8c2d2d491202c3c93594cdbce`.
+  Wider quality passes109existing/zero new with actualexit0. Independent
+  VR-GIMMICK-INTERACTION-START/CPP/MOD status are recorded; both ledgers pass
+  zero violations. Repository2,756promoted/oneframewip; modernization
+  2,755done/989todo. Final two generations preserve all1,748paths/rawhashes;
+  ignored verifier removed and disk absence checked separately. Original
+  3,479cohort2,474promoted/16retired/988generated/oneframewip is
+  2,490resolved/989remaining, forty-one additional since6c8ac0b9.
+  Continue row27 interaction commands;
+  controller/reference/allscene/lifetime and publication remain separate.
+
+### Current Gimmick Interaction Selection
+
+- F00908 FindInteractableGimmickAhead is promoted in GimmickPlacement.
+  Its typed host reuses ActorMovement, TopAt and real placement, ceiling and
+  actor-occupancy APIs. GameplayLoopLive adopts the typed optional result;
+  the generated interaction starter uses the retained C entry. Original
+  module address800A38E0 is verified. All185MIPS words800A38E0-3BC0 match
+  actual BATTLE bytes, SHA256
+  `f8de2877f57e73f362f7dd40ad33f4ec78266df428d21b2d816c11dbbece5446`.
+- Original idle gates precede the rounded direction store, which precedes
+  adjacent negative-grid refusal. Held objects use attachBone, adjacent
+  placement at actorY-128 and ordered actor/adjacent ceilings at actorY-384,
+  without the ground branch's above-object occupancy check. Ground objects
+  retain top-slot-zero refusal, interaction/mode gates, inclusive signed
+  [actorY-128, actorY+64], farther placement for kinds0-3 or two ceilings for
+  kinds4-7, then actual scalar occupancy mode1. Full-width adjacent/far tile
+  coordinates are not byte-wrapped. Captured room/actor/gimmick identities
+  and prefix bounds refuse stale/missing native records.
+- Core/native/module11cases131152assertions pass, including every signed
+  halfword heading, boundary/order/refusal and real top/floor/occupancy cases.
+  All201copier controls pass with actualexit0; existing scalar retirement
+  controls remain and inspect both owned hosts. Scoped9-file quality is
+  zero findings/zero new after braces/constants and assertion-preserving
+  checked-state/coordinate helper repairs; no suppressions or baseline edits.
+- FullDebugRelease each5041cases/10,951,827assertions pass with zero failures,
+  skips or regressions; canonical2400/900frames remain unchanged. Supported
+  two-run generation preserves1,748reviewedpaths/rawhashes, zero changes on
+  both runs; current manifest SHA256
+  `6a0fb65d66526c907791448d890a6861473ab8a4f1bcacc67f9e3f6550dac29d`.
+  Wider quality passes109existing/zero new with actualexit0. Independent
+  VR-GIMMICK-INTERACTION-QUERY/CPP/MOD status are recorded; both ledgers pass
+  zero violations. Repository2,755promoted/oneframewip; modernization
+  2,754done/990todo. Final two generations preserve all1,748paths/rawhashes;
+  ignored verifier removed and disk absence checked separately. Original
+  3,479cohort2,473promoted/16retired/989generated/oneframewip is
+  2,489resolved/990remaining, forty additional since6c8ac0b9.
+  Continue row27 with F00913 interaction initiation; actual
+  controller/reference/allscene/global-lifetime acceptance remains separate.
+
+### Current Native Unsupported Stack Drop
+
+- F00836 DropUnsupportedGimmickStack is owned/wired in GimmickPlacement
+  with a captured native room/gimmick/actor host and original C/module8009F530.
+  ActorRosterLive and unchanged existing sequence stack scenarios adopt it.
+  Original153MIPS8009F530-F790 match module bytes, SHA256
+  `0720959db08fac83ba196924fc8fec0ebdfb9b2ee051b1e8dbb89a6436ddb2e0`.
+- Original mark-falling precedes top/below queries; base velocity0/mode252 is
+  stored before occupancy removal, twice only for interaction2. Survivors
+  clear carrier before conditional low24tile/height/parent/idle/nonfalling
+  attachment; pointer aliases of base are skipped. Typed MovementActor is
+  reused for actor falls: full root-motion reset/newfall countdown4 and NPC
+  destination, preserved existing mode3 motion/countdown, common locomotion/
+  movement-pending/support reset and next-slot skip1. Native identity changes
+  and cleanup refusal stop writes; actor scan is bounded and progress-checked.
+- Core order/carrier/actor/refusal and actual native base/fall/alias/missingtop/
+  module checks pass. Existing sequence empty/nonempty scenarios retain every
+  assertion; captured host reuses actual owned occupancy and actor movement
+  load/store. Combined stack/core/native/sequence/occupancy11cases72assertions
+  pass. Existing actor-above retirement controls now inspect the actual owned
+  host; original source guard/scalar controls are preserved. All201controls
+  pass nativeexit0; no generated output/reference was hand-patched.
+- FullDebugRelease each5030cases/10,820,675assertions pass, zero failures/skips/
+  regressions and unchanged2400/900-frame canonical fingerprints. Scoped
+  core/native/roster/sequence/tests quality passes90existing/zero new after
+  guard/include/test-size repairs without removed expectations/suppressions/
+  baseline updates. Supported2run generation preserves1,724paths after only
+  Gimmicks.cpp/.h/ModulePointers.cpp/manifest first changes, then byte-stable.
+  Wider quality passes109existing/zero new with actualexit0; independent
+  promotion and VR-GIMMICK-STACK-DROP are recorded. Both ledger checks pass
+  zero violations; repository2,754promoted/oneframewip, modernization
+  2,753done/991todo. Final two generations preserve1,724paths/raw hashes;
+  manifest SHA256`50f57568c243ec0d890dc7f5d85b02f5596934b7df13e401cf9825dd5631fcd4`.
+  Owned ignored verifier removed; disk absence checked separately. Exact
+  original3,479cohort2,472promoted/16retired/990generated/oneframewip:
+  2,488resolved/991remaining, thirty-nine additional since6c8ac0b9. Continue row27
+  afterward; actual controller/reference/all-scene/global lifecycle acceptance
+  and unrequested publication/closure remain separate.
+
+### Current Actor-Above Alias Retirement
+
+- F00910 FindActorAboveGimmick is retired in the catalog after its two generated
+  callers adopt the already-owned LiveFindActorOccupyingTile scalar API, without
+  adding a replacement bridge. Original13MIPS800A3C00-3C30 are only LBU X/Z,
+  LH support height and unchanged occupancy-mode forwarding; actual byte SHA256
+  `d461aa79ce0baa4a8a4584849006854bb9384a823affb3f4b5fd40a6b742dc9b`.
+  No stored BATTLE pointer word targets this address; generated function/header
+  and original module binding are removed. Existing stack-update/null-top guard
+  order and owned mode0/1 occupancy behavior stay intact.
+- Existing copier guard fixture now uses the actual source call expression,
+  retaining all ordering assertions; new exact scalar-rewrite/emitted-source
+  control passes. The retired symbol's original name remains before fixups,
+  so the local source-name stage was corrected after fail-closed generation.
+  No generated output was hand-patched. All201copier controls pass nativeexit0.
+  Native module-absence and unsigned-tile/signed-height/mode0-1-2 checks plus
+  placeability10cases185assertions pass; focused copier/test quality is0/0.
+- FullDebugRelease each5021cases/10,820,616assertions pass, zero failures/skips/
+  regressions and unchanged2400/900-frame canonical fingerprints. Supported
+  two-run generation preserves1,724paths after only Gimmicks.cpp/.h/
+  ModulePointers.cpp/manifest first-run changes and zero second-run changes.
+  Wider quality passes109existing/zero new with actualexit0; retirement and
+  VR-GIMMICK-OCCUPANCY-SCALAR are recorded. Both ledger checks pass zero
+  violations; repository2,753promoted/oneframewip, modernization2,752done/992todo
+  across3,744functions after the retired alias leaves its scope. Final two
+  generations preserve1,724paths/raw hashes; manifest SHA256
+  `991817bbcd050c6a3157104ce4268d990c220da0287aeb31141c342f3095473d`.
+  Owned ignored verifier removed; disk absence checked separately. Exact
+  original3,479cohort2,471promoted/16retired/991generated/oneframewip:
+  2,487resolved/992remaining, thirty-eight additional since6c8ac0b9. Continue row27
+  afterward. Raw records in remaining generated consumers/global/controller/
+  reference/all-scene lifecycle remain separate; no unrequested publication/
+  closure claim.
+
+### Current Native Gimmick Placeability
+
+- F00912 CanPlaceGimmickAtPoint is owned/wired in GimmickPlacement.cpp/.hpp
+  and its captured-generation native host, original C/module entry800A3DB4
+  with generated query/motion callers adopted. Original46MIPS800A3DB4-3E68
+  match module bytes; SHA256
+  `817169198e1ad6d6ddda587b55b553a7568f81c0c2d5042b8b06b7535888752d`.
+  Support uses zero origin and full-word X/Z offsets in original mode1, then
+  signed minimum-height refusal, only probe bit20 refusal, then occupancy mode1
+  at X/Z divided128 with truncation toward zero and sampled height forwarded.
+- Core order/bit/fullword signed-coordinate/height boundary tests and actual
+  native floor/probe/actor/absent-room/module checks pass. Fixture first lacked
+  collision layer descriptors and4x4sample payload, then inherited same-tile
+  support gimmicks; both were isolated/completed without changing positive
+  placement or refusal expectations. Native fixture restores room, actor
+  table, probe/samples and all original gimmick records. Placeability/query
+  16cases66,018assertions pass; placeability-only selection8cases180assertions.
+- Full Debug/Release each5019cases/10,820,613assertions pass, zero failures/skips/
+  regressions and unchanged2400/900-frame canonical fingerprints. Scoped
+  placeability/query/core/native/tests quality is0findings/0new. All200copier
+  controls pass nativeexit0; supported2run generation preserves1,724paths after
+  only Gimmicks.cpp/.h/ModulePointers.cpp/manifest first changes, then byte-stable.
+  Wider quality passes109existing/zero new with actualexit0; independent
+  promotion and VR-GIMMICK-PLACEABILITY are recorded. Both ledger checks pass
+  zero violations; repository2,753promoted/oneframewip, modernization
+  2,752done/993todo. Final two generations preserve1,724paths/raw hashes;
+  manifest SHA256`13b24b5ca07316b3231fe9e837b68190c3001d4fc764e24ab00fea0b964bb7d9`.
+  Owned ignored verifier removed; disk absence checked separately. Exact
+  original3,479cohort2,471promoted/15retired/992generated/oneframewip:
+  2,486resolved/993remaining, thirty-seven additional since6c8ac0b9. Continue ordered
+  row27 afterward. Controller/reference/all-scene/global lifecycle stays
+  separate; no unrequested commit/push/closure claim.
+
+### Current Native Gimmick Orientation
+
+- F00854 SetGimmickOrientation is owned/wired in GimmickPlacement.cpp/.hpp
+  and the generation-checked native host; original C/module entry800A0104 and
+  creation/generated reaction callers are adopted. Original49MIPS800A0104-01C4
+  match module bytes, SHA256
+  `9476368483ccc2379dc8fc69802de7ade3dd9ef0da5e5d8d98971ba1ec54870e`.
+  Logical table is24four-byte rows at800E9030-908F before next symbol800E9090,
+  not compatibility3328byte capacity. All96actual bytes match SHA256
+  `8463ddc7b38b4bb62b8d8a94ccc2c25a770d408aaff4634495cc194770e0487c`.
+- Original kind mask permits0/1; low-byte material stores before full-index
+  bounded lookup. Unsigned quarter-turn bytes multiply1024 and wrap to signed
+  halfwords before the existing typed Euler kernel; native matrix4 rotation
+  changes without translation/padding writes. All original rotation reset
+  halfwords are cleared. Known invalid tables/indices refuse with documented
+  material-store ordering; borrowed record/global lifecycle remains separate.
+- Confirmed defect#330 was logged before fix: original CPU800A01B0 SW clears
+  rotationZ+reserved2A, but generated halfword-only store left adjacent19.
+  Native failing-before case1/6 onlyreserved2Afail is now all6pass, without
+  changing expected values. Core kind/order/unsigned-byte/bounds/store-refusal
+  and native matrix/translation/actual unnamed padding/table/module tests pass;
+  coupled orientation/creation/status29cases140,961assertions pass. Creation
+  retains its original ignored orientation return for non-crate kinds.
+- Full Debug/Release each5011cases/10,820,433assertions pass, zero failures/
+  skips/regressions and unchanged2400/900-frame canonical fingerprints. Scoped
+  orientation/query/creation/tests quality is0findings/0new after local alias/
+  brace repairs; no suppression or baseline refresh. All200copier controls
+  pass nativeexit0. Supported2run generation preserves1,724paths after only
+  Gimmicks.cpp/.h/ModulePointers.cpp/manifest first changes, then byte-stable.
+  Wider quality passes109existing/zero new with actualexit0; independent
+  promotion and VR-GIMMICK-ORIENTATION are recorded. Both ledger checks pass
+  zero violations; repository2,752promoted/oneframewip and modernization
+  2,751done/994todo. Final two generations preserve1,724paths/raw hashes;
+  manifest SHA256`0cbf546c0a9dae0b70bf99f1e0bd2cbd31e43dad03434d705aa92f95d6487a0b`.
+  Owned ignored verifier removed; disk absence checked separately. Exact
+  original3,479cohort2,470promoted/15retired/993generated/oneframewip:
+  2,485resolved/994remaining, thirty-six additional since6c8ac0b9. #330 remains
+  open pending publication/exactCI. Continue ordered row27 afterward; no
+  controller/reference/all-scene/global lifetime or unrequested commit/push/
+  closure claim.
+
+### Current Native Menu Gimmick Queries
+
+- F02468 MeasureTileStack/F02469 IsGimmickWithinHeightBand are owned/wired
+  in GimmickPlacement.cpp/.hpp and its checked native snapshot adapter, with
+  original MAINMENU.PRG C/module entries800FA188/800FA238 and generated sphere
+  caller adoption. Height-band retains its historically unused status; actual
+  37instruction-word body is present in the module, not merely a declaration.
+- Missing generated ASM files were resolved by direct read-only module audit:
+  original config gives base800F9800. Existing pinned Windows Capstone decodes
+  all44/37words from offsets988/A38 to A38/ACC. Both use LBU X/Z and skip/motion
+  filters; measurement alone gates signed mode zero and decrements128 unless
+  interaction bits equal2, while band uses inclusive signed Y and wrapping
+  ADDIU upper bound without a mode/falling/attachment gate. REA Rizin was
+  unavailable on Windows; no retry/bootstrap/reference mutation was used.
+- Core all65,536height values/256interaction bytes, active gates/span limits and
+  native unsigned/mode/band/byte-preservation/unaligned-output/null/short-prefix/
+  module cases pass. Menu/query18cases196,979assertions pass. One oversized
+  native test was factored into a local helper without removing assertions.
+  Native output memcpy preserves safe unaligned/null policy separately from
+  original valid-pointer behavior; other borrowed prefixes remain tracked debt.
+- Full Debug/Release each5003cases/10,819,367assertions pass, zero failures/skips/
+  regressions and unchanged2400/900-frame canonical fingerprints. Scoped quality
+  is0findings/0new; all200copier controls pass nativeexit0. Supported two-run
+  generation preserves1,724paths after only Sphere.cpp/ModulePointers.cpp/
+  Gimmicks.cpp/.h/manifest first-run changes, then zero second-run changes.
+  Wider quality passes109existing/zero new with actualexit0; independent
+  promotions and VR-GIMMICK-MENU-QUERIES are recorded. Both ledger checks pass
+  zero violations; repository2,751promoted/oneframewip and modernization
+  2,750done/995todo. Final two generations preserve1,724paths/raw hashes;
+  manifest SHA256`1f68f0b0f2a3622d5cb03f2fe12cba9f338138e2c837137358235e1ca3c762da`.
+  Owned ignored verifier removed; disk absence checked separately. Exact
+  original3,479cohort2,469promoted/15retired/994generated/oneframewip:
+  2,484resolved/995remaining, thirty-five additional since6c8ac0b9.
+  Continue ordered row27 afterward. No controller/reference/all-scene/global
+  lifetime or unrequested publication/closure claim.
+
+### Current Native Gimmick Status
+
+- F00838 GimmickSubtype and F00917 AreGimmicksMoving are owned/wired in
+  GimmickPlacement.cpp/.hpp and the checked query snapshot adapter, with
+  original C/module entries8009F858/800A47C4. GameplayLoopLive uses the typed
+  status API; generated Feedback uses the retained subtype entry. Subtype is
+  unsigned LBU after three-bit kind==1; status scans first16present records
+  with skipped clear/four-bit motion zero/nonzero signed mode. Falling and
+  attachment are not extra status filters. Original16/25MIPS words match bytes.
+- All256kind/subtype bytes, all65,536signed mode values and256motion bytes are
+  covered; native subtype/skip/nibble/ignored-fields/prefix-refusal/module cases
+  pass. Signed one-bit skipped fixture uses representable-1 for the original
+  true bit. Status/query18cases270,942assertions pass. No existing assertion or
+  baseline was weakened. Native source extents remain the shared checked prefix.
+- FullDebugRelease each4995cases/10,753,529assertions pass with zero failures/
+  skips/regressions and unchanged2400/900-frame canonical fingerprints. Scoped
+  status/query/native/production-loop/tests quality is0findings/0new. All200
+  copier controls pass nativeexit0. Supported two-run generation preserves
+  1,724paths; first changes only Feedback.cpp/ModulePointers.cpp/Gimmicks.cpp/.h
+  and manifest, second byte-stable. Wider quality passes109existing/zero new
+  with actualexit0; VR-GIMMICK-STATUS and promotions are recorded. Both ledger
+  checks pass zero violations; repository2,749promoted/oneframewip and
+  modernization2,748done/997todo. Two final post-status generations preserve
+  all1,724paths/raw hashes; manifest SHA256:
+  `1ecca73a81030181112450c28825959c4b7ac7c0777cfe13a39c7825abc5ec1a`.
+  Owned ignored verifier removed; disk absence checked separately. Exact
+  original3,479cohort2,467promoted/15retired/996generated/oneframewip:
+  2,482resolved/997remaining, thirty-three additional since6c8ac0b9.
+  Continue ordered row27; this verified milestone is not task completion.
+  Actual controller/reference/all-scene/global lifetime acceptance stays
+  separate. The two menu stack-check ASM filenames were not found by bounded
+  ignored-file rg lookup; defer their port until actual instruction evidence
+  is recovered. No unrequested commit/push/closure.
+
+### Current Native Gimmick Stack Queries
+
+- F00837 FindGimmickBelow and F00942 FindTopGimmickAtTile are owned/wired
+  in GimmickPlacement.cpp/.hpp with checked native query snapshots and original
+  C/module entries8009F794/800A91DC. ActorSoundLive consumes detached values
+  while preserving its original zero-slot fallback. Generated gimmick/Sphere
+  callers adopt the retained C shapes; no generated output was hand-patched.
+- Original49/55MIPS words match module bytes. Below keeps the first largest
+  eligible Y above-30000 and <=referenceY, including full four-byte tile
+  equality; top keeps the last smallest Y <=4096, LBU tile X/Z, optional idle,
+  parent255/carrier equality and original skipped filter. Falling is a below
+  filter only, not a new top-query filter. Native known short/misaligned prefixes
+  refuse; other borrowed prefixes remain tracked compatibility debt.
+- Core all65,536halfword heights and boundary/eligibility/tie/slot tests pass;
+  native unsigned coordinates, unchanged complete byte snapshots, detached
+  values, null/short/alignment/refusal/module tests pass. Query/audio82cases/
+  131,817assertions and coupled query/creation/resources/release/occupancy/audio
+  116cases132,240assertions pass. The two adapters share the native prefix
+  readability helper; clone detection stays intact without suppression.
+- Full Debug/Release each4987cases/10,613,728assertions pass with zero
+  failures/skips/regressions and unchanged2400/900-frame canonical fingerprints.
+  Scoped quality across core/native/shared-guard/audio/tests is0findings/0new;
+  wider changed+tidy `--jobs 1` passes109existing/zero new with actualexit0.
+  All200copier controls pass nativeexit0; two supported generations preserve
+  1,724reviewed paths after only7expected ownership/project/caller changes,
+  with zero second-run changes. VR-GIMMICK-STACK-QUERIES records both queries
+  and refreshes shared-guard creation evidence; both ledger checks pass zero
+  violations. Repository2,747promoted/oneframewip, modernization2,746done/999todo.
+  Two final post-status generations preserve1,724paths/raw hashes; manifest
+  SHA256`23e0db2c719fb9da8be12bbb7da77ae529d31b53f1f9f180f85534bc2788c755`.
+  Owned ignored verifier removed; disk absence checked separately. Exact
+  original3,479cohort2,465promoted/15retired/998generated/oneframewip:
+  2,480resolved/999remaining, thirty-one additional resolved since6c8ac0b9.
+  Continue ordered row27; reaching fewer than1,000remaining is not completion.
+  No controller/all-scene/sound/reference/global
+  lifetime acceptance or unrequested commit/push/closure is claimed.
+
+### Current Native Gimmick Creation
+
+- F00782 is owned/wired in GimmickResources.cpp/.hpp and the native resource
+  adapter, with original C/module entry8009998C and production ActorAssetsLive
+  queue adoption. The original248MIPS8009998C-9D68 match actual module bytes;
+  SHA256`26d5e62874803ea36582012510a1a0c42c47469fef4ac06ca1a4451f1382679c`.
+- Typed creation preserves busy refusal before publication, published null or
+  model-failure behavior, clear/shared copy of the native prefix only, first
+  shared-ID match, palette/default setup, unsigned tile/variant bytes, wrapped
+  height, orientation/occupancy, and the first earlier supporting-stack match.
+  The native adapter bounds8logical template indices/3pointers and template
+  bytes in a heap allocation or registered module blob; validates model/UV
+  spans, uploads CLUT13, and retains the caller-owned instance tail. Known
+  short/misaligned destinations refuse before publication; other borrowed
+  native prefix pointers remain compatibility debt, not lifetime retirement.
+- Real heap model/UV, shared-prefix/tail, palette row edges, template/destination
+  bounds, unaligned C request preservation, unsigned placement/variant and
+  original module cases pass. Empty-room support is explicitly checked at
+  original sentinel-3000 before the variant subtraction/halfword wrap. The
+  coupled creation/resources/release/production occupancy selection passes
+  34cases423assertions. All existing production occupancy assertions remain.
+- Complete Debug/Release each4977cases/10,482,587assertions pass with zero
+  failures/skips/regressions and unchanged silver_wolves2400-frame and
+  first_lever_room900-frame canonical fingerprints. Scoped quality is0/0;
+  wider changed+tidy `--jobs 1` passes109existing/zero new with actualexit0.
+  No baseline refresh/suppression. All200copier controls pass nativeexit0;
+  their model registration/forget-before-free checks follow the owned adapter.
+- Two180s bounded supported generations preserve1,723reviewed paths; only
+  Gimmicks.cpp/.h, ModulePointers.cpp and the manifest changed on the first
+  ownership generation; the second is byte-stable. F00782 promotion and
+  VR-GIMMICK-CREATE are recorded; both ledger checks pass zero violations.
+  Repository2,745promoted/oneframewip and modernization2,744done/1,001todo.
+  Two final post-status generations preserve all1,723paths and raw hashes;
+  manifest SHA256:
+  `0a04a65cea55770a9b438502df7fcf1eb2d2285d97154f6381e7e0ae8dce51d9`.
+  Owned ignored verifier removed; its disk absence is checked separately.
+  Original3,479cohort now2,463promoted/15retired/1,000generated/oneframewip:
+  2,478resolved/1,001remaining, twenty-nine additional resolved since6c8ac0b9.
+  Continue ordered row27. No unrequested commit/push/closure;
+  actual controller/reference/all-scene/import/global lifecycle stay separate.
+
+### Current Native Gimmick Release
+
+- F00783 is owned/wired in GimmickResources.cpp/.hpp and the checked Live
+  bridge, with original C/module entry80099D6C and maintained ActorRosterLive
+  removal plus generated callers adopted. It is promoted with independent
+  native C++/behavior evidence. Original68MIPS80099D6C-9E78 match module bytes;
+  SHA256`be96c32225ad821ce6adcea197f3d9969d753ac24cbc5b3a6b16044fd13c8cda`.
+- Typed release validates slot/unsigned zero-bone state, searches other live
+  same-kind records by original three-bit ID, frees/forgets unshared geometry
+  before occupancy removal and final slot clear. Shared geometry remains until
+  its final matching owner releases it. Native host checks captured pointer
+  and room generation before/after cleanup, retaining caller-owned instance
+  storage. Empty/negative/out-of-range/bone-zero inputs refuse unchanged.
+  Existing model/heap/AI occupancy services are reused; no new asset format.
+- Core cleanup-order/refusal and actual native heap/extent/shared-retention/
+  invalid-slot/module cases pass. The existing two-cycle production occupancy
+  test was adopted without changing its assertions. Combined release/resource/
+  occupancy21cases329assertions pass. Failed fixture patch placement was
+  repaired only for the new nested additions; the original fixture destructor
+  and all existing state restoration/expectations remain intact.
+- Final full Debug/Release each4964cases/10,482,493assertions pass, zero
+  failures/skips/regressions and unchanged silver_wolves2400-frame /
+  first_lever_room900-frame canonical fingerprints. All200copier controls and
+  strict generation pass. Scoped resource/core/actor-removal/tests/occupancy
+  quality passes zero findings/zero new after four local alias/brace repairs;
+  no suppression or baseline refresh. All1,125original instructions across
+  ten routines and original frozen palette halfwords are audited.
+- F00783 is promoted with VR-GIMMICK-RELEASE. Wider changed+tidy `--jobs 1`
+  passes109existing/zero new with actualexit0; no baseline refresh/suppression.
+  Both ledger checks pass zero violations; repository2,744promoted/oneframewip,
+  modernization2,743done/1,002todo. Two180s bounded supported copier/scaffold
+  generations preserve all1,723reviewed code/Live/test/project/ledger/tool
+  paths and raw hashes. Manifest SHA256:
+  `4c6d034cb5e00e3fe26952b310afe9a22f3a3bb300cf938aef39b0306cc8e001`.
+  Owned ignored verifier removed; disk absence is checked separately.
+  Continue F00782 creation in resource owner. Exact original3,479cohort is
+  2,462promoted/15retired/1,001generated/oneframewip:2,477resolved/1,002remaining
+  (twenty-eight additional since6c8ac0b9). #325-329 publication/exactCI stay
+  open. Actual controller/reference/all-scene/model import and whole global
+  lifetime retirement remain separate; no unrequested commit/push/closure.
+
+### Current Gimmick Resource Selection And Palettes
+
+- F00780/F00781 are owned/wired in new GimmickResources.cpp/.hpp and its
+  checked native bridge, distinct from placement/platform state. Original
+  C/module entries80099900/80099960 and the maintained room-palette producer
+  adopt it through supported generation. Both are promoted with independent
+  VR-GIMMICK-SHARED-MODEL and VR-GIMMICK-PALETTE-TABLE records.
+  Existing ActorAssets handles remain the
+  asset-loader ownership boundary; no new asset authoring format is introduced.
+- Original24MIPS80099900-995C preserve signed LB request-slot exclusion,
+  unsigned unmasked request kind, three-bit loaded object identity, original
+  sixteen-slot scan/first match and dataAddress-only success mutation. Native
+  callbacks snapshot model values and memcpy requests for unaligned inputs;
+  absent/no-match requests are unchanged. Original11MIPS80099960-9988 copy
+  exactly0xE0palette bytes; core validates/stages a complete source, including
+  self/partial overlap, and the native240byte compatibility table retains its
+  trailing16bytes. Oversized table/model pointer ownership remains migration
+  debt; no model sharing lifecycle/global/palette retirement claim is made.
+- All original words match BATTLE image bytes; F00780 SHA256:
+  `4b9eda0cb0bc8d7b4d5b6312f6808db8971560445845f1761aa82d4ed34be446`;
+  F00781 SHA256:
+  `5eae8c68006ca852dccc68cb1fe424d487f869fb7e1376c4088c4d44ae22ec44`.
+  Audited total1,057words across nine routines plus the original frozen palette.
+  Core/native/room-rendering27cases374assertions pass, covering signed slots,
+  masked IDs, scan limits, exact/short/alias palette bytes, request preservation,
+  unaligned request, compatibility tail and both original module addresses.
+- Final full Debug/Release each4956cases/10,482,460assertions pass with zero
+  failures/skips/regressions and unchanged2400/900-frame canonical fingerprints.
+  All200copier controls and strict generation pass. Supported project generation
+  registers the new files and only its Live bridge as legacy-binding capable;
+  no project XML is hand-edited. Focused core/Live/producer/tests quality passes
+  zero findings/zero new after two local brace/include fixes. No suppression,
+  baseline refresh, controller/reference/all-scene/model lifecycle claim.
+- Wider changed+tidy `--jobs 1` passes109existing/zero new (legacy5/tests104)
+  with actualexit0; no baseline refresh/suppression. Named kGimmickPaletteBytes
+  describes the original size without changing the array/type/data extent.
+  Header and focused four-unit quality also pass zero findings/zero new.
+  Both ledger checks pass zero violations; repository2,743promoted/oneframewip,
+  modernization2,742done/1,003todo. Two180s bounded supported copier/scaffold
+  generations preserve all1,723reviewed code/Live/test/project/ledger/tool
+  paths and raw hashes. Manifest SHA256:
+  `38f0c598e38f06124a8b0353c2766756ebeca1b2532cf787fc43dfaa1adc3ec1`.
+  Owned ignored verifier removed; disk absence is checked separately.
+  Continue F00782/F00783 original creation/release lifecycle in the resource
+  owner. Exact original3,479cohort is2,461promoted/15retired/1,002generated/
+  oneframewip:2,476resolved/1,003left (twenty-seven additional since6c8ac0b9).
+  No unrequested commit/push/closure or whole-cohort finish.
+
+### Current Platform Target Waypoint
+
+- F00620 is owned/wired in PlatformPlacement.cpp/.hpp with original C/module
+  entry8008E2D4 and promoted with VR-PLATFORM-TARGET-WAYPOINT.
+  The maintained MovementBehaviorLive AI route-gate consumer now
+  uses a detached value rather than a borrowed VECTOR pointer. Original19MIPS
+ 8008E2D4-E31C match module bytes; SHA256:
+  `2dc102677b05115641b2f67ed030839cac3c70bfc6857e1f4b9521bf5f644013`.
+  The core masks the selected waypoint to two bits and returns checked index
+  and exact value; the C boundary still returns the original record address
+  after validating complete aligned platform data. Hidden authored waypoints
+  remain accessible; absent/partial/invalid indices refuse. Borrowed C/module
+  compatibility and room lifetime retirement remain separate.
+- Core2cases770assertions and native pointer/value/invalid/module cases pass;
+  initial coupled navigation50cases795,772assertions passed. Full Debug then
+  aborted in PursuitTargetsTests.cpp140 because its existing PursuitFixture
+  bound four platform records without binding/restoring their byte extent.
+  The incomplete report at `build/quality/native-tests-debug.xml` is failed
+  diagnostic evidence, not fresh passing verification. The gap was logged on
+  #276 before repair; all original pursuit expectations are retained. Added
+  sizeof(platforms) and saved/restored the previous extent in that fixture;
+  production bounds checks were not weakened. The confirmed owned diagnostic
+  VS.Tests process40236 was stopped after it retained the executable lock;
+  unrelated processes were left alone. Corrected pursuit/waypoint14cases /
+  854assertions pass, including current/planned and group0/group3 gates.
+- Final complete Debug/Release each4944cases/10,482,174assertions pass with
+  zero failures/skips/regressions and unchanged2400/900-frame canonical replay
+  fingerprints. All200copier controls and strict generation pass. Scoped
+  core/Live/AI/tests/pursuit quality0findings/0new passes. All1,022original
+  instruction words across seven platform functions and frozen16palette
+  halfwords are audited; current new generation stability is not yet claimed.
+- Wider changed+tidy `--jobs 1` passes109existing/zero new with actualexit0;
+  no baseline refresh or suppression. Both ledgers pass zero violations;
+  repository2,741promoted/oneframewip, modernization2,740done/1,005todo.
+  Two180s bounded supported copier/scaffold generations preserve all1,718
+  reviewed code/Live/test/project/ledger/tool paths and raw hashes. Manifest:
+  `b9ea460df95ab5290b51ab425a94d234e01c9412e5d4b11c02207b8bd029f66c`.
+  Owned ignored verifier removed; disk absence is checked separately.
+  Exact original3,479cohort is2,459promoted/15retired/1,004generated/oneframewip:
+  2,474resolved/1,005left (twenty-five additional resolved since6c8ac0b9).
+  Continue row27 gimmick resources/lifecycle. No unrequested commit/push/closure
+  or whole-cohort completion; wider original acceptance remains unchanged.
+
+### Current Platform Freeze Appearance
+
+- F00629 is owned/wired in PlatformPlacement.cpp/.hpp with checked C/module
+  entry8008E4DC and native freeze/motion hosts; original generated body removed
+  through the supported copier. It is promoted with VR-PLATFORM-APPEARANCE.
+  Original69MIPS8008E4DC-E5EC match every module word;
+  SHA256`7ec25ae3ed7ab496dc81cc15098c49607ae2ae0e985b64b17ce88b061ea139b5`.
+  Original16halfword palette at80068BFC matches native values;
+  SHA256`99cbd5852e331084d118db806b27bd81fb94728f615eabeac38905c8e344bd86`.
+  Across six platform routines all1,003instruction words are audited.
+- Typed appearance state preserves full-request equality against the unsigned
+  tint byte, nonzero palette choice, ordered flagged-group red/green swaps,
+  optional nonnegative effect toggle and the final byte reread/zero-test flip.
+  Equality returns before all room/palette/environment access. Native records
+  are complete/aligned; environment field extent and generation/pointer/length
+  are checked. Existing typed LoadLiveClutRow handles uploads and refusals;
+  source palette ownership/extent remains a borrowed legacy boundary, not a
+  newly retired native resource lifetime. Missing restoration palette refuses.
+- Four core cases541assertions and five actual native palette/group/refusal
+  cases22assertions pass, plus original module resolution. Native fixtures
+  preserve packed records and restore complete palette animator/room state;
+  exact palette words and real geometry red/green/blue bytes load/swap/restore.
+  Coupled appearance/freeze/motion/shadow44cases721,674assertions pass. The
+  optional effect call/order has core-host evidence; no actual controller/
+  all-scene/reference/palette screenshot or global lifetime retirement claim.
+- Final complete Debug/Release each4938cases/10,481,391assertions pass with
+  zero fail/skip/regressions and unchanged silver_wolves2400-frame and
+  first_lever_room900-frame canonical fingerprints. All200copier controls and
+  strict generation pass. Scoped core/Live/tests quality0findings/0new passes.
+  The fixed palette is an immutable constexpr factory with local kPalette;
+  that resolves cpplint's namespace initializer parsing and tidy's data-literal
+  rules without suppressions or baseline refresh. A failed automatic patch
+  relocation inserted include/data into PlatformRecords; only those owned
+  strays were repaired and all compilation/behavior checks rerun successfully.
+- Wider changed+tidy `--jobs 1` passes109existing/zero new (legacy5/tests104)
+  with actual child exit0; no suppression or baseline refresh. Both ledger
+  checks pass zero violations; repository2,740promoted/oneframewip and
+  modernization2,739done/1,006todo. Two180s bounded supported copier/scaffold
+  generations preserve all1,718reviewed code/Live/test/project/ledger/tool
+  paths and raw hashes. Manifest SHA256:
+  `33486156190cc3793908c276dc62a32a1e91ebc2e1e135f8601de7e5056d439f`.
+  Owned ignored verifier removed; disk absence is checked separately.
+  Continue remaining ordered row27 gimmicks. Exact original3,479cohort is
+  2,458promoted/15retired/1,005generated/oneframewip:2,473resolved/1,006left
+  (twenty-four additional resolved since6c8ac0b9). #325-329 remain
+  open for publication/exactCI. No unrequested commit/push/closure.
+
+### Current Native Platform Shadows
+
+- F00596 is owned and wired in PlatformPlacement.cpp/.hpp with the maintained
+  RoomRenderingLive scene caller and original C/module entry8008CEB0. It is
+  promoted with VR-PLATFORM-SHADOW and VR-SHADOW-PACKET-CAPACITY.
+  Original260MIPS8008CEB0-D2BC were read directly; every word matches the
+  original BATTLE module. Span SHA256:
+  `e02ae8d73c3dcb7ae0208a875448c35e1f9bd1bc06e631e84dff0912e844fe68`.
+- Typed shadow geometry preserves visible/group/pit-surface filtering,
+  signed15bit floor decoding for all65,536halfwords, truncation toward zero,
+  altitude-based fade clamp/radius/shade, wrapped corner halfwords and exclusive
+  depth4/2048 gates. The Live adapter uses the existing room camera/GTE and
+  bounded LivePacketQueue plus subtractive texture-page service. A tilted
+  native frame fixture verifies nonzero projected area, exact gray quad command,
+  draw-mode chain, hidden suppression, room/record preservation and full-buffer
+  refusal. It restores native frame and room state. This is not a screenshot,
+  actual controller/reference/visual/all-scene or global lifetime claim.
+- #329 was logged before fixing a confirmed dirty-worktree partial-emission
+  defect: with only six words left the quad emitted before its two-word draw
+  mode was dropped. The failure-before cursor assertion is retained. Added
+  reusable non-mutating LivePacketQueue::CanEmit and preflight both packets;
+  now one refusal is counted and cursor, all primitive bytes and all ordering
+  tags remain unchanged. Its dedicated case1/4assertions passes; coupled
+  shadows/shared texture-packets36cases/131,290assertions passed before the
+  final two preservation assertions. Existing full/hidden/sufficient-capacity
+  and nondegenerate/shade regressions remain. Issue329 stays open for scoped
+  publication/exactCI; no retail defect or observed blending error is claimed.
+- Final full Debug and Release each pass4,928cases/10,480,827assertions,
+  zero failures/skips/regressions and unchanged canonical2400/900-frame
+  fingerprints. All200copier controls and strict generation pass. Only the
+  obsolete F00596 polygon-pointer cast adaptation was removed; remaining
+  gimmick adaptations were preserved. Focused shadow/core/Live/scene/tests/
+  shared packet units pass zero findings/zero new after eight local style
+  repairs and formatting, without suppression or baseline refresh.
+- Full changed+tidy `--jobs 1` passes109existing/zero new (legacy5/tests104),
+  actual child exit0. The public four-corner extent is named with unchanged
+  type/layout; header and focused five-unit checks also pass0findings/0new.
+  No baseline refresh or suppression. Both ledger checks pass zero violations;
+  repository2,739promoted/oneframewip, modernization2,738done/1,007todo. All934
+  original words across five platform routines match module bytes. Two180s
+  bounded supported copier/scaffold generations preserve all1,718reviewed
+  code/Live/test/project/ledger/tool paths and raw hashes. Manifest SHA256:
+  `1448e37148b9f37d8dcce24318a0455670358a8376f893f04a613ea1d1e22feb`.
+  Owned ignored verifier removed; disk absence is checked separately. Continue
+  F00629 freeze appearance and remaining ordered row27 gimmicks.
+- Exact original3,479cohort is2,457promoted/15retired/1,006generated/oneframewip:
+  2,472resolved/1,007remaining (twenty-three additional resolved since6c8ac0b9).
+  Work remains uncommitted/unpushed;
+  #325-329 publication/exactCI gates stay open. The complete-cohort objective
+  remains unfinished and wider owner requirements are unchanged.
+
+### Current Native Platform Motion
+
+- F00595 is owned and wired in PlatformPlacement.cpp/.hpp with the production
+  GameplayLoopLive caller and original C/module entry8008C8A8. It is promoted
+  with VR-PLATFORM-MOTION; independent C++/behavior and lifetime gates remain.
+  Original386MIPS8008C8A8-CEAC were read directly and every instruction word
+  matches the actual BATTLE module. Span SHA256:
+  `f90d3485bd0346b1611d1d6fb6d06cf0a859b36ec54ea9045ee43d50263def33`.
+- Typed frame/state hosts preserve initial room/platform pause gates; signed
+  freeze halfword subtraction and flash/clear order; each substep's full
+  half-speed bounce increment and byte clamp/wrap; candidate position publish
+  before actor obstruction; callback-selected segment re-read for rollback;
+  unsigned motion halfword wrap, signed duration comparisons, exact arrival,
+  docking and endpoint/segment wraps. The loop re-reads tick speed after its
+  callback. Render_frameBuf is an integer: the flash condition is its value
+  being nonzero, not framebuffer-pointer existence. Hidden/detached-loop
+  geometry behavior and original signed bounce-height updates are retained.
+- Live records are complete/aligned/bounded and checked against captured room
+  generation plus pointer/extent after callbacks. Waypoint projection/storage
+  is shared with the already-promoted reset adapter. Native fixtures restore
+  room, actor/model arrays, tick speed, pause/freeze/tint/frame-buffer and
+  bounce state; packed record and unrelated geometry bytes remain unchanged.
+  Fourteen motion cases cover native updates/freeze/table/module and core
+  callback/arithmetic/order boundaries. Coupled platform selection38cases /
+  263,042assertions passes. No actual controller/visual/all-scene/reference or
+  global lifetime retirement claim is made by these minimal actor-free cases.
+- Final Debug and Release complete builds/regression gates each pass4,917cases
+  /10,349,683assertions, zero failures/skips/regressions and unchanged canonical
+  silver_wolves2400-frame/first_lever_room900-frame fingerprints. All200copier
+  controls and strict generation pass. Only two obsolete F00595 return-edit
+  hunks were removed from cpp_adaptations.json; remaining shadow/gimmick cast
+  records stay intact. Focused core/Live/gameplay caller/tests quality passes
+  zero findings/zero new after nine local style repairs, without suppression
+  or baseline refresh.
+- Full changed+tidy `--jobs 1` passed with actual child exit0 and95existing/
+  zero new (legacy5/tests90). Captured output is at
+  `build/quality/platform-quality.stdout.log`; no baseline refresh. Both ledger
+  checks pass zero violations; repository2,738promoted/oneframewip and
+  modernization2,737done/1,008todo. Two180-second-bounded supported generations
+  preserve all1,718reviewed code/Live/test/project/ledger/tool paths and hashes.
+  Manifest SHA256:
+  `36d823836c2430ae56aefd387a5d0ee6d80d91fc2e4f35f8bc98851ca6e0e632`.
+  The owned ignored verifier is removed; disk absence is checked separately.
+- Exact original3,479cohort is2,456promoted/15retired/1,007generated/oneframewip:
+  2,471resolved/1,008remaining (twenty-two new resolved since6c8ac0b9).
+  Continue ordered #276 row27 with shadows/gimmicks. Work is uncommitted/
+  unpushed; #325-328 scoped publication/exactCI gates remain open. F00629,
+  not F00626, is the remaining legacy freeze-appearance service; F00626 is
+  already-promoted audio ambience. Preserve wider owner requirements.
+
+### Current Platform Initialization, Waypoints And Contacts
+
+- F00593/F00594/F00597 are promoted in PlatformPlacement.cpp/.hpp,
+  with checked native adapters and original C/module entries at8008C538,
+  8008C6B4 and8008D2C0. Original95/125/68MIPS
+  listings were reviewed directly. Initialization resets pause/freeze/tint and
+  the original four bounce slots before geometry placement and terminal
+  entrance reset. Waypoints preserve masked traversal and exact positions.
+  Collection preserves visible file order, source indices, bounce and wrapped
+  halfword coordinates; maintained targeting/collision/navigation-mask callers
+  now consume typed values. The one Movement.cpp cast-adaptation record was
+  renamed with its existing explicit cast intact; strict copier generation
+  succeeds and all200copier controls pass.
+- A coupled collision regression exposed that collection must not inherit the
+  four-slot control limit: the existing five-platform native collision case is
+  preserved. The typed collector is bounded by complete aligned records and
+  existing native bounce storage; the legacy C output entry refuses more than
+  four contacts before writing. A separate fixture verifies that refusal and
+  unchanged output. Oversized compatibility storage is not promoted as a new
+  logical control capacity or a retired global lifetime boundary. Initialization
+  positions all bounded room records, not just four; the fifth-platform and
+  highest encoded entrance-layer/sixth-platform fixtures pass. Only the four
+  original bounce slots reset, and entrance waypoint reset runs last.
+- Fresh complete Debug and Release builds and regression gates each pass
+  4,903cases /10,349,627assertions, zero failures/skips/regressions and unchanged
+  silver_wolves2400-frame /first_lever_room900-frame canonical fingerprints.
+  Final platform/control selection passes33cases /852,896assertions. The native
+  initialization fixture now proves the original four bounce bytes reset from
+  non7 values while the fifth compatibility byte remains19. Existing coupled
+  collision/targeting/navigation selection passed122cases /1,060,210assertions;
+  no unmatched filter is counted. Earlier waypoint-only results are historical.
+- The earlier combined quality run finished with six new findings. All three
+  missing vector includes and bool-to-char/unsigned-byte-to-int conversions
+  are repaired explicitly. Captured combined changed+tidy `--jobs 1` reports
+  95existing/zero new (legacy5/tests90), with empty stderr and normal final
+  report. Its return path is zero when no new findings exist. The final
+  initialization boundary correction then changed only core/Live/tests units;
+  those exact three units pass zero findings/zero new with clang-tidy. No
+  suppression or baseline refresh was used. Both ledger checks pass zero
+  violations; repository2,737promoted/oneframewip and modernization2,736done/
+  1,009todo. Behavior records are VR-PLATFORM-INITIALIZATION/WAYPOINT/COLLECTION.
+- The bounded preservation helper successfully checks all288original
+  instruction words against the actual
+  BATTLE.PRG bytes at image base80068800. F00593/F00594/F00597 span SHA256s are
+  `123d3159e521788c9fd9d18c41fc0d25d58797806c771adc47450c58f5129c7d`,
+  `bab98b522cc25debab3ece33d0449dd4f388a953b661ab66969a34a5dadf2d5d` and
+  `ee53ee290e4b445b332d5b28818252e1ce89e6ee111605c81fc7e4be4fc7bddb`.
+  Two180-second-bounded supported generations preserve all1,718reviewed
+  code/Live/test/project/ledger/tool paths and raw hashes. Manifest SHA256:
+  `75980e393ba4e59e7ed4a8deff24c9bbe019ea89517846f65ee69db68ae232a3`.
+  The owned ignored scratch verifier is removed and Test-Path returnsFalse.
+- The exact original3,479cohort is2,455promoted/15retired/1,008generated/
+  oneframewip:2,470resolved/1,009remaining, twenty-one additional resolved
+  entries over published6c8ac0b9. Work
+  remains uncommitted/unpushed; #325-328 publication/exactCI gates remain open.
+  Continue ordered #276 row27 with platform motion/shadows and remaining
+  gimmicks. The
+  owner's complete-cohort objective is unfinished; wider requirements remain.
+
+### Current Platform Control Milestone
+
+- F00591/F00604/F00605/F00621 are promoted in PlatformPlacement.cpp/.hpp with
+  checked native C/module entries at8008C49C/8008D594/8008D5A0/8008E320.
+  F00592's unused clear-association forwarding alias is retired after no
+  module/caller binding remains. Maintained actor, battle, camera, mode,
+  cutscene and VM callers and remaining generated calls adopt the new entries.
+- Original31/3/23/20MIPS verify control7bits then bounce reset only for full
+  nonnegative input while freeze0; pause SB lowbyte, not normalized boolean;
+  full-input appearance request before SHduration (65536enables/stores0);
+  waiting-bit LHUdwell and maxword sentinel. Native views check record alignment,
+  whole184byte extent and supported four-platform capacity. Original packed
+  fields outside control bits and other bounce bytes remain unchanged.
+- Exhaustive control/pause/dwell halfword inputs,32bit freeze edges, actual
+  packed-record preservation, invalid index/span and module cases pass. Coupled
+  platform/actor/cutscene/VM/state selection258cases /728,468assertions passes.
+  Complete Debug/Release builds and regression gates each pass4,879cases /
+  10,086,641assertions, zero failures/skips/regressions and unchanged canonical
+  silver_wolves2,400-frame /first_lever_room900-frame fingerprints. All200copier
+  controls pass. Final expanded changed+tidy `--jobs 1` scope reports95existing /
+  zero new (legacy5/tests90), with no baseline refresh; its long-run terminal
+  completion is now verified, not pending or inferred from prior console history.
+- Both ledgers have zero violations; repository2,734promoted /oneframewip,
+  modernization2,733done /1,012todo. Exact original cohort3,479 is2,452promoted /
+  15retired /1,011generated /oneframewip:2,467resolved /1,012remaining, eighteen
+  additional resolved entries since published6c8ac0b9. No complete1,000 claim.
+- Two supported generations preserve all1,719reviewed code/Live/test/project/
+  ledger/tool paths and hashes. Manifest SHA256:
+  `f028361ebd2ec1c526b3fd73b36ed2a851bfc3995d1e824111682f9a80445f5f`.
+  Temporary verifier removed and absence checked. The legacy freeze-appearance
+  service and original data/global lifetime remain tracked migration boundaries;
+  no palette/geometry/controller/all-scene parity claim is made by these tests.
+  Continue ordered #276 row27 with platform waypoint/reset/movement and remaining
+  gimmick functions. Work remains uncommitted/unpushed over6c8ac0b9, with #325-328
+  scoped publication/exactCI gates still open; wider requirements are unchanged.
+
+### Current Active-Trigger Retirement
+
+- F00624's borrowed active-trigger table getter is retired after its sole
+  maintained TargetingLive consumer adopts generation-tagged RoomTriggerInfo
+  values from InteractionTargetLive. Original28MIPS8008E400-E46C verify the
+  unsigned flags20/40 suppression and file-order table behavior. No module/
+  caller binding remains; retirement does not count as another C++ promotion.
+- The shared trap table resolver now refuses partial/misaligned/absent records,
+  so both snapshots and returned identities are bounded by complete native
+  table extents. Original signed kind/X/Z values are retained; stale generation
+  identities refuse. Active/target/trap/facing selection20cases115assertions passes.
+- Full final Debug/Release builds and supported regression checks each pass
+  4,870cases /9,496,733assertions, zero failures/skips/regressions, unchanged
+  canonical silver_wolves2,400-frame /first_lever_room900-frame fingerprints.
+  All199copier controls and final changed+tidy `--jobs 1` quality five existing /
+  zero new pass; both ledgers have zero violations. Repository2,730promoted /
+  oneframewip; modernization2,729done /1,017todo.
+- Exact original cohort3,479 has2,448promoted /14retired /1,016generated /
+  oneframewip:2,462resolved /1,017remaining, thirteen additional resolved entries
+  since published6c8ac0b9. No complete1,000-function claim is made.
+- Two supported generations preserve all1,718reviewed paths/hashes. Manifest:
+  `762ec5cc9ff197f9b40faf8053b5c0875508b17c368299b7e404270ec5d55b18`.
+  Temporary verifier removed and absence checked. Continue ordered #276 row27
+  with platform/gimmick control, retaining all wider original flag/global/data/
+  controller/reference and lifetime acceptance requirements. Current work stays
+  uncommitted/unpushed over6c8ac0b9 and #325-328 publication/exactCI gates remain.
+
+### Current Unlock-Effect Milestone
+
+- F00067 is promoted in ChestInteractions as a typed door/chest unlock consumer;
+  its checked native input retains module8006CE70 and generated effect-timeline
+  callers adopt it. The obsolete F00623 borrowed room-door getter is retired
+  only after this consumer moved to RoomObjectTarget/ChestTarget resolvers and
+  no module/caller binding remains. Doors.cpp and Interactions.cpp retain their
+  required global data, not unreviewed function bodies.
+- Original110MIPS8006CE70-D024 verify target tags10/20/100 and low4index,
+  unsigned door lock/signed chest lock eligibility2..3, chest opened-flag signed
+  halfword wrap before risk, clear before sounds3F/40 and failure-label position.
+  The typed core covers all65,536flag values. Native fixtures restore complete
+  room/character/labels/flags/random state and exercise both chest tags, unknown/
+  null no-ops, invalid indices without record/risk access, opened-gate ordering,
+  unaligned/input preservation and original module resolution. Label coordinates
+  are copied synchronously by the existing label routine; no stack pointer is
+  retained by the new adapter. Actual sound/controller/all-scene parity is separate.
+- Latest full Debug/Release builds and supported regression gates each pass
+  4,867cases /9,496,720assertions, zero failures/skips/regressions and unchanged
+  canonical silver_wolves2,400-frame /first_lever_room900-frame fingerprints.
+  All198copier controls and final changed+tidy `--jobs 1` quality five existing /
+  zero new pass. Both ledgers have zero violations and derive2,730repository
+  promotions /oneframewip; modernization2,729done /1,018todo.
+- Exact original cohort3,479 is now2,448promoted /13retired /1,017generated /
+  oneframewip:2,461resolved /1,018remaining, twelve additional resolved entries
+  since published6c8ac0b9. No complete1,000-function claim is made.
+- Two supported generations preserve all1,718reviewed Native/generated/Live/
+  test/project/ledger/tool paths and hashes. Latest manifest SHA256:
+  `161dda0281e0a60574bf85e6a9fa25e59820422b90c6c68d889d1558dd0d3427`.
+  Temporary verifier removed and absence checked. Work remains uncommitted/
+  unpushed over6c8ac0b9; #325-328 stay open pending scoped publication/exact CI.
+  Continue ordered #276 row27 with remaining gimmick/platform functions.
+  All original global/data/queue lifetime, compatibility retirement and broader
+  controller/reference gameplay requirements remain unchanged.
+
+### Current Door Lifecycle Milestone
+
+- F00581/F00582/F00583/F00586 are promoted in the existing typed RoomSwitches
+  owner: collision XOR5, busy/sigil/eight-tick begin, sound/effect/closing-collision/
+  linked start and effect-wait/primary-linked open-clear completion. Original
+ 82/35/74/62MIPS ranges at8008BD74-BEB8,8008BEBC-BF44,8008BF48-C06C and
+ 8008C1C8-C2BC were read in full; all original C/module addresses are retained
+  through checked native entries. Maintained room-object and queue consumers
+  and all generated callers are adopted through the supported copier.
+- #328's actual full-queue test initially reported success and latched busy1/
+  delay8 despite refusal. The deciding native core now refuses before stores/
+  effects and remains retryable. All65,536key halfwords are covered; late
+  admission failure restores original busy/delay. Existing valid-data ordering
+  and saturated next-tick /unsaturated same-tick continuation assertions remain.
+- The queue now has RoomObjectTarget payloads alongside existing typed chest
+  payloads, with room generations and job serials retained across capture,
+  full-queue handoff and reset. The shared room-object resolver now rejects
+  partial/misaligned tables before returning a record. The post-admission
+  extent40to39 discriminator failed before and passes after this owning fix;
+  stale or invalidated jobs retire without changing door countdowns.
+- Final complete Debug/Release builds and supported regression gates each pass
+  4,857cases /9,365,598assertions, zero failures/skips/regressions and unchanged
+  canonical silver_wolves2,400-frame /first_lever_room900-frame fingerprints.
+  All197copier controls and final changed+tidy `--jobs 1` quality five existing /
+  zero new pass. Both ledgers have zero violations and derive2,729repository
+  promotions /oneframewip; modernization2,728done /1,020todo.
+- Exact original cohort3,479 now has2,447promoted /12retired /1,019generated /
+  oneframewip:2,459resolved /1,020remaining, ten additional resolved entries
+  since published6c8ac0b9. This is measured source progress, not a complete1,000
+  claim or gameplay completion. Actual sound/effect/controller/reference parity
+  is not claimed from minimal fixtures that isolate state with unbound effect255.
+- Two supported generations preserve all1,718reviewed Native/generated/Live/
+  test/project/ledger/tool paths and hashes. Manifest SHA256:
+  `2cf9ea289e90bac66116e719516229447d5eb1b1a172a59ad972f5578e19dd66`.
+  Temporary verifier removed and absence checked. Current work remains dirty
+  over6c8ac0b9, uncommitted/unpushed; #325/#326/#327/#328 stay open pending scoped
+  publication and exact-revision CI. Continue ordered #276 row27 with the
+  remaining room-door getter/data consumers and gimmick/platform routines.
+  All wider global/data/queue lifetime and compatibility retirement requirements
+  remain unchanged; earlier sections below preserve prior local milestones.
+
+### Current Door and Sigil Tables
+
+- F00580/F00633/F00634 now have typed RoomSwitches cores over bounded placements,
+  queries, endpoint pairs and byte flags. Live adapters expose room-object
+  identities and preserve the original C/module contracts at8008BC04,
+  8008E6DC and8008E7BC; maintained facing and generated MenuMap/door callers
+  are adopted. F00632's numeric coordinate accessor is retired after both
+  consumers moved to typed pairs and no registered module/caller binding remains.
+- Original92/56/52MIPS words verify the first-record activation guard, signed
+  coordinates/kinds/layers/ranges/scene halves, four companion tiles, first-pair
+  selection, unsigned endpoint/unlock bytes and exact marker-byte1 store.
+  #327's native extent discriminator failed before and passes after limiting
+  Live range views to the eight original boundary words800E849C-800E84AB.
+  G00036's54short/108byte generated compatibility storage contains adjacent pair
+  bytes starting800E84AC; its declaration/provenance remains unchanged and is
+  separately recorded migration debt, not a54-group domain.
+- Coupled door/sigil/facing selection17cases /1,148assertions passes. Complete
+  Debug/Release builds and supported regression checks each pass4,836cases /
+  9,037,712assertions, zero failures/skips/regressions and unchanged canonical
+  silver_wolves2,400-frame /first_lever_room900-frame fingerprints. All197copier
+  controls and final changed+tidy `--jobs 1` quality five existing /zero new pass.
+- Both ledgers have zero violations:2,725repository-promoted /oneframewip.
+  Exact original cohort3,479 now has2,443promoted /12retired /1,023generated /
+  oneframewip:2,455resolved and1,024remaining. Six additional cohort entries are
+  resolved since the published6c8ac0b9 checkpoint; no complete1,000 claim.
+- Two supported generations preserve all1,718reviewed Native/generated/Live/
+  test/project/ledger/tool paths and hashes. Manifest SHA256:
+  `5330d4a4c287bf26936302a290f9fa3c7b2a3199ff1510f23bd3040ba5851c21`.
+  Temporary verifier removed and absence confirmed. Current work is uncommitted
+  over6c8ac0b9; #325/#326/#327 remain open pending scoped publication and exact CI.
+- Continue ordered #276 row27 with door collision and begin/start/finish animation
+  logic, then the other remaining gimmick routines. Existing controller/all-scene/
+  reference, persistent/global/data lifetime and compatibility retirement gates
+  remain unchanged. Earlier sections below preserve their original local milestones.
+
+### Verified Entrance and Fall Continuation
+
+- The owner authorized the pending repairs on2026-11-08. Current source remains
+  `6c8ac0b92cdfafb19c5f9bf0be2095ac2ab58e26` plus uncommitted changes.
+  Nonfatal CheckAshleyFall reloads use the original room route; scripted
+  destinations retain room/zone selection. Both scripted entry coordinates
+  again retain their original five-bit widths, backed by actual ANDI instructions
+  at80074FEC/80075020 and the room-transition JAL at80075148.
+- The formerly failing route discriminator passes. Fall/tile selection:
+  19 cases /2,143 assertions. Entrance/scene selection:15 cases /132,280
+  assertions, including complete record/clear/order/refusal checks and a valid
+  scene with index128 mapping to unsigned254. All256coordinate-byte inputs and
+  all65,536entered-door halfwords are covered without weakening expectations.
+- Complete Debug and Release solution builds and native suites pass:
+  each4,823cases /9,036,584assertions, zero failures/skips. Supported
+  `tools/test/regression.py check --config <config>` in both configurations
+  confirms unchanged silver_wolves2,400-frame and first_lever_room900-frame
+  fingerprints and zero regressions. Current changed+tidy `--jobs 1` reports
+  five existing findings and zero new; all196copier controls pass.
+- All four removed verification records are renewed with fresh limited evidence,
+  including the unchanged324endpoint initialization policy. F00610/F00611 now
+  pass promotion/modernization review with `VR-SCENE-DOOR-TABLES`; the separate
+  gates derive2,722promoted /oneframewip and zero violations. The modernization
+  tracker has2,721done /1,028todo. No complete1,000-function claim is made.
+- Supported copier/solution generation passes twice with all1,718reviewed
+  generated/maintained Native/Live/test/project/ledger/tool paths and hashes
+  unchanged. Manifest SHA256:
+  `82a17b02baf080e7c1a28744f276abed482b3ac12b56334e4a912105186a8b3e`.
+  The temporary bounded verification script was removed and absence checked.
+- #325/#326 have complete local acceptance evidence recorded, but remain open
+  pending scoped fixing publication and exact-revision CI. No commit/push or
+  issue closure is claimed. Continue ordered #276 row27 with the remaining
+  door-table/sigil/animation logic; controller/all-scene/reference and global
+  lifetime retirement remain separate, unchanged requirements.
+
+### Earlier Blocked Investigation (#326; Historical)
+
+- Current source is `6c8ac0b92cdfafb19c5f9bf0be2095ac2ab58e26` plus
+  uncommitted changes. Its published CI42462163420 is successful, but does
+  not verify this dirty worktree. Existing local edits removed the published
+  entrance core and tests, removed verification records, and changed the
+  Ashley nonfatal reload route before this continuation. Those edits were
+  not reverted.
+- The missing entrance API is now owned by Transitions.cpp/.hpp instead of
+  ChestInteractions. F00552/F00577/F00578 ownership and caller contracts
+  follow that move. The original local chest-core deletions remain intact.
+- F00610/F00611 now have bounded typed scene-table implementations in
+  MinimapScene, checked MinimapSceneLive C entries, retained original module
+  addresses and adopted maintained/generated callers. They remain `wip`,
+  not completed promotions. Debug scene-door/minimap selection passes
+  18 cases / 147,029 assertions. Coupled field/minimap/room selection passed
+  429 cases / 416,771 assertions before the new failing discriminator below.
+- Original scene-door listings cover 50 MIPS words at8008D880-8008D944 and
+  55 at8008D948-8008DA20: identifier LBU, entered-door SH and marker-byte
+  LBU/OR0x10/SB. Ghidra's configured backend was unavailable; no Ghidra
+  analysis or original-scene controller/reference parity is claimed.
+- #325 records the generator marking defect. T00542's unchanged notes are
+  now properly CSV-quoted. Marking preflights all three tables before writes
+  and preserves modernized owned copied/compiles flags. Two focused marking
+  controls pass; supported generation/marking completes with all842type rows
+  present. Full control rerun, hash-stable second generation and fixing-revision
+  CI remain required before closure.
+- #326 is a confirmed source-contract counterexample, not a controller-observed
+  gameplay failure. Original BATTLE.PRG byte offset0xC948 / CPU80075148 contains
+  `38-F1-01-0C`, JAL8007C4E0 (room transition). The existing local CheckAshleyFall
+  instead selects zone route when entrance zone10 differs from host zone9.
+  New existing-fixture `[fall-reload-route]` compiles and runs: one case,
+  four assertions, three pass and route1!=0 fails. The deciding production
+  branch was not reverted; explicit owner direction is needed for that change.
+- Reproduction from the repository root:
+  `MSBuild VagrantStory.Native.sln /m:1 /nologo /v:quiet /p:Configuration=Debug /p:Platform=x64 /t:VS_Tests`,
+  then `build/Debug/VS.Tests.exe "[fall-reload-route]" --reporter compact`.
+  Next: resolve #326 in the deciding core, retain the discriminator, renew
+  missing coverage with fresh evidence, run Debug/Release and required quality,
+  generation and replay gates, then continue ordered #276 row27.
+- Current synchronized gates derive2716promoted/sevenwip and four invalid
+  behavior-evidence claims (F00158/F00552/F00577/F00578). No promotion count
+  increase, complete1,000-function claim, Release/full-suite/quality/replay
+  success, issue closure, commit or push is claimed for this continuation.
+  Older checkpoint notes below are historical, not current verification.
 
 ### Scripted Fall Door (#323)
 
@@ -108,7 +1215,7 @@ verification of the current worktree.
   complete pending-door value. The fixture uses a bounded 256 KiB scoped heap,
   sizes saved actor tables from their actual declarations (42 battle entries,
   17 actor records), and releases only its own pending read/allocation.
-- That fixing checkpoint's complete Debug/Release each passed 4,789 tests / 8,902,162 assertions,
+- Current complete Debug/Release each pass 4,789 tests / 8,902,162 assertions,
   zero failures/skips/regressions and unchanged canonical 2,400/900-frame
   fingerprints. Debug coupled40cases/367assertions, copier192/extent9 and
   quality five existing / zero new pass. Both generations preserve all1,735
@@ -117,10 +1224,9 @@ verification of the current worktree.
 - `VR-SCRIPTED-FALL-DOOR-INITIALIZATION` records only this safety contract.
   The minimal fixture's unsupported room3 produces an expected loader refusal;
   successful destination loading and controller fatal-fall/reference parity
-  are not claimed. #323 is closed at fixing `afdc0adc`, exact successful CI
-  `42448832713`. Its initialization policy is retained by the subsequent typed
-  Ashley core above; this safety correction alone was not source promotion.
-  #276/#321 and global compatibility/lifetime requirements remain open.
+  are not claimed. F00158 remains generated and unpromoted. #323 remains open
+  pending scoped publication and exact fixing-revision CI; #276/#321 and
+  remaining Ashley/global compatibility/lifetime requirements remain open.
 
 ### Non-Player Tile Triggers (#276 Row 27)
 

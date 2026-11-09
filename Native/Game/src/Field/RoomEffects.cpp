@@ -111,6 +111,19 @@ bool HideRoomGeometryGroup(std::span<std::byte> geometry, int group_index) {
 }
 
 // decomp: BATTLE.PRG func_80091A1C (src/BATTLE/BATTLE.PRG/2842C.c:582)
+bool SetRoomGeometryGroupPosition(std::span<std::byte> geometry,
+                                  int group_index,
+                                  const RoomEffectPosition& position) {
+  const auto group = FindRoomGeometryGroup(geometry, group_index);
+  if (!group) return false;
+  const auto offset =
+      *group + room_effects::kGroupPositionWord * room_effects::kGroupWordBytes;
+  Store(geometry, offset, position.x);
+  Store(geometry, offset + room_effects::kGroupWordBytes, position.y);
+  Store(geometry, offset + 2 * room_effects::kGroupWordBytes, position.z);
+  return true;
+}
+
 bool SwapRoomGeometryGroupFlags(std::span<std::byte> geometry,
                                 int first_group_index, int second_group_index) {
   const auto first = FindRoomGeometryGroup(geometry, first_group_index);

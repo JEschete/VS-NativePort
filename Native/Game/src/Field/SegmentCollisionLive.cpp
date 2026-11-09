@@ -10,6 +10,7 @@
 
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/SegmentCollision.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -37,6 +38,10 @@ static_assert(sizeof(Field_MpdMovingPlatform) == kSourcePlatformBytes);
 }
 
 SolidVolume ToSolidVolume(const Field_PlatformContactPoint& contact) {
+  return {static_cast<std::uint16_t>(contact.x), contact.height, contact.z};
+}
+
+SolidVolume ToSolidVolume(const PlatformContact& contact) {
   return {static_cast<std::uint16_t>(contact.x), contact.height, contact.z};
 }
 
@@ -85,16 +90,13 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
     if (count > std::size(Field_platformBounceFrames)) {
       InvalidTrace("platform count exceeds native animation storage");
     }
-    std::vector<Field_PlatformContactPoint> contacts(count);
-    const int collected = Field_CollectMovingPlatformPositions(contacts.data());
-    if (collected < 0 ||
-        static_cast<std::size_t>(collected) > contacts.size()) {
+    const auto contacts = CollectLiveMovingPlatformPositions();
+    if (contacts.size() > count) {
       InvalidTrace("platform collector exceeded its native result capacity");
     }
     std::vector<SolidVolume> volumes;
-    volumes.reserve(static_cast<std::size_t>(collected));
-    for (const auto& contact :
-         std::span(contacts).first(static_cast<std::size_t>(collected))) {
+    volumes.reserve(contacts.size());
+    for (const auto& contact : contacts) {
       volumes.push_back(ToSolidVolume(contact));
     }
     return volumes;

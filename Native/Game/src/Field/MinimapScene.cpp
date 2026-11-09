@@ -16,6 +16,8 @@ constexpr std::size_t kVertexBytes = 8;
 constexpr std::size_t kHalfBytes = sizeof(std::int16_t);
 constexpr unsigned kByteBits = CHAR_BIT;
 constexpr std::uint32_t kByteMask = std::numeric_limits<std::uint8_t>::max();
+constexpr std::size_t kRoomZoneOffset = 8;
+constexpr std::size_t kRoomMapOffset = 10;
 enum Table : std::size_t {
   kTriangles,
   kQuads,
@@ -74,7 +76,7 @@ struct Room {
   std::array<Bytes, kTableCount> tables;
 };
 
-bool ReadRoom(Bytes bytes, Room& room) {
+bool ReadRoom(Bytes bytes, Room& room, bool exact_length = true) {
   if (bytes.size() < kWordBytes) return Invalid("missing vertex count", 0);
   const std::size_t count = Word(bytes, 0);
   if (count > kMinimapMaximumVertices ||
@@ -103,11 +105,26 @@ bool ReadRoom(Bytes bytes, Room& room) {
     }
     cursor += entries * kWordBytes;
   }
-  return cursor == bytes.size() || Invalid("room payload length", cursor);
+  return !exact_length || cursor == bytes.size() ||
+         Invalid("room payload length", cursor);
 }
 
 std::size_t RecordOffset(std::size_t index) {
   return kWordBytes + index * kMapSceneRoomRecordBytes;
+}
+
+std::optional<Bytes> CurrentRoomDoors(Bytes bytes) {
+  if (bytes.size() < kWordBytes) return std::nullopt;
+  const std::size_t count = Word(bytes, 0);
+  if (count == 0 ||
+      count > (bytes.size() - kWordBytes) / kMapSceneRoomRecordBytes) {
+    return std::nullopt;
+  }
+  Room room;
+  if (!ReadRoom(bytes.subspan(RecordOffset(count)), room, false)) {
+    return std::nullopt;
+  }
+  return room.tables[kDoors];
 }
 
 bool ReadScene(Bytes bytes, bool resolved, std::vector<Room>& rooms,
@@ -243,6 +260,43 @@ bool IsValidMapScene(std::span<const std::byte> scene) {
   std::vector<Room> rooms;
   std::size_t names = 0;
   return ReadScene(scene, false, rooms, names);
+}
+
+// decomp: F00633 func_8008E6DC, CPU8008E700-8008E714 (146C.c:17399).
+std::optional<SceneRoomAddress> CurrentSceneRoomAddress(
+    std::span<const std::byte> scene) {
+  if (scene.size() < kWordBytes) return std::nullopt;
+  const auto count = Word(scene, 0);
+  if (count == 0 ||
+      count > (scene.size() - kWordBytes) / kMapSceneRoomRecordBytes) {
+    return std::nullopt;
+  }
+  const auto first_room = RecordOffset(0);
+  return SceneRoomAddress{Half(scene, first_room + kRoomZoneOffset),
+                          Half(scene, first_room + kRoomMapOffset)};
+}
+
+// decomp: BATTLE.PRG _getDoorId (src/BATTLE/BATTLE.PRG/146C.c:16954).
+std::optional<std::uint8_t> SceneDoorId(std::span<const std::byte> scene,
+                                        std::int32_t door_index) {
+  if (door_index < 0) return std::nullopt;
+  const auto doors = CurrentRoomDoors(scene);
+  const auto index = static_cast<std::size_t>(door_index);
+  if (!doors || index >= Entries(*doors)) return std::nullopt;
+  return std::to_integer<std::uint8_t>((*doors)[index * kWordBytes + 1]);
+}
+
+// decomp: BATTLE.PRG vs_battle_setDoorEntered2 (146C.c:16974).
+bool MarkEntranceDoorOnSceneMap(std::span<std::byte> scene,
+                                std::int32_t door_index) {
+  if (door_index < 0) return false;
+  const auto doors = CurrentRoomDoors(scene);
+  const auto index = static_cast<std::size_t>(door_index);
+  if (!doors || index >= Entries(*doors)) return false;
+  const auto offset = static_cast<std::size_t>(doors->data() - scene.data()) +
+                      index * kWordBytes + 2;
+  scene[offset] |= static_cast<std::byte>(kEntryDoorFlag);
+  return true;
 }
 
 // decomp: BATTLE.PRG vs_battle_initSceneAndGetRoomNames

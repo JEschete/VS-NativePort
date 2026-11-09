@@ -18,6 +18,7 @@
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
 
@@ -587,7 +588,7 @@ TEST_CASE("Production gimmick release balances one occupancy contribution",
     Field_gimmickInstances[0] = &fixture.gimmick;
     VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
     CHECK(fixture.heights[7][13] == 0x488);
-    CHECK(Field_ReleaseGimmickInstance(0) == 0);
+    CHECK(VS::Field::ReleaseLiveGimmickInstance(0) == 0);
     CHECK(Field_gimmickInstances[0] == nullptr);
     CHECK(fixture.heights[7][13] == 0x88);
     CHECK(Field_gimmickInstances[1] == &fixture.sibling);

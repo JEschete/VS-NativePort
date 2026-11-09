@@ -285,7 +285,6 @@ typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_GIMMICKS_H_DECLS)
 #define VS_FIELD_GIMMICKS_H_DECLS
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
@@ -293,12 +292,9 @@ typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Field/Actors.h"
 #include "Field/Doors.h"
-#include "Field/GimmickMotion.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
-#include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
@@ -342,44 +338,7 @@ extern char Field_gimmickPaletteColors[240];
 extern Field_GimmickInstance* Field_gimmickInstances[16];
 extern int Field_gimmickInteractionDirection;
 extern short const Field_kPlatformBounceOffsets[];
-void Field_DisableTrapAtPosition(SVECTOR* trap_position);
-void Field_FreezeRoomGimmicksTemporarily(void);
 int Field_CurrentSavePointId(void);
-int Field_SetMovingPlatformActor(int platform_index, int platform_control_state);
-void Field_ClearMovingPlatformActor(int platform_index);
-void Field_InitializeMovingPlatforms(void);
-void Field_ResetMovingPlatformWaypoint(int platform_index, int waypoint_index);
-int Field_UpdateMovingPlatforms(void);
-void Field_DrawMovingPlatformShadows(void);
-int Field_CollectMovingPlatformPositions(Field_PlatformContactPoint output_contacts[]);
-Field_MpdFloorTrigger* Field_RoomTriggerAtTile(int query_tile_x, int query_tile_z, int query_floor_layer);
-void Field_SetMovingPlatformsPaused(int paused);
-void Field_FreezeMovingPlatforms(int freeze_frames);
-void Field_SetRoomTriggerEnabled(Field_MpdFloorTrigger* selected_trigger, int activation_value);
-void Field_SetMovingPlatformVisibility(int platform_index, int visibility_value);
-void* Field_MovingPlatformTargetWaypoint(int platform_index);
-u_int Field_MovingPlatformDwellTicks(int platform_index);
-Field_MpdFloorTrigger* Field_ActiveRoomTriggers(int* output_trigger_count);
-void Field_SetPlatformFreezeAppearance(int freeze_appearance_enabled);
-int Field_FindSharedGimmickModel(Content_ActorAssetRequest* asset_request);
-void Field_SetGimmickPaletteTable(void* palette_data);
-int Field_CreateGimmickInstance(Content_ActorAssetRequest* asset_request);
-int Field_ReleaseGimmickInstance(int gimmick_slot);
 void Field_RefreshAshleyInteractionTile(Actors_ActorRecord* actor_record);
-void Field_DropUnsupportedGimmickStack(int removed_gimmick_slot);
-int Field_FindGimmickBelow(Field_GimmickInstance* reference_gimmick);
-int Field_GimmickSubtype(int gimmick_slot);
-int Field_SetGimmickOrientation(int index, int material);
-int Field_FindInteractableGimmickAhead(int actorId);
-Actors_ActorRecord* Field_FindActorAboveGimmick(Field_GimmickInstance* support_gimmick, u_int occupancy_mode_or_first_actor);
-int Field_CanPlaceGimmickAtPoint(int x, int z, int minimumHeight);
-int Field_BeginGimmickInteraction(int actorId);
-void Field_ApplyGimmickInteractionCommand(Actors_ActorRecord* actor, int mode);
-int Field_AreGimmicksMoving(void);
-int Field_FindTopGimmickAtTile(int query_tile_x, int query_tile_z, int require_idle_mode);
-void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused);
-int Field_UpdateGimmickReactionAnimation(Field_GimmickMotionView* object);
-int Field_MeasureTileStack(int query_tile_x, int query_tile_z, int* output_stack_height);
-int Field_IsGimmickWithinHeightBand(int query_tile_x, int query_tile_z, int minimum_height);
 
 #endif // VS_FIELD_GIMMICKS_H_DECLS

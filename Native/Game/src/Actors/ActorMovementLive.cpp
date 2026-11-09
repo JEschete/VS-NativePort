@@ -20,6 +20,7 @@
 #include "Core/Log.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/GimmickDynamicsLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 
 extern "C" {
@@ -30,6 +31,7 @@ extern "C" {
 #include "Field/Collision.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.h"
 #include "State/Timers.h"
 }
 
@@ -284,7 +286,7 @@ class LiveMovementHost final : public MovementHost {
     return Field_platformBounceFrames[platform];
   }
   void SetPlatformRider(int platform, int rider) override {
-    Field_SetMovingPlatformActor(platform, rider);
+    Field_SetMovingPlatformActorEntry(platform, rider);
   }
   int TileSurfaceId(int index) override {
     if (index < 0 ||
@@ -355,13 +357,11 @@ class LiveMovementHost final : public MovementHost {
   std::optional<MovementGimmick> GimmickForActorSlot(int slot) override {
     return OptionalGimmick(Field_FindGimmickForActorSlot(slot));
   }
-  // Cross-slice call (gimmick motion): retarget when that row is promoted.
-  void UpdateGimmickMotion(int slot, int ticks) override {
+  void UpdateGimmickMotion(int slot, int) override {
     Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(slot);
     if (gimmick == nullptr) return;
     const Synced synced(registry_);
-    Field_UpdateGimmickMotion(
-        reinterpret_cast<Field_GimmickPhysicsView*>(gimmick), ticks);
+    static_cast<void>(VS::Field::UpdateLiveGimmickMotion(gimmick));
   }
 
   void SetAiContactOccupancy(int layer) override {

@@ -10,8 +10,10 @@
 
 #include "Core/Log.hpp"
 #include "Field/EnvironmentLive.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -266,7 +268,7 @@ class LiveSceneHost final : public RoomSceneHost {
     Field_UpdateGimmickAnimationQueueEntry();
   }
   void UpdateRoomEffects() override { LiveUpdateRoomEffects(); }
-  void DrawPlatformShadows() override { Field_DrawMovingPlatformShadows(); }
+  void DrawPlatformShadows() override { DrawLiveMovingPlatformShadows(); }
   void UpdateWeather() override { LiveUpdateRoomWeather(); }
   // 146C.c:15791 compares isLoaded and displayFlag as one halfword to 0x101.
   bool RoomShown() override {
@@ -354,7 +356,7 @@ class LivePaletteHost final : public RoomPaletteHost {
                                static_cast<u_int>(colors.size()));
   }
   void SetGimmickPalettes(std::span<std::uint16_t> palettes) override {
-    Field_SetGimmickPaletteTable(palettes.data());
+    static_cast<void>(SetLiveGimmickPaletteTable(std::as_bytes(palettes)));
   }
 };
 }  // namespace
