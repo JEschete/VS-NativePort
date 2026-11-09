@@ -20,6 +20,7 @@
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "ActorAssets.h"
+#include "Actors/Skeleton.h"
 #include "Field/Gimmicks.h"
 }
 

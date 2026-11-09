@@ -22,6 +22,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"

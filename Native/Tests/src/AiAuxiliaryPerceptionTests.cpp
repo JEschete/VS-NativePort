@@ -9,6 +9,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"

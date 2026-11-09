@@ -24,6 +24,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Location.h"
+#include "Actors/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Core/Diagnostics.h"
 #include "Field/Gimmicks.h"

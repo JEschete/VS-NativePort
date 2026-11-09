@@ -25,6 +25,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
