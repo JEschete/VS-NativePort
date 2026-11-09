@@ -77,6 +77,7 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/AttackPrerequisiteTable.h"
 #include "Battle/AttackPrerequisites.h"
 #include "Battle/BattleTypes.h"
@@ -769,7 +770,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&Effects_AdvanceParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D8260u, 0u, (void*)&Battle_Ai_SetTemporaryAwarenessIndicator, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D8400u, 0u, (void*)&Battle_Ai_FindAdjacentMovementDestination, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D85D8u, 0u, (void*)&Battle_Ai_RefreshActionCandidateReadiness, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D87E8u, 0u, (void*)&Battle_Ai_UpdateTargetPerception, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D8EF4u, 0u, (void*)&Battle_Ai_UpdateActorPerception, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D9538u, 0u, (void*)&Battle_Ai_SaveMovementRandomState, 0u, 0u, 0u},
@@ -1511,6 +1511,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&Field_UpdateGimmickMotionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDD8u, 0u, (void*)&Field_DisableTrapAtPositionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A4FCu, 0u, (void*)&Field_CurrentSavePointIdEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D85D8u, 0u, (void*)&Battle_Ai_RefreshActionCandidateReadinessEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009E634u, 0u, (void*)&Field_RefreshAshleyInteractionTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D438u, 0u, (void*)&Field_RoomTriggerAtTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabledEntry, 0u, 0u, 0u},

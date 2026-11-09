@@ -18,6 +18,9 @@ struct Battle_Ai_CandidateEntryView;
 // planning checks (PlanningPrimitives.cpp). Each aborts with a diagnostic when
 // a state, record or ID it needs is invalid.
 namespace VS::Battle::Ai {
+std::optional<bool> RefreshLiveActionCandidateReadiness(
+    Battle_Ai_ActorAiState* state);
+
 // The ranking of a plan view's first `count` candidates, whose handles index
 // the view's order; Apply reorders the view's entries to match it.
 class LiveCandidateRanking {

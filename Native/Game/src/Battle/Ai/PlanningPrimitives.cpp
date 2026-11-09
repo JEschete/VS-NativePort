@@ -58,6 +58,91 @@ std::nullopt_t Refuse(const char* message) {
   return std::nullopt;
 }
 
+std::optional<std::size_t> ReadinessCount(const CandidateReadinessHost& host) {
+  const int count = host.Count();
+  if (count < 0 || static_cast<std::size_t>(count) > kCandidateCapacity) {
+    return Refuse("AI readiness count is outside its ranking");
+  }
+  return static_cast<std::size_t>(count);
+}
+
+struct ReadinessRank {
+  std::size_t handle;
+  ActionCandidate candidate;
+};
+
+std::optional<ReadinessRank> ReadReadinessRank(
+    const CandidateReadinessHost& host, std::size_t rank) {
+  const auto handle = host.RankedHandle(rank);
+  if (!handle) return Refuse("AI readiness ranking has no candidate");
+  const auto candidate = host.Candidate(*handle);
+  if (!candidate) return Refuse("AI readiness candidate is unavailable");
+  return ReadinessRank{*handle, *candidate};
+}
+
+bool RevalidateReadinessCandidate(CandidateReadinessHost& host,
+                                  const ReadinessRank& entry) {
+  if (entry.candidate.Weight() == 0 ||
+      entry.candidate.Threshold() > host.ReadinessLevel()) {
+    return true;
+  }
+  const auto affects = host.CanAffect(entry.handle, entry.candidate.TargetId());
+  if (!affects) return false;
+  if (*affects) {
+    const auto fresh = host.Candidate(entry.handle);
+    if (!fresh || fresh->Row() >= kLimbActionRows ||
+        fresh->Column() >= kLimbActionColumns) {
+      return false;
+    }
+    const auto usable = host.RefreshUsability(fresh->Row(), fresh->Column());
+    if (!usable) return false;
+    if (*usable) return true;
+  }
+  return host.ClearWeight(entry.handle);
+}
+
+std::optional<bool> PromoteReadinessCandidate(CandidateReadinessHost& host) {
+  const auto count = ReadinessCount(host);
+  if (!count) return std::nullopt;
+  if (*count == 0) return false;
+  const auto first = ReadReadinessRank(host, 0);
+  if (!first) return std::nullopt;
+  if (first->candidate.Weight() != 0) return false;
+  for (std::size_t rank = 1; rank < *count; ++rank) {
+    const auto next = ReadReadinessRank(host, rank);
+    if (!next) return std::nullopt;
+    if (next->candidate.Weight() != 0) {
+      if (!host.SetFirstRank(next->handle) || !host.SelectMovementMode()) {
+        return Refuse("AI readiness promotion was refused");
+      }
+      return true;
+    }
+  }
+  if (!host.ClearCount()) return Refuse("AI readiness count clear was refused");
+  return true;
+}
+
+std::optional<std::uint8_t> CandidateReadinessStatus(
+    const CandidateReadinessHost& host) {
+  constexpr std::uint32_t kReadinessMargin = 30;
+  constexpr std::uint8_t kNoCandidateHostilePresent = 2;
+  constexpr std::uint8_t kNoCandidateHostileAbsent = 3;
+  const auto count = ReadinessCount(host);
+  if (!count) return std::nullopt;
+  if (*count == 0) {
+    const auto hostile = host.HasHostileActor();
+    if (!hostile) {
+      return Refuse("AI readiness actor classification is unavailable");
+    }
+    return *hostile ? kNoCandidateHostilePresent : kNoCandidateHostileAbsent;
+  }
+  const auto level = static_cast<std::uint32_t>(host.ReadinessLevel());
+  const auto first = ReadReadinessRank(host, 0);
+  if (!first) return std::nullopt;
+  return static_cast<std::uint8_t>(level + kReadinessMargin <
+                                   first->candidate.Threshold());
+}
+
 constexpr std::uint32_t FieldMask(unsigned bits) {
   return (std::uint32_t{1} << bits) - 1;
 }
@@ -101,6 +186,27 @@ bool IsActionUsable(const ActionCost& action, const ActorResources& resources) {
   }
 }
 }  // namespace
+
+// decomp: BATTLE.PRG func_800D85D8 (6FC00.c:515), original132MIPS.
+std::optional<bool> RefreshActionCandidateReadiness(
+    CandidateReadinessHost& host) {
+  for (std::size_t rank = 0;; ++rank) {
+    const auto count = ReadinessCount(host);
+    if (!count) return std::nullopt;
+    if (rank >= *count) break;
+    const auto entry = ReadReadinessRank(host, rank);
+    if (!entry || !RevalidateReadinessCandidate(host, *entry)) {
+      return Refuse("AI readiness revalidation was refused");
+    }
+  }
+  const auto changed = PromoteReadinessCandidate(host);
+  if (!changed) return std::nullopt;
+  const auto status = CandidateReadinessStatus(host);
+  if (!status || !host.StoreActionStatus(*status)) {
+    return Refuse("AI readiness status store was refused");
+  }
+  return changed;
+}
 
 std::int32_t ActionCandidate::Score() const {
   return std::bit_cast<std::int32_t>(words_[kScoreWord]);

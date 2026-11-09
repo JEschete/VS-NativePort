@@ -109,6 +109,30 @@ class CandidateList {
                                                  unsigned action) = 0;
 };
 
+class CandidateReadinessHost {
+ public:
+  virtual ~CandidateReadinessHost() = default;
+  [[nodiscard]] virtual int Count() const = 0;
+  [[nodiscard]] virtual std::optional<std::size_t> RankedHandle(
+      std::size_t rank) const = 0;
+  [[nodiscard]] virtual std::optional<ActionCandidate> Candidate(
+      std::size_t handle) const = 0;
+  [[nodiscard]] virtual std::uint16_t ReadinessLevel() const = 0;
+  virtual std::optional<bool> CanAffect(std::size_t handle,
+                                        unsigned target) = 0;
+  virtual std::optional<bool> RefreshUsability(unsigned row,
+                                               unsigned column) = 0;
+  virtual bool ClearWeight(std::size_t handle) = 0;
+  virtual bool SetFirstRank(std::size_t handle) = 0;
+  virtual bool ClearCount() = 0;
+  virtual bool SelectMovementMode() = 0;
+  [[nodiscard]] virtual std::optional<bool> HasHostileActor() const = 0;
+  virtual bool StoreActionStatus(std::uint8_t status) = 0;
+};
+
+std::optional<bool> RefreshActionCandidateReadiness(
+    CandidateReadinessHost& host);
+
 // An actor's target memory fields (AI state 0x38, 0x3C and 0x40).
 struct TargetMemory {
   std::uint32_t previous_tile = 0;

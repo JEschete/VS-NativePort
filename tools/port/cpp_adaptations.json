@@ -43,17 +43,6 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\ActionPlanning.cpp": [
 [
-78,
-[
-"            if (!VS::Battle::Ai::CanLiveAiActionAffectActor(state, entry, entry->targetId)",
-"                || !VS::Battle::Ai::RefreshLiveAiActionUsability(state, entry->row, entry->column)) {"
-],
-[
-"            if (!VS::Battle::Ai::CanLiveAiActionAffectActor((Battle_Ai_ActorAiState *)(state), (Battle_Ai_ActionCandidate *)(entry), entry->targetId)",
-"                || !VS::Battle::Ai::RefreshLiveAiActionUsability((Battle_Ai_ActorAiState *)(state), entry->row, entry->column)) {"
-]
-],
-[
 615,
 [
 "    Battle_Ai_planningStatsSnapshot = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActorStats) * 16);"

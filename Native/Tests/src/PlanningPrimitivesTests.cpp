@@ -46,6 +46,89 @@ class FakeTargetMemory final : public ai::TargetMemoryHost {
   mutable std::vector<unsigned> queried;
 };
 
+class FakeCandidateReadiness final : public ai::CandidateReadinessHost {
+ public:
+  FakeCandidateReadiness() {
+    affects.fill(true);
+    for (std::size_t index = 0; index < order.size(); ++index) {
+      order[index] = index;
+      candidates[index].SetWeight(1);
+      candidates[index].SetThreshold(100);
+      candidates[index].SetSlot(1, 1);
+      candidates[index].SetTargetId(static_cast<unsigned>(index));
+    }
+  }
+  int Count() const override { return count; }
+  std::optional<std::size_t> RankedHandle(std::size_t rank) const override {
+    return rank < order.size() ? std::optional(order[rank]) : std::nullopt;
+  }
+  std::optional<ai::ActionCandidate> Candidate(
+      std::size_t handle) const override {
+    return handle < candidates.size() ? std::optional(candidates[handle])
+                                      : std::nullopt;
+  }
+  std::uint16_t ReadinessLevel() const override { return level; }
+  std::optional<bool> CanAffect(std::size_t handle, unsigned target) override {
+    targeting.emplace_back(handle, target);
+    if (slot_after_targeting) {
+      candidates[handle].SetSlot(slot_after_targeting->first,
+                                 slot_after_targeting->second);
+    }
+    if (target_after_targeting) {
+      candidates[handle].SetTargetId(*target_after_targeting);
+    }
+    if (count_after_targeting) count = *count_after_targeting;
+    return affects.at(handle);
+  }
+  std::optional<bool> RefreshUsability(unsigned row, unsigned column) override {
+    usability.emplace_back(row, column);
+    return usable;
+  }
+  bool ClearWeight(std::size_t handle) override {
+    if (!accept_stores) return false;
+    candidates.at(handle).SetWeight(0);
+    return true;
+  }
+  bool SetFirstRank(std::size_t handle) override {
+    if (!accept_stores) return false;
+    order[0] = handle;
+    return true;
+  }
+  bool ClearCount() override {
+    if (!accept_stores) return false;
+    count = 0;
+    return true;
+  }
+  bool SelectMovementMode() override {
+    ++movement_selections;
+    if (clear_after_selection) count = 0;
+    return accept_stores;
+  }
+  std::optional<bool> HasHostileActor() const override { return hostile; }
+  bool StoreActionStatus(std::uint8_t value) override {
+    if (!accept_stores) return false;
+    status = value;
+    return true;
+  }
+
+  int count = 3;
+  std::uint16_t level = 100;
+  std::array<ai::ActionCandidate, ai::kCandidateCapacity> candidates{};
+  std::array<std::size_t, ai::kCandidateCapacity> order{};
+  std::array<bool, ai::kCandidateCapacity> affects{};
+  bool usable = true;
+  bool accept_stores = true;
+  bool clear_after_selection = false;
+  int movement_selections = 0;
+  std::optional<int> count_after_targeting;
+  std::optional<std::pair<unsigned, unsigned>> slot_after_targeting;
+  std::optional<unsigned> target_after_targeting;
+  std::optional<bool> hostile = false;
+  std::optional<std::uint8_t> status;
+  std::vector<std::pair<std::size_t, unsigned>> targeting;
+  std::vector<std::pair<unsigned, unsigned>> usability;
+};
+
 class FakeCandidateList final : public ai::CandidateList {
  public:
   [[nodiscard]] int Count() const override { return count; }
@@ -165,6 +248,125 @@ bool CopiedStatByte(std::size_t offset) {
          (offset >= 0x948 && offset < 0x94C);
 }
 }  // namespace
+
+TEST_CASE("Candidate readiness skips zero and future weights before callbacks",
+          "[ai][planning][candidate-readiness-core]") {
+  FakeCandidateReadiness host;
+  host.candidates[0].SetWeight(0);
+  host.candidates[1].SetThreshold(131);
+  CHECK(ai::RefreshActionCandidateReadiness(host) == true);
+  CHECK(host.targeting ==
+        std::vector<std::pair<std::size_t, unsigned>>{{2, 2}});
+  CHECK(host.order[0] == 1);
+  CHECK(host.order[1] == 1);
+  CHECK(host.order[2] == 2);
+  CHECK(host.count == 3);
+  CHECK(host.status == 1);
+}
+
+TEST_CASE(
+    "Candidate readiness rereads callback fields and preserves other bits",
+    "[ai][planning][candidate-readiness-core]") {
+  FakeCandidateReadiness host;
+  host.count = 1;
+  host.candidates[0] = ai::ActionCandidate(
+      Words{0x11223344, 0xF0000000, 0x55AA55AA, 0xF807FFFF, 0x5A5AA5A5});
+  host.candidates[0].SetSlot(1, 2);
+  host.candidates[0].SetThreshold(100);
+  host.candidates[0].SetTargetId(15);
+  host.candidates[0].SetWeight(255);
+  auto expected = host.candidates[0];
+  expected.SetSlot(5, 3);
+  expected.SetTargetId(9);
+  expected.SetWeight(0);
+  host.slot_after_targeting = std::pair{5u, 3u};
+  host.target_after_targeting = 9;
+  host.usable = false;
+  CHECK(ai::RefreshActionCandidateReadiness(host) == true);
+  CHECK(host.targeting ==
+        std::vector<std::pair<std::size_t, unsigned>>{{0, 15}});
+  CHECK(host.usability == std::vector<std::pair<unsigned, unsigned>>{{5, 3}});
+  CHECK(host.candidates[0].RawWords() == expected.RawWords());
+  CHECK(host.count == 0);
+  CHECK(host.status == 3);
+}
+
+TEST_CASE(
+    "Candidate readiness promotes first survivor without compacting ranks",
+    "[ai][planning][candidate-readiness-core]") {
+  FakeCandidateReadiness host;
+  host.candidates[0].SetWeight(0);
+  host.candidates[1].SetWeight(0);
+  CHECK(ai::RefreshActionCandidateReadiness(host) == true);
+  CHECK(host.order[0] == 2);
+  CHECK(host.order[1] == 1);
+  CHECK(host.order[2] == 2);
+  CHECK(host.count == 3);
+  CHECK(host.movement_selections == 1);
+  CHECK(host.status == 0);
+}
+
+TEST_CASE("Candidate readiness rereads count after targeting and movement",
+          "[ai][planning][candidate-readiness-core]") {
+  FakeCandidateReadiness host;
+  host.count_after_targeting = 1;
+  CHECK(ai::RefreshActionCandidateReadiness(host) == false);
+  CHECK(host.targeting.size() == 1);
+  host = FakeCandidateReadiness{};
+  host.candidates[0].SetWeight(0);
+  host.clear_after_selection = true;
+  host.hostile = true;
+  CHECK(ai::RefreshActionCandidateReadiness(host) == true);
+  CHECK(host.count == 0);
+  CHECK(host.status == 2);
+}
+
+TEST_CASE("Candidate readiness status preserves unsigned threshold margin",
+          "[ai][planning][candidate-readiness-core]") {
+  FakeCandidateReadiness host;
+  host.count = 1;
+  for (std::uint32_t threshold = 0; threshold <= UINT16_MAX; ++threshold) {
+    host.candidates[0].SetThreshold(threshold);
+    CHECK(ai::RefreshActionCandidateReadiness(host) == false);
+    CHECK(host.status == static_cast<std::uint8_t>(130 < threshold));
+    host.targeting.clear();
+    host.usability.clear();
+  }
+  host.level = UINT16_MAX;
+  host.candidates[0].SetThreshold(UINT16_MAX);
+  CHECK(ai::RefreshActionCandidateReadiness(host) == false);
+  CHECK(host.status == 0);
+}
+
+TEST_CASE("Candidate readiness empty and malformed states never invent a rank",
+          "[ai][planning][candidate-readiness-core]") {
+  FakeCandidateReadiness host;
+  host.count = 0;
+  CHECK(ai::RefreshActionCandidateReadiness(host) == false);
+  CHECK(host.status == 3);
+  host.hostile = true;
+  CHECK(ai::RefreshActionCandidateReadiness(host) == false);
+  CHECK(host.status == 2);
+}
+
+TEST_CASE("Candidate readiness malformed ranks refuse before state stores",
+          "[ai][planning][candidate-readiness-core]") {
+  FakeCandidateReadiness host;
+  for (const int count : {-1, 17}) {
+    host.count = count;
+    host.status.reset();
+    CHECK_FALSE(ai::RefreshActionCandidateReadiness(host));
+    CHECK_FALSE(host.status);
+  }
+  host.count = 1;
+  host.order[0] = ai::kCandidateCapacity;
+  CHECK_FALSE(ai::RefreshActionCandidateReadiness(host));
+  host.order[0] = 0;
+  host.affects[0] = false;
+  host.accept_stores = false;
+  CHECK_FALSE(ai::RefreshActionCandidateReadiness(host));
+  CHECK(host.candidates[0].Weight() == 1);
+}
 
 TEST_CASE("Action candidates pack each field into the original record words",
           "[ai][planning]") {

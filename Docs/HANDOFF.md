@@ -7,6 +7,43 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Current AI Candidate Readiness
+
+- Ordered row28 is active. F01637 RefreshActionCandidateReadiness is promoted
+  in the existing PlanningPrimitives core/native owner. It reuses packed
+  ActionCandidate records and existing targeting/usability/movement services;
+  both generated production callers and original C/module800D85D8 are adopted.
+  Its obsolete two-line cast adaptation alone is retired through the copier.
+- Original132MIPS800D85D8-87E4 match actualBATTLE bytes, SHA256
+  `82be842cc0d5706927697f48963818b74a64d63ab3bed4460634a04b7d462db3`.
+  Weighted/threshold gates precede targeting; row/column and loop counts are
+  read fresh after callbacks; clearing preserves every other candidate bit.
+  First surviving rank replaces only slot0 without compaction. Movement
+  selection precedes fresh count/status; no candidates yield hostile2/absent3,
+  otherwise unsigned readiness+30 is compared against the first threshold.
+- Core/native/module14cases131141assertions pass, including all65536thresholds,
+  callback field/count changes, exact packed-state preservation, real native
+  usability, promotion/movement and linked-actor status. Native canonical/view
+  offsets are asserted; count/rank/known-heap/room/table-identity and cyclic
+  roster checks refuse malformed data without invented status. Borrowed
+  outside-arena inputs and global/AI lifecycle retirement remain separate.
+- Both freshly rebuilt full configurations pass5156cases/12,593,409assertions
+  with zero failures/skips/regressions and unchanged2400/900canonical replays.
+  All202copiercontrols pass actual0; source-scoped quality0/0 and full
+  header-aware quality5existing/zero new actual0 pass. Both ledgers pass zero
+  violations:2767repositorypromoted/oneframewip; modernization2766done/978todo.
+  Original3479cohort2485promoted/16retired/977generated/oneframewip gives
+  2501resolved/978remaining, fifty-two additional since6c8ac0b9.
+- Two pre-status generations preserve1761reviewedpaths/rawhashes; manifest
+  `98d997a5306c4c44a401a54f9e322062ae2c1da88b3e0f4be9c58e4e53f20b07`.
+  Final post-status generations also preserve all1761paths/rawhashes and the
+  same manifest. This scoped milestone's publication/CI are next. Row28 remains
+  active; this is not full battle-ai or M8 combat closure.
+- Prior row27 is published36ae14438b9fddab6951cbdd7a8cdd3c2c4cd84c with
+  exactCI42698413726 successful; all325-332issues are reconciled closed with
+  fixing revisions and evidence.276comment6751475112 records row27 completion.
+  Earlier pending-publication wording below is historical and superseded here.
+
 ### Current Row27 Completion
 
 - F00547 CurrentSavePointId and F00828 RefreshAshleyInteractionTile are

@@ -30,6 +30,7 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -64,55 +65,6 @@ Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 
 // decomp: D_800F5904 (D_800F5904@BATTLE/BATTLE.PRG)
 u_char (*Battle_Ai_candidateExclusions)[256];
-
-// decomp: BATTLE.PRG func_800D85D8 (src/BATTLE/BATTLE.PRG/6FC00.c:515)
-int Battle_Ai_RefreshActionCandidateReadiness(Battle_Ai_CandidateReadinessView* state)
-{
-    int i, changed = 0;
-    unsigned char value;
-    Battle_Ai_CandidateEntryView* entry;
-    Battle_Ai_CandidateEntryView* candidate;
-    Battle_Actor* actor;
-    for (i = 0; i < state->candidateCount; i++) {
-        entry = state->candidateOrder[i];
-        if (entry->weight && entry->threshold <= Battle_Ai_roomAiState->readinessLevel) {
-            if (!VS::Battle::Ai::CanLiveAiActionAffectActor((Battle_Ai_ActorAiState *)(state), (Battle_Ai_ActionCandidate *)(entry), entry->targetId)
-                || !VS::Battle::Ai::RefreshLiveAiActionUsability((Battle_Ai_ActorAiState *)(state), entry->row, entry->column)) {
-                entry->weight = 0;
-            }
-        }
-    }
-    if (state->candidateCount > 0 && !state->candidateOrder[0]->weight) {
-        changed = 1;
-        for (i = 1; i < state->candidateCount; i++) {
-            candidate = state->candidateOrder[i];
-            if (candidate->weight) {
-                state->candidateOrder[0] = candidate;
-                VS::Battle::Ai::SelectLiveActionMovementMode(state);
-                goto done;
-            }
-        }
-        state->candidateCount = 0;
-    }
-done:
-    if (!state->candidateCount) {
-        actor = Battle_actors[0];
-        while (actor) {
-            if ((state->relations[actor->id].opaque0 >> 6) == 3) {
-                break;
-            }
-            actor = actor->next;
-        }
-        value = 2;
-        if (!actor) {
-            value = 3;
-        }
-    } else {
-        value = Battle_Ai_roomAiState->readinessLevel + 30 < state->candidateOrder[0]->threshold;
-    }
-    state->actionStatus = value;
-    return changed;
-}
 
 // decomp: BATTLE.PRG func_800DC888 (src/BATTLE/BATTLE.PRG/74088.c:473)
 void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* simulated_actor_rows)
@@ -756,7 +708,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
         state->candidateOrder[i]->threshold += Core_Random_Rand() & 7;
     }
 
-    Battle_Ai_RefreshActionCandidateReadiness((Battle_Ai_CandidateReadinessView*)state);
+    Battle_Ai_RefreshActionCandidateReadinessEntry((Battle_Ai_CandidateReadinessView*)state);
     if (state->candidateCount == 0) {
         state->planMode = 7;
     } else {

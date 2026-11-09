@@ -24,7 +24,6 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
@@ -34,6 +33,7 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
@@ -428,7 +428,7 @@ void Battle_Ai_UpdateActorPerception(void)
         }
 
         VS::Battle::Ai::RefreshLiveAiResourceRestrictions((Battle_Ai_ActorAiState *)(state));
-        if (Battle_Ai_RefreshActionCandidateReadiness((Battle_Ai_CandidateReadinessView*)state)) {
+        if (Battle_Ai_RefreshActionCandidateReadinessEntry((Battle_Ai_CandidateReadinessView*)state)) {
             goto idle;
         }
 

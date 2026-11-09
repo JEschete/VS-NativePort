@@ -11,7 +11,10 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -62,6 +65,33 @@ struct PlanningFixture {
     std::copy(saved_states.begin(), saved_states.end(),
               Battle_Ai_actorAiStates);
     Battle_actionDefinitions[42] = saved_action;
+  }
+};
+
+struct ReadinessFixture : PlanningFixture {
+  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
+  decltype(std::to_array(Battle_actors)) saved_actors =
+      std::to_array(Battle_actors);
+  Battle_Ai_RoomAiState room{};
+  Battle_Actor hostile{};
+  ReadinessFixture() {
+    Battle_Ai_roomAiState = &room;
+    std::fill_n(Battle_actors, std::size(Battle_actors), nullptr);
+    room.readinessLevel = 100;
+    state.candidateCount = 1;
+    for (std::size_t index = 0; index < std::size(state.candidates); ++index) {
+      state.candidates[index].row = 2;
+      state.candidates[index].column = 1;
+      state.candidates[index].action = 42;
+      state.candidates[index].threshold = 131;
+      state.candidates[index].targetId = 3;
+      state.candidates[index].weight = 17;
+      state.candidateOrder[index] = &state.candidates[index];
+    }
+  }
+  ~ReadinessFixture() {
+    Battle_Ai_roomAiState = saved_room;
+    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
   }
 };
 
@@ -125,6 +155,131 @@ TEST_CASE(
   std::memcpy(memory + sizeof(destination), &frames, sizeof(frames));
   VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
   CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE(
+    "Native candidate readiness preserves exact status byte and threshold",
+    "[ai][planning][candidate-readiness-live]") {
+  ReadinessFixture fixture;
+  auto expected = fixture.state;
+  expected.actionStatus = 1;
+  CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
+        false);
+  using StateBytes = std::array<std::byte, sizeof(fixture.state)>;
+  CHECK((std::bit_cast<StateBytes>(fixture.state) ==
+         std::bit_cast<StateBytes>(expected)));
+  fixture.room.readinessLevel = 101;
+  CHECK(Battle_Ai_RefreshActionCandidateReadinessEntry(
+            reinterpret_cast<Battle_Ai_CandidateReadinessView*>(
+                &fixture.state)) == 0);
+  CHECK(fixture.state.actionStatus == 0);
+}
+
+TEST_CASE("Native candidate readiness clears only weight and exhausted count",
+          "[ai][planning][candidate-readiness-live]") {
+  ReadinessFixture fixture;
+  fixture.state.candidates[0].threshold = 100;
+  fixture.state.relations[3].classification = 0;
+  auto expected = fixture.state;
+  expected.candidates[0].weight = 0;
+  expected.candidateCount = 0;
+  expected.actionStatus = 3;
+  CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
+        true);
+  using StateBytes = std::array<std::byte, sizeof(fixture.state)>;
+  CHECK((std::bit_cast<StateBytes>(fixture.state) ==
+         std::bit_cast<StateBytes>(expected)));
+}
+
+TEST_CASE("Native candidate readiness refreshes actual action slot usability",
+          "[ai][planning][candidate-readiness-live]") {
+  ReadinessFixture fixture;
+  auto candidate = VS::Battle::Ai::ActionCandidate(
+      std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(
+          fixture.state.candidates[0]));
+  candidate.SetThreshold(100);
+  candidate.SetOption(VS::Battle::Ai::CandidateOption::kHarmful, true);
+  fixture.state.candidates[0] =
+      std::bit_cast<Battle_Ai_ActionCandidate>(candidate.RawWords());
+  fixture.state.relations[3].classification = 3;
+  Battle_actionDefinitions[42].aiFlags =
+      std::bit_cast<decltype(Battle_actionDefinitions[42].aiFlags)>(
+          std::uint16_t{0x8000});
+  CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
+        false);
+  CHECK(fixture.state.candidates[0].weight == 17);
+  CHECK(fixture.state.actionSlots[2][1].opaque0Bit7 == 1);
+  CHECK(fixture.state.actionStatus == 0);
+  fixture.actor.opaque3C = nullptr;
+  fixture.state.actionStatus = 9;
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state));
+  CHECK(fixture.state.candidates[0].weight == 17);
+  CHECK(fixture.state.actionStatus == 9);
+}
+
+TEST_CASE(
+    "Native candidate readiness promotes first survivor without compaction",
+    "[ai][planning][candidate-readiness-live]") {
+  ReadinessFixture fixture;
+  fixture.state.candidateCount = 3;
+  fixture.state.candidates[0].weight = 0;
+  fixture.state.candidates[1].weight = 0;
+  CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
+        true);
+  CHECK(fixture.state.candidateOrder[0] == &fixture.state.candidates[2]);
+  CHECK(fixture.state.candidateOrder[1] == &fixture.state.candidates[1]);
+  CHECK(fixture.state.candidateOrder[2] == &fixture.state.candidates[2]);
+  CHECK(fixture.state.candidateCount == 3);
+  CHECK(fixture.state.planMode == 1);
+  CHECK(fixture.state.actionStatus == 1);
+}
+
+TEST_CASE("Native candidate readiness empty status checks actual hostile links",
+          "[ai][planning][candidate-readiness-live]") {
+  ReadinessFixture fixture;
+  fixture.state.candidateCount = 0;
+  fixture.hostile.id = 4;
+  fixture.state.relations[4].classification = 3;
+  Battle_actors[0] = &fixture.hostile;
+  CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
+        false);
+  CHECK(fixture.state.actionStatus == 2);
+  fixture.state.relations[4].classification = 2;
+  CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
+        false);
+  CHECK(fixture.state.actionStatus == 3);
+  fixture.hostile.next = &fixture.hostile;
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state));
+}
+
+TEST_CASE("Candidate readiness retains its original module address",
+          "[ai][planning][candidate-readiness-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800D85D8) ==
+        reinterpret_cast<const void*>(
+            &Battle_Ai_RefreshActionCandidateReadinessEntry));
+}
+
+TEST_CASE("Native candidate readiness refuses absent malformed and short state",
+          "[ai][planning][candidate-readiness-live]") {
+  ReadinessFixture fixture;
+  CHECK_FALSE(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(nullptr));
+  fixture.state.candidateCount = 17;
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state));
+  fixture.state.candidateCount = 1;
+  fixture.state.candidateOrder[0] = nullptr;
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state));
+  std::array<std::byte, 4096> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap(arena);
+  auto* state = VS::Core::Memory::AllocateLiveFromLowEnd(16);
+  REQUIRE(state != nullptr);
+  CHECK_FALSE(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(
+      static_cast<Battle_Ai_ActorAiState*>(state)));
 }
 
 TEST_CASE("AI target memory leaves empty and negative candidate sets untouched",

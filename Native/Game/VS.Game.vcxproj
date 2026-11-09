@@ -1876,6 +1876,7 @@
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
     <ClInclude Include="src\Battle\Ai\Perception.h" />
+    <ClInclude Include="src\Battle\Ai\PlanningPrimitivesLive.h" />
     <ClInclude Include="src\Battle\Ai\RoomState.h" />
     <ClInclude Include="src\Battle\AttackPrerequisites.h" />
     <ClInclude Include="src\Battle\AttackPrerequisiteTable.h" />

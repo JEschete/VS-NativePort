@@ -15,6 +15,9 @@
 #include <type_traits>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.h"
+#include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
@@ -25,6 +28,7 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
 }
 
@@ -48,6 +52,33 @@ static_assert(
     std::extent_v<decltype(Battle_Ai_ActionPlanView::candidateOrder)> ==
     kCandidateCapacity);
 constexpr int kRestoreOperation = 2;
+
+static_assert(sizeof(Battle_Ai_CandidateEntryView) ==
+              sizeof(ActionCandidate::Words));
+static_assert(offsetof(Battle_Ai_CandidateReadinessView, candidateCount) ==
+              offsetof(Battle_Ai_ActorAiState, candidateCount));
+static_assert(offsetof(Battle_Ai_CandidateReadinessView, candidateOrder) ==
+              offsetof(Battle_Ai_ActorAiState, candidateOrder));
+static_assert(offsetof(Battle_Ai_CandidateReadinessView, actionStatus) ==
+              offsetof(Battle_Ai_ActorAiState, actionStatus));
+static_assert(offsetof(Battle_Ai_CandidateReadinessView, relations) ==
+              offsetof(Battle_Ai_ActorAiState, relations));
+
+template <class Record>
+bool ReadablePlanningRecord(const Record* record) {
+  if (record == nullptr ||
+      reinterpret_cast<std::uintptr_t>(record) % alignof(Record) != 0) {
+    return false;
+  }
+  const auto allocation = Core::Memory::LivePayloadContaining(record);
+  if (!allocation) {
+    return allocation.error() == Core::Memory::HeapError::kOutsideArena;
+  }
+  const auto offset = reinterpret_cast<std::uintptr_t>(record) -
+                      reinterpret_cast<std::uintptr_t>(allocation->data());
+  return offset <= allocation->size() &&
+         sizeof(Record) <= allocation->size() - offset;
+}
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -198,7 +229,127 @@ class LiveActionUsability final : public ActionUsabilityHost {
   Battle_Ai_ActorAiState& state_;
   const Battle_ActorStats& stats_;
 };
+class LiveCandidateReadiness final : public CandidateReadinessHost {
+ public:
+  explicit LiveCandidateReadiness(Battle_Ai_ActorAiState& state)
+      : state_(state), room_(Battle_Ai_roomAiState) {
+    for (std::size_t index = 0; index < std::size(Battle_Ai_actorAiStates);
+         ++index) {
+      if (Battle_Ai_actorAiStates[index] == &state_) slot_ = index;
+    }
+  }
+  int Count() const override { return Valid() ? state_.candidateCount : -1; }
+  std::optional<std::size_t> RankedHandle(std::size_t rank) const override {
+    if (!Valid() || rank >= std::size(state_.candidateOrder)) {
+      return std::nullopt;
+    }
+    const auto* candidate = state_.candidateOrder[rank];
+    return ReadablePlanningRecord(candidate)
+               ? std::optional(reinterpret_cast<std::size_t>(candidate))
+               : std::nullopt;
+  }
+  std::optional<ActionCandidate> Candidate(std::size_t handle) const override {
+    const auto* record = Record(handle);
+    return record != nullptr ? std::optional(CandidateOf(record))
+                             : std::nullopt;
+  }
+  std::uint16_t ReadinessLevel() const override {
+    return Valid() && ReadablePlanningRecord(room_) ? room_->readinessLevel : 0;
+  }
+  std::optional<bool> CanAffect(std::size_t handle, unsigned target) override {
+    const auto* record = Record(handle);
+    if (record == nullptr) return std::nullopt;
+    const LiveTargeting host(state_);
+    const auto result = CanAiActionAffectActor(host, CandidateOf(record),
+                                               static_cast<int>(target));
+    return Valid() ? result : std::nullopt;
+  }
+  std::optional<bool> RefreshUsability(unsigned row, unsigned column) override {
+    if (!Valid() || !ReadablePlanningRecord(state_.actor) ||
+        !ReadablePlanningRecord(state_.actor->opaque3C)) {
+      return std::nullopt;
+    }
+    LiveActionUsability host(state_, *state_.actor->opaque3C);
+    const auto result = RefreshAiActionUsability(host, static_cast<int>(row),
+                                                 static_cast<int>(column));
+    return Valid() ? result : std::nullopt;
+  }
+  bool ClearWeight(std::size_t handle) override {
+    auto* record = Record(handle);
+    if (record == nullptr) return false;
+    record->weight = 0;
+    return true;
+  }
+  bool SetFirstRank(std::size_t handle) override {
+    auto* record = Record(handle);
+    if (record == nullptr) return false;
+    state_.candidateOrder[0] = record;
+    return true;
+  }
+  bool ClearCount() override {
+    if (!Valid()) return false;
+    state_.candidateCount = 0;
+    return true;
+  }
+  bool SelectMovementMode() override {
+    if (!Valid() || !ReadablePlanningRecord(state_.candidateOrder[0])) {
+      return false;
+    }
+    SelectLiveActionMovementMode(
+        reinterpret_cast<Battle_Ai_CandidateReadinessView*>(&state_));
+    return Valid();
+  }
+  std::optional<bool> HasHostileActor() const override {
+    constexpr unsigned kHostile = 3;
+    if (!Valid()) return std::nullopt;
+    std::array<const Battle_Actor*, kCandidateTargetSlots> visited{};
+    std::size_t count = 0;
+    for (const auto* actor = Battle_actors[0]; actor != nullptr;
+         actor = actor->next) {
+      if (!ReadablePlanningRecord(actor) || actor->id < 0 ||
+          actor->id >= kCandidateTargetSlots || count == visited.size() ||
+          std::find(visited.begin(), visited.end(), actor) != visited.end()) {
+        return std::nullopt;
+      }
+      visited[count++] = actor;
+      if (state_.relations[actor->id].classification == kHostile) return true;
+    }
+    return false;
+  }
+  bool StoreActionStatus(std::uint8_t status) override {
+    if (!Valid()) return false;
+    state_.actionStatus = status;
+    return true;
+  }
+
+ private:
+  bool Valid() const {
+    return ReadablePlanningRecord(&state_) && room_ == Battle_Ai_roomAiState &&
+           (!slot_ || Battle_Ai_actorAiStates[*slot_] == &state_);
+  }
+  Battle_Ai_ActionCandidate* Record(std::size_t handle) const {
+    auto* record = reinterpret_cast<Battle_Ai_ActionCandidate*>(handle);
+    return Valid() && ReadablePlanningRecord(record) ? record : nullptr;
+  }
+  Battle_Ai_ActorAiState& state_;
+  Battle_Ai_RoomAiState* room_;
+  std::optional<std::size_t> slot_;
+};
 }  // namespace
+
+std::optional<bool> RefreshLiveActionCandidateReadiness(
+    Battle_Ai_ActorAiState* state) {
+  if (!ReadablePlanningRecord(state) ||
+      state->actorId >= kCandidateTargetSlots || state->candidateCount < 0 ||
+      state->candidateCount > static_cast<int>(kCandidateCapacity) ||
+      (state->candidateCount > 0 &&
+       !ReadablePlanningRecord(Battle_Ai_roomAiState))) {
+    Core_Debugf("ai", "AI readiness state/count/room is unavailable");
+    return std::nullopt;
+  }
+  LiveCandidateReadiness host(*state);
+  return RefreshActionCandidateReadiness(host);
+}
 
 LiveCandidateRanking::LiveCandidateRanking(Battle_Ai_ActionPlanView* state,
                                            int count) {
@@ -317,3 +468,10 @@ void RefreshLiveAiResourceRestrictions(Battle_Ai_ActorAiState* state) {
   state->lowHp = conditions.low_hp ? 1 : 0;
 }
 }  // namespace VS::Battle::Ai
+
+int Battle_Ai_RefreshActionCandidateReadinessEntry(
+    Battle_Ai_CandidateReadinessView* state) {
+  return VS::Battle::Ai::RefreshLiveActionCandidateReadiness(
+             reinterpret_cast<Battle_Ai_ActorAiState*>(state))
+      .value_or(false);
+}
