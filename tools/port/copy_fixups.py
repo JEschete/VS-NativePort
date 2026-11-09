@@ -365,6 +365,7 @@ _CONTENT_LIVE = {
 
 NATIVE_HELPER_HEADERS = {
     "Battle_Ai_RefreshActionCandidateReadinessEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
+    "Battle_Ai_ApplySimulatedActionResultsEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
     "Field_CurrentSavePointIdEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_RefreshAshleyInteractionTileEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_CreateGimmickInstanceEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
@@ -1133,6 +1134,7 @@ OWNED_CALL_BINDINGS["F01013"] = "Field_UpdateGimmickMotionEntry"
 OWNED_CALL_BINDINGS["F00065"] = "Field_DisableTrapAtPositionEntry"
 OWNED_CALL_BINDINGS["F00547"] = "Field_CurrentSavePointIdEntry"
 OWNED_CALL_BINDINGS["F01637"] = "Battle_Ai_RefreshActionCandidateReadinessEntry"
+OWNED_CALL_BINDINGS["F01697"] = "Battle_Ai_ApplySimulatedActionResultsEntry"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2606,6 +2608,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8006CDD8, "Field_DisableTrapAtPositionEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008A4FC, "Field_CurrentSavePointIdEntry"),
     ("BATTLE/BATTLE.PRG", 0x800D85D8, "Battle_Ai_RefreshActionCandidateReadinessEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800DC888, "Battle_Ai_ApplySimulatedActionResultsEntry"),
     ("BATTLE/BATTLE.PRG", 0x8009E634, "Field_RefreshAshleyInteractionTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),

@@ -249,6 +249,102 @@ bool CopiedStatByte(std::size_t offset) {
 }
 }  // namespace
 
+TEST_CASE("Simulated results apply original action type costs before performer",
+          "[ai][planning][simulation-results-core]") {
+  for (unsigned type = 0; type < 8; ++type) {
+    std::array<ai::ActorCondition, 2> rows{};
+    rows[0] = {.hp = 50,
+               .max_hp = 100,
+               .mp = 40,
+               .max_mp = 100,
+               .weapon_dp = 30,
+               .weapon_max_dp = 100,
+               .shield_dp = 20,
+               .shield_max_dp = 100};
+    ai::SimulatedActorEffect performer;
+    performer.hp = {.delta = 7, .operation = 2};
+    performer.mp = {.delta = 7, .operation = 2};
+    performer.weapon_dp = {.delta = 7, .operation = 2};
+    REQUIRE(ai::ApplySimulatedActionResults(rows, {type, 55}, performer, {}));
+    CHECK(rows[0].hp == (type == 3 ? 7 : 57));
+    CHECK(rows[0].mp == (type == 1 ? 7 : 47));
+    CHECK(rows[0].weapon_dp == (type == 6 ? 7 : 37));
+    CHECK(rows[0].shield_dp == 20);
+    CHECK(rows[1] == ai::ActorCondition{});
+  }
+}
+
+TEST_CASE(
+    "Simulated results preserve ordered repeated actors and status clears",
+    "[ai][planning][simulation-results-core]") {
+  std::array<ai::ActorCondition, 1> rows{
+      {{.hp = 50, .max_hp = 100, .statuses = 0x80000000}}};
+  ai::SimulatedActorEffect performer;
+  performer.hp.delta = 60;
+  performer.statuses_set = 3;
+  performer.statuses_clear = 1;
+  std::array<ai::SimulatedActorEffect, 2> targets{};
+  targets[0].hp = {.delta = 30, .operation = 2};
+  targets[0].statuses_set = 5;
+  targets[0].statuses_clear = 4;
+  targets[1].hp.delta = 10;
+  targets[1].statuses_clear = 2;
+  REQUIRE(ai::ApplySimulatedActionResults(rows, {}, performer, targets));
+  CHECK(rows[0].hp == 20);
+  CHECK(rows[0].statuses == 0x80000001);
+}
+
+TEST_CASE("Simulated results restore only operation two and keep signed deltas",
+          "[ai][planning][simulation-results-core]") {
+  for (std::uint8_t operation = 0; operation < 4; ++operation) {
+    std::array<ai::ActorCondition, 1> rows{{{.hp = 50,
+                                             .max_hp = 100,
+                                             .mp = 40,
+                                             .max_mp = 100,
+                                             .weapon_dp = 30,
+                                             .weapon_max_dp = 100,
+                                             .shield_dp = 20,
+                                             .shield_max_dp = 100}}};
+    ai::SimulatedActorEffect performer;
+    performer.hp = {-10, operation};
+    performer.mp = {10, operation};
+    performer.weapon_dp = {-10, operation};
+    performer.shield_dp = {10, operation};
+    REQUIRE(ai::ApplySimulatedActionResults(rows, {}, performer, {}));
+    CHECK(rows[0].hp == (operation == 2 ? 40 : 60));
+    CHECK(rows[0].mp == (operation == 2 ? 50 : 30));
+    CHECK(rows[0].weapon_dp == (operation == 2 ? 20 : 40));
+    CHECK(rows[0].shield_dp == (operation == 2 ? 30 : 10));
+  }
+}
+
+TEST_CASE(
+    "Simulated results ignore unavailable performers and targets entirely",
+    "[ai][planning][simulation-results-core]") {
+  std::array<ai::ActorCondition, 1> rows{{{.hp = 7, .max_hp = 10}}};
+  const auto before = rows;
+  ai::SimulatedActorEffect performer{.actor_id = 255, .ignored = true};
+  const std::array targets{performer};
+  REQUIRE(ai::ApplySimulatedActionResults(rows, {1, 999}, performer, targets));
+  CHECK(rows == before);
+}
+
+TEST_CASE("Simulated results refuse malformed active rows before mutation",
+          "[ai][planning][simulation-results-core]") {
+  std::array<ai::ActorCondition, 1> rows{{{.hp = 7, .max_hp = 10}}};
+  const auto before = rows;
+  ai::SimulatedActorEffect performer;
+  performer.hp.delta = 2;
+  std::array<ai::SimulatedActorEffect, 1> targets{{{.actor_id = 1}}};
+  CHECK_FALSE(
+      ai::ApplySimulatedActionResults(rows, {3, 5}, performer, targets));
+  CHECK(rows == before);
+  targets[0].ignored = true;
+  CHECK_FALSE(
+      ai::ApplySimulatedActionResults(rows, {3, 256}, performer, targets));
+  CHECK(rows == before);
+}
+
 TEST_CASE("Candidate readiness skips zero and future weights before callbacks",
           "[ai][planning][candidate-readiness-core]") {
   FakeCandidateReadiness host;

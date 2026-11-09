@@ -66,47 +66,6 @@ Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 // decomp: D_800F5904 (D_800F5904@BATTLE/BATTLE.PRG)
 u_char (*Battle_Ai_candidateExclusions)[256];
 
-// decomp: BATTLE.PRG func_800DC888 (src/BATTLE/BATTLE.PRG/74088.c:473)
-void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* simulated_actor_rows)
-{
-    int i;
-    Battle_Ai_ActionTiming* row;
-
-    if (Battle_Ai_planningWorkspace->opaque4.opaque40 == 0) {
-        Battle_ActionDefinition* action = &Battle_actionDefinitions[Battle_Ai_planningWorkspace->opaque0];
-
-        row = &simulated_actor_rows[Battle_Ai_planningWorkspace->opaque4.opaque0];
-
-        switch (action->type) {
-        case Battle_ActionType_Spell:
-            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque8, &row->opaqueA, action->cost, 1);
-            break;
-
-        case Battle_ActionType_BreakArt:
-            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque4, &row->opaque6, action->cost, 1);
-            break;
-
-        case Battle_ActionType_BaseAttack:
-            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque10, &row->opaque12, action->cost, 1);
-            break;
-        }
-    }
-
-    for (i = -1; i < Battle_Ai_planningWorkspace->opaque4A; ++i) {
-        Battle_Ai_EngagementActor* entry = i < 0 ? &Battle_Ai_planningWorkspace->opaque4 : &Battle_Ai_planningWorkspace->opaque4C[i];
-
-        if (entry->opaque40 == 0) {
-            row = &simulated_actor_rows[entry->opaque0];
-            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque4, &row->opaque6, entry->opaque4, entry->opaque1CBit0);
-            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque8, &row->opaqueA, entry->opaque6, entry->opaque1CBit2);
-            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque10, &row->opaque12, entry->opaque38, entry->opaque1EBit2);
-            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque14, &row->opaque16, entry->opaque3C, entry->opaque1EBit6);
-            row->opaqueC |= entry->opaque14;
-            row->opaqueC &= ~entry->opaque18;
-        }
-    }
-}
-
 // decomp: BATTLE.PRG func_800DCAA0 (src/BATTLE/BATTLE.PRG/74088.c:513)
 void Battle_Ai_SimulateActionCandidate(
     Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionTiming* simulated_actor_rows, Battle_Ai_ActionCandidate* candidate, int simulation_mode)
@@ -130,7 +89,7 @@ void Battle_Ai_SimulateActionCandidate(
             candidate->action, ai_state->actorId, target_actor_slot, candidate->targetLimb, &simulated_source_position, &target_position, Battle_Ai_planningWorkspace);
     }
     if (action_available != 0) {
-        Battle_Ai_ApplySimulatedActionResults(simulated_actor_rows);
+        Battle_Ai_ApplySimulatedActionResultsEntry(simulated_actor_rows);
     }
 }
 

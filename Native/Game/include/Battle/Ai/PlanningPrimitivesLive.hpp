@@ -12,6 +12,7 @@ struct Battle_Ai_ActionCandidate;
 struct Battle_Ai_ActionPlanView;
 struct Battle_Ai_ActorAiState;
 struct Battle_Ai_CandidateEntryView;
+struct Battle_Ai_ActionTiming;
 
 // Bindings from the actor AI state, its stats, the action table, the AI state
 // table and the planner's exclusion table to the typed candidate list and
@@ -20,6 +21,8 @@ struct Battle_Ai_CandidateEntryView;
 namespace VS::Battle::Ai {
 std::optional<bool> RefreshLiveActionCandidateReadiness(
     Battle_Ai_ActorAiState* state);
+bool ApplyLiveSimulatedActionResults(
+    std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows);
 
 // The ranking of a plan view's first `count` candidates, whose handles index
 // the view's order; Apply reorders the view's entries to match it.

@@ -7,6 +7,40 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Current AI Simulated Results
+
+- Ordered row28 remains active. F01697 ApplySimulatedActionResults is promoted
+  in existing PlanningPrimitives core/native code, reusing ActorCondition and
+  the owned signed stat-delta helper. Producer checks in ConditionSnapshotBinding
+  verify HP, MP, weapon DP and shield DP rather than guessing decomp fields.
+  Cost types1/3/6 apply before performer effects; ordered targets follow,
+  including repeated actor slots. Only operation2 restores; status clear wins
+  after status set. Original C/module800DC888 and generated caller remain.
+- Original134MIPS800DC888-CA9C match actualBATTLE bytes, SHA256
+  `342ddca4ea84cdc5aa5bae9d02ee308546f3188b4234f01b3522177a1cd6e467`.
+  Native workspace decoding checks the complete flexible target tail against
+  known allocation bounds and native255target capacity, never sizeof(header)
+  alone. Byte copies avoid additional alias reads; output updates only current
+  resources/statuses and preserves maxima, row IDs and reserved metadata.
+  Short tails, overlapping buffers and malformed active IDs refuse before
+  output stores; borrowed outside-arena buffers remain caller-owned contracts.
+- Focused11cases95assertions pass; with readiness native18cases126assertions.
+  Both freshly rebuilt full configurations pass5167cases/12,593,504assertions
+  with zero failures/skips/regressions and unchanged2400/900canonical replay
+  frames. All202copiercontrols pass actual0; source quality0/0 and full
+  header-aware quality5existing/zero new actual0 pass without changed baselines.
+  Both ledgers pass zero violations:2768repositorypromoted/oneframewip;
+  modernization2767done/977todo. Original3479cohort2486promoted/16retired/
+  976generated/oneframewip gives2502resolved/977remaining, fifty-three additional
+  since6c8ac0b9. This is not full battle-ai, M8 combat or EC/global retirement.
+- Two pre-status generations preserve1761reviewedpaths/rawhashes; manifest
+  `bd04d1ec83116ba434b186ddcdd9eec383405da7ba57ed4dd2f6b59b2bbaf8d1`.
+  Final post-status generations also preserve all1761paths/rawhashes and the
+  same manifest. This scoped milestone's publication/CI are next. Prior
+  readiness376c79691850067face6bbd9508fc3858d8bbf89 has successful
+  exactCI42705380792;276comment6752381288 records it. Earlier pending-publication
+  wording below is historical and superseded by this checkpoint.
+
 ### Current AI Candidate Readiness
 
 - Ordered row28 is active. F01637 RefreshActionCandidateReadiness is promoted

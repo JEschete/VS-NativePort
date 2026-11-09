@@ -53,6 +53,52 @@ constexpr unsigned kWeaponPpAction = 4;
 constexpr unsigned kRememberedTargetShift = 24;
 constexpr std::uint32_t kRememberedTileMask = 0xFFFFFF;
 
+bool ApplyConditionDelta(std::int16_t& value, std::int16_t maximum,
+                         const SimulatedStatChange& change) {
+  constexpr std::uint8_t kRestoreSimulationOperation = 2;
+  const auto next =
+      ApplySimulatedStatDelta(value, maximum, change.delta,
+                              change.operation == kRestoreSimulationOperation);
+  if (!next) return false;
+  value = *next;
+  return true;
+}
+
+bool ApplyActorEffect(std::span<ActorCondition> conditions,
+                      const SimulatedActorEffect& effect) {
+  if (effect.ignored) return true;
+  auto& row = conditions[effect.actor_id];
+  if (!ApplyConditionDelta(row.hp, row.max_hp, effect.hp) ||
+      !ApplyConditionDelta(row.mp, row.max_mp, effect.mp) ||
+      !ApplyConditionDelta(row.weapon_dp, row.weapon_max_dp,
+                           effect.weapon_dp) ||
+      !ApplyConditionDelta(row.shield_dp, row.shield_max_dp,
+                           effect.shield_dp)) {
+    return false;
+  }
+  row.statuses |= effect.statuses_set;
+  row.statuses &= ~effect.statuses_clear;
+  return true;
+}
+
+bool ApplySimulationCost(ActorCondition& row, const ActionCost& action) {
+  constexpr unsigned kSimulationSpell = 1;
+  constexpr unsigned kSimulationBreakArt = 3;
+  constexpr unsigned kSimulationBaseAttack = 6;
+  const SimulatedStatChange cost{.delta =
+                                     static_cast<std::int16_t>(action.cost)};
+  switch (action.type) {
+    case kSimulationSpell:
+      return ApplyConditionDelta(row.mp, row.max_mp, cost);
+    case kSimulationBreakArt:
+      return ApplyConditionDelta(row.hp, row.max_hp, cost);
+    case kSimulationBaseAttack:
+      return ApplyConditionDelta(row.weapon_dp, row.weapon_max_dp, cost);
+    default:
+      return true;
+  }
+}
+
 std::nullopt_t Refuse(const char* message) {
   Core_Debugf("ai", "%s", message);
   return std::nullopt;
@@ -186,6 +232,32 @@ bool IsActionUsable(const ActionCost& action, const ActorResources& resources) {
   }
 }
 }  // namespace
+
+// decomp: BATTLE.PRG func_800DC888 (74088.c:473), original134MIPS.
+bool ApplySimulatedActionResults(
+    std::span<ActorCondition> conditions, const ActionCost& action,
+    const SimulatedActorEffect& performer,
+    std::span<const SimulatedActorEffect> targets) {
+  const auto valid = [conditions](const SimulatedActorEffect& effect) {
+    return effect.ignored || effect.actor_id < conditions.size();
+  };
+  if (!valid(performer) ||
+      std::any_of(targets.begin(), targets.end(),
+                  [&valid](const auto& effect) { return !valid(effect); }) ||
+      (!performer.ignored && action.cost > UINT8_MAX)) {
+    Refuse("AI simulation actor or byte cost is outside its table");
+    return false;
+  }
+  if (!performer.ignored &&
+      !ApplySimulationCost(conditions[performer.actor_id], action)) {
+    return false;
+  }
+  if (!ApplyActorEffect(conditions, performer)) return false;
+  for (const auto& target : targets) {
+    if (!ApplyActorEffect(conditions, target)) return false;
+  }
+  return true;
+}
 
 // decomp: BATTLE.PRG func_800D85D8 (6FC00.c:515), original132MIPS.
 std::optional<bool> RefreshActionCandidateReadiness(

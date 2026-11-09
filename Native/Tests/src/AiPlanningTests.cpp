@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <new>
 #include <span>
 
 #include <catch2/catch_test_macros.hpp>
@@ -20,6 +21,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -66,6 +68,39 @@ struct PlanningFixture {
               Battle_Ai_actorAiStates);
     Battle_actionDefinitions[42] = saved_action;
   }
+};
+
+struct SimulationResultsFixture : PlanningFixture {
+  std::array<std::byte, 32768> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  Battle_Ai_ReactionRecord* saved_workspace = Battle_Ai_planningWorkspace;
+  std::array<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
+      rows{};
+  Battle_ActionRequest* request = nullptr;
+  Battle_Ai_ReactionRecord* workspace = nullptr;
+  SimulationResultsFixture() {
+    request = static_cast<Battle_ActionRequest*>(
+        VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Battle_ActionRequest)));
+    if (request == nullptr) throw std::bad_alloc();
+    std::memset(request, 0, sizeof(*request));
+    workspace = reinterpret_cast<Battle_Ai_ReactionRecord*>(request);
+    Battle_Ai_planningWorkspace = workspace;
+    workspace->opaque0 = 42;
+    for (std::size_t index = 0; index < rows.size(); ++index) {
+      rows[index].opaque0Bit0 = static_cast<unsigned>(index);
+      rows[index].reserved0Bit4 = 0xABCDE;
+      rows[index].opaque4 = 50;
+      rows[index].opaque6 = 100;
+      rows[index].opaque8 = 40;
+      rows[index].opaqueA = 100;
+      rows[index].opaque10 = 30;
+      rows[index].opaque12 = 100;
+      rows[index].opaque14 = 20;
+      rows[index].opaque16 = 100;
+      rows[index].opaqueC = 0x80000000;
+    }
+  }
+  ~SimulationResultsFixture() { Battle_Ai_planningWorkspace = saved_workspace; }
 };
 
 struct ReadinessFixture : PlanningFixture {
@@ -155,6 +190,131 @@ TEST_CASE(
   std::memcpy(memory + sizeof(destination), &frames, sizeof(frames));
   VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
   CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE(
+    "Native simulated results preserve row metadata maxima and target order",
+    "[ai][planning][simulation-results-live]") {
+  SimulationResultsFixture fixture;
+  Battle_actionDefinitions[42].type = 3;
+  Battle_actionDefinitions[42].cost = 55;
+  fixture.workspace->opaque4.opaque4 = 7;
+  fixture.workspace->opaque4.opaque1CBit0 = 2;
+  fixture.workspace->opaque4.opaque14 = 3;
+  fixture.workspace->opaque4.opaque18 = 1;
+  fixture.workspace->opaque4A = 2;
+  fixture.workspace->opaque4C[0].opaque0 = 0;
+  fixture.workspace->opaque4C[0].opaque4 = 30;
+  fixture.workspace->opaque4C[0].opaque1CBit0 = 2;
+  fixture.workspace->opaque4C[1].opaque0 = 0;
+  fixture.workspace->opaque4C[1].opaque4 = 10;
+  fixture.workspace->opaque4C[1].opaque18 = 2;
+  auto expected = fixture.rows;
+  expected[0].opaque4 = 27;
+  expected[0].opaqueC = 0x80000000;
+  using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
+  REQUIRE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
+  CHECK((std::bit_cast<RowBytes>(fixture.rows) ==
+         std::bit_cast<RowBytes>(expected)));
+}
+
+TEST_CASE("Native simulated results decode all signed resource operations",
+          "[ai][planning][simulation-results-live]") {
+  for (const unsigned type : {1u, 3u, 6u}) {
+    SimulationResultsFixture fixture;
+    Battle_actionDefinitions[42].type = type;
+    Battle_actionDefinitions[42].cost = 5;
+    auto& performer = fixture.workspace->opaque4;
+    performer.opaque4 = 7;
+    performer.opaque1CBit0 = 2;
+    performer.opaque6 = -9;
+    performer.opaque38 = 9;
+    performer.opaque1EBit2 = 2;
+    performer.opaque3C = -8;
+    performer.opaque1EBit6 = 3;
+    performer.opaque14 = 5;
+    performer.opaque18 = 1;
+    fixture.workspace->opaque4A = 1;
+    auto& target = fixture.workspace->opaque4C[0];
+    target.opaque0 = 1;
+    target.opaque6 = INT16_MAX;
+    target.opaque38 = 5;
+    target.opaque1EBit2 = 2;
+    target.opaque3C = INT16_MIN;
+    auto expected = fixture.rows;
+    expected[0].opaque4 = type == 3 ? 52 : 57;
+    expected[0].opaque8 = type == 1 ? 44 : 49;
+    expected[0].opaque10 = type == 6 ? 34 : 39;
+    expected[0].opaque14 = 28;
+    expected[0].opaqueC = 0x80000004;
+    expected[1].opaque8 = 0;
+    expected[1].opaque10 = 35;
+    expected[1].opaque14 = 100;
+    using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
+    REQUIRE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
+    CHECK((std::bit_cast<RowBytes>(fixture.rows) ==
+           std::bit_cast<RowBytes>(expected)));
+  }
+}
+
+TEST_CASE("Native simulated results accept the complete native target capacity",
+          "[ai][planning][simulation-results-live]") {
+  SimulationResultsFixture fixture;
+  fixture.workspace->opaque4.opaque40 = 1;
+  fixture.workspace->opaque4A =
+      static_cast<u_short>(std::size(fixture.request->targets));
+  using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
+  const auto before = std::bit_cast<RowBytes>(fixture.rows);
+  REQUIRE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
+  CHECK((std::bit_cast<RowBytes>(fixture.rows) == before));
+}
+
+TEST_CASE(
+    "Native simulated results ignore inactive records before action lookup",
+    "[ai][planning][simulation-results-live]") {
+  SimulationResultsFixture fixture;
+  fixture.workspace->opaque0 = UINT16_MAX;
+  fixture.workspace->opaque4.opaque40 = -1;
+  fixture.workspace->opaque4.opaque0 = 255;
+  fixture.workspace->opaque4A = 1;
+  fixture.workspace->opaque4C[0].opaque40 = 1;
+  fixture.workspace->opaque4C[0].opaque0 = 255;
+  using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
+  const auto before = std::bit_cast<RowBytes>(fixture.rows);
+  Battle_Ai_ApplySimulatedActionResultsEntry(fixture.rows.data());
+  CHECK((std::bit_cast<RowBytes>(fixture.rows) == before));
+}
+
+TEST_CASE("Simulated results retain their original module address",
+          "[ai][planning][simulation-results-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DC888) ==
+        reinterpret_cast<const void*>(
+            &Battle_Ai_ApplySimulatedActionResultsEntry));
+}
+
+TEST_CASE("Native simulated results refuse short tails and invalid actor slots",
+          "[ai][planning][simulation-results-live]") {
+  SimulationResultsFixture fixture;
+  using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
+  const auto before = std::bit_cast<RowBytes>(fixture.rows);
+  fixture.workspace->opaque4A = 256;
+  CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
+  fixture.workspace->opaque4A = 0;
+  fixture.workspace->opaque4.opaque0 = 16;
+  CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
+  auto* short_workspace = static_cast<Battle_Ai_ReactionRecord*>(
+      VS::Core::Memory::AllocateLiveFromLowEnd(
+          sizeof(Battle_Ai_ReactionRecord)));
+  REQUIRE(short_workspace != nullptr);
+  std::memset(short_workspace, 0, sizeof(*short_workspace));
+  short_workspace->opaque4A = 1;
+  Battle_Ai_planningWorkspace = short_workspace;
+  CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
+  Battle_Ai_planningWorkspace = nullptr;
+  CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
+  CHECK((std::bit_cast<RowBytes>(fixture.rows) == before));
 }
 
 TEST_CASE(

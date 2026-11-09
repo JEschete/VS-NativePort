@@ -29,7 +29,6 @@ extern int Battle_Ai_unusedPlanCounter;
 extern Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
 extern Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 extern u_char (*Battle_Ai_candidateExclusions)[256];
-void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* simulated_actor_rows);
 void Battle_Ai_SimulateActionCandidate(
     Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionTiming* simulated_actor_rows, Battle_Ai_ActionCandidate* candidate, int simulation_mode);
 void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* candidate);

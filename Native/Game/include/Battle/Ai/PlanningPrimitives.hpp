@@ -7,6 +7,8 @@
 #include <optional>
 #include <span>
 
+#include "Battle/Ai/ConditionSnapshot.hpp"
+
 // The battle AI action planner's candidate list: the 20-byte candidate record,
 // the ranking the planner sorts, the simulated stat snapshot it plans against,
 // and the per-slot usability and targeting checks. The battle runtime owns the
@@ -179,6 +181,27 @@ struct ActionCost {
   unsigned type = 0;
   unsigned cost = 0;
 };
+
+struct SimulatedStatChange {
+  std::int16_t delta = 0;
+  std::uint8_t operation = 1;
+};
+
+struct SimulatedActorEffect {
+  std::uint8_t actor_id = 0;
+  bool ignored = false;
+  SimulatedStatChange hp{};
+  SimulatedStatChange mp{};
+  SimulatedStatChange weapon_dp{};
+  SimulatedStatChange shield_dp{};
+  std::uint32_t statuses_set = 0;
+  std::uint32_t statuses_clear = 0;
+};
+
+bool ApplySimulatedActionResults(std::span<ActorCondition> conditions,
+                                 const ActionCost& action,
+                                 const SimulatedActorEffect& performer,
+                                 std::span<const SimulatedActorEffect> targets);
 
 // The actor stats, action table and AI state the usability refresh reads.
 class ActionUsabilityHost {
