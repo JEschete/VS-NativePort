@@ -285,13 +285,6 @@ typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_GIMMICKS_H_DECLS)
 #define VS_FIELD_GIMMICKS_H_DECLS
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
 #include "Field/Doors.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
@@ -300,7 +293,6 @@ typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
 #include "Field/Zone.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
-#include "Render/Palette.h"
 
 extern MATRIX Field_triggerMarkerMatrix;
 extern Field_TriggerMarkerVertex Field_triggerMarkerVertex;
@@ -338,7 +330,5 @@ extern char Field_gimmickPaletteColors[240];
 extern Field_GimmickInstance* Field_gimmickInstances[16];
 extern int Field_gimmickInteractionDirection;
 extern short const Field_kPlatformBounceOffsets[];
-int Field_CurrentSavePointId(void);
-void Field_RefreshAshleyInteractionTile(Actors_ActorRecord* actor_record);
 
 #endif // VS_FIELD_GIMMICKS_H_DECLS

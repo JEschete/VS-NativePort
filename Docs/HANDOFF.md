@@ -7,6 +7,53 @@ verification of the current worktree.
 
 ## Work order and current state
 
+### Current Row27 Completion
+
+- F00547 CurrentSavePointId and F00828 RefreshAshleyInteractionTile are
+  promoted in the existing ChestInteractions core/native binding. Save-point
+  decisions preserve placement/flag/collision ordering, the physical platform
+  probe versus actual trigger tile, held-mask504000 and kind16 activation.
+  The original native high-byte discriminator already passed; no signedness
+  bug is claimed. Maintained save-menu callers now consume the typed query.
+- Interaction-tile decisions retain slot0, all nine accepted byte animations,
+  one/two-tile reach, every signed-heading quadrant and fullword coordinates
+  after unsigned tile reads. The native adapter preserves actor bytes and
+  every map byte except the selected reservation bit; known-short/misaligned
+  records and out-of-grid nonempty maps refuse before aborting services.
+  The preview caller is typed; original C/modules8008A4FC/8009E634 remain.
+- Original53MIPS8008A4FC-A5CC SHA256
+  `45d5a93144c5eca577a48842ebad29b83f37f3c5f38c33054a5bd9fe4560e22e`
+  and51MIPS8009E634-E6FC SHA256
+  `2e35605af026c61f48719a2835ddc2306c234a88b2e87dbf5ed4adbb6a730614`
+  match actualBATTLE bytes. Coupled18cases526548assertions pass. Both freshly
+  rebuilt full configurations pass5142cases/12,462,268assertions with zero
+  failures/skips/regressions and unchanged2400/900canonical replay frames.
+  All202copiercontrols pass; focused14file quality0/0 and full header-aware
+  quality5existing/zero new actualexit0 pass without changed baselines.
+- Both independent ledgers pass zero violations:2766repositorypromoted plus
+  oneframewip; modernization2765done/979todo. Original3479cohort is2484promoted,
+  16retired,978generated and oneframewip:2500resolved/979remaining, fifty-one
+  additional since6c8ac0b9. Structured audit follows every one of the original
+  51primary IDs despite relocation:46promoted/five retired/zero pending.
+  Plan row27 is done for C++ ownership; generated Gimmicks/Doors/Interactions
+  retain required data but no pending function bodies. Global/controller/
+  reference/allscene and EC/data/type lifetime retirement remain separate.
+- Two pre-status generations preserve1760reviewedpaths/rawhashes; manifest
+  `cad2fad115dbb42653a4240bfc9efe7682e318a2e626b970ded5a6aea1cd68ed`.
+  Final post-status generations also preserve all1760paths/rawhashes and the
+  same manifest. Final policy commit/push/CI are next.
+  Row28 battle-ai stays the next ordered slice after this publication gate.
+- Published627f829924c3820568ac2793c7eac1078f0119dd has successful exact
+  SourceQuality42689907989. Issues325-331 are closed with fixing revisions
+  and their specific regression evidence;276comment6750380662 reconciles it.
+  Final body retirement exposed missing direct actor/SHP includes: issue332
+  was logged before repair and its eight include-only changes are separately
+  published62214ed43c2faa22cd856075b2a3f60b1e45c81c. ExactCI42697089210 is
+  successful;332 stays open until the dependent final body-retirement revision
+  also passes exactCI. The final policy work is still uncommitted.
+  Earlier row27 subsections below retain historical evidence; their older
+  pending-publication wording is superseded by this checkpoint.
+
 ### Current Platform Policies
 
 - F00066 FreezeRoomGimmicksTemporarily and F00619 SetMovingPlatformVisibility

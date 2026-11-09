@@ -24,6 +24,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Core/Log.hpp"
+#include "Field/ChestInteractionsLive.h"
 #include "Menu/FilesLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Platform/App.hpp"
@@ -381,7 +382,8 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
     return Boot_isGameplayActive != 0;
   }
   [[nodiscard]] bool SavePointEnabled() const override {
-    return Field_CurrentSavePointId() && !Audio_Seq_unusedStateFlags.opaqueA7;
+    return VS::Field::LiveCurrentSavePointId() != 0 &&
+           !Audio_Seq_unusedStateFlags.opaqueA7;
   }
   std::expected<void, std::string> WriteSelection(
       const file_menu::FileMenu& menu, VS::Save::WriteConsent consent) override;

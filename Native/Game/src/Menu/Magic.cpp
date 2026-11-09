@@ -20,7 +20,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Content/StringTables.h"
-#include "Field/Gimmicks.h"
+#include "Field/ChestInteractionsLive.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -334,20 +334,20 @@ int Menu_Magic_Update(u_char* state)
                 (char*)(Menu_Magic_teleportationStrings + Text_Menu0_teleportation_Offset_teleportation);
 
             menuStrings[i * 2 + 1] =
-                (Field_CurrentSavePointId() != 0) && (Audio_Seq_unusedStateFlags.opaqueB5 == 2)
+                (Field_CurrentSavePointIdEntry() != 0) && (Audio_Seq_unusedStateFlags.opaqueB5 == 2)
                     ? (char*)(Menu_Magic_teleportationStrings
                               + Text_Menu0_teleportation_Offset_teleportationDisabled)
                     : (char*)(Menu_Magic_teleportationStrings
                               + Text_Menu0_teleportation_Offset_teleportationDesc);
 
-            if ((Field_CurrentSavePointId() != 0) && (Audio_Seq_unusedStateFlags.opaqueB5 == 2)) {
+            if ((Field_CurrentSavePointIdEntry() != 0) && (Audio_Seq_unusedStateFlags.opaqueB5 == 2)) {
                 menuStrings[i * 2 + 1] =
                     (char*)(Menu_Magic_teleportationStrings
                             + Text_Menu0_teleportation_Offset_teleportationDisabled);
             }
 
             rowTypes[i++] =
-                ((j == 48) || (Audio_Seq_unusedStateFlags.opaqueB5 == 2) || (Field_CurrentSavePointId() == 0));
+                ((j == 48) || (Audio_Seq_unusedStateFlags.opaqueB5 == 2) || (Field_CurrentSavePointIdEntry() == 0));
         }
 
         j = Input_settings.cursorMemory;

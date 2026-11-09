@@ -19,6 +19,40 @@ struct ScriptedFallDestination {
 DoorRecord BuildScriptedFallDoor(const ScriptedFallDestination& destination,
                                  const Actors::PackedTile& tile);
 
+struct SavePointTriggerState {
+  std::int16_t kind = 0;
+  std::uint8_t activation = 0;
+};
+
+class SavePointQueryHost {
+ public:
+  virtual ~SavePointQueryHost() = default;
+  virtual std::optional<Actors::ActorPlacementView> PlayerPlacement() = 0;
+  virtual std::uint32_t PlayerStateFlags() = 0;
+  virtual bool HasRoomTrigger(const Actors::PackedTile& tile) = 0;
+  virtual std::optional<SavePointTriggerState> Trigger(
+      const Actors::PackedTile& tile) = 0;
+};
+
+std::uint8_t CurrentSavePointId(SavePointQueryHost& host);
+
+struct AshleyInteractionTileState {
+  std::uint8_t actor_slot = 0;
+  std::uint8_t animation_id = 0;
+  std::int16_t facing = 0;
+  std::uint8_t tile_x = 0;
+  std::uint8_t tile_z = 0;
+};
+
+class AshleyInteractionTileHost {
+ public:
+  virtual ~AshleyInteractionTileHost() = default;
+  virtual bool ReleaseTile(std::int32_t tile_x, std::int32_t tile_z) = 0;
+};
+
+bool RefreshAshleyInteractionTile(const AshleyInteractionTileState& state,
+                                  AshleyInteractionTileHost& host);
+
 enum class AshleyFallResult { kNone, kScriptedTransition, kHandled };
 enum class AshleyTransitionRoute { kRoom, kZone };
 

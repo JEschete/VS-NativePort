@@ -16,6 +16,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/Ai/NavigationPrimitives.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
@@ -694,6 +695,51 @@ struct RecordingGimmickCreationHost final : VS::Field::GimmickCreationHost {
   bool AddOccupancy(std::size_t) override {
     calls.emplace_back("occupancy");
     return true;
+  }
+};
+
+struct RecordingInteractionTileHost final
+    : VS::Field::AshleyInteractionTileHost {
+  std::int32_t tile_x = 0;
+  std::int32_t tile_z = 0;
+  std::uint32_t calls = 0;
+  bool accept = true;
+  bool ReleaseTile(std::int32_t next_x, std::int32_t next_z) override {
+    tile_x = next_x;
+    tile_z = next_z;
+    ++calls;
+    return accept;
+  }
+};
+
+struct RecordingSavePointHost final : VS::Field::SavePointQueryHost {
+  std::optional<VS::Actors::ActorPlacementView> placement{
+      VS::Actors::ActorPlacementView{}};
+  std::uint32_t flags = 0;
+  bool collision_trigger = true;
+  std::optional<VS::Field::SavePointTriggerState> trigger{
+      VS::Field::SavePointTriggerState{16, 255}};
+  VS::Actors::PackedTile probe_tile{};
+  VS::Actors::PackedTile trigger_tile{};
+  std::vector<int> calls;
+  std::optional<VS::Actors::ActorPlacementView> PlayerPlacement() override {
+    calls.push_back(0);
+    return placement;
+  }
+  std::uint32_t PlayerStateFlags() override {
+    calls.push_back(1);
+    return flags;
+  }
+  bool HasRoomTrigger(const VS::Actors::PackedTile& tile) override {
+    calls.push_back(2);
+    probe_tile = tile;
+    return collision_trigger;
+  }
+  std::optional<VS::Field::SavePointTriggerState> Trigger(
+      const VS::Actors::PackedTile& tile) override {
+    calls.push_back(3);
+    trigger_tile = tile;
+    return trigger;
   }
 };
 
@@ -6907,6 +6953,257 @@ TEST_CASE("Gimmick point placement retains its original module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A3DB4) ==
         reinterpret_cast<const void*>(&Field_CanPlaceGimmickAtPointEntry));
+}
+
+TEST_CASE("Interaction tile release preserves every animation and actor byte",
+          "[interaction-tile-core][field]") {
+  RecordingInteractionTileHost host;
+  VS::Field::AshleyInteractionTileState state{};
+  for (std::uint32_t value = 0; value <= UINT8_MAX; ++value) {
+    state.animation_id = static_cast<std::uint8_t>(value);
+    host.calls = 0;
+    REQUIRE(VS::Field::RefreshAshleyInteractionTile(state, host));
+    const bool active = (value >= 0x47 && value <= 0x4A) || value == 0x4C ||
+                        (value >= 0x4F && value <= 0x52);
+    CHECK(host.calls == (active ? 1 : 0));
+  }
+  state.animation_id = 0x47;
+  for (std::uint32_t value = 1; value <= UINT8_MAX; ++value) {
+    state.actor_slot = static_cast<std::uint8_t>(value);
+    host.calls = 0;
+    CHECK(VS::Field::RefreshAshleyInteractionTile(state, host));
+    CHECK(host.calls == 0);
+  }
+}
+
+TEST_CASE("Interaction tile release rounds every heading without byte wrapping",
+          "[interaction-tile-core][field]") {
+  RecordingInteractionTileHost host;
+  VS::Field::AshleyInteractionTileState state{
+      .animation_id = 0x47, .tile_x = 255, .tile_z = 0};
+  const std::array<std::int32_t, 4> x_steps{0, -1, 0, 1};
+  const std::array<std::int32_t, 4> z_steps{-1, 0, 1, 0};
+  for (std::int32_t heading = INT16_MIN; heading <= INT16_MAX; ++heading) {
+    state.facing = static_cast<std::int16_t>(heading);
+    const auto quadrant =
+        static_cast<std::size_t>(((heading + 512) & 4095) / 1024);
+    for (const auto reach : {1, 2}) {
+      state.animation_id = static_cast<std::uint8_t>(reach == 1 ? 0x47 : 0x4F);
+      host.calls = 0;
+      REQUIRE(VS::Field::RefreshAshleyInteractionTile(state, host));
+      CHECK(host.calls == 1);
+      CHECK(host.tile_x == 255 + reach * x_steps[quadrant]);
+      CHECK(host.tile_z == reach * z_steps[quadrant]);
+    }
+  }
+}
+
+TEST_CASE("Interaction tile release forwards refusal and unsigned tile values",
+          "[interaction-tile-core][field]") {
+  RecordingInteractionTileHost host;
+  VS::Field::AshleyInteractionTileState state{.animation_id = 0x4C,
+                                              .facing = 3072};
+  for (std::uint32_t value = 0; value <= UINT8_MAX; ++value) {
+    state.tile_x = static_cast<std::uint8_t>(value);
+    state.tile_z = static_cast<std::uint8_t>(value);
+    REQUIRE(VS::Field::RefreshAshleyInteractionTile(state, host));
+    CHECK(host.tile_x == value + 1);
+    CHECK(host.tile_z == value);
+  }
+  host.accept = false;
+  CHECK_FALSE(VS::Field::RefreshAshleyInteractionTile(state, host));
+}
+
+TEST_CASE(
+    "Save point query probes platform layer before the actual trigger tile",
+    "[save-point-core][field]") {
+  for (std::uint32_t layer = 0; layer < 8; ++layer) {
+    RecordingSavePointHost host;
+    REQUIRE(host.placement);
+    if (!host.placement) throw std::bad_optional_access();
+    host.placement->tile = {.x = 255, .layer = 4, .z = 254};
+    host.flags = layer << 16;
+    CHECK(VS::Field::CurrentSavePointId(host) == 255);
+    CHECK(host.probe_tile.x == (layer == 0 ? 255 : 0));
+    CHECK(host.probe_tile.z == (layer == 0 ? 254 : 0));
+    CHECK(host.probe_tile.layer == (layer == 0 ? 4 : layer));
+    CHECK(host.trigger_tile == host.placement->tile);
+    CHECK(host.calls == std::vector<int>{0, 1, 2, 3});
+  }
+}
+
+TEST_CASE("Save point query collision precedes every held actor flag refusal",
+          "[save-point-core][field]") {
+  for (unsigned bit = 0; bit < 32; ++bit) {
+    RecordingSavePointHost host;
+    host.flags = std::uint32_t{1} << bit;
+    const bool held = (host.flags & 0x504000) != 0;
+    CHECK(VS::Field::CurrentSavePointId(host) == (held ? 0 : 255));
+    CHECK(host.calls ==
+          (held ? std::vector<int>{0, 1, 2} : std::vector<int>{0, 1, 2, 3}));
+  }
+}
+
+TEST_CASE("Save point query retains every unsigned byte only for kind sixteen",
+          "[save-point-core][field]") {
+  RecordingSavePointHost host;
+  REQUIRE(host.trigger);
+  if (!host.trigger) throw std::bad_optional_access();
+  for (std::uint32_t value = 0; value <= UINT8_MAX; ++value) {
+    host.trigger->activation = static_cast<std::uint8_t>(value);
+    CHECK(VS::Field::CurrentSavePointId(host) == value);
+    host.calls.clear();
+  }
+  for (const auto kind :
+       std::array<std::int16_t, 6>{INT16_MIN, -1, 0, 15, 17, INT16_MAX}) {
+    host.trigger->kind = static_cast<std::int16_t>(kind);
+    CHECK(VS::Field::CurrentSavePointId(host) == 0);
+  }
+}
+
+TEST_CASE("Save point query refuses absent actors collision and trigger",
+          "[save-point-core][field]") {
+  RecordingSavePointHost host;
+  host.placement.reset();
+  CHECK(VS::Field::CurrentSavePointId(host) == 0);
+  CHECK(host.calls == std::vector<int>{0});
+  host.placement = VS::Actors::ActorPlacementView{};
+  host.calls.clear();
+  host.collision_trigger = false;
+  CHECK(VS::Field::CurrentSavePointId(host) == 0);
+  CHECK(host.calls == std::vector<int>{0, 1, 2});
+  host.collision_trigger = true;
+  host.trigger.reset();
+  host.calls.clear();
+  CHECK(VS::Field::CurrentSavePointId(host) == 0);
+  CHECK(host.calls == std::vector<int>{0, 1, 2, 3});
+}
+
+TEST_CASE("Native interaction tile release clears only the actual reservation",
+          "[interaction-tile-live][field]") {
+  RoomTriggerLiveFixture room;
+  Actors_ActorRecord record{};
+  record.instance.currentTileX = 2;
+  record.instance.currentTileZ = 2;
+  record.animationId = 0x47;
+  room.flags[1][2] = 0xF5A5;
+  auto expected = room.flags;
+  expected[1][2] &= ~VS::Battle::Ai::kReservedTileFlag;
+  using FlagBytes = std::array<std::byte, sizeof(room.flags)>;
+  const auto saved =
+      std::bit_cast<std::array<std::byte, sizeof(record)>>(record);
+  REQUIRE(VS::Field::RefreshLiveAshleyInteractionTile(&record));
+  CHECK((std::bit_cast<FlagBytes>(room.flags) ==
+         std::bit_cast<FlagBytes>(expected)));
+  CHECK(std::bit_cast<std::array<std::byte, sizeof(record)>>(record) == saved);
+  record.animationId = 0x4F;
+  record.instance.facing = 3072;
+  room.flags[2][4] = 0x80;
+  Field_RefreshAshleyInteractionTileEntry(&record);
+  CHECK(room.flags[2][4] == 0);
+}
+
+TEST_CASE(
+    "Native interaction tile release retains inactive and out of grid state",
+    "[interaction-tile-live][field]") {
+  RoomTriggerLiveFixture room;
+  Actors_ActorRecord record{};
+  record.animationId = 0x47;
+  using FlagBytes = std::array<std::byte, sizeof(room.flags)>;
+  const auto saved = std::bit_cast<FlagBytes>(room.flags);
+  CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(&record));
+  CHECK((std::bit_cast<FlagBytes>(room.flags) == saved));
+  record.animationId = 0;
+  CHECK(VS::Field::RefreshLiveAshleyInteractionTile(&record));
+  record.animationId = 0x47;
+  record.instance.slot = 1;
+  CHECK(VS::Field::RefreshLiveAshleyInteractionTile(&record));
+  CHECK((std::bit_cast<FlagBytes>(room.flags) == saved));
+  record.instance.slot = 0;
+  Battle_Ai_tileFlagMap = nullptr;
+  CHECK(VS::Field::RefreshLiveAshleyInteractionTile(&record));
+}
+
+TEST_CASE(
+    "Native interaction tile release refuses null misaligned and short records",
+    "[interaction-tile-live][field]") {
+  RoomTriggerLiveFixture room;
+  Actors_ActorRecord record{};
+  CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(nullptr));
+  CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(
+      reinterpret_cast<Actors_ActorRecord*>(
+          reinterpret_cast<std::byte*>(&record) + 1)));
+  std::array<std::byte, 4096> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap(arena);
+  auto* short_record = VS::Core::Memory::AllocateLiveFromLowEnd(16);
+  REQUIRE(short_record != nullptr);
+  CHECK_FALSE(VS::Field::RefreshLiveAshleyInteractionTile(
+      static_cast<Actors_ActorRecord*>(short_record)));
+}
+
+TEST_CASE("Native save point query returns unsigned activation bytes",
+          "[save-point-byte-regression][save-point-live][field]") {
+  RoomTriggerLiveFixture room;
+  GimmickPointLiveFixture placement;
+  Actors_actorRecords[0] = &placement.actor;
+  placement.cells[0].hasRoomTrigger = 1;
+  Field_roomData.floorTriggers = room.triggers.data();
+  Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
+  room.triggers[0].kind = 16;
+  Audio_Seq_unusedStateFlags.opaque20 = 0;
+  Audio_Seq_unusedStateFlags.opaque40 = 0;
+  room.triggers[0].activation = 1;
+  REQUIRE(Field_CurrentSavePointIdEntry() == 1);
+  for (const auto value : {127, 128, 255}) {
+    room.triggers[0].activation =
+        std::bit_cast<char>(static_cast<std::uint8_t>(value));
+    CHECK(Field_CurrentSavePointIdEntry() == value);
+  }
+}
+
+TEST_CASE("Interaction tile release retains its original module address",
+          "[interaction-tile-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x8009E634) ==
+      reinterpret_cast<const void*>(&Field_RefreshAshleyInteractionTileEntry));
+}
+
+TEST_CASE("Save point query retains its original module address",
+          "[save-point-live][field]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008A4FC) ==
+        reinterpret_cast<const void*>(&Field_CurrentSavePointIdEntry));
+}
+
+TEST_CASE("Native save point query refuses missing and suppressed trigger data",
+          "[save-point-live][field]") {
+  RoomTriggerLiveFixture room;
+  GimmickPointLiveFixture placement;
+  Actors_actorRecords[0] = &placement.actor;
+  placement.cells[0].hasRoomTrigger = 1;
+  Field_roomData.floorTriggers = room.triggers.data();
+  Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
+  room.triggers[0].kind = 16;
+  room.triggers[0].activation = 7;
+  Audio_Seq_unusedStateFlags.opaque20 = 0;
+  Audio_Seq_unusedStateFlags.opaque40 = 0;
+  REQUIRE(Field_CurrentSavePointIdEntry() == 7);
+  room.triggers[0].kind = 15;
+  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  Audio_Seq_unusedStateFlags.opaque20 = 1;
+  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  room.triggers[0].kind = 16;
+  CHECK(Field_CurrentSavePointIdEntry() == 7);
+  Field_roomData.header.floorTriggersLength = sizeof(room.triggers) - 1;
+  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
+  placement.cells[0].hasRoomTrigger = 0;
+  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  Actors_actorRecords[0] = nullptr;
+  CHECK(Field_CurrentSavePointIdEntry() == 0);
 }
 
 namespace {

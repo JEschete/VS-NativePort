@@ -6,10 +6,13 @@ extern "C" {
 struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
+struct Actors_ActorRecord;
 struct Effects_ActionEffectRequest;
 struct SVECTOR;
 struct Items_TreasureChest;
 enum { kFieldEntranceRecordBytes = 12 };
+int Field_CurrentSavePointIdEntry(void);
+void Field_RefreshAshleyInteractionTileEntry(struct Actors_ActorRecord* record);
 void Field_StoreEntranceDoorForReloadEntry(void);
 void Field_ApplyUnlockEffectToRoomObjectEntry(struct SVECTOR* target_position);
 void Field_SetEntranceDoorRecordEntry(
@@ -51,6 +54,8 @@ extern "C++" {
 #include "Field/ChestInteractions.hpp"
 #include "Field/InteractionTarget.hpp"
 namespace VS::Field {
+std::uint8_t LiveCurrentSavePointId();
+bool RefreshLiveAshleyInteractionTile(const Actors_ActorRecord* record);
 void SetLiveEntranceDoor(const std::optional<DoorRecord>& door);
 void FindLiveEntranceDoorNearTile(std::int32_t tile_x, std::int32_t tile_z,
                                   std::int32_t layer);

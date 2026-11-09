@@ -22,6 +22,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Files.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -626,7 +627,9 @@ class LiveHost : public LiveCardHost {
       Framework::SetLiveInformationMessage(message);
     }
   }
-  int CurrentSavePointId() override { return Field_CurrentSavePointId(); }
+  int CurrentSavePointId() override {
+    return VS::Field::LiveCurrentSavePointId();
+  }
   int SaveLocationId() override {
     return static_cast<unsigned char>(Menu_saveLocationId);
   }

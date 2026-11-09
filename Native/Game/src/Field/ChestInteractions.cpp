@@ -67,6 +67,55 @@ std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
 
 }  // namespace
 
+// decomp: BATTLE.PRG func_8008A4FC (146C.c:15530), original53MIPS.
+std::uint8_t CurrentSavePointId(SavePointQueryHost& host) {
+  constexpr std::int16_t kSavePointKind = 16;
+  const auto placement = host.PlayerPlacement();
+  if (!placement) return 0;
+  const auto flags = host.PlayerStateFlags();
+  auto probe = placement->tile;
+  if ((flags & kTriggerLayerMask) != 0) {
+    probe.x = 0;
+    probe.z = 0;
+    probe.layer = static_cast<std::uint8_t>((flags & kTriggerLayerMask) >>
+                                            kTriggerLayerShift);
+  }
+  if (!host.HasRoomTrigger(probe) || (flags & kTriggerLocationHeld) != 0) {
+    return 0;
+  }
+  const auto trigger = host.Trigger(placement->tile);
+  return trigger && trigger->kind == kSavePointKind ? trigger->activation : 0;
+}
+
+// decomp: BATTLE.PRG func_8009E634 (30DB0.c:2695), original51MIPS.
+bool RefreshAshleyInteractionTile(const AshleyInteractionTileState& state,
+                                  AshleyInteractionTileHost& host) {
+  constexpr std::uint32_t kFirstShortReachAnimation = 0x47;
+  constexpr std::uint32_t kSingleReachAnimation = 0x4C;
+  constexpr std::uint32_t kFirstLongReachAnimation = 0x4F;
+  constexpr std::uint32_t kAnimationRange = 4;
+  constexpr std::int32_t kLongReach = 2;
+  constexpr std::int32_t kNegativeQuadrantCount = 2;
+  if (state.actor_slot != 0) return true;
+  const auto animation = static_cast<std::uint32_t>(state.animation_id);
+  std::int32_t reach = 1;
+  if (animation - kFirstLongReachAnimation < kAnimationRange) {
+    reach = kLongReach;
+  } else if (animation - kFirstShortReachAnimation >= kAnimationRange &&
+             animation != kSingleReachAnimation) {
+    return true;
+  }
+  const auto quadrant =
+      ((static_cast<std::int32_t>(state.facing) + kFacingRoundBias) &
+       kFacingHeadingMask) >>
+      kFacingQuadrantShift;
+  if (quadrant < kNegativeQuadrantCount) reach = -reach;
+  const bool along_x = (quadrant & 1) != 0;
+  return host.ReleaseTile(
+      static_cast<std::int32_t>(state.tile_x) + (along_x ? reach : 0),
+      static_cast<std::int32_t>(state.tile_z) + (along_x ? 0 : reach));
+}
+
 // decomp: scripted-fall door in BATTLE.PRG func_80074BAC (146C.c:5365).
 DoorRecord BuildScriptedFallDoor(const ScriptedFallDestination& destination,
                                  const Actors::PackedTile& tile) {

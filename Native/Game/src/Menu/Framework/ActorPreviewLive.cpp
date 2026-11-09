@@ -26,6 +26,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/ChestInteractionsLive.h"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DepthCue.hpp"
@@ -256,7 +257,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
 
   void RefreshInteractionTile(int slot) override {
     if (Actors_ActorRecord* record = Record(slot)) {
-      Field_RefreshAshleyInteractionTile(record);
+      static_cast<void>(Field::RefreshLiveAshleyInteractionTile(record));
     }
   }
 

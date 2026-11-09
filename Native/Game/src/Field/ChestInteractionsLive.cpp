@@ -14,7 +14,9 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractions.hpp"
@@ -35,12 +37,14 @@
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
 #include "Actors/Location.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Effects/ActionEffects.h"
@@ -92,6 +96,78 @@ Battle_Actor* TileTriggerActor(std::size_t index) {
   const std::span actors(Battle_actors);
   return index < actors.size() ? actors[index] : nullptr;
 }
+
+class LiveAshleyInteractionTileHost final
+    : public VS::Field::AshleyInteractionTileHost {
+ public:
+  bool ReleaseTile(std::int32_t tile_x, std::int32_t tile_z) override {
+    constexpr auto kSide = VS::Battle::Ai::kNavigationGridSide;
+    if (!Valid() ||
+        (flags_ != nullptr &&
+         (tile_x < 0 || tile_z < 0 || tile_x >= kSide || tile_z >= kSide))) {
+      return false;
+    }
+    VS::Battle::Ai::ReleaseLiveAiDestinationTile(tile_x, tile_z);
+    return Valid();
+  }
+
+ private:
+  bool Valid() const {
+    return generation_ == VS::Field::LiveInteractionTargetDomain().generation &&
+           flags_ == Battle_Ai_tileFlagMap;
+  }
+  std::uint64_t generation_ =
+      VS::Field::LiveInteractionTargetDomain().generation;
+  decltype(Battle_Ai_tileFlagMap) flags_ = Battle_Ai_tileFlagMap;
+};
+
+class LiveSavePointQueryHost final : public VS::Field::SavePointQueryHost {
+ public:
+  std::optional<VS::Actors::ActorPlacementView> PlayerPlacement() override {
+    return Valid() ? VS::Actors::LiveActorPlacementView(0) : std::nullopt;
+  }
+  std::uint32_t PlayerStateFlags() override {
+    return Valid() ? VS::Actors::LiveActorStateFlags(0) : 0;
+  }
+  bool HasRoomTrigger(const VS::Actors::PackedTile& tile) override {
+    if (!Valid()) return false;
+    const auto* cell =
+        VS::Field::LiveCollisionCellOrAbsent(tile.x, tile.z, tile.layer);
+    return Valid() && (cell->hasRoomTrigger & 1) != 0;
+  }
+  std::optional<VS::Field::SavePointTriggerState> Trigger(
+      const VS::Actors::PackedTile& tile) override {
+    if (!Valid()) return std::nullopt;
+    const auto target =
+        VS::Field::FindLiveRoomTriggerAtTile({tile.x, tile.z, tile.layer});
+    const auto* record =
+        target ? VS::Field::ResolveLiveTrapTarget(*target) : nullptr;
+    if (!Valid() || record == nullptr) return std::nullopt;
+    return VS::Field::SavePointTriggerState{
+        record->kind, std::bit_cast<std::uint8_t>(record->activation)};
+  }
+
+ private:
+  bool Valid() const {
+    return generation_ == VS::Field::LiveInteractionTargetDomain().generation &&
+           collision_ == Field_roomData.collisionMap &&
+           collision_bytes_ == Field_roomData.header.collisionMapLength &&
+           cells_ == Field_roomData.tileCells &&
+           cell_bytes_ == Field_roomData.header.tileCellsLength &&
+           triggers_ == Field_roomData.floorTriggers &&
+           trigger_bytes_ == Field_roomData.header.floorTriggersLength;
+  }
+  std::uint64_t generation_ =
+      VS::Field::LiveInteractionTargetDomain().generation;
+  decltype(Field_roomData.collisionMap) collision_ =
+      Field_roomData.collisionMap;
+  std::uint32_t collision_bytes_ = Field_roomData.header.collisionMapLength;
+  decltype(Field_roomData.tileCells) cells_ = Field_roomData.tileCells;
+  std::uint32_t cell_bytes_ = Field_roomData.header.tileCellsLength;
+  decltype(Field_roomData.floorTriggers) triggers_ =
+      Field_roomData.floorTriggers;
+  std::uint32_t trigger_bytes_ = Field_roomData.header.floorTriggersLength;
+};
 
 class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
  public:
@@ -822,6 +898,41 @@ class LiveObjectInteractionWaitHost final
 }  // namespace
 
 namespace VS::Field {
+std::uint8_t LiveCurrentSavePointId() {
+  LiveSavePointQueryHost host;
+  return CurrentSavePointId(host);
+}
+
+bool RefreshLiveAshleyInteractionTile(const Actors_ActorRecord* record) {
+  constexpr std::size_t kRequiredBytes =
+      offsetof(Actors_ActorRecord, animationId) +
+      sizeof(decltype(Actors_ActorRecord::animationId));
+  if (record == nullptr ||
+      reinterpret_cast<std::uintptr_t>(record) % alignof(Actors_ActorRecord) !=
+          0) {
+    return false;
+  }
+  const auto allocation = Core::Memory::LivePayloadContaining(record);
+  if (allocation) {
+    const auto offset = reinterpret_cast<std::uintptr_t>(record) -
+                        reinterpret_cast<std::uintptr_t>(allocation->data());
+    if (offset > allocation->size() ||
+        kRequiredBytes > allocation->size() - offset) {
+      return false;
+    }
+  } else if (allocation.error() != Core::Memory::HeapError::kOutsideArena) {
+    return false;
+  }
+  const AshleyInteractionTileState state{
+      .actor_slot = static_cast<std::uint8_t>(record->instance.slot),
+      .animation_id = static_cast<std::uint8_t>(record->animationId),
+      .facing = record->instance.facing,
+      .tile_x = static_cast<std::uint8_t>(record->instance.currentTileX),
+      .tile_z = static_cast<std::uint8_t>(record->instance.currentTileZ)};
+  LiveAshleyInteractionTileHost host;
+  return RefreshAshleyInteractionTile(state, host);
+}
+
 void SetLiveEntranceDoor(const std::optional<DoorRecord>& door) {
   EntranceDoorState state;
   LiveEntranceDoorHost host;
@@ -1060,6 +1171,14 @@ int Field_TrackInteractionCameraToAshleyEntry() {
 }
 
 // decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232).
+int Field_CurrentSavePointIdEntry(void) {
+  return VS::Field::LiveCurrentSavePointId();
+}
+
+void Field_RefreshAshleyInteractionTileEntry(Actors_ActorRecord* record) {
+  static_cast<void>(VS::Field::RefreshLiveAshleyInteractionTile(record));
+}
+
 int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
                                   unsigned char* output) {
   if (actor == nullptr || output == nullptr) {
