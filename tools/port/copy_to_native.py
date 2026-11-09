@@ -2496,12 +2496,21 @@ def mark_ledgers(cp: Copier) -> dict[str, collections.Counter]:
         for i in f.items:
             if i.row and i.kind in ("function", "var", "type", "macro"):
                 emitted[i.row] = "stub" if "not yet ported]" in i.text.split("\n", 1)[0] else "x"
-    counts: dict[str, collections.Counter] = {}
+    tables = []
     for name, key in (("FUNCTION_CATALOG.csv", "F"), ("DATA_LEDGER.csv", "G"), ("TYPE_LEDGER.csv", "T")):
         path = LEDGERS / name
         with path.open(encoding="utf-8", newline="") as fh:
-            rows = list(csv.DictReader(fh))
-        cols = list(rows[0].keys())
+            reader = csv.DictReader(fh)
+            rows = list(reader)
+            cols = reader.fieldnames
+        if not cols or not rows:
+            raise ValueError(f"Empty ledger: {name}")
+        for row in rows:
+            if None in row or any(value is None for value in row.values()):
+                raise ValueError(f"Malformed {name} row {row.get('id', '?')}: extra or missing CSV fields")
+        tables.append((name, key, path, cols, rows))
+    counts: dict[str, collections.Counter] = {}
+    for name, key, path, cols, rows in tables:
         c = collections.Counter()
         for r in rows:
             rid = r["id"]
@@ -2522,8 +2531,10 @@ def mark_ledgers(cp: Copier) -> dict[str, collections.Counter]:
                 st = emitted.get(cp.canon_type(rid)) or ("x" if cp.inline_type(r) else "")
             r["copied"] = st
             r["compiles"] = "x" if st else ""
-            if rid in cp.owned and r.get("modernized") != "x":
-                r["copied"], r["compiles"], r["modernized"] = "x", "x", "wip"
+            if rid in cp.owned:
+                r["copied"], r["compiles"] = "x", "x"
+                if r.get("modernized") != "x":
+                    r["modernized"] = "wip"
                 st = "owned"
             c[st or "missing"] += 1
         with path.open("w", encoding="utf-8", newline="") as fh:

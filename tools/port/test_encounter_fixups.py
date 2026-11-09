@@ -3,8 +3,10 @@
 import csv
 import re
 import runpy
+import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 import audit_assembly_gaps
@@ -20,6 +22,49 @@ def flat(source: str) -> str:
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def marking_fixture(self, root):
+        tables = {
+            "FUNCTION_CATALOG.csv": "id,copy,kind,notes,copied,compiles,modernized\nF1,yes,C,,x,x,x\n",
+            "DATA_LEDGER.csv": "id,copied,compiles,notes\nG1,retired,x,retired-by:fixture\n",
+            "TYPE_LEDGER.csv": "id,copied,compiles,notes\nT1,retired,x,retired-by:fixture\n",
+        }
+        for name, contents in tables.items():
+            (root / name).write_text(contents, encoding="utf-8")
+        return SimpleNamespace(files={}, owned={"F1"}, cat_by_id={})
+
+    def test_mark_ledgers_rejects_malformed_input_before_any_write(self):
+        for name in ("FUNCTION_CATALOG.csv", "DATA_LEDGER.csv", "TYPE_LEDGER.csv"):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                copier = self.marking_fixture(root)
+                path = root / name
+                path.write_text(path.read_text(encoding="utf-8") + "bad,unquoted,extra,fields,here,here,here,here\n", encoding="utf-8")
+                saved = {table.name: table.read_bytes() for table in root.iterdir()}
+                with (
+                    mock.patch.object(copy_to_native, "LEDGERS", root),
+                    self.assertRaisesRegex(ValueError, f"Malformed {re.escape(name)} row bad"),
+                ):
+                    copy_to_native.mark_ledgers(copier)
+                self.assertEqual(saved, {table.name: table.read_bytes() for table in root.iterdir()})
+
+    def test_mark_ledgers_preserves_modernized_owned_status(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            copier = self.marking_fixture(root)
+            with mock.patch.object(copy_to_native, "LEDGERS", root):
+                copy_to_native.mark_ledgers(copier)
+            with (root / "FUNCTION_CATALOG.csv").open(encoding="utf-8", newline="") as table:
+                row = next(csv.DictReader(table))
+            self.assertEqual((row["copied"], row["compiles"], row["modernized"]), ("x", "x", "x"))
+
+    def test_real_copy_ledgers_have_no_extra_or_missing_csv_fields(self):
+        for name in ("FUNCTION_CATALOG.csv", "DATA_LEDGER.csv", "TYPE_LEDGER.csv"):
+            with (copy_to_native.LEDGERS / name).open(encoding="utf-8", newline="") as table:
+                for row in csv.DictReader(table):
+                    with self.subTest(name=name, identifier=row.get("id")):
+                        self.assertNotIn(None, row)
+                        self.assertNotIn(None, row.values())
+
     def test_texture_animations_use_the_callers_overlay_atlas(self):
         copier = object.__new__(copy_to_native.Copier)
         copier.used_fixups = set()
