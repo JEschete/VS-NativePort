@@ -730,7 +730,8 @@ def main() -> int:
         parser.error("baseline updates require a complete scan")
     if args.reconcile_formatting and (args.update_baseline or not args.tidy):
         parser.error("format reconciliation requires --tidy without --update-baseline")
-    selected = scope
+    # Copy: `scope` also bounds tidy diagnostics, so selection must not shrink it.
+    selected = set(scope)
     if args.changed:
         selected = scope & changed_files()
     if args.files is not None:

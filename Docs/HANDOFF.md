@@ -9,21 +9,22 @@ hash and exact-revision CI belong in #276 and the plan row, not guessed here.
 - Base revision: `90e5fbfe6d5559e0e79591db722eae2f4dc48092`, the documentation
   cleanup over code checkpoint `f6ba998e` (F01697,
   [Source Quality run 42710468317](https://github.com/JEschete/VS-NativePort/actions/runs/42710468317)).
-  Two scoped commits follow it on `imp/01-ma04-gates`: the CI exit-code fix for
-  #333, then the F01700-F01703 code checkpoint. Use `git log` and #276 for their
-  hashes and exact-revision runs.
+  Three scoped commits follow it on `imp/01-ma04-gates`, in this order: the CI
+  exit-code fix for #333, the F01700-F01703 code checkpoint, then the #335
+  quality-gate fix. Use `git log` and #276 for their hashes and exact-revision
+  runs. If `git status` still shows them uncommitted, commit them in that order;
+  each later change was verified on top of the earlier ones.
 - **973 functions remain.** Modernization: 2,771 done of 3,744. C++ promotion:
   2,772 promoted plus one frame-orchestrator WIP. These are separate measures.
 - Original 3,479-function cohort: 2,490 promoted, 16 retired, 972 generated,
   one WIP; 2,506 resolved. This continuation resolved 57 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
-- Issues #325-332 are closed with fixing revisions and verified CI. #333 stays
-  open until its fixing revision has a real green run (see Latest Work).
-  Two quality defects found while verifying are logged and **not yet fixed**:
-  #334, the full-scope `quality.py --tidy` gate fails at `HEAD` with 23
-  un-baselined findings in five untouched files, and #335, `--files --tidy`
-  silently drops header findings.
+- Issues #325-332 are closed with fixing revisions and verified CI. #333 and
+  #335 stay open until their fixing revisions have a real green run (see Latest
+  Work). One more quality defect found while verifying is logged and **not yet
+  fixed**: #334, the full-scope `quality.py --tidy` gate fails at `HEAD` with 23
+  un-baselined findings in five untouched files.
 - No owned build, replay, quality run, or CI watcher remains active. The next
   group (F01698, F01699, F01704) has only been located read-only, not edited.
 
@@ -68,6 +69,15 @@ are historical, not instructions or fresh verification.
   rejects any multi-command step, and the ledger was resynced (763 to 746 sites).
   Thirteen new sites were recorded `open` and are untriaged; 30 rows left with
   rewritten code, all `open` with no notes.
+- #335: `quality.py --files X --tidy` silently dropped every diagnostic outside
+  the listed files, so a finding in a header reached through the listed source
+  printed `0 findings` and exited 0. `main()` aliased `selected = scope` and then
+  intersected in place, shrinking the scope that bounds `check_tidy`; it now
+  copies the set. `--changed` and full runs were never affected. The new
+  `test_selected_files_still_report_header_findings` puts a magic number in a
+  header, selects only the including source, and requires that header finding
+  and exit 1. It does not repair #334's findings, and whether this defect left
+  four of those five files un-baselined is unconfirmed.
 - F01637, `RefreshActionCandidateReadiness`, was published in `376c7969`;
   [CI 42705380792](https://github.com/JEschete/VS-NativePort/actions/runs/42705380792)
   passed. It preserves callback rereads, packed candidate bits, non-compacting
@@ -92,10 +102,12 @@ are historical, not instructions or fresh verification.
 
 ## Verified
 
-These are results for the working tree on base `90e5fbfe` that holds both
-pending changes (the F01700-F01703 code and the #333 CI fix), not new runtime
-verification performed by editing this document. Exact-revision CI is pending
-until the commits are pushed.
+These are results for the working tree on base `90e5fbfe` that holds the three
+pending changes (the F01700-F01703 code, the #333 CI fix and the #335 quality
+gate fix), not new runtime verification performed by editing this document. The
+#335 change touches only `tools/lint`; the build, test and replay results below
+were taken before it and do not depend on it. Exact-revision CI is pending until
+the commits are pushed.
 
 - Full rebuilt Debug and Release: **5,177 cases / 12,593,621 assertions each**;
   zero failures or skips. Canonical `silver_wolves` (2,400 frames) and
@@ -119,21 +131,28 @@ until the commits are pushed.
   identical on a pristine export of `90e5fbfe`; this work adds none (#334). No
   baseline or suppression was changed.
 - `gates.py`, `modernization.py` and `hazards.py` pass `--sync --check` with
-  zero violations (746 hazard sites). `test_quality.py` (30) and
+  zero violations (746 hazard sites). `test_quality.py` (31) and
   `test_workflows.py` (5) pass. Two final supported generation runs preserve
   all 1,803 hashed paths (tracked or untracked-not-ignored files under
   `Native`, `tools/port`, `tools/scaffold`, `Docs/ledgers` and the solution;
   this is not the definition behind the older 1,761-path record). Manifest
   SHA256: `df4fcfc298dc8be0cceb20fc04ce96638da67aa0b496c9b38a5de9c808248e9b`.
+- #335: the new positive control fails on a pristine `90e5fbfe` export (every
+  stage reports 0 findings, exit 0) and passes on the fix. `quality.py --files
+  Native/Game/src/Save/NativeContainer.cpp --tidy` printed `0 findings` before
+  and now prints the 19 header findings and exits 1. `quality.py --changed`
+  reports 0 findings and 0 new; `baseline.json` is byte-identical.
 
 ## Next Work
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
 2. Repair the logged maintained-code quality defects as separate scoped
-   changes: #335 first (a one-line scope-aliasing fix with a positive
-   control), then the 23 findings in #334. Repair the code; do not refresh the
-   baseline. Quality work precedes the next promotion group.
+changes. Publish the three prepared changes in order, confirm each
+exact-revision CI run, then close #333 and #335 with their fixing commits and
+evidence. Then repair the 23 findings in #334: fix the code, do not refresh
+the baseline; `--files <source> --tidy` now reports header findings, so use it
+to iterate. Quality work precedes the next promotion group.
 3. Continue ordered row 28. The prepared next bounded group is F01698
    `SimulateActionCandidate` (`func_800DCAA0`), F01699 `UpdateCandidateHitWeight`
    (`func_800DCBD8`), and F01704 `EvaluateActionCandidate` (`func_800DCC94`) in

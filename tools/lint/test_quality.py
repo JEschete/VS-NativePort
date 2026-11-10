@@ -533,6 +533,37 @@ class ToolControlTests(unittest.TestCase):
         self.assertIn("readability-magic-numbers", result.stdout)
         self.assertEqual(quality.BASELINE.read_bytes(), before)
 
+    def test_selected_files_still_report_header_findings(self) -> None:
+        before = quality.BASELINE.read_bytes()
+        (Path(self.directory.name) / "scope").mkdir()
+        header = self.source(
+            "scope/control.hpp", "inline int CalculateHeaderValue() { return 37; }\n"
+        )
+        path = self.source(
+            "scope_control.cc",
+            '#include "scope/control.hpp"\n\n'
+            "int ReadHeaderValue() { return CalculateHeaderValue(); }\n",
+        )
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(quality.HERE / "quality.py"),
+                "--files",
+                path,
+                "--tidy",
+            ],
+            cwd=quality.ROOT,
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn(
+            f"{header}:1: [tidy/readability-magic-numbers]", result.stdout
+        )
+        self.assertEqual(quality.BASELINE.read_bytes(), before)
+
     def test_ruff_detects_an_undefined_name(self) -> None:
         path = self.source("python_control.py", "print(missing_value)\n")
         self.assertTrue(any(item.rule == "F821" for item in quality.check_ruff([path])))
