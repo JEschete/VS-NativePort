@@ -251,6 +251,113 @@ TEST_CASE(
 }
 
 TEST_CASE(
+    "Native fallback selection refreshes all slots and preserves packed fields",
+    "[ai][planning][fallback-selection-live]") {
+  const bool ignores_sight = GENERATE(false, true);
+  PlanningFixture fixture;
+  using Words = VS::Battle::Ai::ActionCandidate::Words;
+  fixture.state.currentChoice = std::bit_cast<Battle_Ai_ActionCandidate>(
+      Words{0xDEADBEEF, 0xFFFFFFFF, 0xABCDEF01, 0xFFFFFFFF, 0xFFFFFFFF});
+  Battle_actionDefinitions[42].aiFlags.opaque1Bit4 = ignores_sight ? 1u : 0u;
+  for (int row = 0; row < 6; ++row) {
+    fixture.stats.limbs[row].hp = 2;
+    for (int column = 0; column < 4; ++column) {
+      fixture.stats.limbActions[row][column].actionId = 42;
+      fixture.state.actionSlots[row][column].special = 1;
+      fixture.state.actionSlots[row][column].rangeSquared =
+          static_cast<unsigned>(row * 4 + column + 1);
+    }
+  }
+  auto expected = fixture.state.currentChoice;
+  expected.row = 5;
+  expected.column = 3;
+  expected.action = 42;
+  expected.distanceSquared = 24;
+  expected.weight = 128;
+  expected.opaque10.opaque0Bit0 = 0;
+  expected.opaque10.opaque0Bit1 = 0;
+  expected.opaque10.opaque0Bit2 = ignores_sight ? 1u : 0u;
+  expected.opaque10.opaque0Bit3 = 0;
+  VS::Battle::Ai::SelectLiveFallbackAction(&fixture.state);
+  CHECK(std::memcmp(&fixture.state.currentChoice, &expected,
+                    sizeof(expected)) == 0);
+  for (const auto& row : fixture.state.actionSlots) {
+    for (const auto& slot : row) CHECK(slot.opaque0Bit7 == 1);
+  }
+}
+
+TEST_CASE(
+    "Native fallback selection clears only the action when no slot qualifies",
+    "[ai][planning][fallback-selection-live]") {
+  PlanningFixture fixture;
+  using Words = VS::Battle::Ai::ActionCandidate::Words;
+  fixture.state.currentChoice = std::bit_cast<Battle_Ai_ActionCandidate>(
+      Words{0xDEADBEEF, 0xFFFFFFFF, 0xABCDEF01, 0xFFFFFFFF, 0xFFFFFFFF});
+  for (auto& row : fixture.state.actionSlots) {
+    for (auto& slot : row) slot.opaque0Bit7 = 1;
+  }
+  for (auto& row : fixture.stats.limbActions) {
+    for (auto& slot : row) slot.actionId = 42;
+  }
+  auto expected = fixture.state.currentChoice;
+  expected.action = 0;
+  VS::Battle::Ai::SelectLiveFallbackAction(&fixture.state);
+  CHECK(std::memcmp(&fixture.state.currentChoice, &expected,
+                    sizeof(expected)) == 0);
+  for (int row = 0; row < 6; ++row) {
+    for (int column = 0; column < 4; ++column) {
+      CHECK(fixture.state.actionSlots[row][column].opaque0Bit7 ==
+            static_cast<unsigned>(row == 2));
+    }
+  }
+}
+
+TEST_CASE(
+    "Native fallback selection keeps selection and usability stats distinct",
+    "[ai][planning][fallback-selection-live]") {
+  PlanningFixture fixture;
+  Battle_ActorStats selection_stats = fixture.stats;
+  fixture.state.stats = &selection_stats;
+  selection_stats.limbActions[2][1].actionId = 0;
+  fixture.state.actionSlots[2][1].special = 1;
+  fixture.state.actionSlots[2][1].rangeSquared = 9;
+  VS::Battle::Ai::SelectLiveFallbackAction(&fixture.state);
+  CHECK(fixture.state.currentChoice.action == 0);
+  CHECK(fixture.state.currentChoice.row == 2);
+  CHECK(fixture.state.currentChoice.column == 1);
+  CHECK(fixture.state.currentChoice.distanceSquared == 9);
+  CHECK(fixture.state.currentChoice.weight == 128);
+  CHECK(fixture.state.currentChoice.opaque10.opaque0Bit2 ==
+        Battle_actionDefinitions[0].aiFlags.opaque1Bit4);
+  CHECK(fixture.state.actionSlots[2][1].opaque0Bit7 == 1);
+}
+
+TEST_CASE(
+    "Native fallback usability reads actor stats rather than selection stats",
+    "[ai][planning][fallback-selection-live]") {
+  PlanningFixture fixture;
+  Battle_ActorStats selection_stats = fixture.stats;
+  fixture.state.stats = &selection_stats;
+  fixture.stats.limbs[2].hp = 1;
+  fixture.state.actionSlots[2][1].special = 1;
+  fixture.state.actionSlots[2][1].rangeSquared = 11;
+  fixture.state.currentChoice.action = 42;
+  fixture.state.currentChoice.distanceSquared = 9;
+  VS::Battle::Ai::SelectLiveFallbackAction(&fixture.state);
+  CHECK(fixture.state.currentChoice.action == 0);
+  CHECK(fixture.state.currentChoice.distanceSquared == 9);
+  CHECK(fixture.state.actionSlots[2][1].opaque0Bit7 == 0);
+}
+
+TEST_CASE("Fallback selection retains its original module address",
+          "[ai][planning][fallback-selection-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DD604) ==
+        reinterpret_cast<const void*>(&Battle_Ai_SelectFallbackActionEntry));
+}
+
+TEST_CASE(
     "Native planning stats refuse reentry and allow a fresh capture after "
     "release",
     "[ai][planning][stats-lifecycle-live]") {

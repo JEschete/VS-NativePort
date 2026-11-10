@@ -8,6 +8,7 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Boot/SessionLive.hpp"
 
@@ -122,7 +123,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
     VS::Battle::Ai::SetLiveActorVerticalMovementSteps(
         actor.actor_id, static_cast<unsigned char>(stats.walkSpeed),
         static_cast<unsigned char>(stats.runSpeed));
-    Battle_Ai_SelectFallbackAction(&plan);
+    SelectLiveFallbackAction(&plan);
   }
 
   void ClearReengagementGrace(const PlanningActor& actor) override {

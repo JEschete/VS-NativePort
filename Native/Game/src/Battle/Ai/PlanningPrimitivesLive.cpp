@@ -462,6 +462,36 @@ class LiveActionUsability final : public ActionUsabilityHost {
   Battle_Ai_ActorAiState& state_;
   const Battle_ActorStats& stats_;
 };
+class LiveFallbackActionSelection final : public FallbackActionHost {
+ public:
+  LiveFallbackActionSelection(Battle_Ai_ActorAiState& state,
+                              const Battle_ActorStats& stats)
+      : state_(state), stats_(stats) {}
+
+  std::optional<FallbackActionSlot> RefreshSlot(int row, int column) override {
+    const unsigned action = stats_.limbActions[row][column].actionId;
+    if (!ReadablePlanningRecord(state_.actor) ||
+        !ReadablePlanningRecord(state_.actor->opaque3C)) {
+      return std::nullopt;
+    }
+    LiveActionUsability usability(state_, *state_.actor->opaque3C);
+    const auto usable = RefreshAiActionUsability(usability, row, column);
+    if (!usable) return std::nullopt;
+    const auto& slot = state_.actionSlots[row][column];
+    const bool eligible = *usable && slot.special != 0;
+    return FallbackActionSlot{.action = action,
+                              .range_squared = eligible ? slot.rangeSquared : 0,
+                              .eligible = eligible};
+  }
+  bool IgnoresSight(unsigned action) const override {
+    return Battle_actionDefinitions[action].aiFlags.opaque1Bit4 != 0;
+  }
+
+ private:
+  Battle_Ai_ActorAiState& state_;
+  const Battle_ActorStats& stats_;
+};
+
 class LiveCandidateReadiness final : public CandidateReadinessHost {
  public:
   explicit LiveCandidateReadiness(Battle_Ai_ActorAiState& state)
@@ -754,6 +784,16 @@ void RememberLiveAiActionTarget(Battle_Ai_ActorAiState* state) {
           "AI target memory requires a ranked, placed target");
 }
 
+void SelectLiveFallbackAction(Battle_Ai_ActorAiState* state) {
+  Require(ReadablePlanningRecord(state) && ReadablePlanningRecord(state->stats),
+          "AI fallback selection requires a complete state and stats record");
+  LiveFallbackActionSelection host(*state, *state->stats);
+  auto choice = CandidateOf(&state->currentChoice);
+  Require(SelectFallbackAction(choice, host),
+          "AI fallback selection refused invalid input");
+  state->currentChoice = RecordOf(choice);
+}
+
 void CopyLiveActionCandidate(Battle_Ai_ActionCandidate* destination,
                              const Battle_Ai_ActionCandidate* source) {
   Require(destination != nullptr, "AI candidate copy requires a destination");
@@ -927,4 +967,8 @@ void Battle_Ai_EvaluateActionCandidateEntry(
   }
   Core_Errorf("ai", "AI candidate evaluation entry refused invalid input");
   std::abort();
+}
+
+void Battle_Ai_SelectFallbackActionEntry(Battle_Ai_ActorAiState* state) {
+  VS::Battle::Ai::SelectLiveFallbackAction(state);
 }

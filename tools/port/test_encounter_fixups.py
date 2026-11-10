@@ -619,6 +619,8 @@ class EncounterFixupTests(unittest.TestCase):
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F01704", "Battle_Ai_EvaluateActionCandidateEntry", "VS::Battle::Ai::EvaluateActionCandidate",
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
+              ("F01707", "Battle_Ai_SelectFallbackActionEntry", "VS::Battle::Ai::SelectFallbackAction",
+               r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F00619", "Field_SetMovingPlatformVisibilityEntry", "VS::Field::SetMovingPlatformVisibility",
                r"Native\Game\include\Field\PlatformPlacement.hpp"),
               ("F00621", "Field_MovingPlatformDwellTicksEntry", "VS::Field::MovingPlatformDwellTicks",
@@ -1263,6 +1265,7 @@ class EncounterFixupTests(unittest.TestCase):
                     "F01698": ("Battle_Ai_SimulateActionCandidateEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01699": ("Battle_Ai_UpdateCandidateHitWeightEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01704": ("Battle_Ai_EvaluateActionCandidateEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01707": ("Battle_Ai_SelectFallbackActionEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F00619": ("Field_SetMovingPlatformVisibilityEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00621": ("Field_MovingPlatformDwellTicksEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00067": ("Field_ApplyUnlockEffectToRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
@@ -2093,6 +2096,15 @@ class EncounterFixupTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertNotIn("0x800DC424u", pointers)
+
+    def test_fallback_selection_migrates_the_owned_workspace_caller(self):
+        root = Path(__file__).resolve().parents[2]
+        workspace = (root / r"Native\Game\src\Battle\Ai\PlanningWorkspaceLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('#include "Battle/Ai/PlanningPrimitivesLive.hpp"', workspace)
+        self.assertIn("SelectLiveFallbackAction(&plan);", workspace)
+        self.assertNotIn("Battle_Ai_SelectFallbackAction(", workspace)
 
     def test_planning_stats_lifecycle_uses_owned_policies_and_reset_binding(self):
         owned = self.owned_items()

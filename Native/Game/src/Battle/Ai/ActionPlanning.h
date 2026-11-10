@@ -28,7 +28,6 @@ extern int Battle_Ai_unusedPlanCounter;
 extern Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
 extern Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 extern u_char (*Battle_Ai_candidateExclusions)[256];
-void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state);
 void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int readiness_threshold);
 void Battle_Ai_AdvancePlanningSimulation(int simulation_time_step);
 void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state);

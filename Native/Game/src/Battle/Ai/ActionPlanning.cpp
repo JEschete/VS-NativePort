@@ -58,46 +58,6 @@ Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 // decomp: D_800F5904 (D_800F5904@BATTLE/BATTLE.PRG)
 u_char (*Battle_Ai_candidateExclusions)[256];
 
-// decomp: BATTLE.PRG func_800DD604 (src/BATTLE/BATTLE.PRG/74088.c:899)
-void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state)
-{
-    u_int best = 0;
-    int row;
-    int col;
-    Battle_Ai_ActionCandidate* choice = &ai_state->currentChoice;
-    Battle_ActorStats* stats = ai_state->stats;
-
-    for (row = 0; row < 6; ++row) {
-        for (col = 0; col < 4; ++col) {
-            int action = stats->limbActions[row][col].actionId;
-            Battle_Ai_ActionSlotMetadata* config = &ai_state->actionSlots[row][col];
-            Battle_Ai_CandidateFlags flags;
-
-            if (!VS::Battle::Ai::RefreshLiveAiActionUsability(ai_state, row, col) || !config->special
-                || best >= config->rangeSquared) {
-                continue;
-            }
-
-            best = config->rangeSquared;
-            choice->distanceSquared = best;
-            choice->column = col;
-            choice->row = row;
-            choice->action = action;
-            choice->opaque10.opaque0Bit1 = 0;
-            flags = choice->opaque10;
-            flags.opaque0Bit2 = Battle_actionDefinitions[action].aiFlags.opaque1Bit4;
-            choice->weight = 128;
-            flags.opaque0Bit0 = 0;
-            flags.opaque0Bit3 = 0;
-            choice->opaque10 = flags;
-        }
-    }
-
-    if (best == 0) {
-        choice->action = 0;
-    }
-}
-
 // decomp: BATTLE.PRG func_800DD918 (src/BATTLE/BATTLE.PRG/74088.c:1007)
 void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int readiness_threshold)
 {

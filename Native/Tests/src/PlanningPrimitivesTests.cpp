@@ -294,6 +294,44 @@ class FakeUsability final : public ai::ActionUsabilityHost {
   std::vector<SlotUpdate> updates;
 };
 
+class FakeFallbackSelection final : public ai::FallbackActionHost {
+ public:
+  std::optional<ai::FallbackActionSlot> RefreshSlot(int row,
+                                                    int column) override {
+    calls.emplace_back(row, column);
+    if (visible_choice != nullptr) {
+      observed.push_back(visible_choice->RawWords());
+    }
+    const int index = row * ai::kLimbActionColumns + column;
+    if (index == failed_slot) return std::nullopt;
+    return slots[static_cast<std::size_t>(index)];
+  }
+  bool IgnoresSight(unsigned action) const override {
+    definition_reads.push_back(action);
+    return ignores_sight;
+  }
+
+  std::array<ai::FallbackActionSlot,
+             static_cast<std::size_t>(ai::kLimbActionRows) *
+                 ai::kLimbActionColumns>
+      slots{};
+  std::vector<std::pair<int, int>> calls;
+  mutable std::vector<unsigned> definition_reads;
+  const ai::ActionCandidate* visible_choice = nullptr;
+  std::vector<Words> observed;
+  int failed_slot = -1;
+  bool ignores_sight = false;
+};
+
+Words FallbackWords(Words words, unsigned row, unsigned column, unsigned action,
+                    std::uint32_t range, bool ignores_sight) {
+  words[1] = (words[1] & ~0x1FFFu) | row | (column << 3) | (action << 5);
+  words[2] = range;
+  words[3] = (words[3] & ~0x07F80000u) | 0x04000000u;
+  words[4] = (words[4] & ~15u) | (ignores_sight ? 4u : 0u);
+  return words;
+}
+
 ai::ActionCandidate SlotCandidate() {
   ai::ActionCandidate candidate;
   candidate.SetSlot(2, 1);
@@ -330,6 +368,109 @@ bool CopiedStatByte(std::size_t offset) {
          (offset >= 0x948 && offset < 0x94C);
 }
 }  // namespace
+
+TEST_CASE(
+    "Fallback selection refreshes every slot and keeps the first unsigned "
+    "maximum",
+    "[ai][planning][fallback-selection]") {
+  const auto range = GENERATE(1u, 0x7FFFFFFFu, 0x80000000u, 0xFFFFFFFFu);
+  const bool ignores_sight = GENERATE(false, true);
+  const Words before{0xDEADBEEF, 0xABCDEF01, 0x76543210, 0xFFFFFFFF,
+                     0xABCDEF0F};
+  ai::ActionCandidate choice(before);
+  FakeFallbackSelection host;
+  host.ignores_sight = ignores_sight;
+  host.slots[0] = {.action = 42, .range_squared = 1, .eligible = true};
+  host.slots[7] = {.action = 43, .range_squared = range, .eligible = true};
+  host.slots[8] = {.action = 44, .range_squared = range, .eligible = true};
+  host.slots[23] = {.action = 45, .range_squared = 0xFFFFFFFFu};
+  REQUIRE(ai::SelectFallbackAction(choice, host));
+  CHECK(choice.RawWords() ==
+        FallbackWords(before, range == 1 ? 0u : 1u, range == 1 ? 0u : 3u,
+                      range == 1 ? 42u : 43u, range, ignores_sight));
+  REQUIRE(host.calls.size() == 24);
+  for (std::size_t index = 0; index < host.calls.size(); ++index) {
+    CHECK(host.calls[index].first == static_cast<int>(index / 4));
+    CHECK(host.calls[index].second == static_cast<int>(index % 4));
+  }
+  const std::vector<unsigned> reads =
+      range == 1 ? std::vector<unsigned>{42} : std::vector<unsigned>{42, 43};
+  CHECK(host.definition_reads == reads);
+}
+
+TEST_CASE(
+    "Fallback selection without a positive eligible range clears only the "
+    "action",
+    "[ai][planning][fallback-selection]") {
+  const bool eligible = GENERATE(false, true);
+  const Words before{0x12345678, 0xFFFFFFFF, 0xABCDEF01, 0xDEADBEEF,
+                     0xFFFFFFFF};
+  ai::ActionCandidate choice(before);
+  FakeFallbackSelection host;
+  for (auto& slot : host.slots) {
+    slot = {.action = 256,
+            .range_squared = eligible ? 0u : 0xFFFFFFFFu,
+            .eligible = eligible};
+  }
+  REQUIRE(ai::SelectFallbackAction(choice, host));
+  auto expected = before;
+  expected[1] &= ~0x1FE0u;
+  CHECK(choice.RawWords() == expected);
+  CHECK(host.calls.size() == 24);
+  CHECK(host.definition_reads.empty());
+}
+
+TEST_CASE(
+    "Fallback selection refuses missing slots and out-of-table winning actions",
+    "[ai][planning][fallback-selection]") {
+  const bool missing = GENERATE(false, true);
+  const Words before{0x12345678, 0xFFFFFFFF, 0xABCDEF01, 0xDEADBEEF,
+                     0xFFFFFFFF};
+  ai::ActionCandidate choice(before);
+  FakeFallbackSelection host;
+  host.slots[0] = {.action = 256, .range_squared = 1, .eligible = true};
+  host.failed_slot = missing ? 0 : -1;
+  CHECK_FALSE(ai::SelectFallbackAction(choice, host));
+  CHECK(choice.RawWords() == before);
+  CHECK(host.calls.size() == 1);
+  CHECK(host.definition_reads.empty());
+}
+
+TEST_CASE(
+    "Fallback selection exposes each winner before refreshing the next slot",
+    "[ai][planning][fallback-selection]") {
+  const Words before{0xFFFFFFFF, 0x12345678, 0xABCDEF01, 0xDEADBEEF,
+                     0xFFFFFFFF};
+  ai::ActionCandidate choice(before);
+  FakeFallbackSelection host;
+  host.visible_choice = &choice;
+  host.slots[0] = {.action = 42, .range_squared = 1, .eligible = true};
+  host.slots[5] = {.action = 43, .range_squared = 2, .eligible = true};
+  REQUIRE(ai::SelectFallbackAction(choice, host));
+  REQUIRE(host.observed.size() == 24);
+  CHECK(host.observed[0] == before);
+  for (std::size_t index = 1; index < host.observed.size(); ++index) {
+    CHECK(host.observed[index] ==
+          (index <= 5 ? FallbackWords(before, 0, 0, 42, 1, false)
+                      : FallbackWords(before, 1, 1, 43, 2, false)));
+  }
+}
+
+TEST_CASE(
+    "Fallback selection reports a failed later refresh without hiding earlier "
+    "writes",
+    "[ai][planning][fallback-selection]") {
+  const Words before{0xFFFFFFFF, 0x12345678, 0xABCDEF01, 0xDEADBEEF,
+                     0xFFFFFFFF};
+  ai::ActionCandidate choice(before);
+  FakeFallbackSelection host;
+  host.slots[0] = {.action = 42, .range_squared = 9, .eligible = true};
+  host.failed_slot = 3;
+  CHECK_FALSE(ai::SelectFallbackAction(choice, host));
+  CHECK(host.calls.size() == 4);
+  CHECK(choice.RawWords() == FallbackWords(before, 0, 0, 42, 9, false));
+  CHECK(host.definition_reads == std::vector<unsigned>{42});
+}
 
 TEST_CASE("Planning stats capture preserves sparse slots and untouched bytes",
           "[ai][planning][stats-lifecycle]") {

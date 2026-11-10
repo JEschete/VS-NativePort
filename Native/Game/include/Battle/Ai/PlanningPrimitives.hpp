@@ -44,6 +44,8 @@ inline constexpr auto kPlanningStatSnapshot = std::to_array(
 
 // The option bits of a candidate's fifth word.
 enum class CandidateOption : std::uint8_t {
+  // The producer sets this for harmful actions in long-range slots.
+  kLongRangeHarmful = 0,
   // The range is a minimum distance the target must keep.
   kMinimumRange = 1,
   kIgnoresSight = 2,
@@ -306,6 +308,27 @@ class ActionUsabilityHost {
   [[nodiscard]] virtual ActorResources Resources() const = 0;
   virtual void SetSlotUsable(int row, int column, bool usable) = 0;
 };
+
+struct FallbackActionSlot {
+  unsigned action = 0;
+  std::uint32_t range_squared = 0;
+  bool eligible = false;
+};
+
+class FallbackActionHost {
+ public:
+  virtual ~FallbackActionHost() = default;
+  // Capture the action before refreshing usability; read eligibility and
+  // range afterwards. Nothing refuses an unreadable slot.
+  virtual std::optional<FallbackActionSlot> RefreshSlot(int row,
+                                                        int column) = 0;
+  [[nodiscard]] virtual bool IgnoresSight(unsigned action) const = 0;
+};
+
+// decomp: func_800DD604 (74088.c:899), 114MIPS at 800DD604-800DD7C8.
+// Refresh all 24 slots and keep the first greatest positive unsigned range.
+// No eligible slot clears only the action; false refuses invalid host data.
+bool SelectFallbackAction(ActionCandidate& choice, FallbackActionHost& host);
 
 // The deciding actor's relations, its peers' restrictions and the action
 // table the target eligibility check reads. IDs are below

@@ -3,7 +3,8 @@
 Updated 2026-11-10. Row 28 (battle AI) resumed after the cleanup checkpoint.
 The condition terms, quality repairs and three candidate-planning promotions
 and the two planning-stat lifecycle promotions are published with green
-exact-revision CI.
+exact-revision CI. F01707 fallback selection is locally verified; its publication
+and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -17,10 +18,10 @@ exact-revision CI.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **968 functions remain.** Modernization: 2,776 done of 3,744. C++ promotion:
-  2,777 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,495 promoted, 16 retired, 967 generated,
-  one WIP; 2,511 resolved. This continuation resolved 62 more than `6c8ac0b9`.
+- **967 functions remain.** Modernization: 2,777 done of 3,744. C++ promotion:
+  2,778 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,496 promoted, 16 retired, 966 generated,
+  one WIP; 2,512 resolved. This continuation resolved 63 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -38,6 +39,10 @@ exact-revision CI.
   implementation, tests, generated callers and related ledgers.
   Their ownership and behavior claims are recorded separately from the retained
   exported snapshot pointer, G00589.
+- The lifecycle evidence update `8b2eedfd` also passed
+  [CI 42763848334](https://github.com/JEschete/VS-NativePort/actions/runs/42763848334).
+  F01707 verification uses that base plus the uncommitted fallback policy,
+  native binding, migrated workspace caller, module entry and related evidence.
 
 ## Sources Of Truth
 
@@ -58,6 +63,17 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01707 now refreshes all 24 action slots through a typed host, selecting the
+  first greatest positive **unsigned** range. It preserves action capture before
+  refresh, metadata reads after refresh, exact packed writes and action-only
+  clearing when no slot qualifies. Native selection reads `state.stats`, while
+  usability still reads the actor's stats; those sources are deliberately not
+  collapsed. The owned workspace caller uses the native API and the original
+  `0x800DD604` module address remains bound to its registered entry.
+- Actual original F01707 instructions match the native core over 4,096 vectors,
+  including all candidate words, refresh order, definition reads and visibility
+  of prior winners. Usability is a controlled callback in that comparison; native
+  tests separately cover real usability, packed fields and distinct stats sources.
 - F01714/F01715 now use typed stat rows and explicit snapshot storage.
   Native bindings preserve the `0x9640` high-end allocation before actor reads,
   empty lists, ordered duplicate slots, original partial-field copies, current
@@ -146,6 +162,26 @@ are historical, not instructions or fresh verification.
   remain open. Local function promotion does not satisfy those wider gates.
 
 ## Verified
+
+For fallback selection on base `8b2eedfd`:
+
+- Debug and Release rebuilds and full suites pass: **5,214 cases /
+  12,644,716 assertions each**, zero failures/skips. Both unchanged canonical
+  replays match in each configuration; zero regressions.
+- `[fallback-selection],[fallback-selection-live]`: 10 cases / 548 assertions;
+  `[ai][planning]`: 123 cases / 188,820 assertions per configuration.
+- Original 114-instruction/native comparison: 4,096 vectors, zero mismatches.
+  The verification ledger records the byte hash and callback limits.
+- All 237 copier controls pass; scoped tidy has 48 existing findings and zero
+  new. No baseline changes. The earlier full-quality result below belongs to the
+  preceding lifecycle milestone, not a new whole-tree scan of this revision.
+- All three ledger gates and static regression pass. Two supported generations
+  preserve all 1,812 sampled hashes. Manifest:
+  `6ba8d08f4d68b87cc4132cd1f024e24b07aa0e45ea4137f83848f5f9bb976daa`.
+- Evidence is in the same session-local files directory: `fallback_build_*`,
+  `fallback_focused_*`, `fallback_planning_*`, `fallback_regression_*`,
+  `fallback_differential.log`, `fallback_copier_tests.log`,
+  `fallback_quality.log`, `fallback_generation1/2.log`, and the three gate logs.
 
 For the stat lifecycle milestone on base `109620c2`:
 
@@ -254,10 +290,9 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. The F01714/F01715 milestone is published with successful exact-revision CI
-   and recorded in #276. Do not close #276: 968 functions remain.
-3. Continue ordered row 28 with F01707 fallback selection, then
-   F01712/F01713 enumeration/simulation in
+2. Publish the locally verified F01707 milestone, confirm exact-revision CI and
+   update #276. Do not close #276: 967 functions remain.
+3. Continue ordered row 28 with F01712/F01713 enumeration/simulation in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
    Those functions remain generated and unverified by this milestone.
 4. Read original source and actual assembly, then trace callers, random-state

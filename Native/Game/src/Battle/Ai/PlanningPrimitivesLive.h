@@ -21,6 +21,7 @@ void Battle_Ai_EvaluateActionCandidateEntry(
     struct Battle_Ai_ActorAiState* state,
     struct Battle_Ai_ActionCandidate* candidate, int mode,
     struct Battle_ActionDefinition* action);
+void Battle_Ai_SelectFallbackActionEntry(struct Battle_Ai_ActorAiState* state);
 #ifdef __cplusplus
 }
 #endif

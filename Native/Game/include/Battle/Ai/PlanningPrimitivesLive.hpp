@@ -61,6 +61,7 @@ class LiveCandidateRanking {
 };
 
 void RememberLiveAiActionTarget(Battle_Ai_ActorAiState* state);
+void SelectLiveFallbackAction(Battle_Ai_ActorAiState* state);
 void CopyLiveActionCandidate(Battle_Ai_ActionCandidate* destination,
                              const Battle_Ai_ActionCandidate* source);
 // Operation 2 restores the stat; any other operation spends it.

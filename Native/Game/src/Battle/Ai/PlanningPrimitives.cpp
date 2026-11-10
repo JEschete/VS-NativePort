@@ -566,6 +566,37 @@ void ActionCandidate::SetRange(unsigned range) {
       WithField(words_[kOptionWord], kRangeShift, kRangeBits, range);
 }
 
+// decomp: func_800DD604 (74088.c:899), 114MIPS at 800DD604-800DD7C8.
+bool SelectFallbackAction(ActionCandidate& choice, FallbackActionHost& host) {
+  std::uint32_t best = 0;
+  for (int row = 0; row < kLimbActionRows; ++row) {
+    for (int column = 0; column < kLimbActionColumns; ++column) {
+      const auto slot = host.RefreshSlot(row, column);
+      if (!slot) {
+        Refuse("AI fallback selection requires readable action slots");
+        return false;
+      }
+      if (!slot->eligible || slot->range_squared <= best) continue;
+      if (slot->action >= kActionDefinitionCount) {
+        Refuse("AI fallback action is outside the definition table");
+        return false;
+      }
+      best = slot->range_squared;
+      choice.SetDistanceSquared(std::bit_cast<std::int32_t>(best));
+      choice.SetSlot(static_cast<unsigned>(row), static_cast<unsigned>(column));
+      choice.SetAction(slot->action);
+      choice.SetOption(CandidateOption::kMinimumRange, false);
+      const bool ignores_sight = host.IgnoresSight(slot->action);
+      choice.SetWeight(kDefaultCandidateWeight);
+      choice.SetOption(CandidateOption::kIgnoresSight, ignores_sight);
+      choice.SetOption(CandidateOption::kLongRangeHarmful, false);
+      choice.SetOption(CandidateOption::kIgnoresObstruction, false);
+    }
+  }
+  if (best == 0) choice.SetAction(0);
+  return true;
+}
+
 // decomp: func_800E4C8C (src/BATTLE/BATTLE.PRG/7BDD4.s:585).
 // C reference: rood-boi battle_movement.c:1749, revision e59320ca (CC0-1.0).
 std::optional<bool> RememberAiActionTarget(TargetMemoryHost& host) {
