@@ -65,10 +65,10 @@
 [
 246,
 [
-"        Battle_Ai_ApplySavedAiSettingsFlags(&packed, (void*)&actor->savedAiSettings);"
+"        VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(&packed, (void*)&actor->savedAiSettings);"
 ],
 [
-"        Battle_Ai_ApplySavedAiSettingsFlags(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));"
+"        VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));"
 ]
 ],
 [

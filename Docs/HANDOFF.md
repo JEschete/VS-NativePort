@@ -11,8 +11,9 @@ including the #336 fix, is published in `e9a85172` with green exact-revision
 CI, and #336 is closed. F01793 target forgetting is published in `31f0bdca`
 with green exact-revision CI. F01810 action-slot metadata is published in
 `deae1369` with green exact-revision CI. F01811 linked-actor resolution is
-locally integrated and verified; its publication and exact-revision CI are
-pending.
+published in `b6dab817` with green exact-revision CI. The #338 promotion-gate
+fix is published in `e78c4062`. F01812 saved AI settings flags is locally
+integrated and verified; its publication and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -26,10 +27,10 @@ pending.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **960 functions remain.** Modernization: 2,784 done of 3,744. C++ promotion:
-  2,785 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,503 promoted, 16 retired, 959 generated,
-  one WIP; 2,519 resolved. This continuation resolved 70 more than `6c8ac0b9`.
+- **959 functions remain.** Modernization: 2,785 done of 3,744. C++ promotion:
+  2,786 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,504 promoted, 16 retired, 958 generated,
+  one WIP; 2,520 resolved. This continuation resolved 71 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -99,10 +100,20 @@ pending.
   live binding, generated actor-state caller, module entry, tests and ledgers.
   The old symbol has four former source files and zero remaining; the
   generated `ActionSelection.cpp/.h` pair is removed.
-- `deae1369` is the F01811 base. Local verification uses it with the
-  linked-actor core, checked live binding, actor-state host, generated
-  actor-state caller, module entry, tests and ledgers. The old symbol has four
-  former source files and zero remaining.
+- `deae1369` was the F01811 base. F01811 is published in `b6dab817`
+  ([CI 42880218716](https://github.com/JEschete/VS-NativePort/actions/runs/42880218716)).
+  Local verification used that base with the linked-actor core, checked live
+  binding, actor-state host, generated actor-state caller, module entry, tests
+  and ledgers. The old symbol has four former source files and zero remaining.
+- `b6dab817` was the #338 base. The gate fix is published in `e78c4062`
+  ([CI 42884695914](https://github.com/JEschete/VS-NativePort/actions/runs/42884695914)).
+  On that revision alone, `test_gates.py` (96) passes and the gate,
+  modernization and hazard checks report zero violations with 2,784 done, so
+  the fix changes no existing ledger row.
+- `e78c4062` is the F01812 base. Local verification uses it with the
+  saved-settings core, checked live binding, generated actor-state caller,
+  module entry, project generator entry, tests and ledgers. The old symbol has
+  three former source files and zero remaining.
 
 ## Sources Of Truth
 
@@ -123,6 +134,27 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01812 now owns the saved AI settings flags through
+  [ActorSettings.hpp](../Native/Game/include/Battle/Ai/ActorSettings.hpp) and
+  [ActorSettings.cpp](../Native/Game/src/Battle/Ai/ActorSettings.cpp). Bits
+  1-11 of the actor's saved settings flags (the room spawn's halfword at actor
+  word `0x34`) replace settings bits 21-31; the enemy template's bits 0-20
+  stay. Flag bit 0 (the caller's enable test) and bits 12-15 are ignored.
+- [ActorSettingsLive.cpp](../Native/Game/src/Battle/Ai/ActorSettingsLive.cpp)
+  reads only the saved pair's halfword at +4 and writes only the 4-byte
+  settings word. The generated actor-state creation caller (F01818) keeps the
+  enable-bit test and calls the native binding; `0x800E5A74` retains the
+  registered entry. Null arguments abort with a diagnostic.
+- The actual 10-instruction original matches the native core over 65,552
+  vectors: every flags halfword with random settings and pair bytes, plus
+  boundary values. The original reads only the settings word and pair+4 and
+  stores only the settings word. Mutants that keep the enable bit, shift by
+  21, keep only bits 0-19 or read pair+6 are rejected.
+- #338: the promotion gate read `return (expr);` as a forwarding call to
+  `return`, so F01812's single-expression body lost `vs_namespace` and failed
+  the modernization check. Keyword-led expressions are no longer forwarding
+  calls; parenthesized forwarding calls still are. Measured over all 2,787
+  records, only F01812 changes. The new controls fail against the old pattern.
 - F01811 now owns AI linked-actor resolution through
   [Relations.hpp](../Native/Game/include/Battle/Ai/Relations.hpp) and
   [Relations.cpp](../Native/Game/src/Battle/Ai/Relations.cpp). It walks the
@@ -553,14 +585,17 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish F01811 and confirm its exact-revision CI, then update #276 and
-   #337. Do not close #276: 960 remain.
-3. Continue ordered row 28 with F01812, F01813 and F01818 in
+2. Publish F01812 and confirm its exact-revision CI, then update #276. Close
+   #338 with its fixing commit and evidence once its exact-revision CI passes.
+   Keep #337 open until its in-game reachability is established. Do not close
+   #276: 959 remain.
+3. Continue ordered row 28 with F01813 (`ApplyActorAiSettings`, planned in the
+   ActorSettings module) and F01818 in
    [ActorState.cpp](../Native/Game/src/Battle/Ai/ActorState.cpp), then
    Behavior, Movement, Navigation, OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01716/F01717/F01793/F01810/F01811 are verified dependencies, not proof of
-   remaining AI behavior or gameplay.
+   F01716/F01717/F01793/F01810/F01811/F01812 are verified dependencies, not
+   proof of remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
@@ -602,7 +637,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 960 functions complete.
+  match delivered scope. Do not declare the remaining 959 functions complete.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
   Do not force-push, rewrite history, or add attribution trailers/headers.
 - Avoid full gameplay JSON, huge terminal histories, and unbounded parsers.

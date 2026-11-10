@@ -229,6 +229,10 @@
     <ClCompile Include="src\Battle\Ai\ActorCommandsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorSettings.cpp" />
+    <ClCompile Include="src\Battle\Ai\ActorSettingsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorState.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2166,6 +2170,8 @@
     <ClInclude Include="include\Battle\Ai\ActorCleanupLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommands.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActorSettings.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActorSettingsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
     <ClInclude Include="include\Battle\Ai\DecisionPrimitives.hpp" />
     <ClInclude Include="include\Battle\Ai\DecisionPrimitivesLive.hpp" />

@@ -2281,6 +2281,30 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(pointers.count("0x800E5998u"), 1)
         self.assertIn(f"0x800E5998u, 0u, (void*)&{live},", pointers)
 
+    def test_ai_saved_settings_flags_keep_their_module_address_and_caller(self):
+        # #276 row 28: Battle_Ai_ApplySavedAiSettingsFlags (F01812) is typed C++ in Battle/Ai/ActorSettings.cpp.
+        owned = self.owned_items()
+        self.assertEqual(owned["F01812"]["name"], "VS::Battle::Ai::ApplySavedAiSettingsFlags")
+        self.assertEqual(owned["F01812"]["path"], r"Native\Game\src\Battle\Ai\ActorSettings.cpp")
+        self.assertNotIn("F01812", copy_fixups.FIXES)
+        live = "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags"
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01812"], live)
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                         r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp")
+        self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5A74, live), copy_fixups.MODULE_BINDING_ENTRIES)
+        ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
+        caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
+        # Creation applies the saved flags only when their enable bit is set, before decoding the settings.
+        call = f"{live}(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));"
+        self.assertEqual(caller.count(call), 1)
+        self.assertLess(caller.index("if (actor->savedAiSettingsFlags & 1) {"), caller.index(call))
+        self.assertLess(caller.index(call), caller.index("Battle_Ai_ApplyActorAiSettings((Battle_Ai_SettingsView *)"))
+        for name in ("ActorState.cpp", "ActorState.h"):
+            self.assertNotIn("Battle_Ai_ApplySavedAiSettingsFlags", (ai / name).read_text(encoding="utf-8"))
+        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertEqual(pointers.count("0x800E5A74u"), 1)
+        self.assertIn(f"0x800E5A74u, 0u, (void*)&{live},", pointers)
+
     @staticmethod
     def battle_ability_function(name: str) -> str:
         # #276 row 31: Battle_AdvanceBattleAbilitySequence (F00099) is typed C++ in Battle/Abilities.cpp.

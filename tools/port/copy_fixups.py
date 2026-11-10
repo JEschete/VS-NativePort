@@ -554,6 +554,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
+    "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags": r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp",
     **{name: r"Native\Game\include\Battle\Ai\RelationsLive.hpp"
        for name in ("VS::Battle::Ai::InitializeLiveActorAiRelations",
                     "VS::Battle::Ai::ApplyLiveSavedActorAiRelations",
@@ -1160,6 +1161,7 @@ OWNED_CALL_BINDINGS["F01717"] = "Battle_Ai_ReconcileCompletedActionPlanEntry"
 OWNED_CALL_BINDINGS["F01793"] = "VS::Battle::Ai::ForgetLiveAiActionTarget"
 OWNED_CALL_BINDINGS["F01810"] = "VS::Battle::Ai::BuildLiveAiActionMetadata"
 OWNED_CALL_BINDINGS["F01811"] = "VS::Battle::Ai::ResolveLiveAiLinkedActors"
+OWNED_CALL_BINDINGS["F01812"] = "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags"
 OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
@@ -2649,6 +2651,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E4CE8, "VS::Battle::Ai::ForgetLiveAiActionTarget"),  # F01793
     ("BATTLE/BATTLE.PRG", 0x800E5710, "VS::Battle::Ai::BuildLiveAiActionMetadata"),  # F01810
     ("BATTLE/BATTLE.PRG", 0x800E5998, "VS::Battle::Ai::ResolveLiveAiLinkedActors"),  # F01811
+    ("BATTLE/BATTLE.PRG", 0x800E5A74, "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags"),  # F01812
     ("BATTLE/BATTLE.PRG", 0x8009E634, "Field_RefreshAshleyInteractionTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),

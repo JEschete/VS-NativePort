@@ -2,6 +2,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
@@ -61,12 +62,6 @@ int Battle_Ai_attributeActorMask;
 
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
 const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
-
-// decomp: BATTLE.PRG func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:595)
-void Battle_Ai_ApplySavedAiSettingsFlags(int* settings_word, Battle_Ai_SavedSettingsPair* saved_settings)
-{
-    *settings_word = ((saved_settings->opaque4 & 0xFFE) << 20) | (*settings_word & 0x1FFFFF);
-}
 
 // decomp: BATTLE.PRG func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:689)
 void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_SettingsWord* settings)
@@ -222,7 +217,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     state->maxRange = range;
     packed = actor->aiSettings;
     if (actor->savedAiSettingsFlags & 1) {
-        Battle_Ai_ApplySavedAiSettingsFlags(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));
+        VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));
     }
     Battle_Ai_ApplyActorAiSettings((Battle_Ai_SettingsView *)((void*)state), (Battle_Ai_SettingsWord *)((void*)&packed));
     VS::Battle::Ai::InitializeLiveActorAiRelations(state);

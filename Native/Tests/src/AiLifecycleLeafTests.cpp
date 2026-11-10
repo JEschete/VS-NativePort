@@ -24,6 +24,7 @@ extern "C" {
 }
 
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 
@@ -673,4 +674,29 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
   CHECK(states[1].linkedActor == 5);
   CHECK(states[2].linkedActor == 2);
   CHECK(states[3].linkedActor == 7);
+}
+
+TEST_CASE("AI saved settings flags apply through the actor-state creation view",
+          "[ai][actor-settings][saved-settings]") {
+  // The creation view's saved pair starts at the actor's group word, so its
+  // second word is the room spawn's saved flags. Only that word's low half is
+  // read and only the settings word is written.
+  const auto bytes = [](const Battle_Actor& actor) {
+    std::array<std::byte, sizeof(Battle_Actor)> image{};
+    std::memcpy(image.data(), &actor, image.size());
+    return image;
+  };
+  Battle_Actor actor{};
+  std::memset(&actor, 0xA5, sizeof(actor));
+  actor.reserved34 = static_cast<int>(0xBEEF0ACFu);
+  actor.templateWord2C = 0x12345678;
+  const auto before = bytes(actor);
+  auto* view = reinterpret_cast<Battle_Ai_AiActorView*>(&actor);
+  REQUIRE((view->savedAiSettingsFlags & 1u) != 0);
+  int packed = view->aiSettings;
+  VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(
+      &packed, reinterpret_cast<const Battle_Ai_SavedSettingsPair*>(
+                   &view->savedAiSettings));
+  CHECK(std::bit_cast<std::uint32_t>(packed) == 0xACF45678u);
+  CHECK(bytes(actor) == before);
 }
