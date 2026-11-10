@@ -117,12 +117,16 @@ Use native Windows PowerShell, serial builds, and bounded operations.
 & .\.venv-3\Scripts\python.exe tools\lint\quality.py --changed --tidy --jobs 1
 & .\.venv-3\Scripts\python.exe tools\ledger\gates.py --sync --check
 & .\.venv-3\Scripts\python.exe tools\ledger\modernization.py --sync --check
+& .\.venv-3\Scripts\python.exe tools\ledger\hazards.py --sync --check
 & .\.venv-3\Scripts\python.exe tools\port\copy_to_native.py
 & .\.venv-3\Scripts\python.exe tools\scaffold\gen_solution.py
 ```
 
 Build and run Release separately. `regression.py check` does **not** rebuild.
 Use supported generation twice and compare reviewed source/output hashes.
+Run `hazards.py --sync --check` after any source change: CI runs `--check`, and a
+stale `HAZARD_LEDGER.csv` fails it (#333). `--sync` keeps each row's triage status
+and adds new sites as `open`; triage them separately.
 Passing a baseline, compiling, or returning success alone is not gameplay proof.
 
 ## Guardrails

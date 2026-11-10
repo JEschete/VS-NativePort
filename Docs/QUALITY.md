@@ -81,6 +81,11 @@ to close an issue. A previous revision's passing run is not a substitute.
 Manual dispatch uses the same Windows job, permissions and quality baselines
 as the automatic triggers.
 
+Each `run:` step holds exactly one command. A multi-line PowerShell step reports
+only the last native command's exit code, so an earlier failing check was reported
+as success (#333). `tools/lint/test_workflows.py` rejects any step with more than
+one command; split such a step instead of reordering its commands.
+
 The Windows job also checks symbol-ledger merge and member-pairing contracts:
 
 ```powershell
@@ -287,4 +292,5 @@ the fast CI job is not a substitute for compilation-based analysis or game testi
 
 ```powershell
 python -m unittest discover -s tools/lint -p test_quality.py -v
+python -m unittest discover -s tools/lint -p test_workflows.py -v
 ```
