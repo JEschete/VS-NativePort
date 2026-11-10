@@ -23,6 +23,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningWorkspace.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -734,6 +735,74 @@ class LiveActionUsability final : public ActionUsabilityHost {
   Battle_Ai_ActorAiState& state_;
   const Battle_ActorStats& stats_;
 };
+
+class LiveActionMetadata final : public ActionMetadataHost {
+ public:
+  explicit LiveActionMetadata(Battle_Ai_ActorAiState& state) : state_(state) {}
+
+  [[nodiscard]] unsigned ActorId() const override { return state_.actorId; }
+  [[nodiscard]] unsigned SlotAction(int row, int column) const override {
+    return Stats().limbActions[row][column].actionId;
+  }
+  [[nodiscard]] MetadataAction Action(unsigned action_id) const override {
+    const Battle_ActionDefinition& action = Battle_actionDefinitions[action_id];
+    return {.type = action.type,
+            .category = action.category,
+            .cost = action.cost,
+            .radial_area = action.aiFlags.radialArea != 0};
+  }
+  [[nodiscard]] std::uint32_t RangeSquared(unsigned action_id) override {
+    return static_cast<std::uint32_t>(LiveCalculateActorActionRangeSquared(
+        &Stats(), static_cast<int>(action_id)));
+  }
+  [[nodiscard]] std::int32_t AreaReach(unsigned action_id,
+                                       std::uint32_t maximum_reach) override {
+    return LiveCalculateActionAreaReach(0, static_cast<int>(action_id),
+                                        maximum_reach);
+  }
+  [[nodiscard]] bool RoomAllowsNonSpellActions() const override {
+    Require(ReadablePlanningRecord(Battle_Ai_roomAiState),
+            "AI action metadata requires the room AI state");
+    return Battle_Ai_roomAiState->allowsNonSpellActions != 0;
+  }
+  [[nodiscard]] ActionSlotMetadata Slot(int row, int column) const override {
+    const Battle_Ai_ActionSlotMetadata& slot = state_.actionSlots[row][column];
+    return {.excludes_self = slot.opaque0Bit1 != 0,
+            .ignores_obstruction = slot.opaque0Bit2 != 0,
+            .kind = static_cast<CandidateEnumerationKind>(slot.kind),
+            .long_range = slot.longRange != 0,
+            .fallback_eligible = slot.special != 0,
+            .radius = static_cast<std::uint16_t>(slot.radius),
+            .range_squared = slot.rangeSquared};
+  }
+  // The usable bit and the reserved bits keep their values.
+  void SetSlot(int row, int column, const ActionSlotMetadata& slot) override {
+    Battle_Ai_ActionSlotMetadata& entry = state_.actionSlots[row][column];
+    entry.opaque0Bit1 = slot.excludes_self ? 1u : 0u;
+    entry.opaque0Bit2 = slot.ignores_obstruction ? 1u : 0u;
+    entry.kind = static_cast<unsigned>(slot.kind);
+    entry.longRange = slot.long_range ? 1u : 0u;
+    entry.special = slot.fallback_eligible ? 1u : 0u;
+    entry.radius = slot.radius;
+    entry.rangeSquared = slot.range_squared;
+  }
+  [[nodiscard]] std::uint8_t ActionCostThreshold() const override {
+    return state_.actionCostEnabled;
+  }
+  void SetActionCostThreshold(std::uint8_t threshold) override {
+    state_.actionCostEnabled = threshold;
+  }
+
+ private:
+  // The player's path never reads the stats record.
+  [[nodiscard]] const Battle_ActorStats& Stats() const {
+    Require(ReadablePlanningRecord(state_.stats),
+            "AI action metadata requires the actor's stats record");
+    return *state_.stats;
+  }
+
+  Battle_Ai_ActorAiState& state_;
+};
 class LiveFallbackActionSelection final : public FallbackActionHost {
  public:
   LiveFallbackActionSelection(Battle_Ai_ActorAiState& state,
@@ -1442,6 +1511,14 @@ void RefreshLiveAiResourceRestrictions(Battle_Ai_ActorAiState* state) {
   state->resourceStatusRestricted = conditions.status_restricted ? 1 : 0;
   state->lowMp = conditions.low_mp ? 1 : 0;
   state->lowHp = conditions.low_hp ? 1 : 0;
+}
+
+void BuildLiveAiActionMetadata(Battle_Ai_ActorAiState* state) {
+  Require(ReadablePlanningRecord(state),
+          "AI action metadata requires an actor state");
+  LiveActionMetadata host(*state);
+  Require(BuildAiActionMetadata(host),
+          "AI action metadata requires slot actions in the action table");
 }
 }  // namespace VS::Battle::Ai
 

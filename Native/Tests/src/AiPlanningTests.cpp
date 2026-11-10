@@ -27,8 +27,9 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -1534,6 +1535,98 @@ TEST_CASE("AI target forgetting retains its original module address",
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800E4CE8) ==
       reinterpret_cast<const void*>(&VS::Battle::Ai::ForgetLiveAiActionTarget));
+}
+
+namespace {
+constexpr std::size_t kSlotBytes = sizeof(Battle_Ai_ActorAiState::actionSlots);
+using SlotBytes = std::array<std::byte, kSlotBytes>;
+
+SlotBytes SlotBytesOf(const Battle_Ai_ActorAiState& state) {
+  SlotBytes bytes{};
+  std::memcpy(bytes.data(), &state.actionSlots, bytes.size());
+  return bytes;
+}
+
+// Action 42 as a radial category-14 action reaching 96 units.
+void DefineMetadataAction(unsigned type) {
+  Battle_ActionDefinition& action = Battle_actionDefinitions[42];
+  action = {};
+  action.type = type;
+  action.category = 14;
+  action.cost = 30;
+  action.rangeX = 1;
+  action.rangeZ = 4;
+  action.shape = 1;
+  action.aiFlags.radialArea = 1;
+  action.areaRangeY = 3;
+}
+}  // namespace
+
+TEST_CASE("AI action metadata writes the typed slot fields and keeps the rest",
+          "[ai][planning][action-metadata-live]") {
+  const int fill = GENERATE(0x00, 0xA5, 0xFF);
+  const unsigned type = GENERATE(0u, 1u);
+  PlanningAdvanceFixture fixture;
+  fixture.room.allowsNonSpellActions = 1;
+  DefineMetadataAction(type);
+  std::memset(&fixture.state.actionSlots, fill,
+              sizeof(fixture.state.actionSlots));
+  fixture.state.actionCostEnabled = 10;
+  Battle_Ai_ActorAiState expected = fixture.state;
+  for (auto& row : expected.actionSlots) {
+    for (auto& slot : row) {
+      slot.opaque0Bit1 = 1;
+      slot.kind = 2;
+      slot.longRange = 0;
+      slot.special = type == 0 ? 1u : 0u;
+      slot.radius = 96;
+      slot.rangeSquared = 96 * 96;
+    }
+  }
+  VS::Battle::Ai::BuildLiveAiActionMetadata(&fixture.state);
+  CHECK(SlotBytesOf(fixture.state) == SlotBytesOf(expected));
+  CHECK(fixture.state.actionCostEnabled == (type == 1 ? 30 : 10));
+  const auto& slot = fixture.state.actionSlots[3][2];
+  CHECK(slot.reserved0Bit0 == (fill & 1u));
+  CHECK(slot.opaque0Bit2 == ((fill >> 2) & 1u));
+  CHECK(slot.opaque0Bit7 == ((fill >> 7) & 1u));
+  CHECK(slot.reserved3Bit0 == static_cast<unsigned>(fill));
+}
+
+TEST_CASE("AI action metadata reads weapon ranges from the actor's stats",
+          "[ai][planning][action-metadata-live]") {
+  PlanningAdvanceFixture fixture;
+  DefineMetadataAction(0);
+  Battle_actionDefinitions[42].rangeX = 0xFF;
+  Battle_actionDefinitions[42].aiFlags.radialArea = 0;
+  fixture.stats.currentRangeZ = 4;
+  fixture.stats.currentAttackShape = 1;
+  VS::Battle::Ai::BuildLiveAiActionMetadata(&fixture.state);
+  CHECK(fixture.state.actionSlots[0][0].rangeSquared == 96 * 96);
+  CHECK(fixture.state.actionSlots[5][3].rangeSquared == 96 * 96);
+  CHECK(fixture.state.actionSlots[0][0].radius == 0);
+  CHECK(fixture.state.actionSlots[0][0].special == 0);
+}
+
+TEST_CASE("AI action metadata only sets the player's threshold",
+          "[ai][planning][action-metadata-live]") {
+  Battle_Ai_ActorAiState state{};
+  std::memset(&state.actionSlots, 0x5A, sizeof(state.actionSlots));
+  state.actorId = 0;
+  state.stats = nullptr;
+  const SlotBytes slots = SlotBytesOf(state);
+  VS::Battle::Ai::BuildLiveAiActionMetadata(&state);
+  CHECK(state.actionCostEnabled == 1);
+  CHECK(SlotBytesOf(state) == slots);
+}
+
+TEST_CASE("AI action metadata retains its original module address",
+          "[ai][planning][action-metadata-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800E5710) ==
+        reinterpret_cast<const void*>(
+            &VS::Battle::Ai::BuildLiveAiActionMetadata));
 }
 
 TEST_CASE("AI candidates copy the complete record including overlapping input",

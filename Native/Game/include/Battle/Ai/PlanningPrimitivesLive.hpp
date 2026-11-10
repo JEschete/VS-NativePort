@@ -92,4 +92,7 @@ void InvalidateLivePlanningStatsSnapshot();
 bool RefreshLiveAiActionUsability(Battle_Ai_ActorAiState* state, int row,
                                   int column);
 void RefreshLiveAiResourceRestrictions(Battle_Ai_ActorAiState* state);
+// decomp: BATTLE.PRG func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526); a
+// slot action outside the action table aborts with an error.
+void BuildLiveAiActionMetadata(Battle_Ai_ActorAiState* state);
 }  // namespace VS::Battle::Ai

@@ -220,7 +220,7 @@ f1ad57ef26e4,DIV-ZERO,medium,pattern,F00978,StepTextureScrolling,Native/Game/src
 ff68fe47b8ac,DIV-ZERO,medium,pattern,F01733,Battle_Ai_UpdateFlightMovement,Native/Game/src/Battle/Ai/Movement.cpp,498,square,57,23,open,
 d1d98c2da6b9,DIV-ZERO,medium,pattern,F01745,Battle_Ai_UpdateWanderMovement,Native/Game/src/Battle/Ai/Movement.cpp,875,range,57,23,open,
 ef98c88f0658,DIV-ZERO,medium,pattern,F01848,Battle_Ai_UpdateBossOrbitTracking,Native/Game/src/Battle/Ai/OrbitingBoss.cpp,196,state->stats->maxHp,57,23,open,
-9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,110,alignment,57,23,open,
+9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,111,alignment,57,23,open,
 758698dcb390,DIV-ZERO,medium,pattern,F00396,Battle_DistributeHitLimbDamage,Native/Game/src/Battle/Damage.cpp,159,limbs,56,24,open,
 0ef12a972d05,DIV-ZERO,low,pattern,F00409,Battle_CalculatePhysicalHitDamage,Native/Game/src/Battle/Damage.cpp,388,(targetActor->risk / 2),56,24,open,
 abfa71786151,DIV-ZERO,low,pattern,F00411,Battle_CalculateSpellHitDamage,Native/Game/src/Battle/Damage.cpp,577,(targetActor->risk >> 1),56,24,open,

@@ -8,8 +8,9 @@ also published with green exact-revision CI. F01712 candidate enumeration is
 published with green exact-revision CI. F01716 action-plan orchestration is
 published with green exact-revision CI. F01717 completed-action reconciliation,
 including the #336 fix, is published in `e9a85172` with green exact-revision
-CI, and #336 is closed. F01793 target forgetting is locally integrated and
-verified; its publication and exact-revision CI are pending.
+CI, and #336 is closed. F01793 target forgetting is published in `31f0bdca`
+with green exact-revision CI. F01810 action-slot metadata is locally
+integrated and verified; its publication and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -23,10 +24,10 @@ verified; its publication and exact-revision CI are pending.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **962 functions remain.** Modernization: 2,782 done of 3,744. C++ promotion:
-  2,783 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,501 promoted, 16 retired, 961 generated,
-  one WIP; 2,517 resolved. This continuation resolved 68 more than `6c8ac0b9`.
+- **961 functions remain.** Modernization: 2,783 done of 3,744. C++ promotion:
+  2,784 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,502 promoted, 16 retired, 960 generated,
+  one WIP; 2,518 resolved. This continuation resolved 69 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -84,10 +85,16 @@ verified; its publication and exact-revision CI are pending.
   Local verification used that base with the completed-plan core, checked live
   binding, migrated workspace caller, generated module entry, tests and ledgers.
   The old symbol has four former source consumers and zero remaining.
-- `e9a85172` is the F01793 base. Local verification uses it with the
-  target-forget core, checked live binding, generated perception and
-  blocked-movement callers, module entry, tests and ledgers. The old symbol has
-  six former source consumers and zero remaining.
+- `e9a85172` was the F01793 base. F01793 is published in `31f0bdca`
+  ([CI 42867473657](https://github.com/JEschete/VS-NativePort/actions/runs/42867473657)).
+  Local verification used that base with the target-forget core, checked live
+  binding, generated perception and blocked-movement callers, module entry,
+  tests and ledgers. The old symbol has six former source consumers and zero
+  remaining.
+- `31f0bdca` is the F01810 base. Local verification uses it with the
+  action-metadata core, checked live binding, generated actor-state caller,
+  module entry, tests and ledgers. The old symbol has four former source files
+  and zero remaining; the generated `ActionSelection.cpp/.h` pair is removed.
 
 ## Sources Of Truth
 
@@ -108,6 +115,27 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01810 now owns AI action-slot metadata through
+  [PlanningPrimitives.hpp](../Native/Game/include/Battle/Ai/PlanningPrimitives.hpp)
+  and [PlanningPrimitives.cpp](../Native/Game/src/Battle/Ai/PlanningPrimitives.cpp).
+  The player (actor 0) only sets the action-cost threshold to 1. Other actors
+  rebuild all 24 slots in row order: squared range (stored before the area
+  call), 16-bit area reach, long range above `0x51000` unless the action is
+  radial, and the fallback flag from the room byte, action type and category
+  14, reread per slot. Self-exclusion and obstruction flags are only set; the
+  kind changes only for a category that has one. Spell costs raise the
+  threshold. Usable and reserved record bits are kept.
+- The live host reads the real stats slots, action table, room AI state and
+  the shared targeting range helpers. A new stats-based range entry in
+  [TargetingLive.cpp](../Native/Game/src/Battle/TargetingLive.cpp) reads the
+  weapon range from the same stats pointer as the original. Actor-state setup
+  calls the native binding and `0x800E5710` retains the registered entry. An
+  action ID of 256 or more is a diagnosed refusal; the original reads past the
+  table.
+- The actual 162-instruction original matches the native core over 4,096
+  vectors, comparing every slot record, the threshold and the call order. A
+  mutant using `>=` for the long-range test is rejected. The generated views
+  in `AiState.h` remain unused; their removal is separate cleanup.
 - F01793 now owns target forgetting through
   [PlanningPrimitives.hpp](../Native/Game/include/Battle/Ai/PlanningPrimitives.hpp)
   and [PlanningPrimitives.cpp](../Native/Game/src/Battle/Ai/PlanningPrimitives.cpp).
@@ -496,14 +524,14 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish F01793 and confirm its exact-revision CI, then update #276.
-   Do not close #276: 962 remain.
-3. Continue ordered row 28 with F01810 in
-   [ActionSelection.cpp](../Native/Game/src/Battle/Ai/ActionSelection.cpp),
-   then the remaining battle-AI files listed by
+2. Publish F01810 and confirm its exact-revision CI, then update #276.
+   Do not close #276: 961 remain.
+3. Continue ordered row 28 with F01811, F01812, F01813 and F01818 in
+   [ActorState.cpp](../Native/Game/src/Battle/Ai/ActorState.cpp), then
+   Behavior, Movement, Navigation, OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01716/F01717/F01793 are verified dependencies, not proof of remaining AI
-   behavior or gameplay.
+   F01716/F01717/F01793/F01810 are verified dependencies, not proof of
+   remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
@@ -545,7 +573,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 970 functions complete.
+  match delivered scope. Do not declare the remaining 961 functions complete.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
   Do not force-push, rewrite history, or add attribution trailers/headers.
 - Avoid full gameplay JSON, huge terminal histories, and unbounded parsers.

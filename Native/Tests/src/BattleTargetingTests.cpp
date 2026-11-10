@@ -3834,6 +3834,28 @@ TEST_CASE("Live action range borrows the attacker's weapon range",
   CHECK(log.Saw("action 300 is outside the action table"));
 }
 
+TEST_CASE("Live actor action range reads the weapon range from the stats",
+          "[battle][battle-targeting]") {
+  const ScopedOverride<Battle_ActionDefinition> saved(
+      Battle_actionDefinitions[250], Battle_ActionDefinition{});
+  Battle_ActionDefinition& action = Battle_actionDefinitions[250];
+  action.rangeX = 0xFF;
+  const BattleLog log;
+  Battle_ActorStats stats{};
+  stats.currentRangeZ = 4;
+  stats.currentAttackShape = 1;
+  CHECK(battle::LiveCalculateActorActionRangeSquared(&stats, 250) == 96 * 96);
+  CHECK(battle::LiveCalculateActorActionRangeSquared(nullptr, 250) == 0);
+  CHECK(log.Saw("action 250 range refused: no attacker weapon range"));
+  // An action with its own range never reads the stats.
+  action.rangeX = 1;
+  action.rangeZ = 4;
+  action.shape = 1;
+  CHECK(battle::LiveCalculateActorActionRangeSquared(nullptr, 250) == 96 * 96);
+  CHECK(battle::LiveCalculateActorActionRangeSquared(&stats, 300) == 0);
+  CHECK(log.Saw("action 300 is outside the action table"));
+}
+
 TEST_CASE("Live range shape extent refuses without a shape",
           "[battle][battle-targeting]") {
   const BattleLog log;

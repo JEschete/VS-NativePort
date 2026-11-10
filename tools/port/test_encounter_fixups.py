@@ -1,6 +1,7 @@
 """Regressions for native source adaptations, without game assets."""
 
 import csv
+import json
 import re
 import runpy
 import tempfile
@@ -2233,8 +2234,30 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(calls, {"Perception.cpp": 2, "Movement.cpp": 1, "PlanningPrimitivesLive.cpp": 0})
         live_source = (ai / "PlanningPrimitivesLive.cpp").read_text(encoding="utf-8")
         self.assertIn("void ForgetTarget() override { ForgetLiveAiActionTarget(&State()); }", live_source)
-        for name in ("ActionSelection.cpp", "ActionSelection.h", "PlanningPrimitivesLive.cpp"):
-            self.assertNotIn("Battle_Ai_ForgetAiActionTarget", (ai / name).read_text(encoding="utf-8"))
+        self.assertNotIn("Battle_Ai_ForgetAiActionTarget", live_source)
+        # F01810 retired ActionSelection.cpp, the generated home of the original forget.
+        self.assertFalse((ai / "ActionSelection.cpp").exists())
+
+    def test_ai_action_metadata_keeps_its_module_address_and_caller(self):
+        # #276 row 28: Battle_Ai_BuildAiActionMetadata (F01810) is typed C++ beside the slot readers it feeds.
+        owned = self.owned_items()
+        self.assertEqual(owned["F01810"]["name"], "VS::Battle::Ai::BuildAiActionMetadata")
+        self.assertEqual(owned["F01810"]["path"], r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp")
+        self.assertNotIn("F01810", copy_fixups.FIXES)
+        live = "VS::Battle::Ai::BuildLiveAiActionMetadata"
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01810"], live)
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                         r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp")
+        self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5710, live), copy_fixups.MODULE_BINDING_ENTRIES)
+        ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
+        caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
+        self.assertEqual(caller.count(f"{live}((Battle_Ai_ActorAiState *)((void*)state));"), 1)
+        self.assertNotIn("Battle_Ai_BuildAiActionMetadata", caller)
+        # The function was the only item in ActionSelection.cpp/.h, so the copy no longer writes them.
+        for name in ("ActionSelection.cpp", "ActionSelection.h"):
+            self.assertFalse((ai / name).exists())
+        manifest = json.loads((copy_to_native.REPO / r"tools\port\copy_manifest.json").read_text(encoding="utf-8"))
+        self.assertNotIn(r"Native\Game\src\Battle\Ai\ActionSelection.cpp", manifest)
 
     @staticmethod
     def battle_ability_function(name: str) -> str:

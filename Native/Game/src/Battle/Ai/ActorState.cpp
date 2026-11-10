@@ -4,6 +4,7 @@
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -161,7 +161,7 @@ void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_Set
     }
     state->linkedActor = 16;
     Battle_Ai_ResolveAiLinkedActors();
-    Battle_Ai_BuildAiActionMetadata((Battle_Ai_ActionMetadataView *)((void*)state));
+    VS::Battle::Ai::BuildLiveAiActionMetadata((Battle_Ai_ActorAiState *)((void*)state));
 }
 
 // decomp: BATTLE.PRG func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:934)

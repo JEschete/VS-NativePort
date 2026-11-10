@@ -69,7 +69,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -814,7 +813,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E2B2Cu, 0u, (void*)&Battle_Ai_UpdateTargetFacing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2CCCu, 0u, (void*)&Battle_Ai_UpdateMovementRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2F5Cu, 0u, (void*)&Battle_Ai_FollowObstacleDetour, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E5710u, 0u, (void*)&Battle_Ai_BuildAiActionMetadata, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5998u, 0u, (void*)&Battle_Ai_ResolveAiLinkedActors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5A74u, 0u, (void*)&Battle_Ai_ApplySavedAiSettingsFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5A9Cu, 0u, (void*)&Battle_Ai_ApplyActorAiSettings, 0u, 0u, 0u},
@@ -1513,6 +1511,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DE3E4u, 0u, (void*)&Battle_Ai_BuildActorActionPlanEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEB10u, 0u, (void*)&Battle_Ai_ReconcileCompletedActionPlanEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4CE8u, 0u, (void*)&VS::Battle::Ai::ForgetLiveAiActionTarget, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E5710u, 0u, (void*)&VS::Battle::Ai::BuildLiveAiActionMetadata, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009E634u, 0u, (void*)&Field_RefreshAshleyInteractionTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D438u, 0u, (void*)&Field_RoomTriggerAtTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabledEntry, 0u, 0u, 0u},

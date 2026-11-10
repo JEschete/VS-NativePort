@@ -88,6 +88,16 @@ constexpr std::uint32_t kRegenerationStatus = 0x20000;
 constexpr std::int32_t kEnumerationBaselineDistance = 256;
 constexpr unsigned kFallbackLimbLowMask = 3;
 constexpr unsigned kFallbackLimbHighBit = 3;
+// Action category bit sets (1 << category) the slot metadata classifies.
+constexpr std::uint32_t kSelfExcludingCategories = 0x4198;
+constexpr std::uint32_t kObstructionIgnoringCategories = 0x154;
+constexpr std::uint32_t kDirectCategories = 0xA;
+constexpr std::uint32_t kLimbCategories = 0x40A0;
+constexpr std::uint32_t kAimedCategories = 0x1954;
+constexpr std::uint32_t kFallbackCategories = 0x4000;
+constexpr unsigned kActionCategoryMask = 15;
+constexpr std::uint32_t kLongRangeSquared = 0x51000;
+constexpr std::uint8_t kPlayerActionCostThreshold = 1;
 
 void UpdateEnumerationWinners(const ActionCandidate& candidate,
                               ActionCandidate& random_best,
@@ -1070,5 +1080,56 @@ ActorResourceConditions RefreshAiResourceRestrictions(
                                        mp * 2u < unsigned{resources.max_mp}),
       .low_hp = hp * 2u < unsigned{resources.max_hp},
   };
+}
+
+// decomp: func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526).
+bool BuildAiActionMetadata(ActionMetadataHost& host) {
+  if (host.ActorId() == 0) {
+    host.SetActionCostThreshold(kPlayerActionCostThreshold);
+    return true;
+  }
+  for (int row = 0; row < kLimbActionRows; ++row) {
+    for (int column = 0; column < kLimbActionColumns; ++column) {
+      const unsigned action_id = host.SlotAction(row, column);
+      if (action_id >= kActionDefinitionCount) {
+        Refuse("AI action metadata action ID is outside the table");
+        return false;
+      }
+      const MetadataAction action = host.Action(action_id);
+      const std::uint32_t category = std::uint32_t{1}
+                                     << (action.category & kActionCategoryMask);
+      ActionSlotMetadata slot = host.Slot(row, column);
+      slot.range_squared = host.RangeSquared(action_id);
+      const std::int32_t maximum_reach = Core::Math::SquareRootInteger(
+          std::bit_cast<std::int32_t>(slot.range_squared));
+      slot.radius = static_cast<std::uint16_t>(host.AreaReach(
+          action_id, std::bit_cast<std::uint32_t>(maximum_reach)));
+      slot.long_range =
+          slot.range_squared > kLongRangeSquared && !action.radial_area;
+      if ((category & kSelfExcludingCategories) != 0) {
+        slot.excludes_self = true;
+      }
+      if ((category & kObstructionIgnoringCategories) != 0) {
+        slot.ignores_obstruction = true;
+      }
+      if ((category & kDirectCategories) != 0) {
+        slot.kind = CandidateEnumerationKind::kDirect;
+      } else if ((category & kLimbCategories) != 0) {
+        slot.kind = CandidateEnumerationKind::kLimb;
+      } else if ((category & kAimedCategories) != 0) {
+        slot.kind = CandidateEnumerationKind::kAimed;
+      }
+      slot.fallback_eligible = host.RoomAllowsNonSpellActions() &&
+                               action.type != kSpellAction &&
+                               action.type != kBreakArtAction &&
+                               (category & kFallbackCategories) != 0;
+      host.SetSlot(row, column, slot);
+      if (action.type == kSpellAction &&
+          host.ActionCostThreshold() < action.cost) {
+        host.SetActionCostThreshold(action.cost);
+      }
+    }
+  }
+  return true;
 }
 }  // namespace VS::Battle::Ai

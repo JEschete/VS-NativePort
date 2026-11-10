@@ -41,34 +41,14 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Battle\\Ai\\ActionSelection.cpp": [
-[
-35,
-[
-"            action = (void*)&Battle_actionDefinitions[id];"
-],
-[
-"            action = (Battle_Ai_MetadataActionView *)((void*)&Battle_actionDefinitions[id]);"
-]
-],
-[
-38,
-[
-"            entry->rangeSquared = VS::Battle::LiveCalculateActionRangeSquared((void*)state, id);"
-],
-[
-"            entry->rangeSquared = VS::Battle::LiveCalculateActionRangeSquared((Battle_Ai_ActionRangeView *)((void*)state), id);"
-]
-]
-],
 "Native\\Game\\src\\Battle\\Ai\\ActorState.cpp": [
 [
 161,
 [
-"    Battle_Ai_BuildAiActionMetadata((void*)state);"
+"    VS::Battle::Ai::BuildLiveAiActionMetadata((void*)state);"
 ],
 [
-"    Battle_Ai_BuildAiActionMetadata((Battle_Ai_ActionMetadataView *)((void*)state));"
+"    VS::Battle::Ai::BuildLiveAiActionMetadata((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [

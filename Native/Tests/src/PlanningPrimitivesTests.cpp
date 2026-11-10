@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -2093,4 +2094,231 @@ TEST_CASE(
                                    ai::kForgottenTargetTile});
   CHECK_FALSE(host.remembered.has_value());
   CHECK(host.queried.empty());
+}
+
+namespace {
+constexpr unsigned kMetadataSpell = 1;
+constexpr unsigned kMetadataBreakArt = 3;
+
+class FakeActionMetadata final : public ai::ActionMetadataHost {
+ public:
+  FakeActionMetadata() {
+    for (auto& row : slot_actions) row.fill(7);
+  }
+
+  [[nodiscard]] unsigned ActorId() const override { return actor_id; }
+  [[nodiscard]] unsigned SlotAction(int row, int column) const override {
+    return slot_actions[static_cast<std::size_t>(row)]
+                       [static_cast<std::size_t>(column)];
+  }
+  [[nodiscard]] ai::MetadataAction Action(unsigned action_id) const override {
+    action_reads.push_back(action_id);
+    return actions[action_id];
+  }
+  [[nodiscard]] std::uint32_t RangeSquared(unsigned action_id) override {
+    events.push_back("range " + std::to_string(action_id));
+    return range_squared;
+  }
+  [[nodiscard]] std::int32_t AreaReach(unsigned action_id,
+                                       std::uint32_t maximum_reach) override {
+    events.push_back("reach " + std::to_string(action_id) + " " +
+                     std::to_string(maximum_reach));
+    return area_reach;
+  }
+  [[nodiscard]] bool RoomAllowsNonSpellActions() const override {
+    ++room_reads;
+    return room_allows_non_spell_actions;
+  }
+  [[nodiscard]] ai::ActionSlotMetadata Slot(int row,
+                                            int column) const override {
+    return slots[static_cast<std::size_t>(row)]
+                [static_cast<std::size_t>(column)];
+  }
+  void SetSlot(int row, int column,
+               const ai::ActionSlotMetadata& slot) override {
+    events.push_back("set " + std::to_string(row) + " " +
+                     std::to_string(column));
+    slots[static_cast<std::size_t>(row)][static_cast<std::size_t>(column)] =
+        slot;
+  }
+  [[nodiscard]] std::uint8_t ActionCostThreshold() const override {
+    return threshold;
+  }
+  void SetActionCostThreshold(std::uint8_t value) override {
+    threshold = value;
+    thresholds.push_back(value);
+  }
+
+  [[nodiscard]] const ai::ActionSlotMetadata& First() const {
+    return slots[0][0];
+  }
+
+  unsigned actor_id = 4;
+  std::array<std::array<unsigned, 4>, 6> slot_actions{};
+  std::array<ai::MetadataAction, ai::kActionDefinitionCount> actions{};
+  std::uint32_t range_squared = 0;
+  std::int32_t area_reach = 0;
+  bool room_allows_non_spell_actions = false;
+  std::array<std::array<ai::ActionSlotMetadata, 4>, 6> slots{};
+  std::uint8_t threshold = 0;
+  std::vector<std::uint8_t> thresholds;
+  std::vector<std::string> events;
+  mutable std::vector<unsigned> action_reads;
+  mutable int room_reads = 0;
+};
+}  // namespace
+
+TEST_CASE("Action metadata only sets the player's threshold",
+          "[ai][planning][action-metadata]") {
+  FakeActionMetadata host;
+  host.actor_id = 0;
+  host.threshold = 9;
+  host.slot_actions[0][0] = 300;
+  host.slots[2][1].radius = 77;
+  CHECK(ai::BuildAiActionMetadata(host));
+  CHECK(host.threshold == 1);
+  CHECK(host.thresholds == std::vector<std::uint8_t>{1});
+  CHECK(host.events.empty());
+  CHECK(host.action_reads.empty());
+  CHECK(host.room_reads == 0);
+  CHECK(host.slots[2][1].radius == 77);
+}
+
+TEST_CASE("Action metadata visits each slot in row order with range first",
+          "[ai][planning][action-metadata]") {
+  FakeActionMetadata host;
+  host.slot_actions[5][3] = 255;
+  host.range_squared = 96 * 96;
+  CHECK(ai::BuildAiActionMetadata(host));
+  std::vector<std::string> expected;
+  for (unsigned row = 0; row < 6; ++row) {
+    for (unsigned column = 0; column < 4; ++column) {
+      const std::string id = row == 5 && column == 3 ? "255" : "7";
+      expected.push_back("range " + id);
+      expected.push_back("reach " + id + " 96");
+      expected.push_back("set " + std::to_string(row) + " " +
+                         std::to_string(column));
+    }
+  }
+  CHECK(host.events == expected);
+  CHECK(host.action_reads.size() == 24);
+  CHECK(host.room_reads == 24);
+  CHECK(host.thresholds.empty());
+}
+
+TEST_CASE("Action metadata classifies each category's flags and kind",
+          "[ai][planning][action-metadata]") {
+  const unsigned category = GENERATE(range(0u, 16u));
+  const auto initial_kind = GENERATE(ai::CandidateEnumerationKind::kNone,
+                                     ai::CandidateEnumerationKind::kAimed);
+  FakeActionMetadata host;
+  host.actions[7].category = category;
+  for (auto& row : host.slots) {
+    for (auto& slot : row) slot.kind = initial_kind;
+  }
+  CHECK(ai::BuildAiActionMetadata(host));
+  const unsigned bit = 1u << category;
+  const auto& slot = host.First();
+  CHECK(slot.excludes_self == ((bit & 0x4198u) != 0));
+  CHECK(slot.ignores_obstruction == ((bit & 0x154u) != 0));
+  auto kind = initial_kind;
+  if ((bit & 0xAu) != 0) {
+    kind = ai::CandidateEnumerationKind::kDirect;
+  } else if ((bit & 0x40A0u) != 0) {
+    kind = ai::CandidateEnumerationKind::kLimb;
+  } else if ((bit & 0x1954u) != 0) {
+    kind = ai::CandidateEnumerationKind::kAimed;
+  }
+  CHECK(slot.kind == kind);
+}
+
+TEST_CASE("Action metadata only sets the self and obstruction flags",
+          "[ai][planning][action-metadata]") {
+  FakeActionMetadata host;
+  host.actions[7].category = 0;
+  host.slots[0][0].excludes_self = true;
+  host.slots[0][0].ignores_obstruction = true;
+  host.slots[0][0].long_range = true;
+  host.slots[0][0].fallback_eligible = true;
+  CHECK(ai::BuildAiActionMetadata(host));
+  CHECK(host.First().excludes_self);
+  CHECK(host.First().ignores_obstruction);
+  CHECK_FALSE(host.First().long_range);
+  CHECK_FALSE(host.First().fallback_eligible);
+}
+
+TEST_CASE("Action metadata long range compares the unsigned squared range",
+          "[ai][planning][action-metadata]") {
+  const auto [range_squared, radial, long_range, root] =
+      GENERATE(std::tuple{0x51000u, false, false, 576u},
+               std::tuple{0x51001u, false, true, 576u},
+               std::tuple{0x51001u, true, false, 576u},
+               std::tuple{0x80000000u, false, true, 0u},
+               std::tuple{0u, false, false, 0u});
+  FakeActionMetadata host;
+  host.actions[7].radial_area = radial;
+  host.range_squared = range_squared;
+  CHECK(ai::BuildAiActionMetadata(host));
+  CHECK(host.First().range_squared == range_squared);
+  CHECK(host.First().long_range == long_range);
+  CHECK(host.events[1] == "reach 7 " + std::to_string(root));
+}
+
+TEST_CASE("Action metadata keeps the low 16 bits of the area reach",
+          "[ai][planning][action-metadata]") {
+  const auto [reach, radius] = GENERATE(
+      std::pair{0x12345, std::uint16_t{0x2345}},
+      std::pair{-1, std::uint16_t{0xFFFF}}, std::pair{96, std::uint16_t{96}});
+  FakeActionMetadata host;
+  host.area_reach = reach;
+  CHECK(ai::BuildAiActionMetadata(host));
+  CHECK(host.First().radius == radius);
+}
+
+TEST_CASE(
+    "Action metadata fallback needs the room, a non-spell and category 14",
+    "[ai][planning][action-metadata]") {
+  const unsigned type = GENERATE(range(0u, 8u));
+  const bool room = GENERATE(false, true);
+  const unsigned category = GENERATE(13u, 14u);
+  FakeActionMetadata host;
+  host.actions[7] = {.type = type, .category = category};
+  host.room_allows_non_spell_actions = room;
+  CHECK(ai::BuildAiActionMetadata(host));
+  CHECK(host.First().fallback_eligible ==
+        (room && type != kMetadataSpell && type != kMetadataBreakArt &&
+         category == 14));
+}
+
+TEST_CASE("Action metadata raises the threshold to the highest spell cost",
+          "[ai][planning][action-metadata]") {
+  FakeActionMetadata host;
+  host.threshold = 5;
+  host.actions[1] = {.type = kMetadataSpell, .cost = 3};
+  host.actions[2] = {.type = kMetadataSpell, .cost = 9};
+  host.actions[3] = {.type = 0, .cost = 200};
+  host.actions[4] = {.type = kMetadataBreakArt, .cost = 50};
+  host.actions[5] = {.type = kMetadataSpell, .cost = 9};
+  host.actions[6] = {.type = kMetadataSpell, .cost = 12};
+  host.slot_actions[0] = {1, 2, 3, 4};
+  host.slot_actions[1] = {5, 6, 2, 1};
+  CHECK(ai::BuildAiActionMetadata(host));
+  CHECK(host.threshold == 12);
+  CHECK(host.thresholds == std::vector<std::uint8_t>{9, 12});
+}
+
+TEST_CASE(
+    "Action metadata refuses an action outside the table after earlier slots",
+    "[ai][planning][action-metadata]") {
+  FakeActionMetadata host;
+  host.actions[7] = {.type = kMetadataSpell, .cost = 8};
+  host.slot_actions[1][2] = GENERATE(256u, 0xFFFFu);
+  host.range_squared = 400;
+  CHECK_FALSE(ai::BuildAiActionMetadata(host));
+  CHECK(host.action_reads.size() == 6);
+  CHECK(std::count(host.events.begin(), host.events.end(), "set 1 1") == 1);
+  CHECK(host.events.back() == "set 1 1");
+  CHECK(host.slots[1][1].range_squared == 400);
+  CHECK(host.slots[1][2].range_squared == 0);
+  CHECK(host.threshold == 8);
 }

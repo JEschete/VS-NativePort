@@ -263,6 +263,15 @@ battle::RangeShape RangeOf(const Battle_Ai_ActionRangeShape& shape) {
           static_cast<std::uint8_t>(shape.rangeZ), shape.shape, shape.angle};
 }
 
+// The weapon range bytes at stats 0x38, which Battle_Ai_ActionRangeShape views.
+battle::RangeShape WeaponRangeOf(const Battle_ActorStats& stats) {
+  return {static_cast<int>(stats.currentRange),
+          static_cast<int>(stats.currentRangeY),
+          static_cast<int>(stats.currentRangeZ),
+          static_cast<int>(stats.currentAttackShape),
+          static_cast<int>(stats.currentAttackShapeAngle)};
+}
+
 std::optional<battle::TargetingActionView> ActionView(int action_id) {
   if (!InRange(Battle_actionDefinitions, action_id)) {
     VS_LOG_ERROR("battle.targeting", "action {} is outside the action table",
@@ -281,6 +290,25 @@ std::optional<battle::TargetingActionView> ActionView(int action_id) {
                action.areaShape >> kAreaAngleShift},
       .radial_area = action.aiFlags.radialArea != 0,
       .shaped_area = action.aiFlags.shapedArea != 0};
+}
+
+// decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476); a
+// weapon-ranged action without the attacker's weapon range is refused as 0.
+int ActionRangeSquared(int action_id,
+                       std::optional<battle::RangeShape> weapon_range) {
+  const std::optional<battle::TargetingActionView> action =
+      ActionView(action_id);
+  if (!action) {
+    return 0;
+  }
+  if (action->range.x == battle::kWeaponRangeSentinel && !weapon_range) {
+    VS_LOG_ERROR("battle.targeting",
+                 "action {} range refused: no attacker weapon range",
+                 action_id);
+    return 0;
+  }
+  return battle::CalculateActionRangeSquared(
+      *action, weapon_range.value_or(battle::RangeShape{}));
 }
 
 // The point the actor's two command words form (*(SVECTOR*)&commandArg1).
@@ -1213,21 +1241,18 @@ int LiveCalculateActionAreaReach(std::intptr_t /*unused*/, int action_id,
 
 int LiveCalculateActionRangeSquared(Battle_Ai_ActionRangeView* actor_range_view,
                                     int action_id) {
-  const std::optional<TargetingActionView> action = ActionView(action_id);
-  if (!action) {
-    return 0;
-  }
-  RangeShape weapon_range;
-  if (action->range.x == kWeaponRangeSentinel) {
-    if (actor_range_view == nullptr || actor_range_view->opaque5C == nullptr) {
-      VS_LOG_ERROR("battle.targeting",
-                   "action {} range refused: no attacker weapon range",
-                   action_id);
-      return 0;
-    }
-    weapon_range = RangeOf(actor_range_view->opaque5C->opaque38);
-  }
-  return CalculateActionRangeSquared(*action, weapon_range);
+  return ActionRangeSquared(
+      action_id,
+      actor_range_view != nullptr && actor_range_view->opaque5C
+          ? std::optional(RangeOf(actor_range_view->opaque5C->opaque38))
+          : std::nullopt);
+}
+
+int LiveCalculateActorActionRangeSquared(const Battle_ActorStats* stats,
+                                         int action_id) {
+  return ActionRangeSquared(
+      action_id,
+      stats != nullptr ? std::optional(WeaponRangeOf(*stats)) : std::nullopt);
 }
 
 void LiveUpdateTargetSelectionHighlight(int mode) {

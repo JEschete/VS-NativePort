@@ -540,4 +540,55 @@ std::optional<bool> RefreshAiActionUsability(ActionUsabilityHost& host, int row,
 // spell-blocking checks.
 [[nodiscard]] ActorResourceConditions RefreshAiResourceRestrictions(
     const ActorResources& resources, std::uint8_t action_cost_threshold);
+
+// The action definition fields the slot metadata reads.
+struct MetadataAction {
+  unsigned type = 0;
+  unsigned category = 0;
+  std::uint8_t cost = 0;
+  bool radial_area = false;
+};
+
+// An AI actor's metadata for one limb action slot; the usable bit and the
+// reserved bits of the record are not part of it.
+struct ActionSlotMetadata {
+  bool excludes_self = false;
+  bool ignores_obstruction = false;
+  CandidateEnumerationKind kind = CandidateEnumerationKind::kNone;
+  bool long_range = false;
+  bool fallback_eligible = false;
+  std::uint16_t radius = 0;
+  std::uint32_t range_squared = 0;
+};
+
+// The actor AI state, its stats, the action table, the room AI state and the
+// action range calculations the slot metadata build reads.
+class ActionMetadataHost {
+ public:
+  virtual ~ActionMetadataHost() = default;
+  [[nodiscard]] virtual unsigned ActorId() const = 0;
+  [[nodiscard]] virtual unsigned SlotAction(int row, int column) const = 0;
+  // Called only with an ID below kActionDefinitionCount.
+  [[nodiscard]] virtual MetadataAction Action(unsigned action_id) const = 0;
+  // The actor's squared reach for the action (func_800E5698).
+  [[nodiscard]] virtual std::uint32_t RangeSquared(unsigned action_id) = 0;
+  // The action's area reach when it is below the maximum (func_800E5600).
+  [[nodiscard]] virtual std::int32_t AreaReach(unsigned action_id,
+                                               std::uint32_t maximum_reach) = 0;
+  // Read again for each slot, as the original does.
+  [[nodiscard]] virtual bool RoomAllowsNonSpellActions() const = 0;
+  [[nodiscard]] virtual ActionSlotMetadata Slot(int row, int column) const = 0;
+  virtual void SetSlot(int row, int column, const ActionSlotMetadata& slot) = 0;
+  [[nodiscard]] virtual std::uint8_t ActionCostThreshold() const = 0;
+  virtual void SetActionCostThreshold(std::uint8_t threshold) = 0;
+};
+
+// decomp: func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526), 162 instructions
+// at 800E5710-800E5994. The player (actor 0) only sets threshold 1. Otherwise
+// each slot's range, 16-bit area reach, long-range and fallback flags are
+// rebuilt; the self-exclusion and obstruction flags are only ever set, the
+// kind changes only for a category that has one, and the threshold rises to
+// the highest spell cost. False refuses an action outside the table; earlier
+// slots stay written.
+bool BuildAiActionMetadata(ActionMetadataHost& host);
 }  // namespace VS::Battle::Ai
