@@ -3,9 +3,9 @@
 Updated 2026-11-10. Row 28 (battle AI) resumed after the cleanup checkpoint.
 The condition terms, quality repairs and three candidate-planning promotions
 and the two planning-stat lifecycle promotions are published with green
-exact-revision CI. F01707 fallback selection is also published with green
-exact-revision CI. F01713 planning simulation is locally verified; publication
-and exact-revision CI are pending.
+exact-revision CI. F01707 fallback selection and F01713 planning simulation are
+also published with green exact-revision CI. F01712 candidate enumeration is
+the next in-progress promotion; it is not yet verified.
 
 ## Checkpoint
 
@@ -48,7 +48,9 @@ and exact-revision CI are pending.
   native binding, migrated workspace caller, module entry and related evidence.
 - The fallback evidence update `23902fe7` passed
   [CI 42768591783](https://github.com/JEschete/VS-NativePort/actions/runs/42768591783).
-  F01713 verification uses that base plus the uncommitted simulation policy,
+  F01713 is published in `6ae86ecd`
+  ([CI 42772302695](https://github.com/JEschete/VS-NativePort/actions/runs/42772302695)).
+  Local verification used base `23902fe7` plus that commit's simulation policy,
   checked binding, generated caller/module entry, tests and related ledgers.
   Its native core keeps the wrapping readiness clock, signed halfword stores
   before clamps, poison/regeneration order, inclusive byte-timer expiry and
@@ -334,12 +336,13 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the locally verified F01713 milestone, confirm exact-revision CI and
-   update #276. Do not close #276: 966 functions remain.
+2. F01713 is published with exact-revision CI and evidence on #276.
+   Do not close #276: 966 functions remain.
 3. Continue ordered row 28 with F01712 enumeration in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   Its original source and all 454 instructions have been read; it remains
-   generated and unverified. The local `enumeration_original.txt` records
+   Its original source and all 454 instructions have been read. The typed
+   policy is in progress, but the live binding/callers remain generated and
+   unverified. The local `enumeration_original.txt` records
    `800DD918-800DE02C` and SHA256
    `e7ba81487e25fd71ccdb0889b37e74f7ac942a8606ba5a9dff8e179a45122f9f`.
    Preserve cache/append order, per-limb random draws and first-winner ties,
