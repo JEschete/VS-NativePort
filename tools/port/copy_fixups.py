@@ -565,6 +565,7 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"
        for name in ("RememberLiveAiActionTarget", "CopyLiveActionCandidate", "ApplyLiveSimulatedStatDelta",
                     "AppendLiveActionCandidate", "SortLiveActionCandidates", "CopyLivePlanningActorStats",
+                    "SnapshotLivePlanningActorStats", "RestoreLivePlanningActorStats",
                     "CanLiveAiActionAffectActor", "RefreshLiveAiActionUsability",
                     "RefreshLiveAiResourceRestrictions", "LiveActorStatusConditionScore", "LiveActorHpRatio",
                     "LiveActorMpRatio", "LiveActorEquipmentDpRatio")},
@@ -1142,6 +1143,8 @@ OWNED_CALL_BINDINGS["F01697"] = "Battle_Ai_ApplySimulatedActionResultsEntry"
 OWNED_CALL_BINDINGS["F01698"] = "Battle_Ai_SimulateActionCandidateEntry"
 OWNED_CALL_BINDINGS["F01699"] = "Battle_Ai_UpdateCandidateHitWeightEntry"
 OWNED_CALL_BINDINGS["F01704"] = "Battle_Ai_EvaluateActionCandidateEntry"
+OWNED_CALL_BINDINGS["F01714"] = "VS::Battle::Ai::SnapshotLivePlanningActorStats"
+OWNED_CALL_BINDINGS["F01715"] = "VS::Battle::Ai::RestoreLivePlanningActorStats"
 OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"

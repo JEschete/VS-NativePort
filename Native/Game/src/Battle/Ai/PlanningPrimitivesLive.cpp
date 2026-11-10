@@ -61,6 +61,7 @@ static_assert(
 constexpr int kRestoreOperation = 2;
 constexpr int kAimedSimulationMode = 3;
 constexpr auto kTargetOffset = offsetof(Battle_Ai_ReactionRecord, opaque4C);
+PlanningStatsSnapshot planning_stats_snapshot;
 static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
               kTargetPreviewCapacity);
 static_assert(kTargetOffset == offsetof(Battle_ActionRequest, targets));
@@ -154,6 +155,29 @@ std::optional<SimulationSnapshot> ReadSimulationSnapshot() {
 bool RefusePlanning(const char* message) {
   Core_Debugf("ai", "%s", message);
   return false;
+}
+
+std::optional<std::span<const PlanningActorStats>> ReadPlanningStatsRows(
+    std::array<PlanningActorStats, kBattleActorSlotCount>& rows) {
+  std::size_t count = 0;
+  for (const auto* actor = Battle_actors[0]; actor != nullptr;
+       actor = actor->next) {
+    if (count >= rows.size() || !ReadablePlanningRecord(actor) ||
+        actor->id < 0 || actor->id >= kBattleActorSlotCount ||
+        !ReadablePlanningRecord(actor->stats)) {
+      return std::nullopt;
+    }
+    auto bytes = std::as_writable_bytes(
+        std::span<Battle_ActorStats, 1>(actor->stats, 1));
+    if (OverlappingPlanningBytes(bytes.data(), bytes.size(),
+                                 planning_stats_snapshot.bytes.data(),
+                                 planning_stats_snapshot.bytes.size())) {
+      return std::nullopt;
+    }
+    rows[count++] = {.slot = static_cast<std::size_t>(actor->id),
+                     .bytes = bytes};
+  }
+  return std::span<const PlanningActorStats>(rows).first(count);
 }
 
 ActorCondition SimulationConditionOf(const Battle_Ai_ActionTiming& row) {
@@ -772,6 +796,52 @@ void CopyLivePlanningActorStats(const Battle_ActorStats* source,
   CopyPlanningActorStats(
       std::as_bytes(std::span<const Battle_ActorStats, 1>(source, 1)),
       std::as_writable_bytes(std::span<Battle_ActorStats, 1>(destination, 1)));
+}
+
+bool SnapshotLivePlanningActorStats() {
+  if (!planning_stats_snapshot.bytes.empty() ||
+      Battle_Ai_planningStatsSnapshot != nullptr) {
+    return RefusePlanning("AI stat capture is already active");
+  }
+  auto* storage = static_cast<std::byte*>(
+      Core::Memory::AllocateLiveFromHighEnd(kPlanningStatsTableBytes));
+  if (storage == nullptr) {
+    return RefusePlanning("AI stat capture has no snapshot storage");
+  }
+  planning_stats_snapshot = {
+      .bytes = std::span<std::byte>(storage, kPlanningStatsTableBytes)};
+  Battle_Ai_planningStatsSnapshot =
+      reinterpret_cast<Battle_ActorStats*>(storage);
+  std::array<PlanningActorStats, kBattleActorSlotCount> rows{};
+  const auto actors = ReadPlanningStatsRows(rows);
+  if (actors && SnapshotPlanningActorStats(planning_stats_snapshot, *actors)) {
+    return true;
+  }
+  Core::Memory::FreeLiveFromHighEnd(storage);
+  InvalidateLivePlanningStatsSnapshot();
+  return RefusePlanning("AI stat capture requires a valid disjoint actor list");
+}
+
+void RestoreLivePlanningActorStats() {
+  const auto storage = planning_stats_snapshot.bytes;
+  const auto allocation = Core::Memory::LivePayloadContaining(storage.data());
+  Require(allocation.has_value() && allocation->data() == storage.data() &&
+              allocation->size() >= kPlanningStatsTableBytes &&
+              reinterpret_cast<std::byte*>(Battle_Ai_planningStatsSnapshot) ==
+                  storage.data(),
+          "AI stat restore requires its live snapshot allocation");
+  std::array<PlanningActorStats, kBattleActorSlotCount> rows{};
+  const auto actors = ReadPlanningStatsRows(rows);
+  Require(actors.has_value() &&
+              RestorePlanningActorStats(planning_stats_snapshot, *actors),
+          "AI stat restore requires a valid captured actor list");
+  Core::Memory::FreeLiveFromHighEnd(storage.data());
+  InvalidateLivePlanningStatsSnapshot();
+}
+
+void InvalidateLivePlanningStatsSnapshot() {
+  planning_stats_snapshot = {};
+  Battle_Ai_planningStatsSnapshot = nullptr;
 }
 
 bool CanLiveAiActionAffectActor(const Battle_Ai_ActorAiState* state,

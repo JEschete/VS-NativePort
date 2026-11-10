@@ -43,15 +43,6 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\ActionPlanning.cpp": [
 [
-615,
-[
-"    Battle_Ai_planningStatsSnapshot = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActorStats) * 16);"
-],
-[
-"    Battle_Ai_planningStatsSnapshot = (Battle_ActorStats *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActorStats) * 16));"
-]
-],
-[
 685,
 [
 "            Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActionChoiceView*)state, (short)delay);"

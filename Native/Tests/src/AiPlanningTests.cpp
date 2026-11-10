@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iterator>
 #include <limits>
 #include <new>
 #include <span>
@@ -67,6 +68,34 @@ struct PlanningFixture {
     std::copy(saved_states.begin(), saved_states.end(),
               Battle_Ai_actorAiStates);
     Battle_actionDefinitions[42] = saved_action;
+  }
+};
+
+struct PlanningStatsFixture {
+  decltype(std::to_array(Battle_actors)) saved_actors =
+      std::to_array(Battle_actors);
+  Battle_ActorStats* saved_snapshot = Battle_Ai_planningStatsSnapshot;
+  std::array<std::byte, 65536> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  Battle_Actor first{}, second{};
+  Battle_ActorStats first_stats{}, second_stats{};
+
+  PlanningStatsFixture() {
+    VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
+    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
+    first.id = 1;
+    first.stats = &first_stats;
+    first.next = &second;
+    second.id = 15;
+    second.stats = &second_stats;
+    Battle_actors[0] = &first;
+    first_stats.currentHp = 100;
+    second_stats.currentHp = 50;
+  }
+  ~PlanningStatsFixture() {
+    VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
+    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    Battle_Ai_planningStatsSnapshot = saved_snapshot;
   }
 };
 
@@ -190,6 +219,109 @@ TEST_CASE(
   std::memcpy(memory + sizeof(destination), &frames, sizeof(frames));
   VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
   CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE(
+    "Native planning stats restore only original fields and release storage",
+    "[ai][planning][stats-lifecycle-live]") {
+  PlanningStatsFixture fixture;
+  const auto original =
+      std::bit_cast<std::array<std::byte, sizeof(Battle_ActorStats)>>(
+          fixture.first_stats);
+  const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  auto* storage = Battle_Ai_planningStatsSnapshot;
+  REQUIRE(storage != nullptr);
+  CHECK(VS::Core::Memory::LivePayloadCapacity(storage).value() >=
+        VS::Battle::Ai::kPlanningStatsTableBytes);
+  std::memset(&fixture.first_stats, 0x75, sizeof(fixture.first_stats));
+  fixture.second_stats.currentHp = 1;
+  VS::Battle::Ai::RestoreLivePlanningActorStats();
+  const auto restored =
+      std::bit_cast<std::array<std::byte, sizeof(Battle_ActorStats)>>(
+          fixture.first_stats);
+  for (std::size_t offset = 0; offset < restored.size(); ++offset) {
+    CHECK(restored[offset] ==
+          (CopiedStatByte(offset) ? original[offset] : std::byte{0x75}));
+  }
+  CHECK(fixture.second_stats.currentHp == 50);
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(storage).has_value());
+  CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
+}
+
+TEST_CASE(
+    "Native planning stats refuse reentry and allow a fresh capture after "
+    "release",
+    "[ai][planning][stats-lifecycle-live]") {
+  PlanningStatsFixture fixture;
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  auto* storage = Battle_Ai_planningStatsSnapshot;
+  fixture.first_stats.currentHp = 7;
+  CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  CHECK(Battle_Ai_planningStatsSnapshot == storage);
+  VS::Battle::Ai::RestoreLivePlanningActorStats();
+  CHECK(fixture.first_stats.currentHp == 100);
+  fixture.first_stats.currentHp = 80;
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  fixture.first_stats.currentHp = 3;
+  VS::Battle::Ai::RestoreLivePlanningActorStats();
+  CHECK(fixture.first_stats.currentHp == 80);
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+}
+
+TEST_CASE("Native planning stats handle empty and shortened actor lists",
+          "[ai][planning][stats-lifecycle-live]") {
+  PlanningStatsFixture fixture;
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  fixture.first.next = nullptr;
+  fixture.first_stats.currentHp = fixture.second_stats.currentHp = 1;
+  VS::Battle::Ai::RestoreLivePlanningActorStats();
+  CHECK(fixture.first_stats.currentHp == 100);
+  CHECK(fixture.second_stats.currentHp == 1);
+  Battle_actors[0] = nullptr;
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  VS::Battle::Ai::RestoreLivePlanningActorStats();
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+}
+
+TEST_CASE(
+    "Native planning stats refuse allocation failure before reading actors",
+    "[ai][planning][stats-lifecycle-live]") {
+  PlanningStatsFixture fixture;
+  std::array<std::byte, 256> tiny{};
+  const VS::Core::Memory::ScopedLiveGameHeap heap(tiny);
+  Battle_actors[0] = reinterpret_cast<Battle_Actor*>(std::uintptr_t{1});
+  CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+}
+
+TEST_CASE(
+    "Native planning stats refuse invalid and aliased actor rows without leaks",
+    "[ai][planning][stats-lifecycle-live]") {
+  const int failure = GENERATE(0, 1, 2, 3, 4);
+  PlanningStatsFixture fixture;
+  if (failure == 0) fixture.second.id = 16;
+  if (failure == 1) fixture.second.stats = nullptr;
+  if (failure == 2) fixture.second.next = &fixture.first;
+  if (failure == 4) fixture.second.id = -1;
+  if (failure == 3) {
+    void* next_storage = VS::Core::Memory::AllocateLiveFromHighEnd(
+        VS::Battle::Ai::kPlanningStatsTableBytes);
+    REQUIRE(next_storage != nullptr);
+    VS::Core::Memory::FreeLiveFromHighEnd(next_storage);
+    fixture.second.stats = static_cast<Battle_ActorStats*>(next_storage);
+  }
+  const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
+  CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(fixture.first_stats.currentHp == 100);
+  CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
+  fixture.second.id = 15;
+  fixture.second.stats = &fixture.second_stats;
+  fixture.second.next = nullptr;
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  VS::Battle::Ai::RestoreLivePlanningActorStats();
 }
 
 TEST_CASE(

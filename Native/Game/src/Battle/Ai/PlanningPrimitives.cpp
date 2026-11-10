@@ -130,6 +130,23 @@ std::nullopt_t Refuse(const char* message) {
   return std::nullopt;
 }
 
+bool ValidPlanningStatsRows(const PlanningStatsSnapshot& snapshot,
+                            std::span<const PlanningActorStats> actors) {
+  return snapshot.bytes.size() == kPlanningStatsTableBytes &&
+         actors.size() <= kBattleActorSlotCount &&
+         std::all_of(actors.begin(), actors.end(), [](const auto& actor) {
+           return actor.slot < kBattleActorSlotCount &&
+                  actor.bytes.size() == kActorStatsRecordBytes;
+         });
+}
+
+std::span<std::byte, kActorStatsRecordBytes> PlanningSnapshotRow(
+    const PlanningStatsSnapshot& snapshot, std::size_t slot) {
+  return std::span<std::byte, kActorStatsRecordBytes>(
+      snapshot.bytes.data() + slot * kActorStatsRecordBytes,
+      kActorStatsRecordBytes);
+}
+
 std::optional<std::size_t> ReadinessCount(const CandidateReadinessHost& host) {
   const int count = host.Count();
   if (count < 0 || static_cast<std::size_t>(count) > kCandidateCapacity) {
@@ -652,6 +669,42 @@ void CopyPlanningActorStats(
     std::memmove(destination.subspan(range.offset, range.size).data(),
                  source.subspan(range.offset, range.size).data(), range.size);
   }
+}
+
+// decomp: snapshotActorStats (74088.c:1295), original28MIPS in func_800DE3E4.
+bool SnapshotPlanningActorStats(PlanningStatsSnapshot& snapshot,
+                                std::span<const PlanningActorStats> actors) {
+  if (!ValidPlanningStatsRows(snapshot, actors)) {
+    Refuse("AI stat capture requires complete rows and a sixteen-slot table");
+    return false;
+  }
+  snapshot.captured_slots.fill(false);
+  for (const auto& actor : actors) {
+    CopyPlanningActorStats(std::span<const std::byte, kActorStatsRecordBytes>(
+                               actor.bytes.data(), kActorStatsRecordBytes),
+                           PlanningSnapshotRow(snapshot, actor.slot));
+    snapshot.captured_slots[actor.slot] = true;
+  }
+  return true;
+}
+
+// decomp: restoreActorStats (74088.c:1309), original25MIPS in func_800DE3E4.
+bool RestorePlanningActorStats(const PlanningStatsSnapshot& snapshot,
+                               std::span<const PlanningActorStats> actors) {
+  if (!ValidPlanningStatsRows(snapshot, actors) ||
+      !std::all_of(actors.begin(), actors.end(),
+                   [&snapshot](const auto& actor) {
+                     return snapshot.captured_slots[actor.slot];
+                   })) {
+    Refuse("AI stat restore requires complete previously captured actor rows");
+    return false;
+  }
+  for (const auto& actor : actors) {
+    CopyPlanningActorStats(PlanningSnapshotRow(snapshot, actor.slot),
+                           std::span<std::byte, kActorStatsRecordBytes>(
+                               actor.bytes.data(), kActorStatsRecordBytes));
+  }
+  return true;
 }
 
 // decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/7C4F4.s:10).

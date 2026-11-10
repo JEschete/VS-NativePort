@@ -2094,6 +2094,36 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertNotIn("0x800DC424u", pointers)
 
+    def test_planning_stats_lifecycle_uses_owned_policies_and_reset_binding(self):
+        owned = self.owned_items()
+        root = Path(__file__).resolve().parents[2]
+        planning = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.cpp").read_text(
+            encoding="utf-8"
+        )
+        header = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.h").read_text(
+            encoding="utf-8"
+        )
+        for identifier, operation in (("F01714", "Snapshot"), ("F01715", "Restore")):
+            core = f"VS::Battle::Ai::{operation}PlanningActorStats"
+            live = f"VS::Battle::Ai::{operation}LivePlanningActorStats"
+            with self.subTest(identifier=identifier):
+                self.assertEqual(owned[identifier]["name"], core)
+                self.assertEqual(
+                    owned[identifier]["path"],
+                    r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp",
+                )
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[identifier], live)
+                self.assertEqual(
+                    copy_fixups.NATIVE_HELPER_HEADERS[live],
+                    r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+                )
+                self.assertIn(f"{live}()", planning)
+                self.assertNotIn(f"Battle_Ai_{operation}PlanningActorStats", planning + header)
+        reset = (root / r"Native\Game\src\Battle\Ai\RoomState.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();", reset)
+
     def test_collision_samples_read_the_live_room_map_as_bytes(self):
         owned = self.owned_items()
         self.assertEqual(owned["F00772"]["name"], "VS::Field::SampleCollisionHeightCode")

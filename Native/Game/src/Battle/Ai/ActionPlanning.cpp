@@ -2,7 +2,6 @@
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -347,32 +346,6 @@ void Battle_Ai_AdvancePlanningSimulation(int simulation_time_step)
     }
 }
 
-// decomp: BATTLE.PRG snapshotActorStats (src/BATTLE/BATTLE.PRG/74088.c:1295)
-int Battle_Ai_SnapshotPlanningActorStats(void)
-{
-    Battle_Actor* actor;
-
-    Battle_Ai_planningStatsSnapshot = (Battle_ActorStats *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActorStats) * 16));
-    if (Battle_Ai_planningStatsSnapshot == NULL) {
-        return 0;
-    }
-    for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
-        VS::Battle::Ai::CopyLivePlanningActorStats(actor->stats, &Battle_Ai_planningStatsSnapshot[actor->id]);
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG restoreActorStats (src/BATTLE/BATTLE.PRG/74088.c:1309)
-void Battle_Ai_RestorePlanningActorStats(void)
-{
-    Battle_Actor* actor;
-
-    for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
-        VS::Battle::Ai::CopyLivePlanningActorStats(&Battle_Ai_planningStatsSnapshot[actor->id], actor->stats);
-    }
-    VS::Core::Memory::FreeLiveFromHighEnd(Battle_Ai_planningStatsSnapshot);
-}
-
 // decomp: src/BATTLE/BATTLE.PRG/74088.c:1264
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
 // decomp: src/BATTLE/BATTLE.PRG/74088.c:1265
@@ -415,7 +388,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
         return;
     }
 
-    if (Battle_Ai_SnapshotPlanningActorStats()) {
+    if (VS::Battle::Ai::SnapshotLivePlanningActorStats()) {
         minDelay = MAX(state->minActionDelay, (u_short)(state->stats->actionRecoveryTimer / 35));
         Battle_Ai_roomAiState->readinessLevel = 0;
 
@@ -470,7 +443,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
             VS::Battle::Ai::SortLiveActionCandidates(state);
         }
     restore:
-        Battle_Ai_RestorePlanningActorStats();
+        VS::Battle::Ai::RestoreLivePlanningActorStats();
         Battle_Ai_roomAiState->readinessLevel = 0;
     } else {
         Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActorAiState *)((Battle_Ai_ActionChoiceView*)state), 0);

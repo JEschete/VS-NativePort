@@ -1,13 +1,17 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -15,6 +19,7 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/RoomState.h"
+#include "Battle/Damage.h"
 }
 
 namespace {
@@ -25,6 +30,8 @@ Pointer InvalidatedBinding() {
 }
 
 struct SessionBindingSnapshot {
+  decltype(std::to_array(Battle_actors)) battle_actors =
+      std::to_array(Battle_actors);
   decltype(std::to_array(Battle_Ai_actorAiStates)) actors =
       std::to_array(Battle_Ai_actorAiStates);
   decltype(std::to_array(Battle_Ai_decisionCallbacks)) callbacks =
@@ -55,6 +62,7 @@ struct SessionBindingSnapshot {
   int engaged = Battle_Ai_candidateEngagedThisUpdate;
 
   ~SessionBindingSnapshot() {
+    std::copy(battle_actors.begin(), battle_actors.end(), Battle_actors);
     std::copy(actors.begin(), actors.end(), Battle_Ai_actorAiStates);
     std::copy(callbacks.begin(), callbacks.end(), Battle_Ai_decisionCallbacks);
     *Battle_Ai_FrameState() = frame;
@@ -160,6 +168,32 @@ void CheckInvalidatedFrameBindings() {
   CHECK(frame.terrainRegions == nullptr);
 }
 }  // namespace
+
+TEST_CASE(
+    "AI session invalidation forgets captured stats without freeing reset "
+    "storage",
+    "[ai][planning][session-reset][stats-lifecycle-live]") {
+  SessionBindingSnapshot saved;
+  std::array<std::byte, 65536> arena{};
+  const VS::Core::Memory::ScopedLiveGameHeap heap(arena);
+  Battle_Actor actor{};
+  Battle_ActorStats stats{};
+  actor.id = 1;
+  actor.stats = &stats;
+  std::fill_n(Battle_actors, saved.battle_actors.size(), nullptr);
+  Battle_actors[0] = &actor;
+  VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  VS::Core::Memory::InitializeLiveHeapAt(
+      arena.data(), static_cast<std::uint32_t>(arena.size()));
+  const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
+  Battle_Ai_InvalidateSessionBindings();
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
+  VS::Battle::Ai::RestoreLivePlanningActorStats();
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
+}
 
 TEST_CASE("AI session invalidation never touches reclaimed allocation storage",
           "[ai][session-reset]") {

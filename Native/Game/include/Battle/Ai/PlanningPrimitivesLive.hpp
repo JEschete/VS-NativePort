@@ -17,8 +17,8 @@ struct Battle_Ai_ActionTiming;
 
 // Bindings from the actor AI state, its stats, the action table, the AI state
 // table and the planner's exclusion table to the typed candidate list and
-// planning checks (PlanningPrimitives.cpp). Each aborts with a diagnostic when
-// a state, record or ID it needs is invalid.
+// planning checks (PlanningPrimitives.cpp). Invalid input is diagnosed:
+// required legacy contracts abort; fallible planning operations report failure.
 namespace VS::Battle::Ai {
 std::optional<bool> RefreshLiveActionCandidateReadiness(
     Battle_Ai_ActorAiState* state);
@@ -73,6 +73,10 @@ void SortLiveActionCandidates(Battle_Ai_ActionPlanView* state);
 // The source and destination may be the same record.
 void CopyLivePlanningActorStats(const Battle_ActorStats* source,
                                 Battle_ActorStats* destination);
+bool SnapshotLivePlanningActorStats();
+void RestoreLivePlanningActorStats();
+// The game arena is already reset; forget bindings without dereferencing them.
+void InvalidateLivePlanningStatsSnapshot();
 [[nodiscard]] bool CanLiveAiActionAffectActor(
     const Battle_Ai_ActorAiState* state,
     const Battle_Ai_ActionCandidate* candidate, int actor_id);

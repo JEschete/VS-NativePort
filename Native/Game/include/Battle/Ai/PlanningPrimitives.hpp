@@ -361,6 +361,29 @@ void CopyPlanningActorStats(
     std::span<const std::byte, kActorStatsRecordBytes> source,
     std::span<std::byte, kActorStatsRecordBytes> destination);
 
+struct PlanningActorStats {
+  std::size_t slot = 0;
+  std::span<std::byte> bytes{};
+};
+
+inline constexpr std::size_t kPlanningStatsTableBytes(
+    kActorStatsRecordBytes* kBattleActorSlotCount);
+
+struct PlanningStatsSnapshot {
+  std::span<std::byte> bytes{};
+  std::array<bool, kBattleActorSlotCount> captured_slots{};
+};
+
+// decomp: snapshotActorStats (74088.c:1295), inlined at 800DE4EC-800DE558.
+// Storage belongs to the caller. Only the original stat-copy ranges change.
+bool SnapshotPlanningActorStats(PlanningStatsSnapshot& snapshot,
+                                std::span<const PlanningActorStats> actors);
+
+// decomp: restoreActorStats (74088.c:1309), inlined at 800DE898-800DE8F8.
+// Restore the current actor list; refuse uncaptured slots before any writes.
+bool RestorePlanningActorStats(const PlanningStatsSnapshot& snapshot,
+                               std::span<const PlanningActorStats> actors);
+
 // decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/7C4F4.s:10).
 // Whether the candidate's action may target the actor: an allied or hostile
 // actor with AI state, a beneficial action only on a non-hostile actor whose

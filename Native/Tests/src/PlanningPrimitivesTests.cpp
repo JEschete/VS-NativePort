@@ -331,6 +331,108 @@ bool CopiedStatByte(std::size_t offset) {
 }
 }  // namespace
 
+TEST_CASE("Planning stats capture preserves sparse slots and untouched bytes",
+          "[ai][planning][stats-lifecycle]") {
+  std::array<std::byte, ai::kPlanningStatsTableBytes> storage{};
+  storage.fill(std::byte{0xCC});
+  std::array<std::byte, ai::kActorStatsRecordBytes> first{}, second{};
+  first.fill(std::byte{0x21});
+  second.fill(std::byte{0x43});
+  const std::array<ai::PlanningActorStats, 2> actors{
+      {{.slot = 15, .bytes = first}, {.slot = 3, .bytes = second}}};
+  ai::PlanningStatsSnapshot snapshot{.bytes = storage};
+  REQUIRE(ai::SnapshotPlanningActorStats(snapshot, actors));
+  for (std::size_t slot = 0; slot < snapshot.captured_slots.size(); ++slot) {
+    CHECK(snapshot.captured_slots[slot] == (slot == 15 || slot == 3));
+    for (std::size_t offset = 0; offset < first.size(); ++offset) {
+      const auto expected =
+          CopiedStatByte(offset) && slot == 15  ? std::byte{0x21}
+          : CopiedStatByte(offset) && slot == 3 ? std::byte{0x43}
+                                                : std::byte{0xCC};
+      CHECK(storage[slot * first.size() + offset] == expected);
+    }
+  }
+  first.fill(std::byte{0x75});
+  second.fill(std::byte{0x75});
+  const std::array<ai::PlanningActorStats, 1> remaining{
+      {{.slot = 3, .bytes = first}}};
+  REQUIRE(ai::RestorePlanningActorStats(snapshot, remaining));
+  for (std::size_t offset = 0; offset < first.size(); ++offset) {
+    CHECK(first[offset] ==
+          (CopiedStatByte(offset) ? std::byte{0x43} : std::byte{0x75}));
+    CHECK(second[offset] == std::byte{0x75});
+  }
+}
+
+TEST_CASE("Planning stats capture keeps the last repeated slot and empty lists",
+          "[ai][planning][stats-lifecycle]") {
+  std::array<std::byte, ai::kPlanningStatsTableBytes> storage{};
+  std::array<std::byte, ai::kActorStatsRecordBytes> first{}, second{};
+  first.fill(std::byte{1});
+  second.fill(std::byte{2});
+  const std::array<ai::PlanningActorStats, 2> actors{
+      {{.slot = 0, .bytes = first}, {.slot = 0, .bytes = second}}};
+  ai::PlanningStatsSnapshot snapshot{.bytes = storage};
+  REQUIRE(ai::SnapshotPlanningActorStats(snapshot, actors));
+  CHECK(storage[0x18] == std::byte{2});
+  REQUIRE(ai::SnapshotPlanningActorStats(snapshot, {}));
+  for (const bool captured : snapshot.captured_slots) CHECK_FALSE(captured);
+  CHECK(storage[0x18] == std::byte{2});
+  CHECK(ai::RestorePlanningActorStats(snapshot, {}));
+}
+
+TEST_CASE(
+    "Planning stats capture validates all rows before changing its snapshot",
+    "[ai][planning][stats-lifecycle]") {
+  const int failure = GENERATE(0, 1, 2, 3);
+  std::array<std::byte, ai::kPlanningStatsTableBytes> storage{};
+  storage.fill(std::byte{0xCC});
+  const auto before = storage;
+  std::array<std::byte, ai::kActorStatsRecordBytes> bytes{};
+  std::vector<ai::PlanningActorStats> actors{{.slot = 1, .bytes = bytes},
+                                             {.slot = 2, .bytes = bytes}};
+  ai::PlanningStatsSnapshot snapshot{.bytes = storage};
+  snapshot.captured_slots.fill(true);
+  if (failure == 0) actors.back().slot = 16;
+  if (failure == 1) {
+    actors.back().bytes = std::span(bytes).first(bytes.size() - 1);
+  }
+  if (failure == 2) {
+    snapshot.bytes = std::span(storage).first(storage.size() - 1);
+  }
+  if (failure == 3) actors.resize(17, actors.front());
+  CHECK_FALSE(ai::SnapshotPlanningActorStats(snapshot, actors));
+  CHECK(storage == before);
+  for (const bool captured : snapshot.captured_slots) CHECK(captured);
+}
+
+TEST_CASE(
+    "Planning stats restore refuses uncaptured or malformed rows before writes",
+    "[ai][planning][stats-lifecycle]") {
+  const int failure = GENERATE(0, 1, 2, 3);
+  std::array<std::byte, ai::kPlanningStatsTableBytes> storage{};
+  std::array<std::byte, ai::kActorStatsRecordBytes> first{}, second{};
+  first.fill(std::byte{0x23});
+  second.fill(std::byte{0x45});
+  const auto first_before = first;
+  const auto second_before = second;
+  std::array<ai::PlanningActorStats, 2> actors{
+      {{.slot = 1, .bytes = first}, {.slot = 3, .bytes = second}}};
+  ai::PlanningStatsSnapshot snapshot{.bytes = storage};
+  snapshot.captured_slots.fill(true);
+  if (failure == 0) actors.back().slot = 16;
+  if (failure == 1) {
+    actors.back().bytes = std::span(second).first(second.size() - 1);
+  }
+  if (failure == 2) {
+    snapshot.bytes = std::span(storage).first(storage.size() - 1);
+  }
+  if (failure == 3) snapshot.captured_slots[3] = false;
+  CHECK_FALSE(ai::RestorePlanningActorStats(snapshot, actors));
+  CHECK(first == first_before);
+  CHECK(second == second_before);
+}
+
 TEST_CASE("Candidate aim fields preserve every unrelated packed bit",
           "[ai][planning][candidate-evaluation]") {
   const Words words{0xDEADBEEF, 0x12345678, 0x87654321, 0xA5A5A5A5, 0xDEADC0DE};

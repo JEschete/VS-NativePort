@@ -15,6 +15,7 @@ extern "C" {
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
@@ -260,7 +261,7 @@ void Battle_Ai_InvalidateSessionBindings(void) {
   Battle_Ai_attributeActorMask = 0;
   Battle_Ai_secondPerceptionTarget = 0;
   Battle_Ai_arenaOrbit = nullptr;
-  Battle_Ai_planningStatsSnapshot = nullptr;
+  VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
   Battle_Ai_planningWorkspace = nullptr;
   Battle_Ai_planningPassCandidates = nullptr;
   Battle_Ai_candidateExclusions = nullptr;

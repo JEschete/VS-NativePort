@@ -1,8 +1,9 @@
 # Current Handoff
 
-Updated 2026-11-09. Row 28 (battle AI) resumed after the cleanup checkpoint.
+Updated 2026-11-10. Row 28 (battle AI) resumed after the cleanup checkpoint.
 The condition terms, quality repairs and three candidate-planning promotions
-are published with green exact-revision CI.
+are published with green exact-revision CI. The two planning-stat lifecycle
+promotions now pass local verification; publication and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -16,10 +17,10 @@ are published with green exact-revision CI.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **970 functions remain.** Modernization: 2,774 done of 3,744. C++ promotion:
-  2,775 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,493 promoted, 16 retired, 969 generated,
-  one WIP; 2,509 resolved. This continuation resolved 60 more than `6c8ac0b9`.
+- **968 functions remain.** Modernization: 2,776 done of 3,744. C++ promotion:
+  2,777 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,495 promoted, 16 retired, 967 generated,
+  one WIP; 2,511 resolved. This continuation resolved 62 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -31,6 +32,10 @@ are published with green exact-revision CI.
   ([CI 42756911275](https://github.com/JEschete/VS-NativePort/actions/runs/42756911275)).
   Local verification used base `8709974d` plus that commit's implementation,
   tests, generated bindings and related ledgers.
+- F01714/F01715 local verification uses base `109620c2` plus the uncommitted
+  lifecycle implementation, tests, generated callers and related ledgers.
+  Their ownership and behavior claims are recorded separately from the retained
+  exported snapshot pointer, G00589.
 
 ## Sources Of Truth
 
@@ -51,6 +56,19 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01714/F01715 now use typed stat rows and explicit snapshot storage.
+  Native bindings preserve the `0x9640` high-end allocation before actor reads,
+  empty lists, ordered duplicate slots, original partial-field copies, current
+  actor-list restoration and release ordering. The original 28/25-instruction
+  blocks match the actual native policies over 512 vectors, comparing every
+  snapshot and restored-record byte; allocator/copy callees are controlled.
+- Reentry, malformed/aliased rows and uncaptured restore slots are refused.
+  Release clears the legacy binding, and production session invalidation forgets
+  metadata without touching reclaimed storage. These are native safety
+  differences, not claims about original malformed-input behavior. The copier
+  removes both old bodies/prototypes and the obsolete allocation-cast adaptation;
+  neither inlined helper had a standalone module entry. G00589 remains a
+  compatibility bridge, not retired data.
 - F01698/F01699/F01704 now use typed candidate simulation, hit weighting and
   evaluation policies. They preserve aimed halfword coordinate wrapping,
   first-nonignored-match byte weighting, rare rejection, special-mode bypass,
@@ -126,6 +144,30 @@ are historical, not instructions or fresh verification.
   remain open. Local function promotion does not satisfy those wider gates.
 
 ## Verified
+
+For the stat lifecycle milestone on base `109620c2`:
+
+- Debug and Release rebuilds pass. Each full suite passes **5,204 cases /
+  12,644,168 assertions**, with zero failures or skips. Both unchanged canonical
+  replays match in each configuration; zero regressions.
+- `[stats-lifecycle],[stats-lifecycle-live]`: 10 cases / 45,851 assertions.
+  `[ai][planning]`: 113 cases / 188,272 assertions per configuration.
+- Original-instruction/native comparison: 512 vectors, zero mismatches;
+  allocation failure, request size, list order, slot stride and release order
+  also checked. The verification ledger records exact byte hashes and limits.
+- All 236 copier controls pass. Full quality: 244 existing findings, zero new;
+  final changed-scope tidy: 48 existing findings, zero new. No baseline changes.
+- Ownership/promotion, modernization, hazards and static regression gates pass.
+  Hazard synchronization refreshes affected line numbers without new triage.
+- Two supported copy/project generations preserve all 1,812 sampled hashes,
+  including owned sources, generated output, ledgers and projects. Manifest:
+  `50952e30b2210934ba1e1c2199cfe0d6dc18c27379d846838cd4767ec16c270a`.
+- Evidence is in the same session-local files directory: `stats_build_*`,
+  `stats_focused_*`, `stats_planning_*`, `stats_regression_*`,
+  `stats_differential.log`, `stats_copier_tests.log`, `stats_quality_full.log`,
+  `stats_quality_final.log`, `stats_generation1/2.log`, and the three gate logs.
+  The only source edit after full quality/runtime verification clarifies a
+  live-binding header comment; final scoped tidy includes it.
 
 For the candidate milestone on base `8709974d`:
 
@@ -210,17 +252,15 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. The F01698/F01699/F01704 milestone is published with successful exact-revision
-   CI and recorded in #276. Do not close #276: 970 functions remain.
-3. Continue ordered row 28. The next bounded planning lifecycle group is
-   F01714 `snapshotActorStats` and F01715 `restoreActorStats`
-   (`74088.c:1295/1309`) in
+2. Publish the locally verified F01714/F01715 milestone, confirm its exact-revision
+   CI and update #276. Do not close #276: 968 functions remain.
+3. Continue ordered row 28 with F01707 fallback selection, then
+   F01712/F01713 enumeration/simulation in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   Their generated code has been inspected, not promoted or behavior-verified.
-4. Read original source and actual assembly, then trace allocation failure,
-   actor-list changes, repeat entry and teardown before implementing.
-   Reuse the owned stat-copy policy and native heap bounds. F01707 fallback
-   selection and F01712/F01713 enumeration/simulation remain later callers.
+   Those functions remain generated and unverified by this milestone.
+4. Read original source and actual assembly, then trace callers, random-state
+   use, candidate-list mutation, failure and reset paths before implementing.
+   Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
 5. Test the deciding core first, then native/caller/module bindings. Make
    generated changes through the copier or owned registry, never by patching
    generated output. Remove only adaptations made obsolete by the owned body.
