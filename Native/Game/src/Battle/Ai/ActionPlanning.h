@@ -23,6 +23,5 @@ extern int Battle_Ai_unusedPlanCounter;
 extern Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
 extern Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 extern u_char (*Battle_Ai_candidateExclusions)[256];
-void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* completed_action);
 
 #endif // VS_BATTLE_AI_ACTIONPLANNING_H_DECLS

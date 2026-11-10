@@ -34,6 +34,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Random.h"
+#include "Field/Gimmicks.h"
 }
 
 namespace {
@@ -306,6 +307,72 @@ bool CopiedStatByte(std::size_t offset) {
          (offset >= 0x398 && offset < 0x8C0) ||
          (offset >= 0x948 && offset < 0x94C);
 }
+
+// A completed action 42 by performer 2, whose plan ranks the matching limb
+// slot (row 3, column 1) against target 5.
+struct CompletedPlanFixture {
+  std::array<Battle_Ai_ActorAiState*, 16> saved_states =
+      std::to_array(Battle_Ai_actorAiStates);
+  decltype(std::to_array(Field_gimmickInstances)) saved_objects =
+      std::to_array(Field_gimmickInstances);
+  decltype(std::to_array(Actors_actorRecords)) saved_models =
+      std::to_array(Actors_actorRecords);
+  Battle_Ai_ActorAiState state{};
+  Battle_Actor actor{};
+  Battle_Ai_ActionCandidate first{};
+  Battle_Ai_ActionCandidate second{};
+  Actors_ActorRecord model{};
+  Field_GimmickInstance object{};
+  Battle_ActionRequest request{};
+
+  static constexpr int kRememberedTile = 5 << 24;
+  static constexpr int kUntouchedTile = 0x12345678;
+
+  CompletedPlanFixture() {
+    std::fill_n(Battle_Ai_actorAiStates, 16, nullptr);
+    std::fill_n(Field_gimmickInstances, 16, nullptr);
+    Battle_Ai_actorAiStates[2] = &state;
+    state.actor = reinterpret_cast<Battle_Ai_EngagementData*>(&actor);
+    state.previousTile = kUntouchedTile;
+    actor.commandOpcode = 24;
+    actor.commandArg0 = (1 << 16) | 3;
+    first.row = 3;
+    first.column = 1;
+    first.action = 42;
+    first.targetId = 5;
+    second = first;
+    second.action = 43;
+    second.targetId = 6;
+    state.candidateCount = 2;
+    state.candidateOrder[0] = &first;
+    state.candidateOrder[1] = &second;
+    Actors_actorRecords[5] = &model;
+    request.actionId = 42;
+    request.primaryTarget.target.targetActor = 2;
+    request.targetCount = 1;
+    request.targets[0].target.targetActor = 4;
+    Field_gimmickInstances[4] = &object;
+  }
+
+  ~CompletedPlanFixture() {
+    std::copy(saved_states.begin(), saved_states.end(),
+              Battle_Ai_actorAiStates);
+    std::copy(saved_objects.begin(), saved_objects.end(),
+              Field_gimmickInstances);
+    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+  }
+
+  void Reconcile() {
+    Battle_Ai_ReconcileCompletedActionPlanEntry(
+        reinterpret_cast<Battle_Ai_ReactionRecord*>(&request));
+  }
+
+  auto Bytes() const {
+    std::array<std::byte, sizeof(state)> bytes{};
+    std::memcpy(bytes.data(), &state, bytes.size());
+    return bytes;
+  }
+};
 }  // namespace
 
 TEST_CASE(
@@ -858,6 +925,99 @@ TEST_CASE("Native enumeration retains its original module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DD918) ==
         reinterpret_cast<void*>(&Battle_Ai_EnumerateActionCandidatesEntry));
+}
+
+TEST_CASE("Completed action reconciliation ignores an absent performer state",
+          "[ai][planning][completed-plan-live]") {
+  CompletedPlanFixture fixture;
+  Battle_Ai_actorAiStates[2] = nullptr;
+  fixture.state.actor = nullptr;
+  const auto expected = fixture.Bytes();
+  fixture.Reconcile();
+  CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE(
+    "Completed action reconciliation ignores absent and position requests",
+    "[ai][planning][completed-plan-live]") {
+  CompletedPlanFixture fixture;
+  const auto expected = fixture.Bytes();
+  Battle_Ai_ReconcileCompletedActionPlanEntry(nullptr);
+  CHECK(fixture.Bytes() == expected);
+  fixture.request.primaryTarget.targetsPosition = 1;
+  fixture.Reconcile();
+  CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE("Completed action reconciliation leaves non-action commands",
+          "[ai][planning][completed-plan-live]") {
+  CompletedPlanFixture fixture;
+  fixture.actor.commandOpcode = 23;
+  const auto expected = fixture.Bytes();
+  fixture.Reconcile();
+  CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE(
+    "Completed action reconciliation records the detour and remembers its "
+    "target",
+    "[ai][planning][completed-plan-live]") {
+  CompletedPlanFixture fixture;
+  fixture.object.objectInfo.objectId = GENERATE(0, 1, 3, 5, 6, 7);
+  fixture.Reconcile();
+  CHECK(fixture.state.opaqueFB == 5);
+  CHECK(fixture.state.previousTile == CompletedPlanFixture::kRememberedTile);
+}
+
+TEST_CASE(
+    "Completed action reconciliation forgets for absent and kind 2 or 4 "
+    "objects",
+    "[ai][planning][completed-plan-live]") {
+  CompletedPlanFixture fixture;
+  const int kind = GENERATE(-1, 2, 4);
+  if (kind < 0) {
+    Field_gimmickInstances[4] = nullptr;
+  } else {
+    fixture.object.objectInfo.objectId = kind;
+  }
+  fixture.Reconcile();
+  CHECK(fixture.state.opaqueFB == 5);
+  CHECK(fixture.state.previousTile == -1);
+}
+
+TEST_CASE("Completed action reconciliation skips position targets",
+          "[ai][planning][completed-plan-live]") {
+  CompletedPlanFixture fixture;
+  fixture.request.targets[0].target.targetActor = 200;
+  fixture.request.targets[0].targetsPosition = 1;
+  fixture.Reconcile();
+  CHECK(fixture.state.opaqueFB == 5);
+  CHECK(fixture.state.previousTile == CompletedPlanFixture::kRememberedTile);
+}
+
+TEST_CASE(
+    "Completed action reconciliation compares the full action and command "
+    "halves",
+    "[ai][planning][completed-plan-live]") {
+  CompletedPlanFixture fixture;
+  SECTION("an action ID past the candidate field") {
+    fixture.request.actionId = 42 + 256;
+  }
+  SECTION("another column") { fixture.actor.commandArg0 = 3; }
+  SECTION("a wider row half") { fixture.actor.commandArg0 = (1 << 16) | 11; }
+  Field_gimmickInstances[4] = nullptr;
+  fixture.Reconcile();
+  CHECK(fixture.state.opaqueFB == 0);
+  CHECK(fixture.state.previousTile == CompletedPlanFixture::kRememberedTile);
+}
+
+TEST_CASE("Completed action reconciliation retains its original module address",
+          "[ai][planning][completed-plan-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DEB10) ==
+        reinterpret_cast<const void*>(
+            &Battle_Ai_ReconcileCompletedActionPlanEntry));
 }
 
 TEST_CASE("Native actor plan retains its original module address",

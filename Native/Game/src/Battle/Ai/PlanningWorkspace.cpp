@@ -21,6 +21,14 @@ constexpr std::uint8_t kArenaReadyProgress = 5;
 constexpr std::uint8_t kActionCommandOpcode = 24;
 constexpr unsigned kFirstArenaActorSubtype = 172;
 constexpr int kPlanCapacity = static_cast<int>(kCandidateCapacity);
+// The action command's argument holds the limb row (lhu +0x0C) and the action
+// column (lhu +0x0E).
+constexpr unsigned kCommandColumnShift = 16;
+constexpr std::uint32_t kCommandRowMask = 0xFFFF;
+// Object kinds 2 and 4 ((0x14 >> kind) & 1 at 800DEC20-800DEC2C) end the
+// performer's target memory.
+constexpr unsigned kTargetMemoryEndingObjectKinds = 0x14;
+constexpr unsigned kObjectKindMask = 7;
 
 bool RefusePlan(const char* reason) {
   Core_Debugf("ai", "%s", reason);
@@ -200,6 +208,36 @@ bool AdjustArenaPlan(ActorActionPlanHost& host) {
   }
   return true;
 }
+
+bool EndsTargetMemory(const CompletedTargetObject& object) {
+  return !object.present ||
+         ((kTargetMemoryEndingObjectKinds >> (object.kind & kObjectKindMask)) &
+          1U) != 0;
+}
+
+// Returns whether a hit result of the completed action ends the performer's
+// target memory, or nullopt on a hit result outside native storage.
+std::optional<bool> CompletedTargetsEndMemory(CompletedActionPlanHost& host) {
+  for (int index = 0; index < host.TargetCount(); ++index) {
+    if (index >= kTargetPreviewCapacity) {
+      RefusePlan("Completed action target count is past the request");
+      return std::nullopt;
+    }
+    const auto target = host.Target(static_cast<std::size_t>(index));
+    if (!target) {
+      RefusePlan("Completed action requires a readable hit result");
+      return std::nullopt;
+    }
+    if (target->targets_position) continue;
+    const auto object = host.TargetObject(target->slot);
+    if (!object) {
+      RefusePlan("Completed action target is outside the gimmick table");
+      return std::nullopt;
+    }
+    if (EndsTargetMemory(*object)) return true;
+  }
+  return false;
+}
 }  // namespace
 
 // func_800DE3E4 (74088.c:1319), 800DE3E4-800DEB0C. Selection counts retain
@@ -241,6 +279,50 @@ bool BuildActorActionPlan(ActorActionPlanHost& host) {
     host.SelectMovement();
   }
   return AdjustArenaPlan(host);
+}
+
+// func_800DEB10 (74088.c:1458), 800DEB10-800DEC84. The original loads the
+// performer's actor before its null-state branch (800DEB48/800DEB4C); an
+// absent state returns here before any actor read (#336). Matches do not end
+// the scan: a later match replaces the detour target and rescans the targets.
+bool ReconcileCompletedActionPlan(const std::optional<CompletedAction>& action,
+                                  CompletedActionPlanHost& host) {
+  if (!action || action->performer_targets_position) return true;
+  const auto selected = host.SelectPerformer(action->performer);
+  if (!selected) {
+    return RefusePlan("Completed action performer is outside the state table");
+  }
+  if (!*selected) return true;
+  const auto command = host.PerformerCommand();
+  if (!command) {
+    return RefusePlan("Completed action requires its performer's actor");
+  }
+  if (command->opcode != kActionCommandOpcode) return true;
+  const auto argument = static_cast<std::uint32_t>(command->argument);
+  const unsigned row = argument & kCommandRowMask;
+  const unsigned column = argument >> kCommandColumnShift;
+  for (int rank = 0; rank < host.CandidateCount(); ++rank) {
+    if (rank >= kPlanCapacity) {
+      return RefusePlan("Completed action candidate count is past the list");
+    }
+    const auto candidate = host.Ranked(static_cast<std::size_t>(rank));
+    if (!candidate) {
+      return RefusePlan("Completed action requires a ranked candidate");
+    }
+    if (action->action_id != candidate->Action() || row != candidate->Row() ||
+        column != candidate->Column()) {
+      continue;
+    }
+    host.SetDetourTarget(static_cast<std::uint8_t>(candidate->TargetId()));
+    const auto ends_memory = CompletedTargetsEndMemory(host);
+    if (!ends_memory) return false;
+    if (*ends_memory) {
+      host.ForgetTarget();
+      return true;
+    }
+  }
+  host.RememberTarget();
+  return true;
 }
 
 // func_800DEC88, BATTLE/BATTLE.PRG/74088.c:1547. The original walks the

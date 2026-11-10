@@ -91,12 +91,13 @@ Battle_ActorStats& StatsOf(const Battle_Actor& actor) {
 class LiveActionPlanningRoom final : public ActionPlanningRoom {
  public:
   explicit LiveActionPlanningRoom(Battle_ActionRequest* request)
-      : record_(reinterpret_cast<Battle_Ai_ReactionRecord*>(request)) {}
+      : request_(request),
+        record_(reinterpret_cast<Battle_Ai_ReactionRecord*>(request)) {}
 
   void ResetReadiness() override { Battle_Ai_roomAiState->readinessLevel = 0; }
 
   void ReconcileCompletedPlan() override {
-    Battle_Ai_ReconcileCompletedActionPlan(record_);
+    ReconcileLiveCompletedActionPlan(request_);
   }
 
   void ApplyRelationshipChanges() override {
@@ -156,6 +157,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   }
 
  private:
+  const Battle_ActionRequest* request_;
   Battle_Ai_ReactionRecord* record_;
 };
 

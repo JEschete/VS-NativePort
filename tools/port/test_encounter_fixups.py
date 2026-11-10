@@ -399,6 +399,8 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("EnumerateLiveActionCandidates(&state_, threshold);", live)
         self.assertIn("BuildLiveActorActionPlan(&plan);", workspace)
         self.assertNotIn("Battle_Ai_BuildActorActionPlan(", workspace)
+        self.assertIn("ReconcileLiveCompletedActionPlan(request_);", workspace)
+        self.assertNotIn("Battle_Ai_ReconcileCompletedActionPlan(", workspace)
 
     def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
         source = (
@@ -634,6 +636,9 @@ class EncounterFixupTests(unittest.TestCase):
               ("F01713", "Battle_Ai_AdvancePlanningSimulationEntry", "VS::Battle::Ai::AdvancePlanningSimulation",
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F01716", "Battle_Ai_BuildActorActionPlanEntry", "VS::Battle::Ai::BuildActorActionPlan",
+               r"Native\Game\include\Battle\Ai\PlanningWorkspace.hpp"),
+              ("F01717", "Battle_Ai_ReconcileCompletedActionPlanEntry",
+               "VS::Battle::Ai::ReconcileCompletedActionPlan",
                r"Native\Game\include\Battle\Ai\PlanningWorkspace.hpp"),
               ("F00619", "Field_SetMovingPlatformVisibilityEntry", "VS::Field::SetMovingPlatformVisibility",
                r"Native\Game\include\Field\PlatformPlacement.hpp"),
@@ -1283,6 +1288,8 @@ class EncounterFixupTests(unittest.TestCase):
                     "F01712": ("Battle_Ai_EnumerateActionCandidatesEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01713": ("Battle_Ai_AdvancePlanningSimulationEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01716": ("Battle_Ai_BuildActorActionPlanEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01717": ("Battle_Ai_ReconcileCompletedActionPlanEntry",
+                               r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F00619": ("Field_SetMovingPlatformVisibilityEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00621": ("Field_MovingPlatformDwellTicksEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00067": ("Field_ApplyUnlockEffectToRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),

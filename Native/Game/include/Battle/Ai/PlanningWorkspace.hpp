@@ -63,6 +63,55 @@ class ActorActionPlanHost {
 // func_800DE3E4, BATTLE/BATTLE.PRG/74088.c:1319; 459 original instructions.
 bool BuildActorActionPlan(ActorActionPlanHost& host);
 
+// The completed request as func_800DEB10 reads it: its action ID (+0x00, lhu)
+// and the primary hit result's actor (+0x04, lbu) and targets-position word
+// (+0x44, lw). That actor performed the action whose plan is reconciled.
+struct CompletedAction {
+  std::uint16_t action_id = 0;
+  std::uint8_t performer = 0;
+  bool performer_targets_position = false;
+};
+
+// One of the request's hit results (+0x4C, stride 0x44).
+struct CompletedActionTarget {
+  std::uint8_t slot = 0;
+  bool targets_position = false;
+};
+
+// The room object in a target's slot of the gimmick table.
+struct CompletedTargetObject {
+  bool present = false;
+  std::uint8_t kind = 0;
+};
+
+class CompletedActionPlanHost {
+ public:
+  virtual ~CompletedActionPlanHost() = default;
+  // Selects the performer's AI state. Returns nullopt for a slot outside the
+  // AI state table or an unreadable state, and false when the slot holds no
+  // state.
+  virtual std::optional<bool> SelectPerformer(unsigned slot) = 0;
+  virtual std::optional<ActionPlanCommand> PerformerCommand() const = 0;
+  virtual int CandidateCount() const = 0;
+  virtual std::optional<ActionCandidate> Ranked(std::size_t rank) const = 0;
+  virtual void SetDetourTarget(std::uint8_t target) = 0;
+  virtual int TargetCount() const = 0;
+  virtual std::optional<CompletedActionTarget> Target(
+      std::size_t index) const = 0;
+  // Returns nullopt for a slot outside the gimmick table or an unreadable
+  // object.
+  virtual std::optional<CompletedTargetObject> TargetObject(
+      unsigned slot) const = 0;
+  virtual void ForgetTarget() = 0;
+  virtual void RememberTarget() = 0;
+};
+
+// func_800DEB10, BATTLE/BATTLE.PRG/74088.c:1458; 94 original instructions.
+// Returns false, without further reads, on input that would leave native
+// storage; an absent request, position request or performer state is a no-op.
+bool ReconcileCompletedActionPlan(const std::optional<CompletedAction>& action,
+                                  CompletedActionPlanHost& host);
+
 // The queued action the plans react to (func_800DEEA4_t at
 // BATTLE/BATTLE.PRG/74088.c:388): its primary target's actor and that target's
 // targets-position word.

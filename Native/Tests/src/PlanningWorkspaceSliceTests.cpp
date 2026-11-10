@@ -253,6 +253,75 @@ class RecordingRoom final : public ActionPlanningRoom {
   }
 };
 
+ai::ActionCandidate CompletedCandidate(unsigned action, unsigned target) {
+  auto candidate = PlanCandidate(1);
+  candidate.SetSlot(2, 1);
+  candidate.SetAction(action);
+  candidate.SetTargetId(target);
+  return candidate;
+}
+
+class RecordingCompletedPlan final : public ai::CompletedActionPlanHost {
+ public:
+  // Row 2 in the low half and column 1 in the high half.
+  static constexpr std::int32_t kSlotArgument = (1 << 16) | 2;
+
+  std::optional<bool> performer = true;
+  std::optional<ai::ActionPlanCommand> command =
+      ai::ActionPlanCommand{24, kSlotArgument};
+  int count = 1;
+  std::vector<std::optional<ai::ActionCandidate>> ranked{
+      CompletedCandidate(5, 9)};
+  std::vector<std::optional<ai::CompletedActionTarget>> targets;
+  std::array<std::optional<ai::CompletedTargetObject>, 16> objects{};
+  int detour = -1;
+  mutable std::vector<std::string> log;
+
+  RecordingCompletedPlan() {
+    objects.fill(ai::CompletedTargetObject{.present = true, .kind = 0});
+  }
+
+  std::optional<bool> SelectPerformer(unsigned slot) override {
+    log.push_back("select " + std::to_string(slot));
+    return performer;
+  }
+  std::optional<ai::ActionPlanCommand> PerformerCommand() const override {
+    log.push_back("command");
+    return command;
+  }
+  int CandidateCount() const override { return count; }
+  std::optional<ai::ActionCandidate> Ranked(std::size_t rank) const override {
+    log.push_back("rank " + std::to_string(rank));
+    return rank < ranked.size() ? ranked[rank] : std::nullopt;
+  }
+  void SetDetourTarget(std::uint8_t target) override {
+    detour = target;
+    log.push_back("detour " + std::to_string(target));
+  }
+  int TargetCount() const override { return static_cast<int>(targets.size()); }
+  std::optional<ai::CompletedActionTarget> Target(
+      std::size_t index) const override {
+    log.push_back("target " + std::to_string(index));
+    return index < targets.size() ? targets[index] : std::nullopt;
+  }
+  std::optional<ai::CompletedTargetObject> TargetObject(
+      unsigned slot) const override {
+    log.push_back("object " + std::to_string(slot));
+    return slot < objects.size() ? objects[slot] : std::nullopt;
+  }
+  void ForgetTarget() override { log.push_back("forget"); }
+  void RememberTarget() override { log.push_back("remember"); }
+};
+
+ai::CompletedAction CompletedActionOf(std::uint16_t action_id) {
+  return {.action_id = action_id, .performer = 3};
+}
+
+ai::CompletedActionTarget CompletedTargetAt(std::uint8_t slot,
+                                            bool targets_position = false) {
+  return {.slot = slot, .targets_position = targets_position};
+}
+
 }  // namespace
 
 TEST_CASE("Actor plan resets exclusions and counts before the zero actor exit",
@@ -556,4 +625,154 @@ TEST_CASE("The promoted plan rebuild has no original module address",
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DEC88u) == nullptr);
+}
+
+TEST_CASE("Completed plan ignores absent and position requests",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  CHECK(ai::ReconcileCompletedActionPlan(std::nullopt, host));
+  auto action = CompletedActionOf(5);
+  action.performer_targets_position = true;
+  CHECK(ai::ReconcileCompletedActionPlan(action, host));
+  CHECK(host.log.empty());
+}
+
+TEST_CASE("Completed plan returns before an absent performer's command (#336)",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  host.performer = false;
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.log == std::vector<std::string>{"select 3"});
+}
+
+TEST_CASE("Completed plan reconciles only action commands",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  host.command =
+      ai::ActionPlanCommand{static_cast<std::uint8_t>(GENERATE(0, 23, 25, 255)),
+                            RecordingCompletedPlan::kSlotArgument};
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.log == std::vector<std::string>{"select 3", "command"});
+}
+
+TEST_CASE("Completed plan records the match and remembers the target",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  host.targets = {CompletedTargetAt(4)};
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.detour == 9);
+  CHECK(host.log == std::vector<std::string>{"select 3", "command", "rank 0",
+                                             "detour 9", "target 0", "object 4",
+                                             "remember"});
+}
+
+TEST_CASE("Completed plan compares the full action ID and both command halves",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  std::uint16_t action_id = 5;
+  SECTION("action IDs past the candidate field") { action_id = 0x105; }
+  SECTION("a wider row half") {
+    host.command = ai::ActionPlanCommand{24, (1 << 16) | 0x0A};
+  }
+  SECTION("a wider column half") {
+    host.command = ai::ActionPlanCommand{24, (5 << 16) | 2};
+  }
+  SECTION("another column") { host.command = ai::ActionPlanCommand{24, 2}; }
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(action_id), host));
+  CHECK(host.detour == -1);
+  CHECK(host.log ==
+        std::vector<std::string>{"select 3", "command", "rank 0", "remember"});
+}
+
+TEST_CASE("Completed plan with no candidates still remembers the target",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  host.count = GENERATE(-1, 0);
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.log ==
+        std::vector<std::string>{"select 3", "command", "remember"});
+}
+
+TEST_CASE("Later completed-plan matches replace the detour and rescan targets",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  host.count = 3;
+  host.ranked = {CompletedCandidate(5, 4), CompletedCandidate(6, 8),
+                 CompletedCandidate(5, 7)};
+  host.targets = {CompletedTargetAt(1)};
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.detour == 7);
+  CHECK(host.log == std::vector<std::string>{
+                        "select 3", "command", "rank 0", "detour 4", "target 0",
+                        "object 1", "rank 1", "rank 2", "detour 7", "target 0",
+                        "object 1", "remember"});
+}
+
+TEST_CASE("Completed plan forgets for absent and kind 2 or 4 target objects",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  const int kind = GENERATE(-1, 2, 4);
+  host.objects[6] = ai::CompletedTargetObject{
+      .present = kind >= 0, .kind = static_cast<std::uint8_t>(kind & 7)};
+  host.count = 2;
+  host.ranked = {CompletedCandidate(5, 4), CompletedCandidate(5, 7)};
+  host.targets = {CompletedTargetAt(200, true), CompletedTargetAt(6),
+                  CompletedTargetAt(1)};
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.detour == 4);
+  CHECK(host.log == std::vector<std::string>{"select 3", "command", "rank 0",
+                                             "detour 4", "target 0", "target 1",
+                                             "object 6", "forget"});
+}
+
+TEST_CASE("Completed plan keeps memory for other target object kinds",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  const auto kind = static_cast<std::uint8_t>(GENERATE(0, 1, 3, 5, 6, 7));
+  host.objects[6] = ai::CompletedTargetObject{.present = true, .kind = kind};
+  host.targets = {CompletedTargetAt(6), CompletedTargetAt(255, true)};
+  CHECK(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.log == std::vector<std::string>{"select 3", "command", "rank 0",
+                                             "detour 9", "target 0", "object 6",
+                                             "target 1", "remember"});
+}
+
+TEST_CASE("Completed plan refuses records outside native storage",
+          "[ai][planning][completed-plan]") {
+  RecordingCompletedPlan host;
+  std::vector<std::string> expected{"select 3", "command"};
+  SECTION("a performer outside the state table") {
+    host.performer = std::nullopt;
+    expected = {"select 3"};
+  }
+  SECTION("a missing performer command") { host.command = std::nullopt; }
+  SECTION("a candidate count past the list") {
+    host.count = 17;
+    host.ranked.assign(16, CompletedCandidate(6, 9));
+    for (int rank = 0; rank < 16; ++rank) {
+      expected.push_back("rank " + std::to_string(rank));
+    }
+  }
+  SECTION("a missing ranked candidate") {
+    host.count = 2;
+    expected.insert(expected.end(), {"rank 0", "detour 9", "rank 1"});
+  }
+  SECTION("a target count past the request") {
+    host.targets.assign(256, CompletedTargetAt(0, true));
+    expected.insert(expected.end(), {"rank 0", "detour 9"});
+    for (int index = 0; index < 255; ++index) {
+      expected.push_back("target " + std::to_string(index));
+    }
+  }
+  SECTION("an unreadable target") {
+    host.targets = {std::nullopt};
+    expected.insert(expected.end(), {"rank 0", "detour 9", "target 0"});
+  }
+  SECTION("a target outside the gimmick table") {
+    host.targets = {CompletedTargetAt(16)};
+    expected.insert(expected.end(),
+                    {"rank 0", "detour 9", "target 0", "object 16"});
+  }
+  CHECK_FALSE(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
+  CHECK(host.log == expected);
 }

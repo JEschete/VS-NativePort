@@ -373,6 +373,7 @@ NATIVE_HELPER_HEADERS = {
     "Battle_Ai_EnumerateActionCandidatesEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
     "Battle_Ai_AdvancePlanningSimulationEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
     "Battle_Ai_BuildActorActionPlanEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
+    "Battle_Ai_ReconcileCompletedActionPlanEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
     "Field_CurrentSavePointIdEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_RefreshAshleyInteractionTileEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_CreateGimmickInstanceEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
@@ -1153,6 +1154,7 @@ OWNED_CALL_BINDINGS["F01713"] = "Battle_Ai_AdvancePlanningSimulationEntry"
 OWNED_CALL_BINDINGS["F01714"] = "VS::Battle::Ai::SnapshotLivePlanningActorStats"
 OWNED_CALL_BINDINGS["F01715"] = "VS::Battle::Ai::RestoreLivePlanningActorStats"
 OWNED_CALL_BINDINGS["F01716"] = "Battle_Ai_BuildActorActionPlanEntry"
+OWNED_CALL_BINDINGS["F01717"] = "Battle_Ai_ReconcileCompletedActionPlanEntry"
 OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
@@ -2638,6 +2640,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DD918, "Battle_Ai_EnumerateActionCandidatesEntry"),
     ("BATTLE/BATTLE.PRG", 0x800DE030, "Battle_Ai_AdvancePlanningSimulationEntry"),
     ("BATTLE/BATTLE.PRG", 0x800DE3E4, "Battle_Ai_BuildActorActionPlanEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800DEB10, "Battle_Ai_ReconcileCompletedActionPlanEntry"),
     ("BATTLE/BATTLE.PRG", 0x8009E634, "Field_RefreshAshleyInteractionTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),

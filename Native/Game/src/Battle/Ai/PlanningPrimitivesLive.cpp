@@ -24,6 +24,7 @@
 #include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/GimmickPlacementLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -34,6 +35,7 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -42,6 +44,7 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Core/Diagnostics.h"
 #include "Core/Random.h"
+#include "Field/Gimmicks.h"
 }
 
 namespace VS::Battle::Ai {
@@ -77,6 +80,19 @@ static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
               kTargetPreviewCapacity);
 static_assert(kTargetOffset == offsetof(Battle_ActionRequest, targets));
 static_assert(sizeof(Battle_Ai_EngagementActor) == sizeof(Battle_HitResult));
+// func_800DEB10 reads the completed request through func_800DEEA4_t and the
+// performer's command argument as two halves (lhu +0x0C, lhu +0x0E).
+static_assert(offsetof(Battle_Ai_ReactionRecord, opaque4) ==
+              offsetof(Battle_ActionRequest, primaryTarget));
+static_assert(offsetof(Battle_Ai_ReactionRecord, opaque4A) ==
+              offsetof(Battle_ActionRequest, targetCount));
+static_assert(offsetof(Battle_Ai_EngagementActor, opaque40) ==
+              offsetof(Battle_HitResult, targetsPosition));
+static_assert(offsetof(Battle_Ai_EngagementData, opaqueC) ==
+              offsetof(Battle_Actor, commandArg0));
+static_assert(offsetof(Battle_Ai_EngagementData, opaqueE) ==
+              offsetof(Battle_Actor, commandArg0) + sizeof(std::uint16_t));
+static_assert(std::size(Field_gimmickInstances) == kCandidateTargetSlots);
 
 static_assert(sizeof(Battle_Ai_CandidateEntryView) ==
               sizeof(ActionCandidate::Words));
@@ -591,6 +607,73 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
   const Battle_ActorStats* initial_stats_;
   LiveCandidateList list_;
   const Battle_Actor* arena_actor_ = nullptr;
+};
+
+class LiveCompletedActionPlan final : public CompletedActionPlanHost {
+ public:
+  explicit LiveCompletedActionPlan(const Battle_ActionRequest* request)
+      : request_(request) {}
+
+  std::optional<bool> SelectPerformer(unsigned slot) override {
+    if (slot >= std::size(Battle_Ai_actorAiStates)) return std::nullopt;
+    auto* state = std::span(Battle_Ai_actorAiStates)[slot];
+    if (state == nullptr) return false;
+    if (!ReadablePlanningRecord(state)) return std::nullopt;
+    state_ = state;
+    return true;
+  }
+  std::optional<ActionPlanCommand> PerformerCommand() const override {
+    const auto* actor = reinterpret_cast<const Battle_Actor*>(State().actor);
+    if (!ReadablePlanningRecord(actor)) return std::nullopt;
+    return ActionPlanCommand{actor->commandOpcode, actor->commandArg0};
+  }
+  int CandidateCount() const override { return State().candidateCount; }
+  std::optional<ActionCandidate> Ranked(std::size_t rank) const override {
+    if (rank >= std::size(State().candidateOrder)) return std::nullopt;
+    const auto* record = std::span(State().candidateOrder)[rank];
+    if (!ReadablePlanningRecord(record)) return std::nullopt;
+    return CandidateOf(record);
+  }
+  void SetDetourTarget(std::uint8_t target) override {
+    State().opaqueFB = target;
+  }
+  int TargetCount() const override {
+    return request_ == nullptr ? 0 : request_->targetCount;
+  }
+  std::optional<CompletedActionTarget> Target(
+      std::size_t index) const override {
+    if (request_ == nullptr || index >= std::size(request_->targets) ||
+        !ReadablePlanningBytes(
+            request_, kTargetOffset + (index + 1) * sizeof(Battle_HitResult),
+            alignof(Battle_ActionRequest))) {
+      return std::nullopt;
+    }
+    const auto& target = std::span(request_->targets)[index];
+    return CompletedActionTarget{
+        .slot = target.target.targetActor,
+        .targets_position = target.targetsPosition != 0};
+  }
+  std::optional<CompletedTargetObject> TargetObject(
+      unsigned slot) const override {
+    if (slot >= std::size(Field_gimmickInstances)) return std::nullopt;
+    const auto* object = std::span(Field_gimmickInstances)[slot];
+    if (object == nullptr) return CompletedTargetObject{};
+    if (!Field::IsLiveGimmickPrefixReadable(object)) return std::nullopt;
+    return CompletedTargetObject{.present = true,
+                                 .kind = object->objectInfo.objectId};
+  }
+  void ForgetTarget() override { Battle_Ai_ForgetAiActionTarget(&State()); }
+  void RememberTarget() override { RememberLiveAiActionTarget(&State()); }
+
+ private:
+  Battle_Ai_ActorAiState& State() const {
+    Require(state_ != nullptr,
+            "Completed action reconciliation requires a selected performer");
+    return *state_;
+  }
+
+  const Battle_ActionRequest* request_;
+  Battle_Ai_ActorAiState* state_ = nullptr;
 };
 
 class LiveTargeting final : public ActionTargetingHost {
@@ -1273,6 +1356,23 @@ void BuildLiveActorActionPlan(Battle_Ai_ActorAiState* state) {
           "Actor action planning refused invalid inputs");
 }
 
+void ReconcileLiveCompletedActionPlan(const Battle_ActionRequest* request) {
+  std::optional<CompletedAction> action;
+  if (request != nullptr) {
+    Require(ReadablePlanningBytes(request, kTargetOffset,
+                                  alignof(Battle_ActionRequest)),
+            "Completed action reconciliation requires a complete request");
+    action =
+        CompletedAction{.action_id = request->actionId,
+                        .performer = request->primaryTarget.target.targetActor,
+                        .performer_targets_position =
+                            request->primaryTarget.targetsPosition != 0};
+  }
+  LiveCompletedActionPlan host(request);
+  Require(ReconcileCompletedActionPlan(action, host),
+          "Completed action reconciliation refused invalid input");
+}
+
 void EnumerateLiveActionCandidates(Battle_Ai_ActorAiState* state,
                                    std::int32_t readiness_threshold) {
   Require(ReadablePlanningRecord(state),
@@ -1404,4 +1504,10 @@ void Battle_Ai_EnumerateActionCandidatesEntry(Battle_Ai_ActorAiState* state,
 
 void Battle_Ai_BuildActorActionPlanEntry(Battle_Ai_ActorAiState* state) {
   VS::Battle::Ai::BuildLiveActorActionPlan(state);
+}
+
+void Battle_Ai_ReconcileCompletedActionPlanEntry(
+    Battle_Ai_ReactionRecord* completed_action) {
+  VS::Battle::Ai::ReconcileLiveCompletedActionPlan(
+      reinterpret_cast<const Battle_ActionRequest*>(completed_action));
 }

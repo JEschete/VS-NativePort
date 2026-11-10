@@ -9,6 +9,7 @@
 
 struct Battle_ActorStats;
 struct Battle_ActionDefinition;
+struct Battle_ActionRequest;
 struct Battle_Ai_ActionCandidate;
 struct Battle_Ai_ActionPlanView;
 struct Battle_Ai_ActorAiState;
@@ -75,6 +76,8 @@ void AppendLiveActionCandidate(Battle_Ai_ActorAiState* state,
                                const Battle_Ai_ActionCandidate* candidate);
 void SortLiveActionCandidates(Battle_Ai_ActionPlanView* state);
 void BuildLiveActorActionPlan(Battle_Ai_ActorAiState* state);
+// A null request is a no-op, as in the original.
+void ReconcileLiveCompletedActionPlan(const Battle_ActionRequest* request);
 // The source and destination may be the same record.
 void CopyLivePlanningActorStats(const Battle_ActorStats* source,
                                 Battle_ActorStats* destination);
