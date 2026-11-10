@@ -35,6 +35,7 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Damage.h"
+#include "Battle/StatusEffects.h"
 #include "Core/Diagnostics.h"
 #include "Core/Random.h"
 }
@@ -60,6 +61,8 @@ static_assert(
     kCandidateCapacity);
 constexpr int kRestoreOperation = 2;
 constexpr int kAimedSimulationMode = 3;
+constexpr std::size_t kPoisonStatusIndex = 14;
+constexpr std::size_t kRegenerationStatusIndex = 17;
 constexpr auto kTargetOffset = offsetof(Battle_Ai_ReactionRecord, opaque4C);
 PlanningStatsSnapshot planning_stats_snapshot;
 static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
@@ -492,6 +495,71 @@ class LiveFallbackActionSelection final : public FallbackActionHost {
   const Battle_ActorStats& stats_;
 };
 
+class LivePlanningSimulation final : public PlanningSimulationHost {
+ public:
+  explicit LivePlanningSimulation(Battle_Ai_RoomAiState& room) : room_(room) {
+    for (auto* actor = Battle_actors[0]; actor != nullptr;
+         actor = actor->next) {
+      Require(count_ < actors_.size() && ReadablePlanningRecord(actor) &&
+                  actor->id >= 0 && actor->id < kBattleActorSlotCount,
+              "Planning simulation requires a bounded valid actor list");
+      actors_[count_++] = actor;
+    }
+  }
+  std::uint16_t Readiness() const override { return room_.readinessLevel; }
+  void SetReadiness(std::uint16_t value) override {
+    room_.readinessLevel = value;
+  }
+  std::size_t ActorCount() const override { return count_; }
+  std::optional<PlanningSimulationStats> ReadActor(
+      std::size_t index) const override {
+    const auto* stats = actors_[index]->stats;
+    if (!ReadablePlanningRecord(stats)) return std::nullopt;
+    PlanningSimulationStats result{
+        .hp = {stats->currentHp, stats->maxHp},
+        .mp = {stats->currentMp, stats->maxMp},
+        .mobility_limbs = {stats->mobilityLimb0, stats->mobilityLimb1},
+        .statuses = static_cast<std::uint32_t>(stats->statuses)};
+    for (std::size_t limb = 0; limb < result.limbs.size(); ++limb) {
+      const auto& source = std::span(stats->limbs)[limb];
+      result.limbs[limb] = {source.hp, source.maxHp};
+    }
+    std::copy_n(std::begin(stats->statusTimers), result.status_timers.size(),
+                result.status_timers.begin());
+    return result;
+  }
+  void WriteActor(std::size_t index,
+                  const PlanningSimulationStats& result) override {
+    auto& stats = *actors_[index]->stats;
+    stats.currentHp = result.hp.value;
+    stats.currentMp = result.mp.value;
+    stats.statuses = std::bit_cast<std::int32_t>(result.statuses);
+    for (std::size_t limb = 0; limb < result.limbs.size(); ++limb) {
+      std::span(stats.limbs)[limb].hp = result.limbs[limb].value;
+    }
+  }
+  bool RefreshRestrictions(std::size_t index) override {
+    state_ = Battle_Ai_actorAiStates[actors_[index]->id];
+    if (!ReadablePlanningRecord(state_) ||
+        !ReadablePlanningRecord(state_->actor) ||
+        !ReadablePlanningRecord(state_->actor->opaque3C)) {
+      return false;
+    }
+    RefreshLiveAiResourceRestrictions(state_);
+    return true;
+  }
+  bool RefreshSlot(std::size_t /*index*/, int row, int column) override {
+    static_cast<void>(RefreshLiveAiActionUsability(state_, row, column));
+    return true;
+  }
+
+ private:
+  Battle_Ai_RoomAiState& room_;
+  std::array<Battle_Actor*, kBattleActorSlotCount> actors_{};
+  std::size_t count_ = 0;
+  Battle_Ai_ActorAiState* state_ = nullptr;
+};
+
 class LiveCandidateReadiness final : public CandidateReadinessHost {
  public:
   explicit LiveCandidateReadiness(Battle_Ai_ActorAiState& state)
@@ -879,6 +947,22 @@ void RestoreLivePlanningActorStats() {
   InvalidateLivePlanningStatsSnapshot();
 }
 
+void AdvanceLivePlanningSimulation(std::int32_t time_step) {
+  Require(ReadablePlanningRecord(Battle_Ai_roomAiState),
+          "Planning simulation requires a valid room AI state");
+  LivePlanningSimulation host(*Battle_Ai_roomAiState);
+  PlanningSimulationRules rules{
+      .poison_interval =
+          Battle_statusEffectParams[kPoisonStatusIndex].tickInterval,
+      .regeneration_interval =
+          Battle_statusEffectParams[kRegenerationStatusIndex].tickInterval};
+  std::copy_n(std::begin(Battle_Ai_kTimedStatusFlags),
+              rules.timed_status_masks.size(),
+              rules.timed_status_masks.begin());
+  Require(AdvancePlanningSimulation(time_step, rules, host),
+          "Planning simulation refused invalid actor inputs");
+}
+
 void InvalidateLivePlanningStatsSnapshot() {
   planning_stats_snapshot = {};
   Battle_Ai_planningStatsSnapshot = nullptr;
@@ -971,4 +1055,8 @@ void Battle_Ai_EvaluateActionCandidateEntry(
 
 void Battle_Ai_SelectFallbackActionEntry(Battle_Ai_ActorAiState* state) {
   VS::Battle::Ai::SelectLiveFallbackAction(state);
+}
+
+void Battle_Ai_AdvancePlanningSimulationEntry(int time_step) {
+  VS::Battle::Ai::AdvanceLivePlanningSimulation(time_step);
 }

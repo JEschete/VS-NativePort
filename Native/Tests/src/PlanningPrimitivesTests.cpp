@@ -294,6 +294,43 @@ class FakeUsability final : public ai::ActionUsabilityHost {
   std::vector<SlotUpdate> updates;
 };
 
+class FakePlanningSimulation final : public ai::PlanningSimulationHost {
+ public:
+  std::uint16_t Readiness() const override { return readiness; }
+  void SetReadiness(std::uint16_t value) override { readiness = value; }
+  std::size_t ActorCount() const override { return actors.size(); }
+  std::optional<ai::PlanningSimulationStats> ReadActor(
+      std::size_t index) const override {
+    reads.emplace_back(index, refreshes.size());
+    if (index == missing_actor) return std::nullopt;
+    return actors[index];
+  }
+  void WriteActor(std::size_t index,
+                  const ai::PlanningSimulationStats& stats) override {
+    writes.push_back(index);
+    actors[index] = stats;
+  }
+  bool RefreshRestrictions(std::size_t index) override {
+    observed_hp.push_back(actors[index].hp.value);
+    refreshes.emplace_back(index, -1, -1);
+    return !fail_restrictions;
+  }
+  bool RefreshSlot(std::size_t index, int row, int column) override {
+    refreshes.emplace_back(index, row, column);
+    return row * 4 + column != failed_slot;
+  }
+
+  std::uint16_t readiness = 0;
+  std::vector<ai::PlanningSimulationStats> actors{1};
+  mutable std::vector<std::pair<std::size_t, std::size_t>> reads;
+  std::vector<std::size_t> writes;
+  std::vector<std::int16_t> observed_hp;
+  std::vector<std::tuple<std::size_t, int, int>> refreshes;
+  std::size_t missing_actor = std::numeric_limits<std::size_t>::max();
+  bool fail_restrictions = false;
+  int failed_slot = -1;
+};
+
 class FakeFallbackSelection final : public ai::FallbackActionHost {
  public:
   std::optional<ai::FallbackActionSlot> RefreshSlot(int row,
@@ -368,6 +405,179 @@ bool CopiedStatByte(std::size_t offset) {
          (offset >= 0x948 && offset < 0x94C);
 }
 }  // namespace
+
+TEST_CASE("Planning simulation advances an empty wrapping clock",
+          "[ai][planning][simulation-advance]") {
+  const auto [start, step, expected] =
+      GENERATE(std::tuple{65535, 1, 0}, std::tuple{0, -1, 65535},
+               std::tuple{2880, 0, 2880}, std::tuple{1, 65536, 1},
+               std::tuple{1, std::numeric_limits<int>::max(), 0});
+  FakePlanningSimulation host;
+  host.actors.clear();
+  host.readiness = static_cast<std::uint16_t>(start);
+  REQUIRE(ai::AdvancePlanningSimulation(step, {}, host));
+  CHECK(host.readiness == expected);
+  CHECK(host.refreshes.empty());
+}
+
+TEST_CASE(
+    "Planning simulation recovers limbs after the exact readiness threshold",
+    "[ai][planning][simulation-advance]") {
+  const bool recover = GENERATE(false, true);
+  FakePlanningSimulation host;
+  host.readiness = recover ? 2881 : 2880;
+  auto& stats = host.actors[0];
+  stats.limbs = {
+      {{-1, 10}, {0, 1}, {1, 10}, {32766, 32767}, {32767, 32767}, {10, 5}}};
+  stats.mobility_limbs = {0, 2};
+  stats.statuses = 0x80000010;
+  REQUIRE(ai::AdvancePlanningSimulation(0, {}, host));
+  const auto expected = recover
+                            ? std::array<int, 6>{1, 1, 3, -32768, -32767, 5}
+                            : std::array<int, 6>{-1, 0, 1, 32766, 32767, 10};
+  for (std::size_t index = 0; index < expected.size(); ++index) {
+    CHECK(stats.limbs[index].value == expected[index]);
+  }
+  CHECK(stats.statuses == (recover ? 0x80000000u : 0x80000010u));
+}
+
+TEST_CASE("Planning simulation uses independent HP and MP recovery periods",
+          "[ai][planning][simulation-advance]") {
+  const auto [step, hp, mp] = GENERATE(
+      std::tuple{179, 10, 20}, std::tuple{180, 10, 20}, std::tuple{239, 10, 20},
+      std::tuple{240, 10, 20}, std::tuple{359, 10, 20}, std::tuple{360, 10, 21},
+      std::tuple{479, 10, 21}, std::tuple{480, 11, 21},
+      std::tuple{-480, 10, 20});
+  FakePlanningSimulation host;
+  host.actors[0].hp = {10, 100};
+  host.actors[0].mp = {20, 100};
+  REQUIRE(ai::AdvancePlanningSimulation(step, {}, host));
+  CHECK(host.actors[0].hp.value == hp);
+  CHECK(host.actors[0].mp.value == mp);
+}
+
+TEST_CASE("Planning simulation stores halfwords before signed resource clamps",
+          "[ai][planning][simulation-advance]") {
+  FakePlanningSimulation host;
+  host.actors[0].hp = {32767, 32767};
+  host.actors[0].mp = {32767, 32767};
+  REQUIRE(ai::AdvancePlanningSimulation(480, {}, host));
+  CHECK(host.actors[0].hp.value == -32768);
+  CHECK(host.actors[0].mp.value == -32768);
+  host.actors[0].hp = {150, 100};
+  host.actors[0].mp = {0, -1};
+  REQUIRE(ai::AdvancePlanningSimulation(0, {}, host));
+  CHECK(host.actors[0].hp.value == 100);
+  CHECK(host.actors[0].mp.value == -1);
+}
+
+TEST_CASE("Planning simulation applies poison before uncapped regeneration",
+          "[ai][planning][simulation-advance]") {
+  FakePlanningSimulation host;
+  host.actors[0].hp = {95, 100};
+  host.actors[0].statuses = 0x24000;
+  const ai::PlanningSimulationRules rules{.poison_interval = 1,
+                                          .regeneration_interval = 1};
+  REQUIRE(ai::AdvancePlanningSimulation(960, rules, host));
+  CHECK(host.actors[0].hp.value == 155);
+  CHECK(host.actors[0].statuses == 0x24000);
+}
+
+TEST_CASE("Planning status ticks preserve zero-divisor instruction results",
+          "[ai][planning][simulation-advance]") {
+  const auto [step, status, expected] =
+      GENERATE(std::tuple{0, 0x4000u, 55}, std::tuple{0, 0x20000u, 45},
+               std::tuple{-32, 0x4000u, 45}, std::tuple{-32, 0x20000u, 55});
+  FakePlanningSimulation host;
+  host.actors[0].hp = {50, 100};
+  host.actors[0].statuses = status;
+  REQUIRE(ai::AdvancePlanningSimulation(step, {}, host));
+  CHECK(host.actors[0].hp.value == expected);
+}
+
+TEST_CASE("Planning simulation expires byte timers at the inclusive boundary",
+          "[ai][planning][simulation-advance]") {
+  const auto [readiness, expected] =
+      GENERATE(std::pair{29, 0x8000002Bu}, std::pair{30, 0x80000022u});
+  FakePlanningSimulation host;
+  host.readiness = static_cast<std::uint16_t>(readiness);
+  host.actors[0].statuses = 0x8000002F;
+  host.actors[0].status_timers = {1, 2, 0, 1, 255};
+  const ai::PlanningSimulationRules rules{
+      .timed_status_masks = {1, 2, 4, 8, 32}};
+  REQUIRE(ai::AdvancePlanningSimulation(0, rules, host));
+  CHECK(host.actors[0].statuses == expected);
+}
+
+TEST_CASE(
+    "Planning simulation refreshes each written actor before reading the next",
+    "[ai][planning][simulation-advance]") {
+  FakePlanningSimulation host;
+  host.actors.resize(2);
+  host.actors[0].hp = {5, 10};
+  host.actors[1].hp = {7, 10};
+  REQUIRE(ai::AdvancePlanningSimulation(480, {}, host));
+  CHECK(host.writes == std::vector<std::size_t>{0, 1});
+  CHECK(host.observed_hp == std::vector<std::int16_t>{6, 8});
+  CHECK(host.reads ==
+        std::vector<std::pair<std::size_t, std::size_t>>{{0, 0}, {1, 25}});
+  std::vector<std::tuple<std::size_t, int, int>> expected;
+  for (std::size_t actor = 0; actor < 2; ++actor) {
+    expected.emplace_back(actor, -1, -1);
+    for (int slot = 0; slot < 24; ++slot) {
+      expected.emplace_back(actor, slot / 4, slot % 4);
+    }
+  }
+  CHECK(host.refreshes == expected);
+}
+
+TEST_CASE("Planning simulation refuses invalid actor shapes",
+          "[ai][planning][simulation-advance]") {
+  FakePlanningSimulation host;
+  SECTION("Oversized lists are refused before advancing") {
+    host.actors.resize(17);
+    CHECK_FALSE(ai::AdvancePlanningSimulation(480, {}, host));
+    CHECK(host.readiness == 0);
+  }
+  SECTION("Invalid first or needed second mobility limbs are refused") {
+    const unsigned position = GENERATE(0u, 1u);
+    host.actors[0].mobility_limbs[position] = 6;
+    CHECK_FALSE(ai::AdvancePlanningSimulation(0, {}, host));
+    CHECK(host.writes.empty());
+  }
+}
+
+TEST_CASE("Planning simulation preserves writes before a missing later actor",
+          "[ai][planning][simulation-advance]") {
+  FakePlanningSimulation host;
+  host.actors.resize(2);
+  host.missing_actor = 1;
+  CHECK_FALSE(ai::AdvancePlanningSimulation(480, {}, host));
+  CHECK(host.readiness == 480);
+  CHECK(host.writes == std::vector<std::size_t>{0});
+  CHECK(host.refreshes.size() == 25);
+}
+
+TEST_CASE("Planning simulation preserves writes before a refresh failure",
+          "[ai][planning][simulation-advance]") {
+  const bool restrictions = GENERATE(false, true);
+  FakePlanningSimulation host;
+  host.fail_restrictions = restrictions;
+  host.failed_slot = 7;
+  CHECK_FALSE(ai::AdvancePlanningSimulation(480, {}, host));
+  CHECK(host.writes == std::vector<std::size_t>{0});
+  CHECK(host.refreshes.size() == (restrictions ? 1u : 9u));
+}
+
+TEST_CASE("Planning simulation does not read an unneeded second mobility limb",
+          "[ai][planning][simulation-advance]") {
+  FakePlanningSimulation host;
+  host.actors[0].limbs[0] = {2, 10};
+  host.actors[0].mobility_limbs = {0, 255};
+  host.actors[0].statuses = 0x10;
+  REQUIRE(ai::AdvancePlanningSimulation(0, {}, host));
+  CHECK(host.actors[0].statuses == 0);
+}
 
 TEST_CASE(
     "Fallback selection refreshes every slot and keeps the first unsigned "

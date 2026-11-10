@@ -330,6 +330,49 @@ class FallbackActionHost {
 // No eligible slot clears only the action; false refuses invalid host data.
 bool SelectFallbackAction(ActionCandidate& choice, FallbackActionHost& host);
 
+struct PlanningVital {
+  std::int16_t value = 0;
+  std::int16_t maximum = 0;
+};
+
+inline constexpr std::size_t kPlanningTimedStatuses = 5;
+
+struct PlanningSimulationStats {
+  PlanningVital hp{}, mp{};
+  std::array<PlanningVital, kLimbActionRows> limbs{};
+  std::array<unsigned, 2> mobility_limbs{};
+  std::uint32_t statuses = 0;
+  std::array<std::uint8_t, kPlanningTimedStatuses> status_timers{};
+};
+
+struct PlanningSimulationRules {
+  std::uint16_t poison_interval = 0;
+  std::uint16_t regeneration_interval = 0;
+  std::array<std::uint32_t, kPlanningTimedStatuses> timed_status_masks{};
+};
+
+class PlanningSimulationHost {
+ public:
+  virtual ~PlanningSimulationHost() = default;
+  [[nodiscard]] virtual std::uint16_t Readiness() const = 0;
+  virtual void SetReadiness(std::uint16_t value) = 0;
+  [[nodiscard]] virtual std::size_t ActorCount() const = 0;
+  [[nodiscard]] virtual std::optional<PlanningSimulationStats> ReadActor(
+      std::size_t index) const = 0;
+  virtual void WriteActor(std::size_t index,
+                          const PlanningSimulationStats& stats) = 0;
+  virtual bool RefreshRestrictions(std::size_t index) = 0;
+  virtual bool RefreshSlot(std::size_t index, int row, int column) = 0;
+};
+
+// decomp: func_800DE030 (74088.c:1167), 237MIPS at 800DE030-800DE3E0.
+// Advance the wrapping readiness clock, recover limbs/resources and expire
+// statuses, then refresh each actor's restrictions and all 24 action slots.
+// False diagnoses invalid host data; earlier clock/actor writes remain visible.
+bool AdvancePlanningSimulation(std::int32_t time_step,
+                               const PlanningSimulationRules& rules,
+                               PlanningSimulationHost& host);
+
 // The deciding actor's relations, its peers' restrictions and the action
 // table the target eligibility check reads. IDs are below
 // kCandidateTargetSlots; actions are below kActionDefinitionCount.

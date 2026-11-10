@@ -78,6 +78,71 @@ constexpr int kRareCandidateRejectionThreshold = 115;
 constexpr unsigned kDefaultCandidateWeight = 128;
 constexpr unsigned kSpecialCandidateWeight = 40;
 constexpr unsigned kIgnoredClassification = 1;
+constexpr std::uint16_t kLimbRecoveryReadiness = 2880;
+constexpr std::int32_t kHpRecoveryPeriod = 240;
+constexpr std::int32_t kMpRecoveryPeriod = 180;
+constexpr unsigned kTimedStatusDurationScale = 30;
+constexpr std::uint32_t kMobilityRestrictedStatus = 0x10;
+constexpr std::uint32_t kPoisonStatus = 0x4000;
+constexpr std::uint32_t kRegenerationStatus = 0x20000;
+
+void RecoverPlanningVital(PlanningVital& vital, std::int32_t amount) {
+  vital.value = std::min(
+      vital.maximum,
+      Core::Math::WrapSigned16(static_cast<std::uint32_t>(vital.value) +
+                               static_cast<std::uint32_t>(amount)));
+}
+
+void ApplyPlanningStatusTick(PlanningVital& hp, std::int32_t ticks,
+                             std::uint16_t interval, bool restores) {
+  const auto count = Core::Math::R3000Quotient(ticks, interval);
+  const auto amount = Core::Math::WrappingMultiply(count, hp.maximum * 5) / 100;
+  const auto next = restores ? Core::Math::WrappingAdd(hp.value, amount)
+                             : Core::Math::WrappingSubtract(hp.value, amount);
+  hp.value = std::max<std::int16_t>(
+      0, Core::Math::WrapSigned16(static_cast<std::uint32_t>(next)));
+}
+
+bool AdvanceSimulationStats(PlanningSimulationStats& stats,
+                            std::uint16_t readiness, std::int32_t time_step,
+                            const PlanningSimulationRules& rules) {
+  if (stats.mobility_limbs[0] >= stats.limbs.size()) {
+    Core_Debugf("ai", "Planning simulation requires valid mobility limbs");
+    return false;
+  }
+  if (readiness > kLimbRecoveryReadiness) {
+    for (auto& limb : stats.limbs) RecoverPlanningVital(limb, 2);
+  }
+  bool mobile = stats.limbs[stats.mobility_limbs[0]].value >= 2;
+  if (!mobile) {
+    if (stats.mobility_limbs[1] >= stats.limbs.size()) {
+      Core_Debugf("ai", "Planning simulation requires a second mobility limb");
+      return false;
+    }
+    mobile = stats.limbs[stats.mobility_limbs[1]].value >= 2;
+  }
+  if (mobile) {
+    stats.statuses &= ~kMobilityRestrictedStatus;
+  }
+  RecoverPlanningVital(stats.hp,
+                       std::max(time_step / kHpRecoveryPeriod - 1, 0));
+  RecoverPlanningVital(stats.mp,
+                       std::max(time_step / kMpRecoveryPeriod - 1, 0));
+  const auto ticks = (time_step >> 5) + (time_step >> 9);
+  if ((stats.statuses & kPoisonStatus) != 0) {
+    ApplyPlanningStatusTick(stats.hp, ticks, rules.poison_interval, false);
+  }
+  if ((stats.statuses & kRegenerationStatus) != 0) {
+    ApplyPlanningStatusTick(stats.hp, ticks, rules.regeneration_interval, true);
+  }
+  for (std::size_t index = 0; index < rules.timed_status_masks.size();
+       ++index) {
+    if (readiness >= stats.status_timers[index] * kTimedStatusDurationScale) {
+      stats.statuses &= ~rules.timed_status_masks[index];
+    }
+  }
+  return true;
+}
 
 bool ApplyConditionDelta(std::int16_t& value, std::int16_t maximum,
                          const SimulatedStatChange& change) {
@@ -567,6 +632,42 @@ void ActionCandidate::SetRange(unsigned range) {
 }
 
 // decomp: func_800DD604 (74088.c:899), 114MIPS at 800DD604-800DD7C8.
+bool AdvancePlanningSimulation(std::int32_t time_step,
+                               const PlanningSimulationRules& rules,
+                               PlanningSimulationHost& host) {
+  const auto count = host.ActorCount();
+  if (count > kBattleActorSlotCount) {
+    Core_Debugf("ai", "Planning simulation actor list exceeds its capacity");
+    return false;
+  }
+  host.SetReadiness(static_cast<std::uint16_t>(
+      host.Readiness() + static_cast<std::uint32_t>(time_step)));
+  for (std::size_t index = 0; index < count; ++index) {
+    auto stats = host.ReadActor(index);
+    if (!stats) {
+      Core_Debugf("ai", "Planning simulation requires readable actor stats");
+      return false;
+    }
+    if (!AdvanceSimulationStats(*stats, host.Readiness(), time_step, rules)) {
+      return false;
+    }
+    host.WriteActor(index, *stats);
+    if (!host.RefreshRestrictions(index)) {
+      Core_Debugf("ai", "Planning simulation could not refresh restrictions");
+      return false;
+    }
+    for (int row = 0; row < kLimbActionRows; ++row) {
+      for (int column = 0; column < kLimbActionColumns; ++column) {
+        if (!host.RefreshSlot(index, row, column)) {
+          Core_Debugf("ai", "Planning simulation could not refresh a slot");
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
 bool SelectFallbackAction(ActionCandidate& choice, FallbackActionHost& host) {
   std::uint32_t best = 0;
   for (int row = 0; row < kLimbActionRows; ++row) {

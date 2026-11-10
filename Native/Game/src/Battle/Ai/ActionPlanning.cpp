@@ -26,7 +26,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Damage.h"
-#include "Battle/StatusEffects.h"
 #include "Field/Gimmicks.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -208,104 +207,6 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
     }
 }
 
-// decomp: BATTLE.PRG func_800DE030 (src/BATTLE/BATTLE.PRG/74088.c:1167)
-void Battle_Ai_AdvancePlanningSimulation(int simulation_time_step)
-{
-    Battle_Actor* actor;
-    int ticks = (simulation_time_step >> 5) + (simulation_time_step >> 9);
-
-    Battle_Ai_roomAiState->readinessLevel += simulation_time_step;
-
-    for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
-        Battle_ActorStats* stats = actor->stats;
-        int statuses = stats->statuses;
-        Battle_Ai_ActorAiState* state;
-        int i;
-        int limb;
-        int amount;
-        int row;
-        int column;
-
-        if (Battle_Ai_roomAiState->readinessLevel > 2880) {
-            for (limb = 0; limb < 6; ++limb) {
-                Battle_LimbStats* limbs = &stats->limbs[limb];
-
-                limbs->hp += 2;
-
-                if (limbs->hp > limbs->maxHp) {
-                    limbs->hp = limbs->maxHp;
-                }
-            }
-        }
-
-        if (stats->limbs[stats->mobilityLimb0].hp >= 2 || stats->limbs[stats->mobilityLimb1].hp >= 2) {
-            statuses &= ~0x10;
-        }
-
-        amount = simulation_time_step / 240;
-
-        if (amount > 0) {
-            stats->currentHp += amount - 1;
-        }
-
-        if (stats->currentHp > stats->maxHp) {
-            stats->currentHp = stats->maxHp;
-        }
-
-        amount = simulation_time_step / 180;
-
-        if (amount > 0) {
-            stats->currentMp += amount - 1;
-        }
-
-        if (stats->currentMp > stats->maxMp) {
-            stats->currentMp = stats->maxMp;
-        }
-
-        if (statuses & 0x4000) {
-            int scale = stats->maxHp * 5;
-
-            stats->currentHp -= ticks / Battle_statusEffectParams[14].tickInterval * scale / 100;
-
-            if (stats->currentHp < 0) {
-                stats->currentHp = 0;
-            }
-        }
-
-        if (statuses & 0x20000) {
-            int scale = stats->maxHp * 5;
-
-            stats->currentHp += ticks / Battle_statusEffectParams[17].tickInterval * scale / 100;
-
-            if (stats->currentHp < 0) {
-                stats->currentHp = 0;
-            }
-        }
-
-        for (i = 0; i < 5; ++i) {
-            if (statuses & Battle_Ai_kTimedStatusFlags[i]) {
-                int duration = stats->statusTimers[i];
-
-                duration = duration * 32 - duration * 2;
-
-                if (Battle_Ai_roomAiState->readinessLevel >= duration) {
-                    statuses &= ~Battle_Ai_kTimedStatusFlags[i];
-                }
-            }
-        }
-
-        stats->statuses = statuses;
-        state = Battle_Ai_actorAiStates[actor->id];
-        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);
-
-        for (row = 0; row < 6; ++row) {
-            for (column = 0; column < 4; ++column) {
-                VS::Battle::Ai::RefreshLiveAiActionUsability(state, row, column);
-            }
-        }
-    }
-}
-
 // decomp: src/BATTLE/BATTLE.PRG/74088.c:1264
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
 // decomp: src/BATTLE/BATTLE.PRG/74088.c:1265
@@ -354,7 +255,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
 
         for (pass = 0; pass < 3; ++pass) {
             delay = MAX(delays[pass], minDelay);
-            Battle_Ai_AdvancePlanningSimulation(delay);
+            Battle_Ai_AdvancePlanningSimulationEntry(delay);
             Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActorAiState *)((Battle_Ai_ActionChoiceView*)state), (short)delay);
             VS::Battle::Ai::SortLiveActionCandidates(state);
 

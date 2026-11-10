@@ -4,7 +4,8 @@ Updated 2026-11-10. Row 28 (battle AI) resumed after the cleanup checkpoint.
 The condition terms, quality repairs and three candidate-planning promotions
 and the two planning-stat lifecycle promotions are published with green
 exact-revision CI. F01707 fallback selection is also published with green
-exact-revision CI; F01713 planning simulation is the next bounded promotion.
+exact-revision CI. F01713 planning simulation is locally verified; publication
+and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -18,10 +19,10 @@ exact-revision CI; F01713 planning simulation is the next bounded promotion.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **967 functions remain.** Modernization: 2,777 done of 3,744. C++ promotion:
-  2,778 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,496 promoted, 16 retired, 966 generated,
-  one WIP; 2,512 resolved. This continuation resolved 63 more than `6c8ac0b9`.
+- **966 functions remain.** Modernization: 2,778 done of 3,744. C++ promotion:
+  2,779 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,497 promoted, 16 retired, 965 generated,
+  one WIP; 2,513 resolved. This continuation resolved 64 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -45,6 +46,17 @@ exact-revision CI; F01713 planning simulation is the next bounded promotion.
   ([CI 42767581728](https://github.com/JEschete/VS-NativePort/actions/runs/42767581728)).
   Local verification used base `8b2eedfd` plus that commit's fallback policy,
   native binding, migrated workspace caller, module entry and related evidence.
+- The fallback evidence update `23902fe7` passed
+  [CI 42768591783](https://github.com/JEschete/VS-NativePort/actions/runs/42768591783).
+  F01713 verification uses that base plus the uncommitted simulation policy,
+  checked binding, generated caller/module entry, tests and related ledgers.
+  Its native core keeps the wrapping readiness clock, signed halfword stores
+  before clamps, poison/regeneration order, inclusive byte-timer expiry and
+  per-actor restriction/slot refresh order. Shared scalar helpers preserve
+  word multiplication and original zero-divisor behavior. Native tests keep
+  the simulated actor's stats distinct from the callback actor's stats.
+  The old function symbol retires separately from the retained room clock,
+  status tables and legacy records.
 
 ## Sources Of Truth
 
@@ -164,6 +176,36 @@ are historical, not instructions or fresh verification.
   remain open. Local function promotion does not satisfy those wider gates.
 
 ## Verified
+
+For planning simulation on base `23902fe7`:
+
+- Debug and Release rebuilds and full suites pass: **5,231 cases /
+  12,644,928 assertions each**, zero failures/skips. Both unchanged canonical
+  replays match in each configuration; zero regressions.
+- `[simulation-advance],[simulation-advance-live]`: 17 cases / 212 assertions;
+  `[ai][planning]`: 140 cases / 189,032 assertions per configuration.
+- Actual 237-instruction/native comparison: 4,096 vectors, zero mismatches.
+  Every stat-record byte, readiness and all 25 callbacks per actor are compared,
+  including callback-visible HP/MP/statuses. Vectors include 0-16 actors,
+  aliased records, signed extremes, arbitrary masks/timers and zero intervals.
+  Refresh callees are controlled here; native tests exercise real refreshes.
+- All 237 copier controls, all three ledger gates and static regression pass.
+  Final scoped tidy: 48 existing findings, zero new; baseline unchanged.
+  This is not a new whole-tree quality scan.
+- Two supported copy/project generations preserve **1,804 unique sampled paths
+  and hashes**: tracked/untracked-not-ignored paths under `Native`, `tools/port`,
+  `tools/scaffold`, `Docs/ledgers`, plus native projects/filters/properties and
+  root solutions/properties. This deduplicated inventory is not the earlier
+  1,812-entry count. Verified native source bytes are unchanged by regeneration.
+  Manifest: `b148d74255c239aaf9d79f60aec498aa1e479869e0ec80abd91c520c71908ea7`.
+- Evidence is in the session-local files directory: `simulation_build_*`,
+  `simulation_focused_*`, `simulation_planning_*`, `simulation_regression_*`,
+  `simulation_differential.log`, `simulation_copier_tests.log`,
+  `simulation_quality.log`, `simulation_generation1/2.log`,
+  `simulation_generation_stability.log`, and the three gate logs.
+- No full planner/controller/reference gameplay or EC/global/data/type
+  retirement claim. Borrowed outside-arena inputs remain a caller contract;
+  malformed lists/records/needed limb indices are diagnosed native refusals.
 
 For fallback selection on base `8b2eedfd`:
 
@@ -292,11 +334,17 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. F01707 is published with exact-revision CI and evidence on #276.
-   Do not close #276: 967 functions remain.
-3. Continue ordered row 28 with F01712/F01713 enumeration/simulation in
+2. Publish the locally verified F01713 milestone, confirm exact-revision CI and
+   update #276. Do not close #276: 966 functions remain.
+3. Continue ordered row 28 with F01712 enumeration in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   Those functions remain generated and unverified by this milestone.
+   Its original source and all 454 instructions have been read; it remains
+   generated and unverified. The local `enumeration_original.txt` records
+   `800DD918-800DE02C` and SHA256
+   `e7ba81487e25fd71ccdb0889b37e74f7ac942a8606ba5a9dff8e179a45122f9f`.
+   Preserve cache/append order, per-limb random draws and first-winner ties,
+   random fallback limbs, and the aimed signed-height/12-bit field behavior.
+   Then advance the larger planner/reconcile callers as dependencies permit.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.

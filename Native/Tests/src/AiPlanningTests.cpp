@@ -30,6 +30,7 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Damage.h"
+#include "Battle/StatusEffects.h"
 #include "Core/Random.h"
 }
 
@@ -68,6 +69,41 @@ struct PlanningFixture {
     std::copy(saved_states.begin(), saved_states.end(),
               Battle_Ai_actorAiStates);
     Battle_actionDefinitions[42] = saved_action;
+  }
+};
+
+struct PlanningAdvanceFixture : PlanningFixture {
+  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
+  decltype(std::to_array(Battle_actors)) saved_actors =
+      std::to_array(Battle_actors);
+  std::array<u_int, 5> saved_masks{};
+  Battle_StatusEffectParams saved_poison = Battle_statusEffectParams[14];
+  Battle_StatusEffectParams saved_regeneration = Battle_statusEffectParams[17];
+  Battle_Ai_RoomAiState room{};
+  Battle_Actor battle_actor{};
+
+  PlanningAdvanceFixture() {
+    std::copy_n(Battle_Ai_kTimedStatusFlags, saved_masks.size(),
+                saved_masks.begin());
+    std::fill_n(Battle_Ai_kTimedStatusFlags, saved_masks.size(), 0);
+    Battle_statusEffectParams[14].tickInterval = 1;
+    Battle_statusEffectParams[17].tickInterval = 1;
+    Battle_Ai_roomAiState = &room;
+    std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
+    battle_actor.id = 1;
+    battle_actor.stats = &stats;
+    Battle_actors[0] = &battle_actor;
+    for (auto& row : stats.limbActions) {
+      for (auto& slot : row) slot.actionId = 42;
+    }
+  }
+  ~PlanningAdvanceFixture() {
+    Battle_Ai_roomAiState = saved_room;
+    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_masks.begin(), saved_masks.end(),
+              Battle_Ai_kTimedStatusFlags);
+    Battle_statusEffectParams[14] = saved_poison;
+    Battle_statusEffectParams[17] = saved_regeneration;
   }
 };
 
@@ -347,6 +383,98 @@ TEST_CASE(
   CHECK(fixture.state.currentChoice.action == 0);
   CHECK(fixture.state.currentChoice.distanceSquared == 9);
   CHECK(fixture.state.actionSlots[2][1].opaque0Bit7 == 0);
+}
+
+TEST_CASE("Native planning simulation updates only the original stat fields",
+          "[ai][planning][simulation-advance-live]") {
+  PlanningAdvanceFixture fixture;
+  fixture.room.readinessLevel = 2880;
+  fixture.stats.statuses = 0x11;
+  Battle_Ai_kTimedStatusFlags[0] = 1;
+  for (auto& limb : fixture.stats.limbs) {
+    limb.hp = 0;
+    limb.maxHp = 10;
+  }
+  fixture.state.resourceStatusRestricted = 1;
+  fixture.state.lowMp = fixture.state.lowHp = 1;
+  auto expected = fixture.stats;
+  expected.statuses = 0;
+  for (auto& limb : expected.limbs) limb.hp = 2;
+  VS::Battle::Ai::AdvanceLivePlanningSimulation(1);
+  CHECK(fixture.room.readinessLevel == 2881);
+  CHECK(std::memcmp(&fixture.stats, &expected, sizeof(expected)) == 0);
+  CHECK(fixture.state.resourceStatusRestricted == 0);
+  CHECK(fixture.state.lowMp == 0);
+  CHECK(fixture.state.lowHp == 0);
+  for (const auto& row : fixture.state.actionSlots) {
+    for (const auto& slot : row) CHECK(slot.opaque0Bit7 == 1);
+  }
+}
+
+TEST_CASE(
+    "Native planning simulation preserves distinct callback stats sources",
+    "[ai][planning][simulation-advance-live]") {
+  PlanningAdvanceFixture fixture;
+  Battle_ActorStats simulated = fixture.stats;
+  simulated.currentHp = 0;
+  fixture.battle_actor.stats = &simulated;
+  fixture.state.stats = nullptr;
+  for (auto& limb : fixture.stats.limbs) limb.hp = 0;
+  for (auto& row : fixture.state.actionSlots) {
+    for (auto& slot : row) slot.opaque0Bit7 = 1;
+  }
+  VS::Battle::Ai::AdvanceLivePlanningSimulation(480);
+  CHECK(simulated.currentHp == 1);
+  CHECK(fixture.stats.currentHp == 100);
+  CHECK(fixture.state.lowHp == 0);
+  for (const auto& row : fixture.state.actionSlots) {
+    for (const auto& slot : row) CHECK(slot.opaque0Bit7 == 0);
+  }
+}
+
+TEST_CASE("Native planning simulation advances an empty actor list",
+          "[ai][planning][simulation-advance-live]") {
+  PlanningAdvanceFixture fixture;
+  Battle_actors[0] = nullptr;
+  fixture.room.readinessLevel = 65535;
+  Battle_Ai_AdvancePlanningSimulationEntry(1);
+  CHECK(fixture.room.readinessLevel == 0);
+}
+
+TEST_CASE("Native planning simulation refreshes each actor by its own slot",
+          "[ai][planning][simulation-advance-live]") {
+  PlanningAdvanceFixture fixture;
+  Battle_ActorStats second_stats = fixture.stats;
+  Battle_Actor second{};
+  Battle_Ai_EngagementData second_actor{};
+  second.id = 3;
+  second.stats = &second_stats;
+  second_actor.opaque3C = &second_stats;
+  fixture.peer.actor = &second_actor;
+  fixture.battle_actor.next = &second;
+  fixture.stats.currentHp = 0;
+  for (auto& limb : fixture.stats.limbs) limb.hp = 0;
+  for (auto& limb : second_stats.limbs) limb.hp = 2;
+  VS::Battle::Ai::AdvanceLivePlanningSimulation(480);
+  CHECK(fixture.stats.currentHp == 1);
+  CHECK(second_stats.currentHp == 100);
+  CHECK(fixture.state.lowHp == 1);
+  CHECK(fixture.peer.lowHp == 0);
+  for (int row = 0; row < 6; ++row) {
+    for (int column = 0; column < 4; ++column) {
+      CHECK(fixture.state.actionSlots[row][column].opaque0Bit7 == 0);
+      CHECK(fixture.peer.actionSlots[row][column].opaque0Bit7 == 1);
+    }
+  }
+}
+
+TEST_CASE("Planning simulation retains its original module address",
+          "[ai][planning][simulation-advance-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800DE030) ==
+      reinterpret_cast<const void*>(&Battle_Ai_AdvancePlanningSimulationEntry));
 }
 
 TEST_CASE("Fallback selection retains its original module address",
