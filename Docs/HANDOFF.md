@@ -3,8 +3,8 @@
 Updated 2026-11-10. Row 28 (battle AI) resumed after the cleanup checkpoint.
 The condition terms, quality repairs and three candidate-planning promotions
 and the two planning-stat lifecycle promotions are published with green
-exact-revision CI. F01707 fallback selection is locally verified; its publication
-and exact-revision CI are pending.
+exact-revision CI. F01707 fallback selection is also published with green
+exact-revision CI; F01713 planning simulation is the next bounded promotion.
 
 ## Checkpoint
 
@@ -41,7 +41,9 @@ and exact-revision CI are pending.
   exported snapshot pointer, G00589.
 - The lifecycle evidence update `8b2eedfd` also passed
   [CI 42763848334](https://github.com/JEschete/VS-NativePort/actions/runs/42763848334).
-  F01707 verification uses that base plus the uncommitted fallback policy,
+  F01707 is published in `e41bbbd5`
+  ([CI 42767581728](https://github.com/JEschete/VS-NativePort/actions/runs/42767581728)).
+  Local verification used base `8b2eedfd` plus that commit's fallback policy,
   native binding, migrated workspace caller, module entry and related evidence.
 
 ## Sources Of Truth
@@ -290,8 +292,8 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the locally verified F01707 milestone, confirm exact-revision CI and
-   update #276. Do not close #276: 967 functions remain.
+2. F01707 is published with exact-revision CI and evidence on #276.
+   Do not close #276: 967 functions remain.
 3. Continue ordered row 28 with F01712/F01713 enumeration/simulation in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
    Those functions remain generated and unverified by this milestone.
