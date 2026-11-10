@@ -632,3 +632,45 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   CHECK(fixture.state.relations[0].classification == 3);
   fixture.CheckRecovery(settings_bit, busy, random);
 }
+
+TEST_CASE("AI linked actors resolve through the live battle actor list",
+          "[ai][relations][linked-actors]") {
+  struct ListFixture {
+    AiLifecycleFixture table;
+    Battle_Actor* saved_head = Battle_actors[0];
+    ~ListFixture() { Battle_actors[0] = saved_head; }
+  } fixture;
+  constexpr std::array<int, 4> kIds{0, 2, 5, 9};
+  std::array<Battle_Actor, kIds.size()> actors{};
+  std::array<Battle_Ai_ActorAiState, kIds.size()> states{};
+  for (std::size_t index = 0; index < kIds.size(); ++index) {
+    std::memset(&states[index], 0xA5, sizeof(states[index]));
+    states[index].linkedActor = 16;
+    actors[index].id = kIds[index];
+    actors[index].next = index + 1 < kIds.size() ? &actors[index + 1] : nullptr;
+    Battle_Ai_actorAiStates[kIds[index]] = &states[index];
+  }
+  // Ashley heads the list: it shares group 3 and is never examined or matched.
+  actors[0].aiGroup = 3;
+  actors[0].aiLinkedGroup = 3;
+  actors[1].aiGroup = 3;
+  actors[1].aiLinkedGroup = 4;
+  actors[2].aiGroup = 4;
+  actors[2].aiLinkedGroup = 3;
+  actors[3].aiGroup = 4;
+  actors[3].aiLinkedGroup = 4;
+  actors[3].reserved30Bit4 = 0x1F;
+  states[3].linkedActor = 7;
+  auto expected = states;
+  expected[1].linkedActor = 5;
+  expected[2].linkedActor = 2;
+  Battle_actors[0] = actors.data();
+  VS::Battle::Ai::ResolveLiveAiLinkedActors();
+  for (std::size_t index = 0; index < kIds.size(); ++index) {
+    CHECK(StateBytes(states[index]) == StateBytes(expected[index]));
+  }
+  CHECK(states[0].linkedActor == 16);
+  CHECK(states[1].linkedActor == 5);
+  CHECK(states[2].linkedActor == 2);
+  CHECK(states[3].linkedActor == 7);
+}

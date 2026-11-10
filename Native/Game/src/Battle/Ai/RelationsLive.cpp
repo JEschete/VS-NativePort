@@ -4,9 +4,11 @@
 #include "Battle/Ai/RelationsLive.hpp"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <optional>
 #include <span>
 
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -183,6 +185,45 @@ class LiveSavedRelationActors final : public SavedRelationActors {
  private:
   RoomActorList actors_;
 };
+
+// The actors after Ashley with their AI group fields, in list order.
+class LiveLinkedActorTable final : public LinkedActorTable {
+ public:
+  LiveLinkedActorTable() {
+    const Battle_Actor* head = Battle_actors[0];
+    Require(head != nullptr,
+            "AI linked actors require Ashley at the battle actor list head");
+    for (const Battle_Actor* actor = head->next; actor != nullptr;
+         actor = actor->next) {
+      // The head takes one of the kRelationActorSlots list entries.
+      Require(count_ + 1 < kRelationActorSlots && actor->id >= 0 &&
+                  actor->id < kRelationActorSlots,
+              "AI linked actors require a bounded battle actor list");
+      actors_.at(count_++) = {
+          .id = static_cast<std::uint8_t>(actor->id),
+          .group = static_cast<std::uint8_t>(actor->aiGroup),
+          .linked_group = static_cast<std::uint8_t>(actor->aiLinkedGroup)};
+    }
+  }
+
+  [[nodiscard]] std::span<const LinkGroupActor> FollowingActors()
+      const override {
+    return std::span(actors_).first(count_);
+  }
+  [[nodiscard]] std::optional<int> LinkedActor(int actor_id) const override {
+    const Battle_Ai_ActorAiState* state =
+        Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)];
+    if (state == nullptr) return std::nullopt;
+    return state->linkedActor;
+  }
+  void SetLinkedActor(int actor_id, int linked) override {
+    TableState(actor_id).linkedActor = static_cast<signed char>(linked);
+  }
+
+ private:
+  std::array<LinkGroupActor, kRelationActorSlots> actors_{};
+  std::size_t count_ = 0;
+};
 }  // namespace
 
 void InitializeLiveActorAiRelations(Battle_Ai_AiCreationView* state) {
@@ -204,5 +245,11 @@ void EndLiveAshleyAlliance(Battle_Ai_ReactionView* state) {
 void TryBeginLiveAshleyAlliance(Battle_Ai_ReactionView* state, int forced) {
   LiveAllianceActor actor(RequireAllianceState(state));
   TryBeginAshleyAlliance(actor, forced != 0);
+}
+
+void ResolveLiveAiLinkedActors() {
+  LiveLinkedActorTable actors;
+  Require(ResolveAiLinkedActors(actors),
+          "AI linked actors require every listed actor's state");
 }
 }  // namespace VS::Battle::Ai

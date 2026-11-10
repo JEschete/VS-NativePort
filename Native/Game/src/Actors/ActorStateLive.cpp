@@ -33,6 +33,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -49,7 +50,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Recovery.h"
@@ -568,7 +568,7 @@ class LiveBattleActorHost final : public BattleActorHost {
   }
   void ResolveAiLinkedActors() override {
     const Synced synced(*this);
-    Battle_Ai_ResolveAiLinkedActors();
+    Battle::Ai::ResolveLiveAiLinkedActors();
   }
   void RebuildActionPlans() override {
     const Synced synced(*this);

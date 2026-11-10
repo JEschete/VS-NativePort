@@ -557,7 +557,8 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Game\include\Battle\Ai\RelationsLive.hpp"
        for name in ("VS::Battle::Ai::InitializeLiveActorAiRelations",
                     "VS::Battle::Ai::ApplyLiveSavedActorAiRelations",
-                    "VS::Battle::Ai::EndLiveAshleyAlliance", "VS::Battle::Ai::TryBeginLiveAshleyAlliance")},
+                    "VS::Battle::Ai::EndLiveAshleyAlliance", "VS::Battle::Ai::TryBeginLiveAshleyAlliance",
+                    "VS::Battle::Ai::ResolveLiveAiLinkedActors")},
     **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\EngagementLive.hpp"
        for name in ("SetLiveActorAwarenessIndicator", "ResetLiveActorAwarenessIndicator", "IsLiveEngagementReady",
                     "UpdateLiveTemporaryAwarenessIndicator", "DisengageLiveActorById", "DisengageLiveActor",
@@ -1158,6 +1159,7 @@ OWNED_CALL_BINDINGS["F01716"] = "Battle_Ai_BuildActorActionPlanEntry"
 OWNED_CALL_BINDINGS["F01717"] = "Battle_Ai_ReconcileCompletedActionPlanEntry"
 OWNED_CALL_BINDINGS["F01793"] = "VS::Battle::Ai::ForgetLiveAiActionTarget"
 OWNED_CALL_BINDINGS["F01810"] = "VS::Battle::Ai::BuildLiveAiActionMetadata"
+OWNED_CALL_BINDINGS["F01811"] = "VS::Battle::Ai::ResolveLiveAiLinkedActors"
 OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
@@ -2646,6 +2648,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DEB10, "Battle_Ai_ReconcileCompletedActionPlanEntry"),
     ("BATTLE/BATTLE.PRG", 0x800E4CE8, "VS::Battle::Ai::ForgetLiveAiActionTarget"),  # F01793
     ("BATTLE/BATTLE.PRG", 0x800E5710, "VS::Battle::Ai::BuildLiveAiActionMetadata"),  # F01810
+    ("BATTLE/BATTLE.PRG", 0x800E5998, "VS::Battle::Ai::ResolveLiveAiLinkedActors"),  # F01811
     ("BATTLE/BATTLE.PRG", 0x8009E634, "Field_RefreshAshleyInteractionTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),

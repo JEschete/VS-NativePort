@@ -2259,6 +2259,28 @@ class EncounterFixupTests(unittest.TestCase):
         manifest = json.loads((copy_to_native.REPO / r"tools\port\copy_manifest.json").read_text(encoding="utf-8"))
         self.assertNotIn(r"Native\Game\src\Battle\Ai\ActionSelection.cpp", manifest)
 
+    def test_ai_linked_actors_keep_their_module_address_and_caller(self):
+        # #276 row 28: Battle_Ai_ResolveAiLinkedActors (F01811) is typed C++ beside the actor relation policies.
+        owned = self.owned_items()
+        self.assertEqual(owned["F01811"]["name"], "VS::Battle::Ai::ResolveAiLinkedActors")
+        self.assertEqual(owned["F01811"]["path"], r"Native\Game\src\Battle\Ai\Relations.cpp")
+        self.assertNotIn("F01811", copy_fixups.FIXES)
+        live = "VS::Battle::Ai::ResolveLiveAiLinkedActors"
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01811"], live)
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                         r"Native\Game\include\Battle\Ai\RelationsLive.hpp")
+        self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5998, live), copy_fixups.MODULE_BINDING_ENTRIES)
+        ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
+        caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
+        # Settings application resolves links right before rebuilding the action metadata.
+        self.assertEqual(caller.count(f"{live}();"), 1)
+        self.assertLess(caller.index(f"{live}();"), caller.index("VS::Battle::Ai::BuildLiveAiActionMetadata("))
+        for name in ("ActorState.cpp", "ActorState.h"):
+            self.assertNotIn("Battle_Ai_ResolveAiLinkedActors", (ai / name).read_text(encoding="utf-8"))
+        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertEqual(pointers.count("0x800E5998u"), 1)
+        self.assertIn(f"0x800E5998u, 0u, (void*)&{live},", pointers)
+
     @staticmethod
     def battle_ability_function(name: str) -> str:
         # #276 row 31: Battle_AdvanceBattleAbilitySequence (F00099) is typed C++ in Battle/Abilities.cpp.

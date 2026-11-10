@@ -2,6 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <cstdint>
+#include <optional>
 #include <span>
 
 // How battle AI actors classify each other, and an actor's temporary alliance
@@ -94,4 +95,34 @@ class SavedRelationActors {
 // Restores each room actor's Ashley relation from its saved options and
 // re-enters a saved alliance (func_800E72D0).
 void ApplySavedActorAiRelations(SavedRelationActors& actors);
+
+// A listed actor's AI group fields (battle actor word 0x30).
+struct LinkGroupActor {
+  std::uint8_t id = 0;
+  // Bits 0-3: the group the actor belongs to.
+  std::uint8_t group = 0;
+  // Bits 9-13: the group whose first listed member the actor follows.
+  std::uint8_t linked_group = 0;
+};
+
+// The listed actors and the linked-actor field of their AI states.
+class LinkedActorTable {
+ public:
+  virtual ~LinkedActorTable() = default;
+  // The actors after the list head (Ashley), in battle actor list order, with
+  // IDs 0 to kRelationActorSlots - 1.
+  [[nodiscard]] virtual std::span<const LinkGroupActor> FollowingActors()
+      const = 0;
+  // The actor the AI state follows (kNoLinkedActor, 16, while unresolved);
+  // nothing without an AI state.
+  [[nodiscard]] virtual std::optional<int> LinkedActor(int actor_id) const = 0;
+  virtual void SetLinkedActor(int actor_id, int linked) = 0;
+};
+
+// Links every listed actor whose linked actor is unresolved to the first
+// listed actor, itself included, whose group equals its linked group; the list
+// head is never examined and a linked group of 16 or more matches no actor.
+// Returns false, writing nothing, when a listed actor has no AI state (#337)
+// (func_800E5998).
+[[nodiscard]] bool ResolveAiLinkedActors(LinkedActorTable& actors);
 }  // namespace VS::Battle::Ai

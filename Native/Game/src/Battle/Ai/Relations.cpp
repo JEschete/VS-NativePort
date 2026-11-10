@@ -1,8 +1,13 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Battle/Ai/Relations.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
+#include <optional>
+#include <span>
+
+#include "Battle/Ai/ActorCleanup.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -109,5 +114,25 @@ void ApplySavedActorAiRelations(SavedRelationActors& actors) {
     actors.RestoreAshleyRelation(actor, relation);
     if (relation.allied) actors.BeginForcedAlliance(actor);
   }
+}
+
+// decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:573).
+bool ResolveAiLinkedActors(LinkedActorTable& actors) {
+  const std::span<const LinkGroupActor> listed = actors.FollowingActors();
+  // The original reads a missing state through a null table entry (#337).
+  const bool all_have_states =
+      std::ranges::all_of(listed, [&actors](const LinkGroupActor& actor) {
+        return actors.LinkedActor(actor.id).has_value();
+      });
+  if (!all_have_states) return false;
+  for (const LinkGroupActor& actor : listed) {
+    // Reread per entry, as the original does: a repeated ID sees an earlier
+    // entry's link.
+    if (actors.LinkedActor(actor.id) != kNoLinkedActor) continue;
+    const auto leader =
+        std::ranges::find(listed, actor.linked_group, &LinkGroupActor::group);
+    if (leader != listed.end()) actors.SetLinkedActor(actor.id, leader->id);
+  }
+  return true;
 }
 }  // namespace VS::Battle::Ai

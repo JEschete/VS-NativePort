@@ -9,8 +9,10 @@ published with green exact-revision CI. F01716 action-plan orchestration is
 published with green exact-revision CI. F01717 completed-action reconciliation,
 including the #336 fix, is published in `e9a85172` with green exact-revision
 CI, and #336 is closed. F01793 target forgetting is published in `31f0bdca`
-with green exact-revision CI. F01810 action-slot metadata is locally
-integrated and verified; its publication and exact-revision CI are pending.
+with green exact-revision CI. F01810 action-slot metadata is published in
+`deae1369` with green exact-revision CI. F01811 linked-actor resolution is
+locally integrated and verified; its publication and exact-revision CI are
+pending.
 
 ## Checkpoint
 
@@ -24,10 +26,10 @@ integrated and verified; its publication and exact-revision CI are pending.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **961 functions remain.** Modernization: 2,783 done of 3,744. C++ promotion:
-  2,784 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,502 promoted, 16 retired, 960 generated,
-  one WIP; 2,518 resolved. This continuation resolved 69 more than `6c8ac0b9`.
+- **960 functions remain.** Modernization: 2,784 done of 3,744. C++ promotion:
+  2,785 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,503 promoted, 16 retired, 959 generated,
+  one WIP; 2,519 resolved. This continuation resolved 70 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -91,10 +93,16 @@ integrated and verified; its publication and exact-revision CI are pending.
   binding, generated perception and blocked-movement callers, module entry,
   tests and ledgers. The old symbol has six former source consumers and zero
   remaining.
-- `31f0bdca` is the F01810 base. Local verification uses it with the
-  action-metadata core, checked live binding, generated actor-state caller,
-  module entry, tests and ledgers. The old symbol has four former source files
-  and zero remaining; the generated `ActionSelection.cpp/.h` pair is removed.
+- `31f0bdca` was the F01810 base. F01810 is published in `deae1369`
+  ([CI 42874511974](https://github.com/JEschete/VS-NativePort/actions/runs/42874511974)).
+  Local verification used that base with the action-metadata core, checked
+  live binding, generated actor-state caller, module entry, tests and ledgers.
+  The old symbol has four former source files and zero remaining; the
+  generated `ActionSelection.cpp/.h` pair is removed.
+- `deae1369` is the F01811 base. Local verification uses it with the
+  linked-actor core, checked live binding, actor-state host, generated
+  actor-state caller, module entry, tests and ledgers. The old symbol has four
+  former source files and zero remaining.
 
 ## Sources Of Truth
 
@@ -115,6 +123,27 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01811 now owns AI linked-actor resolution through
+  [Relations.hpp](../Native/Game/include/Battle/Ai/Relations.hpp) and
+  [Relations.cpp](../Native/Game/src/Battle/Ai/Relations.cpp). It walks the
+  battle actor list after Ashley. Each actor whose signed linked-actor byte
+  (`0x16`) is 16 links to the first listed actor, itself included, whose 4-bit
+  group (word `0x30` bits 0-3) equals its 5-bit linked group (bits 9-13). The
+  link is reread per entry, so a linked group of 16 or more matches nothing
+  and existing links stay.
+- [RelationsLive.cpp](../Native/Game/src/Battle/Ai/RelationsLive.cpp) reads
+  the real actor list and AI state table and writes only the linked-actor
+  byte. Actor creation and re-attach call the native binding, and
+  `0x800E5998` retains the registered entry. A listed actor without an AI
+  state is refused with a diagnostic before any write; the original reads
+  through the null table entry. That case is logged as
+  [#337](https://github.com/JEschete/VS-NativePort/issues/337), and its
+  in-game reachability is unconfirmed.
+- The actual 55-instruction original matches the native core over 4,096
+  vectors, comparing every listed state and the store addresses. The vectors
+  include repeated IDs, linked groups of 16 or more and non-16 link bytes.
+  Mutants that compare a 4-bit linked group or search from the list head are
+  rejected. The null-state vectors (#337) are excluded from that comparison.
 - F01810 now owns AI action-slot metadata through
   [PlanningPrimitives.hpp](../Native/Game/include/Battle/Ai/PlanningPrimitives.hpp)
   and [PlanningPrimitives.cpp](../Native/Game/src/Battle/Ai/PlanningPrimitives.cpp).
@@ -524,13 +553,13 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish F01810 and confirm its exact-revision CI, then update #276.
-   Do not close #276: 961 remain.
-3. Continue ordered row 28 with F01811, F01812, F01813 and F01818 in
+2. Publish F01811 and confirm its exact-revision CI, then update #276 and
+   #337. Do not close #276: 960 remain.
+3. Continue ordered row 28 with F01812, F01813 and F01818 in
    [ActorState.cpp](../Native/Game/src/Battle/Ai/ActorState.cpp), then
    Behavior, Movement, Navigation, OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01716/F01717/F01793/F01810 are verified dependencies, not proof of
+   F01716/F01717/F01793/F01810/F01811 are verified dependencies, not proof of
    remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
@@ -573,7 +602,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 961 functions complete.
+  match delivered scope. Do not declare the remaining 960 functions complete.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
   Do not force-push, rewrite history, or add attribution trailers/headers.
 - Avoid full gameplay JSON, huge terminal histories, and unbounded parsers.

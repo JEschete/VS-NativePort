@@ -17,4 +17,7 @@ void InitializeLiveActorAiRelations(Battle_Ai_AiCreationView* state);
 void ApplyLiveSavedActorAiRelations();
 void EndLiveAshleyAlliance(Battle_Ai_ReactionView* state);
 void TryBeginLiveAshleyAlliance(Battle_Ai_ReactionView* state, int forced);
+// Links each listed actor's unresolved AI linked actor to its group leader
+// (func_800E5998); every actor after Ashley must have an AI state (#337).
+void ResolveLiveAiLinkedActors();
 }  // namespace VS::Battle::Ai

@@ -22,7 +22,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Damage.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -62,29 +61,6 @@ int Battle_Ai_attributeActorMask;
 
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
 const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
-
-// decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:573)
-void Battle_Ai_ResolveAiLinkedActors(void)
-{
-    Battle_Actor* actor = Battle_actors[0]->next;
-
-    while (actor != NULL) {
-        if (Battle_Ai_actorAiStates[actor->id]->linkedActor == 0x10) {
-            Battle_Actor* other = Battle_actors[0]->next;
-
-            while (other != NULL) {
-                if (other->aiGroup == actor->aiLinkedGroup) {
-                    break;
-                }
-                other = other->next;
-            }
-            if (other != NULL) {
-                Battle_Ai_actorAiStates[actor->id]->linkedActor = other->id;
-            }
-        }
-        actor = actor->next;
-    }
-}
 
 // decomp: BATTLE.PRG func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:595)
 void Battle_Ai_ApplySavedAiSettingsFlags(int* settings_word, Battle_Ai_SavedSettingsPair* saved_settings)
@@ -160,7 +136,7 @@ void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_Set
         state->decisionCallback = VS::Battle::Ai::SelectLiveDecisionBehavior(actor->opaque30.word);
     }
     state->linkedActor = 16;
-    Battle_Ai_ResolveAiLinkedActors();
+    VS::Battle::Ai::ResolveLiveAiLinkedActors();
     VS::Battle::Ai::BuildLiveAiActionMetadata((Battle_Ai_ActorAiState *)((void*)state));
 }
 

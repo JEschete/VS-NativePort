@@ -1,7 +1,9 @@
 #include <array>
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -92,6 +94,33 @@ class FakeSavedActors final : public VS::Battle::Ai::SavedRelationActors {
     restored_order.push_back(actor);
   }
   void BeginForcedAlliance(int actor) override { allied.push_back(actor); }
+};
+
+using Link = std::pair<int, int>;
+
+class FakeLinkedActors final : public VS::Battle::Ai::LinkedActorTable {
+ public:
+  std::vector<VS::Battle::Ai::LinkGroupActor> listed;
+  std::array<std::optional<int>, kRelationActorSlots> links{};
+  std::vector<Link> writes;
+
+  [[nodiscard]] std::span<const VS::Battle::Ai::LinkGroupActor>
+  FollowingActors() const override {
+    return listed;
+  }
+  [[nodiscard]] std::optional<int> LinkedActor(int actor_id) const override {
+    return links.at(actor_id);
+  }
+  void SetLinkedActor(int actor_id, int linked) override {
+    writes.emplace_back(actor_id, linked);
+    links.at(actor_id) = linked;
+  }
+
+  void Add(std::uint8_t id, std::uint8_t group, std::uint8_t linked_group,
+           int link = 16) {
+    listed.push_back({.id = id, .group = group, .linked_group = linked_group});
+    links.at(id) = link;
+  }
 };
 
 FakeRelationTable ThreeActorRoom() {
@@ -223,4 +252,73 @@ TEST_CASE("Saved relations restore only actors with saved options",
   CHECK(actors.restored[3].previous_classification == 2);
   CHECK(actors.restored[3].classification_timer == 0x48);
   CHECK(actors.allied == std::vector<int>{7});
+}
+
+TEST_CASE("Linked actors follow the first listed member of their linked group",
+          "[ai][relations][linked-actors]") {
+  FakeLinkedActors actors;
+  actors.Add(3, 2, 5);
+  actors.Add(4, 5, 2);
+  actors.Add(6, 5, 5);
+  actors.Add(7, 1, 1);
+  actors.Add(8, 0, 9);
+  REQUIRE(VS::Battle::Ai::ResolveAiLinkedActors(actors));
+  CHECK(actors.writes == std::vector<Link>{{3, 4}, {4, 3}, {6, 4}, {7, 7}});
+  CHECK(actors.links[8] == 16);
+}
+
+TEST_CASE("Linked actors keep links that are already resolved",
+          "[ai][relations][linked-actors]") {
+  FakeLinkedActors actors;
+  actors.Add(1, 2, 2, 0);
+  actors.Add(2, 2, 2, -1);
+  actors.Add(3, 2, 2, 17);
+  actors.Add(4, 2, 2, 15);
+  actors.Add(5, 2, 2, -112);
+  REQUIRE(VS::Battle::Ai::ResolveAiLinkedActors(actors));
+  CHECK(actors.writes.empty());
+  CHECK(actors.links[3] == 17);
+}
+
+TEST_CASE("Linked groups of 16 or more match no listed actor",
+          "[ai][relations][linked-actors]") {
+  FakeLinkedActors actors;
+  for (std::uint8_t group = 0; group < 16; ++group) {
+    actors.Add(group, group, static_cast<std::uint8_t>(16 + group), 0);
+  }
+  actors.links[0] = 16;
+  actors.links[15] = 16;
+  REQUIRE(VS::Battle::Ai::ResolveAiLinkedActors(actors));
+  CHECK(actors.writes.empty());
+  CHECK(actors.links[0] == 16);
+  CHECK(actors.links[15] == 16);
+}
+
+TEST_CASE("Linked actors refuse a listed actor without an AI state",
+          "[ai][relations][linked-actors]") {
+  FakeLinkedActors actors;
+  actors.Add(3, 2, 5);
+  actors.Add(4, 5, 2);
+  actors.links[4].reset();
+  CHECK_FALSE(VS::Battle::Ai::ResolveAiLinkedActors(actors));
+  CHECK(actors.writes.empty());
+  CHECK(actors.links[3] == 16);
+}
+
+TEST_CASE("Linked actors reread each link in list order",
+          "[ai][relations][linked-actors]") {
+  FakeLinkedActors actors;
+  actors.Add(3, 1, 2);
+  actors.Add(5, 2, 0);
+  actors.listed.push_back({.id = 3, .group = 1, .linked_group = 1});
+  REQUIRE(VS::Battle::Ai::ResolveAiLinkedActors(actors));
+  CHECK(actors.writes == std::vector<Link>{{3, 5}});
+  CHECK(actors.links[5] == 16);
+}
+
+TEST_CASE("Linked actors accept an empty following list",
+          "[ai][relations][linked-actors]") {
+  FakeLinkedActors actors;
+  CHECK(VS::Battle::Ai::ResolveAiLinkedActors(actors));
+  CHECK(actors.writes.empty());
 }
