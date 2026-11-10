@@ -3,6 +3,8 @@
 
 namespace VS::Boot {
 namespace {
+constexpr int kSoftResetWaitFrames = 10;
+
 // Checked before any state changes, so a refused request leaves the session
 // exactly as it was.
 void CheckTransition(const SessionState& state, SessionHost& host) {
@@ -108,7 +110,7 @@ void ResetToTitle(TransitionHost& host) {
   host.StopControllerMotors();
   host.RefreshControllers();
   host.ShutdownAudio();
-  host.WaitForVerticalSync(10);
+  host.WaitForVerticalSync(kSoftResetWaitFrames);
   host.JumpToTitle();
 }
 

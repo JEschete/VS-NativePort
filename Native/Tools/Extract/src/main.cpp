@@ -329,6 +329,86 @@ int ListDisc(const Content::Disc& disc) {
   return 0;
 }
 
+int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
+  // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
+  // reads (sector, size, form, path). Interleaved files (movies, XA audio)
+  // are listed with form "stream" until their converters write them.
+  const fs::path out = Platform::Utf8Path(argv[kOutputArgument]);
+  fs::create_directories(out);
+  std::ofstream manifest(out / Content::DataStore::ManifestName,
+                         std::ios::binary);
+  if (!manifest) {
+    VS_LOG_ERROR("extract", "cannot create the data manifest in {}",
+                 Platform::PathText(out));
+    return 1;
+  }
+  manifest << "lba\tsize\tform\tpath\n";
+  const auto ffmpeg = FindFfmpeg(argc, argv);
+  if (!ffmpeg) {
+    VS_LOG_WARN("extract",
+                "FFmpeg not found (PATH or --ffmpeg): movies are listed, not "
+                "converted");
+  }
+  std::optional<Content::Av1Encoder> encoder;
+  if (ffmpeg && disc.IsImage()) {
+    auto found = Content::FindAv1Encoder(*ffmpeg, out / "ffmpeg-encoders.txt");
+    if (!found) {
+      VS_LOG_ERROR("extract", "{}", found.error());
+      return 1;
+    }
+    encoder = std::move(*found);
+    VS_LOG_INFO("extract", "movies use the FFmpeg encoder {}", encoder->name);
+  }
+  int written = 0;
+  int skipped = 0;
+  for (const auto& f : disc.Files()) {
+    if (f.directory) {
+      continue;
+    }
+    if (f.interleaved) {
+      const bool movie = f.path.ends_with(".STR");
+      fs::path mkv = out / "disc" / fs::path(f.path);
+      mkv += L".mkv";
+      if (movie && encoder) {
+        if (!ConvertMovie(disc, *ffmpeg, *encoder, f, mkv)) return 1;
+        manifest << f.lba << '\t' << f.size << "\tmkv\t" << f.path << '\n';
+        ++written;
+      } else {
+        manifest << f.lba << '\t' << f.size << "\tstream\t" << f.path << '\n';
+        ++skipped;
+      }
+      continue;
+    }
+    auto data = disc.ReadFile(f);
+    if (!data) {
+      VS_LOG_ERROR("extract", "{}", data.error());
+      return 1;
+    }
+    const fs::path dst = out / "disc" / fs::path(f.path);
+    fs::create_directories(dst.parent_path());
+    std::ofstream output(dst, std::ios::binary);
+    output.write(reinterpret_cast<const char*>(data->data()),
+                 static_cast<std::streamsize>(data->size()));
+    output.close();
+    if (!output) {
+      VS_LOG_ERROR("extract", "cannot write {}", Platform::PathText(dst));
+      return 1;
+    }
+    manifest << f.lba << '\t' << f.size << "\traw\t" << f.path << '\n';
+    ++written;
+  }
+  manifest.close();
+  if (!manifest) {
+    VS_LOG_ERROR("extract", "cannot finish the data manifest in {}",
+                 Platform::PathText(out));
+    return 1;
+  }
+  VS_LOG_INFO("extract",
+              "wrote {} files to {} ({} interleaved listed, not converted)",
+              written, Platform::PathText(out), skipped);
+  return ConvertStreams(disc, out, ffmpeg);
+}
+
 bool ValidStreamArguments(int argc, char** argv) {
   return argc == kExtractArguments ||
          (argc == kExtractArguments + 2 &&
@@ -358,84 +438,7 @@ int Run(int argc, char** argv) {
                           FindFfmpeg(argc, argv));
   }
   if (cmd == "extract" && argc >= kExtractArguments) {
-    // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
-    // reads (sector, size, form, path). Interleaved files (movies, XA audio)
-    // are listed with form "stream" until their converters write them.
-    const fs::path out = Platform::Utf8Path(argv[kOutputArgument]);
-    fs::create_directories(out);
-    std::ofstream manifest(out / Content::DataStore::ManifestName,
-                           std::ios::binary);
-    if (!manifest) {
-      VS_LOG_ERROR("extract", "cannot create the data manifest in {}",
-                   Platform::PathText(out));
-      return 1;
-    }
-    manifest << "lba\tsize\tform\tpath\n";
-    const auto ffmpeg = FindFfmpeg(argc, argv);
-    if (!ffmpeg) {
-      VS_LOG_WARN("extract",
-                  "FFmpeg not found (PATH or --ffmpeg): movies are listed, not "
-                  "converted");
-    }
-    std::optional<Content::Av1Encoder> encoder;
-    if (ffmpeg && (*disc)->IsImage()) {
-      auto found =
-          Content::FindAv1Encoder(*ffmpeg, out / "ffmpeg-encoders.txt");
-      if (!found) {
-        VS_LOG_ERROR("extract", "{}", found.error());
-        return 1;
-      }
-      encoder = std::move(*found);
-      VS_LOG_INFO("extract", "movies use the FFmpeg encoder {}", encoder->name);
-    }
-    int written = 0;
-    int skipped = 0;
-    for (const auto& f : (*disc)->Files()) {
-      if (f.directory) {
-        continue;
-      }
-      if (f.interleaved) {
-        const bool movie = f.path.ends_with(".STR");
-        fs::path mkv = out / "disc" / fs::path(f.path);
-        mkv += L".mkv";
-        if (movie && encoder) {
-          if (!ConvertMovie(**disc, *ffmpeg, *encoder, f, mkv)) return 1;
-          manifest << f.lba << '\t' << f.size << "\tmkv\t" << f.path << '\n';
-          ++written;
-        } else {
-          manifest << f.lba << '\t' << f.size << "\tstream\t" << f.path << '\n';
-          ++skipped;
-        }
-        continue;
-      }
-      auto data = (*disc)->ReadFile(f);
-      if (!data) {
-        VS_LOG_ERROR("extract", "{}", data.error());
-        return 1;
-      }
-      const fs::path dst = out / "disc" / fs::path(f.path);
-      fs::create_directories(dst.parent_path());
-      std::ofstream output(dst, std::ios::binary);
-      output.write(reinterpret_cast<const char*>(data->data()),
-                   static_cast<std::streamsize>(data->size()));
-      output.close();
-      if (!output) {
-        VS_LOG_ERROR("extract", "cannot write {}", Platform::PathText(dst));
-        return 1;
-      }
-      manifest << f.lba << '\t' << f.size << "\traw\t" << f.path << '\n';
-      ++written;
-    }
-    manifest.close();
-    if (!manifest) {
-      VS_LOG_ERROR("extract", "cannot finish the data manifest in {}",
-                   Platform::PathText(out));
-      return 1;
-    }
-    VS_LOG_INFO("extract",
-                "wrote {} files to {} ({} interleaved listed, not converted)",
-                written, Platform::PathText(out), skipped);
-    return ConvertStreams(**disc, out, ffmpeg);
+    return ExtractDisc(**disc, argc, argv);
   }
   return Usage();
 }

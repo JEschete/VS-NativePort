@@ -11,7 +11,7 @@ namespace VS::Battle {
 // The 9x9 terrain cells around the sphere centre.
 inline constexpr std::size_t kSphereTerrainCells = 81;
 // The packed wireframe edges for each of the four camera quadrants.
-inline constexpr std::size_t kSphereWireEdges = 4 * 180;
+inline constexpr std::size_t kSphereWireEdges = std::size_t{4} * 180;
 // The screen rows a slice can cover.
 inline constexpr int kSphereSliceRows = 224;
 // The ordering table depths a slice line can be linked at.

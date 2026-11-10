@@ -217,6 +217,8 @@ diagnostics from replacement code remain checked. See
 
 Existing `VS` subsystem namespaces and decomp-linked C exports/types retain their
 published names. Local identifiers and private C++ state use Google naming.
+This includes the published `VS::Effects::ScreenDistortion` namespace; its
+specific naming exception does not disable naming checks for new namespaces.
 The naming configuration lists the existing public logging/input/mode values,
 sector/timing constants, generated module-table symbols and native-view field
 spellings that are preserved. These are explicit spelling exceptions, not a

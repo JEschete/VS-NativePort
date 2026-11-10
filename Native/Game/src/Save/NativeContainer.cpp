@@ -10,42 +10,42 @@ void Advance(ContainerSaveState& state, ContainerSaveState next) {
 
 void PromptDiscard(ContainerSaveState& state, ContainerSaveHost& host) {
   host.OpenInformationBox();
-  host.ShowPrompt(ContainerPrompt::DiscardChanges);
-  Advance(state, ContainerSaveState::ConfirmDiscard);
+  host.ShowPrompt(ContainerPrompt::kDiscardChanges);
+  Advance(state, ContainerSaveState::kConfirmDiscard);
 }
 
 void CloseFiles(ContainerSaveState& state, ContainerSaveHost& host) {
   host.CloseFilePicker();
-  Advance(state, ContainerSaveState::DismissMenu);
+  Advance(state, ContainerSaveState::kDismissMenu);
 }
 
 void UpdateOpening(ContainerSaveState& state, ContainerSaveHost& host) {
   switch (state) {
-    case ContainerSaveState::Initialize:
+    case ContainerSaveState::kInitialize:
       host.BeginSession();
       host.OpenInformationBox();
-      host.ShowPrompt(ContainerPrompt::OpenContainer);
-      Advance(state, ContainerSaveState::Confirm);
+      host.ShowPrompt(ContainerPrompt::kOpenContainer);
+      Advance(state, ContainerSaveState::kConfirm);
       break;
-    case ContainerSaveState::Confirm:
+    case ContainerSaveState::kConfirm:
       if (const int option = host.PollPrompt(); option > 0) {
         host.ShowContainerHeading();
-        Advance(state, ContainerSaveState::LoadFiles);
+        Advance(state, ContainerSaveState::kLoadFiles);
       } else if (option < 0) {
-        Advance(state, ContainerSaveState::ReleaseStorage);
+        Advance(state, ContainerSaveState::kReleaseStorage);
       }
       break;
-    case ContainerSaveState::LoadFiles:
+    case ContainerSaveState::kLoadFiles:
       if (host.MenuRowsIdle() && host.ResourcesReady()) {
         host.OpenFilePicker();
-        Advance(state, ContainerSaveState::SelectFile);
+        Advance(state, ContainerSaveState::kSelectFile);
       }
       break;
-    case ContainerSaveState::SelectFile:
+    case ContainerSaveState::kSelectFile:
       if (const int option = host.PollFilePicker(); option > 0) {
-        Advance(state, ContainerSaveState::StageItems);
+        Advance(state, ContainerSaveState::kStageItems);
       } else if (option < 0) {
-        Advance(state, ContainerSaveState::CloseFiles);
+        Advance(state, ContainerSaveState::kCloseFiles);
       }
       host.DrawFiles();
       break;
@@ -56,28 +56,28 @@ void UpdateOpening(ContainerSaveState& state, ContainerSaveHost& host) {
 
 void UpdateContainerScreen(ContainerSaveState& state, ContainerSaveHost& host) {
   switch (state) {
-    case ContainerSaveState::StageItems:
+    case ContainerSaveState::kStageItems:
       host.OpenContainerScreen();
-      Advance(state, ContainerSaveState::WaitForScreen);
+      Advance(state, ContainerSaveState::kWaitForScreen);
       break;
-    case ContainerSaveState::WaitForScreen:
+    case ContainerSaveState::kWaitForScreen:
       if (host.MenuRowsIdle()) {
         host.BeginResourceLoad();
-        Advance(state, ContainerSaveState::ReloadFiles);
+        Advance(state, ContainerSaveState::kReloadFiles);
       }
       break;
-    case ContainerSaveState::ReloadFiles:
+    case ContainerSaveState::kReloadFiles:
       if (!host.ResourcesReady()) break;
       switch (host.ContainerScreenOutcome()) {
-        case ContainerScreenResult::Restore:
-          Advance(state, ContainerSaveState::RestoreItems);
+        case ContainerScreenResult::kRestore:
+          Advance(state, ContainerSaveState::kRestoreItems);
           break;
-        case ContainerScreenResult::ConfirmDiscard:
+        case ContainerScreenResult::kConfirmDiscard:
           PromptDiscard(state, host);
           break;
-        case ContainerScreenResult::Save:
+        case ContainerScreenResult::kSave:
           host.OpenInformationBox();
-          Advance(state, ContainerSaveState::BeginWrite);
+          Advance(state, ContainerSaveState::kBeginWrite);
           break;
       }
       break;
@@ -88,25 +88,25 @@ void UpdateContainerScreen(ContainerSaveState& state, ContainerSaveHost& host) {
 
 void UpdateWriting(ContainerSaveState& state, ContainerSaveHost& host) {
   switch (state) {
-    case ContainerSaveState::BeginWrite:
+    case ContainerSaveState::kBeginWrite:
       host.BeginWrite();
-      Advance(state, ContainerSaveState::WaitForWrite);
+      Advance(state, ContainerSaveState::kWaitForWrite);
       break;
-    case ContainerSaveState::WaitForWrite:
+    case ContainerSaveState::kWaitForWrite:
       if (const int option = host.PollWrite(); option != 0) {
         if (!host.DataNotSaved() && option < 0) {
           PromptDiscard(state, host);
         } else {
-          Advance(state, ContainerSaveState::CloseFiles);
+          Advance(state, ContainerSaveState::kCloseFiles);
         }
       }
       host.DrawFiles();
       break;
-    case ContainerSaveState::ConfirmDiscard:
+    case ContainerSaveState::kConfirmDiscard:
       if (const int option = host.PollPrompt(); option == 1) {
-        Advance(state, ContainerSaveState::BeginWrite);
+        Advance(state, ContainerSaveState::kBeginWrite);
       } else if (option != 0) {
-        Advance(state, ContainerSaveState::RestoreItems);
+        Advance(state, ContainerSaveState::kRestoreItems);
       }
       break;
     default:
@@ -116,24 +116,24 @@ void UpdateWriting(ContainerSaveState& state, ContainerSaveHost& host) {
 
 bool UpdateClosing(ContainerSaveState& state, ContainerSaveHost& host) {
   switch (state) {
-    case ContainerSaveState::RestoreItems:
+    case ContainerSaveState::kRestoreItems:
       host.RestoreInventory();
       CloseFiles(state, host);
       break;
-    case ContainerSaveState::CloseFiles:
+    case ContainerSaveState::kCloseFiles:
       CloseFiles(state, host);
       break;
-    case ContainerSaveState::DismissMenu:
+    case ContainerSaveState::kDismissMenu:
       host.DismissMenu();
       if (host.MenuRowsIdle()) {
         host.ReleaseResources();
-        Advance(state, ContainerSaveState::ReleaseStorage);
+        Advance(state, ContainerSaveState::kReleaseStorage);
       }
       break;
-    case ContainerSaveState::ReleaseStorage:
+    case ContainerSaveState::kReleaseStorage:
       if (host.InformationBoxClosed()) {
         host.EndSession();
-        Advance(state, ContainerSaveState::Initialize);
+        Advance(state, ContainerSaveState::kInitialize);
         return true;
       }
       break;
@@ -148,26 +148,26 @@ bool UpdateClosing(ContainerSaveState& state, ContainerSaveHost& host) {
 // decomp: MENU7.PRG vs_menu7_saveContainerMenu (src/MENU/MENU7.PRG/260.c:3944)
 bool UpdateContainerSave(ContainerSaveState& state, ContainerSaveHost& host) {
   switch (state) {
-    case ContainerSaveState::Initialize:
-    case ContainerSaveState::Confirm:
-    case ContainerSaveState::LoadFiles:
-    case ContainerSaveState::SelectFile:
+    case ContainerSaveState::kInitialize:
+    case ContainerSaveState::kConfirm:
+    case ContainerSaveState::kLoadFiles:
+    case ContainerSaveState::kSelectFile:
       UpdateOpening(state, host);
       return false;
-    case ContainerSaveState::StageItems:
-    case ContainerSaveState::WaitForScreen:
-    case ContainerSaveState::ReloadFiles:
+    case ContainerSaveState::kStageItems:
+    case ContainerSaveState::kWaitForScreen:
+    case ContainerSaveState::kReloadFiles:
       UpdateContainerScreen(state, host);
       return false;
-    case ContainerSaveState::BeginWrite:
-    case ContainerSaveState::WaitForWrite:
-    case ContainerSaveState::ConfirmDiscard:
+    case ContainerSaveState::kBeginWrite:
+    case ContainerSaveState::kWaitForWrite:
+    case ContainerSaveState::kConfirmDiscard:
       UpdateWriting(state, host);
       return false;
-    case ContainerSaveState::RestoreItems:
-    case ContainerSaveState::CloseFiles:
-    case ContainerSaveState::DismissMenu:
-    case ContainerSaveState::ReleaseStorage:
+    case ContainerSaveState::kRestoreItems:
+    case ContainerSaveState::kCloseFiles:
+    case ContainerSaveState::kDismissMenu:
+    case ContainerSaveState::kReleaseStorage:
       return UpdateClosing(state, host);
   }
   host.ReportInvalidState(static_cast<unsigned>(state));

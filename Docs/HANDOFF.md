@@ -23,11 +23,11 @@ and exact-revision CI are recorded here, in #276 and in the plan row.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-333 and #335 are closed with fixing revisions and verified CI.
-  One more quality defect found while verifying is logged and **not yet
-  fixed**: #334, the full-scope `quality.py --tidy` gate fails at `HEAD` with 23
-  un-baselined findings in five untouched files.
+  #334's 23 maintained-code tidy findings are repaired and locally verified
+  below; close it only after the fixing revision has successful CI.
 - No owned build, replay, quality run, or CI watcher remains active. The next
-  group (F01698, F01699, F01704) has only been located read-only, not edited.
+  group (F01698, F01699, F01704) has unverified edits in an isolated promotion
+  worktree; those edits are not part of this quality checkpoint.
 
 ## Sources Of Truth
 
@@ -48,6 +48,12 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- #334: container save enum constants and their consumers now use `k` prefixes;
+  wire-edge multiplication starts in `std::size_t`; the ten-frame soft-reset
+  wait is named; extraction is separated from command dispatch. The existing
+  published-name policy in [QUALITY.md](QUALITY.md) now explicitly includes
+  `ScreenDistortion` in the specific subsystem-namespace naming list. No
+  baseline was changed. Full tidy reports 244 existing findings and zero new.
 - F01700-F01703, the four condition terms inlined into `EvaluateActionCandidate`,
   are the current code checkpoint. `ActorStatusConditionScore` sums the signed
   weight of each set status bit 0-31; bit 12 counts only when the row's own AI
@@ -103,6 +109,17 @@ are historical, not instructions or fresh verification.
 
 ## Verified
 
+For the #334 repair on base `5e172a60`: Debug and Release rebuilds pass, and
+`[container-save],[sphere][terrain],[screen-warp],[session],[audio][stream],[content]`
+passes 273 cases / 1,636,003 assertions in each configuration. Six synthetic
+extractor CLI cases per configuration preserve the pre-refactor exit codes and
+all ten output files byte-for-byte, including manifest, raw files and stream
+assets, plus explicit no-stream and write-error paths. Full
+`python tools\lint\quality.py --tidy --jobs 4` reports 244 findings, zero new,
+exit 0; `baseline.json` is unchanged. Ownership, modernization and hazard
+checks each report zero violations. Logs are session-local
+`quality_334_full.log`, `build_334_<config>.log`, and `tests_334_<config>.log`.
+
 These are results for the working tree on base `90e5fbfe` subsequently published
 unchanged in the three commits above (the F01700-F01703 code, the #333 CI fix and
 the #335 quality gate fix), not new runtime verification performed by editing this document. The
@@ -148,9 +165,8 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Repair the 23 findings in #334 as a separate scoped change. Fix the code,
-   do not refresh the baseline; `--files <source> --tidy` now reports header
-   findings, so use it to iterate. Quality work precedes the next promotion group.
+2. Confirm exact-revision CI for the #334 repair, close it with the fixing
+   revision and evidence, then integrate the isolated promotion work.
 3. Continue ordered row 28. The prepared next bounded group is F01698
    `SimulateActionCandidate` (`func_800DCAA0`), F01699 `UpdateCandidateHitWeight`
    (`func_800DCBD8`), and F01704 `EvaluateActionCandidate` (`func_800DCC94`) in

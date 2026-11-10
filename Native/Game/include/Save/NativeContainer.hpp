@@ -5,35 +5,35 @@
 namespace VS::Menu::Files {
 
 // The container save submenu's states. The original's memory-card picker
-// states 4..6 are replaced by the native file picker polled in SelectFile.
+// states 4..6 are replaced by the native file picker polled in kSelectFile.
 enum class ContainerSaveState : std::uint8_t {
-  Initialize = 0,
-  Confirm = 1,
-  LoadFiles = 2,
-  SelectFile = 3,
-  StageItems = 7,
-  WaitForScreen = 8,
-  ReloadFiles = 9,
-  BeginWrite = 10,
-  WaitForWrite = 11,
-  ConfirmDiscard = 12,
-  RestoreItems = 13,
-  CloseFiles = 14,
-  DismissMenu = 15,
-  ReleaseStorage = 16,
+  kInitialize = 0,
+  kConfirm = 1,
+  kLoadFiles = 2,
+  kSelectFile = 3,
+  kStageItems = 7,
+  kWaitForScreen = 8,
+  kReloadFiles = 9,
+  kBeginWrite = 10,
+  kWaitForWrite = 11,
+  kConfirmDiscard = 12,
+  kRestoreItems = 13,
+  kCloseFiles = 14,
+  kDismissMenu = 15,
+  kReleaseStorage = 16,
 };
 
 // What the container inventory screen's return state asks the submenu to do
 // next (260.c:4071: 0 restores, 1 asks to discard, anything else saves).
 enum class ContainerScreenResult : std::uint8_t {
-  Restore,
-  ConfirmDiscard,
-  Save,
+  kRestore,
+  kConfirmDiscard,
+  kSave,
 };
 
 enum class ContainerPrompt : std::uint8_t {
-  OpenContainer,
-  DiscardChanges,
+  kOpenContainer,
+  kDiscardChanges,
 };
 
 // The menu, inventory and save-file operations the container submenu drives.

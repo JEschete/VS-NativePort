@@ -93,7 +93,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void ShowPrompt(ContainerPrompt prompt) override {
-    const bool opening = prompt == ContainerPrompt::OpenContainer;
+    const bool opening = prompt == ContainerPrompt::kOpenContainer;
     VS::Menu::Files::UpdateLiveContainerConfirmation(
         opening ? kConfirmContainerOpening : kConfirmContainerDiscard);
     VS::Menu::Framework::SetLiveInformationMessage(
@@ -163,11 +163,11 @@ class LiveContainerSave final : public ContainerSaveHost {
   ContainerScreenResult ContainerScreenOutcome() override {
     switch (Menu_Framework_menuState.returnState) {
       case 0:
-        return ContainerScreenResult::Restore;
+        return ContainerScreenResult::kRestore;
       case 1:
-        return ContainerScreenResult::ConfirmDiscard;
+        return ContainerScreenResult::kConfirmDiscard;
       default:
-        return ContainerScreenResult::Save;
+        return ContainerScreenResult::kSave;
     }
   }
 
