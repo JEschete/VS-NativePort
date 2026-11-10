@@ -85,6 +85,94 @@ constexpr unsigned kTimedStatusDurationScale = 30;
 constexpr std::uint32_t kMobilityRestrictedStatus = 0x10;
 constexpr std::uint32_t kPoisonStatus = 0x4000;
 constexpr std::uint32_t kRegenerationStatus = 0x20000;
+constexpr std::int32_t kEnumerationBaselineDistance = 256;
+constexpr unsigned kFallbackLimbLowMask = 3;
+constexpr unsigned kFallbackLimbHighBit = 3;
+
+void UpdateEnumerationWinners(const ActionCandidate& candidate,
+                              ActionCandidate& random_best,
+                              ActionCandidate& best,
+                              CandidateEnumerationHost& host) {
+  const auto chance = candidate.Weight();
+  const auto roll =
+      static_cast<unsigned>(host.Random()) & kRareCandidateRandomMask;
+  if (roll < chance && candidate.Score() > random_best.Score()) {
+    random_best = candidate;
+  }
+  if (candidate.Score() > best.Score()) best = candidate;
+}
+
+void AppendEnumerationWinner(const ActionCandidate& baseline,
+                             const ActionCandidate& random_best,
+                             const ActionCandidate& best,
+                             CandidateEnumerationHost& host) {
+  if (random_best.Score() > baseline.Score()) {
+    host.Append(random_best);
+  } else if (best.Score() > baseline.Score()) {
+    host.Append(best);
+  }
+}
+
+bool EnumerateLimbCandidates(ActionCandidate& candidate,
+                             const ActionCandidate& baseline, unsigned action,
+                             CandidateEnumerationHost& host) {
+  auto random_best = baseline;
+  auto best = baseline;
+  std::optional<unsigned> last;
+  for (unsigned limb = 0; limb < kLimbActionRows; ++limb) {
+    if (host.LimbMaximum(limb) == 0) continue;
+    last = limb;
+    candidate.SetTargetLimb(limb);
+    if (!host.Evaluate(candidate, CandidateEnumerationKind::kLimb, action)) {
+      return false;
+    }
+    UpdateEnumerationWinners(candidate, random_best, best, host);
+  }
+  const auto draw = static_cast<unsigned>(host.Random());
+  auto part = (draw & kFallbackLimbLowMask) + ((draw >> 2) & 1u) +
+              ((draw >> kFallbackLimbHighBit) & 1u);
+  if (host.LimbMaximum(part) == 0 && last) part = *last;
+  candidate.SetTargetLimb(part);
+  host.Cache(candidate, action);
+  AppendEnumerationWinner(baseline, random_best, best, host);
+  return true;
+}
+
+bool EnumerateTargetCandidates(ActionCandidate& candidate,
+                               const ActionCandidate& baseline, unsigned action,
+                               CandidateEnumerationKind kind,
+                               CandidateEnumerationHost& host) {
+  switch (kind) {
+    case CandidateEnumerationKind::kNone:
+      return true;
+    case CandidateEnumerationKind::kDirect:
+      if (!host.Evaluate(candidate, CandidateEnumerationKind::kDirect,
+                         action)) {
+        return false;
+      }
+      host.Cache(candidate, action);
+      if (candidate.Score() > baseline.Score()) host.Append(candidate);
+      return true;
+    case CandidateEnumerationKind::kLimb:
+      return EnumerateLimbCandidates(candidate, baseline, action, host);
+    case CandidateEnumerationKind::kAimed: {
+      auto random_best = baseline;
+      auto best = baseline;
+      candidate.SetHeightOffset(0);
+      const int height = host.TargetHeight();
+      candidate.SetHeightOffset(
+          static_cast<unsigned>(height < 0 ? -height : height));
+      if (!host.Evaluate(candidate, CandidateEnumerationKind::kAimed, action)) {
+        return false;
+      }
+      UpdateEnumerationWinners(candidate, random_best, best, host);
+      host.Cache(candidate, action);
+      AppendEnumerationWinner(baseline, random_best, best, host);
+      return true;
+    }
+  }
+  return false;
+}
 
 void RecoverPlanningVital(PlanningVital& vital, std::int32_t amount) {
   vital.value = std::min(
@@ -632,6 +720,72 @@ void ActionCandidate::SetRange(unsigned range) {
 }
 
 // decomp: func_800DD604 (74088.c:899), 114MIPS at 800DD604-800DD7C8.
+bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
+                               CandidateEnumerationHost& host) {
+  ActionCandidate baseline;
+  baseline.SetDistanceSquared(kEnumerationBaselineDistance);
+  baseline.SetThreshold(readiness_threshold);
+  if (!host.Evaluate(baseline, CandidateEnumerationKind::kNone, std::nullopt)) {
+    Core_Debugf("ai", "AI enumeration could not evaluate its baseline");
+    return false;
+  }
+  auto candidate = baseline;
+  candidate.SetThreshold(readiness_threshold);
+  for (int row = 0; row < kLimbActionRows; ++row) {
+    for (int column = 0; column < kLimbActionColumns; ++column) {
+      const auto slot = host.ReadSlot(row, column);
+      if (!slot) {
+        Core_Debugf("ai", "AI enumeration requires readable slot data");
+        return false;
+      }
+      if (slot->action == 0 || !slot->usable) continue;
+      if (slot->action >= kActionDefinitionCount) {
+        Core_Debugf("ai", "AI enumeration action is outside its table");
+        return false;
+      }
+      host.BeginTargets();
+      candidate.SetSlot(static_cast<unsigned>(row),
+                        static_cast<unsigned>(column));
+      candidate.SetAction(slot->action);
+      candidate.SetOption(CandidateOption::kMinimumRange, slot->minimum_range);
+      candidate.SetOption(CandidateOption::kIgnoresSight, slot->ignores_sight);
+      candidate.SetOption(CandidateOption::kIgnoresObstruction,
+                          slot->ignores_obstruction);
+      candidate.SetRange(slot->radius);
+      candidate.SetDistanceSquared(
+          std::bit_cast<std::int32_t>(slot->range_squared));
+      std::size_t count = 0;
+      while (const auto target = host.NextTarget()) {
+        if (++count > kBattleActorSlotCount ||
+            target->id >= kCandidateTargetSlots) {
+          Core_Debugf("ai",
+                      "AI enumeration requires a bounded valid actor list");
+          return false;
+        }
+        if (target->dead) continue;
+        candidate.SetTargetId(target->id);
+        candidate.SetOption(CandidateOption::kHarmful,
+                            host.Harmful(slot->action, target->id));
+        candidate.SetOption(CandidateOption::kBeneficial,
+                            host.Beneficial(slot->action, target->id));
+        candidate.SetOption(CandidateOption::kLongRangeHarmful,
+                            host.LongRange(row, column) &&
+                                candidate.Option(CandidateOption::kHarmful));
+        if (!host.CanAffect(candidate, target->id) ||
+            host.Excluded(target->id, slot->action)) {
+          continue;
+        }
+        if (!EnumerateTargetCandidates(candidate, baseline, slot->action,
+                                       host.Kind(row, column), host)) {
+          Core_Debugf("ai", "AI enumeration could not evaluate a target");
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
 bool AdvancePlanningSimulation(std::int32_t time_step,
                                const PlanningSimulationRules& rules,
                                PlanningSimulationHost& host) {

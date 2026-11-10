@@ -23,6 +23,8 @@ void Battle_Ai_EvaluateActionCandidateEntry(
     struct Battle_ActionDefinition* action);
 void Battle_Ai_SelectFallbackActionEntry(struct Battle_Ai_ActorAiState* state);
 void Battle_Ai_AdvancePlanningSimulationEntry(int time_step);
+void Battle_Ai_EnumerateActionCandidatesEntry(
+    struct Battle_Ai_ActorAiState* state, int readiness_threshold);
 #ifdef __cplusplus
 }
 #endif

@@ -373,6 +373,64 @@ bool AdvancePlanningSimulation(std::int32_t time_step,
                                const PlanningSimulationRules& rules,
                                PlanningSimulationHost& host);
 
+enum class CandidateEnumerationKind {
+  kNone = 0,
+  kDirect = 1,
+  kLimb = 2,
+  kAimed = 3
+};
+
+struct EnumerationSlot {
+  unsigned action = 0;
+  bool usable = false;
+  bool minimum_range = false;
+  bool ignores_sight = false;
+  bool ignores_obstruction = false;
+  std::uint16_t radius = 0;
+  std::uint32_t range_squared = 0;
+};
+
+struct EnumerationTarget {
+  unsigned id = 0;
+  bool dead = false;
+};
+
+class CandidateEnumerationHost {
+ public:
+  virtual ~CandidateEnumerationHost() = default;
+  virtual std::optional<EnumerationSlot> ReadSlot(int row, int column) = 0;
+  // Restart the live actor traversal for each usable slot. Nothing from
+  // NextTarget means the end of the list, never an unreadable actor.
+  virtual void BeginTargets() = 0;
+  virtual std::optional<EnumerationTarget> NextTarget() = 0;
+  virtual bool Harmful(unsigned action, unsigned target) = 0;
+  virtual bool Beneficial(unsigned action, unsigned target) = 0;
+  [[nodiscard]] virtual bool LongRange(int row, int column) const = 0;
+  virtual bool CanAffect(const ActionCandidate& candidate, unsigned target) = 0;
+  [[nodiscard]] virtual bool Excluded(unsigned target,
+                                      unsigned action) const = 0;
+  [[nodiscard]] virtual CandidateEnumerationKind Kind(int row,
+                                                      int column) const = 0;
+  [[nodiscard]] virtual std::int16_t LimbMaximum(unsigned limb) const = 0;
+  [[nodiscard]] virtual std::int16_t TargetHeight() const = 0;
+  // kNone without an action is the baseline. Direct and limb passes both
+  // use the limb preview, but retain their original distinct mode arguments.
+  virtual bool Evaluate(ActionCandidate& candidate,
+                        CandidateEnumerationKind kind,
+                        std::optional<unsigned> action) = 0;
+  virtual void Cache(const ActionCandidate& candidate, unsigned action) = 0;
+  virtual void Append(const ActionCandidate& candidate) = 0;
+  virtual int Random() = 0;
+};
+
+// decomp: func_800DD918 (74088.c:1007), 454MIPS at 800DD918-800DE02C.
+// Evaluate the baseline, then enumerate each slot's live targets. Cache before
+// appending strict score improvements; limb/aimed passes retain first winners
+// and the original draw order. Invalid slots, actor IDs or evaluations fail
+// explicitly without undoing earlier callback effects.
+bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
+                               CandidateEnumerationHost& host);
+
 // The deciding actor's relations, its peers' restrictions and the action
 // table the target eligibility check reads. IDs are below
 // kCandidateTargetSlots; actions are below kActionDefinitionCount.

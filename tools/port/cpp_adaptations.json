@@ -43,15 +43,6 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\ActionPlanning.cpp": [
 [
-685,
-[
-"            Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActionChoiceView*)state, (short)delay);"
-],
-[
-"            Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActorAiState *)((Battle_Ai_ActionChoiceView*)state), (short)delay);"
-]
-],
-[
 700,
 [
 "                VS::Battle::Ai::CopyLiveActionCandidate(&Battle_Ai_planningPassCandidates[pass][i], state->candidateOrder[i]);"
@@ -76,15 +67,6 @@
 ],
 [
 "                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(fallback), (Battle_Ai_ActionCandidate *)(&Battle_Ai_fallbackCandidates[i]));"
-]
-],
-[
-736,
-[
-"        Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActionChoiceView*)state, 0);"
-],
-[
-"        Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActorAiState *)((Battle_Ai_ActionChoiceView*)state), 0);"
 ]
 ]
 ],

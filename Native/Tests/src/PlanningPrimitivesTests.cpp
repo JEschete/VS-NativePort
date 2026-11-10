@@ -294,6 +294,128 @@ class FakeUsability final : public ai::ActionUsabilityHost {
   std::vector<SlotUpdate> updates;
 };
 
+struct EnumerationEvaluationInput {
+  ai::ActionCandidate candidate;
+  ai::CandidateEnumerationKind kind;
+  std::optional<unsigned> action;
+};
+
+class FakeCandidateEnumeration final : public ai::CandidateEnumerationHost {
+ public:
+  FakeCandidateEnumeration() {
+    slots[0] = {.action = 42, .usable = true};
+    maximums.fill(1);
+    outcomes.fill({20, 128});
+  }
+  std::optional<ai::EnumerationSlot> ReadSlot(int row, int column) override {
+    slot_reads.emplace_back(row, column);
+    const int index = row * 4 + column;
+    if (index == failed_slot) return std::nullopt;
+    return slots.at(static_cast<std::size_t>(index));
+  }
+  void BeginTargets() override {
+    ++begins;
+    cursor = 0;
+  }
+  std::optional<ai::EnumerationTarget> NextTarget() override {
+    if (cursor == targets.size()) return std::nullopt;
+    return targets.at(cursor++);
+  }
+  bool Harmful(unsigned /*action*/, unsigned /*target*/) override {
+    checks.emplace_back("harmful");
+    return harmful;
+  }
+  bool Beneficial(unsigned /*action*/, unsigned /*target*/) override {
+    checks.emplace_back("beneficial");
+    return beneficial;
+  }
+  bool LongRange(int /*row*/, int /*column*/) const override {
+    checks.emplace_back("range");
+    return long_range;
+  }
+  bool CanAffect(const ai::ActionCandidate& candidate,
+                 unsigned /*target*/) override {
+    checks.emplace_back("affect");
+    eligibility.push_back(candidate);
+    if (kind_after_eligibility) kind = *kind_after_eligibility;
+    return affects;
+  }
+  bool Excluded(unsigned target, unsigned action) const override {
+    checks.emplace_back("excluded");
+    return exclude_all || exclusions.at(target).at(action);
+  }
+  ai::CandidateEnumerationKind Kind(int /*row*/,
+                                    int /*column*/) const override {
+    checks.emplace_back("kind");
+    return kind;
+  }
+  std::int16_t LimbMaximum(unsigned limb) const override {
+    limb_reads.push_back(limb);
+    return maximums.at(limb);
+  }
+  std::int16_t TargetHeight() const override { return height; }
+  bool Evaluate(ai::ActionCandidate& candidate,
+                ai::CandidateEnumerationKind evaluation_kind,
+                std::optional<unsigned> action) override {
+    const auto index = evaluations.size();
+    evaluations.push_back({candidate, evaluation_kind, action});
+    effects.emplace_back(action ? "evaluate" : "baseline");
+    if (static_cast<int>(index) == failed_evaluation) return false;
+    visible = &candidate;
+    if (!action) {
+      candidate = baseline;
+    } else {
+      const auto [score, weight] = outcomes.at(index - 1);
+      candidate.SetScore(score);
+      candidate.SetWeight(weight);
+    }
+    return true;
+  }
+  void Cache(const ai::ActionCandidate& candidate,
+             unsigned /*action*/) override {
+    effects.emplace_back("cache");
+    cached.push_back(candidate);
+  }
+  void Append(const ai::ActionCandidate& candidate) override {
+    effects.emplace_back("append");
+    appended.push_back(candidate);
+    if (exclude_appended) {
+      exclusions.at(candidate.TargetId()).at(candidate.Action()) = true;
+    }
+  }
+  int Random() override {
+    effects.emplace_back("random");
+    if (change_weight_during_random && visible != nullptr) {
+      visible->SetWeight(0);
+    }
+    return draws.at(random_count++);
+  }
+
+  std::array<ai::EnumerationSlot, 24> slots{};
+  std::vector<ai::EnumerationTarget> targets{{.id = 2}};
+  ai::CandidateEnumerationKind kind = ai::CandidateEnumerationKind::kDirect;
+  std::optional<ai::CandidateEnumerationKind> kind_after_eligibility;
+  std::array<std::int16_t, 6> maximums{};
+  std::int16_t height = 0;
+  ai::ActionCandidate baseline{
+      Words{10, 0xE0000000, 0x80000000, 0xF8000070, 0xFFC00000}};
+  std::array<std::pair<int, unsigned>, 32> outcomes{};
+  std::vector<int> draws = std::vector<int>(32, 0);
+  std::array<std::array<bool, 256>, 16> exclusions{};
+  bool harmful = true, beneficial = false, long_range = true, affects = true;
+  bool exclude_all = false, exclude_appended = false;
+  bool change_weight_during_random = false;
+  int failed_slot = -1, failed_evaluation = -1;
+  std::size_t begins = 0, cursor = 0, random_count = 0;
+  ai::ActionCandidate* visible = nullptr;
+  std::vector<std::pair<int, int>> slot_reads;
+  mutable std::vector<std::string> checks;
+  mutable std::vector<unsigned> limb_reads;
+  std::vector<std::string> effects;
+  std::vector<EnumerationEvaluationInput> evaluations;
+  std::vector<ai::ActionCandidate> cached, appended, eligibility;
+};
+
 class FakePlanningSimulation final : public ai::PlanningSimulationHost {
  public:
   std::uint16_t Readiness() const override { return readiness; }
@@ -405,6 +527,206 @@ bool CopiedStatByte(std::size_t offset) {
          (offset >= 0x948 && offset < 0x94C);
 }
 }  // namespace
+
+TEST_CASE("Candidate enumeration evaluates a clean baseline before every slot",
+          "[ai][planning][candidate-enumeration]") {
+  FakeCandidateEnumeration host;
+  host.slots = {};
+  REQUIRE(ai::EnumerateActionCandidates(65535, host));
+  REQUIRE(host.evaluations.size() == 1);
+  CHECK(host.evaluations[0].candidate.RawWords() ==
+        Words{0, 65535u << 13, 256, 0, 0});
+  CHECK_FALSE(host.evaluations[0].action.has_value());
+  CHECK(host.evaluations[0].kind == ai::CandidateEnumerationKind::kNone);
+  std::vector<std::pair<int, int>> expected;
+  for (int slot = 0; slot < 24; ++slot) {
+    expected.emplace_back(slot / 4, slot % 4);
+  }
+  CHECK(host.slot_reads == expected);
+  CHECK(host.begins == 0);
+}
+
+TEST_CASE(
+    "Candidate enumeration sets slot and target fields without clearing other "
+    "bits",
+    "[ai][planning][candidate-enumeration]") {
+  FakeCandidateEnumeration host;
+  host.slots = {};
+  host.slots[11] = {.action = 42,
+                    .usable = true,
+                    .minimum_range = true,
+                    .ignores_obstruction = true,
+                    .radius = 0xBEEF,
+                    .range_squared = 0xFFFFFFFF};
+  host.baseline.SetThreshold(123);
+  REQUIRE(ai::EnumerateActionCandidates(65535, host));
+  REQUIRE(host.evaluations.size() == 2);
+  const Words expected{
+      10, 0xE0000000u | (65535u << 13) | (42u << 5) | (3u << 3) | 2u,
+      0xFFFFFFFF, 0xF8000072, 0xFFC00000u | (0xBEEFu << 6) | 27u};
+  CHECK(host.evaluations[1].candidate.RawWords() == expected);
+  CHECK(host.evaluations[1].action == 42);
+  CHECK(host.evaluations[1].kind == ai::CandidateEnumerationKind::kDirect);
+}
+
+TEST_CASE(
+    "Candidate enumeration skips zero and disabled actions before validating "
+    "IDs",
+    "[ai][planning][candidate-enumeration]") {
+  FakeCandidateEnumeration host;
+  host.slots[0] = {.action = 65535, .usable = false};
+  host.slots[1] = {.action = 0, .usable = true};
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  CHECK(host.evaluations.size() == 1);
+  CHECK(host.begins == 0);
+}
+
+TEST_CASE(
+    "Candidate enumeration skips dead targets and short circuits eligibility",
+    "[ai][planning][candidate-enumeration]") {
+  const bool affects = GENERATE(false, true);
+  FakeCandidateEnumeration host;
+  host.targets = {{.id = 1, .dead = true}, {.id = 2}};
+  host.affects = affects;
+  host.exclude_all = true;
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  std::vector<std::string> expected{"harmful", "beneficial", "range", "affect"};
+  if (affects) expected.emplace_back("excluded");
+  CHECK(host.checks == expected);
+  CHECK(host.evaluations.size() == 1);
+}
+
+TEST_CASE(
+    "Direct candidate enumeration caches before appending signed score "
+    "improvements",
+    "[ai][planning][candidate-enumeration]") {
+  const int score = GENERATE(10, 11, std::numeric_limits<int>::min(),
+                             std::numeric_limits<int>::max());
+  FakeCandidateEnumeration host;
+  host.outcomes[0] = {score, 128};
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  std::vector<std::string> expected{"baseline", "evaluate", "cache"};
+  if (score > 10) expected.emplace_back("append");
+  CHECK(host.effects == expected);
+  REQUIRE(host.cached.size() == 1);
+  CHECK(host.cached[0].Score() == score);
+  CHECK(host.appended.size() == (score > 10 ? 1u : 0u));
+}
+
+TEST_CASE(
+    "Limb enumeration keeps first probabilistic winners before score-only "
+    "fallbacks",
+    "[ai][planning][candidate-enumeration]") {
+  const bool reject = GENERATE(false, true);
+  FakeCandidateEnumeration host;
+  host.kind = ai::CandidateEnumerationKind::kLimb;
+  host.maximums = {1, 0, -1, 1, 0, 0};
+  host.outcomes[0] = {30, reject ? 0u : 128u};
+  host.outcomes[1] = {40, 0};
+  host.outcomes[2] = {30, reject ? 0u : 128u};
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  REQUIRE(host.appended.size() == 1);
+  CHECK(host.appended[0].TargetLimb() == (reject ? 2u : 0u));
+  CHECK(host.appended[0].Score() == (reject ? 40 : 30));
+  CHECK(host.random_count == 4);
+  REQUIRE(host.cached.size() == 1);
+  CHECK(host.cached[0].TargetLimb() == 0);
+  CHECK(host.cached[0].Score() == 30);
+}
+
+TEST_CASE("Limb enumeration caches a random part even without a usable limb",
+          "[ai][planning][candidate-enumeration]") {
+  const bool available = GENERATE(false, true);
+  FakeCandidateEnumeration host;
+  host.kind = ai::CandidateEnumerationKind::kLimb;
+  host.maximums.fill(0);
+  if (available) host.maximums[2] = 1;
+  host.draws = {-1, -1};
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  REQUIRE(host.cached.size() == 1);
+  CHECK(host.cached[0].TargetLimb() == (available ? 2u : 5u));
+  CHECK(host.random_count == (available ? 2u : 1u));
+  CHECK(host.evaluations.size() == (available ? 2u : 1u));
+}
+
+TEST_CASE(
+    "Aimed enumeration reads the current kind and truncates absolute signed "
+    "height",
+    "[ai][planning][candidate-enumeration]") {
+  const auto [height, expected] =
+      GENERATE(std::pair{0, 0u}, std::pair{-1234, 1234u},
+               std::pair{32767, 4095u}, std::pair{-32768, 0u});
+  FakeCandidateEnumeration host;
+  host.kind_after_eligibility = ai::CandidateEnumerationKind::kAimed;
+  host.height = static_cast<std::int16_t>(height);
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  REQUIRE(host.evaluations.size() == 2);
+  CHECK(host.evaluations[1].kind == ai::CandidateEnumerationKind::kAimed);
+  CHECK(host.evaluations[1].candidate.HeightOffset() == expected);
+  CHECK(host.evaluations[1].candidate.TargetLimb() == 7);
+  CHECK(host.random_count == 1);
+  CHECK(host.effects == std::vector<std::string>{"baseline", "evaluate",
+                                                 "random", "cache", "append"});
+}
+
+TEST_CASE(
+    "Candidate enumeration captures chance before drawing but copies after the "
+    "draw",
+    "[ai][planning][candidate-enumeration]") {
+  FakeCandidateEnumeration host;
+  host.kind = ai::CandidateEnumerationKind::kLimb;
+  host.maximums = {1, 0, 0, 0, 0, 0};
+  host.change_weight_during_random = true;
+  host.draws = {127, 0};
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  REQUIRE(host.appended.size() == 1);
+  CHECK(host.appended[0].Weight() == 0);
+  CHECK(host.appended[0].Score() == 20);
+}
+
+TEST_CASE("Candidate enumeration rereads exclusions after earlier appends",
+          "[ai][planning][candidate-enumeration]") {
+  FakeCandidateEnumeration host;
+  host.slots[1] = host.slots[0];
+  host.exclude_appended = true;
+  REQUIRE(ai::EnumerateActionCandidates(0, host));
+  CHECK(host.begins == 2);
+  CHECK(host.evaluations.size() == 2);
+  CHECK(host.appended.size() == 1);
+  CHECK(host.eligibility.size() == 2);
+}
+
+TEST_CASE(
+    "Candidate enumeration refuses invalid slots and retains earlier callback "
+    "effects",
+    "[ai][planning][candidate-enumeration]") {
+  const bool missing = GENERATE(false, true);
+  FakeCandidateEnumeration host;
+  host.slots[1] = {.action = 256, .usable = true};
+  if (missing) host.failed_slot = 1;
+  CHECK_FALSE(ai::EnumerateActionCandidates(0, host));
+  CHECK(host.appended.size() == 1);
+  CHECK(host.cached.size() == 1);
+}
+
+TEST_CASE("Candidate enumeration refuses invalid actors and failed evaluations",
+          "[ai][planning][candidate-enumeration]") {
+  FakeCandidateEnumeration host;
+  SECTION("A target ID is outside the table") {
+    host.targets[0].id = 16;
+    CHECK_FALSE(ai::EnumerateActionCandidates(0, host));
+    CHECK(host.checks.empty());
+  }
+  SECTION("A baseline or target evaluation fails") {
+    host.failed_evaluation = GENERATE(0, 1);
+    CHECK_FALSE(ai::EnumerateActionCandidates(0, host));
+    CHECK(host.cached.empty());
+  }
+  SECTION("Actor traversal exceeds its capacity") {
+    host.targets.resize(17, {.id = 2, .dead = true});
+    CHECK_FALSE(ai::EnumerateActionCandidates(0, host));
+  }
+}
 
 TEST_CASE("Planning simulation advances an empty wrapping clock",
           "[ai][planning][simulation-advance]") {

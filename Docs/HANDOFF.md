@@ -5,7 +5,7 @@ The condition terms, quality repairs and three candidate-planning promotions
 and the two planning-stat lifecycle promotions are published with green
 exact-revision CI. F01707 fallback selection and F01713 planning simulation are
 also published with green exact-revision CI. F01712 candidate enumeration is
-the next in-progress promotion; it is not yet verified.
+locally verified and integrated; its publication and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -19,10 +19,10 @@ the next in-progress promotion; it is not yet verified.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **966 functions remain.** Modernization: 2,778 done of 3,744. C++ promotion:
-  2,779 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,497 promoted, 16 retired, 965 generated,
-  one WIP; 2,513 resolved. This continuation resolved 64 more than `6c8ac0b9`.
+- **965 functions remain.** Modernization: 2,779 done of 3,744. C++ promotion:
+  2,780 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,498 promoted, 16 retired, 964 generated,
+  one WIP; 2,514 resolved. This continuation resolved 65 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -59,6 +59,11 @@ the next in-progress promotion; it is not yet verified.
   the simulated actor's stats distinct from the callback actor's stats.
   The old function symbol retires separately from the retained room clock,
   status tables and legacy records.
+- The simulation evidence update `91717ee8` passed
+  [CI 42773496563](https://github.com/JEschete/VS-NativePort/actions/runs/42773496563).
+  F01712 is locally verified on that base with the uncommitted enumeration core,
+  checked binding, generated planner calls/module entry, tests and ledgers.
+  Publication and exact-revision CI are pending.
 
 ## Sources Of Truth
 
@@ -79,6 +84,23 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01712 now owns candidate enumeration through typed slot/target values and a
+  checked live host. Four scratch records become local candidates. The working
+  candidate retains fields across slots and targets; all 24 slots, actor-list
+  advances, eligibility/exclusions and late metadata reads keep their original
+  order. Direct, limb and aimed evaluation retain distinct mode arguments.
+  Direct mode also uses the existing limb preview; it is not a no-preview mode.
+- Limb/aimed passes keep strict signed-score comparisons and first-winner ties,
+  prefer the probabilistic winner over the score-only fallback, capture chance
+  before RNG but copy the candidate afterward, and cache before appending.
+  Empty-limb fallback still draws a random part; negative limb maxima qualify.
+  Aimed height is the absolute signed halfword narrowed to the 12-bit field.
+- Both generated planner calls and `0x800DD918` use the registered entry.
+  Two obsolete argument adaptations are removed; the remaining generated
+  planner still crosses its legacy record view at the native binding.
+  Native special-action fixtures exercise real evaluation/cache/ranking,
+  separate selection and target stats, repeat-call exclusions and unchanged
+  old scratch bytes. They are not ordinary-preview or gameplay verification.
 - F01707 now refreshes all 24 action slots through a typed host, selecting the
   first greatest positive **unsigned** range. It preserves action capture before
   refresh, metadata reads after refresh, exact packed writes and action-only
@@ -178,6 +200,40 @@ are historical, not instructions or fresh verification.
   remain open. Local function promotion does not satisfy those wider gates.
 
 ## Verified
+
+For candidate enumeration on base `91717ee8`:
+
+- Final Debug and Release rebuilds and full suites pass: **5,248 cases /
+  12,645,114 assertions each**, zero failures/skips. Both unchanged canonical
+  replays match in each configuration; zero regressions.
+- `[candidate-enumeration],[candidate-enumeration-live]`: 17 cases / 186
+  assertions; `[ai][planning]`: 157 cases / 189,218 assertions per configuration.
+- Actual 454-instruction/native comparison: 4,096 vectors, zero mismatches,
+  seed 1712. It compares all evaluation input/output words and original
+  mode/action arguments, plus harmful/beneficial/eligibility, RNG, limb/height,
+  cache and append traces. Cases include all 24 slots and 0-16 actors, signed
+  score extremes/ties, zero/negative limb maxima, signed-height narrowing,
+  late metadata mutation, candidate mutation during RNG and append exclusions.
+  Maximum executed path: 61,821 instruction steps. External callees are
+  controlled; this does not establish full planner/controller/reference parity.
+- Original `800DD918-800DE02C` SHA256:
+  `e7ba81487e25fd71ccdb0889b37e74f7ac942a8606ba5a9dff8e179a45122f9f`.
+- All 238 copier controls, all three ledger gates and static regression pass.
+  Final scoped tidy: 48 existing findings, zero new; baseline unchanged.
+  No new whole-tree quality scan was run.
+- Two supported copy/project generations preserve **1,804 unique sampled
+  paths and hashes**, using the same deduplicated inventory as simulation.
+  Verified native source bytes are unchanged. Manifest:
+  `5851cac45720e10672fb1895203e60f773f5928654d8d5da80660cb97b76a1c5`.
+- Evidence is in the session-local files directory: `enumeration_build_*`,
+  `enumeration_focused_*`, `enumeration_planning_*`, `enumeration_regression_*`,
+  `enumeration_differential.log`, `enumeration_copier_tests.log`,
+  `enumeration_quality.log`, `enumeration_generation1/2.log`,
+  `enumeration_generation_stability.log`, and the three gate logs.
+- Only the old function symbol and its four local scratch candidates retire.
+  Global tables and actor/action/candidate records remain. Malformed inputs
+  are diagnosed native refusals; borrowed outside-arena inputs remain a caller
+  contract. No full battle-AI/M8 or complete EC-04 retirement claim.
 
 For planning simulation on base `23902fe7`:
 
@@ -336,18 +392,12 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. F01713 is published with exact-revision CI and evidence on #276.
-   Do not close #276: 966 functions remain.
-3. Continue ordered row 28 with F01712 enumeration in
+2. Publish the verified F01712 milestone, confirm exact-revision CI and record
+   the evidence on #276. Do not close #276: 965 functions remain.
+3. Continue ordered row 28 with the larger planner/reconcile callers in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   Its original source and all 454 instructions have been read. The typed
-   policy is in progress, but the live binding/callers remain generated and
-   unverified. The local `enumeration_original.txt` records
-   `800DD918-800DE02C` and SHA256
-   `e7ba81487e25fd71ccdb0889b37e74f7ac942a8606ba5a9dff8e179a45122f9f`.
-   Preserve cache/append order, per-limb random draws and first-winner ties,
-   random fallback limbs, and the aimed signed-height/12-bit field behavior.
-   Then advance the larger planner/reconcile callers as dependencies permit.
+   F01712 enumeration and F01713 simulation are verified dependencies, not
+   proof of the remaining planner orchestration or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.

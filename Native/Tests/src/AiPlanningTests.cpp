@@ -195,6 +195,48 @@ struct ReadinessFixture : PlanningFixture {
   }
 };
 
+struct EnumerationFixture : ReadinessFixture {
+  decltype(Battle_Ai_fallbackCandidates) saved_fallback =
+      Battle_Ai_fallbackCandidates;
+  int saved_count = Battle_Ai_fallbackCandidateCount;
+  int saved_mask = Battle_Ai_unusedPlanCounter;
+  unsigned saved_random = Core_Random_State();
+  std::array<Battle_Ai_CandidateEntryView, 24> fallback{};
+  Battle_Actor battle_actor{};
+  Battle_ActorStats target_stats{};
+
+  EnumerationFixture() {
+    Battle_Ai_fallbackCandidates = fallback.data();
+    Battle_Ai_fallbackCandidateCount = 0;
+    Battle_Ai_unusedPlanCounter = 0;
+    Core_Random_Seed(1);
+    state.candidateCount = 0;
+    state.settingsModeLow = 1;
+    state.pointHeight = -4321;
+    state.relations[1].classification = 2;
+    target_stats = stats;
+    target_stats.limbActions[2][1].actionId = 0;
+    target_stats.limbs[2].maxHp = -7;
+    actor.opaque3C = &target_stats;
+    battle_actor.id = 1;
+    battle_actor.stats = &target_stats;
+    Battle_actors[0] = Battle_actors[1] = &battle_actor;
+    Battle_actionDefinitions[42].aiFlags =
+        std::bit_cast<Battle_ActionAiFlags>(std::uint16_t{0x150});
+    auto& slot = state.actionSlots[2][1];
+    slot.opaque0Bit7 = 1;
+    slot.kind = 1;
+    slot.radius = 0x1234;
+    slot.rangeSquared = 0xFFFFFFFFu;
+  }
+  ~EnumerationFixture() {
+    Battle_Ai_fallbackCandidates = saved_fallback;
+    Battle_Ai_fallbackCandidateCount = saved_count;
+    Battle_Ai_unusedPlanCounter = saved_mask;
+    Core_Random_Seed(saved_random);
+  }
+};
+
 struct TargetMemoryFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
@@ -708,6 +750,85 @@ TEST_CASE("Candidate planning functions retain all original module addresses",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DCC94) ==
         reinterpret_cast<const void*>(&Battle_Ai_EvaluateActionCandidateEntry));
+}
+
+TEST_CASE(
+    "Native enumeration preserves special-action fields and distinct stats "
+    "sources",
+    "[ai][planning][candidate-enumeration-live]") {
+  EnumerationFixture fixture;
+  const auto kind = GENERATE(1u, 2u, 3u);
+  fixture.state.actionSlots[2][1].kind = kind;
+  Battle_Ai_EnumerateActionCandidatesEntry(&fixture.state, -1);
+  REQUIRE(fixture.state.candidateCount == 1);
+  const auto& selected = fixture.state.candidates[0];
+  CHECK(selected.row == 2);
+  CHECK(selected.column == 1);
+  CHECK(selected.action == 42);
+  CHECK(selected.targetId == 1);
+  CHECK(selected.threshold == 0xFFFF);
+  CHECK(selected.weight == 40);
+  CHECK(selected.targetLimb == (kind == 2 ? 2 : 0));
+  CHECK(selected.opaqueCBit7 == (kind == 3 ? 225 : 0));
+}
+
+TEST_CASE("Native enumeration caches and ranks without its old scratch records",
+          "[ai][planning][candidate-enumeration-live]") {
+  EnumerationFixture fixture;
+  fixture.state.actionSlots[2][1].kind = GENERATE(1u, 2u, 3u);
+  std::array<std::byte, 4 * sizeof(Battle_Ai_ActionCandidate)> scratch{};
+  const auto* scratch_rows =
+      static_cast<const std::byte*>(Core_ScratchBase()) + 0x30C;
+  std::memcpy(scratch.data(), scratch_rows, scratch.size());
+  Battle_Ai_EnumerateActionCandidatesEntry(&fixture.state, -1);
+  REQUIRE(fixture.state.candidateCount == 1);
+  REQUIRE(Battle_Ai_fallbackCandidateCount == 1);
+  const auto& selected = fixture.state.candidates[0];
+  CHECK(fixture.state.candidateOrder[0] == &selected);
+  CHECK(fixture.exclusions[1][42] == 1);
+  CHECK(Battle_Ai_unusedPlanCounter == (1 << 9));
+  CHECK(std::memcmp(&fixture.fallback[0], &selected, sizeof(selected)) == 0);
+  CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
+}
+
+TEST_CASE("Native enumeration rereads exclusions on repeated calls",
+          "[ai][planning][candidate-enumeration-live]") {
+  EnumerationFixture fixture;
+  fixture.state.actionSlots[2][1].kind = GENERATE(1u, 2u, 3u);
+  Battle_Ai_EnumerateActionCandidatesEntry(&fixture.state, -1);
+  REQUIRE(fixture.state.candidateCount == 1);
+  REQUIRE(Battle_Ai_fallbackCandidateCount == 1);
+  REQUIRE_NOTHROW(
+      VS::Battle::Ai::EnumerateLiveActionCandidates(&fixture.state, 0));
+  CHECK(fixture.state.candidateCount == 1);
+  CHECK(Battle_Ai_fallbackCandidateCount == 1);
+}
+
+TEST_CASE(
+    "Native enumeration leaves disabled slots and existing lists untouched",
+    "[ai][planning][candidate-enumeration-live]") {
+  EnumerationFixture fixture;
+  fixture.state.actionSlots[2][1].opaque0Bit7 = 0;
+  fixture.state.candidateCount = 3;
+  Battle_Ai_fallbackCandidateCount = 7;
+  Battle_Ai_candidateExclusions = nullptr;
+  Battle_Ai_fallbackCandidates = nullptr;
+  using StateBytes = std::array<std::byte, sizeof(fixture.state)>;
+  const auto before = std::bit_cast<StateBytes>(fixture.state);
+  REQUIRE_NOTHROW(
+      VS::Battle::Ai::EnumerateLiveActionCandidates(&fixture.state, 70000));
+  CHECK(std::bit_cast<StateBytes>(fixture.state) == before);
+  CHECK(Battle_Ai_fallbackCandidateCount == 7);
+  CHECK(Battle_Ai_unusedPlanCounter == 0);
+  CHECK(Core_Random_State() == 1);
+}
+
+TEST_CASE("Native enumeration retains its original module address",
+          "[ai][planning][candidate-enumeration-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DD918) ==
+        reinterpret_cast<void*>(&Battle_Ai_EnumerateActionCandidatesEntry));
 }
 
 TEST_CASE(

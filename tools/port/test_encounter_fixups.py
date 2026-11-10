@@ -386,11 +386,26 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_action_plan_selection_counts_start_at_zero(self):
         source = "    int quotas[3] = { 10, 3, 3 };\n    int selected[3];\n    int row;\n"
-        for old, new, _ in copy_fixups.FIXES["F01716"]:
+        edits = [edit for edit in copy_fixups.FIXES["F01716"] if "#274" in edit[2]]
+        self.assertEqual(len(edits), 1)
+        for old, new, _ in edits:
             self.assertEqual(source.count(old), 1)
             source = source.replace(old, new)
         self.assertIn("    int selected[3] = { 0, 0, 0 };\n", source)
         self.assertNotIn("int selected[3];", source)
+
+    def test_action_plan_enumeration_uses_the_owned_record_binding(self):
+        source = (
+            "Battle_Ai_EnumerateActionCandidatesEntry((Battle_Ai_ActionChoiceView*)state, (short)delay);\n"
+            "Battle_Ai_EnumerateActionCandidatesEntry((Battle_Ai_ActionChoiceView*)state, 0);"
+        )
+        edits = [edit for edit in copy_fixups.FIXES["F01716"] if "F01712" in edit[2]]
+        self.assertEqual(len(edits), 1)
+        for old, new, _ in edits:
+            self.assertEqual(source.count(old), 2)
+            source = source.replace(old, new)
+        self.assertEqual(source.count("Entry((Battle_Ai_ActorAiState*)state,"), 2)
+        self.assertNotIn("ActionChoiceView", source)
 
     def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
         source = (
@@ -620,6 +635,8 @@ class EncounterFixupTests(unittest.TestCase):
               ("F01704", "Battle_Ai_EvaluateActionCandidateEntry", "VS::Battle::Ai::EvaluateActionCandidate",
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F01707", "Battle_Ai_SelectFallbackActionEntry", "VS::Battle::Ai::SelectFallbackAction",
+               r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
+              ("F01712", "Battle_Ai_EnumerateActionCandidatesEntry", "VS::Battle::Ai::EnumerateActionCandidates",
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F01713", "Battle_Ai_AdvancePlanningSimulationEntry", "VS::Battle::Ai::AdvancePlanningSimulation",
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
@@ -1268,6 +1285,7 @@ class EncounterFixupTests(unittest.TestCase):
                     "F01699": ("Battle_Ai_UpdateCandidateHitWeightEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01704": ("Battle_Ai_EvaluateActionCandidateEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01707": ("Battle_Ai_SelectFallbackActionEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01712": ("Battle_Ai_EnumerateActionCandidatesEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01713": ("Battle_Ai_AdvancePlanningSimulationEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F00619": ("Field_SetMovingPlatformVisibilityEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00621": ("Field_MovingPlatformDwellTicksEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
