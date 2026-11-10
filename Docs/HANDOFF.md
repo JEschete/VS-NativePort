@@ -12,7 +12,8 @@ CI, and #336 is closed. F01793 target forgetting is published in `31f0bdca`
 with green exact-revision CI. F01810 action-slot metadata is published in
 `deae1369` with green exact-revision CI. F01811 linked-actor resolution is
 published in `b6dab817` with green exact-revision CI. The #338 promotion-gate
-fix is published in `e78c4062`. F01812 saved AI settings flags is locally
+fix is published in `e78c4062`. F01812 saved AI settings flags is published
+in `5c914a97` with green exact-revision CI. F01813 actor AI settings is locally
 integrated and verified; its publication and exact-revision CI are pending.
 
 ## Checkpoint
@@ -27,10 +28,10 @@ integrated and verified; its publication and exact-revision CI are pending.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **959 functions remain.** Modernization: 2,785 done of 3,744. C++ promotion:
-  2,786 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,504 promoted, 16 retired, 958 generated,
-  one WIP; 2,520 resolved. This continuation resolved 71 more than `6c8ac0b9`.
+- **958 functions remain.** Modernization: 2,786 done of 3,744. C++ promotion:
+  2,787 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,505 promoted, 16 retired, 957 generated,
+  one WIP; 2,521 resolved. This continuation resolved 72 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -110,10 +111,16 @@ integrated and verified; its publication and exact-revision CI are pending.
   On that revision alone, `test_gates.py` (96) passes and the gate,
   modernization and hazard checks report zero violations with 2,784 done, so
   the fix changes no existing ledger row.
-- `e78c4062` is the F01812 base. Local verification uses it with the
-  saved-settings core, checked live binding, generated actor-state caller,
-  module entry, project generator entry, tests and ledgers. The old symbol has
-  three former source files and zero remaining.
+- `e78c4062` was the F01812 base. F01812 is published in `5c914a97`
+  ([CI 42885758362](https://github.com/JEschete/VS-NativePort/actions/runs/42885758362)).
+  Local verification used that base with the saved-settings core, checked live
+  binding, generated actor-state caller, module entry, project generator entry,
+  tests and ledgers. The old symbol has three former source files and zero
+  remaining.
+- `5c914a97` is the F01813 base. Local verification uses it with the
+  settings-decode core, checked live binding, generated actor-state caller,
+  module entry, tests and ledgers. The old symbol has three former source
+  files and zero remaining.
 
 ## Sources Of Truth
 
@@ -134,6 +141,46 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01813 now owns actor AI settings decoding through
+  [ActorSettings.hpp](../Native/Game/include/Battle/Ai/ActorSettings.hpp) and
+  [ActorSettings.cpp](../Native/Game/src/Battle/Ai/ActorSettings.cpp).
+  `ApplyActorAiSettings` turns the settings word, the spawn group and flags
+  words (actor `0x30`/`0x34`), the sub-type, collision radius, movement flags
+  and the room waypoints into typed results. It covers the perception range
+  (the near range is capped at `0x240000`), the view angle and the cosine of
+  half of it, and the step, facing-delay, wander and patrol tables. The
+  terrain reject mask changes only while movement flags `0xC0` are clear. The
+  action-movement bit is kept only when a room waypoint has bit 15 set.
+  Sub-types `0xAC`-`0xAD` are orbiting bosses.
+- [ActorSettingsLive.cpp](../Native/Game/src/Battle/Ai/ActorSettingsLive.cpp)
+  reads the real BATTLE.PRG tables. It also checks that the waypoint pointers
+  belong to the active room's auxiliary section (offset `0x440`) and aborts
+  with a diagnostic otherwise. It writes the decoded fields in the original
+  order and installs the orbit callback and its orbit state, or the
+  group-selected decision callback (`nullptr` past the table, #272). It then
+  clears the linked actor to 16, resolves links and rebuilds the action-slot
+  metadata. The generated actor-state creation caller (F01818) calls the
+  native binding, and `0x800E5A9C` retains the registered entry.
+- The actual 265-instruction original matches the native core over 8,192
+  vectors. Each vector compares four things:
+  - the full `0x180`-byte state image against the decoded fields at their PS1
+    offsets;
+  - the call order and arguments;
+  - the native cosine of the original's `rcos` argument;
+  - the decision slot.
+
+  The vectors include orbiting sub-types, rooms with and without active
+  waypoints, kept terrain masks, capped near ranges, large radii and decision
+  indexes past the table. In that last case the native core stores no callback
+  (#272); the original reads past the table. The following mutants are
+  rejected:
+  - an uncapped near range;
+  - a `0x80` radius threshold;
+  - a missing terrain guard;
+  - a wander shift of 5;
+  - three orbiting sub-types;
+  - waypoint bit 14;
+  - an unhalved view angle.
 - F01812 now owns the saved AI settings flags through
   [ActorSettings.hpp](../Native/Game/include/Battle/Ai/ActorSettings.hpp) and
   [ActorSettings.cpp](../Native/Game/src/Battle/Ai/ActorSettings.cpp). Bits
@@ -585,17 +632,15 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish F01812 and confirm its exact-revision CI, then update #276. Close
-   #338 with its fixing commit and evidence once its exact-revision CI passes.
-   Keep #337 open until its in-game reachability is established. Do not close
-   #276: 959 remain.
-3. Continue ordered row 28 with F01813 (`ApplyActorAiSettings`, planned in the
-   ActorSettings module) and F01818 in
+2. Publish F01813 and confirm its exact-revision CI, then update #276. Keep
+   #337 open until its in-game reachability is established. Do not close
+   #276: 958 remain.
+3. Continue ordered row 28 with F01818 (`CreateActorAiState`) in
    [ActorState.cpp](../Native/Game/src/Battle/Ai/ActorState.cpp), then
    Behavior, Movement, Navigation, OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01716/F01717/F01793/F01810/F01811/F01812 are verified dependencies, not
-   proof of remaining AI behavior or gameplay.
+   F01716/F01717/F01793/F01810/F01811/F01812/F01813 are verified dependencies,
+   not proof of remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
@@ -637,7 +682,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 959 functions complete.
+  match delivered scope. Do not declare the remaining 958 functions complete.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
   Do not force-push, rewrite history, or add attribution trailers/headers.
 - Avoid full gameplay JSON, huge terminal histories, and unbounded parsers.

@@ -555,6 +555,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
     "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags": r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp",
+    "VS::Battle::Ai::ApplyLiveActorAiSettings": r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp",
     **{name: r"Native\Game\include\Battle\Ai\RelationsLive.hpp"
        for name in ("VS::Battle::Ai::InitializeLiveActorAiRelations",
                     "VS::Battle::Ai::ApplyLiveSavedActorAiRelations",
@@ -1162,6 +1163,7 @@ OWNED_CALL_BINDINGS["F01793"] = "VS::Battle::Ai::ForgetLiveAiActionTarget"
 OWNED_CALL_BINDINGS["F01810"] = "VS::Battle::Ai::BuildLiveAiActionMetadata"
 OWNED_CALL_BINDINGS["F01811"] = "VS::Battle::Ai::ResolveLiveAiLinkedActors"
 OWNED_CALL_BINDINGS["F01812"] = "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags"
+OWNED_CALL_BINDINGS["F01813"] = "VS::Battle::Ai::ApplyLiveActorAiSettings"
 OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
@@ -2652,6 +2654,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E5710, "VS::Battle::Ai::BuildLiveAiActionMetadata"),  # F01810
     ("BATTLE/BATTLE.PRG", 0x800E5998, "VS::Battle::Ai::ResolveLiveAiLinkedActors"),  # F01811
     ("BATTLE/BATTLE.PRG", 0x800E5A74, "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags"),  # F01812
+    ("BATTLE/BATTLE.PRG", 0x800E5A9C, "VS::Battle::Ai::ApplyLiveActorAiSettings"),  # F01813
     ("BATTLE/BATTLE.PRG", 0x8009E634, "Field_RefreshAshleyInteractionTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),
@@ -5023,12 +5026,6 @@ FIXES["F03437"] = FIXES["F03437"] + [
      "void Boot_InitializeTitleSession(void)\n{\n    Save_NativeResetSession();",
      "main.c:8309 discard staged native state before heap/module initialization"),
 ]
-
-FIXES.setdefault("F01813", []).append(
-    ("Battle_Ai_decisionCallbacks[(actor->opaque30.word >> 4) & 31]",
-     "VS::Battle::Ai::SelectLiveDecisionBehavior(actor->opaque30.word)",
-     "7CD68.c decision behaviour selection: the five-bit spawn index can name slots past the nine-entry table; "
-     "the binding refuses them with a warning instead of reading the AI constants that follow (#272)"))
 
 # #282: vs_main_allocateCdQueueSlot (main.c:9411) returned no value when all 32 disc requests were busy; its binding
 # returns null then. A caller that enqueues a refused request reads its file without the queue instead and keeps the

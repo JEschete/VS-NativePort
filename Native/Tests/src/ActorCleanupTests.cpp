@@ -14,6 +14,7 @@
 #include "Actors/AppearanceTransition.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
@@ -115,6 +116,36 @@ void CheckRetiredAiOwnership(const CleanupFixture& fixture,
   CHECK(Battle_Ai_actorAiStates[5] == peer);
   CHECK(Battle_Ai_FrameState()->actors[5] == peer);
   CHECK(peer->linkedActor == 16);
+}
+
+// Applies zeroed settings to Ashley's state with the given sub-type. Her
+// state keeps the action metadata to her cost threshold; the following
+// actors' states let the link resolution run.
+Battle_Ai_ActorAiState* ApplySubTypeSettings(CleanupFixture& fixture,
+                                             int sub_type) {
+  void* saved_has_waypoints = Battle_Ai_roomHasWaypoints;
+  Battle_Ai_roomHasWaypoints = nullptr;
+  auto* state = fixture.AllocateState(0);
+  fixture.AllocateState(1);
+  fixture.AllocateState(2);
+  fixture.actors[0].subType = static_cast<u_short>(sub_type);
+  state->linkedActor = 7;
+  Battle_Ai_SettingsWord settings{};
+  VS::Battle::Ai::ApplyLiveActorAiSettings(
+      reinterpret_cast<Battle_Ai_SettingsView*>(state), &settings);
+  Battle_Ai_roomHasWaypoints = saved_has_waypoints;
+  return state;
+}
+
+// Frees the orbit and the three states ApplySubTypeSettings allocated.
+void ReleaseSubTypeSettings(CleanupFixture& fixture,
+                            Battle_Ai_ActorAiState* state) {
+  VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_arenaOrbit);
+  Battle_Ai_arenaOrbit = nullptr;
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
+  VS::Core::Memory::FreeLiveFromLowEnd(state);
+  Battle_Ai_actorAiStates[0] = nullptr;
 }
 }  // namespace
 
@@ -283,6 +314,24 @@ TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
   CHECK_FALSE(VS::Core::Memory::GameHeap().Empty());
   VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_arenaOrbit);
   Battle_Ai_arenaOrbit = nullptr;
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("AI settings allocate the orbit state for orbiting boss sub-types",
+          "[ai][actor-settings][settings-live][orbit-state]") {
+  const auto sub_type = GENERATE(0xAC, 0xAD);
+  CleanupFixture fixture;
+  auto* state = ApplySubTypeSettings(fixture, sub_type);
+  const auto* view = reinterpret_cast<const Battle_Ai_SettingsView*>(state);
+  CHECK(view->decisionCallback == Battle_Ai_UpdateOrbitingBossBehavior);
+  CHECK(view->settingsConstant19 == 1);
+  CHECK(state->linkedActor == 16);
+  CHECK(state->actionCostEnabled == 1);
+  REQUIRE(Battle_Ai_arenaOrbit != nullptr);
+  CHECK(Battle_Ai_arenaOrbit->cooldown == 900);
+  ReleaseSubTypeSettings(fixture, state);
+  CHECK(Battle_Ai_actorAiStates[2] == nullptr);
+  CHECK(Battle_Ai_actorAiStates[5] == nullptr);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 

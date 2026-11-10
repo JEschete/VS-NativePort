@@ -1,11 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
-#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -21,7 +18,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -62,78 +58,6 @@ int Battle_Ai_attributeActorMask;
 
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
 const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
-
-// decomp: BATTLE.PRG func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:689)
-void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_SettingsWord* settings)
-{
-    Battle_Ai_SettingsActorView* actor = state->actor;
-    unsigned int rangeSquared, step;
-    int i, temp;
-    rangeSquared = Battle_Ai_kPerceptionRangesSquared[(settings->halves[1] & 28) >> 2];
-    state->farDistanceSquared = rangeSquared;
-    if (rangeSquared > 0x23FFFF) {
-        rangeSquared = 0x240000;
-    }
-    state->nearDistanceSquared = rangeSquared;
-    state->angle = Battle_Ai_viewAngles[settings->halves[1] & 3][0];
-    state->viewCosine = VS::Core::Math::Cosine((state->angle / 2) * 4096 / 360);
-    state->settingsBit15 = (settings->word >> 15) & 1;
-    state->settingsBit14 = (settings->word >> 14) & 1;
-    state->settingsBit13 = (settings->word >> 13) & 1;
-    state->opaque2D = 0;
-    if (Battle_Ai_roomHasWaypoints) {
-        for (i = 0; i < 8; i++) {
-            if (Battle_Ai_roomWaypoints[i] >> 15) {
-                break;
-            }
-        }
-        if (i != 8) {
-            state->opaque2D = (settings->word >> 12) & 1;
-        }
-    }
-    state->opaqueB2 = ((settings->word >> 10) & 3) + 1;
-    state->opaqueB0 = Battle_Ai_settingsBits8Values[(settings->word >> 8) & 3][0];
-    step = 128;
-    if (state->collisionRadius > 128) {
-        step = 32;
-    }
-    state->facingDelay = (step * Battle_Ai_facingDelayScales[(settings->word >> 2) & 3]) >> 4;
-    state->settingsConstant23 = 1;
-    state->settingsByte3Bit0 = settings->bytes[3] & 1;
-    state->settingsBit23 = (settings->word >> 23) & 1;
-    state->settingsBits21 = (settings->word >> 21) & 3;
-    state->settingsBits28 = (settings->word >> 28) & 3;
-    state->settingsBits30 = settings->word >> 30;
-    state->settingsBit26 = (settings->word >> 26) & 1;
-    state->movePeriod = Battle_Ai_kWanderTimingPresets[(settings->word >> 4) & 7].movePeriod;
-    state->restPeriod = Battle_Ai_kWanderTimingPresets[(settings->word >> 4) & 7].restPeriod;
-    state->wanderRate = Battle_Ai_kWanderTimingPresets[(settings->word >> 4) & 7].rate;
-    state->settingsBit27 = (settings->word >> 27) & 1;
-    state->settingsBit25 = (settings->word >> 25) & 1;
-    if (!(state->movementFlags & 0xC0)) {
-        state->settingsBits30Value = Battle_Ai_kSettingsBits30Values[state->settingsBits30];
-    }
-    state->settingsByte0Bit7 = settings->bytes[0] >> 7;
-    temp = actor->opaque34.bits.mode;
-    state->allowFallbackAction = temp >> 1;
-    temp &= 1;
-    state->settingsModeLow = temp;
-    state->opaque102 = Battle_Ai_kFlags34Bit14Values[(actor->opaque34.word >> 14) & 1];
-    state->opaque101 = (actor->opaque30.word >> 14) & 3;
-    state->opaqueC8 = actor->opaque30.halves[1] & 63;
-    state->opaqueCC = (actor->opaque30.word >> 22) & 31;
-    state->opaqueCE = actor->opaque30.word >> 27;
-    if ((unsigned int)(actor->kind - 0xAC) < 2) {
-        state->decisionCallback = Battle_Ai_UpdateOrbitingBossBehavior;
-        state->settingsConstant19 = 1;
-        VS::Battle::Ai::AllocateLiveOrbitingBossState(state);
-    } else {
-        state->decisionCallback = VS::Battle::Ai::SelectLiveDecisionBehavior(actor->opaque30.word);
-    }
-    state->linkedActor = 16;
-    VS::Battle::Ai::ResolveLiveAiLinkedActors();
-    VS::Battle::Ai::BuildLiveAiActionMetadata((Battle_Ai_ActorAiState *)((void*)state));
-}
 
 // decomp: BATTLE.PRG func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:934)
 int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
@@ -219,7 +143,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     if (actor->savedAiSettingsFlags & 1) {
         VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));
     }
-    Battle_Ai_ApplyActorAiSettings((Battle_Ai_SettingsView *)((void*)state), (Battle_Ai_SettingsWord *)((void*)&packed));
+    VS::Battle::Ai::ApplyLiveActorAiSettings((Battle_Ai_SettingsView *)((void*)state), (Battle_Ai_SettingsWord *)((void*)&packed));
     VS::Battle::Ai::InitializeLiveActorAiRelations(state);
     temp = state->moveDistance - 64;
     if (state->farDistanceSquared < (unsigned int)(temp * temp)) {

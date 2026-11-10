@@ -2251,8 +2251,11 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5710, live), copy_fixups.MODULE_BINDING_ENTRIES)
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
         caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
-        self.assertEqual(caller.count(f"{live}((Battle_Ai_ActorAiState *)((void*)state));"), 1)
+        # Its only caller, the settings application (F01813), is owned; the binding rebuilds the metadata last.
+        self.assertNotIn(live, caller)
         self.assertNotIn("Battle_Ai_BuildAiActionMetadata", caller)
+        settings = (ai / "ActorSettingsLive.cpp").read_text(encoding="utf-8")
+        self.assertEqual(settings.count("BuildLiveAiActionMetadata(reinterpret_cast<Battle_Ai_ActorAiState*>(state));"), 1)
         # The function was the only item in ActionSelection.cpp/.h, so the copy no longer writes them.
         for name in ("ActionSelection.cpp", "ActionSelection.h"):
             self.assertFalse((ai / name).exists())
@@ -2272,9 +2275,11 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5998, live), copy_fixups.MODULE_BINDING_ENTRIES)
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
         caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
-        # Settings application resolves links right before rebuilding the action metadata.
-        self.assertEqual(caller.count(f"{live}();"), 1)
-        self.assertLess(caller.index(f"{live}();"), caller.index("VS::Battle::Ai::BuildLiveAiActionMetadata("))
+        self.assertNotIn(live, caller)
+        # The owned settings application (F01813) resolves links right before rebuilding the action metadata.
+        settings = (ai / "ActorSettingsLive.cpp").read_text(encoding="utf-8")
+        self.assertEqual(settings.count("ResolveLiveAiLinkedActors();"), 1)
+        self.assertLess(settings.index("ResolveLiveAiLinkedActors();"), settings.index("BuildLiveAiActionMetadata("))
         for name in ("ActorState.cpp", "ActorState.h"):
             self.assertNotIn("Battle_Ai_ResolveAiLinkedActors", (ai / name).read_text(encoding="utf-8"))
         pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
@@ -2298,12 +2303,40 @@ class EncounterFixupTests(unittest.TestCase):
         call = f"{live}(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));"
         self.assertEqual(caller.count(call), 1)
         self.assertLess(caller.index("if (actor->savedAiSettingsFlags & 1) {"), caller.index(call))
-        self.assertLess(caller.index(call), caller.index("Battle_Ai_ApplyActorAiSettings((Battle_Ai_SettingsView *)"))
+        self.assertLess(caller.index(call), caller.index("VS::Battle::Ai::ApplyLiveActorAiSettings((Battle_Ai_SettingsView *)"))
         for name in ("ActorState.cpp", "ActorState.h"):
             self.assertNotIn("Battle_Ai_ApplySavedAiSettingsFlags", (ai / name).read_text(encoding="utf-8"))
         pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertEqual(pointers.count("0x800E5A74u"), 1)
         self.assertIn(f"0x800E5A74u, 0u, (void*)&{live},", pointers)
+
+    def test_ai_settings_application_keeps_its_module_address_and_caller(self):
+        # #276 row 28: Battle_Ai_ApplyActorAiSettings (F01813) is typed C++ in Battle/Ai/ActorSettings.cpp.
+        owned = self.owned_items()
+        self.assertEqual(owned["F01813"]["name"], "VS::Battle::Ai::ApplyActorAiSettings")
+        self.assertEqual(owned["F01813"]["path"], r"Native\Game\src\Battle\Ai\ActorSettings.cpp")
+        # The #272 decision-callback guard moved into the owned binding with the function.
+        self.assertNotIn("F01813", copy_fixups.FIXES)
+        live = "VS::Battle::Ai::ApplyLiveActorAiSettings"
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01813"], live)
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                         r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp")
+        self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5A9C, live), copy_fixups.MODULE_BINDING_ENTRIES)
+        ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
+        caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
+        # Creation decodes the settings once, after applying any saved flags to the packed word.
+        call = f"{live}((Battle_Ai_SettingsView *)((void*)state), (Battle_Ai_SettingsWord *)((void*)&packed));"
+        self.assertEqual(caller.count(call), 1)
+        self.assertLess(caller.index("VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags("), caller.index(call))
+        for name in ("ActorState.cpp", "ActorState.h"):
+            self.assertNotIn("Battle_Ai_ApplyActorAiSettings", (ai / name).read_text(encoding="utf-8"))
+        # The decode reads the module tables, so the copy still emits them.
+        for table in ("Battle_Ai_kPerceptionRangesSquared", "Battle_Ai_viewAngles", "Battle_Ai_decisionCallbacks",
+                      "Battle_Ai_kWanderTimingPresets", "Battle_Ai_kFlags34Bit14Values"):
+            self.assertIn(table, caller)
+        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertEqual(pointers.count("0x800E5A9Cu"), 1)
+        self.assertIn(f"0x800E5A9Cu, 0u, (void*)&{live},", pointers)
 
     @staticmethod
     def battle_ability_function(name: str) -> str:

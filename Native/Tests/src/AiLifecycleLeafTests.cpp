@@ -4,11 +4,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
 #include "Core/Random.hpp"
 #include "Core/Unported.hpp"
@@ -18,15 +20,18 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Field/Gimmicks.h"
 }
 
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
 
 static_assert(
     std::is_same_v<decltype(&VS::Battle::Ai::ClearLiveActorAiNavigationReset),
@@ -699,4 +704,173 @@ TEST_CASE("AI saved settings flags apply through the actor-state creation view",
                    &view->savedAiSettings));
   CHECK(std::bit_cast<std::uint32_t>(packed) == 0xACF45678u);
   CHECK(bytes(actor) == before);
+}
+
+namespace {
+// Ashley heads the list with the state under test; actors 2 and 5 follow in
+// linked groups so the trailing link resolution has work to do.
+struct ActorSettingsFixture {
+  AiLifecycleFixture table;
+  Battle_Actor* saved_head = Battle_actors[0];
+  void* saved_has_waypoints = Battle_Ai_roomHasWaypoints;
+  std::uint16_t* saved_waypoints = Battle_Ai_roomWaypoints;
+  void* saved_section6 = Field_roomData.section6;
+  u_int saved_section6_length = Field_roomData.header.section6Length;
+  std::array<Battle_Actor, 3> actors{};
+  std::array<Battle_Ai_ActorAiState, 3> states{};
+  alignas(std::uint32_t) std::array<unsigned char, 0x450> auxiliary{};
+
+  ActorSettingsFixture() {
+    constexpr std::array<int, 3> kIds{0, 2, 5};
+    for (std::size_t index = 0; index < kIds.size(); ++index) {
+      actors[index].id = kIds[index];
+      actors[index].next =
+          index + 1 < actors.size() ? &actors[index + 1] : nullptr;
+      Battle_Ai_actorAiStates[kIds[index]] = &states[index];
+    }
+    actors[1].aiGroup = 3;
+    actors[1].aiLinkedGroup = 4;
+    actors[2].aiGroup = 4;
+    actors[2].aiLinkedGroup = 3;
+    states[1].linkedActor = 16;
+    states[2].linkedActor = 16;
+    Battle_actors[0] = actors.data();
+    Battle_Ai_roomHasWaypoints = nullptr;
+    Field_roomData.section6 = auxiliary.data();
+    Field_roomData.header.section6Length = auxiliary.size();
+  }
+
+  ~ActorSettingsFixture() {
+    Battle_actors[0] = saved_head;
+    Battle_Ai_roomHasWaypoints = saved_has_waypoints;
+    Battle_Ai_roomWaypoints = saved_waypoints;
+    Field_roomData.section6 = saved_section6;
+    Field_roomData.header.section6Length = saved_section6_length;
+  }
+
+  // Waypoint 5 of the room's auxiliary section, active or not.
+  void UseRoomWaypoint(std::uint16_t waypoint) {
+    std::memcpy(auxiliary.data() + 0x440 + (5 * sizeof(waypoint)), &waypoint,
+                sizeof(waypoint));
+    Battle_Ai_roomHasWaypoints = auxiliary.data();
+    Battle_Ai_roomWaypoints =
+        reinterpret_cast<std::uint16_t*>(auxiliary.data() + 0x440);
+  }
+
+  // Ashley's spawn words and a patterned state viewed through the settings
+  // view, with the given behaviour index and movement flags.
+  Battle_Ai_SettingsView& PrepareLeader(unsigned behaviour,
+                                        std::uint16_t movement_flags) {
+    Battle_Actor& actor = actors[0];
+    actor.subType = 0xAB;
+    // Spawn group: AI group 0xF, behaviour bits 4-8, linked group 0x1F,
+    // patrol row 2, wander radius 0x2A and wander tile (0x15, 0x1B).
+    actor.aiGroup = 0xF;
+    actor.reserved30Bit4 = behaviour;
+    actor.aiLinkedGroup = 0x1F;
+    actor.reserved31Bit6 = 2u | (0x2Au << 2) | (0x15u << 8) | (0x1Bu << 13);
+    // Spawn flags: mode bits 12-13 both set and patrol rate bit 14.
+    actor.reserved34 = 0x7FFF;
+    Battle_Ai_ActorAiState& state = states[0];
+    std::memset(&state, 0xA5, sizeof(state));
+    state.actorId = 0;
+    state.linkedActor = 7;
+    auto& view = reinterpret_cast<Battle_Ai_SettingsView&>(state);
+    view.actor = reinterpret_cast<Battle_Ai_SettingsActorView*>(&actor);
+    view.collisionRadius = 129;
+    view.movementFlags = movement_flags;
+    return view;
+  }
+
+  // Every multi-bit field nonzero and neighbouring single-bit flags differ.
+  static constexpr std::uint32_t kLeaderSettings =
+      3u | (2u << 2) | (5u << 4) | (1u << 7) | (3u << 8) | (2u << 10) |
+      (1u << 12) | (1u << 14) | (1u << 16) | (6u << 18) | (2u << 21) |
+      (1u << 23) | (1u << 25) | (1u << 27) | (1u << 28) | (3u << 30);
+};
+
+// The state ApplyLiveActorAiSettings leaves from the fixture leader's
+// settings and spawn words.
+void ExpectLiveSettings(Battle_Ai_ActorAiState& expected, int waypoints,
+                        std::uint16_t movement_flags, unsigned behaviour) {
+  auto& want = reinterpret_cast<Battle_Ai_SettingsView&>(expected);
+  const unsigned far = Battle_Ai_kPerceptionRangesSquared[6];
+  want.farDistanceSquared = far;
+  want.nearDistanceSquared = far > 0x23FFFF ? 0x240000 : far;
+  want.angle = Battle_Ai_viewAngles[1][0];
+  want.viewCosine = VS::Core::Math::Cosine((want.angle / 2) * 4096 / 360);
+  want.settingsBit15 = 0;
+  want.settingsBit14 = 1;
+  want.settingsBit13 = 0;
+  want.opaque2D = waypoints == 2 ? 1 : 0;
+  want.opaqueB2 = 3;
+  want.opaqueB0 = Battle_Ai_settingsBits8Values[3][0];
+  want.facingDelay =
+      static_cast<std::uint16_t>((32 * Battle_Ai_facingDelayScales[2]) >> 4);
+  want.settingsConstant23 = 1;
+  want.settingsByte3Bit0 = 0;
+  want.settingsBit23 = 1;
+  want.settingsBits21 = 2;
+  want.settingsBits28 = 1;
+  want.settingsBits30 = 3;
+  want.settingsBit26 = 0;
+  want.movePeriod = Battle_Ai_kWanderTimingPresets[5].movePeriod;
+  want.restPeriod = Battle_Ai_kWanderTimingPresets[5].restPeriod;
+  want.wanderRate = Battle_Ai_kWanderTimingPresets[5].rate;
+  want.settingsBit27 = 1;
+  want.settingsBit25 = 1;
+  if ((movement_flags & 0xC0) == 0) {
+    want.settingsBits30Value = Battle_Ai_kSettingsBits30Values[3];
+  }
+  want.settingsByte0Bit7 = 1;
+  want.allowFallbackAction = 1;
+  want.settingsModeLow = 1;
+  want.opaque102 = Battle_Ai_kFlags34Bit14Values[1];
+  want.opaque101 = 2;
+  want.opaqueC8 = 0x2A;
+  want.opaqueCC = 0x15;
+  want.opaqueCE = 0x1B;
+  want.decisionCallback =
+      behaviour < 9 ? Battle_Ai_decisionCallbacks[behaviour] : nullptr;
+  want.linkedActor = 16;
+  // Ashley's action metadata only sets her action cost threshold.
+  expected.actionCostEnabled = 1;
+}
+}  // namespace
+
+TEST_CASE("AI settings apply every decoded field through the live view",
+          "[ai][actor-settings][settings-live]") {
+  // 0: no auxiliary section; 1: inactive waypoint; 2: active waypoint.
+  const int waypoints = GENERATE(0, 1, 2);
+  const std::uint16_t movement_flags = GENERATE(0x0000, 0x0040, 0xFF3F);
+  const unsigned behaviour = GENERATE(0u, 4u, 8u, 9u, 31u);
+  ActorSettingsFixture fixture;
+  if (waypoints != 0) fixture.UseRoomWaypoint(waypoints == 2 ? 0x8001 : 0x7FFF);
+  Battle_Ai_SettingsView& view =
+      fixture.PrepareLeader(behaviour, movement_flags);
+  const Battle_Ai_ActorAiState& state = fixture.states[0];
+  Battle_Ai_ActorAiState expected;
+  std::memcpy(&expected, &state, sizeof(state));
+  ExpectLiveSettings(expected, waypoints, movement_flags, behaviour);
+  const auto& want = reinterpret_cast<const Battle_Ai_SettingsView&>(expected);
+  Battle_Ai_SettingsWord word{};
+  word.word = ActorSettingsFixture::kLeaderSettings;
+
+  VS::Battle::Ai::ApplyLiveActorAiSettings(&view, &word);
+  CHECK(state.linkedActor == 16);
+  CHECK(view.decisionCallback == want.decisionCallback);
+  CHECK(view.settingsBits30Value == want.settingsBits30Value);
+  CHECK(view.opaque2D == want.opaque2D);
+  CHECK(StateBytes(state) == StateBytes(expected));
+  CHECK(fixture.states[1].linkedActor == 5);
+  CHECK(fixture.states[2].linkedActor == 2);
+}
+
+TEST_CASE("AI settings retain their original module address",
+          "[ai][actor-settings][settings-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800E5A9C) ==
+      reinterpret_cast<const void*>(&VS::Battle::Ai::ApplyLiveActorAiSettings));
 }
