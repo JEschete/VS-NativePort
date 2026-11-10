@@ -6,7 +6,8 @@ and the two planning-stat lifecycle promotions are published with green
 exact-revision CI. F01707 fallback selection and F01713 planning simulation are
 also published with green exact-revision CI. F01712 candidate enumeration is
 published with green exact-revision CI. F01716 action-plan orchestration is
-locally integrated and verified; its publication and exact-revision CI are pending.
+published with green exact-revision CI. F01717 completed-action reconciliation
+is the next in-progress promotion; its read-before-check defect is logged as #336.
 
 ## Checkpoint
 
@@ -68,7 +69,9 @@ locally integrated and verified; its publication and exact-revision CI are pendi
   checked binding, generated planner calls/module entry, tests and ledgers.
 - The enumeration evidence update `9c79316e` passed
   [CI 42778988160](https://github.com/JEschete/VS-NativePort/actions/runs/42778988160).
-  F01716 local verification uses that base with the actor-plan core, native
+  F01716 is published in `6ad0b1fc`
+  ([CI 42787061366](https://github.com/JEschete/VS-NativePort/actions/runs/42787061366)).
+  Local verification used that base with the actor-plan core, native
   binding, migrated workspace and lifecycle-test callers, generated module
   entry and related evidence. Its old symbol has five former source consumers
   and zero remaining consumers. The exported pass/cache/exclusion storage
@@ -456,15 +459,15 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish F01716, confirm its exact-revision CI and update #276.
+2. F01716 is published with exact-revision CI and evidence on #276.
    Do not close #276: 964 functions remain.
 3. Continue ordered row 28 with the larger planner/reconcile callers in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   F01716 is locally verified, not proof of remaining reconcile behavior or
-   gameplay. Before changing F01717, investigate its existing guard-after-read
-   hazard `23cdfd1144f5` and search existing issue evidence. The source reads
-   `entry->actor` before its null guard; runtime reachability is not yet
-   demonstrated. Log a warranted defect before implementing its fix.
+   F01716 is a verified dependency, not proof of remaining reconcile behavior
+   or gameplay. F01717 reads the planning state's actor before its null check
+   (hazard `23cdfd1144f5`); a native test reaches it with an empty state slot,
+   logged as #336. Fix it with the F01717 promotion and close #336 only with
+   the fixing commit, exact-revision CI and test evidence.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
