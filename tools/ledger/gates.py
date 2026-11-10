@@ -65,7 +65,11 @@ IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 TEST_CASE = re.compile(r'\b(?:TEMPLATE_)?TEST_CASE\s*\(\s*((?:"(?:[^"\\]|\\.)*"\s*)+)')
 STRING_LITERAL = re.compile(r'"((?:[^"\\]|\\.)*)"')
 QUALIFIED_NAME = re.compile(r"((?:::)?[A-Za-z_]\w*(?:::~?[A-Za-z_]\w*)*)\s*$")
-FORWARD_CALL = re.compile(r"^\s*(?:return\s+)?(?:::)?([A-Za-z_][\w:]*)\s*\(.*\)\s*;\s*$", re.S)
+# A keyword before parentheses (`return (a + b);`, `sizeof(T)`) is not a callee; redundant parentheses
+# around a returned call (`return (Foo(a));`) still forward (#338).
+FORWARD_CALL = re.compile(
+    r"^\s*(?:return\b\s*)?\(*\s*(?:::)?(?!(?:return|sizeof|alignof|decltype|noexcept|typeid)\b)"
+    r"([A-Za-z_][\w:]*)\s*\(.*\)\s*;\s*$", re.S)
 LOCAL_TYPE = re.compile(r"\b(?:class|struct)\s+([A-Za-z_]\w*)\s*(?:final\s*)?(?::[^;{}()]*)?\{")
 # A body that only logs (Core/Log.hpp) implements the function; it forwards no behavior.
 LOGGING_MACRO = re.compile(r"^VS_LOG_[A-Z]+$")

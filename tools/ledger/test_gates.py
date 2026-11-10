@@ -371,6 +371,27 @@ class PromotionGateTests(GateTestCase):
         )
         self.expect_failure("claim-vs_namespace")
 
+    def test_parenthesized_return_expression_claims_namespace(self) -> None:
+        # #338: the keyword before `(` is not a forwarded callee.
+        for body in ("return (v + 1);", "return ((v & 3) << 2) | (v >> 4);", "return(v);",
+                     "return sizeof(v);"):
+            with self.subTest(body=body):
+                self.fixture.promote()
+                self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
+                    "namespace VS::Sys {\nint Thing(int v) { " + body + " }\n}\n"
+                )
+                self.assertNotIn("claim-vs_namespace", [issue.rule for issue in self.report().issues])
+
+    def test_parenthesized_forwarding_call_cannot_claim_namespace(self) -> None:
+        for body in ("return (Sys_Thing(v));", "return ((::Sys_Thing(v)));", "(Sys_Thing(v));"):
+            with self.subTest(body=body):
+                self.fixture.promote()
+                self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
+                    'extern "C" int Sys_Thing(int v);\n'
+                    "namespace VS::Sys {\nint Thing(int v) { " + body + " }\n}\n"
+                )
+                self.expect_failure("claim-vs_namespace")
+
     def test_logging_only_body_claims_namespace(self) -> None:
         self.fixture.promote()
         self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
