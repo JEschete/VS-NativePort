@@ -13,8 +13,11 @@ with green exact-revision CI. F01810 action-slot metadata is published in
 `deae1369` with green exact-revision CI. F01811 linked-actor resolution is
 published in `b6dab817` with green exact-revision CI. The #338 promotion-gate
 fix is published in `e78c4062`. F01812 saved AI settings flags is published
-in `5c914a97` with green exact-revision CI. F01813 actor AI settings is locally
-integrated and verified; its publication and exact-revision CI are pending.
+in `5c914a97` with green exact-revision CI. F01813 actor AI settings is
+published in `ffd1a8e1`
+([CI 42896326975](https://github.com/JEschete/VS-NativePort/actions/runs/42896326975)).
+The owner paused work during F01818 actor AI state creation. That work is
+uncommitted and has not been built; see [Stopping Point](#stopping-point).
 
 ## Checkpoint
 
@@ -117,10 +120,111 @@ integrated and verified; its publication and exact-revision CI are pending.
   binding, generated actor-state caller, module entry, project generator entry,
   tests and ledgers. The old symbol has three former source files and zero
   remaining.
-- `5c914a97` is the F01813 base. Local verification uses it with the
-  settings-decode core, checked live binding, generated actor-state caller,
-  module entry, tests and ledgers. The old symbol has three former source
-  files and zero remaining.
+- `5c914a97` was the F01813 base. F01813 is published in `ffd1a8e1`
+  ([CI 42896326975](https://github.com/JEschete/VS-NativePort/actions/runs/42896326975)).
+  Local verification used that base with the settings-decode core, checked
+  live binding, generated actor-state caller, module entry, tests and ledgers.
+  The old symbol has three former source files and zero remaining.
+
+## Stopping Point
+
+The owner paused work on 2026-11-10. HEAD `ffd1a8e1` is pushed and green. The
+worktree holds the uncommitted, **unbuilt and untested** F01818 promotion
+(`func_800E6178`, 281 instructions, `7CD68.c:934`). It does not build as it
+stands: the migrated caller links against a file that is not yet in a
+generated project.
+
+Written so far:
+
+- The pure core:
+  - [ActorCreation.hpp](../Native/Game/include/Battle/Ai/ActorCreation.hpp)
+  - [ActorCreation.cpp](../Native/Game/src/Battle/Ai/ActorCreation.cpp)
+
+  `CreateActorAiState` runs through an `ActorCreationHost` and refuses with
+  `std::nullopt` instead of reading missing state. Its steps follow the
+  original's order:
+  1. the attribute bit (kinds `0x15`);
+  2. the special-actor slot (auxiliary actors only, object ID 2 or 4);
+  3. the AI kinds gate (`0x05`);
+  4. the body size, stats and locomotion;
+  5. the settings and relations;
+  6. the move-distance reach clamp (with the original's 32-bit wrap);
+  7. placement;
+  8. the hover (12) or stop (1) start command, for non-Ashley actors only;
+  9. clearing the command;
+  10. the saved relations;
+  11. the rebuild loop.
+- The checked live binding:
+  - [ActorCreationLive.hpp](../Native/Game/include/Battle/Ai/ActorCreationLive.hpp)
+  - [ActorCreationLive.cpp](../Native/Game/src/Battle/Ai/ActorCreationLive.cpp)
+
+  It static-asserts every creation view offset against the native structs,
+  and stores and reloads the state around each host callback. A refusal
+  aborts with a diagnostic.
+- `CreateAiState` in
+  [ActorSpawningLive.cpp](../Native/Game/src/Actors/ActorSpawningLive.cpp)
+  now calls `CreateLiveActorAiState`.
+- The `ActorSpawning.hpp` comments are updated.
+- `ActorCreationLive.cpp` is in the `needs_c_headers` list of
+  `gen_solution.py`.
+- The copier registration in `copy_fixups.py`:
+  - the header map;
+  - `OWNED_CALL_BINDINGS["F01818"]`;
+  - the module entry at `0x800E6178`;
+  - the old `F01818` FIXES entry is removed.
+- The `ActorState.cpp` key in `cpp_adaptations.json` is removed; all of its
+  entries adapted the F01818 body.
+- `owned.csv` has the F01818 row.
+
+Remaining, in order:
+
+1. Run `gen_solution.py`, then `copy_to_native.py` twice, and compare the
+   hashes. `ActorState.cpp` should lose the F01818 body, `ActorState.h` its
+   declaration, and `ModulePointers.cpp` should bind `0x800E6178` to
+   `CreateLiveActorAiState`.
+2. Add `Native/Tests/src/ActorCreationTests.cpp`:
+   - pure tests with a fake host that records the call order and state
+     snapshots;
+   - live tests for Ashley, an auxiliary special actor, a non-AI kind and the
+     module address.
+
+   The non-Ashley live path (start command and plan rebuild) needs deep
+   planning state; the canonical replay regression covers it.
+3. Re-point the F01812/F01813 copier tests in `test_encounter_fixups.py`
+   (around lines 2290-2340, 4212 and 4227) from `ActorState.cpp` to the new
+   files, and add an F01818 copier test.
+4. Then run, in order:
+   1. clang-format;
+   2. the Debug and Release builds;
+   3. the focused, AI and full test suites;
+   4. `regression.py check`;
+   5. a differential of the actual original against the core, with mutants;
+   6. the ledgers;
+   7. tidy;
+   8. a CI replay.
+
+   Commit with no attribution, push, confirm exact-revision CI and update #276.
+
+No inline assembly remains in `Native`. The differential runs the original
+BATTLE.PRG instructions in a local scratch interpreter purely for behavior
+comparison; it is not shipped code or a repository tool.
+
+Disk usage: the working tree is about 34 GB.
+
+| Path | Size | Notes |
+| --- | ---: | --- |
+| `build\Debug\combat-lab` | 7.65 GB | |
+| `build\Release\combat-lab` | 6.92 GB | |
+| `tools\Base` + `tools\PSX` | 9.1 GB | owner tool installs |
+| `.vs` | 3.2 GB | |
+| `vcpkg_installed` | 1.3 GB | |
+
+The Combat Lab growth comes from `regression.py` leaving every scripted
+replay's run directory behind
+([#339](https://github.com/JEschete/VS-NativePort/issues/339)). Nothing has
+been deleted. Removal needs owner approval and must keep interactive runs and
+the runs cited in `COMBAT_LAB.md`/`HANDOFF_HISTORY.md`. **Never delete Ghidra,
+`tools\Base` or `tools\PSX`** (owner directive, 2026-11-10).
 
 ## Sources Of Truth
 
@@ -632,12 +736,13 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish F01813 and confirm its exact-revision CI, then update #276. Keep
-   #337 open until its in-game reachability is established. Do not close
-   #276: 958 remain.
-3. Continue ordered row 28 with F01818 (`CreateActorAiState`) in
-   [ActorState.cpp](../Native/Game/src/Battle/Ai/ActorState.cpp), then
-   Behavior, Movement, Navigation, OrbitingBoss and Perception as listed by
+2. Finish F01818 from the [Stopping Point](#stopping-point) list, then update
+   #276. Keep #337 open until its in-game reachability is established. Do not
+   close #276: 958 remain. Fix #339 (scripted replay run directories) as its
+   own scoped change, and remove existing run directories only with the
+   owner's approval.
+3. Continue ordered row 28 after F01818 with Behavior, Movement, Navigation
+   (F01814-F01817), OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01716/F01717/F01793/F01810/F01811/F01812/F01813 are verified dependencies,
    not proof of remaining AI behavior or gameplay.
@@ -683,6 +788,8 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
   match delivered scope. Do not declare the remaining 958 functions complete.
+- Never delete Ghidra, `tools\Base` or `tools\PSX` to save space, even where
+  they mirror `C:\Tools`. Delete other local data only with owner approval.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
   Do not force-push, rewrite history, or add attribution trailers/headers.
 - Avoid full gameplay JSON, huge terminal histories, and unbounded parsers.
