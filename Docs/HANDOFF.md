@@ -5,7 +5,8 @@ The condition terms, quality repairs and three candidate-planning promotions
 and the two planning-stat lifecycle promotions are published with green
 exact-revision CI. F01707 fallback selection and F01713 planning simulation are
 also published with green exact-revision CI. F01712 candidate enumeration is
-locally verified and integrated; its publication and exact-revision CI are pending.
+published with green exact-revision CI. F01716 action-plan orchestration is
+the next in-progress promotion; no new planner implementation is verified yet.
 
 ## Checkpoint
 
@@ -61,9 +62,10 @@ locally verified and integrated; its publication and exact-revision CI are pendi
   status tables and legacy records.
 - The simulation evidence update `91717ee8` passed
   [CI 42773496563](https://github.com/JEschete/VS-NativePort/actions/runs/42773496563).
-  F01712 is locally verified on that base with the uncommitted enumeration core,
+  F01712 is published in `79c2af10`
+  ([CI 42777655682](https://github.com/JEschete/VS-NativePort/actions/runs/42777655682)).
+  Local verification used that base with the enumeration core,
   checked binding, generated planner calls/module entry, tests and ledgers.
-  Publication and exact-revision CI are pending.
 
 ## Sources Of Truth
 
@@ -392,12 +394,18 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the verified F01712 milestone, confirm exact-revision CI and record
-   the evidence on #276. Do not close #276: 965 functions remain.
+2. F01712 is published with exact-revision CI and evidence on #276.
+   Do not close #276: 965 functions remain.
 3. Continue ordered row 28 with the larger planner/reconcile callers in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
    F01712 enumeration and F01713 simulation are verified dependencies, not
    proof of the remaining planner orchestration or gameplay.
+   F01716 original source and all 459 instructions have now been read:
+   `800DE3E4-800DEB0C`, SHA256
+   `4c6aa5d18b74efc24ec22c91e9aea2f4fe740949700723c41631f114975bdceb`.
+   Preserve #274's initialized selection counts on snapshot failure, cumulative
+   simulation passes, quotas, rejection exclusions, restore/reset order,
+   threshold wrapping and late reads after RNG/readiness/movement callbacks.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
