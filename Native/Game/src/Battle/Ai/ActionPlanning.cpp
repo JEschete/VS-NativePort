@@ -1,9 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -13,12 +11,9 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -31,9 +26,7 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
-#include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
-#include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Field/Gimmicks.h"
 #include "Items/Equipment.h"
@@ -65,108 +58,6 @@ Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 
 // decomp: D_800F5904 (D_800F5904@BATTLE/BATTLE.PRG)
 u_char (*Battle_Ai_candidateExclusions)[256];
-
-// decomp: BATTLE.PRG func_800DCAA0 (src/BATTLE/BATTLE.PRG/74088.c:513)
-void Battle_Ai_SimulateActionCandidate(
-    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionTiming* simulated_actor_rows, Battle_Ai_ActionCandidate* candidate, int simulation_mode)
-{
-    SVECTOR simulated_source_position;
-    SVECTOR target_position;
-    int target_actor_slot = candidate->targetId;
-    int action_available;
-
-    if (simulation_mode != 3) {
-        action_available =
-            Battle_PreviewActionAgainstLimb(candidate->action, ai_state->actorId, target_actor_slot, candidate->targetLimb, Battle_Ai_planningWorkspace);
-    } else {
-        Actors_ActorRecord* actor = Actors_actorRecords[target_actor_slot];
-        target_position.vx = actor->instance.position.vx;
-        target_position.vz = actor->instance.position.vz;
-        target_position.vy = actor->instance.position.vy - candidate->opaqueCBit7;
-        *(int*)&simulated_source_position.vx = *(int*)&target_position.vx;
-        simulated_source_position.vz = target_position.vz + VS::Core::Math::SquareRootInteger(candidate->distanceSquared);
-        action_available = ((int (*)(int, int, int, int, SVECTOR*, SVECTOR*, void*))Battle_PreviewActionAgainstActor)(
-            candidate->action, ai_state->actorId, target_actor_slot, candidate->targetLimb, &simulated_source_position, &target_position, Battle_Ai_planningWorkspace);
-    }
-    if (action_available != 0) {
-        Battle_Ai_ApplySimulatedActionResultsEntry(simulated_actor_rows);
-    }
-}
-
-// decomp: BATTLE.PRG func_800DCBD8 (src/BATTLE/BATTLE.PRG/74088.c:539)
-void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* candidate)
-{
-    int i;
-    int threshold = 0;
-    int id = candidate->targetId;
-
-    for (i = 0; i < Battle_Ai_planningWorkspace->opaque4A; ++i) {
-        Battle_Ai_EngagementActor* entry = &Battle_Ai_planningWorkspace->opaque4C[i];
-        if ((entry->opaque40 == 0) && (id == Battle_Ai_planningWorkspace->opaque4C[i].opaque0)) {
-            threshold = Battle_Ai_planningWorkspace->opaque4C[i].opaque2;
-            break;
-        }
-    }
-
-    candidate->weight = threshold + (threshold >> 2) + (threshold >> 5);
-}
-
-// decomp: BATTLE.PRG func_800DCC94 (src/BATTLE/BATTLE.PRG/74088.c:620)
-void Battle_Ai_EvaluateActionCandidate(
-    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate, int simulation_mode, Battle_ActionDefinition* action_definition)
-{
-    int special = 0;
-    Battle_ActionAiFlags flags = { 0 };
-    Battle_Actor* actor;
-    Battle_Ai_ActionTiming* stats;
-
-    if (action_definition != NULL) {
-        flags = action_definition->aiFlags;
-    }
-
-    if (flags.rarelyChosen && (Core_Random_Rand() & 0x7F) < 115) {
-        candidate->opaque0 = 0x80000000;
-        return;
-    }
-
-    candidate->opaque0 = 0;
-    candidate->weight = 128;
-    stats = (Battle_Ai_ActionTiming*)((uintptr_t)Core_ScratchBase() + 0x18C);
-    VS::Battle::Ai::CaptureBattleActorConditions(std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>(stats, VS::Battle::Ai::kBattleActorSlotCount));
-
-    if (ai_state->settingsModeLow && flags.opaque0Bit4) {
-        special = 1;
-        candidate->weight = 40;
-    } else if (simulation_mode != 0) {
-        Battle_Ai_SimulateActionCandidate(ai_state, stats, candidate, simulation_mode);
-        Battle_Ai_UpdateCandidateHitWeight(candidate);
-    }
-
-    for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
-        int id = actor->id;
-        int kind = ai_state->relations[id].classification;
-        int value;
-
-        if (kind == 1) {
-            continue;
-        }
-
-        value = VS::Battle::Ai::ScoreLiveActorCondition(VS::Battle::Ai::LiveActorStatusConditionScore(&stats[id]), VS::Battle::Ai::LiveActorHpRatio(stats, id),
-            VS::Battle::Ai::LiveActorMpRatio(stats, id), VS::Battle::Ai::LiveActorEquipmentDpRatio(stats, id));
-
-        if (kind != 2) {
-            value = -value;
-        }
-
-        candidate->opaque0 += value;
-    }
-
-    if (special) {
-        ++candidate->opaque0;
-    }
-
-    candidate->opaque0 = candidate->opaque0 * 128 + candidate->weight;
-}
 
 // decomp: BATTLE.PRG func_800DD604 (src/BATTLE/BATTLE.PRG/74088.c:899)
 void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state)
@@ -225,7 +116,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
     VS::Core::Memory::ClearLiveAlignedWords(list, sizeof *list);
     list[0].distanceSquared = 256;
     list[0].threshold = readiness_threshold;
-    Battle_Ai_EvaluateActionCandidate(ai_state, list, 0, NULL);
+    Battle_Ai_EvaluateActionCandidateEntry(ai_state, list, 0, NULL);
     VS::Battle::Ai::CopyLiveActionCandidate(&list[1], list);
     list[1].threshold = readiness_threshold;
     candidate = &list[1];
@@ -269,7 +160,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
 
                 switch (config->kind) {
                 case 1:
-                    Battle_Ai_EvaluateActionCandidate(ai_state, candidate, 1, info);
+                    Battle_Ai_EvaluateActionCandidateEntry(ai_state, candidate, 1, info);
                     VS::Battle::Ai::CacheLiveFallbackActionCandidate(candidate, info);
 
                     if (list[1].opaque0 > list[0].opaque0) {
@@ -291,7 +182,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
 
                         last = limb;
                         list[1].targetLimb = last;
-                        Battle_Ai_EvaluateActionCandidate(ai_state, candidate, 2, info);
+                        Battle_Ai_EvaluateActionCandidateEntry(ai_state, candidate, 2, info);
                         chance = list[1].weight;
 
                         if ((Core_Random_Rand() & 0x7F) < chance && list[1].opaque0 > list[2].opaque0) {
@@ -332,7 +223,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
                         int chance;
 
                         list[1].opaqueCBit7 = ABS(target->pointHeight);
-                        Battle_Ai_EvaluateActionCandidate(ai_state, candidate, 3, info);
+                        Battle_Ai_EvaluateActionCandidateEntry(ai_state, candidate, 3, info);
                         chance = list[1].weight;
 
                         if ((Core_Random_Rand() & 0x7F) < chance && list[1].opaque0 > list[2].opaque0) {

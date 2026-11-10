@@ -613,6 +613,12 @@ class EncounterFixupTests(unittest.TestCase):
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F01697", "Battle_Ai_ApplySimulatedActionResultsEntry", "VS::Battle::Ai::ApplySimulatedActionResults",
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
+              ("F01698", "Battle_Ai_SimulateActionCandidateEntry", "VS::Battle::Ai::SimulateActionCandidate",
+               r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
+              ("F01699", "Battle_Ai_UpdateCandidateHitWeightEntry", "VS::Battle::Ai::UpdateCandidateHitWeight",
+               r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
+              ("F01704", "Battle_Ai_EvaluateActionCandidateEntry", "VS::Battle::Ai::EvaluateActionCandidate",
+               r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F00619", "Field_SetMovingPlatformVisibilityEntry", "VS::Field::SetMovingPlatformVisibility",
                r"Native\Game\include\Field\PlatformPlacement.hpp"),
               ("F00621", "Field_MovingPlatformDwellTicksEntry", "VS::Field::MovingPlatformDwellTicks",
@@ -1254,6 +1260,9 @@ class EncounterFixupTests(unittest.TestCase):
                     "F00828": ("Field_RefreshAshleyInteractionTileEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F01637": ("Battle_Ai_RefreshActionCandidateReadinessEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01697": ("Battle_Ai_ApplySimulatedActionResultsEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01698": ("Battle_Ai_SimulateActionCandidateEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01699": ("Battle_Ai_UpdateCandidateHitWeightEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01704": ("Battle_Ai_EvaluateActionCandidateEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F00619": ("Field_SetMovingPlatformVisibilityEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00621": ("Field_MovingPlatformDwellTicksEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00067": ("Field_ApplyUnlockEffectToRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
@@ -2069,14 +2078,17 @@ class EncounterFixupTests(unittest.TestCase):
         planning = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn('#include "Battle/Ai/ConditionSnapshotBinding.hpp"', planning)
-        self.assertIn(
-            "VS::Battle::Ai::CaptureBattleActorConditions("
-            "std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>("
-            "stats, VS::Battle::Ai::kBattleActorSlotCount));",
-            planning,
+        live = (root / r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.cpp").read_text(
+            encoding="utf-8"
         )
-        self.assertNotIn("Battle_Ai_CaptureActorConditionTable(", planning)
+        self.assertNotIn('#include "Battle/Ai/ConditionSnapshotBinding.hpp"', planning)
+        self.assertIn('#include "Battle/Ai/ConditionSnapshotBinding.hpp"', live)
+        self.assertIn("CaptureBattleActorConditions(rows_);", live)
+        self.assertIn(
+            "std::array<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows_{};",
+            live,
+        )
+        self.assertNotIn("Battle_Ai_CaptureActorConditionTable(", planning + live)
         pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
             encoding="utf-8"
         )

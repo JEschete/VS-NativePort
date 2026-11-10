@@ -1101,6 +1101,9 @@
     <None Include="..\..\lint\test_quality.py">
       <Filter>tools\lint</Filter>
     </None>
+    <None Include="..\..\lint\test_workflows.py">
+      <Filter>tools\lint</Filter>
+    </None>
     <None Include="..\..\naming\ai_offsets.py">
       <Filter>tools\naming</Filter>
     </None>

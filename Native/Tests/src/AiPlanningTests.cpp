@@ -193,6 +193,157 @@ TEST_CASE(
 }
 
 TEST_CASE(
+    "Native candidate hit weighting decodes the complete ordered result tail",
+    "[ai][planning][candidate-evaluation-live]") {
+  SimulationResultsFixture fixture;
+  Battle_Ai_ActionCandidate candidate{};
+  candidate.targetId = 3;
+  candidate.action = 42;
+  candidate.threshold = 54321;
+  candidate.opaque0 = -123456;
+  fixture.workspace->opaque4A = 4;
+  fixture.workspace->opaque4C[0].opaque0 = 3;
+  fixture.workspace->opaque4C[0].opaque40 = 1;
+  fixture.workspace->opaque4C[0].opaque2 = 128;
+  fixture.workspace->opaque4C[1].opaque0 = 2;
+  fixture.workspace->opaque4C[1].opaque2 = 128;
+  fixture.workspace->opaque4C[2].opaque0 = 3;
+  fixture.workspace->opaque4C[3].opaque0 = 3;
+  fixture.workspace->opaque4C[3].opaque2 = 99;
+  for (unsigned threshold = 0; threshold < 256; ++threshold) {
+    fixture.workspace->opaque4C[2].opaque2 =
+        static_cast<unsigned char>(threshold);
+    auto expected = candidate;
+    expected.weight = (threshold + threshold / 4 + threshold / 32) & 255;
+    REQUIRE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
+    CHECK(std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate) ==
+          std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(expected));
+  }
+  fixture.workspace->opaque4A = 0;
+  Battle_Ai_UpdateCandidateHitWeightEntry(&candidate);
+  CHECK(candidate.weight == 0);
+}
+
+TEST_CASE(
+    "Native candidate hit weighting refuses unreadable or oversized tails",
+    "[ai][planning][candidate-evaluation-live]") {
+  SimulationResultsFixture fixture;
+  Battle_Ai_ActionCandidate candidate{};
+  candidate.weight = 99;
+  const auto before =
+      std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate);
+  CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(nullptr));
+  fixture.workspace->opaque4A = 256;
+  CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
+  auto* short_workspace = static_cast<Battle_Ai_ReactionRecord*>(
+      VS::Core::Memory::AllocateLiveFromLowEnd(
+          sizeof(Battle_Ai_ReactionRecord)));
+  REQUIRE(short_workspace != nullptr);
+  std::memset(short_workspace, 0, sizeof(*short_workspace));
+  short_workspace->opaque4A = 1;
+  Battle_Ai_planningWorkspace = short_workspace;
+  CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
+  Battle_Ai_planningWorkspace = nullptr;
+  CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
+  CHECK(std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate) ==
+        before);
+}
+
+TEST_CASE(
+    "Native candidate evaluation owns its snapshot and preserves packed fields",
+    "[ai][planning][candidate-evaluation-live]") {
+  ReadinessFixture fixture;
+  Battle_Actor ally{};
+  Battle_Actor enemy{};
+  Battle_ActorStats enemy_stats = fixture.stats;
+  enemy_stats.currentHp = 50;
+  ally.id = 1;
+  ally.stats = &fixture.stats;
+  ally.next = &enemy;
+  enemy.id = 3;
+  enemy.stats = &enemy_stats;
+  Battle_actors[0] = &ally;
+  fixture.state.relations[1].classification = 2;
+  fixture.state.relations[3].classification = 3;
+  Battle_Ai_ActionCandidate candidate = fixture.state.candidates[0];
+  auto expected = candidate;
+  expected.opaque0 = 256 * 128 + 128;
+  expected.weight = 128;
+  std::array<std::byte, 16 * sizeof(Battle_Ai_ActionTiming)> scratch{};
+  auto* scratch_rows = static_cast<std::byte*>(Core_ScratchBase()) + 0x18C;
+  std::memcpy(scratch.data(), scratch_rows, scratch.size());
+  REQUIRE(VS::Battle::Ai::EvaluateLiveActionCandidate(&fixture.state,
+                                                      &candidate, 0, nullptr));
+  CHECK(std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate) ==
+        std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(expected));
+  CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
+  std::memcpy(scratch_rows, scratch.data(), scratch.size());
+  fixture.state.settingsModeLow = 1;
+  Battle_actionDefinitions[42].aiFlags.opaque0Bit4 = 1;
+  Battle_Ai_EvaluateActionCandidateEntry(&fixture.state, &candidate, 3,
+                                         &Battle_actionDefinitions[42]);
+  CHECK(candidate.opaque0 == 257 * 128 + 40);
+  CHECK(candidate.weight == 40);
+}
+
+TEST_CASE("Native candidate bindings refuse missing state before simulation",
+          "[ai][planning][candidate-evaluation-live]") {
+  SimulationResultsFixture fixture;
+  Battle_Ai_ActionCandidate candidate{};
+  CHECK_FALSE(VS::Battle::Ai::EvaluateLiveActionCandidate(nullptr, &candidate,
+                                                          0, nullptr));
+  CHECK_FALSE(VS::Battle::Ai::EvaluateLiveActionCandidate(&fixture.state,
+                                                          nullptr, 0, nullptr));
+  CHECK_FALSE(VS::Battle::Ai::SimulateLiveActionCandidate(
+      nullptr, fixture.rows, &candidate,
+      VS::Battle::Ai::CandidateSimulationMode::kLimb));
+  fixture.state.actorId = 255;
+  CHECK_FALSE(VS::Battle::Ai::SimulateLiveActionCandidate(
+      &fixture.state, fixture.rows, &candidate,
+      VS::Battle::Ai::CandidateSimulationMode::kLimb));
+}
+
+TEST_CASE("Native candidate simulation refuses aliased inputs before writes",
+          "[ai][planning][candidate-evaluation-live]") {
+  SimulationResultsFixture fixture;
+  Battle_Ai_ActionCandidate candidate{};
+  const auto before = *fixture.request;
+  const auto rows_before = fixture.rows;
+  const std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
+      aliased_rows(reinterpret_cast<Battle_Ai_ActionTiming*>(fixture.workspace),
+                   VS::Battle::Ai::kBattleActorSlotCount);
+  CHECK_FALSE(VS::Battle::Ai::SimulateLiveActionCandidate(
+      &fixture.state, aliased_rows, &candidate,
+      VS::Battle::Ai::CandidateSimulationMode::kLimb));
+  CHECK_FALSE(VS::Battle::Ai::SimulateLiveActionCandidate(
+      reinterpret_cast<Battle_Ai_ActorAiState*>(fixture.workspace),
+      fixture.rows, &candidate,
+      VS::Battle::Ai::CandidateSimulationMode::kLimb));
+  CHECK_FALSE(VS::Battle::Ai::SimulateLiveActionCandidate(
+      &fixture.state, fixture.rows,
+      reinterpret_cast<Battle_Ai_ActionCandidate*>(fixture.workspace),
+      VS::Battle::Ai::CandidateSimulationMode::kLimb));
+  CHECK(std::memcmp(&before, fixture.request, sizeof(before)) == 0);
+  CHECK(std::memcmp(rows_before.data(), fixture.rows.data(),
+                    sizeof(rows_before)) == 0);
+}
+
+TEST_CASE("Candidate planning functions retain all original module addresses",
+          "[ai][planning][candidate-evaluation-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DCAA0) ==
+        reinterpret_cast<const void*>(&Battle_Ai_SimulateActionCandidateEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800DCBD8) ==
+      reinterpret_cast<const void*>(&Battle_Ai_UpdateCandidateHitWeightEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DCC94) ==
+        reinterpret_cast<const void*>(&Battle_Ai_EvaluateActionCandidateEntry));
+}
+
+TEST_CASE(
     "Native simulated results preserve row metadata maxima and target order",
     "[ai][planning][simulation-results-live]") {
   SimulationResultsFixture fixture;

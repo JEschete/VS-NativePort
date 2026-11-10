@@ -8,6 +8,7 @@
 #include <span>
 
 #include "Battle/Ai/ConditionSnapshot.hpp"
+#include "Battle/Targeting.hpp"
 
 // The battle AI action planner's candidate list: the 20-byte candidate record,
 // the ranking the planner sorts, the simulated stat snapshot it plans against,
@@ -69,6 +70,8 @@ class ActionCandidate {
   [[nodiscard]] unsigned Threshold() const;
   [[nodiscard]] std::int32_t DistanceSquared() const;
   [[nodiscard]] unsigned TargetId() const;
+  [[nodiscard]] unsigned TargetLimb() const;
+  [[nodiscard]] unsigned HeightOffset() const;
   [[nodiscard]] unsigned Weight() const;
   [[nodiscard]] bool Option(CandidateOption option) const;
   [[nodiscard]] unsigned Range() const;
@@ -80,6 +83,8 @@ class ActionCandidate {
   void SetThreshold(unsigned threshold);
   void SetDistanceSquared(std::int32_t distance_squared);
   void SetTargetId(unsigned target_id);
+  void SetTargetLimb(unsigned limb);
+  void SetHeightOffset(unsigned height);
   void SetWeight(unsigned weight);
   void SetOption(CandidateOption option, bool enabled);
   void SetRange(unsigned range);
@@ -196,12 +201,71 @@ struct SimulatedActorEffect {
   SimulatedStatChange shield_dp{};
   std::uint32_t statuses_set = 0;
   std::uint32_t statuses_clear = 0;
+  std::uint8_t hit_threshold = 0;
 };
 
 bool ApplySimulatedActionResults(std::span<ActorCondition> conditions,
                                  const ActionCost& action,
                                  const SimulatedActorEffect& performer,
                                  std::span<const SimulatedActorEffect> targets);
+
+enum class CandidateSimulationMode { kLimb, kAimed };
+
+class CandidateSimulationHost {
+ public:
+  virtual ~CandidateSimulationHost() = default;
+  [[nodiscard]] virtual std::optional<TargetPoint> TargetPosition(
+      unsigned target) const = 0;
+  virtual std::optional<bool> PreviewLimb(const ActionCandidate& candidate) = 0;
+  virtual std::optional<bool> PreviewAimed(const ActionCandidate& candidate,
+                                           const TargetPoint& source,
+                                           const TargetPoint& target) = 0;
+  virtual bool ApplyResults() = 0;
+};
+
+struct CandidateCondition {
+  ActorCondition condition{};
+  unsigned classification = 0;
+  bool action_cost_enabled = false;
+};
+
+struct CandidateEvaluationOptions {
+  bool rarely_chosen = false;
+  bool special_action = false;
+  std::optional<CandidateSimulationMode> simulation{};
+};
+
+class CandidateEvaluationHost {
+ public:
+  virtual ~CandidateEvaluationHost() = default;
+  virtual int Random() = 0;
+  virtual bool Capture(ActionCandidate& candidate) = 0;
+  [[nodiscard]] virtual bool SpecialMode() const = 0;
+  virtual bool Simulate(ActionCandidate& candidate,
+                        CandidateSimulationMode mode) = 0;
+  virtual std::optional<std::span<const SimulatedActorEffect>> Hits() = 0;
+  virtual std::optional<std::span<const CandidateCondition>> Conditions() = 0;
+};
+
+// decomp: BATTLE.PRG func_800DCAA0 (74088.c:513; 0x800DCAA0-0x800DCBD4).
+// Aimed previews wrap their coordinate arithmetic to signed halfwords.
+// Unavailable actions leave the snapshot alone; false refuses invalid inputs.
+bool SimulateActionCandidate(CandidateSimulationHost& host,
+                             const ActionCandidate& candidate,
+                             CandidateSimulationMode mode);
+
+// decomp: BATTLE.PRG func_800DCBD8 (74088.c:539; 0x800DCBD8-0x800DCC90).
+// The first nonignored matching target supplies a byte threshold. The scaled
+// weight wraps to eight bits, rather than saturating.
+void UpdateCandidateHitWeight(ActionCandidate& candidate,
+                              std::span<const SimulatedActorEffect> targets);
+
+// decomp: BATTLE.PRG func_800DCC94 (74088.c:620; 0x800DCC94-0x800DCFFC).
+// Rejection changes only the score. Otherwise capture precedes the optional
+// simulation, then condition scores accumulate with the original word wrapping.
+bool EvaluateActionCandidate(ActionCandidate& candidate,
+                             const CandidateEvaluationOptions& options,
+                             CandidateEvaluationHost& host);
 
 // The terms of an actor's condition the planner scores a candidate with
 // (func_800DCC94, BATTLE.PRG 74088.c:620). The original inlines the four

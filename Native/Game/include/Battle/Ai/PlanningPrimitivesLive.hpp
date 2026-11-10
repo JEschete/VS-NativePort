@@ -8,6 +8,7 @@
 #include "Battle/Ai/PlanningPrimitives.hpp"
 
 struct Battle_ActorStats;
+struct Battle_ActionDefinition;
 struct Battle_Ai_ActionCandidate;
 struct Battle_Ai_ActionPlanView;
 struct Battle_Ai_ActorAiState;
@@ -23,6 +24,15 @@ std::optional<bool> RefreshLiveActionCandidateReadiness(
     Battle_Ai_ActorAiState* state);
 bool ApplyLiveSimulatedActionResults(
     std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows);
+bool SimulateLiveActionCandidate(
+    Battle_Ai_ActorAiState* state,
+    std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows,
+    const Battle_Ai_ActionCandidate* candidate, CandidateSimulationMode mode);
+bool UpdateLiveCandidateHitWeight(Battle_Ai_ActionCandidate* candidate);
+bool EvaluateLiveActionCandidate(Battle_Ai_ActorAiState* state,
+                                 Battle_Ai_ActionCandidate* candidate,
+                                 int simulation_mode,
+                                 const Battle_ActionDefinition* action);
 
 // The condition terms (ActorStatusConditionScore and the ratios,
 // PlanningPrimitives.hpp) of a row of the planner's condition snapshot. The

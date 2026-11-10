@@ -10,7 +10,6 @@
 #define VS_BATTLE_AI_ACTIONPLANNING_H_DECLS
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
-#include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -29,11 +28,6 @@ extern int Battle_Ai_unusedPlanCounter;
 extern Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
 extern Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 extern u_char (*Battle_Ai_candidateExclusions)[256];
-void Battle_Ai_SimulateActionCandidate(
-    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionTiming* simulated_actor_rows, Battle_Ai_ActionCandidate* candidate, int simulation_mode);
-void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* candidate);
-void Battle_Ai_EvaluateActionCandidate(
-    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate, int simulation_mode, Battle_ActionDefinition* action_definition);
 void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state);
 void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int readiness_threshold);
 void Battle_Ai_AdvancePlanningSimulation(int simulation_time_step);

@@ -13,7 +13,9 @@
 #include <optional>
 #include <span>
 
+#include "Battle/Ai/DecisionPrimitives.hpp"
 #include "Core/Diagnostics.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/PointerSort.hpp"
 
 namespace VS::Battle::Ai {
@@ -28,6 +30,10 @@ constexpr unsigned kThresholdShift = 13;
 constexpr unsigned kThresholdBits = 16;
 constexpr unsigned kTargetShift = 0;
 constexpr unsigned kTargetBits = 4;
+constexpr unsigned kTargetLimbShift = 4;
+constexpr unsigned kTargetLimbBits = 3;
+constexpr unsigned kHeightOffsetShift = 7;
+constexpr unsigned kHeightOffsetBits = 12;
 constexpr unsigned kWeightShift = 19;
 constexpr unsigned kWeightBits = 8;
 constexpr unsigned kRangeShift = 6;
@@ -65,6 +71,13 @@ constexpr std::int32_t kLowHpScorePenalty = 84;
 // HP below this many 128ths of the maximum takes the low-HP penalty.
 constexpr std::int32_t kLowHpPer128 = 44;
 constexpr std::int32_t kConditionRatioScale = 128;
+constexpr unsigned kHitWeightSmallShift = 5;
+constexpr unsigned kCandidateScoreShift = 7;
+constexpr int kRareCandidateRandomMask = 127;
+constexpr int kRareCandidateRejectionThreshold = 115;
+constexpr unsigned kDefaultCandidateWeight = 128;
+constexpr unsigned kSpecialCandidateWeight = 40;
+constexpr unsigned kIgnoredClassification = 1;
 
 bool ApplyConditionDelta(std::int16_t& value, std::int16_t maximum,
                          const SimulatedStatChange& change) {
@@ -280,6 +293,105 @@ bool ApplySimulatedActionResults(
   return true;
 }
 
+// decomp: BATTLE.PRG func_800DCAA0 (74088.c:513), original78MIPS.
+bool SimulateActionCandidate(CandidateSimulationHost& host,
+                             const ActionCandidate& candidate,
+                             CandidateSimulationMode mode) {
+  std::optional<bool> available;
+  if (mode == CandidateSimulationMode::kAimed) {
+    auto target = host.TargetPosition(candidate.TargetId());
+    if (!target) {
+      Refuse("AI aimed candidate has no target position");
+      return false;
+    }
+    target->y = Core::Math::WrapSigned16(static_cast<std::uint32_t>(target->y) -
+                                         candidate.HeightOffset());
+    target->pad = 0;
+    auto source = *target;
+    source.z = Core::Math::WrapSigned16(
+        static_cast<std::uint32_t>(target->z) +
+        static_cast<std::uint32_t>(
+            Core::Math::SquareRootInteger(candidate.DistanceSquared())));
+    available = host.PreviewAimed(candidate, source, *target);
+  } else {
+    available = host.PreviewLimb(candidate);
+  }
+  if (!available || (*available && !host.ApplyResults())) {
+    Refuse("AI candidate preview or projected results were refused");
+    return false;
+  }
+  return true;
+}
+
+// decomp: BATTLE.PRG func_800DCBD8 (74088.c:539), original47MIPS.
+void UpdateCandidateHitWeight(ActionCandidate& candidate,
+                              std::span<const SimulatedActorEffect> targets) {
+  const auto found = std::find_if(
+      targets.begin(), targets.end(), [&candidate](const auto& target) {
+        return !target.ignored && target.actor_id == candidate.TargetId();
+      });
+  const unsigned threshold = found == targets.end() ? 0u : found->hit_threshold;
+  candidate.SetWeight(threshold + (threshold >> 2) +
+                      (threshold >> kHitWeightSmallShift));
+}
+
+// decomp: BATTLE.PRG func_800DCC94 (74088.c:620), original219MIPS.
+bool EvaluateActionCandidate(ActionCandidate& candidate,
+                             const CandidateEvaluationOptions& options,
+                             CandidateEvaluationHost& host) {
+  if (options.rarely_chosen && (host.Random() & kRareCandidateRandomMask) <
+                                   kRareCandidateRejectionThreshold) {
+    candidate.SetScore(std::numeric_limits<std::int32_t>::min());
+    return true;
+  }
+  candidate.SetScore(0);
+  candidate.SetWeight(kDefaultCandidateWeight);
+  if (!host.Capture(candidate)) {
+    Refuse("AI candidate condition capture was refused");
+    return false;
+  }
+  const bool special = host.SpecialMode() && options.special_action;
+  if (special) {
+    candidate.SetWeight(kSpecialCandidateWeight);
+  } else if (options.simulation) {
+    if (!host.Simulate(candidate, *options.simulation)) {
+      Refuse("AI candidate simulation was refused");
+      return false;
+    }
+    const auto hits = host.Hits();
+    if (!hits) {
+      Refuse("AI candidate hit results are unavailable");
+      return false;
+    }
+    UpdateCandidateHitWeight(candidate, *hits);
+  }
+  const auto conditions = host.Conditions();
+  if (!conditions || conditions->size() > kBattleActorSlotCount) {
+    Refuse("AI candidate condition list is unavailable or too large");
+    return false;
+  }
+  auto score = std::bit_cast<std::uint32_t>(candidate.Score());
+  for (const auto& actor : *conditions) {
+    if (actor.classification == kIgnoredClassification) continue;
+    const auto value = ScoreActorCondition(
+        {.status = ActorStatusConditionScore(actor.condition,
+                                             actor.action_cost_enabled),
+         .hp = Core::Math::WrapSigned16(
+             static_cast<std::uint32_t>(ActorHpRatio(actor.condition))),
+         .mp = Core::Math::WrapSigned16(
+             static_cast<std::uint32_t>(ActorMpRatio(actor.condition))),
+         .dp = Core::Math::WrapSigned16(static_cast<std::uint32_t>(
+             ActorEquipmentDpRatio(actor.condition)))});
+    if (!value) return false;
+    const auto word = std::bit_cast<std::uint32_t>(*value);
+    score += actor.classification == kAlliedClassification ? word : 0u - word;
+  }
+  if (special) ++score;
+  candidate.SetScore(std::bit_cast<std::int32_t>(
+      (score << kCandidateScoreShift) + candidate.Weight()));
+  return true;
+}
+
 // decomp: BATTLE.PRG _getStatusScore (74088.c:565), inlined in func_800DCC94
 // (0x800DCDD4-0x800DCF5C, original99MIPS with the three ratios).
 std::int32_t ActorStatusConditionScore(const ActorCondition& condition,
@@ -363,6 +475,14 @@ unsigned ActionCandidate::TargetId() const {
   return Field(words_[kTargetWord], kTargetShift, kTargetBits);
 }
 
+unsigned ActionCandidate::TargetLimb() const {
+  return Field(words_[kTargetWord], kTargetLimbShift, kTargetLimbBits);
+}
+
+unsigned ActionCandidate::HeightOffset() const {
+  return Field(words_[kTargetWord], kHeightOffsetShift, kHeightOffsetBits);
+}
+
 unsigned ActionCandidate::Weight() const {
   return Field(words_[kTargetWord], kWeightShift, kWeightBits);
 }
@@ -402,6 +522,16 @@ void ActionCandidate::SetDistanceSquared(std::int32_t distance_squared) {
 void ActionCandidate::SetTargetId(unsigned target_id) {
   words_[kTargetWord] =
       WithField(words_[kTargetWord], kTargetShift, kTargetBits, target_id);
+}
+
+void ActionCandidate::SetTargetLimb(unsigned limb) {
+  words_[kTargetWord] =
+      WithField(words_[kTargetWord], kTargetLimbShift, kTargetLimbBits, limb);
+}
+
+void ActionCandidate::SetHeightOffset(unsigned height) {
+  words_[kTargetWord] = WithField(words_[kTargetWord], kHeightOffsetShift,
+                                  kHeightOffsetBits, height);
 }
 
 void ActionCandidate::SetWeight(unsigned weight) {

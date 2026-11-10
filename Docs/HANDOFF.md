@@ -1,8 +1,9 @@
 # Current Handoff
 
 Updated 2026-11-09. Row 28 (battle AI) resumed after the cleanup checkpoint.
-The condition-term group below is published and verified; its fixing revision
-and exact-revision CI are recorded here, in #276 and in the plan row.
+The condition terms and quality repairs are published with green CI.
+The next three candidate-planning promotions are locally verified below;
+their publication and exact-revision CI are the remaining checkpoint steps.
 
 ## Checkpoint
 
@@ -16,18 +17,19 @@ and exact-revision CI are recorded here, in #276 and in the plan row.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **973 functions remain.** Modernization: 2,771 done of 3,744. C++ promotion:
-  2,772 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,490 promoted, 16 retired, 972 generated,
-  one WIP; 2,506 resolved. This continuation resolved 57 more than `6c8ac0b9`.
+- **970 functions remain.** Modernization: 2,774 done of 3,744. C++ promotion:
+  2,775 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,493 promoted, 16 retired, 969 generated,
+  one WIP; 2,509 resolved. This continuation resolved 60 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
-- Issues #325-333 and #335 are closed with fixing revisions and verified CI.
-  #334's 23 maintained-code tidy findings are repaired and locally verified
-  below; close it only after the fixing revision has successful CI.
-- No owned build, replay, quality run, or CI watcher remains active. The next
-  group (F01698, F01699, F01704) has unverified edits in an isolated promotion
-  worktree; those edits are not part of this quality checkpoint.
+- Issues #325-335 are closed with fixing revisions and verified CI.
+  #334 is fixed in `8709974d`
+  ([CI 42751897850](https://github.com/JEschete/VS-NativePort/actions/runs/42751897850)).
+- F01698, F01699 and F01704 are integrated in the main worktree; the temporary
+  isolated worktree was removed. No owned build, replay or quality run remains
+  active. The candidate milestone is verified on base `8709974d` plus the
+  uncommitted implementation, tests, generated bindings and related ledgers.
 
 ## Sources Of Truth
 
@@ -48,6 +50,21 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01698/F01699/F01704 now use typed candidate simulation, hit weighting and
+  evaluation policies. They preserve aimed halfword coordinate wrapping,
+  first-nonignored-match byte weighting, rare rejection, special-mode bypass,
+  relation signs, signed-halfword ratios and wrapped final scores. The native
+  evaluator owns its condition rows instead of using `0x1F80018C`.
+- A shared native decoder checks the complete result tail and 255-target
+  capacity. Preview writes require a complete destination separate from the
+  candidate, AI state and condition rows. Original module addresses remain
+  bound; generated callers use registered entries and no old symbol remains.
+- The new slice and `VR-AI-CANDIDATE-EVALUATION` record the separate promotion,
+  verification and limited old-symbol retirement claims. The actual original
+  instructions match the native policies over 12,608 vectors with zero
+  mismatches. External calls use controlled callbacks; root vectors use exact
+  powers-of-four distances. This does not establish full live preview or
+  controller/reference gameplay parity.
 - #334: container save enum constants and their consumers now use `k` prefixes;
   wire-edge multiplication starts in `std::size_t`; the ten-frame soft-reset
   wait is named; extraction is separated from command dispatch. The existing
@@ -55,7 +72,7 @@ are historical, not instructions or fresh verification.
   `ScreenDistortion` in the specific subsystem-namespace naming list. No
   baseline was changed. Full tidy reports 244 existing findings and zero new.
 - F01700-F01703, the four condition terms inlined into `EvaluateActionCandidate`,
-  are the current code checkpoint. `ActorStatusConditionScore` sums the signed
+  are the preceding code checkpoint. `ActorStatusConditionScore` sums the signed
   weight of each set status bit 0-31; bit 12 counts only when the row's own AI
   state enables action cost. It then adds -128 for zero HP and -84 for HP below
   44/128 of maximum, comparing signed 32-bit products. `ActorHpRatio`,
@@ -102,12 +119,39 @@ are historical, not instructions or fresh verification.
   and [PlanningPrimitivesLive.cpp](../Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp).
   Production callers and original C/module entries are retained. The
   obsolete function-local adaptations were removed through the copier; the
-  generated F01704 caller now calls the owned condition bindings.
+  owned F01704 evaluator now calls the typed condition terms directly.
 - Borrowed outside-arena inputs, broader AI lifecycle, full battle-AI/M8
   gameplay, controller/reference parity, and EC/global/data/type retirement
   remain open. Local function promotion does not satisfy those wider gates.
 
 ## Verified
+
+For the candidate milestone on base `8709974d`:
+
+- Debug and Release rebuilds pass. Each full suite passes **5,194 cases /
+  12,598,317 assertions**, with zero failures or skips. Canonical
+  `silver_wolves` (2,400 frames) and `first_lever_room` (900 frames) match
+  unchanged baselines in both configurations; zero regressions.
+- `[candidate-evaluation],[candidate-evaluation-live]`: 17 cases / 4,696
+  assertions. `[ai][planning]`: 103 cases / 142,421 assertions per configuration.
+- Original-instruction comparison: 2,000 simulation, 4,608 hit-weight and
+  6,000 evaluation vectors; zero mismatches. Source byte hashes and callback
+  limits are recorded in the verification ledger.
+- All 235 copier controls pass, including the relocated owned snapshot
+  producer and three original-address entries. Full tidy: 244 existing
+  findings, zero new. Changed-scope quality after the Python control update:
+  zero findings. No baseline was changed.
+- Ownership/promotion, modernization and hazard gates each report zero
+  violations after synchronization. Static regression checks also pass.
+  The hazard sync removes the old F01698 unchecked lookup and refreshes
+  affected line numbers; it adds no new site or triage claim.
+- Repeated supported generation preserves owned sources and the complete
+  tracked diff. Manifest SHA256:
+  `68e429c54019d243b056deacf957c73db66655b1a8b782198e6817d8dd0995f1`.
+- Logs are under the session `5d4d5fa9-cd6f-4ab6-a214-97513ed24383` files
+  directory: `candidate_build_*`, `candidate_planning_*`,
+  `candidate_regression_*`, `candidate_differential.log`,
+  `candidate_copier_tests.log` and `candidate_quality_*`.
 
 For the #334 repair on base `5e172a60`: Debug and Release rebuilds pass, and
 `[container-save],[sphere][terrain],[screen-warp],[session],[audio][stream],[content]`
@@ -165,20 +209,17 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Confirm exact-revision CI for the #334 repair, close it with the fixing
-   revision and evidence, then integrate the isolated promotion work.
-3. Continue ordered row 28. The prepared next bounded group is F01698
-   `SimulateActionCandidate` (`func_800DCAA0`), F01699 `UpdateCandidateHitWeight`
-   (`func_800DCBD8`), and F01704 `EvaluateActionCandidate` (`func_800DCC94`) in
+2. Publish the verified F01698/F01699/F01704 milestone, confirm its exact-revision
+   CI and update #276. Do not close #276: 970 functions remain.
+3. Continue ordered row 28. The next bounded planning lifecycle group is
+   F01714 `snapshotActorStats` and F01715 `restoreActorStats`
+   (`74088.c:1295/1309`) in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   F01704 already calls the owned condition terms. This is a recommended next
-   group, not a claim that it is already started.
-4. Read the actual original `74088.c` routines at lines 513/539/620 and their
-   matching assembly (`800DCAA0`, `800DCBD8`, `800DCC94-800DCFFC`) before
-   implementing. Establish candidate-weight arithmetic, rounding, clamping,
-   signedness, and the order of the condition terms from evidence. Reuse
-   `ActorCondition`, the existing planning owner, native bounds helpers,
-   and [PlanningPrimitivesTests.cpp](../Native/Tests/src/PlanningPrimitivesTests.cpp).
+   Their generated code has been inspected, not promoted or behavior-verified.
+4. Read original source and actual assembly, then trace allocation failure,
+   actor-list changes, repeat entry and teardown before implementing.
+   Reuse the owned stat-copy policy and native heap bounds. F01707 fallback
+   selection and F01712/F01713 enumeration/simulation remain later callers.
 5. Test the deciding core first, then native/caller/module bindings. Make
    generated changes through the copier or owned registry, never by patching
    generated output. Remove only adaptations made obsolete by the owned body.
@@ -217,7 +258,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 973 functions complete.
+  match delivered scope. Do not declare the remaining 970 functions complete.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
   Do not force-push, rewrite history, or add attribution trailers/headers.
 - Avoid full gameplay JSON, huge terminal histories, and unbounded parsers.

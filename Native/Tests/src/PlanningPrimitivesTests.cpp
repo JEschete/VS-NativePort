@@ -4,6 +4,7 @@
 #include <limits>
 #include <optional>
 #include <span>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -19,6 +20,87 @@ namespace ai = VS::Battle::Ai;
 using ai::CandidateOption;
 using Words = ai::ActionCandidate::Words;
 using SlotUpdate = std::tuple<int, int, bool>;
+
+class FakeCandidateSimulation final : public ai::CandidateSimulationHost {
+ public:
+  std::optional<VS::Battle::TargetPoint> TargetPosition(
+      unsigned target) const override {
+    events.emplace_back("position");
+    requested_target = target;
+    return position;
+  }
+  std::optional<bool> PreviewLimb(
+      const ai::ActionCandidate& candidate) override {
+    events.emplace_back("limb");
+    preview = candidate;
+    return available;
+  }
+  std::optional<bool> PreviewAimed(
+      const ai::ActionCandidate& candidate,
+      const VS::Battle::TargetPoint& source,
+      const VS::Battle::TargetPoint& target) override {
+    events.emplace_back("aimed");
+    preview = candidate;
+    source_position = source;
+    target_position = target;
+    return available;
+  }
+  bool ApplyResults() override {
+    events.emplace_back("apply");
+    return apply;
+  }
+
+  std::optional<VS::Battle::TargetPoint> position;
+  std::optional<bool> available = true;
+  bool apply = true;
+  mutable unsigned requested_target = 0;
+  mutable std::vector<std::string> events;
+  ai::ActionCandidate preview;
+  VS::Battle::TargetPoint source_position{};
+  VS::Battle::TargetPoint target_position{};
+};
+
+class FakeCandidateEvaluation final : public ai::CandidateEvaluationHost {
+ public:
+  int Random() override {
+    events.emplace_back("random");
+    return random;
+  }
+  bool Capture(ai::ActionCandidate& candidate) override {
+    events.emplace_back("capture");
+    captured = candidate;
+    return capture;
+  }
+  bool SpecialMode() const override { return special; }
+  bool Simulate(ai::ActionCandidate&,
+                ai::CandidateSimulationMode mode) override {
+    events.emplace_back("simulate");
+    simulation_mode = mode;
+    return simulate;
+  }
+  std::optional<std::span<const ai::SimulatedActorEffect>> Hits() override {
+    events.emplace_back("hits");
+    if (!have_hits) return std::nullopt;
+    return std::span<const ai::SimulatedActorEffect>(hits);
+  }
+  std::optional<std::span<const ai::CandidateCondition>> Conditions() override {
+    events.emplace_back("conditions");
+    if (!have_conditions) return std::nullopt;
+    return std::span<const ai::CandidateCondition>(conditions);
+  }
+
+  int random = 0;
+  bool capture = true;
+  bool special = false;
+  bool simulate = true;
+  bool have_hits = true;
+  bool have_conditions = true;
+  ai::ActionCandidate captured;
+  std::optional<ai::CandidateSimulationMode> simulation_mode;
+  std::vector<std::string> events;
+  std::vector<ai::SimulatedActorEffect> hits;
+  std::vector<ai::CandidateCondition> conditions;
+};
 
 class FakeTargetMemory final : public ai::TargetMemoryHost {
  public:
@@ -248,6 +330,201 @@ bool CopiedStatByte(std::size_t offset) {
          (offset >= 0x948 && offset < 0x94C);
 }
 }  // namespace
+
+TEST_CASE("Candidate aim fields preserve every unrelated packed bit",
+          "[ai][planning][candidate-evaluation]") {
+  const Words words{0xDEADBEEF, 0x12345678, 0x87654321, 0xA5A5A5A5, 0xDEADC0DE};
+  ai::ActionCandidate candidate(words);
+  candidate.SetTargetLimb(14);
+  candidate.SetHeightOffset(0x1ABC);
+  auto expected = words;
+  expected[3] = (expected[3] & ~0x7FFF0u) | (6u << 4) | (0xABCu << 7);
+  CHECK(candidate.TargetLimb() == 6);
+  CHECK(candidate.HeightOffset() == 0xABC);
+  CHECK(candidate.RawWords() == expected);
+}
+
+TEST_CASE("Candidate simulation applies results only for an available preview",
+          "[ai][planning][candidate-evaluation]") {
+  FakeCandidateSimulation host;
+  ai::ActionCandidate candidate;
+  candidate.SetAction(42);
+  candidate.SetTargetId(3);
+  candidate.SetTargetLimb(5);
+  host.available = GENERATE(false, true);
+  REQUIRE(ai::SimulateActionCandidate(host, candidate,
+                                      ai::CandidateSimulationMode::kLimb));
+  const std::vector<std::string> expected =
+      *host.available ? std::vector<std::string>{"limb", "apply"}
+                      : std::vector<std::string>{"limb"};
+  CHECK(host.events == expected);
+  CHECK(host.preview.RawWords() == candidate.RawWords());
+}
+
+TEST_CASE("Aimed candidate geometry wraps the original halfword coordinates",
+          "[ai][planning][candidate-evaluation]") {
+  FakeCandidateSimulation host;
+  host.position = VS::Battle::TargetPoint{32767, -32760, 32760, 99};
+  ai::ActionCandidate candidate;
+  candidate.SetTargetId(15);
+  candidate.SetHeightOffset(4095);
+  candidate.SetDistanceSquared(256);
+  REQUIRE(ai::SimulateActionCandidate(host, candidate,
+                                      ai::CandidateSimulationMode::kAimed));
+  CHECK(host.requested_target == 15);
+  CHECK(host.target_position ==
+        VS::Battle::TargetPoint{32767, 28681, 32760, 0});
+  CHECK(host.source_position ==
+        VS::Battle::TargetPoint{32767, 28681, -32760, 0});
+  CHECK(host.events == std::vector<std::string>{"position", "aimed", "apply"});
+}
+
+TEST_CASE("Candidate simulation explicitly refuses missing inputs and results",
+          "[ai][planning][candidate-evaluation]") {
+  FakeCandidateSimulation host;
+  ai::ActionCandidate candidate;
+  CHECK_FALSE(ai::SimulateActionCandidate(host, candidate,
+                                          ai::CandidateSimulationMode::kAimed));
+  CHECK(host.events == std::vector<std::string>{"position"});
+  host.events.clear();
+  host.available.reset();
+  CHECK_FALSE(ai::SimulateActionCandidate(host, candidate,
+                                          ai::CandidateSimulationMode::kLimb));
+  CHECK(host.events == std::vector<std::string>{"limb"});
+  host.events.clear();
+  host.available = true;
+  host.apply = false;
+  CHECK_FALSE(ai::SimulateActionCandidate(host, candidate,
+                                          ai::CandidateSimulationMode::kLimb));
+  CHECK(host.events == std::vector<std::string>{"limb", "apply"});
+}
+
+TEST_CASE("Candidate hit weights exhaust every byte threshold and target slot",
+          "[ai][planning][candidate-evaluation]") {
+  for (unsigned target = 0; target < 16; ++target) {
+    for (unsigned threshold = 0; threshold < 256; ++threshold) {
+      ai::ActionCandidate candidate(
+          Words{0x12345678, 0x89ABCDEF, 0x98765432, 0xFEDCBA98, 0x10203040});
+      candidate.SetTargetId(target);
+      auto expected = candidate.RawWords();
+      const auto weight = (threshold + threshold / 4 + threshold / 32) & 255;
+      expected[3] = (expected[3] & ~0x7F80000u) | (weight << 19);
+      const std::array hits{ai::SimulatedActorEffect{
+          .actor_id = static_cast<std::uint8_t>(target),
+          .hit_threshold = static_cast<std::uint8_t>(threshold)}};
+      ai::UpdateCandidateHitWeight(candidate, hits);
+      REQUIRE(candidate.RawWords() == expected);
+    }
+  }
+}
+
+TEST_CASE("Candidate hit weights use the first nonignored matching target",
+          "[ai][planning][candidate-evaluation]") {
+  ai::ActionCandidate candidate;
+  candidate.SetTargetId(3);
+  candidate.SetWeight(99);
+  const std::array hits{
+      ai::SimulatedActorEffect{
+          .actor_id = 3, .ignored = true, .hit_threshold = 127},
+      ai::SimulatedActorEffect{.actor_id = 2, .hit_threshold = 128},
+      ai::SimulatedActorEffect{.actor_id = 3, .hit_threshold = 0},
+      ai::SimulatedActorEffect{.actor_id = 3, .hit_threshold = 255}};
+  ai::UpdateCandidateHitWeight(candidate, hits);
+  CHECK(candidate.Weight() == 0);
+  ai::UpdateCandidateHitWeight(candidate, std::span(hits).last(1));
+  CHECK(candidate.Weight() == 69);
+  ai::UpdateCandidateHitWeight(candidate, {});
+  CHECK(candidate.Weight() == 0);
+}
+
+TEST_CASE("Rare candidate rejection preserves all fields except the score",
+          "[ai][planning][candidate-evaluation]") {
+  const int roll = GENERATE(0, 114, 115, 127, 128, -1);
+  FakeCandidateEvaluation host;
+  host.random = roll;
+  const Words words{123, 0xDEADBEEF, 0x98765432, 0xFEDCBA98, 0xABCDEF01};
+  ai::ActionCandidate candidate(words);
+  REQUIRE(
+      ai::EvaluateActionCandidate(candidate, {.rarely_chosen = true}, host));
+  if ((roll & 127) < 115) {
+    auto expected = words;
+    expected[0] = 0x80000000;
+    CHECK(candidate.RawWords() == expected);
+    CHECK(host.events == std::vector<std::string>{"random"});
+  } else {
+    CHECK(candidate.Score() == 128);
+    CHECK(candidate.Weight() == 128);
+    CHECK(host.events ==
+          std::vector<std::string>{"random", "capture", "conditions"});
+  }
+}
+
+TEST_CASE("Candidate evaluation orders capture simulation and hit weighting",
+          "[ai][planning][candidate-evaluation]") {
+  FakeCandidateEvaluation host;
+  host.hits.push_back({.actor_id = 3, .hit_threshold = 127});
+  ai::ActionCandidate candidate;
+  candidate.SetScore(999);
+  candidate.SetWeight(17);
+  candidate.SetTargetId(3);
+  REQUIRE(ai::EvaluateActionCandidate(
+      candidate, {.simulation = ai::CandidateSimulationMode::kAimed}, host));
+  CHECK(host.captured.Score() == 0);
+  CHECK(host.captured.Weight() == 128);
+  CHECK(host.simulation_mode == ai::CandidateSimulationMode::kAimed);
+  CHECK(host.events ==
+        std::vector<std::string>{"capture", "simulate", "hits", "conditions"});
+  CHECK(candidate.Score() == 161);
+  CHECK(candidate.Weight() == 161);
+}
+
+TEST_CASE(
+    "Special candidate evaluation skips simulation and adds its preference",
+    "[ai][planning][candidate-evaluation]") {
+  FakeCandidateEvaluation host;
+  host.special = true;
+  ai::ActionCandidate candidate;
+  REQUIRE(ai::EvaluateActionCandidate(
+      candidate,
+      {.special_action = true,
+       .simulation = ai::CandidateSimulationMode::kAimed},
+      host));
+  CHECK(host.events == std::vector<std::string>{"capture", "conditions"});
+  CHECK(candidate.Score() == 168);
+  CHECK(candidate.Weight() == 40);
+}
+
+TEST_CASE("Candidate evaluation scores relations and narrows resource ratios",
+          "[ai][planning][candidate-evaluation]") {
+  FakeCandidateEvaluation host;
+  host.conditions = {
+      {.condition = {.hp = 100, .max_hp = 100}, .classification = 2},
+      {.condition = {.hp = 50, .max_hp = 100}, .classification = 3},
+      {.condition = {.hp = 100, .max_hp = 100}, .classification = 1},
+      {.condition = {.hp = 25, .max_hp = 100}, .classification = 0}};
+  ai::ActionCandidate candidate;
+  REQUIRE(ai::EvaluateActionCandidate(candidate, {}, host));
+  // Ally 512; hostile -256; ignored zero; low-HP neutral -(-504 + 128).
+  CHECK(candidate.Score() == (512 - 256 + 376) * 128 + 128);
+  host.conditions = {
+      {.condition = {.hp = 257, .max_hp = 1}, .classification = 2}};
+  REQUIRE(ai::EvaluateActionCandidate(candidate, {}, host));
+  CHECK(candidate.Score() == (-32640 * 4) * 128 + 128);
+}
+
+TEST_CASE("Candidate evaluation refuses failed capture simulation or decoding",
+          "[ai][planning][candidate-evaluation]") {
+  const int failure = GENERATE(0, 1, 2, 3, 4);
+  FakeCandidateEvaluation host;
+  if (failure == 0) host.capture = false;
+  if (failure == 1) host.simulate = false;
+  if (failure == 2) host.have_hits = false;
+  if (failure == 3) host.have_conditions = false;
+  if (failure == 4) host.conditions.resize(17);
+  ai::ActionCandidate candidate;
+  CHECK_FALSE(ai::EvaluateActionCandidate(
+      candidate, {.simulation = ai::CandidateSimulationMode::kLimb}, host));
+}
 
 TEST_CASE("Simulated results apply original action type costs before performer",
           "[ai][planning][simulation-results-core]") {

@@ -44,6 +44,7 @@
     <None Include="..\..\lint\package.json" />
     <None Include="..\..\lint\quality.py" />
     <None Include="..\..\lint\test_quality.py" />
+    <None Include="..\..\lint\test_workflows.py" />
     <None Include="..\..\naming\ai_offsets.py" />
     <None Include="..\..\naming\append_rows.py" />
     <None Include="..\..\naming\batches\BATTLE_01.csv" />

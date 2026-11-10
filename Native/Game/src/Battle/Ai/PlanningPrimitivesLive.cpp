@@ -14,16 +14,20 @@
 #include <optional>
 #include <span>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
+#include "Actors/ActorRecord.h"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
+#include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -32,6 +36,7 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
+#include "Core/Random.h"
 }
 
 namespace VS::Battle::Ai {
@@ -54,6 +59,12 @@ static_assert(
     std::extent_v<decltype(Battle_Ai_ActionPlanView::candidateOrder)> ==
     kCandidateCapacity);
 constexpr int kRestoreOperation = 2;
+constexpr int kAimedSimulationMode = 3;
+constexpr auto kTargetOffset = offsetof(Battle_Ai_ReactionRecord, opaque4C);
+static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
+              kTargetPreviewCapacity);
+static_assert(kTargetOffset == offsetof(Battle_ActionRequest, targets));
+static_assert(sizeof(Battle_Ai_EngagementActor) == sizeof(Battle_HitResult));
 
 static_assert(sizeof(Battle_Ai_CandidateEntryView) ==
               sizeof(ActionCandidate::Words));
@@ -86,6 +97,14 @@ bool ReadablePlanningRecord(const Record* record) {
   return ReadablePlanningBytes(record, sizeof(Record), alignof(Record));
 }
 
+bool OverlappingPlanningBytes(const void* left, std::size_t left_bytes,
+                              const void* right, std::size_t right_bytes) {
+  const auto left_start = reinterpret_cast<std::uintptr_t>(left);
+  const auto right_start = reinterpret_cast<std::uintptr_t>(right);
+  return left_start <= right_start ? right_start - left_start < left_bytes
+                                   : left_start - right_start < right_bytes;
+}
+
 SimulatedActorEffect SimulationEffectOf(
     const Battle_Ai_EngagementActor& entry) {
   return {.actor_id = entry.opaque0,
@@ -97,7 +116,44 @@ SimulatedActorEffect SimulationEffectOf(
           .shield_dp = {entry.opaque3C,
                         static_cast<std::uint8_t>(entry.opaque1EBit6)},
           .statuses_set = entry.opaque14,
-          .statuses_clear = entry.opaque18};
+          .statuses_clear = entry.opaque18,
+          .hit_threshold = entry.opaque2};
+}
+
+struct SimulationSnapshot {
+  const Battle_Ai_ReactionRecord* source = nullptr;
+  Battle_Ai_ReactionRecord header{};
+  std::size_t bytes = 0;
+  std::vector<SimulatedActorEffect> targets;
+};
+
+std::optional<SimulationSnapshot> ReadSimulationSnapshot() {
+  const auto* workspace = Battle_Ai_planningWorkspace;
+  if (!ReadablePlanningRecord(workspace)) return std::nullopt;
+  SimulationSnapshot result;
+  result.source = workspace;
+  std::memcpy(&result.header, workspace, sizeof(result.header));
+  const auto count = static_cast<std::size_t>(result.header.opaque4A);
+  result.bytes = kTargetOffset + count * sizeof(Battle_Ai_EngagementActor);
+  if (count > kTargetPreviewCapacity ||
+      !ReadablePlanningBytes(workspace, result.bytes,
+                             alignof(Battle_Ai_ReactionRecord))) {
+    return std::nullopt;
+  }
+  result.targets.reserve(count);
+  const auto* source = reinterpret_cast<const std::byte*>(workspace);
+  for (std::size_t index = 0; index < count; ++index) {
+    Battle_Ai_EngagementActor entry{};
+    std::memcpy(&entry, source + kTargetOffset + index * sizeof(entry),
+                sizeof(entry));
+    result.targets.push_back(SimulationEffectOf(entry));
+  }
+  return result;
+}
+
+bool RefusePlanning(const char* message) {
+  Core_Debugf("ai", "%s", message);
+  return false;
 }
 
 ActorCondition SimulationConditionOf(const Battle_Ai_ActionTiming& row) {
@@ -129,6 +185,125 @@ ActionCandidate CandidateOf(const Battle_Ai_ActionCandidate* candidate) {
 Battle_Ai_ActionCandidate RecordOf(const ActionCandidate& candidate) {
   return std::bit_cast<Battle_Ai_ActionCandidate>(candidate.RawWords());
 }
+
+class LiveCandidateSimulation final : public CandidateSimulationHost {
+ public:
+  LiveCandidateSimulation(
+      Battle_Ai_ActorAiState& state,
+      std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows)
+      : state_(state), rows_(rows) {}
+
+  std::optional<TargetPoint> TargetPosition(unsigned target) const override {
+    if (target >= std::size(Actors_actorRecords)) return std::nullopt;
+    const auto* actor = Actors_actorRecords[target];
+    if (!ReadablePlanningRecord(actor)) return std::nullopt;
+    const auto& position = actor->instance.position;
+    return TargetPoint{position.vx, position.vy, position.vz};
+  }
+
+  std::optional<bool> PreviewLimb(const ActionCandidate& candidate) override {
+    if (!Ready(candidate)) return std::nullopt;
+    return Battle_PreviewActionAgainstLimb(
+               static_cast<int>(candidate.Action()), state_.actorId,
+               static_cast<int>(candidate.TargetId()),
+               static_cast<int>(candidate.TargetLimb()),
+               Battle_Ai_planningWorkspace) != 0;
+  }
+
+  std::optional<bool> PreviewAimed(const ActionCandidate& candidate,
+                                   const TargetPoint& source,
+                                   const TargetPoint& target) override {
+    if (!Ready(candidate)) return std::nullopt;
+    SVECTOR source_position{source.x, source.y, source.z, source.pad};
+    SVECTOR target_position{target.x, target.y, target.z, target.pad};
+    return Battle_PreviewActionAgainstActor(
+               static_cast<int>(candidate.Action()), state_.actorId,
+               static_cast<int>(candidate.TargetId()),
+               static_cast<int>(candidate.TargetLimb()), &source_position,
+               &target_position,
+               reinterpret_cast<Battle_ActionRequest*>(
+                   Battle_Ai_planningWorkspace)) != 0;
+  }
+
+  bool ApplyResults() override {
+    return ApplyLiveSimulatedActionResults(rows_);
+  }
+
+ private:
+  bool Ready(const ActionCandidate& candidate) const {
+    if (state_.actorId >= std::size(Battle_actors) ||
+        candidate.TargetId() >= std::size(Battle_actors) ||
+        !ReadablePlanningBytes(Battle_Ai_planningWorkspace,
+                               sizeof(Battle_ActionRequest),
+                               alignof(Battle_ActionRequest))) {
+      return false;
+    }
+    const auto* source = Battle_actors[state_.actorId];
+    const auto* target = Battle_actors[candidate.TargetId()];
+    return ReadablePlanningRecord(source) && ReadablePlanningRecord(target) &&
+           ReadablePlanningRecord(source->stats) &&
+           ReadablePlanningRecord(target->stats);
+  }
+
+  Battle_Ai_ActorAiState& state_;
+  std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows_;
+};
+
+class LiveCandidateEvaluation final : public CandidateEvaluationHost {
+ public:
+  LiveCandidateEvaluation(Battle_Ai_ActorAiState& state,
+                          Battle_Ai_ActionCandidate& candidate)
+      : state_(state), candidate_(candidate) {}
+
+  int Random() override { return Core_Random_Rand(); }
+  bool Capture(ActionCandidate& candidate) override {
+    candidate_ = RecordOf(candidate);
+    CaptureBattleActorConditions(rows_);
+    return true;
+  }
+  bool SpecialMode() const override { return state_.settingsModeLow != 0; }
+  bool Simulate(ActionCandidate& candidate,
+                CandidateSimulationMode mode) override {
+    candidate_ = RecordOf(candidate);
+    if (!SimulateLiveActionCandidate(&state_, rows_, &candidate_, mode)) {
+      return false;
+    }
+    candidate = CandidateOf(&candidate_);
+    return true;
+  }
+  std::optional<std::span<const SimulatedActorEffect>> Hits() override {
+    auto snapshot = ReadSimulationSnapshot();
+    if (!snapshot) return std::nullopt;
+    hits_ = std::move(snapshot->targets);
+    return std::span<const SimulatedActorEffect>(hits_);
+  }
+  std::optional<std::span<const CandidateCondition>> Conditions() override {
+    std::size_t count = 0;
+    for (const auto* actor = Battle_actors[0]; actor != nullptr;
+         actor = actor->next) {
+      if (count >= conditions_.size() || !ReadablePlanningRecord(actor) ||
+          actor->id >= kBattleActorSlotCount) {
+        return std::nullopt;
+      }
+      auto& condition = conditions_[count++];
+      condition.classification = state_.relations[actor->id].classification;
+      if (condition.classification == 1) continue;
+      const auto& row = rows_[actor->id];
+      const auto* ai_state = Battle_Ai_actorAiStates[row.opaque0Bit0];
+      if (!ReadablePlanningRecord(ai_state)) return std::nullopt;
+      condition.condition = SimulationConditionOf(row);
+      condition.action_cost_enabled = ai_state->actionCostEnabled != 0;
+    }
+    return std::span<const CandidateCondition>(conditions_).first(count);
+  }
+
+ private:
+  Battle_Ai_ActorAiState& state_;
+  Battle_Ai_ActionCandidate& candidate_;
+  std::array<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows_{};
+  std::array<CandidateCondition, kBattleActorSlotCount> conditions_{};
+  std::vector<SimulatedActorEffect> hits_;
+};
 
 const Battle_ActorStats& StatsOf(const Battle_Ai_ActorAiState& state) {
   Require(state.actor != nullptr && state.actor->opaque3C != nullptr,
@@ -373,31 +548,15 @@ class LiveCandidateReadiness final : public CandidateReadinessHost {
 
 bool ApplyLiveSimulatedActionResults(
     std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows) {
-  constexpr auto kTargetCapacity =
-      std::extent_v<decltype(Battle_ActionRequest::targets)>;
-  constexpr auto kTargetOffset = offsetof(Battle_Ai_ReactionRecord, opaque4C);
-  static_assert(kTargetOffset == offsetof(Battle_ActionRequest, targets));
-  static_assert(sizeof(Battle_Ai_EngagementActor) == sizeof(Battle_HitResult));
-  const auto* workspace = Battle_Ai_planningWorkspace;
   if (!ReadablePlanningBytes(rows.data(), rows.size_bytes(),
-                             alignof(Battle_Ai_ActionTiming)) ||
-      !ReadablePlanningRecord(workspace)) {
+                             alignof(Battle_Ai_ActionTiming))) {
     return false;
   }
-  Battle_Ai_ReactionRecord header{};
-  std::memcpy(&header, workspace, sizeof(header));
-  const auto count = static_cast<std::size_t>(header.opaque4A);
-  const auto bytes = kTargetOffset + count * sizeof(Battle_Ai_EngagementActor);
-  if (count > kTargetCapacity ||
-      !ReadablePlanningBytes(workspace, bytes,
-                             alignof(Battle_Ai_ReactionRecord))) {
-    return false;
-  }
-  const auto row_start = reinterpret_cast<std::uintptr_t>(rows.data());
-  const auto source_start = reinterpret_cast<std::uintptr_t>(workspace);
-  if ((row_start <= source_start &&
-       source_start - row_start < rows.size_bytes()) ||
-      (source_start < row_start && row_start - source_start < bytes)) {
+  const auto snapshot = ReadSimulationSnapshot();
+  if (!snapshot) return false;
+  const auto& header = snapshot->header;
+  if (OverlappingPlanningBytes(rows.data(), rows.size_bytes(), snapshot->source,
+                               snapshot->bytes)) {
     return false;
   }
   ActionCost cost{};
@@ -410,18 +569,10 @@ bool ApplyLiveSimulatedActionResults(
   for (std::size_t index = 0; index < rows.size(); ++index) {
     conditions[index] = SimulationConditionOf(rows[index]);
   }
-  std::vector<SimulatedActorEffect> targets;
-  targets.reserve(count);
-  const auto* source = reinterpret_cast<const std::byte*>(workspace);
-  for (std::size_t index = 0; index < count; ++index) {
-    Battle_Ai_EngagementActor entry{};
-    std::memcpy(&entry, source + kTargetOffset + index * sizeof(entry),
-                sizeof(entry));
-    targets.push_back(SimulationEffectOf(entry));
-  }
-  if (!ApplySimulatedActionResults(
-          conditions, cost, SimulationEffectOf(header.opaque4), targets) ||
-      workspace != Battle_Ai_planningWorkspace) {
+  if (!ApplySimulatedActionResults(conditions, cost,
+                                   SimulationEffectOf(header.opaque4),
+                                   snapshot->targets) ||
+      snapshot->source != Battle_Ai_planningWorkspace) {
     return false;
   }
   for (std::size_t index = 0; index < rows.size(); ++index) {
@@ -431,6 +582,73 @@ bool ApplyLiveSimulatedActionResults(
     rows[index].opaque10 = conditions[index].weapon_dp;
     rows[index].opaque14 = conditions[index].shield_dp;
   }
+  return true;
+}
+
+bool SimulateLiveActionCandidate(
+    Battle_Ai_ActorAiState* state,
+    std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows,
+    const Battle_Ai_ActionCandidate* candidate, CandidateSimulationMode mode) {
+  if (!ReadablePlanningRecord(state) || !ReadablePlanningRecord(candidate) ||
+      !ReadablePlanningBytes(rows.data(), rows.size_bytes(),
+                             alignof(Battle_Ai_ActionTiming))) {
+    return RefusePlanning(
+        "AI simulation requires readable state candidate and rows");
+  }
+  if (!ReadablePlanningBytes(Battle_Ai_planningWorkspace,
+                             sizeof(Battle_ActionRequest),
+                             alignof(Battle_ActionRequest)) ||
+      OverlappingPlanningBytes(rows.data(), rows.size_bytes(),
+                               Battle_Ai_planningWorkspace,
+                               sizeof(Battle_ActionRequest)) ||
+      OverlappingPlanningBytes(state, sizeof(*state),
+                               Battle_Ai_planningWorkspace,
+                               sizeof(Battle_ActionRequest)) ||
+      OverlappingPlanningBytes(candidate, sizeof(*candidate),
+                               Battle_Ai_planningWorkspace,
+                               sizeof(Battle_ActionRequest))) {
+    return RefusePlanning(
+        "AI simulation requires a separate complete result workspace");
+  }
+  LiveCandidateSimulation host(*state, rows);
+  return SimulateActionCandidate(host, CandidateOf(candidate), mode);
+}
+
+bool UpdateLiveCandidateHitWeight(Battle_Ai_ActionCandidate* candidate) {
+  if (!ReadablePlanningRecord(candidate)) {
+    return RefusePlanning("AI hit weighting requires a readable candidate");
+  }
+  const auto snapshot = ReadSimulationSnapshot();
+  if (!snapshot) {
+    return RefusePlanning("AI hit weighting requires a complete result tail");
+  }
+  auto value = CandidateOf(candidate);
+  UpdateCandidateHitWeight(value, snapshot->targets);
+  *candidate = RecordOf(value);
+  return true;
+}
+
+bool EvaluateLiveActionCandidate(Battle_Ai_ActorAiState* state,
+                                 Battle_Ai_ActionCandidate* candidate,
+                                 int simulation_mode,
+                                 const Battle_ActionDefinition* action) {
+  if (!ReadablePlanningRecord(state) || !ReadablePlanningRecord(candidate) ||
+      (action != nullptr && !ReadablePlanningRecord(action))) {
+    return RefusePlanning(
+        "AI evaluation requires readable state candidate and action");
+  }
+  CandidateEvaluationOptions options{
+      .rarely_chosen = action != nullptr && action->aiFlags.rarelyChosen != 0,
+      .special_action = action != nullptr && action->aiFlags.opaque0Bit4 != 0};
+  if (simulation_mode != 0) {
+    options.simulation = simulation_mode == kAimedSimulationMode
+                             ? CandidateSimulationMode::kAimed
+                             : CandidateSimulationMode::kLimb;
+  }
+  auto value = CandidateOf(candidate);
+  LiveCandidateEvaluation host(*state, *candidate);
+  if (!EvaluateActionCandidate(value, options, host)) return false;
+  *candidate = RecordOf(value);
   return true;
 }
 
@@ -601,4 +819,42 @@ void Battle_Ai_ApplySimulatedActionResultsEntry(Battle_Ai_ActionTiming* rows) {
   static_cast<void>(VS::Battle::Ai::ApplyLiveSimulatedActionResults(
       std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>(
           rows, VS::Battle::Ai::kBattleActorSlotCount)));
+}
+
+void Battle_Ai_SimulateActionCandidateEntry(
+    Battle_Ai_ActorAiState* state, Battle_Ai_ActionTiming* rows,
+    Battle_Ai_ActionCandidate* candidate, int mode) {
+  constexpr int kAimedMode = 3;
+  if (rows != nullptr &&
+      VS::Battle::Ai::SimulateLiveActionCandidate(
+          state,
+          std::span<Battle_Ai_ActionTiming,
+                    VS::Battle::Ai::kBattleActorSlotCount>(
+              rows, VS::Battle::Ai::kBattleActorSlotCount),
+          candidate,
+          mode == kAimedMode
+              ? VS::Battle::Ai::CandidateSimulationMode::kAimed
+              : VS::Battle::Ai::CandidateSimulationMode::kLimb)) {
+    return;
+  }
+  Core_Errorf("ai", "AI candidate simulation entry refused invalid input");
+  std::abort();
+}
+
+void Battle_Ai_UpdateCandidateHitWeightEntry(
+    Battle_Ai_ActionCandidate* candidate) {
+  if (VS::Battle::Ai::UpdateLiveCandidateHitWeight(candidate)) return;
+  Core_Errorf("ai", "AI candidate hit-weight entry refused invalid input");
+  std::abort();
+}
+
+void Battle_Ai_EvaluateActionCandidateEntry(
+    Battle_Ai_ActorAiState* state, Battle_Ai_ActionCandidate* candidate,
+    int mode, Battle_ActionDefinition* action) {
+  if (VS::Battle::Ai::EvaluateLiveActionCandidate(state, candidate, mode,
+                                                  action)) {
+    return;
+  }
+  Core_Errorf("ai", "AI candidate evaluation entry refused invalid input");
+  std::abort();
 }
