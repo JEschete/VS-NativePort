@@ -7,6 +7,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -109,7 +109,7 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
                 state->detourStep++;
             }
             if (state->detourStep >= 5) {
-                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActorAiState *)((void*)state));
+                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((void*)state));
                 state->opaque1C = 0;
                 state->detourStep = 0;
                 return 0;

@@ -7,8 +7,9 @@ exact-revision CI. F01707 fallback selection and F01713 planning simulation are
 also published with green exact-revision CI. F01712 candidate enumeration is
 published with green exact-revision CI. F01716 action-plan orchestration is
 published with green exact-revision CI. F01717 completed-action reconciliation,
-including the #336 fix, is locally integrated and verified; its publication
-and exact-revision CI are pending.
+including the #336 fix, is published in `e9a85172` with green exact-revision
+CI, and #336 is closed. F01793 target forgetting is locally integrated and
+verified; its publication and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -22,10 +23,10 @@ and exact-revision CI are pending.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **963 functions remain.** Modernization: 2,781 done of 3,744. C++ promotion:
-  2,782 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,500 promoted, 16 retired, 962 generated,
-  one WIP; 2,516 resolved. This continuation resolved 67 more than `6c8ac0b9`.
+- **962 functions remain.** Modernization: 2,782 done of 3,744. C++ promotion:
+  2,783 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,501 promoted, 16 retired, 961 generated,
+  one WIP; 2,517 resolved. This continuation resolved 68 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -77,10 +78,16 @@ and exact-revision CI are pending.
   entry and related evidence. Its old symbol has five former source consumers
   and zero remaining consumers. The exported pass/cache/exclusion storage
   remains; its retirement is not implied by this function promotion.
-- The action-plan evidence update `5c10d866` is the F01717 base. Local
-  verification uses it with the completed-plan core, checked live binding,
-  migrated workspace caller, generated module entry, tests and ledgers.
+- The action-plan evidence update `5c10d866` was the F01717 base. F01717 is
+  published in `e9a85172`
+  ([CI 42863138438](https://github.com/JEschete/VS-NativePort/actions/runs/42863138438)).
+  Local verification used that base with the completed-plan core, checked live
+  binding, migrated workspace caller, generated module entry, tests and ledgers.
   The old symbol has four former source consumers and zero remaining.
+- `e9a85172` is the F01793 base. Local verification uses it with the
+  target-forget core, checked live binding, generated perception and
+  blocked-movement callers, module entry, tests and ledgers. The old symbol has
+  six former source consumers and zero remaining.
 
 ## Sources Of Truth
 
@@ -101,6 +108,15 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01793 now owns target forgetting through
+  [PlanningPrimitives.hpp](../Native/Game/include/Battle/Ai/PlanningPrimitives.hpp)
+  and [PlanningPrimitives.cpp](../Native/Game/src/Battle/Ai/PlanningPrimitives.cpp).
+  It writes only the previous-tile word (`0x38`) as -1, so remembered-target
+  readers see none. The remembered destination (`0x3C`) and lifetime (`0x40`)
+  stay. It reads no ranking, settings or placement. Perception, blocked
+  movement and completed-action reconciliation call the native binding, and
+  `0x800E4CE8` retains the registered entry. The actual 3-instruction original
+  matches the native core over 4,096 full-state vectors with one 4-byte store.
 - F01717 now owns completed-action reconciliation through
   [PlanningWorkspace.hpp](../Native/Game/include/Battle/Ai/PlanningWorkspace.hpp)
   and [PlanningWorkspace.cpp](../Native/Game/src/Battle/Ai/PlanningWorkspace.cpp).
@@ -480,12 +496,13 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish F01717, confirm its exact-revision CI, close #336 with the fixing
-   commit and test evidence, and update #276. Do not close #276: 963 remain.
-3. Continue ordered row 28 with the remaining callers in
-   [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp) and
-   the battle-AI files listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01716/F01717 are verified dependencies, not proof of remaining AI
+2. Publish F01793 and confirm its exact-revision CI, then update #276.
+   Do not close #276: 962 remain.
+3. Continue ordered row 28 with F01810 in
+   [ActionSelection.cpp](../Native/Game/src/Battle/Ai/ActionSelection.cpp),
+   then the remaining battle-AI files listed by
+   [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
+   F01716/F01717/F01793 are verified dependencies, not proof of remaining AI
    behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.

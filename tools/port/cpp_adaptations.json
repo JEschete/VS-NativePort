@@ -390,10 +390,10 @@
 [
 112,
 [
-"                Battle_Ai_ForgetAiActionTarget((void*)state);"
+"                VS::Battle::Ai::ForgetLiveAiActionTarget((void*)state);"
 ],
 [
-"                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActorAiState *)((void*)state));"
+"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -859,10 +859,10 @@
 [
 387,
 [
-"                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
+"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
 [
-"                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));"
+"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));"
 ]
 ],
 [
@@ -877,10 +877,10 @@
 [
 470,
 [
-"                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
+"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
 [
-"                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));"
+"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));"
 ]
 ],
 [

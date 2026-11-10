@@ -8,15 +8,9 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_ACTIONSELECTION_H_DECLS)
 #define VS_BATTLE_AI_ACTIONSELECTION_H_DECLS
-#include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/Perception.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
 
-void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* ai_state);
 void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state);
 
 #endif // VS_BATTLE_AI_ACTIONSELECTION_H_DECLS

@@ -35,7 +35,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -406,6 +405,9 @@ class LiveTargetMemory final : public TargetMemoryHost {
     state_.rememberedTargetTile = memory.remembered_target_tile;
     state_.targetMemoryFrames = memory.frames;
   }
+  void SetPreviousTile(std::uint32_t tile) override {
+    state_.previousTile = static_cast<int>(tile);
+  }
 
  private:
   Battle_Ai_ActorAiState& state_;
@@ -662,7 +664,7 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
     return CompletedTargetObject{.present = true,
                                  .kind = object->objectInfo.objectId};
   }
-  void ForgetTarget() override { Battle_Ai_ForgetAiActionTarget(&State()); }
+  void ForgetTarget() override { ForgetLiveAiActionTarget(&State()); }
   void RememberTarget() override { RememberLiveAiActionTarget(&State()); }
 
  private:
@@ -1251,6 +1253,12 @@ void RememberLiveAiActionTarget(Battle_Ai_ActorAiState* state) {
   LiveTargetMemory host(*state);
   Require(RememberAiActionTarget(host).has_value(),
           "AI target memory requires a ranked, placed target");
+}
+
+void ForgetLiveAiActionTarget(Battle_Ai_ActorAiState* state) {
+  Require(state != nullptr, "AI target memory requires an actor state");
+  LiveTargetMemory host(*state);
+  ForgetAiActionTarget(host);
 }
 
 void SelectLiveFallbackAction(Battle_Ai_ActorAiState* state) {

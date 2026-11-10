@@ -2216,6 +2216,26 @@ class EncounterFixupTests(unittest.TestCase):
             r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp",
         )
 
+    def test_ai_target_forget_keeps_its_module_address_and_callers(self):
+        # #276 row 28: Battle_Ai_ForgetAiActionTarget (F01793) is typed C++ beside the target memory it clears.
+        owned = self.owned_items()
+        self.assertEqual(owned["F01793"]["name"], "VS::Battle::Ai::ForgetAiActionTarget")
+        self.assertEqual(owned["F01793"]["path"], r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp")
+        self.assertNotIn("F01793", copy_fixups.FIXES)
+        live = "VS::Battle::Ai::ForgetLiveAiActionTarget"
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01793"], live)
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                         r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp")
+        self.assertIn(("BATTLE/BATTLE.PRG", 0x800E4CE8, live), copy_fixups.MODULE_BINDING_ENTRIES)
+        ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
+        calls = {name: (ai / name).read_text(encoding="utf-8").count(f"{live}(")
+                 for name in ("Perception.cpp", "Movement.cpp", "PlanningPrimitivesLive.cpp")}
+        self.assertEqual(calls, {"Perception.cpp": 2, "Movement.cpp": 1, "PlanningPrimitivesLive.cpp": 0})
+        live_source = (ai / "PlanningPrimitivesLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("void ForgetTarget() override { ForgetLiveAiActionTarget(&State()); }", live_source)
+        for name in ("ActionSelection.cpp", "ActionSelection.h", "PlanningPrimitivesLive.cpp"):
+            self.assertNotIn("Battle_Ai_ForgetAiActionTarget", (ai / name).read_text(encoding="utf-8"))
+
     @staticmethod
     def battle_ability_function(name: str) -> str:
         # #276 row 31: Battle_AdvanceBattleAbilitySequence (F00099) is typed C++ in Battle/Abilities.cpp.

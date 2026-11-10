@@ -24,7 +24,6 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -385,7 +384,7 @@ void Battle_Ai_UpdateActorPerception(void)
             state->opaque46 = 0xA8C;
             state->opaque8 = 0;
             if (state->opaque1C) {
-                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));
+                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));
                 state->opaque1C = 0;
             }
         }
@@ -468,7 +467,7 @@ void Battle_Ai_UpdateActorPerception(void)
             if (state->opaque40 == 0 || --state->opaque40 == 0 || Actors_actorRecords[targetId] == NULL
                 || (((Battle_Ai_PerceivedObjectView*)Actors_actorRecords[targetId])->tile.word & 0xFF00FF)
                        != (state->opaque3C & 0xFF00FF)) {
-                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));
+                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));
             }
         }
     }

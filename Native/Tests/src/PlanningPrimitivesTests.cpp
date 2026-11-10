@@ -118,6 +118,9 @@ class FakeTargetMemory final : public ai::TargetMemoryHost {
   void Remember(const ai::TargetMemory& memory) override {
     remembered = memory;
   }
+  void SetPreviousTile(std::uint32_t tile) override {
+    previous_tiles.push_back(tile);
+  }
 
   int count = 2;
   bool disabled = false;
@@ -125,6 +128,7 @@ class FakeTargetMemory final : public ai::TargetMemoryHost {
   std::uint32_t own_tile = 0xF4ABCDEF;
   std::optional<std::uint32_t> target_tile = 0xA1B2C3D4;
   std::optional<ai::TargetMemory> remembered;
+  std::vector<std::uint32_t> previous_tiles;
   mutable std::vector<unsigned> queried;
 };
 
@@ -2060,4 +2064,33 @@ TEST_CASE(
   CHECK_FALSE(ai::RememberAiActionTarget(host).has_value());
   CHECK_FALSE(host.remembered.has_value());
   CHECK(host.queried.size() == (refusal == 3 ? 1u : 0u));
+}
+
+TEST_CASE("Target memory forgets by writing only the negative previous tile",
+          "[ai][planning][target-forget]") {
+  FakeTargetMemory host;
+  ai::ForgetAiActionTarget(host);
+  CHECK(ai::kForgottenTargetTile == 0xFFFFFFFFu);
+  CHECK(static_cast<std::int32_t>(ai::kForgottenTargetTile) < 0);
+  CHECK(host.previous_tiles ==
+        std::vector<std::uint32_t>{ai::kForgottenTargetTile});
+  CHECK_FALSE(host.remembered.has_value());
+  CHECK(host.queried.empty());
+}
+
+TEST_CASE(
+    "Target memory forgets whatever the ranking, settings and placement hold",
+    "[ai][planning][target-forget]") {
+  FakeTargetMemory host;
+  host.count = GENERATE(-1, 0, 1, 17);
+  host.disabled = GENERATE(false, true);
+  host.first_target.reset();
+  host.target_tile.reset();
+  ai::ForgetAiActionTarget(host);
+  ai::ForgetAiActionTarget(host);
+  CHECK(host.previous_tiles ==
+        std::vector<std::uint32_t>{ai::kForgottenTargetTile,
+                                   ai::kForgottenTargetTile});
+  CHECK_FALSE(host.remembered.has_value());
+  CHECK(host.queried.empty());
 }

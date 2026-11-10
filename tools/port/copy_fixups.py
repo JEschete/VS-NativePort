@@ -568,7 +568,8 @@ NATIVE_HELPER_HEADERS = {
                     "CacheLiveFallbackActionCandidate", "PromoteLiveRandomizedActionCandidate",
                     "NextLiveActorRandomMasked", "IsLiveAiTargetBeyondNearRadius", "CanApproachLiveEngagedTarget")},
     **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"
-       for name in ("RememberLiveAiActionTarget", "CopyLiveActionCandidate", "ApplyLiveSimulatedStatDelta",
+       for name in ("RememberLiveAiActionTarget", "ForgetLiveAiActionTarget", "CopyLiveActionCandidate",
+                    "ApplyLiveSimulatedStatDelta",
                     "AppendLiveActionCandidate", "SortLiveActionCandidates", "CopyLivePlanningActorStats",
                     "SnapshotLivePlanningActorStats", "RestoreLivePlanningActorStats",
                     "CanLiveAiActionAffectActor", "RefreshLiveAiActionUsability",
@@ -1155,6 +1156,7 @@ OWNED_CALL_BINDINGS["F01714"] = "VS::Battle::Ai::SnapshotLivePlanningActorStats"
 OWNED_CALL_BINDINGS["F01715"] = "VS::Battle::Ai::RestoreLivePlanningActorStats"
 OWNED_CALL_BINDINGS["F01716"] = "Battle_Ai_BuildActorActionPlanEntry"
 OWNED_CALL_BINDINGS["F01717"] = "Battle_Ai_ReconcileCompletedActionPlanEntry"
+OWNED_CALL_BINDINGS["F01793"] = "VS::Battle::Ai::ForgetLiveAiActionTarget"
 OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
@@ -2641,6 +2643,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DE030, "Battle_Ai_AdvancePlanningSimulationEntry"),
     ("BATTLE/BATTLE.PRG", 0x800DE3E4, "Battle_Ai_BuildActorActionPlanEntry"),
     ("BATTLE/BATTLE.PRG", 0x800DEB10, "Battle_Ai_ReconcileCompletedActionPlanEntry"),
+    ("BATTLE/BATTLE.PRG", 0x800E4CE8, "VS::Battle::Ai::ForgetLiveAiActionTarget"),  # F01793
     ("BATTLE/BATTLE.PRG", 0x8009E634, "Field_RefreshAshleyInteractionTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),

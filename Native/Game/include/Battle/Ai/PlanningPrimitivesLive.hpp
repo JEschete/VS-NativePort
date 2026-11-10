@@ -62,6 +62,7 @@ class LiveCandidateRanking {
 };
 
 void RememberLiveAiActionTarget(Battle_Ai_ActorAiState* state);
+void ForgetLiveAiActionTarget(Battle_Ai_ActorAiState* state);
 void SelectLiveFallbackAction(Battle_Ai_ActorAiState* state);
 void AdvanceLivePlanningSimulation(std::int32_t time_step);
 void EnumerateLiveActionCandidates(Battle_Ai_ActorAiState* state,

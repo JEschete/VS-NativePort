@@ -14,11 +14,6 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-
-// decomp: BATTLE.PRG func_800E4CE8 (src/BATTLE/BATTLE.PRG/7C4E8.c:407)
-void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* ai_state) { ai_state->previousTile = -1; }
 
 // decomp: BATTLE.PRG func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526)
 void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state)

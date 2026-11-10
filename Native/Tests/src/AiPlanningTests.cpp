@@ -30,6 +30,7 @@ extern "C" {
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
@@ -1452,6 +1453,87 @@ TEST_CASE("AI target memory preserves the original nonzero settings guard",
   const auto expected = fixture.Bytes();
   VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
   CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE("AI target forgetting writes only the negative previous tile",
+          "[ai][planning][target-forget-live]") {
+  const int fill = GENERATE(0x00, 0x5A, 0xFF);
+  Battle_Ai_ActorAiState state{};
+  std::memset(&state, fill, sizeof(state));
+  std::array<std::byte, sizeof(state)> expected{};
+  std::memcpy(expected.data(), &state, expected.size());
+  std::memset(expected.data() + offsetof(Battle_Ai_ActorAiState, previousTile),
+              0xFF, sizeof(state.previousTile));
+  VS::Battle::Ai::ForgetLiveAiActionTarget(&state);
+  std::array<std::byte, sizeof(state)> actual{};
+  std::memcpy(actual.data(), &state, actual.size());
+  CHECK(actual == expected);
+  CHECK(state.previousTile == -1);
+}
+
+TEST_CASE("AI target forgetting keeps the remembered destination and lifetime",
+          "[ai][planning][target-forget-live]") {
+  TargetMemoryFixture fixture(5);
+  fixture.state.tile.word = 0x00430201;
+  VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
+  REQUIRE(fixture.state.previousTile == static_cast<int>(0x05430201));
+  auto expected = fixture.Bytes();
+  std::memset(expected.data() + offsetof(Battle_Ai_ActorAiState, previousTile),
+              0xFF, sizeof(fixture.state.previousTile));
+  VS::Battle::Ai::ForgetLiveAiActionTarget(&fixture.state);
+  CHECK(fixture.Bytes() == expected);
+  CHECK(fixture.state.previousTile == -1);
+  CHECK(fixture.state.rememberedTargetTile == 0xA1B2C3D4u);
+  CHECK(fixture.state.targetMemoryFrames == 900);
+}
+
+static_assert(offsetof(Battle_Ai_BlockedRecoveryView, isStuck) ==
+              offsetof(Battle_Ai_ActorAiState, isStuck));
+static_assert(offsetof(Battle_Ai_BlockedRecoveryView, opaque1C) ==
+              offsetof(Battle_Ai_ActorAiState, opaque1C));
+static_assert(offsetof(Battle_Ai_BlockedRecoveryView, tile) ==
+              offsetof(Battle_Ai_ActorAiState, tile));
+static_assert(offsetof(Battle_Ai_BlockedRecoveryView, previousTile) ==
+              offsetof(Battle_Ai_ActorAiState, previousTile));
+static_assert(offsetof(Battle_Ai_BlockedRecoveryView, detourStep) ==
+              offsetof(Battle_Ai_ActorAiState, detourStep));
+static_assert(sizeof(Battle_Ai_BlockedRecoveryView) <=
+              sizeof(Battle_Ai_ActorAiState));
+
+TEST_CASE("Blocked movement forgets its target after exhausting detours",
+          "[ai][movement][target-forget-live]") {
+  struct OrbitGuard {
+    Battle_Ai_ArenaOrbitState* saved = Battle_Ai_arenaOrbit;
+    ~OrbitGuard() { Battle_Ai_arenaOrbit = saved; }
+  } orbit_guard;
+  Battle_Ai_arenaOrbit = nullptr;
+  Battle_Ai_ActorAiState state{};
+  auto* view = reinterpret_cast<Battle_Ai_BlockedRecoveryView*>(&state);
+  view->tile.word = 0x00120034;
+  view->previousTile.word = 0x05120034;
+  view->opaque1C = 7;
+  view->detourStep = static_cast<u_char>(GENERATE(5, 255));
+  std::array<std::byte, sizeof(state)> expected{};
+  std::memcpy(expected.data(), &state, expected.size());
+  expected[offsetof(Battle_Ai_ActorAiState, isStuck)] = std::byte{1};
+  expected[offsetof(Battle_Ai_ActorAiState, opaque1C)] = std::byte{0};
+  expected[offsetof(Battle_Ai_ActorAiState, detourStep)] = std::byte{0};
+  std::memset(expected.data() + offsetof(Battle_Ai_ActorAiState, previousTile),
+              0xFF, sizeof(state.previousTile));
+  const int result = Battle_Ai_TryRecoverBlockedMovement(view);
+  std::array<std::byte, sizeof(state)> actual{};
+  std::memcpy(actual.data(), &state, actual.size());
+  CHECK(result == 0);
+  CHECK(actual == expected);
+}
+
+TEST_CASE("AI target forgetting retains its original module address",
+          "[ai][planning][target-forget-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800E4CE8) ==
+      reinterpret_cast<const void*>(&VS::Battle::Ai::ForgetLiveAiActionTarget));
 }
 
 TEST_CASE("AI candidates copy the complete record including overlapping input",

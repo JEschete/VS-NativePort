@@ -878,6 +878,11 @@ std::optional<bool> RememberAiActionTarget(TargetMemoryHost& host) {
   return true;
 }
 
+// decomp: func_800E4CE8 (src/BATTLE/BATTLE.PRG/7C4E8.c:407).
+void ForgetAiActionTarget(TargetMemoryHost& host) {
+  host.SetPreviousTile(kForgottenTargetTile);
+}
+
 // decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s:9).
 void CopyActionCandidate(ActionCandidate& destination,
                          const ActionCandidate& source) {

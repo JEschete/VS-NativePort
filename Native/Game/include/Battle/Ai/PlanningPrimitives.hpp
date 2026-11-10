@@ -28,6 +28,9 @@ inline constexpr unsigned kActionDefinitionCount = 256;
 // A Battle_ActorStats record (0x964 bytes).
 inline constexpr std::size_t kActorStatsRecordBytes = 0x964;
 inline constexpr std::uint16_t kTargetMemoryFrames = 900;
+// The previous-tile word of a forgotten target (AI state 0x38). It is negative,
+// so readers take no remembered target ID from its high byte.
+inline constexpr std::uint32_t kForgottenTargetTile = 0xFFFFFFFF;
 
 struct StatsByteRange {
   std::size_t offset;
@@ -164,6 +167,8 @@ class TargetMemoryHost {
   [[nodiscard]] virtual std::optional<std::uint32_t> TargetTile(
       unsigned target) const = 0;
   virtual void Remember(const TargetMemory& memory) = 0;
+  // Writes only the previous-tile word (AI state 0x38).
+  virtual void SetPreviousTile(std::uint32_t tile) = 0;
 };
 
 // An actor's HP, MP, weapon PP and status words as its stats store them.
@@ -452,6 +457,11 @@ class ActionTargetingHost {
 // when the ranking is empty or memory is disabled; nothing refuses a count
 // past the ranking, an empty first entry or a target without a placement.
 std::optional<bool> RememberAiActionTarget(TargetMemoryHost& host);
+
+// decomp: func_800E4CE8 (src/BATTLE/BATTLE.PRG/7C4E8.c:407).
+// Forgets the remembered target by marking the previous-tile word; the
+// remembered target tile and its frames stay as they were.
+void ForgetAiActionTarget(TargetMemoryHost& host);
 
 // decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s:9).
 void CopyActionCandidate(ActionCandidate& destination,
