@@ -203,6 +203,33 @@ bool ApplySimulatedActionResults(std::span<ActorCondition> conditions,
                                  const SimulatedActorEffect& performer,
                                  std::span<const SimulatedActorEffect> targets);
 
+// The terms of an actor's condition the planner scores a candidate with
+// (func_800DCC94, BATTLE.PRG 74088.c:620). The original inlines the four
+// helpers (74088.c:565-619) into one run of 99 instructions
+// (0x800DCDD4-0x800DCF5C), so they have no symbol or address of their own.
+// Ratios are not narrowed here; the scoring narrows them to halfwords.
+
+// decomp: BATTLE.PRG _getStatusScore (74088.c:565), inlined in func_800DCC94.
+// The weights of the actor's set status bits (bit 12 only when the actor's AI
+// state enables action costs), less 128 at zero HP and a further 84 below
+// 44/128 of maximum HP.
+[[nodiscard]] std::int32_t ActorStatusConditionScore(
+    const ActorCondition& condition, bool action_cost_enabled);
+
+// decomp: BATTLE.PRG _getHpRatio (74088.c:590), inlined in func_800DCC94.
+// HP scaled to 128 at the maximum and truncated toward zero; zero without a
+// maximum.
+[[nodiscard]] std::int32_t ActorHpRatio(const ActorCondition& condition);
+
+// decomp: BATTLE.PRG _getMpRatio (74088.c:598), inlined in func_800DCC94.
+// MP scaled like the HP ratio.
+[[nodiscard]] std::int32_t ActorMpRatio(const ActorCondition& condition);
+
+// decomp: BATTLE.PRG _getExtraRatio (74088.c:606), inlined in func_800DCC94.
+// The weapon's and the shield's DP, each scaled like the HP ratio, summed.
+[[nodiscard]] std::int32_t ActorEquipmentDpRatio(
+    const ActorCondition& condition);
+
 // The actor stats, action table and AI state the usability refresh reads.
 class ActionUsabilityHost {
  public:

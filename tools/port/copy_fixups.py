@@ -563,7 +563,8 @@ NATIVE_HELPER_HEADERS = {
        for name in ("RememberLiveAiActionTarget", "CopyLiveActionCandidate", "ApplyLiveSimulatedStatDelta",
                     "AppendLiveActionCandidate", "SortLiveActionCandidates", "CopyLivePlanningActorStats",
                     "CanLiveAiActionAffectActor", "RefreshLiveAiActionUsability",
-                    "RefreshLiveAiResourceRestrictions")},
+                    "RefreshLiveAiResourceRestrictions", "LiveActorStatusConditionScore", "LiveActorHpRatio",
+                    "LiveActorMpRatio", "LiveActorEquipmentDpRatio")},
     **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\MovementBehaviorLive.hpp"
        for name in ("SetLiveMovementBehavior", "RefreshLiveAiMovementCooldown", "ApproachLiveActor",
                     "RefreshLiveAiTargetTile", "RefreshLiveAiTargetTileWhenTracking", "WanderAroundLiveSavedCenter",
@@ -1135,6 +1136,10 @@ OWNED_CALL_BINDINGS["F00065"] = "Field_DisableTrapAtPositionEntry"
 OWNED_CALL_BINDINGS["F00547"] = "Field_CurrentSavePointIdEntry"
 OWNED_CALL_BINDINGS["F01637"] = "Battle_Ai_RefreshActionCandidateReadinessEntry"
 OWNED_CALL_BINDINGS["F01697"] = "Battle_Ai_ApplySimulatedActionResultsEntry"
+OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
+OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
+OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
+OWNED_CALL_BINDINGS["F01703"] = "VS::Battle::Ai::LiveActorEquipmentDpRatio"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"

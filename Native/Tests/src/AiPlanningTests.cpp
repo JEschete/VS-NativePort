@@ -317,6 +317,72 @@ TEST_CASE("Native simulated results refuse short tails and invalid actor slots",
   CHECK((std::bit_cast<RowBytes>(fixture.rows) == before));
 }
 
+TEST_CASE("Native condition status score reads the row's own AI state",
+          "[ai][planning][condition-terms-live]") {
+  PlanningFixture fixture;
+  std::array<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
+      rows{};
+  // Row 7 belongs to the fixture's peer in slot 3, so slot 1 is not consulted.
+  Battle_Ai_ActionTiming& row = rows[7];
+  row.opaque0Bit0 = 3;
+  row.opaque4 = 100;
+  row.opaque6 = 100;
+  row.opaqueC = (1u << 6) | (1u << 12);
+  fixture.state.actionCostEnabled = 1;
+  fixture.peer.actionCostEnabled = 0;
+  CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) == 50);
+  fixture.peer.actionCostEnabled = 1;
+  CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) == 50 - 51);
+  fixture.peer.actionCostEnabled = 2;
+  row.opaque4 = 0;
+  CHECK(VS::Battle::Ai::LiveActorStatusConditionScore(&row) ==
+        50 - 51 - 128 - 84);
+}
+
+TEST_CASE("Native condition ratios read each term from the requested row",
+          "[ai][planning][condition-terms-live]") {
+  std::array<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
+      rows{};
+  for (std::size_t index = 0; index < rows.size(); ++index) {
+    auto& row = rows[index];
+    row.opaque0Bit0 = static_cast<u_int>(rows.size() - 1 - index);
+    row.opaque4 = static_cast<std::int16_t>(2 * index);
+    row.opaque6 = 128;
+    row.opaque8 = static_cast<std::int16_t>(3 * index);
+    row.opaqueA = 128;
+    row.opaque10 = static_cast<std::int16_t>(5 * index);
+    row.opaque12 = 128;
+    row.opaque14 = static_cast<std::int16_t>(7 * index);
+    row.opaque16 = 128;
+  }
+  for (int id = 0; id < VS::Battle::Ai::kBattleActorSlotCount; ++id) {
+    CHECK(VS::Battle::Ai::LiveActorHpRatio(rows.data(), id) == 2 * id);
+    CHECK(VS::Battle::Ai::LiveActorMpRatio(rows.data(), id) == 3 * id);
+    CHECK(VS::Battle::Ai::LiveActorEquipmentDpRatio(rows.data(), id) ==
+          12 * id);
+  }
+}
+
+TEST_CASE("Native condition ratios return unnarrowed signed quotients",
+          "[ai][planning][condition-terms-live]") {
+  std::array<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
+      rows{};
+  Battle_Ai_ActionTiming& row = rows[9];
+  row.opaque4 = INT16_MIN;
+  row.opaque6 = 1;
+  row.opaque8 = -1;
+  row.opaqueA = 3;
+  row.opaque10 = INT16_MAX;
+  row.opaque12 = 1;
+  row.opaque14 = INT16_MAX;
+  row.opaque16 = 1;
+  CHECK(VS::Battle::Ai::LiveActorHpRatio(rows.data(), 9) == -4194304);
+  CHECK(VS::Battle::Ai::LiveActorMpRatio(rows.data(), 9) == -42);
+  CHECK(VS::Battle::Ai::LiveActorEquipmentDpRatio(rows.data(), 9) ==
+        2 * 4194176);
+  CHECK(VS::Battle::Ai::LiveActorHpRatio(rows.data(), 8) == 0);
+}
+
 TEST_CASE(
     "Native candidate readiness preserves exact status byte and threshold",
     "[ai][planning][candidate-readiness-live]") {

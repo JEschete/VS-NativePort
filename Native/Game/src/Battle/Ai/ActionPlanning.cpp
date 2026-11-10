@@ -111,69 +111,6 @@ void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* candidate)
     candidate->weight = threshold + (threshold >> 2) + (threshold >> 5);
 }
 
-// decomp: BATTLE.PRG _getStatusScore (src/BATTLE/BATTLE.PRG/74088.c:565)
-int Battle_Ai_ActorStatusConditionScore(Battle_Ai_ActionTiming* stats)
-{
-    static const signed char Battle_Ai_kStatusScores[] = { -51, -39, -39, -39, -26, -51, 50, -13, 12,
-        -13, 12, 25, -51, -26, -45, -26, -39, 76, 19, -13, 12, 12, 12, 12, 12, 12, 12, 12,
-        12, 0, 0, 0 };
-    int score = 0;
-    int i;
-    int noCost = Battle_Ai_actorAiStates[stats->opaque0Bit0]->actionCostEnabled == 0;
-
-    for (i = 0; i < 32; ++i) {
-        if (stats->opaqueC & (1 << i) && (i != 12 || !noCost)) {
-            score += Battle_Ai_kStatusScores[i];
-        }
-    }
-
-    if (stats->opaque4 == 0) {
-        score -= 128;
-    }
-
-    if (stats->opaque4 * 128 < stats->opaque6 * 44) {
-        score -= 84;
-    }
-
-    return score;
-}
-
-// decomp: BATTLE.PRG _getHpRatio (src/BATTLE/BATTLE.PRG/74088.c:590)
-int Battle_Ai_ActorHpRatio(Battle_Ai_ActionTiming* stats, int id)
-{
-    if (stats[id].opaque6 == 0) {
-        return 0;
-    }
-
-    return stats[id].opaque4 * 128 / stats[id].opaque6;
-}
-
-// decomp: BATTLE.PRG _getMpRatio (src/BATTLE/BATTLE.PRG/74088.c:598)
-int Battle_Ai_ActorMpRatio(Battle_Ai_ActionTiming* stats, int id)
-{
-    if (stats[id].opaqueA == 0) {
-        return 0;
-    }
-
-    return stats[id].opaque8 * 128 / stats[id].opaqueA;
-}
-
-// decomp: BATTLE.PRG _getExtraRatio (src/BATTLE/BATTLE.PRG/74088.c:606)
-int Battle_Ai_ActorEquipmentDpRatio(Battle_Ai_ActionTiming* stats, int id)
-{
-    int ratio = 0;
-
-    if (stats[id].opaque12 != 0) {
-        ratio = stats[id].opaque10 * 128 / stats[id].opaque12;
-    }
-
-    if (stats[id].opaque16 != 0) {
-        ratio += stats[id].opaque14 * 128 / stats[id].opaque16;
-    }
-
-    return ratio;
-}
-
 // decomp: BATTLE.PRG func_800DCC94 (src/BATTLE/BATTLE.PRG/74088.c:620)
 void Battle_Ai_EvaluateActionCandidate(
     Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate, int simulation_mode, Battle_ActionDefinition* action_definition)
@@ -214,8 +151,8 @@ void Battle_Ai_EvaluateActionCandidate(
             continue;
         }
 
-        value = VS::Battle::Ai::ScoreLiveActorCondition(Battle_Ai_ActorStatusConditionScore(&stats[id]), Battle_Ai_ActorHpRatio(stats, id),
-            Battle_Ai_ActorMpRatio(stats, id), Battle_Ai_ActorEquipmentDpRatio(stats, id));
+        value = VS::Battle::Ai::ScoreLiveActorCondition(VS::Battle::Ai::LiveActorStatusConditionScore(&stats[id]), VS::Battle::Ai::LiveActorHpRatio(stats, id),
+            VS::Battle::Ai::LiveActorMpRatio(stats, id), VS::Battle::Ai::LiveActorEquipmentDpRatio(stats, id));
 
         if (kind != 2) {
             value = -value;

@@ -32,10 +32,6 @@ extern u_char (*Battle_Ai_candidateExclusions)[256];
 void Battle_Ai_SimulateActionCandidate(
     Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionTiming* simulated_actor_rows, Battle_Ai_ActionCandidate* candidate, int simulation_mode);
 void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* candidate);
-int Battle_Ai_ActorStatusConditionScore(Battle_Ai_ActionTiming* stats);
-int Battle_Ai_ActorHpRatio(Battle_Ai_ActionTiming* stats, int id);
-int Battle_Ai_ActorMpRatio(Battle_Ai_ActionTiming* stats, int id);
-int Battle_Ai_ActorEquipmentDpRatio(Battle_Ai_ActionTiming* stats, int id);
 void Battle_Ai_EvaluateActionCandidate(
     Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate, int simulation_mode, Battle_ActionDefinition* action_definition);
 void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state);

@@ -9,6 +9,7 @@
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -522,8 +523,8 @@ int Tests_ActorConditionSnapshot(void) {
       output.rows[2].opaque8 == 15 && output.rows[2].opaqueA == 60 &&
       output.rows[2].opaque10 == 10 && output.rows[2].opaque12 == 40 &&
       output.rows[2].opaque14 == 30 && output.rows[2].opaque16 == 60 &&
-      Battle_Ai_ActorStatusConditionScore(&output.rows[2]) == -34 &&
-      Battle_Ai_ActorStatusConditionScore(&output.rows[5]) == -314 &&
+      VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[2]) == -34 &&
+      VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[5]) == -314 &&
       output.before == 0xA5A5A5A5u && output.after == 0xA5A5A5A5u &&
       output.rows[1].opaqueC == 0xA5A5A5A5u;
   Battle_actors[0] = savedHead;

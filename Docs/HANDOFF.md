@@ -1,26 +1,31 @@
 # Current Handoff
 
-Updated 2026-11-09. The owner requested a verified stopping point and a clean
-handoff. Do not start another implementation as part of this cleanup.
+Updated 2026-11-09. Row 28 (battle AI) resumed after the cleanup checkpoint.
+The condition-term group below is implemented and verified; once published, its
+hash and exact-revision CI belong in #276 and the plan row, not guessed here.
 
 ## Checkpoint
 
-- Code revision: `f6ba998e902c41aa4de4ddbc86a141cbae3f0d37`
-  (`Promote typed projected action result application`), pushed on
-  `imp/01-ma04-gates`.
-- Exact-revision [Source Quality run 42710468317](https://github.com/JEschete/VS-NativePort/actions/runs/42710468317)
-  completed successfully. The code worktree was clean at this stopping point;
-  this handoff cleanup is a separate documentation-only checkpoint.
-- **977 functions remain.** Modernization: 2,767 done of 3,744. C++ promotion:
-  2,768 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,486 promoted, 16 retired, 976 generated,
-  one WIP; 2,502 resolved. This continuation resolved 53 more than `6c8ac0b9`.
+- Base revision: `90e5fbfe6d5559e0e79591db722eae2f4dc48092`, the documentation
+  cleanup over code checkpoint `f6ba998e` (F01697,
+  [Source Quality run 42710468317](https://github.com/JEschete/VS-NativePort/actions/runs/42710468317)).
+  Two scoped commits follow it on `imp/01-ma04-gates`: the CI exit-code fix for
+  #333, then the F01700-F01703 code checkpoint. Use `git log` and #276 for their
+  hashes and exact-revision runs.
+- **973 functions remain.** Modernization: 2,771 done of 3,744. C++ promotion:
+  2,772 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,490 promoted, 16 retired, 972 generated,
+  one WIP; 2,506 resolved. This continuation resolved 57 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
-- Issues #325-332 are closed with fixing revisions and verified CI. No
-  implementation or investigation from that group remains half-finished.
+- Issues #325-332 are closed with fixing revisions and verified CI. #333 stays
+  open until its fixing revision has a real green run (see Latest Work).
+  Two quality defects found while verifying are logged and **not yet fixed**:
+  #334, the full-scope `quality.py --tidy` gate fails at `HEAD` with 23
+  un-baselined findings in five untouched files, and #335, `--files --tidy`
+  silently drops header findings.
 - No owned build, replay, quality run, or CI watcher remains active. The next
-  condition-scoring functions have only been prepared read-only, not edited.
+  group (F01698, F01699, F01704) has only been located read-only, not edited.
 
 ## Sources Of Truth
 
@@ -41,68 +46,113 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01700-F01703, the four condition terms inlined into `EvaluateActionCandidate`,
+  are the current code checkpoint. `ActorStatusConditionScore` sums the signed
+  weight of each set status bit 0-31; bit 12 counts only when the row's own AI
+  state enables action cost. It then adds -128 for zero HP and -84 for HP below
+  44/128 of maximum, comparing signed 32-bit products. `ActorHpRatio`,
+  `ActorMpRatio` and `ActorEquipmentDpRatio` return `value*128/max`, truncated
+  toward zero and not narrowed to 16 bits, zero without a maximum; the equipment
+  term is weapon plus shield. The original looks the AI state up by the row's own
+  id, not the loop slot, and the native binding does the same.
+- The original 99 inlined instructions at `800DCDD4-800DCF5C` were interpreted
+  from the actual BATTLE bytes against the real native cores over 20,000 vectors
+  (the exact 44/128 boundary, zero maxima, bit 12 on and off, negative HP and
+  results past 16 bits) with zero mismatches. The harness stays out of the
+  repository because it derives from disc data.
+- #333: CI had reported success while `hazards.py --check` failed on a clean
+  `HEAD` export. `HAZARD_LEDGER.csv` was last synced in `34cdf8b7`, and a
+  multi-line PowerShell `run:` step reports only its last native command's exit
+  code, so the later `regression.py static` hid it. Each former multi-command
+  step in `quality.yml` is now one command, [test_workflows.py](../tools/lint/test_workflows.py)
+  rejects any multi-command step, and the ledger was resynced (763 to 746 sites).
+  Thirteen new sites were recorded `open` and are untriaged; 30 rows left with
+  rewritten code, all `open` with no notes.
 - F01637, `RefreshActionCandidateReadiness`, was published in `376c7969`;
   [CI 42705380792](https://github.com/JEschete/VS-NativePort/actions/runs/42705380792)
   passed. It preserves callback rereads, packed candidate bits, non-compacting
   first-survivor promotion, movement ordering, and the 16-bit threshold rules.
-- F01697, `ApplySimulatedActionResults`, is the current code checkpoint. It
-  applies cost types 1/3/6 first, then performer and ordered target effects.
-  Repeated actor slots apply repeatedly; only operation 2 restores; status
-  clearing follows setting. Producer evidence identifies HP, MP, weapon DP,
-  and shield DP. Native decoding validates the complete flexible target tail
-  and 255-target capacity, preserving row IDs, maxima, and reserved bytes.
-- Both policies live in the existing
+- F01697, `ApplySimulatedActionResults`, was the previous code checkpoint
+  (`f6ba998e`). It applies cost types 1/3/6 first, then performer and ordered
+  target effects. Repeated actor slots apply repeatedly; only operation 2
+  restores; status clearing follows setting. Producer evidence identifies HP,
+  MP, weapon DP, and shield DP. Native decoding validates the complete flexible
+  target tail and 255-target capacity, preserving row IDs, maxima, and reserved
+  bytes.
+- These policies live in the existing
   [PlanningPrimitives.hpp](../Native/Game/include/Battle/Ai/PlanningPrimitives.hpp),
   [PlanningPrimitives.cpp](../Native/Game/src/Battle/Ai/PlanningPrimitives.cpp),
   and [PlanningPrimitivesLive.cpp](../Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp).
   Production callers and original C/module entries are retained. The
-  obsolete function-local adaptations were removed through the copier.
+  obsolete function-local adaptations were removed through the copier; the
+  generated F01704 caller now calls the owned condition bindings.
 - Borrowed outside-arena inputs, broader AI lifecycle, full battle-AI/M8
   gameplay, controller/reference parity, and EC/global/data/type retirement
   remain open. Local function promotion does not satisfy those wider gates.
 
 ## Verified
 
-These are results for the code checkpoint above, not new runtime verification
-performed by editing this document:
+These are results for the working tree on base `90e5fbfe` that holds both
+pending changes (the F01700-F01703 code and the #333 CI fix), not new runtime
+verification performed by editing this document. Exact-revision CI is pending
+until the commits are pushed.
 
-- Full rebuilt Debug and Release: **5,167 cases / 12,593,504 assertions each**;
+- Full rebuilt Debug and Release: **5,177 cases / 12,593,621 assertions each**;
   zero failures or skips. Canonical `silver_wolves` (2,400 frames) and
   `first_lever_room` (900 frames) match unchanged baselines; zero regressions.
-- F01697: 11 focused cases / 95 assertions; combined native result/readiness
-  selection: 18 cases / 126 assertions. F01637's original focused total was
-  14 cases / 131,141 assertions.
-- All 202 copier controls pass. Source-scoped quality has zero findings;
-  full header-aware quality has five existing findings and zero new findings,
-  actual exit 0. No suppression or baseline was changed to obtain this result.
-- Both ledger gates pass with zero violations. Two final supported generation
-  runs preserve all 1,761 reviewed paths and raw hashes. Manifest SHA256:
-  `bd04d1ec83116ba434b186ddcdd9eec383405da7ba57ed4dd2f6b59b2bbaf8d1`.
-- F01697's 134 instructions at `800DC888-800DCA9C` match actual BATTLE bytes:
-  SHA256 `342ddca4ea84cdc5aa5bae9d02ee308546f3188b4234f01b3522177a1cd6e467`.
-  F01637's 132 instructions at `800D85D8-800D87E4` are separately recorded in
-  its verification ledger entry.
+- F01700-F01703: 10 focused cases / 117 assertions (seven pure-core, three
+  live-binding); `[ai][planning]` 86 cases / 137,725 assertions; `[ai]` 525
+  cases / 3,131,567 assertions. F01697 was 11 cases / 95 assertions.
+- Original MIPS evidence from actual BATTLE bytes: the 99 inlined instructions
+  at `800DCDD4-800DCF5C`, SHA256
+  `6506a43a5c906fd492cbb9c09cc37ef7510d4a206c026a9b021cfe5badb1d50c`; all of
+  F01704, 219 instructions at `800DCC94-800DCFFC`, SHA256
+  `f19b68e0b0c641f6fa5a5a53bcdb015009a69dbaadf03a87cc221813fe92237f`; the
+  32-byte status table at `0x80069BD0`, SHA256
+  `5d33fbf3c199b41f6535b3a0331f542b1e430fb6acff5f0dc218f054a01ea38a`. The
+  20,000-vector differential run had zero mismatches.
+- All 202 copier controls pass. Changed-scope `quality.py --changed --tidy`:
+  48 findings, all baselined, zero new, exit 0; source-scoped quality: zero
+  findings. **Full-scope `quality.py --tidy` exits 1**: 267 findings, 23 new,
+  all in five files this work does not touch (`NativeContainer.hpp`,
+  `SphereTerrain.hpp`, `RadialWarp.hpp`, `Session.cpp`, `Extract/main.cpp`) and
+  identical on a pristine export of `90e5fbfe`; this work adds none (#334). No
+  baseline or suppression was changed.
+- `gates.py`, `modernization.py` and `hazards.py` pass `--sync --check` with
+  zero violations (746 hazard sites). `test_quality.py` (30) and
+  `test_workflows.py` (5) pass. Two final supported generation runs preserve
+  all 1,803 hashed paths (tracked or untracked-not-ignored files under
+  `Native`, `tools/port`, `tools/scaffold`, `Docs/ledgers` and the solution;
+  this is not the definition behind the older 1,761-path record). Manifest
+  SHA256: `df4fcfc298dc8be0cceb20fc04ce96638da67aa0b496c9b38a5de9c808248e9b`.
 
 ## Next Work
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Continue ordered row 28. The prepared next bounded group is F01700
-   `ActorStatusConditionScore`, F01701 `ActorHpRatio`, and F01702 `ActorMpRatio`
-   in [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   This is a recommended next group, not a claim that it is already started.
-3. Read the actual original `74088.c` routines at lines 565/590/598 and their
-   matching assembly before implementing. Establish status masks, signedness,
-   arithmetic/rounding, clamping, and zero-denominator behavior from evidence.
-   Reuse `ActorCondition`, the existing planning owner, native bounds helpers,
+2. Repair the logged maintained-code quality defects as separate scoped
+   changes: #335 first (a one-line scope-aliasing fix with a positive
+   control), then the 23 findings in #334. Repair the code; do not refresh the
+   baseline. Quality work precedes the next promotion group.
+3. Continue ordered row 28. The prepared next bounded group is F01698
+   `SimulateActionCandidate` (`func_800DCAA0`), F01699 `UpdateCandidateHitWeight`
+   (`func_800DCBD8`), and F01704 `EvaluateActionCandidate` (`func_800DCC94`) in
+   [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
+   F01704 already calls the owned condition terms. This is a recommended next
+   group, not a claim that it is already started.
+4. Read the actual original `74088.c` routines at lines 513/539/620 and their
+   matching assembly (`800DCAA0`, `800DCBD8`, `800DCC94-800DCFFC`) before
+   implementing. Establish candidate-weight arithmetic, rounding, clamping,
+   signedness, and the order of the condition terms from evidence. Reuse
+   `ActorCondition`, the existing planning owner, native bounds helpers,
    and [PlanningPrimitivesTests.cpp](../Native/Tests/src/PlanningPrimitivesTests.cpp).
-4. Test the deciding core first, then native/caller/module bindings. Make
+5. Test the deciding core first, then native/caller/module bindings. Make
    generated changes through the copier or owned registry, never by patching
    generated output. Remove only adaptations made obsolete by the owned body.
-5. Run focused checks after each change and shared full gates for the coherent
+6. Run focused checks after each change and shared full gates for the coherent
    milestone. Keep behavior verification, C++ promotion, modernization, and
    compatibility retirement distinct. Log a newly confirmed defect before fixing it.
-6. Commit and push scoped verified milestones using the owner's configured
+7. Commit and push scoped verified milestones using the owner's configured
    identity, inspect CI on the exact revision, and close eligible issues only
    with their fixing commit and acceptance evidence. Update #276 promptly.
 
@@ -134,7 +184,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 977 functions complete.
+  match delivered scope. Do not declare the remaining 973 functions complete.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
   Do not force-push, rewrite history, or add attribution trailers/headers.
 - Avoid full gameplay JSON, huge terminal histories, and unbounded parsers.

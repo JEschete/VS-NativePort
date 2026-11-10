@@ -53,6 +53,19 @@ constexpr unsigned kWeaponPpAction = 4;
 constexpr unsigned kRememberedTargetShift = 24;
 constexpr std::uint32_t kRememberedTileMask = 0xFFFFFF;
 
+// decomp: BATTLE.PRG statusScores (74088.c:567); the 32 signed bytes at
+// 0x80069BD0 in BATTLE.PRG, one weight per status bit.
+constexpr std::array<std::int8_t, 32> kStatusScores = {
+    -51, -39, -39, -39, -26, -51, 50, -13, 12, -13, 12, 25, -51, -26, -45, -26,
+    -39, 76,  19,  -13, 12,  12,  12, 12,  12, 12,  12, 12, 12,  0,   0,   0,
+};
+constexpr unsigned kActionCostStatusBit = 12;
+constexpr std::int32_t kZeroHpScorePenalty = 128;
+constexpr std::int32_t kLowHpScorePenalty = 84;
+// HP below this many 128ths of the maximum takes the low-HP penalty.
+constexpr std::int32_t kLowHpPer128 = 44;
+constexpr std::int32_t kConditionRatioScale = 128;
+
 bool ApplyConditionDelta(std::int16_t& value, std::int16_t maximum,
                          const SimulatedStatChange& change) {
   constexpr std::uint8_t kRestoreSimulationOperation = 2;
@@ -216,6 +229,14 @@ std::optional<std::int32_t> CheckedInt32(std::int64_t value) {
   return static_cast<std::int32_t>(value);
 }
 
+// The value scaled to 128 at the maximum, truncated toward zero; zero without
+// a maximum.
+constexpr std::int32_t ConditionRatio(std::int16_t value,
+                                      std::int16_t maximum) {
+  return maximum == 0 ? 0
+                      : std::int32_t{value} * kConditionRatioScale / maximum;
+}
+
 bool IsActionUsable(const ActionCost& action, const ActorResources& resources) {
   switch (action.type) {
     case kSpellAction:
@@ -257,6 +278,40 @@ bool ApplySimulatedActionResults(
     if (!ApplyActorEffect(conditions, target)) return false;
   }
   return true;
+}
+
+// decomp: BATTLE.PRG _getStatusScore (74088.c:565), inlined in func_800DCC94
+// (0x800DCDD4-0x800DCF5C, original99MIPS with the three ratios).
+std::int32_t ActorStatusConditionScore(const ActorCondition& condition,
+                                       bool action_cost_enabled) {
+  std::int32_t score = 0;
+  for (unsigned bit = 0; bit < kStatusScores.size(); ++bit) {
+    const bool set = (condition.statuses & (std::uint32_t{1} << bit)) != 0;
+    if (set && (bit != kActionCostStatusBit || action_cost_enabled)) {
+      score += kStatusScores[bit];
+    }
+  }
+  if (condition.hp == 0) score -= kZeroHpScorePenalty;
+  if (condition.hp * kConditionRatioScale < condition.max_hp * kLowHpPer128) {
+    score -= kLowHpScorePenalty;
+  }
+  return score;
+}
+
+// decomp: BATTLE.PRG _getHpRatio (74088.c:590), inlined in func_800DCC94.
+std::int32_t ActorHpRatio(const ActorCondition& condition) {
+  return ConditionRatio(condition.hp, condition.max_hp);
+}
+
+// decomp: BATTLE.PRG _getMpRatio (74088.c:598), inlined in func_800DCC94.
+std::int32_t ActorMpRatio(const ActorCondition& condition) {
+  return ConditionRatio(condition.mp, condition.max_mp);
+}
+
+// decomp: BATTLE.PRG _getExtraRatio (74088.c:606), inlined in func_800DCC94.
+std::int32_t ActorEquipmentDpRatio(const ActorCondition& condition) {
+  return ConditionRatio(condition.weapon_dp, condition.weapon_max_dp) +
+         ConditionRatio(condition.shield_dp, condition.shield_max_dp);
 }
 
 // decomp: BATTLE.PRG func_800D85D8 (6FC00.c:515), original132MIPS.

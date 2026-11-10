@@ -24,6 +24,18 @@ std::optional<bool> RefreshLiveActionCandidateReadiness(
 bool ApplyLiveSimulatedActionResults(
     std::span<Battle_Ai_ActionTiming, kBattleActorSlotCount> rows);
 
+// The condition terms (ActorStatusConditionScore and the ratios,
+// PlanningPrimitives.hpp) of a row of the planner's condition snapshot. The
+// status score takes the row itself and reads its actor's AI state; the
+// ratios take the table's first row and an actor ID below
+// kBattleActorSlotCount.
+[[nodiscard]] int LiveActorStatusConditionScore(
+    const Battle_Ai_ActionTiming* row);
+[[nodiscard]] int LiveActorHpRatio(const Battle_Ai_ActionTiming* rows, int id);
+[[nodiscard]] int LiveActorMpRatio(const Battle_Ai_ActionTiming* rows, int id);
+[[nodiscard]] int LiveActorEquipmentDpRatio(const Battle_Ai_ActionTiming* rows,
+                                            int id);
+
 // The ranking of a plan view's first `count` candidates, whose handles index
 // the view's order; Apply reorders the view's entries to match it.
 class LiveCandidateRanking {

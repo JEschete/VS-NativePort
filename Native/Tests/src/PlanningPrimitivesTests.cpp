@@ -345,6 +345,115 @@ TEST_CASE("Simulated results refuse malformed active rows before mutation",
   CHECK(rows == before);
 }
 
+TEST_CASE("Condition status score applies each status bit's signed weight",
+          "[ai][planning][condition-terms-core]") {
+  // The 32 signed bytes at 0x80069BD0 in BATTLE.PRG.
+  constexpr std::array<int, 32> kWeights = {
+      -51, -39, -39, -39, -26, -51, 50, -13, 12,  -13, 12,
+      25,  -51, -26, -45, -26, -39, 76, 19,  -13, 12,  12,
+      12,  12,  12,  12,  12,  12,  12, 0,   0,   0};
+  const unsigned bit = GENERATE(range(0u, 32u));
+  const ai::ActorCondition condition{
+      .hp = 100, .max_hp = 100, .statuses = std::uint32_t{1} << bit};
+  CHECK(ai::ActorStatusConditionScore(condition, true) == kWeights[bit]);
+}
+
+TEST_CASE(
+    "Condition status score counts the action cost status only when "
+    "the AI enables it",
+    "[ai][planning][condition-terms-core]") {
+  const std::uint32_t others = (1u << 6) | (1u << 11);
+  ai::ActorCondition condition{
+      .hp = 100, .max_hp = 100, .statuses = (1u << 12) | others};
+  CHECK(ai::ActorStatusConditionScore(condition, true) == 50 + 25 - 51);
+  CHECK(ai::ActorStatusConditionScore(condition, false) == 50 + 25);
+  condition.statuses = 1u << 12;
+  CHECK(ai::ActorStatusConditionScore(condition, false) == 0);
+}
+
+TEST_CASE(
+    "Condition status score penalizes zero HP and HP under 44/128 of "
+    "the maximum",
+    "[ai][planning][condition-terms-core]") {
+  CHECK(ai::ActorStatusConditionScore({.hp = 0, .max_hp = 100}, true) ==
+        -128 - 84);
+  CHECK(ai::ActorStatusConditionScore({.hp = 0, .max_hp = 0}, true) == -128);
+  CHECK(ai::ActorStatusConditionScore({.hp = 34, .max_hp = 100}, true) == -84);
+  CHECK(ai::ActorStatusConditionScore({.hp = 35, .max_hp = 100}, true) == 0);
+  // 11 * 128 == 32 * 44: an exact match is not low.
+  CHECK(ai::ActorStatusConditionScore({.hp = 11, .max_hp = 32}, true) == 0);
+  CHECK(ai::ActorStatusConditionScore({.hp = 10, .max_hp = 32}, true) == -84);
+}
+
+TEST_CASE("Condition status score compares HP as signed unnarrowed products",
+          "[ai][planning][condition-terms-core]") {
+  // Negative HP is low but is not the zero-HP case.
+  CHECK(ai::ActorStatusConditionScore({.hp = -1, .max_hp = 100}, true) == -84);
+  CHECK(ai::ActorStatusConditionScore({.hp = 5, .max_hp = -100}, true) == 0);
+  CHECK(ai::ActorStatusConditionScore({.hp = -30, .max_hp = -100}, true) == 0);
+  CHECK(ai::ActorStatusConditionScore({.hp = -35, .max_hp = -100}, true) ==
+        -84);
+  CHECK(ai::ActorStatusConditionScore({.hp = 32767, .max_hp = 32767}, true) ==
+        0);
+  CHECK(ai::ActorStatusConditionScore({.hp = -32768, .max_hp = 32767}, true) ==
+        -84);
+}
+
+TEST_CASE("Condition ratios scale each current value to 128ths of its maximum",
+          "[ai][planning][condition-terms-core]") {
+  const ai::ActorCondition condition{.hp = 50,
+                                     .max_hp = 100,
+                                     .mp = 25,
+                                     .max_mp = 100,
+                                     .weapon_dp = 10,
+                                     .weapon_max_dp = 40,
+                                     .shield_dp = 30,
+                                     .shield_max_dp = 60};
+  CHECK(ai::ActorHpRatio(condition) == 64);
+  CHECK(ai::ActorMpRatio(condition) == 32);
+  CHECK(ai::ActorEquipmentDpRatio(condition) == 32 + 64);
+}
+
+TEST_CASE(
+    "Condition ratios are zero without a maximum and skip absent "
+    "equipment",
+    "[ai][planning][condition-terms-core]") {
+  ai::ActorCondition condition{.hp = 50,
+                               .mp = 50,
+                               .weapon_dp = 10,
+                               .weapon_max_dp = 0,
+                               .shield_dp = 30,
+                               .shield_max_dp = 60};
+  CHECK(ai::ActorHpRatio(condition) == 0);
+  CHECK(ai::ActorMpRatio(condition) == 0);
+  CHECK(ai::ActorEquipmentDpRatio(condition) == 64);
+  condition.weapon_max_dp = 40;
+  condition.shield_max_dp = 0;
+  CHECK(ai::ActorEquipmentDpRatio(condition) == 32);
+  condition.weapon_max_dp = 0;
+  CHECK(ai::ActorEquipmentDpRatio(condition) == 0);
+}
+
+TEST_CASE("Condition ratios truncate toward zero and keep results past 16 bits",
+          "[ai][planning][condition-terms-core]") {
+  ai::ActorCondition condition{.hp = 1, .max_hp = 3, .mp = -1, .max_mp = 3};
+  CHECK(ai::ActorHpRatio(condition) == 42);
+  CHECK(ai::ActorMpRatio(condition) == -42);
+  condition.hp = -1;
+  condition.max_hp = -3;
+  CHECK(ai::ActorHpRatio(condition) == 42);
+  condition.hp = 32767;
+  condition.max_hp = 1;
+  CHECK(ai::ActorHpRatio(condition) == 4194176);
+  condition.hp = -32768;
+  CHECK(ai::ActorHpRatio(condition) == -4194304);
+  condition.max_hp = -1;
+  CHECK(ai::ActorHpRatio(condition) == 4194304);
+  condition.weapon_dp = condition.shield_dp = 32767;
+  condition.weapon_max_dp = condition.shield_max_dp = 1;
+  CHECK(ai::ActorEquipmentDpRatio(condition) == 2 * 4194176);
+}
+
 TEST_CASE("Candidate readiness skips zero and future weights before callbacks",
           "[ai][planning][candidate-readiness-core]") {
   FakeCandidateReadiness host;

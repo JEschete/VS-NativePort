@@ -112,6 +112,15 @@ void Require(bool valid, const char* message) {
   }
 }
 
+const Battle_Ai_ActionTiming& ConditionRowOf(const Battle_Ai_ActionTiming* rows,
+                                             int id) {
+  Require(rows != nullptr && id >= 0 && id < kBattleActorSlotCount,
+          "AI actor condition requires a row in the planner's table");
+  const Battle_Ai_ActionTiming& row = rows[id];
+  Require(ReadablePlanningRecord(&row), "AI actor condition row is unreadable");
+  return row;
+}
+
 ActionCandidate CandidateOf(const Battle_Ai_ActionCandidate* candidate) {
   Require(candidate != nullptr, "AI planning requires a candidate");
   return ActionCandidate(std::bit_cast<ActionCandidate::Words>(*candidate));
@@ -423,6 +432,29 @@ bool ApplyLiveSimulatedActionResults(
     rows[index].opaque14 = conditions[index].shield_dp;
   }
   return true;
+}
+
+int LiveActorStatusConditionScore(const Battle_Ai_ActionTiming* row) {
+  Require(row != nullptr && ReadablePlanningRecord(row),
+          "AI actor status score requires a condition row");
+  const Battle_Ai_ActorAiState* state =
+      Battle_Ai_actorAiStates[row->opaque0Bit0];
+  Require(state != nullptr,
+          "AI actor status score requires the actor's AI state");
+  return ActorStatusConditionScore(SimulationConditionOf(*row),
+                                   state->actionCostEnabled != 0);
+}
+
+int LiveActorHpRatio(const Battle_Ai_ActionTiming* rows, int id) {
+  return ActorHpRatio(SimulationConditionOf(ConditionRowOf(rows, id)));
+}
+
+int LiveActorMpRatio(const Battle_Ai_ActionTiming* rows, int id) {
+  return ActorMpRatio(SimulationConditionOf(ConditionRowOf(rows, id)));
+}
+
+int LiveActorEquipmentDpRatio(const Battle_Ai_ActionTiming* rows, int id) {
+  return ActorEquipmentDpRatio(SimulationConditionOf(ConditionRowOf(rows, id)));
 }
 
 std::optional<bool> RefreshLiveActionCandidateReadiness(
