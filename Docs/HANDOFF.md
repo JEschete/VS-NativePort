@@ -1,9 +1,8 @@
 # Current Handoff
 
 Updated 2026-11-09. Row 28 (battle AI) resumed after the cleanup checkpoint.
-The condition terms and quality repairs are published with green CI.
-The next three candidate-planning promotions are locally verified below;
-their publication and exact-revision CI are the remaining checkpoint steps.
+The condition terms, quality repairs and three candidate-planning promotions
+are published with green exact-revision CI.
 
 ## Checkpoint
 
@@ -28,8 +27,10 @@ their publication and exact-revision CI are the remaining checkpoint steps.
   ([CI 42751897850](https://github.com/JEschete/VS-NativePort/actions/runs/42751897850)).
 - F01698, F01699 and F01704 are integrated in the main worktree; the temporary
   isolated worktree was removed. No owned build, replay or quality run remains
-  active. The candidate milestone is verified on base `8709974d` plus the
-  uncommitted implementation, tests, generated bindings and related ledgers.
+  active. The candidate milestone is published in `ceaee217`
+  ([CI 42756911275](https://github.com/JEschete/VS-NativePort/actions/runs/42756911275)).
+  Local verification used base `8709974d` plus that commit's implementation,
+  tests, generated bindings and related ledgers.
 
 ## Sources Of Truth
 
@@ -209,8 +210,8 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the verified F01698/F01699/F01704 milestone, confirm its exact-revision
-   CI and update #276. Do not close #276: 970 functions remain.
+2. The F01698/F01699/F01704 milestone is published with successful exact-revision
+   CI and recorded in #276. Do not close #276: 970 functions remain.
 3. Continue ordered row 28. The next bounded planning lifecycle group is
    F01714 `snapshotActorStats` and F01715 `restoreActorStats`
    (`74088.c:1295/1309`) in
