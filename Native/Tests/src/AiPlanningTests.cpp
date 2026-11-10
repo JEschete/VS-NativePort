@@ -18,6 +18,7 @@
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
+#include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -29,6 +30,7 @@ extern "C" {
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Random.h"
@@ -234,6 +236,33 @@ struct EnumerationFixture : ReadinessFixture {
     Battle_Ai_fallbackCandidateCount = saved_count;
     Battle_Ai_unusedPlanCounter = saved_mask;
     Core_Random_Seed(saved_random);
+  }
+};
+
+struct ActorPlanFixture : EnumerationFixture {
+  decltype(Battle_Ai_planningPassCandidates) saved_passes =
+      Battle_Ai_planningPassCandidates;
+  Battle_Ai_ArenaOrbitState* saved_orbit = Battle_Ai_arenaOrbit;
+  Battle_ActorStats* saved_snapshot = Battle_Ai_planningStatsSnapshot;
+  int saved_progress = VS::State::LiveScriptFlag(0xA6);
+  std::array<std::byte, 65536> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  Battle_Ai_CandidateEntryView pass_candidates[3][16]{};
+  Battle_Ai_ArenaOrbitState orbit{};
+
+  ActorPlanFixture() {
+    VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
+    Battle_Ai_planningPassCandidates = pass_candidates;
+    Battle_Ai_arenaOrbit = nullptr;
+    state.actionSlots[2][1].opaque0Bit7 = 0;
+    std::memset(exclusions, 1, sizeof(exclusions));
+  }
+  ~ActorPlanFixture() {
+    VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
+    Battle_Ai_planningStatsSnapshot = saved_snapshot;
+    Battle_Ai_planningPassCandidates = saved_passes;
+    Battle_Ai_arenaOrbit = saved_orbit;
+    VS::State::SetLiveScriptFlag(0xA6, saved_progress);
   }
 };
 
@@ -831,6 +860,103 @@ TEST_CASE("Native enumeration retains its original module address",
         reinterpret_cast<void*>(&Battle_Ai_EnumerateActionCandidatesEntry));
 }
 
+TEST_CASE("Native actor plan retains its original module address",
+          "[ai][planning][actor-plan-live]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DE3E4) ==
+        reinterpret_cast<const void*>(&Battle_Ai_BuildActorActionPlanEntry));
+}
+
+TEST_CASE(
+    "Native actor plan clears configured exclusions before the zero actor exit",
+    "[ai][planning][actor-plan-live]") {
+  ActorPlanFixture fixture;
+  fixture.state.actorId = 0;
+  fixture.state.candidateCount = 5;
+  Battle_Ai_fallbackCandidateCount = 7;
+  Battle_Ai_unusedPlanCounter = -1;
+  VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
+  CHECK(fixture.state.candidateCount == 0);
+  CHECK(Battle_Ai_fallbackCandidateCount == 0);
+  CHECK(Battle_Ai_unusedPlanCounter == 0);
+  CHECK(fixture.exclusions[1][0] == 0);
+  CHECK(fixture.exclusions[1][42] == 0);
+  CHECK(fixture.exclusions[1][43] == 1);
+  CHECK(fixture.exclusions[3][42] == 1);
+  CHECK(fixture.room.readinessLevel == 100);
+}
+
+TEST_CASE(
+    "Native actor plan restores projected stats and releases its snapshot",
+    "[ai][planning][actor-plan-live]") {
+  ActorPlanFixture fixture;
+  fixture.stats.limbActions[2][1].actionId = 0;
+  using StatsBytes = std::array<std::byte, sizeof(fixture.target_stats)>;
+  const auto before = std::bit_cast<StatsBytes>(fixture.target_stats);
+  VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
+  CHECK(std::bit_cast<StatsBytes>(fixture.target_stats) == before);
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(fixture.room.readinessLevel == 0);
+  CHECK(fixture.state.candidateCount == 0);
+  CHECK(fixture.state.planMode == 7);
+  CHECK(Core_Random_State() == 1);
+}
+
+TEST_CASE(
+    "Native actor plan retains the no-snapshot path without changing the clock",
+    "[ai][planning][actor-plan-live]") {
+  ActorPlanFixture fixture;
+  auto* reserved = VS::Core::Memory::AllocateLiveFromHighEnd(60000);
+  REQUIRE(reserved != nullptr);
+  VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
+  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(fixture.room.readinessLevel == 100);
+  CHECK(fixture.state.candidateCount == 0);
+  CHECK(fixture.state.planMode == 7);
+  CHECK(Core_Random_State() == 1);
+  VS::Core::Memory::FreeLiveFromHighEnd(reserved);
+}
+
+TEST_CASE(
+    "Native actor plan uses real pass storage ranking and final readiness",
+    "[ai][planning][actor-plan-live]") {
+  ActorPlanFixture fixture;
+  const auto jitter = Core_Random_Rand() & 7;
+  const auto expected_random = Core_Random_State();
+  Core_Random_Seed(1);
+  Battle_Ai_BuildActorActionPlanEntry(&fixture.state);
+  REQUIRE(fixture.state.candidateCount == 1);
+  CHECK(fixture.state.candidateOrder[0] == &fixture.state.candidates[0]);
+  CHECK(fixture.state.candidates[0].action == 42);
+  CHECK(fixture.state.candidates[0].threshold == jitter);
+  CHECK(fixture.exclusions[1][42] == 1);
+  CHECK(Core_Random_State() == expected_random);
+  const auto saved = std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(
+      fixture.pass_candidates[0][0]);
+  CHECK(VS::Battle::Ai::ActionCandidate(saved).Action() == 42);
+}
+
+TEST_CASE("Native actor plan reads the full arena command argument",
+          "[ai][planning][actor-plan-live]") {
+  ActorPlanFixture fixture;
+  fixture.stats.limbActions[2][1].actionId = 0;
+  const int argument = GENERATE(4, 0x10004);
+  Battle_Ai_arenaOrbit = &fixture.orbit;
+  fixture.orbit.planSaved = 1;
+  fixture.orbit.savedPlanCount = 9;
+  fixture.battle_actor.commandOpcode = 24;
+  fixture.battle_actor.commandArg0 = argument;
+  fixture.battle_actor.subType = 173;
+  fixture.state.actor =
+      reinterpret_cast<Battle_Ai_EngagementData*>(&fixture.battle_actor);
+  VS::State::SetLiveScriptFlag(0xA6, 4);
+  VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
+  CHECK(VS::State::LiveScriptFlag(0xA6) == (argument == 4 ? 5 : 4));
+  CHECK(fixture.orbit.savedPlanCount == 0);
+  CHECK(fixture.state.candidateCount == 0);
+}
+
 TEST_CASE(
     "Native simulated results preserve row metadata maxima and target order",
     "[ai][planning][simulation-results-live]") {
@@ -1275,7 +1401,7 @@ TEST_CASE(
 
     // state.actorId == 0 takes the planner's real reset-only path.
     state.actorId = 0;
-    Battle_Ai_BuildActorActionPlan(&plan);
+    VS::Battle::Ai::BuildLiveActorActionPlan(&state);
     state.actorId = 1;
     CHECK(state.candidateCount == 0);
     for (std::size_t index = 0; index < scores.size(); ++index) {

@@ -41,35 +41,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Battle\\Ai\\ActionPlanning.cpp": [
-[
-700,
-[
-"                VS::Battle::Ai::CopyLiveActionCandidate(&Battle_Ai_planningPassCandidates[pass][i], state->candidateOrder[i]);"
-],
-[
-"                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][i]), (Battle_Ai_ActionCandidate *)(state->candidateOrder[i]));"
-]
-],
-[
-713,
-[
-"                VS::Battle::Ai::CopyLiveActionCandidate(entry, &Battle_Ai_planningPassCandidates[pass][j]);"
-],
-[
-"                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(entry), (Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][j]));"
-]
-],
-[
-725,
-[
-"                VS::Battle::Ai::CopyLiveActionCandidate(fallback, &Battle_Ai_fallbackCandidates[i]);"
-],
-[
-"                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(fallback), (Battle_Ai_ActionCandidate *)(&Battle_Ai_fallbackCandidates[i]));"
-]
-]
-],
 "Native\\Game\\src\\Battle\\Ai\\ActionSelection.cpp": [
 [
 35,

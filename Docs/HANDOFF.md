@@ -6,7 +6,7 @@ and the two planning-stat lifecycle promotions are published with green
 exact-revision CI. F01707 fallback selection and F01713 planning simulation are
 also published with green exact-revision CI. F01712 candidate enumeration is
 published with green exact-revision CI. F01716 action-plan orchestration is
-the next in-progress promotion; no new planner implementation is verified yet.
+locally integrated and verified; its publication and exact-revision CI are pending.
 
 ## Checkpoint
 
@@ -20,10 +20,10 @@ the next in-progress promotion; no new planner implementation is verified yet.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **965 functions remain.** Modernization: 2,779 done of 3,744. C++ promotion:
-  2,780 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,498 promoted, 16 retired, 964 generated,
-  one WIP; 2,514 resolved. This continuation resolved 65 more than `6c8ac0b9`.
+- **964 functions remain.** Modernization: 2,780 done of 3,744. C++ promotion:
+  2,781 promoted plus one frame-orchestrator WIP. These are separate measures.
+- Original 3,479-function cohort: 2,499 promoted, 16 retired, 963 generated,
+  one WIP; 2,515 resolved. This continuation resolved 66 more than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -66,6 +66,13 @@ the next in-progress promotion; no new planner implementation is verified yet.
   ([CI 42777655682](https://github.com/JEschete/VS-NativePort/actions/runs/42777655682)).
   Local verification used that base with the enumeration core,
   checked binding, generated planner calls/module entry, tests and ledgers.
+- The enumeration evidence update `9c79316e` passed
+  [CI 42778988160](https://github.com/JEschete/VS-NativePort/actions/runs/42778988160).
+  F01716 local verification uses that base with the actor-plan core, native
+  binding, migrated workspace and lifecycle-test callers, generated module
+  entry and related evidence. Its old symbol has five former source consumers
+  and zero remaining consumers. The exported pass/cache/exclusion storage
+  remains; its retirement is not implied by this function promotion.
 
 ## Sources Of Truth
 
@@ -86,6 +93,24 @@ are historical, not instructions or fresh verification.
 
 ## Latest Work
 
+- F01716 now owns action-plan orchestration through
+  [PlanningWorkspace.hpp](../Native/Game/include/Battle/Ai/PlanningWorkspace.hpp)
+  and [PlanningWorkspace.cpp](../Native/Game/src/Battle/Ai/PlanningWorkspace.cpp).
+  It preserves cache/exclusion reset before the actor-zero exit, unsigned
+  recovery timing, cumulative simulation, pass quotas with spare middle-pass
+  capacity, rejected exclusions and pass-order merging. Empty-plan fallback
+  copies receive weight 128 without changing the cache.
+- A scoped snapshot restores stats and resets readiness before promotion,
+  including refusal and callback-exception paths. Snapshot failure retains
+  #274's initialized selection counts. Threshold spacing and jitter preserve
+  halfword wrapping and reread rankings/counts after RNG; readiness and
+  movement precede late arena reads. The arena binding captures the canonical
+  actor and reads the full 32-bit command argument, not its 16-bit view.
+- The owned workspace caller and `0x800DE3E4` now use the native planner.
+  The generated implementation and three obsolete candidate-copy adaptations
+  are removed through the copier. Native tests cover real snapshot allocation
+  and exhaustion, restoration, simulation, special-action enumeration,
+  pass/ranking storage, readiness, movement and arena command width.
 - F01712 now owns candidate enumeration through typed slot/target values and a
   checked live host. Four scratch records become local candidates. The working
   candidate retains fields across slots and targets; all 24 slots, actor-list
@@ -97,9 +122,9 @@ are historical, not instructions or fresh verification.
   before RNG but copy the candidate afterward, and cache before appending.
   Empty-limb fallback still draws a random part; negative limb maxima qualify.
   Aimed height is the absolute signed halfword narrowed to the 12-bit field.
-- Both generated planner calls and `0x800DD918` use the registered entry.
-  Two obsolete argument adaptations are removed; the remaining generated
-  planner still crosses its legacy record view at the native binding.
+- `0x800DD918` retains the registered entry. The former generated planner
+  calls were migrated with F01716 to the native enumeration API.
+  Two obsolete argument adaptations were removed with F01712.
   Native special-action fixtures exercise real evaluation/cache/ranking,
   separate selection and target stats, repeat-call exclusions and unchanged
   old scratch bytes. They are not ordinary-preview or gameplay verification.
@@ -202,6 +227,43 @@ are historical, not instructions or fresh verification.
   remain open. Local function promotion does not satisfy those wider gates.
 
 ## Verified
+
+For actor-plan orchestration on base `9c79316e`:
+
+- Final Debug and Release rebuilds and full suites pass: **5,269 cases /
+  12,645,295 assertions each**, zero failures/skips. Both unchanged canonical
+  replays match in each configuration; zero regressions.
+- `[actor-plan],[actor-plan-live]`: 21 cases / 181 assertions;
+  `[ai][planning]`: 178 cases / 189,399 assertions per configuration.
+- Actual 459-instruction/native comparison: 4,096 vectors, zero mismatches,
+  seed 1716, maximum 2,822 steps. It compares phase/callback traces, all
+  candidate/pass/cache words, all ranking handles, exclusions, clock and arena
+  outputs. Cases include counts 0-16, empty fallback, unsigned recovery
+  extremes, threshold wrap, RNG ranking/count mutation, timing-pointer
+  replacement and the captured actor across arena flag callbacks.
+- Original `800DE3E4-800DEB0C` SHA256:
+  `4c6aa5d18b74efc24ec22c91e9aea2f4fe740949700723c41631f114975bdceb`.
+  Callees are controlled, including stat copies, enumeration, sorting,
+  promotion and readiness. Failed-allocation selection stack words are
+  initialized explicitly for #274, not claimed as undefined-stack parity.
+- All 238 copier controls, all three ledger gates and static regression pass.
+  Final scoped tidy: 48 existing findings, zero new; baseline unchanged.
+  No new whole-tree quality scan was run. Hazard synchronization preserves
+  741 sites and only updates three source locations.
+- Two supported copy/project generations preserve **1,804 unique sampled
+  paths and hashes**, including verified native source bytes. Manifest:
+  `87385cb9d19430db799309357729923a1feadbb3548aeccd096ef862e8e31da0`.
+- Evidence is in the session-local files directory: `planner_build_*`,
+  `planner_focused_*`, `planner_planning_*`, `planner_regression_*`,
+  `planner_differential.log`, `planner_copier_tests.log`, `planner_quality.log`,
+  `planner_generation1/2.log`, `planner_generation_stability.log`, and the
+  three gate logs. The session-local differential links the owned workspace,
+  planning primitives, decision primitives, scalar math and distance sources.
+- Native special-action fixtures do not establish ordinary-preview/controller
+  gameplay. Invalid counts/storage are explicit diagnosed refusals; borrowed
+  outside-arena inputs remain a caller contract. Pass/cache/exclusion globals
+  and legacy actor/action records remain. No full battle-AI/M8 or complete
+  EC-04 retirement claim.
 
 For candidate enumeration on base `91717ee8`:
 
@@ -394,18 +456,15 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. F01712 is published with exact-revision CI and evidence on #276.
-   Do not close #276: 965 functions remain.
+2. Publish F01716, confirm its exact-revision CI and update #276.
+   Do not close #276: 964 functions remain.
 3. Continue ordered row 28 with the larger planner/reconcile callers in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
-   F01712 enumeration and F01713 simulation are verified dependencies, not
-   proof of the remaining planner orchestration or gameplay.
-   F01716 original source and all 459 instructions have now been read:
-   `800DE3E4-800DEB0C`, SHA256
-   `4c6aa5d18b74efc24ec22c91e9aea2f4fe740949700723c41631f114975bdceb`.
-   Preserve #274's initialized selection counts on snapshot failure, cumulative
-   simulation passes, quotas, rejection exclusions, restore/reset order,
-   threshold wrapping and late reads after RNG/readiness/movement callbacks.
+   F01716 is locally verified, not proof of remaining reconcile behavior or
+   gameplay. Before changing F01717, investigate its existing guard-after-read
+   hazard `23cdfd1144f5` and search existing issue evidence. The source reads
+   `entry->actor` before its null guard; runtime reachability is not yet
+   demonstrated. Log a warranted defect before implementing its fix.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.

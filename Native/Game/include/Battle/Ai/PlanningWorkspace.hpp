@@ -4,7 +4,64 @@
 #include <optional>
 #include <vector>
 
+#include "Battle/Ai/PlanningPrimitives.hpp"
+
 namespace VS::Battle::Ai {
+
+inline constexpr std::size_t kActionPlanPassCount = 3;
+
+struct ActionPlanTiming {
+  std::uint8_t minimum_delay = 0;
+  std::uint16_t recovery_timer = 0;
+};
+
+struct ActionPlanCommand {
+  std::uint8_t opcode = 0;
+  std::int32_t argument = 0;
+};
+
+class ActorActionPlanHost {
+ public:
+  virtual ~ActorActionPlanHost() = default;
+  virtual CandidateList& Candidates() = 0;
+  virtual void ResetFallbackCache() = 0;
+  virtual bool ClearConfiguredExclusions() = 0;
+  virtual std::uint8_t ActorId() const = 0;
+  virtual bool SnapshotStats() = 0;
+  virtual void RestoreStats() noexcept = 0;
+  virtual void ResetReadiness() noexcept = 0;
+  virtual std::optional<ActionPlanTiming> Timing() const = 0;
+  virtual void AdvanceSimulation(int step) = 0;
+  virtual void Enumerate(std::uint16_t threshold) = 0;
+  virtual void Sort() = 0;
+  virtual std::optional<ActionCandidate> Ranked(std::size_t rank) const = 0;
+  virtual bool StorePass(std::size_t pass, std::size_t rank,
+                         const ActionCandidate& candidate) = 0;
+  virtual std::optional<ActionCandidate> Pass(std::size_t pass,
+                                              std::size_t rank) const = 0;
+  virtual bool ClearExclusion(unsigned target, unsigned action) = 0;
+  virtual bool AllowsFallback() const = 0;
+  virtual int FallbackCount() const = 0;
+  virtual std::optional<ActionCandidate> Fallback(std::size_t rank) const = 0;
+  virtual void Promote(int count) = 0;
+  virtual bool SetRankedThreshold(std::size_t rank,
+                                  std::uint16_t threshold) = 0;
+  virtual int Random() = 0;
+  virtual void RefreshReadiness() = 0;
+  virtual void SetPlanMode(std::uint8_t mode) = 0;
+  virtual void SelectMovement() = 0;
+  // Captures the command actor only when an arena adjustment is active.
+  virtual bool BeginArenaAdjustment() = 0;
+  virtual std::uint8_t ArenaProgress() const = 0;
+  virtual std::optional<ActionPlanCommand> ArenaCommand() const = 0;
+  virtual void SetArenaProgress(std::uint8_t progress) = 0;
+  virtual bool ArenaPlanSaved() const = 0;
+  virtual std::optional<std::uint16_t> ArenaActorSubtype() const = 0;
+  virtual void SetSavedPlanCount(std::uint8_t count) = 0;
+};
+
+// func_800DE3E4, BATTLE/BATTLE.PRG/74088.c:1319; 459 original instructions.
+bool BuildActorActionPlan(ActorActionPlanHost& host);
 
 // The queued action the plans react to (func_800DEEA4_t at
 // BATTLE/BATTLE.PRG/74088.c:388): its primary target's actor and that target's

@@ -74,6 +74,7 @@ void ApplyLiveSimulatedStatDelta(std::int16_t* value,
 void AppendLiveActionCandidate(Battle_Ai_ActorAiState* state,
                                const Battle_Ai_ActionCandidate* candidate);
 void SortLiveActionCandidates(Battle_Ai_ActionPlanView* state);
+void BuildLiveActorActionPlan(Battle_Ai_ActorAiState* state);
 // The source and destination may be the same record.
 void CopyLivePlanningActorStats(const Battle_ActorStats* source,
                                 Battle_ActorStats* destination);

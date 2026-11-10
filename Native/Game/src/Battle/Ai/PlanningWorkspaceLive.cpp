@@ -136,8 +136,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
 
   [[nodiscard]] bool BuildActorPlan(const PlanningActor& actor) override {
     auto& plan = AiStateOf(actor.slot);
-    Battle_Ai_BuildActorActionPlan(
-        reinterpret_cast<Battle_Ai_ActionPlanView*>(&plan));
+    BuildLiveActorActionPlan(&plan);
     return plan.usesRoomActionDelay != 0;
   }
 

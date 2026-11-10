@@ -385,27 +385,20 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertNotRegex(source, r"(?<!const )Field_MpdTileCell\*")
 
     def test_action_plan_selection_counts_start_at_zero(self):
-        source = "    int quotas[3] = { 10, 3, 3 };\n    int selected[3];\n    int row;\n"
-        edits = [edit for edit in copy_fixups.FIXES["F01716"] if "#274" in edit[2]]
-        self.assertEqual(len(edits), 1)
-        for old, new, _ in edits:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertIn("    int selected[3] = { 0, 0, 0 };\n", source)
-        self.assertNotIn("int selected[3];", source)
+        source = (copy_to_native.REPO / r"Native\Game\src\Battle\Ai\PlanningWorkspace.cpp").read_text(
+            encoding="utf-8")
+        self.assertIn("std::array<int, kActionPlanPassCount> selected{};", source)
+        self.assertLess(source.index("selected{};"), source.index("if (host.SnapshotStats())"))
+        self.assertNotIn("F01716", copy_fixups.FIXES)
 
     def test_action_plan_enumeration_uses_the_owned_record_binding(self):
-        source = (
-            "Battle_Ai_EnumerateActionCandidatesEntry((Battle_Ai_ActionChoiceView*)state, (short)delay);\n"
-            "Battle_Ai_EnumerateActionCandidatesEntry((Battle_Ai_ActionChoiceView*)state, 0);"
-        )
-        edits = [edit for edit in copy_fixups.FIXES["F01716"] if "F01712" in edit[2]]
-        self.assertEqual(len(edits), 1)
-        for old, new, _ in edits:
-            self.assertEqual(source.count(old), 2)
-            source = source.replace(old, new)
-        self.assertEqual(source.count("Entry((Battle_Ai_ActorAiState*)state,"), 2)
-        self.assertNotIn("ActionChoiceView", source)
+        live = (copy_to_native.REPO / r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.cpp").read_text(
+            encoding="utf-8")
+        workspace = (copy_to_native.REPO / r"Native\Game\src\Battle\Ai\PlanningWorkspaceLive.cpp").read_text(
+            encoding="utf-8")
+        self.assertIn("EnumerateLiveActionCandidates(&state_, threshold);", live)
+        self.assertIn("BuildLiveActorActionPlan(&plan);", workspace)
+        self.assertNotIn("Battle_Ai_BuildActorActionPlan(", workspace)
 
     def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
         source = (
@@ -640,6 +633,8 @@ class EncounterFixupTests(unittest.TestCase):
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
               ("F01713", "Battle_Ai_AdvancePlanningSimulationEntry", "VS::Battle::Ai::AdvancePlanningSimulation",
                r"Native\Game\include\Battle\Ai\PlanningPrimitives.hpp"),
+              ("F01716", "Battle_Ai_BuildActorActionPlanEntry", "VS::Battle::Ai::BuildActorActionPlan",
+               r"Native\Game\include\Battle\Ai\PlanningWorkspace.hpp"),
               ("F00619", "Field_SetMovingPlatformVisibilityEntry", "VS::Field::SetMovingPlatformVisibility",
                r"Native\Game\include\Field\PlatformPlacement.hpp"),
               ("F00621", "Field_MovingPlatformDwellTicksEntry", "VS::Field::MovingPlatformDwellTicks",
@@ -1287,6 +1282,7 @@ class EncounterFixupTests(unittest.TestCase):
                     "F01707": ("Battle_Ai_SelectFallbackActionEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01712": ("Battle_Ai_EnumerateActionCandidatesEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F01713": ("Battle_Ai_AdvancePlanningSimulationEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01716": ("Battle_Ai_BuildActorActionPlanEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
                     "F00619": ("Field_SetMovingPlatformVisibilityEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00621": ("Field_MovingPlatformDwellTicksEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00067": ("Field_ApplyUnlockEffectToRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
@@ -2136,6 +2132,11 @@ class EncounterFixupTests(unittest.TestCase):
         header = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.h").read_text(
             encoding="utf-8"
         )
+        bindings = (root / r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        host = bindings.split("class LiveActorActionPlan final", 1)[1].split(
+            "class LiveTargeting final", 1)[0]
         for identifier, operation in (("F01714", "Snapshot"), ("F01715", "Restore")):
             core = f"VS::Battle::Ai::{operation}PlanningActorStats"
             live = f"VS::Battle::Ai::{operation}LivePlanningActorStats"
@@ -2150,7 +2151,7 @@ class EncounterFixupTests(unittest.TestCase):
                     copy_fixups.NATIVE_HELPER_HEADERS[live],
                     r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
                 )
-                self.assertIn(f"{live}()", planning)
+                self.assertIn(f"{operation}LivePlanningActorStats()", host)
                 self.assertNotIn(f"Battle_Ai_{operation}PlanningActorStats", planning + header)
         reset = (root / r"Native\Game\src\Battle\Ai\RoomState.cpp").read_text(
             encoding="utf-8"

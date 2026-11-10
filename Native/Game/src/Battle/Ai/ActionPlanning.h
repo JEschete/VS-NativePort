@@ -8,10 +8,7 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_ACTIONPLANNING_H_DECLS)
 #define VS_BATTLE_AI_ACTIONPLANNING_H_DECLS
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ModelInstance.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -26,7 +23,6 @@ extern int Battle_Ai_unusedPlanCounter;
 extern Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
 extern Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 extern u_char (*Battle_Ai_candidateExclusions)[256];
-void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state);
 void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* completed_action);
 
 #endif // VS_BATTLE_AI_ACTIONPLANNING_H_DECLS
