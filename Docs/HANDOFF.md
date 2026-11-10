@@ -2,8 +2,8 @@
 
 Updated 2026-11-10. Row 28 (battle AI) resumed after the cleanup checkpoint.
 The condition terms, quality repairs and three candidate-planning promotions
-are published with green exact-revision CI. The two planning-stat lifecycle
-promotions now pass local verification; publication and exact-revision CI are pending.
+and the two planning-stat lifecycle promotions are published with green
+exact-revision CI.
 
 ## Checkpoint
 
@@ -32,8 +32,10 @@ promotions now pass local verification; publication and exact-revision CI are pe
   ([CI 42756911275](https://github.com/JEschete/VS-NativePort/actions/runs/42756911275)).
   Local verification used base `8709974d` plus that commit's implementation,
   tests, generated bindings and related ledgers.
-- F01714/F01715 local verification uses base `109620c2` plus the uncommitted
-  lifecycle implementation, tests, generated callers and related ledgers.
+- F01714/F01715 are published in `bd1f96fc`
+  ([CI 42763174803](https://github.com/JEschete/VS-NativePort/actions/runs/42763174803)).
+  Local verification used base `109620c2` plus that commit's lifecycle
+  implementation, tests, generated callers and related ledgers.
   Their ownership and behavior claims are recorded separately from the retained
   exported snapshot pointer, G00589.
 
@@ -252,8 +254,8 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the locally verified F01714/F01715 milestone, confirm its exact-revision
-   CI and update #276. Do not close #276: 968 functions remain.
+2. The F01714/F01715 milestone is published with successful exact-revision CI
+   and recorded in #276. Do not close #276: 968 functions remain.
 3. Continue ordered row 28 with F01707 fallback selection, then
    F01712/F01713 enumeration/simulation in
    [ActionPlanning.cpp](../Native/Game/src/Battle/Ai/ActionPlanning.cpp).
