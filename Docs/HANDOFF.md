@@ -209,22 +209,27 @@ No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in a local scratch interpreter purely for behavior
 comparison; it is not shipped code or a repository tool.
 
-Disk usage: the working tree is about 34 GB.
+Disk usage: the working tree was about 34 GB and is about 21 GB after the
+owner-approved replay cleanup on 2026-11-10.
 
 | Path | Size | Notes |
 | --- | ---: | --- |
-| `build\Debug\combat-lab` | 7.65 GB | |
-| `build\Release\combat-lab` | 6.92 GB | |
+| `build\Debug\combat-lab` | 0.47 GB | 31 kept runs (was 7.65 GB) |
+| `build\Release\combat-lab` | 0.61 GB | 34 kept runs (was 6.92 GB) |
 | `tools\Base` + `tools\PSX` | 9.1 GB | owner tool installs |
 | `.vs` | 3.2 GB | |
 | `vcpkg_installed` | 1.3 GB | |
 
-The Combat Lab growth comes from `regression.py` leaving every scripted
+The Combat Lab growth came from `regression.py` leaving every scripted
 replay's run directory behind
-([#339](https://github.com/JEschete/VS-NativePort/issues/339)). Nothing has
-been deleted. Removal needs owner approval and must keep interactive runs and
-the runs cited in `COMBAT_LAB.md`/`HANDOFF_HISTORY.md`. **Never delete Ghidra,
-`tools\Base` or `tools\PSX`** (owner directive, 2026-11-10).
+([#339](https://github.com/JEschete/VS-NativePort/issues/339)). The cleanup
+removed only the 1,038 uncited `regression.py` replays (frames 900 or 2,400,
+speed 1, no scripts, sequence or devices) and freed 14.49 GB. It kept every
+interactive, sequenced, device and cited run (those cited in
+`COMBAT_LAB.md`/`HANDOFF_HISTORY.md`). The runs will accumulate again on each
+`regression.py check` until #339 is fixed. Removing anything else needs owner
+approval. **Never delete Ghidra, `tools\Base` or `tools\PSX`** (owner
+directive, 2026-11-10).
 
 ## Sources Of Truth
 
@@ -739,7 +744,7 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 2. Finish F01818 from the [Stopping Point](#stopping-point) list, then update
    #276. Keep #337 open until its in-game reachability is established. Do not
    close #276: 958 remain. Fix #339 (scripted replay run directories) as its
-   own scoped change, and remove existing run directories only with the
+      own scoped change; the existing replay runs were already removed with the
    owner's approval.
 3. Continue ordered row 28 after F01818 with Behavior, Movement, Navigation
    (F01814-F01817), OrbitingBoss and Perception as listed by
