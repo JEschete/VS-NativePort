@@ -46,7 +46,8 @@ the engaged-list, actor-reaction and notification group in `091c9a50`
 ([CI 43041442386](https://github.com/JEschete/VS-NativePort/actions/runs/43041442386))
 and the F01846-F01849 orbiting-boss group in `3aa5b806`
 ([CI 43051019321](https://github.com/JEschete/VS-NativePort/actions/runs/43051019321)).
-The F01638-F01640/F01643 perception group follows it.
+The F01638-F01640/F01643 perception group is published in `33ad4f3e`
+([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695)).
 The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
 See [Stopping Point](#stopping-point) for the current state and the next group.
 
@@ -62,8 +63,7 @@ See [Stopping Point](#stopping-point) for the current state and the next group.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **900 functions remain** (after the perception group that follows
-  `3aa5b806`).
+- **900 functions remain** (after the perception group in `33ad4f3e`).
   Modernization: 2,844 done of 3,744. C++ promotion: 2,845 promoted plus one
   frame-orchestrator WIP. These are separate measures. Row 28 has 10
   generated functions left.
@@ -215,10 +215,10 @@ See [Stopping Point](#stopping-point) for the current state and the next group.
 
 ## Stopping Point
 
-Stopped on owner request (2026-11-11) after the perception group. HEAD
-`3aa5b806` (orbiting boss) is pushed and green
-([CI 43051019321](https://github.com/JEschete/VS-NativePort/actions/runs/43051019321)).
-The commit after it holds the perception group:
+Stopped on owner request (2026-11-11) after the perception group, published
+in `33ad4f3e` on base `3aa5b806` and green on the exact revision
+([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695);
+[#276 comment](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6803558605)):
 
 - F01638 `IsTargetOccludedAtBodyHeight`, F01639
   `IsTargetOccludedAtPointHeight`, F01640 `UpdateTargetPerception` and F01643
@@ -355,11 +355,14 @@ differential rewritten each time. The rules, also in
 Result: from the tooling commit `48ab62e3` (2026-11-10 21:44) to `3aa5b806`
 (2026-11-11 10:42), 11 commits promoted 54 functions in about 13 hours, about
 14 minutes per function against the earlier 33-63, and every function still
-has its own MIPS differential, mutants and broken variant. A group check takes
-15-18 minutes, about 12 of them in changed-file tidy, so lint first with
-`quality.py --files` (seconds) to avoid a second run for a style finding. The
-checklist, including the test-size and ledger re-apply rules learned on the
-perception group, is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
+has its own MIPS differential, mutants and broken variant. With the perception
+group (`33ad4f3e`, 12:59) the total is 58 functions in 12 commits in about
+15 hours, including writing the procedures and splitting oversized tests.
+A group check takes 15-18 minutes, about 11-12 of them in changed-file tidy,
+so lint first with `quality.py --files` (seconds) to avoid a second run for a
+style finding. The checklist, including the test-size and ledger re-apply
+rules learned on the perception group, is
+[WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
 
 ## Sources Of Truth
 
@@ -871,10 +874,10 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Confirm the perception group's exact-revision CI and that #276 has its
-   comment, then continue with the Behavior groups from the
-   [Stopping Point](#stopping-point). Keep #337 open until its in-game
-   reachability is established. Do not close #276: 900 remain.
+2. The perception group (`33ad4f3e`) is green and recorded on #276; continue
+   with the Behavior groups from the [Stopping Point](#stopping-point). Keep
+   #337 open until its in-game reachability is established. Do not close
+   #276: 900 remain.
 3. Continue ordered row 28 with Behavior (F01649-F01654, then F01656-F01659)
    as listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
