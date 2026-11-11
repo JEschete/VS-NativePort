@@ -41,55 +41,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Battle\\Ai\\ActorState.cpp": [
-[
-91,
-[
-"    state = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Battle_Ai_ActorAiState));",
-"    Battle_Ai_actorAiStates[id] = (void*)state;"
-],
-[
-"    state = (Battle_Ai_AiCreationView *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Battle_Ai_ActorAiState)));",
-"    Battle_Ai_actorAiStates[id] = (Battle_Ai_ActorAiState *)((void*)state);"
-]
-],
-[
-143,
-[
-"        VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(&packed, (void*)&actor->savedAiSettings);"
-],
-[
-"        VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));"
-]
-],
-[
-145,
-[
-"    VS::Battle::Ai::ApplyLiveActorAiSettings((void*)state, (void*)&packed);"
-],
-[
-"    VS::Battle::Ai::ApplyLiveActorAiSettings((Battle_Ai_SettingsView *)((void*)state), (Battle_Ai_SettingsWord *)((void*)&packed));"
-]
-],
-[
-164,
-[
-"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 12);"
-],
-[
-"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 12);"
-]
-],
-[
-167,
-[
-"                VS::Battle::Ai::IssueLiveActorCommand((void*)state, 1);"
-],
-[
-"                VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 1);"
-]
-]
-],
 "Native\\Game\\src\\Battle\\Ai\\Behavior.cpp": [
 [
 66,

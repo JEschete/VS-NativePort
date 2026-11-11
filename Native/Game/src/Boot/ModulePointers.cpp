@@ -6,6 +6,7 @@
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -819,7 +820,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E5FDCu, 0u, (void*)&Battle_Ai_FindAdjacentAiGroundHeight, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6098u, 0u, (void*)&Battle_Ai_BuildAiSpecialTerrainHeights, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6158u, 0u, (void*)&Battle_Ai_InitializeRoomNavigation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6178u, 0u, (void*)&Battle_Ai_CreateActorAiState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&Battle_Ai_UpdateBossRadialRetreat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&Battle_Ai_IsBossActionReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7960u, 0u, (void*)&Battle_Ai_UpdateBossOrbitTracking, 0u, 0u, 0u},
@@ -1514,6 +1514,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E5998u, 0u, (void*)&VS::Battle::Ai::ResolveLiveAiLinkedActors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5A74u, 0u, (void*)&VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5A9Cu, 0u, (void*)&VS::Battle::Ai::ApplyLiveActorAiSettings, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6178u, 0u, (void*)&VS::Battle::Ai::CreateLiveActorAiState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009E634u, 0u, (void*)&Field_RefreshAshleyInteractionTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D438u, 0u, (void*)&Field_RoomTriggerAtTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabledEntry, 0u, 0u, 0u},

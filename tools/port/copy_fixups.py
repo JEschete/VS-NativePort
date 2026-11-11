@@ -556,6 +556,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
     "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags": r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp",
     "VS::Battle::Ai::ApplyLiveActorAiSettings": r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp",
+    "VS::Battle::Ai::CreateLiveActorAiState": r"Native\Game\include\Battle\Ai\ActorCreationLive.hpp",
     **{name: r"Native\Game\include\Battle\Ai\RelationsLive.hpp"
        for name in ("VS::Battle::Ai::InitializeLiveActorAiRelations",
                     "VS::Battle::Ai::ApplyLiveSavedActorAiRelations",
@@ -1164,6 +1165,7 @@ OWNED_CALL_BINDINGS["F01810"] = "VS::Battle::Ai::BuildLiveAiActionMetadata"
 OWNED_CALL_BINDINGS["F01811"] = "VS::Battle::Ai::ResolveLiveAiLinkedActors"
 OWNED_CALL_BINDINGS["F01812"] = "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags"
 OWNED_CALL_BINDINGS["F01813"] = "VS::Battle::Ai::ApplyLiveActorAiSettings"
+OWNED_CALL_BINDINGS["F01818"] = "VS::Battle::Ai::CreateLiveActorAiState"
 OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
@@ -2655,6 +2657,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E5998, "VS::Battle::Ai::ResolveLiveAiLinkedActors"),  # F01811
     ("BATTLE/BATTLE.PRG", 0x800E5A74, "VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags"),  # F01812
     ("BATTLE/BATTLE.PRG", 0x800E5A9C, "VS::Battle::Ai::ApplyLiveActorAiSettings"),  # F01813
+    ("BATTLE/BATTLE.PRG", 0x800E6178, "VS::Battle::Ai::CreateLiveActorAiState"),  # F01818
     ("BATTLE/BATTLE.PRG", 0x8009E634, "Field_RefreshAshleyInteractionTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008D438, "Field_RoomTriggerAtTileEntry"),
     ("BATTLE/BATTLE.PRG", 0x8008DEAC, "Field_SetRoomTriggerEnabledEntry"),
@@ -3934,32 +3937,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "start scale (with the scene-order flag, as the original's halfword) from the typed placement"),
         ("(temp_a1->startBrightness = ((char*)temp_a3)[3])", "(temp_a1->startBrightness = splash_layer->brightness)",
          "the original read the layer's unsigned brightness byte (offset 3)"),
-    ],
-    # F01818 / BATTLE 7CD68.c:934: runtime views are rebased by native_views.py, not on-disc structs.
-    "F01818": [
-        ("    unsigned short result[4];", "    SVECTOR result;\n"
-         '    Core_Debugf("ai", "create actor=%p nativeId=%d viewId=%d options=0x%X nativeModel=%p stats=%p",\n'
-         "        (void*)actor, ((Battle_Actor*)actor)->id, id, (unsigned int)options,\n"
-         "        (void*)((Battle_Actor*)actor)->model, (void*)((Battle_Actor*)actor)->stats);",
-         "AI creation identity and native/view layout diagnosis"),
-        ("    state->stats = actor->stats;", "    state->stats = actor->stats;\n"
-         '    Core_Debugf("ai", "created state=%p id=%u viewModel=%p viewStats=%p",\n'
-         "        (void*)state, (unsigned int)state->actorId, (void*)model, (void*)state->stats);",
-         "AI state links before tagged bone lookup"),
-        ("((int*)Battle_Ai_roomAiState)[10 + i]", "Battle_Ai_roomAiState->specialActors[i]",
-         "room special actors are native pointers, not PS1 word offsets"),
-        ("= (int)actor;", "= (Battle_Actor*)actor;", "preserve special actor pointer"),
-        ("VS::Core::Memory::AllocateFromLowEnd(0x484)", "VS::Core::Memory::AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState))",
-         "allocate full native state, never sizeof the partial initialization view"),
-        ("VS::Core::Memory::ClearAlignedWords(state, 0x484)", "VS::Core::Memory::ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState))",
-         "clear full native state including candidate pointer array"),
-        ("VS::Actors::LiveActorTaggedBonePosition(state->actorId, 250, result, 0)",
-         "VS::Actors::LiveActorTaggedBonePosition(state->actorId, 0xFA, &result, 0)", "use actual int/SVECTOR signature"),
-        ("result[1]", "result.vy", "typed tagged bone height"),
-        ("    return (short)options >= 0", '    Core_Debugf("ai", "initialized actor=%d state=%p bytes=%u radius=%u height=%u",\n'
-         "        id, (void*)state, (unsigned int)sizeof(Battle_Ai_ActorAiState),\n"
-         "        (unsigned int)state->radius, (unsigned int)state->pointHeight);\n"
-         "    return (short)options >= 0", "successful initialization gate"),
     ],
     # Actor IDs are 0..15 (146C.c:8936); 0x10 is the linked-actor sentinel, not a table index.
     # 7E05C.s:541-575 identifies the next BSS symbol, tileFlagMap at 0x800F58B8: 0x40 bytes after D_800F5878.

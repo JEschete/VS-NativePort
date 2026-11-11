@@ -2298,12 +2298,13 @@ class EncounterFixupTests(unittest.TestCase):
                          r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp")
         self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5A74, live), copy_fixups.MODULE_BINDING_ENTRIES)
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
-        caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
-        # Creation applies the saved flags only when their enable bit is set, before decoding the settings.
-        call = f"{live}(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));"
+        # The owned creation core (F01818) applies the saved flags only when their enable bit is set,
+        # before the host decodes the settings.
+        caller = (ai / "ActorCreation.cpp").read_text(encoding="utf-8")
+        call = "settings = ApplySavedAiSettingsFlags(settings, actor.saved_settings_flags);"
         self.assertEqual(caller.count(call), 1)
-        self.assertLess(caller.index("if (actor->savedAiSettingsFlags & 1) {"), caller.index(call))
-        self.assertLess(caller.index(call), caller.index("VS::Battle::Ai::ApplyLiveActorAiSettings((Battle_Ai_SettingsView *)"))
+        self.assertLess(caller.index("if ((actor.saved_settings_flags & 1u) != 0) {"), caller.index(call))
+        self.assertLess(caller.index(call), caller.index("host.ApplySettings(state, settings);"))
         for name in ("ActorState.cpp", "ActorState.h"):
             self.assertNotIn("Battle_Ai_ApplySavedAiSettingsFlags", (ai / name).read_text(encoding="utf-8"))
         pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
@@ -2323,20 +2324,46 @@ class EncounterFixupTests(unittest.TestCase):
                          r"Native\Game\include\Battle\Ai\ActorSettingsLive.hpp")
         self.assertIn(("BATTLE/BATTLE.PRG", 0x800E5A9C, live), copy_fixups.MODULE_BINDING_ENTRIES)
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
-        caller = (ai / "ActorState.cpp").read_text(encoding="utf-8")
-        # Creation decodes the settings once, after applying any saved flags to the packed word.
-        call = f"{live}((Battle_Ai_SettingsView *)((void*)state), (Battle_Ai_SettingsWord *)((void*)&packed));"
+        # The owned creation binding (F01818) decodes the settings once, into the state it stored.
+        caller = (ai / "ActorCreationLive.cpp").read_text(encoding="utf-8")
+        call = "ApplyLiveActorAiSettings(reinterpret_cast<Battle_Ai_SettingsView*>(&state),"
         self.assertEqual(caller.count(call), 1)
-        self.assertLess(caller.index("VS::Battle::Ai::ApplyLiveSavedAiSettingsFlags("), caller.index(call))
+        self.assertLess(caller.index("AiState& state = StoreState(created);"), caller.index(call))
+        self.assertIn('#include "Battle/Ai/ActorSettingsLive.hpp"', caller)
+        tables = (ai / "ActorState.cpp").read_text(encoding="utf-8")
         for name in ("ActorState.cpp", "ActorState.h"):
             self.assertNotIn("Battle_Ai_ApplyActorAiSettings", (ai / name).read_text(encoding="utf-8"))
         # The decode reads the module tables, so the copy still emits them.
         for table in ("Battle_Ai_kPerceptionRangesSquared", "Battle_Ai_viewAngles", "Battle_Ai_decisionCallbacks",
                       "Battle_Ai_kWanderTimingPresets", "Battle_Ai_kFlags34Bit14Values"):
-            self.assertIn(table, caller)
+            self.assertIn(table, tables)
         pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertEqual(pointers.count("0x800E5A9Cu"), 1)
         self.assertIn(f"0x800E5A9Cu, 0u, (void*)&{live},", pointers)
+
+    def test_ai_state_creation_keeps_its_module_address_and_caller(self):
+        # #276 row 28: Battle_Ai_CreateActorAiState (F01818) is typed C++ in Battle/Ai/ActorCreation.cpp.
+        owned = self.owned_items()
+        self.assertEqual(owned["F01818"]["name"], "VS::Battle::Ai::CreateActorAiState")
+        self.assertEqual(owned["F01818"]["path"], r"Native\Game\src\Battle\Ai\ActorCreation.cpp")
+        # The layout and diagnostic fixups moved into the owned binding with the function.
+        self.assertNotIn("F01818", copy_fixups.FIXES)
+        live = "VS::Battle::Ai::CreateLiveActorAiState"
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01818"], live)
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
+                         r"Native\Game\include\Battle\Ai\ActorCreationLive.hpp")
+        self.assertIn(("BATTLE/BATTLE.PRG", 0x800E6178, live), copy_fixups.MODULE_BINDING_ENTRIES)
+        ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
+        for name in ("ActorState.cpp", "ActorState.h"):
+            self.assertNotIn("Battle_Ai_CreateActorAiState", (ai / name).read_text(encoding="utf-8"))
+        # Spawning, its only caller, creates the state through the live binding.
+        spawning = (copy_to_native.REPO / r"Native\Game\src\Actors\ActorSpawningLive.cpp").read_text(encoding="utf-8")
+        self.assertEqual(spawning.count("return Battle::Ai::CreateLiveActorAiState(actor, flags);"), 1)
+        self.assertIn('#include "Battle/Ai/ActorCreationLive.hpp"', spawning)
+        self.assertNotIn("Battle_Ai_CreateActorAiState", spawning)
+        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertEqual(pointers.count("0x800E6178u"), 1)
+        self.assertIn(f"0x800E6178u, 0u, (void*)&{live},", pointers)
 
     @staticmethod
     def battle_ability_function(name: str) -> str:
@@ -4209,12 +4236,15 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         execution = (root / "Native/Game/src/Battle/ActionExecution.cpp").read_text(encoding="utf-8")
         self.assertIn("VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[", execution)
         self.assertIn('#include "Battle/Ai/PlanningWorkspaceLive.hpp"', execution)
-        for path in ("Actors/ActorStateLive.cpp", "Battle/Ai/ActorState.cpp", "Boot/GameplayLoopLive.cpp",
-                     "Event/CutsceneLifecycleLive.cpp"):
+        for path in ("Actors/ActorStateLive.cpp", "Boot/GameplayLoopLive.cpp", "Event/CutsceneLifecycleLive.cpp"):
             text = (root / "Native/Game/src" / path).read_text(encoding="utf-8")
             self.assertNotIn("Battle_Ai_RebuildActorActionPlans(", text, path)
             # ActorStateLive.cpp sits inside namespace VS, so it names Battle::Ai without the VS:: prefix.
             self.assertIn("Battle::Ai::RebuildLiveActorActionPlans(", text, path)
+        # The owned creation binding (F01818) sits inside VS::Battle::Ai.
+        creation = (root / "Native/Game/src/Battle/Ai/ActorCreationLive.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Battle_Ai_RebuildActorActionPlans(", creation)
+        self.assertIn("RebuildLiveActorActionPlans(nullptr)", creation)
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x800DEC88u", table)
 
@@ -4224,12 +4254,17 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
             owned = {row["id"]: row for row in csv.DictReader(file)}
         self.assertEqual(owned["F01720"]["name"], "VS::Battle::Ai::IssueActorCommand")
         self.assertFalse((root / "Native/Game/src/Battle/Ai/ActorCommands.h").exists())
-        for path in ("ActorState.cpp", "Behavior.cpp", "Movement.cpp", "Navigation.cpp", "OrbitingBoss.cpp"):
+        for path in ("Behavior.cpp", "Movement.cpp", "Navigation.cpp", "OrbitingBoss.cpp"):
             text = (root / "Native/Game/src/Battle/Ai" / path).read_text(encoding="utf-8")
             self.assertNotIn("Battle_Ai_IssueActorCommand(", text, path)
             self.assertNotIn("Battle/Ai/ActorCommands.h", text, path)
             self.assertIn("VS::Battle::Ai::IssueLiveActorCommand(", text, path)
             self.assertIn('#include "Battle/Ai/ActorCommandsLive.hpp"', text, path)
+        # The owned creation binding (F01818) sits inside VS::Battle::Ai.
+        creation = (root / "Native/Game/src/Battle/Ai/ActorCreationLive.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Battle_Ai_IssueActorCommand(", creation)
+        self.assertIn("IssueLiveActorCommand(&state, static_cast<int>(intent));", creation)
+        self.assertIn('#include "Battle/Ai/ActorCommandsLive.hpp"', creation)
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x800DEEFCu", table)
 

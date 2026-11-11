@@ -20,6 +20,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/Ai/ActorCreationLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDrive.hpp"
@@ -41,8 +42,6 @@ extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/AiViews.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
@@ -576,9 +575,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     if (actor == nullptr) {
       return 0;
     }
-    // The AI views alias the battle actor's leading fields (AiViews.h).
-    return Battle_Ai_CreateActorAiState(
-        reinterpret_cast<Battle_Ai_AiActorView*>(actor), flags);
+    return Battle::Ai::CreateLiveActorAiState(actor, flags);
   }
   void InitializePlaceholder(std::size_t slot, int actor_id) override {
     InitializeLivePlaceholderActor(static_cast<int>(slot), actor_id);

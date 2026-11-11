@@ -329,6 +329,9 @@
     <None Include="..\..\port\data_inventory.py" />
     <None Include="..\..\port\decl_index.py" />
     <None Include="..\..\port\decomp_index.py" />
+    <None Include="..\..\port\differential.py" />
+    <None Include="..\..\port\differentials\actor_settings.py" />
+    <None Include="..\..\port\differentials\actor_settings_driver.cpp" />
     <None Include="..\..\port\field_at.py" />
     <None Include="..\..\port\gen_decomp_headers.py" />
     <None Include="..\..\port\hazard_index.py" />
@@ -336,11 +339,14 @@
     <None Include="..\..\port\native_views.py" />
     <None Include="..\..\port\own.py" />
     <None Include="..\..\port\owned.csv" />
+    <None Include="..\..\port\promote.py" />
     <None Include="..\..\port\ref_index.py" />
     <None Include="..\..\port\relaxed_sources.txt" />
     <None Include="..\..\port\test_assembly_gap_audit.py" />
+    <None Include="..\..\port\test_differential.py" />
     <None Include="..\..\port\test_encounter_fixups.py" />
     <None Include="..\..\port\test_module_symbol_extents.py" />
+    <None Include="..\..\port\test_promote.py" />
     <None Include="..\..\port\test_scene_trace_fixups.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />
@@ -1472,6 +1478,7 @@
     <None Include="..\..\test\decode_pages.ps1" />
     <None Include="..\..\test\duckstation_capture.ps1" />
     <None Include="..\..\test\duckstation_setup.ps1" />
+    <None Include="..\..\test\promotion_check.py" />
     <None Include="..\..\test\regression.py" />
     <None Include="..\..\test\regression_baseline.json" />
     <None Include="..\..\test\run_native.ps1" />
@@ -1479,6 +1486,7 @@
     <None Include="..\..\test\scenarios\first_lever_room.json" />
     <None Include="..\..\test\scenarios\silver_wolves.json" />
     <None Include="..\..\test\slice-ai-ranking-wolves.json" />
+    <None Include="..\..\test\test_promotion_check.py" />
     <None Include="..\..\test\test_regression.py" />
     <None Include="..\..\test\verify_first_lever.py" />
     <None Include="..\..\vcpkg\ports\libchdr\bundled-notices.txt" />

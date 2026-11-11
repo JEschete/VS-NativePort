@@ -29,8 +29,9 @@ count, and is written to build\\differential\\<case>.log.
 
 The interpreter executes branch delay slots but not load delay slots (compiled PS1 code never
 reads a loaded register in the next instruction). Calls must be stubbed or explicitly followed,
-so an unexpected callee stops the run instead of executing silently. GTE/COP instructions,
-syscalls, unaligned accesses and overflow traps raise.
+so an unexpected callee stops the run instead of executing silently. COP instructions other than
+the GTE's leading-zero counter (mtc2 LZCS, mfc2 LZCS/LZCR), syscalls, unaligned accesses and
+overflow traps raise.
 """
 
 from __future__ import annotations
@@ -71,6 +72,19 @@ def s16(value: int) -> int:
 def s32(value: int) -> int:
     value &= MASK
     return value - 0x100000000 if value & 0x80000000 else value
+
+
+# The GTE's leading-zero counter, data registers 30 and 31: the square root and normalisation
+# helpers use it as a plain integer instruction.
+LZCS, LZCR = 30, 31
+
+
+def leading_sign_bits(value: int) -> int:
+    """LZCR: how many leading bits of LZCS equal its sign bit (32 for 0 and -1)."""
+    value &= MASK
+    if value & 0x80000000:
+        value = ~value & MASK
+    return 32 - value.bit_length()
 
 
 class Fault(RuntimeError):
@@ -119,6 +133,7 @@ class Machine:
         self.zero: list[tuple[int, int]] = [(stack - stack_size, stack)]
         self.r = [0] * 32
         self.hi = self.lo = 0
+        self.lzcs = 0
         self.r[R["sp"]] = stack
         self.stubs: dict[int, Callable[[Machine], None]] = {}
         self.follow: set[int] = set()
@@ -260,8 +275,15 @@ class Machine:
             self.write((r[rs] + imm) & MASK, r[rt], size)
         elif op in (0x2A, 0x2E):
             self.store_partial(op, (r[rs] + imm) & MASK, r[rt])
+        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR):
+            if rs == 4:  # mtc2; LZCR is read-only
+                self.lzcs = r[rt] if rd == LZCS else self.lzcs
+            else:
+                r[rt] = self.lzcs if rd == LZCS else leading_sign_bits(self.lzcs)
+        elif op == 0x12:
+            raise Fault(f"unhandled GTE instruction {word:#010x} at {pc:#x} (only LZCS/LZCR are modelled)")
         else:
-            raise Fault(f"unhandled opcode {op:#x} at {pc:#x} (COP/GTE instructions need a stub)")
+            raise Fault(f"unhandled opcode {op:#x} at {pc:#x} (COP instructions need a stub)")
         r[0] = 0
         return flow
 

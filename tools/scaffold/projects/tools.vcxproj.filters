@@ -1015,6 +1015,9 @@
     <Filter Include="tools\port">
       <UniqueIdentifier>{70376229-6E65-5EF4-B9D7-769299972C0F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tools\port\differentials">
+      <UniqueIdentifier>{0D3C68F1-CF0A-5833-8358-CB9205E8C1D1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="tools\release">
       <UniqueIdentifier>{E77D5123-84E8-53BE-AD7D-F49CFEDFA4BB}</UniqueIdentifier>
     </Filter>
@@ -1956,6 +1959,15 @@
     <None Include="..\..\port\decomp_index.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\differential.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\differentials\actor_settings.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\actor_settings_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\field_at.py">
       <Filter>tools\port</Filter>
     </None>
@@ -1977,6 +1989,9 @@
     <None Include="..\..\port\owned.csv">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\promote.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\ref_index.py">
       <Filter>tools\port</Filter>
     </None>
@@ -1986,10 +2001,16 @@
     <None Include="..\..\port\test_assembly_gap_audit.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\test_differential.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\test_encounter_fixups.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_module_symbol_extents.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\test_promote.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_scene_trace_fixups.py">
@@ -5385,6 +5406,9 @@
     <None Include="..\..\test\duckstation_setup.ps1">
       <Filter>tools\test</Filter>
     </None>
+    <None Include="..\..\test\promotion_check.py">
+      <Filter>tools\test</Filter>
+    </None>
     <None Include="..\..\test\regression.py">
       <Filter>tools\test</Filter>
     </None>
@@ -5404,6 +5428,9 @@
       <Filter>tools\test\scenarios</Filter>
     </None>
     <None Include="..\..\test\slice-ai-ranking-wolves.json">
+      <Filter>tools\test</Filter>
+    </None>
+    <None Include="..\..\test\test_promotion_check.py">
       <Filter>tools\test</Filter>
     </None>
     <None Include="..\..\test\test_regression.py">

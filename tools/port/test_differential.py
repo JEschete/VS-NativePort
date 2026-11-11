@@ -88,6 +88,18 @@ class Arithmetic(unittest.TestCase):
         m = run(r_type(0x1B, rs=A0, rt=ZERO), r_type(0x12, V0), r_type(0x10, V1), JR_RA, NOP, a0=9)
         self.assertEqual((m.r[V0], m.r[V1]), (MASK, 9))
 
+    def test_gte_leading_zero_counter(self) -> None:
+        def cop2(move: int, gpr: int, register: int) -> int:
+            return 0x12 << 26 | move << 21 | gpr << 16 | register << 11
+
+        program = (cop2(4, A0, 30), NOP, NOP, cop2(0, V0, 31), cop2(0, V1, 30), cop2(4, A1, 31), JR_RA,
+                   NOP)
+        for value, count in ((0, 32), (1, 31), (0x00010000, 15), (0x7FFFFFFF, 1), (MASK, 32),
+                             (0x80000000, 1), (0xFFFF0000, 16)):
+            m = run(*program, a0=value, a1=0x1234)
+            self.assertEqual((m.r[V0], m.r[V1]), (count, value), hex(value))  # LZCR stays read-only
+        self.assertEqual(differential.leading_sign_bits(0xFFFFFFFE), 31)
+
     def test_signed_overflow_traps(self) -> None:
         with self.assertRaisesRegex(Fault, "overflow"):
             run(r_type(0x20, V0, A0, A1), JR_RA, NOP, a0=0x7FFFFFFF, a1=1)
@@ -135,8 +147,12 @@ class Memory(unittest.TestCase):
             run(i_type(0x29, V0, A0, 1), JR_RA, NOP, a0=DATA)
         with self.assertRaisesRegex(Fault, "unmapped read"):
             run(i_type(0x23, V0, A0, 0), JR_RA, NOP, a0=0x80700000)
-        with self.assertRaisesRegex(Fault, "unhandled opcode"):
+        with self.assertRaisesRegex(Fault, "unhandled GTE instruction"):
             run(0x4A000000, JR_RA, NOP)  # a GTE command
+        with self.assertRaisesRegex(Fault, "unhandled GTE instruction"):
+            run(0x48820000, JR_RA, NOP)  # mtc2 to data register 0
+        with self.assertRaisesRegex(Fault, "unhandled opcode"):
+            run(0xC8000000, JR_RA, NOP)  # lwc2
         machine = Machine(image(i_type(4, ZERO, ZERO, -1), NOP))  # beq zero, zero, self
         with self.assertRaisesRegex(Fault, "runaway"):
             machine.execute(BASE, limit=100)

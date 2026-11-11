@@ -50,7 +50,7 @@ inline constexpr std::uint16_t kAuxiliaryActorKind = 0x10;
 // The kinds that join the room actor list after Ashley.
 inline constexpr std::uint16_t kListedActorKinds = 0x7;
 inline constexpr std::uint16_t kAuxiliaryModelId = 0xFE;
-// Battle_Ai_CreateActorAiState's flags for a fresh AI state.
+// CreateLiveActorAiState's flags for a fresh AI state.
 inline constexpr int kFreshAiFlags = -1;
 
 // The display flags a spawned actor gets (SetLiveActorDisplayFlags).
@@ -723,7 +723,8 @@ class ActorSpawnHost {
   virtual void PlayAnimation(std::size_t slot, int animation) = 0;
   virtual void SetWalkRunSpeeds(std::size_t slot, int walk, int run) = 0;
   virtual void SetCombatPose(std::size_t slot, int pose) = 0;
-  // Battle_Ai_CreateActorAiState: 0 when the actor has no AI script.
+  // CreateLiveActorAiState: 1 when the actor was remembered as idle, else 0
+  // (also for an actor without an AI state).
   [[nodiscard]] virtual int CreateAiState(std::size_t slot, int flags) = 0;
   virtual void InitializePlaceholder(std::size_t slot, int actor_id) = 0;
   virtual void QueueBaseSequence(SpawnedActor actor, std::size_t slot) = 0;
