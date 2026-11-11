@@ -624,6 +624,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::FindLiveAdjacentAiGroundHeight": r"Native\Game\include\Battle\Ai\SpecialTerrainLive.hpp",
     "VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights": r"Native\Game\include\Battle\Ai\SpecialTerrainLive.hpp",
     "VS::Battle::Ai::InitializeLiveRoomNavigation": r"Native\Game\include\Battle\Ai\RoomAiMapLive.hpp",
+    "VS::Battle::Ai::ResolveLiveRouteGateExit": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
+    "VS::Battle::Ai::FindLiveNearestRouteGateEntry": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
+    "VS::Battle::Ai::FindLiveRouteGateAtTile": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
+    "VS::Battle::Ai::ResolveLiveNavigationAreaRoute": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1178,6 +1182,10 @@ OWNED_CALL_BINDINGS["F01814"] = "VS::Battle::Ai::FloodFillLiveAiTerrainHeights"
 OWNED_CALL_BINDINGS["F01815"] = "VS::Battle::Ai::FindLiveAdjacentAiGroundHeight"
 OWNED_CALL_BINDINGS["F01816"] = "VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights"
 OWNED_CALL_BINDINGS["F01817"] = "VS::Battle::Ai::InitializeLiveRoomNavigation"
+OWNED_CALL_BINDINGS["F01721"] = "VS::Battle::Ai::ResolveLiveRouteGateExit"
+OWNED_CALL_BINDINGS["F01722"] = "VS::Battle::Ai::FindLiveNearestRouteGateEntry"
+OWNED_CALL_BINDINGS["F01723"] = "VS::Battle::Ai::FindLiveRouteGateAtTile"
+OWNED_CALL_BINDINGS["F01728"] = "VS::Battle::Ai::ResolveLiveNavigationAreaRoute"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2729,6 +2737,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E5FDC, "VS::Battle::Ai::FindLiveAdjacentAiGroundHeight"),  # F01815
     ("BATTLE/BATTLE.PRG", 0x800E6098, "VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights"),  # F01816
     ("BATTLE/BATTLE.PRG", 0x800E6158, "VS::Battle::Ai::InitializeLiveRoomNavigation"),  # F01817
+    ("BATTLE/BATTLE.PRG", 0x800DF9A8, "VS::Battle::Ai::ResolveLiveRouteGateExit"),  # F01721
+    ("BATTLE/BATTLE.PRG", 0x800DFA54, "VS::Battle::Ai::FindLiveNearestRouteGateEntry"),  # F01722
+    ("BATTLE/BATTLE.PRG", 0x800DFAF8, "VS::Battle::Ai::FindLiveRouteGateAtTile"),  # F01723
+    ("BATTLE/BATTLE.PRG", 0x800DFBCC, "VS::Battle::Ai::ResolveLiveNavigationAreaRoute"),  # F01728
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4076,12 +4088,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # 771A8.c:942 adds a direction delta to `arg0->unk34`, an int in the pinned view; the merged layout of
     # T00532 has the packed tile word as Battle::Ai::TilePosition (union of the word and its bytes).
     "F01731": [("arg0->tile + ", "arg0->tile.word + ", "packed tile word arithmetic (771A8.c:950)")],
-    "F01728": [
-        ("(*(u_char**)((uintptr_t)Core_ScratchBase() + 0x3C4))"
-         "[position.tile.tileZ * *(u_char*)((uintptr_t)Core_ScratchBase() + 0x3DC) + position.tile.tileX]",
-         "(*Battle_Ai_TerrainRegionCell(position.tile.tileX, position.tile.tileZ))",
-         "771A8.c:587 validate route direction access against the authored payload"),
-    ],
     "F01739": [
         ("&TERRAIN_TILE_MASK[state->tile.tile.tileZ * TERRAIN_MAP_WIDTH + state->tile.tile.tileX]",
          "Battle_Ai_TerrainRegionCell(state->tile.tile.tileX, state->tile.tile.tileZ)",

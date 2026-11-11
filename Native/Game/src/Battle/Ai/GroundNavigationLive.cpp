@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
@@ -410,14 +411,11 @@ class LiveGroundWorld final : public LiveGroundRoom {
  public:
   explicit LiveGroundWorld(Battle_Ai_ActorAiState* state) : state_(state) {}
 
-  int FindRouteGateAtTile(GroundNavigator& navigator,
+  // The original passed the actor state, which the lookup ignores.
+  int FindRouteGateAtTile(GroundNavigator& /*navigator*/,
                           std::uint32_t tile) override {
-    int index = -1;
-    Run(navigator, [&](Battle_Ai_ActorAiState& state) {
-      index = Battle_Ai_FindRouteGateAtTile(reinterpret_cast<intptr_t>(&state),
-                                            tile, 0);
-    });
-    return index;
+    return Required(FindLiveRouteGateLink(tile, false),
+                    "AI route link lookup refused its room or platforms");
   }
 
   void Recover(GroundNavigator& navigator) override {

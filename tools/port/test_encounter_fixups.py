@@ -2736,7 +2736,9 @@ class EncounterFixupTests(unittest.TestCase):
             )
 
     def test_ai_direction_queries_keep_bounded_mutable_source_cells(self):
-        for fid in ("F01728", "F01739", "F01742"):
+        # F01728 is owned by AreaRoute.cpp and reads the region cells natively.
+        self.assertNotIn("F01728", copy_fixups.FIXES)
+        for fid in ("F01739", "F01742"):
             with self.subTest(fid=fid):
                 fixes = copy_fixups.FIXES[fid]
                 self.assertEqual(len(fixes), 1)

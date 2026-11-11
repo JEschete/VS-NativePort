@@ -1,7 +1,7 @@
 {
 "Native\\Game\\src\\Battle\\ActionExecution.cpp": [
 [
-165,
+167,
 [
 "                ((void (*)())Battle_ClearSphereTargets)();"
 ],
@@ -12,7 +12,7 @@
 ],
 "Native\\Game\\src\\Battle\\ActionFlow.cpp": [
 [
-354,
+358,
 [
 "    ((void (*)())Battle_ClearSphereTargets)();"
 ],
@@ -23,7 +23,7 @@
 ],
 "Native\\Game\\src\\Battle\\ActionResolution.cpp": [
 [
-595,
+596,
 [
 "                Battle_hitPrerequisiteResult = VS::Battle::LiveCheckActionHitPrerequisite(action_definition, (char*)entry, hit);"
 ],
@@ -32,7 +32,7 @@
 ]
 ],
 [
-653,
+654,
 [
 "    Battle_ResolveActionTargets(action_id, result_out, &preview_request, 0);"
 ],
@@ -310,7 +310,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Movement.cpp": [
 [
-112,
+111,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((void*)state);"
 ],
@@ -319,7 +319,7 @@
 ]
 ],
 [
-161,
+160,
 [
 "    i = Field_CollectMovingPlatformPositionsEntry((void*)points);"
 ],
@@ -328,7 +328,7 @@
 ]
 ],
 [
-246,
+245,
 [
 "    if (Battle_Ai_IsFlightDirectionObstructed((void*)state, direction, 1)) {"
 ],
@@ -337,7 +337,7 @@
 ]
 ],
 [
-297,
+296,
 [
 "                    if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, state->tile) > 0) {",
 "                        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
@@ -348,7 +348,7 @@
 ]
 ],
 [
-339,
+338,
 [
 "    if (Battle_Ai_UpdateFlightGroundTransition((void*)state, action, 1)) {"
 ],
@@ -357,7 +357,7 @@
 ]
 ],
 [
-343,
+342,
 [
 "        VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement((void*)state);"
 ],
@@ -366,7 +366,7 @@
 ]
 ],
 [
-347,
+346,
 [
 "    if (!VS::Battle::Ai::SelectLiveActorVerticalMovementStep((void*)state, &step, &mode)) {"
 ],
@@ -375,7 +375,7 @@
 ]
 ],
 [
-389,
+388,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -384,7 +384,7 @@
 ]
 ],
 [
-395,
+394,
 [
 "        if (state->moveY > 0 && Battle_Ai_IsFlightDirectionObstructed((void*)state, 0, 0)) {"
 ],
@@ -393,7 +393,7 @@
 ]
 ],
 [
-398,
+397,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -402,7 +402,7 @@
 ]
 ],
 [
-407,
+406,
 [
 "        if (!state->opaque0 || Battle_Ai_IsFlightDirectionObstructed((void*)state, 0, 0)) {"
 ],
@@ -411,7 +411,7 @@
 ]
 ],
 [
-409,
+408,
 [
 "            Battle_Ai_UpdateMovementRecovery((void*)state);"
 ],
@@ -420,7 +420,7 @@
 ]
 ],
 [
-437,
+436,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -429,7 +429,7 @@
 ]
 ],
 [
-440,
+439,
 [
 "    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state, angle, 2);"
 ],
@@ -438,7 +438,7 @@
 ]
 ],
 [
-457,
+456,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -447,7 +447,7 @@
 ]
 ],
 [
-488,
+487,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -456,7 +456,7 @@
 ]
 ],
 [
-494,
+493,
 [
 "            Battle_Ai_UpdateFlightDirectionalMovement((void*)state, angle);"
 ],
@@ -465,7 +465,7 @@
 ]
 ],
 [
-518,
+517,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -474,7 +474,7 @@
 ]
 ],
 [
-523,
+522,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -483,7 +483,7 @@
 ]
 ],
 [
-540,
+539,
 [
 "    if (Battle_Ai_UpdateFlightGroundTransition((void*)ai_state, movement_angle, 0) != 0) {"
 ],
@@ -492,7 +492,7 @@
 ]
 ],
 [
-545,
+544,
 [
 "        Battle_Ai_UpdateMovementRecovery((void*)ai_state);"
 ],
@@ -501,7 +501,7 @@
 ]
 ],
 [
-554,
+553,
 [
 "        Battle_Ai_UpdateMovementRecovery((void*)ai_state);"
 ],
@@ -510,7 +510,7 @@
 ]
 ],
 [
-632,
+631,
 [
 "        Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, angle, distance);"
 ],
@@ -519,7 +519,7 @@
 ]
 ],
 [
-647,
+646,
 [
 "    if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, dest.word) > 0) {"
 ],
@@ -528,7 +528,7 @@
 ]
 ],
 [
-653,
+652,
 [
 "        if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, dest.word) > 0) {"
 ],
@@ -537,7 +537,7 @@
 ]
 ],
 [
-662,
+661,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 13);"
 ],
@@ -546,7 +546,7 @@
 ]
 ],
 [
-665,
+664,
 [
 "    Battle_Ai_UpdateMovementRecovery((void*)state);"
 ],
@@ -555,7 +555,7 @@
 ]
 ],
 [
-674,
+673,
 [
 "    Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, angle, state->moveDistance);"
 ],
@@ -564,7 +564,7 @@
 ]
 ],
 [
-676,
+675,
 [
 "    Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, opposite, state->moveDistance);"
 ],
@@ -573,7 +573,7 @@
 ]
 ],
 [
-717,
+716,
 [
 "    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state,"
 ],
@@ -582,7 +582,7 @@
 ]
 ],
 [
-998,
+997,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"
 ],
@@ -591,7 +591,7 @@
 ]
 ],
 [
-1081,
+1080,
 [
 "                Battle_Ai_ProjectClearRadialDestination((void*)s, s->tile, angle,"
 ],
@@ -600,7 +600,7 @@
 ]
 ],
 [
-1094,
+1093,
 [
 "            Battle_Ai_UpdateMovementRecovery((void*)s);"
 ],
@@ -609,7 +609,7 @@
 ]
 ],
 [
-1129,
+1128,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -618,7 +618,7 @@
 ]
 ],
 [
-1149,
+1148,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -627,7 +627,7 @@
 ]
 ],
 [
-1179,
+1178,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)context, 0);"
 ],
@@ -636,7 +636,7 @@
 ]
 ],
 [
-1218,
+1217,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)context, 4);"
 ],
@@ -645,7 +645,7 @@
 ]
 ],
 [
-1236,
+1235,
 [
 "        && VS::Battle::Ai::LiveDestinationOccupancy((void*)state, state->tile.word) > 0) {",
 "        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
@@ -656,7 +656,7 @@
 ]
 ],
 [
-1247,
+1246,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
@@ -665,7 +665,7 @@
 ]
 ],
 [
-1252,
+1251,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 3);"
 ],
@@ -674,7 +674,7 @@
 ]
 ],
 [
-1281,
+1280,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 0);"
 ],
@@ -683,7 +683,7 @@
 ]
 ],
 [
-1285,
+1284,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
@@ -694,7 +694,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Navigation.cpp": [
 [
-468,
+194,
 [
 "                    VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -703,7 +703,7 @@
 ]
 ],
 [
-477,
+203,
 [
 "    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state,"
 ],
@@ -770,7 +770,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
 [
-359,
+358,
 [
 "            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_MovementRecoveryView*)state);"
 ],
@@ -779,7 +779,7 @@
 ]
 ],
 [
-387,
+386,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -788,7 +788,7 @@
 ]
 ],
 [
-429,
+428,
 [
 "        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);"
 ],
@@ -797,7 +797,7 @@
 ]
 ],
 [
-470,
+469,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -806,7 +806,7 @@
 ]
 ],
 [
-590,
+589,
 [
 "    info = (void*)&Battle_actionDefinitions[app->action];"
 ],
@@ -815,7 +815,7 @@
 ]
 ],
 [
-600,
+599,
 [
 "    other = (void*)Battle_Ai_actorAiStates[source];"
 ],
@@ -824,7 +824,7 @@
 ]
 ],
 [
-655,
+654,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -833,7 +833,7 @@
 ]
 ],
 [
-657,
+656,
 [
 "            firstOther = (void*)Battle_Ai_actorAiStates[id];"
 ],
@@ -842,7 +842,7 @@
 ]
 ],
 [
-673,
+672,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -851,7 +851,7 @@
 ]
 ],
 [
-675,
+674,
 [
 "            other = (void*)Battle_Ai_actorAiStates[actor->id];"
 ],
@@ -860,7 +860,7 @@
 ]
 ],
 [
-677,
+676,
 [
 "                for (candidate = (void*)Battle_actors[0]; candidate;"
 ],
@@ -869,7 +869,7 @@
 ]
 ],
 [
-683,
+682,
 [
 "                        for (ally = (void*)Battle_actors[0]; ally; ally = ally->next) {",
 "                            allyState = (void*)Battle_Ai_actorAiStates[ally->id];"
@@ -882,7 +882,7 @@
 ],
 "Native\\Game\\src\\Battle\\Feedback.cpp": [
 [
-139,
+136,
 [
 "    label_spec = ((void* (*)())Battle_ReserveFloatingLabel)();"
 ],
@@ -891,7 +891,7 @@
 ]
 ],
 [
-194,
+191,
 [
 "    p = ((void* (*)())Battle_ReserveFloatingLabel)();"
 ],
@@ -900,7 +900,7 @@
 ]
 ],
 [
-243,
+240,
 [
 "    sprintf(p->text, \"%d\", p->value & 0x7FFF);",
 "    p->textLength = strlen(p->text);"
@@ -911,7 +911,7 @@
 ]
 ],
 [
-263,
+260,
 [
 "    p = ((void* (*)())Battle_ReserveFloatingLabel)();"
 ],
@@ -920,7 +920,7 @@
 ]
 ],
 [
-291,
+288,
 [
 "    q = ((void* (*)())Battle_ReserveFloatingLabel)();"
 ],
@@ -929,7 +929,7 @@
 ]
 ],
 [
-337,
+334,
 [
 "    p = ((void* (*)())Battle_ReserveFloatingLabel)();"
 ],
@@ -938,7 +938,7 @@
 ]
 ],
 [
-726,
+723,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -947,7 +947,7 @@
 ]
 ],
 [
-746,
+743,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -956,7 +956,7 @@
 ]
 ],
 [
-756,
+753,
 [
 "    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -965,7 +965,7 @@
 ]
 ],
 [
-769,
+766,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -974,7 +974,7 @@
 ]
 ],
 [
-777,
+774,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -983,7 +983,7 @@
 ]
 ],
 [
-802,
+799,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -992,7 +992,7 @@
 ]
 ],
 [
-817,
+814,
 [
 "            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -1001,7 +1001,7 @@
 ]
 ],
 [
-886,
+883,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -1010,7 +1010,7 @@
 ]
 ],
 [
-920,
+917,
 [
 "            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -1019,7 +1019,7 @@
 ]
 ],
 [
-971,
+968,
 [
 "            ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
 ],
@@ -1028,7 +1028,7 @@
 ]
 ],
 [
-974,
+971,
 [
 "            vs_getRGB888(64, 128, 64), ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
 ],
@@ -1037,7 +1037,7 @@
 ]
 ],
 [
-996,
+993,
 [
 "        ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
 ],
@@ -1046,7 +1046,7 @@
 ]
 ],
 [
-1129,
+1126,
 [
 "        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -1055,7 +1055,7 @@
 ]
 ],
 [
-1173,
+1170,
 [
 "            ot = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable;"
 ],
@@ -1064,7 +1064,7 @@
 ]
 ],
 [
-1293,
+1290,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -1073,7 +1073,7 @@
 ]
 ],
 [
-1312,
+1309,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16, prim++);"
 ],
@@ -1082,7 +1082,7 @@
 ]
 ],
 [
-1365,
+1362,
 [
 "        p = ((void* (*)())Battle_ReserveFloatingLabel)();"
 ],
@@ -1091,7 +1091,7 @@
 ]
 ],
 [
-1380,
+1377,
 [
 "        sprintf(p->text, \"%d\", p->value & 0x7FFF);",
 "        p->textLength = strlen(p->text);"
@@ -1102,7 +1102,7 @@
 ]
 ],
 [
-1395,
+1392,
 [
 "    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -1111,7 +1111,7 @@
 ]
 ],
 [
-1412,
+1409,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -1120,7 +1120,7 @@
 ]
 ],
 [
-1426,
+1423,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -1129,7 +1129,7 @@
 ]
 ],
 [
-1436,
+1433,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -1138,7 +1138,7 @@
 ]
 ],
 [
-1456,
+1453,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -1149,7 +1149,7 @@
 ],
 "Native\\Game\\src\\Battle\\Hud.cpp": [
 [
-146,
+148,
 [
 "    u_long* prim = Render_frameScratch.orderingTable - 0xC;"
 ],
@@ -1158,7 +1158,7 @@
 ]
 ],
 [
-189,
+191,
 [
 "            0x80, arg2 | 0x80000, clipped_width | 0x100000, Render_frameScratch.orderingTable - 4);"
 ],
@@ -1167,7 +1167,7 @@
 ]
 ],
 [
-210,
+212,
 [
 "                Render_frameScratch.orderingTable - 4)[4] = texture_offset | 0x37FF0000;"
 ],
@@ -1176,7 +1176,7 @@
 ]
 ],
 [
-306,
+308,
 [
 "        VS::Render::QueueLiveSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, Render_frameScratch.overlayOrderingTable);"
 ],
@@ -1185,7 +1185,7 @@
 ]
 ],
 [
-339,
+341,
 [
 "                    Battle_secondShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);"
 ],
@@ -1194,7 +1194,7 @@
 ]
 ],
 [
-346,
+348,
 [
 "            0x1E001E, Render_frameScratch.overlayOrderingTable)[4] = 0x37FBA0B8;"
 ],
@@ -1203,7 +1203,7 @@
 ]
 ],
 [
-358,
+360,
 [
 "                    Battle_firstShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);"
 ],
@@ -1212,7 +1212,7 @@
 ]
 ],
 [
-363,
+365,
 [
 "                Render_frameScratch.overlayOrderingTable)[4] = (((3 - i) * 0x10) | 0x37FB8000);"
 ],
@@ -1221,7 +1221,7 @@
 ]
 ],
 [
-384,
+386,
 [
 "    ot = Render_frameScratch.orderingTable - 4;"
 ],
@@ -1230,7 +1230,7 @@
 ]
 ],
 [
-399,
+401,
 [
 "            Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1239,7 +1239,7 @@
 ]
 ],
 [
-420,
+422,
 [
 "                    0, k + Battle_limbDisplaySpriteOffsets[j], Battle_limbDisplaySpriteSizes[j], ot);"
 ],
@@ -1248,7 +1248,7 @@
 ]
 ],
 [
-439,
+441,
 [
 "            \"RISK  ZERO\", 0x16000C - Battle_hudSlideOffset, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1257,7 +1257,7 @@
 ]
 ],
 [
-508,
+510,
 [
 "    ot -= 4;"
 ],
@@ -1266,7 +1266,7 @@
 ]
 ],
 [
-517,
+519,
 [
 "                VS::Render::QueueLiveSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, ot);"
 ],
@@ -1275,7 +1275,7 @@
 ]
 ],
 [
-526,
+528,
 [
 "            0x80, ((selected & 7) * 3 + 0x94) | (!(selected & 8) ? k : j), 0x40004, ot);"
 ],
@@ -1284,7 +1284,7 @@
 ]
 ],
 [
-533,
+535,
 [
 "        prim = VS::Render::QueueLiveSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, ot);"
 ],
@@ -1293,7 +1293,7 @@
 ]
 ],
 [
-536,
+538,
 [
 "    prim = VS::Render::QueueLiveSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, ot);"
 ],
@@ -1302,7 +1302,7 @@
 ]
 ],
 [
-549,
+551,
 [
 "    char timer_components[4] = {0, timer->seconds, timer->minutes, timer->hours};"
 ],
@@ -1311,7 +1311,7 @@
 ]
 ],
 [
-568,
+570,
 [
 "    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), Render_frameScratch.orderingTable - 4);"
 ],
@@ -1322,7 +1322,7 @@
 ],
 "Native\\Game\\src\\Battle\\Sphere.cpp": [
 [
-77,
+80,
 [
 "        Battle_targetSphere = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_targetSphere);"
 ],
@@ -1331,7 +1331,7 @@
 ]
 ],
 [
-210,
+213,
 [
 "    short* sine = (void*)((uintptr_t)Core_ScratchBase() + 0x3B0);",
 "    short (*basis)[4] = (void*)((uintptr_t)Core_ScratchBase() + 0x398);"
@@ -1342,7 +1342,7 @@
 ]
 ],
 [
-239,
+242,
 [
 "    short* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x350);",
 "    MATRIX* rotation = (void*)((uintptr_t)Core_ScratchBase() + 0x330);"
@@ -1353,7 +1353,7 @@
 ]
 ],
 [
-263,
+266,
 [
 "    return (void*)scratch;"
 ],
@@ -1362,7 +1362,7 @@
 ]
 ],
 [
-337,
+340,
 [
 "    primitive = Render_frameScratch.primitiveCursor;",
 "    orderingTable = Render_frameScratch.orderingTable;"
@@ -1373,7 +1373,7 @@
 ]
 ],
 [
-373,
+376,
 [
 "        Core_Gte_LoadV0(shape->position);"
 ],
@@ -1382,7 +1382,7 @@
 ]
 ],
 [
-375,
+378,
 [
 "        Core_Gte_StoreSz3Otz(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)->depth);"
 ],
@@ -1391,7 +1391,7 @@
 ]
 ],
 [
-427,
+430,
 [
 "        test_transform->opaque18[i] = 0x8000 / *(extent_component = &volume->scale.extents[i]);"
 ],
@@ -1400,7 +1400,7 @@
 ]
 ],
 [
-459,
+462,
 [
 "            *(short*)ptr = *point_components++ - *(u_short*)(base + offset);"
 ],
@@ -1409,7 +1409,7 @@
 ]
 ],
 [
-462,
+465,
 [
 "            ptr += 2;"
 ],
@@ -1418,7 +1418,7 @@
 ]
 ],
 [
-514,
+517,
 [
 "            *ptr = *point_components++ - *(u_short*)(base + offset);"
 ],
@@ -1427,7 +1427,7 @@
 ]
 ],
 [
-574,
+577,
 [
 "            *(short*)ptr = *point_components++ - *(u_short*)(base + offset);"
 ],
@@ -1436,7 +1436,7 @@
 ]
 ],
 [
-576,
+579,
 [
 "            ptr += 2;"
 ],
@@ -1445,7 +1445,7 @@
 ]
 ],
 [
-631,
+634,
 [
 "        *local = *position++ - *(u_short*)(base + offset);"
 ],
@@ -1454,7 +1454,7 @@
 ]
 ],
 [
-655,
+658,
 [
 "        Core_Gte_StoreOpz(&polygon.normalClip);"
 ],
@@ -1463,7 +1463,7 @@
 ]
 ],
 [
-763,
+766,
 [
 "                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
 ],
@@ -1472,7 +1472,7 @@
 ]
 ],
 [
-771,
+774,
 [
 "                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
@@ -1481,7 +1481,7 @@
 ]
 ],
 [
-776,
+779,
 [
 "                    VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
@@ -1490,7 +1490,7 @@
 ]
 ],
 [
-785,
+788,
 [
 "            VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
 ],
@@ -1499,7 +1499,7 @@
 ]
 ],
 [
-791,
+794,
 [
 "        _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), Render_frameScratch.overlayOrderingTable);"
 ],
@@ -1508,7 +1508,7 @@
 ]
 ],
 [
-848,
+851,
 [
 "                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
 ],
@@ -1517,7 +1517,7 @@
 ]
 ],
 [
-856,
+859,
 [
 "                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
@@ -1526,7 +1526,7 @@
 ]
 ],
 [
-861,
+864,
 [
 "                    VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
@@ -1535,7 +1535,7 @@
 ]
 ],
 [
-870,
+873,
 [
 "            VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
 ],
@@ -1544,7 +1544,7 @@
 ]
 ],
 [
-876,
+879,
 [
 "        _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), Render_frameScratch.overlayOrderingTable);"
 ],
@@ -1553,7 +1553,7 @@
 ]
 ],
 [
-895,
+898,
 [
 "    u_long* nextPrim = Render_frameScratch.overlayOrderingTable - (label->depth * 4 - 8);"
 ],
@@ -1562,7 +1562,7 @@
 ]
 ],
 [
-934,
+937,
 [
 "    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1571,7 +1571,7 @@
 ]
 ],
 [
-967,
+970,
 [
 "        Core_Gte_StoreSxy2(&sxy);",
 "        Core_Gte_StoreOtz(&otz);"
@@ -1582,7 +1582,7 @@
 ]
 ],
 [
-1062,
+1065,
 [
 "    short (*basis)[3] = (void*)((uintptr_t)Core_ScratchBase() + 0x398);"
 ],
@@ -1591,7 +1591,7 @@
 ]
 ],
 [
-1232,
+1235,
 [
 "    u_long* ot = Render_frameScratch.orderingTable - 4;"
 ],
@@ -1600,7 +1600,7 @@
 ]
 ],
 [
-1236,
+1239,
 [
 "    Core_Gte_StoreSxy2(&xy);"
 ],
@@ -1609,7 +1609,7 @@
 ]
 ],
 [
-1241,
+1244,
 [
 "        prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1649,7 +1649,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg005.cpp": [
 [
-46,
+47,
 [
 "    fp = renderer_slot->rendererState;"
 ],
@@ -1658,7 +1658,7 @@
 ]
 ],
 [
-51,
+52,
 [
 "        fp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *fp);"
 ],
@@ -1667,7 +1667,7 @@
 ]
 ],
 [
-203,
+204,
 [
 "                Core_Gte_StoreSxy2(&screenXY[i][j]);",
 "                Core_Gte_StoreSz3Otz(&depths[i][j]);"
@@ -1678,7 +1678,7 @@
 ]
 ],
 [
-237,
+238,
 [
 "                    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1689,7 +1689,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg052.cpp": [
 [
-57,
+58,
 [
 "    state = renderer_slot->rendererState;"
 ],
@@ -1698,7 +1698,7 @@
 ]
 ],
 [
-61,
+62,
 [
 "        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
@@ -1707,7 +1707,7 @@
 ]
 ],
 [
-206,
+207,
 [
 "                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);",
 "                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);"
@@ -1718,7 +1718,7 @@
 ]
 ],
 [
-227,
+228,
 [
 "                    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1727,7 +1727,7 @@
 ]
 ],
 [
-258,
+259,
 [
 "                prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1738,7 +1738,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg128.cpp": [
 [
-114,
+117,
 [
 "    Effects_Plg128_CameraEffectState* state = renderer_slot->rendererState;"
 ],
@@ -1747,7 +1747,7 @@
 ]
 ],
 [
-116,
+119,
 [
 "    Effects_ParticleEmitterScratch* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x1D0);"
 ],
@@ -1756,7 +1756,7 @@
 ]
 ],
 [
-122,
+125,
 [
 "        state = renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
@@ -1767,7 +1767,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg162.cpp": [
 [
-64,
+65,
 [
 "    state = renderer_slot->rendererState;"
 ],
@@ -1776,7 +1776,7 @@
 ]
 ],
 [
-68,
+69,
 [
 "        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
@@ -1785,7 +1785,7 @@
 ]
 ],
 [
-213,
+214,
 [
 "                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);",
 "                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);"
@@ -1796,7 +1796,7 @@
 ]
 ],
 [
-234,
+235,
 [
 "                    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1805,7 +1805,7 @@
 ]
 ],
 [
-265,
+266,
 [
 "                prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1816,7 +1816,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg300.cpp": [
 [
-67,
+68,
 [
 "    state = renderer_slot->rendererState;"
 ],
@@ -1825,7 +1825,7 @@
 ]
 ],
 [
-71,
+72,
 [
 "        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
@@ -1834,7 +1834,7 @@
 ]
 ],
 [
-216,
+217,
 [
 "                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);",
 "                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);"
@@ -1845,7 +1845,7 @@
 ]
 ],
 [
-237,
+238,
 [
 "                    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1854,7 +1854,7 @@
 ]
 ],
 [
-267,
+268,
 [
 "                prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1865,7 +1865,7 @@
 ],
 "Native\\Game\\src\\Effects\\Runtime.cpp": [
 [
-107,
+108,
 [
 "Effects_EffectRenderer Effects_rendererTableAlias[];"
 ],
@@ -1874,7 +1874,7 @@
 ]
 ],
 [
-195,
+196,
 [
 "    Effects_EffectInstance* newNode = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode);"
 ],
@@ -1883,7 +1883,7 @@
 ]
 ],
 [
-541,
+544,
 [
 "    Effects_primaryToken = ((int (*)())Effects_AllocateEffectToken)();"
 ],
@@ -1892,7 +1892,7 @@
 ]
 ],
 [
-573,
+576,
 [
 "    char token = ((int (*)())Effects_AllocateEffectToken)();"
 ],
@@ -1901,7 +1901,7 @@
 ]
 ],
 [
-694,
+697,
 [
 "    Effects_EffectInstance* new_instance = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance);"
 ],
@@ -1910,7 +1910,7 @@
 ]
 ],
 [
-738,
+741,
 [
 "    Effects_RendererSlot* new_renderer = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer);"
 ],
@@ -1921,7 +1921,7 @@
 ],
 "Native\\Game\\src\\Effects\\ScreenDistortion\\ScreenDistortion.cpp": [
 [
-38,
+39,
 [
 "    ordering_table = Render_frameScratch.orderingTable;"
 ],
@@ -1930,7 +1930,7 @@
 ]
 ],
 [
-96,
+97,
 [
 "    packet_words = Render_frameScratch.primitiveCursor;"
 ],
@@ -1939,7 +1939,7 @@
 ]
 ],
 [
-170,
+171,
 [
 "    overlay_ordering_table = Render_frameScratch.overlayOrderingTable;",
 "    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0xE00140, 6, Render_frameScratch.primitiveCursor, overlay_ordering_table);"
@@ -1952,7 +1952,7 @@
 ],
 "Native\\Game\\src\\Effects\\Timeline.cpp": [
 [
-31,
+33,
 [
 "    Content_PFileTimelineTable* entry = VS::Content::PFileLiveTimelineSection(Effects_package->block3Data, timeline_index);"
 ],
@@ -1961,7 +1961,7 @@
 ]
 ],
 [
-40,
+46,
 [
 "    effect_instance->context.timeline = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));"
 ],
@@ -1970,7 +1970,7 @@
 ]
 ],
 [
-47,
+53,
 [
 "        p->tracks[i].keys = VS::Content::PFileLiveTimelineTrackData(Effects_package->block3Data, timeline_index, i);"
 ],
@@ -1979,7 +1979,7 @@
 ]
 ],
 [
-274,
+284,
 [
 "            sound + *(((data[event->keyIndex] >> 9) & 31) + ((Effects_PackageBlock11*)sound)->offsets),"
 ],
@@ -2037,7 +2037,7 @@
 ],
 "Native\\Game\\src\\Effects\\Weather.cpp": [
 [
-28,
+30,
 [
 "    Field_weatherParticles = VS::Core::Memory::AllocateLiveFromLowEnd(0x800);"
 ],
@@ -2046,7 +2046,7 @@
 ]
 ],
 [
-122,
+124,
 [
 "            line = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -2055,7 +2055,7 @@
 ]
 ],
 [
-171,
+173,
 [
 "            splash = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -2064,7 +2064,7 @@
 ]
 ],
 [
-250,
+252,
 [
 "        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -2073,7 +2073,7 @@
 ]
 ],
 [
-327,
+329,
 [
 "            prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -2082,7 +2082,7 @@
 ]
 ],
 [
-386,
+388,
 [
 "            prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -2091,7 +2091,7 @@
 ]
 ],
 [
-444,
+446,
 [
 "    prim = cursor;"
 ],
@@ -2100,7 +2100,7 @@
 ]
 ],
 [
-504,
+506,
 [
 "            cursor += sizeof(TILE);"
 ],
@@ -2109,7 +2109,7 @@
 ]
 ],
 [
-518,
+520,
 [
 "            cursor += sizeof(TILE);"
 ],
@@ -2118,7 +2118,7 @@
 ]
 ],
 [
-530,
+532,
 [
 "            cursor += sizeof(TILE);"
 ],
@@ -2129,7 +2129,7 @@
 ],
 "Native\\Game\\src\\Event\\ScriptCamera.cpp": [
 [
-101,
+102,
 [
 "    Event_camera = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera);"
 ],
@@ -2140,7 +2140,7 @@
 ],
 "Native\\Game\\src\\Menu\\BattleAbilities.cpp": [
 [
-117,
+116,
 [
 "        Menu_InitInformationTextBox(3);"
 ],
@@ -2149,7 +2149,7 @@
 ]
 ],
 [
-410,
+409,
 [
 "            Menu_InitInformationTextBox(3);"
 ],
@@ -2158,7 +2158,7 @@
 ]
 ],
 [
-436,
+435,
 [
 "            Menu_InitInformationTextBox(3);"
 ],
@@ -2167,7 +2167,7 @@
 ]
 ],
 [
-611,
+610,
 [
 "    Menu_BattleAbilities_abilityText = VS::Core::Memory::AllocateLiveFromHighEnd(abilityCount * 128);"
 ],
@@ -2176,7 +2176,7 @@
 ]
 ],
 [
-704,
+703,
 [
 "    u_long* scratch = Render_frameScratch.overlayOrderingTable + 8;"
 ],
@@ -2185,7 +2185,7 @@
 ]
 ],
 [
-1342,
+1341,
 [
 "        static const u_char initial[16];"
 ],
@@ -2194,7 +2194,7 @@
 ]
 ],
 [
-1346,
+1345,
 [
 "        static const u_char initial[11];"
 ],
@@ -2203,7 +2203,7 @@
 ]
 ],
 [
-1350,
+1349,
 [
 "        static const char initial[16];"
 ],
@@ -2214,7 +2214,7 @@
 ],
 "Native\\Game\\src\\Menu\\BreakArts.cpp": [
 [
-499,
+498,
 [
 "        static const char initial[16];"
 ],
@@ -2223,7 +2223,7 @@
 ]
 ],
 [
-503,
+502,
 [
 "        static const u_short initial[5];"
 ],
@@ -2234,7 +2234,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\ItemView.cpp": [
 [
-163,
+165,
 [
 "                0x80, icon_x | (arg0 << 0x10), 0x100010, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -2243,7 +2243,7 @@
 ]
 ],
 [
-931,
+933,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -2252,7 +2252,7 @@
 ]
 ],
 [
-1043,
+1045,
 [
 "        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
@@ -2265,7 +2265,7 @@
 ]
 ],
 [
-1124,
+1126,
 [
 "                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;",
 "                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;",
@@ -2278,7 +2278,7 @@
 ]
 ],
 [
-1558,
+1560,
 [
 "            pending_row_text = pending_rows_allocation + 0x6400;",
 "            pending_row_types = pending_rows_allocation + 0x6000;",
@@ -2291,7 +2291,7 @@
 ]
 ],
 [
-1684,
+1686,
 [
 "            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -2300,7 +2300,7 @@
 ]
 ],
 [
-1949,
+1951,
 [
 "        static const char initial[8];"
 ],
@@ -2311,7 +2311,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\Storage.cpp": [
 [
-50,
+52,
 [
 "    Items_WeaponSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
 ],
@@ -2320,7 +2320,7 @@
 ]
 ],
 [
-87,
+89,
 [
 "    Items_ShieldSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
 ],
@@ -2329,7 +2329,7 @@
 ]
 ],
 [
-286,
+288,
 [
 "            Menu_Container_CopyItem(Menu_Container_CopyContainerFlag_CopyContainerFlagsCopy | Items_ItemCategory_Misc, container,"
 ],
@@ -2338,7 +2338,7 @@
 ]
 ],
 [
-588,
+590,
 [
 "        char* sourceIndex = Menu_Inventory_inventoryIndices[i];"
 ],
@@ -2347,7 +2347,7 @@
 ]
 ],
 [
-623,
+625,
 [
 "        char* targetIndex = Menu_Inventory_inventoryIndices[i];"
 ],
@@ -2356,7 +2356,7 @@
 ]
 ],
 [
-1027,
+1029,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -2365,7 +2365,7 @@
 ]
 ],
 [
-1177,
+1179,
 [
 "            packed_discard_digits & 0xF, 0x42, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -2374,7 +2374,7 @@
 ]
 ],
 [
-1180,
+1182,
 [
 "            packed_discard_digits & 0xF, 0x3C, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -2383,7 +2383,7 @@
 ]
 ],
 [
-1182,
+1184,
 [
 "            packed_discard_digits >> 4, 0x36, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -2394,7 +2394,7 @@
 ],
 "Native\\Game\\src\\Menu\\Inventory\\Inventory.cpp": [
 [
-213,
+216,
 [
 "        rowTypes = buf + 0x1800;",
 "        menuText = buf + 0x1900;"
@@ -2405,7 +2405,7 @@
 ]
 ],
 [
-227,
+230,
 [
 "            VS::Menu::Framework::FormatLiveMiscItemRow(misc, &menuText[i * 2], rowTypes - -i, buf + i * 96);"
 ],
@@ -2414,7 +2414,7 @@
 ]
 ],
 [
-347,
+350,
 [
 "    Menu_Inventory_itemsText = VS::Core::Memory::AllocateLiveFromHighEnd(count * 128);"
 ],
@@ -2423,7 +2423,7 @@
 ]
 ],
 [
-1953,
+1956,
 [
 "        static const int (*initial[])(int) = { Menu_Inventory_UpdateArmorMenu, Menu_Inventory_UpdateWeaponMenu,",
 "        Menu_Inventory_UpdateShieldMenu, Menu_Inventory_UpdateAccessoryMenu };"
@@ -2436,7 +2436,7 @@
 ],
 "Native\\Game\\src\\Menu\\Inventory\\ItemDetails.cpp": [
 [
-96,
+98,
 [
 "                128, x | (animationStep << 0x10), vs_getWH(16, 16), Render_frameScratch.orderingTable);"
 ],
@@ -2445,7 +2445,7 @@
 ]
 ],
 [
-718,
+720,
 [
 "        static const int (*initial[])(int) = { Menu_Inventory_UpdateWeaponDetails, Menu_Inventory_UpdateBladeDetails,",
 "        Menu_Inventory_UpdateGripDetails, Menu_Inventory_UpdateShieldDetails, Menu_Inventory_UpdateArmorDetails, Menu_Inventory_UpdateGemDetails };"
@@ -2458,7 +2458,7 @@
 ],
 "Native\\Game\\src\\Menu\\Inventory\\ItemList.cpp": [
 [
-95,
+96,
 [
 "    char* indices = Audio_Seq_unusedInventoryIndices.weapons;"
 ],
@@ -2467,7 +2467,7 @@
 ]
 ],
 [
-152,
+153,
 [
 "    char* indices = Audio_Seq_unusedInventoryIndices.shields;"
 ],
@@ -2476,7 +2476,7 @@
 ]
 ],
 [
-208,
+209,
 [
 "    char* indices = Audio_Seq_unusedInventoryIndices.misc;"
 ],
@@ -2485,7 +2485,7 @@
 ]
 ],
 [
-276,
+277,
 [
 "        char* indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -2494,7 +2494,7 @@
 ]
 ],
 [
-447,
+448,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -2503,7 +2503,7 @@
 ]
 ],
 [
-631,
+632,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, Render_frameScratch.overlayOrderingTable - 12);"
 ],
@@ -2512,7 +2512,7 @@
 ]
 ],
 [
-633,
+634,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, Render_frameScratch.overlayOrderingTable - 12);",
 "        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, Render_frameScratch.overlayOrderingTable - 12);"
@@ -2523,7 +2523,7 @@
 ]
 ],
 [
-735,
+736,
 [
 "    char* indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -2532,7 +2532,7 @@
 ]
 ],
 [
-930,
+931,
 [
 "    indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -2541,7 +2541,7 @@
 ]
 ],
 [
-936,
+937,
 [
 "        rowTypes = textBuf + 0x1800;",
 "        menuText = textBuf + 0x1900;"
@@ -2552,7 +2552,7 @@
 ]
 ],
 [
-960,
+961,
 [
 "            rowCount = Menu_Inventory_BuildItemRows(itemCategory, menuText, rowTypes, textBuf);"
 ],
@@ -2561,7 +2561,7 @@
 ]
 ],
 [
-1064,
+1065,
 [
 "                sp310 = textBuf + 0x1900;",
 "                rowTypes = textBuf + 0x1800;"
@@ -2572,7 +2572,7 @@
 ]
 ],
 [
-1067,
+1068,
 [
 "                count = Menu_Inventory_BuildItemRows(itemCategory, sp310, rowTypes, textBuf);"
 ],
@@ -2581,7 +2581,7 @@
 ]
 ],
 [
-1592,
+1593,
 [
 "        static const char initial[8];"
 ],
@@ -2592,7 +2592,7 @@
 ],
 "Native\\Game\\src\\Menu\\Loot\\LootScreen.cpp": [
 [
-376,
+379,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -2601,7 +2601,7 @@
 ]
 ],
 [
-610,
+613,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -2610,7 +2610,7 @@
 ]
 ],
 [
-1048,
+1051,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -2619,7 +2619,7 @@
 ]
 ],
 [
-1102,
+1105,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -2628,7 +2628,7 @@
 ]
 ],
 [
-1571,
+1574,
 [
 "        Menu_Loot_inventory = buf;",
 "        Menu_Loot_inventoryBackup = buf + sizeof *Menu_Loot_inventory;",
@@ -2641,7 +2641,7 @@
 ]
 ],
 [
-1575,
+1578,
 [
 "            buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity;"
 ],
@@ -2650,7 +2650,7 @@
 ]
 ],
 [
-1599,
+1602,
 [
 "                Menu_InitInformationTextBox(1);"
 ],
@@ -2661,7 +2661,7 @@
 ],
 "Native\\Game\\src\\Menu\\Magic.cpp": [
 [
-633,
+629,
 [
 "        0, &Menu_Magic_mpCostTextBuffer[i], variableCost * 4 + 72, (flags >> 1) & 1);"
 ],
@@ -2670,7 +2670,7 @@
 ]
 ],
 [
-935,
+931,
 [
 "        spell_level_ordering_table = Render_frameScratch.orderingTable - 4;"
 ],
@@ -2681,7 +2681,7 @@
 ],
 "Native\\Game\\src\\Menu\\Manual.cpp": [
 [
-279,
+276,
 [
 "            Menu_Manual_helpText = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size);",
 "            Menu_Manual_helpAssets = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size);"
@@ -2692,7 +2692,7 @@
 ]
 ],
 [
-578,
+583,
 [
 "    area = p->primitiveCursor;"
 ],
@@ -2701,7 +2701,7 @@
 ]
 ],
 [
-592,
+597,
 [
 "        Menu_Manual_DrawIllustration(&spriteData[spriteData[i + 1]]);"
 ],
@@ -2710,7 +2710,7 @@
 ]
 ],
 [
-604,
+609,
 [
 "    area = q->primitiveCursor;"
 ],
@@ -2719,7 +2719,7 @@
 ]
 ],
 [
-681,
+686,
 [
 "            sprite = Render_frameScratch.primitiveCursor;"
 ],
@@ -2728,7 +2728,7 @@
 ]
 ],
 [
-716,
+721,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -2737,7 +2737,7 @@
 ]
 ],
 [
-752,
+757,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -2746,7 +2746,7 @@
 ]
 ],
 [
-778,
+783,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
@@ -2755,7 +2755,7 @@
 ]
 ],
 [
-805,
+810,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -2764,7 +2764,7 @@
 ]
 ],
 [
-832,
+837,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
@@ -2773,7 +2773,7 @@
 ]
 ],
 [
-892,
+897,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -2784,7 +2784,7 @@
 ],
 "Native\\Game\\src\\Menu\\Map.cpp": [
 [
-214,
+217,
 [
 "        nextPrim = Render_frameScratch.overlayOrderingTable;"
 ],
@@ -2793,7 +2793,7 @@
 ]
 ],
 [
-305,
+308,
 [
 "        Menu_Map_backgroundImage = VS::Core::Memory::AllocateLiveFromHighEnd(VS_MAPBG_BIN_SIZE);"
 ],
@@ -2802,7 +2802,7 @@
 ]
 ],
 [
-342,
+349,
 [
 "        Menu_Map_screenMenuBgBackup = VS::Core::Memory::AllocateLiveFromHighEnd(0xB600);"
 ],
@@ -2811,7 +2811,7 @@
 ]
 ],
 [
-514,
+525,
 [
 "    VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);",
 "    Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
@@ -2822,7 +2822,7 @@
 ]
 ],
 [
-517,
+528,
 [
 "    Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -2831,7 +2831,7 @@
 ]
 ],
 [
-519,
+530,
 [
 "    Menu_Map_CenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -2840,7 +2840,7 @@
 ]
 ],
 [
-720,
+731,
 [
 "                    Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -2849,7 +2849,7 @@
 ]
 ],
 [
-722,
+733,
 [
 "                    Menu_Map_CenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -2858,7 +2858,7 @@
 ]
 ],
 [
-779,
+790,
 [
 "                            Menu_Map_SetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -2867,7 +2867,7 @@
 ]
 ],
 [
-782,
+793,
 [
 "                            Menu_Map_SetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -2876,7 +2876,7 @@
 ]
 ],
 [
-866,
+881,
 [
 "            VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);",
 "            Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
@@ -2887,7 +2887,7 @@
 ]
 ],
 [
-869,
+884,
 [
 "            Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -2896,7 +2896,7 @@
 ]
 ],
 [
-871,
+886,
 [
 "            Menu_Map_CenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -2905,7 +2905,7 @@
 ]
 ],
 [
-895,
+910,
 [
 "    Menu_Map_AnimateCentering(Battle_unusedSceneBuffer);"
 ],
@@ -2914,7 +2914,7 @@
 ]
 ],
 [
-914,
+929,
 [
 "    AddPrim((DR_STP*)(pScratch[1] + 0x1FFC), stp++);"
 ],
@@ -2923,7 +2923,7 @@
 ]
 ],
 [
-934,
+949,
 [
 "        Menu_Map_DrawVisitedRooms(Battle_unusedSceneBuffer);"
 ],
@@ -2932,7 +2932,7 @@
 ]
 ],
 [
-1101,
+1116,
 [
 "    roomData += 4;"
 ],
@@ -2941,7 +2941,7 @@
 ]
 ],
 [
-1104,
+1119,
 [
 "        u_int projected_depth = Core_Gte_RotTransPers(roomData, (long*)projected_vertex_rows[i], &sp38, &sp3C);"
 ],
@@ -2950,7 +2950,7 @@
 ]
 ],
 [
-1113,
+1128,
 [
 "        roomData += 8;"
 ],
@@ -2959,7 +2959,7 @@
 ]
 ],
 [
-1126,
+1141,
 [
 "    room_element_cursor = roomData;"
 ],
@@ -2968,7 +2968,7 @@
 ]
 ],
 [
-1129,
+1144,
 [
 "    polyG3 = *(void**)Core_ScratchAddr(0);"
 ],
@@ -2977,7 +2977,7 @@
 ]
 ],
 [
-1360,
+1375,
 [
 "            tile = *(void**)Core_ScratchAddr(0);"
 ],
@@ -2986,7 +2986,7 @@
 ]
 ],
 [
-1434,
+1449,
 [
 "                        ((void**)Core_ScratchAddr(0))[1] + 32);"
 ],
@@ -2995,7 +2995,7 @@
 ]
 ],
 [
-1451,
+1466,
 [
 "            tile = *(void**)Core_ScratchAddr(0);"
 ],
@@ -3004,7 +3004,7 @@
 ]
 ],
 [
-1502,
+1517,
 [
 "    roomVertices = VS_ONDISC_DOT(room[roomId], dataAddress, void *);"
 ],
@@ -3013,7 +3013,7 @@
 ]
 ],
 [
-1534,
+1549,
 [
 "        roomVertices = VS_ONDISC(room, dataAddress, void *);"
 ],
@@ -3022,7 +3022,7 @@
 ]
 ],
 [
-1569,
+1584,
 [
 "    roomVertices = VS_ONDISC_DOT(room[roomId], dataAddress, void *);"
 ],
@@ -3031,7 +3031,7 @@
 ]
 ],
 [
-1684,
+1699,
 [
 "        dataAddress = VS_ONDISC(room, dataAddress, void *);"
 ],
@@ -3040,7 +3040,7 @@
 ]
 ],
 [
-1716,
+1731,
 [
 "        roomVertices = VS_ONDISC(room, dataAddress, void *);"
 ],
@@ -3049,7 +3049,7 @@
 ]
 ],
 [
-1737,
+1752,
 [
 "    sprt = Render_frameScratch.primitiveCursor;"
 ],
@@ -3058,7 +3058,7 @@
 ]
 ],
 [
-1754,
+1769,
 [
 "    sprt = Render_frameScratch.primitiveCursor;"
 ],
@@ -3067,7 +3067,7 @@
 ]
 ],
 [
-1832,
+1847,
 [
 "        SPRT* sprt = *(void**)Core_ScratchAddr(0);"
 ],
@@ -3076,7 +3076,7 @@
 ]
 ],
 [
-1860,
+1875,
 [
 "        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
 ],
@@ -3085,7 +3085,7 @@
 ]
 ],
 [
-1870,
+1885,
 [
 "        sprt = *(void**)Core_ScratchAddr(0);"
 ],
@@ -3094,7 +3094,7 @@
 ]
 ],
 [
-1895,
+1910,
 [
 "        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
 ],
@@ -3103,7 +3103,7 @@
 ]
 ],
 [
-1914,
+1929,
 [
 "    LINE_G2* line = *(void**)Core_ScratchAddr(0);"
 ],
@@ -3112,7 +3112,7 @@
 ]
 ],
 [
-1930,
+1945,
 [
 "    AddPrim(pScratch[1] + 28, poly++);"
 ],
@@ -3121,7 +3121,7 @@
 ]
 ],
 [
-1976,
+1991,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L1, index + 8, 15, legacy_button_render_scratch[1] + 24);",
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R1, Menu_Map_controlsUiXOffset + 64, 15, legacy_button_render_scratch[1] + 24);",
@@ -3138,57 +3138,21 @@
 ]
 ],
 [
-1988,
+2003,
 [
 "                \"BACK\", v, vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
 [
 "                \"BACK\", v, vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
-]
-],
-[
-1990,
-[
-"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
-],
-[
-"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
-]
-],
-[
-1992,
-[
-"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
-],
-[
-"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
-]
-],
-[
-1994,
-[
-"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
-],
-[
-"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
-]
-],
-[
-1996,
-[
-"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
-],
-[
-"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [
 2005,
 [
-"                \"BACK\", v, vs_getRGB888(128, 128, 128), s0[1] + 24);"
+"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
 [
-"                \"BACK\", v, vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
+"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [
@@ -3203,23 +3167,32 @@
 [
 2009,
 [
-"                vs_getRGB888(32, 32, 32), s0[1] + 24);"
+"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
 [
-"                vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [
 2011,
 [
-"                vs_getRGB888(32, 32, 32), s0[1] + 24);"
+"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
 [
-"                vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [
-2013,
+2020,
+[
+"                \"BACK\", v, vs_getRGB888(128, 128, 128), s0[1] + 24);"
+],
+[
+"                \"BACK\", v, vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
+]
+],
+[
+2022,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -3228,7 +3201,34 @@
 ]
 ],
 [
-2021,
+2024,
+[
+"                vs_getRGB888(32, 32, 32), s0[1] + 24);"
+],
+[
+"                vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+]
+],
+[
+2026,
+[
+"                vs_getRGB888(32, 32, 32), s0[1] + 24);"
+],
+[
+"                vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+]
+],
+[
+2028,
+[
+"                vs_getRGB888(128, 128, 128), s0[1] + 24);"
+],
+[
+"                vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));"
+]
+],
+[
+2036,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3237,7 +3237,7 @@
 ]
 ],
 [
-2023,
+2038,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3246,7 +3246,7 @@
 ]
 ],
 [
-2025,
+2040,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3255,7 +3255,7 @@
 ]
 ],
 [
-2027,
+2042,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -3264,7 +3264,7 @@
 ]
 ],
 [
-2029,
+2044,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -3273,7 +3273,7 @@
 ]
 ],
 [
-2037,
+2052,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3282,7 +3282,7 @@
 ]
 ],
 [
-2039,
+2054,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3291,7 +3291,7 @@
 ]
 ],
 [
-2041,
+2056,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -3300,7 +3300,7 @@
 ]
 ],
 [
-2043,
+2058,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3309,7 +3309,7 @@
 ]
 ],
 [
-2045,
+2060,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -3318,7 +3318,7 @@
 ]
 ],
 [
-2053,
+2068,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3327,7 +3327,7 @@
 ]
 ],
 [
-2055,
+2070,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3336,7 +3336,7 @@
 ]
 ],
 [
-2057,
+2072,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3345,7 +3345,7 @@
 ]
 ],
 [
-2059,
+2074,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3354,7 +3354,7 @@
 ]
 ],
 [
-2061,
+2076,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -3363,7 +3363,7 @@
 ]
 ],
 [
-2069,
+2084,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3372,7 +3372,7 @@
 ]
 ],
 [
-2071,
+2086,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3381,7 +3381,7 @@
 ]
 ],
 [
-2073,
+2088,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3390,7 +3390,7 @@
 ]
 ],
 [
-2075,
+2090,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3399,7 +3399,7 @@
 ]
 ],
 [
-2077,
+2092,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -3408,7 +3408,7 @@
 ]
 ],
 [
-2093,
+2108,
 [
 "            vs_getRGB888(128, 128, 128), *(void**)((uintptr_t)Core_ScratchBase() + 0x004) + 24);"
 ],
@@ -3417,7 +3417,7 @@
 ]
 ],
 [
-2102,
+2117,
 [
 "    POLY_FT4* poly = scratch[0];"
 ],
@@ -3426,7 +3426,7 @@
 ]
 ],
 [
-2116,
+2131,
 [
 "    AddPrim(scratch[1] + 28, poly++);"
 ],
@@ -3435,7 +3435,7 @@
 ]
 ],
 [
-2127,
+2142,
 [
 "    POLY_FT4* poly = legacy_render_scratch[0];"
 ],
@@ -3444,7 +3444,7 @@
 ]
 ],
 [
-2144,
+2159,
 [
 "    AddPrim(legacy_render_scratch[1] + 28, poly++);"
 ],
@@ -3453,7 +3453,7 @@
 ]
 ],
 [
-2158,
+2173,
 [
 "    AddPrim(legacy_render_scratch[1] + 28, poly++);"
 ],
@@ -3462,7 +3462,7 @@
 ]
 ],
 [
-2222,
+2237,
 [
 "    POLY_FT4* poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);"
 ],
@@ -3471,7 +3471,7 @@
 ]
 ],
 [
-2250,
+2265,
 [
 "        AddPrim(legacy_ordering_table_scratch[1] + 28, poly++);"
 ],
@@ -3480,7 +3480,7 @@
 ]
 ],
 [
-2274,
+2289,
 [
 "        AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);"
 ],
@@ -3489,7 +3489,7 @@
 ]
 ],
 [
-2293,
+2308,
 [
 "        AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);"
 ],
@@ -3498,7 +3498,7 @@
 ]
 ],
 [
-2313,
+2328,
 [
 "    AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);"
 ],
@@ -3507,7 +3507,7 @@
 ]
 ],
 [
-2438,
+2453,
 [
 "        static const RECT initial[2];"
 ],
@@ -3518,7 +3518,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\CubePuzzle.cpp": [
 [
-119,
+124,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleStartIqDisData + i * 0x8220, &tim);"
 ],
@@ -3527,7 +3527,7 @@
 ]
 ],
 [
-146,
+151,
 [
 "            puzzleData = Menu_Results_initializeCubePuzzleStartIqDisData + 0x10440;"
 ],
@@ -3536,7 +3536,7 @@
 ]
 ],
 [
-216,
+225,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleQuitEscDisData + i * 0x8220, &tim);"
 ],
@@ -3547,7 +3547,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\Results.cpp": [
 [
-347,
+351,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeGameClearTimData + i * 0x8220, &tim);"
 ],
@@ -3556,7 +3556,7 @@
 ]
 ],
 [
-981,
+985,
 [
 "    poly = *(void**)Core_ScratchAddr(0);"
 ],
@@ -3565,7 +3565,7 @@
 ]
 ],
 [
-1003,
+1007,
 [
 "    AddPrim(scratch[1] - 0x1C, poly++);"
 ],
@@ -3574,7 +3574,7 @@
 ]
 ],
 [
-1019,
+1023,
 [
 "    poly = *(void**)Core_ScratchAddr(0);"
 ],
@@ -3583,7 +3583,7 @@
 ]
 ],
 [
-1041,
+1045,
 [
 "    AddPrim(scratch[1] - 0x1C, poly++);"
 ],
@@ -3592,7 +3592,7 @@
 ]
 ],
 [
-1127,
+1131,
 [
 "        area = p[0];"
 ],
@@ -3601,7 +3601,7 @@
 ]
 ],
 [
-1130,
+1134,
 [
 "        AddPrim(p[1] - 0x1C, area++);"
 ],
@@ -3610,7 +3610,7 @@
 ]
 ],
 [
-1202,
+1206,
 [
 "        area = q[0];"
 ],
@@ -3619,7 +3619,7 @@
 ]
 ],
 [
-1205,
+1209,
 [
 "        AddPrim(q[1] - 0x1C, area++);"
 ],
@@ -3628,7 +3628,7 @@
 ]
 ],
 [
-1245,
+1249,
 [
 "    poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);"
 ],
@@ -3637,7 +3637,7 @@
 ]
 ],
 [
-1256,
+1260,
 [
 "    AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -3646,7 +3646,7 @@
 ]
 ],
 [
-1267,
+1271,
 [
 "    POLY_FT4* poly = p[0];"
 ],
@@ -3655,7 +3655,7 @@
 ]
 ],
 [
-1290,
+1294,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -3664,7 +3664,7 @@
 ]
 ],
 [
-1305,
+1309,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -3673,7 +3673,7 @@
 ]
 ],
 [
-1320,
+1324,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -3682,7 +3682,7 @@
 ]
 ],
 [
-1334,
+1338,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -3691,7 +3691,7 @@
 ]
 ],
 [
-1342,
+1346,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -3702,7 +3702,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\TimeAttack.cpp": [
 [
-78,
+84,
 [
 "            VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackResultsTimData, &tim);"
 ],
@@ -3711,7 +3711,7 @@
 ]
 ],
 [
-193,
+203,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackStartTimData + i * 0x8220, &tim);"
 ],
@@ -3722,7 +3722,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Encyclopedia.cpp": [
 [
-226,
+230,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -3731,7 +3731,7 @@
 ]
 ],
 [
-449,
+453,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, scratch[1] + 24);"
 ],
@@ -3740,7 +3740,7 @@
 ]
 ],
 [
-454,
+458,
 [
 "            \"ROTATION\", control_label_x | (18 << 16), Menu_Score_rotationColor, scratch[1] + 24);"
 ],
@@ -3749,7 +3749,7 @@
 ]
 ],
 [
-459,
+463,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, scratch[1] + 24);"
 ],
@@ -3758,7 +3758,7 @@
 ]
 ],
 [
-461,
+465,
 [
 "            \"ZOOM\", control_label_x | (36 << 16), Menu_Score_zoomColor, scratch[1] + 24);"
 ],
@@ -3767,7 +3767,7 @@
 ]
 ],
 [
-465,
+469,
 [
 "            enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, scratch[1] + 0x1C);"
 ],
@@ -3776,7 +3776,7 @@
 ]
 ],
 [
-514,
+518,
 [
 "        poly = scratch[0];"
 ],
@@ -3785,7 +3785,7 @@
 ]
 ],
 [
-568,
+572,
 [
 "    ((void (*)())Menu_Score_FreeEnemyModelBuffer)();"
 ],
@@ -3794,7 +3794,7 @@
 ]
 ],
 [
-596,
+600,
 [
 "    Menu_Score_zudData = VS::Core::Memory::AllocateLiveFromHighEnd(sourceFile.size);"
 ],
@@ -3805,7 +3805,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Records.cpp": [
 [
-174,
+177,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -3814,7 +3814,7 @@
 ]
 ],
 [
-209,
+212,
 [
 "        p->title = (void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]];",
 "        p->description = (void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]];"
@@ -3825,7 +3825,7 @@
 ]
 ],
 [
-511,
+514,
 [
 "        \"PLAYER TIME\", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, p[1] + 0x1C);"
 ],
@@ -3834,7 +3834,7 @@
 ]
 ],
 [
-514,
+517,
 [
 "        \"1ST\", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, p[1] + 0x1C);"
 ],
@@ -3843,7 +3843,7 @@
 ]
 ],
 [
-516,
+519,
 [
 "        \"2ND\", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, p[1] + 0x1C);"
 ],
@@ -3852,7 +3852,7 @@
 ]
 ],
 [
-518,
+521,
 [
 "        \"3RD\", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, p[1] + 0x1C);"
 ],
@@ -3861,7 +3861,7 @@
 ]
 ],
 [
-530,
+533,
 [
 "                q[1] + 0x1C);"
 ],
@@ -3870,7 +3870,7 @@
 ]
 ],
 [
-535,
+538,
 [
 "                q[1] + 0x1C);"
 ],
@@ -3879,7 +3879,7 @@
 ]
 ],
 [
-540,
+543,
 [
 "                q[1] + 0x1C);"
 ],
@@ -3888,7 +3888,7 @@
 ]
 ],
 [
-547,
+550,
 [
 "        vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -3897,7 +3897,7 @@
 ]
 ],
 [
-553,
+556,
 [
 "                \"$--:--:--\", vs_getXY(88, 158), vs_getRGB(80, 80, 80), r[1] + 0x1C);"
 ],
@@ -3906,7 +3906,7 @@
 ]
 ],
 [
-556,
+559,
 [
 "                vs_getXY(88, 158), vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -3917,7 +3917,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-166,
+167,
 [
 "    menuText = menuItem->text;"
 ],
@@ -3926,7 +3926,7 @@
 ]
 ],
 [
-174,
+175,
 [
 "    before = Render_frameScratch.overlayOrderingTable + 8;"
 ],
@@ -3935,7 +3935,7 @@
 ]
 ],
 [
-222,
+223,
 [
 "    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -3944,7 +3944,7 @@
 ]
 ],
 [
-542,
+543,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
@@ -3953,7 +3953,7 @@
 ]
 ],
 [
-1423,
+1428,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -3962,7 +3962,7 @@
 ]
 ],
 [
-1433,
+1438,
 [
 "        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
 ],
@@ -3971,7 +3971,7 @@
 ]
 ],
 [
-1444,
+1449,
 [
 "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
 ],
@@ -3980,7 +3980,7 @@
 ]
 ],
 [
-1467,
+1472,
 [
 "    polyG4 = scratch[0];"
 ],
@@ -3989,7 +3989,7 @@
 ]
 ],
 [
-1482,
+1487,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -3998,7 +3998,7 @@
 ]
 ],
 [
-1492,
+1497,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -4007,7 +4007,7 @@
 ]
 ],
 [
-1504,
+1509,
 [
 "    POLY_G4* polyG4 = scratch[0];"
 ],
@@ -4016,7 +4016,7 @@
 ]
 ],
 [
-1514,
+1519,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -4025,7 +4025,7 @@
 ]
 ],
 [
-1522,
+1527,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -4034,16 +4034,7 @@
 ]
 ],
 [
-1557,
-[
-"        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
-],
-[
-"        vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));"
-]
-],
-[
-1559,
+1562,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -4054,6 +4045,15 @@
 [
 1564,
 [
+"        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
+],
+[
+"        vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));"
+]
+],
+[
+1569,
+[
 "        scratch[1] + 0x1C);"
 ],
 [
@@ -4061,7 +4061,7 @@
 ]
 ],
 [
-1574,
+1579,
 [
 "    POLY_G4* poly = scratch[0];"
 ],
@@ -4070,7 +4070,7 @@
 ]
 ],
 [
-1584,
+1589,
 [
 "    AddPrim(scratch[1] + 0x20, poly++);"
 ],
@@ -4079,7 +4079,7 @@
 ]
 ],
 [
-1594,
+1599,
 [
 "    AddPrim(scratch[1] + 32, poly++);"
 ],
@@ -4090,7 +4090,7 @@
 ],
 "Native\\Game\\src\\Menu\\Status\\ActorStatus.cpp": [
 [
-305,
+312,
 [
 "        colorIndex & 0xFF, ((current + max) - 1) / max, Render_frameScratch.orderingTable - 0xC, xy);"
 ],
@@ -4099,7 +4099,7 @@
 ]
 ],
 [
-314,
+321,
 [
 "    u_long* insertBefore = Render_frameScratch.orderingTable - 0xC;"
 ],
@@ -4108,7 +4108,7 @@
 ]
 ],
 [
-417,
+424,
 [
 "    limb_indicator_ordering_table = Render_frameScratch.overlayOrderingTable;",
 "    prim = Render_frameScratch.primitiveCursor;"
@@ -4119,7 +4119,7 @@
 ]
 ],
 [
-445,
+452,
 [
 "    prim = Render_frameScratch.primitiveCursor;",
 "    leader_line_ordering_table = Render_frameScratch.orderingTable;"
@@ -4130,7 +4130,7 @@
 ]
 ],
 [
-496,
+503,
 [
 "                    128, ((x + 8) & 0xFFFF) | y, vs_getWH(8, 8), Render_frameScratch.orderingTable - 8)[4] ="
 ],
@@ -4139,7 +4139,7 @@
 ]
 ],
 [
-502,
+509,
 [
 "                128, (x & 0xFFFF) | y, vs_getWH(16, 16), Render_frameScratch.orderingTable - 8);"
 ],
@@ -4148,7 +4148,7 @@
 ]
 ],
 [
-830,
+837,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;",
 "    u_long* model_fade_ordering_table = Render_frameScratch.orderingTable;"
@@ -4159,7 +4159,7 @@
 ]
 ],
 [
-869,
+876,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -4168,7 +4168,7 @@
 ]
 ],
 [
-871,
+878,
 [
 "    u_int* background_ordering_table_entry = ordering_table_base + 0x1FF4;"
 ],
@@ -4177,7 +4177,7 @@
 ]
 ],
 [
-874,
+881,
 [
 "        background_ordering_table_entry = ordering_table_base - 4;"
 ],
@@ -4186,7 +4186,7 @@
 ]
 ],
 [
-1649,
+1656,
 [
 "        static const int initial[6];"
 ],
@@ -4197,7 +4197,7 @@
 ],
 "Native\\Game\\src\\Menu\\Status\\EquipmentDetails.cpp": [
 [
-547,
+548,
 [
 "        VS::Menu::Framework::FormatLiveBladeRow(&blade, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -4206,7 +4206,7 @@
 ]
 ],
 [
-551,
+552,
 [
 "        VS::Menu::Framework::FormatLiveGripRow(&grip, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -4215,7 +4215,7 @@
 ]
 ],
 [
-565,
+566,
 [
 "                VS::Menu::Framework::FormatLiveGemRow(&gem, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -4224,7 +4224,7 @@
 ]
 ],
 [
-834,
+835,
 [
 "                        &actor->weapon, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -4233,7 +4233,7 @@
 ]
 ],
 [
-848,
+849,
 [
 "                        &actor->shield, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -4242,7 +4242,7 @@
 ]
 ],
 [
-855,
+856,
 [
 "                            Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -4251,7 +4251,7 @@
 ]
 ],
 [
-858,
+859,
 [
 "                            &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -4260,7 +4260,7 @@
 ]
 ],
 [
-861,
+862,
 [
 "                            Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -4269,7 +4269,7 @@
 ]
 ],
 [
-865,
+866,
 [
 "                            &armor, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -4280,7 +4280,7 @@
 ],
 "Native\\Game\\src\\Menu\\TextBox.cpp": [
 [
-199,
+200,
 [
 "    Menu_sceneNotificationBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(112);"
 ],
@@ -4289,7 +4289,7 @@
 ]
 ],
 [
-374,
+373,
 [
 "    AddPrims(Render_frameScratch.orderingTable - 24, Menu_activeTextBoxOrderingTable, Menu_activeTextBoxOrderingTable + 33);"
 ],

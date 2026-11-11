@@ -13,6 +13,7 @@
 #include <type_traits>
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
@@ -291,12 +292,11 @@ class LiveMovementHost final : public MovementHost {
   [[nodiscard]] std::optional<RouteGate> PlatformRouteGate(
       int group) const override {
     const auto waypoint = Field::LiveMovingPlatformTargetWaypoint(group);
-    if (!waypoint || Battle_Ai_routeGates == nullptr) {
-      return std::nullopt;
-    }
-    Battle_Ai_RouteGateTile gate{};
-    Battle_Ai_FindNearestRouteGateEntry(group, waypoint->x, waypoint->z, &gate);
-    return RouteGate{.x = gate.opaque0, .z = gate.opaque2};
+    if (!waypoint) return std::nullopt;
+    const auto end =
+        FindLiveNearestRouteGateEnd(group, waypoint->x, waypoint->z);
+    if (!end) return std::nullopt;
+    return RouteGate{.x = end->x, .z = end->z};
   }
   [[nodiscard]] std::optional<ActorRoster> BattleActors() const override {
     return LiveBattleActors();

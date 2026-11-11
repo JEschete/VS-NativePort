@@ -65,6 +65,7 @@
     <ClCompile Include="src\ActorStateTests.cpp" />
     <ClCompile Include="src\AiActorCreationTests.cpp" />
     <ClCompile Include="src\AiActorSettingsTests.cpp" />
+    <ClCompile Include="src\AiAreaRouteTests.cpp" />
     <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp" />
     <ClCompile Include="src\AiDecisionsTests.cpp" />
     <ClCompile Include="src\AiDecisionTests.cpp" />

@@ -245,6 +245,10 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorStateHelpers.cpp" />
+    <ClCompile Include="src\Battle\Ai\AreaRoute.cpp" />
+    <ClCompile Include="src\Battle\Ai\AreaRouteLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Behavior.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2185,6 +2189,8 @@
     <ClInclude Include="include\Battle\Ai\ActorCreationLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorSettings.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorSettingsLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\AreaRoute.hpp" />
+    <ClInclude Include="include\Battle\Ai\AreaRouteLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
     <ClInclude Include="include\Battle\Ai\DecisionPrimitives.hpp" />
     <ClInclude Include="include\Battle\Ai\DecisionPrimitivesLive.hpp" />
