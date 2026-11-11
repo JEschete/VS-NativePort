@@ -16,8 +16,14 @@ fix is published in `e78c4062`. F01812 saved AI settings flags is published
 in `5c914a97` with green exact-revision CI. F01813 actor AI settings is
 published in `ffd1a8e1`
 ([CI 42896326975](https://github.com/JEschete/VS-NativePort/actions/runs/42896326975)).
-The owner paused work during F01818 actor AI state creation. That work is
-uncommitted and has not been built; see [Stopping Point](#stopping-point).
+The #340 throughput tooling is published in `48ab62e3` and the #339 replay
+cleanup in `71973e51`. F01818 actor AI state creation is published in
+`eb9443c2`
+([CI 42954096352](https://github.com/JEschete/VS-NativePort/actions/runs/42954096352)),
+and the first grouped promotion, F01814-F01817 special terrain heights and room
+navigation entry, in `fa47431b`
+([CI 42955909989](https://github.com/JEschete/VS-NativePort/actions/runs/42955909989)).
+See [Stopping Point](#stopping-point) for the next group.
 
 ## Checkpoint
 
@@ -31,10 +37,12 @@ uncommitted and has not been built; see [Stopping Point](#stopping-point).
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **958 functions remain.** Modernization: 2,786 done of 3,744. C++ promotion:
-  2,787 promoted plus one frame-orchestrator WIP. These are separate measures.
-- Original 3,479-function cohort: 2,505 promoted, 16 retired, 957 generated,
-  one WIP; 2,521 resolved. This continuation resolved 72 more than `6c8ac0b9`.
+- **953 functions remain** (at `fa47431b`). Modernization: 2,791 done of
+  3,744. C++ promotion: 2,792 promoted plus one frame-orchestrator WIP. These
+  are separate measures.
+- Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
+  957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
+  than `6c8ac0b9`.
 - Plan row 27, field gimmicks/doors, is done for C++ ownership: its original
   51 IDs audit to 46 promoted and five retired. Row 28, battle AI, is active.
 - Issues #325-335 are closed with fixing revisions and verified CI.
@@ -128,85 +136,36 @@ uncommitted and has not been built; see [Stopping Point](#stopping-point).
 
 ## Stopping Point
 
-The owner paused work on 2026-11-10. HEAD `ffd1a8e1` is pushed and green. The
-worktree holds the uncommitted, **unbuilt and untested** F01818 promotion
-(`func_800E6178`, 281 instructions, `7CD68.c:934`). It does not build as it
-stands: the migrated caller links against a file that is not yet in a
-generated project.
+HEAD `fa47431b` is pushed and green; the worktree held no code changes when
+this was written.
 
-Written so far:
+- `eb9443c2` was F01818 (`func_800E6178`, `7CD68.c:934`): the
+  `ActorCreation` core and checked `ActorCreationLive` binding, the migrated
+  `CreateAiState` caller, the `actor_creation` differential and tests.
+- `fa47431b` was the first grouped promotion, F01814-F01817
+  (`SpecialTerrain`, `RoomAiMap`): the `special_terrain` differential runs
+  166 original instructions over 2,048 vectors with 0 mismatches and detects
+  16/16 mutants (`MUTANT_VECTORS` 256). Focused
+  `[terrain-fill],[special-terrain],[room-navigation]`: 21 cases, 2,147
+  assertions. Full suite: 5,372 cases, 12,649,151 assertions in Debug and
+  Release; the replays matched the baseline.
 
-- The pure core:
-  - [ActorCreation.hpp](../Native/Game/include/Battle/Ai/ActorCreation.hpp)
-  - [ActorCreation.cpp](../Native/Game/src/Battle/Ai/ActorCreation.cpp)
+Next group: F01721-F01728 route gates and area routing (`771A8.c:459-767`,
+0x800DF9A8-0x800E02B4, 579 instructions). The design:
 
-  `CreateActorAiState` runs through an `ActorCreationHost` and refuses with
-  `std::nullopt` instead of reading missing state. Its steps follow the
-  original's order:
-  1. the attribute bit (kinds `0x15`);
-  2. the special-actor slot (auxiliary actors only, object ID 2 or 4);
-  3. the AI kinds gate (`0x05`);
-  4. the body size, stats and locomotion;
-  5. the settings and relations;
-  6. the move-distance reach clamp (with the original's 32-bit wrap);
-  7. placement;
-  8. the hover (12) or stop (1) start command, for non-Ashley actors only;
-  9. clearing the command;
-  10. the saved relations;
-  11. the rebuild loop.
-- The checked live binding:
-  - [ActorCreationLive.hpp](../Native/Game/include/Battle/Ai/ActorCreationLive.hpp)
-  - [ActorCreationLive.cpp](../Native/Game/src/Battle/Ai/ActorCreationLive.cpp)
-
-  It static-asserts every creation view offset against the native structs,
-  and stores and reloads the state around each host callback. A refusal
-  aborts with a diagnostic.
-- `CreateAiState` in
-  [ActorSpawningLive.cpp](../Native/Game/src/Actors/ActorSpawningLive.cpp)
-  now calls `CreateLiveActorAiState`.
-- The `ActorSpawning.hpp` comments are updated.
-- `ActorCreationLive.cpp` is in the `needs_c_headers` list of
-  `gen_solution.py`.
-- The copier registration in `copy_fixups.py`:
-  - the header map;
-  - `OWNED_CALL_BINDINGS["F01818"]`;
-  - the module entry at `0x800E6178`;
-  - the old `F01818` FIXES entry is removed.
-- The `ActorState.cpp` key in `cpp_adaptations.json` is removed; all of its
-  entries adapted the F01818 body.
-- `owned.csv` has the F01818 row.
-
-Remaining, in order (the [Promotion Throughput](#promotion-throughput)
-workflow; `register` already reports the hand-made F01818 registration as
-unchanged apart from placement):
-
-1. Done in the working tree on 2026-11-10: `promotion_check.py iterate
-   --generate --focused "[actor-settings]"` ran `gen_solution.py` and the
-   copier (a second copier run changed 0 files), then built the Debug tests
-   with no errors. `ActorState.cpp` lost the F01818 body, `ActorState.h` its
-   declaration, and `ModulePointers.cpp` binds `0x800E6178` to
-   `CreateLiveActorAiState`. The existing `[actor-settings]` tests pass (18
-   cases, 912 assertions).
-2. Add `Native/Tests/src/AiActorCreationTests.cpp`
-   (`promote.py scaffold F01818 --case actor_creation ...` writes the case,
-   driver and test skeletons):
-   - pure tests with a fake host that records the call order and state
-     snapshots;
-   - live tests for Ashley, an auxiliary special actor, a non-AI kind and the
-     module address.
-
-   The non-Ashley live path (start command and plan rebuild) needs deep
-   planning state; the canonical replay regression covers it.
-3. Re-point the F01812/F01813 copier tests in `test_encounter_fixups.py`
-   (around lines 2290-2340, 4212 and 4227) from `ActorState.cpp` to the new
-   files, and add an F01818 copier test.
-4. `python tools\port\differential.py actor_creation`: the original at
-   `0x800E6178` against the core, with mutants. Let `func_800E6828` and
-   `func_800E5A74` run; stub the other callees.
-5. Group F01818 with the next related functions if they are ready, then run
-   `promotion_check.py group`, `promote.py ledgers <spec> --summary
-   <summary.json>`, commit with no attribution, push, confirm exact-revision CI
-   and update #276.
+- A pure `AreaRoute` module: `ResolveRouteGateExit` (F01721),
+  `FindNearestRouteGateEntry` (F01722), `FindRouteGateAtTile` (F01723), the
+  inline route helpers (F01724-F01727) and `ResolveNavigationAreaRoute`
+  (F01728) over a narrow world interface and an `AreaRouteActor` record.
+- An `AreaRouteLive` binding. The F01722 caller in `MovementBehaviorLive.cpp`
+  and `LiveGroundWorld::FindRouteGateAtTile` move to the typed functions; the
+  generated F01740 caller binds to the live F01728 wrapper.
+- F01723 indexes the platform positions by report order, not by platform
+  index. The original reads stale stack slots past the reported count; the
+  typed function never matches them. The differential fills the stack with
+  0xFF so both agree.
+- The differential follows F01721, F01723 and `ratan2` (SLUS_010.40) and
+  stubs the platform collector, dwell, contact and occupancy callees.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -252,7 +211,8 @@ differential rewritten each time. The rules, also in
    loads the original module from `Native\data\disc`, runs the case's vectors
    through the interpreter and the compiled native driver, then checks that
    each mutant (patched original words) changes a result. A case without
-   mutants fails. Reports go to `build\differential\<case>.log`. The F01813
+   mutants fails. A case's optional `MUTANT_VECTORS = N` reruns each mutant on
+   only the first N vectors, which keeps large cases fast. Reports go to `build\differential\<case>.log`. The F01813
    case, [actor_settings.py](../tools/port/differentials/actor_settings.py),
    reproduces the recorded evidence exactly: 265 instructions, 8,192 vectors,
    0 mismatches, every mutant detected, about 33 s including the driver
@@ -798,15 +758,13 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Finish F01818 from the [Stopping Point](#stopping-point) list, then update
-   #276. Keep #337 open until its in-game reachability is established. Do not
-   close #276: 958 remain. Fix #339 (scripted replay run directories) as its
-      own scoped change; the existing replay runs were already removed with the
-   owner's approval.
-3. Continue ordered row 28 after F01818 with Behavior, Movement, Navigation
-   (F01814-F01817), OrbitingBoss and Perception as listed by
+2. Continue the F01721-F01728 group from the [Stopping Point](#stopping-point),
+   then update #276. Keep #337 open until its in-game reachability is
+   established. Do not close #276: 953 remain.
+3. Continue ordered row 28 with Behavior, Movement, the rest of Navigation
+   (F01740 and later), OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01716/F01717/F01793/F01810/F01811/F01812/F01813 are verified dependencies,
+   F01716/F01717/F01793/F01810-F01818 are verified dependencies,
    not proof of remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
@@ -856,7 +814,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 958 functions complete.
+  match delivered scope. Do not declare the remaining 953 functions complete.
 - Never delete Ghidra, `tools\Base` or `tools\PSX` to save space, even where
   they mirror `C:\Tools`. Delete other local data only with owner approval.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.
