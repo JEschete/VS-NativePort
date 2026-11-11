@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import random
 
-from differential import Image, Machine, pack_fields, s16, s32
+from differential import Image, Machine, near, pack_fields, packed, position, s16, s32
 
 ID = "F01735-F01737, F01750"
 ENTRY, END = 0x800E1388, 0x800E1850
@@ -154,21 +154,6 @@ def tile_byte(rng: random.Random) -> int:
     if roll < 0.8:
         return rng.randrange(GRID)
     return rng.choice((0, 1, 30, 31, 32, 254, 255, rng.getrandbits(8)))
-
-
-def packed(rng: random.Random, x: int, z: int) -> int:
-    return rng.getrandbits(8) << 24 | (z & 0xFF) << 16 | rng.getrandbits(8) << 8 | (x & 0xFF)
-
-
-def near(rng: random.Random, tile: int, spread: int) -> int:
-    x, z = tile & 0xFF, tile >> 16 & 0xFF
-    return packed(rng, x + rng.randrange(-spread, spread + 1), z + rng.randrange(-spread, spread + 1))
-
-
-def position(rng: random.Random, tile_coordinate: int) -> int:
-    if rng.random() < 0.9:
-        return s16(tile_coordinate * 128 + rng.randrange(-64, 192))
-    return s16(rng.getrandbits(16))
 
 
 def angle(rng: random.Random) -> int:

@@ -40,10 +40,6 @@ constexpr int kAxisDirectionStride = 2;
 constexpr int kDirectionMask = 7;
 constexpr std::int32_t kStallLimit = 120;
 constexpr std::uint8_t kNoMovementTarget = 16;
-constexpr unsigned kQuadrantShift = 10;
-constexpr std::uint32_t kQuadrantMask = 3;
-constexpr std::uint32_t kQuadrantAngleMask = 0x3FF;
-constexpr std::uint32_t kQuadrantMidpoint = 512;
 constexpr unsigned kDirectionAngleShift = 9;
 
 bool Fail(const char* message) {
@@ -104,13 +100,8 @@ void Turn(RadialMovementWorld& world, RadialMover& mover,
 // The first axis direction searched: the quadrant the model faces, or the
 // next one past its midpoint.
 int FacingAxisDirection(const RadialMover& mover) {
-  const auto facing = static_cast<std::uint32_t>(mover.model_facing) +
-                      static_cast<std::uint32_t>(mover.model_look_yaw);
-  auto quadrant = (facing & kAngleMask) >> kQuadrantShift;
-  if ((facing & kQuadrantAngleMask) > kQuadrantMidpoint) {
-    quadrant = (quadrant + 1) & kQuadrantMask;
-  }
-  return static_cast<int>(quadrant) * kAxisDirectionStride;
+  return NearestAxisDirection(static_cast<std::uint32_t>(mover.model_facing) +
+                              static_cast<std::uint32_t>(mover.model_look_yaw));
 }
 
 // The axis neighbour inside the grid with the highest ground; -1 for none.

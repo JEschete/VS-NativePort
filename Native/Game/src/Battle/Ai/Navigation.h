@@ -52,8 +52,6 @@ extern u_short (*Battle_Ai_tileFlagMap)[32];
 extern unsigned short* Battle_Ai_roomWaypoints;
 extern u_short (*Battle_Ai_specialTerrainHeights)[32];
 extern Battle_Ai_RouteGateEnd* Battle_Ai_routeGates;
-unsigned int Battle_Ai_FindAdjacentMovementDestination(
-    Battle_Ai_MoveTargetView* state, int first, int second, unsigned int direction);
 int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_PathTest test, int mask);
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

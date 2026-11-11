@@ -16,6 +16,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
+#include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -386,9 +387,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
     VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actorId);
     route_ = nullptr;
   }
-  void SaveMovementRandomState() override {
-    Battle_Ai_SaveMovementRandomState();
-  }
+  void SaveMovementRandomState() override { SaveLiveMovementRandomState(); }
 
  private:
   bool started_ = false;

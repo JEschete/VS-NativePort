@@ -12,6 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
@@ -1521,7 +1522,7 @@ TEST_CASE("Blocked movement forgets its target after exhausting detours",
   expected[offsetof(Battle_Ai_ActorAiState, detourStep)] = std::byte{0};
   std::memset(expected.data() + offsetof(Battle_Ai_ActorAiState, previousTile),
               0xFF, sizeof(state.previousTile));
-  const int result = Battle_Ai_TryRecoverBlockedMovement(view);
+  const int result = VS::Battle::Ai::TryRecoverLiveBlockedMovement(view);
   std::array<std::byte, sizeof(state)> actual{};
   std::memcpy(actual.data(), &state, actual.size());
   CHECK(result == 0);

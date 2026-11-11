@@ -9,6 +9,7 @@
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
+#include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
@@ -778,10 +779,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&Effects_InitializeParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&Effects_AdvanceParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D8260u, 0u, (void*)&Battle_Ai_SetTemporaryAwarenessIndicator, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D8400u, 0u, (void*)&Battle_Ai_FindAdjacentMovementDestination, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D87E8u, 0u, (void*)&Battle_Ai_UpdateTargetPerception, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D8EF4u, 0u, (void*)&Battle_Ai_UpdateActorPerception, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D9538u, 0u, (void*)&Battle_Ai_SaveMovementRandomState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D9E18u, 0u, (void*)&Battle_Ai_MoveForActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA1D4u, 0u, (void*)&Battle_Ai_UpdateCombatPursuit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA4BCu, 0u, (void*)&Battle_Ai_TryApproachPlannedTarget, 0u, 0u, 0u},
@@ -792,7 +791,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DAC80u, 0u, (void*)&Battle_Ai_TryExecuteActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAD9Cu, 0u, (void*)&Battle_Ai_TryExecutePlannedActions, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAED0u, 0u, (void*)&Battle_Ai_UpdateActorDecisions, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DB0BCu, 0u, (void*)&Battle_Ai_TryRecoverBlockedMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBF00u, 0u, (void*)&Battle_Ai_UnlinkEngagedActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBFE4u, 0u, (void*)&Battle_Ai_UpdateEngagementBuildup, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC0D0u, 0u, (void*)&Battle_Ai_AnimateEngagementPhase, 0u, 0u, 0u},
@@ -1747,6 +1745,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E153Cu, 0u, (void*)&VS::Battle::Ai::MoveLiveToRadialDestination, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1764u, 0u, (void*)&VS::Battle::Ai::MoveLiveAwayFromReference, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2CCCu, 0u, (void*)&VS::Battle::Ai::RecoverLiveMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D8400u, 0u, (void*)&VS::Battle::Ai::FindLiveAdjacentMovementDestination, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D9538u, 0u, (void*)&VS::Battle::Ai::SaveLiveMovementRandomState, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DB0BCu, 0u, (void*)&VS::Battle::Ai::TryRecoverLiveBlockedMovement, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

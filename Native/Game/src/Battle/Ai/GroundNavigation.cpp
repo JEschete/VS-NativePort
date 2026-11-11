@@ -74,8 +74,6 @@ constexpr std::uint32_t kPathCellKeepMask = 0xFFC30FFF;
 constexpr std::uint32_t kTileTagMask = 0xFF00;
 constexpr unsigned kQuadrantMask = 0x3FF;
 constexpr unsigned kQuadrantShift = 10;
-constexpr unsigned kQuadrantHalf = 512;
-constexpr unsigned kQuadrantCount = 4;
 constexpr unsigned kCardinalShift = 9;
 constexpr unsigned kCardinalMask = 6;
 constexpr int kDiagonalAngleShift = 9;
@@ -1242,12 +1240,7 @@ bool ResolveDirectionalMovement(GroundNavigationWorld& world,
     return true;
   }
   const auto unsigned_angle = static_cast<std::uint32_t>(angle);
-  const unsigned quadrant = (unsigned_angle & kAngleMask) >> kQuadrantShift;
-  const auto nearest =
-      static_cast<int>(((unsigned_angle & kQuadrantMask) > kQuadrantHalf
-                            ? (quadrant + 1) % kQuadrantCount
-                            : quadrant) *
-                       2);
+  const int nearest = NearestAxisDirection(unsigned_angle);
   const auto delta = Delta(world, nearest);
   if (!delta.has_value()) return false;
   const DirectionalMove move{unsigned_angle,

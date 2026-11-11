@@ -9,9 +9,10 @@
   python tools\\port\\promote.py ledgers <spec.json> [--summary build\\promotion-check\\<run>\\summary.json]
 
 register edits tools\\port\\copy_fixups.py (NATIVE_HELPER_HEADERS, OWNED_CALL_BINDINGS and
-MODULE_BINDING_ENTRIES, with the module and address from FUNCTION_CATALOG; the FIXES entry and its
-comment are removed), appends the owned.csv row and adds the Live adapter to gen_solution.py's
-VS.Game C-header list. The header defaults to the source's include path and the Live header to
+MODULE_BINDING_ENTRIES, with the module and address from FUNCTION_CATALOG, or none with --inline for
+a function the original only inlined; the FIXES entry and its comment are removed), appends the
+owned.csv row and adds the Live adapter to gen_solution.py's VS.Game C-header list. The header
+defaults to the source's include path and the Live header to
 <source stem>Live.hpp. prune-adaptations drops the recorded C++ edits (cpp_adaptations.json) that no
 longer match the copier's output once the row is owned, and re-anchors the rest. Every command is
 idempotent: a second run reports nothing to change.
@@ -337,13 +338,17 @@ def register(repository: Repository, args: argparse.Namespace) -> int:
     fixups = TextFile(repository.fixups)
     results = {}
     if args.live:
-        if function.address is None:
-            raise SystemExit(f"{args.id} {function.name}: no address in the name; pass --address")
+        if args.inline and function.address is not None:
+            raise SystemExit(f"{args.id} {function.name}: --inline is for functions without a module address")
+        if function.address is None and not args.inline:
+            raise SystemExit(f"{args.id} {function.name}: no address in the name; pass --address, or --inline "
+                             "when the original only inlined it")
         live_header = args.live_header or str(PureWindowsPath(include_path(args.source)).with_name(
             PureWindowsPath(args.source).stem + "Live.hpp"))
         results["NATIVE_HELPER_HEADERS"] = add_helper_header(fixups, args.live, live_header)
         results["OWNED_CALL_BINDINGS"] = add_call_binding(fixups, args.id, args.live)
-        results["MODULE_BINDING_ENTRIES"] = add_module_entry(fixups, function, args.live)
+        if not args.inline:
+            results["MODULE_BINDING_ENTRIES"] = add_module_entry(fixups, function, args.live)
         if not args.no_c_headers:
             live_source = str(PureWindowsPath(live_header.replace("\\include\\", "\\src\\", 1)).with_suffix(".cpp"))
             results["gen_solution C headers"] = add_c_headers(repository, live_source)
@@ -354,7 +359,9 @@ def register(repository: Repository, args: argparse.Namespace) -> int:
         "since": args.since or datetime.date.today().isoformat(), "notes": args.notes})
     for name, result in results.items():
         log(f"{name}: {result}")
-    leftovers = [index + 1 for index, line in enumerate(fixups.lines) if f'"{args.id}"' in line]
+    own_binding = f'OWNED_CALL_BINDINGS["{args.id}"]'
+    leftovers = [index + 1 for index, line in enumerate(fixups.lines)
+                 if f'"{args.id}"' in line and not line.startswith(own_binding)]
     if leftovers:
         log(f"note: copy_fixups.py still names {args.id} on lines {leftovers}; check they still apply")
     return 0
@@ -695,6 +702,8 @@ def main(argv: list[str] | None = None, repository: Repository | None = None) ->
     command.add_argument("--live-header", help="Live adapter header (default: <source stem>Live.hpp)")
     command.add_argument("--no-c-headers", action="store_true", help="do not list the Live source for C headers")
     command.add_argument("--address", help="hex module address when the catalog name has none")
+    command.add_argument("--inline", action="store_true",
+                         help="the original only inlined the function: bind calls but add no module entry")
     command.add_argument("--notes", required=True, help="owned.csv notes")
     command.add_argument("--since", help="owned.csv date (default today; an existing row keeps its date)")
     command = commands.add_parser("prune-adaptations", help="drop cpp_adaptations.json hunks that no longer match")

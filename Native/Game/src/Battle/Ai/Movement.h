@@ -32,7 +32,6 @@ _Static_assert(sizeof(Battle_Ai_ArenaOrbitState) == 0x20, "Battle_Ai_ArenaOrbitS
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_MOVEMENT_H_DECLS)
 #define VS_BATTLE_AI_MOVEMENT_H_DECLS
-#include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
@@ -50,10 +49,6 @@ _Static_assert(sizeof(Battle_Ai_ArenaOrbitState) == 0x20, "Battle_Ai_ArenaOrbitS
 
 extern int Battle_Ai_savedMovementRandomState;
 extern unsigned short (*Battle_Ai_patrolRoutes)[8];
-int Battle_Ai_HasRepeatingMovementHistory(Battle_Ai_PerceptionUpdateView* state);
-int Battle_Ai_IsMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state);
-void Battle_Ai_SaveMovementRandomState(void);
-int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state);
 int Battle_Ai_IsFlightDirectionObstructed(Battle_Ai_ObstructionView* state, int direction, int ahead);
 int Battle_Ai_CanFlyInDirection(Battle_Ai_DirectionCacheView* state, int direction);
 int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, int action, int mode);

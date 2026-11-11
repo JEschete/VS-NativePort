@@ -87,6 +87,9 @@
     <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiBlockedMovementTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AiDecisionsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -904,7 +904,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("auto* destination = state;", source)
         self.assertIn("destination->scriptedTargetXZ = target;", source)
         self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actorId)", source)
-        self.assertIn("Battle_Ai_SaveMovementRandomState();", source)
+        self.assertIn("SaveLiveMovementRandomState();", source)
         self.assertNotIn("actor[3]", source)
 
     def test_route_availability_keeps_original_shift_mutation_and_native_bounds(self):
@@ -2235,7 +2235,10 @@ class EncounterFixupTests(unittest.TestCase):
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
         calls = {name: (ai / name).read_text(encoding="utf-8").count(f"{live}(")
                  for name in ("Perception.cpp", "Movement.cpp", "PlanningPrimitivesLive.cpp")}
-        self.assertEqual(calls, {"Perception.cpp": 2, "Movement.cpp": 1, "PlanningPrimitivesLive.cpp": 0})
+        self.assertEqual(calls, {"Perception.cpp": 2, "Movement.cpp": 0, "PlanningPrimitivesLive.cpp": 0})
+        # F01660 moved the blocked-movement detour's forget into its live binding.
+        blocked = (ai / "BlockedMovementLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("ForgetLiveAiActionTarget(&state_);", blocked)
         live_source = (ai / "PlanningPrimitivesLive.cpp").read_text(encoding="utf-8")
         self.assertIn("void ForgetTarget() override { ForgetLiveAiActionTarget(&State()); }", live_source)
         self.assertNotIn("Battle_Ai_ForgetAiActionTarget", live_source)

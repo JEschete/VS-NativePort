@@ -639,6 +639,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::MoveLiveToRadialDestination": r"Native\Game\include\Battle\Ai\RadialMovementLive.hpp",
     "VS::Battle::Ai::MoveLiveAwayFromReference": r"Native\Game\include\Battle\Ai\RadialMovementLive.hpp",
     "VS::Battle::Ai::RecoverLiveMovement": r"Native\Game\include\Battle\Ai\RadialMovementLive.hpp",
+    "VS::Battle::Ai::FindLiveAdjacentMovementDestination": r"Native\Game\include\Battle\Ai\BlockedMovementLive.hpp",
+    "VS::Battle::Ai::IsLiveMovementHistoryStalled": r"Native\Game\include\Battle\Ai\BlockedMovementLive.hpp",
+    "VS::Battle::Ai::SaveLiveMovementRandomState": r"Native\Game\include\Battle\Ai\BlockedMovementLive.hpp",
+    "VS::Battle::Ai::TryRecoverLiveBlockedMovement": r"Native\Game\include\Battle\Ai\BlockedMovementLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1208,6 +1212,10 @@ OWNED_CALL_BINDINGS["F01735"] = "VS::Battle::Ai::ProjectLiveClearRadialDestinati
 OWNED_CALL_BINDINGS["F01736"] = "VS::Battle::Ai::MoveLiveToRadialDestination"
 OWNED_CALL_BINDINGS["F01737"] = "VS::Battle::Ai::MoveLiveAwayFromReference"
 OWNED_CALL_BINDINGS["F01750"] = "VS::Battle::Ai::RecoverLiveMovement"
+OWNED_CALL_BINDINGS["F01636"] = "VS::Battle::Ai::FindLiveAdjacentMovementDestination"
+OWNED_CALL_BINDINGS["F01642"] = "VS::Battle::Ai::IsLiveMovementHistoryStalled"
+OWNED_CALL_BINDINGS["F01644"] = "VS::Battle::Ai::SaveLiveMovementRandomState"
+OWNED_CALL_BINDINGS["F01660"] = "VS::Battle::Ai::TryRecoverLiveBlockedMovement"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2774,6 +2782,9 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E153C, "VS::Battle::Ai::MoveLiveToRadialDestination"),  # F01736
     ("BATTLE/BATTLE.PRG", 0x800E1764, "VS::Battle::Ai::MoveLiveAwayFromReference"),  # F01737
     ("BATTLE/BATTLE.PRG", 0x800E2CCC, "VS::Battle::Ai::RecoverLiveMovement"),  # F01750
+    ("BATTLE/BATTLE.PRG", 0x800D8400, "VS::Battle::Ai::FindLiveAdjacentMovementDestination"),  # F01636
+    ("BATTLE/BATTLE.PRG", 0x800D9538, "VS::Battle::Ai::SaveLiveMovementRandomState"),  # F01644
+    ("BATTLE/BATTLE.PRG", 0x800DB0BC, "VS::Battle::Ai::TryRecoverLiveBlockedMovement"),  # F01660
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

@@ -10,6 +10,7 @@
 
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 
@@ -128,7 +129,7 @@ class LiveDecisionActor final : public DecisionActor {
     return Battle_Ai_TryExecutePlannedActions(&state_) != 0;
   }
   bool TryRecoverBlockedMovement() override {
-    return Battle_Ai_TryRecoverBlockedMovement(
+    return TryRecoverLiveBlockedMovement(
                reinterpret_cast<Battle_Ai_BlockedRecoveryView*>(&state_)) != 0;
   }
   bool RunDecisionBehavior() override {

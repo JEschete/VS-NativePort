@@ -310,16 +310,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Movement.cpp": [
 [
-111,
-[
-"                VS::Battle::Ai::ForgetLiveAiActionTarget((void*)state);"
-],
-[
-"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-160,
+63,
 [
 "    i = Field_CollectMovingPlatformPositionsEntry((void*)points);"
 ],
@@ -328,7 +319,7 @@
 ]
 ],
 [
-245,
+148,
 [
 "    if (Battle_Ai_IsFlightDirectionObstructed((void*)state, direction, 1)) {"
 ],
@@ -337,7 +328,7 @@
 ]
 ],
 [
-296,
+199,
 [
 "                    if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, state->tile) > 0) {",
 "                        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
@@ -348,7 +339,7 @@
 ]
 ],
 [
-338,
+241,
 [
 "    if (Battle_Ai_UpdateFlightGroundTransition((void*)state, action, 1)) {"
 ],
@@ -357,7 +348,7 @@
 ]
 ],
 [
-342,
+245,
 [
 "        VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement((void*)state);"
 ],
@@ -366,7 +357,7 @@
 ]
 ],
 [
-346,
+249,
 [
 "    if (!VS::Battle::Ai::SelectLiveActorVerticalMovementStep((void*)state, &step, &mode)) {"
 ],
@@ -375,7 +366,7 @@
 ]
 ],
 [
-388,
+291,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -384,7 +375,7 @@
 ]
 ],
 [
-394,
+297,
 [
 "        if (state->moveY > 0 && Battle_Ai_IsFlightDirectionObstructed((void*)state, 0, 0)) {"
 ],
@@ -393,7 +384,7 @@
 ]
 ],
 [
-397,
+300,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -402,7 +393,7 @@
 ]
 ],
 [
-406,
+309,
 [
 "        if (!state->opaque0 || Battle_Ai_IsFlightDirectionObstructed((void*)state, 0, 0)) {"
 ],
@@ -411,7 +402,7 @@
 ]
 ],
 [
-408,
+311,
 [
 "            VS::Battle::Ai::RecoverLiveMovement((void*)state);"
 ],
@@ -420,7 +411,7 @@
 ]
 ],
 [
-436,
+339,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -429,7 +420,7 @@
 ]
 ],
 [
-439,
+342,
 [
 "    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state, angle, 2);"
 ],
@@ -438,7 +429,7 @@
 ]
 ],
 [
-456,
+359,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -447,7 +438,7 @@
 ]
 ],
 [
-487,
+390,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -456,7 +447,7 @@
 ]
 ],
 [
-493,
+396,
 [
 "            Battle_Ai_UpdateFlightDirectionalMovement((void*)state, angle);"
 ],
@@ -465,7 +456,7 @@
 ]
 ],
 [
-517,
+420,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -474,7 +465,7 @@
 ]
 ],
 [
-522,
+425,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -483,7 +474,7 @@
 ]
 ],
 [
-539,
+442,
 [
 "    if (Battle_Ai_UpdateFlightGroundTransition((void*)ai_state, movement_angle, 0) != 0) {"
 ],
@@ -492,7 +483,7 @@
 ]
 ],
 [
-544,
+447,
 [
 "        VS::Battle::Ai::RecoverLiveMovement((void*)ai_state);"
 ],
@@ -501,7 +492,7 @@
 ]
 ],
 [
-553,
+456,
 [
 "        VS::Battle::Ai::RecoverLiveMovement((void*)ai_state);"
 ],
@@ -510,7 +501,7 @@
 ]
 ],
 [
-590,
+493,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"
 ],
@@ -519,7 +510,7 @@
 ]
 ],
 [
-673,
+576,
 [
 "                VS::Battle::Ai::ProjectLiveClearRadialDestination((void*)s, s->tile, angle,"
 ],
@@ -528,7 +519,7 @@
 ]
 ],
 [
-686,
+589,
 [
 "            VS::Battle::Ai::RecoverLiveMovement((void*)s);"
 ],
@@ -537,7 +528,7 @@
 ]
 ],
 [
-721,
+624,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -546,7 +537,7 @@
 ]
 ],
 [
-741,
+644,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -555,7 +546,7 @@
 ]
 ],
 [
-771,
+674,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)context, 0);"
 ],
@@ -564,7 +555,7 @@
 ]
 ],
 [
-810,
+713,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)context, 4);"
 ],
@@ -631,7 +622,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
 [
-359,
+360,
 [
 "            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_MovementRecoveryView*)state);"
 ],
@@ -640,7 +631,7 @@
 ]
 ],
 [
-387,
+388,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -649,7 +640,7 @@
 ]
 ],
 [
-429,
+430,
 [
 "        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);"
 ],
@@ -658,7 +649,7 @@
 ]
 ],
 [
-470,
+471,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -667,7 +658,7 @@
 ]
 ],
 [
-590,
+591,
 [
 "    info = (void*)&Battle_actionDefinitions[app->action];"
 ],
@@ -676,7 +667,7 @@
 ]
 ],
 [
-600,
+601,
 [
 "    other = (void*)Battle_Ai_actorAiStates[source];"
 ],
@@ -685,7 +676,7 @@
 ]
 ],
 [
-655,
+656,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -694,7 +685,7 @@
 ]
 ],
 [
-657,
+658,
 [
 "            firstOther = (void*)Battle_Ai_actorAiStates[id];"
 ],
@@ -703,7 +694,7 @@
 ]
 ],
 [
-673,
+674,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -712,7 +703,7 @@
 ]
 ],
 [
-675,
+676,
 [
 "            other = (void*)Battle_Ai_actorAiStates[actor->id];"
 ],
@@ -721,7 +712,7 @@
 ]
 ],
 [
-677,
+678,
 [
 "                for (candidate = (void*)Battle_actors[0]; candidate;"
 ],
@@ -730,7 +721,7 @@
 ]
 ],
 [
-683,
+684,
 [
 "                        for (ally = (void*)Battle_actors[0]; ally; ally = ally->next) {",
 "                            allyState = (void*)Battle_Ai_actorAiStates[ally->id];"

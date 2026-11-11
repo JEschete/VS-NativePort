@@ -256,6 +256,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\BlockedMovement.cpp" />
+    <ClCompile Include="src\Battle\Ai\BlockedMovementLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ConditionSnapshot.cpp" />
     <ClCompile Include="src\Battle\Ai\ConditionSnapshotBinding.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2203,6 +2207,8 @@
     <ClInclude Include="include\Battle\Ai\ActorSettingsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\AreaRoute.hpp" />
     <ClInclude Include="include\Battle\Ai\AreaRouteLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\BlockedMovement.hpp" />
+    <ClInclude Include="include\Battle\Ai\BlockedMovementLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
     <ClInclude Include="include\Battle\Ai\DecisionPrimitives.hpp" />
     <ClInclude Include="include\Battle\Ai\DecisionPrimitivesLive.hpp" />

@@ -73,6 +73,22 @@ struct NavigationStep {
   return {.dx = component(code), .dz = component(code >> kZShift)};
 }
 
+// The axis direction (0, 2, 4 or 6) nearest a 12-bit angle: its quadrant, or
+// the next one when the angle lies more than 512 units into it. Shared by
+// func_800D8400, func_800DB0BC, func_800E2CCC and func_800E3600.
+[[nodiscard]] constexpr int NearestAxisDirection(std::uint32_t angle) {
+  constexpr std::uint32_t kAngleMask = 0xFFF;
+  constexpr unsigned kQuadrantShift = 10;
+  constexpr std::uint32_t kQuadrantAngleMask = 0x3FF;
+  constexpr std::uint32_t kQuadrantMidpoint = 512;
+  constexpr std::uint32_t kQuadrantMask = 3;
+  auto quadrant = (angle & kAngleMask) >> kQuadrantShift;
+  if ((angle & kQuadrantAngleMask) > kQuadrantMidpoint) {
+    quadrant = (quadrant + 1) & kQuadrantMask;
+  }
+  return static_cast<int>(quadrant) * 2;
+}
+
 // The room's walkable tile bounds (the room AI state's first four bytes,
 // D_800F58BC), inclusive.
 struct RoomTileBounds {

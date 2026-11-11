@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -401,7 +402,7 @@ void Battle_Ai_UpdateActorPerception(void)
         state->opaque50 = z;
         state->opaque120 = (((z & 0xFFFF) >> 6) << 16) | ((x & 0xFFFF) >> 6);
         if ((0x12600 >> state->opaque124) & 1) {
-            if (Battle_Ai_IsMovementHistoryStalled(state)) {
+            if (VS::Battle::Ai::IsLiveMovementHistoryStalled(state)) {
                 state->historyMask = 0;
                 state->opaque19A = 30;
                 goto idle;

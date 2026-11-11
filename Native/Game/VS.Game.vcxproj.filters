@@ -483,6 +483,12 @@
     <ClInclude Include="src\Battle\Ai\Behavior.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\BlockedMovement.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\BlockedMovementLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ConditionSnapshot.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2620,6 +2626,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\AreaRouteLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\BlockedMovement.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\BlockedMovementLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp">

@@ -18,6 +18,7 @@ function:
   MUTANT_VECTORS        optional: mutants rerun only the first N vectors (default: all)
   vector(rng, number)   -> one input
   run(machine, vector)  -> (observation, driver inputs); stubs calls, then executes ENTRY
+                        (Machine.execute's `stop` ends a run of code inlined in a caller)
   check(image, vector, observation, native, reference) -> problems
                         native is the driver's integers; reference is the unpatched observation
                         the driver inputs were taken from (equal to observation outside mutants)
@@ -77,10 +78,29 @@ def s32(value: int) -> int:
 
 def pack_fields(raw: bytes, fields, values: dict) -> bytearray:
     """`raw` with each (name, offset, size, ...) field set from `values`, truncated to its size."""
-    packed = bytearray(raw)
+    block = bytearray(raw)
     for name, offset, size, *_ in fields:
-        packed[offset:offset + size] = (values[name] & ((1 << size * 8) - 1)).to_bytes(size, "little")
-    return packed
+        block[offset:offset + size] = (values[name] & ((1 << size * 8) - 1)).to_bytes(size, "little")
+    return block
+
+
+# Vector helpers for the battle-AI cases. A tile word holds x in byte 0 and z in byte 2; bytes 1
+# and 3 carry per-actor metadata, drawn at random here.
+def packed(rng: random.Random, x: int, z: int) -> int:
+    return rng.getrandbits(8) << 24 | (z & 0xFF) << 16 | rng.getrandbits(8) << 8 | (x & 0xFF)
+
+
+def near(rng: random.Random, tile: int, spread: int) -> int:
+    """A tile word within `spread` tiles of `tile` on each axis, wrapped to a byte."""
+    x, z = tile & 0xFF, tile >> 16 & 0xFF
+    return packed(rng, x + rng.randrange(-spread, spread + 1), z + rng.randrange(-spread, spread + 1))
+
+
+def position(rng: random.Random, tile_coordinate: int) -> int:
+    """A fine coordinate (128 per tile) on or beside the tile, sometimes anywhere."""
+    if rng.random() < 0.9:
+        return s16(tile_coordinate * 128 + rng.randrange(-64, 192))
+    return s16(rng.getrandbits(16))
 
 
 # The GTE's leading-zero counter, data registers 30 and 31: the square root and normalisation
@@ -215,11 +235,12 @@ class Machine:
         return self.load(address, size, signed) & MASK
 
     # ------------------------------------------------------------------ execution
-    def execute(self, entry: int, limit: int = 1_000_000) -> None:
-        """Run from entry until it returns to the caller."""
+    def execute(self, entry: int, limit: int = 1_000_000, stop: int = STOP) -> None:
+        """Run from entry until it returns to the caller, or until pc reaches `stop` (for code
+        inlined in a caller, where nothing returns)."""
         self.r[R["ra"]] = STOP
         pc = entry
-        while pc != STOP:
+        while pc not in (STOP, stop):
             self.steps += 1
             if self.steps > limit:
                 raise Fault("runaway original")

@@ -6,7 +6,6 @@
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -28,7 +27,6 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Field/PlatformPlacementLive.h"
@@ -41,101 +39,6 @@ int Battle_Ai_savedMovementRandomState;
 
 // decomp: D_800F58D8 (D_800F58D8@BATTLE/BATTLE.PRG)
 unsigned short (*Battle_Ai_patrolRoutes)[8];
-
-// decomp: BATTLE.PRG historyRepeats (src/BATTLE/BATTLE.PRG/6FC00.c:960)
-int Battle_Ai_HasRepeatingMovementHistory(Battle_Ai_PerceptionUpdateView* state)
-{
-    return state->historyX.words[0] == state->historyX.words[1]
-        && state->historyZ.words[0] == state->historyZ.words[1];
-}
-
-// decomp: BATTLE.PRG historyStalled (src/BATTLE/BATTLE.PRG/6FC00.c:966)
-int Battle_Ai_IsMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state)
-{
-    return state->historyMask == 0xFF ? Battle_Ai_HasRepeatingMovementHistory(state) : 0;
-}
-
-// decomp: BATTLE.PRG func_800D9538 (src/BATTLE/BATTLE.PRG/6FC00.c:1178)
-void Battle_Ai_SaveMovementRandomState(void) { Battle_Ai_savedMovementRandomState = *(int*)((uintptr_t)&Battle_Ai_FrameState()->randomState); }
-
-// decomp: BATTLE.PRG func_800DB0BC (src/BATTLE/BATTLE.PRG/71618.c:1212)
-int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
-{
-    u_char directions[4];
-    u_int probe;
-    u_int angle;
-    u_int quadrant;
-    int first;
-    int second;
-    int i;
-
-    if (Battle_Ai_arenaOrbit == NULL) {
-        if ((state->tile.word & 0xFF00FF) == (state->previousTile.word & 0xFF00FF)) {
-            state->isStuck = 1;
-            if (state->detourStep == 0) {
-                angle = VS::Core::Math::Arctangent2(state->x - state->destination.tile.tileX * 128 - 64,
-                    state->z - state->destination.tile.tileZ * 128 - 64);
-                angle &= 0xFFF;
-                first = (angle >> 9) & 7;
-                second = ((angle >> 9) + 2) & 7;
-                quadrant = angle >> 10;
-                if (((angle & 0x3FF) > 512 ? ((quadrant + 1) & 3) * 2 : quadrant * 2)
-                    == first) {
-                    directions[0] = first;
-                    directions[1] = second;
-                } else {
-                    directions[0] = second;
-                    directions[1] = first;
-                }
-                if (VS::Battle::Ai::NextLiveActorRandomMasked(2)) {
-                    directions[2] = (first + 4) & 7;
-                    directions[3] = (second + 4) & 7;
-                } else {
-                    directions[2] = (second + 4) & 7;
-                    directions[3] = (first + 4) & 7;
-                }
-                *(u_int*)state->detourDirections = *(u_int*)directions;
-                probe = 0;
-                for (i = 0; i < 4; ++i) {
-                    ((u_char*)&probe)[0] = state->tile.tile.tileX
-                                         + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[directions[i]].dx;
-                    ((u_char*)&probe)[2] = state->tile.tile.tileZ
-                                         + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[directions[i]].dz;
-                    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, probe) > 0) {
-                        state->detourStep = i;
-                        break;
-                    }
-                }
-                state->detourStep++;
-            }
-            if (state->detourStep >= 5) {
-                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((void*)state));
-                state->opaque1C = 0;
-                state->detourStep = 0;
-                return 0;
-            }
-            state->destination.tile.tileX =
-                state->tile.tile.tileX
-                + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[state->detourDirections[state->detourStep
-                                                                      - 1]]
-                      .dx;
-            state->destination.tile.tileZ =
-                state->tile.tile.tileZ
-                + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[state->detourDirections[state->detourStep
-                                                                      - 1]]
-                      .dz;
-            state->movementTarget = state->opaqueFB;
-            if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, state->destination.word) > 0) {
-                VS::Battle::Ai::DispatchLiveAiLocomotionMode(state, 0, 0);
-            } else {
-                state->detourStep++;
-            }
-            return 1;
-        }
-        state->detourStep = 0;
-    }
-    return 0;
-}
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:794
 #define OBSTRUCTION_CACHE ((Battle_Ai_ObstructionCache*)((uintptr_t)&Battle_Ai_FrameState()->directionCache))

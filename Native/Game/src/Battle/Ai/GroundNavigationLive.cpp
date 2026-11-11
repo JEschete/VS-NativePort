@@ -13,6 +13,7 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
+#include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -463,7 +464,7 @@ class LiveGroundWorld final : public LiveGroundRoom {
                                                 std::uint32_t angle) override {
     std::uint32_t tile = 0;
     Run(navigator, [&](Battle_Ai_ActorAiState& state) {
-      tile = Battle_Ai_FindAdjacentMovementDestination(
+      tile = FindLiveAdjacentMovementDestination(
           reinterpret_cast<Battle_Ai_MoveTargetView*>(&state), first, second,
           angle);
     });

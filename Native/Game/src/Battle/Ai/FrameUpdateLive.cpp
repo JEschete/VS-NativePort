@@ -7,6 +7,8 @@
 #include <cstring>
 #include <optional>
 
+#include "Battle/Ai/BlockedMovementLive.hpp"
+
 extern "C" {
 
 #include "Actors/ActorAllocation.h"
@@ -104,7 +106,9 @@ class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
   void UpdatePerception() override { Battle_Ai_UpdateActorPerception(); }
   void UpdateDecisions() override { Battle_Ai_UpdateActorDecisions(); }
   void AnimateEngagement() override { Battle_Ai_AnimateEngagementPhase(); }
-  void SaveRandomState() override { Battle_Ai_SaveMovementRandomState(); }
+  void SaveRandomState() override {
+    VS::Battle::Ai::SaveLiveMovementRandomState();
+  }
 };
 }  // namespace
 
