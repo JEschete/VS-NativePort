@@ -66,7 +66,9 @@ See [Stopping Point](#stopping-point) for the current state and the next group.
 - **900 functions remain** (after the perception group in `33ad4f3e`).
   Modernization: 2,844 done of 3,744. C++ promotion: 2,845 promoted plus one
   frame-orchestrator WIP. These are separate measures. Row 28 has 10
-  generated functions left.
+  generated functions left. [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv)
+  lists all 900, with purpose, location, plan row and status, as a snapshot at
+  `44fa8847`. No tool refreshes it yet, so it goes stale with each promotion.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
   than `6c8ac0b9`.

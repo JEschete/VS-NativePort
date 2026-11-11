@@ -91,6 +91,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ledgers", "ledgers", "{B9B1
 		Docs\ledgers\MODERNIZATION_LEDGER.csv = Docs\ledgers\MODERNIZATION_LEDGER.csv
 		Docs\ledgers\NATIVE_SYMBOL_REVIEW.csv = Docs\ledgers\NATIVE_SYMBOL_REVIEW.csv
 		Docs\ledgers\PROMOTION_PLAN.csv = Docs\ledgers\PROMOTION_PLAN.csv
+		Docs\ledgers\REMAINING_FUNCTIONS.csv = Docs\ledgers\REMAINING_FUNCTIONS.csv
 		Docs\ledgers\SDK_API_LEDGER.md = Docs\ledgers\SDK_API_LEDGER.md
 		Docs\ledgers\SOURCE_FILE_LEDGER.md = Docs\ledgers\SOURCE_FILE_LEDGER.md
 		Docs\ledgers\SUMMARY.md = Docs\ledgers\SUMMARY.md

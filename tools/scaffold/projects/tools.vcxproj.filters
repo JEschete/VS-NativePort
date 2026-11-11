@@ -2034,6 +2034,12 @@
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\perception.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\perception_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\radial_movement.py">
       <Filter>tools\port\differentials</Filter>
     </None>

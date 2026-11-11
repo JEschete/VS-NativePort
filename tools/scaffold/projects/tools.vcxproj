@@ -354,6 +354,8 @@
     <None Include="..\..\port\differentials\height_filter_driver.cpp" />
     <None Include="..\..\port\differentials\obstacle_detour.py" />
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp" />
+    <None Include="..\..\port\differentials\perception.py" />
+    <None Include="..\..\port\differentials\perception_driver.cpp" />
     <None Include="..\..\port\differentials\radial_movement.py" />
     <None Include="..\..\port\differentials\radial_movement_driver.cpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
