@@ -30,6 +30,14 @@
 - Discover available tools before relying on them. Proposed harness operations in [Decomp Process.md](../Docs/Decomp%20Process.md) are not implemented commands. Do not initialize tools, rewrite agent guidance or configure outbound sync as an incidental step.
 - If repeated attempts produce no new evidence, record the failed approaches, blocker and next observation needed. Preserve a concise handoff instead of repeating the same investigation or weakening the acceptance criteria.
 
+## Promotion Throughput (C++ promotions, #276)
+The owner ruled that 33-63 minutes per promoted function is unacceptable. Promote functions this way:
+- **Group related functions.** Promote 4-8 related functions (for example F01814-F01817, navigation) per commit. Each function still gets its own Catch2 tests, its own differential against the original MIPS code and its own detected mutants; the builds, regression replays, ledgers, commit and CI are shared by the group.
+- **Use the shared differential.** `python tools\port\differential.py <case>` runs the original instructions in the repository's R3000 interpreter against a native driver. A case is `tools\port\differentials\<case>.py` plus `<case>_driver.cpp`; [actor_settings.py](../tools/port/differentials/actor_settings.py) is the reference example. A case without mutants fails. Do not write per-function scratch interpreters.
+- **Script the bookkeeping.** `python tools\port\promote.py show|scaffold|register|prune-adaptations|ledgers` does the copier registration, `owned.csv`, the `gen_solution.py` C-header list, the stale `cpp_adaptations.json` hunks, the ledger rows and the ledger sync/check. Edit those files by hand only for what the tool reports it cannot do.
+- **No duplicate local checks.** Iterate with `python tools\test\promotion_check.py iterate --focused "<tags>"` (Debug VS.Tests only). Run `promotion_check.py group --focused "<tags>"` once per group: copier stability, both builds, both `regression.py check` runs, focused tests, copier tests and changed-file tidy, with the Release build overlapping the Debug regression. Do not replay the GitHub CI workflow locally; CI runs the tool tests and source-quality checks on the pushed revision.
+- **Overlap the waiting.** While builds, the group check or CI run, prepare the next function's analysis, case file and tests instead of idling.
+
 ## Validation and Handoff
 - Use existing build, Catch2 test selections and [quality checks](../Docs/QUALITY.md). Run the smallest checks that cover the change; expand for shared interfaces, state or lifecycle. Do not weaken tests, expected outputs or quality baselines to make an unexplained failure pass.
 - For generator changes, check output correctness, ownership preservation and stability on a second generation run. Do not regenerate over conflicting local edits.

@@ -38,6 +38,10 @@ jobs:
         run: python tools/port/test_scene_trace_fixups.py
       - name: Verify module symbol extents
         run: python tools/port/test_module_symbol_extents.py
+      - name: Verify the MIPS differential interpreter
+        run: python tools/port/test_differential.py
+      - name: Verify promotion bookkeeping
+        run: python tools/port/test_promote.py
       - name: Verify naming contracts
         run: python -m unittest discover -s tools\naming -p test_*.py -v
       - name: Verify external player contracts
@@ -52,6 +56,8 @@ jobs:
         run: python -m unittest discover -s tools\ledger -p test_hazards.py -v
       - name: Verify regression controls
         run: python -m unittest discover -s tools\test -p test_regression.py -v
+      - name: Verify promotion check controls
+        run: python -m unittest discover -s tools\test -p test_promotion_check.py -v
       - name: Check the modernization ledger
         run: python tools\ledger\modernization.py --check
       - name: Check the platform hazard ledger

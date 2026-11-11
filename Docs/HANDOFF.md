@@ -176,13 +176,20 @@ Written so far:
   entries adapted the F01818 body.
 - `owned.csv` has the F01818 row.
 
-Remaining, in order:
+Remaining, in order (the [Promotion Throughput](#promotion-throughput)
+workflow; `register` already reports the hand-made F01818 registration as
+unchanged apart from placement):
 
-1. Run `gen_solution.py`, then `copy_to_native.py` twice, and compare the
-   hashes. `ActorState.cpp` should lose the F01818 body, `ActorState.h` its
-   declaration, and `ModulePointers.cpp` should bind `0x800E6178` to
-   `CreateLiveActorAiState`.
-2. Add `Native/Tests/src/ActorCreationTests.cpp`:
+1. Done in the working tree on 2026-11-10: `promotion_check.py iterate
+   --generate --focused "[actor-settings]"` ran `gen_solution.py` and the
+   copier (a second copier run changed 0 files), then built the Debug tests
+   with no errors. `ActorState.cpp` lost the F01818 body, `ActorState.h` its
+   declaration, and `ModulePointers.cpp` binds `0x800E6178` to
+   `CreateLiveActorAiState`. The existing `[actor-settings]` tests pass (18
+   cases, 912 assertions).
+2. Add `Native/Tests/src/AiActorCreationTests.cpp`
+   (`promote.py scaffold F01818 --case actor_creation ...` writes the case,
+   driver and test skeletons):
    - pure tests with a fake host that records the call order and state
      snapshots;
    - live tests for Ashley, an auxiliary special actor, a non-AI kind and the
@@ -193,21 +200,18 @@ Remaining, in order:
 3. Re-point the F01812/F01813 copier tests in `test_encounter_fixups.py`
    (around lines 2290-2340, 4212 and 4227) from `ActorState.cpp` to the new
    files, and add an F01818 copier test.
-4. Then run, in order:
-   1. clang-format;
-   2. the Debug and Release builds;
-   3. the focused, AI and full test suites;
-   4. `regression.py check`;
-   5. a differential of the actual original against the core, with mutants;
-   6. the ledgers;
-   7. tidy;
-   8. a CI replay.
-
-   Commit with no attribution, push, confirm exact-revision CI and update #276.
+4. `python tools\port\differential.py actor_creation`: the original at
+   `0x800E6178` against the core, with mutants. Let `func_800E6828` and
+   `func_800E5A74` run; stub the other callees.
+5. Group F01818 with the next related functions if they are ready, then run
+   `promotion_check.py group`, `promote.py ledgers <spec> --summary
+   <summary.json>`, commit with no attribution, push, confirm exact-revision CI
+   and update #276.
 
 No inline assembly remains in `Native`. The differential runs the original
-BATTLE.PRG instructions in a local scratch interpreter purely for behavior
-comparison; it is not shipped code or a repository tool.
+BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
+[differential.py](../tools/port/differential.py), purely for behavior
+comparison; it is not shipped code.
 
 Disk usage: the working tree was about 34 GB and is about 21 GB after the
 owner-approved replay cleanup on 2026-11-10.
@@ -230,6 +234,59 @@ interactive, sequenced, device and cited run (those cited in
 `regression.py check` until #339 is fixed. Removing anything else needs owner
 approval. **Never delete Ghidra, `tools\Base` or `tools\PSX`** (owner
 directive, 2026-11-10).
+
+## Promotion Throughput
+
+The owner ruled 33-63 minutes per promoted function unacceptable (2026-11-10,
+[#340](https://github.com/JEschete/VS-NativePort/issues/340)). The time went
+mostly to serial per-function rounds: two full builds, both full suites, four
+replays, a local CI replay and a CI wait for every function, plus a scratch
+differential rewritten each time. The rules, also in
+`.github\copilot-instructions.md`:
+
+1. **Group 4-8 related functions per commit** (for example F01814-F01817).
+   Each function keeps its own tests, differential and detected mutants; the
+   builds, replays, ledgers, commit and CI are shared.
+2. **One differential tool.**
+   `python tools\port\differential.py <case> [--vectors N] [--no-build]`
+   loads the original module from `Native\data\disc`, runs the case's vectors
+   through the interpreter and the compiled native driver, then checks that
+   each mutant (patched original words) changes a result. A case without
+   mutants fails. Reports go to `build\differential\<case>.log`. The F01813
+   case, [actor_settings.py](../tools/port/differentials/actor_settings.py),
+   reproduces the recorded evidence exactly: 265 instructions, 8,192 vectors,
+   0 mismatches, every mutant detected, about 33 s including the driver
+   build.
+3. **Scripted bookkeeping.** `python tools\port\promote.py`:
+   - `show <id>`: catalog facts and the address range;
+   - `scaffold <id> --case <name> --source <cpp> [--test <cpp> --tag <tag>]`:
+     case, driver and Catch2 skeletons, never overwriting;
+   - `register <id> --typed <name> --source <cpp> [--live <adapter>] --notes
+     <text>`: `NATIVE_HELPER_HEADERS`, `OWNED_CALL_BINDINGS`,
+     `MODULE_BINDING_ENTRIES`, the FIXES removal, `owned.csv` and the
+     `gen_solution.py` C-header list;
+   - `prune-adaptations [--dry-run]`: drops `cpp_adaptations.json` hunks the
+     copier output no longer matches and re-anchors the rest;
+   - `ledgers <spec.json> --summary <summary.json>`: catalog, promotion,
+     verify, gate-slice, modernization and plan rows, then the gates,
+     modernization and hazards sync and check.
+
+   Each command is idempotent; a second run reports nothing to change.
+4. **No duplicate local checks.**
+   `python tools\test\promotion_check.py iterate --focused "<tags>"` builds
+   only the Debug tests. `promotion_check.py group --focused "<tags>"` runs
+   once per group:
+   1. copier stability;
+   2. the Debug build;
+   3. `regression.py check` Debug, overlapped with the Release build;
+   4. `regression.py check` Release;
+   5. the focused tests in both configurations;
+   6. the copier tests and changed-file tidy.
+
+   Logs and `summary.json` go to `build\promotion-check\<mode>-<time>\`. The
+   GitHub CI workflow is not replayed locally.
+5. **Overlap the waiting.** Prepare the next function's analysis, case and
+   tests while builds and CI run.
 
 ## Sources Of Truth
 
@@ -756,10 +813,13 @@ passed; the hazard check and workflow-exit controls now pass as independent step
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
 5. Test the deciding core first, then native/caller/module bindings. Make
    generated changes through the copier or owned registry, never by patching
-   generated output. Remove only adaptations made obsolete by the owned body.
-6. Run focused checks after each change and shared full gates for the coherent
-   milestone. Keep behavior verification, C++ promotion, modernization, and
-   compatibility retirement distinct. Log a newly confirmed defect before fixing it.
+   generated output. Remove only adaptations made obsolete by the owned body
+   (`promote.py prune-adaptations`).
+6. Use the [Promotion Throughput](#promotion-throughput) workflow: focused
+   `promotion_check.py iterate` while editing, one `promotion_check.py group`
+   per 4-8 function group. Keep behavior verification, C++ promotion,
+   modernization, and compatibility retirement distinct. Log a newly confirmed
+   defect before fixing it.
 7. Commit and push scoped verified milestones using the owner's configured
    identity, inspect CI on the exact revision, and close eligible issues only
    with their fixing commit and acceptance evidence. Update #276 promptly.
@@ -778,6 +838,10 @@ Use native Windows PowerShell, serial builds, and bounded operations.
 & .\.venv-3\Scripts\python.exe tools\ledger\hazards.py --sync --check
 & .\.venv-3\Scripts\python.exe tools\port\copy_to_native.py
 & .\.venv-3\Scripts\python.exe tools\scaffold\gen_solution.py
+& .\.venv-3\Scripts\python.exe tools\port\promote.py show F01818
+& .\.venv-3\Scripts\python.exe tools\port\differential.py actor_settings
+& .\.venv-3\Scripts\python.exe tools\test\promotion_check.py iterate --focused "[actor-settings]"
+& .\.venv-3\Scripts\python.exe tools\test\promotion_check.py group --focused "[actor-settings]"
 ```
 
 Build and run Release separately. `regression.py check` does **not** rebuild.
