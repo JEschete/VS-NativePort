@@ -14,8 +14,6 @@
 /tools/.sysdeps
 /tools/python
 /resources/Sydney Losstarot (Dying)
-/Docs/Decomp Process.md
-/Docs/RedditPosts.md
 
 # Local Python virtual environments (including numbered duplicates)
 .venv/

@@ -17,6 +17,9 @@ The backbone sources of truth are, in priority order:
 3. `resources\DataCrystal\` — file format and RAM documentation.
 4. `C:\Tools\RE_Docs\` — prior research notes (`VS_NATIVEPORT_CONTEXT.md`, `Native_Ports\VAGRANT_STORY_TOOLING.md`, `SDL3.md`, `TRACY.md`, `RENDERDOC.md`, `DW4_TOOLING.md`).
 
+`C:\Tools\Decomp Process.md` holds the owner's local notes on a proposed decompilation harness. It is not in the
+repository, and the operations it proposes are not implemented commands.
+
 `resources\rood-reverse-noprompt` is an additional **REFERENCE**, kept as an
 ignored local-only checkout, not a submodule of this repository. Its own Git
 metadata, history and local changes are retained. Existing audit citations pin

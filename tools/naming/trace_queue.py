@@ -3,7 +3,7 @@
 Each row is one item whose meaning static reading did not establish, with what an emulator session needs to
 settle it: the functions that touch it (catalog name and RAM address, for breakpoints) and, where a global
 instance of the owning struct has a fixed address, the watch address of the member (for read/write watchpoints).
-See Docs\\RUNTIME_TRACING.md for the workflow and priorities.
+See https://github.com/JEschete/VS-NativePort/issues/347 for the workflow and priorities.
 
   python tools\\naming\\trace_queue.py
 """

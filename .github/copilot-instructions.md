@@ -27,7 +27,7 @@
 - Trace affected callers, producers, consumers, callbacks and reset/cleanup paths. Reuse existing helpers and read the original source/assembly before guessing behavior or field meanings.
 - When Serena is configured, prefer symbol outlines, bodies and references over repeated whole-file reads. Verify the C/C++ index covers the affected translation units; missing results from an incomplete or stale index are not proof of no callers.
 - When Beads is configured, use `bd prime` and linked issue history to recover context, then explicitly claim work consistent with #4's priorities. Keep Beads for dependencies, discoveries, attempts and handoffs, not duplicate per-function status or a replacement priority tracker.
-- Discover available tools before relying on them. Proposed harness operations in [Decomp Process.md](../Docs/Decomp%20Process.md) are not implemented commands. Do not initialize tools, rewrite agent guidance or configure outbound sync as an incidental step.
+- Discover available tools before relying on them. Proposed harness operations in the owner's local notes (`C:\Tools\Decomp Process.md`, not in the repository) are not implemented commands. Do not initialize tools, rewrite agent guidance or configure outbound sync as an incidental step.
 - If repeated attempts produce no new evidence, record the failed approaches, blocker and next observation needed. Preserve a concise handoff instead of repeating the same investigation or weakening the acceptance criteria.
 
 ## Promotion Throughput (C++ promotions, #276)

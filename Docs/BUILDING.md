@@ -6,8 +6,8 @@ step must update this file in the same commit (plan D19).
 
 > **Recorded checkpoint, not a fresh build claim.** See [HANDOFF.md](HANDOFF.md)
 > for the source revision, uncommitted work, validation scope and current priority.
-> Debug/Release results and exact replay procedures are retained in
-> [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md).
+> Debug/Release results and exact replay procedures are retained in the
+> [archived handoff history](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF_HISTORY.md).
 > Run the commands in sections 4 and 7 for your revision.
 > After the extraction step (§5), `VS.Desktop`
 > runs the original boot and title code: NOW LOADING, the publisher and developer logos, the intro movie with the
@@ -252,7 +252,8 @@ its contents and existing evidence paths unchanged.
 
 Use a dedicated `build\scratch\<experiment>` path for future explicitly
 disposable runs, separate from named evidence runs. Before removing an older
-run, check its citations in [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md),
+run, check its citations in the
+[archived handoff history](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF_HISTORY.md),
 [COMBAT_LAB.md](COMBAT_LAB.md) and the relevant issue. Preserve or deliberately
 archive referenced evidence first; unknown provenance means retain it.
 Do not commit or attach disc-derived captures, audio, dumps or BIOS files.

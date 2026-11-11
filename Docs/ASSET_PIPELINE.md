@@ -96,6 +96,9 @@ Native\data\
 
 The exact file list is generated: `CONTENT_LEDGER.csv` (§9) gives every disc file its output path(s).
 
+`ENEMY_DATA_SCHEME.md`, cited in this document for the enemy catalogs, was removed from the repository; read the
+[archived copy](https://github.com/JEschete/VS-NativePort/blob/0e3ae7d8df169bc684c8155fa44b90e731bb4e69/Docs/ENEMY_DATA_SCHEME.md).
+
 ---
 
 ## 4. Tier 1: executable and overlay tables → JSON catalogs

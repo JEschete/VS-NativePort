@@ -24,6 +24,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemGroup Condition="Exists('C:\Tools')">
+    <None Include="C:\Tools\Decomp Process.md" />
     <None Include="C:\Tools\.vscode\settings.json" />
     <None Include="C:\Tools\Base\Analysis\Ghidra\11.4.2\GettingStarted.md" />
     <None Include="C:\Tools\Base\Analysis\Ghidra\11.4.2\bom.json" />

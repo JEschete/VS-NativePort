@@ -268,7 +268,7 @@ fields). Where it helps this port, without replacing the C++ extractor decision:
   reference that `VS.Extract`'s decoders and the round-trip tests (ASSET_PIPELINE.md §7) compare against.
 - **Naming evidence:** `asset_fields` returns verified field identities for on-disc formats (ZND enemy records,
   MPD, SHP...), which can confirm or correct low/opaque `OnDisc` fields in FIELD_LEDGER.csv with a citation to the
-  Workshop field, alongside runtime tracing (RUNTIME_TRACING.md).
+  Workshop field, alongside runtime tracing (#347).
 - **Development data for 1b:** extracting the few files the title slice needs before the converters exist; such
   output stays under `build\` or `Native\data\` (git-ignored), never in the repo.
 

@@ -555,6 +555,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup Condition="Exists('C:\Tools')">
+    <None Include="C:\Tools\Decomp Process.md">
+      <Filter>C-Tools</Filter>
+    </None>
     <None Include="C:\Tools\.vscode\settings.json">
       <Filter>C-Tools\.vscode</Filter>
     </None>

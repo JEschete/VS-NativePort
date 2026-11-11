@@ -11,7 +11,7 @@ The inventory and strategy counts below describe reference-source usage, not
 current native consumer counts or completed retirement. The opening description
 is the target policy, not a claim that hardware-shaped adapters are already gone.
 Cross-check [SUMMARY.md](SUMMARY.md) and the source-backed
-[EC audit](../EMULATION_COMPATIBILITY_AUDIT.md) before changing a retirement gate.
+[EC register](../NATIVE_SOURCE_PORT_PLAN.md#15-emulation-compatibility-register) before changing a retirement gate.
 
 Strategy: **R** rewrite call sites directly to the modern API during the copy (no shim ever exists);
 **T** temporary shim in `Native/<System>/Legacy/`, translating to the modern API, deleted at 0 uses;

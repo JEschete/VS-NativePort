@@ -212,8 +212,8 @@ Style-only debt in `Legacy` directories and the explicit EC-01/EC-02/EC-03/EC-05
 page-space, SPU-register reset, GTE-state and scratchpad replacements is reported separately in
 `deferred_replacement_style`. The exact paths are in `RETIRING_NATIVE`; owned C
 gameplay code is not automatically a replacement exception. Safety and compiler
-diagnostics from replacement code remain checked. See
-[EMULATION_COMPATIBILITY_AUDIT.md](EMULATION_COMPATIBILITY_AUDIT.md).
+diagnostics from replacement code remain checked. See the
+[EC register](NATIVE_SOURCE_PORT_PLAN.md#15-emulation-compatibility-register).
 
 Existing `VS` subsystem namespaces and decomp-linked C exports/types retain their
 published names. Local identifiers and private C++ state use Google naming.

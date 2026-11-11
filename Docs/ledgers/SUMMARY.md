@@ -70,8 +70,8 @@ Data/type modernization and verification remain separate from function promotion
 
 **Known bookkeeping limits:** 8 `copied=stub` rows remain, all generated; every
 owned function records `copied=x`. Neither is a current executable-stub count.
-Use the source-backed [assembly gap audit](../ASSEMBLY_GAPS.md) and its coverage
-records to distinguish implementations, aliases, partial bodies and remaining
+Use the source-backed assembly gap audit (`python tools\port\audit_assembly_gaps.py`, which writes its report and
+coverage records to `build\quality\assembly-audit`) to distinguish implementations, aliases, partial bodies and remaining
 gaps. Blank `named`, `modernized` or `verified` markers mean unrecorded gates,
 not proof that all code is unnamed, unimplemented or untested.
 
@@ -424,32 +424,23 @@ One finding was a real defect. `char` is unsigned in copied code (`/J`) but sign
 | Ownership | Registered implementation/header and exclusion from generated output |
 | Compilation | Successful builds tied to revision, dirty state and configuration; a stored marker is not a fresh build |
 | C++ promotion | The [plan's promotion checklist](../NATIVE_SOURCE_PORT_PLAN.md#82-promotion-checklist-c--cpp-sets-cpp--yes), not just a `.cpp` suffix |
-| Behavior verification | Exact tests/replays, inputs/assets, result and remaining limits; see [current handoff](../HANDOFF.md) and [historical evidence](../HANDOFF_HISTORY.md) |
-| Architectural retirement | Applicable [EC gates](../EMULATION_COMPATIBILITY_AUDIT.md), migrated consumers and cleanup paths; tracked under #18 and its existing issues |
+| Behavior verification | Exact tests/replays, inputs/assets, result and remaining limits; see [current handoff](../HANDOFF.md) and [historical evidence (archived)](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF_HISTORY.md) |
+| Architectural retirement | Applicable [EC gates](../NATIVE_SOURCE_PORT_PLAN.md#15-emulation-compatibility-register), migrated consumers and cleanup paths; tracked under #18 and its existing issues |
 
 ## Inventory snapshots versus current status
 
-The separate [native symbol review](NATIVE_SYMBOL_REVIEW.csv), completed for
-#148 on 2026-10-27, records 570 individually justified binding/snapshot
-retentions. It complements the existing function/field evidence; it does not
-replace those ledgers or advance their status columns. Each record includes a
-specific binding, rationale, source evidence, normalized-LF source SHA-256 and
-exact identifier positions. Separate reviewed committed/dirty variants prevent
-owner edits from being included in a naming commit or silently approved.
+The native symbol review ledger (`NATIVE_SYMBOL_REVIEW.csv`, written for #148 on
+2026-10-27) has been retired. It was not checked in CI and had drifted to 1,602
+unreviewed records (#273), so it no longer described the source.
+`tools\naming\native_symbol_inventory.py` still lists candidate short or opaque
+native identifiers, but no reviewed ledger exists. The last version is
+[archived](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/ledgers/NATIVE_SYMBOL_REVIEW.csv).
 
-The expanded C/C++ inventory includes implementations, headers, modules and
-inline/template bodies, including all 28 current `.inl` producers. On the final
-dirty source snapshot, all 1,873 lexical occurrences in 362 file/name pairs
-have explicit decisions; the committed snapshot has 1,871 occurrences/361 pairs.
-This intentionally retains meaningful math/SDK names, unused formals,
-declaration-only artifacts and specifically justified mixed/unknown roles.
-It is not a claim that every short spelling or opaque field has a known meaning.
-See [the exact commands and limits](../NAMING_CONVENTIONS.md#116-native-semantic-sweep-148-2026-10-27).
-
-[SOURCE_FILE_LEDGER.md](SOURCE_FILE_LEDGER.md) and
-[SDK_API_LEDGER.md](SDK_API_LEDGER.md) retain reference-inventory counts and
-per-file/per-API gates. Their original-source counts and unchecked boxes are
-not automatically synchronized with native ownership or issue acceptance.
+[SDK_API_LEDGER.md](SDK_API_LEDGER.md) retains reference-inventory counts and
+per-API retirement gates. Its original-source counts and unchecked boxes are
+not automatically synchronized with native ownership or issue acceptance. The
+per-file `SOURCE_FILE_LEDGER.md` was retired because it was never updated after
+generation; use the function ledgers above for status.
 The old summary's 3,679 game-function / 1,489 data-row snapshot is superseded
 by the persisted-ledger counts above.
 
