@@ -34,6 +34,8 @@ void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
 // The tile's blocked-direction bits; nothing without the room's regions or
 // outside them.
 [[nodiscard]] std::optional<std::uint8_t> LiveTerrainRegionCell(int x, int z);
+// The room AI state's walkable tile bounds; nothing without a room AI state.
+[[nodiscard]] std::optional<RoomTileBounds> LiveRoomTileBounds();
 
 // The room-region queries a typed world answers from the frame context.
 template <typename World>

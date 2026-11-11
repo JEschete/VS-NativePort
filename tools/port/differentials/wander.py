@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import random
 
-from differential import MASK, Image, Machine, s16, s32
+from differential import MASK, Image, Machine, pack_fields, s16, s32
 
 ID = "F01741-F01745"
 ENTRY, END = 0x800E1BB8, 0x800E23AC
@@ -68,7 +68,6 @@ FIELDS = (
     ("rate", 0xD8, 1, False), ("goal", 0x11C, 4, False), ("behavior_mode", 0x12D, 1, False),
     ("count", 0x15D, 1, False), ("movement_flags", 0x15E, 2, False), ("destination", 0x168, 4, False),
 )
-FIELD = {name: (offset, size, signed) for name, offset, size, signed in FIELDS}
 # The fields an actor call records, as the driver's Snapshot lists them.
 SNAPSHOT = ("is_stuck", "height_filter", "saved_destination", "phase", "timer", "range_squared", "heading",
             "cooldown", "goal", "behavior_mode", "count", "destination")
@@ -238,17 +237,10 @@ def data_block(v: dict) -> bytes:
     block[BOUNDS - DATA:BOUNDS - DATA + 4] = bytes((max_x, max_z, min_x, min_z))
     object_flags = v["object_flags"] | (FLIES if v["flies"] else 0)
     block[OBJECT - DATA + 8:OBJECT - DATA + 12] = object_flags.to_bytes(4, "little")
-    state = bytearray(v["state"])
-    for name, offset, size, _ in FIELDS:
-        state[offset:offset + size] = (v["fields"][name] & ((1 << size * 8) - 1)).to_bytes(size, "little")
+    state = pack_fields(v["state"], FIELDS, v["fields"])
     state[0x58:0x5C] = OBJECT.to_bytes(4, "little")
     block[STATE - DATA:STATE - DATA + STATE_SIZE] = state
     return bytes(block)
-
-
-def field(machine: Machine, name: str) -> int:
-    offset, size, signed = FIELD[name]
-    return machine.load(STATE + offset, size, signed)
 
 
 def run(machine: Machine, v: dict):
@@ -270,7 +262,7 @@ def run(machine: Machine, v: dict):
         return queues[name].pop(0) if queues[name] else 0
 
     def record(m: Machine, code: int, arguments: tuple[int, ...], actor: bool) -> None:
-        snapshot = [field(m, name) for name in SNAPSHOT] if actor else [0] * len(SNAPSHOT)
+        snapshot = m.load_fields(STATE, FIELDS, SNAPSHOT) if actor else [0] * len(SNAPSHOT)
         if actor and m.r[4] != STATE:
             code += NOT_THE_ACTOR
         records.append([code, *arguments, *([0] * (3 - len(arguments))), *snapshot])
@@ -305,7 +297,7 @@ def run(machine: Machine, v: dict):
     machine.execute(CHOOSE_TILE if v["kind"] == K_TILE else UPDATE)
     observation = {
         "result": s32(machine.r[2]) if v["kind"] == K_TILE else 0,
-        "fields": [field(machine, name) for name, *_ in FIELDS],
+        "fields": machine.load_fields(STATE, FIELDS, [name for name, *_ in FIELDS]),
         "cache": machine.load(DIRECTION_CACHE, 1), "records": records, "stores": machine.stores,
     }
     min_x, min_z, max_x, max_z = v["bounds"]

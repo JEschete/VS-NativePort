@@ -14,6 +14,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
@@ -803,12 +804,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E0918u, 0u, (void*)&Battle_Ai_UpdateFlightGroundTransition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E0A68u, 0u, (void*)&Battle_Ai_UpdateFlightMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1238u, 0u, (void*)&Battle_Ai_UpdateFlightDirectionalMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E1388u, 0u, (void*)&Battle_Ai_ProjectClearRadialDestination, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E153Cu, 0u, (void*)&Battle_Ai_MoveToRadialDestination, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E1764u, 0u, (void*)&Battle_Ai_MoveAwayFromReference, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E24ECu, 0u, (void*)&Battle_Ai_UpdateTargetApproachMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2B2Cu, 0u, (void*)&Battle_Ai_UpdateTargetFacing, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E2CCCu, 0u, (void*)&Battle_Ai_UpdateMovementRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2F5Cu, 0u, (void*)&Battle_Ai_FollowObstacleDetour, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&Battle_Ai_UpdateBossRadialRetreat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&Battle_Ai_IsBossActionReady, 0u, 0u, 0u},
@@ -1746,6 +1743,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E1908u, 0u, (void*)&VS::Battle::Ai::MoveLiveWithHeightFilteredDirections, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1BB8u, 0u, (void*)&VS::Battle::Ai::ChooseNextLiveWanderTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1EACu, 0u, (void*)&VS::Battle::Ai::UpdateLiveWanderMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E1388u, 0u, (void*)&VS::Battle::Ai::ProjectLiveClearRadialDestination, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E153Cu, 0u, (void*)&VS::Battle::Ai::MoveLiveToRadialDestination, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E1764u, 0u, (void*)&VS::Battle::Ai::MoveLiveAwayFromReference, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E2CCCu, 0u, (void*)&VS::Battle::Ai::RecoverLiveMovement, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

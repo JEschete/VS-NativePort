@@ -7,6 +7,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -405,7 +406,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         int deltaZ;
         if (!state->opaque0 || Battle_Ai_IsFlightDirectionObstructed((Battle_Ai_ObstructionView *)((void*)state), 0, 0)) {
         recover:
-            Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)state));
+            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));
             return;
         }
         floorY = state->flightHeight;
@@ -541,7 +542,7 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
     }
 
     if (VS::Battle::Ai::SelectLiveActorVerticalMovementStep(ai_state, &vertical_step, &movement_command) == 0) {
-        Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)ai_state));
+        VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)ai_state));
         return;
     }
 
@@ -550,7 +551,7 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
 
     if (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 5 && *(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 7) {
         VS::Battle::Ai::ReleaseLiveActorAiReservations(ai_state);
-        Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)ai_state));
+        VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)ai_state));
         return;
     }
 
@@ -578,109 +579,6 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
         ai_state->stallCounter = 0;
         VS::Battle::Ai::IssueLiveActorCommand(ai_state, movement_command);
     }
-}
-
-// decomp: BATTLE.PRG func_800E1388 (src/BATTLE/BATTLE.PRG/771A8.c:1330)
-void Battle_Ai_ProjectClearRadialDestination(Battle_Ai_MoveTargetView* state, Battle_Ai_TilePosition source, int angle,
-    unsigned int distance)
-{
-    Battle_Ai_TilePosition dest;
-    int i, x, z, heading;
-    unsigned int step;
-    angle = -angle;
-    angle += 0xC00;
-    heading = angle & 0xFFF;
-    step = distance >> 3;
-
-    for (i = 0; i < 8; i++, distance -= step) {
-        x = ((int)(distance * VS::Core::Math::Cosine(heading)) >> 12) + 64;
-        dest.tile.tileX = (int)(source.tile.tileX * 128 + x) >> 7;
-        z = ((int)(distance * VS::Core::Math::Sine(heading)) >> 12) + 64;
-        dest.tile.tileZ = (int)(source.tile.tileZ * 128 + z) >> 7;
-        if (VS::Battle::Ai::LiveDestinationOccupancy(state, dest.word) > 0) {
-            break;
-        }
-    }
-    if (dest.tile.tileX < Battle_Ai_roomAiState->minTileX) {
-        dest.tile.tileX = Battle_Ai_roomAiState->minTileX;
-    } else if (dest.tile.tileX > Battle_Ai_roomAiState->maxTileX) {
-        dest.tile.tileX = Battle_Ai_roomAiState->maxTileX;
-    }
-    if (dest.tile.tileZ < Battle_Ai_roomAiState->minTileZ) {
-        dest.tile.tileZ = Battle_Ai_roomAiState->minTileZ;
-    } else if (dest.tile.tileZ > Battle_Ai_roomAiState->maxTileZ) {
-        dest.tile.tileZ = Battle_Ai_roomAiState->maxTileZ;
-    }
-    state->destination = dest;
-}
-
-// decomp: BATTLE.PRG func_800E153C (src/BATTLE/BATTLE.PRG/771A8.c:1389)
-void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state, int unused)
-{
-    int distance = state->moveDistance;
-    int angle, i;
-    Battle_Ai_TilePosition dest;
-    if ((state->tile.word & 0xFF00FF) == (state->destination.word & 0xFF00FF)) {
-        goto fallback;
-    }
-    angle = VS::Core::Math::Arctangent2(state->x - state->destination.tile.tileX * 128 - 64,
-        state->z - state->destination.tile.tileZ * 128 - 64);
-    if (VS::Core::Math::SquaredVectorLength(state->destination.tile.tileX * 128 - state->x + 64, 0,
-            state->destination.tile.tileZ * 128 - state->z + 64)
-        > (unsigned int)(distance * distance)) {
-        Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, angle, distance);
-    }
-    if ((state->movementFlags & 6)
-        && (state->opaqueD
-            || VS::Core::Math::SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->destination.word), VS::Core::Math::UnpackTileCoordinate(state->tile.word)) < 16)) {
-        if ((int)(state->savedDestination.word << 8) >= 0) {
-            state->destination = state->savedDestination;
-        }
-        VS::Battle::Ai::MoveLiveActorTowardDestinationTile(state, angle);
-        return;
-    }
-    if (++state->moveAttempts < 6) {
-        goto fallback;
-    }
-    dest = state->destination;
-    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {
-        goto begin;
-    }
-    for (i = 0; i < 4; i++) {
-        dest.tile.tileX = state->destination.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i * 2].dx;
-        dest.tile.tileZ = state->destination.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i * 2].dz;
-        if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {
-            state->destination = dest;
-            goto begin;
-        }
-    }
-    goto fallback;
-begin:
-    state->moveAttempts = 0;
-    state->nextTile = state->destination;
-    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 13);
-    return;
-fallback:
-    Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)state));
-}
-
-// decomp: BATTLE.PRG func_800E1764 (src/BATTLE/BATTLE.PRG/771A8.c:1437)
-void Battle_Ai_MoveAwayFromReference(Battle_Ai_MovementDestinationView* state, int angle)
-{
-    unsigned int previous[1];
-    unsigned int distance;
-    int opposite = (angle + 0x800) & 0xFFF;
-    Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, angle, state->moveDistance);
-    previous[0] = state->destination.word;
-    Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, opposite, state->moveDistance);
-    distance = VS::Core::Math::SquaredVectorLength(state->destination.tile.tileX * 128 - state->moveX + 64, 0,
-        state->destination.tile.tileZ * 128 - state->moveZ + 64);
-    if (distance
-        < VS::Core::Math::SquaredVectorLength(((unsigned char*)&previous)[0] * 128 - state->moveX + 64, 0,
-            ((unsigned char*)&previous)[2] * 128 - state->moveZ + 64)) {
-        state->destination.word = previous[0];
-    }
-    Battle_Ai_MoveToRadialDestination(state, angle);
 }
 
 // decomp: BATTLE.PRG func_800E24EC (src/BATTLE/BATTLE.PRG/771A8.c:1973)
@@ -773,7 +671,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                 s->savedDestination.word = oldPosition;
                 distance = VS::Core::Math::SquareRootInteger(distance);
                 radius = s->range - 96;
-                Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)s), s->tile, angle,
+                VS::Battle::Ai::ProjectLiveClearRadialDestination((Battle_Ai_ActorAiState *)((void*)s), s->tile, angle,
                     distance - (radius >= 0 ? radius : -radius));
                 if ((s->destination.word & 0xFF00FF) == (s->tile.word & 0xFF00FF)) {
                     s->opaqueD = one;
@@ -786,7 +684,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
         case 1:
         recover:
             s->movementTarget = target;
-            Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)s));
+            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)s));
             break;
         case 2:
             s->opaque3 = one;
@@ -914,72 +812,6 @@ int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int ta
     return 1;
 failed:
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800E2CCC (src/BATTLE/BATTLE.PRG/771A8.c:2272)
-void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
-{
-    Battle_Ai_RecoveryModelView* context = state->model;
-    int direction, i, bestHeight, bestDirection, height;
-    unsigned int x, z;
-    unsigned int angle, quadrant;
-    int nx, nz;
-    Battle_Ai_TilePosition source;
-    unsigned char* bounds;
-    if ((context->opaque8 & 0x200000) && state->stallCounter++ > 120 && (state->movementFlags & 6)
-        && (state->movementFlags & 0x30)
-        && VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {
-        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
-        VS::Battle::Ai::BeginLiveAiTerrainMovement(state);
-        return;
-    }
-    if (state->movementTarget != 16) {
-        Battle_Ai_ActorPositionView* actor =
-            (Battle_Ai_ActorPositionView*)Actors_actorRecords[state->movementTarget];
-        direction = VS::Core::Math::Arctangent2(state->x - actor->x, state->z - actor->z) & 0xFFF;
-        state->angle = direction;
-        state->opaque13A = state->duration;
-        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);
-    } else if (state->opaque9) {
-        direction = VS::Core::Math::Arctangent2(state->x - state->targetX, state->z - state->targetZ) & 0xFFF;
-        state->heading = direction;
-        state->opaque13A = state->duration;
-        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 3);
-    } else {
-        bestHeight = (-2147483647 - 1);
-        bestDirection = -1;
-        source = state->tile;
-        x = source.word & 255;
-        z = (source.word >> 16) & 255;
-        angle = context->angle26 + context->angle14;
-        quadrant = (angle & 0xFFF) >> 10;
-        if ((angle & 0x3FF) > 512) {
-            direction = ((quadrant + 1) & 3) * 2;
-        } else {
-            direction = quadrant * 2;
-        }
-        i = 0;
-        bounds = (unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds);
-        for (; i < 4; i++) {
-            direction = (direction + i * 2) & 7;
-            nx = (unsigned char)(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dx);
-            nz = (unsigned char)(z + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dz);
-            if (nx < bounds[0] && nz < bounds[1]) {
-                height = (VS::Field::GroundHeightFlagsAtTile(VS::Battle::Ai::CurrentTerrain(), nx, nz) << 17) >> 17;
-                if (height > bestHeight) {
-                    bestDirection = direction;
-                    bestHeight = height;
-                }
-            }
-        }
-        if (bestDirection < 0) {
-            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 0);
-        } else {
-            state->angle = bestDirection << 9;
-            state->opaque13A = state->duration;
-            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);
-        }
-    }
 }
 
 }  // extern "C"

@@ -59,12 +59,7 @@ int Battle_Ai_CanFlyInDirection(Battle_Ai_DirectionCacheView* state, int directi
 int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, int action, int mode);
 void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int action);
 void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state, int movement_angle);
-void Battle_Ai_ProjectClearRadialDestination(Battle_Ai_MoveTargetView* state, Battle_Ai_TilePosition source, int angle,
-    unsigned int distance);
-void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state, int unused);
-void Battle_Ai_MoveAwayFromReference(Battle_Ai_MovementDestinationView* state, int angle);
 int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int option);
 int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int targetId);
-void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state);
 
 #endif // VS_BATTLE_AI_MOVEMENT_H_DECLS

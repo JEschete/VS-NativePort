@@ -28,7 +28,10 @@ F01721-F01728 route gates and area routing are published in `53d04fe5`
 and the F01708-F01710, F01740, F01746 and F01747 waypoint and area-movement
 group in `7fde4472`
 ([CI 42969176657](https://github.com/JEschete/VS-NativePort/actions/runs/42969176657)).
-The F01738/F01739 height-filter and F01741-F01745 wander group follows it. See
+The F01738/F01739 height-filter and F01741-F01745 wander group is published in
+`8e520fb4`
+([CI 42980477174](https://github.com/JEschete/VS-NativePort/actions/runs/42980477174)),
+and the F01735-F01737 radial-movement and F01750 recovery group follows it. See
 [Stopping Point](#stopping-point) for the next group.
 
 ## Checkpoint
@@ -43,8 +46,8 @@ The F01738/F01739 height-filter and F01741-F01745 wander group follows it. See
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **932 functions remain** (after the height-filter and wander group on
-  `7fde4472`). Modernization: 2,812 done of 3,744. C++ promotion: 2,813
+- **928 functions remain** (after the radial-movement and recovery group on
+  `8e520fb4`). Modernization: 2,816 done of 3,744. C++ promotion: 2,817
   promoted plus one frame-orchestrator WIP. These are separate measures.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
@@ -142,66 +145,77 @@ The F01738/F01739 height-filter and F01741-F01745 wander group follows it. See
 
 ## Stopping Point
 
-HEAD `7fde4472` (waypoints and area movement) is pushed and green
-([CI 42969176657](https://github.com/JEschete/VS-NativePort/actions/runs/42969176657)).
-The commit after it holds the height-filter and wander group:
+HEAD `8e520fb4` (height filter and wander) is pushed and green
+([CI 42980477174](https://github.com/JEschete/VS-NativePort/actions/runs/42980477174)).
+The commit after it holds the radial movement group:
 
-- F01738 `FilterDirectionsByGroundHeight` and F01739
-  `MoveWithHeightFilteredDirections` live in `AreaRoute`, with the
-  `MoveLiveWithHeightFilteredDirections` binding in `AreaRouteLive`. F01741
-  `WanderDirectionStep`, F01742 `ChooseNextWanderTile`, F01743
-  `RandomWanderHeading`, F01744 `StartWanderWalk` and F01745
-  `UpdateWanderMovement` live in the new pure `Wander` module with the checked
-  `WanderLive` binding. The generated callers, `GroundNavigationLive.cpp` and
-  `MovementBehaviorLive.cpp` use the live bindings.
-- The live worlds share `LiveDirectionCodes`, `LiveHasRoomData`,
-  `LiveTerrainRegionCell` and the `LiveRoomRegions<World>` mixin in
-  `FrameUpdateLive`, which removed the duplicated room-region overrides.
-- Differentials in `tools\port\differentials`:
-  - `height_filter`: 107 instructions (0x800E1850-0x800E19F8).
-  - `wander`: 509 instructions (0x800E1BB8-0x800E23A8). It stubs the walk
-    and flight direction checks, F01735 and F01750 at their original addresses.
-  - Together: 8,192 vectors, 0 mismatches, 58/58 mutants. The reruns of
-    `area_route` (28/28) and `area_movement` (21/21) still pass.
-- Focused `[height-filter],[wander]`: 50 cases, 325 assertions; the group
-  selection has 155 cases and 1,521 assertions. Full suite: 5,474 cases,
-  12,649,874 assertions in Debug and Release; the replays matched the
-  baseline. Changed-file quality: 48 existing tidy findings, 0 new.
-- A native broken variant of each function fails its tests (F01738 4 cases,
-  F01739 2, F01741 4, F01742 1, F01743 7, F01744 2, F01745 2).
-- One deliberate difference: for a negative roaming heading the original
-  F01745 read a stale byte before the direction codes (0x1F8003EB); native
-  uses direction 7, which the heading points along. 147 vectors reach it.
+- F01735 `ProjectClearRadialDestination`, F01736 `MoveToRadialDestination`,
+  F01737 `MoveAwayFromReference` and F01750 `UpdateMovementRecovery` live in
+  the new pure `RadialMovement` module. The checked `RadialMovementLive`
+  bindings are `ProjectLiveClearRadialDestination`,
+  `MoveLiveToRadialDestination`, `MoveLiveAwayFromReference` and
+  `RecoverLiveMovement`; they keep the original module addresses 0x800E1388,
+  0x800E153C, 0x800E1764 and 0x800E2CCC. `RoomTileBounds` moved to
+  `NavigationPrimitives` and `LiveRoomTileBounds` to `FrameUpdateLive`, shared
+  with `Wander`.
+- The generated callers in `Behavior.cpp`, `OrbitingBoss.cpp`,
+  `Perception.cpp` and `Movement.cpp`, and the `GroundNavigationLive` and
+  `WanderLive` hooks, call the bindings. The four old symbols had 33
+  references at `8e520fb4` and have none now.
+- #341: the original projection kept bytes 1 and 3 of its caller's `$s0` in
+  the destination, and the generated copy stored indeterminate bytes there.
+  Native writes zero; no consumer reads them. The differential seeds `$s0`
+  with zero for direct projections and ignores those bytes after F01736 and
+  F01737.
+- The `radial_movement` differential covers 470 original instructions
+  (0x800E1388-0x800E184C and 0x800E2CCC-0x800E2F58): 4,096 vectors, 0
+  mismatches, 39/39 mutants. The planned `quadrant-not-wrapped` mutant was
+  equivalent, because the loop masks the direction with 7 at 0x800E2E78; it was
+  replaced by `quadrant-wrapped-to-1`. The `wander` rerun still passes (4,096
+  vectors, 43/43 mutants). `differential.py` gained `pack_fields` and
+  `Machine.load_fields`, which both cases share.
+- Focused `[radial-movement]`: 26 cases, 197 assertions; the group selection
+  has 209 cases and 796,358 assertions. Full suite: 5,500 cases, 12,650,071
+  assertions in Debug and Release; the replays matched the baseline.
+  Changed-file quality: 48 existing tidy findings, 0 new.
+- A native broken variant of each function fails its tests (F01735 6 cases,
+  F01736 3, F01737 1, F01750 1).
 
-Next group: F01735-F01737 radial destinations and F01750 movement recovery
-(`771A8.c:1330-1452` and `2272-2335`; 0x800E1388-0x800E1850 and
-0x800E2CCC-0x800E2F40). The design:
+Next group: blocked movement and movement history, F01636, F01641, F01642,
+F01644 and F01660. The design:
 
-- F01735 `ProjectClearRadialDestination` walks eight shrinking distances along
-  the heading until the occupancy check passes, then clamps the tile to the
-  room bounds. The original builds the destination in `$s0` and writes only
-  the x and z bytes; the tag and top bytes keep the caller's register (move
-  distance from F01736, the opposite angle from F01737), and the generated
-  copy reads them uninitialized. No consumer reads them; native zeroes them,
-  and the differential seeds `$s0` to match.
-- F01736 `MoveToRadialDestination` projects when the destination is farther
-  than the move distance. With movement flags 0x6 and either state byte 0xD or
-  a destination within four tiles, it restores the saved destination (when its
-  z byte is below 0x80) and defers to `MoveActorTowardDestinationTile`.
-  Otherwise it retries the
-  destination and its four even neighbours after six attempts before issuing
-  command 13. F01737 `MoveAwayFromReference` keeps the projection farther from
-  the reference point.
-- F01750 `UpdateMovementRecovery` releases the reservations and restarts
-  terrain movement after 120 stalled ticks for a model with flag 0x200000. It
-  otherwise turns towards the movement target or the target point, or picks
-  the highest neighbouring ground in four directions (the original's
-  cumulative `direction += i * 2` visits d, d+2, d+6, d+4).
-- A new typed `RadialMovement` module with a world over the direction codes,
-  room bounds, terrain, model, actor positions, occupancy and the command
-  primitives. The generated callers in `Behavior.cpp`, `OrbitingBoss.cpp`,
-  `Perception.cpp` and `Movement.cpp` and the `GroundNavigationLive` and
-  `WanderLive` hooks move to the live bindings.
+- F01636 `FindAdjacentMovementDestination` (`6FC00.c:430`, 0x800D8400)
+  returns 0 for a disabled mover. With equal directions it probes the given
+  direction; otherwise it probes the nearest axis direction to the heading
+  (rounded up past 512 in the quadrant) and then `first`, or `second` when
+  `first` is that axis. Each probe checks the edge
+  (`CanTraverseLiveTileEdge`). A clear edge then asks occupancy: negative is
+  blocked, nonzero returns the tile, and zero returns 0. A blocked edge returns
+  blocked, and any other result tries the gap landing, where status 1 returns
+  and nonzero is blocked. The result clears the tag byte, and blocked sets
+  status 2.
+- F01641 `HasRepeatingMovementHistory` and F01642 `IsMovementHistoryStalled`
+  are inlined in func_800D8EF4 at 0x800D927C-0x800D92B8 (15 instructions).
+  The history is stalled when the mask (0x81) is 0xFF and both halves of the
+  x history (0x70/0x74) and the z history (0x78/0x7C) repeat. They are
+  verified like F01700-F01703, by interpreting that inlined range.
+- F01644 `SaveMovementRandomState` (0x800D9538, 5 instructions) copies the
+  scratch random state at 0x1F8003F8 to `Battle_Ai_savedMovementRandomState`
+  (0x800F58C4). Its callers are `FrameUpdateLive` and
+  `NavigationPrimitivesLive`.
+- F01660 `TryRecoverBlockedMovement` (`71618.c:1212`, 0x800DB0BC) only acts
+  without the arena orbit and when the tile's x and z equal the previous
+  tile's. It then marks the mover stuck. At detour step 0 it picks the two
+  lateral directions from the angle to the destination's tile centre and their
+  opposites, in an order drawn from `NextLiveActorRandomMasked(2)`, stores the
+  four directions, and records the first one whose neighbour is free (step
+  index plus one). At step 5 or more it forgets the target, clears 0x1C and
+  the step, and returns 0. Otherwise it moves the destination to the detour
+  neighbour and copies 0xFB to the movement target. A free destination
+  dispatches locomotion mode 0; otherwise the step advances. It returns 1
+  while detouring.
+- The nearest-axis rounding is shared by F01636, F01660 and the existing
+  `FacingAxisDirection` in `RadialMovement.cpp`. Extract one helper.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -794,14 +808,15 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Continue with the F01735-F01737/F01750 radial-destination and
-   movement-recovery group from the [Stopping Point](#stopping-point), then
+2. Continue with the F01636/F01641/F01642/F01644/F01660 blocked-movement and
+   movement-history group from the [Stopping Point](#stopping-point), then
    update #276. Keep #337 open until its in-game reachability is established.
-   Do not close #276: 932 remain.
-3. Continue ordered row 28 with Behavior, Movement, the rest of Navigation
-   (F01636 and F01751), OrbitingBoss and Perception as listed by
+   Do not close #276: 928 remain.
+3. Continue ordered row 28 with the flight group (F01729, F01730,
+   F01732-F01734), then target approach, facing and detour (F01748, F01749,
+   F01751), Behavior, Movement, OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01708-F01710/F01716/F01717/F01721-F01728/F01738-F01747/F01793/
+   F01708-F01710/F01716/F01717/F01721-F01728/F01735-F01747/F01750/F01793/
    F01810-F01818 are verified dependencies, not proof of remaining AI behavior
    or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
@@ -852,7 +867,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 932 functions complete.
+  match delivered scope. Do not declare the remaining 928 functions complete.
 - Never delete Ghidra, `tools\Base` or `tools\PSX` to save space, even where
   they mirror `C:\Tools`. Delete other local data only with owner approval.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.

@@ -73,6 +73,15 @@ struct NavigationStep {
   return {.dx = component(code), .dz = component(code >> kZShift)};
 }
 
+// The room's walkable tile bounds (the room AI state's first four bytes,
+// D_800F58BC), inclusive.
+struct RoomTileBounds {
+  std::uint8_t min_x = 0;
+  std::uint8_t min_z = 0;
+  std::uint8_t max_x = 0;
+  std::uint8_t max_z = 0;
+};
+
 // decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/7BDD4.s:542).
 // Reserves a destination tile; nothing without a flag map. False refuses a
 // tile outside the grid.

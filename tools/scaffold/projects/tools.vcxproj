@@ -339,8 +339,12 @@
     <None Include="..\..\port\differentials\area_route.py" />
     <None Include="..\..\port\differentials\area_route_driver.cpp" />
     <None Include="..\..\port\differentials\area_route_world.hpp" />
+    <None Include="..\..\port\differentials\height_filter.py" />
+    <None Include="..\..\port\differentials\height_filter_driver.cpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
+    <None Include="..\..\port\differentials\wander.py" />
+    <None Include="..\..\port\differentials\wander_driver.cpp" />
     <None Include="..\..\port\differentials\waypoint_patrol.py" />
     <None Include="..\..\port\differentials\waypoint_patrol_driver.cpp" />
     <None Include="..\..\port\differentials\waypoint_search.py" />

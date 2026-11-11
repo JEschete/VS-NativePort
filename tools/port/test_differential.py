@@ -69,6 +69,18 @@ class Arithmetic(unittest.TestCase):
     def test_zero_register_stays_zero(self) -> None:
         self.assertEqual(run(addiu(ZERO, ZERO, 5), JR_RA, NOP).r[ZERO], 0)
 
+    def test_pack_fields_truncates_each_field_to_its_size(self) -> None:
+        fields = (("byte", 0, 1, False), ("half", 2, 2, True), ("word", 4, 4))
+        packed = differential.pack_fields(bytes(range(10)), fields,
+                                          {"byte": 0x1FF, "half": -2, "word": 0x12345678})
+        self.assertEqual(packed, bytearray([0xFF, 1, 0xFE, 0xFF, 0x78, 0x56, 0x34, 0x12, 8, 9]))
+
+    def test_load_fields_reads_named_fields_with_their_sign(self) -> None:
+        machine = Machine(image(NOP))
+        machine.store(DATA, bytes([0xFF, 1, 0xFE, 0xFF, 0x78, 0x56, 0x34, 0x12]))
+        fields = (("byte", 0, 1, False), ("half", 2, 2, True), ("word", 4, 4, False))
+        self.assertEqual(machine.load_fields(DATA, fields, ("word", "half", "byte")), [0x12345678, -2, 0xFF])
+
     def test_multiply_and_divide(self) -> None:
         m = run(r_type(0x18, rs=A0, rt=A1), r_type(0x12, V0), r_type(0x10, V1), r_type(0x19, rs=A2, rt=A3),
                 r_type(0x12, T0), r_type(0x10, T1), JR_RA, NOP, a0=-2, a1=3, a2=MASK, a3=2)

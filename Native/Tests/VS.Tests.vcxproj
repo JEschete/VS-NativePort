@@ -74,6 +74,7 @@
     <ClCompile Include="src\AiLifecycleLeafTests.cpp" />
     <ClCompile Include="src\AiNavigationPrimitivesTests.cpp" />
     <ClCompile Include="src\AiPlanningTests.cpp" />
+    <ClCompile Include="src\AiRadialMovementTests.cpp" />
     <ClCompile Include="src\AiRelationsTests.cpp" />
     <ClCompile Include="src\AiSessionResetTests.cpp" />
     <ClCompile Include="src\AiSpecialTerrainTests.cpp" />

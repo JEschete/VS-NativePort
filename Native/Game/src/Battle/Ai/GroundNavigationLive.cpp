@@ -17,6 +17,7 @@
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -403,10 +404,8 @@ class LiveGroundWorld final : public LiveGroundRoom {
   }
 
   void Recover(GroundNavigator& navigator) override {
-    Run(navigator, [](Battle_Ai_ActorAiState& state) {
-      Battle_Ai_UpdateMovementRecovery(
-          reinterpret_cast<Battle_Ai_MovementRecoveryView*>(&state));
-    });
+    Run(navigator,
+        [](Battle_Ai_ActorAiState& state) { RecoverLiveMovement(&state); });
   }
   void IssueCommand(GroundNavigator& navigator, int intent) override {
     Run(navigator, [intent](Battle_Ai_ActorAiState& state) {
@@ -437,12 +436,12 @@ class LiveGroundWorld final : public LiveGroundRoom {
   }
   void MoveToRadialDestination(GroundNavigator& navigator, int angle) override {
     Run(navigator, [angle](Battle_Ai_ActorAiState& state) {
-      Battle_Ai_MoveToRadialDestination(DestinationView(state), angle);
+      MoveLiveToRadialDestination(&state, angle);
     });
   }
   void MoveAwayFromReference(GroundNavigator& navigator, int angle) override {
     Run(navigator, [angle](Battle_Ai_ActorAiState& state) {
-      Battle_Ai_MoveAwayFromReference(DestinationView(state), angle);
+      MoveLiveAwayFromReference(&state, angle);
     });
   }
   int FollowObstacleDetour(GroundNavigator& navigator, bool flight,
@@ -481,10 +480,6 @@ class LiveGroundWorld final : public LiveGroundRoom {
  private:
   static Battle_Ai_TerrainMoveView* TerrainView(Battle_Ai_ActorAiState& state) {
     return reinterpret_cast<Battle_Ai_TerrainMoveView*>(&state);
-  }
-  static Battle_Ai_MovementDestinationView* DestinationView(
-      Battle_Ai_ActorAiState& state) {
-    return reinterpret_cast<Battle_Ai_MovementDestinationView*>(&state);
   }
 
   template <typename Operation>

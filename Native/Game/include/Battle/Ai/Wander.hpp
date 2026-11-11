@@ -41,13 +41,7 @@ struct WanderActor {
   friend bool operator==(const WanderActor&, const WanderActor&) = default;
 };
 
-// The room's walkable tile bounds (D_800F58BC), inclusive.
-struct WanderRoomBounds {
-  std::uint8_t min_x = 0;
-  std::uint8_t min_z = 0;
-  std::uint8_t max_x = 0;
-  std::uint8_t max_z = 0;
-};
+using WanderRoomBounds = RoomTileBounds;
 
 // The room, the actor random stream and the movement primitives the wander
 // uses. Each call taking the actor may read and change it.

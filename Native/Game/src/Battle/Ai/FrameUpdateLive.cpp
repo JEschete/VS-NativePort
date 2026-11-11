@@ -213,4 +213,12 @@ std::optional<std::uint8_t> LiveTerrainRegionCell(int x, int z) {
   }
   return *cell;
 }
+
+std::optional<RoomTileBounds> LiveRoomTileBounds() {
+  if (Battle_Ai_roomAiState == nullptr) return std::nullopt;
+  return RoomTileBounds{.min_x = Battle_Ai_roomAiState->minTileX,
+                        .min_z = Battle_Ai_roomAiState->minTileZ,
+                        .max_x = Battle_Ai_roomAiState->maxTileX,
+                        .max_z = Battle_Ai_roomAiState->maxTileZ};
+}
 }  // namespace VS::Battle::Ai

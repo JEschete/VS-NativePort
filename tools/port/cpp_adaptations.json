@@ -136,11 +136,11 @@
 281,
 [
 "                VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);",
-"                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
+"                VS::Battle::Ai::RecoverLiveMovement((void*)state);"
 ],
 [
 "                VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));",
-"                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));"
+"                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -182,19 +182,19 @@
 [
 355,
 [
-"                    Battle_Ai_ProjectClearRadialDestination((void*)state, tile,"
+"                    VS::Battle::Ai::ProjectLiveClearRadialDestination((void*)state, tile,"
 ],
 [
-"                    Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), tile,"
+"                    VS::Battle::Ai::ProjectLiveClearRadialDestination((Battle_Ai_ActorAiState *)((void*)state), tile,"
 ]
 ],
 [
 375,
 [
-"            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
+"            VS::Battle::Ai::RecoverLiveMovement((void*)state);"
 ],
 [
-"            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));"
+"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -264,11 +264,11 @@
 415,
 [
 "                VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);",
-"                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
+"                VS::Battle::Ai::RecoverLiveMovement((void*)state);"
 ],
 [
 "                VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));",
-"                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));"
+"                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -413,10 +413,10 @@
 [
 408,
 [
-"            Battle_Ai_UpdateMovementRecovery((void*)state);"
+"            VS::Battle::Ai::RecoverLiveMovement((void*)state);"
 ],
 [
-"            Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)state));"
+"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -494,86 +494,23 @@
 [
 544,
 [
-"        Battle_Ai_UpdateMovementRecovery((void*)ai_state);"
+"        VS::Battle::Ai::RecoverLiveMovement((void*)ai_state);"
 ],
 [
-"        Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)ai_state));"
+"        VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)ai_state));"
 ]
 ],
 [
 553,
 [
-"        Battle_Ai_UpdateMovementRecovery((void*)ai_state);"
+"        VS::Battle::Ai::RecoverLiveMovement((void*)ai_state);"
 ],
 [
-"        Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)ai_state));"
+"        VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)ai_state));"
 ]
 ],
 [
-631,
-[
-"        Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, angle, distance);"
-],
-[
-"        Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, angle, distance);"
-]
-],
-[
-646,
-[
-"    if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, dest.word) > 0) {"
-],
-[
-"    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {"
-]
-],
-[
-652,
-[
-"        if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, dest.word) > 0) {"
-],
-[
-"        if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {"
-]
-],
-[
-661,
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 13);"
-],
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 13);"
-]
-],
-[
-664,
-[
-"    Battle_Ai_UpdateMovementRecovery((void*)state);"
-],
-[
-"    Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)state));"
-]
-],
-[
-673,
-[
-"    Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, angle, state->moveDistance);"
-],
-[
-"    Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, angle, state->moveDistance);"
-]
-],
-[
-675,
-[
-"    Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, opposite, state->moveDistance);"
-],
-[
-"    Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, opposite, state->moveDistance);"
-]
-],
-[
-969,
+590,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"
 ],
@@ -582,25 +519,25 @@
 ]
 ],
 [
-1052,
+673,
 [
-"                Battle_Ai_ProjectClearRadialDestination((void*)s, s->tile, angle,"
+"                VS::Battle::Ai::ProjectLiveClearRadialDestination((void*)s, s->tile, angle,"
 ],
 [
-"                Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)s), s->tile, angle,"
+"                VS::Battle::Ai::ProjectLiveClearRadialDestination((Battle_Ai_ActorAiState *)((void*)s), s->tile, angle,"
 ]
 ],
 [
-1065,
+686,
 [
-"            Battle_Ai_UpdateMovementRecovery((void*)s);"
+"            VS::Battle::Ai::RecoverLiveMovement((void*)s);"
 ],
 [
-"            Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)s));"
+"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)s));"
 ]
 ],
 [
-1100,
+721,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -609,7 +546,7 @@
 ]
 ],
 [
-1120,
+741,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -618,7 +555,7 @@
 ]
 ],
 [
-1150,
+771,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)context, 0);"
 ],
@@ -627,74 +564,27 @@
 ]
 ],
 [
-1189,
+810,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)context, 4);"
 ],
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)context), 4);"
 ]
-],
-[
-1207,
-[
-"        && VS::Battle::Ai::LiveDestinationOccupancy((void*)state, state->tile.word) > 0) {",
-"        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
-],
-[
-"        && VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {",
-"        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-1218,
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
-],
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);"
-]
-],
-[
-1223,
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 3);"
-],
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 3);"
-]
-],
-[
-1252,
-[
-"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 0);"
-],
-[
-"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 0);"
-]
-],
-[
-1256,
-[
-"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
-],
-[
-"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);"
-]
 ]
 ],
 "Native\\Game\\src\\Battle\\Ai\\OrbitingBoss.cpp": [
 [
-64,
+65,
 [
-"                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
+"                VS::Battle::Ai::RecoverLiveMovement((void*)state);"
 ],
 [
-"                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));"
+"                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
-82,
+83,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -703,7 +593,7 @@
 ]
 ],
 [
-157,
+158,
 [
 "    if (Battle_Ai_IsBossActionReady((void*)state) && VS::Battle::Ai::IsLiveEngagementReady((void*)state)) {"
 ],
@@ -712,7 +602,7 @@
 ]
 ],
 [
-255,
+256,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -721,7 +611,7 @@
 ]
 ],
 [
-283,
+284,
 [
 "        Battle_Ai_UpdateBossOrbitTracking((void*)ai_state);"
 ],
@@ -730,7 +620,7 @@
 ]
 ],
 [
-300,
+301,
 [
 "        if (Battle_Ai_UpdateBossRadialRetreat((void*)ai_state) != 0) {"
 ],
@@ -741,16 +631,16 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
 [
-358,
+359,
 [
-"            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_MovementRecoveryView*)state);"
+"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_MovementRecoveryView*)state);"
 ],
 [
-"            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((Battle_Ai_MovementRecoveryView*)state));"
+"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((Battle_Ai_MovementRecoveryView*)state));"
 ]
 ],
 [
-386,
+387,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -759,7 +649,7 @@
 ]
 ],
 [
-428,
+429,
 [
 "        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);"
 ],
@@ -768,7 +658,7 @@
 ]
 ],
 [
-469,
+470,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -777,7 +667,7 @@
 ]
 ],
 [
-589,
+590,
 [
 "    info = (void*)&Battle_actionDefinitions[app->action];"
 ],
@@ -786,7 +676,7 @@
 ]
 ],
 [
-599,
+600,
 [
 "    other = (void*)Battle_Ai_actorAiStates[source];"
 ],
@@ -795,7 +685,7 @@
 ]
 ],
 [
-654,
+655,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -804,7 +694,7 @@
 ]
 ],
 [
-656,
+657,
 [
 "            firstOther = (void*)Battle_Ai_actorAiStates[id];"
 ],
@@ -813,7 +703,7 @@
 ]
 ],
 [
-672,
+673,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -822,7 +712,7 @@
 ]
 ],
 [
-674,
+675,
 [
 "            other = (void*)Battle_Ai_actorAiStates[actor->id];"
 ],
@@ -831,7 +721,7 @@
 ]
 ],
 [
-676,
+677,
 [
 "                for (candidate = (void*)Battle_actors[0]; candidate;"
 ],
@@ -840,7 +730,7 @@
 ]
 ],
 [
-682,
+683,
 [
 "                        for (ally = (void*)Battle_actors[0]; ally; ally = ally->next) {",
 "                            allyState = (void*)Battle_Ai_actorAiStates[ally->id];"
@@ -2782,13 +2672,11 @@
 ]
 ],
 [
-525,
+526,
 [
-"    VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);",
 "    Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
 ],
 [
-"    VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);",
 "    Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));"
 ]
 ],
@@ -2847,13 +2735,11 @@
 ]
 ],
 [
-881,
+882,
 [
-"            VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);",
 "            Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
 ],
 [
-"            VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);",
 "            Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));"
 ]
 ],

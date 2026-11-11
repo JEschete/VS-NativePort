@@ -585,6 +585,12 @@
     <ClCompile Include="src\Battle\Ai\PlanningWorkspaceLive.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\RadialMovement.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\RadialMovementLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Relations.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2674,6 +2680,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\PlanningWorkspaceLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\RadialMovement.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\RadialMovementLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp">

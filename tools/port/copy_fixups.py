@@ -635,6 +635,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::MoveLiveWithHeightFilteredDirections": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
     "VS::Battle::Ai::ChooseNextLiveWanderTile": r"Native\Game\include\Battle\Ai\WanderLive.hpp",
     "VS::Battle::Ai::UpdateLiveWanderMovement": r"Native\Game\include\Battle\Ai\WanderLive.hpp",
+    "VS::Battle::Ai::ProjectLiveClearRadialDestination": r"Native\Game\include\Battle\Ai\RadialMovementLive.hpp",
+    "VS::Battle::Ai::MoveLiveToRadialDestination": r"Native\Game\include\Battle\Ai\RadialMovementLive.hpp",
+    "VS::Battle::Ai::MoveLiveAwayFromReference": r"Native\Game\include\Battle\Ai\RadialMovementLive.hpp",
+    "VS::Battle::Ai::RecoverLiveMovement": r"Native\Game\include\Battle\Ai\RadialMovementLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1200,6 +1204,10 @@ OWNED_CALL_BINDINGS["F01738"] = "VS::Battle::Ai::FilterLiveDirectionsByGroundHei
 OWNED_CALL_BINDINGS["F01739"] = "VS::Battle::Ai::MoveLiveWithHeightFilteredDirections"
 OWNED_CALL_BINDINGS["F01742"] = "VS::Battle::Ai::ChooseNextLiveWanderTile"
 OWNED_CALL_BINDINGS["F01745"] = "VS::Battle::Ai::UpdateLiveWanderMovement"
+OWNED_CALL_BINDINGS["F01735"] = "VS::Battle::Ai::ProjectLiveClearRadialDestination"
+OWNED_CALL_BINDINGS["F01736"] = "VS::Battle::Ai::MoveLiveToRadialDestination"
+OWNED_CALL_BINDINGS["F01737"] = "VS::Battle::Ai::MoveLiveAwayFromReference"
+OWNED_CALL_BINDINGS["F01750"] = "VS::Battle::Ai::RecoverLiveMovement"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2762,6 +2770,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E1908, "VS::Battle::Ai::MoveLiveWithHeightFilteredDirections"),  # F01739
     ("BATTLE/BATTLE.PRG", 0x800E1BB8, "VS::Battle::Ai::ChooseNextLiveWanderTile"),  # F01742
     ("BATTLE/BATTLE.PRG", 0x800E1EAC, "VS::Battle::Ai::UpdateLiveWanderMovement"),  # F01745
+    ("BATTLE/BATTLE.PRG", 0x800E1388, "VS::Battle::Ai::ProjectLiveClearRadialDestination"),  # F01735
+    ("BATTLE/BATTLE.PRG", 0x800E153C, "VS::Battle::Ai::MoveLiveToRadialDestination"),  # F01736
+    ("BATTLE/BATTLE.PRG", 0x800E1764, "VS::Battle::Ai::MoveLiveAwayFromReference"),  # F01737
+    ("BATTLE/BATTLE.PRG", 0x800E2CCC, "VS::Battle::Ai::RecoverLiveMovement"),  # F01750
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3770,12 +3782,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("SquaredTileDistance(state->tile.word, state->destination.word)",
          "SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->tile.word),"
          " VS::Core::Math::UnpackTileCoordinate(state->destination.word))",
-         "F01771 is promoted C++: decode both packed tile words at the call instead of passing raw words"),
-    ],
-    "F01736": [
-        ("SquaredTileDistance(state->destination.word, state->tile.word)",
-         "SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->destination.word),"
-         " VS::Core::Math::UnpackTileCoordinate(state->tile.word))",
          "F01771 is promoted C++: decode both packed tile words at the call instead of passing raw words"),
     ],
     "F01846": [

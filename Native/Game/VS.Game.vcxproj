@@ -328,6 +328,10 @@
     <ClCompile Include="src\Battle\Ai\PlanningWorkspaceLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\RadialMovement.cpp" />
+    <ClCompile Include="src\Battle\Ai\RadialMovementLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Relations.cpp" />
     <ClCompile Include="src\Battle\Ai\RelationsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2219,6 +2223,8 @@
     <ClInclude Include="include\Battle\Ai\PlanningPrimitivesLive.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspaceLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\RadialMovement.hpp" />
+    <ClInclude Include="include\Battle\Ai\RadialMovementLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp" />
     <ClInclude Include="include\Battle\Ai\Relations.hpp" />
     <ClInclude Include="include\Battle\Ai\RelationsLive.hpp" />

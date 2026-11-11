@@ -2,6 +2,7 @@
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -62,7 +63,7 @@ int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
     case 1:
         if (!Battle_Ai_radialRetreatPath[motion->pathStep][0] && !Battle_Ai_radialRetreatPath[motion->pathStep][1]) {
             if (((Battle_Ai_RetreatPlayerRecordView*)Actors_actorRecords[0])->opaque8 & 0x70000) {
-                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));
+                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));
                 return 0;
             }
             motion->phase = 0;

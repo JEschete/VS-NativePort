@@ -6,6 +6,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
@@ -356,7 +357,7 @@ void Battle_Ai_UpdateActorPerception(void)
         }
         if (state->opaque19A) {
             state->opaque19A--;
-            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((Battle_Ai_MovementRecoveryView*)state));
+            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((Battle_Ai_MovementRecoveryView*)state));
             Battle_Ai_UpdateTargetPerception((Battle_Ai_PerceptionView*)state, 0);
             state->opaque1D = 1;
             if (state->opaque46 >= 2) {

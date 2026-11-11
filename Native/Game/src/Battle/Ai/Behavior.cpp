@@ -7,6 +7,7 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
@@ -280,7 +280,7 @@ int Battle_Ai_UpdateCloseFollowBehavior(Battle_Ai_EscortView* state)
             if (state->opaqueE9 == 1 && state->planMode != 7) {
                 state->movementTarget = ((Battle_Ai_EscortTargetView*)&entry->opaqueC)->target;
                 VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
-                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));
+                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));
             }
             return 1;
         }
@@ -353,7 +353,7 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
                     state->opaque44--;
                 }
                 if (dot >= -1200 || state->opaque44) {
-                    Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), tile,
+                    VS::Battle::Ai::ProjectLiveClearRadialDestination((Battle_Ai_ActorAiState *)((void*)state), tile,
                         VS::Core::Math::Arctangent2(point.bytes[0] - (tile.word & 255),
                             pointPtr[2] - ((tile.word >> 16) & 255)),
                         320);
@@ -373,7 +373,7 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
         if (valid
             && ((Battle_Ai_EscortView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[target]->distancesSquared[candidate] <= 0x23FFF) {
             state->movementTarget = target;
-            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));
+            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));
             return 1;
         }
         if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 320, 1)) {
@@ -414,7 +414,7 @@ int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state)
             if (state->opaqueE9 == 1 && state->planMode != 7) {
                 state->movementTarget = ((Battle_Ai_EscortTargetView*)&entry->opaqueC)->target;
                 VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
-                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));
+                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));
             }
             return 1;
         }

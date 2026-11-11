@@ -75,6 +75,14 @@ def s32(value: int) -> int:
     return value - 0x100000000 if value & 0x80000000 else value
 
 
+def pack_fields(raw: bytes, fields, values: dict) -> bytearray:
+    """`raw` with each (name, offset, size, ...) field set from `values`, truncated to its size."""
+    packed = bytearray(raw)
+    for name, offset, size, *_ in fields:
+        packed[offset:offset + size] = (values[name] & ((1 << size * 8) - 1)).to_bytes(size, "little")
+    return packed
+
+
 # The GTE's leading-zero counter, data registers 30 and 31: the square root and normalisation
 # helpers use it as a plain integer instruction.
 LZCS, LZCR = 30, 31
@@ -180,6 +188,11 @@ class Machine:
 
     def load(self, address: int, size: int = 4, signed: bool = False) -> int:
         return int.from_bytes(self.bytes(address, size), "little", signed=signed)
+
+    def load_fields(self, base: int, fields, names) -> list[int]:
+        """The (name, offset, size, signed) `fields` at `base` named in `names`, in that order."""
+        layout = {name: (offset, size, signed) for name, offset, size, signed, *_ in fields}
+        return [self.load(base + layout[name][0], layout[name][1], layout[name][2]) for name in names]
 
     def write(self, address: int, value: int, size: int) -> None:
         if address % size:

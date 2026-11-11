@@ -11,6 +11,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Battle/Ai/ActorState.h"
@@ -141,11 +142,7 @@ class LiveWanderWorld final : public LiveRoomRegions<WanderWorld> {
     return Frame().tileFlags[z][x];
   }
   [[nodiscard]] std::optional<WanderRoomBounds> RoomBounds() const override {
-    if (Battle_Ai_roomAiState == nullptr) return std::nullopt;
-    return WanderRoomBounds{.min_x = Battle_Ai_roomAiState->minTileX,
-                            .min_z = Battle_Ai_roomAiState->minTileZ,
-                            .max_x = Battle_Ai_roomAiState->maxTileX,
-                            .max_z = Battle_Ai_roomAiState->maxTileZ};
+    return LiveRoomTileBounds();
   }
   int NextRandomMasked(int range) override {
     return NextLiveActorRandomMasked(range);
@@ -190,18 +187,14 @@ class LiveWanderWorld final : public LiveRoomRegions<WanderWorld> {
     Run(actor, [&] {
       Battle_Ai_TilePosition position{};
       position.word = source;
-      Battle_Ai_ProjectClearRadialDestination(MoveTarget(), position, angle,
-                                              distance);
+      ProjectLiveClearRadialDestination(State(), position, angle, distance);
     });
   }
   void DispatchLocomotion(WanderActor& actor, int kind, int angle) override {
     Run(actor, [&] { DispatchLiveAiLocomotionMode(&view_, kind, angle); });
   }
   void RecoverMovement(WanderActor& actor) override {
-    Run(actor, [&] {
-      Battle_Ai_UpdateMovementRecovery(
-          reinterpret_cast<Battle_Ai_MovementRecoveryView*>(&view_));
-    });
+    Run(actor, [&] { RecoverLiveMovement(State()); });
   }
 
  private:
@@ -214,6 +207,7 @@ class LiveWanderWorld final : public LiveRoomRegions<WanderWorld> {
   Battle_Ai_MoveTargetView* MoveTarget() {
     return reinterpret_cast<Battle_Ai_MoveTargetView*>(&view_);
   }
+  AiState* State() { return reinterpret_cast<AiState*>(&view_); }
 
   View& view_;
 };
