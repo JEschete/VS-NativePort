@@ -13,7 +13,7 @@ from differential import MASK, Fault, Image, Machine
 
 BASE = 0x80010000
 DATA = 0x80300000
-ZERO, V0, V1, A0, A1, A2, A3, T0, T1, SP, RA = 0, 2, 3, 4, 5, 6, 7, 8, 9, 29, 31
+ZERO, V0, V1, A0, A1, A2, A3, T0, T1, T2, SP, RA = 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 29, 31
 NOP = 0
 
 
@@ -134,6 +134,27 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual((m.r[V0], m.r[T1]), (0x40000, 0x7FFF))  # IR saturates; MAC keeps the square
         with self.assertRaisesRegex(Fault, "GTE"):
             run(0x4A000012, JR_RA, NOP)  # MVMVA is not modelled
+
+    def test_gte_interpolation_scales_the_ir_registers_by_ir0(self) -> None:
+        def cop2(move: int, gpr: int, register: int) -> int:
+            return 0x12 << 26 | move << 21 | gpr << 16 | register << 11
+
+        def gpf(shift: int, low_limit: int) -> int:
+            return 0x4B9 << 20 | shift << 19 | low_limit << 10 | differential.GTE_GPF
+
+        def program(command: int) -> tuple[int, ...]:
+            return (cop2(4, A3, 8), cop2(4, A0, 9), cop2(4, A1, 10), cop2(4, A2, 11), NOP, NOP, command,
+                    cop2(0, V0, 25), cop2(0, V1, 26), cop2(0, T0, 27), cop2(0, T1, 9), cop2(0, T2, 11), JR_RA,
+                    NOP)
+
+        # The game's func_80041AF4 issues 0x4B90003D (sf 0, lm 0).
+        self.assertEqual(gpf(0, 0), 0x4B90003D)
+        m = run(*program(gpf(0, 0)), a0=-3, a1=0x12345, a2=0x7FFF, a3=0x10)
+        self.assertEqual((m.r[V0], m.r[V1], m.r[T0]), (-0x30 & MASK, 0x23450, 0x7FFF0))
+        self.assertEqual((m.r[T1], m.r[T2]), (-0x30 & MASK, 0x7FFF))  # IR saturates; MAC keeps it
+        m = run(*program(gpf(1, 1)), a0=-0x2000, a1=0x2000, a2=0x7FFF, a3=0x1000)
+        self.assertEqual((m.r[V0], m.r[V1], m.r[T0]), (-0x2000 & MASK, 0x2000, 0x7FFF))
+        self.assertEqual(m.r[T1], 0)  # lm clamps IR at zero
 
     def test_signed_overflow_traps(self) -> None:
         with self.assertRaisesRegex(Fault, "overflow"):

@@ -49,7 +49,7 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Class | What it is | Sites | Compiler | High | Medium | Low | Open |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `NULL-TABLE` | Sparse table entry read without a check | 142 | 0 | 0 | 130 | 12 | 141 |
+| `NULL-TABLE` | Sparse table entry read without a check | 134 | 0 | 0 | 122 | 12 | 133 |
 | `NULL-RETURN` | Lookup result read without a check | 0 | 0 | 0 | 0 | 0 | 0 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 3 | 0 | 0 | 3 | 0 | 3 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
@@ -57,7 +57,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 84 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
-| `BYTE-OFFSET` | Field reached by a literal byte offset | 37 | 0 | 0 | 37 | 0 | 37 |
+| `BYTE-OFFSET` | Field reached by a literal byte offset | 34 | 0 | 0 | 34 | 0 | 34 |
 | `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 1 | 0 | 0 | 1 | 0 | 1 |
 | `PS1-ADDRESS` | Original memory address used as a value | 1 | 0 | 0 | 0 | 1 | 1 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -66,7 +66,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 28 | 0 | 0 | 28 | 0 | 28 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 679 | 239 | 239 | 403 | 37 | 671 |
+| **Total** | | 668 | 239 | 239 | 392 | 37 | 660 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -96,8 +96,8 @@ there would have hidden the defect and left the wrong behavior in place.
 | #61 | 66 |
 | #253 | 50 |
 | #55 | 34 |
-| #57 | 33 |
 | #45 | 29 |
+| #57 | 22 |
 | #58 | 14 |
 | #47 | 12 |
 | #50 | 11 |

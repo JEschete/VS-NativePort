@@ -24,18 +24,9 @@ _Static_assert(sizeof(Battle_Ai_RelationWord) == 0x4, "Battle_Ai_RelationWord mu
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_PERCEPTION_H_DECLS)
 #define VS_BATTLE_AI_PERCEPTION_H_DECLS
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Navigation.h"
 
 extern int Battle_Ai_frameTickBudget;
 extern int Battle_Ai_secondPerceptionTarget;
 extern int Battle_Ai_candidateEngagedThisUpdate;
-int Battle_Ai_IsTargetOccludedAtExtent(
-    SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id);
-int Battle_Ai_IsTargetOccludedAtHeight(
-    SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id);
-void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id);
-void Battle_Ai_UpdateActorPerception(void);
 
 #endif // VS_BATTLE_AI_PERCEPTION_H_DECLS

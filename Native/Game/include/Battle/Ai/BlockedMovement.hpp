@@ -68,6 +68,9 @@ struct MovementHistory {
   std::array<std::uint32_t, 2> x_words{};  // 0x70
   std::array<std::uint32_t, 2> z_words{};  // 0x78
   std::uint8_t mask = 0;                   // 0x81
+
+  friend bool operator==(const MovementHistory&,
+                         const MovementHistory&) = default;
 };
 
 // decomp: historyRepeats (src/BATTLE/BATTLE.PRG/6FC00.c:960), inlined in

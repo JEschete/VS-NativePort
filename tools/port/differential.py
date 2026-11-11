@@ -35,7 +35,7 @@ reads a loaded register in the next instruction). Calls must be stubbed or expli
 so an unexpected callee stops the run instead of executing silently. A stub registered with
 tail=True also takes a jump or branch to its address (a tail call) and continues at $ra. The GTE model covers moves
 to and from IR0-IR3, MAC1-MAC3, SXY0-SXY2 and the leading-zero counter (LZCS/LZCR) and the SQR
-command; other COP instructions, syscalls, unaligned accesses and overflow traps raise.
+and GPF commands; other COP instructions, syscalls, unaligned accesses and overflow traps raise.
 
 A native broken variant (--replace SOURCE OLD NEW) builds a separate driver from a copy of one of
 the case's SOURCES with one exact text replacement, leaving the tree untouched, and runs the
@@ -171,10 +171,12 @@ def position(rng: random.Random, tile_coordinate: int) -> int:
 # The GTE's leading-zero counter, data registers 30 and 31: the square root and normalisation
 # helpers use it as a plain integer instruction.
 LZCS, LZCR = 30, 31
-# GTE data registers IR1-IR3 (signed halfwords) and MAC1-MAC3 (words), and the SQR command.
+# GTE data registers IR1-IR3 (signed halfwords) and MAC1-MAC3 (words), and the SQR and GPF
+# commands.
 IR = (9, 10, 11)
 MAC = (25, 26, 27)
 GTE_SQR = 0x28
+GTE_GPF = 0x3D
 # IR0 (a signed halfword) and the screen XY FIFO entries SXY0-SXY2 (words), which some routines
 # use as scratch registers across calls.
 IR0 = 8
@@ -403,9 +405,11 @@ class Machine:
                 r[rt] = self.gte_read(rd)
         elif op == 0x12 and rs & 0x10 and funct == GTE_SQR:
             self.gte_square(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
+        elif op == 0x12 and rs & 0x10 and funct == GTE_GPF:
+            self.gte_interpolate(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12:
             raise Fault(f"unhandled GTE instruction {word:#010x} at {pc:#x} "
-                        "(only IR0-IR3, MAC, SXY0-SXY2 and LZCS/LZCR moves and SQR are modelled)")
+                        "(only IR0-IR3, MAC, SXY0-SXY2 and LZCS/LZCR moves, SQR and GPF are modelled)")
         else:
             raise Fault(f"unhandled opcode {op:#x} at {pc:#x} (COP instructions need a stub)")
         r[0] = 0
@@ -495,6 +499,14 @@ class Machine:
         """SQR: MACn = IRn squared, shifted right 12 with sf; IRn saturates to MACn."""
         for ir, mac in zip(IR, MAC, strict=True):
             value = s32(self.gte[ir] * self.gte[ir] >> (12 * shift))
+            self.gte[mac] = value & MASK
+            self.gte[ir] = max(0 if low_limit else -0x8000, min(0x7FFF, value))
+
+    def gte_interpolate(self, shift: int, low_limit: int) -> None:
+        """GPF: MACn = IR0 times IRn, shifted right 12 with sf; IRn saturates to MACn. The colour
+        FIFO it also pushes is not modelled."""
+        for ir, mac in zip(IR, MAC, strict=True):
+            value = s32(self.gte[IR0] * self.gte[ir] >> (12 * shift))
             self.gte[mac] = value & MASK
             self.gte[ir] = max(0 if low_limit else -0x8000, min(0x7FFF, value))
 

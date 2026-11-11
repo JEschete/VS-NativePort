@@ -233,6 +233,10 @@
     <ClCompile Include="src\Battle\Ai\ActorCreationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorPerception.cpp" />
+    <ClCompile Include="src\Battle\Ai\ActorPerceptionLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorSettings.cpp" />
     <ClCompile Include="src\Battle\Ai\ActorSettingsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2215,6 +2219,8 @@
     <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCreation.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCreationLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActorPerception.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActorPerceptionLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorSettings.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorSettingsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\AreaRoute.hpp" />

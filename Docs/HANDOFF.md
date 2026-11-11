@@ -40,8 +40,15 @@ The F01729/F01730/F01732-F01734 flight group, with the #343 fix, is published in
 `39cef575`; its baseline test-name fix (#345) `4310eb0b` passed
 [CI 43015941999](https://github.com/JEschete/VS-NativePort/actions/runs/43015941999).
 The F01630/F01748/F01749/F01751 temporary-awareness, obstacle-detour and
-target-approach group, with the #344 fix, follows it.
-See [Stopping Point](#stopping-point) for the next group.
+target-approach group, with the #344 fix, is published in `3e692a35`
+([CI 43029949145](https://github.com/JEschete/VS-NativePort/actions/runs/43029949145)),
+the engaged-list, actor-reaction and notification group in `091c9a50`
+([CI 43041442386](https://github.com/JEschete/VS-NativePort/actions/runs/43041442386))
+and the F01846-F01849 orbiting-boss group in `3aa5b806`
+([CI 43051019321](https://github.com/JEschete/VS-NativePort/actions/runs/43051019321)).
+The F01638-F01640/F01643 perception group follows it.
+The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
+See [Stopping Point](#stopping-point) for the current state and the next group.
 
 ## Checkpoint
 
@@ -55,10 +62,10 @@ See [Stopping Point](#stopping-point) for the next group.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **904 functions remain** (after the orbiting-boss group that follows
-  `091c9a50`).
-  Modernization: 2,840 done of 3,744. C++ promotion: 2,841 promoted plus one
-  frame-orchestrator WIP. These are separate measures. Row 28 has 14
+- **900 functions remain** (after the perception group that follows
+  `3aa5b806`).
+  Modernization: 2,844 done of 3,744. C++ promotion: 2,845 promoted plus one
+  frame-orchestrator WIP. These are separate measures. Row 28 has 10
   generated functions left.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
@@ -193,45 +200,72 @@ See [Stopping Point](#stopping-point) for the next group.
   mutants), `actor_reaction` (385, 4,096, 66/66) and `action_notification`
   (22, 1,024, 8/8) have 0 mismatches, and every native broken variant was
   detected.
+- `091c9a50` was the orbiting-boss base. F01846 `UpdateBossRadialRetreat`,
+  F01847 `IsBossActionReady`, F01848 `UpdateBossOrbitTracking` and F01849
+  `UpdateOrbitingBossBehavior` are published in `3aa5b806`
+  ([CI 43051019321](https://github.com/JEschete/VS-NativePort/actions/runs/43051019321))
+  in the pure `BossOrbit` module, with `BossOrbitLive` bindings at 0x800E7960
+  and 0x800E7F8C; the generated `OrbitingBoss.cpp` keeps only the orbit data.
+  Differential `boss_orbit`: 699 instructions (0x800E7698-0x800E8180), 4,096
+  vectors, 0 mismatches, 78/78 mutants, and one detected native broken
+  variant per function. The original `vs_gte_rsqrt` (SLUS 0x80041B94) would
+  read before its table for a negative distance, which the game never
+  produces, so the differential generates only non-negative distances. The
+  canonical replays match but are not known to reach the orbiting boss.
 
 ## Stopping Point
 
-HEAD `091c9a50` is pushed and green
-([CI 43041442386](https://github.com/JEschete/VS-NativePort/actions/runs/43041442386)).
-The commit after it holds the orbiting-boss group:
+Stopped on owner request (2026-11-11) after the perception group. HEAD
+`3aa5b806` (orbiting boss) is pushed and green
+([CI 43051019321](https://github.com/JEschete/VS-NativePort/actions/runs/43051019321)).
+The commit after it holds the perception group:
 
-- F01846 `UpdateBossRadialRetreat`, F01847 `IsBossActionReady`, F01848
-  `UpdateBossOrbitTracking` and F01849 `UpdateOrbitingBossBehavior` are typed
-  in the pure `BossOrbit` module. `BossOrbitLive` binds them, with module
-  bindings at 0x800E7960 and 0x800E7F8C. `ActorSettingsLive` installs the
-  typed behavior callback, and the generated `OrbitingBoss.cpp` keeps only the
-  orbit data. The four old symbols had 18 code references and have none.
-- Differential `boss_orbit`: 699 original instructions (0x800E7698-0x800E8180),
-  4,096 vectors, 0 mismatches and 78/78 mutants. The thinnest mutants still
-  change 2-4 vectors (low-height-31, random-mask-0xff, slow-speed-0x2ffff).
-- One native broken variant per function is detected: F01846 retreat
-  flagged-steps 14 to 15 (283 of 4,096 vectors), F01847 `<` to `<=` (387),
-  F01848 ahead tolerance 222 to 256 (62) and F01849 living-core HP 2 to 3 (50).
-- The cached distance from the arena centre is never negative in the game: an
-  s16 squared length wraps only when both deltas are -0x8000, and the eased
-  radius stays at or below 46,308. The original `vs_gte_rsqrt` (SLUS
-  0x80041B94) would read before its table for a negative input, while the
-  native `SquareRootInteger` returns 0, so the differential generates only
-  non-negative values.
-- Group check on base `091c9a50` (`promotion_check.py group`, 7 minutes): 41
-  focused tests (368 assertions) pass in Debug and Release. The full suites
-  pass in both configurations, with 5,667 tests and 12,651,319 assertions
-  each. The silver_wolves (2,400 frames) and first_lever_room (900 frames)
-  replays match their baselines, but they are not known to reach the orbiting
-  boss. Changed-file quality reports 5 existing findings and 0 new. Two copier
-  tests still described the old `OrbitingBoss.cpp` callers and were updated;
-  `test_encounter_fixups.py` then passes 211 tests.
+- F01638 `IsTargetOccludedAtBodyHeight`, F01639
+  `IsTargetOccludedAtPointHeight`, F01640 `UpdateTargetPerception` and F01643
+  `UpdatePerceivingActor` are typed in the pure `ActorPerception` module over
+  `TargetPerceptionWorld` and `ActorPerceptionWorld`. `ActorPerceptionLive`
+  binds them at the module addresses 0x800D87E8 and 0x800D8EF4, and
+  `FrameUpdateLive` calls `UpdateLiveActorPerception`. The generated
+  `Perception.cpp` keeps only three data definitions (`D_800F16F4`,
+  `D_800F58D4`, `D_800F58E0`). The four old symbols had 18 code references
+  and have none.
+- Differential `perception`: one 852-instruction range (0x800D87E8-0x800D9534,
+  SHA-256 98f4c68b...6013), 4,096 vectors, 0 mismatches and 100/100 mutants.
+  The interpreter gained the GTE `GPF` instruction for the facing and distance
+  arithmetic. The terrain segment test and the pass's 14 callees are stubbed
+  with queued answers.
+- One native broken variant per function is detected (of 1,024 vectors): F01638
+  body extent plus one (172), F01639 default point height 65 (46), F01640
+  marking without activity (174), F01643 detour step wrapping to 0 (60) and the
+  HP rule boundary (29).
+- Limits: the differential aliases the actor-record table to the battle-actor
+  models, so the live binding's resolution of targets and occluders through
+  `Battle_actors[id]->model` (kept for auxiliary AI targets without an
+  actor-record entry) is not compared. The live bindings refuse a missing
+  model, pose, link, HP or listed actor where the original read through them.
+  No complete EC-04 or battle-AI/M8 retirement claim.
+- Group check on base `3aa5b806` (`promotion_check.py group --focused
+  "[actor-perception]"`, `build\promotion-check\group-20261111-124014`, 998 s):
+  focused 54 cases and 327 assertions in Debug and Release; the full suite
+  5,721 cases and 12,651,646 assertions in both configurations with 0
+  failures; `silver_wolves` (2,400 frames) and `first_lever_room` (900 frames)
+  match their baselines in both configurations; copier tests,
+  `test_encounter_fixups.py` (211) and `test_differential` (30) pass;
+  changed-file tidy 177 existing findings and 0 new. The 177 are in unchanged
+  translation units (`SequenceTests.cpp`, `LayoutAsserts.cpp` and others) that
+  include the changed `Distance.hpp`.
 
-Next group (row 28 has 14 generated functions left): Perception F01638
-`IsTargetOccludedAtExtent`, F01639 `IsTargetOccludedAtHeight`, F01640
-`UpdateTargetPerception` and F01643 `UpdateActorPerception` (generated
-`Perception.cpp`, 6FC00.c:646-1177, original 0x800D87E8-0x800D9537). After
-that group: Behavior F01649-F01654 and F01656-F01659.
+Next groups (row 28 has 10 generated functions left, all in the generated
+`Behavior.cpp`, `BATTLE/BATTLE.PRG/71618.c`):
+
+1. F01649-F01654 (`func_800D9E18`-`func_800DA738`, 71618.c:511-957): the
+   pursuit, flee and follow movement choices for an action candidate.
+2. F01656-F01659 (`func_800DAAD8`-`func_800DAED0`, 71618.c:958 onward): the
+   retreat hostility adjustment and the per-frame action and movement decision
+   within the frame budget.
+
+Row 28 then needs its completion audit (its original IDs promoted or retired)
+before row 29 starts.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -317,6 +351,15 @@ differential rewritten each time. The rules, also in
    GitHub CI workflow is not replayed locally.
 5. **Overlap the waiting.** Prepare the next function's analysis, case and
    tests while builds and CI run.
+
+Result: from the tooling commit `48ab62e3` (2026-11-10 21:44) to `3aa5b806`
+(2026-11-11 10:42), 11 commits promoted 54 functions in about 13 hours, about
+14 minutes per function against the earlier 33-63, and every function still
+has its own MIPS differential, mutants and broken variant. A group check takes
+15-18 minutes, about 12 of them in changed-file tidy, so lint first with
+`quality.py --files` (seconds) to avoid a second run for a style finding. The
+checklist, including the test-size and ledger re-apply rules learned on the
+perception group, is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
 
 ## Sources Of Truth
 
@@ -828,14 +871,14 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Confirm the target-approach group's exact-revision CI, then continue with
-   the F01678-F01680/F01705/F01706/F01719 engagement and relations group from
-   the [Stopping Point](#stopping-point) and update #276. Keep #337 open until
-   its in-game reachability is established. Do not close #276: 914 remain.
-3. Continue ordered row 28 with Perception and Behavior
+2. Confirm the perception group's exact-revision CI and that #276 has its
+   comment, then continue with the Behavior groups from the
+   [Stopping Point](#stopping-point). Keep #337 open until its in-game
+   reachability is established. Do not close #276: 900 remain.
+3. Continue ordered row 28 with Behavior (F01649-F01654, then F01656-F01659)
    as listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01630/F01636/F01641/F01642/F01644/F01660/F01708-F01710/F01716/F01717/
-   F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified
+   F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
+   F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified
    dependencies, not proof of remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
@@ -844,7 +887,8 @@ passed; the hazard check and workflow-exit controls now pass as independent step
    generated changes through the copier or owned registry, never by patching
    generated output. Remove only adaptations made obsolete by the owned body
    (`promote.py prune-adaptations`).
-6. Use the [Promotion Throughput](#promotion-throughput) workflow: focused
+6. Follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md) and the
+   [Promotion Throughput](#promotion-throughput) workflow: focused
    `promotion_check.py iterate` while editing, one `promotion_check.py group`
    per 4-8 function group. Keep behavior verification, C++ promotion,
    modernization, and compatibility retirement distinct. Log a newly confirmed

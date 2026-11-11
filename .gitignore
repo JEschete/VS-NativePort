@@ -54,6 +54,7 @@ venv/
 /mods/
 vs-native.log
 /.github/*
+!/.github/WORK_PROCEDURES.md
 !/.github/workflows/
 /.github/workflows/*
 !/.github/workflows/quality.yml

@@ -35,6 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{CBD4FBF1-BEF9-5417-B613-DD283F053A41}"
 	ProjectSection(SolutionItems) = preProject
+		.github\WORK_PROCEDURES.md = .github\WORK_PROCEDURES.md
 		.github\copilot-instructions.md = .github\copilot-instructions.md
 	EndProjectSection
 EndProject

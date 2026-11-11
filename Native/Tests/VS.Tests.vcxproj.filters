@@ -81,6 +81,9 @@
     <ClCompile Include="src\AiActorCreationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiActorPerceptionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AiActorSettingsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

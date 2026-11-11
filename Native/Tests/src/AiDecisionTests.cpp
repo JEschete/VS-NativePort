@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/TargetingLive.hpp"
@@ -423,7 +424,7 @@ struct PerceptionFixture : DecisionFixture {
     return std::bit_cast<Battle_Ai_TargetRelation>(state.relations[0]);
   }
 
-  void Update() { Battle_Ai_UpdateTargetPerception(&View(), 0); }
+  void Update() { VS::Battle::Ai::UpdateLiveTargetPerception(&View(), 0); }
 
   int CanExecute() {
     return VS::Battle::Ai::CanExecuteLiveActionCandidate(&state, &candidate);

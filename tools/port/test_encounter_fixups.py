@@ -1383,15 +1383,16 @@ class EncounterFixupTests(unittest.TestCase):
         ai = root / r"Native\Game\src\Battle\Ai"
         caller = (ai / "GroundNavigation.cpp").read_text(encoding="utf-8")
         self.assertIn("UnpackTileCoordinate(navigator.destination)", caller)
-        perception = (ai / "Perception.cpp").read_text(encoding="utf-8")
-        self.assertIn("VS::Core::Math::PositionOf(state->position)", perception)
-        self.assertNotIn("(short*)&state->position", perception)
+        # F01640 reads both positions as typed Position3 values.
+        perception = (ai / "ActorPerception.cpp").read_text(encoding="utf-8")
+        self.assertIn("Core::Math::SquaredDistanceWithHeightOffsets(\n          observer.position", perception)
+        self.assertNotIn("(short*)", perception)
         for path in ai.glob("*.cpp"):
             text = path.read_text(encoding="utf-8")
             self.assertNotIn("Core_Math_SquaredVectorLength", text, path.name)
             self.assertNotIn("Core_Math_SquaredTileDistance", text, path.name)
             self.assertNotIn("Core_Math_SquaredDistanceWithHeightOffsets", text, path.name)
-        for name in ("Behavior", "Perception"):
+        for name in ("Behavior",):
             text = (ai / f"{name}.cpp").read_text(encoding="utf-8")
             self.assertLess(
                 text.index('#include "Core/Math/Distance.hpp"'),
@@ -2240,7 +2241,10 @@ class EncounterFixupTests(unittest.TestCase):
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
         calls = {name: (ai / name).read_text(encoding="utf-8").count(f"{live}(")
                  for name in ("Perception.cpp", "Movement.cpp", "PlanningPrimitivesLive.cpp")}
-        self.assertEqual(calls, {"Perception.cpp": 2, "Movement.cpp": 0, "PlanningPrimitivesLive.cpp": 0})
+        self.assertEqual(calls, {"Perception.cpp": 0, "Movement.cpp": 0, "PlanningPrimitivesLive.cpp": 0})
+        # F01643 moved the perception pass's forget into its live binding.
+        perception = (ai / "ActorPerceptionLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("ForgetLiveAiActionTarget(State());", perception)
         # F01660 moved the blocked-movement detour's forget into its live binding.
         blocked = (ai / "BlockedMovementLive.cpp").read_text(encoding="utf-8")
         self.assertIn("ForgetLiveAiActionTarget(&state_);", blocked)
@@ -3167,19 +3171,22 @@ class EncounterFixupTests(unittest.TestCase):
         )
 
     def test_perception_uses_owned_model_prefixes_for_auxiliary_targets(self):
-        source = """targetObject = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[id];
-Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[candidate];
-d = VS::Core::Math::SquaredDistanceWithHeightOffsets((short*)&state->position,
-    (short*)&((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position, state->pointHeight,
-"""
-        for old, new, _ in copy_fixups.FIXES["F01640"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertIn("Battle_actors[id]->model", source)
-        self.assertIn("actor->model", source)
-        self.assertNotIn("Actors_actorRecords", source)
-        self.assertNotIn("(short*)", source)
-        self.assertEqual(source.count("VS::Core::Math::PositionOf("), 2)
+        # F01640's live binding keeps the old copy fixup: the target and its occluders resolve through their
+        # battle actor's model, since valid auxiliary AI targets own model prefixes without an actor-record entry.
+        self.assertNotIn("F01640", copy_fixups.FIXES)
+        ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
+        live = (ai / "ActorPerceptionLive.cpp").read_text(encoding="utf-8")
+        world = live[live.index("class LiveTargetPerceptionWorld"):]
+        model = world[world.index("std::optional<PerceivedModel> Model("):]
+        model = model[:model.index("\n  }\n")]
+        self.assertIn("Battle_actors[target]", model)
+        self.assertIn("*actor->model", model)
+        self.assertIn("Core::Math::PositionOf(model.position)", model)
+        listed = world[world.index("std::vector<ListedPerceptionActor> ListedActors()"):]
+        listed = listed[:listed.index("\n  }\n")]
+        self.assertIn("Core::Math::PositionOf(actor.model->position)", listed)
+        self.assertNotIn("Actors_actorRecords", model + listed)
+        self.assertNotIn("(short*)", (ai / "ActorPerception.cpp").read_text(encoding="utf-8"))
 
     def test_optional_actor_wrappers_diagnose_and_return_before_dereferencing(self):
         for key in (

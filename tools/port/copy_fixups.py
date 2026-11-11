@@ -662,6 +662,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::IsLiveBossActionReady": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
     "VS::Battle::Ai::UpdateLiveBossOrbitTracking": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
     "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
+    "VS::Battle::Ai::UpdateLiveTargetPerception": r"Native\Game\include\Battle\Ai\ActorPerceptionLive.hpp",
+    "VS::Battle::Ai::UpdateLiveActorPerception": r"Native\Game\include\Battle\Ai\ActorPerceptionLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1254,6 +1256,8 @@ OWNED_CALL_BINDINGS["F01846"] = "VS::Battle::Ai::UpdateLiveBossRadialRetreat"
 OWNED_CALL_BINDINGS["F01847"] = "VS::Battle::Ai::IsLiveBossActionReady"
 OWNED_CALL_BINDINGS["F01848"] = "VS::Battle::Ai::UpdateLiveBossOrbitTracking"
 OWNED_CALL_BINDINGS["F01849"] = "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior"
+OWNED_CALL_BINDINGS["F01640"] = "VS::Battle::Ai::UpdateLiveTargetPerception"
+OWNED_CALL_BINDINGS["F01643"] = "VS::Battle::Ai::UpdateLiveActorPerception"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2842,6 +2846,8 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E78F4, "VS::Battle::Ai::IsLiveBossActionReady"),  # F01847
     ("BATTLE/BATTLE.PRG", 0x800E7960, "VS::Battle::Ai::UpdateLiveBossOrbitTracking"),  # F01848
     ("BATTLE/BATTLE.PRG", 0x800E7F8C, "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior"),  # F01849
+    ("BATTLE/BATTLE.PRG", 0x800D87E8, "VS::Battle::Ai::UpdateLiveTargetPerception"),  # F01640
+    ("BATTLE/BATTLE.PRG", 0x800D8EF4, "VS::Battle::Ai::UpdateLiveActorPerception"),  # F01643
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3810,21 +3816,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          '        Core_Debugf("actors", "absolute slide skips absent actor=%d", arg0);\n'
          "        return;\n    }",
          "func_800A9D90: retain the primitive's optional-actor no-op contract before position/rate access"),
-    ],
-    "F01640": [
-        ("targetObject = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[id];",
-         "targetObject = (Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model;",
-         "valid auxiliary AI targets own model prefixes without an actor-record table entry"),
-        ("Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[candidate];",
-         "Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)actor->model;",
-         "resolve auxiliary occluders through the current Battle_Actor owner like distance/FOV paths"),
-        ("SquaredDistanceWithHeightOffsets((short*)&state->position,",
-         "SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(state->position),",
-         "F01773 is promoted C++: read the observer's SVECTOR as a Position3 instead of aliasing it as short*"),
-        ("(short*)&((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position, state->pointHeight,",
-         "VS::Core::Math::PositionOf(((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position),"
-         " state->pointHeight,",
-         "F01773 is promoted C++: read the target model's SVECTOR as a Position3 instead of aliasing it as short*"),
     ],
     "F01649": [
         ("SquaredDistanceWithHeightOffsets(point, (short*)&Actors_actorRecords[id]->instance.position,",

@@ -5,6 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -115,7 +116,7 @@ struct AuxiliaryPerceptionFixture {
     Battle_actors[3] = &actors[2];
     View().distancesSquared[3] = blocking ? 48 * 48 : 96 * 96 + 48 * 48;
   }
-  void Update() { Battle_Ai_UpdateTargetPerception(&View(), 2); }
+  void Update() { VS::Battle::Ai::UpdateLiveTargetPerception(&View(), 2); }
 };
 }  // namespace
 

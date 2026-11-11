@@ -12,6 +12,8 @@ struct Position3 {
   std::int16_t x{};
   std::int16_t y{};
   std::int16_t z{};
+
+  friend bool operator==(const Position3&, const Position3&) = default;
 };
 
 // A room tile cell.

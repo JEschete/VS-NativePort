@@ -7,6 +7,7 @@
 #include "Audio/StreamControlLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
+#include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
@@ -782,8 +783,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&Effects_ClearParticleTextureState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&Effects_InitializeParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&Effects_AdvanceParticleTextureAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D87E8u, 0u, (void*)&Battle_Ai_UpdateTargetPerception, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D8EF4u, 0u, (void*)&Battle_Ai_UpdateActorPerception, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D9E18u, 0u, (void*)&Battle_Ai_MoveForActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA1D4u, 0u, (void*)&Battle_Ai_UpdateCombatPursuit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA4BCu, 0u, (void*)&Battle_Ai_TryApproachPlannedTarget, 0u, 0u, 0u},
@@ -1752,6 +1751,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&VS::Battle::Ai::IsLiveBossActionReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7960u, 0u, (void*)&VS::Battle::Ai::UpdateLiveBossOrbitTracking, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7F8Cu, 0u, (void*)&VS::Battle::Ai::UpdateLiveOrbitingBossBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D87E8u, 0u, (void*)&VS::Battle::Ai::UpdateLiveTargetPerception, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D8EF4u, 0u, (void*)&VS::Battle::Ai::UpdateLiveActorPerception, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

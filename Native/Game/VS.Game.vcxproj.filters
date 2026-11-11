@@ -450,6 +450,12 @@
     <ClCompile Include="src\Battle\Ai\ActorCreationLive.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorPerception.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorPerceptionLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorSettings.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2632,6 +2638,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ActorCreationLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ActorPerception.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ActorPerceptionLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ActorSettings.hpp">

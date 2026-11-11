@@ -308,44 +308,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
-[
-347,
-[
-"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_MovementRecoveryView*)state);"
-],
-[
-"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((Battle_Ai_MovementRecoveryView*)state));"
-]
-],
-[
-375,
-[
-"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
-],
-[
-"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));"
-]
-],
-[
-417,
-[
-"        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);"
-],
-[
-"        VS::Battle::Ai::RefreshLiveAiResourceRestrictions((Battle_Ai_ActorAiState *)(state));"
-]
-],
-[
-458,
-[
-"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
-],
-[
-"                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));"
-]
-]
-],
 "Native\\Game\\src\\Battle\\Feedback.cpp": [
 [
 136,

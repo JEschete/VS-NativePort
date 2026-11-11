@@ -31,6 +31,7 @@
 - If repeated attempts produce no new evidence, record the failed approaches, blocker and next observation needed. Preserve a concise handoff instead of repeating the same investigation or weakening the acceptance criteria.
 
 ## Promotion Throughput (C++ promotions, #276)
+The step-by-step checklist is [WORK_PROCEDURES.md](WORK_PROCEDURES.md).
 The owner ruled that 33-63 minutes per promoted function is unacceptable. Promote functions this way:
 - **Group related functions.** Promote 4-8 related functions (for example F01814-F01817, navigation) per commit. Each function still gets its own Catch2 tests, its own differential against the original MIPS code and its own detected mutants; the builds, regression replays, ledgers, commit and CI are shared by the group.
 - **Use the shared differential.** `python tools\port\differential.py <case>` runs the original instructions in the repository's R3000 interpreter against a native driver. A case is `tools\port\differentials\<case>.py` plus `<case>_driver.cpp`; [actor_settings.py](../tools/port/differentials/actor_settings.py) is the reference example. A case without mutants fails. Do not write per-function scratch interpreters. Run each function's native broken variant with `--replace SOURCE OLD NEW`, which compiles a patched copy and leaves the tree untouched.

@@ -7,6 +7,7 @@
 #include <cstring>
 #include <optional>
 
+#include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 
@@ -104,7 +105,9 @@ class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
   void SetPerceptionTarget(std::uint32_t target) override {
     Battle_Ai_secondPerceptionTarget = static_cast<int>(target);
   }
-  void UpdatePerception() override { Battle_Ai_UpdateActorPerception(); }
+  void UpdatePerception() override {
+    VS::Battle::Ai::UpdateLiveActorPerception();
+  }
   void UpdateDecisions() override { Battle_Ai_UpdateActorDecisions(); }
   void AnimateEngagement() override {
     VS::Battle::Ai::AnimateLiveEngagementPhase();
