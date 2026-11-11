@@ -686,8 +686,157 @@ TEST_CASE("Route steps refuse missing directions, regions and occupancy",
   CHECK_FALSE(Resolve(world, actor));
 }
 
+namespace {
+constexpr int kTileArea = kIndex;
+constexpr int kDestinationArea = kArea;
+
+// An actor on tile (10, 10) of area kTileArea whose destination (1, 1) lies in
+// kDestinationArea, so the area route from one into the other is kRoute. The
+// movement point is the centre of tile (12, 10).
+ai::AreaMovementActor Mover(FakeRouteWorld& world) {
+  world.flags[10][10] = 0x70 | kTileArea;
+  world.flags[1][1] = 0x70 | kDestinationArea;
+  ai::AreaMovementActor mover{.route = Actor(),
+                              .is_stuck = 0,
+                              .near_target_detour = 7,
+                              .height_filtered_movement = 0,
+                              .area_lock = 1};
+  mover.route.move_x = Centre(12);
+  mover.route.move_z = Centre(10);
+  return mover;
+}
+
+// Heading from the movement point at tile (12, 10) to the actor at (10, 10).
+constexpr int kFromEast = 3072;
+
+ai::AreaMovementStep Directional(int angle, bool clear = false) {
+  return {.action = ai::AreaMovementAction::kDirectionalMovement,
+          .value = angle,
+          .clear_direction_cache = clear};
+}
+}  // namespace
+
+TEST_CASE("Area movement within one area heads away from the movement point",
+          "[ai][area-route][area-movement]") {
+  FakeRouteWorld world;
+  auto mover = Mover(world);
+  world.flags[1][1] = 0x10 | kTileArea;
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        Directional(kFromEast));
+  CHECK(mover.near_target_detour == 0);
+  CHECK(mover.route.target_distance_filter == 1);
+  CHECK(mover.is_stuck == 0);
+  CHECK(world.route_queries.empty());
+
+  mover.route.move_x = Centre(10);
+  mover.route.move_z = Centre(9);
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) == Directional(0));
+  mover.route.move_z = Centre(11);
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) == Directional(2048));
+}
+
+TEST_CASE("Height-filtered movers hand off before reading the tile maps",
+          "[ai][area-route][area-movement]") {
+  FakeRouteWorld world;
+  auto mover = Mover(world);
+  mover.height_filtered_movement = 1;
+  world.has_maps = false;
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        ai::AreaMovementStep{
+            .action = ai::AreaMovementAction::kHeightFilteredDirections,
+            .value = 0,
+            .clear_direction_cache = false});
+  CHECK(mover.near_target_detour == 0);
+  CHECK(mover.route.target_distance_filter == 1);
+}
+
+TEST_CASE("Actors without the area lock are stuck outside the destination area",
+          "[ai][area-route][area-movement]") {
+  FakeRouteWorld world;
+  world.SetRoute(Endpoint(10, 10, kWestStep));
+  auto mover = Mover(world);
+  mover.area_lock = 0;
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        Directional(kFromEast, true));
+  CHECK(mover.is_stuck == 1);
+  CHECK(world.route_queries.empty());
+}
+
+TEST_CASE("Area routes that step or turn hand off to another primitive",
+          "[ai][area-route][area-movement]") {
+  FakeRouteWorld world;
+  world.SetRoute(Endpoint(10, 10, kWestStep));
+  auto mover = Mover(world);
+  const auto before = mover.route;
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        ai::AreaMovementStep{.action = ai::AreaMovementAction::kGroundMovement,
+                             .value = 2 << 9,
+                             .clear_direction_cache = false});
+  CHECK(world.route_queries == std::vector<int>{kRoute});
+  CHECK(mover.route.heading == 2);
+  CHECK(mover.route.move_x == before.move_x);
+  CHECK(mover.is_stuck == 0);
+
+  world.SetRoute(Endpoint(10, 10, kEastStep));
+  world.occupancy[Tile(11, 10)] = 0;
+  mover = Mover(world);
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        ai::AreaMovementStep{.action = ai::AreaMovementAction::kCommand,
+                             .value = static_cast<int>(CommandIntent::kTurn),
+                             .clear_direction_cache = false});
+  CHECK(mover.route.angle == 3072);
+  CHECK(mover.is_stuck == 0);
+}
+
+TEST_CASE("Routed destinations aim at their tile and stay unstuck in one area",
+          "[ai][area-route][area-movement]") {
+  FakeRouteWorld world;
+  world.SetRoute(Endpoint(12, 10), Endpoint(10, 13));
+  auto mover = Mover(world);
+  mover.route.move_x = 0;
+  mover.route.move_z = 0;
+  world.flags[10][12] = 0x20 | kTileArea;
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        Directional(kFromEast));
+  CHECK(mover.route.destination == Tile(12, 10));
+  CHECK(mover.route.move_x == Centre(12));
+  CHECK(mover.route.move_z == Centre(10));
+  CHECK(mover.is_stuck == 0);
+
+  world.flags[10][12] = 0x20 | kDestinationArea;
+  mover = Mover(world);
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        Directional(kFromEast, true));
+  CHECK(mover.is_stuck == 1);
+}
+
+TEST_CASE("Routes that keep the destination leave the actor stuck",
+          "[ai][area-route][area-movement]") {
+  FakeRouteWorld world;
+  world.SetRoute(Endpoint(0, 9), Endpoint(4, 4));
+  auto mover = Mover(world);
+  // ratan2's table gives 510, not 512, for equal deltas.
+  CHECK(ai::UpdateNavigationAreaMovement(world, mover) ==
+        Directional(510, true));
+  CHECK(mover.route.move_x == Centre(1));
+  CHECK(mover.route.move_z == Centre(1));
+  CHECK(mover.is_stuck == 1);
+}
+
+TEST_CASE("Area movement refuses missing maps, routes and outside tiles",
+          "[ai][area-route][area-movement]") {
+  FakeRouteWorld world;
+  auto mover = Mover(world);
+  SECTION("maps") { world.has_maps = false; }
+  SECTION("routes") { world.has_routes = false; }
+  SECTION("tile") { mover.route.tile = Tile(40, 10); }
+  SECTION("destination") { mover.route.destination = Tile(1, 32); }
+  CHECK_FALSE(ai::UpdateNavigationAreaMovement(world, mover));
+  CHECK(mover.is_stuck == 0);
+}
+
 TEST_CASE("Area routing keeps its original module entries",
-          "[ai][area-route][route-gates][redirect-binding]") {
+          "[ai][area-route][route-gates][area-movement][redirect-binding]") {
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
   const auto resolve = [symbols](unsigned address) {
@@ -702,6 +851,8 @@ TEST_CASE("Area routing keeps its original module entries",
         reinterpret_cast<void*>(&ai::FindLiveRouteGateAtTile));
   CHECK(resolve(0x800DFBCCU) ==
         reinterpret_cast<void*>(&ai::ResolveLiveNavigationAreaRoute));
+  CHECK(resolve(0x800E19FCU) ==
+        reinterpret_cast<void*>(&ai::UpdateLiveNavigationAreaMovement));
 }
 
 namespace {

@@ -54,10 +54,6 @@ extern u_short (*Battle_Ai_specialTerrainHeights)[32];
 extern Battle_Ai_RouteGateEnd* Battle_Ai_routeGates;
 unsigned int Battle_Ai_FindAdjacentMovementDestination(
     Battle_Ai_MoveTargetView* state, int first, int second, unsigned int direction);
-unsigned int Battle_Ai_WaypointValue(unsigned short* row, int index);
-unsigned short* Battle_Ai_WaypointAddress(unsigned short* row, int index);
-void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Battle_Ai_WaypointTile* destination);
-void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state);
 int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_PathTest test, int mask);
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

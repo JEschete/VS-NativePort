@@ -582,7 +582,7 @@
 ]
 ],
 [
-997,
+969,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"
 ],
@@ -591,7 +591,7 @@
 ]
 ],
 [
-1080,
+1052,
 [
 "                Battle_Ai_ProjectClearRadialDestination((void*)s, s->tile, angle,"
 ],
@@ -600,7 +600,7 @@
 ]
 ],
 [
-1093,
+1065,
 [
 "            Battle_Ai_UpdateMovementRecovery((void*)s);"
 ],
@@ -609,7 +609,7 @@
 ]
 ],
 [
-1128,
+1100,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -618,7 +618,7 @@
 ]
 ],
 [
-1148,
+1120,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -627,7 +627,7 @@
 ]
 ],
 [
-1178,
+1150,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)context, 0);"
 ],
@@ -636,7 +636,7 @@
 ]
 ],
 [
-1217,
+1189,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)context, 4);"
 ],
@@ -645,7 +645,7 @@
 ]
 ],
 [
-1235,
+1207,
 [
 "        && VS::Battle::Ai::LiveDestinationOccupancy((void*)state, state->tile.word) > 0) {",
 "        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
@@ -656,7 +656,7 @@
 ]
 ],
 [
-1246,
+1218,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
@@ -665,7 +665,7 @@
 ]
 ],
 [
-1251,
+1223,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 3);"
 ],
@@ -674,7 +674,7 @@
 ]
 ],
 [
-1280,
+1252,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 0);"
 ],
@@ -683,32 +683,12 @@
 ]
 ],
 [
-1284,
+1256,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);"
-]
-]
-],
-"Native\\Game\\src\\Battle\\Ai\\Navigation.cpp": [
-[
-194,
-[
-"                    VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
-],
-[
-"                    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
-]
-],
-[
-203,
-[
-"    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state,"
-],
-[
-"    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),"
 ]
 ]
 ],

@@ -181,4 +181,56 @@ class AreaRouteWorld {
 // grid or anything the world refuses.
 [[nodiscard]] std::optional<CommandIntent> ResolveNavigationAreaRoute(
     AreaRouteWorld& world, AreaRouteActor& actor, int index, int area);
+
+// The actor AI state fields area movement reads and writes besides routing's.
+struct AreaMovementActor {
+  AreaRouteActor route;
+  std::uint8_t is_stuck = 0;                  // 0x02
+  std::uint8_t near_target_detour = 0;        // 0x04
+  std::uint8_t height_filtered_movement = 0;  // 0x1A
+  std::uint8_t area_lock = 0;                 // 0x29, settings bit 14
+
+  friend bool operator==(const AreaMovementActor&,
+                         const AreaMovementActor&) = default;
+};
+
+// The movement primitive area movement hands the actor to.
+enum class AreaMovementAction : std::uint8_t {
+  // func_800E1908: walk the directions the ground height allows.
+  kHeightFilteredDirections,
+  // Refresh the movement cooldown (func_800E4BB8), then start ground movement
+  // (func_800E4B70) with `value` as the angle.
+  kGroundMovement,
+  // Refresh the movement cooldown, then issue command intent `value`
+  // (func_800DEEFC).
+  kCommand,
+  // func_800E3600: move toward heading `value` (0..4095).
+  kDirectionalMovement,
+};
+
+struct AreaMovementStep {
+  AreaMovementAction action = AreaMovementAction::kDirectionalMovement;
+  int value = 0;
+  // Whether the room's first direction cache byte is cleared before the
+  // movement, as the original did when the actor was stuck.
+  bool clear_direction_cache = false;
+
+  friend bool operator==(const AreaMovementStep&,
+                         const AreaMovementStep&) = default;
+};
+
+// decomp: func_800E19FC (src/BATTLE/BATTLE.PRG/771A8.c:1540).
+// Steers the actor toward its destination; byte 0x04 is cleared and the
+// target distance filter set first. Height-filtered movers walk the
+// height-filtered directions. When the destination lies in another area, an
+// actor without area_lock is stuck and the room's direction cache is
+// cleared; otherwise the area route from the actor's area into the
+// destination's decides. Moving to its destination aims at that tile's centre
+// and continues only when it shares the actor's area (the actor is otherwise
+// stuck); any other intent starts ground movement (move-direction) or is
+// issued as a command. The actor then heads from its position toward the
+// movement point. Nothing refuses a room without tile maps, a tile or
+// destination outside the grid or anything the area route refuses.
+[[nodiscard]] std::optional<AreaMovementStep> UpdateNavigationAreaMovement(
+    AreaRouteWorld& world, AreaMovementActor& actor);
 }  // namespace VS::Battle::Ai

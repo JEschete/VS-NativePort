@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 
+#include "Battle/Ai/Waypoints.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -22,8 +23,6 @@ namespace VS::Battle::Ai {
 // IDs cover.
 inline constexpr int kMovementActorSlots = 16;
 inline constexpr std::size_t kMovementModeCounterBytes = 13;
-// Each patrol route row holds eight waypoint halfwords (D_800F58D8).
-inline constexpr std::size_t kPatrolWaypointsPerRow = 8;
 // Moving-platform groups a route gate can belong to.
 inline constexpr int kPlatformGroupCount = 4;
 

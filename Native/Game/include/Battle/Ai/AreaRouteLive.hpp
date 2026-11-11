@@ -8,10 +8,11 @@
 
 struct Battle_Ai_AreaRouteView;
 struct Battle_Ai_RouteGateTile;
+struct Battle_Ai_TerrainMoveView;
 
 // Binding from the room's AI frame, route table, route links, moving
 // platforms and the actor AI state to the typed area routing
-// (AreaRoute.cpp). The battle module's pointer table stores the four entries
+// (AreaRoute.cpp). The battle module's pointer table stores the five entries
 // at their original addresses; each aborts with a diagnostic where the typed
 // routine refuses.
 namespace VS::Battle::Ai {
@@ -41,4 +42,8 @@ int FindLiveRouteGateAtTile(std::intptr_t state, unsigned int tile,
 // func_800DFBCC. Returns the command intent for the actor AI state.
 int ResolveLiveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int index,
                                    int area);
+
+// func_800E19FC. Runs the movement primitive UpdateNavigationAreaMovement
+// chooses for the actor AI state.
+void UpdateLiveNavigationAreaMovement(Battle_Ai_TerrainMoveView* state);
 }  // namespace VS::Battle::Ai

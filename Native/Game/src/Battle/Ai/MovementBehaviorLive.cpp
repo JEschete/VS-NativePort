@@ -17,6 +17,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/WaypointsLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 
@@ -37,9 +38,6 @@ extern "C" {
 
 namespace VS::Battle::Ai {
 namespace {
-// The room's auxiliary section holds four patrol rows before its waypoints.
-constexpr std::size_t kLivePatrolRows = 4;
-
 static_assert(std::size(Battle_Ai_actorAiStates) == kMovementActorSlots);
 static_assert(std::extent_v<decltype(Battle_Ai_FrameContext::actors)> ==
               kMovementActorSlots);
@@ -236,12 +234,6 @@ void StoreMovementState(const MovementState& state,
   target.planMode = state.plan_mode;
 }
 
-std::span<const std::uint16_t> LivePatrolRoutes() {
-  if (Battle_Ai_patrolRoutes == nullptr) return {};
-  return {&Battle_Ai_patrolRoutes[0][0],
-          kLivePatrolRows * kPatrolWaypointsPerRow};
-}
-
 // The battle actor list; nothing when it holds an ID outside the actor slots
 // or repeats one.
 std::optional<ActorRoster> LiveBattleActors() {
@@ -334,8 +326,7 @@ class LiveMovementHost final : public MovementHost {
   }
   void UpdateWaypointPatrol(MovementState& state) override {
     StoreMovementState(state, state_);
-    Battle_Ai_UpdateWaypointPatrol(
-        reinterpret_cast<Battle_Ai_PatrolView*>(&state_));
+    UpdateLiveWaypointPatrol(reinterpret_cast<Battle_Ai_PatrolView*>(&state_));
     state = LoadMovementState(state_);
   }
   int UpdateTargetFacing(MovementState& state, int target) override {
@@ -362,7 +353,7 @@ class LiveMovementHost final : public MovementHost {
   }
   void FindNearestActiveWaypoint(MovementState& state) override {
     StoreMovementState(state, state_);
-    Battle_Ai_FindNearestActiveWaypoint(
+    FindLiveNearestActiveWaypoint(
         reinterpret_cast<Battle_Ai_WaypointSearchView*>(&state_),
         reinterpret_cast<Battle_Ai_WaypointTile*>(&state_.plannedTile));
     state = LoadMovementState(state_);

@@ -30,9 +30,9 @@ count, and is written to build\\differential\\<case>.log.
 
 The interpreter executes branch delay slots but not load delay slots (compiled PS1 code never
 reads a loaded register in the next instruction). Calls must be stubbed or explicitly followed,
-so an unexpected callee stops the run instead of executing silently. COP instructions other than
-the GTE's leading-zero counter (mtc2 LZCS, mfc2 LZCS/LZCR), syscalls, unaligned accesses and
-overflow traps raise.
+so an unexpected callee stops the run instead of executing silently. The GTE model covers moves
+to and from IR1-IR3, MAC1-MAC3 and the leading-zero counter (LZCS/LZCR) and the SQR command;
+other COP instructions, syscalls, unaligned accesses and overflow traps raise.
 """
 
 from __future__ import annotations
@@ -78,6 +78,10 @@ def s32(value: int) -> int:
 # The GTE's leading-zero counter, data registers 30 and 31: the square root and normalisation
 # helpers use it as a plain integer instruction.
 LZCS, LZCR = 30, 31
+# GTE data registers IR1-IR3 (signed halfwords) and MAC1-MAC3 (words), and the SQR command.
+IR = (9, 10, 11)
+MAC = (25, 26, 27)
+GTE_SQR = 0x28
 
 
 def leading_sign_bits(value: int) -> int:
@@ -135,6 +139,7 @@ class Machine:
         self.r = [0] * 32
         self.hi = self.lo = 0
         self.lzcs = 0
+        self.gte = dict.fromkeys(IR + MAC, 0)
         self.r[R["sp"]] = stack
         self.stubs: dict[int, Callable[[Machine], None]] = {}
         self.follow: set[int] = set()
@@ -276,13 +281,16 @@ class Machine:
             self.write((r[rs] + imm) & MASK, r[rt], size)
         elif op in (0x2A, 0x2E):
             self.store_partial(op, (r[rs] + imm) & MASK, r[rt])
-        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR):
-            if rs == 4:  # mtc2; LZCR is read-only
-                self.lzcs = r[rt] if rd == LZCS else self.lzcs
+        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR, *IR, *MAC):
+            if rs == 4:
+                self.gte_write(rd, r[rt])
             else:
-                r[rt] = self.lzcs if rd == LZCS else leading_sign_bits(self.lzcs)
+                r[rt] = self.gte_read(rd)
+        elif op == 0x12 and rs & 0x10 and funct == GTE_SQR:
+            self.gte_square(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12:
-            raise Fault(f"unhandled GTE instruction {word:#010x} at {pc:#x} (only LZCS/LZCR are modelled)")
+            raise Fault(f"unhandled GTE instruction {word:#010x} at {pc:#x} "
+                        "(only IR, MAC and LZCS/LZCR moves and SQR are modelled)")
         else:
             raise Fault(f"unhandled opcode {op:#x} at {pc:#x} (COP instructions need a stub)")
         r[0] = 0
@@ -351,6 +359,29 @@ class Machine:
         else:
             raise Fault(f"unhandled funct {funct:#x} at {pc:#x}")
         return None
+
+    def gte_write(self, register: int, value: int) -> None:
+        """mtc2: IR registers keep a signed halfword; LZCR is read-only."""
+        if register == LZCS:
+            self.lzcs = value
+        elif register in IR:
+            self.gte[register] = s16(value)
+        elif register in MAC:
+            self.gte[register] = value & MASK
+
+    def gte_read(self, register: int) -> int:
+        if register == LZCS:
+            return self.lzcs
+        if register == LZCR:
+            return leading_sign_bits(self.lzcs)
+        return self.gte[register] & MASK
+
+    def gte_square(self, shift: int, low_limit: int) -> None:
+        """SQR: MACn = IRn squared, shifted right 12 with sf; IRn saturates to MACn."""
+        for ir, mac in zip(IR, MAC, strict=True):
+            value = s32(self.gte[ir] * self.gte[ir] >> (12 * shift))
+            self.gte[mac] = value & MASK
+            self.gte[ir] = max(0 if low_limit else -0x8000, min(0x7FFF, value))
 
     def divide_signed(self, a: int, b: int) -> None:
         if b == 0:  # The R3000 does not trap: quotient -1 or 1, remainder the dividend.

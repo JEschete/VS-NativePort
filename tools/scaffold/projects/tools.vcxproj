@@ -334,10 +334,17 @@
     <None Include="..\..\port\differentials\actor_creation_driver.cpp" />
     <None Include="..\..\port\differentials\actor_settings.py" />
     <None Include="..\..\port\differentials\actor_settings_driver.cpp" />
+    <None Include="..\..\port\differentials\area_movement.py" />
+    <None Include="..\..\port\differentials\area_movement_driver.cpp" />
     <None Include="..\..\port\differentials\area_route.py" />
     <None Include="..\..\port\differentials\area_route_driver.cpp" />
+    <None Include="..\..\port\differentials\area_route_world.hpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
+    <None Include="..\..\port\differentials\waypoint_patrol.py" />
+    <None Include="..\..\port\differentials\waypoint_patrol_driver.cpp" />
+    <None Include="..\..\port\differentials\waypoint_search.py" />
+    <None Include="..\..\port\differentials\waypoint_search_driver.cpp" />
     <None Include="..\..\port\field_at.py" />
     <None Include="..\..\port\gen_decomp_headers.py" />
     <None Include="..\..\port\hazard_index.py" />

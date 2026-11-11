@@ -960,34 +960,6 @@ recover:
 #undef WANDER_TILES
 #undef WANDER_DIRECTIONS
 
-// decomp: BATTLE.PRG func_800E23AC (src/BATTLE/BATTLE.PRG/771A8.c:1863)
-void Battle_Ai_UpdateWaypointPatrol(Battle_Ai_PatrolView* state)
-{
-    unsigned short* row;
-    unsigned int entry;
-    int step;
-    row = Battle_Ai_patrolRoutes[state->row];
-    entry = Battle_Ai_WaypointValue(row, state->index);
-    if (state->tile.tile.tileX != (entry & 31) || state->tile.tile.tileZ != ((entry >> 5) & 31)) {
-        if (state->opaque104) {
-            state->opaque104--;
-        }
-        if (VS::Battle::Ai::NextLiveActorRandomMasked(1 << state->rate) || state->opaque104) {
-            goto move;
-        }
-        state->direction = -state->direction;
-    }
-    step = state->direction + 8;
-    do {
-        state->index = (state->index + step) & 7;
-    } while (!(Battle_Ai_WaypointValue(row, state->index) >> 15));
-    state->opaque104 = 10;
-move:
-    state->destination.tile.tileX = Battle_Ai_WaypointValue(row, state->index) & 31;
-    state->destination.tile.tileZ = (Battle_Ai_WaypointValue(row, state->index) >> 5) & 31;
-    VS::Battle::Ai::DispatchLiveAiLocomotionMode(state, 0, 0);
-}
-
 // decomp: BATTLE.PRG func_800E24EC (src/BATTLE/BATTLE.PRG/771A8.c:1973)
 int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int option)
 {

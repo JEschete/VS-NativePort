@@ -348,6 +348,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\TileHeightSampling.cpp" />
+    <ClCompile Include="src\Battle\Ai\Waypoints.cpp" />
+    <ClCompile Include="src\Battle\Ai\WaypointsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\AttackPrerequisites.cpp" />
     <ClCompile Include="src\Battle\AttackPrerequisitesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2219,6 +2223,8 @@
     <ClInclude Include="include\Battle\Ai\SpecialTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\SpecialTerrainLive.hpp" />
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />
+    <ClInclude Include="include\Battle\Ai\Waypoints.hpp" />
+    <ClInclude Include="include\Battle\Ai\WaypointsLive.hpp" />
     <ClInclude Include="include\Battle\AttackPrerequisites.hpp" />
     <ClInclude Include="include\Battle\AttackPrerequisitesLive.hpp" />
     <ClInclude Include="include\Battle\BattleMode.hpp" />

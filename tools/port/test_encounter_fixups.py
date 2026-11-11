@@ -1391,13 +1391,16 @@ class EncounterFixupTests(unittest.TestCase):
             self.assertNotIn("Core_Math_SquaredVectorLength", text, path.name)
             self.assertNotIn("Core_Math_SquaredTileDistance", text, path.name)
             self.assertNotIn("Core_Math_SquaredDistanceWithHeightOffsets", text, path.name)
-        for name in ("Behavior", "Movement", "Navigation", "OrbitingBoss", "Perception"):
+        for name in ("Behavior", "Movement", "OrbitingBoss", "Perception"):
             text = (ai / f"{name}.cpp").read_text(encoding="utf-8")
             self.assertLess(
                 text.index('#include "Core/Math/Distance.hpp"'),
                 text.index('extern "C" {'),
                 name,
             )
+        # Navigation.cpp's distance users (F01710, F01740) moved to typed cores.
+        navigation = (ai / "Navigation.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("VS::Core::Math::Squared", navigation)
 
     def test_native_terrain_envelope_calls_the_existing_builder_without_guest_stack(self):
         self.assertEqual(
@@ -4261,6 +4264,10 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
             text = (root / "Native/Game/src/Battle/Ai" / path).read_text(encoding="utf-8")
             self.assertNotIn("Battle_Ai_IssueActorCommand(", text, path)
             self.assertNotIn("Battle/Ai/ActorCommands.h", text, path)
+            # Navigation.cpp's command issuer (F01740) moved to AreaRouteLive.cpp.
+            if path == "Navigation.cpp":
+                self.assertNotIn("IssueLiveActorCommand(", text, path)
+                continue
             self.assertIn("VS::Battle::Ai::IssueLiveActorCommand(", text, path)
             self.assertIn('#include "Battle/Ai/ActorCommandsLive.hpp"', text, path)
         # The owned creation binding (F01818) sits inside VS::Battle::Ai.

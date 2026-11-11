@@ -17,6 +17,7 @@
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
+#include "Battle/Ai/WaypointsLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -795,7 +796,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DC0D0u, 0u, (void*)&Battle_Ai_AnimateEngagementPhase, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DD000u, 0u, (void*)&Battle_Ai_ApplyActorActionReaction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DD344u, 0u, (void*)&Battle_Ai_PropagateActorRelationships, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DD7CCu, 0u, (void*)&Battle_Ai_FindNearestActiveWaypoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEEA4u, 0u, (void*)&Battle_Ai_NotifyActionRelationshipChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E02B4u, 0u, (void*)&Battle_Ai_IsFlightDirectionObstructed, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E0678u, 0u, (void*)&Battle_Ai_CanFlyInDirection, 0u, 0u, 0u},
@@ -807,10 +807,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E1764u, 0u, (void*)&Battle_Ai_MoveAwayFromReference, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1850u, 0u, (void*)&Battle_Ai_FilterDirectionsByGroundHeight, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1908u, 0u, (void*)&Battle_Ai_MoveWithHeightFilteredDirections, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E19FCu, 0u, (void*)&Battle_Ai_UpdateNavigationAreaMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1BB8u, 0u, (void*)&Battle_Ai_ChooseNextWanderTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1EACu, 0u, (void*)&Battle_Ai_UpdateWanderMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E23ACu, 0u, (void*)&Battle_Ai_UpdateWaypointPatrol, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E24ECu, 0u, (void*)&Battle_Ai_UpdateTargetApproachMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2B2Cu, 0u, (void*)&Battle_Ai_UpdateTargetFacing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2CCCu, 0u, (void*)&Battle_Ai_UpdateMovementRecovery, 0u, 0u, 0u},
@@ -1744,6 +1742,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DFA54u, 0u, (void*)&VS::Battle::Ai::FindLiveNearestRouteGateEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DFAF8u, 0u, (void*)&VS::Battle::Ai::FindLiveRouteGateAtTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DFBCCu, 0u, (void*)&VS::Battle::Ai::ResolveLiveNavigationAreaRoute, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DD7CCu, 0u, (void*)&VS::Battle::Ai::FindLiveNearestActiveWaypoint, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E23ACu, 0u, (void*)&VS::Battle::Ai::UpdateLiveWaypointPatrol, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E19FCu, 0u, (void*)&VS::Battle::Ai::UpdateLiveNavigationAreaMovement, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

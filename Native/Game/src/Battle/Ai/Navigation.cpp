@@ -1,13 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/AreaRouteLive.hpp"
-#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Core/Math/Distance.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -17,7 +10,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 
@@ -102,111 +94,6 @@ blocked:
 done:
     return dest.word & 0xFFFF00FF;
 }
-
-// decomp: BATTLE.PRG nearestWaypointValue (src/BATTLE/BATTLE.PRG/74088.c:946)
-unsigned int Battle_Ai_WaypointValue(unsigned short* row, int index)
-{
-    unsigned short* p = row;
-    p += index;
-    return *p;
-}
-
-// decomp: BATTLE.PRG nearestWaypointAddress (src/BATTLE/BATTLE.PRG/74088.c:952)
-unsigned short* Battle_Ai_WaypointAddress(unsigned short* row, int index)
-{
-    row += index;
-    return row;
-}
-
-// decomp: BATTLE.PRG func_800DD7CC (src/BATTLE/BATTLE.PRG/74088.c:957)
-void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Battle_Ai_WaypointTile* destination)
-{
-    int x;
-    int z;
-    u_short (*savedMap)[32];
-    int dx;
-    int dz;
-    int index;
-    unsigned short entry;
-    unsigned int packed;
-    unsigned int distance;
-    unsigned int closest;
-
-    closest = -1U;
-    {
-        index = 0;
-        savedMap = Battle_Ai_FrameState()->heightMap;
-    }
-    Battle_Ai_FrameState()->heightMap = Battle_Ai_specialTerrainHeights;
-    do {
-        entry = *Battle_Ai_WaypointAddress(Battle_Ai_roomWaypoints, index);
-        packed = entry & 0xFFFF;
-        if ((packed >> 0xF) != 0) {
-            x = ((entry & 0x1F) << 7) + 0x40;
-            z = ((packed * 4) & 0xF80) + 0x40;
-            dx = state->x - x;
-            dz = state->z - z;
-            distance = VS::Core::Math::SquaredVectorLength(dx, state->y - VS::Field::GroundHeightAtWorldPosition(VS::Battle::Ai::CurrentTerrain(), x, z), dz);
-            if (distance < closest) {
-                destination->x =
-                    (signed char)(Battle_Ai_WaypointValue(Battle_Ai_roomWaypoints, index) & 0x1F);
-                closest = distance;
-                destination->z =
-                    (signed char)(((unsigned short)Battle_Ai_WaypointValue(Battle_Ai_roomWaypoints, index)
-                                      >> 5)
-                                  & 0x1F);
-            }
-        }
-        index += 1;
-    } while (index < 8);
-    Battle_Ai_FrameState()->heightMap = savedMap;
-}
-
-// decomp: src/BATTLE/BATTLE.PRG/771A8.c:1512
-#define TERRAIN_TILES (*(unsigned short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))
-// decomp: BATTLE.PRG func_800E19FC (src/BATTLE/BATTLE.PRG/771A8.c:1540)
-void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
-{
-    int current, next, mode;
-    int active = 1;
-    state->opaque4 = 0;
-    state->opaque5 = active;
-    if (state->opaque1A) {
-        Battle_Ai_MoveWithHeightFilteredDirections(state);
-        return;
-    }
-    current = TERRAIN_TILES[state->tile.tile.tileZ][state->tile.tile.tileX] & 15;
-    next = TERRAIN_TILES[state->destination.tile.tileZ][state->destination.tile.tileX] & 15;
-    if (current != next) {
-        if (state->settingsBit14) {
-            mode = VS::Battle::Ai::ResolveLiveNavigationAreaRoute((struct Battle_Ai_AreaRouteView*)state, current, next);
-            if (mode == 6) {
-                state->moveX = (state->destination.tile.tileX << 7) + 64;
-                state->moveZ = (state->destination.tile.tileZ << 7) + 64;
-                if ((TERRAIN_TILES[state->destination.tile.tileZ][state->destination.tile.tileX] & 15)
-                    == (TERRAIN_TILES[state->tile.tile.tileZ][state->tile.tile.tileX] & 15)) {
-                    goto move;
-                }
-            } else {
-                VS::Battle::Ai::RefreshLiveAiMovementCooldown(state);
-                if (mode == 5) {
-                    VS::Battle::Ai::BeginLiveAiGroundMovement(state, state->angle << 9);
-                } else {
-                    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
-                }
-                return;
-            }
-        }
-        state->isStuck = active;
-        *(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
-    }
-move:
-    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),
-        VS::Core::Math::Arctangent2(state->position[0] - state->moveX, state->position[2] - state->moveZ)
-            & 0xFFF,
-        0);
-}
-#undef TERRAIN_TILES
 
 // decomp: BATTLE.PRG func_800E2F5C (src/BATTLE/BATTLE.PRG/771A8.c:2388)
 int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_PathTest test, int mask)

@@ -50,6 +50,8 @@ constexpr int kDirectionComponentModulus = 4;
 constexpr unsigned kDirectionZShift = 4;
 
 constexpr std::size_t kMaxPlatformPositions{Field::kMovingPlatformCapacity};
+// The original passed the heading in its 4096-per-turn units, scaled by 512.
+constexpr unsigned kGroundMovementAngleShift = 9;
 
 std::nullopt_t Refuse(const char* message) {
   Core_Warnf("ai", "%s", message);
@@ -475,5 +477,93 @@ std::optional<CommandIntent> ResolveNavigationAreaRoute(AreaRouteWorld& world,
       SquaredDistance(x, z, endpoints[0]) < SquaredDistance(x, z, endpoints[1]);
   return HeadFor(world, actor, first_nearer ? endpoints[0] : endpoints[1],
                  candidate);
+}
+
+namespace {
+std::optional<int> TileArea(const AreaRouteWorld& world, std::uint32_t tile) {
+  const auto flags =
+      NavigationTileFlags(world, RouteTileZ(tile), RouteTileX(tile));
+  if (!flags) return std::nullopt;
+  return *flags & kAreaMask;
+}
+
+int TileCentreOf(std::uint8_t tile) {
+  return (static_cast<int>(tile) << kContactTileShift) + kTileCentre;
+}
+
+// The original's 32-bit subtraction, which wraps.
+std::int32_t WrappingDelta(std::int32_t from, std::int32_t to) {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(from) -
+                                   static_cast<std::uint32_t>(to));
+}
+
+// Where the area route leaves an actor whose destination lies in another
+// area: handed to another movement primitive, or else stuck or not.
+struct DestinationRoute {
+  std::optional<AreaMovementStep> handoff;
+  bool stuck = false;
+};
+
+std::optional<DestinationRoute> RouteToDestinationArea(AreaRouteWorld& world,
+                                                       AreaRouteActor& actor,
+                                                       int current, int next) {
+  const auto intent = ResolveNavigationAreaRoute(world, actor, current, next);
+  if (!intent) return std::nullopt;
+  if (*intent == CommandIntent::kMoveDirection) {
+    return DestinationRoute{
+        .handoff = AreaMovementStep{
+            .action = AreaMovementAction::kGroundMovement,
+            .value = static_cast<int>(static_cast<std::uint32_t>(actor.heading)
+                                      << kGroundMovementAngleShift)}};
+  }
+  if (*intent != CommandIntent::kMoveDestination) {
+    return DestinationRoute{
+        .handoff = AreaMovementStep{.action = AreaMovementAction::kCommand,
+                                    .value = static_cast<int>(*intent)}};
+  }
+  actor.move_x = TileCentreOf(RouteTileX(actor.destination));
+  actor.move_z = TileCentreOf(RouteTileZ(actor.destination));
+  const auto destination_area = TileArea(world, actor.destination);
+  if (!destination_area) return std::nullopt;
+  const auto tile_area = TileArea(world, actor.tile);
+  if (!tile_area) return std::nullopt;
+  return DestinationRoute{.handoff = std::nullopt,
+                          .stuck = *destination_area != *tile_area};
+}
+}  // namespace
+
+// decomp: func_800E19FC (src/BATTLE/BATTLE.PRG/771A8.c:1540).
+std::optional<AreaMovementStep> UpdateNavigationAreaMovement(
+    AreaRouteWorld& world, AreaMovementActor& actor) {
+  actor.near_target_detour = 0;
+  actor.route.target_distance_filter = 1;
+  if (actor.height_filtered_movement != 0) {
+    return AreaMovementStep{.action =
+                                AreaMovementAction::kHeightFilteredDirections};
+  }
+  auto& route = actor.route;
+  const auto current = TileArea(world, route.tile);
+  if (!current) return std::nullopt;
+  const auto next = TileArea(world, route.destination);
+  if (!next) return std::nullopt;
+
+  bool stuck = false;
+  if (*current != *next) {
+    stuck = true;
+    if (actor.area_lock != 0) {
+      const auto routed = RouteToDestinationArea(world, route, *current, *next);
+      if (!routed) return std::nullopt;
+      if (routed->handoff) return routed->handoff;
+      stuck = routed->stuck;
+    }
+    if (stuck) actor.is_stuck = 1;
+  }
+  const auto angle = static_cast<std::uint32_t>(Core::Math::Arctangent2(
+                         WrappingDelta(route.x, route.move_x),
+                         WrappingDelta(route.z, route.move_z))) &
+                     kAngleMask;
+  return AreaMovementStep{.action = AreaMovementAction::kDirectionalMovement,
+                          .value = static_cast<int>(angle),
+                          .clear_direction_cache = stuck};
 }
 }  // namespace VS::Battle::Ai

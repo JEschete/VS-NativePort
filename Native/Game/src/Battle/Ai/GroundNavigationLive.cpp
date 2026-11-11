@@ -431,7 +431,7 @@ class LiveGroundWorld final : public LiveGroundRoom {
   }
   void UpdateNavigationAreaMovement(GroundNavigator& navigator) override {
     Run(navigator, [](Battle_Ai_ActorAiState& state) {
-      Battle_Ai_UpdateNavigationAreaMovement(TerrainView(state));
+      UpdateLiveNavigationAreaMovement(TerrainView(state));
     });
   }
   void MoveWithHeightFilteredDirections(GroundNavigator& navigator) override {

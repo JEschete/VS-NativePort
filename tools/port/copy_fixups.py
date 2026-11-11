@@ -628,6 +628,9 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::FindLiveNearestRouteGateEntry": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
     "VS::Battle::Ai::FindLiveRouteGateAtTile": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
     "VS::Battle::Ai::ResolveLiveNavigationAreaRoute": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
+    "VS::Battle::Ai::FindLiveNearestActiveWaypoint": r"Native\Game\include\Battle\Ai\WaypointsLive.hpp",
+    "VS::Battle::Ai::UpdateLiveWaypointPatrol": r"Native\Game\include\Battle\Ai\WaypointsLive.hpp",
+    "VS::Battle::Ai::UpdateLiveNavigationAreaMovement": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1186,6 +1189,9 @@ OWNED_CALL_BINDINGS["F01721"] = "VS::Battle::Ai::ResolveLiveRouteGateExit"
 OWNED_CALL_BINDINGS["F01722"] = "VS::Battle::Ai::FindLiveNearestRouteGateEntry"
 OWNED_CALL_BINDINGS["F01723"] = "VS::Battle::Ai::FindLiveRouteGateAtTile"
 OWNED_CALL_BINDINGS["F01728"] = "VS::Battle::Ai::ResolveLiveNavigationAreaRoute"
+OWNED_CALL_BINDINGS["F01710"] = "VS::Battle::Ai::FindLiveNearestActiveWaypoint"
+OWNED_CALL_BINDINGS["F01747"] = "VS::Battle::Ai::UpdateLiveWaypointPatrol"
+OWNED_CALL_BINDINGS["F01740"] = "VS::Battle::Ai::UpdateLiveNavigationAreaMovement"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2741,6 +2747,9 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DFA54, "VS::Battle::Ai::FindLiveNearestRouteGateEntry"),  # F01722
     ("BATTLE/BATTLE.PRG", 0x800DFAF8, "VS::Battle::Ai::FindLiveRouteGateAtTile"),  # F01723
     ("BATTLE/BATTLE.PRG", 0x800DFBCC, "VS::Battle::Ai::ResolveLiveNavigationAreaRoute"),  # F01728
+    ("BATTLE/BATTLE.PRG", 0x800DD7CC, "VS::Battle::Ai::FindLiveNearestActiveWaypoint"),  # F01710
+    ("BATTLE/BATTLE.PRG", 0x800E23AC, "VS::Battle::Ai::UpdateLiveWaypointPatrol"),  # F01747
+    ("BATTLE/BATTLE.PRG", 0x800E19FC, "VS::Battle::Ai::UpdateLiveNavigationAreaMovement"),  # F01740
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3559,18 +3568,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F01287": [
         ("((u_long)primitive << 8) >> 8", "LegacyGpu_Handle(primitive)",
          "sphere wireframe packets use native ordering links"),
-    ],
-    "F01710": [
-        ("    int savedMap;", "    u_short (*savedMap)[32];", "cache a native grid pointer"),
-        ("        int* scratch = (int*)((uintptr_t)Core_ScratchBase() + 0x3BC);\n"
-         "        index = 0;\n        savedMap = *scratch;",
-         "        index = 0;\n        savedMap = Battle_Ai_FrameState()->heightMap;",
-         "save the owned AI grid without truncation"),
-        ("*(int*)((uintptr_t)Core_ScratchBase() + 0x3BC) = (int)Battle_Ai_specialTerrainHeights;",
-         "Battle_Ai_FrameState()->heightMap = Battle_Ai_specialTerrainHeights;",
-         "select the full native height-grid pointer"),
-        ("*(int*)((uintptr_t)Core_ScratchBase() + 0x3BC) = savedMap;",
-         "Battle_Ai_FrameState()->heightMap = savedMap;", "restore the full native height-grid pointer"),
     ],
     "G00229": [
         ("Effects_PackageFile Effects_emptyPackage", "u_int Effects_emptyPackage[0x5200 / sizeof(u_int)]",

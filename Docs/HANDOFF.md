@@ -1,6 +1,6 @@
 # Current Handoff
 
-Updated 2026-11-10. Row 28 (battle AI) resumed after the cleanup checkpoint.
+Updated 2026-11-11. Row 28 (battle AI) resumed after the cleanup checkpoint.
 The condition terms, quality repairs and three candidate-planning promotions
 and the two planning-stat lifecycle promotions are published with green
 exact-revision CI. F01707 fallback selection and F01713 planning simulation are
@@ -23,7 +23,10 @@ cleanup in `71973e51`. F01818 actor AI state creation is published in
 and the first grouped promotion, F01814-F01817 special terrain heights and room
 navigation entry, in `fa47431b`
 ([CI 42955909989](https://github.com/JEschete/VS-NativePort/actions/runs/42955909989)).
-See [Stopping Point](#stopping-point) for the next group.
+F01721-F01728 route gates and area routing are published in `53d04fe5`
+([CI 42962718861](https://github.com/JEschete/VS-NativePort/actions/runs/42962718861)).
+The F01708-F01710, F01740, F01746 and F01747 waypoint and area-movement group
+follows it. See [Stopping Point](#stopping-point) for the next group.
 
 ## Checkpoint
 
@@ -37,9 +40,9 @@ See [Stopping Point](#stopping-point) for the next group.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **953 functions remain** (at `fa47431b`). Modernization: 2,791 done of
-  3,744. C++ promotion: 2,792 promoted plus one frame-orchestrator WIP. These
-  are separate measures.
+- **939 functions remain** (after the waypoint group on `53d04fe5`).
+  Modernization: 2,805 done of 3,744. C++ promotion: 2,806 promoted plus one
+  frame-orchestrator WIP. These are separate measures.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
   than `6c8ac0b9`.
@@ -136,36 +139,51 @@ See [Stopping Point](#stopping-point) for the next group.
 
 ## Stopping Point
 
-HEAD `fa47431b` is pushed and green; the worktree held no code changes when
-this was written.
+HEAD `53d04fe5` (F01721-F01728) is pushed and green. The commit after it holds
+the waypoint and area-movement group:
 
-- `eb9443c2` was F01818 (`func_800E6178`, `7CD68.c:934`): the
-  `ActorCreation` core and checked `ActorCreationLive` binding, the migrated
-  `CreateAiState` caller, the `actor_creation` differential and tests.
-- `fa47431b` was the first grouped promotion, F01814-F01817
-  (`SpecialTerrain`, `RoomAiMap`): the `special_terrain` differential runs
-  166 original instructions over 2,048 vectors with 0 mismatches and detects
-  16/16 mutants (`MUTANT_VECTORS` 256). Focused
-  `[terrain-fill],[special-terrain],[room-navigation]`: 21 cases, 2,147
-  assertions. Full suite: 5,372 cases, 12,649,151 assertions in Debug and
-  Release; the replays matched the baseline.
+- F01708/F01746 `WaypointValue`, F01709 `WaypointsFrom`, F01710
+  `FindNearestActiveWaypoint` and F01747 `UpdateWaypointPatrol` live in the
+  pure `Waypoints` module with the checked `WaypointsLive` binding. F01740
+  `UpdateNavigationAreaMovement` lives in `AreaRoute` with an `AreaRouteLive`
+  adapter. The movement-behavior, ground-navigation and navigation-primitive
+  callers use the live bindings; the module table keeps 0x800DD7CC, 0x800E19FC
+  and 0x800E23AC.
+- Differentials in `tools\port\differentials`:
+  - `waypoint_search`: 83 instructions, 4,096 vectors, 10/10 mutants.
+    `differential.py` now models the GTE IR/MAC moves and SQR.
+  - `waypoint_patrol`: 80 instructions, 4,096 vectors, 13/13 mutants. In 249
+    rows the original loops forever; the interpreter raises "runaway original"
+    and native refuses those rows.
+  - `area_movement`: 111 instructions, 4,096 vectors, 21/21 mutants. It reuses
+    the `area_route` world through `area_route_world.hpp` and the helpers split
+    out of `area_route.py`; `area_route` still detects 28/28 mutants after that
+    refactor.
+- Focused `[waypoints],[area-movement]`: 24 cases, 148 assertions; the group
+  selection has 122 cases. Full suite: 5,424 cases, 12,649,549 assertions in
+  Debug and Release; the replays matched the baseline.
+- Two deliberate differences are recorded in the ledgers. Native
+  `Arctangent2` uses the true ratio for magnitudes of 2^22 or more, where the
+  original `ratan2` wrapped, so the area-movement vectors keep move points
+  within 2^18. The live actor random aborts on a range of 0 or less, so patrol
+  rate 31 aborts live where the original drew from INT_MIN.
 
-Next group: F01721-F01728 route gates and area routing (`771A8.c:459-767`,
-0x800DF9A8-0x800E02B4, 579 instructions). The design:
+Next group: F01738/F01739 height-filtered directions and F01741-F01745
+wandering (`771A8.c:1455-1841`; 0x800E1850-0x800E19FC and
+0x800E1BB8-0x800E23AC; 616 instructions). The design:
 
-- A pure `AreaRoute` module: `ResolveRouteGateExit` (F01721),
-  `FindNearestRouteGateEntry` (F01722), `FindRouteGateAtTile` (F01723), the
-  inline route helpers (F01724-F01727) and `ResolveNavigationAreaRoute`
-  (F01728) over a narrow world interface and an `AreaRouteActor` record.
-- An `AreaRouteLive` binding. The F01722 caller in `MovementBehaviorLive.cpp`
-  and `LiveGroundWorld::FindRouteGateAtTile` move to the typed functions; the
-  generated F01740 caller binds to the live F01728 wrapper.
-- F01723 indexes the platform positions by report order, not by platform
-  index. The original reads stale stack slots past the reported count; the
-  typed function never matches them. The differential fills the stack with
-  0xFF so both agree.
-- The differential follows F01721, F01723 and `ratan2` (SLUS_010.40) and
-  stubs the platform collector, dwell, contact and occupancy callees.
+- F01738 `FilterDirectionsByGroundHeight` is pure over the terrain grid and the
+  direction codes. F01739 stores the filtered mask in the actor's terrain
+  region cell around the directional movement, restores it, then issues
+  command 9 with the heading when the movement result is 5 or 7. The F01740
+  live adapter and `GroundNavigationLive.cpp` call it.
+- F01741, F01743 and F01744 are inlined helpers. F01742 `ChooseNextWanderTile`
+  and F01745 `UpdateWanderMovement` need a world over the region cells, tile
+  flags, room bounds, the actor random stream and locomotion dispatch. Through
+  the same world they reach the walk and flight direction checks (F01730 is
+  not promoted), `ProjectClearRadialDestination` (F01735) and
+  `UpdateMovementRecovery` (F01750). The differential stubs those at their
+  original addresses.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -758,14 +776,15 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Continue the F01721-F01728 group from the [Stopping Point](#stopping-point),
-   then update #276. Keep #337 open until its in-game reachability is
-   established. Do not close #276: 953 remain.
+2. Continue with the F01738-F01745 group from the
+   [Stopping Point](#stopping-point), then update #276. Keep #337 open until
+   its in-game reachability is established. Do not close #276: 939 remain.
 3. Continue ordered row 28 with Behavior, Movement, the rest of Navigation
-   (F01740 and later), OrbitingBoss and Perception as listed by
+   (F01636 and F01751), OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01716/F01717/F01793/F01810-F01818 are verified dependencies,
-   not proof of remaining AI behavior or gameplay.
+   F01708-F01710/F01716/F01717/F01721-F01728/F01740/F01746/F01747/F01793/
+   F01810-F01818 are verified dependencies, not proof of remaining AI behavior
+   or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.
    Reuse the owned candidate, evaluation, stat-copy and lifecycle policies.
@@ -814,7 +833,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 953 functions complete.
+  match delivered scope. Do not declare the remaining 939 functions complete.
 - Never delete Ghidra, `tools\Base` or `tools\PSX` to save space, even where
   they mirror `C:\Tools`. Delete other local data only with owner approval.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.

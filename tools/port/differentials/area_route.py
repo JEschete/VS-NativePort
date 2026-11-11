@@ -339,7 +339,26 @@ def contacts_input(v: dict) -> list[int]:
     return [v["count"], *(value for contact in v["contacts"] for value in contact)]
 
 
-def run(machine: Machine, v: dict):
+def maps_input(v: dict) -> list[int]:
+    """The driver's VectorWorld::ReadMaps inputs."""
+    return [*v["routes"], *v["flags"], *v["heights"], v["width"], *v["regions"], *v["codes"], *v["steps"],
+            *v["dwell"], v["closed"], *(int(present) for present in v["actors"]),
+            *(value for pos in v["positions"] for value in pos), *v["occupancy"]]
+
+
+def initial_fields(v: dict) -> list[int]:
+    return actor_fields(lambda address, size, signed: int.from_bytes(
+        v["state"][address - STATE:address - STATE + size], "little", signed=signed))
+
+
+def routing_calls(log: dict) -> list[int]:
+    """The host calls func_800DFBCC made, as VectorWorld::WriteCalls prints them."""
+    out = [len(log["occupancy"]), *(value for call in log["occupancy"] for value in call)]
+    return out + [len(log["contact"]), *log["contact"], len(log["dwell"]), *log["dwell"], log["collect"]]
+
+
+def map_world(machine: Machine, v: dict) -> dict:
+    """Maps the vector's data block and gates and stubs the platform collector; returns the call log."""
     machine.images.append(Image(bytes(data_block(v)), DATA))
     machine.put(ROUTE_GATES, LINKS)
     machine.follow.update({ROUTE_GATE_EXIT, GATE_AT_TILE, ARCTANGENT})
@@ -351,6 +370,13 @@ def run(machine: Machine, v: dict):
             for field, value in enumerate(contact):
                 m.put(m.r[4] + report * 8 + field * 2, value, 2)
         m.r[2] = v["count"]
+
+    machine.stub(COLLECT_PLATFORMS, collect)
+    return log
+
+
+def map_route_world(machine: Machine, v: dict, log: dict) -> None:
+    """The scratch pad, room maps and remaining host calls func_800DFBCC reads."""
 
     def dwell(m: Machine) -> None:
         platform = s32(m.r[4])
@@ -365,7 +391,24 @@ def run(machine: Machine, v: dict):
         log["occupancy"].append([m.r[5], m.load(state + 0x154, 1), m.load(state + 5, 1)])
         m.r[2] = v["occupancy"][min(len(log["occupancy"]) - 1, 1)] & 0xFFFFFFFF
 
-    machine.stub(COLLECT_PLATFORMS, collect)
+    machine.map_zero(SCRATCH, 0x400)
+    for slot in range(SLOTS):
+        machine.put(ACTOR_TABLE + slot * 4, ACTORS + slot * ACTOR_STRIDE if v["actors"][slot] else 0)
+    machine.put(HEIGHT_MAP, HEIGHTS)
+    machine.put(TILE_FLAGS, FLAGS)
+    machine.put(TERRAIN_REGIONS, REGIONS)
+    machine.put(REGION_WIDTH, v["width"], 1)
+    machine.store(SCRATCH_DIRECTIONS, bytes(v["codes"]))
+    machine.put(ROOM_DATA, ROUTES)
+    machine.put(ROOM_AI_STATE, ROOM_AI)
+    machine.store(STEP_DIRECTIONS, bytes(v["steps"]))
+    machine.stub(PLATFORM_DWELL, dwell)
+    machine.stub(CONTACT_OCCUPANCY, contact)
+    machine.stub(DESTINATION_OCCUPANCY, occupancy)
+
+
+def run(machine: Machine, v: dict):
+    log = map_world(machine, v)
     if v["kind"] == K_EXIT:
         machine.r[4:6] = [TILES, TILES + 4]
         machine.execute(ROUTE_GATE_EXIT)
@@ -382,31 +425,12 @@ def run(machine: Machine, v: dict):
         return ({"out": [s32(machine.r[2]), log["collect"]], "stores": machine.stores},
                 [K_GATE, *ends_input(v), *contacts_input(v), v["tile"], v["match"]])
 
-    machine.map_zero(SCRATCH, 0x400)
-    for slot in range(SLOTS):
-        machine.put(ACTOR_TABLE + slot * 4, ACTORS + slot * ACTOR_STRIDE if v["actors"][slot] else 0)
-    machine.put(HEIGHT_MAP, HEIGHTS)
-    machine.put(TILE_FLAGS, FLAGS)
-    machine.put(TERRAIN_REGIONS, REGIONS)
-    machine.put(REGION_WIDTH, v["width"], 1)
-    machine.store(SCRATCH_DIRECTIONS, bytes(v["codes"]))
-    machine.put(ROOM_DATA, ROUTES)
-    machine.put(ROOM_AI_STATE, ROOM_AI)
-    machine.store(STEP_DIRECTIONS, bytes(v["steps"]))
-    machine.stub(PLATFORM_DWELL, dwell)
-    machine.stub(CONTACT_OCCUPANCY, contact)
-    machine.stub(DESTINATION_OCCUPANCY, occupancy)
-    initial = actor_fields(lambda address, size, signed: int.from_bytes(
-        v["state"][address - STATE:address - STATE + size], "little", signed=signed))
+    map_route_world(machine, v, log)
+    initial = initial_fields(v)
     machine.r[4:7] = [STATE, v["index"], v["area"]]
     machine.execute(AREA_ROUTE)
-    out = [s32(machine.r[2]), *actor_fields(machine.load)]
-    out += [len(log["occupancy"]), *(value for call in log["occupancy"] for value in call)]
-    out += [len(log["contact"]), *log["contact"], len(log["dwell"]), *log["dwell"], log["collect"]]
-    inputs = [K_ROUTE, *ends_input(v), *contacts_input(v), v["area"], v["index"], *v["routes"], *v["flags"],
-              *v["heights"], v["width"], *v["regions"], *v["codes"], *v["steps"], *v["dwell"], v["closed"],
-              *(int(present) for present in v["actors"]), *(value for pos in v["positions"] for value in pos),
-              *v["occupancy"], *initial]
+    out = [s32(machine.r[2]), *actor_fields(machine.load), *routing_calls(log)]
+    inputs = [K_ROUTE, *ends_input(v), *contacts_input(v), v["area"], v["index"], *maps_input(v), *initial]
     return {"out": out, "stores": machine.stores}, inputs
 
 

@@ -100,6 +100,29 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual((m.r[V0], m.r[V1]), (count, value), hex(value))  # LZCR stays read-only
         self.assertEqual(differential.leading_sign_bits(0xFFFFFFFE), 31)
 
+    def test_gte_square_of_the_ir_registers(self) -> None:
+        def cop2(move: int, gpr: int, register: int) -> int:
+            return 0x12 << 26 | move << 21 | gpr << 16 | register << 11
+
+        def sqr(shift: int, low_limit: int) -> int:
+            return 0x4A << 24 | shift << 19 | low_limit << 10 | differential.GTE_SQR
+
+        def program(command: int) -> tuple[int, ...]:
+            return (cop2(4, A0, 9), cop2(4, A1, 10), cop2(4, A2, 11), NOP, NOP, command, cop2(0, V0, 25),
+                    cop2(0, V1, 26), cop2(0, T0, 27), cop2(0, T1, 9), JR_RA, NOP)
+
+        # IR1-IR3 keep the low halfword, signed: 0x12345 enters as 0x2345 and 0xFFFF as -1.
+        m = run(*program(sqr(0, 1)), a0=-3, a1=0x12345, a2=0x8000)
+        self.assertEqual((m.r[V0], m.r[V1], m.r[T0]), (9, 0x2345 * 0x2345, 0x40000000))
+        self.assertEqual(m.r[T1], 9)
+        m = run(*program(sqr(1, 0)), a0=0x2000, a1=0xFFFF, a2=0x7FFF)
+        self.assertEqual((m.r[V0], m.r[V1], m.r[T0]), (0x4000, 0, 0x7FFF * 0x7FFF >> 12))
+        self.assertEqual(m.r[T1], 0x4000)
+        m = run(*program(sqr(0, 0)), a0=0x200, a1=0, a2=0)
+        self.assertEqual((m.r[V0], m.r[T1]), (0x40000, 0x7FFF))  # IR saturates; MAC keeps the square
+        with self.assertRaisesRegex(Fault, "GTE"):
+            run(0x4A000012, JR_RA, NOP)  # MVMVA is not modelled
+
     def test_signed_overflow_traps(self) -> None:
         with self.assertRaisesRegex(Fault, "overflow"):
             run(r_type(0x20, V0, A0, A1), JR_RA, NOP, a0=0x7FFFFFFF, a1=1)

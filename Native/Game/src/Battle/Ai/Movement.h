@@ -70,7 +70,6 @@ int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int til
 int Battle_Ai_RandomWanderHeading(int direction);
 void Battle_Ai_StartWanderWalk(Battle_Ai_WanderView* s);
 void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int tile, unsigned int range);
-void Battle_Ai_UpdateWaypointPatrol(Battle_Ai_PatrolView* state);
 int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int option);
 int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int targetId);
 void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state);

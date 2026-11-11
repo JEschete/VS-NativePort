@@ -10,13 +10,16 @@
 #include <optional>
 #include <vector>
 
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Core/Diagnostics.h"
 }
@@ -58,6 +61,21 @@ static_assert(kAiFrameActorSlots == kAreaRouteNoTarget);
 static_assert(kAiFrameGridSide == kNavigationGridSide);
 static_assert(kAiDirectionBytes == kNavigationDirections);
 static_assert(sizeof(Battle_Ai_RouteGateTile) == kRouteGateTileBytes);
+// So does the area movement view.
+using MoveView = Battle_Ai_TerrainMoveView;
+static_assert(offsetof(MoveView, isStuck) == offsetof(AiState, isStuck));
+static_assert(offsetof(MoveView, opaque4) == offsetof(AiState, opaque4));
+static_assert(offsetof(MoveView, opaque5) == offsetof(AiState, opaque5));
+static_assert(offsetof(MoveView, opaque1A) == offsetof(AiState, opaque1A));
+static_assert(offsetof(MoveView, settingsBit14) ==
+              offsetof(AiState, settingsBit14));
+static_assert(offsetof(MoveView, tile) == offsetof(AiState, tile));
+static_assert(offsetof(MoveView, position) == offsetof(AiState, position));
+static_assert(offsetof(MoveView, destination) ==
+              offsetof(AiState, destination));
+static_assert(offsetof(MoveView, moveX) == offsetof(AiState, moveX));
+static_assert(offsetof(MoveView, moveZ) == offsetof(AiState, moveZ));
+static_assert(offsetof(MoveView, angle) == offsetof(AiState, heading));
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -278,5 +296,40 @@ int ResolveLiveNavigationAreaRoute(Battle_Ai_AreaRouteView* view, int index,
   Store(actor, state);
   return static_cast<int>(
       Required(intent, "AI area route refused its room or actor"));
+}
+
+void UpdateLiveNavigationAreaMovement(Battle_Ai_TerrainMoveView* view) {
+  auto& state = State(view);
+  LiveAreaRouteWorld world(state);
+  AreaMovementActor actor{.route = Load(state),
+                          .is_stuck = state.isStuck,
+                          .near_target_detour = state.opaque4,
+                          .height_filtered_movement = state.opaque1A,
+                          .area_lock = state.settingsBit14};
+  const auto step = UpdateNavigationAreaMovement(world, actor);
+  Store(actor.route, state);
+  state.isStuck = actor.is_stuck;
+  state.opaque4 = actor.near_target_detour;
+  const auto movement =
+      Required(step, "AI area movement refused its room or actor");
+  switch (movement.action) {
+    case AreaMovementAction::kHeightFilteredDirections:
+      Battle_Ai_MoveWithHeightFilteredDirections(view);
+      return;
+    case AreaMovementAction::kGroundMovement:
+      RefreshLiveAiMovementCooldown(view);
+      BeginLiveAiGroundMovement(&state, movement.value);
+      return;
+    case AreaMovementAction::kCommand:
+      RefreshLiveAiMovementCooldown(view);
+      IssueLiveActorCommand(&state, movement.value);
+      return;
+    case AreaMovementAction::kDirectionalMovement:
+      // The original cleared only the first cache byte, 0x1F8003D0.
+      if (movement.clear_direction_cache) Frame().walk_valid = 0;
+      ResolveLiveDirectionalMovement(&state, movement.value, 0);
+      return;
+  }
+  Require(false, "AI area movement chose no movement");
 }
 }  // namespace VS::Battle::Ai

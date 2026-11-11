@@ -281,6 +281,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\SpecialTerrainLive.cpp",
                 r"src\Battle\Ai\RoomAiMapLive.cpp",
                 r"src\Battle\Ai\AreaRouteLive.cpp",
+                r"src\Battle\Ai\WaypointsLive.cpp",
                 r"src\Save\NativeSnapshot.cpp",
                 r"src\Save\RuntimeSnapshot.cpp",
                 r"src\Save\NativeFiles.cpp",

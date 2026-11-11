@@ -7,11 +7,13 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Battle/Ai/WaypointsLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -20,6 +22,7 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
 }
 
@@ -670,4 +673,55 @@ TEST_CASE("Actor contact release preserves source no-state and no-room gates",
   Battle_Ai_roomAiState = &fixture.room;
   VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xA1);
+}
+
+TEST_CASE("Live patrols store the cursor and walk to the next waypoint",
+          "[ai][waypoints][waypoints-live][ground-motion]") {
+  GroundFixture fixture;
+  auto* const saved_routes = Battle_Ai_patrolRoutes;
+  std::uint16_t routes[4][8]{};
+  routes[1][0] = 0x8000 | (8 << 5) | 8;
+  routes[1][1] = 0x8000 | (8 << 5) | 10;
+  Battle_Ai_patrolRoutes = routes;
+  auto& state = fixture.states[0];
+  state.patrolRow = 1;
+  state.patrolRate = 3;
+  state.patrolDirection = 1;
+  VS::Battle::Ai::UpdateLiveWaypointPatrol(
+      reinterpret_cast<Battle_Ai_PatrolView*>(&state));
+  Battle_Ai_patrolRoutes = saved_routes;
+  CHECK(state.patrolIndex == 1);
+  CHECK(state.patrolRow == 1);
+  CHECK(state.patrolRate == 3);
+  CHECK(state.patrolDirection == 1);
+  CHECK(state.patrolCooldown == 10);
+  CHECK(state.destination.word == Tile(10, 8));
+  CHECK(fixture.actors[0].commandOpcode == 9);
+}
+
+TEST_CASE("Live area movement clears one cache byte when the actor is stuck",
+          "[ai][area-movement][area-route-live][ground-motion]") {
+  const bool stuck = GENERATE(false, true);
+  GroundFixture fixture;
+  auto& state = fixture.states[0];
+  fixture.flags[8][8] = 1;
+  fixture.flags[8][10] = stuck ? 2 : 1;
+  state.destination.word = Tile(10, 8);
+  state.opaque4 = 5;
+  state.moveX = 1344;
+  state.moveZ = 1088;
+  auto& frame = *Battle_Ai_FrameState();
+  frame.walk_valid = 0xFF;
+  frame.walk_passable = 0xFF;
+  frame.blocker_valid = 0xFF;
+  frame.reserved_cache = 0x5A;
+  VS::Battle::Ai::UpdateLiveNavigationAreaMovement(
+      reinterpret_cast<Battle_Ai_TerrainMoveView*>(&state));
+  CHECK(state.opaque4 == 0);
+  CHECK(state.opaque5 == 1);
+  CHECK(frame.blocker_valid == 0xFF);
+  CHECK(frame.reserved_cache == 0x5A);
+  CHECK((frame.walk_valid == 0xFF) == !stuck);
+  if (stuck) CHECK(state.isStuck == 1);
+  CHECK(fixture.actors[0].commandOpcode == 9);
 }
