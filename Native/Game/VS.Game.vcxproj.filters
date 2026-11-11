@@ -522,6 +522,12 @@
     <ClCompile Include="src\Battle\Ai\EngagementLive.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\FlightMovement.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\FlightMovementLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\FlightTerrain.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2653,6 +2659,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\EngagementLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\FlightMovement.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\FlightMovementLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp">

@@ -96,6 +96,9 @@
     <ClCompile Include="src\AiDecisionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiFlightMovementTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AiGroundNavigationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

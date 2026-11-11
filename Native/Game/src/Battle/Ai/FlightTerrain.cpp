@@ -15,19 +15,7 @@ constexpr int kDirectionShift = 9;
 constexpr std::uint32_t kCardinalDirectionMask = 6;
 constexpr int kDiagonalDirectionCount = 3;
 constexpr int kDirectionMask = kFlightDirectionCount - 1;
-constexpr std::uint32_t kNavigationHeightMask = 0x1FFFF;
-constexpr std::uint32_t kNavigationHeightSign = 0x10000;
-constexpr int kNavigationHeightModulus = 0x20000;
 constexpr int kSegmentSampleShift = 4;
-
-// The 17-bit signed navigation height kept in the unwrapped terrain value.
-int SignedNavigationGroundHeight(int height) {
-  const std::uint32_t value =
-      static_cast<std::uint32_t>(height) & kNavigationHeightMask;
-  return (value & kNavigationHeightSign) != 0
-             ? static_cast<int>(value) - kNavigationHeightModulus
-             : static_cast<int>(value);
-}
 }  // namespace
 
 // decomp: BATTLE.PRG func_800E0850 (src/BATTLE/BATTLE.PRG/771A8.c:942).
@@ -52,7 +40,9 @@ int LowestReachableGroundHeight(const FlightNeighborhood& neighborhood,
   return minimum_height;
 }
 
-// decomp: BATTLE.PRG func_800E6A6C (src/BATTLE/BATTLE.PRG/7E05C.s:187).
+// decomp: BATTLE.PRG func_800E6A6C (src/BATTLE/BATTLE.PRG/7E05C.s:187). Each
+// sample keeps the low 15 bits of func_800E4318's value (sll/sra 17), the
+// narrowing GroundHeightAtWorldPosition applies (#343).
 int MinimumAiGroundHeightAlongSegment(Field::TerrainGrid terrain, int start_x,
                                       int start_z, int end_x, int end_z) {
   const int step_x = (end_x - start_x) >> kSegmentSampleShift;
@@ -63,8 +53,7 @@ int MinimumAiGroundHeightAlongSegment(Field::TerrainGrid terrain, int start_x,
   for (int sample = 0; sample < kGroundSegmentSampleCount; ++sample) {
     x += step_x;
     z += step_z;
-    const int ground_height = SignedNavigationGroundHeight(
-        Field::GroundHeightFlagsAtWorldPosition(terrain, x, z));
+    const int ground_height = Field::GroundHeightAtWorldPosition(terrain, x, z);
     if (ground_height < minimum_height) minimum_height = ground_height;
   }
   return minimum_height;

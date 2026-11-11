@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -163,11 +164,8 @@ class LiveWanderWorld final : public LiveRoomRegions<WanderWorld> {
   [[nodiscard]] bool CanFlyInDirection(WanderActor& actor,
                                        int direction) override {
     bool open = false;
-    Run(actor, [&] {
-      open = Battle_Ai_CanFlyInDirection(
-                 reinterpret_cast<Battle_Ai_DirectionCacheView*>(&view_),
-                 direction) != 0;
-    });
+    Run(actor,
+        [&] { open = CanLiveActorFlyInDirection(State(), direction) != 0; });
     return open;
   }
   [[nodiscard]] bool CanWalkInDirection(WanderActor& actor,

@@ -33,8 +33,11 @@ The F01738/F01739 height-filter and F01741-F01745 wander group is published in
 ([CI 42980477174](https://github.com/JEschete/VS-NativePort/actions/runs/42980477174)),
 and the F01735-F01737 radial-movement and F01750 recovery group in `8da2ca02`
 ([CI 42989259435](https://github.com/JEschete/VS-NativePort/actions/runs/42989259435)).
-The F01636/F01641/F01642/F01644/F01660 blocked-movement group follows it. See
-[Stopping Point](#stopping-point) for the next group.
+The F01636/F01641/F01642/F01644/F01660 blocked-movement group is published in
+`388d46a2`
+([CI 42997686408](https://github.com/JEschete/VS-NativePort/actions/runs/42997686408)).
+The F01729/F01730/F01732-F01734 flight group, with the #343 fix, follows it.
+See [Stopping Point](#stopping-point) for the next group.
 
 ## Checkpoint
 
@@ -48,9 +51,10 @@ The F01636/F01641/F01642/F01644/F01660 blocked-movement group follows it. See
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **923 functions remain** (after the blocked-movement group on `8da2ca02`).
-  Modernization: 2,821 done of 3,744. C++ promotion: 2,822 promoted plus one
-  frame-orchestrator WIP. These are separate measures.
+- **918 functions remain** (after the flight group on `388d46a2`).
+  Modernization: 2,826 done of 3,744. C++ promotion: 2,827 promoted plus one
+  frame-orchestrator WIP. These are separate measures. Row 28 has 28
+  generated functions left.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
   than `6c8ac0b9`.
@@ -155,63 +159,70 @@ The F01636/F01641/F01642/F01644/F01660 blocked-movement group follows it. See
 
 ## Stopping Point
 
-HEAD `8da2ca02` (radial movement) is pushed and green
-([CI 42989259435](https://github.com/JEschete/VS-NativePort/actions/runs/42989259435)).
-The commit after it holds the blocked-movement and movement-history group:
+HEAD `388d46a2` (blocked movement and movement history) is pushed and green
+([CI 42997686408](https://github.com/JEschete/VS-NativePort/actions/runs/42997686408)).
+It moved F01636, F01641, F01642, F01644 and F01660 into the pure
+`BlockedMovement` module with checked `BlockedMovementLive` bindings at
+0x800D8400, 0x800D9538 and 0x800DB0BC (differential: 311 instructions, 4,096
+vectors, 0 mismatches, 43/43 mutants).
 
-- F01636 `FindAdjacentMovementDestination`, F01641
-  `HasRepeatingMovementHistory`, F01642 `IsMovementHistoryStalled`, F01644
-  `SaveMovementRandomState` and F01660 `TryRecoverBlockedMovement` live in the
-  new pure `BlockedMovement` module. The checked `BlockedMovementLive` bindings
-  `FindLiveAdjacentMovementDestination`, `SaveLiveMovementRandomState` and
-  `TryRecoverLiveBlockedMovement` keep the module addresses 0x800D8400,
-  0x800D9538 and 0x800DB0BC. F01641 and F01642 were inlined in func_800D8EF4
-  and have no module entry; `IsLiveMovementHistoryStalled` serves the
-  generated perception caller.
-- `NearestAxisDirection` in `NavigationPrimitives.hpp` now holds the
-  nearest-axis rounding shared by `BlockedMovement`, `RadialMovement` and
-  `GroundNavigation`.
-- The callers in `GroundNavigationLive.cpp`, generated `Perception.cpp`,
-  `FrameUpdateLive.cpp`, `NavigationPrimitivesLive.cpp` and `DecisionsLive.cpp`
-  call the bindings. The old symbols had 11 consuming files at `8da2ca02` and
-  have none now.
-- The `blocked_movement` differential covers 311 original instructions
-  (0x800D8400-0x800D85D4, the inlined 0x800D927C-0x800D92B4,
-  0x800D9538-0x800D9548 and 0x800DB0BC-0x800DB36C): 4,096 vectors, 0
-  mismatches, 43/43 mutants. `differential.py` gained a `stop` address for
-  `Machine.execute`, which interprets the inlined range, and the shared
-  `packed`, `near` and `position` vector helpers.
-- Each native broken variant is detected by the differential: lateral
-  directions swapped (379 of 4,096 vectors), the status-0 quirk dropped (115)
-  and an unbiased detour step (333).
-- Focused `[blocked-movement]`: 24 cases, 123 assertions; with
-  `[target-forget-live]`, 28 cases and 139 assertions. Full suite: 5,524 cases,
-  12,650,194 assertions in Debug and Release; the replays matched the baseline.
-  Changed-file quality: 48 existing tidy findings, 0 new. The five copier test
-  commands pass after `test_encounter_fixups.py` followed the moved
-  random-state and target-forget calls.
+The commit after it holds the flight group and the #343 fix:
 
-Next group: flight, F01729, F01730 and F01732-F01734 (1,027 words in
-generated `Movement.cpp`, source `771A8.c:798-1330`):
+- F01729 `IsFlightDirectionObstructed`, F01730 `CanFlyInDirection`, F01732
+  `UpdateFlightGroundTransition`, F01733 `UpdateFlightMovement` and F01734
+  `UpdateFlightDirectionalMovement` live in the new pure `FlightMovement`
+  module. The checked `FlightMovementLive` bindings keep the module addresses
+  0x800E02B4, 0x800E0678, 0x800E0918, 0x800E0A68 and 0x800E1238; generated
+  `Movement.cpp` lost 452 lines. `CurrentTerrain.cpp`,
+  `GroundNavigationLive.cpp` and `WanderLive.cpp` call the bindings.
+- #342 (kept): the original glide divides without a zero check. Native keeps
+  the R3000 results through `R3000Quotient` and the new
+  `R3000UnsignedQuotient` (0xFFFFFFFF for a zero divisor), including the
+  `vs_gte_rsqrt` table read the zero sum produces.
+- #343 (fixed): `MinimumAiGroundHeightAlongSegment` now wraps each sample to
+  the original's signed 15 bits. That changes the `first_lever_room` flier's
+  glide from tick 122, so both replay baselines were re-recorded with the new
+  `regression.py record --config both`. With only the `FlightTerrain.cpp` fix
+  reverted, the promotion replays the old baseline exactly.
+- The `flight_movement` differential covers 1,077 original instructions:
+  3,072 vectors, 0 mismatches, 41/41 mutants. Native broken variants are
+  detected: F01729 platform slack 0x40 (181 vectors), F01730 without the
+  previous-tile check (22), F01732 near radius 17 (13), F01733 zero-sum root
+  22 (1) and F01734 heading resolve mode 2 (341). `differential.py` gained the
+  shared `placed_state`, `field_problems`, `call_problems` and
+  `store_problems` helpers; the flight, radial, wander and blocked cases use
+  them.
+- Focused `[flight-movement],[ai][flight]`: 35 cases, 173 assertions in Debug
+  and Release. Full suite: 5,550 cases, 12,650,337 assertions in Debug and
+  Release; the replays match the re-recorded baseline. Changed-file quality:
+  177 existing findings, 0 new.
 
-- F01729 `IsFlightDirectionObstructed` (0x800E02B4, 241 words), F01730
-  `CanFlyInDirection` (0x800E0678, 118), F01732 `UpdateFlightGroundTransition`
-  (0x800E0918, 84), F01733 `UpdateFlightMovement` (0x800E0A68, 500) and F01734
-  `UpdateFlightDirectionalMovement` (0x800E1238, 84). F01731
-  `LowestReachableGroundHeight` is already owned in `FlightTerrain.cpp`.
-- Consumers outside `Movement.cpp`: `CurrentTerrain.cpp`
-  (`CanFlyInDirection`), `GroundNavigationLive.cpp` and `WanderLive.cpp`.
-- F01733 also uses `SquareRootInteger`, `Arctangent2`, `Cosine`/`Sine`,
-  `MinimumAiGroundHeightAlongSegment`, `GroundHeightAtPackedTile`,
-  `SelectLiveActorVerticalMovementStep`, `ResolveLiveDirectionalMovement` (it
-  reads the frame's movement result, 5 or 7) and `IssueLiveActorCommand`.
-- Log first: the original `div` at 0x800E1030 and `divu` at 0x800E1050 and
-  0x800E1110 have no zero checks, while the generated C++ divides by
-  `height + ground` and its square, which traps on x86 when either is zero.
-  In-game reachability is unconfirmed. The typed core should use
-  `R3000Quotient` and a new unsigned counterpart that returns 0xFFFFFFFF for a
-  zero divisor.
-- Split F01733 into its own group if its differential grows too large.
+Next group (row 28 has 28 generated functions left): F01630, F01748, F01749
+and F01751.
+
+- F01630 `SetTemporaryAwarenessIndicator` (`Perception.cpp:53-58`) stores the
+  marker (u16, 0x138) and frames (u8, 0x12A). Add a pure setter beside
+  `TemporaryAwareness` in `Engagement.hpp` and a live binding in
+  `EngagementLive`. Callers: `RelationsLive.cpp`, `ActorCleanupLive.cpp`,
+  `EngagementTests.cpp`, generated `Behavior.cpp` (6, 0) and `Movement.cpp`
+  (7, 40, twice), and `ModulePointers.cpp`.
+- F01748 `UpdateTargetApproachMovement` (0x800E24EC) and F01749
+  `UpdateTargetFacing` (0x800E2B2C) go into a new pure `TargetApproach`
+  module plus `TargetApproachLive`, following `RadialMovement`. The hosts in
+  `MovementBehaviorLive.cpp` (the two direct calls, with the offsets already
+  asserted) store and reload the movement state around them. Keep the
+  `opaqueF8++ > 180` short-circuit, uint32 squares, range modes above 2
+  leaving the mode unchanged, case 2 clearing the frame direction cache's
+  byte 0, and the unconditional target-tile refresh.
+- F01751 `FollowObstacleDetour` (0x800E2F5C, generated `Navigation.cpp`)
+  becomes a typed `GroundNavigation` function over the existing `WalkProbe`
+  and `FlightProbe`, replacing the world's `FollowObstacleDetour` virtual. Its
+  third argument is a tile-flag bit (0xB walking, 0xC flying), not an intent.
+  `GroundNavigator` needs E4, E7 and E8, and the world needs another actor's
+  movement flags and wait timer. Fix #344 in the same change: the original
+  writes `nextTile` byte 3 from its caller's `$fp`, which `func_800E3600`
+  always sets to the mode argument, so it is 0; the generated copy leaves it
+  indeterminate. The differential seeds `$fp` with the mode.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -804,14 +815,15 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Continue with the F01729/F01730/F01732-F01734 flight group from the
-   [Stopping Point](#stopping-point), then update #276. Keep #337 open until
-   its in-game reachability is established. Do not close #276: 923 remain.
-3. Continue ordered row 28 with target approach, facing and detour (F01748,
-   F01749, F01751), then Behavior, Movement, OrbitingBoss and Perception as
-   listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
+2. Confirm the flight group's exact-revision CI, then continue with the
+   F01630/F01748/F01749/F01751 group from the
+   [Stopping Point](#stopping-point), fixing #344 there, and update #276. Keep
+   #337 open until its in-game reachability is established. Do not close #276:
+   918 remain.
+3. Continue ordered row 28 with Behavior, Movement, OrbitingBoss and Perception
+   as listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01636/F01641/F01642/F01644/F01660/F01708-F01710/F01716/F01717/
-   F01721-F01728/F01735-F01747/F01750/F01793/F01810-F01818 are verified
+   F01721-F01747/F01750/F01793/F01810-F01818 are verified
    dependencies, not proof of remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.

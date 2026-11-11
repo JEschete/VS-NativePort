@@ -126,6 +126,22 @@ TEST_CASE("Segment ground samples sixteen steps past the start",
             terrain.Grid(), start_x, start_z, end_x, start_z) == -64);
 }
 
+// Issue #343: func_800E6A6C narrows each sample with sll/sra 17, the same
+// signed 15-bit wrap as the ground-height query, not a 17-bit one.
+TEST_CASE("Segment ground samples wrap to signed 15 bits",
+          "[ai][flight][terrain]") {
+  Terrain terrain;
+  const int start_x = 8 * 128 + 64;
+  const int start_z = 4 * 128 + 64;
+  const int end_x = start_x + 16 * 128;
+  terrain.rows[4][16] = 0x100;  // +0x4000 wraps to -0x4000
+  CHECK(VS::Battle::Ai::MinimumAiGroundHeightAlongSegment(
+            terrain.Grid(), start_x, start_z, end_x, start_z) == -0x4000);
+  terrain.rows[4][16] = 0x200;  // -0x8000 wraps to zero
+  CHECK(VS::Battle::Ai::MinimumAiGroundHeightAlongSegment(
+            terrain.Grid(), start_x, start_z, end_x, start_z) == 0);
+}
+
 TEST_CASE("Room navigation ceiling comes from the published settings",
           "[ai][flight][room]") {
   VS::Battle::Ai::RoomAiSettings settings;

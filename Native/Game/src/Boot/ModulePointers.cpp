@@ -11,6 +11,7 @@
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
+#include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -797,11 +798,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DD000u, 0u, (void*)&Battle_Ai_ApplyActorActionReaction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DD344u, 0u, (void*)&Battle_Ai_PropagateActorRelationships, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEEA4u, 0u, (void*)&Battle_Ai_NotifyActionRelationshipChanges, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E02B4u, 0u, (void*)&Battle_Ai_IsFlightDirectionObstructed, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E0678u, 0u, (void*)&Battle_Ai_CanFlyInDirection, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E0918u, 0u, (void*)&Battle_Ai_UpdateFlightGroundTransition, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E0A68u, 0u, (void*)&Battle_Ai_UpdateFlightMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E1238u, 0u, (void*)&Battle_Ai_UpdateFlightDirectionalMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E24ECu, 0u, (void*)&Battle_Ai_UpdateTargetApproachMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2B2Cu, 0u, (void*)&Battle_Ai_UpdateTargetFacing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2F5Cu, 0u, (void*)&Battle_Ai_FollowObstacleDetour, 0u, 0u, 0u},
@@ -1748,6 +1744,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D8400u, 0u, (void*)&VS::Battle::Ai::FindLiveAdjacentMovementDestination, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D9538u, 0u, (void*)&VS::Battle::Ai::SaveLiveMovementRandomState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DB0BCu, 0u, (void*)&VS::Battle::Ai::TryRecoverLiveBlockedMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E02B4u, 0u, (void*)&VS::Battle::Ai::IsLiveFlightDirectionObstructed, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E0678u, 0u, (void*)&VS::Battle::Ai::CanLiveActorFlyInDirection, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E0918u, 0u, (void*)&VS::Battle::Ai::UpdateLiveFlightGroundTransition, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E0A68u, 0u, (void*)&VS::Battle::Ai::UpdateLiveFlightMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E1238u, 0u, (void*)&VS::Battle::Ai::UpdateLiveFlightDirectionalMovement, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

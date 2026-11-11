@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <span>
 
+#include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Field/TerrainHeight.hpp"
 
@@ -48,10 +49,10 @@ FlightNeighborhood ActorFlightNeighborhood(Battle_Ai_ActorAiState& state) {
     neighborhood.steps[direction] = {deltas[direction].dx,
                                      deltas[direction].dz};
   }
-  // The flight test caches its answers in the actor's AI state.
-  auto* cache = reinterpret_cast<Battle_Ai_DirectionCacheView*>(&state);
-  neighborhood.can_fly = [cache](int direction) {
-    return Battle_Ai_CanFlyInDirection(cache, direction) != 0;
+  // The flight test caches its answers in the room's AI frame.
+  auto* actor = &state;
+  neighborhood.can_fly = [actor](int direction) {
+    return CanLiveActorFlyInDirection(actor, direction) != 0;
   };
   // std::function keeps its small target inline; NRVO or the move rebinds it.
   // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)

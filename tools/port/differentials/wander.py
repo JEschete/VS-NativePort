@@ -11,7 +11,18 @@ from __future__ import annotations
 
 import random
 
-from differential import MASK, Image, Machine, pack_fields, s16, s32
+from differential import (
+    MASK,
+    Image,
+    Machine,
+    call_problems,
+    field_problems,
+    pack_fields,
+    placed_state,
+    s16,
+    s32,
+    store_problems,
+)
 
 ID = "F01741-F01745"
 ENTRY, END = 0x800E1BB8, 0x800E23AC
@@ -237,10 +248,7 @@ def data_block(v: dict) -> bytes:
     block[BOUNDS - DATA:BOUNDS - DATA + 4] = bytes((max_x, max_z, min_x, min_z))
     object_flags = v["object_flags"] | (FLIES if v["flies"] else 0)
     block[OBJECT - DATA + 8:OBJECT - DATA + 12] = object_flags.to_bytes(4, "little")
-    state = pack_fields(v["state"], FIELDS, v["fields"])
-    state[0x58:0x5C] = OBJECT.to_bytes(4, "little")
-    block[STATE - DATA:STATE - DATA + STATE_SIZE] = state
-    return bytes(block)
+    return placed_state(block, STATE - DATA, pack_fields(v["state"], FIELDS, v["fields"]), OBJECT)
 
 
 def run(machine: Machine, v: dict):
@@ -328,23 +336,11 @@ def check(image: Image, v: dict, obs: dict, native: list[int], reference: dict) 
     records = [native[start + i * RECORD:start + (i + 1) * RECORD] for i in range(count)]
     if result != obs["result"]:
         problems.append(f"tile choice: native {result} original {obs['result']}")
-    differing = [f"{NAMES[i]} native {fields[i]} original {obs['fields'][i]}"
-                 for i in range(len(FIELDS)) if fields[i] != obs["fields"][i]]
-    if differing:
-        problems.append("fields: " + ", ".join(differing))
+    problems += field_problems(NAMES, fields, obs["fields"], hexadecimal=False)
     if cache != obs["cache"]:
         problems.append(f"direction cache: native {cache} original {obs['cache']}")
-    if records != obs["records"]:
-        first = next((i for i, (a, b) in enumerate(zip(records, obs["records"], strict=False))
-                      if a != b),
-                     min(len(records), len(obs["records"])))
-        problems.append(f"calls differ from {first}: native {records[first:first + 2]} "
-                        f"original {obs['records'][first:first + 2]}")
-    for address, size in obs["stores"]:
-        if not any(low <= address and address + size <= high for low, high in ALLOWED):
-            problems.append(f"original stored {size} bytes at {address:#x}")
-            break
-    return problems
+    problems += call_problems(records, obs["records"])
+    return problems + store_problems(obs["stores"], ALLOWED)
 
 
 def describe(image: Image, results: list) -> list[str]:

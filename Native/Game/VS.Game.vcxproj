@@ -279,6 +279,10 @@
     <ClCompile Include="src\Battle\Ai\EngagementLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\FlightMovement.cpp" />
+    <ClCompile Include="src\Battle\Ai\FlightMovementLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\FlightTerrain.cpp" />
     <ClCompile Include="src\Battle\Ai\FrameUpdate.cpp" />
     <ClCompile Include="src\Battle\Ai\FrameUpdateLive.cpp">
@@ -2216,6 +2220,8 @@
     <ClInclude Include="include\Battle\Ai\DecisionsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\Engagement.hpp" />
     <ClInclude Include="include\Battle\Ai\EngagementLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\FlightMovement.hpp" />
+    <ClInclude Include="include\Battle\Ai\FlightMovementLive.hpp" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdate.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdateLive.hpp" />

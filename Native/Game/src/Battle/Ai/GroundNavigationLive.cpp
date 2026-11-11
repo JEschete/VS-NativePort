@@ -16,6 +16,7 @@
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
@@ -263,8 +264,8 @@ int GroundTest(Battle_Ai_MovementPathView* view, int direction) {
 }
 
 int FlightTest(Battle_Ai_MovementPathView* view, int direction) {
-  return Battle_Ai_CanFlyInDirection(
-      reinterpret_cast<Battle_Ai_DirectionCacheView*>(view), direction);
+  return CanLiveActorFlyInDirection(
+      reinterpret_cast<Battle_Ai_ActorAiState*>(view), direction);
 }
 
 const Actors_ActorRecord* Model(int actor_id) {
@@ -425,14 +426,13 @@ class LiveGroundWorld final : public LiveGroundRoom {
   }
   void UpdateFlightMovement(GroundNavigator& navigator, int angle) override {
     Run(navigator, [angle](Battle_Ai_ActorAiState& state) {
-      Battle_Ai_UpdateFlightMovement(
-          reinterpret_cast<Battle_Ai_MovementStepView*>(&state), angle);
+      UpdateLiveFlightMovement(&state, angle);
     });
   }
   void UpdateFlightDirectionalMovement(GroundNavigator& navigator,
                                        int angle) override {
     Run(navigator, [angle](Battle_Ai_ActorAiState& state) {
-      Battle_Ai_UpdateFlightDirectionalMovement(&state, angle);
+      UpdateLiveFlightDirectionalMovement(&state, angle);
     });
   }
   void MoveToRadialDestination(GroundNavigator& navigator, int angle) override {

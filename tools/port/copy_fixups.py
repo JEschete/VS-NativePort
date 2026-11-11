@@ -643,6 +643,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::IsLiveMovementHistoryStalled": r"Native\Game\include\Battle\Ai\BlockedMovementLive.hpp",
     "VS::Battle::Ai::SaveLiveMovementRandomState": r"Native\Game\include\Battle\Ai\BlockedMovementLive.hpp",
     "VS::Battle::Ai::TryRecoverLiveBlockedMovement": r"Native\Game\include\Battle\Ai\BlockedMovementLive.hpp",
+    "VS::Battle::Ai::IsLiveFlightDirectionObstructed": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
+    "VS::Battle::Ai::CanLiveActorFlyInDirection": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveFlightGroundTransition": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveFlightMovement": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveFlightDirectionalMovement": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1216,6 +1221,11 @@ OWNED_CALL_BINDINGS["F01636"] = "VS::Battle::Ai::FindLiveAdjacentMovementDestina
 OWNED_CALL_BINDINGS["F01642"] = "VS::Battle::Ai::IsLiveMovementHistoryStalled"
 OWNED_CALL_BINDINGS["F01644"] = "VS::Battle::Ai::SaveLiveMovementRandomState"
 OWNED_CALL_BINDINGS["F01660"] = "VS::Battle::Ai::TryRecoverLiveBlockedMovement"
+OWNED_CALL_BINDINGS["F01729"] = "VS::Battle::Ai::IsLiveFlightDirectionObstructed"
+OWNED_CALL_BINDINGS["F01730"] = "VS::Battle::Ai::CanLiveActorFlyInDirection"
+OWNED_CALL_BINDINGS["F01732"] = "VS::Battle::Ai::UpdateLiveFlightGroundTransition"
+OWNED_CALL_BINDINGS["F01733"] = "VS::Battle::Ai::UpdateLiveFlightMovement"
+OWNED_CALL_BINDINGS["F01734"] = "VS::Battle::Ai::UpdateLiveFlightDirectionalMovement"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2785,6 +2795,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D8400, "VS::Battle::Ai::FindLiveAdjacentMovementDestination"),  # F01636
     ("BATTLE/BATTLE.PRG", 0x800D9538, "VS::Battle::Ai::SaveLiveMovementRandomState"),  # F01644
     ("BATTLE/BATTLE.PRG", 0x800DB0BC, "VS::Battle::Ai::TryRecoverLiveBlockedMovement"),  # F01660
+    ("BATTLE/BATTLE.PRG", 0x800E02B4, "VS::Battle::Ai::IsLiveFlightDirectionObstructed"),  # F01729
+    ("BATTLE/BATTLE.PRG", 0x800E0678, "VS::Battle::Ai::CanLiveActorFlyInDirection"),  # F01730
+    ("BATTLE/BATTLE.PRG", 0x800E0918, "VS::Battle::Ai::UpdateLiveFlightGroundTransition"),  # F01732
+    ("BATTLE/BATTLE.PRG", 0x800E0A68, "VS::Battle::Ai::UpdateLiveFlightMovement"),  # F01733
+    ("BATTLE/BATTLE.PRG", 0x800E1238, "VS::Battle::Ai::UpdateLiveFlightDirectionalMovement"),  # F01734
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3782,18 +3797,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position,",
          "VS::Core::Math::PositionOf(((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position),",
          "F01773 is promoted C++: pass the player model's short[3] position as a Position3 value"),
-    ],
-    "F01732": [
-        ("SquaredTileDistance(state->destination, state->tile)",
-         "SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->destination)),"
-         " VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile)))",
-         "F01771 is promoted C++: decode both packed tile words at the call instead of passing raw words"),
-    ],
-    "F01733": [
-        ("SquaredTileDistance(state->tile.word, state->destination.word)",
-         "SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->tile.word),"
-         " VS::Core::Math::UnpackTileCoordinate(state->destination.word))",
-         "F01771 is promoted C++: decode both packed tile words at the call instead of passing raw words"),
     ],
     "F01846": [
         ("    VS::Core::Math::SquaredVectorLength(0x7C0 - state->x, 0, 0x7C0 - state->z);\n",

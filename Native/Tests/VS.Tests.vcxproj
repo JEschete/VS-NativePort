@@ -70,6 +70,7 @@
     <ClCompile Include="src\AiBlockedMovementTests.cpp" />
     <ClCompile Include="src\AiDecisionsTests.cpp" />
     <ClCompile Include="src\AiDecisionTests.cpp" />
+    <ClCompile Include="src\AiFlightMovementTests.cpp" />
     <ClCompile Include="src\AiGroundNavigationTests.cpp" />
     <ClCompile Include="src\AiLayoutTests.cpp" />
     <ClCompile Include="src\AiLifecycleLeafTests.cpp" />

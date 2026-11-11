@@ -16,7 +16,20 @@ from __future__ import annotations
 
 import random
 
-from differential import Image, Machine, near, pack_fields, packed, position, s16, s32
+from differential import (
+    Image,
+    Machine,
+    call_problems,
+    field_problems,
+    near,
+    pack_fields,
+    packed,
+    placed_state,
+    position,
+    s16,
+    s32,
+    store_problems,
+)
 
 ID = "F01735-F01737, F01750"
 ENTRY, END = 0x800E1388, 0x800E1850
@@ -273,10 +286,7 @@ def data_block(v: dict) -> bytes:
         record = RECORDS - DATA + index * RECORD_SIZE
         block[record + 0x1C:record + 0x1E] = (x & 0xFFFF).to_bytes(2, "little")
         block[record + 0x20:record + 0x22] = (z & 0xFFFF).to_bytes(2, "little")
-    state = pack_fields(v["state"], FIELDS, v["fields"])
-    state[0x58:0x5C] = MODEL.to_bytes(4, "little")
-    block[STATE - DATA:STATE - DATA + STATE_SIZE] = state
-    return bytes(block)
+    return placed_state(block, STATE - DATA, pack_fields(v["state"], FIELDS, v["fields"]), MODEL)
 
 
 def run(machine: Machine, v: dict):
@@ -355,20 +365,9 @@ def check(image: Image, v: dict, obs: dict, native: list[int], reference: dict) 
     records = [native[start + i * RECORD:start + (i + 1) * RECORD] for i in range(count)]
     fields, records = untagged(v["kind"], fields, records)
     original_fields, original_records = untagged(v["kind"], obs["fields"], obs["records"])
-    differing = [f"{NAMES[i]} native {fields[i]:#x} original {original_fields[i]:#x}"
-                 for i in range(len(FIELDS)) if fields[i] != original_fields[i]]
-    if differing:
-        problems.append("fields: " + ", ".join(differing))
-    if records != original_records:
-        first = next((i for i, (a, b) in enumerate(zip(records, original_records, strict=False)) if a != b),
-                     min(len(records), len(original_records)))
-        problems.append(f"calls differ from {first}: native {records[first:first + 2]} "
-                        f"original {original_records[first:first + 2]}")
-    for address, size in obs["stores"]:
-        if not any(low <= address and address + size <= high for low, high in ALLOWED):
-            problems.append(f"original stored {size} bytes at {address:#x}")
-            break
-    return problems
+    problems += field_problems(NAMES, fields, original_fields)
+    problems += call_problems(records, original_records)
+    return problems + store_problems(obs["stores"], ALLOWED)
 
 
 def beyond(f: dict) -> bool:

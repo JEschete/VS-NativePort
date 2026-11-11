@@ -84,6 +84,39 @@ def pack_fields(raw: bytes, fields, values: dict) -> bytearray:
     return block
 
 
+def placed_state(block: bytearray, offset: int, state: bytearray, model: int) -> bytes:
+    """`block` with an AI state (`state`, already packed) at `offset`, its model pointer (0x58) set to `model`."""
+    state[0x58:0x5C] = model.to_bytes(4, "little")
+    block[offset:offset + len(state)] = state
+    return bytes(block)
+
+
+# Comparison helpers shared by the cases' check() functions.
+def field_problems(names, native: list[int], original: list[int], hexadecimal: bool = True) -> list[str]:
+    """One "fields: ..." problem naming each of `names` the two runs left different, or none."""
+    shown = "{:#x}" if hexadecimal else "{}"
+    differing = [f"{name} native {shown.format(mine)} original {shown.format(theirs)}"
+                 for name, mine, theirs in zip(names, native, original, strict=False) if mine != theirs]
+    return ["fields: " + ", ".join(differing)] if differing else []
+
+
+def call_problems(native: list[list[int]], original: list[list[int]]) -> list[str]:
+    """One problem quoting the first two calls from where the recorded call lists diverge, or none."""
+    if native == original:
+        return []
+    first = next((i for i, (a, b) in enumerate(zip(native, original, strict=False)) if a != b),
+                 min(len(native), len(original)))
+    return [f"calls differ from {first}: native {native[first:first + 2]} original {original[first:first + 2]}"]
+
+
+def store_problems(stores, allowed: list[tuple[int, int]]) -> list[str]:
+    """The first store the original made outside the `allowed` [low, high) spans, or none."""
+    for address, size in stores:
+        if not any(low <= address and address + size <= high for low, high in allowed):
+            return [f"original stored {size} bytes at {address:#x}"]
+    return []
+
+
 # Vector helpers for the battle-AI cases. A tile word holds x in byte 0 and z in byte 2; bytes 1
 # and 3 carry per-actor metadata, drawn at random here.
 def packed(rng: random.Random, x: int, z: int) -> int:

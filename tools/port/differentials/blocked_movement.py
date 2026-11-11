@@ -17,7 +17,17 @@ from __future__ import annotations
 
 import random
 
-from differential import Image, Machine, near, pack_fields, packed, position, s32
+from differential import (
+    Image,
+    Machine,
+    call_problems,
+    field_problems,
+    near,
+    pack_fields,
+    packed,
+    position,
+    s32,
+)
 
 ID = "F01636, F01641, F01642, F01644, F01660"
 ENTRY, END = 0x800DB0BC, 0x800DB370
@@ -377,16 +387,8 @@ def check(image: Image, v: dict, obs: dict, native: list[int], reference: dict) 
     if result != obs["result"]:
         problems.append(f"result native {result:#x} original {obs['result']:#x}")
     if kind == K_RECOVER:
-        differing = [f"{MOVER[i]} native {fields[i]:#x} original {obs['fields'][i]:#x}"
-                     for i in range(len(MOVER)) if fields[i] != obs["fields"][i]]
-        if differing:
-            problems.append("fields: " + ", ".join(differing))
-    if records != original_records:
-        first = next((i for i, (a, b) in enumerate(zip(records, original_records, strict=False)) if a != b),
-                     min(len(records), len(original_records)))
-        problems.append(f"calls differ from {first}: native {records[first:first + 2]} "
-                        f"original {original_records[first:first + 2]}")
-    return problems
+        problems += field_problems(MOVER, fields, obs["fields"])
+    return problems + call_problems(records, original_records)
 
 
 def adjacent_outcome(v: dict, obs: dict, native: list[int]) -> str:

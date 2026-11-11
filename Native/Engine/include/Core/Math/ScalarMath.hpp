@@ -109,6 +109,13 @@ struct NormalizedVector {
   return dividend / divisor;
 }
 
+// The quotient the R3000 DIVU instruction leaves in LO: truncating unsigned
+// division, with a zero divisor giving every bit set. Defined for every input.
+[[nodiscard]] constexpr std::uint32_t R3000UnsignedQuotient(
+    std::uint32_t dividend, std::uint32_t divisor) noexcept {
+  return divisor == 0 ? ~0u : dividend / divisor;
+}
+
 // Q12 sine and cosine of an angle in 4096-per-turn units; only the low 12
 // bits of the angle count.
 [[nodiscard]] std::int32_t Sine(std::int32_t angle) noexcept;

@@ -28,6 +28,10 @@ static_assert(Math::R3000Quotient(-7, 0) == 1);
 static_assert(Math::R3000Quotient(kMin, -1) == kMin);
 static_assert(Math::R3000Quotient(-7, 2) == -3);
 static_assert(Math::R3000Quotient(7, -2) == -3);
+static_assert(Math::R3000UnsignedQuotient(7, 0) == 0xFFFFFFFFu);
+static_assert(Math::R3000UnsignedQuotient(0, 0) == 0xFFFFFFFFu);
+static_assert(Math::R3000UnsignedQuotient(0xFFFFFFFFu, 2) == 0x7FFFFFFFu);
+static_assert(Math::R3000UnsignedQuotient(7, 2) == 3);
 
 static_assert(
     std::is_same_v<decltype(&Math::InterpolateLiveSevenBitVector<VECTOR>),
