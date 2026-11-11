@@ -1,6 +1,7 @@
 """Compare a function's original MIPS instructions with its owned native code (#340).
 
   python tools\\port\\differential.py <case> [--vectors N] [--no-mutants] [--no-build] [--log PATH]
+  python tools\\port\\differential.py <case> --replace SOURCE OLD NEW [--vectors N]
   python tools\\port\\differential.py --list
 
 The original side runs the function's own R3000 instructions from the extracted module
@@ -32,8 +33,13 @@ count, and is written to build\\differential\\<case>.log.
 The interpreter executes branch delay slots but not load delay slots (compiled PS1 code never
 reads a loaded register in the next instruction). Calls must be stubbed or explicitly followed,
 so an unexpected callee stops the run instead of executing silently. The GTE model covers moves
-to and from IR1-IR3, MAC1-MAC3 and the leading-zero counter (LZCS/LZCR) and the SQR command;
-other COP instructions, syscalls, unaligned accesses and overflow traps raise.
+to and from IR0-IR3, MAC1-MAC3, SXY0-SXY2 and the leading-zero counter (LZCS/LZCR) and the SQR
+command; other COP instructions, syscalls, unaligned accesses and overflow traps raise.
+
+A native broken variant (--replace SOURCE OLD NEW) builds a separate driver from a copy of one of
+the case's SOURCES with one exact text replacement, leaving the tree untouched, and runs the
+vectors without mutants; the variant is detected when at least one vector mismatches. Its report
+is build\\differential\\<case>-variant.log.
 """
 
 from __future__ import annotations
@@ -143,6 +149,11 @@ LZCS, LZCR = 30, 31
 IR = (9, 10, 11)
 MAC = (25, 26, 27)
 GTE_SQR = 0x28
+# IR0 (a signed halfword) and the screen XY FIFO entries SXY0-SXY2 (words), which some routines
+# use as scratch registers across calls.
+IR0 = 8
+SXY = (12, 13, 14)
+SCRATCH_GTE = (IR0, *SXY)
 
 
 def leading_sign_bits(value: int) -> int:
@@ -200,7 +211,7 @@ class Machine:
         self.r = [0] * 32
         self.hi = self.lo = 0
         self.lzcs = 0
-        self.gte = dict.fromkeys(IR + MAC, 0)
+        self.gte = dict.fromkeys(IR + MAC + SCRATCH_GTE, 0)
         self.r[R["sp"]] = stack
         self.stubs: dict[int, Callable[[Machine], None]] = {}
         self.follow: set[int] = set()
@@ -348,7 +359,7 @@ class Machine:
             self.write((r[rs] + imm) & MASK, r[rt], size)
         elif op in (0x2A, 0x2E):
             self.store_partial(op, (r[rs] + imm) & MASK, r[rt])
-        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR, *IR, *MAC):
+        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR, *IR, *MAC, *SCRATCH_GTE):
             if rs == 4:
                 self.gte_write(rd, r[rt])
             else:
@@ -357,7 +368,7 @@ class Machine:
             self.gte_square(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12:
             raise Fault(f"unhandled GTE instruction {word:#010x} at {pc:#x} "
-                        "(only IR, MAC and LZCS/LZCR moves and SQR are modelled)")
+                        "(only IR0-IR3, MAC, SXY0-SXY2 and LZCS/LZCR moves and SQR are modelled)")
         else:
             raise Fault(f"unhandled opcode {op:#x} at {pc:#x} (COP instructions need a stub)")
         r[0] = 0
@@ -431,9 +442,9 @@ class Machine:
         """mtc2: IR registers keep a signed halfword; LZCR is read-only."""
         if register == LZCS:
             self.lzcs = value
-        elif register in IR:
+        elif register in (IR0, *IR):
             self.gte[register] = s16(value)
-        elif register in MAC:
+        elif register in (*MAC, *SXY):
             self.gte[register] = value & MASK
 
     def gte_read(self, register: int) -> int:
@@ -585,13 +596,37 @@ def vcvars() -> Path:
     return VCVARS
 
 
-def build_driver(case: ModuleType) -> Path:
-    output = OUTPUT / case.PATH.stem
+def variant_sources(case: ModuleType, output: Path,
+                    replacements: list[tuple[str, str, str]]) -> tuple[list[Path], list[Path]]:
+    """Copy each replaced source into output with its one exact replacement; return the sources and
+    the original directories of the copies (for their quoted includes)."""
+    sources = [ROOT / path for path in case.SOURCES]
+    directories: list[Path] = []
+    for target, old, new in replacements:
+        matches = [index for index, path in enumerate(sources)
+                   if path.name.lower() == Path(target).name.lower()
+                   or path.resolve() == (ROOT / target).resolve()]
+        if len(matches) != 1:
+            raise SystemExit(f"--replace {target}: matches {len(matches)} of the case's SOURCES")
+        original = ROOT / case.SOURCES[matches[0]]
+        text = sources[matches[0]].read_text(encoding="utf-8")
+        if text.count(old) != 1:
+            raise SystemExit(f"--replace {target}: the old text occurs {text.count(old)} times, not once")
+        copy = output / original.name
+        copy.write_text(text.replace(old, new), encoding="utf-8")
+        sources[matches[0]] = copy
+        directories.append(original.parent)
+    return sources, directories
+
+
+def build_driver(case: ModuleType, replacements: list[tuple[str, str, str]] | None = None) -> Path:
+    output = OUTPUT / (case.PATH.stem + ("-variant" if replacements else ""))
     output.mkdir(parents=True, exist_ok=True)
     executable = output / "driver.exe"
+    sources, directories = variant_sources(case, output, replacements or [])
     includes = [ROOT / "Native" / "Game" / "include", ROOT / "Native" / "Engine" / "include",
-                *(ROOT / path for path in getattr(case, "INCLUDES", ()))]
-    sources = [case.PATH.with_name(case.DRIVER), *(ROOT / path for path in case.SOURCES)]
+                *(ROOT / path for path in getattr(case, "INCLUDES", ())), *directories]
+    sources = [case.PATH.with_name(case.DRIVER), *sources]
     command = (f'call "{vcvars()}" >nul && cl /nologo /std:c++20 /EHsc /O2 /DVS_DIFFERENTIAL '
                + " ".join(f'/I "{path}"' for path in includes) + " "
                + " ".join(f'"{path}"' for path in sources)
@@ -623,6 +658,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--no-mutants", action="store_true", help="skip the mutant runs")
     parser.add_argument("--no-build", action="store_true", help="reuse the previously built driver")
     parser.add_argument("--log", type=Path, help="report path (default build\\differential\\<case>.log)")
+    parser.add_argument("--replace", nargs=3, action="append", metavar=("SOURCE", "OLD", "NEW"),
+                        help="native broken variant: build from a copy of SOURCE with OLD replaced "
+                             "by NEW (once each; repeatable) and expect mismatches")
     args = parser.parse_args(argv)
     if args.list or not args.case:
         for path in sorted(CASES.glob("*.py")):
@@ -630,6 +668,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     case = load_case(args.case)
     images = case_images(case)
+    if args.replace:
+        executable = build_driver(case, [tuple(item) for item in args.replace])
+        report = run_case(case, images, driver_runner(executable, images[0]), args.vectors, False)
+        detected = report.mismatches > 0
+        report.lines.append("VARIANT DETECTED" if detected else "VARIANT UNDETECTED")
+        text = "\n".join(report.lines) + "\n"
+        log = args.log or OUTPUT / f"{case.PATH.stem}-variant.log"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        log.write_text(text, encoding="utf-8")
+        sys.stdout.write(text)
+        print(f"report: {log}")
+        return 0 if detected else 1
     executable = OUTPUT / case.PATH.stem / "driver.exe"
     if not args.no_build or not executable.is_file():
         executable = build_driver(case)

@@ -43,8 +43,6 @@ typedef union Battle_Ai_TilePosition {
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_NAVIGATION_H_DECLS)
 #define VS_BATTLE_AI_NAVIGATION_H_DECLS
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
 
 extern Battle_Ai_DirectionDelta Battle_Ai_directionDeltas[8];
 extern u_char Battle_Ai_routeStepDirections[272];
@@ -52,6 +50,5 @@ extern u_short (*Battle_Ai_tileFlagMap)[32];
 extern unsigned short* Battle_Ai_roomWaypoints;
 extern u_short (*Battle_Ai_specialTerrainHeights)[32];
 extern Battle_Ai_RouteGateEnd* Battle_Ai_routeGates;
-int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_PathTest test, int mask);
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

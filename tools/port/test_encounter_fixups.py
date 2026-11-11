@@ -1391,16 +1391,20 @@ class EncounterFixupTests(unittest.TestCase):
             self.assertNotIn("Core_Math_SquaredVectorLength", text, path.name)
             self.assertNotIn("Core_Math_SquaredTileDistance", text, path.name)
             self.assertNotIn("Core_Math_SquaredDistanceWithHeightOffsets", text, path.name)
-        for name in ("Behavior", "Movement", "OrbitingBoss", "Perception"):
+        for name in ("Behavior", "OrbitingBoss", "Perception"):
             text = (ai / f"{name}.cpp").read_text(encoding="utf-8")
             self.assertLess(
                 text.index('#include "Core/Math/Distance.hpp"'),
                 text.index('extern "C" {'),
                 name,
             )
-        # Navigation.cpp's distance users (F01710, F01740) moved to typed cores.
-        navigation = (ai / "Navigation.cpp").read_text(encoding="utf-8")
-        self.assertNotIn("VS::Core::Math::Squared", navigation)
+        # Navigation.cpp's distance users (F01710, F01740) and Movement.cpp's
+        # (F01748, F01749) moved to typed cores.
+        for name in ("Navigation", "Movement"):
+            text = (ai / f"{name}.cpp").read_text(encoding="utf-8")
+            self.assertNotIn("VS::Core::Math::Squared", text, name)
+        approach = (ai / "TargetApproach.cpp").read_text(encoding="utf-8")
+        self.assertIn('#include "Core/Math/Distance.hpp"', approach)
 
     def test_native_terrain_envelope_calls_the_existing_builder_without_guest_stack(self):
         self.assertEqual(
@@ -4261,8 +4265,9 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
             text = (root / "Native/Game/src/Battle/Ai" / path).read_text(encoding="utf-8")
             self.assertNotIn("Battle_Ai_IssueActorCommand(", text, path)
             self.assertNotIn("Battle/Ai/ActorCommands.h", text, path)
-            # Navigation.cpp's command issuer (F01740) moved to AreaRouteLive.cpp.
-            if path == "Navigation.cpp":
+            # Navigation.cpp's command issuer (F01740) moved to AreaRouteLive.cpp
+            # and Movement.cpp's (F01748, F01749) to TargetApproachLive.cpp.
+            if path in ("Navigation.cpp", "Movement.cpp"):
                 self.assertNotIn("IssueLiveActorCommand(", text, path)
                 continue
             self.assertIn("VS::Battle::Ai::IssueLiveActorCommand(", text, path)
@@ -4272,6 +4277,8 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertNotIn("Battle_Ai_IssueActorCommand(", creation)
         self.assertIn("IssueLiveActorCommand(&state, static_cast<int>(intent));", creation)
         self.assertIn('#include "Battle/Ai/ActorCommandsLive.hpp"', creation)
+        approach = (root / "Native/Game/src/Battle/Ai/TargetApproachLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("IssueLiveActorCommand(&state_, static_cast<int>(intent));", approach)
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x800DEEFCu", table)
 

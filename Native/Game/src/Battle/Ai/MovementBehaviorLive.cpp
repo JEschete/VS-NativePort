@@ -17,6 +17,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Core/Math/Distance.hpp"
@@ -314,7 +315,7 @@ class LiveMovementHost final : public MovementHost {
   int UpdateTargetApproach(MovementState& state, int option) override {
     StoreMovementState(state, state_);
     const int moved =
-        Battle_Ai_UpdateTargetApproachMovement(&Approach(state_), option);
+        UpdateLiveTargetApproachMovement(&Approach(state_), option);
     state = LoadMovementState(state_);
     return moved;
   }
@@ -332,7 +333,7 @@ class LiveMovementHost final : public MovementHost {
   }
   int UpdateTargetFacing(MovementState& state, int target) override {
     StoreMovementState(state, state_);
-    const int turned = Battle_Ai_UpdateTargetFacing(
+    const int turned = UpdateLiveTargetFacing(
         reinterpret_cast<Battle_Ai_MovementDecisionView*>(&state_), target);
     state = LoadMovementState(state_);
     return turned;

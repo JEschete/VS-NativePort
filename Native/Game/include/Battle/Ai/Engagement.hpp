@@ -76,6 +76,13 @@ bool SetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id,
 // Clears the marker, then shows the reset marker.
 bool ResetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id);
 
+// decomp: func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407).
+// Starts a temporary marker for `frames` frames. The AI state keeps the
+// marker's low 16 bits and the count's low 8 bits, as the original's halfword
+// and byte stores did.
+void SetTemporaryAwarenessIndicator(TemporaryAwareness& awareness, int marker,
+                                    int frames);
+
 // decomp: func_800D826C (src/BATTLE/BATTLE.PRG/6FA6C.s:10).
 [[nodiscard]] bool IsEngagementReady(std::uint16_t engaged_frames);
 

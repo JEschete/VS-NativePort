@@ -23,6 +23,7 @@
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -80,6 +81,23 @@ static_assert(offsetof(Battle_Ai_TargetApproachView, targetId) >=
               offsetof(Battle_Ai_TargetApproachView, targetId) <
                   offsetof(Battle_Ai_ActorAiState, reservedD9) +
                       sizeof(Battle_Ai_ActorAiState{}.reservedD9));
+// The pursuit flags the detour clears: 0xE4 lies in the reserved bytes, 0xE7
+// and 0xE8 are named in both layouts.
+static_assert(offsetof(Battle_Ai_TargetApproachView, opaqueE4) >=
+                  offsetof(Battle_Ai_ActorAiState, reservedD9) &&
+              offsetof(Battle_Ai_TargetApproachView, opaqueE4) <
+                  offsetof(Battle_Ai_ActorAiState, reservedD9) +
+                      sizeof(Battle_Ai_ActorAiState{}.reservedD9));
+static_assert(offsetof(Battle_Ai_TargetApproachView, opaqueE7) ==
+              offsetof(Battle_Ai_ActorAiState, opaqueE7));
+static_assert(offsetof(Battle_Ai_TargetApproachView, opaqueE8) ==
+              offsetof(Battle_Ai_ActorAiState, opaqueE8));
+static_assert(offsetof(Battle_Ai_MovementPathView, opaqueE4) ==
+              offsetof(Battle_Ai_TargetApproachView, opaqueE4));
+static_assert(offsetof(Battle_Ai_MovementPathView, waitTimer) ==
+              offsetof(Battle_Ai_ActorAiState, opaque19A));
+static_assert(offsetof(Battle_Ai_MovementPathView, opaque199) ==
+              offsetof(Battle_Ai_ActorAiState, detour_run));
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -149,6 +167,9 @@ void LoadPlacement(const Battle_Ai_ActorAiState& state, GroundNavigator& nav) {
       *reinterpret_cast<const Battle_Ai_TargetApproachView*>(&state);
   nav.approach_target_id = approach.targetId;
   nav.approach_range = approach.range;
+  nav.pursuit_e4 = approach.opaqueE4;
+  nav.pursuit_e7 = state.opaqueE7;
+  nav.pursuit_e8 = state.opaqueE8;
 }
 
 void LoadMovement(const Battle_Ai_ActorAiState& state, GroundNavigator& nav) {
@@ -222,6 +243,10 @@ void StorePlacement(const GroundNavigator& nav, Battle_Ai_ActorAiState& state) {
   state.bodyHeight = nav.body_height;
   state.fine_x = nav.fine_x;
   state.fine_z = nav.fine_z;
+  reinterpret_cast<Battle_Ai_TargetApproachView&>(state).opaqueE4 =
+      nav.pursuit_e4;
+  state.opaqueE7 = nav.pursuit_e7;
+  state.opaqueE8 = nav.pursuit_e8;
 }
 
 void StoreMovement(const GroundNavigator& nav, Battle_Ai_ActorAiState& state) {
@@ -258,11 +283,6 @@ Battle_Ai_MovementPathView* PathView(Battle_Ai_ActorAiState& state) {
   return reinterpret_cast<Battle_Ai_MovementPathView*>(&state);
 }
 
-int GroundTest(Battle_Ai_MovementPathView* view, int direction) {
-  return CanLiveActorWalkInDirection(
-      reinterpret_cast<Battle_Ai_WanderView*>(view), direction);
-}
-
 int FlightTest(Battle_Ai_MovementPathView* view, int direction) {
   return CanLiveActorFlyInDirection(
       reinterpret_cast<Battle_Ai_ActorAiState*>(view), direction);
@@ -278,6 +298,9 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
  public:
   [[nodiscard]] std::uint32_t RoomBounds() const override {
     return Frame().roomBounds;
+  }
+  [[nodiscard]] std::optional<RoomTileBounds> RoomTileLimits() const override {
+    return LiveRoomTileBounds();
   }
   [[nodiscard]] bool HasTileMaps() const override {
     return Frame().tileFlags != nullptr && Frame().heightMap != nullptr;
@@ -356,6 +379,18 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
     return GroundPoint{.x = model->instance.position.vx,
                        .z = model->instance.position.vz};
   }
+  [[nodiscard]] std::optional<ActorDetourWait> OtherActorDetourWait(
+      int actor_id) const override {
+    const auto* other = OtherState(actor_id);
+    if (other == nullptr) return std::nullopt;
+    return ActorDetourWait{.movement_flags = other->movementFlags,
+                           .repeat_wait = other->opaque19A};
+  }
+  void SetOtherActorRepeatWait(int actor_id, std::uint8_t wait) override {
+    auto* other = OtherState(actor_id);
+    Require(other != nullptr, "AI detour nudge requires the actor's AI state");
+    other->opaque19A = wait;
+  }
 
   int NextRandomMasked(int range) override {
     return NextLiveActorRandomMasked(range);
@@ -389,6 +424,11 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
   static Battle_Ai_FrameContext& Frame() { return *Battle_Ai_FrameState(); }
 
  private:
+  static Battle_Ai_ActorAiState* OtherState(int actor_id) {
+    if (actor_id < 0 || actor_id >= kAiFrameActorSlots) return nullptr;
+    return Frame().actors[actor_id];
+  }
+
   const Battle_Actor* cursor_ = nullptr;
 };
 
@@ -444,15 +484,6 @@ class LiveGroundWorld final : public LiveGroundRoom {
     Run(navigator, [angle](Battle_Ai_ActorAiState& state) {
       MoveLiveAwayFromReference(&state, angle);
     });
-  }
-  int FollowObstacleDetour(GroundNavigator& navigator, bool flight,
-                           int intent) override {
-    int action = -1;
-    Run(navigator, [&](Battle_Ai_ActorAiState& state) {
-      action = Battle_Ai_FollowObstacleDetour(
-          PathView(state), flight ? FlightTest : GroundTest, intent);
-    });
-    return action;
   }
   void RefreshMovementCooldown(GroundNavigator& navigator) override {
     Run(navigator, [](Battle_Ai_ActorAiState& state) {
@@ -602,6 +633,18 @@ unsigned int InitializeLiveObstacleDetour(Battle_Ai_ActorAiState* view,
                                                            flags, probe);
                          }),
                   "AI obstacle detour refused its probe or hesitation");
+}
+
+int FollowLiveObstacleDetour(Battle_Ai_MovementPathView* view,
+                             Battle_Ai_PathTest test, int blocked_flag_bit) {
+  auto& state = State(view);
+  LivePathProbe probe(state, test);
+  return Required(Update(state,
+                         [&](auto& world, auto& navigator) {
+                           return FollowObstacleDetour(world, navigator, probe,
+                                                       blocked_flag_bit);
+                         }),
+                  "AI obstacle detour refused its probe, room or blocker");
 }
 
 int UpdateLiveHesitationTurn(void* view, int chance, int kind, int slot) {

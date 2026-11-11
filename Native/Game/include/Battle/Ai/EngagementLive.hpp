@@ -16,6 +16,8 @@ struct Battle_Ai_RoomAiState;
 namespace VS::Battle::Ai {
 void SetLiveActorAwarenessIndicator(int actor_id, int marker);
 void ResetLiveActorAwarenessIndicator(Battle_Ai_PlanEvaluationView* state);
+void SetLiveTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* state,
+                                        int marker, int frames);
 [[nodiscard]] bool IsLiveEngagementReady(const Battle_Ai_ActorAiState* state);
 void UpdateLiveTemporaryAwarenessIndicator(
     Battle_Ai_PerceptionUpdateView* state);

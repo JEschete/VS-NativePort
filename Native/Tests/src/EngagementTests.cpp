@@ -219,7 +219,7 @@ TEST_CASE(
     "[ai][engagement]") {
   EngagementFixture fixture;
   auto& state = fixture.states[1];
-  Battle_Ai_SetTemporaryAwarenessIndicator(&state, 7, 2);
+  VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator(&state, 7, 2);
   auto* view = reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awarenessFramesRemaining == 1);
@@ -229,4 +229,23 @@ TEST_CASE(
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
   VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awarenessMarker == 7);
+}
+
+TEST_CASE("AI temporary awareness keeps the stored widths of marker and frames",
+          "[ai][engagement]") {
+  VS::Battle::Ai::TemporaryAwareness awareness{.frames_remaining = 9,
+                                               .marker = 3};
+  VS::Battle::Ai::SetTemporaryAwarenessIndicator(awareness, 0x12345, 0x1FF);
+  CHECK(awareness.marker == 0x2345);
+  CHECK(awareness.frames_remaining == 0xFF);
+  VS::Battle::Ai::SetTemporaryAwarenessIndicator(awareness, -1, -1);
+  CHECK(awareness.marker == 0xFFFF);
+  CHECK(awareness.frames_remaining == 0xFF);
+
+  EngagementFixture fixture;
+  auto& state = fixture.states[1];
+  VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator(&state, 0x10007, 0x128);
+  CHECK(state.awarenessMarker == 7);
+  CHECK(state.awarenessFramesRemaining == 0x28);
+  CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
 }

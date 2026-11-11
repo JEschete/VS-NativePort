@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 #include <span>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -61,12 +62,18 @@ struct FakeWorld final : ai::GroundNavigationWorld {
   bool has_gates = true;
   int gate = -1;
   ai::RouteGateEnd link_start{.x = 7, .z = 2};
-  int detour_action = -1;
+  std::optional<ai::RoomTileBounds> limits =
+      ai::RoomTileBounds{.min_x = 0, .min_z = 0, .max_x = 31, .max_z = 31};
+  std::array<std::optional<ai::ActorDetourWait>, kSlots> others{};
   std::uint32_t adjacent = 0;
   int fly = 1;
   std::vector<Call> calls;
 
   [[nodiscard]] std::uint32_t RoomBounds() const override { return bounds; }
+  [[nodiscard]] std::optional<ai::RoomTileBounds> RoomTileLimits()
+      const override {
+    return limits;
+  }
   [[nodiscard]] bool HasTileMaps() const override { return has_maps; }
   [[nodiscard]] std::uint16_t TileFlags(int x, int z) const override {
     return flags.at(z).at(x);
@@ -117,6 +124,15 @@ struct FakeWorld final : ai::GroundNavigationWorld {
       int actor_id) const override {
     return positions.at(static_cast<std::size_t>(actor_id));
   }
+  [[nodiscard]] std::optional<ai::ActorDetourWait> OtherActorDetourWait(
+      int actor_id) const override {
+    return others.at(static_cast<std::size_t>(actor_id));
+  }
+  void SetOtherActorRepeatWait(int actor_id, std::uint8_t wait) override {
+    auto& other = others.at(static_cast<std::size_t>(actor_id));
+    if (!other.has_value()) throw std::logic_error("no AI state to nudge");
+    other->repeat_wait = wait;
+  }
   int NextRandomMasked(int range) override {
     random_ranges.push_back(range);
     if (randoms.empty()) return 0;
@@ -163,11 +179,6 @@ struct FakeWorld final : ai::GroundNavigationWorld {
   }
   void MoveAwayFromReference(ai::GroundNavigator& /*n*/, int angle) override {
     calls.push_back({"away", angle});
-  }
-  int FollowObstacleDetour(ai::GroundNavigator& /*n*/, bool flight,
-                           int intent) override {
-    calls.push_back({flight ? "detour-fly" : "detour-walk", intent});
-    return detour_action;
   }
   void RefreshMovementCooldown(ai::GroundNavigator& /*n*/) override {
     calls.push_back({"cooldown"});
@@ -521,6 +532,361 @@ TEST_CASE("AI obstacle detours restart with a fresh cardinal mask",
   CHECK(*flags == (0x10U | (0b0101U << 18U)));
 }
 
+namespace {
+constexpr std::uint32_t kDetourStop = 1U << 16U;
+constexpr std::uint32_t kDetourChanged = 1U << 17U;
+constexpr int kWalkBlockedBit = 11;
+constexpr int kFlightBlockedBit = 12;
+
+struct DetourFields {
+  int heading = 0;
+  bool clockwise = false;
+  int steps = 1;
+  int visited = 0;
+  bool changed = false;
+  int cell = 0;
+  int bound_x = 0;
+  int bound_z = 0;
+};
+
+// An active detour word (Battle_Ai_DetourWord) built field by field.
+constexpr std::uint32_t DetourWord(const DetourFields& fields) {
+  return 1U | (static_cast<std::uint32_t>(fields.heading) << 1U) |
+         (fields.clockwise ? 0x10U : 0U) |
+         (static_cast<std::uint32_t>(fields.steps) << 5U) |
+         (static_cast<std::uint32_t>(fields.visited) << 12U) |
+         (fields.changed ? kDetourChanged : 0U) |
+         (static_cast<std::uint32_t>(fields.cell) << 18U) |
+         (static_cast<std::uint32_t>(fields.bound_x) << 22U) |
+         (static_cast<std::uint32_t>(fields.bound_z) << 27U);
+}
+
+FakeProbe OpenProbe() {
+  FakeProbe probe;
+  probe.results.fill(1);
+  return probe;
+}
+
+std::optional<int> Follow(FakeWorld& world, ai::GroundNavigator& navigator,
+                          FakeProbe& probe) {
+  return ai::FollowObstacleDetour(world, navigator, probe, kWalkBlockedBit);
+}
+
+std::uint8_t RepeatWait(const FakeWorld& world, int actor) {
+  const auto& other = world.others.at(static_cast<std::size_t>(actor));
+  if (!other.has_value()) throw std::logic_error("the actor has no AI state");
+  return other->repeat_wait;
+}
+}  // namespace
+
+TEST_CASE("AI obstacle detours end a spent run without probing",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  navigator.detour_run = 3;
+  navigator.target_distance_filter = 1;
+  const auto word = DetourWord({.heading = 2, .steps = 0});
+  navigator.navigation_flags = word;
+  auto probe = OpenProbe();
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(navigator.navigation_flags == word);
+  CHECK(navigator.gait == 3);
+  CHECK(navigator.target_distance_filter == 0);
+  CHECK(probe.asked.empty());
+  CHECK(world.blocker_valid == 0);
+}
+
+TEST_CASE("AI obstacle detours nudge the actor on the turn side",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  // Heading 0 turns counter-clockwise, so the turn side is direction 2. The
+  // cardinal cell already matches, so the detour keeps its heading.
+  const auto word = DetourWord({.heading = 0, .cell = 15});
+  navigator.navigation_flags = word;
+  world.blocker_valid = 0xFF;
+  world.blockers[2] = 5;  // Actor 4.
+  world.others[4] = ai::ActorDetourWait{};
+  world.randoms = {3};
+  auto probe = OpenProbe();
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.navigation_flags == word);
+  CHECK(RepeatWait(world, 4) == 7);
+  // A committed or waiting blocker keeps its wait and draws no random.
+  world.others[4] = ai::ActorDetourWait{.movement_flags = 0x20};
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(RepeatWait(world, 4) == 0);
+  world.others[4] = ai::ActorDetourWait{.repeat_wait = 2};
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(RepeatWait(world, 4) == 2);
+  CHECK(world.random_ranges == std::vector<int>{4});
+}
+
+TEST_CASE("AI obstacle detours nudge themselves and skip blockers without AI",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  // A clockwise turn from heading 0 puts the turn side at direction 6.
+  navigator.navigation_flags =
+      DetourWord({.heading = 0, .clockwise = true, .cell = 15});
+  world.blocker_valid = 0xFF;
+  world.blockers[6] = 2;  // The navigator's own actor 1.
+  world.randoms = {1};
+  auto probe = OpenProbe();
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.repeat_wait == 5);
+  world.blockers[6] = 6;  // Actor 5 has no AI state: warned and skipped.
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(world.random_ranges == std::vector<int>{4});
+  world.blockers[6] = 17;  // Outside the actor table.
+  CHECK_FALSE(Follow(world, navigator, probe));
+}
+
+TEST_CASE("AI obstacle detours reverse when the tile ahead closes",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  world.blocker_valid = 0xFF;
+  auto navigator = Navigator();
+  auto probe = OpenProbe();
+  probe.results[0] = 0;  // The cardinal cell is 0b0111.
+  const auto word = DetourWord({.heading = 0, .visited = 3, .cell = 7});
+  navigator.navigation_flags = word;
+  // The closed probe alone does not reverse while the tile ahead is free.
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.navigation_flags == word);
+  world.flags[3][3] = 0x10;
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.navigation_flags ==
+        DetourWord(
+            {.heading = 4, .clockwise = true, .changed = true, .cell = 7}));
+  // Once changed, the heading is not tested again.
+  probe.asked.clear();
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(probe.asked == std::vector<int>{0, 2, 4, 6});
+}
+
+TEST_CASE("AI obstacle detours reverse for an actor ahead unless near a target",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  world.blocker_valid = 0xFF;
+  auto navigator = Navigator();
+  auto probe = OpenProbe();
+  probe.results[0] = 0;
+  const auto word = DetourWord({.heading = 0, .visited = 3, .cell = 7});
+  // Another actor on the tile ahead also reverses the turn.
+  world.actor_list = {4};
+  world.actors[4] = ModelAt(Centre(3), Centre(3));
+  navigator.navigation_flags = word;
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.navigation_flags ==
+        DetourWord(
+            {.heading = 4, .clockwise = true, .changed = true, .cell = 7}));
+  // A near-target detour never reverses.
+  navigator.navigation_flags = word;
+  navigator.near_target_detour = 1;
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.navigation_flags == word);
+}
+
+TEST_CASE("AI obstacle detours stop when the turn side leaves the room",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  navigator.pursuit_e4 = 1;
+  navigator.pursuit_e7 = 2;
+  navigator.pursuit_e8 = 3;
+  auto probe = OpenProbe();
+  const auto word = DetourWord({.heading = 0, .cell = 15});
+  navigator.navigation_flags = word;
+  // The flight bit on the turn side (2,4) does not stop a walking detour.
+  world.flags[4][2] = 1U << kFlightBlockedBit;
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.pursuit_e4 == 1);
+  CHECK(ai::FollowObstacleDetour(world, navigator, probe, kFlightBlockedBit) ==
+        -1);
+  CHECK(navigator.navigation_flags == (word | kDetourStop));
+  CHECK(navigator.pursuit_e4 == 0);
+  CHECK(navigator.pursuit_e7 == 0);
+  CHECK(navigator.pursuit_e8 == 0);
+  // A near-target detour ignores the room.
+  navigator.navigation_flags = word;
+  navigator.near_target_detour = 1;
+  CHECK(ai::FollowObstacleDetour(world, navigator, probe, kFlightBlockedBit) ==
+        5);
+}
+
+TEST_CASE("AI obstacle detours test each room limit on the turn side",
+          "[ai][ground-navigation]") {
+  struct Case {
+    DetourFields fields;
+    ai::RoomTileBounds limits;
+  };
+  // From tile (3,4) the turn sides are (2,4), (4,4), (3,5) and (3,3).
+  for (const auto& [fields, limits] : {
+           Case{{.heading = 0, .cell = 15}, {3, 0, 31, 31}},
+           Case{{.heading = 0, .clockwise = true, .cell = 15}, {0, 0, 3, 31}},
+           Case{{.heading = 2, .cell = 15}, {0, 0, 31, 4}},
+           Case{{.heading = 2, .clockwise = true, .cell = 15}, {0, 4, 31, 31}},
+       }) {
+    FakeWorld world;
+    auto navigator = Navigator();
+    navigator.navigation_flags = DetourWord(fields);
+    auto probe = OpenProbe();
+    CHECK(Follow(world, navigator, probe) == 5);
+    world.limits = limits;
+    CHECK(Follow(world, navigator, probe) == -1);
+    CHECK(navigator.navigation_flags == (DetourWord(fields) | kDetourStop));
+  }
+}
+
+TEST_CASE("AI obstacle detours end past the boundary along z",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  navigator.destination = Tile(3, 9);  // Centre z 1216.
+  auto probe = OpenProbe();
+  // The boundary tile 6 (z 768) lies between the actor (576) and the target.
+  const auto word = DetourWord({.heading = 0, .cell = 15, .bound_z = 6});
+  navigator.navigation_flags = word;
+  CHECK(Follow(world, navigator, probe) == 5);
+  navigator.z = 800;
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(navigator.navigation_flags == word);
+  // A near-target detour ends on the near side instead.
+  navigator.near_target_detour = 1;
+  CHECK(Follow(world, navigator, probe) == 5);
+  navigator.z = Centre(4);
+  CHECK(Follow(world, navigator, probe) == -1);
+}
+
+TEST_CASE("AI obstacle detours end past the boundary along x",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  navigator.destination = Tile(1, 4);  // Centre x 192.
+  auto probe = OpenProbe();
+  // The boundary tile 2 (x 256) lies between the target and the actor (448).
+  const auto word = DetourWord({.heading = 0, .cell = 15, .bound_x = 2});
+  navigator.navigation_flags = word;
+  CHECK(Follow(world, navigator, probe) == 5);
+  navigator.x = 200;
+  CHECK(Follow(world, navigator, probe) == -1);
+  navigator.near_target_detour = 1;
+  CHECK(Follow(world, navigator, probe) == 5);
+  navigator.x = Centre(3);
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(navigator.navigation_flags == word);
+}
+
+TEST_CASE("AI obstacle detours stop once the inner side opens",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  world.randoms = {2};
+  auto probe = OpenProbe();
+  // A new cardinal cell turns the detour; the inner side behind it is open.
+  navigator.navigation_flags = DetourWord({.heading = 0});
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(navigator.navigation_flags ==
+        (DetourWord({.heading = 0, .cell = 15}) | kDetourStop));
+  CHECK(navigator.repeat_wait == 6);
+  CHECK(probe.asked == std::vector<int>{0, 0, 2, 4, 6, 3, 2});
+  // A waiting actor is not nudged again; a clockwise turn tests 5 and 6.
+  probe.asked.clear();
+  navigator.navigation_flags = DetourWord({.heading = 0, .clockwise = true});
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(probe.asked == std::vector<int>{0, 0, 2, 4, 6, 5, 6});
+  CHECK(world.random_ranges == std::vector<int>{4});
+}
+
+TEST_CASE("AI obstacle detours stop after trying every cardinal",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  auto probe = OpenProbe();
+  probe.results[1] = 0;  // Heading 6 turning counter-clockwise looks at 1.
+  navigator.navigation_flags =
+      DetourWord({.heading = 6, .visited = 7, .changed = true});
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(
+      navigator.navigation_flags ==
+      (DetourWord({.heading = 6, .visited = 15, .changed = true, .cell = 15}) |
+       kDetourStop));
+}
+
+TEST_CASE("AI obstacle detours scan for an open heading or a free step",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  auto navigator = Navigator();
+  auto probe = OpenProbe();
+  probe.results[3] = 0;  // The inner side behind stays walled.
+  navigator.navigation_flags = DetourWord({.heading = 0});
+  CHECK(Follow(world, navigator, probe) == 5);
+  CHECK(navigator.navigation_flags ==
+        DetourWord({.heading = 2, .visited = 1, .changed = true, .cell = 15}));
+  // With every heading closed the free inner tile becomes the next step; its
+  // tag and top byte are zero (#344).
+  probe.results.fill(0);
+  navigator.next_tile = ~0U;
+  navigator.navigation_flags =
+      DetourWord({.heading = 0, .changed = true, .cell = 15});
+  CHECK(Follow(world, navigator, probe) == 14);
+  CHECK(navigator.next_tile == Tile(2, 4));
+  CHECK(navigator.navigation_flags ==
+        DetourWord({.heading = 2, .visited = 1, .changed = true}));
+}
+
+TEST_CASE("AI obstacle detours end when the scan finds no way",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  for (const auto& [x, z] :
+       std::array<std::array<int, 2>, 4>{{{2, 4}, {3, 3}, {4, 4}, {3, 5}}}) {
+    world.flags.at(z).at(x) = 0x10;
+  }
+  auto navigator = Navigator();
+  FakeProbe probe;
+  probe.results.fill(0);
+  navigator.navigation_flags =
+      DetourWord({.heading = 0, .changed = true, .cell = 15});
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(navigator.navigation_flags ==
+        DetourWord({.heading = 0, .visited = 1, .changed = true}));
+  CHECK(probe.asked == std::vector<int>{0, 2, 4, 6, 3, 2, 0, 6, 4});
+  // A clockwise scan runs the other way round.
+  probe.asked.clear();
+  navigator.navigation_flags = DetourWord(
+      {.heading = 0, .clockwise = true, .changed = true, .cell = 15});
+  CHECK(Follow(world, navigator, probe) == -1);
+  CHECK(probe.asked == std::vector<int>{0, 2, 4, 6, 5, 6, 0, 2, 4});
+}
+
+TEST_CASE("AI obstacle detours refuse missing rooms and unmapped tiles",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  world.blocker_valid = 0xFF;
+  auto navigator = Navigator();
+  auto probe = OpenProbe();
+  const auto word = DetourWord({.heading = 0, .changed = true, .cell = 15});
+  navigator.navigation_flags = word;
+  world.limits.reset();
+  CHECK_FALSE(Follow(world, navigator, probe));
+  CHECK(navigator.navigation_flags == word);
+  world.limits = ai::RoomTileBounds{.max_x = 40, .max_z = 40};
+  world.has_maps = false;
+  CHECK_FALSE(Follow(world, navigator, probe));
+  world.has_maps = true;
+  // The clockwise turn side (32,4) is inside the limits but off the map.
+  navigator.tile = Tile(31, 4);
+  navigator.navigation_flags =
+      DetourWord({.heading = 0, .clockwise = true, .changed = true});
+  CHECK_FALSE(Follow(world, navigator, probe));
+  navigator.tile = Tile(3, 4);
+  navigator.navigation_flags = DetourWord({.heading = 0, .cell = 15});
+  probe.results[0].reset();
+  CHECK_FALSE(Follow(world, navigator, probe));
+  CHECK(navigator.navigation_flags == DetourWord({.heading = 0, .cell = 15}));
+}
+
 TEST_CASE("AI hesitation turns start, count down and poll",
           "[ai][ground-navigation]") {
   FakeWorld world;
@@ -827,15 +1193,19 @@ TEST_CASE("AI directional movement follows detours first",
           "[ai][ground-navigation]") {
   FakeWorld world;
   auto navigator = Navigator();
-  navigator.navigation_flags = 1U | (5U << 1U);
-  world.detour_action = 5;
+  // A flight detour heading 5 whose cardinal cell still holds keeps walking.
+  navigator.navigation_flags = DetourWord({.heading = 5, .cell = 15});
   REQUIRE(ai::ResolveDirectionalMovement(world, navigator, 0, 2));
   CHECK(navigator.heading == 5);
-  world.detour_action = -1;
+  // A spent walking detour ends with a cooldown and a recovery.
+  navigator.navigation_flags = DetourWord({.heading = 5, .steps = 0});
   REQUIRE(ai::ResolveDirectionalMovement(world, navigator, 0, 0));
-  CHECK(world.calls == std::vector<Call>{{"detour-fly", 12},
+  CHECK(world.calls == std::vector<Call>{{"fly", 5},
+                                         {"fly", 0},
+                                         {"fly", 2},
+                                         {"fly", 4},
+                                         {"fly", 6},
                                          {"command", 5},
-                                         {"detour-walk", 11},
                                          {"cooldown"},
                                          {"recover"}});
 }
@@ -844,13 +1214,6 @@ TEST_CASE("AI directional movement heads along open directions",
           "[ai][ground-navigation]") {
   FakeWorld world;
   auto navigator = Navigator();
-  navigator.navigation_flags = 1U | (5U << 1U);
-  world.detour_action = 5;
-  REQUIRE(ai::ResolveDirectionalMovement(world, navigator, 0, 2));
-  world.detour_action = -1;
-  REQUIRE(ai::ResolveDirectionalMovement(world, navigator, 0, 0));
-  world.calls.clear();
-  navigator.navigation_flags = 0;
   // The heading keeps the unmasked angle.
   REQUIRE(ai::ResolveDirectionalMovement(world, navigator, 0x1000, 2));
   CHECK(navigator.heading == 0x1000);
@@ -873,5 +1236,16 @@ TEST_CASE("AI directional movement refuses invalid modes and codes",
   CHECK_FALSE(ai::ResolveDirectionalMovement(world, navigator, 0, -1));
   world.codes[0] = 0;
   CHECK_FALSE(ai::ResolveDirectionalMovement(world, navigator, 0, 2));
+  CHECK(world.calls.empty());
+}
+
+TEST_CASE("AI directional movement refuses a refused detour",
+          "[ai][ground-navigation]") {
+  FakeWorld world;
+  world.limits.reset();
+  auto navigator = Navigator();
+  navigator.navigation_flags =
+      DetourWord({.heading = 0, .changed = true, .cell = 15});
+  CHECK_FALSE(ai::ResolveDirectionalMovement(world, navigator, 0, 0));
   CHECK(world.calls.empty());
 }

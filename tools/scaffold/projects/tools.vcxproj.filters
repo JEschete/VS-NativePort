@@ -1995,6 +1995,12 @@
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\flight_movement.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\flight_movement_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\height_filter.py">
       <Filter>tools\port\differentials</Filter>
     </None>

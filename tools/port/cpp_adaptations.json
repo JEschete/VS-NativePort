@@ -218,10 +218,10 @@
 [
 391,
 [
-"            ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)state, 6, 0);"
+"            VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator((void*)state, 6, 0);"
 ],
 [
-"            ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)state), 6, 0);"
+"            VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator((Battle_Ai_ActorAiState *)((void*)state), 6, 0);"
 ]
 ],
 [
@@ -308,71 +308,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Battle\\Ai\\Movement.cpp": [
-[
-41,
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"
-],
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)s), 0);"
-]
-],
-[
-124,
-[
-"                VS::Battle::Ai::ProjectLiveClearRadialDestination((void*)s, s->tile, angle,"
-],
-[
-"                VS::Battle::Ai::ProjectLiveClearRadialDestination((Battle_Ai_ActorAiState *)((void*)s), s->tile, angle,"
-]
-],
-[
-137,
-[
-"            VS::Battle::Ai::RecoverLiveMovement((void*)s);"
-],
-[
-"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)s));"
-]
-],
-[
-172,
-[
-"                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
-],
-[
-"                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)s), 7, 40);"
-]
-],
-[
-192,
-[
-"                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
-],
-[
-"                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)s), 7, 40);"
-]
-],
-[
-222,
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((void*)context, 0);"
-],
-[
-"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)context), 0);"
-]
-],
-[
-261,
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((void*)context, 4);"
-],
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)context), 4);"
-]
-]
-],
 "Native\\Game\\src\\Battle\\Ai\\OrbitingBoss.cpp": [
 [
 65,
@@ -431,7 +366,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
 [
-360,
+353,
 [
 "            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_MovementRecoveryView*)state);"
 ],
@@ -440,7 +375,7 @@
 ]
 ],
 [
-388,
+381,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -449,7 +384,7 @@
 ]
 ],
 [
-430,
+423,
 [
 "        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);"
 ],
@@ -458,7 +393,7 @@
 ]
 ],
 [
-471,
+464,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -467,7 +402,7 @@
 ]
 ],
 [
-591,
+584,
 [
 "    info = (void*)&Battle_actionDefinitions[app->action];"
 ],
@@ -476,7 +411,7 @@
 ]
 ],
 [
-601,
+594,
 [
 "    other = (void*)Battle_Ai_actorAiStates[source];"
 ],
@@ -485,7 +420,7 @@
 ]
 ],
 [
-656,
+649,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -494,7 +429,7 @@
 ]
 ],
 [
-658,
+651,
 [
 "            firstOther = (void*)Battle_Ai_actorAiStates[id];"
 ],
@@ -503,7 +438,7 @@
 ]
 ],
 [
-674,
+667,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -512,7 +447,7 @@
 ]
 ],
 [
-676,
+669,
 [
 "            other = (void*)Battle_Ai_actorAiStates[actor->id];"
 ],
@@ -521,7 +456,7 @@
 ]
 ],
 [
-678,
+671,
 [
 "                for (candidate = (void*)Battle_actors[0]; candidate;"
 ],
@@ -530,7 +465,7 @@
 ]
 ],
 [
-684,
+677,
 [
 "                        for (ally = (void*)Battle_actors[0]; ally; ally = ally->next) {",
 "                            allyState = (void*)Battle_Ai_actorAiStates[ally->id];"

@@ -32,20 +32,8 @@ _Static_assert(sizeof(Battle_Ai_ArenaOrbitState) == 0x20, "Battle_Ai_ArenaOrbitS
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_MOVEMENT_H_DECLS)
 #define VS_BATTLE_AI_MOVEMENT_H_DECLS
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/TextureAnimation.h"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Navigation.h"
-#include "Render/Palette.h"
 
 extern int Battle_Ai_savedMovementRandomState;
 extern unsigned short (*Battle_Ai_patrolRoutes)[8];
-int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int option);
-int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int targetId);
 
 #endif // VS_BATTLE_AI_MOVEMENT_H_DECLS

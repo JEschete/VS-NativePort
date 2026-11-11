@@ -359,6 +359,10 @@
     <ClCompile Include="src\Battle\Ai\SpecialTerrainLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\TargetApproach.cpp" />
+    <ClCompile Include="src\Battle\Ai\TargetApproachLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\TileHeightSampling.cpp" />
     <ClCompile Include="src\Battle\Ai\Wander.cpp" />
     <ClCompile Include="src\Battle\Ai\WanderLive.cpp">
@@ -2244,6 +2248,8 @@
     <ClInclude Include="include\Battle\Ai\RoomAiMapLive.hpp" />
     <ClInclude Include="include\Battle\Ai\SpecialTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\SpecialTerrainLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\TargetApproach.hpp" />
+    <ClInclude Include="include\Battle\Ai\TargetApproachLive.hpp" />
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />
     <ClInclude Include="include\Battle\Ai\Wander.hpp" />
     <ClInclude Include="include\Battle\Ai\WanderLive.hpp" />

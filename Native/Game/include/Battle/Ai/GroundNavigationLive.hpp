@@ -39,6 +39,8 @@ int LiveCardinalPassabilityMask(Battle_Ai_MovementPathView* state,
 unsigned int InitializeLiveObstacleDetour(Battle_Ai_ActorAiState* state,
                                           unsigned int flags,
                                           Battle_Ai_PathTest test);
+int FollowLiveObstacleDetour(Battle_Ai_MovementPathView* state,
+                             Battle_Ai_PathTest test, int blocked_flag_bit);
 int UpdateLiveHesitationTurn(void* state, int chance, int kind, int slot);
 int SelectLiveActorVerticalMovementStep(Battle_Ai_ActorAiState* state,
                                         int* value, int* code);

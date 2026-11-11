@@ -138,7 +138,7 @@ class LiveAllianceActor final : public AshleyAllianceActor {
     return reaction_.settingsBit25 != 0;
   }
   void SetTemporaryAwareness(int marker, int frames) override {
-    Battle_Ai_SetTemporaryAwarenessIndicator(&state_, marker, frames);
+    SetLiveTemporaryAwarenessIndicator(&state_, marker, frames);
   }
   void QueueReaction(int command, int range) override {
     SetLiveActorAiReactionWithDelay(

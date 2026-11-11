@@ -34,7 +34,6 @@ _Static_assert(sizeof(Battle_Ai_RelationWord) == 0x4, "Battle_Ai_RelationWord mu
 extern int Battle_Ai_frameTickBudget;
 extern int Battle_Ai_secondPerceptionTarget;
 extern int Battle_Ai_candidateEngagedThisUpdate;
-void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* ai_state, int awareness_marker, int duration_frames);
 int Battle_Ai_IsTargetOccludedAtExtent(
     SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id);
 int Battle_Ai_IsTargetOccludedAtHeight(

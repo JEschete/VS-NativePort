@@ -77,6 +77,17 @@ struct GroundNavigator {
   // them; the navigation routines never write them.
   std::uint8_t approach_target_id = 0;
   std::int32_t approach_range = 0;
+  // The target approach's pursuit progress flags (AI state 0xE4, 0xE7 and
+  // 0xE8, PursuitProgress); a detour that leaves the room clears them.
+  std::uint8_t pursuit_e4 = 0;
+  std::uint8_t pursuit_e7 = 0;
+  std::uint8_t pursuit_e8 = 0;
+};
+
+// Another actor's movement flags and detour wait (AI state 0x15E and 0x19A).
+struct ActorDetourWait {
+  std::uint16_t movement_flags = 0;
+  std::uint8_t repeat_wait = 0;
 };
 
 // Another battle actor's AI collision record and model placement.
@@ -111,6 +122,10 @@ class GroundNavigationWorld {
   virtual ~GroundNavigationWorld() = default;
   // Room bounds: width in bits 0-7, height in bits 8-15.
   [[nodiscard]] virtual std::uint32_t RoomBounds() const = 0;
+  // The room AI state's walkable tile bounds; nothing without a room AI
+  // state.
+  [[nodiscard]] virtual std::optional<RoomTileBounds> RoomTileLimits()
+      const = 0;
   // Whether the room's tile flag and height maps are loaded.
   [[nodiscard]] virtual bool HasTileMaps() const = 0;
   [[nodiscard]] virtual std::uint16_t TileFlags(int x, int z) const = 0;
@@ -141,6 +156,10 @@ class GroundNavigationWorld {
       int actor_id) const = 0;
   [[nodiscard]] virtual std::optional<GroundPoint> ModelPosition(
       int actor_id) const = 0;
+  // Another actor's detour wait; nothing for an actor without an AI state.
+  [[nodiscard]] virtual std::optional<ActorDetourWait> OtherActorDetourWait(
+      int actor_id) const = 0;
+  virtual void SetOtherActorRepeatWait(int actor_id, std::uint8_t wait) = 0;
 
   // The actor random stream: a value below range (a power of two).
   virtual int NextRandomMasked(int range) = 0;
@@ -169,10 +188,6 @@ class GroundNavigationWorld {
   virtual void MoveToRadialDestination(GroundNavigator& navigator,
                                        int angle) = 0;
   virtual void MoveAwayFromReference(GroundNavigator& navigator, int angle) = 0;
-  // Follows an active detour with the walk or flight probe; the action to
-  // issue, or negative when the detour ends.
-  virtual int FollowObstacleDetour(GroundNavigator& navigator, bool flight,
-                                   int intent) = 0;
   virtual void RefreshMovementCooldown(GroundNavigator& navigator) = 0;
   virtual std::uint32_t FindAdjacentMovementDestination(
       GroundNavigator& navigator, int first, int second,
@@ -250,6 +265,18 @@ void SetDetourBoundary(GroundNavigator& navigator);
 [[nodiscard]] std::optional<std::uint32_t> InitializeObstacleDetour(
     GroundNavigationWorld& world, GroundNavigator& navigator,
     std::uint32_t flags, GroundDirectionProbe& probe);
+
+// decomp: func_800E2F5C (src/BATTLE/BATTLE.PRG/771A8.c:2388).
+// Follows an active obstacle detour (navigation_flags) one step around the
+// obstacle: 5 keeps walking the detour heading, 14 steps to next_tile and -1
+// ends this step, setting the stop bit when the detour is spent or leaves the
+// room. Nudges an actor blocking the turn side to wait. The probe is the walk
+// or flight test; a side tile whose flag bit `blocked_flag_bit` is set ends
+// the detour. Nothing refuses a refused probe, direction or tile query, a room
+// without AI bounds or tile maps, or a blocking actor ID outside the table.
+[[nodiscard]] std::optional<int> FollowObstacleDetour(
+    GroundNavigationWorld& world, GroundNavigator& navigator,
+    GroundDirectionProbe& probe, int blocked_flag_bit);
 
 // decomp: func_800E4180 (src/BATTLE/BATTLE.PRG/7B5DC.s).
 // Starts or continues a hesitation turn of kind 1 or 2 (3 only polls) and
@@ -337,7 +364,7 @@ bool BeginAiMovementTowardPoint(GroundNavigationWorld& world,
 // Walks or flies (mode 2-3) toward the angle: follows an active detour, steps
 // down a descent, walks the heading or a cardinal, takes an adjacent tile or
 // starts a detour; modes 1 and 3 detour only near the target. False refuses a
-// mode outside 0..3 or a refused probe, descent or hesitation.
+// mode outside 0..3 or a refused probe, descent, detour or hesitation.
 bool ResolveDirectionalMovement(GroundNavigationWorld& world,
                                 GroundNavigator& navigator, int angle,
                                 int mode);

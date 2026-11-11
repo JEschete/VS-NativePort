@@ -50,13 +50,6 @@ int Battle_Ai_secondPerceptionTarget;
 // decomp: D_800F58E0 (D_800F58E0@BATTLE/BATTLE.PRG)
 int Battle_Ai_candidateEngagedThisUpdate;
 
-// decomp: BATTLE.PRG func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407)
-void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* ai_state, int awareness_marker, int duration_frames)
-{
-    ai_state->awarenessMarker = awareness_marker;
-    ai_state->awarenessFramesRemaining = duration_frames;
-}
-
 // decomp: src/BATTLE/BATTLE.PRG/6FC00.c:644
 #define RELATION_STATES ((Battle_Ai_PerceptionView**)((uintptr_t)&Battle_Ai_FrameState()->actors))
 // decomp: BATTLE.PRG checkExtent (src/BATTLE/BATTLE.PRG/6FC00.c:646)

@@ -143,6 +143,17 @@ void ResetLiveActorAwarenessIndicator(Battle_Ai_PlanEvaluationView* state) {
           "AI marker reset requires an actor ID in the AI state table");
 }
 
+void SetLiveTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* pointer,
+                                        int marker, int frames) {
+  Battle_Ai_ActorAiState& state = StateOf(pointer);
+  TemporaryAwareness awareness{
+      .frames_remaining = state.awarenessFramesRemaining,
+      .marker = state.awarenessMarker};
+  SetTemporaryAwarenessIndicator(awareness, marker, frames);
+  state.awarenessMarker = awareness.marker;
+  state.awarenessFramesRemaining = awareness.frames_remaining;
+}
+
 bool IsLiveEngagementReady(const Battle_Ai_ActorAiState* state) {
   Require(state != nullptr, "AI engagement readiness requires an actor state");
   return IsEngagementReady(state->engagementFrames);

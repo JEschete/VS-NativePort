@@ -67,8 +67,14 @@ constexpr int kStepIntent = 14;
 constexpr int kWalkDirectionIntent = 5;
 constexpr int kWalkHeadingIntent = 7;
 constexpr int kTimedTurnIntent = 16;
-constexpr int kGroundDetourIntent = 11;
-constexpr int kFlightDetourIntent = 12;
+constexpr int kGroundDetourBlockedBit = 11;
+constexpr int kFlightDetourBlockedBit = 12;
+constexpr int kDetourEnded = -1;
+constexpr unsigned kNudgeFlags = 0x30;
+constexpr int kNudgeRandomRange = 4;
+constexpr int kNudgeBaseWait = 4;
+constexpr int kDetourScanDirections = 4;
+constexpr std::uint32_t kAllCardinalsVisited = 15;
 constexpr std::uint16_t kBlockedWait = 254;
 constexpr std::uint32_t kPathCellKeepMask = 0xFFC30FFF;
 constexpr std::uint32_t kTileTagMask = 0xFF00;
@@ -95,6 +101,13 @@ constexpr std::uint32_t kPathTurn = 0x10;
 constexpr std::uint32_t kPathStop = 0x10000;
 constexpr std::uint32_t kPathChanged = 0x20000;
 constexpr unsigned kPathCellShift = 18;
+constexpr unsigned kPathHeadingWidth = 3;
+constexpr unsigned kPathStepWidth = 7;
+constexpr unsigned kPathVisitedShift = 12;
+constexpr unsigned kPathNibbleWidth = 4;
+constexpr unsigned kPathStopShift = 16;
+constexpr unsigned kPathChangedShift = 17;
+constexpr unsigned kPathBoundWidth = 5;
 constexpr unsigned kNearTargetSquared = 0x31000;
 constexpr int kModeSlots = 7;
 constexpr std::size_t kModeStride = 2;
@@ -678,18 +691,331 @@ std::optional<bool> TryAdjacent(GroundNavigationWorld& world,
   return AdjacentAction(world, navigator, tile);
 }
 
-void FollowActiveDetour(GroundNavigationWorld& world,
+// The detour word (Battle_Ai_DetourWord): bit 0 active, 1-3 heading, 4 the
+// clockwise turn, 5-11 the step budget, 12-15 the visited cardinals, 16 stop,
+// 17 changed, 18-21 the cardinal mask and 22-26 / 27-31 the boundary tiles.
+class DetourPath {
+ public:
+  explicit DetourPath(std::uint32_t word) : word_(word) {}
+  [[nodiscard]] std::uint32_t Word() const { return word_; }
+  [[nodiscard]] int Heading() const { return Get(kHeadingField); }
+  [[nodiscard]] bool Clockwise() const { return Get(kClockwiseField) != 0; }
+  [[nodiscard]] int Steps() const { return Get(kStepsField); }
+  [[nodiscard]] int Visited() const { return Get(kVisitedField); }
+  [[nodiscard]] bool Changed() const { return Get(kChangedField) != 0; }
+  [[nodiscard]] int Cell() const { return Get(kCellField); }
+  // The boundary tiles' world coordinates; 0 when unset.
+  [[nodiscard]] int BoundX() const { return Get(kBoundXField) << kTileShift; }
+  [[nodiscard]] int BoundZ() const { return Get(kBoundZField) << kTileShift; }
+  // The turn toward the walking side: 1 clockwise, -1 otherwise.
+  [[nodiscard]] int Turn() const { return Clockwise() ? 1 : -1; }
+
+  void SetHeading(int heading) { Set(kHeadingField, heading); }
+  void SetClockwise(bool clockwise) { Set(kClockwiseField, clockwise ? 1 : 0); }
+  void SetVisited(int visited) { Set(kVisitedField, visited); }
+  void SetCell(int cell) { Set(kCellField, cell); }
+  void MarkChanged() { Set(kChangedField, 1); }
+  void MarkStopped() { Set(kStopField, 1); }
+  // Heads in the direction, marking a change of heading.
+  void Head(int direction) {
+    if (Heading() != direction) MarkChanged();
+    SetHeading(direction);
+  }
+
+ private:
+  struct Field {
+    unsigned shift;
+    unsigned width;
+  };
+  static constexpr Field kHeadingField{kPathHeadingShift, kPathHeadingWidth};
+  static constexpr Field kClockwiseField{kPathTurnShift, 1};
+  static constexpr Field kStepsField{kPathStepShift, kPathStepWidth};
+  static constexpr Field kVisitedField{kPathVisitedShift, kPathNibbleWidth};
+  static constexpr Field kStopField{kPathStopShift, 1};
+  static constexpr Field kChangedField{kPathChangedShift, 1};
+  static constexpr Field kCellField{kPathCellShift, kPathNibbleWidth};
+  static constexpr Field kBoundXField{kPathXShift, kPathBoundWidth};
+  static constexpr Field kBoundZField{kPathZShift, kPathBoundWidth};
+
+  static constexpr std::uint32_t Mask(Field field) {
+    return ((1U << field.width) - 1U) << field.shift;
+  }
+  [[nodiscard]] int Get(Field field) const {
+    return static_cast<int>((word_ & Mask(field)) >> field.shift);
+  }
+  void Set(Field field, int value) {
+    word_ = (word_ & ~Mask(field)) |
+            ((static_cast<std::uint32_t>(value) << field.shift) & Mask(field));
+  }
+
+  std::uint32_t word_;
+};
+
+Tile Neighbor(Tile tile, Tile delta) {
+  return {tile.x + delta.x, tile.z + delta.z};
+}
+
+// A neighbour tile word as the original built it: 8-bit coordinates that wrap
+// and a zero tag. Byte 3 was the caller's small mode register, always 0
+// (#344).
+std::uint32_t PackWrapped(Tile tile) {
+  return (static_cast<std::uint32_t>(tile.x) & kByteMask) |
+         ((static_cast<std::uint32_t>(tile.z) & kByteMask) << kTileZShift);
+}
+
+std::uint8_t NudgeWait(GroundNavigationWorld& world) {
+  return static_cast<std::uint8_t>(world.NextRandomMasked(kNudgeRandomRange) +
+                                   kNudgeBaseWait);
+}
+
+bool ReadyForNudge(std::uint16_t movement_flags, std::uint8_t repeat_wait) {
+  return (movement_flags & kNudgeFlags) == 0 && repeat_wait == 0;
+}
+
+// The actor blocking the turn side waits a few frames unless it is already
+// waiting or committed to a move. False refuses a refused blocker probe or a
+// blocker ID outside the table.
+bool NudgeSideBlocker(GroundNavigationWorld& world, GroundNavigator& navigator,
+                      int side) {
+  const auto hit = DirectionalBlockingActor(world, navigator, side);
+  if (!hit.has_value()) return false;
+  if (*hit == 0) return true;
+  const int blocker = *hit - 1;
+  if (blocker >= kActorSlots) {
+    Core_Warnf("ai", "AI detour blocker %d is out of bounds", blocker);
+    return false;
+  }
+  if (blocker == navigator.actor_id) {
+    // A per-frame cached blocker can be this actor, whose wait the navigator
+    // holds.
+    if (ReadyForNudge(navigator.movement_flags, navigator.repeat_wait)) {
+      navigator.repeat_wait = NudgeWait(world);
+    }
+    return true;
+  }
+  const auto other = world.OtherActorDetourWait(blocker);
+  if (!other.has_value()) {
+    // The original went through the empty AI slot into low memory.
+    Core_Warnf("ai", "AI detour blocker %d has no AI state to nudge", blocker);
+    return true;
+  }
+  if (ReadyForNudge(other->movement_flags, other->repeat_wait)) {
+    world.SetOtherActorRepeatWait(blocker, NudgeWait(world));
+  }
+  return true;
+}
+
+// Whether the tile ahead is closed: its edge fails or another actor or the
+// previous tile occupies it.
+std::optional<bool> StepClosed(GroundNavigationWorld& world,
+                               const GroundNavigator& navigator,
+                               std::uint32_t tile, int direction) {
+  const auto edge =
+      CanTraverseTileEdge(world, navigator, navigator.tile, tile, direction);
+  if (!edge.has_value()) return std::nullopt;
+  if (*edge == 0) return true;
+  const auto occupancy = DestinationOccupancy(world, navigator, tile);
+  if (!occupancy.has_value()) return std::nullopt;
+  return *occupancy <= 0;
+}
+
+// A detour that has not turned yet reverses when its heading closes. False
+// refuses as StepClosed or a refused probe.
+bool ReverseIfAheadClosed(GroundNavigationWorld& world,
+                          GroundNavigator& navigator,
+                          GroundDirectionProbe& probe, DetourPath& path) {
+  if (navigator.near_target_detour != 0 || path.Changed()) return true;
+  const auto open = Open(probe, navigator, path.Heading());
+  if (!open.has_value()) return false;
+  if (*open) return true;
+  const auto delta = Delta(world, path.Heading());
+  if (!delta.has_value()) return false;
+  const auto ahead = PackWrapped(Neighbor(Unpack(navigator.tile), *delta));
+  const auto closed = StepClosed(world, navigator, ahead, path.Heading());
+  if (!closed.has_value()) return false;
+  if (*closed) {
+    path.MarkChanged();
+    path.SetClockwise(!path.Clockwise());
+    path.SetVisited(0);
+    path.SetHeading(path.Heading() + kHalfTurnDirections);
+  }
+  return true;
+}
+
+// Whether the turn side leaves the room's walkable bounds or meets a tile with
+// the blocked flag. The original read the flag map before testing the bounds;
+// the bounds come first here so an outside tile never indexes the map, with
+// the same result.
+std::optional<bool> SideLeavesRoom(const GroundNavigationWorld& world,
+                                   const GroundNavigator& navigator, int side,
+                                   int blocked_flag_bit) {
+  const auto delta = Delta(world, side);
+  if (!delta.has_value()) return std::nullopt;
+  const auto limits = world.RoomTileLimits();
+  if (!limits.has_value()) {
+    Core_Warnf("ai", "AI obstacle detour requires the room's tile bounds");
+    return std::nullopt;
+  }
+  const Tile point = Neighbor(Unpack(navigator.tile), *delta);
+  if (point.x > limits->max_x || point.z > limits->max_z ||
+      point.x < limits->min_x || point.z < limits->min_z) {
+    return true;
+  }
+  if (!world.HasTileMaps() || point.x >= kGridSide || point.z >= kGridSide) {
+    Core_Warnf("ai", "AI detour side tile (%d,%d) is outside the flag map",
+               point.x, point.z);
+    return std::nullopt;
+  }
+  const unsigned flags = world.TileFlags(point.x, point.z);
+  return ((flags >> (static_cast<unsigned>(blocked_flag_bit) & kShiftMask)) &
+          1U) != 0;
+}
+
+// Whether the actor passed the boundary on the far side from the destination
+// tile's centre; a near-target detour tests the near side.
+bool PassedBoundary(int bound, int centre, int position, bool near_target) {
+  if (bound <= 0) return false;
+  if (near_target) {
+    return (bound < centre && position < bound) ||
+           (centre < bound && bound < position);
+  }
+  return (centre < bound && position < bound) ||
+         (bound < centre && bound < position);
+}
+
+enum class DetourLimit { kInside, kReached, kLeftRoom };
+
+std::optional<DetourLimit> CheckDetourLimits(GroundNavigationWorld& world,
+                                             GroundNavigator& navigator,
+                                             const DetourPath& path, int side,
+                                             int blocked_flag_bit) {
+  const bool near_target = navigator.near_target_detour != 0;
+  if (!near_target) {
+    const auto left = SideLeavesRoom(world, navigator, side, blocked_flag_bit);
+    if (!left.has_value()) return std::nullopt;
+    if (*left) {
+      navigator.pursuit_e8 = 0;
+      navigator.pursuit_e7 = 0;
+      navigator.pursuit_e4 = 0;
+      return DetourLimit::kLeftRoom;
+    }
+  }
+  const auto target = Unpack(navigator.destination);
+  if (PassedBoundary(path.BoundZ(), TileCentre(target.z), navigator.z,
+                     near_target) ||
+      PassedBoundary(path.BoundX(), TileCentre(target.x), navigator.x,
+                     near_target)) {
+    return DetourLimit::kReached;
+  }
+  return DetourLimit::kInside;
+}
+
+// Steps onto the neighbour when its edge and tile are free, storing it as the
+// next tile.
+std::optional<bool> TryDetourStep(GroundNavigationWorld& world,
+                                  GroundNavigator& navigator, int direction) {
+  const auto delta = Delta(world, direction);
+  if (!delta.has_value()) return std::nullopt;
+  const auto point = PackWrapped(Neighbor(Unpack(navigator.tile), *delta));
+  const auto closed = StepClosed(world, navigator, point, direction);
+  if (!closed.has_value()) return std::nullopt;
+  if (*closed) return false;
+  navigator.next_tile = point;
+  return true;
+}
+
+// Turns around the obstacle: stops when the inner side opens again (the
+// obstacle ended) or every cardinal was tried, then scans from the inner side
+// for an open heading or a free tile to step to.
+std::optional<int> TurnAroundObstacle(GroundNavigationWorld& world,
+                                      GroundNavigator& navigator,
+                                      GroundDirectionProbe& probe,
+                                      DetourPath& path) {
+  const int turn = path.Turn();
+  const auto behind = Open(
+      probe, navigator, (path.Heading() - (turn * 2) - turn) & kDirectionMask);
+  if (!behind.has_value()) return std::nullopt;
+  if (*behind) {
+    const auto inner =
+        Open(probe, navigator, (path.Heading() - (turn * 2)) & kDirectionMask);
+    if (!inner.has_value()) return std::nullopt;
+    if (*inner) {
+      if (ReadyForNudge(navigator.movement_flags, navigator.repeat_wait)) {
+        navigator.repeat_wait = NudgeWait(world);
+      }
+      path.MarkStopped();
+      return kDetourEnded;
+    }
+  }
+  path.SetVisited(path.Visited() | (1 << (path.Heading() >> 1)));
+  if (static_cast<std::uint32_t>(path.Visited()) == kAllCardinalsVisited) {
+    path.MarkStopped();
+    return kDetourEnded;
+  }
+  int direction = (path.Heading() - (turn * 2)) & kDirectionMask;
+  for (int scanned = 0; scanned < kDetourScanDirections; ++scanned) {
+    const auto open = Open(probe, navigator, direction);
+    if (!open.has_value()) return std::nullopt;
+    if (*open) {
+      path.Head(direction);
+      return kWalkDirectionIntent;
+    }
+    const auto stepped = TryDetourStep(world, navigator, direction);
+    if (!stepped.has_value()) return std::nullopt;
+    if (*stepped) {
+      path.Head(direction);
+      return kStepIntent;
+    }
+    direction = (direction + (turn * 2)) & kDirectionMask;
+  }
+  return kDetourEnded;
+}
+
+std::optional<int> AdvanceObstacleDetour(GroundNavigationWorld& world,
+                                         GroundNavigator& navigator,
+                                         GroundDirectionProbe& probe,
+                                         DetourPath& path,
+                                         int blocked_flag_bit) {
+  if (path.Steps() == 0) return kDetourEnded;
+  const int side =
+      (path.Clockwise() ? path.Heading() - 2 : path.Heading() + 2) &
+      kDirectionMask;
+  if (!NudgeSideBlocker(world, navigator, side)) return std::nullopt;
+  if (!ReverseIfAheadClosed(world, navigator, probe, path)) return std::nullopt;
+  const auto limit =
+      CheckDetourLimits(world, navigator, path, side, blocked_flag_bit);
+  if (!limit.has_value()) return std::nullopt;
+  if (*limit == DetourLimit::kLeftRoom) {
+    path.MarkStopped();
+    return kDetourEnded;
+  }
+  if (*limit == DetourLimit::kReached) return kDetourEnded;
+  const auto cell = CardinalPassabilityMask(navigator, probe);
+  if (!cell.has_value()) return std::nullopt;
+  if (*cell == path.Cell()) return kWalkDirectionIntent;
+  path.SetCell(*cell);
+  return TurnAroundObstacle(world, navigator, probe, path);
+}
+
+bool FollowActiveDetour(GroundNavigationWorld& world,
                         GroundNavigator& navigator, bool flight) {
-  const int action = world.FollowObstacleDetour(
-      navigator, flight, flight ? kFlightDetourIntent : kGroundDetourIntent);
-  if (action < 0) {
+  WalkProbe walk(world);
+  FlightProbe fly(world);
+  GroundDirectionProbe& probe =
+      flight ? static_cast<GroundDirectionProbe&>(fly) : walk;
+  const auto action = FollowObstacleDetour(
+      world, navigator, probe,
+      flight ? kFlightDetourBlockedBit : kGroundDetourBlockedBit);
+  if (!action.has_value()) return false;
+  if (*action < 0) {
     world.RefreshMovementCooldown(navigator);
     world.Recover(navigator);
-    return;
+    return true;
   }
   navigator.heading = Half((navigator.navigation_flags >> 1) &
                            static_cast<unsigned>(kDirectionMask));
-  world.IssueCommand(navigator, action);
+  world.IssueCommand(navigator, *action);
+  return true;
 }
 
 struct DirectionalMove {
@@ -953,6 +1279,21 @@ std::optional<int> CardinalPassabilityMask(GroundNavigator& navigator,
                               static_cast<unsigned>(*open));
   }
   return result;
+}
+
+// decomp: func_800E2F5C (src/BATTLE/BATTLE.PRG/771A8.c:2388).
+std::optional<int> FollowObstacleDetour(GroundNavigationWorld& world,
+                                        GroundNavigator& navigator,
+                                        GroundDirectionProbe& probe,
+                                        int blocked_flag_bit) {
+  DetourPath path(navigator.navigation_flags);
+  navigator.target_distance_filter = 0;
+  navigator.gait = navigator.detour_run;
+  const auto action =
+      AdvanceObstacleDetour(world, navigator, probe, path, blocked_flag_bit);
+  if (!action.has_value()) return std::nullopt;
+  navigator.navigation_flags = path.Word();
+  return action;
 }
 
 // decomp: func_800E3DDC (src/BATTLE/BATTLE.PRG/7B5DC.s:10).
@@ -1236,8 +1577,7 @@ bool ResolveDirectionalMovement(GroundNavigationWorld& world,
   }
   const bool flight = mode >= 2;
   if ((navigator.navigation_flags & 1U) != 0) {
-    FollowActiveDetour(world, navigator, flight);
-    return true;
+    return FollowActiveDetour(world, navigator, flight);
   }
   const auto unsigned_angle = static_cast<std::uint32_t>(angle);
   const int nearest = NearestAxisDirection(unsigned_angle);

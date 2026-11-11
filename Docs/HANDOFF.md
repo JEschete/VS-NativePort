@@ -36,7 +36,11 @@ and the F01735-F01737 radial-movement and F01750 recovery group in `8da2ca02`
 The F01636/F01641/F01642/F01644/F01660 blocked-movement group is published in
 `388d46a2`
 ([CI 42997686408](https://github.com/JEschete/VS-NativePort/actions/runs/42997686408)).
-The F01729/F01730/F01732-F01734 flight group, with the #343 fix, follows it.
+The F01729/F01730/F01732-F01734 flight group, with the #343 fix, is published in
+`39cef575`; its baseline test-name fix (#345) `4310eb0b` passed
+[CI 43015941999](https://github.com/JEschete/VS-NativePort/actions/runs/43015941999).
+The F01630/F01748/F01749/F01751 temporary-awareness, obstacle-detour and
+target-approach group, with the #344 fix, follows it.
 See [Stopping Point](#stopping-point) for the next group.
 
 ## Checkpoint
@@ -51,9 +55,9 @@ See [Stopping Point](#stopping-point) for the next group.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **918 functions remain** (after the flight group on `388d46a2`).
-  Modernization: 2,826 done of 3,744. C++ promotion: 2,827 promoted plus one
-  frame-orchestrator WIP. These are separate measures. Row 28 has 28
+- **914 functions remain** (after the target-approach group on `4310eb0b`).
+  Modernization: 2,830 done of 3,744. C++ promotion: 2,831 promoted plus one
+  frame-orchestrator WIP. These are separate measures. Row 28 has 24
   generated functions left.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
@@ -159,70 +163,69 @@ See [Stopping Point](#stopping-point) for the next group.
 
 ## Stopping Point
 
-HEAD `388d46a2` (blocked movement and movement history) is pushed and green
-([CI 42997686408](https://github.com/JEschete/VS-NativePort/actions/runs/42997686408)).
-It moved F01636, F01641, F01642, F01644 and F01660 into the pure
-`BlockedMovement` module with checked `BlockedMovementLive` bindings at
-0x800D8400, 0x800D9538 and 0x800DB0BC (differential: 311 instructions, 4,096
-vectors, 0 mismatches, 43/43 mutants).
+HEAD `4310eb0b` is pushed and green
+([CI 43015941999](https://github.com/JEschete/VS-NativePort/actions/runs/43015941999)).
+It follows the flight group `39cef575`, whose own run
+([CI 43015300469](https://github.com/JEschete/VS-NativePort/actions/runs/43015300469))
+failed only because the regression baseline still named the replaced flight
+tests (#345, closed). The flight group moved F01729, F01730 and F01732-F01734
+into the pure `FlightMovement` module with checked `FlightMovementLive`
+bindings at 0x800E02B4, 0x800E0678, 0x800E0918, 0x800E0A68 and 0x800E1238.
+It keeps #342's R3000 quotients and fixes #343: segment heights now wrap to
+the original's signed 15 bits, so both replay baselines were re-recorded. Its
+differential covers 1,077 instructions: 3,072 vectors, 0 mismatches and 41/41
+mutants.
 
-The commit after it holds the flight group and the #343 fix:
+The commit after it holds the temporary-awareness, obstacle-detour and
+target-approach group and the #344 fix:
 
-- F01729 `IsFlightDirectionObstructed`, F01730 `CanFlyInDirection`, F01732
-  `UpdateFlightGroundTransition`, F01733 `UpdateFlightMovement` and F01734
-  `UpdateFlightDirectionalMovement` live in the new pure `FlightMovement`
-  module. The checked `FlightMovementLive` bindings keep the module addresses
-  0x800E02B4, 0x800E0678, 0x800E0918, 0x800E0A68 and 0x800E1238; generated
-  `Movement.cpp` lost 452 lines. `CurrentTerrain.cpp`,
-  `GroundNavigationLive.cpp` and `WanderLive.cpp` call the bindings.
-- #342 (kept): the original glide divides without a zero check. Native keeps
-  the R3000 results through `R3000Quotient` and the new
-  `R3000UnsignedQuotient` (0xFFFFFFFF for a zero divisor), including the
-  `vs_gte_rsqrt` table read the zero sum produces.
-- #343 (fixed): `MinimumAiGroundHeightAlongSegment` now wraps each sample to
-  the original's signed 15 bits. That changes the `first_lever_room` flier's
-  glide from tick 122, so both replay baselines were re-recorded with the new
-  `regression.py record --config both`. With only the `FlightTerrain.cpp` fix
-  reverted, the promotion replays the old baseline exactly.
-- The `flight_movement` differential covers 1,077 original instructions:
-  3,072 vectors, 0 mismatches, 41/41 mutants. Native broken variants are
-  detected: F01729 platform slack 0x40 (181 vectors), F01730 without the
-  previous-tile check (22), F01732 near radius 17 (13), F01733 zero-sum root
-  22 (1) and F01734 heading resolve mode 2 (341). `differential.py` gained the
-  shared `placed_state`, `field_problems`, `call_problems` and
-  `store_problems` helpers; the flight, radial, wander and blocked cases use
-  them.
-- Focused `[flight-movement],[ai][flight]`: 35 cases, 173 assertions in Debug
-  and Release. Full suite: 5,550 cases, 12,650,337 assertions in Debug and
-  Release; the replays match the re-recorded baseline. Changed-file quality:
-  177 existing findings, 0 new.
+- F01630 `SetTemporaryAwarenessIndicator` is a pure setter over
+  `TemporaryAwareness` in `Engagement`. `SetLiveTemporaryAwarenessIndicator`
+  (`EngagementLive`, 0x800D8260) serves `RelationsLive.cpp`,
+  `ActorCleanupLive.cpp`, `TargetApproachLive.cpp` and generated `Behavior.cpp`.
+- F01751 `FollowObstacleDetour` is typed in `GroundNavigation`. The typed
+  ground navigation calls it directly; `FollowLiveObstacleDetour` keeps
+  0x800E2F5C. #344 (fixed): the next tile's top byte is the original's 0, where
+  the generated copy stored an uninitialized byte.
+- F01748 `UpdateTargetApproachMovement` and F01749 `UpdateTargetFacing` live
+  in the new pure `TargetApproach` module. `TargetApproachLive` keeps
+  0x800E24EC and 0x800E2B2C, and the `MovementBehaviorLive.cpp` host calls it.
+- The generated `Behavior`, `Movement`, `Navigation` and `Perception` copies
+  lost the old definitions: the four old symbols had 21 references and have
+  none.
+- Differentials, all with every mutant detected:
+  - `temporary_awareness`: 3 instructions, 1,024 vectors, 0 mismatches, 6/6.
+  - `obstacle_detour`: 425 instructions, 4,096 vectors, 0 mismatches, 27/27.
+    The #344 `next-tile-tag` mutant changes 38 vectors, so the full next-tile
+    word is compared.
+  - `target_approach` (F01748 and F01749 together): 504 instructions, 4,096
+    vectors, 0 mismatches, 75/75. Its move points stay below 2^21: the
+    original `ratan2` wraps from 2^22 and reads past its table, which the
+    native `Arctangent2` corrects on purpose.
+- Native broken variants, run with the new
+  `differential.py <case> --replace SOURCE OLD NEW`, are all detected: F01630
+  marker stored as a byte (613 of 1,024 vectors), F01751 distance filter set
+  to 1 (4,096 of 4,096), F01748 retarget at 181 calls (44 of 4,096) and F01749
+  turn timer plus one (446 of 4,096).
+- The harness's GTE model now also covers IR0 and SXY0-SXY2. The near-target
+  test (0x800E4FB0, the promoted `IsAiTargetBeyondNearRadius`) squares the
+  constant 10, not its third argument; the native keeps that.
+- Group check on base `4310eb0b`: 124 focused tests (1,018 assertions) pass
+  in Debug and Release. The full suites pass in both configurations, with
+  5,598 tests and 12,650,641 assertions each. The silver_wolves (2,400 frames)
+  and first_lever_room (900 frames) replays match their baselines. The copier
+  and ledger controls pass. Changed-file tidy reports 5 existing findings and
+  0 new. Two copier controls now expect generated `Movement.cpp` to hold data
+  only: its distance and command users moved to `TargetApproach`.
 
-Next group (row 28 has 28 generated functions left): F01630, F01748, F01749
-and F01751.
-
-- F01630 `SetTemporaryAwarenessIndicator` (`Perception.cpp:53-58`) stores the
-  marker (u16, 0x138) and frames (u8, 0x12A). Add a pure setter beside
-  `TemporaryAwareness` in `Engagement.hpp` and a live binding in
-  `EngagementLive`. Callers: `RelationsLive.cpp`, `ActorCleanupLive.cpp`,
-  `EngagementTests.cpp`, generated `Behavior.cpp` (6, 0) and `Movement.cpp`
-  (7, 40, twice), and `ModulePointers.cpp`.
-- F01748 `UpdateTargetApproachMovement` (0x800E24EC) and F01749
-  `UpdateTargetFacing` (0x800E2B2C) go into a new pure `TargetApproach`
-  module plus `TargetApproachLive`, following `RadialMovement`. The hosts in
-  `MovementBehaviorLive.cpp` (the two direct calls, with the offsets already
-  asserted) store and reload the movement state around them. Keep the
-  `opaqueF8++ > 180` short-circuit, uint32 squares, range modes above 2
-  leaving the mode unchanged, case 2 clearing the frame direction cache's
-  byte 0, and the unconditional target-tile refresh.
-- F01751 `FollowObstacleDetour` (0x800E2F5C, generated `Navigation.cpp`)
-  becomes a typed `GroundNavigation` function over the existing `WalkProbe`
-  and `FlightProbe`, replacing the world's `FollowObstacleDetour` virtual. Its
-  third argument is a tile-flag bit (0xB walking, 0xC flying), not an intent.
-  `GroundNavigator` needs E4, E7 and E8, and the world needs another actor's
-  movement flags and wait timer. Fix #344 in the same change: the original
-  writes `nextTile` byte 3 from its caller's `$fp`, which `func_800E3600`
-  always sets to the mode argument, so it is 0; the generated copy leaves it
-  indeterminate. The differential seeds `$fp` with the mode.
+Next group (row 28 has 24 generated functions left): F01678
+`UnlinkEngagedActor`, F01679 `UpdateEngagementBuildup` and F01680
+`AnimateEngagementPhase` (generated `Perception.cpp`, 73700.c:414-530), with
+F01705 `ApplyActorActionReaction`, F01706 `PropagateActorRelationships` and
+F01719 `NotifyActionRelationshipChanges` (74088.c). They belong beside the
+`Engagement` and `Relations` modules. The others left are Perception F01638,
+F01639, F01640 and F01643; Behavior F01649-F01654 and F01656-F01659; and
+OrbitingBoss F01846-F01849.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -269,7 +272,11 @@ differential rewritten each time. The rules, also in
    through the interpreter and the compiled native driver, then checks that
    each mutant (patched original words) changes a result. A case without
    mutants fails. A case's optional `MUTANT_VECTORS = N` reruns each mutant on
-   only the first N vectors, which keeps large cases fast. Reports go to `build\differential\<case>.log`. The F01813
+   only the first N vectors, which keeps large cases fast. Reports go to `build\differential\<case>.log`.
+   `--replace SOURCE OLD NEW` builds a native broken variant from a patched
+   copy of one source (the tree is untouched) and expects mismatches; use it
+   for each function's broken-variant check instead of editing and reverting
+   the source. The F01813
    case, [actor_settings.py](../tools/port/differentials/actor_settings.py),
    reproduces the recorded evidence exactly: 265 instructions, 8,192 vectors,
    0 mismatches, every mutant detected, about 33 s including the driver
@@ -815,15 +822,14 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Confirm the flight group's exact-revision CI, then continue with the
-   F01630/F01748/F01749/F01751 group from the
-   [Stopping Point](#stopping-point), fixing #344 there, and update #276. Keep
-   #337 open until its in-game reachability is established. Do not close #276:
-   918 remain.
+2. Confirm the target-approach group's exact-revision CI, then continue with
+   the F01678-F01680/F01705/F01706/F01719 engagement and relations group from
+   the [Stopping Point](#stopping-point) and update #276. Keep #337 open until
+   its in-game reachability is established. Do not close #276: 914 remain.
 3. Continue ordered row 28 with Behavior, Movement, OrbitingBoss and Perception
    as listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01636/F01641/F01642/F01644/F01660/F01708-F01710/F01716/F01717/
-   F01721-F01747/F01750/F01793/F01810-F01818 are verified
+   F01630/F01636/F01641/F01642/F01644/F01660/F01708-F01710/F01716/F01717/
+   F01721-F01751/F01793/F01810-F01818 are verified
    dependencies, not proof of remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.

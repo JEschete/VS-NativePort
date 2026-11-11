@@ -42,6 +42,13 @@ bool ResetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id) {
          SetActorAwarenessIndicator(markers, actor_id, kAwarenessMarkerReset);
 }
 
+// decomp: func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407).
+void SetTemporaryAwarenessIndicator(TemporaryAwareness& awareness, int marker,
+                                    int frames) {
+  awareness.marker = static_cast<std::uint16_t>(marker);
+  awareness.frames_remaining = static_cast<std::uint8_t>(frames);
+}
+
 // decomp: func_800D826C (src/BATTLE/BATTLE.PRG/6FA6C.s:10).
 bool IsEngagementReady(std::uint16_t engaged_frames) {
   return engaged_frames >= kEngagementReadyFrames;

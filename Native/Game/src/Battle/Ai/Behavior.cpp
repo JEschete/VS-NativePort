@@ -389,7 +389,7 @@ fallback:
             if ((unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(128) < 128) {
                 state->opaque18 = 1;
             }
-            ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)state), 6, 0);
+            VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator((Battle_Ai_ActorAiState *)((void*)state), 6, 0);
         }
         if (VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1)) {
             return 1;

@@ -314,7 +314,7 @@ class LiveHostility final : public HostilityHost {
   void ShowAwarenessIndicator(HostilityState& state, int indicator,
                               int frames) override {
     StoreHostility(state, state_);
-    Battle_Ai_SetTemporaryAwarenessIndicator(&state_, indicator, frames);
+    SetLiveTemporaryAwarenessIndicator(&state_, indicator, frames);
     state = LoadHostility(state_);
   }
   void RequestReaction(HostilityState& state, int value, int range) override {

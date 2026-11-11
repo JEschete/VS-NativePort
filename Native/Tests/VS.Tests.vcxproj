@@ -80,6 +80,7 @@
     <ClCompile Include="src\AiRelationsTests.cpp" />
     <ClCompile Include="src\AiSessionResetTests.cpp" />
     <ClCompile Include="src\AiSpecialTerrainTests.cpp" />
+    <ClCompile Include="src\AiTargetApproachTests.cpp" />
     <ClCompile Include="src\AiWanderTests.cpp" />
     <ClCompile Include="src\AiWaypointTests.cpp" />
     <ClCompile Include="src\AnimationControlTests.cpp" />

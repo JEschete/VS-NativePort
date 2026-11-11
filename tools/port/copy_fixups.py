@@ -648,6 +648,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::UpdateLiveFlightGroundTransition": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
     "VS::Battle::Ai::UpdateLiveFlightMovement": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
     "VS::Battle::Ai::UpdateLiveFlightDirectionalMovement": r"Native\Game\include\Battle\Ai\FlightMovementLive.hpp",
+    "VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator": r"Native\Game\include\Battle\Ai\EngagementLive.hpp",
+    "VS::Battle::Ai::FollowLiveObstacleDetour": r"Native\Game\include\Battle\Ai\GroundNavigationLive.hpp",
+    "VS::Battle::Ai::UpdateLiveTargetApproachMovement": r"Native\Game\include\Battle\Ai\TargetApproachLive.hpp",
+    "VS::Battle::Ai::UpdateLiveTargetFacing": r"Native\Game\include\Battle\Ai\TargetApproachLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1226,6 +1230,10 @@ OWNED_CALL_BINDINGS["F01730"] = "VS::Battle::Ai::CanLiveActorFlyInDirection"
 OWNED_CALL_BINDINGS["F01732"] = "VS::Battle::Ai::UpdateLiveFlightGroundTransition"
 OWNED_CALL_BINDINGS["F01733"] = "VS::Battle::Ai::UpdateLiveFlightMovement"
 OWNED_CALL_BINDINGS["F01734"] = "VS::Battle::Ai::UpdateLiveFlightDirectionalMovement"
+OWNED_CALL_BINDINGS["F01630"] = "VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator"
+OWNED_CALL_BINDINGS["F01751"] = "VS::Battle::Ai::FollowLiveObstacleDetour"
+OWNED_CALL_BINDINGS["F01748"] = "VS::Battle::Ai::UpdateLiveTargetApproachMovement"
+OWNED_CALL_BINDINGS["F01749"] = "VS::Battle::Ai::UpdateLiveTargetFacing"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2800,6 +2808,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E0918, "VS::Battle::Ai::UpdateLiveFlightGroundTransition"),  # F01732
     ("BATTLE/BATTLE.PRG", 0x800E0A68, "VS::Battle::Ai::UpdateLiveFlightMovement"),  # F01733
     ("BATTLE/BATTLE.PRG", 0x800E1238, "VS::Battle::Ai::UpdateLiveFlightDirectionalMovement"),  # F01734
+    ("BATTLE/BATTLE.PRG", 0x800D8260, "VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator"),  # F01630
+    ("BATTLE/BATTLE.PRG", 0x800E2F5C, "VS::Battle::Ai::FollowLiveObstacleDetour"),  # F01751
+    ("BATTLE/BATTLE.PRG", 0x800E24EC, "VS::Battle::Ai::UpdateLiveTargetApproachMovement"),  # F01748
+    ("BATTLE/BATTLE.PRG", 0x800E2B2C, "VS::Battle::Ai::UpdateLiveTargetFacing"),  # F01749
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -6674,14 +6686,6 @@ for identifier, old, new, evidence in (
      "                int v0 = (arg0 & 3) * 8 + 0x3070;\n                var_s2 = v0 - var_s1;\n",
      "                int overlay_texture_end = (arg0 & 3) * 8 + 0x3070;\n                var_s2 = overlay_texture_end - var_s1;\n",
      "Separate block v0 is atlas packed UV endpoint (arg0&3)*8+0x3070; subtracting clipped_width chooses strip UV. Not the screen-X local above."),
-    ("F01654",
-     "Battle_Ai_ActionExecutionView* arg0, int arg1, int arg2",
-     "Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames",
-     "Independent cast-prototype parameters, NOT enclosing locals. Callee F01630 writes awarenessMarker and awarenessFramesRemaining. Original caller forwards (state,6,0) or (s,7,40); copy-generated named cast has same ABI. Apply only this exact parameter span."),
-    ("F01748",
-     "Battle_Ai_ActionExecutionView* arg0, int arg1, int arg2",
-     "Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames",
-     "Independent cast-prototype parameters, NOT enclosing locals. Callee F01630 writes awarenessMarker and awarenessFramesRemaining. Original caller forwards (state,6,0) or (s,7,40); copy-generated named cast has same ABI. Apply only this exact parameter span."),
 ):
     FIXES.setdefault(identifier, []).append((old, new, evidence))
 
