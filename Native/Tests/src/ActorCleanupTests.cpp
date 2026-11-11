@@ -15,6 +15,7 @@
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
+#include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
@@ -323,7 +324,8 @@ TEST_CASE("AI settings allocate the orbit state for orbiting boss sub-types",
   CleanupFixture fixture;
   auto* state = ApplySubTypeSettings(fixture, sub_type);
   const auto* view = reinterpret_cast<const Battle_Ai_SettingsView*>(state);
-  CHECK(view->decisionCallback == Battle_Ai_UpdateOrbitingBossBehavior);
+  CHECK(view->decisionCallback ==
+        VS::Battle::Ai::UpdateLiveOrbitingBossBehavior);
   CHECK(view->settingsConstant19 == 1);
   CHECK(state->linkedActor == 16);
   CHECK(state->actionCostEnabled == 1);

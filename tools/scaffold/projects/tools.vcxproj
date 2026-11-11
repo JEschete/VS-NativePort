@@ -330,8 +330,11 @@
     <None Include="..\..\port\decl_index.py" />
     <None Include="..\..\port\decomp_index.py" />
     <None Include="..\..\port\differential.py" />
+    <None Include="..\..\port\differentials\action_notification.py" />
     <None Include="..\..\port\differentials\actor_creation.py" />
     <None Include="..\..\port\differentials\actor_creation_driver.cpp" />
+    <None Include="..\..\port\differentials\actor_reaction.py" />
+    <None Include="..\..\port\differentials\actor_reaction_driver.cpp" />
     <None Include="..\..\port\differentials\actor_settings.py" />
     <None Include="..\..\port\differentials\actor_settings_driver.cpp" />
     <None Include="..\..\port\differentials\area_movement.py" />
@@ -341,6 +344,10 @@
     <None Include="..\..\port\differentials\area_route_world.hpp" />
     <None Include="..\..\port\differentials\blocked_movement.py" />
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\boss_orbit.py" />
+    <None Include="..\..\port\differentials\boss_orbit_driver.cpp" />
+    <None Include="..\..\port\differentials\engaged_list.py" />
+    <None Include="..\..\port\differentials\engaged_list_driver.cpp" />
     <None Include="..\..\port\differentials\flight_movement.py" />
     <None Include="..\..\port\differentials\flight_movement_driver.cpp" />
     <None Include="..\..\port\differentials\height_filter.py" />

@@ -1962,10 +1962,19 @@
     <None Include="..\..\port\differential.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\differentials\action_notification.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\actor_creation.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\actor_creation_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\actor_reaction.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\actor_reaction_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\actor_settings.py">
@@ -1993,6 +2002,18 @@
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\boss_orbit.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\boss_orbit_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\engaged_list.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\engaged_list_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\flight_movement.py">

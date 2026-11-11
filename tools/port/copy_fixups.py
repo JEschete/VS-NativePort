@@ -658,6 +658,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::ApplyLiveActorActionReaction": r"Native\Game\include\Battle\Ai\RelationsLive.hpp",
     "VS::Battle::Ai::PropagateLiveActorRelationships": r"Native\Game\include\Battle\Ai\RelationsLive.hpp",
     "VS::Battle::Ai::NotifyLiveActionRelationshipChanges": r"Native\Game\include\Battle\Ai\RelationsLive.hpp",
+    "VS::Battle::Ai::UpdateLiveBossRadialRetreat": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
+    "VS::Battle::Ai::IsLiveBossActionReady": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
+    "VS::Battle::Ai::UpdateLiveBossOrbitTracking": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
+    "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1246,6 +1250,10 @@ OWNED_CALL_BINDINGS["F01680"] = "VS::Battle::Ai::AnimateLiveEngagementPhase"
 OWNED_CALL_BINDINGS["F01705"] = "VS::Battle::Ai::ApplyLiveActorActionReaction"
 OWNED_CALL_BINDINGS["F01706"] = "VS::Battle::Ai::PropagateLiveActorRelationships"
 OWNED_CALL_BINDINGS["F01719"] = "VS::Battle::Ai::NotifyLiveActionRelationshipChanges"
+OWNED_CALL_BINDINGS["F01846"] = "VS::Battle::Ai::UpdateLiveBossRadialRetreat"
+OWNED_CALL_BINDINGS["F01847"] = "VS::Battle::Ai::IsLiveBossActionReady"
+OWNED_CALL_BINDINGS["F01848"] = "VS::Battle::Ai::UpdateLiveBossOrbitTracking"
+OWNED_CALL_BINDINGS["F01849"] = "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2830,6 +2838,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DD000, "VS::Battle::Ai::ApplyLiveActorActionReaction"),  # F01705
     ("BATTLE/BATTLE.PRG", 0x800DD344, "VS::Battle::Ai::PropagateLiveActorRelationships"),  # F01706
     ("BATTLE/BATTLE.PRG", 0x800DEEA4, "VS::Battle::Ai::NotifyLiveActionRelationshipChanges"),  # F01719
+    ("BATTLE/BATTLE.PRG", 0x800E7698, "VS::Battle::Ai::UpdateLiveBossRadialRetreat"),  # F01846
+    ("BATTLE/BATTLE.PRG", 0x800E78F4, "VS::Battle::Ai::IsLiveBossActionReady"),  # F01847
+    ("BATTLE/BATTLE.PRG", 0x800E7960, "VS::Battle::Ai::UpdateLiveBossOrbitTracking"),  # F01848
+    ("BATTLE/BATTLE.PRG", 0x800E7F8C, "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior"),  # F01849
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3827,12 +3839,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position,",
          "VS::Core::Math::PositionOf(((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position),",
          "F01773 is promoted C++: pass the player model's short[3] position as a Position3 value"),
-    ],
-    "F01846": [
-        ("    VS::Core::Math::SquaredVectorLength(0x7C0 - state->x, 0, 0x7C0 - state->z);\n",
-         "",
-         "7EE98.c:506 discards this result; the original call only left GTE MAC registers that nothing reads, "
-         "and the promoted pure function has no native effect"),
     ],
     "F01353": [("((u_long)primBuf << 8) >> 8", "LegacyGpu_Handle(primBuf)", "stat-gauge native packet link")],
     "F01348": [

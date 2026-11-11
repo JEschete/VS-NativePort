@@ -14,6 +14,7 @@
 
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
@@ -224,7 +225,7 @@ void ApplyLiveActorAiSettings(Battle_Ai_SettingsView* state,
   state->opaqueCC = decoded.wander_center_tile_x;
   state->opaqueCE = decoded.wander_center_tile_z;
   if (decoded.orbiting_boss) {
-    state->decisionCallback = Battle_Ai_UpdateOrbitingBossBehavior;
+    state->decisionCallback = UpdateLiveOrbitingBossBehavior;
     state->settingsConstant19 = 1;
     AllocateLiveOrbitingBossState(state);
   } else {

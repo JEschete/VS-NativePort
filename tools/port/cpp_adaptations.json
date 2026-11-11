@@ -308,62 +308,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Battle\\Ai\\OrbitingBoss.cpp": [
-[
-65,
-[
-"                VS::Battle::Ai::RecoverLiveMovement((void*)state);"
-],
-[
-"                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-83,
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
-],
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
-]
-],
-[
-158,
-[
-"    if (Battle_Ai_IsBossActionReady((void*)state) && VS::Battle::Ai::IsLiveEngagementReady((void*)state)) {"
-],
-[
-"    if (Battle_Ai_IsBossActionReady((Battle_Ai_ActorAiState *)((void*)state)) && VS::Battle::Ai::IsLiveEngagementReady((Battle_Ai_ActorAiState *)((void*)state))) {"
-]
-],
-[
-256,
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
-],
-[
-"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
-]
-],
-[
-284,
-[
-"        Battle_Ai_UpdateBossOrbitTracking((void*)ai_state);"
-],
-[
-"        Battle_Ai_UpdateBossOrbitTracking((Battle_Ai_OrbitTrackingView *)((void*)ai_state));"
-]
-],
-[
-301,
-[
-"        if (Battle_Ai_UpdateBossRadialRetreat((void*)ai_state) != 0) {"
-],
-[
-"        if (Battle_Ai_UpdateBossRadialRetreat((Battle_Ai_RadialRetreatView *)((void*)ai_state)) != 0) {"
-]
-]
-],
 "Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
 [
 347,

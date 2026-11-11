@@ -489,6 +489,12 @@
     <ClCompile Include="src\Battle\Ai\BlockedMovementLive.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\BossOrbit.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\BossOrbitLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ConditionSnapshot.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2644,6 +2650,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\BlockedMovementLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\BossOrbit.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\BossOrbitLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp">

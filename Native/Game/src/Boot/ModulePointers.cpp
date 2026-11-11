@@ -10,6 +10,7 @@
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
+#include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FlightMovementLive.hpp"
@@ -793,10 +794,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DAC80u, 0u, (void*)&Battle_Ai_TryExecuteActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAD9Cu, 0u, (void*)&Battle_Ai_TryExecutePlannedActions, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAED0u, 0u, (void*)&Battle_Ai_UpdateActorDecisions, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&Battle_Ai_UpdateBossRadialRetreat, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&Battle_Ai_IsBossActionReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E7960u, 0u, (void*)&Battle_Ai_UpdateBossOrbitTracking, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E7F8Cu, 0u, (void*)&Battle_Ai_UpdateOrbitingBossBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8184u, 16u, (void*)&Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8194u, 32u, (void*)&Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81B4u, 16u, (void*)&Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor, 1u, 1u},
@@ -1751,6 +1748,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DD000u, 0u, (void*)&VS::Battle::Ai::ApplyLiveActorActionReaction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DD344u, 0u, (void*)&VS::Battle::Ai::PropagateLiveActorRelationships, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEEA4u, 0u, (void*)&VS::Battle::Ai::NotifyLiveActionRelationshipChanges, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&VS::Battle::Ai::UpdateLiveBossRadialRetreat, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&VS::Battle::Ai::IsLiveBossActionReady, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E7960u, 0u, (void*)&VS::Battle::Ai::UpdateLiveBossOrbitTracking, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E7F8Cu, 0u, (void*)&VS::Battle::Ai::UpdateLiveOrbitingBossBehavior, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

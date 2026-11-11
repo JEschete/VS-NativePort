@@ -55,10 +55,10 @@ See [Stopping Point](#stopping-point) for the next group.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **908 functions remain** (after the engaged-list, actor-reaction and
-  notification group that follows `3e692a35`).
-  Modernization: 2,836 done of 3,744. C++ promotion: 2,837 promoted plus one
-  frame-orchestrator WIP. These are separate measures. Row 28 has 18
+- **904 functions remain** (after the orbiting-boss group that follows
+  `091c9a50`).
+  Modernization: 2,840 done of 3,744. C++ promotion: 2,841 promoted plus one
+  frame-orchestrator WIP. These are separate measures. Row 28 has 14
   generated functions left.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
@@ -184,58 +184,54 @@ See [Stopping Point](#stopping-point) for the next group.
   native `Arctangent2` corrects on purpose. The near-target test (0x800E4FB0)
   squares the constant 10, not its third argument; the native keeps that.
 
+- `3e692a35` was the engaged-list base. F01678 `UnlinkEngagedActor`, F01679
+  `UpdateEngagementBuildup` and F01680 `AnimateEngagementPhase` (typed in
+  `Engagement`) and F01705, F01706 and F01719 (typed in `Relations`) are
+  published in `091c9a50`
+  ([CI 43041442386](https://github.com/JEschete/VS-NativePort/actions/runs/43041442386)).
+  The differentials `engaged_list` (167 instructions, 4,096 vectors, 33/33
+  mutants), `actor_reaction` (385, 4,096, 66/66) and `action_notification`
+  (22, 1,024, 8/8) have 0 mismatches, and every native broken variant was
+  detected.
+
 ## Stopping Point
 
-HEAD `3e692a35` is pushed and green
-([CI 43029949145](https://github.com/JEschete/VS-NativePort/actions/runs/43029949145)).
-The commit after it holds the engaged-list, actor-reaction and notification
-group:
+HEAD `091c9a50` is pushed and green
+([CI 43041442386](https://github.com/JEschete/VS-NativePort/actions/runs/43041442386)).
+The commit after it holds the orbiting-boss group:
 
-- F01678 `UnlinkEngagedActor`, F01679 `UpdateEngagementBuildup` and F01680
-  `AnimateEngagementPhase` are typed in `Engagement`, with checked
-  `EngagementLive` bindings at 0x800DBF00, 0x800DBFE4 and 0x800DC0D0.
-- F01705 `ApplyActorActionReaction`, F01706 `PropagateActorRelationships` and
-  F01719 `NotifyActionRelationshipChanges` are typed in `Relations`, with
-  `RelationsLive` bindings at 0x800DD000, 0x800DD344 and 0x800DEEA4.
-- `FrameUpdateLive`, `ActorCleanupLive`, `NavigationPrimitivesLive`,
-  `MovementBehaviorLive` and `AbilitiesLive` call the typed versions, and the
-  generated `Perception` copy lost the three engagement definitions. The six
-  old symbols had 30 code references and have none.
-- Differentials, all with 0 mismatches and every mutant detected:
-  - `engaged_list` (F01678-F01680): 167 instructions, 4,096 vectors, 33/33.
-  - `actor_reaction` (F01705 and F01706): 385 instructions, 4,096 vectors,
-    66/66. Hit effects are biased toward the restore effect, the acting actor
-    toward Ashley, and half the propagation vectors use faction-structured
-    relations, so the rarest mutant (orbit stopped on restore) still changes 3
-    vectors.
-  - `action_notification` (F01719): 22 instructions, 1,024 vectors, 8/8.
-  - The harness gained tail-call stubs and shared case helpers,
-    `field_writer` and `output_problems`, which replace per-case copies.
-- Native broken variants are all detected: F01678, F01679 and F01680 change
-  121, 58 and 281 of 4,096 vectors; the F01705 reaction timer minus one 821 of
-  4,096; the F01706 classification forced neutral 411 of 4,096; and the F01719
-  grace left uncleared 381 of 1,024.
-- Group check on base `3e692a35` (`promotion_check.py group`, 8 minutes): 164
-  focused tests (114,002 assertions) pass in Debug and Release. The full
-  suites pass in both configurations, with 5,626 tests and 12,650,951
-  assertions each. The silver_wolves (2,400 frames) and first_lever_room (900
-  frames) replays match their baselines. The copier and ledger controls pass.
-  Its first tidy run found six new findings: two Python clones, one cpplint
-  namespace indent, one missing final newline and two brace warnings. After
-  the fixes, changed-file quality reports 48 existing findings (5 legacy, 43
-  tests) and 0 new. The focused tests in both configurations and the three
-  differentials were rerun after the fixes.
+- F01846 `UpdateBossRadialRetreat`, F01847 `IsBossActionReady`, F01848
+  `UpdateBossOrbitTracking` and F01849 `UpdateOrbitingBossBehavior` are typed
+  in the pure `BossOrbit` module. `BossOrbitLive` binds them, with module
+  bindings at 0x800E7960 and 0x800E7F8C. `ActorSettingsLive` installs the
+  typed behavior callback, and the generated `OrbitingBoss.cpp` keeps only the
+  orbit data. The four old symbols had 18 code references and have none.
+- Differential `boss_orbit`: 699 original instructions (0x800E7698-0x800E8180),
+  4,096 vectors, 0 mismatches and 78/78 mutants. The thinnest mutants still
+  change 2-4 vectors (low-height-31, random-mask-0xff, slow-speed-0x2ffff).
+- One native broken variant per function is detected: F01846 retreat
+  flagged-steps 14 to 15 (283 of 4,096 vectors), F01847 `<` to `<=` (387),
+  F01848 ahead tolerance 222 to 256 (62) and F01849 living-core HP 2 to 3 (50).
+- The cached distance from the arena centre is never negative in the game: an
+  s16 squared length wraps only when both deltas are -0x8000, and the eased
+  radius stays at or below 46,308. The original `vs_gte_rsqrt` (SLUS
+  0x80041B94) would read before its table for a negative input, while the
+  native `SquareRootInteger` returns 0, so the differential generates only
+  non-negative values.
+- Group check on base `091c9a50` (`promotion_check.py group`, 7 minutes): 41
+  focused tests (368 assertions) pass in Debug and Release. The full suites
+  pass in both configurations, with 5,667 tests and 12,651,319 assertions
+  each. The silver_wolves (2,400 frames) and first_lever_room (900 frames)
+  replays match their baselines, but they are not known to reach the orbiting
+  boss. Changed-file quality reports 5 existing findings and 0 new. Two copier
+  tests still described the old `OrbitingBoss.cpp` callers and were updated;
+  `test_encounter_fixups.py` then passes 211 tests.
 
-Next group (row 28 has 18 generated functions left): OrbitingBoss F01846
-`UpdateBossRadialRetreat`, F01847 `IsBossActionReady`, F01848
-`UpdateBossOrbitTracking` and F01849 `UpdateOrbitingBossBehavior` (generated
-`OrbitingBoss.cpp`, 7EE98.c:506-753, original 0x800E7698-0x800E8184).
-`radialRetreatPath` (D_800F17DC) is declared `[36][2]`, but its pointer range
-is 124 bytes. The table ends with a `(0, 0)` terminator at index 29, and index
-30 is the next datum, `(0, -4096)`. Phases 0 and 1 read only indices 0-29, and
-the 144-byte copy reproduces the original memory past the table, so this is
-not a behavior defect. After that group: Perception F01638, F01639, F01640 and
-F01643; Behavior F01649-F01654 and F01656-F01659.
+Next group (row 28 has 14 generated functions left): Perception F01638
+`IsTargetOccludedAtExtent`, F01639 `IsTargetOccludedAtHeight`, F01640
+`UpdateTargetPerception` and F01643 `UpdateActorPerception` (generated
+`Perception.cpp`, 6FC00.c:646-1177, original 0x800D87E8-0x800D9537). After
+that group: Behavior F01649-F01654 and F01656-F01659.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -836,10 +832,10 @@ passed; the hazard check and workflow-exit controls now pass as independent step
    the F01678-F01680/F01705/F01706/F01719 engagement and relations group from
    the [Stopping Point](#stopping-point) and update #276. Keep #337 open until
    its in-game reachability is established. Do not close #276: 914 remain.
-3. Continue ordered row 28 with Behavior, Movement, OrbitingBoss and Perception
+3. Continue ordered row 28 with Perception and Behavior
    as listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01641/F01642/F01644/F01660/F01708-F01710/F01716/F01717/
-   F01721-F01751/F01793/F01810-F01818 are verified
+   F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified
    dependencies, not proof of remaining AI behavior or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
    use, candidate-list mutation, failure and reset paths before implementing.

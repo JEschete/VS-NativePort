@@ -69,6 +69,7 @@
     <ClCompile Include="src\AiAreaRouteTests.cpp" />
     <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp" />
     <ClCompile Include="src\AiBlockedMovementTests.cpp" />
+    <ClCompile Include="src\AiBossOrbitTests.cpp" />
     <ClCompile Include="src\AiDecisionsTests.cpp" />
     <ClCompile Include="src\AiDecisionTests.cpp" />
     <ClCompile Include="src\AiFlightMovementTests.cpp" />
