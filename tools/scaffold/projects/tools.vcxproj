@@ -345,10 +345,16 @@
     <None Include="..\..\port\differentials\flight_movement_driver.cpp" />
     <None Include="..\..\port\differentials\height_filter.py" />
     <None Include="..\..\port\differentials\height_filter_driver.cpp" />
+    <None Include="..\..\port\differentials\obstacle_detour.py" />
+    <None Include="..\..\port\differentials\obstacle_detour_driver.cpp" />
     <None Include="..\..\port\differentials\radial_movement.py" />
     <None Include="..\..\port\differentials\radial_movement_driver.cpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
+    <None Include="..\..\port\differentials\target_approach.py" />
+    <None Include="..\..\port\differentials\target_approach_driver.cpp" />
+    <None Include="..\..\port\differentials\temporary_awareness.py" />
+    <None Include="..\..\port\differentials\temporary_awareness_driver.cpp" />
     <None Include="..\..\port\differentials\wander.py" />
     <None Include="..\..\port\differentials\wander_driver.cpp" />
     <None Include="..\..\port\differentials\waypoint_patrol.py" />

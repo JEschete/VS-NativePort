@@ -9,6 +9,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Field/GameModeLive.hpp"
@@ -217,8 +218,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
     VS::Content::ReleaseLiveActorSequence(actor, kind);
   }
   void NotifyQueuedActionRelationships() override {
-    Battle_Ai_NotifyActionRelationshipChanges(
-        reinterpret_cast<Battle_Ai_ReactionRecord*>(&Queued()));
+    VS::Battle::Ai::NotifyLiveActionRelationshipChanges(&Queued());
   }
   void ResolveSelectionIntoQueue(int action_id) override {
     Battle_ResolveActionTargets(action_id, &Queued(), &state_->selection, 1);

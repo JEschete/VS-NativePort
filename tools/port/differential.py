@@ -32,7 +32,8 @@ count, and is written to build\\differential\\<case>.log.
 
 The interpreter executes branch delay slots but not load delay slots (compiled PS1 code never
 reads a loaded register in the next instruction). Calls must be stubbed or explicitly followed,
-so an unexpected callee stops the run instead of executing silently. The GTE model covers moves
+so an unexpected callee stops the run instead of executing silently. A stub registered with
+tail=True also takes a jump or branch to its address (a tail call) and continues at $ra. The GTE model covers moves
 to and from IR0-IR3, MAC1-MAC3, SXY0-SXY2 and the leading-zero counter (LZCS/LZCR) and the SQR
 command; other COP instructions, syscalls, unaligned accesses and overflow traps raise.
 
@@ -97,6 +98,16 @@ def placed_state(block: bytearray, offset: int, state: bytearray, model: int) ->
     return bytes(block)
 
 
+def field_writer(block: bytearray, base: int) -> Callable[[int, int, int], None]:
+    """put(address, value, size) storing `value`'s low `size` bytes into `block`, loaded at `base`."""
+    def put(address: int, value: int, size: int) -> None:
+        at = address - base
+        if not 0 <= at <= len(block) - size:
+            raise ValueError(f"{address:#x}+{size} is outside the block at {base:#x}")
+        block[at:at + size] = (value & ((1 << size * 8) - 1)).to_bytes(size, "little")
+    return put
+
+
 # Comparison helpers shared by the cases' check() functions.
 def field_problems(names, native: list[int], original: list[int], hexadecimal: bool = True) -> list[str]:
     """One "fields: ..." problem naming each of `names` the two runs left different, or none."""
@@ -121,6 +132,21 @@ def store_problems(stores, allowed: list[tuple[int, int]]) -> list[str]:
         if not any(low <= address and address + size <= high for low, high in allowed):
             return [f"original stored {size} bytes at {address:#x}"]
     return []
+
+
+def output_problems(names, native: list[int], observation: dict, allowed: list[tuple[int, int]]) -> list[str]:
+    """Compares a driver's [refused, value per name..., call count, three words per call...] output with the
+    original's observation {"values", "calls", "stores"}."""
+    if native[0]:
+        return ["native refused"]
+    values = len(names)
+    problems = [f"{name} native {theirs & MASK:#x} original {ours & MASK:#x}"
+                for name, theirs, ours in zip(names, native[1:1 + values], observation["values"], strict=True)
+                if theirs != ours]
+    first = 2 + values
+    calls = [native[first + i * 3:first + (i + 1) * 3] for i in range(native[1 + values])]
+    problems += call_problems(calls, observation["calls"])
+    return problems + store_problems(observation["stores"], allowed)
 
 
 # Vector helpers for the battle-AI cases. A tile word holds x in byte 0 and z in byte 2; bytes 1
@@ -214,6 +240,7 @@ class Machine:
         self.gte = dict.fromkeys(IR + MAC + SCRATCH_GTE, 0)
         self.r[R["sp"]] = stack
         self.stubs: dict[int, Callable[[Machine], None]] = {}
+        self.tail_stubs: set[int] = set()
         self.follow: set[int] = set()
         self.trace: list[tuple] = []
         self.stores: list[tuple[int, int]] = []
@@ -230,9 +257,13 @@ class Machine:
     def put(self, address: int, value: int, size: int = 4) -> None:
         self.store(address, (value & ((1 << size * 8) - 1)).to_bytes(size, "little"))
 
-    def stub(self, address: int, handler: Callable[[Machine], None] | None = None) -> None:
-        """Replace a callee; without a handler the call is a no-op returning $v0 unchanged."""
+    def stub(self, address: int, handler: Callable[[Machine], None] | None = None, tail: bool = False) -> None:
+        """Replace a callee; without a handler the call is a no-op returning $v0 unchanged. With
+        `tail`, a jump or branch to the address is a tail call: the stub runs and execution
+        continues at $ra."""
         self.stubs[address] = handler or (lambda machine: None)
+        if tail:
+            self.tail_stubs.add(address)
 
     # ------------------------------------------------------------------ memory
     def byte(self, address: int) -> int:
@@ -295,7 +326,13 @@ class Machine:
             if self.step(pc + 4) is not None:
                 raise Fault(f"control transfer in the delay slot at {pc + 4:#x}")
             kind, target = flow
-            pc = (pc + 8 if self.call(target) else target) if kind == "call" else target
+            if kind == "call":
+                pc = pc + 8 if self.call(target) else target
+            elif target in self.tail_stubs:
+                self.stubs[target](self)
+                pc = self.r[R["ra"]]
+            else:
+                pc = target
 
     def call(self, address: int) -> bool:
         """Run a stub and return True, or return False to execute the real callee."""

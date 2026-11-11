@@ -2,13 +2,11 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Battle/Ai/RelationsLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -23,16 +21,12 @@ extern "C" {
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Damage.h"
@@ -314,7 +308,7 @@ void Battle_Ai_UpdateActorPerception(void)
         if (flags & 0x20) {
             VS::Battle::Ai::DisengageLiveActor((Battle_Ai_ActorAiState*)state);
             VS::Battle::Ai::ResetLiveActorAwarenessIndicator((struct Battle_Ai_PlanEvaluationView*)state);
-            Battle_Ai_UnlinkEngagedActor((Battle_Ai_ActorAiState*)state);
+            VS::Battle::Ai::UnlinkLiveEngagedActor((Battle_Ai_ActorAiState*)state);
         skip:
             state->opaque14 = 1;
             continue;
@@ -324,7 +318,7 @@ void Battle_Ai_UpdateActorPerception(void)
         if (flags & 0x80) {
             goto skip;
         }
-        ((void (*)(struct Battle_Ai_EngagementView*))Battle_Ai_UpdateEngagementBuildup)((struct Battle_Ai_EngagementView*)state);
+        VS::Battle::Ai::UpdateLiveEngagementBuildup((Battle_Ai_ActorAiState*)state);
         if ((flags & 0x40) || state->opaque18C
             || (object->opaque8.bits.skipStateA | object->opaque8.bits.skipStateB | object->opaque5ADBit7)
             || id == 0) {
@@ -465,249 +459,6 @@ void Battle_Ai_UpdateActorPerception(void)
                 VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));
             }
         }
-    }
-}
-
-// decomp: BATTLE.PRG func_800DBF00 (src/BATTLE/BATTLE.PRG/73700.c:414)
-void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* ai_state)
-{
-    Battle_Ai_EngagementData* data = ai_state->actor;
-    Battle_Ai_ActorAiState* node;
-
-    ai_state->opaque12F = 0;
-    data->opaqueBBit2 = 2;
-
-    if (ai_state == Battle_Ai_roomAiState->engagedTail) {
-        data->opaqueBBit2 = 2;
-        Battle_Ai_roomAiState->engagedTail = Battle_Ai_roomAiState->engagedTail->nextEngaged != NULL ? Battle_Ai_roomAiState->engagedTail->nextEngaged
-                                                              : Battle_Ai_roomAiState->engagedHead;
-    }
-
-    if (Battle_Ai_roomAiState->engagedHead == ai_state) {
-        Battle_Ai_roomAiState->engagedHead = ai_state->nextEngaged;
-    } else {
-        for (node = Battle_Ai_roomAiState->engagedHead; node != NULL; node = node->nextEngaged) {
-            if (node->nextEngaged == ai_state) {
-                node->nextEngaged = ai_state->nextEngaged;
-                return;
-            }
-        }
-    }
-
-    if (Battle_Ai_roomAiState->engagedHead == NULL) {
-        Battle_Ai_roomAiState->engagedTail = NULL;
-    }
-}
-
-// decomp: BATTLE.PRG func_800DBFE4 (src/BATTLE/BATTLE.PRG/73700.c:463)
-void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* ai_state)
-{
-    if (ai_state->engagementFrames != 0 && ++ai_state->engagementFrames != 0) {
-        int frame;
-
-        if (ai_state->engagementFrames < 8) {
-            frame = 0;
-        } else if (ai_state->engagementFrames < 16) {
-            frame = 1;
-        } else if (ai_state->engagementFrames < 24) {
-            frame = 2;
-        } else {
-            frame = 3;
-        }
-
-        if (ai_state->engagementFrames <= 120) {
-            VS::Battle::Ai::SetLiveActorAwarenessIndicator(ai_state->actorId, frame + 1);
-            return;
-        }
-
-        VS::Battle::Ai::RememberLiveAiActionTarget(ai_state);
-        VS::Battle::Ai::DisengageLiveActor(ai_state);
-    }
-
-    if (ai_state->reengagementGraceFrames != 0) {
-        if (--ai_state->reengagementGraceFrames != 0) {
-            VS::Battle::Ai::SetLiveActorAwarenessIndicator(ai_state->actorId, 4);
-        } else {
-            VS::Battle::Ai::SetLiveActorAwarenessIndicator(ai_state->actorId, 0);
-        }
-    }
-
-    if (ai_state->engagementCooldownFrames != 0) {
-        --ai_state->engagementCooldownFrames;
-    }
-}
-
-// decomp: BATTLE.PRG func_800DC0D0 (src/BATTLE/BATTLE.PRG/73700.c:499)
-void Battle_Ai_AnimateEngagementPhase(void)
-{
-    Battle_Ai_EngagementView* head = (Battle_Ai_EngagementView*)Battle_Ai_roomAiState->engagedHead;
-    Battle_Ai_EngagementView* state;
-    int changed = 0;
-    Battle_Ai_EngagementActorView* actor;
-    if (head) {
-        state = head;
-        do {
-            actor = state->actor;
-            if ((state->targetFlags >> 6) != 2) {
-                if (state->phase == 0) {
-                    state->direction = 1;
-                    actor->mode = 1;
-                    changed = 1;
-                } else if (state->phase == 16) {
-                    state->direction = -1;
-                    actor->mode = 2;
-                    changed = 1;
-                }
-                state->phase += state->direction;
-                if (changed) {
-                    break;
-                }
-            }
-            state = state->nextEngaged;
-        } while (state);
-    }
-}
-
-// decomp: BATTLE.PRG func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:716)
-void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai_StatApplicationView* app)
-{
-    int own, source, action, i, bad;
-    Battle_Ai_ReactionView* other;
-    Battle_Ai_StatDeltaView* entry;
-    Battle_Ai_ReactionActionView* info;
-    if (!app || app->first.skip) {
-        return;
-    }
-    own = state->actorId;
-    if (!own) {
-        return;
-    }
-    info = (Battle_Ai_ReactionActionView *)((void*)&Battle_actionDefinitions[app->action]);
-    bad = 0;
-    if (((info->effect1 >> 7) & 63) == 3 || ((info->effect2 >> 7) & 63) == 3) {
-        bad = 1;
-    }
-    if (bad) {
-        return;
-    }
-    source = app->first.actor;
-    action = app->action;
-    other = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[source]);
-    for (i = 0; i < app->count; i++) {
-        entry = &app->entries[i];
-        if (entry->skip || entry->actor != own || source == own) {
-            continue;
-        }
-        if (state->behaviorMode == 1) {
-            state->behaviorMode = 2;
-        }
-        if (VS::Battle::Ai::IsLiveActionBeneficialToActor(action, state->actorId)) {
-            if (source == 0 && state->usesRoomActionDelay == 0 && state->settingsBit27) {
-                VS::Battle::Ai::TryBeginLiveAshleyAlliance(state, 0);
-            } else if ((other->relations[0].bytes.firstByte >> 6) == 3) {
-                VS::Battle::Ai::EndLiveAshleyAlliance(state);
-            }
-        }
-        state->relations[source].reactionBits.timer = 28;
-        if (VS::Battle::Ai::IsLiveActionHarmfulToActor(action, state->actorId)) {
-            if (Battle_Ai_arenaOrbit && source == 0 && (entry->modes & 3) != 2 && entry->hp > 0) {
-                ((Battle_Ai_ReactionOrbitView*)Battle_Ai_arenaOrbit)->isOrbiting = 0;
-            }
-            if (source == 0 && state->settingsBit27) {
-                VS::Battle::Ai::EndLiveAshleyAlliance(state);
-            }
-            if (state->settingsBit25 && (state->settingsBit26 == 0 || source == 0)) {
-                VS::Battle::Ai::MakeLiveTargetHostile(state, source);
-            } else if (state->relations[source].reactionBits.classification != 3) {
-                if (other->relations[own].reactionBits.counter) {
-                    other->relations[own].reactionBits.counter = 0;
-                    other->relations[own].reactionBits.classification = other->relations[own].reactionBits.previousClassification;
-                } else {
-                    state->relations[source].reactionBits.counter = 127;
-                    state->relations[source].reactionBits.previousClassification =
-                        state->relations[source].reactionBits.classification;
-                    if (state->settingsBit26) {
-                        VS::Battle::Ai::MakeLiveTargetHostile(state, source);
-                    }
-                }
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800DD344 (src/BATTLE/BATTLE.PRG/74088.c:782)
-void Battle_Ai_PropagateActorRelationships(Battle_Ai_ReactionView* state)
-{
-    Battle_Ai_ActorListNodeView* actor;
-    Battle_Ai_ActorListNodeView* candidate;
-    Battle_Ai_ActorListNodeView* ally;
-    Battle_Ai_ReactionView* other;
-    Battle_Ai_ReactionView* firstOther;
-    Battle_Ai_ReactionView* allyState;
-    int id, classification;
-    unsigned int otherClass;
-    if (state->usesRoomActionDelay) {
-        for (actor = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); actor; actor = actor->next) {
-            id = actor->id;
-            firstOther = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[id]);
-            if (id == state->actorId || id == 0 || firstOther->settingsBits21 == 3) {
-                classification = 2;
-            } else if (!firstOther->usesRoomActionDelay) {
-                if ((firstOther->relations[0].bytes.firstByte >> 6) == 3) {
-                    classification = 3;
-                    state->relations[id].reactionBits.counter = 0;
-                } else {
-                    classification = 1;
-                }
-            } else {
-                classification = 1;
-            }
-            state->relations[id].reactionBits.classification = classification;
-        }
-    } else if (state->settingsByte3Bit0) {
-        for (actor = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); actor; actor = actor->next) {
-            otherClass = state->relations[actor->id].bytes.firstByte >> 6;
-            other = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[actor->id]);
-            if (otherClass == 2 && (other->relations[state->actorId].bytes.firstByte >> 6) == 2) {
-                for (candidate = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); candidate;
-                    candidate = candidate->next) {
-                    id = candidate->id;
-                    if (state->relations[id].reactionBits.classification == 1
-                        && (state->relations[id].word & 1)
-                        && (other->relations[id].bytes.firstByte >> 6) == 3) {
-                        for (ally = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); ally; ally = ally->next) {
-                            allyState = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[ally->id]);
-                            if ((state->relations[ally->id].bytes.firstByte >> 6) == 2
-                                && (allyState->relations[state->actorId].bytes.firstByte >> 6) == 2
-                                && (allyState->relations[id].reactionBits.classification == 2
-                                    || (allyState->relations[id].reactionBits.counter
-                                        && allyState->relations[id].reactionBits.previousClassification == 2))) {
-                                break;
-                            }
-                        }
-                        if (!ally) {
-                            VS::Battle::Ai::MakeLiveTargetHostile(state, id);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800DEEA4 (src/BATTLE/BATTLE.PRG/74088.c:1596)
-void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* completed_action)
-{
-    if (completed_action != NULL) {
-        if (completed_action->opaque4.opaque40 == 0) {
-            Battle_Ai_ActorAiState* entry = Battle_Ai_actorAiStates[completed_action->opaque4.opaque0];
-
-            if (entry != NULL) {
-                entry->reengagementGraceFrames = 0;
-            }
-        }
-
-        VS::Battle::Ai::ApplyLiveActionRelationshipChanges(completed_action);
     }
 }
 

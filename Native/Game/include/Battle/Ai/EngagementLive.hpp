@@ -26,6 +26,11 @@ void UpdateLiveTemporaryAwarenessIndicator(
 void DisengageLiveActorById(int actor_id);
 void DisengageLiveActor(Battle_Ai_ActorAiState* state);
 bool TryEngageLiveActor(Battle_Ai_ActorAiState* state);
+// `state` must be the AI state table's entry for its actor ID; the engaged
+// list's pointers are matched against that table.
+void UnlinkLiveEngagedActor(Battle_Ai_ActorAiState* state);
+void UpdateLiveEngagementBuildup(Battle_Ai_ActorAiState* state);
+void AnimateLiveEngagementPhase();
 
 // The room's engaged actor mask, stored as two unaligned bytes.
 [[nodiscard]] std::uint16_t EngagedMask(const Battle_Ai_RoomAiState& room);

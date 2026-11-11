@@ -228,6 +228,24 @@ class Control(unittest.TestCase):
         self.assertEqual(m.r[V0], 5)
         self.assertEqual(m.stores, [(differential.DEFAULT_STACK - 8, 4)])
 
+    def test_tail_stub_takes_jumps_and_branches_and_returns_to_ra(self) -> None:
+        callee = 0x80020000
+        seen = []
+
+        def setup(m: Machine, tail: bool) -> None:
+            m.stub(callee, lambda machine: seen.append(machine.r[A0]), tail=tail)
+
+        jump = 2 << 26 | (callee >> 2 & 0x3FFFFFF)
+        m = run(jump, addiu(A0, ZERO, 3), setup=lambda machine: setup(machine, True))
+        self.assertEqual(seen, [3])
+        self.assertEqual(m.r[RA], differential.STOP)
+        branch = i_type(1, 1, ZERO, (callee - BASE - 4) >> 2)  # bgez $zero
+        run(branch, addiu(A0, ZERO, 4), setup=lambda machine: setup(machine, True))
+        self.assertEqual(seen, [3, 4])
+        with self.assertRaises(Fault):
+            run(jump, NOP, setup=lambda machine: setup(machine, False))
+        self.assertEqual(seen, [3, 4])
+
     def test_jump_in_a_delay_slot_is_rejected(self) -> None:
         with self.assertRaisesRegex(Fault, "delay slot"):
             run(JR_RA, JR_RA)
@@ -260,6 +278,29 @@ class Images(unittest.TestCase):
                     Image.load("OTHER.PRG")
         with self.assertRaisesRegex(Fault, "outside the module"):
             image(NOP).read(BASE + 2)
+
+
+class CaseHelpers(unittest.TestCase):
+    def test_field_writer_truncates_and_checks_bounds(self) -> None:
+        block = bytearray(8)
+        put = differential.field_writer(block, BASE)
+        put(BASE + 1, -2, 2)
+        put(BASE + 4, 0x1_2345_6789, 4)
+        self.assertEqual(bytes(block), bytes([0, 0xFE, 0xFF, 0, 0x89, 0x67, 0x45, 0x23]))
+        with self.assertRaisesRegex(ValueError, "outside the block"):
+            put(BASE + 6, 0, 4)
+        with self.assertRaisesRegex(ValueError, "outside the block"):
+            put(BASE - 1, 0, 1)
+
+    def test_output_problems_compare_values_calls_and_stores(self) -> None:
+        names = ["a", "b"]
+        observation = {"values": [1, 0xFFFFFFFF], "calls": [[4, 1, 2]], "stores": [(BASE, 4)]}
+        allowed = [(BASE, BASE + 4)]
+        self.assertEqual(differential.output_problems(names, [0, 1, 0xFFFFFFFF, 1, 4, 1, 2], observation, allowed), [])
+        self.assertEqual(differential.output_problems(names, [1], observation, allowed), ["native refused"])
+        problems = differential.output_problems(names, [0, 2, 0xFFFFFFFF, 0], observation, [])
+        self.assertEqual(problems, ["a native 0x2 original 0x1", "calls differ from 0: native [] original [[4, 1, 2]]",
+                                    f"original stored 4 bytes at {BASE:#x}"])
 
 
 def fake_case(**overrides) -> types.ModuleType:

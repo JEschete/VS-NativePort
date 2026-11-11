@@ -60,6 +60,9 @@
     <ClCompile Include="src\ActorMovementTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActorReactionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActorRosterTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

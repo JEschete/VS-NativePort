@@ -652,6 +652,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::FollowLiveObstacleDetour": r"Native\Game\include\Battle\Ai\GroundNavigationLive.hpp",
     "VS::Battle::Ai::UpdateLiveTargetApproachMovement": r"Native\Game\include\Battle\Ai\TargetApproachLive.hpp",
     "VS::Battle::Ai::UpdateLiveTargetFacing": r"Native\Game\include\Battle\Ai\TargetApproachLive.hpp",
+    "VS::Battle::Ai::UnlinkLiveEngagedActor": r"Native\Game\include\Battle\Ai\EngagementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveEngagementBuildup": r"Native\Game\include\Battle\Ai\EngagementLive.hpp",
+    "VS::Battle::Ai::AnimateLiveEngagementPhase": r"Native\Game\include\Battle\Ai\EngagementLive.hpp",
+    "VS::Battle::Ai::ApplyLiveActorActionReaction": r"Native\Game\include\Battle\Ai\RelationsLive.hpp",
+    "VS::Battle::Ai::PropagateLiveActorRelationships": r"Native\Game\include\Battle\Ai\RelationsLive.hpp",
+    "VS::Battle::Ai::NotifyLiveActionRelationshipChanges": r"Native\Game\include\Battle\Ai\RelationsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1234,6 +1240,12 @@ OWNED_CALL_BINDINGS["F01630"] = "VS::Battle::Ai::SetLiveTemporaryAwarenessIndica
 OWNED_CALL_BINDINGS["F01751"] = "VS::Battle::Ai::FollowLiveObstacleDetour"
 OWNED_CALL_BINDINGS["F01748"] = "VS::Battle::Ai::UpdateLiveTargetApproachMovement"
 OWNED_CALL_BINDINGS["F01749"] = "VS::Battle::Ai::UpdateLiveTargetFacing"
+OWNED_CALL_BINDINGS["F01678"] = "VS::Battle::Ai::UnlinkLiveEngagedActor"
+OWNED_CALL_BINDINGS["F01679"] = "VS::Battle::Ai::UpdateLiveEngagementBuildup"
+OWNED_CALL_BINDINGS["F01680"] = "VS::Battle::Ai::AnimateLiveEngagementPhase"
+OWNED_CALL_BINDINGS["F01705"] = "VS::Battle::Ai::ApplyLiveActorActionReaction"
+OWNED_CALL_BINDINGS["F01706"] = "VS::Battle::Ai::PropagateLiveActorRelationships"
+OWNED_CALL_BINDINGS["F01719"] = "VS::Battle::Ai::NotifyLiveActionRelationshipChanges"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2812,6 +2824,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E2F5C, "VS::Battle::Ai::FollowLiveObstacleDetour"),  # F01751
     ("BATTLE/BATTLE.PRG", 0x800E24EC, "VS::Battle::Ai::UpdateLiveTargetApproachMovement"),  # F01748
     ("BATTLE/BATTLE.PRG", 0x800E2B2C, "VS::Battle::Ai::UpdateLiveTargetFacing"),  # F01749
+    ("BATTLE/BATTLE.PRG", 0x800DBF00, "VS::Battle::Ai::UnlinkLiveEngagedActor"),  # F01678
+    ("BATTLE/BATTLE.PRG", 0x800DBFE4, "VS::Battle::Ai::UpdateLiveEngagementBuildup"),  # F01679
+    ("BATTLE/BATTLE.PRG", 0x800DC0D0, "VS::Battle::Ai::AnimateLiveEngagementPhase"),  # F01680
+    ("BATTLE/BATTLE.PRG", 0x800DD000, "VS::Battle::Ai::ApplyLiveActorActionReaction"),  # F01705
+    ("BATTLE/BATTLE.PRG", 0x800DD344, "VS::Battle::Ai::PropagateLiveActorRelationships"),  # F01706
+    ("BATTLE/BATTLE.PRG", 0x800DEEA4, "VS::Battle::Ai::NotifyLiveActionRelationshipChanges"),  # F01719
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4556,6 +4574,11 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Battle::Ai::\1LiveAshleyAlliance(",
      "F01681/F01682 #46 typed promotion: the alliance binding supplies the reaction state and owns the decision "
      "callback swap"),
+    (r"^Battle::Ai::UpdateActorPerception$",
+     r"\bVS::Battle::Ai::UpdateLiveEngagementBuildup\(\(struct Battle_Ai_EngagementView\*\)state\)",
+     r"VS::Battle::Ai::UpdateLiveEngagementBuildup((Battle_Ai_ActorAiState*)state)",
+     "F01679 #276 typed promotion: the buildup binding takes the actor's AI state, which the perception view "
+     "aliases"),
     (r"", r"\bVS::Battle::Ai::IssueActorCommand\(",
      r"VS::Battle::Ai::IssueLiveActorCommand(",
      "F01720 #46 typed promotion: the command binding snapshots the AI state and supplies the frame terrain, actor model, "

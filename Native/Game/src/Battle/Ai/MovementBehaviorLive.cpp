@@ -17,6 +17,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
@@ -25,6 +26,7 @@
 
 extern "C" {
 #include "Actors/Movement.h"
+#include "Battle/Action.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -382,12 +384,13 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
            nullptr;
   }
   void ApplyActionReaction(int actor_id) override {
-    Battle_Ai_ApplyActorActionReaction(
+    // The original passes the completed action as actionStatApplication.
+    ApplyLiveActorActionReaction(
         ReactionState(actor_id),
-        reinterpret_cast<Battle_Ai_StatApplicationView*>(record_));
+        reinterpret_cast<const Battle_ActionRequest*>(record_));
   }
   void PropagateRelationships(int actor_id) override {
-    Battle_Ai_PropagateActorRelationships(ReactionState(actor_id));
+    PropagateLiveActorRelationships(ReactionState(actor_id));
   }
 
  private:

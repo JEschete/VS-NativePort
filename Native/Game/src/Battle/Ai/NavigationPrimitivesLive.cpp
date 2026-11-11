@@ -220,7 +220,7 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
     DisengageLiveActor(state);
     ResetLiveActorAwarenessIndicator(
         reinterpret_cast<Battle_Ai_PlanEvaluationView*>(state));
-    Battle_Ai_UnlinkEngagedActor(state);
+    UnlinkLiveEngagedActor(state);
   }
   bool AllocateOverride(int actor_id) override {
     auto* storage = static_cast<Battle_Ai_ActorAiState*>(

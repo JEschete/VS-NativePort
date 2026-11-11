@@ -3,6 +3,7 @@
 
 #include "Battle/Ai/Relations.hpp"
 
+struct Battle_ActionRequest;
 struct Battle_Ai_AiCreationView;
 struct Battle_Ai_ReactionView;
 
@@ -20,4 +21,15 @@ void TryBeginLiveAshleyAlliance(Battle_Ai_ReactionView* state, int forced);
 // Links each listed actor's unresolved AI linked actor to its group leader
 // (func_800E5998); every actor after Ashley must have an AI state (#337).
 void ResolveLiveAiLinkedActors();
+// The AI state `state` reacts to the completed action `request`, which the
+// original reads as actionStatApplication; nothing happens without a request
+// (func_800DD000).
+void ApplyLiveActorActionReaction(Battle_Ai_ReactionView* state,
+                                  const Battle_ActionRequest* request);
+// Reclassifies the room or shares allies' hostility from the AI state
+// `state`'s point of view (func_800DD344).
+void PropagateLiveActorRelationships(Battle_Ai_ReactionView* state);
+// Lets the completed action's acting actor engage again and has every AI
+// actor react to it; nothing happens without a request (func_800DEEA4).
+void NotifyLiveActionRelationshipChanges(Battle_ActionRequest* request);
 }  // namespace VS::Battle::Ai

@@ -366,7 +366,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
 [
-353,
+347,
 [
 "            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_MovementRecoveryView*)state);"
 ],
@@ -375,7 +375,7 @@
 ]
 ],
 [
-381,
+375,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -384,7 +384,7 @@
 ]
 ],
 [
-423,
+417,
 [
 "        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);"
 ],
@@ -393,86 +393,12 @@
 ]
 ],
 [
-464,
+458,
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
 [
 "                VS::Battle::Ai::ForgetLiveAiActionTarget((Battle_Ai_ActorAiState *)((Battle_Ai_ActionExecutionView*)state));"
-]
-],
-[
-584,
-[
-"    info = (void*)&Battle_actionDefinitions[app->action];"
-],
-[
-"    info = (Battle_Ai_ReactionActionView *)((void*)&Battle_actionDefinitions[app->action]);"
-]
-],
-[
-594,
-[
-"    other = (void*)Battle_Ai_actorAiStates[source];"
-],
-[
-"    other = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[source]);"
-]
-],
-[
-649,
-[
-"        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
-],
-[
-"        for (actor = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); actor; actor = actor->next) {"
-]
-],
-[
-651,
-[
-"            firstOther = (void*)Battle_Ai_actorAiStates[id];"
-],
-[
-"            firstOther = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[id]);"
-]
-],
-[
-667,
-[
-"        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
-],
-[
-"        for (actor = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); actor; actor = actor->next) {"
-]
-],
-[
-669,
-[
-"            other = (void*)Battle_Ai_actorAiStates[actor->id];"
-],
-[
-"            other = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[actor->id]);"
-]
-],
-[
-671,
-[
-"                for (candidate = (void*)Battle_actors[0]; candidate;"
-],
-[
-"                for (candidate = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); candidate;"
-]
-],
-[
-677,
-[
-"                        for (ally = (void*)Battle_actors[0]; ally; ally = ally->next) {",
-"                            allyState = (void*)Battle_Ai_actorAiStates[ally->id];"
-],
-[
-"                        for (ally = (Battle_Ai_ActorListNodeView *)((void*)Battle_actors[0]); ally; ally = ally->next) {",
-"                            allyState = (Battle_Ai_ReactionView *)((void*)Battle_Ai_actorAiStates[ally->id]);"
 ]
 ]
 ],

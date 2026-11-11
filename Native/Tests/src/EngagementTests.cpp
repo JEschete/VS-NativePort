@@ -150,11 +150,11 @@ TEST_CASE("AI existing buildup consumer advances a real join to readiness",
   EngagementFixture fixture;
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   for (int tick = 0; tick < 30; ++tick) {
-    Battle_Ai_UpdateEngagementBuildup(&fixture.states[1]);
+    VS::Battle::Ai::UpdateLiveEngagementBuildup(&fixture.states[1]);
   }
   CHECK(fixture.states[1].engagementFrames == 31);
   CHECK_FALSE(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
-  Battle_Ai_UpdateEngagementBuildup(&fixture.states[1]);
+  VS::Battle::Ai::UpdateLiveEngagementBuildup(&fixture.states[1]);
   CHECK(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x84);
 }

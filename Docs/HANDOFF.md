@@ -55,9 +55,10 @@ See [Stopping Point](#stopping-point) for the next group.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **914 functions remain** (after the target-approach group on `4310eb0b`).
-  Modernization: 2,830 done of 3,744. C++ promotion: 2,831 promoted plus one
-  frame-orchestrator WIP. These are separate measures. Row 28 has 24
+- **908 functions remain** (after the engaged-list, actor-reaction and
+  notification group that follows `3e692a35`).
+  Modernization: 2,836 done of 3,744. C++ promotion: 2,837 promoted plus one
+  frame-orchestrator WIP. These are separate measures. Row 28 has 18
   generated functions left.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
@@ -160,72 +161,81 @@ See [Stopping Point](#stopping-point) for the next group.
   writes zero to the projection bytes that the generated copy left
   indeterminate. Its differential covers 470 original instructions: 4,096
   vectors, 0 mismatches and 39/39 mutants.
+- F01729, F01730 and F01732-F01734 are published in `39cef575` in the pure
+  `FlightMovement` module, with checked `FlightMovementLive` bindings at
+  0x800E02B4, 0x800E0678, 0x800E0918, 0x800E0A68 and 0x800E1238. Its run
+  failed only because the regression baseline still named the replaced flight
+  tests (#345, fixed in `4310eb0b`,
+  [CI 43015941999](https://github.com/JEschete/VS-NativePort/actions/runs/43015941999)).
+  It keeps #342's R3000 quotients and fixes #343: segment heights wrap to the
+  original's signed 15 bits, so both replay baselines were re-recorded. Its
+  differential covers 1,077 instructions: 3,072 vectors, 0 mismatches and
+  41/41 mutants.
+- `4310eb0b` was the target-approach base. F01630, F01751, F01748 and F01749
+  and the #344 fix are published in `3e692a35`
+  ([CI 43029949145](https://github.com/JEschete/VS-NativePort/actions/runs/43029949145)).
+  F01630 is a pure setter in `Engagement`. F01751 `FollowObstacleDetour` is
+  typed in `GroundNavigation`; #344's next-tile top byte is now the original's
+  0. F01748 and F01749 live in the pure `TargetApproach` module. Differentials:
+  `temporary_awareness` (3 instructions, 1,024 vectors, 6/6 mutants),
+  `obstacle_detour` (425, 4,096, 27/27) and `target_approach` (504, 4,096,
+  75/75), all with 0 mismatches. Target-approach move points stay below 2^21:
+  the original `ratan2` wraps from 2^22 and reads past its table, which the
+  native `Arctangent2` corrects on purpose. The near-target test (0x800E4FB0)
+  squares the constant 10, not its third argument; the native keeps that.
 
 ## Stopping Point
 
-HEAD `4310eb0b` is pushed and green
-([CI 43015941999](https://github.com/JEschete/VS-NativePort/actions/runs/43015941999)).
-It follows the flight group `39cef575`, whose own run
-([CI 43015300469](https://github.com/JEschete/VS-NativePort/actions/runs/43015300469))
-failed only because the regression baseline still named the replaced flight
-tests (#345, closed). The flight group moved F01729, F01730 and F01732-F01734
-into the pure `FlightMovement` module with checked `FlightMovementLive`
-bindings at 0x800E02B4, 0x800E0678, 0x800E0918, 0x800E0A68 and 0x800E1238.
-It keeps #342's R3000 quotients and fixes #343: segment heights now wrap to
-the original's signed 15 bits, so both replay baselines were re-recorded. Its
-differential covers 1,077 instructions: 3,072 vectors, 0 mismatches and 41/41
-mutants.
+HEAD `3e692a35` is pushed and green
+([CI 43029949145](https://github.com/JEschete/VS-NativePort/actions/runs/43029949145)).
+The commit after it holds the engaged-list, actor-reaction and notification
+group:
 
-The commit after it holds the temporary-awareness, obstacle-detour and
-target-approach group and the #344 fix:
+- F01678 `UnlinkEngagedActor`, F01679 `UpdateEngagementBuildup` and F01680
+  `AnimateEngagementPhase` are typed in `Engagement`, with checked
+  `EngagementLive` bindings at 0x800DBF00, 0x800DBFE4 and 0x800DC0D0.
+- F01705 `ApplyActorActionReaction`, F01706 `PropagateActorRelationships` and
+  F01719 `NotifyActionRelationshipChanges` are typed in `Relations`, with
+  `RelationsLive` bindings at 0x800DD000, 0x800DD344 and 0x800DEEA4.
+- `FrameUpdateLive`, `ActorCleanupLive`, `NavigationPrimitivesLive`,
+  `MovementBehaviorLive` and `AbilitiesLive` call the typed versions, and the
+  generated `Perception` copy lost the three engagement definitions. The six
+  old symbols had 30 code references and have none.
+- Differentials, all with 0 mismatches and every mutant detected:
+  - `engaged_list` (F01678-F01680): 167 instructions, 4,096 vectors, 33/33.
+  - `actor_reaction` (F01705 and F01706): 385 instructions, 4,096 vectors,
+    66/66. Hit effects are biased toward the restore effect, the acting actor
+    toward Ashley, and half the propagation vectors use faction-structured
+    relations, so the rarest mutant (orbit stopped on restore) still changes 3
+    vectors.
+  - `action_notification` (F01719): 22 instructions, 1,024 vectors, 8/8.
+  - The harness gained tail-call stubs and shared case helpers,
+    `field_writer` and `output_problems`, which replace per-case copies.
+- Native broken variants are all detected: F01678, F01679 and F01680 change
+  121, 58 and 281 of 4,096 vectors; the F01705 reaction timer minus one 821 of
+  4,096; the F01706 classification forced neutral 411 of 4,096; and the F01719
+  grace left uncleared 381 of 1,024.
+- Group check on base `3e692a35` (`promotion_check.py group`, 8 minutes): 164
+  focused tests (114,002 assertions) pass in Debug and Release. The full
+  suites pass in both configurations, with 5,626 tests and 12,650,951
+  assertions each. The silver_wolves (2,400 frames) and first_lever_room (900
+  frames) replays match their baselines. The copier and ledger controls pass.
+  Its first tidy run found six new findings: two Python clones, one cpplint
+  namespace indent, one missing final newline and two brace warnings. After
+  the fixes, changed-file quality reports 48 existing findings (5 legacy, 43
+  tests) and 0 new. The focused tests in both configurations and the three
+  differentials were rerun after the fixes.
 
-- F01630 `SetTemporaryAwarenessIndicator` is a pure setter over
-  `TemporaryAwareness` in `Engagement`. `SetLiveTemporaryAwarenessIndicator`
-  (`EngagementLive`, 0x800D8260) serves `RelationsLive.cpp`,
-  `ActorCleanupLive.cpp`, `TargetApproachLive.cpp` and generated `Behavior.cpp`.
-- F01751 `FollowObstacleDetour` is typed in `GroundNavigation`. The typed
-  ground navigation calls it directly; `FollowLiveObstacleDetour` keeps
-  0x800E2F5C. #344 (fixed): the next tile's top byte is the original's 0, where
-  the generated copy stored an uninitialized byte.
-- F01748 `UpdateTargetApproachMovement` and F01749 `UpdateTargetFacing` live
-  in the new pure `TargetApproach` module. `TargetApproachLive` keeps
-  0x800E24EC and 0x800E2B2C, and the `MovementBehaviorLive.cpp` host calls it.
-- The generated `Behavior`, `Movement`, `Navigation` and `Perception` copies
-  lost the old definitions: the four old symbols had 21 references and have
-  none.
-- Differentials, all with every mutant detected:
-  - `temporary_awareness`: 3 instructions, 1,024 vectors, 0 mismatches, 6/6.
-  - `obstacle_detour`: 425 instructions, 4,096 vectors, 0 mismatches, 27/27.
-    The #344 `next-tile-tag` mutant changes 38 vectors, so the full next-tile
-    word is compared.
-  - `target_approach` (F01748 and F01749 together): 504 instructions, 4,096
-    vectors, 0 mismatches, 75/75. Its move points stay below 2^21: the
-    original `ratan2` wraps from 2^22 and reads past its table, which the
-    native `Arctangent2` corrects on purpose.
-- Native broken variants, run with the new
-  `differential.py <case> --replace SOURCE OLD NEW`, are all detected: F01630
-  marker stored as a byte (613 of 1,024 vectors), F01751 distance filter set
-  to 1 (4,096 of 4,096), F01748 retarget at 181 calls (44 of 4,096) and F01749
-  turn timer plus one (446 of 4,096).
-- The harness's GTE model now also covers IR0 and SXY0-SXY2. The near-target
-  test (0x800E4FB0, the promoted `IsAiTargetBeyondNearRadius`) squares the
-  constant 10, not its third argument; the native keeps that.
-- Group check on base `4310eb0b`: 124 focused tests (1,018 assertions) pass
-  in Debug and Release. The full suites pass in both configurations, with
-  5,598 tests and 12,650,641 assertions each. The silver_wolves (2,400 frames)
-  and first_lever_room (900 frames) replays match their baselines. The copier
-  and ledger controls pass. Changed-file tidy reports 5 existing findings and
-  0 new. Two copier controls now expect generated `Movement.cpp` to hold data
-  only: its distance and command users moved to `TargetApproach`.
-
-Next group (row 28 has 24 generated functions left): F01678
-`UnlinkEngagedActor`, F01679 `UpdateEngagementBuildup` and F01680
-`AnimateEngagementPhase` (generated `Perception.cpp`, 73700.c:414-530), with
-F01705 `ApplyActorActionReaction`, F01706 `PropagateActorRelationships` and
-F01719 `NotifyActionRelationshipChanges` (74088.c). They belong beside the
-`Engagement` and `Relations` modules. The others left are Perception F01638,
-F01639, F01640 and F01643; Behavior F01649-F01654 and F01656-F01659; and
-OrbitingBoss F01846-F01849.
+Next group (row 28 has 18 generated functions left): OrbitingBoss F01846
+`UpdateBossRadialRetreat`, F01847 `IsBossActionReady`, F01848
+`UpdateBossOrbitTracking` and F01849 `UpdateOrbitingBossBehavior` (generated
+`OrbitingBoss.cpp`, 7EE98.c:506-753, original 0x800E7698-0x800E8184).
+`radialRetreatPath` (D_800F17DC) is declared `[36][2]`, but its pointer range
+is 124 bytes. The table ends with a `(0, 0)` terminator at index 29, and index
+30 is the next datum, `(0, -4096)`. Phases 0 and 1 read only indices 0-29, and
+the 144-byte copy reproduces the original memory past the table, so this is
+not a behavior defect. After that group: Perception F01638, F01639, F01640 and
+F01643; Behavior F01649-F01654 and F01656-F01659.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,

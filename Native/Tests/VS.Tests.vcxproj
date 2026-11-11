@@ -58,6 +58,7 @@
     <ClCompile Include="src\ActorCommandTests.cpp" />
     <ClCompile Include="src\ActorMotionTests.cpp" />
     <ClCompile Include="src\ActorMovementTests.cpp" />
+    <ClCompile Include="src\ActorReactionTests.cpp" />
     <ClCompile Include="src\ActorRosterTests.cpp" />
     <ClCompile Include="src\ActorShadowTests.cpp" />
     <ClCompile Include="src\ActorSoundTransitionTests.cpp" />

@@ -17,6 +17,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -204,7 +205,7 @@ std::array<unsigned, 3> TwoFavorableAllianceRolls() {
 struct AshleyActionFixture : AshleyAllianceFixture {
   Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
   Battle_ActorStats stats{};
-  Battle_Ai_StatApplicationView application{};
+  Battle_ActionRequest request{};
 
   AshleyActionFixture() {
     Battle_actionDefinitions[42] = {};
@@ -214,10 +215,10 @@ struct AshleyActionFixture : AshleyAllianceFixture {
     state.savedRelationOptions = -1;
     other_state.savedRelationOptions = -1;
     Settings()->decisionCallback = AshleyAllianceTestCallback;
-    application.action = 42;
-    application.first.actor = 0;
-    application.count = 1;
-    application.entries[0].actor = 1;
+    request.actionId = 42;
+    request.primaryTarget.target.targetActor = 0;
+    request.targetCount = 1;
+    request.targets[0].target.targetActor = 1;
   }
 
   ~AshleyActionFixture() { Battle_actionDefinitions[42] = saved_action; }
@@ -225,7 +226,7 @@ struct AshleyActionFixture : AshleyAllianceFixture {
   void Apply(std::uint16_t flags) {
     Battle_actionDefinitions[42].aiFlags =
         std::bit_cast<Battle_ActionAiFlags>(flags);
-    Battle_Ai_ApplyActorActionReaction(Reaction(), &application);
+    VS::Battle::Ai::ApplyLiveActorActionReaction(Reaction(), &request);
   }
 };
 

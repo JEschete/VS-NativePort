@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "Battle/Ai/BlockedMovementLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 
 extern "C" {
 
@@ -105,7 +106,9 @@ class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
   }
   void UpdatePerception() override { Battle_Ai_UpdateActorPerception(); }
   void UpdateDecisions() override { Battle_Ai_UpdateActorDecisions(); }
-  void AnimateEngagement() override { Battle_Ai_AnimateEngagementPhase(); }
+  void AnimateEngagement() override {
+    VS::Battle::Ai::AnimateLiveEngagementPhase();
+  }
   void SaveRandomState() override {
     VS::Battle::Ai::SaveLiveMovementRandomState();
   }

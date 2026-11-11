@@ -239,7 +239,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
         reinterpret_cast<Battle_Ai_PlanEvaluationView*>(StateAt(actor_id)));
   }
   void UnlinkEngagedActor(int actor_id) override {
-    Battle_Ai_UnlinkEngagedActor(StateAt(actor_id));
+    UnlinkLiveEngagedActor(StateAt(actor_id));
   }
   void RetireAiState(int actor_id) override {
     const auto slot = static_cast<std::size_t>(actor_id);

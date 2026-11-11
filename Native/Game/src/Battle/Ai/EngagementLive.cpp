@@ -11,13 +11,17 @@
 #include <optional>
 
 extern "C" {
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/Diagnostics.h"
 }
+
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -28,6 +32,12 @@ static_assert(offsetof(Battle_Ai_PerceptionUpdateView,
               offsetof(Battle_Ai_ActorAiState, awarenessFramesRemaining));
 static_assert(offsetof(Battle_Ai_PerceptionUpdateView, awarenessMarker) ==
               offsetof(Battle_Ai_ActorAiState, awarenessMarker));
+// The AI state's engagement data is the battle actor; its pose bits are the
+// command flags byte.
+static_assert(offsetof(Battle_Ai_EngagementData, reservedA) + 1 ==
+              offsetof(Battle_Actor, commandFlags));
+constexpr unsigned kPoseShift = 2;
+constexpr unsigned kPoseMask = 3u << kPoseShift;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -43,7 +53,7 @@ class LiveAwarenessMarkers final : public AwarenessMarkers {
   }
 };
 
-class LiveEngagementHost final : public EngagementHost {
+class LiveEngagementHost final : public EngagementBuildupHost {
  public:
   LiveEngagementHost(Battle_Ai_ActorAiState& state, Battle_Ai_RoomAiState* room)
       : state_(state), room_(room) {}
@@ -61,20 +71,87 @@ class LiveEngagementHost final : public EngagementHost {
     state_.nextEngaged = room_->engagedHead;
     room_->engagedHead = &state_;
   }
-  void UnlinkEngagedActor() override {
-    Require(state_.actor != nullptr && room_ != nullptr,
-            "AI disengagement requires the actor and room state");
-    Battle_Ai_UnlinkEngagedActor(&state_);
-  }
+  void UnlinkEngagedActor() override { UnlinkLiveEngagedActor(&state_); }
   [[nodiscard]] std::optional<bool> HasSingleOpponent() const override {
     const Battle_Actor* first = Battle_actors[0];
     if (first == nullptr) return std::nullopt;
     return first->next != nullptr && first->next->next == nullptr;
   }
+  void RememberActionTarget() override { RememberLiveAiActionTarget(&state_); }
 
  private:
   Battle_Ai_ActorAiState& state_;
   Battle_Ai_RoomAiState* room_;
+};
+
+// Maps the room's engaged-list pointers to AI state table IDs. A pointer is
+// matched by address alone, so a removed actor's stale successor is never
+// dereferenced.
+class LiveEngagedList final : public EngagedList {
+ public:
+  explicit LiveEngagedList(Battle_Ai_RoomAiState& room) : room_(room) {}
+
+  [[nodiscard]] std::optional<int> Head() const override {
+    return IdOf(room_.engagedHead);
+  }
+  void SetHead(std::optional<int> actor_id) override {
+    room_.engagedHead = StateOrNull(actor_id);
+  }
+  [[nodiscard]] std::optional<int> Tail() const override {
+    return IdOf(room_.engagedTail);
+  }
+  void SetTail(std::optional<int> actor_id) override {
+    room_.engagedTail = StateOrNull(actor_id);
+  }
+  [[nodiscard]] std::optional<int> Next(int actor_id) const override {
+    return IdOf(At(actor_id).nextEngaged);
+  }
+  void SetNext(int actor_id, std::optional<int> next) override {
+    At(actor_id).nextEngaged = StateOrNull(next);
+  }
+  [[nodiscard]] EngagementPhase Phase(int actor_id) const override {
+    const Battle_Ai_ActorAiState& state = At(actor_id);
+    return {.phase = state.opaque12F, .step = state.opaque130};
+  }
+  void SetPhase(int actor_id, EngagementPhase phase) override {
+    Battle_Ai_ActorAiState& state = At(actor_id);
+    state.opaque12F = phase.phase;
+    state.opaque130 = phase.step;
+  }
+  void SetPose(int actor_id, unsigned pose) override {
+    Battle_Ai_ActorAiState& state = At(actor_id);
+    Require(state.actor != nullptr, "AI engagement pose requires the actor");
+    auto& actor = *reinterpret_cast<Battle_Actor*>(state.actor);
+    actor.commandFlags = static_cast<u_char>(
+        (actor.commandFlags & ~kPoseMask) | ((pose << kPoseShift) & kPoseMask));
+  }
+  [[nodiscard]] unsigned AshleyClassification(int actor_id) const override {
+    return At(actor_id).relations[0].classification;
+  }
+
+ private:
+  static std::optional<int> IdOf(const Battle_Ai_ActorAiState* state) {
+    if (state == nullptr) return std::nullopt;
+    for (int id = 0; id < kEngagementActorSlots; ++id) {
+      if (Battle_Ai_actorAiStates[static_cast<std::size_t>(id)] == state) {
+        return id;
+      }
+    }
+    Require(false, "AI engaged list holds a state outside the AI state table");
+    return std::nullopt;
+  }
+  static Battle_Ai_ActorAiState* StateOrNull(std::optional<int> actor_id) {
+    if (!actor_id.has_value()) return nullptr;
+    return &At(*actor_id);
+  }
+  static Battle_Ai_ActorAiState& At(int actor_id) {
+    Battle_Ai_ActorAiState* state =
+        Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)];
+    Require(state != nullptr, "AI engaged list requires the member's state");
+    return *state;
+  }
+
+  Battle_Ai_RoomAiState& room_;
 };
 
 class LiveEngagementTable final : public EngagementTable {
@@ -211,5 +288,41 @@ bool TryEngageLiveActor(Battle_Ai_ActorAiState* pointer) {
   StoreTimers(state, timers);
   if (roster.has_value()) StoreRoster(*Battle_Ai_roomAiState, *roster);
   return *engaged;
+}
+
+void UnlinkLiveEngagedActor(Battle_Ai_ActorAiState* pointer) {
+  Battle_Ai_ActorAiState& state = StateOf(pointer);
+  Require(state.actorId < kEngagementActorSlots &&
+              Battle_Ai_actorAiStates[state.actorId] == &state,
+          "AI engaged-list removal requires the AI state table's entry");
+  Require(state.actor != nullptr && Battle_Ai_roomAiState != nullptr,
+          "AI engaged-list removal requires the actor and room state");
+  LiveEngagedList list(*Battle_Ai_roomAiState);
+  Require(UnlinkEngagedActor(list, state.actorId),
+          "AI engaged-list removal requires a list without repeats");
+}
+
+void UpdateLiveEngagementBuildup(Battle_Ai_ActorAiState* pointer) {
+  Battle_Ai_ActorAiState& state = StateOf(pointer);
+  EngagementTimers timers = TimersOf(state);
+  std::optional<EngagementRoster> roster;
+  if (Battle_Ai_roomAiState != nullptr) {
+    roster = RosterOf(*Battle_Ai_roomAiState);
+  }
+  LiveEngagementHost host(state, Battle_Ai_roomAiState);
+  const bool updated = UpdateEngagementBuildup(
+      host, state.actorId, timers, roster.has_value() ? &*roster : nullptr);
+  Require(updated,
+          "AI engagement buildup requires a valid actor, roster and list");
+  StoreTimers(state, timers);
+  if (roster.has_value()) StoreRoster(*Battle_Ai_roomAiState, *roster);
+}
+
+void AnimateLiveEngagementPhase() {
+  Require(Battle_Ai_roomAiState != nullptr,
+          "AI engagement animation requires room state");
+  LiveEngagedList list(*Battle_Ai_roomAiState);
+  Require(AnimateEngagementPhase(list),
+          "AI engagement animation requires a list without repeats");
 }
 }  // namespace VS::Battle::Ai
