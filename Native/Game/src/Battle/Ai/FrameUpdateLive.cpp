@@ -196,4 +196,21 @@ void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
   state->runStep = steps.run_step;
   state->maxRange = steps.max_range;
 }
+
+NavigationDirectionCodes LiveDirectionCodes() {
+  NavigationDirectionCodes codes{};
+  std::memcpy(codes.data(), frame_context.directions, codes.size());
+  return codes;
+}
+
+bool LiveHasRoomData() { return frame_context.roomData != nullptr; }
+
+std::optional<std::uint8_t> LiveTerrainRegionCell(int x, int z) {
+  u_char* cell = nullptr;
+  if (frame_context.terrainRegions == nullptr ||
+      Battle_Ai_TryTerrainRegionCell(x, z, &cell) == 0) {
+    return std::nullopt;
+  }
+  return *cell;
+}
 }  // namespace VS::Battle::Ai

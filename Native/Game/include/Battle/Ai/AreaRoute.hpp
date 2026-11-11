@@ -11,6 +11,7 @@
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
 #include "Field/PlatformPlacement.hpp"
+#include "Field/TerrainHeight.hpp"
 
 // Routing an AI actor from one area of the room into a neighbouring one. The
 // room holds a route word per area pair (area * 16 + neighbour): two packed
@@ -233,4 +234,71 @@ struct AreaMovementStep {
 // destination outside the grid or anything the area route refuses.
 [[nodiscard]] std::optional<AreaMovementStep> UpdateNavigationAreaMovement(
     AreaRouteWorld& world, AreaMovementActor& actor);
+
+// decomp: func_800E1850 (src/BATTLE/BATTLE.PRG/771A8.c:1455).
+// The blocked-direction mask (bit i for direction i) without each set
+// direction whose neighbouring tile's ground height (func_800E42EC) is greater
+// than `maximum_height`, compared signed. The tile packs x in byte 0 and z in
+// byte 2. Nothing refuses a set direction whose neighbour is outside the
+// terrain grid, or a room without terrain, which the original read past.
+[[nodiscard]] std::optional<std::uint8_t> FilterDirectionsByGroundHeight(
+    std::uint8_t mask, std::uint32_t tile, int maximum_height,
+    const NavigationDirectionCodes& directions, Field::TerrainGrid terrain);
+
+// The actor AI state fields the height-filtered movement reads.
+struct HeightFilteredMover {
+  std::uint32_t tile = 0;   // 0x34
+  std::int16_t x = 0;       // 0x4C
+  std::int16_t y = 0;       // 0x4E
+  std::int16_t z = 0;       // 0x50
+  std::int32_t move_x = 0;  // 0x17C
+  std::int32_t move_z = 0;  // 0x180
+};
+
+// What a directional move (func_800E3600) left behind.
+struct DirectionalMoveOutcome {
+  // The frame's movement result (0x1F8003C8): the command intent it issued.
+  int movement_result = 0;
+  // The actor's heading (0x188) after the move.
+  std::uint16_t heading = 0;
+};
+
+// The room and the movement primitive the height-filtered movement uses.
+class HeightFilteredMoveWorld {
+ public:
+  virtual ~HeightFilteredMoveWorld() = default;
+  // The tile's blocked-direction bits; nothing outside the room's regions.
+  [[nodiscard]] virtual std::optional<std::uint8_t> TerrainRegionCell(
+      int x, int z) const = 0;
+  virtual void SetTerrainRegionCell(int x, int z, std::uint8_t cell) = 0;
+  [[nodiscard]] virtual NavigationDirectionCodes DirectionCodes() const = 0;
+  [[nodiscard]] virtual Field::TerrainGrid Terrain() const = 0;
+  // func_800E3600 with mode 0: moves the actor toward the angle (0..4095).
+  // Nothing refuses.
+  [[nodiscard]] virtual std::optional<DirectionalMoveOutcome> MoveInDirection(
+      int angle) = 0;
+};
+
+// How a height-filtered move ends.
+struct HeightFilteredMove {
+  // The heading of the walk command (CommandOpcode::kWalk) the actor takes
+  // when the move issued kMoveDirection (scaled by 512, as a halfword) or
+  // kMoveHeading. The original tested only the result's low five bits, so a
+  // result 32 above either also walks, with the heading unscaled.
+  std::optional<std::uint16_t> walk_heading;
+
+  friend bool operator==(const HeightFilteredMove&,
+                         const HeightFilteredMove&) = default;
+};
+
+// decomp: func_800E1908 (src/BATTLE/BATTLE.PRG/771A8.c:1517).
+// Moves the actor from its position toward the movement point while its
+// tile's region cell holds the height-filtered mask
+// (FilterDirectionsByGroundHeight against the actor's y), then restores the
+// cell. Nothing refuses a tile outside the room's regions, which the original
+// read past, or anything the filter or the move refuses; the cell then keeps
+// its bits.
+[[nodiscard]] std::optional<HeightFilteredMove>
+MoveWithHeightFilteredDirections(HeightFilteredMoveWorld& world,
+                                 const HeightFilteredMover& actor);
 }  // namespace VS::Battle::Ai

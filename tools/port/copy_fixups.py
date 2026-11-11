@@ -631,6 +631,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::FindLiveNearestActiveWaypoint": r"Native\Game\include\Battle\Ai\WaypointsLive.hpp",
     "VS::Battle::Ai::UpdateLiveWaypointPatrol": r"Native\Game\include\Battle\Ai\WaypointsLive.hpp",
     "VS::Battle::Ai::UpdateLiveNavigationAreaMovement": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
+    "VS::Battle::Ai::FilterLiveDirectionsByGroundHeight": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
+    "VS::Battle::Ai::MoveLiveWithHeightFilteredDirections": r"Native\Game\include\Battle\Ai\AreaRouteLive.hpp",
+    "VS::Battle::Ai::ChooseNextLiveWanderTile": r"Native\Game\include\Battle\Ai\WanderLive.hpp",
+    "VS::Battle::Ai::UpdateLiveWanderMovement": r"Native\Game\include\Battle\Ai\WanderLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1192,6 +1196,10 @@ OWNED_CALL_BINDINGS["F01728"] = "VS::Battle::Ai::ResolveLiveNavigationAreaRoute"
 OWNED_CALL_BINDINGS["F01710"] = "VS::Battle::Ai::FindLiveNearestActiveWaypoint"
 OWNED_CALL_BINDINGS["F01747"] = "VS::Battle::Ai::UpdateLiveWaypointPatrol"
 OWNED_CALL_BINDINGS["F01740"] = "VS::Battle::Ai::UpdateLiveNavigationAreaMovement"
+OWNED_CALL_BINDINGS["F01738"] = "VS::Battle::Ai::FilterLiveDirectionsByGroundHeight"
+OWNED_CALL_BINDINGS["F01739"] = "VS::Battle::Ai::MoveLiveWithHeightFilteredDirections"
+OWNED_CALL_BINDINGS["F01742"] = "VS::Battle::Ai::ChooseNextLiveWanderTile"
+OWNED_CALL_BINDINGS["F01745"] = "VS::Battle::Ai::UpdateLiveWanderMovement"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2750,6 +2758,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DD7CC, "VS::Battle::Ai::FindLiveNearestActiveWaypoint"),  # F01710
     ("BATTLE/BATTLE.PRG", 0x800E23AC, "VS::Battle::Ai::UpdateLiveWaypointPatrol"),  # F01747
     ("BATTLE/BATTLE.PRG", 0x800E19FC, "VS::Battle::Ai::UpdateLiveNavigationAreaMovement"),  # F01740
+    ("BATTLE/BATTLE.PRG", 0x800E1850, "VS::Battle::Ai::FilterLiveDirectionsByGroundHeight"),  # F01738
+    ("BATTLE/BATTLE.PRG", 0x800E1908, "VS::Battle::Ai::MoveLiveWithHeightFilteredDirections"),  # F01739
+    ("BATTLE/BATTLE.PRG", 0x800E1BB8, "VS::Battle::Ai::ChooseNextLiveWanderTile"),  # F01742
+    ("BATTLE/BATTLE.PRG", 0x800E1EAC, "VS::Battle::Ai::UpdateLiveWanderMovement"),  # F01745
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4085,19 +4097,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # 771A8.c:942 adds a direction delta to `arg0->unk34`, an int in the pinned view; the merged layout of
     # T00532 has the packed tile word as Battle::Ai::TilePosition (union of the word and its bytes).
     "F01731": [("arg0->tile + ", "arg0->tile.word + ", "packed tile word arithmetic (771A8.c:950)")],
-    "F01739": [
-        ("&TERRAIN_TILE_MASK[state->tile.tile.tileZ * TERRAIN_MAP_WIDTH + state->tile.tile.tileX]",
-         "Battle_Ai_TerrainRegionCell(state->tile.tile.tileX, state->tile.tile.tileZ)",
-         "771A8.c:1517 retain bounded mutable direction-byte ownership"),
-    ],
-    "F01742": [
-        ("(*(unsigned char**)((uintptr_t)Core_ScratchBase() + 0x3C4))"
-         "[state->goal.tile.tileZ\n"
-         "                                                       * (*(unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3DC))\n"
-         "                                                   + state->goal.tile.tileX]",
-         "(*Battle_Ai_TerrainRegionCell(state->goal.tile.tileX, state->goal.tile.tileZ))",
-         "771A8.c:1638 validate wander direction access against the authored payload"),
-    ],
     # BATTLE 5BF94.c:1332 func_800C64D0 walks and splices an ordering-table list by raw 24-bit addresses (mask kept
     # in a variable, so the hazard index cannot see them as links): links are handles (Legacy/Render/LibGpu.h).
     "F01324": [

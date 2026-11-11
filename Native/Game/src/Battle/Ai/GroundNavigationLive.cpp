@@ -15,6 +15,7 @@
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
@@ -270,7 +271,7 @@ const Actors_ActorRecord* Model(int actor_id) {
 }
 
 // The room's AI frame, its maps and caches.
-class LiveGroundRoom : public GroundNavigationWorld {
+class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
  public:
   [[nodiscard]] std::uint32_t RoomBounds() const override {
     return Frame().roomBounds;
@@ -283,23 +284,6 @@ class LiveGroundRoom : public GroundNavigationWorld {
   }
   [[nodiscard]] Field::TerrainGrid Terrain() const override {
     return CurrentTerrain();
-  }
-  [[nodiscard]] NavigationDirectionCodes DirectionCodes() const override {
-    NavigationDirectionCodes codes{};
-    std::memcpy(codes.data(), Frame().directions, codes.size());
-    return codes;
-  }
-  [[nodiscard]] bool HasRoomData() const override {
-    return Frame().roomData != nullptr;
-  }
-  [[nodiscard]] std::optional<std::uint8_t> TerrainRegionCell(
-      int x, int z) const override {
-    u_char* cell = nullptr;
-    if (Frame().terrainRegions == nullptr ||
-        Battle_Ai_TryTerrainRegionCell(x, z, &cell) == 0) {
-      return std::nullopt;
-    }
-    return *cell;
   }
 
   [[nodiscard]] std::uint8_t WalkValid() const override {
@@ -436,7 +420,7 @@ class LiveGroundWorld final : public LiveGroundRoom {
   }
   void MoveWithHeightFilteredDirections(GroundNavigator& navigator) override {
     Run(navigator, [](Battle_Ai_ActorAiState& state) {
-      Battle_Ai_MoveWithHeightFilteredDirections(TerrainView(state));
+      MoveLiveWithHeightFilteredDirections(TerrainView(state));
     });
   }
   void UpdateFlightMovement(GroundNavigator& navigator, int angle) override {

@@ -24,9 +24,12 @@ and the first grouped promotion, F01814-F01817 special terrain heights and room
 navigation entry, in `fa47431b`
 ([CI 42955909989](https://github.com/JEschete/VS-NativePort/actions/runs/42955909989)).
 F01721-F01728 route gates and area routing are published in `53d04fe5`
-([CI 42962718861](https://github.com/JEschete/VS-NativePort/actions/runs/42962718861)).
-The F01708-F01710, F01740, F01746 and F01747 waypoint and area-movement group
-follows it. See [Stopping Point](#stopping-point) for the next group.
+([CI 42962718861](https://github.com/JEschete/VS-NativePort/actions/runs/42962718861)),
+and the F01708-F01710, F01740, F01746 and F01747 waypoint and area-movement
+group in `7fde4472`
+([CI 42969176657](https://github.com/JEschete/VS-NativePort/actions/runs/42969176657)).
+The F01738/F01739 height-filter and F01741-F01745 wander group follows it. See
+[Stopping Point](#stopping-point) for the next group.
 
 ## Checkpoint
 
@@ -40,9 +43,9 @@ follows it. See [Stopping Point](#stopping-point) for the next group.
   #335 is fixed in `ba968d04`
   ([CI 42748445178](https://github.com/JEschete/VS-NativePort/actions/runs/42748445178)).
   All three exact-revision runs passed.
-- **939 functions remain** (after the waypoint group on `53d04fe5`).
-  Modernization: 2,805 done of 3,744. C++ promotion: 2,806 promoted plus one
-  frame-orchestrator WIP. These are separate measures.
+- **932 functions remain** (after the height-filter and wander group on
+  `7fde4472`). Modernization: 2,812 done of 3,744. C++ promotion: 2,813
+  promoted plus one frame-orchestrator WIP. These are separate measures.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
   than `6c8ac0b9`.
@@ -139,51 +142,66 @@ follows it. See [Stopping Point](#stopping-point) for the next group.
 
 ## Stopping Point
 
-HEAD `53d04fe5` (F01721-F01728) is pushed and green. The commit after it holds
-the waypoint and area-movement group:
+HEAD `7fde4472` (waypoints and area movement) is pushed and green
+([CI 42969176657](https://github.com/JEschete/VS-NativePort/actions/runs/42969176657)).
+The commit after it holds the height-filter and wander group:
 
-- F01708/F01746 `WaypointValue`, F01709 `WaypointsFrom`, F01710
-  `FindNearestActiveWaypoint` and F01747 `UpdateWaypointPatrol` live in the
-  pure `Waypoints` module with the checked `WaypointsLive` binding. F01740
-  `UpdateNavigationAreaMovement` lives in `AreaRoute` with an `AreaRouteLive`
-  adapter. The movement-behavior, ground-navigation and navigation-primitive
-  callers use the live bindings; the module table keeps 0x800DD7CC, 0x800E19FC
-  and 0x800E23AC.
+- F01738 `FilterDirectionsByGroundHeight` and F01739
+  `MoveWithHeightFilteredDirections` live in `AreaRoute`, with the
+  `MoveLiveWithHeightFilteredDirections` binding in `AreaRouteLive`. F01741
+  `WanderDirectionStep`, F01742 `ChooseNextWanderTile`, F01743
+  `RandomWanderHeading`, F01744 `StartWanderWalk` and F01745
+  `UpdateWanderMovement` live in the new pure `Wander` module with the checked
+  `WanderLive` binding. The generated callers, `GroundNavigationLive.cpp` and
+  `MovementBehaviorLive.cpp` use the live bindings.
+- The live worlds share `LiveDirectionCodes`, `LiveHasRoomData`,
+  `LiveTerrainRegionCell` and the `LiveRoomRegions<World>` mixin in
+  `FrameUpdateLive`, which removed the duplicated room-region overrides.
 - Differentials in `tools\port\differentials`:
-  - `waypoint_search`: 83 instructions, 4,096 vectors, 10/10 mutants.
-    `differential.py` now models the GTE IR/MAC moves and SQR.
-  - `waypoint_patrol`: 80 instructions, 4,096 vectors, 13/13 mutants. In 249
-    rows the original loops forever; the interpreter raises "runaway original"
-    and native refuses those rows.
-  - `area_movement`: 111 instructions, 4,096 vectors, 21/21 mutants. It reuses
-    the `area_route` world through `area_route_world.hpp` and the helpers split
-    out of `area_route.py`; `area_route` still detects 28/28 mutants after that
-    refactor.
-- Focused `[waypoints],[area-movement]`: 24 cases, 148 assertions; the group
-  selection has 122 cases. Full suite: 5,424 cases, 12,649,549 assertions in
-  Debug and Release; the replays matched the baseline.
-- Two deliberate differences are recorded in the ledgers. Native
-  `Arctangent2` uses the true ratio for magnitudes of 2^22 or more, where the
-  original `ratan2` wrapped, so the area-movement vectors keep move points
-  within 2^18. The live actor random aborts on a range of 0 or less, so patrol
-  rate 31 aborts live where the original drew from INT_MIN.
+  - `height_filter`: 107 instructions (0x800E1850-0x800E19F8).
+  - `wander`: 509 instructions (0x800E1BB8-0x800E23A8). It stubs the walk
+    and flight direction checks, F01735 and F01750 at their original addresses.
+  - Together: 8,192 vectors, 0 mismatches, 58/58 mutants. The reruns of
+    `area_route` (28/28) and `area_movement` (21/21) still pass.
+- Focused `[height-filter],[wander]`: 50 cases, 325 assertions; the group
+  selection has 155 cases and 1,521 assertions. Full suite: 5,474 cases,
+  12,649,874 assertions in Debug and Release; the replays matched the
+  baseline. Changed-file quality: 48 existing tidy findings, 0 new.
+- A native broken variant of each function fails its tests (F01738 4 cases,
+  F01739 2, F01741 4, F01742 1, F01743 7, F01744 2, F01745 2).
+- One deliberate difference: for a negative roaming heading the original
+  F01745 read a stale byte before the direction codes (0x1F8003EB); native
+  uses direction 7, which the heading points along. 147 vectors reach it.
 
-Next group: F01738/F01739 height-filtered directions and F01741-F01745
-wandering (`771A8.c:1455-1841`; 0x800E1850-0x800E19FC and
-0x800E1BB8-0x800E23AC; 616 instructions). The design:
+Next group: F01735-F01737 radial destinations and F01750 movement recovery
+(`771A8.c:1330-1452` and `2272-2335`; 0x800E1388-0x800E1850 and
+0x800E2CCC-0x800E2F40). The design:
 
-- F01738 `FilterDirectionsByGroundHeight` is pure over the terrain grid and the
-  direction codes. F01739 stores the filtered mask in the actor's terrain
-  region cell around the directional movement, restores it, then issues
-  command 9 with the heading when the movement result is 5 or 7. The F01740
-  live adapter and `GroundNavigationLive.cpp` call it.
-- F01741, F01743 and F01744 are inlined helpers. F01742 `ChooseNextWanderTile`
-  and F01745 `UpdateWanderMovement` need a world over the region cells, tile
-  flags, room bounds, the actor random stream and locomotion dispatch. Through
-  the same world they reach the walk and flight direction checks (F01730 is
-  not promoted), `ProjectClearRadialDestination` (F01735) and
-  `UpdateMovementRecovery` (F01750). The differential stubs those at their
-  original addresses.
+- F01735 `ProjectClearRadialDestination` walks eight shrinking distances along
+  the heading until the occupancy check passes, then clamps the tile to the
+  room bounds. The original builds the destination in `$s0` and writes only
+  the x and z bytes; the tag and top bytes keep the caller's register (move
+  distance from F01736, the opposite angle from F01737), and the generated
+  copy reads them uninitialized. No consumer reads them; native zeroes them,
+  and the differential seeds `$s0` to match.
+- F01736 `MoveToRadialDestination` projects when the destination is farther
+  than the move distance. With movement flags 0x6 and either state byte 0xD or
+  a destination within four tiles, it restores the saved destination (when its
+  z byte is below 0x80) and defers to `MoveActorTowardDestinationTile`.
+  Otherwise it retries the
+  destination and its four even neighbours after six attempts before issuing
+  command 13. F01737 `MoveAwayFromReference` keeps the projection farther from
+  the reference point.
+- F01750 `UpdateMovementRecovery` releases the reservations and restarts
+  terrain movement after 120 stalled ticks for a model with flag 0x200000. It
+  otherwise turns towards the movement target or the target point, or picks
+  the highest neighbouring ground in four directions (the original's
+  cumulative `direction += i * 2` visits d, d+2, d+6, d+4).
+- A new typed `RadialMovement` module with a world over the direction codes,
+  room bounds, terrain, model, actor positions, occupancy and the command
+  primitives. The generated callers in `Behavior.cpp`, `OrbitingBoss.cpp`,
+  `Perception.cpp` and `Movement.cpp` and the `GroundNavigationLive` and
+  `WanderLive` hooks move to the live bindings.
 
 No inline assembly remains in `Native`. The differential runs the original
 BATTLE.PRG instructions in the repository's test-only R3000 interpreter,
@@ -207,9 +225,9 @@ replay's run directory behind
 removed only the 1,038 uncited `regression.py` replays (frames 900 or 2,400,
 speed 1, no scripts, sequence or devices) and freed 14.49 GB. It kept every
 interactive, sequenced, device and cited run (those cited in
-`COMBAT_LAB.md`/`HANDOFF_HISTORY.md`). The runs will accumulate again on each
-`regression.py check` until #339 is fixed. Removing anything else needs owner
-approval. **Never delete Ghidra, `tools\Base` or `tools\PSX`** (owner
+`COMBAT_LAB.md`/`HANDOFF_HISTORY.md`). Since `71973e51` (#339, closed)
+`regression.py check` removes its replay run directories. Removing anything
+else needs owner approval. **Never delete Ghidra, `tools\Base` or `tools\PSX`** (owner
 directive, 2026-11-10).
 
 ## Promotion Throughput
@@ -776,13 +794,14 @@ passed; the hazard check and workflow-exit controls now pass as independent step
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Continue with the F01738-F01745 group from the
-   [Stopping Point](#stopping-point), then update #276. Keep #337 open until
-   its in-game reachability is established. Do not close #276: 939 remain.
+2. Continue with the F01735-F01737/F01750 radial-destination and
+   movement-recovery group from the [Stopping Point](#stopping-point), then
+   update #276. Keep #337 open until its in-game reachability is established.
+   Do not close #276: 932 remain.
 3. Continue ordered row 28 with Behavior, Movement, the rest of Navigation
    (F01636 and F01751), OrbitingBoss and Perception as listed by
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
-   F01708-F01710/F01716/F01717/F01721-F01728/F01740/F01746/F01747/F01793/
+   F01708-F01710/F01716/F01717/F01721-F01728/F01738-F01747/F01793/
    F01810-F01818 are verified dependencies, not proof of remaining AI behavior
    or gameplay.
 4. Read original source and actual assembly, then trace callers, random-state
@@ -833,7 +852,7 @@ Passing a baseline, compiling, or returning success alone is not gameplay proof.
 - Keep `resources/rood-reverseWin` and upstream references read-only. Source
   listings and actual instruction bytes/consumers establish behavior, not names.
 - Never weaken requirements, expected outputs, tests, or quality baselines to
-  match delivered scope. Do not declare the remaining 939 functions complete.
+  match delivered scope. Do not declare the remaining 932 functions complete.
 - Never delete Ghidra, `tools\Base` or `tools\PSX` to save space, even where
   they mirror `C:\Tools`. Delete other local data only with owner approval.
 - Keep disc assets, BIOS, captures, dumps, logs, and local scratch out of commits.

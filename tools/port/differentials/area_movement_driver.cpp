@@ -11,6 +11,7 @@
 
 extern "C" void Core_Errorf(const char*, const char*, ...) { std::abort(); }
 extern "C" void Core_Warnf(const char*, const char*, ...) { }
+extern "C" void Core_Debugf(const char*, const char*, ...) { }
 
 int main()
 {

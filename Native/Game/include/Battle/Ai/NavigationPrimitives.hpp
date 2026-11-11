@@ -49,6 +49,30 @@ struct TileOccupantPlacement {
 // 4-5, each 3 meaning -1.
 using NavigationDirectionCodes = std::array<std::uint8_t, kDirectionCodeCount>;
 
+// One direction code's tile step.
+struct NavigationStep {
+  int dx = 0;
+  int dz = 0;
+
+  friend bool operator==(const NavigationStep&,
+                         const NavigationStep&) = default;
+};
+
+// Each component is a two-bit two's-complement value, -2..1, as the original
+// decoded it (sll/sra pairs over the code byte).
+[[nodiscard]] constexpr NavigationStep DecodeDirectionCode(std::uint8_t code) {
+  constexpr unsigned kComponentMask = 3;
+  constexpr unsigned kSignBit = 2;
+  constexpr int kModulus = 4;
+  constexpr unsigned kZShift = 4;
+  const auto component = [](unsigned value) {
+    value &= kComponentMask;
+    return (value & kSignBit) != 0 ? static_cast<int>(value) - kModulus
+                                   : static_cast<int>(value);
+  };
+  return {.dx = component(code), .dz = component(code >> kZShift)};
+}
+
 // decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/7BDD4.s:542).
 // Reserves a destination tile; nothing without a flag map. False refuses a
 // tile outside the grid.

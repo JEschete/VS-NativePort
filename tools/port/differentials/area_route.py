@@ -14,6 +14,7 @@ MODULES = ("BATTLE/BATTLE.PRG", "SLUS_010.40")
 DRIVER = "area_route_driver.cpp"
 SOURCES = (
     r"Native\Game\src\Battle\Ai\AreaRoute.cpp",
+    r"Native\Game\src\Field\TerrainHeight.cpp",
     r"Native\Engine\src\Core\Math\ScalarMath.cpp",
     r"Native\Engine\src\Core\Math\Distance.cpp",
 )

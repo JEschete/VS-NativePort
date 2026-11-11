@@ -2738,18 +2738,12 @@ class EncounterFixupTests(unittest.TestCase):
                 r"Native\Game\include\Save\NativeResume.h",
             )
 
-    def test_ai_direction_queries_keep_bounded_mutable_source_cells(self):
-        # F01728 is owned by AreaRoute.cpp and reads the region cells natively.
-        self.assertNotIn("F01728", copy_fixups.FIXES)
-        for fid in ("F01739", "F01742"):
+    def test_owned_ai_direction_queries_need_no_region_cell_fixes(self):
+        # F01728 and F01739 are owned by AreaRoute.cpp and F01742 by Wander.cpp;
+        # each reads the region cells natively, so no generated fix remains.
+        for fid in ("F01728", "F01739", "F01742"):
             with self.subTest(fid=fid):
-                fixes = copy_fixups.FIXES[fid]
-                self.assertEqual(len(fixes), 1)
-                old, new, _ = fixes[0]
-                self.assertIn("tile.tileZ", old)
-                self.assertIn("Battle_Ai_TerrainRegionCell", new)
-                self.assertNotIn("Core_ScratchBase", new)
-                self.assertNotIn("TERRAIN_TILE_MASK", new)
+                self.assertNotIn(fid, copy_fixups.FIXES)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["Battle_Ai_TerrainRegionCell"],
             r"Native\Game\src\Battle\Ai\FrameUpdate.h",

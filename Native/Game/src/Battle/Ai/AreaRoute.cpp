@@ -44,11 +44,6 @@ constexpr unsigned kStepLengthMask = 3;
 // A gate's tag is its platform plus two, also its contact occupancy bit.
 constexpr int kGateTagBase = 2;
 
-constexpr unsigned kDirectionComponentMask = 3;
-constexpr unsigned kDirectionSignBit = 2;
-constexpr int kDirectionComponentModulus = 4;
-constexpr unsigned kDirectionZShift = 4;
-
 constexpr std::size_t kMaxPlatformPositions{Field::kMovingPlatformCapacity};
 // The original passed the heading in its 4096-per-turn units, scaled by 512.
 constexpr unsigned kGroundMovementAngleShift = 9;
@@ -91,14 +86,6 @@ std::uint32_t Stepped(std::uint32_t tile, int dx, int dz) {
          (static_cast<std::uint32_t>(z) << kTileZShift) | x;
 }
 
-// Each component is a two-bit two's-complement value, -2..1.
-int DirectionComponent(unsigned code) {
-  const auto value = code & kDirectionComponentMask;
-  return (value & kDirectionSignBit) != 0
-             ? static_cast<int>(value) - kDirectionComponentModulus
-             : static_cast<int>(value);
-}
-
 struct RouteStep {
   int direction = 0;
   int dx = 0;
@@ -112,11 +99,9 @@ std::optional<RouteStep> StepOf(const AreaRouteWorld& world,
   if (direction >= kNavigationDirections) {
     return Refuse("AI area route step has no direction");
   }
-  const unsigned code =
-      world.DirectionCodes()[static_cast<std::size_t>(direction)];
-  return RouteStep{.direction = direction,
-                   .dx = DirectionComponent(code),
-                   .dz = DirectionComponent(code >> kDirectionZShift)};
+  const auto step = DecodeDirectionCode(
+      world.DirectionCodes()[static_cast<std::size_t>(direction)]);
+  return RouteStep{.direction = direction, .dx = step.dx, .dz = step.dz};
 }
 
 // The exit word the original wrote: the exit's three bytes over the old
@@ -565,5 +550,67 @@ std::optional<AreaMovementStep> UpdateNavigationAreaMovement(
   return AreaMovementStep{.action = AreaMovementAction::kDirectionalMovement,
                           .value = static_cast<int>(angle),
                           .clear_direction_cache = stuck};
+}
+
+// decomp: func_800E1850 (src/BATTLE/BATTLE.PRG/771A8.c:1455).
+std::optional<std::uint8_t> FilterDirectionsByGroundHeight(
+    std::uint8_t mask, std::uint32_t tile, int maximum_height,
+    const NavigationDirectionCodes& directions, Field::TerrainGrid terrain) {
+  const int x = RouteTileX(tile);
+  const int z = RouteTileZ(tile);
+  auto filtered = mask;
+  for (int direction = 0; direction < kNavigationDirections; ++direction) {
+    const auto bit = static_cast<std::uint8_t>(1U << direction);
+    if ((mask & bit) == 0) continue;
+    const auto step =
+        DecodeDirectionCode(directions[static_cast<std::size_t>(direction)]);
+    const auto height =
+        Field::TryGroundHeightAtTile(terrain, x + step.dx, z + step.dz);
+    if (!height) {
+      return Refuse("AI height filter reads a neighbour outside the terrain");
+    }
+    if (*height > maximum_height) {
+      filtered = static_cast<std::uint8_t>(filtered & ~bit);
+    }
+  }
+  return filtered;
+}
+
+namespace {
+// The movement results that leave the actor walking: kMoveDirection and
+// kMoveHeading, tested as bits 5 and 7 of 0xA0 by the result's low five bits.
+constexpr std::uint32_t kWalkingResults = 0xA0;
+constexpr unsigned kResultShiftMask = 31;
+}  // namespace
+
+// decomp: func_800E1908 (src/BATTLE/BATTLE.PRG/771A8.c:1517).
+std::optional<HeightFilteredMove> MoveWithHeightFilteredDirections(
+    HeightFilteredMoveWorld& world, const HeightFilteredMover& actor) {
+  const int x = RouteTileX(actor.tile);
+  const int z = RouteTileZ(actor.tile);
+  const auto cell = world.TerrainRegionCell(x, z);
+  if (!cell) return Refuse("AI height-filtered move has no terrain region");
+  const auto filtered = FilterDirectionsByGroundHeight(
+      *cell, actor.tile, actor.y, world.DirectionCodes(), world.Terrain());
+  if (!filtered) return std::nullopt;
+  world.SetTerrainRegionCell(x, z, *filtered);
+  const auto angle = static_cast<std::uint32_t>(Core::Math::Arctangent2(
+                         WrappingDelta(actor.x, actor.move_x),
+                         WrappingDelta(actor.z, actor.move_z))) &
+                     kAngleMask;
+  const auto outcome = world.MoveInDirection(static_cast<int>(angle));
+  world.SetTerrainRegionCell(x, z, *cell);
+  if (!outcome) return Refuse("AI height-filtered move refused its movement");
+  const auto result = static_cast<std::uint32_t>(outcome->movement_result);
+  if (((kWalkingResults >> (result & kResultShiftMask)) & 1U) == 0) {
+    return HeightFilteredMove{};
+  }
+  if (outcome->movement_result ==
+      static_cast<int>(CommandIntent::kMoveDirection)) {
+    return HeightFilteredMove{
+        .walk_heading = static_cast<std::uint16_t>(
+            outcome->heading << kGroundMovementAngleShift)};
+  }
+  return HeightFilteredMove{.walk_heading = outcome->heading};
 }
 }  // namespace VS::Battle::Ai

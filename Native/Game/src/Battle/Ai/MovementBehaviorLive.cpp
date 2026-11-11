@@ -17,6 +17,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -320,8 +321,8 @@ class LiveMovementHost final : public MovementHost {
   void UpdateWander(MovementState& state, std::uint32_t tile,
                     std::uint32_t range) override {
     StoreMovementState(state, state_);
-    Battle_Ai_UpdateWanderMovement(
-        reinterpret_cast<Battle_Ai_WanderView*>(&state_), tile, range);
+    UpdateLiveWanderMovement(reinterpret_cast<Battle_Ai_WanderView*>(&state_),
+                             tile, range);
     state = LoadMovementState(state_);
   }
   void UpdateWaypointPatrol(MovementState& state) override {

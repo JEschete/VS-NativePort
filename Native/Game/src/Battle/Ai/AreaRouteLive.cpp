@@ -11,6 +11,8 @@
 #include <vector>
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -76,6 +78,7 @@ static_assert(offsetof(MoveView, destination) ==
 static_assert(offsetof(MoveView, moveX) == offsetof(AiState, moveX));
 static_assert(offsetof(MoveView, moveZ) == offsetof(AiState, moveZ));
 static_assert(offsetof(MoveView, angle) == offsetof(AiState, heading));
+static_assert(offsetof(MoveView, actor) == offsetof(AiState, actor));
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -177,17 +180,10 @@ class LiveAreaRouteWorld final : public AreaRouteWorld {
   }
   [[nodiscard]] std::optional<std::uint8_t> TerrainRegionCell(
       int x, int z) const override {
-    u_char* cell = nullptr;
-    if (Frame().terrainRegions == nullptr ||
-        Battle_Ai_TryTerrainRegionCell(x, z, &cell) == 0) {
-      return std::nullopt;
-    }
-    return *cell;
+    return LiveTerrainRegionCell(x, z);
   }
   [[nodiscard]] NavigationDirectionCodes DirectionCodes() const override {
-    NavigationDirectionCodes codes{};
-    std::memcpy(codes.data(), Frame().directions, codes.size());
-    return codes;
+    return LiveDirectionCodes();
   }
   [[nodiscard]] std::uint8_t RouteStepDirection(int kind) const override {
     return Battle_Ai_routeStepDirections[static_cast<std::size_t>(kind)];
@@ -224,6 +220,40 @@ class LiveAreaRouteWorld final : public AreaRouteWorld {
         static_cast<const SVECTOR*>(Frame().actors[slot]->nativePointer60);
     if (position == nullptr) return std::nullopt;
     return AreaRoutePoint{.x = position->vx, .z = position->vz};
+  }
+
+ private:
+  AiState& state_;
+};
+
+// The room's terrain regions and the actor's directional movement.
+class LiveHeightFilteredMoveWorld final : public HeightFilteredMoveWorld {
+ public:
+  explicit LiveHeightFilteredMoveWorld(AiState& state) : state_(state) {}
+
+  [[nodiscard]] std::optional<std::uint8_t> TerrainRegionCell(
+      int x, int z) const override {
+    return LiveTerrainRegionCell(x, z);
+  }
+  void SetTerrainRegionCell(int x, int z, std::uint8_t value) override {
+    u_char* cell = nullptr;
+    Require(Frame().terrainRegions != nullptr &&
+                Battle_Ai_TryTerrainRegionCell(x, z, &cell) != 0,
+            "AI height filter writes outside the regions");
+    *cell = value;
+  }
+  [[nodiscard]] NavigationDirectionCodes DirectionCodes() const override {
+    return LiveDirectionCodes();
+  }
+  [[nodiscard]] Field::TerrainGrid Terrain() const override {
+    return CurrentTerrain();
+  }
+  [[nodiscard]] std::optional<DirectionalMoveOutcome> MoveInDirection(
+      int angle) override {
+    ResolveLiveDirectionalMovement(&state_, angle, 0);
+    return DirectionalMoveOutcome{
+        .movement_result = Frame().movementResult,
+        .heading = static_cast<std::uint16_t>(state_.heading)};
   }
 
  private:
@@ -314,7 +344,7 @@ void UpdateLiveNavigationAreaMovement(Battle_Ai_TerrainMoveView* view) {
       Required(step, "AI area movement refused its room or actor");
   switch (movement.action) {
     case AreaMovementAction::kHeightFilteredDirections:
-      Battle_Ai_MoveWithHeightFilteredDirections(view);
+      MoveLiveWithHeightFilteredDirections(view);
       return;
     case AreaMovementAction::kGroundMovement:
       RefreshLiveAiMovementCooldown(view);
@@ -331,5 +361,33 @@ void UpdateLiveNavigationAreaMovement(Battle_Ai_TerrainMoveView* view) {
       return;
   }
   Require(false, "AI area movement chose no movement");
+}
+
+unsigned char FilterLiveDirectionsByGroundHeight(unsigned char mask,
+                                                 unsigned int tile,
+                                                 int maximum_height) {
+  return Required(
+      FilterDirectionsByGroundHeight(mask, tile, maximum_height,
+                                     LiveDirectionCodes(), CurrentTerrain()),
+      "AI height filter refused its terrain");
+}
+
+void MoveLiveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* view) {
+  auto& state = State(view);
+  // The original named the actor before the move, which may replace it.
+  auto* actor = view->actor;
+  LiveHeightFilteredMoveWorld world(state);
+  const auto move =
+      Required(MoveWithHeightFilteredDirections(world, {.tile = state.tile.word,
+                                                        .x = state.position.vx,
+                                                        .y = state.position.vy,
+                                                        .z = state.position.vz,
+                                                        .move_x = state.moveX,
+                                                        .move_z = state.moveZ}),
+               "AI height-filtered move refused its room or movement");
+  if (!move.walk_heading) return;
+  Require(actor != nullptr, "AI height-filtered walk requires an actor");
+  actor->commandOpcode = static_cast<u_char>(CommandOpcode::kWalk);
+  actor->commandHeading = *move.walk_heading;
 }
 }  // namespace VS::Battle::Ai

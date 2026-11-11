@@ -573,15 +573,6 @@
 ]
 ],
 [
-716,
-[
-"    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state,"
-],
-[
-"    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),"
-]
-],
-[
 969,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"

@@ -63,13 +63,6 @@ void Battle_Ai_ProjectClearRadialDestination(Battle_Ai_MoveTargetView* state, Ba
     unsigned int distance);
 void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state, int unused);
 void Battle_Ai_MoveAwayFromReference(Battle_Ai_MovementDestinationView* state, int angle);
-u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char direction_mask, u_int packed_tile, int maximum_ground_height);
-void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state);
-Battle_Ai_DirectionDelta* Battle_Ai_WanderDirectionOffset(int index);
-int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int tile, unsigned int maxCount, int arg3);
-int Battle_Ai_RandomWanderHeading(int direction);
-void Battle_Ai_StartWanderWalk(Battle_Ai_WanderView* s);
-void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int tile, unsigned int range);
 int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int option);
 int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int targetId);
 void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state);

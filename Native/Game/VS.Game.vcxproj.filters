@@ -612,6 +612,12 @@
     <ClCompile Include="src\Battle\Ai\TileHeightSampling.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\Wander.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\WanderLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Waypoints.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2692,6 +2698,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\Wander.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\WanderLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\Waypoints.hpp">

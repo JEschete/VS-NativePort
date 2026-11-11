@@ -46,4 +46,14 @@ int ResolveLiveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int index,
 // func_800E19FC. Runs the movement primitive UpdateNavigationAreaMovement
 // chooses for the actor AI state.
 void UpdateLiveNavigationAreaMovement(Battle_Ai_TerrainMoveView* state);
+
+// func_800E1850. FilterDirectionsByGroundHeight over the room's direction
+// codes and terrain.
+unsigned char FilterLiveDirectionsByGroundHeight(unsigned char mask,
+                                                 unsigned int tile,
+                                                 int maximum_height);
+
+// func_800E1908. Runs MoveWithHeightFilteredDirections for the actor AI
+// state, then writes the walk command to the actor it named before the move.
+void MoveLiveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state);
 }  // namespace VS::Battle::Ai
