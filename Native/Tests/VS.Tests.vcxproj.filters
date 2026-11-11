@@ -111,6 +111,9 @@
     <ClCompile Include="src\AiSessionResetTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiSpecialTerrainTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AnimationControlTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

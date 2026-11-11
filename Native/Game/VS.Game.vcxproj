@@ -329,12 +329,19 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\RoomAiMap.cpp" />
+    <ClCompile Include="src\Battle\Ai\RoomAiMapLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\RoomState.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\SpecialTerrain.cpp" />
+    <ClCompile Include="src\Battle\Ai\SpecialTerrainLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\TileHeightSampling.cpp" />
     <ClCompile Include="src\Battle\AttackPrerequisites.cpp" />
@@ -2202,6 +2209,9 @@
     <ClInclude Include="include\Battle\Ai\Relations.hpp" />
     <ClInclude Include="include\Battle\Ai\RelationsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp" />
+    <ClInclude Include="include\Battle\Ai\RoomAiMapLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\SpecialTerrain.hpp" />
+    <ClInclude Include="include\Battle\Ai\SpecialTerrainLive.hpp" />
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />
     <ClInclude Include="include\Battle\AttackPrerequisites.hpp" />
     <ClInclude Include="include\Battle\AttackPrerequisitesLive.hpp" />

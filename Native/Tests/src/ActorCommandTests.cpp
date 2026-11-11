@@ -12,6 +12,7 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
@@ -284,7 +285,7 @@ struct RoomCommandFixture : CommandFixture {
 
 TEST_CASE(
     "Room entry prepares special heights before actor commands and reentry",
-    "[ai][special-terrain][room-context]") {
+    "[ai][special-terrain][room-context][room-navigation]") {
   RoomCommandFixture fixture;
   alignas(Field_MpdCollisionHeader) std::array<unsigned char, 40> collision{};
   const Field_MpdCollisionHeader header{2, 2, 16, 4};
@@ -305,7 +306,7 @@ TEST_CASE(
         static_cast<signed char>(kZ[index]);
   }
   for (int entry = 0; entry < 2; ++entry) {
-    VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
+    VS::Battle::Ai::InitializeLiveRoomNavigation();
     REQUIRE(Battle_Ai_specialTerrainHeights != nullptr);
     CHECK(Battle_Ai_tileFlagMap[1][1] == 0x20);
     CHECK(Battle_Ai_specialTerrainHeights[1][1] == 0x2002);

@@ -4,10 +4,8 @@
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/CollisionMapLive.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -642,63 +640,5 @@ done:
     state->path = path;
     return -1;
 }
-
-// decomp: BATTLE.PRG func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:760)
-void Battle_Ai_FloodFillAiTerrainHeights(int tile_x, int tile_z, int height_value)
-{
-    Battle_Ai_DirectionDelta* step;
-    int i;
-    int value = height_value & 0x3FF;
-
-    Battle_Ai_specialTerrainHeights[tile_z][tile_x] = (Battle_Ai_specialTerrainHeights[tile_z][tile_x] & 0xFC00) | value | 0x2000;
-
-    for (i = 0, step = Battle_Ai_directionDeltas; i < 4; ++i, step += 2) {
-        u_int x = tile_x + step->dx;
-        u_int z = tile_z + step->dz;
-
-        if (x < 32 && z < 32 && (Battle_Ai_tileFlagMap[z][x] & 0x20)
-            && !(Battle_Ai_specialTerrainHeights[z][x] & 0x2000)) {
-            Battle_Ai_FloodFillAiTerrainHeights(x, z, height_value);
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:779)
-int Battle_Ai_FindAdjacentAiGroundHeight(int tile_x, int tile_z)
-{
-    int i;
-    u_int x;
-    u_int z;
-
-    for (i = 0; i < 4; i++) {
-        x = tile_x + Battle_Ai_directionDeltas[i * 2].dx;
-        z = tile_z + Battle_Ai_directionDeltas[i * 2].dz;
-        if (x < 32 && z < 32 && !(Battle_Ai_tileFlagMap[z][x] & 0x70)) {
-            return VS::Field::LiveFloorHeightAt(x << 7 | 0x40, z << 7 | 0x40) >> 6;
-        }
-    }
-    return -1;
-}
-
-// decomp: BATTLE.PRG func_800E6098 (src/BATTLE/BATTLE.PRG/7CD68.c:795)
-void Battle_Ai_BuildAiSpecialTerrainHeights(void)
-{
-    int x;
-    int z;
-
-    for (z = 0; z < 32; ++z) {
-        for (x = 0; x < 32; ++x) {
-            if ((Battle_Ai_tileFlagMap[z][x] & 0x20) && !(Battle_Ai_specialTerrainHeights[z][x] & 0x2000)) {
-                int r = Battle_Ai_FindAdjacentAiGroundHeight(x, z);
-                if (r >= 0) {
-                    Battle_Ai_FloodFillAiTerrainHeights(x, z, r);
-                }
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800E6158 (src/BATTLE/BATTLE.PRG/7CD68.c:814)
-void Battle_Ai_InitializeRoomNavigation(void) { VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime()); }
 
 }  // extern "C"

@@ -1962,6 +1962,12 @@
     <None Include="..\..\port\differential.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\differentials\actor_creation.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\actor_creation_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\actor_settings.py">
       <Filter>tools\port\differentials</Filter>
     </None>

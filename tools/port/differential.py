@@ -15,6 +15,7 @@ function:
   DRIVER, SOURCES       the driver next to the case and the Native sources it compiles with
   VECTORS, SEED         default vector count and random seed
   MUTANTS               {name: {address: replacement word}}; every mutant must be detected
+  MUTANT_VECTORS        optional: mutants rerun only the first N vectors (default: all)
   vector(rng, number)   -> one input
   run(machine, vector)  -> (observation, driver inputs); stubs calls, then executes ENTRY
   check(image, vector, observation, native, reference) -> problems
@@ -454,8 +455,9 @@ def run_case(case: ModuleType, images: list[Image], native: Native, vectors: int
     if mutants:
         if not getattr(case, "MUTANTS", None):
             report.undetected.append("(the case defines no mutants)")
-        report.lines.append("Mutants (original words patched): " + ", ".join(
-            f"{name} {hits} differing" for name, hits in mutant_hits(case, images, results, report)))
+        sample = results[:getattr(case, "MUTANT_VECTORS", None) or len(results)]
+        report.lines.append(f"Mutants (original words patched, {len(sample)} vectors each): " + ", ".join(
+            f"{name} {hits} differing" for name, hits in mutant_hits(case, images, sample, report)))
     return report
 
 

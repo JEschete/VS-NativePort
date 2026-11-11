@@ -1419,7 +1419,8 @@ class EncounterFixupTests(unittest.TestCase):
         body = bodies[0].body
         self.assertIn("LiveSpecialTerrainBuilder builder;", body)
         self.assertIn("BuildAiTerrainHeightsWithWorkspace(builder)", body)
-        self.assertIn("Battle_Ai_BuildAiSpecialTerrainHeights();", source)
+        self.assertIn("BuildLiveAiSpecialTerrainHeights();", source)
+        self.assertNotIn("Battle_Ai_BuildAiSpecialTerrainHeights", source)
         self.assertNotIn("AllocateFromHighEnd", body)
         self.assertNotIn("Core_ScratchBase", body)
 

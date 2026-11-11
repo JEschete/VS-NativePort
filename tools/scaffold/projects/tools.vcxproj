@@ -330,6 +330,8 @@
     <None Include="..\..\port\decl_index.py" />
     <None Include="..\..\port\decomp_index.py" />
     <None Include="..\..\port\differential.py" />
+    <None Include="..\..\port\differentials\actor_creation.py" />
+    <None Include="..\..\port\differentials\actor_creation_driver.cpp" />
     <None Include="..\..\port\differentials\actor_settings.py" />
     <None Include="..\..\port\differentials\actor_settings_driver.cpp" />
     <None Include="..\..\port\field_at.py" />

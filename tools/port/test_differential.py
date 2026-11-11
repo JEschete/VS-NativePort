@@ -266,6 +266,15 @@ class Harness(unittest.TestCase):
         self.assertIn("64 results", text)
         self.assertIn("64 vectors; mismatches=0", text)
         self.assertIn("gte 64 differing", text)  # a faulting mutant counts as detected
+        self.assertIn("Mutants (original words patched, 64 vectors each)", text)
+
+    def test_mutant_vectors_limits_the_mutant_reruns(self) -> None:
+        report = differential.run_case(fake_case(MUTANT_VECTORS=5), self.images, native_sum, vectors=20)
+        self.assertTrue(report.passed, report.lines)
+        text = "\n".join(report.lines)
+        self.assertIn("20 vectors; mismatches=0", text)
+        self.assertIn("Mutants (original words patched, 5 vectors each)", text)
+        self.assertIn("gte 5 differing", text)
 
     def test_native_mismatches_are_counted(self) -> None:
         def wrong_for_odd(lines: list[str]) -> list[list[int]]:

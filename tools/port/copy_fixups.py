@@ -620,6 +620,10 @@ NATIVE_HELPER_HEADERS = {
        for name in ("VS::Field::LiveMovingPlatformPlacement", "VS::Field::FindLiveMovingPlatformById")},
     "Event_ScriptSetAshleyBattleModeOpcode": r"Native\Game\src\Event\WeaponModeOpcode.h",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
+    "VS::Battle::Ai::FloodFillLiveAiTerrainHeights": r"Native\Game\include\Battle\Ai\SpecialTerrainLive.hpp",
+    "VS::Battle::Ai::FindLiveAdjacentAiGroundHeight": r"Native\Game\include\Battle\Ai\SpecialTerrainLive.hpp",
+    "VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights": r"Native\Game\include\Battle\Ai\SpecialTerrainLive.hpp",
+    "VS::Battle::Ai::InitializeLiveRoomNavigation": r"Native\Game\include\Battle\Ai\RoomAiMapLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1170,6 +1174,10 @@ OWNED_CALL_BINDINGS["F01700"] = "VS::Battle::Ai::LiveActorStatusConditionScore"
 OWNED_CALL_BINDINGS["F01701"] = "VS::Battle::Ai::LiveActorHpRatio"
 OWNED_CALL_BINDINGS["F01702"] = "VS::Battle::Ai::LiveActorMpRatio"
 OWNED_CALL_BINDINGS["F01703"] = "VS::Battle::Ai::LiveActorEquipmentDpRatio"
+OWNED_CALL_BINDINGS["F01814"] = "VS::Battle::Ai::FloodFillLiveAiTerrainHeights"
+OWNED_CALL_BINDINGS["F01815"] = "VS::Battle::Ai::FindLiveAdjacentAiGroundHeight"
+OWNED_CALL_BINDINGS["F01816"] = "VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights"
+OWNED_CALL_BINDINGS["F01817"] = "VS::Battle::Ai::InitializeLiveRoomNavigation"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2717,6 +2725,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E68A0, "VS::Battle::Ai::RemoveLiveAiTileOccupant"),  # F01827
     ("BATTLE/BATTLE.PRG", 0x800E68EC, "VS::Battle::Ai::MarkLiveAiTileDynamicObstacle"),  # F01828
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace"),  # F01832
+    ("BATTLE/BATTLE.PRG", 0x800E5EC0, "VS::Battle::Ai::FloodFillLiveAiTerrainHeights"),  # F01814
+    ("BATTLE/BATTLE.PRG", 0x800E5FDC, "VS::Battle::Ai::FindLiveAdjacentAiGroundHeight"),  # F01815
+    ("BATTLE/BATTLE.PRG", 0x800E6098, "VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights"),  # F01816
+    ("BATTLE/BATTLE.PRG", 0x800E6158, "VS::Battle::Ai::InitializeLiveRoomNavigation"),  # F01817
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

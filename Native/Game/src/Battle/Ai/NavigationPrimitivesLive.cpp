@@ -19,6 +19,7 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -96,7 +97,7 @@ class LiveSpecialTerrainBuilder final : public SpecialTerrainBuilder {
            Battle_Ai_specialTerrainHeights != nullptr;
   }
   void BuildSpecialTerrainHeights() override {
-    Battle_Ai_BuildAiSpecialTerrainHeights();
+    BuildLiveAiSpecialTerrainHeights();
   }
 };
 

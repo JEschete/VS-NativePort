@@ -23,6 +23,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Encounter.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -755,7 +756,7 @@ class LiveEntrance : public Host {
     Actors::RestoreLiveActorIdlePose(0);
     Actors::BuildLiveActorPoseAtMatrix(0, &Scratch().viewMatrix);
     SetLiveActorCollisionBypass(0, 0);
-    Battle_Ai_InitializeRoomNavigation();
+    Battle::Ai::InitializeLiveRoomNavigation();
   }
 };
 

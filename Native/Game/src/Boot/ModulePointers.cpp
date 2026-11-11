@@ -14,6 +14,8 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
+#include "Battle/Ai/RoomAiMapLive.hpp"
+#include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -816,10 +818,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E2B2Cu, 0u, (void*)&Battle_Ai_UpdateTargetFacing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2CCCu, 0u, (void*)&Battle_Ai_UpdateMovementRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2F5Cu, 0u, (void*)&Battle_Ai_FollowObstacleDetour, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E5EC0u, 0u, (void*)&Battle_Ai_FloodFillAiTerrainHeights, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E5FDCu, 0u, (void*)&Battle_Ai_FindAdjacentAiGroundHeight, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6098u, 0u, (void*)&Battle_Ai_BuildAiSpecialTerrainHeights, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6158u, 0u, (void*)&Battle_Ai_InitializeRoomNavigation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&Battle_Ai_UpdateBossRadialRetreat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&Battle_Ai_IsBossActionReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7960u, 0u, (void*)&Battle_Ai_UpdateBossOrbitTracking, 0u, 0u, 0u},
@@ -1741,6 +1739,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E68A0u, 0u, (void*)&VS::Battle::Ai::RemoveLiveAiTileOccupant, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E68ECu, 0u, (void*)&VS::Battle::Ai::MarkLiveAiTileDynamicObstacle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E5EC0u, 0u, (void*)&VS::Battle::Ai::FloodFillLiveAiTerrainHeights, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E5FDCu, 0u, (void*)&VS::Battle::Ai::FindLiveAdjacentAiGroundHeight, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6098u, 0u, (void*)&VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6158u, 0u, (void*)&VS::Battle::Ai::InitializeLiveRoomNavigation, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

@@ -8,6 +8,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Battle/Ai/RoomAiMapLive.hpp"
+#include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 #include "Platform/GameFiber.hpp"
@@ -139,4 +141,59 @@ TEST_CASE("A special region without eligible adjacent ground stays unseeded",
   CHECK(std::memcmp(before.data(), fixture.heights, before.size()) == 0);
   VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace();
   CHECK(std::memcmp(before.data(), fixture.heights, before.size()) == 0);
+}
+
+TEST_CASE("Live adjacent ground height reads the room floor beside a tile",
+          "[ai][special-terrain][terrain-fill]") {
+  SpecialTerrainFixture fixture;
+  CHECK(VS::Battle::Ai::FindLiveAdjacentAiGroundHeight(1, 1) == 2);
+  fixture.flags[0][1] = fixture.flags[1][2] = 0x10;
+  fixture.flags[2][1] = fixture.flags[1][0] = 0x40;
+  CHECK(VS::Battle::Ai::FindLiveAdjacentAiGroundHeight(1, 1) == -1);
+  fixture.flags[1][0] = 0x80;
+  CHECK(VS::Battle::Ai::FindLiveAdjacentAiGroundHeight(1, 1) == 2);
+}
+
+TEST_CASE("Live terrain fill floods the room's connected special tiles",
+          "[ai][special-terrain][terrain-fill]") {
+  SpecialTerrainFixture fixture;
+  fixture.flags[1][1] = fixture.flags[1][2] = fixture.flags[2][2] = 0x20;
+  fixture.flags[3][3] = 0x20;
+  VS::Battle::Ai::FloodFillLiveAiTerrainHeights(1, 1, 0x407);
+  CHECK(fixture.heights[1][1] == 0xA807);
+  CHECK(fixture.heights[1][2] == 0xA807);
+  CHECK(fixture.heights[2][2] == 0xA807);
+  CHECK(fixture.heights[3][3] == (0x8800 | (3 * 32 + 3)));
+  CHECK(fixture.heights[0][0] == 0x8800);
+}
+
+TEST_CASE("Live special terrain build seeds each region from its ground",
+          "[ai][special-terrain][terrain-fill]") {
+  SpecialTerrainFixture fixture;
+  fixture.flags[1][1] = fixture.flags[5][6] = 0x20;
+  VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights();
+  CHECK(fixture.heights[1][1] == 0xA802);
+  CHECK(fixture.heights[5][6] == 0xA802);
+  CHECK(fixture.heights[1][2] == (0x8800 | (1 * 32 + 2)));
+}
+
+TEST_CASE("Special terrain and room navigation keep their module entries",
+          "[ai][special-terrain][room-navigation][redirect-binding]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto resolve = [symbols](unsigned address) {
+    return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                             address);
+  };
+  CHECK(
+      resolve(0x800E5EC0u) ==
+      reinterpret_cast<void*>(&VS::Battle::Ai::FloodFillLiveAiTerrainHeights));
+  CHECK(
+      resolve(0x800E5FDCu) ==
+      reinterpret_cast<void*>(&VS::Battle::Ai::FindLiveAdjacentAiGroundHeight));
+  CHECK(resolve(0x800E6098u) ==
+        reinterpret_cast<void*>(
+            &VS::Battle::Ai::BuildLiveAiSpecialTerrainHeights));
+  CHECK(resolve(0x800E6158u) ==
+        reinterpret_cast<void*>(&VS::Battle::Ai::InitializeLiveRoomNavigation));
 }

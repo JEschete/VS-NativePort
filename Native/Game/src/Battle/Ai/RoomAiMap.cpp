@@ -152,6 +152,11 @@ void InitializeRoomAiMap(RoomAiRuntime& runtime) {
   runtime.RefreshDerivedRoomState();
 }
 
+// decomp: BATTLE.PRG func_800E6158 (src/BATTLE/BATTLE.PRG/7CD68.c:814).
+void InitializeRoomNavigation(RoomAiRuntime& runtime) {
+  InitializeRoomAiMap(runtime);
+}
+
 // decomp: BATTLE.PRG func_800E6F1C (src/BATTLE/BATTLE.PRG/7E05C.s:541).
 void FreeRoomAiState(RoomAiRuntime& runtime) {
   runtime.FreeActorAiStates();

@@ -67,9 +67,5 @@ int Battle_Ai_SetNavigationAreaFromTile(Battle_Ai_AreaRouteView* state, Battle_A
 int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int index, int area);
 void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state);
 int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_PathTest test, int mask);
-void Battle_Ai_FloodFillAiTerrainHeights(int tile_x, int tile_z, int height_value);
-int Battle_Ai_FindAdjacentAiGroundHeight(int tile_x, int tile_z);
-void Battle_Ai_BuildAiSpecialTerrainHeights(void);
-void Battle_Ai_InitializeRoomNavigation(void);
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

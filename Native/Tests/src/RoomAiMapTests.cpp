@@ -223,6 +223,18 @@ TEST_CASE("Room AI lifecycle publishes and releases through its runtime",
   CHECK(runtime.calls == std::vector<std::string>{"free-actors", "release"});
 }
 
+TEST_CASE("Room navigation entry builds and publishes the room AI map",
+          "[ai][room][room-navigation]") {
+  RecordingRuntime runtime(FlatRoom(3, 5));
+  VS::Battle::Ai::InitializeRoomNavigation(runtime);
+  CHECK(runtime.calls == std::vector<std::string>{"publish", "refresh"});
+  const RoomAiGrid& published = Required(runtime.published);
+  CHECK(published.settings.max_tile_x == 3);
+  CHECK(published.settings.max_tile_z == 5);
+  CHECK(published.flags[4][2] == 0);
+  CHECK(published.flags[5][2] == VS::Battle::Ai::kBlockedTileFlag);
+}
+
 TEST_CASE("The battle runtime reads the current room as a bounded source",
           "[ai][room]") {
   const Field_RoomRecord saved = Field_roomData;

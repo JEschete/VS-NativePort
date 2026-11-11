@@ -102,6 +102,10 @@ class RoomAiRuntime {
 // initialized (func_800E6F9C). Aborts on an invalid room header.
 void InitializeRoomAiMap(RoomAiRuntime& runtime);
 
+// Initializes the room's AI navigation on room entry: the original only
+// built and published the room AI map (func_800E6158).
+void InitializeRoomNavigation(RoomAiRuntime& runtime);
+
 // Frees every actor's AI state and the room AI map (func_800E6F1C).
 void FreeRoomAiState(RoomAiRuntime& runtime);
 }  // namespace VS::Battle::Ai
