@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import itertools
 import json
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import regression  # noqa: E402
@@ -172,6 +175,101 @@ class ReplayTests(unittest.TestCase):
     def test_a_truncated_last_line_is_ignored(self) -> None:
         text = trace(120) + '{"tick": 120, "category": "fra'
         self.assertEqual(regression.fingerprint(text), regression.fingerprint(trace(120)))
+
+
+REPLAY_MANIFEST = {"frames": 120, "scripts": 0, "sequence": "", "devices": False, "speed": 1}
+
+
+class ReplayRunTests(unittest.TestCase):
+    """#339: a matching replay deletes its Combat Lab run; anything to diagnose, or not provably its own, stays."""
+
+    def setUp(self) -> None:
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        self.build = Path(folder.name) / "Debug"
+        self.runs = self.build / "combat-lab" / "runs"
+        self.runs.mkdir(parents=True)
+        self.interactive = self.make_run("interactive", trace(120), REPLAY_MANIFEST | {"devices": True})
+        self.counter = 0
+        for target, value in (("build_directory", lambda config: self.build), ("SCENARIOS", {"w": ("w.json", 120)}),
+                              ("run_tests", lambda executable: regression.parse_report(report()))):
+            patcher = mock.patch.object(regression, target, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        printer = mock.patch("builtins.print")
+        printer.start()
+        self.addCleanup(printer.stop)
+
+    def make_run(self, name: str, events: str, manifest: dict) -> Path:
+        directory = self.runs / name
+        directory.mkdir()
+        (directory / "events.jsonl").write_text(events, encoding="utf-8")
+        (directory / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+        return directory
+
+    def combat_lab(self, *events: str, manifest: dict = REPLAY_MANIFEST, runs: int = 1, code: int = 0):
+        """Stands in for VS.CombatLab.exe: each launch writes `runs` run directories with the next trace."""
+        traces = itertools.cycle(events)
+
+        def run(command: list[str], **kwargs) -> types.SimpleNamespace:
+            text = next(traces)
+            for _ in range(runs):
+                self.counter += 1
+                self.make_run(f"run-{self.counter}", text, manifest)
+            return types.SimpleNamespace(returncode=code)
+
+        return mock.patch.object(regression.subprocess, "run", run)
+
+    def baseline(self, events: str):
+        return mock.patch.object(regression, "read_baseline", lambda: {
+            "tests": {"cases": ["alpha", "beta"], "assertions": 100},
+            "replays": {"Debug": {"w": regression.fingerprint(events)}}})
+
+    def remaining(self) -> list[str]:
+        return sorted(path.name for path in self.runs.iterdir())
+
+    def test_a_matching_replay_deletes_its_run(self) -> None:
+        with self.baseline(trace(120)), self.combat_lab(trace(120)):
+            self.assertEqual(regression.check("Debug"), [])
+        self.assertEqual(self.remaining(), ["interactive"])
+
+    def test_a_differing_replay_keeps_and_cites_its_run(self) -> None:
+        with self.baseline(trace(120)), self.combat_lab(trace(120, change_at=50)):
+            problems = regression.check("Debug")
+        self.assertEqual([problem.rule for problem in problems], ["replay-diverged"])
+        self.assertIn(f"run kept at {self.runs / 'run-1'}", problems[0].message)
+        self.assertEqual(self.remaining(), ["interactive", "run-1"])
+
+    def test_a_run_that_is_not_a_scripted_replay_is_never_deleted(self) -> None:
+        for manifest in (REPLAY_MANIFEST | {"devices": True}, REPLAY_MANIFEST | {"scripts": 1},
+                         REPLAY_MANIFEST | {"sequence": "s.json"}, REPLAY_MANIFEST | {"frames": 999}):
+            with self.baseline(trace(120)), self.combat_lab(trace(120), manifest=manifest):
+                self.assertEqual(regression.check("Debug"), [])
+        self.assertEqual(len(self.remaining()), 5)
+
+    def test_two_new_runs_are_never_deleted(self) -> None:
+        with self.baseline(trace(120)), self.combat_lab(trace(120), runs=2):
+            self.assertEqual(regression.check("Debug"), [])
+        self.assertEqual(self.remaining(), ["interactive", "run-1", "run-2"])
+
+    def test_a_failed_replay_cites_its_run(self) -> None:
+        with self.baseline(trace(120)), self.combat_lab(trace(120), code=3), \
+                self.assertRaisesRegex(SystemExit, "exited 3; run kept at .*run-1"):
+            regression.check("Debug")
+        self.assertEqual(self.remaining(), ["interactive", "run-1"])
+
+    def test_record_deletes_a_stable_pair_and_keeps_an_unstable_one(self) -> None:
+        with self.baseline(trace(120)), self.combat_lab(trace(120)), \
+                mock.patch.object(regression, "write_baseline") as write:
+            self.assertEqual(regression.record("Debug"), [])
+        write.assert_called_once()
+        self.assertEqual(self.remaining(), ["interactive"])
+
+        with self.baseline(trace(120)), self.combat_lab(trace(120), trace(120, change_at=50)):
+            problems = regression.record("Debug")
+        self.assertEqual([problem.rule for problem in problems], ["replay-unstable"])
+        self.assertIn(f"run kept at {self.runs / 'run-3'} and {self.runs / 'run-4'}", problems[0].message)
+        self.assertEqual(self.remaining(), ["interactive", "run-3", "run-4"])
 
 
 if __name__ == "__main__":

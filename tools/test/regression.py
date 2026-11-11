@@ -15,6 +15,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -176,7 +177,14 @@ def run_tests(executable: Path) -> TestRun:
         return parse_report(report.read_text(encoding="utf-8", errors="replace"))
 
 
-def run_replay(executable: Path, scenario: str, frames: int) -> dict:
+@dataclass(frozen=True)
+class Replay:
+    fingerprint: dict
+    directory: Path
+    owned: bool  # only this replay could have created the directory, so it may be deleted
+
+
+def run_replay(executable: Path, scenario: str, frames: int) -> Replay:
     runs = executable.parent / "combat-lab" / "runs"
     before = set(runs.iterdir()) if runs.is_dir() else set()
     completed = subprocess.run(
@@ -184,10 +192,37 @@ def run_replay(executable: Path, scenario: str, frames: int) -> dict:
          "--fixed-frame-ticks", FIXED_FRAME_TICKS],
         cwd=ROOT, check=False, timeout=REPLAY_TIMEOUT_SECONDS, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
-    created = sorted(set(runs.iterdir()) - before)
+    created = sorted(set(runs.iterdir()) - before) if runs.is_dir() else []
     if completed.returncode != 0 or not created:
-        raise SystemExit(f"{scenario}: {executable.name} exited {completed.returncode}")
-    return fingerprint((created[-1] / "events.jsonl").read_text(encoding="utf-8", errors="replace"))
+        kept = f"; run kept at {created[-1]}" if created else ""
+        raise SystemExit(f"{scenario}: {executable.name} exited {completed.returncode}{kept}")
+    directory = created[-1]
+    owned = len(created) == 1 and is_replay_run(directory, frames)
+    return Replay(fingerprint((directory / "events.jsonl").read_text(encoding="utf-8", errors="replace")), directory,
+                  owned)
+
+
+def is_replay_run(directory: Path, frames: int) -> bool:
+    """The manifest of a scripted replay: no device input, scripts or sequence, and exactly the requested frames."""
+    try:
+        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return (manifest.get("frames") == frames and manifest.get("scripts") == 0 and not manifest.get("sequence")
+            and manifest.get("devices") is False)
+
+
+def discard(replay: Replay) -> None:
+    """A matching replay leaves nothing to diagnose (#339); a run this replay may not own is never deleted."""
+    if replay.owned:
+        shutil.rmtree(replay.directory)
+    else:
+        print(f"kept {replay.directory}: not provably this replay's run")
+
+
+def kept(problems: list[Problem], *replays: Replay) -> list[Problem]:
+    where = " and ".join(str(replay.directory) for replay in replays)
+    return [Problem(problem.rule, problem.subject, f"{problem.message}; run kept at {where}") for problem in problems]
 
 
 def read_baseline() -> dict:
@@ -216,10 +251,14 @@ def check(config: str) -> list[Problem]:
         if name not in replays:
             problems.append(Problem("baseline-missing", name, f"no {config} replay baseline"))
             continue
-        actual = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
-        found = compare_replay(name, replays[name], actual)
-        print(f"{config} replay {name}: {actual['frames']} frames, {'differs' if found else 'matches baseline'}")
-        problems += found
+        replay = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
+        found = compare_replay(name, replays[name], replay.fingerprint)
+        print(f"{config} replay {name}: {replay.fingerprint['frames']} frames, "
+              f"{'differs' if found else 'matches baseline'}")
+        if found:
+            problems += kept(found, replay)
+        else:
+            discard(replay)
     return problems
 
 
@@ -234,10 +273,13 @@ def record(config: str) -> list[Problem]:
     for name, (scenario, frames) in SCENARIOS.items():
         first = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
         second = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
-        repeat = compare_replay(name, first, second)
+        repeat = compare_replay(name, first.fingerprint, second.fingerprint)
         if repeat:
-            return [Problem("replay-unstable", name, f"two identical runs differ: {repeat[0].message}")]
-        replays[name] = first
+            return kept([Problem("replay-unstable", name, f"two identical runs differ: {repeat[0].message}")],
+                        first, second)
+        discard(first)
+        discard(second)
+        replays[name] = first.fingerprint
     differences = compare_configurations(baseline["replays"])
     if differences:
         return differences
