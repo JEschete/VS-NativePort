@@ -2,6 +2,8 @@
 
   python tools\\test\\regression.py check [--config Debug]     run the tests and scenario replays against the baseline
   python tools\\test\\regression.py record [--config Debug]    replace that configuration's baseline with a passing run
+  python tools\\test\\regression.py record --config both      record Debug and Release together, for a replay change
+                                                              that both configurations make (they must still agree)
   python tools\\test\\regression.py static                     no build needed: every baseline test still exists in source
   python tools\\test\\regression.py coverage                   measure what the tests and replays execute, per function
 
@@ -262,30 +264,34 @@ def check(config: str) -> list[Problem]:
     return problems
 
 
-def record(config: str) -> list[Problem]:
-    directory = build_directory(config)
-    run = run_tests(directory / "VS.Tests.exe")
-    if run.failed:
-        return [Problem("test-failed", name, "a failing run cannot become the baseline") for name in sorted(run.failed)]
+def record(configs: list[str]) -> list[Problem]:
+    """Nothing is written unless every configuration passes, replays twice identically and agrees with the others."""
     baseline = read_baseline()
-    baseline["tests"] = {"cases": sorted(run.passed | run.skipped), "assertions": run.assertions}
-    replays = baseline["replays"].setdefault(config, {})
-    for name, (scenario, frames) in SCENARIOS.items():
-        first = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
-        second = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
-        repeat = compare_replay(name, first.fingerprint, second.fingerprint)
-        if repeat:
-            return kept([Problem("replay-unstable", name, f"two identical runs differ: {repeat[0].message}")],
-                        first, second)
-        discard(first)
-        discard(second)
-        replays[name] = first.fingerprint
+    for config in configs:
+        directory = build_directory(config)
+        run = run_tests(directory / "VS.Tests.exe")
+        if run.failed:
+            return [Problem("test-failed", name, "a failing run cannot become the baseline")
+                    for name in sorted(run.failed)]
+        baseline["tests"] = {"cases": sorted(run.passed | run.skipped), "assertions": run.assertions}
+        replays = baseline["replays"].setdefault(config, {})
+        for name, (scenario, frames) in SCENARIOS.items():
+            first = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
+            second = run_replay(directory / "VS.CombatLab.exe", scenario, frames)
+            repeat = compare_replay(name, first.fingerprint, second.fingerprint)
+            if repeat:
+                return kept([Problem("replay-unstable", name, f"two identical runs differ: {repeat[0].message}")],
+                            first, second)
+            discard(first)
+            discard(second)
+            replays[name] = first.fingerprint
+        print(f"{config}: {len(baseline['tests']['cases']):,} tests, {run.assertions:,} assertions, "
+              f"{len(replays)} replays")
     differences = compare_configurations(baseline["replays"])
     if differences:
         return differences
     write_baseline(baseline)
-    print(f"recorded {config}: {len(baseline['tests']['cases']):,} tests, {run.assertions:,} assertions, "
-          f"{len(replays)} replays")
+    print(f"recorded {' and '.join(configs)}")
     return []
 
 
@@ -376,12 +382,13 @@ def coverage() -> list[Problem]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=["check", "record", "static", "coverage"])
-    parser.add_argument("--config", default="Debug", choices=["Debug", "Release"])
+    parser.add_argument("--config", default="Debug", choices=["Debug", "Release", "both"])
     arguments = parser.parse_args()
+    configs = ["Debug", "Release"] if arguments.config == "both" else [arguments.config]
     if arguments.command == "check":
-        problems = check(arguments.config)
+        problems = [problem for config in configs for problem in check(config)]
     elif arguments.command == "record":
-        problems = record(arguments.config)
+        problems = record(configs)
     elif arguments.command == "coverage":
         problems = coverage()
     else:

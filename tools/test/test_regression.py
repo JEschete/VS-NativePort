@@ -261,15 +261,30 @@ class ReplayRunTests(unittest.TestCase):
     def test_record_deletes_a_stable_pair_and_keeps_an_unstable_one(self) -> None:
         with self.baseline(trace(120)), self.combat_lab(trace(120)), \
                 mock.patch.object(regression, "write_baseline") as write:
-            self.assertEqual(regression.record("Debug"), [])
+            self.assertEqual(regression.record(["Debug"]), [])
         write.assert_called_once()
         self.assertEqual(self.remaining(), ["interactive"])
 
         with self.baseline(trace(120)), self.combat_lab(trace(120), trace(120, change_at=50)):
-            problems = regression.record("Debug")
+            problems = regression.record(["Debug"])
         self.assertEqual([problem.rule for problem in problems], ["replay-unstable"])
         self.assertIn(f"run kept at {self.runs / 'run-3'} and {self.runs / 'run-4'}", problems[0].message)
         self.assertEqual(self.remaining(), ["interactive", "run-3", "run-4"])
+
+    def test_a_replay_change_both_configurations_make_is_recorded_together(self) -> None:
+        old = regression.fingerprint(trace(120))
+        both = {"tests": {"cases": ["alpha", "beta"], "assertions": 100},
+                "replays": {"Debug": {"w": old}, "Release": {"w": old}}}
+        with mock.patch.object(regression, "read_baseline", lambda: json.loads(json.dumps(both))), \
+                self.combat_lab(trace(120, change_at=50)), \
+                mock.patch.object(regression, "write_baseline") as write:
+            problems = regression.record(["Debug"])
+            self.assertEqual([problem.rule for problem in problems], ["replay-configurations-differ"])
+            write.assert_not_called()
+            self.assertEqual(regression.record(["Debug", "Release"]), [])
+        written = write.call_args.args[0]["replays"]
+        self.assertEqual(written["Debug"], written["Release"])
+        self.assertNotEqual(written["Debug"]["w"], old)
 
 
 if __name__ == "__main__":
