@@ -37,7 +37,8 @@ symbol references are gone.
   recovery-entry observations pass. Actual table/ABI controls and prior basic/
   random differential and guard suites pass again.
 - Original and native stat dispatch/recovery algorithms execute, with a
-  controlled selected stat callback. Publication and exact-revision CI pending.
+  controlled selected stat callback. Published in `7a3360d4`, green on
+  [CI 43208041790](https://github.com/JEschete/VS-NativePort/actions/runs/43208041790).
   No row30, gameplay or EC/M8 completion claim.
 
 Random8 effects are published in `0c3c8f6f`, green on
@@ -298,15 +299,16 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 The continuation is active, not paused. Row 28 is published and green. The
 row-29 checkpoint has all 88 IDs resolved (85 promoted, three retired),
 published and green in `7b797783`. #349, #350 and #351 are closed.
-Row 30's first 15 effect producers are published and green through `0c3c8f6f`.
-The eight triggered-recovery producers are verified locally; publish and
-confirm CI, then continue the focused tooling and producer/consumer fixes.
+Row 30's first 23 effect producers are published and green through `7a3360d4`.
+Continue the focused tooling and producer/consumer fixes.
 
 [#354](https://github.com/JEschete/VS-NativePort/issues/354) records the
 forwarding classifier treating an unbraced `if (...) Call();` as a call to
 `if`. Current native policies use ordinary braces and pass unchanged gates;
-repair the classifier with focused positive/negative tests, not a baseline
-refresh or unrelated status promotion.
+the classifier correction is locally verified with four formerly failing
+control-flow cases, keyword-prefixed forwarding controls, all 98 gate tests
+and scoped Ruff. Fresh before/after live gate reports are identical with
+zero violations. Its separate commit/publication/CI remain pending.
 
 [#352](https://github.com/JEschete/VS-NativePort/issues/352) records a later
 F00510 cost-check defect: BaseAttack with a weapon cost type outside 1-4
@@ -512,7 +514,7 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish triggered recovery and confirm CI; then repair #354 with scoped tests.
+2. Triggered recovery is published and green in `7a3360d4`; publish the verified #354 repair.
    Keep #337 open until its in-game reachability is established. Do not close
    #276: 779 remain.
 3. Continue row 30 with the cost and preview groups above, following

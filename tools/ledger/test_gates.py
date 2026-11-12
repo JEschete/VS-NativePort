@@ -392,6 +392,29 @@ class PromotionGateTests(GateTestCase):
                 )
                 self.expect_failure("claim-vs_namespace")
 
+    def test_unbraced_control_flow_claims_namespace(self) -> None:
+        for body in ("if (v) LocalStep(v);", "while (v) LocalStep(v);",
+                     'for (char item : "x") LocalStep(item);',
+                     "switch (v) default: LocalStep(v);"):
+            with self.subTest(body=body):
+                self.fixture.promote()
+                self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
+                    "namespace VS::Sys {\nvoid LocalStep(int) {}\n"
+                    "void Thing(int v) { " + body + " }\n}\n"
+                )
+                self.assertNotIn("claim-vs_namespace", [issue.rule for issue in self.report().issues])
+
+    def test_keyword_prefixed_forwarding_call_cannot_claim_namespace(self) -> None:
+        for callee in ("if_ready", "while_active", "for_each", "switch_mode"):
+            with self.subTest(callee=callee):
+                self.fixture.promote()
+                self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
+                    f'extern "C" int {callee}(int v);\n'
+                    "namespace VS::Sys {\nint Thing(int v) { "
+                    f"return ({callee}(v));" + " }\n}\n"
+                )
+                self.expect_failure("claim-vs_namespace")
+
     def test_logging_only_body_claims_namespace(self) -> None:
         self.fixture.promote()
         self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
