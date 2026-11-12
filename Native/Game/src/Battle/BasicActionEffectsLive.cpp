@@ -178,6 +178,10 @@ class LiveRandomStatQueue final : public RandomStatQueue {
 
 using Mediator = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
 static_assert(
+    std::is_same_v<decltype(&QueueLiveDarkAffinityRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveDamageTriggeredRecovery), Mediator>);
+static_assert(
     std::is_same_v<decltype(&QueueLiveSpellTriggeredRecovery), Mediator>);
 static_assert(
     std::is_same_v<decltype(&QueueLiveNonSpellTriggeredRecovery), Mediator>);
@@ -216,6 +220,28 @@ static_assert(
 static_assert(std::is_same_v<decltype(&SetLiveActionFlag64), Mediator>);
 static_assert(std::is_same_v<decltype(&SetLiveActionFlag32), Mediator>);
 }  // namespace
+
+// decomp: func_800847F0 (src/BATTLE/BATTLE.PRG/146C.c:12694).
+void QueueLiveDarkAffinityRecovery(Battle_ActionDefinition* action,
+                                   Battle_HitResult* source,
+                                   Battle_HitResult* target, int hit,
+                                   int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueDarkAffinityRecovery(queue);
+}
+// decomp: func_80084870 (src/BATTLE/BATTLE.PRG/146C.c:12705).
+void QueueLiveDamageTriggeredRecovery(Battle_ActionDefinition* action,
+                                      Battle_HitResult* source,
+                                      Battle_HitResult* target, int hit,
+                                      int execute) {
+  Require(Battle_actionState != nullptr,
+          "Damage-triggered recovery requires selected action state");
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueDamageTriggeredRecovery(
+      static_cast<std::uint8_t>(
+          Battle_actionState->selection.primaryTarget.hpEffect),
+      queue);
+}
 
 // decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12606).
 void QueueLiveSpellTriggeredRecovery(Battle_ActionDefinition* action,

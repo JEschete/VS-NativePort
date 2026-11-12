@@ -172,13 +172,6 @@
     <ClCompile Include="src\Battle\ActionCostsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\ActionEffects.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Battle\ActionExecution.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -425,6 +418,10 @@
     </ClCompile>
     <ClCompile Include="src\Battle\DamagePolicies.cpp" />
     <ClCompile Include="src\Battle\DamagePoliciesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Battle\DamageRecoveryEffects.cpp" />
+    <ClCompile Include="src\Battle\DamageRecoveryEffectsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Feedback.cpp">
@@ -2335,6 +2332,8 @@
     <ClInclude Include="include\Battle\DamageCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\DamagePolicies.hpp" />
     <ClInclude Include="include\Battle\DamagePoliciesLive.hpp" />
+    <ClInclude Include="include\Battle\DamageRecoveryEffects.hpp" />
+    <ClInclude Include="include\Battle\DamageRecoveryEffectsLive.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />
     <ClInclude Include="include\Battle\Enemy.h" />
     <ClInclude Include="include\Battle\HitCalculations.hpp" />

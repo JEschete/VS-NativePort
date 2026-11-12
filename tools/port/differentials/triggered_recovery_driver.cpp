@@ -19,7 +19,8 @@ constexpr std::array policies{
     b::QueueSpellTriggeredRecovery, b::QueueNonSpellTriggeredRecovery,
     b::QueuePhysicalAffinityRecovery, b::QueueAirAffinityRecovery,
     b::QueueFireAffinityRecovery, b::QueueEarthAffinityRecovery,
-    b::QueueWaterAffinityRecovery, b::QueueLightAffinityRecovery};
+    b::QueueWaterAffinityRecovery, b::QueueLightAffinityRecovery,
+    b::QueueDarkAffinityRecovery};
 std::int16_t low(unsigned value) {
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(value));
 }
@@ -99,9 +100,10 @@ int main() {
       unsigned current{}, maximum{}; in >> current >> maximum;
       limb = {low(current), low(maximum)};
     }
-    if (!in || function >= policies.size()) return 2;
+    if (!in || function > policies.size()) return 2;
     queue.decode();
-    policies[function](queue);
+    if (function == 9) b::QueueDamageTriggeredRecovery(queue.type & 3, queue);
+    else policies[function](queue);
     const bool canaries = queue.before == std::array<unsigned,4>{1,2,3,4} &&
                           queue.after == std::array<unsigned,4>{5,6,7,8};
     std::cout << canaries;

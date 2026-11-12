@@ -24,19 +24,3 @@ typedef struct Battle_SoundEventTargets {
 } Battle_SoundEventTargets;
 
 #endif // VS_BATTLE_ACTIONEFFECTS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_ACTIONEFFECTS_H_DECLS)
-#define VS_BATTLE_ACTIONEFFECTS_H_DECLS
-#include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Hit.h"
-
-int Battle_QueueDarkAffinityRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueueDamageTriggeredRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueueHitDamageAndEquipmentWear(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-
-#endif // VS_BATTLE_ACTIONEFFECTS_H_DECLS

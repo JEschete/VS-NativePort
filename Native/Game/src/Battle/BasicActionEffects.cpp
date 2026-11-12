@@ -14,6 +14,8 @@ constexpr std::uint8_t kFireAffinity = 2;
 constexpr std::uint8_t kEarthAffinity = 3;
 constexpr std::uint8_t kWaterAffinity = 4;
 constexpr std::uint8_t kLightAffinity = 5;
+constexpr std::uint8_t kDarkAffinity = 6;
+constexpr std::uint8_t kCriticalHpDamage = 3;
 
 void QueueTriggeredRecovery(TriggeredRecoveryQueue& queue) {
   const auto amount = queue.Calculate();
@@ -89,6 +91,20 @@ void QueueWaterAffinityRecovery(TriggeredRecoveryQueue& queue) {
 // decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12683).
 void QueueLightAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kLightAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+
+// decomp: func_800847F0 (src/BATTLE/BATTLE.PRG/146C.c:12694).
+void QueueDarkAffinityRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedAffinity() == kDarkAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_80084870 (src/BATTLE/BATTLE.PRG/146C.c:12705).
+void QueueDamageTriggeredRecovery(std::uint8_t primary_hp_mode,
+                                  TriggeredRecoveryQueue& queue) {
+  if (primary_hp_mode == 1 || primary_hp_mode == kCriticalHpDamage) {
     QueueTriggeredRecovery(queue);
   }
 }

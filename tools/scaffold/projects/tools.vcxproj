@@ -336,6 +336,8 @@
     <None Include="..\..\port\differentials\action_execution.py" />
     <None Include="..\..\port\differentials\action_execution_driver.cpp" />
     <None Include="..\..\port\differentials\action_notification.py" />
+    <None Include="..\..\port\differentials\action_preview.py" />
+    <None Include="..\..\port\differentials\action_preview_driver.cpp" />
     <None Include="..\..\port\differentials\actor_creation.py" />
     <None Include="..\..\port\differentials\actor_creation_driver.cpp" />
     <None Include="..\..\port\differentials\actor_reaction.py" />

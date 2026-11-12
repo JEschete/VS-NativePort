@@ -20,6 +20,7 @@
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
+#include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
@@ -426,11 +427,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     Battle_attackPrerequisiteFunctions[1] = Battle_AcceptAttackPrerequisiteSlot;
     Battle_attackPrerequisiteFunctions[2] = Battle_AcceptAttackPrerequisiteSlot;
     Battle_actionEffectMediators[58] =
-        [](Battle_ActionDefinition* definition, Battle_HitResult* source_hit,
-           Battle_HitResult* target_hit, int hit, int random) {
-          Battle_QueueHitDamageAndEquipmentWear(definition, source_hit,
-                                                target_hit, hit, random);
-        };
+        VS::Battle::QueueLiveHitDamageAndEquipmentWear;
     Battle_statCalculators[25] = VS::Battle::LivePhysicalDamageWithDebuffs;
     stats[0].agility = 200;
     stats[0].strength = 150;
@@ -1812,7 +1809,8 @@ TEST_CASE("All battle abilities charge original Risk with chain growth and cap",
     fixture.stats[0].risk = risk;
     const int cost =
         base_cost + (id < 40 && step >= 10 ? (step * step) / 10 : 0);
-    const int expected = (1 << 24) + (Battle_ActionType_Ability << 16) + cost;
+    const auto expected = static_cast<std::uint32_t>(
+        (1 << 24) + (Battle_ActionType_Ability << 16) + cost);
     CHECK(VS::Battle::LiveActionCostAndAvailability(id, &fixture.stats[0], 0) ==
           expected);
     CHECK(fixture.stats[0].risk == risk);
@@ -1841,9 +1839,9 @@ TEST_CASE("All forty Break Arts require surviving their original HP cost",
   actor.currentHp = static_cast<decltype(actor.currentHp)>(hp);
   actor.risk = 7;
   actor.weapon.currentPp = 35;
-  const int expected = (affordable ? 1 << 24 : 0) +
-                       (Battle_ActionType_BreakArt << 16) + cost +
-                       (affordable ? 0 : 1);
+  const auto expected = static_cast<std::uint32_t>(
+      (affordable ? 1 << 24 : 0) + (Battle_ActionType_BreakArt << 16) + cost +
+      (affordable ? 0 : 1));
   CHECK(VS::Battle::LiveActionCostAndAvailability(action_id, &actor, 0) ==
         expected);
   CHECK(actor.currentHp == hp);
@@ -2087,12 +2085,12 @@ TEST_CASE("Single-hit offensive abilities apply their original stat factors",
     int mp_change;
   };
   const auto examples = std::to_array<Example>({
-      {22, {4, 7, Battle_QueueHitDamageAndEquipmentWear}, -72, 0},
-      {23, {18, 3, Battle_AccumulateHpRestoration, true}, 32, 0},
-      {24, {4, 3, Battle_AccumulateMpDamage}, 0, -32},
-      {25, {18, 3, Battle_AccumulateMpRestoration, true}, 0, 32},
-      {26, {5, 1, Battle_QueueHitDamageAndEquipmentWear}, -42, 0},
-      {27, {11, 2, Battle_AccumulateMpDamage}, 0, -42},
+      {22, {4, 7, VS::Battle::QueueLiveHitDamageAndEquipmentWear}, -72, 0},
+      {23, {18, 3, VS::Battle::QueueLiveHpRecovery, true}, 32, 0},
+      {24, {4, 3, VS::Battle::QueueLiveMpDrain}, 0, -32},
+      {25, {18, 3, VS::Battle::QueueLiveMpRecovery, true}, 0, 32},
+      {26, {5, 1, VS::Battle::QueueLiveHitDamageAndEquipmentWear}, -42, 0},
+      {27, {11, 2, VS::Battle::QueueLiveMpDrain}, 0, -42},
   });
   for (const auto& example : examples) {
     CAPTURE(example.id);
@@ -2109,7 +2107,7 @@ TEST_CASE("Single-hit offensive abilities apply their original stat factors",
 TEST_CASE("Temper damages the target and restores weapon DP",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
-  fixture.Queue(28, 0, {4, 4, Battle_QueueHitDamageAndEquipmentWear});
+  fixture.Queue(28, 0, {4, 4, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
   fixture.Queue(28, 1, {18, 20, Battle_AccumulateWeaponDpRestoration, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 758, 200);
@@ -2119,8 +2117,9 @@ TEST_CASE("Temper damages the target and restores weapon DP",
 TEST_CASE("Crimson Pain applies both enemy and self HP damage",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
-  fixture.Queue(29, 0, {6, 10, Battle_QueueHitDamageAndEquipmentWear});
-  fixture.Queue(29, 1, {6, 3, Battle_QueueHitDamageAndEquipmentWear, true});
+  fixture.Queue(29, 0, {6, 10, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
+  fixture.Queue(29, 1,
+                {6, 3, VS::Battle::QueueLiveHitDamageAndEquipmentWear, true});
   fixture.Commit();
   fixture.CheckResources(580, 100, 718, 200);
 }
@@ -2128,7 +2127,7 @@ TEST_CASE("Crimson Pain applies both enemy and self HP damage",
 TEST_CASE("Instill damages the target and restores weapon PP",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
-  fixture.Queue(30, 0, {4, 1, Battle_QueueHitDamageAndEquipmentWear});
+  fixture.Queue(30, 0, {4, 1, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
   fixture.Queue(30, 1, {4, 10, Battle_AccumulateWeaponPpRestoration, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 788, 200);
@@ -2138,8 +2137,8 @@ TEST_CASE("Instill damages the target and restores weapon PP",
 TEST_CASE("Phantom Pain converts weapon PP to damage and empties it",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
-  fixture.Queue(31, 0, {8, 0, Battle_QueueHitDamageAndEquipmentWear});
-  fixture.Queue(31, 1, {1, 0, Battle_AccumulateWeaponPpDrain, true});
+  fixture.Queue(31, 0, {8, 0, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
+  fixture.Queue(31, 1, {1, 0, VS::Battle::QueueLiveWeaponPpDrain, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 728, 200);
   CHECK(fixture.stats[0].weapon.currentPp == 0);
@@ -2150,7 +2149,7 @@ TEST_CASE("Siphon Soul restores half the incoming spell cost as MP",
   const bool spell = GENERATE(false, true);
   AbilityEffectFixture fixture;
   fixture.action.selection.actionId = spell ? 99 : 1;
-  fixture.Queue(41, 0, {21, 5, Battle_AccumulateMpRestoration, true});
+  fixture.Queue(41, 0, {21, 5, VS::Battle::QueueLiveMpRecovery, true});
   fixture.Commit();
   fixture.CheckResources(600, spell ? 112 : 100, 800, 200);
 }
@@ -2163,8 +2162,9 @@ TEST_CASE("Reflect abilities return damage only for the matching action type",
   AbilityEffectFixture fixture;
   fixture.action.selection.actionId = spell ? 99 : 1;
   fixture.action.selection.primaryTarget.hpEffect = incoming_effect;
-  fixture.Queue(id, 0,
-                {id == 42 ? 9 : 10, 4, Battle_QueueHitDamageAndEquipmentWear});
+  fixture.Queue(
+      id, 0,
+      {id == 42 ? 9 : 10, 4, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
   fixture.Commit();
   const bool applies =
       (spell == (id == 42)) && (incoming_effect == 1 || incoming_effect == 3);
@@ -2199,7 +2199,7 @@ TEST_CASE("All seven affinity defenses recover only matching damage",
       VS::Battle::QueueLiveEarthAffinityRecovery,
       VS::Battle::QueueLiveWaterAffinityRecovery,
       VS::Battle::QueueLiveLightAffinityRecovery,
-      Battle_QueueDarkAffinityRecovery};
+      VS::Battle::QueueLiveDarkAffinityRecovery};
   const int affinity = GENERATE(0, 1, 2, 3, 4, 5, 6);
   const int incoming = GENERATE(0, 1, 2, 3, 4, 5, 6);
   const int incoming_effect = GENERATE(1, 2, 3);
@@ -2217,8 +2217,9 @@ TEST_CASE("Phantom Shield converts shield PP to recovery only after damage",
   const int incoming_effect = GENERATE(0, 1, 2, 3);
   AbilityEffectFixture fixture;
   fixture.action.selection.primaryTarget.hpEffect = incoming_effect;
-  fixture.Queue(53, 0, {23, 0, Battle_QueueDamageTriggeredRecovery, true});
-  fixture.Queue(53, 1, {1, 0, Battle_AccumulateShieldPpDrain, true});
+  fixture.Queue(53, 0,
+                {23, 0, VS::Battle::QueueLiveDamageTriggeredRecovery, true});
+  fixture.Queue(53, 1, {1, 0, VS::Battle::QueueLiveShieldPpDrain, true});
   fixture.Commit();
   const bool applies = incoming_effect == 1 || incoming_effect == 3;
   fixture.CheckResources(applies ? 690 : 600, 100, 800, 200);
@@ -2271,13 +2272,13 @@ TEST_CASE("Restorative abilities respect HP MP and equipment capacity",
   AbilityEffectFixture fixture;
   SECTION("Gain Life") {
     fixture.stats[0].currentHp = 995;
-    fixture.Queue(23, 0, {18, 3, Battle_AccumulateHpRestoration, true});
+    fixture.Queue(23, 0, {18, 3, VS::Battle::QueueLiveHpRecovery, true});
     fixture.Commit();
     CHECK(fixture.stats[0].currentHp == 1000);
   }
   SECTION("Gain Magic") {
     fixture.stats[0].currentMp = 299;
-    fixture.Queue(25, 0, {18, 3, Battle_AccumulateMpRestoration, true});
+    fixture.Queue(25, 0, {18, 3, VS::Battle::QueueLiveMpRecovery, true});
     fixture.Commit();
     CHECK(fixture.stats[0].currentMp == 300);
   }
@@ -2303,7 +2304,8 @@ TEST_CASE("MP damage abilities cannot drain more MP than the target has",
   fixture.stats[1].currentMp =
       static_cast<decltype(fixture.stats[1].currentMp)>(mp);
   fixture.Queue(
-      id, 0, {id == 24 ? 4 : 11, id == 24 ? 3 : 2, Battle_AccumulateMpDamage});
+      id, 0,
+      {id == 24 ? 4 : 11, id == 24 ? 3 : 2, VS::Battle::QueueLiveMpDrain});
   const int damage = std::min(mp, id == 24 ? 32 : 42);
   CHECK(fixture.target.target.mp == damage);
   CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(damage));
@@ -2335,10 +2337,12 @@ TEST_CASE("Two-hit Break Arts accumulate both original physical hit contracts",
     const int second = 150 - 60 - 6 * (art.damage_type + second_affinity);
     CHECK(first > 0);
     CHECK(second > 0);
-    fixture.Queue(art.id, 0,
-                  {25, art.factor, Battle_QueueHitDamageAndEquipmentWear});
+    fixture.Queue(
+        art.id, 0,
+        {25, art.factor, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
     CHECK(fixture.target.target.hp == first);
-    fixture.Queue(art.id, 1, {25, 0, Battle_QueueHitDamageAndEquipmentWear});
+    fixture.Queue(art.id, 1,
+                  {25, 0, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
     CHECK(fixture.target.target.hp == first + second);
     fixture.CheckResolvedHits(art.id, first + second);
     fixture.Commit();

@@ -29,18 +29,6 @@ extern void (*Battle_actionEffectMediators[70])(
     Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int);
 extern u_int Battle_hitPrerequisiteResult;
 extern u_int Battle_previousHitResult;
-int Battle_AccumulateMpDamage(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_AccumulateWeaponPpDrain(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_AccumulateShieldPpDrain(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_AccumulateHpRestoration(
-    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_AccumulateMpRestoration(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
 int Battle_AccumulateWeaponPpRestoration(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
 int Battle_AccumulateWeaponDpRestoration(

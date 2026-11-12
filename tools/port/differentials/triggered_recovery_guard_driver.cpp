@@ -1,4 +1,4 @@
-// Checked F00476-F00483 live boundaries; real owned dispatch/recovery by default.
+// Checked F00476-F00485 live boundaries; real owned dispatch/recovery by default.
 #include <algorithm>
 #include <array>
 #include <bit>
@@ -32,11 +32,12 @@ u_int Battle_lastActionStatValue{}, Battle_hitPrerequisiteResult{};
 namespace {
 namespace b = VS::Battle;
 using Handler = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
-constexpr std::array<Handler, 8> handlers{
+constexpr std::array<Handler, 10> handlers{
     b::QueueLiveSpellTriggeredRecovery, b::QueueLiveNonSpellTriggeredRecovery,
     b::QueueLivePhysicalAffinityRecovery, b::QueueLiveAirAffinityRecovery,
     b::QueueLiveFireAffinityRecovery, b::QueueLiveEarthAffinityRecovery,
-    b::QueueLiveWaterAffinityRecovery, b::QueueLiveLightAffinityRecovery};
+    b::QueueLiveWaterAffinityRecovery, b::QueueLiveLightAffinityRecovery,
+    b::QueueLiveDarkAffinityRecovery, b::QueueLiveDamageTriggeredRecovery};
 template<class T> auto bytes(const T& value) {
   return std::bit_cast<std::array<std::byte, sizeof(T)>>(value);
 }
@@ -126,6 +127,7 @@ int main(int argc, char** argv) {
   Battle_actionState = &state;
   state.selection.actionId = function < 2 ? 255 : 65535;
   state.selection.effectVariant = static_cast<char>(function - 2);
+  state.selection.primaryTarget.hpEffect = 1;
   Battle_actionDefinitions[255].type = function == 0 ? 1 : 7;
   action.type = function == 0 ? 7 : 1;
   action.hits[1].statCalculatorId = 1;

@@ -70,6 +70,11 @@ void QueueEarthAffinityRecovery(TriggeredRecoveryQueue& queue);
 void QueueWaterAffinityRecovery(TriggeredRecoveryQueue& queue);
 // decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12683).
 void QueueLightAffinityRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_800847F0 (src/BATTLE/BATTLE.PRG/146C.c:12694).
+void QueueDarkAffinityRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_80084870 (src/BATTLE/BATTLE.PRG/146C.c:12705).
+void QueueDamageTriggeredRecovery(std::uint8_t primary_hp_mode,
+                                  TriggeredRecoveryQueue& queue);
 
 // decomp: _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717).
 void QueueRandomStrengthIncrease(RandomStatQueue& queue);

@@ -387,9 +387,6 @@
     <ClCompile Include="src\Battle\ActionCostsLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClCompile Include="src\Battle\ActionEffects.cpp">
-      <Filter>src\Battle</Filter>
-    </ClCompile>
     <ClInclude Include="src\Battle\ActionEffects.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
@@ -730,6 +727,12 @@
       <Filter>src\Battle</Filter>
     </ClCompile>
     <ClCompile Include="src\Battle\DamagePoliciesLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\DamageRecoveryEffects.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\DamageRecoveryEffectsLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\EncounterHooks.h">
@@ -2920,6 +2923,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\DamagePoliciesLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\DamageRecoveryEffects.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\DamageRecoveryEffectsLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Encounter.hpp">

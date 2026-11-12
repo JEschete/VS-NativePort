@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -11,14 +10,12 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/TargetingState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -38,73 +35,6 @@ u_int Battle_hitPrerequisiteResult;
 
 // decomp: D_800F1A04 (D_800F1A04@BATTLE/BATTLE.PRG)
 u_int Battle_previousHitResult;
-
-// decomp: BATTLE.PRG func_80084CAC (src/BATTLE/BATTLE.PRG/146C.c:12820)
-int Battle_AccumulateMpDamage(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
-{
-    Battle_ActorStats* target_stats = Battle_actors[target_hit->target.targetActor]->stats;
-    short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
-
-    if (target_stats->currentMp < amount) {
-        amount = target_stats->currentMp;
-        Battle_lastActionStatValue = target_stats->currentMp;
-    }
-
-    target_hit->target.mp += amount;
-    target_hit->mpEffect = 1;
-}
-
-// decomp: BATTLE.PRG func_80084D44 (src/BATTLE/BATTLE.PRG/146C.c:12835)
-int Battle_AccumulateWeaponPpDrain(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    if (Battle_actors[target_hit->target.targetActor]->stats->weapon.blade.id != 0) {
-        u_short amount =
-            Battle_actors[target_hit->target.targetActor]->stats->weapon.currentPp;
-        target_hit->weaponPpChange += amount;
-        target_hit->weaponPpEffect = 1;
-    }
-}
-
-// decomp: BATTLE.PRG func_80084DA8 (src/BATTLE/BATTLE.PRG/146C.c:12847)
-int Battle_AccumulateShieldPpDrain(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    Battle_ActorStats* actor = Battle_actors[target_hit->target.targetActor]->stats;
-
-    if ((Battle_actionState->selection.primaryTarget.hpEffect == 1) || (Battle_actionState->selection.primaryTarget.hpEffect == 3)) {
-        if (actor->shield.base.id != 0) {
-            short amount = actor->shield.currentPp;
-            target_hit->shieldPpChange += amount;
-            target_hit->shieldPpEffect = 1;
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_80084E28 (src/BATTLE/BATTLE.PRG/146C.c:12862)
-int Battle_AccumulateHpRestoration(
-    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
-{
-    short amount = VS::Battle::LiveCalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
-    target_hit->target.hp += amount;
-    target_hit->hpEffect = 2;
-
-    if (target_hit->targetsPosition == 0) {
-        VS::Battle::LiveDistributeLimbRecovery(action, target_hit, amount);
-    }
-}
-
-// decomp: BATTLE.PRG func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12874)
-int Battle_AccumulateMpRestoration(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
-{
-    short restoration_amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
-    target_hit->target.mp = target_hit->target.mp + restoration_amount;
-    target_hit->mpEffect = 2;
-}
 
 // decomp: BATTLE.PRG func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882)
 int Battle_AccumulateWeaponPpRestoration(

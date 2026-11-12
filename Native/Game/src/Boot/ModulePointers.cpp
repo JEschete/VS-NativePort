@@ -35,6 +35,7 @@
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
+#include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
@@ -91,7 +92,6 @@ extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
-#include "Battle/ActionEffects.h"
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
@@ -352,14 +352,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800847F0u, 0u, (void*)&Battle_QueueDarkAffinityRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084870u, 0u, (void*)&Battle_QueueDamageTriggeredRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084B70u, 0u, (void*)&Battle_QueueHitDamageAndEquipmentWear, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084CACu, 0u, (void*)&Battle_AccumulateMpDamage, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084D44u, 0u, (void*)&Battle_AccumulateWeaponPpDrain, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084DA8u, 0u, (void*)&Battle_AccumulateShieldPpDrain, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084E28u, 0u, (void*)&Battle_AccumulateHpRestoration, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084EA0u, 0u, (void*)&Battle_AccumulateMpRestoration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084EECu, 0u, (void*)&Battle_AccumulateWeaponPpRestoration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084F40u, 0u, (void*)&Battle_AccumulateWeaponDpRestoration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084F94u, 0u, (void*)&Battle_AccumulateRiskReduction, 0u, 0u, 0u},
@@ -1767,6 +1759,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80085B10u, 0u, (void*)&VS::Battle::ResolveLiveActionTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008631Cu, 0u, (void*)&VS::Battle::PreviewLiveActionAgainstLimb, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800863A4u, 0u, (void*)&VS::Battle::PreviewLiveActionAgainstActor, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800847F0u, 0u, (void*)&VS::Battle::QueueLiveDarkAffinityRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084870u, 0u, (void*)&VS::Battle::QueueLiveDamageTriggeredRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084B70u, 0u, (void*)&VS::Battle::QueueLiveHitDamageAndEquipmentWear, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084CACu, 0u, (void*)&VS::Battle::QueueLiveMpDrain, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084D44u, 0u, (void*)&VS::Battle::QueueLiveWeaponPpDrain, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084DA8u, 0u, (void*)&VS::Battle::QueueLiveShieldPpDrain, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084E28u, 0u, (void*)&VS::Battle::QueueLiveHpRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084EA0u, 0u, (void*)&VS::Battle::QueueLiveMpRecovery, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

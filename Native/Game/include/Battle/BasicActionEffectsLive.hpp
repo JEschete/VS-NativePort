@@ -5,6 +5,11 @@ struct Battle_ActionDefinition;
 struct Battle_HitResult;
 
 namespace VS::Battle {
+void QueueLiveDarkAffinityRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                                   Battle_HitResult*, int, int);
+void QueueLiveDamageTriggeredRecovery(Battle_ActionDefinition*,
+                                      Battle_HitResult*, Battle_HitResult*, int,
+                                      int);
 void QueueLiveSpellTriggeredRecovery(Battle_ActionDefinition*,
                                      Battle_HitResult*, Battle_HitResult*, int,
                                      int);

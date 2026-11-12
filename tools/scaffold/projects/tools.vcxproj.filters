@@ -1980,6 +1980,12 @@
     <None Include="..\..\port\differentials\action_notification.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\action_preview.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\action_preview_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\actor_creation.py">
       <Filter>tools\port\differentials</Filter>
     </None>

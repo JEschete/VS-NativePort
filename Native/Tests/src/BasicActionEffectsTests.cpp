@@ -16,6 +16,7 @@
 
 #include "Battle/BasicActionEffects.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
+#include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/RandomLive.hpp"
@@ -722,7 +723,7 @@ struct RecoveryEffect {
   Handler live;
   std::uint32_t address;
 };
-constexpr std::array<RecoveryEffect, 8> kRecoveryEffects{{
+constexpr std::array<RecoveryEffect, 9> kRecoveryEffects{{
     {battle::QueueSpellTriggeredRecovery,
      battle::QueueLiveSpellTriggeredRecovery, 0x80084390},
     {battle::QueueNonSpellTriggeredRecovery,
@@ -739,6 +740,8 @@ constexpr std::array<RecoveryEffect, 8> kRecoveryEffects{{
      0x800846F0},
     {battle::QueueLightAffinityRecovery, battle::QueueLiveLightAffinityRecovery,
      0x80084770},
+    {battle::QueueDarkAffinityRecovery, battle::QueueLiveDarkAffinityRecovery,
+     0x800847F0},
 }};
 
 struct RecoveryQueue final : battle::TriggeredRecoveryQueue {
@@ -1088,5 +1091,239 @@ TEST_CASE(
     "F00483 original VOID5 mediator integrates stat and recovery policies",
     "[triggered-recovery][F00483]") {
   CheckLiveRecovery(7);
+}
+TEST_CASE("F00484 dark recovery preserves unused-input gates",
+          "[damage-recovery][F00484]") {
+  CheckRecoveryGates(8);
+  CheckLiveRecoveryMiss(8);
+}
+TEST_CASE("F00484 dark recovery reads current pending HP and always recovers",
+          "[damage-recovery][F00484]") {
+  CheckRecoveryCallback(8);
+  CheckLiveRecovery(8);
+}
+TEST_CASE("F00485 primary damage mode gates independently of input identity",
+          "[damage-recovery][F00485]") {
+  RecoveryFixture fixture;
+  for (std::uint8_t mode = 0; mode < 4; ++mode) {
+    RecoveryQueue queue;
+    queue.amount = -7;
+    const auto before = queue.target;
+    battle::QueueDamageTriggeredRecovery(mode, queue);
+    if (mode == 1 || mode == 3) {
+      CHECK(queue.target.changes.at(kHp) ==
+            battle::ActionResultChange{-306, 2});
+      CHECK(queue.events == std::vector<int>{3, 4, 5, 6});
+    } else {
+      CHECK(queue.target == before);
+      fixture.state.selection.primaryTarget.hpEffect = mode;
+      battle::QueueLiveDamageTriggeredRecovery(nullptr, nullptr, nullptr, -99,
+                                               -1);
+      CHECK(fixture.calls == 0);
+    }
+  }
+}
+TEST_CASE("F00485 original mediator recovers through real dispatch and limbs",
+          "[damage-recovery][F00485]") {
+  RecoveryFixture fixture;
+  Battle_statCalculators[1] = RecoveryCalculator;
+  const auto handler =
+      Relocated(0x80084870, battle::QueueLiveDamageTriggeredRecovery);
+  for (const auto mode : {1U, 3U}) {
+    for (const auto amount : {-32768, 0, 32767}) {
+      fixture.state.selection.primaryTarget.hpEffect = mode;
+      fixture.index = 1;
+      fixture.execute = -1;
+      CheckLiveRecoverySample(fixture, handler, 8, amount, 32767);
+    }
+  }
+}
+
+struct DamageFixture;
+DamageFixture* g_damage{};
+struct DamageFixture : RecoveryFixture {
+  int critical_before = Battle_criticalHitOccurred;
+  int critical_seen{};
+  bool mutate_owner = true;
+  DamageFixture() {
+    g_damage = this;
+    source.target.targetActor = 41;
+    hit.target.targetActor = 41;
+    hit.targetsPosition = 0;
+    changed.target.targetActor = 40;
+    changed.targetsPosition = 0;
+    changed.target.targetLimb = 5;
+    changed.inflictStatuses = 0x10;
+    Battle_actors[40] = &replacement;
+    stats.actorId = 41;
+    replacement_stats.actorId = 40;
+    input.category = 1;
+    stats.currentMp = 71;
+    stats.weapon.currentDp = 100;
+    stats.weapon.currentPp = 10;
+    stats.weapon.maxPp = 500;
+    stats.shield.currentDp = 100;
+    stats.shield.currentPp = 10;
+    stats.shield.maxPp = 500;
+    actor.weaponDrawn = 1;
+    amount = 30;
+  }
+  ~DamageFixture() {
+    Battle_criticalHitOccurred = critical_before;
+    g_damage = nullptr;
+  }
+};
+std::int16_t DamageCalculator(Battle_ActionDefinition* action,
+                              Battle_HitResult* source,
+                              Battle_HitResult* target, int hit, int execute) {
+  auto& fixture = *g_damage;
+  ++fixture.calls;
+  fixture.arguments_match =
+      action == &fixture.input && source == &fixture.source &&
+      target == &fixture.hit && hit == 1 && execute == fixture.execute;
+  fixture.critical_seen = Battle_criticalHitOccurred;
+  Battle_criticalHitOccurred = -7;
+  *target = fixture.changed;
+  if (fixture.mutate_owner) fixture.actor.stats = &fixture.replacement_stats;
+  fixture.stats.currentMp = -19;
+  fixture.stats.statuses = 0x8000;
+  return fixture.amount;
+}
+TEST_CASE("F00494 caches stats owners but distributes to the current hit actor",
+          "[damage-recovery][F00494]") {
+  DamageFixture fixture;
+  Battle_statCalculators[1] = DamageCalculator;
+  Battle_criticalHitOccurred = 123;
+  fixture.execute = -1;
+  fixture.changed.target.hp = 32767;
+  Relocated(0x80084B70, battle::QueueLiveHitDamageAndEquipmentWear)(
+      &fixture.input, &fixture.source, &fixture.hit, 1, fixture.execute);
+  CHECK(fixture.arguments_match);
+  CHECK(fixture.critical_seen == 0);
+  CHECK(fixture.hit.target.hp == RecoveryHalf(32767 + 30));
+  CHECK(fixture.hit.hpEffect == 3);
+  CHECK(fixture.hit.inflictStatuses == 0x8010);
+  CHECK(fixture.stats.weapon.currentDp == 70);
+  CHECK(fixture.stats.weapon.currentPp == 13);
+  CHECK(fixture.stats.shield.currentDp == 70);
+  CHECK(fixture.stats.shield.currentPp == 13);
+}
+TEST_CASE("F00494 preview removes damage status without consuming equipment",
+          "[damage-recovery][F00494]") {
+  DamageFixture fixture;
+  Battle_statCalculators[1] = DamageCalculator;
+  fixture.execute = 0;
+  fixture.actor.stats = nullptr;
+  fixture.source.target.targetActor = 41;
+  fixture.hit.target.targetActor = 40;
+  fixture.replacement_stats.statuses = 0x8000;
+  battle::QueueLiveHitDamageAndEquipmentWear(&fixture.input, &fixture.source,
+                                             &fixture.hit, 1, 0);
+  CHECK(fixture.hit.inflictStatuses == 0x8010);
+  CHECK(fixture.stats.weapon.currentDp == 100);
+  CHECK(fixture.stats.currentHp == 123);
+}
+TEST_CASE("F00494 position damage permits unused null stats owners",
+          "[damage-recovery][F00494]") {
+  DamageFixture fixture;
+  Battle_statCalculators[1] = DamageCalculator;
+  fixture.actor.stats = nullptr;
+  fixture.hit.targetsPosition = 1;
+  fixture.changed.targetsPosition = -1;
+  battle::QueueLiveHitDamageAndEquipmentWear(&fixture.input, &fixture.source,
+                                             &fixture.hit, 1, 0);
+  CHECK(fixture.hit.hpEffect == 3);
+  CHECK(fixture.hit.inflictStatuses == 0x10);
+  CHECK(fixture.calls == 1);
+}
+TEST_CASE("F00495 caps against current MP of the cached owner without flooring",
+          "[damage-recovery][F00495]") {
+  DamageFixture fixture;
+  Battle_statCalculators[1] = DamageCalculator;
+  fixture.changed.target.mp = -32768;
+  Relocated(0x80084CAC, battle::QueueLiveMpDrain)(
+      &fixture.input, &fixture.source, &fixture.hit, 1, 0);
+  CHECK(fixture.hit.target.mp == 32749);
+  CHECK(fixture.hit.mpEffect == 1);
+  CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(-19));
+  CHECK(fixture.stats.currentMp == -19);
+  CHECK(fixture.replacement_stats.currentMp == 0);
+}
+TEST_CASE("F00495 uncapped negative amount leaves the calculator last value",
+          "[damage-recovery][F00495]") {
+  DamageFixture fixture;
+  Battle_statCalculators[1] = DamageCalculator;
+  fixture.amount = -30;
+  fixture.changed.target.mp = 7;
+  battle::QueueLiveMpDrain(&fixture.input, &fixture.source, &fixture.hit, 1, 0);
+  CHECK(fixture.hit.target.mp == -23);
+  CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(-30));
+}
+TEST_CASE(
+    "F00496 queues unsigned current weapon PP and preserves no-blade state",
+    "[damage-recovery][F00496]") {
+  DamageFixture fixture;
+  auto handler = Relocated(0x80084D44, battle::QueueLiveWeaponPpDrain);
+  const auto before = Bytes(fixture.hit);
+  handler(nullptr, nullptr, &fixture.hit, -99, 0);
+  CHECK(Bytes(fixture.hit) == before);
+  fixture.stats.weapon.blade.id = 65535;
+  fixture.stats.weapon.currentPp = 65535;
+  auto expected = fixture.hit;
+  expected.weaponPpChange = RecoveryHalf(expected.weaponPpChange - 1);
+  expected.weaponPpEffect = 1;
+  handler(nullptr, nullptr, &fixture.hit, -99, -1);
+  CHECK(Bytes(fixture.hit) == Bytes(expected));
+}
+TEST_CASE(
+    "F00497 shield gate permits unused null stats and preserves no shield",
+    "[damage-recovery][F00497]") {
+  DamageFixture fixture;
+  auto handler = Relocated(0x80084DA8, battle::QueueLiveShieldPpDrain);
+  const auto before = Bytes(fixture.hit);
+  fixture.actor.stats = nullptr;
+  for (auto mode : {0U, 2U}) {
+    fixture.state.selection.primaryTarget.hpEffect = mode;
+    handler(nullptr, nullptr, &fixture.hit, -99, 0);
+    CHECK(Bytes(fixture.hit) == before);
+  }
+  fixture.actor.stats = &fixture.stats;
+  fixture.state.selection.primaryTarget.hpEffect = 3;
+  handler(nullptr, nullptr, &fixture.hit, -99, -1);
+  CHECK(Bytes(fixture.hit) == before);
+  fixture.stats.shield.base.id = 1;
+  fixture.stats.shield.currentPp = 65535;
+  auto expected = fixture.hit;
+  expected.shieldPpChange = RecoveryHalf(expected.shieldPpChange - 1);
+  expected.shieldPpEffect = 1;
+  handler(nullptr, nullptr, &fixture.hit, -99, 0);
+  CHECK(Bytes(fixture.hit) == Bytes(expected));
+}
+TEST_CASE("F00498 post-calculation position controls real limb recovery",
+          "[damage-recovery][F00498]") {
+  RecoveryFixture fixture;
+  Battle_statCalculators[1] = RecoveryCalculator;
+  const auto handler = Relocated(0x80084E28, battle::QueueLiveHpRecovery);
+  fixture.changed.targetsPosition = 0;
+  CheckLiveRecoverySample(fixture, handler, 8, 30, 32767);
+  fixture.Prepare(8, 0, -1);
+  fixture.changed.targetsPosition = -1;
+  const auto limbs = fixture.changed.limbs[5].effects.opaque0;
+  handler(&fixture.input, &fixture.source, &fixture.hit, 0, 0);
+  CHECK(fixture.hit.limbs[5].effects.opaque0 == limbs);
+  CHECK(fixture.hit.hpEffect == 2);
+}
+TEST_CASE("F00499 MP recovery wraps current queue and preserves neighbors",
+          "[damage-recovery][F00499]") {
+  DamageFixture fixture;
+  Battle_statCalculators[1] = DamageCalculator;
+  fixture.changed.target.mp = 32767;
+  auto expected = fixture.changed;
+  expected.target.mp = RecoveryHalf(32767 + 30);
+  expected.mpEffect = 2;
+  Relocated(0x80084EA0, battle::QueueLiveMpRecovery)(
+      &fixture.input, &fixture.source, &fixture.hit, 1, 0);
+  CHECK(Bytes(fixture.hit) == Bytes(expected));
+  CHECK(fixture.stats.currentMp == -19);
 }
 }  // namespace
