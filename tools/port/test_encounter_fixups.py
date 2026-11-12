@@ -98,6 +98,34 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertFalse(any(identifier == "F00592" for _, _, identifier in copy_fixups.MODULE_FUNCTION_ENTRIES))
         self.assertNotIn("F00592", copy_fixups.OWNED_CALL_BINDINGS)
 
+    def test_empty_calculation_sentinels_retire_with_distinct_typed_guards(self):
+        with (copy_to_native.LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8", newline="") as table:
+            rows = {row["id"]: row for row in csv.DictReader(table)}
+        with (copy_to_native.REPO / "tools/port/owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"] for row in csv.DictReader(table)}
+        for identifier, address, kind in (("F00341", 0x8007E974, "Hit"),
+                                          ("F00407", 0x80081130, "Stat"),
+                                          ("F00436", 0x80083990, "Effect")):
+            with self.subTest(identifier=identifier):
+                row = rows[identifier]
+                guard = f"VS::Battle::RejectLive{kind}Selector"
+                self.assertEqual((row["copy"], row["copied"], row["cpp"]), ("no", "retired", ""))
+                self.assertIn(f"retired-by:{guard}", row["notes"])
+                self.assertNotIn(identifier, owned)
+                self.assertNotIn(identifier, copy_fixups.OWNED_CALL_BINDINGS)
+                self.assertIn(("BATTLE/BATTLE.PRG", address, guard), copy_fixups.MODULE_BINDING_ENTRIES)
+
+    def test_action_routing_keeps_zero_and_direct_prerequisites_out_of_hit_roll(self):
+        source = (copy_to_native.REPO / "Native/Game/src/Battle/ActionResolution.cpp").read_text(encoding="utf-8")
+        body = source[source.index("void Battle_ResolveActionTargets("):]
+        dispatch = body[body.index("switch (action_definition->hits[hit].prerequisiteFunctionId)"):]
+        direct = dispatch[dispatch.index("case 6:"):dispatch.index("case 3:")]
+        self.assertIn("Battle_ApplyActionHitEffect(", direct)
+        self.assertNotIn("LiveRollActionHit", direct)
+        skipped = dispatch[dispatch.index("case 0:"):dispatch.index("default:")]
+        self.assertEqual(flat(skipped), "case 0: break;")
+        self.assertEqual(dispatch.count("VS::Battle::LiveRollActionHit("), 2)
+
     def test_texture_animations_use_the_callers_overlay_atlas(self):
         copier = object.__new__(copy_to_native.Copier)
         copier.used_fixups = set()

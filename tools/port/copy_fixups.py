@@ -727,6 +727,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LiveGemHitChance": r"Native\Game\include\Battle\HitModifiersLive.hpp",
     "VS::Battle::LiveRiskHitChance": r"Native\Game\include\Battle\HitModifiersLive.hpp",
     "VS::Battle::LiveChainHitChance": r"Native\Game\include\Battle\HitModifiersLive.hpp",
+    "VS::Battle::LiveAgilityHitChance": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::LiveIntelligenceHitChance": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::LiveCostAdjustedAgilityHitChance": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::LiveRollActionHit": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::LiveCalculateActionStatChange": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::RejectLiveHitSelector": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::RejectLiveStatSelector": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::RejectLiveEffectSelector": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1384,6 +1392,11 @@ OWNED_CALL_BINDINGS["F00342"] = "VS::Battle::PreviousLiveHitSuccessThreshold"
 OWNED_CALL_BINDINGS["F00343"] = "VS::Battle::LiveGemHitChance"
 OWNED_CALL_BINDINGS["F00347"] = "VS::Battle::LiveRiskHitChance"
 OWNED_CALL_BINDINGS["F00348"] = "VS::Battle::LiveChainHitChance"
+OWNED_CALL_BINDINGS["F00344"] = "VS::Battle::LiveAgilityHitChance"
+OWNED_CALL_BINDINGS["F00345"] = "VS::Battle::LiveIntelligenceHitChance"
+OWNED_CALL_BINDINGS["F00346"] = "VS::Battle::LiveCostAdjustedAgilityHitChance"
+OWNED_CALL_BINDINGS["F00349"] = "VS::Battle::LiveRollActionHit"
+OWNED_CALL_BINDINGS["F00435"] = "VS::Battle::LiveCalculateActionStatChange"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3037,6 +3050,15 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8007E99C, "VS::Battle::LiveGemHitChance"),  # F00343
     ("BATTLE/BATTLE.PRG", 0x8007F138, "VS::Battle::LiveRiskHitChance"),  # F00347
     ("BATTLE/BATTLE.PRG", 0x8007F1A4, "VS::Battle::LiveChainHitChance"),  # F00348
+    ("BATTLE/BATTLE.PRG", 0x8007EA74, "VS::Battle::LiveAgilityHitChance"),  # F00344
+    ("BATTLE/BATTLE.PRG", 0x8007ECA8, "VS::Battle::LiveIntelligenceHitChance"),  # F00345
+    ("BATTLE/BATTLE.PRG", 0x8007EEFC, "VS::Battle::LiveCostAdjustedAgilityHitChance"),  # F00346
+    ("BATTLE/BATTLE.PRG", 0x8007F230, "VS::Battle::LiveRollActionHit"),  # F00349
+    ("BATTLE/BATTLE.PRG", 0x800838EC, "VS::Battle::LiveCalculateActionStatChange"),  # F00435
+    # #350: retired unused sentinels keep separate, correctly typed relocation guards.
+    ("BATTLE/BATTLE.PRG", 0x8007E974, "VS::Battle::RejectLiveHitSelector"),  # retired F00341
+    ("BATTLE/BATTLE.PRG", 0x80081130, "VS::Battle::RejectLiveStatSelector"),  # retired F00407
+    ("BATTLE/BATTLE.PRG", 0x80083990, "VS::Battle::RejectLiveEffectSelector"),  # retired F00436
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

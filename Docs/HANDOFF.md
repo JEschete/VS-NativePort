@@ -18,31 +18,38 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-29 group
 
-F00339/F00340/F00342/F00343/F00347/F00348 are locally verified on `d1dd80f4`
-in the typed `HitModifiers` core/live module. Gem presence and stacking rules,
-independent stats-owner lookup, deferred validation, signed hit indices and
-unsigned risk/evasion arithmetic are preserved. The four table callbacks use
-the actual INT table type; the two gem helpers retain SHORT returns. All 27
-old code-symbol references are gone, including remaining hit-calculator callers.
+F00344/F00345/F00346/F00349/F00435 are locally verified on `42acb462` in
+`HitCalculations`: attribute hit calculations and typed hit/stat dispatch.
+F00341/F00407/F00436 are separately retired under #350, not C++ promotions.
+The original action-table, routing and definition-write audit establishes
+unused sentinels; their relocation addresses now bind to distinct, typed,
+diagnostic rejection guards. No unspecified return value was invented.
 
-- Three disjoint original spans total 353 instructions: 0x8007E5E0-0x8007E974,
-  0x8007E97C-0x8007EA74 and 0x8007F138-0x8007F230. Full per-function hashes
-  are in `build\scratch\status-queue\hit-modifiers-ledgers.json`.
-- `hit_modifiers`: 12,288 vectors, zero mismatches, 57/57 mutants detected.
-  Six native variants detect 591/667/209/263/149/511 mismatches respectively
-  over 3,072 vectors each. Gem helpers and the original jump table execute
-  without service stubs.
-- Group `build\promotion-check\group-20261112-013933`, 448 seconds:
-  Debug/Release each pass 5,915 cases/12,804,891 assertions. Coupled selections
-  pass 44 cases/152,374 assertions; own cases are 25/151,503, including
-  exhaustive U16 risk and U8 evasion. Both canonical replays match, copier
-  stability and 272 controls pass, and tidy has five existing findings, zero new.
-- Evidence: `build\differential\hit_modifiers.log`,
-  `hit_modifiers-final-live.log`, six `hit_modifiers-F*-variant.log` files
-  and the recipe above. Publication and exact-revision CI pending. The first
-  group rejected new tidy findings; explicit bit preservation and fixture
-  initialization were corrected, then differential, iteration and full group
-  gates passed again. No #350, interactive gameplay or EC/M8 completion claim.
+- Five active spans total 603 original instructions: 0x8007EA74-0x8007F138,
+  0x8007F230-0x8007F434 and 0x800838EC-0x80083990. Per-function hashes and
+  separate two-instruction sentinel provenance are in
+  `build\scratch\status-queue\hit-calculations-{ledgers,audit}.json`.
+- `hit_calculations`: 15,360 vectors, zero mismatches, 60/60 mutants detected.
+  Five native variants detect 267/332/242/5/333 mismatches respectively over
+  2,048 vectors each. Real gem helpers execute; RNG and selected callbacks
+  are controlled services with call-order/state comparisons.
+- Group `build\promotion-check\group-20261112-021358`, 439 seconds:
+  Debug/Release each pass 5,941 cases/12,805,093 assertions; combined focus is
+  70 cases/152,576 assertions, own tests 26/202. Both replays, copier stability
+  and 274 controls pass; tidy has five existing findings, zero new.
+- Original-table invariants have three detected negative controls. Sixty
+  invalid-input child probes log/refuse; both lazy exemptions pass. Actual
+  INT/SHORT/VOID table-type checks compile and three wrong assignments fail.
+- Evidence: `build\differential\hit_calculations-full.log`,
+  `hit_calculations-final-source.log`, five native-variant logs and the audit
+  above. Publication, exact-revision CI and #350 closure are pending.
+  Retirement is not a numeric behavioral or C++ promotion claim. Runtime
+  audit covers reviewed production/import/reset paths, not arbitrary corrupt
+  memory or future content. No interactive gameplay or EC/M8 completion claim.
+
+The six hit modifiers are published in `42acb462`, green on
+[CI 43170979793](https://github.com/JEschete/VS-NativePort/actions/runs/43170979793),
+with evidence on [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6817073762).
 
 The actor-vitals group is published in `d1dd80f4`, green on
 [CI 43166632406](https://github.com/JEschete/VS-NativePort/actions/runs/43166632406),
@@ -127,8 +134,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 63 of the original 900 resolved; 837 remain** (836 generated plus
-F01416 owned WIP). Modernization is 2,907/3,744; C++ promotion is 2,908 plus
+**Progress: 71 of the original 900 resolved (68 promoted, 3 retired); 829
+remain** (828 generated plus F01416 owned WIP). Modernization is 2,912/3,741;
+C++ promotion is 2,913 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -197,12 +205,12 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue row 29 with F00344/F00345/F00346/F00349 and the three #350 placeholders
-F00341/F00407/F00436. The four active functions' 562 instructions are read in
-`build\scratch\status-queue\hit_attribute_modifiers.txt` and `hit_modifiers.txt`.
-Preserve signed gear/limb modifiers, wrapped arithmetic, lazy reads and
-post-random gem reads. Audit and resolve the empty callback contracts without
-inventing values. Track any proven retirement separately from C++ promotion.
+Continue row 29 with F00412/F00413/F00414/F00415/F00416/F00417/F00419/F00426.
+Their 242 original instructions are read in
+`build\scratch\status-queue\stat_factors.txt`. The three previous-target-hit
+aliases are byte-identical and already share a native name; keep them together
+with per-ID tests/differentials. Preserve signed division, low-halfword queue
+offsets and short-return wrapping, plus lazy selected-action/effect gates.
 Finish the remaining damage/hit functions afterward. Keep every original
 cohort row in the progress CSV, including
 resolved ones; the `snapshot` column stays `44fa8847`. F01416 remains the one
@@ -250,16 +258,15 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 ## Stopping Point
 
 The continuation is active, not paused. Row 28 is published and green. The
-first 47 row-29 functions are published and green, and #349 is closed.
-The six supporting hit modifiers are verified locally; publish and confirm CI.
+first 53 row-29 functions are published and green, and #349 is closed.
+The eight-function hit/stat dispatch and #350 group is verified locally;
+publish, confirm CI and close #350 with evidence, then continue stat factors.
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
 353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
 [#350](https://github.com/JEschete/VS-NativePort/issues/350) tracks the separate
-F00341/F00407/F00436 empty-callback return/ABI defects. Original zero hit
-selectors are bypassed by prerequisite routing; the stat-consuming effects
-never select stat calculator zero, and effect-zero rows have prerequisite
-zero. Finish the native routing/definition-write audit before retiring or
-rejecting these placeholders. Do not invent zero returns.
+F00341/F00407/F00436 empty-callback return/ABI defects. The source/definition
+audit and typed retirement guards are verified locally; closure awaits the
+published fixing revision's CI. No original numeric return behavior is claimed.
 The later F00344/F00345/F00346 attribute modifiers have their 433 original
 instructions read in `build\scratch\status-queue\hit_attribute_modifiers.txt`;
 reuse `Core::Math` wrapping arithmetic and `R3000Quotient`, including its
@@ -436,10 +443,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the six verified hit modifiers and confirm exact-revision CI.
+2. Publish the verified hit/stat group, confirm CI and close #350 with evidence.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 837 remain.
-3. Continue row 29 with the remaining hit calculators and #350 above, following
+   #276: 829 remain.
+3. Continue row 29 with the eight stat-factor functions above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

@@ -179,14 +179,6 @@ void Battle_DistributeLimbRecovery(Battle_ActionDefinition* action, Battle_HitRe
     }
 }
 
-// decomp: BATTLE.PRG _statCalculatorNop (src/BATTLE/BATTLE.PRG/146C.c:11230)
-void Battle_IgnoreStatCalculator(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-}
-
 // decomp: BATTLE.PRG _getLastValue (src/BATTLE/BATTLE.PRG/146C.c:11237)
 short Battle_LastActionStatValue(Battle_ActionDefinition* action_definition __attribute__((unused)),
     Battle_HitResult* source_hit __attribute__((unused)),
@@ -894,24 +886,6 @@ short Battle_TargetRisk(Battle_ActionDefinition* action_definition __attribute__
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
     return Battle_actors[target_hit->target.targetActor]->stats->risk;
-}
-
-// decomp: BATTLE.PRG _calculateStatChange (src/BATTLE/BATTLE.PRG/146C.c:12248)
-short Battle_CalculateActionStatChange(
-    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit, int execute_action)
-{
-    short amount;
-
-    if ((target_hit->targetsPosition == 0)
-        && (Battle_actors[target_hit->target.targetActor]->stats->actorId == 128)) {
-        amount = 999;
-    } else {
-        amount = Battle_statCalculators[action->hits[hit].statCalculatorId](
-            action, source_hit, target_hit, hit, execute_action);
-    }
-
-    Battle_lastActionStatValue = amount;
-    return amount;
 }
 
 }  // extern "C"

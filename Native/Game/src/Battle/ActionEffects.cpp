@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -79,7 +80,7 @@ int Battle_QueueSpellTriggeredRecovery(
     Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionDefinitions[Battle_actionState->selection.actionId].type == Battle_ActionType_Spell) {
-        short amount = Battle_CalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action, target_hit, amount);
@@ -91,7 +92,7 @@ int Battle_QueuePhysicalTriggeredRecovery(
     Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionDefinitions[Battle_actionState->selection.actionId].type != Battle_ActionType_Spell) {
-        short amount = Battle_CalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action, target_hit, amount);
@@ -103,7 +104,7 @@ int Battle_QueuePhysicalAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionState->selection.effectVariant == 0) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -115,7 +116,7 @@ int Battle_QueueAirAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionState->selection.effectVariant == 1) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -127,7 +128,7 @@ int Battle_QueueFireAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionState->selection.effectVariant == 2) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -139,7 +140,7 @@ int Battle_QueueEarthAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionState->selection.effectVariant == 3) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -151,7 +152,7 @@ int Battle_QueueWaterAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionState->selection.effectVariant == 4) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -163,7 +164,7 @@ int Battle_QueueLightAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionState->selection.effectVariant == 5) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -175,7 +176,7 @@ int Battle_QueueDarkAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     if (Battle_actionState->selection.effectVariant == 6) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -188,7 +189,7 @@ int Battle_QueueDamageTriggeredRecovery(
 {
     int incoming_hp_effect = Battle_actionState->selection.primaryTarget.hpEffect;
     if ((incoming_hp_effect == 1) || ((incoming_hp_effect == 3))) {
-        short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+        short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
         target_hit->target.hp += amount;
         target_hit->hpEffect = 2;
         Battle_DistributeLimbRecovery(action_definition, target_hit, amount);
@@ -283,7 +284,7 @@ int Battle_QueueHitDamageAndEquipmentWear(
     Battle_ActorStats* source_stats = Battle_actors[source_hit->target.targetActor]->stats;
     Battle_ActorStats* target_stats = Battle_actors[target_hit->target.targetActor]->stats;
     Battle_criticalHitOccurred = 0;
-    damage_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    damage_amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
     target_hit->target.hp += damage_amount;
 
     if (Battle_criticalHitOccurred != 0) {

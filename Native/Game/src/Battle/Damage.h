@@ -32,10 +32,6 @@ short Battle_ApplyDamageGemMultiplier(
     Battle_ActionDefinition* action, short damage_amount, Battle_ActorStats* source_stats, Battle_ActorStats* target_stats);
 void Battle_DistributeHitLimbDamage(Battle_ActionDefinition* action, Battle_HitResult* entity, short baseValue);
 void Battle_DistributeLimbRecovery(Battle_ActionDefinition* action, Battle_HitResult* entity, short amount);
-void Battle_IgnoreStatCalculator(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
 short Battle_LastActionStatValue(Battle_ActionDefinition* action_definition __attribute__((unused)),
     Battle_HitResult* source_hit __attribute__((unused)),
     Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
@@ -97,7 +93,5 @@ short Battle_PhysicalDamageWithDebuffs(
 short Battle_TargetRisk(Battle_ActionDefinition* action_definition __attribute__((unused)),
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-short Battle_CalculateActionStatChange(
-    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit, int execute_action);
 
 #endif // VS_BATTLE_DAMAGE_H_DECLS

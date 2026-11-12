@@ -30,6 +30,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -345,15 +346,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E974u, 0u, (void*)&Battle_IgnoreHitCallback, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007EA74u, 0u, (void*)&Battle_AgilityHitChance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007ECA8u, 0u, (void*)&Battle_IntelligenceHitChance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007EEFCu, 0u, (void*)&Battle_CostAdjustedAgilityHitChance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F230u, 0u, (void*)&Battle_RollActionHit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007FE5Cu, 0u, (void*)&Battle_ApplyDamageGemMultiplier, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80080000u, 0u, (void*)&Battle_DistributeHitLimbDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800801E0u, 0u, (void*)&Battle_DistributeLimbRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80081130u, 0u, (void*)&Battle_IgnoreStatCalculator, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081138u, 0u, (void*)&Battle_LastActionStatValue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081148u, 0u, (void*)&Battle_CalculatePhysicalHitDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800819D0u, 0u, (void*)&Battle_PhysicalDamageWithoutDebuffs, 0u, 0u, 0u},
@@ -378,8 +373,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008384Cu, 0u, (void*)&Battle_ScaleLastActionStatValue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008388Cu, 0u, (void*)&Battle_PhysicalDamageWithDebuffs, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800838BCu, 0u, (void*)&Battle_TargetRisk, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800838ECu, 0u, (void*)&Battle_CalculateActionStatChange, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083990u, 0u, (void*)&Battle_IgnoreHitCallback, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084228u, 0u, (void*)&Battle_MarkSourceActionSuccess, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084248u, 0u, (void*)&Battle_QueueInstantDeath, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800842ACu, 0u, (void*)&Battle_QueueDamageBasedArmorWear, 0u, 0u, 0u},
@@ -1760,6 +1753,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007E99Cu, 0u, (void*)&VS::Battle::LiveGemHitChance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007F138u, 0u, (void*)&VS::Battle::LiveRiskHitChance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007F1A4u, 0u, (void*)&VS::Battle::LiveChainHitChance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007EA74u, 0u, (void*)&VS::Battle::LiveAgilityHitChance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007ECA8u, 0u, (void*)&VS::Battle::LiveIntelligenceHitChance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007EEFCu, 0u, (void*)&VS::Battle::LiveCostAdjustedAgilityHitChance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F230u, 0u, (void*)&VS::Battle::LiveRollActionHit, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800838ECu, 0u, (void*)&VS::Battle::LiveCalculateActionStatChange, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007E974u, 0u, (void*)&VS::Battle::RejectLiveHitSelector, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80081130u, 0u, (void*)&VS::Battle::RejectLiveStatSelector, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083990u, 0u, (void*)&VS::Battle::RejectLiveEffectSelector, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

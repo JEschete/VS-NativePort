@@ -15,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
@@ -415,7 +416,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
   ArtResolutionFixture() {
     // BATTLE.PRG dispatch tables at file 0x7FA34, 0x7FA54 and 0x7FB78.
     Battle_hitFunctions[1] = VS::Battle::PreviousLiveHitSuccessThreshold;
-    Battle_hitFunctions[3] = Battle_AgilityHitChance;
+    Battle_hitFunctions[3] = VS::Battle::LiveAgilityHitChance;
     Battle_attackPrerequisiteFunctions[1] = Battle_AcceptAttackPrerequisiteSlot;
     Battle_attackPrerequisiteFunctions[2] = Battle_AcceptAttackPrerequisiteSlot;
     Battle_actionEffectMediators[58] =
@@ -2293,7 +2294,7 @@ TEST_CASE("MP damage abilities cannot drain more MP than the target has",
       id, 0, {id == 24 ? 4 : 11, id == 24 ? 3 : 2, Battle_AccumulateMpDamage});
   const int damage = std::min(mp, id == 24 ? 32 : 42);
   CHECK(fixture.target.target.mp == damage);
-  CHECK(Battle_lastActionStatValue == damage);
+  CHECK(Battle_lastActionStatValue == static_cast<std::uint32_t>(damage));
   fixture.Commit();
   fixture.CheckResources(600, 100, 800, mp - damage);
 }

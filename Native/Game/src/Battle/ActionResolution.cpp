@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Battle/HitChance.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingState.h"
@@ -51,7 +51,7 @@ int Battle_AccumulateMpDamage(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     Battle_ActorStats* target_stats = Battle_actors[target_hit->target.targetActor]->stats;
-    short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    short amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
 
     if (target_stats->currentMp < amount) {
         amount = target_stats->currentMp;
@@ -95,7 +95,7 @@ int Battle_AccumulateShieldPpDrain(Battle_ActionDefinition* action_definition __
 int Battle_AccumulateHpRestoration(
     Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short amount = Battle_CalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
+    short amount = VS::Battle::LiveCalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
     target_hit->target.hp += amount;
     target_hit->hpEffect = 2;
 
@@ -108,7 +108,7 @@ int Battle_AccumulateHpRestoration(
 int Battle_AccumulateMpRestoration(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    short restoration_amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
     target_hit->target.mp = target_hit->target.mp + restoration_amount;
     target_hit->mpEffect = 2;
 }
@@ -117,7 +117,7 @@ int Battle_AccumulateMpRestoration(
 int Battle_AccumulateWeaponPpRestoration(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    short restoration_amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
     target_hit->weaponPpChange += restoration_amount;
     target_hit->weaponPpEffect = 2;
 }
@@ -126,7 +126,7 @@ int Battle_AccumulateWeaponPpRestoration(
 int Battle_AccumulateWeaponDpRestoration(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    short restoration_amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
     target_hit->limbs[6].effects.opaque0 += restoration_amount;
     target_hit->weaponDpEffect = 2;
 }
@@ -135,7 +135,7 @@ int Battle_AccumulateWeaponDpRestoration(
 int Battle_AccumulateRiskReduction(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    short restoration_amount = VS::Battle::LiveCalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
     int shifted_restoration_amount = restoration_amount << 0x10;
     if (shifted_restoration_amount != 0) {
         target_hit->riskChange += restoration_amount;
@@ -540,7 +540,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
             entry = &result->primaryTarget;
             stats = Battle_actors[result->primaryTarget.target.targetActor]->stats;
             Battle_hitPrerequisiteResult = 1;
-            Battle_previousHitResult = Battle_RollActionHit(action_definition, entry, entry, hit, execute_action);
+            Battle_previousHitResult = VS::Battle::LiveRollActionHit(action_definition, entry, entry, hit, execute_action);
             if ((Battle_previousHitResult != 0) || (execute_action == 0)) {
                 Battle_ApplyActionHitEffect(action_definition, entry, entry, execute_action, hit);
                 if (execute_action && stats->cancelsHitResults) {
@@ -597,7 +597,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
                 stats = Battle_actors[entry->target.targetActor]->stats;
                 Battle_hitPrerequisiteResult = VS::Battle::LiveCheckActionHitPrerequisite(action_definition, (u_char *)((char*)entry), hit);
                 if (Battle_hitPrerequisiteResult != 0) {
-                    Battle_previousHitResult = Battle_RollActionHit(action_definition, user, entry, hit, execute_action);
+                    Battle_previousHitResult = VS::Battle::LiveRollActionHit(action_definition, user, entry, hit, execute_action);
                     if ((Battle_previousHitResult != 0) || (execute_action == 0)) {
 
                         Battle_ApplyActionHitEffect(action_definition, user, entry, execute_action, hit);

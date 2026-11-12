@@ -414,6 +414,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\HitCalculations.cpp" />
+    <ClCompile Include="src\Battle\HitCalculationsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\HitChance.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2299,6 +2303,8 @@
     <ClInclude Include="include\Battle\BattleModeLive.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />
     <ClInclude Include="include\Battle\Enemy.h" />
+    <ClInclude Include="include\Battle\HitCalculations.hpp" />
+    <ClInclude Include="include\Battle\HitCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\HitModifiers.hpp" />
     <ClInclude Include="include\Battle\HitModifiersLive.hpp" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
