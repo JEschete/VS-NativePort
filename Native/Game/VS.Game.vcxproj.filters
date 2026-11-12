@@ -414,6 +414,12 @@
     <ClInclude Include="src\Battle\ActionMenu.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\ActionPresentation.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\ActionPresentationLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionPreview.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -2713,6 +2719,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionEffectDispatchLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\ActionPresentation.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\ActionPresentationLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionPreview.hpp">

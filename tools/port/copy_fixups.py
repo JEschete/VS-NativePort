@@ -802,6 +802,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::QueueLiveRiskRecovery": r"Native\Game\include\Battle\DamageRecoveryEffectsLive.hpp",
     "VS::Battle::DeriveLiveLimbInjuryStatuses": r"Native\Game\include\Battle\ActionEffectDispatchLive.hpp",
     "VS::Battle::ApplyLiveActionHitEffect": r"Native\Game\include\Battle\ActionEffectDispatchLive.hpp",
+    "VS::Battle::StartLiveActionAnimation": r"Native\Game\include\Battle\ActionPresentationLive.hpp",
+    "VS::Battle::AdvanceLiveActionEffectPhase": r"Native\Game\include\Battle\ActionPresentationLive.hpp",
+    "VS::Battle::CommitLiveSelectedAction": r"Native\Game\include\Battle\ActionPresentationLive.hpp",
+    "VS::Battle::StartLiveActionPresentation": r"Native\Game\include\Battle\ActionPresentationLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1537,6 +1541,10 @@ OWNED_CALL_BINDINGS["F00501"] = "VS::Battle::QueueLiveWeaponDpRecovery"
 OWNED_CALL_BINDINGS["F00502"] = "VS::Battle::QueueLiveRiskRecovery"
 OWNED_CALL_BINDINGS["F00506"] = "VS::Battle::DeriveLiveLimbInjuryStatuses"
 OWNED_CALL_BINDINGS["F00507"] = "VS::Battle::ApplyLiveActionHitEffect"
+OWNED_CALL_BINDINGS["F00100"] = "VS::Battle::StartLiveActionAnimation"
+OWNED_CALL_BINDINGS["F00101"] = "VS::Battle::AdvanceLiveActionEffectPhase"
+OWNED_CALL_BINDINGS["F00108"] = "VS::Battle::CommitLiveSelectedAction"
+OWNED_CALL_BINDINGS["F00109"] = "VS::Battle::StartLiveActionPresentation"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3276,6 +3284,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80084F94, "VS::Battle::QueueLiveRiskRecovery"),  # F00502
     ("BATTLE/BATTLE.PRG", 0x80085008, "VS::Battle::DeriveLiveLimbInjuryStatuses"),  # F00506
     ("BATTLE/BATTLE.PRG", 0x80085390, "VS::Battle::ApplyLiveActionHitEffect"),  # F00507
+    ("BATTLE/BATTLE.PRG", 0x80070278, "VS::Battle::StartLiveActionAnimation"),  # F00100
+    ("BATTLE/BATTLE.PRG", 0x800704B0, "VS::Battle::AdvanceLiveActionEffectPhase"),  # F00101
+    ("BATTLE/BATTLE.PRG", 0x80070F28, "VS::Battle::CommitLiveSelectedAction"),  # F00108
+    ("BATTLE/BATTLE.PRG", 0x8007138C, "VS::Battle::StartLiveActionPresentation"),  # F00109
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

@@ -21,7 +21,6 @@ void Battle_UpdateFinalTargetSelection(void);
 void Battle_UpdateActionCameraZoom(void);
 void Battle_WaitForActionEffectReady(void);
 void Battle_StartReadyActionAnimation(void);
-void Battle_StartFollowupActionEffects(void);
 void Battle_WaitForActionResolution(void);
 void Battle_WaitForTargetRecovery(void);
 void Battle_FinishActionSequence(void);

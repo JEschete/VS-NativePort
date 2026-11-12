@@ -2,6 +2,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/TargetingLive.hpp"
@@ -121,14 +122,14 @@ void Battle_UpdateInitialTargetSelection(void)
     if (Battle_actionState->isPlayerAction != 0) {
         if (Battle_actionState->selection.primaryTarget.target.targetActor != 0) {
             if (++Battle_actionState->selectionFrames >= 0x1F) {
-                Battle_CommitSelectedAction(1);
+                VS::Battle::CommitLiveSelectedAction(1);
             }
         } else if (VS::Battle::LiveUpdateTargetSelectionMenu(&Battle_actionState->cameraPreview) != 0) {
             Battle_actionState->selectedPreview = Battle_actionState->cameraPreview;
-            Battle_CommitSelectedAction(1);
+            VS::Battle::CommitLiveSelectedAction(1);
         }
     } else {
-        Battle_CommitSelectedAction(1);
+        VS::Battle::CommitLiveSelectedAction(1);
     }
 }
 
@@ -155,7 +156,7 @@ void Battle_UpdateFinalTargetSelection(void)
         if (Battle_actionState->selection.primaryTarget.target.targetActor != 0) {
             if (++Battle_actionState->selectionFrames >= 0x1F) {
                 Battle_actionState->selectedPreview = 0;
-                Battle_CommitSelectedAction(2);
+                VS::Battle::CommitLiveSelectedAction(2);
             }
         } else if (VS::Battle::LiveUpdateTargetSelectionMenu(&Battle_actionState->cameraPreview) != 0) {
             Battle_actionState->selectedPreview = Battle_actionState->cameraPreview;
@@ -172,11 +173,11 @@ void Battle_UpdateFinalTargetSelection(void)
                 VS::Battle::LiveReturnToBattleActionMenu();
                 return;
             }
-            Battle_CommitSelectedAction(2);
+            VS::Battle::CommitLiveSelectedAction(2);
         }
     } else {
         Battle_actionState->selectedPreview = 0;
-        Battle_CommitSelectedAction(2);
+        VS::Battle::CommitLiveSelectedAction(2);
     }
 }
 
@@ -202,7 +203,7 @@ void Battle_UpdateActionCameraZoom(void)
                     && (Field_sphericalCamera.delta.yaw == 0))
                 && ((Field_sphericalCamera.delta.mode == 1)
                     || (Field_sphericalCamera.delta.mode == 3))) {
-                Battle_StartActionPresentation();
+                VS::Battle::StartLiveActionPresentation();
             }
         } else if (Battle_actionState->cameraZoomState == 1) {
             Battle_StepCameraTowardActionMidpoint(1);
@@ -225,7 +226,7 @@ void Battle_UpdateActionCameraZoom(void)
                         && (Field_sphericalCamera.delta.yaw == 0))
                     && ((Field_sphericalCamera.delta.mode == 1)
                         || (Field_sphericalCamera.delta.mode == 3))) {
-                    Battle_StartActionPresentation();
+                    VS::Battle::StartLiveActionPresentation();
                 }
             }
         } else if (Battle_actionState->cameraZoomState == 2) {
@@ -244,13 +245,13 @@ void Battle_UpdateActionCameraZoom(void)
                         && (Field_sphericalCamera.delta.yaw == 0))
                     && ((Field_sphericalCamera.delta.mode == 1)
                         || (Field_sphericalCamera.delta.mode == 3))) {
-                    Battle_StartActionPresentation();
+                    VS::Battle::StartLiveActionPresentation();
                 }
             }
         } else if ((Field_sphericalCamera.delta.yaw == 0)
                    && ((Field_sphericalCamera.delta.mode == 1)
                        || (Field_sphericalCamera.delta.mode == 3))) {
-            Battle_StartActionPresentation();
+            VS::Battle::StartLiveActionPresentation();
         }
     }
 }
@@ -262,7 +263,7 @@ void Battle_WaitForActionEffectReady(void)
     if ((Menu_IsSceneNotificationPending() == 0)
         && ((VS::Actors::LiveActorStateFlags(queued_action->primaryTarget.target.targetActor) & 0x08000100) == 0x08000100)
         && (VS::Content::FindLiveFreeActorAssetRequest() == 0) && (Effects_CanStartEffectTrack() != 0)) {
-        Battle_AdvanceActionEffectPhase();
+        VS::Battle::AdvanceLiveActionEffectPhase();
     }
 }
 
@@ -270,13 +271,10 @@ void Battle_WaitForActionEffectReady(void)
 void Battle_StartReadyActionAnimation(void)
 {
     if (!(Effects_effectBusyFlags & 2)) {
-        Battle_StartActionAnimation();
+        VS::Battle::StartLiveActionAnimation();
         Effects_StartEffectTrack(0);
     }
 }
-
-// decomp: BATTLE.PRG func_80079030 (src/BATTLE/BATTLE.PRG/146C.c:7354)
-void Battle_StartFollowupActionEffects(void) { Battle_StartActionPresentation(); }
 
 // decomp: BATTLE.PRG func_80079050 (src/BATTLE/BATTLE.PRG/146C.c:7356)
 void Battle_WaitForActionResolution(void)

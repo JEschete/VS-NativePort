@@ -7,6 +7,7 @@
 #include "Audio/StreamControlLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
+#include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
@@ -305,11 +306,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006FBCCu, 0u, (void*)&Battle_BeginPostActionRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006FCBCu, 0u, (void*)&Battle_BeginActionTrailFade, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006FD0Cu, 0u, (void*)&Battle_FinishBattleAbilitySequence, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80070278u, 0u, (void*)&Battle_StartActionAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800704B0u, 0u, (void*)&Battle_AdvanceActionEffectPhase, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80070F28u, 0u, (void*)&Battle_CommitSelectedAction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007138Cu, 0u, (void*)&Battle_StartActionPresentation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800719DCu, 0u, (void*)&Battle_CommitEnvironmentAction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80072B9Cu, 0u, (void*)&Battle_ResetActionPhase, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&Effects_BeginAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
@@ -327,7 +323,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800784ACu, 0u, (void*)&Battle_UpdateActionCameraZoom, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80078748u, 0u, (void*)&Battle_WaitForActionEffectReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800787F0u, 0u, (void*)&Battle_StartReadyActionAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80079030u, 0u, (void*)&Battle_StartFollowupActionEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80079050u, 0u, (void*)&Battle_WaitForActionResolution, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800790BCu, 0u, (void*)&Battle_WaitForTargetRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800793C0u, 0u, (void*)&Battle_FinishActionSequence, 0u, 0u, 0u},
@@ -1768,6 +1763,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80084F94u, 0u, (void*)&VS::Battle::QueueLiveRiskRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80085008u, 0u, (void*)&VS::Battle::DeriveLiveLimbInjuryStatuses, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80085390u, 0u, (void*)&VS::Battle::ApplyLiveActionHitEffect, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80070278u, 0u, (void*)&VS::Battle::StartLiveActionAnimation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800704B0u, 0u, (void*)&VS::Battle::AdvanceLiveActionEffectPhase, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80070F28u, 0u, (void*)&VS::Battle::CommitLiveSelectedAction, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007138Cu, 0u, (void*)&VS::Battle::StartLiveActionPresentation, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

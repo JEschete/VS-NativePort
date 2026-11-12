@@ -1,23 +1,12 @@
 {
 "Native\\Game\\src\\Battle\\ActionExecution.cpp": [
 [
-167,
+168,
 [
 "                ((void (*)())Battle_ClearSphereTargets)();"
 ],
 [
 "                ((void (*)(...))Battle_ClearSphereTargets)();"
-]
-]
-],
-"Native\\Game\\src\\Battle\\ActionFlow.cpp": [
-[
-359,
-[
-"    ((void (*)())Battle_ClearSphereTargets)();"
-],
-[
-"    ((void (*)(...))Battle_ClearSphereTargets)();"
 ]
 ]
 ],

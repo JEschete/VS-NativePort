@@ -21,6 +21,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
@@ -704,8 +705,9 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   void BeginPostActionRecovery(int mode) override {
     Battle_BeginPostActionRecovery(mode);
   }
-  void CommitEnvironmentAction(int mode) override {
-    Battle_CommitEnvironmentAction(mode);
+  void CommitEnvironmentAction(int /*mode*/) override {
+    // func_800719DC ignored the caller's menu mode and selected environment.
+    VS::Battle::CommitLiveSelectedAction(0);
   }
   void StorePreferredCameraDistance() override {
     VS::Field::LiveStorePreferredActionCameraDistance();

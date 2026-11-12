@@ -37,11 +37,12 @@ After those checks pass, REMAINING_FUNCTIONS.csv refreshes its progress columns 
 resolved rows or changing the original snapshot/provenance columns.
 
 An optional "retirements" map records audited unused IDs separately from "functions".
-Each entry requires "name" (the checked rejection binding), "path" and "note" (including
+Each entry requires "name" (the checked rejection or replacement binding), "path" and "note" (including
 retired-by and the audit evidence). It retains the catalog identity, sets copied=retired,
 and clears cpp/modernized/verified rather than forging promotion or original-return proof.
 VERIFY_LEDGER includes both dispositions; the owned gate slice contains only promoted IDs.
-Rejection module bindings still require explicit registration in copy_fixups.py.
+Required rejection module bindings still need explicit registration in copy_fixups.py;
+unused forwarding aliases need a caller/reference audit before removing their entries.
 """
 
 from __future__ import annotations

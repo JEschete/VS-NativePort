@@ -50,6 +50,8 @@
   <ItemGroup>
     <ClCompile Include="src\ActionCostsTests.cpp" />
     <ClCompile Include="src\ActionEffectDispatchTests.cpp" />
+    <ClCompile Include="src\ActionPresentationLiveTests.cpp" />
+    <ClCompile Include="src\ActionPresentationTests.cpp" />
     <ClCompile Include="src\ActionPreviewTests.cpp" />
     <ClCompile Include="src\ActionResultCommitTests.cpp" />
     <ClCompile Include="src\ActionResultsSliceTests.cpp" />
@@ -335,6 +337,7 @@
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />

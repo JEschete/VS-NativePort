@@ -333,6 +333,8 @@
     <None Include="..\..\port\differentials\action_costs.py" />
     <None Include="..\..\port\differentials\action_costs_driver.cpp" />
     <None Include="..\..\port\differentials\action_costs_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\action_effect_dispatch.py" />
+    <None Include="..\..\port\differentials\action_effect_dispatch_driver.cpp" />
     <None Include="..\..\port\differentials\action_execution.py" />
     <None Include="..\..\port\differentials\action_execution_driver.cpp" />
     <None Include="..\..\port\differentials\action_notification.py" />
@@ -389,6 +391,9 @@
     <None Include="..\..\port\differentials\random_stat_effects.py" />
     <None Include="..\..\port\differentials\random_stat_effects_driver.cpp" />
     <None Include="..\..\port\differentials\random_stat_effects_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\resource_dispatch_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\resource_recovery.py" />
+    <None Include="..\..\port\differentials\resource_recovery_driver.cpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
     <None Include="..\..\port\differentials\stat_factors.py" />
@@ -423,6 +428,7 @@
     <None Include="..\..\port\promote.py" />
     <None Include="..\..\port\ref_index.py" />
     <None Include="..\..\port\relaxed_sources.txt" />
+    <None Include="..\..\port\resource_dispatch_audit.py" />
     <None Include="..\..\port\test_assembly_gap_audit.py" />
     <None Include="..\..\port\test_differential.py" />
     <None Include="..\..\port\test_encounter_fixups.py" />

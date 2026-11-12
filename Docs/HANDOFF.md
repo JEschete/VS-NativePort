@@ -18,6 +18,33 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-30 group
 
+F00100/F00101/F00108/F00109/F00110/F00191 are locally resolved on `475ed67d`:
+four typed `ActionPresentation` promotions and two separately retired forwarding
+aliases. The completed evidence was recovered before publication; source hashes
+still match the final verified group.
+
+- Evidence: `build\scratch\action-presentation\evidence.json`.
+- Active functions: 837 original instructions, 12,288 defined vectors, zero
+  mismatches; 64 original mutants and four native broken variants detected.
+  The two aliases have separate VOID caller/reference controls across 89 images.
+- Group `build\promotion-check\group-20261112-110611`, 369 seconds:
+  Debug/Release each pass 6,205 cases/12,924,644 assertions; coupled selection
+  530 cases/35,599 assertions. Both canonical replays, copier stability and
+  controls pass; tidy five existing findings, zero new.
+- #356 production regressions verify correct compacted target kinds, current-hit
+  default limbs, bystander exclusion and the 16-target effect boundary. The
+  seventeenth unique target is diagnosed before append/dispatch, never truncated;
+  255 duplicate source hits remain supported. Separate broken variants detect
+  the corrected cases. The signed model nibble is projected as its original
+  unsigned four-bit value, with its own red/green control.
+- Original parity excludes the corrected indexing/overflow cases and unspecified
+  padding. The overwritten first bone lookup is omitted only after auditing the
+  read-only query contract. No fabricated effects or capacity expansion.
+- Publication and exact-revision CI are pending. No interactive particle/combat,
+  row-30 completion or EC/M8 retirement claim; #355 and #296 remain open.
+
+### Previous resource/injury/dispatch group
+
 F00500-F00507 are locally resolved on `f2d4c84d`: five C++ promotions and
 three separate reserved-selector retirements. Resource changes reuse
 `DamageRecoveryEffects`; injury/progression policies use `ActionEffectDispatch`.
@@ -43,7 +70,9 @@ three separate reserved-selector retirements. Resource changes reuse
 - `promote.py ledgers` now accepts an audited `retirements` map separately from
   promotions, with identity/idempotence and double-disposition controls. The
   original 900-row cohort is retained; no baseline was weakened.
-- Publication and exact-revision CI are pending. No whole selected-stat,
+- Published in `475ed67d`, green on
+  [CI 43242544386](https://github.com/JEschete/VS-NativePort/actions/runs/43242544386).
+  No whole selected-stat,
   interactive combat, row-30 completion or EC/M8 retirement claim.
 
 ### Previous damage/recovery group
@@ -283,9 +312,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 147 of the original 900 resolved (141 promoted, 6 retired); 753
-remain** (752 generated plus F01416 owned WIP). Modernization is 2,985/3,741;
-C++ promotion is 2,986 plus
+**Progress: 153 of the original 900 resolved (145 promoted, 8 retired); 747
+remain** (746 generated plus F01416 owned WIP). Modernization is 2,989/3,741;
+C++ promotion is 2,990 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -354,14 +383,16 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue ordered row 30 (`battle-actions`, 42 of 91 still remaining;
-46 promoted and three retired).
+Continue ordered row 30 (`battle-actions`, 36 of 91 still remaining;
+50 promoted and five retired).
 The #354 classifier repair and cost group F00510/F00511/F00512/F00548
 (#352) and six-function preview group (#353) are published and green.
 Damage/recovery effects F00484/F00485/F00494-F00499 are published and green.
-Publish the verified resource/injury/dispatch group F00500-F00507.
-Then promote presentation F00100/F00101/F00108/F00109/F00110/F00191
-with #356, including evidence-backed disposition of its two forwarding aliases.
+Resource/injury/dispatch F00500-F00507 is published and green in `475ed67d`.
+Publish the verified presentation group with #356, then continue phase helpers
+F00001/F00089/F00096/F00097/F00098/F00114/F00121/F00122. Their 152 original
+instructions and alias audit are in `action_phase_helpers.txt` and
+`action_phase_configured_module_references.log` under `build\scratch\status-queue`.
 Their original source/instruction analysis is in `damage_recovery_effects.txt`
 and `resource_effect_dispatch.txt` under `build\scratch\status-queue`.
 Subsequent phase and outcome helpers also have complete instruction analysis.
@@ -429,8 +460,8 @@ Row 30's first 23 effect producers are published and green through `7a3360d4`.
 The four cost functions are published and green in `64a95a3d`; #352 is closed.
 The six preview/resolution functions are published and green in `242d0a0f`;
 #353 is closed. The next eight damage/recovery effects are published and green
-in `f2d4c84d`. Resource/injury/dispatch is locally resolved, with publication
-and exact-revision CI pending.
+in `f2d4c84d`. Resource/injury/dispatch is published and green in `475ed67d`;
+the next presentation group owns #356.
 
 [#354](https://github.com/JEschete/VS-NativePort/issues/354) records the
 forwarding classifier treating an unbraced `if (...) Call();` as a call to
@@ -491,6 +522,15 @@ with controlled position/animation/sound/bone services. Evidence:
 This is not an interactive visual result or a reopening of #76's unrelated
 particle-motion acceptance. Fix in the owning presentation group after the
 current effect groups; keep corrected output separate from original parity.
+
+The remaining ten battle-animation functions have complete source and
+930-instruction analysis in `build\scratch\status-queue\action_animations.txt`.
+[#296 remains open](https://github.com/JEschete/VS-NativePort/issues/296#issuecomment-6827636218):
+the original target-impact caller supplies its visited-hit count as the
+climbing blend argument, but the source-impact caller still inherits incoming
+s4. `climbing_blend_probe.py/.log` verifies both call chains. Source-route
+provenance and actual climbing/reference behavior still need evidence; no
+blend constant or completed climbing fix is claimed.
 
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
 353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
@@ -677,8 +717,8 @@ Their current/next/pending statements are historical, not instructions or fresh 
 2. Triggered recovery, cost contracts, previews and #354 are published and green;
    #352, #353 and #354 are closed.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 753 remain.
-3. Publish resource/injury/dispatch, then continue presentation with #356, following
+   #276: 747 remain.
+3. Publish presentation with #356, then continue phase helpers, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

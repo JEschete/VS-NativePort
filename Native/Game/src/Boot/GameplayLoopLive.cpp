@@ -11,6 +11,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -444,7 +445,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         VS::Battle::LiveUpdateBattleAbilityTiming();
         break;
       case BattleActionFlow::kFollowupEffects:
-        Battle_StartFollowupActionEffects();
+        VS::Battle::StartLiveActionPresentation();
         break;
       case BattleActionFlow::kWaitResolution:
         Battle_WaitForActionResolution();

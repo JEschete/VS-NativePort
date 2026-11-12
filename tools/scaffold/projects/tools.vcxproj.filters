@@ -1971,6 +1971,12 @@
     <None Include="..\..\port\differentials\action_costs_guard_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\action_effect_dispatch.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\action_effect_dispatch_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\action_execution.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2139,6 +2145,15 @@
     <None Include="..\..\port\differentials\random_stat_effects_guard_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\resource_dispatch_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\resource_recovery.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\resource_recovery_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\special_terrain.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2239,6 +2254,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\relaxed_sources.txt">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\resource_dispatch_audit.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_assembly_gap_audit.py">
