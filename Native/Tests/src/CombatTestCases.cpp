@@ -2218,10 +2218,10 @@ TEST_CASE("Offensive status abilities queue and apply their original ailments",
     AbilityEffect apply;
   };
   constexpr auto kExamples = std::to_array<Example>({
-      {32, 0x2000, Battle_QueueParalysis},
-      {34, 0x8000, Battle_QueueNumbness},
+      {32, 0x2000, VS::Battle::QueueLiveParalysis},
+      {34, 0x8000, VS::Battle::QueueLiveNumbness},
       {35, 0x1000, VS::Battle::QueueLiveSilence},
-      {37, 0x4000, Battle_QueuePoison},
+      {37, 0x4000, VS::Battle::QueueLivePoison},
   });
   for (const auto& example : kExamples) {
     CAPTURE(example.id);

@@ -175,4 +175,63 @@ std::optional<BanishOutcome> QueueBanish(std::span<const StatusRule> rules,
   return BanishOutcome{.changed_mask = changed.value(),
                        .analyze_requested = execute_action};
 }
+// decomp: func_80083DEC (src/BATTLE/BATTLE.PRG/146C.c:12399).
+std::optional<StatusFeedback> QueueParalysis(std::span<const StatusRule> rules,
+                                             const StatusTarget& target,
+                                             QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kParalysis,
+                       StatusFeedback::kNegative);
+}
+
+// decomp: func_80083E3C (src/BATTLE/BATTLE.PRG/146C.c:12408).
+std::optional<StatusFeedback> QueuePoison(std::span<const StatusRule> rules,
+                                          const StatusTarget& target,
+                                          QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kPoison,
+                       StatusFeedback::kNegative);
+}
+
+// decomp: func_80083E8C (src/BATTLE/BATTLE.PRG/146C.c:12417).
+std::optional<StatusFeedback> QueueNumbness(std::span<const StatusRule> rules,
+                                            const StatusTarget& target,
+                                            QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kNumbness,
+                       StatusFeedback::kNegative);
+}
+
+// decomp: func_80083EDC (src/BATTLE/BATTLE.PRG/146C.c:12426).
+std::optional<StatusFeedback> QueueCurse(std::span<const StatusRule> rules,
+                                         const StatusTarget& target,
+                                         QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kCurse,
+                       StatusFeedback::kNegative);
+}
+
+// decomp: func_80083F2C (src/BATTLE/BATTLE.PRG/146C.c:12435).
+std::optional<std::uint32_t> QueueAirAttackUp(std::span<const StatusRule> rules,
+                                              const StatusTarget& target,
+                                              QueuedStatuses& queued) {
+  return QueueRule(rules, target, queued, StatusRuleId::kAirAttackUp);
+}
+
+// decomp: func_80083F50 (src/BATTLE/BATTLE.PRG/146C.c:12442).
+std::optional<std::uint32_t> QueueFireAttackUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued) {
+  return QueueRule(rules, target, queued, StatusRuleId::kFireAttackUp);
+}
+
+// decomp: func_80083F74 (src/BATTLE/BATTLE.PRG/146C.c:12449).
+std::optional<std::uint32_t> QueueEarthAttackUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued) {
+  return QueueRule(rules, target, queued, StatusRuleId::kEarthAttackUp);
+}
+
+// decomp: func_80083F98 (src/BATTLE/BATTLE.PRG/146C.c:12456).
+std::optional<std::uint32_t> QueueWaterAttackUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued) {
+  return QueueRule(rules, target, queued, StatusRuleId::kWaterAttackUp);
+}
 }  // namespace VS::Battle

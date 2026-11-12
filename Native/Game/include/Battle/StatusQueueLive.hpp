@@ -37,4 +37,20 @@ void QueueLiveRegeneration(Battle_ActionDefinition*, Battle_HitResult*,
                            Battle_HitResult* target, int, int);
 void QueueLiveBanish(Battle_ActionDefinition*, Battle_HitResult*,
                      Battle_HitResult* target, int, int execute_action);
+void QueueLiveParalysis(Battle_ActionDefinition*, Battle_HitResult*,
+                        Battle_HitResult* target, int, int);
+void QueueLivePoison(Battle_ActionDefinition*, Battle_HitResult*,
+                     Battle_HitResult* target, int, int);
+void QueueLiveNumbness(Battle_ActionDefinition*, Battle_HitResult*,
+                       Battle_HitResult* target, int, int);
+void QueueLiveCurse(Battle_ActionDefinition*, Battle_HitResult*,
+                    Battle_HitResult* target, int, int);
+void QueueLiveAirAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                          Battle_HitResult* target, int, int);
+void QueueLiveFireAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                           Battle_HitResult* target, int, int);
+void QueueLiveEarthAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int);
+void QueueLiveWaterAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int);
 }  // namespace VS::Battle

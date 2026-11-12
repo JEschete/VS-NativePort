@@ -192,4 +192,36 @@ void QueueLiveBanish(Battle_ActionDefinition*, Battle_HitResult*,
     StatsOf(HitOf(target)).isAnalyzed = 1;
   }
 }
+void QueueLiveParalysis(Battle_ActionDefinition*, Battle_HitResult*,
+                        Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueueParalysis);
+}
+void QueueLivePoison(Battle_ActionDefinition*, Battle_HitResult*,
+                     Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueuePoison);
+}
+void QueueLiveNumbness(Battle_ActionDefinition*, Battle_HitResult*,
+                       Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueueNumbness);
+}
+void QueueLiveCurse(Battle_ActionDefinition*, Battle_HitResult*,
+                    Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueueCurse);
+}
+void QueueLiveAirAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                          Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueAirAttackUp);
+}
+void QueueLiveFireAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                           Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueFireAttackUp);
+}
+void QueueLiveEarthAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueEarthAttackUp);
+}
+void QueueLiveWaterAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueWaterAttackUp);
+}
 }  // namespace VS::Battle

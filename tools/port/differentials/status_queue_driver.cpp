@@ -1,5 +1,5 @@
-// Native side of status_queue.py: F00405/F00406/F00437-F00450, original 146C.c
-// _setApplicableStatuses, _setInflictedStatuses and func_80083998..func_80083D7C.
+// Native side of status_queue.py: F00405/F00406/F00437-F00458, original 146C.c
+// _setApplicableStatuses, _setInflictedStatuses and func_80083998..func_80083F98.
 #include "Battle/StatusQueue.hpp"
 
 #include <array>
@@ -60,11 +60,17 @@ int main() {
   using namespace VS::Battle;
   using Wrapper = std::optional<StatusFeedback> (*)(
       std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
-  constexpr std::array<Wrapper, 14> wrappers{
+  constexpr std::array<Wrapper, 22> wrappers{
       QueueStrengthDown, QueueIntelligenceDown, QueueAgilityDown,
       QueueEquipmentDown, QueueHalfMovement, QueueStrengthUp,
       QueueIntelligenceUp, QueueAgilityUp, QueueEquipmentUp,
-      QueueQuicken, QueueSilence, nullptr, QueueRegeneration, nullptr};
+      QueueQuicken, QueueSilence, nullptr, QueueRegeneration, nullptr,
+      QueueParalysis, QueuePoison, QueueNumbness, QueueCurse,
+      nullptr, nullptr, nullptr, nullptr};
+  using MaskWrapper = std::optional<std::uint32_t> (*)(
+      std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
+  constexpr std::array<MaskWrapper, 4> attack_wrappers{
+      QueueAirAttackUp, QueueFireAttackUp, QueueEarthAttackUp, QueueWaterAttackUp};
   std::string line;
   while (std::getline(std::cin, line)) {
     std::istringstream input(line);
@@ -80,7 +86,7 @@ int main() {
     for (auto& word : hit) input >> word;
     for (auto& word : params) input >> word;
     for (auto& word : stats) input >> word;
-    if (!input || function >= 16 || rule_id >= kStatusRuleCount || actor_id > 255) return 2;
+    if (!input || function >= wrappers.size() + 2 || rule_id >= kStatusRuleCount || actor_id > 255) return 2;
     target.value.exempt = actor_id == 128;
     queued.value = {hit[5], hit[6], static_cast<StatusFeedback>((hit[7] >> 16) & 3u)};
     for (std::size_t index = 0; index < rules.value.size(); ++index) {
@@ -115,6 +121,10 @@ int main() {
           result = stats[0x954 / 4];
         }
       }
+    } else if (function >= 20) {
+      const auto mask = attack_wrappers.at(function - 20)(rules.value, target.value, queued.value);
+      refused = !mask.has_value();
+      if (mask) result = mask.value();
     } else {
       const auto feedback = wrappers[function - 2](rules.value, target.value, queued.value);
       refused = !feedback.has_value();

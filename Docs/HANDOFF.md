@@ -18,29 +18,37 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-29 group
 
-F00443-F00450 are locally verified on `1c420d3f`, together with the #349
-callback correction. All fourteen promoted effect callbacks now match the
-actual `void` mediator type; the two consumed-mask primitives remain `int`.
-The tests compile a callback array using the real table element type, relocate
-the original module table, and invoke all fourteen through that table while
-checking hit/stat neighbors. Banish analysis is execution-only even when its
-status effect is blocked. Incidental MIPS return values are projected only
-by the differential driver, never exposed as a production callback API.
+F00451-F00458 are locally verified on `e8565059`: Paralysis, Poison, Numbness,
+Curse and the four elemental attack increases use the shared typed status
+policies. Ailments conditionally set negative feedback; elemental attack
+changes preserve feedback. Twenty-two promoted effect callbacks now compile
+as the real `void` mediator type and execute through the relocated original
+table with hit/stat neighbor checks. The maintained offensive-ability tests
+call the new live bindings. All 27 old-symbol references are removed.
 
-- New original span: 0x80083B78-0x80083DEC, 157 instructions, SHA-256
-  `aa53382b617b2ab5af4db5c50d0e1a16caea26df1ad0eeff5d26f4b03c886391`.
-- Shared `status_queue`: all sixteen functions, 16,384 vectors, zero
-  mismatches, 87/87 mutants detected. Eight new native broken variants detect
-  36/38/39/35/36/36/40/40 mismatches of 1,024 vectors respectively.
-- Group `build\promotion-check\group-20261111-215441`, 461 seconds:
-  Debug/Release each pass 5,803 cases/12,652,228 assertions; focused tests
-  pass 40 cases/435 assertions. Both canonical replays match, copier
+- New original span: 0x80083DEC-0x80083FBC, 116 instructions, SHA-256
+  `608c5d6d6962a944b54a5163a8d250c20b0e4e1ecd127cb03b8461002e06b2cf`.
+- Shared `status_queue`: all 24 functions, 24,576 vectors, zero mismatches,
+  119/119 mutants detected. Eight native broken variants detect
+  52/49/54/51/50/49/50/52 mismatches of 2,048 vectors respectively.
+  Synthetic actor-table indices now stay in the actual 42-slot live domain;
+  stats identities independently exercise the full byte range and exemption128.
+- Group `build\promotion-check\group-20261111-222706`, 443 seconds:
+  Debug/Release each pass 5,812 cases/12,652,324 assertions; focused tests
+  pass 63 cases/1,394 assertions. Both canonical replays match, copier
   stability/controls pass, and tidy reports six existing findings, zero new.
-- Ledgers are synchronized. Evidence recipe:
-  `build\scratch\status-queue\group8-ledgers.json`.
-  Publication and exact fixing-revision CI remain required before closing
-  #349. Other generated mediator signatures remain migration debt; this is
-  not full status gameplay or EC/M8 completion.
+- Evidence: `build\differential\status_queue-F00451-F00458.log`, the eight
+  per-ID variant logs, and `build\scratch\status-queue\ailments-ledgers.json`.
+  Publication and exact-revision CI are pending. Other generated callbacks
+  remain migration debt; no full status gameplay or EC/M8 completion claim.
+
+The preceding F00443-F00450 group and #349 are published in `e8565059`;
+[CI 43146186212](https://github.com/JEschete/VS-NativePort/actions/runs/43146186212)
+passed. [#349 is closed](https://github.com/JEschete/VS-NativePort/issues/349#issuecomment-6813404271)
+with compiler-negative-control and actual typed-dispatch evidence. Its
+16-function differential is archived at
+`build\differential\status_queue-F00443-F00450.log`. Incidental MIPS returns
+remain driver-only projections, not production callback APIs.
 
 ### First row-29 group (published)
 
@@ -79,8 +87,8 @@ and generated action-resolution consumers use the checked live API.
   the real effect-mediator table takes `void` callbacks, but the six promoted
   Live handlers retained misleading original `int` declarations. A native
   compiler assignment probe rejects the types; no gameplay crash is claimed.
-  The latest group repairs those six bindings, uses the correct signature for
-  its new handlers, and adds compile-time and actual typed-dispatch tests.
+  Commit `e8565059` repaired those six bindings and its eight new handlers,
+  with compile-time and actual typed-dispatch tests; #349 is now closed.
   Green builds/replays alone did not prove this contract. The two status
   primitives retain their consumed `int` masks.
 
@@ -97,8 +105,8 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 26 of the original 900 resolved; 874 remain** (873 generated plus
-F01416 owned WIP). Modernization is 2,870/3,744; C++ promotion is 2,871 plus
+**Progress: 34 of the original 900 resolved; 866 remain** (865 generated plus
+F01416 owned WIP). Modernization is 2,878/3,744; C++ promotion is 2,879 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -167,13 +175,14 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue row 29 with F00451-F00458: Paralysis, Poison, Numbness, Curse and
-the four elemental attack increases. Their original source and 116
-instructions (0x80083DEC-0x80083FBC, SHA-256
-`608c5d6d6962a944b54a5163a8d250c20b0e4e1ecd127cb03b8461002e06b2cf`)
-have been read. Ailments conditionally set negative feedback; elemental
-attack changes leave it alone. All Live handlers must match the real `void`
-mediator type. Keep every original
+Continue row 29 with F00459-F00466: four elemental defense increases and four
+ailment cures. Their original source and 116 instructions
+(0x80083FBC-0x8008418C, SHA-256
+`2c7e1a3eda71161447fe3e8adab26d8d61d3a9b507c29d8f97d18ac10e41d1ab`)
+have been read. Cures use the removal primitive, ignore immunity/blocking and
+conditionally set positive feedback; defense changes use applicability and
+leave feedback alone. All Live handlers must match the real `void` mediator
+type. Keep every original
 cohort row in the progress CSV, including
 resolved ones; the `snapshot` column stays `44fa8847`. F01416 remains the one
 owned WIP and must not disappear from the remaining count.
@@ -220,9 +229,9 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 ## Stopping Point
 
 The continuation is active, not paused. Row 28 is published and green. The
-first eight row-29 status-queue functions are published and green. F00443-F00450
-and #349 are now verified locally; publish, confirm CI and close #349, then
-continue F00451-F00458. The perception checkpoint below is historical.
+first sixteen row-29 status functions are published and green, and #349 is
+closed. F00451-F00458 are verified locally; publish and confirm CI, then
+continue F00459-F00466. The perception checkpoint below is historical.
 
 Stopped on owner request (2026-11-11) after the perception group, published
 in `33ad4f3e` on base `3aa5b806` and green on the exact revision
@@ -393,10 +402,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the verified F00443-F00450 and #349 changes and confirm exact-revision CI.
+2. Publish the verified F00451-F00458 changes and confirm exact-revision CI.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 874 remain.
-3. Continue row 29 with status handlers F00451-F00458, following
+   #276: 866 remain.
+3. Continue row 29 with status handlers F00459-F00466, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified
