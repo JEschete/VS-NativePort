@@ -783,6 +783,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LivePreviewActorActionCost": r"Native\Game\include\Battle\ActionCostsLive.hpp",
     "VS::Battle::LiveAddActionRecoveryDelay": r"Native\Game\include\Battle\ActionCostsLive.hpp",
     "VS::Battle::LiveActorActionRestrictionFlags": r"Native\Game\include\Battle\ActionCostsLive.hpp",
+    "VS::Battle::ClearLiveActionRequest": r"Native\Game\include\Battle\ActionPreviewLive.hpp",
+    "VS::Battle::InitializeLiveActionHit": r"Native\Game\include\Battle\ActionPreviewLive.hpp",
+    "VS::Battle::FinalizeLiveActionHit": r"Native\Game\include\Battle\ActionPreviewLive.hpp",
+    "VS::Battle::ResolveLiveActionTargets": r"Native\Game\include\Battle\ActionPreviewLive.hpp",
+    "VS::Battle::PreviewLiveActionAgainstLimb": r"Native\Game\include\Battle\ActionPreviewLive.hpp",
+    "VS::Battle::PreviewLiveActionAgainstActor": r"Native\Game\include\Battle\ActionPreviewLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1499,6 +1505,12 @@ OWNED_CALL_BINDINGS["F00510"] = "VS::Battle::LiveActionCostAndAvailability"
 OWNED_CALL_BINDINGS["F00511"] = "VS::Battle::LivePreviewActorActionCost"
 OWNED_CALL_BINDINGS["F00512"] = "VS::Battle::LiveAddActionRecoveryDelay"
 OWNED_CALL_BINDINGS["F00548"] = "VS::Battle::LiveActorActionRestrictionFlags"
+OWNED_CALL_BINDINGS["F00508"] = "VS::Battle::ClearLiveActionRequest"
+OWNED_CALL_BINDINGS["F00509"] = "VS::Battle::InitializeLiveActionHit"
+OWNED_CALL_BINDINGS["F00513"] = "VS::Battle::FinalizeLiveActionHit"
+OWNED_CALL_BINDINGS["F00514"] = "VS::Battle::ResolveLiveActionTargets"
+OWNED_CALL_BINDINGS["F00515"] = "VS::Battle::PreviewLiveActionAgainstLimb"
+OWNED_CALL_BINDINGS["F00516"] = "VS::Battle::PreviewLiveActionAgainstActor"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3215,6 +3227,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80085978, "VS::Battle::LivePreviewActorActionCost"),  # F00511
     ("BATTLE/BATTLE.PRG", 0x800859B4, "VS::Battle::LiveAddActionRecoveryDelay"),  # F00512
     ("BATTLE/BATTLE.PRG", 0x8008A5D0, "VS::Battle::LiveActorActionRestrictionFlags"),  # F00548
+    ("BATTLE/BATTLE.PRG", 0x800856F8, "VS::Battle::ClearLiveActionRequest"),  # F00508
+    ("BATTLE/BATTLE.PRG", 0x80085718, "VS::Battle::InitializeLiveActionHit"),  # F00509
+    ("BATTLE/BATTLE.PRG", 0x80085A34, "VS::Battle::FinalizeLiveActionHit"),  # F00513
+    ("BATTLE/BATTLE.PRG", 0x80085B10, "VS::Battle::ResolveLiveActionTargets"),  # F00514
+    ("BATTLE/BATTLE.PRG", 0x8008631C, "VS::Battle::PreviewLiveActionAgainstLimb"),  # F00515
+    ("BATTLE/BATTLE.PRG", 0x800863A4, "VS::Battle::PreviewLiveActionAgainstActor"),  # F00516
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3415,17 +3433,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("VS::Battle::Ai::AddAiTileOccupant(object);",
          "VS::Battle::Ai::AddAiTileOccupant((const Field_GimmickInstance*)object);",
          "the rebased physics view aliases the native owning Gimmick; pass its checked tile prefix explicitly"),
-    ],
-    "F00514": [
-        ("*(int*)&spec->recoveryDelay & 0x4000",
-         "spec->resetsHitResults",
-         "Action byte13 bit6 is the typed source interception flag; do not alias four bytes starting at recoveryDelay"),
-        ("&origin, &position, &impact, result->primaryTarget.target.targetActor);",
-         "&origin, &position, &impact, result->primaryTarget.target.targetActor) != NULL;",
-         "Native segment trace returns an output pointer; this caller consumes only collision truth"),
-        ("VS::Field::TraceActorAndTerrainCollision(",
-         "VS::Field::TraceLiveActorAndTerrainCollision(",
-         "F01834 typed core takes a trace world; the generated caller uses the live binding"),
     ],
     "F01363": [
         ("Effects_screenEffectDefaults[2] = 0x1000;",
@@ -3800,10 +3807,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("VS::Core::Memory::AllocateFromHighEnd(0x1B00)",
          "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
          "C48.c:546 scratch ends with 128 text pointers; reserve native pointer width, not the PS1 512 bytes"),
-    ],
-    "F00508": [
-        ("arg0, 0x84C", "arg0, sizeof(Battle_ActionRequest)",
-         "Clear the complete native action result including all supported targets"),
     ],
     "F01554": [
         ("((Effects_ParticleAttractionView*)node)->attraction",

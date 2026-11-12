@@ -4,6 +4,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -404,7 +405,7 @@ void Battle_CommitSelectedAction(int target_selection_mode)
         VS::Battle::LiveSetSingleActionTarget();
     }
 
-    Battle_ResolveActionTargets(Battle_actionState->selection.actionId, Battle_actionState->queue, &Battle_actionState->selection, 1);
+    VS::Battle::ResolveLiveActionTargets(Battle_actionState->selection.actionId, Battle_actionState->queue, &Battle_actionState->selection, 1);
 
     if ((Battle_actionState->selection.primaryTarget.target.targetActor == 0)
         && ((action_id = Battle_actionState->selection.actionId, (action_id == 1))

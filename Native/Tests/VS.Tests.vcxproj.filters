@@ -33,6 +33,9 @@
     <ClCompile Include="src\ActionCostsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActionPreviewTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActionResultCommitTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

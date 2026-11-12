@@ -18,6 +18,38 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-30 group
 
+F00508/F00509/F00513/F00514/F00515/F00516 are locally verified on `64a95a3d`,
+using typed `ActionPreview` policies and checked live bindings. Generated
+and owned callers now use the native reset, outcome, resolution and preview APIs.
+
+- Evidence: `build\scratch\action-preview\evidence.json`.
+- `action_preview`: 861 original instructions, 12,288 defined vectors,
+  zero mismatches; 56 original mutants and six native broken variants detected.
+- Group `build\promotion-check\group-20261112-081034`, 533 seconds:
+  Debug/Release each pass 6,162 cases/12,916,857 assertions; coupled selection
+  120 cases/154,524 assertions; own tests 26/531. Both canonical replays,
+  second-generation stability and 213 copier controls pass; tidy 49 existing
+  findings, zero new. A test-only statement-count finding was repaired before
+  repeating the full group; no assertions or baselines were weakened.
+- Both production preview entrypoints execute original actions 23/25 through
+  real resolution and chain evasion. All 12 action/builder/prior-storage
+  combinations produce identical complete fresh results. Source limb 0 and
+  focus 0 follow the existing fresh-selection contract, not an actor's default
+  target limb or a reaction's copied hit. Checked limb guards are unchanged.
+- Native 255-target reset/copy, clear-before-read aliases, callback-current
+  data with cached owners, cancellation identity, redirects and lazy unused
+  inputs pass controls. Original trap definitions 6-21 also run populated
+  world-source resolution previews.
+- Original unspecified preview fields are excluded from numeric equivalence
+  and verified separately as the #353 fix. Original geometry comparisons
+  cover nonnegative low32 squared lengths; negative words retain the existing
+  native scalar clamp. Used missing redirect/world-physical context is diagnosed.
+- Publication and exact-revision CI are pending. Effect/injury/volume services
+  and module tables remain migration debt; no interactive gameplay, row-30
+  completion or EC/M8 retirement claim.
+
+### Previous action-cost group
+
 F00510/F00511/F00512/F00548 are locally verified on `e55a82ea`, using typed
 `ActionCosts` policies and checked live bindings. All 37 old symbol references
 are removed, including generated menus and owned ability/diagnostic callers.
@@ -40,7 +72,9 @@ are removed, including generated menus and owned ability/diagnostic callers.
   numeric equivalence to the original uninitialized register. Defined resource
   widths, HP reserve, risk clamp, chain arithmetic, additive packed carries,
   lazy inputs and callback-visible reads remain verified.
-- Publication and exact-revision CI are pending. No interactive gameplay,
+- Published in `64a95a3d`, green on
+  [CI 43216475577](https://github.com/JEschete/VS-NativePort/actions/runs/43216475577).
+  No interactive gameplay,
   attack-eligibility, row-30 completion or EC/M8 retirement claim.
 
 ### Previous triggered-recovery group
@@ -187,9 +221,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 125 of the original 900 resolved (122 promoted, 3 retired); 775
-remain** (774 generated plus F01416 owned WIP). Modernization is 2,966/3,741;
-C++ promotion is 2,967 plus
+**Progress: 131 of the original 900 resolved (128 promoted, 3 retired); 769
+remain** (768 generated plus F01416 owned WIP). Modernization is 2,972/3,741;
+C++ promotion is 2,973 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -258,15 +292,15 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue ordered row 30 (`battle-actions`, 64 of 91 still remaining).
-The #354 classifier repair is published and green. Publish the verified
-cost group F00510/F00511/F00512/F00548 (#352), then continue result
-setup/resolution F00508/F00509/F00513/F00514/F00515/F00516 (#353). The shared
-cost-helper source/assembly analysis is in `build\scratch\status-queue\action_cost_helpers.txt`.
-Keep ordinary empty weapons valid and fix preview producers rather than
-weakening limb guards. Further
-recovery and dispatch groups have source/assembly analysis recorded; do not
-silently jump ahead of this ordered package.
+Continue ordered row 30 (`battle-actions`, 58 of 91 still remaining).
+The #354 classifier repair and cost group F00510/F00511/F00512/F00548
+(#352) are published and green. Publish the verified six-function preview
+group (#353), then continue damage/recovery effects
+F00484/F00485/F00494-F00499, followed by resource/injury/dispatch F00500-F00507.
+Their original source/instruction analysis is in `damage_recovery_effects.txt`
+and `resource_effect_dispatch.txt` under `build\scratch\status-queue`.
+Subsequent phase and outcome helpers also have complete instruction analysis.
+Do not silently jump ahead of this ordered package.
 
 [#351](https://github.com/JEschete/VS-NativePort/issues/351) records F00421's
 latent healing-affinity defect: drawn encoded-affinity 1 reads an unwritten
@@ -327,7 +361,8 @@ The continuation is active, not paused. Row 28 is published and green. The
 row-29 checkpoint has all 88 IDs resolved (85 promoted, three retired),
 published and green in `7b797783`. #349, #350 and #351 are closed.
 Row 30's first 23 effect producers are published and green through `7a3360d4`.
-Continue the focused tooling and producer/consumer fixes.
+The four cost functions are published and green in `64a95a3d`; #352 is closed.
+Continue the preview producer/consumer fix.
 
 [#354](https://github.com/JEschete/VS-NativePort/issues/354) records the
 forwarding classifier treating an unbraced `if (...) Call();` as a call to
@@ -349,21 +384,19 @@ type zero/cost zero. The verified cost group explicitly treats that pair as
 no resource payment without rejecting ordinary empty loadouts; other
 unsupported pairs refuse diagnostically. See the latest group above and
 [#352 evidence](https://github.com/JEschete/VS-NativePort/issues/352#issuecomment-6823239942).
-Publication and exact-revision CI are still required before closure.
+The fixing revision `64a95a3d` and its exact-revision CI are verified;
+[#352 is closed](https://github.com/JEschete/VS-NativePort/issues/352#issuecomment-6823558442).
 
 [#353](https://github.com/JEschete/VS-NativePort/issues/353) records partial
 preview-request initialization in F00515/F00516. The original builders pass
 stack-dependent source-limb/focus fields to the resolver; original self-route
 actions 23/25 use chain evasion, which reads that limb. Do not weaken the
 checked limb guard. Repro: `build\scratch\status-queue\preview-initialization-probe.py`.
-After publishing the verified cost group, continue result setup/resolution
-F00508/F00509/F00513/F00514/F00515/F00516 (#353). All 861 original instructions
-are analyzed in `action_cost_helpers.txt` and `action_preview_resolution.txt`
-under `build\scratch\status-queue`. Preserve the full native 255-target reset
-and define consumed preview source fields rather than weakening guards.
-This adjusts grouping within
-row 30 to repair the demonstrated producer/consumer defects before more effect
-leaves; it does not change the ordered package priorities.
+The six-function preview group now verifies complete fresh initialization
+and actual self-route calls without weakening the limb guard; see the latest
+group above and [local acceptance evidence](https://github.com/JEschete/VS-NativePort/issues/353#issuecomment-6824772846).
+Publication and exact-revision CI remain required before closure.
+After that milestone, resume the prepared effect groups within row 30.
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
 353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
 [#350](https://github.com/JEschete/VS-NativePort/issues/350) tracks the separate
@@ -546,10 +579,11 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Triggered recovery and #354 are published and green; #354 is closed.
+2. Triggered recovery, cost contracts and #354 are published and green;
+   #352 and #354 are closed.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 775 remain.
-3. Continue row 30 with the cost and preview groups above, following
+   #276: 769 remain.
+3. Publish the preview group, then continue the prepared row-30 effects, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

@@ -11,6 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/ActionPreviewLive.hpp"
 #include "Content/ModuleData.h"
 #include "Field/SegmentCollision.hpp"
 #include "Field/SegmentCollisionLive.hpp"
@@ -344,8 +345,8 @@ TEST_CASE(
   input->targets[0].targetsPosition = 1;
   const SVECTOR target{256, 0, 96, 0};
   std::memcpy(&input->targets[0].target, &target, sizeof target);
-  Battle_ResolveActionTargets(ActionTraceFixture::kAction, result.get(),
-                              input.get(), 1);
+  VS::Battle::ResolveLiveActionTargets(ActionTraceFixture::kAction,
+                                       result.get(), input.get(), 1);
   CHECK(result->targetCount == 1);
   CHECK(result->targets[0].targetsPosition == 1);
   CHECK(result->targets[0].target.mp == 0x80);

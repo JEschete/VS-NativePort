@@ -15,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
@@ -294,8 +295,8 @@ struct AbilityEffectFixture : AbilityFixture {
     Battle_actionDefinitions[99].type = Battle_ActionType_Spell;
     Battle_actionDefinitions[99].cost = 25;
     Battle_actionDefinitions[99].unlocked = 1;
-    Battle_InitializeHitResult(&source);
-    Battle_InitializeHitResult(&target);
+    VS::Battle::InitializeLiveActionHit(&source);
+    VS::Battle::InitializeLiveActionHit(&target);
     target.target.targetActor = 1;
     for (int index = 0; index < 2; ++index) {
       Battle_Ai_actorAiStates[index] = &ai[index];
@@ -458,7 +459,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     Battle_ActionRequest result{};
     input.targetCount = 1;
     input.targets[0].target.targetActor = 1;
-    Battle_ResolveActionTargets(id, &result, &input, 0);
+    VS::Battle::ResolveLiveActionTargets(id, &result, &input, 0);
     return result;
   }
 
@@ -1483,8 +1484,8 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
     Audio_Seq_unusedArtsStatus.artsLearned[counter] = static_cast<u_char>(tier);
     Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[counter] =
         static_cast<u_short>(kBreakArtThresholds[counter][tier] - 1);
-    Battle_InitializeHitResult(&source);
-    Battle_InitializeHitResult(&target);
+    VS::Battle::InitializeLiveActionHit(&source);
+    VS::Battle::InitializeLiveActionHit(&target);
     target.target.targetActor = 1;
     target.target.hp = stats[1].currentHp;
     Battle_actionDefinitions[184].type = Battle_ActionType_BreakArt;

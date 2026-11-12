@@ -54,12 +54,5 @@ int Battle_IgnoreActionEffect(Battle_ActionDefinition* action_definition __attri
 void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* hit_result);
 void Battle_ApplyActionHitEffect(
     Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int execute_action, int hit);
-void Battle_ClearActionResult(void* action_result);
-void Battle_InitializeHitResult(Battle_HitResult* hit_result);
-void Battle_FinalizeHitOutcome(Battle_HitStatusView* hit_status);
-void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battle_ActionRequest* source, int execute_action);
-int Battle_PreviewActionAgainstLimb(int action_id, int source_actor_slot, int targetActor, int targetLimb, void* result_out);
-int Battle_PreviewActionAgainstActor(int action_id, int source_actor_slot, int targetActor, int target_limb, SVECTOR* source_position,
-    SVECTOR* target_position, Battle_ActionRequest* result_out);
 
 #endif // VS_BATTLE_ACTIONRESOLUTION_H_DECLS

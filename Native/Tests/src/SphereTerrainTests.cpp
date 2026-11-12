@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -301,7 +302,7 @@ TEST_CASE("Native action result clearing covers the entire native capacity",
   } storage{};
   storage.before = storage.after = kGuard;
   std::memset(&storage.request, 0xA5, sizeof storage.request);
-  Battle_ClearActionResult(&storage.request);
+  VS::Battle::ClearLiveActionRequest(&storage.request);
   std::array<unsigned char, sizeof(Battle_ActionRequest)> cleared{};
   CHECK(std::memcmp(&storage.request, cleared.data(), cleared.size()) == 0);
   CHECK(storage.before == kGuard);
@@ -315,7 +316,7 @@ TEST_CASE("AI planning result clearing preserves every adjacent native buffer",
   std::memset(workspace.candidates, 0xA5, sizeof workspace.candidates);
   std::memset(workspace.exclusions, 0xA5, sizeof workspace.exclusions);
   std::memset(workspace.fallback, 0xA5, sizeof workspace.fallback);
-  Battle_ClearActionResult(&workspace.result);
+  VS::Battle::ClearLiveActionRequest(&workspace.result);
   std::array<unsigned char, sizeof(Battle_ActionRequest)> cleared{};
   CHECK(std::memcmp(&workspace.result, cleared.data(), cleared.size()) == 0);
   const auto untouched = [](const auto& buffer) {

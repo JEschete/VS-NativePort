@@ -21,6 +21,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -532,8 +533,8 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   [[nodiscard]] battle::ActionPreviewResult PreviewActionAgainstLimb(
       int action_id, int source_actor, int target_actor, int limb) override {
     Battle_ActionRequest result{};
-    Battle_PreviewActionAgainstLimb(action_id, source_actor, target_actor, limb,
-                                    &result);
+    VS::Battle::PreviewLiveActionAgainstLimb(action_id, source_actor,
+                                             target_actor, limb, &result);
     const Battle_HitResult& hit = result.targets[0];
     return {.action_id = result.actionId,
             .damage_type = result.damageType,

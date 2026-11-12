@@ -14,6 +14,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -508,8 +509,8 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
       return false;
     }
     auto& action = *Battle_actionState;
-    Battle_ResolveActionTargets(action_id, &action.queue[0], &action.selection,
-                                1);
+    VS::Battle::ResolveLiveActionTargets(action_id, &action.queue[0],
+                                         &action.selection, 1);
     return true;
   }
   bool BeginEffect(const VS::Field::TrapEffectRequest& effect) override {

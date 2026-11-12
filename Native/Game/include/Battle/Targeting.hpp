@@ -84,7 +84,7 @@ struct ActionTargetPreview {
 };
 
 // The previewed hit of an action against one target
-// (Battle_PreviewActionAgainstLimb's request and its first hit).
+// (PreviewLiveActionAgainstLimb's request and its first hit).
 struct ActionPreviewResult {
   int action_id = 0;
   int damage_type = 0;

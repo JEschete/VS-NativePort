@@ -116,15 +116,16 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(("BATTLE/BATTLE.PRG", address, guard), copy_fixups.MODULE_BINDING_ENTRIES)
 
     def test_action_routing_keeps_zero_and_direct_prerequisites_out_of_hit_roll(self):
-        source = (copy_to_native.REPO / "Native/Game/src/Battle/ActionResolution.cpp").read_text(encoding="utf-8")
-        body = source[source.index("void Battle_ResolveActionTargets("):]
-        dispatch = body[body.index("switch (action_definition->hits[hit].prerequisiteFunctionId)"):]
-        direct = dispatch[dispatch.index("case 6:"):dispatch.index("case 3:")]
-        self.assertIn("Battle_ApplyActionHitEffect(", direct)
-        self.assertNotIn("LiveRollActionHit", direct)
-        skipped = dispatch[dispatch.index("case 0:"):dispatch.index("default:")]
-        self.assertEqual(flat(skipped), "case 0: break;")
-        self.assertEqual(dispatch.count("VS::Battle::LiveRollActionHit("), 2)
+        source = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreview.cpp").read_text(encoding="utf-8")
+        body = source[source.index("bool ResolveHits("):source.index("ActionRequest FreshPreview(")]
+        self.assertIn("if (prerequisite == 0) continue;", body)
+        direct = body[body.index("if (prerequisite >= kFirstDirectPrerequisite"):body.index("} else if")]
+        self.assertIn("world.Effect(", direct)
+        self.assertNotIn("world.Roll(", direct)
+        self.assertEqual(source.count("world.Roll("), 2)
+        live = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreviewLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("LiveRollActionHit(", live)
+        self.assertIn("Battle_ApplyActionHitEffect(", live)
 
     def test_texture_animations_use_the_callers_overlay_atlas(self):
         copier = object.__new__(copy_to_native.Copier)
@@ -1509,14 +1510,12 @@ class EncounterFixupTests(unittest.TestCase):
                 copy_fixups.MODULE_BINDING_ENTRIES,
             )
             self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
-        self.assertEqual(
-            copy_fixups.FIXES["F00514"][0][1], "spec->resetsHitResults"
-        )
-        self.assertIn("!= NULL;", copy_fixups.FIXES["F00514"][1][1])
-        self.assertEqual(
-            copy_fixups.FIXES["F00514"][2][1],
-            "VS::Field::TraceLiveActorAndTerrainCollision(",
-        )
+        live = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreviewLive.cpp").read_text(encoding="utf-8")
+        core = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreview.cpp").read_text(encoding="utf-8")
+        self.assertIn("return definition.resetsHitResults != 0;", live)
+        self.assertIn("Field::TraceLiveActorAndTerrainCollision(", live)
+        self.assertIn("? std::optional{std::bit_cast<ActionPoint>(impact)}", live)
+        self.assertIn("if (!impact) return false;", core)
 
     def test_screen_warp_routes_through_the_live_binding(self):
         root = Path(__file__).resolve().parents[2]

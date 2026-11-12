@@ -200,6 +200,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionPreview.cpp" />
+    <ClCompile Include="src\Battle\ActionPreviewLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionResolution.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2257,6 +2261,8 @@
     <ClInclude Include="include\Battle\Action.h" />
     <ClInclude Include="include\Battle\ActionCosts.hpp" />
     <ClInclude Include="include\Battle\ActionCostsLive.hpp" />
+    <ClInclude Include="include\Battle\ActionPreview.hpp" />
+    <ClInclude Include="include\Battle\ActionPreviewLive.hpp" />
     <ClInclude Include="include\Battle\ActionResults.hpp" />
     <ClInclude Include="include\Battle\ActionResultsLive.hpp" />
     <ClInclude Include="include\Battle\ActorVitals.hpp" />

@@ -12,32 +12,12 @@
 ],
 "Native\\Game\\src\\Battle\\ActionFlow.cpp": [
 [
-358,
+359,
 [
 "    ((void (*)())Battle_ClearSphereTargets)();"
 ],
 [
 "    ((void (*)(...))Battle_ClearSphereTargets)();"
-]
-]
-],
-"Native\\Game\\src\\Battle\\ActionResolution.cpp": [
-[
-485,
-[
-"                Battle_hitPrerequisiteResult = VS::Battle::LiveCheckActionHitPrerequisite(action_definition, (char*)entry, hit);"
-],
-[
-"                Battle_hitPrerequisiteResult = VS::Battle::LiveCheckActionHitPrerequisite(action_definition, (u_char *)((char*)entry), hit);"
-]
-],
-[
-543,
-[
-"    Battle_ResolveActionTargets(action_id, result_out, &preview_request, 0);"
-],
-[
-"    Battle_ResolveActionTargets(action_id, (Battle_ActionRequest *)(result_out), &preview_request, 0);"
 ]
 ]
 ],

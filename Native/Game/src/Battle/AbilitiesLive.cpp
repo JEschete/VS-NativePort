@@ -10,6 +10,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
@@ -222,7 +223,8 @@ class LiveAbilityHost final : public battle::AbilityHost {
     VS::Battle::Ai::NotifyLiveActionRelationshipChanges(&Queued());
   }
   void ResolveSelectionIntoQueue(int action_id) override {
-    Battle_ResolveActionTargets(action_id, &Queued(), &state_->selection, 1);
+    VS::Battle::ResolveLiveActionTargets(action_id, &Queued(),
+                                         &state_->selection, 1);
   }
   void QueueChainCount(int count) override { Battle_QueueChainCount(count); }
   void ShowAbilityTimingCue(int frames) override {

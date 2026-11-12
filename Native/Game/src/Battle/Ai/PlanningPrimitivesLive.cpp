@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
@@ -254,7 +255,7 @@ class LiveCandidateSimulation final : public CandidateSimulationHost {
 
   std::optional<bool> PreviewLimb(const ActionCandidate& candidate) override {
     if (!Ready(candidate)) return std::nullopt;
-    return Battle_PreviewActionAgainstLimb(
+    return PreviewLiveActionAgainstLimb(
                static_cast<int>(candidate.Action()), state_.actorId,
                static_cast<int>(candidate.TargetId()),
                static_cast<int>(candidate.TargetLimb()),
@@ -267,7 +268,7 @@ class LiveCandidateSimulation final : public CandidateSimulationHost {
     if (!Ready(candidate)) return std::nullopt;
     SVECTOR source_position{source.x, source.y, source.z, source.pad};
     SVECTOR target_position{target.x, target.y, target.z, target.pad};
-    return Battle_PreviewActionAgainstActor(
+    return PreviewLiveActionAgainstActor(
                static_cast<int>(candidate.Action()), state_.actorId,
                static_cast<int>(candidate.TargetId()),
                static_cast<int>(candidate.TargetLimb()), &source_position,
