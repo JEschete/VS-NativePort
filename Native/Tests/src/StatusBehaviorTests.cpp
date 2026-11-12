@@ -3,6 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Legacy/Psx.h"
@@ -151,7 +152,7 @@ struct ConditionFixture {
   static void CheckActionRestrictions(int restricted_action = -1) {
     for (int action_id : {97, 141, 224}) {
       CAPTURE(action_id);
-      CHECK(Battle_ActorActionRestrictionFlags(0, action_id) ==
+      CHECK(VS::Battle::LiveActorActionRestrictionFlags(0, action_id) ==
             (action_id == restricted_action ? 4 : 0));
     }
   }

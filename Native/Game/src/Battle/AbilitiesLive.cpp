@@ -9,6 +9,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
@@ -359,7 +360,7 @@ bool LiveAbilityHost::ActionAvailable(int action_id) const {
     return false;
   }
   const auto availability =
-      static_cast<std::uint32_t>(Battle_ActionCostAndAvailability(
+      static_cast<std::uint32_t>(battle::LiveActionCostAndAvailability(
           static_cast<u_int>(action_id), Battle_characterState->stats, 0));
   return (availability & kActionAvailableMask) != 0;
 }

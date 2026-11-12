@@ -13,6 +13,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -191,7 +192,7 @@ void InspectActionOptions(PlayerObservationState& state) {
             {action, InspectGameText(definition.name), std::string(family),
              menu_order, static_cast<int>(definition.type),
              static_cast<int>(definition.cost),
-             Battle_ActorActionRestrictionFlags(0, action),
+             VS::Battle::LiveActorActionRestrictionFlags(0, action),
              std::bit_cast<std::uint16_t>(definition.aiFlags), rank, ranks});
       }
       ++menu_order;
@@ -232,12 +233,13 @@ void InspectItemOptions(PlayerObservationState& state) {
     }
     const auto& definition = Battle_actionDefinitions[action];
     const auto& hit = definition.hits[0];
-    state.item_options.push_back(
-        {item.id, static_cast<int>(action), item.count,
-         InspectGameText(definition.name),
-         Battle_ActorActionRestrictionFlags(0, static_cast<int>(action)),
-         static_cast<int>(hit.effectId), static_cast<int>(hit.statCalculatorId),
-         static_cast<int>(hit.statFactor)});
+    state.item_options.push_back({item.id, static_cast<int>(action), item.count,
+                                  InspectGameText(definition.name),
+                                  VS::Battle::LiveActorActionRestrictionFlags(
+                                      0, static_cast<int>(action)),
+                                  static_cast<int>(hit.effectId),
+                                  static_cast<int>(hit.statCalculatorId),
+                                  static_cast<int>(hit.statFactor)});
   }
 }
 

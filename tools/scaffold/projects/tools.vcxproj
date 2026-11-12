@@ -396,6 +396,9 @@
     <None Include="..\..\port\differentials\target_approach_driver.cpp" />
     <None Include="..\..\port\differentials\temporary_awareness.py" />
     <None Include="..\..\port\differentials\temporary_awareness_driver.cpp" />
+    <None Include="..\..\port\differentials\triggered_recovery.py" />
+    <None Include="..\..\port\differentials\triggered_recovery_driver.cpp" />
+    <None Include="..\..\port\differentials\triggered_recovery_guard_driver.cpp" />
     <None Include="..\..\port\differentials\wander.py" />
     <None Include="..\..\port\differentials\wander_driver.cpp" />
     <None Include="..\..\port\differentials\waypoint_patrol.py" />

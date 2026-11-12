@@ -18,6 +18,33 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-30 group
 
+F00510/F00511/F00512/F00548 are locally verified on `e55a82ea`, using typed
+`ActionCosts` policies and checked live bindings. All 37 old symbol references
+are removed, including generated menus and owned ability/diagnostic callers.
+
+- Evidence: `build\scratch\status-queue\cost4-evidence.json`.
+- `action_costs`: 16,384 defined vectors over 261 original instructions,
+  zero mismatches; 36 original mutants and four native broken variants detected.
+  Cost-preview and restriction comparisons execute the real cost callee.
+- Group `build\promotion-check\group-20261112-070000`, 439 seconds:
+  Debug/Release each pass 6,136 cases/12,916,326 assertions; coupled selection
+  223 cases/25,220 assertions; own tests 28/593. Both canonical replays,
+  second-generation stability and copier controls pass; tidy six existing
+  findings, zero new.
+- All 81 checked-live diagnostic probes pass. Tests exercise actual empty
+  equip/unequip and shipped natural/armed enemy producers. All 256 ZNDs'
+  455 character records use cost pairs 0/0 or 2/1-3; 216 are no-resource
+  records, including 65 positive-HP records offering base attack.
+- For #352, empty/natural weapon type 0/cost 0 explicitly means no payment;
+  unsupported combinations are diagnosed. This is a native contract, not
+  numeric equivalence to the original uninitialized register. Defined resource
+  widths, HP reserve, risk clamp, chain arithmetic, additive packed carries,
+  lazy inputs and callback-visible reads remain verified.
+- Publication and exact-revision CI are pending. No interactive gameplay,
+  attack-eligibility, row-30 completion or EC/M8 retirement claim.
+
+### Previous triggered-recovery group
+
 F00476-F00483 are locally verified on `0c3c8f6f`, using a shared
 `TriggeredRecoveryQueue` and checked VOID5 bindings. Selected type/affinity
 gates remain separate from input action data; calculator results update
@@ -160,9 +187,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 121 of the original 900 resolved (118 promoted, 3 retired); 779
-remain** (778 generated plus F01416 owned WIP). Modernization is 2,962/3,741;
-C++ promotion is 2,963 plus
+**Progress: 125 of the original 900 resolved (122 promoted, 3 retired); 775
+remain** (774 generated plus F01416 owned WIP). Modernization is 2,966/3,741;
+C++ promotion is 2,967 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -231,9 +258,9 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue ordered row 30 (`battle-actions`, 68 of 91 still remaining).
-First repair the small #354 classifier defect without weakening forwarding
-detection, then the cost group F00510/F00511/F00512/F00548 (#352) and result
+Continue ordered row 30 (`battle-actions`, 64 of 91 still remaining).
+The #354 classifier repair is published and green. Publish the verified
+cost group F00510/F00511/F00512/F00548 (#352), then continue result
 setup/resolution F00508/F00509/F00513/F00514/F00515/F00516 (#353). The shared
 cost-helper source/assembly analysis is in `build\scratch\status-queue\action_cost_helpers.txt`.
 Keep ordinary empty weapons valid and fix preview producers rather than
@@ -308,28 +335,33 @@ forwarding classifier treating an unbraced `if (...) Call();` as a call to
 the classifier correction is locally verified with four formerly failing
 control-flow cases, keyword-prefixed forwarding controls, all 98 gate tests
 and scoped Ruff. Fresh before/after live gate reports are identical with
-zero violations. Its separate commit/publication/CI remain pending.
+zero violations. Published in `e55a82ea`, green on
+[CI 43209366101](https://github.com/JEschete/VS-NativePort/actions/runs/43209366101);
+[#354 is closed](https://github.com/JEschete/VS-NativePort/issues/354#issuecomment-6822541802).
 
 [#352](https://github.com/JEschete/VS-NativePort/issues/352) records a later
 F00510 cost-check defect: BaseAttack with a weapon cost type outside 1-4
 uses an uninitialized resource value. A shared-MIPS probe changes the
 requirements byte by changing only incoming a3, which is not a formal
-argument. Audit actual weapon/empty/natural-weapon initialization before
-choosing the native contract; no gameplay reachability or zero default is
-assumed. Repro: `build\scratch\status-queue\action-cost-input-probe.py`.
-The original and native unequip paths do produce cost type zero/cost zero;
-that case also flips affordability with a negative incoming a3. Do not
-blanket-reject normal empty loadouts; the base-attack/reference contract
-still needs its owning analysis.
+argument. Repro: `build\scratch\status-queue\action-cost-input-probe.py`.
+The original/native unequip paths and shipped natural-weapon data produce
+type zero/cost zero. The verified cost group explicitly treats that pair as
+no resource payment without rejecting ordinary empty loadouts; other
+unsupported pairs refuse diagnostically. See the latest group above and
+[#352 evidence](https://github.com/JEschete/VS-NativePort/issues/352#issuecomment-6823239942).
+Publication and exact-revision CI are still required before closure.
 
 [#353](https://github.com/JEschete/VS-NativePort/issues/353) records partial
 preview-request initialization in F00515/F00516. The original builders pass
 stack-dependent source-limb/focus fields to the resolver; original self-route
 actions 23/25 use chain evasion, which reads that limb. Do not weaken the
 checked limb guard. Repro: `build\scratch\status-queue\preview-initialization-probe.py`.
-After the current triggered-recovery group, prioritize the coherent cost group
-F00510/F00511/F00512/F00548 (#352), then result setup/resolution
-F00508/F00509/F00513/F00514/F00515/F00516 (#353). This adjusts grouping within
+After publishing the verified cost group, continue result setup/resolution
+F00508/F00509/F00513/F00514/F00515/F00516 (#353). All 861 original instructions
+are analyzed in `action_cost_helpers.txt` and `action_preview_resolution.txt`
+under `build\scratch\status-queue`. Preserve the full native 255-target reset
+and define consumed preview source fields rather than weakening guards.
+This adjusts grouping within
 row 30 to repair the demonstrated producer/consumer defects before more effect
 leaves; it does not change the ordered package priorities.
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
@@ -514,9 +546,9 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Triggered recovery is published and green in `7a3360d4`; publish the verified #354 repair.
+2. Triggered recovery and #354 are published and green; #354 is closed.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 779 remain.
+   #276: 775 remain.
 3. Continue row 30 with the cost and preview groups above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
@@ -293,120 +294,6 @@ void Battle_InitializeHitResult(Battle_HitResult* hit_result)
     *(&hit_result->inflictStatuses + 1) = 0;
 }
 
-// decomp: BATTLE.PRG _getActionCost (src/BATTLE/BATTLE.PRG/146C.c:13075)
-int Battle_ActionCostAndAvailability(u_int actionId, Battle_ActorStats* actor, int updateStat)
-{
-    int requirementsMet;
-    int actionType;
-    int cost;
-    Battle_ActionDefinition* action;
-    int statValue;
-
-    action = &Battle_actionDefinitions[actionId];
-    cost = action->cost;
-    actionType = action->type;
-
-    switch (actionType) {
-    case Battle_ActionType_Spell:
-        statValue = actor->currentMp;
-        break;
-    case Battle_ActionType_Ability:
-        statValue = 100 - actor->risk;
-        break;
-    case Battle_ActionType_BreakArt:
-        statValue = actor->currentHp;
-        ++cost;
-        break;
-    case 4:
-        statValue = actor->weapon.currentPp;
-        break;
-    case Battle_ActionType_BaseAttack:
-        cost = actor->weapon.risk;
-        switch (actor->weapon.actionType) {
-        case Battle_ActionType_Spell:
-            statValue = actor->currentMp;
-            break;
-        case Battle_ActionType_Ability:
-            statValue = 100 - actor->risk;
-            break;
-        case Battle_ActionType_BreakArt:
-            statValue = actor->currentHp;
-            ++cost;
-            break;
-        case 4:
-            statValue = actor->weapon.currentPp;
-            break;
-        }
-        actionType = actor->weapon.actionType;
-        break;
-    default:
-        statValue = 0;
-        break;
-    }
-
-    if (actionType == Battle_ActionType_Ability) {
-        if (Battle_actionState->chainStep >= 10) {
-            if ((actionId - 22) < 18) {
-                cost += (Battle_actionState->chainStep * Battle_actionState->chainStep) / 10;
-            }
-        }
-    }
-    if (statValue >= cost) {
-        if (actionType == Battle_ActionType_BreakArt) {
-            --cost;
-        }
-        statValue -= cost;
-        requirementsMet = 1;
-    } else {
-        if (actionType == Battle_ActionType_Ability) {
-            statValue = 0;
-            requirementsMet = 1;
-        } else {
-            requirementsMet = 0;
-        }
-    }
-
-    if (updateStat != 0) {
-        switch (actionType) {
-        case Battle_ActionType_Spell:
-            actor->currentMp = statValue;
-            break;
-        case Battle_ActionType_Ability:
-            actor->risk = 100 - statValue;
-            break;
-        case Battle_ActionType_BreakArt:
-            actor->currentHp = statValue;
-            break;
-        case 4:
-            actor->weapon.currentPp = statValue;
-            break;
-        }
-    }
-
-    return (requirementsMet << 24) + (actionType << 16) + cost;
-}
-
-// decomp: BATTLE.PRG func_80085978 (src/BATTLE/BATTLE.PRG/146C.c:13167)
-void Battle_PreviewActorActionCost(int action_id, int actor_slot)
-{
-    Battle_ActionCostAndAvailability(action_id, Battle_actors[actor_slot]->stats, 0);
-}
-
-// decomp: BATTLE.PRG func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13172)
-void Battle_AddActionRecoveryDelay(u_int action_id, Battle_ActorStats* actor_stats, int execute_action)
-{
-    Battle_ActionDefinition* action_definition = &Battle_actionDefinitions[action_id];
-
-    if ((execute_action != 0) && ((action_id - 0x16) >= 0x20)) {
-        if (action_definition->recoveryDelay == 0xFF) {
-            actor_stats->actionRecoveryTimer += (actor_stats->weapon.recoveryDelay + actor_stats->recoveryDelayBonus) << 8;
-        } else {
-            int recovery_delay = action_definition->recoveryDelay + actor_stats->recoveryDelayBonus;
-            actor_stats->actionRecoveryTimer += recovery_delay << 8;
-        }
-    }
-}
-
 // decomp: BATTLE.PRG func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13186)
 void Battle_FinalizeHitOutcome(Battle_HitStatusView* hit_status)
 {
@@ -637,8 +524,8 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
         *source = *result;
     }
     if (execute_action && (attacker != NULL)) {
-        Battle_AddActionRecoveryDelay(action, attacker, 1);
-        Battle_ActionCostAndAvailability(action, attacker, 1);
+        VS::Battle::LiveAddActionRecoveryDelay(action, attacker, 1);
+        VS::Battle::LiveActionCostAndAvailability(action, attacker, 1);
     }
 }
 
@@ -655,7 +542,7 @@ int Battle_PreviewActionAgainstLimb(int action_id, int source_actor_slot, int ta
     preview_request.targets[0].targetsPosition = 0;
     preview_request.targets[0].target.targetLimb = targetLimb;
     Battle_ResolveActionTargets(action_id, (Battle_ActionRequest *)(result_out), &preview_request, 0);
-    return Battle_ActionCostAndAvailability(action_id, Battle_actors[source_actor_slot]->stats, 0) & 0xFF000000;
+    return VS::Battle::LiveActionCostAndAvailability(action_id, Battle_actors[source_actor_slot]->stats, 0) & 0xFF000000;
 }
 
 // decomp: BATTLE.PRG func_800863A4 (src/BATTLE/BATTLE.PRG/146C.c:13436)
@@ -752,38 +639,7 @@ int Battle_PreviewActionAgainstActor(int action_id, int source_actor_slot, int t
     }
 
     Battle_ResolveActionTargets(action_id, result_out, &preview_request, 0);
-    return Battle_ActionCostAndAvailability(action_id, Battle_actors[source_actor_slot]->stats, 0) & 0xFF000000;
-}
-
-// decomp: BATTLE.PRG vs_battle_getActionFlags (src/BATTLE/BATTLE.PRG/146C.c:15566)
-int Battle_ActorActionRestrictionFlags(int actorId, int actionId)
-{
-    Battle_ActionDefinition* action = &Battle_actionDefinitions[actionId];
-    Battle_ActorStats* actor = Battle_actors[actorId]->stats;
-    int ret = actor->actionRecoveryTimer != 0;
-
-    if (!(Battle_ActionCostAndAvailability(actionId, actor, 0) & 0xFF000000)) {
-        ret |= 2;
-    }
-
-    if ((actorId == 0) && (!(action->unlocked << 15))) {
-        ret |= 4;
-    }
-
-    if (actionId < 141) {
-        if (actor->statuses & 0x1000) {
-            ret |= 4;
-        }
-    } else if (actionId < 224) {
-        if (Battle_actors[actorId]->weaponDrawn == 0) {
-            ret |= 4;
-        }
-
-        if (actor->statuses & 0x2000) {
-            ret |= 4;
-        }
-    }
-    return ret;
+    return VS::Battle::LiveActionCostAndAvailability(action_id, Battle_actors[source_actor_slot]->stats, 0) & 0xFF000000;
 }
 
 }  // extern "C"

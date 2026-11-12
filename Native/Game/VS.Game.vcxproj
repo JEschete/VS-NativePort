@@ -168,6 +168,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionCosts.cpp" />
+    <ClCompile Include="src\Battle\ActionCostsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionEffects.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2251,6 +2255,8 @@
     <ClInclude Include="include\Battle\Abilities.hpp" />
     <ClInclude Include="include\Battle\AbilitiesLive.hpp" />
     <ClInclude Include="include\Battle\Action.h" />
+    <ClInclude Include="include\Battle\ActionCosts.hpp" />
+    <ClInclude Include="include\Battle\ActionCostsLive.hpp" />
     <ClInclude Include="include\Battle\ActionResults.hpp" />
     <ClInclude Include="include\Battle\ActionResultsLive.hpp" />
     <ClInclude Include="include\Battle\ActorVitals.hpp" />

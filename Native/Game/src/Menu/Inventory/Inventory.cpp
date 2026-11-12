@@ -2,6 +2,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -29,7 +30,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
@@ -246,7 +246,7 @@ void Menu_Inventory_UpdateMiscItemShortcut(int initialize)
             }
 
             if ((Menu_Framework_actionRestrictions & 7) || (misc->id >= Items_KeyItemId_BronzeKey)
-                || (Battle_ActorActionRestrictionFlags(0, Menu_Inventory_miscItemShortcutActions[i]) & 2)) {
+                || (VS::Battle::LiveActorActionRestrictionFlags(0, Menu_Inventory_miscItemShortcutActions[i]) & 2)) {
                 rowTypes[i] |= Menu_Framework_RowTypeFlag_Disabled;
             }
         }

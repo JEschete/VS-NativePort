@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
@@ -601,7 +601,7 @@ void Menu_Magic_SetSpellMpCost(int id)
         id = -id;
     }
 
-    flags = Battle_ActorActionRestrictionFlags(0, id);
+    flags = VS::Battle::LiveActorActionRestrictionFlags(0, id);
     VS::Menu::Framework::SetLiveActionCostText(1, "MP", 8, (flags >> 1) & 1);
 
     cost = Battle_actionDefinitions[id].cost;
@@ -733,7 +733,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                     [Menu_Magic_magicStrings[i + Text_Menu0_magic_Index_warlockSpellDescs]];
                 rowTypes[rowCount] = 0;
 
-                if (Battle_ActorActionRestrictionFlags(0, actionId) != 0) {
+                if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
                     rowTypes[rowCount] |= 1;
                 }
 
@@ -891,7 +891,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         }
 
         if (Input_buttonsPressed.allButtons & PADRright) {
-            if (Battle_ActorActionRestrictionFlags(0, Menu_Magic_warlockMenuSelectedRow + i) == 0) {
+            if (VS::Battle::LiveActorActionRestrictionFlags(0, Menu_Magic_warlockMenuSelectedRow + i) == 0) {
 
                 VS::Menu::PlaySelectSound();
 
@@ -1058,7 +1058,7 @@ int Menu_Magic_UpdateShamanMenu(u_int initShortcutInvoked)
             menuStrings[rowCount * 2 + 1] =
                 (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[i + Text_Menu0_magic_Index_shamanSpellDescs]];
             rowTypes[rowCount] = 0;
-            if (Battle_ActorActionRestrictionFlags(0, actionId) != 0) {
+            if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
                 rowTypes[rowCount] |= 1;
             }
             Menu_Magic_availableShamanSpells[rowCount] = actionId;
@@ -1148,7 +1148,7 @@ int Menu_Magic_UpdateSorcererMenu(u_int initShortcutInvoked)
                 (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[i
                                                     + Text_Menu0_magic_Index_sorcererSpellDescs]];
             rowTypes[rowCount] = 0;
-            if (Battle_ActorActionRestrictionFlags(0, actionId) != 0) {
+            if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
                 rowTypes[rowCount] |= 1;
             }
             Menu_Magic_availableSorcererSpells[rowCount] = actionId;
@@ -1236,7 +1236,7 @@ int Menu_Magic_UpdateEnchanterMenu(u_int initShortcutInvoked)
             menuStrings[rowCount * 2 + 1] = (char*)&Menu_Magic_magicStrings
                 [Menu_Magic_magicStrings[i + Text_Menu0_magic_Index_enchanterSpellDescs]];
             rowTypes[rowCount] = 0;
-            if (Battle_ActorActionRestrictionFlags(0, actionId) != 0) {
+            if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
                 rowTypes[rowCount] |= 1;
             }
             Menu_Magic_availableEnchanterSpells[rowCount] = actionId;

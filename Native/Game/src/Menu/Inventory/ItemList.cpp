@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/TextBoxes.h"
@@ -1276,7 +1276,7 @@ loop_1:
             if (Audio_Seq_unusedInventory.misc[index].id > 457) {
                 *Menu_Framework_rowTypeBuf = 1;
                 sp310[1] = (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_cannotUse];
-            } else if (Battle_ActorActionRestrictionFlags(0, Menu_Inventory_unusedMiscActions[Menu_Inventory_itemListSelectedRow - 1]) & 2) {
+            } else if (VS::Battle::LiveActorActionRestrictionFlags(0, Menu_Inventory_unusedMiscActions[Menu_Inventory_itemListSelectedRow - 1]) & 2) {
                 *Menu_Framework_rowTypeBuf = 1;
                 sp310[1] = (char*)&Menu_Inventory_menuText[Text_Menu3_menuText_Offset_insufficientMp];
             }

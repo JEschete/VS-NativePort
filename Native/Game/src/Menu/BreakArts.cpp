@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/ActionCostsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
-#include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Content/StringTables.h"
@@ -62,7 +62,7 @@ void Menu_BreakArts_SetHpCost(int id)
     int i;
     int cost;
 
-    flags = Battle_ActorActionRestrictionFlags(0, id);
+    flags = VS::Battle::LiveActorActionRestrictionFlags(0, id);
     VS::Menu::Framework::SetLiveActionCostText(1, "HP", 8, (flags >> 1) & 1);
 
     cost = Battle_actionDefinitions[id].cost;
@@ -183,7 +183,7 @@ int Menu_BreakArts_UpdateArtList(int typeCursorMem)
                 rowTypes[rowCount] = 0;
 
                 if ((Menu_BreakArts_artListWeaponType != Battle_characterState->equippedWeaponCategory)
-                    || (Battle_ActorActionRestrictionFlags(0, actionId) != 0)) {
+                    || (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0)) {
                     rowTypes[rowCount] = 1;
                 }
 

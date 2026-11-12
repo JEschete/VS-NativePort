@@ -5,6 +5,7 @@
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
@@ -368,14 +369,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80085390u, 0u, (void*)&Battle_ApplyActionHitEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800856F8u, 0u, (void*)&Battle_ClearActionResult, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80085718u, 0u, (void*)&Battle_InitializeHitResult, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008574Cu, 0u, (void*)&Battle_ActionCostAndAvailability, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80085978u, 0u, (void*)&Battle_PreviewActorActionCost, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800859B4u, 0u, (void*)&Battle_AddActionRecoveryDelay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80085A34u, 0u, (void*)&Battle_FinalizeHitOutcome, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80085B10u, 0u, (void*)&Battle_ResolveActionTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008631Cu, 0u, (void*)&Battle_PreviewActionAgainstLimb, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800863A4u, 0u, (void*)&Battle_PreviewActionAgainstActor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008A5D0u, 0u, (void*)&Battle_ActorActionRestrictionFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E8F8u, 0u, (void*)&Effects_AllocateWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EA90u, 0u, (void*)&Effects_InitializeRoomWeather, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EB04u, 0u, (void*)&Effects_RoomWeatherState, 0u, 0u, 0u},
@@ -1765,6 +1762,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80084670u, 0u, (void*)&VS::Battle::QueueLiveEarthAffinityRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800846F0u, 0u, (void*)&VS::Battle::QueueLiveWaterAffinityRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084770u, 0u, (void*)&VS::Battle::QueueLiveLightAffinityRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008574Cu, 0u, (void*)&VS::Battle::LiveActionCostAndAvailability, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80085978u, 0u, (void*)&VS::Battle::LivePreviewActorActionCost, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800859B4u, 0u, (void*)&VS::Battle::LiveAddActionRecoveryDelay, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008A5D0u, 0u, (void*)&VS::Battle::LiveActorActionRestrictionFlags, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

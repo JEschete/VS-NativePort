@@ -48,6 +48,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionCostsTests.cpp" />
     <ClCompile Include="src\ActionResultCommitTests.cpp" />
     <ClCompile Include="src\ActionResultsSliceTests.cpp" />
     <ClCompile Include="src\ActorAssetsTests.cpp" />

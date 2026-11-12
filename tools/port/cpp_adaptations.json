@@ -23,7 +23,7 @@
 ],
 "Native\\Game\\src\\Battle\\ActionResolution.cpp": [
 [
-598,
+485,
 [
 "                Battle_hitPrerequisiteResult = VS::Battle::LiveCheckActionHitPrerequisite(action_definition, (char*)entry, hit);"
 ],
@@ -32,7 +32,7 @@
 ]
 ],
 [
-656,
+543,
 [
 "    Battle_ResolveActionTargets(action_id, result_out, &preview_request, 0);"
 ],

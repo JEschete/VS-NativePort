@@ -14,6 +14,7 @@
 
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
@@ -1811,10 +1812,10 @@ TEST_CASE("All battle abilities charge original Risk with chain growth and cap",
     const int cost =
         base_cost + (id < 40 && step >= 10 ? (step * step) / 10 : 0);
     const int expected = (1 << 24) + (Battle_ActionType_Ability << 16) + cost;
-    CHECK(Battle_ActionCostAndAvailability(id, &fixture.stats[0], 0) ==
+    CHECK(VS::Battle::LiveActionCostAndAvailability(id, &fixture.stats[0], 0) ==
           expected);
     CHECK(fixture.stats[0].risk == risk);
-    CHECK(Battle_ActionCostAndAvailability(id, &fixture.stats[0], 1) ==
+    CHECK(VS::Battle::LiveActionCostAndAvailability(id, &fixture.stats[0], 1) ==
           expected);
     CHECK(fixture.stats[0].risk == std::min(100, risk + cost));
     CHECK(fixture.stats[0].currentHp == 600);
@@ -1842,9 +1843,11 @@ TEST_CASE("All forty Break Arts require surviving their original HP cost",
   const int expected = (affordable ? 1 << 24 : 0) +
                        (Battle_ActionType_BreakArt << 16) + cost +
                        (affordable ? 0 : 1);
-  CHECK(Battle_ActionCostAndAvailability(action_id, &actor, 0) == expected);
+  CHECK(VS::Battle::LiveActionCostAndAvailability(action_id, &actor, 0) ==
+        expected);
   CHECK(actor.currentHp == hp);
-  CHECK(Battle_ActionCostAndAvailability(action_id, &actor, 1) == expected);
+  CHECK(VS::Battle::LiveActionCostAndAvailability(action_id, &actor, 1) ==
+        expected);
   CHECK(actor.currentHp == (affordable ? hp - cost : hp));
   CHECK(actor.currentMp == 120);
   CHECK(actor.risk == 7);
@@ -1872,7 +1875,8 @@ TEST_CASE(
   actor.currentMp = 0;
   constexpr std::array<int, 7> kFlags{0, 4, 4, 4, 0, 1, 2};
   const auto before = actor;
-  CHECK(Battle_ActorActionRestrictionFlags(0, action_id) == kFlags[gate]);
+  CHECK(VS::Battle::LiveActorActionRestrictionFlags(0, action_id) ==
+        kFlags[gate]);
   CHECK(actor.currentHp == before.currentHp);
   CHECK(actor.currentMp == before.currentMp);
   CHECK(actor.statuses == before.statuses);

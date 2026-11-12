@@ -2160,6 +2160,15 @@
     <None Include="..\..\port\differentials\temporary_awareness_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\triggered_recovery.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\triggered_recovery_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\triggered_recovery_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\wander.py">
       <Filter>tools\port\differentials</Filter>
     </None>
