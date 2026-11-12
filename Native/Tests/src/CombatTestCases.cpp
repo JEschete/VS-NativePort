@@ -15,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -413,7 +414,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
 
   ArtResolutionFixture() {
     // BATTLE.PRG dispatch tables at file 0x7FA34, 0x7FA54 and 0x7FB78.
-    Battle_hitFunctions[1] = Battle_PreviousHitSuccessThreshold;
+    Battle_hitFunctions[1] = VS::Battle::PreviousLiveHitSuccessThreshold;
     Battle_hitFunctions[3] = Battle_AgilityHitChance;
     Battle_attackPrerequisiteFunctions[1] = Battle_AcceptAttackPrerequisiteSlot;
     Battle_attackPrerequisiteFunctions[2] = Battle_AcceptAttackPrerequisiteSlot;

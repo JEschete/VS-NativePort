@@ -339,6 +339,8 @@
     <None Include="..\..\port\differentials\actor_reaction_driver.cpp" />
     <None Include="..\..\port\differentials\actor_settings.py" />
     <None Include="..\..\port\differentials\actor_settings_driver.cpp" />
+    <None Include="..\..\port\differentials\actor_vitals.py" />
+    <None Include="..\..\port\differentials\actor_vitals_driver.cpp" />
     <None Include="..\..\port\differentials\area_movement.py" />
     <None Include="..\..\port\differentials\area_movement_driver.cpp" />
     <None Include="..\..\port\differentials\area_route.py" />

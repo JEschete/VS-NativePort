@@ -721,6 +721,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::ApplyLiveActorActionResult": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Battle::UpdateLiveActorVitals": r"Native\Game\include\Battle\ActorVitalsLive.hpp",
     "VS::Battle::UpdateLiveRoomActorVitals": r"Native\Game\include\Battle\ActorVitalsLive.hpp",
+    "VS::Battle::AttackLiveGemHitBonus": r"Native\Game\include\Battle\HitModifiersLive.hpp",
+    "VS::Battle::DefenseLiveGemHitBonus": r"Native\Game\include\Battle\HitModifiersLive.hpp",
+    "VS::Battle::PreviousLiveHitSuccessThreshold": r"Native\Game\include\Battle\HitModifiersLive.hpp",
+    "VS::Battle::LiveGemHitChance": r"Native\Game\include\Battle\HitModifiersLive.hpp",
+    "VS::Battle::LiveRiskHitChance": r"Native\Game\include\Battle\HitModifiersLive.hpp",
+    "VS::Battle::LiveChainHitChance": r"Native\Game\include\Battle\HitModifiersLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1372,6 +1378,12 @@ OWNED_CALL_BINDINGS["F00194"] = "VS::Battle::ResolveLiveActorDefeat"
 OWNED_CALL_BINDINGS["F00522"] = "VS::Battle::ApplyLiveActorActionResult"
 OWNED_CALL_BINDINGS["F00525"] = "VS::Battle::UpdateLiveActorVitals"
 OWNED_CALL_BINDINGS["F00526"] = "VS::Battle::UpdateLiveRoomActorVitals"
+OWNED_CALL_BINDINGS["F00339"] = "VS::Battle::AttackLiveGemHitBonus"
+OWNED_CALL_BINDINGS["F00340"] = "VS::Battle::DefenseLiveGemHitBonus"
+OWNED_CALL_BINDINGS["F00342"] = "VS::Battle::PreviousLiveHitSuccessThreshold"
+OWNED_CALL_BINDINGS["F00343"] = "VS::Battle::LiveGemHitChance"
+OWNED_CALL_BINDINGS["F00347"] = "VS::Battle::LiveRiskHitChance"
+OWNED_CALL_BINDINGS["F00348"] = "VS::Battle::LiveChainHitChance"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3019,6 +3031,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800875C8, "VS::Battle::ApplyLiveActorActionResult"),  # F00522
     ("BATTLE/BATTLE.PRG", 0x80088554, "VS::Battle::UpdateLiveActorVitals"),  # F00525
     ("BATTLE/BATTLE.PRG", 0x80088B6C, "VS::Battle::UpdateLiveRoomActorVitals"),  # F00526
+    ("BATTLE/BATTLE.PRG", 0x8007E5E0, "VS::Battle::AttackLiveGemHitBonus"),  # F00339
+    ("BATTLE/BATTLE.PRG", 0x8007E6A0, "VS::Battle::DefenseLiveGemHitBonus"),  # F00340
+    ("BATTLE/BATTLE.PRG", 0x8007E97C, "VS::Battle::PreviousLiveHitSuccessThreshold"),  # F00342
+    ("BATTLE/BATTLE.PRG", 0x8007E99C, "VS::Battle::LiveGemHitChance"),  # F00343
+    ("BATTLE/BATTLE.PRG", 0x8007F138, "VS::Battle::LiveRiskHitChance"),  # F00347
+    ("BATTLE/BATTLE.PRG", 0x8007F1A4, "VS::Battle::LiveChainHitChance"),  # F00348
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

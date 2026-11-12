@@ -196,6 +196,7 @@
     </ClCompile>
     <ClCompile Include="src\GroundNavigationTests.cpp" />
     <ClCompile Include="src\HeapTests.cpp" />
+    <ClCompile Include="src\HitModifiersTests.cpp" />
     <ClCompile Include="src\InformationTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
     <ClCompile Include="src\IntroPlayerTests.cpp" />

@@ -402,6 +402,9 @@
     <ClCompile Include="src\HeapTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\HitModifiersTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\InformationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

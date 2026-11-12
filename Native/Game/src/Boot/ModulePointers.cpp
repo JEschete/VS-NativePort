@@ -30,6 +30,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
+#include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
@@ -344,16 +345,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E5E0u, 0u, (void*)&Battle_AttackGemHitBonus, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E6A0u, 0u, (void*)&Battle_DefenseGemHitBonus, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E974u, 0u, (void*)&Battle_IgnoreHitCallback, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E97Cu, 0u, (void*)&Battle_PreviousHitSuccessThreshold, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E99Cu, 0u, (void*)&Battle_GemHitChance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007EA74u, 0u, (void*)&Battle_AgilityHitChance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007ECA8u, 0u, (void*)&Battle_IntelligenceHitChance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007EEFCu, 0u, (void*)&Battle_CostAdjustedAgilityHitChance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F138u, 0u, (void*)&Battle_RiskHitChance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F1A4u, 0u, (void*)&Battle_ChainHitChance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007F230u, 0u, (void*)&Battle_RollActionHit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007FE5Cu, 0u, (void*)&Battle_ApplyDamageGemMultiplier, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80080000u, 0u, (void*)&Battle_DistributeHitLimbDamage, 0u, 0u, 0u},
@@ -1759,6 +1754,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800875C8u, 0u, (void*)&VS::Battle::ApplyLiveActorActionResult, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088554u, 0u, (void*)&VS::Battle::UpdateLiveActorVitals, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088B6Cu, 0u, (void*)&VS::Battle::UpdateLiveRoomActorVitals, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007E5E0u, 0u, (void*)&VS::Battle::AttackLiveGemHitBonus, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007E6A0u, 0u, (void*)&VS::Battle::DefenseLiveGemHitBonus, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007E97Cu, 0u, (void*)&VS::Battle::PreviousLiveHitSuccessThreshold, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007E99Cu, 0u, (void*)&VS::Battle::LiveGemHitChance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F138u, 0u, (void*)&VS::Battle::LiveRiskHitChance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F1A4u, 0u, (void*)&VS::Battle::LiveChainHitChance, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

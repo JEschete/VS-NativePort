@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/HitModifiersLive.hpp"
 #include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -21,187 +22,12 @@ extern "C" {
 // decomp: _hitFunctions (_hitFunctions@BATTLE/BATTLE.PRG)
 int (*Battle_hitFunctions[8])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.cpp) */
 
-// decomp: BATTLE.PRG _getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9712)
-short Battle_AttackGemHitBonus(Battle_ActionDefinition* action, Battle_ActorStats* actor)
-{
-    int hasGemBuff = 0;
-    int gemBuff = 0;
-
-    if (Battle_actors[actor->actorId]->weaponDrawn & 1) {
-        int i;
-        if (action->type == Battle_ActionType_Spell) {
-            hasGemBuff = 0;
-            for (i = 0; i < 3; ++i) {
-                if (actor->weapon.gems[i].gemEffects == 2) {
-                    hasGemBuff = 1;
-                }
-            }
-        } else {
-            hasGemBuff = 0;
-            for (i = 0; i < 3; ++i) {
-                if (actor->weapon.gems[i].gemEffects == 1) {
-                    hasGemBuff = 1;
-                }
-            }
-        }
-        if (hasGemBuff != 0) {
-            gemBuff = 20;
-        }
-    }
-    return gemBuff;
-}
-
-// decomp: BATTLE.PRG _getDefenseGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9741)
-short Battle_DefenseGemHitBonus(Battle_ActionDefinition* action, Battle_ActorStats* actor, int hitNumber)
-{
-    int hasGemBuff;
-    int i;
-
-    int gemBuff = 0;
-    if (Battle_actors[actor->actorId]->weaponDrawn & 1) {
-        hasGemBuff = 0;
-        if (action->type == 1) {
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 6) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-        } else {
-            u_int v = action->id;
-            if ((v < 40) || (((v - 54) & 0xFF) < 170)) {
-                hasGemBuff = 0;
-                for (i = 0; i < 3; ++i) {
-                    if (actor->shield.gems[i].gemEffects == 5) {
-                        hasGemBuff = 1;
-                    }
-                }
-                if (hasGemBuff != 0) {
-                    gemBuff += 20;
-                }
-            }
-        }
-
-        hasGemBuff = 0;
-        switch (action->hits[hitNumber].effectId) {
-        case 1:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 11) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        case 2:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 12) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        case 3:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 13) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        case 5:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 14) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        case 11:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 16) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        case 15:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 18) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        case 16:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 19) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        case 17:
-            for (i = 0; i < 3; ++i) {
-                if (actor->shield.gems[i].gemEffects == 21) {
-                    hasGemBuff = 1;
-                }
-            }
-            if (hasGemBuff != 0) {
-                gemBuff += 20;
-            }
-            break;
-        }
-    }
-    return gemBuff;
-}
-
 // decomp: BATTLE.PRG _invalidHitFunction (src/BATTLE/BATTLE.PRG/146C.c:9860)
 int Battle_IgnoreHitCallback(Battle_ActionDefinition* action_definition __attribute__((unused)),
     Battle_HitResult* source_hit __attribute__((unused)),
     Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
     int execute_action __attribute__((unused)))
 {
-}
-
-// decomp: BATTLE.PRG func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9867)
-int Battle_PreviousHitSuccessThreshold(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    return Battle_previousHitResult != 0 ? 100 : 255;
-}
-
-// decomp: BATTLE.PRG _getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9875)
-int Battle_GemHitChance(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target,
-    int hitNumber, int execute_action __attribute__((unused)))
-{
-    int gemModifier = 100;
-    if ((source != NULL) && (source->targetsPosition == 0)) {
-        gemModifier +=
-            Battle_AttackGemHitBonus(action, Battle_actors[source->target.targetActor]->stats);
-    }
-    if ((target != NULL) && (target->targetsPosition == 0)) {
-        gemModifier -= Battle_DefenseGemHitBonus(
-            action, Battle_actors[target->target.targetActor]->stats, hitNumber);
-    }
-    return gemModifier;
 }
 
 // decomp: BATTLE.PRG _getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9890)
@@ -244,8 +70,8 @@ int Battle_AgilityHitChance(Battle_ActionDefinition* action, Battle_HitResult* s
         agiDiff = variance_base_chance + variance;
     }
 
-    agiDiff += Battle_AttackGemHitBonus(action, sourceActor);
-    agiDiff -= Battle_DefenseGemHitBonus(action, targetActor, hitNumber);
+    agiDiff += VS::Battle::AttackLiveGemHitBonus(action, sourceActor);
+    agiDiff -= VS::Battle::DefenseLiveGemHitBonus(action, targetActor, hitNumber);
 
     if (agiDiff < 0) {
         agiDiff = 0;
@@ -296,8 +122,8 @@ int Battle_IntelligenceHitChance(Battle_ActionDefinition* action, Battle_HitResu
         intDiff = variance_base_chance + variance;
     }
 
-    intDiff += Battle_AttackGemHitBonus(action, sourceActor);
-    intDiff -= Battle_DefenseGemHitBonus(action, targetActor, hitNumber);
+    intDiff += VS::Battle::AttackLiveGemHitBonus(action, sourceActor);
+    intDiff -= VS::Battle::DefenseLiveGemHitBonus(action, targetActor, hitNumber);
 
     if (intDiff < 0) {
         intDiff = 0;
@@ -350,8 +176,8 @@ int Battle_CostAdjustedAgilityHitChance(Battle_ActionDefinition* action, Battle_
         agiDiff = variance_base_chance + variance;
     }
 
-    agiDiff += Battle_AttackGemHitBonus(action, sourceActor);
-    agiDiff -= Battle_DefenseGemHitBonus(action, targetActor, hitNumber);
+    agiDiff += VS::Battle::AttackLiveGemHitBonus(action, sourceActor);
+    agiDiff -= VS::Battle::DefenseLiveGemHitBonus(action, targetActor, hitNumber);
 
     if (agiDiff < 0) {
         agiDiff = 0;
@@ -360,38 +186,6 @@ int Battle_CostAdjustedAgilityHitChance(Battle_ActionDefinition* action, Battle_
     }
 
     return agiDiff;
-}
-
-// decomp: BATTLE.PRG _getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10045)
-int Battle_RiskHitChance(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source,
-    Battle_HitResult* target_hit __attribute__((unused)), int hitNumber __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    int rate =
-        ((Battle_actors[source->target.targetActor]->stats->risk + 150) * 100) / 256;
-    if (rate == 255) {
-        rate = 254;
-    }
-    return rate;
-}
-
-// decomp: BATTLE.PRG _getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10057)
-int Battle_ChainHitChance(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int rate;
-
-    rate = ((255
-                - Battle_actors[target->target.targetActor]
-                    ->stats->limbs[target->target.targetLimb]
-                    .chainEvasion)
-               * 100)
-         / 255;
-    if (rate == 255) {
-        rate = 254;
-    }
-    return rate;
 }
 
 // decomp: BATTLE.PRG _doesAttackHit (src/BATTLE/BATTLE.PRG/146C.c:10075)

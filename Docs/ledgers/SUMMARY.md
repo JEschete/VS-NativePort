@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 2903 | owned functions |
-| 2903 | owned functions in C++ sources |
-| 842 | generated function rows |
+| 2909 | owned functions |
+| 2909 | owned functions in C++ sources |
+| 836 | generated function rows |
 | 17 | retired function rows |
 | 445 | excluded function rows |
 
@@ -44,22 +44,22 @@ generator-managed output.
 | --- | ---: | ---: | ---: |
 | `copied` | 3,744 | 18 (`retired`) | 445 |
 | `compiles` | 3,748 | 0 | 459 |
-| `named` | 139 | 0 | 4,068 |
-| `understood` | 293 | 0 | 3,914 |
-| `modernized` | 2,902 | 1 (`wip`) | 1,304 |
-| `cpp` | 2,902 | 1 (`wip`) | 1,304 |
-| `verified` | 176 | 0 | 4,031 |
+| `named` | 145 | 0 | 4,062 |
+| `understood` | 299 | 0 | 3,908 |
+| `modernized` | 2,908 | 1 (`wip`) | 1,298 |
+| `cpp` | 2,908 | 1 (`wip`) | 1,298 |
+| `verified` | 182 | 0 | 4,025 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 2903 |
-| `vs_namespace` | 2902 |
-| `typed_interface` | 2902 |
-| `no_bridge` | 2902 |
-| `strict_clean` | 2903 |
-| `behavior_evidence` | 2902 |
+| `source_cpp` | 2909 |
+| `vs_namespace` | 2908 |
+| `typed_interface` | 2908 |
+| `no_bridge` | 2908 |
+| `strict_clean` | 2909 |
+| `behavior_evidence` | 2908 |
 
-Promotion records: 2903; derived `cpp=x`: 2902, `cpp=wip`: 1. Verification records: 330; `verified=x` markers: 176.
+Promotion records: 2909; derived `cpp=x`: 2908, `cpp=wip`: 1. Verification records: 331; `verified=x` markers: 182.
 
 <!-- gates:end -->
 

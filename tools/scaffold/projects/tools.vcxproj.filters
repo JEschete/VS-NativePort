@@ -1989,6 +1989,12 @@
     <None Include="..\..\port\differentials\actor_settings_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\actor_vitals.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\actor_vitals_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\area_movement.py">
       <Filter>tools\port\differentials</Filter>
     </None>
