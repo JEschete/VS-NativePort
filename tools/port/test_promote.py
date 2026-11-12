@@ -13,6 +13,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import promote
 
@@ -314,6 +315,59 @@ class PromoteTests(unittest.TestCase):
         spec["plan"]["replace"] = [["not in the notes", "nor this"]]
         with self.assertRaises(SystemExit):
             self.ledgers(spec, "--set", "focused=1")
+
+    def test_progress_keeps_the_original_cohort_and_distinguishes_retirement(self) -> None:
+        fields = ("id,native_name,native_file,plan_order,plan_status,track,modernization_status,cpp_status,"
+                  "copied_to_native,compile_mode,behavior_verified,tests_execute,replay_execute,snapshot,purpose")
+        path = self.repository.ledger("REMAINING_FUNCTIONS")
+        write(path, fields + "\n" +
+              "\n".join(f"{identifier},old,old.cpp,28,active,generated,todo,not started,"
+                        f"yes,relaxed,no,no,yes,original-sha,\"purpose, {identifier}\""
+                        for identifier in ("F01818", "F01819", "F01814")) + "\n", "\r\n")
+        catalog = promote.CsvTable(self.repository.ledger("FUNCTION_CATALOG"))
+        catalog.update("id", "F01818", lambda row: row.update(
+            {"cpp": "x", "final_location": "new.cpp", "verified": "x"}))
+        catalog.update("id", "F01819", lambda row: row.update({"cpp": "wip"}))
+        catalog.update("id", "F01814", lambda row: row.update({"copied": "retired", "copy": "no"}))
+        catalog.save()
+        modern = promote.CsvTable(self.repository.ledger("MODERNIZATION_LEDGER"))
+        modern.update("id", "F01818", lambda row: row.update(
+            {"track": "owned", "status": "done", "compile": "strict", "tests_execute": "yes",
+             "replay_execute": "no"}))
+        modern.upsert("id", {"id": "F01819", "track": "owned", "status": "todo", "compile": "strict"}, "sorted")
+        modern.save()
+        self.assertEqual(promote.sync_remaining_functions(self.repository), 0)
+        first = path.read_bytes()
+        self.assertEqual(promote.sync_remaining_functions(self.repository), 0)
+        self.assertEqual(path.read_bytes(), first)
+        rows = [row for row, _ in promote.CsvTable(path).rows]
+        self.assertEqual([row["id"] for row in rows], ["F01818", "F01819", "F01814"])
+        self.assertEqual([row["cpp_status"] for row in rows], ["promoted", "in progress", "retired"])
+        self.assertEqual([row["snapshot"] for row in rows], ["original-sha"] * 3)
+        self.assertEqual((rows[0]["native_file"], rows[0]["behavior_verified"], rows[0]["replay_execute"]),
+                         ("new.cpp", "yes", "no"))
+        self.assertEqual(rows[2]["compile_mode"], "not applicable")
+        self.assertNotIn(b"\n", first.replace(b"\r\n", b""))
+
+    def test_progress_missing_canonical_row_does_not_write_partial_results(self) -> None:
+        path = self.repository.ledger("REMAINING_FUNCTIONS")
+        write(path, "id,native_name,native_file,plan_order,plan_status,track,modernization_status,cpp_status,"
+              "copied_to_native,compile_mode,behavior_verified,tests_execute,replay_execute\n"
+              "F01818,old,old.cpp,28,active,generated,todo,not started,yes,relaxed,no,no,yes\n"
+              "F99999,missing,missing.cpp,28,active,generated,todo,not started,yes,relaxed,no,no,yes\n")
+        before = path.read_bytes()
+        with self.assertRaises(SystemExit):
+            promote.sync_remaining_functions(self.repository)
+        self.assertEqual(path.read_bytes(), before)
+
+    def test_failed_ledger_check_does_not_refresh_progress(self) -> None:
+        with patch.object(promote.subprocess, "run") as command, \
+                patch.object(promote, "sync_remaining_functions") as refresh:
+            command.return_value.returncode = 1
+            command.return_value.stdout = "failed"
+            command.return_value.stderr = ""
+            self.assertEqual(promote.sync_ledgers(self.repository), 1)
+            refresh.assert_not_called()
 
     # ------------------------------------------------------------------ scaffold and show
     def test_scaffold_writes_templates_once(self) -> None:

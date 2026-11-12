@@ -1,6 +1,6 @@
 # Current Handoff
 
-Updated 2026-11-11. Row 28 (battle AI) of the C++ promotion work (#276) is active. The latest promotion is the
+Updated 2026-11-11. Row 28 (battle AI) of the C++ promotion work (#276) is active. The previously published promotion is the
 F01638-F01640/F01643 perception group in `33ad4f3e`
 ([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695)). Each published row-28
 commit and its exact-revision CI run are recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276)
@@ -9,7 +9,67 @@ and in the ledgers. The per-function publish list, Latest Work and Verified sect
 The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
 See [Stopping Point](#stopping-point) for the current state and the next group.
 
-## Checkpoint
+## Active continuation (2026-11-11)
+
+The owner requested completion of the original 900-function cohort and progress
+tracking in `REMAINING_FUNCTIONS.csv`. Work resumed from clean `0e8989ad`;
+exact-revision Source Quality `43105524312` passed. The earlier stopping point
+below is retained as historical evidence, not an instruction to pause.
+
+The first batch is F01649-F01654 in `CandidateMovement.hpp/.cpp` and
+`CandidateMovementLive.hpp/.cpp`: candidate movement, combat pursuit,
+planned-target approach, close follow, enemy pursuit and guard movement.
+The six old symbols had 24 code references; all are removed. Generated callers
+and all six original module entries use the checked live bindings.
+
+**Progress: 6 of the original 900 resolved; 894 remain** (893 generated plus
+F01416 owned WIP). Modernization is 2,850/3,744; C++ promotion is 2,851 plus
+one WIP. These remain separate measures.
+
+- Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
+  SHA-256 `9f02fb28f761f8b846c643243bf60e6bc5cc335caec80929103dbb087cee375d`.
+- `differential.py candidate_movement`: 6,144 vectors (1,024/function),
+  zero mismatches; 73/73 mutants detected on 1,152 vectors each. External
+  callees are queued stubs, including mutation effects; original scalar math
+  instructions are followed. Evidence: `build\differential\candidate_movement.log`.
+- Native broken variants detect 2/47/27/111/78/40 mismatches respectively
+  for F01649-F01654 over 1,152 vectors each. Reports:
+  `build\differential\candidate_movement-F01649-variant.log` through
+  `candidate_movement-F01654-variant.log`.
+- Initial focused expectations incorrectly assumed exact integer square roots.
+  Running the original instructions confirmed 10000 -> 99, 40000 -> 199 and
+  90000 -> 298; the tests now use those values and the actual range boundaries.
+  The differential also caught stale candidate reads across callbacks; the
+  core preserves the entry-time target and range while rereading the fields
+  the original reloads. Dedicated tests cover both callback cases.
+- The first group check passed both builds, full suites and replays but failed
+  tidy on optional access and signed-byte diagnostics. These were corrected
+  without changing baselines; signed linked IDs intentionally preserve the
+  original `lb` semantics rather than converting negative IDs to unsigned.
+- Final group gate: `promotion_check.py group --focused "[candidate-movement]"`,
+  `build\promotion-check\group-20261111-203535`, 371 seconds. Debug and Release
+  each pass 32 focused cases/174 assertions and 5,753 full-suite cases/
+  12,651,820 assertions. Both `silver_wolves` (2,400 frames) and
+  `first_lever_room` (900 frames) match in both configurations. Copier
+  stability and controls pass; tidy reports four existing findings, zero new.
+- Canonical gates, modernization and hazards sync/check pass. The progress CSV
+  retains 900 rows with six `done`/`promoted` rows. All 18 promotion-tool
+  controls pass, including original-cohort retention, unchanged snapshot,
+  retirement versus WIP, byte-stable rerun and failure-before-write.
+
+The live boundary retains the actor-record, AI/frame and room tables. Missing
+required records, negative linked IDs and invalid rosters are refused with
+diagnostics. Empty/unused candidate paths remain lazy. Neither these tests nor
+the canonical replays establish every pursuit/guard gameplay path, complete
+battle-AI/M8 behavior, or EC-04 retirement.
+
+After this batch is published, continue directly with F01656-F01659. Their
+original 377-instruction range, 0x800DAAD8-0x800DB0BC, has been read along with
+callers and state contracts. Then audit row 28 and start row 29; F01416 remains
+the one owned WIP in the original cohort. Keep every cohort row in the progress
+CSV, including resolved ones; the `snapshot` column stays `44fa8847`.
+
+## Prior checkpoint (before this continuation)
 
 - Branch `imp/01-ma04-gates`. Last code commit: `33ad4f3e` (perception group). It is followed by documentation commits
   only: `44fa8847` (handoff), `8db4f46e` (the remaining-functions snapshot) and the Docs cleanup described below.
@@ -18,7 +78,9 @@ See [Stopping Point](#stopping-point) for the current state and the next group.
   frame-orchestrator WIP. These are separate measures. Row 28 has 10
   generated functions left. [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv)
   lists all 900, with purpose, location, plan row and status, as a snapshot at
-  `44fa8847`. No tool refreshes it yet, so it goes stale with each promotion.
+  `44fa8847`. `promote.py ledgers` now refreshes its progress columns after
+  the canonical ledger checks pass. It retains all 900 original rows,
+  including resolved entries, and keeps their original snapshot/provenance.
 - Original 3,479-function cohort at `ffd1a8e1`: 2,505 promoted, 16 retired,
   957 generated, one WIP; 2,521 resolved. This continuation resolved 72 more
   than `6c8ac0b9`.

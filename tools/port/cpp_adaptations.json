@@ -43,216 +43,16 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Behavior.cpp": [
 [
-66,
+42,
 [
-"            if (VS::Battle::Ai::CanApproachLiveEngagedTarget((void*)state, (void*)entry)) {"
+"    if (!state->actionStatus && VS::Battle::Ai::TryApproachLivePlannedTarget((void*)state, (void*)entry)) {"
 ],
 [
-"            if (VS::Battle::Ai::CanApproachLiveEngagedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
+"    if (!state->actionStatus && VS::Battle::Ai::TryApproachLivePlannedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
 ]
 ],
 [
-85,
-[
-"                VS::Battle::Ai::TryEngageLiveActor((void*)state);"
-],
-[
-"                VS::Battle::Ai::TryEngageLiveActor((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-89,
-[
-"        if (VS::Battle::Ai::ApproachLiveActor((void*)state, id, distance, flag)) {"
-],
-[
-"        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), id, distance, flag)) {"
-]
-],
-[
-92,
-[
-"        return VS::Battle::Ai::TrackLiveActorPosition((void*)state, id) != 0;"
-],
-[
-"        return VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), id) != 0;"
-]
-],
-[
-94,
-[
-"        if (!VS::Battle::Ai::IsLiveActionCooldownReady((void*)state, (void*)entry)) {"
-],
-[
-"        if (!VS::Battle::Ai::IsLiveActionCooldownReady((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
-]
-],
-[
-126,
-[
-"        VS::Battle::Ai::DisengageLiveActor((void*)state);"
-],
-[
-"        VS::Battle::Ai::DisengageLiveActor((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-154,
-[
-"        if (Battle_Ai_MoveForActionCandidate((void*)ai_state, (void*)entry)) {"
-],
-[
-"        if (Battle_Ai_MoveForActionCandidate((Battle_Ai_CandidateMovementView *)((void*)ai_state), (Battle_Ai_CandidateEntryView *)((void*)entry))) {"
-]
-],
-[
-162,
-[
-"                return Battle_Ai_MoveForActionCandidate((void*)ai_state, (void*)entry);"
-],
-[
-"                return Battle_Ai_MoveForActionCandidate((Battle_Ai_CandidateMovementView *)((void*)ai_state), (Battle_Ai_CandidateEntryView *)((void*)entry));"
-]
-],
-[
-273,
-[
-"    if (!state->actionStatus && Battle_Ai_TryApproachPlannedTarget((void*)state, (void*)entry)) {"
-],
-[
-"    if (!state->actionStatus && Battle_Ai_TryApproachPlannedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
-]
-],
-[
-278,
-[
-"        if (VS::Battle::Ai::ApproachLiveActor((void*)state, target, 288, 1)) {"
-],
-[
-"        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 288, 1)) {"
-]
-],
-[
-281,
-[
-"                VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);",
-"                VS::Battle::Ai::RecoverLiveMovement((void*)state);"
-],
-[
-"                VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));",
-"                VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-286,
-[
-"        if (VS::Battle::Ai::TrackLiveActorPosition((void*)state, target)) {"
-],
-[
-"        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
-]
-],
-[
-299,
-[
-"        return VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 1);"
-],
-[
-"        return VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);"
-]
-],
-[
-303,
-[
-"        && VS::Battle::Ai::ApproachLiveActor((void*)state, target, 1024, 1)) {"
-],
-[
-"        && VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 1024, 1)) {"
-]
-],
-[
-306,
-[
-"    return Battle_Ai_UpdateCombatPursuit((void*)state);"
-],
-[
-"    return Battle_Ai_UpdateCombatPursuit((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-355,
-[
-"                    VS::Battle::Ai::ProjectLiveClearRadialDestination((void*)state, tile,"
-],
-[
-"                    VS::Battle::Ai::ProjectLiveClearRadialDestination((Battle_Ai_ActorAiState *)((void*)state), tile,"
-]
-],
-[
-375,
-[
-"            VS::Battle::Ai::RecoverLiveMovement((void*)state);"
-],
-[
-"            VS::Battle::Ai::RecoverLiveMovement((Battle_Ai_ActorAiState *)((void*)state));"
-]
-],
-[
-378,
-[
-"        if (VS::Battle::Ai::ApproachLiveActor((void*)state, target, 320, 1)) {"
-],
-[
-"        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 320, 1)) {"
-]
-],
-[
-381,
-[
-"        if (VS::Battle::Ai::TrackLiveActorPosition((void*)state, target)) {"
-],
-[
-"        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
-]
-],
-[
-391,
-[
-"            VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator((void*)state, 6, 0);"
-],
-[
-"            VS::Battle::Ai::SetLiveTemporaryAwarenessIndicator((Battle_Ai_ActorAiState *)((void*)state), 6, 0);"
-]
-],
-[
-393,
-[
-"        if (VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 1)) {"
-],
-[
-"        if (VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1)) {"
-]
-],
-[
-397,
-[
-"    return VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 1);"
-],
-[
-"    return VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);"
-]
-],
-[
-407,
-[
-"    if (!state->actionStatus && Battle_Ai_TryApproachPlannedTarget((void*)state, (void*)entry)) {"
-],
-[
-"    if (!state->actionStatus && Battle_Ai_TryApproachPlannedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
-]
-],
-[
-412,
+47,
 [
 "        if (VS::Battle::Ai::ApproachLiveActor((void*)state, target, 384, 0)) {"
 ],
@@ -261,7 +61,7 @@
 ]
 ],
 [
-415,
+50,
 [
 "                VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);",
 "                VS::Battle::Ai::RecoverLiveMovement((void*)state);"
@@ -272,7 +72,7 @@
 ]
 ],
 [
-420,
+55,
 [
 "        if (VS::Battle::Ai::TrackLiveActorPosition((void*)state, target)) {"
 ],
@@ -281,7 +81,7 @@
 ]
 ],
 [
-428,
+63,
 [
 "            if (VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 0)) {"
 ],
@@ -290,7 +90,7 @@
 ]
 ],
 [
-522,
+157,
 [
 "                VS::Battle::Ai::IssueLiveActorCommand((void*)state, 17);"
 ],
@@ -299,7 +99,7 @@
 ]
 ],
 [
-541,
+176,
 [
 "                    Battle_Ai_TryExecutePlannedActions((void*)state);"
 ],

@@ -33,6 +33,8 @@ FUNCTION_CATALOG rows get the catalog fields, named/understood/modernized/verifi
 (once); CPP_PROMOTION gets an id-ordered record, VERIFY_LEDGER and GATE_SLICES a newest-first row,
 MODERNIZATION_LEDGER status done and PROMOTION_PLAN the slice, commit and note replacements. Then
 tools\\ledger\\gates.py, modernization.py and hazards.py run --sync and --check (skip with --no-sync).
+After those checks pass, REMAINING_FUNCTIONS.csv refreshes its progress columns without deleting
+resolved rows or changing the original snapshot/provenance columns.
 """
 
 from __future__ import annotations
@@ -565,6 +567,44 @@ def ledgers(repository: Repository, args: argparse.Namespace) -> int:
 LEDGER_TOOLS = ("gates.py", "modernization.py", "hazards.py")
 
 
+def sync_remaining_functions(repository: Repository) -> int:
+    """Refresh the original remaining-function cohort from checked canonical ledgers."""
+    remaining = CsvTable(repository.ledger("REMAINING_FUNCTIONS"))
+    catalog = CsvTable(repository.ledger("FUNCTION_CATALOG"))
+    modernization = CsvTable(repository.ledger("MODERNIZATION_LEDGER"))
+    plans = CsvTable(repository.ledger("PROMOTION_PLAN"))
+    resolved = 0
+    for original, _ in remaining.rows:
+        identifier = original["id"]
+        function = catalog.get("id", identifier)
+        retired = function["copied"] == "retired"
+        progress = {
+            "native_name": function["final_name"],
+            "native_file": function["final_location"],
+            "cpp_status": "retired" if retired else
+                          {"x": "promoted", "wip": "in progress", "": "not started"}[function["cpp"]],
+            "copied_to_native": "retired" if retired else "yes" if function["copied"] == "x" else "no",
+            "behavior_verified": "yes" if function["verified"] == "x" else "no",
+            "plan_status": plans.get("order", original["plan_order"])["status"],
+        }
+        if retired:
+            progress |= {"track": "retired", "modernization_status": "done", "compile_mode": "not applicable",
+                         "tests_execute": "not applicable", "replay_execute": "not applicable"}
+        else:
+            modern = modernization.get("id", identifier)
+            progress |= {
+                "track": modern["track"], "modernization_status": modern["status"],
+                "compile_mode": modern["compile"], "tests_execute": modern["tests_execute"],
+                "replay_execute": modern["replay_execute"],
+            }
+        resolved += retired or function["cpp"] == "x" and progress["modernization_status"] == "done"
+        remaining.update("id", identifier, lambda row, progress=progress: row.update(progress))
+    changed = remaining.save()
+    log(f"REMAINING_FUNCTIONS: {'changed' if changed else 'unchanged'}; "
+        f"{resolved} resolved, {len(remaining.rows) - resolved} remaining")
+    return 0
+
+
 def sync_ledgers(repository: Repository) -> int:
     """Sync every ledger first (each reads the others), then check them all."""
     for flags in (["--sync"], ["--check"]):
@@ -575,7 +615,7 @@ def sync_ledgers(repository: Repository) -> int:
             if completed.returncode:
                 log((completed.stdout + completed.stderr)[-4000:])
                 return 1
-    return 0
+    return sync_remaining_functions(repository)
 
 
 # ---------------------------------------------------------------------- scaffold

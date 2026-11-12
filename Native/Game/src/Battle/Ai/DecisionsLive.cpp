@@ -11,6 +11,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
+#include "Battle/Ai/CandidateMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 
@@ -66,7 +67,7 @@ class LiveDecisionActor final : public DecisionActor {
     WanderAroundLiveSavedCenter(&state_);
   }
   int UpdateCombatPursuit() override {
-    return Battle_Ai_UpdateCombatPursuit(&state_);
+    return UpdateLiveCombatPursuit(&state_);
   }
   void PatrolWaypoints() override { PatrolLiveWaypoints(&state_); }
   [[nodiscard]] std::optional<PursuitCandidate> BestCandidate() const override {

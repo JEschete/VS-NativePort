@@ -99,6 +99,9 @@
     <ClCompile Include="src\AiBossOrbitTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiCandidateMovementTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AiDecisionsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

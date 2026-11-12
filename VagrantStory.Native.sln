@@ -48,6 +48,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{46E34AD5-0
 	ProjectSection(SolutionItems) = preProject
 		Docs\ASSET_PIPELINE.md = Docs\ASSET_PIPELINE.md
 		Docs\BUILDING.md = Docs\BUILDING.md
+		Docs\COMBAT_LAB.md = Docs\COMBAT_LAB.md
 		Docs\HANDOFF.md = Docs\HANDOFF.md
 		Docs\MODERNIZATION.md = Docs\MODERNIZATION.md
 		Docs\NAMING_CONVENTIONS.md = Docs\NAMING_CONVENTIONS.md

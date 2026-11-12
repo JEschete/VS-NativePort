@@ -664,6 +664,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior": r"Native\Game\include\Battle\Ai\BossOrbitLive.hpp",
     "VS::Battle::Ai::UpdateLiveTargetPerception": r"Native\Game\include\Battle\Ai\ActorPerceptionLive.hpp",
     "VS::Battle::Ai::UpdateLiveActorPerception": r"Native\Game\include\Battle\Ai\ActorPerceptionLive.hpp",
+    "VS::Battle::Ai::MoveLiveForActionCandidate": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveCombatPursuit": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
+    "VS::Battle::Ai::TryApproachLivePlannedTarget": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveCloseFollowBehavior": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveEnemyPursuitBehavior": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveGuardMovementBehavior": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1258,6 +1264,12 @@ OWNED_CALL_BINDINGS["F01848"] = "VS::Battle::Ai::UpdateLiveBossOrbitTracking"
 OWNED_CALL_BINDINGS["F01849"] = "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior"
 OWNED_CALL_BINDINGS["F01640"] = "VS::Battle::Ai::UpdateLiveTargetPerception"
 OWNED_CALL_BINDINGS["F01643"] = "VS::Battle::Ai::UpdateLiveActorPerception"
+OWNED_CALL_BINDINGS["F01649"] = "VS::Battle::Ai::MoveLiveForActionCandidate"
+OWNED_CALL_BINDINGS["F01650"] = "VS::Battle::Ai::UpdateLiveCombatPursuit"
+OWNED_CALL_BINDINGS["F01651"] = "VS::Battle::Ai::TryApproachLivePlannedTarget"
+OWNED_CALL_BINDINGS["F01652"] = "VS::Battle::Ai::UpdateLiveCloseFollowBehavior"
+OWNED_CALL_BINDINGS["F01653"] = "VS::Battle::Ai::UpdateLiveEnemyPursuitBehavior"
+OWNED_CALL_BINDINGS["F01654"] = "VS::Battle::Ai::UpdateLiveGuardMovementBehavior"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2848,6 +2860,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E7F8C, "VS::Battle::Ai::UpdateLiveOrbitingBossBehavior"),  # F01849
     ("BATTLE/BATTLE.PRG", 0x800D87E8, "VS::Battle::Ai::UpdateLiveTargetPerception"),  # F01640
     ("BATTLE/BATTLE.PRG", 0x800D8EF4, "VS::Battle::Ai::UpdateLiveActorPerception"),  # F01643
+    ("BATTLE/BATTLE.PRG", 0x800D9E18, "VS::Battle::Ai::MoveLiveForActionCandidate"),  # F01649
+    ("BATTLE/BATTLE.PRG", 0x800DA1D4, "VS::Battle::Ai::UpdateLiveCombatPursuit"),  # F01650
+    ("BATTLE/BATTLE.PRG", 0x800DA4BC, "VS::Battle::Ai::TryApproachLivePlannedTarget"),  # F01651
+    ("BATTLE/BATTLE.PRG", 0x800DA5CC, "VS::Battle::Ai::UpdateLiveCloseFollowBehavior"),  # F01652
+    ("BATTLE/BATTLE.PRG", 0x800DA6A4, "VS::Battle::Ai::UpdateLiveEnemyPursuitBehavior"),  # F01653
+    ("BATTLE/BATTLE.PRG", 0x800DA738, "VS::Battle::Ai::UpdateLiveGuardMovementBehavior"),  # F01654
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3816,12 +3834,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          '        Core_Debugf("actors", "absolute slide skips absent actor=%d", arg0);\n'
          "        return;\n    }",
          "func_800A9D90: retain the primitive's optional-actor no-op contract before position/rate access"),
-    ],
-    "F01649": [
-        ("SquaredDistanceWithHeightOffsets(point, (short*)&Actors_actorRecords[id]->instance.position,",
-         "SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(point),"
-         " VS::Core::Math::PositionOf(Actors_actorRecords[id]->instance.position),",
-         "F01773 is promoted C++: pass the planned point and target instance as Position3 values, not short*"),
     ],
     "F01659": [
         ("SquaredDistanceWithHeightOffsets(state->position,",

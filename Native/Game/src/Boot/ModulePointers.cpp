@@ -12,6 +12,7 @@
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/BossOrbitLive.hpp"
+#include "Battle/Ai/CandidateMovementLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FlightMovementLive.hpp"
@@ -783,12 +784,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&Effects_ClearParticleTextureState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&Effects_InitializeParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&Effects_AdvanceParticleTextureAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D9E18u, 0u, (void*)&Battle_Ai_MoveForActionCandidate, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DA1D4u, 0u, (void*)&Battle_Ai_UpdateCombatPursuit, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DA4BCu, 0u, (void*)&Battle_Ai_TryApproachPlannedTarget, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DA5CCu, 0u, (void*)&Battle_Ai_UpdateCloseFollowBehavior, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DA6A4u, 0u, (void*)&Battle_Ai_UpdateEnemyPursuitBehavior, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DA738u, 0u, (void*)&Battle_Ai_UpdateGuardMovementBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAAD8u, 0u, (void*)&Battle_Ai_UpdateEscortCombatBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAC80u, 0u, (void*)&Battle_Ai_TryExecuteActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAD9Cu, 0u, (void*)&Battle_Ai_TryExecutePlannedActions, 0u, 0u, 0u},
@@ -1753,6 +1748,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E7F8Cu, 0u, (void*)&VS::Battle::Ai::UpdateLiveOrbitingBossBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D87E8u, 0u, (void*)&VS::Battle::Ai::UpdateLiveTargetPerception, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D8EF4u, 0u, (void*)&VS::Battle::Ai::UpdateLiveActorPerception, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D9E18u, 0u, (void*)&VS::Battle::Ai::MoveLiveForActionCandidate, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DA1D4u, 0u, (void*)&VS::Battle::Ai::UpdateLiveCombatPursuit, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DA4BCu, 0u, (void*)&VS::Battle::Ai::TryApproachLivePlannedTarget, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DA5CCu, 0u, (void*)&VS::Battle::Ai::UpdateLiveCloseFollowBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DA6A4u, 0u, (void*)&VS::Battle::Ai::UpdateLiveEnemyPursuitBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DA738u, 0u, (void*)&VS::Battle::Ai::UpdateLiveGuardMovementBehavior, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},
