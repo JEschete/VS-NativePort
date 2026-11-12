@@ -36,6 +36,7 @@ enum class StatusRuleId : std::uint8_t {
   kEarthDefenseUp = 27,
   kWaterDefenseUp = 28,
   kBanish = 29,
+  kInstantDeathRemoval = 30,
 };
 
 enum class StatusFeedback : std::uint8_t {

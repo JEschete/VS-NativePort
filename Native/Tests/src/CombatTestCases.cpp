@@ -15,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
@@ -2353,7 +2354,7 @@ TEST_CASE("Armor-wearing arts saturate both original DP application stages",
       static_cast<decltype(fixture.target.target.targetLimb)>(limb);
   fixture.target.target.hp = 20;
   fixture.target.hpEffect = 1;
-  fixture.Queue(id, 1, {0, 0, Battle_QueueDamageBasedArmorWear});
+  fixture.Queue(id, 1, {0, 0, VS::Battle::QueueLiveDamageBasedArmorWear});
   CHECK(fixture.target.armorDpChange == 40);
   CHECK(fixture.target.limbs[limb].effects.opaque2 == 40);
   fixture.Commit();

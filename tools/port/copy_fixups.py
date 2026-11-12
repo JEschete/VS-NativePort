@@ -758,6 +758,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LiveCalculateSpellHitDamage": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
     "VS::Battle::LiveCalculateSpellHealing": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
     "VS::Battle::LivePhysicalDamageWithDebuffs": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
+    "VS::Battle::MarkLiveSourceActionSuccess": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveInstantDeath": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveDamageBasedArmorWear": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::SetLiveActionFlag64": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::SetLiveActionFlag32": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1447,6 +1452,13 @@ OWNED_CALL_BINDINGS["F00410"] = "VS::Battle::LivePhysicalDamageWithoutDebuffs"
 OWNED_CALL_BINDINGS["F00411"] = "VS::Battle::LiveCalculateSpellHitDamage"
 OWNED_CALL_BINDINGS["F00421"] = "VS::Battle::LiveCalculateSpellHealing"
 OWNED_CALL_BINDINGS["F00433"] = "VS::Battle::LivePhysicalDamageWithDebuffs"
+OWNED_CALL_BINDINGS["F00469"] = "VS::Battle::MarkLiveSourceActionSuccess"
+OWNED_CALL_BINDINGS["F00470"] = "VS::Battle::QueueLiveInstantDeath"
+OWNED_CALL_BINDINGS["F00471"] = "VS::Battle::QueueLiveDamageBasedArmorWear"
+OWNED_CALL_BINDINGS["F00472"] = "VS::Battle::MarkLiveSourceActionSuccess"
+OWNED_CALL_BINDINGS["F00473"] = "VS::Battle::SetLiveActionFlag64"
+OWNED_CALL_BINDINGS["F00474"] = "VS::Battle::SetLiveActionFlag32"
+OWNED_CALL_BINDINGS["F00475"] = "VS::Battle::MarkLiveSourceActionSuccess"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3136,6 +3148,13 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800819FC, "VS::Battle::LiveCalculateSpellHitDamage"),  # F00411
     ("BATTLE/BATTLE.PRG", 0x800829B8, "VS::Battle::LiveCalculateSpellHealing"),  # F00421
     ("BATTLE/BATTLE.PRG", 0x8008388C, "VS::Battle::LivePhysicalDamageWithDebuffs"),  # F00433
+    ("BATTLE/BATTLE.PRG", 0x80084228, "VS::Battle::MarkLiveSourceActionSuccess"),  # F00469
+    ("BATTLE/BATTLE.PRG", 0x80084248, "VS::Battle::QueueLiveInstantDeath"),  # F00470
+    ("BATTLE/BATTLE.PRG", 0x800842AC, "VS::Battle::QueueLiveDamageBasedArmorWear"),  # F00471
+    ("BATTLE/BATTLE.PRG", 0x800842F0, "VS::Battle::MarkLiveSourceActionSuccess"),  # F00472
+    ("BATTLE/BATTLE.PRG", 0x80084310, "VS::Battle::SetLiveActionFlag64"),  # F00473
+    ("BATTLE/BATTLE.PRG", 0x80084340, "VS::Battle::SetLiveActionFlag32"),  # F00474
+    ("BATTLE/BATTLE.PRG", 0x80084370, "VS::Battle::MarkLiveSourceActionSuccess"),  # F00475
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

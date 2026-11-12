@@ -1,10 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -25,56 +23,6 @@ extern "C" {
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Render/Palette.h"
-
-// decomp: BATTLE.PRG func_80084228 (src/BATTLE/BATTLE.PRG/146C.c:12547)
-int Battle_MarkSourceActionSuccess(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit, int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    source_hit->sourceResult = 2;
-}
-
-// decomp: BATTLE.PRG func_80084248 (src/BATTLE/BATTLE.PRG/146C.c:12554)
-int Battle_QueueInstantDeath(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    VS::Battle::QueueLiveStatusRemovalMask(0x1E, target_hit);
-    target_hit->target.hp = Battle_actors[target_hit->target.targetActor]->stats->currentHp;
-    target_hit->hpEffect = 1;
-}
-
-// decomp: BATTLE.PRG func_800842AC (src/BATTLE/BATTLE.PRG/146C.c:12563)
-int Battle_QueueDamageBasedArmorWear(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    target_hit->armorDpChange = target_hit->target.hp * 2;
-    target_hit->limbs[target_hit->target.targetLimb].effects.opaque2 = target_hit->target.hp * 2;
-    target_hit->armorDpEffect = 1;
-}
-
-// decomp: BATTLE.PRG func_80084310 (src/BATTLE/BATTLE.PRG/146C.c:12579)
-int Battle_SetActionFlag64(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action)
-{
-    if (execute_action != 0) {
-        VS::State::SetLiveScriptFlag(0x40, 1);
-    }
-}
-
-// decomp: BATTLE.PRG func_80084340 (src/BATTLE/BATTLE.PRG/146C.c:12589)
-int Battle_SetActionFlag32(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action)
-{
-    if (execute_action != 0) {
-        VS::State::SetLiveScriptFlag(0x20, 1);
-    }
-}
 
 // decomp: BATTLE.PRG func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12606)
 int Battle_QueueSpellTriggeredRecovery(

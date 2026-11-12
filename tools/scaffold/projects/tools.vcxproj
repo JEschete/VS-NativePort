@@ -352,6 +352,9 @@
     <None Include="..\..\port\differentials\boss_orbit_driver.cpp" />
     <None Include="..\..\port\differentials\candidate_movement.py" />
     <None Include="..\..\port\differentials\candidate_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\damage_calculations.py" />
+    <None Include="..\..\port\differentials\damage_calculations_driver.cpp" />
+    <None Include="..\..\port\differentials\damage_calculations_guard_driver.cpp" />
     <None Include="..\..\port\differentials\damage_policies.py" />
     <None Include="..\..\port\differentials\damage_policies_driver.cpp" />
     <None Include="..\..\port\differentials\damage_policies_guard_driver.cpp" />

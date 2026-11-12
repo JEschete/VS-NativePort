@@ -1,6 +1,6 @@
 # Current Handoff
 
-Updated 2026-11-12. Rows 28 (battle AI) and 29 (damage/status) of the C++ promotion work (#276) are source-complete; row 30 follows D5 publication/CI. The earlier perception promotion is the
+Updated 2026-11-12. Rows 28 (battle AI) and 29 (damage/status) of the C++ promotion work (#276) are source-complete and published; row 30 (battle-actions) is active. The earlier perception promotion is the
 F01638-F01640/F01643 perception group in `33ad4f3e`
 ([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695)). Each published row-28
 commit and its exact-revision CI run are recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276)
@@ -16,32 +16,37 @@ tracking in `REMAINING_FUNCTIONS.csv`. Work resumed from clean `0e8989ad`;
 exact-revision Source Quality `43105524312` passed. The earlier stopping point
 below is retained as historical evidence, not an instruction to pause.
 
-### Latest row-29 group
+### Latest row-30 group
 
-F00409/F00410/F00411/F00421/F00433 are locally verified on `85fb812e` in
-`DamageCalculations`. Physical/spell/healing calculations preserve staged S16
-wrapping, low32 products, cached owners and affinities, post-random reads and
-growth order. The two wrappers execute the moved physical core. All 18 old
-references are gone; generated `Damage.cpp` remains the owner of globals.
+F00469-F00475 are locally verified on `7b797783` in `BasicActionEffects`.
+Five typed policies cover seven original addresses, preserving the three
+source-success aliases, queued instant-death/armor effects and script-flag
+side effects. Live mediators use the actual VOID5 type. All 18 old-symbol
+references are gone.
 
-- Five spans total 1,434 original instructions: 0x80081148-0x80082144,
-  0x800829B8-0x80082FF4 and 0x8008388C-0x800838BC. Per-function hashes and
-  commands: `build\scratch\status-queue\d5-ledgers.json`.
-- `damage_calculations`: 20,480 defined vectors, zero mismatches, 31/31 mutants.
-  Five native variants detect 97/410/469/359/400 mismatches respectively over
-  512 vectors per ID. Real original/native gem policy executes.
-- #351 now diagnoses encoded-zero healing and drawn encoded-one healing;
-  undrawn encoded one remains supported. Undefined candidate inputs are
-  counted separately, not numerically compared. All 127 live refusal probes
-  pass, as do actual original definitions 65/96 in both drawn states.
-- Group `build\promotion-check\group-20261112-042844`, 432 seconds:
-  Debug/Release each pass 6,040 cases/12,823,891 assertions; combined focus
-  271 cases/173,646 assertions; own tests 27/175. Both replays, copier stability
-  and 274 controls pass; tidy five existing findings, zero new.
-- All 88 original row-29 IDs reconcile: 85 promoted, three separately retired,
-  zero remaining. Audit: `build\scratch\status-queue\d5-row29-audit.json`.
-  Publication, exact-revision CI and #351 closure are pending. Random/growth
-  service controls are explicit limits. No interactive gameplay or EC/M8 claim.
+- Original span: 0x80084228-0x80084390, 90 instructions, plus the real original
+  status-removal helper. Per-ID hashes and evidence:
+  `build\scratch\basic-action-effects\ledgers-final.json`.
+- `basic_action_effects`: 14,336 vectors, zero mismatches, 31/31 mutants.
+  Per-ID native variants detect 1024/410/1024/1024/819/819/1024 mismatches
+  respectively over 1,024 vectors per ID.
+- Group `build\promotion-check\group-20261112-050611`, 434 seconds:
+  Debug/Release each pass 6,060 cases/12,841,649 assertions; coupled selection
+  104 cases/19,486 assertions; own tests 20/17,758. Both replays, copier
+  stability and controls pass; tidy five existing findings, zero new.
+- Thirteen diagnostic refusal probes, post-helper target/HP rereads, unused
+  argument paths and actual-table ABI rejection pass. Script-flag calls are
+  controlled services with exact index/value traces; status removal executes
+  real original instructions.
+- Evidence: `build\differential\basic-action-effects-full.log`, native variant
+  logs and `build\scratch\basic-action-effects\cohort-audit.json`. Publication
+  and exact-revision CI pending. No row30, gameplay or EC/M8 completion claim.
+
+Row 29 is published in `7b797783`, green on
+[CI 43193683736](https://github.com/JEschete/VS-NativePort/actions/runs/43193683736):
+all 88 IDs reconciled, 85 promoted and three retired. [#351 is closed](https://github.com/JEschete/VS-NativePort/issues/351#issuecomment-6820264328).
+Its supported healing contract and undefined-input refusals remain verified;
+no original numeric return behavior was invented for retired sentinels.
 
 C6 damage policies are published in `85fb812e`, green on
 [CI 43188974850](https://github.com/JEschete/VS-NativePort/actions/runs/43188974850),
@@ -148,9 +153,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 98 of the original 900 resolved (95 promoted, 3 retired); 802
-remain** (801 generated plus F01416 owned WIP). Modernization is 2,939/3,741;
-C++ promotion is 2,940 plus
+**Progress: 105 of the original 900 resolved (102 promoted, 3 retired); 795
+remain** (794 generated plus F01416 owned WIP). Modernization is 2,946/3,741;
+C++ promotion is 2,947 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -219,13 +224,12 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-After D5 publication and green CI, start ordered row 30 (`battle-actions`,
-91 original remaining functions). First group: F00469-F00475, seven basic
-effect producers with three byte-identical source-success aliases. Then
-F00486-F00493, eight random-stat producers. Their 90+153 instructions are
-read in `build\scratch\status-queue\action_effect_leaves.txt`. Preserve actual
-VOID mediator types, pending-result masks, status-removal rule 30, signed
-limb bounds, script-flag side effects and post-RNG reads. Further triggered
+Continue ordered row 30 (`battle-actions`, 84 of 91 still remaining) with
+F00486-F00493, eight random-stat producers. Their 153 instructions are read
+in `build\scratch\status-queue\action_effect_leaves.txt`. Preserve actual
+VOID mediator types, unconditional bounded-four draws even during preview,
+post-RNG pending-field reads, signed-halfword wrapping and the distinct
+increase/decrease mode bits. Reuse typed result records. Further triggered
 recovery and dispatch groups have source/assembly analysis recorded; do not
 silently jump ahead of this ordered package.
 
@@ -234,7 +238,7 @@ latent healing-affinity defect: drawn encoded-affinity 1 reads an unwritten
 stack halfword. The shared original-MIPS probe returns 100 versus 200 when
 only that synthetic residue changes; both original healing definitions use
 encoded affinity 6 and avoid the path. The D5 supported contract and explicit
-refusals are verified locally; closure awaits publication and green CI.
+refusals are published and CI-verified; #351 is closed.
 No zero intermediate or gameplay-failure claim is invented. Evidence:
 `build\scratch\status-queue\healing-affinity-probe.py`
 and its log.
@@ -285,9 +289,10 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 ## Stopping Point
 
 The continuation is active, not paused. Row 28 is published and green. The
-row-29 checkpoint has all 88 IDs resolved (85 promoted, three retired);
-D5 publication/CI and #351 closure remain. #349 and #350 are closed.
-Continue row 30 only after the final row-29 revision is published and green.
+row-29 checkpoint has all 88 IDs resolved (85 promoted, three retired),
+published and green in `7b797783`. #349, #350 and #351 are closed.
+Row 30's seven basic effect producers are locally verified; publish and confirm
+CI, then continue with the eight random-stat producers.
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
 353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
 [#350](https://github.com/JEschete/VS-NativePort/issues/350) tracks the separate
@@ -470,10 +475,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish D5, confirm exact-revision CI and close #351 with acceptance evidence.
+2. Publish the seven basic action effects and confirm exact-revision CI.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 802 remain.
-3. Then start row 30 with the seven basic effect producers above, following
+   #276: 795 remain.
+3. Continue row 30 with the eight random-stat producers above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

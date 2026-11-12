@@ -32,23 +32,6 @@ typedef struct Battle_SoundEventTargets {
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"
 
-int Battle_MarkSourceActionSuccess(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit, int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
-int Battle_QueueInstantDeath(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueDamageBasedArmorWear(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_SetActionFlag64(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action);
-int Battle_SetActionFlag32(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action);
 int Battle_QueueSpellTriggeredRecovery(
     Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
 int Battle_QueuePhysicalTriggeredRecovery(

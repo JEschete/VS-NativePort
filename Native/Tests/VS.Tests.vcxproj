@@ -100,6 +100,7 @@
     <ClCompile Include="src\AudioPlaybackBanksTests.cpp" />
     <ClCompile Include="src\AudioTests.cpp" />
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />
+    <ClCompile Include="src\BasicActionEffectsTests.cpp" />
     <ClCompile Include="src\BattleTargetingTests.cpp" />
     <ClCompile Include="src\CameraConstraintTests.cpp" />
     <ClCompile Include="src\CdDriveTests.cpp" />

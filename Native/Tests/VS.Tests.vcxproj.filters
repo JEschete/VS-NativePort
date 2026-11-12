@@ -186,6 +186,9 @@
     <ClCompile Include="src\AwarenessMarkerTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\BasicActionEffectsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\BattleTargetingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

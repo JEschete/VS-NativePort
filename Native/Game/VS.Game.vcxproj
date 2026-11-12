@@ -396,6 +396,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\BasicActionEffects.cpp" />
+    <ClCompile Include="src\Battle\BasicActionEffectsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\BattleMode.cpp" />
     <ClCompile Include="src\Battle\BattleModeLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2311,6 +2315,8 @@
     <ClInclude Include="include\Battle\Ai\WaypointsLive.hpp" />
     <ClInclude Include="include\Battle\AttackPrerequisites.hpp" />
     <ClInclude Include="include\Battle\AttackPrerequisitesLive.hpp" />
+    <ClInclude Include="include\Battle\BasicActionEffects.hpp" />
+    <ClInclude Include="include\Battle\BasicActionEffectsLive.hpp" />
     <ClInclude Include="include\Battle\BattleMode.hpp" />
     <ClInclude Include="include\Battle\BattleModeLive.hpp" />
     <ClInclude Include="include\Battle\DamageCalculations.hpp" />
