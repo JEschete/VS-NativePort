@@ -15,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
@@ -339,7 +340,7 @@ struct AbilityEffectFixture : AbilityFixture {
 
   static void BindCalculators() {
     // BATTLE.PRG _statCalculators, original pointer table at file 0x7FB0C.
-    Battle_statCalculators[1] = Battle_LastActionStatValue;
+    Battle_statCalculators[1] = VS::Battle::LiveLastActionStatValue;
     Battle_statCalculators[4] = VS::Battle::LiveScalePreviousTargetHit;
     Battle_statCalculators[5] = VS::Battle::LiveScaleSourceMissingHp;
     Battle_statCalculators[6] = VS::Battle::LiveScaleTargetCurrentHp;

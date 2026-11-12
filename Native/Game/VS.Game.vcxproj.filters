@@ -702,6 +702,12 @@
     <ClInclude Include="src\Battle\Damage.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\DamagePolicies.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\DamagePoliciesLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClInclude Include="src\Battle\EncounterHooks.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
@@ -2860,6 +2866,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\BattleModeLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\DamagePolicies.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\DamagePoliciesLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Encounter.hpp">

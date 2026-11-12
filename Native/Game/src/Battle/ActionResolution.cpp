@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
+#include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -100,7 +101,7 @@ int Battle_AccumulateHpRestoration(
     target_hit->hpEffect = 2;
 
     if (target_hit->targetsPosition == 0) {
-        Battle_DistributeLimbRecovery(action, target_hit, amount);
+        VS::Battle::LiveDistributeLimbRecovery(action, target_hit, amount);
     }
 }
 

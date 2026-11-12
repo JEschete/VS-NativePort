@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/DamagePoliciesLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 extern "C" {
@@ -35,155 +36,6 @@ int Battle_criticalHitOccurred;
 
 // decomp: _armorDpAdjustmentAmounts (_armorDpAdjustmentAmounts@BATTLE/BATTLE.PRG)
 short Battle_limbArmorDpLoss[8];
-
-// decomp: BATTLE.PRG func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10534)
-short Battle_ApplyDamageGemMultiplier(
-    Battle_ActionDefinition* action, short damage_amount, Battle_ActorStats* source_stats, Battle_ActorStats* target_stats)
-{
-    int has_modifier_gem;
-    int damage_percent;
-    int i;
-
-    damage_percent = 100;
-
-    if (action->type == Battle_ActionType_Spell) {
-        has_modifier_gem = 0;
-
-        for (i = 0; i < 3; ++i) {
-            if (source_stats->weapon.gems[i].gemEffects == 4) {
-                has_modifier_gem = 1;
-            }
-        }
-
-        if (has_modifier_gem != 0) {
-            damage_percent += 5;
-        }
-
-        has_modifier_gem = 0;
-
-        for (i = 0; i < 3; ++i) {
-            if (target_stats->shield.gems[i].gemEffects == 8) {
-                has_modifier_gem = 1;
-            }
-        }
-
-    } else {
-
-        has_modifier_gem = 0;
-
-        for (i = 0; i < 3; ++i) {
-            if (source_stats->weapon.gems[i].gemEffects == 3) {
-                has_modifier_gem = 1;
-            }
-        }
-
-        if (has_modifier_gem != 0) {
-            damage_percent += 5;
-        }
-
-        has_modifier_gem = 0;
-
-        for (i = 0; i < 3; ++i) {
-            if (target_stats->shield.gems[i].gemEffects == 7) {
-                has_modifier_gem = 1;
-            }
-        }
-    }
-
-    if (has_modifier_gem != 0) {
-        damage_percent -= 5;
-    }
-
-    return (damage_amount * damage_percent) / 100;
-}
-
-// decomp: BATTLE.PRG func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10612)
-void Battle_DistributeHitLimbDamage(Battle_ActionDefinition* action, Battle_HitResult* entity, short baseValue)
-{
-    int i;
-    int limbs;
-    Battle_ActorStats* actor;
-
-    for (i = 0; i < 6; ++i) {
-        Battle_limbArmorDpLoss[i] = 0;
-    }
-
-    actor = Battle_actors[entity->target.targetActor]->stats;
-
-    switch (action->category) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-        limbs = 0;
-
-        for (i = 0; i < 6; ++i) {
-            if (actor->limbs[i].maxHp != 0) {
-                ++limbs;
-            }
-        }
-
-        for (i = 0; i < 6; ++i) {
-            if (actor->limbs[i].maxHp != 0) {
-                Battle_limbArmorDpLoss[i] = baseValue / limbs;
-                entity->limbs[i].effects.opaque0 += Battle_limbArmorDpLoss[i];
-            }
-        }
-        break;
-    case 5:
-    case 7:
-    case 14:
-        for (i = 0; i < 6; ++i) {
-            Battle_limbArmorDpLoss[i] =
-                (baseValue * actor->dpSplash[entity->target.targetLimb][i]) / 100;
-            entity->limbs[i].effects.opaque0 += Battle_limbArmorDpLoss[i];
-        }
-        break;
-    case 6:
-    case 8:
-    case 11:
-    case 12:
-        Battle_limbArmorDpLoss[entity->target.targetLimb] = baseValue;
-        entity->limbs[entity->target.targetLimb].effects.opaque0 += baseValue;
-        break;
-    }
-}
-
-// decomp: BATTLE.PRG func_800801E0 (src/BATTLE/BATTLE.PRG/146C.c:10664)
-void Battle_DistributeLimbRecovery(Battle_ActionDefinition* action, Battle_HitResult* entity, short amount)
-{
-    int i;
-    int limbDamageTaken = 0;
-    Battle_ActorStats* actor = Battle_actors[entity->target.targetActor]->stats;
-
-    for (i = 0; i < 6; ++i) {
-        if (actor->limbs[i].maxHp != 0) {
-            limbDamageTaken += actor->limbs[i].maxHp - actor->limbs[i].hp;
-        }
-    }
-
-    if (limbDamageTaken != 0) {
-        for (i = 0; i < 6; ++i) {
-            if (actor->limbs[i].maxHp != 0) {
-                int limb_recovery_amount = (amount * (actor->limbs[i].maxHp - actor->limbs[i].hp))
-                            / limbDamageTaken;
-                Battle_limbArmorDpLoss[i] = limb_recovery_amount;
-                entity->limbs[i].effects.opaque0 =
-                    entity->limbs[i].effects.opaque0 + ((limb_recovery_amount << 0x10) >> 0xF);
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG _getLastValue (src/BATTLE/BATTLE.PRG/146C.c:11237)
-short Battle_LastActionStatValue(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    return Battle_lastActionStatValue;
-}
 
 // decomp: BATTLE.PRG _getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11271)
 short Battle_CalculatePhysicalHitDamage(Battle_ActionDefinition* action, Battle_HitResult* source,
@@ -348,7 +200,7 @@ short Battle_CalculatePhysicalHitDamage(Battle_ActionDefinition* action, Battle_
     defense += calculation.shieldStat * calculation.shieldStatFactor;
     defense += calculation.armorStat * calculation.armorStatFactor;
     defense /= (targetActor->risk / 2) + 100;
-    value = Battle_ApplyDamageGemMultiplier(action, attack - defense, sourceActor, targetActor);
+    value = VS::Battle::LiveApplyDamageGemMultiplier(action, attack - defense, sourceActor, targetActor);
 
     if (value < 0) {
         value = 0;
@@ -537,7 +389,7 @@ short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_Hit
     defense += calculation.shieldStat * calculation.shieldStatFactor;
     defense += calculation.armorStat * calculation.armorStatFactor;
     defense /= (targetActor->risk >> 1) + 100;
-    value = Battle_ApplyDamageGemMultiplier(action, attack - defense, sourceActor, targetActor);
+    value = VS::Battle::LiveApplyDamageGemMultiplier(action, attack - defense, sourceActor, targetActor);
 
     if (value < 0) {
         value = 0;
@@ -671,7 +523,7 @@ short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitRe
     defense += calculation.shieldStat * calculation.shieldStatFactor;
     defense += calculation.armorStat * calculation.armorStatFactor;
     defense /= (targetActor->risk / 2) + 100;
-    value = Battle_ApplyDamageGemMultiplier(action, attack - defense, sourceActor, targetActor);
+    value = VS::Battle::LiveApplyDamageGemMultiplier(action, attack - defense, sourceActor, targetActor);
 
     if (value < 0) {
         value = 0;
@@ -700,27 +552,11 @@ short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitRe
     return value;
 }
 
-// decomp: BATTLE.PRG _factorLastValue (src/BATTLE/BATTLE.PRG/146C.c:12228)
-short Battle_ScaleLastActionStatValue(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    return (Battle_lastActionStatValue * action_definition->hits[hit_index].statFactor) / 10;
-}
-
 // decomp: BATTLE.PRG _getPhysicalAttackDamageWithStatusModifiers (src/BATTLE/BATTLE.PRG/146C.c:12235)
 short Battle_PhysicalDamageWithDebuffs(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
     return Battle_CalculatePhysicalHitDamage(action_definition, source_hit, target_hit, hit_index, execute_action, 1);
-}
-
-// decomp: BATTLE.PRG _getRisk (src/BATTLE/BATTLE.PRG/146C.c:12241)
-short Battle_TargetRisk(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    return Battle_actors[target_hit->target.targetActor]->stats->risk;
 }
 
 }  // extern "C"

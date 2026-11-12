@@ -123,6 +123,7 @@
     <ClCompile Include="src\CoreTests.cpp" />
     <ClCompile Include="src\CursorMemoryTests.cpp" />
     <ClCompile Include="src\CutsceneLifecycleTests.cpp" />
+    <ClCompile Include="src\DamagePoliciesTests.cpp" />
     <ClCompile Include="src\DataMenuTests.cpp" />
     <ClCompile Include="src\DecisionPrimitivesTests.cpp" />
     <ClCompile Include="src\DiscImageTests.cpp" />

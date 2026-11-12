@@ -16,10 +16,8 @@
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"
-#include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Items/Weapons.h"
 #include "Render/Palette.h"
 
 extern u_short Battle_bladePpDamageBonuses[12];
@@ -28,14 +26,6 @@ extern Battle_Actor* Battle_actors[42];
 extern u_int Battle_lastActionStatValue;
 extern int Battle_criticalHitOccurred;
 extern short Battle_limbArmorDpLoss[8];
-short Battle_ApplyDamageGemMultiplier(
-    Battle_ActionDefinition* action, short damage_amount, Battle_ActorStats* source_stats, Battle_ActorStats* target_stats);
-void Battle_DistributeHitLimbDamage(Battle_ActionDefinition* action, Battle_HitResult* entity, short baseValue);
-void Battle_DistributeLimbRecovery(Battle_ActionDefinition* action, Battle_HitResult* entity, short amount);
-short Battle_LastActionStatValue(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
 short Battle_CalculatePhysicalHitDamage(Battle_ActionDefinition* action, Battle_HitResult* source,
     Battle_HitResult* target, int nHit, int withRandMod, int applyStatuses);
 short Battle_PhysicalDamageWithoutDebuffs(Battle_ActionDefinition* action,
@@ -44,13 +34,7 @@ short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_Hit
     Battle_HitResult* target, int nHit, int addRandMod);
 short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target, int nHit,
     int withRandMod);
-short Battle_ScaleLastActionStatValue(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
 short Battle_PhysicalDamageWithDebuffs(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-short Battle_TargetRisk(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
 
 #endif // VS_BATTLE_DAMAGE_H_DECLS

@@ -18,29 +18,36 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-29 group
 
-F00418/F00424/F00425/F00427/F00428/F00429/F00430/F00431 are locally verified
-on `93b3ac07`, extending `StatFactors`. Seven bindings cover eight IDs, with
-physical aliases sharing a body and the spell alias reusing F00417. Signed
-short narrowing, independent selected/input action owners and lazy gates are
-preserved. All 28 old-symbol occurrences are gone.
+F00394/F00396/F00397/F00408/F00432/F00434 are locally verified on `d29b8d86`
+in `DamagePolicies`: gem scaling, limb damage/recovery and last-value/risk
+policies. Six-of-eight DP clearing versus stale recovery entries, U8 splash,
+signed narrowing and unsigned wrapped scaling are preserved. All 34 old-symbol
+occurrences are gone; consumer bodies otherwise remain unchanged.
 
-- New original spans total 254 instructions: 0x8008241C-0x800824D8,
-  0x800834A4-0x80083524 and 0x80083590-0x8008384C. Full evidence:
-  `build\scratch\status-queue\stat-factors-b8-ledgers.json`.
-- Extended `stat_factors`: 32,768 vectors, zero mismatches, 143/143 mutants
-  detected, including all prior A8 cases. New per-ID native variants detect
-  168/479/472/243/174/49/417/272 mismatches over 512 vectors per ID.
-- Group `build\promotion-check\group-20261112-031728`, 470 seconds:
-  Debug/Release each pass 5,993 cases/12,807,508 assertions; combined focus
-  122 cases/154,991 assertions. B8 owns 26/2,122; A8+B8 owns 52/2,415.
+- Original spans total 285 instructions: 0x8007FE5C-0x8007FF8C,
+  0x80080000-0x800802C4, 0x80081138-0x80081148, 0x8008384C-0x8008388C and
+  0x800838BC-0x800838EC. Evidence: `build\scratch\status-queue\c6-ledgers.json`
+  and `c6-audit.json`.
+- `damage_policies`: 24,576 vectors, zero mismatches, 42/42 mutants detected.
+  Six native variants detect 126/110/330/384/99/214 mismatches respectively
+  over 512 vectors per ID in 3,072-vector runs.
+- Group `build\promotion-check\group-20261112-035702`, 427 seconds:
+  Debug/Release each pass 6,013 cases/12,823,716 assertions; combined focus
+  244 cases/173,471 assertions including Items. Own tests: 20/16,208.
   Both replays, copier stability and 274 controls pass; tidy five existing,
   zero new.
-- All 94 live refusal cases pass (43 new, 51 prior), as do lazy valid paths,
-  actual SHORT table relocation and both incompatible-ABI controls.
-- Evidence: `build\differential\stat_factors-b8-full.log`, final-source and
-  native-variant logs. A8 logs are archived under `build\differential\stat_factors-a8`.
-  Publication and exact-revision CI pending. No service stubs, retirement
-  changes, #351 fix, interactive gameplay or EC/M8 completion claim.
+- All 57 checked-live refusal cases and unused-null paths pass; actual SHORT
+  table binding rejects INT/VOID controls. The original SLUS category jump
+  table executes without service stubs.
+- Evidence: `build\differential\damage-policies-full-final.log`,
+  `damage-policies-final-source.log` and six `damage-policies-broken-F*.log`
+  reports. Publication and exact-revision CI pending. Original DP scratch,
+  last-value and module storage remain compatibility debt. No #351 fix,
+  interactive gameplay or EC/M8 completion claim.
+
+B8 incoming-stat factors are published in `d29b8d86`, green on
+[CI 43183509421](https://github.com/JEschete/VS-NativePort/actions/runs/43183509421),
+with evidence on [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6818895374).
 
 A8 stat factors are published in `93b3ac07`, green on
 [CI 43179698344](https://github.com/JEschete/VS-NativePort/actions/runs/43179698344),
@@ -139,9 +146,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 87 of the original 900 resolved (84 promoted, 3 retired); 813
-remain** (812 generated plus F01416 owned WIP). Modernization is 2,928/3,741;
-C++ promotion is 2,929 plus
+**Progress: 93 of the original 900 resolved (90 promoted, 3 retired); 807
+remain** (806 generated plus F01416 owned WIP). Modernization is 2,934/3,741;
+C++ promotion is 2,935 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -210,13 +217,13 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue row 29 with F00394/F00396/F00397/F00408/F00432/F00434: damage gems,
-limb damage/recovery and last-value/risk helpers. All 285 instructions are
-read in `build\scratch\status-queue\limb_damage.txt`. Preserve U8 splash
-coefficients, signed division/narrowing, six-of-eight scratch resets versus
-stale recovery entries, doubled narrowed recovery shares and unsigned
-last-value multiplication/division. The final five damage calculators have all 1,434
-instructions read in `damage_calculations.txt`.
+Finish row 29 with F00409/F00410/F00411/F00421/F00433: physical damage,
+spell damage, healing and the two physical-policy wrappers. All 1,434
+instructions are read in `build\scratch\status-queue\damage_calculations.txt`.
+Preserve each S16 intermediate wrap, low32 products, signed division, cached
+owners/affinities, post-RNG reads and equipment-growth order. Reuse the new
+damage gem policy and existing Items growth helpers. Reconcile all row-29
+IDs before marking the slice complete, then continue ordered row 30.
 
 [#351](https://github.com/JEschete/VS-NativePort/issues/351) records F00421's
 latent healing-affinity defect: drawn encoded-affinity 1 reads an unwritten
@@ -273,9 +280,9 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 ## Stopping Point
 
 The continuation is active, not paused. Row 28 is published and green. The
-row-29 checkpoint has 69 resolved functions (66 promoted, three retired),
-published and green. #349 and #350 are closed. B8 incoming-stat factors are
-verified locally; publish and confirm CI, then continue C6 limb/damage helpers.
+row-29 checkpoint has 77 resolved functions (74 promoted, three retired),
+published and green. #349 and #350 are closed. C6 limb/damage helpers are
+verified locally; publish and confirm CI, then finish D5 and #351.
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
 353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
 [#350](https://github.com/JEschete/VS-NativePort/issues/350) tracks the separate
@@ -458,10 +465,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the verified B8 incoming-stat factors and confirm exact-revision CI.
+2. Publish the verified C6 damage helpers and confirm exact-revision CI.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 813 remain.
-3. Continue row 29 with the six limb/damage helpers above, following
+   #276: 807 remain.
+3. Finish row 29 with the five damage calculators and #351 above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

@@ -237,6 +237,9 @@
     <ClCompile Include="src\CutsceneLifecycleTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\DamagePoliciesTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\DataMenuTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
