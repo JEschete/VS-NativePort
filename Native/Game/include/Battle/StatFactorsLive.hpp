@@ -24,4 +24,19 @@ std::int16_t LiveScaleIncomingSpellDamage(Battle_ActionDefinition*,
 std::int16_t LiveScaleSourceMissingMp(Battle_ActionDefinition*,
                                       Battle_HitResult*, Battle_HitResult*, int,
                                       int);
+std::int16_t LiveScaleIncomingPhysicalDamage(Battle_ActionDefinition*,
+                                             Battle_HitResult*,
+                                             Battle_HitResult*, int, int);
+std::int16_t LiveTargetMissingHp(Battle_ActionDefinition*, Battle_HitResult*,
+                                 Battle_HitResult*, int, int);
+std::int16_t LiveTargetMissingMp(Battle_ActionDefinition*, Battle_HitResult*,
+                                 Battle_HitResult*, int, int);
+std::int16_t LiveScaleIncomingSpellCost(Battle_ActionDefinition*,
+                                        Battle_HitResult*, Battle_HitResult*,
+                                        int, int);
+std::int16_t LiveScaleIncomingDamage(Battle_ActionDefinition*,
+                                     Battle_HitResult*, Battle_HitResult*, int,
+                                     int);
+std::int16_t LiveSourceShieldPp(Battle_ActionDefinition*, Battle_HitResult*,
+                                Battle_HitResult*, int, int);
 }  // namespace VS::Battle

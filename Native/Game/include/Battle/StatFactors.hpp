@@ -23,9 +23,12 @@ class StatFactorWorld {
   virtual std::optional<std::uint8_t> Factor(int hit) = 0;
   virtual std::optional<StatFactorHit> PreviousTarget() = 0;
   virtual std::optional<StatFactorVital> SourceVital(StatFactorResource) = 0;
+  virtual std::optional<StatFactorVital> TargetVital(StatFactorResource) = 0;
   virtual std::optional<std::int16_t> TargetHp() = 0;
   virtual std::optional<std::uint16_t> WeaponPp() = 0;
+  virtual std::optional<std::uint16_t> ShieldPp() = 0;
   virtual std::optional<std::uint8_t> SelectedActionType() = 0;
+  virtual std::optional<std::uint8_t> SelectedActionCost() = 0;
   virtual std::optional<std::uint8_t> PrimaryHpEffect() = 0;
   virtual std::optional<StatFactorHit> PrimaryHit() = 0;
 };
@@ -42,4 +45,14 @@ std::optional<std::int16_t> ScaleIncomingSpellDamage(int hit,
                                                      StatFactorWorld& world);
 std::optional<std::int16_t> ScaleSourceMissingMp(int hit,
                                                  StatFactorWorld& world);
+// F00417/F00427 share ScaleIncomingSpellDamage; F00418/F00428 share this.
+std::optional<std::int16_t> ScaleIncomingPhysicalDamage(int hit,
+                                                        StatFactorWorld& world);
+std::optional<std::int16_t> TargetMissingHp(StatFactorWorld& world);
+std::optional<std::int16_t> TargetMissingMp(StatFactorWorld& world);
+std::optional<std::int16_t> ScaleIncomingSpellCost(int hit,
+                                                   StatFactorWorld& world);
+std::optional<std::int16_t> ScaleIncomingDamage(int hit,
+                                                StatFactorWorld& world);
+std::optional<std::int16_t> SourceShieldPp(StatFactorWorld& world);
 }  // namespace VS::Battle

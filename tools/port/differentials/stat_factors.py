@@ -1,4 +1,4 @@
-"""Eight stat-factor entries, including three byte-identical original aliases."""
+"""A8/B8 stat-factor entries with independently exercised original aliases."""
 
 import random
 import zlib
@@ -6,17 +6,20 @@ from dataclasses import dataclass
 
 from differential import DEFAULT_STACK, MASK, Image, Machine
 
-ID = "F00412-F00417 (182 instructions); F00419/F00426 disjoint spans below"
+ID = "A8/B8 stat factors (sixteen explicit original spans below)"
 ENTRY, END = 0x80082144, 0x8008241C
 ENTRIES = (ENTRY, 0x800821B0, 0x80082234, 0x800822A0, 0x8008231C, 0x80082360,
-           0x800824D8, 0x80083524)
+           0x800824D8, 0x80083524, 0x8008241C, 0x800834A4, 0x800834E4,
+           0x80083590, 0x8008364C, 0x80083708, 0x8008379C, 0x8008381C)
 ENDS = (0x800821B0, 0x80082234, 0x800822A0, 0x8008231C, 0x80082360, END,
-        0x8008255C, 0x80083590)
-FUNCTIONS = ("F00412", "F00413", "F00414", "F00415", "F00416", "F00417", "F00419", "F00426")
+        0x8008255C, 0x80083590, 0x800824D8, 0x800834E4, 0x80083524,
+        0x8008364C, 0x80083708, 0x8008379C, 0x8008381C, 0x8008384C)
+FUNCTIONS = ("F00412", "F00413", "F00414", "F00415", "F00416", "F00417", "F00419", "F00426",
+             "F00418", "F00424", "F00425", "F00427", "F00428", "F00429", "F00430", "F00431")
 MODULES = ("BATTLE/BATTLE.PRG", "SLUS_010.40")
 DRIVER = "stat_factors_driver.cpp"
 SOURCES = (r"Native\Game\src\Battle\StatFactors.cpp",)
-VECTORS, SEED, MUTANT_VECTORS = 16384, 412413414415416417419426, 4096
+VECTORS, SEED, MUTANT_VECTORS = 32768, 412413414415416417419426, 8192
 GUARD = 16
 GLOBAL, TABLE, DEFINITIONS = 0x800F19CC, 0x800F1928, 0x8004B9DC
 STATE, ACTION, SOURCE, TARGET = 0x80500000, 0x80501000, 0x80502000, 0x80502100
@@ -73,6 +76,58 @@ MUTANTS.update({
     "F00417-divide-five": {0x80082408: 0x00051043},
     "F00417-unsigned-return": {0x80082418: 0x00021402},
 })
+for label, changes in tuple(MUTANTS.items()):
+    if label.startswith("F00417-"):
+        MUTANTS[label.replace("F00417-", "F00427-")] = {
+            address - 0x80082360 + 0x80083590: word for address, word in changes.items()}
+for index in (8, 12):
+    entry, name = ENTRIES[index], FUNCTIONS[index]
+    for label, offset, word in (
+        ("wrong-selected-id", 0x14, 0x94A3000A),
+        ("wrong-type", 0x38, 0x24040002), ("type-mask", 0x40, 0x30420001),
+        ("skip-type-gate", 0x44, 0), ("effect-wide-mask", 0x54, 0x30430007),
+        ("effect-two", 0x60, 0x24020002), ("skip-effect-gate", 0x64, 0),
+        ("unsigned-hp", 0x74, 0x94A30010), ("unsigned-mp", 0x78, 0x94A40012),
+        ("subtract-mp", 0x80, 0x00641823), ("factor-mask", 0x88, 0x3042000F),
+        ("divide-five", 0xA8, 0x00051043), ("unsigned-return", 0xB8, 0x00021402),
+    ):
+        MUTANTS[f"{name}-{label}"] = {entry + offset: word}
+for index in (9, 10):
+    entry, name = ENTRIES[index], FUNCTIONS[index]
+    current = 0x18 if index == 9 else 0x1C
+    for label, offset, word in (
+        ("source-owner", 4, 0x90A20000),
+        ("maximum-is-current", 0x24, 0x94620000 | current),
+        ("current-is-maximum", 0x28, 0x94630000 | (current + 2)),
+        ("sum-not-missing", 0x30, 0x00431021),
+        ("unsigned-return", 0x3C, 0x00021402),
+    ):
+        MUTANTS[f"{name}-{label}"] = {entry + offset: word}
+MUTANTS.update({
+    "F00429-wrong-selected-id": {0x80083718: 0x9443000A},
+    "F00429-wrong-type": {0x8008373C: 0x24030002},
+    "F00429-type-mask": {0x80083744: 0x30420001},
+    "F00429-skip-type-gate": {0x80083748: 0},
+    "F00429-wrong-hit": {0x80083758: 0x8C420018},
+    "F00429-input-cost-owner": {0x8008375C: 0x90A30003},
+    "F00429-signed-cost": {0x8008375C: 0x80830003},
+    "F00429-factor-mask": {0x80083764: 0x3042000F},
+    "F00429-add-not-multiply": {0x8008376C: 0x00621821},
+    "F00429-divide-five": {0x80083784: 0x00031042},
+    "F00430-effect-wide-mask": {0x800837B0: 0x30430007},
+    "F00430-effect-two": {0x800837C0: 0x24020002},
+    "F00430-skip-effect-gate": {0x800837C4: 0},
+    "F00430-unsigned-hp": {0x800837D4: 0x94A30010},
+    "F00430-unsigned-mp": {0x800837D8: 0x94A40012},
+    "F00430-subtract-mp": {0x800837E0: 0x00641823},
+    "F00430-factor-mask": {0x800837E8: 0x3042000F},
+    "F00430-divide-five": {0x80083808: 0x00051043},
+    "F00430-unsigned-return": {0x80083818: 0x00021402},
+    "F00431-target-owner": {0x80083820: 0x90C20000},
+    "F00431-unsigned-pp": {0x80083840: 0x944202B0},
+    "F00431-byte-pp": {0x80083840: 0x904202B0},
+    "F00431-weapon-pp": {0x80083840: 0x8442014C},
+})
 
 
 @dataclass(frozen=True)
@@ -88,26 +143,26 @@ def put(block: bytearray, offset: int, value: int, size: int = 4) -> None:
 
 
 def vector(rng: random.Random, number: int) -> Vector:
-    function, lane = number % 8, number // 8
+    function, lane = number % len(FUNCTIONS), number // len(FUNCTIONS)
     selected = (0, 255)[lane % 2]
     locations = ((TABLE, 42 * 4), (STATE, 0x60), (ACTION, 0x1C),
                  (SOURCE, 8), (TARGET, 8), (ACTORS, 0x40), (ACTORS + 0x100, 0x40),
-                 (STATS, 0x150), (STATS + 0x1000, 0x150),
+                 (STATS, 0x2B4), (STATS + 0x1000, 0x2B4),
                  (DEFINITIONS + 52 * selected, 4))
     blocks = [bytearray(rng.randbytes(size + 2 * GUARD)) for _, size in locations]
     # The original action-state pointer follows actor slots 0..40 in this region.
-    put(blocks[0], GLOBAL - TABLE, STATE)
+    put(blocks[0], GLOBAL - TABLE, 0 if function in (9, 10, 15) else STATE)
     slots = (0, 39) if lane % 2 else (1, 40)
     for owner, slot in enumerate(slots):
         put(blocks[0], slot * 4, ACTORS + owner * 0x100)
         put(blocks[3 + owner], 0, slot, 1)
         put(blocks[5 + owner], 0x3C, STATS + owner * 0x1000)
-        for offset in (0x18, 0x1A, 0x1C, 0x1E, 0x14C):
+        for offset in (0x18, 0x1A, 0x1C, 0x1E, 0x14C, 0x2B0):
             value = rng.choice((0, 1, -1, -32768, 32767, 65535, rng.randrange(65536)))
             put(blocks[7 + owner], offset, value, 2)
     queue = (0, 1, 32768, 65535)[lane % 4] | (rng.randrange(1, 65536) << 16)
     put(blocks[1], 0, queue)
-    put(blocks[1], 8, selected, 2)
+    put(blocks[1], 8, 65535 if function == 14 else selected, 2)
     put(blocks[1], 0x52, (0, 1, 255)[lane % 3], 2)
     for offset in (0x10, 0x12, 0x58, 0x5A):
         value = rng.choice((0, 1, -1, -32768, 32767, rng.randrange(-32768, 32768)))
@@ -121,14 +176,19 @@ def vector(rng: random.Random, number: int) -> Vector:
             (rng.getrandbits(32) & ~(31 << 22)) | (factor << 22))
     action, hit = ACTION, (lane // 2) % 2
     source, target = SOURCE, TARGET
-    if function in (0, 2, 5, 7):
+    if function in (0, 2, 5, 7, 8, 11, 12, 13, 14):
         source = target = 0
-    elif function in (1, 4, 6):
+    elif function in (1, 4, 6, 15):
         # Keep a valid different unused target in half the vectors for owner mutants.
         target = TARGET if lane % 2 else 0
-    elif function == 3:
+    elif function in (3, 9, 10):
         source = SOURCE if lane % 2 else 0
-    if function == 4 or (function == 5 and (action_type != 1 or effect not in (1, 3))):
+    rejected = (
+        function in (5, 11) and (action_type != 1 or effect not in (1, 3))
+        or function in (8, 12) and (action_type == 1 or effect not in (1, 3))
+        or function == 13 and action_type != 1
+        or function == 14 and effect not in (1, 3))
+    if function in (4, 9, 10, 15) or rejected:
         action, hit = 0, MASK
     arguments = (action, source, target, hit, rng.getrandbits(32))
     return Vector(function, arguments, tuple(

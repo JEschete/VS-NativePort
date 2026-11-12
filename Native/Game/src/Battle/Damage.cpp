@@ -7,14 +7,11 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
-#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Battle/TargetingState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -560,24 +557,6 @@ short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_Hit
     return value;
 }
 
-// decomp: BATTLE.PRG _factorPhysicalDamageReceived0 (src/BATTLE/BATTLE.PRG/146C.c:11703)
-short Battle_ScaleIncomingPhysicalDamage(Battle_ActionDefinition* action,
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)))
-{
-    short scaled_amount = 0;
-    if (((Battle_actionDefinitions[Battle_actionState->selection.actionId].type)) != Battle_ActionType_Spell) {
-        if ((Battle_actionState->selection.primaryTarget.hpEffect == 1)
-            || (Battle_actionState->selection.primaryTarget.hpEffect == 3)) {
-            scaled_amount = ((Battle_actionState->selection.primaryTarget.target.hp + Battle_actionState->selection.primaryTarget.target.mp)
-                         * action->hits[hit_index].statFactor)
-                   / 10;
-        }
-    }
-    return scaled_amount;
-}
-
 // decomp: BATTLE.PRG _hpHealed (src/BATTLE/BATTLE.PRG/146C.c:11850)
 short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target, int nHit,
     int withRandMod)
@@ -719,83 +698,6 @@ short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitRe
     }
 
     return value;
-}
-
-// decomp: BATTLE.PRG _getRecoverableHp (src/BATTLE/BATTLE.PRG/146C.c:12130)
-short Battle_TargetMissingHp(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    return Battle_actors[target_hit->target.targetActor]->stats->maxHp
-         - Battle_actors[target_hit->target.targetActor]->stats->currentHp;
-}
-
-// decomp: BATTLE.PRG _getRecoverableMp (src/BATTLE/BATTLE.PRG/146C.c:12138)
-short Battle_TargetMissingMp(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    return Battle_actors[target_hit->target.targetActor]->stats->maxMp
-         - Battle_actors[target_hit->target.targetActor]->stats->currentMp;
-}
-
-// decomp: BATTLE.PRG _factorMagicDamageReceivedOfType (src/BATTLE/BATTLE.PRG/146C.c:12156)
-short Battle_ScaleIncomingSpellEffect(Battle_ActionDefinition* action,
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)))
-{
-    short scaled_amount = 0;
-    if (Battle_actionDefinitions[Battle_actionState->selection.actionId].type == Battle_ActionType_Spell) {
-        if ((Battle_actionState->selection.primaryTarget.hpEffect
-                == Battle_actionDefinitions[Battle_actionState->selection.actionId].type)
-            || (Battle_actionState->selection.primaryTarget.hpEffect == 3)) {
-            scaled_amount = ((Battle_actionState->selection.primaryTarget.target.hp + Battle_actionState->selection.primaryTarget.target.mp)
-                         * action->hits[hit_index].statFactor)
-                   / 10;
-        }
-    }
-    return scaled_amount;
-}
-
-// decomp: BATTLE.PRG _factorSpellCost (src/BATTLE/BATTLE.PRG/146C.c:12191)
-short Battle_ScaleIncomingSpellCost(Battle_ActionDefinition* action, Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)))
-{
-    short scaled_spell_cost;
-
-    if (Battle_actionDefinitions[Battle_actionState->selection.actionId].type == Battle_ActionType_Spell) {
-        scaled_spell_cost = (Battle_actionDefinitions[Battle_actionState->selection.actionId].cost
-                     * action->hits[hit_index].statFactor)
-               / 10;
-    } else {
-        scaled_spell_cost = 0;
-    }
-
-    return scaled_spell_cost;
-}
-
-// decomp: BATTLE.PRG _factorDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:12208)
-short Battle_ScaleIncomingDamage(Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)))
-{
-    short scaled_amount = 0;
-    if ((Battle_actionState->selection.primaryTarget.hpEffect == 1) || (Battle_actionState->selection.primaryTarget.hpEffect == 3)) {
-        scaled_amount = ((Battle_actionState->selection.primaryTarget.target.hp + Battle_actionState->selection.primaryTarget.target.mp)
-                     * action_definition->hits[hit_index].statFactor)
-               / 10;
-    }
-    return scaled_amount;
-}
-
-// decomp: BATTLE.PRG _getEquippedShieldDp (src/BATTLE/BATTLE.PRG/146C.c:12221)
-short Battle_SourceShieldPp(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    return Battle_actors[source_hit->target.targetActor]->stats->shield.currentPp;
 }
 
 // decomp: BATTLE.PRG _factorLastValue (src/BATTLE/BATTLE.PRG/146C.c:12228)

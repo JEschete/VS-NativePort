@@ -57,19 +57,30 @@ int main(int argc, char** argv) {
   const std::array callbacks{b::LiveScalePreviousTargetHit, b::LiveScaleSourceMissingHp,
       b::LiveScalePreviousTargetHit, b::LiveScaleTargetCurrentHp,
       b::LiveWeaponPpWithChainOffset, b::LiveScaleIncomingSpellDamage,
-      b::LiveScaleSourceMissingMp, b::LiveScalePreviousTargetHit};
+      b::LiveScaleSourceMissingMp, b::LiveScalePreviousTargetHit,
+      b::LiveScaleIncomingPhysicalDamage, b::LiveTargetMissingHp, b::LiveTargetMissingMp,
+      b::LiveScaleIncomingSpellDamage, b::LiveScaleIncomingPhysicalDamage,
+      b::LiveScaleIncomingSpellCost, b::LiveScaleIncomingDamage, b::LiveSourceShieldPp};
+  constexpr std::array ids{412, 413, 414, 415, 416, 417, 419, 426,
+                           418, 424, 425, 427, 428, 429, 430, 431};
   for (unsigned index = 0; index < callbacks.size(); ++index) {
     auto callback = callbacks[index];
-    Battle_actionState = nullptr;
-    Refuses([&] { callback(&action, &source, &target, 0, 0); });
+    const auto first = refusals;
+    Battle_actionDefinitions[0].type = index == 8 || index == 12 ? 7 : 1;
+    if (index != 9 && index != 10 && index != 15) {
+      Battle_actionState = nullptr;
+      Refuses([&] { callback(&action, &source, &target, 0, 0); });
+    }
     Battle_actionState = state.get();
-    if (index != 4) {
+    if (index != 4 && index != 9 && index != 10 && index != 15) {
       Refuses([&] { callback(nullptr, &source, &target, 0, 0); });
       for (auto hit : {-1, 2}) {
         Refuses([&] { callback(&action, &source, &target, hit, 0); });
       }
     }
-    if (index == 1 || index == 3 || index == 4 || index == 6) {
+    if (index == 1 || index == 3 || index == 4 || index == 6 ||
+        index == 9 || index == 10 || index == 15) {
+      source.targetsPosition = target.targetsPosition = 1;
       Refuses([&] { callback(&action, nullptr, nullptr, 0, 0); });
       Battle_actors[0] = nullptr;
       Refuses([&] { callback(&action, &source, &target, 0, 0); });
@@ -83,21 +94,41 @@ int main(int argc, char** argv) {
       }
       source.target.targetActor = target.target.targetActor = 0;
     }
-  }
-  for (auto id : {256, 65535}) {
-    state->selection.actionId = static_cast<unsigned short>(id);
-    Refuses([&] { b::LiveScaleIncomingSpellDamage(nullptr, nullptr, nullptr, -1, 0); });
+    if (index == 5 || index == 8 || index == 11 || index == 12 || index == 13) {
+      for (auto id : {256, 65535}) {
+        state->selection.actionId = static_cast<unsigned short>(id);
+        Refuses([&] { callback(nullptr, nullptr, nullptr, -1, 0); });
+      }
+      state->selection.actionId = 0;
+    }
+    std::printf("F%05d refusal cases [%u,%u)\n", ids[index], first, refusals);
   }
   state->selection.actionId = 0;
   for (unsigned type = 0; type < 8; ++type) {
     Battle_actionDefinitions[0].type = type;
     for (unsigned effect = 0; effect < 4; ++effect) {
       state->selection.primaryTarget.hpEffect = effect;
-      if (type == 1 && (effect == 1 || effect == 3)) continue;
-      if (b::LiveScaleIncomingSpellDamage(nullptr, nullptr, nullptr, -1, -1) != 0) return 1;
+      if (type != 1 || (effect != 1 && effect != 3)) {
+        if (b::LiveScaleIncomingSpellDamage(nullptr, nullptr, nullptr, -1, -1) != 0) return 1;
+      }
+      if (type == 1 || (effect != 1 && effect != 3)) {
+        if (b::LiveScaleIncomingPhysicalDamage(nullptr, nullptr, nullptr, 2, -1) != 0) return 1;
+      }
+      if (type != 1 &&
+          b::LiveScaleIncomingSpellCost(nullptr, nullptr, nullptr, -1, -1) != 0) return 1;
+      if (effect != 1 && effect != 3) {
+        state->selection.actionId = 65535;
+        if (b::LiveScaleIncomingDamage(nullptr, nullptr, nullptr, 2, -1) != 0) return 1;
+        state->selection.actionId = 0;
+      }
     }
   }
   stats.weapon.currentPp = 65535;
   if (b::LiveWeaponPpWithChainOffset(nullptr, &source, nullptr, -1, -1) != -2) return 1;
+  Battle_actionState = nullptr;
+  stats.shield.currentPp = 32768;
+  if (b::LiveSourceShieldPp(nullptr, &source, nullptr, 2, -1) != -32768) return 1;
+  if (b::LiveTargetMissingHp(nullptr, nullptr, &target, -1, -1) != 0) return 1;
+  if (b::LiveTargetMissingMp(nullptr, nullptr, &target, 2, -1) != 0) return 1;
   std::printf("%u negative cases; lazy type/effect and unused action/index checks passed\n", refusals);
 }

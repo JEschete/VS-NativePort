@@ -58,8 +58,18 @@ struct World final : battle::StatFactorWorld {
   std::optional<std::int16_t> TargetHp() override {
     return Read<std::int16_t>(Stats(target) + 0x18);
   }
+  std::optional<battle::StatFactorVital> TargetVital(battle::StatFactorResource resource) override {
+    const auto address = Stats(target) + (resource == battle::StatFactorResource::kHp ? 0x18 : 0x1C);
+    return battle::StatFactorVital{Read<std::int16_t>(address), Read<std::int16_t>(address + 2)};
+  }
   std::optional<std::uint16_t> WeaponPp() override {
     return Read<std::uint16_t>(Stats(source) + 0x14C);
+  }
+  std::optional<std::uint16_t> ShieldPp() override {
+    return Read<std::uint16_t>(Stats(source) + 0x2B0);
+  }
+  std::optional<std::uint8_t> SelectedActionCost() override {
+    return Read<std::uint8_t>(kDefinitions + Read<std::uint16_t>(State() + 8) * 52 + 3);
   }
   std::optional<std::uint8_t> SelectedActionType() override {
     return (Read<std::uint32_t>(kDefinitions + Read<std::uint16_t>(State() + 8) * 52) >> 17) & 7;
@@ -103,7 +113,13 @@ int main() {
     const std::array calculators{battle::ScalePreviousTargetHit, battle::ScaleSourceMissingHp,
         battle::ScalePreviousTargetHit, battle::ScaleTargetCurrentHp,
         +[](int, battle::StatFactorWorld& w) { return battle::WeaponPpWithChainOffset(w); },
-        battle::ScaleIncomingSpellDamage, battle::ScaleSourceMissingMp, battle::ScalePreviousTargetHit};
+        battle::ScaleIncomingSpellDamage, battle::ScaleSourceMissingMp, battle::ScalePreviousTargetHit,
+        battle::ScaleIncomingPhysicalDamage,
+        +[](int, battle::StatFactorWorld& w) { return battle::TargetMissingHp(w); },
+        +[](int, battle::StatFactorWorld& w) { return battle::TargetMissingMp(w); },
+        battle::ScaleIncomingSpellDamage, battle::ScaleIncomingPhysicalDamage,
+        battle::ScaleIncomingSpellCost, battle::ScaleIncomingDamage,
+        +[](int, battle::StatFactorWorld& w) { return battle::SourceShieldPp(w); }};
     const auto result = calculators.at(function)(static_cast<int>(hit), world);
     const auto after = world.Crc();
     std::cout << result.has_value() << ' ' << static_cast<std::uint32_t>(result.value_or(0))

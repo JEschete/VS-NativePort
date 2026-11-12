@@ -73,9 +73,28 @@ class LiveStatFactorWorld final : public StatFactorWorld {
     const auto* stats = StatsOf(target_);
     return stats ? std::optional{stats->currentHp} : std::nullopt;
   }
+  std::optional<StatFactorVital> TargetVital(
+      StatFactorResource resource) override {
+    const auto* stats = StatsOf(target_);
+    if (stats == nullptr) return std::nullopt;
+    if (resource == StatFactorResource::kHp) {
+      return StatFactorVital{stats->currentHp, stats->maxHp};
+    }
+    return StatFactorVital{stats->currentMp, stats->maxMp};
+  }
   std::optional<std::uint16_t> WeaponPp() override {
     const auto* stats = StatsOf(source_);
     return stats ? std::optional{stats->weapon.currentPp} : std::nullopt;
+  }
+  std::optional<std::uint16_t> ShieldPp() override {
+    const auto* stats = StatsOf(source_);
+    return stats ? std::optional{stats->shield.currentPp} : std::nullopt;
+  }
+  std::optional<std::uint8_t> SelectedActionCost() override {
+    if (Battle_actionState == nullptr) return std::nullopt;
+    const auto id = Battle_actionState->selection.actionId;
+    if (id >= std::size(Battle_actionDefinitions)) return std::nullopt;
+    return Battle_actionDefinitions[id].cost;
   }
   std::optional<std::uint8_t> SelectedActionType() override {
     if (Battle_actionState == nullptr) return std::nullopt;
@@ -129,7 +148,8 @@ std::int16_t LiveWeaponPpWithChainOffset(Battle_ActionDefinition*,
   LiveStatFactorWorld world(nullptr, source, nullptr);
   return Checked(WeaponPpWithChainOffset(world));
 }
-// decomp: _factorMagicDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:11686).
+// decomp: _factorMagicDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:11686),
+// _factorMagicDamageReceivedOfType (:12156); F00417/F00427 share this binding.
 std::int16_t LiveScaleIncomingSpellDamage(Battle_ActionDefinition* action,
                                           Battle_HitResult*, Battle_HitResult*,
                                           int hit, int) {
@@ -143,6 +163,47 @@ std::int16_t LiveScaleSourceMissingMp(Battle_ActionDefinition* action,
   LiveStatFactorWorld world(action, source, nullptr);
   return Checked(ScaleSourceMissingMp(hit, world));
 }
+// decomp: _factorPhysicalDamageReceived0 (src/BATTLE/BATTLE.PRG/146C.c:11703),
+// _factorPhysicalDamageReceived1 (:12174); F00418/F00428 share this binding.
+std::int16_t LiveScaleIncomingPhysicalDamage(Battle_ActionDefinition* action,
+                                             Battle_HitResult*,
+                                             Battle_HitResult*, int hit, int) {
+  LiveStatFactorWorld world(action, nullptr, nullptr);
+  return Checked(ScaleIncomingPhysicalDamage(hit, world));
+}
+// decomp: _getRecoverableHp (src/BATTLE/BATTLE.PRG/146C.c:12130).
+std::int16_t LiveTargetMissingHp(Battle_ActionDefinition*, Battle_HitResult*,
+                                 Battle_HitResult* target, int, int) {
+  LiveStatFactorWorld world(nullptr, nullptr, target);
+  return Checked(TargetMissingHp(world));
+}
+// decomp: _getRecoverableMp (src/BATTLE/BATTLE.PRG/146C.c:12138).
+std::int16_t LiveTargetMissingMp(Battle_ActionDefinition*, Battle_HitResult*,
+                                 Battle_HitResult* target, int, int) {
+  LiveStatFactorWorld world(nullptr, nullptr, target);
+  return Checked(TargetMissingMp(world));
+}
+// decomp: _factorSpellCost (src/BATTLE/BATTLE.PRG/146C.c:12191).
+std::int16_t LiveScaleIncomingSpellCost(Battle_ActionDefinition* action,
+                                        Battle_HitResult*, Battle_HitResult*,
+                                        int hit, int) {
+  LiveStatFactorWorld world(action, nullptr, nullptr);
+  return Checked(ScaleIncomingSpellCost(hit, world));
+}
+// decomp: _factorDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:12208).
+std::int16_t LiveScaleIncomingDamage(Battle_ActionDefinition* action,
+                                     Battle_HitResult*, Battle_HitResult*,
+                                     int hit, int) {
+  LiveStatFactorWorld world(action, nullptr, nullptr);
+  return Checked(ScaleIncomingDamage(hit, world));
+}
+// decomp: _getEquippedShieldDp (src/BATTLE/BATTLE.PRG/146C.c:12221).
+std::int16_t LiveSourceShieldPp(Battle_ActionDefinition*,
+                                Battle_HitResult* source, Battle_HitResult*,
+                                int, int) {
+  LiveStatFactorWorld world(nullptr, source, nullptr);
+  return Checked(SourceShieldPp(world));
+}
 static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
                              decltype(&LiveScalePreviousTargetHit)&>);
 static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
@@ -155,4 +216,16 @@ static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
                              decltype(&LiveScaleIncomingSpellDamage)&>);
 static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
                              decltype(&LiveScaleSourceMissingMp)&>);
+static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+                             decltype(&LiveScaleIncomingPhysicalDamage)&>);
+static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+                             decltype(&LiveTargetMissingHp)&>);
+static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+                             decltype(&LiveTargetMissingMp)&>);
+static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+                             decltype(&LiveScaleIncomingSpellCost)&>);
+static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+                             decltype(&LiveScaleIncomingDamage)&>);
+static_assert(std::is_same_v<decltype(Battle_statCalculators[0]),
+                             decltype(&LiveSourceShieldPp)&>);
 }  // namespace VS::Battle

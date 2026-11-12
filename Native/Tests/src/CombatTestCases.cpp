@@ -345,14 +345,14 @@ struct AbilityEffectFixture : AbilityFixture {
     Battle_statCalculators[6] = VS::Battle::LiveScaleTargetCurrentHp;
     Battle_statCalculators[8] = VS::Battle::LiveWeaponPpWithChainOffset;
     Battle_statCalculators[9] = VS::Battle::LiveScaleIncomingSpellDamage;
-    Battle_statCalculators[10] = Battle_ScaleIncomingPhysicalDamage;
+    Battle_statCalculators[10] = VS::Battle::LiveScaleIncomingPhysicalDamage;
     Battle_statCalculators[11] = VS::Battle::LiveScaleSourceMissingMp;
     Battle_statCalculators[18] = VS::Battle::LiveScalePreviousTargetHit;
-    Battle_statCalculators[19] = Battle_ScaleIncomingSpellEffect;
-    Battle_statCalculators[20] = Battle_ScaleIncomingPhysicalDamage;
-    Battle_statCalculators[21] = Battle_ScaleIncomingSpellCost;
-    Battle_statCalculators[22] = Battle_ScaleIncomingDamage;
-    Battle_statCalculators[23] = Battle_SourceShieldPp;
+    Battle_statCalculators[19] = VS::Battle::LiveScaleIncomingSpellDamage;
+    Battle_statCalculators[20] = VS::Battle::LiveScaleIncomingPhysicalDamage;
+    Battle_statCalculators[21] = VS::Battle::LiveScaleIncomingSpellCost;
+    Battle_statCalculators[22] = VS::Battle::LiveScaleIncomingDamage;
+    Battle_statCalculators[23] = VS::Battle::LiveSourceShieldPp;
   }
 
   void Queue(int id, int hit, const AbilityHit& contract) {
