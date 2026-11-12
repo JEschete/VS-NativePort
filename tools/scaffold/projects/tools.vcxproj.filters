@@ -2046,6 +2046,15 @@
     <None Include="..\..\port\differentials\height_filter_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\hit_calculations.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hit_calculations_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hit_calculations_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\hit_modifiers.py">
       <Filter>tools\port\differentials</Filter>
     </None>

@@ -17,6 +17,7 @@
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
+#include "Battle/StatFactorsLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -339,14 +340,14 @@ struct AbilityEffectFixture : AbilityFixture {
   static void BindCalculators() {
     // BATTLE.PRG _statCalculators, original pointer table at file 0x7FB0C.
     Battle_statCalculators[1] = Battle_LastActionStatValue;
-    Battle_statCalculators[4] = Battle_ScalePreviousTargetHit;
-    Battle_statCalculators[5] = Battle_ScaleSourceMissingHp;
-    Battle_statCalculators[6] = Battle_ScaleTargetCurrentHp;
-    Battle_statCalculators[8] = Battle_WeaponPpWithChainOffset;
-    Battle_statCalculators[9] = Battle_ScaleIncomingSpellDamage;
+    Battle_statCalculators[4] = VS::Battle::LiveScalePreviousTargetHit;
+    Battle_statCalculators[5] = VS::Battle::LiveScaleSourceMissingHp;
+    Battle_statCalculators[6] = VS::Battle::LiveScaleTargetCurrentHp;
+    Battle_statCalculators[8] = VS::Battle::LiveWeaponPpWithChainOffset;
+    Battle_statCalculators[9] = VS::Battle::LiveScaleIncomingSpellDamage;
     Battle_statCalculators[10] = Battle_ScaleIncomingPhysicalDamage;
-    Battle_statCalculators[11] = Battle_ScaleSourceMissingMp;
-    Battle_statCalculators[18] = Battle_ScalePreviousTargetHit;
+    Battle_statCalculators[11] = VS::Battle::LiveScaleSourceMissingMp;
+    Battle_statCalculators[18] = VS::Battle::LiveScalePreviousTargetHit;
     Battle_statCalculators[19] = Battle_ScaleIncomingSpellEffect;
     Battle_statCalculators[20] = Battle_ScaleIncomingPhysicalDamage;
     Battle_statCalculators[21] = Battle_ScaleIncomingSpellCost;

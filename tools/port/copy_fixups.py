@@ -735,6 +735,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::RejectLiveHitSelector": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
     "VS::Battle::RejectLiveStatSelector": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
     "VS::Battle::RejectLiveEffectSelector": r"Native\Game\include\Battle\HitCalculationsLive.hpp",
+    "VS::Battle::LiveScalePreviousTargetHit": r"Native\Game\include\Battle\StatFactorsLive.hpp",
+    "VS::Battle::LiveScaleSourceMissingHp": r"Native\Game\include\Battle\StatFactorsLive.hpp",
+    "VS::Battle::LiveScaleTargetCurrentHp": r"Native\Game\include\Battle\StatFactorsLive.hpp",
+    "VS::Battle::LiveWeaponPpWithChainOffset": r"Native\Game\include\Battle\StatFactorsLive.hpp",
+    "VS::Battle::LiveScaleIncomingSpellDamage": r"Native\Game\include\Battle\StatFactorsLive.hpp",
+    "VS::Battle::LiveScaleSourceMissingMp": r"Native\Game\include\Battle\StatFactorsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1397,6 +1403,14 @@ OWNED_CALL_BINDINGS["F00345"] = "VS::Battle::LiveIntelligenceHitChance"
 OWNED_CALL_BINDINGS["F00346"] = "VS::Battle::LiveCostAdjustedAgilityHitChance"
 OWNED_CALL_BINDINGS["F00349"] = "VS::Battle::LiveRollActionHit"
 OWNED_CALL_BINDINGS["F00435"] = "VS::Battle::LiveCalculateActionStatChange"
+OWNED_CALL_BINDINGS["F00412"] = "VS::Battle::LiveScalePreviousTargetHit"
+OWNED_CALL_BINDINGS["F00413"] = "VS::Battle::LiveScaleSourceMissingHp"
+OWNED_CALL_BINDINGS["F00414"] = "VS::Battle::LiveScalePreviousTargetHit"
+OWNED_CALL_BINDINGS["F00415"] = "VS::Battle::LiveScaleTargetCurrentHp"
+OWNED_CALL_BINDINGS["F00416"] = "VS::Battle::LiveWeaponPpWithChainOffset"
+OWNED_CALL_BINDINGS["F00417"] = "VS::Battle::LiveScaleIncomingSpellDamage"
+OWNED_CALL_BINDINGS["F00419"] = "VS::Battle::LiveScaleSourceMissingMp"
+OWNED_CALL_BINDINGS["F00426"] = "VS::Battle::LiveScalePreviousTargetHit"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3059,6 +3073,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8007E974, "VS::Battle::RejectLiveHitSelector"),  # retired F00341
     ("BATTLE/BATTLE.PRG", 0x80081130, "VS::Battle::RejectLiveStatSelector"),  # retired F00407
     ("BATTLE/BATTLE.PRG", 0x80083990, "VS::Battle::RejectLiveEffectSelector"),  # retired F00436
+    ("BATTLE/BATTLE.PRG", 0x80082144, "VS::Battle::LiveScalePreviousTargetHit"),  # F00412
+    ("BATTLE/BATTLE.PRG", 0x800821B0, "VS::Battle::LiveScaleSourceMissingHp"),  # F00413
+    ("BATTLE/BATTLE.PRG", 0x80082234, "VS::Battle::LiveScalePreviousTargetHit"),  # F00414
+    ("BATTLE/BATTLE.PRG", 0x800822A0, "VS::Battle::LiveScaleTargetCurrentHp"),  # F00415
+    ("BATTLE/BATTLE.PRG", 0x8008231C, "VS::Battle::LiveWeaponPpWithChainOffset"),  # F00416
+    ("BATTLE/BATTLE.PRG", 0x80082360, "VS::Battle::LiveScaleIncomingSpellDamage"),  # F00417
+    ("BATTLE/BATTLE.PRG", 0x800824D8, "VS::Battle::LiveScaleSourceMissingMp"),  # F00419
+    ("BATTLE/BATTLE.PRG", 0x80083524, "VS::Battle::LiveScalePreviousTargetHit"),  # F00426
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

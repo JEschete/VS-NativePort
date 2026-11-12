@@ -42,28 +42,10 @@ short Battle_PhysicalDamageWithoutDebuffs(Battle_ActionDefinition* action,
     Battle_HitResult* source, Battle_HitResult* target, int nHit, int withRandMod);
 short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_HitResult* source,
     Battle_HitResult* target, int nHit, int addRandMod);
-short Battle_ScalePreviousTargetHit(Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
-short Battle_ScaleSourceMissingHp(Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)));
-short Battle_ScaleTargetCurrentHp(Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)));
-short Battle_WeaponPpWithChainOffset(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
-short Battle_ScaleIncomingSpellDamage(Battle_ActionDefinition* action,
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)));
 short Battle_ScaleIncomingPhysicalDamage(Battle_ActionDefinition* action,
     Battle_HitResult* source_hit __attribute__((unused)),
     Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
     int execute_action __attribute__((unused)));
-short Battle_ScaleSourceMissingMp(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
 short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target, int nHit,
     int withRandMod);
 short Battle_TargetMissingHp(Battle_ActionDefinition* action_definition __attribute__((unused)),

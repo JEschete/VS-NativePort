@@ -358,6 +358,9 @@
     <None Include="..\..\port\differentials\flight_movement_driver.cpp" />
     <None Include="..\..\port\differentials\height_filter.py" />
     <None Include="..\..\port\differentials\height_filter_driver.cpp" />
+    <None Include="..\..\port\differentials\hit_calculations.py" />
+    <None Include="..\..\port\differentials\hit_calculations_driver.cpp" />
+    <None Include="..\..\port\differentials\hit_calculations_guard_driver.cpp" />
     <None Include="..\..\port\differentials\hit_modifiers.py" />
     <None Include="..\..\port\differentials\hit_modifiers_driver.cpp" />
     <None Include="..\..\port\differentials\obstacle_detour.py" />

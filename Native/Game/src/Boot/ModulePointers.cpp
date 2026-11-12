@@ -32,6 +32,7 @@
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
+#include "Battle/StatFactorsLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
@@ -353,18 +354,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80081148u, 0u, (void*)&Battle_CalculatePhysicalHitDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800819D0u, 0u, (void*)&Battle_PhysicalDamageWithoutDebuffs, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800819FCu, 0u, (void*)&Battle_CalculateSpellHitDamage, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80082144u, 0u, (void*)&Battle_ScalePreviousTargetHit, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800821B0u, 0u, (void*)&Battle_ScaleSourceMissingHp, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80082234u, 0u, (void*)&Battle_ScalePreviousTargetHit, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800822A0u, 0u, (void*)&Battle_ScaleTargetCurrentHp, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008231Cu, 0u, (void*)&Battle_WeaponPpWithChainOffset, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80082360u, 0u, (void*)&Battle_ScaleIncomingSpellDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008241Cu, 0u, (void*)&Battle_ScaleIncomingPhysicalDamage, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800824D8u, 0u, (void*)&Battle_ScaleSourceMissingMp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800829B8u, 0u, (void*)&Battle_CalculateSpellHealing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800834A4u, 0u, (void*)&Battle_TargetMissingHp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800834E4u, 0u, (void*)&Battle_TargetMissingMp, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083524u, 0u, (void*)&Battle_ScalePreviousTargetHit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083590u, 0u, (void*)&Battle_ScaleIncomingSpellEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008364Cu, 0u, (void*)&Battle_ScaleIncomingPhysicalDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083708u, 0u, (void*)&Battle_ScaleIncomingSpellCost, 0u, 0u, 0u},
@@ -1761,6 +1754,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007E974u, 0u, (void*)&VS::Battle::RejectLiveHitSelector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081130u, 0u, (void*)&VS::Battle::RejectLiveStatSelector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083990u, 0u, (void*)&VS::Battle::RejectLiveEffectSelector, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80082144u, 0u, (void*)&VS::Battle::LiveScalePreviousTargetHit, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800821B0u, 0u, (void*)&VS::Battle::LiveScaleSourceMissingHp, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80082234u, 0u, (void*)&VS::Battle::LiveScalePreviousTargetHit, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800822A0u, 0u, (void*)&VS::Battle::LiveScaleTargetCurrentHp, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008231Cu, 0u, (void*)&VS::Battle::LiveWeaponPpWithChainOffset, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80082360u, 0u, (void*)&VS::Battle::LiveScaleIncomingSpellDamage, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800824D8u, 0u, (void*)&VS::Battle::LiveScaleSourceMissingMp, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083524u, 0u, (void*)&VS::Battle::LiveScalePreviousTargetHit, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

@@ -296,6 +296,7 @@
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\SpritesTests.cpp" />
     <ClCompile Include="src\StateRecordsTests.cpp" />
+    <ClCompile Include="src\StatFactorsTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\StatusHelpersTests.cpp" />
     <ClCompile Include="src\StatusLifecycleTests.cpp" />

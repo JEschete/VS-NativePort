@@ -560,64 +560,6 @@ short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_Hit
     return value;
 }
 
-// decomp: BATTLE.PRG _previousHitFactor0 (src/BATTLE/BATTLE.PRG/146C.c:11640)
-short Battle_ScalePreviousTargetHit(Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    return (((Battle_actionState->selection.targets[0].target.hp + Battle_actionState->selection.targets[0].target.mp)
-                * action_definition->hits[hit_index].statFactor)
-               / 10)
-         + (Battle_actionState->queueIndex - 1);
-}
-
-// decomp: BATTLE.PRG _hpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11650)
-short Battle_ScaleSourceMissingHp(Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)))
-{
-    Battle_ActorStats* actor = Battle_actors[source_hit->target.targetActor]->stats;
-    int v = (actor->maxHp - actor->currentHp) * action_definition->hits[hit_index].statFactor;
-    return (v / 10) + (Battle_actionState->queueIndex - 1);
-}
-
-// decomp: BATTLE.PRG _factorCurrentHp (src/BATTLE/BATTLE.PRG/146C.c:11669)
-short Battle_ScaleTargetCurrentHp(Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)))
-{
-    int v = Battle_actors[target_hit->target.targetActor]->stats->currentHp
-          * action_definition->hits[hit_index].statFactor;
-    return (v / 100) + (Battle_actionState->queueIndex - 1);
-}
-
-// decomp: BATTLE.PRG _getWeaponPp (src/BATTLE/BATTLE.PRG/146C.c:11678)
-short Battle_WeaponPpWithChainOffset(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source_hit,
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)))
-{
-    return Battle_actors[source_hit->target.targetActor]->stats->weapon.currentPp
-         + ((u_short)Battle_actionState->queueIndex - 1);
-}
-
-// decomp: BATTLE.PRG _factorMagicDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:11686)
-short Battle_ScaleIncomingSpellDamage(Battle_ActionDefinition* action,
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index,
-    int execute_action __attribute__((unused)))
-{
-    short scaled_amount = 0;
-    if (((Battle_actionDefinitions[Battle_actionState->selection.actionId].type)) == Battle_ActionType_Spell) {
-        if ((Battle_actionState->selection.primaryTarget.hpEffect == 1)
-            || (Battle_actionState->selection.primaryTarget.hpEffect == 3)) {
-            scaled_amount = ((Battle_actionState->selection.primaryTarget.target.hp + Battle_actionState->selection.primaryTarget.target.mp)
-                         * action->hits[hit_index].statFactor)
-                   / 10;
-        }
-    }
-    return scaled_amount;
-}
-
 // decomp: BATTLE.PRG _factorPhysicalDamageReceived0 (src/BATTLE/BATTLE.PRG/146C.c:11703)
 short Battle_ScaleIncomingPhysicalDamage(Battle_ActionDefinition* action,
     Battle_HitResult* source_hit __attribute__((unused)),
@@ -634,15 +576,6 @@ short Battle_ScaleIncomingPhysicalDamage(Battle_ActionDefinition* action,
         }
     }
     return scaled_amount;
-}
-
-// decomp: BATTLE.PRG _mpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11720)
-short Battle_ScaleSourceMissingMp(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
-{
-    Battle_ActorStats* actor = Battle_actors[source_hit->target.targetActor]->stats;
-    return (actor->maxMp - actor->currentMp) * action_definition->hits[hit_index].statFactor / 10
-         + (Battle_actionState->queueIndex - 1);
 }
 
 // decomp: BATTLE.PRG _hpHealed (src/BATTLE/BATTLE.PRG/146C.c:11850)

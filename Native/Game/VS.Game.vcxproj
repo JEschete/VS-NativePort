@@ -468,6 +468,10 @@
     <ClCompile Include="src\Battle\SphereTerrainLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\StatFactors.cpp" />
+    <ClCompile Include="src\Battle\StatFactorsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\StatusEffects.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2309,6 +2313,8 @@
     <ClInclude Include="include\Battle\HitModifiersLive.hpp" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
+    <ClInclude Include="include\Battle\StatFactors.hpp" />
+    <ClInclude Include="include\Battle\StatFactorsLive.hpp" />
     <ClInclude Include="include\Battle\StatusHelpers.hpp" />
     <ClInclude Include="include\Battle\StatusHelpersLive.hpp" />
     <ClInclude Include="include\Battle\StatusLifecycle.hpp" />
