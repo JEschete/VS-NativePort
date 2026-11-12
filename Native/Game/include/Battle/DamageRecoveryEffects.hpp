@@ -48,4 +48,10 @@ void QueueShieldPpDrain(DamageRecoveryQueue& queue);
 void QueueHpRecovery(DamageRecoveryQueue& queue);
 // decomp: func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12874).
 void QueueMpRecovery(DamageRecoveryQueue& queue);
+// decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882).
+void QueueWeaponPpRecovery(DamageRecoveryQueue& queue);
+// decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12890).
+void QueueWeaponDpRecovery(DamageRecoveryQueue& queue);
+// decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12898).
+void QueueRiskRecovery(DamageRecoveryQueue& queue);
 }  // namespace VS::Battle

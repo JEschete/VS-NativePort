@@ -63,6 +63,8 @@ struct Queue final:b::DamageRecoveryQueue,b::ActionCalculationWorld {
       case b::ActionResultField::kMp:return {6,2};
       case b::ActionResultField::kWeaponPp:return {0x3A,20};
       case b::ActionResultField::kShieldPp:return {0x3E,24};
+      case b::ActionResultField::kWeaponDp:return {0x38,18};
+      case b::ActionResultField::kRisk:return {8,4};
       default:std::abort();
     }
   }
@@ -172,12 +174,18 @@ int main(){
     for(auto& b:q.stats)for(auto& value:b.words)in>>value;
     if(!in)return 2;
     switch(q.function){
+#if defined(RESOURCE_RECOVERY_CASE)
+      case 0:b::QueueWeaponPpRecovery(q);break;
+      case 1:b::QueueWeaponDpRecovery(q);break;
+      case 2:b::QueueRiskRecovery(q);break;
+#else
       case 0:b::QueueHitDamageAndEquipmentWear(q,q.execute!=0);break;
       case 1:b::QueueMpDrain(q);break;
       case 2:b::QueueWeaponPpDrain(q);break;
       case 3:b::QueueShieldPpDrain(q);break;
       case 4:b::QueueHpRecovery(q);break;
       case 5:b::QueueMpRecovery(q);break;
+#endif
       default:return 3;
     }
     for(const auto* b:{&q.source,&q.target})for(auto value:b->words)std::cout<<value<<' ';

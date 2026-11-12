@@ -797,6 +797,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::QueueLiveShieldPpDrain": r"Native\Game\include\Battle\DamageRecoveryEffectsLive.hpp",
     "VS::Battle::QueueLiveHpRecovery": r"Native\Game\include\Battle\DamageRecoveryEffectsLive.hpp",
     "VS::Battle::QueueLiveMpRecovery": r"Native\Game\include\Battle\DamageRecoveryEffectsLive.hpp",
+    "VS::Battle::QueueLiveWeaponPpRecovery": r"Native\Game\include\Battle\DamageRecoveryEffectsLive.hpp",
+    "VS::Battle::QueueLiveWeaponDpRecovery": r"Native\Game\include\Battle\DamageRecoveryEffectsLive.hpp",
+    "VS::Battle::QueueLiveRiskRecovery": r"Native\Game\include\Battle\DamageRecoveryEffectsLive.hpp",
+    "VS::Battle::DeriveLiveLimbInjuryStatuses": r"Native\Game\include\Battle\ActionEffectDispatchLive.hpp",
+    "VS::Battle::ApplyLiveActionHitEffect": r"Native\Game\include\Battle\ActionEffectDispatchLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1527,6 +1532,11 @@ OWNED_CALL_BINDINGS["F00496"] = "VS::Battle::QueueLiveWeaponPpDrain"
 OWNED_CALL_BINDINGS["F00497"] = "VS::Battle::QueueLiveShieldPpDrain"
 OWNED_CALL_BINDINGS["F00498"] = "VS::Battle::QueueLiveHpRecovery"
 OWNED_CALL_BINDINGS["F00499"] = "VS::Battle::QueueLiveMpRecovery"
+OWNED_CALL_BINDINGS["F00500"] = "VS::Battle::QueueLiveWeaponPpRecovery"
+OWNED_CALL_BINDINGS["F00501"] = "VS::Battle::QueueLiveWeaponDpRecovery"
+OWNED_CALL_BINDINGS["F00502"] = "VS::Battle::QueueLiveRiskRecovery"
+OWNED_CALL_BINDINGS["F00506"] = "VS::Battle::DeriveLiveLimbInjuryStatuses"
+OWNED_CALL_BINDINGS["F00507"] = "VS::Battle::ApplyLiveActionHitEffect"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3189,6 +3199,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8007E974, "VS::Battle::RejectLiveHitSelector"),  # retired F00341
     ("BATTLE/BATTLE.PRG", 0x80081130, "VS::Battle::RejectLiveStatSelector"),  # retired F00407
     ("BATTLE/BATTLE.PRG", 0x80083990, "VS::Battle::RejectLiveEffectSelector"),  # retired F00436
+    # #276 reserved selectors 67-69: zero original action hits; VOID5 refusal.
+    ("BATTLE/BATTLE.PRG", 0x80084FF0, "VS::Battle::RejectLiveEffectSelector"),  # retired F00503
+    ("BATTLE/BATTLE.PRG", 0x80084FF8, "VS::Battle::RejectLiveEffectSelector"),  # retired F00504
+    ("BATTLE/BATTLE.PRG", 0x80085000, "VS::Battle::RejectLiveEffectSelector"),  # retired F00505
     ("BATTLE/BATTLE.PRG", 0x80082144, "VS::Battle::LiveScalePreviousTargetHit"),  # F00412
     ("BATTLE/BATTLE.PRG", 0x800821B0, "VS::Battle::LiveScaleSourceMissingHp"),  # F00413
     ("BATTLE/BATTLE.PRG", 0x80082234, "VS::Battle::LiveScalePreviousTargetHit"),  # F00414
@@ -3257,6 +3271,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80084DA8, "VS::Battle::QueueLiveShieldPpDrain"),  # F00497
     ("BATTLE/BATTLE.PRG", 0x80084E28, "VS::Battle::QueueLiveHpRecovery"),  # F00498
     ("BATTLE/BATTLE.PRG", 0x80084EA0, "VS::Battle::QueueLiveMpRecovery"),  # F00499
+    ("BATTLE/BATTLE.PRG", 0x80084EEC, "VS::Battle::QueueLiveWeaponPpRecovery"),  # F00500
+    ("BATTLE/BATTLE.PRG", 0x80084F40, "VS::Battle::QueueLiveWeaponDpRecovery"),  # F00501
+    ("BATTLE/BATTLE.PRG", 0x80084F94, "VS::Battle::QueueLiveRiskRecovery"),  # F00502
+    ("BATTLE/BATTLE.PRG", 0x80085008, "VS::Battle::DeriveLiveLimbInjuryStatuses"),  # F00506
+    ("BATTLE/BATTLE.PRG", 0x80085390, "VS::Battle::ApplyLiveActionHitEffect"),  # F00507
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

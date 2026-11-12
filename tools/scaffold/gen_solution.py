@@ -357,6 +357,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\ActionCostsLive.cpp",
                 r"src\Battle\ActionPreviewLive.cpp",
                 r"src\Battle\DamageRecoveryEffectsLive.cpp",
+                r"src\Battle\ActionEffectDispatchLive.cpp",
             ))
 
 

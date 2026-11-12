@@ -387,6 +387,12 @@
     <ClCompile Include="src\Battle\ActionCostsLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionEffectDispatch.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\ActionEffectDispatchLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClInclude Include="src\Battle\ActionEffects.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
@@ -2701,6 +2707,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionCostsLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\ActionEffectDispatch.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\ActionEffectDispatchLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionPreview.hpp">

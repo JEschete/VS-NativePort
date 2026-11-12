@@ -29,18 +29,5 @@ extern void (*Battle_actionEffectMediators[70])(
     Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int);
 extern u_int Battle_hitPrerequisiteResult;
 extern u_int Battle_previousHitResult;
-int Battle_AccumulateWeaponPpRestoration(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_AccumulateWeaponDpRestoration(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_AccumulateRiskReduction(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_IgnoreActionEffect(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
-void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* hit_result);
-void Battle_ApplyActionHitEffect(
-    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int execute_action, int hit);
 
 #endif // VS_BATTLE_ACTIONRESOLUTION_H_DECLS

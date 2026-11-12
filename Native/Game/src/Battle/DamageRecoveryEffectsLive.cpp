@@ -71,6 +71,11 @@ class LiveQueue final : public DamageRecoveryQueue {
         return {hit.target.hp, static_cast<std::uint8_t>(hit.hpEffect)};
       case ActionResultField::kMp:
         return {hit.target.mp, static_cast<std::uint8_t>(hit.mpEffect)};
+      case ActionResultField::kWeaponDp:
+        return {hit.weaponDpChange,
+                static_cast<std::uint8_t>(hit.weaponDpEffect)};
+      case ActionResultField::kRisk:
+        return {hit.riskChange, static_cast<std::uint8_t>(hit.riskEffect)};
       case ActionResultField::kWeaponPp:
         return {hit.weaponPpChange,
                 static_cast<std::uint8_t>(hit.weaponPpEffect)};
@@ -93,6 +98,14 @@ class LiveQueue final : public DamageRecoveryQueue {
       case ActionResultField::kMp:
         hit.mpEffect = change.mode;
         hit.target.mp = change.amount;
+        break;
+      case ActionResultField::kWeaponDp:
+        hit.weaponDpEffect = change.mode;
+        hit.weaponDpChange = change.amount;
+        break;
+      case ActionResultField::kRisk:
+        hit.riskEffect = change.mode;
+        hit.riskChange = change.amount;
         break;
       case ActionResultField::kWeaponPp:
         hit.weaponPpEffect = change.mode;
@@ -178,7 +191,32 @@ static_assert(std::is_same_v<decltype(&QueueLiveWeaponPpDrain), Mediator>);
 static_assert(std::is_same_v<decltype(&QueueLiveShieldPpDrain), Mediator>);
 static_assert(std::is_same_v<decltype(&QueueLiveHpRecovery), Mediator>);
 static_assert(std::is_same_v<decltype(&QueueLiveMpRecovery), Mediator>);
+static_assert(std::is_same_v<decltype(&QueueLiveWeaponPpRecovery), Mediator>);
+static_assert(std::is_same_v<decltype(&QueueLiveWeaponDpRecovery), Mediator>);
+static_assert(std::is_same_v<decltype(&QueueLiveRiskRecovery), Mediator>);
 }  // namespace
+
+// decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882).
+void QueueLiveWeaponPpRecovery(Battle_ActionDefinition* action,
+                               Battle_HitResult* source,
+                               Battle_HitResult* target, int hit, int execute) {
+  LiveQueue queue(action, source, target, hit, execute);
+  QueueWeaponPpRecovery(queue);
+}
+// decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12890).
+void QueueLiveWeaponDpRecovery(Battle_ActionDefinition* action,
+                               Battle_HitResult* source,
+                               Battle_HitResult* target, int hit, int execute) {
+  LiveQueue queue(action, source, target, hit, execute);
+  QueueWeaponDpRecovery(queue);
+}
+// decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12898).
+void QueueLiveRiskRecovery(Battle_ActionDefinition* action,
+                           Battle_HitResult* source, Battle_HitResult* target,
+                           int hit, int execute) {
+  LiveQueue queue(action, source, target, hit, execute);
+  QueueRiskRecovery(queue);
+}
 
 // decomp: func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12789).
 void QueueLiveHitDamageAndEquipmentWear(Battle_ActionDefinition* action,

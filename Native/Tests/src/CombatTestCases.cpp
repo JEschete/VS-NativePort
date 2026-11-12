@@ -5,7 +5,6 @@
 #include <iterator>
 #include <type_traits>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -15,6 +14,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
@@ -257,11 +257,9 @@ struct AbilityFixture {
   }
 };
 
-using LegacyAbilityEffect = int (*)(Battle_ActionDefinition*, Battle_HitResult*,
-                                    Battle_HitResult*, int, int);
 using MediatorTable = decltype(Battle_actionEffectMediators);
 using NativeAbilityEffect = std::remove_extent_t<MediatorTable>;
-using AbilityEffect = std::variant<LegacyAbilityEffect, NativeAbilityEffect>;
+using AbilityEffect = NativeAbilityEffect;
 
 struct AbilityHit {
   int calculator;
@@ -366,12 +364,8 @@ struct AbilityEffectFixture : AbilityFixture {
     definition.category = id <= 31 ? 14 : 0;
     definition.hits[hit].statCalculatorId = contract.calculator;
     definition.hits[hit].statFactor = contract.factor;
-    std::visit(
-        [&](auto apply) {
-          apply(&definition, &source, contract.self ? &source : &target, hit,
-                0);
-        },
-        contract.apply);
+    contract.apply(&definition, &source, contract.self ? &source : &target, hit,
+                   0);
   }
 
   void Commit() {
@@ -1487,11 +1481,9 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
     target.target.hp = stats[1].currentHp;
     Battle_actionDefinitions[184].type = Battle_ActionType_BreakArt;
     Battle_actionDefinitions[160].type = Battle_ActionType_Item;
-    Battle_actionEffectMediators[0] =
-        [](Battle_ActionDefinition* definition, Battle_HitResult* from,
-           Battle_HitResult* to, int hit, int update) {
-          Battle_IgnoreActionEffect(definition, from, to, hit, update);
-        };
+    Battle_actionEffectMediators[0] = [](Battle_ActionDefinition*,
+                                         Battle_HitResult*, Battle_HitResult*,
+                                         int, int) {};
   }
 
   ~BreakArtKillFixture() {
@@ -1545,8 +1537,8 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
   }
 
   void Resolve() {
-    Battle_ApplyActionHitEffect(&Battle_actionDefinitions[action_id], &source,
-                                &target, apply, 0);
+    VS::Battle::ApplyLiveActionHitEffect(&Battle_actionDefinitions[action_id],
+                                         &source, &target, apply, 0);
   }
 };
 
@@ -2108,7 +2100,7 @@ TEST_CASE("Temper damages the target and restores weapon DP",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
   fixture.Queue(28, 0, {4, 4, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
-  fixture.Queue(28, 1, {18, 20, Battle_AccumulateWeaponDpRestoration, true});
+  fixture.Queue(28, 1, {18, 20, VS::Battle::QueueLiveWeaponDpRecovery, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 758, 200);
   CHECK(fixture.stats[0].weapon.currentDp == 304);
@@ -2128,7 +2120,7 @@ TEST_CASE("Instill damages the target and restores weapon PP",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
   fixture.Queue(30, 0, {4, 1, VS::Battle::QueueLiveHitDamageAndEquipmentWear});
-  fixture.Queue(30, 1, {4, 10, Battle_AccumulateWeaponPpRestoration, true});
+  fixture.Queue(30, 1, {4, 10, VS::Battle::QueueLiveWeaponPpRecovery, true});
   fixture.Commit();
   fixture.CheckResources(600, 100, 788, 200);
   CHECK(fixture.stats[0].weapon.currentPp == 173);
@@ -2284,13 +2276,13 @@ TEST_CASE("Restorative abilities respect HP MP and equipment capacity",
   }
   SECTION("Temper") {
     fixture.stats[0].weapon.currentDp = 995;
-    fixture.Queue(28, 1, {18, 20, Battle_AccumulateWeaponDpRestoration, true});
+    fixture.Queue(28, 1, {18, 20, VS::Battle::QueueLiveWeaponDpRecovery, true});
     fixture.Commit();
     CHECK(fixture.stats[0].weapon.currentDp == 1000);
   }
   SECTION("Instill") {
     fixture.stats[0].weapon.currentPp = 250;
-    fixture.Queue(30, 1, {4, 10, Battle_AccumulateWeaponPpRestoration, true});
+    fixture.Queue(30, 1, {4, 10, VS::Battle::QueueLiveWeaponPpRecovery, true});
     fixture.Commit();
     CHECK(fixture.stats[0].weapon.currentPp == 255);
   }

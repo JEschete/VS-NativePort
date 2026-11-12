@@ -366,6 +366,9 @@
     <None Include="..\..\port\differentials\damage_policies.py" />
     <None Include="..\..\port\differentials\damage_policies_driver.cpp" />
     <None Include="..\..\port\differentials\damage_policies_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\damage_recovery.py" />
+    <None Include="..\..\port\differentials\damage_recovery_driver.cpp" />
+    <None Include="..\..\port\differentials\damage_recovery_guard_driver.cpp" />
     <None Include="..\..\port\differentials\engaged_list.py" />
     <None Include="..\..\port\differentials\engaged_list_driver.cpp" />
     <None Include="..\..\port\differentials\flight_movement.py" />

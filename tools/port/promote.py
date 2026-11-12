@@ -35,6 +35,13 @@ MODERNIZATION_LEDGER status done and PROMOTION_PLAN the slice, commit and note r
 tools\\ledger\\gates.py, modernization.py and hazards.py run --sync and --check (skip with --no-sync).
 After those checks pass, REMAINING_FUNCTIONS.csv refreshes its progress columns without deleting
 resolved rows or changing the original snapshot/provenance columns.
+
+An optional "retirements" map records audited unused IDs separately from "functions".
+Each entry requires "name" (the checked rejection binding), "path" and "note" (including
+retired-by and the audit evidence). It retains the catalog identity, sets copied=retired,
+and clears cpp/modernized/verified rather than forging promotion or original-return proof.
+VERIFY_LEDGER includes both dispositions; the owned gate slice contains only promoted IDs.
+Rejection module bindings still require explicit registration in copy_fixups.py.
 """
 
 from __future__ import annotations
@@ -466,9 +473,12 @@ def add_item(items: str, item: str) -> str:
 
 def apply_ledgers(repository: Repository, spec: dict, values: dict[str, str]) -> dict[str, bool]:
     functions = spec["functions"]
-    ids = list(functions)
+    retirements = spec.get("retirements", {})
+    if set(functions) & set(retirements):
+        raise SystemExit("an ID cannot be both promoted and retired")
+    ids = [*functions, *retirements]
     owned = CsvTable(repository.owned)
-    paths = {identifier: owned.get("id", identifier)["path"] for identifier in ids}
+    paths = {identifier: owned.get("id", identifier)["path"] for identifier in functions}
     record, slice_name, base = spec["record"], spec.get("slice", ""), values["base"]
 
     catalog = CsvTable(repository.ledger("FUNCTION_CATALOG"))
@@ -481,6 +491,19 @@ def apply_ledgers(repository: Repository, spec: dict, values: dict[str, str]) ->
         catalog.update("id", identifier, update_catalog)
 
     promotion = CsvTable(repository.ledger("CPP_PROMOTION"))
+    for identifier, entry in retirements.items():
+        if promotion.find("id", identifier) is not None:
+            raise SystemExit(f"{identifier}: cannot retire an existing C++ promotion")
+        if not all(entry.get(key) for key in ("name", "path", "note")):
+            raise SystemExit(f"{identifier}: retirement needs name, path and note")
+
+        def retire(row: dict, entry: dict = entry) -> None:
+            row.update({"final_name": entry["name"], "final_location": entry["path"],
+                        "copy": "no", "copied": "retired", "cpp": "", "named": "x", "understood": "x",
+                        "modernized": "", "verified": ""})
+            row["notes"] = append_once(row["notes"], entry["note"])
+
+        catalog.update("id", identifier, retire)
     for identifier, entry in functions.items():
         promotion.upsert("id", {
             "id": identifier, "path": paths[identifier], "source_cpp": "x", "vs_namespace": "x",
@@ -505,7 +528,7 @@ def apply_ledgers(repository: Repository, spec: dict, values: dict[str, str]) ->
         gate = spec["gate"]
         slices = CsvTable(repository.ledger("GATE_SLICES"))
         slices.upsert("slice", {
-            "slice": slice_name, "ids": ";".join(ids), "old_bridges": gate.get("old_bridges", ""),
+            "slice": slice_name, "ids": ";".join(functions), "old_bridges": gate.get("old_bridges", ""),
             "ec": gate.get("ec", ""), "before": gate.get("before", ""), "after": gate.get("after", ""),
             "before_revision": base, "evidence": gate.get("evidence", f"verify:{record}"),
             "notes": gate.get("notes", "")}, "top")
@@ -545,7 +568,8 @@ def ledgers(repository: Repository, args: argparse.Namespace) -> int:
     values |= dict(item.split("=", 1) for item in args.set or [])
     if "base" not in values:
         values["base"] = git_head(repository.root)
-    values |= {"ids": ";".join(spec["functions"]), "record": spec["record"], "slice": spec.get("slice", "")}
+    values |= {"ids": ";".join([*spec["functions"], *spec.get("retirements", {})]),
+               "record": spec["record"], "slice": spec.get("slice", "")}
     verify = spec.get("verify", {})
     if not verify.get("references"):
         if not spec.get("focused"):

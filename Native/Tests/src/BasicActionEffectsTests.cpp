@@ -17,6 +17,7 @@
 #include "Battle/BasicActionEffects.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/RandomLive.hpp"
@@ -1325,5 +1326,83 @@ TEST_CASE("F00499 MP recovery wraps current queue and preserves neighbors",
       &fixture.input, &fixture.source, &fixture.hit, 1, 0);
   CHECK(Bytes(fixture.hit) == Bytes(expected));
   CHECK(fixture.stats.currentMp == -19);
+}
+
+void CheckResourceRecoverySample(RecoveryFixture& fixture, Handler handler,
+                                 unsigned resource, int amount, int pending) {
+  constexpr std::size_t kUnusedSelection = 8;
+  fixture.Prepare(kUnusedSelection, amount, pending);
+  fixture.changed.weaponPpChange = RecoveryHalf(pending);
+  fixture.changed.weaponDpChange = RecoveryHalf(pending);
+  fixture.changed.riskChange = RecoveryHalf(pending);
+  auto expected = fixture.changed;
+  const auto value = RecoveryHalf(pending + amount);
+  if (resource == 0) {
+    expected.weaponPpChange = value;
+    expected.weaponPpEffect = 2;
+  } else if (resource == 1) {
+    expected.weaponDpChange = value;
+    expected.weaponDpEffect = 2;
+  } else if (amount != 0) {
+    expected.riskChange = value;
+    expected.riskEffect = 2;
+  }
+  handler(&fixture.input, fixture.expected_source, &fixture.hit, 1,
+          fixture.execute);
+  CHECK(fixture.arguments_match);
+  CHECK(fixture.calls == 1);
+  CHECK(Bytes(fixture.hit) == Bytes(expected));
+}
+
+void CheckResourceRecovery(unsigned resource) {
+  RecoveryFixture fixture;
+  Battle_statCalculators[1] = RecoveryCalculator;
+  constexpr std::array<Handler, 3> kHandlers{battle::QueueLiveWeaponPpRecovery,
+                                             battle::QueueLiveWeaponDpRecovery,
+                                             battle::QueueLiveRiskRecovery};
+  constexpr std::array<std::uint32_t, 3> kAddresses{0x80084EEC, 0x80084F40,
+                                                    0x80084F94};
+  const auto handler =
+      Relocated(kAddresses.at(resource), kHandlers.at(resource));
+  for (const auto amount : {-32768, -1, 0, 1, 32767}) {
+    for (const auto pending : kPendingAmounts) {
+      for (const int execute : {0, -1, 1}) {
+        fixture.index = 1;
+        fixture.execute = execute;
+        CheckResourceRecoverySample(fixture, handler, resource, amount,
+                                    pending);
+      }
+    }
+  }
+}
+TEST_CASE("F00500 restores PP after calculation with full halfword wrapping",
+          "[resource-dispatch][F00500]") {
+  CheckResourceRecovery(0);
+}
+TEST_CASE("F00501 restores weapon DP without touching limb or PP neighbors",
+          "[resource-dispatch][F00501]") {
+  CheckResourceRecovery(1);
+}
+TEST_CASE("F00502 leaves zero risk recovery and its mode unchanged",
+          "[resource-dispatch][F00502]") {
+  CheckResourceRecovery(2);
+}
+TEST_CASE("F00503 reserved original selector relocates to VOID refusal",
+          "[resource-dispatch][F00503]") {
+  LiveFixture fixture;
+  CHECK(Relocated(0x80084FF0, battle::RejectLiveEffectSelector) ==
+        battle::RejectLiveEffectSelector);
+}
+TEST_CASE("F00504 reserved original selector relocates to VOID refusal",
+          "[resource-dispatch][F00504]") {
+  LiveFixture fixture;
+  CHECK(Relocated(0x80084FF8, battle::RejectLiveEffectSelector) ==
+        battle::RejectLiveEffectSelector);
+}
+TEST_CASE("F00505 reserved original selector relocates to VOID refusal",
+          "[resource-dispatch][F00505]") {
+  LiveFixture fixture;
+  CHECK(Relocated(0x80085000, battle::RejectLiveEffectSelector) ==
+        battle::RejectLiveEffectSelector);
 }
 }  // namespace

@@ -6,6 +6,7 @@
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
@@ -352,14 +353,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084EECu, 0u, (void*)&Battle_AccumulateWeaponPpRestoration, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084F40u, 0u, (void*)&Battle_AccumulateWeaponDpRestoration, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084F94u, 0u, (void*)&Battle_AccumulateRiskReduction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084FF0u, 0u, (void*)&Battle_IgnoreActionEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80084FF8u, 0u, (void*)&Battle_IgnoreActionEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80085000u, 0u, (void*)&Battle_IgnoreActionEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80085008u, 0u, (void*)&Battle_DeriveLimbInjuryStatuses, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80085390u, 0u, (void*)&Battle_ApplyActionHitEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E8F8u, 0u, (void*)&Effects_AllocateWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EA90u, 0u, (void*)&Effects_InitializeRoomWeather, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EB04u, 0u, (void*)&Effects_RoomWeatherState, 0u, 0u, 0u},
@@ -1699,6 +1692,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007E974u, 0u, (void*)&VS::Battle::RejectLiveHitSelector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081130u, 0u, (void*)&VS::Battle::RejectLiveStatSelector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083990u, 0u, (void*)&VS::Battle::RejectLiveEffectSelector, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084FF0u, 0u, (void*)&VS::Battle::RejectLiveEffectSelector, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084FF8u, 0u, (void*)&VS::Battle::RejectLiveEffectSelector, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80085000u, 0u, (void*)&VS::Battle::RejectLiveEffectSelector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80082144u, 0u, (void*)&VS::Battle::LiveScalePreviousTargetHit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800821B0u, 0u, (void*)&VS::Battle::LiveScaleSourceMissingHp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80082234u, 0u, (void*)&VS::Battle::LiveScalePreviousTargetHit, 0u, 0u, 0u},
@@ -1767,6 +1763,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80084DA8u, 0u, (void*)&VS::Battle::QueueLiveShieldPpDrain, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084E28u, 0u, (void*)&VS::Battle::QueueLiveHpRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084EA0u, 0u, (void*)&VS::Battle::QueueLiveMpRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084EECu, 0u, (void*)&VS::Battle::QueueLiveWeaponPpRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084F40u, 0u, (void*)&VS::Battle::QueueLiveWeaponDpRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80084F94u, 0u, (void*)&VS::Battle::QueueLiveRiskRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80085008u, 0u, (void*)&VS::Battle::DeriveLiveLimbInjuryStatuses, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80085390u, 0u, (void*)&VS::Battle::ApplyLiveActionHitEffect, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

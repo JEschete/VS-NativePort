@@ -5,6 +5,12 @@ struct Battle_ActionDefinition;
 struct Battle_HitResult;
 
 namespace VS::Battle {
+void QueueLiveWeaponPpRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                               Battle_HitResult*, int, int);
+void QueueLiveWeaponDpRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                               Battle_HitResult*, int, int);
+void QueueLiveRiskRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                           Battle_HitResult*, int, int);
 void QueueLiveHitDamageAndEquipmentWear(Battle_ActionDefinition*,
                                         Battle_HitResult*, Battle_HitResult*,
                                         int, int);

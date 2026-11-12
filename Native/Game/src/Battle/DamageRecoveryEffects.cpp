@@ -81,4 +81,22 @@ void QueueMpRecovery(DamageRecoveryQueue& queue) {
   const auto amount = queue.Calculate();
   AddChange(queue, ActionResultField::kMp, amount, 2);
 }
+
+// decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882).
+void QueueWeaponPpRecovery(DamageRecoveryQueue& queue) {
+  const auto amount = queue.Calculate();
+  AddChange(queue, ActionResultField::kWeaponPp, amount, 2);
+}
+
+// decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12890).
+void QueueWeaponDpRecovery(DamageRecoveryQueue& queue) {
+  const auto amount = queue.Calculate();
+  AddChange(queue, ActionResultField::kWeaponDp, amount, 2);
+}
+
+// decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12898).
+void QueueRiskRecovery(DamageRecoveryQueue& queue) {
+  const auto amount = queue.Calculate();
+  if (amount != 0) AddChange(queue, ActionResultField::kRisk, amount, 2);
+}
 }  // namespace VS::Battle

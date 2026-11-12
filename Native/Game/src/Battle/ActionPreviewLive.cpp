@@ -14,6 +14,7 @@
 
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionPreview.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
@@ -221,12 +222,12 @@ class LiveWorld final : public ActionPreviewWorld {
               ActionHit& target, int execute, int hit) override {
     Callback callback(*this);
     auto& owner = static_cast<LiveDefinition&>(definition);
-    Battle_ApplyActionHitEffect(&owner.definition, LiveHit(source),
-                                LiveHit(target), execute, hit);
+    ApplyLiveActionHitEffect(&owner.definition, LiveHit(source),
+                             LiveHit(target), execute, hit);
   }
   void Injuries(ActionHit& target) override {
     Callback callback(*this);
-    Battle_DeriveLimbInjuryStatuses(LiveHit(target));
+    DeriveLiveLimbInjuryStatuses(LiveHit(target));
   }
   bool Recovery(std::uint32_t action, ResolutionActor& actor) override {
     Callback callback(*this);

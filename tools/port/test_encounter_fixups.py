@@ -125,7 +125,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(source.count("world.Roll("), 2)
         live = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreviewLive.cpp").read_text(encoding="utf-8")
         self.assertIn("LiveRollActionHit(", live)
-        self.assertIn("Battle_ApplyActionHitEffect(", live)
+        self.assertIn("ApplyLiveActionHitEffect(", live)
 
     def test_texture_animations_use_the_callers_overlay_atlas(self):
         copier = object.__new__(copy_to_native.Copier)

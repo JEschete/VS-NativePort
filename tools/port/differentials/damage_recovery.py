@@ -131,7 +131,7 @@ def vector(rng: random.Random, number: int) -> Vector:
                   tuple(stats))
 
 
-def run(machine: Machine, vector: Vector) -> tuple[dict, list[int]]:
+def run(machine: Machine, vector: Vector, entries=ENTRIES) -> tuple[dict, list[int]]:
     v = vector
     machine.store(SOURCE - 16, v.blocks[0])
     machine.store(TARGET - 16, v.blocks[1])
@@ -186,7 +186,7 @@ def run(machine: Machine, vector: Vector) -> tuple[dict, list[int]]:
     machine.follow.update((CALCULATE, DAMAGE, RECOVER, WEAR, PP))
     machine.r[4:8] = [ACTION, source, TARGET, 1]
     machine.put(DEFAULT_STACK + 16, v.execute)
-    machine.execute(ENTRIES[v.function], limit=3000)
+    machine.execute(entries[v.function], limit=3000)
     memory = [*words(machine.bytes(SOURCE - 16, 100)),
               *words(machine.bytes(TARGET - 16, 100)),
               *words(machine.bytes(DP, 16)), machine.load(LAST), machine.load(CRITICAL)]

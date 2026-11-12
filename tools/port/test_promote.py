@@ -302,6 +302,32 @@ class PromoteTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.ledgers(SPEC, "--set", "focused=1")
 
+    def test_retirement_preserves_identity_without_claiming_promotion(self) -> None:
+        spec = json.loads(json.dumps(SPEC))
+        spec["functions"] = {}
+        spec["retirements"] = {"F01818": {
+            "name": "VS::Battle::Reject", "path": "guard.cpp",
+            "note": "; retired-by:VS::Battle::Reject; audited unused entry"}}
+        self.ledgers(spec, "--set", "focused=1")
+        before = self.snapshot()
+        self.ledgers(spec, "--set", "focused=1")
+        self.assertEqual(self.snapshot(), before)
+        row = promote.CsvTable(self.repository.ledger("FUNCTION_CATALOG")).get("id", "F01818")
+        self.assertEqual((row["copied"], row["cpp"], row["verified"]), ("retired", "", ""))
+        self.assertEqual(row["final_location"], "guard.cpp")
+        promotion = promote.CsvTable(self.repository.ledger("CPP_PROMOTION"))
+        self.assertIsNone(promotion.find("id", "F01818"))
+        verify = promote.CsvTable(self.repository.ledger("VERIFY_LEDGER"))
+        self.assertEqual(verify.rows[0][0]["ids"], "F01818")
+
+    def test_retirement_rejects_double_disposition(self) -> None:
+        spec = json.loads(json.dumps(SPEC))
+        spec["retirements"] = {"F01818": {}}
+        before = self.snapshot()
+        with self.assertRaises(SystemExit):
+            self.ledgers(spec, "--set", "focused=1")
+        self.assertEqual(self.snapshot(), before)
+
     def test_ledgers_need_the_verify_fields(self) -> None:
         run(self.repository, *REGISTER)
         spec = json.loads(json.dumps(SPEC))

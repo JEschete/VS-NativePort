@@ -49,6 +49,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ActionCostsTests.cpp" />
+    <ClCompile Include="src\ActionEffectDispatchTests.cpp" />
     <ClCompile Include="src\ActionPreviewTests.cpp" />
     <ClCompile Include="src\ActionResultCommitTests.cpp" />
     <ClCompile Include="src\ActionResultsSliceTests.cpp" />

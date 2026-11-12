@@ -172,6 +172,10 @@
     <ClCompile Include="src\Battle\ActionCostsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionEffectDispatch.cpp" />
+    <ClCompile Include="src\Battle\ActionEffectDispatchLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionExecution.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2258,6 +2262,8 @@
     <ClInclude Include="include\Battle\Action.h" />
     <ClInclude Include="include\Battle\ActionCosts.hpp" />
     <ClInclude Include="include\Battle\ActionCostsLive.hpp" />
+    <ClInclude Include="include\Battle\ActionEffectDispatch.hpp" />
+    <ClInclude Include="include\Battle\ActionEffectDispatchLive.hpp" />
     <ClInclude Include="include\Battle\ActionPreview.hpp" />
     <ClInclude Include="include\Battle\ActionPreviewLive.hpp" />
     <ClInclude Include="include\Battle\ActionResults.hpp" />
