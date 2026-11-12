@@ -18,28 +18,31 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-30 group
 
-F00486-F00493 are locally verified on `ca4ff6a3`, extending
-`BasicActionEffects` with a shared random-stat queue. All eight VOID5
-callbacks draw before reading pending fields, retain target identity and
-queue positive amounts with distinct increase/decrease modes. All 24 old
+F00476-F00483 are locally verified on `0c3c8f6f`, using a shared
+`TriggeredRecoveryQueue` and checked VOID5 bindings. Selected type/affinity
+gates remain separate from input action data; calculator results update
+post-callback pending HP/flags before the real recovery helper. All 32 old
 symbol references are gone.
 
-- Original span: 0x8008490C-0x80084B70, 153 instructions. Evidence:
-  `build\scratch\random-stat-effects\ledgers-final.json`.
-- `random_stat_effects`: 16,384 vectors, zero mismatches, 88/88 mutants.
-  Each native direction variant detects 1,024/1,024 own-ID vectors with the
-  other seven IDs unchanged; a shared stale-read variant detects all eight.
-- Group `build\promotion-check\group-20261112-053117`, 432 seconds:
-  Debug/Release each pass 6,084 cases/12,863,209 assertions; coupled selection
-  128 cases/41,046 assertions; own tests 24/21,560. Both replays, copier
+- Original span: 0x80084390-0x800847F0, 280 instructions. Evidence:
+  `build\scratch\triggered-recovery\ledgers-final.json`.
+- `triggered_recovery`: 16,384 vectors, zero mismatches, 98 mutants detected.
+  Eight native inverted-gate variants detect every own-ID vector, with
+  unrelated IDs unchanged; a shared stale-read variant is also detected.
+- Group `build\promotion-check\group-20261112-060558`, 421 seconds:
+  Debug/Release each pass 6,108 cases/12,915,733 assertions; coupled selection
+  196 cases/109,974 assertions; own tests 24/52,524. Both replays, copier
   stability and controls pass; tidy zero new findings.
-- All eight null-target diagnostics, 3,840 real-live callback mutation/identity
-  checks and actual VOID5 table/ABI controls pass. The prior basic7 differential
-  (14,336 vectors, 31 mutants) and 13 guards pass again.
-- Evidence: `build\differential\random-stat-effects-full.log`, variant logs
-  and `build\scratch\random-stat-effects\cohort-audit.json`. Publication and
-  exact-revision CI pending. Controlled RNG traces are explicit differential
-  limits; no row30, gameplay or EC/M8 completion claim.
+- Ninety-eight diagnostic probes, 32 real-helper successes and 24 controlled
+  recovery-entry observations pass. Actual table/ABI controls and prior basic/
+  random differential and guard suites pass again.
+- Original and native stat dispatch/recovery algorithms execute, with a
+  controlled selected stat callback. Publication and exact-revision CI pending.
+  No row30, gameplay or EC/M8 completion claim.
+
+Random8 effects are published in `0c3c8f6f`, green on
+[CI 43202720511](https://github.com/JEschete/VS-NativePort/actions/runs/43202720511),
+with evidence on [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6821655175).
 
 Basic7 effects are published in `ca4ff6a3`, green on
 [CI 43199227740](https://github.com/JEschete/VS-NativePort/actions/runs/43199227740),
@@ -156,9 +159,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 113 of the original 900 resolved (110 promoted, 3 retired); 787
-remain** (786 generated plus F01416 owned WIP). Modernization is 2,954/3,741;
-C++ promotion is 2,955 plus
+**Progress: 121 of the original 900 resolved (118 promoted, 3 retired); 779
+remain** (778 generated plus F01416 owned WIP). Modernization is 2,962/3,741;
+C++ promotion is 2,963 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -227,12 +230,13 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue ordered row 30 (`battle-actions`, 76 of 91 still remaining) with
-F00476-F00483, eight triggered-recovery producers. Their 280 instructions
-are read in `build\scratch\status-queue\triggered_recovery.txt`. Preserve
-independent selected-action/affinity gates, unused-input laziness, exact
-five-argument stat dispatch, post-callback pending HP/flag reads and
-recovery-helper ordering. Reuse typed stat and limb policies. Further
+Continue ordered row 30 (`battle-actions`, 68 of 91 still remaining).
+First repair the small #354 classifier defect without weakening forwarding
+detection, then the cost group F00510/F00511/F00512/F00548 (#352) and result
+setup/resolution F00508/F00509/F00513/F00514/F00515/F00516 (#353). The shared
+cost-helper source/assembly analysis is in `build\scratch\status-queue\action_cost_helpers.txt`.
+Keep ordinary empty weapons valid and fix preview producers rather than
+weakening limb guards. Further
 recovery and dispatch groups have source/assembly analysis recorded; do not
 silently jump ahead of this ordered package.
 
@@ -294,9 +298,15 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 The continuation is active, not paused. Row 28 is published and green. The
 row-29 checkpoint has all 88 IDs resolved (85 promoted, three retired),
 published and green in `7b797783`. #349, #350 and #351 are closed.
-Row 30's seven basic effect producers are published and green in `ca4ff6a3`;
-the eight random-stat producers are verified locally. Publish and confirm
-CI, then continue the triggered-recovery group.
+Row 30's first 15 effect producers are published and green through `0c3c8f6f`.
+The eight triggered-recovery producers are verified locally; publish and
+confirm CI, then continue the focused tooling and producer/consumer fixes.
+
+[#354](https://github.com/JEschete/VS-NativePort/issues/354) records the
+forwarding classifier treating an unbraced `if (...) Call();` as a call to
+`if`. Current native policies use ordinary braces and pass unchanged gates;
+repair the classifier with focused positive/negative tests, not a baseline
+refresh or unrelated status promotion.
 
 [#352](https://github.com/JEschete/VS-NativePort/issues/352) records a later
 F00510 cost-check defect: BaseAttack with a weapon cost type outside 1-4
@@ -309,6 +319,17 @@ The original and native unequip paths do produce cost type zero/cost zero;
 that case also flips affordability with a negative incoming a3. Do not
 blanket-reject normal empty loadouts; the base-attack/reference contract
 still needs its owning analysis.
+
+[#353](https://github.com/JEschete/VS-NativePort/issues/353) records partial
+preview-request initialization in F00515/F00516. The original builders pass
+stack-dependent source-limb/focus fields to the resolver; original self-route
+actions 23/25 use chain evasion, which reads that limb. Do not weaken the
+checked limb guard. Repro: `build\scratch\status-queue\preview-initialization-probe.py`.
+After the current triggered-recovery group, prioritize the coherent cost group
+F00510/F00511/F00512/F00548 (#352), then result setup/resolution
+F00508/F00509/F00513/F00514/F00515/F00516 (#353). This adjusts grouping within
+row 30 to repair the demonstrated producer/consumer defects before more effect
+leaves; it does not change the ordered package priorities.
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
 353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
 [#350](https://github.com/JEschete/VS-NativePort/issues/350) tracks the separate
@@ -491,10 +512,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the eight random-stat effects and confirm exact-revision CI.
+2. Publish triggered recovery and confirm CI; then repair #354 with scoped tests.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 787 remain.
-3. Continue row 30 with the eight triggered-recovery producers above, following
+   #276: 779 remain.
+3. Continue row 30 with the cost and preview groups above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

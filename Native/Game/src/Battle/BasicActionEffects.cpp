@@ -8,6 +8,22 @@
 namespace VS::Battle {
 namespace {
 enum class StatDirection : std::uint8_t { kDecrease = 1, kIncrease = 2 };
+constexpr std::uint8_t kPhysicalAffinity = 0;
+constexpr std::uint8_t kAirAffinity = 1;
+constexpr std::uint8_t kFireAffinity = 2;
+constexpr std::uint8_t kEarthAffinity = 3;
+constexpr std::uint8_t kWaterAffinity = 4;
+constexpr std::uint8_t kLightAffinity = 5;
+
+void QueueTriggeredRecovery(TriggeredRecoveryQueue& queue) {
+  const auto amount = queue.Calculate();
+  auto change = queue.ReadHp();
+  change.mode = 2;
+  change.amount = std::bit_cast<std::int16_t>(
+      static_cast<std::uint16_t>(change.amount + amount));
+  queue.WriteHp(change);
+  queue.RecoverLimbs(amount);
+}
 
 void QueueRandomStat(RandomStatQueue& queue, ActionResultField field,
                      StatDirection direction) {
@@ -27,6 +43,55 @@ std::int16_t DoubledHp(const ActorActionResult& target) {
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(hp * 2));
 }
 }  // namespace
+
+// decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12606).
+void QueueSpellTriggeredRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedActionType() == 1) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_80084440 (src/BATTLE/BATTLE.PRG/146C.c:12617).
+void QueueNonSpellTriggeredRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedActionType() != 1) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_800844F0 (src/BATTLE/BATTLE.PRG/146C.c:12628).
+void QueuePhysicalAffinityRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedAffinity() == kPhysicalAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_80084570 (src/BATTLE/BATTLE.PRG/146C.c:12639).
+void QueueAirAffinityRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedAffinity() == kAirAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_800845F0 (src/BATTLE/BATTLE.PRG/146C.c:12650).
+void QueueFireAffinityRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedAffinity() == kFireAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_80084670 (src/BATTLE/BATTLE.PRG/146C.c:12661).
+void QueueEarthAffinityRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedAffinity() == kEarthAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_800846F0 (src/BATTLE/BATTLE.PRG/146C.c:12672).
+void QueueWaterAffinityRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedAffinity() == kWaterAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
+// decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12683).
+void QueueLightAffinityRecovery(TriggeredRecoveryQueue& queue) {
+  if (queue.SelectedAffinity() == kLightAffinity) {
+    QueueTriggeredRecovery(queue);
+  }
+}
 
 // decomp: _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717).
 void QueueRandomStrengthIncrease(RandomStatQueue& queue) {

@@ -9,11 +9,15 @@
 #include <type_traits>
 
 #include "Battle/BasicActionEffects.hpp"
+#include "Battle/DamagePoliciesLive.hpp"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
+#include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
+#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -33,6 +37,55 @@ Battle_HitResult& HitOf(Battle_HitResult* hit) {
   Require(hit != nullptr, "Basic action effect requires its used hit result");
   return *hit;
 }
+
+class LiveTriggeredRecoveryQueue final : public TriggeredRecoveryQueue {
+ public:
+  LiveTriggeredRecoveryQueue(Battle_ActionDefinition* action,
+                             Battle_HitResult* source, Battle_HitResult* target,
+                             int hit, int execute)
+      : action_(action),
+        source_(source),
+        target_(target),
+        hit_(hit),
+        execute_(execute) {}
+  std::uint8_t SelectedActionType() override {
+    const auto id = Selection().actionId;
+    Require(id < std::size(Battle_actionDefinitions),
+            "Triggered recovery selected action is outside definitions");
+    return static_cast<std::uint8_t>(Battle_actionDefinitions[id].type);
+  }
+  std::uint8_t SelectedAffinity() override {
+    return static_cast<std::uint8_t>(Selection().effectVariant);
+  }
+  std::int16_t Calculate() override {
+    return LiveCalculateActionStatChange(action_, source_, target_, hit_,
+                                         execute_);
+  }
+  ActionResultChange ReadHp() override {
+    const auto& target = HitOf(target_);
+    return {target.target.hp, static_cast<std::uint8_t>(target.hpEffect)};
+  }
+  void WriteHp(ActionResultChange change) override {
+    auto& target = HitOf(target_);
+    target.hpEffect = change.mode;
+    target.target.hp = change.amount;
+  }
+  void RecoverLimbs(std::int16_t amount) override {
+    LiveDistributeLimbRecovery(action_, target_, amount);
+  }
+
+ private:
+  static const Battle_ActionRequest& Selection() {
+    Require(Battle_actionState != nullptr,
+            "Triggered recovery requires selected action state");
+    return Battle_actionState->selection;
+  }
+  Battle_ActionDefinition* action_;
+  Battle_HitResult* source_;
+  Battle_HitResult* target_;
+  int hit_;
+  int execute_;
+};
 
 class LiveInstantDeathQueue final : public InstantDeathQueue {
  public:
@@ -125,6 +178,22 @@ class LiveRandomStatQueue final : public RandomStatQueue {
 
 using Mediator = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
 static_assert(
+    std::is_same_v<decltype(&QueueLiveSpellTriggeredRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveNonSpellTriggeredRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLivePhysicalAffinityRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveAirAffinityRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveFireAffinityRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveEarthAffinityRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveWaterAffinityRecovery), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveLightAffinityRecovery), Mediator>);
+static_assert(
     std::is_same_v<decltype(&QueueLiveRandomStrengthIncrease), Mediator>);
 static_assert(
     std::is_same_v<decltype(&QueueLiveRandomIntelligenceIncrease), Mediator>);
@@ -147,6 +216,71 @@ static_assert(
 static_assert(std::is_same_v<decltype(&SetLiveActionFlag64), Mediator>);
 static_assert(std::is_same_v<decltype(&SetLiveActionFlag32), Mediator>);
 }  // namespace
+
+// decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12606).
+void QueueLiveSpellTriggeredRecovery(Battle_ActionDefinition* action,
+                                     Battle_HitResult* source,
+                                     Battle_HitResult* target, int hit,
+                                     int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueSpellTriggeredRecovery(queue);
+}
+// decomp: func_80084440 (src/BATTLE/BATTLE.PRG/146C.c:12617).
+void QueueLiveNonSpellTriggeredRecovery(Battle_ActionDefinition* action,
+                                        Battle_HitResult* source,
+                                        Battle_HitResult* target, int hit,
+                                        int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueNonSpellTriggeredRecovery(queue);
+}
+// decomp: func_800844F0 (src/BATTLE/BATTLE.PRG/146C.c:12628).
+void QueueLivePhysicalAffinityRecovery(Battle_ActionDefinition* action,
+                                       Battle_HitResult* source,
+                                       Battle_HitResult* target, int hit,
+                                       int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueuePhysicalAffinityRecovery(queue);
+}
+// decomp: func_80084570 (src/BATTLE/BATTLE.PRG/146C.c:12639).
+void QueueLiveAirAffinityRecovery(Battle_ActionDefinition* action,
+                                  Battle_HitResult* source,
+                                  Battle_HitResult* target, int hit,
+                                  int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueAirAffinityRecovery(queue);
+}
+// decomp: func_800845F0 (src/BATTLE/BATTLE.PRG/146C.c:12650).
+void QueueLiveFireAffinityRecovery(Battle_ActionDefinition* action,
+                                   Battle_HitResult* source,
+                                   Battle_HitResult* target, int hit,
+                                   int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueFireAffinityRecovery(queue);
+}
+// decomp: func_80084670 (src/BATTLE/BATTLE.PRG/146C.c:12661).
+void QueueLiveEarthAffinityRecovery(Battle_ActionDefinition* action,
+                                    Battle_HitResult* source,
+                                    Battle_HitResult* target, int hit,
+                                    int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueEarthAffinityRecovery(queue);
+}
+// decomp: func_800846F0 (src/BATTLE/BATTLE.PRG/146C.c:12672).
+void QueueLiveWaterAffinityRecovery(Battle_ActionDefinition* action,
+                                    Battle_HitResult* source,
+                                    Battle_HitResult* target, int hit,
+                                    int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueWaterAffinityRecovery(queue);
+}
+// decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12683).
+void QueueLiveLightAffinityRecovery(Battle_ActionDefinition* action,
+                                    Battle_HitResult* source,
+                                    Battle_HitResult* target, int hit,
+                                    int execute) {
+  LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
+  QueueLightAffinityRecovery(queue);
+}
 
 // decomp: _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717).
 void QueueLiveRandomStrengthIncrease(Battle_ActionDefinition*,

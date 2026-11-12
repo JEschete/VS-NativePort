@@ -378,6 +378,9 @@
     <None Include="..\..\port\differentials\perception_driver.cpp" />
     <None Include="..\..\port\differentials\radial_movement.py" />
     <None Include="..\..\port\differentials\radial_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\random_stat_effects.py" />
+    <None Include="..\..\port\differentials\random_stat_effects_driver.cpp" />
+    <None Include="..\..\port\differentials\random_stat_effects_guard_driver.cpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
     <None Include="..\..\port\differentials\stat_factors.py" />

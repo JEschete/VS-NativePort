@@ -8,16 +8,22 @@
 #include <type_traits>
 
 #include "Battle/BasicActionEffectsLive.hpp"
+#include "Battle/DamagePoliciesLive.hpp"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Battle/ActionResolution.h"
+#include "Battle/ActionFlow.h"
+#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 Battle_Actor* Battle_actors[42]{};
+Battle_ActionState* Battle_actionState{};
+Battle_ActionDefinition Battle_actionDefinitions[256]{};
 Battle_StatusEffectParams Battle_statusEffectParams[32]{};
 }
 namespace {
@@ -47,6 +53,12 @@ extern "C" void Core_Errorf(const char*, const char* message, ...) {
 extern "C" void Core_Debugf(const char*, const char*, ...) {}
 namespace VS::Core {
 std::int32_t NextLiveRandomBounded(std::int32_t) { std::_Exit(88); }
+}
+namespace VS::Battle {
+std::int16_t LiveCalculateActionStatChange(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int) {
+  std::_Exit(88);
+}
+void LiveDistributeLimbRecovery(Battle_ActionDefinition*, Battle_HitResult*, std::int16_t) { std::_Exit(88); }
 }
 namespace VS::State {
 void SetLiveScriptFlag(int id, int value) {

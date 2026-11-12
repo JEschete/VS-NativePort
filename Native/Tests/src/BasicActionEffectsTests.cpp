@@ -22,7 +22,9 @@
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
+#include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
+#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -712,5 +714,379 @@ TEST_CASE("F00492 original void mediator draws once even in preview",
 TEST_CASE("F00493 original void mediator draws once even in preview",
           "[random-stat-effects][F00493]") {
   CheckLiveRandom(kRandomEffects.at(7));
+}
+
+using RecoveryPolicy = void (*)(battle::TriggeredRecoveryQueue&);
+struct RecoveryEffect {
+  RecoveryPolicy policy;
+  Handler live;
+  std::uint32_t address;
+};
+constexpr std::array<RecoveryEffect, 8> kRecoveryEffects{{
+    {battle::QueueSpellTriggeredRecovery,
+     battle::QueueLiveSpellTriggeredRecovery, 0x80084390},
+    {battle::QueueNonSpellTriggeredRecovery,
+     battle::QueueLiveNonSpellTriggeredRecovery, 0x80084440},
+    {battle::QueuePhysicalAffinityRecovery,
+     battle::QueueLivePhysicalAffinityRecovery, 0x800844F0},
+    {battle::QueueAirAffinityRecovery, battle::QueueLiveAirAffinityRecovery,
+     0x80084570},
+    {battle::QueueFireAffinityRecovery, battle::QueueLiveFireAffinityRecovery,
+     0x800845F0},
+    {battle::QueueEarthAffinityRecovery, battle::QueueLiveEarthAffinityRecovery,
+     0x80084670},
+    {battle::QueueWaterAffinityRecovery, battle::QueueLiveWaterAffinityRecovery,
+     0x800846F0},
+    {battle::QueueLightAffinityRecovery, battle::QueueLiveLightAffinityRecovery,
+     0x80084770},
+}};
+
+struct RecoveryQueue final : battle::TriggeredRecoveryQueue {
+  battle::ActorActionResult target = SeedQueuedResult();
+  std::optional<battle::ActorActionResult> during;
+  battle::ActorActionResult observed{};
+  std::uint8_t type{}, affinity{};
+  std::int16_t amount{}, recovered{};
+  std::vector<int> events;
+  std::uint8_t SelectedActionType() override {
+    events.push_back(1);
+    return type;
+  }
+  std::uint8_t SelectedAffinity() override {
+    events.push_back(2);
+    return affinity;
+  }
+  std::int16_t Calculate() override {
+    events.push_back(3);
+    type ^= 1;
+    affinity ^= 1;
+    if (during) target = during.value();
+    return amount;
+  }
+  battle::ActionResultChange ReadHp() override {
+    events.push_back(4);
+    return target.changes.at(kHp);
+  }
+  void WriteHp(battle::ActionResultChange change) override {
+    events.push_back(5);
+    target.changes.at(kHp) = change;
+  }
+  void RecoverLimbs(std::int16_t value) override {
+    events.push_back(6);
+    recovered = value;
+    observed = target;
+  }
+};
+
+bool RecoveryMatches(std::size_t function, unsigned type, unsigned affinity) {
+  if (function < 2) return (type == 1) == (function == 0);
+  return affinity == function - 2;
+}
+
+void CheckRecoveryGates(std::size_t function) {
+  for (unsigned type = 0; type < 8; ++type) {
+    for (unsigned affinity = 0; affinity < 256; ++affinity) {
+      RecoveryQueue queue;
+      queue.type = static_cast<std::uint8_t>(type);
+      queue.affinity = static_cast<std::uint8_t>(affinity);
+      queue.amount = -7;
+      const auto before = queue.target;
+      const bool matches = RecoveryMatches(function, type, affinity);
+      auto expected = before;
+      if (matches) expected.changes.at(kHp) = {-306, 2};
+      const int gate = function < 2 ? 1 : 2;
+      kRecoveryEffects.at(function).policy(queue);
+      CHECK(queue.target == expected);
+      CHECK(queue.events == (matches ? std::vector<int>{gate, 3, 4, 5, 6}
+                                     : std::vector<int>{gate}));
+    }
+  }
+}
+
+std::int16_t RecoveryHalf(int value) {
+  return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(value));
+}
+
+void CheckRecoveryCallbackSample(std::size_t function, int amount, int pending,
+                                 std::uint8_t mode) {
+  RecoveryQueue queue;
+  queue.type = function == 0 ? 1 : 7;
+  queue.affinity = static_cast<std::uint8_t>(function - 2);
+  queue.amount = RecoveryHalf(amount);
+  auto changed = SeedQueuedResult();
+  changed.changes.at(kHp) = {RecoveryHalf(pending), mode};
+  changed.inflict_statuses ^= 0xFEDCBA98;
+  changed.limbs.at(3).armor_dp = 997;
+  queue.during.emplace(changed);
+  auto expected = changed;
+  expected.changes.at(kHp) = {RecoveryHalf(pending + amount), 2};
+  kRecoveryEffects.at(function).policy(queue);
+  CHECK(queue.target == expected);
+  CHECK(queue.observed == expected);
+  CHECK(queue.recovered == amount);
+  CHECK(queue.events == std::vector<int>{function < 2 ? 1 : 2, 3, 4, 5, 6});
+}
+
+void CheckRecoveryCallback(std::size_t function) {
+  constexpr std::array kAmounts{-32768, -19, -1, 0, 1, 32767};
+  for (const int amount : kAmounts) {
+    for (const int pending : kPendingAmounts) {
+      for (std::uint8_t mode = 0; mode < 4; ++mode) {
+        CheckRecoveryCallbackSample(function, amount, pending, mode);
+      }
+    }
+  }
+}
+
+struct RecoveryFixture;
+RecoveryFixture* g_recovery{};
+struct RecoveryFixture : LiveFixture {
+  Battle_ActionState* saved_state = Battle_actionState;
+  Battle_ActionState state{};
+  decltype(std::to_array(Battle_actionDefinitions)) definitions =
+      std::to_array(Battle_actionDefinitions);
+  decltype(std::to_array(Battle_statCalculators)) calculators =
+      std::to_array(Battle_statCalculators);
+  decltype(std::to_array(Battle_limbArmorDpLoss)) armor =
+      std::to_array(Battle_limbArmorDpLoss);
+  std::uint32_t last = Battle_lastActionStatValue;
+  Battle_ActionDefinition input{};
+  Battle_ActorStats replacement_stats{};
+  Battle_Actor replacement{};
+  Battle_HitResult source = SeedHit();
+  Battle_HitResult changed = SeedHit();
+  Battle_HitResult* expected_source{};
+  std::int16_t amount{};
+  int index{}, execute{}, calls{};
+  bool arguments_match{};
+
+  RecoveryFixture() {
+    Battle_actionState = &state;
+    g_recovery = this;
+    replacement.stats = &replacement_stats;
+    replacement_stats.limbs[5].maxHp = 100;
+    replacement_stats.currentHp = 321;
+    stats.limbs[0].maxHp = 100;
+    stats.currentHp = 123;
+    changed.target.targetActor = 41;
+    input.type = 6;
+    input.hits[0].statCalculatorId = 1;
+    input.hits[1].statCalculatorId = 1;
+  }
+  ~RecoveryFixture() {
+    g_recovery = nullptr;
+    Battle_actionState = saved_state;
+    Battle_lastActionStatValue = last;
+    std::ranges::copy(definitions, Battle_actionDefinitions);
+    std::ranges::copy(calculators, Battle_statCalculators);
+    std::ranges::copy(armor, Battle_limbArmorDpLoss);
+  }
+  void Select(std::size_t function) {
+    state.selection.actionId = function < 2 ? 255 : 65535;
+    Battle_actionDefinitions[255].type = function == 0 ? 1 : 7;
+    state.selection.effectVariant = static_cast<char>(function - 2);
+  }
+  void Prepare(std::size_t function, int value, int pending) {
+    Select(function);
+    amount = RecoveryHalf(value);
+    changed.target.hp = RecoveryHalf(pending);
+    changed.hpEffect = static_cast<unsigned>(pending) & 3U;
+    hit = SeedHit();
+    hit.target.targetActor = 41;
+    hit.targetsPosition = pending & 1;
+    expected_source = index == 0 ? &source : &hit;
+    calls = 0;
+    Battle_actors[41] = &actor;
+    std::ranges::fill(Battle_limbArmorDpLoss, 71);
+  }
+};
+
+std::int16_t RecoveryCalculator(Battle_ActionDefinition* action,
+                                Battle_HitResult* source,
+                                Battle_HitResult* target, int index,
+                                int execute) {
+  auto& fixture = *g_recovery;
+  ++fixture.calls;
+  fixture.arguments_match = action == &fixture.input &&
+                            source == fixture.expected_source &&
+                            target == &fixture.hit && index == fixture.index &&
+                            execute == fixture.execute;
+  *target = fixture.changed;
+  Battle_actors[41] = &fixture.replacement;
+  fixture.state.selection.actionId = 65535;
+  fixture.state.selection.effectVariant = 127;
+  return fixture.amount;
+}
+
+void CheckLiveRecoverySample(RecoveryFixture& fixture, Handler handler,
+                             std::size_t function, int amount, int pending) {
+  fixture.Prepare(function, amount, pending);
+  auto expected = fixture.changed;
+  expected.target.hp = RecoveryHalf(pending + amount);
+  expected.hpEffect = 2;
+  expected.limbs[5].effects.opaque0 =
+      RecoveryHalf(expected.limbs[5].effects.opaque0 + amount * 2);
+  auto expected_armor = std::to_array(Battle_limbArmorDpLoss);
+  expected_armor.at(5) = RecoveryHalf(amount);
+  const auto source = Bytes(fixture.source);
+  handler(&fixture.input, fixture.expected_source, &fixture.hit, fixture.index,
+          fixture.execute);
+  CHECK(fixture.arguments_match);
+  CHECK(fixture.calls == 1);
+  CHECK(Bytes(fixture.hit) == Bytes(expected));
+  CHECK(Bytes(fixture.source) == source);
+  CHECK(std::to_array(Battle_limbArmorDpLoss) == expected_armor);
+  CHECK(Battle_lastActionStatValue ==
+        static_cast<std::uint32_t>(static_cast<std::int32_t>(fixture.amount)));
+  CHECK(fixture.stats.currentHp == 123);
+  CHECK(fixture.replacement_stats.currentHp == 321);
+}
+
+void CheckLiveRecovery(std::size_t function) {
+  RecoveryFixture fixture;
+  Battle_statCalculators[1] = RecoveryCalculator;
+  const auto& effect = kRecoveryEffects.at(function);
+  const auto handler = Relocated(effect.address, effect.live);
+  for (const auto execute : {0, 1, -1}) {
+    fixture.execute = execute;
+    for (const auto index : {0, 1}) {
+      fixture.index = index;
+      for (const auto amount : {-32768, -19, 0, 1, 32767}) {
+        for (const auto pending : kPendingAmounts) {
+          CheckLiveRecoverySample(fixture, handler, function, amount, pending);
+        }
+      }
+    }
+  }
+}
+
+void CheckLiveRecoveryMiss(std::size_t function) {
+  RecoveryFixture fixture;
+  Battle_statCalculators[1] = RecoveryCalculator;
+  std::ranges::fill(Battle_actors, nullptr);
+  for (unsigned selected = 0; selected < 256; ++selected) {
+    fixture.Select(function);
+    const auto type = selected % 8;
+    Battle_actionDefinitions[255].type = type;
+    fixture.state.selection.effectVariant = static_cast<char>(selected);
+    if (RecoveryMatches(function, type, selected)) continue;
+    kRecoveryEffects.at(function).live(nullptr, nullptr, nullptr,
+                                       std::numeric_limits<int>::min(), -1);
+    CHECK(fixture.calls == 0);
+    CHECK(Battle_lastActionStatValue == fixture.last);
+  }
+}
+
+TEST_CASE("F00476 selects spells from the selected action not the input",
+          "[triggered-recovery][F00476]") {
+  CheckRecoveryGates(0);
+  CheckLiveRecoveryMiss(0);
+}
+TEST_CASE("F00477 selects every nonspell type",
+          "[triggered-recovery][F00477]") {
+  CheckRecoveryGates(1);
+  CheckLiveRecoveryMiss(1);
+}
+TEST_CASE("F00478 selects physical source affinity without definition lookup",
+          "[triggered-recovery][F00478]") {
+  CheckRecoveryGates(2);
+  CheckLiveRecoveryMiss(2);
+}
+TEST_CASE("F00479 selects air source affinity without definition lookup",
+          "[triggered-recovery][F00479]") {
+  CheckRecoveryGates(3);
+  CheckLiveRecoveryMiss(3);
+}
+TEST_CASE("F00480 selects fire source affinity without definition lookup",
+          "[triggered-recovery][F00480]") {
+  CheckRecoveryGates(4);
+  CheckLiveRecoveryMiss(4);
+}
+TEST_CASE("F00481 selects earth source affinity without definition lookup",
+          "[triggered-recovery][F00481]") {
+  CheckRecoveryGates(5);
+  CheckLiveRecoveryMiss(5);
+}
+TEST_CASE("F00482 selects water source affinity without definition lookup",
+          "[triggered-recovery][F00482]") {
+  CheckRecoveryGates(6);
+  CheckLiveRecoveryMiss(6);
+}
+TEST_CASE("F00483 selects light source affinity without definition lookup",
+          "[triggered-recovery][F00483]") {
+  CheckRecoveryGates(7);
+  CheckLiveRecoveryMiss(7);
+}
+TEST_CASE("F00476 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00476]") {
+  CheckRecoveryCallback(0);
+}
+TEST_CASE("F00477 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00477]") {
+  CheckRecoveryCallback(1);
+}
+TEST_CASE("F00478 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00478]") {
+  CheckRecoveryCallback(2);
+}
+TEST_CASE("F00479 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00479]") {
+  CheckRecoveryCallback(3);
+}
+TEST_CASE("F00480 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00480]") {
+  CheckRecoveryCallback(4);
+}
+TEST_CASE("F00481 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00481]") {
+  CheckRecoveryCallback(5);
+}
+TEST_CASE("F00482 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00482]") {
+  CheckRecoveryCallback(6);
+}
+TEST_CASE("F00483 rereads pending HP and recovers even a zero amount",
+          "[triggered-recovery][F00483]") {
+  CheckRecoveryCallback(7);
+}
+TEST_CASE(
+    "F00476 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00476]") {
+  CheckLiveRecovery(0);
+}
+TEST_CASE(
+    "F00477 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00477]") {
+  CheckLiveRecovery(1);
+}
+TEST_CASE(
+    "F00478 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00478]") {
+  CheckLiveRecovery(2);
+}
+TEST_CASE(
+    "F00479 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00479]") {
+  CheckLiveRecovery(3);
+}
+TEST_CASE(
+    "F00480 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00480]") {
+  CheckLiveRecovery(4);
+}
+TEST_CASE(
+    "F00481 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00481]") {
+  CheckLiveRecovery(5);
+}
+TEST_CASE(
+    "F00482 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00482]") {
+  CheckLiveRecovery(6);
+}
+TEST_CASE(
+    "F00483 original VOID5 mediator integrates stat and recovery policies",
+    "[triggered-recovery][F00483]") {
+  CheckLiveRecovery(7);
 }
 }  // namespace

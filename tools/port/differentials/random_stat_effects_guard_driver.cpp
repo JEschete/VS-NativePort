@@ -10,15 +10,21 @@
 #include <type_traits>
 
 #include "Battle/BasicActionEffectsLive.hpp"
+#include "Battle/DamagePoliciesLive.hpp"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Battle/ActionResolution.h"
+#include "Battle/ActionFlow.h"
+#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 Battle_Actor* Battle_actors[42]{};
+Battle_ActionState* Battle_actionState{};
+Battle_ActionDefinition Battle_actionDefinitions[256]{};
 }
 namespace {
 namespace b = VS::Battle;
@@ -68,6 +74,10 @@ void SetLiveScriptFlag(int, int) { std::_Exit(88); }
 }
 namespace VS::Battle {
 int QueueLiveStatusRemovalMask(int, Battle_HitResult*) { std::_Exit(88); }
+std::int16_t LiveCalculateActionStatChange(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int) {
+  std::_Exit(88);
+}
+void LiveDistributeLimbRecovery(Battle_ActionDefinition*, Battle_HitResult*, std::int16_t) { std::_Exit(88); }
 }
 namespace VS::Core {
 std::int32_t NextLiveRandomBounded(std::int32_t bound) {

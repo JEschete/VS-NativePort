@@ -2106,6 +2106,15 @@
     <None Include="..\..\port\differentials\radial_movement_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\random_stat_effects.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\random_stat_effects_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\random_stat_effects_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\special_terrain.py">
       <Filter>tools\port\differentials</Filter>
     </None>

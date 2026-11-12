@@ -5,6 +5,25 @@ struct Battle_ActionDefinition;
 struct Battle_HitResult;
 
 namespace VS::Battle {
+void QueueLiveSpellTriggeredRecovery(Battle_ActionDefinition*,
+                                     Battle_HitResult*, Battle_HitResult*, int,
+                                     int);
+void QueueLiveNonSpellTriggeredRecovery(Battle_ActionDefinition*,
+                                        Battle_HitResult*, Battle_HitResult*,
+                                        int, int);
+void QueueLivePhysicalAffinityRecovery(Battle_ActionDefinition*,
+                                       Battle_HitResult*, Battle_HitResult*,
+                                       int, int);
+void QueueLiveAirAffinityRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                                  Battle_HitResult*, int, int);
+void QueueLiveFireAffinityRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                                   Battle_HitResult*, int, int);
+void QueueLiveEarthAffinityRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                                    Battle_HitResult*, int, int);
+void QueueLiveWaterAffinityRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                                    Battle_HitResult*, int, int);
+void QueueLiveLightAffinityRecovery(Battle_ActionDefinition*, Battle_HitResult*,
+                                    Battle_HitResult*, int, int);
 void QueueLiveRandomStrengthIncrease(Battle_ActionDefinition*,
                                      Battle_HitResult*, Battle_HitResult*, int,
                                      int);

@@ -2176,8 +2176,8 @@ TEST_CASE("Absorb abilities recover damage only for the matching action type",
   fixture.action.selection.primaryTarget.hpEffect = incoming_effect;
   fixture.Queue(id, 0,
                 {id == 44 ? 19 : 20, 2,
-                 id == 44 ? Battle_QueueSpellTriggeredRecovery
-                          : Battle_QueuePhysicalTriggeredRecovery,
+                 id == 44 ? VS::Battle::QueueLiveSpellTriggeredRecovery
+                          : VS::Battle::QueueLiveNonSpellTriggeredRecovery,
                  true});
   fixture.Commit();
   const bool applies =
@@ -2188,9 +2188,12 @@ TEST_CASE("Absorb abilities recover damage only for the matching action type",
 TEST_CASE("All seven affinity defenses recover only matching damage",
           "[combat][abilities][ability-effects]") {
   constexpr std::array<AbilityEffect, 7> kEffects{
-      Battle_QueuePhysicalAffinityRecovery, Battle_QueueAirAffinityRecovery,
-      Battle_QueueFireAffinityRecovery,     Battle_QueueEarthAffinityRecovery,
-      Battle_QueueWaterAffinityRecovery,    Battle_QueueLightAffinityRecovery,
+      VS::Battle::QueueLivePhysicalAffinityRecovery,
+      VS::Battle::QueueLiveAirAffinityRecovery,
+      VS::Battle::QueueLiveFireAffinityRecovery,
+      VS::Battle::QueueLiveEarthAffinityRecovery,
+      VS::Battle::QueueLiveWaterAffinityRecovery,
+      VS::Battle::QueueLiveLightAffinityRecovery,
       Battle_QueueDarkAffinityRecovery};
   const int affinity = GENERATE(0, 1, 2, 3, 4, 5, 6);
   const int incoming = GENERATE(0, 1, 2, 3, 4, 5, 6);

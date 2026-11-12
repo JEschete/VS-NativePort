@@ -41,6 +41,36 @@ class RandomStatQueue {
                            ActionResultChange change) = 0;
 };
 
+// Services retain the original call arguments and target identity for this
+// invocation. Pending HP is read after calculation; recovery sees the write.
+class TriggeredRecoveryQueue {
+ public:
+  virtual ~TriggeredRecoveryQueue() = default;
+  [[nodiscard]] virtual std::uint8_t SelectedActionType() = 0;
+  [[nodiscard]] virtual std::uint8_t SelectedAffinity() = 0;
+  [[nodiscard]] virtual std::int16_t Calculate() = 0;
+  [[nodiscard]] virtual ActionResultChange ReadHp() = 0;
+  virtual void WriteHp(ActionResultChange change) = 0;
+  virtual void RecoverLimbs(std::int16_t amount) = 0;
+};
+
+// decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12606).
+void QueueSpellTriggeredRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_80084440 (src/BATTLE/BATTLE.PRG/146C.c:12617).
+void QueueNonSpellTriggeredRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_800844F0 (src/BATTLE/BATTLE.PRG/146C.c:12628).
+void QueuePhysicalAffinityRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_80084570 (src/BATTLE/BATTLE.PRG/146C.c:12639).
+void QueueAirAffinityRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_800845F0 (src/BATTLE/BATTLE.PRG/146C.c:12650).
+void QueueFireAffinityRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_80084670 (src/BATTLE/BATTLE.PRG/146C.c:12661).
+void QueueEarthAffinityRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_800846F0 (src/BATTLE/BATTLE.PRG/146C.c:12672).
+void QueueWaterAffinityRecovery(TriggeredRecoveryQueue& queue);
+// decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12683).
+void QueueLightAffinityRecovery(TriggeredRecoveryQueue& queue);
+
 // decomp: _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717).
 void QueueRandomStrengthIncrease(RandomStatQueue& queue);
 // decomp: _increaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12726).

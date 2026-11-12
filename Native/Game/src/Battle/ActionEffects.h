@@ -32,22 +32,6 @@ typedef struct Battle_SoundEventTargets {
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"
 
-int Battle_QueueSpellTriggeredRecovery(
-    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueuePhysicalTriggeredRecovery(
-    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueuePhysicalAffinityRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueueAirAffinityRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueueFireAffinityRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueueEarthAffinityRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueueWaterAffinityRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
-int Battle_QueueLightAffinityRecovery(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
 int Battle_QueueDarkAffinityRecovery(
     Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
 int Battle_QueueDamageTriggeredRecovery(
