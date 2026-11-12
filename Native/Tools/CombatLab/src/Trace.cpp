@@ -138,7 +138,7 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
   expected.event_source = source.get<int>();
   if (expected.game_over_to_title &&
       (expected.event_source != 0 || expected.events.front() != 0)) {
-    // Battle_ResolveActorDefeat requests only external event 0.
+    // ResolveLiveActorDefeat requests only external event 0.
     throw std::runtime_error(
         "game_over_to_title scenes start with external event 0");
   }

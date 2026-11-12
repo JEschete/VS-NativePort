@@ -84,9 +84,6 @@ _Static_assert(sizeof(Battle_StatusEffectParams) == 0x10, "Battle_StatusEffectPa
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_STATUSEFFECTS_H_DECLS)
 #define VS_BATTLE_STATUSEFFECTS_H_DECLS
-#include "Battle/ActionResolution.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Hit.h"
 #include "Menu/Framework/ActorPreview.h"
 #include "Menu/Score/ScoreScreen.h"
 
@@ -100,8 +97,5 @@ extern int Battle_unusedSubmenuState;
 extern Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 extern int Battle_unusedGlobal2;
 extern Battle_StatusEffectParams Battle_statusEffectParams[32];
-void Battle_ApplyActorActionResult(Battle_HitResult* hit_result);
-int Battle_UpdateActorVitals(void);
-int Battle_UpdateRoomActorVitals(void);
 
 #endif // VS_BATTLE_STATUSEFFECTS_H_DECLS

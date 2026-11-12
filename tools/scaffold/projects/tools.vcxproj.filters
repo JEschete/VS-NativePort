@@ -2070,6 +2070,12 @@
     <None Include="..\..\port\differentials\status_helpers_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\status_lifecycle.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\status_lifecycle_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\status_queue.py">
       <Filter>tools\port\differentials</Filter>
     </None>

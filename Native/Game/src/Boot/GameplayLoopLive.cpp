@@ -11,6 +11,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -234,7 +235,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         VS::Actors::ExecuteLiveQueuedActorCommands());
   }
   RoomActorOutcome UpdateRoomActorVitals() override {
-    return static_cast<RoomActorOutcome>(Battle_UpdateRoomActorVitals());
+    return static_cast<RoomActorOutcome>(Battle::UpdateLiveRoomActorVitals());
   }
   void SetRecoveryRewardMode(int recovery_reward_mode) override {
     Battle_recoveryRewardMode = recovery_reward_mode;

@@ -2,13 +2,18 @@
 #include "Battle/ActionResultsLive.hpp"
 
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <optional>
 
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/ActionResults.hpp"
+#include "Battle/ActorVitalsLive.hpp"
+#include "Battle/StatusHelpersLive.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
@@ -18,6 +23,8 @@ extern "C" {
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
+#include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
@@ -79,7 +86,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
                 action_->actionId, actor_id_, hit->target.targetLimb,
                 hit->target.impactKind, hit->target.hp, hit->target.mp,
                 hit->hpEffect, hit->mpEffect);
-    Battle_ApplyActorActionResult(hit);
+    ApplyLiveActorActionResult(hit);
   }
 
   void PlayDamageReaction(int actor_id) override {
@@ -102,6 +109,70 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   int actor_id_;
   Battle_ActionRequest* action_;
   SVECTOR* position_;
+};
+
+ActorActionResult ReadResult(const Battle_HitResult& hit) {
+  ActorActionResult result{
+      .target = static_cast<std::uint8_t>(hit.target.targetActor),
+      .limb = std::bit_cast<std::int8_t>(
+          static_cast<std::uint8_t>(hit.target.targetLimb)),
+      .impact = static_cast<std::uint8_t>(hit.target.impactKind),
+      .changes = {{
+          {hit.target.hp, static_cast<std::uint8_t>(hit.hpEffect)},
+          {hit.target.mp, static_cast<std::uint8_t>(hit.mpEffect)},
+          {hit.riskChange, static_cast<std::uint8_t>(hit.riskEffect)},
+          {hit.strengthChange, static_cast<std::uint8_t>(hit.strengthEffect)},
+          {hit.intelligenceChange,
+           static_cast<std::uint8_t>(hit.intelligenceEffect)},
+          {hit.agilityChange, static_cast<std::uint8_t>(hit.agilityEffect)},
+          {hit.maxHpChange, static_cast<std::uint8_t>(hit.maxHpEffect)},
+          {hit.maxMpChange, static_cast<std::uint8_t>(hit.maxMpEffect)},
+          {hit.weaponDpChange, static_cast<std::uint8_t>(hit.weaponDpEffect)},
+          {hit.weaponPpChange, static_cast<std::uint8_t>(hit.weaponPpEffect)},
+          {hit.armorDpChange, static_cast<std::uint8_t>(hit.armorDpEffect)},
+          {hit.shieldPpChange, static_cast<std::uint8_t>(hit.shieldPpEffect)},
+      }},
+      .inflict_statuses = std::bit_cast<std::uint32_t>(hit.inflictStatuses),
+      .remove_statuses = std::bit_cast<std::uint32_t>(hit.removeStatuses)};
+  for (std::size_t index = 0; index < result.limbs.size(); ++index) {
+    result.limbs.at(index) = {hit.limbs[index].effects.opaque0,
+                              hit.limbs[index].effects.opaque2};
+  }
+  return result;
+}
+
+class LiveActorActionResultWorld final : public ActorActionResultWorld {
+ public:
+  explicit LiveActorActionResultWorld(Battle_HitResult& hit) : hit_(hit) {}
+  void CommitEquipmentStats() override { Battle_CommitEquipmentStatChanges(); }
+  ActorActionResult ReadHit() override { return ReadResult(hit_); }
+  ActorVitalsAccess* TargetStats(std::uint8_t slot) override {
+    if (slot >= std::size(Battle_actors) || Battle_actors[slot] == nullptr ||
+        Battle_actors[slot]->stats == nullptr) {
+      return nullptr;
+    }
+    stats_.emplace(*Battle_actors[slot]->stats);
+    return &stats_.value();
+  }
+  void Number(int slot, int limb, std::uint32_t amount, int label) override {
+    QueueLiveActorStatChangeNumber(slot, limb, std::bit_cast<int>(amount),
+                                   label);
+  }
+  void StatusLabel(int slot, std::uint32_t mask, bool removing) override {
+    Battle_QueueActorStatusLabels(slot, 0, std::bit_cast<int>(mask), removing);
+  }
+  void RemoveStatuses(ActorVitalsAccess& stats, std::uint32_t mask) override {
+    auto& owner = static_cast<LiveActorVitalsAccess&>(stats).Owner();
+    RemoveLiveActorStatuses(std::bit_cast<int>(mask), &owner);
+  }
+  void InflictStatuses(ActorVitalsAccess& stats, std::uint32_t mask) override {
+    auto& owner = static_cast<LiveActorVitalsAccess&>(stats).Owner();
+    InflictLiveActorStatuses(std::bit_cast<int>(mask), &owner);
+  }
+
+ private:
+  Battle_HitResult& hit_;
+  std::optional<LiveActorVitalsAccess> stats_;
 };
 
 }  // namespace
@@ -129,5 +200,19 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
   }
   LiveActionTargetEffects effects(actor_id, &action, position);
   ApplyActionTargetEffects(actor_id, effects);
+}
+
+// decomp: _applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:14018).
+void ApplyLiveActorActionResult(Battle_HitResult* hit) {
+  if (hit == nullptr) {
+    VS_LOG_ERROR("combat", "Action result requires a hit");
+    std::abort();
+  }
+  LiveActorActionResultWorld world(*hit);
+  if (!ApplyActorActionResult(world)) {
+    VS_LOG_ERROR("combat",
+                 "Action result requires valid target stats/used limb");
+    std::abort();
+  }
 }
 }  // namespace VS::Battle

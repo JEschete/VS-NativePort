@@ -2,6 +2,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/BattleTypes.h"
-#include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
@@ -397,7 +397,7 @@ void Battle_FinishActionSequence(void)
         action = &Battle_actionState->queue[i % 4];
         for (j = 0; j < action->targetCount; ++j) {
             if (action->targets[j].targetsPosition == 0) {
-                Battle_ResolveActorDefeat(
+                VS::Battle::ResolveLiveActorDefeat(
                     action->primaryTarget.target.targetActor, action->targets[j].target.targetActor, 1);
             }
         }
@@ -406,7 +406,7 @@ void Battle_FinishActionSequence(void)
         action = &Battle_actionState->queue[i % 4];
         if (action->primaryTarget.targetsPosition == 0) {
             actor = action->primaryTarget.target.targetActor;
-            Battle_ResolveActorDefeat(actor, actor, 1);
+            VS::Battle::ResolveLiveActorDefeat(actor, actor, 1);
         }
     }
     if (Field_controlMode == 3) {

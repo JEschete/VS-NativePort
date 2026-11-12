@@ -28,7 +28,6 @@ extern Battle_Actor* Battle_actors[42];
 extern u_int Battle_lastActionStatValue;
 extern int Battle_criticalHitOccurred;
 extern short Battle_limbArmorDpLoss[8];
-int Battle_ResolveActorDefeat(int source_actor_slot, int target_actor_slot, int count_kill);
 short Battle_ApplyDamageGemMultiplier(
     Battle_ActionDefinition* action, short damage_amount, Battle_ActorStats* source_stats, Battle_ActorStats* target_stats);
 void Battle_DistributeHitLimbDamage(Battle_ActionDefinition* action, Battle_HitResult* entity, short baseValue);

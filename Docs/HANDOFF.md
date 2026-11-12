@@ -18,30 +18,35 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-29 group
 
-F00254/F00517/F00520/F00523 are locally verified on `8e21f5b7` in the
-`StatusLifecycle` core and checked live binding: Ashley status preservation,
-removal, infliction and timers. Requested-mask side effects, callback-visible
-state, signed HP, byte/halfword wrapping, equipment growth and poison/regen
-ordering are retained. All 32 old-symbol references are gone; actor spawning,
-state, room loading, script commands, encounter and Items consumers migrated.
+F00194/F00522/F00525/F00526 are locally verified on `c888aab4` in
+`ActorVitals` and the extended `ActionResults` core/live modules. Defeat,
+action-result application and periodic vitals preserve cached actor/stat
+owners, post-callback reads, signed/unsigned halfword behavior and outcome
+precedence. Shared lifecycle state/projection is reused. All 23 old code-symbol
+occurrences are gone, including generated callers and module bindings.
 
-- Four disjoint original spans total 1,107 instructions: 0x8007C31C-0x8007C348,
-  0x80086754-0x80086EA4, 0x80086FA8-0x80087578 and 0x80087EF4-0x800882F4.
-  Full hashes are in `build\scratch\status-queue\lifecycle-ledgers.json`.
-- `status_lifecycle`: 8,192 vectors, zero mismatches, 48/48 mutants detected.
-  Four native broken variants detect 47/325/248/242 mismatches respectively,
-  over 1,024 vectors each.
-- Group `build\promotion-check\group-20261112-000615`, 499 seconds:
-  Debug/Release each pass 5,859 cases/12,652,780 assertions. Coupled selections
-  pass 110 cases/1,850 assertions; lifecycle alone is 18 cases/122 assertions.
+- Four disjoint original spans total 1,040 instructions: 0x800792E4-0x800793C0,
+  0x800875C8-0x80087EF4, 0x80088554-0x80088B6C and 0x80088B6C-0x80088B8C.
+  Full hashes are in `build\scratch\status-queue\vitals-ledgers.json`.
+- `actor_vitals`: 8,192 vectors, zero mismatches, 63/63 mutants detected.
+  Four native variants detect 55/256/330/256 mismatches respectively over
+  1,024 vectors each. Shared lifecycle and helper differentials pass again.
+- Group `build\promotion-check\group-20261112-010015`, 503 seconds:
+  Debug/Release each pass 5,890 cases/12,653,388 assertions. Coupled selections
+  pass 146 cases/2,466 assertions; this group's own cases are 31/608.
   Both canonical replays match, copier stability and 272 controls pass, and
-  tidy reports six existing findings, zero new.
-- Evidence: `build\differential\status_lifecycle.log`,
-  `status_lifecycle-final-layout.log`, four `status_lifecycle-F*-variant.log`
-  files and the ledger recipe above. Publication and exact-revision CI pending.
-  RNG/label/movement/equipment service stubs are explicit differential limits;
-  callback snapshots and guarded final state are compared. Instrumented
+  tidy reports 12 existing findings, zero new.
+- Evidence: `build\differential\actor_vitals.log`,
+  `actor_vitals-final-layout.log`, four `actor_vitals-F*-variant.log` files,
+  `status_lifecycle-vitals-projection.log`, `status_helpers-vitals-projection.log`
+  and the recipe above. Publication and exact-revision CI pending. External
+  label/animation/lifecycle/event services are explicit differential stubs;
+  vitals and room-wrapper calls execute the real sibling cores. Instrumented
   coverage is unchanged; no interactive gameplay, EC/M8 or #337 closure claim.
+
+The lifecycle group is published in `c888aab4`, green on
+[CI 43160888226](https://github.com/JEschete/VS-NativePort/actions/runs/43160888226),
+with evidence on [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6815535713).
 
 The seven supporting leaves are published in `8e21f5b7`, green on
 [CI 43156876978](https://github.com/JEschete/VS-NativePort/actions/runs/43156876978),
@@ -118,8 +123,8 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 53 of the original 900 resolved; 847 remain** (846 generated plus
-F01416 owned WIP). Modernization is 2,897/3,744; C++ promotion is 2,898 plus
+**Progress: 57 of the original 900 resolved; 843 remain** (842 generated plus
+F01416 owned WIP). Modernization is 2,901/3,744; C++ promotion is 2,902 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -188,13 +193,13 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue row 29 with F00194/F00522/F00525/F00526 (defeat, action-result commit and
-vitals). Their original source, native callers and all 1,040 instructions have
-been read; disassembly is in `build\scratch\status-queue\status_vitals.txt`.
-Preserve signed-halfword wrap before clamps, queued-mask rereads after labels,
-cached actor/stat owners versus refreshed table slots, and event-result
-precedence. F00526 can call the fully moved F00525 core in the same module;
-it still needs its own tests, original instructions and detected variants.
+Continue row 29 with F00339/F00340/F00342/F00343/F00347/F00348: gem bonuses,
+previous-hit threshold and risk/chain hit modifiers. All 353 original
+instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
+Preserve lazy action/hit-index access, stats-owner drawn-state lookup, the
+first three shield gems, duplicate-gem non-stacking and exact 255 correction
+without clamping larger risk-derived values. All 256 action IDs, unsigned
+evasion bytes and unsigned risk halfwords can be tested exhaustively.
 Finish the remaining damage/hit functions afterward. Keep every original
 cohort row in the progress CSV, including
 resolved ones; the `snapshot` column stays `44fa8847`. F01416 remains the one
@@ -242,9 +247,22 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 ## Stopping Point
 
 The continuation is active, not paused. Row 28 is published and green. The
-first 39 row-29 status functions are published and green, and #349 is closed.
-F00254/F00517/F00520/F00523 are verified locally; publish and confirm CI, then
-continue F00194/F00522/F00525/F00526.
+first 43 row-29 status functions are published and green, and #349 is closed.
+F00194/F00522/F00525/F00526 are verified locally; publish and confirm CI, then
+continue the six supporting hit modifiers.
+The next support group is F00339/F00340/F00342/F00343/F00347/F00348; all
+353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
+[#350](https://github.com/JEschete/VS-NativePort/issues/350) tracks the separate
+F00341/F00407/F00436 empty-callback return/ABI defects. Original zero hit
+selectors are bypassed by prerequisite routing; the stat-consuming effects
+never select stat calculator zero, and effect-zero rows have prerequisite
+zero. Finish the native routing/definition-write audit before retiring or
+rejecting these placeholders. Do not invent zero returns.
+The later F00344/F00345/F00346 attribute modifiers have their 433 original
+instructions read in `build\scratch\status-queue\hit_attribute_modifiers.txt`;
+reuse `Core::Math` wrapping arithmetic and `R3000Quotient`, including its
+defined zero-divisor behavior. Keep F00412/F00414/F00426 and F00418/F00428
+aliases together when grouping the subsequent stat calculators.
 The perception checkpoint below is historical.
 
 Stopped on owner request (2026-11-11) after the perception group, published
@@ -416,10 +434,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the four verified lifecycle functions and confirm exact-revision CI.
+2. Publish the four verified actor-vitals functions and confirm exact-revision CI.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 847 remain.
-3. Continue row 29 with the four action-result/vitals functions above, following
+   #276: 843 remain.
+3. Continue row 29 with the six supporting hit modifiers above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

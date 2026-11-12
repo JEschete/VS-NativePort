@@ -14,6 +14,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -227,7 +228,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
     auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return false;
     record->stats->currentHp = 0;
-    Battle_ResolveActorDefeat(0, actor, 0);
+    VS::Battle::ResolveLiveActorDefeat(0, actor, 0);
     return true;
   }
   bool TriggerFallEvent() override {

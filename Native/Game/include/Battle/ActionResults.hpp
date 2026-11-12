@@ -1,7 +1,10 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
+
+#include "Battle/ActorVitals.hpp"
 
 // Applies the current action's results to the actor it reached and picks the
 // actor's reaction. The action's hits and the reactions are reached through
@@ -49,4 +52,65 @@ class ActionTargetEffects {
 // (func_8006CB04). World target ids queue a label when tagged and apply no
 // hit. Requires a nonnegative `actor_id`.
 void ApplyActionTargetEffects(int actor_id, ActionTargetEffects& effects);
+
+enum class ActionResultField : std::size_t {
+  kHp,
+  kMp,
+  kRisk,
+  kStrength,
+  kIntelligence,
+  kAgility,
+  kMaxHp,
+  kMaxMp,
+  kWeaponDp,
+  kWeaponPp,
+  kArmorDp,
+  kShieldPp,
+  kCount
+};
+struct ActionResultChange {
+  std::int16_t amount{};
+  std::uint8_t mode{};
+  friend bool operator==(const ActionResultChange&,
+                         const ActionResultChange&) = default;
+};
+struct ActionResultLimb {
+  std::int16_t hp{};
+  std::int16_t armor_dp{};
+  friend bool operator==(const ActionResultLimb&,
+                         const ActionResultLimb&) = default;
+};
+struct ActorActionResult {
+  std::uint8_t target{};
+  std::int8_t limb{};
+  std::uint8_t impact{};
+  std::array<ActionResultChange,
+             static_cast<std::size_t>(ActionResultField::kCount)>
+      changes{};
+  std::array<ActionResultLimb, Items::kLimbCount> limbs{};
+  // These names retain the original hit record's reversed semantics.
+  std::uint32_t inflict_statuses{};
+  std::uint32_t remove_statuses{};
+  friend bool operator==(const ActorActionResult&,
+                         const ActorActionResult&) = default;
+};
+
+class ActorActionResultWorld {
+ public:
+  virtual ~ActorActionResultWorld() = default;
+  virtual void CommitEquipmentStats() = 0;
+  virtual ActorActionResult ReadHit() = 0;
+  virtual ActorVitalsAccess* TargetStats(std::uint8_t slot) = 0;
+  virtual void Number(int slot, int limb, std::uint32_t amount, int label) = 0;
+  virtual void StatusLabel(int slot, std::uint32_t mask, bool removing) = 0;
+  virtual void RemoveStatuses(ActorVitalsAccess& stats, std::uint32_t mask) = 0;
+  virtual void InflictStatuses(ActorVitalsAccess& stats,
+                               std::uint32_t mask) = 0;
+};
+
+// Callbacks observe committed writes; the target slot/stats owner are cached,
+// while hit fields and stats are reread after callbacks. False refuses missing
+// stats or the selected armor limb, only when that limb is actually used.
+// decomp: _applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:14018).
+bool ApplyActorActionResult(ActorActionResultWorld& world);
 }  // namespace VS::Battle

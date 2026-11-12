@@ -5,6 +5,8 @@
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
+#include "Battle/ActionResultsLive.hpp"
+#include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
@@ -319,7 +321,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80079030u, 0u, (void*)&Battle_StartFollowupActionEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80079050u, 0u, (void*)&Battle_WaitForActionResolution, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800790BCu, 0u, (void*)&Battle_WaitForTargetRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800792E4u, 0u, (void*)&Battle_ResolveActorDefeat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800793C0u, 0u, (void*)&Battle_FinishActionSequence, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800797BCu, 0u, (void*)&Battle_UpdateLootResults, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007980Cu, 0u, (void*)&Battle_UpdateAbilityUnlockDelay, 0u, 0u, 0u},
@@ -432,9 +433,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80085B10u, 0u, (void*)&Battle_ResolveActionTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008631Cu, 0u, (void*)&Battle_PreviewActionAgainstLimb, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800863A4u, 0u, (void*)&Battle_PreviewActionAgainstActor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800875C8u, 0u, (void*)&Battle_ApplyActorActionResult, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80088554u, 0u, (void*)&Battle_UpdateActorVitals, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80088B6Cu, 0u, (void*)&Battle_UpdateRoomActorVitals, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A5D0u, 0u, (void*)&Battle_ActorActionRestrictionFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E8F8u, 0u, (void*)&Effects_AllocateWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EA90u, 0u, (void*)&Effects_InitializeRoomWeather, 0u, 0u, 0u},
@@ -1757,6 +1755,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80086754u, 0u, (void*)&VS::Battle::RemoveLiveActorStatuses, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80086FA8u, 0u, (void*)&VS::Battle::InflictLiveActorStatuses, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80087EF4u, 0u, (void*)&VS::Battle::UpdateLiveActorStatusTimers, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800792E4u, 0u, (void*)&VS::Battle::ResolveLiveActorDefeat, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800875C8u, 0u, (void*)&VS::Battle::ApplyLiveActorActionResult, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80088554u, 0u, (void*)&VS::Battle::UpdateLiveActorVitals, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80088B6Cu, 0u, (void*)&VS::Battle::UpdateLiveRoomActorVitals, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

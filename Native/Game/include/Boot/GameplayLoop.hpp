@@ -87,7 +87,7 @@ inline constexpr std::int32_t kEventPlaybackStatusRequest = 0xFF;
 inline constexpr std::int32_t kEventTriggerBegins = 1;
 inline constexpr std::int32_t kEventPlaybackIdle = 0;
 
-// Actors_ExecuteQueuedActorCommands and Battle_UpdateRoomActorVitals results.
+// ExecuteLiveQueuedActorCommands and UpdateLiveRoomActorVitals results.
 enum class RoomActorOutcome : std::int32_t {
   kNone = 0,
   kBeginCutscene = 1,

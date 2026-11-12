@@ -1,8 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ActorRosterLive.hpp"
-#include "Actors/AnimationControlLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Event/CutsceneLifecycleLive.hpp"
 #include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -16,10 +13,8 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
-#include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/TargetingState.h"
-#include "Event/RoomTriggerEntryLive.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -43,28 +38,6 @@ int Battle_criticalHitOccurred;
 
 // decomp: _armorDpAdjustmentAmounts (_armorDpAdjustmentAmounts@BATTLE/BATTLE.PRG)
 short Battle_limbArmorDpLoss[8];
-
-// decomp: BATTLE.PRG func_800792E4 (src/BATTLE/BATTLE.PRG/146C.c:7413)
-int Battle_ResolveActorDefeat(int source_actor_slot, int target_actor_slot, int count_kill)
-{
-    int ret = 0;
-    if (Battle_actors[target_actor_slot] != NULL) {
-        if (Battle_actors[target_actor_slot]->stats->currentHp == 0) {
-            Battle_ResolveEnemyDefeat(source_actor_slot, target_actor_slot, count_kill);
-            if (target_actor_slot == 0) {
-                Battle_SuppressAshleyStatusLabels();
-                Event_EvaluateRoomEventTriggersEntry(0x40, 0, NULL, 0);
-                VS::Event::BeginLiveQueuedCutscene();
-                ret = 1;
-            } else if (Battle_actors[target_actor_slot]->retainAfterDefeat == 0) {
-                VS::Actors::RemoveLiveActorAtSlot(target_actor_slot, 1);
-            }
-        } else {
-            VS::Actors::RestoreLiveActorIdlePose(target_actor_slot);
-        }
-    }
-    return ret;
-}
 
 // decomp: BATTLE.PRG func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10534)
 short Battle_ApplyDamageGemMultiplier(

@@ -4,6 +4,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionResultsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
@@ -42,7 +43,6 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
-#include "Battle/StatusEffects.h"
 #include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -229,7 +229,7 @@ void Battle_ApplyActionSourceEffects(int source_actor_slot, SVECTOR* arg1)
             break;
         }
 
-        Battle_ApplyActorActionResult(&queued_action->primaryTarget);
+        VS::Battle::ApplyLiveActorActionResult(&queued_action->primaryTarget);
     }
 }
 

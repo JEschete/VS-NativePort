@@ -212,6 +212,15 @@ void Apply(Battle_ActorStats* pointer, Operation operation) {
 }
 }  // namespace
 
+StatusLifecycleState ReadLiveStatusState(const Battle_ActorStats& stats) {
+  return Load(stats);
+}
+
+void WriteLiveStatusState(const StatusLifecycleState& state,
+                          Battle_ActorStats& stats) {
+  Store(state, stats);
+}
+
 // decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736).
 void PreserveLiveAshleyStatuses() {
   Require(Battle_characterState != nullptr,

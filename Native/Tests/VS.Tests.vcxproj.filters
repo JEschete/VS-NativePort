@@ -30,6 +30,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionResultCommitTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActionResultsSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -76,6 +79,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ActorStateTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActorVitalsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AiActionExecutionTests.cpp">

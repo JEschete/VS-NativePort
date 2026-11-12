@@ -48,6 +48,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionResultCommitTests.cpp" />
     <ClCompile Include="src\ActionResultsSliceTests.cpp" />
     <ClCompile Include="src\ActorAssetsTests.cpp" />
     <ClCompile Include="src\ActorAttachmentTests.cpp" />
@@ -64,6 +65,7 @@
     <ClCompile Include="src\ActorSoundTransitionTests.cpp" />
     <ClCompile Include="src\ActorSpawningTests.cpp" />
     <ClCompile Include="src\ActorStateTests.cpp" />
+    <ClCompile Include="src\ActorVitalsTests.cpp" />
     <ClCompile Include="src\AiActionExecutionTests.cpp" />
     <ClCompile Include="src\AiActorCreationTests.cpp" />
     <ClCompile Include="src\AiActorPerceptionTests.cpp" />

@@ -366,8 +366,8 @@ struct AbilityEffectFixture : AbilityFixture {
   }
 
   void Commit() {
-    Battle_ApplyActorActionResult(&source);
-    Battle_ApplyActorActionResult(&target);
+    VS::Battle::ApplyLiveActorActionResult(&source);
+    VS::Battle::ApplyLiveActorActionResult(&target);
   }
 
   void CheckResources(int source_hp, int source_mp, int target_hp,
