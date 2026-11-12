@@ -10,6 +10,7 @@
 
 #include "Battle/BasicActionEffects.hpp"
 #include "Battle/StatusQueueLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Battle/ActionResolution.h"
@@ -64,7 +65,81 @@ class LiveActionScriptFlags final : public ActionScriptFlags {
   }
 };
 
+class LiveRandomStatQueue final : public RandomStatQueue {
+ public:
+  explicit LiveRandomStatQueue(Battle_HitResult& hit) : hit_(hit) {}
+  std::int32_t DrawBounded(std::int32_t bound) override {
+    return Core::NextLiveRandomBounded(bound);
+  }
+  ActionResultChange ReadChange(ActionResultField field) override {
+    switch (field) {
+      case ActionResultField::kStrength:
+        return {hit_.strengthChange,
+                static_cast<std::uint8_t>(hit_.strengthEffect)};
+      case ActionResultField::kIntelligence:
+        return {hit_.intelligenceChange,
+                static_cast<std::uint8_t>(hit_.intelligenceEffect)};
+      case ActionResultField::kAgility:
+        return {hit_.agilityChange,
+                static_cast<std::uint8_t>(hit_.agilityEffect)};
+      case ActionResultField::kMaxHp:
+        return {hit_.maxHpChange, static_cast<std::uint8_t>(hit_.maxHpEffect)};
+      case ActionResultField::kMaxMp:
+        return {hit_.maxMpChange, static_cast<std::uint8_t>(hit_.maxMpEffect)};
+      default:
+        Require(false, "Random stat queue requires a supported stat field");
+        return {};
+    }
+  }
+  void WriteChange(ActionResultField field,
+                   ActionResultChange change) override {
+    switch (field) {
+      case ActionResultField::kStrength:
+        hit_.strengthEffect = change.mode;
+        hit_.strengthChange = change.amount;
+        break;
+      case ActionResultField::kIntelligence:
+        hit_.intelligenceEffect = change.mode;
+        hit_.intelligenceChange = change.amount;
+        break;
+      case ActionResultField::kAgility:
+        hit_.agilityEffect = change.mode;
+        hit_.agilityChange = change.amount;
+        break;
+      case ActionResultField::kMaxHp:
+        hit_.maxHpEffect = change.mode;
+        hit_.maxHpChange = change.amount;
+        break;
+      case ActionResultField::kMaxMp:
+        hit_.maxMpEffect = change.mode;
+        hit_.maxMpChange = change.amount;
+        break;
+      default:
+        Require(false, "Random stat queue requires a supported stat field");
+    }
+  }
+
+ private:
+  Battle_HitResult& hit_;
+};
+
 using Mediator = std::remove_extent_t<decltype(Battle_actionEffectMediators)>;
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomStrengthIncrease), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomIntelligenceIncrease), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomAgilityIncrease), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomMaxHpIncrease), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomMaxMpIncrease), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomStrengthDecrease), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomIntelligenceDecrease), Mediator>);
+static_assert(
+    std::is_same_v<decltype(&QueueLiveRandomAgilityDecrease), Mediator>);
 static_assert(std::is_same_v<decltype(&MarkLiveSourceActionSuccess), Mediator>);
 static_assert(std::is_same_v<decltype(&QueueLiveInstantDeath), Mediator>);
 static_assert(
@@ -72,6 +147,66 @@ static_assert(
 static_assert(std::is_same_v<decltype(&SetLiveActionFlag64), Mediator>);
 static_assert(std::is_same_v<decltype(&SetLiveActionFlag32), Mediator>);
 }  // namespace
+
+// decomp: _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717).
+void QueueLiveRandomStrengthIncrease(Battle_ActionDefinition*,
+                                     Battle_HitResult*,
+                                     Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomStrengthIncrease(queue);
+}
+
+// decomp: _increaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12726).
+void QueueLiveRandomIntelligenceIncrease(Battle_ActionDefinition*,
+                                         Battle_HitResult*,
+                                         Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomIntelligenceIncrease(queue);
+}
+
+// decomp: _increaseAgilityRand (src/BATTLE/BATTLE.PRG/146C.c:12735).
+void QueueLiveRandomAgilityIncrease(Battle_ActionDefinition*, Battle_HitResult*,
+                                    Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomAgilityIncrease(queue);
+}
+
+// decomp: _increaseMaxHpRand (src/BATTLE/BATTLE.PRG/146C.c:12744).
+void QueueLiveRandomMaxHpIncrease(Battle_ActionDefinition*, Battle_HitResult*,
+                                  Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomMaxHpIncrease(queue);
+}
+
+// decomp: _increaseMaxMpRand (src/BATTLE/BATTLE.PRG/146C.c:12753).
+void QueueLiveRandomMaxMpIncrease(Battle_ActionDefinition*, Battle_HitResult*,
+                                  Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomMaxMpIncrease(queue);
+}
+
+// decomp: _decreaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12762).
+void QueueLiveRandomStrengthDecrease(Battle_ActionDefinition*,
+                                     Battle_HitResult*,
+                                     Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomStrengthDecrease(queue);
+}
+
+// decomp: _decreaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12771).
+void QueueLiveRandomIntelligenceDecrease(Battle_ActionDefinition*,
+                                         Battle_HitResult*,
+                                         Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomIntelligenceDecrease(queue);
+}
+
+// decomp: _decreaseAglityRand (src/BATTLE/BATTLE.PRG/146C.c:12780).
+void QueueLiveRandomAgilityDecrease(Battle_ActionDefinition*, Battle_HitResult*,
+                                    Battle_HitResult* target, int, int) {
+  LiveRandomStatQueue queue(HitOf(target));
+  QueueRandomAgilityDecrease(queue);
+}
 
 // decomp: func_80084228 / func_800842F0 / func_80084370
 // (src/BATTLE/BATTLE.PRG/146C.c:12547/12572/12599).

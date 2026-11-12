@@ -9,6 +9,7 @@
 
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Battle/ActionResolution.h"
@@ -44,6 +45,9 @@ extern "C" void Core_Errorf(const char*, const char* message, ...) {
   std::_Exit(85);
 }
 extern "C" void Core_Debugf(const char*, const char*, ...) {}
+namespace VS::Core {
+std::int32_t NextLiveRandomBounded(std::int32_t) { std::_Exit(88); }
+}
 namespace VS::State {
 void SetLiveScriptFlag(int id, int value) {
   ++flags_count; flag_id = id; flag_value = value;

@@ -763,6 +763,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::QueueLiveDamageBasedArmorWear": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
     "VS::Battle::SetLiveActionFlag64": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
     "VS::Battle::SetLiveActionFlag32": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomStrengthIncrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomIntelligenceIncrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomAgilityIncrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomMaxHpIncrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomMaxMpIncrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomStrengthDecrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomIntelligenceDecrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
+    "VS::Battle::QueueLiveRandomAgilityDecrease": r"Native\Game\include\Battle\BasicActionEffectsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1459,6 +1467,14 @@ OWNED_CALL_BINDINGS["F00472"] = "VS::Battle::MarkLiveSourceActionSuccess"
 OWNED_CALL_BINDINGS["F00473"] = "VS::Battle::SetLiveActionFlag64"
 OWNED_CALL_BINDINGS["F00474"] = "VS::Battle::SetLiveActionFlag32"
 OWNED_CALL_BINDINGS["F00475"] = "VS::Battle::MarkLiveSourceActionSuccess"
+OWNED_CALL_BINDINGS["F00486"] = "VS::Battle::QueueLiveRandomStrengthIncrease"
+OWNED_CALL_BINDINGS["F00487"] = "VS::Battle::QueueLiveRandomIntelligenceIncrease"
+OWNED_CALL_BINDINGS["F00488"] = "VS::Battle::QueueLiveRandomAgilityIncrease"
+OWNED_CALL_BINDINGS["F00489"] = "VS::Battle::QueueLiveRandomMaxHpIncrease"
+OWNED_CALL_BINDINGS["F00490"] = "VS::Battle::QueueLiveRandomMaxMpIncrease"
+OWNED_CALL_BINDINGS["F00491"] = "VS::Battle::QueueLiveRandomStrengthDecrease"
+OWNED_CALL_BINDINGS["F00492"] = "VS::Battle::QueueLiveRandomIntelligenceDecrease"
+OWNED_CALL_BINDINGS["F00493"] = "VS::Battle::QueueLiveRandomAgilityDecrease"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3155,6 +3171,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80084310, "VS::Battle::SetLiveActionFlag64"),  # F00473
     ("BATTLE/BATTLE.PRG", 0x80084340, "VS::Battle::SetLiveActionFlag32"),  # F00474
     ("BATTLE/BATTLE.PRG", 0x80084370, "VS::Battle::MarkLiveSourceActionSuccess"),  # F00475
+    ("BATTLE/BATTLE.PRG", 0x8008490C, "VS::Battle::QueueLiveRandomStrengthIncrease"),  # F00486
+    ("BATTLE/BATTLE.PRG", 0x80084958, "VS::Battle::QueueLiveRandomIntelligenceIncrease"),  # F00487
+    ("BATTLE/BATTLE.PRG", 0x800849A4, "VS::Battle::QueueLiveRandomAgilityIncrease"),  # F00488
+    ("BATTLE/BATTLE.PRG", 0x800849F0, "VS::Battle::QueueLiveRandomMaxHpIncrease"),  # F00489
+    ("BATTLE/BATTLE.PRG", 0x80084A3C, "VS::Battle::QueueLiveRandomMaxMpIncrease"),  # F00490
+    ("BATTLE/BATTLE.PRG", 0x80084A8C, "VS::Battle::QueueLiveRandomStrengthDecrease"),  # F00491
+    ("BATTLE/BATTLE.PRG", 0x80084AD8, "VS::Battle::QueueLiveRandomIntelligenceDecrease"),  # F00492
+    ("BATTLE/BATTLE.PRG", 0x80084B24, "VS::Battle::QueueLiveRandomAgilityDecrease"),  # F00493
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

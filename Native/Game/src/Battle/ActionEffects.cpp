@@ -1,7 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -143,86 +142,6 @@ int Battle_QueueDamageTriggeredRecovery(
         target_hit->hpEffect = 2;
         VS::Battle::LiveDistributeLimbRecovery(action_definition, target_hit, amount);
     }
-}
-
-// decomp: BATTLE.PRG _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717)
-int Battle_QueueRandomStrengthIncrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->strengthChange += amount;
-    target_hit->strengthEffect = 2;
-}
-
-// decomp: BATTLE.PRG _increaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12726)
-int Battle_QueueRandomIntelligenceIncrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->intelligenceChange += amount;
-    target_hit->intelligenceEffect = 2;
-}
-
-// decomp: BATTLE.PRG _increaseAgilityRand (src/BATTLE/BATTLE.PRG/146C.c:12735)
-int Battle_QueueRandomAgilityIncrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->agilityChange += amount;
-    target_hit->agilityEffect = 2;
-}
-
-// decomp: BATTLE.PRG _increaseMaxHpRand (src/BATTLE/BATTLE.PRG/146C.c:12744)
-int Battle_QueueRandomMaximumHpIncrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->maxHpChange += amount;
-    target_hit->maxHpEffect = 2;
-}
-
-// decomp: BATTLE.PRG _increaseMaxMpRand (src/BATTLE/BATTLE.PRG/146C.c:12753)
-int Battle_QueueRandomMaximumMpIncrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->maxMpChange += amount;
-    target_hit->maxMpEffect = 2;
-}
-
-// decomp: BATTLE.PRG _decreaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12762)
-int Battle_QueueRandomStrengthDecrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->strengthChange += amount;
-    target_hit->strengthEffect = 1;
-}
-
-// decomp: BATTLE.PRG _decreaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12771)
-int Battle_QueueRandomIntelligenceDecrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->intelligenceChange += amount;
-    target_hit->intelligenceEffect = 1;
-}
-
-// decomp: BATTLE.PRG _decreaseAglityRand (src/BATTLE/BATTLE.PRG/146C.c:12780)
-int Battle_QueueRandomAgilityDecrease(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
-    target_hit->agilityChange += amount;
-    target_hit->agilityEffect = 1;
 }
 
 // decomp: BATTLE.PRG func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12789)

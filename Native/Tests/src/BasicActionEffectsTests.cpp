@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <iterator>
+#include <limits>
 #include <optional>
 #include <span>
 #include <type_traits>
@@ -17,6 +18,7 @@
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
+#include "Core/RandomLive.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -25,6 +27,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
+#include "Core/Random.h"
 }
 
 namespace {
@@ -431,5 +434,283 @@ TEST_CASE("Flag thirty two original void mediator invokes the native policy",
           "[basic-action-effects][F00474]") {
   LiveFixture fixture;
   CheckLiveFlag(Relocated(0x80084340, battle::SetLiveActionFlag32), 32);
+}
+
+struct RandomQueue final : battle::RandomStatQueue {
+  battle::ActorActionResult hit{};
+  std::optional<battle::ActorActionResult> during_draw;
+  int draw{};
+  int bound{};
+  std::vector<int> events;
+  std::vector<Field> fields;
+
+  std::int32_t DrawBounded(std::int32_t maximum) override {
+    events.push_back(1);
+    bound = maximum;
+    if (during_draw) {
+      hit = during_draw.value();
+    }
+    return draw;
+  }
+  battle::ActionResultChange ReadChange(Field field) override {
+    events.push_back(2);
+    fields.push_back(field);
+    return hit.changes.at(static_cast<std::size_t>(field));
+  }
+  void WriteChange(Field field, battle::ActionResultChange change) override {
+    events.push_back(3);
+    fields.push_back(field);
+    hit.changes.at(static_cast<std::size_t>(field)) = change;
+  }
+};
+
+using RandomPolicy = void (*)(battle::RandomStatQueue&);
+struct RandomEffect {
+  RandomPolicy policy;
+  Handler live;
+  Field field;
+  std::uint8_t mode;
+  std::uint32_t address;
+  std::size_t offset;
+  unsigned shift;
+};
+constexpr std::array<RandomEffect, 8> kRandomEffects{{
+    {battle::QueueRandomStrengthIncrease,
+     battle::QueueLiveRandomStrengthIncrease, Field::kStrength, 2, 0x8008490C,
+     0x0A, 6},
+    {battle::QueueRandomIntelligenceIncrease,
+     battle::QueueLiveRandomIntelligenceIncrease, Field::kIntelligence, 2,
+     0x80084958, 0x0C, 8},
+    {battle::QueueRandomAgilityIncrease, battle::QueueLiveRandomAgilityIncrease,
+     Field::kAgility, 2, 0x800849A4, 0x0E, 10},
+    {battle::QueueRandomMaxHpIncrease, battle::QueueLiveRandomMaxHpIncrease,
+     Field::kMaxHp, 2, 0x800849F0, 0x10, 12},
+    {battle::QueueRandomMaxMpIncrease, battle::QueueLiveRandomMaxMpIncrease,
+     Field::kMaxMp, 2, 0x80084A3C, 0x12, 14},
+    {battle::QueueRandomStrengthDecrease,
+     battle::QueueLiveRandomStrengthDecrease, Field::kStrength, 1, 0x80084A8C,
+     0x0A, 6},
+    {battle::QueueRandomIntelligenceDecrease,
+     battle::QueueLiveRandomIntelligenceDecrease, Field::kIntelligence, 1,
+     0x80084AD8, 0x0C, 8},
+    {battle::QueueRandomAgilityDecrease, battle::QueueLiveRandomAgilityDecrease,
+     Field::kAgility, 1, 0x80084B24, 0x0E, 10},
+}};
+constexpr std::array kPendingAmounts{0, 19, -17, 32767, 32768, 65535};
+
+battle::ActorActionResult SeedQueuedResult() {
+  battle::ActorActionResult hit{};
+  hit.target = 255;
+  hit.limb = -128;
+  hit.impact = 0xA5;
+  hit.changes.fill({-299, 3});
+  hit.limbs.fill({123, -456});
+  hit.inflict_statuses = 0xDEADBEEF;
+  hit.remove_statuses = 0x87654321;
+  return hit;
+}
+
+struct RandomSample {
+  int draw;
+  int pending;
+  std::uint8_t mode;
+};
+
+void CheckRandomPolicySample(const RandomEffect& effect, bool mutate,
+                             RandomSample sample) {
+  RandomQueue queue;
+  queue.draw = sample.draw;
+  queue.hit = SeedQueuedResult();
+  auto expected = queue.hit;
+  expected.changes.at(static_cast<std::size_t>(effect.field)) = {
+      std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(sample.pending)),
+      sample.mode};
+  if (mutate) {
+    expected.inflict_statuses ^= 0x76543210;
+    expected.changes.at(kHp) = {-789, 1};
+    queue.during_draw.emplace(expected);
+  } else {
+    queue.hit = expected;
+  }
+  expected.changes.at(static_cast<std::size_t>(effect.field)) = {
+      std::bit_cast<std::int16_t>(
+          static_cast<std::uint16_t>(sample.pending + sample.draw + 1)),
+      effect.mode};
+  effect.policy(queue);
+  CHECK(queue.hit == expected);
+  CHECK(queue.bound == 4);
+  CHECK(queue.events == std::vector<int>{1, 2, 3});
+  CHECK(queue.fields == std::vector<Field>{effect.field, effect.field});
+}
+
+void CheckRandomPolicy(const RandomEffect& effect, bool mutate) {
+  for (int draw = 0; draw < 4; ++draw) {
+    for (const auto pending : kPendingAmounts) {
+      for (std::uint8_t mode = 0; mode < 4; ++mode) {
+        CheckRandomPolicySample(effect, mutate, {draw, pending, mode});
+      }
+    }
+  }
+}
+
+struct RandomStateFixture {
+  decltype(std::to_array(Core_randomShuffleTable)) table =
+      std::to_array(Core_randomShuffleTable);
+  int index = Core_randomShuffleIndex;
+  std::uint32_t bios = VS::Core::BiosRand().State();
+  ~RandomStateFixture() {
+    std::ranges::copy(table, Core_randomShuffleTable);
+    Core_randomShuffleIndex = index;
+    VS::Core::BiosRand().Seed(bios);
+  }
+};
+
+void SetPending(Battle_HitResult& hit, const RandomEffect& effect, int amount,
+                unsigned mode) {
+  auto halves =
+      std::bit_cast<std::array<std::uint16_t, sizeof(Battle_HitResult) / 2>>(
+          hit);
+  halves.at(effect.offset / 2) = static_cast<std::uint16_t>(amount);
+  auto words =
+      std::bit_cast<std::array<std::uint32_t, sizeof(Battle_HitResult) / 4>>(
+          halves);
+  words.at(7) = (words.at(7) & ~(3U << effect.shift)) | (mode << effect.shift);
+  hit = std::bit_cast<Battle_HitResult>(words);
+}
+
+void CheckLiveRandomSample(Handler handler, const RandomEffect& effect,
+                           RandomSample sample) {
+  constexpr std::array kUnusedValues{0, 1, -1, std::numeric_limits<int>::min(),
+                                     std::numeric_limits<int>::max()};
+  for (const auto unused : kUnusedValues) {
+    auto hit = SeedHit();
+    SetPending(hit, effect, sample.pending, sample.mode);
+    auto expected = hit;
+    SetPending(expected, effect, sample.pending + sample.draw + 1, effect.mode);
+    std::ranges::fill(Core_randomShuffleTable, 0);
+    Core_randomShuffleIndex = 96;
+    Core_randomShuffleTable[0] = 32767 - sample.draw * 8192;
+    VS::Core::BiosRand().Seed(12345);
+    VS::Core::Rand15 expected_bios(12345);
+    auto expected_table = std::to_array(Core_randomShuffleTable);
+    expected_table.fill(0);
+    expected_table.at(0) = expected_bios.Next();
+    handler(nullptr, nullptr, &hit, unused, unused);
+    CHECK(Bytes(hit) == Bytes(expected));
+    CHECK(VS::Core::BiosRand().State() == expected_bios.State());
+    CHECK(Core_randomShuffleIndex == 0);
+    CHECK(std::to_array(Core_randomShuffleTable) == expected_table);
+  }
+}
+
+void CheckLiveRandom(const RandomEffect& effect) {
+  LiveFixture fixture;
+  RandomStateFixture saved;
+  const auto handler = Relocated(effect.address, effect.live);
+  std::ranges::fill(Battle_actors, nullptr);
+  for (int draw = 0; draw < 4; ++draw) {
+    for (const auto pending : kPendingAmounts) {
+      for (std::uint8_t mode = 0; mode < 4; ++mode) {
+        CheckLiveRandomSample(handler, effect, {draw, pending, mode});
+      }
+    }
+  }
+}
+
+TEST_CASE("F00486 queues all random strength increases with halfword wrap",
+          "[random-stat-effects][F00486]") {
+  CheckRandomPolicy(kRandomEffects.at(0), false);
+}
+TEST_CASE("F00487 queues all random intelligence increases with halfword wrap",
+          "[random-stat-effects][F00487]") {
+  CheckRandomPolicy(kRandomEffects.at(1), false);
+}
+TEST_CASE("F00488 queues all random agility increases with halfword wrap",
+          "[random-stat-effects][F00488]") {
+  CheckRandomPolicy(kRandomEffects.at(2), false);
+}
+TEST_CASE("F00489 queues all random maximum HP increases with halfword wrap",
+          "[random-stat-effects][F00489]") {
+  CheckRandomPolicy(kRandomEffects.at(3), false);
+}
+TEST_CASE("F00490 queues all random maximum MP increases with halfword wrap",
+          "[random-stat-effects][F00490]") {
+  CheckRandomPolicy(kRandomEffects.at(4), false);
+}
+TEST_CASE("F00491 adds positive strength amounts with decrease mode",
+          "[random-stat-effects][F00491]") {
+  CheckRandomPolicy(kRandomEffects.at(5), false);
+}
+TEST_CASE("F00492 adds positive intelligence amounts with decrease mode",
+          "[random-stat-effects][F00492]") {
+  CheckRandomPolicy(kRandomEffects.at(6), false);
+}
+TEST_CASE("F00493 adds positive agility amounts with decrease mode",
+          "[random-stat-effects][F00493]") {
+  CheckRandomPolicy(kRandomEffects.at(7), false);
+}
+TEST_CASE("F00486 rereads the pending result after its random callback",
+          "[random-stat-effects][F00486]") {
+  CheckRandomPolicy(kRandomEffects.at(0), true);
+}
+TEST_CASE("F00487 rereads the pending result after its random callback",
+          "[random-stat-effects][F00487]") {
+  CheckRandomPolicy(kRandomEffects.at(1), true);
+}
+TEST_CASE("F00488 rereads the pending result after its random callback",
+          "[random-stat-effects][F00488]") {
+  CheckRandomPolicy(kRandomEffects.at(2), true);
+}
+TEST_CASE("F00489 rereads the pending result after its random callback",
+          "[random-stat-effects][F00489]") {
+  CheckRandomPolicy(kRandomEffects.at(3), true);
+}
+TEST_CASE("F00490 rereads the pending result after its random callback",
+          "[random-stat-effects][F00490]") {
+  CheckRandomPolicy(kRandomEffects.at(4), true);
+}
+TEST_CASE("F00491 rereads the pending result after its random callback",
+          "[random-stat-effects][F00491]") {
+  CheckRandomPolicy(kRandomEffects.at(5), true);
+}
+TEST_CASE("F00492 rereads the pending result after its random callback",
+          "[random-stat-effects][F00492]") {
+  CheckRandomPolicy(kRandomEffects.at(6), true);
+}
+TEST_CASE("F00493 rereads the pending result after its random callback",
+          "[random-stat-effects][F00493]") {
+  CheckRandomPolicy(kRandomEffects.at(7), true);
+}
+TEST_CASE("F00486 original void mediator draws once even in preview",
+          "[random-stat-effects][F00486]") {
+  CheckLiveRandom(kRandomEffects.at(0));
+}
+TEST_CASE("F00487 original void mediator draws once even in preview",
+          "[random-stat-effects][F00487]") {
+  CheckLiveRandom(kRandomEffects.at(1));
+}
+TEST_CASE("F00488 original void mediator draws once even in preview",
+          "[random-stat-effects][F00488]") {
+  CheckLiveRandom(kRandomEffects.at(2));
+}
+TEST_CASE("F00489 original void mediator draws once even in preview",
+          "[random-stat-effects][F00489]") {
+  CheckLiveRandom(kRandomEffects.at(3));
+}
+TEST_CASE("F00490 original void mediator draws once even in preview",
+          "[random-stat-effects][F00490]") {
+  CheckLiveRandom(kRandomEffects.at(4));
+}
+TEST_CASE("F00491 original void mediator draws once even in preview",
+          "[random-stat-effects][F00491]") {
+  CheckLiveRandom(kRandomEffects.at(5));
+}
+TEST_CASE("F00492 original void mediator draws once even in preview",
+          "[random-stat-effects][F00492]") {
+  CheckLiveRandom(kRandomEffects.at(6));
+}
+TEST_CASE("F00493 original void mediator draws once even in preview",
+          "[random-stat-effects][F00493]") {
+  CheckLiveRandom(kRandomEffects.at(7));
 }
 }  // namespace

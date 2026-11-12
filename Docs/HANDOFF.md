@@ -18,29 +18,32 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-30 group
 
-F00469-F00475 are locally verified on `7b797783` in `BasicActionEffects`.
-Five typed policies cover seven original addresses, preserving the three
-source-success aliases, queued instant-death/armor effects and script-flag
-side effects. Live mediators use the actual VOID5 type. All 18 old-symbol
-references are gone.
+F00486-F00493 are locally verified on `ca4ff6a3`, extending
+`BasicActionEffects` with a shared random-stat queue. All eight VOID5
+callbacks draw before reading pending fields, retain target identity and
+queue positive amounts with distinct increase/decrease modes. All 24 old
+symbol references are gone.
 
-- Original span: 0x80084228-0x80084390, 90 instructions, plus the real original
-  status-removal helper. Per-ID hashes and evidence:
-  `build\scratch\basic-action-effects\ledgers-final.json`.
-- `basic_action_effects`: 14,336 vectors, zero mismatches, 31/31 mutants.
-  Per-ID native variants detect 1024/410/1024/1024/819/819/1024 mismatches
-  respectively over 1,024 vectors per ID.
-- Group `build\promotion-check\group-20261112-050611`, 434 seconds:
-  Debug/Release each pass 6,060 cases/12,841,649 assertions; coupled selection
-  104 cases/19,486 assertions; own tests 20/17,758. Both replays, copier
-  stability and controls pass; tidy five existing findings, zero new.
-- Thirteen diagnostic refusal probes, post-helper target/HP rereads, unused
-  argument paths and actual-table ABI rejection pass. Script-flag calls are
-  controlled services with exact index/value traces; status removal executes
-  real original instructions.
-- Evidence: `build\differential\basic-action-effects-full.log`, native variant
-  logs and `build\scratch\basic-action-effects\cohort-audit.json`. Publication
-  and exact-revision CI pending. No row30, gameplay or EC/M8 completion claim.
+- Original span: 0x8008490C-0x80084B70, 153 instructions. Evidence:
+  `build\scratch\random-stat-effects\ledgers-final.json`.
+- `random_stat_effects`: 16,384 vectors, zero mismatches, 88/88 mutants.
+  Each native direction variant detects 1,024/1,024 own-ID vectors with the
+  other seven IDs unchanged; a shared stale-read variant detects all eight.
+- Group `build\promotion-check\group-20261112-053117`, 432 seconds:
+  Debug/Release each pass 6,084 cases/12,863,209 assertions; coupled selection
+  128 cases/41,046 assertions; own tests 24/21,560. Both replays, copier
+  stability and controls pass; tidy zero new findings.
+- All eight null-target diagnostics, 3,840 real-live callback mutation/identity
+  checks and actual VOID5 table/ABI controls pass. The prior basic7 differential
+  (14,336 vectors, 31 mutants) and 13 guards pass again.
+- Evidence: `build\differential\random-stat-effects-full.log`, variant logs
+  and `build\scratch\random-stat-effects\cohort-audit.json`. Publication and
+  exact-revision CI pending. Controlled RNG traces are explicit differential
+  limits; no row30, gameplay or EC/M8 completion claim.
+
+Basic7 effects are published in `ca4ff6a3`, green on
+[CI 43199227740](https://github.com/JEschete/VS-NativePort/actions/runs/43199227740),
+with evidence on [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6821132916).
 
 Row 29 is published in `7b797783`, green on
 [CI 43193683736](https://github.com/JEschete/VS-NativePort/actions/runs/43193683736):
@@ -153,9 +156,9 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 105 of the original 900 resolved (102 promoted, 3 retired); 795
-remain** (794 generated plus F01416 owned WIP). Modernization is 2,946/3,741;
-C++ promotion is 2,947 plus
+**Progress: 113 of the original 900 resolved (110 promoted, 3 retired); 787
+remain** (786 generated plus F01416 owned WIP). Modernization is 2,954/3,741;
+C++ promotion is 2,955 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -224,12 +227,12 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue ordered row 30 (`battle-actions`, 84 of 91 still remaining) with
-F00486-F00493, eight random-stat producers. Their 153 instructions are read
-in `build\scratch\status-queue\action_effect_leaves.txt`. Preserve actual
-VOID mediator types, unconditional bounded-four draws even during preview,
-post-RNG pending-field reads, signed-halfword wrapping and the distinct
-increase/decrease mode bits. Reuse typed result records. Further triggered
+Continue ordered row 30 (`battle-actions`, 76 of 91 still remaining) with
+F00476-F00483, eight triggered-recovery producers. Their 280 instructions
+are read in `build\scratch\status-queue\triggered_recovery.txt`. Preserve
+independent selected-action/affinity gates, unused-input laziness, exact
+five-argument stat dispatch, post-callback pending HP/flag reads and
+recovery-helper ordering. Reuse typed stat and limb policies. Further
 recovery and dispatch groups have source/assembly analysis recorded; do not
 silently jump ahead of this ordered package.
 
@@ -291,8 +294,21 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 The continuation is active, not paused. Row 28 is published and green. The
 row-29 checkpoint has all 88 IDs resolved (85 promoted, three retired),
 published and green in `7b797783`. #349, #350 and #351 are closed.
-Row 30's seven basic effect producers are locally verified; publish and confirm
-CI, then continue with the eight random-stat producers.
+Row 30's seven basic effect producers are published and green in `ca4ff6a3`;
+the eight random-stat producers are verified locally. Publish and confirm
+CI, then continue the triggered-recovery group.
+
+[#352](https://github.com/JEschete/VS-NativePort/issues/352) records a later
+F00510 cost-check defect: BaseAttack with a weapon cost type outside 1-4
+uses an uninitialized resource value. A shared-MIPS probe changes the
+requirements byte by changing only incoming a3, which is not a formal
+argument. Audit actual weapon/empty/natural-weapon initialization before
+choosing the native contract; no gameplay reachability or zero default is
+assumed. Repro: `build\scratch\status-queue\action-cost-input-probe.py`.
+The original and native unequip paths do produce cost type zero/cost zero;
+that case also flips affordability with a negative incoming a3. Do not
+blanket-reject normal empty loadouts; the base-attack/reference contract
+still needs its owning analysis.
 The supporting group covers F00339/F00340/F00342/F00343/F00347/F00348; all
 353 original instructions are read in `build\scratch\status-queue\hit_modifiers.txt`.
 [#350](https://github.com/JEschete/VS-NativePort/issues/350) tracks the separate
@@ -475,10 +491,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the seven basic action effects and confirm exact-revision CI.
+2. Publish the eight random-stat effects and confirm exact-revision CI.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 795 remain.
-3. Continue row 30 with the eight random-stat producers above, following
+   #276: 787 remain.
+3. Continue row 30 with the eight triggered-recovery producers above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified
