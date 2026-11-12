@@ -21,6 +21,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
@@ -703,7 +704,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     VS::Menu::Framework::ReleaseLiveMenuRows();
   }
   void BeginPostActionRecovery(int mode) override {
-    Battle_BeginPostActionRecovery(mode);
+    VS::Battle::BeginLivePostActionRecovery(mode);
   }
   void CommitEnvironmentAction(int /*mode*/) override {
     // func_800719DC ignored the caller's menu mode and selected environment.

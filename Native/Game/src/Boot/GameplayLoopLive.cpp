@@ -11,6 +11,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -391,7 +392,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         &Battle_actionState->queue[0]));
   }
   void BeginPostActionRecovery(int recovery_reward_mode) override {
-    Battle_BeginPostActionRecovery(recovery_reward_mode);
+    VS::Battle::BeginLivePostActionRecovery(recovery_reward_mode);
   }
 
   [[nodiscard]] bool CanStartEffectTrack() override {
@@ -407,7 +408,9 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Battle::LiveBeginActorActionSelection(slot,
                                               static_cast<u_short>(action));
   }
-  void BeginAshleyWeaponToggle() override { Battle_BeginAshleyWeaponToggle(); }
+  void BeginAshleyWeaponToggle() override {
+    VS::Battle::BeginLiveAshleyWeaponToggle();
+  }
   void StopAshleyDirectMovement() override {
     VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(),
                                   kAshleySlot, 0, 0);
@@ -415,7 +418,9 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   [[nodiscard]] bool IsAshleyActionAnimationBusy() override {
     return VS::Actors::IsLiveActorActionAnimationBusy(kAshleySlot) != 0;
   }
-  void EndAshleyWeaponToggle() override { Battle_EndAshleyWeaponToggle(); }
+  void EndAshleyWeaponToggle() override {
+    VS::Field::LiveEnterFieldExplorationMode();
+  }
   void UpdateGimImages() override { VS::Render::UpdateLiveGimImages(); }
 
   void UpdateTargetingRiskPenalty() override {

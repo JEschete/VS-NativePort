@@ -10,6 +10,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -194,10 +195,10 @@ class LiveAbilityHost final : public battle::AbilityHost {
   }
 
   void WaitForPostActionMovement() override {
-    Battle_WaitForPostActionMovement();
+    VS::Battle::WaitForLivePostActionMovement();
   }
   void FinishBattleAbilitySequence() override {
-    Battle_FinishBattleAbilitySequence();
+    VS::Battle::FinishLiveBattleAbilitySequence();
   }
   void PlayAbilityLearnedPose() override {
     VS::Actors::PlayLiveActorActionPose(0, nullptr, kAbilityLearnedPose);

@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
@@ -146,7 +147,7 @@ class LiveLootFlowHost final : public LootFlowHost {
     VS::Battle::LiveBeginPendingAbilityReward();
   }
   void WaitForPostActionMovement() override {
-    Battle_WaitForPostActionMovement();
+    VS::Battle::WaitForLivePostActionMovement();
   }
   void OpenScriptedLootList() override {
     Battle_lootMenuOpened = 1;

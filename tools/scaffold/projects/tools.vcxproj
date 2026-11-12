@@ -317,6 +317,7 @@
     <None Include="..\..\naming\upstream_layout.py" />
     <None Include="..\..\naming\upstream_prs.py" />
     <None Include="..\..\permuter_settings.toml" />
+    <None Include="..\..\port\action_presentation_audit.py" />
     <None Include="..\..\port\audit_assembly_gaps.py" />
     <None Include="..\..\port\check_event_dispatch.py" />
     <None Include="..\..\port\check_leftovers.py" />
@@ -338,6 +339,9 @@
     <None Include="..\..\port\differentials\action_execution.py" />
     <None Include="..\..\port\differentials\action_execution_driver.cpp" />
     <None Include="..\..\port\differentials\action_notification.py" />
+    <None Include="..\..\port\differentials\action_presentation.py" />
+    <None Include="..\..\port\differentials\action_presentation_driver.cpp" />
+    <None Include="..\..\port\differentials\action_presentation_guard_driver.cpp" />
     <None Include="..\..\port\differentials\action_preview.py" />
     <None Include="..\..\port\differentials\action_preview_driver.cpp" />
     <None Include="..\..\port\differentials\actor_creation.py" />

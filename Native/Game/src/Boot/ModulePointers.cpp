@@ -7,6 +7,7 @@
 #include "Audio/StreamControlLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
@@ -288,7 +289,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x80069D14u, 0u, (void*)&Battle_ReleaseQueuedActorAttacks, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C1CCu, 0u, (void*)&Battle_ResolveEnemyDefeat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C480u, 0u, (void*)&Effects_StartWeaponTrail, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C4A4u, 0u, (void*)&Effects_FadeWeaponTrails, 0u, 0u, 0u},
@@ -301,16 +301,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006D064u, 0u, (void*)&Effects_RestoreActionActorTint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006F450u, 0u, (void*)&Effects_SpawnGroundPlaneImpactEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006F4B0u, 0u, (void*)&Effects_SpawnTrapTileEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006F5FCu, 0u, (void*)&Battle_WaitForPostActionMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006F848u, 0u, (void*)&Effects_SpawnAbilityLearnedEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006FBCCu, 0u, (void*)&Battle_BeginPostActionRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006FCBCu, 0u, (void*)&Battle_BeginActionTrailFade, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006FD0Cu, 0u, (void*)&Battle_FinishBattleAbilitySequence, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80072B9Cu, 0u, (void*)&Battle_ResetActionPhase, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&Effects_BeginAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800734C0u, 0u, (void*)&Battle_BeginAshleyWeaponToggle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007350Cu, 0u, (void*)&Battle_EndAshleyWeaponToggle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&Effects_ActionEffectBusyFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074A20u, 0u, (void*)&Battle_BeginActorDefeatAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80077F14u, 0u, (void*)&Battle_ActionTargetLimbPosition, 0u, 0u, 0u},
@@ -1767,6 +1760,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800704B0u, 0u, (void*)&VS::Battle::AdvanceLiveActionEffectPhase, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80070F28u, 0u, (void*)&VS::Battle::CommitLiveSelectedAction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007138Cu, 0u, (void*)&VS::Battle::StartLiveActionPresentation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80069D14u, 0u, (void*)&VS::Battle::ReleaseLiveQueuedActorAttacks, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006F5FCu, 0u, (void*)&VS::Battle::WaitForLivePostActionMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006FBCCu, 0u, (void*)&VS::Battle::BeginLivePostActionRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006FCBCu, 0u, (void*)&VS::Battle::BeginLiveActionTrailFade, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006FD0Cu, 0u, (void*)&VS::Battle::FinishLiveBattleAbilitySequence, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80072B9Cu, 0u, (void*)&VS::Battle::ResetLiveActionPhase, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800734C0u, 0u, (void*)&VS::Battle::BeginLiveAshleyWeaponToggle, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

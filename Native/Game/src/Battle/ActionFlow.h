@@ -18,17 +18,9 @@ extern u_int Battle_actionFlowMode;
 extern int Battle_recoveryRewardMode;
 extern Battle_ActionState* Battle_actionState;
 extern char Battle_spellCommitFlag;
-void Battle_ReleaseQueuedActorAttacks(void);
 void Battle_ResolveEnemyDefeat(int source_actor_slot, int actorId, int count_kill);
 int Battle_PlayWeaponHitSounds(int source_actor_slot);
 void Battle_ApplyActionSourceEffects(int source_actor_slot, SVECTOR* arg1);
-void Battle_WaitForPostActionMovement(void);
-void Battle_BeginPostActionRecovery(int recovery_reward_mode);
-void Battle_BeginActionTrailFade(void);
-void Battle_FinishBattleAbilitySequence(void);
-void Battle_ResetActionPhase(void);
-void Battle_BeginAshleyWeaponToggle(void);
-void Battle_EndAshleyWeaponToggle(void);
 int Battle_BeginActorDefeatAnimation(int actor_slot);
 void Battle_ApplyLearnedActionUnlocks(void);
 

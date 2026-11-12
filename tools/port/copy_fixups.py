@@ -806,6 +806,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::AdvanceLiveActionEffectPhase": r"Native\Game\include\Battle\ActionPresentationLive.hpp",
     "VS::Battle::CommitLiveSelectedAction": r"Native\Game\include\Battle\ActionPresentationLive.hpp",
     "VS::Battle::StartLiveActionPresentation": r"Native\Game\include\Battle\ActionPresentationLive.hpp",
+    "VS::Battle::ReleaseLiveQueuedActorAttacks": r"Native\Game\include\Battle\ActionPhasesLive.hpp",
+    "VS::Battle::WaitForLivePostActionMovement": r"Native\Game\include\Battle\ActionPhasesLive.hpp",
+    "VS::Battle::BeginLivePostActionRecovery": r"Native\Game\include\Battle\ActionPhasesLive.hpp",
+    "VS::Battle::BeginLiveActionTrailFade": r"Native\Game\include\Battle\ActionPhasesLive.hpp",
+    "VS::Battle::FinishLiveBattleAbilitySequence": r"Native\Game\include\Battle\ActionPhasesLive.hpp",
+    "VS::Battle::ResetLiveActionPhase": r"Native\Game\include\Battle\ActionPhasesLive.hpp",
+    "VS::Battle::BeginLiveAshleyWeaponToggle": r"Native\Game\include\Battle\ActionPhasesLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1545,6 +1552,13 @@ OWNED_CALL_BINDINGS["F00100"] = "VS::Battle::StartLiveActionAnimation"
 OWNED_CALL_BINDINGS["F00101"] = "VS::Battle::AdvanceLiveActionEffectPhase"
 OWNED_CALL_BINDINGS["F00108"] = "VS::Battle::CommitLiveSelectedAction"
 OWNED_CALL_BINDINGS["F00109"] = "VS::Battle::StartLiveActionPresentation"
+OWNED_CALL_BINDINGS["F00001"] = "VS::Battle::ReleaseLiveQueuedActorAttacks"
+OWNED_CALL_BINDINGS["F00089"] = "VS::Battle::WaitForLivePostActionMovement"
+OWNED_CALL_BINDINGS["F00096"] = "VS::Battle::BeginLivePostActionRecovery"
+OWNED_CALL_BINDINGS["F00097"] = "VS::Battle::BeginLiveActionTrailFade"
+OWNED_CALL_BINDINGS["F00098"] = "VS::Battle::FinishLiveBattleAbilitySequence"
+OWNED_CALL_BINDINGS["F00114"] = "VS::Battle::ResetLiveActionPhase"
+OWNED_CALL_BINDINGS["F00121"] = "VS::Battle::BeginLiveAshleyWeaponToggle"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3288,6 +3302,13 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800704B0, "VS::Battle::AdvanceLiveActionEffectPhase"),  # F00101
     ("BATTLE/BATTLE.PRG", 0x80070F28, "VS::Battle::CommitLiveSelectedAction"),  # F00108
     ("BATTLE/BATTLE.PRG", 0x8007138C, "VS::Battle::StartLiveActionPresentation"),  # F00109
+    ("BATTLE/BATTLE.PRG", 0x80069D14, "VS::Battle::ReleaseLiveQueuedActorAttacks"),  # F00001
+    ("BATTLE/BATTLE.PRG", 0x8006F5FC, "VS::Battle::WaitForLivePostActionMovement"),  # F00089
+    ("BATTLE/BATTLE.PRG", 0x8006FBCC, "VS::Battle::BeginLivePostActionRecovery"),  # F00096
+    ("BATTLE/BATTLE.PRG", 0x8006FCBC, "VS::Battle::BeginLiveActionTrailFade"),  # F00097
+    ("BATTLE/BATTLE.PRG", 0x8006FD0C, "VS::Battle::FinishLiveBattleAbilitySequence"),  # F00098
+    ("BATTLE/BATTLE.PRG", 0x80072B9C, "VS::Battle::ResetLiveActionPhase"),  # F00114
+    ("BATTLE/BATTLE.PRG", 0x800734C0, "VS::Battle::BeginLiveAshleyWeaponToggle"),  # F00121
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

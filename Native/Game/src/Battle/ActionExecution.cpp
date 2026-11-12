@@ -2,6 +2,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -280,8 +281,8 @@ void Battle_StartReadyActionAnimation(void)
 void Battle_WaitForActionResolution(void)
 {
     if (VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[Battle_actionState->queueIndex & 3]) == 0) {
-        Battle_ReleaseQueuedActorAttacks();
-        Battle_BeginActionTrailFade();
+        VS::Battle::ReleaseLiveQueuedActorAttacks();
+        VS::Battle::BeginLiveActionTrailFade();
     }
 }
 
@@ -331,7 +332,7 @@ void Battle_WaitForTargetRecovery(void)
             var_s4 = 0;
         }
 
-        Battle_BeginPostActionRecovery(var_s4);
+        VS::Battle::BeginLivePostActionRecovery(var_s4);
     }
 }
 

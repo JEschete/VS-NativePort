@@ -13,6 +13,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentation.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -200,7 +201,7 @@ class LiveWorld final : public ActionPresentationWorld {
   void ResetReaction(int actor) override {
     Ai::ResetActorAiReactionDelay(Ai::BattleActorReactionDelays(), actor);
   }
-  void Recover() override { Battle_BeginPostActionRecovery(0); }
+  void Recover() override { BeginLivePostActionRecovery(0); }
   void ReturnToMenu() override { LiveReturnToBattleActionMenu(); }
   std::int16_t SelectionKind() override {
     return MenuSelection().selectionKind;

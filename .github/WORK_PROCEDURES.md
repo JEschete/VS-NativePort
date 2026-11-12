@@ -103,16 +103,21 @@ work (splitting tests, writing a differential case) to a background agent while 
 - If a fix after the group check changes code, re-run the differential and `promotion_check.py iterate`; re-run the
   group check before publishing.
 
-### 6. Document, publish and close out
+### 6. Record, publish and continue
 
-- Update [HANDOFF.md](../Docs/HANDOFF.md): the remaining count, the group's evidence (differential range, SHA-256,
-  vectors, mutants, broken variants, group check numbers), the limits and the next group.
+- Keep per-function status in the canonical ledgers and the original
+  [REMAINING_FUNCTIONS.csv](../Docs/ledgers/REMAINING_FUNCTIONS.csv). Keep commands, hashes, differential/mutant
+  results, group-check results and limits in the group's machine-readable evidence. Do not duplicate that report
+  into a prose handoff after every batch.
 - Commit only the group's files. Write the message to a UTF-8 file without BOM and use `git commit -F <file>`;
   no attribution. Push, then `gh run watch <id> --exit-status`.
-- While CI runs, start the next group's analysis.
-- After CI passes, comment on the issue with the commit, the CI run and the evidence. Close an issue only when all
-  its acceptance criteria are verified.
-- Delete the scratch files the group left in `build\`.
+- While checks or CI run, prepare the next related group's source analysis, case and tests. Reuse prepared analysis
+  and existing helpers; do not restart an audit without a concrete new correctness question.
+- After CI passes, post a concise issue checkpoint with the commit, CI run, cohort counts and evidence location.
+  Close an issue only when all its acceptance criteria are verified, then continue the next ordered group.
+- Update [HANDOFF.md](../Docs/HANDOFF.md) at a package boundary, an owner pause or a genuine blocker, not every
+  batch. Include the exact current revision, remaining count, next action and any unresolved limits.
+- Retain referenced verification evidence; clean only disposable scratch intermediates.
 
 ## Stopping
 
