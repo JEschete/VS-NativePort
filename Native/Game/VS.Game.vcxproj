@@ -407,6 +407,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\DamageCalculations.cpp" />
+    <ClCompile Include="src\Battle\DamageCalculationsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\DamagePolicies.cpp" />
     <ClCompile Include="src\Battle\DamagePoliciesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2309,6 +2313,8 @@
     <ClInclude Include="include\Battle\AttackPrerequisitesLive.hpp" />
     <ClInclude Include="include\Battle\BattleMode.hpp" />
     <ClInclude Include="include\Battle\BattleModeLive.hpp" />
+    <ClInclude Include="include\Battle\DamageCalculations.hpp" />
+    <ClInclude Include="include\Battle\DamageCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\DamagePolicies.hpp" />
     <ClInclude Include="include\Battle\DamagePoliciesLive.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />

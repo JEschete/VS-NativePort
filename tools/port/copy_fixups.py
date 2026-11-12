@@ -753,6 +753,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LiveLastActionStatValue": r"Native\Game\include\Battle\DamagePoliciesLive.hpp",
     "VS::Battle::LiveScaleLastActionStatValue": r"Native\Game\include\Battle\DamagePoliciesLive.hpp",
     "VS::Battle::LiveTargetRisk": r"Native\Game\include\Battle\DamagePoliciesLive.hpp",
+    "VS::Battle::LiveCalculatePhysicalHitDamage": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
+    "VS::Battle::LivePhysicalDamageWithoutDebuffs": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
+    "VS::Battle::LiveCalculateSpellHitDamage": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
+    "VS::Battle::LiveCalculateSpellHealing": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
+    "VS::Battle::LivePhysicalDamageWithDebuffs": r"Native\Game\include\Battle\DamageCalculationsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1437,6 +1442,11 @@ OWNED_CALL_BINDINGS["F00397"] = "VS::Battle::LiveDistributeLimbRecovery"
 OWNED_CALL_BINDINGS["F00408"] = "VS::Battle::LiveLastActionStatValue"
 OWNED_CALL_BINDINGS["F00432"] = "VS::Battle::LiveScaleLastActionStatValue"
 OWNED_CALL_BINDINGS["F00434"] = "VS::Battle::LiveTargetRisk"
+OWNED_CALL_BINDINGS["F00409"] = "VS::Battle::LiveCalculatePhysicalHitDamage"
+OWNED_CALL_BINDINGS["F00410"] = "VS::Battle::LivePhysicalDamageWithoutDebuffs"
+OWNED_CALL_BINDINGS["F00411"] = "VS::Battle::LiveCalculateSpellHitDamage"
+OWNED_CALL_BINDINGS["F00421"] = "VS::Battle::LiveCalculateSpellHealing"
+OWNED_CALL_BINDINGS["F00433"] = "VS::Battle::LivePhysicalDamageWithDebuffs"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3121,6 +3131,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80081138, "VS::Battle::LiveLastActionStatValue"),  # F00408
     ("BATTLE/BATTLE.PRG", 0x8008384C, "VS::Battle::LiveScaleLastActionStatValue"),  # F00432
     ("BATTLE/BATTLE.PRG", 0x800838BC, "VS::Battle::LiveTargetRisk"),  # F00434
+    ("BATTLE/BATTLE.PRG", 0x80081148, "VS::Battle::LiveCalculatePhysicalHitDamage"),  # F00409
+    ("BATTLE/BATTLE.PRG", 0x800819D0, "VS::Battle::LivePhysicalDamageWithoutDebuffs"),  # F00410
+    ("BATTLE/BATTLE.PRG", 0x800819FC, "VS::Battle::LiveCalculateSpellHitDamage"),  # F00411
+    ("BATTLE/BATTLE.PRG", 0x800829B8, "VS::Battle::LiveCalculateSpellHealing"),  # F00421
+    ("BATTLE/BATTLE.PRG", 0x8008388C, "VS::Battle::LivePhysicalDamageWithDebuffs"),  # F00433
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

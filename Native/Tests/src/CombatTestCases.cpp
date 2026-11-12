@@ -15,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
@@ -427,7 +428,7 @@ struct ArtResolutionFixture : AbilityEffectFixture {
           Battle_QueueHitDamageAndEquipmentWear(definition, source_hit,
                                                 target_hit, hit, random);
         };
-    Battle_statCalculators[25] = Battle_PhysicalDamageWithDebuffs;
+    Battle_statCalculators[25] = VS::Battle::LivePhysicalDamageWithDebuffs;
     stats[0].agility = 200;
     stats[0].strength = 150;
     stats[1].strength = 80;

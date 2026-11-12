@@ -26,15 +26,5 @@ extern Battle_Actor* Battle_actors[42];
 extern u_int Battle_lastActionStatValue;
 extern int Battle_criticalHitOccurred;
 extern short Battle_limbArmorDpLoss[8];
-short Battle_CalculatePhysicalHitDamage(Battle_ActionDefinition* action, Battle_HitResult* source,
-    Battle_HitResult* target, int nHit, int withRandMod, int applyStatuses);
-short Battle_PhysicalDamageWithoutDebuffs(Battle_ActionDefinition* action,
-    Battle_HitResult* source, Battle_HitResult* target, int nHit, int withRandMod);
-short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_HitResult* source,
-    Battle_HitResult* target, int nHit, int addRandMod);
-short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target, int nHit,
-    int withRandMod);
-short Battle_PhysicalDamageWithDebuffs(
-    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action);
 
 #endif // VS_BATTLE_DAMAGE_H_DECLS

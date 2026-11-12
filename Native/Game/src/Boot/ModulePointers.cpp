@@ -30,6 +30,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
+#include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
@@ -348,11 +349,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80081148u, 0u, (void*)&Battle_CalculatePhysicalHitDamage, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800819D0u, 0u, (void*)&Battle_PhysicalDamageWithoutDebuffs, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800819FCu, 0u, (void*)&Battle_CalculateSpellHitDamage, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800829B8u, 0u, (void*)&Battle_CalculateSpellHealing, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008388Cu, 0u, (void*)&Battle_PhysicalDamageWithDebuffs, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084228u, 0u, (void*)&Battle_MarkSourceActionSuccess, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084248u, 0u, (void*)&Battle_QueueInstantDeath, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800842ACu, 0u, (void*)&Battle_QueueDamageBasedArmorWear, 0u, 0u, 0u},
@@ -1763,6 +1759,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80081138u, 0u, (void*)&VS::Battle::LiveLastActionStatValue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008384Cu, 0u, (void*)&VS::Battle::LiveScaleLastActionStatValue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800838BCu, 0u, (void*)&VS::Battle::LiveTargetRisk, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80081148u, 0u, (void*)&VS::Battle::LiveCalculatePhysicalHitDamage, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800819D0u, 0u, (void*)&VS::Battle::LivePhysicalDamageWithoutDebuffs, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800819FCu, 0u, (void*)&VS::Battle::LiveCalculateSpellHitDamage, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800829B8u, 0u, (void*)&VS::Battle::LiveCalculateSpellHealing, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008388Cu, 0u, (void*)&VS::Battle::LivePhysicalDamageWithDebuffs, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},
