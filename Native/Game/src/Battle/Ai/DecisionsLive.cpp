@@ -8,6 +8,7 @@
 #include <iterator>
 #include <optional>
 
+#include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/Movement.h"
 #include "Core/Diagnostics.h"
 }
@@ -127,7 +127,7 @@ class LiveDecisionActor final : public DecisionActor {
     IssueLiveActorCommand(&state_, command);
   }
   bool TryExecutePlannedActions() override {
-    return Battle_Ai_TryExecutePlannedActions(&state_) != 0;
+    return TryExecuteLivePlannedActions(&state_) != 0;
   }
   bool TryRecoverBlockedMovement() override {
     return TryRecoverLiveBlockedMovement(

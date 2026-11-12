@@ -64,6 +64,7 @@
     <ClCompile Include="src\ActorSoundTransitionTests.cpp" />
     <ClCompile Include="src\ActorSpawningTests.cpp" />
     <ClCompile Include="src\ActorStateTests.cpp" />
+    <ClCompile Include="src\AiActionExecutionTests.cpp" />
     <ClCompile Include="src\AiActorCreationTests.cpp" />
     <ClCompile Include="src\AiActorPerceptionTests.cpp" />
     <ClCompile Include="src\AiActorSettingsTests.cpp" />

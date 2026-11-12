@@ -104,6 +104,7 @@ class World final : public ai::CandidateMovementWorld {
   std::function<void(ai::CandidateMover&)> after_dispatch;
   std::function<void()> after_can_approach;
   std::function<void()> after_cooldown;
+  std::function<void(ai::CandidateMover&)> after_flee;
   mutable std::vector<Call> calls;
 
   World() {
@@ -114,6 +115,18 @@ class World final : public ai::CandidateMovementWorld {
     frame.fill(true);
     models.fill(ai::PursuitTarget{});
     heights.fill(0);
+  }
+  std::size_t ActorHead() const override {
+    return roster && roster.value().count != 0 ? 1 : 0;
+  }
+  std::optional<int> ActorId(std::size_t node) const override {
+    if (!roster || node == 0 || node > roster.value().count) {
+      return std::nullopt;
+    }
+    return roster.value().ids.at(node - 1);
+  }
+  std::size_t ActorNext(std::size_t node) const override {
+    return roster && node < roster.value().count ? node + 1 : 0;
   }
   std::optional<std::size_t> RankedHandle(std::size_t rank) const override {
     return rank < ranks.size() ? ranks.at(rank) : std::nullopt;
@@ -170,6 +183,7 @@ class World final : public ai::CandidateMovementWorld {
   }
   int Flee(ai::CandidateMover& mover, int kind) override {
     Note(CallKind::kFlee, mover, kind);
+    if (after_flee) after_flee(mover);
     return Pop(flees, 0);
   }
   void Wander(ai::CandidateMover& mover, std::uint32_t tile,
@@ -236,6 +250,60 @@ ai::CandidateMover Mover() {
   return mover;
 }
 }  // namespace
+
+TEST_CASE("Escort follow uses its distance and recovery prefix",
+          "[candidate-movement][F01656]") {
+  World world;
+  auto mover = Mover();
+  world.can_approach = false;
+  world.approaches = {1};
+  mover.range_mode = 1;
+  CHECK(ai::UpdateEscortCombatBehavior(world, mover) == 1);
+  CHECK(world.Last(CallKind::kApproach).second == 384);
+  CHECK(world.Last(CallKind::kApproach).third == 0);
+  CHECK(mover.movement_target == 2);
+  CHECK(world.Count(CallKind::kRelease) == 1);
+  CHECK(world.Count(CallKind::kRecover) == 1);
+}
+
+TEST_CASE("Escort restores current old-class bits after flee mutations",
+          "[candidate-movement][F01656]") {
+  World world;
+  auto mover = Mover();
+  mover.action_status = 1;
+  mover.linked_actor = 16;
+  FixtureValue(world.roster).count = 3;
+  FixtureValue(world.roster).ids = {2, 3, 4};
+  mover.relations.at(2) = 0x001000C0;
+  mover.relations.at(3) = 0x20000080;
+  mover.relations.at(4) = 0x10100040;
+  world.after_flee = [](auto& state) { state.relations.at(4) = 0x2FE123FF; };
+  world.flees = {-7};
+  CHECK(ai::UpdateEscortCombatBehavior(world, mover) == 1);
+  CHECK(world.Count(CallKind::kFlee) == 1);
+  CHECK(world.Last(CallKind::kFlee).first == 0);
+  CHECK(mover.relations.at(4) == 0x2FE123BF);
+  CHECK(mover.relations.at(2) == 0x001000C0);
+  CHECK(mover.relations.at(3) == 0x20000080);
+}
+
+TEST_CASE("Escort exhaustion restores relations and refuses invalid IDs",
+          "[candidate-movement][F01656]") {
+  World world;
+  auto mover = Mover();
+  mover.action_status = 1;
+  mover.linked_actor = 16;
+  FixtureValue(world.roster).count = 1;
+  FixtureValue(world.roster).ids.at(0) = 3;
+  mover.relations.at(3) = 0x20100000;
+  CHECK(ai::UpdateEscortCombatBehavior(world, mover) == 0);
+  CHECK(mover.relations.at(3) == 0x20100080);
+  mover.linked_actor = -1;
+  CHECK_FALSE(ai::UpdateEscortCombatBehavior(world, mover));
+  mover.linked_actor = 16;
+  FixtureValue(world.roster).ids.at(0) = 16;
+  CHECK_FALSE(ai::UpdateEscortCombatBehavior(world, mover));
+}
 
 TEST_CASE("Candidate movement does not read an unused candidate",
           "[candidate-movement][F01649]") {
@@ -768,4 +836,6 @@ TEST_CASE(
         reinterpret_cast<void*>(&ai::UpdateLiveEnemyPursuitBehavior));
   CHECK(resolve(0x800DA738) ==
         reinterpret_cast<void*>(&ai::UpdateLiveGuardMovementBehavior));
+  CHECK(resolve(0x800DAAD8) ==
+        reinterpret_cast<void*>(&ai::UpdateLiveEscortCombatBehavior));
 }

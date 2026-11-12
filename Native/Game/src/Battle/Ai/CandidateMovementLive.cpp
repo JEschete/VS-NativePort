@@ -12,6 +12,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/CandidateMovement.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
@@ -134,9 +135,14 @@ void Store(const CandidateMover& mover, State& state) {
   state.opaque18 = mover.alerted;
   state.opaque44 = mover.guard_delay;
   state.movementTarget = mover.movement_target;
+  for (int id = 0; id < kCandidateTargetSlots; ++id) {
+    state.relations[id] =
+        std::bit_cast<Battle_Ai_RelationWord>(mover.relations.at(id));
+  }
 }
 
-class LiveCandidateMovementWorld final : public CandidateMovementWorld {
+class LiveCandidateMovementWorld final
+    : public LiveDecisionList<CandidateMovementWorld> {
  public:
   explicit LiveCandidateMovementWorld(State& state) : state_(state) {}
 
@@ -361,5 +367,9 @@ int UpdateLiveEnemyPursuitBehavior(Escort* state) {
 
 int UpdateLiveGuardMovementBehavior(Escort* state) {
   return Run(reinterpret_cast<State*>(state), UpdateGuardMovementBehavior);
+}
+
+int UpdateLiveEscortCombatBehavior(Escort* state) {
+  return Run(reinterpret_cast<State*>(state), UpdateEscortCombatBehavior);
 }
 }  // namespace VS::Battle::Ai

@@ -1392,13 +1392,13 @@ class EncounterFixupTests(unittest.TestCase):
             self.assertNotIn("Core_Math_SquaredVectorLength", text, path.name)
             self.assertNotIn("Core_Math_SquaredTileDistance", text, path.name)
             self.assertNotIn("Core_Math_SquaredDistanceWithHeightOffsets", text, path.name)
-        for name in ("Behavior",):
-            text = (ai / f"{name}.cpp").read_text(encoding="utf-8")
-            self.assertLess(
-                text.index('#include "Core/Math/Distance.hpp"'),
-                text.index('extern "C" {'),
-                name,
-            )
+        # F01659 keeps record-derived height separate from battle-head position.
+        execution = (ai / "ActionExecution.cpp").read_text(encoding="utf-8")
+        binding = (ai / "ActionExecutionLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Core::Math::SquaredDistanceWithHeightOffsets(", execution)
+        self.assertIn("state.position, position.value(), state.point_height, height", execution)
+        self.assertIn("Core::Math::PositionOf(Battle_actors[0]->model->position)", binding)
+        self.assertNotIn("(short*)", execution)
         # Navigation.cpp's distance users (F01710, F01740), Movement.cpp's
         # (F01748, F01749) and OrbitingBoss.cpp's (F01848) moved to typed cores.
         for name in ("Navigation", "Movement", "OrbitingBoss"):
@@ -4269,7 +4269,7 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
             owned = {row["id"]: row for row in csv.DictReader(file)}
         self.assertEqual(owned["F01720"]["name"], "VS::Battle::Ai::IssueActorCommand")
         self.assertFalse((root / "Native/Game/src/Battle/Ai/ActorCommands.h").exists())
-        for path in ("Behavior.cpp", "Movement.cpp", "Navigation.cpp", "OrbitingBoss.cpp"):
+        for path in ("ActionExecutionLive.cpp", "Movement.cpp", "Navigation.cpp", "OrbitingBoss.cpp"):
             text = (root / "Native/Game/src/Battle/Ai" / path).read_text(encoding="utf-8")
             self.assertNotIn("Battle_Ai_IssueActorCommand(", text, path)
             self.assertNotIn("Battle/Ai/ActorCommands.h", text, path)
@@ -4279,7 +4279,7 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
             if path in ("Navigation.cpp", "Movement.cpp", "OrbitingBoss.cpp"):
                 self.assertNotIn("IssueLiveActorCommand(", text, path)
                 continue
-            self.assertIn("VS::Battle::Ai::IssueLiveActorCommand(", text, path)
+            self.assertIn("IssueLiveActorCommand(", text, path)
             self.assertIn('#include "Battle/Ai/ActorCommandsLive.hpp"', text, path)
         # The owned creation binding (F01818) sits inside VS::Battle::Ai.
         creation = (root / "Native/Game/src/Battle/Ai/ActorCreationLive.cpp").read_text(encoding="utf-8")

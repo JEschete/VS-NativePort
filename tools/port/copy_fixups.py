@@ -670,6 +670,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::UpdateLiveCloseFollowBehavior": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
     "VS::Battle::Ai::UpdateLiveEnemyPursuitBehavior": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
     "VS::Battle::Ai::UpdateLiveGuardMovementBehavior": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
+    "VS::Battle::Ai::UpdateLiveEscortCombatBehavior": r"Native\Game\include\Battle\Ai\CandidateMovementLive.hpp",
+    "VS::Battle::Ai::TryExecuteLiveActionCandidate": r"Native\Game\include\Battle\Ai\ActionExecutionLive.hpp",
+    "VS::Battle::Ai::TryExecuteLivePlannedActions": r"Native\Game\include\Battle\Ai\ActionExecutionLive.hpp",
+    "VS::Battle::Ai::UpdateLiveActorDecisions": r"Native\Game\include\Battle\Ai\ActionExecutionLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1270,6 +1274,10 @@ OWNED_CALL_BINDINGS["F01651"] = "VS::Battle::Ai::TryApproachLivePlannedTarget"
 OWNED_CALL_BINDINGS["F01652"] = "VS::Battle::Ai::UpdateLiveCloseFollowBehavior"
 OWNED_CALL_BINDINGS["F01653"] = "VS::Battle::Ai::UpdateLiveEnemyPursuitBehavior"
 OWNED_CALL_BINDINGS["F01654"] = "VS::Battle::Ai::UpdateLiveGuardMovementBehavior"
+OWNED_CALL_BINDINGS["F01656"] = "VS::Battle::Ai::UpdateLiveEscortCombatBehavior"
+OWNED_CALL_BINDINGS["F01657"] = "VS::Battle::Ai::TryExecuteLiveActionCandidate"
+OWNED_CALL_BINDINGS["F01658"] = "VS::Battle::Ai::TryExecuteLivePlannedActions"
+OWNED_CALL_BINDINGS["F01659"] = "VS::Battle::Ai::UpdateLiveActorDecisions"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2866,6 +2874,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DA5CC, "VS::Battle::Ai::UpdateLiveCloseFollowBehavior"),  # F01652
     ("BATTLE/BATTLE.PRG", 0x800DA6A4, "VS::Battle::Ai::UpdateLiveEnemyPursuitBehavior"),  # F01653
     ("BATTLE/BATTLE.PRG", 0x800DA738, "VS::Battle::Ai::UpdateLiveGuardMovementBehavior"),  # F01654
+    ("BATTLE/BATTLE.PRG", 0x800DAAD8, "VS::Battle::Ai::UpdateLiveEscortCombatBehavior"),  # F01656
+    ("BATTLE/BATTLE.PRG", 0x800DAC80, "VS::Battle::Ai::TryExecuteLiveActionCandidate"),  # F01657
+    ("BATTLE/BATTLE.PRG", 0x800DAD9C, "VS::Battle::Ai::TryExecuteLivePlannedActions"),  # F01658
+    ("BATTLE/BATTLE.PRG", 0x800DAED0, "VS::Battle::Ai::UpdateLiveActorDecisions"),  # F01659
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -3834,14 +3846,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          '        Core_Debugf("actors", "absolute slide skips absent actor=%d", arg0);\n'
          "        return;\n    }",
          "func_800A9D90: retain the primitive's optional-actor no-op contract before position/rate access"),
-    ],
-    "F01659": [
-        ("SquaredDistanceWithHeightOffsets(state->position,",
-         "SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(state->position),",
-         "F01773 is promoted C++: pass the deciding actor's short[3] position as a Position3 value"),
-        ("((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position,",
-         "VS::Core::Math::PositionOf(((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position),",
-         "F01773 is promoted C++: pass the player model's short[3] position as a Position3 value"),
     ],
     "F01353": [("((u_long)primBuf << 8) >> 8", "LegacyGpu_Handle(primBuf)", "stat-gauge native packet link")],
     "F01348": [

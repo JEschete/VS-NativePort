@@ -346,6 +346,8 @@
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp" />
     <None Include="..\..\port\differentials\boss_orbit.py" />
     <None Include="..\..\port\differentials\boss_orbit_driver.cpp" />
+    <None Include="..\..\port\differentials\candidate_movement.py" />
+    <None Include="..\..\port\differentials\candidate_movement_driver.cpp" />
     <None Include="..\..\port\differentials\engaged_list.py" />
     <None Include="..\..\port\differentials\engaged_list_driver.cpp" />
     <None Include="..\..\port\differentials\flight_movement.py" />

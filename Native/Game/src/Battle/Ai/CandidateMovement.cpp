@@ -24,6 +24,10 @@ constexpr int kTileCenter = 64;
 constexpr int kRangeUnits = 32;
 constexpr int kPursuitDistance = 640;
 constexpr int kCloseFollowDistance = 288;
+constexpr int kEscortFollowDistance = 384;
+constexpr unsigned kCategoryShift = 20;
+constexpr unsigned kCategoryMask = 127;
+constexpr unsigned kOldRelationShift = 28;
 constexpr int kEnemyDistance = 1024;
 constexpr int kGuardDistance = 320;
 constexpr int kGuardDelay = 10;
@@ -362,9 +366,10 @@ std::optional<int> TryApproachPlannedTarget(CandidateMovementWorld& world,
       {.target = static_cast<int>(target), .distance = distance, .option = 1});
 }
 
-// decomp: func_800DA5CC (src/BATTLE/BATTLE.PRG/71618.c:814).
-std::optional<int> UpdateCloseFollowBehavior(CandidateMovementWorld& world,
-                                             CandidateMover& mover) {
+namespace {
+std::optional<int> FollowLinkedActor(CandidateMovementWorld& world,
+                                     CandidateMover& mover, int distance,
+                                     int option) {
   const auto first = world.RankedHandle(0);
   if (mover.action_status == 0) {
     if (!first) return Refuse("AI close follow requires its action candidate");
@@ -377,9 +382,9 @@ std::optional<int> UpdateCloseFollowBehavior(CandidateMovementWorld& world,
   const int target = static_cast<int>(mover.linked_actor);
   if (target >= kCandidateTargetSlots) return 0;
   if (!ValidTarget(target)) return Refuse("AI close follow target is negative");
-  if (world.Approach(mover, {.target = target,
-                             .distance = kCloseFollowDistance,
-                             .option = 1}) != 0) {
+  if (world.Approach(
+          mover, {.target = target, .distance = distance, .option = option}) !=
+      0) {
     if (mover.range_mode == 1 && mover.plan_mode != kPlayerMode) {
       if (!first) {
         return Refuse("AI close follow requires its recovery candidate");
@@ -394,6 +399,51 @@ std::optional<int> UpdateCloseFollowBehavior(CandidateMovementWorld& world,
     return 1;
   }
   return world.Track(mover, target) != 0 ? 1 : 0;
+}
+}  // namespace
+
+// decomp: func_800DA5CC (src/BATTLE/BATTLE.PRG/71618.c:814).
+std::optional<int> UpdateCloseFollowBehavior(CandidateMovementWorld& world,
+                                             CandidateMover& mover) {
+  return FollowLinkedActor(world, mover, kCloseFollowDistance, 1);
+}
+
+// decomp: func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:958).
+std::optional<int> UpdateEscortCombatBehavior(CandidateMovementWorld& world,
+                                              CandidateMover& mover) {
+  const auto followed =
+      FollowLinkedActor(world, mover, kEscortFollowDistance, 0);
+  if (!followed || followed.value() != 0) return followed;
+  std::array<std::size_t, kCandidateTargetSlots> visited{};
+  std::size_t count = 0;
+  for (auto node = world.ActorHead(); node != 0; node = world.ActorNext(node)) {
+    if (count == visited.size()) return Refuse("AI escort list is unbounded");
+    for (std::size_t index = 0; index < count; ++index) {
+      if (visited.at(index) == node) return Refuse("AI escort list is cyclic");
+    }
+    visited.at(count++) = node;
+    auto id = world.ActorId(node);
+    if (!id || !ValidTarget(id.value())) {
+      return Refuse("AI escort actor ID is invalid");
+    }
+    auto& relation = mover.relations.at(id.value());
+    if (Classification(mover, id.value()) == kEnemy ||
+        ((relation >> kCategoryShift) & kCategoryMask) == 0) {
+      continue;
+    }
+    relation |= kRelationMask << kRelationShift;
+    const int fled = world.Flee(mover, 0);
+    id = world.ActorId(node);
+    if (!id || !ValidTarget(id.value())) {
+      return Refuse("AI escort callback changed its actor ID");
+    }
+    auto& current = mover.relations.at(id.value());
+    current =
+        (current & ~(kRelationMask << kRelationShift)) |
+        (((current >> kOldRelationShift) & kRelationMask) << kRelationShift);
+    if (fled != 0) return 1;
+  }
+  return 0;
 }
 
 // decomp: func_800DA6A4 (src/BATTLE/BATTLE.PRG/71618.c:839).

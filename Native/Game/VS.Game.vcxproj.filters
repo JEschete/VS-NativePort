@@ -426,6 +426,12 @@
     <ClInclude Include="src\Battle\Actor.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\ActionExecution.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActionExecutionLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActionPlanning.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -483,12 +489,6 @@
     <ClCompile Include="src\Battle\Ai\AreaRouteLive.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\Behavior.cpp">
-      <Filter>src\Battle\Ai</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Battle\Ai\Behavior.h">
-      <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\Ai\BlockedMovement.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2627,6 +2627,12 @@
     </ClInclude>
     <ClInclude Include="include\Battle\ActionResultsLive.hpp">
       <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ActionExecution.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ActionExecutionLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ActorCleanup.hpp">
       <Filter>include\Battle\Ai</Filter>

@@ -8,6 +8,7 @@ struct Battle_Ai_CandidateEntryView;
 struct Battle_Ai_EscortView;
 
 namespace VS::Battle::Ai {
+int UpdateLiveEscortCombatBehavior(Battle_Ai_EscortView* state);
 int MoveLiveForActionCandidate(Battle_Ai_CandidateMovementView* state,
                                Battle_Ai_CandidateEntryView* candidate);
 int UpdateLiveCombatPursuit(Battle_Ai_ActorAiState* state);

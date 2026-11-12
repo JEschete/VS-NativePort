@@ -389,6 +389,10 @@ def effect_address(field: int) -> tuple[int, int]:
 
 
 def run(machine: Machine, v: dict):
+    return run_at(machine, v, ENTRIES[v["kind"]])
+
+
+def run_at(machine: Machine, v: dict, entry: int):
     if "data" not in v:
         v["data"] = data_block(v)
     initial = v["data"]
@@ -441,7 +445,7 @@ def run(machine: Machine, v: dict):
     for code, address in enumerate(CALLEES):
         machine.stub(address, lambda m, code=code: stub(m, code))
     machine.r[4], machine.r[5] = STATE, CANDIDATES + v["handle"] * CANDIDATE_SIZE
-    machine.execute(ENTRIES[v["kind"]])
+    machine.execute(entry)
     changed = [(address, initial[address - DATA], after)
                for address, after in machine.overlay.items()
                if DATA <= address < DATA + DATA_SIZE and initial[address - DATA] != after]

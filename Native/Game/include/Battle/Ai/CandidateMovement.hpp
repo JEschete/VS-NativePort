@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/MovementBehavior.hpp"
 #include "Battle/Ai/PlanningPrimitives.hpp"
 
@@ -41,9 +42,9 @@ struct PursuitTarget {
 
 // Candidate handles retain identity across calls. Calls taking the mover
 // publish its writes before running and read back any changes they make.
-class CandidateMovementWorld {
+class CandidateMovementWorld : public DecisionActorList {
  public:
-  virtual ~CandidateMovementWorld() = default;
+  ~CandidateMovementWorld() override = default;
   [[nodiscard]] virtual std::optional<std::size_t> RankedHandle(
       std::size_t rank) const = 0;
   [[nodiscard]] virtual std::optional<ActionCandidate> Candidate(
@@ -101,6 +102,9 @@ std::optional<int> TryApproachPlannedTarget(CandidateMovementWorld& world,
 // decomp: func_800DA5CC (src/BATTLE/BATTLE.PRG/71618.c:814).
 std::optional<int> UpdateCloseFollowBehavior(CandidateMovementWorld& world,
                                              CandidateMover& mover);
+// decomp: func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:958).
+std::optional<int> UpdateEscortCombatBehavior(CandidateMovementWorld& world,
+                                              CandidateMover& mover);
 // decomp: func_800DA6A4 (src/BATTLE/BATTLE.PRG/71618.c:839).
 std::optional<int> UpdateEnemyPursuitBehavior(CandidateMovementWorld& world,
                                               CandidateMover& mover);

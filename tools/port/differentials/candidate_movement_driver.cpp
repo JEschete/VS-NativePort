@@ -109,6 +109,12 @@ public:
     std::vector<long long> tiles;
     std::vector<Effect> effects;
     std::vector<std::vector<long long>> calls;
+    std::size_t ActorHead() const override { return roster.count ? 1 : 0; }
+    std::optional<int> ActorId(std::size_t node) const override
+    {
+        return node && node <= roster.count ? std::optional<int>(roster.ids.at(node - 1)) : std::nullopt;
+    }
+    std::size_t ActorNext(std::size_t node) const override { return node < roster.count ? node + 1 : 0; }
 
     std::vector<long long> Snapshot() const
     {
@@ -197,11 +203,8 @@ private:
 };
 } // namespace
 
-int main()
+void RunMovementLine(std::istringstream& in)
 {
-    std::string line;
-    while (std::getline(std::cin, line)) {
-        std::istringstream in(line);
         const int kind = Read<int>(in);
         const auto handle = Read<std::size_t>(in);
         CandidateMover mover;
@@ -253,6 +256,7 @@ int main()
         case 2: result = TryApproachPlannedTarget(world, mover, handle); break;
         case 3: result = UpdateCloseFollowBehavior(world, mover); break;
         case 4: result = UpdateEnemyPursuitBehavior(world, mover); break;
+        case 6: result = UpdateEscortCombatBehavior(world, mover); break;
         default: result = UpdateGuardMovementBehavior(world, mover); break;
         }
         std::cout << (!result.has_value() ? 1 : 0) << ' ' << result.value_or(0);
@@ -263,5 +267,15 @@ int main()
             for (const auto value : call)
                 std::cout << ' ' << value;
         std::cout << '\n';
+}
+
+#ifndef VS_MOVEMENT_DRIVER_INCLUDED
+int main()
+{
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        std::istringstream in(line);
+        RunMovementLine(in);
     }
 }
+#endif

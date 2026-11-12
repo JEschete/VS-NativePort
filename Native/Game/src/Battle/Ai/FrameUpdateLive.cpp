@@ -7,6 +7,7 @@
 #include <cstring>
 #include <optional>
 
+#include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -108,7 +108,9 @@ class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
   void UpdatePerception() override {
     VS::Battle::Ai::UpdateLiveActorPerception();
   }
-  void UpdateDecisions() override { Battle_Ai_UpdateActorDecisions(); }
+  void UpdateDecisions() override {
+    VS::Battle::Ai::UpdateLiveActorDecisions();
+  }
   void AnimateEngagement() override {
     VS::Battle::Ai::AnimateLiveEngagementPhase();
   }

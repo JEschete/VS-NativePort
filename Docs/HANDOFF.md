@@ -1,13 +1,13 @@
 # Current Handoff
 
-Updated 2026-11-11. Row 28 (battle AI) of the C++ promotion work (#276) is active. The previously published promotion is the
+Updated 2026-11-11. Row 28 (battle AI) of the C++ promotion work (#276) is source-complete; row 29 is next. The earlier perception promotion is the
 F01638-F01640/F01643 perception group in `33ad4f3e`
 ([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695)). Each published row-28
 commit and its exact-revision CI run are recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276)
 and in the ledgers. The per-function publish list, Latest Work and Verified sections that used to be here are in the
 [archived handoff](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF.md).
 The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
-See [Stopping Point](#stopping-point) for the current state and the next group.
+See [Active continuation](#active-continuation-2026-11-11) for current evidence and the next group.
 
 ## Active continuation (2026-11-11)
 
@@ -16,14 +16,19 @@ tracking in `REMAINING_FUNCTIONS.csv`. Work resumed from clean `0e8989ad`;
 exact-revision Source Quality `43105524312` passed. The earlier stopping point
 below is retained as historical evidence, not an instruction to pause.
 
+The candidate-movement batch is published in `fc0e2525`; exact-revision Source
+Quality [43136464204](https://github.com/JEschete/VS-NativePort/actions/runs/43136464204)
+passed. Publication and detailed evidence are recorded on
+[#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812029760).
+
 The first batch is F01649-F01654 in `CandidateMovement.hpp/.cpp` and
 `CandidateMovementLive.hpp/.cpp`: candidate movement, combat pursuit,
 planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 6 of the original 900 resolved; 894 remain** (893 generated plus
-F01416 owned WIP). Modernization is 2,850/3,744; C++ promotion is 2,851 plus
+**Progress: 10 of the original 900 resolved; 890 remain** (889 generated plus
+F01416 owned WIP). Modernization is 2,854/3,744; C++ promotion is 2,855 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -63,11 +68,37 @@ diagnostics. Empty/unused candidate paths remain lazy. Neither these tests nor
 the canonical replays establish every pursuit/guard gameplay path, complete
 battle-AI/M8 behavior, or EC-04 retirement.
 
-After this batch is published, continue directly with F01656-F01659. Their
-original 377-instruction range, 0x800DAAD8-0x800DB0BC, has been read along with
-callers and state contracts. Then audit row 28 and start row 29; F01416 remains
-the one owned WIP in the original cohort. Keep every cohort row in the progress
-CSV, including resolved ones; the `snapshot` column stays `44fa8847`.
+The final row-28 batch, F01656-F01659, is now locally verified on `fc0e2525`.
+`ActionExecution` and its checked live binding implement candidate execution,
+planned actions and frame-budget dispatch; escort movement shares the follow
+prefix in `CandidateMovement`. Generated `Behavior.cpp/.h` are retired and
+their four old symbols have zero consumers (17 before).
+
+- Original range: 0x800DAAD8-0x800DB0BC (exclusive), 377 instructions,
+  SHA-256 `1559513320faef91480dbd464ee03abfb539cad367eca3e435866f70ea2408d3`.
+- `differential.py action_execution`: 4,096 vectors, zero mismatches;
+  47/47 mutants detected. Four native broken variants detect 81/212/84/82
+  mismatches over 1,024 vectors each. The shared `candidate_movement`
+  differential was rerun: 6,144 vectors, zero mismatches, 73/73 mutants.
+- Group `build\promotion-check\group-20261111-205725`, 385 seconds:
+  Debug/Release each pass 5,773 cases/12,651,925 assertions; combined focused
+  tests pass 52 cases/279 assertions. Both canonical replays match in both
+  configurations; copier stability and 272 tool controls pass; tidy reports
+  five existing findings, zero new.
+- Row-28 audit: all 89 original cohort IDs are promoted; no generated
+  function remains in the slice. Plan row 28 is marked done. This is source
+  promotion, not M8 or EC-04 completion. External differential callees remain
+  queued stubs, and #337 remains suspected with diagnostic refusals preserved.
+- Local evidence: `build\differential\action_execution.log`, the four
+  `action_execution-F01656-variant.log` through `F01659` reports, and
+  `build\scratch\pursuit\action_execution_ledgers.json`. Publication and
+  exact-revision CI for the final batch are the next gate.
+
+Continue with row 29: F00405/F00406 and F00437-F00442 (eight related status
+queue functions). Their original source, callers and 188 original instructions
+have been read. Keep every original cohort row in the progress CSV, including
+resolved ones; the `snapshot` column stays `44fa8847`. F01416 remains the one
+owned WIP and must not disappear from the remaining count.
 
 ## Prior checkpoint (before this continuation)
 
@@ -109,6 +140,10 @@ On owner request, obsolete and duplicate documents were removed from `Docs`. The
 the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decomp Process.md` and the draft was deleted.
 
 ## Stopping Point
+
+The continuation is active, not paused. Row 28 is source-complete and its final
+four-function group is verified locally; publish it and confirm CI, then begin
+row 29 as described above. The perception checkpoint below is historical.
 
 Stopped on owner request (2026-11-11) after the perception group, published
 in `33ad4f3e` on base `3aa5b806` and green on the exact revision
@@ -279,12 +314,12 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. The perception group (`33ad4f3e`) is green and recorded on #276; continue
-   with the Behavior groups from the [Stopping Point](#stopping-point). Keep
-   #337 open until its in-game reachability is established. Do not close
-   #276: 900 remain.
-3. Continue ordered row 28 with Behavior (F01649-F01654, then F01656-F01659)
-   as listed by [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
+2. Publish the verified final row-28 group and confirm its exact-revision CI,
+   then continue row 29. Keep #337 open until its in-game reachability is
+   established. Do not close #276: 890 remain.
+3. Start row 29 with status-queue primitives F00405/F00406 and the six
+   related handlers F00437-F00442, following
+   [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified
    dependencies, not proof of remaining AI behavior or gameplay.

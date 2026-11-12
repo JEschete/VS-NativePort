@@ -2010,6 +2010,12 @@
     <None Include="..\..\port\differentials\boss_orbit_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\candidate_movement.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\candidate_movement_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\engaged_list.py">
       <Filter>tools\port\differentials</Filter>
     </None>

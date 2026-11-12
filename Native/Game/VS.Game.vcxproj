@@ -214,6 +214,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActionExecution.cpp" />
+    <ClCompile Include="src\Battle\Ai\ActionExecutionLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActionPlanning.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -252,13 +256,6 @@
     <ClCompile Include="src\Battle\Ai\AreaRoute.cpp" />
     <ClCompile Include="src\Battle\Ai\AreaRouteLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="src\Battle\Ai\Behavior.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\BlockedMovement.cpp" />
     <ClCompile Include="src\Battle\Ai\BlockedMovementLive.cpp">
@@ -1915,7 +1912,6 @@
     <ClInclude Include="src\Battle\Ai\ActorState.h" />
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
-    <ClInclude Include="src\Battle\Ai\Behavior.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp" />
     <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
@@ -2217,6 +2213,8 @@
     <ClInclude Include="include\Battle\Action.h" />
     <ClInclude Include="include\Battle\ActionResults.hpp" />
     <ClInclude Include="include\Battle\ActionResultsLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActionExecution.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActionExecutionLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCleanup.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCleanupLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommands.hpp" />
