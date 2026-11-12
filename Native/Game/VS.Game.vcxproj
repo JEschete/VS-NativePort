@@ -467,6 +467,10 @@
     <ClCompile Include="src\Battle\StatusHelpersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\StatusLifecycle.cpp" />
+    <ClCompile Include="src\Battle\StatusLifecycleLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\StatusQueue.cpp" />
     <ClCompile Include="src\Battle\StatusQueueLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2289,6 +2293,8 @@
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
     <ClInclude Include="include\Battle\StatusHelpers.hpp" />
     <ClInclude Include="include\Battle\StatusHelpersLive.hpp" />
+    <ClInclude Include="include\Battle\StatusLifecycle.hpp" />
+    <ClInclude Include="include\Battle\StatusLifecycleLive.hpp" />
     <ClInclude Include="include\Battle\StatusQueue.hpp" />
     <ClInclude Include="include\Battle\StatusQueueLive.hpp" />
     <ClInclude Include="include\Battle\Targeting.hpp" />

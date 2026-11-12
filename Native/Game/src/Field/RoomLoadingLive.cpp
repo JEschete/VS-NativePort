@@ -25,6 +25,7 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Encounter.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Log.hpp"
@@ -1103,7 +1104,7 @@ class LiveRoomLoadHost final
     Battle_ActorStats* stats = Battle_characterState->stats;
     static_cast<void>(
         Battle_QueueActorStatusLabels(0, 0, stats->statuses & statuses, 1));
-    Battle_RemoveActorStatuses(statuses, stats);
+    VS::Battle::RemoveLiveActorStatuses(statuses, stats);
   }
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15392-15405)

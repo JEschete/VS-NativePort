@@ -3,6 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -117,20 +118,20 @@ struct ConditionFixture {
     if (VS::Battle::QueueLiveApplicableStatusChanges(effect, &hit) == 0) {
       return false;
     }
-    Battle_RemoveActorStatuses(hit.inflictStatuses, &stats);
-    Battle_InflictActorStatuses(hit.removeStatuses, &stats);
+    VS::Battle::RemoveLiveActorStatuses(hit.inflictStatuses, &stats);
+    VS::Battle::InflictLiveActorStatuses(hit.removeStatuses, &stats);
     return true;
   }
 
   void Cure(int effect) {
     Battle_HitResult hit{};
     REQUIRE(VS::Battle::QueueLiveStatusRemovalMask(effect, &hit) != 0);
-    Battle_RemoveActorStatuses(hit.inflictStatuses, &stats);
+    VS::Battle::RemoveLiveActorStatuses(hit.inflictStatuses, &stats);
   }
 
   void Tick(int count) {
     for (int index = 0; index < count; ++index) {
-      Battle_UpdateActorStatusTimers(&stats);
+      VS::Battle::UpdateLiveActorStatusTimers(&stats);
     }
   }
 

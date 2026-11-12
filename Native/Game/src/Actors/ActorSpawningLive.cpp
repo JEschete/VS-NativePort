@@ -21,6 +21,7 @@
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDrive.hpp"
@@ -509,7 +510,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void InflictStatuses(std::size_t slot, std::int32_t statuses) override {
     if (Battle_ActorStats* stats = SlotStats(slot); stats != nullptr) {
-      Battle_InflictActorStatuses(statuses, stats);
+      VS::Battle::InflictLiveActorStatuses(statuses, stats);
     }
   }
 
@@ -804,7 +805,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void InflictCharacterStatuses(std::int32_t statuses) override {
     if (Battle_ActorStats* stats = CharacterStats(); stats != nullptr) {
-      Battle_InflictActorStatuses(statuses, stats);
+      VS::Battle::InflictLiveActorStatuses(statuses, stats);
     }
   }
 

@@ -19,6 +19,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/BattleModeLive.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Event/ScriptActorCommands.hpp"
 #include "Event/ScriptActorOpcodes.h"
@@ -367,7 +368,9 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   void SetBattleMode(int actor, int mode) override {
     VS::Battle::LiveSetActorBattleMode(actor, mode);
   }
-  void PreserveAshleyStatuses() override { Battle_PreserveAshleyStatuses(); }
+  void PreserveAshleyStatuses() override {
+    VS::Battle::PreserveLiveAshleyStatuses();
+  }
   void MarkEnteredDoor(int door) override {
     Field_MarkEntranceDoorOnSceneMapEntry(door);
   }

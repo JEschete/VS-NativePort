@@ -713,6 +713,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::QueueLiveActorStatChangeNumber": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
     "VS::Battle::UpdateLiveTargetingRiskPenalty": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
     "VS::Battle::ResetLiveTargetingRiskPenaltyTimer": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
+    "VS::Battle::PreserveLiveAshleyStatuses": r"Native\Game\include\Battle\StatusLifecycleLive.hpp",
+    "VS::Battle::RemoveLiveActorStatuses": r"Native\Game\include\Battle\StatusLifecycleLive.hpp",
+    "VS::Battle::InflictLiveActorStatuses": r"Native\Game\include\Battle\StatusLifecycleLive.hpp",
+    "VS::Battle::UpdateLiveActorStatusTimers": r"Native\Game\include\Battle\StatusLifecycleLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1356,6 +1360,10 @@ OWNED_CALL_BINDINGS["F00519"] = "VS::Battle::ApplyLiveArmorElementEnchantment"
 OWNED_CALL_BINDINGS["F00521"] = "VS::Battle::QueueLiveActorStatChangeNumber"
 OWNED_CALL_BINDINGS["F00527"] = "VS::Battle::UpdateLiveTargetingRiskPenalty"
 OWNED_CALL_BINDINGS["F00528"] = "VS::Battle::ResetLiveTargetingRiskPenaltyTimer"
+OWNED_CALL_BINDINGS["F00254"] = "VS::Battle::PreserveLiveAshleyStatuses"
+OWNED_CALL_BINDINGS["F00517"] = "VS::Battle::RemoveLiveActorStatuses"
+OWNED_CALL_BINDINGS["F00520"] = "VS::Battle::InflictLiveActorStatuses"
+OWNED_CALL_BINDINGS["F00523"] = "VS::Battle::UpdateLiveActorStatusTimers"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2995,6 +3003,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80087578, "VS::Battle::QueueLiveActorStatChangeNumber"),  # F00521
     ("BATTLE/BATTLE.PRG", 0x80088B8C, "VS::Battle::UpdateLiveTargetingRiskPenalty"),  # F00527
     ("BATTLE/BATTLE.PRG", 0x80088CA0, "VS::Battle::ResetLiveTargetingRiskPenaltyTimer"),  # F00528
+    ("BATTLE/BATTLE.PRG", 0x8007C31C, "VS::Battle::PreserveLiveAshleyStatuses"),  # F00254
+    ("BATTLE/BATTLE.PRG", 0x80086754, "VS::Battle::RemoveLiveActorStatuses"),  # F00517
+    ("BATTLE/BATTLE.PRG", 0x80086FA8, "VS::Battle::InflictLiveActorStatuses"),  # F00520
+    ("BATTLE/BATTLE.PRG", 0x80087EF4, "VS::Battle::UpdateLiveActorStatusTimers"),  # F00523
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

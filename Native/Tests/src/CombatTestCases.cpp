@@ -15,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
@@ -2228,8 +2229,8 @@ TEST_CASE("Offensive status abilities queue and apply their original ailments",
     AbilityEffectFixture fixture;
     fixture.Queue(example.id, 0, {0, 0, example.apply});
     CHECK(fixture.target.removeStatuses == example.mask);
-    Battle_InflictActorStatuses(fixture.target.removeStatuses,
-                                &fixture.stats[1]);
+    VS::Battle::InflictLiveActorStatuses(fixture.target.removeStatuses,
+                                         &fixture.stats[1]);
     CHECK(fixture.stats[1].statuses == example.mask);
     CHECK(fixture.stats[0].statuses == 0);
     fixture.CheckResources(600, 100, 800, 200);
@@ -2239,11 +2240,12 @@ TEST_CASE("Offensive status abilities queue and apply their original ailments",
 TEST_CASE("Ward removes paralysis and numbness without curing poison",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
-  Battle_InflictActorStatuses(0xE000, &fixture.stats[0]);
+  VS::Battle::InflictLiveActorStatuses(0xE000, &fixture.stats[0]);
   fixture.Queue(40, 0, {0, 0, VS::Battle::QueueLiveParalysisCure, true});
   fixture.Queue(40, 1, {0, 0, VS::Battle::QueueLiveNumbnessCure, true});
   CHECK(fixture.source.inflictStatuses == 0xA000);
-  Battle_RemoveActorStatuses(fixture.source.inflictStatuses, &fixture.stats[0]);
+  VS::Battle::RemoveLiveActorStatuses(fixture.source.inflictStatuses,
+                                      &fixture.stats[0]);
   CHECK(fixture.stats[0].statuses == 0x4000);
   CHECK(fixture.stats[0].walkSpeed == 8);
   CHECK(fixture.stats[0].runSpeed == 12);

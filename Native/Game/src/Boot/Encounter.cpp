@@ -17,6 +17,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetPages.h"
 #include "Boot/SessionLive.hpp"
@@ -444,10 +445,10 @@ std::expected<void, std::string> ApplyAdjustment(EncounterAdjustment adjustment,
   // These original hit-result names are inverted: inflictStatuses cures;
   // removeStatuses applies. Use the same order as production hit resolution.
   if (hit.inflictStatuses != 0) {
-    Battle_RemoveActorStatuses(hit.inflictStatuses, &stats);
+    VS::Battle::RemoveLiveActorStatuses(hit.inflictStatuses, &stats);
   }
   if (hit.removeStatuses != 0) {
-    Battle_InflictActorStatuses(hit.removeStatuses, &stats);
+    VS::Battle::InflictLiveActorStatuses(hit.removeStatuses, &stats);
   }
   return {};
 }

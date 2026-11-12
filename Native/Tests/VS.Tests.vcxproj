@@ -294,6 +294,7 @@
     <ClCompile Include="src\StateRecordsTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\StatusHelpersTests.cpp" />
+    <ClCompile Include="src\StatusLifecycleTests.cpp" />
     <ClCompile Include="src\StatusQueueTests.cpp" />
     <ClCompile Include="src\StreamControlTests.cpp" />
     <ClCompile Include="src\TargetingDrawSliceTests.cpp" />

@@ -660,6 +660,9 @@
     <ClCompile Include="src\StatusHelpersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusLifecycleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\StatusQueueTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

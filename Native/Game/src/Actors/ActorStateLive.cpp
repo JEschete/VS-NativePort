@@ -35,6 +35,7 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -543,7 +544,7 @@ class LiveBattleActorHost final : public BattleActorHost {
     const Battle_Actor* actor = LiveActor(id);
     if (actor == nullptr || actor->stats == nullptr) return;
     const Synced synced(*this);
-    Battle_RemoveActorStatuses(kAllStatuses, actor->stats);
+    VS::Battle::RemoveLiveActorStatuses(kAllStatuses, actor->stats);
     Battle_recoveryResetWord = 0;
   }
   void SetMarker(int id, int flags) override {

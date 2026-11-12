@@ -29,6 +29,7 @@
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
@@ -342,7 +343,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007C31Cu, 0u, (void*)&Battle_PreserveAshleyStatuses, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E5E0u, 0u, (void*)&Battle_AttackGemHitBonus, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E6A0u, 0u, (void*)&Battle_DefenseGemHitBonus, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E974u, 0u, (void*)&Battle_IgnoreHitCallback, 0u, 0u, 0u},
@@ -432,10 +432,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80085B10u, 0u, (void*)&Battle_ResolveActionTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008631Cu, 0u, (void*)&Battle_PreviewActionAgainstLimb, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800863A4u, 0u, (void*)&Battle_PreviewActionAgainstActor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80086754u, 0u, (void*)&Battle_RemoveActorStatuses, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80086FA8u, 0u, (void*)&Battle_InflictActorStatuses, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800875C8u, 0u, (void*)&Battle_ApplyActorActionResult, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80087EF4u, 0u, (void*)&Battle_UpdateActorStatusTimers, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088554u, 0u, (void*)&Battle_UpdateActorVitals, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088B6Cu, 0u, (void*)&Battle_UpdateRoomActorVitals, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A5D0u, 0u, (void*)&Battle_ActorActionRestrictionFlags, 0u, 0u, 0u},
@@ -1756,6 +1753,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80087578u, 0u, (void*)&VS::Battle::QueueLiveActorStatChangeNumber, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088B8Cu, 0u, (void*)&VS::Battle::UpdateLiveTargetingRiskPenalty, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088CA0u, 0u, (void*)&VS::Battle::ResetLiveTargetingRiskPenaltyTimer, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007C31Cu, 0u, (void*)&VS::Battle::PreserveLiveAshleyStatuses, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80086754u, 0u, (void*)&VS::Battle::RemoveLiveActorStatuses, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80086FA8u, 0u, (void*)&VS::Battle::InflictLiveActorStatuses, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80087EF4u, 0u, (void*)&VS::Battle::UpdateLiveActorStatusTimers, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

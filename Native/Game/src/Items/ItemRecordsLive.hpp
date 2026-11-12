@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/ItemRecords.hpp"
@@ -379,7 +380,7 @@ class LiveEquipStatusHost final : public EquipStatusHost {
   }
   void RemoveStatuses(std::int32_t statuses) override {
     CommitOnce();
-    Battle_RemoveActorStatuses(statuses, &ashley_);
+    VS::Battle::RemoveLiveActorStatuses(statuses, &ashley_);
   }
   // Commits the equipment when no status call did.
   void Finish() { CommitOnce(); }
