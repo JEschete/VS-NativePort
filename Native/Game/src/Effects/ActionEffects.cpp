@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -121,7 +122,7 @@ int Effects_QueueActionImpactEffects(int attacker_index)
             Effects_QueueActionHitEffect(0x26, &queued_action->targets[i], 0);
         }
 
-        Battle_PlayWeaponHitSounds(attacker_index);
+        VS::Battle::PlayLiveWeaponHitSounds(attacker_index);
     }
 
     return 1;

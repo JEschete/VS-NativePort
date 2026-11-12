@@ -5,6 +5,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Audio/StreamLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Content/PFileLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -15,7 +16,6 @@
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Battle/ActionFlow.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -395,9 +395,9 @@ void Effects_ApplyTargetActionImpact(Effects_EffectInstance* effect_instance)
 void Effects_ApplySourceActionImpact(Effects_EffectInstance* effect_instance)
 {
     if (effect_instance->context.source.type == 4) {
-        Battle_ApplyActionSourceEffects(effect_instance->context.source.value.actor.actor, NULL);
+        VS::Battle::ApplyLiveActionSourceEffects(effect_instance->context.source.value.actor.actor, NULL);
     } else {
-        Battle_ApplyActionSourceEffects(
+        VS::Battle::ApplyLiveActionSourceEffects(
             effect_instance->context.source.value.position.pad, &effect_instance->context.source.value.position);
     }
 }

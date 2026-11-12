@@ -50,6 +50,8 @@
   <ItemGroup>
     <ClCompile Include="src\ActionCostsTests.cpp" />
     <ClCompile Include="src\ActionEffectDispatchTests.cpp" />
+    <ClCompile Include="src\ActionOutcomesLiveTests.cpp" />
+    <ClCompile Include="src\ActionOutcomesTests.cpp" />
     <ClCompile Include="src\ActionPhasesTests.cpp" />
     <ClCompile Include="src\ActionPresentationLiveTests.cpp" />
     <ClCompile Include="src\ActionPresentationTests.cpp" />

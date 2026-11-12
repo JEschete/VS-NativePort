@@ -12,6 +12,7 @@
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "State/SceneTimerLive.hpp"
@@ -72,7 +73,7 @@ class LiveVitalsWorld final : public ActorVitalsWorld {
     return Actors::IsLiveActorActionAnimationBusy(slot);
   }
   void ResolveEnemyDefeat(int source, int target, int count_kill) override {
-    Battle_ResolveEnemyDefeat(source, target, count_kill);
+    ResolveLiveEnemyDefeat(source, target, count_kill);
   }
   void RestoreIdle(int slot) override {
     Actors::RestoreLiveActorIdlePose(slot);
@@ -86,7 +87,7 @@ class LiveVitalsWorld final : public ActorVitalsWorld {
   }
   void BeginQueuedCutscene() override { Event::BeginLiveQueuedCutscene(); }
   void BeginDefeatAnimation(int slot) override {
-    Battle_BeginActorDefeatAnimation(slot);
+    BeginLiveActorDefeatAnimation(slot);
   }
   void StatusTimers(ActorVitalsAccess& stats) override {
     auto& owner = static_cast<LiveActorVitalsAccess&>(stats).Owner();

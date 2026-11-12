@@ -15,6 +15,7 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
@@ -37,6 +38,7 @@
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
+#include "State/KillScoreLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -2514,7 +2516,7 @@ TEST_CASE("Enemy loot rolls equipment before its optional item candidate",
 }
 
 TEST_CASE("Defeat eligibility prevents repeat item rewards and random draws",
-          "[combat][loot][drop-rules]") {
+          "[combat][loot][drop-rules][action-outcomes][F00048]") {
   const int guard = GENERATE(0, 1, 2);
   const int guaranteed = GENERATE(0, 1);
   const bool retained = GENERATE(false, true);
@@ -2527,14 +2529,46 @@ TEST_CASE("Defeat eligibility prevents repeat item rewards and random draws",
   if (guard == 0) {
     for (int index = 0; index < 3; ++index) expected.Next(255);
   }
-  Battle_ResolveEnemyDefeat(0, 1, 0);
+  VS::Battle::ResolveLiveEnemyDefeat(0, 1, 0);
   auto* const first = Items_lootListHead;
-  Battle_ResolveEnemyDefeat(0, 1, 0);
+  VS::Battle::ResolveLiveEnemyDefeat(0, 1, 0);
   CHECK(Items_lootListHead == first);
   CHECK((first != nullptr) == (guard == 0 && guaranteed != 0));
   CHECK(fixture.enemy.defeated == (guard != 1));
   fixture.random.CheckSequence(expected);
   fixture.CheckCleared();
+}
+
+void PrepareScoredEnemyDefeat(AbilityFixture& ability, EnemyLootFixture& loot) {
+  VS::State::StoreLiveKillScore(
+      {.weapon_kill_streak_blade_category = 3, .weapon_kill_streak = 4});
+  ability.action.selection.actionId = 1;
+  ability.stats[0].weapon.blade.category = 3;
+  loot.enemy.kind = 4;
+  loot.enemy.subType = 7;
+  loot.stats.enemyClass = 2;
+  loot.stats.maxHp = 100;
+  loot.SetGuaranteed(1);
+}
+
+TEST_CASE(
+    "F00048 production defeat combines score streak and loot exactly once",
+    "[combat][loot][action-outcomes][F00048]") {
+  AbilityFixture ability;
+  EnemyLootFixture loot;
+  PrepareScoredEnemyDefeat(ability, loot);
+  VS::Battle::ResolveLiveEnemyDefeat(0, 1, -1);
+  const auto score = VS::State::LiveKillScore();
+  auto* const first = Items_lootListHead;
+  CHECK(score.enemy_kills.at(2) == 1);
+  CHECK(score.enemy_kill_flags.at(0) == 128);
+  CHECK(score.streak_score == 300);
+  CHECK(score.weapon_kill_streak == 5);
+  CHECK(first != nullptr);
+  CHECK(loot.enemy.defeated == 1);
+  VS::Battle::ResolveLiveEnemyDefeat(0, 1, 1);
+  CHECK(VS::State::LiveKillScore() == score);
+  CHECK(Items_lootListHead == first);
 }
 
 TEST_CASE("Direct duplicate loot queues release rejected nodes after rolling",

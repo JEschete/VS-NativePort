@@ -1989,6 +1989,15 @@
     <None Include="..\..\port\differentials\action_notification.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\action_phases.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\action_phases_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\action_phases_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\action_presentation.py">
       <Filter>tools\port\differentials</Filter>
     </None>

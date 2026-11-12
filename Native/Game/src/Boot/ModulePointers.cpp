@@ -7,6 +7,7 @@
 #include "Audio/StreamControlLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
@@ -289,13 +290,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x8006C1CCu, 0u, (void*)&Battle_ResolveEnemyDefeat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C480u, 0u, (void*)&Effects_StartWeaponTrail, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C4A4u, 0u, (void*)&Effects_FadeWeaponTrails, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C4C4u, 0u, (void*)&Effects_QueueActionHitEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006C5ACu, 0u, (void*)&Battle_PlayWeaponHitSounds, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C84Cu, 0u, (void*)&Effects_QueueActionImpactEffects, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006CA20u, 0u, (void*)&Battle_ApplyActionSourceEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&Effects_SignalActorEffectAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006D028u, 0u, (void*)&Effects_TintActionActorRed, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006D064u, 0u, (void*)&Effects_RestoreActionActorTint, 0u, 0u, 0u},
@@ -305,7 +303,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&Effects_BeginAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&Effects_ActionEffectBusyFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80074A20u, 0u, (void*)&Battle_BeginActorDefeatAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80077F14u, 0u, (void*)&Battle_ActionTargetLimbPosition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80077F70u, 0u, (void*)&Battle_ActionTargetDistance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800780A8u, 0u, (void*)&Battle_ActionCameraMidpoint, 0u, 0u, 0u},
@@ -1767,6 +1764,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006FD0Cu, 0u, (void*)&VS::Battle::FinishLiveBattleAbilitySequence, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80072B9Cu, 0u, (void*)&VS::Battle::ResetLiveActionPhase, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800734C0u, 0u, (void*)&VS::Battle::BeginLiveAshleyWeaponToggle, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006C1CCu, 0u, (void*)&VS::Battle::ResolveLiveEnemyDefeat, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006C5ACu, 0u, (void*)&VS::Battle::PlayLiveWeaponHitSounds, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006CA20u, 0u, (void*)&VS::Battle::ApplyLiveActionSourceEffects, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80074A20u, 0u, (void*)&VS::Battle::BeginLiveActorDefeatAnimation, 0u, 0u, 0u},
+    {"BATTLE/INITBTL.PRG", 0x800F9818u, 0u, (void*)&VS::Battle::ApplyLiveLearnedActionUnlocks, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

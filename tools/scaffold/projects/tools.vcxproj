@@ -339,6 +339,9 @@
     <None Include="..\..\port\differentials\action_execution.py" />
     <None Include="..\..\port\differentials\action_execution_driver.cpp" />
     <None Include="..\..\port\differentials\action_notification.py" />
+    <None Include="..\..\port\differentials\action_phases.py" />
+    <None Include="..\..\port\differentials\action_phases_driver.cpp" />
+    <None Include="..\..\port\differentials\action_phases_guard_driver.cpp" />
     <None Include="..\..\port\differentials\action_presentation.py" />
     <None Include="..\..\port\differentials\action_presentation_driver.cpp" />
     <None Include="..\..\port\differentials\action_presentation_guard_driver.cpp" />

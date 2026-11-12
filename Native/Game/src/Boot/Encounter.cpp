@@ -17,6 +17,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetPages.h"
@@ -503,7 +504,7 @@ void LearnProfileSpells(bool all_spells) {
       }
     }
   }
-  Battle_ApplyLearnedActionUnlocks();
+  Battle::ApplyLiveLearnedActionUnlocks();
 }
 }  // namespace
 
@@ -574,7 +575,7 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
   if (profile == EncounterProfile::kPostMinotaur || all_spells) {
     LearnProfileSpells(all_spells);
   } else if (all_abilities || all_break_arts) {
-    Battle_ApplyLearnedActionUnlocks();
+    Battle::ApplyLiveLearnedActionUnlocks();
   }
   VS_LOG_INFO("encounter.profile",
               "Ashley={} representative_test_actions={} all_spells={} "

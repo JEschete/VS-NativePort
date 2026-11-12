@@ -197,6 +197,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionOutcomes.cpp" />
+    <ClCompile Include="src\Battle\ActionOutcomesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionPhases.cpp" />
     <ClCompile Include="src\Battle\ActionPhasesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2272,6 +2276,8 @@
     <ClInclude Include="include\Battle\ActionCostsLive.hpp" />
     <ClInclude Include="include\Battle\ActionEffectDispatch.hpp" />
     <ClInclude Include="include\Battle\ActionEffectDispatchLive.hpp" />
+    <ClInclude Include="include\Battle\ActionOutcomes.hpp" />
+    <ClInclude Include="include\Battle\ActionOutcomesLive.hpp" />
     <ClInclude Include="include\Battle\ActionPhases.hpp" />
     <ClInclude Include="include\Battle\ActionPhasesLive.hpp" />
     <ClInclude Include="include\Battle\ActionPresentation.hpp" />

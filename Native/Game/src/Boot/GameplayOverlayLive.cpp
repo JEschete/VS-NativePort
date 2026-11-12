@@ -6,6 +6,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/SystemResourcesLive.hpp"
@@ -109,7 +110,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Input::ResetLiveVibrationPatterns();
   }
   void ApplyLearnedActionUnlocks() override {
-    Battle_ApplyLearnedActionUnlocks();
+    VS::Battle::ApplyLiveLearnedActionUnlocks();
   }
   void ApplyGameplayDefaults(const GameplayOverlayDefaults& defaults) override {
     Field_zoneContext.currentSceneId = 0;

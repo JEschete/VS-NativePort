@@ -2,6 +2,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
@@ -317,12 +318,12 @@ void Battle_WaitForTargetRecovery(void)
             queued_action = &Battle_actionState->queue[i % 4];
 
             if (queued_action->primaryTarget.targetsPosition == 0) {
-                Battle_BeginActorDefeatAnimation(queued_action->primaryTarget.target.targetActor);
+                VS::Battle::BeginLiveActorDefeatAnimation(queued_action->primaryTarget.target.targetActor);
             }
 
             for (j = 0; j < queued_action->targetCount; ++j) {
                 if ((queued_action->targets[j].targetsPosition == 0)
-                    && (Battle_BeginActorDefeatAnimation(queued_action->targets[j].target.targetActor) != 0)) {
+                    && (VS::Battle::BeginLiveActorDefeatAnimation(queued_action->targets[j].target.targetActor) != 0)) {
                     var_s4 = 2;
                 }
             }

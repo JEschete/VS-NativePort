@@ -49,11 +49,11 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Class | What it is | Sites | Compiler | High | Medium | Low | Open |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `NULL-TABLE` | Sparse table entry read without a check | 38 | 0 | 0 | 30 | 8 | 37 |
+| `NULL-TABLE` | Sparse table entry read without a check | 36 | 0 | 0 | 28 | 8 | 35 |
 | `NULL-RETURN` | Lookup result read without a check | 0 | 0 | 0 | 0 | 0 | 0 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 3 | 0 | 0 | 3 | 0 | 3 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
-| `DIV-ZERO` | Division by a value that was not checked | 130 | 0 | 0 | 107 | 23 | 123 |
+| `DIV-ZERO` | Division by a value that was not checked | 132 | 0 | 0 | 109 | 23 | 125 |
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 83 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |

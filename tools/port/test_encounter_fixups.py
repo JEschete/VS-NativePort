@@ -23,6 +23,34 @@ def flat(source: str) -> str:
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_action_outcomes_keep_globals_and_bind_owned_module_entries(self):
+        names = {
+            "F00048": ("ResolveLiveEnemyDefeat", "BATTLE/BATTLE.PRG", 0x8006C1CC),
+            "F00059": ("PlayLiveWeaponHitSounds", "BATTLE/BATTLE.PRG", 0x8006C5AC),
+            "F00061": ("ApplyLiveActionSourceEffects", "BATTLE/BATTLE.PRG", 0x8006CA20),
+            "F00156": ("BeginLiveActorDefeatAnimation", "BATTLE/BATTLE.PRG", 0x80074A20),
+            "F01851": ("ApplyLiveLearnedActionUnlocks", "BATTLE/INITBTL.PRG", 0x800F9818),
+        }
+        with (Path(__file__).parent / "owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table)}
+        for identifier, (name, module, address) in names.items():
+            with self.subTest(identifier=identifier):
+                binding = f"VS::Battle::{name}"
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[identifier], binding)
+                self.assertIn((module, address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                self.assertEqual(owned[identifier]["path"], r"Native\Game\src\Battle\ActionOutcomes.cpp")
+                self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                                 r"Native\Game\include\Battle\ActionOutcomesLive.hpp")
+        generated = (Path(__file__).resolve().parents[2] / r"Native\Game\src\Battle\ActionFlow.cpp").read_text(
+            encoding="utf-8")
+        for symbol in ("Battle_actionState", "Battle_actionFlowMode", "Battle_recoveryRewardMode",
+                       "Battle_actionSelection", "Battle_spellCommitFlag"):
+            self.assertIn(symbol, generated)
+        for name in ("Battle_ResolveEnemyDefeat", "Battle_PlayWeaponHitSounds",
+                     "Battle_ApplyActionSourceEffects", "Battle_BeginActorDefeatAnimation",
+                     "Battle_ApplyLearnedActionUnlocks"):
+            self.assertNotIn(name, generated)
+
     def marking_fixture(self, root):
         tables = {
             "FUNCTION_CATALOG.csv": "id,copy,kind,notes,copied,compiles,modernized\nF1,yes,C,,x,x,x\n",

@@ -14,6 +14,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -279,7 +280,7 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
   void BeginDefeat(std::int32_t actor) override {
     const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return;
-    Battle_BeginActorDefeatAnimation(record->stats->actorId);
+    VS::Battle::BeginLiveActorDefeatAnimation(record->stats->actorId);
   }
   VS::Field::DoorRecord StoreEntranceForReload() override {
     Field_StoreEntranceDoorForReloadEntry();
