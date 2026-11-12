@@ -84,7 +84,6 @@ _Static_assert(sizeof(Battle_StatusEffectParams) == 0x10, "Battle_StatusEffectPa
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_STATUSEFFECTS_H_DECLS)
 #define VS_BATTLE_STATUSEFFECTS_H_DECLS
-#include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
@@ -107,22 +106,11 @@ extern Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 extern int Battle_unusedGlobal2;
 extern Battle_StatusEffectParams Battle_statusEffectParams[32];
 void Battle_PreserveAshleyStatuses(void);
-int Battle_QueueDispel(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueNegativeStatusCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
 void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats);
-void Battle_ApplyWeaponElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount);
-void Battle_ApplyArmorElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount);
 void Battle_InflictActorStatuses(int status_mask, Battle_ActorStats* actor_stats);
-void Battle_QueueActorStatChangeNumber(int actor_slot, int limb_tag, int encoded_amount, int label_flags);
 void Battle_ApplyActorActionResult(Battle_HitResult* hit_result);
 void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor);
 int Battle_UpdateActorVitals(void);
 int Battle_UpdateRoomActorVitals(void);
-void Battle_UpdateTargetingRiskPenalty(void);
-void Battle_ResetTargetingRiskPenaltyTimer(void);
 
 #endif // VS_BATTLE_STATUSEFFECTS_H_DECLS

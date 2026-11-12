@@ -28,6 +28,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
+#include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
@@ -383,8 +384,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800838BCu, 0u, (void*)&Battle_TargetRisk, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800838ECu, 0u, (void*)&Battle_CalculateActionStatChange, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083990u, 0u, (void*)&Battle_IgnoreHitCallback, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008418Cu, 0u, (void*)&Battle_QueueDispel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800841C8u, 0u, (void*)&Battle_QueueNegativeStatusCure, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084228u, 0u, (void*)&Battle_MarkSourceActionSuccess, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80084248u, 0u, (void*)&Battle_QueueInstantDeath, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800842ACu, 0u, (void*)&Battle_QueueDamageBasedArmorWear, 0u, 0u, 0u},
@@ -434,16 +433,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008631Cu, 0u, (void*)&Battle_PreviewActionAgainstLimb, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800863A4u, 0u, (void*)&Battle_PreviewActionAgainstActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80086754u, 0u, (void*)&Battle_RemoveActorStatuses, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80086EA4u, 0u, (void*)&Battle_ApplyWeaponElementEnchantment, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80086EF4u, 0u, (void*)&Battle_ApplyArmorElementEnchantment, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80086FA8u, 0u, (void*)&Battle_InflictActorStatuses, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80087578u, 0u, (void*)&Battle_QueueActorStatChangeNumber, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800875C8u, 0u, (void*)&Battle_ApplyActorActionResult, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80087EF4u, 0u, (void*)&Battle_UpdateActorStatusTimers, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088554u, 0u, (void*)&Battle_UpdateActorVitals, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80088B6Cu, 0u, (void*)&Battle_UpdateRoomActorVitals, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80088B8Cu, 0u, (void*)&Battle_UpdateTargetingRiskPenalty, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80088CA0u, 0u, (void*)&Battle_ResetTargetingRiskPenaltyTimer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A5D0u, 0u, (void*)&Battle_ActorActionRestrictionFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E8F8u, 0u, (void*)&Effects_AllocateWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EA90u, 0u, (void*)&Effects_InitializeRoomWeather, 0u, 0u, 0u},
@@ -1755,6 +1749,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008409Cu, 0u, (void*)&VS::Battle::QueueLivePoisonCure, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800840ECu, 0u, (void*)&VS::Battle::QueueLiveCurseCure, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008413Cu, 0u, (void*)&VS::Battle::QueueLiveNumbnessCure, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008418Cu, 0u, (void*)&VS::Battle::QueueLiveDispel, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800841C8u, 0u, (void*)&VS::Battle::QueueLiveNegativeStatusCure, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80086EA4u, 0u, (void*)&VS::Battle::ApplyLiveWeaponElementEnchantment, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80086EF4u, 0u, (void*)&VS::Battle::ApplyLiveArmorElementEnchantment, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80087578u, 0u, (void*)&VS::Battle::QueueLiveActorStatChangeNumber, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80088B8Cu, 0u, (void*)&VS::Battle::UpdateLiveTargetingRiskPenalty, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80088CA0u, 0u, (void*)&VS::Battle::ResetLiveTargetingRiskPenaltyTimer, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

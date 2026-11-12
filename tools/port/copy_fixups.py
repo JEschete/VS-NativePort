@@ -706,6 +706,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::QueueLivePoisonCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     "VS::Battle::QueueLiveCurseCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     "VS::Battle::QueueLiveNumbnessCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveDispel": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveNegativeStatusCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::ApplyLiveWeaponElementEnchantment": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
+    "VS::Battle::ApplyLiveArmorElementEnchantment": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
+    "VS::Battle::QueueLiveActorStatChangeNumber": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
+    "VS::Battle::UpdateLiveTargetingRiskPenalty": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
+    "VS::Battle::ResetLiveTargetingRiskPenaltyTimer": r"Native\Game\include\Battle\StatusHelpersLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1342,6 +1349,13 @@ OWNED_CALL_BINDINGS["F00463"] = "VS::Battle::QueueLiveParalysisCure"
 OWNED_CALL_BINDINGS["F00464"] = "VS::Battle::QueueLivePoisonCure"
 OWNED_CALL_BINDINGS["F00465"] = "VS::Battle::QueueLiveCurseCure"
 OWNED_CALL_BINDINGS["F00466"] = "VS::Battle::QueueLiveNumbnessCure"
+OWNED_CALL_BINDINGS["F00467"] = "VS::Battle::QueueLiveDispel"
+OWNED_CALL_BINDINGS["F00468"] = "VS::Battle::QueueLiveNegativeStatusCure"
+OWNED_CALL_BINDINGS["F00518"] = "VS::Battle::ApplyLiveWeaponElementEnchantment"
+OWNED_CALL_BINDINGS["F00519"] = "VS::Battle::ApplyLiveArmorElementEnchantment"
+OWNED_CALL_BINDINGS["F00521"] = "VS::Battle::QueueLiveActorStatChangeNumber"
+OWNED_CALL_BINDINGS["F00527"] = "VS::Battle::UpdateLiveTargetingRiskPenalty"
+OWNED_CALL_BINDINGS["F00528"] = "VS::Battle::ResetLiveTargetingRiskPenaltyTimer"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2974,6 +2988,13 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8008409C, "VS::Battle::QueueLivePoisonCure"),  # F00464
     ("BATTLE/BATTLE.PRG", 0x800840EC, "VS::Battle::QueueLiveCurseCure"),  # F00465
     ("BATTLE/BATTLE.PRG", 0x8008413C, "VS::Battle::QueueLiveNumbnessCure"),  # F00466
+    ("BATTLE/BATTLE.PRG", 0x8008418C, "VS::Battle::QueueLiveDispel"),  # F00467
+    ("BATTLE/BATTLE.PRG", 0x800841C8, "VS::Battle::QueueLiveNegativeStatusCure"),  # F00468
+    ("BATTLE/BATTLE.PRG", 0x80086EA4, "VS::Battle::ApplyLiveWeaponElementEnchantment"),  # F00518
+    ("BATTLE/BATTLE.PRG", 0x80086EF4, "VS::Battle::ApplyLiveArmorElementEnchantment"),  # F00519
+    ("BATTLE/BATTLE.PRG", 0x80087578, "VS::Battle::QueueLiveActorStatChangeNumber"),  # F00521
+    ("BATTLE/BATTLE.PRG", 0x80088B8C, "VS::Battle::UpdateLiveTargetingRiskPenalty"),  # F00527
+    ("BATTLE/BATTLE.PRG", 0x80088CA0, "VS::Battle::ResetLiveTargetingRiskPenaltyTimer"),  # F00528
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -6790,22 +6811,6 @@ REGEX_FIXES += [
 # Individually reviewed battle bindings; structural fixups run first.
 # Separate shadowed locals and cast-prototype parameters before naming outer bindings.
 for identifier, old, new, evidence in (
-    ("F00521",
-     "void Battle_QueueActorStatChangeNumber(int arg0, int arg1, int arg2, int arg3)\n",
-     "void Battle_QueueActorStatChangeNumber(int actor_slot, int limb_tag, int encoded_amount, int label_flags)\n",
-     "Enclosing function formals/uses only, excluding separately scoped cast-prototype parameters on the forwarding line. F00714 verifies each forwarded role."),
-    ("F00521",
-     "    if ((Battle_actors[arg0]->roomSpawnIndex != 0x80) || (arg0 == 0)) {\n",
-     "    if ((Battle_actors[actor_slot]->roomSpawnIndex != 0x80) || (actor_slot == 0)) {\n",
-     "Enclosing function formals/uses only, excluding separately scoped cast-prototype parameters on the forwarding line. F00714 verifies each forwarded role."),
-    ("F00521",
-     "arg0, arg1, arg2, arg3);\n",
-     "actor_slot, limb_tag, encoded_amount, label_flags);\n",
-     "Enclosing function formals/uses only, excluding separately scoped cast-prototype parameters on the forwarding line. F00714 verifies each forwarded role."),
-    ("F00521",
-     "int arg0, int arg1, u_int arg2, int arg3",
-     "int actor_slot, int limb_tag, u_int encoded_amount, int label_flags",
-     "Independent parameters inside QueueActorValueLabel function-pointer cast, not enclosing locals. F00714 resolves actor/limb and encodes amount sign plus label color/visibility flags. Preserve types and ABI."),
     ("F00523",
      "int arg0, int arg1, u_int arg2, int arg3",
      "int actor_slot, int limb_tag, u_int encoded_amount, int label_flags",

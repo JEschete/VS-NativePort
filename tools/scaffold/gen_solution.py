@@ -345,6 +345,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\AttackPrerequisitesLive.cpp",
                 r"src\Battle\BattleModeLive.cpp",
                 r"src\Battle\StatusQueueLive.cpp",
+                r"src\Battle\StatusHelpersLive.cpp",
             ))
 
 

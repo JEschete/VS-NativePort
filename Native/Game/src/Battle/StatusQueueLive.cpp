@@ -264,4 +264,22 @@ void QueueLiveNumbnessCure(Battle_ActionDefinition*, Battle_HitResult*,
                            Battle_HitResult* target, int, int) {
   QueueHandler(target, QueueNumbnessCure);
 }
+// decomp: func_8008418C (src/BATTLE/BATTLE.PRG/146C.c:12527).
+void QueueLiveDispel(Battle_ActionDefinition*, Battle_HitResult*,
+                     Battle_HitResult* target, int, int) {
+  auto& hit = HitOf(target);
+  auto queued = Load(hit);
+  QueueDispel(std::bit_cast<std::uint32_t>(StatsOf(hit).statuses), queued);
+  Store(queued, hit);
+}
+
+// decomp: func_800841C8 (src/BATTLE/BATTLE.PRG/146C.c:12535).
+void QueueLiveNegativeStatusCure(Battle_ActionDefinition*, Battle_HitResult*,
+                                 Battle_HitResult* target, int, int) {
+  auto& hit = HitOf(target);
+  auto queued = Load(hit);
+  QueueNegativeStatusCure(std::bit_cast<std::uint32_t>(StatsOf(hit).statuses),
+                          queued);
+  Store(queued, hit);
+}
 }  // namespace VS::Battle

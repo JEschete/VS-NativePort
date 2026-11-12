@@ -58,6 +58,35 @@ void CheckHandler(Handler handler, std::size_t rule_id, Feedback feedback) {
   CHECK(queued == before);
 }
 
+TEST_CASE("Dispel filters the exact status mask and preserves queued neighbors",
+          "[status-queue][F00467]") {
+  battle::QueuedStatuses queued{
+      .added = 4, .removed = 1, .feedback = Feedback::kNegative};
+  CHECK(battle::QueueDispel(0xFFFFFFFF, queued) == 0x1FFE1FE0);
+  CHECK(queued.removed == 0x1FFE1FE1);
+  CHECK(queued.added == 4);
+  CHECK(queued.feedback == Feedback::kNegative);
+  const auto before = queued;
+  CHECK(battle::QueueDispel(0x8001E01F, queued) == 0);
+  CHECK(queued == before);
+}
+
+TEST_CASE(
+    "Negative status cure selects only its three bits and not prior queued "
+    "removals",
+    "[status-queue][F00468]") {
+  battle::QueuedStatuses queued{
+      .added = 4, .removed = 0x80010000, .feedback = Feedback::kNegative};
+  const auto before = queued;
+  CHECK(battle::QueueNegativeStatusCure(0x80010000, queued) == Feedback::kNone);
+  CHECK(queued == before);
+  CHECK(battle::QueueNegativeStatusCure(0xFFFFFFFF, queued) ==
+        Feedback::kPositive);
+  CHECK(queued.removed == 0x8001E000);
+  CHECK(queued.added == 4);
+  CHECK(queued.feedback == Feedback::kPositive);
+}
+
 using MaskHandler = std::optional<std::uint32_t> (*)(
     std::span<const battle::StatusRule>, const battle::StatusTarget&,
     battle::QueuedStatuses&);
@@ -215,6 +244,17 @@ void CheckUnchangedHandler(Handler handler, std::size_t rule_id) {
   target = {.active = 2};
   CHECK(handler(rules, target, queued) == Feedback::kNone);
   CHECK(queued == before);
+}
+
+void RelocateMediators(std::span<const std::uint8_t> image) {
+  const auto tables =
+      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto table = std::ranges::find(
+      tables, reinterpret_cast<void**>(Battle_actionEffectMediators),
+      &Content_ModulePointerTable::target);
+  REQUIRE(table != tables.end());
+  REQUIRE(VS::Content::RelocateModulePointerTable(
+      *table, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
 }
 
 std::vector<std::uint8_t> ReadOriginalBattleModule() {
@@ -667,14 +707,7 @@ TEST_CASE(
   VS::Content::DataStore::ScopedOverride store;
   const auto image = ReadOriginalBattleModule();
   LiveFixture fixture;
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
-  const auto table = std::ranges::find(
-      tables, reinterpret_cast<void**>(Battle_actionEffectMediators),
-      &Content_ModulePointerTable::target);
-  REQUIRE(table != tables.end());
-  REQUIRE(VS::Content::RelocateModulePointerTable(
-      *table, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
+  RelocateMediators(image);
   constexpr std::array<int, 30> kRules{5,  7,  9,  19, 4,  6,  8,  10, 20, 11,
                                        12, 18, 17, 29, 13, 14, 15, 16, 21, 22,
                                        23, 24, 25, 26, 27, 28, 13, 14, 16, 15};
@@ -685,6 +718,42 @@ TEST_CASE(
   for (std::size_t index = 0; index < kLiveHandlers.size(); ++index) {
     CheckRelocatedMediator(kLiveHandlers.at(index), kRules.at(index),
                            kFeedback.at(index), index >= kFirstCureIndex);
+  }
+}
+
+TEST_CASE(
+    "Original module status filters bypass exemption and immunity without "
+    "altering stats",
+    "[status-queue][F00467][F00468][live][module]") {
+  constexpr std::array<LiveHandler, 2> kHandlers{
+      battle::QueueLiveDispel, battle::QueueLiveNegativeStatusCure};
+  constexpr std::array<std::uint32_t, 2> kAddresses{0x8008418C, 0x800841C8};
+  constexpr std::array<std::uint32_t, 2> kMasks{0x1FFE1FE0, 0xE000};
+  VS::Content::DataStore::ScopedOverride store;
+  const auto image = ReadOriginalBattleModule();
+  LiveFixture fixture;
+  RelocateMediators(image);
+  for (std::size_t index = 0; index < kHandlers.size(); ++index) {
+    CHECK(VS::Content::ResolveModuleAddress(
+              {Content_moduleSymbols, Content_moduleSymbolCount},
+              "BATTLE/BATTLE.PRG", kAddresses.at(index)) ==
+          reinterpret_cast<void*>(kHandlers.at(index)));
+    const auto mediator =
+        std::ranges::find(Battle_actionEffectMediators, kHandlers.at(index));
+    REQUIRE(mediator != std::end(Battle_actionEffectMediators));
+    fixture.stats.actorId = kExemptActor;
+    fixture.stats.statuses = -1;
+    fixture.stats.statusImmunities = -1;
+    fixture.hit.removeStatuses = 4;
+    fixture.hit.inflictStatuses = 1;
+    fixture.hit.statStatusEffect = 3;
+    auto expected = fixture.hit;
+    expected.inflictStatuses = static_cast<std::int32_t>(kMasks.at(index) | 1);
+    if (index == 1) expected.statStatusEffect = 2;
+    const auto before_stats = Bytes(fixture.stats);
+    (*mediator)(nullptr, nullptr, &fixture.hit, -1, kNegativeExecute);
+    CHECK(Bytes(fixture.hit) == Bytes(expected));
+    CHECK(Bytes(fixture.stats) == before_stats);
   }
 }
 

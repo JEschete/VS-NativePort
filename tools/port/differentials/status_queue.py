@@ -1,4 +1,4 @@
-"""F00405/F00406/F00437-F00466 status queue primitives and thirty rule wrappers."""
+"""F00405/F00406/F00437-F00468 status primitives, rule wrappers and direct filters."""
 
 import random
 from dataclasses import dataclass
@@ -12,32 +12,36 @@ from differential import (
     store_problems,
 )
 
-ID = "F00405/F00406/F00437-F00466"
+ID = "F00405/F00406/F00437-F00468"
 ENTRY, END = 0x80081020, 0x80081130
 WRAPPER_START, WRAPPER_END = 0x80083998, 0x80083B78
 NEXT_START, NEXT_END = WRAPPER_END, 0x80083DEC
 AILMENT_START, ATTACK_START, ATTACK_END = NEXT_END, 0x80083F2C, 0x80083FBC
 DEFENSE_START, CURE_START, CURE_END = ATTACK_END, 0x8008404C, 0x8008418C
+FILTER_START, FILTER_END = CURE_END, 0x80084228
 MODULES = (r"BATTLE/BATTLE.PRG", "SLUS_010.40")
 DRIVER = "status_queue_driver.cpp"
 SOURCES = (r"Native\Game\src\Battle\StatusQueue.cpp",)
-VECTORS, SEED = 32768, 405406437
+VECTORS, SEED = 34816, 405406437
 MUTANT_VECTORS = 2048
 
-FUNCTIONS = ("F00405", "F00406", *(f"F{number:05}" for number in range(437, 467)))
+FUNCTIONS = ("F00405", "F00406", *(f"F{number:05}" for number in range(437, 469)))
 ENTRIES = (ENTRY, 0x800810CC, *(WRAPPER_START + index * 0x50 for index in range(11)),
            0x80083D08, 0x80083D2C, 0x80083D7C,
            *(AILMENT_START + index * 0x50 for index in range(4)),
            *(ATTACK_START + index * 0x24 for index in range(8)),
-           *(CURE_START + index * 0x50 for index in range(4)))
+           *(CURE_START + index * 0x50 for index in range(4)),
+           FILTER_START, 0x800841C8)
 RULE_IDS = (5, 7, 9, 19, 4, 6, 8, 10, 20, 11, 12, 18, 17, 29,
-            13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 13, 14, 16, 15)
+            13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 13, 14, 16, 15, 0, 0)
 WARD, BANISH = 13, 15
+DISPEL, NEGATIVE_CURE = 32, 33
+DIRECT_FUNCTIONS = (DISPEL, NEGATIVE_CURE)
 RAW_FUNCTIONS = (WARD, *range(20, 28))
 CURE_FUNCTIONS = (1, 28, 29, 30, 31)
 POSITIVE_FUNCTIONS = (7, 8, 9, 10, 11, 14, *CURE_FUNCTIONS[1:])
 FEEDBACK_FUNCTIONS = tuple(index for index in range(2, len(FUNCTIONS))
-                           if index not in (*RAW_FUNCTIONS, BANISH))
+                           if index not in (*RAW_FUNCTIONS, BANISH, *DIRECT_FUNCTIONS))
 RULE_COUNT = 32
 ACTOR_SLOTS = 42  # Battle_actors extent; actor_id below is the stats identity, not this slot.
 PARAMS, ACTORS = 0x8004EECC, 0x800F1928
@@ -93,6 +97,17 @@ MUTANTS.update({
     "F00450-clear-stats-neighbors": {0x80083DD0: 0x00601021},
     "F00450-no-analysis-store": {0x80083DD4: 0},
     "F00450-wrong-return-word": {0x80083DC8: 0x8C820948},
+    "F00467-mask-high-bit-lost": {0x800841A4: 0x3C040FFE},
+    "F00467-mask-low-bit-lost": {0x800841AC: 0x34841FC0},
+    "F00467-replace-removed": {0x800841BC: 0x00401821},
+    "F00467-no-store": {0x800841C4: 0},
+    "F00468-mask-loses-paralysis": {0x800841F4: 0x3063C000},
+    "F00468-replace-removed": {0x800841F8: 0x00601021},
+    "F00468-feedback-without-change": {0x800841FC: 0},
+    "F00468-no-removal-store": {0x80084200: 0},
+    "F00468-feedback-keeps-bit16": {0x80084204: 0x3C02FFFD},
+    "F00468-negative-feedback": {0x80084214: 0x3C020001},
+    "F00468-no-feedback-store": {0x8008421C: 0},
 })
 for _function in RAW_FUNCTIONS[1:]:
     _entry, _rule_id = ENTRIES[_function], RULE_IDS[_function - 2]
@@ -205,6 +220,12 @@ def vector(rng: random.Random, number: int) -> Vector:
         elif scenario == 30:
             actor_id = 128
 
+    if function in DIRECT_FUNCTIONS and lane < 128:
+        active = (0, MASK, 0x1FFE1FE0, 0xE000, 0x10000, 0x80000000,
+                  0x20, 0x2000, 0x4000, 0x8000, 1)[lane % 11]
+        actor_id = 128 if lane % 2 == 0 else 1
+        immunities = blocking = MASK
+
     hit = bytearray(rng.randbytes(HIT_SIZE))
     actor = bytearray(rng.randbytes(ACTOR_SIZE))
     stats = bytearray(rng.randbytes(STATS_SIZE))
@@ -279,7 +300,7 @@ def check(image: Image, vector: Vector, observation: dict, native: list[int], re
         problems.append("original changed actor, actor table or status-rule table/guards")
 
     allowed = [(HIT + 0x18, HIT + 0x1C)]
-    if vector.function not in CURE_FUNCTIONS:
+    if vector.function not in (*CURE_FUNCTIONS, *DIRECT_FUNCTIONS):
         allowed.append((HIT + 0x14, HIT + 0x18))
     if vector.function in FEEDBACK_FUNCTIONS:
         allowed.extend(((HIT + 0x1C, HIT + 0x20),
@@ -290,14 +311,17 @@ def check(image: Image, vector: Vector, observation: dict, native: list[int], re
         allowed.append((DEFAULT_STACK - 16, DEFAULT_STACK - 4))
         if analyze:
             allowed.append((STATS + ANALYSIS_OFFSET, STATS + ANALYSIS_OFFSET + 4))
+    elif vector.function == NEGATIVE_CURE:
+        allowed.append((HIT + 0x1C, HIT + 0x20))
     problems += store_problems(observation["stores"], allowed)
     if any(size != 4 for _, size in observation["stores"]):
         problems.append("original made a non-word store")
 
     params = words(vector.params)
     blocking = params[GUARD_SIZE // 4 + vector.rule_id * 4 + 3]
-    eligible = vector.actor_id != 128 and (
-        vector.function in CURE_FUNCTIONS or not (blocking & vector.active))
+    eligible = vector.function in DIRECT_FUNCTIONS or (
+        vector.actor_id != 128 and (
+            vector.function in CURE_FUNCTIONS or not (blocking & vector.active)))
     expected_stores = []
     if vector.function in FEEDBACK_FUNCTIONS:
         expected_stores.extend(((DEFAULT_STACK - 8, 4), (DEFAULT_STACK - 4, 4)))
@@ -307,10 +331,12 @@ def check(image: Image, vector: Vector, observation: dict, native: list[int], re
         expected_stores.extend(((DEFAULT_STACK - 12, 4), (DEFAULT_STACK - 16, 4),
                                 (DEFAULT_STACK - 8, 4)))
     if eligible:
-        if vector.function not in CURE_FUNCTIONS:
+        if vector.function not in (*CURE_FUNCTIONS, *DIRECT_FUNCTIONS):
             expected_stores.append((HIT + 0x14, 4))
         expected_stores.append((HIT + 0x18, 4))
     if vector.function in FEEDBACK_FUNCTIONS and native[1]:
+        expected_stores.append((HIT + 0x1C, 4))
+    if vector.function == NEGATIVE_CURE and vector.active & 0xE000:
         expected_stores.append((HIT + 0x1C, 4))
     if analyze:
         expected_stores.append((STATS + ANALYSIS_OFFSET, 4))
@@ -333,7 +359,10 @@ def describe(image: Image, results: list) -> list[str]:
         f"F00459-F00466 {DEFENSE_START:08X}-{CURE_END - 4:08X} inclusive: "
         f"{(CURE_END - DEFENSE_START) // 4} original instructions; "
         f"sha256={image.sha256(DEFENSE_START, CURE_END)}",
-        "The two disjoint spans contain 577 instructions total; the intervening gap is not "
+        f"F00467-F00468 {FILTER_START:08X}-{FILTER_END - 4:08X} inclusive: "
+        f"{(FILTER_END - FILTER_START) // 4} original instructions; "
+        f"sha256={image.sha256(FILTER_START, FILTER_END)}",
+        "The two disjoint spans contain 616 instructions total; the intervening gap is not "
         "part of this case. Wrappers execute the original primitive, with no status-logic stubs.",
     ]
     for function, name in enumerate(FUNCTIONS):
@@ -345,7 +374,7 @@ def describe(image: Image, results: list) -> list[str]:
         all_immune = sum(v.immunities == MASK for v, _ in selected)
         feedbacks = sorted({int.from_bytes(v.hit[0x1C:0x20], "little") >> 16 & 3 for v, _ in selected})
         lines.append(f"{name}: {len(selected)} vectors, {changed} nonzero returns, "
-                     f"{len(selected) - changed} zero returns, {exempt} actor-128 exemptions, "
+                     f"{len(selected) - changed} zero returns, {exempt} actor-128 identities, "
                      f"{all_immune} all-immune, {active} active-status, {sign_bit} full-width rule tables, "
                      f"initial feedback values {feedbacks}")
         if function == BANISH:

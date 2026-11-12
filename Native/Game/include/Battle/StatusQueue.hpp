@@ -205,4 +205,10 @@ std::optional<StatusFeedback> QueueCurseCure(std::span<const StatusRule> rules,
 std::optional<StatusFeedback> QueueNumbnessCure(
     std::span<const StatusRule> rules, const StatusTarget& target,
     QueuedStatuses& queued);
+// These direct filters do not consult rule tables, immunity or exemption.
+// decomp: func_8008418C (src/BATTLE/BATTLE.PRG/146C.c:12527).
+std::uint32_t QueueDispel(std::uint32_t active, QueuedStatuses& queued);
+// decomp: func_800841C8 (src/BATTLE/BATTLE.PRG/146C.c:12535).
+StatusFeedback QueueNegativeStatusCure(std::uint32_t active,
+                                       QueuedStatuses& queued);
 }  // namespace VS::Battle

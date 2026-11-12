@@ -69,4 +69,8 @@ void QueueLiveCurseCure(Battle_ActionDefinition*, Battle_HitResult*,
                         Battle_HitResult* target, int, int);
 void QueueLiveNumbnessCure(Battle_ActionDefinition*, Battle_HitResult*,
                            Battle_HitResult* target, int, int);
+void QueueLiveDispel(Battle_ActionDefinition*, Battle_HitResult*,
+                     Battle_HitResult* target, int, int);
+void QueueLiveNegativeStatusCure(Battle_ActionDefinition*, Battle_HitResult*,
+                                 Battle_HitResult* target, int, int);
 }  // namespace VS::Battle

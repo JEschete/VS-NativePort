@@ -463,6 +463,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\StatusHelpers.cpp" />
+    <ClCompile Include="src\Battle\StatusHelpersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\StatusQueue.cpp" />
     <ClCompile Include="src\Battle\StatusQueueLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2283,6 +2287,8 @@
     <ClInclude Include="include\Battle\Enemy.h" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
+    <ClInclude Include="include\Battle\StatusHelpers.hpp" />
+    <ClInclude Include="include\Battle\StatusHelpersLive.hpp" />
     <ClInclude Include="include\Battle\StatusQueue.hpp" />
     <ClInclude Include="include\Battle\StatusQueueLive.hpp" />
     <ClInclude Include="include\Battle\Targeting.hpp" />

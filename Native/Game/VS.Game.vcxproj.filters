@@ -759,6 +759,12 @@
     <ClInclude Include="src\Battle\StatusEffects.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\StatusHelpers.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\StatusHelpersLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\StatusQueue.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -2830,6 +2836,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\StatusHelpers.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\StatusHelpersLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\StatusQueue.hpp">

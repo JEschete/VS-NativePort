@@ -14,6 +14,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Boot/GameplayLoop.hpp"
 #include "Boot/SessionLive.hpp"
@@ -416,7 +417,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   void UpdateGimImages() override { VS::Render::UpdateLiveGimImages(); }
 
   void UpdateTargetingRiskPenalty() override {
-    Battle_UpdateTargetingRiskPenalty();
+    VS::Battle::UpdateLiveTargetingRiskPenalty();
   }
   void RunBattleActionFlow(BattleActionFlow flow) override {
     switch (flow) {

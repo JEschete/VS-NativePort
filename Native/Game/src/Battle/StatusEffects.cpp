@@ -2,6 +2,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/StatusHelpersLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "State/SceneTimerLive.hpp"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/AbilityState.h"
-#include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
@@ -20,9 +20,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/TargetingState.h"
 #include "Event/RoomTriggerEntryLive.h"
-#include "Field/Interactions.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -64,28 +62,6 @@ Battle_StatusEffectParams Battle_statusEffectParams[32]; /* contents: module ima
 
 // decomp: BATTLE.PRG func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736)
 void Battle_PreserveAshleyStatuses(void) { Battle_RemoveActorStatuses(0, Battle_characterState->stats); }
-
-// decomp: BATTLE.PRG func_8008418C (src/BATTLE/BATTLE.PRG/146C.c:12527)
-int Battle_QueueDispel(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    target_hit->inflictStatuses |=
-        (Battle_actors[target_hit->target.targetActor]->stats->statuses & 0x1FFE1FE0);
-}
-
-// decomp: BATTLE.PRG func_800841C8 (src/BATTLE/BATTLE.PRG/146C.c:12535)
-int Battle_QueueNegativeStatusCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    int negative_status_mask = Battle_actors[target_hit->target.targetActor]->stats->statuses & 0xE000;
-    target_hit->inflictStatuses |= negative_status_mask;
-
-    if (negative_status_mask != 0) {
-        target_hit->statStatusEffect = 2;
-    }
-}
 
 // decomp: BATTLE.PRG func_80086754 (src/BATTLE/BATTLE.PRG/146C.c:13532)
 void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
@@ -357,39 +333,6 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
     }
 }
 
-// decomp: BATTLE.PRG func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13801)
-void Battle_ApplyWeaponElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount)
-{
-    if (actor_stats->weapon.blade.id != 0) {
-        actor_stats->weapon.classAffinityCurrent.affinities[0][increased_affinity] += modifier_amount;
-        actor_stats->weapon.classAffinityCurrent.affinities[0][decreased_affinity] -= modifier_amount;
-        actor_stats->weapon.affinityModifiers[increased_affinity] = modifier_amount;
-        actor_stats->weapon.affinityModifiers[decreased_affinity] = -modifier_amount;
-    }
-}
-
-// decomp: BATTLE.PRG func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13811)
-void Battle_ApplyArmorElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount)
-{
-    int i;
-
-    if (actor_stats->shield.base.id != 0) {
-        actor_stats->shield.classAffinityCurrent.affinities[0][increased_affinity] += modifier_amount;
-        actor_stats->shield.classAffinityCurrent.affinities[0][decreased_affinity] -= modifier_amount;
-        actor_stats->shield.affinityModifiers[increased_affinity] = modifier_amount;
-        actor_stats->shield.affinityModifiers[decreased_affinity] = -modifier_amount;
-    }
-
-    for (i = 0; i < 6; ++i) {
-        if (actor_stats->limbs[i].armor.armor.id != 0) {
-            actor_stats->limbs[i].armor.classAffinityCurrent.affinities[0][increased_affinity] += modifier_amount;
-            actor_stats->limbs[i].armor.classAffinityCurrent.affinities[0][decreased_affinity] -= modifier_amount;
-            actor_stats->limbs[i].armor.affinityModifiers[increased_affinity] = modifier_amount;
-            actor_stats->limbs[i].armor.affinityModifiers[decreased_affinity] = -modifier_amount;
-        }
-    }
-}
-
 // decomp: BATTLE.PRG func_80086FA8 (src/BATTLE/BATTLE.PRG/146C.c:13832)
 void Battle_InflictActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
 {
@@ -529,16 +472,16 @@ void Battle_InflictActorStatuses(int status_mask, Battle_ActorStats* actor_stats
 
         switch (element_status_mask) {
         case 0x200000:
-            Battle_ApplyWeaponElementEnchantment(actor_stats, 1, 3, equipment_modifier_amount);
+            VS::Battle::ApplyLiveWeaponElementEnchantment(actor_stats, 1, 3, equipment_modifier_amount);
             break;
         case 0x400000:
-            Battle_ApplyWeaponElementEnchantment(actor_stats, 2, 4, equipment_modifier_amount);
+            VS::Battle::ApplyLiveWeaponElementEnchantment(actor_stats, 2, 4, equipment_modifier_amount);
             break;
         case 0x800000:
-            Battle_ApplyWeaponElementEnchantment(actor_stats, 3, 1, equipment_modifier_amount);
+            VS::Battle::ApplyLiveWeaponElementEnchantment(actor_stats, 3, 1, equipment_modifier_amount);
             break;
         case 0x01000000:
-            Battle_ApplyWeaponElementEnchantment(actor_stats, 4, 2, equipment_modifier_amount);
+            VS::Battle::ApplyLiveWeaponElementEnchantment(actor_stats, 4, 2, equipment_modifier_amount);
             break;
         }
     }
@@ -555,26 +498,18 @@ void Battle_InflictActorStatuses(int status_mask, Battle_ActorStats* actor_stats
 
         switch (element_status_mask) {
         case 0x2000000:
-            Battle_ApplyArmorElementEnchantment(actor_stats, 1, 3, equipment_modifier_amount);
+            VS::Battle::ApplyLiveArmorElementEnchantment(actor_stats, 1, 3, equipment_modifier_amount);
             break;
         case 0x4000000:
-            Battle_ApplyArmorElementEnchantment(actor_stats, 2, 4, equipment_modifier_amount);
+            VS::Battle::ApplyLiveArmorElementEnchantment(actor_stats, 2, 4, equipment_modifier_amount);
             break;
         case 0x8000000:
-            Battle_ApplyArmorElementEnchantment(actor_stats, 3, 1, equipment_modifier_amount);
+            VS::Battle::ApplyLiveArmorElementEnchantment(actor_stats, 3, 1, equipment_modifier_amount);
             break;
         case 0x10000000:
-            Battle_ApplyArmorElementEnchantment(actor_stats, 4, 2, equipment_modifier_amount);
+            VS::Battle::ApplyLiveArmorElementEnchantment(actor_stats, 4, 2, equipment_modifier_amount);
             break;
         }
-    }
-}
-
-// decomp: BATTLE.PRG func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:14011)
-void Battle_QueueActorStatChangeNumber(int actor_slot, int limb_tag, int encoded_amount, int label_flags)
-{
-    if ((Battle_actors[actor_slot]->roomSpawnIndex != 0x80) || (actor_slot == 0)) {
-        ((void (*)(int actor_slot, int limb_tag, u_int encoded_amount, int label_flags))Battle_QueueActorValueLabel)(actor_slot, limb_tag, encoded_amount, label_flags);
     }
 }
 
@@ -592,13 +527,13 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
     actor = Battle_actors[targetActorId]->stats;
 
     if (hit_result->target.impactKind == 4) {
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, 0, 2);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, 0, 2);
     }
 
     switch (hit_result->hpEffect) {
     case 2:
 
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->target.hp, 0);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->target.hp, 0);
 
         actor->currentHp += hit_result->target.hp;
 
@@ -620,7 +555,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
     case 3:
     case 1:
 
-        Battle_QueueActorStatChangeNumber(
+        VS::Battle::QueueLiveActorStatChangeNumber(
             targetActorId, hit_result->target.targetLimb, hit_result->target.hp | 0x80000000, 0);
 
         if (actor->currentHp > hit_result->target.hp) {
@@ -647,7 +582,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
 
     switch (hit_result->mpEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->target.mp, 1);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->target.mp, 1);
 
         actor->currentMp += hit_result->target.mp;
 
@@ -658,7 +593,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
         break;
 
     case 1:
-        Battle_QueueActorStatChangeNumber(
+        VS::Battle::QueueLiveActorStatChangeNumber(
             targetActorId, hit_result->target.targetLimb, hit_result->target.mp | 0x80000000, 1);
 
         if (actor->currentMp > hit_result->target.mp) {
@@ -674,7 +609,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
         break;
 
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->riskChange | 0x80000000, 8);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->riskChange | 0x80000000, 8);
 
         if (actor->risk > hit_result->riskChange) {
             actor->risk -= hit_result->riskChange;
@@ -686,7 +621,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
 
     switch (hit_result->strengthEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->strengthChange, 5);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->strengthChange, 5);
 
         actor->totalStrength += hit_result->strengthChange;
 
@@ -703,7 +638,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
         break;
 
     case 1:
-        Battle_QueueActorStatChangeNumber(
+        VS::Battle::QueueLiveActorStatChangeNumber(
             targetActorId, hit_result->target.targetLimb, hit_result->strengthChange | 0x80000000, 5);
 
         if (actor->totalStrength > hit_result->strengthChange) {
@@ -723,7 +658,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
 
     switch (hit_result->intelligenceEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->intelligenceChange, 6);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->intelligenceChange, 6);
 
         actor->totalIntelligence += hit_result->intelligenceChange;
 
@@ -740,7 +675,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
         break;
 
     case 1:
-        Battle_QueueActorStatChangeNumber(
+        VS::Battle::QueueLiveActorStatChangeNumber(
             targetActorId, hit_result->target.targetLimb, hit_result->intelligenceChange | 0x80000000, 6);
 
         if (actor->totalIntelligence > hit_result->intelligenceChange) {
@@ -760,7 +695,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
 
     switch (hit_result->agilityEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->agilityChange, 7);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->agilityChange, 7);
 
         actor->totalAgility += hit_result->agilityChange;
 
@@ -777,7 +712,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
         break;
 
     case 1:
-        Battle_QueueActorStatChangeNumber(
+        VS::Battle::QueueLiveActorStatChangeNumber(
             targetActorId, hit_result->target.targetLimb, hit_result->agilityChange | 0x80000000, 7);
 
         if (actor->totalAgility > hit_result->agilityChange) {
@@ -798,7 +733,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
     case 1:
         break;
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->maxHpChange, 3);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->maxHpChange, 3);
 
         actor->maxHp += hit_result->maxHpChange;
 
@@ -812,7 +747,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
     case 1:
         break;
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->maxMpChange, 4);
+        VS::Battle::QueueLiveActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->maxMpChange, 4);
 
         actor->maxMp += hit_result->maxMpChange;
 
@@ -1247,28 +1182,5 @@ int Battle_UpdateActorVitals(void)
 
 // decomp: BATTLE.PRG func_80088B6C (src/BATTLE/BATTLE.PRG/146C.c:14743)
 int Battle_UpdateRoomActorVitals(void) { return Battle_UpdateActorVitals(); }
-
-// decomp: BATTLE.PRG func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14745)
-void Battle_UpdateTargetingRiskPenalty(void)
-{
-    if ((Field_controlMode == 2) && (Battle_actionFlowMode < 4) && (Battle_actionFlowMode != 0)) {
-        if ((Battle_targetingRiskTimer == 0)
-            && ((
-                (Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->stats->statuses
-                    & 8)
-                != 0))
-            && (Battle_actionState->selection.primaryTarget.targetsPosition == 0)) {
-            if (Battle_actionState->selection.primaryTarget.target.targetActor == 0) {
-                if (Battle_characterState->stats->risk < 100) {
-                    ++Battle_characterState->stats->risk;
-                }
-            }
-        }
-        Battle_targetingRiskTimer = (Battle_targetingRiskTimer + State_tickSpeed) % 30;
-    }
-}
-
-// decomp: BATTLE.PRG func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14764)
-void Battle_ResetTargetingRiskPenaltyTimer(void) { Battle_targetingRiskTimer = 0; }
 
 }  // extern "C"

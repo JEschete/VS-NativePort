@@ -1,4 +1,4 @@
-// Native side of status_queue.py: F00405/F00406/F00437-F00466, original 146C.c
+// Native side of status_queue.py: F00405/F00406/F00437-F00468, original 146C.c
 // _setApplicableStatuses, _setInflictedStatuses and func_80083998..func_8008413C.
 #include "Battle/StatusQueue.hpp"
 
@@ -60,7 +60,7 @@ int main() {
   using namespace VS::Battle;
   using Wrapper = std::optional<StatusFeedback> (*)(
       std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
-  constexpr std::array<Wrapper, 30> wrappers{
+  constexpr std::array<Wrapper, 32> wrappers{
       QueueStrengthDown, QueueIntelligenceDown, QueueAgilityDown,
       QueueEquipmentDown, QueueHalfMovement, QueueStrengthUp,
       QueueIntelligenceUp, QueueAgilityUp, QueueEquipmentUp,
@@ -68,7 +68,8 @@ int main() {
       QueueParalysis, QueuePoison, QueueNumbness, QueueCurse,
       nullptr, nullptr, nullptr, nullptr,
       nullptr, nullptr, nullptr, nullptr,
-      QueueParalysisCure, QueuePoisonCure, QueueCurseCure, QueueNumbnessCure};
+      QueueParalysisCure, QueuePoisonCure, QueueCurseCure, QueueNumbnessCure,
+      nullptr, nullptr};
   using MaskWrapper = std::optional<std::uint32_t> (*)(
       std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
   constexpr std::array<MaskWrapper, 8> elemental_wrappers{
@@ -128,6 +129,11 @@ int main() {
       const auto mask = elemental_wrappers.at(function - 20)(rules.value, target.value, queued.value);
       refused = !mask.has_value();
       if (mask) result = mask.value();
+    } else if (function == 32) {
+      result = QueueDispel(target.value.active, queued.value);
+    } else if (function == 33) {
+      const auto feedback = QueueNegativeStatusCure(target.value.active, queued.value);
+      result = feedback == StatusFeedback::kNone ? queued.value.removed : 0x20000u;
     } else {
       const auto feedback = wrappers[function - 2](rules.value, target.value, queued.value);
       refused = !feedback.has_value();

@@ -296,4 +296,22 @@ std::optional<StatusFeedback> QueueNumbnessCure(
   return QueueStatRule(rules, target, queued, StatusRuleId::kNumbness,
                        StatusFeedback::kPositive, QueueStatusRemovalMask);
 }
+// decomp: func_8008418C (src/BATTLE/BATTLE.PRG/146C.c:12527).
+std::uint32_t QueueDispel(std::uint32_t active, QueuedStatuses& queued) {
+  constexpr std::uint32_t kDispelStatuses = 0x1FFE1FE0;
+  const auto removed = active & kDispelStatuses;
+  queued.removed |= removed;
+  return removed;
+}
+
+// decomp: func_800841C8 (src/BATTLE/BATTLE.PRG/146C.c:12535).
+StatusFeedback QueueNegativeStatusCure(std::uint32_t active,
+                                       QueuedStatuses& queued) {
+  constexpr std::uint32_t kNegativeCureStatuses = 0xE000;
+  const auto removed = active & kNegativeCureStatuses;
+  queued.removed |= removed;
+  if (removed == 0) return StatusFeedback::kNone;
+  queued.feedback = StatusFeedback::kPositive;
+  return StatusFeedback::kPositive;
+}
 }  // namespace VS::Battle

@@ -22,6 +22,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
+#include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Log.hpp"
 #include "Field/CameraLive.hpp"
@@ -709,7 +710,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     VS::Field::LiveStorePreferredActionCameraDistance();
   }
   void ResetRiskPenaltyTimer() override {
-    Battle_ResetTargetingRiskPenaltyTimer();
+    VS::Battle::ResetLiveTargetingRiskPenaltyTimer();
   }
   void TransformRoomPalettes(
       const battle::RoomPaletteTransform& transform) override {
