@@ -1962,6 +1962,12 @@
     <None Include="..\..\port\differential.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\differentials\action_execution.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\action_execution_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\action_notification.py">
       <Filter>tools\port\differentials</Filter>
     </None>

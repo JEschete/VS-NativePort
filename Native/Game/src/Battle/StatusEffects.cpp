@@ -2,6 +2,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "State/SceneTimerLive.hpp"
@@ -65,109 +66,12 @@ Battle_StatusEffectParams Battle_statusEffectParams[32]; /* contents: module ima
 // decomp: BATTLE.PRG func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736)
 void Battle_PreserveAshleyStatuses(void) { Battle_RemoveActorStatuses(0, Battle_characterState->stats); }
 
-// decomp: BATTLE.PRG _setApplicableStatuses (src/BATTLE/BATTLE.PRG/146C.c:11195)
-int Battle_QueueApplicableStatusChanges(int status_id, Battle_HitResult* entity)
-{
-    int inflict = 0;
-    int remove = 0;
-    Battle_StatusEffectParams* params = &Battle_statusEffectParams[status_id];
-    Battle_ActorStats* target_stats = Battle_actors[entity->target.targetActor]->stats;
-
-    if (target_stats->actorId != 128) {
-
-        int current_statuses = target_stats->statuses;
-
-        if (!(current_statuses & params->blockingStatuses)) {
-            remove = params->statusFlags & ~target_stats->statusImmunities & (~current_statuses | params->cancelledStatuses);
-            entity->removeStatuses |= remove;
-            inflict = params->cancelledStatuses & target_stats->statuses;
-            entity->inflictStatuses |= inflict;
-        }
-    }
-
-    return remove | inflict;
-}
-
-// decomp: BATTLE.PRG _setInflictedStatuses (src/BATTLE/BATTLE.PRG/146C.c:11217)
-int Battle_QueueStatusRemovalMask(int status_id, Battle_HitResult* entity)
-{
-    int ret = 0;
-    Battle_StatusEffectParams* params = &Battle_statusEffectParams[status_id];
-
-    if (Battle_actors[entity->target.targetActor]->stats->actorId != 128) {
-        ret = params->statusFlags & Battle_actors[entity->target.targetActor]->stats->statuses;
-        entity->inflictStatuses |= ret;
-    }
-
-    return ret;
-}
-
-// decomp: BATTLE.PRG func_80083998 (src/BATTLE/BATTLE.PRG/146C.c:12273)
-int Battle_QueueStrengthDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    if (Battle_QueueApplicableStatusChanges(5, target_hit) != 0) {
-        target_hit->statStatusEffect = 1;
-    }
-}
-
-// decomp: BATTLE.PRG func_800839E8 (src/BATTLE/BATTLE.PRG/146C.c:12282)
-int Battle_QueueIntelligenceDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    if (Battle_QueueApplicableStatusChanges(7, target_hit) != 0) {
-        target_hit->statStatusEffect = 1;
-    }
-}
-
-// decomp: BATTLE.PRG func_80083A38 (src/BATTLE/BATTLE.PRG/146C.c:12291)
-int Battle_QueueAgilityDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    if (Battle_QueueApplicableStatusChanges(9, target_hit) != 0) {
-        target_hit->statStatusEffect = 1;
-    }
-}
-
-// decomp: BATTLE.PRG func_80083A88 (src/BATTLE/BATTLE.PRG/146C.c:12300)
-int Battle_QueueEquipmentDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    if (Battle_QueueApplicableStatusChanges(19, target_hit) != 0) {
-        target_hit->statStatusEffect = 1;
-    }
-}
-
-// decomp: BATTLE.PRG func_80083AD8 (src/BATTLE/BATTLE.PRG/146C.c:12309)
-int Battle_QueueHalfMovement(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    if (Battle_QueueApplicableStatusChanges(4, target_hit) != 0) {
-        target_hit->statStatusEffect = 1;
-    }
-}
-
-// decomp: BATTLE.PRG func_80083B28 (src/BATTLE/BATTLE.PRG/146C.c:12318)
-int Battle_QueueStrengthUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
-{
-    if (Battle_QueueApplicableStatusChanges(6, target_hit) != 0) {
-        target_hit->statStatusEffect = 2;
-    }
-}
-
 // decomp: BATTLE.PRG func_80083B78 (src/BATTLE/BATTLE.PRG/146C.c:12327)
 int Battle_QueueIntelligenceUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(8, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(8, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -177,7 +81,7 @@ int Battle_QueueAgilityUp(Battle_ActionDefinition* action_definition __attribute
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(10, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(10, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -187,7 +91,7 @@ int Battle_QueueEquipmentUp(Battle_ActionDefinition* action_definition __attribu
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(20, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(20, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -197,7 +101,7 @@ int Battle_QueueQuicken(Battle_ActionDefinition* action_definition __attribute__
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(11, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(11, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -207,7 +111,7 @@ int Battle_QueueSilence(Battle_ActionDefinition* action_definition __attribute__
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(12, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(12, target_hit) != 0) {
         target_hit->statStatusEffect = 1;
     }
 }
@@ -218,7 +122,7 @@ int Battle_QueueMagicWard(Battle_ActionDefinition* action_definition __attribute
     Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
     int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x12, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x12, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083D2C (src/BATTLE/BATTLE.PRG/146C.c:12380)
@@ -226,7 +130,7 @@ int Battle_QueueRegeneration(Battle_ActionDefinition* action_definition __attrib
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(17, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(17, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -236,7 +140,7 @@ int Battle_QueueBanish(Battle_ActionDefinition* action_definition __attribute__(
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action)
 {
-    Battle_QueueApplicableStatusChanges(0x1D, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x1D, target_hit);
     if (execute_action != 0) {
         Battle_actors[target_hit->target.targetActor]->stats->isAnalyzed = 1;
     }
@@ -247,7 +151,7 @@ int Battle_QueueParalysis(Battle_ActionDefinition* action_definition __attribute
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(13, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(13, target_hit) != 0) {
         target_hit->statStatusEffect = 1;
     }
 }
@@ -257,7 +161,7 @@ int Battle_QueuePoison(Battle_ActionDefinition* action_definition __attribute__(
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(14, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(14, target_hit) != 0) {
         target_hit->statStatusEffect = 1;
     }
 }
@@ -267,7 +171,7 @@ int Battle_QueueNumbness(Battle_ActionDefinition* action_definition __attribute_
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(15, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(15, target_hit) != 0) {
         target_hit->statStatusEffect = 1;
     }
 }
@@ -277,7 +181,7 @@ int Battle_QueueCurse(Battle_ActionDefinition* action_definition __attribute__((
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(16, target_hit) != 0) {
+    if (VS::Battle::QueueLiveApplicableStatusChanges(16, target_hit) != 0) {
         target_hit->statStatusEffect = 1;
     }
 }
@@ -287,7 +191,7 @@ int Battle_QueueAirAttackUp(Battle_ActionDefinition* action_definition __attribu
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x15, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x15, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083F50 (src/BATTLE/BATTLE.PRG/146C.c:12442)
@@ -295,7 +199,7 @@ int Battle_QueueFireAttackUp(Battle_ActionDefinition* action_definition __attrib
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x16, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x16, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083F74 (src/BATTLE/BATTLE.PRG/146C.c:12449)
@@ -303,7 +207,7 @@ int Battle_QueueEarthAttackUp(Battle_ActionDefinition* action_definition __attri
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x17, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x17, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083F98 (src/BATTLE/BATTLE.PRG/146C.c:12456)
@@ -311,7 +215,7 @@ int Battle_QueueWaterAttackUp(Battle_ActionDefinition* action_definition __attri
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x18, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x18, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083FBC (src/BATTLE/BATTLE.PRG/146C.c:12463)
@@ -319,7 +223,7 @@ int Battle_QueueAirDefenseUp(Battle_ActionDefinition* action_definition __attrib
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x19, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x19, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083FE0 (src/BATTLE/BATTLE.PRG/146C.c:12470)
@@ -327,7 +231,7 @@ int Battle_QueueFireDefenseUp(Battle_ActionDefinition* action_definition __attri
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x1A, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x1A, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80084004 (src/BATTLE/BATTLE.PRG/146C.c:12477)
@@ -335,7 +239,7 @@ int Battle_QueueEarthDefenseUp(Battle_ActionDefinition* action_definition __attr
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x1B, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x1B, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80084028 (src/BATTLE/BATTLE.PRG/146C.c:12484)
@@ -343,7 +247,7 @@ int Battle_QueueWaterDefenseUp(Battle_ActionDefinition* action_definition __attr
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x1C, target_hit);
+    VS::Battle::QueueLiveApplicableStatusChanges(0x1C, target_hit);
 }
 
 // decomp: BATTLE.PRG func_8008404C (src/BATTLE/BATTLE.PRG/146C.c:12491)
@@ -351,7 +255,7 @@ int Battle_QueueParalysisCure(Battle_ActionDefinition* action_definition __attri
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0xD, target_hit) != 0) {
+    if (VS::Battle::QueueLiveStatusRemovalMask(0xD, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -361,7 +265,7 @@ int Battle_QueuePoisonCure(Battle_ActionDefinition* action_definition __attribut
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0xE, target_hit) != 0) {
+    if (VS::Battle::QueueLiveStatusRemovalMask(0xE, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -371,7 +275,7 @@ int Battle_QueueCurseCure(Battle_ActionDefinition* action_definition __attribute
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0x10, target_hit) != 0) {
+    if (VS::Battle::QueueLiveStatusRemovalMask(0x10, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }
@@ -381,7 +285,7 @@ int Battle_QueueNumbnessCure(Battle_ActionDefinition* action_definition __attrib
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0xF, target_hit) != 0) {
+    if (VS::Battle::QueueLiveStatusRemovalMask(0xF, target_hit) != 0) {
         target_hit->statStatusEffect = 2;
     }
 }

@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
@@ -186,7 +187,7 @@ void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* hit_result)
                 limb_health_test = 1;
             }
             if (limb_health_test == 0) {
-                Battle_QueueApplicableStatusChanges(4, hit_result);
+                VS::Battle::QueueLiveApplicableStatusChanges(4, hit_result);
             }
         }
     } else {
@@ -199,7 +200,7 @@ void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* hit_result)
                 limb_health_test = 1;
             }
             if (limb_health_test != 0) {
-                Battle_QueueStatusRemovalMask(4, hit_result);
+                VS::Battle::QueueLiveStatusRemovalMask(4, hit_result);
             }
         }
     }
@@ -221,12 +222,12 @@ void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* hit_result)
                 limb_health_test = projected_limb_hp << 0x10;
                 limb_health_test = 0x10000 < limb_health_test;
                 if (!limb_health_test) {
-                    Battle_QueueApplicableStatusChanges(Battle_limbInjuryStatusIds[i], hit_result);
+                    VS::Battle::QueueLiveApplicableStatusChanges(Battle_limbInjuryStatusIds[i], hit_result);
                 }
             } else {
                 limb_health_test = (projected_limb_hp << 0x10) > 0x10000;
                 if (limb_health_test) {
-                    Battle_QueueStatusRemovalMask(Battle_limbInjuryStatusIds[i], hit_result);
+                    VS::Battle::QueueLiveStatusRemovalMask(Battle_limbInjuryStatusIds[i], hit_result);
                 }
             }
         }

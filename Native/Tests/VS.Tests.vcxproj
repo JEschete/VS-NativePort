@@ -293,6 +293,7 @@
     <ClCompile Include="src\SpritesTests.cpp" />
     <ClCompile Include="src\StateRecordsTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
+    <ClCompile Include="src\StatusQueueTests.cpp" />
     <ClCompile Include="src\StreamControlTests.cpp" />
     <ClCompile Include="src\TargetingDrawSliceTests.cpp" />
     <ClCompile Include="src\TargetPagePartitionTests.cpp" />

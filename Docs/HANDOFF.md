@@ -1,6 +1,6 @@
 # Current Handoff
 
-Updated 2026-11-11. Row 28 (battle AI) of the C++ promotion work (#276) is source-complete; row 29 is next. The earlier perception promotion is the
+Updated 2026-11-11. Row 28 (battle AI) of the C++ promotion work (#276) is source-complete; row 29 is active. The earlier perception promotion is the
 F01638-F01640/F01643 perception group in `33ad4f3e`
 ([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695)). Each published row-28
 commit and its exact-revision CI run are recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276)
@@ -16,6 +16,40 @@ tracking in `REMAINING_FUNCTIONS.csv`. Work resumed from clean `0e8989ad`;
 exact-revision Source Quality `43105524312` passed. The earlier stopping point
 below is retained as historical evidence, not an instruction to pause.
 
+### Current row-29 group
+
+F00405/F00406/F00437-F00442 are locally verified on `b6c5c42a` in the
+`StatusQueue` core/live module. Typed rules, target status/immunity/exemption
+and queued additions/removals replace the global reads; six status handlers
+share the rule kernel while preserving their own rule and feedback choices.
+The eight old symbols have zero references (62 before). Production encounter
+and generated action-resolution consumers use the checked live API.
+
+- Original spans: 0x80081020-0x80081130 (68 instructions, SHA-256
+  `64025fc62cd0f26206a1c079b5b0c41878fb9aab80a366befe9215f89c23c9c6`)
+  and 0x80083998-0x80083B78 (120 instructions, SHA-256
+  `107dfe5fc9b8f9c2f2dae0acd89f076721670639ec0685cedce907b363ae23b9`).
+- `status_queue`: 8,192 vectors, zero mismatches; 46/46 mutants detected.
+  Original primitives execute through the handlers without status-logic
+  stubs. Eight native broken variants detect 823/152/154/155/157/159/149/166
+  mismatches of 2,048 vectors respectively.
+- Final group `build\promotion-check\group-20261111-212737`, 384 seconds:
+  Debug/Release each pass 5,786 cases/12,652,032 assertions, with 23 focused
+  cases/239 assertions. Both canonical replays match in both configurations;
+  copier stability/controls pass; tidy reports five existing findings, zero
+  new. The first group failed only the case's import sorting; it was fixed,
+  the differential rerun, and the complete group gate repeated.
+- Canonical ledgers and progress refresh pass. Local evidence:
+  `build\differential\status_queue.log`, eight `status_queue-F*-variant.log`
+  reports and `build\scratch\status-queue\ledger.json`.
+- Limits: distinct valid synthetic input storage in the differential; missing
+  rules and invalid live pointers/indices refuse diagnostically. The live
+  32-rule and 42-actor tables remain compatibility dependencies. No complete
+  interactive status coverage or EC-04/M8 retirement claim. Publication and
+  exact-revision CI for this group are pending.
+
+### Completed battle-AI groups
+
 The candidate-movement batch is published in `fc0e2525`; exact-revision Source
 Quality [43136464204](https://github.com/JEschete/VS-NativePort/actions/runs/43136464204)
 passed. Publication and detailed evidence are recorded on
@@ -27,8 +61,8 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 10 of the original 900 resolved; 890 remain** (889 generated plus
-F01416 owned WIP). Modernization is 2,854/3,744; C++ promotion is 2,855 plus
+**Progress: 18 of the original 900 resolved; 882 remain** (881 generated plus
+F01416 owned WIP). Modernization is 2,862/3,744; C++ promotion is 2,863 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -91,12 +125,18 @@ their four old symbols have zero consumers (17 before).
   queued stubs, and #337 remains suspected with diagnostic refusals preserved.
 - Local evidence: `build\differential\action_execution.log`, the four
   `action_execution-F01656-variant.log` through `F01659` reports, and
-  `build\scratch\pursuit\action_execution_ledgers.json`. Publication and
-  exact-revision CI for the final batch are the next gate.
+  `build\scratch\pursuit\action_execution_ledgers.json`. Published in
+  `b6c5c42a`; exact-revision
+  [CI 43139398025](https://github.com/JEschete/VS-NativePort/actions/runs/43139398025)
+  passed, recorded on
+  [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue with row 29: F00405/F00406 and F00437-F00442 (eight related status
-queue functions). Their original source, callers and 188 original instructions
-have been read. Keep every original cohort row in the progress CSV, including
+Continue row 29 with F00443-F00450: remaining attribute increases, Quicken,
+Silence, Magic Ward, Regeneration and Banish. Their original source and 157
+instructions (0x80083B78-0x80083DEC) have been read. Banish analyzes on actual
+execution even when its status change is blocked; preserve the original
+return register using named fields at the live boundary. Keep every original
+cohort row in the progress CSV, including
 resolved ones; the `snapshot` column stays `44fa8847`. F01416 remains the one
 owned WIP and must not disappear from the remaining count.
 
@@ -141,9 +181,10 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 
 ## Stopping Point
 
-The continuation is active, not paused. Row 28 is source-complete and its final
-four-function group is verified locally; publish it and confirm CI, then begin
-row 29 as described above. The perception checkpoint below is historical.
+The continuation is active, not paused. Row 28 is published and green. The
+first eight row-29 status-queue functions are verified locally; publish them
+and confirm CI, then continue F00443-F00450. The perception checkpoint below
+is historical.
 
 Stopped on owner request (2026-11-11) after the perception group, published
 in `33ad4f3e` on base `3aa5b806` and green on the exact revision
@@ -314,11 +355,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the verified final row-28 group and confirm its exact-revision CI,
-   then continue row 29. Keep #337 open until its in-game reachability is
-   established. Do not close #276: 890 remain.
-3. Start row 29 with status-queue primitives F00405/F00406 and the six
-   related handlers F00437-F00442, following
+2. Publish the verified first row-29 status-queue group and confirm its
+   exact-revision CI, then continue. Keep #337 open until its in-game
+   reachability is established. Do not close #276: 882 remain.
+3. Continue row 29 with status handlers F00443-F00450, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

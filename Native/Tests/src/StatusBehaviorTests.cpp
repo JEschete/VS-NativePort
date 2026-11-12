@@ -3,6 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/StatusQueueLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -113,7 +114,9 @@ struct ConditionFixture {
 
   bool Apply(int effect) {
     Battle_HitResult hit{};
-    if (Battle_QueueApplicableStatusChanges(effect, &hit) == 0) return false;
+    if (VS::Battle::QueueLiveApplicableStatusChanges(effect, &hit) == 0) {
+      return false;
+    }
     Battle_RemoveActorStatuses(hit.inflictStatuses, &stats);
     Battle_InflictActorStatuses(hit.removeStatuses, &stats);
     return true;
@@ -121,7 +124,7 @@ struct ConditionFixture {
 
   void Cure(int effect) {
     Battle_HitResult hit{};
-    REQUIRE(Battle_QueueStatusRemovalMask(effect, &hit) != 0);
+    REQUIRE(VS::Battle::QueueLiveStatusRemovalMask(effect, &hit) != 0);
     Battle_RemoveActorStatuses(hit.inflictStatuses, &stats);
   }
 

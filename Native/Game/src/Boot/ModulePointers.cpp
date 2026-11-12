@@ -28,6 +28,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -355,8 +356,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007FE5Cu, 0u, (void*)&Battle_ApplyDamageGemMultiplier, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80080000u, 0u, (void*)&Battle_DistributeHitLimbDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800801E0u, 0u, (void*)&Battle_DistributeLimbRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80081020u, 0u, (void*)&Battle_QueueApplicableStatusChanges, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800810CCu, 0u, (void*)&Battle_QueueStatusRemovalMask, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081130u, 0u, (void*)&Battle_IgnoreStatCalculator, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081138u, 0u, (void*)&Battle_LastActionStatValue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081148u, 0u, (void*)&Battle_CalculatePhysicalHitDamage, 0u, 0u, 0u},
@@ -384,12 +383,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800838BCu, 0u, (void*)&Battle_TargetRisk, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800838ECu, 0u, (void*)&Battle_CalculateActionStatChange, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083990u, 0u, (void*)&Battle_IgnoreHitCallback, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083998u, 0u, (void*)&Battle_QueueStrengthDown, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800839E8u, 0u, (void*)&Battle_QueueIntelligenceDown, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083A38u, 0u, (void*)&Battle_QueueAgilityDown, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083A88u, 0u, (void*)&Battle_QueueEquipmentDown, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083AD8u, 0u, (void*)&Battle_QueueHalfMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083B28u, 0u, (void*)&Battle_QueueStrengthUp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083B78u, 0u, (void*)&Battle_QueueIntelligenceUp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083BC8u, 0u, (void*)&Battle_QueueAgilityUp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083C18u, 0u, (void*)&Battle_QueueEquipmentUp, 0u, 0u, 0u},
@@ -1754,6 +1747,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DAC80u, 0u, (void*)&VS::Battle::Ai::TryExecuteLiveActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAD9Cu, 0u, (void*)&VS::Battle::Ai::TryExecuteLivePlannedActions, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAED0u, 0u, (void*)&VS::Battle::Ai::UpdateLiveActorDecisions, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80081020u, 0u, (void*)&VS::Battle::QueueLiveApplicableStatusChanges, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800810CCu, 0u, (void*)&VS::Battle::QueueLiveStatusRemovalMask, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083998u, 0u, (void*)&VS::Battle::QueueLiveStrengthDown, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800839E8u, 0u, (void*)&VS::Battle::QueueLiveIntelligenceDown, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083A38u, 0u, (void*)&VS::Battle::QueueLiveAgilityDown, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083A88u, 0u, (void*)&VS::Battle::QueueLiveEquipmentDown, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083AD8u, 0u, (void*)&VS::Battle::QueueLiveHalfMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083B28u, 0u, (void*)&VS::Battle::QueueLiveStrengthUp, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

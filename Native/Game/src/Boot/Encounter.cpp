@@ -17,6 +17,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetPages.h"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
@@ -437,7 +438,7 @@ std::expected<void, std::string> ApplyAdjustment(EncounterAdjustment adjustment,
   }
   Battle_HitResult hit{};
   hit.target.targetActor = 0;
-  if (Battle_QueueApplicableStatusChanges(parameter, &hit) == 0) {
+  if (VS::Battle::QueueLiveApplicableStatusChanges(parameter, &hit) == 0) {
     return std::unexpected("STATUS ALREADY ACTIVE, BLOCKED OR IMMUNE");
   }
   // These original hit-result names are inverted: inflictStatuses cures;

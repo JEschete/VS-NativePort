@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
 #include "Battle/TargetingState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -37,7 +37,7 @@ int Battle_QueueInstantDeath(Battle_ActionDefinition* action_definition __attrib
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueStatusRemovalMask(0x1E, target_hit);
+    VS::Battle::QueueLiveStatusRemovalMask(0x1E, target_hit);
     target_hit->target.hp = Battle_actors[target_hit->target.targetActor]->stats->currentHp;
     target_hit->hpEffect = 1;
 }
