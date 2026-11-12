@@ -224,4 +224,44 @@ void QueueLiveWaterAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
                             Battle_HitResult* target, int, int) {
   ApplyHandler(target, QueueWaterAttackUp);
 }
+// decomp: func_80083FBC (src/BATTLE/BATTLE.PRG/146C.c:12463).
+void QueueLiveAirDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                           Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueAirDefenseUp);
+}
+// decomp: func_80083FE0 (src/BATTLE/BATTLE.PRG/146C.c:12470).
+void QueueLiveFireDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueFireDefenseUp);
+}
+// decomp: func_80084004 (src/BATTLE/BATTLE.PRG/146C.c:12477).
+void QueueLiveEarthDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                             Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueEarthDefenseUp);
+}
+// decomp: func_80084028 (src/BATTLE/BATTLE.PRG/146C.c:12484).
+void QueueLiveWaterDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                             Battle_HitResult* target, int, int) {
+  ApplyHandler(target, QueueWaterDefenseUp);
+}
+// decomp: func_8008404C (src/BATTLE/BATTLE.PRG/146C.c:12491).
+void QueueLiveParalysisCure(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueueParalysisCure);
+}
+// decomp: func_8008409C (src/BATTLE/BATTLE.PRG/146C.c:12500).
+void QueueLivePoisonCure(Battle_ActionDefinition*, Battle_HitResult*,
+                         Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueuePoisonCure);
+}
+// decomp: func_800840EC (src/BATTLE/BATTLE.PRG/146C.c:12509).
+void QueueLiveCurseCure(Battle_ActionDefinition*, Battle_HitResult*,
+                        Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueueCurseCure);
+}
+// decomp: func_8008413C (src/BATTLE/BATTLE.PRG/146C.c:12518).
+void QueueLiveNumbnessCure(Battle_ActionDefinition*, Battle_HitResult*,
+                           Battle_HitResult* target, int, int) {
+  QueueHandler(target, QueueNumbnessCure);
+}
 }  // namespace VS::Battle

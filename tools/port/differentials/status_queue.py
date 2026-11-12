@@ -1,4 +1,4 @@
-"""F00405/F00406/F00437-F00458 status queue primitives and twenty-two rule wrappers."""
+"""F00405/F00406/F00437-F00466 status queue primitives and thirty rule wrappers."""
 
 import random
 from dataclasses import dataclass
@@ -12,26 +12,30 @@ from differential import (
     store_problems,
 )
 
-ID = "F00405/F00406/F00437-F00458"
+ID = "F00405/F00406/F00437-F00466"
 ENTRY, END = 0x80081020, 0x80081130
 WRAPPER_START, WRAPPER_END = 0x80083998, 0x80083B78
 NEXT_START, NEXT_END = WRAPPER_END, 0x80083DEC
 AILMENT_START, ATTACK_START, ATTACK_END = NEXT_END, 0x80083F2C, 0x80083FBC
+DEFENSE_START, CURE_START, CURE_END = ATTACK_END, 0x8008404C, 0x8008418C
 MODULES = (r"BATTLE/BATTLE.PRG", "SLUS_010.40")
 DRIVER = "status_queue_driver.cpp"
 SOURCES = (r"Native\Game\src\Battle\StatusQueue.cpp",)
-VECTORS, SEED = 24576, 405406437
+VECTORS, SEED = 32768, 405406437
 MUTANT_VECTORS = 2048
 
-FUNCTIONS = ("F00405", "F00406", *(f"F{number:05}" for number in range(437, 459)))
+FUNCTIONS = ("F00405", "F00406", *(f"F{number:05}" for number in range(437, 467)))
 ENTRIES = (ENTRY, 0x800810CC, *(WRAPPER_START + index * 0x50 for index in range(11)),
            0x80083D08, 0x80083D2C, 0x80083D7C,
            *(AILMENT_START + index * 0x50 for index in range(4)),
-           *(ATTACK_START + index * 0x24 for index in range(4)))
+           *(ATTACK_START + index * 0x24 for index in range(8)),
+           *(CURE_START + index * 0x50 for index in range(4)))
 RULE_IDS = (5, 7, 9, 19, 4, 6, 8, 10, 20, 11, 12, 18, 17, 29,
-            13, 14, 15, 16, 21, 22, 23, 24)
+            13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 13, 14, 16, 15)
 WARD, BANISH = 13, 15
-RAW_FUNCTIONS = (WARD, 20, 21, 22, 23)
+RAW_FUNCTIONS = (WARD, *range(20, 28))
+CURE_FUNCTIONS = (1, 28, 29, 30, 31)
+POSITIVE_FUNCTIONS = (7, 8, 9, 10, 11, 14, *CURE_FUNCTIONS[1:])
 FEEDBACK_FUNCTIONS = tuple(index for index in range(2, len(FUNCTIONS))
                            if index not in (*RAW_FUNCTIONS, BANISH))
 RULE_COUNT = 32
@@ -65,7 +69,7 @@ MUTANTS = {
 for _function in FEEDBACK_FUNCTIONS:
     _entry, _rule_id = ENTRIES[_function], RULE_IDS[_function - 2]
     _name = FUNCTIONS[_function]
-    _positive = _function in (7, 8, 9, 10, 11, 14)
+    _positive = _function in POSITIVE_FUNCTIONS
     _kept_bit = 16 if _positive else 17
     MUTANTS.update({
         f"{_name}-wrong-rule": {_entry + 0x0C: 0x24040000 | ((_rule_id + 1) % RULE_COUNT)},
@@ -75,6 +79,8 @@ for _function in FEEDBACK_FUNCTIONS:
         f"{_name}-wrong-feedback": {_entry + 0x34: 0x3C020001 if _positive else 0x3C020002},
         f"{_name}-feedback-on-no-change": {_entry + 0x1C: 0},
     })
+    if _function in CURE_FUNCTIONS:
+        MUTANTS[f"{_name}-application-not-removal"] = {_entry + 0x14: 0x0C020408}
 MUTANTS.update({
     "F00448-wrong-rule": {0x80083D0C: 0x24040013},
     "F00448-removal-not-application": {0x80083D14: 0x0C020433},
@@ -273,7 +279,7 @@ def check(image: Image, vector: Vector, observation: dict, native: list[int], re
         problems.append("original changed actor, actor table or status-rule table/guards")
 
     allowed = [(HIT + 0x18, HIT + 0x1C)]
-    if vector.function != 1:
+    if vector.function not in CURE_FUNCTIONS:
         allowed.append((HIT + 0x14, HIT + 0x18))
     if vector.function in FEEDBACK_FUNCTIONS:
         allowed.extend(((HIT + 0x1C, HIT + 0x20),
@@ -290,7 +296,8 @@ def check(image: Image, vector: Vector, observation: dict, native: list[int], re
 
     params = words(vector.params)
     blocking = params[GUARD_SIZE // 4 + vector.rule_id * 4 + 3]
-    eligible = vector.actor_id != 128 and (vector.function == 1 or not (blocking & vector.active))
+    eligible = vector.actor_id != 128 and (
+        vector.function in CURE_FUNCTIONS or not (blocking & vector.active))
     expected_stores = []
     if vector.function in FEEDBACK_FUNCTIONS:
         expected_stores.extend(((DEFAULT_STACK - 8, 4), (DEFAULT_STACK - 4, 4)))
@@ -300,7 +307,7 @@ def check(image: Image, vector: Vector, observation: dict, native: list[int], re
         expected_stores.extend(((DEFAULT_STACK - 12, 4), (DEFAULT_STACK - 16, 4),
                                 (DEFAULT_STACK - 8, 4)))
     if eligible:
-        if vector.function != 1:
+        if vector.function not in CURE_FUNCTIONS:
             expected_stores.append((HIT + 0x14, 4))
         expected_stores.append((HIT + 0x18, 4))
     if vector.function in FEEDBACK_FUNCTIONS and native[1]:
@@ -323,7 +330,10 @@ def describe(image: Image, results: list) -> list[str]:
         f"F00451-F00458 {AILMENT_START:08X}-{ATTACK_END - 4:08X} inclusive: "
         f"{(ATTACK_END - AILMENT_START) // 4} original instructions; "
         f"sha256={image.sha256(AILMENT_START, ATTACK_END)}",
-        "The two disjoint spans contain 461 instructions total; the intervening gap is not "
+        f"F00459-F00466 {DEFENSE_START:08X}-{CURE_END - 4:08X} inclusive: "
+        f"{(CURE_END - DEFENSE_START) // 4} original instructions; "
+        f"sha256={image.sha256(DEFENSE_START, CURE_END)}",
+        "The two disjoint spans contain 577 instructions total; the intervening gap is not "
         "part of this case. Wrappers execute the original primitive, with no status-logic stubs.",
     ]
     for function, name in enumerate(FUNCTIONS):
@@ -339,9 +349,10 @@ def describe(image: Image, results: list) -> list[str]:
                      f"{all_immune} all-immune, {active} active-status, {sign_bit} full-width rule tables, "
                      f"initial feedback values {feedbacks}")
         if function == BANISH:
-            lines.append(f"Banish execute flags: {sorted({v.execute for v, _ in selected if v.scenario < 24})}; "
-                         f"{sum(v.execute != 0 for v, _ in selected)} executed, "
-                         f"{sum(v.execute == 0 for v, _ in selected)} previews")
+            positive = sum(0 < (v.execute & MASK) < 0x80000000 for v, _ in selected)
+            negative = sum(bool(v.execute & 0x80000000) for v, _ in selected)
+            lines.append(f"Banish execute flags: {positive} positive, {negative} negative, "
+                         f"{sum(v.execute == 0 for v, _ in selected)} zero/previews")
     lines.append("Compared raw v0 via driver-only projection of typed outcomes (production mediator callbacks "
                  "are void), all hit/stats bytes, exact original store order/width/address, "
                  "read-only actor/actor-table/rule-table "

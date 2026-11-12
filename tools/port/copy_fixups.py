@@ -698,6 +698,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::QueueLiveFireAttackUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     "VS::Battle::QueueLiveEarthAttackUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     "VS::Battle::QueueLiveWaterAttackUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveAirDefenseUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveFireDefenseUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveEarthDefenseUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveWaterDefenseUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveParalysisCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLivePoisonCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveCurseCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveNumbnessCure": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1326,6 +1334,14 @@ OWNED_CALL_BINDINGS["F00455"] = "VS::Battle::QueueLiveAirAttackUp"
 OWNED_CALL_BINDINGS["F00456"] = "VS::Battle::QueueLiveFireAttackUp"
 OWNED_CALL_BINDINGS["F00457"] = "VS::Battle::QueueLiveEarthAttackUp"
 OWNED_CALL_BINDINGS["F00458"] = "VS::Battle::QueueLiveWaterAttackUp"
+OWNED_CALL_BINDINGS["F00459"] = "VS::Battle::QueueLiveAirDefenseUp"
+OWNED_CALL_BINDINGS["F00460"] = "VS::Battle::QueueLiveFireDefenseUp"
+OWNED_CALL_BINDINGS["F00461"] = "VS::Battle::QueueLiveEarthDefenseUp"
+OWNED_CALL_BINDINGS["F00462"] = "VS::Battle::QueueLiveWaterDefenseUp"
+OWNED_CALL_BINDINGS["F00463"] = "VS::Battle::QueueLiveParalysisCure"
+OWNED_CALL_BINDINGS["F00464"] = "VS::Battle::QueueLivePoisonCure"
+OWNED_CALL_BINDINGS["F00465"] = "VS::Battle::QueueLiveCurseCure"
+OWNED_CALL_BINDINGS["F00466"] = "VS::Battle::QueueLiveNumbnessCure"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2950,6 +2966,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80083F50, "VS::Battle::QueueLiveFireAttackUp"),  # F00456
     ("BATTLE/BATTLE.PRG", 0x80083F74, "VS::Battle::QueueLiveEarthAttackUp"),  # F00457
     ("BATTLE/BATTLE.PRG", 0x80083F98, "VS::Battle::QueueLiveWaterAttackUp"),  # F00458
+    ("BATTLE/BATTLE.PRG", 0x80083FBC, "VS::Battle::QueueLiveAirDefenseUp"),  # F00459
+    ("BATTLE/BATTLE.PRG", 0x80083FE0, "VS::Battle::QueueLiveFireDefenseUp"),  # F00460
+    ("BATTLE/BATTLE.PRG", 0x80084004, "VS::Battle::QueueLiveEarthDefenseUp"),  # F00461
+    ("BATTLE/BATTLE.PRG", 0x80084028, "VS::Battle::QueueLiveWaterDefenseUp"),  # F00462
+    ("BATTLE/BATTLE.PRG", 0x8008404C, "VS::Battle::QueueLiveParalysisCure"),  # F00463
+    ("BATTLE/BATTLE.PRG", 0x8008409C, "VS::Battle::QueueLivePoisonCure"),  # F00464
+    ("BATTLE/BATTLE.PRG", 0x800840EC, "VS::Battle::QueueLiveCurseCure"),  # F00465
+    ("BATTLE/BATTLE.PRG", 0x8008413C, "VS::Battle::QueueLiveNumbnessCure"),  # F00466
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

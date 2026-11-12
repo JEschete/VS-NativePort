@@ -31,6 +31,10 @@ enum class StatusRuleId : std::uint8_t {
   kFireAttackUp = 22,
   kEarthAttackUp = 23,
   kWaterAttackUp = 24,
+  kAirDefenseUp = 25,
+  kFireDefenseUp = 26,
+  kEarthDefenseUp = 27,
+  kWaterDefenseUp = 28,
   kBanish = 29,
 };
 
@@ -167,6 +171,38 @@ std::optional<std::uint32_t> QueueEarthAttackUp(
     QueuedStatuses& queued);
 // decomp: func_80083F98 (src/BATTLE/BATTLE.PRG/146C.c:12456).
 std::optional<std::uint32_t> QueueWaterAttackUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued);
+// decomp: func_80083FBC (src/BATTLE/BATTLE.PRG/146C.c:12463).
+std::optional<std::uint32_t> QueueAirDefenseUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued);
+// decomp: func_80083FE0 (src/BATTLE/BATTLE.PRG/146C.c:12470).
+std::optional<std::uint32_t> QueueFireDefenseUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued);
+// decomp: func_80084004 (src/BATTLE/BATTLE.PRG/146C.c:12477).
+std::optional<std::uint32_t> QueueEarthDefenseUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued);
+// decomp: func_80084028 (src/BATTLE/BATTLE.PRG/146C.c:12484).
+std::optional<std::uint32_t> QueueWaterDefenseUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued);
+// decomp: func_8008404C (src/BATTLE/BATTLE.PRG/146C.c:12491).
+std::optional<StatusFeedback> QueueParalysisCure(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued);
+// decomp: func_8008409C (src/BATTLE/BATTLE.PRG/146C.c:12500).
+std::optional<StatusFeedback> QueuePoisonCure(std::span<const StatusRule> rules,
+                                              const StatusTarget& target,
+                                              QueuedStatuses& queued);
+// decomp: func_800840EC (src/BATTLE/BATTLE.PRG/146C.c:12509).
+std::optional<StatusFeedback> QueueCurseCure(std::span<const StatusRule> rules,
+                                             const StatusTarget& target,
+                                             QueuedStatuses& queued);
+// decomp: func_8008413C (src/BATTLE/BATTLE.PRG/146C.c:12518).
+std::optional<StatusFeedback> QueueNumbnessCure(
     std::span<const StatusRule> rules, const StatusTarget& target,
     QueuedStatuses& queued);
 }  // namespace VS::Battle

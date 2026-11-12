@@ -2240,8 +2240,8 @@ TEST_CASE("Ward removes paralysis and numbness without curing poison",
           "[combat][abilities][ability-effects]") {
   AbilityEffectFixture fixture;
   Battle_InflictActorStatuses(0xE000, &fixture.stats[0]);
-  fixture.Queue(40, 0, {0, 0, Battle_QueueParalysisCure, true});
-  fixture.Queue(40, 1, {0, 0, Battle_QueueNumbnessCure, true});
+  fixture.Queue(40, 0, {0, 0, VS::Battle::QueueLiveParalysisCure, true});
+  fixture.Queue(40, 1, {0, 0, VS::Battle::QueueLiveNumbnessCure, true});
   CHECK(fixture.source.inflictStatuses == 0xA000);
   Battle_RemoveActorStatuses(fixture.source.inflictStatuses, &fixture.stats[0]);
   CHECK(fixture.stats[0].statuses == 0x4000);

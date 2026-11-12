@@ -53,4 +53,20 @@ void QueueLiveEarthAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
                             Battle_HitResult* target, int, int);
 void QueueLiveWaterAttackUp(Battle_ActionDefinition*, Battle_HitResult*,
                             Battle_HitResult* target, int, int);
+void QueueLiveAirDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                           Battle_HitResult* target, int, int);
+void QueueLiveFireDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int);
+void QueueLiveEarthDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                             Battle_HitResult* target, int, int);
+void QueueLiveWaterDefenseUp(Battle_ActionDefinition*, Battle_HitResult*,
+                             Battle_HitResult* target, int, int);
+void QueueLiveParalysisCure(Battle_ActionDefinition*, Battle_HitResult*,
+                            Battle_HitResult* target, int, int);
+void QueueLivePoisonCure(Battle_ActionDefinition*, Battle_HitResult*,
+                         Battle_HitResult* target, int, int);
+void QueueLiveCurseCure(Battle_ActionDefinition*, Battle_HitResult*,
+                        Battle_HitResult* target, int, int);
+void QueueLiveNumbnessCure(Battle_ActionDefinition*, Battle_HitResult*,
+                           Battle_HitResult* target, int, int);
 }  // namespace VS::Battle

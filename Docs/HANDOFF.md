@@ -18,29 +18,32 @@ below is retained as historical evidence, not an instruction to pause.
 
 ### Latest row-29 group
 
-F00451-F00458 are locally verified on `e8565059`: Paralysis, Poison, Numbness,
-Curse and the four elemental attack increases use the shared typed status
-policies. Ailments conditionally set negative feedback; elemental attack
-changes preserve feedback. Twenty-two promoted effect callbacks now compile
-as the real `void` mediator type and execute through the relocated original
-table with hit/stat neighbor checks. The maintained offensive-ability tests
-call the new live bindings. All 27 old-symbol references are removed.
+F00459-F00466 are locally verified on `fff60643`: the four elemental defense
+increases and four ailment cures use the shared typed status policies.
+Defense changes preserve feedback; cures use the removal primitive, ignore
+blocking/immunity, preserve queued additions and conditionally set positive
+feedback. Thirty promoted effect callbacks compile as the real `void`
+mediator type and run through the relocated original table. Maintained Ward
+ability consumers use the new bindings. All 26 old-symbol references are gone.
 
-- New original span: 0x80083DEC-0x80083FBC, 116 instructions, SHA-256
-  `608c5d6d6962a944b54a5163a8d250c20b0e4e1ecd127cb03b8461002e06b2cf`.
-- Shared `status_queue`: all 24 functions, 24,576 vectors, zero mismatches,
-  119/119 mutants detected. Eight native broken variants detect
-  52/49/54/51/50/49/50/52 mismatches of 2,048 vectors respectively.
-  Synthetic actor-table indices now stay in the actual 42-slot live domain;
-  stats identities independently exercise the full byte range and exemption128.
-- Group `build\promotion-check\group-20261111-222706`, 443 seconds:
-  Debug/Release each pass 5,812 cases/12,652,324 assertions; focused tests
-  pass 63 cases/1,394 assertions. Both canonical replays match, copier
-  stability/controls pass, and tidy reports six existing findings, zero new.
-- Evidence: `build\differential\status_queue-F00451-F00458.log`, the eight
-  per-ID variant logs, and `build\scratch\status-queue\ailments-ledgers.json`.
-  Publication and exact-revision CI are pending. Other generated callbacks
-  remain migration debt; no full status gameplay or EC/M8 completion claim.
+- New original span: 0x80083FBC-0x8008418C, 116 instructions, SHA-256
+  `2c7e1a3eda71161447fe3e8adab26d8d61d3a9b507c29d8f97d18ac10e41d1ab`.
+- Shared `status_queue`: all 32 functions, 32,768 vectors, zero mismatches,
+  155/155 mutants detected. Eight native broken variants detect
+  39/39/38/37/28/29/30/29 mismatches of 2,048 vectors respectively.
+- Group `build\promotion-check\group-20261111-224845`, 440 seconds:
+  Debug/Release each pass 5,821 cases/12,652,506 assertions; focused tests
+  pass 72 cases/1,576 assertions. Both canonical replays match, copier
+  stability/controls pass, and tidy reports zero new findings.
+- Evidence: `build\differential\status_queue-F00459-F00466.log`, the eight
+  `status_queue-defense-cure-F004*-variant.log` files, and
+  `build\scratch\status-queue\defense-cure-ledgers.json`. Publication and
+  exact-revision CI are pending. Instrumented coverage columns were not
+  remeasured; no full status gameplay or EC/M8 completion claim.
+
+The preceding ailment/attack group is published in `fff60643`, green on
+[CI 43149478721](https://github.com/JEschete/VS-NativePort/actions/runs/43149478721),
+with evidence on [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6813988874).
 
 The preceding F00443-F00450 group and #349 are published in `e8565059`;
 [CI 43146186212](https://github.com/JEschete/VS-NativePort/actions/runs/43146186212)
@@ -105,8 +108,8 @@ planned-target approach, close follow, enemy pursuit and guard movement.
 The six old symbols had 24 code references; all are removed. Generated callers
 and all six original module entries use the checked live bindings.
 
-**Progress: 34 of the original 900 resolved; 866 remain** (865 generated plus
-F01416 owned WIP). Modernization is 2,878/3,744; C++ promotion is 2,879 plus
+**Progress: 42 of the original 900 resolved; 858 remain** (857 generated plus
+F01416 owned WIP). Modernization is 2,886/3,744; C++ promotion is 2,887 plus
 one WIP. These remain separate measures.
 
 - Original range: 0x800D9E18-0x800DAA6C (exclusive), 789 instructions,
@@ -175,14 +178,15 @@ their four old symbols have zero consumers (17 before).
   passed, recorded on
   [#276](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6812436244).
 
-Continue row 29 with F00459-F00466: four elemental defense increases and four
-ailment cures. Their original source and 116 instructions
-(0x80083FBC-0x8008418C, SHA-256
-`2c7e1a3eda71161447fe3e8adab26d8d61d3a9b507c29d8f97d18ac10e41d1ab`)
-have been read. Cures use the removal primitive, ignore immunity/blocking and
-conditionally set positive feedback; defense changes use applicability and
-leave feedback alone. All Live handlers must match the real `void` mediator
-type. Keep every original
+Continue row 29 with seven supporting leaves:
+F00467/F00468 (Dispel and negative-status cure), F00518/F00519 (elemental
+enchantment), F00521 (stat-number policy), and F00527/F00528 (targeting-risk
+clock). Their original source, callers and 196 instructions have been read.
+F00521 ends at the named successor 0x800875C8 (20 instructions), not the
+607-word range inferred by `promote.py show`. Enchantments must preserve
+halfword wrap and same-index store order; the risk flow-mode gate is unsigned
+1-3 and reads the player's risk through its separate owner. Reuse typed Items
+records and their Live conversions. Keep every original
 cohort row in the progress CSV, including
 resolved ones; the `snapshot` column stays `44fa8847`. F01416 remains the one
 owned WIP and must not disappear from the remaining count.
@@ -229,9 +233,10 @@ the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decom
 ## Stopping Point
 
 The continuation is active, not paused. Row 28 is published and green. The
-first sixteen row-29 status functions are published and green, and #349 is
-closed. F00451-F00458 are verified locally; publish and confirm CI, then
-continue F00459-F00466. The perception checkpoint below is historical.
+first 24 row-29 status functions are published and green, and #349 is closed.
+F00459-F00466 are verified locally; publish and confirm CI, then continue the
+seven analyzed leaves F00467/F00468/F00518/F00519/F00521/F00527/F00528.
+The perception checkpoint below is historical.
 
 Stopped on owner request (2026-11-11) after the perception group, published
 in `33ad4f3e` on base `3aa5b806` and green on the exact revision
@@ -402,10 +407,10 @@ Their current/next/pending statements are historical, not instructions or fresh 
 
 1. Recheck `git status`, HEAD, and the exact-revision CI before resuming.
    Preserve intervening owner edits; archived results do not verify a new tree.
-2. Publish the verified F00451-F00458 changes and confirm exact-revision CI.
+2. Publish the verified F00459-F00466 group and confirm exact-revision CI.
    Keep #337 open until its in-game reachability is established. Do not close
-   #276: 866 remain.
-3. Continue row 29 with status handlers F00459-F00466, following
+   #276: 858 remain.
+3. Continue row 29 with the seven supporting status leaves above, following
    [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv).
    F01630/F01636/F01638-F01644/F01660/F01678-F01680/F01705-F01710/F01716/
    F01717/F01719/F01721-F01751/F01793/F01810-F01818/F01846-F01849 are verified

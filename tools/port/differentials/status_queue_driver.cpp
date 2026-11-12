@@ -1,5 +1,5 @@
-// Native side of status_queue.py: F00405/F00406/F00437-F00458, original 146C.c
-// _setApplicableStatuses, _setInflictedStatuses and func_80083998..func_80083F98.
+// Native side of status_queue.py: F00405/F00406/F00437-F00466, original 146C.c
+// _setApplicableStatuses, _setInflictedStatuses and func_80083998..func_8008413C.
 #include "Battle/StatusQueue.hpp"
 
 #include <array>
@@ -60,17 +60,20 @@ int main() {
   using namespace VS::Battle;
   using Wrapper = std::optional<StatusFeedback> (*)(
       std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
-  constexpr std::array<Wrapper, 22> wrappers{
+  constexpr std::array<Wrapper, 30> wrappers{
       QueueStrengthDown, QueueIntelligenceDown, QueueAgilityDown,
       QueueEquipmentDown, QueueHalfMovement, QueueStrengthUp,
       QueueIntelligenceUp, QueueAgilityUp, QueueEquipmentUp,
       QueueQuicken, QueueSilence, nullptr, QueueRegeneration, nullptr,
       QueueParalysis, QueuePoison, QueueNumbness, QueueCurse,
-      nullptr, nullptr, nullptr, nullptr};
+      nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr,
+      QueueParalysisCure, QueuePoisonCure, QueueCurseCure, QueueNumbnessCure};
   using MaskWrapper = std::optional<std::uint32_t> (*)(
       std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
-  constexpr std::array<MaskWrapper, 4> attack_wrappers{
-      QueueAirAttackUp, QueueFireAttackUp, QueueEarthAttackUp, QueueWaterAttackUp};
+  constexpr std::array<MaskWrapper, 8> elemental_wrappers{
+      QueueAirAttackUp, QueueFireAttackUp, QueueEarthAttackUp, QueueWaterAttackUp,
+      QueueAirDefenseUp, QueueFireDefenseUp, QueueEarthDefenseUp, QueueWaterDefenseUp};
   std::string line;
   while (std::getline(std::cin, line)) {
     std::istringstream input(line);
@@ -121,8 +124,8 @@ int main() {
           result = stats[0x954 / 4];
         }
       }
-    } else if (function >= 20) {
-      const auto mask = attack_wrappers.at(function - 20)(rules.value, target.value, queued.value);
+    } else if (function >= 20 && function < 28) {
+      const auto mask = elemental_wrappers.at(function - 20)(rules.value, target.value, queued.value);
       refused = !mask.has_value();
       if (mask) result = mask.value();
     } else {
