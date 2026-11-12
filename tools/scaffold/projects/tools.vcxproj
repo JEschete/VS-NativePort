@@ -364,6 +364,8 @@
     <None Include="..\..\port\differentials\radial_movement_driver.cpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
+    <None Include="..\..\port\differentials\status_queue.py" />
+    <None Include="..\..\port\differentials\status_queue_driver.cpp" />
     <None Include="..\..\port\differentials\target_approach.py" />
     <None Include="..\..\port\differentials\target_approach_driver.cpp" />
     <None Include="..\..\port\differentials\temporary_awareness.py" />

@@ -2064,6 +2064,12 @@
     <None Include="..\..\port\differentials\special_terrain_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\status_queue.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\status_queue_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\target_approach.py">
       <Filter>tools\port\differentials</Filter>
     </None>

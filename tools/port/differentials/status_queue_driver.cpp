@@ -1,5 +1,5 @@
-// Native side of status_queue.py: F00405/F00406/F00437-F00442, original 146C.c
-// _setApplicableStatuses, _setInflictedStatuses and func_80083998..func_80083B28.
+// Native side of status_queue.py: F00405/F00406/F00437-F00450, original 146C.c
+// _setApplicableStatuses, _setInflictedStatuses and func_80083998..func_80083D7C.
 #include "Battle/StatusQueue.hpp"
 
 #include <array>
@@ -60,22 +60,27 @@ int main() {
   using namespace VS::Battle;
   using Wrapper = std::optional<StatusFeedback> (*)(
       std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
-  constexpr std::array<Wrapper, 6> wrappers{
+  constexpr std::array<Wrapper, 14> wrappers{
       QueueStrengthDown, QueueIntelligenceDown, QueueAgilityDown,
-      QueueEquipmentDown, QueueHalfMovement, QueueStrengthUp};
+      QueueEquipmentDown, QueueHalfMovement, QueueStrengthUp,
+      QueueIntelligenceUp, QueueAgilityUp, QueueEquipmentUp,
+      QueueQuicken, QueueSilence, nullptr, QueueRegeneration, nullptr};
   std::string line;
   while (std::getline(std::cin, line)) {
     std::istringstream input(line);
     unsigned function = 0, rule_id = 0, actor_id = 0;
+    std::uint32_t execute = 0;
     Guarded<StatusTarget> target;
     Guarded<QueuedStatuses> queued;
     Guarded<Rules> rules;
     Hit hit{};
+    std::array<std::uint32_t, 0x970 / 4> stats{};
     std::array<std::uint32_t, kStatusRuleCount * 4 + 8> params{};
-    input >> function >> rule_id >> actor_id >> target.value.active >> target.value.immunities;
+    input >> function >> rule_id >> actor_id >> target.value.active >> target.value.immunities >> execute;
     for (auto& word : hit) input >> word;
     for (auto& word : params) input >> word;
-    if (!input || function >= 8 || rule_id >= kStatusRuleCount || actor_id > 255) return 2;
+    for (auto& word : stats) input >> word;
+    if (!input || function >= 16 || rule_id >= kStatusRuleCount || actor_id > 255) return 2;
     target.value.exempt = actor_id == 128;
     queued.value = {hit[5], hit[6], static_cast<StatusFeedback>((hit[7] >> 16) & 3u)};
     for (std::size_t index = 0; index < rules.value.size(); ++index) {
@@ -94,10 +99,26 @@ int main() {
       result = QueueApplicableStatusChanges(rules.value[rule_id], target.value, queued.value);
     } else if (function == 1) {
       result = QueueStatusRemovalMask(rules.value[rule_id], target.value, queued.value);
+    } else if (function == 13) {
+      const auto mask = QueueMagicWard(rules.value, target.value, queued.value);
+      refused = !mask.has_value();
+      if (mask) result = mask.value();
+    } else if (function == 15) {
+      const auto outcome = QueueBanish(rules.value, target.value, queued.value, execute != 0);
+      refused = !outcome.has_value();
+      if (outcome) {
+        result = outcome.value().changed_mask;
+        if (outcome.value().analyze_requested) {
+          // Project the original incidental v0 for comparison only. The live
+          // mediator is void and commits analysis through the named stats field.
+          stats[0x954 / 4] |= 0x00020000u;
+          result = stats[0x954 / 4];
+        }
+      }
     } else {
       const auto feedback = wrappers[function - 2](rules.value, target.value, queued.value);
       refused = !feedback.has_value();
-      if (feedback) result = static_cast<std::uint32_t>(*feedback) << 16;
+      if (feedback) result = static_cast<std::uint32_t>(feedback.value()) << 16;
     }
     const bool guards_ok = GuardsUnchanged(target, hit) && GuardsUnchanged(queued, hit) &&
                            GuardsUnchanged(rules, hit);
@@ -111,6 +132,7 @@ int main() {
     std::cout << refused << ' ' << result << ' ' << diagnostics << ' ' << guards_ok << ' '
               << target_ok << ' ' << rules_ok;
     for (const auto word : hit) std::cout << ' ' << word;
+    for (const auto word : stats) std::cout << ' ' << word;
     std::cout << '\n';
   }
 }

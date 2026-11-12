@@ -3,16 +3,21 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <limits>
 #include <optional>
 #include <span>
+#include <type_traits>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/StatusQueue.hpp"
 #include "Battle/StatusQueueLive.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 extern "C" {
+#include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -22,6 +27,15 @@ extern "C" {
 namespace {
 namespace battle = VS::Battle;
 using Feedback = battle::StatusFeedback;
+constexpr std::size_t kWardRule = 18;
+constexpr std::size_t kBanishRule = 29;
+constexpr std::uint32_t kHighStatus = 0x80000000;
+constexpr int kNegativeExecute = -17;
+constexpr unsigned kExemptActor = 128;
+constexpr unsigned kRecoveryTimer = 0xABCD;
+constexpr unsigned kRecoveryBonus = 43;
+using LiveTable = decltype(Battle_actionEffectMediators);
+using LiveHandler = std::remove_extent_t<LiveTable>;
 using Handler = std::optional<Feedback> (*)(std::span<const battle::StatusRule>,
                                             const battle::StatusTarget&,
                                             battle::QueuedStatuses&);
@@ -49,6 +63,8 @@ struct LiveFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Battle_statusEffectParams)) saved_rules =
       std::to_array(Battle_statusEffectParams);
+  decltype(std::to_array(Battle_actionEffectMediators)) saved_mediators =
+      std::to_array(Battle_actionEffectMediators);
   Battle_ActorStats stats{};
   Battle_Actor actor{};
   Battle_HitResult hit{};
@@ -70,11 +86,51 @@ struct LiveFixture {
   ~LiveFixture() {
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_rules, Battle_statusEffectParams);
+    std::ranges::copy(saved_mediators, Battle_actionEffectMediators);
   }
 };
 
-auto Bytes(const Battle_HitResult& hit) {
-  return std::bit_cast<std::array<std::byte, sizeof(Battle_HitResult)>>(hit);
+template <typename T>
+auto Bytes(const T& value) {
+  return std::bit_cast<std::array<std::byte, sizeof(T)>>(value);
+}
+
+void CheckUnchangedHandler(Handler handler, std::size_t rule_id) {
+  std::array<battle::StatusRule, battle::kStatusRuleCount> rules{};
+  rules.at(rule_id) = {.statuses = 2, .blocking = 4};
+  battle::StatusTarget target{.active = 4};
+  battle::QueuedStatuses queued{
+      .added = kHighStatus, .removed = 1, .feedback = Feedback::kNegative};
+  const auto before = queued;
+  CHECK(handler(rules, target, queued) == Feedback::kNone);
+  CHECK(queued == before);
+  target = {.immunities = 2};
+  CHECK(handler(rules, target, queued) == Feedback::kNone);
+  CHECK(queued == before);
+  target = {.active = 2};
+  CHECK(handler(rules, target, queued) == Feedback::kNone);
+  CHECK(queued == before);
+}
+
+std::vector<std::uint8_t> ReadOriginalBattleModule() {
+  for (auto directory = std::filesystem::current_path();
+       directory != directory.parent_path();
+       directory = directory.parent_path()) {
+    const auto root = directory / "Native" / "data";
+    if (!std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
+      continue;
+    }
+    REQUIRE(VS::Content::DataStore::Open(root));
+    const auto* store = VS::Content::DataStore::Get();
+    REQUIRE(store != nullptr);
+    const auto* entry = store->Find("BATTLE/BATTLE.PRG");
+    REQUIRE(entry != nullptr);
+    const auto image = store->ReadAll(*entry);
+    REQUIRE(image.has_value());
+    return image.value();
+  }
+  SKIP("Extracted Native/data is unavailable");
+  return {};
 }
 }  // namespace
 
@@ -172,6 +228,109 @@ TEST_CASE("Strength up queues rule six and positive feedback",
   CheckHandler(battle::QueueStrengthUp, 6, Feedback::kPositive);
 }
 
+TEST_CASE("Intelligence up queues rule eight and positive feedback",
+          "[status-queue][F00443]") {
+  CheckHandler(battle::QueueIntelligenceUp, 8, Feedback::kPositive);
+  CheckUnchangedHandler(battle::QueueIntelligenceUp, 8);
+}
+TEST_CASE("Agility up queues rule ten and positive feedback",
+          "[status-queue][F00444]") {
+  CheckHandler(battle::QueueAgilityUp, 10, Feedback::kPositive);
+  CheckUnchangedHandler(battle::QueueAgilityUp, 10);
+}
+TEST_CASE("Equipment up queues rule twenty and positive feedback",
+          "[status-queue][F00445]") {
+  CheckHandler(battle::QueueEquipmentUp, 20, Feedback::kPositive);
+  CheckUnchangedHandler(battle::QueueEquipmentUp, 20);
+}
+TEST_CASE("Quicken queues rule eleven and positive feedback",
+          "[status-queue][F00446]") {
+  CheckHandler(battle::QueueQuicken, 11, Feedback::kPositive);
+  CheckUnchangedHandler(battle::QueueQuicken, 11);
+}
+TEST_CASE("Silence queues rule twelve and negative feedback",
+          "[status-queue][F00447]") {
+  CheckHandler(battle::QueueSilence, 12, Feedback::kNegative);
+  CheckUnchangedHandler(battle::QueueSilence, 12);
+}
+TEST_CASE("Regeneration queues rule seventeen and positive feedback",
+          "[status-queue][F00449]") {
+  CheckHandler(battle::QueueRegeneration, 17, Feedback::kPositive);
+  CheckUnchangedHandler(battle::QueueRegeneration, 17);
+}
+
+TEST_CASE("Magic ward returns the raw rule mask without feedback",
+          "[status-queue][F00448]") {
+  std::array<battle::StatusRule, battle::kStatusRuleCount> rules{};
+  rules.at(kWardRule) = {.statuses = kHighStatus, .cancelled = 4};
+  battle::StatusTarget target{.active = 4};
+  battle::QueuedStatuses queued{.added = 1, .feedback = Feedback::kNegative};
+  CHECK(battle::QueueMagicWard(rules, target, queued) == (kHighStatus | 4));
+  CHECK(queued ==
+        battle::QueuedStatuses{kHighStatus | 1, 4, Feedback::kNegative});
+  const auto before = queued;
+  target.exempt = true;
+  CHECK(battle::QueueMagicWard(rules, target, queued) == 0);
+  CHECK(queued == before);
+  CHECK_FALSE(battle::QueueMagicWard(std::span(rules).first(kWardRule), target,
+                                     queued));
+  CHECK(queued == before);
+}
+
+TEST_CASE("Magic ward blocking immunity and reapplication keep feedback",
+          "[status-queue][F00448]") {
+  std::array<battle::StatusRule, battle::kStatusRuleCount> rules{};
+  rules.at(kWardRule) = {.statuses = 2, .cancelled = 2, .blocking = 4};
+  battle::StatusTarget target{.active = 4};
+  battle::QueuedStatuses queued{.feedback = Feedback::kPositive};
+  CHECK(battle::QueueMagicWard(rules, target, queued) == 0);
+  target = {.immunities = 2};
+  CHECK(battle::QueueMagicWard(rules, target, queued) == 0);
+  target = {.active = 2};
+  CHECK(battle::QueueMagicWard(rules, target, queued) == 2);
+  CHECK(queued == battle::QueuedStatuses{2, 2, Feedback::kPositive});
+}
+
+TEST_CASE("Banish separates preview status changes from execution analysis",
+          "[status-queue][F00450]") {
+  std::array<battle::StatusRule, battle::kStatusRuleCount> rules{};
+  rules.at(kBanishRule) = {.statuses = kHighStatus, .cancelled = 4};
+  const battle::StatusTarget target{.active = 4};
+  battle::QueuedStatuses queued{.added = 1, .feedback = Feedback::kNegative};
+  CHECK(battle::QueueBanish(rules, target, queued, false) ==
+        battle::BanishOutcome{kHighStatus | 4, false});
+  CHECK(queued ==
+        battle::QueuedStatuses{kHighStatus | 1, 4, Feedback::kNegative});
+  const auto before = queued;
+  CHECK(battle::QueueBanish(rules, target, queued, true) ==
+        battle::BanishOutcome{kHighStatus | 4, true});
+  CHECK(queued == before);
+  CHECK_FALSE(battle::QueueBanish(std::span(rules).first(kBanishRule), target,
+                                  queued, true));
+  CHECK(queued == before);
+}
+
+TEST_CASE("Banish analysis is independent of blocking immunity and exemption",
+          "[status-queue][F00450]") {
+  std::array<battle::StatusRule, battle::kStatusRuleCount> rules{};
+  rules.at(kBanishRule) = {.statuses = 2, .blocking = 4};
+  const std::array<battle::StatusTarget, 4> targets{
+      battle::StatusTarget{.exempt = true},
+      {.active = 4},
+      {.immunities = 2},
+      {.active = 2}};
+  for (const auto& target : targets) {
+    battle::QueuedStatuses queued{
+        .added = 1, .removed = 4, .feedback = Feedback::kPositive};
+    const auto before = queued;
+    CHECK(battle::QueueBanish(rules, target, queued, false) ==
+          battle::BanishOutcome{0, false});
+    CHECK(battle::QueueBanish(rules, target, queued, true) ==
+          battle::BanishOutcome{0, true});
+    CHECK(queued == before);
+  }
+}
+
 TEST_CASE(
     "Status queue live primitives preserve signed return bits and hit "
     "neighbors",
@@ -195,8 +354,6 @@ TEST_CASE(
     "Status queue live callbacks preserve unused arguments and neighboring "
     "flags",
     "[status-queue][live]") {
-  using LiveHandler = int (*)(Battle_ActionDefinition*, Battle_HitResult*,
-                              Battle_HitResult*, int, int);
   const std::array<LiveHandler, 6> handlers{
       battle::QueueLiveStrengthDown, battle::QueueLiveIntelligenceDown,
       battle::QueueLiveAgilityDown,  battle::QueueLiveEquipmentDown,
@@ -208,11 +365,10 @@ TEST_CASE(
     auto expected = fixture.hit;
     expected.removeStatuses = 0x40000000;
     expected.statStatusEffect = index == 5 ? 2 : 1;
-    CHECK(handlers.at(index)(nullptr, nullptr, &fixture.hit, -1, 23) ==
-          (index == 5 ? 0x20000 : 0x10000));
+    handlers.at(index)(nullptr, nullptr, &fixture.hit, -1, 23);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
     fixture.stats.actorId = 128;
-    CHECK(handlers.at(index)(nullptr, nullptr, &fixture.hit, 0, 0) == 0);
+    handlers.at(index)(nullptr, nullptr, &fixture.hit, 0, 0);
     CHECK(Bytes(fixture.hit) == Bytes(expected));
   }
 }
@@ -242,4 +398,191 @@ TEST_CASE(
         reinterpret_cast<void*>(&battle::QueueLiveHalfMovement));
   CHECK(resolve(0x80083B28) ==
         reinterpret_cast<void*>(&battle::QueueLiveStrengthUp));
+}
+
+TEST_CASE("New status callbacks preserve all hit and stats neighbors",
+          "[status-queue][live]") {
+  const std::array<LiveHandler, 6> handlers{
+      battle::QueueLiveIntelligenceUp, battle::QueueLiveAgilityUp,
+      battle::QueueLiveEquipmentUp,    battle::QueueLiveQuicken,
+      battle::QueueLiveSilence,        battle::QueueLiveRegeneration};
+  const std::array<int, 6> rules{8, 10, 20, 11, 12, 17};
+  constexpr std::size_t kSilenceIndex = 4;
+  for (std::size_t index = 0; index < handlers.size(); ++index) {
+    LiveFixture fixture;
+    fixture.stats.actionRecoveryTimer = kRecoveryTimer;
+    fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+    const auto before_stats = Bytes(fixture.stats);
+    Battle_statusEffectParams[rules.at(index)].statusFlags = 0x40000000;
+    auto expected = fixture.hit;
+    expected.removeStatuses = 0x40000000;
+    expected.statStatusEffect = index == kSilenceIndex ? 1 : 2;
+    handlers.at(index)(nullptr, nullptr, &fixture.hit, -1, kNegativeExecute);
+    CHECK(Bytes(fixture.hit) == Bytes(expected));
+    CHECK(Bytes(fixture.stats) == before_stats);
+    Battle_statusEffectParams[rules.at(index)].blockingStatuses = 1;
+    fixture.stats.statuses = 1;
+    handlers.at(index)(nullptr, nullptr, &fixture.hit, 0, 0);
+    CHECK(Bytes(fixture.hit) == Bytes(expected));
+  }
+}
+
+TEST_CASE("Live magic ward preserves feedback and the complete stats record",
+          "[status-queue][F00448][live]") {
+  LiveFixture fixture;
+  fixture.stats.actionRecoveryTimer = kRecoveryTimer;
+  fixture.stats.cancelsHitResults = 1;
+  fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+  Battle_statusEffectParams[kWardRule].statusFlags =
+      std::bit_cast<std::int32_t>(kHighStatus);
+  const auto before_stats = Bytes(fixture.stats);
+  auto expected = fixture.hit;
+  expected.removeStatuses = std::bit_cast<std::int32_t>(kHighStatus);
+  battle::QueueLiveMagicWard(nullptr, nullptr, &fixture.hit, -1,
+                             kNegativeExecute);
+  CHECK(Bytes(fixture.hit) == Bytes(expected));
+  CHECK(Bytes(fixture.stats) == before_stats);
+  fixture.stats.actorId = kExemptActor;
+  battle::QueueLiveMagicWard(nullptr, nullptr, &fixture.hit, 0, 1);
+  CHECK(Bytes(fixture.hit) == Bytes(expected));
+  CHECK(fixture.stats.isAnalyzed == 0);
+}
+
+TEST_CASE("Live Banish preview queues status changes without analyzing",
+          "[status-queue][F00450][live]") {
+  for (const unsigned analyzed : {0U, 1U}) {
+    LiveFixture fixture;
+    fixture.stats.isAnalyzed = static_cast<u_char>(analyzed);
+    fixture.stats.actionRecoveryTimer = kRecoveryTimer;
+    fixture.stats.cancelsHitResults = 1;
+    fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+    Battle_statusEffectParams[kBanishRule].statusFlags =
+        std::bit_cast<std::int32_t>(kHighStatus);
+    const auto before_stats = Bytes(fixture.stats);
+    auto expected = fixture.hit;
+    expected.removeStatuses = std::bit_cast<std::int32_t>(kHighStatus);
+    battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, -1, 0);
+    CHECK(Bytes(fixture.hit) == Bytes(expected));
+    CHECK(Bytes(fixture.stats) == before_stats);
+  }
+}
+
+TEST_CASE(
+    "Live Banish nonzero execution changes only analysis and preserves stats "
+    "neighbors",
+    "[status-queue][F00450][live]") {
+  for (const int execute :
+       {1, kNegativeExecute, std::numeric_limits<int>::min()}) {
+    LiveFixture fixture;
+    fixture.stats.actionRecoveryTimer = kRecoveryTimer;
+    fixture.stats.cancelsHitResults = 1;
+    fixture.stats.recoveryDelayBonus = kRecoveryBonus;
+    fixture.stats.statusTimers[7] = 0xA5;
+    auto expected_stats = fixture.stats;
+    expected_stats.isAnalyzed = 1;
+    const auto before_hit = Bytes(fixture.hit);
+    battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, -1, execute);
+    CHECK(Bytes(fixture.hit) == before_hit);
+    CHECK(Bytes(fixture.stats) == Bytes(expected_stats));
+    battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, execute);
+    CHECK(Bytes(fixture.stats) == Bytes(expected_stats));
+  }
+}
+
+TEST_CASE(
+    "Live Banish analyzes exempt and blocked actors independently of table "
+    "slots",
+    "[status-queue][F00450][live]") {
+  LiveFixture fixture;
+  Battle_statusEffectParams[kBanishRule].statusFlags = 2;
+  fixture.stats.actorId = kExemptActor;
+  const auto before_hit = Bytes(fixture.hit);
+  battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, 1);
+  CHECK(Bytes(fixture.hit) == before_hit);
+  CHECK(fixture.stats.isAnalyzed == 1);
+  fixture.stats.actorId = 1;
+  fixture.stats.isAnalyzed = 0;
+  fixture.stats.statuses = 4;
+  Battle_statusEffectParams[kBanishRule].blockingStatuses = 4;
+  battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, kNegativeExecute);
+  CHECK(Bytes(fixture.hit) == before_hit);
+  CHECK(fixture.stats.isAnalyzed == 1);
+  Battle_actors[0] = &fixture.actor;
+  fixture.hit.target.targetActor = 0;
+  fixture.stats.statuses = 0;
+  battle::QueueLiveBanish(nullptr, nullptr, &fixture.hit, 0, 0);
+  CHECK(fixture.hit.removeStatuses == 2);
+}
+
+TEST_CASE("New status module entries resolve to their checked native callbacks",
+          "[status-queue][live]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto resolve = [&](std::uint32_t address) {
+    return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                             address);
+  };
+  CHECK(resolve(0x80083B78) ==
+        reinterpret_cast<void*>(&battle::QueueLiveIntelligenceUp));
+  CHECK(resolve(0x80083BC8) ==
+        reinterpret_cast<void*>(&battle::QueueLiveAgilityUp));
+  CHECK(resolve(0x80083C18) ==
+        reinterpret_cast<void*>(&battle::QueueLiveEquipmentUp));
+  CHECK(resolve(0x80083C68) ==
+        reinterpret_cast<void*>(&battle::QueueLiveQuicken));
+  CHECK(resolve(0x80083CB8) ==
+        reinterpret_cast<void*>(&battle::QueueLiveSilence));
+  CHECK(resolve(0x80083D08) ==
+        reinterpret_cast<void*>(&battle::QueueLiveMagicWard));
+  CHECK(resolve(0x80083D2C) ==
+        reinterpret_cast<void*>(&battle::QueueLiveRegeneration));
+  CHECK(resolve(0x80083D7C) ==
+        reinterpret_cast<void*>(&battle::QueueLiveBanish));
+}
+
+TEST_CASE(
+    "Original module mediators dispatch all promoted status callbacks as void",
+    "[status-queue][live][module][issue-349]") {
+  constexpr std::array<LiveHandler, 14> kLiveHandlers{
+      battle::QueueLiveStrengthDown,   battle::QueueLiveIntelligenceDown,
+      battle::QueueLiveAgilityDown,    battle::QueueLiveEquipmentDown,
+      battle::QueueLiveHalfMovement,   battle::QueueLiveStrengthUp,
+      battle::QueueLiveIntelligenceUp, battle::QueueLiveAgilityUp,
+      battle::QueueLiveEquipmentUp,    battle::QueueLiveQuicken,
+      battle::QueueLiveSilence,        battle::QueueLiveMagicWard,
+      battle::QueueLiveRegeneration,   battle::QueueLiveBanish};
+  VS::Content::DataStore::ScopedOverride store;
+  const auto image = ReadOriginalBattleModule();
+  LiveFixture fixture;
+  const auto tables =
+      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto table = std::ranges::find(
+      tables, reinterpret_cast<void**>(Battle_actionEffectMediators),
+      &Content_ModulePointerTable::target);
+  REQUIRE(table != tables.end());
+  REQUIRE(VS::Content::RelocateModulePointerTable(
+      *table, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
+  constexpr std::array<int, 14> kRules{5,  7,  9,  19, 4,  6,  8,
+                                       10, 20, 11, 12, 18, 17, 29};
+  constexpr std::array<unsigned, 14> kFeedback{1, 1, 1, 1, 1, 2, 2,
+                                               2, 2, 2, 1, 3, 2, 3};
+  for (std::size_t index = 0; index < kLiveHandlers.size(); ++index) {
+    const auto mediator = std::ranges::find(Battle_actionEffectMediators,
+                                            kLiveHandlers.at(index));
+    REQUIRE(mediator != std::end(Battle_actionEffectMediators));
+    std::ranges::fill(Battle_statusEffectParams, Battle_StatusEffectParams{});
+    Battle_statusEffectParams[kRules.at(index)].statusFlags =
+        std::bit_cast<std::int32_t>(kHighStatus);
+    fixture.hit.removeStatuses = 0;
+    fixture.hit.statStatusEffect = 3;
+    fixture.stats.isAnalyzed = 0;
+    auto expected_hit = fixture.hit;
+    expected_hit.removeStatuses = std::bit_cast<std::int32_t>(kHighStatus);
+    expected_hit.statStatusEffect = kFeedback.at(index);
+    auto expected_stats = fixture.stats;
+    expected_stats.isAnalyzed = kRules.at(index) == kBanishRule;
+    (*mediator)(nullptr, nullptr, &fixture.hit, -1, kNegativeExecute);
+    CHECK(Bytes(fixture.hit) == Bytes(expected_hit));
+    CHECK(Bytes(fixture.stats) == Bytes(expected_stats));
+  }
 }

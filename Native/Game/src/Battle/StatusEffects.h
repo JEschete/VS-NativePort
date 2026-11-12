@@ -107,31 +107,6 @@ extern Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 extern int Battle_unusedGlobal2;
 extern Battle_StatusEffectParams Battle_statusEffectParams[32];
 void Battle_PreserveAshleyStatuses(void);
-int Battle_QueueIntelligenceUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueAgilityUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueEquipmentUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueQuicken(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueSilence(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueMagicWard(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)),
-    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
-    int execute_action __attribute__((unused)));
-int Battle_QueueRegeneration(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
-int Battle_QueueBanish(Battle_ActionDefinition* action_definition __attribute__((unused)),
-    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
-    int hit_index __attribute__((unused)), int execute_action);
 int Battle_QueueParalysis(Battle_ActionDefinition* action_definition __attribute__((unused)),
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));

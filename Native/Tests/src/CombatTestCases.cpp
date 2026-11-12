@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <cstring>
 #include <iterator>
+#include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -13,6 +15,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
@@ -244,8 +247,11 @@ struct AbilityFixture {
   }
 };
 
-using AbilityEffect = int (*)(Battle_ActionDefinition*, Battle_HitResult*,
-                              Battle_HitResult*, int, int);
+using LegacyAbilityEffect = int (*)(Battle_ActionDefinition*, Battle_HitResult*,
+                                    Battle_HitResult*, int, int);
+using MediatorTable = decltype(Battle_actionEffectMediators);
+using NativeAbilityEffect = std::remove_extent_t<MediatorTable>;
+using AbilityEffect = std::variant<LegacyAbilityEffect, NativeAbilityEffect>;
 
 struct AbilityHit {
   int calculator;
@@ -350,8 +356,12 @@ struct AbilityEffectFixture : AbilityFixture {
     definition.category = id <= 31 ? 14 : 0;
     definition.hits[hit].statCalculatorId = contract.calculator;
     definition.hits[hit].statFactor = contract.factor;
-    contract.apply(&definition, &source, contract.self ? &source : &target, hit,
-                   0);
+    std::visit(
+        [&](auto apply) {
+          apply(&definition, &source, contract.self ? &source : &target, hit,
+                0);
+        },
+        contract.apply);
   }
 
   void Commit() {
@@ -2210,7 +2220,7 @@ TEST_CASE("Offensive status abilities queue and apply their original ailments",
   constexpr auto kExamples = std::to_array<Example>({
       {32, 0x2000, Battle_QueueParalysis},
       {34, 0x8000, Battle_QueueNumbness},
-      {35, 0x1000, Battle_QueueSilence},
+      {35, 0x1000, VS::Battle::QueueLiveSilence},
       {37, 0x4000, Battle_QueuePoison},
   });
   for (const auto& example : kExamples) {

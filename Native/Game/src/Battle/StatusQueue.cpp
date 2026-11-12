@@ -12,17 +12,26 @@ extern "C" {
 
 namespace VS::Battle {
 namespace {
-std::optional<StatusFeedback> QueueStatRule(std::span<const StatusRule> rules,
-                                            const StatusTarget& target,
-                                            QueuedStatuses& queued,
-                                            StatusRuleId id,
-                                            StatusFeedback feedback) {
+std::optional<std::uint32_t> QueueRule(std::span<const StatusRule> rules,
+                                       const StatusTarget& target,
+                                       QueuedStatuses& queued,
+                                       StatusRuleId id) {
   const auto index = static_cast<std::size_t>(id);
   if (index >= rules.size()) {
     Core_Debugf("battle", "Status queue rule %zu is outside its table", index);
     return std::nullopt;
   }
-  if (QueueApplicableStatusChanges(rules[index], target, queued) == 0) {
+  return QueueApplicableStatusChanges(rules[index], target, queued);
+}
+
+std::optional<StatusFeedback> QueueStatRule(std::span<const StatusRule> rules,
+                                            const StatusTarget& target,
+                                            QueuedStatuses& queued,
+                                            StatusRuleId id,
+                                            StatusFeedback feedback) {
+  const auto changed = QueueRule(rules, target, queued, id);
+  if (!changed) return std::nullopt;
+  if (changed.value() == 0) {
     return StatusFeedback::kNone;
   }
   queued.feedback = feedback;
@@ -99,5 +108,71 @@ std::optional<StatusFeedback> QueueStrengthUp(std::span<const StatusRule> rules,
                                               QueuedStatuses& queued) {
   return QueueStatRule(rules, target, queued, StatusRuleId::kStrengthUp,
                        StatusFeedback::kPositive);
+}
+
+// decomp: func_80083B78 (src/BATTLE/BATTLE.PRG/146C.c:12327).
+std::optional<StatusFeedback> QueueIntelligenceUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kIntelligenceUp,
+                       StatusFeedback::kPositive);
+}
+
+// decomp: func_80083BC8 (src/BATTLE/BATTLE.PRG/146C.c:12336).
+std::optional<StatusFeedback> QueueAgilityUp(std::span<const StatusRule> rules,
+                                             const StatusTarget& target,
+                                             QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kAgilityUp,
+                       StatusFeedback::kPositive);
+}
+
+// decomp: func_80083C18 (src/BATTLE/BATTLE.PRG/146C.c:12345).
+std::optional<StatusFeedback> QueueEquipmentUp(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kEquipmentUp,
+                       StatusFeedback::kPositive);
+}
+
+// decomp: func_80083C68 (src/BATTLE/BATTLE.PRG/146C.c:12354).
+std::optional<StatusFeedback> QueueQuicken(std::span<const StatusRule> rules,
+                                           const StatusTarget& target,
+                                           QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kQuicken,
+                       StatusFeedback::kPositive);
+}
+
+// decomp: func_80083CB8 (src/BATTLE/BATTLE.PRG/146C.c:12363).
+std::optional<StatusFeedback> QueueSilence(std::span<const StatusRule> rules,
+                                           const StatusTarget& target,
+                                           QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kSilence,
+                       StatusFeedback::kNegative);
+}
+
+// decomp: func_80083D08 (src/BATTLE/BATTLE.PRG/146C.c:12372).
+std::optional<std::uint32_t> QueueMagicWard(std::span<const StatusRule> rules,
+                                            const StatusTarget& target,
+                                            QueuedStatuses& queued) {
+  return QueueRule(rules, target, queued, StatusRuleId::kMagicWard);
+}
+
+// decomp: func_80083D2C (src/BATTLE/BATTLE.PRG/146C.c:12380).
+std::optional<StatusFeedback> QueueRegeneration(
+    std::span<const StatusRule> rules, const StatusTarget& target,
+    QueuedStatuses& queued) {
+  return QueueStatRule(rules, target, queued, StatusRuleId::kRegeneration,
+                       StatusFeedback::kPositive);
+}
+
+// decomp: func_80083D7C (src/BATTLE/BATTLE.PRG/146C.c:12389).
+std::optional<BanishOutcome> QueueBanish(std::span<const StatusRule> rules,
+                                         const StatusTarget& target,
+                                         QueuedStatuses& queued,
+                                         bool execute_action) {
+  const auto changed = QueueRule(rules, target, queued, StatusRuleId::kBanish);
+  if (!changed) return std::nullopt;
+  return BanishOutcome{.changed_mask = changed.value(),
+                       .analyze_requested = execute_action};
 }
 }  // namespace VS::Battle

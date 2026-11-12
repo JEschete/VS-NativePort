@@ -682,6 +682,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::QueueLiveEquipmentDown": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     "VS::Battle::QueueLiveHalfMovement": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     "VS::Battle::QueueLiveStrengthUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveIntelligenceUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveAgilityUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveEquipmentUp": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveQuicken": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveSilence": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveMagicWard": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveRegeneration": r"Native\Game\include\Battle\StatusQueueLive.hpp",
+    "VS::Battle::QueueLiveBanish": r"Native\Game\include\Battle\StatusQueueLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1294,6 +1302,14 @@ OWNED_CALL_BINDINGS["F00439"] = "VS::Battle::QueueLiveAgilityDown"
 OWNED_CALL_BINDINGS["F00440"] = "VS::Battle::QueueLiveEquipmentDown"
 OWNED_CALL_BINDINGS["F00441"] = "VS::Battle::QueueLiveHalfMovement"
 OWNED_CALL_BINDINGS["F00442"] = "VS::Battle::QueueLiveStrengthUp"
+OWNED_CALL_BINDINGS["F00443"] = "VS::Battle::QueueLiveIntelligenceUp"
+OWNED_CALL_BINDINGS["F00444"] = "VS::Battle::QueueLiveAgilityUp"
+OWNED_CALL_BINDINGS["F00445"] = "VS::Battle::QueueLiveEquipmentUp"
+OWNED_CALL_BINDINGS["F00446"] = "VS::Battle::QueueLiveQuicken"
+OWNED_CALL_BINDINGS["F00447"] = "VS::Battle::QueueLiveSilence"
+OWNED_CALL_BINDINGS["F00448"] = "VS::Battle::QueueLiveMagicWard"
+OWNED_CALL_BINDINGS["F00449"] = "VS::Battle::QueueLiveRegeneration"
+OWNED_CALL_BINDINGS["F00450"] = "VS::Battle::QueueLiveBanish"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -2902,6 +2918,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80083A88, "VS::Battle::QueueLiveEquipmentDown"),  # F00440
     ("BATTLE/BATTLE.PRG", 0x80083AD8, "VS::Battle::QueueLiveHalfMovement"),  # F00441
     ("BATTLE/BATTLE.PRG", 0x80083B28, "VS::Battle::QueueLiveStrengthUp"),  # F00442
+    ("BATTLE/BATTLE.PRG", 0x80083B78, "VS::Battle::QueueLiveIntelligenceUp"),  # F00443
+    ("BATTLE/BATTLE.PRG", 0x80083BC8, "VS::Battle::QueueLiveAgilityUp"),  # F00444
+    ("BATTLE/BATTLE.PRG", 0x80083C18, "VS::Battle::QueueLiveEquipmentUp"),  # F00445
+    ("BATTLE/BATTLE.PRG", 0x80083C68, "VS::Battle::QueueLiveQuicken"),  # F00446
+    ("BATTLE/BATTLE.PRG", 0x80083CB8, "VS::Battle::QueueLiveSilence"),  # F00447
+    ("BATTLE/BATTLE.PRG", 0x80083D08, "VS::Battle::QueueLiveMagicWard"),  # F00448
+    ("BATTLE/BATTLE.PRG", 0x80083D2C, "VS::Battle::QueueLiveRegeneration"),  # F00449
+    ("BATTLE/BATTLE.PRG", 0x80083D7C, "VS::Battle::QueueLiveBanish"),  # F00450
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
