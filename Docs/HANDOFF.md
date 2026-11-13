@@ -7,7 +7,45 @@ commit and its exact-revision CI run are recorded on [#276](https://github.com/J
 and in the ledgers. The per-function publish list, Latest Work and Verified sections that used to be here are in the
 [archived handoff](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF.md).
 The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
-See [Current continuation and blocker](#current-continuation-and-blocker) for current work.
+See [Owner-requested pause](#owner-requested-pause) and
+[Current continuation and blocker](#current-continuation-and-blocker) for the current boundary.
+
+## Owner-requested pause
+
+The owner requested a stopping point on 2026-11-12. No new batches or long
+verification runs should start until the owner resumes the work.
+
+- Last published code checkpoint: `013924cd857f2c277814411ea388b77ca1fb2ae6`,
+  successful exact-revision [CI 43360661373](https://github.com/JEschete/VS-NativePort/actions/runs/43360661373).
+  The original 900-row cohort remains **188 resolved (179 promoted, nine retired),
+  712 remaining**. No unfinished reward functions are included.
+- Eight reward-flow functions are preserved as **uncommitted WIP**:
+  F04123-F04126 and F00220-F00223. There are nine staged new paths and fourteen
+  unstaged paths; preserve both the index and worktree. The owned/copier
+  registrations are provisional; no ledger promotion or behavior-verification
+  marks were applied. Nine other reward functions and both reward globals remain.
+- Exact paths, completed commands and limits are in the local, ignored
+  `build\scratch\reward-flow\owner-pause.json`. All worker-owned processes have
+  stopped; no worker is continuing implementation.
+- Completed partial evidence: Debug 29 cases/277 assertions, 8,192 original-MIPS
+  vectors with zero mismatches, 89 detected mutants and 33 Live controls.
+  Eight individual native variants completed, but their aggregate source-hash
+  guard failed after a test-only CLUT-row correction during the run. The
+  aggregate verification is **not passed** and must be reconciled, not waived.
+- Not completed: final group, Release/full native suites, canonical replays,
+  copier stability/controls, ordered camera/shadow controls, final ledgers or
+  publication. Do not describe the eight functions as verified promotions.
+
+On resume, inspect `owner-pause.json` and the individual native-variant reports;
+reconcile the aggregate hash guard without weakening source-mutation checks.
+Then run:
+
+```powershell
+.\.venv-3\Scripts\python.exe tools\test\promotion_check.py iterate --focused "[reward-flow]"
+```
+
+Only after the remaining full group and publication/CI gates pass may the CSV
+count advance. F00830 remains separately blocked under #296; row 30 is not complete.
 
 ## Current continuation and blocker
 
@@ -17,8 +55,10 @@ The older continuation sections below are historical checkpoints, not current ne
 
 The six animation policies are published in `10f09362`, with successful exact-revision
 [CI 43354155209](https://github.com/JEschete/VS-NativePort/actions/runs/43354155209).
-The final defined reactions F00819/F00832/F00891 are locally verified on that base:
-`build\scratch\animation-reactions\verification.json`. Their publication/CI is pending.
+The final defined reactions F00819/F00832/F00891 are published in `013924cd`,
+with successful exact-revision
+[CI 43360661373](https://github.com/JEschete/VS-NativePort/actions/runs/43360661373).
+Evidence: `build\scratch\animation-reactions\verification.json`.
 The CSV records 188 resolved (179 promoted, nine retired), with 712 remaining.
 
 Row 30 is **not complete**: F00830 remains unresolved under [#296](https://github.com/JEschete/VS-NativePort/issues/296).
