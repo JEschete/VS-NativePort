@@ -840,6 +840,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::SetLiveEnemyCombatPose": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
     "VS::Battle::PlayLiveDefenseAbilityAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
     "VS::Battle::FinishLiveEnemyCombatPose": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::BeginLiveRewardPause": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::EndLiveRewardPause": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::ResumeLiveAfterRewards": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::CheckLiveRewardUnlocks": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::ShowLivePendingRewardUnlock": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::OpenLivePendingLootRewards": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::OpenLiveRewardResults": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::UpdateLiveRewardResultsDialog": r"Native\Game\include\Battle\RewardFlowLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1613,6 +1621,14 @@ OWNED_CALL_BINDINGS["F00834"] = "VS::Battle::PlayLiveBreakArtAnimation"
 OWNED_CALL_BINDINGS["F00819"] = "VS::Battle::SetLiveEnemyCombatPose"
 OWNED_CALL_BINDINGS["F00832"] = "VS::Battle::PlayLiveDefenseAbilityAnimation"
 OWNED_CALL_BINDINGS["F00891"] = "VS::Battle::FinishLiveEnemyCombatPose"
+OWNED_CALL_BINDINGS["F04123"] = "VS::Battle::BeginLiveRewardPause"
+OWNED_CALL_BINDINGS["F04124"] = "VS::Battle::EndLiveRewardPause"
+OWNED_CALL_BINDINGS["F04125"] = "VS::Battle::ResumeLiveAfterRewards"
+OWNED_CALL_BINDINGS["F04126"] = "VS::Battle::CheckLiveRewardUnlocks"
+OWNED_CALL_BINDINGS["F00220"] = "VS::Battle::ShowLivePendingRewardUnlock"
+OWNED_CALL_BINDINGS["F00221"] = "VS::Battle::OpenLivePendingLootRewards"
+OWNED_CALL_BINDINGS["F00222"] = "VS::Battle::OpenLiveRewardResults"
+OWNED_CALL_BINDINGS["F00223"] = "VS::Battle::UpdateLiveRewardResultsDialog"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3390,6 +3406,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8009DF3C, "VS::Battle::SetLiveEnemyCombatPose"),  # F00819
     ("BATTLE/BATTLE.PRG", 0x8009EE9C, "VS::Battle::PlayLiveDefenseAbilityAnimation"),  # F00832
     ("BATTLE/BATTLE.PRG", 0x800A2574, "VS::Battle::FinishLiveEnemyCombatPose"),  # F00891
+    ("BATTLE/BATTLE.PRG", 0x8007B410, "VS::Battle::BeginLiveRewardPause"),  # F04123
+    ("BATTLE/BATTLE.PRG", 0x8007B470, "VS::Battle::EndLiveRewardPause"),  # F04124
+    ("BATTLE/BATTLE.PRG", 0x8007B4C4, "VS::Battle::ResumeLiveAfterRewards"),  # F04125
+    ("BATTLE/BATTLE.PRG", 0x8007B508, "VS::Battle::CheckLiveRewardUnlocks"),  # F04126
+    ("BATTLE/BATTLE.PRG", 0x8007B63C, "VS::Battle::ShowLivePendingRewardUnlock"),  # F00220
+    ("BATTLE/BATTLE.PRG", 0x8007B764, "VS::Battle::OpenLivePendingLootRewards"),  # F00221
+    ("BATTLE/BATTLE.PRG", 0x8007B7DC, "VS::Battle::OpenLiveRewardResults"),  # F00222
+    ("BATTLE/BATTLE.PRG", 0x8007B834, "VS::Battle::UpdateLiveRewardResultsDialog"),  # F00223
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

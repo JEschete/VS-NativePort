@@ -495,6 +495,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\RewardFlow.cpp" />
+    <ClCompile Include="src\Battle\RewardFlowLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Rewards.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2382,6 +2386,8 @@
     <ClInclude Include="include\Battle\HitCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\HitModifiers.hpp" />
     <ClInclude Include="include\Battle\HitModifiersLive.hpp" />
+    <ClInclude Include="include\Battle\RewardFlow.hpp" />
+    <ClInclude Include="include\Battle\RewardFlowLive.hpp" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
     <ClInclude Include="include\Battle\StatFactors.hpp" />

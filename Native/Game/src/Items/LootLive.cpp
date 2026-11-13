@@ -19,6 +19,7 @@
 
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
+#include "Battle/RewardFlowLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
@@ -153,9 +154,9 @@ class LiveLootFlowHost final : public LootFlowHost {
     Battle_lootMenuOpened = 1;
     VS::Menu::Framework::OpenLiveLootListMenu(Items_lootListHead);
     Battle_actionFlowMode = kScriptedLootFlowMode;
-    Battle_BeginRewardPause();
+    VS::Battle::BeginLiveRewardPause();
   }
-  void ResumeAfterRewards() override { Battle_ResumeAfterRewards(); }
+  void ResumeAfterRewards() override { VS::Battle::ResumeLiveAfterRewards(); }
   void ResetLootPaging() override { Menu_Loot_ResetPaging(); }
 };
 

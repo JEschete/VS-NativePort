@@ -24,7 +24,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 14: #55 Actor identity and teardown | 0 | 0 | 0 | 233 | 0 | 0 |
 | 15: #58 Item definitions and instances | 0 | 0 | 0 | 66 | 0 | 0 |
 | 23: #57 AI, navigation and collision contexts | 0 | 0 | 0 | 236 | 0 | 0 |
-| 24: #56 Combat intents and results | 0 | 94 | 3,245 | 307 | 43 | 0 |
+| 24: #56 Combat intents and results | 0 | 86 | 3,142 | 315 | 35 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
 | 26: #59 Event VM results and execution | 0 | 71 | 1,444 | 188 | 49 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
@@ -32,14 +32,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 1 | 370 | 22,721 | 359 | 303 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 1 | 711 | 33,011 | 3255 | 480 | 0 |
+| **Total** | 1 | 703 | 32,908 | 3263 | 472 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,023 |
-| todo | 712 |
+| done | 3,031 |
+| todo | 704 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 45 done, 8 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (2 active, 45 done, 7 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -74,7 +74,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 29 | battle-damage-status | done | self | 3 | 0 | 0 |
 | 30 | battle-actions | active | self | 5 | 1 | 117 |
 | 31 | battle-targeting-prerequisites | done | self | 8 | 0 | 0 |
-| 32 | battle-sphere-hud-rewards | planned | - | 4 | 93 | 3,128 |
+| 32 | battle-sphere-hud-rewards | active | self | 4 | 85 | 3,025 |
 | 33 | event-vm-triggers | done | self | 9 | 0 | 0 |
 | 34 | event-script-actors | done | self | 3 | 0 | 0 |
 | 35 | event-script-camera-screen-field | planned | - | 3 | 71 | 1,444 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 169 |
-| Referenced by the original-address module table | 1 | 333 |
+| Called from generated code | 1 | 167 |
+| Referenced by the original-address module table | 1 | 325 |
 | Calls an SDK shim | 0 | 75 |
 | Signature uses SDK integer types or `void*` | 0 | 111 |
-| Compiled with relaxed settings | 0 | 711 |
+| Compiled with relaxed settings | 0 | 703 |
 
 Function bodies: 3,735 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 1 open owned functions have generated callers.
 

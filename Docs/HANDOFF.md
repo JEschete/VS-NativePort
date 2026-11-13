@@ -1,6 +1,6 @@
 # Current Handoff
 
-Updated 2026-11-12. Rows 28 (battle AI) and 29 (damage/status) of the C++ promotion work (#276) are source-complete and published; row 30 (battle-actions) is active. The earlier perception promotion is the
+Updated 2026-11-13. Rows 28 (battle AI) and 29 (damage/status) of the C++ promotion work (#276) are source-complete and published; row 30 (battle-actions) is active. The earlier perception promotion is the
 F01638-F01640/F01643 perception group in `33ad4f3e`
 ([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695)). Each published row-28
 commit and its exact-revision CI run are recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276)
@@ -12,40 +12,32 @@ See [Owner-requested pause](#owner-requested-pause) and
 
 ## Owner-requested pause
 
-The owner requested a stopping point on 2026-11-12. No new batches or long
-verification runs should start until the owner resumes the work.
+The owner paused the work on 2026-11-12 and requested completion of only the
+eight-function reward WIP on 2026-11-13. That batch is locally complete; the
+remaining cohort work stays paused. Do not start another batch without resumption.
 
-- Last published code checkpoint: `013924cd857f2c277814411ea388b77ca1fb2ae6`,
-  successful exact-revision [CI 43360661373](https://github.com/JEschete/VS-NativePort/actions/runs/43360661373).
-  The original 900-row cohort remains **188 resolved (179 promoted, nine retired),
-  712 remaining**. No unfinished reward functions are included.
-- Eight reward-flow functions are preserved as **uncommitted WIP**:
-  F04123-F04126 and F00220-F00223. There are nine staged new paths and fourteen
-  unstaged paths; preserve both the index and worktree. The owned/copier
-  registrations are provisional; no ledger promotion or behavior-verification
-  marks were applied. Nine other reward functions and both reward globals remain.
-- Exact paths, completed commands and limits are in the local, ignored
-  `build\scratch\reward-flow\owner-pause.json`. All worker-owned processes have
-  stopped; no worker is continuing implementation.
-- Completed partial evidence: Debug 29 cases/277 assertions, 8,192 original-MIPS
-  vectors with zero mismatches, 89 detected mutants and 33 Live controls.
-  Eight individual native variants completed, but their aggregate source-hash
-  guard failed after a test-only CLUT-row correction during the run. The
-  aggregate verification is **not passed** and must be reconciled, not waived.
-- Not completed: final group, Release/full native suites, canonical replays,
-  copier stability/controls, ordered camera/shadow controls, final ledgers or
-  publication. Do not describe the eight functions as verified promotions.
+- F04123-F04126 and F00220-F00223 are eight typed reward-flow promotions.
+  The original 900-row cohort is **196 resolved (187 promoted, nine retired),
+  704 remaining**. Row 32 has eight promoted and 85 remaining.
+- Evidence: `build\scratch\reward-flow\verification.json`, verified on
+  `2cdb3e64e4a5603b8fbd4433df62f800e0f10fcf` plus the scoped changes.
+  Publication commit and exact-revision CI are recorded on
+  [#276](https://github.com/JEschete/VS-NativePort/issues/276) and in that evidence.
+- Per-function proof: 285 original instructions, 8,192 vectors, zero mismatches,
+  89 detected original mutants, eight detected native variants, 29 own Catch2
+  cases/277 assertions and 33 Live controls. The aggregate native-variant hash
+  guard was rerun successfully on an unchanged tree, not waived.
+- Final group `build\promotion-check\group-20261113-003641\summary.json`:
+  376 seconds; Debug/Release each pass 6,380 cases/12,926,759 assertions.
+  Both canonical replays, copier stability/controls and zero-new quality pass.
+  Ordered camera/shadow controls pass 39 cases/175 assertions in each configuration.
+- Canonical ledgers and the CSV are synchronized and checked. No reward WIP from
+  the paused batch remains; nine other generated reward functions and both reward
+  globals are retained. The earlier `owner-pause.json` is a historical WIP snapshot.
 
-On resume, inspect `owner-pause.json` and the individual native-variant reports;
-reconcile the aggregate hash guard without weakening source-mutation checks.
-Then run:
-
-```powershell
-.\.venv-3\Scripts\python.exe tools\test\promotion_check.py iterate --focused "[reward-flow]"
-```
-
-Only after the remaining full group and publication/CI gates pass may the CSV
-count advance. F00830 remains separately blocked under #296; row 30 is not complete.
+On a later resumption, continue the remaining reward package before other row-32
+work. F00830 remains separately blocked under #296; row 30 is not complete.
+No gameplay or compatibility-retirement completion is claimed.
 
 ## Current continuation and blocker
 
@@ -59,14 +51,15 @@ The final defined reactions F00819/F00832/F00891 are published in `013924cd`,
 with successful exact-revision
 [CI 43360661373](https://github.com/JEschete/VS-NativePort/actions/runs/43360661373).
 Evidence: `build\scratch\animation-reactions\verification.json`.
-The CSV records 188 resolved (179 promoted, nine retired), with 712 remaining.
+The CSV records 196 resolved (187 promoted, nine retired), with 704 remaining.
 
 Row 30 is **not complete**: F00830 remains unresolved under [#296](https://github.com/JEschete/VS-NativePort/issues/296).
 Its source-climbing blend inherits VM address/linked-list state; zero is not equivalent to all shadow/blend effects.
 The original function body and DATA remain unchanged. Do not invent a blend constant, pointer/register API,
 or a refusal presented as a completed gameplay fix. The next observation is an evidenced native behavior decision
 or aligned reference climbing-hit evidence; the target-route visited-count evidence alone does not resolve it.
-Continue independently verifiable maintained-code work without marking this function or row 30 complete.
+When the owner resumes, continue independently verifiable maintained-code work
+without marking this function or row 30 complete.
 
 ## Active continuation (2026-11-11)
 

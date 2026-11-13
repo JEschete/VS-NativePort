@@ -2238,6 +2238,15 @@
     <None Include="..\..\port\differentials\resource_recovery_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\reward_flow.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\reward_flow_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\reward_flow_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\special_terrain.py">
       <Filter>tools\port\differentials</Filter>
     </None>

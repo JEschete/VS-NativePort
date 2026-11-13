@@ -45,6 +45,7 @@
 #include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
+#include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -309,14 +310,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800797BCu, 0u, (void*)&Battle_UpdateLootResults, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007980Cu, 0u, (void*)&Battle_UpdateAbilityUnlockDelay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007983Cu, 0u, (void*)&Battle_UpdateAbilityUnlockResults, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B410u, 0u, (void*)&Battle_BeginRewardPause, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B470u, 0u, (void*)&Battle_EndRewardPause, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B4C4u, 0u, (void*)&Battle_ResumeAfterRewards, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B508u, 0u, (void*)&Battle_CheckRewardUnlocks, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B63Cu, 0u, (void*)&Battle_ShowPendingRewardUnlock, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B764u, 0u, (void*)&Battle_OpenPendingLootRewards, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B7DCu, 0u, (void*)&Battle_OpenRewardResults, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B834u, 0u, (void*)&Battle_UpdateRewardResultsDialog, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B884u, 0u, (void*)&Battle_UpdatePendingLootDialog, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B908u, 0u, (void*)&Battle_WaitForRewardUnlockEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B938u, 0u, (void*)&Battle_UpdateRewardUnlockDialog, 0u, 0u, 0u},
@@ -1772,6 +1765,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009DF3Cu, 0u, (void*)&VS::Battle::SetLiveEnemyCombatPose, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009EE9Cu, 0u, (void*)&VS::Battle::PlayLiveDefenseAbilityAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A2574u, 0u, (void*)&VS::Battle::FinishLiveEnemyCombatPose, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B410u, 0u, (void*)&VS::Battle::BeginLiveRewardPause, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B470u, 0u, (void*)&VS::Battle::EndLiveRewardPause, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B4C4u, 0u, (void*)&VS::Battle::ResumeLiveAfterRewards, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B508u, 0u, (void*)&VS::Battle::CheckLiveRewardUnlocks, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B63Cu, 0u, (void*)&VS::Battle::ShowLivePendingRewardUnlock, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B764u, 0u, (void*)&VS::Battle::OpenLivePendingLootRewards, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B7DCu, 0u, (void*)&VS::Battle::OpenLiveRewardResults, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B834u, 0u, (void*)&VS::Battle::UpdateLiveRewardResultsDialog, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},
