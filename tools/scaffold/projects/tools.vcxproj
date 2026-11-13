@@ -347,6 +347,9 @@
     <None Include="..\..\port\differentials\action_presentation_guard_driver.cpp" />
     <None Include="..\..\port\differentials\action_preview.py" />
     <None Include="..\..\port\differentials\action_preview_driver.cpp" />
+    <None Include="..\..\port\differentials\action_sequence.py" />
+    <None Include="..\..\port\differentials\action_sequence_driver.cpp" />
+    <None Include="..\..\port\differentials\action_sequence_guard_driver.cpp" />
     <None Include="..\..\port\differentials\actor_creation.py" />
     <None Include="..\..\port\differentials\actor_creation_driver.cpp" />
     <None Include="..\..\port\differentials\actor_reaction.py" />
