@@ -91,7 +91,8 @@ std::optional<std::size_t> Format(Bytes& out, const Bytes& source,
 }
 
 Bytes Digits(std::uint8_t code, std::uint8_t parameter, std::int32_t value) {
-  const auto view = Render::EncodeTextInteger(code, parameter, value).View();
+  const auto encoded = Render::EncodeTextInteger(code, parameter, value);
+  const auto view = encoded.View();
   return {view.begin(), view.end()};
 }
 
