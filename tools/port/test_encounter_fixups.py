@@ -23,6 +23,29 @@ def flat(source: str) -> str:
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_action_camera_selection_binds_all_eight_owned_entries(self):
+        names = ("ActionTargetLimbPosition", "ActionTargetDistance", "ActionCameraMidpoint",
+                 "StepCameraTowardActionMidpoint", "UpdateInitialTargetSelection",
+                 "UpdateActionAreaSelection", "UpdateFinalTargetSelection", "UpdateActionCameraZoom")
+        addresses = (0x80077F14, 0x80077F70, 0x800780A8, 0x8007820C,
+                     0x80078248, 0x800782E4, 0x80078364, 0x800784AC)
+        with (Path(__file__).parent / "owned.csv").open(encoding="utf-8", newline="") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table)}
+        for number, (name, address) in enumerate(zip(names, addresses, strict=True), 179):
+            identifier, binding = f"F{number:05}", f"VS::Battle::Live{name}"
+            with self.subTest(identifier=identifier):
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[identifier], binding)
+                self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                self.assertEqual(owned[identifier]["path"], r"Native\Game\src\Battle\ActionCameraSelection.cpp")
+                self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                                 r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp")
+        root = Path(__file__).resolve().parents[2]
+        generated = (root / r"Native\Game\src\Battle\ActionExecution.cpp").read_text(encoding="utf-8")
+        for name in names:
+            self.assertNotIn(f"Battle_{name}(", generated)
+        self.assertIn("Battle_settledCameraDistance", generated)
+        self.assertIn("Battle_cameraEaseMode", generated)
+
     def test_action_outcomes_keep_globals_and_bind_owned_module_entries(self):
         names = {
             "F00048": ("ResolveLiveEnemyDefeat", "BATTLE/BATTLE.PRG", 0x8006C1CC),

@@ -11,6 +11,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
@@ -429,16 +430,16 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   void RunBattleActionFlow(BattleActionFlow flow) override {
     switch (flow) {
       case BattleActionFlow::kInitialTargetSelection:
-        Battle_UpdateInitialTargetSelection();
+        Battle::LiveUpdateInitialTargetSelection();
         break;
       case BattleActionFlow::kAreaSelection:
-        Battle_UpdateActionAreaSelection();
+        Battle::LiveUpdateActionAreaSelection();
         break;
       case BattleActionFlow::kFinalTargetSelection:
-        Battle_UpdateFinalTargetSelection();
+        Battle::LiveUpdateFinalTargetSelection();
         break;
       case BattleActionFlow::kCameraZoom:
-        Battle_UpdateActionCameraZoom();
+        Battle::LiveUpdateActionCameraZoom();
         break;
       case BattleActionFlow::kWaitEffectReady:
         Battle_WaitForActionEffectReady();

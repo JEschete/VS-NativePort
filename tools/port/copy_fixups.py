@@ -818,6 +818,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::ApplyLiveActionSourceEffects": r"Native\Game\include\Battle\ActionOutcomesLive.hpp",
     "VS::Battle::BeginLiveActorDefeatAnimation": r"Native\Game\include\Battle\ActionOutcomesLive.hpp",
     "VS::Battle::ApplyLiveLearnedActionUnlocks": r"Native\Game\include\Battle\ActionOutcomesLive.hpp",
+    "VS::Battle::LiveActionTargetLimbPosition": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::LiveActionTargetDistance": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::LiveActionCameraMidpoint": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::LiveStepCameraTowardActionMidpoint": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::LiveUpdateInitialTargetSelection": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::LiveUpdateActionAreaSelection": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::LiveUpdateFinalTargetSelection": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::LiveUpdateActionCameraZoom": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1569,6 +1577,14 @@ OWNED_CALL_BINDINGS["F00059"] = "VS::Battle::PlayLiveWeaponHitSounds"
 OWNED_CALL_BINDINGS["F00061"] = "VS::Battle::ApplyLiveActionSourceEffects"
 OWNED_CALL_BINDINGS["F00156"] = "VS::Battle::BeginLiveActorDefeatAnimation"
 OWNED_CALL_BINDINGS["F01851"] = "VS::Battle::ApplyLiveLearnedActionUnlocks"
+OWNED_CALL_BINDINGS["F00179"] = "VS::Battle::LiveActionTargetLimbPosition"
+OWNED_CALL_BINDINGS["F00180"] = "VS::Battle::LiveActionTargetDistance"
+OWNED_CALL_BINDINGS["F00181"] = "VS::Battle::LiveActionCameraMidpoint"
+OWNED_CALL_BINDINGS["F00182"] = "VS::Battle::LiveStepCameraTowardActionMidpoint"
+OWNED_CALL_BINDINGS["F00183"] = "VS::Battle::LiveUpdateInitialTargetSelection"
+OWNED_CALL_BINDINGS["F00184"] = "VS::Battle::LiveUpdateActionAreaSelection"
+OWNED_CALL_BINDINGS["F00185"] = "VS::Battle::LiveUpdateFinalTargetSelection"
+OWNED_CALL_BINDINGS["F00186"] = "VS::Battle::LiveUpdateActionCameraZoom"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3324,6 +3340,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8006CA20, "VS::Battle::ApplyLiveActionSourceEffects"),  # F00061
     ("BATTLE/BATTLE.PRG", 0x80074A20, "VS::Battle::BeginLiveActorDefeatAnimation"),  # F00156
     ("BATTLE/INITBTL.PRG", 0x800F9818, "VS::Battle::ApplyLiveLearnedActionUnlocks"),  # F01851
+    ("BATTLE/BATTLE.PRG", 0x80077F14, "VS::Battle::LiveActionTargetLimbPosition"),  # F00179
+    ("BATTLE/BATTLE.PRG", 0x80077F70, "VS::Battle::LiveActionTargetDistance"),  # F00180
+    ("BATTLE/BATTLE.PRG", 0x800780A8, "VS::Battle::LiveActionCameraMidpoint"),  # F00181
+    ("BATTLE/BATTLE.PRG", 0x8007820C, "VS::Battle::LiveStepCameraTowardActionMidpoint"),  # F00182
+    ("BATTLE/BATTLE.PRG", 0x80078248, "VS::Battle::LiveUpdateInitialTargetSelection"),  # F00183
+    ("BATTLE/BATTLE.PRG", 0x800782E4, "VS::Battle::LiveUpdateActionAreaSelection"),  # F00184
+    ("BATTLE/BATTLE.PRG", 0x80078364, "VS::Battle::LiveUpdateFinalTargetSelection"),  # F00185
+    ("BATTLE/BATTLE.PRG", 0x800784AC, "VS::Battle::LiveUpdateActionCameraZoom"),  # F00186
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4086,19 +4110,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "D_800F19EC aliases the spherical camera mode at +0x1C"),
         ("Battle_settledCameraDistance", "Field_sphericalCamera.values.distance",
          "D_800F19D8 aliases the spherical camera distance at +0x8"),
-    ],
-    "F00186": [
-        ("    VECTOR sp30;",
-         "    VECTOR sp30;\n"
-         '    Core_Debugf("combat-flow", "camera mode=%d zoom=%d yaw=%d distance=%d action=%u targets=%u",\n'
-         "        Field_sphericalCamera.delta.mode, Battle_actionState->cameraZoomState,\n"
-         "        Field_sphericalCamera.delta.yaw, Field_sphericalCamera.values.distance,\n"
-         "        (unsigned)Battle_actionState->selection.actionId, (unsigned)Battle_actionState->selection.targetCount);",
-         "temporary combat camera gate trace"),
-        ("VS::Field::LiveComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);",
-         "VS::Field::LiveComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);\n"
-         '                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);',
-         "temporary camera convergence trace"),
     ],
     "F01364": [
         ("    VS::Core::Memory::ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);",

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionPreview.hpp"
@@ -156,7 +157,7 @@ class LiveWorld final : public ActionPreviewWorld {
     }
     Callback callback(*this);
     SVECTOR position{};
-    Battle_ActionTargetLimbPosition(slot, limb, &position);
+    LiveActionTargetLimbPosition(slot, limb, &position);
     return std::bit_cast<ActionPoint>(position);
   }
   std::optional<ActionPoint> LimbPosition(int slot, int limb) override {

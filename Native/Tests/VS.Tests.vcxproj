@@ -48,6 +48,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionCameraSelectionLiveTests.cpp" />
+    <ClCompile Include="src\ActionCameraSelectionTests.cpp" />
     <ClCompile Include="src\ActionCostsTests.cpp" />
     <ClCompile Include="src\ActionEffectDispatchTests.cpp" />
     <ClCompile Include="src\ActionOutcomesLiveTests.cpp" />
@@ -340,6 +342,7 @@
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />

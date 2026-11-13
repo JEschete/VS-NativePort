@@ -1,15 +1,4 @@
 {
-"Native\\Game\\src\\Battle\\ActionExecution.cpp": [
-[
-170,
-[
-"                ((void (*)())Battle_ClearSphereTargets)();"
-],
-[
-"                ((void (*)(...))Battle_ClearSphereTargets)();"
-]
-]
-],
 "Native\\Game\\src\\Battle\\Feedback.cpp": [
 [
 136,

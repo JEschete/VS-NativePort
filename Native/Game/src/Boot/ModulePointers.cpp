@@ -5,6 +5,7 @@
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
+#include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
@@ -303,14 +304,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&Effects_BeginAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&Effects_ActionEffectBusyFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80077F14u, 0u, (void*)&Battle_ActionTargetLimbPosition, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80077F70u, 0u, (void*)&Battle_ActionTargetDistance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800780A8u, 0u, (void*)&Battle_ActionCameraMidpoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007820Cu, 0u, (void*)&Battle_StepCameraTowardActionMidpoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80078248u, 0u, (void*)&Battle_UpdateInitialTargetSelection, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800782E4u, 0u, (void*)&Battle_UpdateActionAreaSelection, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80078364u, 0u, (void*)&Battle_UpdateFinalTargetSelection, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800784ACu, 0u, (void*)&Battle_UpdateActionCameraZoom, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80078748u, 0u, (void*)&Battle_WaitForActionEffectReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800787F0u, 0u, (void*)&Battle_StartReadyActionAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80079050u, 0u, (void*)&Battle_WaitForActionResolution, 0u, 0u, 0u},
@@ -1769,6 +1762,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006CA20u, 0u, (void*)&VS::Battle::ApplyLiveActionSourceEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074A20u, 0u, (void*)&VS::Battle::BeginLiveActorDefeatAnimation, 0u, 0u, 0u},
     {"BATTLE/INITBTL.PRG", 0x800F9818u, 0u, (void*)&VS::Battle::ApplyLiveLearnedActionUnlocks, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80077F14u, 0u, (void*)&VS::Battle::LiveActionTargetLimbPosition, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80077F70u, 0u, (void*)&VS::Battle::LiveActionTargetDistance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800780A8u, 0u, (void*)&VS::Battle::LiveActionCameraMidpoint, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007820Cu, 0u, (void*)&VS::Battle::LiveStepCameraTowardActionMidpoint, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80078248u, 0u, (void*)&VS::Battle::LiveUpdateInitialTargetSelection, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800782E4u, 0u, (void*)&VS::Battle::LiveUpdateActionAreaSelection, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80078364u, 0u, (void*)&VS::Battle::LiveUpdateFinalTargetSelection, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800784ACu, 0u, (void*)&VS::Battle::LiveUpdateActionCameraZoom, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

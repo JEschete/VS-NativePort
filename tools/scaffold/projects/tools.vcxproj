@@ -363,6 +363,9 @@
     <None Include="..\..\port\differentials\basic_action_effects.py" />
     <None Include="..\..\port\differentials\basic_action_effects_driver.cpp" />
     <None Include="..\..\port\differentials\basic_action_effects_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\battle_outcomes.py" />
+    <None Include="..\..\port\differentials\battle_outcomes_driver.cpp" />
+    <None Include="..\..\port\differentials\battle_outcomes_guard_driver.cpp" />
     <None Include="..\..\port\differentials\blocked_movement.py" />
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp" />
     <None Include="..\..\port\differentials\boss_orbit.py" />

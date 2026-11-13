@@ -66,7 +66,6 @@ void Battle_ClearPrimarySphereVolume(){}
 void Battle_ClearSecondarySphereVolume(){}
 void Battle_FreeSphere(){}
 void Battle_BeginPostActionRecovery(int){}
-int Battle_ActionTargetDistance(){return 449;}
 void Battle_SetActorMarkersHidden(int){}
 void Battle_SetHudHidden(int){}
 void Menu_ShowSceneNotification(int,int,int){}
@@ -110,6 +109,7 @@ namespace VS::Content {
 int QueueLiveActorAssetRequest(const Content_ActorAssetRequest* request){asset=*request;++assets;return 0;}
 }
 namespace VS::Battle {
+int LiveActionTargetDistance(){return 449;}
 void LiveReturnToBattleActionMenu(){}
 void LiveCollectEnvironmentActionTargets(){}
 void LiveSetAllActionTargets(){}

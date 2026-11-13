@@ -13,6 +13,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentation.hpp"
 #include "Battle/ActionPreviewLive.hpp"
@@ -235,7 +236,7 @@ class LiveWorld final : public ActionPresentationWorld {
     Require(category < std::size(Audio_Seq_unusedScoredata.weaponAttacks));
     Audio_Seq_unusedScoredata.weaponAttacks[category] = count;
   }
-  int TargetDistance() override { return Battle_ActionTargetDistance(); }
+  int TargetDistance() override { return LiveActionTargetDistance(); }
   void ClearSpellCommit() override { Battle_spellCommitFlag = 0; }
   std::uint16_t HealCount() override {
     return Audio_Seq_unusedScoredata.healCount;
