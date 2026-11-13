@@ -561,7 +561,7 @@ class SdkMatrix(unittest.TestCase):
             self.assertEqual((m.gte, m.gte_flag), (before, 0xFFFFF000))
         cop2 = self.cop2
         for word in (
-            cop2(6, A0, 5),
+            cop2(6, A0, 8),
             cop2(6, A0, 30),
             cop2(2, V0, 0),
             cop2(4, A0, 2),
@@ -668,7 +668,7 @@ class Mac0Stores(unittest.TestCase):
 
     def test_swc2_refuses_every_other_data_register_explicitly(self) -> None:
         for register in range(32):
-            if register == 24:
+            if register in (8, 14, 24):
                 continue
             m = self.machine(i_type(0x3A, register, A0, 0))
             m.store(DATA, b"\xa5" * 16)
@@ -705,6 +705,369 @@ class Mac0Stores(unittest.TestCase):
                 self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"),
             ):
                 m.step(BASE + 8)
+
+
+class SdkProjection(unittest.TestCase):
+    @staticmethod
+    def machine(
+        *,
+        matrix=SdkMatrix.IDENTITY,
+        vector=(12, -7, 1024),
+        translation=(0, 0, 0),
+        projection=(160 << 16, 120 << 16, 256, 0, 0),
+        command=0x4A180001,
+    ) -> Machine:
+        """Initialize every transform/projection input explicitly, without game defaults."""
+        m = Machine(image(command))
+        m.gte_rotation = [
+            (matrix[index] & 0xFFFF) | (matrix[index + 1] & 0xFFFF) << 16
+            for index in range(0, 8, 2)
+        ] + [differential.s16(matrix[8])]
+        m.gte_translation = list(translation)
+        m.gte_projection = dict(zip((24, 25, 26, 27, 28), projection, strict=True))
+        m.gte[0] = (vector[0] & 0xFFFF) | (vector[1] & 0xFFFF) << 16
+        m.gte[1] = differential.s16(vector[2])
+        m.gte_flag = 0xFFFFF000
+        return m
+
+    @staticmethod
+    def state(m: Machine) -> tuple:
+        return (
+            Mac0Stores.unchanged_state(m),
+            tuple(m.gte_translation),
+            tuple(m.gte_projection.items()),
+            dict(m.overlay),
+            list(m.stores),
+        )
+
+    def test_translation_and_projection_control_transfers_preserve_state(self) -> None:
+        for register, value, expected in (
+            (5, 0x80000000, -2147483648),
+            (6, 0xFFFF8001, -32767),
+            (7, 0x7FFFFFFF, 2147483647),
+            (24, 0xFFFF0000, -65536),
+            (25, 0x80000000, -2147483648),
+            (26, 0x1234FFFF, 65535),
+        ):
+            for flag in (None, 0xFFFFF000):
+                with self.subTest(register=register, flag=flag):
+                    m = self.machine(command=SdkMatrix.cop2(6, A0, register))
+                    m.r[A0], m.gte_flag = value, flag
+                    before = Mac0Stores.unchanged_state(m)
+                    translation, projection = (
+                        list(m.gte_translation),
+                        dict(m.gte_projection),
+                    )
+                    if register < 8:
+                        translation[register - 5] = expected
+                    else:
+                        projection[register] = expected
+                    m.step(BASE)
+                    self.assertEqual(Mac0Stores.unchanged_state(m), before)
+                    self.assertEqual(m.gte_translation, translation)
+                    self.assertEqual(m.gte_projection, projection)
+
+    def test_rtps_fifo_repeat_entry_and_unmodified_state(self) -> None:
+        for previous_flag in (None, 0xFFFFF000):
+            with self.subTest(previous_flag=previous_flag):
+                m = self.machine()
+                m.gte.update(
+                    {
+                        12: 0x11112222,
+                        13: 0x33334444,
+                        14: 0x55556666,
+                        16: 10,
+                        17: 20,
+                        18: 30,
+                        19: 40,
+                        20: 0xAABBCCDD,
+                    }
+                )
+                m.gte_flag = previous_flag
+                m.lzcs, m.hi, m.lo = 0xFFFF0000, 0x10203040, 0x50607080
+                before, controls = (
+                    dict(m.gte),
+                    (
+                        list(m.gte_rotation),
+                        list(m.gte_translation),
+                        dict(m.gte_projection),
+                    ),
+                )
+                registers = list(m.r)
+                m.step(BASE)
+                before.update(
+                    {
+                        8: 0,
+                        9: 12,
+                        10: -7,
+                        11: 1024,
+                        12: 0x33334444,
+                        13: 0x55556666,
+                        14: 0x007600A3,
+                        16: 20,
+                        17: 30,
+                        18: 40,
+                        19: 1024,
+                        24: 0,
+                        25: 12,
+                        26: 0xFFFFFFF9,
+                        27: 1024,
+                    }
+                )
+                self.assertEqual(m.gte, before)
+                self.assertEqual(m.gte_flag, 0)
+                self.assertEqual(
+                    (m.gte_rotation, m.gte_translation, m.gte_projection), controls
+                )
+                self.assertEqual(m.r, registers)
+                self.assertEqual(
+                    (m.lzcs, m.hi, m.lo), (0xFFFF0000, 0x10203040, 0x50607080)
+                )
+                self.assertEqual(
+                    (m.stores, m.overlay, m.trace, m.stubs, m.patches),
+                    ([], {}, [], {}, {}),
+                )
+                m.gte[0], m.gte[1] = 0x0008FFFC, 512
+                m.step(BASE)
+                self.assertEqual(
+                    tuple(m.gte[index] for index in (12, 13, 14)),
+                    (0x55556666, 0x007600A3, 0x007C009E),
+                )
+                self.assertEqual(
+                    tuple(m.gte[index] for index in (16, 17, 18, 19)),
+                    (30, 40, 1024, 512),
+                )
+                self.assertEqual(m.gte_flag, 0)
+
+    def test_rtps_signed44_partial_overflow_wrap_and_arithmetic_shift(self) -> None:
+        for axis, translation_value, component, expected_mac, flag in (
+            (0, 2147483647, 1, -2147483648, 0xC1000000),
+            (1, 2147483647, 1, -2147483648, 0xA0800000),
+            (2, 2147483647, 1, -2147483648, 0x90460000),
+            (0, -2147483648, -1, 2147483647, 0x89000000),
+            (1, -2147483648, -1, 2147483647, 0x84800000),
+            (2, -2147483648, -1, 2147483647, 0x82440000),
+        ):
+            with self.subTest(axis=axis, component=component):
+                matrix, translation = [0] * 9, [0, 0, 1]
+                matrix[axis * 3], translation[axis] = 4096, translation_value
+                m = self.machine(
+                    matrix=matrix,
+                    translation=translation,
+                    vector=(component, 0, 0),
+                    projection=(0, 0, 0, 0, 0),
+                )
+                m.step(BASE)
+                self.assertEqual(differential.s32(m.gte_read(25 + axis)), expected_mac)
+                self.assertEqual(m.gte[9 + axis], -32768 if component == 1 else 32767)
+                self.assertEqual(m.gte_flag, flag)
+        for translation, row, vector, mac, ir, flag in (
+            (2147483647, (4096, -4096, 0), (1, 1, 0), 2147483647, 32767, 0xC9000000),
+            (268435456, (0, 0, 0), (0, 0, 0), 268435456, 32767, 0x81000000),
+            (
+                0,
+                (-32768, -32768, -32768),
+                (-32768, -32768, -32768),
+                786432,
+                32767,
+                0x81000000,
+            ),
+            (0, (1, 0, 0), (-1, 0, 0), -1, -1, 0),
+            (0, (4095, 0, 0), (1, 0, 0), 0, 0, 0),
+        ):
+            with self.subTest(translation=translation, row=row):
+                m = self.machine(
+                    matrix=(*row, 0, 0, 0, 0, 0, 0),
+                    vector=vector,
+                    translation=(translation, 0, 1),
+                    projection=(0, 0, 0, 0, 0),
+                )
+                m.step(BASE)
+                self.assertEqual(
+                    (differential.s32(m.gte_read(25)), m.gte[9], m.gte_flag),
+                    (mac, ir, flag),
+                )
+
+    def test_rtps_strict_ir_depth_screen_limits_and_summary(self) -> None:
+        for translation, ir, depth, flag in (
+            ((32767, -32768, 32767), (32767, -32768, 32767), 32767, 0),
+            ((32768, -32769, 32768), (32767, -32768, 32767), 32768, 0x81C00000),
+            ((0, 0, 32768), (0, 0, 32767), 32768, 0x00400000),
+            ((0, 0, 65535), (0, 0, 32767), 65535, 0x00400000),
+            ((0, 0, 65536), (0, 0, 32767), 65535, 0x80440000),
+            ((0, 0, -1), (0, 0, -1), 0, 0x80060000),
+            ((0, 0, 0), (0, 0, 0), 0, 0x80020000),
+        ):
+            with self.subTest(translation=translation):
+                m = self.machine(
+                    vector=(0, 0, 0),
+                    translation=translation,
+                    projection=(0, 0, 0, 0, 0),
+                )
+                m.step(BASE)
+                self.assertEqual(tuple(m.gte[index] for index in (9, 10, 11)), ir)
+                self.assertEqual((m.gte[19], m.gte_flag), (depth, flag))
+        for vector, sxy, flag in (
+            ((1023, -1024, 1), 0xFC0003FF, 0),
+            ((1024, -1025, 1), 0xFC0003FF, 0x80006000),
+            ((-1024, 1023, 1), 0x03FFFC00, 0),
+            ((-1025, 1024, 1), 0x03FFFC00, 0x80006000),
+        ):
+            with self.subTest(vector=vector):
+                m = self.machine(vector=vector, projection=(0, 0, 1, 0, 0))
+                m.step(BASE)
+                self.assertEqual((m.gte[14], m.gte_flag), (sxy, flag))
+
+    def test_rtps_unr_division_rounding_and_near_plane_edges(self) -> None:
+        # PSX-SPX documents the last two clamped-but-not-overflowed UNR examples.
+        for h, z, quotient, overflow in (
+            (0, 0, 0x1FFFF, True),
+            (0, 1, 0, False),
+            (1, 1, 0x10000, False),
+            (2, 1, 0x1FFFF, True),
+            (1, 2, 0x08000, False),
+            (3, 2, 0x18000, False),
+            (1, 3, 0x05555, False),
+            (65535, 32768, 0x1FFFE, False),
+            (65535, 65535, 0x0FFFF, False),  # UNR is not exact even for H == SZ3.
+            (0xFE3F, 0x7F20, 0x1FFFF, False),
+            (0xF015, 0x780B, 0x1FFFF, False),
+        ):
+            with self.subTest(h=h, z=z):
+                self.assertEqual(Machine.gte_divide(h, z), (quotient, overflow))
+        self.assertEqual(Machine.gte_divide(0x1234FFFF, 65535), (0x0FFFF, False))
+        self.assertEqual((0xFE3F * 0x10000 + 0x7F20 // 2) // 0x7F20, 0x1FFFE)
+
+    def test_rtps_screen_and_depth_cue_use_wide_mac0_before_limiters(self) -> None:
+        m = self.machine(vector=(32767, -32768, 1), projection=(65536, -1, 1, 0, 0))
+        m.step(BASE)
+        self.assertEqual(
+            (m.gte[14], m.gte[24], m.gte_flag), (0xFC0003FF, 0, 0x8001E000)
+        )
+        for dqa, dqb, mac0, ir0, flag in (
+            (0, 0, 0, 0, 0),
+            (0, -1, 0xFFFFFFFF, 0, 0x00001000),
+            (256, 0, 0x01000000, 4096, 0),
+            (256, 4096, 0x01001000, 4096, 0x00001000),
+            (32767, 65535, 0x7FFFFFFF, 4096, 0x00001000),
+            (32767, 65536, 0x80000000, 4096, 0x80011000),
+            (-32768, 0, 0x80000000, 0, 0x00001000),
+            (-32768, -1, 0x7FFFFFFF, 0, 0x80009000),
+            (0x1234FFFF, 0, 0xFFFF0000, 0, 0x00001000),
+            (0, 0x80000000, 0x80000000, 0, 0x00001000),
+        ):
+            with self.subTest(dqa=dqa, dqb=dqb):
+                m = self.machine(vector=(0, 0, 1), projection=(0, 0, 1, dqa, dqb))
+                m.step(BASE)
+                self.assertEqual((m.gte[24], m.gte[8], m.gte_flag), (mac0, ir0, flag))
+
+    def test_projection_result_transfers_and_faults_are_atomic(self) -> None:
+        for register, value, expected in (
+            (8, -32767, b"\x01\x80\xff\xff"),
+            (14, 0x80017FFF, b"\xff\x7f\x01\x80"),
+        ):
+            for base, offset, destination in (
+                (DATA + 8, -4, DATA + 4),
+                (0xFFFFFFFC, 4, 0),
+            ):
+                with self.subTest(register=register, base=base):
+                    m = self.machine(command=i_type(0x3A, register, A0, offset))
+                    m.gte[register], m.r[A0], m.gte_flag = value, base, None
+                    low = (destination - 4) & MASK
+                    m.store(low, b"\xa5" * 4)
+                    m.store(destination, b"\xa5" * 8)
+                    before = self.state(m)[:3]
+                    m.step(BASE)
+                    self.assertEqual(self.state(m)[:3], before)
+                    self.assertEqual(m.bytes(low, 4), b"\xa5" * 4)
+                    self.assertEqual(m.bytes(destination, 8), expected + b"\xa5" * 4)
+                    self.assertTrue(all(0 <= address <= MASK for address in m.overlay))
+                    self.assertEqual(m.stores, [(destination, 4)])
+            for offset in (1, 2, 3):
+                m = self.machine(command=i_type(0x3A, register, A0, offset))
+                m.gte[register], m.r[A0], m.gte_flag = value, DATA, None
+                m.store(DATA, b"\xa5" * 16)
+                before = self.state(m)
+                with (
+                    self.subTest(register=register, offset=offset),
+                    self.assertRaisesRegex(Fault, "unaligned 4-byte store"),
+                ):
+                    m.step(BASE)
+                self.assertEqual(self.state(m), before)
+        m = self.machine(command=SdkMatrix.cop2(0, V0, 19))
+        m.gte[19], m.gte_flag = 0x1234FFFF, None
+        m.step(BASE)
+        self.assertEqual(m.r[V0], 65535)
+        self.assertIsNone(m.gte_flag)
+        for move, register in (
+            (0, 15),
+            (4, 15),
+            (0, 28),
+            (4, 28),
+            (0, 29),
+            (4, 29),
+            (0, 16),
+            (0, 17),
+            (0, 18),
+            (4, 19),
+            (2, 26),
+            (6, 27),
+            (6, 28),
+        ):
+            m = self.machine(command=SdkMatrix.cop2(move, A0, register))
+            before = self.state(m)
+            with (
+                self.subTest(move=move, register=register),
+                self.assertRaisesRegex(Fault, "unhandled GTE instruction"),
+            ):
+                m.step(BASE)
+            self.assertEqual(self.state(m), before)
+
+    def test_rtps_configuration_guards_and_unknown_other_command_flags(self) -> None:
+        for fake in range(32):
+            m = self.machine(command=0x4A080001 | fake << 20)
+            m.step(BASE)
+            self.assertEqual(
+                (m.gte[9], m.gte[10], m.gte[11], m.gte_flag), (12, -7, 1024, 0)
+            )
+        for word in (
+            0x4A000001,
+            *(0x4A080001 | 1 << bit for bit in range(6, 19)),
+        ):
+            m = self.machine(command=word)
+            before = self.state(m)
+            with (
+                self.subTest(word=hex(word)),
+                self.assertRaisesRegex(Fault, "unsupported GTE RTPS configuration"),
+            ):
+                m.step(BASE)
+            self.assertEqual(self.state(m), before)
+        for command in (0x4A000028, 0x4B90003D):
+            m = self.machine()
+            m.images = [
+                image(
+                    command,
+                    SdkMatrix.cop2(6, A0, 5),
+                    SdkMatrix.cop2(6, A0, 26),
+                    i_type(0x3A, 14, A1, 0),
+                    SdkMatrix.cop2(0, V1, 19),
+                    SdkMatrix.cop2(2, V0, 31),
+                    0x4A180001,
+                    SdkMatrix.cop2(2, V0, 31),
+                )
+            ]
+            m.r[A1] = DATA
+            for index in range(5):
+                m.step(BASE + 4 * index)
+                self.assertIsNone(m.gte_flag)
+            with (
+                self.subTest(command=hex(command)),
+                self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"),
+            ):
+                m.step(BASE + 20)
+            m.step(BASE + 24)
+            m.step(BASE + 28)
+            self.assertEqual((m.gte_flag, m.r[V0]), (0, 0))
 
 
 class Memory(unittest.TestCase):
