@@ -34,8 +34,10 @@ The interpreter executes branch delay slots but not load delay slots (compiled P
 reads a loaded register in the next instruction). Calls must be stubbed or explicitly followed,
 so an unexpected callee stops the run instead of executing silently. A stub registered with
 tail=True also takes a jump or branch to its address (a tail call) and continues at $ra. The GTE model covers moves
-to and from IR0-IR3, MAC1-MAC3, SXY0-SXY2 and the leading-zero counter (LZCS/LZCR) and the SQR
-and GPF commands; other COP instructions, syscalls, unaligned accesses and overflow traps raise.
+to and from IR0-IR3, MAC0-MAC3, SXY0-SXY2 and the leading-zero counter (LZCS/LZCR), and the SQR,
+GPF and NCLIP commands. Control moves cover FLAG, whose command result is modelled only for
+NCLIP; reading FLAG after SQR/GPF raises rather than reporting unmodelled status. Other COP
+instructions, syscalls, unaligned accesses and overflow traps raise.
 
 A native broken variant (--replace SOURCE OLD NEW) builds a separate driver from a copy of one of
 the case's SOURCES with one exact text replacement, leaving the tree untouched, and runs the
@@ -171,10 +173,11 @@ def position(rng: random.Random, tile_coordinate: int) -> int:
 # The GTE's leading-zero counter, data registers 30 and 31: the square root and normalisation
 # helpers use it as a plain integer instruction.
 LZCS, LZCR = 30, 31
-# GTE data registers IR1-IR3 (signed halfwords) and MAC1-MAC3 (words), and the SQR and GPF
-# commands.
+# GTE data registers IR1-IR3 (signed halfwords) and MAC0-MAC3 (words).
 IR = (9, 10, 11)
 MAC = (25, 26, 27)
+MAC0 = 24
+GTE_NCLIP = 0x06
 GTE_SQR = 0x28
 GTE_GPF = 0x3D
 # IR0 (a signed halfword) and the screen XY FIFO entries SXY0-SXY2 (words), which some routines
@@ -239,7 +242,8 @@ class Machine:
         self.r = [0] * 32
         self.hi = self.lo = 0
         self.lzcs = 0
-        self.gte = dict.fromkeys(IR + MAC + SCRATCH_GTE, 0)
+        self.gte = dict.fromkeys(IR + MAC + (MAC0,) + SCRATCH_GTE, 0)
+        self.gte_flag: int | None = 0
         self.r[R["sp"]] = stack
         self.stubs: dict[int, Callable[[Machine], None]] = {}
         self.tail_stubs: set[int] = set()
@@ -398,18 +402,28 @@ class Machine:
             self.write((r[rs] + imm) & MASK, r[rt], size)
         elif op in (0x2A, 0x2E):
             self.store_partial(op, (r[rs] + imm) & MASK, r[rt])
-        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR, *IR, *MAC, *SCRATCH_GTE):
+        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR, MAC0, *IR, *MAC, *SCRATCH_GTE):
             if rs == 4:
                 self.gte_write(rd, r[rt])
             else:
                 r[rt] = self.gte_read(rd)
+        elif op == 0x12 and rs in (2, 6) and rd == 31:
+            if rs == 6:
+                self.gte_write_flag(r[rt])
+            elif self.gte_flag is None:
+                raise Fault(f"GTE FLAG after SQR/GPF is not modelled at {pc:#x}")
+            else:
+                r[rt] = self.gte_flag
+        elif op == 0x12 and rs & 0x10 and funct == GTE_NCLIP:
+            self.gte_nclip()
         elif op == 0x12 and rs & 0x10 and funct == GTE_SQR:
             self.gte_square(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12 and rs & 0x10 and funct == GTE_GPF:
             self.gte_interpolate(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12:
             raise Fault(f"unhandled GTE instruction {word:#010x} at {pc:#x} "
-                        "(only IR0-IR3, MAC, SXY0-SXY2 and LZCS/LZCR moves, SQR and GPF are modelled)")
+                        "(only IR0-IR3, MAC0-MAC3, SXY0-SXY2, LZCS/LZCR and FLAG moves, "
+                        "SQR, GPF and NCLIP are modelled)")
         else:
             raise Fault(f"unhandled opcode {op:#x} at {pc:#x} (COP instructions need a stub)")
         r[0] = 0
@@ -485,7 +499,7 @@ class Machine:
             self.lzcs = value
         elif register in (IR0, *IR):
             self.gte[register] = s16(value)
-        elif register in (*MAC, *SXY):
+        elif register in (MAC0, *MAC, *SXY):
             self.gte[register] = value & MASK
 
     def gte_read(self, register: int) -> int:
@@ -495,8 +509,26 @@ class Machine:
             return leading_sign_bits(self.lzcs)
         return self.gte[register] & MASK
 
+    def gte_write_flag(self, value: int) -> None:
+        """ctc2 FLAG: bits 30-12 are writable; bit 31 summarizes bits 30-23 and 18-13."""
+        value &= 0x7FFFF000
+        self.gte_flag = value | (0x80000000 if value & 0x7F87E000 else 0)
+
+    def gte_nclip(self) -> None:
+        """NCLIP: signed screen-coordinate winding in MAC0, with final signed32 overflow."""
+        # Sony Inline Programming Reference pp. 6-3, 6-42: <4> checks the wide OPZ sum,
+        # before its conversion to MAC0. https://psx-spx.consoledev.net/geometrytransformationenginegte/
+        sx0, sy0 = s16(self.gte[12]), s16(self.gte[12] >> 16)
+        sx1, sy1 = s16(self.gte[13]), s16(self.gte[13] >> 16)
+        sx2, sy2 = s16(self.gte[14]), s16(self.gte[14] >> 16)
+        value = sx0 * sy1 + sx1 * sy2 + sx2 * sy0 - sx0 * sy2 - sx1 * sy0 - sx2 * sy1
+        self.gte[MAC0] = value & MASK
+        flag = 1 << 16 if value > 0x7FFFFFFF else 1 << 15 if value < -0x80000000 else 0
+        self.gte_write_flag(flag)
+
     def gte_square(self, shift: int, low_limit: int) -> None:
         """SQR: MACn = IRn squared, shifted right 12 with sf; IRn saturates to MACn."""
+        self.gte_flag = None
         for ir, mac in zip(IR, MAC, strict=True):
             value = s32(self.gte[ir] * self.gte[ir] >> (12 * shift))
             self.gte[mac] = value & MASK
@@ -505,6 +537,7 @@ class Machine:
     def gte_interpolate(self, shift: int, low_limit: int) -> None:
         """GPF: MACn = IR0 times IRn, shifted right 12 with sf; IRn saturates to MACn. The colour
         FIFO it also pushes is not modelled."""
+        self.gte_flag = None
         for ir, mac in zip(IR, MAC, strict=True):
             value = s32(self.gte[IR0] * self.gte[ir] >> (12 * shift))
             self.gte[mac] = value & MASK

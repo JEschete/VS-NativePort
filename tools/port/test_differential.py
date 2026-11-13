@@ -166,6 +166,138 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(run(r_type(0x21, V0, A0, A1), JR_RA, NOP, a0=0x7FFFFFFF, a1=1).r[V0], 0x80000000)
 
 
+class NormalClipping(unittest.TestCase):
+    @staticmethod
+    def cop2(move: int, gpr: int, register: int) -> int:
+        return 0x12 << 26 | move << 21 | gpr << 16 | register << 11
+
+    def clip(self, points: tuple[int, int, int], command: int = 0x4B400006) -> Machine:
+        cop2 = self.cop2
+        return run(
+            cop2(4, A0, 12),
+            cop2(4, A1, 13),
+            cop2(4, A2, 14),
+            NOP,
+            NOP,
+            command,
+            cop2(0, V0, 24),
+            cop2(2, V1, 31),
+            NOP,
+            JR_RA,
+            NOP,
+            a0=points[0],
+            a1=points[1],
+            a2=points[2],
+        )
+
+    def test_nclip_winding_signed_coordinates_and_degenerate_results(self) -> None:
+        for points, mac0 in (
+            ((0, 0x00000006, 0x00040000), 24),  # Clockwise with screen Y pointing down.
+            ((0, 0x00040000, 0x00000006), 0xFFFFFFE8),
+            ((0x00010001, 0x00030003, 0x00050005), 0),
+            ((0xFFFEFFFF, 0xFFFE0002, 0x0002FFFF), 12),
+        ):
+            with self.subTest(points=points):
+                m = self.clip(points)
+                self.assertEqual((m.r[V0], m.r[V1]), (mac0, 0))
+
+    def test_nclip_wraps_mac0_and_tests_only_the_complete_wide_sum(self) -> None:
+        # Sony Inline Programming Reference 6-42 checks the entire OPZ expression as <4>.
+        for points, mac0, flag in (
+            ((0x80008000, 0x80007FFF, 0x7FFF8000), 0xFFFE0001, 0x80010000),
+            ((0x80008000, 0x7FFF8000, 0x80007FFF), 0x0001FFFF, 0x80008000),
+            ((0x80008000, 0x80017FFF, 0x00010000), 0x7FFFFFFF, 0),
+            ((0x80008000, 0x80017FFF, 0x0001FFFF), 0x80000000, 0x80010000),
+            ((0x80008000, 0x0001FFFF, 0x80017FFF), 0x80000000, 0),
+            ((0x80008000, 0x0001FFFE, 0x80017FFF), 0x7FFFFFFF, 0x80008000),
+            # The first three products' sum exceeds signed32; the complete sum cancels.
+            ((0x80008000, 0x80008001, 0x80018000), 1, 0),
+            ((0x7FFF8000, 0x7FFF8001, 0x7FFE8000), 0xFFFFFFFF, 0),
+        ):
+            with self.subTest(points=points):
+                m = self.clip(points)
+                self.assertEqual((m.r[V0], m.r[V1]), (mac0, flag))
+                self.assertEqual(m.gte[24], mac0)
+
+    def test_nclip_preserves_other_state_and_ignores_non_nclip_command_bits(
+        self,
+    ) -> None:
+        for command in (0x4B400006, 0x4A000006, 0x4B480406, 0x4A140006):
+            with self.subTest(command=hex(command)):
+                m = Machine(image(command, JR_RA, NOP))
+                m.gte.update(
+                    {register: 0x12340000 + register for register in range(32)}
+                )
+                m.gte[12], m.gte[13], m.gte[14] = 0, 6, 0x00040000
+                m.lzcs, m.hi, m.lo = 0xFFFF0000, 0x10203040, 0x50607080
+                m.gte_flag = 0xFFFFF000
+                before = dict(m.gte)
+                m.execute(BASE)
+                before[24] = 24
+                self.assertEqual(m.gte, before)
+                self.assertEqual(m.gte_flag, 0)
+                self.assertEqual(
+                    (m.lzcs, m.hi, m.lo), (0xFFFF0000, 0x10203040, 0x50607080)
+                )
+                self.assertEqual((m.stores, m.overlay, m.trace), ([], {}, []))
+
+    def test_nclip_flag_control_moves_reset_and_repeat_entry(self) -> None:
+        cop2 = self.cop2
+        for value, expected in (
+            (MASK, 0xFFFFF000),
+            (0x80000FFF, 0),
+            (0x00401000, 0x00401000),  # IR3 and IR0 do not contribute to bit 31.
+            (0x00080000, 0x00080000),  # Neither does the blue colour limiter.
+            (0x00010000, 0x80010000),
+            (0x00008000, 0x80008000),
+        ):
+            with self.subTest(value=hex(value)):
+                m = run(
+                    cop2(6, A0, 31),
+                    cop2(2, T0, 31),
+                    NOP,
+                    cop2(4, A1, 24),
+                    cop2(0, T1, 24),
+                    NOP,
+                    cop2(2, T2, 31),
+                    NOP,
+                    0x4B400006,
+                    cop2(2, V0, 31),
+                    NOP,
+                    JR_RA,
+                    NOP,
+                    a0=value,
+                    a1=0x80000000,
+                )
+                self.assertEqual(
+                    (m.r[T0], m.r[T1], m.r[T2], m.r[V0]),
+                    (expected, 0x80000000, expected, 0),
+                )
+        m = Machine(image(0x4B400006, JR_RA, NOP))
+        m.gte[12], m.gte[13], m.gte[14] = 0x80008000, 0x80007FFF, 0x7FFF8000
+        m.execute(BASE)
+        self.assertEqual((m.gte_read(24), m.gte_flag), (0xFFFE0001, 0x80010000))
+        m.gte[12], m.gte[13], m.gte[14] = 0, 6, 0x00040000
+        m.execute(BASE)
+        self.assertEqual((m.gte_read(24), m.gte_flag), (24, 0))
+
+    def test_nclip_status_support_does_not_invent_other_gte_status(self) -> None:
+        cop2 = self.cop2
+        for command in (0x4A000028, 0x4B90003D):
+            with self.subTest(command=hex(command)):
+                with self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"):
+                    run(0x4B400006, command, cop2(2, V0, 31), NOP, JR_RA, NOP)
+                # A subsequent NCLIP defines FLAG again without needing a new Machine.
+                self.assertEqual(
+                    run(command, 0x4B400006, cop2(2, V0, 31), NOP, JR_RA, NOP).r[V0], 0
+                )
+        for command in (cop2(2, V0, 30), cop2(6, A0, 30)):
+            with self.subTest(command=hex(command)), self.assertRaisesRegex(
+                Fault, "unhandled GTE instruction"
+            ):
+                run(command, JR_RA, NOP)
+
+
 class Memory(unittest.TestCase):
     def test_signed_and_unsigned_loads_and_stores(self) -> None:
         def setup(m: Machine) -> None:
