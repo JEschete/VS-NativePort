@@ -73,6 +73,13 @@ class RewardDialogWorld : public RewardWorld {
   virtual void GrantPendingAbilityUnlock() = 0;
 };
 
+class RewardDispatchWorld : public RewardDialogWorld {
+ public:
+  [[nodiscard]] virtual std::uint32_t CurrentPhase() = 0;
+  virtual void SetLootMenuOpened(std::int32_t value) = 0;
+  virtual void SetFollowAction(std::int32_t value) = 0;
+};
+
 void BeginRewardPause(RewardWorld& world);
 void EndRewardPause(RewardWorld& world);
 void ResumeAfterRewards(RewardWorld& world);
@@ -85,4 +92,9 @@ void UpdateLootResults(RewardDialogWorld& world);
 void UpdateAbilityUnlockDelay(RewardDialogWorld& world);
 void UpdateAbilityUnlockResults(RewardDialogWorld& world);
 void UpdatePendingLootDialog(RewardDialogWorld& world);
+void WaitForRewardUnlockEffects(RewardDialogWorld& world);
+void UpdateRewardUnlockDialog(RewardDialogWorld& world);
+void BeginEventRewardResults(RewardDispatchWorld& world);
+void BeginPostActionRewards(RewardDispatchWorld& world);
+[[nodiscard]] int UpdateRewardSequence(RewardDispatchWorld& world);
 }  // namespace VS::Battle

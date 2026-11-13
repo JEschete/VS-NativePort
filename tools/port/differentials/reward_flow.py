@@ -168,6 +168,99 @@ class Vector:
                 *(x for state in self.states for x in state), *self.guards, self.unlocked]
 
 
+@dataclass(frozen=True)
+class DialogVector:
+    function: int
+    lane: int
+    mutation: int
+    seed: int
+    pending: int
+    notification: int
+    menu: int
+    changed_id: int
+    globals: tuple[int, ...]
+    menus: tuple[int, ...]
+    states: tuple[tuple[int, ...], ...]
+    guards: tuple[int, ...]
+    unlocked: int
+
+    def prefix_inputs(self) -> list[int]:
+        return [self.function, self.lane, self.mutation, self.seed, self.pending,
+                self.notification, self.menu, self.changed_id, *self.globals]
+
+    def object_inputs(self) -> list[int]:
+        return [*self.menus, *(x for state in self.states for x in state),
+                *self.guards, self.unlocked]
+
+
+def dialog_boundaries(rng: random.Random, lane: int) -> tuple[tuple[int, int], int, int, int, int]:
+    scenario = lane % 16
+    status = (1, 0, 0xFFFF, 0x101, 0x8001, 0xFF01, 0x8000, 0x7FFF)[scenario % 8]
+    menus = (rng.getrandbits(16) << 16 | status,
+             rng.getrandbits(16) << 16 | (1 if scenario % 3 == 0 else 0x101))
+    effects = (0, 1, 2, 3, 4, 0x10000, 0x80000000, 0xFFFFFFFC)[scenario % 8]
+    if lane >= 256 and lane % 7 == 0:
+        effects = rng.getrandbits(32)
+    follow = (0, 1, 0x10000, MASK, 0x80000000)[scenario % 5]
+    loot = (0, 0x10000, 0, MASK, 1, 0x80000000)[scenario % 6]
+    notice = (0, 0, 1, MASK, 0x10000, 0x80000000, 0, 0)[scenario % 8]
+    return menus, effects, follow, loot, notice
+
+
+def toggle_word(m: Machine, address: int) -> None:
+    m.put(address, 0 if m.load(address) else 0x80000000)
+
+
+def reward_observation(m: Machine, menu: int) -> tuple[int, int, int]:
+    pointer = m.load(GLOBAL)
+    action = m.load(pointer + 8, 2) if pointer in STATES else MASK
+    status = m.load(menu, 2) if menu in MENUS else MASK
+    word = (m.load(DEFINITIONS + action * DEFINITION_STRIDE + 12)
+            if action < 256 else MASK)
+    return action, status, word
+
+
+def complete_reward_pose(m: Machine) -> None:
+    m.put(FOLLOW, 0)
+    m.put(PHASE, 0xAABBCCDD)
+
+
+def replace_observed_menu(m: Machine, dynamic: dict[str, int], owner: int, lane: int) -> None:
+    dynamic["menu"] = MENUS[1] if owner == MENUS[0] else MENUS[0]
+    m.put(owner, 1 if lane % 2 else 0x101, 2)
+
+
+def stamp_callback_state(m: Machine, guard: int, ordinal: int) -> None:
+    m.put(PHASE, 0xA1000000 | ordinal)
+    m.put(PAUSED, 0xB2000000 | ordinal)
+    m.put(guard, 0xC3000000 | ordinal)
+
+
+def callback_args(m: Machine, count: int) -> list[int]:
+    args = m.r[4:4 + min(count, 4)]
+    if count == 5:
+        args.append(m.load(m.r[29] + 16))
+    return args
+
+
+def record_dialog_call(m: Machine, calls: list[int], address: int, args: list[int],
+                       result: int, globals_: tuple[int, ...], dynamic: dict[str, int]) -> None:
+    action, status, word = reward_observation(m, dynamic["menu"])
+    calls.extend([address, len(args), *args, *([0] * (5 - len(args))), result,
+                  *(m.load(a) for a in globals_), dynamic["menu"], dynamic["notice"],
+                  dynamic["pending"], action, status, word])
+
+
+def prepare_dialog_machine(m: Machine, v: DialogVector, globals_: tuple[int, ...],
+                           guards: tuple[int, ...]) -> dict[str, int]:
+    for address, value in zip(globals_, v.globals, strict=True):
+        m.put(address, value)
+    for address, value in zip(guards, v.guards, strict=True):
+        m.put(address, value)
+    prepare_reward_objects(m, v.states, v.menus, v.seed, v.unlocked)
+    return {"menu": v.menu, "notice": v.notification, "pending": v.pending}
+
+
 def selection_states(rng: random.Random, scenario: int) -> tuple[tuple[int, ...], ...]:
     states = []
     for owner in range(2):
@@ -249,10 +342,6 @@ def run(m: Machine, v: Vector) -> tuple[dict, list[int]]:
     counts = [0, 0, 0]
     calls = []
 
-    def selected() -> int:
-        pointer = m.load(GLOBAL)
-        return m.load(pointer + 8, 2) if pointer in STATES else MASK
-
     def mutate(address: int) -> None:
         ordinal = len(calls) // EVENT_WIDTH
         if v.mutation == 1:
@@ -272,8 +361,7 @@ def run(m: Machine, v: Vector) -> tuple[dict, list[int]]:
         if v.mutation in (1, 5) and address == ROOM_PALETTE:
             dynamic["pending"] = v.pending ^ MASK
         if v.mutation == 6 and address == POSE:
-            m.put(FOLLOW, 0)
-            m.put(PHASE, 0xAABBCCDD)
+            complete_reward_pose(m)
         if v.mutation == 7 and address == LOOT_MENU:
             m.put(LOOT, HEADS[2] if m.load(LOOT) != HEADS[2] else HEADS[1])
             m.put(PHASE, 0xFACEB00C)
@@ -283,9 +371,7 @@ def run(m: Machine, v: Vector) -> tuple[dict, list[int]]:
     def stub(address: int):
         def invoke(machine: Machine) -> None:
             count = ARG_COUNTS[address]
-            args = machine.r[4:4 + min(count, 4)]
-            if count == 5:
-                args.append(machine.load(machine.r[29] + 16))
+            args = callback_args(machine, count)
             result = 0
             if address == FLAG:
                 slot = 0 if args[0] == 0xB6 else 1
@@ -297,10 +383,7 @@ def run(m: Machine, v: Vector) -> tuple[dict, list[int]]:
                 counts[2] += 1
             elif address == MENU_STATE:
                 result = dynamic["menu"]
-            action = selected()
-            status = machine.load(dynamic["menu"], 2) if dynamic["menu"] in MENUS else MASK
-            word = (machine.load(DEFINITIONS + action * DEFINITION_STRIDE + 12)
-                    if action < 256 else MASK)
+            action, status, word = reward_observation(machine, dynamic["menu"])
             calls.extend([address, count, *args, *([0] * (5 - count)), result,
                           *(machine.load(a) for a in (PHASE, FOLLOW, PAUSED, LOOT, GLOBAL)),
                           dynamic["menu"], action, status, word])

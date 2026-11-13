@@ -11,10 +11,5 @@
 
 extern int Battle_lootMenuOpened;
 extern int Battle_rewardsFollowAction;
-void Battle_WaitForRewardUnlockEffects(void);
-void Battle_UpdateRewardUnlockDialog(void);
-void Battle_BeginEventRewardResults(void);
-void Battle_BeginPostActionRewards(void);
-int Battle_UpdateRewardSequence(void);
 
 #endif // VS_BATTLE_REWARDS_H_DECLS

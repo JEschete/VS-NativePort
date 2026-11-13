@@ -438,4 +438,178 @@ TEST_CASE("Reward dialogs retain four original void module entrypoints",
           reinterpret_cast<void*>(kEntries.at(index)));
   }
 }
+
+TEST_CASE("F00225 live wait opens new reward phase six through actual services",
+          "[reward-dispatch][reward-live][F00225]") {
+  LiveDialogFixture fixture;
+  Effects_effectBusyFlags = 0x10000;
+  b::WaitForLiveRewardUnlockEffects();
+  CHECK(Battle_actionFlowMode == 6);
+  CHECK(Field_isInteractionPaused == 1);
+  CHECK(Menu_Framework_menuState.currentMenu == 3);
+  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
+  CHECK(Menu_Framework_unlockedBattleAbility == 1);
+  CHECK(Battle_recoveryRewardMode == 0);
+}
+
+TEST_CASE("F00225 live busy mask does not require action or ability owners",
+          "[reward-dispatch][reward-live][F00225]") {
+  LiveDialogFixture fixture;
+  Effects_effectBusyFlags = GENERATE(1, 2, 3, INT32_MIN + 2);
+  Battle_actionState = nullptr;
+  Battle_characterState = nullptr;
+  b::WaitForLiveRewardUnlockEffects();
+  CHECK(Battle_actionFlowMode == 99);
+  CHECK(Field_isInteractionPaused == 77);
+  CHECK(Menu_Framework_menuState.currentMenu == 0x3F);
+}
+
+TEST_CASE("F00226 live busy menu preserves production notice timing",
+          "[reward-dispatch][reward-live][F00226]") {
+  LiveDialogFixture fixture;
+  Menu_Framework_actionSelection.menuStatus = 1;
+  Menu_sceneNotificationBuffer = fixture.notice.data();
+  Menu_textBoxes[7].flags.done = 1;
+  Menu_sceneNotificationTimed = 1;
+  Menu_sceneNotificationTimer = 12;
+  Battle_actionState = nullptr;
+  b::UpdateLiveRewardUnlockDialog();
+  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
+  CHECK(Menu_sceneNotificationTimer == 12);
+  CHECK(Menu_sceneNotificationBuffer == fixture.notice.data());
+  CHECK(Battle_actionFlowMode == 99);
+  CHECK(Field_isInteractionPaused == 77);
+}
+
+void PrepareClosedUnlock() {
+  Menu_Framework_menuItems = nullptr;
+  Menu_Framework_menuState.currentMenu = 0x7F;
+  Menu_Framework_actionSelection.menuStatus = 1;
+  Battle_actionState = nullptr;
+  Field_controlMode = 0x89ABCDEF;
+  Field_isMinimapVisible = 0;
+}
+
+TEST_CASE("F00226 live close ends reward pause then checks actual unlocks",
+          "[reward-dispatch][reward-live][F00226]") {
+  LiveDialogFixture fixture;
+  PrepareClosedUnlock();
+  b::UpdateLiveRewardUnlockDialog();
+  CHECK(Menu_Framework_actionSelection.menuStatus == 2);
+  CHECK(Menu_sceneNotificationBuffer == nullptr);
+  CHECK(Battle_actionFlowMode == 5);
+  CHECK(Field_isInteractionPaused == 0);
+}
+
+TEST_CASE(
+    "F00226 live close preserves field control while starting unlock effects",
+    "[reward-dispatch][reward-live][F00226]") {
+  LiveDialogFixture fixture;
+  PrepareClosedUnlock();
+  b::UpdateLiveRewardUnlockDialog();
+  CHECK(Field_areMovingPlatformsPaused == 1);
+  CHECK(Field_controlMode == 0x89ABCDEF);
+  CHECK(Field_isMinimapVisible == 0);
+  CHECK(render::LivePaletteAnimation().enabled);
+}
+
+TEST_CASE("F00227 live event start resets full flags before challenge results",
+          "[reward-dispatch][reward-live][F00227]") {
+  LiveDialogFixture fixture;
+  Battle_lootMenuOpened = INT32_MIN;
+  Battle_rewardsFollowAction = 0x10000;
+  Battle_actionState = nullptr;
+  Battle_characterState = nullptr;
+  VS::State::SetLiveScriptFlag(0xAB, 3);
+  b::BeginLiveEventRewardResults();
+  CHECK(Battle_lootMenuOpened == 0);
+  CHECK(Battle_rewardsFollowAction == 0);
+  CHECK(Battle_actionFlowMode == 3);
+  CHECK(Menu_Framework_menuState.currentMenu == 15);
+  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
+  CHECK(Field_isInteractionPaused == 1);
+}
+
+TEST_CASE(
+    "F00228 live post action resets full flags before the actual loot menu",
+    "[reward-dispatch][reward-live][F00228]") {
+  LiveDialogFixture fixture;
+  Items_LootListNode node{};
+  Items_lootListHead = &node;
+  Battle_lootMenuOpened = INT32_MIN;
+  Battle_rewardsFollowAction = INT32_MIN;
+  Battle_actionState = nullptr;
+  Battle_characterState = nullptr;
+  VS::State::SetLiveScriptFlag(0xAB, 3);
+  b::BeginLivePostActionRewards();
+  CHECK(Battle_lootMenuOpened == 0);
+  CHECK(Battle_rewardsFollowAction == 1);
+  CHECK(Battle_actionFlowMode == 4);
+  CHECK(Menu_Framework_menuState.currentMenu == 12);
+  CHECK(Menu_Framework_lootLists == &node);
+  CHECK(Field_isInteractionPaused == 1);
+}
+
+TEST_CASE("F00229 live unknown full phases are not narrowed or booleanized",
+          "[reward-dispatch][reward-live][F00229]") {
+  LiveDialogFixture fixture;
+  const u_int phase = GENERATE(0U, 2U, 7U, 0x10003U, 0x10004U, 0x10005U,
+                               0x10006U, 0x80000003U, 0xFFFFFFFFU);
+  Battle_actionFlowMode = phase;
+  Battle_actionState = nullptr;
+  Battle_characterState = nullptr;
+  CHECK(b::UpdateLiveRewardSequence() == 0);
+  CHECK(Battle_actionFlowMode == phase);
+  CHECK(Menu_Framework_actionSelection.menuStatus == 0);
+  CHECK(Field_isInteractionPaused == 77);
+}
+
+TEST_CASE("F00229 live handled waiting phases preserve the original int result",
+          "[reward-dispatch][reward-live][F00229]") {
+  LiveDialogFixture fixture;
+  const u_int phase = GENERATE(3U, 4U, 5U, 6U);
+  Battle_actionFlowMode = phase;
+  Menu_Framework_actionSelection.menuStatus = 1;
+  Effects_effectBusyFlags = 2;
+  Battle_actionState = nullptr;
+  Battle_characterState = nullptr;
+  CHECK(b::UpdateLiveRewardSequence() == 1);
+  CHECK(Battle_actionFlowMode == phase);
+  CHECK(Field_isInteractionPaused == 77);
+}
+
+TEST_CASE("F00229 live completed handler returns one before next idle dispatch",
+          "[reward-dispatch][reward-live][F00229]") {
+  LiveDialogFixture fixture;
+  Battle_actionFlowMode = 3;
+  Menu_Framework_menuItems = nullptr;
+  Menu_Framework_menuState.currentMenu = 0x7F;
+  Menu_Framework_actionSelection.menuStatus = 1;
+  Battle_actionState = nullptr;
+  Battle_characterState = nullptr;
+  CHECK(b::UpdateLiveRewardSequence() == 1);
+  CHECK(Battle_actionFlowMode == 2);
+  CHECK(b::UpdateLiveRewardSequence() == 0);
+  CHECK(Field_isInteractionPaused == 0);
+}
+
+TEST_CASE("Reward dispatch keeps four VOID0 and the distinct INT0 module entry",
+          "[reward-dispatch][reward-abi]") {
+  using VoidEntry = void (*)();
+  constexpr std::array<VoidEntry, 4> kEntries{
+      b::WaitForLiveRewardUnlockEffects, b::UpdateLiveRewardUnlockDialog,
+      b::BeginLiveEventRewardResults, b::BeginLivePostActionRewards};
+  constexpr std::array<std::uint32_t, 4> kAddresses{0x8007B908, 0x8007B938,
+                                                    0x8007B9A0, 0x8007B9CC};
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  for (std::size_t index = 0; index < kEntries.size(); ++index) {
+    CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                            kAddresses.at(index)) ==
+          reinterpret_cast<void*>(kEntries.at(index)));
+  }
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8007B9FC) ==
+        reinterpret_cast<void*>(&b::UpdateLiveRewardSequence));
+}
 }  // namespace

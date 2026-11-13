@@ -166,4 +166,58 @@ void UpdatePendingLootDialog(RewardDialogWorld& world) {
     }
   }
 }
+
+// decomp: BATTLE.PRG func_8007B908 (src/BATTLE/BATTLE.PRG/146C.c:8418)
+void WaitForRewardUnlockEffects(RewardDialogWorld& world) {
+  if ((world.EffectsBusyFlags() & kAbilityEffectsBusyMask) == 0) {
+    ShowPendingRewardUnlock(world);
+  }
+}
+
+// decomp: BATTLE.PRG func_8007B938 (src/BATTLE/BATTLE.PRG/146C.c:8425)
+void UpdateRewardUnlockDialog(RewardDialogWorld& world) {
+  world.UpdateMenu();
+  if (world.MenuStatus() != kMenuBusy &&
+      world.SceneNotificationPending() == 0) {
+    EndRewardPause(world);
+    world.ReleaseMenuRows();
+    world.ReleaseSceneNotification();
+    CheckRewardUnlocks(world);
+  }
+}
+
+// decomp: BATTLE.PRG func_8007B9A0 (src/BATTLE/BATTLE.PRG/146C.c:8436)
+void BeginEventRewardResults(RewardDispatchWorld& world) {
+  world.SetLootMenuOpened(0);
+  world.SetFollowAction(0);
+  OpenRewardResults(world);
+}
+
+// decomp: BATTLE.PRG func_8007B9CC (src/BATTLE/BATTLE.PRG/146C.c:8443)
+void BeginPostActionRewards(RewardDispatchWorld& world) {
+  world.SetLootMenuOpened(0);
+  world.SetFollowAction(1);
+  OpenPendingLootRewards(world);
+}
+
+// decomp: BATTLE.PRG func_8007B9FC (src/BATTLE/BATTLE.PRG/146C.c:8450)
+int UpdateRewardSequence(RewardDispatchWorld& world) {
+  const std::uint32_t phase = world.CurrentPhase();
+  switch (phase) {
+    case static_cast<std::uint32_t>(RewardPhase::kResults):
+      UpdateRewardResultsDialog(world);
+      return 1;
+    case static_cast<std::uint32_t>(RewardPhase::kLoot):
+      UpdatePendingLootDialog(world);
+      return 1;
+    case static_cast<std::uint32_t>(RewardPhase::kUnlockEffects):
+      WaitForRewardUnlockEffects(world);
+      return 1;
+    case static_cast<std::uint32_t>(RewardPhase::kUnlockDialog):
+      UpdateRewardUnlockDialog(world);
+      return 1;
+    default:
+      return 0;
+  }
+}
 }  // namespace VS::Battle

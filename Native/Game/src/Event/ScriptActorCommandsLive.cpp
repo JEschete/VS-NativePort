@@ -19,6 +19,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/BattleModeLive.hpp"
+#include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Event/ScriptActorCommands.hpp"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Battle/Actor.h"
-#include "Battle/Rewards.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
@@ -385,7 +385,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
                                        loot.second_item, loot.second_count);
   }
   [[nodiscard]] int UpdateRewardSequence() override {
-    return Battle_UpdateRewardSequence();
+    return VS::Battle::UpdateLiveRewardSequence();
   }
   void ConsumeMiscItem(int item) override {
     VS::Items::ConsumeLiveMiscItem(item);

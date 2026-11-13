@@ -51,7 +51,7 @@ Battle_ActionDefinition& Definition(std::uint16_t action) {
   return Battle_actionDefinitions[action];
 }
 
-class LiveWorld final : public RewardDialogWorld {
+class LiveWorld final : public RewardDispatchWorld {
  public:
   void SetPhase(RewardPhase phase) override {
     Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
@@ -149,6 +149,13 @@ class LiveWorld final : public RewardDialogWorld {
   void ReleaseSceneNotification() override { Menu_ReleaseSceneNotification(); }
   void BeginPendingAbilityReward() override { LiveBeginPendingAbilityReward(); }
   void GrantPendingAbilityUnlock() override { LiveGrantPendingAbilityUnlock(); }
+  std::uint32_t CurrentPhase() override { return Battle_actionFlowMode; }
+  void SetLootMenuOpened(std::int32_t value) override {
+    Battle_lootMenuOpened = value;
+  }
+  void SetFollowAction(std::int32_t value) override {
+    Battle_rewardsFollowAction = value;
+  }
 };
 }  // namespace
 
@@ -203,5 +210,30 @@ void UpdateLiveAbilityUnlockResults() {
 void UpdateLivePendingLootDialog() {
   LiveWorld world;
   UpdatePendingLootDialog(world);
+}
+// decomp: BATTLE.PRG func_8007B908 (src/BATTLE/BATTLE.PRG/146C.c:8418)
+void WaitForLiveRewardUnlockEffects() {
+  LiveWorld world;
+  WaitForRewardUnlockEffects(world);
+}
+// decomp: BATTLE.PRG func_8007B938 (src/BATTLE/BATTLE.PRG/146C.c:8425)
+void UpdateLiveRewardUnlockDialog() {
+  LiveWorld world;
+  UpdateRewardUnlockDialog(world);
+}
+// decomp: BATTLE.PRG func_8007B9A0 (src/BATTLE/BATTLE.PRG/146C.c:8436)
+void BeginLiveEventRewardResults() {
+  LiveWorld world;
+  BeginEventRewardResults(world);
+}
+// decomp: BATTLE.PRG func_8007B9CC (src/BATTLE/BATTLE.PRG/146C.c:8443)
+void BeginLivePostActionRewards() {
+  LiveWorld world;
+  BeginPostActionRewards(world);
+}
+// decomp: BATTLE.PRG func_8007B9FC (src/BATTLE/BATTLE.PRG/146C.c:8450)
+int UpdateLiveRewardSequence() {
+  LiveWorld world;
+  return UpdateRewardSequence(world);
 }
 }  // namespace VS::Battle

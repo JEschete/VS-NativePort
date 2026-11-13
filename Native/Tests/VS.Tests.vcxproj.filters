@@ -22,6 +22,9 @@
     <Filter Include="include">
       <UniqueIdentifier>{22026869-5DDF-5AC8-ABAC-99A959772135}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Battle">
+      <UniqueIdentifier>{22871B11-9240-53E6-B31A-1372D0FB4E08}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Menu">
       <UniqueIdentifier>{C699903A-8E56-55DE-A1A8-6EDC0041BE84}</UniqueIdentifier>
     </Filter>
@@ -636,6 +639,9 @@
     <ClCompile Include="src\RewardDialogsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\RewardDispatchTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\RewardFlowLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -813,6 +819,9 @@
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>

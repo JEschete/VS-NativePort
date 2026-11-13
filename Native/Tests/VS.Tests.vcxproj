@@ -279,6 +279,7 @@
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\ResultsTextureTests.cpp" />
     <ClCompile Include="src\RewardDialogsTests.cpp" />
+    <ClCompile Include="src\RewardDispatchTests.cpp" />
     <ClCompile Include="src\RewardFlowLiveTests.cpp" />
     <ClCompile Include="src\RewardFlowTests.cpp" />
     <ClCompile Include="src\RoomAiMapTests.cpp" />
@@ -354,6 +355,7 @@
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />

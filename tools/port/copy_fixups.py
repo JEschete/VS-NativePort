@@ -852,6 +852,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::UpdateLiveAbilityUnlockDelay": r"Native\Game\include\Battle\RewardFlowLive.hpp",
     "VS::Battle::UpdateLiveAbilityUnlockResults": r"Native\Game\include\Battle\RewardFlowLive.hpp",
     "VS::Battle::UpdateLivePendingLootDialog": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::WaitForLiveRewardUnlockEffects": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::UpdateLiveRewardUnlockDialog": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::BeginLiveEventRewardResults": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::BeginLivePostActionRewards": r"Native\Game\include\Battle\RewardFlowLive.hpp",
+    "VS::Battle::UpdateLiveRewardSequence": r"Native\Game\include\Battle\RewardFlowLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1643,6 +1648,11 @@ OWNED_CALL_BINDINGS["F00196"] = "VS::Battle::UpdateLiveLootResults"
 OWNED_CALL_BINDINGS["F00197"] = "VS::Battle::UpdateLiveAbilityUnlockDelay"
 OWNED_CALL_BINDINGS["F00198"] = "VS::Battle::UpdateLiveAbilityUnlockResults"
 OWNED_CALL_BINDINGS["F00224"] = "VS::Battle::UpdateLivePendingLootDialog"
+OWNED_CALL_BINDINGS["F00225"] = "VS::Battle::WaitForLiveRewardUnlockEffects"
+OWNED_CALL_BINDINGS["F00226"] = "VS::Battle::UpdateLiveRewardUnlockDialog"
+OWNED_CALL_BINDINGS["F00227"] = "VS::Battle::BeginLiveEventRewardResults"
+OWNED_CALL_BINDINGS["F00228"] = "VS::Battle::BeginLivePostActionRewards"
+OWNED_CALL_BINDINGS["F00229"] = "VS::Battle::UpdateLiveRewardSequence"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3438,6 +3448,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8007980C, "VS::Battle::UpdateLiveAbilityUnlockDelay"),  # F00197
     ("BATTLE/BATTLE.PRG", 0x8007983C, "VS::Battle::UpdateLiveAbilityUnlockResults"),  # F00198
     ("BATTLE/BATTLE.PRG", 0x8007B884, "VS::Battle::UpdateLivePendingLootDialog"),  # F00224
+    ("BATTLE/BATTLE.PRG", 0x8007B908, "VS::Battle::WaitForLiveRewardUnlockEffects"),  # F00225
+    ("BATTLE/BATTLE.PRG", 0x8007B938, "VS::Battle::UpdateLiveRewardUnlockDialog"),  # F00226
+    ("BATTLE/BATTLE.PRG", 0x8007B9A0, "VS::Battle::BeginLiveEventRewardResults"),  # F00227
+    ("BATTLE/BATTLE.PRG", 0x8007B9CC, "VS::Battle::BeginLivePostActionRewards"),  # F00228
+    ("BATTLE/BATTLE.PRG", 0x8007B9FC, "VS::Battle::UpdateLiveRewardSequence"),  # F00229
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

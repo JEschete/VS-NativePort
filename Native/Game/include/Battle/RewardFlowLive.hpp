@@ -14,4 +14,9 @@ void UpdateLiveLootResults();
 void UpdateLiveAbilityUnlockDelay();
 void UpdateLiveAbilityUnlockResults();
 void UpdateLivePendingLootDialog();
+void WaitForLiveRewardUnlockEffects();
+void UpdateLiveRewardUnlockDialog();
+void BeginLiveEventRewardResults();
+void BeginLivePostActionRewards();
+[[nodiscard]] int UpdateLiveRewardSequence();
 }  // namespace VS::Battle

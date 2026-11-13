@@ -20,6 +20,7 @@
 #include "Audio/MusicLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/RewardFlowLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
@@ -37,7 +38,6 @@
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
-#include "Battle/Rewards.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
@@ -406,9 +406,11 @@ class LiveVmHost final : public ScriptVmHost {
     return Menu_DismissTextBox(box) != 0;
   }
   bool UpdateRewardSequence() override {
-    return Battle_UpdateRewardSequence() != 0;
+    return Battle::UpdateLiveRewardSequence() != 0;
   }
-  void BeginEventRewardResults() override { Battle_BeginEventRewardResults(); }
+  void BeginEventRewardResults() override {
+    Battle::BeginLiveEventRewardResults();
+  }
   void RunEndingAndReturnToTitle() override {
     Boot::RunEndingAndReturnToTitleLive();
   }

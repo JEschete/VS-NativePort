@@ -12,6 +12,7 @@
 
 #include "Battle/RewardFlow.hpp"
 #include "Battle/RewardFlowLive.hpp"
+#include "Battle/RewardPresentationRecorder.hpp"
 #include "Content/ModuleData.h"
 
 namespace {
@@ -53,7 +54,8 @@ struct Event {
   Word first{}, second{};
   bool operator==(const Event&) const = default;
 };
-struct World final : b::RewardWorld {
+struct World final
+    : reward_tests::RewardPresentationRecorder<b::RewardWorld, Op> {
   Word phase = 99, paused = 77;
   std::int32_t follow = 0;
   std::array<std::uint8_t, 3> b6{1, 1, 1};
@@ -71,6 +73,9 @@ struct World final : b::RewardWorld {
   void Record(Event event) {
     events.push_back(event);
     if (callback) callback(event);
+  }
+  void RecordPresentation(Op operation, std::uint32_t value) override {
+    Record({operation, value});
   }
   void SetPhase(b::RewardPhase value) override {
     phase = static_cast<Word>(value);
@@ -115,24 +120,6 @@ struct World final : b::RewardWorld {
     transforms.push_back(value);
     Record({Op::kSceneColors});
   }
-  void EnableClutAnimation(bool value) override {
-    Record({Op::kClut, value ? 1U : 0U});
-  }
-  void FreezeActorAnimations() override { Record({Op::kFreeze}); }
-  void UnfreezeActorAnimations() override { Record({Op::kUnfreeze}); }
-  void PauseRoomAnimations(bool value) override {
-    Record({Op::kRoom, value ? 1U : 0U});
-  }
-  void ShowMinimap(bool value) override {
-    Record({Op::kMinimap, value ? 1U : 0U});
-  }
-  void DuckAmbience(bool value) override {
-    Record({Op::kAmbience, value ? 1U : 0U});
-  }
-  void RestoreIdlePose() override { Record({Op::kIdle}); }
-  void PlayLearnedPose() override { Record({Op::kPose}); }
-  void SpawnLearnedEffect() override { Record({Op::kEffect}); }
-  void PauseMovingPlatforms() override { Record({Op::kPlatforms}); }
   void ShowActionLearned(std::uint16_t action) override {
     Record({Op::kNotice, action});
   }

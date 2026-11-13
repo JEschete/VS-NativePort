@@ -89,6 +89,8 @@ work (splitting tests, writing a differential case) to a background agent while 
 - For new test worlds or callback-heavy cases, run a scoped `--files <test file> --tidy` preflight. The fast pass
   does not catch unchecked optionals or oversized assertion/callback expansions; do not discover those only
   after both full regressions have run.
+- After shared fixture or mixed C++/Python edits, run the fast `--changed` pass over the complete changeset.
+  A scoped C++ check does not select changed Python imports for ruff.
 - Write a ledger spec (record, slice, function notes, verification, gate, plan row text) and apply it before the group
   check, because the copier tests compare the catalog's `final_location` with `owned.csv`:
   `python tools\port\promote.py ledgers <spec.json> --summary build\promotion-check\<run>\summary.json`.

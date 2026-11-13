@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Audio/MusicLive.hpp"
+#include "Battle/RewardFlowLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -16,7 +17,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Hud.h"
-#include "Battle/Rewards.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptField.h"
@@ -56,7 +56,7 @@ intptr_t Event_ScriptRunMenuTransition(u_char* script, short thread_index)
     case 12:
         if (Event_isMenuTransitionActive == 0) {
             VS::State::SetLiveScriptFlag(0xB6, Event_kMenuTransitionModes[script[1] - 10]);
-            Battle_BeginEventRewardResults();
+            VS::Battle::BeginLiveEventRewardResults();
             Event_isMenuTransitionActive = 1;
             return 1;
         }
@@ -66,13 +66,13 @@ intptr_t Event_ScriptRunMenuTransition(u_char* script, short thread_index)
             if (VS::State::LiveScriptFlag(0xB6) == 1) {
                 VS::State::SetLiveScriptFlag(0xB6, 2);
             }
-            Battle_BeginEventRewardResults();
+            VS::Battle::BeginLiveEventRewardResults();
             Event_musicSlot = 2;
             Event_isMenuTransitionActive = 1;
             return 1;
         }
     finishState:
-        if (Battle_UpdateRewardSequence() != 0) {
+        if (VS::Battle::UpdateLiveRewardSequence() != 0) {
             return 1;
         }
         VS::State::SetLiveScriptFlag(0xB6, 0);
@@ -81,19 +81,19 @@ intptr_t Event_ScriptRunMenuTransition(u_char* script, short thread_index)
     case 13:
         if (Event_isMenuTransitionActive == 0) {
             VS::State::SetLiveScriptFlag(0xB6, 1);
-            Battle_BeginEventRewardResults();
+            VS::Battle::BeginLiveEventRewardResults();
             Event_isMenuTransitionActive = 1;
             return 1;
         }
         goto finishTransition;
     case 15:
         if (Event_isMenuTransitionActive == 0) {
-            Battle_BeginPostActionRewards();
+            VS::Battle::BeginLivePostActionRewards();
             Event_isMenuTransitionActive = 1;
             return 1;
         }
     finishTransition:
-        if (Battle_UpdateRewardSequence() == 0) {
+        if (VS::Battle::UpdateLiveRewardSequence() == 0) {
             Event_isMenuTransitionActive = 0;
             return 4;
         }
