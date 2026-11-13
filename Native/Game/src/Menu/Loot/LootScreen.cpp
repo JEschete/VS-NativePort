@@ -11,6 +11,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
+#include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -32,7 +33,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
@@ -241,7 +241,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         --Menu_Inventory_itemCategoryIconsAnimationStep;
     }
 
-    Menu_Inventory_DrawCategoryIcons(Menu_Inventory_itemCategoryIconsAnimationStep, Menu_Inventory_selectedItemCategoryIconOnTop);
+    VS::Menu::Inventory::DrawLiveItemCategoryIcons(Menu_Inventory_itemCategoryIconsAnimationStep, Menu_Inventory_selectedItemCategoryIconOnTop);
 
     if (Menu_Inventory_statusCommandState != 0) {
         if (Menu_Inventory_statusCommandAnimationStep < 10) {

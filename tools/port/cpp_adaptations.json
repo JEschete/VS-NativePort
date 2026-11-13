@@ -1542,17 +1542,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Menu\\Inventory\\ItemDetails.cpp": [
-[
-55,
-[
-"                128, x | (animationStep << 0x10), vs_getWH(16, 16), Render_frameScratch.orderingTable);"
-],
-[
-"                128, x | (animationStep << 0x10), vs_getWH(16, 16), (u_long *)(Render_frameScratch.orderingTable));"
-]
-]
-],
 "Native\\Game\\src\\Menu\\Inventory\\ItemList.cpp": [
 [
 97,

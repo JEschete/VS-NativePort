@@ -229,6 +229,9 @@
     <ClCompile Include="src\InventoryDetailHelpersLiveTests.cpp" />
     <ClCompile Include="src\InventoryDetailHelpersModuleTests.cpp" />
     <ClCompile Include="src\InventoryDetailHelpersTests.cpp" />
+    <ClCompile Include="src\ItemDetailDispatchLiveTests.cpp" />
+    <ClCompile Include="src\ItemDetailDispatchModuleTests.cpp" />
+    <ClCompile Include="src\ItemDetailDispatchTests.cpp" />
     <ClCompile Include="src\ItemsTests.cpp" />
     <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LauncherTests.cpp" />
@@ -365,6 +368,8 @@
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
+    <ClInclude Include="include\Menu\ItemDetailDispatchLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />

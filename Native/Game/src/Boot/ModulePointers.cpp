@@ -65,6 +65,7 @@
 #include "Items/EquipmentLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
+#include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -1985,6 +1986,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUB.PRG", 0x801032F8u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveGripDetails, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80103460u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveShieldDetails, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80103538u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveShieldDetails, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80102A3Cu, 0u, (void*)&VS::Menu::Inventory::DrawLiveItemCategoryIcons, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80102B14u, 0u, (void*)&VS::Menu::Inventory::DrawLiveItemCategoryIcons, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x801036BCu, 0u, (void*)&VS::Menu::Inventory::UpdateLiveArmorDetails, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80103794u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveArmorDetails, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x801038E4u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveGemDetails, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x801039BCu, 0u, (void*)&VS::Menu::Inventory::UpdateLiveGemDetails, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80103AD0u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveItemDetails, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80103BA8u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveItemDetails, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

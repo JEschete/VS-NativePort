@@ -10,6 +10,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
+#include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -35,7 +36,6 @@ extern "C" {
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/TextBox.h"
 #include "Render/Palette.h"
@@ -1045,7 +1045,7 @@ loop_1:
                         row = VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
 
                         VS::Menu::Framework::LiveMenuItem(row >> 8)->outsetIcon = 0;
-                        Menu_Inventory_UpdateItemDetails(itemCategory | ((row + offset) << 4));
+                        VS::Menu::Inventory::UpdateLiveItemDetails(itemCategory | ((row + offset) << 4));
 #undef offset
                         Menu_Inventory_secondaryTitleEnabled = 0;
                         Menu_Inventory_itemListState = 7;
@@ -1233,7 +1233,7 @@ loop_1:
         break;
 
     case Menu_Inventory_ItemListState_ViewDetails:
-        i = Menu_Inventory_UpdateItemDetails(0);
+        i = VS::Menu::Inventory::UpdateLiveItemDetails(0);
 
         if (i == 0) {
             break;

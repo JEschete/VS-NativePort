@@ -507,6 +507,15 @@
     <ClCompile Include="src\InventoryDetailHelpersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ItemDetailDispatchLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ItemDetailDispatchModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ItemDetailDispatchTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ItemsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -847,6 +856,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ItemDetailDispatchLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp">

@@ -17,6 +17,7 @@
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllers.hpp"
+#include "Menu/Inventory/ItemDetailLiveSupport.hpp"
 #include "Render/GameFontLive.hpp"
 
 extern "C" {
@@ -124,57 +125,21 @@ std::optional<DetailSelection> Selection(int item_info) {
       DetailPage{static_cast<std::uint8_t>(command - 1)}};
 }
 
-std::span<char> BoundText(char* text, std::span<char> table) {
-  const auto first = reinterpret_cast<std::uintptr_t>(table.data());
-  const auto address = reinterpret_cast<std::uintptr_t>(text);
-  if (!table.empty() && address >= first && address - first < table.size()) {
-    return {text, table.size() - (address - first)};
-  }
-  return {};
-}
-
 std::span<char> TextView(char* text, std::span<char> weapon_name = {}) {
   if (text == nullptr) {
     Refuse("formatter did not supply a used row text");
   }
-  const std::array tables{
-      weapon_name,
-      std::span<char>{Menu_Framework_stringBuf,
-                      Menu_Framework_stringBuf == nullptr
-                          ? 0
-                          : Framework::kStringBufferBytes},
-      std::span<char>{
-          reinterpret_cast<char*>(Menu_Framework_itemHelp),
-          Menu_Framework_itemHelp == nullptr ? 0 : Framework::kItemHelpBytes},
-      std::span<char>{reinterpret_cast<char*>(Menu_Framework_itemNames),
-                      Menu_Framework_itemNames == nullptr
-                          ? 0
-                          : Framework::kItemNamesBytes}};
-  for (const auto table : tables) {
-    if (auto view = BoundText(text, table); !view.empty()) {
-      return view;
-    }
+  if (auto view = FindLiveItemDetailText(text, weapon_name); !view.empty()) {
+    return view;
   }
   Refuse("formatter row text is outside its current owners");
 }
 
-class LiveWorld final : public EquipmentDetailWorld {
+class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
  public:
-  explicit LiveWorld(Category category) : category_(category) {}
+  explicit LiveWorld(Category category)
+      : LiveDetailWorld(RequireRows), category_(category) {}
 
-  std::int32_t RowsReady() override {
-    RequireRows();
-    return Framework::AreLiveMenuRowsIdle();
-  }
-  std::uint32_t PressedButtons() override {
-    return Input_buttonsPressed.allButtons;
-  }
-  void BeginTransition(DetailRowId row) override {
-    BeginLiveDetailsTransition(row.index);
-  }
-  void InitializeLayout(DetailRowId row, DetailStatPages pages) override {
-    InitializeLiveDetailsLayout(row.index, static_cast<int>(pages));
-  }
   InventorySlot CurrentItem(DetailPage page) override {
     const auto order = CurrentOrder();
     if (page.index < 0 ||

@@ -15,6 +15,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
+#include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -55,7 +56,6 @@ extern "C" {
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Render/Palette.h"
 
@@ -1782,7 +1782,7 @@ int Menu_Inventory_Update(u_char* state)
         --Menu_Inventory_itemCategoryIconsAnimationStep;
     }
 
-    Menu_Inventory_DrawCategoryIcons(Menu_Inventory_itemCategoryIconsAnimationStep, Menu_Inventory_selectedItemCategoryIconOnTop);
+    VS::Menu::Inventory::DrawLiveItemCategoryIcons(Menu_Inventory_itemCategoryIconsAnimationStep, Menu_Inventory_selectedItemCategoryIconOnTop);
 
     if (Menu_Inventory_statusCommandState) {
         if (Menu_Inventory_statusCommandAnimationStep < 10) {

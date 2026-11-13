@@ -2337,10 +2337,13 @@
     <ClInclude Include="src\Menu\Inventory\Inventory.h">
       <Filter>src\Menu\Inventory</Filter>
     </ClInclude>
-    <ClCompile Include="src\Menu\Inventory\ItemDetails.cpp">
+    <ClCompile Include="src\Menu\Inventory\ItemDetailDispatch.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Inventory\ItemDetails.h">
+    <ClCompile Include="src\Menu\Inventory\ItemDetailDispatchLive.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Inventory\ItemDetailLiveSupport.hpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Inventory\ItemList.cpp">
@@ -3589,6 +3592,12 @@
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\EquipmentDetailControllersLive.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\ItemDetailDispatch.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\ItemDetailDispatchLive.hpp">
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Options.hpp">

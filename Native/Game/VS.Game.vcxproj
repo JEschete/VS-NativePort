@@ -1701,12 +1701,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Menu\Inventory\ItemDetails.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Menu\Inventory\ItemDetailDispatch.cpp" />
+    <ClCompile Include="src\Menu\Inventory\ItemDetailDispatchLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Menu\Inventory\ItemList.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2218,7 +2215,7 @@
     <ClInclude Include="src\Menu\Framework\Menus.h" />
     <ClInclude Include="src\Menu\Framework\TextBoxes.h" />
     <ClInclude Include="src\Menu\Inventory\Inventory.h" />
-    <ClInclude Include="src\Menu\Inventory\ItemDetails.h" />
+    <ClInclude Include="src\Menu\Inventory\ItemDetailLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Inventory\ItemList.h" />
     <ClInclude Include="src\Menu\Legacy.h" />
     <ClInclude Include="src\Menu\Loot\LootInventory.h" />
@@ -2575,6 +2572,8 @@
     <ClInclude Include="include\Menu\Inventory\DetailsPoliciesLive.hpp" />
     <ClInclude Include="include\Menu\Inventory\EquipmentDetailControllers.hpp" />
     <ClInclude Include="include\Menu\Inventory\EquipmentDetailControllersLive.hpp" />
+    <ClInclude Include="include\Menu\Inventory\ItemDetailDispatch.hpp" />
+    <ClInclude Include="include\Menu\Inventory\ItemDetailDispatchLive.hpp" />
     <ClInclude Include="include\Menu\Options.hpp" />
     <ClInclude Include="include\Menu\OptionsLive.hpp" />
     <ClInclude Include="include\Menu\Rename.hpp" />

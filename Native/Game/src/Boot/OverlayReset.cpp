@@ -7,7 +7,6 @@ extern "C" {
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
@@ -51,7 +50,6 @@ void Boot_ResetMenu2Statics(void)
 void Boot_ResetMenu3Statics(void)
 {
     Menu_Inventory_ResetMenu3Statics();
-    Menu_Inventory_ItemDetails_ResetMenu3Statics();
     Menu_Inventory_ItemList_ResetMenu3Statics();
 }
 
