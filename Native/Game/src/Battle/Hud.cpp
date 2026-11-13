@@ -1,11 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/AbilitiesLive.hpp"
+#include "Battle/HudRenderingLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -130,130 +128,6 @@ char Battle_puzzleTimerText[9] = "00:00:00";
 // decomp: D_8005046C (D_8005046C@SLUS_010.40)
 int Battle_puzzleTimer;
 
-// decomp: BATTLE.PRG _renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:3088)
-void Battle_DrawHudStatGauge(int colorIndex, int current, int max)
-{
-    u_long* prim = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC);
-    int xy = Battle_hudGaugePositions[colorIndex] - Battle_hudSlideOffset;
-
-    if (max != 0) {
-        VS::Render::DrawLiveStatGauge(colorIndex, (((current << 6) + max) - 1) / max, prim, xy);
-        if (colorIndex & 2) {
-            xy += 54 | (3 << 0x10);
-            if (colorIndex == 3) {
-                current = (current + 0xFF) >> 8;
-            }
-        } else {
-            xy = VS::Render::DrawLiveIntegerRightAligned(0, xy + (56 | ((u_short)-8 << 0x10)), max, NULL);
-            VS::Render::DrawLiveNumericGlyph(2, xy, 0, prim);
-            xy += (u_short)-7 | ((u_short)-2 << 0x10);
-        }
-        VS::Render::DrawLiveIntegerRightAligned(1, xy, current, NULL);
-        VS::Render::QueueLiveSpriteWithTexturePage(0x180, Battle_hudGaugeLabelPositions[colorIndex] - Battle_hudSlideOffset,
-            Battle_hudGaugeLabelWidths[colorIndex] | 0x90000, prim)[4] =
-            Battle_hudGaugeLabelTexU[colorIndex] | 0x37F60000;
-    }
-}
-
-// decomp: BATTLE.PRG func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:3112)
-void Battle_DrawSlidingStatusIcon(int status_icon_id, int slide_offset, int arg2)
-{
-    int clipped_width;
-    int texture_offset;
-    u_long* sprite_packet;
-
-    if ((status_icon_id != 0xFF) && (Battle_hudSlideOffset == 0)) {
-
-        texture_offset = Battle_statusIconTexOffsets[status_icon_id];
-        arg2 = (arg2 * 0x10) + 0xA0;
-
-        if (slide_offset < 0) {
-            texture_offset -= slide_offset;
-            clipped_width = slide_offset + 0x10;
-        } else {
-            arg2 += slide_offset;
-            clipped_width = 0x10 - slide_offset;
-        }
-
-        sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(
-            0x80, arg2 | 0x80000, clipped_width | 0x100000, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4));
-
-        sprite_packet[4] = (texture_offset | (((0x0F0F906A >> status_icon_id) & 1) ? 0x37F90000 : 0x37F80000));
-
-        if ((status_icon_id & 0x10) && !(arg2 & 8)) {
-            texture_offset = (status_icon_id & 3) * 8 + 0x3068;
-            if (clipped_width >= 9) {
-                if (arg2 & 7) {
-                    arg2 += 8;
-                    clipped_width -= 8;
-                } else {
-                    int clipped_icon_left = arg2 - 8;
-                    arg2 = clipped_icon_left + clipped_width;
-                    clipped_width = 8;
-                }
-            } else {
-                int overlay_texture_end = (status_icon_id & 3) * 8 + 0x3070;
-                texture_offset = overlay_texture_end - clipped_width;
-            }
-
-            VS::Render::QueueLiveSpriteWithTexturePage(0x80, arg2 | 0x80000, clipped_width | 0x80000,
-                (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4))[4] = texture_offset | 0x37FF0000;
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:3197)
-int Battle_ShortcutIconBrightness(int shortcut_index)
-{
-    int restriction_flags = VS::Menu::Framework::LiveActionRestrictionFlags(0);
-    int brightness_transparency = 0x180;
-
-    switch (shortcut_index) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-        if (VS::Battle::LiveHasUnlockedSpellClass((0x3021 >> (shortcut_index * 4)) & 0xF) == 0) {
-            return 0;
-        }
-        if (restriction_flags & 0xB7) {
-            brightness_transparency = 0x140;
-        }
-        break;
-    case 4:
-        if (restriction_flags & 0x7) {
-            brightness_transparency = 0x140;
-        }
-        break;
-    case 5:
-    case 6:
-        if (VS::Battle::LiveHasUnlockedBattleAbility(6 - shortcut_index) == 0) {
-            return 0;
-        }
-        break;
-    case 7:
-        if (VS::Battle::LiveHasUnlockedWeaponBreakArt() == 0) {
-            return 0;
-        }
-        if (restriction_flags & 0x15F) {
-            brightness_transparency = 0x140;
-        }
-        break;
-    default:
-        break;
-    }
-    return brightness_transparency;
-}
-
-// decomp: BATTLE.PRG func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:3241)
-void Battle_DrawShortcutButtonMarker(int packed_screen_position, int brightness_transparency)
-{
-    u_long* sprite_packet =
-        VS::Render::QueueLiveSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, (u_long *)(Render_frameScratch.overlayOrderingTable));
-    sprite_packet[1] = 0xE1000017;
-    sprite_packet[4] = 0x373D80C0;
-}
-
 // decomp: BATTLE.PRG func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:3249)
 void Battle_DrawShortcutHud(void)
 {
@@ -275,9 +149,9 @@ void Battle_DrawShortcutHud(void)
         panel_x_offset = -Menu_Framework_rowAnimationSteps[Battle_shortcutHudAnimationStep];
 
         for (i = 0; i < 4; ++i) {
-            icon_brightness_transparency = Battle_ShortcutIconBrightness(i + 4);
+            icon_brightness_transparency = VS::Battle::LiveShortcutIconBrightness(i + 4);
             if (icon_brightness_transparency != 0) {
-                Battle_DrawShortcutButtonMarker(
+                VS::Battle::DrawLiveShortcutButtonMarker(
                     ((panel_x_offset + Battle_secondShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_secondShortcutMarkerPositions[i + 4] << 0x10),
                     icon_brightness_transparency);
                 sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(icon_brightness_transparency,
@@ -293,9 +167,9 @@ void Battle_DrawShortcutHud(void)
         panel_x_offset = (0xA0 - panel_x_offset);
 
         for (i = 0; i < 4; ++i) {
-            icon_brightness_transparency = Battle_ShortcutIconBrightness(i);
+            icon_brightness_transparency = VS::Battle::LiveShortcutIconBrightness(i);
             if (icon_brightness_transparency != 0) {
-                Battle_DrawShortcutButtonMarker(
+                VS::Battle::DrawLiveShortcutButtonMarker(
                     ((panel_x_offset + Battle_firstShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_firstShortcutMarkerPositions[i + 4] << 0x10),
                     icon_brightness_transparency);
                 sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(icon_brightness_transparency,
@@ -375,10 +249,10 @@ void Battle_DrawBattleHud(void)
         }
     }
 
-    Battle_DrawHudStatGauge(0, actor->currentHp, actor->maxHp);
-    Battle_DrawHudStatGauge(1, actor->currentMp, actor->maxMp);
+    VS::Battle::DrawLiveHudStatGauge(0, actor->currentHp, actor->maxHp);
+    VS::Battle::DrawLiveHudStatGauge(1, actor->currentMp, actor->maxMp);
     if ((k = actor->risk) != 0) {
-        Battle_DrawHudStatGauge(2, k, 100);
+        VS::Battle::DrawLiveHudStatGauge(2, k, 100);
     }
     if (k == 0) {
         VS::Render::DrawLiveCompactText(
@@ -450,11 +324,11 @@ void Battle_DrawBattleHud(void)
     }
     rightX = k + 16;
     Battle_statusIconCarousel.bytes[3] = j & 0xF;
-    Battle_DrawSlidingStatusIcon(Battle_statusIconCarousel.bytes[2], rightX, 1);
+    VS::Battle::DrawLiveSlidingStatusIcon(Battle_statusIconCarousel.bytes[2], rightX, 1);
     ot = (u_char*)(ot) - (4);
-    Battle_DrawSlidingStatusIcon(Battle_statusIconCarousel.bytes[1], k, 1);
-    Battle_DrawSlidingStatusIcon(Battle_statusIconCarousel.bytes[1], rightX, 0);
-    Battle_DrawSlidingStatusIcon(Battle_statusIconCarousel.bytes[0], k, 0);
+    VS::Battle::DrawLiveSlidingStatusIcon(Battle_statusIconCarousel.bytes[1], k, 1);
+    VS::Battle::DrawLiveSlidingStatusIcon(Battle_statusIconCarousel.bytes[1], rightX, 0);
+    VS::Battle::DrawLiveSlidingStatusIcon(Battle_statusIconCarousel.bytes[0], k, 0);
 
     k = 0x80000 - Battle_hudSlideOffset;
     if (count < 3) {

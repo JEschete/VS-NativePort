@@ -268,43 +268,7 @@
 ],
 "Native\\Game\\src\\Battle\\Hud.cpp": [
 [
-135,
-[
-"    u_long* prim = Render_frameScratch.orderingTable - 0xC;"
-],
-[
-"    u_long* prim = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC);"
-]
-],
-[
-178,
-[
-"            0x80, arg2 | 0x80000, clipped_width | 0x100000, Render_frameScratch.orderingTable - 4);"
-],
-[
-"            0x80, arg2 | 0x80000, clipped_width | 0x100000, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4));"
-]
-],
-[
-199,
-[
-"                Render_frameScratch.orderingTable - 4)[4] = texture_offset | 0x37FF0000;"
-],
-[
-"                (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4))[4] = texture_offset | 0x37FF0000;"
-]
-],
-[
-251,
-[
-"        VS::Render::QueueLiveSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, Render_frameScratch.overlayOrderingTable);"
-],
-[
-"        VS::Render::QueueLiveSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, (u_long *)(Render_frameScratch.overlayOrderingTable));"
-]
-],
-[
-284,
+158,
 [
 "                    Battle_secondShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);"
 ],
@@ -313,7 +277,7 @@
 ]
 ],
 [
-291,
+165,
 [
 "            0x1E001E, Render_frameScratch.overlayOrderingTable)[4] = 0x37FBA0B8;"
 ],
@@ -322,7 +286,7 @@
 ]
 ],
 [
-303,
+177,
 [
 "                    Battle_firstShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);"
 ],
@@ -331,7 +295,7 @@
 ]
 ],
 [
-308,
+182,
 [
 "                Render_frameScratch.overlayOrderingTable)[4] = (((3 - i) * 0x10) | 0x37FB8000);"
 ],
@@ -340,7 +304,7 @@
 ]
 ],
 [
-329,
+203,
 [
 "    ot = Render_frameScratch.orderingTable - 4;"
 ],
@@ -349,7 +313,7 @@
 ]
 ],
 [
-344,
+218,
 [
 "            Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -358,7 +322,7 @@
 ]
 ],
 [
-365,
+239,
 [
 "                    0, k + Battle_limbDisplaySpriteOffsets[j], Battle_limbDisplaySpriteSizes[j], ot);"
 ],
@@ -367,7 +331,7 @@
 ]
 ],
 [
-384,
+258,
 [
 "            \"RISK  ZERO\", 0x16000C - Battle_hudSlideOffset, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -376,7 +340,7 @@
 ]
 ],
 [
-453,
+327,
 [
 "    ot -= 4;"
 ],
@@ -385,7 +349,7 @@
 ]
 ],
 [
-462,
+336,
 [
 "                VS::Render::QueueLiveSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, ot);"
 ],
@@ -394,7 +358,7 @@
 ]
 ],
 [
-471,
+345,
 [
 "            0x80, ((selected & 7) * 3 + 0x94) | (!(selected & 8) ? k : j), 0x40004, ot);"
 ],
@@ -403,7 +367,7 @@
 ]
 ],
 [
-478,
+352,
 [
 "        prim = VS::Render::QueueLiveSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, ot);"
 ],
@@ -412,7 +376,7 @@
 ]
 ],
 [
-481,
+355,
 [
 "    prim = VS::Render::QueueLiveSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, ot);"
 ],
@@ -421,7 +385,7 @@
 ]
 ],
 [
-488,
+362,
 [
 "    char timer_components[4] = {0, timer->seconds, timer->minutes, timer->hours};"
 ],
@@ -430,7 +394,7 @@
 ]
 ],
 [
-507,
+381,
 [
 "    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), Render_frameScratch.orderingTable - 4);"
 ],

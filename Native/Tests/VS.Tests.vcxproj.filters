@@ -480,6 +480,18 @@
     <ClCompile Include="src\HitModifiersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\HudRenderingLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudRenderingModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudRenderingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudShortcutLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\HudStateLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -846,6 +858,15 @@
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\Battle\HudRenderingFixture.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\HudRenderingLiveFixture.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\HudShortcutLiveFixture.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>

@@ -421,6 +421,13 @@
     <None Include="..\..\port\differentials\hit_calculations_guard_driver.cpp" />
     <None Include="..\..\port\differentials\hit_modifiers.py" />
     <None Include="..\..\port\differentials\hit_modifiers_driver.cpp" />
+    <None Include="..\..\port\differentials\hud_rendering_common.py" />
+    <None Include="..\..\port\differentials\hud_rendering_driver.cpp" />
+    <None Include="..\..\port\differentials\hud_rendering_f01354.py" />
+    <None Include="..\..\port\differentials\hud_rendering_f01355.py" />
+    <None Include="..\..\port\differentials\hud_rendering_f01358.py" />
+    <None Include="..\..\port\differentials\hud_rendering_f01360.py" />
+    <None Include="..\..\port\differentials\hud_rendering_guard_driver.cpp" />
     <None Include="..\..\port\differentials\hud_state_common.py" />
     <None Include="..\..\port\differentials\hud_state_driver.cpp" />
     <None Include="..\..\port\differentials\hud_state_f00235.py" />

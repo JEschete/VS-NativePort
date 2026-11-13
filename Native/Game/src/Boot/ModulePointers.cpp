@@ -45,6 +45,7 @@
 #include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
+#include "Battle/HudRenderingLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
@@ -464,10 +465,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&Menu_SetTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&Menu_SelectTextBoxChoice, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9B38u, 0u, (void*)&Battle_DrawHudStatGauge, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9CB4u, 0u, (void*)&Battle_DrawSlidingStatusIcon, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9EB8u, 0u, (void*)&Battle_ShortcutIconBrightness, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9F98u, 0u, (void*)&Battle_DrawShortcutButtonMarker, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9FE8u, 0u, (void*)&Battle_DrawShortcutHud, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CA2DCu, 0u, (void*)&Battle_DrawBattleHud, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CA97Cu, 0u, (void*)&Effects_ResetScreenEffectState, 0u, 0u, 0u},
@@ -1777,6 +1774,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CB560u, 0u, (void*)&VS::Battle::HideLivePuzzleTimer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB654u, 0u, (void*)&VS::Battle::SetLiveHudHidden, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB660u, 0u, (void*)&VS::Battle::SetLiveHudBattleMode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C9B38u, 0u, (void*)&VS::Battle::DrawLiveHudStatGauge, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C9CB4u, 0u, (void*)&VS::Battle::DrawLiveSlidingStatusIcon, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C9EB8u, 0u, (void*)&VS::Battle::LiveShortcutIconBrightness, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C9F98u, 0u, (void*)&VS::Battle::DrawLiveShortcutButtonMarker, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

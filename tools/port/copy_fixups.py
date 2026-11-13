@@ -865,6 +865,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::HideLivePuzzleTimer": r"Native\Game\include\Battle\HudStateLive.hpp",
     "VS::Battle::SetLiveHudHidden": r"Native\Game\include\Battle\HudStateLive.hpp",
     "VS::Battle::SetLiveHudBattleMode": r"Native\Game\include\Battle\HudStateLive.hpp",
+    "VS::Battle::DrawLiveHudStatGauge": r"Native\Game\include\Battle\HudRenderingLive.hpp",
+    "VS::Battle::DrawLiveSlidingStatusIcon": r"Native\Game\include\Battle\HudRenderingLive.hpp",
+    "VS::Battle::LiveShortcutIconBrightness": r"Native\Game\include\Battle\HudRenderingLive.hpp",
+    "VS::Battle::DrawLiveShortcutButtonMarker": r"Native\Game\include\Battle\HudRenderingLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1677,6 +1681,10 @@ OWNED_CALL_BINDINGS["F01382"] = "VS::Battle::ShowLivePuzzleTimer"
 OWNED_CALL_BINDINGS["F01383"] = "VS::Battle::HideLivePuzzleTimer"
 OWNED_CALL_BINDINGS["F01385"] = "VS::Battle::SetLiveHudHidden"
 OWNED_CALL_BINDINGS["F01386"] = "VS::Battle::SetLiveHudBattleMode"
+OWNED_CALL_BINDINGS["F01354"] = "VS::Battle::DrawLiveHudStatGauge"
+OWNED_CALL_BINDINGS["F01355"] = "VS::Battle::DrawLiveSlidingStatusIcon"
+OWNED_CALL_BINDINGS["F01358"] = "VS::Battle::LiveShortcutIconBrightness"
+OWNED_CALL_BINDINGS["F01360"] = "VS::Battle::DrawLiveShortcutButtonMarker"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3493,6 +3501,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800CB560, "VS::Battle::HideLivePuzzleTimer"),  # F01383
     ("BATTLE/BATTLE.PRG", 0x800CB654, "VS::Battle::SetLiveHudHidden"),  # F01385
     ("BATTLE/BATTLE.PRG", 0x800CB660, "VS::Battle::SetLiveHudBattleMode"),  # F01386
+    ("BATTLE/BATTLE.PRG", 0x800C9B38, "VS::Battle::DrawLiveHudStatGauge"),  # F01354
+    ("BATTLE/BATTLE.PRG", 0x800C9CB4, "VS::Battle::DrawLiveSlidingStatusIcon"),  # F01355
+    ("BATTLE/BATTLE.PRG", 0x800C9EB8, "VS::Battle::LiveShortcutIconBrightness"),  # F01358
+    ("BATTLE/BATTLE.PRG", 0x800C9F98, "VS::Battle::DrawLiveShortcutButtonMarker"),  # F01360
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

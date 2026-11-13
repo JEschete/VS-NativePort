@@ -170,6 +170,7 @@ f8da63549b09,DIV-ZERO,medium,pattern,F01851,ApplyLearnedActionUnlocks,Native/Gam
 19e1bfedf4f8,DIV-ZERO,medium,pattern,,DrawChoice,Native/Game/src/Battle/Ai/Wander.cpp,159,static_cast,57,23,open,
 fe461f81515b,DIV-ZERO,medium,pattern,,Roam,Native/Game/src/Battle/Ai/Wander.cpp,168,range,57,23,open,
 ff7c2bc2c19e,DIV-ZERO,medium,pattern,F00396,DistributeHitLimbDamage,Native/Game/src/Battle/DamagePolicies.cpp,76,static_cast,56,24,open,
+dccc46474def,DIV-ZERO,medium,pattern,,GaugeFill,Native/Game/src/Battle/HudRendering.cpp,57,gauge.maximum,56,24,open,
 c67c129977cc,DIV-ZERO,medium,pattern,F01287,Battle_DrawSphereWireLine,Native/Game/src/Battle/Sphere.cpp,309,ay,56,24,open,
 f8f11c15795e,DIV-ZERO,medium,pattern,F01287,Battle_DrawSphereWireLine,Native/Game/src/Battle/Sphere.cpp,314,ax,56,24,open,
 8a5c587c7204,DIV-ZERO,medium,pattern,F01293,Battle_IsPointInTargetCone,Native/Game/src/Battle/Sphere.cpp,592,volume->scale.flags.opaque1Bit0,56,24,open,
