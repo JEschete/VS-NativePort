@@ -481,6 +481,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\HudState.cpp" />
+    <ClCompile Include="src\Battle\HudStateLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Legacy.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2394,6 +2398,8 @@
     <ClInclude Include="include\Battle\HitCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\HitModifiers.hpp" />
     <ClInclude Include="include\Battle\HitModifiersLive.hpp" />
+    <ClInclude Include="include\Battle\HudState.hpp" />
+    <ClInclude Include="include\Battle\HudStateLive.hpp" />
     <ClInclude Include="include\Battle\RewardFlow.hpp" />
     <ClInclude Include="include\Battle\RewardFlowLive.hpp" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />

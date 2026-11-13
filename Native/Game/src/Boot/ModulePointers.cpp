@@ -45,6 +45,7 @@
 #include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
@@ -309,7 +310,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&Effects_BeginAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&Effects_ActionEffectBusyFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007BD8Cu, 0u, (void*)&Battle_SetGameplayHudHidden, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BE20u, 0u, (void*)&Effects_StartScriptedActorEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
@@ -465,10 +465,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9B38u, 0u, (void*)&Battle_DrawHudStatGauge, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9CB4u, 0u, (void*)&Battle_DrawSlidingStatusIcon, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9E08u, 0u, (void*)&Battle_StatusIconFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9E5Cu, 0u, (void*)&Battle_LimbCondition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9EB8u, 0u, (void*)&Battle_ShortcutIconBrightness, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9F88u, 0u, (void*)&Battle_ShowShortcutHud, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9F98u, 0u, (void*)&Battle_DrawShortcutButtonMarker, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9FE8u, 0u, (void*)&Battle_DrawShortcutHud, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CA2DCu, 0u, (void*)&Battle_DrawBattleHud, 0u, 0u, 0u},
@@ -477,11 +474,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CB2B8u, 0u, (void*)&Menu_ShowSceneNotification, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&Menu_IsSceneNotificationPending, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&Menu_ReleaseSceneNotification, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB550u, 0u, (void*)&Battle_ShowPuzzleTimer, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB560u, 0u, (void*)&Battle_HidePuzzleTimer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB56Cu, 0u, (void*)&Battle_DrawPuzzleTimer, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB654u, 0u, (void*)&Battle_SetHudHidden, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB660u, 0u, (void*)&Battle_SetHudBattleMode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB678u, 0u, (void*)&Effects_LoadScreenEffectOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB708u, 0u, (void*)&Effects_DrawScreenEffectOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB79Cu, 0u, (void*)&Effects_AcquireScreenEffectOverlay, 0u, 0u, 0u},
@@ -1775,6 +1768,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007B9A0u, 0u, (void*)&VS::Battle::BeginLiveEventRewardResults, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B9CCu, 0u, (void*)&VS::Battle::BeginLivePostActionRewards, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B9FCu, 0u, (void*)&VS::Battle::UpdateLiveRewardSequence, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007BD8Cu, 0u, (void*)&VS::Battle::SetLiveGameplayHudHidden, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C9E08u, 0u, (void*)&VS::Battle::LiveStatusIconFlags, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C9E5Cu, 0u, (void*)&VS::Battle::LiveLimbCondition, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C9F88u, 0u, (void*)&VS::Battle::ShowLiveShortcutHud, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB550u, 0u, (void*)&VS::Battle::ShowLivePuzzleTimer, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB560u, 0u, (void*)&VS::Battle::HideLivePuzzleTimer, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB654u, 0u, (void*)&VS::Battle::SetLiveHudHidden, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB660u, 0u, (void*)&VS::Battle::SetLiveHudBattleMode, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

@@ -22,6 +22,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -837,7 +838,9 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     }
   }
 
-  void SetHudBattleMode(int mode) override { Battle_SetHudBattleMode(mode); }
+  void SetHudBattleMode(int mode) override {
+    VS::Battle::SetLiveHudBattleMode(mode);
+  }
 
   void ClearAshleySnapshotPending() override {
     State_ashleySnapshot.stats.isPending = 0;

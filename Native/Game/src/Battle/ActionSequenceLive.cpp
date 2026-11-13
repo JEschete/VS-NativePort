@@ -14,6 +14,7 @@
 #include "Battle/ActionSequence.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -127,7 +128,7 @@ class LiveWorld final : public ActionSequenceWorld {
   }
   int LookAtOnAshley() override { return Field::LiveIsCameraLookAtOnAshley(); }
   void ResumeField() override { Field::LiveResumeFieldAfterMenu(); }
-  void ShowHud() override { Battle_SetHudHidden(0); }
+  void ShowHud() override { VS::Battle::SetLiveHudHidden(0); }
   std::uint8_t SelectedActor() override {
     return State().selection.primaryTarget.target.targetActor;
   }

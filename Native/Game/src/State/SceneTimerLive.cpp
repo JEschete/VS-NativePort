@@ -6,6 +6,7 @@
 
 #include <cstdint>
 
+#include "Battle/HudStateLive.hpp"
 #include "State/SceneTimer.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -29,8 +30,8 @@ namespace VS::State {
 namespace {
 class LiveSceneTimerHost final : public SceneTimerHost {
  public:
-  void ShowTimer() override { Battle_ShowPuzzleTimer(); }
-  void HideTimer() override { Battle_HidePuzzleTimer(); }
+  void ShowTimer() override { VS::Battle::ShowLivePuzzleTimer(); }
+  void HideTimer() override { VS::Battle::HideLivePuzzleTimer(); }
   // Core_Random_Rand keeps the RNG trace of the BIOS sequence.
   int Random() override { return Core_Random_Rand(); }
 };

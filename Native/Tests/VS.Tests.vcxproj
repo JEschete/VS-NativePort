@@ -220,6 +220,9 @@
     <ClCompile Include="src\HeapTests.cpp" />
     <ClCompile Include="src\HitCalculationsTests.cpp" />
     <ClCompile Include="src\HitModifiersTests.cpp" />
+    <ClCompile Include="src\HudStateLiveTests.cpp" />
+    <ClCompile Include="src\HudStateModuleTests.cpp" />
+    <ClCompile Include="src\HudStateTests.cpp" />
     <ClCompile Include="src\InformationTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
     <ClCompile Include="src\IntroPlayerTests.cpp" />

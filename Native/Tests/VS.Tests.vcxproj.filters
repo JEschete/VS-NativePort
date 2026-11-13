@@ -480,6 +480,15 @@
     <ClCompile Include="src\HitModifiersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\HudStateLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudStateModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudStateTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\InformationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -3,6 +3,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -1531,7 +1532,7 @@ int Menu_Inventory_Update(u_char* state)
 
         VS::Field::LiveSetFieldRenderingEnabled(0);
         VS::Menu::Framework::InitializeLiveInformationBox();
-        Battle_SetHudHidden(1);
+        VS::Battle::SetLiveHudHidden(1);
 
         Battle_hudSlideOffset = 0x200000;
 
@@ -1587,7 +1588,7 @@ int Menu_Inventory_Update(u_char* state)
                 Menu_Framework_menuState.executeAbilityType = 13;
                 *state = 12;
 
-                Battle_SetHudHidden(0);
+                VS::Battle::SetLiveHudHidden(0);
 
                 Battle_hudSlideOffset = 0;
 
@@ -1604,7 +1605,7 @@ int Menu_Inventory_Update(u_char* state)
                 VS::Menu::Inventory::SetLivePanelVisibility(0);
                 VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
                 VS::Field::LiveSetFieldRenderingEnabled(1);
-                Battle_SetHudHidden(0);
+                VS::Battle::SetLiveHudHidden(0);
 
                 Battle_hudSlideOffset = 0;
 
@@ -1653,7 +1654,7 @@ int Menu_Inventory_Update(u_char* state)
             VS::Field::LiveSetFieldRenderingEnabled(1);
             VS::Menu::Inventory::SetLivePanelVisibility(0);
             VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-            Battle_SetHudHidden(0);
+            VS::Battle::SetLiveHudHidden(0);
 
             Battle_hudSlideOffset = 0;
             Menu_Inventory_closeDelay = 10;
@@ -1690,7 +1691,7 @@ int Menu_Inventory_Update(u_char* state)
         VS::Field::LiveSetFieldRenderingEnabled(1);
         VS::Menu::Inventory::SetLivePanelVisibility(0);
         VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-        Battle_SetHudHidden(0);
+        VS::Battle::SetLiveHudHidden(0);
 
         Battle_hudSlideOffset = 0;
 

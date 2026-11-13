@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/SfxLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -387,7 +388,7 @@ int Menu_Map_UpdateScreen(u_char* state)
             break;
         } else if (Menu_Map_screenArmFileLoaded) {
             VS::Field::LiveSetFieldRenderingEnabled(0);
-            Battle_SetHudHidden(1);
+            VS::Battle::SetLiveHudHidden(1);
 
             Battle_hudSlideOffset = 0x200000;
             *state = 6;
@@ -406,7 +407,7 @@ int Menu_Map_UpdateScreen(u_char* state)
 
         if (Menu_Map_menuResult != 0) {
             VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
-            Battle_SetHudHidden(0);
+            VS::Battle::SetLiveHudHidden(0);
 
             Battle_hudSlideOffset = 0;
 

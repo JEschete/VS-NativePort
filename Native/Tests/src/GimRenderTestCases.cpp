@@ -6,6 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/HudStateLive.hpp"
 #include "Legacy/Psx.h"
 #include "State/SceneTimerLive.hpp"
 
@@ -237,11 +238,11 @@ TEST_CASE("Puzzle timer hide and show preserve repeatable native rendering",
           "[render][puzzle-timer]") {
   PuzzleTimerFixture fixture;
   for (int repeat = 0; repeat < 2; ++repeat) {
-    Battle_ShowPuzzleTimer();
+    VS::Battle::ShowLivePuzzleTimer();
     CHECK(Battle_lowerScreenUiState == 1);
     fixture.Draw(0, 12);
     fixture.CheckRendering("00:00:12");
-    Battle_HidePuzzleTimer();
+    VS::Battle::HideLivePuzzleTimer();
     CHECK(Battle_lowerScreenUiState == 0);
   }
 }

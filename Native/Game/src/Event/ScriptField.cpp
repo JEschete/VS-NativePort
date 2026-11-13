@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Audio/MusicLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Field/BackgroundLive.hpp"
@@ -16,7 +17,6 @@
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Battle/Hud.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptField.h"
@@ -43,7 +43,7 @@ intptr_t Event_ScriptClearRoomActorCache(u_char* instruction, short thread_index
 // decomp: BATTLE.PRG func_800B92D0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1813)
 intptr_t Event_ScriptSetHudVisible(u_char* instruction, short thread_index)
 {
-    Battle_SetGameplayHudHidden(instruction[1] ^ 1);
+    VS::Battle::SetLiveGameplayHudHidden(instruction[1] ^ 1);
     return 0;
 }
 

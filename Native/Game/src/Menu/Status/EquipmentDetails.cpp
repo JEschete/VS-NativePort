@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/HudStateLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/Hud.h"
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
@@ -678,7 +678,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         Menu_Status_equipmentDetailsSelectedEquipmentRow = row - 1;
         Menu_Status_renderBasicStatsState = 0;
 
-        Battle_SetHudHidden(1);
+        VS::Battle::SetLiveHudHidden(1);
         Menu_Status_HoistEquipmentRow(Menu_Status_equipmentDetailsSelectedEquipmentRow);
         VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
@@ -744,7 +744,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
 
                 Menu_Status_renderBasicStatsState = 0;
 
-                Battle_SetHudHidden(1);
+                VS::Battle::SetLiveHudHidden(1);
 
                 if (Menu_Status_equipmentDetailsSelectedEquipmentRow != 0 && Menu_Status_equipmentDetailsSelectedEquipmentRow != state) {
                     return 0;

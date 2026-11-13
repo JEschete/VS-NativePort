@@ -2,6 +2,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Battle/Hud.h"
 #include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -218,7 +218,7 @@ void Effects_BeginAshleyStandaloneEffect(int effect_id)
     request.position.vx = 0;
     Effects_BeginActionEffect(&request, 0, 0);
     State_tickSpeed = 4;
-    Battle_SetHudHidden(1);
+    VS::Battle::SetLiveHudHidden(1);
     VS::Field::SetLiveMinimapVisible(0);
 }
 
@@ -227,7 +227,7 @@ void Effects_EndAshleyStandaloneEffect(void)
 {
     VS::Field::LiveEnterFieldExplorationMode();
     State_tickSpeed = 2;
-    Battle_SetHudHidden(0);
+    VS::Battle::SetLiveHudHidden(0);
     VS::Field::SetLiveMinimapVisible(1);
 }
 

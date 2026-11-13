@@ -24,6 +24,7 @@
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -695,7 +696,9 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     }
     return (Battle_characterState->weaponDrawn & 1) != 0;
   }
-  void SetHudBattleMode(int mode) override { Battle_SetHudBattleMode(mode); }
+  void SetHudBattleMode(int mode) override {
+    VS::Battle::SetLiveHudBattleMode(mode);
+  }
   void ResumeAfterActionSelection() override {
     VS::Menu::Framework::ResumeLiveAfterActionSelection();
   }

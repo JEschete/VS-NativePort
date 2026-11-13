@@ -25,6 +25,7 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Encounter.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -1209,7 +1210,7 @@ class LiveRoomLoadHost final
     static_cast<void>(Effects_InitializeRoomWeather(0));
     LiveRestoreRoomEffectSoundVolume();
     LiveEnterFieldExplorationMode();
-    Battle_SetHudHidden(0);
+    VS::Battle::SetLiveHudHidden(0);
   }
 
   [[nodiscard]] int RoomMusicSlot() const override {

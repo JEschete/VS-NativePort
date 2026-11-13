@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/MapLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -130,19 +130,6 @@ char Battle_puzzleTimerText[9] = "00:00:00";
 // decomp: D_8005046C (D_8005046C@SLUS_010.40)
 int Battle_puzzleTimer;
 
-// decomp: BATTLE.PRG func_8007BD8C (src/BATTLE/BATTLE.PRG/146C.c:8561)
-int Battle_SetGameplayHudHidden(int hidden)
-{
-    if (hidden != 0) {
-        Battle_SetHudHidden(1);
-        VS::Field::SetLiveMinimapVisible(0);
-    } else {
-        Battle_SetHudHidden(0);
-        VS::Field::SetLiveMinimapVisible(1);
-    }
-    return hidden;
-}
-
 // decomp: BATTLE.PRG _renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:3088)
 void Battle_DrawHudStatGauge(int colorIndex, int current, int max)
 {
@@ -215,47 +202,6 @@ void Battle_DrawSlidingStatusIcon(int status_icon_id, int slide_offset, int arg2
     }
 }
 
-// decomp: BATTLE.PRG vs_battle_getStatusFlags (src/BATTLE/BATTLE.PRG/5BF94.c:3158)
-int Battle_StatusIconFlags(Battle_ActorStats* actor_stats)
-{
-    int i;
-    int remaining_status_bits = (u_int)actor_stats->statuses >> 5;
-    int icon_flags = remaining_status_bits & 0xFFFF;
-    remaining_status_bits >>= 16;
-
-    for (i = 0; i < 8; ++i) {
-        if ((remaining_status_bits >> i) & 1) {
-            icon_flags |= Battle_upperStatusIconFlags[i] << 16;
-        }
-    }
-
-    return icon_flags;
-}
-
-// decomp: BATTLE.PRG vs_battle_getLimbStatus (src/BATTLE/BATTLE.PRG/5BF94.c:3174)
-int Battle_LimbCondition(Battle_LimbStats* limb)
-{
-    int maxHp = limb->maxHp;
-
-    if (limb->hp < 2) {
-        return Battle_LimbConditionLevel_Critical;
-    }
-
-    if ((limb->hp * 4) < maxHp) {
-        return Battle_LimbConditionLevel_Damaged;
-    }
-
-    if ((limb->hp * 4) < (maxHp * 3)) {
-        return Battle_LimbConditionLevel_Wounded;
-    }
-
-    if (limb->hp < maxHp) {
-        return Battle_LimbConditionLevel_Good;
-    }
-
-    return Battle_LimbConditionLevel_Excellent;
-}
-
 // decomp: BATTLE.PRG func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:3197)
 int Battle_ShortcutIconBrightness(int shortcut_index)
 {
@@ -298,9 +244,6 @@ int Battle_ShortcutIconBrightness(int shortcut_index)
     }
     return brightness_transparency;
 }
-
-// decomp: BATTLE.PRG func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:3239)
-void Battle_ShowShortcutHud(void) { Battle_shortcutHudRequested = 1; }
 
 // decomp: BATTLE.PRG func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:3241)
 void Battle_DrawShortcutButtonMarker(int packed_screen_position, int brightness_transparency)
@@ -421,7 +364,7 @@ void Battle_DrawBattleHud(void)
                 j = i + (Battle_hudBattleMode & 1) * 5;
                 prim = VS::Render::QueueLiveSpriteWithTexturePage(
                     0, k + Battle_limbDisplaySpriteOffsets[j], Battle_limbDisplaySpriteSizes[j], (u_long *)(ot));
-                prim[2] = Battle_limbStatusColors[Battle_LimbCondition(
+                prim[2] = Battle_limbStatusColors[VS::Battle::LiveLimbCondition(
                               &Battle_characterState->stats->limbs[i])]
                         | 0x64000000;
                 prim[4] = Battle_limbDisplaySpriteTexCoords[j];
@@ -446,7 +389,7 @@ void Battle_DrawBattleHud(void)
         return;
     }
 
-    flags = Battle_StatusIconFlags(actor);
+    flags = VS::Battle::LiveStatusIconFlags(actor);
     count = 0;
     selected = 0xFF;
     for (j = 0; j < 32; ++j) {
@@ -540,12 +483,6 @@ void Battle_DrawBattleHud(void)
     prim[4] = 0x37F40C00;
 }
 
-// decomp: BATTLE.PRG func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3838)
-void Battle_ShowPuzzleTimer(void) { Battle_lowerScreenUiState = 1; }
-
-// decomp: BATTLE.PRG func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3840)
-void Battle_HidePuzzleTimer(void) { Battle_lowerScreenUiState = 0; }
-
 // decomp: BATTLE.PRG _renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3844)
 void Battle_DrawPuzzleTimer(const State_SceneTimer* timer)
 {
@@ -570,11 +507,5 @@ void Battle_DrawPuzzleTimer(const State_SceneTimer* timer)
         Battle_puzzleTimerText, timer->seconds, timer->minutes, timer->hours, timer->frames);
     VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), ((u_char*)(Render_frameScratch.orderingTable)) - 4);
 }
-
-// decomp: BATTLE.PRG func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867)
-void Battle_SetHudHidden(int hidden) { Battle_hudHidden = hidden; }
-
-// decomp: BATTLE.PRG func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3869)
-void Battle_SetHudBattleMode(int battle_mode) { Battle_hudBattleMode = battle_mode; }
 
 }  // extern "C"

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/SfxLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -156,7 +157,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         Menu_Loot_hudWasHidden = Battle_hudHidden;
 
         if (!Menu_Loot_hudWasHidden) {
-            Battle_SetHudHidden(1);
+            VS::Battle::SetLiveHudHidden(1);
             Battle_hudSlideOffset = 0x200000;
         }
 
@@ -176,7 +177,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         VS::Field::LiveSetFieldRenderingEnabled(1);
 
         if (Menu_Loot_hudWasHidden == 0) {
-            Battle_SetHudHidden(0);
+            VS::Battle::SetLiveHudHidden(0);
             Battle_hudSlideOffset = 0;
         }
 

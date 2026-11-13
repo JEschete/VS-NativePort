@@ -19,6 +19,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetingLive.hpp"
@@ -302,7 +303,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
 
   void BeginShortcutMenu() override { VS::Field::LiveBeginShortcutMenu(); }
   void EndShortcutMenu() override { VS::Field::LiveEndShortcutMenu(); }
-  void ShowShortcutHud() override { Battle_ShowShortcutHud(); }
+  void ShowShortcutHud() override { VS::Battle::ShowLiveShortcutHud(); }
   bool OpenShortcutMenu(int shortcut) override {
     return VS::Menu::Framework::OpenLiveShortcutMenu(shortcut) != 0;
   }

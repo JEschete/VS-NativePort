@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/SfxLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -169,7 +170,7 @@ int Menu_Manual_UpdateScreen(u_char* state)
             Menu_Manual_openDelay -= 1;
         } else if (Menu_Manual_screenIsInit != 0) {
             VS::Field::LiveSetFieldRenderingEnabled(0);
-            Battle_SetHudHidden(1);
+            VS::Battle::SetLiveHudHidden(1);
             Battle_hudSlideOffset = 0x200000;
             *state = Menu_Manual_ManualOverlayState_WaitReady;
         }
@@ -183,7 +184,7 @@ int Menu_Manual_UpdateScreen(u_char* state)
             break;
         }
         VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
-        Battle_SetHudHidden(0);
+        VS::Battle::SetLiveHudHidden(0);
         Battle_hudSlideOffset = 0;
         VS::Field::LiveSetFieldRenderingEnabled(1);
         VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);

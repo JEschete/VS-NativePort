@@ -816,6 +816,12 @@
     <ClInclude Include="src\Battle\Hud.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\HudState.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\HudStateLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Legacy.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3052,6 +3058,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\HitModifiersLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\HudState.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\HudStateLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\RewardFlow.hpp">

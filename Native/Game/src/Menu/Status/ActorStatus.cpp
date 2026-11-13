@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/Controller.hpp"
@@ -131,7 +132,7 @@ void Menu_Status_BeginVitalsTransition(int actor)
         Menu_Status_renderBasicStatsState = 1;
         Menu_Status_basicStatsAnimDelay = 4;
     } else if (Menu_Status_initializedActor == 0) {
-        Battle_SetHudHidden(1);
+        VS::Battle::SetLiveHudHidden(1);
         Menu_Status_renderBasicStatsState = 4;
         Menu_Status_basicStatsAnimDelay = 4;
     } else {
@@ -327,7 +328,7 @@ void Menu_Status_DrawVitals(void)
     case 1:
         if (Menu_Status_basicStatsAnimState == 0) {
             if (Menu_Status_basicStatsAnimDelay == 0) {
-                Battle_SetHudHidden(0);
+                VS::Battle::SetLiveHudHidden(0);
                 Menu_Status_renderBasicStatsState = 0;
             } else {
                 --Menu_Status_basicStatsAnimDelay;
@@ -481,7 +482,7 @@ void Menu_Status_DrawStatusEffectIcons(Battle_ActorStats* actor, int animationSt
 {
     int i;
 
-    u_int flags = Battle_StatusIconFlags(actor);
+    u_int flags = VS::Battle::LiveStatusIconFlags(actor);
     int statusCount = 0;
 
     for (i = 0; i < 32; ++i) {
@@ -533,7 +534,7 @@ int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_ac
 
     if (actor != NULL) {
 
-        xPos = Battle_StatusIconFlags(actor);
+        xPos = VS::Battle::LiveStatusIconFlags(actor);
 
         if (xPos == 0) {
             return 1;
@@ -741,7 +742,7 @@ int Menu_Status_UpdateLimbPanel(int init)
             VS::Render::DrawLiveCompactText(Battle_limbNames[limb->nameIndex],
                 (Menu_Framework_rowAnimationSteps[step] + 216) | ((34 + i * 16) << 16), NULL);
 
-            limbStatus = Battle_LimbCondition(limb);
+            limbStatus = VS::Battle::LiveLimbCondition(limb);
 
             Menu_Status_DrawLimbConditionIndicator(limbStatus,
                 (Menu_Framework_rowAnimationSteps[step] + 216) | ((36 + i * 16) << 16), 0);
@@ -786,7 +787,7 @@ int Menu_Status_UpdateLimbPanel(int init)
                           : vs_getRGB888(128, 128, 128) >> panel_dimming_shift,
                 0);
 
-            limbStatus = Battle_LimbCondition(limb);
+            limbStatus = VS::Battle::LiveLimbCondition(limb);
 
             Menu_Status_DrawLimbConditionIndicator(
                 limbStatus, (0x24 + i * 0x10) * 0x10000 | 0xD8, panel_dimming_shift - (i == highlighted_limb_index));
@@ -816,7 +817,7 @@ int Menu_Status_UpdateLimbPanel(int init)
                 VS::Render::DrawLiveCompactText(Battle_limbNames[limb->nameIndex],
                     ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 216) | ((34 + i * 16) << 16), 0);
 
-                limbStatus = Battle_LimbCondition(limb);
+                limbStatus = VS::Battle::LiveLimbCondition(limb);
 
                 Menu_Status_DrawLimbConditionIndicator(limbStatus,
                     ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 216) | ((36 + i * 16) << 16), 0);
@@ -980,7 +981,7 @@ void Menu_Status_ShowSelectedLimbCondition(void)
     Battle_stringContext.strings[0] =
         (char*)&Battle_statusStrings[Battle_statusStrings[limb->nameIndex]];
     Battle_stringContext.strings[1] =
-        (char*)&Menu_Status_statusStrings[Menu_Status_statusStrings[Battle_LimbCondition(limb)
+        (char*)&Menu_Status_statusStrings[Menu_Status_statusStrings[VS::Battle::LiveLimbCondition(limb)
                                               + Text_Menu4_status_Index_critical]];
     VS::Render::FormatLiveEncodedText(
         Menu_Framework_stringBuf, (char*)&Menu_Status_statusStrings[Text_Menu4_status_Offset_values]);
@@ -1392,7 +1393,7 @@ int Menu_Status_Update(u_char* state)
 
                 Menu_Status_updateAnimWait = 1;
 
-                if (Battle_StatusIconFlags(Battle_actors[userInput]->stats) == 0) {
+                if (VS::Battle::LiveStatusIconFlags(Battle_actors[userInput]->stats) == 0) {
                     *state = 5;
                 }
             }

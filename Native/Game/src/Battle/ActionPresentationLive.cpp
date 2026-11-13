@@ -20,6 +20,7 @@
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -301,7 +302,7 @@ class LiveWorld final : public ActionPresentationWorld {
     live.material = std::bit_cast<decltype(live.material)>(asset.material);
     Content::QueueLiveActorAssetRequest(&live);
   }
-  void HideHud() override { Battle_SetHudHidden(1); }
+  void HideHud() override { VS::Battle::SetLiveHudHidden(1); }
   bool InformationEnabled() override { return Input_settings.information != 0; }
   void ShowAction(std::uint16_t action) override {
     constexpr int kActionNotification = 0xB;

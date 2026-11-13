@@ -17,11 +17,6 @@ _Static_assert(sizeof(Battle_HudHighlightWord) == 0x4, "Battle_HudHighlightWord 
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_HUD_H_DECLS)
 #define VS_BATTLE_HUD_H_DECLS
-#include "Battle/Actor.h"
-#include "Items/Equipment.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Weapons.h"
 #include "State/SceneTimer.h"
 
 extern char* Battle_limbNames[20];
@@ -57,20 +52,12 @@ extern char* Battle_puzzleTimerTextPointer;
 extern char Battle_lowerScreenUiState;
 extern char Battle_puzzleTimerText[9];
 extern int Battle_puzzleTimer;
-int Battle_SetGameplayHudHidden(int hidden);
 void Battle_DrawHudStatGauge(int colorIndex, int current, int max);
 void Battle_DrawSlidingStatusIcon(int status_icon_id, int slide_offset, int arg2);
-int Battle_StatusIconFlags(Battle_ActorStats* actor_stats);
-int Battle_LimbCondition(Battle_LimbStats* limb);
 int Battle_ShortcutIconBrightness(int shortcut_index);
-void Battle_ShowShortcutHud(void);
 void Battle_DrawShortcutButtonMarker(int packed_screen_position, int brightness_transparency);
 void Battle_DrawShortcutHud(void);
 void Battle_DrawBattleHud(void);
-void Battle_ShowPuzzleTimer(void);
-void Battle_HidePuzzleTimer(void);
 void Battle_DrawPuzzleTimer(const State_SceneTimer* timer);
-void Battle_SetHudHidden(int hidden);
-void Battle_SetHudBattleMode(int battle_mode);
 
 #endif // VS_BATTLE_HUD_H_DECLS

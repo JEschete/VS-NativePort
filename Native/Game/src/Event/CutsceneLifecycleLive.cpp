@@ -8,6 +8,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Event/CutsceneLifecycle.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -149,7 +150,7 @@ class LiveCutsceneHost final : public CutsceneHost {
     Render::SetLiveCameraFarClip(kRestoreFarClip, 1);
     Field::LiveSetCameraRoll(0);
   }
-  void ShowGameplayHud() override { Battle_SetGameplayHudHidden(0); }
+  void ShowGameplayHud() override { VS::Battle::SetLiveGameplayHudHidden(0); }
   CutsceneMusic Music() override {
     return {Field_zoneContext.musicSlot, Audio_soundState.playingMusicHandle,
             Audio_soundState.musicHandles};

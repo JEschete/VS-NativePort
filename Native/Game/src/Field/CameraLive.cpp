@@ -12,6 +12,7 @@
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -398,7 +399,7 @@ void LiveCameraHost::SetPreferredActionCameraDistance(std::int32_t distance) {
 }
 
 void LiveCameraHost::SetHudHidden(bool hidden) {
-  Escape([hidden] { Battle_SetHudHidden(hidden ? 1 : 0); });
+  Escape([hidden] { VS::Battle::SetLiveHudHidden(hidden ? 1 : 0); });
 }
 
 void LiveCameraHost::SetActorMarkersHidden(bool hidden) {

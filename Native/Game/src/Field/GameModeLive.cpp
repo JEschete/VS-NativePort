@@ -7,6 +7,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/AmbienceLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Core/Log.hpp"
 #include "Field/MapLive.hpp"
@@ -100,7 +101,9 @@ class LiveFieldModeHost final : public FieldModeHost {
   [[nodiscard]] bool IsWeaponDrawn() const override {
     return (Battle_characterState->weaponDrawn & kHudWeaponDrawn) != 0;
   }
-  void SetHudBattleMode(int mode) override { Battle_SetHudBattleMode(mode); }
+  void SetHudBattleMode(int mode) override {
+    VS::Battle::SetLiveHudBattleMode(mode);
+  }
   void ReleaseMenuRows() override { Menu::Framework::ReleaseLiveMenuRows(); }
   void ClearActionMenuStatus() override {
     if (selection_ != nullptr) {

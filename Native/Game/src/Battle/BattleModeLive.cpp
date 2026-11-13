@@ -7,6 +7,7 @@
 #include <iterator>
 
 #include "Actors/AnimationControlLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
 
 extern "C" {
@@ -57,7 +58,7 @@ class LiveBattleModeHost final : public battle::BattleModeHost {
                                             : 0;
   }
   void SetHudBattleMode(int weapon_drawn) override {
-    Battle_SetHudBattleMode(weapon_drawn);
+    VS::Battle::SetLiveHudBattleMode(weapon_drawn);
   }
 };
 

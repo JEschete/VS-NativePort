@@ -2235,6 +2235,39 @@
     <None Include="..\..\port\differentials\hit_modifiers_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\hud_state_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f00235.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f01356.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f01357.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f01359.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f01382.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f01383.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f01385.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_f01386.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\hud_state_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\inventory_detail_f02566.py">
       <Filter>tools\port\differentials</Filter>
     </None>
