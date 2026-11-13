@@ -446,6 +446,15 @@
     <None Include="..\..\port\differentials\equipment_detail_b_guard_driver.cpp" />
     <None Include="..\..\port\differentials\flight_movement.py" />
     <None Include="..\..\port\differentials\flight_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_label_queue_advance.py" />
+    <None Include="..\..\port\differentials\floating_label_queue_compact.py" />
+    <None Include="..\..\port\differentials\floating_label_queue_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_label_queue_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_label_queue_remove.py" />
+    <None Include="..\..\port\differentials\floating_label_queue_reserve.py" />
+    <None Include="..\..\port\differentials\floating_label_queue_reset.py" />
+    <None Include="..\..\port\differentials\floating_label_queue_support.py" />
+    <None Include="..\..\port\differentials\floating_label_queue_world.py" />
     <None Include="..\..\port\differentials\height_filter.py" />
     <None Include="..\..\port\differentials\height_filter_driver.cpp" />
     <None Include="..\..\port\differentials\hit_calculations.py" />

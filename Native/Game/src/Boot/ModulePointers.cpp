@@ -43,6 +43,7 @@
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
@@ -333,8 +334,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80090434u, 0u, (void*)&Effects_DrawScreenWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80090A1Cu, 0u, (void*)&Effects_ResetFallingWeatherParticle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80090B28u, 0u, (void*)&Effects_RecalculateWeatherVelocity, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80093AB4u, 0u, (void*)&Battle_ResetFloatingLabels, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80093B04u, 0u, (void*)&Battle_QueueWorldLockedLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80093B68u, 0u, (void*)&Battle_QueueActorValueLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80093E64u, 0u, (void*)&Battle_QueueAbilityTimingResult, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80093F24u, 0u, (void*)&Battle_QueueChainCount, 0u, 0u, 0u},
@@ -342,7 +341,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009406Cu, 0u, (void*)&Battle_QueueActorStatusLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800941FCu, 0u, (void*)&Battle_UpdateAndDrawFloatingLabels, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80094844u, 0u, (void*)&Battle_PlaceActorValueLabel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80094AF8u, 0u, (void*)&Battle_AdvanceFloatingLabelQueue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80094B0Cu, 0u, (void*)&Battle_DrawActorValueLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80094E18u, 0u, (void*)&Battle_DrawValueLabelCaption, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009506Cu, 0u, (void*)&Battle_DrawLockedFloatingLabel, 0u, 0u, 0u},
@@ -352,9 +350,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80095A4Cu, 0u, (void*)&Battle_DrawChainCount, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80095C18u, 0u, (void*)&Battle_DrawActorMarker, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009627Cu, 0u, (void*)&Battle_DrawActorMarkers, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800962E4u, 0u, (void*)&Battle_ReserveFloatingLabel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009639Cu, 0u, (void*)&Battle_CompactFloatingLabels, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80096444u, 0u, (void*)&Battle_RemoveFloatingLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009651Cu, 0u, (void*)&Battle_DrawOffscreenActorArrow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80096768u, 0u, (void*)&Battle_QueueEquipmentStatChange, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009695Cu, 0u, (void*)&Battle_DrawEquipmentStatChange, 0u, 0u, 0u},
@@ -1782,6 +1777,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80095B70u, 0u, (void*)&VS::Battle::SetLiveActorMarkersHidden, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80095B7Cu, 0u, (void*)&VS::Battle::SetLiveActorMarker, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009722Cu, 0u, (void*)&VS::Battle::SuppressLiveAshleyStatusLabels, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80093AB4u, 0u, (void*)&VS::Battle::ResetLiveFloatingLabels, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80093B04u, 0u, (void*)&VS::Battle::QueueLiveWorldLockedLabelEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80094AF8u, 0u, (void*)&VS::Battle::AdvanceLiveFloatingLabelQueue, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800962E4u, 0u, (void*)&VS::Battle::ReserveLiveFloatingLabel, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009639Cu, 0u, (void*)&VS::Battle::CompactLiveFloatingLabels, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80096444u, 0u, (void*)&VS::Battle::RemoveLiveFloatingLabel, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

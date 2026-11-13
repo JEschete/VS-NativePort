@@ -459,6 +459,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\FloatingLabelQueue.cpp" />
+    <ClCompile Include="src\Battle\FloatingLabelQueueLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\HitCalculations.cpp" />
     <ClCompile Include="src\Battle\HitCalculationsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2413,6 +2417,8 @@
     <ClInclude Include="include\Battle\DamageRecoveryEffectsLive.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />
     <ClInclude Include="include\Battle\Enemy.h" />
+    <ClInclude Include="include\Battle\FloatingLabelQueue.hpp" />
+    <ClInclude Include="include\Battle\FloatingLabelQueueLive.hpp" />
     <ClInclude Include="include\Battle\HitCalculations.hpp" />
     <ClInclude Include="include\Battle\HitCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\HitModifiers.hpp" />

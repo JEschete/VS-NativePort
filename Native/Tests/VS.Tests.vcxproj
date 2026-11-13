@@ -211,6 +211,9 @@
     <ClCompile Include="src\FileMenuTests.cpp" />
     <ClCompile Include="src\FilesTests.cpp" />
     <ClCompile Include="src\FlightTerrainTests.cpp" />
+    <ClCompile Include="src\FloatingLabelQueueLiveTests.cpp" />
+    <ClCompile Include="src\FloatingLabelQueueModuleTests.cpp" />
+    <ClCompile Include="src\FloatingLabelQueueTests.cpp" />
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\FrameTimingTests.cpp" />
     <ClCompile Include="src\FrameUpdateTests.cpp" />
@@ -404,6 +407,8 @@
     <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />
+    <ClInclude Include="include\TestSupport\FloatingLabelQueueFixture.hpp" />
+    <ClInclude Include="include\TestSupport\FloatingLabelQueueLiveFixture.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />
   </ItemGroup>

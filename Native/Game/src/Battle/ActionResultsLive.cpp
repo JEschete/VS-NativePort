@@ -13,6 +13,7 @@
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActorVitalsLive.hpp"
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Log.hpp"
@@ -55,7 +56,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
         static_cast<u_short>(position_->vx),
         static_cast<u_short>(position_->vy),
         static_cast<u_short>(position_->vz)};
-    Battle_QueueWorldLockedLabel(world.data());
+    QueueLiveWorldLockedLabel(world);
   }
 
   std::size_t HitCount() override {

@@ -25,6 +25,7 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Encounter.hpp"
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -599,7 +600,7 @@ class LiveSections : public Host {
     LiveInitializeRoomEffects();
     Items::RestoreLiveRoomChestStates();
     Field_InitializeMovingPlatformsEntry();
-    Battle_ResetFloatingLabels();
+    Battle::ResetLiveFloatingLabels();
     Effects_AllocateWeatherParticles();
     LiveInitializeRoomBackgroundColors();
     LiveUploadRoomPalettes();

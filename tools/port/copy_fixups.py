@@ -875,6 +875,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::SetLiveActorMarkersHidden": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
     "VS::Battle::SetLiveActorMarker": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
     "VS::Battle::SuppressLiveAshleyStatusLabels": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
+    "VS::Battle::ResetLiveFloatingLabels": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+    "VS::Battle::QueueLiveWorldLockedLabelEntry": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+    "VS::Battle::AdvanceLiveFloatingLabelQueue": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+    "VS::Battle::ReserveLiveFloatingLabel": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+    "VS::Battle::CompactLiveFloatingLabels": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+    "VS::Battle::RemoveLiveFloatingLabel": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1720,6 +1726,12 @@ OWNED_CALL_BINDINGS["F01384"] = "VS::Battle::DrawLivePuzzleTimer"
 OWNED_CALL_BINDINGS["F00729"] = "VS::Battle::SetLiveActorMarkersHidden"
 OWNED_CALL_BINDINGS["F00730"] = "VS::Battle::SetLiveActorMarker"
 OWNED_CALL_BINDINGS["F00743"] = "VS::Battle::SuppressLiveAshleyStatusLabels"
+OWNED_CALL_BINDINGS["F00712"] = "VS::Battle::ResetLiveFloatingLabels"
+OWNED_CALL_BINDINGS["F00713"] = "VS::Battle::QueueLiveWorldLockedLabelEntry"
+OWNED_CALL_BINDINGS["F00721"] = "VS::Battle::AdvanceLiveFloatingLabelQueue"
+OWNED_CALL_BINDINGS["F00734"] = "VS::Battle::ReserveLiveFloatingLabel"
+OWNED_CALL_BINDINGS["F00735"] = "VS::Battle::CompactLiveFloatingLabels"
+OWNED_CALL_BINDINGS["F00736"] = "VS::Battle::RemoveLiveFloatingLabel"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3569,6 +3581,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80095B70, "VS::Battle::SetLiveActorMarkersHidden"),  # F00729
     ("BATTLE/BATTLE.PRG", 0x80095B7C, "VS::Battle::SetLiveActorMarker"),  # F00730
     ("BATTLE/BATTLE.PRG", 0x8009722C, "VS::Battle::SuppressLiveAshleyStatusLabels"),  # F00743
+    ("BATTLE/BATTLE.PRG", 0x80093AB4, "VS::Battle::ResetLiveFloatingLabels"),  # F00712
+    ("BATTLE/BATTLE.PRG", 0x80093B04, "VS::Battle::QueueLiveWorldLockedLabelEntry"),  # F00713
+    ("BATTLE/BATTLE.PRG", 0x80094AF8, "VS::Battle::AdvanceLiveFloatingLabelQueue"),  # F00721
+    ("BATTLE/BATTLE.PRG", 0x800962E4, "VS::Battle::ReserveLiveFloatingLabel"),  # F00734
+    ("BATTLE/BATTLE.PRG", 0x8009639C, "VS::Battle::CompactLiveFloatingLabels"),  # F00735
+    ("BATTLE/BATTLE.PRG", 0x80096444, "VS::Battle::RemoveLiveFloatingLabel"),  # F00736
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -5868,6 +5886,29 @@ for _row, _variable in (
         '        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);\n'
         "        return;\n    }",
         "retain the guarded movement primitive's optional actor contract in its rate wrapper",
+    ))
+
+NATIVE_HELPER_HEADERS |= {
+    "VS::Battle::CommitLiveFloatingLabel": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+    "VS::Battle::LiveFloatingLabelCount": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+}
+for _fid, _pointer in {
+    "F00714": "p",
+    "F00715": "p",
+    "F00716": "q",
+    "F00718": "p",
+    "F00738": "p",
+}.items():
+    FIXES.setdefault(_fid, []).append((
+        "++Battle_floatingLabelCount;",
+        f"VS::Battle::CommitLiveFloatingLabel({_pointer});",
+        "#365: publish the reserved slot at the original final increment point",
+    ))
+for _fid in ("F00714", "F00715", "F00716", "F00718", "F00719", "F00738", "F00742"):
+    FIXES.setdefault(_fid, []).append((
+        " < Battle_floatingLabelCount;",
+        " < VS::Battle::LiveFloatingLabelCount();",
+        "#365: validate the current count at each existing traversal-bound read",
     ))
 
 # The WEP header (Actors::WeaponModelData, 30DB0.c:598): four section offsets, relocated in place by _parseWep and

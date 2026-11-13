@@ -19,6 +19,7 @@
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -570,7 +571,7 @@ class LiveUnlockEffectHost final : public VS::Field::UnlockEffectHost {
         std::bit_cast<std::uint16_t>(point.x),
         std::bit_cast<std::uint16_t>(point.y),
         std::bit_cast<std::uint16_t>(point.z)};
-    static_cast<void>(Battle_QueueWorldLockedLabel(words.data()));
+    static_cast<void>(VS::Battle::QueueLiveWorldLockedLabel(words));
   }
 };
 

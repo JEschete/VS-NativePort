@@ -1,25 +1,7 @@
 {
 "Native\\Game\\src\\Battle\\Feedback.cpp": [
 [
-136,
-[
-"    label_spec = ((void* (*)())Battle_ReserveFloatingLabel)();"
-],
-[
-"    label_spec = (Battle_FloatingLabelSpec *)(((void* (*)(...))Battle_ReserveFloatingLabel)());"
-]
-],
-[
-191,
-[
-"    p = ((void* (*)())Battle_ReserveFloatingLabel)();"
-],
-[
-"    p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());"
-]
-],
-[
-240,
+213,
 [
 "    sprintf(p->text, \"%d\", p->value & 0x7FFF);",
 "    p->textLength = strlen(p->text);"
@@ -30,34 +12,7 @@
 ]
 ],
 [
-260,
-[
-"    p = ((void* (*)())Battle_ReserveFloatingLabel)();"
-],
-[
-"    p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());"
-]
-],
-[
-288,
-[
-"    q = ((void* (*)())Battle_ReserveFloatingLabel)();"
-],
-[
-"    q = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());"
-]
-],
-[
-334,
-[
-"    p = ((void* (*)())Battle_ReserveFloatingLabel)();"
-],
-[
-"    p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());"
-]
-],
-[
-723,
+689,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -66,7 +21,7 @@
 ]
 ],
 [
-743,
+709,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -75,7 +30,7 @@
 ]
 ],
 [
-753,
+719,
 [
 "    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -84,7 +39,7 @@
 ]
 ],
 [
-766,
+732,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -93,7 +48,7 @@
 ]
 ],
 [
-774,
+740,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -102,7 +57,7 @@
 ]
 ],
 [
-799,
+765,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -111,26 +66,26 @@
 ]
 ],
 [
-814,
+780,
 [
 "            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
 [
 "            AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);"
+]
+],
+[
+849,
+[
+"    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
+],
+[
+"    prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
 ]
 ],
 [
 883,
 [
-"    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"    prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-917,
-[
 "            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
 [
@@ -138,7 +93,7 @@
 ]
 ],
 [
-968,
+934,
 [
 "            ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
 ],
@@ -147,7 +102,7 @@
 ]
 ],
 [
-971,
+937,
 [
 "            vs_getRGB888(64, 128, 64), ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
 ],
@@ -156,7 +111,7 @@
 ]
 ],
 [
-993,
+959,
 [
 "        ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
 ],
@@ -165,7 +120,7 @@
 ]
 ],
 [
-1104,
+1070,
 [
 "        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -174,7 +129,7 @@
 ]
 ],
 [
-1148,
+1114,
 [
 "            ot = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable;"
 ],
@@ -183,7 +138,7 @@
 ]
 ],
 [
-1268,
+1184,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -192,7 +147,7 @@
 ]
 ],
 [
-1287,
+1203,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16, prim++);"
 ],
@@ -201,16 +156,7 @@
 ]
 ],
 [
-1340,
-[
-"        p = ((void* (*)())Battle_ReserveFloatingLabel)();"
-],
-[
-"        p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());"
-]
-],
-[
-1355,
+1271,
 [
 "        sprintf(p->text, \"%d\", p->value & 0x7FFF);",
 "        p->textLength = strlen(p->text);"
@@ -221,7 +167,7 @@
 ]
 ],
 [
-1370,
+1286,
 [
 "    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -230,7 +176,7 @@
 ]
 ],
 [
-1387,
+1303,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -239,7 +185,7 @@
 ]
 ],
 [
-1401,
+1317,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -248,7 +194,7 @@
 ]
 ],
 [
-1411,
+1327,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -257,7 +203,7 @@
 ]
 ],
 [
-1431,
+1347,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],

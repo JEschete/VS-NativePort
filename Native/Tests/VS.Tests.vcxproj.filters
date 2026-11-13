@@ -474,6 +474,15 @@
     <ClCompile Include="src\FlightTerrainTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FloatingLabelQueueLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FloatingLabelQueueModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FloatingLabelQueueTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\FogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -967,6 +976,12 @@
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\FloatingLabelQueueFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\FloatingLabelQueueLiveFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ScriptSources.hpp">

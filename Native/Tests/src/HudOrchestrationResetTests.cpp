@@ -4,6 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudOrchestrationLiveFixture.hpp"
 
@@ -21,7 +22,7 @@ TEST_CASE("HUD feedback entry reset clears commands but preserves marker BSS",
   std::ranges::fill(std::span(Battle_actorMarkers).first<16>(), char{7});
   b::SetLiveActorMarkersHidden(0xFFFF);
   b::SuppressLiveAshleyStatusLabels();
-  Battle_ResetFloatingLabels();
+  b::ResetLiveFloatingLabels();
   CHECK(Battle_actorMarkersHidden == 0);
   CHECK(Battle_ashleyStatusLabelsSuppressed == 0);
   CHECK(std::ranges::all_of(std::span(Battle_actorMarkers).first<16>(),

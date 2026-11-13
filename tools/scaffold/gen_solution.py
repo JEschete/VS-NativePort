@@ -370,6 +370,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\HudStateLive.cpp",
                 r"src\Battle\HudRenderingLive.cpp",
                 r"src\Battle\HudOrchestrationLive.cpp",
+                r"src\Battle\FloatingLabelQueueLive.cpp",
                 r"src\Menu\Inventory\DetailsPoliciesLive.cpp",
                 r"src\Menu\Inventory\EquipmentDetailControllersLive.cpp",
                 r"src\Menu\Inventory\ItemDetailDispatchLive.cpp",

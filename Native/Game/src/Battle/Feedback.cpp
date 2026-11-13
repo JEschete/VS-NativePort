@@ -1,12 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Math/Vector.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Battle/BattleTypes.h"
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
 #include "Field/GimmickPlacementLive.h"
@@ -118,32 +117,6 @@ RECT const Battle_kStatChangeSecondWordRects[] = { { 104, 160, 28, 8 }, { 104, 1
     { 144, 160, 30, 8 }, { 144, 168, 14, 8 }, { 144, 176, 18, 8 }, { 144, 184, 26, 8 },
     { 144, 192, 26, 8 }, { 144, 200, 22, 8 }, { 144, 208, 36, 8 } };
 
-// decomp: BATTLE.PRG func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1465)
-void Battle_ResetFloatingLabels(void)
-{
-    Battle_actorMarkersHidden = 0;
-    Battle_abilityTimingCueFrames = 0;
-    Battle_floatingLabelCount = 0;
-    Battle_statusLabelStepTimer = 0;
-    Battle_ashleyStatusLabelsSuppressed = 0;
-    VS::Core::Memory::ZeroLiveAlignedWords(Battle_floatingLabels, sizeof *Battle_floatingLabels);
-}
-
-// decomp: BATTLE.PRG func_80093B04 (src/BATTLE/BATTLE.PRG/2842C.c:1475)
-int Battle_QueueWorldLockedLabel(u_short* world_position)
-{
-    Battle_FloatingLabelSpec* label_spec;
-
-    label_spec = (Battle_FloatingLabelSpec *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
-    label_spec->opaqueB = 0;
-    label_spec->opaque8 = 3;
-    label_spec->opaque0 = world_position[0];
-    label_spec->opaque2 = world_position[1];
-    label_spec->opaque4 = world_position[2];
-    ++Battle_floatingLabelCount;
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_80093B68 (src/BATTLE/BATTLE.PRG/2842C.c:1544)
 int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amount, int label_flags)
 {
@@ -171,7 +144,7 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
     count = 0;
     frame = 0;
 
-    for (p = *Battle_floatingLabels; i < Battle_floatingLabelCount; ++i, ++p) {
+    for (p = *Battle_floatingLabels; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++p) {
         if ((p->key.bytes[0] == 1) && (p->key.bytes[1] == actor_slot) && (p->position.pad >= 0)) {
             frame = p->frame;
             ++count;
@@ -181,7 +154,7 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
     i = 0;
     flags = 0;
 
-    for (p = *Battle_floatingLabels; i < Battle_floatingLabelCount; ++i, ++p) {
+    for (p = *Battle_floatingLabels; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++p) {
         if ((p->key.bytes[0] == 1) && (p->key.bytes[1] == actor_slot) && (p->limb == limb)
             && (p->position.pad == count - 1)) {
             flags = 128;
@@ -189,7 +162,7 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
         }
     }
 
-    p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
+    p = VS::Battle::ReserveLiveFloatingLabel();
 
     if (limb != 255) {
         result = VS::Actors::LiveActorBonePosition(actor_slot, limb, &p->position, 2);
@@ -240,7 +213,7 @@ int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amou
 
     sprintf((char*)p->text, "%d", p->value & 0x7FFF);
     p->textLength = strlen((const char *)(p->text));
-    ++Battle_floatingLabelCount;
+    VS::Battle::CommitLiveFloatingLabel(p);
     return 0;
 }
 
@@ -251,20 +224,20 @@ int Battle_QueueAbilityTimingResult(int timing_result)
     Battle_FloatingLabel* p = *Battle_floatingLabels;
     int i;
 
-    for (i = 0; i < Battle_floatingLabelCount; ++i, ++p) {
+    for (i = 0; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++p) {
         if (p->key.halfword == 4) {
-            Battle_RemoveFloatingLabel(i);
+            VS::Battle::RemoveLiveFloatingLabel(i);
             break;
         }
     }
 
-    p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
+    p = VS::Battle::ReserveLiveFloatingLabel();
     p->frame = 0;
     p->key.bytes[0] = 4;
     p->key.bytes[1] = 0;
     p->value = timing_result;
     p->textLength = Core_Random_Rand() & 7;
-    ++Battle_floatingLabelCount;
+    VS::Battle::CommitLiveFloatingLabel(p);
     return 0;
 }
 
@@ -275,9 +248,9 @@ int Battle_QueueChainCount(int chain_count)
     Battle_FloatingLabel* q;
     int i;
 
-    for (i = 0; i < Battle_floatingLabelCount; ++i, ++p) {
+    for (i = 0; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++p) {
         if (p->key.halfword == 5) {
-            Battle_RemoveFloatingLabel(i);
+            VS::Battle::RemoveLiveFloatingLabel(i);
             break;
         }
     }
@@ -286,7 +259,7 @@ int Battle_QueueChainCount(int chain_count)
         return 0;
     }
 
-    q = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
+    q = VS::Battle::ReserveLiveFloatingLabel();
     q->key.bytes[0] = 5;
     q->frame = 0;
     q->key.bytes[1] = 0;
@@ -294,7 +267,7 @@ int Battle_QueueChainCount(int chain_count)
     if (q->value >= 1000) {
         q->value = 999;
     }
-    ++Battle_floatingLabelCount;
+    VS::Battle::CommitLiveFloatingLabel(q);
     return 0;
 }
 
@@ -322,7 +295,7 @@ int Battle_QueueActorStatusLabel(int actor_slot, int bone_tag, int status_index,
     int kind = 0;
     Battle_FloatingLabel* p = *Battle_floatingLabels;
 
-    for (; i < Battle_floatingLabelCount; ++i, ++p) {
+    for (; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++p) {
         if ((p->key.bytes[0] == 2) && (p->key.bytes[1] == actor_slot)) {
             frame = p->textLength + 0xC;
             if (p->position.pad >= 0) {
@@ -332,7 +305,7 @@ int Battle_QueueActorStatusLabel(int actor_slot, int bone_tag, int status_index,
         }
     }
 
-    p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
+    p = VS::Battle::ReserveLiveFloatingLabel();
     if (label_flags & 0x80) {
         if (VS::Actors::ProjectLiveActorTaggedBone(actor_slot, 0xFB, &screen_position, 0) != 0) {
             return 0;
@@ -358,7 +331,7 @@ int Battle_QueueActorStatusLabel(int actor_slot, int bone_tag, int status_index,
     p->limb = bone_tag;
     p->colorFlags = label_flags;
     p->value = status_index;
-    ++Battle_floatingLabelCount;
+    VS::Battle::CommitLiveFloatingLabel(p);
     return 0;
 }
 
@@ -383,7 +356,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
         label = *Battle_floatingLabels;
         Battle_statusLabelStepTimer = 0;
 
-        for (i = 0; i < Battle_floatingLabelCount; ++i, ++label) {
+        for (i = 0; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++label) {
             if (label->key.bytes[0] == 6 && --label->position.pad == -1) {
                 for (p = 0; p < i; ++p) {
                     if ((*Battle_floatingLabels)[p].key.bytes[0] == 6) {
@@ -398,7 +371,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
     label = *Battle_floatingLabels;
     Battle_placedLabelCount = 0;
 
-    for (i = 0; i < Battle_floatingLabelCount; ++i, ++label) {
+    for (i = 0; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++label) {
         SVECTOR position;
         short screen[2];
         long flag;
@@ -480,14 +453,14 @@ void Battle_UpdateAndDrawFloatingLabels(void)
 
             if (label->colorFlags & 0x80) {
                 label->colorFlags &= 0x7F;
-                Battle_AdvanceFloatingLabelQueue(label);
+                VS::Battle::AdvanceLiveFloatingLabelQueue(label);
                 break;
             }
 
             label->frame += State_tickSpeed / 2;
 
             if (label->frame >= 10) {
-                Battle_AdvanceFloatingLabelQueue(label);
+                VS::Battle::AdvanceLiveFloatingLabelQueue(label);
             }
             break;
         case 2:
@@ -518,7 +491,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
             label->frame += State_tickSpeed / 2;
 
             if (label->frame >= 10) {
-                Battle_AdvanceFloatingLabelQueue(label);
+                VS::Battle::AdvanceLiveFloatingLabelQueue(label);
             }
             break;
         case 3:
@@ -573,7 +546,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
     }
 
     if (removed > 0) {
-        Battle_CompactFloatingLabels(removed);
+        VS::Battle::CompactLiveFloatingLabels(removed);
     }
 }
 
@@ -672,13 +645,6 @@ void Battle_PlaceActorValueLabel(short* pos, Battle_FloatingLabel* label)
     }
 
     ++Battle_placedLabelCount;
-}
-
-// decomp: BATTLE.PRG func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2067)
-void Battle_AdvanceFloatingLabelQueue(Battle_FloatingLabel* label)
-{
-    label->frame = 0;
-    --label->position.pad;
 }
 
 // decomp: BATTLE.PRG func_80094B0C (src/BATTLE/BATTLE.PRG/2842C.c:2073)
@@ -1186,56 +1152,6 @@ void Battle_DrawActorMarkers(void)
     }
 }
 
-// decomp: BATTLE.PRG func_800962E4 (src/BATTLE/BATTLE.PRG/2842C.c:2595)
-void* Battle_ReserveFloatingLabel(void)
-{
-    Battle_FloatingLabel* p;
-    int i;
-
-    if (Battle_floatingLabelCount < 32) {
-        p = &(*Battle_floatingLabels)[Battle_floatingLabelCount];
-    } else {
-        for (i = 0; i < 31; ++i) {
-            VS::Core::Memory::CopyLiveAlignedWords(
-                &(*Battle_floatingLabels)[i], &(*Battle_floatingLabels)[i + 1], sizeof(*Battle_floatingLabels)[i]);
-        }
-        VS::Core::Memory::ZeroLiveAlignedWords(&(*Battle_floatingLabels)[31], sizeof(*Battle_floatingLabels)[31]);
-        p = &(*Battle_floatingLabels)[31];
-    }
-    return p;
-}
-
-// decomp: BATTLE.PRG func_8009639C (src/BATTLE/BATTLE.PRG/2842C.c:2613)
-void Battle_CompactFloatingLabels(int removal_count)
-{
-    int j;
-    int i;
-
-    for (i = 0; i < removal_count; ++i) {
-        for (j = 0; j < Battle_floatingLabelCount; ++j) {
-            if ((*Battle_floatingLabels)[j].key.bytes[0] == 0) {
-                Battle_RemoveFloatingLabel(j);
-                break;
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_80096444 (src/BATTLE/BATTLE.PRG/2842C.c:2628)
-void Battle_RemoveFloatingLabel(int label_index)
-{
-    int i;
-
-    --Battle_floatingLabelCount;
-    if (label_index != Battle_floatingLabelCount) {
-        for (i = label_index; i < Battle_floatingLabelCount; ++i) {
-            VS::Core::Memory::CopyLiveAlignedWords(
-                &(*Battle_floatingLabels)[i], &(*Battle_floatingLabels)[i + 1], sizeof(*Battle_floatingLabels)[i]);
-        }
-    }
-    VS::Core::Memory::ZeroLiveAlignedWords(&(*Battle_floatingLabels)[Battle_floatingLabelCount], sizeof(*Battle_floatingLabels)[Battle_floatingLabelCount]);
-}
-
 // decomp: BATTLE.PRG func_8009651C (src/BATTLE/BATTLE.PRG/2842C.c:2642)
 void Battle_DrawOffscreenActorArrow(SVECTOR* position, int direction)
 {
@@ -1332,13 +1248,13 @@ int Battle_QueueEquipmentStatChange(int arg0, int stat_label_kind, int encoded_a
         p = *Battle_floatingLabels;
         count = 0;
 
-        for (i = 0; i < Battle_floatingLabelCount; ++i, ++p) {
+        for (i = 0; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++p) {
             if ((p->key.bytes[0] == 6) || (p->key.bytes[0] == 7)) {
                 ++count;
             }
         }
 
-        p = (Battle_FloatingLabel *)(((void* (*)(...))Battle_ReserveFloatingLabel)());
+        p = VS::Battle::ReserveLiveFloatingLabel();
         p->key.bytes[0] = 7;
         p->key.bytes[1] = 0x7F;
         p->position.pad = count;
@@ -1355,7 +1271,7 @@ int Battle_QueueEquipmentStatChange(int arg0, int stat_label_kind, int encoded_a
 
         sprintf((char*)p->text, "%d", p->value & 0x7FFF);
         p->textLength = strlen((const char *)(p->text));
-        ++Battle_floatingLabelCount;
+        VS::Battle::CommitLiveFloatingLabel(p);
     }
 
     return 0;
@@ -1486,7 +1402,7 @@ void Battle_CommitEquipmentStatChanges(void)
     int i;
     Battle_FloatingLabel* p = *Battle_floatingLabels;
 
-    for (i = 0; i < Battle_floatingLabelCount; ++i, ++p) {
+    for (i = 0; i < VS::Battle::LiveFloatingLabelCount(); ++i, ++p) {
         if (p->key.bytes[0] == 7) {
             p->key.bytes[0] = 6;
         }
