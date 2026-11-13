@@ -1,3 +1,5 @@
+#include <process.h>
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -17,6 +19,7 @@
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/ContainerCapacityLiveFixture.hpp"
 #include "Menu/Framework/Framework.hpp"
+#include "Platform/App.hpp"
 #include "Render/GameFont.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -119,6 +122,21 @@ TEST_CASE("F02972 live measures all seven owners with genuine space glyphs",
 TEST_CASE(
     "F02972 live reloads the actual workspace after a render-log callback",
     "[container-capacity-live][F02972]") {
+  // Render diagnostics are process-wide and report only power-of-two counts.
+  const auto arguments = std::to_array<std::string>(
+      {(VS::Platform::ExecutableDir() / "VS.Tests.exe").string(),
+       "[.container-capacity-owner-rebind]", "--reporter", "compact"});
+  const auto output =
+      VS::Platform::ExecutableDir() /
+      ("container-capacity-owner-rebind-" + std::to_string(_getpid()) + ".log");
+  CAPTURE(output);
+  const auto result = VS::Platform::RunProcess(arguments, output);
+  REQUIRE(result.has_value());
+  CHECK(*result == 0);
+}
+
+TEST_CASE("F02972 isolated callback retains the original workspace and packets",
+          "[.container-capacity-owner-rebind]") {
   LiveFixture fixture;
   auto& next = *fixture.containers.replacement;
   std::span(next.gadgetBag.items.gems).back().id = 1;
