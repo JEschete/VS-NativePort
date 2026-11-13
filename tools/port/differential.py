@@ -34,10 +34,13 @@ The interpreter executes branch delay slots but not load delay slots (compiled P
 reads a loaded register in the next instruction). Calls must be stubbed or explicitly followed,
 so an unexpected callee stops the run instead of executing silently. A stub registered with
 tail=True also takes a jump or branch to its address (a tail call) and continues at $ra. The GTE model covers moves
-to and from IR0-IR3, MAC0-MAC3, SXY0-SXY2 and the leading-zero counter (LZCS/LZCR), and the SQR,
-GPF and NCLIP commands. Control moves cover FLAG, whose command result is modelled only for
-NCLIP; reading FLAG after SQR/GPF raises rather than reporting unmodelled status. Other COP
-instructions, syscalls, unaligned accesses and overflow traps raise.
+to and from V0, IR0-IR3, MAC0-MAC3, SXY0-SXY2 and the leading-zero counter (LZCS/LZCR), LWC2
+loads into V0, SWC2 stores from MAC0 only, rotation-control writes, and the SQR, GPF and
+NCLIP commands. MVMVA supports only sf=1, rotation matrix, V0, no translation and lm=0
+(SDK ApplyMatrixSV); other configurations raise. Only its fake command-number bits are ignored.
+FLAG command results are modelled for NCLIP and this MVMVA subset; reading FLAG after SQR/GPF
+raises rather than reporting unmodelled status. Other COP instructions, syscalls, unaligned
+accesses and overflow traps raise.
 
 A native broken variant (--replace SOURCE OLD NEW) builds a separate driver from a copy of one of
 the case's SOURCES with one exact text replacement, leaving the tree untouched, and runs the
@@ -173,11 +176,13 @@ def position(rng: random.Random, tile_coordinate: int) -> int:
 # The GTE's leading-zero counter, data registers 30 and 31: the square root and normalisation
 # helpers use it as a plain integer instruction.
 LZCS, LZCR = 30, 31
+VXY0, VZ0 = 0, 1
 # GTE data registers IR1-IR3 (signed halfwords) and MAC0-MAC3 (words).
 IR = (9, 10, 11)
 MAC = (25, 26, 27)
 MAC0 = 24
 GTE_NCLIP = 0x06
+GTE_MVMVA = 0x12
 GTE_SQR = 0x28
 GTE_GPF = 0x3D
 # IR0 (a signed halfword) and the screen XY FIFO entries SXY0-SXY2 (words), which some routines
@@ -242,7 +247,8 @@ class Machine:
         self.r = [0] * 32
         self.hi = self.lo = 0
         self.lzcs = 0
-        self.gte = dict.fromkeys(IR + MAC + (MAC0,) + SCRATCH_GTE, 0)
+        self.gte = dict.fromkeys((VXY0, VZ0) + IR + MAC + (MAC0,) + SCRATCH_GTE, 0)
+        self.gte_rotation = [0] * 5
         self.gte_flag: int | None = 0
         self.r[R["sp"]] = stack
         self.stubs: dict[int, Callable[[Machine], None]] = {}
@@ -402,7 +408,16 @@ class Machine:
             self.write((r[rs] + imm) & MASK, r[rt], size)
         elif op in (0x2A, 0x2E):
             self.store_partial(op, (r[rs] + imm) & MASK, r[rt])
-        elif op == 0x12 and rs in (0, 4) and rd in (LZCS, LZCR, MAC0, *IR, *MAC, *SCRATCH_GTE):
+        elif op == 0x32 and rt in (VXY0, VZ0):
+            self.gte_write(rt, self.aligned_load((r[rs] + imm) & MASK, 4, False))
+        elif op == 0x3A:
+            if rt != MAC0:
+                raise Fault(
+                    f"unsupported SWC2 data register {rt} at {pc:#x} "
+                    "(only MAC0 is modelled)"
+                )
+            self.write((r[rs] + imm) & MASK, self.gte_read(MAC0), 4)
+        elif op == 0x12 and rs in (0, 4) and rd in (VXY0, VZ0, LZCS, LZCR, MAC0, *IR, *MAC, *SCRATCH_GTE):
             if rs == 4:
                 self.gte_write(rd, r[rt])
             else:
@@ -414,16 +429,23 @@ class Machine:
                 raise Fault(f"GTE FLAG after SQR/GPF is not modelled at {pc:#x}")
             else:
                 r[rt] = self.gte_flag
+        elif op == 0x12 and rs == 6 and rd < 5:
+            self.gte_rotation[rd] = s16(r[rt]) if rd == 4 else r[rt] & MASK
         elif op == 0x12 and rs & 0x10 and funct == GTE_NCLIP:
             self.gte_nclip()
+        elif op == 0x12 and rs & 0x10 and funct == GTE_MVMVA:
+            if word & ~0x01F00000 != 0x4A086012:
+                raise Fault(f"unsupported GTE MVMVA configuration {word:#010x} at {pc:#x} "
+                            "(only sf=1, rotation, V0, no translation, lm=0 is modelled)")
+            self.gte_rotate_v0()
         elif op == 0x12 and rs & 0x10 and funct == GTE_SQR:
             self.gte_square(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12 and rs & 0x10 and funct == GTE_GPF:
             self.gte_interpolate(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12:
             raise Fault(f"unhandled GTE instruction {word:#010x} at {pc:#x} "
-                        "(only IR0-IR3, MAC0-MAC3, SXY0-SXY2, LZCS/LZCR and FLAG moves, "
-                        "SQR, GPF and NCLIP are modelled)")
+                        "(only V0, IR0-IR3, MAC0-MAC3, SXY0-SXY2, LZCS/LZCR and FLAG moves, "
+                        "rotation-control writes, SQR, GPF, NCLIP and SDK MVMVA are modelled)")
         else:
             raise Fault(f"unhandled opcode {op:#x} at {pc:#x} (COP instructions need a stub)")
         r[0] = 0
@@ -494,12 +516,12 @@ class Machine:
         return None
 
     def gte_write(self, register: int, value: int) -> None:
-        """mtc2: IR registers keep a signed halfword; LZCR is read-only."""
+        """mtc2/lwc2: VZ0 and IR keep a signed halfword; LZCR is read-only."""
         if register == LZCS:
             self.lzcs = value
-        elif register in (IR0, *IR):
+        elif register in (VZ0, IR0, *IR):
             self.gte[register] = s16(value)
-        elif register in (MAC0, *MAC, *SXY):
+        elif register in (VXY0, MAC0, *MAC, *SXY):
             self.gte[register] = value & MASK
 
     def gte_read(self, register: int) -> int:
@@ -524,6 +546,32 @@ class Machine:
         value = sx0 * sy1 + sx1 * sy2 + sx2 * sy0 - sx0 * sy2 - sx1 * sy0 - sx2 * sy1
         self.gte[MAC0] = value & MASK
         flag = 1 << 16 if value > 0x7FFFFFFF else 1 << 15 if value < -0x80000000 else 0
+        self.gte_write_flag(flag)
+
+    def gte_rotate_v0(self) -> None:
+        """SDK ApplyMatrixSV MVMVA: sf=1, rotation matrix, V0, no translation, lm=0."""
+        # Sony Inline Programming Reference 5-27, 6-26; libgte/MTX_06.s.
+        # Three signed16 products stay in [-3221127168, 3221225472]: no signed44
+        # overflow, but wrapping at signed32 before shifting would be incorrect.
+        matrix = [
+            s16(self.gte_rotation[index // 2] >> (16 * (index % 2)))
+            for index in range(9)
+        ]
+        vector = (
+            s16(self.gte[VXY0]),
+            s16(self.gte[VXY0] >> 16),
+            s16(self.gte[VZ0]),
+        )
+        flag = 0
+        for row, (ir, mac) in enumerate(zip(IR, MAC, strict=True)):
+            value = (
+                sum(matrix[row * 3 + column] * vector[column] for column in range(3))
+                >> 12
+            )
+            self.gte[mac] = value & MASK
+            self.gte[ir] = max(-0x8000, min(0x7FFF, value))
+            if not -0x8000 <= value <= 0x7FFF:
+                flag |= 1 << (24 - row)
         self.gte_write_flag(flag)
 
     def gte_square(self, shift: int, low_limit: int) -> None:

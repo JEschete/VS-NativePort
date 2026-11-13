@@ -298,6 +298,415 @@ class NormalClipping(unittest.TestCase):
                 run(command, JR_RA, NOP)
 
 
+class SdkMatrix(unittest.TestCase):
+    IDENTITY = (4096, 0, 0, 0, 4096, 0, 0, 0, 4096)
+
+    @staticmethod
+    def cop2(move: int, gpr: int, register: int) -> int:
+        return 0x12 << 26 | move << 21 | gpr << 16 | register << 11
+
+    @classmethod
+    def sdk_words(cls, command: int = 0x4A486012) -> tuple[int, ...]:
+        # ApplyMatrixSV, SLUS_010.40 libgte/MTX_06.s, 0x80041724..0x8004177B.
+        return (
+            *(i_type(0x23, T0 + index, A0, 4 * index) for index in range(5)),
+            *(cls.cop2(6, T0 + index, index) for index in range(5)),
+            i_type(0x32, 0, A1, 0),
+            i_type(0x32, 1, A1, 4),
+            NOP,
+            command,
+            *(cls.cop2(0, T0 + index, 9 + index) for index in range(3)),
+            *(i_type(0x29, T0 + index, A2, 2 * index) for index in range(3)),
+            JR_RA,
+            r_type(0x21, V0, A2, ZERO),
+        )
+
+    def apply(self, matrix, vector, command: int = 0x4A486012) -> Machine:
+        def setup(m: Machine) -> None:
+            for index, value in enumerate(matrix):
+                m.put(DATA + 2 * index, value, 2)
+            m.put(DATA + 18, 0xA55A, 2)
+            for index, value in enumerate(vector):
+                m.put(DATA + 0x40 + 2 * index, value, 2)
+            m.put(DATA + 0x46, 0xDEAD, 2)
+            m.put(DATA + 0x86, 0xBEEF, 2)
+            m.gte_flag = 0xFFFFF000
+
+        return run(
+            *self.sdk_words(command),
+            setup=setup,
+            a0=DATA,
+            a1=DATA + 0x40,
+            a2=DATA + 0x80,
+        )
+
+    def assert_result(self, m: Machine, mac, ir, flag: int) -> None:
+        self.assertEqual(
+            tuple(differential.s32(m.gte_read(register)) for register in (25, 26, 27)),
+            mac,
+        )
+        self.assertEqual(
+            tuple(differential.s32(m.gte_read(register)) for register in (9, 10, 11)),
+            ir,
+        )
+        self.assertEqual(
+            tuple(m.load(DATA + 0x80 + 2 * axis, 2, signed=True) for axis in range(3)),
+            ir,
+        )
+        self.assertEqual(m.gte_flag, flag)
+
+    def test_sdk_sequence_packs_signed_rotation_and_v0(self) -> None:
+        for matrix, vector, expected in (
+            (self.IDENTITY, (-32768, 32767, -1), (-32768, 32767, -1)),
+            ((4096, 0, 0, 0, 0, -4096, 0, 4096, 0), (7, -11, 13), (7, -13, -11)),
+            ((0, 0, 4096, 0, 4096, 0, -4096, 0, 0), (7, -11, 13), (13, -11, -7)),
+            ((0, -4096, 0, 4096, 0, 0, 0, 0, 4096), (7, -11, 13), (11, 7, 13)),
+            ((4096, 0, 0, 0, 4096, 0, 0, 0, -4096), (7, -11, 13), (7, -11, -13)),
+            (
+                (4096, 2048, -1024, -8192, 4096, 512, 256, -4096, 8192),
+                (8, -16, 32),
+                (-8, -28, 80),
+            ),
+        ):
+            with self.subTest(matrix=matrix):
+                m = self.apply(matrix, vector)
+                self.assert_result(m, expected, expected, 0)
+                self.assertEqual(m.r[V0], DATA + 0x80)
+                self.assertEqual(m.load(DATA + 0x86, 2), 0xBEEF)
+                self.assertEqual(
+                    m.stores, [(DATA + 0x80, 2), (DATA + 0x82, 2), (DATA + 0x84, 2)]
+                )
+                self.assertEqual((m.stubs, m.patches), ({}, {}))
+
+    def test_mvmva_accumulates_wide_before_arithmetic_q12_shift(self) -> None:
+        m = self.apply(
+            (-32768, -32768, -32768, 32767, 32767, 32767, -32768, 32767, 1),
+            (-32768, -32768, -32768),
+        )
+        self.assert_result(m, (786432, -786408, 0), (32767, -32768, 0), 0x81800000)
+        for vector, expected in (
+            ((-1, 0, 0), (-1, -1, -2)),
+            ((1, 0, 0), (0, 0, 1)),
+        ):
+            with self.subTest(vector=vector):
+                m = self.apply((1, 0, 0, 4095, 0, 0, 4097, 0, 0), vector)
+                self.assert_result(m, expected, expected, 0)
+
+    def test_mvmva_ir_limits_and_channel_specific_summary_flags(self) -> None:
+        for row, saturation_flag in enumerate((0x81000000, 0x80800000, 0x00400000)):
+            matrix = [0] * 9
+            matrix[3 * row] = matrix[3 * row + 1] = 4096
+            for vector, mac_value, ir_value, clipped in (
+                ((32767, 0, 0), 32767, 32767, False),
+                ((32767, 1, 0), 32768, 32767, True),
+                ((-32768, 0, 0), -32768, -32768, False),
+                ((-32768, -1, 0), -32769, -32768, True),
+            ):
+                with self.subTest(row=row, vector=vector):
+                    mac, ir = [0] * 3, [0] * 3
+                    mac[row], ir[row] = mac_value, ir_value
+                    m = self.apply(matrix, vector)
+                    self.assert_result(
+                        m, tuple(mac), tuple(ir), saturation_flag if clipped else 0
+                    )
+        m = self.apply((4096, 4096, 0) * 3, (-32768, -1, 0))
+        self.assert_result(
+            m, (-32769, -32769, -32769), (-32768, -32768, -32768), 0x81C00000
+        )
+
+    def test_rotation_and_v0_moves_are_transfers_not_commands(self) -> None:
+        cop2 = self.cop2
+        for flag in (None, 0xFFFFF000):
+            with self.subTest(flag=flag):
+                m = Machine(
+                    image(
+                        cop2(6, A0, 4),
+                        cop2(4, A1, 0),
+                        cop2(4, A2, 1),
+                        cop2(0, V0, 0),
+                        cop2(0, V1, 1),
+                        NOP,
+                        JR_RA,
+                        NOP,
+                    )
+                )
+                m.gte_rotation = [11, 22, 33, 44, 55]
+                m.gte_flag = flag
+                m.r[A0], m.r[A1], m.r[A2] = 0x12348000, 0x80007FFF, 0xBEEF8001
+                before = dict(m.gte)
+                m.execute(BASE)
+                before.update({0: 0x80007FFF, 1: -32767})
+                self.assertEqual(m.gte, before)
+                self.assertEqual(m.gte_rotation, [11, 22, 33, 44, -32768])
+                self.assertEqual((m.r[V0], m.r[V1]), (0x80007FFF, 0xFFFF8001))
+                self.assertEqual(m.gte_flag, flag)
+                self.assertEqual((m.stores, m.overlay), ([], {}))
+
+    def test_lwc2_v0_signed_offsets_wrap_alignment_and_atomic_faults(self) -> None:
+        cop2 = self.cop2
+
+        def setup(m: Machine) -> None:
+            m.put(DATA, 0x80007FFF)
+            m.put(DATA + 4, 0xCAFE8001)
+            m.gte_flag = 0xFFFFF000
+
+        m = run(
+            i_type(0x32, 0, A0, -4),
+            i_type(0x32, 1, A0, 0),
+            cop2(0, V0, 0),
+            cop2(0, V1, 1),
+            NOP,
+            JR_RA,
+            NOP,
+            setup=setup,
+            a0=DATA + 4,
+        )
+        self.assertEqual((m.r[V0], m.r[V1]), (0x80007FFF, 0xFFFF8001))
+        self.assertEqual((m.load(DATA), m.load(DATA + 4)), (0x80007FFF, 0xCAFE8001))
+        self.assertEqual((m.gte_flag, m.stores), (0xFFFFF000, []))
+        m = run(
+            i_type(0x32, 0, A0, 4),
+            JR_RA,
+            NOP,
+            setup=lambda machine: machine.put(0, 0xFEDCBA98),
+            a0=0xFFFFFFFC,
+        )
+        self.assertEqual(m.gte_read(0), 0xFEDCBA98)
+        for register in (0, 1):
+            for address, offset, message in (
+                (DATA, 1, "unaligned 4-byte load"),
+                (DATA, 2, "unaligned 4-byte load"),
+                (DATA, 3, "unaligned 4-byte load"),
+                (0x80700000, 0, "unmapped read"),
+            ):
+                m = Machine(image(i_type(0x32, register, A0, offset)))
+                m.map_zero(DATA, 0x10)
+                m.r[A0] = address
+                m.gte[register], m.gte_flag = 0x1234, None
+                before = dict(m.gte)
+                with (
+                    self.subTest(register=register, address=address, offset=offset),
+                    self.assertRaisesRegex(Fault, message),
+                ):
+                    m.step(BASE)
+                self.assertEqual(m.gte, before)
+                self.assertIsNone(m.gte_flag)
+                self.assertEqual((m.stores, m.overlay), ([], {}))
+
+    def test_mvmva_preserves_state_and_does_not_expand_sqr_gpf_status(self) -> None:
+        for previous_flag in (None, 0xFFFFF000):
+            m = Machine(image(0x4A486012))
+            m.gte.update({register: 0x12340000 + register for register in range(32)})
+            m.gte[0], m.gte[1] = 0xFFFE0001, 3
+            m.gte_rotation = [4096, 0, 4096, 0, 4096]
+            m.gte_flag = previous_flag
+            m.lzcs, m.hi, m.lo = 0xFFFF0000, 0x10203040, 0x50607080
+            m.put(DATA, 0xAABBCCDD)
+            before, rotation = dict(m.gte), list(m.gte_rotation)
+            registers, overlay = list(m.r), dict(m.overlay)
+            m.step(BASE)
+            before.update({9: 1, 10: -2, 11: 3, 25: 1, 26: 0xFFFFFFFE, 27: 3})
+            self.assertEqual(m.gte, before)
+            self.assertEqual(m.gte_rotation, rotation)
+            self.assertEqual(m.gte_flag, 0)
+            self.assertEqual((m.r, m.overlay), (registers, overlay))
+            self.assertEqual((m.lzcs, m.hi, m.lo), (0xFFFF0000, 0x10203040, 0x50607080))
+            self.assertEqual((m.stores, m.trace, m.patches), ([], [], {}))
+        cop2 = self.cop2
+        for command in (0x4A000028, 0x4B90003D):
+            with (
+                self.subTest(command=hex(command)),
+                self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"),
+            ):
+                run(
+                    0x4A486012,
+                    command,
+                    cop2(6, A0, 0),
+                    cop2(4, A0, 0),
+                    i_type(0x32, 1, A1, 0),
+                    cop2(2, V0, 31),
+                    NOP,
+                    JR_RA,
+                    NOP,
+                    a1=DATA,
+                )
+            m = run(command, 0x4A486012, cop2(2, V0, 31), NOP, JR_RA, NOP)
+            self.assertEqual(m.r[V0], 0)
+
+    def test_mvmva_accepts_only_sdk_configuration_and_fake_command_variants(
+        self,
+    ) -> None:
+        for fake in range(32):
+            with self.subTest(fake=fake):
+                m = self.apply(self.IDENTITY, (7, -11, 13), 0x4A086012 | fake << 20)
+                self.assert_result(m, (7, -11, 13), (7, -11, 13), 0)
+        command = 0x4A486012
+        unsupported = [
+            command & ~(1 << 19),
+            command | 1 << 10,
+            *(command | value << 17 for value in (1, 2, 3)),
+            *(command | value << 15 for value in (1, 2, 3)),
+            *((command & ~(3 << 13)) | value << 13 for value in (0, 1, 2)),
+            *(command | 1 << bit for bit in (6, 7, 8, 9, 11, 12)),
+        ]
+        for word in unsupported:
+            m = Machine(image(word))
+            m.gte_flag = 0xFFFFF000
+            before = dict(m.gte)
+            with (
+                self.subTest(word=hex(word)),
+                self.assertRaisesRegex(Fault, "unsupported GTE MVMVA configuration"),
+            ):
+                m.step(BASE)
+            self.assertEqual((m.gte, m.gte_flag), (before, 0xFFFFF000))
+        cop2 = self.cop2
+        for word in (
+            cop2(6, A0, 5),
+            cop2(6, A0, 30),
+            cop2(2, V0, 0),
+            cop2(4, A0, 2),
+            cop2(0, V0, 2),
+            i_type(0x32, 2, A0, 0),
+        ):
+            with (
+                self.subTest(word=hex(word)),
+                self.assertRaisesRegex(Fault, "unhandled"),
+            ):
+                run(word, JR_RA, NOP)
+
+
+class Mac0Stores(unittest.TestCase):
+    @staticmethod
+    def unchanged_state(m: Machine) -> tuple:
+        return (
+            tuple(m.r),
+            tuple(m.gte.items()),
+            tuple(m.gte_rotation),
+            m.gte_flag,
+            m.lzcs,
+            m.hi,
+            m.lo,
+            tuple(m.images),
+            tuple(m.zero),
+            tuple(m.trace),
+            dict(m.stubs),
+            set(m.tail_stubs),
+            set(m.follow),
+            dict(m.patches),
+            m.steps,
+        )
+
+    @staticmethod
+    def machine(word: int) -> Machine:
+        m = Machine(image(word))
+        m.gte.update({register: 0x12340000 + register for register in range(32)})
+        m.gte_rotation = [4096, 0, 4096, 0, 4096]
+        m.lzcs, m.hi, m.lo = 0xFFFF0000, 0x10203040, 0x50607080
+        m.r[24] = 0x13579BDF
+        return m
+
+    def test_original_swc2_mac0_word_preserves_sign_bytes_and_other_state(self) -> None:
+        for value, payload in (
+            (0, b"\x00\x00\x00\x00"),
+            (0x12345678, b"\x78\x56\x34\x12"),
+            (0x7FFFFFFF, b"\xff\xff\xff\x7f"),
+            (0x80000000, b"\x00\x00\x00\x80"),
+            (0xFFFFFFFF, b"\xff\xff\xff\xff"),
+        ):
+            for flag in (None, 0x80010000):
+                with self.subTest(value=hex(value), flag=flag):
+                    m = self.machine(0xE9580000)
+                    m.store(DATA, b"\xa5" * 16)
+                    m.r[T2], m.gte[24], m.gte_flag = DATA + 4, value, flag
+                    before = self.unchanged_state(m)
+                    m.step(BASE)
+                    self.assertEqual(self.unchanged_state(m), before)
+                    self.assertEqual(
+                        m.bytes(DATA, 16), b"\xa5" * 4 + payload + b"\xa5" * 8
+                    )
+                    self.assertEqual(m.stores, [(DATA + 4, 4)])
+
+    def test_swc2_signed_offsets_wrap_and_stay_within_one_word(self) -> None:
+        for base, offset, destination in (
+            (0x80300010, -8, 0x80300008),
+            (0x80300000, 8, 0x80300008),
+            (0x80308000, -32768, 0x80300000),
+            (0x80300000, 32764, 0x80307FFC),
+            (0xFFFFFFFC, 4, 0),
+            (0, -4, 0xFFFFFFFC),
+        ):
+            with self.subTest(base=hex(base), offset=offset):
+                m = self.machine(i_type(0x3A, 24, A0, offset))
+                low, high = (destination - 4) & MASK, (destination + 4) & MASK
+                m.put(low, 0x10203040)
+                m.put(destination, 0xA5A5A5A5)
+                m.put(high, 0x50607080)
+                m.r[A0], m.gte[24] = base, 0x89ABCDEF
+                before, keys = self.unchanged_state(m), set(m.overlay)
+                m.step(BASE)
+                self.assertEqual(self.unchanged_state(m), before)
+                self.assertEqual(m.bytes(destination, 4), b"\xef\xcd\xab\x89")
+                self.assertEqual(m.bytes(low, 4), b"\x40\x30\x20\x10")
+                self.assertEqual(m.bytes(high, 4), b"\x80\x70\x60\x50")
+                self.assertEqual(set(m.overlay), keys)
+                self.assertTrue(all(0 <= address <= MASK for address in m.overlay))
+                self.assertEqual(m.stores, [(destination, 4)])
+
+    def test_swc2_misalignment_faults_before_any_write(self) -> None:
+        for base, offset in ((DATA, 1), (DATA, 2), (DATA, 3), (0, -1)):
+            m = self.machine(i_type(0x3A, 24, A0, offset))
+            m.store(DATA, b"\xa5" * 16)
+            m.r[A0], m.gte_flag = base, None
+            before, memory = self.unchanged_state(m), dict(m.overlay)
+            with (
+                self.subTest(base=hex(base), offset=offset),
+                self.assertRaisesRegex(Fault, "unaligned 4-byte store"),
+            ):
+                m.step(BASE)
+            self.assertEqual(self.unchanged_state(m), before)
+            self.assertEqual((m.overlay, m.stores), (memory, []))
+
+    def test_swc2_refuses_every_other_data_register_explicitly(self) -> None:
+        for register in range(32):
+            if register == 24:
+                continue
+            m = self.machine(i_type(0x3A, register, A0, 0))
+            m.store(DATA, b"\xa5" * 16)
+            m.r[A0] = DATA + 1
+            before, memory = self.unchanged_state(m), dict(m.overlay)
+            with (
+                self.subTest(register=register),
+                self.assertRaisesRegex(Fault, "unsupported SWC2 data register"),
+            ):
+                m.step(BASE)
+            self.assertEqual(self.unchanged_state(m), before)
+            self.assertEqual((m.overlay, m.stores), (memory, []))
+
+    def test_swc2_preserves_nclip_and_unknown_sqr_gpf_status(self) -> None:
+        cfc_flag = SdkMatrix.cop2(2, V0, 31)
+        m = Machine(image(0x4B400006, 0xE9580000, cfc_flag))
+        m.gte[12], m.gte[13], m.gte[14] = 0x80008000, 0x80007FFF, 0x7FFF8000
+        m.r[T2] = DATA
+        m.step(BASE)
+        m.step(BASE + 4)
+        m.step(BASE + 8)
+        self.assertEqual(m.bytes(DATA, 4), b"\x01\x00\xfe\xff")
+        self.assertEqual((m.gte_read(24), m.r[V0]), (0xFFFE0001, 0x80010000))
+        for command in (0x4A000028, 0x4B90003D):
+            m = Machine(image(command, 0xE9580000, cfc_flag))
+            m.r[T2], m.gte[24] = DATA, 0x89ABCDEF
+            m.step(BASE)
+            before = self.unchanged_state(m)
+            m.step(BASE + 4)
+            self.assertEqual(self.unchanged_state(m), before)
+            self.assertEqual(m.bytes(DATA, 4), b"\xef\xcd\xab\x89")
+            with (
+                self.subTest(command=hex(command)),
+                self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"),
+            ):
+                m.step(BASE + 8)
+
+
 class Memory(unittest.TestCase):
     def test_signed_and_unsigned_loads_and_stores(self) -> None:
         def setup(m: Machine) -> None:
@@ -338,9 +747,9 @@ class Memory(unittest.TestCase):
         with self.assertRaisesRegex(Fault, "unhandled GTE instruction"):
             run(0x4A000000, JR_RA, NOP)  # a GTE command
         with self.assertRaisesRegex(Fault, "unhandled GTE instruction"):
-            run(0x48820000, JR_RA, NOP)  # mtc2 to data register 0
+            run(0x48821000, JR_RA, NOP)  # mtc2 to unsupported vector 1
         with self.assertRaisesRegex(Fault, "unhandled opcode"):
-            run(0xC8000000, JR_RA, NOP)  # lwc2
+            run(0xC8020000, JR_RA, NOP)  # lwc2 to unsupported vector 1
         machine = Machine(image(i_type(4, ZERO, ZERO, -1), NOP))  # beq zero, zero, self
         with self.assertRaisesRegex(Fault, "runaway"):
             machine.execute(BASE, limit=100)
