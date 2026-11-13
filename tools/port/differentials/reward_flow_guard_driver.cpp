@@ -14,6 +14,7 @@
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
+#include "Field/GameModeLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -31,7 +32,8 @@ extern "C" {
 Battle_ActionState* Battle_actionState { };
 Battle_ActionDefinition Battle_actionDefinitions[256] { };
 u_int Battle_actionFlowMode { };
-int Battle_rewardsFollowAction { }, Field_isInteractionPaused { };
+int Battle_rewardsFollowAction { }, Battle_lootMenuOpened { }, Field_isInteractionPaused { };
+int Effects_effectBusyFlags { };
 Items_LootListNode* Items_lootListHead { };
 void Core_Errorf(const char*, const char* message, ...)
 {
@@ -184,6 +186,7 @@ void SetLiveClutAnimationEnabled(int enabled)
 }
 }
 namespace VS::Field {
+void LiveResumeFieldAfterMenu() { std::abort(); }
 void LiveSetRoomAnimationsPaused(int paused)
 {
     valid &= paused == (events.back() == kUnfreeze ? 1 : 0);
@@ -210,6 +213,8 @@ void LiveSetRoomAmbienceDucked(int ducked)
 }
 }
 namespace VS::Battle {
+void LiveBeginPendingAbilityReward() { std::abort(); }
+void LiveGrantPendingAbilityUnlock() { std::abort(); }
 int LivePendingBattleAbilityUnlocks()
 {
     ++pending_reads;
@@ -217,6 +222,8 @@ int LivePendingBattleAbilityUnlocks()
     return std::bit_cast<int>(pending);
 }
 }
+extern "C" int Menu_IsSceneNotificationPending() { std::abort(); }
+extern "C" void Menu_ReleaseSceneNotification() { std::abort(); }
 namespace VS::Menu::Framework {
 void OpenLiveAbilityUnlockMenu(int art, int ability)
 {

@@ -275,6 +275,7 @@
     <ClCompile Include="src\RenderScreenOverlayTests.cpp" />
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\ResultsTextureTests.cpp" />
+    <ClCompile Include="src\RewardDialogsTests.cpp" />
     <ClCompile Include="src\RewardFlowLiveTests.cpp" />
     <ClCompile Include="src\RewardFlowTests.cpp" />
     <ClCompile Include="src\RoomAiMapTests.cpp" />

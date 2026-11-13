@@ -60,9 +60,10 @@ work (splitting tests, writing a differential case) to a background agent while 
 - Write Catch2 tests for every function under a group tag, covering each branch and refusal.
 - Iterate with `python tools\test\promotion_check.py iterate --focused "[tag]"` (Debug game and tests only).
 - Keep each `TEST_CASE` to about 9 assertions. Every Catch2 assertion expands to several statements, and tidy's
-  `readability-function-size` limit (80 statements, lambdas included) fails larger cases. Read optionals with
-  `.value()` rather than `->`, do not initialize throwing namespace-scope statics, compare structs by value or
-  `std::bit_cast` bytes rather than `memcmp`, and keep LF line endings.
+  `readability-function-size` limit (80 statements, lambdas included) can still fail callback-heavy cases.
+  Guard optional reads in the same function or a guarded value-returning helper; `.value()` or a Catch2 `REQUIRE`
+  alone is not an explicit guard for tidy. Do not initialize throwing namespace-scope statics, compare structs by
+  value or `std::bit_cast` bytes rather than `memcmp`, and keep LF line endings.
 
 ### 4. Compare against the original
 
@@ -85,6 +86,9 @@ work (splitting tests, writing a differential case) to a background agent while 
   (`.venv-3\Lib\site-packages\clang_format\data\bin\clang-format.exe --style=file -i <file>`), then run the fast
   pass `python tools\lint\quality.py --files <changed first-party files>` (format, cpplint, ruff and clones in
   seconds; differential drivers are not first-party and are rejected by `--files`).
+- For new test worlds or callback-heavy cases, run a scoped `--files <test file> --tidy` preflight. The fast pass
+  does not catch unchecked optionals or oversized assertion/callback expansions; do not discover those only
+  after both full regressions have run.
 - Write a ledger spec (record, slice, function notes, verification, gate, plan row text) and apply it before the group
   check, because the copier tests compare the catalog's `final_location` with `owned.csv`:
   `python tools\port\promote.py ledgers <spec.json> --summary build\promotion-check\<run>\summary.json`.

@@ -19,6 +19,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Boot/GameplayLoop.hpp"
@@ -464,13 +465,13 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         Battle::FinishLiveActionSequence();
         break;
       case BattleActionFlow::kLootResults:
-        Battle_UpdateLootResults();
+        Battle::UpdateLiveLootResults();
         break;
       case BattleActionFlow::kAbilityUnlockDelay:
-        Battle_UpdateAbilityUnlockDelay();
+        Battle::UpdateLiveAbilityUnlockDelay();
         break;
       case BattleActionFlow::kAbilityUnlockResults:
-        Battle_UpdateAbilityUnlockResults();
+        Battle::UpdateLiveAbilityUnlockResults();
         break;
       case BattleActionFlow::kIdle:
         break;

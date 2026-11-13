@@ -621,6 +621,9 @@
     <ClCompile Include="src\ResultsTextureTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\RewardDialogsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\RewardFlowLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

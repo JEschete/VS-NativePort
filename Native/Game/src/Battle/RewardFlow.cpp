@@ -8,6 +8,7 @@ constexpr int kRewardStoryFlag = 0xAB;
 constexpr int kResultsStage = 3;
 constexpr int kPendingArtShift = 16;
 constexpr int kMenuBusy = 1;
+constexpr std::uint32_t kAbilityEffectsBusyMask = 3;
 
 bool PendingAction(RewardWorld& world) {
   const RewardSelection selection = world.Selection();
@@ -120,6 +121,49 @@ void UpdateRewardResultsDialog(RewardWorld& world) {
     EndRewardPause(world);
     world.ReleaseMenuRows();
     OpenPendingLootRewards(world);
+  }
+}
+
+// decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7516)
+void UpdateLootResults(RewardDialogWorld& world) {
+  world.UpdateMenu();
+  if (world.MenuStatus() != kMenuBusy) {
+    world.ResumeFieldAfterMenu();
+    world.ReleaseMenuRows();
+    world.BeginPendingAbilityReward();
+  }
+}
+
+// decomp: BATTLE.PRG func_8007980C (src/BATTLE/BATTLE.PRG/146C.c:7526)
+void UpdateAbilityUnlockDelay(RewardDialogWorld& world) {
+  if ((world.EffectsBusyFlags() & kAbilityEffectsBusyMask) == 0) {
+    world.GrantPendingAbilityUnlock();
+  }
+}
+
+// decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7533)
+void UpdateAbilityUnlockResults(RewardDialogWorld& world) {
+  world.UpdateMenu();
+  if (world.MenuStatus() != kMenuBusy &&
+      world.SceneNotificationPending() == 0) {
+    world.ResumeFieldAfterMenu();
+    world.ReleaseMenuRows();
+    world.ReleaseSceneNotification();
+    world.BeginPendingAbilityReward();
+  }
+}
+
+// decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8402)
+void UpdatePendingLootDialog(RewardDialogWorld& world) {
+  world.UpdateMenu();
+  if (world.MenuStatus() != kMenuBusy) {
+    if (world.FollowAction() != 0) EndRewardPause(world);
+    world.ReleaseMenuRows();
+    if (world.LootMenuOpened() != 0) {
+      ResumeAfterRewards(world);
+    } else {
+      CheckRewardUnlocks(world);
+    }
   }
 }
 }  // namespace VS::Battle

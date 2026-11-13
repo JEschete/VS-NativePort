@@ -61,6 +61,18 @@ class RewardWorld {
   virtual void ReleaseMenuRows() = 0;
 };
 
+// Older ability rewards have distinct recovery policies from reward unlocks.
+class RewardDialogWorld : public RewardWorld {
+ public:
+  [[nodiscard]] virtual std::uint32_t EffectsBusyFlags() = 0;
+  [[nodiscard]] virtual std::int32_t SceneNotificationPending() = 0;
+  [[nodiscard]] virtual std::int32_t LootMenuOpened() = 0;
+  virtual void ResumeFieldAfterMenu() = 0;
+  virtual void ReleaseSceneNotification() = 0;
+  virtual void BeginPendingAbilityReward() = 0;
+  virtual void GrantPendingAbilityUnlock() = 0;
+};
+
 void BeginRewardPause(RewardWorld& world);
 void EndRewardPause(RewardWorld& world);
 void ResumeAfterRewards(RewardWorld& world);
@@ -69,4 +81,8 @@ void ShowPendingRewardUnlock(RewardWorld& world);
 void OpenPendingLootRewards(RewardWorld& world);
 void OpenRewardResults(RewardWorld& world);
 void UpdateRewardResultsDialog(RewardWorld& world);
+void UpdateLootResults(RewardDialogWorld& world);
+void UpdateAbilityUnlockDelay(RewardDialogWorld& world);
+void UpdateAbilityUnlockResults(RewardDialogWorld& world);
+void UpdatePendingLootDialog(RewardDialogWorld& world);
 }  // namespace VS::Battle

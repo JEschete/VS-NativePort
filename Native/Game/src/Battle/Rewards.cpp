@@ -1,7 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Battle/AbilitiesLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
-#include "Field/GameModeLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -15,54 +13,6 @@ int Battle_lootMenuOpened;
 
 // decomp: D_800F1864 (D_800F1864@BATTLE/BATTLE.PRG)
 int Battle_rewardsFollowAction;
-
-// decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7516)
-void Battle_UpdateLootResults(void)
-{
-    VS::Menu::Framework::UpdateLiveMenuOverlay();
-    if (VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) {
-        VS::Field::LiveResumeFieldAfterMenu();
-        VS::Menu::Framework::ReleaseLiveMenuRows();
-        VS::Battle::LiveBeginPendingAbilityReward();
-    }
-}
-
-// decomp: BATTLE.PRG func_8007980C (src/BATTLE/BATTLE.PRG/146C.c:7526)
-void Battle_UpdateAbilityUnlockDelay(void)
-{
-    if (!(Effects_effectBusyFlags & 3)) {
-        VS::Battle::LiveGrantPendingAbilityUnlock();
-    }
-}
-
-// decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7533)
-void Battle_UpdateAbilityUnlockResults(void)
-{
-    VS::Menu::Framework::UpdateLiveMenuOverlay();
-    if ((VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) && (Menu_IsSceneNotificationPending() == 0)) {
-        VS::Field::LiveResumeFieldAfterMenu();
-        VS::Menu::Framework::ReleaseLiveMenuRows();
-        Menu_ReleaseSceneNotification();
-        VS::Battle::LiveBeginPendingAbilityReward();
-    }
-}
-
-// decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8402)
-void Battle_UpdatePendingLootDialog(void)
-{
-    VS::Menu::Framework::UpdateLiveMenuOverlay();
-    if (VS::Menu::Framework::LiveActionSelectionState()->menuStatus != 1) {
-        if (Battle_rewardsFollowAction != 0) {
-            VS::Battle::EndLiveRewardPause();
-        }
-        VS::Menu::Framework::ReleaseLiveMenuRows();
-        if (Battle_lootMenuOpened != 0) {
-            VS::Battle::ResumeLiveAfterRewards();
-        } else {
-            VS::Battle::CheckLiveRewardUnlocks();
-        }
-    }
-}
 
 // decomp: BATTLE.PRG func_8007B908 (src/BATTLE/BATTLE.PRG/146C.c:8418)
 void Battle_WaitForRewardUnlockEffects(void)
@@ -108,7 +58,7 @@ int Battle_UpdateRewardSequence(void)
         VS::Battle::UpdateLiveRewardResultsDialog();
         return 1;
     case 4:
-        Battle_UpdatePendingLootDialog();
+        VS::Battle::UpdateLivePendingLootDialog();
         return 1;
     case 5:
         Battle_WaitForRewardUnlockEffects();

@@ -9,6 +9,7 @@
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/RewardFlow.hpp"
+#include "Field/GameModeLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -22,6 +23,7 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
 #include "Effects/ActionEffects.h"
+#include "Effects/Runtime.h"
 #include "Field/GameModeLiveState.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Items/LootLiveState.h"
@@ -49,7 +51,7 @@ Battle_ActionDefinition& Definition(std::uint16_t action) {
   return Battle_actionDefinitions[action];
 }
 
-class LiveWorld final : public RewardWorld {
+class LiveWorld final : public RewardDialogWorld {
  public:
   void SetPhase(RewardPhase phase) override {
     Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
@@ -136,6 +138,17 @@ class LiveWorld final : public RewardWorld {
     return owner->menuStatus;
   }
   void ReleaseMenuRows() override { Menu::Framework::ReleaseLiveMenuRows(); }
+  std::uint32_t EffectsBusyFlags() override {
+    return static_cast<std::uint32_t>(Effects_effectBusyFlags);
+  }
+  std::int32_t SceneNotificationPending() override {
+    return Menu_IsSceneNotificationPending();
+  }
+  std::int32_t LootMenuOpened() override { return Battle_lootMenuOpened; }
+  void ResumeFieldAfterMenu() override { Field::LiveResumeFieldAfterMenu(); }
+  void ReleaseSceneNotification() override { Menu_ReleaseSceneNotification(); }
+  void BeginPendingAbilityReward() override { LiveBeginPendingAbilityReward(); }
+  void GrantPendingAbilityUnlock() override { LiveGrantPendingAbilityUnlock(); }
 };
 }  // namespace
 
@@ -170,5 +183,25 @@ void OpenLiveRewardResults() {
 void UpdateLiveRewardResultsDialog() {
   LiveWorld world;
   UpdateRewardResultsDialog(world);
+}
+// decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7516)
+void UpdateLiveLootResults() {
+  LiveWorld world;
+  UpdateLootResults(world);
+}
+// decomp: BATTLE.PRG func_8007980C (src/BATTLE/BATTLE.PRG/146C.c:7526)
+void UpdateLiveAbilityUnlockDelay() {
+  LiveWorld world;
+  UpdateAbilityUnlockDelay(world);
+}
+// decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7533)
+void UpdateLiveAbilityUnlockResults() {
+  LiveWorld world;
+  UpdateAbilityUnlockResults(world);
+}
+// decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8402)
+void UpdateLivePendingLootDialog() {
+  LiveWorld world;
+  UpdatePendingLootDialog(world);
 }
 }  // namespace VS::Battle

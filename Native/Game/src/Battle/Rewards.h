@@ -11,10 +11,6 @@
 
 extern int Battle_lootMenuOpened;
 extern int Battle_rewardsFollowAction;
-void Battle_UpdateLootResults(void);
-void Battle_UpdateAbilityUnlockDelay(void);
-void Battle_UpdateAbilityUnlockResults(void);
-void Battle_UpdatePendingLootDialog(void);
 void Battle_WaitForRewardUnlockEffects(void);
 void Battle_UpdateRewardUnlockDialog(void);
 void Battle_BeginEventRewardResults(void);

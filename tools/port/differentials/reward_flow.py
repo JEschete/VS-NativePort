@@ -168,6 +168,18 @@ class Vector:
                 *(x for state in self.states for x in state), *self.guards, self.unlocked]
 
 
+def selection_states(rng: random.Random, scenario: int) -> tuple[tuple[int, ...], ...]:
+    states = []
+    for owner in range(2):
+        action = (0, 1, 255, 1, 1, 1, 1, 255)[scenario % 8] if owner == 0 else 255
+        primary = rng.getrandbits(24) << 8 | (255 if scenario % 8 == 6 else 0)
+        position = (0x80000000 if scenario % 8 == 4 else 0)
+        continued = rng.getrandbits(24) | (255 << 24 if scenario % 8 == 5 else 0)
+        states.append((rng.getrandbits(16) << 16 | action, primary, position,
+                       continued, rng.getrandbits(32)))
+    return tuple(states)
+
+
 def vector(rng: random.Random, number: int) -> Vector:
     function, lane = number % 8, number // 8
     scenario = lane % 16
@@ -184,14 +196,7 @@ def vector(rng: random.Random, number: int) -> Vector:
         pending = rng.getrandbits(32)
     if function == 3 and scenario % 8 == 6:
         pending = 0
-    states = []
-    for owner in range(2):
-        action = (0, 1, 255, 1, 1, 1, 1, 255)[scenario % 8] if owner == 0 else 255
-        primary = rng.getrandbits(24) << 8 | (255 if scenario % 8 == 6 else 0)
-        position = (0x80000000 if scenario % 8 == 4 else 0)
-        continued = rng.getrandbits(24) | (255 << 24 if scenario % 8 == 5 else 0)
-        states.append((rng.getrandbits(16) << 16 | action, primary, position,
-                       continued, rng.getrandbits(32)))
+    states = selection_states(rng, scenario)
     head = HEADS[(scenario // 2) % 3]
     pointer = STATES[0]
     can_skip_state = function in (0, 1, 2) or (function == 3 and b6[0] & 255 == 0 and pending)
@@ -220,21 +225,26 @@ def state_addresses(base: int) -> tuple[int, ...]:
     return base + 8, base + 12, base + 0x4C, base + 0x2C04, base + 0x2C08
 
 
+def prepare_reward_objects(m: Machine, states: tuple[tuple[int, ...], ...],
+                           menus: tuple[int, ...], seed: int, unlocked: int) -> None:
+    for base, fields in zip(STATES, states, strict=True):
+        m.map_zero(base, 0x3000)
+        for address, value in zip(state_addresses(base), fields, strict=True):
+            m.put(address, value)
+    for address, value in zip(MENUS, menus, strict=True):
+        m.put(address, value)
+    m.map_zero(DEFINITIONS, 256 * DEFINITION_STRIDE)
+    for index in range(256):
+        m.put(DEFINITIONS + index * DEFINITION_STRIDE + 12,
+              definition(seed, index, states[0][0] & 0xFFFF, unlocked))
+
+
 def run(m: Machine, v: Vector) -> tuple[dict, list[int]]:
     for address, value in zip((PHASE, FOLLOW, PAUSED, LOOT, GLOBAL), v.globals[:5], strict=True):
         m.put(address, value)
     for address, value in zip(GUARDS, v.guards, strict=True):
         m.put(address, value)
-    for base, fields in zip(STATES, v.states, strict=True):
-        m.map_zero(base, 0x3000)
-        for address, value in zip(state_addresses(base), fields, strict=True):
-            m.put(address, value)
-    for address, value in zip(MENUS, v.menus, strict=True):
-        m.put(address, value)
-    m.map_zero(DEFINITIONS, 256 * DEFINITION_STRIDE)
-    for index in range(256):
-        m.put(DEFINITIONS + index * DEFINITION_STRIDE + 12,
-              definition(v.seed, index, v.states[0][0] & 0xFFFF, v.unlocked))
+    prepare_reward_objects(m, v.states, v.menus, v.seed, v.unlocked)
     dynamic = {"menu": v.globals[5], "pending": v.pending}
     counts = [0, 0, 0]
     calls = []

@@ -7,14 +7,41 @@ commit and its exact-revision CI run are recorded on [#276](https://github.com/J
 and in the ledgers. The per-function publish list, Latest Work and Verified sections that used to be here are in the
 [archived handoff](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF.md).
 The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
-See [Owner-requested pause](#owner-requested-pause) and
+See [Coordinated continuation](#coordinated-continuation) and
 [Current continuation and blocker](#current-continuation-and-blocker) for the current boundary.
 
-## Owner-requested pause
+## Coordinated continuation
+
+The owner resumed the remaining-function work on 2026-11-13 with a coordinator
+and two isolated implementation workers; [#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6846379221).
+The verified base is `dcf481125fb575cc9a02f30c43d93038c2f65097`,
+with successful exact-revision
+[CI 43374243364](https://github.com/JEschete/VS-NativePort/actions/runs/43374243364).
+At that verified base the cohort had 196 resolved (187 promoted, nine retired),
+704 remaining. Current progress is in [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv)
+and the CI-backed issue checkpoints.
+
+- Initial Worker A cluster: F00196/F00197/F00198/F00224 reward-dialog continuations in
+  `D:\Dev\NativePort\wt\coordinated-a-battle-events`.
+- Initial Worker B cluster: F02566/F02567/F02569/F02571/F02573/F02574 inventory-detail helpers in
+  `D:\Dev\NativePort\wt\coordinated-b-inventory`. Release integration only after
+  checking actual native callee/shared-state dependencies against maintained order.
+- The coordinator owns main-tree registration/generation, canonical ledgers/CSV,
+  shared integration gates, scoped commits/pushes and exact-revision CI.
+  Worker preparation is not a completed promotion. Sources stay frozen during
+  evidence runs; linked reference/data/dependency inputs are read-only.
+- Existing broad dirty `a47-menu-inventory-container` and `a52-menu-map-manual-text`
+  worktrees are preserved untouched and are unverified prior art, not fresh bases.
+  F00830/#296 remains separately blocked; row 30 is not complete.
+
+Routine batches use the canonical ledgers, machine-readable evidence and concise
+CI-backed issue checkpoints, not a handoff diary.
+
+## Earlier owner-requested pause
 
 The owner paused the work on 2026-11-12 and requested completion of only the
-eight-function reward WIP on 2026-11-13. That batch is locally complete; the
-remaining cohort work stays paused. Do not start another batch without resumption.
+eight-function reward WIP on 2026-11-13. That batch is complete. This section
+records that earlier boundary, not a current instruction to pause.
 
 - F04123-F04126 and F00220-F00223 are eight typed reward-flow promotions.
   The original 900-row cohort is **196 resolved (187 promoted, nine retired),
@@ -35,8 +62,8 @@ remaining cohort work stays paused. Do not start another batch without resumptio
   the paused batch remains; nine other generated reward functions and both reward
   globals are retained. The earlier `owner-pause.json` is a historical WIP snapshot.
 
-On a later resumption, continue the remaining reward package before other row-32
-work. F00830 remains separately blocked under #296; row 30 is not complete.
+The coordinated continuation above starts with the remaining reward package.
+F00830 remains separately blocked under #296; row 30 is not complete.
 No gameplay or compatibility-retirement completion is claimed.
 
 ## Current continuation and blocker
@@ -51,15 +78,15 @@ The final defined reactions F00819/F00832/F00891 are published in `013924cd`,
 with successful exact-revision
 [CI 43360661373](https://github.com/JEschete/VS-NativePort/actions/runs/43360661373).
 Evidence: `build\scratch\animation-reactions\verification.json`.
-The CSV records 196 resolved (187 promoted, nine retired), with 704 remaining.
+Current cohort counts are maintained in the CSV, not duplicated into each handoff.
 
 Row 30 is **not complete**: F00830 remains unresolved under [#296](https://github.com/JEschete/VS-NativePort/issues/296).
 Its source-climbing blend inherits VM address/linked-list state; zero is not equivalent to all shadow/blend effects.
 The original function body and DATA remain unchanged. Do not invent a blend constant, pointer/register API,
 or a refusal presented as a completed gameplay fix. The next observation is an evidenced native behavior decision
 or aligned reference climbing-hit evidence; the target-route visited-count evidence alone does not resolve it.
-When the owner resumes, continue independently verifiable maintained-code work
-without marking this function or row 30 complete.
+Continue independently verifiable maintained-code work without marking this
+function or row 30 complete.
 
 ## Active continuation (2026-11-11)
 
