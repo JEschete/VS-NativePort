@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/TextureAnimationLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -377,7 +378,7 @@ void Menu_UpdateTextBoxes(void)
     ClearOTag(Menu_activeTextBoxOrderingTable, 34);
 
     if (Battle_lowerScreenUiState == 1) {
-        Battle_DrawPuzzleTimer(&State_sceneTimer);
+        VS::Battle::DrawLivePuzzleTimer(&State_sceneTimer);
     }
 
     Effects_DrawScreenEffectOverlay();

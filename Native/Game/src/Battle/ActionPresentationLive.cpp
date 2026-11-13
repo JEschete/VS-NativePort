@@ -20,6 +20,7 @@
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -256,7 +257,7 @@ class LiveWorld final : public ActionPresentationWorld {
     Render::TransformLiveSceneColors(kColorMode, kColorSpeed, 0, 0, 0);
   }
   void FreezeAnimations() override { Actors::FreezeLiveActorAnimations(); }
-  void HideMarkers() override { Battle_SetActorMarkersHidden(1); }
+  void HideMarkers() override { VS::Battle::SetLiveActorMarkersHidden(1); }
   void HideMinimap() override { Field::SetLiveMinimapVisible(0); }
   void ResumeRoomAnimations() override {
     Field::LiveSetRoomAnimationsPaused(0);

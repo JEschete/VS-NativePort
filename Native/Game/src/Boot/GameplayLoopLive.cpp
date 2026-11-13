@@ -19,6 +19,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
@@ -496,7 +497,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   void UpdateEffectRuntime() override {
     Effects_effectBusyFlags = Effects_UpdateEffectRuntime();
   }
-  void DrawBattleHud() override { Battle_DrawBattleHud(); }
+  void DrawBattleHud() override { VS::Battle::DrawLiveBattleHud(); }
   void UpdateTextBoxes() override { Menu_UpdateTextBoxes(); }
   void UpdateTickTransitions() override {
     VS::Input::UpdateLiveVibrationPatterns();

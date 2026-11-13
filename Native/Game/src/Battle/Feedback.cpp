@@ -994,28 +994,6 @@ void Battle_DrawChainCount(int x, int y, Battle_FloatingLabel* p)
         (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));
 }
 
-// decomp: BATTLE.PRG func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2379)
-void Battle_SetActorMarkersHidden(int hidden) { Battle_actorMarkersHidden = hidden; }
-
-// decomp: BATTLE.PRG func_80095B7C (src/BATTLE/BATTLE.PRG/2842C.c:2381)
-void Battle_SetActorMarker(int actor_slot, int marker_flags)
-{
-    if (actor_slot != 0) {
-        if (marker_flags & 0x80) {
-            Battle_actorMarkers[actor_slot] |= 0x80;
-            return;
-        }
-        if (marker_flags & 0x40) {
-            Battle_actorMarkers[actor_slot] &= 0x7F;
-            return;
-        }
-        Battle_actorMarkers[actor_slot] &= 0x80;
-        Battle_actorMarkers[actor_slot] |= marker_flags & 0x7F;
-        return;
-    }
-    memset(Battle_actorMarkers, marker_flags, 0x10);
-}
-
 // decomp: BATTLE.PRG func_80095C18 (src/BATTLE/BATTLE.PRG/2842C.c:2399)
 void Battle_DrawActorMarker(int actor, int kind)
 {
@@ -1514,8 +1492,5 @@ void Battle_CommitEquipmentStatChanges(void)
         }
     }
 }
-
-// decomp: BATTLE.PRG func_8009722C (src/BATTLE/BATTLE.PRG/2842C.c:2893)
-void Battle_SuppressAshleyStatusLabels(void) { Battle_ashleyStatusLabelsSuppressed = 1; }
 
 }  // extern "C"

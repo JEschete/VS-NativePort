@@ -480,6 +480,18 @@
     <ClCompile Include="src\HitModifiersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\HudOrchestrationLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudOrchestrationModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudOrchestrationResetTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HudOrchestrationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\HudRenderingLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -858,6 +870,12 @@
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\Battle\HudOrchestrationFixture.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\HudOrchestrationLiveFixture.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\HudRenderingFixture.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>

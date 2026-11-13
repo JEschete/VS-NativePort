@@ -35,6 +35,7 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Log.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -549,7 +550,7 @@ class LiveBattleActorHost final : public BattleActorHost {
   }
   void SetMarker(int id, int flags) override {
     const Synced synced(*this);
-    Battle_SetActorMarker(id, flags);
+    VS::Battle::SetLiveActorMarker(id, flags);
   }
   bool UnlinkFromRoomList(int id) override {
     const Synced synced(*this);

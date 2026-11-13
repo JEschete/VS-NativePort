@@ -1,0 +1,28 @@
+"""F00729 full visibility command stored with original signed halfword width."""
+
+from functools import partial
+
+from differentials.hud_orchestration_common import (
+    MUTATIONS,
+    SPECS,
+    check_for,
+    run_for,
+    vector_for,
+)
+
+ID = "F00729"
+_, ENTRY, END = SPECS[ID]
+DRIVER = "hud_orchestration_driver.cpp"
+SOURCES = (
+    "Native\\Game\\src\\Battle\\HudOrchestration.cpp",
+    "Native\\Game\\src\\Battle\\HudState.cpp",
+    "Native\\Engine\\src\\Core\\Math\\ScalarMath.cpp",
+    "Native\\Engine\\src\\Core\\Math\\Distance.cpp",
+    "Native\\Engine\\src\\Render\\Sprites.cpp",
+)
+INCLUDES = ("Native\\Tests\\include",)
+VECTORS, SEED, MUTANT_VECTORS = 1024, 729, 256
+MUTANTS = MUTATIONS[ID]
+vector = partial(vector_for, ID)
+run = partial(run_for, ID)
+check = partial(check_for, ID)

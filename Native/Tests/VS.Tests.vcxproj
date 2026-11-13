@@ -220,6 +220,10 @@
     <ClCompile Include="src\HeapTests.cpp" />
     <ClCompile Include="src\HitCalculationsTests.cpp" />
     <ClCompile Include="src\HitModifiersTests.cpp" />
+    <ClCompile Include="src\HudOrchestrationLiveTests.cpp" />
+    <ClCompile Include="src\HudOrchestrationModuleTests.cpp" />
+    <ClCompile Include="src\HudOrchestrationResetTests.cpp" />
+    <ClCompile Include="src\HudOrchestrationTests.cpp" />
     <ClCompile Include="src\HudRenderingLiveTests.cpp" />
     <ClCompile Include="src\HudRenderingModuleTests.cpp" />
     <ClCompile Include="src\HudRenderingTests.cpp" />
@@ -368,6 +372,8 @@
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Battle\HudOrchestrationFixture.hpp" />
+    <ClInclude Include="include\Battle\HudOrchestrationLiveFixture.hpp" />
     <ClInclude Include="include\Battle\HudRenderingFixture.hpp" />
     <ClInclude Include="include\Battle\HudRenderingLiveFixture.hpp" />
     <ClInclude Include="include\Battle\HudShortcutLiveFixture.hpp" />

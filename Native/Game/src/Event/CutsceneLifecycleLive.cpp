@@ -8,6 +8,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Event/CutsceneLifecycle.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -105,7 +106,7 @@ class LiveCutsceneHost final : public CutsceneHost {
     Battle::Ai::RefreshLiveActorAiReservations(actor);
   }
   void SetMarkersHidden(bool hidden) override {
-    Battle_SetActorMarkersHidden(hidden ? 1 : 0);
+    VS::Battle::SetLiveActorMarkersHidden(hidden ? 1 : 0);
   }
   void ClearMenuRequest() override { Field_isMenuRequestQueued = 0; }
   void PauseMovingPlatforms(bool paused) override {

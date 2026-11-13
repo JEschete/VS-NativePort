@@ -7,6 +7,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/AmbienceLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Core/Log.hpp"
@@ -70,7 +71,7 @@ class LiveFieldModeHost final : public FieldModeHost {
     Actors::UnfreezeLiveActorAnimations();
   }
   void SetActorMarkersHidden(bool hidden) override {
-    Battle_SetActorMarkersHidden(Flag(hidden));
+    VS::Battle::SetLiveActorMarkersHidden(Flag(hidden));
   }
   void SetMinimapVisible(bool visible) override {
     static_cast<void>(SetLiveMinimapVisible(Flag(visible)));

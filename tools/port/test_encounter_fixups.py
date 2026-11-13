@@ -2993,33 +2993,33 @@ class EncounterFixupTests(unittest.TestCase):
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertEqual(source, 'char Battle_puzzleTimerText[9] = "00:00:00";')
-        source = (
-            "void Battle_DrawPuzzleTimer(int* value)\n{\n"
-            "    char sp10[4];\n"
-            "    *(int*)sp10 = *value;\n"
-            "Battle_puzzleTimerTextPointer[6 - i * 3] = digit;\n"
-            "    VS::Render::DrawLiveCompactText(Battle_puzzleTimerTextPointer, xy, ordering);"
-            "\n}"
-        )
-        for old, new, _ in copy_fixups.FIXES["F01384"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
+        root = Path(__file__).resolve().parents[2]
+        source = root.joinpath(
+            "Native", "Game", "src", "Battle", "HudOrchestrationLive.cpp"
+        ).read_text(encoding="utf-8")
+        core = root.joinpath(
+            "Native", "Game", "src", "Battle", "HudOrchestration.cpp"
+        ).read_text(encoding="utf-8")
         self.assertNotIn("Battle_puzzleTimerTextPointer", source)
-        self.assertIn("VS::Render::DrawLiveCompactText(Battle_puzzleTimerText,", source)
+        self.assertIn("FormatPuzzleTimer(time,", source)
+        self.assertIn("std::span(Battle_puzzleTimerText)", source)
+        self.assertIn("std::span<char, kPuzzleTimerTextBytes> text", core)
         self.assertLess(
-            source.index("Core_Debugf"), source.index("DrawLiveCompactText")
+            source.index('Core_Debugf("hud.timer"'),
+            source.index("DrawText(std::string_view(Battle_puzzleTimerText"),
         )
         self.assertIn("const State_SceneTimer* timer", source)
-        self.assertIn("timer->seconds, timer->minutes, timer->hours", source)
+        for field in ("seconds", "minutes", "hours"):
+            self.assertIn(f"timer->{field}", source)
         self.assertNotIn("*(int*)sp10", source)
         source = (
             "        Render_activeTextBoxIndex = id;\n\n"
-            "Battle_DrawPuzzleTimer(&Battle_puzzleTimer);"
+            "VS::Battle::DrawLivePuzzleTimer(&Battle_puzzleTimer);"
         )
         for old, new, _ in copy_fixups.FIXES["F01392"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
-        self.assertEqual(source, "Battle_DrawPuzzleTimer(&State_sceneTimer);")
+        self.assertEqual(source, "VS::Battle::DrawLivePuzzleTimer(&State_sceneTimer);")
 
     def test_orbit_return_globals_preserve_complete_command_objects(self):
         for gid, name, extent in (

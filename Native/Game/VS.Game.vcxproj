@@ -481,6 +481,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\HudOrchestration.cpp" />
+    <ClCompile Include="src\Battle\HudOrchestrationLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\HudRendering.cpp" />
     <ClCompile Include="src\Battle\HudRenderingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2399,6 +2403,8 @@
     <ClInclude Include="include\Battle\HitCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\HitModifiers.hpp" />
     <ClInclude Include="include\Battle\HitModifiersLive.hpp" />
+    <ClInclude Include="include\Battle\HudOrchestration.hpp" />
+    <ClInclude Include="include\Battle\HudOrchestrationLive.hpp" />
     <ClInclude Include="include\Battle\HudRendering.hpp" />
     <ClInclude Include="include\Battle\HudRenderingLive.hpp" />
     <ClInclude Include="include\Battle\HudState.hpp" />

@@ -17,7 +17,6 @@ _Static_assert(sizeof(Battle_HudHighlightWord) == 0x4, "Battle_HudHighlightWord 
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_HUD_H_DECLS)
 #define VS_BATTLE_HUD_H_DECLS
-#include "State/SceneTimer.h"
 
 extern char* Battle_limbNames[20];
 extern char Battle_hudStatusIconsHidden;
@@ -52,8 +51,5 @@ extern char* Battle_puzzleTimerTextPointer;
 extern char Battle_lowerScreenUiState;
 extern char Battle_puzzleTimerText[9];
 extern int Battle_puzzleTimer;
-void Battle_DrawShortcutHud(void);
-void Battle_DrawBattleHud(void);
-void Battle_DrawPuzzleTimer(const State_SceneTimer* timer);
 
 #endif // VS_BATTLE_HUD_H_DECLS

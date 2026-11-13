@@ -13,6 +13,7 @@
 #include "Battle/ActionOutcomes.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Save/Snapshot.hpp"
 #include "State/KillScoreLive.hpp"
@@ -141,7 +142,9 @@ class LiveDefeatWorld final : public ActorDefeatWorld {
     Require(stats != nullptr);
     return stats->currentHp;
   }
-  void HideMarker(int actor) override { Battle_SetActorMarker(actor, 0); }
+  void HideMarker(int actor) override {
+    VS::Battle::SetLiveActorMarker(actor, 0);
+  }
   bool Retained(int actor) override {
     return Actor(actor).retainAfterDefeat != 0;
   }

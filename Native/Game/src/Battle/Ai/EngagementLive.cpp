@@ -10,6 +10,8 @@
 #include <iterator>
 #include <optional>
 
+#include "Battle/HudOrchestrationLive.hpp"
+
 extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
@@ -49,7 +51,7 @@ void Require(bool valid, const char* message) {
 class LiveAwarenessMarkers final : public AwarenessMarkers {
  public:
   void SetMarker(int actor_id, int marker) override {
-    Battle_SetActorMarker(actor_id, marker);
+    VS::Battle::SetLiveActorMarker(actor_id, marker);
   }
 };
 
@@ -59,7 +61,7 @@ class LiveEngagementHost final : public EngagementBuildupHost {
       : state_(state), room_(room) {}
 
   void SetMarker(int actor_id, int marker) override {
-    Battle_SetActorMarker(actor_id, marker);
+    VS::Battle::SetLiveActorMarker(actor_id, marker);
   }
   [[nodiscard]] bool CandidateEngagedThisUpdate() const override {
     return Battle_Ai_candidateEngagedThisUpdate != 0;

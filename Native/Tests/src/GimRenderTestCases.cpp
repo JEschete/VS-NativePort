@@ -6,6 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Legacy/Psx.h"
 #include "State/SceneTimerLive.hpp"
@@ -117,6 +118,7 @@ struct PuzzleTimerFixture {
   State_SceneTimer saved_timer = State_sceneTimer;
   int saved_packed_timer = Battle_puzzleTimer;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* saved_ordering_table = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   std::array<u_long, 256> storage{};
   std::array<u_long, 16> ordering{};
@@ -145,6 +147,7 @@ struct PuzzleTimerFixture {
     State_sceneTimer = saved_timer;
     Battle_puzzleTimer = saved_packed_timer;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_legacyOrderingTables[0] = saved_ordering_table;
     Render_frameBuf = saved_framebuffer;
   }
 
@@ -155,11 +158,12 @@ struct PuzzleTimerFixture {
     // The Live queue reserves its packets inside the frame's buffer.
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch.primitiveCursor = storage.data() + 1;
     Render_frameScratch.orderingTable = ordering.data() + 1;
     Audio_Seq_unusedStateFlags.puzzleTimerHundredths =
         static_cast<char>(hundredths);
-    Battle_DrawPuzzleTimer(&timer);
+    VS::Battle::DrawLivePuzzleTimer(&timer);
   }
 
   void Draw(int packed_timer, int hundredths) {

@@ -74,8 +74,6 @@ void Battle_DrawActorStatusLabel(int x, int y, Battle_FloatingLabel* p);
 void Battle_DrawStatusRemovalMarker(int screen_x, int screen_y, int arg2);
 void Battle_DrawAbilityTimingResult(int x, int y, Battle_FloatingLabel* p);
 void Battle_DrawChainCount(int x, int y, Battle_FloatingLabel* p);
-void Battle_SetActorMarkersHidden(int hidden);
-void Battle_SetActorMarker(int actor_slot, int marker_flags);
 void Battle_DrawActorMarker(int actor, int kind);
 void Battle_DrawActorMarkers(void);
 void* Battle_ReserveFloatingLabel(void);
@@ -87,6 +85,5 @@ void Battle_DrawEquipmentStatChange(int x, int y, Battle_FloatingLabel* p);
 void Battle_ShowAbilityTimingCue(int cue_duration_frames);
 void Battle_DrawAbilityTimingCue(void);
 void Battle_CommitEquipmentStatChanges(void);
-void Battle_SuppressAshleyStatusLabels(void);
 
 #endif // VS_BATTLE_FEEDBACK_H_DECLS

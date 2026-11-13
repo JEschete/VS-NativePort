@@ -12,6 +12,7 @@
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -403,7 +404,7 @@ void LiveCameraHost::SetHudHidden(bool hidden) {
 }
 
 void LiveCameraHost::SetActorMarkersHidden(bool hidden) {
-  Escape([hidden] { Battle_SetActorMarkersHidden(hidden ? 1 : 0); });
+  Escape([hidden] { VS::Battle::SetLiveActorMarkersHidden(hidden ? 1 : 0); });
 }
 
 std::uint32_t LiveCameraHost::HeldButtons() {

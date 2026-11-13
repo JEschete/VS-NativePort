@@ -869,6 +869,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSlidingStatusIcon": r"Native\Game\include\Battle\HudRenderingLive.hpp",
     "VS::Battle::LiveShortcutIconBrightness": r"Native\Game\include\Battle\HudRenderingLive.hpp",
     "VS::Battle::DrawLiveShortcutButtonMarker": r"Native\Game\include\Battle\HudRenderingLive.hpp",
+    "VS::Battle::DrawLiveShortcutHud": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
+    "VS::Battle::DrawLiveBattleHud": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
+    "VS::Battle::DrawLivePuzzleTimer": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
+    "VS::Battle::SetLiveActorMarkersHidden": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
+    "VS::Battle::SetLiveActorMarker": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
+    "VS::Battle::SuppressLiveAshleyStatusLabels": r"Native\Game\include\Battle\HudOrchestrationLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1685,6 +1691,12 @@ OWNED_CALL_BINDINGS["F01354"] = "VS::Battle::DrawLiveHudStatGauge"
 OWNED_CALL_BINDINGS["F01355"] = "VS::Battle::DrawLiveSlidingStatusIcon"
 OWNED_CALL_BINDINGS["F01358"] = "VS::Battle::LiveShortcutIconBrightness"
 OWNED_CALL_BINDINGS["F01360"] = "VS::Battle::DrawLiveShortcutButtonMarker"
+OWNED_CALL_BINDINGS["F01361"] = "VS::Battle::DrawLiveShortcutHud"
+OWNED_CALL_BINDINGS["F01362"] = "VS::Battle::DrawLiveBattleHud"
+OWNED_CALL_BINDINGS["F01384"] = "VS::Battle::DrawLivePuzzleTimer"
+OWNED_CALL_BINDINGS["F00729"] = "VS::Battle::SetLiveActorMarkersHidden"
+OWNED_CALL_BINDINGS["F00730"] = "VS::Battle::SetLiveActorMarker"
+OWNED_CALL_BINDINGS["F00743"] = "VS::Battle::SuppressLiveAshleyStatusLabels"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3505,6 +3517,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800C9CB4, "VS::Battle::DrawLiveSlidingStatusIcon"),  # F01355
     ("BATTLE/BATTLE.PRG", 0x800C9EB8, "VS::Battle::LiveShortcutIconBrightness"),  # F01358
     ("BATTLE/BATTLE.PRG", 0x800C9F98, "VS::Battle::DrawLiveShortcutButtonMarker"),  # F01360
+    ("BATTLE/BATTLE.PRG", 0x800C9FE8, "VS::Battle::DrawLiveShortcutHud"),  # F01361
+    ("BATTLE/BATTLE.PRG", 0x800CA2DC, "VS::Battle::DrawLiveBattleHud"),  # F01362
+    ("BATTLE/BATTLE.PRG", 0x800CB56C, "VS::Battle::DrawLivePuzzleTimer"),  # F01384
+    ("BATTLE/BATTLE.PRG", 0x80095B70, "VS::Battle::SetLiveActorMarkersHidden"),  # F00729
+    ("BATTLE/BATTLE.PRG", 0x80095B7C, "VS::Battle::SetLiveActorMarker"),  # F00730
+    ("BATTLE/BATTLE.PRG", 0x8009722C, "VS::Battle::SuppressLiveAshleyStatusLabels"),  # F00743
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4368,25 +4386,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("&Event_kOrbitReturnSecondCommand", "Event_kOrbitReturnSecondCommand",
          "4A0A8.c:4069 consumes the complete three-byte look-at tween command"),
     ],
-    "F01384": [
-        ("int* value", "const State_SceneTimer* timer",
-         "read the authoritative native scene clock through a typed const contract"),
-        ("    char sp10[4];",
-         "    char sp10[4] = {0, timer->seconds, timer->minutes, timer->hours};",
-         "format named clock fields without reinterpreting an independent packed alias"),
-        ("    *(int*)sp10 = *value;\n", "",
-         "the HUD no longer copies the detached PS1 timer-word view"),
-        ("Battle_puzzleTimerTextPointer", "Battle_puzzleTimerText",
-         "5BF94.c:3844 the native timer owns its writable buffer instead of depending on a dropped PS1 pointer binding"),
-        ("    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText,",
-         '    Core_Debugf("hud.timer", "text=%s seconds=%d minutes=%d hours=%d frames=%d",\n'
-         "        Battle_puzzleTimerText, timer->seconds, timer->minutes, timer->hours, timer->frames);\n"
-         "    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText,",
-         "retain exact per-render timer text in detailed gameplay diagnostics"),
-    ],
     "F01392": [
-        ("Battle_DrawPuzzleTimer(&Battle_puzzleTimer);",
-         "Battle_DrawPuzzleTimer(&State_sceneTimer);",
+        ("VS::Battle::DrawLivePuzzleTimer(&Battle_puzzleTimer);",
+         "VS::Battle::DrawLivePuzzleTimer(&State_sceneTimer);",
          "SLUS 0x8005046C is the time-field subobject of the authoritative timer at 0x80050468, not independent native storage"),
         ("        Render_activeTextBoxIndex = id;\n\n", "",
          "#276 row 6: the text box drawers take the box's layers from its index in Menu_textBoxes (D_800F4E80 retired)"),

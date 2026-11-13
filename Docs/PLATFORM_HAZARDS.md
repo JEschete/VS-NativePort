@@ -58,7 +58,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
 | `BYTE-OFFSET` | Field reached by a literal byte offset | 26 | 0 | 0 | 26 | 0 | 26 |
-| `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 1 | 0 | 0 | 1 | 0 | 1 |
+| `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 0 | 0 | 0 | 0 | 0 | 0 |
 | `PS1-ADDRESS` | Original memory address used as a value | 0 | 0 | 0 | 0 | 0 | 0 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 2 | 2 | 2 | 0 | 0 | 2 |
@@ -66,7 +66,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 27 | 0 | 0 | 27 | 0 | 27 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 557 | 239 | 239 | 287 | 31 | 547 |
+| **Total** | | 556 | 239 | 239 | 286 | 31 | 546 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -91,7 +91,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | Roadmap issue | Sites |
 | --- | ---: |
 | #60 | 123 |
-| #56 | 96 |
+| #56 | 95 |
 | no roadmap issue | 79 |
 | #61 | 66 |
 | #253 | 50 |

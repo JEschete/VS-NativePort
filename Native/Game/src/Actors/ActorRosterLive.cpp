@@ -17,6 +17,7 @@
 #include "Actors/BattleActorState.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -203,7 +204,7 @@ void InitializeLivePlaceholderActor(int actor_id, int auxiliary) {
   std::memcpy(stats->name, placeholder.name.data(), placeholder.name.size());
   stats->cancelsHitResults = placeholder.cancels_hit_results ? 1 : 0;
   if (placeholder.marker_flags.has_value()) {
-    Battle_SetActorMarker(actor_id, *placeholder.marker_flags);
+    VS::Battle::SetLiveActorMarker(actor_id, *placeholder.marker_flags);
   }
   actor->roomSpawnIndex = placeholder.room_spawn_index;
   actor->killCounted = placeholder.kill_counted ? 1 : 0;

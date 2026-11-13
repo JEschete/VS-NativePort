@@ -24,6 +24,7 @@
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
@@ -736,7 +737,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     Field_SetMovingPlatformsPausedEntry(paused ? 1 : 0);
   }
   void SetActorMarkersHidden(bool hidden) override {
-    Battle_SetActorMarkersHidden(hidden ? 1 : 0);
+    VS::Battle::SetLiveActorMarkersHidden(hidden ? 1 : 0);
   }
   void SetClutAnimationEnabled(bool enabled) override {
     VS::Render::SetLiveClutAnimationEnabled(enabled ? 1 : 0);

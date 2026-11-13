@@ -165,7 +165,7 @@
 ]
 ],
 [
-1126,
+1104,
 [
 "        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -174,7 +174,7 @@
 ]
 ],
 [
-1170,
+1148,
 [
 "            ot = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable;"
 ],
@@ -183,7 +183,7 @@
 ]
 ],
 [
-1290,
+1268,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -192,7 +192,7 @@
 ]
 ],
 [
-1309,
+1287,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16, prim++);"
 ],
@@ -201,7 +201,7 @@
 ]
 ],
 [
-1362,
+1340,
 [
 "        p = ((void* (*)())Battle_ReserveFloatingLabel)();"
 ],
@@ -210,7 +210,7 @@
 ]
 ],
 [
-1377,
+1355,
 [
 "        sprintf(p->text, \"%d\", p->value & 0x7FFF);",
 "        p->textLength = strlen(p->text);"
@@ -221,7 +221,7 @@
 ]
 ],
 [
-1392,
+1370,
 [
 "    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -230,7 +230,7 @@
 ]
 ],
 [
-1409,
+1387,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -239,7 +239,7 @@
 ]
 ],
 [
-1423,
+1401,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -248,7 +248,7 @@
 ]
 ],
 [
-1433,
+1411,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -257,149 +257,12 @@
 ]
 ],
 [
-1453,
+1431,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
 [
 "        AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) + 8, prim++);"
-]
-]
-],
-"Native\\Game\\src\\Battle\\Hud.cpp": [
-[
-158,
-[
-"                    Battle_secondShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);"
-],
-[
-"                    Battle_secondShortcutIconSizes[i], (u_long *)(Render_frameScratch.overlayOrderingTable));"
-]
-],
-[
-165,
-[
-"            0x1E001E, Render_frameScratch.overlayOrderingTable)[4] = 0x37FBA0B8;"
-],
-[
-"            0x1E001E, (u_long *)(Render_frameScratch.overlayOrderingTable))[4] = 0x37FBA0B8;"
-]
-],
-[
-177,
-[
-"                    Battle_firstShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);"
-],
-[
-"                    Battle_firstShortcutIconSizes[i], (u_long *)(Render_frameScratch.overlayOrderingTable));"
-]
-],
-[
-182,
-[
-"                Render_frameScratch.overlayOrderingTable)[4] = (((3 - i) * 0x10) | 0x37FB8000);"
-],
-[
-"                (u_long *)(Render_frameScratch.overlayOrderingTable))[4] = (((3 - i) * 0x10) | 0x37FB8000);"
-]
-],
-[
-203,
-[
-"    ot = Render_frameScratch.orderingTable - 4;"
-],
-[
-"    ot = ((u_char*)(Render_frameScratch.orderingTable)) - 4;"
-]
-],
-[
-218,
-[
-"            Render_frameScratch.orderingTable - 0xC);"
-],
-[
-"            (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));"
-]
-],
-[
-239,
-[
-"                    0, k + Battle_limbDisplaySpriteOffsets[j], Battle_limbDisplaySpriteSizes[j], ot);"
-],
-[
-"                    0, k + Battle_limbDisplaySpriteOffsets[j], Battle_limbDisplaySpriteSizes[j], (u_long *)(ot));"
-]
-],
-[
-258,
-[
-"            \"RISK  ZERO\", 0x16000C - Battle_hudSlideOffset, Render_frameScratch.orderingTable - 0xC);"
-],
-[
-"            \"RISK  ZERO\", 0x16000C - Battle_hudSlideOffset, ((u_char*)(Render_frameScratch.orderingTable)) - 0xC);"
-]
-],
-[
-327,
-[
-"    ot -= 4;"
-],
-[
-"    ot = (u_char*)(ot) - (4);"
-]
-],
-[
-336,
-[
-"                VS::Render::QueueLiveSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, ot);"
-],
-[
-"                VS::Render::QueueLiveSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, (u_long *)(ot));"
-]
-],
-[
-345,
-[
-"            0x80, ((selected & 7) * 3 + 0x94) | (!(selected & 8) ? k : j), 0x40004, ot);"
-],
-[
-"            0x80, ((selected & 7) * 3 + 0x94) | (!(selected & 8) ? k : j), 0x40004, (u_long *)(ot));"
-]
-],
-[
-352,
-[
-"        prim = VS::Render::QueueLiveSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, ot);"
-],
-[
-"        prim = VS::Render::QueueLiveSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, (u_long *)(ot));"
-]
-],
-[
-355,
-[
-"    prim = VS::Render::QueueLiveSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, ot);"
-],
-[
-"    prim = VS::Render::QueueLiveSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, (u_long *)(ot));"
-]
-],
-[
-362,
-[
-"    char timer_components[4] = {0, timer->seconds, timer->minutes, timer->hours};"
-],
-[
-"    char timer_components[4] = {0, (char)(timer->seconds), (char)(timer->minutes), (char)(timer->hours)};"
-]
-],
-[
-381,
-[
-"    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), Render_frameScratch.orderingTable - 4);"
-],
-[
-"    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), ((u_char*)(Render_frameScratch.orderingTable)) - 4);"
 ]
 ]
 ],
@@ -3326,7 +3189,7 @@
 ],
 "Native\\Game\\src\\Menu\\TextBox.cpp": [
 [
-200,
+201,
 [
 "    Menu_sceneNotificationBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(112);"
 ],
@@ -3335,7 +3198,7 @@
 ]
 ],
 [
-373,
+374,
 [
 "    AddPrims(Render_frameScratch.orderingTable - 24, Menu_activeTextBoxOrderingTable, Menu_activeTextBoxOrderingTable + 33);"
 ],

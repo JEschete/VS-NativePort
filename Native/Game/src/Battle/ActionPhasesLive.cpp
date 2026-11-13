@@ -11,6 +11,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionPhases.hpp"
 #include "Battle/BattleModeLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
@@ -87,7 +88,7 @@ class LiveWorld final : public ActionPhaseWorld {
   void ResumeRoomAnimations() override {
     Field::LiveSetRoomAnimationsPaused(0);
   }
-  void ShowActorMarkers() override { Battle_SetActorMarkersHidden(0); }
+  void ShowActorMarkers() override { VS::Battle::SetLiveActorMarkersHidden(0); }
   void SetRecoveryReward(std::int32_t mode) override {
     Battle_recoveryRewardMode = mode;
   }

@@ -13,6 +13,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "State/SceneTimerLive.hpp"
@@ -81,7 +82,9 @@ class LiveVitalsWorld final : public ActorVitalsWorld {
   void RemoveActor(int slot, int reason) override {
     Actors::RemoveLiveActorAtSlot(slot, reason);
   }
-  void SuppressAshleyLabels() override { Battle_SuppressAshleyStatusLabels(); }
+  void SuppressAshleyLabels() override {
+    VS::Battle::SuppressLiveAshleyStatusLabels();
+  }
   std::int16_t EventTrigger(int event) override {
     return Event_EvaluateRoomEventTriggersEntry(event, 0, nullptr, 0);
   }

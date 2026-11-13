@@ -25,6 +25,7 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Encounter.hpp"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Boot/SessionLive.hpp"
@@ -1279,7 +1280,7 @@ class LiveRoomUnloadHost final
 
   void ResetRoomActorState() override {
     Battle::Ai::FreeRoomAiState(Battle::Ai::BattleRoomAiRuntime());
-    Battle_SetActorMarker(0, 0);
+    VS::Battle::SetLiveActorMarker(0, 0);
     Actors::ResetAllLiveActorMovement();
     Items::ClearLiveRoomLootList();
   }
