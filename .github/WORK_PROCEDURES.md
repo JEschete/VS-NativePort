@@ -51,6 +51,8 @@ work (splitting tests, writing a differential case) to a background agent while 
 - Run `python tools\port\promote.py scaffold|register|prune-adaptations` for the copier registration, `owned.csv`,
   the `gen_solution.py` header list, module bindings and stale `cpp_adaptations.json` hunks. Edit those by hand only
   where the tool says it cannot. Never hand-edit `.vcxproj` files; run `python tools\scaffold\gen_solution.py`.
+- Stage the group's new tool files before final project generation: the tools solution inventory uses tracked
+  files. Restage the scoped files after fixes before committing; staging does not establish verification.
 - Migrate the callers to the live binding so the old generated symbols have no references.
 
 ### 3. Test while iterating

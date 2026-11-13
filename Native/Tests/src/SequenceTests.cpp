@@ -12,6 +12,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionSequenceLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -98,11 +99,11 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   Battle_specialActionPitch = 2;
   VS::Actors::RegisterSequenceBank(bank, sizeof file);
   if (consumer == 0) {
-    Battle_PlaySpecialActionAnimation(kActorId, nullptr, mode);
+    VS::Battle::PlayLiveSpecialActionAnimation(kActorId, nullptr, mode);
   } else if (consumer == 1) {
-    Battle_PlayBreakArtAnimation(kActorId, nullptr, mode);
+    VS::Battle::PlayLiveBreakArtAnimation(kActorId, nullptr, mode);
   } else if (consumer == 2) {
-    Battle_PlaySpellCastAnimation(kActorId, nullptr, mode);
+    VS::Battle::PlayLiveSpellCastAnimation(kActorId, nullptr, mode);
   } else {
     Battle_SetEnemyCombatPose(kActorId, 3);
   }

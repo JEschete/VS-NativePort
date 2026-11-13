@@ -13,6 +13,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentation.hpp"
@@ -351,20 +352,20 @@ void LiveWorld::Animate(ActionPose pose, int actor, int parameter,
   auto* focus = &State().selection.focusPosition;
   switch (pose) {
     case ActionPose::kMelee:
-      Battle_PlayMeleeAttackAnimation(actor, focus, parameter);
+      PlayLiveMeleeAttackAnimation(actor, focus, parameter);
       break;
     case ActionPose::kSpell:
-      Battle_PlaySpellCastAnimation(actor, focus, parameter);
+      PlayLiveSpellCastAnimation(actor, focus, parameter);
       break;
     case ActionPose::kBreakArt:
-      Battle_PlayBreakArtAnimation(actor, focus, parameter);
+      PlayLiveBreakArtAnimation(actor, focus, parameter);
       break;
     case ActionPose::kSpecial:
-      Battle_PlaySpecialActionAnimation(actor, focus, parameter);
+      PlayLiveSpecialActionAnimation(actor, focus, parameter);
       break;
     case ActionPose::kChain:
-      Battle_PlayChainAbilityAnimation(actor, focus, parameter,
-                                       std::bit_cast<int>(step));
+      PlayLiveChainAbilityAnimation(actor, focus, parameter,
+                                    std::bit_cast<int>(step));
       break;
     case ActionPose::kDefense:
       Battle_PlayDefenseAbilityAnimation(actor, focus, parameter);

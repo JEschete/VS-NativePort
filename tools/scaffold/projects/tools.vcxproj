@@ -331,6 +331,15 @@
     <None Include="..\..\port\decl_index.py" />
     <None Include="..\..\port\decomp_index.py" />
     <None Include="..\..\port\differential.py" />
+    <None Include="..\..\port\differentials\action_animation_817.py" />
+    <None Include="..\..\port\differentials\action_animation_818.py" />
+    <None Include="..\..\port\differentials\action_animation_823.py" />
+    <None Include="..\..\port\differentials\action_animation_831.py" />
+    <None Include="..\..\port\differentials\action_animation_833.py" />
+    <None Include="..\..\port\differentials\action_animation_834.py" />
+    <None Include="..\..\port\differentials\action_animations_common.py" />
+    <None Include="..\..\port\differentials\action_animations_driver.cpp" />
+    <None Include="..\..\port\differentials\action_animations_guard_driver.cpp" />
     <None Include="..\..\port\differentials\action_costs.py" />
     <None Include="..\..\port\differentials\action_costs_driver.cpp" />
     <None Include="..\..\port\differentials\action_costs_guard_driver.cpp" />

@@ -831,6 +831,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::WaitForLiveActionResolution": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
     "VS::Battle::WaitForLiveTargetRecovery": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
     "VS::Battle::FinishLiveActionSequence": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
+    "VS::Battle::PlayLiveMeleeAttackAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::PlayLiveDefenseAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::PlayLiveSpellCastAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::PlayLiveChainAbilityAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::PlayLiveSpecialActionAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::PlayLiveBreakArtAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1595,6 +1601,12 @@ OWNED_CALL_BINDINGS["F00188"] = "VS::Battle::StartLiveReadyActionAnimation"
 OWNED_CALL_BINDINGS["F00192"] = "VS::Battle::WaitForLiveActionResolution"
 OWNED_CALL_BINDINGS["F00193"] = "VS::Battle::WaitForLiveTargetRecovery"
 OWNED_CALL_BINDINGS["F00195"] = "VS::Battle::FinishLiveActionSequence"
+OWNED_CALL_BINDINGS["F00817"] = "VS::Battle::PlayLiveMeleeAttackAnimation"
+OWNED_CALL_BINDINGS["F00818"] = "VS::Battle::PlayLiveDefenseAnimation"
+OWNED_CALL_BINDINGS["F00823"] = "VS::Battle::PlayLiveSpellCastAnimation"
+OWNED_CALL_BINDINGS["F00831"] = "VS::Battle::PlayLiveChainAbilityAnimation"
+OWNED_CALL_BINDINGS["F00833"] = "VS::Battle::PlayLiveSpecialActionAnimation"
+OWNED_CALL_BINDINGS["F00834"] = "VS::Battle::PlayLiveBreakArtAnimation"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3363,6 +3375,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80079050, "VS::Battle::WaitForLiveActionResolution"),  # F00192
     ("BATTLE/BATTLE.PRG", 0x800790BC, "VS::Battle::WaitForLiveTargetRecovery"),  # F00193
     ("BATTLE/BATTLE.PRG", 0x800793C0, "VS::Battle::FinishLiveActionSequence"),  # F00195
+    ("BATTLE/BATTLE.PRG", 0x8009DD00, "VS::Battle::PlayLiveMeleeAttackAnimation"),  # F00817
+    ("BATTLE/BATTLE.PRG", 0x8009DDF4, "VS::Battle::PlayLiveDefenseAnimation"),  # F00818
+    ("BATTLE/BATTLE.PRG", 0x8009E2E0, "VS::Battle::PlayLiveSpellCastAnimation"),  # F00823
+    ("BATTLE/BATTLE.PRG", 0x8009EC9C, "VS::Battle::PlayLiveChainAbilityAnimation"),  # F00831
+    ("BATTLE/BATTLE.PRG", 0x8009EFEC, "VS::Battle::PlayLiveSpecialActionAnimation"),  # F00833
+    ("BATTLE/BATTLE.PRG", 0x8009F298, "VS::Battle::PlayLiveBreakArtAnimation"),  # F00834
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4358,15 +4376,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("VS::Actors::FindLiveActorAnimationHeader(temp_s2, var_s0, sp10);",
          "VS::Actors::FindLiveActorAnimationHeader(temp_s2, var_s0, &sp10);", "use the declared output contract"),
         ("if (sp10[0] == 0)", "if (sp10 == NULL)", "test the complete native pointer"),
-    ],
-    "F00823": [
-        ("    int sp20;", "    u_short* sp20;", "native animation-header output"),
-    ],
-    "F00833": [
-        ("    int animation;", "    u_short* animation;", "native animation-header output"),
-    ],
-    "F00834": [
-        ("    int sp10;", "    u_short* sp10;", "native animation-header output"),
     ],
     "F02995": [
         ("    char buffer[1024];", "    static char buffer[1024];",

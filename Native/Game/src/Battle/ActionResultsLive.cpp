@@ -10,6 +10,7 @@
 #include <optional>
 
 #include "Actors/AnimationControlLive.hpp"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
@@ -98,7 +99,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   }
 
   void PlayDefense(int actor_id) override {
-    Battle_PlayDefenseAnimation(actor_id, &Battle_actionState->rangeOrigin);
+    PlayLiveDefenseAnimation(actor_id, &Battle_actionState->rangeOrigin);
   }
 
   void PlayRecoveryPose() override {

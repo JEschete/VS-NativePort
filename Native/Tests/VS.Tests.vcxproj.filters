@@ -30,6 +30,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionAnimationsLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActionAnimationsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActionCameraSelectionLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -780,6 +786,9 @@
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
