@@ -1180,7 +1180,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\ItemView.cpp": [
 [
-166,
+167,
 [
 "                0x80, icon_x | (arg0 << 0x10), 0x100010, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1189,7 +1189,7 @@
 ]
 ],
 [
-934,
+935,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1198,7 +1198,7 @@
 ]
 ],
 [
-1046,
+1047,
 [
 "        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
@@ -1211,7 +1211,7 @@
 ]
 ],
 [
-1127,
+1128,
 [
 "                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;",
 "                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;",
@@ -1224,7 +1224,7 @@
 ]
 ],
 [
-1561,
+1562,
 [
 "            pending_row_text = pending_rows_allocation + 0x6400;",
 "            pending_row_types = pending_rows_allocation + 0x6000;",
@@ -1237,7 +1237,7 @@
 ]
 ],
 [
-1687,
+1688,
 [
 "            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1246,7 +1246,7 @@
 ]
 ],
 [
-1952,
+1953,
 [
 "        static const char initial[8];"
 ],
@@ -1257,7 +1257,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\Storage.cpp": [
 [
-53,
+52,
 [
 "    Items_WeaponSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
 ],
@@ -1266,7 +1266,7 @@
 ]
 ],
 [
-90,
+89,
 [
 "    Items_ShieldSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
 ],
@@ -1275,34 +1275,7 @@
 ]
 ],
 [
-121,
-[
-"            Menu_Container_CopyItem(Menu_Container_CopyContainerFlag_CopyContainerFlagsCopy | Items_ItemCategory_Misc, container,"
-],
-[
-"            Menu_Container_CopyItem((int)Menu_Container_CopyContainerFlag_CopyContainerFlagsCopy | Items_ItemCategory_Misc, container,"
-]
-],
-[
-423,
-[
-"        char* sourceIndex = Menu_Inventory_inventoryIndices[i];"
-],
-[
-"        char* sourceIndex = (char *)(Menu_Inventory_inventoryIndices[i]);"
-]
-],
-[
-458,
-[
-"        char* targetIndex = Menu_Inventory_inventoryIndices[i];"
-],
-[
-"        char* targetIndex = (char *)(Menu_Inventory_inventoryIndices[i]);"
-]
-],
-[
-862,
+453,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1311,7 +1284,7 @@
 ]
 ],
 [
-1012,
+603,
 [
 "            packed_discard_digits & 0xF, 0x42, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -1320,7 +1293,7 @@
 ]
 ],
 [
-1015,
+606,
 [
 "            packed_discard_digits & 0xF, 0x3C, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -1329,7 +1302,7 @@
 ]
 ],
 [
-1017,
+608,
 [
 "            packed_discard_digits >> 4, 0x36, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],

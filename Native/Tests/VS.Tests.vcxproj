@@ -135,6 +135,10 @@
     <ClCompile Include="src\ContainerIndexingLiveTests.cpp" />
     <ClCompile Include="src\ContainerIndexingModuleTests.cpp" />
     <ClCompile Include="src\ContainerIndexingTests.cpp" />
+    <ClCompile Include="src\ContainerTransfersLiveFixture.cpp" />
+    <ClCompile Include="src\ContainerTransfersLiveTests.cpp" />
+    <ClCompile Include="src\ContainerTransfersModuleTests.cpp" />
+    <ClCompile Include="src\ContainerTransfersTests.cpp" />
     <ClCompile Include="src\ContentSliceTests.cpp" />
     <ClCompile Include="src\ContentTests.cpp" />
     <ClCompile Include="src\ControllerTests.cpp" />
@@ -382,6 +386,8 @@
     <ClInclude Include="include\Battle\HudShortcutLiveFixture.hpp" />
     <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp" />
     <ClInclude Include="include\Items\ContainerIndexingLiveFixture.hpp" />
+    <ClInclude Include="include\Items\ContainerTransfersLiveFixture.hpp" />
+    <ClInclude Include="include\Items\ContainerTransfersWorld.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />

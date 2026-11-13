@@ -4,6 +4,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
+#include "Items/ContainerTransfersLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
@@ -780,7 +781,7 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
             case 5:
                 VS::Menu::Framework::FormatLiveGemRow(
                     &container->gems[itemIndex], &text[i * 2], &rowTypes[i], c);
-                if (Menu_Container_ParentShieldIndex(5, itemIndex, container) != 0) {
+                if (VS::Items::LiveContainerParentShieldIndex(5, itemIndex, container) != 0) {
                     rowType = 0xCC01;
                 }
                 break;
@@ -789,7 +790,7 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
                     &container->misc[itemIndex], &text[i * 2], &rowTypes[i], c);
                 break;
             }
-            if (Menu_Container_ParentWeaponIndex(itemCategory, itemIndex, container) != 0) {
+            if (VS::Items::LiveContainerParentWeaponIndex(itemCategory, itemIndex, container) != 0) {
                 rowType = 0xCC01;
             }
             ++itemCount;
@@ -868,7 +869,7 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
                         &text[i * 2], &rowTypes[i], c);
                     break;
                 }
-                parentIndex = Menu_Container_ParentWeaponIndex(
+                parentIndex = VS::Items::LiveContainerParentWeaponIndex(
                     itemCategory, itemIndex, &Menu_Container_containerData->items);
                 if (parentIndex != 0) {
                     rowType = 0xCA00;
@@ -877,7 +878,7 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
                         rowType = 0xCC00;
                     }
                 }
-                parentIndex = Menu_Container_ParentShieldIndex(
+                parentIndex = VS::Items::LiveContainerParentShieldIndex(
                     itemCategory, itemIndex, &Menu_Container_containerData->items);
                 if (parentIndex != 0) {
                     rowType = 0xCA00;
@@ -1050,7 +1051,7 @@ loop_1:
         Menu_Inventory_freezeTabArrows = 1;
 
         for (temp_s3 = 0; temp_s3 < 7; ++temp_s3) {
-            Menu_Container_RebuildCategoryIndices(temp_s3, Menu_Container_containerData);
+            VS::Items::RebuildLiveContainerCategoryIndices(temp_s3, Menu_Container_containerData);
         }
 
         Menu_Container_RebuildPendingTransfers();
@@ -1120,7 +1121,7 @@ loop_1:
             } else if (Menu_Container_itemListSelectedRow > 0) {
                 if (selected_category_id == 7) {
                     Menu_Container_UndoPendingTransfer(Menu_Container_itemListSelectedRow - 1);
-                    Menu_Container_RefreshMiscTransferCount();
+                    VS::Items::RefreshLiveMiscTransferCount();
                     VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 4;
                 } else {
@@ -1302,7 +1303,7 @@ loop_1:
             break;
         }
 
-        var_a2 = Menu_Container_ParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = VS::Items::LiveContainerParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         var_a1 = 8;
 
         if (var_a2 != 0) {
@@ -1313,7 +1314,7 @@ loop_1:
                               : 4];
         }
 
-        var_a2 = Menu_Container_ParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = VS::Items::LiveContainerParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         var_a1 = 8;
 
         if (var_a2 != 0) {
@@ -1336,8 +1337,8 @@ loop_1:
                     VS::Items::CountLiveContainerItems(temp_s2, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
             }
 
-            Menu_Container_PreviewTransferredMisc();
-            var_a2 = Menu_Container_CopyItem(6, &Menu_Framework_unusedInventoryStorage->transferPreview, temp_s3,
+            VS::Items::PreviewLiveTransferredMisc();
+            var_a2 = VS::Items::CopyLiveContainerItem(6, &Menu_Framework_unusedInventoryStorage->transferPreview, temp_s3,
                 &Menu_Container_containerData->items);
             if ((Menu_Container_browsingGadgetBag == 0) && (var_a2 > 0x40)) {
                 var_a2 = 0;
@@ -1377,8 +1378,8 @@ loop_1:
         if (((u_int)(selected_category_id - 1) < 2) || ((selected_category_id == 5))) {
             action_row_text[2] = Menu_Framework_itemHelp + 0x3527;
             action_row_text[3] = Menu_Framework_itemHelp + 0x352C;
-            if ((Menu_Container_ParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items) == 0)
-                && (Menu_Container_ParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items)
+            if ((VS::Items::LiveContainerParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items) == 0)
+                && (VS::Items::LiveContainerParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items)
                     == 0)) {
                 action_row_text[3] = Menu_Framework_itemHelp + 0x35B2;
                 Menu_Framework_rowTypeBuf[1] = 1;
@@ -1405,14 +1406,14 @@ loop_1:
             }
             break;
         }
-        var_a2 = Menu_Container_ParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = VS::Items::LiveContainerParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         if (var_a2 != 0) {
             temp_s0 = 1;
             if (Menu_Container_containerData->items.weapons[var_a2 - 1].isEquipped == 0) {
                 temp_s0 = 2;
             }
         }
-        var_a2 = Menu_Container_ParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = VS::Items::LiveContainerParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         if (var_a2 != 0) {
             temp_s0 = 1;
             if (Menu_Container_containerData->items.shields[var_a2 - 1].isEquipped == 0) {
@@ -1501,12 +1502,12 @@ loop_1:
         break;
     case 10:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            temp_s3 = Menu_Container_ParentWeaponIndex(
+            temp_s3 = VS::Items::LiveContainerParentWeaponIndex(
                 selected_category_id, temp_s1[Menu_Container_itemListSelectedRow - 1] - 1, &Menu_Container_containerData->items);
             if (temp_s3 != 0) {
                 selected_category_id = 0;
             } else {
-                temp_s3 = Menu_Container_ParentShieldIndex(
+                temp_s3 = VS::Items::LiveContainerParentShieldIndex(
                     selected_category_id, temp_s1[Menu_Container_itemListSelectedRow - 1] - 1, &Menu_Container_containerData->items);
                 selected_category_id = 3;
             }
@@ -1596,7 +1597,7 @@ loop_1:
                 // Pointless check and duplicated loops
                 if (Menu_Container_browsingGadgetBag != 0) {
                     while ((temp_s2 = Menu_Framework_unusedInventoryStorage->itemsToTransfer[0])) {
-                        Menu_Container_CopyItem((temp_s2 >> 8) | 0x10, &Menu_Container_otherStorage->items,
+                        VS::Items::CopyLiveContainerItem((temp_s2 >> 8) | 0x10, &Menu_Container_otherStorage->items,
                             (temp_s2 - 1) & 0xFF, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
                         VS::Items::ClearLiveContainerItem((temp_s2 >> 8), (temp_s2 - 1) & 0xFF,
                             &Menu_Framework_unusedInventoryStorage->stagedTransfer);
@@ -1604,7 +1605,7 @@ loop_1:
                     }
                 } else {
                     while ((temp_s2 = Menu_Framework_unusedInventoryStorage->itemsToTransfer[0])) {
-                        Menu_Container_CopyItem((temp_s2 >> 8) | 0x10, &Menu_Container_otherStorage->items,
+                        VS::Items::CopyLiveContainerItem((temp_s2 >> 8) | 0x10, &Menu_Container_otherStorage->items,
                             (temp_s2 - 1) & 0xFF, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
                         VS::Items::ClearLiveContainerItem((temp_s2 >> 8), (temp_s2 - 1) & 0xFF,
                             &Menu_Framework_unusedInventoryStorage->stagedTransfer);
@@ -1612,7 +1613,7 @@ loop_1:
                     }
                 }
                 for (temp_s3 = 0; temp_s3 < 7; ++temp_s3) {
-                    Menu_Container_RebuildCategoryIndices(temp_s3, Menu_Container_otherStorage);
+                    VS::Items::RebuildLiveContainerCategoryIndices(temp_s3, Menu_Container_otherStorage);
                 }
                 VS::Menu::Framework::ClearLiveMenuExcept(0);
                 Menu_Container_itemListStep = 17;
@@ -1747,7 +1748,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         VS::Core::Memory::CopyLiveHalfwordBlocks(&Menu_Framework_unusedInventoryStorage->container.items,
             &Menu_Framework_unusedInventoryStorage->storedContainer,
             sizeof Menu_Framework_unusedInventoryStorage->container.items);
-        Menu_Container_SnapshotGadgetBag();
+        VS::Items::SnapshotLiveGadgetBag();
         Menu_Container_capacityListSlideStep = 0;
         Menu_Container_directionReopenDelay = 0;
         Menu_Container_categoryTitleSlideStep = 0;
@@ -1803,9 +1804,9 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         break;
     case 6:
         if (VS::Menu::Framework::UnloadLiveItemTextWhenReady() != 0) {
-            Menu_Container_CommitGadgetBag();
+            VS::Items::CommitLiveGadgetBag();
             for (i = 0; i < 7; ++i) {
-                Menu_Container_RebuildCategoryIndices(i, &Menu_Framework_unusedInventoryStorage->container);
+                VS::Items::RebuildLiveContainerCategoryIndices(i, &Menu_Framework_unusedInventoryStorage->container);
             }
             for (i = 0; i < 7; ++i) {
                 if (VS::Items::CountLiveContainerItems(i, &Menu_Framework_unusedInventoryStorage->container.items)
@@ -1874,7 +1875,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
 
     if (Menu_Container_controlsPanelMode != 0) {
         if (Menu_Container_controlsPanelSlideStep == 0) {
-            Menu_Container_RefreshMiscTransferCount();
+            VS::Items::RefreshLiveMiscTransferCount();
         }
         if (Menu_Container_controlsPanelSlideStep < 0xAU) {
             ++Menu_Container_controlsPanelSlideStep;

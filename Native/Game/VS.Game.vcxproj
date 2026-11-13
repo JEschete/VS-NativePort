@@ -1611,6 +1611,10 @@
     <ClCompile Include="src\Items\ContainerIndexingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Items\ContainerTransfers.cpp" />
+    <ClCompile Include="src\Items\ContainerTransfersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Items\EquipmentAffinity.cpp" />
     <ClCompile Include="src\Items\EquipmentLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2562,6 +2566,8 @@
     <ClInclude Include="include\Field\TrapsLive.hpp" />
     <ClInclude Include="include\Items\ContainerIndexing.hpp" />
     <ClInclude Include="include\Items\ContainerIndexingLive.hpp" />
+    <ClInclude Include="include\Items\ContainerTransfers.hpp" />
+    <ClInclude Include="include\Items\ContainerTransfersLive.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\EquipmentAffinity.hpp" />
     <ClInclude Include="include\Items\EquipmentLive.hpp" />

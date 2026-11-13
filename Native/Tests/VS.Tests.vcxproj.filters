@@ -282,6 +282,18 @@
     <ClCompile Include="src\ContainerIndexingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ContainerTransfersLiveFixture.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerTransfersLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerTransfersModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerTransfersTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ContentSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -901,6 +913,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\ContainerIndexingLiveFixture.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ContainerTransfersLiveFixture.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ContainerTransfersWorld.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp">

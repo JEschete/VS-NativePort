@@ -65,6 +65,7 @@
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TrapsLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
+#include "Items/ContainerTransfersLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
@@ -1971,6 +1972,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUD.PRG", 0x80102F88u, 0u, (void*)&VS::Items::LiveContainerItemId, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103070u, 0u, (void*)&VS::Items::CountLiveContainerItems, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103110u, 0u, (void*)&VS::Items::FindLiveEmptyContainerSlot, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801031A0u, 0u, (void*)&VS::Items::PreviewLiveTransferredMisc, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103270u, 0u, (void*)&VS::Items::RefreshLiveMiscTransferCount, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801032ACu, 0u, (void*)&VS::Items::CopyLiveContainerItem, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801037D8u, 0u, (void*)&VS::Items::RebuildLiveContainerCategoryIndices, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801039ACu, 0u, (void*)&VS::Items::SnapshotLiveGadgetBag, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103B20u, 0u, (void*)&VS::Items::CommitLiveGadgetBag, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103C9Cu, 0u, (void*)&VS::Items::LiveContainerParentWeaponIndex, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103D14u, 0u, (void*)&VS::Items::LiveContainerParentShieldIndex, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008255Cu, 0u, (void*)&VS::Field::CalculateLiveTrapPanelDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80082FF4u, 0u, (void*)&VS::Field::CalculateLiveHealingPanelRecovery, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073TiledRing, 0u, 0u, 0u},

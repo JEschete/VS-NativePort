@@ -1340,6 +1340,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Items::LiveContainerItemId": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::CountLiveContainerItems": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::FindLiveEmptyContainerSlot": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
+    "VS::Items::PreviewLiveTransferredMisc": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::RefreshLiveMiscTransferCount": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::CopyLiveContainerItem": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::RebuildLiveContainerCategoryIndices": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::SnapshotLiveGadgetBag": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::CommitLiveGadgetBag": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::LiveContainerParentWeaponIndex": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::LiveContainerParentShieldIndex": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2324,6 +2332,14 @@ OWNED_CALL_BINDINGS["F02930"] = "VS::Items::ClearLiveContainerItem"
 OWNED_CALL_BINDINGS["F02931"] = "VS::Items::LiveContainerItemId"
 OWNED_CALL_BINDINGS["F02932"] = "VS::Items::CountLiveContainerItems"
 OWNED_CALL_BINDINGS["F02933"] = "VS::Items::FindLiveEmptyContainerSlot"
+OWNED_CALL_BINDINGS["F02934"] = "VS::Items::PreviewLiveTransferredMisc"
+OWNED_CALL_BINDINGS["F02935"] = "VS::Items::RefreshLiveMiscTransferCount"
+OWNED_CALL_BINDINGS["F02936"] = "VS::Items::CopyLiveContainerItem"
+OWNED_CALL_BINDINGS["F02937"] = "VS::Items::RebuildLiveContainerCategoryIndices"
+OWNED_CALL_BINDINGS["F02938"] = "VS::Items::SnapshotLiveGadgetBag"
+OWNED_CALL_BINDINGS["F02939"] = "VS::Items::CommitLiveGadgetBag"
+OWNED_CALL_BINDINGS["F02940"] = "VS::Items::LiveContainerParentWeaponIndex"
+OWNED_CALL_BINDINGS["F02941"] = "VS::Items::LiveContainerParentShieldIndex"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3728,6 +3744,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x80102F88, "VS::Items::LiveContainerItemId"),  # F02931
     ("MENU/MENUD.PRG", 0x80103070, "VS::Items::CountLiveContainerItems"),  # F02932
     ("MENU/MENUD.PRG", 0x80103110, "VS::Items::FindLiveEmptyContainerSlot"),  # F02933
+    ("MENU/MENUD.PRG", 0x801031A0, "VS::Items::PreviewLiveTransferredMisc"),  # F02934
+    ("MENU/MENUD.PRG", 0x80103270, "VS::Items::RefreshLiveMiscTransferCount"),  # F02935
+    ("MENU/MENUD.PRG", 0x801032AC, "VS::Items::CopyLiveContainerItem"),  # F02936
+    ("MENU/MENUD.PRG", 0x801037D8, "VS::Items::RebuildLiveContainerCategoryIndices"),  # F02937
+    ("MENU/MENUD.PRG", 0x801039AC, "VS::Items::SnapshotLiveGadgetBag"),  # F02938
+    ("MENU/MENUD.PRG", 0x80103B20, "VS::Items::CommitLiveGadgetBag"),  # F02939
+    ("MENU/MENUD.PRG", 0x80103C9C, "VS::Items::LiveContainerParentWeaponIndex"),  # F02940
+    ("MENU/MENUD.PRG", 0x80103D14, "VS::Items::LiveContainerParentShieldIndex"),  # F02941
     ("BATTLE/BATTLE.PRG", 0x8008255C, "VS::Field::CalculateLiveTrapPanelDamage"),  # F00420 Battle_statCalculators[12]
     ("BATTLE/BATTLE.PRG", 0x80082FF4, "VS::Field::CalculateLiveHealingPanelRecovery"),  # F00422 [14]
     ("EFFECT/PLG074.BIN", 0x800F98F8, "VS::Effects::Templates::UpdateLivePlg073TiledRing"),  # F01986

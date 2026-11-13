@@ -2181,6 +2181,12 @@
     <ClInclude Include="src\Items\ContainerTables.hpp">
       <Filter>src\Items</Filter>
     </ClInclude>
+    <ClCompile Include="src\Items\ContainerTransfers.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Items\ContainerTransfersLive.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
     <ClCompile Include="src\Items\EquipmentAffinity.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
@@ -3544,6 +3550,12 @@
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\ContainerIndexingLive.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ContainerTransfers.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ContainerTransfersLive.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Equipment.h">

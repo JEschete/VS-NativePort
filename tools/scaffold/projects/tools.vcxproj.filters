@@ -2172,6 +2172,39 @@
     <None Include="..\..\port\differentials\container_indexing_guard_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\container_transfers_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02934.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02935.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02936.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02937.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02938.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02939.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02940.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_f02941.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\container_transfers_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\damage_calculations.py">
       <Filter>tools\port\differentials</Filter>
     </None>

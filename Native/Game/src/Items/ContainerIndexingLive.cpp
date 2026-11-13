@@ -35,46 +35,6 @@ ItemCategory Category(int category) {
   return static_cast<ItemCategory>(category);
 }
 
-class LiveWorld final : public ContainerWorld {
- public:
-  explicit LiveWorld(Items_ContainerData* owner = nullptr) : owner_(owner) {}
-  std::uint16_t Capacity(ItemCategory category) override {
-    return Menu_Container_containerItemCapacities[static_cast<std::size_t>(
-        category)];
-  }
-  ContainerRecord Read(ItemCategory category, std::size_t index) override {
-    if (owner_ == nullptr) Refuse("missing container record owner");
-    return Live::VisitContainerTable(
-        *owner_, category, [&](const auto& table) -> ContainerRecord {
-          if (index >= std::size(table)) {
-            Refuse("record index outside live container table");
-          }
-          return Live::Typed(table[index]);
-        });
-  }
-  void Write(ItemCategory category, std::size_t index,
-             const ContainerRecord& item) override {
-    if (owner_ == nullptr) Refuse("missing container record owner");
-    Live::VisitContainerTable(*owner_, category, [&](auto& table) {
-      if (index >= std::size(table)) {
-        Refuse("record index outside live container table");
-      }
-      using Legacy = std::remove_reference_t<decltype(table[index])>;
-      const auto* record = std::get_if<Live::TypedRecordOf<Legacy>>(&item);
-      if (record == nullptr) {
-        Refuse("record type disagrees with live container table");
-      }
-      Live::Commit(table[index], *record);
-    });
-  }
-  [[noreturn]] void Refuse(std::string_view reason) override {
-    Items::Refuse(reason);
-  }
-
- private:
-  Items_ContainerData* const owner_;
-};
-
 std::uint16_t* IndexPointer(Items_ContainerIndices& indices,
                             std::size_t offset) {
   const std::array<std::span<std::uint16_t>, kItemCategoryCount - 1> tables{
@@ -102,10 +62,46 @@ constexpr std::size_t kOriginalIndicesOffset = 0x3C00;
 static_assert(offsetof(Items_Container, indices) == kOriginalIndicesOffset);
 }  // namespace
 
+LiveContainerWorld::LiveContainerWorld(Items_ContainerData* owner)
+    : owner_(owner) {}
+std::uint16_t LiveContainerWorld::Capacity(ItemCategory category) {
+  return Menu_Container_containerItemCapacities[static_cast<std::size_t>(
+      category)];
+}
+ContainerRecord LiveContainerWorld::Read(ItemCategory category,
+                                         std::size_t index) {
+  if (owner_ == nullptr) Refuse("missing container record owner");
+  return Live::VisitContainerTable(
+      *owner_, category, [&](const auto& table) -> ContainerRecord {
+        if (index >= std::size(table)) {
+          Refuse("record index outside live container table");
+        }
+        return Live::Typed(table[index]);
+      });
+}
+void LiveContainerWorld::Write(ItemCategory category, std::size_t index,
+                               const ContainerRecord& item) {
+  if (owner_ == nullptr) Refuse("missing container record owner");
+  Live::VisitContainerTable(*owner_, category, [&](auto& table) {
+    if (index >= std::size(table)) {
+      Refuse("record index outside live container table");
+    }
+    using Legacy = std::remove_reference_t<decltype(table[index])>;
+    const auto* record = std::get_if<Live::TypedRecordOf<Legacy>>(&item);
+    if (record == nullptr) {
+      Refuse("record type disagrees with live container table");
+    }
+    Live::Commit(table[index], *record);
+  });
+}
+[[noreturn]] void LiveContainerWorld::Refuse(std::string_view reason) {
+  Items::Refuse(reason);
+}
+
 // decomp: _getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:85)
 std::uint16_t* LiveContainerCategoryIndices(int category,
                                             Items_Container* container) {
-  LiveWorld world;
+  LiveContainerWorld world;
   const auto offset = ContainerCategoryIndices(Category(category), world);
   if (container == nullptr) Refuse("missing container index owner");
   return IndexPointer(container->indices, offset);
@@ -114,7 +110,7 @@ std::uint16_t* LiveContainerCategoryIndices(int category,
 // decomp: _getContainerItemIndex (src/MENU/MENUD.PRG/234.c:97)
 int FindLiveContainerItemRow(int category, int index, std::uint16_t* indices) {
   const auto typed_category = Category(category);
-  LiveWorld world;
+  LiveContainerWorld world;
   return FindContainerItemRow(typed_category, index,
                               Order(typed_category, indices), world);
 }
@@ -123,7 +119,7 @@ int FindLiveContainerItemRow(int category, int index, std::uint16_t* indices) {
 void AppendLiveContainerItemIndex(int category, int index,
                                   std::uint16_t* indices) {
   const auto typed_category = Category(category);
-  LiveWorld world;
+  LiveContainerWorld world;
   AppendContainerItemIndex(typed_category, index,
                            Order(typed_category, indices), world);
 }
@@ -131,26 +127,26 @@ void AppendLiveContainerItemIndex(int category, int index,
 // decomp: _initContainerObject (src/MENU/MENUD.PRG/234.c:121)
 void ClearLiveContainerItem(int category, int index,
                             Items_ContainerData* container) {
-  LiveWorld world(container);
+  LiveContainerWorld world(container);
   ClearContainerItem(Category(category), index, world);
 }
 
 // decomp: _getContainerItemId (src/MENU/MENUD.PRG/234.c:191)
 int LiveContainerItemId(int category, int index,
                         Items_ContainerData* container) {
-  LiveWorld world(container);
+  LiveContainerWorld world(container);
   return ContainerItemId(Category(category), index, world);
 }
 
 // decomp: _countContainerItems (src/MENU/MENUD.PRG/234.c:221)
 int CountLiveContainerItems(int category, Items_ContainerData* container) {
-  LiveWorld world(container);
+  LiveContainerWorld world(container);
   return CountContainerItems(Category(category), world);
 }
 
 // decomp: _getEmptyContainerSlot (src/MENU/MENUD.PRG/234.c:234)
 int FindLiveEmptyContainerSlot(int category, Items_ContainerData* container) {
-  LiveWorld world(container);
+  LiveContainerWorld world(container);
   return FindEmptyContainerSlot(Category(category), world);
 }
 }  // namespace VS::Items

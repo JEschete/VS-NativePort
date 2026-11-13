@@ -400,6 +400,17 @@
     <None Include="..\..\port\differentials\container_indexing_f02932.py" />
     <None Include="..\..\port\differentials\container_indexing_f02933.py" />
     <None Include="..\..\port\differentials\container_indexing_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\container_transfers_common.py" />
+    <None Include="..\..\port\differentials\container_transfers_driver.cpp" />
+    <None Include="..\..\port\differentials\container_transfers_f02934.py" />
+    <None Include="..\..\port\differentials\container_transfers_f02935.py" />
+    <None Include="..\..\port\differentials\container_transfers_f02936.py" />
+    <None Include="..\..\port\differentials\container_transfers_f02937.py" />
+    <None Include="..\..\port\differentials\container_transfers_f02938.py" />
+    <None Include="..\..\port\differentials\container_transfers_f02939.py" />
+    <None Include="..\..\port\differentials\container_transfers_f02940.py" />
+    <None Include="..\..\port\differentials\container_transfers_f02941.py" />
+    <None Include="..\..\port\differentials\container_transfers_guard_driver.cpp" />
     <None Include="..\..\port\differentials\damage_calculations.py" />
     <None Include="..\..\port\differentials\damage_calculations_driver.cpp" />
     <None Include="..\..\port\differentials\damage_calculations_guard_driver.cpp" />
