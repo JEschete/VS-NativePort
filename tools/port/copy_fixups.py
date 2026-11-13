@@ -1333,6 +1333,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Inventory::UpdateLiveArmorDetails": r"Native\Game\include\Menu\Inventory\ItemDetailDispatchLive.hpp",
     "VS::Menu::Inventory::UpdateLiveGemDetails": r"Native\Game\include\Menu\Inventory\ItemDetailDispatchLive.hpp",
     "VS::Menu::Inventory::UpdateLiveItemDetails": r"Native\Game\include\Menu\Inventory\ItemDetailDispatchLive.hpp",
+    "VS::Items::LiveContainerCategoryIndices": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
+    "VS::Items::FindLiveContainerItemRow": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
+    "VS::Items::AppendLiveContainerItemIndex": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
+    "VS::Items::ClearLiveContainerItem": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
+    "VS::Items::LiveContainerItemId": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
+    "VS::Items::CountLiveContainerItems": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
+    "VS::Items::FindLiveEmptyContainerSlot": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2310,6 +2317,13 @@ OWNED_CALL_BINDINGS["F02568"] = "VS::Menu::Inventory::DrawLiveItemCategoryIcons"
 OWNED_CALL_BINDINGS["F02579"] = "VS::Menu::Inventory::UpdateLiveArmorDetails"
 OWNED_CALL_BINDINGS["F02580"] = "VS::Menu::Inventory::UpdateLiveGemDetails"
 OWNED_CALL_BINDINGS["F02581"] = "VS::Menu::Inventory::UpdateLiveItemDetails"
+OWNED_CALL_BINDINGS["F02927"] = "VS::Items::LiveContainerCategoryIndices"
+OWNED_CALL_BINDINGS["F02928"] = "VS::Items::FindLiveContainerItemRow"
+OWNED_CALL_BINDINGS["F02929"] = "VS::Items::AppendLiveContainerItemIndex"
+OWNED_CALL_BINDINGS["F02930"] = "VS::Items::ClearLiveContainerItem"
+OWNED_CALL_BINDINGS["F02931"] = "VS::Items::LiveContainerItemId"
+OWNED_CALL_BINDINGS["F02932"] = "VS::Items::CountLiveContainerItems"
+OWNED_CALL_BINDINGS["F02933"] = "VS::Items::FindLiveEmptyContainerSlot"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3707,6 +3721,13 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x800427A8, "VS::Core::NextLiveRandomBounded"),  # F03434
     ("SLUS_010.40", 0x80042860, "VS::Core::NextLiveRandomAveraged"),  # F03435
     ("BATTLE/BATTLE.PRG", 0x80083430, "VS::Items::CalculateLiveItemRecovery"),  # F00423 Battle_statCalculators[15]
+    ("MENU/MENUD.PRG", 0x80102C94, "VS::Items::LiveContainerCategoryIndices"),  # F02927
+    ("MENU/MENUD.PRG", 0x80102CD0, "VS::Items::FindLiveContainerItemRow"),  # F02928
+    ("MENU/MENUD.PRG", 0x80102D28, "VS::Items::AppendLiveContainerItemIndex"),  # F02929
+    ("MENU/MENUD.PRG", 0x80102D80, "VS::Items::ClearLiveContainerItem"),  # F02930
+    ("MENU/MENUD.PRG", 0x80102F88, "VS::Items::LiveContainerItemId"),  # F02931
+    ("MENU/MENUD.PRG", 0x80103070, "VS::Items::CountLiveContainerItems"),  # F02932
+    ("MENU/MENUD.PRG", 0x80103110, "VS::Items::FindLiveEmptyContainerSlot"),  # F02933
     ("BATTLE/BATTLE.PRG", 0x8008255C, "VS::Field::CalculateLiveTrapPanelDamage"),  # F00420 Battle_statCalculators[12]
     ("BATTLE/BATTLE.PRG", 0x80082FF4, "VS::Field::CalculateLiveHealingPanelRecovery"),  # F00422 [14]
     ("EFFECT/PLG074.BIN", 0x800F98F8, "VS::Effects::Templates::UpdateLivePlg073TiledRing"),  # F01986

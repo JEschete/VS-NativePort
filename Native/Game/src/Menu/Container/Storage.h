@@ -47,14 +47,6 @@ void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_Inventor
     Items_ContainerData* container);
 void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_InventoryShield* source,
     Items_ContainerData* container);
-u_short* Menu_Container_CategoryIndices(int itemCategory, Items_Container* container);
-int Menu_Container_FindItemRow(int itemCategory, int index, u_short* indices);
-void Menu_Container_AppendItemIndex(int itemCategory, int index, u_short* indices);
-void Menu_Container_ClearItem(
-    int itemCategory, int index, Items_ContainerData* container);
-int Menu_Container_ItemId(int type, int index, Items_ContainerData* container);
-int Menu_Container_CountItems(int itemCategory, Items_ContainerData* container);
-int Menu_Container_FindEmptySlot(int itemCategory, Items_ContainerData* container);
 void Menu_Container_PreviewTransferredMisc(void);
 void Menu_Container_RefreshMiscTransferCount(void);
 int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContainer,

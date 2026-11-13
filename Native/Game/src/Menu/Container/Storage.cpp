@@ -4,6 +4,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/ContainerIndexingLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -106,174 +107,6 @@ void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_Inventor
     VS::Core::Memory::FreeLiveFromHighEnd(temp);
 }
 
-// decomp: MENUD.PRG _getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:85)
-u_short* Menu_Container_CategoryIndices(int itemCategory, Items_Container* container)
-{
-    int i;
-    int offset;
-
-    offset = 0;
-    for (i = 0; i < itemCategory; ++i) {
-        offset += Menu_Container_containerItemCapacities[i];
-    }
-    return (u_short*)&container->indices + offset;
-}
-
-// decomp: MENUD.PRG _getContainerItemIndex (src/MENU/MENUD.PRG/234.c:97)
-int Menu_Container_FindItemRow(int itemCategory, int index, u_short* indices)
-{
-    int i;
-
-    for (i = 0; i < Menu_Container_containerItemCapacities[itemCategory]; ++i) {
-        if (indices[i] == (index + 1)) {
-            return i + 1;
-        }
-    }
-    return 0;
-}
-
-// decomp: MENUD.PRG _setContainerItemIndex (src/MENU/MENUD.PRG/234.c:109)
-void Menu_Container_AppendItemIndex(int itemCategory, int index, u_short* indices)
-{
-    int i;
-
-    for (i = 0; i < Menu_Container_containerItemCapacities[itemCategory]; ++i) {
-        if (indices[i] == 0) {
-            indices[i] = index + 1;
-            return;
-        }
-    }
-}
-
-// decomp: MENUD.PRG _initContainerObject (src/MENU/MENUD.PRG/234.c:121)
-void Menu_Container_ClearItem(
-    int itemCategory, int index, Items_ContainerData* container)
-{
-    int i;
-
-    switch (itemCategory) {
-    case Items_ItemCategory_Weapon: {
-        Items_InventoryWeapon* weapon = &container->weapons[index];
-
-        Menu_Container_ClearItem(1, weapon->blade - 1, container);
-        Menu_Container_ClearItem(2, weapon->grip - 1, container);
-
-        for (i = 0; i < 3; ++i) {
-            int gem = weapon->gems[i];
-            if (gem != 0) {
-                Menu_Container_ClearItem(Items_ItemCategory_Gem, gem - 1, container);
-            }
-        }
-
-        VS::Core::Memory::ZeroLiveWordsBackward(weapon, sizeof *weapon);
-        weapon->index = index + 1;
-        break;
-    }
-    case Items_ItemCategory_Blade: {
-        Items_InventoryBlade* blade = &container->blades[index];
-        VS::Core::Memory::ZeroLiveWordsBackward(blade, sizeof *blade);
-        blade->index = index + 1;
-        break;
-    }
-    case Items_ItemCategory_Grip: {
-        Items_InventoryGrip* grip = &container->grips[index];
-        VS::Core::Memory::ZeroLiveWordsBackward(grip, sizeof *grip);
-        grip->index = index + 1;
-        break;
-    }
-    case Items_ItemCategory_Shield: {
-        Items_InventoryShield* shield = &container->shields[index];
-
-        for (i = 0; i < 3; ++i) {
-            int gem = shield->gems[i];
-            if (gem != 0) {
-                Menu_Container_ClearItem(Items_ItemCategory_Gem, gem - 1, container);
-            }
-        }
-
-        VS::Core::Memory::ZeroLiveWordsBackward(shield, sizeof *shield);
-        shield->index = index + 1;
-        break;
-    }
-    case Items_ItemCategory_Armor: {
-        Items_InventoryArmor* armor = &container->armor[index];
-        VS::Core::Memory::ZeroLiveWordsBackward(armor, sizeof *armor);
-        armor->index = index + 1;
-        break;
-    }
-    case Items_ItemCategory_Gem: {
-        Items_InventoryGem* gem = &container->gems[index];
-        VS::Core::Memory::ZeroLiveWordsBackward(gem, sizeof *gem);
-        gem->index = index + 1;
-        break;
-    }
-    case Items_ItemCategory_Misc: {
-        Items_InventoryMisc* item = &container->misc[index];
-        VS::Core::Memory::ZeroLiveWordsBackward(item, sizeof *item);
-        item->index = index + 1;
-        break;
-    }
-    }
-}
-
-// decomp: MENUD.PRG _getContainerItemId (src/MENU/MENUD.PRG/234.c:191)
-int Menu_Container_ItemId(int type, int index, Items_ContainerData* container)
-{
-    int ret = 0;
-
-    switch (type) {
-    case Items_ItemCategory_Weapon:
-        ret = container->weapons[index].blade;
-        break;
-    case Items_ItemCategory_Blade:
-        ret = container->blades[index].id;
-        break;
-    case Items_ItemCategory_Grip:
-        ret = container->grips[index].id;
-        break;
-    case Items_ItemCategory_Shield:
-        ret = container->shields[index].base.id;
-        break;
-    case Items_ItemCategory_Armor:
-        ret = container->armor[index].id;
-        break;
-    case Items_ItemCategory_Gem:
-        ret = container->gems[index].id;
-        break;
-    case Items_ItemCategory_Misc:
-        ret = container->misc[index].id;
-        break;
-    }
-    return ret;
-}
-
-// decomp: MENUD.PRG _countContainerItems (src/MENU/MENUD.PRG/234.c:221)
-int Menu_Container_CountItems(int itemCategory, Items_ContainerData* container)
-{
-    int i;
-    int count = 0;
-
-    for (i = 0; i < Menu_Container_containerItemCapacities[itemCategory]; ++i) {
-        if (Menu_Container_ItemId(itemCategory, i, container) != 0) {
-            ++count;
-        }
-    }
-    return count;
-}
-
-// decomp: MENUD.PRG _getEmptyContainerSlot (src/MENU/MENUD.PRG/234.c:234)
-int Menu_Container_FindEmptySlot(int itemCategory, Items_ContainerData* container)
-{
-    int i;
-
-    for (i = 0; i < Menu_Container_containerItemCapacities[itemCategory]; ++i) {
-        if (Menu_Container_ItemId(itemCategory, i, container) == 0) {
-            break;
-        }
-    }
-    return i;
-}
-
 // decomp: MENUD.PRG func_801031A0 (src/MENU/MENUD.PRG/234.c:259)
 void Menu_Container_PreviewTransferredMisc(void)
 {
@@ -297,7 +130,7 @@ void Menu_Container_RefreshMiscTransferCount(void)
 {
     Menu_Container_PreviewTransferredMisc();
     Menu_Container_transferredMiscCount =
-        Menu_Container_CountItems(Items_ItemCategory_Misc, &Menu_Framework_unusedInventoryStorage->transferPreview);
+        VS::Items::CountLiveContainerItems(Items_ItemCategory_Misc, &Menu_Framework_unusedInventoryStorage->transferPreview);
 }
 
 // decomp: MENUD.PRG _copyContainerItem (src/MENU/MENUD.PRG/234.c:283)
@@ -316,8 +149,8 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
     copyFlag = (itemCategory >> 4) & 1;
     itemCategory = itemCategory & 0xF;
     index = 0;
-    itemCount = Menu_Container_CountItems(itemCategory, targetContainer);
-    targetSlot = Menu_Container_FindEmptySlot(itemCategory, targetContainer);
+    itemCount = VS::Items::CountLiveContainerItems(itemCategory, targetContainer);
+    targetSlot = VS::Items::FindLiveEmptyContainerSlot(itemCategory, targetContainer);
 
     switch (itemCategory) {
     case Items_ItemCategory_Weapon: {
@@ -325,8 +158,8 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
         Items_InventoryWeapon* target = &targetContainer->weapons[targetSlot];
 
         if (((itemCount != 32)
-                && (Menu_Container_CountItems(Items_ItemCategory_Blade, targetContainer) != 64))
-            && (Menu_Container_CountItems(Items_ItemCategory_Grip, targetContainer) != 64)) {
+                && (VS::Items::CountLiveContainerItems(Items_ItemCategory_Blade, targetContainer) != 64))
+            && (VS::Items::CountLiveContainerItems(Items_ItemCategory_Grip, targetContainer) != 64)) {
 
             subItemCount = 0;
 
@@ -336,7 +169,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
                 }
             }
 
-            if ((Menu_Container_CountItems(Items_ItemCategory_Gem, targetContainer) + subItemCount)
+            if ((VS::Items::CountLiveContainerItems(Items_ItemCategory_Gem, targetContainer) + subItemCount)
                 > 192) {
                 break;
             }
@@ -414,7 +247,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
             }
         }
 
-        if ((Menu_Container_CountItems(Items_ItemCategory_Gem, targetContainer) + subItemCount)
+        if ((VS::Items::CountLiveContainerItems(Items_ItemCategory_Gem, targetContainer) + subItemCount)
             > 192) {
             break;
         }
@@ -526,13 +359,13 @@ void Menu_Container_RebuildCategoryIndices(int itemCategory, Items_Container* co
     int capacity;
     u_short* indexOffset;
 
-    indexOffset = Menu_Container_CategoryIndices(itemCategory, container);
+    indexOffset = VS::Items::LiveContainerCategoryIndices(itemCategory, container);
     capacity = Menu_Container_containerItemCapacities[itemCategory];
 
     for (i = 0; i < capacity; ++i) {
         source = indexOffset[i];
         if ((source != 0)
-            && (Menu_Container_ItemId(itemCategory, source - 1, &container->items) == 0)) {
+            && (VS::Items::LiveContainerItemId(itemCategory, source - 1, &container->items) == 0)) {
             indexOffset[i] = 0;
         }
     }
@@ -567,9 +400,9 @@ void Menu_Container_RebuildCategoryIndices(int itemCategory, Items_Container* co
     }
 
     for (i = 0; i < capacity; ++i) {
-        if ((Menu_Container_ItemId(itemCategory, i, &container->items) != 0)
-            && (Menu_Container_FindItemRow(itemCategory, i, indexOffset) == 0)) {
-            Menu_Container_AppendItemIndex(itemCategory, i, indexOffset);
+        if ((VS::Items::LiveContainerItemId(itemCategory, i, &container->items) != 0)
+            && (VS::Items::FindLiveContainerItemRow(itemCategory, i, indexOffset) == 0)) {
+            VS::Items::AppendLiveContainerItemIndex(itemCategory, i, indexOffset);
         }
     }
 }
@@ -589,7 +422,7 @@ void Menu_Container_SnapshotGadgetBag(void)
     for (i = 0; i < 7; ++i) {
         int j;
         char* sourceIndex = (char *)(Menu_Inventory_inventoryIndices[i]);
-        u_short* targetIndex = Menu_Container_CategoryIndices(i, container);
+        u_short* targetIndex = VS::Items::LiveContainerCategoryIndices(i, container);
 
         for (j = 0; j < Items_Inventory_inventoryItemCapacities[i]; ++j) {
             targetIndex[j] = sourceIndex[j];
@@ -624,7 +457,7 @@ void Menu_Container_CommitGadgetBag(void)
         int j;
         int k;
         char* targetIndex = (char *)(Menu_Inventory_inventoryIndices[i]);
-        u_short* sourceIndex = Menu_Container_CategoryIndices(i, container);
+        u_short* sourceIndex = VS::Items::LiveContainerCategoryIndices(i, container);
 
         for (j = 0; j < 7; ++j) {
             Menu_Container_RebuildCategoryIndices(j, container);
@@ -694,7 +527,7 @@ void Menu_Container_SortWeapons(int stat)
 
     Items_InventoryWeapon* sourceWeapons = Menu_Container_containerData->items.weapons;
     u_short* targetIndices =
-        Menu_Container_CategoryIndices(Items_ItemCategory_Weapon, Menu_Container_containerData);
+        VS::Items::LiveContainerCategoryIndices(Items_ItemCategory_Weapon, Menu_Container_containerData);
     VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, sizeof sortedIndices);
     sortedIndex = 0;
 
@@ -746,7 +579,7 @@ void Menu_Container_SortShields(int sort_stat_id)
     int shield_id;
 
     Items_InventoryShield* shield_items = Menu_Container_containerData->items.shields;
-    u_short* shield_indices = Menu_Container_CategoryIndices(3, Menu_Container_containerData);
+    u_short* shield_indices = VS::Items::LiveContainerCategoryIndices(3, Menu_Container_containerData);
     int sorted_shield_count = 0;
 
     VS::Core::Memory::ZeroLiveWordsBackward(&sorted_shield_indices, sizeof sorted_shield_indices);
@@ -798,7 +631,7 @@ void Menu_Container_SortMisc(int sort_stat_id)
     Items_InventoryMisc* item;
 
     item = Menu_Container_containerData->items.misc;
-    misc_indices = Menu_Container_CategoryIndices(6, Menu_Container_containerData);
+    misc_indices = VS::Items::LiveContainerCategoryIndices(6, Menu_Container_containerData);
     VS::Core::Memory::ZeroLiveWordsBackward(&sorted_misc_indices, sizeof sorted_misc_indices);
     sorted_misc_count = 0;
 
@@ -869,7 +702,7 @@ void Menu_Container_SortEquipment(int category_id, int sort_stat_id)
 
     {
         u_short sorted_equipment_indices[category_capacity];
-        category_indices = Menu_Container_CategoryIndices(category_id, Menu_Container_containerData);
+        category_indices = VS::Items::LiveContainerCategoryIndices(category_id, Menu_Container_containerData);
         VS::Core::Memory::ZeroLiveWordsBackward(std::as_writable_bytes(std::span(&sorted_equipment_indices[0], sizeof sorted_equipment_indices / sizeof sorted_equipment_indices[0])), category_capacity * 2);
 
         while (1) {
@@ -1082,7 +915,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         if (i != 0) {
             if (i == 1) {
                 VS::Audio::LivePlaySfxCentered(0x7E, 0x1C);
-                Menu_Container_ClearItem(
+                VS::Items::ClearLiveContainerItem(
                     Menu_Container_discardMenuItemCategory, Menu_Container_discardMenuSelectedItem, &Menu_Container_containerData->items);
             } else {
                 VS::Menu::PlayLeaveSound();
@@ -1209,7 +1042,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
                 VS::Audio::LivePlaySfxCentered(0x7E, 0x1C);
                 if (Menu_Container_containerData->items.misc[Menu_Container_discardMenuSelectedItem].count
                     == Menu_Container_discardCount) {
-                    Menu_Container_ClearItem(
+                    VS::Items::ClearLiveContainerItem(
                         Menu_Container_discardMenuItemCategory, Menu_Container_discardMenuSelectedItem, &Menu_Container_containerData->items);
                 } else {
                     Menu_Container_containerData->items.misc[Menu_Container_discardMenuSelectedItem].count -= Menu_Container_discardCount;
@@ -1253,9 +1086,9 @@ int Menu_Container_CountShieldGems(int shield_index)
 // decomp: MENUD.PRG func_801066DC (src/MENU/MENUD.PRG/234.c:1983)
 int Menu_Container_WouldExceedCapacity(int category_id, int additional_item_count)
 {
-    int destination_item_count = Menu_Container_CountItems(category_id, &Menu_Container_otherStorage->items);
+    int destination_item_count = VS::Items::CountLiveContainerItems(category_id, &Menu_Container_otherStorage->items);
     int projected_item_count =
-        additional_item_count + (destination_item_count + Menu_Container_CountItems(category_id, &Menu_Framework_unusedInventoryStorage->stagedTransfer));
+        additional_item_count + (destination_item_count + VS::Items::CountLiveContainerItems(category_id, &Menu_Framework_unusedInventoryStorage->stagedTransfer));
 
     if (Menu_Container_browsingGadgetBag != 0) {
         return Menu_Container_containerItemCapacities[category_id] < projected_item_count;
@@ -1321,7 +1154,7 @@ void Menu_Container_UndoPendingTransfer(int pending_transfer_index)
     staged_item_index = (packed_transfer_item - 1) & 0xFF;
     Menu_Container_CopyItem(category_id | 0x10, &Menu_Container_containerData->items, staged_item_index,
         &Menu_Framework_unusedInventoryStorage->stagedTransfer);
-    Menu_Container_ClearItem(category_id, staged_item_index, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
+    VS::Items::ClearLiveContainerItem(category_id, staged_item_index, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
 }
 
 // decomp: MENUD.PRG func_80106948 (src/MENU/MENUD.PRG/234.c:2054)
@@ -1329,7 +1162,7 @@ void Menu_Container_StageItemTransfer(int category_id, int item_index)
 {
     Menu_Container_CopyItem(category_id | 0x10, &Menu_Framework_unusedInventoryStorage->stagedTransfer, item_index,
         &Menu_Container_containerData->items);
-    Menu_Container_ClearItem(category_id, item_index, &Menu_Container_containerData->items);
+    VS::Items::ClearLiveContainerItem(category_id, item_index, &Menu_Container_containerData->items);
 }
 
 // decomp: MENUD.PRG func_801069B0 (src/MENU/MENUD.PRG/234.c:2061)
@@ -1373,7 +1206,7 @@ void Menu_Container_RebuildPendingTransfers(void)
     for (i = 0; i < 64; ++i) {
         int source = pending_transfer_items[i];
         if ((source != 0)
-            && (Menu_Container_ItemId((source >> 8), (source - 1) & 0xFF,
+            && (VS::Items::LiveContainerItemId((source >> 8), (source - 1) & 0xFF,
                     &Menu_Framework_unusedInventoryStorage->stagedTransfer)
                 == 0)) {
             pending_transfer_items[i] = 0;
@@ -1411,7 +1244,7 @@ void Menu_Container_RebuildPendingTransfers(void)
 
     for (k = 0; k < 7; ++k) {
         for (i = 0; i < Menu_Container_containerItemCapacities[k]; ++i) {
-            if ((Menu_Container_ItemId(k, i, &Menu_Framework_unusedInventoryStorage->stagedTransfer) != 0)
+            if ((VS::Items::LiveContainerItemId(k, i, &Menu_Framework_unusedInventoryStorage->stagedTransfer) != 0)
                 && (Menu_Container_FindPendingTransfer(k, i) == 0)) {
                 Menu_Container_AppendPendingTransfer(k, i);
             }

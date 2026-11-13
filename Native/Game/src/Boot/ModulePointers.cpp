@@ -64,6 +64,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TrapsLive.hpp"
+#include "Items/ContainerIndexingLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
@@ -1963,6 +1964,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x800427A8u, 0u, (void*)&VS::Core::NextLiveRandomBounded, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042860u, 0u, (void*)&VS::Core::NextLiveRandomAveraged, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083430u, 0u, (void*)&VS::Items::CalculateLiveItemRecovery, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80102C94u, 0u, (void*)&VS::Items::LiveContainerCategoryIndices, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80102CD0u, 0u, (void*)&VS::Items::FindLiveContainerItemRow, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80102D28u, 0u, (void*)&VS::Items::AppendLiveContainerItemIndex, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80102D80u, 0u, (void*)&VS::Items::ClearLiveContainerItem, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80102F88u, 0u, (void*)&VS::Items::LiveContainerItemId, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103070u, 0u, (void*)&VS::Items::CountLiveContainerItems, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103110u, 0u, (void*)&VS::Items::FindLiveEmptyContainerSlot, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008255Cu, 0u, (void*)&VS::Field::CalculateLiveTrapPanelDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80082FF4u, 0u, (void*)&VS::Field::CalculateLiveHealingPanelRecovery, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073TiledRing, 0u, 0u, 0u},

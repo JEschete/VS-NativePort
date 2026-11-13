@@ -22,7 +22,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
 | 10: #50 Render submission and frame ownership | 0 | 0 | 0 | 145 | 0 | 0 |
 | 14: #55 Actor identity and teardown | 0 | 0 | 0 | 233 | 0 | 0 |
-| 15: #58 Item definitions and instances | 0 | 0 | 0 | 66 | 0 | 0 |
+| 15: #58 Item definitions and instances | 0 | 0 | 0 | 73 | 0 | 0 |
 | 23: #57 AI, navigation and collision contexts | 0 | 0 | 0 | 236 | 0 | 0 |
 | 24: #56 Combat intents and results | 0 | 59 | 2,640 | 329 | 21 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
@@ -30,14 +30,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 176 | 5,601 | 682 | 85 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 1 | 356 | 22,080 | 372 | 290 | 0 |
+| 34: #60 Menu screens and workspaces | 1 | 349 | 21,934 | 372 | 283 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 1 | 662 | 31,765 | 3290 | 445 | 0 |
+| **Total** | 1 | 655 | 31,619 | 3297 | 438 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,072 |
-| todo | 663 |
+| done | 3,079 |
+| todo | 656 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 45 done, 6 planned); open functions in no slice: 0.
 
@@ -89,7 +89,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 44 | effects-surface-templates | done | self | 7 | 0 | 0 |
 | 45 | menu-framework | done | self | 2 | 0 | 0 |
 | 46 | menu-framework-rows-details | done | self | 6 | 0 | 0 |
-| 47 | menu-inventory-container | active | self | 5 | 84 | 6,312 |
+| 47 | menu-inventory-container | active | self | 5 | 77 | 6,166 |
 | 48 | menu-loot-status-abilities | planned | - | 7 | 95 | 7,172 |
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | planned | - | 6 | 103 | 5,020 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 153 |
+| Called from generated code | 1 | 149 |
 | Referenced by the original-address module table | 1 | 298 |
 | Calls an SDK shim | 0 | 75 |
-| Signature uses SDK integer types or `void*` | 0 | 111 |
-| Compiled with relaxed settings | 0 | 662 |
+| Signature uses SDK integer types or `void*` | 0 | 108 |
+| Compiled with relaxed settings | 0 | 655 |
 
 Function bodies: 3,735 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 1 open owned functions have generated callers.
 

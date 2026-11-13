@@ -1607,6 +1607,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Items\ContainerIndexing.cpp" />
+    <ClCompile Include="src\Items\ContainerIndexingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Items\EquipmentAffinity.cpp" />
     <ClCompile Include="src\Items\EquipmentLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2196,6 +2200,7 @@
     <ClInclude Include="src\Field\Znd.h" />
     <ClInclude Include="src\Field\Zone.h" />
     <ClInclude Include="src\Items\Categories.h" />
+    <ClInclude Include="src\Items\ContainerTables.hpp" />
     <ClInclude Include="src\Items\EquipmentInit.h" />
     <ClInclude Include="src\Items\InventoryLiveState.h" />
     <ClInclude Include="src\Items\ItemRecordsLive.hpp" />
@@ -2555,6 +2560,8 @@
     <ClInclude Include="include\Field\TransitionsLive.hpp" />
     <ClInclude Include="include\Field\Traps.hpp" />
     <ClInclude Include="include\Field\TrapsLive.hpp" />
+    <ClInclude Include="include\Items\ContainerIndexing.hpp" />
+    <ClInclude Include="include\Items\ContainerIndexingLive.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\EquipmentAffinity.hpp" />
     <ClInclude Include="include\Items\EquipmentLive.hpp" />

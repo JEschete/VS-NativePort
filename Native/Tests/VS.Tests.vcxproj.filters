@@ -25,6 +25,9 @@
     <Filter Include="include\Battle">
       <UniqueIdentifier>{22871B11-9240-53E6-B31A-1372D0FB4E08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Items">
+      <UniqueIdentifier>{5BC90C22-7B60-5405-B25A-BBFE4FA3B9C8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Menu">
       <UniqueIdentifier>{C699903A-8E56-55DE-A1A8-6EDC0041BE84}</UniqueIdentifier>
     </Filter>
@@ -268,6 +271,15 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ConditionSnapshotTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerIndexingLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerIndexingModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerIndexingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ContentSliceTests.cpp">
@@ -887,6 +899,9 @@
     </ClInclude>
     <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp">
       <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ContainerIndexingLiveFixture.hpp">
+      <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp">
       <Filter>include\Menu</Filter>

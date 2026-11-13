@@ -132,6 +132,9 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\ConditionSnapshotTests.cpp" />
+    <ClCompile Include="src\ContainerIndexingLiveTests.cpp" />
+    <ClCompile Include="src\ContainerIndexingModuleTests.cpp" />
+    <ClCompile Include="src\ContainerIndexingTests.cpp" />
     <ClCompile Include="src\ContentSliceTests.cpp" />
     <ClCompile Include="src\ContentTests.cpp" />
     <ClCompile Include="src\ControllerTests.cpp" />
@@ -378,6 +381,7 @@
     <ClInclude Include="include\Battle\HudRenderingLiveFixture.hpp" />
     <ClInclude Include="include\Battle\HudShortcutLiveFixture.hpp" />
     <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp" />
+    <ClInclude Include="include\Items\ContainerIndexingLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
