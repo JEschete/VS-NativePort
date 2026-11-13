@@ -10,7 +10,6 @@ from differential import (
     DEFAULT_STACK,
     IR,
     MAC,
-    Image,
     Machine,
     R,
     field_problems,
@@ -250,60 +249,47 @@ def describe(operation, _image, results):
 
 
 def mutants(operation: int) -> dict:
-    image = Image.load("BATTLE/BATTLE.PRG")
-
-    def immediate(address, value):
-        return {address: (image.read(address) & 0xFFFF0000) | value}
-
-    def shift(address, value):
-        return {address: (image.read(address) & ~(31 << 6)) | (value << 6)}
-
-    def opcode(address, value):
-        return {address: (image.read(address) & 0x03FFFFFF) | (value << 26)}
-
+    # Metadata discovery must not require extracted images; these are the
+    # unchanged audited instruction patches, not reads of the original words.
     groups = (
         {
-            "reciprocal-numerator": immediate(0x800C0FB4, 0x7FFF),
-            "signed-extent-byte": opcode(0x800C0FD0, 0x20),
-            "pitch-scale": shift(0x800C1000, 3),
-            "yaw-not-negated": {0x800C1014: image.read(0x800C1014) ^ 2},
+            "reciprocal-numerator": {0x800C0FB4: 0x340A7FFF},
+            "signed-extent-byte": {0x800C0FD0: 0x80420004},
+            "pitch-scale": {0x800C1000: 0x000210C0},
+            "yaw-not-negated": {0x800C1014: 0x00021021},
         },
         {
-            "point-origin-added": {0x800C1078: image.read(0x800C1078) ^ 2},
-            "normalization-scale": shift(0x800C10CC, 11),
-            "missing-z-axis": immediate(0x800C10E4, 2),
-            "radius-inclusive-band": immediate(0x800C1100, 2),
-            "signed-radius-comparison": opcode(0x800C1100, 0xA),
+            "point-origin-added": {0x800C1078: 0x00621821},
+            "normalization-scale": {0x800C10CC: 0x000A12C3},
+            "missing-z-axis": {0x800C10E4: 0x28A20002},
+            "radius-inclusive-band": {0x800C1100: 0x2C420002},
+            "signed-radius-comparison": {0x800C1100: 0x28420001},
         },
         {
-            "inverted-height-mode": opcode(0x800C1188, 5),
-            "full-height-shift": shift(0x800C1198, 5),
-            "signed-height-mask": immediate(0x800C11B0, 0x7FFF),
-            "wrong-axis-reciprocal-stride": immediate(0x800C11FC, 2),
-            "radius-inclusive-band": immediate(0x800C121C, 2),
+            "inverted-height-mode": {0x800C1188: 0x16400006},
+            "full-height-shift": {0x800C1198: 0x00021140},
+            "signed-height-mask": {0x800C11B0: 0x30637FFF},
+            "wrong-axis-reciprocal-stride": {0x800C11FC: 0x24E70002},
+            "radius-inclusive-band": {0x800C121C: 0x2E100002},
         },
         {
-            "half-height-shift": shift(0x800C12C4, 4),
-            "cone-divisor-scale": shift(0x800C12F0, 12),
-            "radius-one-larger": immediate(0x800C1348, 257),
-            "unsigned-cone-comparison": {0x800C135C: image.read(0x800C135C) | 1},
+            "half-height-shift": {0x800C12C4: 0x00021100},
+            "cone-divisor-scale": {0x800C12F0: 0x00031B03},
+            "radius-one-larger": {0x800C1348: 0x24020101},
+            "unsigned-cone-comparison": {0x800C135C: 0x0067182B},
         },
         {
-            "half-height-gate": shift(0x800C1444, 4),
-            "inverted-footprint-mode": opcode(0x800C1460, 5),
-            "first-corner-x-sign": {0x800C1488: image.read(0x800C1488) ^ 2},
-            "wrong-nclip-next-vertex": {
-                0x800C150C: (image.read(0x800C150C) & ~(31 << 11)) | (13 << 11)
-            },
-            "inverted-winding-rejection": {
-                0x800C152C: image.read(0x800C152C) | (1 << 16)
-            },
+            "half-height-gate": {0x800C1444: 0x00021100},
+            "inverted-footprint-mode": {0x800C1460: 0x16600004},
+            "first-corner-x-sign": {0x800C1488: 0x00071821},
+            "wrong-nclip-next-vertex": {0x800C150C: 0x48836800},
+            "inverted-winding-rejection": {0x800C152C: 0x04410005},
         },
         {
             "unknown-kind-returns-one": {0x800C158C: 0x24040001},
-            "height-shift-two-bits": immediate(0x800C15C8, 2),
-            "reversed-pitch-off-by-one": immediate(0x800C160C, 127),
-            "only-first-flags-byte-restored": opcode(0x800C1648, 0x28),
+            "height-shift-two-bits": {0x800C15C8: 0x24060002},
+            "reversed-pitch-off-by-one": {0x800C160C: 0x2442007F},
+            "only-first-flags-byte-restored": {0x800C1648: 0xA2110004},
         },
     )
     return groups[operation]

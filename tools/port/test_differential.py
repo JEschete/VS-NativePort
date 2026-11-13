@@ -1320,7 +1320,10 @@ class Harness(unittest.TestCase):
         self.assertTrue(case.PATH.with_name(case.DRIVER).is_file())
         root = differential.ROOT
         self.assertTrue(all((root / source).is_file() for source in case.SOURCES))
-        with mock.patch("sys.stdout") as output:
+        with (
+            mock.patch("sys.stdout") as output,
+            mock.patch.object(Image, "load", side_effect=AssertionError("case metadata reads a disc image")),
+        ):
             self.assertEqual(differential.main(["--list"]), 0)
         self.assertIn("actor_settings", "".join(call.args[0] for call in output.write.call_args_list))
 
