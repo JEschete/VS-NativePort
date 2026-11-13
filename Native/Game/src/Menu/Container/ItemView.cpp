@@ -5,17 +5,14 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
+#include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Audio/Seq/Channel.h"
-#include "Battle/Feedback.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
@@ -35,9 +32,6 @@ extern "C" {
 #include "Menu/TextBox.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-
-// decomp: local static of _gripNavigation, at file scope so the module reset reaches it
-static char* Menu_Container_gemSlotCountText = "X     0";
 
 // decomp: D_80109A08 (D_80109A08@src/MENU/MENUD.PRG/234.c)
 char const* Menu_Container_kStorageNames[] = { "GADGET BAG", "CONTAINER" };
@@ -94,42 +88,6 @@ u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData
 // decomp: vs_menuD_containerData (vs_menuD_containerData@MENU/MENUD.PRG)
 Items_Container* Menu_Container_containerData;
 
-// decomp: MENUD.PRG func_80103E24 (src/MENU/MENUD.PRG/234.c:700)
-void Menu_Container_DrawCategoryIcons(int arg0, int details_view_phase)
-{
-    int i;
-    u_long* icon_sprite_packet;
-    Menu_Framework_MenuRow* details_menu_row;
-
-    int selected_category_icon = (Menu_Framework_menuMemory.opaque85[0x1B] - 1) & 7;
-
-    if (arg0 == 4) {
-        VS::Menu::Framework::DrawLiveTabNavigation(0);
-    }
-
-    arg0 = (arg0 * 8) - 16;
-
-    for (i = 0; i < 8; ++i) {
-
-        int icon_x = (((i + 1) & 7) * 0x10) + 0x20;
-
-        if ((i == selected_category_icon) && (details_view_phase == 1)) {
-            details_menu_row = VS::Menu::Framework::LiveMenuItem(0x1F);
-            if (icon_x >= (details_menu_row->x - 0xC)) {
-                details_menu_row->rowIcon = i + 0x18;
-                continue;
-            } else {
-                icon_sprite_packet = VS::Render::QueueLiveDefaultSprite(0x100010, icon_x | 0x100000);
-            }
-        } else {
-            icon_sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(
-                0x80, icon_x | (arg0 << 0x10), 0x100010, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
-        }
-
-        icon_sprite_packet[4] = (0x78 + i * 0x10) | 0x8000 | (i == selected_category_icon ? 0x37FD0000 : 0x37FE0000);
-    }
-}
-
 // decomp: MENUD.PRG _setWeaponUi (src/MENU/MENUD.PRG/234.c:810)
 void Menu_Container_BuildWeaponRow(Items_ContainerData* container, char** rowStrings,
     int* rowTypes, char* buf, int index)
@@ -149,456 +107,6 @@ void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStr
 
     VS::Menu::container::BuildLiveShieldStats(&shield, &container->shields[index], container);
     VS::Menu::Framework::FormatLiveShieldRow(&shield, rowStrings, rowTypes, buf);
-}
-
-// decomp: MENUD.PRG _weaponNavigation (src/MENU/MENUD.PRG/234.c:829)
-int Menu_Container_UpdateWeaponDetails(int weaponIndex)
-{
-    static char Menu_Container_weaponDetailsStep;
-    static char Menu_Container_weaponDetailsSlideStep;
-    static char Menu_Container_weaponDetailsItemSource;
-    static u_char Menu_Container_weaponDetailsSelectedWeapon;
-    static char Menu_Container_unusedWeaponDetailsFlag;
-
-    enum Menu_Container_EquipmentDetailsState { Menu_Container_EquipmentDetailsState_Init, Menu_Container_EquipmentDetailsState_Animate, Menu_Container_EquipmentDetailsState_HandleInput, Menu_Container_EquipmentDetailsState_Exit };
-
-    char* text[2];
-    int rowId;
-    int selectedWeapon;
-    int i;
-
-    if (weaponIndex != 0) {
-        Menu_Container_weaponDetailsItemSource = weaponIndex >> 8;
-        Menu_Container_weaponDetailsSelectedWeapon = weaponIndex - 1;
-        VS::Menu::container::BeginLiveDetailsTransition(Menu_Container_weaponDetailsItemSource);
-        Menu_Container_unusedWeaponDetailsFlag = 0;
-        Menu_Container_weaponDetailsSlideStep = 0;
-        Menu_Container_weaponDetailsStep = 0;
-        return 0;
-    }
-
-    switch (Menu_Container_weaponDetailsStep) {
-    case Menu_Container_EquipmentDetailsState_Init:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            VS::Menu::container::InitializeLiveDetailsLayout(Menu_Container_weaponDetailsItemSource, 7);
-            VS::Menu::Framework::SetLiveWeaponStats(
-                Menu_Container_containerData->indices.weapons[Menu_Container_weaponDetailsSelectedWeapon]);
-            VS::Menu::Framework::UpdateLiveDpPpBars(3);
-            Menu_Container_weaponDetailsStep = Menu_Container_EquipmentDetailsState_Animate;
-        }
-        break;
-    case Menu_Container_EquipmentDetailsState_Animate:
-        if (Menu_Container_weaponDetailsSlideStep < 10) {
-            ++Menu_Container_weaponDetailsSlideStep;
-            if (Menu_Container_weaponDetailsSlideStep < 6) {
-                VS::Menu::Framework::CreateLiveWeaponComponentRow(Menu_Container_weaponDetailsSlideStep,
-                    Menu_Container_containerData->indices.weapons[Menu_Container_weaponDetailsSelectedWeapon], 1);
-            }
-            break;
-        }
-        Menu_Container_weaponDetailsStep = Menu_Container_EquipmentDetailsState_HandleInput;
-        break;
-    case Menu_Container_EquipmentDetailsState_HandleInput:
-        if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            VS::Menu::container::ExitLiveDetailsView(1);
-            Menu_Container_weaponDetailsStep = Menu_Container_EquipmentDetailsState_Exit;
-        } else {
-            selectedWeapon = VS::Menu::container::PollLiveDetailsPaging(0, Menu_Container_weaponDetailsSelectedWeapon);
-            if (selectedWeapon != Menu_Container_weaponDetailsSelectedWeapon) {
-                Menu_Container_weaponDetailsSelectedWeapon = selectedWeapon;
-                i = VS::Menu::container::SelectLiveDetailsItem(0, selectedWeapon);
-                Menu_Container_BuildWeaponRow(&Menu_Container_containerData->items, text, &rowId,
-                    Menu_Framework_stringBuf, i - 1);
-                VS::Menu::Framework::SetLiveWeaponStats(i);
-
-                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_weaponDetailsItemSource, text, rowId, selectedWeapon);
-                for (i = 1; i < 6; ++i) {
-                    VS::Menu::Framework::CreateLiveWeaponComponentRow(
-                        i, Menu_Container_containerData->indices.weapons[selectedWeapon], 0);
-                }
-            }
-        }
-        break;
-    case Menu_Container_EquipmentDetailsState_Exit:
-        return VS::Menu::Framework::AreLiveMenuRowsIdle();
-    }
-    return 0;
-}
-
-// decomp: MENUD.PRG _bladeNavigation (src/MENU/MENUD.PRG/234.c:902)
-int Menu_Container_UpdateBladeDetails(int bladeIndex)
-{
-    static char Menu_Container_bladeDetailsStep;
-    static char Menu_Container_bladeDetailsDelay;
-    static char Menu_Container_bladeDetailsItemSource;
-    static u_char Menu_Container_bladeDetailsItemIndex;
-
-    enum Menu_Container_EquipmentDetailsState { Menu_Container_EquipmentDetailsState_Init, Menu_Container_EquipmentDetailsState_Animate, Menu_Container_EquipmentDetailsState_HandleInput, Menu_Container_EquipmentDetailsState_Exit };
-
-    char* text[2];
-    int row_type;
-    int selectedBlade;
-    int blade_id;
-
-    if (bladeIndex != 0) {
-        Menu_Container_bladeDetailsItemSource = bladeIndex >> 8;
-        Menu_Container_bladeDetailsItemIndex = bladeIndex - 1;
-        VS::Menu::container::BeginLiveDetailsTransition(Menu_Container_bladeDetailsItemSource);
-        Menu_Container_bladeDetailsDelay = 10;
-        Menu_Container_bladeDetailsStep = 0;
-        return 0;
-    }
-
-    switch (Menu_Container_bladeDetailsStep) {
-    case Menu_Container_EquipmentDetailsState_Init:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            VS::Menu::container::InitializeLiveDetailsLayout(Menu_Container_bladeDetailsItemSource, 3);
-            VS::Menu::Framework::SetLiveBladeStats(
-                Menu_Container_containerData->indices.blades[Menu_Container_bladeDetailsItemIndex]);
-            VS::Menu::Framework::UpdateLiveDpPpBars(3);
-            Menu_Container_bladeDetailsStep = Menu_Container_EquipmentDetailsState_Animate;
-        }
-        break;
-    case Menu_Container_EquipmentDetailsState_Animate:
-        if (Menu_Container_bladeDetailsDelay != 0) {
-            --Menu_Container_bladeDetailsDelay;
-        } else {
-            Menu_Container_bladeDetailsStep = Menu_Container_EquipmentDetailsState_HandleInput;
-        }
-        break;
-    case Menu_Container_EquipmentDetailsState_HandleInput:
-        if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            VS::Menu::container::ExitLiveDetailsView(1);
-            Menu_Container_bladeDetailsStep = Menu_Container_EquipmentDetailsState_Exit;
-        } else {
-            selectedBlade = VS::Menu::container::PollLiveDetailsPaging(1, Menu_Container_bladeDetailsItemIndex);
-            if (selectedBlade != Menu_Container_bladeDetailsItemIndex) {
-                Menu_Container_bladeDetailsItemIndex = selectedBlade;
-                blade_id = VS::Menu::container::SelectLiveDetailsItem(1, selectedBlade);
-                VS::Menu::Framework::FormatLiveBladeRow(
-                    &Menu_Container_containerData->items.blades[blade_id - 1], text, &row_type,
-                    Menu_Framework_stringBuf);
-                VS::Menu::Framework::SetLiveBladeStats(blade_id);
-                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_bladeDetailsItemSource, text, row_type, selectedBlade);
-            }
-        }
-        break;
-    case Menu_Container_EquipmentDetailsState_Exit:
-        return VS::Menu::Framework::AreLiveMenuRowsIdle();
-    }
-    return 0;
-}
-
-// decomp: MENUD.PRG _gripNavigation (src/MENU/MENUD.PRG/234.c:965)
-int Menu_Container_UpdateGripDetails(int packed_details_selection)
-{
-
-    static char Menu_Container_gripDetailsStep;
-    static char Menu_Container_gripDetailsSlideStep;
-    static char Menu_Container_gripDetailsItemSource;
-    static u_char Menu_Container_gripDetailsItemIndex;
-    static char Menu_Container_unusedGripDetailsFlag;
-
-    char* row_text[2];
-    int row_type;
-    int selected_grip_index;
-    int grip_id;
-
-    if (packed_details_selection != 0) {
-        Menu_Container_gripDetailsItemSource = packed_details_selection >> 8;
-        Menu_Container_gripDetailsItemIndex = packed_details_selection - 1;
-        VS::Menu::container::BeginLiveDetailsTransition(Menu_Container_gripDetailsItemSource);
-        Menu_Container_unusedGripDetailsFlag = 0;
-        Menu_Container_gripDetailsSlideStep = 0;
-        Menu_Container_gripDetailsStep = 0;
-        return 0;
-    }
-    switch (Menu_Container_gripDetailsStep) {
-    case 0:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            VS::Menu::container::InitializeLiveDetailsLayout(Menu_Container_gripDetailsItemSource, 4);
-            VS::Menu::Framework::SetLiveGripStats(
-                Menu_Container_containerData->indices.grips[Menu_Container_gripDetailsItemIndex]);
-            Menu_Container_gripDetailsStep = 1U;
-        }
-        break;
-    case 1:
-        if (Menu_Container_gripDetailsSlideStep < 0xAU) {
-            Menu_Container_gripDetailsSlideStep = (Menu_Container_gripDetailsSlideStep + 1);
-        } else {
-            Menu_Container_gripDetailsStep = 2U;
-        }
-        break;
-    case 2:
-        if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            VS::Menu::container::ExitLiveDetailsView(0);
-            Menu_Container_gripDetailsStep = 3U;
-        } else {
-            selected_grip_index = VS::Menu::container::PollLiveDetailsPaging(2, Menu_Container_gripDetailsItemIndex);
-            if (selected_grip_index != Menu_Container_gripDetailsItemIndex) {
-                Menu_Container_gripDetailsItemIndex = selected_grip_index;
-                grip_id = VS::Menu::container::SelectLiveDetailsItem(2, selected_grip_index);
-                VS::Menu::Framework::FormatLiveGripRow(&Menu_Container_containerData->items.grips[grip_id - 1],
-                    row_text, &row_type, Menu_Framework_stringBuf);
-                VS::Menu::Framework::SetLiveGripStats(grip_id);
-                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_gripDetailsItemSource, row_text, row_type, selected_grip_index);
-            }
-        }
-        // BUG: write to .rodata
-        Menu_Container_gemSlotCountText[6] = (Menu_Container_containerData->items
-                             .grips[Menu_Container_containerData->indices.grips[Menu_Container_gripDetailsItemIndex] - 1]
-                             .gemSlots
-                         + 0x30);
-
-        VS::Menu::Framework::DrawLiveRowIcon(Menu_Framework_MainMenuIcon_Gem | (1 << 8), 256, 32);
-        VS::Render::DrawLiveCompactText(Menu_Container_gemSlotCountText, vs_getXY(280, 36), NULL);
-        break;
-
-    case 3:
-        return VS::Menu::Framework::AreLiveMenuRowsIdle();
-    }
-
-    return 0;
-}
-
-// decomp: MENUD.PRG _shieldNavigation (src/MENU/MENUD.PRG/234.c:1037)
-int Menu_Container_UpdateShieldDetails(int packed_details_selection)
-{
-    static char Menu_Container_shieldDetailsStep;
-    static char Menu_Container_shieldDetailsSlideStep;
-    static char Menu_Container_shieldDetailsItemSource;
-    static u_char Menu_Container_shieldDetailsItemIndex;
-    static char Menu_Container_unusedShieldDetailsFlag;
-
-    char* row_text[2];
-    int row_type;
-    int selected_shield_index;
-    int i;
-
-    if (packed_details_selection != 0) {
-        Menu_Container_shieldDetailsItemSource = packed_details_selection >> 8;
-        Menu_Container_shieldDetailsItemIndex = packed_details_selection - 1;
-        VS::Menu::container::BeginLiveDetailsTransition(Menu_Container_shieldDetailsItemSource);
-        Menu_Container_unusedShieldDetailsFlag = 0;
-        Menu_Container_shieldDetailsSlideStep = 0;
-        Menu_Container_shieldDetailsStep = 0;
-        return 0;
-    }
-
-    switch (Menu_Container_shieldDetailsStep) {
-    case 0:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            VS::Menu::container::InitializeLiveDetailsLayout(Menu_Container_shieldDetailsItemSource, 7);
-            VS::Menu::Framework::SetLiveShieldStats(
-                Menu_Container_containerData->indices.shields[Menu_Container_shieldDetailsItemIndex]);
-            VS::Menu::Framework::UpdateLiveDpPpBars(3);
-            Menu_Container_shieldDetailsStep = 1;
-        }
-        break;
-    case 1:
-        if (Menu_Container_shieldDetailsSlideStep < 10) {
-            ++Menu_Container_shieldDetailsSlideStep;
-            if (Menu_Container_shieldDetailsSlideStep < 4) {
-                VS::Menu::Framework::CreateLiveShieldGemRow(
-                    Menu_Container_shieldDetailsSlideStep, Menu_Container_containerData->indices.shields[Menu_Container_shieldDetailsItemIndex], 1);
-            }
-            break;
-        }
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            Menu_Container_shieldDetailsStep = 2;
-        }
-        break;
-    case 2:
-        if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            VS::Menu::container::ExitLiveDetailsView(1);
-            Menu_Container_shieldDetailsStep = 3;
-        } else {
-            selected_shield_index = VS::Menu::container::PollLiveDetailsPaging(3, Menu_Container_shieldDetailsItemIndex);
-            if (selected_shield_index != Menu_Container_shieldDetailsItemIndex) {
-                Menu_Container_shieldDetailsItemIndex = selected_shield_index;
-                i = VS::Menu::container::SelectLiveDetailsItem(3, selected_shield_index);
-                Menu_Container_BuildShieldRow(&Menu_Container_containerData->items, row_text, &row_type,
-                    Menu_Framework_stringBuf, i - 1);
-                VS::Menu::Framework::SetLiveShieldStats(i);
-                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_shieldDetailsItemSource, row_text, row_type, selected_shield_index);
-                for (i = 1; i < 4; ++i) {
-                    VS::Menu::Framework::CreateLiveShieldGemRow(
-                        i, Menu_Container_containerData->indices.shields[selected_shield_index], 0);
-                }
-                return 0;
-            }
-        }
-        break;
-    case 3:
-        return VS::Menu::Framework::AreLiveMenuRowsIdle();
-    }
-    return 0;
-}
-
-// decomp: MENUD.PRG _armorNavigation (src/MENU/MENUD.PRG/234.c:1110)
-int Menu_Container_UpdateArmorDetails(int packed_details_selection)
-{
-    static char Menu_Container_armorDetailsStep;
-    static char Menu_Container_armorDetailsDelay;
-    static char Menu_Container_armorDetailsItemSource;
-    static u_char Menu_Container_armorDetailsItemIndex;
-
-    char* row_text[2];
-    int row_type;
-    int selected_armor_index;
-    int armor_id;
-
-    if (packed_details_selection != 0) {
-        Menu_Container_armorDetailsItemSource = packed_details_selection >> 8;
-        Menu_Container_armorDetailsItemIndex = (packed_details_selection - 1);
-        VS::Menu::container::BeginLiveDetailsTransition(Menu_Container_armorDetailsItemSource);
-        Menu_Container_armorDetailsDelay = 10;
-        Menu_Container_armorDetailsStep = 0;
-        return 0;
-    }
-
-    switch (Menu_Container_armorDetailsStep) {
-    case 0:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            VS::Menu::container::InitializeLiveDetailsLayout(Menu_Container_armorDetailsItemSource, 7);
-            VS::Menu::Framework::SetLiveArmorStats(
-                Menu_Container_containerData->indices.armor[Menu_Container_armorDetailsItemIndex]);
-            if (Audio_Seq_unusedInventory
-                    .armor[Menu_Container_containerData->indices.armor[Menu_Container_armorDetailsItemIndex] - 1]
-                    .category
-                != 7) {
-                VS::Menu::Framework::UpdateLiveDpPpBars(1);
-            }
-            Menu_Container_armorDetailsStep = 1;
-        }
-        break;
-    case 1:
-        if (Menu_Container_armorDetailsDelay != 0) {
-            Menu_Container_armorDetailsDelay = (Menu_Container_armorDetailsDelay - 1);
-        } else {
-            Menu_Container_armorDetailsStep = 2;
-        }
-        break;
-    case 2:
-        if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            VS::Menu::container::ExitLiveDetailsView(1);
-            Menu_Container_armorDetailsStep = 3;
-        } else {
-            selected_armor_index = VS::Menu::container::PollLiveDetailsPaging(4, Menu_Container_armorDetailsItemIndex);
-            if (selected_armor_index != Menu_Container_armorDetailsItemIndex) {
-                Menu_Container_armorDetailsItemIndex = selected_armor_index;
-                armor_id = VS::Menu::container::SelectLiveDetailsItem(4, selected_armor_index);
-                VS::Menu::Framework::FormatLiveInventoryArmorRow(
-                    &Menu_Container_containerData->items.armor[armor_id - 1], row_text, &row_type,
-                    Menu_Framework_stringBuf);
-                VS::Menu::Framework::SetLiveArmorStats(armor_id);
-                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_armorDetailsItemSource, row_text, row_type, selected_armor_index);
-            }
-        }
-        break;
-    case 3:
-        return VS::Menu::Framework::AreLiveMenuRowsIdle();
-    }
-    return 0;
-}
-
-// decomp: MENUD.PRG _gemNavigation (src/MENU/MENUD.PRG/234.c:1176)
-int Menu_Container_UpdateGemDetails(int packed_details_selection)
-{
-    static u_char Menu_Container_gemDetailsStep;
-    static u_char Menu_Container_gemDetailsDelay;
-    static u_char Menu_Container_gemDetailsItemSource;
-    static u_char Menu_Container_gemDetailsItemIndex;
-
-    char* row_text[2];
-    int row_type;
-    int selected_gem_index;
-    int gem_id;
-
-    if (packed_details_selection != 0) {
-        Menu_Container_gemDetailsItemSource = packed_details_selection >> 8;
-        Menu_Container_gemDetailsItemIndex = packed_details_selection - 1;
-        VS::Menu::container::BeginLiveDetailsTransition(Menu_Container_gemDetailsItemSource);
-        Menu_Container_gemDetailsDelay = 10;
-        Menu_Container_gemDetailsStep = 0;
-        return 0;
-    }
-
-    switch (Menu_Container_gemDetailsStep) {
-    case 0:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            VS::Menu::container::InitializeLiveDetailsLayout(Menu_Container_gemDetailsItemSource, 3);
-            VS::Menu::Framework::SetLiveGemStats(Menu_Container_containerData->indices.gems[Menu_Container_gemDetailsItemIndex]);
-            Menu_Container_gemDetailsStep = 1;
-        }
-        break;
-    case 1:
-        if (Menu_Container_gemDetailsDelay != 0) {
-            Menu_Container_gemDetailsDelay -= 1;
-        } else {
-            Menu_Container_gemDetailsStep = 2;
-        }
-        break;
-    case 2:
-        if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            VS::Menu::container::ExitLiveDetailsView(0);
-            Menu_Container_gemDetailsStep = 3;
-            Menu_Container_detailsClosedWithTriangle = Input_buttonsPressed.allButtons & 0x10;
-        } else {
-            selected_gem_index = VS::Menu::container::PollLiveDetailsPaging(5, Menu_Container_gemDetailsItemIndex);
-            if (selected_gem_index != Menu_Container_gemDetailsItemIndex) {
-                Menu_Container_gemDetailsItemIndex = selected_gem_index;
-                gem_id = VS::Menu::container::SelectLiveDetailsItem(5, selected_gem_index);
-                VS::Menu::Framework::FormatLiveGemRow(&Menu_Container_containerData->items.gems[gem_id - 1],
-                    row_text, &row_type, Menu_Framework_stringBuf);
-                VS::Menu::Framework::SetLiveGemStats(gem_id);
-                VS::Menu::Framework::UpdateLiveItemDetailsSelection(Menu_Container_gemDetailsItemSource, row_text, row_type, selected_gem_index);
-            }
-        }
-        break;
-    case 3:
-        return VS::Menu::Framework::AreLiveMenuRowsIdle();
-    }
-    return 0;
-}
-
-// decomp: MENUD.PRG func_80105008 (src/MENU/MENUD.PRG/234.c:1235)
-int Menu_Container_UpdateItemDetails(int packed_category_selection)
-{
-    static int (*Menu_Container_kItemDetailHandlers[])(int) = { Menu_Container_UpdateWeaponDetails, Menu_Container_UpdateBladeDetails,
-        Menu_Container_UpdateGripDetails, Menu_Container_UpdateShieldDetails, Menu_Container_UpdateArmorDetails, Menu_Container_UpdateGemDetails };
-
-    static u_char Menu_Container_detailsCategory;
-
-    int detail_handler_result;
-    int packed_details_selection = 0;
-
-    if (packed_category_selection != 0) {
-        packed_details_selection = packed_category_selection >> 4;
-        Menu_Container_detailsCategory = packed_category_selection & 0xF;
-        Menu_Container_detailsViewPhase = 1;
-        Menu_Container_detailsClosedWithTriangle = 0;
-        VS::Menu::Framework::ResetLiveItemDetailCursor();
-        VS::Menu::Framework::LiveMenuItem(0x1F)->itemPage = packed_details_selection & 0xFF;
-        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
-    }
-
-    detail_handler_result = Menu_Container_kItemDetailHandlers[Menu_Container_detailsCategory](packed_details_selection);
-
-    if (detail_handler_result != 0) {
-        if (Menu_Container_detailsClosedWithTriangle != 0) {
-            return -2;
-        }
-        Menu_Container_categoryIconsVisible = 1;
-        Menu_Container_detailsViewPhase = 0;
-        Menu_Container_controlsPanelMode = 1;
-        VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
-    } else if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-        Menu_Framework_cursorColor = Menu_Framework_selectedStatusViewElement != 9;
-        VS::Menu::Framework::DrawLiveTabNavigation(1);
-        VS::Menu::Framework::UpdateLiveItemDetails();
-    }
-    return detail_handler_result;
 }
 
 // decomp: MENUD.PRG func_80106464 (src/MENU/MENUD.PRG/234.c:1925)
@@ -1017,7 +525,7 @@ loop_1:
                         VS::Menu::PlaySelectSound();
                         temp_s0 = VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
                         VS::Menu::Framework::LiveMenuItem(temp_s0 >> 8)->outsetIcon = 0;
-                        Menu_Container_UpdateItemDetails(selected_category_id | ((temp_s0 + details_index_bias) * 0x10));
+                        VS::Menu::container::UpdateLiveItemDetails(selected_category_id | ((temp_s0 + details_index_bias) * 0x10));
                         Menu_Container_categoryTitleVisible = 0;
                         Menu_Container_itemListStep = 7;
                         break;
@@ -1168,7 +676,7 @@ loop_1:
         }
         break;
     case 7:
-        temp_s3 = Menu_Container_UpdateItemDetails(0);
+        temp_s3 = VS::Menu::container::UpdateLiveItemDetails(0);
         if (temp_s3 != 0) {
             if (temp_s3 == -2) {
                 return -2;
@@ -1777,7 +1285,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         --Menu_Container_categoryIconsSlideStep;
     }
 
-    Menu_Container_DrawCategoryIcons(Menu_Container_categoryIconsSlideStep, Menu_Container_detailsViewPhase);
+    VS::Menu::container::DrawLiveCategoryIcons(Menu_Container_categoryIconsSlideStep, Menu_Container_detailsViewPhase);
 
     if (Menu_Container_controlsPanelMode != 0) {
         if (Menu_Container_controlsPanelSlideStep == 0) {
@@ -1852,10 +1360,6 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
 // MENUD.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Container_ItemView_ResetMenudStatics(void)
 {
-    {
-        static const char* initial = "X     0";
-        memcpy((void*)&Menu_Container_gemSlotCountText, &initial, sizeof Menu_Container_gemSlotCountText);
-    }
     {
         static const char initial[8] = {};
         memcpy((void*)&Menu_Container_itemActionIds, &initial, sizeof Menu_Container_itemActionIds);

@@ -1126,16 +1126,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\ItemView.cpp": [
 [
-125,
-[
-"                0x80, icon_x | (arg0 << 0x10), 0x100010, Render_frameScratch.orderingTable - 0xC);"
-],
-[
-"                0x80, icon_x | (arg0 << 0x10), 0x100010, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));"
-]
-],
-[
-841,
+349,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1144,7 +1135,7 @@
 ]
 ],
 [
-953,
+461,
 [
 "        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
@@ -1157,7 +1148,7 @@
 ]
 ],
 [
-1034,
+542,
 [
 "                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;",
 "                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;",
@@ -1170,7 +1161,7 @@
 ]
 ],
 [
-1468,
+976,
 [
 "            pending_row_text = pending_rows_allocation + 0x6400;",
 "            pending_row_types = pending_rows_allocation + 0x6000;",
@@ -1183,7 +1174,7 @@
 ]
 ],
 [
-1594,
+1102,
 [
 "            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1192,7 +1183,7 @@
 ]
 ],
 [
-1859,
+1363,
 [
 "        static const char initial[8];"
 ],

@@ -1658,6 +1658,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerDetailControllers.cpp" />
+    <ClCompile Include="src\Menu\Container\ContainerDetailControllersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ContainerDetailHelpers.cpp" />
     <ClCompile Include="src\Menu\Container\ContainerDetailHelpersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1684,6 +1688,7 @@
     <ClCompile Include="src\Menu\Framework\ActorPreviewLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Framework\CategoryIcons.cpp" />
     <ClCompile Include="src\Menu\Framework\EquipmentDetails.cpp" />
     <ClCompile Include="src\Menu\Framework\EquipmentDetailsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2229,6 +2234,7 @@
     <ClInclude Include="src\Menu\FilesLiveState.h" />
     <ClInclude Include="src\Menu\Framework\ActorPreview.h" />
     <ClInclude Include="src\Menu\Framework\AshleyPreview.h" />
+    <ClInclude Include="src\Menu\Framework\DetailDispatchLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Framework\DetailInputLive.hpp" />
     <ClInclude Include="src\Menu\Framework\EquipmentDetailsLiveState.h" />
     <ClInclude Include="src\Menu\Framework\Framework.h" />
@@ -2593,6 +2599,8 @@
     <ClInclude Include="include\Items\Loot.hpp" />
     <ClInclude Include="include\Items\LootLive.hpp" />
     <ClInclude Include="include\Items\Recovery.hpp" />
+    <ClInclude Include="include\Menu\Container\ContainerDetailControllers.hpp" />
+    <ClInclude Include="include\Menu\Container\ContainerDetailControllersLive.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpers.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpersLive.hpp" />
     <ClInclude Include="include\Menu\Files.hpp" />
@@ -2600,6 +2608,7 @@
     <ClInclude Include="include\Menu\Framework\ActionSelection.h" />
     <ClInclude Include="include\Menu\Framework\ActorPreview.hpp" />
     <ClInclude Include="include\Menu\Framework\ActorPreviewLive.hpp" />
+    <ClInclude Include="include\Menu\Framework\CategoryIcons.hpp" />
     <ClInclude Include="include\Menu\Framework\DetailInput.hpp" />
     <ClInclude Include="include\Menu\Framework\EquipmentDetails.hpp" />
     <ClInclude Include="include\Menu\Framework\EquipmentDetailsLive.hpp" />

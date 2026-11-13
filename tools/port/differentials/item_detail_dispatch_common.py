@@ -19,6 +19,7 @@ MODULE_BASES.update(
 DRIVER = "item_detail_dispatch_driver.cpp"
 SOURCES = (
     r"Native\Game\src\Menu\Inventory\ItemDetailDispatch.cpp",
+    r"Native\Game\src\Menu\Framework\CategoryIcons.cpp",
     r"Native\Game\src\Menu\Inventory\EquipmentDetailControllers.cpp",
     r"Native\Game\src\Menu\Inventory\DetailsPolicies.cpp",
     r"Native\Game\src\Items\Inventory.cpp",

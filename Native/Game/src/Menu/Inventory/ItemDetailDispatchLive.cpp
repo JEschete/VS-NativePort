@@ -10,6 +10,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Input/Pad.hpp"
 #include "Items/ItemRecordsLive.hpp"
+#include "Menu/Framework/DetailDispatchLiveSupport.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -278,8 +279,14 @@ class LiveIconWorld final : public CategoryIconWorld {
   }
 };
 
-class LiveDispatcherWorld final : public ItemDetailDispatcherWorld {
+class LiveDispatcherWorld final
+    : public Framework::LiveDetailDispatcherWorld<ItemDetailDispatcherWorld,
+                                                  RequireRows, RequireFrame> {
+  using Base = Framework::LiveDetailDispatcherWorld<ItemDetailDispatcherWorld,
+                                                    RequireRows, RequireFrame>;
+
  public:
+  LiveDispatcherWorld() : Base("used detail cursor outside its elements") {}
   void SetHeaderPlacement(DetailHeaderPlacement placement) override {
     Menu_Inventory_selectedItemCategoryIconOnTop = static_cast<char>(placement);
   }
@@ -287,34 +294,24 @@ class LiveDispatcherWorld final : public ItemDetailDispatcherWorld {
     Menu_Inventory_exitToBattle =
         intent == BattleReturnIntent::kBattle ? Input::Triangle : 0;
   }
-  void ResetDetailCursor() override { Framework::ResetLiveItemDetailCursor(); }
   Framework::MenuRow& CategoryHeader() override {
     return Row(kCategoryHeaderRow);
   }
   void SetCommand(DetailCommand command) override {
-    Framework::SetLiveCommandLabel(command == DetailCommand::kMenu
-                                       ? Menu_Framework_MenuCommand_Menu
-                                       : Menu_Framework_MenuCommand_None);
+    Framework::SetLiveDetailCommand(command == DetailCommand::kMenu);
   }
   std::int32_t RunController(
       Category category, std::optional<DetailSelection> selection) override {
     const int command = ControllerCommand(selection);
-    switch (category) {
-      case Category::kWeapon:
-        return UpdateLiveWeaponDetails(command);
-      case Category::kBlade:
-        return UpdateLiveBladeDetails(command);
-      case Category::kGrip:
-        return UpdateLiveGripDetails(command);
-      case Category::kShield:
-        return UpdateLiveShieldDetails(command);
-      case Category::kArmor:
-        return UpdateLiveArmorDetails(command);
-      case Category::kGem:
-        return UpdateLiveGemDetails(command);
-      default:
-        Inventory::Refuse("detail dispatcher category outside its controllers");
+    static constexpr std::array kControllers{
+        UpdateLiveWeaponDetails, UpdateLiveBladeDetails, UpdateLiveGripDetails,
+        UpdateLiveShieldDetails, UpdateLiveArmorDetails, UpdateLiveGemDetails};
+    const auto result = Framework::RunLiveDetailController(
+        static_cast<std::uint8_t>(category), command, kControllers);
+    if (!result.has_value()) {
+      Inventory::Refuse("detail dispatcher category outside its controllers");
     }
+    return result.value();
   }
   bool ReturnsToBattle() override { return Menu_Inventory_exitToBattle != 0; }
   void SetCategoryVisibility(std::uint8_t visibility) override {
@@ -325,28 +322,6 @@ class LiveDispatcherWorld final : public ItemDetailDispatcherWorld {
   }
   void SetPreviewLayout(PreviewLayout layout) override {
     Menu_Inventory_ashleyRenderState = static_cast<int>(layout);
-  }
-  std::int32_t RowsReady() override {
-    RequireRows();
-    return Framework::AreLiveMenuRowsIdle();
-  }
-  std::uint8_t SelectedDetailElement() override {
-    return Menu_Framework_selectedStatusViewElement;
-  }
-  void SetCursorBright(bool bright) override {
-    Menu_Framework_cursorColor = bright ? 1 : 0;
-  }
-  void DrawDetailTabNavigation() override {
-    RequireFrame(true);
-    Framework::DrawLiveTabNavigation(1);
-  }
-  void DrawItemDetails() override {
-    RequireRows();
-    if (Menu_Framework_selectedStatusViewElement >=
-        Framework::kStatusViewElementCount) {
-      Inventory::Refuse("used detail cursor outside its elements");
-    }
-    Framework::UpdateLiveItemDetails();
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
     Core_Errorf("menu.inventory", "Item details refused: %.*s",

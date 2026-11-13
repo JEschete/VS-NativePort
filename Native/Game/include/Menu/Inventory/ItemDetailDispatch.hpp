@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include "Items/ItemRecords.hpp"
+#include "Menu/Framework/CategoryIcons.hpp"
 #include "Menu/Inventory/EquipmentDetailControllers.hpp"
 
 namespace VS::Menu::Inventory {
@@ -34,23 +35,8 @@ class ItemDetailWorld {
                           DetailPage page) = 0;
 };
 
-struct CategoryIcon {
-  std::uint8_t category = 0;
-  std::int32_t x = 0;
-  std::int32_t y = 0;
-  bool selected_palette = false;
-  bool overlay = false;
-  friend bool operator==(CategoryIcon, CategoryIcon) = default;
-};
-
-class CategoryIconWorld {
- public:
-  virtual ~CategoryIconWorld() = default;
-  [[nodiscard]] virtual std::uint8_t CurrentCategory() = 0;
-  virtual void DrawListTabNavigation() = 0;
-  [[nodiscard]] virtual Framework::MenuRow& CategoryHeader() = 0;
-  virtual void DrawIcon(CategoryIcon icon) = 0;
-};
+using CategoryIcon = Framework::CategoryIcon;
+using CategoryIconWorld = Framework::CategoryIconWorld;
 
 enum class DetailHeaderPlacement : std::uint8_t { kList, kDetails };
 enum class DetailCommand : std::uint8_t { kNone, kMenu };

@@ -7,14 +7,6 @@ namespace VS::Menu::Inventory {
 namespace {
 constexpr std::uint8_t kAnimationFrames = 10;
 constexpr std::uint32_t kExitButtons = Input::Triangle | Input::Cross;
-constexpr std::int32_t kIconCount = 8;
-constexpr std::int32_t kIconPitch = 16;
-constexpr std::int32_t kIconStartX = 32;
-constexpr std::int32_t kIconMergeInset = 12;
-constexpr std::int32_t kFirstCategoryRowIcon = 24;
-constexpr std::int32_t kLastIconAnimationStep = 4;
-constexpr std::int32_t kIconAnimationPitch = 8;
-constexpr std::int32_t kDetailHeaderY = 16;
 constexpr std::uint8_t kFirstDetailElement = 9;
 constexpr std::uint8_t kDetailCategoryCount = 6;
 constexpr std::int32_t kReturnToBattle = -2;
@@ -111,37 +103,6 @@ void EnterDispatcher(ItemDetailDispatcherState& state,
   world.SetCommand(DetailCommand::kNone);
 }
 }  // namespace
-
-// decomp: _renderItemCategory (src/MENU/items0.h:46-81).
-void DrawItemCategoryIcons(CategoryIconWorld& world,
-                           std::int32_t animation_step,
-                           std::int32_t highlight_selected) {
-  const auto selected = (world.CurrentCategory() - 1) & (kIconCount - 1);
-  if (animation_step == kLastIconAnimationStep) {
-    world.DrawListTabNavigation();
-  }
-  const auto y = Core::Math::WrappingSubtract(
-      Core::Math::WrappingMultiply(animation_step, kIconAnimationPitch),
-      kIconPitch);
-  for (std::int32_t category = 0; category < kIconCount; ++category) {
-    const auto x =
-        (((category + 1) & (kIconCount - 1)) * kIconPitch) + kIconStartX;
-    const bool overlay = category == selected && highlight_selected == 1;
-    if (overlay) {
-      auto& header = world.CategoryHeader();
-      if (x >= header.x - kIconMergeInset) {
-        header.row_icon =
-            static_cast<std::uint8_t>(category + kFirstCategoryRowIcon);
-        continue;
-      }
-    }
-    world.DrawIcon({.category = static_cast<std::uint8_t>(category),
-                    .x = x,
-                    .y = overlay ? kDetailHeaderY : y,
-                    .selected_palette = category == selected,
-                    .overlay = overlay});
-  }
-}
 
 // decomp: _armorStatusView (src/MENU/items1.h:464-544).
 std::int32_t UpdateArmorDetails(EquipmentDetailState& state,

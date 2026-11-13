@@ -2265,6 +2265,12 @@
     <ClInclude Include="src\Menu\BreakArts.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Container\ContainerDetailControllers.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerDetailControllersLive.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ContainerDetailHelpers.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
@@ -2305,6 +2311,12 @@
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
     <ClInclude Include="src\Menu\Framework\AshleyPreview.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Framework\CategoryIcons.cpp">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\DetailDispatchLiveSupport.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="src\Menu\Framework\DetailInputLive.hpp">
@@ -3624,6 +3636,12 @@
     <ClInclude Include="include\Items\Recovery.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerDetailControllers.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerDetailControllersLive.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpers.hpp">
       <Filter>include\Menu\Container</Filter>
     </ClInclude>
@@ -3643,6 +3661,9 @@
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\ActorPreviewLive.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\CategoryIcons.hpp">
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\DetailInput.hpp">

@@ -25,18 +25,10 @@ extern int Menu_Container_detailsClosedWithTriangle;;
 extern Items_Container* Menu_Container_otherStorage;;
 extern u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData.cpp) */;
 extern Items_Container* Menu_Container_containerData;;
-void Menu_Container_DrawCategoryIcons(int arg0, int details_view_phase);
 void Menu_Container_BuildWeaponRow(Items_ContainerData* container, char** rowStrings,
     int* rowTypes, char* buf, int index);
 void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStrings,
     int* rowTypes, char* buf, int index);
-int Menu_Container_UpdateWeaponDetails(int weaponIndex);
-int Menu_Container_UpdateBladeDetails(int bladeIndex);
-int Menu_Container_UpdateGripDetails(int packed_details_selection);
-int Menu_Container_UpdateShieldDetails(int packed_details_selection);
-int Menu_Container_UpdateArmorDetails(int packed_details_selection);
-int Menu_Container_UpdateGemDetails(int packed_details_selection);
-int Menu_Container_UpdateItemDetails(int packed_category_selection);
 void Menu_Container_DrawCapacityCount(int capacity_limit, int packed_count_position, int occupied_count);
 void Menu_Container_DrawStorageCapacities(void);
 int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, char* textBuf);
