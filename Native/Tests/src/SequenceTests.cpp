@@ -12,6 +12,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Battle/ActionSequenceLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Field/GimmickPlacementLive.h"
@@ -427,7 +428,7 @@ int Tests_ActionCameraRecovery(void) {
   Render_projectionDistance = 640;
   Battle_cameraEaseMode = 0;
   Battle_settledCameraDistance = 0;
-  Battle_FinishActionSequence();
+  VS::Battle::FinishLiveActionSequence();
   const int passed = Render_projectionDistance == 576 &&
                      Field_sphericalCamera.values.distance == 1728;
   Battle_actionState = savedAction;

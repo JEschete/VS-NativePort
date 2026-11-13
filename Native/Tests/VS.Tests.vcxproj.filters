@@ -66,6 +66,12 @@
     <ClCompile Include="src\ActionResultsSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActionSequenceLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ActionSequenceTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActorAssetsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -778,6 +784,9 @@
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp">

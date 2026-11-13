@@ -228,6 +228,10 @@
     <ClCompile Include="src\Battle\ActionResultsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionSequence.cpp" />
+    <ClCompile Include="src\Battle\ActionSequenceLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionTable.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2292,6 +2296,8 @@
     <ClInclude Include="include\Battle\ActionPreviewLive.hpp" />
     <ClInclude Include="include\Battle\ActionResults.hpp" />
     <ClInclude Include="include\Battle\ActionResultsLive.hpp" />
+    <ClInclude Include="include\Battle\ActionSequence.hpp" />
+    <ClInclude Include="include\Battle\ActionSequenceLive.hpp" />
     <ClInclude Include="include\Battle\ActorVitals.hpp" />
     <ClInclude Include="include\Battle\ActorVitalsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActionExecution.hpp" />

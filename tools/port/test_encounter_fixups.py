@@ -23,6 +23,36 @@ def flat(source: str) -> str:
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_action_sequence_preserves_data_and_binds_five_owned_entries(self):
+        names = {
+            "F00187": ("WaitForLiveActionEffectReady", 0x80078748),
+            "F00188": ("StartLiveReadyActionAnimation", 0x800787F0),
+            "F00192": ("WaitForLiveActionResolution", 0x80079050),
+            "F00193": ("WaitForLiveTargetRecovery", 0x800790BC),
+            "F00195": ("FinishLiveActionSequence", 0x800793C0),
+        }
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table)}
+        for identifier, (name, address) in names.items():
+            binding = f"VS::Battle::{name}"
+            with self.subTest(identifier=identifier):
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[identifier], binding)
+                self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                self.assertEqual(owned[identifier]["path"], r"Native\Game\src\Battle\ActionSequence.cpp")
+                self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                                 r"Native\Game\include\Battle\ActionSequenceLive.hpp")
+        generated = (root / r"Native\Game\src\Battle\ActionExecution.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("void Battle_", generated)
+        self.assertIn("Battle_settledCameraDistance", generated)
+        self.assertIn("Battle_cameraEaseMode", generated)
+        binding = (root / r"Native\Game\src\Battle\ActionSequenceLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Field_sphericalCamera.values.distance", binding)
+        self.assertNotIn("Battle_settledCameraDistance", binding)
+        self.assertIn("Render::SetLiveCameraProjectionDistance", binding)
+        self.assertNotIn("Core_Gte_SetGeomScreen", binding)
+        self.assertIn("Target recovery refused: empty sequence has no last action", binding)
+
     def test_action_camera_selection_binds_all_eight_owned_entries(self):
         names = ("ActionTargetLimbPosition", "ActionTargetDistance", "ActionCameraMidpoint",
                  "StepCameraTowardActionMidpoint", "UpdateInitialTargetSelection",
@@ -4326,8 +4356,8 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         with (root / "tools/port/owned.csv").open(newline="") as file:
             owned = {row["id"]: row for row in csv.DictReader(file)}
         self.assertEqual(owned["F01718"]["name"], "VS::Battle::Ai::RebuildActorActionPlans")
-        execution = (root / "Native/Game/src/Battle/ActionExecution.cpp").read_text(encoding="utf-8")
-        self.assertIn("VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[", execution)
+        execution = (root / "Native/Game/src/Battle/ActionSequenceLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Ai::RebuildLiveActorActionPlans(&action_)", execution)
         self.assertIn('#include "Battle/Ai/PlanningWorkspaceLive.hpp"', execution)
         for path in ("Actors/ActorStateLive.cpp", "Boot/GameplayLoopLive.cpp", "Event/CutsceneLifecycleLive.cpp"):
             text = (root / "Native/Game/src" / path).read_text(encoding="utf-8")

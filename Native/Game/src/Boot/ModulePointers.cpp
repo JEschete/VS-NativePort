@@ -13,6 +13,7 @@
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/ActionSequenceLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -304,11 +305,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&Effects_BeginAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&Effects_ActionEffectBusyFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80078748u, 0u, (void*)&Battle_WaitForActionEffectReady, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800787F0u, 0u, (void*)&Battle_StartReadyActionAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80079050u, 0u, (void*)&Battle_WaitForActionResolution, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800790BCu, 0u, (void*)&Battle_WaitForTargetRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800793C0u, 0u, (void*)&Battle_FinishActionSequence, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800797BCu, 0u, (void*)&Battle_UpdateLootResults, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007980Cu, 0u, (void*)&Battle_UpdateAbilityUnlockDelay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007983Cu, 0u, (void*)&Battle_UpdateAbilityUnlockResults, 0u, 0u, 0u},
@@ -1770,6 +1766,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800782E4u, 0u, (void*)&VS::Battle::LiveUpdateActionAreaSelection, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80078364u, 0u, (void*)&VS::Battle::LiveUpdateFinalTargetSelection, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800784ACu, 0u, (void*)&VS::Battle::LiveUpdateActionCameraZoom, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80078748u, 0u, (void*)&VS::Battle::WaitForLiveActionEffectReady, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800787F0u, 0u, (void*)&VS::Battle::StartLiveReadyActionAnimation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80079050u, 0u, (void*)&VS::Battle::WaitForLiveActionResolution, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800790BCu, 0u, (void*)&VS::Battle::WaitForLiveTargetRecovery, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800793C0u, 0u, (void*)&VS::Battle::FinishLiveActionSequence, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

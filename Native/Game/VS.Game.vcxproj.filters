@@ -456,6 +456,12 @@
     <ClCompile Include="src\Battle\ActionResultsLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionSequence.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\ActionSequenceLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionTable.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -2773,6 +2779,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionResultsLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\ActionSequence.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\ActionSequenceLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActorVitals.hpp">

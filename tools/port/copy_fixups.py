@@ -826,6 +826,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LiveUpdateActionAreaSelection": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
     "VS::Battle::LiveUpdateFinalTargetSelection": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
     "VS::Battle::LiveUpdateActionCameraZoom": r"Native\Game\include\Battle\ActionCameraSelectionLive.hpp",
+    "VS::Battle::WaitForLiveActionEffectReady": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
+    "VS::Battle::StartLiveReadyActionAnimation": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
+    "VS::Battle::WaitForLiveActionResolution": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
+    "VS::Battle::WaitForLiveTargetRecovery": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
+    "VS::Battle::FinishLiveActionSequence": r"Native\Game\include\Battle\ActionSequenceLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1585,6 +1590,11 @@ OWNED_CALL_BINDINGS["F00183"] = "VS::Battle::LiveUpdateInitialTargetSelection"
 OWNED_CALL_BINDINGS["F00184"] = "VS::Battle::LiveUpdateActionAreaSelection"
 OWNED_CALL_BINDINGS["F00185"] = "VS::Battle::LiveUpdateFinalTargetSelection"
 OWNED_CALL_BINDINGS["F00186"] = "VS::Battle::LiveUpdateActionCameraZoom"
+OWNED_CALL_BINDINGS["F00187"] = "VS::Battle::WaitForLiveActionEffectReady"
+OWNED_CALL_BINDINGS["F00188"] = "VS::Battle::StartLiveReadyActionAnimation"
+OWNED_CALL_BINDINGS["F00192"] = "VS::Battle::WaitForLiveActionResolution"
+OWNED_CALL_BINDINGS["F00193"] = "VS::Battle::WaitForLiveTargetRecovery"
+OWNED_CALL_BINDINGS["F00195"] = "VS::Battle::FinishLiveActionSequence"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3348,6 +3358,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800782E4, "VS::Battle::LiveUpdateActionAreaSelection"),  # F00184
     ("BATTLE/BATTLE.PRG", 0x80078364, "VS::Battle::LiveUpdateFinalTargetSelection"),  # F00185
     ("BATTLE/BATTLE.PRG", 0x800784AC, "VS::Battle::LiveUpdateActionCameraZoom"),  # F00186
+    ("BATTLE/BATTLE.PRG", 0x80078748, "VS::Battle::WaitForLiveActionEffectReady"),  # F00187
+    ("BATTLE/BATTLE.PRG", 0x800787F0, "VS::Battle::StartLiveReadyActionAnimation"),  # F00188
+    ("BATTLE/BATTLE.PRG", 0x80079050, "VS::Battle::WaitForLiveActionResolution"),  # F00192
+    ("BATTLE/BATTLE.PRG", 0x800790BC, "VS::Battle::WaitForLiveTargetRecovery"),  # F00193
+    ("BATTLE/BATTLE.PRG", 0x800793C0, "VS::Battle::FinishLiveActionSequence"),  # F00195
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4104,12 +4119,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "MENU3/68C4.c resets the preview weapon fade at byte 0x11 of the same model"),
         ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
          "D_800F4590 aliases vs_battle_wepModels[2], including its second preview slot"),
-    ],
-    "F00195": [
-        ("Battle_cameraEaseMode", "Field_sphericalCamera.delta.mode",
-         "D_800F19EC aliases the spherical camera mode at +0x1C"),
-        ("Battle_settledCameraDistance", "Field_sphericalCamera.values.distance",
-         "D_800F19D8 aliases the spherical camera distance at +0x8"),
     ],
     "F01364": [
         ("    VS::Core::Memory::ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);",

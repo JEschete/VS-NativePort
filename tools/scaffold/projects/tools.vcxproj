@@ -370,6 +370,9 @@
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp" />
     <None Include="..\..\port\differentials\boss_orbit.py" />
     <None Include="..\..\port\differentials\boss_orbit_driver.cpp" />
+    <None Include="..\..\port\differentials\camera_selection.py" />
+    <None Include="..\..\port\differentials\camera_selection_driver.cpp" />
+    <None Include="..\..\port\differentials\camera_selection_guard_driver.cpp" />
     <None Include="..\..\port\differentials\candidate_movement.py" />
     <None Include="..\..\port\differentials\candidate_movement_driver.cpp" />
     <None Include="..\..\port\differentials\damage_calculations.py" />

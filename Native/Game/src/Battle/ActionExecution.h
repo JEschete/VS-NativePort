@@ -11,10 +11,5 @@
 
 extern int Battle_settledCameraDistance;
 extern int Battle_cameraEaseMode;
-void Battle_WaitForActionEffectReady(void);
-void Battle_StartReadyActionAnimation(void);
-void Battle_WaitForActionResolution(void);
-void Battle_WaitForTargetRecovery(void);
-void Battle_FinishActionSequence(void);
 
 #endif // VS_BATTLE_ACTIONEXECUTION_H_DECLS

@@ -14,6 +14,7 @@
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
+#include "Battle/ActionSequenceLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
@@ -442,10 +443,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         Battle::LiveUpdateActionCameraZoom();
         break;
       case BattleActionFlow::kWaitEffectReady:
-        Battle_WaitForActionEffectReady();
+        Battle::WaitForLiveActionEffectReady();
         break;
       case BattleActionFlow::kStartReadyAnimation:
-        Battle_StartReadyActionAnimation();
+        Battle::StartLiveReadyActionAnimation();
         break;
       case BattleActionFlow::kAbilityTiming:
         VS::Battle::LiveUpdateBattleAbilityTiming();
@@ -454,13 +455,13 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         VS::Battle::StartLiveActionPresentation();
         break;
       case BattleActionFlow::kWaitResolution:
-        Battle_WaitForActionResolution();
+        Battle::WaitForLiveActionResolution();
         break;
       case BattleActionFlow::kWaitTargetRecovery:
-        Battle_WaitForTargetRecovery();
+        Battle::WaitForLiveTargetRecovery();
         break;
       case BattleActionFlow::kFinishSequence:
-        Battle_FinishActionSequence();
+        Battle::FinishLiveActionSequence();
         break;
       case BattleActionFlow::kLootResults:
         Battle_UpdateLootResults();

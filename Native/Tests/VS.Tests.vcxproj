@@ -60,6 +60,8 @@
     <ClCompile Include="src\ActionPreviewTests.cpp" />
     <ClCompile Include="src\ActionResultCommitTests.cpp" />
     <ClCompile Include="src\ActionResultsSliceTests.cpp" />
+    <ClCompile Include="src\ActionSequenceLiveTests.cpp" />
+    <ClCompile Include="src\ActionSequenceTests.cpp" />
     <ClCompile Include="src\ActorAssetsTests.cpp" />
     <ClCompile Include="src\ActorAttachmentTests.cpp" />
     <ClCompile Include="src\ActorCleanupCoreTests.cpp" />
@@ -344,6 +346,7 @@
   <ItemGroup>
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
+    <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
