@@ -1670,6 +1670,10 @@
     <ClCompile Include="src\Menu\Container\ContainerDetailHelpersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerSorting.cpp" />
+    <ClCompile Include="src\Menu\Container\ContainerSortingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ItemView.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2609,6 +2613,8 @@
     <ClInclude Include="include\Menu\Container\ContainerDetailControllersLive.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpers.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpersLive.hpp" />
+    <ClInclude Include="include\Menu\Container\ContainerSorting.hpp" />
+    <ClInclude Include="include\Menu\Container\ContainerSortingLive.hpp" />
     <ClInclude Include="include\Menu\Files.hpp" />
     <ClInclude Include="include\Menu\FilesLive.hpp" />
     <ClInclude Include="include\Menu\Framework\ActionSelection.h" />

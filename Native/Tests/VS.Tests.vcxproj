@@ -141,6 +141,9 @@
     <ClCompile Include="src\ContainerIndexingLiveTests.cpp" />
     <ClCompile Include="src\ContainerIndexingModuleTests.cpp" />
     <ClCompile Include="src\ContainerIndexingTests.cpp" />
+    <ClCompile Include="src\ContainerSortingLiveTests.cpp" />
+    <ClCompile Include="src\ContainerSortingModuleTests.cpp" />
+    <ClCompile Include="src\ContainerSortingTests.cpp" />
     <ClCompile Include="src\ContainerTransfersLiveFixture.cpp" />
     <ClCompile Include="src\ContainerTransfersLiveTests.cpp" />
     <ClCompile Include="src\ContainerTransfersModuleTests.cpp" />
@@ -404,6 +407,7 @@
     <ClInclude Include="include\Menu\ContainerDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailHelpersSamples.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailHelpersWorld.hpp" />
+    <ClInclude Include="include\Menu\ContainerSortingWorld.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />

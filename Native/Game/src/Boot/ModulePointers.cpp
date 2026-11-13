@@ -71,6 +71,7 @@
 #include "Items/EquipmentLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
+#include "Menu/Container/ContainerSortingLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
@@ -2033,6 +2034,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUD.PRG", 0x80104BDCu, 0u, (void*)&VS::Menu::container::UpdateLiveArmorDetails, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80104E14u, 0u, (void*)&VS::Menu::container::UpdateLiveGemDetails, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80105008u, 0u, (void*)&VS::Menu::container::UpdateLiveItemDetails, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801051F8u, 0u, (void*)&VS::Menu::container::SortLiveWeapons, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80105454u, 0u, (void*)&VS::Menu::container::SortLiveShields, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801055F0u, 0u, (void*)&VS::Menu::container::SortLiveMisc, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80105844u, 0u, (void*)&VS::Menu::container::CopyLiveEquipmentStats, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x8010592Cu, 0u, (void*)&VS::Menu::container::SortLiveEquipment, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

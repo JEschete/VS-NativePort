@@ -2283,6 +2283,12 @@
     <ClCompile Include="src\Menu\Container\ContainerDetailHelpersLive.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerSorting.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerSortingLive.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ItemView.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
@@ -3658,6 +3664,12 @@
       <Filter>include\Menu\Container</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpersLive.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerSorting.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerSortingLive.hpp">
       <Filter>include\Menu\Container</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Files.hpp">

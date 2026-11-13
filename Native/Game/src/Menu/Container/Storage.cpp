@@ -1,12 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/SfxLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
-#include "Items/EquipmentLive.hpp"
-#include "Menu/Container/ContainerDetailHelpersLive.hpp"
+#include "Menu/Container/ContainerSortingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -15,11 +12,8 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/InventoryLiveState.h"
-#include "Items/Loadout.h"
-#include "Items/Weapons.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/Framework.h"
@@ -44,229 +38,6 @@ static char Menu_Container_discardMenuCountTemplate[] = "|>48|000/000\0";
 
 // decomp: local static of _discardMenu, at file scope so the module reset reaches it
 static char Menu_Container_discardSteps[] = { 1, 10, 100 };
-
-// decomp: MENUD.PRG _sortWeaponsByStat (src/MENU/MENUD.PRG/234.c:1306)
-void Menu_Container_SortWeapons(int stat)
-{
-    Items_WeaponLoadout target;
-    u_short sortedIndices[32];
-    int i;
-    int maxStatValue;
-    int sortedIndex;
-    int sourceIndex;
-
-    Items_InventoryWeapon* sourceWeapons = Menu_Container_containerData->items.weapons;
-    u_short* targetIndices =
-        VS::Items::LiveContainerCategoryIndices(Items_ItemCategory_Weapon, Menu_Container_containerData);
-    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, sizeof sortedIndices);
-    sortedIndex = 0;
-
-    while (1) {
-        maxStatValue = -INT_MAX - 1;
-
-        for (i = 0; i < 32; ++i) {
-            int statValue;
-            sourceIndex = targetIndices[i];
-            if (sourceIndex == 0) {
-                continue;
-            }
-            VS::Menu::container::BuildLiveWeaponStats(
-                &target, &sourceWeapons[sourceIndex - 1], &Menu_Container_containerData->items);
-            statValue = VS::Menu::Framework::LiveWeaponSortValue(stat, &target);
-            if (maxStatValue < statValue) {
-                maxStatValue = statValue;
-            }
-        }
-
-        if (maxStatValue == (-INT_MAX - 1)) {
-            break;
-        }
-
-        for (i = 0; i < 32; ++i) {
-            sourceIndex = targetIndices[i];
-            if (sourceIndex == 0) {
-                continue;
-            }
-            VS::Menu::container::BuildLiveWeaponStats(
-                &target, &sourceWeapons[sourceIndex - 1], &Menu_Container_containerData->items);
-            if (VS::Menu::Framework::LiveWeaponSortValue(stat, &target) == maxStatValue) {
-                sortedIndices[sortedIndex++] = sourceIndex;
-                targetIndices[i] = 0;
-            }
-        }
-    }
-    VS::Core::Memory::CopyLiveHalfwordBlocks(targetIndices, &sortedIndices, sizeof sortedIndices);
-}
-
-// decomp: MENUD.PRG _sortShieldsByStat (src/MENU/MENUD.PRG/234.c:1388)
-void Menu_Container_SortShields(int sort_stat_id)
-{
-    Items_ShieldLoadout shield_stats;
-    u_short sorted_shield_indices[0x20];
-    int shield_sort_value;
-    int i;
-    int highest_remaining_sort_value;
-    int shield_id;
-
-    Items_InventoryShield* shield_items = Menu_Container_containerData->items.shields;
-    u_short* shield_indices = VS::Items::LiveContainerCategoryIndices(3, Menu_Container_containerData);
-    int sorted_shield_count = 0;
-
-    VS::Core::Memory::ZeroLiveWordsBackward(&sorted_shield_indices, sizeof sorted_shield_indices);
-
-    while (1) {
-        highest_remaining_sort_value = 0x80000000;
-
-        for (i = 0; i < 32; ++i) {
-            shield_id = shield_indices[i];
-            if (shield_id != 0) {
-                VS::Menu::container::BuildLiveShieldStats(
-                    &shield_stats, &shield_items[shield_id - 1], &Menu_Container_containerData->items);
-                shield_sort_value = VS::Menu::Framework::LiveShieldSortValue(sort_stat_id, &shield_stats);
-                if (highest_remaining_sort_value < shield_sort_value) {
-                    highest_remaining_sort_value = shield_sort_value;
-                }
-            }
-        }
-
-        if (highest_remaining_sort_value == 0x80000000) {
-            break;
-        }
-
-        for (i = 0; i < 32; ++i) {
-            shield_id = shield_indices[i];
-            if (shield_id != 0) {
-                VS::Menu::container::BuildLiveShieldStats(
-                    &shield_stats, &shield_items[shield_id - 1], &Menu_Container_containerData->items);
-                if (VS::Menu::Framework::LiveShieldSortValue(sort_stat_id, &shield_stats) == highest_remaining_sort_value) {
-                    sorted_shield_indices[sorted_shield_count++] = shield_id;
-                    shield_indices[i] = 0;
-                }
-            }
-        }
-    }
-    VS::Core::Memory::CopyLiveHalfwordBlocks(shield_indices, &sorted_shield_indices, sizeof sorted_shield_indices);
-}
-
-// decomp: MENUD.PRG _sortItemsByStat (src/MENU/MENUD.PRG/234.c:1445)
-void Menu_Container_SortMisc(int sort_stat_id)
-{
-    u_short sorted_misc_indices[0x100];
-    int misc_sort_value;
-    int i;
-    int highest_remaining_sort_value;
-    int sorted_misc_count;
-    int misc_item_id;
-    u_short* misc_indices;
-    Items_InventoryMisc* item;
-
-    item = Menu_Container_containerData->items.misc;
-    misc_indices = VS::Items::LiveContainerCategoryIndices(6, Menu_Container_containerData);
-    VS::Core::Memory::ZeroLiveWordsBackward(&sorted_misc_indices, sizeof sorted_misc_indices);
-    sorted_misc_count = 0;
-
-    while (1) {
-        highest_remaining_sort_value = 0x80000000;
-
-        for (i = 0; i < 256; ++i) {
-            misc_item_id = misc_indices[i];
-            if (misc_item_id != 0) {
-                misc_sort_value = VS::Menu::Framework::LiveMiscSortValue(sort_stat_id, &item[misc_item_id - 1]);
-                if (highest_remaining_sort_value < misc_sort_value) {
-                    highest_remaining_sort_value = misc_sort_value;
-                }
-            }
-        }
-
-        if (highest_remaining_sort_value == 0x80000000) {
-            break;
-        }
-
-        for (i = 0; i < 256; ++i) {
-            misc_item_id = misc_indices[i];
-            if ((misc_item_id != 0) && (VS::Menu::Framework::LiveMiscSortValue(sort_stat_id, &item[misc_item_id - 1]) == highest_remaining_sort_value)) {
-                sorted_misc_indices[sorted_misc_count++] = misc_item_id;
-                misc_indices[i] = 0;
-            }
-        }
-    }
-    VS::Core::Memory::CopyLiveHalfwordBlocks(misc_indices, &sorted_misc_indices, sizeof sorted_misc_indices);
-}
-
-// decomp: MENUD.PRG _sortEquipment (src/MENU/MENUD.PRG/234.c:1528)
-void Menu_Container_CopyEquipmentStats(Items_EquipmentPartStats* item, int type, int index)
-{
-    switch (type) {
-    case Items_ItemCategory_Blade:
-        VS::Items::ReadLiveInventoryBladeStats(
-            item, &Menu_Container_containerData->items.blades[index]);
-        return;
-    case Items_ItemCategory_Grip:
-        VS::Items::ReadLiveInventoryGripStats(
-            item, &Menu_Container_containerData->items.grips[index]);
-        return;
-    case Items_ItemCategory_Armor:
-        VS::Items::ReadLiveInventoryArmorStats(
-            item, &Menu_Container_containerData->items.armor[index]);
-        return;
-    case Items_ItemCategory_Gem:
-        VS::Items::ReadLiveInventoryGemStats(item, &Menu_Container_containerData->items.gems[index]);
-        return;
-    }
-}
-
-// decomp: MENUD.PRG _copyEquipmentByStat (src/MENU/MENUD.PRG/234.c:1549)
-void Menu_Container_SortEquipment(int category_id, int sort_stat_id)
-{
-    Items_EquipmentPartStats equipment_stats;
-    int equipment_sort_value;
-    int i;
-    int highest_remaining_sort_value;
-    int sorted_equipment_count;
-    int equipment_id;
-    int category_capacity;
-    u_short* category_indices;
-
-    sorted_equipment_count = 0;
-    category_capacity = Menu_Container_containerItemCapacities[category_id];
-
-    {
-        u_short sorted_equipment_indices[category_capacity];
-        category_indices = VS::Items::LiveContainerCategoryIndices(category_id, Menu_Container_containerData);
-        VS::Core::Memory::ZeroLiveWordsBackward(std::as_writable_bytes(std::span(&sorted_equipment_indices[0], sizeof sorted_equipment_indices / sizeof sorted_equipment_indices[0])), category_capacity * 2);
-
-        while (1) {
-            highest_remaining_sort_value = 0x80000000;
-
-            for (i = 0; i < category_capacity; ++i) {
-                equipment_id = category_indices[i];
-                if (equipment_id != 0) {
-                    Menu_Container_CopyEquipmentStats(&equipment_stats, category_id, equipment_id - 1);
-                    equipment_sort_value = VS::Menu::Framework::LiveEquipmentSortValue(sort_stat_id, &equipment_stats);
-                    if (highest_remaining_sort_value < equipment_sort_value) {
-                        highest_remaining_sort_value = equipment_sort_value;
-                    }
-                }
-            }
-
-            if (highest_remaining_sort_value == 0x80000000) {
-                break;
-            }
-
-            for (i = 0; i < category_capacity; ++i) {
-                equipment_id = category_indices[i];
-                if (equipment_id != 0) {
-                    Menu_Container_CopyEquipmentStats(&equipment_stats, category_id, equipment_id - 1);
-                    if (VS::Menu::Framework::LiveEquipmentSortValue(sort_stat_id, &equipment_stats) == highest_remaining_sort_value) {
-                        sorted_equipment_indices[sorted_equipment_count++] = equipment_id;
-                        category_indices[i] = 0;
-                    }
-                }
-            }
-        }
-        VS::Core::Memory::CopyLiveHalfwordBlocks(category_indices, &sorted_equipment_indices[0], category_capacity * 2);
-    }
-}
 
 // decomp: MENUD.PRG _displaySortMenu (src/MENU/MENUD.PRG/234.c:1601)
 int Menu_Container_UpdateSortMenu(int category_selection)
@@ -326,16 +97,16 @@ int Menu_Container_UpdateSortMenu(int category_selection)
                 VS::Menu::PlaySelectSound();
                 switch (Menu_Container_sortCategory) {
                 case 0:
-                    Menu_Container_SortWeapons(Menu_Container_kWeaponSortStats[i]);
+                    VS::Menu::container::SortLiveWeapons(Menu_Container_kWeaponSortStats[i]);
                     break;
                 case 3:
-                    Menu_Container_SortShields(Menu_Container_kShieldSortStats[i]);
+                    VS::Menu::container::SortLiveShields(Menu_Container_kShieldSortStats[i]);
                     break;
                 case 6:
-                    Menu_Container_SortMisc(Menu_Container_kMiscSortStats[i]);
+                    VS::Menu::container::SortLiveMisc(Menu_Container_kMiscSortStats[i]);
                     break;
                 default:
-                    Menu_Container_SortEquipment(Menu_Container_sortCategory, Menu_Container_kSortStatLists[Menu_Container_sortCategory][i]);
+                    VS::Menu::container::SortLiveEquipment(Menu_Container_sortCategory, Menu_Container_kSortStatLists[Menu_Container_sortCategory][i]);
                     break;
                 }
             } else {

@@ -423,6 +423,15 @@
     <None Include="..\..\port\differentials\container_indexing_f02932.py" />
     <None Include="..\..\port\differentials\container_indexing_f02933.py" />
     <None Include="..\..\port\differentials\container_indexing_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\container_sorting_common.py" />
+    <None Include="..\..\port\differentials\container_sorting_driver.cpp" />
+    <None Include="..\..\port\differentials\container_sorting_f02961.py" />
+    <None Include="..\..\port\differentials\container_sorting_f02963.py" />
+    <None Include="..\..\port\differentials\container_sorting_f02965.py" />
+    <None Include="..\..\port\differentials\container_sorting_f02967.py" />
+    <None Include="..\..\port\differentials\container_sorting_f02968.py" />
+    <None Include="..\..\port\differentials\container_sorting_keys.hpp" />
+    <None Include="..\..\port\differentials\container_sorting_live_driver.cpp" />
     <None Include="..\..\port\differentials\container_transfers_common.py" />
     <None Include="..\..\port\differentials\container_transfers_driver.cpp" />
     <None Include="..\..\port\differentials\container_transfers_f02934.py" />

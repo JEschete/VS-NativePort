@@ -1377,6 +1377,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::container::UpdateLiveArmorDetails": r"Native\Game\include\Menu\Container\ContainerDetailControllersLive.hpp",
     "VS::Menu::container::UpdateLiveGemDetails": r"Native\Game\include\Menu\Container\ContainerDetailControllersLive.hpp",
     "VS::Menu::container::UpdateLiveItemDetails": r"Native\Game\include\Menu\Container\ContainerDetailControllersLive.hpp",
+    "VS::Menu::container::SortLiveWeapons": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
+    "VS::Menu::container::SortLiveShields": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
+    "VS::Menu::container::SortLiveMisc": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
+    "VS::Menu::container::CopyLiveEquipmentStats": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
+    "VS::Menu::container::SortLiveEquipment": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2397,6 +2402,11 @@ OWNED_CALL_BINDINGS["F02956"] = "VS::Menu::container::UpdateLiveShieldDetails"
 OWNED_CALL_BINDINGS["F02957"] = "VS::Menu::container::UpdateLiveArmorDetails"
 OWNED_CALL_BINDINGS["F02958"] = "VS::Menu::container::UpdateLiveGemDetails"
 OWNED_CALL_BINDINGS["F02959"] = "VS::Menu::container::UpdateLiveItemDetails"
+OWNED_CALL_BINDINGS["F02961"] = "VS::Menu::container::SortLiveWeapons"
+OWNED_CALL_BINDINGS["F02963"] = "VS::Menu::container::SortLiveShields"
+OWNED_CALL_BINDINGS["F02965"] = "VS::Menu::container::SortLiveMisc"
+OWNED_CALL_BINDINGS["F02967"] = "VS::Menu::container::CopyLiveEquipmentStats"
+OWNED_CALL_BINDINGS["F02968"] = "VS::Menu::container::SortLiveEquipment"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3870,6 +3880,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x80104BDC, "VS::Menu::container::UpdateLiveArmorDetails"),  # F02957
     ("MENU/MENUD.PRG", 0x80104E14, "VS::Menu::container::UpdateLiveGemDetails"),  # F02958
     ("MENU/MENUD.PRG", 0x80105008, "VS::Menu::container::UpdateLiveItemDetails"),  # F02959
+    ("MENU/MENUD.PRG", 0x801051F8, "VS::Menu::container::SortLiveWeapons"),  # F02961
+    ("MENU/MENUD.PRG", 0x80105454, "VS::Menu::container::SortLiveShields"),  # F02963
+    ("MENU/MENUD.PRG", 0x801055F0, "VS::Menu::container::SortLiveMisc"),  # F02965
+    ("MENU/MENUD.PRG", 0x80105844, "VS::Menu::container::CopyLiveEquipmentStats"),  # F02967
+    ("MENU/MENUD.PRG", 0x8010592C, "VS::Menu::container::SortLiveEquipment"),  # F02968
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

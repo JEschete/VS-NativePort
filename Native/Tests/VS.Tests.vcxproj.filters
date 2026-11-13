@@ -300,6 +300,15 @@
     <ClCompile Include="src\ContainerIndexingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ContainerSortingLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerSortingModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerSortingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ContainerTransfersLiveFixture.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -967,6 +976,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ContainerDetailHelpersWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ContainerSortingWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp">
