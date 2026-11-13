@@ -1180,7 +1180,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\ItemView.cpp": [
 [
-167,
+125,
 [
 "                0x80, icon_x | (arg0 << 0x10), 0x100010, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1189,7 +1189,7 @@
 ]
 ],
 [
-935,
+841,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1198,7 +1198,7 @@
 ]
 ],
 [
-1047,
+953,
 [
 "        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
@@ -1211,7 +1211,7 @@
 ]
 ],
 [
-1128,
+1034,
 [
 "                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;",
 "                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;",
@@ -1224,7 +1224,7 @@
 ]
 ],
 [
-1562,
+1468,
 [
 "            pending_row_text = pending_rows_allocation + 0x6400;",
 "            pending_row_types = pending_rows_allocation + 0x6000;",
@@ -1237,7 +1237,7 @@
 ]
 ],
 [
-1688,
+1594,
 [
 "            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1246,7 +1246,7 @@
 ]
 ],
 [
-1953,
+1859,
 [
 "        static const char initial[8];"
 ],
@@ -1257,25 +1257,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\Storage.cpp": [
 [
-52,
-[
-"    Items_WeaponSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
-],
-[
-"    Items_WeaponSpawnLoadout* temp = (Items_WeaponSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));"
-]
-],
-[
-89,
-[
-"    Items_ShieldSpawnLoadout* temp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp);"
-],
-[
-"    Items_ShieldSpawnLoadout* temp = (Items_ShieldSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));"
-]
-],
-[
-453,
+392,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1284,7 +1266,7 @@
 ]
 ],
 [
-603,
+542,
 [
 "            packed_discard_digits & 0xF, 0x42, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -1293,7 +1275,7 @@
 ]
 ],
 [
-606,
+545,
 [
 "            packed_discard_digits & 0xF, 0x3C, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -1302,7 +1284,7 @@
 ]
 ],
 [
-608,
+547,
 [
 "            packed_discard_digits >> 4, 0x36, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],

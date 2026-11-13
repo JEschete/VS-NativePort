@@ -37,16 +37,10 @@ _Static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Contain
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_CONTAINER_STORAGE_H_DECLS)
 #define VS_MENU_CONTAINER_STORAGE_H_DECLS
 #include "Items/Equipment.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
 #include "Items/Weapons.h"
 
 extern u_short Menu_Container_transferredMiscCount;;
 extern u_short Menu_Container_containerItemCapacities[];
-void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_InventoryWeapon* source,
-    Items_ContainerData* container);
-void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_InventoryShield* source,
-    Items_ContainerData* container);
 void Menu_Container_SortWeapons(int stat);
 void Menu_Container_SortShields(int sort_stat_id);
 void Menu_Container_SortMisc(int sort_stat_id);

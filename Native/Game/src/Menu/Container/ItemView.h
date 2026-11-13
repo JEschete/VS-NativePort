@@ -25,13 +25,7 @@ extern int Menu_Container_detailsClosedWithTriangle;;
 extern Items_Container* Menu_Container_otherStorage;;
 extern u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData.cpp) */;
 extern Items_Container* Menu_Container_containerData;;
-void Menu_Container_SetPanelVisibility(char panel_visibility);
-int Menu_Container_PollDetailsPaging(int itemCategory, int currentSelection);
 void Menu_Container_DrawCategoryIcons(int arg0, int details_view_phase);
-void Menu_Container_BeginDetailsTransition(int menu_row_id);
-void Menu_Container_InitializeDetailsLayout(int selected_menu_row_id, int stat_page_panel_command);
-int Menu_Container_SelectDetailsItem(int category_id, int category_item_index);
-void Menu_Container_ExitDetailsView(int hide_dp_pp_bars);
 void Menu_Container_BuildWeaponRow(Items_ContainerData* container, char** rowStrings,
     int* rowTypes, char* buf, int index);
 void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStrings,

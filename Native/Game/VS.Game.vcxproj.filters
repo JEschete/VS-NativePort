@@ -46,6 +46,9 @@
     <Filter Include="include\Menu">
       <UniqueIdentifier>{1F22F31A-05D5-580B-810E-2ABF8457BA62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Menu\Container">
+      <UniqueIdentifier>{9BAF8BCF-ECFF-5432-9499-C6287764F310}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Menu\Framework">
       <UniqueIdentifier>{EC2E19C3-730C-5083-A87C-1AC3D1CA2E85}</UniqueIdentifier>
     </Filter>
@@ -2256,6 +2259,12 @@
     <ClInclude Include="src\Menu\BreakArts.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Container\ContainerDetailHelpers.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerDetailHelpersLive.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ItemView.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
@@ -2290,6 +2299,9 @@
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
     <ClInclude Include="src\Menu\Framework\AshleyPreview.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Framework\DetailInputLive.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Framework\EquipmentDetails.cpp">
@@ -3600,6 +3612,12 @@
     <ClInclude Include="include\Items\Recovery.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerDetailHelpers.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerDetailHelpersLive.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\Files.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
@@ -3613,6 +3631,9 @@
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\ActorPreviewLive.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\DetailInput.hpp">
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\EquipmentDetails.hpp">

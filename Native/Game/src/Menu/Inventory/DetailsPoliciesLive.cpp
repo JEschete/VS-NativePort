@@ -7,6 +7,7 @@
 #include "Input/Pad.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
+#include "Menu/Framework/DetailInputLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -49,19 +50,10 @@ void RequireRow(DetailRowId row) {
   }
 }
 
-class LiveWorld final : public DetailsWorld {
+class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
  public:
   explicit LiveWorld(int category = -1) : category_(category) {}
 
-  std::uint32_t HeldButtons() override {
-    return static_cast<std::uint32_t>(Input_buttonsState);
-  }
-  std::uint32_t RepeatButtons() override {
-    return static_cast<std::uint32_t>(Input_buttonRepeat);
-  }
-  std::uint32_t PressedButtons() override {
-    return Input_buttonsPressed.allButtons;
-  }
   std::int32_t ItemCount() override {
     RequireCategory(Items::kItemCategoryCount);
     return Items::Inventory::CountLiveItems(category_, nullptr);

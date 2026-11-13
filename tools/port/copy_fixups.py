@@ -1348,6 +1348,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Items::CommitLiveGadgetBag": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
     "VS::Items::LiveContainerParentWeaponIndex": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
     "VS::Items::LiveContainerParentShieldIndex": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Menu::container::BuildLiveWeaponStats": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
+    "VS::Menu::container::BuildLiveShieldStats": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
+    "VS::Menu::container::SetLivePanelVisibility": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
+    "VS::Menu::container::PollLiveDetailsPaging": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
+    "VS::Menu::container::BeginLiveDetailsTransition": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
+    "VS::Menu::container::InitializeLiveDetailsLayout": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
+    "VS::Menu::container::SelectLiveDetailsItem": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
+    "VS::Menu::container::ExitLiveDetailsView": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2340,6 +2348,14 @@ OWNED_CALL_BINDINGS["F02938"] = "VS::Items::SnapshotLiveGadgetBag"
 OWNED_CALL_BINDINGS["F02939"] = "VS::Items::CommitLiveGadgetBag"
 OWNED_CALL_BINDINGS["F02940"] = "VS::Items::LiveContainerParentWeaponIndex"
 OWNED_CALL_BINDINGS["F02941"] = "VS::Items::LiveContainerParentShieldIndex"
+OWNED_CALL_BINDINGS["F02925"] = "VS::Menu::container::BuildLiveWeaponStats"
+OWNED_CALL_BINDINGS["F02926"] = "VS::Menu::container::BuildLiveShieldStats"
+OWNED_CALL_BINDINGS["F02942"] = "VS::Menu::container::SetLivePanelVisibility"
+OWNED_CALL_BINDINGS["F02943"] = "VS::Menu::container::PollLiveDetailsPaging"
+OWNED_CALL_BINDINGS["F02945"] = "VS::Menu::container::BeginLiveDetailsTransition"
+OWNED_CALL_BINDINGS["F02947"] = "VS::Menu::container::InitializeLiveDetailsLayout"
+OWNED_CALL_BINDINGS["F02949"] = "VS::Menu::container::SelectLiveDetailsItem"
+OWNED_CALL_BINDINGS["F02950"] = "VS::Menu::container::ExitLiveDetailsView"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3785,6 +3801,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x801039BC, "VS::Menu::Inventory::UpdateLiveGemDetails"),  # F02580
     ("MENU/MENU3.PRG", 0x80103AD0, "VS::Menu::Inventory::UpdateLiveItemDetails"),  # F02581
     ("MENU/MENUB.PRG", 0x80103BA8, "VS::Menu::Inventory::UpdateLiveItemDetails"),  # F02581
+    ("MENU/MENUD.PRG", 0x80102A34, "VS::Menu::container::BuildLiveWeaponStats"),  # F02925
+    ("MENU/MENUD.PRG", 0x80102BB0, "VS::Menu::container::BuildLiveShieldStats"),  # F02926
+    ("MENU/MENUD.PRG", 0x80103D50, "VS::Menu::container::SetLivePanelVisibility"),  # F02942
+    ("MENU/MENUD.PRG", 0x80103D6C, "VS::Menu::container::PollLiveDetailsPaging"),  # F02943
+    ("MENU/MENUD.PRG", 0x80103F64, "VS::Menu::container::BeginLiveDetailsTransition"),  # F02945
+    ("MENU/MENUD.PRG", 0x80104034, "VS::Menu::container::InitializeLiveDetailsLayout"),  # F02947
+    ("MENU/MENUD.PRG", 0x80104114, "VS::Menu::container::SelectLiveDetailsItem"),  # F02949
+    ("MENU/MENUD.PRG", 0x80104170, "VS::Menu::container::ExitLiveDetailsView"),  # F02950
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

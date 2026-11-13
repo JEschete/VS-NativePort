@@ -273,6 +273,15 @@
     <ClCompile Include="src\ConditionSnapshotTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ContainerDetailHelpersLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerDetailHelpersModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerDetailHelpersTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ContainerIndexingLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -920,6 +929,12 @@
     </ClInclude>
     <ClInclude Include="include\Items\ContainerTransfersWorld.hpp">
       <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ContainerDetailHelpersSamples.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ContainerDetailHelpersWorld.hpp">
+      <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp">
       <Filter>include\Menu</Filter>

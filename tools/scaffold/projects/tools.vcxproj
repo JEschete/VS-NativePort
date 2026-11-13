@@ -390,6 +390,17 @@
     <None Include="..\..\port\differentials\camera_selection_guard_driver.cpp" />
     <None Include="..\..\port\differentials\candidate_movement.py" />
     <None Include="..\..\port\differentials\candidate_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\container_detail_helpers_common.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_driver.cpp" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02925.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02926.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02942.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02943.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02945.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02947.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02949.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_f02950.py" />
+    <None Include="..\..\port\differentials\container_detail_helpers_guard_driver.cpp" />
     <None Include="..\..\port\differentials\container_indexing_common.py" />
     <None Include="..\..\port\differentials\container_indexing_driver.cpp" />
     <None Include="..\..\port\differentials\container_indexing_f02927.py" />

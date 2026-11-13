@@ -2,11 +2,11 @@
 #include "Audio/SfxLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -45,67 +45,6 @@ static char Menu_Container_discardMenuCountTemplate[] = "|>48|000/000\0";
 // decomp: local static of _discardMenu, at file scope so the module reset reaches it
 static char Menu_Container_discardSteps[] = { 1, 10, 100 };
 
-// decomp: MENUD.PRG vs_menuD_initUiWeapon (src/MENU/MENUD.PRG/234.c:21)
-void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_InventoryWeapon* source,
-    Items_ContainerData* container)
-{
-    int i;
-    Items_WeaponSpawnLoadout* temp = (Items_WeaponSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));
-    VS::Core::Memory::ZeroLiveAlignedWords(temp, sizeof *temp);
-
-    if (source != NULL) {
-        temp->index = source->index;
-        if (source->blade != 0) {
-            VS::Items::ReadLiveInventoryBladeStats(
-                &temp->blade, &container->blades[source->blade - 1]);
-            temp->material = container->blades[source->blade - 1].material;
-        }
-
-        if (source->grip != 0) {
-            VS::Items::ReadLiveInventoryGripStats(
-                &temp->grip, &container->grips[source->grip - 1]);
-        }
-
-        for (i = 0; i < 3; ++i) {
-            if (source->gems[i] != 0) {
-                VS::Items::ReadLiveInventoryGemStats(
-                    &temp->gems[i], &container->gems[source->gems[i] - 1]);
-            }
-        }
-    }
-
-    for (i = 0; i < 24; ++i) {
-        temp->name[i] = source->name[i];
-    }
-
-    VS::Items::BuildLiveWeaponStatsFromParts(target, temp);
-    VS::Core::Memory::FreeLiveFromHighEnd(temp);
-}
-
-// decomp: MENUD.PRG vs_menuD_initUiShield (src/MENU/MENUD.PRG/234.c:57)
-void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_InventoryShield* source,
-    Items_ContainerData* container)
-{
-    int i;
-    Items_ShieldSpawnLoadout* temp = (Items_ShieldSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *temp));
-    VS::Core::Memory::ZeroLiveAlignedWords(temp, sizeof *temp);
-
-    if (source != NULL) {
-        temp->index = source->index;
-        VS::Items::ReadLiveInventoryArmorStats(&temp->base, &source->base);
-        temp->material = source->base.material;
-
-        for (i = 0; i < 3; ++i) {
-            if (source->gems[i] != 0) {
-                VS::Items::ReadLiveInventoryGemStats(
-                    &temp->gems[i], &container->gems[(source->gems[i] & 0x7F) - 1]);
-            }
-        }
-    }
-    VS::Items::BuildLiveShieldStatsFromParts(target, temp);
-    VS::Core::Memory::FreeLiveFromHighEnd(temp);
-}
-
 // decomp: MENUD.PRG _sortWeaponsByStat (src/MENU/MENUD.PRG/234.c:1306)
 void Menu_Container_SortWeapons(int stat)
 {
@@ -131,7 +70,7 @@ void Menu_Container_SortWeapons(int stat)
             if (sourceIndex == 0) {
                 continue;
             }
-            Menu_Container_BuildWeaponStats(
+            VS::Menu::container::BuildLiveWeaponStats(
                 &target, &sourceWeapons[sourceIndex - 1], &Menu_Container_containerData->items);
             statValue = VS::Menu::Framework::LiveWeaponSortValue(stat, &target);
             if (maxStatValue < statValue) {
@@ -148,7 +87,7 @@ void Menu_Container_SortWeapons(int stat)
             if (sourceIndex == 0) {
                 continue;
             }
-            Menu_Container_BuildWeaponStats(
+            VS::Menu::container::BuildLiveWeaponStats(
                 &target, &sourceWeapons[sourceIndex - 1], &Menu_Container_containerData->items);
             if (VS::Menu::Framework::LiveWeaponSortValue(stat, &target) == maxStatValue) {
                 sortedIndices[sortedIndex++] = sourceIndex;
@@ -181,7 +120,7 @@ void Menu_Container_SortShields(int sort_stat_id)
         for (i = 0; i < 32; ++i) {
             shield_id = shield_indices[i];
             if (shield_id != 0) {
-                Menu_Container_BuildShieldStats(
+                VS::Menu::container::BuildLiveShieldStats(
                     &shield_stats, &shield_items[shield_id - 1], &Menu_Container_containerData->items);
                 shield_sort_value = VS::Menu::Framework::LiveShieldSortValue(sort_stat_id, &shield_stats);
                 if (highest_remaining_sort_value < shield_sort_value) {
@@ -197,7 +136,7 @@ void Menu_Container_SortShields(int sort_stat_id)
         for (i = 0; i < 32; ++i) {
             shield_id = shield_indices[i];
             if (shield_id != 0) {
-                Menu_Container_BuildShieldStats(
+                VS::Menu::container::BuildLiveShieldStats(
                     &shield_stats, &shield_items[shield_id - 1], &Menu_Container_containerData->items);
                 if (VS::Menu::Framework::LiveShieldSortValue(sort_stat_id, &shield_stats) == highest_remaining_sort_value) {
                     sorted_shield_indices[sorted_shield_count++] = shield_id;

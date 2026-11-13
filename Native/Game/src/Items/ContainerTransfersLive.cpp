@@ -59,19 +59,6 @@ OrderTables Orders(Items_ContainerIndices& indices) {
           indices.armor,   indices.gems,   indices.misc};
 }
 
-std::span<std::uint16_t> SelectedOrder(ItemCategory category,
-                                       Items_Container* container) {
-  auto* selected =
-      LiveContainerCategoryIndices(static_cast<int>(category), container);
-  if (container == nullptr) Refuse("missing container index owner");
-  for (auto table : Orders(container->indices)) {
-    for (std::size_t row = 0; row < table.size(); ++row) {
-      if (table.data() + row == selected) return table.subspan(row);
-    }
-  }
-  return {};
-}
-
 class LiveBag final : public GadgetBagWorld {
  public:
   LiveBag() : owner_(&Storage().gadgetBag), bag_(&owner_->items) {}
@@ -83,7 +70,7 @@ class LiveBag final : public GadgetBagWorld {
     }
   }
   std::span<std::uint16_t> BagOrder(ItemCategory category) override {
-    return SelectedOrder(category, owner_);
+    return LiveContainerCategoryOrder(category, owner_);
   }
   std::uint8_t InventoryCapacity(ItemCategory category) override {
     return Items_Inventory_inventoryItemCapacities[static_cast<std::size_t>(
@@ -143,6 +130,19 @@ std::uint16_t Preview(bool count) {
 }
 }  // namespace
 
+std::span<std::uint16_t> LiveContainerCategoryOrder(
+    ItemCategory category, Items_Container* container) {
+  auto* selected =
+      LiveContainerCategoryIndices(static_cast<int>(category), container);
+  if (container == nullptr) Refuse("missing container index owner");
+  for (auto table : Orders(container->indices)) {
+    for (std::size_t row = 0; row < table.size(); ++row) {
+      if (table.data() + row == selected) return table.subspan(row);
+    }
+  }
+  return {};
+}
+
 // decomp: func_801031A0 (src/MENU/MENUD.PRG/234.c:259)
 void PreviewLiveTransferredMisc() { static_cast<void>(Preview(false)); }
 
@@ -169,7 +169,7 @@ int CopyLiveContainerItem(int category_flags, Items_ContainerData* target,
 void RebuildLiveContainerCategoryIndices(int category,
                                          Items_Container* container) {
   const auto typed_category = Category(category);
-  auto order = SelectedOrder(typed_category, container);
+  auto order = LiveContainerCategoryOrder(typed_category, container);
   LiveContainerWorld world(container == nullptr ? nullptr : &container->items);
   RebuildContainerCategoryIndices(typed_category, order, world);
 }

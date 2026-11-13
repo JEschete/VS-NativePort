@@ -1,9 +1,16 @@
 #pragma once
 
+#include <span>
+
+#include "Items/ItemRecords.hpp"
+
 struct Items_Container;
 struct Items_ContainerData;
 
 namespace VS::Items {
+// The original offset resolver, bounded to its actual array subobject.
+[[nodiscard]] std::span<std::uint16_t> LiveContainerCategoryOrder(
+    ItemCategory category, Items_Container* container);
 void PreviewLiveTransferredMisc();
 void RefreshLiveMiscTransferCount();
 [[nodiscard]] int CopyLiveContainerItem(int category_flags,

@@ -16,6 +16,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
+#include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRows.hpp"
@@ -324,7 +325,7 @@ std::optional<Items::WeaponLoadout> LiveItemRowsHost::InventoryWeaponLoadout(
   if (Menu_Framework_weapons == Audio_Seq_unusedInventory.weapons) {
     Items::LoadLiveInventoryWeaponStats(&loadout, &legacy);
   } else if (Items_ContainerData* container = OpenContainer()) {
-    Menu_Container_BuildWeaponStats(&loadout, &legacy, container);
+    VS::Menu::container::BuildLiveWeaponStats(&loadout, &legacy, container);
   } else {
     return std::nullopt;
   }
@@ -339,7 +340,7 @@ std::optional<Items::ShieldLoadout> LiveItemRowsHost::InventoryShieldLoadout(
   if (Menu_Framework_shields == Audio_Seq_unusedInventory.shields) {
     Items::LoadLiveInventoryShieldStats(&loadout, &legacy);
   } else if (Items_ContainerData* container = OpenContainer()) {
-    Menu_Container_BuildShieldStats(&loadout, &legacy, container);
+    VS::Menu::container::BuildLiveShieldStats(&loadout, &legacy, container);
   } else {
     return std::nullopt;
   }

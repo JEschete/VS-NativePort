@@ -4,6 +4,7 @@
 #include <span>
 #include <string_view>
 
+#include "Menu/Framework/DetailInput.hpp"
 #include "Menu/Framework/Framework.hpp"
 
 namespace VS::Menu::Inventory {
@@ -44,19 +45,8 @@ inline constexpr DetailRowId kCategoryHeaderRow{31};
 
 // Services resolve their current owner when called. Paging's category is
 // needed only after the simultaneous-L1/R1 gate, not on entry.
-class DetailsWorld {
+class DetailsWorld : public Framework::DetailInputWorld {
  public:
-  DetailsWorld() = default;
-  DetailsWorld(const DetailsWorld&) = delete;
-  DetailsWorld& operator=(const DetailsWorld&) = delete;
-  DetailsWorld(DetailsWorld&&) = delete;
-  DetailsWorld& operator=(DetailsWorld&&) = delete;
-  virtual ~DetailsWorld() = default;
-
-  [[nodiscard]] virtual std::uint32_t HeldButtons() = 0;
-  [[nodiscard]] virtual std::uint32_t RepeatButtons() = 0;
-  [[nodiscard]] virtual std::uint32_t PressedButtons() = 0;
-  [[nodiscard]] virtual std::int32_t ItemCount() = 0;
   virtual void RememberPage(CursorMemory memory) = 0;
   [[nodiscard]] virtual std::span<const std::uint8_t> DisplayOrder() = 0;
   [[noreturn]] virtual void Refuse(std::string_view reason) = 0;

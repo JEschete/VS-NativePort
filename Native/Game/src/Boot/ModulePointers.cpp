@@ -67,6 +67,7 @@
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
@@ -2013,6 +2014,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUB.PRG", 0x801039BCu, 0u, (void*)&VS::Menu::Inventory::UpdateLiveGemDetails, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80103AD0u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveItemDetails, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80103BA8u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveItemDetails, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80102A34u, 0u, (void*)&VS::Menu::container::BuildLiveWeaponStats, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80102BB0u, 0u, (void*)&VS::Menu::container::BuildLiveShieldStats, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103D50u, 0u, (void*)&VS::Menu::container::SetLivePanelVisibility, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103D6Cu, 0u, (void*)&VS::Menu::container::PollLiveDetailsPaging, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80103F64u, 0u, (void*)&VS::Menu::container::BeginLiveDetailsTransition, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80104034u, 0u, (void*)&VS::Menu::container::InitializeLiveDetailsLayout, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80104114u, 0u, (void*)&VS::Menu::container::SelectLiveDetailsItem, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80104170u, 0u, (void*)&VS::Menu::container::ExitLiveDetailsView, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
