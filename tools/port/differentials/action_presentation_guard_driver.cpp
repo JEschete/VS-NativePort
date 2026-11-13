@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include "Battle/ActionAnimationsLive.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 extern "C" {
@@ -65,16 +67,9 @@ void Battle_ClearSphereTargets(){}
 void Battle_ClearPrimarySphereVolume(){}
 void Battle_ClearSecondarySphereVolume(){}
 void Battle_FreeSphere(){}
-void Battle_BeginPostActionRecovery(int){}
 void Battle_SetActorMarkersHidden(int){}
 void Battle_SetHudHidden(int){}
 void Menu_ShowSceneNotification(int,int,int){}
-void Battle_PlayMeleeAttackAnimation(int,SVECTOR*,int){pose();}
-void Battle_PlaySpellCastAnimation(int,SVECTOR*,int){pose();}
-void Battle_PlayBreakArtAnimation(int,SVECTOR*,int){pose();}
-void Battle_PlaySpecialActionAnimation(int,SVECTOR*,int){pose();}
-void Battle_PlayChainAbilityAnimation(int,SVECTOR*,int,int){pose();}
-void Battle_PlayDefenseAbilityAnimation(int,SVECTOR*,int){pose();}
 int Effects_BeginActionEffect(Effects_ActionEffectRequest* request,int,int){
   ++dispatches;guarded.request=*request;check_canaries();return 0;
 }
@@ -109,6 +104,13 @@ namespace VS::Content {
 int QueueLiveActorAssetRequest(const Content_ActorAssetRequest* request){asset=*request;++assets;return 0;}
 }
 namespace VS::Battle {
+void BeginLivePostActionRecovery(std::int32_t){}
+void PlayLiveMeleeAttackAnimation(int,SVECTOR*,int){pose();}
+void PlayLiveSpellCastAnimation(int,SVECTOR*,int){pose();}
+void PlayLiveBreakArtAnimation(int,SVECTOR*,int){pose();}
+void PlayLiveSpecialActionAnimation(int,SVECTOR*,int){pose();}
+void PlayLiveChainAbilityAnimation(int,SVECTOR*,int,int){pose();}
+void PlayLiveDefenseAbilityAnimation(int,SVECTOR*,int){pose();}
 int LiveActionTargetDistance(){return 449;}
 void LiveReturnToBattleActionMenu(){}
 void LiveCollectEnvironmentActionTargets(){}

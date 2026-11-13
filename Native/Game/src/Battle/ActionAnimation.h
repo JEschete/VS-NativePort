@@ -12,9 +12,6 @@
 extern u_char Battle_chainAbilityAnimationGroups[168];
 extern int Battle_chainAbilityAnimationSide;
 extern char Battle_specialActionPitch;
-void Battle_SetEnemyCombatPose(int actor_slot, int pose_mode);
 void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position);
-void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position, int arg2);
-void Battle_FinishEnemyCombatPose(int actor_slot, short facing);
 
 #endif // VS_BATTLE_ACTIONANIMATION_H_DECLS

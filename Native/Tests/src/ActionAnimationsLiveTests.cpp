@@ -20,7 +20,9 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
+#include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
+#include "Battle/ActionFlow.h"
 }
 namespace {
 namespace b = VS::Battle;
@@ -41,6 +43,8 @@ struct LiveFixture {
   int saved_side = Battle_chainAbilityAnimationSide;
   char saved_pitch = Battle_specialActionPitch;
   char saved_clip = Actors_lastResolvedSequenceIndex;
+  Battle_ActionState* saved_action = Battle_actionState;
+  Battle_ActionState action{};
   u_char saved_group = Battle_chainAbilityAnimationGroups[kAbility];
   Model model{};
   std::array<std::uint32_t, 1024> sequence{};
@@ -88,6 +92,7 @@ struct LiveFixture {
     Battle_chainAbilityAnimationGroups[kAbility] = 2;
     Battle_chainAbilityAnimationSide = 0;
     Battle_specialActionPitch = 2;
+    Battle_actionState = &action;
   }
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;
@@ -101,6 +106,7 @@ struct LiveFixture {
     Battle_chainAbilityAnimationGroups[kAbility] = saved_group;
     Battle_chainAbilityAnimationSide = saved_side;
     Battle_specialActionPitch = saved_pitch;
+    Battle_actionState = saved_action;
   }
   Actors_SeqAnimationBank* Bank() {
     return reinterpret_cast<Actors_SeqAnimationBank*>(sequence.data());
@@ -112,6 +118,12 @@ struct LiveFixture {
 };
 
 using ThreeArguments = void (*)(int, SVECTOR*, int);
+static_assert(
+    std::is_same_v<decltype(&b::SetLiveEnemyCombatPose), void (*)(int, int)>);
+static_assert(std::is_same_v<decltype(&b::PlayLiveDefenseAbilityAnimation),
+                             ThreeArguments>);
+static_assert(std::is_same_v<decltype(&b::FinishLiveEnemyCombatPose),
+                             void (*)(int, std::int16_t)>);
 static_assert(
     std::is_same_v<decltype(&b::PlayLiveMeleeAttackAnimation), ThreeArguments>);
 static_assert(std::is_same_v<decltype(&b::PlayLiveDefenseAnimation),
@@ -311,5 +323,94 @@ TEST_CASE("F00834 production mode zero never queues the available FE clip",
   CHECK(fixture->actor.animationId == 0xBF);
   CHECK(fixture->actor.queuedAnimation == 0);
   CHECK(fixture->actor.headTracking.pad == 30);
+}
+
+TEST_CASE("Reaction module relocation binds the original VOID2 and VOID3 ABIs",
+          "[action-reactions][redirect-binding]") {
+  const std::array<std::uint32_t, 3> addresses{0x8009DF3C, 0x8009EE9C,
+                                               0x800A2574};
+  const auto image =
+      std::bit_cast<std::array<unsigned char, sizeof(addresses)>>(addresses);
+  const std::array<void*, 3> expected{
+      reinterpret_cast<void*>(&b::SetLiveEnemyCombatPose),
+      reinterpret_cast<void*>(&b::PlayLiveDefenseAbilityAnimation),
+      reinterpret_cast<void*>(&b::FinishLiveEnemyCombatPose)};
+  std::array<void*, 3> relocated{};
+  const Content_ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 3,
+                                         relocated.data(),    3, nullptr};
+  REQUIRE(VS::Content::RelocateModulePointerTable(
+      table, image,
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount)));
+  CHECK(relocated == expected);
+}
+
+TEST_CASE(
+    "F00819 real playback copies the complete native pose including padding",
+    "[action-reactions][F00819][actors-animation]") {
+  auto fixture = std::make_unique<LiveFixture>();
+  auto& actor = fixture->actor;
+  std::ranges::fill(std::as_writable_bytes(std::span(&actor.pose, 1)),
+                    std::byte{0x5A});
+  actor.pose.eventScript = nullptr;
+  actor.pose.nextEventFrame = 0;
+  actor.pose.eventWait = 0;
+  actor.pose.frame = 0;
+  actor.pose.holdingLastFrame = 0;
+  actor.pose.reachedEnd = 0;
+  using PoseBytes = std::array<std::byte, sizeof(Actors_AnimationPose)>;
+  b::SetLiveEnemyCombatPose(kSlot, 1);
+  CHECK(actor.animationId == 0xC6);
+  CHECK(actor.pose.boneKeys[0].vx == 32);
+  CHECK(std::bit_cast<PoseBytes>(actor.blendPose) ==
+        std::bit_cast<PoseBytes>(actor.pose));
+  CHECK(actor.pose.reserved54C == 0x5A5A5A5A);
+  CHECK(actor.pose.reserved2A0[41].pad == 0);
+}
+
+TEST_CASE("F00819 real missing finish header falls back to the idle clip",
+          "[action-reactions][F00819][actors-animation]") {
+  auto fixture = std::make_unique<LiveFixture>();
+  fixture->actor.animationId = 0xC6;
+  fixture->Missing(0xC7 - 100);
+  b::SetLiveEnemyCombatPose(kSlot, 3);
+  CHECK(fixture->actor.animationId == 6);
+  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.blendFrames == 16);
+  CHECK(fixture->actor.instance.turnFrames == 777);
+}
+
+TEST_CASE(
+    "F00832 reuses production defense playback before the real empty tail",
+    "[action-reactions][F00832][actors-animation]") {
+  auto fixture = std::make_unique<LiveFixture>();
+  fixture->actor.instance.weaponDrawn = 1;
+  SVECTOR point{1024, 0, 0, 77};
+  b::PlayLiveDefenseAbilityAnimation(kSlot, &point, 0x10000);
+  CHECK(fixture->actor.animationId == 0x50 + 100);
+  CHECK(fixture->actor.pose.boneKeys[0].vx == 32);
+  CHECK(fixture->actor.instance.turnFrames == 4);
+  CHECK(fixture->actor.headTracking.pad == 30);
+  CHECK(fixture->actor.instance.jumpCountdown == 99);
+}
+
+TEST_CASE(
+    "F00891 uses the production turn service and actual finish-pose playback",
+    "[action-reactions][F00891][actors-animation]") {
+  auto fixture = std::make_unique<LiveFixture>();
+  auto& actor = fixture->actor;
+  actor.animationId = 0xC8;
+  actor.turnRate = 99;
+  actor.instance.wasDrawn = 1;
+  actor.instance.reactionState = 13;
+  actor.instance.poseState = 1;
+  b::FinishLiveEnemyCombatPose(kSlot, 1024);
+  CHECK(actor.instance.facingDelta == 1024);
+  CHECK(actor.instance.turnFrames == 2);
+  CHECK(actor.turnRate == 99);
+  CHECK(actor.animationId == 0xC9);
+  CHECK(actor.pose.boneKeys[0].vx == 32);
+  CHECK(actor.instance.poseState == 6);
+  CHECK(actor.instance.wasDrawn == 1);
+  CHECK(actor.instance.reactionState == 13);
 }
 }  // namespace

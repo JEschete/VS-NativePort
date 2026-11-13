@@ -333,10 +333,13 @@
     <None Include="..\..\port\differential.py" />
     <None Include="..\..\port\differentials\action_animation_817.py" />
     <None Include="..\..\port\differentials\action_animation_818.py" />
+    <None Include="..\..\port\differentials\action_animation_819.py" />
     <None Include="..\..\port\differentials\action_animation_823.py" />
     <None Include="..\..\port\differentials\action_animation_831.py" />
+    <None Include="..\..\port\differentials\action_animation_832.py" />
     <None Include="..\..\port\differentials\action_animation_833.py" />
     <None Include="..\..\port\differentials\action_animation_834.py" />
+    <None Include="..\..\port\differentials\action_animation_891.py" />
     <None Include="..\..\port\differentials\action_animations_common.py" />
     <None Include="..\..\port\differentials\action_animations_driver.cpp" />
     <None Include="..\..\port\differentials\action_animations_guard_driver.cpp" />

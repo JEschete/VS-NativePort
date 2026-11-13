@@ -2,10 +2,8 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -16,7 +14,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/ActionAnimation.h"
-#include "Effects/ActionEffects.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Render/Palette.h"
 
@@ -28,50 +25,6 @@ int Battle_chainAbilityAnimationSide;
 
 // decomp: D_800F49E4 (D_800F49E4@BATTLE/BATTLE.PRG)
 char Battle_specialActionPitch;
-
-// decomp: BATTLE.PRG func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2408)
-void Battle_SetEnemyCombatPose(int actor_slot, int pose_mode)
-{
-    u_short* animation_header;
-    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
-
-    int animation_id = 0;
-    int blend_frames = 0;
-
-    if (actor->instance.slot == 0) {
-        return;
-    }
-
-    switch (pose_mode) {
-    case 0:
-        animation_id = 6;
-        break;
-    case 1:
-        animation_id = 0xC6;
-        break;
-    case 2:
-        animation_id = 0xC8;
-        break;
-    case 3:
-        animation_id = actor->animationId;
-        if ((animation_id != 0xC6) && (animation_id != 0xC8)) {
-            return;
-        }
-        ++animation_id;
-        blend_frames = 8;
-        VS::Actors::FindLiveActorAnimationHeader(actor, animation_id, &animation_header);
-        if (animation_header == NULL) {
-            animation_id = 6;
-            blend_frames = 0x10;
-        }
-        break;
-    }
-
-    VS::Actors::PlayLiveActorAnimation(actor_slot, animation_id, 0, blend_frames);
-    if (pose_mode < 3) {
-        VS::Core::Memory::CopyLiveAlignedWords(&actor->blendPose, &actor->pose, sizeof actor->blendPose);
-    }
-}
 
 // decomp: BATTLE.PRG func_8009EA14 (src/BATTLE/BATTLE.PRG/30DB0.c:2837)
 void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
@@ -191,61 +144,6 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
         VS::Actors::PlayLiveActorAnimation(actor_slot, var_s0, 0, blend_frames);
         VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
     }
-}
-
-// decomp: BATTLE.PRG func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3040)
-void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position, int arg2)
-{
-    int _[3] __attribute__((unused));
-    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
-
-    if (actor->instance.weaponDrawn
-        && ((actor->instance.slot == 0)
-            || (!actor->instance.motionLocked && !actor->instance.isJumping
-                && (actor->instance.movementMode != 2) && (actor->instance.movementMode != 3)))) {
-        int target_pitch;
-        int animation_id;
-        int blend_frames;
-
-        if (actor->collisionRadius < 0x80) {
-            actor->instance.facingDelta = VS::Actors::LiveActorFacingDeltaToPoint(actor, target_position);
-            actor->instance.turnFrames = 4;
-            blend_frames = 8;
-        } else {
-            blend_frames = 4;
-        }
-
-        target_pitch = VS::Actors::LiveActorPitchToPoint(actor, target_position);
-        animation_id = 0x4F;
-
-        if (target_pitch >= -0xE4) {
-            animation_id = 0x50;
-            if (target_pitch >= 0xAC) {
-                animation_id = 0x51;
-            }
-        }
-
-        VS::Actors::PlayLiveActorAnimation(actor_slot, animation_id, 0, blend_frames);
-        VS::Actors::ResetLiveActorHeadTrackingSpeed(actor);
-    }
-
-    if (actor->instance.slot == 0) {
-        if (actor->instance.movementMode != 3) {
-            actor->instance.movementMode = 0;
-        }
-        actor->instance.jumpCountdown = 0;
-    }
-
-    Effects_QueueActionImpactEffects(actor_slot);
-}
-
-// decomp: BATTLE.PRG func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:625)
-void Battle_FinishEnemyCombatPose(int actor_slot, short facing)
-{
-    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
-    VS::Actors::TurnLiveActorToAtRate(actor_slot, facing, 8);
-    Battle_SetEnemyCombatPose(actor_slot, 3);
-    actor->instance.poseState = 6;
 }
 
 }  // extern "C"

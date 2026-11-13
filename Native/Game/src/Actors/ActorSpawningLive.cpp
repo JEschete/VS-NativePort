@@ -20,6 +20,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssets.hpp"
@@ -569,7 +570,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     SetLiveActorWalkRunSpeeds(static_cast<int>(slot), walk, run);
   }
   void SetCombatPose(std::size_t slot, int pose) override {
-    Battle_SetEnemyCombatPose(static_cast<int>(slot), pose);
+    Battle::SetLiveEnemyCombatPose(static_cast<int>(slot), pose);
   }
   [[nodiscard]] int CreateAiState(std::size_t slot, int flags) override {
     Battle_Actor* actor = SlotActor(slot);

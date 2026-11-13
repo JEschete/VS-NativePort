@@ -23,6 +23,35 @@ def flat(source: str) -> str:
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_action_reactions_preserve_pending_damage_policy_and_data(self):
+        names = {
+            "F00819": ("SetLiveEnemyCombatPose", "SetEnemyCombatPose", 0x8009DF3C),
+            "F00832": ("PlayLiveDefenseAbilityAnimation", "PlayDefenseAbilityAnimation", 0x8009EE9C),
+            "F00891": ("FinishLiveEnemyCombatPose", "FinishEnemyCombatPose", 0x800A2574),
+        }
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"tools\port\owned.csv").open(newline="", encoding="utf-8") as table:
+            owned = {row["id"]: row for row in csv.DictReader(table)}
+        generated = (root / r"Native\Game\src\Battle\ActionAnimation.cpp").read_text(encoding="utf-8")
+        header = (root / r"Native\Game\src\Battle\ActionAnimation.h").read_text(encoding="utf-8")
+        for identifier, (live, old, address) in names.items():
+            binding = f"VS::Battle::{live}"
+            with self.subTest(identifier=identifier):
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[identifier], binding)
+                self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+                self.assertEqual(owned[identifier]["path"], r"Native\Game\src\Battle\ActionAnimations.cpp")
+                self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                                 r"Native\Game\include\Battle\ActionAnimationsLive.hpp")
+                self.assertNotIn(f"Battle_{old}(", generated)
+                self.assertNotIn(f"Battle_{old}(", header)
+        self.assertNotIn("F00830", owned)
+        self.assertNotIn("F00830", copy_fixups.OWNED_CALL_BINDINGS)
+        self.assertIn("void Battle_PlayActorDamageReaction(", generated)
+        for declaration in ("u_char Battle_chainAbilityAnimationGroups[168];",
+                            "int Battle_chainAbilityAnimationSide;",
+                            "char Battle_specialActionPitch;"):
+            self.assertIn(declaration, generated)
+
     def test_action_sequence_preserves_data_and_binds_five_owned_entries(self):
         names = {
             "F00187": ("WaitForLiveActionEffectReady", 0x80078748),

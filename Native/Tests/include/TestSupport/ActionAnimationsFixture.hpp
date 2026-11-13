@@ -24,7 +24,9 @@ enum class Kind : std::uint32_t {
   kBone,
   kQueue,
   kSide,
-  kSpecialPitch
+  kSpecialPitch,
+  kTurn,
+  kImpact
 };
 struct Event {
   Kind kind = Kind::kFacing;
@@ -32,7 +34,9 @@ struct Event {
   bool operator==(const Event&) const = default;
 };
 
-struct Actor final : b::ActionAnimationActor {
+inline constexpr std::size_t kReactionPoseWords = 340;
+
+struct Actor final : b::ActionReactionActor {
   std::uint32_t flags = 0x00800000;
   std::uint8_t slot = 1;
   std::uint8_t jump = 99;
@@ -48,6 +52,9 @@ struct Actor final : b::ActionAnimationActor {
   std::uint8_t battle_entries = 102;
   std::uint8_t special_entries = 64;
   bool map_present = true;
+  std::uint8_t animation = 0;
+  std::array<std::uint32_t, kReactionPoseWords> pose{};
+  std::array<std::uint32_t, kReactionPoseWords> blend_pose{};
 
   std::uint8_t Slot() const override { return slot; }
   bool WeaponDrawn() const override { return (flags & 0x00800000U) != 0; }
@@ -65,6 +72,12 @@ struct Actor final : b::ActionAnimationActor {
   }
   void ClearMovementMode() override { flags &= ~0x00070000U; }
   void ClearJumpCountdown() override { jump = 0; }
+  std::uint8_t AnimationId() const override { return animation; }
+  void CopyPoseToBlend() override { blend_pose = pose; }
+  void SetPoseState(std::uint8_t state) override {
+    flags =
+        (flags & 0x8FFFFFFFU) | (static_cast<std::uint32_t>(state & 7U) << 28);
+  }
 };
 
 class Banks final : public a::AnimationBankSource {
@@ -85,7 +98,7 @@ class Banks final : public a::AnimationBankSource {
   std::array<std::uint8_t, 2048> bytes_{};
 };
 
-struct World final : b::ActionAnimationWorld {
+struct World final : b::ActionReactionWorld {
   std::array<::VS::test_support::action_animations::Actor, 3> actors;
   int table_owner = 0;
   std::optional<a::MotionVector> target = a::MotionVector{0, 0, 1024, 0};
@@ -107,7 +120,7 @@ struct World final : b::ActionAnimationWorld {
   unsigned group_reads = 0;
   unsigned actor_reads = 0;
 
-  b::ActionAnimationActor* Actor(int) override {
+  b::ActionReactionActor* Actor(int) override {
     ++actor_reads;
     return table_owner < 0 ? nullptr
                            : &actors.at(static_cast<std::size_t>(table_owner));
@@ -124,7 +137,11 @@ struct World final : b::ActionAnimationWorld {
   }
   void Record(Event event) {
     events.push_back(event);
-    ApplyPreset(event);
+    if (preset > 11) {
+      ApplyReactionPreset(event);
+    } else {
+      ApplyPreset(event);
+    }
     if (callback) callback(event);
   }
   std::optional<std::int16_t> RootBoneHeight(std::uint8_t slot) override {
@@ -195,6 +212,14 @@ struct World final : b::ActionAnimationWorld {
   void ResetHead(b::ActionAnimationActor& actor) override {
     Record({Kind::kReset, static_cast<std::uint32_t>(Owner(actor))});
   }
+  void TurnTo(int slot, std::int16_t facing, int rate) override {
+    Record({Kind::kTurn, static_cast<std::uint32_t>(slot),
+            static_cast<std::uint32_t>(facing),
+            static_cast<std::uint32_t>(rate)});
+  }
+  void QueueImpactEffects(int slot) override {
+    Record({Kind::kImpact, static_cast<std::uint32_t>(slot)});
+  }
   std::vector<Event> Calls(Kind kind) const {
     std::vector<Event> result;
     for (const auto& event : events) {
@@ -258,23 +283,60 @@ struct World final : b::ActionAnimationWorld {
       actor.flags = (actor.flags & ~0x00070000U) | 0x00020000U;
     }
   }
+  void ApplyReactionPreset(const Event& event) {
+    if (preset == 12 && event.kind == Kind::kPlay) {
+      table_owner = 1;
+      for (std::size_t index = 0; index < actors.size(); ++index) {
+        auto& actor = actors.at(index);
+        for (std::size_t word = 0; word < actor.pose.size(); ++word) {
+          actor.pose.at(word) ^=
+              static_cast<std::uint32_t>(0xA5C30000U + 0x100U * index + word);
+        }
+      }
+    } else if ((preset == 13 || preset == 18) && event.kind == Kind::kTurn) {
+      table_owner = 1;
+      actors.at(1).slot = 1;
+      actors.at(1).animation = 0xC8;
+      actors.at(0).flags ^= 0x8F123456U;
+    } else if ((preset == 14 || preset == 18) && event.kind == Kind::kHeader) {
+      auto& actor = actors.at(event.owner);
+      actor.animation = 0;
+      table_owner = 2;
+      actors.at(0).flags ^= 0x8F123456U;
+    } else if (preset == 15 && event.kind == Kind::kPlay) {
+      table_owner = 2;
+      actors.at(0).flags ^= 0x8F123456U;
+    } else if (preset == 16 && event.kind == Kind::kTurn) {
+      table_owner = 1;
+      actors.at(1).slot = 0;
+    } else if (preset == 17 && event.kind == Kind::kTurn) {
+      actors.at(0).animation = 0xC6;
+      actors.at(0).flags ^= 0x8F123456U;
+    }
+  }
 };
 
 inline Result Run(int function, int slot, int parameter, int sequence,
-                  b::ActionAnimationWorld& world) {
+                  b::ActionReactionWorld& world) {
   switch (function) {
     case 817:
       return b::PlayMeleeAttackAnimation(slot, parameter, world);
     case 818:
       return b::PlayDefenseAnimation(slot, world);
+    case 819:
+      return b::SetEnemyCombatPose(slot, parameter, world);
     case 823:
       return b::PlaySpellCastAnimation(slot, parameter, world);
     case 831:
       return b::PlayChainAbilityAnimation(slot, parameter, sequence, world);
+    case 832:
+      return b::PlayDefenseAbilityAnimation(slot, world);
     case 833:
       return b::PlaySpecialActionAnimation(slot, parameter, world);
     case 834:
       return b::PlayBreakArtAnimation(slot, parameter, world);
+    case 891:
+      return b::FinishEnemyCombatPose(slot, parameter, world);
     default:
       return Result::kInvalidCastPhase;
   }

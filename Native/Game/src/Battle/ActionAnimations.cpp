@@ -38,6 +38,13 @@ constexpr int kSpecialAnimation = 0xFF;
 constexpr int kBreakArtFollowupAnimation = 0xFE;
 constexpr std::uint8_t kDefenseBlockedMovement = 2;
 constexpr std::uint8_t kDefensePreservedMovement = 3;
+constexpr int kEnemyIdleAnimation = 6;
+constexpr int kEnemyReadyAnimation = 0xC6;
+constexpr int kEnemyAlternateReadyAnimation = 0xC8;
+constexpr int kEnemyFinishMode = 3;
+constexpr int kEnemyFallbackBlendFrames = 16;
+constexpr int kEnemyTurnSteps = 8;
+constexpr std::uint8_t kFinishedCombatPose = 6;
 
 Vec3 Vector(Actors::MotionVector point) { return {point.x, point.y, point.z}; }
 
@@ -150,6 +157,45 @@ ActionAnimationResult PlayDefenseAnimation(int slot,
   return Result::kComplete;
 }
 
+// decomp: func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2408), F00819.
+ActionAnimationResult SetEnemyCombatPose(int slot, int mode,
+                                         ActionReactionWorld& world) {
+  auto* actor = world.Actor(slot);
+  if (actor == nullptr) return Result::kMissingActor;
+  if (actor->Slot() == 0) return Result::kComplete;
+  int animation = 0;
+  int blend = 0;
+  switch (mode) {
+    case 0:
+      animation = kEnemyIdleAnimation;
+      break;
+    case 1:
+      animation = kEnemyReadyAnimation;
+      break;
+    case 2:
+      animation = kEnemyAlternateReadyAnimation;
+      break;
+    case kEnemyFinishMode:
+      animation = actor->AnimationId();
+      if (animation != kEnemyReadyAnimation &&
+          animation != kEnemyAlternateReadyAnimation) {
+        return Result::kComplete;
+      }
+      ++animation;
+      blend = kActionBlendFrames;
+      if (!world.HasAnimation(*actor, animation)) {
+        animation = kEnemyIdleAnimation;
+        blend = kEnemyFallbackBlendFrames;
+      }
+      break;
+    default:
+      break;
+  }
+  world.Play(slot, animation, blend);
+  if (mode < kEnemyFinishMode) actor->CopyPoseToBlend();
+  return Result::kComplete;
+}
+
 // F00823: func_8009E2E0, src/BATTLE/BATTLE.PRG/30DB0.c:2554.
 ActionAnimationResult PlaySpellCastAnimation(int slot, int phase,
                                              ActionAnimationWorld& world) {
@@ -202,6 +248,16 @@ ActionAnimationResult PlayChainAbilityAnimation(int slot, int ability,
   return Result::kComplete;
 }
 
+// decomp: func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3040), F00832.
+// The prefix is exactly F00818, including callback-current player cleanup.
+ActionAnimationResult PlayDefenseAbilityAnimation(int slot,
+                                                  ActionReactionWorld& world) {
+  const auto result = PlayDefenseAnimation(slot, world);
+  if (result != Result::kComplete) return result;
+  world.QueueImpactEffects(slot);
+  return Result::kComplete;
+}
+
 // F00833: func_8009EFEC, src/BATTLE/BATTLE.PRG/30DB0.c:3087.
 ActionAnimationResult PlaySpecialActionAnimation(int slot, int mode,
                                                  ActionAnimationWorld& world) {
@@ -245,6 +301,19 @@ ActionAnimationResult PlayBreakArtAnimation(int slot, int mode,
   if (world.HasAnimation(*actor, kBreakArtFollowupAnimation)) {
     world.Queue(slot, kBreakArtFollowupAnimation, kActionBlendFrames, 0);
   }
+  return Result::kComplete;
+}
+
+// decomp: func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:625), F00891.
+ActionAnimationResult FinishEnemyCombatPose(int slot, int facing,
+                                            ActionReactionWorld& world) {
+  auto* actor = world.Actor(slot);
+  if (actor == nullptr) return Result::kMissingActor;
+  world.TurnTo(slot, WrapSigned16(static_cast<std::uint32_t>(facing)),
+               kEnemyTurnSteps);
+  const auto result = SetEnemyCombatPose(slot, kEnemyFinishMode, world);
+  if (result != Result::kComplete) return result;
+  actor->SetPoseState(kFinishedCombatPose);
   return Result::kComplete;
 }
 }  // namespace VS::Battle

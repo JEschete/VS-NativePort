@@ -1971,16 +1971,25 @@
     <None Include="..\..\port\differentials\action_animation_818.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\action_animation_819.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\action_animation_823.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\action_animation_831.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\action_animation_832.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\action_animation_833.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\action_animation_834.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\action_animation_891.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\action_animations_common.py">

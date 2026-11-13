@@ -6,6 +6,7 @@
 #include <iterator>
 #include <optional>
 
+#include "Actors/ActorMotionLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -13,8 +14,11 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
+#include "Battle/ActionFlow.h"
 #include "Core/Diagnostics.h"
+#include "Effects/ActionEffects.h"
 }
 
 namespace VS::Battle {
@@ -54,7 +58,7 @@ void Require(ActionAnimationResult result) {
   }
 }
 
-class LiveActor final : public ActionAnimationActor {
+class LiveActor final : public ActionReactionActor {
  public:
   explicit LiveActor(Actors_ActorRecord& record) : record_(record) {}
   Actors_ActorRecord& Record() { return record_; }
@@ -84,15 +88,20 @@ class LiveActor final : public ActionAnimationActor {
   }
   void ClearMovementMode() override { record_.instance.movementMode = 0; }
   void ClearJumpCountdown() override { record_.instance.jumpCountdown = 0; }
+  std::uint8_t AnimationId() const override { return record_.animationId; }
+  void CopyPoseToBlend() override { record_.blendPose = record_.pose; }
+  void SetPoseState(std::uint8_t state) override {
+    record_.instance.poseState = state;
+  }
 
  private:
   Actors_ActorRecord& record_;
 };
 
-class LiveWorld final : public ActionAnimationWorld {
+class LiveWorld final : public ActionReactionWorld {
  public:
   explicit LiveWorld(SVECTOR* target) : target_(target) {}
-  ActionAnimationActor* Actor(int slot) override {
+  ActionReactionActor* Actor(int slot) override {
     Require(slot >= 0 &&
             static_cast<std::size_t>(slot) < std::size(Actors_actorRecords));
     auto* record = Actors_actorRecords[slot];
@@ -147,6 +156,13 @@ class LiveWorld final : public ActionAnimationWorld {
     auto& record = static_cast<LiveActor&>(actor).Record();
     Actors::ResetLiveActorHeadTrackingSpeed(&record);
   }
+  void TurnTo(int slot, std::int16_t facing, int rate) override {
+    Actors::TurnLiveActorToAtRate(slot, facing, rate);
+  }
+  void QueueImpactEffects(int slot) override {
+    Require(Battle_actionState != nullptr);
+    static_cast<void>(Effects_QueueActionImpactEffects(slot));
+  }
 
  private:
   SVECTOR* target_;
@@ -165,6 +181,11 @@ void PlayLiveDefenseAnimation(int slot, SVECTOR* target) {
   LiveWorld world(target);
   Require(PlayDefenseAnimation(slot, world));
 }
+// decomp: func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2408), F00819.
+void SetLiveEnemyCombatPose(int slot, int mode) {
+  LiveWorld world(nullptr);
+  Require(SetEnemyCombatPose(slot, mode, world));
+}
 // F00823: func_8009E2E0, src/BATTLE/BATTLE.PRG/30DB0.c:2554.
 void PlayLiveSpellCastAnimation(int slot, SVECTOR* target, int phase) {
   LiveWorld world(target);
@@ -176,6 +197,12 @@ void PlayLiveChainAbilityAnimation(int slot, SVECTOR* target, int ability,
   LiveWorld world(target);
   Require(PlayChainAbilityAnimation(slot, ability, sequence, world));
 }
+// decomp: func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3040), F00832.
+void PlayLiveDefenseAbilityAnimation(int slot, SVECTOR* target,
+                                     int /*unused*/) {
+  LiveWorld world(target);
+  Require(PlayDefenseAbilityAnimation(slot, world));
+}
 // F00833: func_8009EFEC, src/BATTLE/BATTLE.PRG/30DB0.c:3087.
 void PlayLiveSpecialActionAnimation(int slot, SVECTOR* target, int mode) {
   LiveWorld world(target);
@@ -185,5 +212,10 @@ void PlayLiveSpecialActionAnimation(int slot, SVECTOR* target, int mode) {
 void PlayLiveBreakArtAnimation(int slot, SVECTOR* target, int mode) {
   LiveWorld world(target);
   Require(PlayBreakArtAnimation(slot, mode, world));
+}
+// decomp: func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:625), F00891.
+void FinishLiveEnemyCombatPose(int slot, std::int16_t facing) {
+  LiveWorld world(nullptr);
+  Require(FinishEnemyCombatPose(slot, facing, world));
 }
 }  // namespace VS::Battle

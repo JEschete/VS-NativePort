@@ -837,6 +837,9 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::PlayLiveChainAbilityAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
     "VS::Battle::PlayLiveSpecialActionAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
     "VS::Battle::PlayLiveBreakArtAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::SetLiveEnemyCombatPose": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::PlayLiveDefenseAbilityAnimation": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
+    "VS::Battle::FinishLiveEnemyCombatPose": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1607,6 +1610,9 @@ OWNED_CALL_BINDINGS["F00823"] = "VS::Battle::PlayLiveSpellCastAnimation"
 OWNED_CALL_BINDINGS["F00831"] = "VS::Battle::PlayLiveChainAbilityAnimation"
 OWNED_CALL_BINDINGS["F00833"] = "VS::Battle::PlayLiveSpecialActionAnimation"
 OWNED_CALL_BINDINGS["F00834"] = "VS::Battle::PlayLiveBreakArtAnimation"
+OWNED_CALL_BINDINGS["F00819"] = "VS::Battle::SetLiveEnemyCombatPose"
+OWNED_CALL_BINDINGS["F00832"] = "VS::Battle::PlayLiveDefenseAbilityAnimation"
+OWNED_CALL_BINDINGS["F00891"] = "VS::Battle::FinishLiveEnemyCombatPose"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3381,6 +3387,9 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8009EC9C, "VS::Battle::PlayLiveChainAbilityAnimation"),  # F00831
     ("BATTLE/BATTLE.PRG", 0x8009EFEC, "VS::Battle::PlayLiveSpecialActionAnimation"),  # F00833
     ("BATTLE/BATTLE.PRG", 0x8009F298, "VS::Battle::PlayLiveBreakArtAnimation"),  # F00834
+    ("BATTLE/BATTLE.PRG", 0x8009DF3C, "VS::Battle::SetLiveEnemyCombatPose"),  # F00819
+    ("BATTLE/BATTLE.PRG", 0x8009EE9C, "VS::Battle::PlayLiveDefenseAbilityAnimation"),  # F00832
+    ("BATTLE/BATTLE.PRG", 0x800A2574, "VS::Battle::FinishLiveEnemyCombatPose"),  # F00891
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4371,12 +4380,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "G01780": [("Render_TextureRegion Menu_Results_disMap[]", "Render_TextureRegion Menu_Results_disMap[127]",
                  "3B8.c:1162 _texture_t[127]; the typed texture draws take bounds-checked atlas spans")],
     # Animation-header outputs are native pointers, not PS1-sized integers.
-    "F00819": [
-        ("    int sp10[2];", "    u_short* sp10;", "native animation-header output"),
-        ("VS::Actors::FindLiveActorAnimationHeader(temp_s2, var_s0, sp10);",
-         "VS::Actors::FindLiveActorAnimationHeader(temp_s2, var_s0, &sp10);", "use the declared output contract"),
-        ("if (sp10[0] == 0)", "if (sp10 == NULL)", "test the complete native pointer"),
-    ],
     "F02995": [
         ("    char buffer[1024];", "    static char buffer[1024];",
          "retain manual text until the deferred textbox update and render"),

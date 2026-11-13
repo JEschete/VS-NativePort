@@ -368,7 +368,7 @@ void LiveWorld::Animate(ActionPose pose, int actor, int parameter,
                                     std::bit_cast<int>(step));
       break;
     case ActionPose::kDefense:
-      Battle_PlayDefenseAbilityAnimation(actor, focus, parameter);
+      PlayLiveDefenseAbilityAnimation(actor, focus, parameter);
       break;
   }
 }

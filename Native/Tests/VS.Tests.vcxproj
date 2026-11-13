@@ -60,6 +60,8 @@
     <ClCompile Include="src\ActionPresentationLiveTests.cpp" />
     <ClCompile Include="src\ActionPresentationTests.cpp" />
     <ClCompile Include="src\ActionPreviewTests.cpp" />
+    <ClCompile Include="src\ActionReactionsEffectsTests.cpp" />
+    <ClCompile Include="src\ActionReactionsTests.cpp" />
     <ClCompile Include="src\ActionResultCommitTests.cpp" />
     <ClCompile Include="src\ActionResultsSliceTests.cpp" />
     <ClCompile Include="src\ActionSequenceLiveTests.cpp" />

@@ -7,7 +7,26 @@ commit and its exact-revision CI run are recorded on [#276](https://github.com/J
 and in the ledgers. The per-function publish list, Latest Work and Verified sections that used to be here are in the
 [archived handoff](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF.md).
 The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
-See [Active continuation](#active-continuation-2026-11-11) for current evidence and the next group.
+See [Current continuation and blocker](#current-continuation-and-blocker) for current work.
+
+## Current continuation and blocker
+
+Routine batch status now lives in [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv),
+the canonical ledgers, machine-readable evidence and [#276](https://github.com/JEschete/VS-NativePort/issues/276).
+The older continuation sections below are historical checkpoints, not current next-work instructions.
+
+The six animation policies are published in `10f09362`, with successful exact-revision
+[CI 43354155209](https://github.com/JEschete/VS-NativePort/actions/runs/43354155209).
+The final defined reactions F00819/F00832/F00891 are locally verified on that base:
+`build\scratch\animation-reactions\verification.json`. Their publication/CI is pending.
+The CSV records 188 resolved (179 promoted, nine retired), with 712 remaining.
+
+Row 30 is **not complete**: F00830 remains unresolved under [#296](https://github.com/JEschete/VS-NativePort/issues/296).
+Its source-climbing blend inherits VM address/linked-list state; zero is not equivalent to all shadow/blend effects.
+The original function body and DATA remain unchanged. Do not invent a blend constant, pointer/register API,
+or a refusal presented as a completed gameplay fix. The next observation is an evidenced native behavior decision
+or aligned reference climbing-hit evidence; the target-route visited-count evidence alone does not resolve it.
+Continue independently verifiable maintained-code work without marking this function or row 30 complete.
 
 ## Active continuation (2026-11-11)
 

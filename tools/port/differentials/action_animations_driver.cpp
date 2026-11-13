@@ -5,6 +5,10 @@
 
 namespace t = VS::test_support::action_animations;
 namespace {
+bool Reaction(int function)
+{
+    return function == 819 || function == 832 || function == 891;
+}
 std::int64_t Read()
 {
     std::int64_t value { };
@@ -84,6 +88,15 @@ int main()
         world.target = target_present ? std::optional { point } : std::nullopt;
         for (auto& actor : world.actors)
             ReadActor(actor);
+        if (Reaction(function)) {
+            for (auto& actor : world.actors) {
+                actor.animation = static_cast<std::uint8_t>(Read());
+                for (auto& word : actor.blend_pose)
+                    word = static_cast<std::uint32_t>(Read());
+                for (auto& word : actor.pose)
+                    word = static_cast<std::uint32_t>(Read());
+            }
+        }
         if (!std::cin)
             return 2;
         const auto result = t::Run(function, slot, parameter, sequence, world);
@@ -104,6 +117,15 @@ int main()
             Emit(event.first);
             Emit(event.second);
             Emit(event.third);
+        }
+        if (Reaction(function)) {
+            for (const auto& actor : world.actors) {
+                Emit(actor.animation);
+                for (const auto word : actor.blend_pose)
+                    Emit(word);
+                for (const auto word : actor.pose)
+                    Emit(word);
+            }
         }
         std::cout << '\n';
     }

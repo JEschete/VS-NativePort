@@ -105,7 +105,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   } else if (consumer == 2) {
     VS::Battle::PlayLiveSpellCastAnimation(kActorId, nullptr, mode);
   } else {
-    Battle_SetEnemyCombatPose(kActorId, 3);
+    VS::Battle::SetLiveEnemyCombatPose(kActorId, 3);
   }
   int passed = actor.animationLocked == 1 && actor.animationId == 0xC6;
   if (consumer < 2) {

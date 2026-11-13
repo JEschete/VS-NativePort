@@ -65,17 +65,37 @@ class ActionAnimationWorld {
   virtual void ResetHead(ActionAnimationActor& actor) = 0;
 };
 
+class ActionReactionActor : public ActionAnimationActor {
+ public:
+  virtual std::uint8_t AnimationId() const = 0;
+  virtual void CopyPoseToBlend() = 0;
+  virtual void SetPoseState(std::uint8_t state) = 0;
+};
+
+class ActionReactionWorld : public ActionAnimationWorld {
+ public:
+  ActionReactionActor* Actor(int slot) override = 0;
+  virtual void TurnTo(int slot, std::int16_t facing, int rate) = 0;
+  virtual void QueueImpactEffects(int slot) = 0;
+};
+
 ActionAnimationResult PlayMeleeAttackAnimation(int slot, int parameter,
                                                ActionAnimationWorld& world);
 ActionAnimationResult PlayDefenseAnimation(int slot,
                                            ActionAnimationWorld& world);
+ActionAnimationResult SetEnemyCombatPose(int slot, int mode,
+                                         ActionReactionWorld& world);
 ActionAnimationResult PlaySpellCastAnimation(int slot, int phase,
                                              ActionAnimationWorld& world);
 ActionAnimationResult PlayChainAbilityAnimation(int slot, int ability,
                                                 int sequence,
                                                 ActionAnimationWorld& world);
+ActionAnimationResult PlayDefenseAbilityAnimation(int slot,
+                                                  ActionReactionWorld& world);
 ActionAnimationResult PlaySpecialActionAnimation(int slot, int mode,
                                                  ActionAnimationWorld& world);
 ActionAnimationResult PlayBreakArtAnimation(int slot, int mode,
                                             ActionAnimationWorld& world);
+ActionAnimationResult FinishEnemyCombatPose(int slot, int facing,
+                                            ActionReactionWorld& world);
 }  // namespace VS::Battle

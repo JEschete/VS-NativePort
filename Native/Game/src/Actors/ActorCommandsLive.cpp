@@ -18,6 +18,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/CameraLive.hpp"
@@ -226,7 +227,7 @@ class LiveCommandHost final : public ActorCommandHost {
     QueueLiveFlightMovement(actor_id, step, speed, facing);
   }
   void FinishCombatPose(int actor_id, std::int16_t facing) override {
-    Battle_FinishEnemyCombatPose(actor_id, facing);
+    Battle::FinishLiveEnemyCombatPose(actor_id, facing);
   }
   [[nodiscard]] std::optional<std::uint16_t> LimbActionId(
       int actor_id, unsigned limb, unsigned slot) const override {
