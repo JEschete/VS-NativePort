@@ -363,6 +363,15 @@
     <ClCompile Include="src\EngagementTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EquipmentDetailControllersLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EquipmentDetailControllersModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EquipmentDetailControllersTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EquipmentDetailTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -821,6 +830,12 @@
     </ClCompile>
     <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp">
       <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp">
+      <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp">
       <Filter>include\Menu</Filter>

@@ -1540,38 +1540,16 @@
 [
 "    Menu_Inventory_itemsText = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(count * 128));"
 ]
-],
-[
-1957,
-[
-"        static const int (*initial[])(int) = { Menu_Inventory_UpdateArmorMenu, Menu_Inventory_UpdateWeaponMenu,",
-"        Menu_Inventory_UpdateShieldMenu, Menu_Inventory_UpdateAccessoryMenu };"
-],
-[
-"        static const int (*initial[])(int) = { (const int (*)(int))(Menu_Inventory_UpdateArmorMenu), (const int (*)(int))(Menu_Inventory_UpdateWeaponMenu),",
-"        (const int (*)(int))(Menu_Inventory_UpdateShieldMenu), (const int (*)(int))(Menu_Inventory_UpdateAccessoryMenu) };"
-]
 ]
 ],
 "Native\\Game\\src\\Menu\\Inventory\\ItemDetails.cpp": [
 [
-58,
+55,
 [
 "                128, x | (animationStep << 0x10), vs_getWH(16, 16), Render_frameScratch.orderingTable);"
 ],
 [
 "                128, x | (animationStep << 0x10), vs_getWH(16, 16), (u_long *)(Render_frameScratch.orderingTable));"
-]
-],
-[
-623,
-[
-"        static const int (*initial[])(int) = { Menu_Inventory_UpdateWeaponDetails, Menu_Inventory_UpdateBladeDetails,",
-"        Menu_Inventory_UpdateGripDetails, Menu_Inventory_UpdateShieldDetails, Menu_Inventory_UpdateArmorDetails, Menu_Inventory_UpdateGemDetails };"
-],
-[
-"        static const int (*initial[])(int) = { (const int (*)(int))(Menu_Inventory_UpdateWeaponDetails), (const int (*)(int))(Menu_Inventory_UpdateBladeDetails),",
-"        (const int (*)(int))(Menu_Inventory_UpdateGripDetails), (const int (*)(int))(Menu_Inventory_UpdateShieldDetails), (const int (*)(int))(Menu_Inventory_UpdateArmorDetails), (const int (*)(int))(Menu_Inventory_UpdateGemDetails) };"
 ]
 ]
 ],

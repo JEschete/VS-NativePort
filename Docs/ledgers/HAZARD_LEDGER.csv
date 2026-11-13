@@ -103,7 +103,7 @@ ba008c40e12a,CAPACITY-LITERAL,medium,pattern,F02635,Menu_Inventory_UpdateEquipme
 f38626528a64,CAPACITY-LITERAL,medium,pattern,F02635,Menu_Inventory_UpdateEquipmentMenu,Native/Game/src/Menu/Inventory/Inventory.cpp,1376,loop bound 8,60,34,open,
 10ee96708f59,CAPACITY-LITERAL,medium,pattern,F02635,Menu_Inventory_UpdateEquipmentMenu,Native/Game/src/Menu/Inventory/Inventory.cpp,1394,loop bound 8,60,34,open,
 f0f4929a397e,CAPACITY-LITERAL,medium,pattern,F02635,Menu_Inventory_UpdateEquipmentMenu,Native/Game/src/Menu/Inventory/Inventory.cpp,1397,loop bound 16,60,34,open,
-60b35f7d540e,CAPACITY-LITERAL,medium,pattern,F02568,Menu_Inventory_DrawCategoryIcons,Native/Game/src/Menu/Inventory/ItemDetails.cpp,42,loop bound 8,60,34,open,
+60b35f7d540e,CAPACITY-LITERAL,medium,pattern,F02568,Menu_Inventory_DrawCategoryIcons,Native/Game/src/Menu/Inventory/ItemDetails.cpp,39,loop bound 8,60,34,open,
 b9f308e5a6db,CAPACITY-LITERAL,medium,pattern,F02583,Menu_Inventory_SortWeapons,Native/Game/src/Menu/Inventory/ItemList.cpp,108,loop bound 8,60,34,open,
 e497f5914e34,CAPACITY-LITERAL,medium,pattern,F02583,Menu_Inventory_SortWeapons,Native/Game/src/Menu/Inventory/ItemList.cpp,108,loop bound 8,60,34,open,
 24023e8baff7,CAPACITY-LITERAL,medium,pattern,F02585,Menu_Inventory_SortShields,Native/Game/src/Menu/Inventory/ItemList.cpp,165,loop bound 8,60,34,open,

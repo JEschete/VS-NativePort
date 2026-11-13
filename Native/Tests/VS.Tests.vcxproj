@@ -169,6 +169,9 @@
     <ClCompile Include="src\EndingResultsTests.cpp" />
     <ClCompile Include="src\EngagementCoreTests.cpp" />
     <ClCompile Include="src\EngagementTests.cpp" />
+    <ClCompile Include="src\EquipmentDetailControllersLiveTests.cpp" />
+    <ClCompile Include="src\EquipmentDetailControllersModuleTests.cpp" />
+    <ClCompile Include="src\EquipmentDetailControllersTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
     <ClCompile Include="src\EventRetentionPredicateTests.cpp" />
     <ClCompile Include="src\EventScriptActorCommandsTests.cpp" />
@@ -356,6 +359,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Battle\RewardPresentationRecorder.hpp" />
+    <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />

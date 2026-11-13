@@ -1686,6 +1686,10 @@
     <ClCompile Include="src\Menu\Inventory\DetailsPoliciesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\EquipmentDetailControllers.cpp" />
+    <ClCompile Include="src\Menu\Inventory\EquipmentDetailControllersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Inventory\Inventory.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2563,6 +2567,8 @@
     <ClInclude Include="include\Menu\Framework\ItemRowsLive.hpp" />
     <ClInclude Include="include\Menu\Inventory\DetailsPolicies.hpp" />
     <ClInclude Include="include\Menu\Inventory\DetailsPoliciesLive.hpp" />
+    <ClInclude Include="include\Menu\Inventory\EquipmentDetailControllers.hpp" />
+    <ClInclude Include="include\Menu\Inventory\EquipmentDetailControllersLive.hpp" />
     <ClInclude Include="include\Menu\Options.hpp" />
     <ClInclude Include="include\Menu\OptionsLive.hpp" />
     <ClInclude Include="include\Menu\Rename.hpp" />

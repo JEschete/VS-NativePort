@@ -1911,6 +1911,15 @@ class Copier:
                 self.resets[(loc, ov)].append((name, decl))
         return text
 
+    @staticmethod
+    def reset_initial_declaration(decl: str) -> str:
+        pointer = re.search(r"\(\s*\*\s*(?:(?:const|volatile)\s+)*initial\b", decl)
+        if pointer:
+            if re.search(r"\bconst\b", pointer.group()):
+                return decl
+            return re.sub(r"(\(\s*\*)", r"\1const ", decl, count=1)
+        return f"const {decl}"
+
     def copy_resets(self) -> None:
         by_ov: dict[str, list[str]] = collections.defaultdict(list)
         for (loc, ov), entries in sorted(self.resets.items()):
@@ -1922,7 +1931,8 @@ class Copier:
             body = []
             for name, decl in entries:
                 init_decl = re.sub(rf"\b{re.escape(name)}\b", "initial", decl, count=1)
-                body.append(f"    {{\n        static const {init_decl};\n"
+                init_decl = self.reset_initial_declaration(init_decl)
+                body.append(f"    {{\n        static {init_decl};\n"
                             f"        memcpy((void*)&{name}, &initial, sizeof {name});\n    }}\n")
             self.out(loc).items.append(Item(
                 "function", f"// {ov} reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).\n"

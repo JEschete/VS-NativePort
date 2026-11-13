@@ -1955,8 +1955,8 @@ void Menu_Inventory_ResetMenu3Statics(void)
         memcpy((void*)&Menu_Inventory_armorMenuBodyPartCategories, &initial, sizeof Menu_Inventory_armorMenuBodyPartCategories);
     }
     {
-        static const int (*initial[])(int) = { (const int (*)(int))(Menu_Inventory_UpdateArmorMenu), (const int (*)(int))(Menu_Inventory_UpdateWeaponMenu),
-        (const int (*)(int))(Menu_Inventory_UpdateShieldMenu), (const int (*)(int))(Menu_Inventory_UpdateAccessoryMenu) };
+        static int (*const initial[])(int) = { Menu_Inventory_UpdateArmorMenu, Menu_Inventory_UpdateWeaponMenu,
+        Menu_Inventory_UpdateShieldMenu, Menu_Inventory_UpdateAccessoryMenu };
         memcpy((void*)&Menu_Inventory_dispatchEquipmentMenuEquipMenuHandlers, &initial, sizeof Menu_Inventory_dispatchEquipmentMenuEquipMenuHandlers);
     }
     {

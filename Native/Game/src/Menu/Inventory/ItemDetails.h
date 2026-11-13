@@ -10,10 +10,6 @@
 #define VS_MENU_INVENTORY_ITEMDETAILS_H_DECLS
 
 void Menu_Inventory_DrawCategoryIcons(int animationStep, int highlightSelected);
-int Menu_Inventory_UpdateWeaponDetails(int itemInfo);
-int Menu_Inventory_UpdateBladeDetails(int itemInfo);
-int Menu_Inventory_UpdateGripDetails(int itemInfo);
-int Menu_Inventory_UpdateShieldDetails(int itemInfo);
 int Menu_Inventory_UpdateArmorDetails(int itemInfo);
 int Menu_Inventory_UpdateGemDetails(int itemInfo);
 int Menu_Inventory_UpdateItemDetails(int itemInfo);

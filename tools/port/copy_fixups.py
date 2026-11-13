@@ -1307,6 +1307,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Inventory::InitializeLiveDetailsLayout": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
     "VS::Menu::Inventory::SelectLiveDetailsItem": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
     "VS::Menu::Inventory::ExitLiveDetailsView": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveWeaponDetails": r"Native\Game\include\Menu\Inventory\EquipmentDetailControllersLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveBladeDetails": r"Native\Game\include\Menu\Inventory\EquipmentDetailControllersLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveGripDetails": r"Native\Game\include\Menu\Inventory\EquipmentDetailControllersLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveShieldDetails": r"Native\Game\include\Menu\Inventory\EquipmentDetailControllersLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2258,6 +2262,10 @@ OWNED_CALL_BINDINGS["F02569"] = "VS::Menu::Inventory::BeginLiveDetailsTransition
 OWNED_CALL_BINDINGS["F02571"] = "VS::Menu::Inventory::InitializeLiveDetailsLayout"
 OWNED_CALL_BINDINGS["F02573"] = "VS::Menu::Inventory::SelectLiveDetailsItem"
 OWNED_CALL_BINDINGS["F02574"] = "VS::Menu::Inventory::ExitLiveDetailsView"
+OWNED_CALL_BINDINGS["F02575"] = "VS::Menu::Inventory::UpdateLiveWeaponDetails"
+OWNED_CALL_BINDINGS["F02576"] = "VS::Menu::Inventory::UpdateLiveBladeDetails"
+OWNED_CALL_BINDINGS["F02577"] = "VS::Menu::Inventory::UpdateLiveGripDetails"
+OWNED_CALL_BINDINGS["F02578"] = "VS::Menu::Inventory::UpdateLiveShieldDetails"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3654,6 +3662,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x80102E08, "VS::Menu::Inventory::SelectLiveDetailsItem"),  # F02573
     ("MENU/MENU3.PRG", 0x80102D7C, "VS::Menu::Inventory::ExitLiveDetailsView"),  # F02574
     ("MENU/MENUB.PRG", 0x80102E54, "VS::Menu::Inventory::ExitLiveDetailsView"),  # F02574
+    ("MENU/MENU3.PRG", 0x80102DEC, "VS::Menu::Inventory::UpdateLiveWeaponDetails"),  # F02575
+    ("MENU/MENUB.PRG", 0x80102EC4, "VS::Menu::Inventory::UpdateLiveWeaponDetails"),  # F02575
+    ("MENU/MENU3.PRG", 0x80103034, "VS::Menu::Inventory::UpdateLiveBladeDetails"),  # F02576
+    ("MENU/MENUB.PRG", 0x8010310C, "VS::Menu::Inventory::UpdateLiveBladeDetails"),  # F02576
+    ("MENU/MENU3.PRG", 0x80103220, "VS::Menu::Inventory::UpdateLiveGripDetails"),  # F02577
+    ("MENU/MENUB.PRG", 0x801032F8, "VS::Menu::Inventory::UpdateLiveGripDetails"),  # F02577
+    ("MENU/MENU3.PRG", 0x80103460, "VS::Menu::Inventory::UpdateLiveShieldDetails"),  # F02578
+    ("MENU/MENUB.PRG", 0x80103538, "VS::Menu::Inventory::UpdateLiveShieldDetails"),  # F02578
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

@@ -23,6 +23,21 @@ def flat(source: str) -> str:
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_reset_initializer_qualifies_function_pointers_not_their_returns(self):
+        declarations = (
+            ("int (*initial[])(int) = { first, second }",
+             "int (*const initial[])(int) = { first, second }"),
+            ("void (*initial)(void) = callback",
+             "void (*const initial)(void) = callback"),
+            ("int (*const initial[])(int) = { first }",
+             "int (*const initial[])(int) = { first }"),
+            ("unsigned initial[2] = { 1, 2 }",
+             "const unsigned initial[2] = { 1, 2 }"),
+        )
+        for declaration, expected in declarations:
+            with self.subTest(declaration=declaration):
+                self.assertEqual(copy_to_native.Copier.reset_initial_declaration(declaration), expected)
+
     def test_action_reactions_preserve_pending_damage_policy_and_data(self):
         names = {
             "F00819": ("SetLiveEnemyCombatPose", "SetEnemyCombatPose", 0x8009DF3C),

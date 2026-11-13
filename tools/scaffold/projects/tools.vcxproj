@@ -401,6 +401,17 @@
     <None Include="..\..\port\differentials\damage_recovery_guard_driver.cpp" />
     <None Include="..\..\port\differentials\engaged_list.py" />
     <None Include="..\..\port\differentials\engaged_list_driver.cpp" />
+    <None Include="..\..\port\differentials\equipment_detail_b_common.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_driver.cpp" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02575.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02575_menub.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02576.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02576_menub.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02577.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02577_menub.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02578.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_f02578_menub.py" />
+    <None Include="..\..\port\differentials\equipment_detail_b_guard_driver.cpp" />
     <None Include="..\..\port\differentials\flight_movement.py" />
     <None Include="..\..\port\differentials\flight_movement_driver.cpp" />
     <None Include="..\..\port\differentials\height_filter.py" />
