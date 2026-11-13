@@ -20,6 +20,7 @@ extern "C" {
 #include "Actors/SkeletonLiveState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Core/Gte.h"
 #include "Field/CameraLiveState.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "Render/Camera.h"
@@ -87,9 +88,20 @@ struct LiveFixture {
     Field_cameraTransition = saved_transition;
     Field_zoneContext.bounds = saved_bounds;
     Render_frameScratch = saved_frame;
-    VS::Render::SetLiveCameraProjectionDistance(saved_projection);
+    // An inactive legacy global is not a snapshot of the math projection.
+    Render_projectionDistance = saved_projection;
     Actors_boneMatrixScratch = saved_bone_camera;
     VS::Render::ForgetLiveModelExtent(&model);
+  }
+};
+struct ProjectionReset {
+  int saved_projection = Render_projectionDistance;
+  ProjectionReset() = default;
+  ProjectionReset(const ProjectionReset&) = delete;
+  ProjectionReset& operator=(const ProjectionReset&) = delete;
+  ~ProjectionReset() {
+    Core_Gte_Reset();
+    Render_projectionDistance = saved_projection;
   }
 };
 using Point = std::array<std::int16_t, 4>;
@@ -210,6 +222,7 @@ TEST_CASE(
 TEST_CASE(
     "F00186 production zoom uses the real Field tracking and Render setter",
     "[camera-selection][F00186][F00182][redirect-binding]") {
+  const ProjectionReset reset;
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.cameraZoomState = 1;
   Field_sphericalCamera = {};
@@ -225,6 +238,23 @@ TEST_CASE(
   CHECK((Render_frameScratch.camera.lookAt.vx != 0 ||
          Render_frameScratch.camera.lookAt.vz != 0));
   CHECK(fixture->state.queueIndex == 3);
+}
+TEST_CASE("Camera fixture leaves unused math projection unchanged",
+          "[camera-selection][fixture-isolation]") {
+  const ProjectionReset reset;
+  Core_Gte_Reset();
+  Core_Gte_SetGeomScreen(333);
+  Render_projectionDistance = 0;
+  SVECTOR point{256, 0, 1024, 0};
+  Core_GteWord before{}, after{}, cue{}, flags{};
+  Core_Gte_RotTransPers(&point, &before, &cue, &flags);
+  REQUIRE(before != 0);
+  {
+    auto fixture = std::make_unique<LiveFixture>();
+  }
+  Core_Gte_RotTransPers(&point, &after, &cue, &flags);
+  CHECK(after == before);
+  CHECK(Render_projectionDistance == 0);
 }
 TEST_CASE("F00179 through F00186 module entries retain their actual call ABI",
           "[camera-selection][redirect-binding]") {
