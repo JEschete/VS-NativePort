@@ -546,7 +546,7 @@ class SdkMatrix(unittest.TestCase):
             command | 1 << 10,
             *(command | value << 17 for value in (1, 2, 3)),
             *(command | value << 15 for value in (1, 2, 3)),
-            *((command & ~(3 << 13)) | value << 13 for value in (0, 1, 2)),
+            *((command & ~(3 << 13)) | value << 13 for value in (1, 2)),
             *(command | 1 << bit for bit in (6, 7, 8, 9, 11, 12)),
         ]
         for word in unsupported:
@@ -668,7 +668,7 @@ class Mac0Stores(unittest.TestCase):
 
     def test_swc2_refuses_every_other_data_register_explicitly(self) -> None:
         for register in range(32):
-            if register in (8, 14, 24):
+            if register in (8, 14, 24, 25, 26, 27):
                 continue
             m = self.machine(i_type(0x3A, register, A0, 0))
             m.store(DATA, b"\xa5" * 16)
@@ -1068,6 +1068,432 @@ class SdkProjection(unittest.TestCase):
             m.step(BASE + 24)
             m.step(BASE + 28)
             self.assertEqual((m.gte_flag, m.r[V0]), (0, 0))
+
+
+class SdkTranslation(unittest.TestCase):
+    @staticmethod
+    def result(m: Machine) -> tuple:
+        return (
+            tuple(differential.s32(m.gte_read(register)) for register in (25, 26, 27)),
+            tuple(m.gte[register] for register in (9, 10, 11)),
+            m.gte_flag,
+        )
+
+    def test_mvmva_tr_signed_inputs_translation_and_result_stores(self) -> None:
+        for matrix, vector, translation, expected in (
+            (
+                SdkMatrix.IDENTITY,
+                (-32768, 32767, -1),
+                (9, -17, 23),
+                (-32759, 32750, 22),
+            ),
+            (
+                (4096, 2048, -1024, -8192, 4096, 512, 256, -4096, 8192),
+                (8, -16, 32),
+                (-101, 203, -307),
+                (-109, 175, -227),
+            ),
+            (
+                (0, 0, 4096, 0, 4096, 0, -4096, 0, 0),
+                (7, -11, 13),
+                (64, -128, 512),
+                (77, -139, 505),
+            ),
+        ):
+            with self.subTest(matrix=matrix, translation=translation):
+                m = SdkProjection.machine(
+                    matrix=matrix, vector=vector, translation=translation
+                )
+                # RotTrans's original command; observe its MAC results through MFC2/SW.
+                m.images = [
+                    image(
+                        0x4A480012,
+                        *(
+                            SdkMatrix.cop2(0, T0 + index, 25 + index)
+                            for index in range(3)
+                        ),
+                        SdkMatrix.cop2(2, T0 + 3, 31),
+                        NOP,
+                        *(
+                            i_type(0x2B, T0 + index, A0, 4 * index)
+                            for index in range(4)
+                        ),
+                        JR_RA,
+                        NOP,
+                    )
+                ]
+                m.r[A0] = DATA + 4
+                m.store(DATA, b"\xa5" * 24)
+                m.execute(BASE)
+                self.assertEqual(self.result(m), (expected, expected, 0))
+                self.assertEqual(
+                    tuple(
+                        m.load(DATA + 4 + 4 * index, signed=True) for index in range(4)
+                    ),
+                    (*expected, 0),
+                )
+                self.assertEqual(m.bytes(DATA, 4) + m.bytes(DATA + 20, 4), b"\xa5" * 8)
+                self.assertEqual(
+                    m.stores, [(DATA + 4 + 4 * index, 4) for index in range(4)]
+                )
+                self.assertEqual((m.stubs, m.patches), ({}, {}))
+
+    def test_mvmva_tr_signed44_overflow_wrap_and_partial_cancellation(self) -> None:
+        for axis, translation_value, component, expected_mac, flag in (
+            (0, 2147483647, 1, -2147483648, 0xC1000000),
+            (1, 2147483647, 1, -2147483648, 0xA0800000),
+            (2, 2147483647, 1, -2147483648, 0x90400000),
+            (0, -2147483648, -1, 2147483647, 0x89000000),
+            (1, -2147483648, -1, 2147483647, 0x84800000),
+            (2, -2147483648, -1, 2147483647, 0x82400000),
+        ):
+            with self.subTest(axis=axis, component=component):
+                matrix, translation = [0] * 9, [0] * 3
+                matrix[axis * 3], translation[axis] = 4096, translation_value
+                m = SdkProjection.machine(
+                    matrix=matrix,
+                    vector=(component, 0, 0),
+                    translation=translation,
+                    command=0x4A480012,
+                )
+                m.step(BASE)
+                mac, ir = [0] * 3, [0] * 3
+                mac[axis] = expected_mac
+                ir[axis] = -32768 if component == 1 else 32767
+                self.assertEqual(self.result(m), (tuple(mac), tuple(ir), flag))
+        for translation, row, mac, flag in (
+            (2147483647, (4096, -4096, 0), 2147483647, 0xC9000000),
+            (-2147483648, (-4096, 4096, 0), -2147483648, 0xC9000000),
+            (268435456, (0, 0, 0), 268435456, 0x81000000),
+            (0xFFFFFFFF, (0, 0, 0), -1, 0),
+        ):
+            with self.subTest(translation=translation, row=row):
+                m = SdkProjection.machine(
+                    matrix=(*row, 0, 0, 0, 0, 0, 0),
+                    vector=(1, 1, 0),
+                    translation=(translation, 0, 0),
+                    command=0x4A480012,
+                )
+                m.step(BASE)
+                ir = 32767 if mac > 32767 else -32768 if mac < -32768 else mac
+                self.assertEqual(self.result(m), ((mac, 0, 0), (ir, 0, 0), flag))
+
+    def test_mvmva_tr_ir_limits_and_arithmetic_q12_shift(self) -> None:
+        for axis, saturation_flag in enumerate((0x81000000, 0x80800000, 0x00400000)):
+            for value, limited, flag in (
+                (32767, 32767, 0),
+                (32768, 32767, saturation_flag),
+                (-32768, -32768, 0),
+                (-32769, -32768, saturation_flag),
+            ):
+                with self.subTest(axis=axis, value=value):
+                    translation, ir = [0] * 3, [0] * 3
+                    translation[axis], ir[axis] = value, limited
+                    m = SdkProjection.machine(
+                        matrix=(0,) * 9,
+                        vector=(0, 0, 0),
+                        translation=translation,
+                        command=0x4A480012,
+                    )
+                    m.step(BASE)
+                    self.assertEqual(
+                        self.result(m), (tuple(translation), tuple(ir), flag)
+                    )
+        for matrix, vector, translation, mac, ir, flag in (
+            (
+                (1, 0, 0, 4095, 0, 0, 4097, 0, 0),
+                (-1, 0, 0),
+                (3, -5, 7),
+                (2, -6, 5),
+                (2, -6, 5),
+                0,
+            ),
+            (
+                (-32768, -32768, -32768, 32767, 32767, 32767, -32768, 32767, 1),
+                (-32768, -32768, -32768),
+                (13, -17, 19),
+                (786445, -786425, 19),
+                (32767, -32768, 19),
+                0x81800000,
+            ),
+        ):
+            with self.subTest(matrix=matrix):
+                m = SdkProjection.machine(
+                    matrix=matrix,
+                    vector=vector,
+                    translation=translation,
+                    command=0x4A480012,
+                )
+                m.step(BASE)
+                self.assertEqual(self.result(m), (mac, ir, flag))
+
+    def test_mvmva_tr_preserves_nonresults_and_resets_flags_on_repeat_entry(
+        self,
+    ) -> None:
+        for previous_flag in (None, 0xFFFFF000):
+            with self.subTest(previous_flag=previous_flag):
+                m = SdkProjection.machine(
+                    vector=(1, -2, 3), translation=(5, 7, 11), command=0x4A480012
+                )
+                m.gte.update(
+                    {register: 0x12340000 + register for register in range(2, 32)}
+                )
+                m.gte_flag = previous_flag
+                m.lzcs, m.hi, m.lo = 0xFFFF0000, 0x10203040, 0x50607080
+                m.put(DATA, 0xAABBCCDD)
+                before = dict(m.gte)
+                state = SdkProjection.state(m)
+                m.step(BASE)
+                before.update({9: 6, 10: 5, 11: 14, 25: 6, 26: 5, 27: 14})
+                self.assertEqual(m.gte, before)
+                self.assertEqual(self.result(m), ((6, 5, 14), (6, 5, 14), 0))
+                # Only IR1-3, MAC1-3 and FLAG change; no projection/FIFO side effects.
+                after = SdkProjection.state(m)
+                for index in (0, 2, *range(4, len(state[0]))):
+                    self.assertEqual(after[0][index], state[0][index])
+                self.assertEqual(after[1:], state[1:])
+                m.gte[0], m.gte[1] = 0x0002FFFF, -3
+                m.gte_translation[:] = (-5, -7, -11)
+                m.gte_flag = 0xFFFFF000
+                m.step(BASE)
+                self.assertEqual(self.result(m), ((-6, -5, -14), (-6, -5, -14), 0))
+
+    def test_mvmva_tr_accepts_only_the_explicit_sdk_configuration(self) -> None:
+        for fake in range(32):
+            with self.subTest(fake=fake):
+                m = SdkProjection.machine(
+                    translation=(5, 7, 11), command=0x4A080012 | fake << 20
+                )
+                m.step(BASE)
+                self.assertEqual(self.result(m), ((17, 0, 1035), (17, 0, 1035), 0))
+        m = SdkProjection.machine(translation=(5, 7, 11), command=0x4A486012)
+        m.step(BASE)
+        self.assertEqual(self.result(m), ((12, -7, 1024), (12, -7, 1024), 0))
+        command = 0x4A480012
+        for word in (
+            command & ~(1 << 19),
+            command | 1 << 10,
+            *(command | value << 17 for value in (1, 2, 3)),
+            *(command | value << 15 for value in (1, 2, 3)),
+            *(command | value << 13 for value in (1, 2)),
+            *(command | 1 << bit for bit in (6, 7, 8, 9, 11, 12)),
+        ):
+            m = SdkProjection.machine(command=word)
+            before = SdkProjection.state(m)
+            with (
+                self.subTest(word=hex(word)),
+                self.assertRaisesRegex(Fault, "unsupported GTE MVMVA configuration"),
+            ):
+                m.step(BASE)
+            self.assertEqual(SdkProjection.state(m), before)
+
+    def test_mvmva_tr_does_not_invent_unknown_status_or_control_aliases(self) -> None:
+        cop2 = SdkMatrix.cop2
+        for command in (0x4A000028, 0x4B90003D):
+            m = SdkProjection.machine()
+            m.images = [
+                image(
+                    command,
+                    cop2(6, A0, 5),
+                    cop2(4, A1, 0),
+                    cop2(2, V0, 31),
+                    0x4A480012,
+                    cop2(2, V0, 31),
+                    command,
+                    cop2(2, V0, 31),
+                )
+            ]
+            m.r[A0], m.r[A1] = -5 & MASK, 0
+            for index in range(3):
+                m.step(BASE + 4 * index)
+                self.assertIsNone(m.gte_flag)
+            with (
+                self.subTest(command=hex(command)),
+                self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"),
+            ):
+                m.step(BASE + 12)
+            m.step(BASE + 16)
+            m.step(BASE + 20)
+            self.assertEqual((m.gte_flag, m.r[V0]), (0, 0))
+            m.step(BASE + 24)
+            with self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"):
+                m.step(BASE + 28)
+        for move, registers in (
+            (2, (*range(8), 24, 25, 26, 27, 28)),
+            (6, (*range(8, 24), 27, 28, 29, 30)),
+        ):
+            for register in registers:
+                m = SdkProjection.machine(command=cop2(move, A0, register))
+                before = SdkProjection.state(m)
+                with (
+                    self.subTest(move=move, register=register),
+                    self.assertRaisesRegex(Fault, "unhandled GTE instruction"),
+                ):
+                    m.step(BASE)
+                self.assertEqual(SdkProjection.state(m), before)
+
+
+class SdkRotTrans(unittest.TestCase):
+    # Entire original SLUS_010.40 libgte/SMP_04.s leaf, 800417EC..80041813.
+    LEAF = (
+        0xC8800000,
+        0xC8810004,
+        0,
+        0x4A480012,
+        0xE8B90000,
+        0xE8BA0004,
+        0xE8BB0008,
+        0x4842F800,
+        0x03E00008,
+        0xACC20000,
+    )
+
+    def test_original_rottrans_leaf_stores_post_shift_mac_not_saturated_ir(
+        self,
+    ) -> None:
+        for vector, translation, mac, ir, flag in (
+            (
+                (-32768, 32767, -1),
+                (9, -17, 23),
+                (-32759, 32750, 22),
+                (-32759, 32750, 22),
+                0,
+            ),
+            (
+                (1, 2, -3),
+                (0x1234567, -0x2345678, 0x3456789),
+                (19088744, -36984438, 54880134),
+                (32767, -32768, 32767),
+                0x81C00000,
+            ),
+            (
+                (1, -1, 0),
+                (2147483647,) * 3,
+                (-2147483648, 2147483646, 2147483647),
+                (-32768, 32767, 32767),
+                0xC1C00000,
+            ),
+            (
+                (-1, -1, -1),
+                (-2147483648,) * 3,
+                (2147483647,) * 3,
+                (32767,) * 3,
+                0x8FC00000,
+            ),
+        ):
+            with self.subTest(vector=vector, translation=translation):
+                m = SdkProjection.machine(translation=translation)
+                m.images = [image(*self.LEAF)]
+                for index, value in enumerate(vector):
+                    m.put(DATA + 0x40 + 2 * index, value, 2)
+                m.put(DATA + 0x46, 0xDEAD, 2)
+                m.store(DATA + 0x7C, b"\xa5" * 20)
+                m.store(DATA + 0xBC, b"\xa5" * 12)
+                m.r[A0], m.r[A1], m.r[A2] = DATA + 0x40, DATA + 0x80, DATA + 0xC0
+                m.execute(BASE)
+                self.assertEqual(SdkTranslation.result(m), (mac, ir, flag))
+                self.assertEqual(
+                    tuple(
+                        m.load(DATA + 0x80 + 4 * axis, signed=True) for axis in range(3)
+                    ),
+                    mac,
+                )
+                self.assertEqual((m.r[V0], m.load(DATA + 0xC0)), (flag, flag))
+                for guard in (DATA + 0x7C, DATA + 0x8C, DATA + 0xBC, DATA + 0xC4):
+                    self.assertEqual(m.bytes(guard, 4), b"\xa5" * 4)
+                self.assertEqual(
+                    m.stores,
+                    [
+                        (DATA + 0x80, 4),
+                        (DATA + 0x84, 4),
+                        (DATA + 0x88, 4),
+                        (DATA + 0xC0, 4),
+                    ],
+                )
+                self.assertEqual((m.stubs, m.patches), ({}, {}))
+
+    def test_mac_stores_full_words_with_signed_offsets_wrap_and_preserved_state(
+        self,
+    ) -> None:
+        for register in (25, 26, 27):
+            for value in (0x01234567, -0x1234567, 0xFFFFFFFF, 0x80000000):
+                for base, offset, destination in (
+                    (DATA + 8, -4, DATA + 4),
+                    (0xFFFFFFFC, 4, 0),
+                    (0, -4, 0xFFFFFFFC),
+                ):
+                    for flag in (None, 0xFFFFF000):
+                        with self.subTest(
+                            register=register, value=value, base=base, flag=flag
+                        ):
+                            m = SdkProjection.machine(
+                                command=i_type(0x3A, register, A0, offset)
+                            )
+                            m.gte[register], m.gte[register - 16] = value, 123
+                            m.r[A0], m.gte_flag = base, flag
+                            m.lzcs, m.hi, m.lo = 0xFFFF0000, 0x10203040, 0x50607080
+                            low, high = (
+                                (destination - 4) & MASK,
+                                (destination + 4) & MASK,
+                            )
+                            for address in (low, destination, high):
+                                m.put(address, 0xA5A5A5A5)
+                            before = SdkProjection.state(m)
+                            keys = set(m.overlay)
+                            m.step(BASE)
+                            self.assertEqual(SdkProjection.state(m)[:3], before[:3])
+                            self.assertEqual(
+                                m.bytes(destination, 4),
+                                (value & MASK).to_bytes(4, "little"),
+                            )
+                            self.assertEqual(
+                                m.bytes(low, 4) + m.bytes(high, 4), b"\xa5" * 8
+                            )
+                            self.assertEqual(
+                                (m.stores, set(m.overlay)), ([(destination, 4)], keys)
+                            )
+                            self.assertTrue(
+                                all(0 <= address <= MASK for address in m.overlay)
+                            )
+
+    def test_mac_store_misalignment_refuses_before_any_state_or_memory_write(
+        self,
+    ) -> None:
+        for register in (25, 26, 27):
+            for base, offset in ((DATA, 1), (DATA, 2), (DATA, 3), (0, -1)):
+                m = SdkProjection.machine(command=i_type(0x3A, register, A0, offset))
+                m.r[A0], m.gte_flag = base, None
+                m.store(DATA, b"\xa5" * 16)
+                before = SdkProjection.state(m)
+                with (
+                    self.subTest(register=register, base=base, offset=offset),
+                    self.assertRaisesRegex(Fault, "unaligned 4-byte store"),
+                ):
+                    m.step(BASE)
+                self.assertEqual(SdkProjection.state(m), before)
+
+    def test_mac_store_transfers_do_not_define_unknown_flag_status(self) -> None:
+        for register in (25, 26, 27):
+            for command in (0x4A000028, 0x4B90003D):
+                with self.subTest(register=register, command=hex(command)):
+                    m = SdkProjection.machine()
+                    m.images = [
+                        image(
+                            command,
+                            i_type(0x3A, register, A0, 0),
+                            SdkMatrix.cop2(2, V0, 31),
+                        )
+                    ]
+                    m.r[A0] = DATA
+                    m.step(BASE)
+                    expected = m.gte_read(register)
+                    before = SdkProjection.state(m)[:3]
+                    m.step(BASE + 4)
+                    self.assertEqual(SdkProjection.state(m)[:3], before)
+                    self.assertEqual(m.load(DATA), expected)
+                    self.assertIsNone(m.gte_flag)
+                    with self.assertRaisesRegex(Fault, "GTE FLAG.*not modelled"):
+                        m.step(BASE + 8)
 
 
 class Memory(unittest.TestCase):

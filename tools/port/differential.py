@@ -35,15 +35,17 @@ reads a loaded register in the next instruction). Calls must be stubbed or expli
 so an unexpected callee stops the run instead of executing silently. A stub registered with
 tail=True also takes a jump or branch to its address (a tail call) and continues at $ra. The GTE model covers moves
 to and from V0, IR0-IR3, MAC0-MAC3, SXY0-SXY2 and the leading-zero counter
-(LZCS/LZCR), plus MFC2 SZ3, LWC2 V0 and SWC2 MAC0/IR0/SXY2. Rotation,
+(LZCS/LZCR), plus MFC2 SZ3, LWC2 V0 and SWC2 MAC0-MAC3/IR0/SXY2. Rotation,
 translation and OFX/OFY/H control writes are modelled; other control moves
 (except FLAG), SXYP and colour aliases still raise.
 RTPS supports only sf=1/lm=0, including signed44 accumulation, saturation, integer UNR
 division, screen/depth FIFOs and DQA/DQB depth cueing. Controls start deterministically
 at zero, not physical game state; fixtures must initialize their transform/projection
 state. The SQR, GPF and NCLIP commands are also modelled. MVMVA supports only sf=1,
-rotation matrix, V0, no translation and lm=0 (SDK ApplyMatrixSV); other configurations
-raise. Only its fake command-number bits are ignored.
+rotation matrix, V0, TR or no translation and lm=0 (SDK RotTrans/ApplyMatrixSV);
+other configurations raise. Only its fake command-number bits are ignored.
+RotTrans's SWC2 MAC1-MAC3 result stores preserve the full post-shift MAC words,
+not the saturated IR values. Other data-register store aliases still raise.
 FLAG command results are modelled for RTPS, NCLIP and this MVMVA subset; reading FLAG
 after SQR/GPF raises rather than reporting unmodelled status. Other COP instructions,
 syscalls, unaligned accesses and overflow traps raise.
@@ -422,10 +424,10 @@ class Machine:
         elif op == 0x32 and rt in (VXY0, VZ0):
             self.gte_write(rt, self.aligned_load((r[rs] + imm) & MASK, 4, False))
         elif op == 0x3A:
-            if rt not in (MAC0, IR0, 14):
+            if rt not in (MAC0, *MAC, IR0, 14):
                 raise Fault(
                     f"unsupported SWC2 data register {rt} at {pc:#x} "
-                    "(only MAC0, IR0 and SXY2 are modelled)"
+                    "(only MAC0-MAC3, IR0 and SXY2 are modelled)"
                 )
             self.write((r[rs] + imm) & MASK, self.gte_read(rt), 4)
         elif op == 0x12 and rs in (0, 4) and rd in (VXY0, VZ0, LZCS, LZCR, MAC0, *IR, *MAC, *SCRATCH_GTE):
@@ -458,10 +460,14 @@ class Machine:
         elif op == 0x12 and rs & 0x10 and funct == GTE_NCLIP:
             self.gte_nclip()
         elif op == 0x12 and rs & 0x10 and funct == GTE_MVMVA:
-            if word & ~0x01F00000 != 0x4A086012:
+            configuration = word & ~0x01F00000
+            if configuration not in (0x4A086012, 0x4A080012):
                 raise Fault(f"unsupported GTE MVMVA configuration {word:#010x} at {pc:#x} "
-                            "(only sf=1, rotation, V0, no translation, lm=0 is modelled)")
-            self.gte_rotate_v0()
+                            "(only sf=1, rotation, V0, TR/no translation, lm=0 is modelled)")
+            if configuration == 0x4A080012:
+                self.gte_write_flag(self.gte_transform_v0(self.gte_translation))
+            else:
+                self.gte_rotate_v0()
         elif op == 0x12 and rs & 0x10 and funct == GTE_SQR:
             self.gte_square(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12 and rs & 0x10 and funct == GTE_GPF:
@@ -579,29 +585,35 @@ class Machine:
 
     def gte_rotate_v0(self) -> None:
         """SDK ApplyMatrixSV MVMVA: sf=1, rotation matrix, V0, no translation, lm=0."""
-        # Sony Inline Programming Reference 5-27, 6-26; libgte/MTX_06.s.
-        # Three signed16 products stay in [-3221127168, 3221225472]: no signed44
-        # overflow, but wrapping at signed32 before shifting would be incorrect.
-        matrix = [
-            s16(self.gte_rotation[index // 2] >> (16 * (index % 2)))
-            for index in range(9)
-        ]
+        self.gte_write_flag(self.gte_transform_v0((0, 0, 0)))
+
+    def gte_transform_v0(self, translation: Iterable[int]) -> int:
+        """Shared sf=1/lm=0 rotation/V0 transform; return its MAC/IR status bits."""
+        # Sony Inline Programming Reference 5-24..27, 6-3..7, 6-26.
+        # SDK callers: libgte/MTX_06.s, SMP_02.s and SMP_04.s (RotTrans).
         vector = (
             s16(self.gte[VXY0]),
             s16(self.gte[VXY0] >> 16),
             s16(self.gte[VZ0]),
         )
         flag = 0
-        for row, (ir, mac) in enumerate(zip(IR, MAC, strict=True)):
-            value = (
-                sum(matrix[row * 3 + column] * vector[column] for column in range(3))
-                >> 12
-            )
+        for row, (ir, mac, offset) in enumerate(zip(IR, MAC, translation, strict=True)):
+            value = s32(offset) << 12
+            for column, component in enumerate(vector):
+                index = row * 3 + column
+                coefficient = s16(self.gte_rotation[index // 2] >> (16 * (index % 2)))
+                value += coefficient * component
+                if value >= 1 << 43:
+                    flag |= 1 << (30 - row)
+                elif value < -(1 << 43):
+                    flag |= 1 << (27 - row)
+                value = ((value + (1 << 43)) & ((1 << 44) - 1)) - (1 << 43)
+            value >>= 12
             self.gte[mac] = value & MASK
             self.gte[ir] = max(-0x8000, min(0x7FFF, value))
             if not -0x8000 <= value <= 0x7FFF:
                 flag |= 1 << (24 - row)
-        self.gte_write_flag(flag)
+        return flag
 
     @staticmethod
     def gte_divide(numerator: int, depth: int) -> tuple[int, bool]:
@@ -621,15 +633,7 @@ class Machine:
         """RTPS sf=1/lm=0: signed44 transform, depth/XY FIFOs and depth cue."""
         # Sony Inline Programming Reference 5-24..27, 6-3..7; PSX-SPX documents UNR.
         # SDK caller: src/SLUS_010.40/libgte/SMP_02.s, RotTransPers.
-        flag = 0
-
-        def accumulate(value: int, row: int) -> int:
-            nonlocal flag
-            if value >= 1 << 43:
-                flag |= 1 << (30 - row)
-            elif value < -(1 << 43):
-                flag |= 1 << (27 - row)
-            return ((value + (1 << 43)) & ((1 << 44) - 1)) - (1 << 43)
+        flag = self.gte_transform_v0(self.gte_translation)
 
         def limit(value: int, low: int, high: int, bit: int) -> int:
             nonlocal flag
@@ -644,16 +648,6 @@ class Machine:
             elif value < -0x80000000:
                 flag |= 1 << 15
 
-        vector = (s16(self.gte[VXY0]), s16(self.gte[VXY0] >> 16), s16(self.gte[VZ0]))
-        for row, (ir, mac) in enumerate(zip(IR, MAC, strict=True)):
-            value = s32(self.gte_translation[row]) << 12
-            for column, component in enumerate(vector):
-                index = row * 3 + column
-                coefficient = s16(self.gte_rotation[index // 2] >> (16 * (index % 2)))
-                value = accumulate(value + coefficient * component, row)
-            value >>= 12
-            self.gte[mac] = value & MASK
-            self.gte[ir] = limit(value, -0x8000, 0x7FFF, 24 - row)
         depth = limit(s32(self.gte[MAC[2]]), 0, 0xFFFF, 18)
         self.gte[16], self.gte[17], self.gte[18], self.gte[19] = (
             self.gte[17],
