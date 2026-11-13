@@ -550,6 +550,15 @@
     <None Include="..\..\port\differentials\reward_flow_guard_driver.cpp" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
+    <None Include="..\..\port\differentials\sphere_containment_common.py" />
+    <None Include="..\..\port\differentials\sphere_containment_cone.py" />
+    <None Include="..\..\port\differentials\sphere_containment_cylinder.py" />
+    <None Include="..\..\port\differentials\sphere_containment_dispatch.py" />
+    <None Include="..\..\port\differentials\sphere_containment_driver.cpp" />
+    <None Include="..\..\port\differentials\sphere_containment_ellipsoid.py" />
+    <None Include="..\..\port\differentials\sphere_containment_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\sphere_containment_prism.py" />
+    <None Include="..\..\port\differentials\sphere_containment_transform.py" />
     <None Include="..\..\port\differentials\stat_factors.py" />
     <None Include="..\..\port\differentials\stat_factors_driver.cpp" />
     <None Include="..\..\port\differentials\stat_factors_guard_driver.cpp" />

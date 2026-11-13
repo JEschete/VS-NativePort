@@ -19,6 +19,7 @@
 #include "Battle/ActionPreview.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
+#include "Battle/SphereContainmentLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 extern "C" {
 #include "Battle/Action.h"
@@ -177,7 +178,7 @@ class LiveWorld final : public ActionPreviewWorld {
     auto live_volume = std::bit_cast<Battle_TargetVolume>(volume);
     auto components =
         std::bit_cast<std::array<std::uint16_t, kActionPointComponents>>(point);
-    return Battle_IsPointInTargetVolume(&live_volume, components.data()) != 0;
+    return IsLivePointInTargetVolume(&live_volume, components) != 0;
   }
   std::optional<ActionPoint> Trace(ActionPoint origin, ActionPoint target,
                                    int source) override {

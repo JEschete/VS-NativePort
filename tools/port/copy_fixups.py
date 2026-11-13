@@ -881,6 +881,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::ReserveLiveFloatingLabel": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
     "VS::Battle::CompactLiveFloatingLabels": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
     "VS::Battle::RemoveLiveFloatingLabel": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
+    "VS::Battle::BuildLiveTargetVolumeTestTransform": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
+    "VS::Battle::IsLivePointInTargetEllipsoid": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
+    "VS::Battle::IsLivePointInTargetCylinder": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
+    "VS::Battle::IsLivePointInTargetCone": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
+    "VS::Battle::IsLivePointInTargetPrism": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
+    "VS::Battle::IsLivePointInTargetVolume": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
+    "VS::Battle::IsLivePointInCurrentSphereVolume": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1740,6 +1747,12 @@ OWNED_CALL_BINDINGS["F00721"] = "VS::Battle::AdvanceLiveFloatingLabelQueue"
 OWNED_CALL_BINDINGS["F00734"] = "VS::Battle::ReserveLiveFloatingLabel"
 OWNED_CALL_BINDINGS["F00735"] = "VS::Battle::CompactLiveFloatingLabels"
 OWNED_CALL_BINDINGS["F00736"] = "VS::Battle::RemoveLiveFloatingLabel"
+OWNED_CALL_BINDINGS["F01290"] = "VS::Battle::BuildLiveTargetVolumeTestTransform"
+OWNED_CALL_BINDINGS["F01291"] = "VS::Battle::IsLivePointInTargetEllipsoid"
+OWNED_CALL_BINDINGS["F01292"] = "VS::Battle::IsLivePointInTargetCylinder"
+OWNED_CALL_BINDINGS["F01293"] = "VS::Battle::IsLivePointInTargetCone"
+OWNED_CALL_BINDINGS["F01294"] = "VS::Battle::IsLivePointInTargetPrism"
+OWNED_CALL_BINDINGS["F01295"] = "VS::Battle::IsLivePointInTargetVolume"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3603,6 +3616,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800962E4, "VS::Battle::ReserveLiveFloatingLabel"),  # F00734
     ("BATTLE/BATTLE.PRG", 0x8009639C, "VS::Battle::CompactLiveFloatingLabels"),  # F00735
     ("BATTLE/BATTLE.PRG", 0x80096444, "VS::Battle::RemoveLiveFloatingLabel"),  # F00736
+    ("BATTLE/BATTLE.PRG", 0x800C0FA8, "VS::Battle::BuildLiveTargetVolumeTestTransform"),  # F01290
+    ("BATTLE/BATTLE.PRG", 0x800C1034, "VS::Battle::IsLivePointInTargetEllipsoid"),  # F01291
+    ("BATTLE/BATTLE.PRG", 0x800C110C, "VS::Battle::IsLivePointInTargetCylinder"),  # F01292
+    ("BATTLE/BATTLE.PRG", 0x800C123C, "VS::Battle::IsLivePointInTargetCone"),  # F01293
+    ("BATTLE/BATTLE.PRG", 0x800C1384, "VS::Battle::IsLivePointInTargetPrism"),  # F01294
+    ("BATTLE/BATTLE.PRG", 0x800C1564, "VS::Battle::IsLivePointInTargetVolume"),  # F01295
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -5911,6 +5930,13 @@ for _row, _variable in (
         "        return;\n    }",
         "retain the guarded movement primitive's optional actor contract in its rate wrapper",
     ))
+
+FIXES.setdefault("F01310", []).append((
+    "VS::Battle::IsLivePointInTargetVolume(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)"
+    "->volumes[1], arg0->opaque0)",
+    "VS::Battle::IsLivePointInCurrentSphereVolume(1, arg0->opaque0)",
+    "5BE50.c:65 containment reads the current native sphere and its known point-component array",
+))
 
 NATIVE_HELPER_HEADERS |= {
     "VS::Battle::CommitLiveFloatingLabel": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",

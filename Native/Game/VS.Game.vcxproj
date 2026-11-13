@@ -529,6 +529,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\SphereContainment.cpp" />
+    <ClCompile Include="src\Battle\SphereContainmentLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\SphereTerrain.cpp" />
     <ClCompile Include="src\Battle\SphereTerrainLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2437,6 +2441,8 @@
     <ClInclude Include="include\Battle\HudStateLive.hpp" />
     <ClInclude Include="include\Battle\RewardFlow.hpp" />
     <ClInclude Include="include\Battle\RewardFlowLive.hpp" />
+    <ClInclude Include="include\Battle\SphereContainment.hpp" />
+    <ClInclude Include="include\Battle\SphereContainmentLive.hpp" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
     <ClInclude Include="include\Battle\StatFactors.hpp" />

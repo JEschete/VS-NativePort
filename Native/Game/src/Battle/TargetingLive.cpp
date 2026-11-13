@@ -26,6 +26,7 @@
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
+#include "Battle/SphereContainmentLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -532,7 +533,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
         static_cast<std::uint16_t>(point.y),
         static_cast<std::uint16_t>(point.z),
         static_cast<std::uint16_t>(point.pad)};
-    return Battle_IsPointInTargetVolume(&volume, components.data()) != 0;
+    return VS::Battle::IsLivePointInTargetVolume(&volume, components) != 0;
   }
   [[nodiscard]] battle::ActionPreviewResult PreviewActionAgainstLimb(
       int action_id, int source_actor, int target_actor, int limb) override {

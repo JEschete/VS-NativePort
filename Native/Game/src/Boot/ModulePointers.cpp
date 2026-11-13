@@ -50,6 +50,7 @@
 #include "Battle/HudRenderingLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
+#include "Battle/SphereContainmentLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -439,12 +440,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C085Cu, 0u, (void*)&Battle_BuildSphereVolumeTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0990u, 0u, (void*)&Battle_DrawSphereWireLine, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0D78u, 0u, (void*)&Battle_DrawSphere, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0FA8u, 0u, (void*)&Battle_BuildTargetVolumeTestTransform, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C1034u, 0u, (void*)&Battle_IsPointInTargetEllipsoid, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C110Cu, 0u, (void*)&Battle_IsPointInTargetCylinder, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C123Cu, 0u, (void*)&Battle_IsPointInTargetCone, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C1384u, 0u, (void*)&Battle_IsPointInTargetPrism, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C1564u, 0u, (void*)&Battle_IsPointInTargetVolume, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C16DCu, 0u, (void*)&Battle_ClearSphereTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C16FCu, 0u, (void*)&Battle_DrawRightTargetLabelLink, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1A40u, 0u, (void*)&Battle_DrawLeftTargetLabelLink, 0u, 0u, 0u},
@@ -1784,6 +1779,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800962E4u, 0u, (void*)&VS::Battle::ReserveLiveFloatingLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009639Cu, 0u, (void*)&VS::Battle::CompactLiveFloatingLabels, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80096444u, 0u, (void*)&VS::Battle::RemoveLiveFloatingLabel, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C0FA8u, 0u, (void*)&VS::Battle::BuildLiveTargetVolumeTestTransform, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C1034u, 0u, (void*)&VS::Battle::IsLivePointInTargetEllipsoid, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C110Cu, 0u, (void*)&VS::Battle::IsLivePointInTargetCylinder, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C123Cu, 0u, (void*)&VS::Battle::IsLivePointInTargetCone, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C1384u, 0u, (void*)&VS::Battle::IsLivePointInTargetPrism, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C1564u, 0u, (void*)&VS::Battle::IsLivePointInTargetVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

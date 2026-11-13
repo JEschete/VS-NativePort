@@ -840,6 +840,15 @@
     <ClCompile Include="src\SpecialTerrainTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SphereContainmentLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SphereContainmentModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SphereContainmentTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SphereTerrainSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1003,6 +1012,9 @@
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\SphereContainmentLiveFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">

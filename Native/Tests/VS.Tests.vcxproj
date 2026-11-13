@@ -351,6 +351,9 @@
     <ClCompile Include="src\SoundTransitionTests.cpp" />
     <ClCompile Include="src\SourceNormalizationTests.cpp" />
     <ClCompile Include="src\SpecialTerrainTests.cpp" />
+    <ClCompile Include="src\SphereContainmentLiveTests.cpp" />
+    <ClCompile Include="src\SphereContainmentModuleTests.cpp" />
+    <ClCompile Include="src\SphereContainmentTests.cpp" />
     <ClCompile Include="src\SphereTerrainSliceTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\SpritesTests.cpp" />
@@ -416,6 +419,7 @@
     <ClInclude Include="include\TestSupport\FloatingLabelQueueLiveFixture.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />
+    <ClInclude Include="include\TestSupport\SphereContainmentLiveFixture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">
