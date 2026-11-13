@@ -485,6 +485,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Render\UiTexturedQuads.cpp" />
     <ClCompile Include="src\Save\MemoryCard\GameFiles.cpp" />
     <ClCompile Include="src\Save\MemoryCard\Resources.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -705,6 +706,7 @@
     <ClInclude Include="include\Render\TimImageLive.hpp" />
     <ClInclude Include="include\Render\UiPackets.hpp" />
     <ClInclude Include="include\Render\UiPacketsLive.hpp" />
+    <ClInclude Include="include\Render\UiTexturedQuads.hpp" />
     <ClInclude Include="include\Save\MemoryCard\GameFiles.hpp" />
     <ClInclude Include="include\Save\SaveStore.hpp" />
     <ClInclude Include="include\Save\Snapshot.hpp" />

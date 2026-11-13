@@ -9,6 +9,7 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Feedback.h"
+#include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"

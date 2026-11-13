@@ -30,34 +30,7 @@
 ]
 ],
 [
-719,
-[
-"    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"    POLY_FT4* prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-732,
-[
-"    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
-],
-[
-"    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);"
-]
-],
-[
-740,
-[
-"    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
-],
-[
-"    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);"
-]
-],
-[
-765,
+775,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -66,7 +39,7 @@
 ]
 ],
 [
-780,
+809,
 [
 "            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -75,52 +48,7 @@
 ]
 ],
 [
-849,
-[
-"    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"    prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-883,
-[
-"            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
-],
-[
-"            AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);"
-]
-],
-[
-934,
-[
-"            ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
-],
-[
-"            (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));"
-]
-],
-[
-937,
-[
-"            vs_getRGB888(64, 128, 64), ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
-],
-[
-"            vs_getRGB888(64, 128, 64), (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));"
-]
-],
-[
-959,
-[
-"        ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16);"
-],
-[
-"        (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));"
-]
-],
-[
-1070,
+926,
 [
 "        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -129,7 +57,7 @@
 ]
 ],
 [
-1114,
+970,
 [
 "            ot = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable;"
 ],
@@ -138,7 +66,7 @@
 ]
 ],
 [
-1184,
+1040,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -147,7 +75,7 @@
 ]
 ],
 [
-1203,
+1059,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16, prim++);"
 ],
@@ -156,18 +84,18 @@
 ]
 ],
 [
-1271,
+1127,
 [
 "        sprintf(p->text, \"%d\", p->value & 0x7FFF);",
 "        p->textLength = strlen(p->text);"
 ],
 [
-"        sprintf((char*)p->text, \"%d\", p->value & 0x7FFF);",
+"        sprintf((char *)(p->text), \"%d\", p->value & 0x7FFF);",
 "        p->textLength = strlen((const char *)(p->text));"
 ]
 ],
 [
-1286,
+1142,
 [
 "    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -176,7 +104,7 @@
 ]
 ],
 [
-1303,
+1159,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -185,7 +113,7 @@
 ]
 ],
 [
-1317,
+1173,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -194,7 +122,7 @@
 ]
 ],
 [
-1327,
+1183,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -203,7 +131,7 @@
 ]
 ],
 [
-1347,
+1203,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -1054,7 +982,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\ItemView.cpp": [
 [
-349,
+314,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1063,7 +991,7 @@
 ]
 ],
 [
-461,
+426,
 [
 "        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
@@ -1076,7 +1004,7 @@
 ]
 ],
 [
-542,
+507,
 [
 "                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;",
 "                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;",
@@ -1089,7 +1017,7 @@
 ]
 ],
 [
-976,
+941,
 [
 "            pending_row_text = pending_rows_allocation + 0x6400;",
 "            pending_row_types = pending_rows_allocation + 0x6000;",
@@ -1102,7 +1030,7 @@
 ]
 ],
 [
-1102,
+1067,
 [
 "            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1111,7 +1039,7 @@
 ]
 ],
 [
-1363,
+1328,
 [
 "        static const char initial[8];"
 ],
@@ -1122,7 +1050,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\Storage.cpp": [
 [
-392,
+161,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1131,7 +1059,7 @@
 ]
 ],
 [
-542,
+311,
 [
 "            packed_discard_digits & 0xF, 0x42, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -1140,7 +1068,7 @@
 ]
 ],
 [
-545,
+314,
 [
 "            packed_discard_digits & 0xF, 0x3C, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -1149,7 +1077,7 @@
 ]
 ],
 [
-547,
+316,
 [
 "            packed_discard_digits >> 4, 0x36, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
 ],
@@ -1517,7 +1445,7 @@
 ],
 "Native\\Game\\src\\Menu\\Map.cpp": [
 [
-218,
+219,
 [
 "        nextPrim = Render_frameScratch.overlayOrderingTable;"
 ],
@@ -1526,7 +1454,7 @@
 ]
 ],
 [
-309,
+310,
 [
 "        Menu_Map_backgroundImage = VS::Core::Memory::AllocateLiveFromHighEnd(VS_MAPBG_BIN_SIZE);"
 ],
@@ -1535,7 +1463,7 @@
 ]
 ],
 [
-350,
+351,
 [
 "        Menu_Map_screenMenuBgBackup = VS::Core::Memory::AllocateLiveFromHighEnd(0xB600);"
 ],
@@ -1544,7 +1472,7 @@
 ]
 ],
 [
-527,
+528,
 [
 "    Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
 ],
@@ -1553,7 +1481,7 @@
 ]
 ],
 [
-529,
+530,
 [
 "    Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -1562,7 +1490,7 @@
 ]
 ],
 [
-531,
+532,
 [
 "    Menu_Map_CenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -1571,7 +1499,7 @@
 ]
 ],
 [
-732,
+733,
 [
 "                    Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -1580,7 +1508,7 @@
 ]
 ],
 [
-734,
+735,
 [
 "                    Menu_Map_CenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -1589,7 +1517,7 @@
 ]
 ],
 [
-791,
+792,
 [
 "                            Menu_Map_SetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -1598,7 +1526,7 @@
 ]
 ],
 [
-794,
+795,
 [
 "                            Menu_Map_SetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -1607,7 +1535,7 @@
 ]
 ],
 [
-883,
+884,
 [
 "            Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
 ],
@@ -1616,7 +1544,7 @@
 ]
 ],
 [
-885,
+886,
 [
 "            Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -1625,7 +1553,7 @@
 ]
 ],
 [
-887,
+888,
 [
 "            Menu_Map_CenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -1634,7 +1562,7 @@
 ]
 ],
 [
-911,
+912,
 [
 "    Menu_Map_AnimateCentering(Battle_unusedSceneBuffer);"
 ],
@@ -1643,7 +1571,7 @@
 ]
 ],
 [
-930,
+931,
 [
 "    AddPrim((DR_STP*)(pScratch[1] + 0x1FFC), stp++);"
 ],
@@ -1652,7 +1580,7 @@
 ]
 ],
 [
-950,
+951,
 [
 "        Menu_Map_DrawVisitedRooms(Battle_unusedSceneBuffer);"
 ],
@@ -1661,7 +1589,7 @@
 ]
 ],
 [
-1117,
+1118,
 [
 "    roomData += 4;"
 ],
@@ -1670,7 +1598,7 @@
 ]
 ],
 [
-1120,
+1121,
 [
 "        u_int projected_depth = Core_Gte_RotTransPers(roomData, (long*)projected_vertex_rows[i], &sp38, &sp3C);"
 ],
@@ -1679,7 +1607,7 @@
 ]
 ],
 [
-1129,
+1130,
 [
 "        roomData += 8;"
 ],
@@ -1688,7 +1616,7 @@
 ]
 ],
 [
-1142,
+1143,
 [
 "    room_element_cursor = roomData;"
 ],
@@ -1697,7 +1625,7 @@
 ]
 ],
 [
-1145,
+1146,
 [
 "    polyG3 = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1706,7 +1634,7 @@
 ]
 ],
 [
-1376,
+1377,
 [
 "            tile = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1715,7 +1643,7 @@
 ]
 ],
 [
-1450,
+1451,
 [
 "                        ((void**)Core_ScratchAddr(0))[1] + 32);"
 ],
@@ -1724,7 +1652,7 @@
 ]
 ],
 [
-1467,
+1468,
 [
 "            tile = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1733,7 +1661,7 @@
 ]
 ],
 [
-1518,
+1519,
 [
 "    roomVertices = VS_ONDISC_DOT(room[roomId], dataAddress, void *);"
 ],
@@ -1742,7 +1670,7 @@
 ]
 ],
 [
-1550,
+1551,
 [
 "        roomVertices = VS_ONDISC(room, dataAddress, void *);"
 ],
@@ -1751,7 +1679,7 @@
 ]
 ],
 [
-1585,
+1586,
 [
 "    roomVertices = VS_ONDISC_DOT(room[roomId], dataAddress, void *);"
 ],
@@ -1760,7 +1688,7 @@
 ]
 ],
 [
-1700,
+1701,
 [
 "        dataAddress = VS_ONDISC(room, dataAddress, void *);"
 ],
@@ -1769,7 +1697,7 @@
 ]
 ],
 [
-1732,
+1733,
 [
 "        roomVertices = VS_ONDISC(room, dataAddress, void *);"
 ],
@@ -1778,7 +1706,7 @@
 ]
 ],
 [
-1753,
+1754,
 [
 "    sprt = Render_frameScratch.primitiveCursor;"
 ],
@@ -1787,7 +1715,7 @@
 ]
 ],
 [
-1770,
+1771,
 [
 "    sprt = Render_frameScratch.primitiveCursor;"
 ],
@@ -1796,7 +1724,7 @@
 ]
 ],
 [
-1848,
+1849,
 [
 "        SPRT* sprt = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1805,7 +1733,7 @@
 ]
 ],
 [
-1876,
+1877,
 [
 "        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
 ],
@@ -1814,7 +1742,7 @@
 ]
 ],
 [
-1886,
+1887,
 [
 "        sprt = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1823,7 +1751,7 @@
 ]
 ],
 [
-1911,
+1912,
 [
 "        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
 ],
@@ -1832,7 +1760,7 @@
 ]
 ],
 [
-1930,
+1931,
 [
 "    LINE_G2* line = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1841,7 +1769,7 @@
 ]
 ],
 [
-1946,
+1947,
 [
 "    AddPrim(pScratch[1] + 28, poly++);"
 ],
@@ -1850,7 +1778,7 @@
 ]
 ],
 [
-1992,
+1993,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L1, index + 8, 15, legacy_button_render_scratch[1] + 24);",
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R1, Menu_Map_controlsUiXOffset + 64, 15, legacy_button_render_scratch[1] + 24);",
@@ -1867,7 +1795,7 @@
 ]
 ],
 [
-2004,
+2005,
 [
 "                \"BACK\", v, vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1876,7 +1804,7 @@
 ]
 ],
 [
-2006,
+2007,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1885,7 +1813,7 @@
 ]
 ],
 [
-2008,
+2009,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1894,7 +1822,7 @@
 ]
 ],
 [
-2010,
+2011,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1903,7 +1831,7 @@
 ]
 ],
 [
-2012,
+2013,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1912,7 +1840,7 @@
 ]
 ],
 [
-2021,
+2022,
 [
 "                \"BACK\", v, vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1921,7 +1849,7 @@
 ]
 ],
 [
-2023,
+2024,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1930,7 +1858,7 @@
 ]
 ],
 [
-2025,
+2026,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -1939,7 +1867,7 @@
 ]
 ],
 [
-2027,
+2028,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -1948,7 +1876,7 @@
 ]
 ],
 [
-2029,
+2030,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1957,7 +1885,7 @@
 ]
 ],
 [
-2037,
+2038,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -1966,7 +1894,7 @@
 ]
 ],
 [
-2039,
+2040,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -1975,7 +1903,7 @@
 ]
 ],
 [
-2041,
+2042,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -1984,7 +1912,7 @@
 ]
 ],
 [
-2043,
+2044,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -1993,7 +1921,7 @@
 ]
 ],
 [
-2045,
+2046,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -2002,7 +1930,7 @@
 ]
 ],
 [
-2053,
+2054,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2011,7 +1939,7 @@
 ]
 ],
 [
-2055,
+2056,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2020,7 +1948,7 @@
 ]
 ],
 [
-2057,
+2058,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -2029,7 +1957,7 @@
 ]
 ],
 [
-2059,
+2060,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2038,7 +1966,7 @@
 ]
 ],
 [
-2061,
+2062,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -2047,7 +1975,7 @@
 ]
 ],
 [
-2069,
+2070,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2056,7 +1984,7 @@
 ]
 ],
 [
-2071,
+2072,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2065,7 +1993,7 @@
 ]
 ],
 [
-2073,
+2074,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2074,7 +2002,7 @@
 ]
 ],
 [
-2075,
+2076,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2083,7 +2011,7 @@
 ]
 ],
 [
-2077,
+2078,
 [
 "                vs_getRGB888(128, 128, 128), s0[1] + 24);"
 ],
@@ -2092,7 +2020,7 @@
 ]
 ],
 [
-2085,
+2086,
 [
 "            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2101,7 +2029,7 @@
 ]
 ],
 [
-2087,
+2088,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2110,7 +2038,7 @@
 ]
 ],
 [
-2089,
+2090,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2119,7 +2047,7 @@
 ]
 ],
 [
-2091,
+2092,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2128,7 +2056,7 @@
 ]
 ],
 [
-2093,
+2094,
 [
 "                vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
@@ -2137,7 +2065,7 @@
 ]
 ],
 [
-2109,
+2110,
 [
 "            vs_getRGB888(128, 128, 128), *(void**)((uintptr_t)Core_ScratchBase() + 0x004) + 24);"
 ],
@@ -2146,7 +2074,7 @@
 ]
 ],
 [
-2118,
+2119,
 [
 "    POLY_FT4* poly = scratch[0];"
 ],
@@ -2155,7 +2083,7 @@
 ]
 ],
 [
-2132,
+2133,
 [
 "    AddPrim(scratch[1] + 28, poly++);"
 ],
@@ -2164,7 +2092,7 @@
 ]
 ],
 [
-2143,
+2144,
 [
 "    POLY_FT4* poly = legacy_render_scratch[0];"
 ],
@@ -2173,7 +2101,7 @@
 ]
 ],
 [
-2160,
+2161,
 [
 "    AddPrim(legacy_render_scratch[1] + 28, poly++);"
 ],
@@ -2182,7 +2110,7 @@
 ]
 ],
 [
-2174,
+2175,
 [
 "    AddPrim(legacy_render_scratch[1] + 28, poly++);"
 ],
@@ -2191,7 +2119,7 @@
 ]
 ],
 [
-2238,
+2239,
 [
 "    POLY_FT4* poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);"
 ],
@@ -2200,7 +2128,7 @@
 ]
 ],
 [
-2266,
+2267,
 [
 "        AddPrim(legacy_ordering_table_scratch[1] + 28, poly++);"
 ],
@@ -2209,7 +2137,7 @@
 ]
 ],
 [
-2290,
+2291,
 [
 "        AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);"
 ],
@@ -2218,7 +2146,7 @@
 ]
 ],
 [
-2309,
+2310,
 [
 "        AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);"
 ],
@@ -2227,7 +2155,7 @@
 ]
 ],
 [
-2329,
+2330,
 [
 "    AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);"
 ],
@@ -2236,7 +2164,7 @@
 ]
 ],
 [
-2454,
+2455,
 [
 "        static const RECT initial[2];"
 ],
@@ -2276,7 +2204,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\Results.cpp": [
 [
-351,
+352,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeGameClearTimData + i * 0x8220, &tim);"
 ],
@@ -2285,7 +2213,7 @@
 ]
 ],
 [
-985,
+986,
 [
 "    poly = *(void**)Core_ScratchAddr(0);"
 ],
@@ -2294,7 +2222,7 @@
 ]
 ],
 [
-1007,
+1008,
 [
 "    AddPrim(scratch[1] - 0x1C, poly++);"
 ],
@@ -2303,7 +2231,7 @@
 ]
 ],
 [
-1023,
+1024,
 [
 "    poly = *(void**)Core_ScratchAddr(0);"
 ],
@@ -2312,7 +2240,7 @@
 ]
 ],
 [
-1045,
+1046,
 [
 "    AddPrim(scratch[1] - 0x1C, poly++);"
 ],
@@ -2321,7 +2249,7 @@
 ]
 ],
 [
-1131,
+1132,
 [
 "        area = p[0];"
 ],
@@ -2330,7 +2258,7 @@
 ]
 ],
 [
-1134,
+1135,
 [
 "        AddPrim(p[1] - 0x1C, area++);"
 ],
@@ -2339,7 +2267,7 @@
 ]
 ],
 [
-1206,
+1207,
 [
 "        area = q[0];"
 ],
@@ -2348,7 +2276,7 @@
 ]
 ],
 [
-1209,
+1210,
 [
 "        AddPrim(q[1] - 0x1C, area++);"
 ],
@@ -2357,7 +2285,7 @@
 ]
 ],
 [
-1249,
+1250,
 [
 "    poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);"
 ],
@@ -2366,7 +2294,7 @@
 ]
 ],
 [
-1260,
+1261,
 [
 "    AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -2375,7 +2303,7 @@
 ]
 ],
 [
-1271,
+1272,
 [
 "    POLY_FT4* poly = p[0];"
 ],
@@ -2384,7 +2312,7 @@
 ]
 ],
 [
-1294,
+1295,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -2393,7 +2321,7 @@
 ]
 ],
 [
-1309,
+1310,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -2402,7 +2330,7 @@
 ]
 ],
 [
-1324,
+1325,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -2411,7 +2339,7 @@
 ]
 ],
 [
-1338,
+1339,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -2420,7 +2348,7 @@
 ]
 ],
 [
-1346,
+1347,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -2534,7 +2462,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Records.cpp": [
 [
-177,
+178,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -2543,7 +2471,7 @@
 ]
 ],
 [
-212,
+213,
 [
 "        p->title = (void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]];",
 "        p->description = (void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]];"
@@ -2554,7 +2482,7 @@
 ]
 ],
 [
-514,
+515,
 [
 "        \"PLAYER TIME\", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, p[1] + 0x1C);"
 ],
@@ -2563,7 +2491,7 @@
 ]
 ],
 [
-517,
+518,
 [
 "        \"1ST\", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, p[1] + 0x1C);"
 ],
@@ -2572,7 +2500,7 @@
 ]
 ],
 [
-519,
+520,
 [
 "        \"2ND\", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, p[1] + 0x1C);"
 ],
@@ -2581,7 +2509,7 @@
 ]
 ],
 [
-521,
+522,
 [
 "        \"3RD\", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, p[1] + 0x1C);"
 ],
@@ -2590,7 +2518,7 @@
 ]
 ],
 [
-533,
+534,
 [
 "                q[1] + 0x1C);"
 ],
@@ -2599,7 +2527,7 @@
 ]
 ],
 [
-538,
+539,
 [
 "                q[1] + 0x1C);"
 ],
@@ -2608,7 +2536,7 @@
 ]
 ],
 [
-543,
+544,
 [
 "                q[1] + 0x1C);"
 ],
@@ -2617,7 +2545,7 @@
 ]
 ],
 [
-550,
+551,
 [
 "        vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -2626,7 +2554,7 @@
 ]
 ],
 [
-556,
+557,
 [
 "                \"$--:--:--\", vs_getXY(88, 158), vs_getRGB(80, 80, 80), r[1] + 0x1C);"
 ],
@@ -2635,7 +2563,7 @@
 ]
 ],
 [
-559,
+560,
 [
 "                vs_getXY(88, 158), vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -2646,7 +2574,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-168,
+169,
 [
 "    menuText = menuItem->text;"
 ],
@@ -2655,7 +2583,7 @@
 ]
 ],
 [
-176,
+177,
 [
 "    before = Render_frameScratch.overlayOrderingTable + 8;"
 ],
@@ -2664,7 +2592,7 @@
 ]
 ],
 [
-224,
+225,
 [
 "    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -2673,7 +2601,7 @@
 ]
 ],
 [
-544,
+545,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
@@ -2682,7 +2610,7 @@
 ]
 ],
 [
-1429,
+1430,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -2691,7 +2619,7 @@
 ]
 ],
 [
-1439,
+1440,
 [
 "        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
 ],
@@ -2700,7 +2628,7 @@
 ]
 ],
 [
-1450,
+1451,
 [
 "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
 ],
@@ -2709,7 +2637,7 @@
 ]
 ],
 [
-1473,
+1474,
 [
 "    polyG4 = scratch[0];"
 ],
@@ -2718,7 +2646,7 @@
 ]
 ],
 [
-1488,
+1489,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -2727,7 +2655,7 @@
 ]
 ],
 [
-1498,
+1499,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -2736,7 +2664,7 @@
 ]
 ],
 [
-1510,
+1511,
 [
 "    POLY_G4* polyG4 = scratch[0];"
 ],
@@ -2745,7 +2673,7 @@
 ]
 ],
 [
-1520,
+1521,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -2754,7 +2682,7 @@
 ]
 ],
 [
-1528,
+1529,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -2763,7 +2691,7 @@
 ]
 ],
 [
-1563,
+1564,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -2772,7 +2700,7 @@
 ]
 ],
 [
-1565,
+1566,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -2781,7 +2709,7 @@
 ]
 ],
 [
-1570,
+1571,
 [
 "        scratch[1] + 0x1C);"
 ],
@@ -2790,7 +2718,7 @@
 ]
 ],
 [
-1580,
+1581,
 [
 "    POLY_G4* poly = scratch[0];"
 ],
@@ -2799,7 +2727,7 @@
 ]
 ],
 [
-1590,
+1591,
 [
 "    AddPrim(scratch[1] + 0x20, poly++);"
 ],
@@ -2808,7 +2736,7 @@
 ]
 ],
 [
-1600,
+1601,
 [
 "    AddPrim(scratch[1] + 32, poly++);"
 ],
@@ -2819,7 +2747,7 @@
 ],
 "Native\\Game\\src\\Menu\\Status\\ActorStatus.cpp": [
 [
-313,
+314,
 [
 "        colorIndex & 0xFF, ((current + max) - 1) / max, Render_frameScratch.orderingTable - 0xC, xy);"
 ],
@@ -2828,7 +2756,7 @@
 ]
 ],
 [
-322,
+323,
 [
 "    u_long* insertBefore = Render_frameScratch.orderingTable - 0xC;"
 ],
@@ -2837,7 +2765,7 @@
 ]
 ],
 [
-425,
+426,
 [
 "    limb_indicator_ordering_table = Render_frameScratch.overlayOrderingTable;",
 "    prim = Render_frameScratch.primitiveCursor;"
@@ -2848,7 +2776,7 @@
 ]
 ],
 [
-453,
+454,
 [
 "    prim = Render_frameScratch.primitiveCursor;",
 "    leader_line_ordering_table = Render_frameScratch.orderingTable;"
@@ -2859,7 +2787,7 @@
 ]
 ],
 [
-504,
+505,
 [
 "                    128, ((x + 8) & 0xFFFF) | y, vs_getWH(8, 8), Render_frameScratch.orderingTable - 8)[4] ="
 ],
@@ -2868,7 +2796,7 @@
 ]
 ],
 [
-510,
+511,
 [
 "                128, (x & 0xFFFF) | y, vs_getWH(16, 16), Render_frameScratch.orderingTable - 8);"
 ],
@@ -2877,7 +2805,7 @@
 ]
 ],
 [
-838,
+839,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;",
 "    u_long* model_fade_ordering_table = Render_frameScratch.orderingTable;"
@@ -2888,7 +2816,7 @@
 ]
 ],
 [
-877,
+878,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -2897,7 +2825,7 @@
 ]
 ],
 [
-879,
+880,
 [
 "    u_int* background_ordering_table_entry = ordering_table_base + 0x1FF4;"
 ],
@@ -2906,7 +2834,7 @@
 ]
 ],
 [
-882,
+883,
 [
 "        background_ordering_table_entry = ordering_table_base - 4;"
 ],
@@ -2915,7 +2843,7 @@
 ]
 ],
 [
-1657,
+1658,
 [
 "        static const int initial[6];"
 ],

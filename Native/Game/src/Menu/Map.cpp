@@ -40,6 +40,7 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
+#include "Menu/Inventory/Inventory.h"
 #include "Menu/Map.h"
 #include "Menu/TextBox.h"
 #include "Render/Camera.h"

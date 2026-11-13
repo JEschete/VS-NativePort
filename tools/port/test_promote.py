@@ -13,6 +13,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import promote
@@ -247,6 +248,28 @@ class PromoteTests(unittest.TestCase):
         self.assertEqual(kept, {"a.cpp": [[2, ["one"], ["ONE"]], [4, ["three"], ["THREE"]]]})
         self.assertEqual(len(dropped), 3)
         self.assertTrue(any(line.startswith("c.cpp: whole file") for line in dropped))
+
+    def test_prune_hunks_refuses_deleted_duplicate_crossing_a_survivor(self) -> None:
+        rendered = {"a.cpp": "prefix\nsurviving conversion\nlater function\nrepeated line\n"}
+        table = {"a.cpp": [[1, ["repeated line"], ["first type conversion"]],
+                         [2, ["surviving conversion"], ["required conversion"]],
+                         [5, ["repeated line"], ["second type conversion"]]]}
+        with self.assertRaisesRegex(SystemExit, "cannot safely re-anchor"):
+            promote.prune_hunks(table, rendered)
+
+    def test_prune_adaptations_does_not_write_after_ambiguous_match(self) -> None:
+        rendered = {"a.cpp": "prefix\nsurviving conversion\nlater function\nrepeated line\n"}
+        table = {"a.cpp": [[1, ["repeated line"], ["first type conversion"]],
+                         [2, ["surviving conversion"], ["required conversion"]]]}
+        write(self.repository.adaptations, json.dumps(table) + "\n")
+        original = self.repository.adaptations.read_bytes()
+        copier = SimpleNamespace(Copier=lambda: None, render=lambda _: rendered)
+        with (
+            patch.dict("sys.modules", {"copy_to_native": copier}),
+            self.assertRaisesRegex(SystemExit, "cannot safely re-anchor"),
+        ):
+            run(self.repository, "prune-adaptations")
+        self.assertEqual(self.repository.adaptations.read_bytes(), original)
 
     def test_write_adaptations_matches_the_recorder_format(self) -> None:
         path = self.root / "adaptations.json"

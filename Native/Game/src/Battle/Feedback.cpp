@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
+#include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Core/Math/Vector.hpp"
-#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -345,7 +345,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
 
     if (Battle_abilityTimingCueFrames > 0) {
         --Battle_abilityTimingCueFrames;
-        Battle_DrawAbilityTimingCue();
+        VS::Battle::DrawLiveAbilityTimingCue();
     }
 
     if (Field_areRoomUpdatesPaused == 0) {
@@ -430,7 +430,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
                 Battle_PlaceActorValueLabel(screen, label);
 
                 if (label->colorFlags == 2) {
-                    Battle_DrawLockedFloatingLabel(screen[0], screen[1], label);
+                    VS::Battle::DrawLiveLockedFloatingLabel(screen[0], screen[1], label);
                 } else {
                     Battle_DrawActorValueLabel(screen[0], screen[1], label);
                 }
@@ -469,7 +469,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
 
                 if (label->key.bytes[1] != 0 || Battle_ashleyStatusLabelsSuppressed == 0) {
                     if (label->colorFlags == 2) {
-                        Battle_DrawLockedFloatingLabel(screen[0], screen[1], label);
+                        VS::Battle::DrawLiveLockedFloatingLabel(screen[0], screen[1], label);
                     } else {
                         Battle_DrawActorStatusLabel(screen[0], screen[1], label);
                     }
@@ -495,7 +495,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
             }
             break;
         case 3:
-            Battle_DrawLockedFloatingLabel(screen[0], screen[1], label);
+            VS::Battle::DrawLiveLockedFloatingLabel(screen[0], screen[1], label);
             label->frame += State_tickSpeed / 2;
 
             if (label->frame >= 31) {
@@ -504,7 +504,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
             }
             break;
         case 4:
-            Battle_DrawAbilityTimingResult(44, 48, label);
+            VS::Battle::DrawLiveAbilityTimingResult(44, 48, label);
             label->frame += State_tickSpeed / 2;
 
             if (label->frame >= 46) {
@@ -513,7 +513,7 @@ void Battle_UpdateAndDrawFloatingLabels(void)
             }
             break;
         case 5:
-            Battle_DrawChainCount(44, 64, label);
+            VS::Battle::DrawLiveChainCount(44, 64, label);
             label->frame += State_tickSpeed / 2;
 
             if (label->frame >= 91) {
@@ -667,7 +667,7 @@ void Battle_DrawActorValueLabel(int x, int y, Battle_FloatingLabel* p)
             y += p->frame >> 1;
         }
 
-        i = Battle_DrawValueLabelCaption(x, y, p);
+        i = VS::Battle::DrawLiveValueLabelCaption(x, y, p);
         color = 0;
         offset = 0;
     } else {
@@ -708,80 +708,6 @@ void Battle_DrawActorValueLabel(int x, int y, Battle_FloatingLabel* p)
         setTPage(prim, 0, 0, 768, 0);
         setClut(prim, 832, 223);
         AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);
-    }
-
-    ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim;
-}
-
-// decomp: BATTLE.PRG func_80094E18 (src/BATTLE/BATTLE.PRG/2842C.c:2138)
-int Battle_DrawValueLabelCaption(int x, int y, Battle_FloatingLabel* p)
-{
-    RECT const* rect = &Battle_kLabelCaptionRects[Battle_valueCaptionRects[p->colorFlags - 3]];
-    POLY_FT4* prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);
-    int sign = p->value;
-    int width = (p->textLength * 6 + rect->w + 12) / 2;
-
-    x -= width;
-    setPolyFT4(prim);
-    setXY4(prim, x, y - 6, x + rect->w, y - 6, x, y + 6, x + rect->w, y + 6);
-    setShadeTex(prim, 1);
-    setUV4(prim, rect->x, rect->y, rect->x + rect->w, rect->y, rect->x, rect->y + 12,
-        rect->x + rect->w, rect->y + 12);
-    setTPage(prim, 0, 0, 448, 256);
-    setClut(prim, 976, 220);
-    sign = (sign & 0x8000) ? 0 : 8;
-    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);
-    x += rect->w + 4;
-    setPolyFT4(prim);
-    setXY4(prim, x, y - 5, x + 8, y - 5, x, y + 5, x + 8, y + 5);
-    setUV4(prim, sign + 154, 76, sign + 162, 76, sign + 154, 86, sign + 162, 86);
-    setTPage(prim, 0, 0, 768, 0);
-    setClut(prim, 864, 223);
-    setShadeTex(prim, 1);
-    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);
-    ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim;
-    return width;
-}
-
-// decomp: BATTLE.PRG func_8009506C (src/BATTLE/BATTLE.PRG/2842C.c:2167)
-void Battle_DrawLockedFloatingLabel(int screen_x, int screen_y, Battle_FloatingLabel* label)
-{
-    POLY_FT4* prim;
-    int step;
-    int y0;
-    int y1;
-    int i;
-
-    if (label->frame < 4) {
-        step = label->frame;
-    } else if (label->frame >= 27) {
-        step = 30 - label->frame;
-    } else {
-        step = 4;
-    }
-
-    screen_x -= 16;
-    y0 = screen_y - Battle_lockedLabelHalfHeights[step];
-    y1 = screen_y + Battle_lockedLabelHalfHeights[step];
-    prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);
-
-    for (i = 0; i < 4; ++i) {
-        if ((screen_x < 320) && ((screen_x + Battle_lockedLabelPieces[i].w) >= 0)) {
-            setPolyFT4(prim);
-            setXY4(prim, screen_x, y0, screen_x + Battle_lockedLabelPieces[i].w, y0, screen_x, y1,
-                screen_x + Battle_lockedLabelPieces[i].w, y1);
-            setShadeTex(prim, 1);
-            setUV4(prim, Battle_lockedLabelPieces[i].x, Battle_lockedLabelPieces[i].y,
-                Battle_lockedLabelPieces[i].x + Battle_lockedLabelPieces[i].w, Battle_lockedLabelPieces[i].y, Battle_lockedLabelPieces[i].x,
-                Battle_lockedLabelPieces[i].y + 10, Battle_lockedLabelPieces[i].x + Battle_lockedLabelPieces[i].w,
-                Battle_lockedLabelPieces[i].y + 10);
-            setSemiTrans(prim, 1);
-            setTPage(prim, 0, 0, 768, 0);
-            setClut(prim, 864, 223);
-            AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);
-        }
-
-        screen_x += Battle_lockedLabelPieces[i].w;
     }
 
     ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim;
@@ -829,7 +755,7 @@ void Battle_DrawActorStatusLabel(int x, int y, Battle_FloatingLabel* p)
             width = 4;
         }
 
-        Battle_DrawStatusRemovalMarker(x, y, width);
+        VS::Battle::DrawLiveStatusRemovalMarker(x, y, width);
     }
 
     width = 0;
@@ -888,76 +814,6 @@ void Battle_DrawActorStatusLabel(int x, int y, Battle_FloatingLabel* p)
     }
 
     ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim;
-}
-
-// decomp: BATTLE.PRG func_800957D0 (src/BATTLE/BATTLE.PRG/2842C.c:2312)
-void Battle_DrawStatusRemovalMarker(int screen_x, int screen_y, int arg2)
-{
-    void** p = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-    POLY_FT4* prim = (POLY_FT4*)p[0];
-
-    setlen(prim, 9);
-    setcode(prim, 0x2C);
-    screen_x -= 8;
-    arg2 <<= 4;
-    setXY4(
-        prim, screen_x, screen_y - 5, screen_x + 16, screen_y - 5, screen_x, screen_y + 5, screen_x + 16, screen_y + 5);
-    setUV4(
-        prim, arg2 + 0x40, 0x30, arg2 + 0x50, 0x30, arg2 + 0x40, 0x3A, arg2 + 0x50, 0x3A);
-    prim->tpage = 0x17;
-    prim->clut = 0x373E;
-    setShadeTex(prim, 1);
-    AddPrim((u_long*)p[1] - 5, prim++);
-    p[0] = prim;
-}
-
-// decomp: BATTLE.PRG func_800958A4 (src/BATTLE/BATTLE.PRG/2842C.c:2332)
-void Battle_DrawAbilityTimingResult(int x, int y, Battle_FloatingLabel* p)
-{
-    char* timing[] = { "$TOO   FAST!", "$FAST!", "", "$SLOW!", "$TOO   SLOW!" };
-    char* success[] = { "$COOL!", "$GOOD!", "$EXCELLENT!", "$RIGHT   ON!", "$PERFECT!",
-        "$WELL   TIMED!", "$NICE!", "$GREAT!" };
-    short offsets[] = { 64, 16, 4, 1 };
-    int colors[] = { vs_getRGB888(0, 128, 128), vs_getRGB888(32, 128, 96),
-        vs_getRGB888(64, 128, 64), vs_getRGB888(96, 128, 32), vs_getRGB888(128, 128, 0) };
-    int step;
-
-    if (p->frame < 4) {
-        step = p->frame;
-        x -= offsets[step];
-    } else if (p->frame >= 42) {
-        step = 45 - p->frame;
-        x -= offsets[step];
-    }
-
-    if (p->value != 2) {
-        VS::Render::DrawLiveCompactTextColor(timing[p->value], vs_getXY_2(x, y), colors[p->value],
-            (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));
-    } else {
-        VS::Render::DrawLiveCompactTextColor(success[p->textLength], vs_getXY_2(x, y),
-            vs_getRGB888(64, 128, 64), (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));
-    }
-}
-
-// decomp: BATTLE.PRG func_80095A4C (src/BATTLE/BATTLE.PRG/2842C.c:2359)
-void Battle_DrawChainCount(int x, int y, Battle_FloatingLabel* p)
-{
-    char text[16];
-    short offsets[] = { 64, 16, 4, 1 };
-
-    if ((p->frame < 4) && (p->value == 1)) {
-        x -= offsets[p->frame];
-    } else if (p->frame >= 87) {
-        x -= offsets[90 - p->frame];
-    }
-    if (p->value == 1) {
-        sprintf(text, "$1 CHAIN");
-    } else {
-        sprintf(text, "$%d CHAINS", p->value);
-    }
-
-    VS::Render::DrawLiveCompactTextColor(text, vs_getXY_2(x, y), vs_getRGB888(160, 64, 16),
-        (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));
 }
 
 // decomp: BATTLE.PRG func_80095C18 (src/BATTLE/BATTLE.PRG/2842C.c:2399)
@@ -1269,7 +1125,7 @@ int Battle_QueueEquipmentStatChange(int arg0, int stat_label_kind, int encoded_a
             p->value = (encoded_amount & 0x7FFF) | ((encoded_amount & 0x80000000) >> 16);
         }
 
-        sprintf((char*)p->text, "%d", p->value & 0x7FFF);
+        sprintf((char *)(p->text), "%d", p->value & 0x7FFF);
         p->textLength = strlen((const char *)(p->text));
         VS::Battle::CommitLiveFloatingLabel(p);
     }
@@ -1376,24 +1232,6 @@ void Battle_ShowAbilityTimingCue(int cue_duration_frames)
     }
 
     Battle_abilityTimingCueFrames += cue_duration_frames;
-}
-
-// decomp: BATTLE.PRG func_800970BC (src/BATTLE/BATTLE.PRG/2842C.c:2864)
-void Battle_DrawAbilityTimingCue(void)
-{
-    void** p = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-    POLY_FT4* prim = (POLY_FT4*)p[0];
-
-    setPolyFT4(prim);
-    setXY4(prim, Battle_abilityTimingCuePosition.vx - 11, Battle_abilityTimingCuePosition.vy - 32, Battle_abilityTimingCuePosition.vx + 11,
-        Battle_abilityTimingCuePosition.vy - 32, Battle_abilityTimingCuePosition.vx - 11, Battle_abilityTimingCuePosition.vy, Battle_abilityTimingCuePosition.vx + 11,
-        Battle_abilityTimingCuePosition.vy);
-    setUV4(prim, 0xC0, 0, 0xD6, 0, 0xC0, 0x20, 0xD6, 0x20);
-    setRGB0(prim, 0xF0, 0x40, 0x20);
-    setTPage(prim, 0, 0, 448, 256);
-    setClut(prim, 960, 221);
-    AddPrim((u_long*)p[1] - 5, prim++);
-    p[0] = prim;
 }
 
 // decomp: BATTLE.PRG func_800971D4 (src/BATTLE/BATTLE.PRG/2842C.c:2881)

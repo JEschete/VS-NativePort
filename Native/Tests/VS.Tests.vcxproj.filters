@@ -510,6 +510,15 @@
     <ClCompile Include="src\FloatingLabelQueueTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FloatingLabelRenderingLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FloatingLabelRenderingModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FloatingLabelRenderingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\FogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1033,6 +1042,9 @@
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\FloatingLabelQueueLiveFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\FloatingLabelRenderingLiveFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ScriptSources.hpp">

@@ -44,6 +44,7 @@
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
+#include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
@@ -347,19 +348,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800941FCu, 0u, (void*)&Battle_UpdateAndDrawFloatingLabels, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80094844u, 0u, (void*)&Battle_PlaceActorValueLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80094B0Cu, 0u, (void*)&Battle_DrawActorValueLabel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80094E18u, 0u, (void*)&Battle_DrawValueLabelCaption, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009506Cu, 0u, (void*)&Battle_DrawLockedFloatingLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80095258u, 0u, (void*)&Battle_DrawActorStatusLabel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800957D0u, 0u, (void*)&Battle_DrawStatusRemovalMarker, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800958A4u, 0u, (void*)&Battle_DrawAbilityTimingResult, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80095A4Cu, 0u, (void*)&Battle_DrawChainCount, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80095C18u, 0u, (void*)&Battle_DrawActorMarker, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009627Cu, 0u, (void*)&Battle_DrawActorMarkers, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009651Cu, 0u, (void*)&Battle_DrawOffscreenActorArrow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80096768u, 0u, (void*)&Battle_QueueEquipmentStatChange, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009695Cu, 0u, (void*)&Battle_DrawEquipmentStatChange, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80096FF0u, 0u, (void*)&Battle_ShowAbilityTimingCue, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800970BCu, 0u, (void*)&Battle_DrawAbilityTimingCue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800971D4u, 0u, (void*)&Battle_CommitEquipmentStatChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009EA14u, 0u, (void*)&Battle_PlayActorDamageReaction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6724u, 0u, (void*)&Event_ScriptWaitForSplashFile, 0u, 0u, 0u},
@@ -1788,6 +1783,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C123Cu, 0u, (void*)&VS::Battle::IsLivePointInTargetCone, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1384u, 0u, (void*)&VS::Battle::IsLivePointInTargetPrism, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1564u, 0u, (void*)&VS::Battle::IsLivePointInTargetVolume, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80094E18u, 0u, (void*)&VS::Battle::DrawLiveValueLabelCaption, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009506Cu, 0u, (void*)&VS::Battle::DrawLiveLockedFloatingLabel, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800957D0u, 0u, (void*)&VS::Battle::DrawLiveStatusRemovalMarker, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800958A4u, 0u, (void*)&VS::Battle::DrawLiveAbilityTimingResult, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80095A4Cu, 0u, (void*)&VS::Battle::DrawLiveChainCount, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800970BCu, 0u, (void*)&VS::Battle::DrawLiveAbilityTimingCue, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

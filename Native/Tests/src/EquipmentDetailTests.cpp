@@ -311,8 +311,8 @@ TEST_CASE("Weapon naming selection highlight retains the lower UI chain",
   CHECK(fixture.frame.ReachesLastEntry());
   const auto packets = fixture.Packets();
   REQUIRE(packets.size() == 1);
-  CHECK(packets[0][3] == vs_getXY_2(128, 76));
-  CHECK(packets[0][9] == vs_getXY_2(138, 94));
+  CHECK(packets[0][3] == 0x004C0080);
+  CHECK(packets[0][9] == 0x005E008A);
   CHECK(fixture.frame.storage.front() == 0xDEADBEEF);
   CHECK(fixture.frame.storage.back() == 0xDEADBEEF);
 }

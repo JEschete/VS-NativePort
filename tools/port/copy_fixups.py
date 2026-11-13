@@ -888,6 +888,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::IsLivePointInTargetPrism": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
     "VS::Battle::IsLivePointInTargetVolume": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
     "VS::Battle::IsLivePointInCurrentSphereVolume": r"Native\Game\include\Battle\SphereContainmentLive.hpp",
+    "VS::Battle::DrawLiveValueLabelCaption": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
+    "VS::Battle::DrawLiveLockedFloatingLabel": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
+    "VS::Battle::DrawLiveStatusRemovalMarker": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
+    "VS::Battle::DrawLiveAbilityTimingResult": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
+    "VS::Battle::DrawLiveChainCount": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
+    "VS::Battle::DrawLiveAbilityTimingCue": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1766,6 +1772,12 @@ OWNED_CALL_BINDINGS["F01292"] = "VS::Battle::IsLivePointInTargetCylinder"
 OWNED_CALL_BINDINGS["F01293"] = "VS::Battle::IsLivePointInTargetCone"
 OWNED_CALL_BINDINGS["F01294"] = "VS::Battle::IsLivePointInTargetPrism"
 OWNED_CALL_BINDINGS["F01295"] = "VS::Battle::IsLivePointInTargetVolume"
+OWNED_CALL_BINDINGS["F00723"] = "VS::Battle::DrawLiveValueLabelCaption"
+OWNED_CALL_BINDINGS["F00724"] = "VS::Battle::DrawLiveLockedFloatingLabel"
+OWNED_CALL_BINDINGS["F00726"] = "VS::Battle::DrawLiveStatusRemovalMarker"
+OWNED_CALL_BINDINGS["F00727"] = "VS::Battle::DrawLiveAbilityTimingResult"
+OWNED_CALL_BINDINGS["F00728"] = "VS::Battle::DrawLiveChainCount"
+OWNED_CALL_BINDINGS["F00741"] = "VS::Battle::DrawLiveAbilityTimingCue"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3648,6 +3660,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800C123C, "VS::Battle::IsLivePointInTargetCone"),  # F01293
     ("BATTLE/BATTLE.PRG", 0x800C1384, "VS::Battle::IsLivePointInTargetPrism"),  # F01294
     ("BATTLE/BATTLE.PRG", 0x800C1564, "VS::Battle::IsLivePointInTargetVolume"),  # F01295
+    ("BATTLE/BATTLE.PRG", 0x80094E18, "VS::Battle::DrawLiveValueLabelCaption"),  # F00723
+    ("BATTLE/BATTLE.PRG", 0x8009506C, "VS::Battle::DrawLiveLockedFloatingLabel"),  # F00724
+    ("BATTLE/BATTLE.PRG", 0x800957D0, "VS::Battle::DrawLiveStatusRemovalMarker"),  # F00726
+    ("BATTLE/BATTLE.PRG", 0x800958A4, "VS::Battle::DrawLiveAbilityTimingResult"),  # F00727
+    ("BATTLE/BATTLE.PRG", 0x80095A4C, "VS::Battle::DrawLiveChainCount"),  # F00728
+    ("BATTLE/BATTLE.PRG", 0x800970BC, "VS::Battle::DrawLiveAbilityTimingCue"),  # F00741
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

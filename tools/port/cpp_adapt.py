@@ -6,8 +6,9 @@
 
 The copier stays the source of generated files: this tool edits them in place, then records each changed line in
 tools\\port\\cpp_adaptations.json as (path, old line, new line), which copy_to_native.py replays after it renders. Only
-conversions that C performed implicitly are written out, so each edit states the conversion C already did. A
-diagnostic no rule understands stays an error for a person to resolve.
+conversions that C performed implicitly are written out, so each edit states the conversion C already did.
+Macro-expansion notes do not count as additional overload candidates. A diagnostic no rule understands stays
+an error for a person to resolve.
 """
 from __future__ import annotations
 
@@ -385,8 +386,8 @@ def derive_pass(paths: list[str]) -> tuple[int, int]:
                         if note["level"] != "note":
                             break
                         notes.append(note["message"])
-                    viable = [NOT_VIABLE.search(note) for note in notes]
-                    if len(viable) == 1 and viable[0]:
+                    viable = [match for note in notes if (match := NOT_VIABLE.search(note))]
+                    if len(viable) == 1:
                         done = fix_call_argument(get(where), int(item["line"]), int(item["col"]), viable[0][2],
                                                  int(viable[0][3]))
             fixed += done

@@ -478,6 +478,10 @@
     <None Include="..\..\port\differentials\equipment_detail_b_guard_driver.cpp" />
     <None Include="..\..\port\differentials\flight_movement.py" />
     <None Include="..\..\port\differentials\flight_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_label_caption.py" />
+    <None Include="..\..\port\differentials\floating_label_chain.py" />
+    <None Include="..\..\port\differentials\floating_label_cue.py" />
+    <None Include="..\..\port\differentials\floating_label_locked.py" />
     <None Include="..\..\port\differentials\floating_label_queue_advance.py" />
     <None Include="..\..\port\differentials\floating_label_queue_compact.py" />
     <None Include="..\..\port\differentials\floating_label_queue_driver.cpp" />
@@ -487,6 +491,11 @@
     <None Include="..\..\port\differentials\floating_label_queue_reset.py" />
     <None Include="..\..\port\differentials\floating_label_queue_support.py" />
     <None Include="..\..\port\differentials\floating_label_queue_world.py" />
+    <None Include="..\..\port\differentials\floating_label_removal.py" />
+    <None Include="..\..\port\differentials\floating_label_rendering_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_label_rendering_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_label_rendering_support.py" />
+    <None Include="..\..\port\differentials\floating_label_timing.py" />
     <None Include="..\..\port\differentials\height_filter.py" />
     <None Include="..\..\port\differentials\height_filter_driver.cpp" />
     <None Include="..\..\port\differentials\hit_calculations.py" />
@@ -613,6 +622,7 @@
     <None Include="..\..\port\relaxed_sources.txt" />
     <None Include="..\..\port\resource_dispatch_audit.py" />
     <None Include="..\..\port\test_assembly_gap_audit.py" />
+    <None Include="..\..\port\test_cpp_adapt.py" />
     <None Include="..\..\port\test_differential.py" />
     <None Include="..\..\port\test_encounter_fixups.py" />
     <None Include="..\..\port\test_module_symbol_extents.py" />

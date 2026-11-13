@@ -223,6 +223,9 @@
     <ClCompile Include="src\FloatingLabelQueueLiveTests.cpp" />
     <ClCompile Include="src\FloatingLabelQueueModuleTests.cpp" />
     <ClCompile Include="src\FloatingLabelQueueTests.cpp" />
+    <ClCompile Include="src\FloatingLabelRenderingLiveTests.cpp" />
+    <ClCompile Include="src\FloatingLabelRenderingModuleTests.cpp" />
+    <ClCompile Include="src\FloatingLabelRenderingTests.cpp" />
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\FrameTimingTests.cpp" />
     <ClCompile Include="src\FrameUpdateTests.cpp" />
@@ -426,6 +429,7 @@
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />
     <ClInclude Include="include\TestSupport\FloatingLabelQueueFixture.hpp" />
     <ClInclude Include="include\TestSupport\FloatingLabelQueueLiveFixture.hpp" />
+    <ClInclude Include="include\TestSupport\FloatingLabelRenderingLiveFixture.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />
     <ClInclude Include="include\TestSupport\SphereContainmentLiveFixture.hpp" />

@@ -738,6 +738,9 @@
     <ClInclude Include="src\Render\UiPrimitives.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\UiTexturedQuads.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Save\MemoryCard\GameFiles.cpp">
       <Filter>src\Save\MemoryCard</Filter>
     </ClCompile>
@@ -1192,6 +1195,9 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\UiPacketsLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\UiTexturedQuads.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\MemoryCard\GameFiles.hpp">

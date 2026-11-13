@@ -14,8 +14,9 @@ a function the original only inlined; the FIXES entry and its comment are remove
 owned.csv row and adds the Live adapter to gen_solution.py's VS.Game C-header list. The header
 defaults to the source's include path and the Live header to
 <source stem>Live.hpp. prune-adaptations drops the recorded C++ edits (cpp_adaptations.json) that no
-longer match the copier's output once the row is owned, and re-anchors the rest. Every command is
-idempotent: a second run reports nothing to change.
+longer match the copier's output once the row is owned, and re-anchors the rest. If a repeated line
+would cross a surviving edit, it refuses without writing: rederive with cpp_adapt.py and record
+the compiler's conversions instead. Every command is idempotent: a second run reports nothing to change.
 
 The ledger spec is JSON. Every string may hold {placeholders}, filled from the summary's "values",
 the spec's "values" and --set name=value; base (HEAD), ids, record, slice and focused_tests are
@@ -388,11 +389,20 @@ def prune_hunks(table: dict, rendered: dict[str, str]) -> tuple[dict, list[str]]
         lines = rendered[path].split("\n")
         cursor = shift = 0
         survivors = []
-        for index, old, new in hunks:
+        for position, (index, old, new) in enumerate(hunks):
             found = index + shift
             if found < cursor or lines[found:found + len(old)] != old:
                 found = next((i for i in range(cursor, len(lines) - len(old) + 1) if lines[i:i + len(old)] == old),
                              None)
+                if found is not None:
+                    for _, following, _ in hunks[position + 1:]:
+                        if following and any(
+                                lines[i:i + len(following)] == following
+                                for i in range(cursor, found - len(following) + 1)):
+                            raise SystemExit(
+                                f"{path}:{index + 1}: cannot safely re-anchor a repeated C++ edit "
+                                "past a surviving edit. Rederive with tools\\port\\cpp_adapt.py "
+                                "and record the compiler's conversions; adaptations were not written.")
             if found is None:
                 dropped.append(f"{path}:{index + 1}: {old[:1]}")
                 continue

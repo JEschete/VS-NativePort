@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:108
+#define vs_getRGB888(r, g, b) (((r) & 0xFF) | (((g) & 0xFF) << 8) | (((b) & 0xFF) << 16))
+
 #endif // VS_MENU_INVENTORY_INVENTORY_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_INVENTORY_INVENTORY_H_DECLS)

@@ -798,6 +798,12 @@
     <ClCompile Include="src\Battle\FloatingLabelQueueLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\FloatingLabelRendering.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\FloatingLabelRenderingLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClInclude Include="src\Battle\Hit.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
@@ -3136,6 +3142,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\FloatingLabelQueueLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\FloatingLabelRendering.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\FloatingLabelRenderingLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\HitCalculations.hpp">

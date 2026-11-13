@@ -2406,6 +2406,18 @@
     <None Include="..\..\port\differentials\flight_movement_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\floating_label_caption.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_chain.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_cue.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_locked.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\floating_label_queue_advance.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2431,6 +2443,21 @@
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\floating_label_queue_world.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_removal.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_rendering_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_rendering_guard_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_rendering_support.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\floating_label_timing.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\height_filter.py">
@@ -2809,6 +2836,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_assembly_gap_audit.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\test_cpp_adapt.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_differential.py">
