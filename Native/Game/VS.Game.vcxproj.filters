@@ -2187,6 +2187,12 @@
     <ClInclude Include="src\Items\Categories.h">
       <Filter>src\Items</Filter>
     </ClInclude>
+    <ClCompile Include="src\Items\ContainerGemCounts.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Items\ContainerGemCountsLive.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
     <ClCompile Include="src\Items\ContainerIndexing.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
@@ -2271,6 +2277,12 @@
     <ClInclude Include="src\Menu\BreakArts.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Container\ContainerCapacity.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerCapacityLive.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ContainerDetailControllers.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
@@ -3600,6 +3612,12 @@
     <ClInclude Include="include\Field\TrapsLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
+    <ClInclude Include="include\Items\ContainerGemCounts.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ContainerGemCountsLive.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
     <ClInclude Include="include\Items\ContainerIndexing.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
@@ -3653,6 +3671,12 @@
     </ClInclude>
     <ClInclude Include="include\Items\Recovery.hpp">
       <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerCapacity.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerCapacityLive.hpp">
+      <Filter>include\Menu\Container</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Container\ContainerDetailControllers.hpp">
       <Filter>include\Menu\Container</Filter>

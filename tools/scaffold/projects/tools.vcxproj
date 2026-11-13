@@ -390,6 +390,17 @@
     <None Include="..\..\port\differentials\camera_selection_guard_driver.cpp" />
     <None Include="..\..\port\differentials\candidate_movement.py" />
     <None Include="..\..\port\differentials\candidate_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\container_capacity_common.py" />
+    <None Include="..\..\port\differentials\container_capacity_driver.cpp" />
+    <None Include="..\..\port\differentials\container_capacity_f02971.py" />
+    <None Include="..\..\port\differentials\container_capacity_f02972.py" />
+    <None Include="..\..\port\differentials\container_capacity_f02973.py" />
+    <None Include="..\..\port\differentials\container_capacity_f02974.py" />
+    <None Include="..\..\port\differentials\container_capacity_f02975.py" />
+    <None Include="..\..\port\differentials\container_capacity_f02976.py" />
+    <None Include="..\..\port\differentials\container_capacity_f02977.py" />
+    <None Include="..\..\port\differentials\container_capacity_f02978.py" />
+    <None Include="..\..\port\differentials\container_capacity_guard_driver.cpp" />
     <None Include="..\..\port\differentials\container_detail_controllers_common.py" />
     <None Include="..\..\port\differentials\container_detail_controllers_driver.cpp" />
     <None Include="..\..\port\differentials\container_detail_controllers_f02944.py" />

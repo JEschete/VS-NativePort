@@ -305,6 +305,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Items\InventoryLive.cpp",
                 r"src\Items\ContainerIndexingLive.cpp",
                 r"src\Items\ContainerTransfersLive.cpp",
+                r"src\Items\ContainerGemCountsLive.cpp",
                 r"src\Actors\ActorTableLive.cpp",
                 r"src\Actors\AppearanceLive.cpp",
                 r"src\Actors\TextureAnimationLive.cpp",
@@ -378,6 +379,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\Container\ContainerDetailHelpersLive.cpp",
                 r"src\Menu\Container\ContainerDetailControllersLive.cpp",
                 r"src\Menu\Container\ContainerSortingLive.cpp",
+                r"src\Menu\Container\ContainerCapacityLive.cpp",
             ))
 
 

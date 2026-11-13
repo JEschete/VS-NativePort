@@ -2,7 +2,6 @@
 #include "Audio/SfxLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Items/ContainerIndexingLive.hpp"
-#include "Items/ContainerTransfersLive.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -13,7 +12,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
-#include "Items/InventoryLiveState.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/Framework.h"
@@ -356,114 +354,6 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         break;
     }
     return 0;
-}
-
-// decomp: MENUD.PRG _getWeaponsubItemCount (src/MENU/MENUD.PRG/234.c:1959)
-int Menu_Container_CountWeaponGems(int weapon_index)
-{
-    int i;
-    Items_InventoryWeapon* temp = &Menu_Container_containerData->items.weapons[weapon_index];
-    int count = 0;
-
-    for (i = 0; i < Menu_Container_containerData->items.grips[temp->grip - 1].gemSlots; ++i) {
-        count += temp->gems[i] != 0;
-    }
-    return count;
-}
-
-// decomp: MENUD.PRG _getShieldsubItemCount (src/MENU/MENUD.PRG/234.c:1971)
-int Menu_Container_CountShieldGems(int shield_index)
-{
-    int i;
-    Items_InventoryShield* shield = &Menu_Container_containerData->items.shields[shield_index];
-    int count = 0;
-
-    for (i = 0; i < shield->base.gemSlots; ++i) {
-        count += shield->gems[i] != 0;
-    }
-    return count;
-}
-
-// decomp: MENUD.PRG func_801066DC (src/MENU/MENUD.PRG/234.c:1983)
-int Menu_Container_WouldExceedCapacity(int category_id, int additional_item_count)
-{
-    int destination_item_count = VS::Items::CountLiveContainerItems(category_id, &Menu_Container_otherStorage->items);
-    int projected_item_count =
-        additional_item_count + (destination_item_count + VS::Items::CountLiveContainerItems(category_id, &Menu_Framework_unusedInventoryStorage->stagedTransfer));
-
-    if (Menu_Container_browsingGadgetBag != 0) {
-        return Menu_Container_containerItemCapacities[category_id] < projected_item_count;
-    }
-    return Items_Inventory_inventoryItemCapacities[category_id] < projected_item_count;
-}
-
-// decomp: MENUD.PRG func_80106784 (src/MENU/MENUD.PRG/234.c:1995)
-int Menu_Container_TransferCapacityError(int category_id, int item_index)
-{
-    int i;
-
-    for (i = 0; i < 64; ++i) {
-        if (Menu_Framework_unusedInventoryStorage->itemsToTransfer[i] == 0) {
-            break;
-        }
-    }
-
-    if (category_id == 0) {
-        i += 2 + Menu_Container_CountWeaponGems(item_index);
-    }
-
-    if (category_id == 3) {
-        i += Menu_Container_CountShieldGems(item_index);
-    }
-
-    if (i >= 64) {
-        return 1;
-    }
-
-    if (Menu_Container_WouldExceedCapacity(category_id, 1) != 0) {
-        return 2;
-    }
-
-    if (category_id == 0) {
-        if (Menu_Container_WouldExceedCapacity(1, 1) != 0) {
-            return 2;
-        }
-        if (Menu_Container_WouldExceedCapacity(2, 1) != 0) {
-            return 2;
-        }
-        if (Menu_Container_WouldExceedCapacity(5, Menu_Container_CountWeaponGems(item_index)) != 0) {
-            return 2;
-        }
-    }
-
-    if (category_id == 3 && Menu_Container_WouldExceedCapacity(5, Menu_Container_CountShieldGems(item_index)) != 0) {
-        return 2;
-    }
-
-    return 0;
-}
-
-// decomp: MENUD.PRG func_801068BC (src/MENU/MENUD.PRG/234.c:2040)
-void Menu_Container_UndoPendingTransfer(int pending_transfer_index)
-{
-    int staged_item_index;
-    int category_id;
-    int packed_transfer_item;
-
-    packed_transfer_item = Menu_Framework_unusedInventoryStorage->itemsToTransfer[pending_transfer_index];
-    category_id = packed_transfer_item >> 8;
-    staged_item_index = (packed_transfer_item - 1) & 0xFF;
-    VS::Items::CopyLiveContainerItem(category_id | 0x10, &Menu_Container_containerData->items, staged_item_index,
-        &Menu_Framework_unusedInventoryStorage->stagedTransfer);
-    VS::Items::ClearLiveContainerItem(category_id, staged_item_index, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
-}
-
-// decomp: MENUD.PRG func_80106948 (src/MENU/MENUD.PRG/234.c:2054)
-void Menu_Container_StageItemTransfer(int category_id, int item_index)
-{
-    VS::Items::CopyLiveContainerItem(category_id | 0x10, &Menu_Framework_unusedInventoryStorage->stagedTransfer, item_index,
-        &Menu_Container_containerData->items);
-    VS::Items::ClearLiveContainerItem(category_id, item_index, &Menu_Container_containerData->items);
 }
 
 // decomp: MENUD.PRG func_801069B0 (src/MENU/MENUD.PRG/234.c:2061)

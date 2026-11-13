@@ -5,6 +5,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
+#include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -107,42 +108,6 @@ void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStr
 
     VS::Menu::container::BuildLiveShieldStats(&shield, &container->shields[index], container);
     VS::Menu::Framework::FormatLiveShieldRow(&shield, rowStrings, rowTypes, buf);
-}
-
-// decomp: MENUD.PRG func_80106464 (src/MENU/MENUD.PRG/234.c:1925)
-void Menu_Container_DrawCapacityCount(int capacity_limit, int packed_count_position, int occupied_count)
-{
-    int used_count_color;
-    int packed_used_count_position;
-
-    used_count_color = 0x808080;
-    VS::Menu::Framework::DrawLiveColoredInteger(capacity_limit, packed_count_position, 0x808080, 0);
-    packed_used_count_position = packed_count_position - 0x20;
-    VS::Render::DrawLiveCompactTextColor("/", packed_used_count_position, 0x808080, NULL);
-    if ((occupied_count * 2) < capacity_limit) {
-        used_count_color = 0x804020;
-    }
-    VS::Menu::Framework::DrawLiveColoredInteger(occupied_count, packed_used_count_position, used_count_color, 0);
-}
-
-// decomp: MENUD.PRG func_80106504 (src/MENU/MENUD.PRG/234.c:1940)
-void Menu_Container_DrawStorageCapacities(void)
-{
-    int i;
-    int var_s1_2;
-
-    for (i = 0; i < 2; ++i) {
-        VS::Render::DrawLiveCompactText(Menu_Container_kStorageNames[i], (0x3A + i * 0x80) | 0x580000, NULL);
-    }
-
-    for (i = 0; i < 7; ++i, var_s1_2 += 0xC) {
-        Menu_Container_DrawCapacityCount(Items_Inventory_inventoryItemCapacities[i],
-            ((0x64 + 0xC * i) << 16) | 0x70,
-            VS::Items::CountLiveContainerItems(i, &Menu_Framework_unusedInventoryStorage->gadgetBag.items));
-        VS::Render::DrawLiveCompactText(Menu_Container_kCategoryLabels[i], ((0x64 + 0xC * i) << 16) | 0xA0, NULL);
-        Menu_Container_DrawCapacityCount(Menu_Container_containerItemCapacities[i], ((0x64 + 0xC * i) << 16) | 0xF8,
-            VS::Items::CountLiveContainerItems(i, &Menu_Framework_unusedInventoryStorage->container.items));
-    }
 }
 
 // decomp: MENUD.PRG func_80106C64 (src/MENU/MENUD.PRG/234.c:2145)
@@ -534,7 +499,7 @@ loop_1:
                 }
             } else if (Menu_Container_itemListSelectedRow > 0) {
                 if (selected_category_id == 7) {
-                    Menu_Container_UndoPendingTransfer(Menu_Container_itemListSelectedRow - 1);
+                    VS::Menu::container::UndoLivePendingTransfer(Menu_Container_itemListSelectedRow - 1);
                     VS::Items::RefreshLiveMiscTransferCount();
                     VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 4;
@@ -776,7 +741,7 @@ loop_1:
             var_a2 = var_a2 == 0;
             action_row_text[1] = &Menu_Container_menuText[temp_s2];
         } else {
-            var_a2 = Menu_Container_TransferCapacityError(selected_category_id, temp_s3);
+            var_a2 = VS::Menu::container::LiveTransferCapacityError(selected_category_id, temp_s3);
             action_row_text[1] = &Menu_Container_menuText[Menu_Container_menuText[var_a2 + 5]];
         }
 
@@ -872,7 +837,7 @@ loop_1:
                 switch (Menu_Container_itemActionIds[temp_s3]) {
                 case 1:
                     VS::Menu::Framework::InitializeLiveInformationBox();
-                    Menu_Container_StageItemTransfer(selected_category_id, VS::Items::LiveContainerCategoryIndices(selected_category_id,
+                    VS::Menu::container::StageLiveItemTransfer(selected_category_id, VS::Items::LiveContainerCategoryIndices(selected_category_id,
                                               Menu_Container_containerData)[Menu_Container_itemListSelectedRow - 1]
                                               - 1);
                     VS::Menu::Framework::ClearLiveMenuExcept(0);
@@ -1125,7 +1090,7 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
         VS::Menu::Framework::SetLiveInformationMessage(direction_help_text);
         break;
     }
-    Menu_Container_DrawStorageCapacities();
+    VS::Menu::container::DrawLiveStorageCapacities();
     return 0;
 }
 
@@ -1348,10 +1313,10 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
             } else {
                 category_capacity = Items_Inventory_inventoryItemCapacities[s3];
             }
-            Menu_Container_DrawCapacityCount(category_capacity, i + packed_capacity_row_position, projected_category_count);
+            VS::Menu::container::DrawLiveCapacityCount(category_capacity, i + packed_capacity_row_position, projected_category_count);
             packed_capacity_row_position += vs_getXY_4(0, 12);
         }
-        Menu_Container_DrawCapacityCount(Menu_Container_browsingGadgetBag != 0 ? 0x100 : 0x40, i + 0xA00070, Menu_Container_transferredMiscCount);
+        VS::Menu::container::DrawLiveCapacityCount(Menu_Container_browsingGadgetBag != 0 ? 0x100 : 0x40, i + 0xA00070, Menu_Container_transferredMiscCount);
     }
     return 0;
 }

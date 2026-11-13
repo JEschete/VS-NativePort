@@ -1361,6 +1361,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Items::CommitLiveGadgetBag": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
     "VS::Items::LiveContainerParentWeaponIndex": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
     "VS::Items::LiveContainerParentShieldIndex": r"Native\Game\include\Items\ContainerTransfersLive.hpp",
+    "VS::Items::CountLiveContainerWeaponGems": r"Native\Game\include\Items\ContainerGemCountsLive.hpp",
+    "VS::Items::CountLiveContainerShieldGems": r"Native\Game\include\Items\ContainerGemCountsLive.hpp",
     "VS::Menu::container::BuildLiveWeaponStats": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
     "VS::Menu::container::BuildLiveShieldStats": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
     "VS::Menu::container::SetLivePanelVisibility": r"Native\Game\include\Menu\Container\ContainerDetailHelpersLive.hpp",
@@ -1382,6 +1384,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::container::SortLiveMisc": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
     "VS::Menu::container::CopyLiveEquipmentStats": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
     "VS::Menu::container::SortLiveEquipment": r"Native\Game\include\Menu\Container\ContainerSortingLive.hpp",
+    "VS::Menu::container::DrawLiveCapacityCount": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
+    "VS::Menu::container::DrawLiveStorageCapacities": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
+    "VS::Menu::container::WouldExceedLiveCapacity": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
+    "VS::Menu::container::LiveTransferCapacityError": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
+    "VS::Menu::container::UndoLivePendingTransfer": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
+    "VS::Menu::container::StageLiveItemTransfer": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2386,6 +2394,8 @@ OWNED_CALL_BINDINGS["F02938"] = "VS::Items::SnapshotLiveGadgetBag"
 OWNED_CALL_BINDINGS["F02939"] = "VS::Items::CommitLiveGadgetBag"
 OWNED_CALL_BINDINGS["F02940"] = "VS::Items::LiveContainerParentWeaponIndex"
 OWNED_CALL_BINDINGS["F02941"] = "VS::Items::LiveContainerParentShieldIndex"
+OWNED_CALL_BINDINGS["F02973"] = "VS::Items::CountLiveContainerWeaponGems"
+OWNED_CALL_BINDINGS["F02974"] = "VS::Items::CountLiveContainerShieldGems"
 OWNED_CALL_BINDINGS["F02925"] = "VS::Menu::container::BuildLiveWeaponStats"
 OWNED_CALL_BINDINGS["F02926"] = "VS::Menu::container::BuildLiveShieldStats"
 OWNED_CALL_BINDINGS["F02942"] = "VS::Menu::container::SetLivePanelVisibility"
@@ -2407,6 +2417,12 @@ OWNED_CALL_BINDINGS["F02963"] = "VS::Menu::container::SortLiveShields"
 OWNED_CALL_BINDINGS["F02965"] = "VS::Menu::container::SortLiveMisc"
 OWNED_CALL_BINDINGS["F02967"] = "VS::Menu::container::CopyLiveEquipmentStats"
 OWNED_CALL_BINDINGS["F02968"] = "VS::Menu::container::SortLiveEquipment"
+OWNED_CALL_BINDINGS["F02971"] = "VS::Menu::container::DrawLiveCapacityCount"
+OWNED_CALL_BINDINGS["F02972"] = "VS::Menu::container::DrawLiveStorageCapacities"
+OWNED_CALL_BINDINGS["F02975"] = "VS::Menu::container::WouldExceedLiveCapacity"
+OWNED_CALL_BINDINGS["F02976"] = "VS::Menu::container::LiveTransferCapacityError"
+OWNED_CALL_BINDINGS["F02977"] = "VS::Menu::container::UndoLivePendingTransfer"
+OWNED_CALL_BINDINGS["F02978"] = "VS::Menu::container::StageLiveItemTransfer"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3831,6 +3847,8 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x80103B20, "VS::Items::CommitLiveGadgetBag"),  # F02939
     ("MENU/MENUD.PRG", 0x80103C9C, "VS::Items::LiveContainerParentWeaponIndex"),  # F02940
     ("MENU/MENUD.PRG", 0x80103D14, "VS::Items::LiveContainerParentShieldIndex"),  # F02941
+    ("MENU/MENUD.PRG", 0x80106624, "VS::Items::CountLiveContainerWeaponGems"),  # F02973
+    ("MENU/MENUD.PRG", 0x80106684, "VS::Items::CountLiveContainerShieldGems"),  # F02974
     ("BATTLE/BATTLE.PRG", 0x8008255C, "VS::Field::CalculateLiveTrapPanelDamage"),  # F00420 Battle_statCalculators[12]
     ("BATTLE/BATTLE.PRG", 0x80082FF4, "VS::Field::CalculateLiveHealingPanelRecovery"),  # F00422 [14]
     ("EFFECT/PLG074.BIN", 0x800F98F8, "VS::Effects::Templates::UpdateLivePlg073TiledRing"),  # F01986
@@ -3885,6 +3903,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x801055F0, "VS::Menu::container::SortLiveMisc"),  # F02965
     ("MENU/MENUD.PRG", 0x80105844, "VS::Menu::container::CopyLiveEquipmentStats"),  # F02967
     ("MENU/MENUD.PRG", 0x8010592C, "VS::Menu::container::SortLiveEquipment"),  # F02968
+    ("MENU/MENUD.PRG", 0x80106464, "VS::Menu::container::DrawLiveCapacityCount"),  # F02971
+    ("MENU/MENUD.PRG", 0x80106504, "VS::Menu::container::DrawLiveStorageCapacities"),  # F02972
+    ("MENU/MENUD.PRG", 0x801066DC, "VS::Menu::container::WouldExceedLiveCapacity"),  # F02975
+    ("MENU/MENUD.PRG", 0x80106784, "VS::Menu::container::LiveTransferCapacityError"),  # F02976
+    ("MENU/MENUD.PRG", 0x801068BC, "VS::Menu::container::UndoLivePendingTransfer"),  # F02977
+    ("MENU/MENUD.PRG", 0x80106948, "VS::Menu::container::StageLiveItemTransfer"),  # F02978
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

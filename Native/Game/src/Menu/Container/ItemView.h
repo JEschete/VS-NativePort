@@ -29,8 +29,6 @@ void Menu_Container_BuildWeaponRow(Items_ContainerData* container, char** rowStr
     int* rowTypes, char* buf, int index);
 void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStrings,
     int* rowTypes, char* buf, int index);
-void Menu_Container_DrawCapacityCount(int capacity_limit, int packed_count_position, int occupied_count);
-void Menu_Container_DrawStorageCapacities(void);
 int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, char* textBuf);
 void Menu_Container_RestoreItemRows(int category_id);
 int Menu_Container_UpdateTransferConfirmation(int initialize_confirmation);

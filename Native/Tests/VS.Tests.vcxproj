@@ -132,6 +132,9 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\ConditionSnapshotTests.cpp" />
+    <ClCompile Include="src\ContainerCapacityLiveTests.cpp" />
+    <ClCompile Include="src\ContainerCapacityModuleTests.cpp" />
+    <ClCompile Include="src\ContainerCapacityTests.cpp" />
     <ClCompile Include="src\ContainerDetailControllersLiveTests.cpp" />
     <ClCompile Include="src\ContainerDetailControllersModuleTests.cpp" />
     <ClCompile Include="src\ContainerDetailControllersTests.cpp" />
@@ -403,6 +406,8 @@
     <ClInclude Include="include\Items\ContainerIndexingLiveFixture.hpp" />
     <ClInclude Include="include\Items\ContainerTransfersLiveFixture.hpp" />
     <ClInclude Include="include\Items\ContainerTransfersWorld.hpp" />
+    <ClInclude Include="include\Menu\ContainerCapacityLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\ContainerCapacityWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailHelpersSamples.hpp" />

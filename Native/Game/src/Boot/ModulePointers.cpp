@@ -66,9 +66,11 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TrapsLive.hpp"
+#include "Items/ContainerGemCountsLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
@@ -1985,6 +1987,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUD.PRG", 0x80103B20u, 0u, (void*)&VS::Items::CommitLiveGadgetBag, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103C9Cu, 0u, (void*)&VS::Items::LiveContainerParentWeaponIndex, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103D14u, 0u, (void*)&VS::Items::LiveContainerParentShieldIndex, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80106624u, 0u, (void*)&VS::Items::CountLiveContainerWeaponGems, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80106684u, 0u, (void*)&VS::Items::CountLiveContainerShieldGems, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008255Cu, 0u, (void*)&VS::Field::CalculateLiveTrapPanelDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80082FF4u, 0u, (void*)&VS::Field::CalculateLiveHealingPanelRecovery, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073TiledRing, 0u, 0u, 0u},
@@ -2039,6 +2043,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUD.PRG", 0x801055F0u, 0u, (void*)&VS::Menu::container::SortLiveMisc, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80105844u, 0u, (void*)&VS::Menu::container::CopyLiveEquipmentStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x8010592Cu, 0u, (void*)&VS::Menu::container::SortLiveEquipment, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80106464u, 0u, (void*)&VS::Menu::container::DrawLiveCapacityCount, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80106504u, 0u, (void*)&VS::Menu::container::DrawLiveStorageCapacities, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801066DCu, 0u, (void*)&VS::Menu::container::WouldExceedLiveCapacity, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80106784u, 0u, (void*)&VS::Menu::container::LiveTransferCapacityError, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801068BCu, 0u, (void*)&VS::Menu::container::UndoLivePendingTransfer, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80106948u, 0u, (void*)&VS::Menu::container::StageLiveItemTransfer, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
