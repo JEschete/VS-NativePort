@@ -8,6 +8,7 @@
 #include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
+#include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -28,9 +29,7 @@ extern "C" {
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/Menus.h"
-#include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/TextBox.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -275,92 +274,6 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
     return itemCount;
 }
 
-// decomp: MENUD.PRG func_801071D8 (src/MENU/MENUD.PRG/234.c:2309)
-void Menu_Container_RestoreItemRows(int category_id)
-{
-    int selected_row_mismatch;
-    int i;
-
-    while (Menu_Framework_itemsListRow < 16) {
-        VS::Menu::Framework::UpdateLiveRowSelection();
-    }
-
-    for (i = 20; i < 40; ++i) {
-
-        Menu_Framework_MenuRow* restored_menu_row = VS::Menu::Framework::LiveMenuItem(i);
-
-        if (restored_menu_row->state == 2) {
-            restored_menu_row->state = 1;
-            restored_menu_row->x = restored_menu_row->targetPosition0;
-        }
-
-        selected_row_mismatch = i ^ (Menu_Framework_menuMemory.cursorMemories[(category_id + 81) * 2] + 20);
-        restored_menu_row->selected = selected_row_mismatch == 0;
-    }
-}
-
-// decomp: MENUD.PRG func_801072B0 (src/MENU/MENUD.PRG/234.c:2332)
-int Menu_Container_UpdateTransferConfirmation(int initialize_confirmation)
-{
-    static int Menu_Container_transferConfirmationSelectedAction;
-    static char Menu_Container_transferConfirmationStep;
-    static char Menu_Container_transferConfirmationLayoutPadding[3] __attribute__((unused));
-
-    char* confirmation_row_text[4];
-    int confirmation_row_types[2];
-    int i;
-    int confirmation_step;
-
-    if (initialize_confirmation != 0) {
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
-        Menu_Container_controlsPanelMode = 5;
-        Menu_Inventory_freezeTabArrows = 0;
-        Menu_Container_transferConfirmationSelectedAction = 0;
-        Menu_Container_transferConfirmationStep = 0;
-        return 0;
-    }
-
-    confirmation_step = Menu_Container_transferConfirmationStep;
-
-    switch (confirmation_step) {
-    case 0:
-        for (i = 0; i < 2; ++i) {
-            confirmation_row_text[i * 2] = (char*)&Menu_Container_menuText[Menu_Container_menuText[8 + i]];
-            confirmation_row_text[i * 2 + 1] = (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 10]];
-            confirmation_row_types[i] = 0;
-        }
-
-        VS::Menu::Framework::CreateLiveActionRows(2, 3, confirmation_row_text, confirmation_row_types);
-        Menu_Container_transferConfirmationStep = 1;
-        break;
-    case 1:
-        VS::Menu::Framework::UpdateLiveActionMenu();
-        Menu_Container_transferConfirmationSelectedAction = VS::Menu::Framework::LiveActionSelectionResult() + 1;
-
-        if (Menu_Container_transferConfirmationSelectedAction != 0) {
-            VS::Menu::Framework::FlyOutLiveRowLeft(0);
-            VS::Menu::Framework::FlyOutLiveRowLeft(1);
-            if (Menu_Container_transferConfirmationSelectedAction == confirmation_step) {
-                VS::Menu::PlaySelectSound();
-                VS::Menu::Framework::ClearLiveMenuExcept(0);
-                VS::Menu::container::SetLivePanelVisibility(0);
-            } else {
-                VS::Menu::PlayLeaveSound();
-                if (Menu_Container_transferConfirmationSelectedAction == 2) {
-                    Menu_Container_transferConfirmationSelectedAction = -1;
-                }
-            }
-            Menu_Container_transferConfirmationStep = 2;
-        }
-        break;
-    case 2:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            return Menu_Container_transferConfirmationSelectedAction;
-        }
-    }
-    return 0;
-}
-
 // decomp: MENUD.PRG func_80107490 (src/MENU/MENUD.PRG/234.c:2393)
 int Menu_Container_UpdateItemList(int transfer_direction_selection)
 {
@@ -447,7 +360,7 @@ loop_1:
             Menu_Container_itemListFirstEntry = 0;
             VS::Menu::Framework::CreateLiveMenuRows(temp_s2, (selected_category_id + 0x51) | 0x19200, initial_row_text, initial_row_types);
             if (Menu_Container_itemListStep == 0) {
-                Menu_Container_RestoreItemRows(selected_category_id);
+                VS::Menu::container::RestoreLiveItemRows(selected_category_id);
             }
             Input_settings.cursorMemory = temp_s3;
         }
@@ -467,7 +380,7 @@ loop_1:
                     return -1;
                 }
                 if (selected_category_id == 7) {
-                    Menu_Container_UpdateTransferConfirmation(1);
+                    VS::Menu::container::UpdateLiveTransferConfirmation(1);
                     Menu_Container_itemListStep = 0xF;
                 } else {
                     Menu_Framework_menuMemory.opaqueA0[0] = 0;
@@ -514,7 +427,7 @@ loop_1:
                     VS::Menu::Framework::CreateLiveMenuRows(
                         temp_s0, (selected_category_id + 0x51) | 0x19200, rebuilt_row_text, rebuilt_row_types);
                     Input_settings.cursorMemory = temp_s3;
-                    Menu_Container_RestoreItemRows(selected_category_id);
+                    VS::Menu::container::RestoreLiveItemRows(selected_category_id);
                     Menu_Container_controlsPanelMode = 1;
                     Menu_Inventory_freezeTabArrows = 0;
                     VS::Core::Memory::FreeLiveFromHighEnd(rebuilt_rows_allocation);
@@ -532,7 +445,7 @@ loop_1:
                     VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 0xD;
                 } else {
-                    Menu_Container_UpdateTransferConfirmation(1);
+                    VS::Menu::container::UpdateLiveTransferConfirmation(1);
                     Menu_Container_itemListStep = 0xF;
                 }
                 break;
@@ -856,16 +769,16 @@ loop_1:
                             >= 2)) {
                         temp_s2 |= 0x10000;
                     }
-                    Menu_Container_UpdateDiscardMenu(temp_s2);
+                    VS::Menu::container::UpdateLiveDiscardMenu(temp_s2);
                     Menu_Container_itemListStep = 0xB;
                     break;
                 case 4:
-                    Menu_Container_UpdateDiscardMenu(temp_s1[Menu_Container_itemListSelectedRow - 1] | (selected_category_id << 0xC) | 0x20000);
+                    VS::Menu::container::UpdateLiveDiscardMenu(temp_s1[Menu_Container_itemListSelectedRow - 1] | (selected_category_id << 0xC) | 0x20000);
                     Menu_Container_itemListStep = 0xB;
                     break;
                 case 5:
                     VS::Menu::Framework::InitializeLiveInformationBox();
-                    Menu_Container_UpdateSortMenu(selected_category_id + 1);
+                    VS::Menu::container::UpdateLiveSortMenu(selected_category_id + 1);
                     Menu_Container_itemListStep = 0xC;
                     break;
                 }
@@ -914,7 +827,7 @@ loop_1:
         }
         break;
     case 11:
-        temp_s3 = Menu_Container_UpdateDiscardMenu(0);
+        temp_s3 = VS::Menu::container::UpdateLiveDiscardMenu(0);
         if (temp_s3 != 0) {
             VS::Menu::Framework::InitializeLiveInformationBox();
             VS::Menu::Framework::FlyOutLiveRowsLeftExcept(0x28);
@@ -926,7 +839,7 @@ loop_1:
         }
         break;
     case 12:
-        temp_s3 = Menu_Container_UpdateSortMenu(0);
+        temp_s3 = VS::Menu::container::UpdateLiveSortMenu(0);
         if (temp_s3 != 0) {
             VS::Menu::Framework::FlyOutLiveRowsLeftExcept(0x28);
             VS::Menu::Framework::ClearLiveMenuExcept(0);
@@ -957,12 +870,12 @@ loop_1:
     case 14:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
             VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
-            Menu_Container_UpdateTransferConfirmation(1);
+            VS::Menu::container::UpdateLiveTransferConfirmation(1);
             Menu_Container_itemListStep = 0xF;
         }
         break;
     case 15:
-        temp_s3 = Menu_Container_UpdateTransferConfirmation(0);
+        temp_s3 = VS::Menu::container::UpdateLiveTransferConfirmation(0);
         if (temp_s3 != 0) {
             VS::Menu::Framework::InitializeLiveInformationBox();
             if (temp_s3 < 0) {

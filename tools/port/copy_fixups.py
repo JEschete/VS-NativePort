@@ -1396,6 +1396,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::container::LiveTransferCapacityError": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
     "VS::Menu::container::UndoLivePendingTransfer": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
     "VS::Menu::container::StageLiveItemTransfer": r"Native\Game\include\Menu\Container\ContainerCapacityLive.hpp",
+    "VS::Menu::container::UpdateLiveSortMenu": r"Native\Game\include\Menu\Container\ContainerMenuDialogsLive.hpp",
+    "VS::Menu::container::UpdateLiveDiscardMenu": r"Native\Game\include\Menu\Container\ContainerMenuDialogsLive.hpp",
+    "VS::Menu::container::RestoreLiveItemRows": r"Native\Game\include\Menu\Container\ContainerMenuDialogsLive.hpp",
+    "VS::Menu::container::UpdateLiveTransferConfirmation": r"Native\Game\include\Menu\Container\ContainerMenuDialogsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2435,6 +2439,10 @@ OWNED_CALL_BINDINGS["F02975"] = "VS::Menu::container::WouldExceedLiveCapacity"
 OWNED_CALL_BINDINGS["F02976"] = "VS::Menu::container::LiveTransferCapacityError"
 OWNED_CALL_BINDINGS["F02977"] = "VS::Menu::container::UndoLivePendingTransfer"
 OWNED_CALL_BINDINGS["F02978"] = "VS::Menu::container::StageLiveItemTransfer"
+OWNED_CALL_BINDINGS["F02969"] = "VS::Menu::container::UpdateLiveSortMenu"
+OWNED_CALL_BINDINGS["F02970"] = "VS::Menu::container::UpdateLiveDiscardMenu"
+OWNED_CALL_BINDINGS["F02983"] = "VS::Menu::container::RestoreLiveItemRows"
+OWNED_CALL_BINDINGS["F02984"] = "VS::Menu::container::UpdateLiveTransferConfirmation"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3927,6 +3935,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x80106784, "VS::Menu::container::LiveTransferCapacityError"),  # F02976
     ("MENU/MENUD.PRG", 0x801068BC, "VS::Menu::container::UndoLivePendingTransfer"),  # F02977
     ("MENU/MENUD.PRG", 0x80106948, "VS::Menu::container::StageLiveItemTransfer"),  # F02978
+    ("MENU/MENUD.PRG", 0x80105ACC, "VS::Menu::container::UpdateLiveSortMenu"),  # F02969
+    ("MENU/MENUD.PRG", 0x80105D24, "VS::Menu::container::UpdateLiveDiscardMenu"),  # F02970
+    ("MENU/MENUD.PRG", 0x801071D8, "VS::Menu::container::RestoreLiveItemRows"),  # F02983
+    ("MENU/MENUD.PRG", 0x801072B0, "VS::Menu::container::UpdateLiveTransferConfirmation"),  # F02984
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

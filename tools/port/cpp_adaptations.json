@@ -366,6 +366,28 @@
 ]
 ]
 ],
+"Native\\Game\\src\\Boot\\OverlayReset.cpp": [
+[
+0,
+[
+"// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line."
+],
+[
+"// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.",
+"#include \"Menu/Container/ContainerMenuDialogsLive.hpp\""
+]
+],
+[
+87,
+[
+"    Menu_Container_Storage_ResetMenudStatics();"
+],
+[
+"    Menu_Container_Storage_ResetMenudStatics();",
+"    VS::Menu::container::ResetLiveContainerDialogStatics();"
+]
+]
+],
 "Native\\Game\\src\\Effects\\Particles.cpp": [
 [
 96,
@@ -982,16 +1004,7 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\ItemView.cpp": [
 [
-314,
-[
-"        Menu_InitInformationTextBox(1);"
-],
-[
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-],
-[
-426,
+339,
 [
 "        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
@@ -1004,7 +1017,7 @@
 ]
 ],
 [
-507,
+420,
 [
 "                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;",
 "                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;",
@@ -1017,7 +1030,7 @@
 ]
 ],
 [
-941,
+854,
 [
 "            pending_row_text = pending_rows_allocation + 0x6400;",
 "            pending_row_types = pending_rows_allocation + 0x6000;",
@@ -1030,7 +1043,7 @@
 ]
 ],
 [
-1067,
+980,
 [
 "            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1039,50 +1052,12 @@
 ]
 ],
 [
-1328,
+1241,
 [
 "        static const char initial[8];"
 ],
 [
 "        static const char initial[8] = {};"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Container\\Storage.cpp": [
-[
-161,
-[
-"        Menu_InitInformationTextBox(1);"
-],
-[
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-],
-[
-311,
-[
-"            packed_discard_digits & 0xF, 0x42, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
-],
-[
-"            packed_discard_digits & 0xF, 0x42, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));"
-]
-],
-[
-314,
-[
-"            packed_discard_digits & 0xF, 0x3C, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
-],
-[
-"            packed_discard_digits & 0xF, 0x3C, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));"
-]
-],
-[
-316,
-[
-"            packed_discard_digits >> 4, 0x36, 0x82, Render_frameScratch.overlayOrderingTable - 0xC);"
-],
-[
-"            packed_discard_digits >> 4, 0x36, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));"
 ]
 ]
 ],

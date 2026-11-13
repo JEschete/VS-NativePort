@@ -26,6 +26,7 @@ struct Items_EquipmentPartStats;
 namespace VS::Menu::Framework {
 struct MenuRow;
 struct RowPlacement;
+struct RowText;
 
 // BATTLE.PRG (5BF94.c).
 int LoadLiveMenuOverlay(int packed_menu_state);
@@ -38,6 +39,7 @@ MenuRow& SetLiveMenuItemText(const RowPlacement& placement,
                              std::span<const std::uint8_t> text);
 // LiveMenuItem for typed hosts.
 MenuRow& LiveMenuRow(int row);
+[[nodiscard]] std::span<std::uint8_t> LiveMenuCursorMemory();
 int LiveGradientStopColor(u_int gradient, u_int color_index, int brightness);
 void DrawLiveMenuItem(Menu_Framework_MenuRow* row);
 int UpdateLiveMainMenuSelection(int mode);
@@ -59,6 +61,8 @@ int DrawLiveMainMenuCursor(int step, int position);
 // MAINMENU.PRG (58EC.c, C48.c).
 void CreateLiveActionRows(int row_count, int sub_menu_id, char* menu_text[],
                           int row_types[]);
+void CreateLiveActionRowsText(int sub_menu_id, std::span<const RowText> texts,
+                              std::span<const std::int32_t> row_types);
 int LiveHighlightedActionRow();
 int LiveActionSelectionResult();
 Menu_Framework_MenuRow* CreateLiveActionRow(int row, int x);
@@ -71,6 +75,7 @@ void DeactivateLiveRow(int row);
 void DismissLiveInformationBox();
 void InitializeLiveInformationBox();
 void SetLiveInformationMessage(char* message);
+void SetLiveInformationMessageText(std::span<const std::uint8_t> message);
 // A null `before` links into the overlay ordering table.
 void DrawLiveButtonIcon(int button_id, int x, int y, u_long* before);
 int DrawLiveCursor(u_int step, int position);

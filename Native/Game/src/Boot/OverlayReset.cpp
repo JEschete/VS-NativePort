@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Container/ContainerMenuDialogsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
@@ -86,6 +87,7 @@ void Boot_ResetMenudStatics(void)
 {
     Menu_Container_ItemView_ResetMenudStatics();
     Menu_Container_Storage_ResetMenudStatics();
+    VS::Menu::container::ResetLiveContainerDialogStatics();
 }
 
 // Call where the original loads MENUE.PRG: restores the statics its reload re-read from the disc.

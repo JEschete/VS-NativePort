@@ -1363,6 +1363,18 @@ int LiveHighlightedActionRow() {
   return HighlightedActionRow(call.Ctx());
 }
 
+void CreateLiveActionRowsText(int sub_menu_id, std::span<const RowText> texts,
+                              std::span<const std::int32_t> row_types) {
+  LiveCall call;
+  CreateActionRows(call.Ctx(), static_cast<int>(texts.size()), sub_menu_id,
+                   texts, row_types);
+}
+
+std::span<std::uint8_t> LiveMenuCursorMemory() {
+  LiveHost host;
+  return host.MenuMemory();
+}
+
 int LiveActionSelectionResult() {
   LiveCall call;
   return ActionSelectionResult(call.Ctx());
@@ -1416,6 +1428,11 @@ void InitializeLiveInformationBox() {
 void SetLiveInformationMessage(char* message) {
   LiveCall call;
   SetInformationMessage(call.Ctx(), Trusted(message));
+}
+
+void SetLiveInformationMessageText(std::span<const std::uint8_t> message) {
+  LiveCall call;
+  SetInformationMessage(call.Ctx(), message);
 }
 
 void DrawLiveButtonIcon(int button_id, int x, int y, u_long* before) {

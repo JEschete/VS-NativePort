@@ -39,8 +39,6 @@ _Static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Contain
 
 extern u_short Menu_Container_transferredMiscCount;;
 extern u_short Menu_Container_containerItemCapacities[];
-int Menu_Container_UpdateSortMenu(int category_selection);
-int Menu_Container_UpdateDiscardMenu(int packed_discard_selection);
 int Menu_Container_FindPendingTransfer(int category_id, int item_index);
 void Menu_Container_AppendPendingTransfer(int category_id, int item_index);
 void Menu_Container_RebuildPendingTransfers(void);
