@@ -1296,6 +1296,12 @@ NATIVE_HELPER_HEADERS = {
            "Input_previousButtons", "Input_buttonsPressed", "Input_buttonsState",
            "Input_settings",
        )},
+    "VS::Menu::Inventory::SetLivePanelVisibility": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
+    "VS::Menu::Inventory::PollLiveDetailsPaging": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
+    "VS::Menu::Inventory::BeginLiveDetailsTransition": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
+    "VS::Menu::Inventory::InitializeLiveDetailsLayout": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
+    "VS::Menu::Inventory::SelectLiveDetailsItem": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
+    "VS::Menu::Inventory::ExitLiveDetailsView": r"Native\Game\include\Menu\Inventory\DetailsPoliciesLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2236,6 +2242,12 @@ for _bindings, _header in (
     OWNED_CALL_BINDINGS |= {fid: f"VS::Field::{name}" for fid, name in _bindings.items()}
     NATIVE_HELPER_HEADERS |= {f"VS::Field::{name}": _header for name in _bindings.values()}
 OWNED_CALL_BINDINGS["F00231"] = "VS::Actors::ForgetLiveRoomEnemies"
+OWNED_CALL_BINDINGS["F02566"] = "VS::Menu::Inventory::SetLivePanelVisibility"
+OWNED_CALL_BINDINGS["F02567"] = "VS::Menu::Inventory::PollLiveDetailsPaging"
+OWNED_CALL_BINDINGS["F02569"] = "VS::Menu::Inventory::BeginLiveDetailsTransition"
+OWNED_CALL_BINDINGS["F02571"] = "VS::Menu::Inventory::InitializeLiveDetailsLayout"
+OWNED_CALL_BINDINGS["F02573"] = "VS::Menu::Inventory::SelectLiveDetailsItem"
+OWNED_CALL_BINDINGS["F02574"] = "VS::Menu::Inventory::ExitLiveDetailsView"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3615,6 +3627,18 @@ MODULE_BINDING_ENTRIES = (
     ("EFFECT/PLG074.BIN", 0x800F98F8, "VS::Effects::Templates::UpdateLivePlg073TiledRing"),  # F01986
     ("EFFECT/PLG074.BIN", 0x800FA7F0, "VS::Effects::Templates::UpdateLivePlg073Ring"),  # F01987
     ("EFFECT/PLG074.BIN", 0x800FD534, "VS::Effects::Templates::UpdateLivePlg073RotatingSurface"),  # F01995
+    ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
+    ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
+    ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
+    ("MENU/MENUB.PRG", 0x80102A60, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
+    ("MENU/MENU3.PRG", 0x80102B78, "VS::Menu::Inventory::BeginLiveDetailsTransition"),  # F02569
+    ("MENU/MENUB.PRG", 0x80102C50, "VS::Menu::Inventory::BeginLiveDetailsTransition"),  # F02569
+    ("MENU/MENU3.PRG", 0x80102C44, "VS::Menu::Inventory::InitializeLiveDetailsLayout"),  # F02571
+    ("MENU/MENUB.PRG", 0x80102D1C, "VS::Menu::Inventory::InitializeLiveDetailsLayout"),  # F02571
+    ("MENU/MENU3.PRG", 0x80102D30, "VS::Menu::Inventory::SelectLiveDetailsItem"),  # F02573
+    ("MENU/MENUB.PRG", 0x80102E08, "VS::Menu::Inventory::SelectLiveDetailsItem"),  # F02573
+    ("MENU/MENU3.PRG", 0x80102D7C, "VS::Menu::Inventory::ExitLiveDetailsView"),  # F02574
+    ("MENU/MENUB.PRG", 0x80102E54, "VS::Menu::Inventory::ExitLiveDetailsView"),  # F02574
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

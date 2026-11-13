@@ -9,13 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_INVENTORY_ITEMDETAILS_H_DECLS)
 #define VS_MENU_INVENTORY_ITEMDETAILS_H_DECLS
 
-void Menu_Inventory_SetPanelVisibility(char state);
-int Menu_Inventory_PollDetailsPaging(int items, int page);
 void Menu_Inventory_DrawCategoryIcons(int animationStep, int highlightSelected);
-void Menu_Inventory_BeginDetailsTransition(int id);
-void Menu_Inventory_InitializeDetailsLayout(int selectedItem, int classAffinityType);
-int Menu_Inventory_SelectDetailsItem(int itemCategory, int itemId);
-void Menu_Inventory_ExitDetailsView(int clearDpPp);
 int Menu_Inventory_UpdateWeaponDetails(int itemInfo);
 int Menu_Inventory_UpdateBladeDetails(int itemInfo);
 int Menu_Inventory_UpdateGripDetails(int itemInfo);

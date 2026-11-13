@@ -220,6 +220,9 @@
     <ClCompile Include="src\InformationTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
     <ClCompile Include="src\IntroPlayerTests.cpp" />
+    <ClCompile Include="src\InventoryDetailHelpersLiveTests.cpp" />
+    <ClCompile Include="src\InventoryDetailHelpersModuleTests.cpp" />
+    <ClCompile Include="src\InventoryDetailHelpersTests.cpp" />
     <ClCompile Include="src\ItemsTests.cpp" />
     <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LauncherTests.cpp" />
@@ -351,6 +354,7 @@
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />

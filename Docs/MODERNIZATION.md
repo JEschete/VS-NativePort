@@ -30,16 +30,16 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 176 | 5,601 | 682 | 85 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 1 | 370 | 22,721 | 359 | 303 | 0 |
+| 34: #60 Menu screens and workspaces | 1 | 364 | 22,645 | 364 | 298 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 1 | 699 | 32,872 | 3267 | 468 | 0 |
+| **Total** | 1 | 693 | 32,796 | 3272 | 463 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,035 |
-| todo | 700 |
+| done | 3,041 |
+| todo | 694 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (2 active, 45 done, 7 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 45 done, 6 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -89,7 +89,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 44 | effects-surface-templates | done | self | 7 | 0 | 0 |
 | 45 | menu-framework | done | self | 2 | 0 | 0 |
 | 46 | menu-framework-rows-details | done | self | 6 | 0 | 0 |
-| 47 | menu-inventory-container | planned | - | 5 | 98 | 6,953 |
+| 47 | menu-inventory-container | active | self | 5 | 92 | 6,877 |
 | 48 | menu-loot-status-abilities | planned | - | 7 | 95 | 7,172 |
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | planned | - | 6 | 103 | 5,020 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 167 |
+| Called from generated code | 1 | 165 |
 | Referenced by the original-address module table | 1 | 321 |
 | Calls an SDK shim | 0 | 75 |
 | Signature uses SDK integer types or `void*` | 0 | 111 |
-| Compiled with relaxed settings | 0 | 699 |
+| Compiled with relaxed settings | 0 | 693 |
 
 Function bodies: 3,735 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 1 open owned functions have generated callers.
 

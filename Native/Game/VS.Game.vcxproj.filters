@@ -49,6 +49,9 @@
     <Filter Include="include\Menu\Framework">
       <UniqueIdentifier>{EC2E19C3-730C-5083-A87C-1AC3D1CA2E85}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Menu\Inventory">
+      <UniqueIdentifier>{CD7B450D-4494-576F-8757-B3B17D3ABE26}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Menu\Setup">
       <UniqueIdentifier>{09910199-A0A9-57B0-A127-053BA74AC746}</UniqueIdentifier>
     </Filter>
@@ -2310,6 +2313,12 @@
     <ClInclude Include="src\Menu\Framework\TextBoxes.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Inventory\DetailsPolicies.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\DetailsPoliciesLive.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Inventory\Inventory.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
@@ -3551,6 +3560,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\ItemRowsLive.hpp">
       <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\DetailsPolicies.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\DetailsPoliciesLive.hpp">
+      <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Options.hpp">
       <Filter>include\Menu</Filter>

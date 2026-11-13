@@ -9,6 +9,7 @@
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -139,7 +140,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         break;
 
     case 1:
-        Menu_Inventory_SetPanelVisibility(0);
+        VS::Menu::Inventory::SetLivePanelVisibility(0);
 
         Menu_Inventory_secondaryTitleAnimationStep = 0;
         Menu_Inventory_itemCategoryIconsAnimationStep = 0;
@@ -170,7 +171,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
             break;
         }
 
-        Menu_Inventory_SetPanelVisibility(0);
+        VS::Menu::Inventory::SetLivePanelVisibility(0);
         VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
         VS::Field::LiveSetFieldRenderingEnabled(1);
 

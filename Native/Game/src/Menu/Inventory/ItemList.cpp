@@ -9,6 +9,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -913,7 +914,7 @@ loop_1:
             menuItem->targetPosition0 = 180;
         }
 
-        Menu_Inventory_SetPanelVisibility(1);
+        VS::Menu::Inventory::SetLivePanelVisibility(1);
 
         Menu_Inventory_secondaryTitleAnimationStep = 0;
         Menu_Inventory_itemListIgnoreCursorMemory = initialize & 1;

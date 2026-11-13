@@ -1,9 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Items/InventoryLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Sounds.hpp"
+#include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -16,10 +15,8 @@ extern "C" {
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
-#include "Menu/Inventory/ItemList.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -29,43 +26,6 @@ static int (*Menu_Inventory_itemDetailsStatusViewDispatch[])(int) = { Menu_Inven
 
 // decomp: local static of _gripStatusView, at file scope so the module reset reaches it
 static char* Menu_Inventory_gripDetailsGemSlotCountBuf = "X     0";
-
-// decomp: MENU _toggleMenuUi (src/MENU/_toggleUi.h:9)
-void Menu_Inventory_SetPanelVisibility(char state)
-{
-    Menu_Inventory_secondaryTitleEnabled = state;
-    Menu_Inventory_itemCategoryIconsEnabled = state;
-    Menu_Inventory_statusCommandState = state;
-}
-
-// decomp: MENU _itemPaging (src/MENU/items0.h:15)
-int Menu_Inventory_PollDetailsPaging(int items, int page)
-{
-    if ((Input_buttonsState & (PADL1 | PADR1)) != (PADL1 | PADR1)) {
-
-        int previousPage = page;
-
-        items = VS::Items::Inventory::CountLiveItems(items, NULL);
-
-        if (Input_buttonRepeat & PADL1) {
-            page += items - 1;
-        }
-
-        if (Input_buttonRepeat & PADR1) {
-            ++page;
-        }
-
-        if (page >= items) {
-            page -= items;
-        }
-
-        if ((Input_buttonsPressed.allButtons & (PADL1 | PADR1)) && (page == previousPage)) {
-            VS::Menu::PlayInvalidSound();
-        }
-    }
-
-    return page;
-}
 
 // decomp: MENU _renderItemCategory (src/MENU/items0.h:46)
 void Menu_Inventory_DrawCategoryIcons(int animationStep, int highlightSelected)
@@ -105,63 +65,6 @@ void Menu_Inventory_DrawCategoryIcons(int animationStep, int highlightSelected)
     }
 }
 
-// decomp: MENU _startMenuTransition (src/MENU/items0.h:87)
-void Menu_Inventory_BeginDetailsTransition(int id)
-{
-    Menu_Framework_MenuRow* menuItem;
-
-    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-
-    menuItem = VS::Menu::Framework::LiveMenuItem(31);
-    menuItem->state = Menu_Framework_MenuItemState_SlideY;
-    menuItem->targetPosition0 = 18;
-
-    menuItem = VS::Menu::Framework::LiveMenuItem(id);
-    menuItem->state = Menu_Framework_MenuItemState_SlideX;
-    menuItem->targetPosition0 = 155;
-    menuItem->selected = 1;
-    menuItem->subText = NULL;
-}
-
-// decomp: MENU _initMenuLayout (src/MENU/items1.h:21)
-void Menu_Inventory_InitializeDetailsLayout(int selectedItem, int classAffinityType)
-{
-    Menu_Inventory_ashleyRenderState = 1;
-    Menu_Inventory_itemCategoryIconsEnabled = 0;
-    Menu_Inventory_statusCommandState = 0;
-
-    VS::Menu::Framework::ContinueLiveItemDetailsTransition(selectedItem);
-    VS::Menu::Framework::UpdateLiveEquipmentStatPages(classAffinityType);
-    VS::Menu::Framework::UpdateLivePrimaryStatPanel(1);
-}
-
-// decomp: MENU _getItemIndex (src/MENU/items1.h:54)
-int Menu_Inventory_SelectDetailsItem(int itemCategory, int itemId)
-{
-    // Actually accesses struct at unk3A, might originally have been raw
-    // pointer manipulation.
-    Menu_Framework_menuMemory.cursorMemories[(itemCategory + 30) * 2] = 0;
-    Menu_Framework_menuMemory.cursorMemories[(itemCategory + 30) * 2 + 1] = itemId;
-    return Menu_Inventory_inventoryIndices[itemCategory][itemId];
-}
-
-// decomp: MENU _exitStatusView (src/MENU/items1.h:74)
-void Menu_Inventory_ExitDetailsView(int clearDpPp)
-{
-    VS::Menu::PlayLeaveSound();
-    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-    VS::Menu::Framework::FlyOutLiveRowLeft(-1);
-    VS::Menu::Framework::UpdateLiveEquipmentStatPages(-1);
-    VS::Menu::Framework::UpdateLivePrimaryStatPanel(2);
-
-    Menu_Inventory_selectedItemCategoryIconOnTop = 2;
-    Menu_Inventory_exitToBattle = Input_buttonsPressed.allButtons & PADRup;
-
-    if (clearDpPp != 0) {
-        VS::Menu::Framework::UpdateLiveDpPpBars(4);
-    }
-}
-
 // decomp: MENU _weaponStatusView (src/MENU/items1.h:98)
 int Menu_Inventory_UpdateWeaponDetails(int itemInfo)
 {
@@ -182,7 +85,7 @@ int Menu_Inventory_UpdateWeaponDetails(int itemInfo)
         Menu_Inventory_weaponDetailsItemRow = itemInfo >> 8;
         Menu_Inventory_weaponDetailsItemIndex = (itemInfo - 1) & 0xFF;
 
-        Menu_Inventory_BeginDetailsTransition(Menu_Inventory_weaponDetailsItemRow);
+        VS::Menu::Inventory::BeginLiveDetailsTransition(Menu_Inventory_weaponDetailsItemRow);
 
         Menu_Inventory_weaponDetailsLayoutPadding = 0;
         Menu_Inventory_weaponDetailsInitRow = 0;
@@ -194,7 +97,7 @@ int Menu_Inventory_UpdateWeaponDetails(int itemInfo)
     switch (Menu_Inventory_weaponDetailsState) {
     case Menu_Inventory_WeaponDetailsState_Init:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            Menu_Inventory_InitializeDetailsLayout(Menu_Inventory_weaponDetailsItemRow, 7);
+            VS::Menu::Inventory::InitializeLiveDetailsLayout(Menu_Inventory_weaponDetailsItemRow, 7);
             VS::Menu::Framework::SetLiveWeaponStats(Audio_Seq_unusedInventoryIndices.weapons[Menu_Inventory_weaponDetailsItemIndex]);
             VS::Menu::Framework::UpdateLiveDpPpBars(3);
             Menu_Inventory_weaponDetailsState = Menu_Inventory_WeaponDetailsState_InitWeapon;
@@ -216,18 +119,18 @@ int Menu_Inventory_UpdateWeaponDetails(int itemInfo)
 
     case Menu_Inventory_WeaponDetailsState_ManageInput:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            Menu_Inventory_ExitDetailsView(1);
+            VS::Menu::Inventory::ExitLiveDetailsView(1);
             Menu_Inventory_weaponDetailsState = 3;
             break;
         }
 
-        newIndex = Menu_Inventory_PollDetailsPaging(0, Menu_Inventory_weaponDetailsItemIndex);
+        newIndex = VS::Menu::Inventory::PollLiveDetailsPaging(0, Menu_Inventory_weaponDetailsItemIndex);
 
         if (newIndex != Menu_Inventory_weaponDetailsItemIndex) {
             int weaponToDisplay;
 
             Menu_Inventory_weaponDetailsItemIndex = newIndex;
-            weaponToDisplay = Menu_Inventory_SelectDetailsItem(0, newIndex);
+            weaponToDisplay = VS::Menu::Inventory::SelectLiveDetailsItem(0, newIndex);
 
             VS::Menu::Framework::FormatLiveInventoryWeaponRow(
                 &Audio_Seq_unusedInventory.weapons[weaponToDisplay - 1], menuText, &rowType,
@@ -270,7 +173,7 @@ int Menu_Inventory_UpdateBladeDetails(int itemInfo)
         Menu_Inventory_bladeDetailsItemRow = itemInfo >> 8;
         Menu_Inventory_bladeDetailsItemIndex = (itemInfo - 1) & 0xFF;
 
-        Menu_Inventory_BeginDetailsTransition(Menu_Inventory_bladeDetailsItemRow);
+        VS::Menu::Inventory::BeginLiveDetailsTransition(Menu_Inventory_bladeDetailsItemRow);
 
         Menu_Inventory_bladeDetailsAnimationTimer = 10;
         Menu_Inventory_bladeDetailsState = Menu_Inventory_EquipmentDetailsState_Init;
@@ -281,7 +184,7 @@ int Menu_Inventory_UpdateBladeDetails(int itemInfo)
     switch (Menu_Inventory_bladeDetailsState) {
     case Menu_Inventory_EquipmentDetailsState_Init:
         if ((Menu_Inventory_bladeDetailsState == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0)) {
-            Menu_Inventory_InitializeDetailsLayout(Menu_Inventory_bladeDetailsItemRow, 3);
+            VS::Menu::Inventory::InitializeLiveDetailsLayout(Menu_Inventory_bladeDetailsItemRow, 3);
             VS::Menu::Framework::SetLiveBladeStats(Audio_Seq_unusedInventoryIndices.blades[Menu_Inventory_bladeDetailsItemIndex]);
             VS::Menu::Framework::UpdateLiveDpPpBars(3);
             Menu_Inventory_bladeDetailsState = Menu_Inventory_EquipmentDetailsState_Wait;
@@ -298,18 +201,18 @@ int Menu_Inventory_UpdateBladeDetails(int itemInfo)
 
     case Menu_Inventory_EquipmentDetailsState_ManageInput:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            Menu_Inventory_ExitDetailsView(1);
+            VS::Menu::Inventory::ExitLiveDetailsView(1);
             Menu_Inventory_bladeDetailsState = Menu_Inventory_EquipmentDetailsState_ReturnMenuReady;
             break;
         }
 
-        newIndex = Menu_Inventory_PollDetailsPaging(1, (int)Menu_Inventory_bladeDetailsItemIndex);
+        newIndex = VS::Menu::Inventory::PollLiveDetailsPaging(1, (int)Menu_Inventory_bladeDetailsItemIndex);
 
         if (newIndex != Menu_Inventory_bladeDetailsItemIndex) {
             int bladeToDisplay;
 
             Menu_Inventory_bladeDetailsItemIndex = newIndex;
-            bladeToDisplay = Menu_Inventory_SelectDetailsItem(1, newIndex);
+            bladeToDisplay = VS::Menu::Inventory::SelectLiveDetailsItem(1, newIndex);
 
             VS::Menu::Framework::FormatLiveBladeRow(&Audio_Seq_unusedInventory.blades[bladeToDisplay - 1],
                 meunText, &rowType, Menu_Framework_stringBuf);
@@ -344,7 +247,7 @@ int Menu_Inventory_UpdateGripDetails(int itemInfo)
         Menu_Inventory_gripDetailsItemRow = itemInfo >> 8;
         Menu_Inventory_gripDetailsItemIndex = (itemInfo - 1) & 0xFF;
 
-        Menu_Inventory_BeginDetailsTransition(Menu_Inventory_gripDetailsItemRow);
+        VS::Menu::Inventory::BeginLiveDetailsTransition(Menu_Inventory_gripDetailsItemRow);
 
         Menu_Inventory_gripDetailsLayoutPadding = 0;
         Menu_Inventory_gripDetailsAnimationTimer = 0;
@@ -356,7 +259,7 @@ int Menu_Inventory_UpdateGripDetails(int itemInfo)
     switch (Menu_Inventory_gripDetailsState) {
     case Menu_Inventory_EquipmentDetailsState_Init:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            Menu_Inventory_InitializeDetailsLayout(Menu_Inventory_gripDetailsItemRow, 4);
+            VS::Menu::Inventory::InitializeLiveDetailsLayout(Menu_Inventory_gripDetailsItemRow, 4);
             VS::Menu::Framework::SetLiveGripStats(Audio_Seq_unusedInventoryIndices.grips[Menu_Inventory_gripDetailsItemIndex]);
             Menu_Inventory_gripDetailsState = Menu_Inventory_EquipmentDetailsState_Wait;
         }
@@ -372,15 +275,15 @@ int Menu_Inventory_UpdateGripDetails(int itemInfo)
 
     case Menu_Inventory_EquipmentDetailsState_ManageInput:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            Menu_Inventory_ExitDetailsView(0);
+            VS::Menu::Inventory::ExitLiveDetailsView(0);
             Menu_Inventory_gripDetailsState = Menu_Inventory_EquipmentDetailsState_ReturnMenuReady;
         } else {
-            int newIndex = Menu_Inventory_PollDetailsPaging(2, Menu_Inventory_gripDetailsItemIndex);
+            int newIndex = VS::Menu::Inventory::PollLiveDetailsPaging(2, Menu_Inventory_gripDetailsItemIndex);
 
             if (newIndex != Menu_Inventory_gripDetailsItemIndex) {
                 int gripToDisplay;
                 Menu_Inventory_gripDetailsItemIndex = newIndex;
-                gripToDisplay = Menu_Inventory_SelectDetailsItem(2, newIndex);
+                gripToDisplay = VS::Menu::Inventory::SelectLiveDetailsItem(2, newIndex);
 
                 VS::Menu::Framework::FormatLiveGripRow(&Audio_Seq_unusedInventory.grips[gripToDisplay - 1],
                     menuText, &rowType, Menu_Framework_stringBuf);
@@ -427,7 +330,7 @@ int Menu_Inventory_UpdateShieldDetails(int itemInfo)
         Menu_Inventory_shieldDetailsItemRow = itemInfo >> 8;
         Menu_Inventory_shieldDetailsItemIndex = (itemInfo - 1) & 0xFF;
 
-        Menu_Inventory_BeginDetailsTransition(Menu_Inventory_shieldDetailsItemRow);
+        VS::Menu::Inventory::BeginLiveDetailsTransition(Menu_Inventory_shieldDetailsItemRow);
 
         Menu_Inventory_shieldDetailsLayoutPadding = 0;
         Menu_Inventory_shieldDetailsInitRow = 0;
@@ -439,7 +342,7 @@ int Menu_Inventory_UpdateShieldDetails(int itemInfo)
     switch (Menu_Inventory_shieldDetailsState) {
     case Menu_Inventory_ShieldDetailsState_Init:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            Menu_Inventory_InitializeDetailsLayout(Menu_Inventory_shieldDetailsItemRow, 7);
+            VS::Menu::Inventory::InitializeLiveDetailsLayout(Menu_Inventory_shieldDetailsItemRow, 7);
             VS::Menu::Framework::SetLiveShieldStats(Audio_Seq_unusedInventoryIndices.shields[Menu_Inventory_shieldDetailsItemIndex]);
             VS::Menu::Framework::UpdateLiveDpPpBars(3);
 
@@ -467,16 +370,16 @@ int Menu_Inventory_UpdateShieldDetails(int itemInfo)
 
     case Menu_Inventory_ShieldDetailsState_ManageInput:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            Menu_Inventory_ExitDetailsView(1);
+            VS::Menu::Inventory::ExitLiveDetailsView(1);
             Menu_Inventory_shieldDetailsState = Menu_Inventory_ShieldDetailsState_ReturnMenuReady;
             break;
         }
 
-        newIndex = Menu_Inventory_PollDetailsPaging(3, Menu_Inventory_shieldDetailsItemIndex);
+        newIndex = VS::Menu::Inventory::PollLiveDetailsPaging(3, Menu_Inventory_shieldDetailsItemIndex);
 
         if (newIndex != Menu_Inventory_shieldDetailsItemIndex) {
             Menu_Inventory_shieldDetailsItemIndex = newIndex;
-            i = Menu_Inventory_SelectDetailsItem(3, newIndex);
+            i = VS::Menu::Inventory::SelectLiveDetailsItem(3, newIndex);
 
             VS::Menu::Framework::FormatLiveInventoryShieldRow(&Audio_Seq_unusedInventory.shields[i - 1],
                 menuText, &rowType, Menu_Framework_stringBuf);
@@ -517,7 +420,7 @@ int Menu_Inventory_UpdateArmorDetails(int itemInfo)
         Menu_Inventory_armorDetailsItemRow = itemInfo >> 8;
         Menu_Inventory_armorDetailsItemIndex = (itemInfo - 1) & 0xFF;
 
-        Menu_Inventory_BeginDetailsTransition(Menu_Inventory_armorDetailsItemRow);
+        VS::Menu::Inventory::BeginLiveDetailsTransition(Menu_Inventory_armorDetailsItemRow);
 
         Menu_Inventory_armorDetailsAnimationTimer = 10;
         Menu_Inventory_armorDetailsStatus = 0;
@@ -528,7 +431,7 @@ int Menu_Inventory_UpdateArmorDetails(int itemInfo)
     switch (Menu_Inventory_armorDetailsStatus) {
     case 0:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            Menu_Inventory_InitializeDetailsLayout(Menu_Inventory_armorDetailsItemRow, 7);
+            VS::Menu::Inventory::InitializeLiveDetailsLayout(Menu_Inventory_armorDetailsItemRow, 7);
             VS::Menu::Framework::SetLiveArmorStats(Audio_Seq_unusedInventoryIndices.armor[Menu_Inventory_armorDetailsItemIndex]);
             if (Audio_Seq_unusedInventory.armor[Audio_Seq_unusedInventoryIndices.armor[Menu_Inventory_armorDetailsItemIndex] - 1]
                     .category
@@ -550,19 +453,19 @@ int Menu_Inventory_UpdateArmorDetails(int itemInfo)
 
     case Menu_Inventory_EquipmentDetailsState_ManageInput:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            Menu_Inventory_ExitDetailsView(1);
+            VS::Menu::Inventory::ExitLiveDetailsView(1);
             Menu_Inventory_armorDetailsStatus = Menu_Inventory_EquipmentDetailsState_ReturnMenuReady;
 
             break;
         }
 
-        newIndex = Menu_Inventory_PollDetailsPaging(4, Menu_Inventory_armorDetailsItemIndex);
+        newIndex = VS::Menu::Inventory::PollLiveDetailsPaging(4, Menu_Inventory_armorDetailsItemIndex);
 
         if (newIndex != Menu_Inventory_armorDetailsItemIndex) {
             int armorToDisplay;
 
             Menu_Inventory_armorDetailsItemIndex = newIndex;
-            armorToDisplay = Menu_Inventory_SelectDetailsItem(4, newIndex);
+            armorToDisplay = VS::Menu::Inventory::SelectLiveDetailsItem(4, newIndex);
 
             VS::Menu::Framework::FormatLiveInventoryArmorRow(
                 &Audio_Seq_unusedInventory.armor[armorToDisplay - 1], menuText, &rowType,
@@ -600,7 +503,7 @@ int Menu_Inventory_UpdateGemDetails(int itemInfo)
         Menu_Inventory_gemDetailsItemRow = itemInfo >> 8;
         Menu_Inventory_gemDetailsItemIndex = (itemInfo - 1) & 0xFF;
 
-        Menu_Inventory_BeginDetailsTransition(Menu_Inventory_gemDetailsItemRow);
+        VS::Menu::Inventory::BeginLiveDetailsTransition(Menu_Inventory_gemDetailsItemRow);
 
         Menu_Inventory_gemDetailsAnimationTimer = 10;
         Menu_Inventory_gemDetailsState = Menu_Inventory_EquipmentDetailsState_Init;
@@ -611,7 +514,7 @@ int Menu_Inventory_UpdateGemDetails(int itemInfo)
     switch (Menu_Inventory_gemDetailsState) {
     case Menu_Inventory_EquipmentDetailsState_Init:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            Menu_Inventory_InitializeDetailsLayout(Menu_Inventory_gemDetailsItemRow, 3);
+            VS::Menu::Inventory::InitializeLiveDetailsLayout(Menu_Inventory_gemDetailsItemRow, 3);
             VS::Menu::Framework::SetLiveGemStats(Audio_Seq_unusedInventoryIndices.gems[Menu_Inventory_gemDetailsItemIndex]);
 
             Menu_Inventory_gemDetailsState = Menu_Inventory_EquipmentDetailsState_Wait;
@@ -628,7 +531,7 @@ int Menu_Inventory_UpdateGemDetails(int itemInfo)
 
     case Menu_Inventory_EquipmentDetailsState_ManageInput:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-            Menu_Inventory_ExitDetailsView(0);
+            VS::Menu::Inventory::ExitLiveDetailsView(0);
 
             Menu_Inventory_gemDetailsState = Menu_Inventory_EquipmentDetailsState_ReturnMenuReady;
             Menu_Inventory_exitToBattle = Input_buttonsPressed.allButtons & PADRup;
@@ -636,13 +539,13 @@ int Menu_Inventory_UpdateGemDetails(int itemInfo)
             break;
         }
 
-        newIndex = Menu_Inventory_PollDetailsPaging(5, Menu_Inventory_gemDetailsItemIndex);
+        newIndex = VS::Menu::Inventory::PollLiveDetailsPaging(5, Menu_Inventory_gemDetailsItemIndex);
 
         if (newIndex != Menu_Inventory_gemDetailsItemIndex) {
             int gemToDisplay;
 
             Menu_Inventory_gemDetailsItemIndex = newIndex;
-            gemToDisplay = Menu_Inventory_SelectDetailsItem(5, newIndex);
+            gemToDisplay = VS::Menu::Inventory::SelectLiveDetailsItem(5, newIndex);
 
             VS::Menu::Framework::FormatLiveGemRow(&Audio_Seq_unusedInventory.gems[gemToDisplay - 1], menuText,
                 &rowType, Menu_Framework_stringBuf);

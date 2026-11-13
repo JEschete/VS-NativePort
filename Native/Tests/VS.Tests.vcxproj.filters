@@ -22,6 +22,9 @@
     <Filter Include="include">
       <UniqueIdentifier>{22026869-5DDF-5AC8-ABAC-99A959772135}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Menu">
+      <UniqueIdentifier>{C699903A-8E56-55DE-A1A8-6EDC0041BE84}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\TestSupport">
       <UniqueIdentifier>{AE866DD3-4F0B-5FA3-844A-14E23D43BFF6}</UniqueIdentifier>
     </Filter>
@@ -474,6 +477,15 @@
     <ClCompile Include="src\IntroPlayerTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\InventoryDetailHelpersLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InventoryDetailHelpersModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InventoryDetailHelpersTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ItemsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -801,6 +813,9 @@
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>

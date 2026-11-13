@@ -13,6 +13,7 @@
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -1429,7 +1430,7 @@ int Menu_Inventory_UpdateEquipmentMenu(int initialize)
 
             Menu_Inventory_equipmentMenuState = Menu_Inventory_EquipmentMenuState_Quit;
         } else {
-            Menu_Inventory_BeginDetailsTransition(Menu_Inventory_equipmentMenuSelectedRow - 1 + 10);
+            VS::Menu::Inventory::BeginLiveDetailsTransition(Menu_Inventory_equipmentMenuSelectedRow - 1 + 10);
 
             Menu_Inventory_equipmentMenuState = Menu_Inventory_EquipmentMenuState_InitEquipSubMenu;
         }
@@ -1512,7 +1513,7 @@ int Menu_Inventory_Update(u_char* state)
 
     switch (*state) {
     case Menu_Inventory_InventoryMenuState_Init:
-        Menu_Inventory_SetPanelVisibility(0);
+        VS::Menu::Inventory::SetLivePanelVisibility(0);
         VS::Menu::Framework::SetLiveActorComparisonStats(16);
 
         Menu_Inventory_secondaryTitleAnimationStep = 0;
@@ -1579,7 +1580,7 @@ int Menu_Inventory_Update(u_char* state)
                 break;
 
             case 3:
-                Menu_Inventory_SetPanelVisibility(0);
+                VS::Menu::Inventory::SetLivePanelVisibility(0);
                 VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
                 VS::Field::LiveSetFieldRenderingEnabled(1);
 
@@ -1600,7 +1601,7 @@ int Menu_Inventory_Update(u_char* state)
             } else {
                 *state = Menu_Inventory_InventoryMenuState_Quit;
 
-                Menu_Inventory_SetPanelVisibility(0);
+                VS::Menu::Inventory::SetLivePanelVisibility(0);
                 VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
                 VS::Field::LiveSetFieldRenderingEnabled(1);
                 Battle_SetHudHidden(0);
@@ -1650,7 +1651,7 @@ int Menu_Inventory_Update(u_char* state)
         if (Menu_Framework_menuState.returnState != 0) {
             VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
             VS::Field::LiveSetFieldRenderingEnabled(1);
-            Menu_Inventory_SetPanelVisibility(0);
+            VS::Menu::Inventory::SetLivePanelVisibility(0);
             VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
             Battle_SetHudHidden(0);
 
@@ -1659,7 +1660,7 @@ int Menu_Inventory_Update(u_char* state)
 
             *state = 11;
         } else if (VS::Menu::Framework::AreLiveMenuRowsIdle()) {
-            Menu_Inventory_SetPanelVisibility(0);
+            VS::Menu::Inventory::SetLivePanelVisibility(0);
 
             Menu_Inventory_secondaryTitleAnimationStep = 0;
             Menu_Inventory_itemCategoryIconsAnimationStep = 0;
@@ -1687,7 +1688,7 @@ int Menu_Inventory_Update(u_char* state)
 
     case Menu_Inventory_InventoryMenuState_QuitToBattle:
         VS::Field::LiveSetFieldRenderingEnabled(1);
-        Menu_Inventory_SetPanelVisibility(0);
+        VS::Menu::Inventory::SetLivePanelVisibility(0);
         VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
         Battle_SetHudHidden(0);
 

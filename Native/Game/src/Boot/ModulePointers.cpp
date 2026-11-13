@@ -62,6 +62,7 @@
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TrapsLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Menu/Inventory/DetailsPoliciesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -1962,6 +1963,18 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073TiledRing, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FA7F0u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073Ring, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073RotatingSurface, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80102A60u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80102B78u, 0u, (void*)&VS::Menu::Inventory::BeginLiveDetailsTransition, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80102C50u, 0u, (void*)&VS::Menu::Inventory::BeginLiveDetailsTransition, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80102C44u, 0u, (void*)&VS::Menu::Inventory::InitializeLiveDetailsLayout, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80102D1Cu, 0u, (void*)&VS::Menu::Inventory::InitializeLiveDetailsLayout, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80102D30u, 0u, (void*)&VS::Menu::Inventory::SelectLiveDetailsItem, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80102E08u, 0u, (void*)&VS::Menu::Inventory::SelectLiveDetailsItem, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80102D7Cu, 0u, (void*)&VS::Menu::Inventory::ExitLiveDetailsView, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80102E54u, 0u, (void*)&VS::Menu::Inventory::ExitLiveDetailsView, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
