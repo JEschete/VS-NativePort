@@ -17,19 +17,12 @@ int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance);
 int Effects_LoadEffectTimelineImmediate(Effects_EffectInstance* effect_instance);
 int Effects_TickEffectRenderers(Effects_EffectInstance* effect_instance);
 int Effects_TickEffectTransforms(Effects_EffectInstance* effect_instance);
-int Effects_SetActionEffectVerticalOffset(Effects_EffectInstance* effect_instance);
 int Effects_InitializeScriptEffectTransforms(Effects_EffectInstance* effect_instance);
 int Effects_EmitParticlesFromScriptRegister(Effects_EffectInstance* effect_instance);
 int Effects_RefreshScriptParticleEnvironment(Effects_EffectInstance* effect_instance __attribute__((unused)));
-int Effects_SignalSourceActorFromScript(Effects_EffectInstance* effect_instance);
 int Effects_LoadEffectTimelineFromRegister(Effects_EffectInstance* effect_instance);
 int Effects_TickEffectTimelineFromScript(Effects_EffectInstance* effect_instance);
 int Effects_BranchIfEffectTimelineFinished(Effects_EffectInstance* effect_instance);
 int Effects_FreeEffectScriptTimeline(Effects_EffectInstance* effect_instance);
-int Effects_SetParticleColorCurvesFromScript(Effects_EffectInstance* effect_instance);
-int Effects_ApplyPairedParticleColorPreset(Effects_EffectInstance* effect_instance);
-int Effects_CompleteChildEffectScript(Effects_EffectInstance* effect_instance);
-int Effects_ApplyParticleColorPresetTable(Effects_EffectInstance* effect_instance);
-int Effects_ReportInvalidEffectInstruction(Effects_EffectInstance* effect_instance __attribute__((unused)));
 
 #endif // VS_EFFECTS_SCRIPTVM_H_DECLS

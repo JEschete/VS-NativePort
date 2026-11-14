@@ -117,9 +117,6 @@ Effects_EffectPackage Effects_actionPackage;
 // decomp: D_800F57A0 (D_800F57A0@BATTLE/BATTLE.PRG)
 Effects_EffectPackage Effects_secondaryPackage;
 
-// decomp: BATTLE.PRG func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)
-int Effects_IgnoreRuntimeDiagnostic(int diagnostic_code __attribute__((unused))) { }
-
 // decomp: BATTLE.PRG func_800CE64C (src/BATTLE/BATTLE.PRG/5BF94.c:5047)
 void Effects_InitEffectRuntime(void)
 {

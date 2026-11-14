@@ -2427,10 +2427,19 @@
     <None Include="..\..\port\differentials\damage_recovery_guard_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_diagnostic_hook.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_branch.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_script_child_complete.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_clear_variant.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_color_curves.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_continue.py">
@@ -2442,6 +2451,9 @@
     <None Include="..\..\port\differentials\effect_script_end.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_script_invalid_instruction.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_jump.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2451,7 +2463,16 @@
     <None Include="..\..\port\differentials\effect_script_opcode_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_script_paired_preset.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_particle_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_particle_equal.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_preset_table.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_read_byte.py">
@@ -2475,7 +2496,13 @@
     <None Include="..\..\port\differentials\effect_script_set_register.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_script_signal_source.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_variant_cleared.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_vertical_offset.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_yield.py">
@@ -3064,6 +3091,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\effect_script_opcode_differential.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\effect_script_particle_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\field_at.py">

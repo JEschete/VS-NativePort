@@ -48,4 +48,28 @@ int LiveBranchIfEffectRegisterEqual(Effects_EffectInstance* instance);
 int LiveBranchIfParticleCountEqual(Effects_EffectInstance* instance);
 // func_800D4D98 (5BF94.c:7705): only clears the action variant.
 int LiveClearScriptActionVariant(Effects_EffectInstance* instance);
+
+// The transform, signal and particle colour opcodes. Heights apply to the
+// package's transforms up to the instance's 16 (a larger count is clamped
+// with a diagnostic); a definition past the package's and a colour preset
+// past the seven end the instance (2) with a diagnostic.
+// func_800D49A4 (5BF94.c:7602).
+int LiveSetActionEffectVerticalOffset(Effects_EffectInstance* instance);
+// func_800D4D64 (5BF94.c:7697).
+int LiveSignalSourceActorFromScript(Effects_EffectInstance* instance);
+// func_800D4F00 (5BF94.c:7749).
+int LiveSetParticleColorCurvesFromScript(Effects_EffectInstance* instance);
+// func_800D4FB4 (5BF94.c:7762).
+int LiveApplyPairedParticleColorPreset(Effects_EffectInstance* instance);
+// func_800D5048 (5BF94.c:7776): a parent whose running-child count was
+// already 0 wraps to 31 as the original did, with a diagnostic.
+int LiveCompleteChildEffectScript(Effects_EffectInstance* instance);
+// func_800D5088 (5BF94.c:7785).
+int LiveApplyParticleColorPresetTable(Effects_EffectInstance* instance);
+// func_800D5150 (5BF94.c:7799): reports the invalid instruction and yields.
+int LiveReportInvalidEffectInstruction(Effects_EffectInstance* instance);
+
+// func_800CE644 (5BF94.c:5045): the original's empty diagnostic hook, now a
+// rate-limited warning naming the code.
+void LiveReportEffectDiagnostic(int code);
 }  // namespace VS::Effects

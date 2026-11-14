@@ -5,7 +5,6 @@
 #include "Effects/TransformsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -73,24 +72,6 @@ int Effects_TickEffectTransforms(Effects_EffectInstance* effect_instance)
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7602)
-int Effects_SetActionEffectVerticalOffset(Effects_EffectInstance* effect_instance)
-{
-    int i;
-
-    if (((u_short)(effect_instance->context.effectId - 6) < 16) || (effect_instance->context.effectId == 0x21)
-        || (effect_instance->context.effectId == 0x24)) {
-        for (i = 0; i < Effects_package->block9Data->transformCount; ++i) {
-            effect_instance->transforms[i].positionY = -0x80;
-        }
-    } else if ((effect_instance->context.effectId == 0x38) && (effect_instance->registers[3] == 0x2B)) {
-        for (i = 0; i < Effects_package->block9Data->transformCount; ++i) {
-            effect_instance->transforms[i].positionY = 0x80;
-        }
-    }
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:7619)
 int Effects_InitializeScriptEffectTransforms(Effects_EffectInstance* effect_instance)
 {
@@ -109,15 +90,6 @@ int Effects_EmitParticlesFromScriptRegister(Effects_EffectInstance* effect_insta
 int Effects_RefreshScriptParticleEnvironment(Effects_EffectInstance* effect_instance __attribute__((unused)))
 {
     VS::Effects::LiveUpdateParticleGravityAndDrag();
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:7697)
-int Effects_SignalSourceActorFromScript(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->context.source.type == 4) {
-        Effects_SignalActorEffectAnimation(effect_instance->context.source.value.actor.actor);
-    }
     return 1;
 }
 
@@ -159,65 +131,6 @@ int Effects_FreeEffectScriptTimeline(Effects_EffectInstance* effect_instance)
         effect_instance->context.timeline = NULL;
     }
     return 1;
-}
-
-// decomp: BATTLE.PRG func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:7749)
-int Effects_SetParticleColorCurvesFromScript(Effects_EffectInstance* effect_instance)
-{
-    u_char first = VS::Effects::LiveReadScriptByte(effect_instance);
-    u_char second = VS::Effects::LiveReadScriptByte(effect_instance);
-    u_char third = VS::Effects::LiveReadScriptByte(effect_instance);
-    Effects_ParticleDefinition* dst = &Effects_package->block5Data->definitions[first & 0x3F];
-
-    dst->rCurve = (first >> 6) + ((second & 0xF) << 2);
-    dst->gCurve = (second >> 4) + ((third & 3) << 4);
-    dst->bCurve = third >> 2;
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7762)
-int Effects_ApplyPairedParticleColorPreset(Effects_EffectInstance* effect_instance)
-{
-    int i;
-
-    for (i = 0; i < 2; ++i) {
-        Effects_ParticleDefinition* dst = &Effects_package->block5Data->definitions[i];
-        dst->rCurve = Effects_pairedParticleColorPresets[effect_instance->context.target.colorPreset][i][0];
-        dst->gCurve = Effects_pairedParticleColorPresets[effect_instance->context.target.colorPreset][i][1];
-        dst->bCurve = Effects_pairedParticleColorPresets[effect_instance->context.target.colorPreset][i][2];
-    }
-
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:7776)
-int Effects_CompleteChildEffectScript(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->parent != 0) {
-        --effect_instance->parent->childCount;
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:7785)
-int Effects_ApplyParticleColorPresetTable(Effects_EffectInstance* effect_instance)
-{
-    int i;
-
-    for (i = 0; i < 5; i++) {
-        Effects_ParticleDefinition* dst =
-            &Effects_package->block5Data->definitions[Effects_particleColorPresetTable[effect_instance->context.target.colorPreset][i][3]];
-        dst->rCurve = Effects_particleColorPresetTable[effect_instance->context.target.colorPreset][i][0];
-        dst->gCurve = Effects_particleColorPresetTable[effect_instance->context.target.colorPreset][i][1];
-        dst->bCurve = Effects_particleColorPresetTable[effect_instance->context.target.colorPreset][i][2];
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:7799)
-int Effects_ReportInvalidEffectInstruction(Effects_EffectInstance* effect_instance __attribute__((unused)))
-{
-    return Effects_IgnoreRuntimeDiagnostic(0x1E);
 }
 
 }  // extern "C"

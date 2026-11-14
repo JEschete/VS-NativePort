@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
+#include <memory>
 #include <optional>
 #include <span>
 #include <stdexcept>
@@ -23,15 +24,19 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/EffectScript.hpp"
+#include "Effects/EffectScriptLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
+#include "TestSupport/EffectProgramScope.hpp"
 
 extern "C" {
 #include "Actors/Location.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/CameraLiveState.h"
 #include "Effects/Package.h"
+#include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 }
 
@@ -1863,4 +1868,158 @@ TEST_CASE("Promoted effect resources and transforms leave no module binding",
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                             address) == nullptr);
   }
+}
+
+namespace {
+// Block 9 counting `transforms` and block 5 holding `definitions`.
+std::vector<std::byte> ScriptPackage(std::uint8_t transforms,
+                                     std::size_t definitions) {
+  std::vector<std::uint8_t> parameters(Effects::kPackageParametersRequiredBytes,
+                                       0);
+  parameters.back() = transforms;
+  return BuildPackage({
+      {.type = 5,
+       .payload = std::vector<std::uint8_t>(
+           Effects::kParticleDefinitionHeaderBytes +
+               (definitions * Effects::kParticleDefinitionBytes),
+           0)},
+      {.type = 9, .payload = parameters},
+  });
+}
+
+std::span<Effects_ParticleDefinition> BoundDefinitions() {
+  return {Effects_actionPackage.block5Data->definitions,
+          Effects::LiveParticleDefinitionCount()};
+}
+
+struct Rgb {
+  int red;
+  int green;
+  int blue;
+  friend bool operator==(const Rgb&, const Rgb&) = default;
+};
+
+Rgb CurvesOf(const Effects_ParticleDefinition& definition) {
+  return {definition.rCurve, definition.gCurve, definition.bCurve};
+}
+
+// Restores the first preset of D_800EC330 and of D_800EC368.
+class PresetScope {
+ public:
+  PresetScope() : paired_(Saved(Paired())), table_(Saved(Table())) {}
+  PresetScope(const PresetScope&) = delete;
+  PresetScope& operator=(const PresetScope&) = delete;
+  PresetScope(PresetScope&&) = delete;
+  PresetScope& operator=(PresetScope&&) = delete;
+  ~PresetScope() {
+    std::ranges::copy(paired_, Paired().begin());
+    std::ranges::copy(table_, Table().begin());
+  }
+
+ private:
+  static std::span<std::byte> Paired() {
+    return std::as_writable_bytes(
+        std::span{Effects_pairedParticleColorPresets[0]});
+  }
+  static std::span<std::byte> Table() {
+    return std::as_writable_bytes(
+        std::span{Effects_particleColorPresetTable[0]});
+  }
+  static std::vector<std::byte> Saved(std::span<const std::byte> bytes) {
+    return {bytes.begin(), bytes.end()};
+  }
+
+  std::vector<std::byte> paired_;
+  std::vector<std::byte> table_;
+};
+}  // namespace
+
+TEST_CASE("Live effect script vertical offsets move the package's transforms",
+          "[effect-script]") {
+  LivePackageScope scope;
+  auto package = ScriptPackage(2, 1);
+  REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
+  auto instance = std::make_unique<Effects_EffectInstance>();
+  for (auto& slot : instance->transforms) slot.positionY = 9;
+  instance->context.effectId = 6;
+  CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
+  CHECK(instance->transforms[0].positionY == Effects::kLoweredEffectHeight);
+  CHECK(instance->transforms[1].positionY == Effects::kLoweredEffectHeight);
+  CHECK(instance->transforms[2].positionY == 9);
+
+  instance->context.effectId = 0x38;
+  instance->registers[Effects::kActionVariantRegister] = 0x2B;
+  CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
+  CHECK(instance->transforms[1].positionY == Effects::kRaisedEffectHeight);
+}
+
+TEST_CASE("Live effect script vertical offsets clamp counts past the slots",
+          "[effect-script]") {
+  LivePackageScope scope;
+  auto package = ScriptPackage(40, 1);
+  REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
+  auto instance = std::make_unique<Effects_EffectInstance>();
+  instance->context.effectId = 0x24;
+  CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
+  CHECK(std::ranges::all_of(instance->transforms, [](const auto& slot) {
+    return slot.positionY == Effects::kLoweredEffectHeight;
+  }));
+}
+
+TEST_CASE("Live effect script colour curves set the operand's definition",
+          "[effect-script]") {
+  LivePackageScope scope;
+  auto package = ScriptPackage(0, 3);
+  REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
+  // Definition 2 with red 45, green 51 and blue 38.
+  std::array program{std::byte{0x42}, std::byte{0x3B}, std::byte{0x9B}};
+  const VS::test_support::EffectProgramScope recorded{program};
+  Effects_EffectInstance instance{};
+  instance.script = reinterpret_cast<char*>(program.data());
+  CHECK(Effects::LiveSetParticleColorCurvesFromScript(&instance) == 1);
+  CHECK(instance.scriptOffset == 3);
+  CHECK(CurvesOf(BoundDefinitions()[2]) == Rgb{45, 51, 38});
+  CHECK(CurvesOf(BoundDefinitions()[1]) == Rgb{});
+}
+
+TEST_CASE(
+    "Live effect script colour curves end on definitions past the "
+    "package",
+    "[effect-script]") {
+  LivePackageScope scope;
+  auto package = ScriptPackage(0, 2);
+  REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
+  std::array program{std::byte{0x42}, std::byte{0x3B}, std::byte{0x9B}};
+  const VS::test_support::EffectProgramScope recorded{program};
+  Effects_EffectInstance instance{};
+  instance.script = reinterpret_cast<char*>(program.data());
+  CHECK(Effects::LiveSetParticleColorCurvesFromScript(&instance) == 2);
+  CHECK(instance.scriptOffset == 3);
+  CHECK(std::ranges::all_of(BoundDefinitions(), [](const auto& definition) {
+    return CurvesOf(definition) == Rgb{};
+  }));
+}
+
+TEST_CASE("Live effect script presets read the module's preset tables",
+          "[effect-script]") {
+  LivePackageScope scope;
+  const PresetScope presets;
+  auto package = ScriptPackage(0, 3);
+  REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
+  std::ranges::copy(std::array<u_char, 4>{1, 2, 3, 0},
+                    std::begin(Effects_pairedParticleColorPresets[0][0]));
+  std::ranges::copy(std::array<u_char, 4>{4, 5, 6, 0},
+                    std::begin(Effects_pairedParticleColorPresets[0][1]));
+  Effects_EffectInstance instance{};
+  CHECK(Effects::LiveApplyPairedParticleColorPreset(&instance) == 1);
+  CHECK(CurvesOf(BoundDefinitions()[0]) == Rgb{1, 2, 3});
+  CHECK(CurvesOf(BoundDefinitions()[1]) == Rgb{4, 5, 6});
+
+  for (auto& entry : Effects_particleColorPresetTable[0]) {
+    std::ranges::copy(std::array<u_char, 4>{7, 8, 9, 2}, std::begin(entry));
+  }
+  CHECK(Effects::LiveApplyParticleColorPresetTable(&instance) == 1);
+  CHECK(CurvesOf(BoundDefinitions()[2]) == Rgb{7, 8, 9});
+  instance.context.target.colorPreset = Effects::kParticleColorPresets;
+  CHECK(Effects::LiveApplyParticleColorPresetTable(&instance) == 2);
 }

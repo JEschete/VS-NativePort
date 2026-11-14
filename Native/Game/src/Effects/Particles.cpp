@@ -6,6 +6,7 @@
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/EffectScriptLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -131,7 +132,7 @@ Effects_Particle* Effects_AllocateEffectParticle(Effects_EffectInstance* effect_
     Effects_Particle* node = Effects_freeParticles;
 
     if (node == NULL) {
-        Effects_IgnoreRuntimeDiagnostic(0x14);
+        VS::Effects::LiveReportEffectDiagnostic(0x14);
     }
 
     Effects_ClearParticleTextureState((int*)&node->textureAnimation);

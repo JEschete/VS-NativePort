@@ -622,6 +622,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveBranchIfEffectRegisterEqual": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveBranchIfParticleCountEqual": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveClearScriptActionVariant": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveSetActionEffectVerticalOffset": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveSignalSourceActorFromScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveSetParticleColorCurvesFromScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveApplyPairedParticleColorPreset": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveCompleteChildEffectScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveApplyParticleColorPresetTable": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveReportInvalidEffectInstruction": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveReportEffectDiagnostic": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2553,6 +2561,14 @@ OWNED_CALL_BINDINGS["F01531"] = "VS::Effects::LiveSetEffectScriptRegister"
 OWNED_CALL_BINDINGS["F01532"] = "VS::Effects::LiveBranchIfEffectRegisterEqual"
 OWNED_CALL_BINDINGS["F01533"] = "VS::Effects::LiveBranchIfParticleCountEqual"
 OWNED_CALL_BINDINGS["F01538"] = "VS::Effects::LiveClearScriptActionVariant"
+OWNED_CALL_BINDINGS["F01528"] = "VS::Effects::LiveSetActionEffectVerticalOffset"
+OWNED_CALL_BINDINGS["F01537"] = "VS::Effects::LiveSignalSourceActorFromScript"
+OWNED_CALL_BINDINGS["F01544"] = "VS::Effects::LiveSetParticleColorCurvesFromScript"
+OWNED_CALL_BINDINGS["F01545"] = "VS::Effects::LiveApplyPairedParticleColorPreset"
+OWNED_CALL_BINDINGS["F01546"] = "VS::Effects::LiveCompleteChildEffectScript"
+OWNED_CALL_BINDINGS["F01547"] = "VS::Effects::LiveApplyParticleColorPresetTable"
+OWNED_CALL_BINDINGS["F01548"] = "VS::Effects::LiveReportInvalidEffectInstruction"
+OWNED_CALL_BINDINGS["F01419"] = "VS::Effects::LiveReportEffectDiagnostic"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4006,6 +4022,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D4B34, "VS::Effects::LiveBranchIfEffectRegisterEqual"),  # F01532
     ("BATTLE/BATTLE.PRG", 0x800D4B90, "VS::Effects::LiveBranchIfParticleCountEqual"),  # F01533
     ("BATTLE/BATTLE.PRG", 0x800D4D98, "VS::Effects::LiveClearScriptActionVariant"),  # F01538
+    ("BATTLE/BATTLE.PRG", 0x800D49A4, "VS::Effects::LiveSetActionEffectVerticalOffset"),  # F01528
+    ("BATTLE/BATTLE.PRG", 0x800D4D64, "VS::Effects::LiveSignalSourceActorFromScript"),  # F01537
+    ("BATTLE/BATTLE.PRG", 0x800D4F00, "VS::Effects::LiveSetParticleColorCurvesFromScript"),  # F01544
+    ("BATTLE/BATTLE.PRG", 0x800D4FB4, "VS::Effects::LiveApplyPairedParticleColorPreset"),  # F01545
+    ("BATTLE/BATTLE.PRG", 0x800D5048, "VS::Effects::LiveCompleteChildEffectScript"),  # F01546
+    ("BATTLE/BATTLE.PRG", 0x800D5088, "VS::Effects::LiveApplyParticleColorPresetTable"),  # F01547
+    ("BATTLE/BATTLE.PRG", 0x800D5150, "VS::Effects::LiveReportInvalidEffectInstruction"),  # F01548
+    ("BATTLE/BATTLE.PRG", 0x800CE644, "VS::Effects::LiveReportEffectDiagnostic"),  # F01419
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

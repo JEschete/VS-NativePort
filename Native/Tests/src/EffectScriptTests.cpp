@@ -597,3 +597,192 @@ TEST_CASE("Live effect script operand opcodes refuse null instances",
   CHECK(fx::LiveBranchIfEffectRegisterEqual(nullptr) == 2);
   CHECK(fx::LiveBranchIfParticleCountEqual(nullptr) == 2);
 }
+
+namespace {
+using Heights = std::array<std::int32_t, 3>;
+constexpr Heights Filled(std::int32_t height) {
+  return {height, height, height};
+}
+constexpr Heights kLowered = Filled(fx::kLoweredEffectHeight);
+constexpr Heights kRaised = Filled(fx::kRaisedEffectHeight);
+constexpr Heights kKept{5, -6, 7};
+
+Heights OffsetHeights(std::uint16_t effect_id, std::uint8_t register3 = 0) {
+  Heights heights = kKept;
+  fx::ScriptRegisters registers{};
+  registers[fx::kActionVariantRegister] = register3;
+  CHECK(fx::SetActionEffectVerticalOffset(effect_id, registers, heights) ==
+        ScriptStep::kContinue);
+  return heights;
+}
+}  // namespace
+
+TEST_CASE("Effect script vertical offsets lower effects 6-21, 0x21 and 0x24",
+          "[effect-script]") {
+  CHECK(OffsetHeights(6) == kLowered);
+  CHECK(OffsetHeights(21) == kLowered);
+  CHECK(OffsetHeights(0x21) == kLowered);
+  CHECK(OffsetHeights(0x24) == kLowered);
+  CHECK(OffsetHeights(5) == kKept);
+  CHECK(OffsetHeights(22) == kKept);
+  CHECK(OffsetHeights(0xFFFF) == kKept);
+}
+
+TEST_CASE("Effect script vertical offsets raise effect 0x38 for variant 0x2B",
+          "[effect-script]") {
+  CHECK(OffsetHeights(0x38, 0x2B) == kRaised);
+  CHECK(OffsetHeights(0x38, 0x2A) == kKept);
+  CHECK(OffsetHeights(0x37, 0x2B) == kKept);
+}
+
+TEST_CASE("Effect script source signals name only actor-part sources",
+          "[effect-script]") {
+  CHECK(fx::SourceActorToSignal(4, 7) == std::optional<std::uint8_t>{7});
+  CHECK(fx::SourceActorToSignal(4, 0xFF) == std::optional<std::uint8_t>{0xFF});
+  CHECK_FALSE(fx::SourceActorToSignal(3, 7).has_value());
+  CHECK_FALSE(fx::SourceActorToSignal(0x104, 7).has_value());
+}
+
+namespace {
+using Curves = fx::ParticleColorCurves;
+using Step = fx::OpcodeStep;
+constexpr Step kDefinitionRefused{std::unexpect, Refusal::kDefinition};
+constexpr Step kPresetRefused{std::unexpect, Refusal::kColorPreset};
+// Definition 2 with red 45 (0b101101), green 51 (0b110011) and blue 38
+// (0b100110), packed low bits first.
+constexpr std::uint8_t kPackedFirst = 0x42;
+constexpr std::uint8_t kPackedSecond = 0x3B;
+constexpr std::uint8_t kPackedThird = 0x9B;
+constexpr Curves kPackedCurves{.red = 45, .green = 51, .blue = 38};
+constexpr Curves kOldCurves{.red = 1, .green = 2, .blue = 3};
+}  // namespace
+
+TEST_CASE("Effect script colour curves unpack three operand bytes",
+          "[effect-script]") {
+  const auto program = Program({kPackedFirst, kPackedSecond, kPackedThird});
+  std::vector<Curves> curves(3, kOldCurves);
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::SetParticleColorCurves(cursor, curves) == kContinued);
+  CHECK(cursor.offset == 3);
+  CHECK(curves == std::vector<Curves>{kOldCurves, kOldCurves, kPackedCurves});
+
+  const auto full = Program({0xFF, 0xFF, 0xFF});
+  ScriptCursor top{.program = full, .offset = 0};
+  std::vector<Curves> many(64);
+  CHECK(fx::SetParticleColorCurves(top, many) == kContinued);
+  CHECK(many.back() == Curves{.red = 63, .green = 63, .blue = 63});
+}
+
+TEST_CASE("Effect script colour curves refuse definitions past the package",
+          "[effect-script]") {
+  const auto program = Program({kPackedFirst, kPackedSecond, kPackedThird});
+  std::vector<Curves> curves(2, kOldCurves);
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::SetParticleColorCurves(cursor, curves) == kDefinitionRefused);
+  CHECK(cursor.offset == 3);
+  CHECK(curves == std::vector<Curves>(2, kOldCurves));
+
+  // A truncated operand refuses before any definition is chosen.
+  ScriptCursor truncated{.program = std::span{program}.first(2), .offset = 0};
+  std::vector<Curves> enough(3, kOldCurves);
+  CHECK(fx::SetParticleColorCurves(truncated, enough) == kOperandRefused);
+  CHECK(truncated.offset == 2);
+  CHECK(enough == std::vector<Curves>(3, kOldCurves));
+}
+
+TEST_CASE("Effect script paired presets set definitions 0 and 1",
+          "[effect-script]") {
+  const std::array<fx::PairedColorPreset, 2> presets{{
+      {Curves{1, 2, 3}, Curves{4, 3, 3}},
+      {Curves{3, 1, 2}, Curves{3, 4, 3}},
+  }};
+  std::vector<Curves> curves(3, kOldCurves);
+  CHECK(fx::ApplyPairedColorPreset(1, presets, curves) == kContinued);
+  CHECK(curves ==
+        std::vector<Curves>{Curves{3, 1, 2}, Curves{3, 4, 3}, kOldCurves});
+  CHECK(fx::ApplyPairedColorPreset(2, presets, curves) == kPresetRefused);
+  std::vector<Curves> single(1, kOldCurves);
+  CHECK(fx::ApplyPairedColorPreset(0, presets, single) == kDefinitionRefused);
+  CHECK(single == std::vector<Curves>(1, kOldCurves));
+}
+
+TEST_CASE("Effect script preset tables apply every entry in order",
+          "[effect-script]") {
+  const auto entry = [](std::uint8_t definition, std::uint8_t red) {
+    return fx::ColorPresetEntry{.curves = Curves{red, 0, 0},
+                                .definition = definition};
+  };
+  const std::array<fx::ColorPresetTable, 2> tables{{
+      {entry(1, 10), entry(3, 11), entry(1, 12), entry(0, 13), entry(2, 14)},
+      {entry(0, 20), entry(1, 21), entry(2, 22), entry(3, 23), entry(4, 24)},
+  }};
+  std::vector<Curves> curves(4, kOldCurves);
+  CHECK(fx::ApplyColorPresetTable(0, tables, curves) == kContinued);
+  CHECK(curves == std::vector<Curves>{Curves{13, 0, 0}, Curves{12, 0, 0},
+                                      Curves{14, 0, 0}, Curves{11, 0, 0}});
+
+  // An entry past the definitions refuses the whole table.
+  std::vector<Curves> kept(4, kOldCurves);
+  CHECK(fx::ApplyColorPresetTable(1, tables, kept) == kDefinitionRefused);
+  CHECK(kept == std::vector<Curves>(4, kOldCurves));
+  CHECK(fx::ApplyColorPresetTable(2, tables, kept) == kPresetRefused);
+}
+
+TEST_CASE("Effect script child completions keep the 5-bit count wrap",
+          "[effect-script]") {
+  using Count = std::optional<std::uint8_t>;
+  CHECK(fx::CompleteChildScript(Count{3}) == Count{2});
+  CHECK(fx::CompleteChildScript(Count{1}) == Count{0});
+  CHECK(fx::CompleteChildScript(Count{0}) == Count{fx::kChildCountMask});
+  CHECK_FALSE(fx::CompleteChildScript(std::nullopt).has_value());
+}
+
+TEST_CASE("Effect script invalid instructions report and yield",
+          "[effect-script]") {
+  const fx::ScriptDiagnosticStep report = fx::ReportInvalidInstruction();
+  CHECK(report.diagnostic == fx::EffectDiagnostic::kInvalidInstruction);
+  CHECK(report.step == ScriptStep::kYield);
+  CHECK(fx::HandlerResult(report.step) == 0);
+  CHECK_FALSE(fx::DescribeEffectDiagnostic(0x1E).empty());
+  CHECK_FALSE(fx::DescribeEffectDiagnostic(0x14).empty());
+  CHECK(fx::DescribeEffectDiagnostic(0).empty());
+}
+
+TEST_CASE("Live effect script child completions release the parent's child",
+          "[effect-script]") {
+  Effects_EffectInstance parent{};
+  parent.childCount = 2;
+  Effects_EffectInstance child{};
+  child.parent = &parent;
+  CHECK(fx::LiveCompleteChildEffectScript(&child) == 1);
+  CHECK(parent.childCount == 1);
+  parent.childCount = 0;
+  parent.frame = 0x1234;
+  CHECK(fx::LiveCompleteChildEffectScript(&child) == 1);
+  CHECK(parent.childCount == fx::kChildCountMask);
+  CHECK(parent.frame == 0x1234);
+  child.parent = nullptr;
+  CHECK(fx::LiveCompleteChildEffectScript(&child) == 1);
+}
+
+TEST_CASE("Live effect script signals skip sources that are not actor parts",
+          "[effect-script]") {
+  Effects_EffectInstance instance{};
+  instance.context.source.type = 3;
+  CHECK(fx::LiveSignalSourceActorFromScript(&instance) == 1);
+  CHECK(fx::LiveReportInvalidEffectInstruction(nullptr) == 0);
+  CHECK(fx::LiveReportInvalidEffectInstruction(&instance) == 0);
+  fx::LiveReportEffectDiagnostic(0x55);
+}
+
+TEST_CASE(
+    "Live effect script transform and colour opcodes refuse null "
+    "instances",
+    "[effect-script]") {
+  CHECK(fx::LiveSetActionEffectVerticalOffset(nullptr) == 2);
+  CHECK(fx::LiveSignalSourceActorFromScript(nullptr) == 2);
+  CHECK(fx::LiveSetParticleColorCurvesFromScript(nullptr) == 2);
+  CHECK(fx::LiveApplyPairedParticleColorPreset(nullptr) == 2);
+  CHECK(fx::LiveCompleteChildEffectScript(nullptr) == 2);
+  CHECK(fx::LiveApplyParticleColorPresetTable(nullptr) == 2);
+}

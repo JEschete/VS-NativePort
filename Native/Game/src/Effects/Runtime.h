@@ -332,7 +332,6 @@ extern Effects_EffectRenderer Effects_rendererTableAlias[];
 extern Effects_EffectRenderer Effects_effectRenderers[8];
 extern Effects_EffectPackage Effects_actionPackage;
 extern Effects_EffectPackage Effects_secondaryPackage;
-int Effects_IgnoreRuntimeDiagnostic(int diagnostic_code __attribute__((unused)));
 void Effects_InitEffectRuntime(void);
 void Effects_ResetEffectInstances(void);
 void Effects_InitEffectInstance(Effects_EffectSpawnRequest* spawn_request, Effects_EffectInstance* effect_instance);

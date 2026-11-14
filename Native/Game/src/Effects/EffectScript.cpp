@@ -1,11 +1,16 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Effects/EffectScript.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <optional>
+#include <span>
+#include <string_view>
+
+#include "Effects/Transforms.hpp"
 
 namespace VS::Effects {
 namespace {
@@ -40,6 +45,49 @@ ReadRegisterOperands(ScriptCursor& cursor) {
     return std::unexpected(ScriptRefusal::kRegister);
   }
   return RegisterOperands{.index = *index, .value = *value};
+}
+
+// The action effects func_800D49A4 lowers (6-21, 0x21 and 0x24) and the one
+// it raises for a register-3 value.
+constexpr std::uint16_t kFirstLoweredEffect = 6;
+constexpr std::uint16_t kLoweredEffectRun = 16;
+constexpr std::uint16_t kLoweredEffect = 0x21;
+constexpr std::uint16_t kOtherLoweredEffect = 0x24;
+constexpr std::uint16_t kRaisedEffect = 0x38;
+constexpr std::uint8_t kRaisedVariant = 0x2B;
+
+[[nodiscard]] bool IsLoweredEffect(std::uint16_t effect_id) {
+  return static_cast<std::uint16_t>(effect_id - kFirstLoweredEffect) <
+             kLoweredEffectRun ||
+         effect_id == kLoweredEffect || effect_id == kOtherLoweredEffect;
+}
+
+// The colour opcode's three operand bytes, packed low bits first: a 6-bit
+// definition index, then 6-bit red (2 + 4 bits), green (4 + 2 bits) and blue
+// curves.
+constexpr std::size_t kColorOperandBytes = 3;
+using ColorOperands = std::array<std::uint8_t, kColorOperandBytes>;
+constexpr std::uint8_t kDefinitionMask = 0x3F;
+constexpr unsigned kDefinitionBits = 6;
+constexpr unsigned kRedLowBits = 2;
+constexpr unsigned kRedHighBits = 4;
+constexpr unsigned kGreenLowBits = 4;
+constexpr unsigned kGreenHighBits = 2;
+constexpr std::uint8_t kRedHighMask = 0xF;
+constexpr std::uint8_t kGreenHighMask = 0x3;
+
+[[nodiscard]] ParticleColorCurves UnpackColorCurves(
+    const ColorOperands& operands) {
+  const auto [first, second, third] = operands;
+  return {
+      .red =
+          static_cast<std::uint8_t>((first >> kDefinitionBits) |
+                                    ((second & kRedHighMask) << kRedLowBits)),
+      .green = static_cast<std::uint8_t>(
+          (second >> kRedHighBits) |
+          ((third & kGreenHighMask) << kGreenLowBits)),
+      .blue = static_cast<std::uint8_t>(third >> kGreenHighBits),
+  };
 }
 }  // namespace
 
@@ -191,5 +239,104 @@ OpcodeStep BranchIfParticleCountEqual(std::uint8_t particle_count,
 ScriptStep ClearActionVariant(std::uint8_t& variant) {
   variant = 0;
   return ScriptStep::kContinue;
+}
+
+// decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7602)
+ScriptStep SetActionEffectVerticalOffset(std::uint16_t effect_id,
+                                         const ScriptRegisters& registers,
+                                         std::span<std::int32_t> heights) {
+  std::optional<std::int32_t> height;
+  if (IsLoweredEffect(effect_id)) {
+    height = kLoweredEffectHeight;
+  } else if (effect_id == kRaisedEffect &&
+             std::get<kActionVariantRegister>(registers) == kRaisedVariant) {
+    height = kRaisedEffectHeight;
+  }
+  if (height) std::ranges::fill(heights, *height);
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:7697)
+std::optional<std::uint8_t> SourceActorToSignal(std::uint16_t source_type,
+                                                std::uint8_t actor) {
+  if (source_type != kActorPartEndpoint) return std::nullopt;
+  return actor;
+}
+
+// decomp: func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:7749)
+OpcodeStep SetParticleColorCurves(ScriptCursor& cursor,
+                                  std::span<ParticleColorCurves> curves) {
+  ColorOperands operands{};
+  for (auto& operand : operands) {
+    const auto value = ReadScriptByte(cursor);
+    if (!value) return std::unexpected(ScriptRefusal::kOperand);
+    operand = *value;
+  }
+  const std::size_t definition = operands[0] & kDefinitionMask;
+  if (definition >= curves.size()) {
+    return std::unexpected(ScriptRefusal::kDefinition);
+  }
+  curves[definition] = UnpackColorCurves(operands);
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7762)
+OpcodeStep ApplyPairedColorPreset(std::uint16_t preset,
+                                  std::span<const PairedColorPreset> presets,
+                                  std::span<ParticleColorCurves> curves) {
+  if (preset >= presets.size()) {
+    return std::unexpected(ScriptRefusal::kColorPreset);
+  }
+  if (curves.size() < kPairedDefinitions) {
+    return std::unexpected(ScriptRefusal::kDefinition);
+  }
+  std::ranges::copy(presets[preset], curves.begin());
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:7785)
+OpcodeStep ApplyColorPresetTable(std::uint16_t preset,
+                                 std::span<const ColorPresetTable> tables,
+                                 std::span<ParticleColorCurves> curves) {
+  if (preset >= tables.size()) {
+    return std::unexpected(ScriptRefusal::kColorPreset);
+  }
+  const ColorPresetTable& table = tables[preset];
+  const auto names_definition = [&curves](const ColorPresetEntry& entry) {
+    return entry.definition < curves.size();
+  };
+  if (!std::ranges::all_of(table, names_definition)) {
+    return std::unexpected(ScriptRefusal::kDefinition);
+  }
+  for (const ColorPresetEntry& entry : table) {
+    curves[entry.definition] = entry.curves;
+  }
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:7776)
+std::optional<std::uint8_t> CompleteChildScript(
+    std::optional<std::uint8_t> parent_children) {
+  return parent_children.transform([](std::uint8_t children) {
+    return static_cast<std::uint8_t>((children - 1) & kChildCountMask);
+  });
+}
+
+// decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)
+std::string_view DescribeEffectDiagnostic(std::int32_t code) {
+  switch (code) {
+    case static_cast<std::int32_t>(EffectDiagnostic::kParticlePoolExhausted):
+      return "particle pool exhausted";
+    case static_cast<std::int32_t>(EffectDiagnostic::kInvalidInstruction):
+      return "invalid effect script instruction";
+    default:
+      return {};
+  }
+}
+
+// decomp: func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:7799)
+ScriptDiagnosticStep ReportInvalidInstruction() {
+  return {.diagnostic = EffectDiagnostic::kInvalidInstruction,
+          .step = ScriptStep::kYield};
 }
 }  // namespace VS::Effects

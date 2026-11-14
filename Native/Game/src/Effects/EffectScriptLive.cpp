@@ -2,20 +2,32 @@
 #include "Effects/EffectScriptLive.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <optional>
+#include <ranges>
 #include <span>
+#include <string_view>
 #include <type_traits>
+#include <vector>
 
 #include "Core/Log.hpp"
+#include "Effects/EffectResources.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/Transforms.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Effects/ActionEffects.h"
+#include "Effects/Package.h"
+#include "Effects/Particles.h"
 #include "Effects/Runtime.h"
+#include "Effects/Transforms.h"
 }
 
 static_assert(std::extent_v<decltype(Effects_scriptOpcodeHandlers)> ==
@@ -24,6 +36,16 @@ static_assert(std::extent_v<decltype(Effects_EffectInstance::registers)> ==
               VS::Effects::kScriptRegisters);
 static_assert(std::extent_v<decltype(Effects_actionVariantValues)> >=
               VS::Effects::kActionVariantValues);
+static_assert(std::extent_v<decltype(Effects_EffectInstance::transforms)> ==
+              VS::Effects::kEffectTransformSlots);
+static_assert(std::extent_v<decltype(Effects_pairedParticleColorPresets)> >=
+              VS::Effects::kParticleColorPresets);
+static_assert(std::extent_v<decltype(Effects_pairedParticleColorPresets), 1> ==
+              VS::Effects::kPairedDefinitions);
+static_assert(std::extent_v<decltype(Effects_particleColorPresetTable)> >=
+              VS::Effects::kParticleColorPresets);
+static_assert(std::extent_v<decltype(Effects_particleColorPresetTable), 1> ==
+              VS::Effects::kColorPresetEntries);
 
 namespace VS::Effects {
 namespace {
@@ -31,6 +53,11 @@ std::uint64_t refused_calls = 0;
 std::uint64_t refused_reads = 0;
 std::uint64_t refused_opcodes = 0;
 std::uint64_t refused_registers = 0;
+std::uint64_t refused_definitions = 0;
+std::uint64_t refused_presets = 0;
+std::uint64_t clamped_transforms = 0;
+std::uint64_t wrapped_children = 0;
+std::uint64_t reported_diagnostics = 0;
 
 [[nodiscard]] bool ShouldReport(std::uint64_t& count) {
   return std::has_single_bit(++count);
@@ -88,8 +115,42 @@ template <typename Step>
   return HandlerResult(result);
 }
 
-// Runs an operand opcode over the instance's cursor; a refused operand or
-// register ends the instance.
+// Reports a refused operand opcode; Settle reports refused reads.
+void ReportOpcodeRefusal(const char* entry, ScriptRefusal refusal,
+                         std::uint16_t offset) {
+  switch (refusal) {
+    case ScriptRefusal::kOperand:
+      return;
+    case ScriptRefusal::kRegister:
+      if (ShouldReport(refused_registers)) {
+        VS_LOG_WARN("effects",
+                    "effect script: {} before {:#x} names a register past the "
+                    "{} registers ({} refusals)",
+                    entry, offset, kScriptRegisters, refused_registers);
+      }
+      return;
+    case ScriptRefusal::kDefinition:
+      if (ShouldReport(refused_definitions)) {
+        VS_LOG_WARN("effects",
+                    "effect script: {} before {:#x} names a particle "
+                    "definition past the package's {} ({} refusals)",
+                    entry, offset, LiveParticleDefinitionCount(),
+                    refused_definitions);
+      }
+      return;
+    case ScriptRefusal::kColorPreset:
+      if (ShouldReport(refused_presets)) {
+        VS_LOG_WARN("effects",
+                    "effect script: {} before {:#x} names a colour preset past "
+                    "the {} presets ({} refusals)",
+                    entry, offset, kParticleColorPresets, refused_presets);
+      }
+      return;
+  }
+}
+
+// Runs an operand opcode over the instance's cursor; a refused operand,
+// register, definition or colour preset ends the instance.
 template <typename Opcode>
 [[nodiscard]] int RunOpcode(Effects_EffectInstance* instance, const char* entry,
                             Opcode opcode) {
@@ -101,12 +162,7 @@ template <typename Opcode>
   const OpcodeStep step = opcode(*instance, cursor);
   const auto refusal = step ? std::nullopt : std::optional{step.error()};
   Settle(*instance, cursor, refusal == ScriptRefusal::kOperand);
-  if (refusal == ScriptRefusal::kRegister && ShouldReport(refused_registers)) {
-    VS_LOG_WARN("effects",
-                "effect script: {} before {:#x} names a register past the "
-                "{} registers ({} refusals)",
-                entry, cursor.offset, kScriptRegisters, refused_registers);
-  }
+  if (refusal) ReportOpcodeRefusal(entry, *refusal, cursor.offset);
   return HandlerResult(step.value_or(ScriptStep::kEnd));
 }
 
@@ -133,6 +189,102 @@ void StoreRegisters(Effects_EffectInstance& instance,
       values.begin(),
       [](char value) { return std::bit_cast<std::uint8_t>(value); });
   return values;
+}
+
+// The package's transforms, up to the instance's slots.
+[[nodiscard]] std::size_t PackageTransformCount() {
+  const std::optional<PackageParameters> parameters = ReadPackageParameters(
+      LiveBoundPackageBlock(PackageBlockType::kParameters));
+  if (!parameters) return 0;
+  const std::size_t counted = parameters->transform_count;
+  if (counted > kEffectTransformSlots && ShouldReport(clamped_transforms)) {
+    VS_LOG_WARN("effects",
+                "effect script: block 9 counts {} transforms; heights apply to "
+                "the instance's {} ({} clamps)",
+                counted, kEffectTransformSlots, clamped_transforms);
+  }
+  return std::min(counted, kEffectTransformSlots);
+}
+
+[[nodiscard]] std::span<Effects_ParticleDefinition> PackageDefinitions() {
+  if (Effects_package == nullptr || Effects_package->block5Data == nullptr) {
+    return {};
+  }
+  return {Effects_package->block5Data->definitions,
+          LiveParticleDefinitionCount()};
+}
+
+// Runs a colour opcode over the package's definitions' curves, storing them
+// back unless it refused.
+template <typename Apply>
+[[nodiscard]] OpcodeStep WithDefinitionCurves(Apply apply) {
+  const std::span definitions = PackageDefinitions();
+  std::vector<ParticleColorCurves> curves(definitions.size());
+  std::ranges::transform(definitions, curves.begin(),
+                         [](const Effects_ParticleDefinition& definition) {
+                           return ParticleColorCurves{
+                               .red = definition.rCurve,
+                               .green = definition.gCurve,
+                               .blue = definition.bCurve};
+                         });
+  const OpcodeStep step = apply(std::span{curves});
+  if (!step) return step;
+  for (auto&& [definition, curve] : std::views::zip(definitions, curves)) {
+    definition.rCurve = curve.red;
+    definition.gCurve = curve.green;
+    definition.bCurve = curve.blue;
+  }
+  return step;
+}
+
+// A preset entry's bytes (D_800EC330 and D_800EC368).
+constexpr std::size_t kPresetEntryBytes = 4;
+static_assert(std::extent_v<decltype(Effects_pairedParticleColorPresets), 2> ==
+              kPresetEntryBytes);
+static_assert(std::extent_v<decltype(Effects_particleColorPresetTable), 2> ==
+              kPresetEntryBytes);
+using PresetBytes = std::span<const u_char, kPresetEntryBytes>;
+
+// A preset entry's red, green and blue curves; the fourth byte is padding in
+// the paired presets and the definition index in the table.
+[[nodiscard]] ParticleColorCurves CurvesOf(PresetBytes bytes) {
+  return {.red = bytes[0], .green = bytes[1], .blue = bytes[2]};
+}
+
+// D_800EC330's seven paired presets.
+[[nodiscard]] std::array<PairedColorPreset, kParticleColorPresets>
+PairedPresets() {
+  std::array<PairedColorPreset, kParticleColorPresets> presets{};
+  std::ranges::transform(std::span{Effects_pairedParticleColorPresets}
+                             .first<kParticleColorPresets>(),
+                         presets.begin(), [](const auto& preset) {
+                           PairedColorPreset paired{};
+                           std::ranges::transform(
+                               preset, paired.begin(), [](const auto& bytes) {
+                                 return CurvesOf(PresetBytes{bytes});
+                               });
+                           return paired;
+                         });
+  return presets;
+}
+
+// D_800EC368's seven preset tables.
+[[nodiscard]] std::array<ColorPresetTable, kParticleColorPresets>
+PresetTables() {
+  std::array<ColorPresetTable, kParticleColorPresets> tables{};
+  std::ranges::transform(
+      std::span{Effects_particleColorPresetTable}
+          .first<kParticleColorPresets>(),
+      tables.begin(), [](const auto& preset) {
+        ColorPresetTable table{};
+        std::ranges::transform(preset, table.begin(), [](const auto& bytes) {
+          const PresetBytes entry{bytes};
+          return ColorPresetEntry{.curves = CurvesOf(entry),
+                                  .definition = entry.back()};
+        });
+        return table;
+      });
+  return tables;
 }
 
 // The instance a frame's run reads and dispatches through the handler table.
@@ -300,5 +452,114 @@ int LiveBranchIfParticleCountEqual(Effects_EffectInstance* instance) {
 // decomp: func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:7705)
 int LiveClearScriptActionVariant(Effects_EffectInstance* /*instance*/) {
   return HandlerResult(ClearActionVariant(Effects_actionVariant));
+}
+
+// decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7602)
+int LiveSetActionEffectVerticalOffset(Effects_EffectInstance* instance) {
+  if (instance == nullptr) {
+    ReportRefusal("vertical offset");
+    return HandlerResult(ScriptStep::kEnd);
+  }
+  const std::span slots =
+      std::span{instance->transforms}.first(PackageTransformCount());
+  std::array<std::int32_t, kEffectTransformSlots> heights{};
+  std::ranges::transform(slots, heights.begin(),
+                         &Effects_TransformSlot::positionY);
+  const ScriptStep step = SetActionEffectVerticalOffset(
+      std::bit_cast<std::uint16_t>(instance->context.effectId),
+      RegistersOf(*instance), std::span{heights}.first(slots.size()));
+  for (auto&& [slot, height] : std::views::zip(slots, heights)) {
+    slot.positionY = height;
+  }
+  return HandlerResult(step);
+}
+
+// decomp: func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:7697)
+int LiveSignalSourceActorFromScript(Effects_EffectInstance* instance) {
+  if (instance == nullptr) {
+    ReportRefusal("signal source actor");
+    return HandlerResult(ScriptStep::kEnd);
+  }
+  const Effects_ActionEffectTarget& source = instance->context.source;
+  if (const auto actor = SourceActorToSignal(
+          source.type, static_cast<std::uint8_t>(source.value.actor.actor))) {
+    Effects_SignalActorEffectAnimation(*actor);
+  }
+  return HandlerResult(ContinueScript());
+}
+
+// decomp: func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:7749)
+int LiveSetParticleColorCurvesFromScript(Effects_EffectInstance* instance) {
+  return RunOpcode(
+      instance, "set particle colour curves",
+      [](Effects_EffectInstance& /*effect*/, ScriptCursor& cursor) {
+        return WithDefinitionCurves(
+            [&cursor](std::span<ParticleColorCurves> curves) {
+              return SetParticleColorCurves(cursor, curves);
+            });
+      });
+}
+
+// decomp: func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7762)
+int LiveApplyPairedParticleColorPreset(Effects_EffectInstance* instance) {
+  return RunOpcode(
+      instance, "apply paired colour preset",
+      [](Effects_EffectInstance& effect, ScriptCursor& /*cursor*/) {
+        const auto presets = PairedPresets();
+        return WithDefinitionCurves(
+            [&effect, &presets](std::span<ParticleColorCurves> curves) {
+              return ApplyPairedColorPreset(effect.context.target.colorPreset,
+                                            presets, curves);
+            });
+      });
+}
+
+// decomp: func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:7776)
+int LiveCompleteChildEffectScript(Effects_EffectInstance* instance) {
+  if (instance == nullptr) {
+    ReportRefusal("complete child");
+    return HandlerResult(ScriptStep::kEnd);
+  }
+  Effects_EffectInstance* parent = instance->parent;
+  if (parent == nullptr) return HandlerResult(ContinueScript());
+  const auto children = static_cast<std::uint8_t>(parent->childCount);
+  if (children == 0 && ShouldReport(wrapped_children)) {
+    VS_LOG_WARN("effects",
+                "effect script: a child completed with its parent counting no "
+                "running children; the count wraps to {} ({} wraps)",
+                kChildCountMask, wrapped_children);
+  }
+  parent->childCount = CompleteChildScript(children).value_or(children);
+  return HandlerResult(ContinueScript());
+}
+
+// decomp: func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:7785)
+int LiveApplyParticleColorPresetTable(Effects_EffectInstance* instance) {
+  return RunOpcode(
+      instance, "apply colour preset table",
+      [](Effects_EffectInstance& effect, ScriptCursor& /*cursor*/) {
+        const auto tables = PresetTables();
+        return WithDefinitionCurves(
+            [&effect, &tables](std::span<ParticleColorCurves> curves) {
+              return ApplyColorPresetTable(effect.context.target.colorPreset,
+                                           tables, curves);
+            });
+      });
+}
+
+// decomp: func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:7799)
+int LiveReportInvalidEffectInstruction(Effects_EffectInstance* /*instance*/) {
+  const ScriptDiagnosticStep report = ReportInvalidInstruction();
+  LiveReportEffectDiagnostic(static_cast<int>(report.diagnostic));
+  return HandlerResult(report.step);
+}
+
+// decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)
+void LiveReportEffectDiagnostic(int code) {
+  if (!ShouldReport(reported_diagnostics)) return;
+  const std::string_view description = DescribeEffectDiagnostic(code);
+  VS_LOG_WARN("effects", "effect diagnostic {:#x}: {} ({} reports)", code,
+              description.empty() ? "unknown code" : description,
+              reported_diagnostics);
 }
 }  // namespace VS::Effects
