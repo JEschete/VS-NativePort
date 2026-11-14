@@ -14,6 +14,8 @@ function:
   MODULES               module paths under Native\\data\\disc (default BATTLE/BATTLE.PRG); the
                         first is the function's own module and is passed to the driver
   DRIVER, SOURCES       the driver next to the case and the Native sources it compiles with
+  COMPILER, CXX_STANDARD, COMPILER_OPTIONS
+                        optional compiler, standard and additional flags (defaults: cl, c++20)
   VECTORS, SEED         default vector count and random seed
   MUTANTS               {name: {address: replacement word}}; every mutant must be detected
   MUTANT_VECTORS        optional: mutants rerun only the first N vectors (default: all)
@@ -857,7 +859,11 @@ def build_driver(case: ModuleType, replacements: list[tuple[str, str, str]] | No
     includes = [ROOT / "Native" / "Game" / "include", ROOT / "Native" / "Engine" / "include",
                 *(ROOT / path for path in getattr(case, "INCLUDES", ())), *directories]
     sources = [case.PATH.with_name(case.DRIVER), *sources]
-    command = (f'call "{vcvars()}" >nul && cl /nologo /std:c++20 /EHsc /O2 /DVS_DIFFERENTIAL '
+    compiler = getattr(case, "COMPILER", "cl")
+    standard = getattr(case, "CXX_STANDARD", "c++20")
+    options = (f"/std:{standard}", "/EHsc", "/O2", "/DVS_DIFFERENTIAL",
+               *getattr(case, "COMPILER_OPTIONS", ()))
+    command = (f'call "{vcvars()}" >nul && {compiler} /nologo ' + " ".join(options) + " "
                + " ".join(f'/I "{path}"' for path in includes) + " "
                + " ".join(f'"{path}"' for path in sources)
                + f' /Fe:"{executable}" /Fo:"{output}\\\\"')

@@ -1685,6 +1685,34 @@ def native_sum(lines: list[str]) -> list[list[int]]:
 class Harness(unittest.TestCase):
     images = [image(r_type(0x21, V0, A0, A1), JR_RA, NOP)]
 
+    def test_driver_build_uses_optional_compiler_settings(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            case = fake_case()
+            case.PATH = Path(folder) / "case.py"
+            case.DRIVER = "driver.cpp"
+            case.SOURCES = ("source.cpp",)
+            case.INCLUDES = (r"Native\Engine",)
+            output = Path(folder) / "output"
+            result = types.SimpleNamespace(returncode=0, stdout="", stderr="")
+            with (
+                mock.patch.object(differential, "OUTPUT", output),
+                mock.patch.object(differential, "vcvars", return_value=Path("vcvars64.bat")),
+                mock.patch.object(differential, "variant_sources", return_value=([Path("source.cpp")], [])),
+                mock.patch.object(differential.subprocess, "run", return_value=result) as run_process,
+            ):
+                differential.build_driver(case)
+                default_command = run_process.call_args.args[0]
+                self.assertIn("&& cl /nologo /std:c++20 /EHsc /O2 /DVS_DIFFERENTIAL", default_command)
+
+                case.COMPILER = "clang-cl"
+                case.CXX_STANDARD = "c++latest"
+                case.COMPILER_OPTIONS = ("/J", "/clang:-fwrapv")
+                differential.build_driver(case)
+                copied_command = run_process.call_args.args[0]
+                self.assertIn("&& clang-cl /nologo /std:c++latest /EHsc /O2 /DVS_DIFFERENTIAL /J /clang:-fwrapv",
+                              copied_command)
+                self.assertIn(f'/I "{differential.ROOT / "Native" / "Engine"}"', copied_command)
+
     def test_matching_native_side_passes_and_detects_mutants(self) -> None:
         report = differential.run_case(fake_case(), self.images, native_sum)
         self.assertTrue(report.passed, report.lines)
