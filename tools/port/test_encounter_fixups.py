@@ -3408,7 +3408,14 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(source, "u_short pulsedPalette[16];")
 
     def test_pressed_button_ports_use_the_ledger_inline_struct_type(self):
-        copier = copy_to_native.Copier()
+        copier = object.__new__(copy_to_native.Copier)
+        copier.types = copy_to_native.rd("TYPE_LEDGER.csv")
+        copier.type_by_id = {row["id"]: row for row in copier.types}
+        copier.fields = {
+            row["id"]: row for row in copy_to_native.rd("FIELD_LEDGER.csv")
+        }
+        copier.ptr_fields = set()
+        copier.report = copy_to_native.collections.defaultdict(list)
         text = copier.generated_type(
             copier.type_by_id["T00746"], "Input_PressedButtonsView"
         )
