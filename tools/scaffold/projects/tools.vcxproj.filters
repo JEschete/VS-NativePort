@@ -2469,6 +2469,9 @@
     <None Include="..\..\port\differentials\effect_script_particle_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_script_particle_environment.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_particle_equal.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2497,6 +2500,30 @@
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_signal_source.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_finished.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_free.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_immediate.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_register.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_tick.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_transform_initialize.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_transform_tick.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_variant_cleared.py">
@@ -3094,6 +3121,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\effect_script_particle_differential.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\effect_script_timeline_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\field_at.py">

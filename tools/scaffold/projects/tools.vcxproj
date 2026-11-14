@@ -499,6 +499,7 @@
     <None Include="..\..\port\differentials\effect_script_opcode_driver.cpp" />
     <None Include="..\..\port\differentials\effect_script_paired_preset.py" />
     <None Include="..\..\port\differentials\effect_script_particle_driver.cpp" />
+    <None Include="..\..\port\differentials\effect_script_particle_environment.py" />
     <None Include="..\..\port\differentials\effect_script_particle_equal.py" />
     <None Include="..\..\port\differentials\effect_script_preset_table.py" />
     <None Include="..\..\port\differentials\effect_script_read_byte.py" />
@@ -509,6 +510,14 @@
     <None Include="..\..\port\differentials\effect_script_selector.py" />
     <None Include="..\..\port\differentials\effect_script_set_register.py" />
     <None Include="..\..\port\differentials\effect_script_signal_source.py" />
+    <None Include="..\..\port\differentials\effect_script_timeline_driver.cpp" />
+    <None Include="..\..\port\differentials\effect_script_timeline_finished.py" />
+    <None Include="..\..\port\differentials\effect_script_timeline_free.py" />
+    <None Include="..\..\port\differentials\effect_script_timeline_immediate.py" />
+    <None Include="..\..\port\differentials\effect_script_timeline_register.py" />
+    <None Include="..\..\port\differentials\effect_script_timeline_tick.py" />
+    <None Include="..\..\port\differentials\effect_script_transform_initialize.py" />
+    <None Include="..\..\port\differentials\effect_script_transform_tick.py" />
     <None Include="..\..\port\differentials\effect_script_variant_cleared.py" />
     <None Include="..\..\port\differentials\effect_script_vertical_offset.py" />
     <None Include="..\..\port\differentials\effect_script_yield.py" />
@@ -708,6 +717,7 @@
     <None Include="..\..\port\effect_script_differential.py" />
     <None Include="..\..\port\effect_script_opcode_differential.py" />
     <None Include="..\..\port\effect_script_particle_differential.py" />
+    <None Include="..\..\port\effect_script_timeline_differential.py" />
     <None Include="..\..\port\field_at.py" />
     <None Include="..\..\port\gen_decomp_headers.py" />
     <None Include="..\..\port\hazard_index.py" />

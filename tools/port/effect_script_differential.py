@@ -191,13 +191,29 @@ def describe(image, results) -> list[str]:
     return [f"{stubbed} vectors ran stubbed handlers; most common results {common}"]
 
 
-def configure(function: int, mode: int, entry: int, end: int, mutants: dict) -> dict:
-    """Case-module globals for one effect script function compared in `mode`."""
+def case_globals(function: int, entry: int, end: int, mutants: dict, *, driver: str, vector, run, check,
+                 describe) -> dict:
+    """Case-module globals for one effect script original that an effect script harness's
+    `driver` compares; `vector` and `run` are the case's bound callbacks."""
     return {
         "ID": f"F{function:05}", "ENTRY": entry, "END": end,
-        "DRIVER": DRIVER, "SOURCES": SOURCES, "MODULES": MODULES, "CXX_STANDARD": "c++latest",
+        "DRIVER": driver, "SOURCES": SOURCES, "MODULES": MODULES, "CXX_STANDARD": "c++latest",
         "VECTORS": 256, "SEED": function, "MUTANT_VECTORS": 64, "MUTANTS": mutants,
-        "vector": lambda rng, number: vector(rng, number, mode),
-        "run": lambda machine, value: run(machine, value, entry),
-        "check": check, "describe": describe,
+        "vector": vector, "run": run, "check": check, "describe": describe,
     }
+
+
+def value_problems(names: tuple[str, ...], ours: list[int], theirs: list[int]) -> list[str]:
+    """The named values the native printed that differ from the original's."""
+    if len(theirs) != len(ours):
+        return [f"native printed {len(theirs)} values, original {len(ours)}: {theirs} {ours}"]
+    return [f"{name} native {native_value} original {original}"
+            for name, native_value, original in zip(names, theirs, ours, strict=True)
+            if native_value != original]
+
+
+def configure(function: int, mode: int, entry: int, end: int, mutants: dict) -> dict:
+    """Case-module globals for one effect script function compared in `mode`."""
+    return case_globals(function, entry, end, mutants, driver=DRIVER,
+                        vector=lambda rng, number: vector(rng, number, mode),
+                        run=lambda machine, value: run(machine, value, entry), check=check, describe=describe)

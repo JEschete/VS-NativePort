@@ -69,6 +69,26 @@ int LiveApplyParticleColorPresetTable(Effects_EffectInstance* instance);
 // func_800D5150 (5BF94.c:7799): reports the invalid instruction and yields.
 int LiveReportInvalidEffectInstruction(Effects_EffectInstance* instance);
 
+// The timeline, transform and particle-environment opcodes. A timeline
+// opcode run before the instance loads a timeline ends the instance (2) with
+// a diagnostic; the original read through the null timeline.
+// func_800D48A4 (5BF94.c:7569).
+int LiveLoadEffectTimelineImmediate(Effects_EffectInstance* instance);
+// func_800D4DB0 (5BF94.c:7713).
+int LiveLoadEffectTimelineFromRegister(Effects_EffectInstance* instance);
+// func_800D4E5C (5BF94.c:7728).
+int LiveTickEffectTimelineFromScript(Effects_EffectInstance* instance);
+// func_800D4E90 (5BF94.c:7734).
+int LiveBranchIfEffectTimelineFinished(Effects_EffectInstance* instance);
+// func_800D4EC0 (5BF94.c:7740).
+int LiveFreeEffectScriptTimeline(Effects_EffectInstance* instance);
+// func_800D4984 (5BF94.c:7596).
+int LiveTickEffectTransforms(Effects_EffectInstance* instance);
+// func_800D4A94 (5BF94.c:7619).
+int LiveInitializeScriptEffectTransforms(Effects_EffectInstance* instance);
+// func_800D4D44 (5BF94.c:7691).
+int LiveRefreshScriptParticleEnvironment(Effects_EffectInstance* instance);
+
 // func_800CE644 (5BF94.c:5045): the original's empty diagnostic hook, now a
 // rate-limited warning naming the code.
 void LiveReportEffectDiagnostic(int code);

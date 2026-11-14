@@ -786,3 +786,193 @@ TEST_CASE(
   CHECK(fx::LiveCompleteChildEffectScript(nullptr) == 2);
   CHECK(fx::LiveApplyParticleColorPresetTable(nullptr) == 2);
 }
+
+namespace {
+// Records the effect runtime calls the timeline, transform and environment
+// opcodes make.
+class RecordingHost final : public fx::ScriptEffectHost {
+ public:
+  void LoadTimeline(std::uint8_t index) override { loaded.push_back(index); }
+  void TickTimeline(std::uint16_t child_offset) override {
+    ticked.push_back(child_offset);
+  }
+  void FreeTimeline() override { ++freed; }
+  void UpdateTransforms() override { ++updated; }
+  void InitializeTransforms() override { ++initialized; }
+  void UpdateParticleEnvironment() override { ++refreshed; }
+
+  std::vector<std::uint8_t> loaded;
+  std::vector<std::uint16_t> ticked;
+  int freed = 0;
+  int updated = 0;
+  int initialized = 0;
+  int refreshed = 0;
+};
+
+constexpr Step kTimelineRefused{std::unexpect, Refusal::kTimeline};
+
+std::vector<std::uint8_t> LoadedFor(std::uint8_t value, bool has_parent,
+                                    const fx::TimelineRemap& remap) {
+  const auto program = Program({1});
+  fx::ScriptRegisters registers{};
+  registers[1] = value;
+  ScriptCursor cursor{.program = program, .offset = 0};
+  RecordingHost host;
+  CHECK(fx::LoadRegisterTimeline(cursor, registers, has_parent, remap, host) ==
+        kContinued);
+  CHECK(cursor.offset == 1);
+  return host.loaded;
+}
+}  // namespace
+
+TEST_CASE("Effect script immediate timelines load and move to E000's loop",
+          "[effect-script]") {
+  const auto program = Program({0x30, 0x99});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  RecordingHost host;
+  CHECK(fx::LoadTimelineImmediate(cursor, host) == kContinued);
+  CHECK(cursor.offset == fx::kImmediateTimelineLoop);
+  CHECK(host.loaded == std::vector<std::uint8_t>{0x30});
+
+  ScriptCursor truncated{.program = std::span{program}.first(0), .offset = 0};
+  CHECK(fx::LoadTimelineImmediate(truncated, host) == kOperandRefused);
+  CHECK(host.loaded.size() == 1);
+}
+
+TEST_CASE("Effect script register timelines map root values through the ids",
+          "[effect-script]") {
+  const fx::TimelineRemap remap{.ids = {1, 2, 5, 0}, .timeline_count = 5};
+  using Loaded = std::vector<std::uint8_t>;
+  CHECK(LoadedFor(0, false, remap) == Loaded{0});
+  CHECK(LoadedFor(1, false, remap) == Loaded{1});
+  // An id equal to the count is not remapped, as in the original.
+  CHECK(LoadedFor(2, false, remap) == Loaded{2});
+  CHECK(LoadedFor(3, false, remap) == Loaded{3});
+  CHECK(LoadedFor(4, false, remap) == Loaded{4});
+  CHECK(LoadedFor(0xFF, false, remap) == Loaded{0xFF});
+}
+
+TEST_CASE("Effect script register timelines load children's values unmapped",
+          "[effect-script]") {
+  using Loaded = std::vector<std::uint8_t>;
+  CHECK(LoadedFor(1, true, {.ids = {1, 2, 5, 0}, .timeline_count = 5}) ==
+        Loaded{1});
+  // Without a timeline count, or below a negative one, values load as read.
+  CHECK(LoadedFor(1, false, {.ids = {1, 2, 5, 0}, .timeline_count = {}}) ==
+        Loaded{1});
+  CHECK(LoadedFor(0, false, {.ids = {9}, .timeline_count = -1}) == Loaded{0});
+  CHECK(LoadedFor(0, false, {.ids = {9}, .timeline_count = 10}) == Loaded{8});
+}
+
+TEST_CASE("Effect script register timelines refuse operands and registers",
+          "[effect-script]") {
+  const auto program = Program({4});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  RecordingHost host;
+  const fx::TimelineRemap remap{};
+  CHECK(fx::LoadRegisterTimeline(cursor, {}, false, remap, host) ==
+        kRegisterRefused);
+  CHECK(cursor.offset == 1);
+  CHECK(fx::LoadRegisterTimeline(cursor, {}, false, remap, host) ==
+        kOperandRefused);
+  CHECK(host.loaded.empty());
+}
+
+TEST_CASE("Effect script timeline ticks pass the child offset halfword",
+          "[effect-script]") {
+  const auto program = Program({0xD4, 0x01, 0x34});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  RecordingHost host;
+  CHECK(fx::TickTimelineFromScript(cursor, true, host) == kContinued);
+  CHECK(cursor.offset == 2);
+  CHECK(host.ticked == std::vector<std::uint16_t>{0x01D4});
+
+  // The operand is read before the missing timeline refuses.
+  cursor.offset = 0;
+  CHECK(fx::TickTimelineFromScript(cursor, false, host) == kTimelineRefused);
+  CHECK(cursor.offset == 2);
+  CHECK(fx::TickTimelineFromScript(cursor, true, host) == kOperandRefused);
+  CHECK(host.ticked.size() == 1);
+}
+
+TEST_CASE("Effect script timeline branches wait for every track to finish",
+          "[effect-script]") {
+  const auto program = Program({0xC5, 0x00});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::BranchIfTimelineFinished(1U, cursor) == kContinued);
+  CHECK(cursor.offset == 2);
+  cursor.offset = 0;
+  CHECK(fx::BranchIfTimelineFinished(0x80000000U, cursor) == kContinued);
+  CHECK(cursor.offset == 2);
+  cursor.offset = 0;
+  CHECK(fx::BranchIfTimelineFinished(0U, cursor) == kContinued);
+  CHECK(cursor.offset == 0xC5);
+  cursor.offset = 0;
+  CHECK(fx::BranchIfTimelineFinished(std::nullopt, cursor) == kTimelineRefused);
+  CHECK(cursor.offset == 0);
+}
+
+TEST_CASE("Effect script timeline frees run only for a loaded timeline",
+          "[effect-script]") {
+  RecordingHost host;
+  CHECK(fx::FreeScriptTimeline(false, host) == ScriptStep::kContinue);
+  CHECK(host.freed == 0);
+  CHECK(fx::FreeScriptTimeline(true, host) == ScriptStep::kContinue);
+  CHECK(host.freed == 1);
+}
+
+TEST_CASE("Effect script runtime opcodes call the effect host and continue",
+          "[effect-script]") {
+  RecordingHost host;
+  CHECK(fx::TickScriptTransforms(host) == ScriptStep::kContinue);
+  CHECK(fx::InitializeScriptTransforms(host) == ScriptStep::kContinue);
+  CHECK(fx::RefreshParticleEnvironment(host) == ScriptStep::kContinue);
+  const std::array<int, 4> calls{host.updated, host.initialized, host.refreshed,
+                                 host.freed};
+  constexpr std::array<int, 4> kExpectedCalls{1, 1, 1, 0};
+  CHECK(calls == kExpectedCalls);
+  CHECK(host.loaded.empty());
+  CHECK(host.ticked.empty());
+}
+
+TEST_CASE("Live effect script timeline branches read the instance timeline",
+          "[effect-script]") {
+  auto program = Program({0xC5, 0x00});
+  const VS::test_support::EffectProgramScope recorded{program};
+  auto instance = InstanceAt(program, 0);
+  Effects_EffectTimeline timeline{};
+  timeline.activeTracks = 0;
+  instance.context.timeline = &timeline;
+  CHECK(fx::LiveBranchIfEffectTimelineFinished(&instance) == 1);
+  CHECK(instance.scriptOffset == 0xC5);
+}
+
+TEST_CASE("Live effect script timeline opcodes end without a timeline",
+          "[effect-script]") {
+  auto program = Program({0xC5, 0x00, 0xD4, 0x00, 4});
+  const VS::test_support::EffectProgramScope recorded{program};
+  auto instance = InstanceAt(program, 0);
+  // The original read through the null timeline; the native ends.
+  CHECK(fx::LiveBranchIfEffectTimelineFinished(&instance) == 2);
+  CHECK(instance.scriptOffset == 0);
+  instance.scriptOffset = 2;
+  CHECK(fx::LiveTickEffectTimelineFromScript(&instance) == 2);
+  CHECK(instance.scriptOffset == 4);
+  CHECK(fx::LiveFreeEffectScriptTimeline(&instance) == 1);
+  CHECK(fx::LiveLoadEffectTimelineFromRegister(&instance) == 2);
+  CHECK(instance.scriptOffset == 5);
+}
+
+TEST_CASE(
+    "Live effect script timeline and transform opcodes refuse null "
+    "instances",
+    "[effect-script]") {
+  CHECK(fx::LiveLoadEffectTimelineImmediate(nullptr) == 2);
+  CHECK(fx::LiveLoadEffectTimelineFromRegister(nullptr) == 2);
+  CHECK(fx::LiveTickEffectTimelineFromScript(nullptr) == 2);
+  CHECK(fx::LiveBranchIfEffectTimelineFinished(nullptr) == 2);
+  CHECK(fx::LiveFreeEffectScriptTimeline(nullptr) == 2);
+  CHECK(fx::LiveTickEffectTransforms(nullptr) == 2);
+  CHECK(fx::LiveInitializeScriptEffectTransforms(nullptr) == 2);
+  CHECK(fx::LiveRefreshScriptParticleEnvironment(nullptr) == 2);
+}

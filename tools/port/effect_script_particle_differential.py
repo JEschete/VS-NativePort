@@ -26,18 +26,18 @@ import random
 from differential import DEFAULT_STACK, DEFAULT_STACK_SIZE, Machine, s32, store_problems
 from effect_script_differential import (
     INSTANCE,
-    MODULES,
     OFFSET_FIELD,
     PROGRAM,
     PROGRAM_BYTES,
     READ_BYTE_ADDRESS,
     SCRIPT_FIELD,
+    case_globals,
     place,
     start_offset,
+    value_problems,
 )
 
 DRIVER = "effect_script_particle_driver.cpp"
-SOURCES = (r"Native\Game\src\Effects\EffectScript.cpp",)
 
 INSTANCE_BYTES = 0xD60
 PARENT_FIELD = 0x4
@@ -274,11 +274,7 @@ def check(image, value: dict, observation: dict, native: list[int], reference) -
         if theirs != [expected]:
             problems.append(f"native described code {value['code']:#x} as {theirs}, expected {expected}")
         return problems + store_problems(observation["stores"], allowed_stores(value))
-    if len(theirs) != len(ours):
-        return problems + [f"native printed {len(theirs)} values, original {len(ours)}: {theirs} {ours}"]
-    problems += [f"{name} native {native_value} original {original}"
-                 for name, native_value, original in zip(names(value, len(ours)), theirs, ours, strict=True)
-                 if native_value != original]
+    problems += value_problems(names(value, len(ours)), ours, theirs)
     return problems + store_problems(observation["stores"], allowed_stores(value))
 
 
@@ -308,11 +304,6 @@ def describe(image, results) -> list[str]:
 
 def configure(function: int, mode: int, entry: int, end: int, mutants: dict) -> dict:
     """Case-module globals for one original compared in `mode`."""
-    return {
-        "ID": f"F{function:05}", "ENTRY": entry, "END": end,
-        "DRIVER": DRIVER, "SOURCES": SOURCES, "MODULES": MODULES, "CXX_STANDARD": "c++latest",
-        "VECTORS": 256, "SEED": function, "MUTANT_VECTORS": 64, "MUTANTS": mutants,
-        "vector": lambda rng, number: vector(rng, number, mode),
-        "run": lambda machine, value: run(machine, value, entry),
-        "check": check, "describe": describe,
-    }
+    return case_globals(function, entry, end, mutants, driver=DRIVER,
+                        vector=lambda rng, number: vector(rng, number, mode),
+                        run=lambda machine, value: run(machine, value, entry), check=check, describe=describe)

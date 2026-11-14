@@ -15,11 +15,13 @@
 #include <vector>
 
 #include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Transforms.hpp"
+#include "Effects/TransformsLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -27,6 +29,7 @@ extern "C" {
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.h"
 #include "Effects/Transforms.h"
 }
 
@@ -55,6 +58,8 @@ std::uint64_t refused_opcodes = 0;
 std::uint64_t refused_registers = 0;
 std::uint64_t refused_definitions = 0;
 std::uint64_t refused_presets = 0;
+std::uint64_t refused_timelines = 0;
+std::uint64_t unmapped_timelines = 0;
 std::uint64_t clamped_transforms = 0;
 std::uint64_t wrapped_children = 0;
 std::uint64_t reported_diagnostics = 0;
@@ -144,6 +149,14 @@ void ReportOpcodeRefusal(const char* entry, ScriptRefusal refusal,
                     "effect script: {} before {:#x} names a colour preset past "
                     "the {} presets ({} refusals)",
                     entry, offset, kParticleColorPresets, refused_presets);
+      }
+      return;
+    case ScriptRefusal::kTimeline:
+      if (ShouldReport(refused_timelines)) {
+        VS_LOG_WARN("effects",
+                    "effect script: {} before {:#x} needs a timeline the "
+                    "instance has not loaded ({} refusals)",
+                    entry, offset, refused_timelines);
       }
       return;
   }
@@ -285,6 +298,68 @@ PresetTables() {
         return table;
       });
   return tables;
+}
+
+// The timeline ids and timeline count a root instance's register timelines
+// map through. A package without block 9 maps none.
+[[nodiscard]] TimelineRemap PackageTimelineRemap() {
+  TimelineRemap remap{};
+  if (const auto parameters = ReadPackageParameters(
+          LiveBoundPackageBlock(PackageBlockType::kParameters))) {
+    remap.ids = parameters->timeline_ids;
+  } else if (ShouldReport(unmapped_timelines)) {
+    VS_LOG_WARN("effects",
+                "effect script: the package binds no block 9; register "
+                "timelines load unmapped ({} times)",
+                unmapped_timelines);
+  }
+  const std::span timelines =
+      LiveBoundPackageBlock(PackageBlockType::kTimelines);
+  if (timelines.size() >= sizeof(Effects_PackageBlock3::count)) {
+    remap.timeline_count =
+        reinterpret_cast<const Effects_PackageBlock3*>(timelines.data())->count;
+  }
+  return remap;
+}
+
+// The instance's timeline, transforms and the particle environment.
+class InstanceEffectHost final : public ScriptEffectHost {
+ public:
+  explicit InstanceEffectHost(Effects_EffectInstance& instance)
+      : instance_(&instance) {}
+
+  void LoadTimeline(std::uint8_t index) override {
+    Effects_LoadEffectTimeline(instance_, index, 0);
+  }
+  void TickTimeline(std::uint16_t child_offset) override {
+    Effects_TickEffectTimeline(instance_, child_offset);
+  }
+  void FreeTimeline() override {
+    Core::Memory::FreeLiveFromHighEnd(instance_->context.timeline);
+    instance_->context.timeline = nullptr;
+  }
+  void UpdateTransforms() override { LiveUpdateEffectTransforms(instance_); }
+  void InitializeTransforms() override {
+    LiveInitializeTransformStates(instance_);
+  }
+  void UpdateParticleEnvironment() override {
+    LiveUpdateParticleGravityAndDrag();
+  }
+
+ private:
+  Effects_EffectInstance* instance_;
+};
+
+// Runs an operand-free opcode over the instance's effect runtime.
+template <typename Step>
+[[nodiscard]] int RunHostStep(Effects_EffectInstance* instance,
+                              const char* entry, Step step) {
+  if (instance == nullptr) {
+    ReportRefusal(entry);
+    return HandlerResult(ScriptStep::kEnd);
+  }
+  InstanceEffectHost host{*instance};
+  return HandlerResult(step(*instance, host));
 }
 
 // The instance a frame's run reads and dispatches through the handler table.
@@ -552,6 +627,88 @@ int LiveReportInvalidEffectInstruction(Effects_EffectInstance* /*instance*/) {
   const ScriptDiagnosticStep report = ReportInvalidInstruction();
   LiveReportEffectDiagnostic(static_cast<int>(report.diagnostic));
   return HandlerResult(report.step);
+}
+
+// decomp: func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7569)
+int LiveLoadEffectTimelineImmediate(Effects_EffectInstance* instance) {
+  return RunOpcode(instance, "load timeline",
+                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                     InstanceEffectHost host{effect};
+                     return LoadTimelineImmediate(cursor, host);
+                   });
+}
+
+// decomp: func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:7713)
+int LiveLoadEffectTimelineFromRegister(Effects_EffectInstance* instance) {
+  return RunOpcode(instance, "load register timeline",
+                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                     InstanceEffectHost host{effect};
+                     const bool has_parent = effect.parent != nullptr;
+                     return LoadRegisterTimeline(
+                         cursor, RegistersOf(effect), has_parent,
+                         has_parent ? TimelineRemap{} : PackageTimelineRemap(),
+                         host);
+                   });
+}
+
+// decomp: func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:7728)
+int LiveTickEffectTimelineFromScript(Effects_EffectInstance* instance) {
+  return RunOpcode(instance, "tick timeline",
+                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                     InstanceEffectHost host{effect};
+                     return TickTimelineFromScript(
+                         cursor, effect.context.timeline != nullptr, host);
+                   });
+}
+
+// decomp: func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:7734)
+int LiveBranchIfEffectTimelineFinished(Effects_EffectInstance* instance) {
+  return RunOpcode(
+      instance, "branch if timeline finished",
+      [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+        const Effects_EffectTimeline* timeline = effect.context.timeline;
+        const auto active_tracks =
+            timeline == nullptr ? std::nullopt
+                                : std::optional{std::bit_cast<std::uint32_t>(
+                                      timeline->activeTracks)};
+        return BranchIfTimelineFinished(active_tracks, cursor);
+      });
+}
+
+// decomp: func_800D4EC0 (src/BATTLE/BATTLE.PRG/5BF94.c:7740)
+int LiveFreeEffectScriptTimeline(Effects_EffectInstance* instance) {
+  return RunHostStep(
+      instance, "free timeline",
+      [](Effects_EffectInstance& effect, ScriptEffectHost& host) {
+        return FreeScriptTimeline(effect.context.timeline != nullptr, host);
+      });
+}
+
+// decomp: func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:7596)
+int LiveTickEffectTransforms(Effects_EffectInstance* instance) {
+  return RunHostStep(
+      instance, "tick transforms",
+      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+        return TickScriptTransforms(host);
+      });
+}
+
+// decomp: func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:7619)
+int LiveInitializeScriptEffectTransforms(Effects_EffectInstance* instance) {
+  return RunHostStep(
+      instance, "initialize transforms",
+      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+        return InitializeScriptTransforms(host);
+      });
+}
+
+// decomp: func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:7691)
+int LiveRefreshScriptParticleEnvironment(Effects_EffectInstance* instance) {
+  return RunHostStep(
+      instance, "refresh particle environment",
+      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+        return RefreshParticleEnvironment(host);
+      });
 }
 
 // decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)

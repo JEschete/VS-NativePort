@@ -339,4 +339,75 @@ ScriptDiagnosticStep ReportInvalidInstruction() {
   return {.diagnostic = EffectDiagnostic::kInvalidInstruction,
           .step = ScriptStep::kYield};
 }
+
+// decomp: func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7569)
+OpcodeStep LoadTimelineImmediate(ScriptCursor& cursor, ScriptEffectHost& host) {
+  const auto timeline = ReadScriptByte(cursor);
+  if (!timeline) return std::unexpected(ScriptRefusal::kOperand);
+  host.LoadTimeline(*timeline);
+  cursor.offset = kImmediateTimelineLoop;
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:7713)
+OpcodeStep LoadRegisterTimeline(ScriptCursor& cursor,
+                                const ScriptRegisters& registers,
+                                bool has_parent, const TimelineRemap& remap,
+                                ScriptEffectHost& host) {
+  const auto index = ReadScriptByte(cursor);
+  if (!index) return std::unexpected(ScriptRefusal::kOperand);
+  if (*index >= registers.size()) {
+    return std::unexpected(ScriptRefusal::kRegister);
+  }
+  std::uint8_t timeline = registers.at(*index);
+  if (!has_parent && timeline < remap.ids.size()) {
+    const std::uint8_t id = remap.ids.at(timeline);
+    if (id != 0 && remap.timeline_count && id < *remap.timeline_count) {
+      timeline = static_cast<std::uint8_t>(id - 1);
+    }
+  }
+  host.LoadTimeline(timeline);
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:7728)
+OpcodeStep TickTimelineFromScript(ScriptCursor& cursor, bool has_timeline,
+                                  ScriptEffectHost& host) {
+  const auto child_offset = ReadScriptHalfword(cursor);
+  if (!child_offset) return std::unexpected(ScriptRefusal::kOperand);
+  if (!has_timeline) return std::unexpected(ScriptRefusal::kTimeline);
+  host.TickTimeline(*child_offset);
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:7734)
+OpcodeStep BranchIfTimelineFinished(std::optional<std::uint32_t> active_tracks,
+                                    ScriptCursor& cursor) {
+  if (!active_tracks) return std::unexpected(ScriptRefusal::kTimeline);
+  return Branch(*active_tracks == 0, cursor);
+}
+
+// decomp: func_800D4EC0 (src/BATTLE/BATTLE.PRG/5BF94.c:7740)
+ScriptStep FreeScriptTimeline(bool has_timeline, ScriptEffectHost& host) {
+  if (has_timeline) host.FreeTimeline();
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:7596)
+ScriptStep TickScriptTransforms(ScriptEffectHost& host) {
+  host.UpdateTransforms();
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:7619)
+ScriptStep InitializeScriptTransforms(ScriptEffectHost& host) {
+  host.InitializeTransforms();
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:7691)
+ScriptStep RefreshParticleEnvironment(ScriptEffectHost& host) {
+  host.UpdateParticleEnvironment();
+  return ScriptStep::kContinue;
+}
 }  // namespace VS::Effects

@@ -630,6 +630,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveApplyParticleColorPresetTable": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveReportInvalidEffectInstruction": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveReportEffectDiagnostic": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveLoadEffectTimelineImmediate": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveLoadEffectTimelineFromRegister": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveTickEffectTimelineFromScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveBranchIfEffectTimelineFinished": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveFreeEffectScriptTimeline": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveTickEffectTransforms": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveInitializeScriptEffectTransforms": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveRefreshScriptParticleEnvironment": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2569,6 +2577,14 @@ OWNED_CALL_BINDINGS["F01546"] = "VS::Effects::LiveCompleteChildEffectScript"
 OWNED_CALL_BINDINGS["F01547"] = "VS::Effects::LiveApplyParticleColorPresetTable"
 OWNED_CALL_BINDINGS["F01548"] = "VS::Effects::LiveReportInvalidEffectInstruction"
 OWNED_CALL_BINDINGS["F01419"] = "VS::Effects::LiveReportEffectDiagnostic"
+OWNED_CALL_BINDINGS["F01524"] = "VS::Effects::LiveLoadEffectTimelineImmediate"
+OWNED_CALL_BINDINGS["F01540"] = "VS::Effects::LiveLoadEffectTimelineFromRegister"
+OWNED_CALL_BINDINGS["F01541"] = "VS::Effects::LiveTickEffectTimelineFromScript"
+OWNED_CALL_BINDINGS["F01542"] = "VS::Effects::LiveBranchIfEffectTimelineFinished"
+OWNED_CALL_BINDINGS["F01543"] = "VS::Effects::LiveFreeEffectScriptTimeline"
+OWNED_CALL_BINDINGS["F01527"] = "VS::Effects::LiveTickEffectTransforms"
+OWNED_CALL_BINDINGS["F01529"] = "VS::Effects::LiveInitializeScriptEffectTransforms"
+OWNED_CALL_BINDINGS["F01536"] = "VS::Effects::LiveRefreshScriptParticleEnvironment"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4030,6 +4046,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D5088, "VS::Effects::LiveApplyParticleColorPresetTable"),  # F01547
     ("BATTLE/BATTLE.PRG", 0x800D5150, "VS::Effects::LiveReportInvalidEffectInstruction"),  # F01548
     ("BATTLE/BATTLE.PRG", 0x800CE644, "VS::Effects::LiveReportEffectDiagnostic"),  # F01419
+    ("BATTLE/BATTLE.PRG", 0x800D48A4, "VS::Effects::LiveLoadEffectTimelineImmediate"),  # F01524
+    ("BATTLE/BATTLE.PRG", 0x800D4DB0, "VS::Effects::LiveLoadEffectTimelineFromRegister"),  # F01540
+    ("BATTLE/BATTLE.PRG", 0x800D4E5C, "VS::Effects::LiveTickEffectTimelineFromScript"),  # F01541
+    ("BATTLE/BATTLE.PRG", 0x800D4E90, "VS::Effects::LiveBranchIfEffectTimelineFinished"),  # F01542
+    ("BATTLE/BATTLE.PRG", 0x800D4EC0, "VS::Effects::LiveFreeEffectScriptTimeline"),  # F01543
+    ("BATTLE/BATTLE.PRG", 0x800D4984, "VS::Effects::LiveTickEffectTransforms"),  # F01527
+    ("BATTLE/BATTLE.PRG", 0x800D4A94, "VS::Effects::LiveInitializeScriptEffectTransforms"),  # F01529
+    ("BATTLE/BATTLE.PRG", 0x800D4D44, "VS::Effects::LiveRefreshScriptParticleEnvironment"),  # F01536
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

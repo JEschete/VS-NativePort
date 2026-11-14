@@ -9,6 +9,8 @@
 #include <span>
 #include <string_view>
 
+#include "Effects/EffectResources.hpp"
+
 // The effect script loop of BATTLE.PRG (5BF94.c:7506-7826). An effect
 // instance runs its package's block-8 program from a 16-bit offset, one
 // opcode byte at a time, through a 49-entry handler table; branch operands
@@ -98,15 +100,17 @@ using ActionVariantValues = std::array<std::uint8_t, kActionVariantValues>;
 
 // Why an operand opcode refused: an operand read past the program, a
 // register operand past the four registers, a particle definition past the
-// package's definitions, or a colour preset past the seven presets. The
-// original wrote and read whatever followed; no shipped program reaches one
-// (the effect packages only name registers 0, 1 and 3, and every colour
-// opcode names definitions its package has).
+// package's definitions, a colour preset past the seven presets, or a
+// timeline opcode run before the instance has a timeline. The original wrote
+// and read whatever followed, or read through the null timeline; no shipped
+// program reaches one (the effect packages only name registers 0, 1 and 3,
+// and every colour opcode names definitions its package has).
 enum class ScriptRefusal : std::uint8_t {
   kOperand,
   kRegister,
   kDefinition,
   kColorPreset,
+  kTimeline,
 };
 
 using OpcodeStep = std::expected<ScriptStep, ScriptRefusal>;
@@ -235,4 +239,84 @@ struct ScriptDiagnosticStep {
 // the hook's untouched v0, which held the handler's own address (the
 // dispatcher's jalr target), a yield result.
 [[nodiscard]] ScriptDiagnosticStep ReportInvalidInstruction();
+
+// The effect runtime the timeline, transform and particle-environment
+// opcodes run for their instance.
+class ScriptEffectHost {
+ public:
+  ScriptEffectHost() = default;
+  ScriptEffectHost(const ScriptEffectHost&) = delete;
+  ScriptEffectHost& operator=(const ScriptEffectHost&) = delete;
+  ScriptEffectHost(ScriptEffectHost&&) = delete;
+  ScriptEffectHost& operator=(ScriptEffectHost&&) = delete;
+  virtual ~ScriptEffectHost() = default;
+
+  // func_800D55A4 (5BF94.c:7885): replaces the instance's timeline with the
+  // package's timeline `index`.
+  virtual void LoadTimeline(std::uint8_t index) = 0;
+  // func_800D6AEC (5BF94.c:8442): runs a frame of the instance's timeline;
+  // the child effects its tracks start run from `child_offset`.
+  virtual void TickTimeline(std::uint16_t child_offset) = 0;
+  // Frees the instance's timeline (func_80043C60) and clears it.
+  virtual void FreeTimeline() = 0;
+  // func_800D0D08 (5BF94.c:6227): advances the instance's transforms.
+  virtual void UpdateTransforms() = 0;
+  // func_800CFEF0 (5BF94.c:5940): sets up the instance's transforms.
+  virtual void InitializeTransforms() = 0;
+  // func_800D78F0 (6F014.c:477): applies the package's particle gravity and
+  // drag.
+  virtual void UpdateParticleEnvironment() = 0;
+};
+
+// Where func_800D48A4 moves the script: E000.P, the only package whose
+// program loads a timeline by immediate, runs its timeline loop from 0xB7.
+inline constexpr std::uint16_t kImmediateTimelineLoop = 0xB7;
+
+// func_800D48A4 (5BF94.c:7569): loads the operand byte's timeline, then
+// moves to kImmediateTimelineLoop.
+[[nodiscard]] OpcodeStep LoadTimelineImmediate(ScriptCursor& cursor,
+                                               ScriptEffectHost& host);
+
+// What func_800D4DB0 maps a root instance's register value 0-3 through: the
+// package's timeline ids (block 9 + 0x16), and block 3's timeline count, none
+// when the package binds no block 3.
+struct TimelineRemap {
+  std::array<std::uint8_t, kParameterTimelineCount> ids{};
+  std::optional<std::int32_t> timeline_count;
+};
+
+// func_800D4DB0 (5BF94.c:7713): reads a register index and loads the
+// timeline the register's value names. An instance without a parent maps a
+// value 0-3 whose id is non-zero and below the timeline count to timeline
+// id - 1; as in the original, an id equal to the count loads the value.
+[[nodiscard]] OpcodeStep LoadRegisterTimeline(ScriptCursor& cursor,
+                                              const ScriptRegisters& registers,
+                                              bool has_parent,
+                                              const TimelineRemap& remap,
+                                              ScriptEffectHost& host);
+
+// func_800D4E5C (5BF94.c:7728): reads the child script offset and runs a
+// frame of the instance's timeline.
+[[nodiscard]] OpcodeStep TickTimelineFromScript(ScriptCursor& cursor,
+                                                bool has_timeline,
+                                                ScriptEffectHost& host);
+
+// func_800D4E90 (5BF94.c:7734): branches once no track of the timeline is
+// active; `active_tracks` is its track mask, none without a timeline.
+[[nodiscard]] OpcodeStep BranchIfTimelineFinished(
+    std::optional<std::uint32_t> active_tracks, ScriptCursor& cursor);
+
+// func_800D4EC0 (5BF94.c:7740): frees the instance's timeline, if any.
+[[nodiscard]] ScriptStep FreeScriptTimeline(bool has_timeline,
+                                            ScriptEffectHost& host);
+
+// func_800D4984 (5BF94.c:7596): advances the instance's transforms.
+[[nodiscard]] ScriptStep TickScriptTransforms(ScriptEffectHost& host);
+
+// func_800D4A94 (5BF94.c:7619): sets up the instance's transforms.
+[[nodiscard]] ScriptStep InitializeScriptTransforms(ScriptEffectHost& host);
+
+// func_800D4D44 (5BF94.c:7691): applies the package's particle gravity and
+// drag.
+[[nodiscard]] ScriptStep RefreshParticleEnvironment(ScriptEffectHost& host);
 }  // namespace VS::Effects
