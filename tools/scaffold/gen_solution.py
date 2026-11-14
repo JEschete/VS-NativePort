@@ -336,6 +336,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\EffectScriptLive.cpp",
                 r"src\Effects\PrimaryEffectLive.cpp",
                 r"src\Effects\TimelineCommandsLive.cpp",
+                r"src\Effects\TimelineTracksLive.cpp",
                 r"src\Title\TitleMenuLive.cpp",
                 r"src\Field\CameraLive.cpp",
                 r"src\Field\BackgroundLive.cpp",

@@ -661,6 +661,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LivePauseMovingRoomObjects": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
     "VS::Effects::LiveInvalidateEffectTransformAttachments": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
     "VS::Effects::LiveTickActionControlTrack": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveInitializeParticleTimelineKey": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveInitializeShakeTimelineKey": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveAdvanceEffectTimelineKey": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveTickSourceActorColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveTickTargetActorColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveTickOtherActorColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveTickSceneColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveTickBackgroundColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2631,6 +2639,14 @@ OWNED_CALL_BINDINGS["F01577"] = "VS::Effects::LiveHoldEffectTimelineFrame"
 OWNED_CALL_BINDINGS["F01578"] = "VS::Effects::LivePauseMovingRoomObjects"
 OWNED_CALL_BINDINGS["F01580"] = "VS::Effects::LiveInvalidateEffectTransformAttachments"
 OWNED_CALL_BINDINGS["F01587"] = "VS::Effects::LiveTickActionControlTrack"
+OWNED_CALL_BINDINGS["F01558"] = "VS::Effects::LiveInitializeParticleTimelineKey"
+OWNED_CALL_BINDINGS["F01559"] = "VS::Effects::LiveInitializeShakeTimelineKey"
+OWNED_CALL_BINDINGS["F01560"] = "VS::Effects::LiveAdvanceEffectTimelineKey"
+OWNED_CALL_BINDINGS["F01566"] = "VS::Effects::LiveTickSourceActorColorTrack"
+OWNED_CALL_BINDINGS["F01567"] = "VS::Effects::LiveTickTargetActorColorTrack"
+OWNED_CALL_BINDINGS["F01568"] = "VS::Effects::LiveTickOtherActorColorTrack"
+OWNED_CALL_BINDINGS["F01569"] = "VS::Effects::LiveTickSceneColorTrack"
+OWNED_CALL_BINDINGS["F01570"] = "VS::Effects::LiveTickBackgroundColorTrack"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4123,6 +4139,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D6554, "VS::Effects::LivePauseMovingRoomObjects"),  # F01578
     ("BATTLE/BATTLE.PRG", 0x800D65A8, "VS::Effects::LiveInvalidateEffectTransformAttachments"),  # F01580
     ("BATTLE/BATTLE.PRG", 0x800D6894, "VS::Effects::LiveTickActionControlTrack"),  # F01587
+    ("BATTLE/BATTLE.PRG", 0x800D5700, "VS::Effects::LiveInitializeParticleTimelineKey"),  # F01558
+    ("BATTLE/BATTLE.PRG", 0x800D5738, "VS::Effects::LiveInitializeShakeTimelineKey"),  # F01559
+    ("BATTLE/BATTLE.PRG", 0x800D5780, "VS::Effects::LiveAdvanceEffectTimelineKey"),  # F01560
+    ("BATTLE/BATTLE.PRG", 0x800D5F8C, "VS::Effects::LiveTickSourceActorColorTrack"),  # F01566
+    ("BATTLE/BATTLE.PRG", 0x800D6048, "VS::Effects::LiveTickTargetActorColorTrack"),  # F01567
+    ("BATTLE/BATTLE.PRG", 0x800D61AC, "VS::Effects::LiveTickOtherActorColorTrack"),  # F01568
+    ("BATTLE/BATTLE.PRG", 0x800D6298, "VS::Effects::LiveTickSceneColorTrack"),  # F01569
+    ("BATTLE/BATTLE.PRG", 0x800D6310, "VS::Effects::LiveTickBackgroundColorTrack"),  # F01570
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

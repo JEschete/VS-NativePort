@@ -1623,6 +1623,12 @@
     <ClCompile Include="src\Effects\TimelineCommandsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\TimelineTracks.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\TimelineTracksLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\TrailEmitter.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3472,6 +3478,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\TimelineCommandsLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TimelineTracks.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TimelineTracksLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\TrailEmitter.hpp">

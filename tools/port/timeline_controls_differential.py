@@ -26,10 +26,10 @@ from differential import (
     DEFAULT_STACK,
     DEFAULT_STACK_SIZE,
     Machine,
-    field_problems,
     mode_case,
+    printed_problems,
+    recorded_observation,
     s32,
-    store_problems,
 )
 
 MODULES = ("BATTLE/BATTLE.PRG",)
@@ -263,24 +263,7 @@ def run(machine: Machine, value: dict, entry: int) -> tuple:
     machine.r[5] = TRACK if mode == DISPATCH else value["index"] | high[0] << 8
     machine.r[6] = value["style"] | high[1] << 8
     machine.execute(entry)
-
-    values, names = state(machine, mode)
-    values += [len(calls), *(item for call in calls for item in call)]
-    names += [
-        "calls",
-        *(
-            f"call {index} word {word}"
-            for index, call in enumerate(calls)
-            for word in range(len(call))
-        ),
-    ]
-    observation = {
-        "values": values,
-        "names": names,
-        "calls": calls,
-        "stores": list(machine.stores),
-    }
-    return observation, inputs_of(value)
+    return recorded_observation(machine, *state(machine, mode), calls), inputs_of(value)
 
 
 def allowed_stores(value: dict) -> list[tuple[int, int]]:
@@ -296,12 +279,7 @@ def allowed_stores(value: dict) -> list[tuple[int, int]]:
 def check(
     image, value: dict, observation: dict, native: list[int], reference
 ) -> list[str]:
-    ours = observation["values"]
-    if native != ours and len(native) != len(ours):
-        return [f"native printed {native}, original {ours}"]
-    return field_problems(
-        observation["names"], native, ours, hexadecimal=False
-    ) + store_problems(observation["stores"], allowed_stores(value))
+    return printed_problems(observation, native, allowed_stores(value))
 
 
 def describe(image, results) -> list[str]:

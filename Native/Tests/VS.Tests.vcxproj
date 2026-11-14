@@ -399,6 +399,7 @@
     <ClCompile Include="src\TexturePagesTests.cpp" />
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
     <ClCompile Include="src\TimelineCommandsTests.cpp" />
+    <ClCompile Include="src\TimelineTracksTests.cpp" />
     <ClCompile Include="src\TitleMenuTests.cpp" />
     <ClCompile Include="src\TrailEmitterTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />

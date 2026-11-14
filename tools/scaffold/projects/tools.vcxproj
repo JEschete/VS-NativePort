@@ -723,6 +723,14 @@
     <None Include="..\..\port\differentials\timeline_commands_sound.py" />
     <None Include="..\..\port\differentials\timeline_commands_source_impact.py" />
     <None Include="..\..\port\differentials\timeline_commands_target_impact.py" />
+    <None Include="..\..\port\differentials\timeline_controls_dispatch.py" />
+    <None Include="..\..\port\differentials\timeline_controls_driver.cpp" />
+    <None Include="..\..\port\differentials\timeline_controls_fade.py" />
+    <None Include="..\..\port\differentials\timeline_controls_hold.py" />
+    <None Include="..\..\port\differentials\timeline_controls_invalidate.py" />
+    <None Include="..\..\port\differentials\timeline_controls_pause.py" />
+    <None Include="..\..\port\differentials\timeline_controls_resume.py" />
+    <None Include="..\..\port\differentials\timeline_controls_trail.py" />
     <None Include="..\..\port\differentials\triggered_recovery.py" />
     <None Include="..\..\port\differentials\triggered_recovery_driver.cpp" />
     <None Include="..\..\port\differentials\triggered_recovery_guard_driver.cpp" />
@@ -758,6 +766,7 @@
     <None Include="..\..\port\test_promote.py" />
     <None Include="..\..\port\test_scene_trace_fixups.py" />
     <None Include="..\..\port\timeline_commands_differential.py" />
+    <None Include="..\..\port\timeline_controls_differential.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />
     <None Include="..\..\PSX\Asset-Tools\jpsxdec\.github\ISSUE_TEMPLATE\config.yml" />

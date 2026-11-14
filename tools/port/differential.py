@@ -152,6 +152,29 @@ def store_problems(stores, allowed: list[tuple[int, int]]) -> list[str]:
     return []
 
 
+def flattened_calls(calls: list[list[int]]) -> tuple[list[int], list[str]]:
+    """Recorded `calls` as a driver prints them, [count, every word of every call...], with a name per value."""
+    values = [len(calls), *(item for call in calls for item in call)]
+    names = ["calls", *(f"call {index} word {word}" for index, call in enumerate(calls) for word in range(len(call)))]
+    return values, names
+
+
+def recorded_observation(machine: Machine, values: list[int], names: list[str], calls: list[list[int]]) -> dict:
+    """The observation of an original that printed `values` (one name each) and made the recorded `calls`."""
+    call_values, call_names = flattened_calls(calls)
+    return {"values": values + call_values, "names": names + call_names, "calls": calls,
+            "stores": list(machine.stores)}
+
+
+def printed_problems(observation: dict, native: list[int], allowed: list[tuple[int, int]]) -> list[str]:
+    """Compares a driver's printed values with the original's observation {"values", "names", "stores"}."""
+    ours = observation["values"]
+    if native != ours and len(native) != len(ours):
+        return [f"native printed {native}, original {ours}"]
+    return (field_problems(observation["names"], native, ours, hexadecimal=False)
+            + store_problems(observation["stores"], allowed))
+
+
 def output_problems(names, native: list[int], observation: dict, allowed: list[tuple[int, int]]) -> list[str]:
     """Compares a driver's [refused, value per name..., call count, three words per call...] output with the
     original's observation {"values", "calls", "stores"}."""

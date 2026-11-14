@@ -230,7 +230,7 @@ class ActionControlHost {
   virtual ~ActionControlHost() = default;
   // Performs one command on the effect instance.
   virtual void Perform(const ActionControl& control) = 0;
-  // Effects_AdvanceEffectTimelineKey: false once the track has no more keys.
+  // LiveAdvanceEffectTimelineKey: false once the track has no more keys.
   [[nodiscard]] virtual bool AdvanceKey() = 0;
 
  protected:

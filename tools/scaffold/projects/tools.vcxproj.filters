@@ -3141,6 +3141,30 @@
     <None Include="..\..\port\differentials\timeline_commands_target_impact.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\timeline_controls_dispatch.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_controls_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_controls_fade.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_controls_hold.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_controls_invalidate.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_controls_pause.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_controls_resume.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_controls_trail.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\triggered_recovery.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -3244,6 +3268,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\timeline_commands_differential.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\timeline_controls_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\understood.py">

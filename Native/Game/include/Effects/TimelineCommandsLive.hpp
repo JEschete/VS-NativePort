@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+#include "Effects/TimelineCommands.hpp"
+
+struct Effects_ActionEffectTarget;
 struct Effects_EffectInstance;
 struct Effects_TimelineTrack;
 
@@ -13,6 +16,10 @@ struct Effects_TimelineTrack;
 // a null instance or a transform past the instance's slots is refused with a
 // diagnostic.
 namespace VS::Effects {
+// An action effect endpoint as the typed commands and tracks read it.
+[[nodiscard]] CommandEndpoint CommandEndpointOf(
+    const Effects_ActionEffectTarget& endpoint);
+
 // func_800D6388 (5BF94.c:8213): the battle action's target effects.
 void LiveApplyTargetActionImpact(Effects_EffectInstance* instance);
 // func_800D63D0 (5BF94.c:8223): the battle action's source effects.

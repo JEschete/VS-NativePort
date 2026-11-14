@@ -24,10 +24,10 @@ from differential import (
     DEFAULT_STACK,
     DEFAULT_STACK_SIZE,
     Machine,
-    field_problems,
+    flattened_calls,
     mode_case,
+    printed_problems,
     s32,
-    store_problems,
 )
 
 MODULES = ("BATTLE/BATTLE.PRG",)
@@ -200,15 +200,7 @@ def run(machine: Machine, value: dict, entry: int) -> tuple:
         inputs += [value["variant"], value["last"], value["seed"]]
     machine.execute(entry)
 
-    values = [len(calls), *(item for call in calls for item in call)]
-    names = [
-        "calls",
-        *(
-            f"call {index} word {word}"
-            for index, call in enumerate(calls)
-            for word in range(len(call))
-        ),
-    ]
+    values, names = flattened_calls(calls)
     if mode == SOUND:
         values += [rand["draws"], machine.load(LAST_VARIANT, 1)]
         names += ["draws", "last variant"]
@@ -218,12 +210,7 @@ def run(machine: Machine, value: dict, entry: int) -> tuple:
 def check(
     image, value: dict, observation: dict, native: list[int], reference
 ) -> list[str]:
-    ours = observation["values"]
-    if native != ours and len(native) != len(ours):
-        return [f"native printed {native}, original {ours}"]
-    return field_problems(
-        observation["names"], native, ours, hexadecimal=False
-    ) + store_problems(observation["stores"], allowed_stores(value["mode"]))
+    return printed_problems(observation, native, allowed_stores(value["mode"]))
 
 
 def describe(image, results) -> list[str]:

@@ -15,6 +15,7 @@
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/TimelineCommands.hpp"
+#include "Effects/TimelineTracksLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -23,7 +24,6 @@ extern "C" {
 #include "Core/Gte.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Effects/Timeline.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
 #include "Field/ChestInteractionsLive.h"
@@ -78,22 +78,13 @@ void ReportMissing(std::string_view command, std::string_view missing) {
       &instance.transforms[*slot]);
 }
 
-[[nodiscard]] CommandEndpoint EndpointOf(
-    const Effects_ActionEffectTarget& endpoint) {
-  const SVECTOR& point = endpoint.value.position;
-  return {
-      .type = endpoint.type,
-      .actor = static_cast<std::uint8_t>(endpoint.value.actor.actor),
-      .point = {.x = point.vx, .y = point.vy, .z = point.vz, .pad = point.pad}};
-}
-
 [[nodiscard]] CommandEndpoints EndpointsOf(
     const Effects_EffectInstance& instance) {
   const Effects_EffectInstanceTargets& context = instance.context;
-  return {.source = EndpointOf(context.source),
-          .emit_from = EndpointOf(context.emitFrom),
-          .target = EndpointOf(context.target),
-          .emit_to = EndpointOf(context.emitTo)};
+  return {.source = CommandEndpointOf(context.source),
+          .emit_from = CommandEndpointOf(context.emitFrom),
+          .target = CommandEndpointOf(context.target),
+          .emit_to = CommandEndpointOf(context.emitTo)};
 }
 
 [[nodiscard]] SVECTOR PointOf(const EndpointPoint& point) {
@@ -133,7 +124,7 @@ class LiveActionControlHost final : public ActionControlHost {
 
   void Perform(const ActionControl& control) override;
   bool AdvanceKey() override {
-    return Effects_AdvanceEffectTimelineKey(track_) != 0;
+    return LiveAdvanceEffectTimelineKey(track_) != 0;
   }
 
  private:
@@ -155,6 +146,14 @@ class LiveActionControlHost final : public ActionControlHost {
       .timing = key.frame, .operand0 = key.opaque2, .operand1 = key.opaque3};
 }
 }  // namespace
+
+CommandEndpoint CommandEndpointOf(const Effects_ActionEffectTarget& endpoint) {
+  const SVECTOR& point = endpoint.value.position;
+  return {
+      .type = endpoint.type,
+      .actor = static_cast<std::uint8_t>(endpoint.value.actor.actor),
+      .point = {.x = point.vx, .y = point.vy, .z = point.vz, .pad = point.pad}};
+}
 
 void LiveApplyTargetActionImpact(Effects_EffectInstance* instance) {
   if (Refused(instance, "target impact")) return;

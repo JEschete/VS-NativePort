@@ -13,19 +13,11 @@
 #include "Effects/Transforms.h"
 
 void Effects_LoadEffectTimeline(Effects_EffectInstance* effect_instance, int timeline_index, int arg2);
-void Effects_InitializeParticleTimelineKey(Effects_TimelineTrack* timeline_track);
-void Effects_InitializeShakeTimelineKey(Effects_TimelineTrack* timeline_track);
-int Effects_AdvanceEffectTimelineKey(Effects_TimelineTrack* timeline_track);
 int Effects_TickParticleEmissionTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 int Effects_TickEffectSoundTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 int Effects_TickChildEffectTrack(Effects_EffectInstance* effect_instance, Effects_ChildTrackView* child_track, int child_script_offset);
 int Effects_TickEffectRendererTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 int Effects_TickControllerVibrationTrack(Effects_EffectInstance* actor, Effects_TimelineTrack* event);
-int Effects_TickSourceActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
-int Effects_TickTargetActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track, int apply_to_all_targets);
-int Effects_TickOtherActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
-int Effects_TickSceneColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
-int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 int Effects_TickCameraShakeTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 void Effects_TickEffectTimeline(Effects_EffectInstance* effect_instance, int child_script_offset);
 

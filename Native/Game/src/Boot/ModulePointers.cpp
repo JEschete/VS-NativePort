@@ -67,6 +67,7 @@
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
+#include "Effects/TimelineTracksLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TrapsLive.hpp"
@@ -528,19 +529,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D5294u, 0u, (void*)&Effects_SetParticleDrag, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D52A4u, 0u, (void*)&Effects_IntegrateParticleMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D55A4u, 0u, (void*)&Effects_LoadEffectTimeline, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5700u, 0u, (void*)&Effects_InitializeParticleTimelineKey, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5738u, 0u, (void*)&Effects_InitializeShakeTimelineKey, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5780u, 0u, (void*)&Effects_AdvanceEffectTimelineKey, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D57FCu, 0u, (void*)&Effects_TickParticleEmissionTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5904u, 0u, (void*)&Effects_TickEffectSoundTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5A98u, 0u, (void*)&Effects_TickChildEffectTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5D74u, 0u, (void*)&Effects_TickEffectRendererTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5E00u, 0u, (void*)&Effects_TickControllerVibrationTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5F8Cu, 0u, (void*)&Effects_TickSourceActorColorTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6048u, 0u, (void*)&Effects_TickTargetActorColorTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D61ACu, 0u, (void*)&Effects_TickOtherActorColorTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6298u, 0u, (void*)&Effects_TickSceneColorTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6310u, 0u, (void*)&Effects_TickBackgroundColorTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6A18u, 0u, (void*)&Effects_TickCameraShakeTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6AECu, 0u, (void*)&Effects_TickEffectTimeline, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&Effects_ClearParticleTextureState, 0u, 0u, 0u},
@@ -2005,6 +1998,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D6554u, 0u, (void*)&VS::Effects::LivePauseMovingRoomObjects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D65A8u, 0u, (void*)&VS::Effects::LiveInvalidateEffectTransformAttachments, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6894u, 0u, (void*)&VS::Effects::LiveTickActionControlTrack, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5700u, 0u, (void*)&VS::Effects::LiveInitializeParticleTimelineKey, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5738u, 0u, (void*)&VS::Effects::LiveInitializeShakeTimelineKey, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5780u, 0u, (void*)&VS::Effects::LiveAdvanceEffectTimelineKey, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5F8Cu, 0u, (void*)&VS::Effects::LiveTickSourceActorColorTrack, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D6048u, 0u, (void*)&VS::Effects::LiveTickTargetActorColorTrack, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D61ACu, 0u, (void*)&VS::Effects::LiveTickOtherActorColorTrack, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D6298u, 0u, (void*)&VS::Effects::LiveTickSceneColorTrack, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D6310u, 0u, (void*)&VS::Effects::LiveTickBackgroundColorTrack, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},

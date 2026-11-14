@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ActorStateLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Audio/StreamLive.hpp"
 #include "Content/PFileLive.hpp"
@@ -7,8 +6,8 @@
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
+#include "Effects/TimelineTracksLive.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Package.h"
@@ -55,46 +54,13 @@ void Effects_LoadEffectTimeline(Effects_EffectInstance* effect_instance, int tim
         p->tracks[i].keyIndex = -1;
         *(int*)&p->tracks[i].curveFrame = 0;
         p->tracks[i].keyParameter = 0;
-        Effects_AdvanceEffectTimelineKey(&p->tracks[i]);
+        VS::Effects::LiveAdvanceEffectTimelineKey(&p->tracks[i]);
         p->activeTracks |= 1 << i;
     }
 
     p->flags = count ? 2 : 0;
     Core_Debugf("effects", "timeline=%d state=%p tracks=%d stride=%u", timeline_index, (void*)p,
         (int)p->trackCount, (unsigned int)sizeof(Effects_TimelineTrack));
-}
-
-// decomp: BATTLE.PRG func_800D5700 (src/BATTLE/BATTLE.PRG/5BF94.c:7920)
-void Effects_InitializeParticleTimelineKey(Effects_TimelineTrack* timeline_track)
-{
-    Effects_ParticleTrackKey* base = (Effects_ParticleTrackKey*)timeline_track->keys;
-    timeline_track->keyParameter = base[timeline_track->keyIndex].opaque2Bit4;
-    timeline_track->keyTimer = base[timeline_track->keyIndex].duration;
-}
-
-// decomp: BATTLE.PRG func_800D5738 (src/BATTLE/BATTLE.PRG/5BF94.c:7927)
-void Effects_InitializeShakeTimelineKey(Effects_TimelineTrack* timeline_track)
-{
-    timeline_track->keyTimer =
-        VS::Effects::LiveSegmentedEffectCurveDuration((((Effects_ShakeTrackKey*)&timeline_track->keys[timeline_track->keyIndex * 2 + 1])->curve));
-}
-
-// decomp: BATTLE.PRG func_800D5780 (src/BATTLE/BATTLE.PRG/5BF94.c:7933)
-int Effects_AdvanceEffectTimelineKey(Effects_TimelineTrack* timeline_track)
-{
-    if (timeline_track->keyIndex + 1 >= timeline_track->header.keyCount) {
-        return 0;
-    }
-    timeline_track->keyIndex++;
-    switch (timeline_track->header.kind) {
-    case 1:
-        Effects_InitializeParticleTimelineKey(timeline_track);
-        break;
-    case 0xD:
-        Effects_InitializeShakeTimelineKey(timeline_track);
-        break;
-    }
-    return 1;
 }
 
 // decomp: BATTLE.PRG func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:7950)
@@ -116,7 +82,7 @@ int Effects_TickParticleEmissionTrack(Effects_EffectInstance* effect_instance, E
         --timeline_track->keyTimer;
     }
     if (timeline_track->keyTimer == 0) {
-        ret = Effects_AdvanceEffectTimelineKey(timeline_track);
+        ret = VS::Effects::LiveAdvanceEffectTimelineKey(timeline_track);
         timeline_track->curveFrame = 0;
     }
     return ret;
@@ -151,7 +117,7 @@ int Effects_TickEffectSoundTrack(Effects_EffectInstance* effect_instance, Effect
         }
     }
 
-    return Effects_AdvanceEffectTimelineKey(timeline_track);
+    return VS::Effects::LiveAdvanceEffectTimelineKey(timeline_track);
 }
 
 // decomp: BATTLE.PRG func_800D5A98 (src/BATTLE/BATTLE.PRG/5BF94.c:8005)
@@ -227,7 +193,7 @@ int Effects_TickEffectRendererTrack(Effects_EffectInstance* effect_instance, Eff
     if (renderer_key->frame == effect_instance->context.timeline->frame) {
         Effects_AttachEffectRenderer(effect_instance, Effects_effectRenderers[renderer_key->effectRenderer],
             (renderer_key->opaque1Bit1 + renderer_key->opaque2Bit5 * 256) | (renderer_key->opaque4 << 0x10));
-        return Effects_AdvanceEffectTimelineKey(timeline_track);
+        return VS::Effects::LiveAdvanceEffectTimelineKey(timeline_track);
     }
     return 1;
 }
@@ -276,98 +242,8 @@ int Effects_TickControllerVibrationTrack(Effects_EffectInstance* actor, Effects_
             255, 1);
     }
 
-    result = Effects_AdvanceEffectTimelineKey(event);
+    result = VS::Effects::LiveAdvanceEffectTimelineKey(event);
     return result;
-}
-
-// decomp: BATTLE.PRG func_800D5F8C (src/BATTLE/BATTLE.PRG/5BF94.c:8128)
-int Effects_TickSourceActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
-{
-    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)timeline_track->keys + timeline_track->keyIndex;
-
-    if (color_key->frame == effect_instance->context.timeline->frame) {
-        if ((effect_instance->context.emitFrom.type == 4)
-            && (VS::Actors::LiveActorStateFlags(effect_instance->context.emitFrom.value.actor.actor) & 2)) {
-            VS::Render::TransformLiveActorColors(color_key->mode, color_key->duration,
-                effect_instance->context.emitFrom.value.actor.actor, color_key->red - 0x80,
-                color_key->green - 0x80, color_key->blue - 0x80);
-        }
-        return Effects_AdvanceEffectTimelineKey(timeline_track);
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D6048 (src/BATTLE/BATTLE.PRG/5BF94.c:8144)
-int Effects_TickTargetActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track, int apply_to_all_targets)
-{
-    int i;
-    Effects_ColorTrackKey* entry = (Effects_ColorTrackKey*)timeline_track->keys + timeline_track->keyIndex;
-
-    if (entry->frame != effect_instance->context.timeline->frame) {
-        return 1;
-    }
-
-    if (apply_to_all_targets != 0) {
-        Effects_ActionEffectRequest* effect = &Effects_actionRequest;
-
-        for (i = 0; i < Effects_actionRequest.count; ++i) {
-            if ((effect->targets[i].type == 4)
-                && (VS::Actors::LiveActorStateFlags(effect->targets[i].value.actor.actor) & 2)) {
-                VS::Render::TransformLiveActorColors(entry->mode, entry->duration,
-                    effect->targets[i].value.actor.actor, entry->red - 128,
-                    entry->green - 128, entry->blue - 128);
-            }
-        }
-    } else if ((effect_instance->context.emitTo.type == 4)
-               && (VS::Actors::LiveActorStateFlags(effect_instance->context.emitTo.value.actor.actor) & 2)) {
-        VS::Render::TransformLiveActorColors(entry->mode, entry->duration, effect_instance->context.emitTo.value.actor.actor,
-            entry->red - 128, entry->green - 128, entry->blue - 128);
-    }
-    return Effects_AdvanceEffectTimelineKey(timeline_track);
-}
-
-// decomp: BATTLE.PRG func_800D61AC (src/BATTLE/BATTLE.PRG/5BF94.c:8172)
-int Effects_TickOtherActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
-{
-    int i;
-    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)(timeline_track->keys + (timeline_track->keyIndex * 2));
-
-    if (color_key->frame == effect_instance->context.timeline->frame) {
-        for (i = 0; i < Effects_actionRequest.otherCount; ++i) {
-            if (VS::Actors::LiveActorStateFlags(Effects_actionRequest.others[i]) & 2) {
-                VS::Render::TransformLiveActorColors(color_key->mode, color_key->duration, Effects_actionRequest.others[i],
-                    color_key->red - 0x80, (color_key->green - 0x80), (color_key->blue - 0x80));
-            }
-        }
-        return Effects_AdvanceEffectTimelineKey(timeline_track);
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D6298 (src/BATTLE/BATTLE.PRG/5BF94.c:8189)
-int Effects_TickSceneColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
-{
-    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)timeline_track->keys + (timeline_track->keyIndex);
-
-    if (color_key->frame == effect_instance->context.timeline->frame) {
-        VS::Render::TransformLiveSceneColors(color_key->mode, color_key->duration, color_key->red - 0x80,
-            color_key->green - 0x80, (color_key->blue - 0x80));
-        return Effects_AdvanceEffectTimelineKey(timeline_track);
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D6310 (src/BATTLE/BATTLE.PRG/5BF94.c:8201)
-int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
-{
-    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)(timeline_track->keys + timeline_track->keyIndex * 2);
-
-    if (color_key->frame == effect_instance->context.timeline->frame) {
-        VS::Render::TransformLiveBackgroundColors(color_key->mode, color_key->duration, color_key->red - 0x80,
-            color_key->green - 0x80, color_key->blue - 0x80);
-        return Effects_AdvanceEffectTimelineKey(timeline_track);
-    }
-    return 1;
 }
 
 // decomp: BATTLE.PRG func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:8422)
@@ -386,7 +262,7 @@ int Effects_TickCameraShakeTrack(Effects_EffectInstance* effect_instance, Effect
             e->opaque7Bit1);
     }
     if (--timeline_track->keyTimer == 0) {
-        ret = Effects_AdvanceEffectTimelineKey(timeline_track);
+        ret = VS::Effects::LiveAdvanceEffectTimelineKey(timeline_track);
     }
     return ret;
 }
@@ -420,19 +296,19 @@ void Effects_TickEffectTimeline(Effects_EffectInstance* effect_instance, int chi
                 temp = Effects_TickControllerVibrationTrack(effect_instance, timeline_track);
                 break;
             case 6:
-                temp = Effects_TickSourceActorColorTrack(effect_instance, timeline_track);
+                temp = VS::Effects::LiveTickSourceActorColorTrack(effect_instance, timeline_track);
                 break;
             case 7:
-                temp = Effects_TickTargetActorColorTrack(effect_instance, timeline_track, effect_instance->context.timeline->flags & 2);
+                temp = VS::Effects::LiveTickTargetActorColorTrack(effect_instance, timeline_track, effect_instance->context.timeline->flags & 2);
                 break;
             case 8:
-                temp = Effects_TickOtherActorColorTrack(effect_instance, timeline_track);
+                temp = VS::Effects::LiveTickOtherActorColorTrack(effect_instance, timeline_track);
                 break;
             case 9:
-                temp = Effects_TickSceneColorTrack(effect_instance, timeline_track);
+                temp = VS::Effects::LiveTickSceneColorTrack(effect_instance, timeline_track);
                 break;
             case 10:
-                temp = Effects_TickBackgroundColorTrack(effect_instance, timeline_track);
+                temp = VS::Effects::LiveTickBackgroundColorTrack(effect_instance, timeline_track);
                 break;
             case 12:
                 temp = VS::Effects::LiveTickActionControlTrack(effect_instance, timeline_track);
