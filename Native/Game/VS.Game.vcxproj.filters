@@ -1473,6 +1473,12 @@
     <ClInclude Include="src\Effects\Plugins\Plg301.h">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\PrimaryEffect.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\PrimaryEffectLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\PurgeTables.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3358,6 +3364,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ParticleRenderLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\PrimaryEffect.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\PrimaryEffectLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarp.hpp">

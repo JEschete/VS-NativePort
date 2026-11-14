@@ -16,6 +16,7 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Effects/PrimaryEffectLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/GameModeLive.hpp"
@@ -96,7 +97,7 @@ class LiveWorld final : public ActionSequenceWorld {
   int FreeAssetRequest() override {
     return Content::FindLiveFreeActorAssetRequest();
   }
-  int CanStartEffect() override { return Effects_CanStartEffectTrack(); }
+  int CanStartEffect() override { return Effects::LiveCanStartEffectTrack(); }
   void AdvanceEffectPhase() override { AdvanceLiveActionEffectPhase(); }
   std::uint32_t EffectBusyFlags() override { return Effects_effectBusyFlags; }
   void StartAnimation() override { StartLiveActionAnimation(); }

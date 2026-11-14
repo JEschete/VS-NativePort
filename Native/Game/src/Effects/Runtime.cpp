@@ -10,6 +10,7 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/PrimaryEffectLive.hpp"
 #include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -129,7 +130,7 @@ void Effects_InitEffectRuntime(void)
 void Effects_ResetEffectInstances(void)
 {
     int i;
-    Effects_SetPrimaryEffectPhase(0);
+    VS::Effects::LiveSetPrimaryEffectPhase(0);
     Effects_startedTrackCount = 0;
     Effects_trackCount = 0;
     Effects_primaryLoaded = 0;
@@ -268,11 +269,11 @@ int Effects_UpdatePrimaryEffects(void)
             VS::Boot::WaitForOverlayReadyLive();
             VS::Effects::LiveConfigureEffectResources();
             if ((Effects_actionRequest.effectId != 0) && (Effects_packageFile.lba == 0)) {
-                Effects_SetPrimaryEffectPhase(4);
+                VS::Effects::LiveSetPrimaryEffectPhase(4);
                 Effects_trackCount = 0;
                 Effects_startedTrackCount = 0;
             } else {
-                Effects_SetPrimaryEffectPhase(2);
+                VS::Effects::LiveSetPrimaryEffectPhase(2);
             }
             if (Effects_purgeOverlayLoaded != 0) {
                 VS::Content::ReleaseLiveOverlayWorkspace(2);
@@ -283,13 +284,13 @@ int Effects_UpdatePrimaryEffects(void)
 
     case 2:
         if (VS::Effects::LiveUpdateEffectTextureLoading() == 0) {
-            Effects_SetPrimaryEffectPhase(8);
+            VS::Effects::LiveSetPrimaryEffectPhase(8);
         }
         break;
 
     case 8:
         if (VS::Effects::LiveUpdateEffectPluginLoading() == 0) {
-            Effects_SetPrimaryEffectPhase(3);
+            VS::Effects::LiveSetPrimaryEffectPhase(3);
             VS::Boot::WaitForOverlayReadyLive();
         }
         break;
@@ -297,7 +298,7 @@ int Effects_UpdatePrimaryEffects(void)
     case 3:
         if (VS::Effects::LiveLoadEffectPackage() == 0) {
             VS::Effects::LiveBindEffectPackageBlocks(Effects_packageBuffer);
-            Effects_SetPrimaryEffectPhase(5);
+            VS::Effects::LiveSetPrimaryEffectPhase(5);
 
             Effects_trackCount = Effects_package->block9Data->frameCount;
             Effects_startedTrackCount = 0;
@@ -357,7 +358,7 @@ int Effects_UpdatePrimaryEffects(void)
             VS::Input::StopLiveVibrationPatterns(0, 1);
             VS::Effects::LiveReleaseEffectPackageResources();
             Effects_ReleaseParticlePool();
-            Effects_ReleaseEffectToken(Effects_primaryToken);
+            VS::Effects::LiveReleaseEffectToken(Effects_primaryToken);
 
             Effects_primaryLoaded = 0;
             Effects_primaryToken = 0;
@@ -368,9 +369,9 @@ int Effects_UpdatePrimaryEffects(void)
             }
 
             VS::Effects::LiveResetEffectCameraMotion();
-            Effects_SetPrimaryEffectPhase(9);
+            VS::Effects::LiveSetPrimaryEffectPhase(9);
         } else {
-            Effects_SetPrimaryEffectPhase(5);
+            VS::Effects::LiveSetPrimaryEffectPhase(5);
         }
 
         primary_busy = 1;
@@ -391,7 +392,7 @@ int Effects_UpdatePrimaryEffects(void)
             VS::Content::ReleaseLiveDiscRequest(Effects_menuReloadSlot);
             Effects_menuReloadSlot = NULL;
         }
-        Effects_SetPrimaryEffectPhase(0);
+        VS::Effects::LiveSetPrimaryEffectPhase(0);
         primary_busy = 0;
         break;
     }
@@ -452,36 +453,6 @@ int Effects_UpdateSecondaryEffects(void)
     return secondary_busy_bits;
 }
 
-// decomp: BATTLE.PRG func_800CEEBC (src/BATTLE/BATTLE.PRG/5BF94.c:5373)
-int Effects_CanStartEffectTrack(void)
-{
-    int can_start_track = 0;
-    if (((Effects_primaryPhase - 4) < 2) && (Effects_trackCount > Effects_startedTrackCount)) {
-        can_start_track = Effects_pendingTracks > 0;
-    }
-    return can_start_track;
-}
-
-// decomp: BATTLE.PRG func_800CEF0C (src/BATTLE/BATTLE.PRG/5BF94.c:5382)
-int Effects_PrimaryEffectTrackCount(void)
-{
-    int active_track_count = 0;
-    if ((Effects_primaryPhase - 4) < 2) {
-        active_track_count = Effects_trackCount;
-    }
-    return active_track_count;
-}
-
-// decomp: BATTLE.PRG func_800CEF38 (src/BATTLE/BATTLE.PRG/5BF94.c:5391)
-void Effects_RequeueEffectTrack(int track_index)
-{
-    Effects_startedTrackCount -= 1;
-    Effects_pendingTracks |= 1 << track_index;
-}
-
-// decomp: BATTLE.PRG func_800CEF64 (src/BATTLE/BATTLE.PRG/5BF94.c:5397)
-int Effects_IsPrimaryEffectLoaded(void) { return Effects_primaryLoaded != 0; }
-
 // decomp: BATTLE.PRG func_800CEF74 (src/BATTLE/BATTLE.PRG/5BF94.c:5399)
 int Effects_StartEffectTrack(int track_index)
 {
@@ -489,7 +460,7 @@ int Effects_StartEffectTrack(int track_index)
     int v;
 
     VS::Effects::LiveSelectEffectResourceContext(1);
-    v = Effects_CanStartEffectTrack();
+    v = VS::Effects::LiveCanStartEffectTrack();
     if (v != 0) {
         if (Effects_pendingTracks & (1 << track_index)) {
             char* script_bytes = Effects_package->block8Data;
@@ -503,7 +474,7 @@ int Effects_StartEffectTrack(int track_index)
             spawn_request.token = Effects_primaryToken;
             spawn_request.script = script_bytes;
             Effects_CreatePrimaryEffectInstance(&spawn_request);
-            Effects_SetPrimaryEffectPhase(4);
+            VS::Effects::LiveSetPrimaryEffectPhase(4);
             ++Effects_startedTrackCount;
             Effects_pendingTracks &= ~(1 << track_index);
         }
@@ -539,11 +510,11 @@ int Effects_BeginActionEffect(Effects_ActionEffectRequest* effect_request, int a
         Effects_actionVariantArgument = variant_argument;
     }
 
-    Effects_primaryToken = ((int (*)(...))Effects_AllocateEffectToken)();
+    Effects_primaryToken = VS::Effects::LiveAllocateEffectToken();
     VS::Effects::LiveSelectEffectResourceContext(1);
     VS::Effects::LiveCaptureEffectCamera(&Effects_savedActionCamera);
     VS::Effects::LiveCaptureEffectCamera(&Effects_effectCamera);
-    Effects_SetPrimaryEffectPhase(6);
+    VS::Effects::LiveSetPrimaryEffectPhase(6);
 
     return Effects_primaryToken;
 }
@@ -571,7 +542,7 @@ char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* effect_request, 
 {
     Effects_EffectSpawnRequest spawn;
     int _[4] __attribute__((unused));
-    char token = ((int (*)(...))Effects_AllocateEffectToken)();
+    char token = VS::Effects::LiveAllocateEffectToken();
     int i;
 
     spawn.source = &effect_request->source;
@@ -636,57 +607,8 @@ int Effects_SpawnSecondaryEffectRequest(Effects_ActionEffectRequest* effect_requ
     return Effects_SpawnSecondaryEffects(effect_request, arg1, renderer_parameters);
 }
 
-// decomp: BATTLE.PRG func_800CF478 (src/BATTLE/BATTLE.PRG/5BF94.c:5546)
-void Effects_SetPrimaryEffectPhase(int effect_phase) { Effects_primaryPhase = effect_phase; }
-
 // decomp: BATTLE.PRG func_800CF484 (src/BATTLE/BATTLE.PRG/5BF94.c:5548)
 void Effects_SetSecondaryEffectPhase(int effect_phase, Effects_EffectInstance* effect_instance) { effect_instance->context.phase = effect_phase; }
-
-// decomp: BATTLE.PRG func_800CF48C (src/BATTLE/BATTLE.PRG/5BF94.c:5550)
-int Effects_PrimaryEffectPhase(void) { return Effects_primaryPhase; }
-
-// decomp: BATTLE.PRG func_800CF49C (src/BATTLE/BATTLE.PRG/5BF94.c:5552)
-int Effects_AllocateEffectToken(void)
-{
-    int allocated_bits;
-    int j;
-    int i;
-    int allocated_token;
-    int* bitmap_base;
-
-    allocated_token = 0;
-    bitmap_base = Effects_tokenBitmaps;
-
-    for (i = 0; i < 4; ++i) {
-        allocated_bits = Effects_tokenBitmaps[i];
-        if (allocated_bits == -2) {
-            continue;
-        }
-
-        for (j = 1; j < 32; ++j) {
-            int v = 1 << j;
-            if (!(allocated_bits & v)) {
-                Effects_tokenBitmaps[i] = allocated_bits | v;
-                allocated_token = (i << 5) + j;
-                goto done;
-            }
-        }
-    }
-done:
-    return allocated_token;
-}
-
-// decomp: BATTLE.PRG func_800CF514 (src/BATTLE/BATTLE.PRG/5BF94.c:5582)
-void Effects_ReleaseEffectToken(int effect_token)
-{
-    int* ptr = Effects_tokenBitmaps;
-    int bitmap_word_index = effect_token;
-    if (effect_token < 0) {
-        bitmap_word_index = effect_token + 0x1F;
-    }
-    bitmap_word_index >>= 5;
-    ptr[bitmap_word_index] &= ~(1 << (effect_token - (bitmap_word_index << 5)));
-}
 
 // decomp: BATTLE.PRG func_800CF55C (src/BATTLE/BATTLE.PRG/5BF94.c:5593)
 Effects_EffectInstance* Effects_CreateSecondaryEffectInstance(Effects_EffectSpawnRequest* spawn_request)
@@ -729,7 +651,7 @@ void Effects_DestroySecondaryEffectInstance(Effects_EffectInstance* effect_insta
         }
     }
     Effects_ReleaseAllEffectParticles(effect_instance);
-    Effects_ReleaseEffectToken(effect_instance->token);
+    VS::Effects::LiveReleaseEffectToken(effect_instance->token);
     VS::Core::Memory::FreeLiveFromHighEnd(effect_instance);
 }
 

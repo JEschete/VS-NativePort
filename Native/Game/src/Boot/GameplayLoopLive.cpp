@@ -28,6 +28,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Effects/PrimaryEffectLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVmLive.hpp"
@@ -401,7 +402,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
 
   [[nodiscard]] bool CanStartEffectTrack() override {
-    return Effects_CanStartEffectTrack() != 0;
+    return VS::Effects::LiveCanStartEffectTrack() != 0;
   }
   void StartEffectTrack() override {
     static_cast<void>(Effects_StartEffectTrack(0));

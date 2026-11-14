@@ -15,6 +15,7 @@
 #include <span>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Effects/PrimaryEffectLive.hpp"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.h"
@@ -132,7 +133,7 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
     Effects_ReleaseScriptedEffectTrigger(track);
   }
   void RequeueEffectTrack(int track) override {
-    Effects_RequeueEffectTrack(track);
+    VS::Effects::LiveRequeueEffectTrack(track);
   }
   void ClearPrimaryEffects() override { Effects_ClearPrimaryEffects(); }
   [[nodiscard]] int EffectPlaybackState() override {

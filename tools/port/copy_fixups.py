@@ -638,6 +638,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveTickEffectTransforms": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveInitializeScriptEffectTransforms": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveRefreshScriptParticleEnvironment": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveCanStartEffectTrack": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LivePrimaryEffectTrackCount": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LiveRequeueEffectTrack": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LiveIsPrimaryEffectLoaded": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LiveSetPrimaryEffectPhase": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LivePrimaryEffectPhase": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LiveAllocateEffectToken": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LiveReleaseEffectToken": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2585,6 +2593,14 @@ OWNED_CALL_BINDINGS["F01543"] = "VS::Effects::LiveFreeEffectScriptTimeline"
 OWNED_CALL_BINDINGS["F01527"] = "VS::Effects::LiveTickEffectTransforms"
 OWNED_CALL_BINDINGS["F01529"] = "VS::Effects::LiveInitializeScriptEffectTransforms"
 OWNED_CALL_BINDINGS["F01536"] = "VS::Effects::LiveRefreshScriptParticleEnvironment"
+OWNED_CALL_BINDINGS["F01427"] = "VS::Effects::LiveCanStartEffectTrack"
+OWNED_CALL_BINDINGS["F01428"] = "VS::Effects::LivePrimaryEffectTrackCount"
+OWNED_CALL_BINDINGS["F01429"] = "VS::Effects::LiveRequeueEffectTrack"
+OWNED_CALL_BINDINGS["F01430"] = "VS::Effects::LiveIsPrimaryEffectLoaded"
+OWNED_CALL_BINDINGS["F01438"] = "VS::Effects::LiveSetPrimaryEffectPhase"
+OWNED_CALL_BINDINGS["F01440"] = "VS::Effects::LivePrimaryEffectPhase"
+OWNED_CALL_BINDINGS["F01441"] = "VS::Effects::LiveAllocateEffectToken"
+OWNED_CALL_BINDINGS["F01442"] = "VS::Effects::LiveReleaseEffectToken"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4054,6 +4070,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D4984, "VS::Effects::LiveTickEffectTransforms"),  # F01527
     ("BATTLE/BATTLE.PRG", 0x800D4A94, "VS::Effects::LiveInitializeScriptEffectTransforms"),  # F01529
     ("BATTLE/BATTLE.PRG", 0x800D4D44, "VS::Effects::LiveRefreshScriptParticleEnvironment"),  # F01536
+    ("BATTLE/BATTLE.PRG", 0x800CEEBC, "VS::Effects::LiveCanStartEffectTrack"),  # F01427
+    ("BATTLE/BATTLE.PRG", 0x800CEF0C, "VS::Effects::LivePrimaryEffectTrackCount"),  # F01428
+    ("BATTLE/BATTLE.PRG", 0x800CEF38, "VS::Effects::LiveRequeueEffectTrack"),  # F01429
+    ("BATTLE/BATTLE.PRG", 0x800CEF64, "VS::Effects::LiveIsPrimaryEffectLoaded"),  # F01430
+    ("BATTLE/BATTLE.PRG", 0x800CF478, "VS::Effects::LiveSetPrimaryEffectPhase"),  # F01438
+    ("BATTLE/BATTLE.PRG", 0x800CF48C, "VS::Effects::LivePrimaryEffectPhase"),  # F01440
+    ("BATTLE/BATTLE.PRG", 0x800CF49C, "VS::Effects::LiveAllocateEffectToken"),  # F01441
+    ("BATTLE/BATTLE.PRG", 0x800CF514, "VS::Effects::LiveReleaseEffectToken"),  # F01442
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

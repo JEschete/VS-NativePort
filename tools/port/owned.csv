@@ -3368,3 +3368,11 @@ F01543,function,VS::Effects::FreeScriptTimeline,Native\Game\src\Effects\EffectSc
 F01527,function,VS::Effects::TickScriptTransforms,Native\Game\src\Effects\EffectScript.cpp,Native\Game\include\Effects\EffectScript.hpp,2026-11-14,Advances the instance transforms through the typed effect host.
 F01529,function,VS::Effects::InitializeScriptTransforms,Native\Game\src\Effects\EffectScript.cpp,Native\Game\include\Effects\EffectScript.hpp,2026-11-14,Sets up the instance transforms through the typed effect host.
 F01536,function,VS::Effects::RefreshParticleEnvironment,Native\Game\src\Effects\EffectScript.cpp,Native\Game\include\Effects\EffectScript.hpp,2026-11-14,Applies the package particle gravity and drag through the typed effect host.
+F01427,function,VS::Effects::CanStartTrack,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed track-start check over the primary effect state.
+F01428,function,VS::Effects::PlayableTrackCount,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed playable track count over the primary effect state.
+F01429,function,VS::Effects::RequeueTrack,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed track requeue; tracks outside the 32-bit pending mask are refused.
+F01430,function,VS::Effects::IsPrimaryEffectLoaded,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed primary-effect loaded check.
+F01438,function,VS::Effects::SetPrimaryEffectPhase,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed phase store; phases the runtime never sets are refused.
+F01440,function,VS::Effects::PrimaryEffectPhaseOf,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed phase read.
+F01441,function,VS::Effects::AllocateEffectToken,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed effect token allocation over the four-word pool.
+F01442,function,VS::Effects::ReleaseEffectToken,Native\Game\src\Effects\PrimaryEffect.cpp,Native\Game\include\Effects\PrimaryEffect.hpp,2026-11-14,Typed effect token release; tokens outside the pool are refused.

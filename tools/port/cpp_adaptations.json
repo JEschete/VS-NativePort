@@ -390,7 +390,7 @@
 ],
 "Native\\Game\\src\\Effects\\Particles.cpp": [
 [
-96,
+97,
 [
 "    Effects_particlePool = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Effects_particlePool * count);"
 ],
@@ -399,7 +399,7 @@
 ]
 ],
 [
-647,
+648,
 [
 "            Core_Gte_SetRotMatrix(scratch);"
 ],
@@ -408,7 +408,7 @@
 ]
 ],
 [
-676,
+677,
 [
 "            Core_Gte_SetRotMatrix(scratch);"
 ],
@@ -635,7 +635,7 @@
 ],
 "Native\\Game\\src\\Effects\\Runtime.cpp": [
 [
-108,
+109,
 [
 "Effects_EffectRenderer Effects_rendererTableAlias[];"
 ],
@@ -644,7 +644,7 @@
 ]
 ],
 [
-196,
+194,
 [
 "    Effects_EffectInstance* newNode = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode);"
 ],
@@ -653,25 +653,7 @@
 ]
 ],
 [
-544,
-[
-"    Effects_primaryToken = ((int (*)())Effects_AllocateEffectToken)();"
-],
-[
-"    Effects_primaryToken = ((int (*)(...))Effects_AllocateEffectToken)();"
-]
-],
-[
-576,
-[
-"    char token = ((int (*)())Effects_AllocateEffectToken)();"
-],
-[
-"    char token = ((int (*)(...))Effects_AllocateEffectToken)();"
-]
-],
-[
-697,
+616,
 [
 "    Effects_EffectInstance* new_instance = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance);"
 ],
@@ -680,7 +662,7 @@
 ]
 ],
 [
-741,
+660,
 [
 "    Effects_RendererSlot* new_renderer = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer);"
 ],

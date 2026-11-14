@@ -3,6 +3,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/HudStateLive.hpp"
+#include "Effects/PrimaryEffectLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -269,9 +270,9 @@ void Effects_StartScriptedActorEffect(int effect_id, int target_actor_index)
 void Effects_ReleaseScriptedEffectTrigger(int track_index) { Effects_StartEffectTrack(track_index); }
 
 // decomp: BATTLE.PRG func_8007BEE4 (src/BATTLE/BATTLE.PRG/146C.c:8613)
-int Effects_ScriptedEffectPlaybackState(void) { return Effects_PrimaryEffectPhase(); }
+int Effects_ScriptedEffectPlaybackState(void) { return VS::Effects::LivePrimaryEffectPhase(); }
 
 // decomp: BATTLE.PRG func_8007BF0C (src/BATTLE/BATTLE.PRG/146C.c:8617)
-int Effects_IsScriptedEffectTriggerReady(void) { return Effects_CanStartEffectTrack() != 0; }
+int Effects_IsScriptedEffectTriggerReady(void) { return VS::Effects::LiveCanStartEffectTrack() != 0; }
 
 }  // extern "C"
