@@ -4073,7 +4073,12 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "SCREFF2/5E8.c:23 receives one 32-bit ordering link, not native pointer storage"),
         ("(LegacyGpu_Handle(*arg3) & 0xFFFFFF)", "(*arg3 & 0xFFFFFF)",
          "the existing ordering head is already an encoded link"),
+        ("((u_long)*arg3 & 0xFFFFFF)", "(*arg3 & 0xFFFFFF)",
+         "the existing ordering head is already an encoded link"),
         ("*arg3 = (void*)(((uintptr_t)arg2 << 8) >> 8);",
+         "*arg3 = LegacyGpu_Handle(arg2);",
+         "publish a single-word packet handle without clobbering the adjacent ordering entry"),
+        ("*arg3 = (void*)(((u_long)arg2 << 8) >> 8);",
          "*arg3 = LegacyGpu_Handle(arg2);",
          "publish a single-word packet handle without clobbering the adjacent ordering entry"),
     ],
@@ -4082,7 +4087,12 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "SCREFF2/5E8.c:41 shares the same single-word overlay ordering head"),
         ("(LegacyGpu_Handle(*temp_s4) & 0xFFFFFF)", "(*temp_s4 & 0xFFFFFF)",
          "retain the prior encoded head when linking shaded ring packets"),
+        ("((u_long)*temp_s4 & 0xFFFFFF)", "(*temp_s4 & 0xFFFFFF)",
+         "retain the prior encoded head when linking shaded ring packets"),
         ("*temp_s4 = (void*)(((uintptr_t)var_s2 << 8) >> 8);",
+         "*temp_s4 = LegacyGpu_Handle(var_s2);",
+         "ring packets must publish encoded 32-bit links, never raw x64 addresses"),
+        ("*temp_s4 = (void*)(((u_long)var_s2 << 8) >> 8);",
          "*temp_s4 = LegacyGpu_Handle(var_s2);",
          "ring packets must publish encoded 32-bit links, never raw x64 addresses"),
     ],
@@ -4442,6 +4452,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("pScratch2[0] = (uintptr_t)sprt;",
          "Render_frameScratch.primitiveCursor = sprt;",
          "do not truncate the second strip cursor through a32-bit lvalue"),
+        ("pScratch2[0] = (u_long)sprt;",
+         "Render_frameScratch.primitiveCursor = sprt;",
+         "do not truncate the second strip cursor through a32-bit lvalue"),
     ],
     "F04153": [
         ("    short (*var_s1)[4] = (void*)Core_ScratchAddr(64);",
@@ -4509,12 +4522,16 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "Status limb indicator packets retain native link handles"),
     ],
-        "F02663": [
-           ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-            "Status limb leader-line link must not terminate traversal before the lower UI entries"),
-        ],
+    "F02663": [
+        ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "Status limb leader-line link must not terminate traversal before the lower UI entries"),
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "Status limb leader-line link must not terminate traversal before the lower UI entries"),
+    ],
     "F02677": [
         ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "Status model fade packets retain native link handles"),
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "Status model fade packets retain native link handles"),
     ],
     "F02678": [
@@ -5142,7 +5159,14 @@ for _row, _decl, _where in (
     FIXES.setdefault(_row, []).extend(
         ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
 
-FIXUP_VARIANT_COUNTS: dict[str, int] = {"F02456": 2}
+FIXUP_VARIANT_COUNTS: dict[str, int] = {
+    "F02456": 2,
+    "F02461": 3,
+    "F02462": 3,
+    "F02663": 1,
+    "F02677": 1,
+    "F02699": 9,
+}
 
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
                         "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")
