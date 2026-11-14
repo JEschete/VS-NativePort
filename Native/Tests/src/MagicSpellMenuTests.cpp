@@ -26,8 +26,9 @@ static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateShamanMenuLive),
                              MagicMenuEntryPoint>);
 static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateSorcererMenuLive),
                              MagicMenuEntryPoint>);
-static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateEnchanterMenuLive),
-                             MagicMenuEntryPoint>);
+static_assert(
+    std::is_same_v<decltype(&VS::Menu::Magic::UpdateEnchanterMenuLive),
+                   MagicMenuEntryPoint>);
 
 using VS::Menu::Magic::ApplyGlobalSpellRestrictions;
 using VS::Menu::Magic::AvailableSpellList;
