@@ -54,7 +54,7 @@ generator-managed output.
 | --- | ---: |
 | `source_cpp` | 3173 |
 | `vs_namespace` | 3172 |
-| `typed_interface` | 3168 |
+| `typed_interface` | 3172 |
 | `no_bridge` | 3168 |
 | `strict_clean` | 3173 |
 | `behavior_evidence` | 3172 |
