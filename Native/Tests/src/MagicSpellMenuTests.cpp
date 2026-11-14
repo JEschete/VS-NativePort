@@ -1,13 +1,33 @@
 #include <array>
 #include <cstdint>
 #include <span>
+#include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Menu/MagicMenus.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MagicSpellMenu.hpp"
 
 namespace {
+
+using MagicMenuEntryPoint = int (*)(unsigned int);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateWarlockMenu),
+                             MagicMenuEntryPoint>);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateShamanMenu),
+                             MagicMenuEntryPoint>);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateSorcererMenu),
+                             MagicMenuEntryPoint>);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateEnchanterMenu),
+                             MagicMenuEntryPoint>);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateWarlockMenuLive),
+                             MagicMenuEntryPoint>);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateShamanMenuLive),
+                             MagicMenuEntryPoint>);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateSorcererMenuLive),
+                             MagicMenuEntryPoint>);
+static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateEnchanterMenuLive),
+                             MagicMenuEntryPoint>);
 
 using VS::Menu::Magic::ApplyGlobalSpellRestrictions;
 using VS::Menu::Magic::AvailableSpellList;

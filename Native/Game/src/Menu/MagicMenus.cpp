@@ -544,7 +544,7 @@ void UpdateWarlockLevelMenu(WarlockMenuState& menu_state, int& selected_row) {
 }  // namespace
 
 // decomp: MENU0.PRG _warlockMagicMenu (src/MENU/MENU0.PRG/84.c:164)
-int UpdateWarlockMenu(u_int init_shortcut_invoked) {
+int UpdateWarlockMenu(unsigned int init_shortcut_invoked) {
   static WarlockMenuState menu_state;
   static int selected_row;
   static int menu_shortcut_invoked;
@@ -581,7 +581,7 @@ int UpdateWarlockMenu(u_int init_shortcut_invoked) {
 }
 
 // decomp: MENU0.PRG _shamanMagicMenu (src/MENU/MENU0.PRG/84.c:512)
-int UpdateShamanMenu(u_int init_shortcut_invoked) {
+int UpdateShamanMenu(unsigned int init_shortcut_invoked) {
   enum ShamanMenuState { kInit, kHandleInput, kReturnIfReady };
 
   static int shaman_menu_state;
@@ -664,7 +664,7 @@ int UpdateShamanMenu(u_int init_shortcut_invoked) {
 }
 
 // decomp: MENU0.PRG _sorcererMagicMenu (src/MENU/MENU0.PRG/84.c:613)
-int UpdateSorcererMenu(u_int init_shortcut_invoked) {
+int UpdateSorcererMenu(unsigned int init_shortcut_invoked) {
   enum SpellListMenuState { kInit, kHandleInput, kReturnIfReady };
 
   static int sorcerer_menu_state;
@@ -748,7 +748,7 @@ int UpdateSorcererMenu(u_int init_shortcut_invoked) {
 }
 
 // decomp: MENU0.PRG _enchanterMagicMenu (src/MENU/MENU0.PRG/84.c:713)
-int UpdateEnchanterMenu(u_int init_shortcut_invoked) {
+int UpdateEnchanterMenu(unsigned int init_shortcut_invoked) {
   enum SpellListMenuState { kInit, kHandleInput, kReturnIfReady };
   static int enchanter_menu_state;
   static int enchanter_menu_selected_row;
