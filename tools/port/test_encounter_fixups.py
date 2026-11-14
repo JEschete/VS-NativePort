@@ -3416,6 +3416,21 @@ class EncounterFixupTests(unittest.TestCase):
         }
         copier.ptr_fields = set()
         copier.report = copy_to_native.collections.defaultdict(list)
+        anonymous_ports = "struct (unnamed struct at main.h:484:5)[2]"
+        copier._gen = SimpleNamespace(
+            layout=lambda _tid: {
+                "fields": [
+                    {"type": "u_int", "offset": 0},
+                    {"type": anonymous_ports, "offset": 0},
+                ]
+            },
+            members={
+                "T00746": [
+                    {"id": "T00746.000"},
+                    {"id": "T00746.001"},
+                ]
+            },
+        )
         text = copier.generated_type(
             copier.type_by_id["T00746"], "Input_PressedButtonsView"
         )
