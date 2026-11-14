@@ -984,6 +984,9 @@
     <ClCompile Include="src\TimelineCommandsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TimelinePlaybackTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TimelineTracksTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

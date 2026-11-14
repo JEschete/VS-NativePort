@@ -702,44 +702,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Effects\\Timeline.cpp": [
-[
-23,
-[
-"    Content_PFileTimelineTable* entry = VS::Content::PFileLiveTimelineSection(Effects_package->block3Data, timeline_index);"
-],
-[
-"    Content_PFileTimelineTable* entry = (Content_PFileTimelineTable *)(VS::Content::PFileLiveTimelineSection(Effects_package->block3Data, timeline_index));"
-]
-],
-[
-36,
-[
-"    effect_instance->context.timeline = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));"
-],
-[
-"    effect_instance->context.timeline = (Effects_EffectTimeline *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)));"
-]
-],
-[
-43,
-[
-"        p->tracks[i].keys = VS::Content::PFileLiveTimelineTrackData(Effects_package->block3Data, timeline_index, i);"
-],
-[
-"        p->tracks[i].keys = (u_long *)(VS::Content::PFileLiveTimelineTrackData(Effects_package->block3Data, timeline_index, i));"
-]
-],
-[
-274,
-[
-"            sound + *(((data[event->keyIndex] >> 9) & 31) + ((Effects_PackageBlock11*)sound)->offsets),"
-],
-[
-"            (char *)(sound + *(((data[event->keyIndex] >> 9) & 31) + ((Effects_PackageBlock11*)sound)->offsets)),"
-]
-]
-],
 "Native\\Game\\src\\Effects\\Trails.cpp": [
 [
 37,

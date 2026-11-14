@@ -1223,15 +1223,12 @@
     <ClCompile Include="src\Effects\TextureBindingsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Effects\Timeline.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Effects\TimelineCommands.cpp" />
     <ClCompile Include="src\Effects\TimelineCommandsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Effects\TimelinePlayback.cpp" />
+    <ClCompile Include="src\Effects\TimelinePlaybackLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Effects\TimelineTracks.cpp" />
@@ -2198,7 +2195,7 @@
     <ClInclude Include="src\Effects\ScreenEffectState.h" />
     <ClInclude Include="src\Effects\ScriptVm.h" />
     <ClInclude Include="src\Effects\Templates\TemplateState.h" />
-    <ClInclude Include="src\Effects\Timeline.h" />
+    <ClInclude Include="src\Effects\TimelineTrackKeys.hpp" />
     <ClInclude Include="src\Effects\Trails.h" />
     <ClInclude Include="src\Effects\Transforms.h" />
     <ClInclude Include="src\Effects\Weather.h" />
@@ -2573,6 +2570,8 @@
     <ClInclude Include="include\Effects\TextureBindings.hpp" />
     <ClInclude Include="include\Effects\TimelineCommands.hpp" />
     <ClInclude Include="include\Effects\TimelineCommandsLive.hpp" />
+    <ClInclude Include="include\Effects\TimelinePlayback.hpp" />
+    <ClInclude Include="include\Effects\TimelinePlaybackLive.hpp" />
     <ClInclude Include="include\Effects\TimelineTracks.hpp" />
     <ClInclude Include="include\Effects\TimelineTracksLive.hpp" />
     <ClInclude Include="include\Effects\TrailEmitter.hpp" />

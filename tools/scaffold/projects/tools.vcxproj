@@ -731,6 +731,15 @@
     <None Include="..\..\port\differentials\timeline_controls_pause.py" />
     <None Include="..\..\port\differentials\timeline_controls_resume.py" />
     <None Include="..\..\port\differentials\timeline_controls_trail.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_advance.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_background.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_driver.cpp" />
+    <None Include="..\..\port\differentials\timeline_tracks_other.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_particle.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_scene.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_shake.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_source.py" />
+    <None Include="..\..\port\differentials\timeline_tracks_target.py" />
     <None Include="..\..\port\differentials\triggered_recovery.py" />
     <None Include="..\..\port\differentials\triggered_recovery_driver.cpp" />
     <None Include="..\..\port\differentials\triggered_recovery_guard_driver.cpp" />
@@ -767,6 +776,7 @@
     <None Include="..\..\port\test_scene_trace_fixups.py" />
     <None Include="..\..\port\timeline_commands_differential.py" />
     <None Include="..\..\port\timeline_controls_differential.py" />
+    <None Include="..\..\port\timeline_tracks_differential.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />
     <None Include="..\..\PSX\Asset-Tools\jpsxdec\.github\ISSUE_TEMPLATE\config.yml" />

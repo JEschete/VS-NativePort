@@ -4022,21 +4022,6 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             "u_int lifecycle_command, int packed_parameters)",
         )
 
-    def test_effect_timeline_shadow_declaration_is_not_the_active_track(self):
-        old = "    Effects_TimelineTrack* temp_a1;"
-        new = "    Effects_TimelineTrack* unused_track_declaration;"
-        self.assertIn(
-            (old, new),
-            [(before, after) for before, after, _ in copy_fixups.FIXES["F01589"]],
-        )
-        source = old + "\n{ Effects_TimelineTrack* temp_a1 = tracks; Use(temp_a1); }"
-        source = source.replace(old, new, 1)
-        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-            if re.search(row, "Effects::TickEffectTimeline"):
-                source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
-        self.assertIn("Effects_TimelineTrack* unused_track_declaration;", source)
-        self.assertIn("Effects_TimelineTrack* timeline_track = tracks; Use(timeline_track);", source)
-
     def test_texture_page_macro_name_preserves_packet_and_handle_contracts(self):
         macro = copy_fixups.MACRO_REPLACEMENTS["_insertTPage"]
         self.assertIn("#define _insertTPage(after, texture_page_mode)", macro)
@@ -4616,8 +4601,8 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
             owned = {row["id"]: row for row in csv.DictReader(file)}
         self.assertEqual(owned["F00062"]["name"], "VS::Battle::ApplyActionTargetEffects")
         self.assertFalse((root / "Native/Game/src/Battle/ActionResults.h").exists())
-        text = (root / "Native/Game/src/Effects/Timeline.cpp").read_text(encoding="utf-8")
-        self.assertNotIn("Battle_ApplyActionTargetEffects(", text)
+        for path in (root / "Native/Game/src/Effects").glob("*.cpp"):
+            self.assertNotIn("Battle_ApplyActionTargetEffects(", path.read_text(encoding="utf-8"), path.name)
         live = (root / "Native/Game/src/Effects/TimelineCommandsLive.cpp").read_text(encoding="utf-8")
         self.assertIn("Battle::ApplyLiveActionTargetEffects", live)
         self.assertIn('#include "Battle/ActionResultsLive.hpp"', live)

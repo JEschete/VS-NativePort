@@ -1,9 +1,10 @@
-extern "C" {
 #include <stdint.h>
 #include <string.h>
 
+#include "Effects/TimelinePlaybackLive.hpp"
+
+extern "C" {
 #include "Effects/Runtime.h"
-#include "Effects/Timeline.h"
 #include "Legacy/Psx.h"
 
 // 5BF94.c:8442 used PS1 header-sized pointer arithmetic instead of indexing
@@ -29,7 +30,7 @@ int Tests_EffectTimelineTrackStride(void) {
   timeline->tracks[0].header.keyCount = timeline->tracks[1].header.keyCount = 1;
   // Both sound keys lie in the future: no audio side effects, but both native
   // key pointers are read.
-  Effects_TickEffectTimeline(&effect, 0);
+  VS::Effects::LiveTickEffectTimeline(&effect, 0);
   return timeline->frame == 1 && timeline->activeTracks == 3 &&
          timeline->tracks[0].keys == &firstKey &&
          timeline->tracks[1].keys == &secondKey &&

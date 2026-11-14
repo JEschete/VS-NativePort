@@ -669,6 +669,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveTickOtherActorColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
     "VS::Effects::LiveTickSceneColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
     "VS::Effects::LiveTickBackgroundColorTrack": r"Native\Game\include\Effects\TimelineTracksLive.hpp",
+    "VS::Effects::LiveLoadEffectTimeline": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveTickParticleEmissionTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveTickEffectSoundTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveTickChildEffectTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveTickEffectRendererTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveTickControllerVibrationTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveTickCameraShakeTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveTickEffectTimeline": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2647,6 +2655,14 @@ OWNED_CALL_BINDINGS["F01567"] = "VS::Effects::LiveTickTargetActorColorTrack"
 OWNED_CALL_BINDINGS["F01568"] = "VS::Effects::LiveTickOtherActorColorTrack"
 OWNED_CALL_BINDINGS["F01569"] = "VS::Effects::LiveTickSceneColorTrack"
 OWNED_CALL_BINDINGS["F01570"] = "VS::Effects::LiveTickBackgroundColorTrack"
+OWNED_CALL_BINDINGS["F01557"] = "VS::Effects::LiveLoadEffectTimeline"
+OWNED_CALL_BINDINGS["F01561"] = "VS::Effects::LiveTickParticleEmissionTrack"
+OWNED_CALL_BINDINGS["F01562"] = "VS::Effects::LiveTickEffectSoundTrack"
+OWNED_CALL_BINDINGS["F01563"] = "VS::Effects::LiveTickChildEffectTrack"
+OWNED_CALL_BINDINGS["F01564"] = "VS::Effects::LiveTickEffectRendererTrack"
+OWNED_CALL_BINDINGS["F01565"] = "VS::Effects::LiveTickControllerVibrationTrack"
+OWNED_CALL_BINDINGS["F01588"] = "VS::Effects::LiveTickCameraShakeTrack"
+OWNED_CALL_BINDINGS["F01589"] = "VS::Effects::LiveTickEffectTimeline"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4147,6 +4163,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D61AC, "VS::Effects::LiveTickOtherActorColorTrack"),  # F01568
     ("BATTLE/BATTLE.PRG", 0x800D6298, "VS::Effects::LiveTickSceneColorTrack"),  # F01569
     ("BATTLE/BATTLE.PRG", 0x800D6310, "VS::Effects::LiveTickBackgroundColorTrack"),  # F01570
+    ("BATTLE/BATTLE.PRG", 0x800D55A4, "VS::Effects::LiveLoadEffectTimeline"),  # F01557
+    ("BATTLE/BATTLE.PRG", 0x800D57FC, "VS::Effects::LiveTickParticleEmissionTrack"),  # F01561
+    ("BATTLE/BATTLE.PRG", 0x800D5904, "VS::Effects::LiveTickEffectSoundTrack"),  # F01562
+    ("BATTLE/BATTLE.PRG", 0x800D5A98, "VS::Effects::LiveTickChildEffectTrack"),  # F01563
+    ("BATTLE/BATTLE.PRG", 0x800D5D74, "VS::Effects::LiveTickEffectRendererTrack"),  # F01564
+    ("BATTLE/BATTLE.PRG", 0x800D5E00, "VS::Effects::LiveTickControllerVibrationTrack"),  # F01565
+    ("BATTLE/BATTLE.PRG", 0x800D6A18, "VS::Effects::LiveTickCameraShakeTrack"),  # F01588
+    ("BATTLE/BATTLE.PRG", 0x800D6AEC, "VS::Effects::LiveTickEffectTimeline"),  # F01589
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
@@ -4343,11 +4367,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "Consolidation backup uses the same row allocation as the live screen."),
         ("sizeof *Menu_Loot_lootList * 160", "sizeof *Menu_Loot_lootList * kMenuLootRowCapacity",
          "Consolidation restoration includes every supported row."),
-    ],
-    "F01563": [
-        ("(*(u_int*)((char*)arg0 + 0x14) & 0xF800) == 0",
-         "arg0->childCount == 0",
-         "the original +0x14 child-count bits move when native instance pointers grow"),
     ],
     "F01515": [
         ("    for (i = 0; i < count; ++i) {\n        node = Effects_AllocateEffectParticle(arg0);",
@@ -5038,17 +5057,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "publish the catalogued 400-index plugin slice boundary for bounded native consumers"),
     ],
     # BATTLE 5BF94.c:7885/8442: the timeline header stays eight bytes, but tracks contain native pointers.
-    "F01557": [
-        ("entry->trackCount * 16 + 8", "sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)",
-         "allocate native timeline tracks"),
-        ("    p->flags = count ? 2 : 0;", "    p->flags = count ? 2 : 0;\n"
-         '    Core_Debugf("effects", "timeline=%d state=%p tracks=%d stride=%u", arg1, (void*)p,\n'
-         "        (int)p->trackCount, (unsigned int)sizeof(Effects_TimelineTrack));", "timeline allocation diagnosis"),
-    ],
-    "F01589": [
-        ("(Effects_TimelineTrack*)&arg0->context.timeline[var_s1 * 2 + 1]", "&arg0->context.timeline->tracks[var_s1]",
-         "index native tracks, not PS1 eight-byte header units"),
-    ],
     # BATTLE 573B8.c:67: opcode results are control codes 0..4 or native instruction addresses.
     "F01271": [
         ("    int ret;", "    intptr_t ret;", "preserve opcode branch addresses"),
@@ -6143,19 +6151,7 @@ FIXES.setdefault("F01425", []).append((
     "            }",
     "main.c:9411 a refused (null) request is not enqueued; case 9 skips it (#282)"))
 
-# 5BF94.c:7885 LoadEffectTimeline: the P-file binding refuses a section or track outside the timeline block with a
-# warning and null (PFileLive.hpp). A refused section keeps the effect's current timeline; a refused track ends the
-# timeline's tracks before it.
-FIXES.setdefault("F01557", []).extend([
-    ("    int i;\n\n    if (arg0->context.timeline != NULL) {",
-     "    int i;\n\n    if (entry == NULL) {\n        return;\n    }\n\n"
-     "    if (arg0->context.timeline != NULL) {",
-     "PFileTimelineSection refuses a section outside the timeline block"),
-    ("        p->tracks[i].header = entry->tracks[i].header;",
-     "        if (p->tracks[i].keys == NULL) {\n            p->trackCount = i;\n            break;\n        }\n"
-     "        p->tracks[i].header = entry->tracks[i].header;",
-     "PFileTimelineTrackData refuses a track outside the timeline block"),
-])
+
 
 for _row, _variable in (
     ("F00946", "actor"),
@@ -8371,16 +8367,6 @@ REGEX_FIXES += [
     for old, new in bindings
 ]
 
-
-# Individually reviewed effect bindings; structural fixups run first.
-# Separate shadowed locals and cast-prototype parameters before naming outer bindings.
-for identifier, old, new, evidence in (
-    ("F01589",
-     "    Effects_TimelineTrack* temp_a1;",
-     "    Effects_TimelineTrack* unused_track_declaration;",
-     "The uninitialized outer pointer is declaration-only. A distinct inner pointer is initialized to tracks[track_index] and passed to every handler. Prepare the outer declaration first, then rename only the remaining inner temp_a1 binding."),
-):
-    FIXES.setdefault(identifier, []).append((old, new, evidence))
 
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)

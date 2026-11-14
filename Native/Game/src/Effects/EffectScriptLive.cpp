@@ -20,6 +20,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
 #include "Legacy/Psx.h"
@@ -29,7 +30,6 @@ extern "C" {
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-#include "Effects/Timeline.h"
 #include "Effects/Transforms.h"
 }
 
@@ -329,10 +329,10 @@ class InstanceEffectHost final : public ScriptEffectHost {
       : instance_(&instance) {}
 
   void LoadTimeline(std::uint8_t index) override {
-    Effects_LoadEffectTimeline(instance_, index, 0);
+    LiveLoadEffectTimeline(instance_, index, 0);
   }
   void TickTimeline(std::uint16_t child_offset) override {
-    Effects_TickEffectTimeline(instance_, child_offset);
+    LiveTickEffectTimeline(instance_, child_offset);
   }
   void FreeTimeline() override {
     Core::Memory::FreeLiveFromHighEnd(instance_->context.timeline);

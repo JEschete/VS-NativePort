@@ -1611,18 +1611,21 @@
     <ClCompile Include="src\Effects\TextureBindingsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Effects\Timeline.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Timeline.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\TimelineCommands.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
     <ClCompile Include="src\Effects\TimelineCommandsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\TimelinePlayback.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\TimelinePlaybackLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\TimelineTrackKeys.hpp">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\TimelineTracks.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3478,6 +3481,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\TimelineCommandsLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TimelinePlayback.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TimelinePlaybackLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\TimelineTracks.hpp">

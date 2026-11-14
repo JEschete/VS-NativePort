@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -13,10 +12,10 @@
 
 #include "Actors/ActorFlags.hpp"
 #include "Actors/ActorStateLive.hpp"
-#include "Core/Log.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
+#include "Effects/TimelineTrackKeys.hpp"
 #include "Effects/TimelineTracks.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 
@@ -36,35 +35,6 @@ constexpr std::size_t kColourKeyWords = sizeof(KeyRecord) / sizeof(u_long);
 static_assert(kColourKeyWords * sizeof(u_long) == sizeof(KeyRecord));
 constexpr auto kActionTargets = std::extent_v<decltype(Request::targets)>;
 constexpr auto kActionOthers = std::extent_v<decltype(Request::others)>;
-
-std::uint64_t refusals = 0;
-
-// Reports a refused call; the first refusal and each power of two after it
-// are logged.
-void Refuse(std::string_view call, std::string_view missing) {
-  if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("effects", "timeline {} refused: {} ({} refusals)", call,
-                missing, refusals);
-  }
-}
-
-// The words of the track's current key, or empty (refused) without a track,
-// keys or a current key.
-[[nodiscard]] std::span<const u_long> KeyWordsOf(
-    const Effects_TimelineTrack* track, std::size_t words_per_key,
-    std::string_view call) {
-  if (track == nullptr || track->keys == nullptr) {
-    Refuse(call, "no track keys");
-    return {};
-  }
-  const int index = track->keyIndex;
-  if (index < 0 || index >= track->header.keyCount) {
-    Refuse(call, "no current key");
-    return {};
-  }
-  return {track->keys + (static_cast<std::size_t>(index) * words_per_key),
-          words_per_key};
-}
 
 class LiveColourTrackHost final : public ColourTrackHost {
  public:
@@ -106,10 +76,10 @@ struct ColourTrackState {
     const Effects_EffectInstance* instance, const Effects_TimelineTrack* track,
     std::string_view call) {
   if (instance == nullptr || instance->context.timeline == nullptr) {
-    Refuse(call, "no effect instance or timeline");
+    RefuseTimelineCall(call, "no effect instance or timeline");
     return std::nullopt;
   }
-  const auto words = KeyWordsOf(track, kColourKeyWords, call);
+  const auto words = TimelineKeyUnits<u_long>(track, kColourKeyWords, call);
   if (words.empty()) return std::nullopt;
   const auto& key =
       *reinterpret_cast<const Effects_ColorTrackKey*>(words.data());
@@ -133,22 +103,11 @@ int RunColourTrack(Effects_EffectInstance* instance,
   LiveColourTrackHost host(*track);
   return tick(state->key, state->frame, host) ? 1 : 0;
 }
-
-// The request's first `count` entries, at most all of them; more are reported.
-template <typename Entry, std::size_t kSize>
-[[nodiscard]] std::span<const Entry> FirstOf(
-    const std::array<Entry, kSize>& entries, std::size_t count,
-    std::string_view call) {
-  if (count > kSize) {
-    Refuse(call, "action entries past the request's sixteen");
-    count = kSize;
-  }
-  return std::span(entries).first(count);
-}
 }  // namespace
 
 void LiveInitializeParticleTimelineKey(Effects_TimelineTrack* track) {
-  const auto words = KeyWordsOf(track, kParticleKeyWords, "particle key");
+  const auto words =
+      TimelineKeyUnits<u_long>(track, kParticleKeyWords, "particle key");
   if (words.empty()) return;
   const ParticleKeyTiming timing =
       ParticleKeyTimingOf(static_cast<std::uint32_t>(words.front()));
@@ -157,7 +116,8 @@ void LiveInitializeParticleTimelineKey(Effects_TimelineTrack* track) {
 }
 
 void LiveInitializeShakeTimelineKey(Effects_TimelineTrack* track) {
-  const auto words = KeyWordsOf(track, kShakeKeyWords, "shake key");
+  const auto words =
+      TimelineKeyUnits<u_long>(track, kShakeKeyWords, "shake key");
   if (words.empty()) return;
   track->keyTimer =
       ShakeKeyTimer(static_cast<std::uint32_t>(words[kShakeParametersWord]),
@@ -168,7 +128,7 @@ void LiveInitializeShakeTimelineKey(Effects_TimelineTrack* track) {
 
 int LiveAdvanceEffectTimelineKey(Effects_TimelineTrack* track) {
   if (track == nullptr) {
-    Refuse("key advance", "no track");
+    RefuseTimelineCall("key advance", "no track");
     return 0;
   }
   const auto next = AdvanceTimelineKey(
@@ -213,8 +173,9 @@ int LiveTickTargetActorColorTrack(Effects_EffectInstance* instance,
         if (all_targets) {
           std::ranges::transform(Effects_actionRequest.targets, targets.begin(),
                                  CommandEndpointOf);
-          action_targets = FirstOf(targets, Effects_actionRequest.count,
-                                   "target actor colour track");
+          action_targets =
+              FirstActionEntries(targets, Effects_actionRequest.count,
+                                 "target actor colour track");
         }
         return TickTargetActorColourTrack(
             key, frame, action_targets,
@@ -231,8 +192,8 @@ int LiveTickOtherActorColorTrack(Effects_EffectInstance* instance,
         std::ranges::copy(Effects_actionRequest.others, others.begin());
         return TickOtherActorColourTrack(
             key, frame,
-            FirstOf(others, Effects_actionRequest.otherCount,
-                    "other actor colour track"),
+            FirstActionEntries(others, Effects_actionRequest.otherCount,
+                               "other actor colour track"),
             host);
       });
 }
