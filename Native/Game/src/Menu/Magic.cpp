@@ -4,9 +4,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Sounds.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/SpritesLive.hpp"
+#include "Menu/MagicMenusLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -17,8 +15,6 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Feedback.h"
-#include "Battle/Sphere.h"
 #include "Content/StringTables.h"
 #include "Field/ChestInteractionsLive.h"
 #include "Input/ControllerLiveState.h"
@@ -28,10 +24,7 @@ extern "C" {
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
-#include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
 
 // decomp: vs_battle_warlockSpellIds (vs_battle_warlockSpellIds@BATTLE/BATTLE.PRG)
@@ -94,15 +87,6 @@ int Menu_Magic_savePointData[] = { 0x0305001B, 0x0801000E, 0x04030199, 0x0C0C001
 
 // decomp: _teleportationStrings (_teleportationStrings@MENU/MENU0.PRG)
 u_short Menu_Magic_teleportationStrings[1599]; /* contents: disc string table (ModuleData.cpp) */
-
-// decomp: local static of _warlockMagicMenu, at file scope so the module reset reaches it
-static char Menu_Magic_warlockMenuLevelledSpells[] = { Battle_WarlockSpell_Explosion,
-        Battle_WarlockSpell_Thunderburst, Battle_WarlockSpell_FlameSphere,
-        Battle_WarlockSpell_GaeaStrike, Battle_WarlockSpell_Avalanche,
-        Battle_WarlockSpell_RadialSurge, Battle_WarlockSpell_Meteor };
-
-// decomp: local static of _warlockMagicMenu, at file scope so the module reset reaches it
-static char* Menu_Magic_warlockMenuSpellLevels[] = { "LV1", "LV2", "LV3", "LV4", "--" };
 
 // decomp: MENU0.PRG _teleportMenu (src/MENU/MENU0.PRG/15AC.c:22)
 int Menu_Magic_UpdateTeleportMenu(int init)
@@ -288,19 +272,19 @@ int Menu_Magic_Update(u_char* state)
             switch (i) {
             case Menu_Magic_ShortcutMagicMenu_Warlock:
                 *state = Menu_Magic_MagicMenuState_WarlockMenu;
-                Menu_Magic_UpdateWarlockMenu(1);
+                VS::Menu::Magic::UpdateWarlockMenuLive(1);
                 break;
             case Menu_Magic_ShortcutMagicMenu_Shaman:
                 *state = Menu_Magic_MagicMenuState_ShamanMenu;
-                Menu_Magic_UpdateShamanMenu(1);
+                VS::Menu::Magic::UpdateShamanMenuLive(1);
                 break;
             case Menu_Magic_ShortcutMagicMenu_Sorcerer:
                 *state = Menu_Magic_MagicMenuState_SorcererMenu;
-                Menu_Magic_UpdateSorcererMenu(1);
+                VS::Menu::Magic::UpdateSorcererMenuLive(1);
                 break;
             case Menu_Magic_ShortcutMagicMenu_Enchanter:
                 *state = Menu_Magic_MagicMenuState_EnchanterMenu;
-                Menu_Magic_UpdateEnchanterMenu(1);
+                VS::Menu::Magic::UpdateEnchanterMenuLive(1);
                 break;
             }
             break;
@@ -375,19 +359,19 @@ int Menu_Magic_Update(u_char* state)
             switch (selectedRow) {
             case Menu_Magic_MagicSubmenu_Warlock:
                 *state = Menu_Magic_MagicMenuState_WarlockMenu;
-                Menu_Magic_UpdateWarlockMenu(1);
+                VS::Menu::Magic::UpdateWarlockMenuLive(1);
                 break;
             case Menu_Magic_MagicSubmenu_Shaman:
                 *state = Menu_Magic_MagicMenuState_ShamanMenu;
-                Menu_Magic_UpdateShamanMenu(1);
+                VS::Menu::Magic::UpdateShamanMenuLive(1);
                 break;
             case Menu_Magic_MagicSubmenu_Sorcerer:
                 *state = Menu_Magic_MagicMenuState_SorcererMenu;
-                Menu_Magic_UpdateSorcererMenu(1);
+                VS::Menu::Magic::UpdateSorcererMenuLive(1);
                 break;
             case Menu_Magic_MagicSubmenu_Enchanter:
                 *state = Menu_Magic_MagicMenuState_EnchanterMenu;
-                Menu_Magic_UpdateEnchanterMenu(1);
+                VS::Menu::Magic::UpdateEnchanterMenuLive(1);
                 break;
             case Menu_Magic_MagicSubmenu_Teleport:
                 *state = Menu_Magic_MagicMenuState_TeleportMenu;
@@ -411,13 +395,13 @@ int Menu_Magic_Update(u_char* state)
         VS::Menu::Framework::SetLiveMenuItem(
             0xA, 0x140, 0x22, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_warlock))
             ->selected = 1;
-        Menu_Magic_UpdateWarlockMenu(2);
+        VS::Menu::Magic::UpdateWarlockMenuLive(2);
 
         *state = Menu_Magic_MagicMenuState_WarlockMenu;
         break;
 
     case Menu_Magic_MagicMenuState_WarlockMenu:
-        i = Menu_Magic_UpdateWarlockMenu(0);
+        i = VS::Menu::Magic::UpdateWarlockMenuLive(0);
 
         if (i == 0) {
             break;
@@ -442,13 +426,13 @@ int Menu_Magic_Update(u_char* state)
         VS::Menu::Framework::SetLiveMenuItem(
             11, 320, 34, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_shaman))
             ->selected = 1;
-        Menu_Magic_UpdateShamanMenu(2);
+        VS::Menu::Magic::UpdateShamanMenuLive(2);
 
         *state = Menu_Magic_MagicMenuState_ShamanMenu;
         break;
 
     case Menu_Magic_MagicMenuState_ShamanMenu:
-        i = Menu_Magic_UpdateShamanMenu(0);
+        i = VS::Menu::Magic::UpdateShamanMenuLive(0);
 
         if (i == 0) {
             break;
@@ -473,13 +457,13 @@ int Menu_Magic_Update(u_char* state)
         VS::Menu::Framework::SetLiveMenuItem(
             12, 320, 34, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_sorcerer))
             ->selected = 1;
-        Menu_Magic_UpdateSorcererMenu(2);
+        VS::Menu::Magic::UpdateSorcererMenuLive(2);
 
         *state = Menu_Magic_MagicMenuState_SorcererMenu;
         break;
 
     case Menu_Magic_MagicMenuState_SorcererMenu:
-        i = Menu_Magic_UpdateSorcererMenu(0);
+        i = VS::Menu::Magic::UpdateSorcererMenuLive(0);
 
         if (i == 0) {
             break;
@@ -504,13 +488,13 @@ int Menu_Magic_Update(u_char* state)
         VS::Menu::Framework::SetLiveMenuItem(
             13, 320, 34, 0x7E, 8, (char*)(Menu_Magic_magicStrings + Text_Menu0_magic_Offset_enchanter))
             ->selected = 1;
-        Menu_Magic_UpdateEnchanterMenu(2);
+        VS::Menu::Magic::UpdateEnchanterMenuLive(2);
 
         *state = Menu_Magic_MagicMenuState_EnchanterMenu;
         break;
 
     case Menu_Magic_MagicMenuState_EnchanterMenu:
-        i = Menu_Magic_UpdateEnchanterMenu(0);
+        i = VS::Menu::Magic::UpdateEnchanterMenuLive(0);
 
         if (i == 0) {
             break;
@@ -686,622 +670,6 @@ int Menu_Magic_TeleportMpCost(int targetSavePointId)
     }
 
     return cost;
-}
-
-// decomp: MENU0.PRG _warlockMagicMenu (src/MENU/MENU0.PRG/84.c:164)
-int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
-{
-    enum Menu_Magic_WarlockMenuState { Menu_Magic_WarlockMenuState_Init, Menu_Magic_WarlockMenuState_HandleInput, Menu_Magic_WarlockMenuState_ReturnIfReady, Menu_Magic_WarlockMenuState_LevelledSpellInit, Menu_Magic_WarlockMenuState_LevelledSpell };
-
-
-    static u_int Menu_Magic_warlockMenuState;
-    static int Menu_Magic_warlockMenuSelectedRow;
-    static int Menu_Magic_warlockMenuShortcutInvoked;
-
-    int rowCount;
-    int i;
-
-    if (initShortcutInvoked) {
-
-        Menu_Magic_warlockMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
-
-        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(0, 1);
-
-        Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_Init;
-        return 0;
-    }
-
-    switch (Menu_Magic_warlockMenuState) {
-    case Menu_Magic_WarlockMenuState_Init: {
-        char* menuStrings[36];
-        int rowTypes[18];
-
-        if (!Menu_Framework_shortcutInvoked && !VS::Menu::Framework::AreLiveMenuRowsIdle()) {
-            break;
-        }
-
-        rowCount = 0;
-
-        for (i = 0; i < 18; ++i) {
-            int actionId = Menu_Magic_warlockSpellIds[i];
-
-            if (Battle_actionDefinitions[actionId].unlocked) {
-                menuStrings[rowCount * 2] =
-                    (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[i
-                                                        + Text_Menu0_magic_Index_warlockSpells]];
-                menuStrings[rowCount * 2 + 1] = (char*)&Menu_Magic_magicStrings
-                    [Menu_Magic_magicStrings[i + Text_Menu0_magic_Index_warlockSpellDescs]];
-                rowTypes[rowCount] = 0;
-
-                if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
-                    rowTypes[rowCount] |= 1;
-                }
-
-                Menu_Magic_availableWarlockSpells[rowCount] = actionId;
-                ++rowCount;
-            }
-        }
-
-        if (Menu_Framework_actionRestrictions & 0xB7) {
-            for (i = 0; i < 18; ++i) {
-                rowTypes[i] |= 1;
-            }
-        }
-
-        i = Input_settings.cursorMemory;
-
-        if (Menu_Magic_warlockMenuShortcutInvoked != 0) {
-            Input_settings.cursorMemory = 1;
-        }
-
-        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 7, menuStrings, rowTypes);
-
-        Input_settings.cursorMemory = i;
-        Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_HandleInput;
-        break;
-    }
-    case Menu_Magic_WarlockMenuState_HandleInput:
-
-        Menu_Magic_warlockMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
-
-        if (Menu_Magic_warlockMenuSelectedRow != 0) {
-
-            Menu_Framework_displayActionCost = 0;
-
-            if (Menu_Framework_shortcutInvoked && (Menu_Magic_warlockMenuSelectedRow == -1)) {
-                Menu_Magic_warlockMenuSelectedRow = -2;
-            }
-
-            if (Menu_Magic_warlockMenuSelectedRow == -1) {
-                VS::Menu::Framework::ClearLiveMenuExcept(0);
-
-                Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
-                break;
-            }
-
-            if (Menu_Magic_warlockMenuSelectedRow > 0) {
-
-                Menu_Magic_warlockMenuSelectedRow = Menu_Magic_availableWarlockSpells[Menu_Magic_warlockMenuSelectedRow - 1];
-
-                for (rowCount = 0; rowCount < 7; ++rowCount) {
-                    if ((Menu_Magic_warlockMenuSelectedRow == Menu_Magic_warlockMenuLevelledSpells[rowCount])
-                        && (Battle_actionDefinitions[Menu_Magic_warlockMenuSelectedRow + 1].unlocked)) {
-
-                        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(
-                            Menu_Framework_menuMemory.cursorMemories[14], 2);
-
-                        Menu_Framework_displayActionCost = 1;
-                        Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_LevelledSpellInit;
-                    }
-                }
-
-                if (Menu_Magic_warlockMenuState == Menu_Magic_WarlockMenuState_LevelledSpellInit) {
-                    break;
-                }
-            }
-
-            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-            VS::Menu::Framework::DismissLiveInformationBox();
-            VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
-
-            Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
-
-        } else {
-
-            i = Menu_Magic_availableWarlockSpells[VS::Menu::Framework::LiveHighlightedRow()];
-
-            for (rowCount = 0; rowCount < 7; ++rowCount) {
-                if (i == Menu_Magic_warlockMenuLevelledSpells[rowCount]) {
-                    if (Battle_actionDefinitions[i + 1].unlocked) {
-                        i = -i;
-                    }
-                    break;
-                }
-            }
-
-            Menu_Magic_SetSpellMpCost(i);
-        }
-
-        break;
-
-    case Menu_Magic_WarlockMenuState_ReturnIfReady:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            return Menu_Magic_warlockMenuSelectedRow;
-        }
-        break;
-
-    case Menu_Magic_WarlockMenuState_LevelledSpellInit:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0) {
-            break;
-        }
-
-        i = 2;
-
-        if (Battle_actionDefinitions[Menu_Magic_warlockMenuSelectedRow + 2].unlocked) {
-            i = 3;
-            if (Battle_actionDefinitions[Menu_Magic_warlockMenuSelectedRow + 3].unlocked) {
-                i = 4;
-            }
-        }
-
-        Menu_Framework_menuMemory.cursorMemories[13] = i;
-
-        if (Menu_Framework_menuMemory.cursorMemories[12] >= i) {
-            Menu_Framework_menuMemory.cursorMemories[12] = i - 1;
-        }
-
-        Menu_Magic_warlockLevelCursorBlink = 0;
-        Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_LevelledSpell;
-        break;
-
-    case Menu_Magic_WarlockMenuState_LevelledSpell: {
-        u_long* spell_level_ordering_table;
-        int level;
-        int level_locked;
-        u_long* prim;
-
-        i = Menu_Framework_menuMemory.cursorMemories[12];
-        rowCount = Menu_Framework_menuMemory.cursorMemories[13];
-
-        if (Input_buttonsPressed.allButtons & PADRup) {
-
-            VS::Menu::PlayLeaveSound();
-
-            Menu_Framework_displayActionCost = 0;
-
-            VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-            VS::Menu::Framework::DismissLiveInformationBox();
-            VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
-
-            Menu_Magic_warlockMenuSelectedRow = -2;
-            Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
-            break;
-        }
-
-        if (Input_buttonsPressed.allButtons & PADRdown) {
-
-            VS::Menu::PlayLeaveSound();
-
-            for (i = 20; i < 30; ++i) {
-                VS::Menu::Framework::FlyOutLiveRowRight(i);
-            }
-
-            Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_Init;
-            break;
-        }
-
-        if (Input_buttonsPressed.allButtons & PADRright) {
-            if (VS::Battle::LiveActorActionRestrictionFlags(0, Menu_Magic_warlockMenuSelectedRow + i) == 0) {
-
-                VS::Menu::PlaySelectSound();
-
-                Menu_Framework_displayActionCost = 0;
-
-                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-                VS::Menu::Framework::DismissLiveInformationBox();
-                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
-
-                Menu_Magic_warlockMenuState = Menu_Magic_WarlockMenuState_ReturnIfReady;
-                Menu_Magic_warlockMenuSelectedRow += i;
-                break;
-
-            } else {
-                VS::Menu::PlayInvalidSound();
-            }
-        }
-
-        if (Input_buttonRepeat & PADLright) {
-            if (i < (rowCount - 1)) {
-                ++i;
-            }
-        }
-
-        if (Input_buttonRepeat & PADLleft) {
-            if (i > 0) {
-                --i;
-            }
-        }
-
-        if (i != Menu_Framework_menuMemory.cursorMemories[0xC]) {
-            VS::Menu::PlayChangeSound();
-            Menu_Framework_menuMemory.cursorMemories[0xC] = i;
-        }
-
-        Menu_Magic_SetSpellMpCost(Menu_Magic_warlockMenuSelectedRow + i);
-
-        spell_level_ordering_table = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4);
-
-        for (level = 0; level < 4; ++level) {
-
-            level_locked = 0;
-
-            if (i >= level) {
-                int v;
-
-                VS::Render::DrawLiveCompactText(
-                    Menu_Magic_warlockMenuSpellLevels[level], (99 + level * 32) | vs_getXY(0, 103), NULL);
-
-                prim = VS::Render::QueueLiveSpriteWithTexturePage(
-                    Menu_Framework_cursorBrightnessAnimation[Menu_Magic_warlockLevelCursorBlink],
-                    (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
-                prim[4] = vs_getUV0Clut(192, 112, 976, 223);
-
-                v = Menu_Magic_warlockLevelCursorBlink;
-
-                if (level == i) {
-                    ++Menu_Magic_warlockLevelCursorBlink;
-                    Menu_Magic_warlockLevelCursorBlink &= 0xF;
-                } else {
-                    Menu_Magic_warlockLevelCursorBlink = v & 0xF;
-                }
-
-            } else if (level < rowCount) {
-
-                VS::Render::DrawLiveCompactText(
-                    Menu_Magic_warlockMenuSpellLevels[level], (99 + level * 32) | vs_getXY(0, 103), NULL);
-
-                prim = VS::Render::QueueLiveSpriteWithTexturePage(
-                    64, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
-                prim[4] = vs_getUV0Clut(192, 112, 992, 223);
-
-            } else {
-
-                level_locked = 1;
-
-                VS::Render::DrawLiveCompactText(
-                    Menu_Magic_warlockMenuSpellLevels[4], (102 + level * 32) | vs_getXY(0, 103), NULL);
-
-                prim = VS::Render::QueueLiveSpriteWithTexturePage(
-                    0, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
-                prim[1] = 0x64602000;
-                prim[4] = vs_getUV0Clut(192, 112, 992, 223);
-            }
-
-            prim[-3] = (u_short)prim[-3] | (getClut(848, 223) << 16);
-            prim[-5] = prim[-5] | 0x02000000;
-            prim[-8] = (u_short)prim[-8] | (getClut(848, 223) << 16);
-            prim[-10] |= 0x02000000;
-
-            if (level_locked != 0) {
-                prim[-12] =
-                    vs_getTpage(768, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
-            } else {
-                prim[-17] =
-                    vs_getTpage(768, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
-                prim[-13] = (u_short)prim[-13] | (getClut(848, 223) << 16);
-                prim[-15] |= 0x02000000;
-            }
-        }
-
-        prim = VS::Render::QueueLiveSpriteWithTexturePage(
-            128, vs_getXY(80, 100), vs_getWH(16, 16), spell_level_ordering_table);
-        prim[4] = vs_getUV0Clut(80, 48, 976, 223);
-
-        prim += 6;
-
-        prim[0] = vs_getTag(u_long[9], *spell_level_ordering_table);
-        prim[1] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyFt4, 128, 128, 128);
-        prim[2] = vs_getXY(224, 100);
-        prim[3] = vs_getUV0Clut(95, 48, 976, 223);
-        prim[4] = vs_getXY(240, 100);
-        prim[5] =
-            vs_getUV1Tpage(79, 48, 768, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
-        prim[6] = vs_getXY(224, 116);
-        prim[7] = vs_getUV(95, 64);
-        prim[8] = vs_getXY(240, 116);
-        prim[9] = vs_getUV(79, 64);
-
-        *spell_level_ordering_table = LegacyGpu_Handle(prim);
-        Render_frameScratch.primitiveCursor = prim + 10;
-
-        break;
-    }
-    }
-    return 0;
-}
-
-// decomp: MENU0.PRG _shamanMagicMenu (src/MENU/MENU0.PRG/84.c:512)
-int Menu_Magic_UpdateShamanMenu(u_int initShortcutInvoked)
-{
-    enum Menu_Magic_ShamanMenuState { Menu_Magic_ShamanMenuState_Init, Menu_Magic_ShamanMenuState_HandleInput, Menu_Magic_ShamanMenuState_ReturnIfReady };
-
-    static int Menu_Magic_shamanMenuState;
-    static int Menu_Magic_shamanMenuSelectedRow;
-    static int Menu_Magic_shamanMenuShortcutInvoked;
-
-    char* menuStrings[12];
-    int rowTypes[6];
-    int i;
-    int rowCount;
-    int actionId;
-
-    if (initShortcutInvoked != 0) {
-        Menu_Magic_shamanMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
-        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(1, 1);
-        Menu_Magic_shamanMenuState = Menu_Magic_ShamanMenuState_Init;
-        return 0;
-    }
-
-    switch (Menu_Magic_shamanMenuState) {
-    case Menu_Magic_ShamanMenuState_Init:
-        if ((Menu_Framework_shortcutInvoked == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0)) {
-            break;
-        }
-
-        rowCount = 0;
-        for (i = 0; i < 6; ++i) {
-            actionId = Menu_Magic_shamanSpellIds[i];
-            if (!Battle_actionDefinitions[actionId].unlocked) {
-                continue;
-            }
-            menuStrings[rowCount * 2] = Battle_actionDefinitions[actionId].name;
-            menuStrings[rowCount * 2 + 1] =
-                (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[i + Text_Menu0_magic_Index_shamanSpellDescs]];
-            rowTypes[rowCount] = 0;
-            if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
-                rowTypes[rowCount] |= 1;
-            }
-            Menu_Magic_availableShamanSpells[rowCount] = actionId;
-            ++rowCount;
-        }
-
-        if (Menu_Framework_actionRestrictions & 0xB7) {
-            for (i = 0; i < 6; ++i) {
-                rowTypes[i] |= 1;
-            }
-        }
-
-        i = Input_settings.cursorMemory;
-        if (Menu_Magic_shamanMenuShortcutInvoked != 0) {
-            Input_settings.cursorMemory = 1;
-        }
-        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 8, menuStrings, rowTypes);
-        Input_settings.cursorMemory = i;
-        Menu_Magic_shamanMenuState = Menu_Magic_ShamanMenuState_HandleInput;
-        break;
-    case Menu_Magic_ShamanMenuState_HandleInput:
-        Menu_Magic_shamanMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
-        if (Menu_Magic_shamanMenuSelectedRow != 0) {
-            Menu_Framework_displayActionCost = 0;
-            if ((Menu_Framework_shortcutInvoked != 0) && (Menu_Magic_shamanMenuSelectedRow == -1)) {
-                Menu_Magic_shamanMenuSelectedRow = -2;
-            }
-            if (Menu_Magic_shamanMenuSelectedRow == -1) {
-                VS::Menu::Framework::ClearLiveMenuExcept(0);
-            } else {
-                if (Menu_Magic_shamanMenuSelectedRow > 0) {
-                    Menu_Magic_shamanMenuSelectedRow = Menu_Magic_availableShamanSpells[Menu_Magic_shamanMenuSelectedRow - 1];
-                }
-                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-                VS::Menu::Framework::DismissLiveInformationBox();
-                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
-            }
-            Menu_Magic_shamanMenuState = Menu_Magic_ShamanMenuState_ReturnIfReady;
-        } else {
-            Menu_Magic_SetSpellMpCost(Menu_Magic_availableShamanSpells[VS::Menu::Framework::LiveHighlightedRow()]);
-        }
-        break;
-    case Menu_Magic_ShamanMenuState_ReturnIfReady:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            return Menu_Magic_shamanMenuSelectedRow;
-        }
-        break;
-    }
-    return 0;
-}
-
-// decomp: MENU0.PRG _sorcererMagicMenu (src/MENU/MENU0.PRG/84.c:613)
-int Menu_Magic_UpdateSorcererMenu(u_int initShortcutInvoked)
-{
-    enum Menu_Magic_SpellListMenuState { Menu_Magic_SpellListMenuState_Init, Menu_Magic_SpellListMenuState_HandleInput, Menu_Magic_SpellListMenuState_ReturnIfready };
-
-    static int Menu_Magic_sorcererMenuState;
-    static int Menu_Magic_sorcererMenuSelectedRow;
-    static int Menu_Magic_sorcererMenuShortcutInvoked;
-
-    char* menuStrings[36];
-    int rowTypes[18];
-    int i;
-    int rowCount;
-    int actionId;
-
-    if (initShortcutInvoked != 0) {
-        Menu_Magic_sorcererMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
-        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(2, 1);
-        Menu_Magic_sorcererMenuState = Menu_Magic_SpellListMenuState_Init;
-        return 0;
-    }
-
-    switch (Menu_Magic_sorcererMenuState) {
-    case Menu_Magic_SpellListMenuState_Init:
-        if (!Menu_Framework_shortcutInvoked && !VS::Menu::Framework::AreLiveMenuRowsIdle()) {
-            break;
-        }
-        rowCount = 0;
-        for (i = 0; i < 18; ++i) {
-            actionId = Menu_Magic_sorcererSpellIds[i];
-            if (!Battle_actionDefinitions[actionId].unlocked) {
-                continue;
-            }
-            menuStrings[rowCount * 2] = Battle_actionDefinitions[actionId].name;
-            menuStrings[rowCount * 2 + 1] =
-                (char*)&Menu_Magic_magicStrings[Menu_Magic_magicStrings[i
-                                                    + Text_Menu0_magic_Index_sorcererSpellDescs]];
-            rowTypes[rowCount] = 0;
-            if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
-                rowTypes[rowCount] |= 1;
-            }
-            Menu_Magic_availableSorcererSpells[rowCount] = actionId;
-            ++rowCount;
-        }
-
-        if (Menu_Framework_actionRestrictions & 0xB7) {
-            for (i = 0; i < 18; ++i) {
-                rowTypes[i] |= 1;
-            }
-        }
-
-        i = Input_settings.cursorMemory;
-        if (Menu_Magic_sorcererMenuShortcutInvoked != 0) {
-            Input_settings.cursorMemory = 1;
-        }
-        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 9, menuStrings, rowTypes);
-        Input_settings.cursorMemory = i;
-        Menu_Magic_sorcererMenuState = Menu_Magic_SpellListMenuState_HandleInput;
-        break;
-    case Menu_Magic_SpellListMenuState_HandleInput:
-        Menu_Magic_sorcererMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
-        if (Menu_Magic_sorcererMenuSelectedRow != 0) {
-            Menu_Framework_displayActionCost = 0;
-            if (Menu_Framework_shortcutInvoked && (Menu_Magic_sorcererMenuSelectedRow == -1)) {
-                Menu_Magic_sorcererMenuSelectedRow = -2;
-            }
-            if (Menu_Magic_sorcererMenuSelectedRow == -1) {
-                VS::Menu::Framework::ClearLiveMenuExcept(0);
-            } else {
-                if (Menu_Magic_sorcererMenuSelectedRow > 0) {
-                    Menu_Magic_sorcererMenuSelectedRow = Menu_Magic_availableSorcererSpells[Menu_Magic_sorcererMenuSelectedRow - 1];
-                }
-                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-                VS::Menu::Framework::DismissLiveInformationBox();
-                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
-            }
-            Menu_Magic_sorcererMenuState = Menu_Magic_SpellListMenuState_ReturnIfready;
-        } else {
-            Menu_Magic_SetSpellMpCost(Menu_Magic_availableSorcererSpells[VS::Menu::Framework::LiveHighlightedRow()]);
-        }
-        break;
-    case Menu_Magic_SpellListMenuState_ReturnIfready:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            return Menu_Magic_sorcererMenuSelectedRow;
-        }
-        break;
-    }
-    return 0;
-}
-
-// decomp: MENU0.PRG _enchanterMagicMenu (src/MENU/MENU0.PRG/84.c:713)
-int Menu_Magic_UpdateEnchanterMenu(u_int initShortcutInvoked)
-{
-    enum Menu_Magic_SpellListMenuState { Menu_Magic_SpellListMenuState_Init, Menu_Magic_SpellListMenuState_HandleInput, Menu_Magic_SpellListMenuState_ReturnIfready };
-    static int Menu_Magic_enchanterMenuState;
-    static int Menu_Magic_enchanterMenuSelectedRow;
-    static int Menu_Magic_enchanterMenuShortcutInvoked;
-
-    char* menuStrings[16];
-    int rowTypes[8];
-    int i;
-    int rowCount;
-    int actionId;
-
-    if (initShortcutInvoked != 0) {
-        Menu_Magic_enchanterMenuShortcutInvoked = (initShortcutInvoked ^ 2) < 1;
-        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(3, 1);
-        Menu_Magic_enchanterMenuState = Menu_Magic_SpellListMenuState_Init;
-        return 0;
-    }
-
-    switch (Menu_Magic_enchanterMenuState) {
-    case Menu_Magic_SpellListMenuState_Init:
-        if ((Menu_Framework_shortcutInvoked == 0) && (VS::Menu::Framework::AreLiveMenuRowsIdle() == 0)) {
-            break;
-        }
-        rowCount = 0;
-        for (i = 0; i < 8; ++i) {
-            actionId = Menu_Magic_enchanterSpellIds[i];
-            if (!Battle_actionDefinitions[actionId].unlocked) {
-                continue;
-            }
-            menuStrings[rowCount * 2] = Battle_actionDefinitions[actionId].name;
-            menuStrings[rowCount * 2 + 1] = (char*)&Menu_Magic_magicStrings
-                [Menu_Magic_magicStrings[i + Text_Menu0_magic_Index_enchanterSpellDescs]];
-            rowTypes[rowCount] = 0;
-            if (VS::Battle::LiveActorActionRestrictionFlags(0, actionId) != 0) {
-                rowTypes[rowCount] |= 1;
-            }
-            Menu_Magic_availableEnchanterSpells[rowCount] = actionId;
-            ++rowCount;
-        }
-
-        if (Menu_Framework_actionRestrictions & 0xB7) {
-            for (i = 0; i < 8; ++i) {
-                rowTypes[i] |= 1;
-            }
-        }
-
-        i = Input_settings.cursorMemory;
-        if (Menu_Magic_enchanterMenuShortcutInvoked != 0) {
-            Input_settings.cursorMemory = 1;
-        }
-        VS::Menu::Framework::CreateLiveMenuRows(rowCount, (2 << 8) | 10, menuStrings, rowTypes);
-        Input_settings.cursorMemory = i;
-        Menu_Magic_enchanterMenuState = Menu_Magic_SpellListMenuState_HandleInput;
-        break;
-    case Menu_Magic_SpellListMenuState_HandleInput:
-        Menu_Magic_enchanterMenuSelectedRow = VS::Menu::Framework::LiveSelectedRow() + 1;
-        if (Menu_Magic_enchanterMenuSelectedRow != 0) {
-            Menu_Framework_displayActionCost = 0;
-            if ((Menu_Framework_shortcutInvoked != 0) && (Menu_Magic_enchanterMenuSelectedRow == -1)) {
-                Menu_Magic_enchanterMenuSelectedRow = -2;
-            }
-            if (Menu_Magic_enchanterMenuSelectedRow == -1) {
-                VS::Menu::Framework::ClearLiveMenuExcept(0);
-            } else {
-                if (Menu_Magic_enchanterMenuSelectedRow > 0) {
-                    Menu_Magic_enchanterMenuSelectedRow = Menu_Magic_availableEnchanterSpells[Menu_Magic_enchanterMenuSelectedRow - 1];
-                }
-                VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-                VS::Menu::Framework::DismissLiveInformationBox();
-                VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
-            }
-            Menu_Magic_enchanterMenuState = Menu_Magic_SpellListMenuState_ReturnIfready;
-        } else {
-            Menu_Magic_SetSpellMpCost(Menu_Magic_availableEnchanterSpells[VS::Menu::Framework::LiveHighlightedRow()]);
-        }
-        break;
-    case Menu_Magic_SpellListMenuState_ReturnIfready:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            return Menu_Magic_enchanterMenuSelectedRow;
-        }
-        break;
-    }
-    return 0;
-}
-
-// MENU0.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Magic_ResetMenu0Statics(void)
-{
-    {
-        static const char initial[] = { Battle_WarlockSpell_Explosion,
-        Battle_WarlockSpell_Thunderburst, Battle_WarlockSpell_FlameSphere,
-        Battle_WarlockSpell_GaeaStrike, Battle_WarlockSpell_Avalanche,
-        Battle_WarlockSpell_RadialSurge, Battle_WarlockSpell_Meteor };
-        memcpy((void*)&Menu_Magic_warlockMenuLevelledSpells, &initial, sizeof Menu_Magic_warlockMenuLevelledSpells);
-    }
-    {
-        static const char* initial[] = { "LV1", "LV2", "LV3", "LV4", "--" };
-        memcpy((void*)&Menu_Magic_warlockMenuSpellLevels, &initial, sizeof Menu_Magic_warlockMenuSpellLevels);
-    }
 }
 
 }  // extern "C"

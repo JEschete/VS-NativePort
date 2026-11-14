@@ -672,6 +672,9 @@
     <ClCompile Include="src\LootStagingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MagicSpellMenuTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -9,7 +9,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Magic.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
 #include "Menu/Results/CubePuzzle.h"
@@ -26,12 +25,6 @@ void Boot_ResetMainMenuStatics(void)
 {
     Menu_Inventory_ResetMainMenuStatics();
     Menu_Inventory_ItemList_ResetMainMenuStatics();
-}
-
-// Call where the original loads MENU0.PRG: restores the statics its reload re-read from the disc.
-void Boot_ResetMenu0Statics(void)
-{
-    Menu_Magic_ResetMenu0Statics();
 }
 
 // Call where the original loads MENU2.PRG: restores the statics its reload re-read from the disc.

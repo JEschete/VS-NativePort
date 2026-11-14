@@ -3323,3 +3323,9 @@ F02610,function,VS::Menu::break_arts::UpdateArtList,Native\Game\src\Menu\BreakAr
 F02611,function,VS::Menu::break_arts::UpdateWeaponCategories,Native\Game\src\Menu\BreakArtsCore.cpp,Native\Game\include\Menu\BreakArts.hpp,2026-11-13,"MENU1.PRG 30.c:266; verified Ghidra body [0x80102F68,0x801031FC), 165 contiguous instructions."
 F02612,function,VS::Menu::break_arts::CreateHeader,Native\Game\src\Menu\BreakArtsCore.cpp,Native\Game\include\Menu\BreakArts.hpp,2026-11-13,"MENU1.PRG 30.c:344; verified Ghidra body [0x801031FC,0x80103270), 29 contiguous instructions."
 F02613,function,VS::Menu::break_arts::Update,Native\Game\src\Menu\BreakArtsCore.cpp,Native\Game\include\Menu\BreakArts.hpp,2026-11-13,"MENU1.PRG 30.c:358; verified Ghidra body [0x80103270,0x80103478), 130 contiguous instructions."
+G00983,global,Menu_Magic_warlockMenuLevelledSpells,Native\Game\src\Menu\MagicMenus.cpp,Native\Game\src\Menu\MagicMenus.h,2026-11-13,from Native\Game\src\Menu\Magic.cpp
+G00994,global,Menu_Magic_warlockMenuSpellLevels,Native\Game\src\Menu\MagicMenus.cpp,Native\Game\src\Menu\MagicMenus.h,2026-11-13,from Native\Game\src\Menu\Magic.cpp
+F02604,function,VS::Menu::Magic::UpdateWarlockMenu,Native\Game\src\Menu\MagicMenus.cpp,Native\Game\include\Menu\MagicMenus.hpp,2026-11-13,MENU0.PRG/84.c:164; native spell rows and live menu binding
+F02605,function,VS::Menu::Magic::UpdateShamanMenu,Native\Game\src\Menu\MagicMenus.cpp,Native\Game\include\Menu\MagicMenus.hpp,2026-11-13,MENU0.PRG/84.c:512; native spell rows and live menu binding
+F02606,function,VS::Menu::Magic::UpdateSorcererMenu,Native\Game\src\Menu\MagicMenus.cpp,Native\Game\include\Menu\MagicMenus.hpp,2026-11-13,MENU0.PRG/84.c:613; native spell rows and live menu binding
+F02607,function,VS::Menu::Magic::UpdateEnchanterMenu,Native\Game\src\Menu\MagicMenus.cpp,Native\Game\include\Menu\MagicMenus.hpp,2026-11-13,MENU0.PRG/84.c:713; native spell rows and live menu binding

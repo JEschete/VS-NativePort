@@ -378,7 +378,7 @@
 ]
 ],
 [
-80,
+73,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
@@ -1241,21 +1241,12 @@
 ],
 "Native\\Game\\src\\Menu\\Magic.cpp": [
 [
-629,
+613,
 [
 "        0, &Menu_Magic_mpCostTextBuffer[i], variableCost * 4 + 72, (flags >> 1) & 1);"
 ],
 [
 "        0, (const char *)(&Menu_Magic_mpCostTextBuffer[i]), variableCost * 4 + 72, (flags >> 1) & 1);"
-]
-],
-[
-931,
-[
-"        spell_level_ordering_table = Render_frameScratch.orderingTable - 4;"
-],
-[
-"        spell_level_ordering_table = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4);"
 ]
 ]
 ],
@@ -2493,7 +2484,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-169,
+168,
 [
 "    menuText = menuItem->text;"
 ],
@@ -2502,7 +2493,7 @@
 ]
 ],
 [
-177,
+176,
 [
 "    before = Render_frameScratch.overlayOrderingTable + 8;"
 ],
@@ -2511,7 +2502,7 @@
 ]
 ],
 [
-225,
+224,
 [
 "    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -2520,7 +2511,7 @@
 ]
 ],
 [
-545,
+544,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
@@ -2529,7 +2520,7 @@
 ]
 ],
 [
-1430,
+1429,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -2538,7 +2529,7 @@
 ]
 ],
 [
-1440,
+1439,
 [
 "        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
 ],
@@ -2547,7 +2538,7 @@
 ]
 ],
 [
-1451,
+1450,
 [
 "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
 ],
@@ -2556,7 +2547,7 @@
 ]
 ],
 [
-1474,
+1473,
 [
 "    polyG4 = scratch[0];"
 ],
@@ -2565,7 +2556,7 @@
 ]
 ],
 [
-1489,
+1488,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -2574,7 +2565,7 @@
 ]
 ],
 [
-1499,
+1498,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -2583,7 +2574,7 @@
 ]
 ],
 [
-1511,
+1510,
 [
 "    POLY_G4* polyG4 = scratch[0];"
 ],
@@ -2592,7 +2583,7 @@
 ]
 ],
 [
-1521,
+1520,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -2601,7 +2592,7 @@
 ]
 ],
 [
-1529,
+1528,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -2610,7 +2601,7 @@
 ]
 ],
 [
-1564,
+1563,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -2619,7 +2610,7 @@
 ]
 ],
 [
-1566,
+1565,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -2628,7 +2619,7 @@
 ]
 ],
 [
-1571,
+1570,
 [
 "        scratch[1] + 0x1C);"
 ],
@@ -2637,7 +2628,7 @@
 ]
 ],
 [
-1581,
+1580,
 [
 "    POLY_G4* poly = scratch[0];"
 ],
@@ -2646,7 +2637,7 @@
 ]
 ],
 [
-1591,
+1590,
 [
 "    AddPrim(scratch[1] + 0x20, poly++);"
 ],
@@ -2655,7 +2646,7 @@
 ]
 ],
 [
-1601,
+1600,
 [
 "    AddPrim(scratch[1] + 32, poly++);"
 ],

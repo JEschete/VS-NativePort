@@ -8,6 +8,10 @@ typedef struct Menu_Score_EnemyEntry Menu_Score_EnemyEntry;
 typedef struct Menu_Score_Row Menu_Score_Row;
 typedef struct Menu_Score_ZudHeader Menu_Score_ZudHeader;
 
+// decomp: src/include/gpu.h:99
+#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
+    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
+
 // decomp: _gazetteRow (src/MENU/MENU9.PRG/238.c:363)
 typedef struct Menu_Score_Row {
     char selected;

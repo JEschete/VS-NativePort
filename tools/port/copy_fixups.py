@@ -1429,6 +1429,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::break_arts::UpdateWeaponCategoriesLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
     "VS::Menu::break_arts::CreateHeaderLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
     "VS::Menu::break_arts::UpdateLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
+    "VS::Menu::Magic::UpdateWarlockMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
+    "VS::Menu::Magic::UpdateShamanMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
+    "VS::Menu::Magic::UpdateSorcererMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
+    "VS::Menu::Magic::UpdateEnchanterMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2501,6 +2505,10 @@ OWNED_CALL_BINDINGS["F02610"] = "VS::Menu::break_arts::UpdateArtListLive"
 OWNED_CALL_BINDINGS["F02611"] = "VS::Menu::break_arts::UpdateWeaponCategoriesLive"
 OWNED_CALL_BINDINGS["F02612"] = "VS::Menu::break_arts::CreateHeaderLive"
 OWNED_CALL_BINDINGS["F02613"] = "VS::Menu::break_arts::UpdateLive"
+OWNED_CALL_BINDINGS["F02604"] = "VS::Menu::Magic::UpdateWarlockMenuLive"
+OWNED_CALL_BINDINGS["F02605"] = "VS::Menu::Magic::UpdateShamanMenuLive"
+OWNED_CALL_BINDINGS["F02606"] = "VS::Menu::Magic::UpdateSorcererMenuLive"
+OWNED_CALL_BINDINGS["F02607"] = "VS::Menu::Magic::UpdateEnchanterMenuLive"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4024,6 +4032,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU1.PRG", 0x80102F68, "VS::Menu::break_arts::UpdateWeaponCategoriesLive"),  # F02611
     ("MENU/MENU1.PRG", 0x801031FC, "VS::Menu::break_arts::CreateHeaderLive"),  # F02612
     ("MENU/MENU1.PRG", 0x80103270, "VS::Menu::break_arts::UpdateLive"),  # F02613
+    ("MENU/MENU0.PRG", 0x80102B08, "VS::Menu::Magic::UpdateWarlockMenuLive"),  # F02604
+    ("MENU/MENU0.PRG", 0x80103464, "VS::Menu::Magic::UpdateShamanMenuLive"),  # F02605
+    ("MENU/MENU0.PRG", 0x801037A8, "VS::Menu::Magic::UpdateSorcererMenuLive"),  # F02606
+    ("MENU/MENU0.PRG", 0x80103AEC, "VS::Menu::Magic::UpdateEnchanterMenuLive"),  # F02607
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -4488,9 +4500,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
         (r'"Fandango\0"', r'"\x0F\x24\x31\x27\x24\x31\x2A\x32\xE7"',
          "INITBTL.PRG 18.c pragma vsstring default weapon name; preserve original encoded text"),
     ],
-    "F02604": [
-        ("((u_int)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "MENU0/84.c rank selector must link its final frame packet with a native handle; truncation hides the lower UI chain"),
+    "F02610": [
+        ("static u_short Menu_BreakArts_artListActionIds[4];",
+         "static u_short Menu_BreakArts_artListActionIds[5];",
+         "MENU1/30.c weapon arts need four action IDs plus View Arts; adapt before hoisting so the reload initializer has the same extent"),
     ],
     "F02662": [
         ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",

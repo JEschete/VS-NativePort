@@ -83,6 +83,7 @@
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
+#include "Menu/MagicMenusLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -2086,6 +2087,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU1.PRG", 0x80102F68u, 0u, (void*)&VS::Menu::break_arts::UpdateWeaponCategoriesLive, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x801031FCu, 0u, (void*)&VS::Menu::break_arts::CreateHeaderLive, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x80103270u, 0u, (void*)&VS::Menu::break_arts::UpdateLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x80102B08u, 0u, (void*)&VS::Menu::Magic::UpdateWarlockMenuLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x80103464u, 0u, (void*)&VS::Menu::Magic::UpdateShamanMenuLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x801037A8u, 0u, (void*)&VS::Menu::Magic::UpdateSorcererMenuLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x80103AECu, 0u, (void*)&VS::Menu::Magic::UpdateEnchanterMenuLive, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

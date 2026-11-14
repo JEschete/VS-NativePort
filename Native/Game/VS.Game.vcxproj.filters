@@ -2508,6 +2508,18 @@
     <ClInclude Include="src\Menu\Magic.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\MagicMenus.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\MagicMenus.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\MagicMenusLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\MagicSpellMenu.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Manual.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -3842,6 +3854,15 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Loot\LootStagingLive.hpp">
       <Filter>include\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MagicMenus.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MagicMenusLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MagicSpellMenu.hpp">
+      <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Options.hpp">
       <Filter>include\Menu</Filter>

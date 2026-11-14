@@ -4747,11 +4747,14 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_rank_menu_preserves_native_packet_link(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Magic.cpp").read_text()
-        menu = source.split("int Menu_Magic_UpdateWarlockMenu(", 1)[1]
-        menu = menu.split("int Menu_Magic_UpdateShamanMenu(", 1)[0]
-        self.assertIn("*spell_level_ordering_table = LegacyGpu_Handle(prim);", menu)
-        self.assertNotIn("*spell_level_ordering_table = ((u_int)prim << 8) >> 8;", menu)
+        source = (root / "Native/Game/src/Menu/MagicMenus.cpp").read_text()
+        menu = source.split("int UpdateWarlockMenu(", 1)[1]
+        menu = menu.split("int UpdateShamanMenu(", 1)[0]
+        arrow = source.split("void DrawWarlockLevelArrow(", 1)[1]
+        arrow = arrow.split("void DrawWarlockLevelMenu(", 1)[0]
+        self.assertIn("InitializeWarlockLevelMenu(menu_state, selected_row);", menu)
+        self.assertIn("*spell_level_ordering_table = LegacyGpu_Handle(prim);", arrow)
+        self.assertNotIn("*spell_level_ordering_table = ((u_int)prim << 8) >> 8;", arrow)
 
     def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
         root = Path(__file__).resolve().parents[2]

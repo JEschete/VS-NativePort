@@ -4,10 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/include/gpu.h:99
-#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
-    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
-
 #endif // VS_MENU_MAGIC_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_MAGIC_H_DECLS)
@@ -37,10 +33,5 @@ int Menu_Magic_Update(u_char* state);
 void Menu_Magic_SetSpellMpCost(int id);
 void Menu_Magic_SetTeleportMpCost(int costDecimal, int disabled);
 int Menu_Magic_TeleportMpCost(int targetSavePointId);
-int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked);
-int Menu_Magic_UpdateShamanMenu(u_int initShortcutInvoked);
-int Menu_Magic_UpdateSorcererMenu(u_int initShortcutInvoked);
-int Menu_Magic_UpdateEnchanterMenu(u_int initShortcutInvoked);
-void Menu_Magic_ResetMenu0Statics(void);
 
 #endif // VS_MENU_MAGIC_H_DECLS
