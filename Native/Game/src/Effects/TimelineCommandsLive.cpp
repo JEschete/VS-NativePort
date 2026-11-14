@@ -12,7 +12,10 @@
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Log.hpp"
+#include "Effects/CameraLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/TimelineCommands.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -20,13 +23,24 @@ extern "C" {
 #include "Core/Gte.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.h"
+#include "Effects/Trails.h"
+#include "Effects/Transforms.h"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/InteractionTargetLive.h"
 }
 
+// Effects_TransformMotionView views an Effects_TransformSlot
+// (TransformsLive.cpp checks its fields).
+static_assert(sizeof(Effects_TransformMotionView) ==
+              sizeof(Effects_TransformSlot));
+static_assert(sizeof(Effects_ActionControlKey) ==
+              sizeof(VS::Effects::ActionControlKey));
+
 namespace VS::Effects {
 namespace {
 std::uint64_t refused_instances = 0;
+std::uint64_t refused_records = 0;
 
 // Reports a null instance; the first refusal and each power of two after it
 // are logged.
@@ -40,6 +54,28 @@ std::uint64_t refused_instances = 0;
                 command, refused_instances);
   }
   return true;
+}
+
+// Reports a missing transform, timeline or track key, rate-limited as Refused.
+void ReportMissing(std::string_view command, std::string_view missing) {
+  if (std::has_single_bit(++refused_records)) {
+    VS_LOG_WARN("effects", "timeline command {} refused: {} ({} refusals)",
+                command, missing, refused_records);
+  }
+}
+
+// The transform's motion record, or null (refused) past the instance's
+// transforms.
+[[nodiscard]] Effects_TransformMotionView* MotionOf(
+    Effects_EffectInstance& instance, std::uint8_t transform_index,
+    std::string_view command) {
+  const auto slot = TransformSlotOf(transform_index);
+  if (!slot) {
+    ReportMissing(command, "transform past the instance's slots");
+    return nullptr;
+  }
+  return reinterpret_cast<Effects_TransformMotionView*>(
+      &instance.transforms[*slot]);
 }
 
 [[nodiscard]] CommandEndpoint EndpointOf(
@@ -72,6 +108,51 @@ void ApplyImpact(const ActionImpact& impact, Apply apply) {
   }
   SVECTOR point = PointOf(*impact.point);
   apply(impact.actor, &point);
+}
+
+class LiveTimelineEffectHost final : public TimelineEffectHost {
+ public:
+  void SaveResourceContext() override { LiveSaveEffectResourceContext(); }
+  void RestoreResourceContext() override { LiveRestoreEffectResourceContext(); }
+  void SpawnBoneTrail(const WeaponTrail& trail) override {
+    Effects_SpawnBoneTrail(trail.actor, trail.bone, trail.texture,
+                           trail.colour);
+  }
+  void FadeBoneTrails() override { Effects_FadeBoneTrails(0, 0); }
+  void FreezeRoomObjects() override {
+    static_cast<void>(Field::FreezeLiveRoomGimmicksTemporarily());
+  }
+};
+
+// Performs the commands on the instance whose track is ticking.
+class LiveActionControlHost final : public ActionControlHost {
+ public:
+  LiveActionControlHost(Effects_EffectInstance& instance,
+                        Effects_TimelineTrack& track)
+      : instance_(&instance), track_(&track) {}
+
+  void Perform(const ActionControl& control) override;
+  bool AdvanceKey() override {
+    return Effects_AdvanceEffectTimelineKey(track_) != 0;
+  }
+
+ private:
+  Effects_EffectInstance* instance_;
+  Effects_TimelineTrack* track_;
+};
+
+// The track's current key, or nullopt (refused) without keys or past them.
+[[nodiscard]] std::optional<ActionControlKey> CurrentKeyOf(
+    const Effects_TimelineTrack& track) {
+  const int index = track.keyIndex;
+  if (track.keys == nullptr || index < 0 || index >= track.header.keyCount) {
+    ReportMissing("action-control track", "no current key");
+    return std::nullopt;
+  }
+  const auto& key =
+      reinterpret_cast<const Effects_ActionControlKey*>(track.keys)[index];
+  return ActionControlKey{
+      .timing = key.frame, .operand0 = key.opaque2, .operand1 = key.opaque3};
 }
 }  // namespace
 
@@ -136,5 +217,111 @@ void LivePrepareTargetDefenseTiming(Effects_EffectInstance* instance) {
   if (const auto actor = DefenseTimingTarget(EndpointsOf(*instance))) {
     Battle::LiveArmDefenseAbilityTimingWindow(*actor);
   }
+}
+
+void LiveSpawnTransformWeaponTrail(Effects_EffectInstance* instance,
+                                   std::uint8_t transform_index,
+                                   std::uint8_t packed_style) {
+  if (Refused(instance, "weapon trail")) return;
+  const auto* motion = MotionOf(*instance, transform_index, "weapon trail");
+  if (motion == nullptr) return;
+  LiveTimelineEffectHost host;
+  SpawnTransformWeaponTrail({.actor = motion->actor, .bone = motion->bone},
+                            packed_style, host);
+}
+
+void LiveFadeActionWeaponTrails() {
+  LiveTimelineEffectHost host;
+  FadeActionWeaponTrails(host);
+}
+
+void LiveResumeEffectTransformMotion(Effects_EffectInstance* instance,
+                                     std::uint8_t transform_index) {
+  if (Refused(instance, "resume transform")) return;
+  if (auto* motion = MotionOf(*instance, transform_index, "resume transform")) {
+    motion->flags = ResumeTransformMotion(motion->flags);
+  }
+}
+
+void LiveHoldEffectTimelineFrame(Effects_EffectInstance* instance) {
+  if (Refused(instance, "hold frame")) return;
+  Effects_EffectTimeline* timeline = instance->context.timeline;
+  if (timeline == nullptr) {
+    ReportMissing("hold frame", "no timeline");
+    return;
+  }
+  timeline->flags = static_cast<char>(
+      HoldTimelineFrame(static_cast<std::uint8_t>(timeline->flags)));
+}
+
+void LivePauseMovingRoomObjects() {
+  LiveTimelineEffectHost host;
+  PauseMovingRoomObjects(host);
+}
+
+void LiveInvalidateEffectTransformAttachments(Effects_EffectInstance* instance,
+                                              std::uint8_t transform_index) {
+  if (Refused(instance, "invalidate transform")) return;
+  if (auto* motion =
+          MotionOf(*instance, transform_index, "invalidate transform")) {
+    motion->flags = InvalidateTransformAttachments(motion->flags);
+  }
+}
+
+// NOLINTNEXTLINE(readability-function-size): one call per command.
+void LiveActionControlHost::Perform(const ActionControl& control) {
+  using enum ActionControlCommand;
+  switch (control.command) {
+    case kTargetImpact:
+      return LiveApplyTargetActionImpact(instance_);
+    case kSourceImpact:
+      return LiveApplySourceActionImpact(instance_);
+    case kTargetRoomTile:
+      return LiveActivateTargetRoomTile(instance_);
+    case kTransformWeaponTrail:
+      return LiveSpawnTransformWeaponTrail(instance_, control.operand0,
+                                           control.operand1);
+    case kFadeWeaponTrails:
+      return LiveFadeActionWeaponTrails();
+    case kResumeTransformMotion:
+      return LiveResumeEffectTransformMotion(instance_, control.operand0);
+    case kHoldTimelineFrame:
+      return LiveHoldEffectTimelineFrame(instance_);
+    case kPauseRoomObjects:
+      return LivePauseMovingRoomObjects();
+    case kSignalSourceActor:
+      return LiveSignalSourceActorFromTimeline(instance_);
+    case kInvalidateTransformAttachments:
+      return LiveInvalidateEffectTransformAttachments(instance_,
+                                                      control.operand0);
+    case kSourceWeaponBrightness:
+      return LiveSetSourceWeaponBrightness(instance_, control.operand0);
+    case kSourceReactionSound:
+      return LivePlaySourceActorReactionSound(instance_, control.operand0);
+    case kTargetGimmick:
+      return LiveActivateTargetGimmick(instance_);
+    case kFocusCamera:
+      return LiveFocusCameraOnEffectTransform(instance_, control.operand0,
+                                              control.operand1);
+    case kRestoreCamera:
+      return LiveRestoreActionEffectCamera(instance_, control.operand0);
+    case kDefenseTiming:
+      return LivePrepareTargetDefenseTiming(instance_);
+  }
+}
+
+int LiveTickActionControlTrack(Effects_EffectInstance* instance,
+                               Effects_TimelineTrack* track) {
+  if (Refused(instance, "action-control track")) return 0;
+  if (track == nullptr || instance->context.timeline == nullptr) {
+    ReportMissing("action-control track", "no track or timeline");
+    return 0;
+  }
+  const auto key = CurrentKeyOf(*track);
+  if (!key) return 0;
+  LiveActionControlHost host(*instance, *track);
+  return TickActionControlTrack(*key, instance->context.timeline->frame, host)
+             ? 1
+             : 0;
 }
 }  // namespace VS::Effects

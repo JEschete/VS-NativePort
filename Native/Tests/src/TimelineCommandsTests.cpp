@@ -1,6 +1,11 @@
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <optional>
+#include <span>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -10,6 +15,7 @@
 #include "Effects/TimelineCommandsLive.hpp"
 extern "C" {
 #include "Effects/Runtime.h"
+#include "Effects/Transforms.h"
 }
 
 namespace {
@@ -162,4 +168,213 @@ TEST_CASE("Live reaction sound skips a non-actor emitter",
   const u_char last = Effects_lastReactionSoundVariant;
   fx::LivePlaySourceActorReactionSound(&instance, 4);
   CHECK(Effects_lastReactionSoundVariant == last);
+}
+
+namespace {
+// Records the effect resource, trail and room object calls in order.
+class RecordingEffectHost final : public fx::TimelineEffectHost {
+ public:
+  void SaveResourceContext() override { calls.emplace_back("save"); }
+  void RestoreResourceContext() override { calls.emplace_back("restore"); }
+  void SpawnBoneTrail(const fx::WeaponTrail& trail) override {
+    calls.emplace_back("spawn");
+    trails.push_back(trail);
+  }
+  void FadeBoneTrails() override { calls.emplace_back("fade"); }
+  void FreezeRoomObjects() override { calls.emplace_back("freeze"); }
+
+  std::vector<std::string> calls;
+  std::vector<fx::WeaponTrail> trails;
+};
+
+// Records the commands performed and answers AdvanceKey with `more_keys`.
+class RecordingControlHost final : public fx::ActionControlHost {
+ public:
+  explicit RecordingControlHost(bool more_keys) : more_keys_(more_keys) {}
+
+  void Perform(const fx::ActionControl& control) override {
+    performed.push_back(control);
+  }
+  bool AdvanceKey() override {
+    ++advances;
+    return more_keys_;
+  }
+
+  std::vector<fx::ActionControl> performed;
+  int advances = 0;
+
+ private:
+  bool more_keys_;
+};
+
+constexpr std::uint16_t Timing(std::uint16_t command, std::uint16_t frame) {
+  return static_cast<std::uint16_t>((command << 9) | frame);
+}
+
+Effects_TransformMotionView& MotionOf(Effects_EffectInstance& instance,
+                                      std::size_t slot) {
+  return *reinterpret_cast<Effects_TransformMotionView*>(
+      &instance.transforms[slot]);
+}
+
+using InstanceBytes = std::array<std::byte, sizeof(Effects_EffectInstance)>;
+InstanceBytes BytesOf(const Effects_EffectInstance& instance) {
+  InstanceBytes bytes{};
+  std::memcpy(bytes.data(), &instance, bytes.size());
+  return bytes;
+}
+
+// An action-control track (kind 12) over `keys`, at its first key.
+Effects_TimelineTrack ControlTrack(std::span<Effects_ActionControlKey> keys) {
+  Effects_TimelineTrack track{};
+  track.keys = reinterpret_cast<u_long*>(keys.data());
+  track.header.kind = 12;
+  track.header.keyCount = static_cast<u_char>(keys.size());
+  return track;
+}
+}  // namespace
+
+TEST_CASE("Weapon trails spawn inside the action's resource context",
+          "[timeline-commands]") {
+  RecordingEffectHost host;
+  fx::SpawnTransformWeaponTrail({.actor = 7, .bone = 3}, 47, host);
+  fx::SpawnTransformWeaponTrail({.actor = 1, .bone = 0}, 0xFF, host);
+  CHECK(host.calls == std::vector<std::string>{"save", "spawn", "restore",
+                                               "save", "spawn", "restore"});
+  CHECK(host.trails ==
+        std::vector<fx::WeaponTrail>{
+            {.actor = 7, .bone = 3, .texture = 7, .colour = 4},
+            {.actor = 1, .bone = 0, .texture = 5, .colour = 25}});
+
+  RecordingEffectHost others;
+  fx::FadeActionWeaponTrails(others);
+  fx::PauseMovingRoomObjects(others);
+  CHECK(others.calls == std::vector<std::string>{"fade", "freeze"});
+}
+
+TEST_CASE("Transform and timeline flag commands change only their bits",
+          "[timeline-commands]") {
+  CHECK(fx::ResumeTransformMotion(0x8003) == 0x8007);
+  CHECK(fx::ResumeTransformMotion(fx::kTransformFrameAdvances) ==
+        fx::kTransformFrameAdvances);
+  CHECK(fx::InvalidateTransformAttachments(0xFFFF) == 0xFFFC);
+  CHECK(fx::InvalidateTransformAttachments(0x0004) == 0x0004);
+  CHECK(fx::HoldTimelineFrame(0x02) == 0x03);
+  CHECK(fx::HoldTimelineFrame(0xFF) == 0xFF);
+
+  CHECK(fx::TransformSlotOf(0) == 0U);
+  CHECK(fx::TransformSlotOf(15) == 15U);
+  CHECK_FALSE(fx::TransformSlotOf(16).has_value());
+  CHECK_FALSE(fx::TransformSlotOf(0xFF).has_value());
+}
+
+TEST_CASE("Action-control keys run once due and then advance the track",
+          "[timeline-commands]") {
+  const fx::ActionControlKey focus{
+      .timing = Timing(13, 0x40), .operand0 = 2, .operand1 = 9};
+  RecordingControlHost waiting(true);
+  CHECK(fx::TickActionControlTrack(focus, 0x3F, waiting));
+  CHECK(waiting.performed.empty());
+  CHECK(waiting.advances == 0);
+
+  RecordingControlHost due(false);
+  CHECK_FALSE(fx::TickActionControlTrack(focus, 0x40, due));
+  CHECK(due.performed == std::vector<fx::ActionControl>{
+                             {.command = fx::ActionControlCommand::kFocusCamera,
+                              .operand0 = 2,
+                              .operand1 = 9}});
+  CHECK(due.advances == 1);
+}
+
+TEST_CASE("Action-control keys past the commands or the frame only wait",
+          "[timeline-commands]") {
+  // A negative timeline frame never matches the key's nine frame bits.
+  RecordingControlHost negative(true);
+  CHECK(fx::TickActionControlTrack({.timing = Timing(0, 0x1FF)}, -1, negative));
+  CHECK(negative.advances == 0);
+
+  // Commands from 16 on do nothing but still advance the track.
+  RecordingControlHost unknown(true);
+  CHECK(fx::TickActionControlTrack({.timing = Timing(16, 5)}, 5, unknown));
+  CHECK(fx::TickActionControlTrack({.timing = Timing(127, 5)}, 5, unknown));
+  CHECK(unknown.performed.empty());
+  CHECK(unknown.advances == 2);
+}
+
+TEST_CASE("Live transform commands update the instance's own transforms",
+          "[timeline-commands]") {
+  // #388: the copied commands viewed the instance with the PS1 header size,
+  // so they wrote the registers and the previous transform instead.
+  static Effects_EffectInstance instance{};
+  std::ranges::fill(instance.registers, 0x5A);
+  MotionOf(instance, 4).flags = 0x8003;
+  fx::LiveResumeEffectTransformMotion(&instance, 0);
+  fx::LiveResumeEffectTransformMotion(&instance, 4);
+  fx::LiveInvalidateEffectTransformAttachments(&instance, 4);
+  CHECK(MotionOf(instance, 0).flags == fx::kTransformFrameAdvances);
+  CHECK(MotionOf(instance, 4).flags == 0x8004);
+  CHECK(MotionOf(instance, 3).flags == 0);
+  CHECK(std::ranges::all_of(instance.registers,
+                            [](char value) { return value == 0x5A; }));
+
+  const InstanceBytes before = BytesOf(instance);
+  fx::LiveResumeEffectTransformMotion(&instance, 16);
+  fx::LiveInvalidateEffectTransformAttachments(&instance, 0xFF);
+  fx::LiveSpawnTransformWeaponTrail(&instance, 16, 47);
+  fx::LiveResumeEffectTransformMotion(nullptr, 0);
+  fx::LiveInvalidateEffectTransformAttachments(nullptr, 0);
+  fx::LiveSpawnTransformWeaponTrail(nullptr, 0, 47);
+  fx::LiveHoldEffectTimelineFrame(nullptr);
+  fx::LiveHoldEffectTimelineFrame(&instance);
+  CHECK(BytesOf(instance) == before);
+}
+
+TEST_CASE("Live action-control track runs due keys on the instance",
+          "[timeline-commands]") {
+  static Effects_EffectTimeline timeline;
+  static Effects_EffectInstance instance{};
+  static std::array<Effects_ActionControlKey, 2> keys{{
+      {.frame = Timing(6, 12), .opaque2 = 0, .opaque3 = 0},
+      {.frame = Timing(5, 12), .opaque2 = 4, .opaque3 = 0},
+  }};
+  timeline.frame = 12;
+  instance.context.timeline = &timeline;
+  Effects_TimelineTrack track = ControlTrack(keys);
+
+  CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 1);
+  CHECK((timeline.flags & fx::kTimelineFrameHeld) != 0);
+  CHECK(track.keyIndex == 1);
+  // The last key resumes transform 4 and ends the track.
+  CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
+  CHECK(MotionOf(instance, 4).flags == fx::kTransformFrameAdvances);
+  CHECK(track.keyIndex == 1);
+
+  timeline.frame = 13;
+  CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 1);
+}
+
+TEST_CASE("Live action-control track refuses a missing or unread key",
+          "[timeline-commands]") {
+  static Effects_EffectTimeline timeline;
+  static Effects_EffectInstance instance{};
+  static std::array<Effects_ActionControlKey, 2> keys{{
+      {.frame = Timing(6, 0), .opaque2 = 0, .opaque3 = 0},
+      {.frame = Timing(6, 0), .opaque2 = 0, .opaque3 = 0},
+  }};
+  instance.context.timeline = &timeline;
+  Effects_TimelineTrack track = ControlTrack(keys);
+
+  track.keyIndex = -1;
+  CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
+  track.keyIndex = 2;
+  CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
+  CHECK(fx::LiveTickActionControlTrack(&instance, nullptr) == 0);
+  CHECK(fx::LiveTickActionControlTrack(nullptr, &track) == 0);
+  instance.context.timeline = nullptr;
+  track.keyIndex = 0;
+  CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
+  track.keys = nullptr;
+  instance.context.timeline = &timeline;
+  CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
+  CHECK(timeline.flags == 0);
 }

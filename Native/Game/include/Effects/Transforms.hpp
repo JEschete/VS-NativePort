@@ -80,6 +80,12 @@ struct TransformPoint {
                          const TransformPoint&) = default;
 };
 
+// TransformState.flags: the attachment and the target have been resolved, and
+// the frame advances each update (5BF94.c:6076-6310, 8249-8270).
+inline constexpr std::uint16_t kTransformAttachmentResolved = 0x1;
+inline constexpr std::uint16_t kTransformTargetResolved = 0x2;
+inline constexpr std::uint16_t kTransformFrameAdvances = 0x4;
+
 // func_800D0548_arg1 (5BF94.c:6076): one transform's animation state.
 struct TransformState {
   std::array<std::int16_t, Core::Math::kMatrixOrder> rotation{};

@@ -6,7 +6,6 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -16,9 +15,7 @@ extern "C" {
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Timeline.h"
-#include "Effects/Trails.h"
 #include "Effects/Transforms.h"
-#include "Field/PlatformPlacementLive.h"
 #include "PFile.h"
 
 // decomp: BATTLE.PRG func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
@@ -373,118 +370,6 @@ int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Ef
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240)
-void Effects_SpawnTransformWeaponTrail(Effects_EffectInstance* effect_instance, u_char transform_index, u_char packed_trail_style)
-{
-    VS::Effects::LiveSaveEffectResourceContext();
-    Effects_SpawnBoneTrail(effect_instance->transforms[transform_index].actor, effect_instance->transforms[transform_index].bone, packed_trail_style % 10, packed_trail_style / 10);
-    VS::Effects::LiveRestoreEffectResourceContext();
-}
-
-// decomp: BATTLE.PRG func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:8247)
-void Effects_FadeActionWeaponTrails(void) { Effects_FadeBoneTrails(0, 0); }
-
-// decomp: BATTLE.PRG func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:8249)
-void Effects_ResumeEffectTransformMotion(Effects_TransformControlView* transform_controls, char transform_index)
-{
-    transform_controls += transform_index;
-    transform_controls->motionResumed = 1;
-}
-
-// decomp: BATTLE.PRG func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:8255)
-void Effects_HoldEffectTimelineFrame(Effects_EffectInstance* effect_instance) { effect_instance->context.timeline->flags |= 1; }
-
-// decomp: BATTLE.PRG func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
-void Effects_PauseMovingRoomObjects(void) { Field_FreezeRoomGimmicksTemporarilyEntry(); }
-
-// decomp: BATTLE.PRG func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:8266)
-void Effects_InvalidateEffectTransformAttachments(Effects_TransformControlView* transform_controls, char transform_index)
-{
-    transform_controls += transform_index;
-    transform_controls->attachmentMode = 0;
-}
-
-// decomp: BATTLE.PRG func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:8342)
-int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
-{
-    Effects_ActionControlKey* control_key = (Effects_ActionControlKey*)(timeline_track->keys - (-timeline_track->keyIndex));
-
-    if ((control_key->frame & 0x1FF) == effect_instance->context.timeline->frame) {
-        u_char control_operand0 = control_key->opaque2;
-        u_char control_operand1 = control_key->opaque3;
-
-        switch (control_key->frame >> 9) {
-        case 0:
-            VS::Effects::LiveApplyTargetActionImpact(effect_instance);
-            break;
-
-        case 1:
-            VS::Effects::LiveApplySourceActionImpact(effect_instance);
-            break;
-
-        case 2:
-            VS::Effects::LiveActivateTargetRoomTile(effect_instance);
-            break;
-
-        case 3:
-            Effects_SpawnTransformWeaponTrail(effect_instance, control_operand0, control_operand1);
-            break;
-
-        case 4:
-            Effects_FadeActionWeaponTrails();
-            break;
-
-        case 5:
-            Effects_ResumeEffectTransformMotion((Effects_TransformControlView*)effect_instance, control_operand0);
-            break;
-
-        case 6:
-            Effects_HoldEffectTimelineFrame(effect_instance);
-            break;
-
-        case 7:
-            Effects_PauseMovingRoomObjects();
-            break;
-
-        case 8:
-            VS::Effects::LiveSignalSourceActorFromTimeline(effect_instance);
-            break;
-
-        case 9:
-            Effects_InvalidateEffectTransformAttachments((Effects_TransformControlView*)effect_instance, control_operand0);
-            break;
-
-        case 10:
-            VS::Effects::LiveSetSourceWeaponBrightness(effect_instance, control_operand0);
-            break;
-
-        case 11:
-            VS::Effects::LivePlaySourceActorReactionSound(effect_instance, control_operand0);
-            break;
-
-        case 12:
-            VS::Effects::LiveActivateTargetGimmick(effect_instance);
-            break;
-
-        case 13:
-            VS::Effects::LiveFocusCameraOnEffectTransform(effect_instance, control_operand0, control_operand1);
-            break;
-
-        case 14:
-            VS::Effects::LiveRestoreActionEffectCamera(effect_instance, control_operand0);
-            break;
-
-        case 15:
-            VS::Effects::LivePrepareTargetDefenseTiming(effect_instance);
-            break;
-        }
-
-        return Effects_AdvanceEffectTimelineKey(timeline_track);
-    }
-
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:8422)
 int Effects_TickCameraShakeTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
@@ -550,7 +435,7 @@ void Effects_TickEffectTimeline(Effects_EffectInstance* effect_instance, int chi
                 temp = Effects_TickBackgroundColorTrack(effect_instance, timeline_track);
                 break;
             case 12:
-                temp = Effects_TickActionControlTrack(effect_instance, timeline_track);
+                temp = VS::Effects::LiveTickActionControlTrack(effect_instance, timeline_track);
                 break;
             case 13:
                 temp = Effects_TickCameraShakeTrack(effect_instance, timeline_track);

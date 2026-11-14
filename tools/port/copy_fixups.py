@@ -654,6 +654,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LivePlaySourceActorReactionSound": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
     "VS::Effects::LiveActivateTargetGimmick": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
     "VS::Effects::LivePrepareTargetDefenseTiming": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveSpawnTransformWeaponTrail": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveFadeActionWeaponTrails": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveResumeEffectTransformMotion": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveHoldEffectTimelineFrame": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LivePauseMovingRoomObjects": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveInvalidateEffectTransformAttachments": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveTickActionControlTrack": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2617,6 +2624,13 @@ OWNED_CALL_BINDINGS["F01581"] = "VS::Effects::LiveSetSourceWeaponBrightness"
 OWNED_CALL_BINDINGS["F01582"] = "VS::Effects::LivePlaySourceActorReactionSound"
 OWNED_CALL_BINDINGS["F01583"] = "VS::Effects::LiveActivateTargetGimmick"
 OWNED_CALL_BINDINGS["F01586"] = "VS::Effects::LivePrepareTargetDefenseTiming"
+OWNED_CALL_BINDINGS["F01574"] = "VS::Effects::LiveSpawnTransformWeaponTrail"
+OWNED_CALL_BINDINGS["F01575"] = "VS::Effects::LiveFadeActionWeaponTrails"
+OWNED_CALL_BINDINGS["F01576"] = "VS::Effects::LiveResumeEffectTransformMotion"
+OWNED_CALL_BINDINGS["F01577"] = "VS::Effects::LiveHoldEffectTimelineFrame"
+OWNED_CALL_BINDINGS["F01578"] = "VS::Effects::LivePauseMovingRoomObjects"
+OWNED_CALL_BINDINGS["F01580"] = "VS::Effects::LiveInvalidateEffectTransformAttachments"
+OWNED_CALL_BINDINGS["F01587"] = "VS::Effects::LiveTickActionControlTrack"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4102,6 +4116,13 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D6628, "VS::Effects::LivePlaySourceActorReactionSound"),  # F01582
     ("BATTLE/BATTLE.PRG", 0x800D66CC, "VS::Effects::LiveActivateTargetGimmick"),  # F01583
     ("BATTLE/BATTLE.PRG", 0x800D6860, "VS::Effects::LivePrepareTargetDefenseTiming"),  # F01586
+    ("BATTLE/BATTLE.PRG", 0x800D6448, "VS::Effects::LiveSpawnTransformWeaponTrail"),  # F01574
+    ("BATTLE/BATTLE.PRG", 0x800D64E4, "VS::Effects::LiveFadeActionWeaponTrails"),  # F01575
+    ("BATTLE/BATTLE.PRG", 0x800D6508, "VS::Effects::LiveResumeEffectTransformMotion"),  # F01576
+    ("BATTLE/BATTLE.PRG", 0x800D6538, "VS::Effects::LiveHoldEffectTimelineFrame"),  # F01577
+    ("BATTLE/BATTLE.PRG", 0x800D6554, "VS::Effects::LivePauseMovingRoomObjects"),  # F01578
+    ("BATTLE/BATTLE.PRG", 0x800D65A8, "VS::Effects::LiveInvalidateEffectTransformAttachments"),  # F01580
+    ("BATTLE/BATTLE.PRG", 0x800D6894, "VS::Effects::LiveTickActionControlTrack"),  # F01587
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

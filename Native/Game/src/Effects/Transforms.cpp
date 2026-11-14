@@ -41,9 +41,9 @@ constexpr std::uint16_t kFaceSavedTarget = 0x4000;
 constexpr std::uint16_t kFaceTarget = 0x8000;
 
 // State flags.
-constexpr std::uint16_t kAttachmentResolved = 0x1;
-constexpr std::uint16_t kTargetResolved = 0x2;
-constexpr std::uint16_t kFrameAdvances = 0x4;
+constexpr std::uint16_t kAttachmentResolved = kTransformAttachmentResolved;
+constexpr std::uint16_t kTargetResolved = kTransformTargetResolved;
+constexpr std::uint16_t kFrameAdvances = kTransformFrameAdvances;
 constexpr std::uint16_t kSplineBuilt = 0x8;
 
 // Definition mode: the target actor (low five bits), the easing (bits 5-6),

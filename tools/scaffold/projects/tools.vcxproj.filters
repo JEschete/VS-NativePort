@@ -3114,6 +3114,33 @@
     <None Include="..\..\port\differentials\temporary_awareness_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\timeline_commands_brightness.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_defense.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_gimmick.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_room_tile.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_signal.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_sound.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_source_impact.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_commands_target_impact.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\triggered_recovery.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -3214,6 +3241,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_scene_trace_fixups.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\timeline_commands_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\understood.py">

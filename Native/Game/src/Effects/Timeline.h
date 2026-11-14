@@ -26,13 +26,6 @@ int Effects_TickTargetActorColorTrack(Effects_EffectInstance* effect_instance, E
 int Effects_TickOtherActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 int Effects_TickSceneColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
-void Effects_SpawnTransformWeaponTrail(Effects_EffectInstance* effect_instance, u_char transform_index, u_char packed_trail_style);
-void Effects_FadeActionWeaponTrails(void);
-void Effects_ResumeEffectTransformMotion(Effects_TransformControlView* transform_controls, char transform_index);
-void Effects_HoldEffectTimelineFrame(Effects_EffectInstance* effect_instance);
-void Effects_PauseMovingRoomObjects(void);
-void Effects_InvalidateEffectTransformAttachments(Effects_TransformControlView* transform_controls, char transform_index);
-int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 int Effects_TickCameraShakeTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track);
 void Effects_TickEffectTimeline(Effects_EffectInstance* effect_instance, int child_script_offset);
 

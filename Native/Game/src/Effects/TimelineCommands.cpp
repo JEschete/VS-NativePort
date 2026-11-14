@@ -1,6 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Effects/TimelineCommands.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 
@@ -86,5 +87,62 @@ std::optional<EndpointPoint> TargetGimmick(const CommandEndpoints& endpoints) {
 std::optional<std::uint8_t> DefenseTimingTarget(
     const CommandEndpoints& endpoints) {
   return ActorOf(endpoints.emit_to);
+}
+
+std::optional<std::size_t> TransformSlotOf(std::uint8_t operand) {
+  if (operand >= kEffectTransformSlots) return std::nullopt;
+  return operand;
+}
+
+// decomp: func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240)
+void SpawnTransformWeaponTrail(TransformAnchor anchor,
+                               std::uint8_t packed_style,
+                               TimelineEffectHost& host) {
+  host.SaveResourceContext();
+  host.SpawnBoneTrail(
+      {.actor = anchor.actor,
+       .bone = anchor.bone,
+       .texture = static_cast<std::uint8_t>(packed_style % kTrailStyleBase),
+       .colour = static_cast<std::uint8_t>(packed_style / kTrailStyleBase)});
+  host.RestoreResourceContext();
+}
+
+// decomp: func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:8247)
+void FadeActionWeaponTrails(TimelineEffectHost& host) { host.FadeBoneTrails(); }
+
+// decomp: func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:8249)
+std::uint16_t ResumeTransformMotion(std::uint16_t flags) {
+  return static_cast<std::uint16_t>(flags | kTransformFrameAdvances);
+}
+
+// decomp: func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:8255)
+std::uint8_t HoldTimelineFrame(std::uint8_t flags) {
+  return static_cast<std::uint8_t>(flags | kTimelineFrameHeld);
+}
+
+// decomp: func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
+void PauseMovingRoomObjects(TimelineEffectHost& host) {
+  host.FreezeRoomObjects();
+}
+
+// decomp: func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:8266)
+std::uint16_t InvalidateTransformAttachments(std::uint16_t flags) {
+  constexpr std::uint16_t kResolved =
+      kTransformAttachmentResolved | kTransformTargetResolved;
+  return static_cast<std::uint16_t>(flags & ~kResolved);
+}
+
+// decomp: func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:8342)
+bool TickActionControlTrack(const ActionControlKey& key,
+                            std::int16_t timeline_frame,
+                            ActionControlHost& host) {
+  if ((key.timing & kActionControlFrameMask) != timeline_frame) return true;
+  const auto command = key.timing >> kActionControlCommandShift;
+  if (command < kActionControlCommands) {
+    host.Perform({.command = static_cast<ActionControlCommand>(command),
+                  .operand0 = key.operand0,
+                  .operand1 = key.operand1});
+  }
+  return host.AdvanceKey();
 }
 }  // namespace VS::Effects

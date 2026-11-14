@@ -1,15 +1,18 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <optional>
 
 #include "Effects/Transforms.hpp"
 
-// Typed effect timeline action-control commands (BATTLE.PRG 5BF94.c:8213-8340).
-// Each reads the effect instance's endpoints and selects what the command
-// applies to; TimelineCommandsLive.hpp performs it.
+// Typed effect timeline action-control commands (BATTLE.PRG 5BF94.c:8213-8420).
+// The endpoint commands read the effect instance's endpoints and select what
+// they apply to; the transform and timeline commands update the instance's
+// flags; TickActionControlTrack runs a track's due key.
+// TimelineCommandsLive.hpp performs them on the effect instance records.
 namespace VS::Effects {
 // An endpoint on a room tile or room object (Effects_ActionEffectTarget type
 // 5).
@@ -109,4 +112,139 @@ struct ReactionSound {
 // defense ability timing window opens.
 [[nodiscard]] std::optional<std::uint8_t> DefenseTimingTarget(
     const CommandEndpoints& endpoints);
+
+// Effects_EffectTimeline.flags: the timeline stays on its frame.
+inline constexpr std::uint8_t kTimelineFrameHeld = 0x1;
+// A packed trail style's low decimal digit picks the texture, the rest the
+// colour.
+inline constexpr std::uint8_t kTrailStyleBase = 10;
+
+// The transform slot a command operand names; nullopt from
+// kEffectTransformSlots on (refused: the original indexes past the instance's
+// transforms).
+[[nodiscard]] std::optional<std::size_t> TransformSlotOf(std::uint8_t operand);
+
+// An effect transform's attachment: an actor and one of its bones.
+struct TransformAnchor {
+  std::uint8_t actor{};
+  std::uint8_t bone{};
+};
+
+// A weapon trail drawn from an actor's bone.
+struct WeaponTrail {
+  std::uint8_t actor{};
+  std::uint8_t bone{};
+  std::uint8_t texture{};
+  std::uint8_t colour{};
+
+  friend bool operator==(const WeaponTrail&, const WeaponTrail&) = default;
+};
+
+// The effect resources, trails and room objects the commands reach.
+class TimelineEffectHost {
+ public:
+  virtual ~TimelineEffectHost() = default;
+  // LiveSaveEffectResourceContext: the next calls use the action's effect
+  // resources.
+  virtual void SaveResourceContext() = 0;
+  // LiveRestoreEffectResourceContext.
+  virtual void RestoreResourceContext() = 0;
+  // Effects_SpawnBoneTrail.
+  virtual void SpawnBoneTrail(const WeaponTrail& trail) = 0;
+  // Effects_FadeBoneTrails: every weapon trail fades out.
+  virtual void FadeBoneTrails() = 0;
+  // FreezeLiveRoomGimmicksTemporarily.
+  virtual void FreezeRoomObjects() = 0;
+
+ protected:
+  TimelineEffectHost() = default;
+  TimelineEffectHost(const TimelineEffectHost&) = default;
+  TimelineEffectHost& operator=(const TimelineEffectHost&) = default;
+  TimelineEffectHost(TimelineEffectHost&&) = default;
+  TimelineEffectHost& operator=(TimelineEffectHost&&) = default;
+};
+
+// decomp: func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240): spawns the
+// trail of `packed_style` from the anchor with the action's resources.
+void SpawnTransformWeaponTrail(TransformAnchor anchor,
+                               std::uint8_t packed_style,
+                               TimelineEffectHost& host);
+// decomp: func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:8247)
+void FadeActionWeaponTrails(TimelineEffectHost& host);
+// decomp: func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:8249): a transform's
+// flags with its frame advancing again.
+[[nodiscard]] std::uint16_t ResumeTransformMotion(std::uint16_t flags);
+// decomp: func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:8255): the timeline
+// flags holding its frame.
+[[nodiscard]] std::uint8_t HoldTimelineFrame(std::uint8_t flags);
+// decomp: func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
+void PauseMovingRoomObjects(TimelineEffectHost& host);
+// decomp: func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:8266): a transform's
+// flags with its attachment and target to resolve again.
+[[nodiscard]] std::uint16_t InvalidateTransformAttachments(std::uint16_t flags);
+
+// Effects_ActionControlKey (5BF94.c:57): `timing` holds the frame the key is
+// due in bits 0-8 and its command in bits 9-15.
+struct ActionControlKey {
+  std::uint16_t timing{};
+  std::uint8_t operand0{};
+  std::uint8_t operand1{};
+};
+inline constexpr std::uint16_t kActionControlFrameMask = 0x1FF;
+inline constexpr int kActionControlCommandShift = 9;
+
+// The action-control commands, by key command number; the numbers from
+// kActionControlCommands on do nothing.
+enum class ActionControlCommand : std::uint8_t {
+  kTargetImpact,
+  kSourceImpact,
+  kTargetRoomTile,
+  kTransformWeaponTrail,
+  kFadeWeaponTrails,
+  kResumeTransformMotion,
+  kHoldTimelineFrame,
+  kPauseRoomObjects,
+  kSignalSourceActor,
+  kInvalidateTransformAttachments,
+  kSourceWeaponBrightness,
+  kSourceReactionSound,
+  kTargetGimmick,
+  kFocusCamera,
+  kRestoreCamera,
+  kDefenseTiming,
+};
+inline constexpr std::uint8_t kActionControlCommands = 16;
+
+// A due key's command and its operands.
+struct ActionControl {
+  ActionControlCommand command{};
+  std::uint8_t operand0{};
+  std::uint8_t operand1{};
+
+  friend bool operator==(const ActionControl&, const ActionControl&) = default;
+};
+
+// What an action-control track drives.
+class ActionControlHost {
+ public:
+  virtual ~ActionControlHost() = default;
+  // Performs one command on the effect instance.
+  virtual void Perform(const ActionControl& control) = 0;
+  // Effects_AdvanceEffectTimelineKey: false once the track has no more keys.
+  [[nodiscard]] virtual bool AdvanceKey() = 0;
+
+ protected:
+  ActionControlHost() = default;
+  ActionControlHost(const ActionControlHost&) = default;
+  ActionControlHost& operator=(const ActionControlHost&) = default;
+  ActionControlHost(ActionControlHost&&) = default;
+  ActionControlHost& operator=(ActionControlHost&&) = default;
+};
+
+// decomp: func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:8342): once the
+// timeline reaches the key's frame, performs its command and advances the
+// track. False once the track has no more keys.
+[[nodiscard]] bool TickActionControlTrack(const ActionControlKey& key,
+                                          std::int16_t timeline_frame,
+                                          ActionControlHost& host);
 }  // namespace VS::Effects

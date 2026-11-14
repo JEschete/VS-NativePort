@@ -714,6 +714,15 @@
     <None Include="..\..\port\differentials\target_approach_driver.cpp" />
     <None Include="..\..\port\differentials\temporary_awareness.py" />
     <None Include="..\..\port\differentials\temporary_awareness_driver.cpp" />
+    <None Include="..\..\port\differentials\timeline_commands_brightness.py" />
+    <None Include="..\..\port\differentials\timeline_commands_defense.py" />
+    <None Include="..\..\port\differentials\timeline_commands_driver.cpp" />
+    <None Include="..\..\port\differentials\timeline_commands_gimmick.py" />
+    <None Include="..\..\port\differentials\timeline_commands_room_tile.py" />
+    <None Include="..\..\port\differentials\timeline_commands_signal.py" />
+    <None Include="..\..\port\differentials\timeline_commands_sound.py" />
+    <None Include="..\..\port\differentials\timeline_commands_source_impact.py" />
+    <None Include="..\..\port\differentials\timeline_commands_target_impact.py" />
     <None Include="..\..\port\differentials\triggered_recovery.py" />
     <None Include="..\..\port\differentials\triggered_recovery_driver.cpp" />
     <None Include="..\..\port\differentials\triggered_recovery_guard_driver.cpp" />
@@ -748,6 +757,7 @@
     <None Include="..\..\port\test_module_symbol_extents.py" />
     <None Include="..\..\port\test_promote.py" />
     <None Include="..\..\port\test_scene_trace_fixups.py" />
+    <None Include="..\..\port\timeline_commands_differential.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />
     <None Include="..\..\PSX\Asset-Tools\jpsxdec\.github\ISSUE_TEMPLATE\config.yml" />
