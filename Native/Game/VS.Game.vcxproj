@@ -1230,6 +1230,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Effects\TimelineCommands.cpp" />
+    <ClCompile Include="src\Effects\TimelineCommandsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\TrailEmitter.cpp" />
     <ClCompile Include="src\Effects\TrailEmitterLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2563,6 +2567,8 @@
     <ClInclude Include="include\Effects\Templates\TrailTarget.hpp" />
     <ClInclude Include="include\Effects\Templates\TrailUpdate.hpp" />
     <ClInclude Include="include\Effects\TextureBindings.hpp" />
+    <ClInclude Include="include\Effects\TimelineCommands.hpp" />
+    <ClInclude Include="include\Effects\TimelineCommandsLive.hpp" />
     <ClInclude Include="include\Effects\TrailEmitter.hpp" />
     <ClInclude Include="include\Effects\TrailEmitterLive.hpp" />
     <ClInclude Include="include\Effects\Transforms.hpp" />

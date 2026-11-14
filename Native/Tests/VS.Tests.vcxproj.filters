@@ -981,6 +981,9 @@
     <ClCompile Include="src\TextureRegionDrawTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TimelineCommandsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TitleMenuTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

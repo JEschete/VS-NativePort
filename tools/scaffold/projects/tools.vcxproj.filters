@@ -2961,6 +2961,33 @@
     <None Include="..\..\port\differentials\perception_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\primary_effect_allocate_token.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_can_start.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_loaded.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_phase.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_release_token.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_requeue.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_set_phase.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\primary_effect_track_count.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\radial_movement.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -3151,6 +3178,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\owned.csv">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\primary_effect_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\promote.py">

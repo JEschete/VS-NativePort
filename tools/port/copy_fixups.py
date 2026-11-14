@@ -646,6 +646,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LivePrimaryEffectPhase": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
     "VS::Effects::LiveAllocateEffectToken": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
     "VS::Effects::LiveReleaseEffectToken": r"Native\Game\include\Effects\PrimaryEffectLive.hpp",
+    "VS::Effects::LiveApplyTargetActionImpact": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveApplySourceActionImpact": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveActivateTargetRoomTile": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveSignalSourceActorFromTimeline": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveSetSourceWeaponBrightness": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LivePlaySourceActorReactionSound": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LiveActivateTargetGimmick": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
+    "VS::Effects::LivePrepareTargetDefenseTiming": r"Native\Game\include\Effects\TimelineCommandsLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2601,6 +2609,14 @@ OWNED_CALL_BINDINGS["F01438"] = "VS::Effects::LiveSetPrimaryEffectPhase"
 OWNED_CALL_BINDINGS["F01440"] = "VS::Effects::LivePrimaryEffectPhase"
 OWNED_CALL_BINDINGS["F01441"] = "VS::Effects::LiveAllocateEffectToken"
 OWNED_CALL_BINDINGS["F01442"] = "VS::Effects::LiveReleaseEffectToken"
+OWNED_CALL_BINDINGS["F01571"] = "VS::Effects::LiveApplyTargetActionImpact"
+OWNED_CALL_BINDINGS["F01572"] = "VS::Effects::LiveApplySourceActionImpact"
+OWNED_CALL_BINDINGS["F01573"] = "VS::Effects::LiveActivateTargetRoomTile"
+OWNED_CALL_BINDINGS["F01579"] = "VS::Effects::LiveSignalSourceActorFromTimeline"
+OWNED_CALL_BINDINGS["F01581"] = "VS::Effects::LiveSetSourceWeaponBrightness"
+OWNED_CALL_BINDINGS["F01582"] = "VS::Effects::LivePlaySourceActorReactionSound"
+OWNED_CALL_BINDINGS["F01583"] = "VS::Effects::LiveActivateTargetGimmick"
+OWNED_CALL_BINDINGS["F01586"] = "VS::Effects::LivePrepareTargetDefenseTiming"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4078,6 +4094,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800CF48C, "VS::Effects::LivePrimaryEffectPhase"),  # F01440
     ("BATTLE/BATTLE.PRG", 0x800CF49C, "VS::Effects::LiveAllocateEffectToken"),  # F01441
     ("BATTLE/BATTLE.PRG", 0x800CF514, "VS::Effects::LiveReleaseEffectToken"),  # F01442
+    ("BATTLE/BATTLE.PRG", 0x800D6388, "VS::Effects::LiveApplyTargetActionImpact"),  # F01571
+    ("BATTLE/BATTLE.PRG", 0x800D63D0, "VS::Effects::LiveApplySourceActionImpact"),  # F01572
+    ("BATTLE/BATTLE.PRG", 0x800D6418, "VS::Effects::LiveActivateTargetRoomTile"),  # F01573
+    ("BATTLE/BATTLE.PRG", 0x800D6574, "VS::Effects::LiveSignalSourceActorFromTimeline"),  # F01579
+    ("BATTLE/BATTLE.PRG", 0x800D65D8, "VS::Effects::LiveSetSourceWeaponBrightness"),  # F01581
+    ("BATTLE/BATTLE.PRG", 0x800D6628, "VS::Effects::LivePlaySourceActorReactionSound"),  # F01582
+    ("BATTLE/BATTLE.PRG", 0x800D66CC, "VS::Effects::LiveActivateTargetGimmick"),  # F01583
+    ("BATTLE/BATTLE.PRG", 0x800D6860, "VS::Effects::LivePrepareTargetDefenseTiming"),  # F01586
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

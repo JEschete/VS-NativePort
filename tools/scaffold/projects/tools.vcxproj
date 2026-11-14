@@ -663,6 +663,15 @@
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp" />
     <None Include="..\..\port\differentials\perception.py" />
     <None Include="..\..\port\differentials\perception_driver.cpp" />
+    <None Include="..\..\port\differentials\primary_effect_allocate_token.py" />
+    <None Include="..\..\port\differentials\primary_effect_can_start.py" />
+    <None Include="..\..\port\differentials\primary_effect_driver.cpp" />
+    <None Include="..\..\port\differentials\primary_effect_loaded.py" />
+    <None Include="..\..\port\differentials\primary_effect_phase.py" />
+    <None Include="..\..\port\differentials\primary_effect_release_token.py" />
+    <None Include="..\..\port\differentials\primary_effect_requeue.py" />
+    <None Include="..\..\port\differentials\primary_effect_set_phase.py" />
+    <None Include="..\..\port\differentials\primary_effect_track_count.py" />
     <None Include="..\..\port\differentials\radial_movement.py" />
     <None Include="..\..\port\differentials\radial_movement_driver.cpp" />
     <None Include="..\..\port\differentials\random_stat_effects.py" />
@@ -727,6 +736,7 @@
     <None Include="..\..\port\native_views.py" />
     <None Include="..\..\port\own.py" />
     <None Include="..\..\port\owned.csv" />
+    <None Include="..\..\port\primary_effect_differential.py" />
     <None Include="..\..\port\promote.py" />
     <None Include="..\..\port\ref_index.py" />
     <None Include="..\..\port\relaxed_sources.txt" />

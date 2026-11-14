@@ -18,12 +18,14 @@ tokens 0-127; the read entries see any stored phase.
 from __future__ import annotations
 
 import random
+import sys
 
 from differential import (
     DEFAULT_STACK,
     DEFAULT_STACK_SIZE,
     Machine,
     field_problems,
+    mode_case,
     s32,
     store_problems,
 )
@@ -260,20 +262,4 @@ def describe(image, results) -> list[str]:
 
 def configure(function: int, mode: int, entry: int, end: int, mutants: dict) -> dict:
     """Case-module globals for one original compared in `mode`."""
-    return {
-        "ID": f"F{function:05}",
-        "ENTRY": entry,
-        "END": end,
-        "DRIVER": DRIVER,
-        "SOURCES": SOURCES,
-        "MODULES": MODULES,
-        "CXX_STANDARD": "c++latest",
-        "VECTORS": 256,
-        "SEED": function,
-        "MUTANT_VECTORS": 64,
-        "MUTANTS": mutants,
-        "vector": lambda rng, number: vector(rng, number, mode),
-        "run": lambda machine, value: run(machine, value, entry),
-        "check": check,
-        "describe": describe,
-    }
+    return mode_case(function, mode, entry, end, mutants, harness=sys.modules[__name__])

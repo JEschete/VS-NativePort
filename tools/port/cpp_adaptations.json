@@ -704,7 +704,7 @@
 ],
 "Native\\Game\\src\\Effects\\Timeline.cpp": [
 [
-33,
+26,
 [
 "    Content_PFileTimelineTable* entry = VS::Content::PFileLiveTimelineSection(Effects_package->block3Data, timeline_index);"
 ],
@@ -713,7 +713,7 @@
 ]
 ],
 [
-46,
+39,
 [
 "    effect_instance->context.timeline = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));"
 ],
@@ -722,7 +722,7 @@
 ]
 ],
 [
-53,
+46,
 [
 "        p->tracks[i].keys = VS::Content::PFileLiveTimelineTrackData(Effects_package->block3Data, timeline_index, i);"
 ],
@@ -731,7 +731,7 @@
 ]
 ],
 [
-284,
+277,
 [
 "            sound + *(((data[event->keyIndex] >> 9) & 31) + ((Effects_PackageBlock11*)sound)->offsets),"
 ],

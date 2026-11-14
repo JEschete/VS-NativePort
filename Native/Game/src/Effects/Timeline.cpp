@@ -1,30 +1,23 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/AppearanceLive.hpp"
-#include "Audio/ActorSoundLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Audio/StreamLive.hpp"
-#include "Battle/AbilitiesLive.hpp"
-#include "Battle/ActionOutcomesLive.hpp"
-#include "Battle/ActionResultsLive.hpp"
 #include "Content/PFileLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/TimelineCommandsLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Timeline.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
-#include "Field/ChestInteractionsLive.h"
-#include "Field/InteractionTargetLive.h"
 #include "Field/PlatformPlacementLive.h"
 #include "PFile.h"
 
@@ -380,36 +373,6 @@ int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Ef
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D6388 (src/BATTLE/BATTLE.PRG/5BF94.c:8213)
-void Effects_ApplyTargetActionImpact(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->context.target.type == 4) {
-        VS::Battle::ApplyLiveActionTargetEffects(effect_instance->context.target.value.actor.actor, NULL);
-    } else {
-        VS::Battle::ApplyLiveActionTargetEffects(
-            effect_instance->context.target.value.position.pad, &effect_instance->context.target.value.position);
-    }
-}
-
-// decomp: BATTLE.PRG func_800D63D0 (src/BATTLE/BATTLE.PRG/5BF94.c:8223)
-void Effects_ApplySourceActionImpact(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->context.source.type == 4) {
-        VS::Battle::ApplyLiveActionSourceEffects(effect_instance->context.source.value.actor.actor, NULL);
-    } else {
-        VS::Battle::ApplyLiveActionSourceEffects(
-            effect_instance->context.source.value.position.pad, &effect_instance->context.source.value.position);
-    }
-}
-
-// decomp: BATTLE.PRG func_800D6418 (src/BATTLE/BATTLE.PRG/5BF94.c:8233)
-void Effects_ActivateTargetRoomTile(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->context.target.type == 5) {
-        Field_DisableTrapAtPositionEntry(&effect_instance->context.target.value.position);
-    }
-}
-
 // decomp: BATTLE.PRG func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240)
 void Effects_SpawnTransformWeaponTrail(Effects_EffectInstance* effect_instance, u_char transform_index, u_char packed_trail_style)
 {
@@ -434,66 +397,11 @@ void Effects_HoldEffectTimelineFrame(Effects_EffectInstance* effect_instance) { 
 // decomp: BATTLE.PRG func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
 void Effects_PauseMovingRoomObjects(void) { Field_FreezeRoomGimmicksTemporarilyEntry(); }
 
-// decomp: BATTLE.PRG func_800D6574 (src/BATTLE/BATTLE.PRG/5BF94.c:8259)
-void Effects_SignalSourceActorFromTimeline(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->context.source.type == 4) {
-        Effects_SignalActorEffectAnimation(effect_instance->context.source.value.actor.actor);
-    }
-}
-
 // decomp: BATTLE.PRG func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:8266)
 void Effects_InvalidateEffectTransformAttachments(Effects_TransformControlView* transform_controls, char transform_index)
 {
     transform_controls += transform_index;
     transform_controls->attachmentMode = 0;
-}
-
-// decomp: BATTLE.PRG func_800D65D8 (src/BATTLE/BATTLE.PRG/5BF94.c:8272)
-void Effects_SetSourceWeaponBrightness(Effects_EffectInstance* effect_instance, u_char brightness_override)
-{
-
-    if (effect_instance->context.emitFrom.type == 4) {
-        if (brightness_override != 0) {
-            VS::Actors::SetLiveWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 1, brightness_override);
-
-        } else {
-            VS::Actors::SetLiveWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 0, 0);
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800D6628 (src/BATTLE/BATTLE.PRG/5BF94.c:8285)
-void Effects_PlaySourceActorReactionSound(Effects_EffectInstance* effect_instance, u_char reaction_sound_variant)
-{
-    int var;
-
-    if (effect_instance->context.emitFrom.type == 4) {
-        if (reaction_sound_variant < 4) {
-            VS::Audio::LivePlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, reaction_sound_variant);
-        } else {
-            do {
-                var = Core_Random_Rand() % 3;
-            } while (var == Effects_lastReactionSoundVariant);
-            VS::Audio::LivePlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, Effects_lastReactionSoundVariant = var);
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800D66CC (src/BATTLE/BATTLE.PRG/5BF94.c:8301)
-void Effects_ActivateTargetGimmick(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->context.target.type == 5) {
-        Field_ApplyUnlockEffectToRoomObjectEntry(&effect_instance->context.target.value.position);
-    }
-}
-
-// decomp: BATTLE.PRG func_800D6860 (src/BATTLE/BATTLE.PRG/5BF94.c:8335)
-void Effects_PrepareAshleyTargetImpact(Effects_EffectInstance* effect_instance)
-{
-    if (effect_instance->context.emitTo.type == 4) {
-        VS::Battle::LiveArmDefenseAbilityTimingWindow(effect_instance->context.emitTo.value.actor.actor);
-    }
 }
 
 // decomp: BATTLE.PRG func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:8342)
@@ -507,15 +415,15 @@ int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effe
 
         switch (control_key->frame >> 9) {
         case 0:
-            Effects_ApplyTargetActionImpact(effect_instance);
+            VS::Effects::LiveApplyTargetActionImpact(effect_instance);
             break;
 
         case 1:
-            Effects_ApplySourceActionImpact(effect_instance);
+            VS::Effects::LiveApplySourceActionImpact(effect_instance);
             break;
 
         case 2:
-            Effects_ActivateTargetRoomTile(effect_instance);
+            VS::Effects::LiveActivateTargetRoomTile(effect_instance);
             break;
 
         case 3:
@@ -539,7 +447,7 @@ int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effe
             break;
 
         case 8:
-            Effects_SignalSourceActorFromTimeline(effect_instance);
+            VS::Effects::LiveSignalSourceActorFromTimeline(effect_instance);
             break;
 
         case 9:
@@ -547,15 +455,15 @@ int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effe
             break;
 
         case 10:
-            Effects_SetSourceWeaponBrightness(effect_instance, control_operand0);
+            VS::Effects::LiveSetSourceWeaponBrightness(effect_instance, control_operand0);
             break;
 
         case 11:
-            Effects_PlaySourceActorReactionSound(effect_instance, control_operand0);
+            VS::Effects::LivePlaySourceActorReactionSound(effect_instance, control_operand0);
             break;
 
         case 12:
-            Effects_ActivateTargetGimmick(effect_instance);
+            VS::Effects::LiveActivateTargetGimmick(effect_instance);
             break;
 
         case 13:
@@ -567,7 +475,7 @@ int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effe
             break;
 
         case 15:
-            Effects_PrepareAshleyTargetImpact(effect_instance);
+            VS::Effects::LivePrepareTargetDefenseTiming(effect_instance);
             break;
         }
 

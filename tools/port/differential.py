@@ -167,6 +167,19 @@ def output_problems(names, native: list[int], observation: dict, allowed: list[t
     return problems + store_problems(observation["stores"], allowed)
 
 
+def mode_case(function: int, mode: int, entry: int, end: int, mutants: dict, *, harness: ModuleType) -> dict:
+    """Case-module globals for one original that a mode-switched `harness` compares. The harness provides DRIVER,
+    SOURCES and MODULES, `vector(rng, number, mode)`, `run(machine, value, entry)`, `check` and `describe`."""
+    return {
+        "ID": f"F{function:05}", "ENTRY": entry, "END": end,
+        "DRIVER": harness.DRIVER, "SOURCES": harness.SOURCES, "MODULES": harness.MODULES, "CXX_STANDARD": "c++latest",
+        "VECTORS": 256, "SEED": function, "MUTANT_VECTORS": 64, "MUTANTS": mutants,
+        "vector": lambda rng, number: harness.vector(rng, number, mode),
+        "run": lambda machine, value: harness.run(machine, value, entry),
+        "check": harness.check, "describe": harness.describe,
+    }
+
+
 # Vector helpers for the battle-AI cases. A tile word holds x in byte 0 and z in byte 2; bytes 1
 # and 3 carry per-actor metadata, drawn at random here.
 def packed(rng: random.Random, x: int, z: int) -> int:
