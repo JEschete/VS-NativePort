@@ -12,11 +12,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 
-void Effects_BranchEffectScriptIf(int condition, Effects_EffectInstance* effect_instance);
-int Effects_YieldEffectScriptAtOffset(Effects_EffectInstance* effect_instance);
-int Effects_JumpEffectScript(Effects_EffectInstance* effect_instance);
 int Effects_SpawnEffectScript(Effects_EffectInstance* effect_instance);
-int Effects_EndEffectScript(Effects_EffectInstance* effect_instance __attribute__((unused)));
 int Effects_SetEffectScriptSelector(Effects_EffectInstance* effect_instance);
 int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance);
 int Effects_BranchIfEffectRenderersFinished(Effects_EffectInstance* effect_instance);
@@ -34,7 +30,6 @@ int Effects_EmitParticlesFromScriptRegister(Effects_EffectInstance* effect_insta
 int Effects_RefreshScriptParticleEnvironment(Effects_EffectInstance* effect_instance __attribute__((unused)));
 int Effects_SignalSourceActorFromScript(Effects_EffectInstance* effect_instance);
 int Effects_ClearScriptActionVariant(Effects_EffectInstance* effect_instance __attribute__((unused)));
-int Effects_ContinueEffectScript(Effects_EffectInstance* effect_instance __attribute__((unused)));
 int Effects_LoadEffectTimelineFromRegister(Effects_EffectInstance* effect_instance);
 int Effects_TickEffectTimelineFromScript(Effects_EffectInstance* effect_instance);
 int Effects_BranchIfEffectTimelineFinished(Effects_EffectInstance* effect_instance);
@@ -44,8 +39,5 @@ int Effects_ApplyPairedParticleColorPreset(Effects_EffectInstance* effect_instan
 int Effects_CompleteChildEffectScript(Effects_EffectInstance* effect_instance);
 int Effects_ApplyParticleColorPresetTable(Effects_EffectInstance* effect_instance);
 int Effects_ReportInvalidEffectInstruction(Effects_EffectInstance* effect_instance __attribute__((unused)));
-u_char Effects_ReadScriptByte(Effects_EffectInstance* effect_instance);
-u_short Effects_ReadScriptHalfword(Effects_EffectInstance* effect_instance);
-int Effects_RunEffectScript(Effects_EffectInstance* effect_instance);
 
 #endif // VS_EFFECTS_SCRIPTVM_H_DECLS

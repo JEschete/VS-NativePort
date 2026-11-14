@@ -2787,6 +2787,30 @@
     <None Include="..\..\port\differentials\loot_misc_staging.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\loot_rows_append.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_rows_build.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_rows_count_category.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_rows_difficulty.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_rows_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_rows_key_flag.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_rows_refresh.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_rows_stage.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\loot_shield_staging.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2992,6 +3016,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\layout_check.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\loot_rows_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\loot_staging_differential.py">

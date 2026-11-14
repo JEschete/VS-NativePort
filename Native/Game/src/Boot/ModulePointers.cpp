@@ -62,6 +62,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
+#include "Effects/EffectScriptLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -525,11 +526,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D2904u, 0u, (void*)&Effects_ReleaseAllEffectParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D2A38u, 0u, (void*)&Effects_SetParticleSpawnPosition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D2ADCu, 0u, (void*)&Effects_EmitParticleEvent, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D46DCu, 0u, (void*)&Effects_BranchEffectScriptIf, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D4720u, 0u, (void*)&Effects_YieldEffectScriptAtOffset, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D474Cu, 0u, (void*)&Effects_JumpEffectScript, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4778u, 0u, (void*)&Effects_SpawnEffectScript, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D47C0u, 0u, (void*)&Effects_EndEffectScript, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D47C8u, 0u, (void*)&Effects_SetEffectScriptSelector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D47F4u, 0u, (void*)&Effects_ScriptAttachRenderer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D487Cu, 0u, (void*)&Effects_BranchIfEffectRenderersFinished, 0u, 0u, 0u},
@@ -548,7 +545,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D4D44u, 0u, (void*)&Effects_RefreshScriptParticleEnvironment, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4D64u, 0u, (void*)&Effects_SignalSourceActorFromScript, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4D98u, 0u, (void*)&Effects_ClearScriptActionVariant, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D4DA8u, 0u, (void*)&Effects_ContinueEffectScript, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4DB0u, 0u, (void*)&Effects_LoadEffectTimelineFromRegister, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4E5Cu, 0u, (void*)&Effects_TickEffectTimelineFromScript, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4E90u, 0u, (void*)&Effects_BranchIfEffectTimelineFinished, 0u, 0u, 0u},
@@ -558,9 +554,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D5048u, 0u, (void*)&Effects_CompleteChildEffectScript, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5088u, 0u, (void*)&Effects_ApplyParticleColorPresetTable, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5150u, 0u, (void*)&Effects_ReportInvalidEffectInstruction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5170u, 0u, (void*)&Effects_ReadScriptByte, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5198u, 0u, (void*)&Effects_ReadScriptHalfword, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D51D8u, 0u, (void*)&Effects_RunEffectScript, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5260u, 0u, (void*)&Effects_SetParticleGravity, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5294u, 0u, (void*)&Effects_SetParticleDrag, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D52A4u, 0u, (void*)&Effects_IntegrateParticleMotion, 0u, 0u, 0u},
@@ -2002,6 +1995,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073TiledRing, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FA7F0u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073Ring, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073RotatingSurface, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D46DCu, 0u, (void*)&VS::Effects::LiveBranchEffectScriptIf, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D4720u, 0u, (void*)&VS::Effects::LiveYieldEffectScriptAtOffset, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D474Cu, 0u, (void*)&VS::Effects::LiveJumpEffectScript, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D47C0u, 0u, (void*)&VS::Effects::LiveEndEffectScript, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D4DA8u, 0u, (void*)&VS::Effects::LiveContinueEffectScript, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5170u, 0u, (void*)&VS::Effects::LiveReadScriptByte, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5198u, 0u, (void*)&VS::Effects::LiveReadScriptHalfword, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D51D8u, 0u, (void*)&VS::Effects::LiveRunEffectScript, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},

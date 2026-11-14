@@ -1059,6 +1059,12 @@
     <ClInclude Include="src\Effects\EffectResourcesLiveState.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\EffectScript.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\EffectScriptLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClInclude Include="src\Effects\Loading.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
@@ -3337,6 +3343,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\EffectResourcesLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\EffectScript.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\EffectScriptLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\PackageExtents.hpp">

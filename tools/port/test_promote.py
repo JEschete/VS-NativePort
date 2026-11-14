@@ -365,6 +365,19 @@ class PromoteTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.ledgers(spec, "--set", "focused=1")
 
+    def test_ledgers_start_a_planned_row(self) -> None:
+        write(self.repository.ledger("PROMOTION_PLAN"),
+              PLAN.replace("active,self", "planned,").replace("F01818 remains generated; more", ""))
+        run(self.repository, *REGISTER)
+        spec = json.loads(json.dumps(SPEC))
+        spec["plan"] |= {"status": "active", "replace": [["", "F01818 typed"]]}
+        self.ledgers(spec, "--set", "focused=1")
+        before = self.snapshot()
+        self.ledgers(spec, "--set", "focused=1")
+        self.assertEqual(before, self.snapshot())
+        plan = promote.CsvTable(self.repository.ledger("PROMOTION_PLAN")).get("order", "28")
+        self.assertEqual((plan["status"], plan["notes"]), ("active", "F01818 typed"))
+
     def test_progress_keeps_the_original_cohort_and_distinguishes_retirement(self) -> None:
         fields = ("id,native_name,native_file,plan_order,plan_status,track,modernization_status,cpp_status,"
                   "copied_to_native,compile_mode,behavior_verified,tests_execute,replay_execute,snapshot,purpose")

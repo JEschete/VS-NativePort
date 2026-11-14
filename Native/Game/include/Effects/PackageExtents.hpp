@@ -32,4 +32,16 @@ void RecordLiveEffectCurves(std::span<const std::byte> payload);
 // is not the recorded block.
 [[nodiscard]] std::size_t LiveParticleDefinitionCount();
 [[nodiscard]] std::size_t LiveEffectCurveCount();
+
+// Bound block-8 program payloads. Effect instances keep the bare program
+// pointer the original stored, so the script loop looks the extent up by
+// that pointer. A block recorded again at the same
+// address replaces the extent; a package that binds no block 8 keeps the
+// previous package's pointer and extent, as the original kept the pointer.
+void RecordLiveEffectPrograms(std::span<const std::byte> payload);
+// Withdraws the program block starting at `programs`.
+void ForgetLiveEffectPrograms(const void* programs);
+// The recorded program block starting at `programs`; empty when none is.
+[[nodiscard]] std::span<const std::byte> LiveEffectPrograms(
+    const void* programs);
 }  // namespace VS::Effects

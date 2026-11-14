@@ -28,11 +28,13 @@ always defined.
    "verify": {"command": "...", "dirty": "...", "expected": "...", "limits": "...", "notes": "..."},
    "gate": {"old_bridges": "symbol:...", "ec": "EC-04", "before": "3", "after": "0",
             "evidence": "...", "notes": "..."},
-   "plan": {"order": "28", "commit": "", "replace": [["old notes text", "new notes text"]]}}
+   "plan": {"order": "28", "commit": "", "status": "active",
+            "replace": [["old notes text", "new notes text"]]}}
 
 FUNCTION_CATALOG rows get the catalog fields, named/understood/modernized/verified and the note
 (once); CPP_PROMOTION gets an id-ordered record, VERIFY_LEDGER and GATE_SLICES a newest-first row,
-MODERNIZATION_LEDGER status done and PROMOTION_PLAN the slice, commit and note replacements. Then
+MODERNIZATION_LEDGER status done and PROMOTION_PLAN the slice, commit, optional status and note
+replacements (an empty old text fills a row with no notes yet). Then
 tools\\ledger\\gates.py, modernization.py and hazards.py run --sync and --check (skip with --no-sync).
 After those checks pass, REMAINING_FUNCTIONS.csv refreshes its progress columns without deleting
 resolved rows or changing the original snapshot/provenance columns.
@@ -557,8 +559,11 @@ def apply_ledgers(repository: Repository, spec: dict, values: dict[str, str]) ->
         def update_plan(row: dict) -> None:
             row["gate_slice"] = add_item(row["gate_slice"], slice_name)
             row["commits"] = add_item(row["commits"], plan.get("commit", ""))
+            row["status"] = plan.get("status") or row["status"]
             for old, new in plan.get("replace", []):
-                if old in row["notes"]:
+                if not old and not row["notes"]:
+                    row["notes"] = new
+                elif old and old in row["notes"]:
                     row["notes"] = row["notes"].replace(old, new)
                 elif new not in row["notes"]:
                     raise SystemExit(f"PROMOTION_PLAN {plan['order']}: neither the old nor the new note text is "

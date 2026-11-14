@@ -606,6 +606,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::DrawLiveEffectParticleList": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
     "VS::Effects::DrawLiveAnimatedSpriteParticles": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
     "VS::Effects::UpdateLivePlg074TrailEmitter": r"Native\Game\include\Effects\TrailEmitterLive.hpp",
+    "VS::Effects::LiveBranchEffectScriptIf": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveYieldEffectScriptAtOffset": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveJumpEffectScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveEndEffectScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveContinueEffectScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveReadScriptByte": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveReadScriptHalfword": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveRunEffectScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2521,6 +2529,14 @@ OWNED_CALL_BINDINGS["F02604"] = "VS::Menu::Magic::UpdateWarlockMenuLive"
 OWNED_CALL_BINDINGS["F02605"] = "VS::Menu::Magic::UpdateShamanMenuLive"
 OWNED_CALL_BINDINGS["F02606"] = "VS::Menu::Magic::UpdateSorcererMenuLive"
 OWNED_CALL_BINDINGS["F02607"] = "VS::Menu::Magic::UpdateEnchanterMenuLive"
+OWNED_CALL_BINDINGS["F01516"] = "VS::Effects::LiveBranchEffectScriptIf"
+OWNED_CALL_BINDINGS["F01517"] = "VS::Effects::LiveYieldEffectScriptAtOffset"
+OWNED_CALL_BINDINGS["F01518"] = "VS::Effects::LiveJumpEffectScript"
+OWNED_CALL_BINDINGS["F01520"] = "VS::Effects::LiveEndEffectScript"
+OWNED_CALL_BINDINGS["F01539"] = "VS::Effects::LiveContinueEffectScript"
+OWNED_CALL_BINDINGS["F01549"] = "VS::Effects::LiveReadScriptByte"
+OWNED_CALL_BINDINGS["F01550"] = "VS::Effects::LiveReadScriptHalfword"
+OWNED_CALL_BINDINGS["F01551"] = "VS::Effects::LiveRunEffectScript"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3958,6 +3974,14 @@ MODULE_BINDING_ENTRIES = (
     ("EFFECT/PLG074.BIN", 0x800F98F8, "VS::Effects::Templates::UpdateLivePlg073TiledRing"),  # F01986
     ("EFFECT/PLG074.BIN", 0x800FA7F0, "VS::Effects::Templates::UpdateLivePlg073Ring"),  # F01987
     ("EFFECT/PLG074.BIN", 0x800FD534, "VS::Effects::Templates::UpdateLivePlg073RotatingSurface"),  # F01995
+    ("BATTLE/BATTLE.PRG", 0x800D46DC, "VS::Effects::LiveBranchEffectScriptIf"),  # F01516
+    ("BATTLE/BATTLE.PRG", 0x800D4720, "VS::Effects::LiveYieldEffectScriptAtOffset"),  # F01517
+    ("BATTLE/BATTLE.PRG", 0x800D474C, "VS::Effects::LiveJumpEffectScript"),  # F01518
+    ("BATTLE/BATTLE.PRG", 0x800D47C0, "VS::Effects::LiveEndEffectScript"),  # F01520
+    ("BATTLE/BATTLE.PRG", 0x800D4DA8, "VS::Effects::LiveContinueEffectScript"),  # F01539
+    ("BATTLE/BATTLE.PRG", 0x800D5170, "VS::Effects::LiveReadScriptByte"),  # F01549
+    ("BATTLE/BATTLE.PRG", 0x800D5198, "VS::Effects::LiveReadScriptHalfword"),  # F01550
+    ("BATTLE/BATTLE.PRG", 0x800D51D8, "VS::Effects::LiveRunEffectScript"),  # F01551
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
@@ -4191,19 +4215,19 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "without changing nonzero scaling, particle emission or RNG consumption."),
     ],
     "F01531": [
-        ("arg0->registers[Effects_ReadScriptByte(arg0)] = Effects_ReadScriptHalfword(arg0);",
-         "u_char registerIndex = Effects_ReadScriptByte(arg0);\n"
-         "    u_short value = Effects_ReadScriptHalfword(arg0);\n"
+        ("arg0->registers[VS::Effects::LiveReadScriptByte(arg0)] = VS::Effects::LiveReadScriptHalfword(arg0);",
+         "u_char registerIndex = VS::Effects::LiveReadScriptByte(arg0);\n"
+         "    u_short value = VS::Effects::LiveReadScriptHalfword(arg0);\n"
          "    arg0->registers[registerIndex] = value;",
          "5BF94.c:7633 / 800D4AFC..800D4B18 reads the index before the halfword; "
          "native assignment evaluation must not reorder the shared cursor"),
     ],
     "F01532": [
-        ("Effects_BranchEffectScriptIf(arg0->registers[Effects_ReadScriptByte(arg0)] == "
-         "(Effects_ReadScriptHalfword(arg0)), arg0);",
-         "u_char registerIndex = Effects_ReadScriptByte(arg0);\n"
-         "    u_short value = Effects_ReadScriptHalfword(arg0);\n"
-         "    Effects_BranchEffectScriptIf((u_char)arg0->registers[registerIndex] == value, arg0);",
+        ("VS::Effects::LiveBranchEffectScriptIf(arg0->registers[VS::Effects::LiveReadScriptByte(arg0)] == "
+         "(VS::Effects::LiveReadScriptHalfword(arg0)), arg0);",
+         "u_char registerIndex = VS::Effects::LiveReadScriptByte(arg0);\n"
+         "    u_short value = VS::Effects::LiveReadScriptHalfword(arg0);\n"
+         "    VS::Effects::LiveBranchEffectScriptIf((u_char)arg0->registers[registerIndex] == value, arg0);",
          "5BF94.c:7639 / 800D4B44..800D4B74 preserves ordered operands and the original lbu comparison"),
     ],
     "F01535": [

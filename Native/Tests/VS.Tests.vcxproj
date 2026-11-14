@@ -177,6 +177,7 @@
     <ClCompile Include="src\EffectParticleTests.cpp" />
     <ClCompile Include="src\EffectResourcesTransformsTests.cpp" />
     <ClCompile Include="src\EffectRingTests.cpp" />
+    <ClCompile Include="src\EffectScriptTests.cpp" />
     <ClCompile Include="src\EffectSurfaceTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.cpp">
@@ -447,6 +448,7 @@
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
+    <ClInclude Include="include\TestSupport\EffectProgramScope.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />
     <ClInclude Include="include\TestSupport\FloatingLabelQueueFixture.hpp" />
     <ClInclude Include="include\TestSupport\FloatingLabelQueueLiveFixture.hpp" />

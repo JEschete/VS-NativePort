@@ -9,6 +9,7 @@
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/EffectScriptLive.hpp"
 #include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-#include "Effects/ScriptVm.h"
 #include "Effects/Transforms.h"
 
 // decomp: D_800EC2E4 (D_800EC2E4@BATTLE/BATTLE.PRG)
@@ -331,7 +331,7 @@ int Effects_UpdatePrimaryEffects(void)
 
             VS::Effects::LiveUpdateParticleGravityAndDrag();
 
-            if (Effects_RunEffectScript(instance_cursor) == 0) {
+            if (VS::Effects::LiveRunEffectScript(instance_cursor) == 0) {
                 Effects_DestroyPrimaryEffectInstance(instance_cursor);
             } else {
                 ++instance_cursor->frame;
@@ -441,7 +441,7 @@ int Effects_UpdateSecondaryEffects(void)
                 }
                 renderer_cursor = next_renderer;
             }
-            if (Effects_RunEffectScript(instance_cursor) == 0) {
+            if (VS::Effects::LiveRunEffectScript(instance_cursor) == 0) {
                 Effects_DestroySecondaryEffectInstance(instance_cursor);
                 Effects_ReleaseParticlePool();
             } else {

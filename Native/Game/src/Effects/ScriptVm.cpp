@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/EffectScriptLive.hpp"
 #include "Effects/TransformsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -12,49 +13,22 @@ extern "C" {
 #include "Effects/Timeline.h"
 #include "Effects/Transforms.h"
 
-// decomp: BATTLE.PRG func_800D46DC (src/BATTLE/BATTLE.PRG/5BF94.c:7506)
-void Effects_BranchEffectScriptIf(int condition, Effects_EffectInstance* effect_instance)
-{
-    if (condition) {
-        effect_instance->scriptOffset = Effects_ReadScriptHalfword(effect_instance);
-    } else {
-        effect_instance->scriptOffset += 2;
-    }
-}
-
-// decomp: BATTLE.PRG func_800D4720 (src/BATTLE/BATTLE.PRG/5BF94.c:7515)
-int Effects_YieldEffectScriptAtOffset(Effects_EffectInstance* effect_instance)
-{
-    effect_instance->scriptOffset = Effects_ReadScriptHalfword(effect_instance);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800D474C (src/BATTLE/BATTLE.PRG/5BF94.c:7521)
-int Effects_JumpEffectScript(Effects_EffectInstance* effect_instance)
-{
-    effect_instance->scriptOffset = Effects_ReadScriptHalfword(effect_instance);
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:7527)
 int Effects_SpawnEffectScript(Effects_EffectInstance* effect_instance)
 {
     Effects_EffectSpawnRequest spawn_request;
 
     spawn_request.script = effect_instance->script;
-    spawn_request.scriptOffset = Effects_ReadScriptHalfword(effect_instance);
+    spawn_request.scriptOffset = VS::Effects::LiveReadScriptHalfword(effect_instance);
     spawn_request.source = &effect_instance->context.source;
     Effects_CreatePrimaryEffectInstance(&spawn_request);
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D47C0 (src/BATTLE/BATTLE.PRG/5BF94.c:7538)
-int Effects_EndEffectScript(Effects_EffectInstance* effect_instance __attribute__((unused))) { return 2; }
-
 // decomp: BATTLE.PRG func_800D47C8 (src/BATTLE/BATTLE.PRG/5BF94.c:7540)
 int Effects_SetEffectScriptSelector(Effects_EffectInstance* effect_instance)
 {
-    Effects_scriptSelector = Effects_ReadScriptByte(effect_instance);
+    Effects_scriptSelector = VS::Effects::LiveReadScriptByte(effect_instance);
     return 1;
 }
 
@@ -64,9 +38,9 @@ int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance)
     int renderer_parameters;
     int renderer_index;
 
-    renderer_index = Effects_ReadScriptByte(effect_instance);
-    renderer_parameters = Effects_ReadScriptHalfword(effect_instance);
-    renderer_parameters = renderer_parameters + (Effects_ReadScriptHalfword(effect_instance) << 0x10);
+    renderer_index = VS::Effects::LiveReadScriptByte(effect_instance);
+    renderer_parameters = VS::Effects::LiveReadScriptHalfword(effect_instance);
+    renderer_parameters = renderer_parameters + (VS::Effects::LiveReadScriptHalfword(effect_instance) << 0x10);
 
     if (effect_instance->context.parameter != 0) {
         renderer_parameters = effect_instance->context.parameter;
@@ -79,14 +53,14 @@ int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance)
 // decomp: BATTLE.PRG func_800D487C (src/BATTLE/BATTLE.PRG/5BF94.c:7563)
 int Effects_BranchIfEffectRenderersFinished(Effects_EffectInstance* effect_instance)
 {
-    Effects_BranchEffectScriptIf(effect_instance->context.renderer == 0, effect_instance);
+    VS::Effects::LiveBranchEffectScriptIf(effect_instance->context.renderer == 0, effect_instance);
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7569)
 int Effects_LoadEffectTimelineImmediate(Effects_EffectInstance* effect_instance)
 {
-    Effects_LoadEffectTimeline(effect_instance, Effects_ReadScriptByte(effect_instance) & 0xFF, 0);
+    Effects_LoadEffectTimeline(effect_instance, VS::Effects::LiveReadScriptByte(effect_instance) & 0xFF, 0);
     effect_instance->scriptOffset = 0xB7;
     return 1;
 }
@@ -94,7 +68,7 @@ int Effects_LoadEffectTimelineImmediate(Effects_EffectInstance* effect_instance)
 // decomp: BATTLE.PRG func_800D48E4 (src/BATTLE/BATTLE.PRG/5BF94.c:7576)
 int Effects_BranchIfActionVariantCleared(Effects_EffectInstance* effect_instance)
 {
-    Effects_BranchEffectScriptIf(Effects_actionVariant == 0, effect_instance);
+    VS::Effects::LiveBranchEffectScriptIf(Effects_actionVariant == 0, effect_instance);
     return 1;
 }
 
@@ -157,8 +131,8 @@ int Effects_LoadActionVariantRegister(Effects_EffectInstance* effect_instance)
 // decomp: BATTLE.PRG func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7633)
 int Effects_SetEffectScriptRegister(Effects_EffectInstance* instance)
 {
-    u_char registerIndex = Effects_ReadScriptByte(instance);
-    u_short value = Effects_ReadScriptHalfword(instance);
+    u_char registerIndex = VS::Effects::LiveReadScriptByte(instance);
+    u_short value = VS::Effects::LiveReadScriptHalfword(instance);
     instance->registers[registerIndex] = value;
     return 1;
 }
@@ -166,23 +140,23 @@ int Effects_SetEffectScriptRegister(Effects_EffectInstance* instance)
 // decomp: BATTLE.PRG func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:7639)
 int Effects_BranchIfEffectRegisterEqual(Effects_EffectInstance* instance)
 {
-    u_char registerIndex = Effects_ReadScriptByte(instance);
-    u_short value = Effects_ReadScriptHalfword(instance);
-    Effects_BranchEffectScriptIf((u_char)instance->registers[registerIndex] == value, instance);
+    u_char registerIndex = VS::Effects::LiveReadScriptByte(instance);
+    u_short value = VS::Effects::LiveReadScriptHalfword(instance);
+    VS::Effects::LiveBranchEffectScriptIf((u_char)instance->registers[registerIndex] == value, instance);
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D4B90 (src/BATTLE/BATTLE.PRG/5BF94.c:7645)
 int Effects_BranchIfParticleCountEqual(Effects_EffectInstance* effect_instance)
 {
-    Effects_BranchEffectScriptIf(effect_instance->particleCount == Effects_ReadScriptByte(effect_instance), effect_instance);
+    VS::Effects::LiveBranchEffectScriptIf(effect_instance->particleCount == VS::Effects::LiveReadScriptByte(effect_instance), effect_instance);
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:7651)
 int Effects_EmitParticlesFromScriptRegister(Effects_EffectInstance* effect_instance)
 {
-    Effects_EmitParticleEvent(effect_instance, effect_instance->registers[Effects_ReadScriptByte(effect_instance)], 0, 0, NULL);
+    Effects_EmitParticleEvent(effect_instance, effect_instance->registers[VS::Effects::LiveReadScriptByte(effect_instance)], 0, 0, NULL);
     return 1;
 }
 
@@ -209,13 +183,10 @@ int Effects_ClearScriptActionVariant(Effects_EffectInstance* effect_instance __a
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D4DA8 (src/BATTLE/BATTLE.PRG/5BF94.c:7711)
-int Effects_ContinueEffectScript(Effects_EffectInstance* effect_instance __attribute__((unused))) { return 1; }
-
 // decomp: BATTLE.PRG func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:7713)
 int Effects_LoadEffectTimelineFromRegister(Effects_EffectInstance* effect_instance)
 {
-    u_char index = effect_instance->registers[Effects_ReadScriptByte(effect_instance)];
+    u_char index = effect_instance->registers[VS::Effects::LiveReadScriptByte(effect_instance)];
 
     if (effect_instance->parent == NULL && index < 4) {
         int id = Effects_package->block9Data->timelineIds[index];
@@ -231,14 +202,14 @@ int Effects_LoadEffectTimelineFromRegister(Effects_EffectInstance* effect_instan
 // decomp: BATTLE.PRG func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:7728)
 int Effects_TickEffectTimelineFromScript(Effects_EffectInstance* effect_instance)
 {
-    Effects_TickEffectTimeline(effect_instance, Effects_ReadScriptHalfword(effect_instance));
+    Effects_TickEffectTimeline(effect_instance, VS::Effects::LiveReadScriptHalfword(effect_instance));
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:7734)
 int Effects_BranchIfEffectTimelineFinished(Effects_EffectInstance* effect_instance)
 {
-    Effects_BranchEffectScriptIf(effect_instance->context.timeline->activeTracks == 0, effect_instance);
+    VS::Effects::LiveBranchEffectScriptIf(effect_instance->context.timeline->activeTracks == 0, effect_instance);
     return 1;
 }
 
@@ -255,9 +226,9 @@ int Effects_FreeEffectScriptTimeline(Effects_EffectInstance* effect_instance)
 // decomp: BATTLE.PRG func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:7749)
 int Effects_SetParticleColorCurvesFromScript(Effects_EffectInstance* effect_instance)
 {
-    u_char first = Effects_ReadScriptByte(effect_instance);
-    u_char second = Effects_ReadScriptByte(effect_instance);
-    u_char third = Effects_ReadScriptByte(effect_instance);
+    u_char first = VS::Effects::LiveReadScriptByte(effect_instance);
+    u_char second = VS::Effects::LiveReadScriptByte(effect_instance);
+    u_char third = VS::Effects::LiveReadScriptByte(effect_instance);
     Effects_ParticleDefinition* dst = &Effects_package->block5Data->definitions[first & 0x3F];
 
     dst->rCurve = (first >> 6) + ((second & 0xF) << 2);
@@ -309,31 +280,6 @@ int Effects_ApplyParticleColorPresetTable(Effects_EffectInstance* effect_instanc
 int Effects_ReportInvalidEffectInstruction(Effects_EffectInstance* effect_instance __attribute__((unused)))
 {
     return Effects_IgnoreRuntimeDiagnostic(0x1E);
-}
-
-// decomp: BATTLE.PRG func_800D5170 (src/BATTLE/BATTLE.PRG/5BF94.c:7804)
-u_char Effects_ReadScriptByte(Effects_EffectInstance* effect_instance) { return effect_instance->script[effect_instance->scriptOffset++]; }
-
-// decomp: BATTLE.PRG func_800D5198 (src/BATTLE/BATTLE.PRG/5BF94.c:7806)
-u_short Effects_ReadScriptHalfword(Effects_EffectInstance* effect_instance)
-{
-    u_char lo = Effects_ReadScriptByte(effect_instance);
-    u_char hi = Effects_ReadScriptByte(effect_instance);
-    return lo | (hi << 8);
-}
-
-// decomp: BATTLE.PRG func_800D51D8 (src/BATTLE/BATTLE.PRG/5BF94.c:7813)
-int Effects_RunEffectScript(Effects_EffectInstance* effect_instance)
-{
-    int miscIndex;
-
-    do {
-        miscIndex = Effects_scriptOpcodeHandlers[Effects_ReadScriptByte(effect_instance)](effect_instance);
-        if (miscIndex == 2) {
-            return 0;
-        }
-    } while (miscIndex == 1);
-    return 1;
 }
 
 }  // extern "C"

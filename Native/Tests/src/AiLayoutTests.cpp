@@ -1,9 +1,11 @@
 #include <array>
+#include <span>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Legacy/Psx.h"
+#include "TestSupport/EffectProgramScope.hpp"
 
 extern "C" {
 #include "Effects/Runtime.h"
@@ -90,6 +92,8 @@ TEST_CASE("Effect register instructions consume the index before the halfword",
   const auto value = GENERATE(0U, 1U, 2U, 255U, 0x101U, 0x202U, 0x3FFU);
   std::array<char, 3> script{static_cast<char>(index), static_cast<char>(value),
                              static_cast<char>(value >> 8)};
+  const VS::test_support::EffectProgramScope program{
+      std::as_bytes(std::span{script})};
   Effects_EffectInstance instance{};
   instance.script = script.data();
   for (unsigned reg = 0; reg < 4; ++reg) {
@@ -111,6 +115,8 @@ TEST_CASE(
   const bool equal = GENERATE(false, true);
   std::array<char, 5> script{static_cast<char>(index), static_cast<char>(value),
                              static_cast<char>(value >> 8), 0x34, 0x12};
+  const VS::test_support::EffectProgramScope program{
+      std::as_bytes(std::span{script})};
   Effects_EffectInstance instance{};
   instance.script = script.data();
   instance.registers[index] = static_cast<char>(equal ? value : value ^ 1U);

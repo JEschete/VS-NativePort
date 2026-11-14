@@ -28,6 +28,24 @@ struct PackageExtentRecord {
 std::array<PackageExtentRecord, kRecordCapacity> records{};
 std::size_t next_replacement = 0;
 
+// The action and secondary packages' program blocks, with room for blocks
+// rebound at other addresses and for test programs.
+constexpr std::size_t kProgramCapacity = 8;
+
+struct ProgramExtent {
+  const std::byte* data = nullptr;
+  std::size_t size = 0;
+};
+
+std::array<ProgramExtent, kProgramCapacity> programs{};
+std::size_t next_program = 0;
+
+ProgramExtent* FindProgram(const void* data) {
+  if (data == nullptr) return nullptr;
+  const auto found = std::ranges::find(programs, data, &ProgramExtent::data);
+  return found == programs.end() ? nullptr : &*found;
+}
+
 PackageExtentRecord* Find() {
   if (Effects_package == nullptr) return nullptr;
   const auto found = std::ranges::find(records, Effects_package,
@@ -79,5 +97,25 @@ std::size_t LiveEffectCurveCount() {
     return 0;
   }
   return record->curve_count;
+}
+
+void RecordLiveEffectPrograms(std::span<const std::byte> payload) {
+  if (payload.data() == nullptr) return;
+  auto* extent = FindProgram(payload.data());
+  if (extent == nullptr) {
+    extent = &programs.at(next_program);
+    next_program = (next_program + 1) % programs.size();
+  }
+  *extent = {.data = payload.data(), .size = payload.size()};
+}
+
+void ForgetLiveEffectPrograms(const void* data) {
+  if (auto* extent = FindProgram(data)) *extent = {};
+}
+
+std::span<const std::byte> LiveEffectPrograms(const void* data) {
+  const auto* extent = FindProgram(data);
+  if (extent == nullptr) return {};
+  return {extent->data, extent->size};
 }
 }  // namespace VS::Effects

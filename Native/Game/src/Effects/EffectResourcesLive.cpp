@@ -275,6 +275,9 @@ void RecordExtents(const EffectPackageBlocks& blocks, const PackageWalk& walk) {
        PackageBlockBit(PackageBlockType::kParticleDefinitions)) != 0) {
     RecordLiveParticleDefinitions(blocks.particle_definitions);
   }
+  if ((walk.bound_types & PackageBlockBit(PackageBlockType::kPrograms)) != 0) {
+    RecordLiveEffectPrograms(blocks.programs);
+  }
 }
 
 void ReportWalk(const PackageWalk& walk) {
