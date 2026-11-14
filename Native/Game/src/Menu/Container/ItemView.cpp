@@ -9,6 +9,7 @@
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
+#include "Menu/Container/ContainerPendingRowsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -109,171 +110,6 @@ void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStr
     VS::Menu::Framework::FormatLiveShieldRow(&shield, rowStrings, rowTypes, buf);
 }
 
-// decomp: MENUD.PRG func_80106C64 (src/MENU/MENUD.PRG/234.c:2145)
-int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, char* textBuf)
-{
-    int itemCount;
-    u_short* indices;
-    int itemIndex;
-    int parentIndex;
-    int i;
-    int rowType;
-    Items_ContainerData* container = &Menu_Framework_unusedInventoryStorage->stagedTransfer;
-    char* c;
-    itemCount = 0;
-    c = textBuf;
-
-    if (itemCategory == 7) {
-
-        for (i = 0; i < 64; ++i, c += 0x60) {
-            itemIndex = Menu_Framework_unusedInventoryStorage->itemsToTransfer[i];
-            itemCategory = itemIndex >> 8;
-            itemIndex &= 0xFF;
-
-            if (itemIndex == 0) {
-                break;
-            }
-
-            --itemIndex;
-            rowType = 0;
-
-            switch (itemCategory) {
-            case 0:
-                Menu_Container_BuildWeaponRow(container, &text[i * 2], &rowTypes[i], c, itemIndex);
-                break;
-            case 1:
-                VS::Menu::Framework::FormatLiveBladeRow(
-                    &container->blades[itemIndex], &text[i * 2], &rowTypes[i], c);
-                break;
-            case 2:
-                VS::Menu::Framework::FormatLiveGripRow(
-                    &container->grips[itemIndex], &text[i * 2], &rowTypes[i], c);
-                break;
-            case 3:
-                Menu_Container_BuildShieldRow(container, &text[i * 2], &rowTypes[i], c, itemIndex);
-                break;
-            case 4:
-                VS::Menu::Framework::FormatLiveInventoryArmorRow(
-                    &container->armor[itemIndex], &text[i * 2], &rowTypes[i], c);
-                break;
-            case 5:
-                VS::Menu::Framework::FormatLiveGemRow(
-                    &container->gems[itemIndex], &text[i * 2], &rowTypes[i], c);
-                if (VS::Items::LiveContainerParentShieldIndex(5, itemIndex, container) != 0) {
-                    rowType = 0xCC01;
-                }
-                break;
-            case 6:
-                VS::Menu::Framework::FormatLiveMiscItemRow(
-                    &container->misc[itemIndex], &text[i * 2], &rowTypes[i], c);
-                break;
-            }
-            if (VS::Items::LiveContainerParentWeaponIndex(itemCategory, itemIndex, container) != 0) {
-                rowType = 0xCC01;
-            }
-            ++itemCount;
-            rowTypes[i] |= rowType;
-        }
-    } else {
-        char** t;
-        int* r;
-        indices = VS::Items::LiveContainerCategoryIndices(itemCategory, Menu_Container_containerData);
-        if (itemCategory == 6) {
-            int j;
-            for (i = 0, j = 0; i < 256;) {
-                t = &text[j * 2];
-                r = &rowTypes[j];
-                itemIndex = indices[i];
-
-                if (itemIndex == 0) {
-                    break;
-                }
-
-                --itemIndex;
-
-                VS::Menu::Framework::FormatLiveMiscItemRow(
-                    &Menu_Container_containerData->items.misc[itemIndex], t, r, c);
-                ++itemCount;
-                ++j;
-                ++i;
-                c += 0x60;
-            }
-        } else {
-
-            for (i = 0; i < Menu_Container_containerItemCapacities[itemCategory]; ++i, c += 0x60) {
-                itemIndex = indices[i];
-
-                if (itemIndex == 0) {
-                    break;
-                }
-
-                --itemIndex;
-                rowType = 0;
-
-                switch (itemCategory) {
-                case 0:
-                    Menu_Container_BuildWeaponRow(&Menu_Container_containerData->items, &text[i * 2],
-                        &rowTypes[i], c, itemIndex);
-                    if (Menu_Container_containerData->items.weapons[itemIndex].isEquipped != 0) {
-                        rowType = 0xCA00;
-                    }
-                    break;
-                case 1:
-                    VS::Menu::Framework::FormatLiveBladeRow(
-                        &Menu_Container_containerData->items.blades[itemIndex], &text[i * 2],
-                        &rowTypes[i], c);
-                    break;
-                case 2:
-                    VS::Menu::Framework::FormatLiveGripRow(&Menu_Container_containerData->items.grips[itemIndex],
-                        &text[i * 2], &rowTypes[i], c);
-                    break;
-                case 3:
-                    Menu_Container_BuildShieldRow(&Menu_Container_containerData->items, &text[i * 2],
-                        &rowTypes[i], c, itemIndex);
-                    if (Menu_Container_containerData->items.shields[itemIndex].isEquipped != 0) {
-                        rowType = 0xCA00;
-                    }
-                    break;
-                case 4:
-                    VS::Menu::Framework::FormatLiveInventoryArmorRow(
-                        &Menu_Container_containerData->items.armor[itemIndex], &text[i * 2],
-                        &rowTypes[i], c);
-                    if (Menu_Container_containerData->items.armor[itemIndex].limb != 0) {
-                        rowType = 0xCA00;
-                    }
-                    break;
-                case 5:
-                    VS::Menu::Framework::FormatLiveGemRow(&Menu_Container_containerData->items.gems[itemIndex],
-                        &text[i * 2], &rowTypes[i], c);
-                    break;
-                }
-                parentIndex = VS::Items::LiveContainerParentWeaponIndex(
-                    itemCategory, itemIndex, &Menu_Container_containerData->items);
-                if (parentIndex != 0) {
-                    rowType = 0xCA00;
-                    if (Menu_Container_containerData->items.weapons[parentIndex - 1].isEquipped
-                        == 0) {
-                        rowType = 0xCC00;
-                    }
-                }
-                parentIndex = VS::Items::LiveContainerParentShieldIndex(
-                    itemCategory, itemIndex, &Menu_Container_containerData->items);
-                if (parentIndex != 0) {
-                    rowType = 0xCA00;
-                    if (Menu_Container_containerData->items.shields[parentIndex - 1].isEquipped
-                        == 0) {
-                        rowType = 0xCC00;
-                    }
-                }
-
-                ++itemCount;
-                rowTypes[i] |= rowType;
-            }
-        }
-    }
-    return itemCount;
-}
-
 // decomp: MENUD.PRG func_80107490 (src/MENU/MENUD.PRG/234.c:2393)
 int Menu_Container_UpdateItemList(int transfer_direction_selection)
 {
@@ -337,7 +173,7 @@ loop_1:
         VS::Menu::Framework::InitializeLiveInformationBox();
         /* fallthrough */
     case 1:
-        temp_s1 = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00));
+        temp_s1 = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace)));
         initial_row_types = (int *)(((u_char*)((void*)temp_s1)) + 0x6000);
         initial_row_text = (char **)(((u_char*)((void*)temp_s1)) + 0x6400);
         Menu_Inventory_freezeTabArrows = 1;
@@ -346,8 +182,8 @@ loop_1:
             VS::Items::RebuildLiveContainerCategoryIndices(temp_s3, Menu_Container_containerData);
         }
 
-        Menu_Container_RebuildPendingTransfers();
-        temp_s2 = Menu_Container_BuildItemRows(selected_category_id, initial_row_text, initial_row_types, (char*)temp_s1);
+        VS::Menu::container::RebuildLivePendingTransfers();
+        temp_s2 = VS::Menu::container::BuildLiveItemRows(selected_category_id, initial_row_text, initial_row_types, (char*)temp_s1);
         Menu_Container_categoryEmpty = temp_s2 == 0;
         if (Menu_Container_categoryEmpty != 0) {
             VS::Menu::Framework::SetLiveInformationMessage(
@@ -417,10 +253,10 @@ loop_1:
                     VS::Menu::Framework::ClearLiveMenuExcept(0);
                     Menu_Container_itemListStep = 4;
                 } else {
-                    rebuilt_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00U);
+                    rebuilt_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace));
                     rebuilt_row_text = (char **)(((u_char*)(rebuilt_rows_allocation)) + 0x6400);
                     rebuilt_row_types = (int *)(((u_char*)(rebuilt_rows_allocation)) + 0x6000);
-                    temp_s0 = Menu_Container_BuildItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, (char *)(rebuilt_rows_allocation));
+                    temp_s0 = VS::Menu::container::BuildLiveItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, (char *)(rebuilt_rows_allocation));
                     rebuilt_row_types[Menu_Container_itemListSelectedRow - 1] |= 8;
                     temp_s3 = Input_settings.cursorMemory;
                     Input_settings.cursorMemory = 1;
@@ -851,10 +687,10 @@ loop_1:
         break;
     case 13:
         if (VS::Menu::Framework::AreLiveMenuRowsIdle() != 0) {
-            pending_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00U);
+            pending_rows_allocation = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace));
             pending_row_text = (char **)(((u_char*)(pending_rows_allocation)) + 0x6400);
             pending_row_types = (int *)(((u_char*)(pending_rows_allocation)) + 0x6000);
-            temp_s2 = Menu_Container_BuildItemRows(7, pending_row_text, pending_row_types, (char *)(pending_rows_allocation));
+            temp_s2 = VS::Menu::container::BuildLiveItemRows(7, pending_row_text, pending_row_types, (char *)(pending_rows_allocation));
             Menu_Container_categoryEmpty = temp_s2 == 0;
             if (Menu_Container_categoryEmpty != 0) {
                 VS::Menu::Framework::SetLiveInformationMessage(
@@ -893,7 +729,7 @@ loop_1:
                             (temp_s2 - 1) & 0xFF, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
                         VS::Items::ClearLiveContainerItem((temp_s2 >> 8), (temp_s2 - 1) & 0xFF,
                             &Menu_Framework_unusedInventoryStorage->stagedTransfer);
-                        Menu_Container_RebuildPendingTransfers();
+                        VS::Menu::container::RebuildLivePendingTransfers();
                     }
                 } else {
                     while ((temp_s2 = Menu_Framework_unusedInventoryStorage->itemsToTransfer[0])) {
@@ -901,7 +737,7 @@ loop_1:
                             (temp_s2 - 1) & 0xFF, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
                         VS::Items::ClearLiveContainerItem((temp_s2 >> 8), (temp_s2 - 1) & 0xFF,
                             &Menu_Framework_unusedInventoryStorage->stagedTransfer);
-                        Menu_Container_RebuildPendingTransfers();
+                        VS::Menu::container::RebuildLivePendingTransfers();
                     }
                 }
                 for (temp_s3 = 0; temp_s3 < 7; ++temp_s3) {

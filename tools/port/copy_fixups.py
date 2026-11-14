@@ -1400,6 +1400,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::container::UpdateLiveDiscardMenu": r"Native\Game\include\Menu\Container\ContainerMenuDialogsLive.hpp",
     "VS::Menu::container::RestoreLiveItemRows": r"Native\Game\include\Menu\Container\ContainerMenuDialogsLive.hpp",
     "VS::Menu::container::UpdateLiveTransferConfirmation": r"Native\Game\include\Menu\Container\ContainerMenuDialogsLive.hpp",
+    "VS::Menu::container::FindLivePendingTransfer": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
+    "VS::Menu::container::AppendLivePendingTransfer": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
+    "VS::Menu::container::RebuildLivePendingTransfers": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
+    "VS::Menu::container::BuildLiveItemRows": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2443,6 +2447,10 @@ OWNED_CALL_BINDINGS["F02969"] = "VS::Menu::container::UpdateLiveSortMenu"
 OWNED_CALL_BINDINGS["F02970"] = "VS::Menu::container::UpdateLiveDiscardMenu"
 OWNED_CALL_BINDINGS["F02983"] = "VS::Menu::container::RestoreLiveItemRows"
 OWNED_CALL_BINDINGS["F02984"] = "VS::Menu::container::UpdateLiveTransferConfirmation"
+OWNED_CALL_BINDINGS["F02979"] = "VS::Menu::container::FindLivePendingTransfer"
+OWNED_CALL_BINDINGS["F02980"] = "VS::Menu::container::AppendLivePendingTransfer"
+OWNED_CALL_BINDINGS["F02981"] = "VS::Menu::container::RebuildLivePendingTransfers"
+OWNED_CALL_BINDINGS["F02982"] = "VS::Menu::container::BuildLiveItemRows"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3939,6 +3947,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x80105D24, "VS::Menu::container::UpdateLiveDiscardMenu"),  # F02970
     ("MENU/MENUD.PRG", 0x801071D8, "VS::Menu::container::RestoreLiveItemRows"),  # F02983
     ("MENU/MENUD.PRG", 0x801072B0, "VS::Menu::container::UpdateLiveTransferConfirmation"),  # F02984
+    ("MENU/MENUD.PRG", 0x801069B0, "VS::Menu::container::FindLivePendingTransfer"),  # F02979
+    ("MENU/MENUD.PRG", 0x80106A04, "VS::Menu::container::AppendLivePendingTransfer"),  # F02980
+    ("MENU/MENUD.PRG", 0x80106A50, "VS::Menu::container::RebuildLivePendingTransfers"),  # F02981
+    ("MENU/MENUD.PRG", 0x80106C64, "VS::Menu::container::BuildLiveItemRows"),  # F02982
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -4324,6 +4336,14 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("VS::Core::Memory::AllocateFromHighEnd(0x1B00)",
          "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
          "C48.c:546 scratch ends with 128 text pointers; reserve native pointer width, not the PS1 512 bytes"),
+    ],
+    "F02985": [
+        ("VS::Core::Memory::AllocateFromHighEnd(0x6C00)",
+         "VS::Core::Memory::AllocateFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace))",
+         "#370: 234.c:2393 container rows own 512 native pointers after their fixed text/type fields"),
+        ("VS::Core::Memory::AllocateFromHighEnd(0x6C00U)",
+         "VS::Core::Memory::AllocateFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace))",
+         "#370: both rebuilt and pending row workspaces require the native pointer-width extent"),
     ],
     "F01554": [
         ("((Effects_ParticleAttractionView*)node)->attraction",

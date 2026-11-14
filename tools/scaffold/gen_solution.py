@@ -382,6 +382,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\Container\ContainerSortingLive.cpp",
                 r"src\Menu\Container\ContainerCapacityLive.cpp",
                 r"src\Menu\Container\ContainerMenuDialogsLive.cpp",
+                r"src\Menu\Container\ContainerPendingRowsLive.cpp",
             ))
 
 

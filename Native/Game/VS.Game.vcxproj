@@ -1686,6 +1686,10 @@
     <ClCompile Include="src\Menu\Container\ContainerMenuDialogsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerPendingRows.cpp" />
+    <ClCompile Include="src\Menu\Container\ContainerPendingRowsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ContainerSorting.cpp" />
     <ClCompile Include="src\Menu\Container\ContainerSortingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2637,6 +2641,8 @@
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpersLive.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerMenuDialogs.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerMenuDialogsLive.hpp" />
+    <ClInclude Include="include\Menu\Container\ContainerPendingRows.hpp" />
+    <ClInclude Include="include\Menu\Container\ContainerPendingRowsLive.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerSorting.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerSortingLive.hpp" />
     <ClInclude Include="include\Menu\Files.hpp" />

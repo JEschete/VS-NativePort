@@ -20,6 +20,10 @@ struct Menu_Framework_MenuRow;
 // or text array, a reference outside the bound table and a table that is
 // neither the inventory's nor the container's are refused and reported.
 namespace VS::Menu::Framework {
+struct TextRef;
+// Reuses the item formatters' resolver for caller-owned row buffers and names.
+[[nodiscard]] char* ResolveLiveItemRowText(TextRef text, void* buffer,
+                                           char* weapon_name);
 // MAINMENU.PRG (2D10.c). The description buffer is
 // kRowDescriptionBufferBytes long.
 Menu_Framework_MenuRow* CreateLiveWeaponComponentRow(int row, int weapon_index,

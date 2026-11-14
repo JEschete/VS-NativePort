@@ -1004,46 +1004,46 @@
 ],
 "Native\\Game\\src\\Menu\\Container\\ItemView.cpp": [
 [
-339,
+175,
 [
-"        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00);",
+"        temp_s1 = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace));",
 "        initial_row_types = (void*)temp_s1 + 0x6000;",
 "        initial_row_text = (void*)temp_s1 + 0x6400;"
 ],
 [
-"        temp_s1 = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(0x6C00));",
+"        temp_s1 = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace)));",
 "        initial_row_types = (int *)(((u_char*)((void*)temp_s1)) + 0x6000);",
 "        initial_row_text = (char **)(((u_char*)((void*)temp_s1)) + 0x6400);"
 ]
 ],
 [
-420,
+256,
 [
 "                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;",
 "                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;",
-"                    temp_s0 = Menu_Container_BuildItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, rebuilt_rows_allocation);"
+"                    temp_s0 = VS::Menu::container::BuildLiveItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, rebuilt_rows_allocation);"
 ],
 [
 "                    rebuilt_row_text = (char **)(((u_char*)(rebuilt_rows_allocation)) + 0x6400);",
 "                    rebuilt_row_types = (int *)(((u_char*)(rebuilt_rows_allocation)) + 0x6000);",
-"                    temp_s0 = Menu_Container_BuildItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, (char *)(rebuilt_rows_allocation));"
+"                    temp_s0 = VS::Menu::container::BuildLiveItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, (char *)(rebuilt_rows_allocation));"
 ]
 ],
 [
-854,
+690,
 [
 "            pending_row_text = pending_rows_allocation + 0x6400;",
 "            pending_row_types = pending_rows_allocation + 0x6000;",
-"            temp_s2 = Menu_Container_BuildItemRows(7, pending_row_text, pending_row_types, pending_rows_allocation);"
+"            temp_s2 = VS::Menu::container::BuildLiveItemRows(7, pending_row_text, pending_row_types, pending_rows_allocation);"
 ],
 [
 "            pending_row_text = (char **)(((u_char*)(pending_rows_allocation)) + 0x6400);",
 "            pending_row_types = (int *)(((u_char*)(pending_rows_allocation)) + 0x6000);",
-"            temp_s2 = Menu_Container_BuildItemRows(7, pending_row_text, pending_row_types, (char *)(pending_rows_allocation));"
+"            temp_s2 = VS::Menu::container::BuildLiveItemRows(7, pending_row_text, pending_row_types, (char *)(pending_rows_allocation));"
 ]
 ],
 [
-980,
+816,
 [
 "            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
@@ -1052,7 +1052,7 @@
 ]
 ],
 [
-1241,
+1077,
 [
 "        static const char initial[8];"
 ],

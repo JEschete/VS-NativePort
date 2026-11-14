@@ -29,7 +29,6 @@ void Menu_Container_BuildWeaponRow(Items_ContainerData* container, char** rowStr
     int* rowTypes, char* buf, int index);
 void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStrings,
     int* rowTypes, char* buf, int index);
-int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, char* textBuf);
 int Menu_Container_UpdateItemList(int transfer_direction_selection);
 int Menu_Container_UpdateTransferDirection(int initialize_direction_menu);
 int Menu_Container_UpdateScreen(u_char* screen_step);

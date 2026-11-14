@@ -289,6 +289,10 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
 };
 }  // namespace
 
+char* ResolveLiveItemRowText(TextRef text, void* buffer, char* weapon_name) {
+  return LegacyText(text, buffer, weapon_name);
+}
+
 void LiveItemRowsHost::Refuse(std::string_view what) { Warn(what); }
 
 std::span<const std::uint8_t> LiveItemRowsHost::HelpText() {

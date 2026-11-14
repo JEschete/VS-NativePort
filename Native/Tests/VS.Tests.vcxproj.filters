@@ -318,6 +318,15 @@
     <ClCompile Include="src\ContainerMenuDialogsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ContainerPendingRowsLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerPendingRowsModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContainerPendingRowsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ContainerSortingLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1015,6 +1024,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ContainerMenuDialogsWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ContainerPendingRowsLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ContainerPendingRowsWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ContainerSortingWorld.hpp">

@@ -147,6 +147,9 @@
     <ClCompile Include="src\ContainerMenuDialogsLiveTests.cpp" />
     <ClCompile Include="src\ContainerMenuDialogsModuleTests.cpp" />
     <ClCompile Include="src\ContainerMenuDialogsTests.cpp" />
+    <ClCompile Include="src\ContainerPendingRowsLiveTests.cpp" />
+    <ClCompile Include="src\ContainerPendingRowsModuleTests.cpp" />
+    <ClCompile Include="src\ContainerPendingRowsTests.cpp" />
     <ClCompile Include="src\ContainerSortingLiveTests.cpp" />
     <ClCompile Include="src\ContainerSortingModuleTests.cpp" />
     <ClCompile Include="src\ContainerSortingTests.cpp" />
@@ -420,6 +423,8 @@
     <ClInclude Include="include\Menu\ContainerDetailHelpersWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerMenuDialogsLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ContainerMenuDialogsWorld.hpp" />
+    <ClInclude Include="include\Menu\ContainerPendingRowsLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\ContainerPendingRowsWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerSortingWorld.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />

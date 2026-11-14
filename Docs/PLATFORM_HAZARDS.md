@@ -64,9 +64,9 @@ there would have hidden the defect and left the wrong behavior in place.
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 2 | 2 | 2 | 0 | 0 | 2 |
 | `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 4 | 0 | 0 | 4 | 0 | 4 |
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
-| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 27 | 0 | 0 | 27 | 0 | 27 |
+| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 26 | 0 | 0 | 26 | 0 | 26 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 555 | 239 | 239 | 285 | 31 | 545 |
+| **Total** | | 554 | 239 | 239 | 284 | 31 | 544 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Roadmap issue | Sites |
 | --- | ---: |
-| #60 | 121 |
+| #60 | 120 |
 | #56 | 96 |
 | no roadmap issue | 79 |
 | #61 | 66 |
