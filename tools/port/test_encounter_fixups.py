@@ -3567,21 +3567,18 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("(Actors_ActorRecord*)", live)
 
     def test_effect_register_consumers_preserve_original_operand_order(self):
-        for function_id, function_name in (
-            ("F01531", "Effects::SetEffectScriptRegister"),
-            ("F01532", "Effects::BranchIfEffectRegisterEqual"),
-        ):
-            old, replacement, _ = copy_fixups.FIXES[function_id][0]
-            source = old.replace(old, replacement)
-            for row, pattern, value, _ in copy_fixups.REGEX_FIXES:
-                if re.search(row, function_name):
-                    source = re.sub(pattern, value, source)
-            self.assertIn("registerIndex = VS::Effects::LiveReadScriptByte(instance)", source)
-            self.assertIn("value = VS::Effects::LiveReadScriptHalfword(instance)", source)
-            self.assertLess(source.index("registerIndex ="), source.index("value ="))
-            self.assertNotIn("arg0", source)
-            self.assertEqual(source.count("LiveReadScript"), 2)
-        self.assertIn("(u_char)instance.registers", source.replace("->", "."))
+        # 5BF94.c:7633/7639 read the register index before the halfword and compare the unsigned
+        # register; the typed opcodes own that order now, not a copy fixup.
+        for function_id in ("F01531", "F01532"):
+            self.assertNotIn(function_id, copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Game\src\Effects\EffectScript.cpp").read_text(encoding="utf-8")
+        operands = source[source.index("ReadRegisterOperands(ScriptCursor& cursor) {"):]
+        self.assertLess(operands.index("ReadScriptByte(cursor)"), operands.index("ReadScriptHalfword(cursor)"))
+        self.assertLess(operands.index("ReadScriptHalfword(cursor)"), operands.index("kScriptRegisters"))
+        live = (root / r"Native\Game\src\Effects\EffectScriptLive.cpp").read_text(encoding="utf-8")
+        registers = live[live.index("ScriptRegisters RegistersOf("):]
+        self.assertIn("std::bit_cast<std::uint8_t>(value)", registers[:registers.index("}\n")])
 
     def test_score_preview_requests_use_initialized_native_record_storage(self):
         source = """Content_ActorAssetRequest slot;

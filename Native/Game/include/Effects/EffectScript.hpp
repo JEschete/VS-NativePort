@@ -1,8 +1,10 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <optional>
 #include <span>
 
@@ -81,4 +83,60 @@ class ScriptMachine {
 // func_800D51D8 (5BF94.c:7813): runs opcodes until one yields or ends the
 // instance. A refused opcode read or handler ends it.
 [[nodiscard]] ScriptRun RunScript(ScriptMachine& machine);
+
+// An instance's four script registers (instance + 0x10), which opcodes set,
+// test and read operands from.
+inline constexpr std::size_t kScriptRegisters = 4;
+using ScriptRegisters = std::array<std::uint8_t, kScriptRegisters>;
+
+// The register the action-variant opcode loads, and the values it loads for
+// the four action variants (D_800EC32C).
+inline constexpr std::size_t kActionVariantRegister = 3;
+inline constexpr std::size_t kActionVariantValues = 4;
+using ActionVariantValues = std::array<std::uint8_t, kActionVariantValues>;
+
+// Why an operand opcode refused: an operand read past the program, or a
+// register operand past the four registers. The original wrote and read the
+// instance fields after the registers; no shipped program names one (the
+// effect packages only name registers 0, 1 and 3).
+enum class ScriptRefusal : std::uint8_t { kOperand, kRegister };
+
+using OpcodeStep = std::expected<ScriptStep, ScriptRefusal>;
+
+// func_800D47C8 (5BF94.c:7540): stores the operand byte in the selector.
+[[nodiscard]] OpcodeStep SetScriptSelector(ScriptCursor& cursor,
+                                           std::int32_t& selector);
+
+// func_800D487C (5BF94.c:7563): branches once no renderer is attached.
+[[nodiscard]] OpcodeStep BranchIfRenderersFinished(bool renderers_attached,
+                                                   ScriptCursor& cursor);
+
+// func_800D48E4 (5BF94.c:7576): branches when the action variant is 0.
+[[nodiscard]] OpcodeStep BranchIfActionVariantCleared(std::uint8_t variant,
+                                                      ScriptCursor& cursor);
+
+// func_800D4AB4 (5BF94.c:7625): loads the variant's value into register 3;
+// a variant past the four keeps the register.
+[[nodiscard]] ScriptStep LoadActionVariantRegister(
+    std::uint8_t variant, const ActionVariantValues& values,
+    ScriptRegisters& registers);
+
+// func_800D4AEC (5BF94.c:7633): reads a register index, then a halfword
+// whose low byte the register keeps.
+[[nodiscard]] OpcodeStep SetScriptRegister(ScriptCursor& cursor,
+                                           ScriptRegisters& registers);
+
+// func_800D4B34 (5BF94.c:7639): reads a register index and a halfword, then
+// branches when the register equals the whole halfword, so a value past 0xFF
+// never branches.
+[[nodiscard]] OpcodeStep BranchIfScriptRegisterEqual(
+    ScriptCursor& cursor, const ScriptRegisters& registers);
+
+// func_800D4B90 (5BF94.c:7645): branches when the operand byte equals the
+// instance's particle count.
+[[nodiscard]] OpcodeStep BranchIfParticleCountEqual(std::uint8_t particle_count,
+                                                    ScriptCursor& cursor);
+
+// func_800D4D98 (5BF94.c:7705): clears the action variant.
+[[nodiscard]] ScriptStep ClearActionVariant(std::uint8_t& variant);
 }  // namespace VS::Effects

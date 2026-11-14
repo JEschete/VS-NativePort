@@ -1,8 +1,11 @@
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <initializer_list>
+#include <iterator>
 #include <optional>
 #include <span>
 #include <utility>
@@ -130,6 +133,45 @@ Effects_EffectInstance InstanceAt(std::vector<std::byte>& program,
   instance.scriptOffset = offset;
   return instance;
 }
+
+using Refusal = fx::ScriptRefusal;
+constexpr fx::OpcodeStep kContinued{ScriptStep::kContinue};
+constexpr fx::OpcodeStep kOperandRefused{std::unexpect, Refusal::kOperand};
+constexpr fx::OpcodeStep kRegisterRefused{std::unexpect, Refusal::kRegister};
+
+// Restores the selector, the action variant and its four values.
+class ScriptGlobalsScope {
+ public:
+  ScriptGlobalsScope()
+      : selector_(Effects_scriptSelector),
+        variant_(Effects_actionVariant),
+        values_(VariantValues()) {}
+  ScriptGlobalsScope(const ScriptGlobalsScope&) = delete;
+  ScriptGlobalsScope& operator=(const ScriptGlobalsScope&) = delete;
+  ScriptGlobalsScope(ScriptGlobalsScope&&) = delete;
+  ScriptGlobalsScope& operator=(ScriptGlobalsScope&&) = delete;
+  ~ScriptGlobalsScope() {
+    Effects_scriptSelector = selector_;
+    Effects_actionVariant = variant_;
+    std::ranges::copy(values_, std::begin(Effects_actionVariantValues));
+  }
+
+  static void SetVariantValues(std::array<char, fx::kActionVariantValues> to) {
+    std::ranges::copy(to, std::begin(Effects_actionVariantValues));
+  }
+
+ private:
+  static std::array<char, fx::kActionVariantValues> VariantValues() {
+    std::array<char, fx::kActionVariantValues> values{};
+    std::ranges::copy_n(std::begin(Effects_actionVariantValues), values.size(),
+                        values.begin());
+    return values;
+  }
+
+  int selector_;
+  std::uint8_t variant_;
+  std::array<char, fx::kActionVariantValues> values_;
+};
 }  // namespace
 
 TEST_CASE("Effect script byte reads advance one byte and stop at the program",
@@ -346,4 +388,212 @@ TEST_CASE("Live effect script entries refuse a null instance",
   fx::LiveBranchEffectScriptIf(1, nullptr);
   CHECK(fx::LiveEndEffectScript(nullptr) == 2);
   CHECK(fx::LiveContinueEffectScript(nullptr) == 1);
+}
+
+TEST_CASE("Effect script selectors store the zero-extended operand byte",
+          "[effect-script]") {
+  const auto program = Program({0xFF});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  std::int32_t selector = -1;
+  CHECK(fx::SetScriptSelector(cursor, selector) == kContinued);
+  CHECK(selector == 0xFF);
+  CHECK(cursor.offset == 1);
+
+  selector = 7;
+  CHECK(fx::SetScriptSelector(cursor, selector) == kOperandRefused);
+  CHECK(selector == 7);
+  CHECK(cursor.offset == 1);
+}
+
+TEST_CASE("Effect script renderer branches wait for the renderers to finish",
+          "[effect-script]") {
+  const auto program = Program({0x34, 0x12});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::BranchIfRenderersFinished(false, cursor) == kContinued);
+  CHECK(cursor.offset == 0x1234);
+  cursor.offset = 0;
+  CHECK(fx::BranchIfRenderersFinished(true, cursor) == kContinued);
+  CHECK(cursor.offset == 2);
+}
+
+TEST_CASE("Effect script variant branches wait for a cleared action variant",
+          "[effect-script]") {
+  const auto program = Program({0x34, 0x12});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::BranchIfActionVariantCleared(0, cursor) == kContinued);
+  CHECK(cursor.offset == 0x1234);
+  cursor.offset = 0;
+  CHECK(fx::BranchIfActionVariantCleared(1, cursor) == kContinued);
+  CHECK(cursor.offset == 2);
+
+  cursor.offset = 1;
+  CHECK(fx::BranchIfActionVariantCleared(0, cursor) == kOperandRefused);
+  CHECK(cursor.offset == 1);
+}
+
+TEST_CASE("Effect script particle-count branches compare the operand byte",
+          "[effect-script]") {
+  const auto program = Program({0x90, 0x34, 0x12});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::BranchIfParticleCountEqual(0x90, cursor) == kContinued);
+  CHECK(cursor.offset == 0x1234);
+  cursor.offset = 0;
+  CHECK(fx::BranchIfParticleCountEqual(0x10, cursor) == kContinued);
+  CHECK(cursor.offset == 3);
+
+  cursor.offset = 1;
+  CHECK(fx::BranchIfParticleCountEqual(0x34, cursor) == kOperandRefused);
+  CHECK(cursor.offset == 2);
+}
+
+TEST_CASE("Effect script action variants below four load register 3",
+          "[effect-script]") {
+  constexpr fx::ActionVariantValues kValues{10, 20, 30, 40};
+  for (const std::uint8_t variant : std::to_array<std::uint8_t>({0, 1, 2, 3})) {
+    fx::ScriptRegisters registers{1, 2, 3, 4};
+    CHECK(fx::LoadActionVariantRegister(variant, kValues, registers) ==
+          ScriptStep::kContinue);
+    CHECK(registers == fx::ScriptRegisters{1, 2, 3, kValues.at(variant)});
+  }
+  for (const std::uint8_t variant : std::to_array<std::uint8_t>({4, 5, 0xFF})) {
+    fx::ScriptRegisters registers{1, 2, 3, 4};
+    CHECK(fx::LoadActionVariantRegister(variant, kValues, registers) ==
+          ScriptStep::kContinue);
+    CHECK(registers == fx::ScriptRegisters{1, 2, 3, 4});
+  }
+
+  std::uint8_t variant = 3;
+  CHECK(fx::ClearActionVariant(variant) == ScriptStep::kContinue);
+  CHECK(variant == 0);
+}
+
+TEST_CASE("Effect script register writes keep the halfword's low byte",
+          "[effect-script]") {
+  const auto program = Program({1, 0x34, 0x12, 3, 0xFF, 0x00});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  fx::ScriptRegisters registers{1, 2, 3, 4};
+  CHECK(fx::SetScriptRegister(cursor, registers) == kContinued);
+  CHECK(registers == fx::ScriptRegisters{1, 0x34, 3, 4});
+  CHECK(cursor.offset == 3);
+  CHECK(fx::SetScriptRegister(cursor, registers) == kContinued);
+  CHECK(registers == fx::ScriptRegisters{1, 0x34, 3, 0xFF});
+  CHECK(cursor.offset == 6);
+}
+
+TEST_CASE("Effect script register branches compare the whole halfword",
+          "[effect-script]") {
+  const auto program =
+      Program({2, 0x80, 0x00, 0x78, 0x56, 2, 0x80, 0x01, 0x78, 0x56});
+  const fx::ScriptRegisters registers{0, 0, 0x80, 0};
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::BranchIfScriptRegisterEqual(cursor, registers) == kContinued);
+  CHECK(cursor.offset == 0x5678);
+
+  // 0x180 keeps the register's low byte but is not equal to it.
+  cursor.offset = 5;
+  CHECK(fx::BranchIfScriptRegisterEqual(cursor, registers) == kContinued);
+  CHECK(cursor.offset == 10);
+}
+
+TEST_CASE("Effect script register operands refuse registers past the four",
+          "[effect-script]") {
+  const auto program = Program({4, 0x34, 0x12, 0x78, 0x56, 0xFF, 0x00});
+  fx::ScriptRegisters registers{1, 2, 3, 4};
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::SetScriptRegister(cursor, registers) == kRegisterRefused);
+  CHECK(cursor.offset == 3);
+  cursor.offset = 0;
+  CHECK(fx::BranchIfScriptRegisterEqual(cursor, registers) == kRegisterRefused);
+  CHECK(cursor.offset == 3);
+  CHECK(registers == fx::ScriptRegisters{1, 2, 3, 4});
+
+  // A truncated halfword refuses the operand, whatever the index.
+  cursor.offset = 5;
+  CHECK(fx::SetScriptRegister(cursor, registers) == kOperandRefused);
+  CHECK(cursor.offset == 6);
+  cursor.offset = 5;
+  CHECK(fx::BranchIfScriptRegisterEqual(cursor, registers) == kOperandRefused);
+  CHECK(registers == fx::ScriptRegisters{1, 2, 3, 4});
+}
+
+TEST_CASE("Live effect script register opcodes update the instance",
+          "[effect-script]") {
+  auto program = Program({1, 0x34, 0x12, 1, 0x34, 0x00, 0x20, 0x00});
+  const VS::test_support::EffectProgramScope recorded{program};
+  auto instance = InstanceAt(program, 0);
+  CHECK(fx::LiveSetEffectScriptRegister(&instance) == 1);
+  CHECK(std::bit_cast<std::uint8_t>(instance.registers[1]) == 0x34);
+  CHECK(instance.scriptOffset == 3);
+  CHECK(fx::LiveBranchIfEffectRegisterEqual(&instance) == 1);
+  CHECK(instance.scriptOffset == 0x20);
+
+  // The original compared the count as an unsigned byte.
+  auto counted = Program({0x90, 0x40, 0x00});
+  const VS::test_support::EffectProgramScope counted_scope{counted};
+  auto particles = InstanceAt(counted, 0);
+  particles.particleCount = std::bit_cast<char>(std::uint8_t{0x90});
+  CHECK(fx::LiveBranchIfParticleCountEqual(&particles) == 1);
+  CHECK(particles.scriptOffset == 0x40);
+
+  particles.scriptOffset = 1;
+  CHECK(fx::LiveBranchIfEffectRenderersFinished(&particles) == 1);
+  CHECK(particles.scriptOffset == 0x40);
+}
+
+TEST_CASE("Live effect script opcodes follow the selector and action variant",
+          "[effect-script]") {
+  const ScriptGlobalsScope globals;
+  ScriptGlobalsScope::SetVariantValues({10, 20, 30, 40});
+  auto program = Program({0xC8, 0x34, 0x12});
+  const VS::test_support::EffectProgramScope recorded{program};
+  auto instance = InstanceAt(program, 0);
+
+  CHECK(fx::LiveSetEffectScriptSelector(&instance) == 1);
+  CHECK(Effects_scriptSelector == 0xC8);
+
+  Effects_actionVariant = 2;
+  CHECK(fx::LiveLoadActionVariantRegister(&instance) == 1);
+  CHECK(instance.registers[3] == 30);
+  CHECK(fx::LiveBranchIfActionVariantCleared(&instance) == 1);
+  CHECK(instance.scriptOffset == 3);
+}
+
+TEST_CASE("Live effect script variant clears release the variant branch",
+          "[effect-script]") {
+  const ScriptGlobalsScope globals;
+  auto program = Program({0x34, 0x12});
+  const VS::test_support::EffectProgramScope recorded{program};
+  auto instance = InstanceAt(program, 0);
+
+  Effects_actionVariant = 2;
+  CHECK(fx::LiveClearScriptActionVariant(nullptr) == 1);
+  CHECK(Effects_actionVariant == 0);
+  CHECK(fx::LiveBranchIfActionVariantCleared(&instance) == 1);
+  CHECK(instance.scriptOffset == 0x1234);
+}
+
+TEST_CASE("Live effect script register opcodes end on refused operands",
+          "[effect-script]") {
+  auto program = Program({4, 0x34, 0x12, 1, 0x34});
+  const VS::test_support::EffectProgramScope recorded{program};
+  auto instance = InstanceAt(program, 0);
+  instance.registers[1] = 9;
+  CHECK(fx::LiveSetEffectScriptRegister(&instance) == 2);
+  CHECK(instance.scriptOffset == 3);
+  CHECK(fx::LiveSetEffectScriptRegister(&instance) == 2);
+  CHECK(instance.scriptOffset == 4);
+  CHECK(instance.registers[1] == 9);
+  instance.scriptOffset = 0;
+  CHECK(fx::LiveBranchIfEffectRegisterEqual(&instance) == 2);
+}
+
+TEST_CASE("Live effect script operand opcodes refuse null instances",
+          "[effect-script]") {
+  CHECK(fx::LiveSetEffectScriptSelector(nullptr) == 2);
+  CHECK(fx::LiveBranchIfEffectRenderersFinished(nullptr) == 2);
+  CHECK(fx::LiveBranchIfActionVariantCleared(nullptr) == 2);
+  CHECK(fx::LiveLoadActionVariantRegister(nullptr) == 2);
+  CHECK(fx::LiveSetEffectScriptRegister(nullptr) == 2);
+  CHECK(fx::LiveBranchIfEffectRegisterEqual(nullptr) == 2);
+  CHECK(fx::LiveBranchIfParticleCountEqual(nullptr) == 2);
 }

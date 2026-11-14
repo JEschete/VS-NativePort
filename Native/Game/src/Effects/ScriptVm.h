@@ -13,23 +13,15 @@
 #include "Effects/Transforms.h"
 
 int Effects_SpawnEffectScript(Effects_EffectInstance* effect_instance);
-int Effects_SetEffectScriptSelector(Effects_EffectInstance* effect_instance);
 int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance);
-int Effects_BranchIfEffectRenderersFinished(Effects_EffectInstance* effect_instance);
 int Effects_LoadEffectTimelineImmediate(Effects_EffectInstance* effect_instance);
-int Effects_BranchIfActionVariantCleared(Effects_EffectInstance* effect_instance);
 int Effects_TickEffectRenderers(Effects_EffectInstance* effect_instance);
 int Effects_TickEffectTransforms(Effects_EffectInstance* effect_instance);
 int Effects_SetActionEffectVerticalOffset(Effects_EffectInstance* effect_instance);
 int Effects_InitializeScriptEffectTransforms(Effects_EffectInstance* effect_instance);
-int Effects_LoadActionVariantRegister(Effects_EffectInstance* effect_instance);
-int Effects_SetEffectScriptRegister(Effects_EffectInstance* instance);
-int Effects_BranchIfEffectRegisterEqual(Effects_EffectInstance* instance);
-int Effects_BranchIfParticleCountEqual(Effects_EffectInstance* effect_instance);
 int Effects_EmitParticlesFromScriptRegister(Effects_EffectInstance* effect_instance);
 int Effects_RefreshScriptParticleEnvironment(Effects_EffectInstance* effect_instance __attribute__((unused)));
 int Effects_SignalSourceActorFromScript(Effects_EffectInstance* effect_instance);
-int Effects_ClearScriptActionVariant(Effects_EffectInstance* effect_instance __attribute__((unused)));
 int Effects_LoadEffectTimelineFromRegister(Effects_EffectInstance* effect_instance);
 int Effects_TickEffectTimelineFromScript(Effects_EffectInstance* effect_instance);
 int Effects_BranchIfEffectTimelineFinished(Effects_EffectInstance* effect_instance);

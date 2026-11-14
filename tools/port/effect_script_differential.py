@@ -195,7 +195,7 @@ def configure(function: int, mode: int, entry: int, end: int, mutants: dict) -> 
     """Case-module globals for one effect script function compared in `mode`."""
     return {
         "ID": f"F{function:05}", "ENTRY": entry, "END": end,
-        "DRIVER": DRIVER, "SOURCES": SOURCES, "MODULES": MODULES,
+        "DRIVER": DRIVER, "SOURCES": SOURCES, "MODULES": MODULES, "CXX_STANDARD": "c++latest",
         "VECTORS": 256, "SEED": function, "MUTANT_VECTORS": 64, "MUTANTS": mutants,
         "vector": lambda rng, number: vector(rng, number, mode),
         "run": lambda machine, value: run(machine, value, entry),

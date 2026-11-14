@@ -614,6 +614,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveReadScriptByte": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveReadScriptHalfword": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveRunEffectScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveSetEffectScriptSelector": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveBranchIfEffectRenderersFinished": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveBranchIfActionVariantCleared": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveLoadActionVariantRegister": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveSetEffectScriptRegister": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveBranchIfEffectRegisterEqual": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveBranchIfParticleCountEqual": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveClearScriptActionVariant": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2537,6 +2545,14 @@ OWNED_CALL_BINDINGS["F01539"] = "VS::Effects::LiveContinueEffectScript"
 OWNED_CALL_BINDINGS["F01549"] = "VS::Effects::LiveReadScriptByte"
 OWNED_CALL_BINDINGS["F01550"] = "VS::Effects::LiveReadScriptHalfword"
 OWNED_CALL_BINDINGS["F01551"] = "VS::Effects::LiveRunEffectScript"
+OWNED_CALL_BINDINGS["F01521"] = "VS::Effects::LiveSetEffectScriptSelector"
+OWNED_CALL_BINDINGS["F01523"] = "VS::Effects::LiveBranchIfEffectRenderersFinished"
+OWNED_CALL_BINDINGS["F01525"] = "VS::Effects::LiveBranchIfActionVariantCleared"
+OWNED_CALL_BINDINGS["F01530"] = "VS::Effects::LiveLoadActionVariantRegister"
+OWNED_CALL_BINDINGS["F01531"] = "VS::Effects::LiveSetEffectScriptRegister"
+OWNED_CALL_BINDINGS["F01532"] = "VS::Effects::LiveBranchIfEffectRegisterEqual"
+OWNED_CALL_BINDINGS["F01533"] = "VS::Effects::LiveBranchIfParticleCountEqual"
+OWNED_CALL_BINDINGS["F01538"] = "VS::Effects::LiveClearScriptActionVariant"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3982,6 +3998,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D5170, "VS::Effects::LiveReadScriptByte"),  # F01549
     ("BATTLE/BATTLE.PRG", 0x800D5198, "VS::Effects::LiveReadScriptHalfword"),  # F01550
     ("BATTLE/BATTLE.PRG", 0x800D51D8, "VS::Effects::LiveRunEffectScript"),  # F01551
+    ("BATTLE/BATTLE.PRG", 0x800D47C8, "VS::Effects::LiveSetEffectScriptSelector"),  # F01521
+    ("BATTLE/BATTLE.PRG", 0x800D487C, "VS::Effects::LiveBranchIfEffectRenderersFinished"),  # F01523
+    ("BATTLE/BATTLE.PRG", 0x800D48E4, "VS::Effects::LiveBranchIfActionVariantCleared"),  # F01525
+    ("BATTLE/BATTLE.PRG", 0x800D4AB4, "VS::Effects::LiveLoadActionVariantRegister"),  # F01530
+    ("BATTLE/BATTLE.PRG", 0x800D4AEC, "VS::Effects::LiveSetEffectScriptRegister"),  # F01531
+    ("BATTLE/BATTLE.PRG", 0x800D4B34, "VS::Effects::LiveBranchIfEffectRegisterEqual"),  # F01532
+    ("BATTLE/BATTLE.PRG", 0x800D4B90, "VS::Effects::LiveBranchIfParticleCountEqual"),  # F01533
+    ("BATTLE/BATTLE.PRG", 0x800D4D98, "VS::Effects::LiveClearScriptActionVariant"),  # F01538
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
@@ -4213,22 +4237,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                 }""",
          "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
          "without changing nonzero scaling, particle emission or RNG consumption."),
-    ],
-    "F01531": [
-        ("arg0->registers[VS::Effects::LiveReadScriptByte(arg0)] = VS::Effects::LiveReadScriptHalfword(arg0);",
-         "u_char registerIndex = VS::Effects::LiveReadScriptByte(arg0);\n"
-         "    u_short value = VS::Effects::LiveReadScriptHalfword(arg0);\n"
-         "    arg0->registers[registerIndex] = value;",
-         "5BF94.c:7633 / 800D4AFC..800D4B18 reads the index before the halfword; "
-         "native assignment evaluation must not reorder the shared cursor"),
-    ],
-    "F01532": [
-        ("VS::Effects::LiveBranchEffectScriptIf(arg0->registers[VS::Effects::LiveReadScriptByte(arg0)] == "
-         "(VS::Effects::LiveReadScriptHalfword(arg0)), arg0);",
-         "u_char registerIndex = VS::Effects::LiveReadScriptByte(arg0);\n"
-         "    u_short value = VS::Effects::LiveReadScriptHalfword(arg0);\n"
-         "    VS::Effects::LiveBranchEffectScriptIf((u_char)arg0->registers[registerIndex] == value, arg0);",
-         "5BF94.c:7639 / 800D4B44..800D4B74 preserves ordered operands and the original lbu comparison"),
     ],
     "F01535": [
         ("    /* The original caller supplies arguments to this argument-free wrapper. */\n", "",
@@ -5658,9 +5666,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      "5BF94.c:8513 verified block2 halfword program-offset selection"),
     (r"^Effects::AdvanceParticleTextureAnimation$", r"\bw\b", "command",
      "5BF94.c:8521 verified frame/offset/loop/end command word"),
-    (r"^Effects::(?:SetEffectScriptRegister|BranchIfEffectRegisterEqual)$",
-     r"\barg0\b", "instance",
-     "5BF94.c:7633/7639 verified effect-instance stream and register ownership"),
     *[(r"^Menu::Score::QueueEnemyModelRead$", rf"\b{old}\b", new,
        "592C.c:171 verified source-file and palette-variant selection meanings")
       for old, new in (("id", "zudId"), ("cdFile", "sourceFile"),

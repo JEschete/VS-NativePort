@@ -4,12 +4,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Effects/EffectScriptLive.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/EffectProgramScope.hpp"
 
 extern "C" {
 #include "Effects/Runtime.h"
-#include "Effects/ScriptVm.h"
 }
 
 extern "C" int Tests_LayoutAssertsLinked(void);
@@ -99,7 +99,7 @@ TEST_CASE("Effect register instructions consume the index before the halfword",
   for (unsigned reg = 0; reg < 4; ++reg) {
     instance.registers[reg] = static_cast<char>(0x40 + reg);
   }
-  REQUIRE(Effects_SetEffectScriptRegister(&instance) == 1);
+  REQUIRE(VS::Effects::LiveSetEffectScriptRegister(&instance) == 1);
   CHECK(instance.scriptOffset == script.size());
   for (unsigned reg = 0; reg < 4; ++reg) {
     CHECK(static_cast<u_char>(instance.registers[reg]) ==
@@ -120,7 +120,7 @@ TEST_CASE(
   Effects_EffectInstance instance{};
   instance.script = script.data();
   instance.registers[index] = static_cast<char>(equal ? value : value ^ 1U);
-  REQUIRE(Effects_BranchIfEffectRegisterEqual(&instance) == 1);
+  REQUIRE(VS::Effects::LiveBranchIfEffectRegisterEqual(&instance) == 1);
   CHECK(instance.scriptOffset ==
         (equal && value <= 255U ? 0x1234 : script.size()));
 }

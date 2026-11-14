@@ -25,13 +25,6 @@ int Effects_SpawnEffectScript(Effects_EffectInstance* effect_instance)
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D47C8 (src/BATTLE/BATTLE.PRG/5BF94.c:7540)
-int Effects_SetEffectScriptSelector(Effects_EffectInstance* effect_instance)
-{
-    Effects_scriptSelector = VS::Effects::LiveReadScriptByte(effect_instance);
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:7546)
 int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance)
 {
@@ -50,25 +43,11 @@ int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance)
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D487C (src/BATTLE/BATTLE.PRG/5BF94.c:7563)
-int Effects_BranchIfEffectRenderersFinished(Effects_EffectInstance* effect_instance)
-{
-    VS::Effects::LiveBranchEffectScriptIf(effect_instance->context.renderer == 0, effect_instance);
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7569)
 int Effects_LoadEffectTimelineImmediate(Effects_EffectInstance* effect_instance)
 {
     Effects_LoadEffectTimeline(effect_instance, VS::Effects::LiveReadScriptByte(effect_instance) & 0xFF, 0);
     effect_instance->scriptOffset = 0xB7;
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D48E4 (src/BATTLE/BATTLE.PRG/5BF94.c:7576)
-int Effects_BranchIfActionVariantCleared(Effects_EffectInstance* effect_instance)
-{
-    VS::Effects::LiveBranchEffectScriptIf(Effects_actionVariant == 0, effect_instance);
     return 1;
 }
 
@@ -119,40 +98,6 @@ int Effects_InitializeScriptEffectTransforms(Effects_EffectInstance* effect_inst
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800D4AB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7625)
-int Effects_LoadActionVariantRegister(Effects_EffectInstance* effect_instance)
-{
-    if (Effects_actionVariant < 4) {
-        effect_instance->registers[3] = Effects_actionVariantValues[Effects_actionVariant];
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7633)
-int Effects_SetEffectScriptRegister(Effects_EffectInstance* instance)
-{
-    u_char registerIndex = VS::Effects::LiveReadScriptByte(instance);
-    u_short value = VS::Effects::LiveReadScriptHalfword(instance);
-    instance->registers[registerIndex] = value;
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:7639)
-int Effects_BranchIfEffectRegisterEqual(Effects_EffectInstance* instance)
-{
-    u_char registerIndex = VS::Effects::LiveReadScriptByte(instance);
-    u_short value = VS::Effects::LiveReadScriptHalfword(instance);
-    VS::Effects::LiveBranchEffectScriptIf((u_char)instance->registers[registerIndex] == value, instance);
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D4B90 (src/BATTLE/BATTLE.PRG/5BF94.c:7645)
-int Effects_BranchIfParticleCountEqual(Effects_EffectInstance* effect_instance)
-{
-    VS::Effects::LiveBranchEffectScriptIf(effect_instance->particleCount == VS::Effects::LiveReadScriptByte(effect_instance), effect_instance);
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:7651)
 int Effects_EmitParticlesFromScriptRegister(Effects_EffectInstance* effect_instance)
 {
@@ -173,13 +118,6 @@ int Effects_SignalSourceActorFromScript(Effects_EffectInstance* effect_instance)
     if (effect_instance->context.source.type == 4) {
         Effects_SignalActorEffectAnimation(effect_instance->context.source.value.actor.actor);
     }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:7705)
-int Effects_ClearScriptActionVariant(Effects_EffectInstance* effect_instance __attribute__((unused)))
-{
-    Effects_actionVariant = 0;
     return 1;
 }
 
