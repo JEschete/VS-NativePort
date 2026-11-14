@@ -2289,6 +2289,12 @@
     <ClInclude Include="src\Menu\BreakArts.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\BreakArtsCore.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\BreakArtsLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ContainerCapacity.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
@@ -3722,6 +3728,12 @@
     </ClInclude>
     <ClInclude Include="include\Items\Recovery.hpp">
       <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\BreakArts.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\BreakArtsLive.hpp">
+      <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Container\ContainerCapacity.hpp">
       <Filter>include\Menu\Container</Filter>

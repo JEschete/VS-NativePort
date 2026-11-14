@@ -1670,6 +1670,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\BreakArtsCore.cpp" />
+    <ClCompile Include="src\Menu\BreakArtsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ContainerCapacity.cpp" />
     <ClCompile Include="src\Menu\Container\ContainerCapacityLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2644,6 +2648,8 @@
     <ClInclude Include="include\Items\Loot.hpp" />
     <ClInclude Include="include\Items\LootLive.hpp" />
     <ClInclude Include="include\Items\Recovery.hpp" />
+    <ClInclude Include="include\Menu\BreakArts.hpp" />
+    <ClInclude Include="include\Menu\BreakArtsLive.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerCapacity.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerCapacityLive.hpp" />
     <ClInclude Include="include\Menu\Container\ContainerDetailControllers.hpp" />

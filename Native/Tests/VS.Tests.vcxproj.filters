@@ -249,6 +249,9 @@
     <ClCompile Include="src\BattleTargetingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\BreakArtsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CameraConstraintTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

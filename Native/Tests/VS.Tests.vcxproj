@@ -118,6 +118,7 @@
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />
     <ClCompile Include="src\BasicActionEffectsTests.cpp" />
     <ClCompile Include="src\BattleTargetingTests.cpp" />
+    <ClCompile Include="src\BreakArtsTests.cpp" />
     <ClCompile Include="src\CameraConstraintTests.cpp" />
     <ClCompile Include="src\CdDriveTests.cpp" />
     <ClCompile Include="src\CollisionSamplingTests.cpp" />

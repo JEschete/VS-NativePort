@@ -30,6 +30,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "Menu/BreakArtsLive.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -934,7 +935,7 @@ class LiveHost final : public Host {
       case Submenu::kMagic:
         return Menu_Magic_Update(bytes);
       case Submenu::kBreakArts:
-        return Menu_BreakArts_Update(bytes);
+        return VS::Menu::break_arts::UpdateLive(bytes);
       case Submenu::kBattleAbilities:
         return Menu_BattleAbilities_Update(bytes);
       case Submenu::kInventory:
