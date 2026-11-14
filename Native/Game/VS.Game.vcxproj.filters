@@ -1050,6 +1050,12 @@
     <ClCompile Include="src\Effects\CurvesLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\EffectInstances.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\EffectInstancesLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\EffectResources.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3358,6 +3364,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\CurvesLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\EffectInstances.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\EffectInstancesLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\EffectResources.hpp">

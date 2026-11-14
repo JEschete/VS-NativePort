@@ -62,6 +62,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
@@ -488,9 +489,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CE174u, 0u, (void*)&Effects_UpdateBoneTrail, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CE64Cu, 0u, (void*)&Effects_InitEffectRuntime, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CE67Cu, 0u, (void*)&Effects_ResetEffectInstances, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CE714u, 0u, (void*)&Effects_InitEffectInstance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CE83Cu, 0u, (void*)&Effects_CreatePrimaryEffectInstance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CE8F4u, 0u, (void*)&Effects_DestroyPrimaryEffectInstance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CE9B0u, 0u, (void*)&Effects_UpdatePrimaryEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CED60u, 0u, (void*)&Effects_UpdateSecondaryEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CEF74u, 0u, (void*)&Effects_StartEffectTrack, 0u, 0u, 0u},
@@ -500,11 +498,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CF218u, 0u, (void*)&Effects_SpawnSecondaryEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF3F8u, 0u, (void*)&Effects_BeginSecondaryEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF458u, 0u, (void*)&Effects_SpawnSecondaryEffectRequest, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF484u, 0u, (void*)&Effects_SetSecondaryEffectPhase, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF55Cu, 0u, (void*)&Effects_CreateSecondaryEffectInstance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF614u, 0u, (void*)&Effects_DestroySecondaryEffectInstance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF694u, 0u, (void*)&Effects_AttachEffectRenderer, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF70Cu, 0u, (void*)&Effects_DetachEffectRenderer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF7A8u, 0u, (void*)&Effects_SpawnBoneTrail, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF830u, 0u, (void*)&Effects_FadeBoneTrails, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF8BCu, 0u, (void*)&Effects_SpawnSourceActorEffect, 0u, 0u, 0u},
@@ -2006,6 +1999,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D5E00u, 0u, (void*)&VS::Effects::LiveTickControllerVibrationTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6A18u, 0u, (void*)&VS::Effects::LiveTickCameraShakeTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6AECu, 0u, (void*)&VS::Effects::LiveTickEffectTimeline, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CE714u, 0u, (void*)&VS::Effects::LiveInitEffectInstance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CE83Cu, 0u, (void*)&VS::Effects::LiveCreatePrimaryEffectInstance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CE8F4u, 0u, (void*)&VS::Effects::LiveDestroyPrimaryEffectInstance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF484u, 0u, (void*)&VS::Effects::LiveSetSecondaryEffectPhase, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF55Cu, 0u, (void*)&VS::Effects::LiveCreateSecondaryEffectInstance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF614u, 0u, (void*)&VS::Effects::LiveDestroySecondaryEffectInstance, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF694u, 0u, (void*)&VS::Effects::LiveAttachEffectRenderer, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF70Cu, 0u, (void*)&VS::Effects::LiveDetachEffectRenderer, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},

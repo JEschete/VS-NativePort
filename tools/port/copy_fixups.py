@@ -677,6 +677,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveTickControllerVibrationTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
     "VS::Effects::LiveTickCameraShakeTrack": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
     "VS::Effects::LiveTickEffectTimeline": r"Native\Game\include\Effects\TimelinePlaybackLive.hpp",
+    "VS::Effects::LiveInitEffectInstance": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveCreatePrimaryEffectInstance": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveDestroyPrimaryEffectInstance": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveSetSecondaryEffectPhase": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveCreateSecondaryEffectInstance": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveDestroySecondaryEffectInstance": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveAttachEffectRenderer": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveDetachEffectRenderer": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2663,6 +2671,14 @@ OWNED_CALL_BINDINGS["F01564"] = "VS::Effects::LiveTickEffectRendererTrack"
 OWNED_CALL_BINDINGS["F01565"] = "VS::Effects::LiveTickControllerVibrationTrack"
 OWNED_CALL_BINDINGS["F01588"] = "VS::Effects::LiveTickCameraShakeTrack"
 OWNED_CALL_BINDINGS["F01589"] = "VS::Effects::LiveTickEffectTimeline"
+OWNED_CALL_BINDINGS["F01422"] = "VS::Effects::LiveInitEffectInstance"
+OWNED_CALL_BINDINGS["F01423"] = "VS::Effects::LiveCreatePrimaryEffectInstance"
+OWNED_CALL_BINDINGS["F01424"] = "VS::Effects::LiveDestroyPrimaryEffectInstance"
+OWNED_CALL_BINDINGS["F01439"] = "VS::Effects::LiveSetSecondaryEffectPhase"
+OWNED_CALL_BINDINGS["F01443"] = "VS::Effects::LiveCreateSecondaryEffectInstance"
+OWNED_CALL_BINDINGS["F01444"] = "VS::Effects::LiveDestroySecondaryEffectInstance"
+OWNED_CALL_BINDINGS["F01445"] = "VS::Effects::LiveAttachEffectRenderer"
+OWNED_CALL_BINDINGS["F01446"] = "VS::Effects::LiveDetachEffectRenderer"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4171,6 +4187,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D5E00, "VS::Effects::LiveTickControllerVibrationTrack"),  # F01565
     ("BATTLE/BATTLE.PRG", 0x800D6A18, "VS::Effects::LiveTickCameraShakeTrack"),  # F01588
     ("BATTLE/BATTLE.PRG", 0x800D6AEC, "VS::Effects::LiveTickEffectTimeline"),  # F01589
+    ("BATTLE/BATTLE.PRG", 0x800CE714, "VS::Effects::LiveInitEffectInstance"),  # F01422
+    ("BATTLE/BATTLE.PRG", 0x800CE83C, "VS::Effects::LiveCreatePrimaryEffectInstance"),  # F01423
+    ("BATTLE/BATTLE.PRG", 0x800CE8F4, "VS::Effects::LiveDestroyPrimaryEffectInstance"),  # F01424
+    ("BATTLE/BATTLE.PRG", 0x800CF484, "VS::Effects::LiveSetSecondaryEffectPhase"),  # F01439
+    ("BATTLE/BATTLE.PRG", 0x800CF55C, "VS::Effects::LiveCreateSecondaryEffectInstance"),  # F01443
+    ("BATTLE/BATTLE.PRG", 0x800CF614, "VS::Effects::LiveDestroySecondaryEffectInstance"),  # F01444
+    ("BATTLE/BATTLE.PRG", 0x800CF694, "VS::Effects::LiveAttachEffectRenderer"),  # F01445
+    ("BATTLE/BATTLE.PRG", 0x800CF70C, "VS::Effects::LiveDetachEffectRenderer"),  # F01446
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

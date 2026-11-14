@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -15,7 +16,7 @@ int Effects_SpawnEffectScript(Effects_EffectInstance* effect_instance)
     spawn_request.script = effect_instance->script;
     spawn_request.scriptOffset = VS::Effects::LiveReadScriptHalfword(effect_instance);
     spawn_request.source = &effect_instance->context.source;
-    Effects_CreatePrimaryEffectInstance(&spawn_request);
+    VS::Effects::LiveCreatePrimaryEffectInstance(&spawn_request);
     return 1;
 }
 
@@ -33,7 +34,7 @@ int Effects_ScriptAttachRenderer(Effects_EffectInstance* effect_instance)
         renderer_parameters = effect_instance->context.parameter;
     }
 
-    Effects_AttachEffectRenderer(effect_instance, Effects_scriptRenderers[renderer_index], renderer_parameters);
+    VS::Effects::LiveAttachEffectRenderer(effect_instance, Effects_scriptRenderers[renderer_index], renderer_parameters);
     return 1;
 }
 
@@ -45,7 +46,7 @@ int Effects_TickEffectRenderers(Effects_EffectInstance* effect_instance)
     while (renderer_cursor != 0) {
         Effects_RendererSlot* next_renderer = renderer_cursor->next;
         if (renderer_cursor->renderer(renderer_cursor, 2, 0) == 0) {
-            Effects_DetachEffectRenderer(effect_instance, renderer_cursor);
+            VS::Effects::LiveDetachEffectRenderer(effect_instance, renderer_cursor);
         }
         renderer_cursor = next_renderer;
     }

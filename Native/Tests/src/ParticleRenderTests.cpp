@@ -19,6 +19,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleRenderLive.hpp"
@@ -859,7 +860,7 @@ TEST_CASE("Child effect tracks wait for the native outstanding child count",
   CHECK(Effects_primaryInstances == nullptr);
 
   while (Effects_primaryInstances != nullptr) {
-    Effects_DestroyPrimaryEffectInstance(Effects_primaryInstances);
+    VS::Effects::LiveDestroyPrimaryEffectInstance(Effects_primaryInstances);
   }
   Effects_primaryInstances = saved_instances;
 }
@@ -1875,7 +1876,7 @@ TEST_CASE(
   DispatchHeap heap;
   for (int cycle = 0; cycle < 3; ++cycle) {
     for (int index = 87; index <= 90; ++index) {
-      auto* slot = Effects_AttachEffectRenderer(
+      auto* slot = VS::Effects::LiveAttachEffectRenderer(
           &fixture.instance, Effects_effectEntryPoints[index], 2);
       REQUIRE(slot != nullptr);
       REQUIRE(slot->rendererState != nullptr);
@@ -1904,7 +1905,7 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
   Effects_Plg053_closedRingColorFactors[0] = {32, 64, 96, 0};
   DispatchHeap heap;
   for (int cycle = 0; cycle < 3; ++cycle) {
-    auto* slot = Effects_AttachEffectRenderer(
+    auto* slot = VS::Effects::LiveAttachEffectRenderer(
         &fixture.instance, &VS::Effects::Templates::UpdateLivePlg053ClosedRing,
         2);
     REQUIRE(slot != nullptr);

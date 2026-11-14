@@ -20,6 +20,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/TimelineCommands.hpp"
@@ -141,8 +142,8 @@ class LivePlaybackHost final : public TimelinePlaybackHost {
       RefuseTimelineCall("renderer track", "a renderer past the table");
       return;
     }
-    Effects_AttachEffectRenderer(
-        instance_, std::span(Effects_effectRenderers)[renderer], parameters);
+    static_cast<void>(LiveAttachEffectRenderer(
+        instance_, std::span(Effects_effectRenderers)[renderer], parameters));
   }
   void Vibrate(std::uint8_t pattern) override {
     const std::span<const std::byte> block =
@@ -190,7 +191,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
   spawn.scriptOffset = child_script_offset_;
   spawn.parent = instance_;
   spawn.token = static_cast<u_char>(instance_->token);
-  Effects_EffectInstance* child = Effects_CreatePrimaryEffectInstance(&spawn);
+  Effects_EffectInstance* child = LiveCreatePrimaryEffectInstance(&spawn);
   if (child == nullptr) {
     RefuseTimelineCall("child effect track", "no free effect instance");
     return false;

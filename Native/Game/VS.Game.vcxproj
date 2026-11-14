@@ -667,6 +667,10 @@
     <ClCompile Include="src\Effects\CurvesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Effects\EffectInstances.cpp" />
+    <ClCompile Include="src\Effects\EffectInstancesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\EffectResources.cpp" />
     <ClCompile Include="src\Effects\EffectResourcesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2529,6 +2533,8 @@
     <ClInclude Include="include\Effects\CameraLive.hpp" />
     <ClInclude Include="include\Effects\Curves.hpp" />
     <ClInclude Include="include\Effects\CurvesLive.hpp" />
+    <ClInclude Include="include\Effects\EffectInstances.hpp" />
+    <ClInclude Include="include\Effects\EffectInstancesLive.hpp" />
     <ClInclude Include="include\Effects\EffectResources.hpp" />
     <ClInclude Include="include\Effects\EffectResourcesLive.hpp" />
     <ClInclude Include="include\Effects\EffectScript.hpp" />

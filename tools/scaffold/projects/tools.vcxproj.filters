@@ -3165,6 +3165,33 @@
     <None Include="..\..\port\differentials\timeline_controls_trail.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\timeline_playback_child.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_dispatcher.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_load.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_particle.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_renderer.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_shake.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_sound.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\timeline_playback_vibration.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\timeline_tracks_advance.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -3298,6 +3325,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\timeline_controls_differential.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\timeline_playback_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\timeline_tracks_differential.py">

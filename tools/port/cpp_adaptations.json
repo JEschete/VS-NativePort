@@ -635,39 +635,12 @@
 ],
 "Native\\Game\\src\\Effects\\Runtime.cpp": [
 [
-109,
+110,
 [
 "Effects_EffectRenderer Effects_rendererTableAlias[];"
 ],
 [
 "Effects_EffectRenderer Effects_rendererTableAlias[1];"
-]
-],
-[
-194,
-[
-"    Effects_EffectInstance* newNode = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode);"
-],
-[
-"    Effects_EffectInstance* newNode = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode));"
-]
-],
-[
-616,
-[
-"    Effects_EffectInstance* new_instance = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance);"
-],
-[
-"    Effects_EffectInstance* new_instance = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance));"
-]
-],
-[
-660,
-[
-"    Effects_RendererSlot* new_renderer = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer);"
-],
-[
-"    Effects_RendererSlot* new_renderer = (Effects_RendererSlot *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer));"
 ]
 ]
 ],

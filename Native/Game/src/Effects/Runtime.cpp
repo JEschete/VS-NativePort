@@ -8,6 +8,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
@@ -147,105 +148,6 @@ void Effects_ResetEffectInstances(void)
     }
 }
 
-// decomp: BATTLE.PRG func_800CE714 (src/BATTLE/BATTLE.PRG/5BF94.c:5074)
-void Effects_InitEffectInstance(Effects_EffectSpawnRequest* spawn_request, Effects_EffectInstance* effect_instance)
-{
-    int i;
-
-    effect_instance->parent = spawn_request->parent;
-    effect_instance->particleCount = 0;
-    effect_instance->priority = spawn_request->priority;
-    effect_instance->scriptOffset = spawn_request->scriptOffset;
-    effect_instance->script = spawn_request->script;
-    *(int*)&effect_instance->registers = 0;
-    effect_instance->token = spawn_request->token;
-    effect_instance->particles = 0;
-    effect_instance->childCount = 0;
-    effect_instance->frame = 0;
-
-    for (i = 0; i < 16; ++i) {
-        ((short*)&effect_instance->transforms[i].reserved4)[1] = 0;
-        effect_instance->transforms[i].reserved4 = 0;
-        effect_instance->transforms[i].reserved0 = 0;
-        effect_instance->transforms[i].reservedC = 0;
-        effect_instance->transforms[i].reserved8 = 0;
-        effect_instance->transforms[i].reserved18 = 0;
-        effect_instance->transforms[i].reserved14 = 0;
-        effect_instance->transforms[i].reserved10 = 0;
-        effect_instance->transforms[i].reserved30 = 0;
-        effect_instance->transforms[i].reserved2C = 0;
-        effect_instance->transforms[i].reserved28 = 0;
-        *(int*)&effect_instance->transforms[i].actor = 0;
-    }
-
-    effect_instance->context.source = *spawn_request->source;
-    effect_instance->context.emitFrom = *spawn_request->emitFrom;
-    effect_instance->context.target = *spawn_request->target;
-    effect_instance->context.emitTo = *spawn_request->emitTo;
-
-    effect_instance->context.timeline = 0;
-    effect_instance->context.renderer = 0;
-    effect_instance->context.parameter = 0;
-}
-
-// decomp: BATTLE.PRG func_800CE83C (src/BATTLE/BATTLE.PRG/5BF94.c:5114)
-Effects_EffectInstance* Effects_CreatePrimaryEffectInstance(Effects_EffectSpawnRequest* spawn_request)
-{
-    Effects_EffectInstance* currentNode;
-    Effects_EffectInstance* newNode = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *newNode));
-
-    Effects_InitEffectInstance(spawn_request, newNode);
-
-    currentNode = Effects_primaryInstances;
-
-    if ((currentNode == NULL) || (spawn_request->priority < currentNode->priority)) {
-        newNode->next = currentNode;
-        Effects_primaryInstances = newNode;
-    } else {
-        while (1) {
-            if ((currentNode->next == NULL) || (spawn_request->priority < currentNode->next->priority)) {
-                newNode->next = currentNode->next;
-                currentNode->next = newNode;
-                break;
-            }
-            currentNode = currentNode->next;
-        }
-    }
-    return newNode;
-}
-
-// decomp: BATTLE.PRG func_800CE8F4 (src/BATTLE/BATTLE.PRG/5BF94.c:5139)
-void Effects_DestroyPrimaryEffectInstance(Effects_EffectInstance* effect_instance)
-{
-    Effects_RendererSlot* renderer_cursor;
-    Effects_EffectInstance* instance_cursor = Effects_primaryInstances;
-
-    if (instance_cursor == effect_instance) {
-        Effects_primaryInstances = effect_instance->next;
-    } else {
-        while (instance_cursor->next != NULL) {
-            if (instance_cursor->next == effect_instance) {
-                instance_cursor->next = effect_instance->next;
-                break;
-            }
-            instance_cursor = instance_cursor->next;
-        }
-    }
-
-    Effects_ReleaseAllEffectParticles(effect_instance);
-
-    renderer_cursor = effect_instance->context.renderer;
-
-    while (renderer_cursor != NULL) {
-        Effects_RendererSlot* next_renderer = renderer_cursor->next;
-        renderer_cursor->renderer(renderer_cursor, 4, 0);
-        Effects_DetachEffectRenderer(effect_instance, renderer_cursor);
-        renderer_cursor = next_renderer;
-    }
-
-    VS::Core::Memory::FreeLiveFromHighEnd(effect_instance);
-}
-
 // decomp: BATTLE.PRG func_800CE9B0 (src/BATTLE/BATTLE.PRG/5BF94.c:5170)
 int Effects_UpdatePrimaryEffects(void)
 {
@@ -330,7 +232,7 @@ int Effects_UpdatePrimaryEffects(void)
             VS::Effects::LiveUpdateParticleGravityAndDrag();
 
             if (VS::Effects::LiveRunEffectScript(instance_cursor) == 0) {
-                Effects_DestroyPrimaryEffectInstance(instance_cursor);
+                VS::Effects::LiveDestroyPrimaryEffectInstance(instance_cursor);
             } else {
                 ++instance_cursor->frame;
             }
@@ -421,7 +323,7 @@ int Effects_UpdateSecondaryEffects(void)
             break;
         case 3:
             Effects_AcquireParticlePool(0xFF);
-            Effects_SetSecondaryEffectPhase(4, instance_cursor);
+            VS::Effects::LiveSetSecondaryEffectPhase(4, instance_cursor);
             break;
         case 4:
             if (Effects_package->curveBlock != NULL) {
@@ -435,12 +337,12 @@ int Effects_UpdateSecondaryEffects(void)
             while (renderer_cursor != NULL) {
                 Effects_RendererSlot* next_renderer = renderer_cursor->next;
                 if (renderer_cursor->renderer(renderer_cursor, 2, 0) == 0) {
-                    Effects_DetachEffectRenderer(instance_cursor, renderer_cursor);
+                    VS::Effects::LiveDetachEffectRenderer(instance_cursor, renderer_cursor);
                 }
                 renderer_cursor = next_renderer;
             }
             if (VS::Effects::LiveRunEffectScript(instance_cursor) == 0) {
-                Effects_DestroySecondaryEffectInstance(instance_cursor);
+                VS::Effects::LiveDestroySecondaryEffectInstance(instance_cursor);
                 Effects_ReleaseParticlePool();
             } else {
                 ++instance_cursor->frame;
@@ -473,7 +375,7 @@ int Effects_StartEffectTrack(int track_index)
             spawn_request.parent = 0;
             spawn_request.token = Effects_primaryToken;
             spawn_request.script = script_bytes;
-            Effects_CreatePrimaryEffectInstance(&spawn_request);
+            VS::Effects::LiveCreatePrimaryEffectInstance(&spawn_request);
             VS::Effects::LiveSetPrimaryEffectPhase(4);
             ++Effects_startedTrackCount;
             Effects_pendingTracks &= ~(1 << track_index);
@@ -532,7 +434,7 @@ void Effects_ClearPrimaryEffects(void)
             VS::Core::Memory::FreeLiveFromHighEnd(instance_cursor->context.timeline);
             instance_cursor->context.timeline = NULL;
         }
-        Effects_DestroyPrimaryEffectInstance(instance_cursor);
+        VS::Effects::LiveDestroyPrimaryEffectInstance(instance_cursor);
         instance_cursor = next_instance;
     }
 }
@@ -575,7 +477,7 @@ char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* effect_request, 
 
         spawn.target = &effect_request->targets[i];
         spawn.priority = effect_request->targets[i].type;
-        child = Effects_CreateSecondaryEffectInstance(&spawn);
+        child = VS::Effects::LiveCreateSecondaryEffectInstance(&spawn);
         child->context.parameter = renderer_parameters;
         child->context.effectId = effect_request->effectId;
 
@@ -585,7 +487,7 @@ char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* effect_request, 
             child->busyBits = 2;
         }
 
-        Effects_SetSecondaryEffectPhase(3, child);
+        VS::Effects::LiveSetSecondaryEffectPhase(3, child);
     }
 
     return token;
@@ -605,86 +507,6 @@ int Effects_BeginSecondaryEffects(Effects_ActionEffectRequest* effect_request, i
 int Effects_SpawnSecondaryEffectRequest(Effects_ActionEffectRequest* effect_request, int arg1, int renderer_parameters)
 {
     return Effects_SpawnSecondaryEffects(effect_request, arg1, renderer_parameters);
-}
-
-// decomp: BATTLE.PRG func_800CF484 (src/BATTLE/BATTLE.PRG/5BF94.c:5548)
-void Effects_SetSecondaryEffectPhase(int effect_phase, Effects_EffectInstance* effect_instance) { effect_instance->context.phase = effect_phase; }
-
-// decomp: BATTLE.PRG func_800CF55C (src/BATTLE/BATTLE.PRG/5BF94.c:5593)
-Effects_EffectInstance* Effects_CreateSecondaryEffectInstance(Effects_EffectSpawnRequest* spawn_request)
-{
-    Effects_EffectInstance* instance_cursor;
-    Effects_EffectInstance* new_instance = (Effects_EffectInstance *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_instance));
-    Effects_InitEffectInstance(spawn_request, new_instance);
-    instance_cursor = Effects_secondaryInstances;
-
-    if ((instance_cursor == NULL) || (spawn_request->priority < instance_cursor->priority)) {
-        new_instance->next = instance_cursor;
-        Effects_secondaryInstances = new_instance;
-    } else {
-        while (1) {
-            Effects_EffectInstance* next_instance = instance_cursor->next;
-            if ((next_instance == NULL) || (spawn_request->priority < next_instance->priority)) {
-                new_instance->next = next_instance;
-                instance_cursor->next = new_instance;
-                break;
-            }
-            instance_cursor = next_instance;
-        }
-    }
-    return new_instance;
-}
-
-// decomp: BATTLE.PRG func_800CF614 (src/BATTLE/BATTLE.PRG/5BF94.c:5617)
-void Effects_DestroySecondaryEffectInstance(Effects_EffectInstance* effect_instance)
-{
-    Effects_EffectInstance* instance_cursor = Effects_secondaryInstances;
-    if (instance_cursor == effect_instance) {
-        Effects_secondaryInstances = effect_instance->next;
-    } else {
-        while (instance_cursor->next != NULL) {
-            if (instance_cursor->next == effect_instance) {
-                instance_cursor->next = effect_instance->next;
-                break;
-            }
-            instance_cursor = instance_cursor->next;
-        }
-    }
-    Effects_ReleaseAllEffectParticles(effect_instance);
-    VS::Effects::LiveReleaseEffectToken(effect_instance->token);
-    VS::Core::Memory::FreeLiveFromHighEnd(effect_instance);
-}
-
-// decomp: BATTLE.PRG func_800CF694 (src/BATTLE/BATTLE.PRG/5BF94.c:5636)
-Effects_RendererSlot* Effects_AttachEffectRenderer(Effects_EffectInstance* effect_instance, Effects_EffectRenderer renderer, int renderer_parameters)
-{
-    Effects_RendererSlot* new_renderer = (Effects_RendererSlot *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *new_renderer));
-    new_renderer->next = effect_instance->context.renderer;
-    effect_instance->context.renderer = new_renderer;
-    new_renderer->renderer = renderer;
-    new_renderer->rendererState = 0;
-    new_renderer->renderer(new_renderer, 1, renderer_parameters);
-    return new_renderer;
-}
-
-// decomp: BATTLE.PRG func_800CF70C (src/BATTLE/BATTLE.PRG/5BF94.c:5647)
-void Effects_DetachEffectRenderer(Effects_EffectInstance* effect_instance, Effects_RendererSlot* renderer_slot)
-{
-    if (renderer_slot->rendererState != NULL) {
-        VS::Core::Memory::FreeLiveFromHighEnd(renderer_slot->rendererState);
-    }
-
-    if (effect_instance->context.renderer == renderer_slot) {
-        effect_instance->context.renderer = renderer_slot->next;
-    } else {
-        Effects_RendererSlot* renderer_cursor = effect_instance->context.renderer;
-        while (renderer_cursor->next != renderer_slot) {
-            renderer_cursor = renderer_cursor->next;
-        }
-        renderer_cursor->next = renderer_slot->next;
-    }
-
-    VS::Core::Memory::FreeLiveFromHighEnd(renderer_slot);
 }
 
 // decomp: BATTLE.PRG func_800CF8BC (src/BATTLE/BATTLE.PRG/5BF94.c:5697)
