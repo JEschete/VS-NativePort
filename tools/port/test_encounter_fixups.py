@@ -3407,6 +3407,20 @@ class EncounterFixupTests(unittest.TestCase):
             source = source.replace(old, new)
         self.assertEqual(source, "u_short pulsedPalette[16];")
 
+    def test_pressed_button_ports_use_the_ledger_inline_struct_type(self):
+        copier = copy_to_native.Copier()
+        text = copier.generated_type(
+            copier.type_by_id["T00746"], "Input_PressedButtonsView"
+        )
+        self.assertIn(
+            "struct { char lowByte; char highByte; } ports[2];", text
+        )
+        self.assertNotIn("(unnamed struct at", text)
+        self.assertTrue(
+            any(entry.startswith("T00746.001 ") for entry in
+                copier.report["layout-type-from-ledger"])
+        )
+
     def test_room_rendering_dispatches_typed_appearance_owners(self):
         self.assertNotIn("F01008", copy_fixups.FIXES)
         live = self.model_rendering_live_source()

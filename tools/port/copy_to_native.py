@@ -1413,6 +1413,12 @@ class Copier:
                 # unk28 is a u_short next to unk2A, where the pinned view had one int)
                 self.report["layout-type-from-ledger"].append(f"{m['id']} {t} -> {ft}")
                 t = ft
+            elif ft and ft != f["type"] and t.startswith("struct (unnamed struct at ") and \
+                    t.endswith(")[2]") and re.fullmatch(
+                        r"struct\s*\{\s*char\s+\w+\s*;\s*char\s+\w+\s*;\s*\}\[2\]", ft
+                    ):
+                self.report["layout-type-from-ledger"].append(f"{m['id']} {t} -> {ft}")
+                t = ft
             if m["id"] in self.ptr_fields and re.fullmatch(self.BASE_INT, t):
                 t = "uintptr_t"
                 self.report["hazard-member-uintptr"].append(m["id"])
