@@ -31,15 +31,7 @@ _Static_assert(sizeof(Menu_Loot_LootListItem) == 0x4, "Menu_Loot_LootListItem mu
 #define VS_MENU_LOOT_LOOTINVENTORY_H_DECLS
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
-#include "Items/Weapons.h"
 
-int Menu_Loot_StageBlade(Items_InventoryBlade* source, int weapon);
-int Menu_Loot_StageGrip(Items_InventoryGrip* source, int weaponIndex);
-int Menu_Loot_StageGem(Items_InventoryGem* source, int item);
-int Menu_Loot_StageWeapon(Items_LootedWeapon* looted_weapon);
-int Menu_Loot_StageArmor(Items_InventoryArmor* source);
-int Menu_Loot_StageShield(Items_LootedShield* looted_shield);
-int Menu_Loot_StageMiscItem(Items_LootedItem* looted_item);
 void Menu_Loot_RefreshClaimableRows(void);
 void Menu_Loot_AppendLootRow(int itemCategory, int itemIndex);
 int Menu_Loot_CountContainedCategory(int counted_category, Menu_Loot_LootListItem* loot_list_item);

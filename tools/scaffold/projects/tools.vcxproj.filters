@@ -2721,6 +2721,30 @@
     <None Include="..\..\port\differentials\item_detail_dispatch_guard_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\loot_armor_staging.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_blade_staging.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_gem_staging.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_grip_staging.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_misc_staging.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_shield_staging.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_staging_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\loot_weapon_staging.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\obstacle_detour.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2896,6 +2920,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\layout_check.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\loot_staging_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\native_views.py">

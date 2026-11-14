@@ -81,6 +81,7 @@
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
+#include "Menu/Loot/LootStagingLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -2071,6 +2072,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUD.PRG", 0x80106A04u, 0u, (void*)&VS::Menu::container::AppendLivePendingTransfer, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80106A50u, 0u, (void*)&VS::Menu::container::RebuildLivePendingTransfers, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80106C64u, 0u, (void*)&VS::Menu::container::BuildLiveItemRows, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80107C54u, 0u, (void*)&VS::Menu::Loot::Live::StageBlade, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80107CE8u, 0u, (void*)&VS::Menu::Loot::Live::StageGrip, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80107D7Cu, 0u, (void*)&VS::Menu::Loot::Live::StageGem, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80107E10u, 0u, (void*)&VS::Menu::Loot::Live::StageWeapon, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80107F1Cu, 0u, (void*)&VS::Menu::Loot::Live::StageArmor, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80107F9Cu, 0u, (void*)&VS::Menu::Loot::Live::StageShield, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x8010808Cu, 0u, (void*)&VS::Menu::Loot::Live::StageMiscItem, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

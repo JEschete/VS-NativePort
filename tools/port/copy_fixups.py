@@ -4051,12 +4051,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "offsetof(Field_GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
     ],
-    **{fid: [(f"if (index == {capacity})", f"if (index > {capacity})",
-              "The staging index is one-based; inspect the final valid slot before rejecting a full array.")]
-       for fid, capacity in (
-           ("F02846", "16"), ("F02847", "16"), ("F02848", "0x30"),
-           ("F02850", "16"), ("F02852", "64"),
-       )},
     "F02858": [
         *[(f"Menu_Loot_IsDropAllowed(arg0->{member}.difficultyFlags)",
            f"Menu_Loot_CanStageDrop(&arg0->{member}.difficultyFlags)",
@@ -4070,13 +4064,13 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
               ("grip", "Items_ItemCategory_Grip"), ("shield", "Items_ItemCategory_Shield"),
               ("gem", "Items_ItemCategory_Gem"), ("misc[i]", "Items_ItemCategory_Misc"),
           )],
-        ("Menu_Loot_AppendLootRow(\n                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->armor[i].armor));",
+        ("Menu_Loot_AppendLootRow(\n                Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->armor[i].armor));",
          "Menu_Loot_AppendStagedDrop(&arg0->armor[i].difficultyFlags,\n"
-         "                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->armor[i].armor));",
+         "                Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->armor[i].armor));",
          "Retain each deferred limb armor independently."),
-        ("Menu_Loot_AppendLootRow(\n            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->accessory.accessory));",
+        ("Menu_Loot_AppendLootRow(\n            Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->accessory.accessory));",
          "Menu_Loot_AppendStagedDrop(&arg0->accessory.difficultyFlags,\n"
-         "            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->accessory.accessory));",
+         "            Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->accessory.accessory));",
          "Accessories share armor storage but retain their own source entry."),
     ],
     "F02859": [

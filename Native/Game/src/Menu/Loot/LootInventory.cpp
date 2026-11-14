@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "Menu/Loot/LootStagingLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -15,189 +16,6 @@ extern "C" {
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
 #include "State/StateFlags.h"
-
-// decomp: MENUB.PRG _copyBladeToInventory (src/MENU/MENUB.PRG/260.c:712)
-int Menu_Loot_StageBlade(Items_InventoryBlade* source, int weapon)
-{
-    int index = 1;
-    Items_InventoryBlade* blade = Menu_Loot_inventory->blades;
-
-    while (blade->id != 0) {
-        ++blade;
-        ++index;
-        if (index > 16) {
-            return 0;
-        }
-    }
-
-    VS::Core::Memory::CopyLiveHalfwords(blade, source, sizeof *blade);
-
-    blade->assembledWeaponIndex = weapon;
-    blade->index = index;
-    return index;
-}
-
-// decomp: MENUB.PRG _copyGripToInventory (src/MENU/MENUB.PRG/260.c:739)
-int Menu_Loot_StageGrip(Items_InventoryGrip* source, int weaponIndex)
-{
-    int index = 1;
-    Items_InventoryGrip* grip = Menu_Loot_inventory->grips;
-
-    while (grip->id != 0) {
-        ++grip;
-        ++index;
-        if (index > 16) {
-            return 0;
-        }
-    }
-
-    VS::Core::Memory::CopyLiveHalfwords(grip, source, sizeof *grip);
-
-    grip->assembledWeaponIndex = weaponIndex;
-    grip->index = index;
-    return index;
-}
-
-// decomp: MENUB.PRG _copyGemToInventory (src/MENU/MENUB.PRG/260.c:766)
-int Menu_Loot_StageGem(Items_InventoryGem* source, int item)
-{
-    int index = 1;
-    Items_InventoryGem* gem = Menu_Loot_inventory->gems;
-
-    while (gem->id != 0) {
-        ++gem;
-        ++index;
-        if (index > 0x30) {
-            return 0;
-        }
-    }
-
-    VS::Core::Memory::CopyLiveHalfwords(gem, source, sizeof *gem);
-
-    gem->setItemIndex = item;
-    gem->index = index;
-    return index;
-}
-
-// decomp: MENUB.PRG _copyWeaponToInventory (src/MENU/MENUB.PRG/260.c:792)
-int Menu_Loot_StageWeapon(Items_LootedWeapon* looted_weapon)
-{
-    int i;
-    Items_InventoryWeapon* slot = Menu_Loot_inventory->weapons;
-    int index = 1;
-    int gems = 0;
-
-    for (i = 0; i < 3; ++i) {
-        gems += looted_weapon->gems[i].id != 0;
-    }
-    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Weapon, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Blade, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Grip, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
-        return 0;
-    }
-
-    while (slot->blade != 0) {
-        ++slot;
-        if (++index > 8) {
-            return 0;
-        }
-    }
-
-    VS::Core::Memory::ZeroLiveWordsBackward(slot, sizeof *slot);
-
-    slot->index = index;
-    slot->blade = Menu_Loot_StageBlade(&looted_weapon->blade, index);
-    slot->grip = Menu_Loot_StageGrip(&looted_weapon->grip, index);
-
-    for (i = 0; i < 3; i++) {
-        if (looted_weapon->gems[i].id != 0) {
-            slot->gems[i] = Menu_Loot_StageGem(&looted_weapon->gems[i], index);
-        }
-    }
-
-    VS::Core::Memory::CopyLiveBytesBackward(slot->name, looted_weapon->name, sizeof slot->name);
-
-    return index;
-}
-
-// decomp: MENUB.PRG _copyArmorToInventory (src/MENU/MENUB.PRG/260.c:827)
-int Menu_Loot_StageArmor(Items_InventoryArmor* source)
-{
-    int index = 1;
-    Items_InventoryArmor* armor = Menu_Loot_inventory->armor;
-
-    while (armor->id != 0) {
-        ++armor;
-        ++index;
-        if (index > 16) {
-            return 0;
-        }
-    }
-
-    VS::Core::Memory::CopyLiveHalfwords(armor, source, sizeof *armor);
-
-    armor->index = index;
-    return index;
-}
-
-// decomp: MENUB.PRG _copyShieldToInventory (src/MENU/MENUB.PRG/260.c:852)
-int Menu_Loot_StageShield(Items_LootedShield* looted_shield)
-{
-    int i;
-
-    Items_InventoryShield* shield = Menu_Loot_inventory->shields;
-    int index = 1;
-    int gems = 0;
-
-    for (i = 0; i < 3; ++i) {
-        gems += looted_shield->gems[i].id != 0;
-    }
-    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Shield, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
-        return 0;
-    }
-
-    while (shield->base.id != 0) {
-        ++shield;
-        ++index;
-        if (index > 8) {
-            return 0;
-        }
-    }
-
-    VS::Core::Memory::ZeroLiveWordsBackward(shield, sizeof *shield);
-    VS::Core::Memory::CopyLiveHalfwords(&shield->base, &looted_shield->shield, sizeof shield->base);
-
-    shield->base.limb = index;
-
-    for (i = 0; i < 3; ++i) {
-        if (looted_shield->gems[i].id != 0) {
-            shield->gems[i] = Menu_Loot_StageGem(&looted_shield->gems[i], index | 0x80);
-        }
-    }
-
-    return index;
-}
-
-// decomp: MENUB.PRG _copyMiscToInventory (src/MENU/MENUB.PRG/260.c:886)
-int Menu_Loot_StageMiscItem(Items_LootedItem* looted_item)
-{
-    int index = 1;
-    Items_InventoryMisc* item = Menu_Loot_inventory->misc;
-
-    while (item->id != 0) {
-        ++index;
-        ++item;
-        if (index > 64) {
-            return 0;
-        }
-    }
-
-    item->id = looted_item->itemId;
-    item->count = looted_item->count;
-    return index;
-}
 
 // decomp: MENUB.PRG _updateLootList (src/MENU/MENUB.PRG/260.c:907)
 void Menu_Loot_RefreshClaimableRows(void)
@@ -304,41 +122,41 @@ void Menu_Loot_StageDropRecord(Items_BattleLoot* drop_record)
     int i;
 
     if (Menu_Loot_CanStageDrop(&drop_record->weapon.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&drop_record->weapon.difficultyFlags, Items_ItemCategory_Weapon, Menu_Loot_StageWeapon(&drop_record->weapon));
+        Menu_Loot_AppendStagedDrop(&drop_record->weapon.difficultyFlags, Items_ItemCategory_Weapon, VS::Menu::Loot::Live::StageWeapon(&drop_record->weapon));
     }
 
     if (Menu_Loot_CanStageDrop(&drop_record->blade.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&drop_record->blade.difficultyFlags, Items_ItemCategory_Blade, Menu_Loot_StageBlade(&drop_record->blade.blade, 0));
+        Menu_Loot_AppendStagedDrop(&drop_record->blade.difficultyFlags, Items_ItemCategory_Blade, VS::Menu::Loot::Live::StageBlade(&drop_record->blade.blade, 0));
     }
 
     if (Menu_Loot_CanStageDrop(&drop_record->grip.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&drop_record->grip.difficultyFlags, Items_ItemCategory_Grip, Menu_Loot_StageGrip(&drop_record->grip.grip, 0));
+        Menu_Loot_AppendStagedDrop(&drop_record->grip.difficultyFlags, Items_ItemCategory_Grip, VS::Menu::Loot::Live::StageGrip(&drop_record->grip.grip, 0));
     }
 
     if (Menu_Loot_CanStageDrop(&drop_record->shield.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&drop_record->shield.difficultyFlags, Items_ItemCategory_Shield, Menu_Loot_StageShield(&drop_record->shield));
+        Menu_Loot_AppendStagedDrop(&drop_record->shield.difficultyFlags, Items_ItemCategory_Shield, VS::Menu::Loot::Live::StageShield(&drop_record->shield));
     }
 
     for (i = 0; i < 2; ++i) {
         if (Menu_Loot_CanStageDrop(&drop_record->armor[i].difficultyFlags) != 0) {
             Menu_Loot_AppendStagedDrop(&drop_record->armor[i].difficultyFlags,
-                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&drop_record->armor[i].armor));
+                Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&drop_record->armor[i].armor));
         }
     }
 
     if (Menu_Loot_CanStageDrop(&drop_record->accessory.difficultyFlags) != 0) {
         Menu_Loot_AppendStagedDrop(&drop_record->accessory.difficultyFlags,
-            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&drop_record->accessory.accessory));
+            Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&drop_record->accessory.accessory));
     }
 
     if (Menu_Loot_CanStageDrop(&drop_record->gem.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&drop_record->gem.difficultyFlags, Items_ItemCategory_Gem, Menu_Loot_StageGem(&drop_record->gem.gem, 0));
+        Menu_Loot_AppendStagedDrop(&drop_record->gem.difficultyFlags, Items_ItemCategory_Gem, VS::Menu::Loot::Live::StageGem(&drop_record->gem.gem, 0));
     }
 
     for (i = 0; i < 3; ++i) {
         if ((Menu_Loot_CanStageDrop(&drop_record->misc[i].difficultyFlags) != 0)
             && (drop_record->misc[i].itemId != 0) && (drop_record->misc[i].count != 0)) {
-            Menu_Loot_AppendStagedDrop(&drop_record->misc[i].difficultyFlags, Items_ItemCategory_Misc, Menu_Loot_StageMiscItem(&drop_record->misc[i]));
+            Menu_Loot_AppendStagedDrop(&drop_record->misc[i].difficultyFlags, Items_ItemCategory_Misc, VS::Menu::Loot::Live::StageMiscItem(&drop_record->misc[i]));
         }
     }
 

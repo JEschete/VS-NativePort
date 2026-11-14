@@ -4567,31 +4567,32 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         screen = (root / "SetupScreen.cpp").read_text(encoding="utf-8")
         self.assertIn("void ShowPartList(Context& context, const PartListRows& rows)", screen)
 
-    def test_loot_staging_uses_last_slots_and_preflights_composites(self):
+    def test_loot_staging_owned_helpers_keep_typed_tests_and_live_bindings(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Loot/LootInventory.cpp").read_text()
-        reviewed_arguments = {
-            "F02849": "looted_weapon",
-            "F02851": "looted_shield",
-            "F02852": "looted_item",
+        functions = {
+            "F02846": "StageBlade",
+            "F02847": "StageGrip",
+            "F02848": "StageGem",
+            "F02849": "StageWeapon",
+            "F02850": "StageArmor",
+            "F02851": "StageShield",
+            "F02852": "StageMiscItem",
         }
-        for fid in (
-            "F02846",
-            "F02847",
-            "F02848",
-            "F02849",
-            "F02850",
-            "F02851",
-            "F02852",
-        ):
-            for old, new, _ in copy_fixups.FIXES[fid]:
-                if fid in reviewed_arguments:
-                    old = re.sub(r"\barg0\b", reviewed_arguments[fid], old)
-                    new = re.sub(r"\barg0\b", reviewed_arguments[fid], new)
-                self.assertIn(new, source)
-                self.assertNotIn(old, source)
-        self.assertIn("Items_ItemCategory_Grip, 1", source)
-        self.assertIn("Items_ItemCategory_Gem, gems", source)
+        source = (root / "Native/Game/src/Menu/Loot/LootStaging.cpp").read_text()
+        tests = (root / "Native/Tests/src/LootStagingTests.cpp").read_text()
+        for fid, function in functions.items():
+            with self.subTest(function=function):
+                binding = f"VS::Menu::Loot::Live::{function}"
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[fid], binding)
+                self.assertEqual(
+                    copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                    r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+                )
+                self.assertIn(f"int {function}(", source)
+                self.assertIn(f"[loot-staging][{fid}]", tests)
+        self.assertIn("weapon staging rejects full component tables unchanged", tests)
+        self.assertIn("shield staging rejects a full gem table unchanged", tests)
 
     def test_loot_overflow_never_appends_a_failed_staging_index(self):
         root = Path(__file__).resolve().parents[2]

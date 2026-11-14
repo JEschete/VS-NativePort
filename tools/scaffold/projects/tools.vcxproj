@@ -583,6 +583,14 @@
     <None Include="..\..\port\differentials\item_detail_dispatch_f02581.py" />
     <None Include="..\..\port\differentials\item_detail_dispatch_f02581_menub.py" />
     <None Include="..\..\port\differentials\item_detail_dispatch_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\loot_armor_staging.py" />
+    <None Include="..\..\port\differentials\loot_blade_staging.py" />
+    <None Include="..\..\port\differentials\loot_gem_staging.py" />
+    <None Include="..\..\port\differentials\loot_grip_staging.py" />
+    <None Include="..\..\port\differentials\loot_misc_staging.py" />
+    <None Include="..\..\port\differentials\loot_shield_staging.py" />
+    <None Include="..\..\port\differentials\loot_staging_driver.cpp" />
+    <None Include="..\..\port\differentials\loot_weapon_staging.py" />
     <None Include="..\..\port\differentials\obstacle_detour.py" />
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp" />
     <None Include="..\..\port\differentials\perception.py" />
@@ -642,6 +650,7 @@
     <None Include="..\..\port\gen_decomp_headers.py" />
     <None Include="..\..\port\hazard_index.py" />
     <None Include="..\..\port\layout_check.py" />
+    <None Include="..\..\port\loot_staging_differential.py" />
     <None Include="..\..\port\native_views.py" />
     <None Include="..\..\port\own.py" />
     <None Include="..\..\port\owned.csv" />

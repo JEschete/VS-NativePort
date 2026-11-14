@@ -38,6 +38,7 @@
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Loot/LootStagingLive.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -2804,25 +2805,25 @@ TEST_CASE("Loot staging uses every slot of the original inventory capacities",
   loot.misc[0].count = 1;
   const std::array<int (*)(Items_BattleLoot&), 7> stage{
       [](Items_BattleLoot& value) {
-        return Menu_Loot_StageWeapon(&value.weapon);
+        return VS::Menu::Loot::Live::StageWeapon(&value.weapon);
       },
       [](Items_BattleLoot& value) {
-        return Menu_Loot_StageBlade(&value.blade.blade, 0);
+        return VS::Menu::Loot::Live::StageBlade(&value.blade.blade, 0);
       },
       [](Items_BattleLoot& value) {
-        return Menu_Loot_StageGrip(&value.grip.grip, 0);
+        return VS::Menu::Loot::Live::StageGrip(&value.grip.grip, 0);
       },
       [](Items_BattleLoot& value) {
-        return Menu_Loot_StageShield(&value.shield);
+        return VS::Menu::Loot::Live::StageShield(&value.shield);
       },
       [](Items_BattleLoot& value) {
-        return Menu_Loot_StageArmor(&value.armor[0].armor);
+        return VS::Menu::Loot::Live::StageArmor(&value.armor[0].armor);
       },
       [](Items_BattleLoot& value) {
-        return Menu_Loot_StageGem(&value.gem.gem, 0);
+        return VS::Menu::Loot::Live::StageGem(&value.gem.gem, 0);
       },
       [](Items_BattleLoot& value) {
-        return Menu_Loot_StageMiscItem(&value.misc[0]);
+        return VS::Menu::Loot::Live::StageMiscItem(&value.misc[0]);
       }};
   for (int index = 0; index < capacities[category]; ++index) {
     CAPTURE(category, index);
@@ -2862,8 +2863,8 @@ TEST_CASE("Composite loot staging preflights all component storage",
   const auto input_before = loot;
   const bool fits = parents < 8 && gems + attached <= 48 &&
                     (shield || (blades < 16 && grips < 16));
-  const int result = shield ? Menu_Loot_StageShield(&loot.shield)
-                            : Menu_Loot_StageWeapon(&loot.weapon);
+  const int result = shield ? VS::Menu::Loot::Live::StageShield(&loot.shield)
+                            : VS::Menu::Loot::Live::StageWeapon(&loot.weapon);
   CHECK(result == (fits ? parents + 1 : 0));
   CHECK(std::memcmp(&loot, &input_before, sizeof(loot)) == 0);
   if (!fits) EquipmentLootFixture::CheckInventory(fixture.source, before);
