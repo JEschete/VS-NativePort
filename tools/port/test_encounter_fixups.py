@@ -438,6 +438,29 @@ class EncounterFixupTests(unittest.TestCase):
             "Tint(&Menu_Results_timeAttackStartColors[1]);",
         )
 
+    def test_feedback_tiles_preserve_both_native_packet_handles(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        row = {"id": "F02456", "final_name": "Effects::ScreenDistortion::DrawFeedbackTiles"}
+        expected = ("ordering_table[index] = LegacyGpu_Handle(packet_words);\n"
+                    "*ordering_table = LegacyGpu_Handle(packet_words);\n")
+        for source in (
+            "ordering_table[index] = ((uintptr_t)var_t2 << 8) >> 8;\n"
+            "*ordering_table = ((u_long)var_t2 << 8) >> 8;\n",
+            "ordering_table[index] = ((u_long)var_t2 << 8) >> 8;\n"
+            "*ordering_table = ((u_long)var_t2 << 8) >> 8;\n",
+        ):
+            with self.subTest(source=source):
+                copier.used_fixups = set()
+                self.assertEqual(copier.apply_fixups(row, source), expected)
+                self.assertEqual(
+                    sum(source.count(old) for fid, old in copier.used_fixups if fid == "F02456"),
+                    2,
+                )
+
+        with self.assertRaisesRegex(SystemExit, "expected 2 variant matches, found 1"):
+            copier.apply_fixups(row, "ordering_table[index] = ((u_long)var_t2 << 8) >> 8;\n")
+
     def test_absent_model_effect_targets_empty_slot_without_deferred_proof(self):
         for fixup_id in ("F01433", "F01438"):
             self.assertNotIn(fixup_id, copy_fixups.FIXES)

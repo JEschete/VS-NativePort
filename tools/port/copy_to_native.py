@@ -891,11 +891,22 @@ class Copier:
         return names
 
     def apply_fixups(self, r: dict, text: str) -> str:
+        variant_count = cf.FIXUP_VARIANT_COUNTS.get(r["id"])
+        matched_count = 0
         for old, new, why in cf.FIXES.get(r["id"], []):
-            if old not in text:
+            count = text.count(old)
+            if count == 0:
+                if variant_count is not None:
+                    continue
                 raise SystemExit(f"copy_fixups: {r['id']} {r['final_name']}: '{old}' not found ({why})")
             text = text.replace(old, new)
+            matched_count += count
             self.used_fixups.add((r["id"], old))
+        if variant_count is not None and matched_count != variant_count:
+            raise SystemExit(
+                f"copy_fixups: {r['id']} {r['final_name']}: expected {variant_count} variant matches, "
+                f"found {matched_count}"
+            )
         for row_rx, pat, rep, _reason in cf.REGEX_FIXES:
             if compiled_fixup_regex(row_rx).search(r["final_name"]):
                 text, n = substitute_fixup(text, pat, rep)

@@ -8,10 +8,11 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
-from common import Gen  # noqa: E402
+from common import Gen, canonical_type_key  # noqa: E402
 
 
 class ReviewedConsumerTests(unittest.TestCase):
@@ -33,6 +34,41 @@ class ReviewedConsumerTests(unittest.TestCase):
             if isinstance(node, ast.Lambda)
             and any(arg.arg == argument for arg in node.args.args)
         ]
+
+    def test_anonymous_type_keys_ignore_checkout_root(self):
+        repository_key = (
+            r"struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src"
+            r"\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5)"
+        )
+        worktree_key = (
+            r"struct:(unnamed at D:\Dev\NativePort\wt\batch-loot-inventory\resources\rood-reverseWin\src"
+            r"\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5)"
+        )
+        self.assertEqual(canonical_type_key(repository_key), canonical_type_key(worktree_key))
+        self.assertNotEqual(
+            canonical_type_key(repository_key.replace("rood-reverseWin", "rood-reverse")),
+            canonical_type_key(repository_key),
+        )
+
+    def test_layout_matches_member_lists_across_checkout_roots(self):
+        repository_key = (
+            r"struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src"
+            r"\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5)"
+        )
+        worktree_key = (
+            r"struct:(unnamed at D:\Dev\NativePort\wt\batch-loot-inventory\resources\rood-reverseWin\src"
+            r"\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5)"
+        )
+        layout = {"key": worktree_key, "fields": [{"name": "weaponCategories"}]}
+        gen = Gen.__new__(Gen)
+        gen.types = {"T00123": {"key": repository_key}}
+        gen.members = {"T00123": [{"name": "weaponCategories"}]}
+        gen.trees = {
+            "": SimpleNamespace(ix={"types": {"target": layout}}),
+            "upstream:": SimpleNamespace(ix={"types": {}}),
+        }
+
+        self.assertIs(gen.layout("T00123"), layout)
 
     def test_ledger_reader_preserves_rows_and_closes_on_success_and_error(self):
         with tempfile.TemporaryDirectory() as directory:

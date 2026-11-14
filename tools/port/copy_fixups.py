@@ -4759,9 +4759,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
                  "textbox ordering entries hold native link handles, never truncated address bits")],
     "F02456": [
         ("((uintptr_t)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
-         "SCREFF2.PRG func_800F986C offscreen feedback link must retain the native packet handle"),
+         "SCREFF2.PRG func_800F986C feedback link must retain the native packet handle"),
         ("((u_long)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
-         "SCREFF2.PRG func_800F986C framebuffer restore link must retain the native packet handle"),
+         "SCREFF2.PRG func_800F986C framebuffer link must retain the native packet handle"),
     ],
     **{fid: [("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
               "shared primitive helpers use the native link table")] for fid in ("F01405", "F01406")},
@@ -5141,6 +5141,8 @@ for _row, _decl, _where in (
     _evidence = f"#288: {_where} of the cell lookup without a NULL check"
     FIXES.setdefault(_row, []).extend(
         ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
+
+FIXUP_VARIANT_COUNTS: dict[str, int] = {"F02456": 2}
 
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
                         "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")

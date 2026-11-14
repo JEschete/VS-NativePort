@@ -29,6 +29,21 @@ LEDGERS = ROOT / "Docs" / "ledgers"
 LABEL = re.compile(r"\(([^:()]+):(\d+) (\w+)\)$")
 
 
+def canonical_type_key(key: str) -> str:
+    match = re.fullmatch(r"(?P<head>.*\(unnamed at )(?P<path>.*):(?P<line>\d+):(?P<column>\d+)\)", key)
+    if match is None:
+        return key
+    path = match["path"].replace("\\", "/")
+    for source_root in ("resources/rood-reverseWin/src/", "resources/rood-reverse/src/"):
+        start = path.lower().rfind(source_root.lower())
+        if start >= 0:
+            path = path[start:]
+            break
+    else:
+        return key
+    return f"{match['head']}{path}:{match['line']}:{match['column']})"
+
+
 def ledger_rows(name: str) -> list[dict[str, str]]:
     with (LEDGERS / name).open(encoding="utf-8") as stream:
         return list(csv.DictReader(stream))
@@ -193,18 +208,19 @@ class Gen:
 
     def layout(self, tid: str) -> dict:
         """Index layout matching the ledger's member list: pinned first, then upstream (adopted merged layouts)."""
-        key = self.types[tid]["key"].partition("#")[0]
+        key = canonical_type_key(self.types[tid]["key"].partition("#")[0])
         want = [m["name"] for m in self.members[tid]]
         for p in ("", "upstream:"):
             for x in self.trees[p].ix["types"].values():
-                if x["key"] == key and [f["name"] for f in x["fields"]] == want:
+                if canonical_type_key(x["key"]) == key and [f["name"] for f in x["fields"]] == want:
                     return x
         for p in ("", "upstream:"):
             for x in self.trees[p].ix["types"].values():
-                if x["key"] == key and len(x["fields"]) == len(want):
+                if canonical_type_key(x["key"]) == key and len(x["fields"]) == len(want):
                     return x
         # merged layout (UPSTREAM_LAYOUTS): each member's offset from the pinned layout by name, else upstream's
-        sources = [x for p in ("", "upstream:") for x in self.trees[p].ix["types"].values() if x["key"] == key]
+        sources = [x for p in ("", "upstream:") for x in self.trees[p].ix["types"].values()
+                   if canonical_type_key(x["key"]) == key]
         fields = []
         for n in want:
             f = next((f for x in sources for f in x["fields"] if f["name"] == n), None)
