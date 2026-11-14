@@ -687,6 +687,9 @@
     <ClCompile Include="src\MenuAssetsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MenuEquipmentStatsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MenuFrameworkTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

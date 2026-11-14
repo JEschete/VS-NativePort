@@ -1,6 +1,14 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "Items/Loadout.h"
+#ifdef __cplusplus
+}
+#endif
+
 // Binds the equipment details (EquipmentDetails.hpp) to the variables the
 // copied menus share (EquipmentDetailsLiveState.h), the item tables and texts
 // (ItemRowsLive.hpp), Ashley's equipment, the battle actors, the controller,
@@ -35,6 +43,15 @@ void UpdateLivePrimaryStatPanel(int animate);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void SetLiveDpPp(int current_dp, int max_dp, int current_pp, int max_pp);
 void UpdateLiveDpPpBars(int flags);
+
+// MENU4.PRG 120.c: populate the battle equipment's status detail panels.
+void PopulateLiveWeaponStats(Items_WeaponLoadout* weapon);
+void PopulateLiveShieldStats(Items_ShieldLoadout* shield);
+void PopulateLiveArmorStats(Items_ArmorLoadout* armor);
+void PopulateLiveAccessoryStats(Items_AccessorySpawnLoadout* accessory);
+void PopulateLiveBladeStats(Items_WeaponLoadout* weapon);
+void PopulateLiveGripStats(Items_EquipmentPartStats* grip);
+void PopulateLiveGemStats(Items_EquipmentPartStats* gem);
 
 // MAINMENU.PRG reloads restore the module image values of the screen's
 // statics (the DP/PP bars, the cursor and the panels' slides); the shared

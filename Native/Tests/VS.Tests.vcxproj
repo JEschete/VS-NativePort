@@ -294,6 +294,7 @@
     <ClCompile Include="src\MemoryTests.cpp" />
     <ClCompile Include="src\MenuActorPreviewTests.cpp" />
     <ClCompile Include="src\MenuAssetsTests.cpp" />
+    <ClCompile Include="src\MenuEquipmentStatsTests.cpp" />
     <ClCompile Include="src\MenuFrameworkTests.cpp" />
     <ClCompile Include="src\MenuRowsDetailsTests.cpp" />
     <ClCompile Include="src\MenuSetupTests.cpp" />

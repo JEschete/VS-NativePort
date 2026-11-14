@@ -1416,6 +1416,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Loot::Live::StageArmor": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
     "VS::Menu::Loot::Live::StageShield": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
     "VS::Menu::Loot::Live::StageMiscItem": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Framework::PopulateLiveWeaponStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
+    "VS::Menu::Framework::PopulateLiveShieldStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
+    "VS::Menu::Framework::PopulateLiveArmorStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
+    "VS::Menu::Framework::PopulateLiveAccessoryStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
+    "VS::Menu::Framework::PopulateLiveBladeStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
+    "VS::Menu::Framework::PopulateLiveGripStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
+    "VS::Menu::Framework::PopulateLiveGemStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2475,6 +2482,13 @@ OWNED_CALL_BINDINGS["F02849"] = "VS::Menu::Loot::Live::StageWeapon"
 OWNED_CALL_BINDINGS["F02850"] = "VS::Menu::Loot::Live::StageArmor"
 OWNED_CALL_BINDINGS["F02851"] = "VS::Menu::Loot::Live::StageShield"
 OWNED_CALL_BINDINGS["F02852"] = "VS::Menu::Loot::Live::StageMiscItem"
+OWNED_CALL_BINDINGS["F02640"] = "VS::Menu::Framework::PopulateLiveWeaponStats"
+OWNED_CALL_BINDINGS["F02641"] = "VS::Menu::Framework::PopulateLiveShieldStats"
+OWNED_CALL_BINDINGS["F02642"] = "VS::Menu::Framework::PopulateLiveArmorStats"
+OWNED_CALL_BINDINGS["F02643"] = "VS::Menu::Framework::PopulateLiveAccessoryStats"
+OWNED_CALL_BINDINGS["F02644"] = "VS::Menu::Framework::PopulateLiveBladeStats"
+OWNED_CALL_BINDINGS["F02645"] = "VS::Menu::Framework::PopulateLiveGripStats"
+OWNED_CALL_BINDINGS["F02646"] = "VS::Menu::Framework::PopulateLiveGemStats"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded

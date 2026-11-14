@@ -24,6 +24,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/Status/EquipmentStats.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -42,6 +43,8 @@ extern "C" {
 
 namespace VS::Menu::Framework {
 namespace {
+constexpr std::size_t kArmorStatsLimbCount = 5;
+
 static_assert(kMenuComparisonStatCount == kComparisonStatCount);
 static_assert(kMenuRangeRiskBytes == kRangeRiskBytes);
 static_assert(kMenuEquipmentStatCount == kEquipmentStatCount);
@@ -463,6 +466,109 @@ void SetLiveDpPp(int current_dp, int max_dp, int current_pp, int max_pp) {
 void UpdateLiveDpPpBars(int flags) {
   LiveCall(
       [flags](EquipmentDetailsContext& ctx) { UpdateDpPpBars(ctx, flags); });
+}
+
+void PopulateLiveWeaponStats(Items_WeaponLoadout* weapon) {
+  if (weapon == nullptr) {
+    Warn("missing weapon loadout for status details");
+    return;
+  }
+  const auto typed = VS::Items::Live::Typed(*weapon);
+  const Battle_ActorStats* const ashley = AshleyStats();
+  const bool equipped = ashley != nullptr && weapon == &ashley->weapon;
+  LiveCall([&](EquipmentDetailsContext& ctx) {
+    const auto effects =
+        VS::Menu::Status::PopulateWeaponStats(ctx.state, typed, equipped);
+    SetEnabledStatPages(ctx, effects.enabled_pages);
+  });
+}
+
+void PopulateLiveShieldStats(Items_ShieldLoadout* shield) {
+  if (shield == nullptr) {
+    Warn("missing shield loadout for status details");
+    return;
+  }
+  const auto typed = VS::Items::Live::Typed(*shield);
+  const Battle_ActorStats* const ashley = AshleyStats();
+  const bool equipped = ashley != nullptr && shield == &ashley->shield;
+  LiveCall([&](EquipmentDetailsContext& ctx) {
+    const auto effects =
+        VS::Menu::Status::PopulateShieldStats(ctx.state, typed, equipped);
+    SetEnabledStatPages(ctx, effects.enabled_pages);
+  });
+}
+
+void PopulateLiveArmorStats(Items_ArmorLoadout* armor) {
+  if (armor == nullptr) {
+    Warn("missing armor loadout for status details");
+    return;
+  }
+  const auto typed = VS::Items::Live::Typed(*armor);
+  const Battle_ActorStats* const ashley = AshleyStats();
+  bool equipped = false;
+  if (ashley != nullptr) {
+    for (std::size_t limb = 0; limb < kArmorStatsLimbCount; ++limb) {
+      equipped |= armor == &ashley->limbs[limb].armor;
+    }
+  }
+  LiveCall([&](EquipmentDetailsContext& ctx) {
+    const auto effects =
+        VS::Menu::Status::PopulateArmorStats(ctx.state, typed, equipped);
+    SetEnabledStatPages(ctx, effects.enabled_pages);
+  });
+}
+
+void PopulateLiveAccessoryStats(Items_AccessorySpawnLoadout* accessory) {
+  if (accessory == nullptr) {
+    Warn("missing accessory loadout for status details");
+    return;
+  }
+  const auto typed = VS::Items::Live::Typed(*accessory);
+  LiveCall([&](EquipmentDetailsContext& ctx) {
+    const auto effects =
+        VS::Menu::Status::PopulateAccessoryStats(ctx.state, typed);
+    SetEnabledStatPages(ctx, effects.enabled_pages);
+  });
+}
+
+void PopulateLiveBladeStats(Items_WeaponLoadout* weapon) {
+  if (weapon == nullptr) {
+    Warn("missing weapon loadout for blade details");
+    return;
+  }
+  const auto typed = VS::Items::Live::Typed(*weapon);
+  LiveCall([&](EquipmentDetailsContext& ctx) {
+    const auto effects = VS::Menu::Status::PopulateBladeStats(
+        ctx.state, typed.blade, typed.current_pp, typed.max_pp);
+    SetEnabledStatPages(ctx, effects.enabled_pages);
+    UpdateDpPpBars(ctx, effects.dp_pp_bars);
+  });
+}
+
+void PopulateLiveGripStats(Items_EquipmentPartStats* grip) {
+  if (grip == nullptr) {
+    Warn("missing grip stats for status details");
+    return;
+  }
+  const auto typed = VS::Items::Live::Typed(*grip);
+  LiveCall([&](EquipmentDetailsContext& ctx) {
+    const auto effects = VS::Menu::Status::PopulateGripStats(ctx.state, typed);
+    SetEnabledStatPages(ctx, effects.enabled_pages);
+    UpdateDpPpBars(ctx, effects.dp_pp_bars);
+  });
+}
+
+void PopulateLiveGemStats(Items_EquipmentPartStats* gem) {
+  if (gem == nullptr) {
+    Warn("missing gem stats for status details");
+    return;
+  }
+  const auto typed = VS::Items::Live::Typed(*gem);
+  LiveCall([&](EquipmentDetailsContext& ctx) {
+    const auto effects = VS::Menu::Status::PopulateGemStats(ctx.state, typed);
+    SetEnabledStatPages(ctx, effects.enabled_pages);
+    UpdateDpPpBars(ctx, effects.dp_pp_bars);
+  });
 }
 
 void ResetLiveEquipmentDetailsStatics() {
