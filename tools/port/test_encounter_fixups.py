@@ -4719,11 +4719,25 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/BreakArts.cpp").read_text()
-        self.assertIn("static u_short Menu_BreakArts_artListActionIds[5];", source)
-        reset = source.split("void Menu_BreakArts_ResetMenu1Statics(", 1)[1]
-        self.assertIn("static const u_short initial[5] = {};", reset)
-        self.assertNotIn("static const u_short initial[4] = {};", reset)
+        generated = (root / "Native/Game/src/Menu/BreakArts.cpp").read_text()
+        self.assertNotIn("Menu_BreakArts_artListActionIds", generated)
+        self.assertNotIn("Menu_BreakArts_ResetMenu1Statics", generated)
+
+        ownership = (root / "tools/port/owned.csv").read_text()
+        self.assertIn(
+            "F02610,function,VS::Menu::break_arts::UpdateArtList,"
+            "Native\\Game\\src\\Menu\\BreakArtsCore.cpp",
+            ownership,
+        )
+        core = (root / "Native/Game/include/Menu/BreakArts.hpp").read_text()
+        self.assertIn("kMaxArtRows = kArtCount + 1;", core)
+        self.assertIn("std::array<std::uint16_t, kMaxArtRows> action_ids{}", core)
+
+        live = (root / "Native/Game/src/Menu/BreakArtsLive.cpp").read_text()
+        self.assertIn("void ResetLiveStatics() { g_state = {}; }", live)
+        cursor_tests = (root / "Native/Tests/src/CursorMemoryTests.cpp").read_text()
+        self.assertIn("Four learned Break Arts preserve their navigation row", cursor_tests)
+        self.assertIn("ResetLiveStatics()", cursor_tests)
 
     def test_encounter_trace_uses_action_actor_not_targeting_mode(self):
         root = Path(__file__).resolve().parents[2]

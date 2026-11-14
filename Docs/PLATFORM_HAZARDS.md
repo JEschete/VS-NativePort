@@ -53,11 +53,11 @@ there would have hidden the defect and left the wrong behavior in place.
 | `NULL-RETURN` | Lookup result read without a check | 0 | 0 | 0 | 0 | 0 | 0 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 3 | 0 | 0 | 3 | 0 | 3 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
-| `DIV-ZERO` | Division by a value that was not checked | 134 | 0 | 0 | 111 | 23 | 127 |
+| `DIV-ZERO` | Division by a value that was not checked | 135 | 0 | 0 | 112 | 23 | 128 |
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 82 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
-| `BYTE-OFFSET` | Field reached by a literal byte offset | 24 | 0 | 0 | 24 | 0 | 24 |
+| `BYTE-OFFSET` | Field reached by a literal byte offset | 23 | 0 | 0 | 23 | 0 | 23 |
 | `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 0 | 0 | 0 | 0 | 0 | 0 |
 | `PS1-ADDRESS` | Original memory address used as a value | 0 | 0 | 0 | 0 | 0 | 0 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |

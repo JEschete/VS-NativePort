@@ -378,7 +378,7 @@
 ]
 ],
 [
-87,
+80,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
@@ -979,26 +979,6 @@
 ],
 [
 "        static const char initial[16] = {};"
-]
-]
-],
-"Native\\Game\\src\\Menu\\BreakArts.cpp": [
-[
-498,
-[
-"        static const char initial[16];"
-],
-[
-"        static const char initial[16] = {};"
-]
-],
-[
-502,
-[
-"        static const u_short initial[5];"
-],
-[
-"        static const u_short initial[5] = {};"
 ]
 ]
 ],
@@ -2793,7 +2773,7 @@
 ],
 "Native\\Game\\src\\Menu\\Status\\EquipmentDetails.cpp": [
 [
-548,
+359,
 [
 "        VS::Menu::Framework::FormatLiveBladeRow(&blade, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -2802,7 +2782,7 @@
 ]
 ],
 [
-552,
+363,
 [
 "        VS::Menu::Framework::FormatLiveGripRow(&grip, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -2811,7 +2791,7 @@
 ]
 ],
 [
-566,
+377,
 [
 "                VS::Menu::Framework::FormatLiveGemRow(&gem, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -2820,7 +2800,7 @@
 ]
 ],
 [
-835,
+646,
 [
 "                        &actor->weapon, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -2829,7 +2809,7 @@
 ]
 ],
 [
-849,
+660,
 [
 "                        &actor->shield, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -2838,7 +2818,7 @@
 ]
 ],
 [
-856,
+667,
 [
 "                            Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -2847,7 +2827,7 @@
 ]
 ],
 [
-859,
+670,
 [
 "                            &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -2856,7 +2836,7 @@
 ]
 ],
 [
-862,
+673,
 [
 "                            Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -2865,7 +2845,7 @@
 ]
 ],
 [
-866,
+677,
 [
 "                            &armor, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],

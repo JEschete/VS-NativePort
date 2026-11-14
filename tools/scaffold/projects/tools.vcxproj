@@ -319,6 +319,7 @@
     <None Include="..\..\permuter_settings.toml" />
     <None Include="..\..\port\action_presentation_audit.py" />
     <None Include="..\..\port\audit_assembly_gaps.py" />
+    <None Include="..\..\port\breakarts_differential.py" />
     <None Include="..\..\port\check_event_dispatch.py" />
     <None Include="..\..\port\check_leftovers.py" />
     <None Include="..\..\port\check_native_views.py" />
@@ -385,6 +386,13 @@
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp" />
     <None Include="..\..\port\differentials\boss_orbit.py" />
     <None Include="..\..\port\differentials\boss_orbit_driver.cpp" />
+    <None Include="..\..\port\differentials\breakarts_driver.cpp" />
+    <None Include="..\..\port\differentials\breakarts_f02608.py" />
+    <None Include="..\..\port\differentials\breakarts_f02609.py" />
+    <None Include="..\..\port\differentials\breakarts_f02610.py" />
+    <None Include="..\..\port\differentials\breakarts_f02611.py" />
+    <None Include="..\..\port\differentials\breakarts_f02612.py" />
+    <None Include="..\..\port\differentials\breakarts_f02613.py" />
     <None Include="..\..\port\differentials\camera_selection.py" />
     <None Include="..\..\port\differentials\camera_selection_driver.cpp" />
     <None Include="..\..\port\differentials\camera_selection_guard_driver.cpp" />

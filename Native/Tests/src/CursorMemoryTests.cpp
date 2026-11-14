@@ -15,10 +15,12 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/SoundPlaybackLive.hpp"
+#include "Content/StringTables.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/BreakArtsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/Setup/Assembly.hpp"
@@ -151,9 +153,12 @@ struct BreakArtMenuFixture {
       : category(weapon_category),
         first_action(Battle_ActionId_DaggerArtOne + (category - 1) * 4),
         saved_arts(Audio_Seq_unusedArtsStatus.artsLearned[category % 10]) {
-    Menu_BreakArts_ResetMenu1Statics();
+    VS::Menu::break_arts::ResetLiveStatics();
     std::fill_n(Menu_BreakArts_strings, saved_strings.size(), 0xE7E7);
     std::fill_n(Menu_BreakArts_strings, 72, 96);
+    Menu_BreakArts_strings[96] = 0;
+    Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArts] = 0;
+    Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArtsDesc] = 0;
     Audio_Seq_unusedArtsStatus.artsLearned[category % 10] = 4;
     Battle_characterState = Battle_actors[0] = &actor;
     actor.stats = &stats;
@@ -169,11 +174,12 @@ struct BreakArtMenuFixture {
       action.type = Battle_ActionType_BreakArt;
       action.unlocked = 1;
       std::fill_n(action.name, std::size(action.name), static_cast<char>(0xE7));
+      action.name[0] = '\0';
     }
   }
 
   ~BreakArtMenuFixture() {
-    Menu_BreakArts_ResetMenu1Statics();
+    VS::Menu::break_arts::ResetLiveStatics();
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_BreakArts_strings);
     std::copy(saved_actions.begin(), saved_actions.end(),
@@ -191,17 +197,17 @@ struct BreakArtMenuFixture {
   }
 
   void Open() {
-    REQUIRE(Menu_BreakArts_UpdateArtList(category) == 0);
+    REQUIRE(VS::Menu::break_arts::UpdateArtListLive(category) == 0);
     FinishRowAnimations();
-    REQUIRE(Menu_BreakArts_UpdateArtList(0) == 0);
+    REQUIRE(VS::Menu::break_arts::UpdateArtListLive(0) == 0);
   }
 
   int SelectRow(int row) {
     Menu_Framework_selectedRow = row;
     VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
-    REQUIRE(Menu_BreakArts_UpdateArtList(0) == 0);
+    REQUIRE(VS::Menu::break_arts::UpdateArtListLive(0) == 0);
     FinishRowAnimations();
-    return Menu_BreakArts_UpdateArtList(0);
+    return VS::Menu::break_arts::UpdateArtListLive(0);
   }
 };
 

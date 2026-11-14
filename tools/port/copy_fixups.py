@@ -1423,12 +1423,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Framework::PopulateLiveBladeStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveGripStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveGemStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
-    "VS::Menu::BreakArts::SetHpCostLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
-    "VS::Menu::BreakArts::DrawNextUnlockPointsLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
-    "VS::Menu::BreakArts::UpdateArtListLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
-    "VS::Menu::BreakArts::UpdateWeaponCategoriesLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
-    "VS::Menu::BreakArts::CreateHeaderLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
-    "VS::Menu::BreakArts::UpdateLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
+    "VS::Menu::break_arts::SetHpCostLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
+    "VS::Menu::break_arts::DrawNextUnlockPointsLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
+    "VS::Menu::break_arts::UpdateArtListLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
+    "VS::Menu::break_arts::UpdateWeaponCategoriesLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
+    "VS::Menu::break_arts::CreateHeaderLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
+    "VS::Menu::break_arts::UpdateLive": r"Native\Game\include\Menu\BreakArtsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2495,12 +2495,12 @@ OWNED_CALL_BINDINGS["F02643"] = "VS::Menu::Framework::PopulateLiveAccessoryStats
 OWNED_CALL_BINDINGS["F02644"] = "VS::Menu::Framework::PopulateLiveBladeStats"
 OWNED_CALL_BINDINGS["F02645"] = "VS::Menu::Framework::PopulateLiveGripStats"
 OWNED_CALL_BINDINGS["F02646"] = "VS::Menu::Framework::PopulateLiveGemStats"
-OWNED_CALL_BINDINGS["F02608"] = "VS::Menu::BreakArts::SetHpCostLive"
-OWNED_CALL_BINDINGS["F02609"] = "VS::Menu::BreakArts::DrawNextUnlockPointsLive"
-OWNED_CALL_BINDINGS["F02610"] = "VS::Menu::BreakArts::UpdateArtListLive"
-OWNED_CALL_BINDINGS["F02611"] = "VS::Menu::BreakArts::UpdateWeaponCategoriesLive"
-OWNED_CALL_BINDINGS["F02612"] = "VS::Menu::BreakArts::CreateHeaderLive"
-OWNED_CALL_BINDINGS["F02613"] = "VS::Menu::BreakArts::UpdateLive"
+OWNED_CALL_BINDINGS["F02608"] = "VS::Menu::break_arts::SetHpCostLive"
+OWNED_CALL_BINDINGS["F02609"] = "VS::Menu::break_arts::DrawNextUnlockPointsLive"
+OWNED_CALL_BINDINGS["F02610"] = "VS::Menu::break_arts::UpdateArtListLive"
+OWNED_CALL_BINDINGS["F02611"] = "VS::Menu::break_arts::UpdateWeaponCategoriesLive"
+OWNED_CALL_BINDINGS["F02612"] = "VS::Menu::break_arts::CreateHeaderLive"
+OWNED_CALL_BINDINGS["F02613"] = "VS::Menu::break_arts::UpdateLive"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4018,12 +4018,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x80107F1C, "VS::Menu::Loot::Live::StageArmor"),  # F02850
     ("MENU/MENUB.PRG", 0x80107F9C, "VS::Menu::Loot::Live::StageShield"),  # F02851
     ("MENU/MENUB.PRG", 0x8010808C, "VS::Menu::Loot::Live::StageMiscItem"),  # F02852
-    ("MENU/MENU1.PRG", 0x80102830, "VS::Menu::BreakArts::SetHpCostLive"),  # F02608
-    ("MENU/MENU1.PRG", 0x80102914, "VS::Menu::BreakArts::DrawNextUnlockPointsLive"),  # F02609
-    ("MENU/MENU1.PRG", 0x80102A4C, "VS::Menu::BreakArts::UpdateArtListLive"),  # F02610
-    ("MENU/MENU1.PRG", 0x80102F68, "VS::Menu::BreakArts::UpdateWeaponCategoriesLive"),  # F02611
-    ("MENU/MENU1.PRG", 0x801031FC, "VS::Menu::BreakArts::CreateHeaderLive"),  # F02612
-    ("MENU/MENU1.PRG", 0x80103270, "VS::Menu::BreakArts::UpdateLive"),  # F02613
+    ("MENU/MENU1.PRG", 0x80102830, "VS::Menu::break_arts::SetHpCostLive"),  # F02608
+    ("MENU/MENU1.PRG", 0x80102914, "VS::Menu::break_arts::DrawNextUnlockPointsLive"),  # F02609
+    ("MENU/MENU1.PRG", 0x80102A4C, "VS::Menu::break_arts::UpdateArtListLive"),  # F02610
+    ("MENU/MENU1.PRG", 0x80102F68, "VS::Menu::break_arts::UpdateWeaponCategoriesLive"),  # F02611
+    ("MENU/MENU1.PRG", 0x801031FC, "VS::Menu::break_arts::CreateHeaderLive"),  # F02612
+    ("MENU/MENU1.PRG", 0x80103270, "VS::Menu::break_arts::UpdateLive"),  # F02613
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

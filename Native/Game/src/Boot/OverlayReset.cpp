@@ -4,7 +4,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
 #include "Menu/BattleAbilities.h"
-#include "Menu/BreakArts.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Inventory/Inventory.h"
@@ -33,12 +32,6 @@ void Boot_ResetMainMenuStatics(void)
 void Boot_ResetMenu0Statics(void)
 {
     Menu_Magic_ResetMenu0Statics();
-}
-
-// Call where the original loads MENU1.PRG: restores the statics its reload re-read from the disc.
-void Boot_ResetMenu1Statics(void)
-{
-    Menu_BreakArts_ResetMenu1Statics();
 }
 
 // Call where the original loads MENU2.PRG: restores the statics its reload re-read from the disc.

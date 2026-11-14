@@ -8,7 +8,6 @@ fecb27f0f444,BYTE-OFFSET,medium,pattern,F01920,Effects_Plg052_UpdateRepeatingRin
 407734ee3b21,BYTE-OFFSET,medium,pattern,F02398,Effects_Plg300_UpdateForegroundRepeatingRing,Native/Game/src/Effects/Plugins/Plg300.cpp,96,(u_char*)Effects_Plg300_ringColorFactors2) +,61,31,open,
 38560a9f5550,BYTE-OFFSET,medium,pattern,F01417,Effects_DrawTrailSegment,Native/Game/src/Effects/Trails.cpp,57,(u_char*)Render_frameScratch.orderingTable +,61,31,open,
 64c73dd49bf2,BYTE-OFFSET,medium,pattern,F01417,Effects_DrawTrailSegment,Native/Game/src/Effects/Trails.cpp,57,(u_char*)Render_frameScratch.orderingTable +,61,31,open,
-494243151156,BYTE-OFFSET,medium,pattern,F02610,Menu_BreakArts_UpdateArtList,Native/Game/src/Menu/BreakArts.cpp,181,(char*)&Menu_BreakArts_strings[Menu_BreakArts_strings[Text_Menu1_strings_Index_daggerArt1 +,60,34,open,
 252ee5e7d383,BYTE-OFFSET,medium,pattern,F02985,Menu_Container_UpdateItemList,Native/Game/src/Menu/Container/ItemView.cpp,190,(char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag +,60,34,open,
 38d94bb45445,BYTE-OFFSET,medium,pattern,F02985,Menu_Container_UpdateItemList,Native/Game/src/Menu/Container/ItemView.cpp,190,(char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag +,60,34,open,
 b60773d7d08e,BYTE-OFFSET,medium,pattern,F02987,Menu_Container_UpdateScreen,Native/Game/src/Menu/Container/ItemView.cpp,904,(char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_screenResult +,60,34,open,
@@ -223,6 +222,7 @@ d8458bba03bf,DIV-ZERO,medium,pattern,,PlatformRecords,Native/Game/src/Field/Plat
 2150acc97d9c,DIV-ZERO,medium,pattern,,RoomDoorRecords,Native/Game/src/Field/RoomSwitchesLive.cpp,46,alignof(Field_MpdLockTrigger),45,3,open,
 254d310e4e9a,DIV-ZERO,medium,pattern,,QuarterPercent,Native/Game/src/Field/Traps.cpp,38,denominator,45,3,guarded,"all three callers (ApplyLimbDefense, ApplyShieldDefense) call QuarterPercent only after checking that the max DP or PP denominator is nonzero"
 e90dfbe21c21,DIV-ZERO,low,pattern,,PanelDefense,Native/Game/src/Field/Traps.cpp,100,((risk / 2) + kRiskDefenseBase),45,3,false-positive,"risk is an unsigned 16-bit value, so the divisor (risk / 2) + kRiskDefenseBase is at least 100"
+d621538737a1,DIV-ZERO,medium,pattern,F02609,DrawNextUnlockPoints,Native/Game/src/Menu/BreakArtsCore.cpp,277,static_cast,60,34,open,
 39dbe2e87246,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2207,divisor,60,34,open,
 ee5c5f5527d7,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2212,divisor,60,34,open,
 30c226fb9e82,DIV-ZERO,medium,pattern,,CopyPartClassAffinity,Native/Game/src/Menu/Framework/EquipmentDetails.cpp,244,classes.size(),60,34,open,

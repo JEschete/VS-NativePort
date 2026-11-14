@@ -11,7 +11,6 @@
 
 void Boot_ResetMainMenuStatics(void);
 void Boot_ResetMenu0Statics(void);
-void Boot_ResetMenu1Statics(void);
 void Boot_ResetMenu2Statics(void);
 void Boot_ResetMenu3Statics(void);
 void Boot_ResetMenu4Statics(void);

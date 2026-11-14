@@ -71,6 +71,7 @@
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
@@ -2079,6 +2080,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUB.PRG", 0x80107F1Cu, 0u, (void*)&VS::Menu::Loot::Live::StageArmor, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80107F9Cu, 0u, (void*)&VS::Menu::Loot::Live::StageShield, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x8010808Cu, 0u, (void*)&VS::Menu::Loot::Live::StageMiscItem, 0u, 0u, 0u},
+    {"MENU/MENU1.PRG", 0x80102830u, 0u, (void*)&VS::Menu::break_arts::SetHpCostLive, 0u, 0u, 0u},
+    {"MENU/MENU1.PRG", 0x80102914u, 0u, (void*)&VS::Menu::break_arts::DrawNextUnlockPointsLive, 0u, 0u, 0u},
+    {"MENU/MENU1.PRG", 0x80102A4Cu, 0u, (void*)&VS::Menu::break_arts::UpdateArtListLive, 0u, 0u, 0u},
+    {"MENU/MENU1.PRG", 0x80102F68u, 0u, (void*)&VS::Menu::break_arts::UpdateWeaponCategoriesLive, 0u, 0u, 0u},
+    {"MENU/MENU1.PRG", 0x801031FCu, 0u, (void*)&VS::Menu::break_arts::CreateHeaderLive, 0u, 0u, 0u},
+    {"MENU/MENU1.PRG", 0x80103270u, 0u, (void*)&VS::Menu::break_arts::UpdateLive, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
