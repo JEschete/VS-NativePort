@@ -12,13 +12,6 @@
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 
-void Menu_Status_PopulateWeaponStats(Items_WeaponLoadout* weapon);
-void Menu_Status_PopulateShieldStats(Items_ShieldLoadout* shield);
-void Menu_Status_PopulateArmorStats(Items_ArmorLoadout* armor);
-void Menu_Status_PopulateAccessoryStats(Items_AccessorySpawnLoadout* accessory);
-void Menu_Status_PopulateBladeStats(Items_WeaponLoadout* weapon);
-void Menu_Status_PopulateGripStats(Items_EquipmentPartStats* grip);
-void Menu_Status_PopulateGemStats(Items_EquipmentPartStats* gem);
 void Menu_Status_FormatBladeDescription(Items_EquipmentPartStats* blade, char* menuText[],
     int rowTypes[] __attribute__((unused)));
 void Menu_Status_FormatGripDescription(

@@ -490,6 +490,15 @@
     <None Include="..\..\port\differentials\equipment_detail_b_f02578.py" />
     <None Include="..\..\port\differentials\equipment_detail_b_f02578_menub.py" />
     <None Include="..\..\port\differentials\equipment_detail_b_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\equipment_stats_common.py" />
+    <None Include="..\..\port\differentials\equipment_stats_driver.cpp" />
+    <None Include="..\..\port\differentials\f02640_equipment_weapon.py" />
+    <None Include="..\..\port\differentials\f02641_equipment_shield.py" />
+    <None Include="..\..\port\differentials\f02642_equipment_armor.py" />
+    <None Include="..\..\port\differentials\f02643_equipment_accessory.py" />
+    <None Include="..\..\port\differentials\f02644_equipment_blade.py" />
+    <None Include="..\..\port\differentials\f02645_equipment_grip.py" />
+    <None Include="..\..\port\differentials\f02646_equipment_gem.py" />
     <None Include="..\..\port\differentials\flight_movement.py" />
     <None Include="..\..\port\differentials\flight_movement_driver.cpp" />
     <None Include="..\..\port\differentials\floating_label_caption.py" />

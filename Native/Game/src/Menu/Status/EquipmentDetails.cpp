@@ -12,7 +12,6 @@ extern "C" {
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
-#include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/TargetingState.h"
@@ -36,194 +35,6 @@ extern "C" {
 
 // decomp: local static of _equipmentDetailScreen, at file scope so the module reset reaches it
 static char Menu_Status_equipmentDetailsCursorAnimState = 0;
-
-// decomp: MENU4.PRG _drawWeaponInfo (src/MENU/MENU4.PRG/120.c:26)
-void Menu_Status_PopulateWeaponStats(Items_WeaponLoadout* weapon)
-{
-    Menu_Framework_equipmentSubtype = 1;
-
-    VS::Menu::Framework::ResetLiveEquipmentStats();
-    VS::Menu::Framework::SetLiveRangeAndRisk(0, 0, 0, 1);
-
-    if (weapon->blade.id != 0) {
-        int i;
-
-        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &weapon->classAffinityCurrent,
-            sizeof weapon->classAffinityCurrent);
-        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats + 48, &weapon->classAffinityBaseline,
-            sizeof weapon->classAffinityBaseline);
-
-        Menu_Framework_equipmentStats[63] =
-            weapon == &Battle_characterState->stats->weapon;
-
-        for (i = 0; i < 4; ++i) {
-            Menu_Framework_equipmentStats[i + 32] = weapon->grip.types[i];
-        }
-
-        Menu_Framework_equipmentStats[36] = weapon->damageType;
-
-        VS::Menu::Framework::SetLiveDpPp(
-            weapon->currentDp, weapon->maxDp, weapon->currentPp, weapon->maxPp);
-        VS::Menu::Framework::SetLivePrimaryStats(
-            weapon->currentStr, weapon->currentInt, weapon->currentAgility, 1);
-
-        Menu_Framework_strIntAgi[4] = weapon->baseStr;
-        Menu_Framework_strIntAgi[5] = weapon->baseInt;
-        Menu_Framework_strIntAgi[6] = weapon->baseAgility;
-
-        VS::Menu::Framework::SetLiveRangeAndRisk(weapon->range.range, weapon->risk, 0, 1);
-    }
-
-    VS::Menu::Framework::SetLiveEnabledStatPages(7);
-}
-
-// decomp: MENU4.PRG _drawShieldInfo (src/MENU/MENU4.PRG/120.c:68)
-void Menu_Status_PopulateShieldStats(Items_ShieldLoadout* shield)
-{
-    Menu_Framework_equipmentSubtype = 8;
-
-    VS::Menu::Framework::ResetLiveEquipmentStats();
-
-    if (shield->base.id != 0) {
-        int i;
-
-        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &shield->classAffinityCurrent,
-            sizeof shield->classAffinityCurrent);
-        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats + 48, &shield->classAffinityBaseline,
-            sizeof shield->classAffinityBaseline);
-
-        Menu_Framework_equipmentStats[63] =
-            shield == &Battle_characterState->stats->shield;
-
-        for (i = 0; i < 4; ++i) {
-            Menu_Framework_equipmentStats[i + 32] = shield->types[i];
-        }
-
-        VS::Menu::Framework::SetLiveDpPp(
-            shield->currentDp, shield->maxDp, shield->currentPp, shield->maxPp);
-        VS::Menu::Framework::SetLivePrimaryStats(
-            shield->currentStr, shield->currentInt, shield->currentAgility, 1);
-
-        Menu_Framework_strIntAgi[4] = shield->baseStr;
-        Menu_Framework_strIntAgi[5] = shield->baseInt;
-        Menu_Framework_strIntAgi[6] = shield->baseAgility;
-    }
-    VS::Menu::Framework::SetLiveEnabledStatPages(7);
-}
-
-// decomp: MENU4.PRG _drawArmorInfo (src/MENU/MENU4.PRG/120.c:104)
-void Menu_Status_PopulateArmorStats(Items_ArmorLoadout* armor)
-{
-    Menu_Framework_equipmentSubtype = 16;
-
-    VS::Menu::Framework::ResetLiveEquipmentStats();
-
-    if (armor->armor.id != 0) {
-        int i;
-
-        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &armor->classAffinityCurrent,
-            sizeof armor->classAffinityCurrent);
-        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats + 48, &armor->classAffinityBaseline,
-            sizeof armor->classAffinityBaseline);
-
-        Menu_Framework_equipmentStats[63] = 0;
-
-        for (i = 0; i < 5; ++i) {
-            Menu_Framework_equipmentStats[63] |=
-                armor == &Battle_characterState->stats->limbs[i].armor;
-        }
-
-        for (i = 0; i < 4; ++i) {
-            Menu_Framework_equipmentStats[i + 32] = armor->types[i];
-        }
-
-        VS::Menu::Framework::SetLiveDpPp(armor->currentDp, armor->maxDp, 0, 0);
-        VS::Menu::Framework::SetLivePrimaryStats(
-            armor->currentStr, armor->currentInt, armor->currentAgility, 1);
-
-        Menu_Framework_strIntAgi[4] = armor->baseStr;
-        Menu_Framework_strIntAgi[5] = armor->baseInt;
-        Menu_Framework_strIntAgi[6] = armor->baseAgility;
-    }
-
-    VS::Menu::Framework::SetLiveEnabledStatPages(7);
-}
-
-// decomp: MENU4.PRG _drawAccessoryInfo (src/MENU/MENU4.PRG/120.c:144)
-void Menu_Status_PopulateAccessoryStats(Items_AccessorySpawnLoadout* accessory)
-{
-    Menu_Framework_equipmentSubtype = 32;
-
-    VS::Menu::Framework::ResetLiveEquipmentStats();
-
-    if (accessory->accessory.id != 0) {
-        int i;
-        for (i = 0; i < 16; ++i) {
-            Menu_Framework_equipmentStats[i] = accessory->classes[i & 7];
-            Menu_Framework_equipmentStats[i + 16] = accessory->affinities[i & 7];
-            Menu_Framework_equipmentStats[i + 32] =
-                accessory->types[i & 7]; // BUG? Copies past end
-        }
-
-        VS::Menu::Framework::SetLivePrimaryStats(
-            accessory->currentStr, accessory->currentInt, accessory->currentAgility, 2);
-    }
-
-    VS::Menu::Framework::SetLiveEnabledStatPages(7);
-}
-
-// decomp: MENU4.PRG _drawBladeInfo (src/MENU/MENU4.PRG/120.c:169)
-void Menu_Status_PopulateBladeStats(Items_WeaponLoadout* weapon)
-{
-    int i;
-
-    Items_EquipmentPartStats* blade = &weapon->blade;
-    Menu_Framework_equipmentSubtype = 2;
-
-    for (i = 0; i < 16; ++i) {
-        Menu_Framework_equipmentStats[i] = blade->classes[i & 7];
-        Menu_Framework_equipmentStats[i + 16] = blade->affinities[i & 7];
-    }
-
-    VS::Menu::Framework::SetLiveDpPp(blade->currentDp, blade->maxDp, weapon->currentPp, weapon->maxPp);
-    VS::Menu::Framework::SetLivePrimaryStats(blade->strength, blade->intelligence, blade->agility, 1);
-    VS::Menu::Framework::SetLiveRangeAndRisk(blade->range.range, blade->cost, 0, 1);
-    VS::Menu::Framework::SetLiveEnabledStatPages(3);
-    VS::Menu::Framework::UpdateLiveDpPpBars(11);
-}
-
-// decomp: MENU4.PRG _drawGripInfo (src/MENU/MENU4.PRG/120.c:191)
-void Menu_Status_PopulateGripStats(Items_EquipmentPartStats* grip)
-{
-    int i;
-
-    Menu_Framework_equipmentSubtype = 4;
-
-    for (i = 0; i < 4; ++i) {
-        Menu_Framework_equipmentStats[i + 32] = grip->types[i];
-    }
-
-    VS::Menu::Framework::SetLivePrimaryStats(grip->strength, grip->intelligence, grip->agility, 1);
-    VS::Menu::Framework::SetLiveEnabledStatPages(4);
-    VS::Menu::Framework::UpdateLiveDpPpBars(8);
-}
-
-// decomp: MENU4.PRG _drawGemInfo (src/MENU/MENU4.PRG/120.c:209)
-void Menu_Status_PopulateGemStats(Items_EquipmentPartStats* gem)
-{
-    int i;
-
-    Menu_Framework_equipmentSubtype = 64;
-
-    for (i = 0; i < 16; ++i) {
-        Menu_Framework_equipmentStats[i] = gem->classes[i & 7];
-        Menu_Framework_equipmentStats[i + 16] = gem->affinities[i & 7];
-    }
-
-    VS::Menu::Framework::SetLivePrimaryStats(gem->strength, gem->intelligence, gem->agility, 1);
-    VS::Menu::Framework::SetLiveEnabledStatPages(3);
-    VS::Menu::Framework::UpdateLiveDpPpBars(8);
-}
 
 // decomp: MENU4.PRG _initBladeDescription (src/MENU/MENU4.PRG/120.c:228)
 void Menu_Status_FormatBladeDescription(Items_EquipmentPartStats* blade, char* menuText[],
@@ -296,12 +107,12 @@ char* Menu_Status_SelectWeaponComponent(int row, Items_WeaponLoadout* weapon)
 
     case 1:
         Menu_Status_FormatBladeDescription(&weapon->blade, menuText, &rowType);
-        Menu_Status_PopulateBladeStats(weapon);
+        VS::Menu::Framework::PopulateLiveBladeStats(weapon);
         break;
 
     case 2:
         Menu_Status_FormatGripDescription(&weapon->grip, menuText, &rowType);
-        Menu_Status_PopulateGripStats(&weapon->grip);
+        VS::Menu::Framework::PopulateLiveGripStats(&weapon->grip);
         break;
 
     case 3:
@@ -309,7 +120,7 @@ char* Menu_Status_SelectWeaponComponent(int row, Items_WeaponLoadout* weapon)
     case 5:
         if (weapon->gems[row - 3].id != 0) {
             Menu_Status_CopyGemDescription(&weapon->gems[row - 3], menuText, &rowType);
-            Menu_Status_PopulateGemStats(&weapon->gems[row - 3]);
+            VS::Menu::Framework::PopulateLiveGemStats(&weapon->gems[row - 3]);
         } else {
             VS::Menu::Framework::UpdateLiveDpPpBars(8);
             VS::Menu::Framework::ResetLiveEquipmentStats();
@@ -337,7 +148,7 @@ char* Menu_Status_SelectShieldComponent(int row, Items_ShieldLoadout* shield)
     } else if (row < 4) {
         if (shield->gems[row - 1].id != 0) {
             Menu_Status_CopyGemDescription(&shield->gems[row - 1], (char**)&menuText, &rowType);
-            Menu_Status_PopulateGemStats(&shield->gems[row - 1]);
+            VS::Menu::Framework::PopulateLiveGemStats(&shield->gems[row - 1]);
         } else {
             VS::Menu::Framework::UpdateLiveDpPpBars(8);
             VS::Menu::Framework::ResetLiveEquipmentStats();
@@ -708,21 +519,21 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         switch (Menu_Status_equipmentDetailsSelectedEquipmentRow) {
         case 0:
             VS::Menu::Framework::UpdateLiveDpPpBars(3);
-            Menu_Status_PopulateWeaponStats(&actor->weapon);
+            VS::Menu::Framework::PopulateLiveWeaponStats(&actor->weapon);
             break;
 
         case 1:
             VS::Menu::Framework::UpdateLiveDpPpBars(3);
-            Menu_Status_PopulateShieldStats(&actor->shield);
+            VS::Menu::Framework::PopulateLiveShieldStats(&actor->shield);
             break;
 
         default:
             if ((Menu_Status_equipmentDetailsSelectedEquipmentRow - 2) < limbs) {
                 VS::Menu::Framework::UpdateLiveDpPpBars(1);
-                Menu_Status_PopulateArmorStats(&actor->limbs[Menu_Status_equipmentDetailsSelectedEquipmentRow - 2].armor);
+                VS::Menu::Framework::PopulateLiveArmorStats(&actor->limbs[Menu_Status_equipmentDetailsSelectedEquipmentRow - 2].armor);
             } else {
                 VS::Menu::Framework::UpdateLiveDpPpBars(0);
-                Menu_Status_PopulateAccessoryStats(&actor->accessory);
+                VS::Menu::Framework::PopulateLiveAccessoryStats(&actor->accessory);
             }
             break;
         }
@@ -826,7 +637,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                 switch (selected_equipment_row) {
                 case 0:
                     VS::Menu::Framework::UpdateLiveDpPpBars(11);
-                    Menu_Status_PopulateWeaponStats(&actor->weapon);
+                    VS::Menu::Framework::PopulateLiveWeaponStats(&actor->weapon);
 
                     for (i = 1; i < 6; ++i) {
                         Menu_Status_SetWeaponComponentRow(i, &actor->weapon, 0);
@@ -840,7 +651,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
 
                 case 1:
                     VS::Menu::Framework::UpdateLiveDpPpBars(11);
-                    Menu_Status_PopulateShieldStats(&actor->shield);
+                    VS::Menu::Framework::PopulateLiveShieldStats(&actor->shield);
 
                     for (i = 1; i < 4; ++i) {
                         Menu_Status_SetShieldGemRow(i, &actor->shield, 0);
@@ -855,13 +666,13 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                     if ((selected_equipment_row - 2) < limbs) {
                         VS::Menu::Framework::UpdateLiveDpPpBars(
                             (int)Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);
-                        Menu_Status_PopulateArmorStats(&actor->limbs[selected_equipment_row - 2].armor);
+                        VS::Menu::Framework::PopulateLiveArmorStats(&actor->limbs[selected_equipment_row - 2].armor);
                         VS::Menu::Framework::FormatLiveArmorRow(&actor->limbs[selected_equipment_row - 2].armor, equipment_row_text,
                             (int *)(&equipment_row_flags), Menu_Framework_stringBuf);
                     } else {
                         VS::Menu::Framework::UpdateLiveDpPpBars(
                             (int)Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);
-                        Menu_Status_PopulateAccessoryStats((Items_AccessorySpawnLoadout*)&actor->accessory);
+                        VS::Menu::Framework::PopulateLiveAccessoryStats((Items_AccessorySpawnLoadout*)&actor->accessory);
                         VS::Items::StoreLiveInventoryAccessoryStats(&armor, &actor->accessory);
                         VS::Menu::Framework::FormatLiveInventoryArmorRow(
                             &armor, equipment_row_text, (int *)(&equipment_row_flags), Menu_Framework_stringBuf);
@@ -913,7 +724,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         switch (Menu_Status_equipmentDetailsSelectedEquipmentRow) {
         case 0:
             VS::Menu::Framework::UpdateLiveDpPpBars(11);
-            Menu_Status_PopulateWeaponStats(&actor->weapon);
+            VS::Menu::Framework::PopulateLiveWeaponStats(&actor->weapon);
 
             newSelection = Menu_Status_NavigateDetailElements(
                 previousSelection, actor->weapon.grip.gemSlots + 114);
@@ -922,7 +733,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
 
         case 1:
             VS::Menu::Framework::UpdateLiveDpPpBars(11);
-            Menu_Status_PopulateShieldStats(&actor->shield);
+            VS::Menu::Framework::PopulateLiveShieldStats(&actor->shield);
 
             newSelection = Menu_Status_NavigateDetailElements(
                 previousSelection, actor->shield.base.gemSlots + 96);
