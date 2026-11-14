@@ -82,6 +82,7 @@
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
+#include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 extern "C" {
@@ -2081,6 +2082,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUB.PRG", 0x80107F1Cu, 0u, (void*)&VS::Menu::Loot::Live::StageArmor, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80107F9Cu, 0u, (void*)&VS::Menu::Loot::Live::StageShield, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x8010808Cu, 0u, (void*)&VS::Menu::Loot::Live::StageMiscItem, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x801080F0u, 0u, (void*)&VS::Menu::Loot::Live::RefreshClaimableRows, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x8010822Cu, 0u, (void*)&VS::Menu::Loot::Live::AppendLootRow, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80108264u, 0u, (void*)&VS::Menu::Loot::Live::CountContainedCategory, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x801086DCu, 0u, (void*)&VS::Menu::Loot::Live::IsDropAllowed, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x801086F4u, 0u, (void*)&VS::Menu::Loot::Live::StageDropRecord, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x801088D4u, 0u, (void*)&VS::Menu::Loot::Live::BuildStagedInventory, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x8010A24Cu, 0u, (void*)&VS::Menu::Loot::Live::RecordClaimedKey, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x80102830u, 0u, (void*)&VS::Menu::break_arts::SetHpCostLive, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x80102914u, 0u, (void*)&VS::Menu::break_arts::DrawNextUnlockPointsLive, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x80102A4Cu, 0u, (void*)&VS::Menu::break_arts::UpdateArtListLive, 0u, 0u, 0u},

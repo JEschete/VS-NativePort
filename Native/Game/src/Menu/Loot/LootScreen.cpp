@@ -12,6 +12,7 @@
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
+#include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -25,7 +26,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/InventoryLiveState.h"
-#include "Items/Loot.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
@@ -465,7 +465,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
 
         VS::Core::Memory::CopyLiveHalfwordBlocks(
             Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, kMenuLootRowCapacity * sizeof *Menu_Loot_lootListWorkingCopy);
-        Menu_Loot_RefreshClaimableRows();
+        VS::Menu::Loot::Live::RefreshClaimableRows();
 
         Menu_Loot_lootLeftEdge = 10;
         Menu_Loot_showLoot = 1;
@@ -773,7 +773,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
         if (item != NULL) {
             color = vs_getRGB(64, 64, 64)
                  << ((item == (Menu_Loot_LootListItem*)1)
-                        || (Menu_Loot_CountContainedCategory(i, item) != 0));
+                        || (VS::Menu::Loot::Live::CountContainedCategory(i, item) != 0));
         }
 
         y = (24 + i * 12) << 16;
@@ -790,7 +790,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
             }
 
             if (((uintptr_t)item >> 1) != 0) {
-                if (capacity < (Menu_Loot_CountContainedCategory(i, item) + itemCount)) {
+                if (capacity < (VS::Menu::Loot::Live::CountContainedCategory(i, item) + itemCount)) {
                     color = vs_getRGB(128, 64, 32);
                 }
             }
@@ -1296,7 +1296,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
                         int miscId = Menu_Loot_inventory->misc[loot->itemIndex].id;
 
                         if (miscId > 457) {
-                            Menu_Loot_RecordClaimedKey(miscId);
+                            VS::Menu::Loot::Live::RecordClaimedKey(miscId);
                         }
                     }
 
@@ -1338,7 +1338,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
                     i = Menu_Loot_inventory->misc[loot->itemIndex].id;
 
                     if (i > 457) {
-                        Menu_Loot_RecordClaimedKey(i);
+                        VS::Menu::Loot::Live::RecordClaimedKey(i);
                     }
                 }
 
@@ -1502,7 +1502,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
         if (Menu_Loot_lootLeftEdge == 0) {
             Menu_Loot_controlsEnabled = 1;
             Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_Init;
-            Menu_Loot_RefreshClaimableRows();
+            VS::Menu::Loot::Live::RefreshClaimableRows();
         }
         break;
 
@@ -1529,7 +1529,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
                 }
             }
 
-            Menu_Loot_RefreshClaimableRows();
+            VS::Menu::Loot::Live::RefreshClaimableRows();
 
             if (Menu_Loot_lootListCount == 0) {
 
@@ -1585,7 +1585,7 @@ int Menu_Loot_Update(u_char* state)
         Menu_Loot_updateLayoutPadding = 0;
 
         VS::Menu::Framework::LoadLiveItemText(1);
-        Menu_Loot_BuildStagedInventory(Menu_Framework_lootLists);
+        VS::Menu::Loot::Live::BuildStagedInventory(Menu_Framework_lootLists);
 
         Menu_Loot_controlsEnabled = 0;
         Menu_Loot_showInventory = 1;

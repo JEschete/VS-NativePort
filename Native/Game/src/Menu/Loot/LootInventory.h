@@ -26,18 +26,3 @@ typedef struct Menu_Loot_LootListItem {
 _Static_assert(sizeof(Menu_Loot_LootListItem) == 0x4, "Menu_Loot_LootListItem must keep its PS1 layout");
 
 #endif // VS_MENU_LOOT_LOOTINVENTORY_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_LOOT_LOOTINVENTORY_H_DECLS)
-#define VS_MENU_LOOT_LOOTINVENTORY_H_DECLS
-#include "Items/Inventory.h"
-#include "Items/Loot.h"
-
-void Menu_Loot_RefreshClaimableRows(void);
-void Menu_Loot_AppendLootRow(int itemCategory, int itemIndex);
-int Menu_Loot_CountContainedCategory(int counted_category, Menu_Loot_LootListItem* loot_list_item);
-int Menu_Loot_IsDropAllowed(int drop_difficulty_flags);
-void Menu_Loot_StageDropRecord(Items_BattleLoot* drop_record);
-void Menu_Loot_BuildStagedInventory(Items_LootListNode* node);
-void Menu_Loot_RecordClaimedKey(int item_id);
-
-#endif // VS_MENU_LOOT_LOOTINVENTORY_H_DECLS

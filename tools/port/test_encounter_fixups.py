@@ -4746,19 +4746,33 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertIn("weapon staging rejects full component tables unchanged", tests)
         self.assertIn("shield staging rejects a full gem table unchanged", tests)
 
-    def test_loot_overflow_never_appends_a_failed_staging_index(self):
+    def test_loot_rows_are_owned_and_overflow_defers(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Loot/LootInventory.cpp").read_text()
-        stage = source.split("void Menu_Loot_StageDropRecord(", 1)[1]
-        stage = stage.split("// decomp:", 1)[0]
-        self.assertNotIn("Menu_Loot_AppendLootRow(", stage)
-        self.assertEqual(stage.count("Menu_Loot_AppendStagedDrop("), 8)
-        append = source.split("void Menu_Loot_AppendStagedDrop(", 1)[1]
-        append = append.split("int Menu_Loot_AdvanceStagedInventory(", 1)[0]
-        self.assertLess(
-            append.index("if (index == 0)"), append.index("Menu_Loot_AppendLootRow(")
-        )
-        self.assertIn("Menu_Loot_paging.deferred = 1;", append)
+        functions = {
+            "F02853": "RefreshClaimableRows",
+            "F02854": "AppendLootRow",
+            "F02855": "CountContainedCategory",
+            "F02857": "IsDropAllowed",
+            "F02858": "StageDropRecord",
+            "F02859": "BuildStagedInventory",
+            "F02866": "RecordClaimedKey",
+        }
+        for fid, function in functions.items():
+            with self.subTest(function=function):
+                binding = f"VS::Menu::Loot::Live::{function}"
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[fid], binding)
+                self.assertEqual(
+                    copy_fixups.NATIVE_HELPER_HEADERS[binding],
+                    r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+                )
+        source = (root / "Native/Game/src/Menu/Loot/LootRows.cpp").read_text()
+        stage = source.split("void StageDrop(", 1)[1].split("}  // namespace", 1)[0]
+        self.assertLess(stage.index("if (slot == 0"), stage.index("batch.drops[batch.count] = drop;"))
+        self.assertIn("batch.deferred = true;", stage)
+        tests = (root / "Native/Tests/src/LootRowsTests.cpp").read_text()
+        for fid in functions:
+            self.assertIn(f"[loot-rows][{fid}]", tests)
 
     def test_loot_pages_share_row_capacity_and_reset_before_source_release(self):
         root = Path(__file__).resolve().parents[2]

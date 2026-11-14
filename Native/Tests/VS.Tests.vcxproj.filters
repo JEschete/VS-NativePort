@@ -669,6 +669,9 @@
     <ClCompile Include="src\LogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\LootRowsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\LootStagingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

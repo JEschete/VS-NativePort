@@ -2481,12 +2481,15 @@
     <ClInclude Include="src\Menu\Legacy.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
-    <ClCompile Include="src\Menu\Loot\LootInventory.cpp">
-      <Filter>src\Menu\Loot</Filter>
-    </ClCompile>
     <ClInclude Include="src\Menu\Loot\LootInventory.h">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Loot\LootRows.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Loot\LootRowsLive.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Loot\LootScreen.cpp">
       <Filter>src\Menu\Loot</Filter>
     </ClCompile>
@@ -3848,6 +3851,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatchLive.hpp">
       <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootRows.hpp">
+      <Filter>include\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootRowsLive.hpp">
+      <Filter>include\Menu\Loot</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Loot\LootStaging.hpp">
       <Filter>include\Menu\Loot</Filter>

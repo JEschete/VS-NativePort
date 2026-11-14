@@ -2814,6 +2814,9 @@
     <None Include="..\..\port\differentials\magic_menus_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\native_compile_support.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\obstacle_detour.py">
       <Filter>tools\port\differentials</Filter>
     </None>

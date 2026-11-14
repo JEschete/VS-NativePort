@@ -1317,9 +1317,7 @@ NATIVE_HELPER_HEADERS = {
        for name in ("Core_Warnf", "Core_Errorf")},
     **{name: r"Native\Game\src\Menu\Loot\Paging.h"
        for name in (
-           "kMenuLootRowCapacity", "Menu_Loot_HasStagingSpace",
-           "Menu_Loot_CanStageDrop", "Menu_Loot_AppendStagedDrop",
-           "Menu_Loot_BeginPaging", "Menu_Loot_AdvanceStagedInventory",
+           "kMenuLootRowCapacity", "Menu_Loot_AdvanceStagedInventory",
            "Menu_Loot_ResetPaging",
        )},
     **{f"VS::Input::{name}": r"Native\Engine\include\Input\ControllerLive.hpp"
@@ -1416,6 +1414,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Loot::Live::StageArmor": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
     "VS::Menu::Loot::Live::StageShield": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
     "VS::Menu::Loot::Live::StageMiscItem": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Loot::Live::RefreshClaimableRows": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+    "VS::Menu::Loot::Live::AppendLootRow": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+    "VS::Menu::Loot::Live::CountContainedCategory": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+    "VS::Menu::Loot::Live::IsDropAllowed": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+    "VS::Menu::Loot::Live::StageDropRecord": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+    "VS::Menu::Loot::Live::BuildStagedInventory": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+    "VS::Menu::Loot::Live::RecordClaimedKey": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
     "VS::Menu::Framework::PopulateLiveWeaponStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveShieldStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveArmorStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
@@ -2492,6 +2497,13 @@ OWNED_CALL_BINDINGS["F02849"] = "VS::Menu::Loot::Live::StageWeapon"
 OWNED_CALL_BINDINGS["F02850"] = "VS::Menu::Loot::Live::StageArmor"
 OWNED_CALL_BINDINGS["F02851"] = "VS::Menu::Loot::Live::StageShield"
 OWNED_CALL_BINDINGS["F02852"] = "VS::Menu::Loot::Live::StageMiscItem"
+OWNED_CALL_BINDINGS["F02853"] = "VS::Menu::Loot::Live::RefreshClaimableRows"
+OWNED_CALL_BINDINGS["F02854"] = "VS::Menu::Loot::Live::AppendLootRow"
+OWNED_CALL_BINDINGS["F02855"] = "VS::Menu::Loot::Live::CountContainedCategory"
+OWNED_CALL_BINDINGS["F02857"] = "VS::Menu::Loot::Live::IsDropAllowed"
+OWNED_CALL_BINDINGS["F02858"] = "VS::Menu::Loot::Live::StageDropRecord"
+OWNED_CALL_BINDINGS["F02859"] = "VS::Menu::Loot::Live::BuildStagedInventory"
+OWNED_CALL_BINDINGS["F02866"] = "VS::Menu::Loot::Live::RecordClaimedKey"
 OWNED_CALL_BINDINGS["F02640"] = "VS::Menu::Framework::PopulateLiveWeaponStats"
 OWNED_CALL_BINDINGS["F02641"] = "VS::Menu::Framework::PopulateLiveShieldStats"
 OWNED_CALL_BINDINGS["F02642"] = "VS::Menu::Framework::PopulateLiveArmorStats"
@@ -4026,6 +4038,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x80107F1C, "VS::Menu::Loot::Live::StageArmor"),  # F02850
     ("MENU/MENUB.PRG", 0x80107F9C, "VS::Menu::Loot::Live::StageShield"),  # F02851
     ("MENU/MENUB.PRG", 0x8010808C, "VS::Menu::Loot::Live::StageMiscItem"),  # F02852
+    ("MENU/MENUB.PRG", 0x801080F0, "VS::Menu::Loot::Live::RefreshClaimableRows"),  # F02853
+    ("MENU/MENUB.PRG", 0x8010822C, "VS::Menu::Loot::Live::AppendLootRow"),  # F02854
+    ("MENU/MENUB.PRG", 0x80108264, "VS::Menu::Loot::Live::CountContainedCategory"),  # F02855
+    ("MENU/MENUB.PRG", 0x801086DC, "VS::Menu::Loot::Live::IsDropAllowed"),  # F02857
+    ("MENU/MENUB.PRG", 0x801086F4, "VS::Menu::Loot::Live::StageDropRecord"),  # F02858
+    ("MENU/MENUB.PRG", 0x801088D4, "VS::Menu::Loot::Live::BuildStagedInventory"),  # F02859
+    ("MENU/MENUB.PRG", 0x8010A24C, "VS::Menu::Loot::Live::RecordClaimedKey"),  # F02866
     ("MENU/MENU1.PRG", 0x80102830, "VS::Menu::break_arts::SetHpCostLive"),  # F02608
     ("MENU/MENU1.PRG", 0x80102914, "VS::Menu::break_arts::DrawNextUnlockPointsLive"),  # F02609
     ("MENU/MENU1.PRG", 0x80102A4C, "VS::Menu::break_arts::UpdateArtListLive"),  # F02610
@@ -4104,104 +4123,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], "
          "offsetof(Field_GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
-    ],
-    "F02858": [
-        *[(f"Menu_Loot_IsDropAllowed(arg0->{member}.difficultyFlags)",
-           f"Menu_Loot_CanStageDrop(&arg0->{member}.difficultyFlags)",
-           "Track eligible overflow separately from successfully staged drops.")
-          for member in ("weapon", "blade", "grip", "shield", "armor[i]", "accessory", "gem", "misc[i]")],
-        *[(f"Menu_Loot_AppendLootRow({category},",
-           f"Menu_Loot_AppendStagedDrop(&arg0->{member}.difficultyFlags, {category},",
-           "Never append a zero staging result; retain the complete source for the next batch.")
-          for member, category in (
-              ("weapon", "Items_ItemCategory_Weapon"), ("blade", "Items_ItemCategory_Blade"),
-              ("grip", "Items_ItemCategory_Grip"), ("shield", "Items_ItemCategory_Shield"),
-              ("gem", "Items_ItemCategory_Gem"), ("misc[i]", "Items_ItemCategory_Misc"),
-          )],
-        ("Menu_Loot_AppendLootRow(\n                Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->armor[i].armor));",
-         "Menu_Loot_AppendStagedDrop(&arg0->armor[i].difficultyFlags,\n"
-         "                Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->armor[i].armor));",
-         "Retain each deferred limb armor independently."),
-        ("Menu_Loot_AppendLootRow(\n            Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->accessory.accessory));",
-         "Menu_Loot_AppendStagedDrop(&arg0->accessory.difficultyFlags,\n"
-         "            Items_ItemCategory_Armor, VS::Menu::Loot::Live::StageArmor(&arg0->accessory.accessory));",
-         "Accessories share armor storage but retain their own source entry."),
-    ],
-    "F02859": [
-        ("    VS::Core::Memory::ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
-         "    Menu_Loot_BeginPaging(node);\n"
-         "    VS::Core::Memory::ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
-         "Start each batch with independent row indices and no stale source pointers."),
-        ("\n}", """
-}
-
-/* Native batching for MENUB 260.c:1124/1174; original bag capacities remain unchanged. */
-static struct {
-    Items_LootListNode* nodes;
-    char* stagedFlags[kMenuLootRowCapacity];
-    int count;
-    int deferred;
-} Menu_Loot_paging;
-
-void Menu_Loot_ResetPaging(void)
-{
-    VS::Core::Memory::ZeroAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
-}
-
-void Menu_Loot_BeginPaging(Items_LootListNode* nodes)
-{
-    Menu_Loot_ResetPaging();
-    Menu_Loot_paging.nodes = nodes;
-    Menu_Loot_lootListCount = 0;
-    Menu_Loot_lootListOffset = 0;
-    Menu_Loot_selectedLoot = 0;
-}
-
-int Menu_Loot_HasStagingSpace(int category, int quantity)
-{
-    return VS::Items::Inventory::CountLiveItems(category, Menu_Loot_inventory) + quantity
-        <= Items_Inventory_inventoryItemCapacities[category];
-}
-
-int Menu_Loot_CanStageDrop(char* difficulty_flags)
-{
-    if (Menu_Loot_IsDropAllowed(*difficulty_flags) == 0) {
-        return 0;
-    }
-    if (Menu_Loot_paging.count == kMenuLootRowCapacity) {
-        Menu_Loot_paging.deferred = 1;
-        return 0;
-    }
-    return 1;
-}
-
-void Menu_Loot_AppendStagedDrop(char* difficulty_flags, int category, int index)
-{
-    if (index == 0) {
-        Menu_Loot_paging.deferred = 1;
-        return;
-    }
-    Menu_Loot_AppendLootRow(category, index);
-    Menu_Loot_paging.stagedFlags[Menu_Loot_paging.count++] = difficulty_flags;
-}
-
-int Menu_Loot_AdvanceStagedInventory(void)
-{
-    int i;
-    Items_LootListNode* nodes = Menu_Loot_paging.nodes;
-    if (Menu_Loot_paging.deferred == 0) {
-        return 0;
-    }
-    /* Called only after claims finish or the existing leave confirmation accepts this batch. */
-    for (i = 0; i < Menu_Loot_paging.count; ++i) {
-        *Menu_Loot_paging.stagedFlags[i] = 0;
-    }
-    Menu_Loot_BuildStagedInventory(nodes);
-    Menu_Loot_lootListOffset = 0;
-    Menu_Loot_selectedLoot = 0;
-    return Menu_Loot_lootListCount != 0;
-}""",
-         "Keep excess source entries alive and expose them only after the current batch is resolved."),
     ],
     "F02864": [
         ("""            } else {

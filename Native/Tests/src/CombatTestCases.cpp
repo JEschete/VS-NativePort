@@ -38,6 +38,7 @@
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -985,7 +986,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       CHECK(rows[index].state == !first_claimed);
     }
     Audio_Seq_unusedInventory = {};
-    Menu_Loot_RefreshClaimableRows();
+    VS::Menu::Loot::Live::RefreshClaimableRows();
   }
 
   void CheckArmorBatchComplete(std::vector<int>& seen) {
@@ -1030,7 +1031,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     for (auto& armor : loot.armor) {
       armor.difficultyFlags = static_cast<char>(flags);
     }
-    Menu_Loot_BuildStagedInventory(Items_lootListHead);
+    VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   }
 
   static void CheckRow(const Menu_Loot_LootListItem& row, int index,
@@ -1059,7 +1060,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       CHECK(result ==
             (fits ? (index < 2 ? 1 : armor_count + claimed_armor + 1) : 0));
       if (index >= 2 && fits) ++claimed_armor;
-      Menu_Loot_RefreshClaimableRows();
+      VS::Menu::Loot::Live::RefreshClaimableRows();
     }
     CHECK(std::memcmp(&source, &source_before, sizeof(source)) == 0);
     CheckClaimedArmor(armor_count, claimed_armor);
@@ -2505,7 +2506,7 @@ TEST_CASE("Enemy loot rolls equipment before its optional item candidate",
   CHECK((Items_lootListHead != nullptr) == (guaranteed != 0 || success));
   if (Items_lootListHead != nullptr) {
     fixture.CheckQueued(guaranteed, candidate, success);
-    Menu_Loot_BuildStagedInventory(Items_lootListHead);
+    VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
     fixture.DeliverRows(guaranteed + (success ? 1 : 0));
   }
   CHECK(LootInventoryFixture::Quantity(323) == (guaranteed > 0 ? 2 : 0));
@@ -2613,7 +2614,7 @@ TEST_CASE("Loot staging filters difficulty and incomplete misc candidates",
   loot.misc[1].difficultyFlags = 3;
   loot.misc[2].itemId = 325;
   const bool eligible = has_id && has_count && (flags & (difficulty + 1)) != 0;
-  Menu_Loot_StageDropRecord(&loot);
+  VS::Menu::Loot::Live::StageDropRecord(&loot);
   fixture.DeliverRows(eligible ? 2 : 1);
   CHECK(LootInventoryFixture::Quantity(323) == (eligible ? 2 : 0));
   CHECK(LootInventoryFixture::Quantity(324) == 3);
@@ -2879,7 +2880,7 @@ TEST_CASE(
   const bool claim_first = GENERATE(false, true);
   EquipmentStagingFixture fixture;
   fixture.QueueArmorBatch();
-  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
   std::vector<int> seen;
   fixture.CollectArmorPage(seen, claim_first);
@@ -2892,13 +2893,13 @@ TEST_CASE("Pending loot pages reset safely before source release and reopen",
           "[combat][loot][staging-capacity]") {
   EquipmentStagingFixture fixture;
   fixture.QueueArmorBatch();
-  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
   const auto first = Items_lootListHead->loot;
   Menu_Loot_ResetPaging();
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
   CHECK(std::memcmp(&Items_lootListHead->loot, &first, sizeof(first)) == 0);
-  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
   fixture.CheckCleared();
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
@@ -2906,7 +2907,7 @@ TEST_CASE("Pending loot pages reset safely before source release and reopen",
   fixture.stats = {};
   fixture.SetGuaranteed(1);
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
-  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   fixture.DeliverRows(1);
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
   fixture.CheckCleared();
@@ -2920,12 +2921,12 @@ TEST_CASE("Single chest loot remains intact when staging is abandoned",
   chest.misc[1] = {467, 3, 1};
   Menu_Framework_lootEntry = &chest;
   const auto before = chest;
-  Menu_Loot_BuildStagedInventory(nullptr);
+  VS::Menu::Loot::Live::BuildStagedInventory(nullptr);
   REQUIRE(Menu_Loot_lootListCount == 2);
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
   Menu_Loot_ResetPaging();
   CHECK(std::memcmp(&chest, &before, sizeof(chest)) == 0);
-  Menu_Loot_BuildStagedInventory(nullptr);
+  VS::Menu::Loot::Live::BuildStagedInventory(nullptr);
   fixture.DeliverRows(2);
   CHECK(std::memcmp(&chest, &before, sizeof(chest)) == 0);
 }
@@ -2934,7 +2935,7 @@ TEST_CASE("Loot menu cancellation retains the page until positive confirmation",
           "[combat][loot][staging-capacity][loot-paging-ui]") {
   LootPagingMenuFixture fixture;
   fixture.QueueArmorBatch();
-  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   const auto before = fixture.source;
   const auto queued = Items_lootListHead->loot;
   fixture.OpenLeaveConfirmation();
@@ -2954,7 +2955,7 @@ TEST_CASE("Loot menu take-all advances only after the current claims finish",
           "[combat][loot][staging-capacity][loot-paging-ui]") {
   LootPagingMenuFixture fixture;
   fixture.QueueArmorBatch();
-  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   fixture.Step(PADRleft);
   CHECK(Menu_Loot_lootListCount == 16);
   for (int tick = 0; tick < 10 && Menu_Loot_lootListCount != 8; ++tick) {
@@ -2963,7 +2964,7 @@ TEST_CASE("Loot menu take-all advances only after the current claims finish",
   REQUIRE(Menu_Loot_lootListCount == 8);
   fixture.CheckClaims(16, 16);
   Audio_Seq_unusedInventory = {};
-  Menu_Loot_RefreshClaimableRows();
+  VS::Menu::Loot::Live::RefreshClaimableRows();
   fixture.Step(PADRleft);
   int result = 0;
   for (int tick = 0; tick < 10 && result == 0; ++tick) {
@@ -2978,7 +2979,7 @@ TEST_CASE("Loot menu cannot abandon a key while another page is pending",
   LootPagingMenuFixture fixture;
   fixture.QueueArmorBatch();
   Items_lootListHead->loot.misc[0] = {467, 3, 1};
-  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 17);
   const auto before = fixture.source;
   const auto queued = Items_lootListHead->loot;
