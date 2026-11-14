@@ -1794,6 +1794,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Loot\LootStaging.cpp" />
+    <ClCompile Include="src\Menu\Loot\LootStagingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Magic.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2673,6 +2677,8 @@
     <ClInclude Include="include\Menu\Inventory\InventorySortingLive.hpp" />
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatch.hpp" />
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatchLive.hpp" />
+    <ClInclude Include="include\Menu\Loot\LootStaging.hpp" />
+    <ClInclude Include="include\Menu\Loot\LootStagingLive.hpp" />
     <ClInclude Include="include\Menu\Options.hpp" />
     <ClInclude Include="include\Menu\OptionsLive.hpp" />
     <ClInclude Include="include\Menu\Rename.hpp" />

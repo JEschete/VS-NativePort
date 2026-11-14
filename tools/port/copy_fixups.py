@@ -1409,6 +1409,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::container::AppendLivePendingTransfer": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
     "VS::Menu::container::RebuildLivePendingTransfers": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
     "VS::Menu::container::BuildLiveItemRows": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
+    "VS::Menu::Loot::Live::StageBlade": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Loot::Live::StageGrip": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Loot::Live::StageGem": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Loot::Live::StageWeapon": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Loot::Live::StageArmor": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Loot::Live::StageShield": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
+    "VS::Menu::Loot::Live::StageMiscItem": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2461,6 +2468,13 @@ OWNED_CALL_BINDINGS["F02979"] = "VS::Menu::container::FindLivePendingTransfer"
 OWNED_CALL_BINDINGS["F02980"] = "VS::Menu::container::AppendLivePendingTransfer"
 OWNED_CALL_BINDINGS["F02981"] = "VS::Menu::container::RebuildLivePendingTransfers"
 OWNED_CALL_BINDINGS["F02982"] = "VS::Menu::container::BuildLiveItemRows"
+OWNED_CALL_BINDINGS["F02846"] = "VS::Menu::Loot::Live::StageBlade"
+OWNED_CALL_BINDINGS["F02847"] = "VS::Menu::Loot::Live::StageGrip"
+OWNED_CALL_BINDINGS["F02848"] = "VS::Menu::Loot::Live::StageGem"
+OWNED_CALL_BINDINGS["F02849"] = "VS::Menu::Loot::Live::StageWeapon"
+OWNED_CALL_BINDINGS["F02850"] = "VS::Menu::Loot::Live::StageArmor"
+OWNED_CALL_BINDINGS["F02851"] = "VS::Menu::Loot::Live::StageShield"
+OWNED_CALL_BINDINGS["F02852"] = "VS::Menu::Loot::Live::StageMiscItem"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -3971,6 +3985,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x80106A04, "VS::Menu::container::AppendLivePendingTransfer"),  # F02980
     ("MENU/MENUD.PRG", 0x80106A50, "VS::Menu::container::RebuildLivePendingTransfers"),  # F02981
     ("MENU/MENUD.PRG", 0x80106C64, "VS::Menu::container::BuildLiveItemRows"),  # F02982
+    ("MENU/MENUB.PRG", 0x80107C54, "VS::Menu::Loot::Live::StageBlade"),  # F02846
+    ("MENU/MENUB.PRG", 0x80107CE8, "VS::Menu::Loot::Live::StageGrip"),  # F02847
+    ("MENU/MENUB.PRG", 0x80107D7C, "VS::Menu::Loot::Live::StageGem"),  # F02848
+    ("MENU/MENUB.PRG", 0x80107E10, "VS::Menu::Loot::Live::StageWeapon"),  # F02849
+    ("MENU/MENUB.PRG", 0x80107F1C, "VS::Menu::Loot::Live::StageArmor"),  # F02850
+    ("MENU/MENUB.PRG", 0x80107F9C, "VS::Menu::Loot::Live::StageShield"),  # F02851
+    ("MENU/MENUB.PRG", 0x8010808C, "VS::Menu::Loot::Live::StageMiscItem"),  # F02852
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -4036,44 +4057,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
            ("F02846", "16"), ("F02847", "16"), ("F02848", "0x30"),
            ("F02850", "16"), ("F02852", "64"),
        )},
-    "F02849": [
-        ("if (++index == 8)", "if (++index > 8)",
-         "Use all eight original temporary weapon slots."),
-        ("    int index = 1;\n\n    while",
-         """    int index = 1;
-    int gems = 0;
-
-    for (i = 0; i < 3; ++i) {
-        gems += arg0->gems[i].id != 0;
-    }
-    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Weapon, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Blade, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Grip, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
-        return 0;
-    }
-
-    while""",
-         "Reject a composite staging attempt before reserving its parent or any component."),
-    ],
-    "F02851": [
-        ("if (index == 8)", "if (index > 8)",
-         "Use all eight original temporary shield slots."),
-        ("    int index = 1;\n\n    while",
-         """    int index = 1;
-    int gems = 0;
-
-    for (i = 0; i < 3; ++i) {
-        gems += arg0->gems[i].id != 0;
-    }
-    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Shield, 1)
-        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
-        return 0;
-    }
-
-    while""",
-         "Reject a shield before staging a partial set of mounted gems."),
-    ],
     "F02858": [
         *[(f"Menu_Loot_IsDropAllowed(arg0->{member}.difficultyFlags)",
            f"Menu_Loot_CanStageDrop(&arg0->{member}.difficultyFlags)",

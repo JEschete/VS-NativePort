@@ -1,0 +1,56 @@
+"""F02846 _copyBladeToInventory (MENUB.PRG 260.c:712), typed loot staging."""
+
+from __future__ import annotations
+
+import random
+
+from differential import Machine
+from loot_staging_differential import (
+    BLADE,
+)
+from loot_staging_differential import (
+    COMPILER as COMPILER,
+)
+from loot_staging_differential import (
+    COMPILER_OPTIONS as COMPILER_OPTIONS,
+)
+from loot_staging_differential import (
+    CXX_STANDARD as CXX_STANDARD,
+)
+from loot_staging_differential import (
+    INCLUDES as INCLUDES,
+)
+from loot_staging_differential import (
+    check as check_vector,
+)
+from loot_staging_differential import run as run_vector
+from loot_staging_differential import vector as make_vector
+
+ID = "F02846"
+ENTRY, END = 0x80107C54, 0x80107CE8
+MODULES = ("MENU/MENUB.PRG",)
+DRIVER = "loot_staging_driver.cpp"
+SOURCES = (
+    r"Native\Game\src\Menu\Loot\LootStaging.cpp",
+    r"Native\Game\src\Items\EquipmentStats.cpp",
+    r"Native\Game\src\Items\Inventory.cpp",
+)
+VECTORS, SEED = 256, 2846
+MUTANT_VECTORS = 64
+MUTANTS = {
+    "blade-owner-not-written": {0x80107CC8: 0x00000000},
+    "blade-index-not-written": {0x80107CCC: 0x00000000},
+}
+
+
+def vector(rng: random.Random, number: int) -> dict:
+    return make_vector(rng, number, BLADE)
+
+
+def run(machine: Machine, vector_value: dict) -> tuple:
+    return run_vector(machine, vector_value, ENTRY)
+
+
+def check(image, vector_value: dict, observation: tuple,
+          native: list[int], reference: tuple) -> list[str]:
+    return check_vector(image, vector_value, observation, native, reference)

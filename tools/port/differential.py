@@ -76,7 +76,10 @@ ROOT = Path(__file__).resolve().parents[2]
 DISC = ROOT / "Native" / "data" / "disc"
 CASES = Path(__file__).resolve().parent / "differentials"
 OUTPUT = ROOT / "build" / "differential"
-MODULE_BASES = {"BATTLE/BATTLE.PRG": 0x80068800}
+MODULE_BASES = {
+    "BATTLE/BATTLE.PRG": 0x80068800,
+    "MENU/MENUB.PRG": 0x80102800,
+}
 STOP = 0xFFFFFFF0
 DEFAULT_STACK = 0x80400000
 DEFAULT_STACK_SIZE = 0x4000

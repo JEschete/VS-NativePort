@@ -55,6 +55,9 @@
     <Filter Include="include\Menu\Inventory">
       <UniqueIdentifier>{CD7B450D-4494-576F-8757-B3B17D3ABE26}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Menu\Loot">
+      <UniqueIdentifier>{87C127D0-0575-5A56-B30B-870835CC05DE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Menu\Setup">
       <UniqueIdentifier>{09910199-A0A9-57B0-A127-053BA74AC746}</UniqueIdentifier>
     </Filter>
@@ -2481,6 +2484,12 @@
     <ClInclude Include="src\Menu\Loot\LootScreen.h">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Loot\LootStaging.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Loot\LootStagingLive.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
     <ClInclude Include="src\Menu\Loot\Paging.h">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>
@@ -3809,6 +3818,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatchLive.hpp">
       <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootStaging.hpp">
+      <Filter>include\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootStagingLive.hpp">
+      <Filter>include\Menu\Loot</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Options.hpp">
       <Filter>include\Menu</Filter>
