@@ -12,7 +12,7 @@
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerSorting.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/SortingKeysLive.hpp"
 
 extern "C" {
 #include "Core/Diagnostics.h"
@@ -41,7 +41,7 @@ bool Overlap(const void* first, std::size_t first_bytes, const void* second,
                        : left - right < second_bytes;
 }
 
-class LiveSortingWorld final : public SortingWorld {
+class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
  public:
   Items::ContainerWorld& SourceRecords() override {
     source_.emplace(CurrentData());
@@ -63,30 +63,6 @@ class LiveSortingWorld final : public SortingWorld {
   std::uint16_t Capacity(Items::ItemCategory category) override {
     Items::LiveContainerWorld capacities;
     return capacities.Capacity(category);
-  }
-  std::int32_t WeaponValue(std::int32_t stat,
-                           const Items::WeaponLoadout& weapon) override {
-    Items_WeaponLoadout legacy{};
-    Items::Live::Commit(legacy, weapon);
-    return Framework::LiveWeaponSortValue(stat, &legacy);
-  }
-  std::int32_t ShieldValue(std::int32_t stat,
-                           const Items::ShieldLoadout& shield) override {
-    Items_ShieldLoadout legacy{};
-    Items::Live::Commit(legacy, shield);
-    return Framework::LiveShieldSortValue(stat, &legacy);
-  }
-  std::int32_t MiscValue(std::int32_t stat,
-                         const Items::InventoryMisc& item) override {
-    Items_InventoryMisc legacy{};
-    Items::Live::Commit(legacy, item);
-    return Framework::LiveMiscSortValue(stat, &legacy);
-  }
-  std::int32_t EquipmentValue(std::int32_t stat,
-                              const Items::EquipmentPart& part) override {
-    Items_EquipmentPartStats legacy{};
-    Items::Live::Commit(legacy, part);
-    return Framework::LiveEquipmentSortValue(stat, &legacy);
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
     container::Refuse(reason);

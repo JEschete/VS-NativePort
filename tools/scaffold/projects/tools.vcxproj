@@ -559,6 +559,19 @@
     <None Include="..\..\port\differentials\inventory_detail_helpers_common.py" />
     <None Include="..\..\port\differentials\inventory_detail_helpers_driver.cpp" />
     <None Include="..\..\port\differentials\inventory_detail_helpers_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\inventory_sorting_common.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_driver.cpp" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02583.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02583_menub.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02585.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02585_menub.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02587.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02587_menub.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02589.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02589_menub.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02590.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_f02590_menub.py" />
+    <None Include="..\..\port\differentials\inventory_sorting_live_driver.cpp" />
     <None Include="..\..\port\differentials\item_detail_dispatch_common.py" />
     <None Include="..\..\port\differentials\item_detail_dispatch_driver.cpp" />
     <None Include="..\..\port\differentials\item_detail_dispatch_f02568.py" />
@@ -591,6 +604,7 @@
     <None Include="..\..\port\differentials\reward_flow.py" />
     <None Include="..\..\port\differentials\reward_flow_driver.cpp" />
     <None Include="..\..\port\differentials\reward_flow_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\sorting_vectors.py" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />
     <None Include="..\..\port\differentials\sphere_containment_common.py" />

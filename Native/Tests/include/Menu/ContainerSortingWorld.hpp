@@ -8,11 +8,10 @@
 #include <initializer_list>
 #include <optional>
 #include <span>
-#include <stdexcept>
-#include <string>
 #include <vector>
 
 #include "Menu/Container/ContainerSorting.hpp"
+#include "Menu/SortingKeysFixture.hpp"
 
 namespace VS::Menu::container::sort_test {
 enum class Operation : std::uint8_t {
@@ -35,10 +34,10 @@ struct Event {
 inline constexpr std::size_t kOwners = 2;
 inline constexpr std::size_t kKeySlots = 256;
 
-class World : public SortingWorld {
+class World : public sorting_test::KeyedWorld<SortingWorld, World, Operation,
+                                              kKeySlots> {
  public:
   std::array<Items::ContainerStorage, kOwners> owners;
-  std::array<std::int32_t, kKeySlots> keys{};
   std::size_t owner = 0;
   std::uint8_t observed_material = 0;
   std::size_t trace_count = 0;
@@ -78,21 +77,6 @@ class World : public SortingWorld {
                            const Items::WeaponLoadout& weapon) override {
     observed_material = weapon.blade.material;
     return Observe(Operation::kWeapon, stat, keys[weapon.index]);
-  }
-  std::int32_t ShieldValue(std::int32_t stat,
-                           const Items::ShieldLoadout& shield) override {
-    return Observe(Operation::kShield, stat, keys[shield.index]);
-  }
-  std::int32_t MiscValue(std::int32_t stat,
-                         const Items::InventoryMisc& item) override {
-    return Observe(Operation::kMisc, stat, keys[item.index]);
-  }
-  std::int32_t EquipmentValue(std::int32_t stat,
-                              const Items::EquipmentPart& part) override {
-    return Observe(Operation::kEquipment, stat, keys[part.index]);
-  }
-  [[noreturn]] void Refuse(std::string_view reason) override {
-    throw std::runtime_error(std::string(reason));
   }
   std::int32_t Observe(Operation operation, std::int32_t stat = 0,
                        std::int32_t value = 0) {

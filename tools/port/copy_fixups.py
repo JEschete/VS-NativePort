@@ -1352,6 +1352,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Inventory::UpdateLiveArmorDetails": r"Native\Game\include\Menu\Inventory\ItemDetailDispatchLive.hpp",
     "VS::Menu::Inventory::UpdateLiveGemDetails": r"Native\Game\include\Menu\Inventory\ItemDetailDispatchLive.hpp",
     "VS::Menu::Inventory::UpdateLiveItemDetails": r"Native\Game\include\Menu\Inventory\ItemDetailDispatchLive.hpp",
+    "VS::Menu::Inventory::SortLiveWeapons": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
+    "VS::Menu::Inventory::SortLiveShields": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
+    "VS::Menu::Inventory::SortLiveMisc": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
+    "VS::Menu::Inventory::CopyLiveEquipmentStats": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
+    "VS::Menu::Inventory::SortLiveEquipment": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
     "VS::Items::LiveContainerCategoryIndices": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::FindLiveContainerItemRow": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::AppendLiveContainerItemIndex": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
@@ -2399,6 +2404,11 @@ OWNED_CALL_BINDINGS["F02568"] = "VS::Menu::Inventory::DrawLiveItemCategoryIcons"
 OWNED_CALL_BINDINGS["F02579"] = "VS::Menu::Inventory::UpdateLiveArmorDetails"
 OWNED_CALL_BINDINGS["F02580"] = "VS::Menu::Inventory::UpdateLiveGemDetails"
 OWNED_CALL_BINDINGS["F02581"] = "VS::Menu::Inventory::UpdateLiveItemDetails"
+OWNED_CALL_BINDINGS["F02583"] = "VS::Menu::Inventory::SortLiveWeapons"
+OWNED_CALL_BINDINGS["F02585"] = "VS::Menu::Inventory::SortLiveShields"
+OWNED_CALL_BINDINGS["F02587"] = "VS::Menu::Inventory::SortLiveMisc"
+OWNED_CALL_BINDINGS["F02589"] = "VS::Menu::Inventory::CopyLiveEquipmentStats"
+OWNED_CALL_BINDINGS["F02590"] = "VS::Menu::Inventory::SortLiveEquipment"
 OWNED_CALL_BINDINGS["F02927"] = "VS::Items::LiveContainerCategoryIndices"
 OWNED_CALL_BINDINGS["F02928"] = "VS::Items::FindLiveContainerItemRow"
 OWNED_CALL_BINDINGS["F02929"] = "VS::Items::AppendLiveContainerItemIndex"
@@ -3916,6 +3926,16 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x801039BC, "VS::Menu::Inventory::UpdateLiveGemDetails"),  # F02580
     ("MENU/MENU3.PRG", 0x80103AD0, "VS::Menu::Inventory::UpdateLiveItemDetails"),  # F02581
     ("MENU/MENUB.PRG", 0x80103BA8, "VS::Menu::Inventory::UpdateLiveItemDetails"),  # F02581
+    ("MENU/MENU3.PRG", 0x80103CC8, "VS::Menu::Inventory::SortLiveWeapons"),  # F02583
+    ("MENU/MENUB.PRG", 0x80103DA0, "VS::Menu::Inventory::SortLiveWeapons"),  # F02583
+    ("MENU/MENU3.PRG", 0x80103F00, "VS::Menu::Inventory::SortLiveShields"),  # F02585
+    ("MENU/MENUB.PRG", 0x80103FD8, "VS::Menu::Inventory::SortLiveShields"),  # F02585
+    ("MENU/MENU3.PRG", 0x8010408C, "VS::Menu::Inventory::SortLiveMisc"),  # F02587
+    ("MENU/MENUB.PRG", 0x80104164, "VS::Menu::Inventory::SortLiveMisc"),  # F02587
+    ("MENU/MENU3.PRG", 0x801042C4, "VS::Menu::Inventory::CopyLiveEquipmentStats"),  # F02589
+    ("MENU/MENUB.PRG", 0x8010439C, "VS::Menu::Inventory::CopyLiveEquipmentStats"),  # F02589
+    ("MENU/MENU3.PRG", 0x8010439C, "VS::Menu::Inventory::SortLiveEquipment"),  # F02590
+    ("MENU/MENUB.PRG", 0x80104474, "VS::Menu::Inventory::SortLiveEquipment"),  # F02590
     ("MENU/MENUD.PRG", 0x80102A34, "VS::Menu::container::BuildLiveWeaponStats"),  # F02925
     ("MENU/MENUD.PRG", 0x80102BB0, "VS::Menu::container::BuildLiveShieldStats"),  # F02926
     ("MENU/MENUD.PRG", 0x80103D50, "VS::Menu::container::SetLivePanelVisibility"),  # F02942

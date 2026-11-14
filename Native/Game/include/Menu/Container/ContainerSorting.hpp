@@ -5,16 +5,17 @@
 #include <string_view>
 
 #include "Items/ContainerIndexing.hpp"
+#include "Menu/Framework/SortingKeys.hpp"
 
 namespace VS::Menu::container {
-class SortingWorld {
+class SortingWorld : public Framework::SortingKeys {
  public:
   SortingWorld() = default;
   SortingWorld(const SortingWorld&) = delete;
   SortingWorld& operator=(const SortingWorld&) = delete;
   SortingWorld(SortingWorld&&) = delete;
   SortingWorld& operator=(SortingWorld&&) = delete;
-  virtual ~SortingWorld() = default;
+  ~SortingWorld() override = default;
 
   [[nodiscard]] virtual Items::ContainerWorld& SourceRecords() = 0;
   [[nodiscard]] virtual Items::ContainerWorld& CurrentRecords() = 0;
@@ -22,15 +23,6 @@ class SortingWorld {
       Items::ItemCategory category) = 0;
   [[nodiscard]] virtual std::uint16_t Capacity(
       Items::ItemCategory category) = 0;
-  [[nodiscard]] virtual std::int32_t WeaponValue(
-      std::int32_t stat, const Items::WeaponLoadout& weapon) = 0;
-  [[nodiscard]] virtual std::int32_t ShieldValue(
-      std::int32_t stat, const Items::ShieldLoadout& shield) = 0;
-  [[nodiscard]] virtual std::int32_t MiscValue(
-      std::int32_t stat, const Items::InventoryMisc& item) = 0;
-  [[nodiscard]] virtual std::int32_t EquipmentValue(
-      std::int32_t stat, const Items::EquipmentPart& part) = 0;
-  [[noreturn]] virtual void Refuse(std::string_view reason) = 0;
 };
 
 void SortWeapons(SortingWorld& world, std::int32_t stat);

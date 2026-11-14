@@ -2397,6 +2397,9 @@
     <ClInclude Include="src\Menu\Framework\ItemRowsLiveState.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="src\Menu\Framework\ItemSorting.hpp">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
     <ClInclude Include="src\Menu\Framework\MenuItems.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
@@ -2410,6 +2413,9 @@
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
     <ClInclude Include="src\Menu\Framework\Menus.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Framework\SortingKeysLive.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Framework\TextBoxes.cpp">
@@ -2436,6 +2442,12 @@
     <ClInclude Include="src\Menu\Inventory\Inventory.h">
       <Filter>src\Menu\Inventory</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Inventory\InventorySorting.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\InventorySortingLive.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Inventory\ItemDetailDispatch.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
@@ -3771,6 +3783,9 @@
     <ClInclude Include="include\Menu\Framework\ItemRowsLive.hpp">
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\Framework\SortingKeys.hpp">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\Inventory\DetailsPolicies.hpp">
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
@@ -3781,6 +3796,12 @@
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\EquipmentDetailControllersLive.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\InventorySorting.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\InventorySortingLive.hpp">
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatch.hpp">

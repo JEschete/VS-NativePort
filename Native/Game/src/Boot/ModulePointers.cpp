@@ -79,6 +79,7 @@
 #include "Menu/Container/ContainerSortingLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
+#include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -2025,6 +2026,16 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUB.PRG", 0x801039BCu, 0u, (void*)&VS::Menu::Inventory::UpdateLiveGemDetails, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80103AD0u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveItemDetails, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80103BA8u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveItemDetails, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80103CC8u, 0u, (void*)&VS::Menu::Inventory::SortLiveWeapons, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80103DA0u, 0u, (void*)&VS::Menu::Inventory::SortLiveWeapons, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80103F00u, 0u, (void*)&VS::Menu::Inventory::SortLiveShields, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80103FD8u, 0u, (void*)&VS::Menu::Inventory::SortLiveShields, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x8010408Cu, 0u, (void*)&VS::Menu::Inventory::SortLiveMisc, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80104164u, 0u, (void*)&VS::Menu::Inventory::SortLiveMisc, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x801042C4u, 0u, (void*)&VS::Menu::Inventory::CopyLiveEquipmentStats, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x8010439Cu, 0u, (void*)&VS::Menu::Inventory::CopyLiveEquipmentStats, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x8010439Cu, 0u, (void*)&VS::Menu::Inventory::SortLiveEquipment, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80104474u, 0u, (void*)&VS::Menu::Inventory::SortLiveEquipment, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102A34u, 0u, (void*)&VS::Menu::container::BuildLiveWeaponStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102BB0u, 0u, (void*)&VS::Menu::container::BuildLiveShieldStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103D50u, 0u, (void*)&VS::Menu::container::SetLivePanelVisibility, 0u, 0u, 0u},

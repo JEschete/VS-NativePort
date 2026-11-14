@@ -9,6 +9,7 @@
 
 #include "Items/ContainerIndexingLiveFixture.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
+#include "Menu/SortingKeysFixture.hpp"
 
 namespace {
 namespace sorting = VS::Menu::container;
@@ -164,16 +165,8 @@ TEST_CASE(
     "[container-sorting-live][F02967]") {
   LiveFixture fixture;
   Menu_Container_containerData = nullptr;
-  constexpr std::array kUnsupported{-1,
-                                    0,
-                                    3,
-                                    6,
-                                    7,
-                                    256,
-                                    257,
-                                    std::numeric_limits<int>::min(),
-                                    std::numeric_limits<int>::max()};
-  for (const int category : kUnsupported) {
+  for (const int category :
+       VS::Menu::sorting_test::kUnsupportedEquipmentCategories) {
     CHECK_NOTHROW(sorting::CopyLiveEquipmentStats(
         nullptr, category, std::numeric_limits<int>::min()));
   }

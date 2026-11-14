@@ -627,6 +627,15 @@
     <ClCompile Include="src\InventoryDetailHelpersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\InventorySortingLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InventorySortingModuleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InventorySortingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ItemDetailDispatchLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1044,10 +1053,19 @@
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\InventorySortingLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\InventorySortingWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\ItemDetailDispatchLiveFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\SortingKeysFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp">

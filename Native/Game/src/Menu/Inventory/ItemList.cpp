@@ -4,12 +4,11 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
+#include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -86,243 +85,6 @@ static u_char Menu_Inventory_sortMenuShieldSortStats[] = { 0, 1, 4, 5, 8, 9, 10,
 static u_char Menu_Inventory_sortMenuWeaponSortStats[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
         15, 16, 17, 18, 19, 20, 21, 22, 23 };
 
-// decomp: MENU _sortWeapons (src/MENU/items1.h:731)
-void Menu_Inventory_SortWeapons(int stat)
-{
-    Items_WeaponLoadout uiWeapon;
-    char sortedIndices[8];
-    int i;
-    int sortedPos;
-
-    Items_InventoryWeapon* weapon = Audio_Seq_unusedInventory.weapons;
-    char* indices = (char *)(Audio_Seq_unusedInventoryIndices.weapons);
-
-    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, 8);
-
-    sortedPos = 0;
-
-    while (1) {
-        int index;
-        int maxValue = -INT_MAX - 1;
-
-        for (i = 0; i < 8; ++i) {
-            index = indices[i];
-
-            if (index != 0) {
-                int value;
-
-                VS::Items::LoadLiveInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
-
-                value = VS::Menu::Framework::LiveWeaponSortValue(stat, &uiWeapon);
-
-                if (maxValue < value) {
-                    maxValue = value;
-                }
-            }
-        }
-
-        if (maxValue == -INT_MAX - 1) {
-            break;
-        }
-
-        for (i = 0; i < 8; ++i) {
-            index = indices[i];
-
-            if (index != 0) {
-
-                VS::Items::LoadLiveInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
-
-                if (VS::Menu::Framework::LiveWeaponSortValue(stat, &uiWeapon) == maxValue) {
-                    sortedIndices[sortedPos++] = index;
-                    indices[i] = 0;
-                }
-            }
-        }
-    }
-
-    VS::Core::Memory::CopyLiveHalfwordBlocks(indices, sortedIndices, 8);
-}
-
-// decomp: MENU _sortShields (src/MENU/items1.h:827)
-void Menu_Inventory_SortShields(int stat)
-{
-    Items_ShieldLoadout uiShield;
-    char sortedIndices[8];
-    int i;
-    int sortedPos;
-
-    Items_InventoryShield* shield = &Audio_Seq_unusedInventory.shields[0];
-    char* indices = (char *)(Audio_Seq_unusedInventoryIndices.shields);
-
-    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, sizeof sortedIndices);
-
-    sortedPos = 0;
-
-    while (1) {
-        int index;
-        int maxValue = -INT_MAX - 1;
-
-        for (i = 0; i < 8; ++i) {
-            int value;
-            index = indices[i];
-
-            if (index != 0) {
-
-                VS::Items::LoadLiveInventoryShieldStats(&uiShield, &shield[index - 1]);
-
-                value = VS::Menu::Framework::LiveShieldSortValue(stat, &uiShield);
-
-                if (maxValue < value) {
-                    maxValue = value;
-                }
-            }
-        }
-
-        if (maxValue == -INT_MAX - 1) {
-            break;
-        }
-
-        for (i = 0; i < 8; ++i) {
-            index = indices[i];
-
-            if (index != 0) {
-
-                VS::Items::LoadLiveInventoryShieldStats(&uiShield, &shield[index - 1]);
-
-                if (VS::Menu::Framework::LiveShieldSortValue(stat, &uiShield) == maxValue) {
-                    sortedIndices[sortedPos++] = index;
-                    indices[i] = 0;
-                }
-            }
-        }
-    }
-
-    VS::Core::Memory::CopyLiveHalfwordBlocks(indices, sortedIndices, 8);
-}
-
-// decomp: MENU _sortMisc (src/MENU/items1.h:899)
-void Menu_Inventory_SortMisc(int stat)
-{
-    char sortedIndices[64];
-    int i;
-    int sortedPos;
-
-    Items_InventoryMisc* misc = Audio_Seq_unusedInventory.misc;
-    char* indices = (char *)(Audio_Seq_unusedInventoryIndices.misc);
-
-    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, sizeof sortedIndices);
-    sortedPos = 0;
-
-    while (1) {
-        int index;
-        int maxValue = -INT_MAX - 1;
-
-        for (i = 0; i < 0x40; ++i) {
-            index = indices[i];
-
-            if (index != 0) {
-                int value = VS::Menu::Framework::LiveMiscSortValue(stat, &misc[index - 1]);
-
-                if (maxValue < value) {
-                    maxValue = value;
-                }
-            }
-        }
-
-        if (maxValue == -INT_MAX - 1) {
-            break;
-        }
-
-        for (i = 0; i < 0x40; ++i) {
-            index = indices[i];
-
-            if ((index != 0) && (VS::Menu::Framework::LiveMiscSortValue(stat, &misc[index - 1]) == maxValue)) {
-                sortedIndices[sortedPos++] = index;
-                indices[i] = 0;
-            }
-        }
-    }
-
-    VS::Core::Memory::CopyLiveHalfwordBlocks(indices, sortedIndices, sizeof sortedIndices);
-}
-
-// decomp: MENU _copyEquipment (src/MENU/items1.h:994)
-void Menu_Inventory_CopyEquipmentStats(
-    Items_EquipmentPartStats* equipment, int itemCategory, int itemIndex)
-{
-    switch (itemCategory) {
-    case Items_ItemCategory_Blade:
-        VS::Items::ReadLiveInventoryBladeStats(
-            equipment, &Audio_Seq_unusedInventory.blades[itemIndex]);
-        return;
-    case Items_ItemCategory_Grip:
-        VS::Items::ReadLiveInventoryGripStats(equipment, &Audio_Seq_unusedInventory.grips[itemIndex]);
-        return;
-    case Items_ItemCategory_Armor:
-        VS::Items::ReadLiveInventoryArmorStats(equipment, &Audio_Seq_unusedInventory.armor[itemIndex]);
-        return;
-    case Items_ItemCategory_Gem:
-        VS::Items::ReadLiveInventoryGemStats(equipment, &Audio_Seq_unusedInventory.gems[itemIndex]);
-        return;
-    }
-}
-
-// decomp: MENU _sortEquipment (src/MENU/items1.h:1017)
-void Menu_Inventory_SortEquipment(int itemCategory, int stat)
-{
-    Items_EquipmentPartStats uiEquipment;
-    int i;
-    int sortedPos = 0;
-    int capacity = Items_Inventory_inventoryItemCapacities[itemCategory];
-    {
-        char sortedIndices[capacity];
-        char* indices = (char *)(Menu_Inventory_inventoryIndices[itemCategory]);
-
-        VS::Core::Memory::ZeroLiveWordsBackward(std::as_writable_bytes(std::span(&sortedIndices[0], sizeof sortedIndices / sizeof sortedIndices[0])), capacity);
-
-        while (1) {
-            int index;
-            int maxValue = -INT_MAX - 1;
-
-            for (i = 0; i < capacity; ++i) {
-                index = indices[i];
-
-                if (index != 0) {
-                    int value;
-
-                    Menu_Inventory_CopyEquipmentStats(&uiEquipment, itemCategory, index - 1);
-
-                    value = VS::Menu::Framework::LiveEquipmentSortValue(stat, &uiEquipment);
-
-                    if (maxValue < value) {
-                        maxValue = value;
-                    }
-                }
-            }
-
-            if (maxValue == -INT_MAX - 1) {
-                break;
-            }
-
-            for (i = 0; i < capacity; ++i) {
-                index = indices[i];
-
-                if (index != 0) {
-
-                    Menu_Inventory_CopyEquipmentStats(&uiEquipment, itemCategory, index - 1);
-
-                    if (VS::Menu::Framework::LiveEquipmentSortValue(stat, &uiEquipment) == maxValue) {
-                        sortedIndices[sortedPos++] = index;
-                        indices[i] = 0;
-                    }
-                }
-            }
-        }
-
-        VS::Core::Memory::CopyLiveHalfwordBlocks(indices, &sortedIndices[0], capacity);
-    }
-}
-
 // decomp: MENU _sortItems (src/MENU/items1.h:1077)
 int Menu_Inventory_UpdateSortMenu(int initItemCategory)
 {
@@ -381,19 +143,19 @@ int Menu_Inventory_UpdateSortMenu(int initItemCategory)
 
                 switch (Menu_Inventory_sortMenuItemCategory) {
                 case Items_ItemCategory_Weapon:
-                    Menu_Inventory_SortWeapons(Menu_Inventory_sortMenuWeaponSortStats[i]);
+                    VS::Menu::Inventory::SortLiveWeapons(Menu_Inventory_sortMenuWeaponSortStats[i]);
                     break;
 
                 case Items_ItemCategory_Shield:
-                    Menu_Inventory_SortShields(Menu_Inventory_sortMenuGripSortStats[i]);
+                    VS::Menu::Inventory::SortLiveShields(Menu_Inventory_sortMenuGripSortStats[i]);
                     break;
 
                 case Items_ItemCategory_Misc:
-                    Menu_Inventory_SortMisc(Menu_Inventory_sortMenuMiscSortStats[i]);
+                    VS::Menu::Inventory::SortLiveMisc(Menu_Inventory_sortMenuMiscSortStats[i]);
                     break;
 
                 default:
-                    Menu_Inventory_SortEquipment(Menu_Inventory_sortMenuItemCategory, Menu_Inventory_sortMenuSortStats[Menu_Inventory_sortMenuItemCategory][i]);
+                    VS::Menu::Inventory::SortLiveEquipment(Menu_Inventory_sortMenuItemCategory, Menu_Inventory_sortMenuSortStats[Menu_Inventory_sortMenuItemCategory][i]);
                     break;
                 }
             } else {

@@ -1094,43 +1094,7 @@
 ],
 "Native\\Game\\src\\Menu\\Inventory\\ItemList.cpp": [
 [
-97,
-[
-"    char* indices = Audio_Seq_unusedInventoryIndices.weapons;"
-],
-[
-"    char* indices = (char *)(Audio_Seq_unusedInventoryIndices.weapons);"
-]
-],
-[
-154,
-[
-"    char* indices = Audio_Seq_unusedInventoryIndices.shields;"
-],
-[
-"    char* indices = (char *)(Audio_Seq_unusedInventoryIndices.shields);"
-]
-],
-[
-210,
-[
-"    char* indices = Audio_Seq_unusedInventoryIndices.misc;"
-],
-[
-"    char* indices = (char *)(Audio_Seq_unusedInventoryIndices.misc);"
-]
-],
-[
-278,
-[
-"        char* indices = Menu_Inventory_inventoryIndices[itemCategory];"
-],
-[
-"        char* indices = (char *)(Menu_Inventory_inventoryIndices[itemCategory]);"
-]
-],
-[
-449,
+211,
 [
 "        Menu_InitInformationTextBox(1);"
 ],
@@ -1139,7 +1103,7 @@
 ]
 ],
 [
-633,
+395,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, Render_frameScratch.overlayOrderingTable - 12);"
 ],
@@ -1148,7 +1112,7 @@
 ]
 ],
 [
-635,
+397,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, Render_frameScratch.overlayOrderingTable - 12);",
 "        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, Render_frameScratch.overlayOrderingTable - 12);"
@@ -1159,7 +1123,7 @@
 ]
 ],
 [
-737,
+499,
 [
 "    char* indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -1168,7 +1132,7 @@
 ]
 ],
 [
-932,
+694,
 [
 "    indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -1177,7 +1141,7 @@
 ]
 ],
 [
-938,
+700,
 [
 "        rowTypes = textBuf + 0x1800;",
 "        menuText = textBuf + 0x1900;"
@@ -1188,7 +1152,7 @@
 ]
 ],
 [
-962,
+724,
 [
 "            rowCount = Menu_Inventory_BuildItemRows(itemCategory, menuText, rowTypes, textBuf);"
 ],
@@ -1197,7 +1161,7 @@
 ]
 ],
 [
-1066,
+828,
 [
 "                sp310 = textBuf + 0x1900;",
 "                rowTypes = textBuf + 0x1800;"
@@ -1208,7 +1172,7 @@
 ]
 ],
 [
-1069,
+831,
 [
 "                count = Menu_Inventory_BuildItemRows(itemCategory, sp310, rowTypes, textBuf);"
 ],
@@ -1217,7 +1181,7 @@
 ]
 ],
 [
-1594,
+1356,
 [
 "        static const char initial[8];"
 ],

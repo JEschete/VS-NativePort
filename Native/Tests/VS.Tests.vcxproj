@@ -268,6 +268,9 @@
     <ClCompile Include="src\InventoryDetailHelpersLiveTests.cpp" />
     <ClCompile Include="src\InventoryDetailHelpersModuleTests.cpp" />
     <ClCompile Include="src\InventoryDetailHelpersTests.cpp" />
+    <ClCompile Include="src\InventorySortingLiveTests.cpp" />
+    <ClCompile Include="src\InventorySortingModuleTests.cpp" />
+    <ClCompile Include="src\InventorySortingTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchLiveTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchModuleTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchTests.cpp" />
@@ -429,8 +432,11 @@
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
+    <ClInclude Include="include\Menu\InventorySortingLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\InventorySortingWorld.hpp" />
     <ClInclude Include="include\Menu\ItemDetailDispatchLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp" />
+    <ClInclude Include="include\Menu\SortingKeysFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
