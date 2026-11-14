@@ -1781,6 +1781,21 @@ class Harness(unittest.TestCase):
             self.assertEqual(differential.main(["--list"]), 0)
         self.assertIn("actor_settings", "".join(call.args[0] for call in output.write.call_args_list))
 
+    def test_case_helpers_load_without_an_earlier_case(self) -> None:
+        # #385: a helper outside the cases folder imports native_compile_support beside the cases.
+        helpers = ("native_compile_support", "loot_staging_differential")
+        saved_path = list(sys.path)
+        saved_modules = {name: sys.modules.pop(name) for name in helpers if name in sys.modules}
+        try:
+            sys.path[:] = [entry for entry in sys.path if entry and Path(entry).resolve() != differential.CASES]
+            case = differential.load_case("loot_armor_staging")
+            self.assertEqual((case.ID, case.COMPILER), ("F02850", "clang-cl"))
+        finally:
+            sys.path[:] = saved_path
+            for name in helpers:
+                sys.modules.pop(name, None)
+            sys.modules.update(saved_modules)
+
 
 if __name__ == "__main__":
     unittest.main()

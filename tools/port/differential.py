@@ -756,6 +756,9 @@ def load_case(name: str) -> ModuleType:
     # Cases import this module by name; run as a script it must not load a second copy whose
     # Fault the harness would not catch.
     sys.modules.setdefault("differential", sys.modules[__name__])
+    # Cases and their helpers import the shared modules beside the cases (#385).
+    if str(CASES) not in sys.path:
+        sys.path.insert(0, str(CASES))
     spec = importlib.util.spec_from_file_location(f"differential_{path.stem}", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
