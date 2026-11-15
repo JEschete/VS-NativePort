@@ -35,6 +35,8 @@ struct EngagementFixture {
     Battle_Ai_roomAiState = &room;
     Battle_Ai_candidateEngagedThisUpdate = 0;
     room.engagementLimit = 1;
+    VS::Battle::Ai::StoreEngagedMask(room, 0);
+    room.engagedCount = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
     const std::array<int, 3> ids{0, 2, 5};

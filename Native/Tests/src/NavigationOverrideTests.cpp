@@ -147,6 +147,8 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     source.locomotionFlags = 0x42;
     Battle_Ai_actorAiStates[1] = &source;
     Battle_Ai_roomAiState = &room;
+    VS::Battle::Ai::StoreEngagedMask(room, 0);
+    room.engagedCount = 0;
     Battle_Ai_roomHasWaypoints = nullptr;
     Battle_Ai_specialTerrainHeights = heights;
     Battle_Ai_savedMovementRandomState = 0x1234;

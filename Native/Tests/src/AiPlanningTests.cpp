@@ -94,6 +94,10 @@ struct PlanningAdvanceFixture : PlanningFixture {
     std::fill_n(Battle_Ai_kTimedStatusFlags, saved_masks.size(), 0);
     Battle_statusEffectParams[14].tickInterval = 1;
     Battle_statusEffectParams[17].tickInterval = 1;
+    room.allowsNonSpellActions = 0;
+    room.engaged_mask_bytes[0] = 0;
+    room.engaged_mask_bytes[1] = 0;
+    room.engagedCount = 0;
     Battle_Ai_roomAiState = &room;
     std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
     battle_actor.id = 1;

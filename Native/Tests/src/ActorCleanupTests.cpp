@@ -78,6 +78,8 @@ struct CleanupFixture {
     room.maxTileX = room.maxTileZ = 31;
     room.minTileX = room.minTileZ = 0;
     room.engagementLimit = 2;
+    VS::Battle::Ai::StoreEngagedMask(room, 0);
+    room.engagedCount = 0;
   }
 
   ~CleanupFixture() {

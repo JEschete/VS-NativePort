@@ -52,6 +52,8 @@ struct GroundFixture {
 
   GroundFixture() {
     auto& frame = *Battle_Ai_FrameState();
+    std::memset(room.engaged_mask_bytes, 0, sizeof room.engaged_mask_bytes);
+    room.engagedCount = 0;
     frame.heightMap = heights;
     frame.tileFlags = flags;
     frame.roomBounds = 0x2020;
