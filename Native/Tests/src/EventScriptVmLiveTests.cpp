@@ -14,14 +14,18 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Event/InterpolationCurveLive.h"
+#include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLiveState.h"
+#include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -2209,6 +2213,192 @@ TEST_CASE("Native palette binding transforms the live background colours",
   CHECK(VS::Render::LivePaletteAnimation().background != before.background);
   CHECK(VS::Render::LivePaletteAnimation().tints == before.tints);
   CHECK(VS::Render::RefusedLivePaletteRequestCount() == refused);
+}
+
+namespace {
+// The splash opcode adapters with their original handlers' addresses.
+constexpr auto kSplashControlEntries = std::to_array<ControlEntry>({
+    {0x800B6724, Event_ScriptWaitForSplashFileOpcode},
+    {0x800B6FD8, Event_ScriptLoadSplashImageOpcode},
+    {0x800B7014, Event_ScriptConfigureSplashLayerOpcode},
+    {0x800B70E8, Event_ScriptTweenSplashLayerOpcode},
+    {0x800B71C4, Event_ScriptFreeSplashImageOpcode},
+    {0x800B71F4, Event_ScriptWaitForSplashTweenOpcode},
+});
+
+// The six tween records the native array keeps.
+constexpr int kSplashTweenSlots = 6;
+
+// Starts and ends without an image set in a scoped heap, restoring the texture
+// pages and the tween records.
+struct SplashOpcodeStateFixture {
+  struct alignas(VS::Core::Memory::kHeapUnitBytes) Arena {
+    std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 4096> bytes{};
+  };
+  std::unique_ptr<Arena> arena = std::make_unique<Arena>();
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena->bytes};
+  VS::Render::TexturePageTable pages = VS::Render::LiveTexturePages();
+  std::array<event::SplashTween, kSplashTweenSlots> tweens{};
+
+  SplashOpcodeStateFixture() {
+    for (int slot = 0; slot < kSplashTweenSlots; ++slot) {
+      tweens.at(static_cast<std::size_t>(slot)) = event::LiveSplashTween(slot);
+      event::SetLiveSplashTween(slot, {});
+    }
+    VS::Render::ForgetLiveGimImages();
+    VS::Render::InitializeLiveTexturePages();
+  }
+  ~SplashOpcodeStateFixture() {
+    VS::Render::ForgetLiveGimImages();
+    VS::Render::LiveTexturePages() = pages;
+    for (int slot = 0; slot < kSplashTweenSlots; ++slot) {
+      event::SetLiveSplashTween(slot,
+                                tweens.at(static_cast<std::size_t>(slot)));
+    }
+  }
+  SplashOpcodeStateFixture(const SplashOpcodeStateFixture&) = delete;
+  SplashOpcodeStateFixture& operator=(const SplashOpcodeStateFixture&) = delete;
+  SplashOpcodeStateFixture(SplashOpcodeStateFixture&&) = delete;
+  SplashOpcodeStateFixture& operator=(SplashOpcodeStateFixture&&) = delete;
+};
+
+// Binds the splash opcodes and the stop opcode in both tables, runs thread 0
+// from the script's start and returns the cursor offset it stopped at, or -1
+// when the script finished.
+int RunSplashScript(Bytes bytes) {
+  const auto start = MountScript(std::move(bytes));
+  constexpr std::array<std::pair<std::uint8_t, std::uint8_t>, 6> kSizes{{
+      {0x0C, 1},
+      {0x16, 4},
+      {0x17, 6},
+      {0x18, 7},
+      {0x19, 1},
+      {0x1A, 1},
+  }};
+  for (std::size_t index = 0; index < kSizes.size(); ++index) {
+    const auto [opcode, size] = kSizes.at(index);
+    Event_kSkipOpcodeHandlers[opcode] = Event_kOpcodeHandlers[opcode] =
+        kSplashControlEntries.at(index).handler;
+    Event_kOpcodeSizes[opcode] = size;
+  }
+  Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
+      Event_CommandStopScriptContextOpcode;
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  static_cast<void>(event::ExecuteLiveScriptThread(0));
+  const event::ScriptLocation cursor = host.ThreadCursor(0);
+  return cursor.Present() ? static_cast<int>(cursor.offset) : -1;
+}
+}  // namespace
+
+TEST_CASE("Native splash opcode bindings refuse detached command borrows",
+          "[event][script][splash][event-vm-live]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint8_t, 7> command{};
+  const auto expected =
+      static_cast<std::intptr_t>(event::ScriptFlowKind::kStop);
+  for (const auto& entry : kSplashControlEntries) {
+    CAPTURE(entry.address);
+    CHECK(entry.handler(command.data(), 0) == expected);
+  }
+}
+
+TEST_CASE("Native splash bindings load a set and wait for its file",
+          "[event][script][splash][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const SplashOpcodeStateFixture splash;
+  // STAFF011.GIM (image 0) at page 25, then the file wait holds.
+  CHECK(RunSplashScript({0x16, 0x00, 0x00, 25, 0x0C, 0xF0}) == 4);
+  REQUIRE(VS::Render::LiveGimImagesPresent());
+  CHECK(VS::Render::LiveGimImageLoading() == 1);
+}
+
+TEST_CASE("Native splash load binding refuses a negative image id",
+          "[event][script][splash][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const SplashOpcodeStateFixture splash;
+  const std::uint64_t refused = VS::Render::RefusedLiveGimRequestCount();
+  // 0xFFFF is image -1; without a set the file wait advances.
+  CHECK(RunSplashScript({0x16, 0xFF, 0xFF, 25, 0x0C, 0xF0}) == -1);
+  CHECK_FALSE(VS::Render::LiveGimImagesPresent());
+  CHECK(VS::Render::RefusedLiveGimRequestCount() == refused + 2);
+}
+
+namespace {
+// Loads image 0, then configures layer 1 with routine 1 at -256,254, scale
+// 0x1000 and brightness 0x90 and starts a 30-frame easing-5 tween to 32,-32,
+// scale 0x2000 and brightness 0xFF; the tween wait then holds.
+void ConfigureAndTweenLayerOne() {
+  REQUIRE(RunSplashScript({0x16, 0x00, 0x00, 25, 0xF0}) == -1);
+  REQUIRE(VS::Render::LiveGimImagesPresent());
+  event::SetLiveSplashTween(1, {.duration = 5});
+  CHECK(RunSplashScript({0x17, 0x41, 0x80, 0x7F, 0x20, 0x90, 0x18, 0x10, 0xF0,
+                         0x40, 0xFF, 0x45, 30, 0x1A, 0xF0}) == 13);
+}
+}  // namespace
+
+TEST_CASE("Native splash configure binding places a layer",
+          "[event][script][splash][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const SplashOpcodeStateFixture splash;
+  ConfigureAndTweenLayerOne();
+  REQUIRE(VS::Render::LiveGimLayerPlacement(1).has_value());
+  const VS::Render::GimPlacement placement =
+      VS::Render::LiveGimLayerPlacement(1).value_or(VS::Render::GimPlacement{});
+  CHECK(placement.offset_x == -256);
+  CHECK(placement.offset_y == 254);
+  CHECK(placement.scale_and_order == 0x1000);
+  CHECK(placement.brightness == 0x90);
+}
+
+TEST_CASE("Native splash tween binding starts from the configured layer",
+          "[event][script][splash][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const SplashOpcodeStateFixture splash;
+  ConfigureAndTweenLayerOne();
+  const event::SplashTween tween = event::LiveSplashTween(1);
+  // easing, elapsed, duration, then the x, y, scale and brightness starts
+  // and deltas.
+  CHECK(std::array<int, 11>{tween.easing_mode, tween.elapsed, tween.duration,
+                            tween.start_x, tween.delta_x, tween.start_y,
+                            tween.delta_y, tween.start_scale, tween.delta_scale,
+                            tween.start_brightness, tween.delta_brightness} ==
+        std::array<int, 11>{5, 0, 30, -256, 288, 254, -286, 0x1000, 0x1000,
+                            0x90, 0x6F});
+}
+
+TEST_CASE("Native splash layer bindings advance without a set",
+          "[event][script][splash][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const SplashOpcodeStateFixture splash;
+  event::SetLiveSplashTween(0, {.duration = 7});
+  CHECK(RunSplashScript(
+            {0x17, 0x00, 1, 2, 3, 4, 0x18, 1, 2, 3, 4, 0x00, 9, 0xF0}) == -1);
+  CHECK(event::LiveSplashTween(0).duration == 7);
+  CHECK_FALSE(VS::Render::LiveGimImagesPresent());
+}
+
+TEST_CASE("Native splash tween wait binding reads only the first three records",
+          "[event][script][splash][event-vm-live]") {
+  for (int slot = 0; slot < kSplashTweenSlots; ++slot) {
+    CAPTURE(slot);
+    const LiveVmFixture fixture;
+    const SplashOpcodeStateFixture splash;
+    event::SetLiveSplashTween(slot, {.duration = 1});
+    CHECK(RunSplashScript({0x1A, 0xF0}) == (slot < 3 ? 0 : -1));
+  }
+}
+
+TEST_CASE("Native splash free binding yields while a skip runs",
+          "[event][script][splash][event-vm-live]") {
+  for (const int skip : {0, 1, 2}) {
+    CAPTURE(skip);
+    const LiveVmFixture fixture;
+    const SplashOpcodeStateFixture splash;
+    Event_skipState = static_cast<char>(skip);
+    CHECK(RunSplashScript({0x19, 0xF0}) == (skip == 2 ? 1 : -1));
+    CHECK_FALSE(VS::Render::LiveGimImagesPresent());
+  }
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",

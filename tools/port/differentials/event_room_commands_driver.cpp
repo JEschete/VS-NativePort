@@ -5,6 +5,7 @@
 // calls as [count, kind and arguments of each call...].
 #include <cstdint>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -240,6 +241,14 @@ public:
     void TransformActorColors(const PaletteTransform&, int) override { }
     void TransformSceneColors(const PaletteTransform&) override { }
     void TransformBackgroundColors(const PaletteTransform&) override { }
+    bool SplashImageLoading() override { return {}; }
+    bool SplashImagesPresent() const override { return {}; }
+    void QueueSplashImage(int, int) override { }
+    void ReleaseSplashImages() override { }
+    void ConfigureSplashLayer(int, int, const ImageLayerPlacement&) override { }
+    std::optional<ImageLayerPlacement> SplashLayerPlacement(int) override { return {}; }
+    SplashTween SplashImageTween(int) const override { return {}; }
+    void SetSplashImageTween(int, const SplashTween&) override { }
 };
 
 template <typename Value> bool Read(Value& value)

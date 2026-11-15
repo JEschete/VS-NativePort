@@ -603,6 +603,14 @@
     <None Include="..\..\port\differentials\event_screen_commands_f01126.py" />
     <None Include="..\..\port\differentials\event_screen_commands_f01127.py" />
     <None Include="..\..\port\differentials\event_screen_commands_f01128.py" />
+    <None Include="..\..\port\differentials\event_splash_commands_common.py" />
+    <None Include="..\..\port\differentials\event_splash_commands_driver.cpp" />
+    <None Include="..\..\port\differentials\event_splash_commands_f01031.py" />
+    <None Include="..\..\port\differentials\event_splash_commands_f01043.py" />
+    <None Include="..\..\port\differentials\event_splash_commands_f01044.py" />
+    <None Include="..\..\port\differentials\event_splash_commands_f01045.py" />
+    <None Include="..\..\port\differentials\event_splash_commands_f01046.py" />
+    <None Include="..\..\port\differentials\event_splash_commands_f01047.py" />
     <None Include="..\..\port\differentials\f02640_equipment_weapon.py" />
     <None Include="..\..\port\differentials\f02641_equipment_shield.py" />
     <None Include="..\..\port\differentials\f02642_equipment_armor.py" />

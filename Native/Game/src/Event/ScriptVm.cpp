@@ -8,7 +8,6 @@ extern "C" {
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptEffectOpcodes.h"
 #include "Event/ScriptField.h"
-#include "Event/ScriptScreen.h"
 #include "Event/ScriptVm.h"
 #include "Event/WeaponModeOpcode.h"
 
@@ -119,10 +118,10 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
-    Event_ScriptWaitForEventFileOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptWaitForSplashFile, Event_ScriptBeginSkippableCutsceneOpcode, Event_ScriptEndCutsceneAndJumpOpcode,
+    Event_ScriptWaitForEventFileOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptWaitForSplashFileOpcode, Event_ScriptBeginSkippableCutsceneOpcode, Event_ScriptEndCutsceneAndJumpOpcode,
     Event_ScriptEndCutsceneOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptDismissDialogBoxOpcode,
-    Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptLoadSplashImage, Event_ScriptConfigureSplashLayer,
-    Event_ScriptTweenSplashLayer, Event_ScriptFreeSplashImage, Event_ScriptYieldFrameOpcode, Event_ScriptSetDialogIntegerOpcode,
+    Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptLoadSplashImageOpcode, Event_ScriptConfigureSplashLayerOpcode,
+    Event_ScriptTweenSplashLayerOpcode, Event_ScriptFreeSplashImageOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptSetDialogIntegerOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptSetDialogTransitionDurationOpcode, Event_ScriptResetActorGroupStateOpcode, Event_ScriptStoreActorTileOpcode, Event_ScriptSpawnActorOpcode,
     Event_ScriptNavigateActorToTileOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetActorGroupFlagsOpcode, Event_ScriptSetActorSoundMixOpcode, Event_ScriptWalkActorToTileOpcode,
     Event_ScriptWalkActorToWorldPosOpcode, Event_ScriptSlideActorToTileOpcode, Event_ScriptSlideActorToWorldPosOpcode, Event_ScriptSetActorAttachmentOpcode, Event_ScriptNavigateActorToWorldPosOpcode,

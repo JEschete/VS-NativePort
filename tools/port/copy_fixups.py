@@ -3315,6 +3315,12 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01126", 0x800B9BF8, "ScriptWaitForScreenTransition"),
     ("F01127", 0x800B9C18, "ScriptTogglePaletteHook"),
     ("F01128", 0x800B9C58, "ScriptTransformPalettes"),
+    ("F01031", 0x800B6724, "ScriptWaitForSplashFile"),
+    ("F01043", 0x800B6FD8, "ScriptLoadSplashImage"),
+    ("F01044", 0x800B7014, "ScriptConfigureSplashLayer"),
+    ("F01045", 0x800B70E8, "ScriptTweenSplashLayer"),
+    ("F01046", 0x800B71C4, "ScriptFreeSplashImage"),
+    ("F01047", 0x800B71F4, "ScriptWaitForSplashTween"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -5136,61 +5142,9 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         "F01006": [("*(MATRIX*)&source", "*source", "44F14.c:853; copy the supplied camera matrix, not pointer-stack bytes")],
     # #276 row 6 (render GIM images): the event scripts reach the typed GIM set (GimImagesLive.hpp) instead of
     # viewing its PS1 layer records. 4A0A8.c:609 read the pending bit through a possibly missing set.
-    "F01031": [
-        ("{ return Render_gimLayers->isLoadPending; }", "{ return VS::Render::LiveGimImageLoading(); }",
-         "the load-pending query goes through the typed set, which reports a missing set instead of reading it"),
-    ],
     # 4A0A8.c:857-877: the tween stops and the layer takes the script's routine and placement, then activates.
-    "F01044": [
-        ("    Event_SplashTween* new_var;\n\n"
-         "    Event_SplashLayerView* temp_a1 = Render_gimLayers;\n\n"
-         "    if (temp_a1 == NULL) {\n"
-         "        return 0;\n"
-         "    }\n\n"
-         "    new_var = &Event_splashTweens[arg0[1] >> 6];\n"
-         "    new_var->durationFrames = 0;\n"
-         "    temp_a1 = temp_a1 + ((arg0[1] >> 6));\n"
-         "    temp_a1->renderMode = arg0[1] & 3;\n"
-         "    temp_a1->offsetX = (signed char)arg0[2] * 2;\n"
-         "    temp_a1->offsetY = (signed char)arg0[3] * 2;\n"
-         "    temp_a1->scaleFixed12 = arg0[4] << 7;\n"
-         "    temp_a1->brightness = arg0[5];\n"
-         "    VS::Render::ActivateGimLayer(arg0[1] >> 6, temp_a1, arg0);",
-         "    if (!VS::Render::LiveGimImagesPresent()) {\n"
-         "        return 0;\n"
-         "    }\n\n"
-         "    Event_splashTweens[arg0[1] >> 6].durationFrames = 0;\n"
-         "    VS::Render::ConfigureLiveGimLayer(arg0[1] >> 6, arg0[1] & 3, (signed char)arg0[2] * 2,\n"
-         "                                      (signed char)arg0[3] * 2, arg0[4] << 7, arg0[5]);",
-         "configure and activate the layer through the typed set; a fourth layer index is refused there"),
-    ],
     # 4A0A8.c:879-903: the tween starts from the layer's placement. The original read a fourth layer past the
     # set and its tween was never advanced (F01212 tweens three), so the script waited forever; it is skipped.
-    "F01045": [
-        ("    Event_SplashLayerView* temp_a3 = Render_gimLayers;\n"
-         "    int temp_a2 = arg0[5] >> 6;\n"
-         "    Event_SplashTween* temp_a1 = &Event_splashTweens[temp_a2];\n\n"
-         "    if (temp_a3 == NULL) {\n"
-         "        return 0;\n"
-         "    }\n\n"
-         "    temp_a3 += temp_a2;\n\n",
-         "    int temp_a2 = arg0[5] >> 6;\n"
-         "    Event_SplashTween* temp_a1 = &Event_splashTweens[temp_a2];\n"
-         "    const auto splash_layer = VS::Render::LiveGimLayerPlacement(temp_a2);\n\n"
-         "    if (!splash_layer) {\n"
-         "        return 0;\n"
-         "    }\n\n",
-         "the tween reads the typed placement; no set or a fourth layer continues the script"),
-        ("(temp_a1->startX = temp_a3->offsetX)", "(temp_a1->startX = splash_layer->offset_x)",
-         "start X from the typed placement"),
-        ("(temp_a1->startY = temp_a3->offsetY)", "(temp_a1->startY = splash_layer->offset_y)",
-         "start Y from the typed placement"),
-        ("(temp_a1->startScaleFixed12 = temp_a3->scaleFixed12)",
-         "(temp_a1->startScaleFixed12 = splash_layer->scale_and_order)",
-         "start scale (with the scene-order flag, as the original's halfword) from the typed placement"),
-        ("(temp_a1->startBrightness = ((char*)temp_a3)[3])", "(temp_a1->startBrightness = splash_layer->brightness)",
-         "the original read the layer's unsigned brightness byte (offset 3)"),
-    ],
     # Actor IDs are 0..15 (146C.c:8936); 0x10 is the linked-actor sentinel, not a table index.
     # 7E05C.s:541-575 identifies the next BSS symbol, tileFlagMap at 0x800F58B8: 0x40 bytes after D_800F5878.
     "G00130": [
@@ -6426,12 +6380,6 @@ REGEX_FIXES += [
         ("Event::ScriptEndCutscene",
          (('temp_v1', 'previous_skip_state'),),
          "F01035 4A0A8.c:653-662 separately snapshots D_800F4C2C into temp_v1, clears global, and uses old state to choose cleanup/yield versus normal completion. This binding was individually reviewed, not assumed equivalent merely from F01034 spelling."),
-        ("Event::ScriptConfigureSplashLayer",
-         (('new_var', 'splash_tween'),),
-         "F01044 4A0A8.c:857-877 early-outs without a GIM set, clears the encoded layer's D_800F4B30 tween duration for immediate configuration, then sets the layer's routine/offset/scale/brightness and activates it. #276 row 6 moved the layer writes to VS::Render::ConfigureLiveGimLayer; new_var only survives if the tween pointer is reintroduced."),
-        ("Event::ScriptTweenSplashLayer",
-         (('temp_a1', 'splash_tween'), ('temp_a2', 'layer_index')),
-         "F01045 4A0A8.c:879-903 derives temp_a2=byte5>>6 and chooses temp_a1 in the tween array; #276 row 6 reads the layer's typed placement (splash_layer) instead of offsetting a PS1 record. It waits for idle tween, captures start/delta values from the placement, and resets elapsed."),
         ("Event::ScriptBranchOnFlagImmediate",
          (('temp_a0', 'flag_value'), ('temp_a1', 'immediate_value')),
          "F01085 4A0A8.c:1543-1587 gets temp_a0 from the packed flag index and temp_a1 from byte3. Every compare/bit-test uses these same operands; true comparison returns0, other path returns the relative target. Preserve char signedness and branch polarity; names do not endorse older ledger wording about which condition branches."),

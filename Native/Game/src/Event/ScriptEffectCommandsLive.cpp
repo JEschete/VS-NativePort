@@ -359,6 +359,34 @@ void UpdateLiveWeatherTween() {
   Field::LiveSetWeatherIntensity(tween.intensity);
 }
 
+SplashTween LiveSplashTween(int layer) {
+  if (layer < 0 ||
+      static_cast<std::size_t>(layer) >= std::size(Event_splashTweens)) {
+    return {};
+  }
+  return FromRecord(Event_splashTweens[static_cast<std::size_t>(layer)]);
+}
+
+void SetLiveSplashTween(int layer, const SplashTween& tween) {
+  if (layer < 0 ||
+      static_cast<std::size_t>(layer) >= std::size(Event_splashTweens)) {
+    return;
+  }
+  Event_SplashTween& record =
+      Event_splashTweens[static_cast<std::size_t>(layer)];
+  record.easingMode = static_cast<char>(tween.easing_mode);
+  record.elapsedFrames = static_cast<char>(tween.elapsed);
+  record.durationFrames = static_cast<char>(tween.duration);
+  record.startX = tween.start_x;
+  record.startY = tween.start_y;
+  record.deltaX = tween.delta_x;
+  record.deltaY = tween.delta_y;
+  record.startScaleFixed12 = tween.start_scale;
+  record.deltaScaleFixed12 = tween.delta_scale;
+  record.startBrightness = tween.start_brightness;
+  record.deltaBrightness = tween.delta_brightness;
+}
+
 }  // namespace VS::Event
 
 // decomp: func_800BA8BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2454), opcode 0xA0

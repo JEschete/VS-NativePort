@@ -115,6 +115,18 @@ intptr_t Event_ScriptTogglePaletteHookOpcode(uint8_t* instruction,
                                              int16_t thread_index);
 intptr_t Event_ScriptTransformPalettesOpcode(uint8_t* instruction,
                                              int16_t thread_index);
+intptr_t Event_ScriptWaitForSplashFileOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
+intptr_t Event_ScriptLoadSplashImageOpcode(uint8_t* instruction,
+                                           int16_t thread_index);
+intptr_t Event_ScriptConfigureSplashLayerOpcode(uint8_t* instruction,
+                                                int16_t thread_index);
+intptr_t Event_ScriptTweenSplashLayerOpcode(uint8_t* instruction,
+                                            int16_t thread_index);
+intptr_t Event_ScriptFreeSplashImageOpcode(uint8_t* instruction,
+                                           int16_t thread_index);
+intptr_t Event_ScriptWaitForSplashTweenOpcode(uint8_t* instruction,
+                                              int16_t thread_index);
 
 #ifdef __cplusplus
 }

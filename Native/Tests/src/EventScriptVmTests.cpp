@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -20,6 +21,7 @@
 #include "Event/ScriptRoomCommands.hpp"
 #include "Event/ScriptScreenCommands.hpp"
 #include "Event/ScriptSources.hpp"
+#include "Event/ScriptSplashCommands.hpp"
 #include "Event/ScriptVm.hpp"
 
 namespace {
@@ -53,6 +55,13 @@ class RecordingHost final : public event::ScriptVmHost {
   // The ids the actor selection returns, ending with the sentinel 1.
   std::vector<std::uint16_t> selected_actors{1};
   std::size_t selection_cursor = 0;
+  // The splash image set: its loading bit, its layers (absent past the set)
+  // and the tween records, with the image calls in order.
+  bool splash_loading = false;
+  bool splash_present = false;
+  std::array<std::optional<event::ImageLayerPlacement>, 4> splash_layers{};
+  std::array<event::SplashTween, 4> splash_tweens{};
+  std::vector<std::string> splash_calls;
   std::vector<std::pair<Location, int>> instructions;
   Bytes palette_command = Bytes(8);
   Bytes sound_marker{0x82, 0x05, 0, 0};
@@ -517,6 +526,34 @@ class RecordingHost final : public event::ScriptVmHost {
     NoteScreen("BackgroundColors",
                {transform.mode, transform.duration, transform.red_offset,
                 transform.green_offset, transform.blue_offset});
+  }
+  bool SplashImageLoading() override { return splash_loading; }
+  bool SplashImagesPresent() const override { return splash_present; }
+  void QueueSplashImage(int image_id, int first_page) override {
+    splash_calls.push_back("Queue " + std::to_string(image_id) + ' ' +
+                           std::to_string(first_page));
+  }
+  void ReleaseSplashImages() override { splash_calls.emplace_back("Release"); }
+  void ConfigureSplashLayer(
+      int layer, int routine,
+      const event::ImageLayerPlacement& placement) override {
+    splash_calls.push_back(
+        "Configure " + std::to_string(layer) + ' ' + std::to_string(routine) +
+        ' ' + std::to_string(placement.x) + ' ' + std::to_string(placement.y) +
+        ' ' + std::to_string(placement.scale) + ' ' +
+        std::to_string(placement.brightness));
+  }
+  std::optional<event::ImageLayerPlacement> SplashLayerPlacement(
+      int layer) override {
+    return splash_layers.at(static_cast<std::size_t>(layer));
+  }
+  event::SplashTween SplashImageTween(int layer) const override {
+    return splash_tweens.at(static_cast<std::size_t>(layer));
+  }
+  void SetSplashImageTween(int layer,
+                           const event::SplashTween& tween) override {
+    splash_calls.push_back("Tween " + std::to_string(layer));
+    splash_tweens.at(static_cast<std::size_t>(layer)) = tween;
   }
 
  private:
@@ -1026,6 +1063,231 @@ TEST_CASE("Palette transform targets the scene or background or nothing",
   for (const std::uint8_t selector : {0x30, 0x3F, 0x80, 0xF0, 0xFF}) {
     CAPTURE(selector);
     CHECK(PaletteCalls({0x70, selector, 0, 0, 1, 1, 1, 1}, {}).empty());
+  }
+}
+
+namespace {
+using Tween = event::SplashTween;
+using Placement = event::ImageLayerPlacement;
+
+// A tween partway through its frames.
+Tween RunningTween() {
+  return {.easing_mode = 3,
+          .elapsed = 4,
+          .duration = 9,
+          .start_x = 11,
+          .start_y = -12,
+          .delta_x = 13,
+          .delta_y = -14,
+          .start_scale = 15,
+          .delta_scale = -16,
+          .start_brightness = 17,
+          .delta_brightness = -18};
+}
+
+bool SameTween(const Tween& left, const Tween& right) {
+  return std::tie(left.easing_mode, left.elapsed, left.duration, left.start_x,
+                  left.start_y, left.delta_x, left.delta_y, left.start_scale,
+                  left.delta_scale, left.start_brightness,
+                  left.delta_brightness) ==
+         std::tie(right.easing_mode, right.elapsed, right.duration,
+                  right.start_x, right.start_y, right.delta_x, right.delta_y,
+                  right.start_scale, right.delta_scale, right.start_brightness,
+                  right.delta_brightness);
+}
+
+// Runs a complete splash opcode on `host` with an image set whose layers sit
+// at `placement`.
+void SplashRun(RecordingHost& host, Handler handler, const Bytes& bytes,
+               Flow expected, Placement placement = {}) {
+  host.splash_present = true;
+  for (std::size_t layer = 0; layer < 3; ++layer) {
+    host.splash_layers.at(layer) = placement;
+  }
+  CHECK(Run(handler, host, bytes) == expected);
+  CHECK(host.refusals.empty());
+}
+
+// The image calls a complete splash opcode makes with a default image set.
+Calls SplashCalls(Handler handler, const Bytes& bytes) {
+  RecordingHost host;
+  SplashRun(host, handler, bytes, Flow::Of(Kind::kAdvance));
+  return host.splash_calls;
+}
+}  // namespace
+
+TEST_CASE("Splash opcodes refuse truncated operand spans",
+          "[event][script][splash][event-vm]") {
+  const std::array commands{
+      std::pair{event::ScriptLoadSplashImage, 4},
+      std::pair{event::ScriptConfigureSplashLayer, 6},
+      std::pair{event::ScriptTweenSplashLayer, 7},
+  };
+  for (const auto& [handler, length] : commands) {
+    for (int size = 0; size < length; ++size) {
+      RecordingHost host;
+      host.splash_present = true;
+      host.splash_layers.at(0) = Placement{};
+      CHECK(Run(handler, host, Bytes(static_cast<std::size_t>(size))) ==
+            Flow::Of(Kind::kAdvance));
+      REQUIRE(host.refusals.size() == 1);
+      CHECK(host.refusals[0] == std::pair{Refusal::kShortInstruction, size});
+      CHECK(host.splash_calls.empty());
+    }
+  }
+}
+
+TEST_CASE("Splash file wait holds only while the image file loads",
+          "[event][script][splash][event-vm]") {
+  for (const bool loading : {false, true}) {
+    RecordingHost host;
+    host.splash_loading = loading;
+    CHECK(Run(event::ScriptWaitForSplashFile, host, {0x0C}) ==
+          Flow::Of(loading ? Kind::kHold : Kind::kAdvance));
+    CHECK(host.splash_calls.empty());
+    CHECK(host.refusals.empty());
+  }
+}
+
+TEST_CASE("Splash image load passes a signed image id and its first page",
+          "[event][script][splash][event-vm]") {
+  CHECK(SplashCalls(event::ScriptLoadSplashImage, {0x16, 0x34, 0x12, 0x19}) ==
+        Calls{"Queue 4660 25"});
+  CHECK(SplashCalls(event::ScriptLoadSplashImage, {0x16, 0xFF, 0xFF, 0x80}) ==
+        Calls{"Queue -1 128"});
+  CHECK(SplashCalls(event::ScriptLoadSplashImage,
+                    {0x16, 0x00, 0x80, 0xFF, 7}) == Calls{"Queue -32768 255"});
+}
+
+TEST_CASE("Splash layer configuration stops the tween and doubles offsets",
+          "[event][script][splash][event-vm]") {
+  RecordingHost host;
+  host.splash_present = true;
+  host.splash_tweens.fill(RunningTween());
+  // Layer 1, routine 2, offsets -128 and 127, scale byte 0xFF.
+  CHECK(Run(event::ScriptConfigureSplashLayer, host,
+            {0x17, 0x42, 0x80, 0x7F, 0xFF, 0x90}) == Flow::Of(Kind::kAdvance));
+  CHECK(host.splash_calls ==
+        Calls{"Tween 1", "Configure 1 2 -256 254 32640 144"});
+  Tween stopped = RunningTween();
+  stopped.duration = 0;
+  CHECK(SameTween(host.splash_tweens[1], stopped));
+  CHECK(SameTween(host.splash_tweens[0], RunningTween()));
+  CHECK(SameTween(host.splash_tweens[2], RunningTween()));
+}
+
+TEST_CASE("Splash layer configuration decodes every selector bit",
+          "[event][script][splash][event-vm]") {
+  // Bits 2-5 are ignored; routine bits 0-1.
+  CHECK(SplashCalls(event::ScriptConfigureSplashLayer,
+                    {0x17, 0x3C, 1, 0xFF, 0, 0}) ==
+        Calls{"Tween 0", "Configure 0 0 2 -2 0 0"});
+  // Selector 3 passes through; the host refuses its image layer.
+  CHECK(SplashCalls(event::ScriptConfigureSplashLayer,
+                    {0x17, 0xFF, 0x7F, 0x81, 1, 0xFF, 9}) ==
+        Calls{"Tween 3", "Configure 3 3 254 -254 128 255"});
+}
+
+TEST_CASE("Splash layer configuration does nothing without an image set",
+          "[event][script][splash][event-vm]") {
+  RecordingHost host;
+  host.splash_tweens.fill(RunningTween());
+  CHECK(Run(event::ScriptConfigureSplashLayer, host,
+            {0x17, 0x40, 1, 2, 3, 4}) == Flow::Of(Kind::kAdvance));
+  CHECK(host.splash_calls.empty());
+  CHECK(SameTween(host.splash_tweens[1], RunningTween()));
+}
+
+TEST_CASE("Splash layer tween starts from the layer placement",
+          "[event][script][splash][event-vm]") {
+  // Layer 2, easing 5 (bits 3-5 ignored), 30 frames.
+  RecordingHost host;
+  SplashRun(host, event::ScriptTweenSplashLayer,
+            {0x18, 0x80, 0x7F, 0x20, 0xFF, 0x8D, 30}, Flow::Of(Kind::kAdvance),
+            {.x = 10, .y = -20, .scale = 4096, .brightness = 128});
+  CHECK(host.splash_calls == Calls{"Tween 2"});
+  CHECK(SameTween(host.splash_tweens[2], Tween{.easing_mode = 5,
+                                               .elapsed = 0,
+                                               .duration = 30,
+                                               .start_x = 10,
+                                               .start_y = -20,
+                                               .delta_x = -266,
+                                               .delta_y = 274,
+                                               .start_scale = 4096,
+                                               .delta_scale = 0,
+                                               .start_brightness = 128,
+                                               .delta_brightness = 127}));
+}
+
+TEST_CASE("Splash layer tween wraps its deltas to 16 bits",
+          "[event][script][splash][event-vm]") {
+  RecordingHost host;
+  SplashRun(host, event::ScriptTweenSplashLayer,
+            {0x18, 0x7F, 0x80, 0xFF, 0, 0x00, 1}, Flow::Of(Kind::kAdvance),
+            {.x = -32768, .y = 32767, .scale = -32768, .brightness = 0x1FF});
+  const Tween& tween = host.splash_tweens[0];
+  CHECK(tween.delta_x == -32514);
+  CHECK(tween.delta_y == 32513);
+  CHECK(tween.start_scale == -32768);
+  CHECK(tween.delta_scale == -128);
+  // The original read the brightness byte.
+  CHECK(tween.start_brightness == 255);
+  CHECK(tween.delta_brightness == -255);
+  CHECK(tween.duration == 1);
+}
+
+TEST_CASE("Splash layer tween holds while the layer tween runs",
+          "[event][script][splash][event-vm]") {
+  RecordingHost host;
+  host.splash_present = true;
+  host.splash_layers.at(1) = Placement{.x = 1};
+  host.splash_tweens[1] = RunningTween();
+  CHECK(Run(event::ScriptTweenSplashLayer, host, {0x18, 1, 2, 3, 4, 0x47, 5}) ==
+        Flow::Of(Kind::kHold));
+  CHECK(host.splash_calls.empty());
+  CHECK(SameTween(host.splash_tweens[1], RunningTween()));
+}
+
+TEST_CASE("Splash layer tween advances without an image layer",
+          "[event][script][splash][event-vm]") {
+  RecordingHost host;
+  host.splash_tweens.fill(RunningTween());
+  host.splash_tweens[3].duration = 0;
+  // Selector 3 has no layer; layer 0 has no set.
+  for (const std::uint8_t selector : {0xC0, 0x00}) {
+    CHECK(Run(event::ScriptTweenSplashLayer, host,
+              {0x18, 1, 2, 3, 4, selector, 5}) == Flow::Of(Kind::kAdvance));
+  }
+  CHECK(host.splash_calls.empty());
+  CHECK(host.splash_tweens[3].duration == 0);
+}
+
+TEST_CASE("Splash image free releases the set and yields only while skipping",
+          "[event][script][splash][event-vm]") {
+  const std::array skips{
+      std::pair{event::CutsceneSkip::kNone, Kind::kAdvance},
+      std::pair{event::CutsceneSkip::kSkippable, Kind::kAdvance},
+      std::pair{event::CutsceneSkip::kSkipping, Kind::kAdvanceAndYield},
+  };
+  for (const auto& [skip, kind] : skips) {
+    RecordingHost host;
+    host.skip = skip;
+    CHECK(Run(event::ScriptFreeSplashImage, host, {0x19}) == Flow::Of(kind));
+    CHECK(host.splash_calls == Calls{"Release"});
+  }
+}
+
+TEST_CASE("Splash tween wait holds while any of the three layer tweens runs",
+          "[event][script][splash][event-vm]") {
+  RecordingHost idle;
+  CHECK(Run(event::ScriptWaitForSplashTween, idle, {0x1A}) ==
+        Flow::Of(Kind::kAdvance));
+  for (std::size_t layer = 0; layer < 4; ++layer) {
+    RecordingHost host;
+    host.splash_tweens.at(layer).duration = 0x80;
+    CHECK(Run(event::ScriptWaitForSplashTween, host, {0x1A}) ==
+          Flow::Of(layer < 3 ? Kind::kHold : Kind::kAdvance));
+    CHECK(host.splash_calls.empty());
   }
 }
 

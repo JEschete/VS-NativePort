@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <memory>
 #include <new>
+#include <optional>
 #include <span>
 #include <type_traits>
 #include <utility>
@@ -30,6 +31,7 @@
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptRoomCommands.hpp"
 #include "Event/ScriptScreenCommands.hpp"
+#include "Event/ScriptSplashCommands.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -42,6 +44,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -180,6 +183,15 @@ constexpr std::array kControlBindings{
                    ScriptTogglePaletteHook},
     ControlBinding{Event_ScriptTransformPalettesOpcode,
                    ScriptTransformPalettes},
+    ControlBinding{Event_ScriptWaitForSplashFileOpcode,
+                   ScriptWaitForSplashFile},
+    ControlBinding{Event_ScriptLoadSplashImageOpcode, ScriptLoadSplashImage},
+    ControlBinding{Event_ScriptConfigureSplashLayerOpcode,
+                   ScriptConfigureSplashLayer},
+    ControlBinding{Event_ScriptTweenSplashLayerOpcode, ScriptTweenSplashLayer},
+    ControlBinding{Event_ScriptFreeSplashImageOpcode, ScriptFreeSplashImage},
+    ControlBinding{Event_ScriptWaitForSplashTweenOpcode,
+                   ScriptWaitForSplashTween},
 };
 
 ScriptControlOpcode NativeControl(OpcodeHandler handler) {
@@ -635,6 +647,37 @@ class LiveVmHost final : public ScriptVmHost {
     Render::TransformLiveBackgroundColors(
         transform.mode, transform.duration, transform.red_offset,
         transform.green_offset, transform.blue_offset);
+  }
+  bool SplashImageLoading() override {
+    return Render::LiveGimImageLoading() != 0;
+  }
+  bool SplashImagesPresent() const override {
+    return Render::LiveGimImagesPresent();
+  }
+  void QueueSplashImage(int image_id, int first_page) override {
+    Render::QueueLiveGimImage(image_id, first_page);
+  }
+  void ReleaseSplashImages() override { Render::ReleaseLiveGimImages(); }
+  void ConfigureSplashLayer(int layer, int routine,
+                            const ImageLayerPlacement& placement) override {
+    Render::ConfigureLiveGimLayer(layer, routine, placement.x, placement.y,
+                                  placement.scale, placement.brightness);
+  }
+  std::optional<ImageLayerPlacement> SplashLayerPlacement(int layer) override {
+    const auto placement = Render::LiveGimLayerPlacement(layer);
+    if (!placement.has_value()) {
+      return std::nullopt;
+    }
+    return ImageLayerPlacement{.x = placement->offset_x,
+                               .y = placement->offset_y,
+                               .scale = placement->scale_and_order,
+                               .brightness = placement->brightness};
+  }
+  SplashTween SplashImageTween(int layer) const override {
+    return LiveSplashTween(layer);
+  }
+  void SetSplashImageTween(int layer, const SplashTween& tween) override {
+    SetLiveSplashTween(layer, tween);
   }
 
  private:
@@ -1494,4 +1537,46 @@ std::intptr_t Event_ScriptTransformPalettesOpcode(std::uint8_t* instruction,
                                                   std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptTransformPalettes);
+}
+
+// decomp: BATTLE.PRG func_800B6724 (4A0A8.c:609).
+std::intptr_t Event_ScriptWaitForSplashFileOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptWaitForSplashFile);
+}
+
+// decomp: BATTLE.PRG vs_battle_script_loadGim (4A0A8.c:851).
+std::intptr_t Event_ScriptLoadSplashImageOpcode(std::uint8_t* instruction,
+                                                std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptLoadSplashImage);
+}
+
+// decomp: BATTLE.PRG func_800B7014 (4A0A8.c:857).
+std::intptr_t Event_ScriptConfigureSplashLayerOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptConfigureSplashLayer);
+}
+
+// decomp: BATTLE.PRG func_800B70E8 (4A0A8.c:879).
+std::intptr_t Event_ScriptTweenSplashLayerOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptTweenSplashLayer);
+}
+
+// decomp: BATTLE.PRG func_800B71C4 (4A0A8.c:905).
+std::intptr_t Event_ScriptFreeSplashImageOpcode(std::uint8_t* instruction,
+                                                std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptFreeSplashImage);
+}
+
+// decomp: BATTLE.PRG func_800B71F4 (4A0A8.c:911).
+std::intptr_t Event_ScriptWaitForSplashTweenOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptWaitForSplashTween);
 }

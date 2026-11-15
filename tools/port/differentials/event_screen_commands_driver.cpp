@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -244,6 +245,14 @@ public:
     void SetRoomBackgroundOffset(int, int) override { }
     void SetBackgroundParallaxScale(int, int) override { }
     void SetFirstPersonViewDisabled(bool) override { }
+    bool SplashImageLoading() override { return {}; }
+    bool SplashImagesPresent() const override { return {}; }
+    void QueueSplashImage(int, int) override { }
+    void ReleaseSplashImages() override { }
+    void ConfigureSplashLayer(int, int, const ImageLayerPlacement&) override { }
+    std::optional<ImageLayerPlacement> SplashLayerPlacement(int) override { return {}; }
+    SplashTween SplashImageTween(int) const override { return {}; }
+    void SetSplashImageTween(int, const SplashTween&) override { }
 };
 
 template <typename Value> bool Read(Value& value)

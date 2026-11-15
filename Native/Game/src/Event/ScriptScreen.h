@@ -11,11 +11,5 @@
 #include "Event/Splash.h"
 
 extern Event_SplashTween Event_splashTweens[6];
-intptr_t Event_ScriptWaitForSplashFile(u_char* instruction, short thread_index);
-intptr_t Event_ScriptLoadSplashImage(u_char* instruction, short thread_index);
-intptr_t Event_ScriptConfigureSplashLayer(u_char* instruction, short thread_index);
-intptr_t Event_ScriptTweenSplashLayer(u_char* instruction, short thread_index);
-intptr_t Event_ScriptFreeSplashImage(u_char* instruction, short thread_index);
-intptr_t Event_ScriptWaitForSplashTween(u_char* instruction, short thread_index);
 
 #endif // VS_EVENT_SCRIPTSCREEN_H_DECLS

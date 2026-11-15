@@ -1426,6 +1426,7 @@
     </ClCompile>
     <ClCompile Include="src\Event\ScriptScreenCommands.cpp" />
     <ClCompile Include="src\Event\ScriptSources.cpp" />
+    <ClCompile Include="src\Event\ScriptSplashCommands.cpp" />
     <ClCompile Include="src\Event\ScriptVm.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2654,6 +2655,7 @@
     <ClInclude Include="include\Event\ScriptRoomCommands.hpp" />
     <ClInclude Include="include\Event\ScriptScreenCommands.hpp" />
     <ClInclude Include="include\Event\ScriptSources.hpp" />
+    <ClInclude Include="include\Event\ScriptSplashCommands.hpp" />
     <ClInclude Include="include\Event\ScriptStep.hpp" />
     <ClInclude Include="include\Event\ScriptVm.hpp" />
     <ClInclude Include="include\Event\ScriptVmLive.hpp" />

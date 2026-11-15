@@ -9,9 +9,11 @@
 // cursor against its region.
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <span>
 
 #include "Event/ScriptCommand.hpp"
+#include "Event/ScriptEffectCommands.hpp"
 
 namespace VS::Event {
 
@@ -503,6 +505,21 @@ class ScriptVmHost {
                                     int actor) = 0;
   virtual void TransformSceneColors(const PaletteTransform& transform) = 0;
   virtual void TransformBackgroundColors(const PaletteTransform& transform) = 0;
+
+  // The splash image set and its tweens the splash opcodes drive
+  // (Event/ScriptSplashCommands.hpp). Layers are the script's selectors,
+  // 0-3: the host refuses a layer its image set lacks, and an unknown tween
+  // record reads as idle.
+  [[nodiscard]] virtual bool SplashImageLoading() = 0;
+  [[nodiscard]] virtual bool SplashImagesPresent() const = 0;
+  virtual void QueueSplashImage(int image_id, int first_page) = 0;
+  virtual void ReleaseSplashImages() = 0;
+  virtual void ConfigureSplashLayer(int layer, int routine,
+                                    const ImageLayerPlacement& placement) = 0;
+  [[nodiscard]] virtual std::optional<ImageLayerPlacement> SplashLayerPlacement(
+      int layer) = 0;
+  [[nodiscard]] virtual SplashTween SplashImageTween(int layer) const = 0;
+  virtual void SetSplashImageTween(int layer, const SplashTween& tween) = 0;
 };
 
 // decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)
