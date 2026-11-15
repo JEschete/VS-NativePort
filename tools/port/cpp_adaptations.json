@@ -438,37 +438,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Effects\\ScreenDistortion\\ScreenDistortion.cpp": [
-[
-39,
-[
-"    ordering_table = Render_frameScratch.orderingTable;"
-],
-[
-"    ordering_table = (u_long *)(Render_frameScratch.orderingTable);"
-]
-],
-[
-97,
-[
-"    packet_words = Render_frameScratch.primitiveCursor;"
-],
-[
-"    packet_words = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-171,
-[
-"    overlay_ordering_table = Render_frameScratch.overlayOrderingTable;",
-"    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0xE00140, 6, Render_frameScratch.primitiveCursor, overlay_ordering_table);"
-],
-[
-"    overlay_ordering_table = (u_long *)(Render_frameScratch.overlayOrderingTable);",
-"    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0xE00140, 6, (int *)(Render_frameScratch.primitiveCursor), overlay_ordering_table);"
-]
-]
-],
 "Native\\Game\\src\\Effects\\Weather.cpp": [
 [
 30,

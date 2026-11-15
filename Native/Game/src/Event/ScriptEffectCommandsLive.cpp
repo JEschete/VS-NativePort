@@ -18,6 +18,7 @@
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Core/Diagnostics.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffects.h"
@@ -213,7 +213,7 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
   void AcquireScreenEffects() override { Effects_AcquireScreenEffectOverlay(); }
   void ReleaseScreenEffects() override { Effects_ReleaseScreenEffectOverlay(); }
   void SetDistortionLayer(int layer) override {
-    Effects_ScreenDistortion_SetFeedbackLayer(layer);
+    VS::Effects::ScreenDistortion::SetLiveFeedbackLayer(layer);
   }
   void SetScanlineOverlay(std::uint8_t enabled) override {
     Event_isScanlineOverlayEnabled = static_cast<char>(enabled);

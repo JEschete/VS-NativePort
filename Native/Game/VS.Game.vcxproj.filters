@@ -1563,12 +1563,12 @@
     <ClCompile Include="src\Effects\ScreenDistortion\RadialWarpLive.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>
-    <ClCompile Include="src\Effects\ScreenDistortion\ScreenDistortion.cpp">
+    <ClCompile Include="src\Effects\ScreenDistortion\ScreenOverlays.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\ScreenDistortion\ScreenDistortion.h">
+    <ClCompile Include="src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\ScreenEffects.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3547,6 +3547,12 @@
       <Filter>include\Effects\ScreenDistortion</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarpLive.hpp">
+      <Filter>include\Effects\ScreenDistortion</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlays.hpp">
+      <Filter>include\Effects\ScreenDistortion</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp">
       <Filter>include\Effects\ScreenDistortion</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\Templates\ClosedRing.hpp">

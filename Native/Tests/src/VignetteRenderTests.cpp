@@ -4,10 +4,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Effects/ScreenDistortion/ScreenOverlays.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
 #include "Render/Render.h"
 }
 
@@ -24,6 +27,9 @@ struct VignetteFixture {
   Render_FrameScratch* frame =
       static_cast<Render_FrameScratch*>(Core_ScratchBase());
   Render_FrameScratch saved = *frame;
+  void* const saved_ordering = Render_legacyOrderingTables[Render_frameBuf & 1];
+  void* const saved_primitives =
+      Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
   alignas(8) std::array<u_long, 8> ordering{};
   std::array<int, kPacketWords + 2> packets{};
   u_long tail = LEGACY_GPU_LINK_END;
@@ -35,9 +41,15 @@ struct VignetteFixture {
     *frame = {};
     frame->primitiveCursor = packets.data() + 1;
     frame->overlayOrderingTable = ordering.data() + 2;
+    Render_legacyOrderingTables[Render_frameBuf & 1] = ordering.data();
+    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = packets.data() + 1;
   }
 
-  ~VignetteFixture() { *frame = saved; }
+  ~VignetteFixture() {
+    *frame = saved;
+    Render_legacyOrderingTables[Render_frameBuf & 1] = saved_ordering;
+    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_primitives;
+  }
 
   int* Triangle(std::size_t index) {
     return packets.data() + 1 + index * kTriangleWords;
@@ -56,6 +68,11 @@ struct VignetteFixture {
   }
 };
 
+int Ellipse(int angle, int radius) {
+  return static_cast<int>(
+      VS::Effects::ScreenDistortion::EllipsePoint(angle, radius));
+}
+
 void* CheckPacket(void* node, int* expected, std::size_t words) {
   REQUIRE(node == expected);
   CHECK(static_cast<P_TAG*>(node)->len == words - 1);
@@ -66,7 +83,7 @@ void* CheckPacket(void* node, int* expected, std::size_t words) {
 TEST_CASE("Vignette links occupy one word and retain the previous chain",
           "[render][effects][vignette]") {
   VignetteFixture fixture;
-  Effects_ScreenDistortion_DrawVignette();
+  VS::Effects::ScreenDistortion::DrawLiveVignette();
 
   fixture.CheckBounds();
   void* node = nextPrim(&fixture.ordering[2]);
@@ -84,7 +101,7 @@ TEST_CASE("Vignette links occupy one word and retain the previous chain",
 TEST_CASE("Vignette retains every original corner and elliptical ring packet",
           "[render][effects][vignette]") {
   VignetteFixture fixture;
-  Effects_ScreenDistortion_DrawVignette();
+  VS::Effects::ScreenDistortion::DrawLiveVignette();
   REQUIRE(fixture.ordering[3] == static_cast<u_long>(kGuard));
   constexpr std::array kCorners{0xE00140, 0xE00000, 0, 0x140};
   for (std::size_t index = 0; index < kTriangleCount; ++index) {
@@ -92,10 +109,9 @@ TEST_CASE("Vignette retains every original corner and elliptical ring packet",
     const int* packet = fixture.Triangle(index);
     const std::array actual{packet[1], packet[2], packet[3],
                             packet[4], packet[5], packet[6]};
-    const std::array expected{
-        0x32FFFFFF, kCorners[index / 4],
-        0xA0A0A0,   Effects_ScreenDistortion_EllipsePoint(angle + 1, 0x80),
-        0xA0A0A0,   Effects_ScreenDistortion_EllipsePoint(angle, 0x80)};
+    const std::array expected{0x32FFFFFF, kCorners[index / 4],
+                              0xA0A0A0,   Ellipse(angle + 1, 0x80),
+                              0xA0A0A0,   Ellipse(angle, 0x80)};
     CHECK(actual == expected);
   }
   for (std::size_t index = 0; index < kRingCount; ++index) {
@@ -104,16 +120,11 @@ TEST_CASE("Vignette retains every original corner and elliptical ring packet",
     const std::array actual{packet[1], packet[2], packet[3],
                             packet[4], packet[5], packet[6],
                             packet[7], packet[8], packet[9]};
-    const std::array expected{
-        static_cast<int>(0xE1000220u),
-        0x3AA0A0A0,
-        Effects_ScreenDistortion_EllipsePoint(angle + 1, 0x80),
-        0xA0A0A0,
-        Effects_ScreenDistortion_EllipsePoint(angle, 0x80),
-        0,
-        Effects_ScreenDistortion_EllipsePoint(angle + 1, 0x60),
-        0,
-        Effects_ScreenDistortion_EllipsePoint(angle, 0x60)};
+    const std::array expected{static_cast<int>(0xE1000220u), 0x3AA0A0A0,
+                              Ellipse(angle + 1, 0x80),      0xA0A0A0,
+                              Ellipse(angle, 0x80),          0,
+                              Ellipse(angle + 1, 0x60),      0,
+                              Ellipse(angle, 0x60)};
     CHECK(actual == expected);
   }
 }
@@ -127,9 +138,9 @@ TEST_CASE(
   constexpr std::array kInner{0x00700124u, 0x00D000A0u, 0x0070001Cu,
                               0x001000A0u};
   for (std::size_t index = 0; index < kAngles.size(); ++index) {
-    CHECK(static_cast<std::uint32_t>(Effects_ScreenDistortion_EllipsePoint(
-              kAngles[index], 0x80)) == kOuter[index]);
-    CHECK(static_cast<std::uint32_t>(Effects_ScreenDistortion_EllipsePoint(
-              kAngles[index], 0x60)) == kInner[index]);
+    CHECK(VS::Effects::ScreenDistortion::EllipsePoint(kAngles[index], 0x80) ==
+          kOuter[index]);
+    CHECK(VS::Effects::ScreenDistortion::EllipsePoint(kAngles[index], 0x60) ==
+          kInner[index]);
   }
 }

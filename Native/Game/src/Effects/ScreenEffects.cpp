@@ -3,13 +3,13 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 
@@ -65,10 +65,10 @@ void Effects_DrawScreenEffectOverlay(void)
             VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
         }
         if (screen_effect_state->feedbackLayer != 0) {
-            Effects_ScreenDistortion_DrawFeedbackTiles();
+            VS::Effects::ScreenDistortion::DrawLiveFeedbackTiles();
         }
         if (screen_effect_state->vignetteEnabled != 0) {
-            Effects_ScreenDistortion_DrawVignette();
+            VS::Effects::ScreenDistortion::DrawLiveVignette();
         }
     }
 }

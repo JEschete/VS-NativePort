@@ -261,6 +261,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Event\ScriptVmLive.cpp",
                 r"src\Effects\ScreenEffectState.cpp",
                 r"src\Effects\ScreenDistortion\RadialWarpLive.cpp",
+                r"src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp",
                 r"src\Battle\TargetingDrawLive.cpp",
                 r"src\Battle\ActionResultsLive.cpp",
                 r"src\Field\DoorMatchesLive.cpp",

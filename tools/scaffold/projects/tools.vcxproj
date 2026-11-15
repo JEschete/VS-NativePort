@@ -793,6 +793,15 @@
     <None Include="..\..\port\differentials\reward_flow.py" />
     <None Include="..\..\port\differentials\reward_flow_driver.cpp" />
     <None Include="..\..\port\differentials\reward_flow_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\screen_distortion_common.py" />
+    <None Include="..\..\port\differentials\screen_distortion_driver.cpp" />
+    <None Include="..\..\port\differentials\screen_distortion_f02455.py" />
+    <None Include="..\..\port\differentials\screen_distortion_f02456.py" />
+    <None Include="..\..\port\differentials\screen_distortion_f02457.py" />
+    <None Include="..\..\port\differentials\screen_distortion_f02459.py" />
+    <None Include="..\..\port\differentials\screen_distortion_f02460.py" />
+    <None Include="..\..\port\differentials\screen_distortion_f02461.py" />
+    <None Include="..\..\port\differentials\screen_distortion_f02462.py" />
     <None Include="..\..\port\differentials\sorting_vectors.py" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />

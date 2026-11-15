@@ -8,6 +8,7 @@ extern "C++" {
 #include <cstddef>
 
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -21,7 +22,6 @@ extern "C++" {
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Input/ControllerLiveState.h"
@@ -238,6 +238,7 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   const Render_FrameScratch saved_frame = Render_frameScratch;
   const int saved_framebuffer = Render_frameBuf;
   void* const saved_buffer = Render_legacyPrimitiveBuffers[framebuffer & 1];
+  void* const saved_ordering = Render_legacyOrderingTables[framebuffer & 1];
   Effects_ScreenEffectOverlay* saved_effect = Effects_screenEffectOverlay;
   Effects_ScreenEffectOverlay effect = {0};
   effect.feedbackLayer = feedback_layer;
@@ -252,8 +253,9 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   Render_frameScratch.orderingTable = ordering + kSceneOrderingEntry;
   Render_frameScratch.primitiveCursor = storage + 1;
   Render_legacyPrimitiveBuffers[framebuffer & 1] = storage + 1;
+  Render_legacyOrderingTables[framebuffer & 1] = ordering;
 
-  Effects_ScreenDistortion_DrawFeedbackTiles();
+  VS::Effects::ScreenDistortion::DrawLiveFeedbackTiles();
 
   u_long* feedback =
       storage + 1 +
@@ -280,6 +282,7 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
            visited == expected_packets;
   Render_frameScratch = saved_frame;
   Render_legacyPrimitiveBuffers[framebuffer & 1] = saved_buffer;
+  Render_legacyOrderingTables[framebuffer & 1] = saved_ordering;
   Render_frameBuf = saved_framebuffer;
   Effects_screenEffectOverlay = saved_effect;
   return passed;

@@ -3,6 +3,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -10,7 +11,6 @@
 #include "Render/ScreenOverlayLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Camera.h"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/Screen.h"
@@ -305,7 +305,7 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
         if (Event_camera->screenEffectTween.durationFrames == 0) {
             Event_camera->screenEffectTween.currentValue0 = effectValue = script[1] << 6;
             Event_camera->screenEffectTween.currentValue1 = (signed char)script[2];
-            ((void (*)(int, int))Effects_ScreenDistortion_SetRadialWarp)(effectValue, Event_camera->screenEffectTween.currentValue1);
+            VS::Effects::ScreenDistortion::SetLiveRadialWarpWords(effectValue, Event_camera->screenEffectTween.currentValue1);
         } else {
             Event_camera->screenEffectTween.elapsedFrames = 0;
             Event_camera->screenEffectTween.deltaValue0 =
@@ -370,7 +370,7 @@ void Event_UpdateEventScreenTransforms(void)
         VS::Render::SetLiveFramebufferEffectOffset(&screen_transform);
     }
     if (Event_UpdateEventTripleTween(&Event_camera->screenEffectTween) != 0) {
-        ((void (*)(int, int))Effects_ScreenDistortion_SetRadialWarp)(Event_camera->screenEffectTween.currentValue0, Event_camera->screenEffectTween.currentValue1);
+        VS::Effects::ScreenDistortion::SetLiveRadialWarpWords(Event_camera->screenEffectTween.currentValue0, Event_camera->screenEffectTween.currentValue1);
     }
 }
 

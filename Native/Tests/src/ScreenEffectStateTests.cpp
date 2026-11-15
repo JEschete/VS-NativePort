@@ -9,13 +9,13 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.h"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Field/DoorMatchList.h"
@@ -159,8 +159,8 @@ TEST_CASE("Screen-effect parameter setters retain the typed default controller",
           "[effects][screen-state]") {
   const ScreenStateFixture fixture;
   Effects_screenEffectOverlay = &Effects_screenEffectDefaults;
-  Effects_ScreenDistortion_SetRadialWarp(1234, -567);
-  Effects_ScreenDistortion_SetVignetteEnabled(7);
+  VS::Effects::ScreenDistortion::SetLiveRadialWarpWords(1234, -567);
+  VS::Effects::ScreenDistortion::SetLiveVignetteEnabled(7);
   CHECK(Effects_screenEffectDefaults.radialWarpArg0 == 1234);
   CHECK(Effects_screenEffectDefaults.radialWarpArg1 == -567);
   CHECK(Effects_screenEffectDefaults.vignetteEnabled == 7);

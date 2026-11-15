@@ -612,6 +612,12 @@ NATIVE_HELPER_HEADERS = {
                     "ClearLiveActorAiNavigationReset", "InitializeLiveActorAiExtensionHook")},
     "VS::Effects::ScreenDistortion::WarpLivePolygonVertices":
         r"Native\Game\include\Effects\ScreenDistortion\RadialWarpLive.hpp",
+    "VS::Effects::ScreenDistortion::SetLiveFeedbackLayer": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::DrawLiveFeedbackTiles": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::SetLiveRadialWarpWords": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::SetLiveVignetteEnabled": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::AppendLiveVignetteCorner": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::DrawLiveVignette": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
@@ -2834,6 +2840,12 @@ OWNED_CALL_BINDINGS["F01452"] = "VS::Effects::LiveMapTrailFramebufferTexture"
 OWNED_CALL_BINDINGS["F00056"] = "VS::Effects::LiveStartWeaponTrail"
 OWNED_CALL_BINDINGS["F00057"] = "VS::Effects::LiveFadeWeaponTrails"
 OWNED_CALL_BINDINGS["F02068"] = "VS::Effects::Plg128::UpdateLiveEffectCamera"
+OWNED_CALL_BINDINGS["F02455"] = "VS::Effects::ScreenDistortion::SetLiveFeedbackLayer"
+OWNED_CALL_BINDINGS["F02456"] = "VS::Effects::ScreenDistortion::DrawLiveFeedbackTiles"
+OWNED_CALL_BINDINGS["F02457"] = "VS::Effects::ScreenDistortion::SetLiveRadialWarpWords"
+OWNED_CALL_BINDINGS["F02459"] = "VS::Effects::ScreenDistortion::SetLiveVignetteEnabled"
+OWNED_CALL_BINDINGS["F02461"] = "VS::Effects::ScreenDistortion::AppendLiveVignetteCorner"
+OWNED_CALL_BINDINGS["F02462"] = "VS::Effects::ScreenDistortion::DrawLiveVignette"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4603,34 +4615,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "VS::Battle::Ai::ActorNavigationOverrideStatus(arg0)",
          "7C7E0.s consumes the actor ID in a0; preserve it explicitly instead of relying on the caller's PS1 register"),
     ],
-    "F02461": [
-        ("void** arg3", "u_long* arg3",
-         "SCREFF2/5E8.c:23 receives one 32-bit ordering link, not native pointer storage"),
-        ("(LegacyGpu_Handle(*arg3) & 0xFFFFFF)", "(*arg3 & 0xFFFFFF)",
-         "the existing ordering head is already an encoded link"),
-        ("((u_long)*arg3 & 0xFFFFFF)", "(*arg3 & 0xFFFFFF)",
-         "the existing ordering head is already an encoded link"),
-        ("*arg3 = (void*)(((uintptr_t)arg2 << 8) >> 8);",
-         "*arg3 = LegacyGpu_Handle(arg2);",
-         "publish a single-word packet handle without clobbering the adjacent ordering entry"),
-        ("*arg3 = (void*)(((u_long)arg2 << 8) >> 8);",
-         "*arg3 = LegacyGpu_Handle(arg2);",
-         "publish a single-word packet handle without clobbering the adjacent ordering entry"),
-    ],
-    "F02462": [
-        ("void** temp_s4;", "u_long* temp_s4;",
-         "SCREFF2/5E8.c:41 shares the same single-word overlay ordering head"),
-        ("(LegacyGpu_Handle(*temp_s4) & 0xFFFFFF)", "(*temp_s4 & 0xFFFFFF)",
-         "retain the prior encoded head when linking shaded ring packets"),
-        ("((u_long)*temp_s4 & 0xFFFFFF)", "(*temp_s4 & 0xFFFFFF)",
-         "retain the prior encoded head when linking shaded ring packets"),
-        ("*temp_s4 = (void*)(((uintptr_t)var_s2 << 8) >> 8);",
-         "*temp_s4 = LegacyGpu_Handle(var_s2);",
-         "ring packets must publish encoded 32-bit links, never raw x64 addresses"),
-        ("*temp_s4 = (void*)(((u_long)var_s2 << 8) >> 8);",
-         "*temp_s4 = LegacyGpu_Handle(var_s2);",
-         "ring packets must publish encoded 32-bit links, never raw x64 addresses"),
-    ],
     "F00782": [
         ("memset(s1, 0, 0x178);",
          "memset(s1, 0, offsetof(Field_GimmickInstance, reserved178));",
@@ -5074,12 +5058,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ],
     "F01416": [("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
                  "textbox ordering entries hold native link handles, never truncated address bits")],
-    "F02456": [
-        ("((uintptr_t)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
-         "SCREFF2.PRG func_800F986C feedback link must retain the native packet handle"),
-        ("((u_long)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
-         "SCREFF2.PRG func_800F986C framebuffer link must retain the native packet handle"),
-    ],
     **{fid: [("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
               "shared primitive helpers use the native link table")] for fid in ("F01405", "F01406")},
     "F03423": [
@@ -5394,9 +5372,6 @@ for _row, _decl, _where in (
         ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
 
 FIXUP_VARIANT_COUNTS: dict[str, int] = {
-    "F02456": 2,
-    "F02461": 3,
-    "F02462": 3,
     "F02663": 1,
     "F02677": 1,
     "F02699": 9,
@@ -9017,27 +8992,6 @@ REGEX_FIXES += [
         ("Effects::Plg300::UpdateForegroundRepeatingRing",
          (('arg0', 'renderer_slot'), ('arg1', 'lifecycle_command'), ('arg2', 'packed_parameters'), ('speed', 'angular_step')),
          "F02398 Each independently inspected ring renderer stores parameter low byte lifetime and upper byte definition; random sampled speed is added to state.angle before Sin/Cos. This is angular increment, not translation speed. Packet v0..v3 remain SDK V-coordinate members."),
-        ("Effects::ScreenDistortion::SetFeedbackLayer",
-         (('arg0', 'ordering_layer'),),
-         "F02455 Stored as feedbackLayer, used as ordering-table index minus3; zero releases texture reservation."),
-        ("Effects::ScreenDistortion::DrawFeedbackTiles",
-         (('temp_v0', 'texture_page_bits'), ('var_s2', 'tile_strip_x'), ('temp_s4', 'ordering_table'), ('var_t2', 'packet_words'), ('s5', 'texture_page_mode')),
-         "F02456 Strip loop X coordinate determines framebuffer texture page; packet_words successively refers to sprite, draw-area and reset packets."),
-        ("Effects::ScreenDistortion::SetRadialWarp",
-         (('arg0', 'initial_scale_q12'), ('arg1', 'radial_growth_q12')),
-         "F02457 Original 3D8.s loads offset4 unsigned then <<4 for scale seed; offset6 signed is added to0x1000 and multiplied into each next radius scale with >>12. Retains incoming short types and wrap behavior."),
-        ("Effects::ScreenDistortion::SetVignetteEnabled",
-         (('arg0', 'enabled'),),
-         "F02459 Stored in vignetteEnabled gate used by DrawScreenEffectOverlay."),
-        ("Effects::ScreenDistortion::EllipsePoint",
-         (('arg0', 'angular_step'), ('arg1', 'radius'), ('var_s1', 'radial_modulation_q6')),
-         "F02460 64 angular steps per revolution (<<6); modulation=64+abs(8-((step+8)&15)); returns packed XY centered160,112."),
-        ("Effects::ScreenDistortion::AppendVignetteCorner",
-         (('arg0', 'packed_corner_xy'), ('arg1', 'first_angular_step'), ('arg2', 'packet_words'), ('arg3', 'ordering_head'), ('var_s2', 'angular_step')),
-         "F02461 Writes four corner-fan triangles from fixed corner to adjacent ellipse points and advances packet output."),
-        ("Effects::ScreenDistortion::DrawVignette",
-         (('var_s2', 'packet_words'), ('temp_s4', 'overlay_ordering_table')),
-         "F02462 Four corner fans and64 rim quads linked into overlay table; packet cursor advances by exact word counts."),
         ("Effects::InitializeTransformStates",
          (('arg0', 'effect_instance'),),
          "F04134 Resets each transform state from block10 definition and initializes source/target attachment references from this instance context, retaining actor sentinels and copied position storage."),

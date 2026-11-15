@@ -26,6 +26,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
@@ -58,7 +59,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
-#include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Actors.h"
 #include "Event/Playback.h"
 #include "Event/Script.h"
@@ -1013,7 +1013,7 @@ void LiveVmHost::ApplySpecialOperation(SpecialOperation operation,
       Field_SetMovingPlatformsPausedEntry(argument);
       break;
     case SpecialOperation::kSetVignette:
-      Effects_ScreenDistortion_SetVignetteEnabled(argument);
+      VS::Effects::ScreenDistortion::SetLiveVignetteEnabled(argument);
       break;
     case SpecialOperation::kCancelRoomVisit:
       Field::LiveCancelPendingRoomVisit();

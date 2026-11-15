@@ -448,74 +448,6 @@ class EncounterFixupTests(unittest.TestCase):
             "Tint(&Menu_Results_timeAttackStartColors[1]);",
         )
 
-    def test_feedback_tiles_preserve_both_native_packet_handles(self):
-        copier = object.__new__(copy_to_native.Copier)
-        copier.used_fixups = set()
-        row = {"id": "F02456", "final_name": "Effects::ScreenDistortion::DrawFeedbackTiles"}
-        expected = ("ordering_table[index] = LegacyGpu_Handle(packet_words);\n"
-                    "*ordering_table = LegacyGpu_Handle(packet_words);\n")
-        for source in (
-            "ordering_table[index] = ((uintptr_t)var_t2 << 8) >> 8;\n"
-            "*ordering_table = ((u_long)var_t2 << 8) >> 8;\n",
-            "ordering_table[index] = ((u_long)var_t2 << 8) >> 8;\n"
-            "*ordering_table = ((u_long)var_t2 << 8) >> 8;\n",
-        ):
-            with self.subTest(source=source):
-                copier.used_fixups = set()
-                self.assertEqual(copier.apply_fixups(row, source), expected)
-                self.assertEqual(
-                    sum(source.count(old) for fid, old in copier.used_fixups if fid == "F02456"),
-                    2,
-                )
-
-        with self.assertRaisesRegex(SystemExit, "expected 2 variant matches, found 1"):
-            copier.apply_fixups(row, "ordering_table[index] = ((u_long)var_t2 << 8) >> 8;\n")
-
-    def test_vignette_ordering_links_accept_root_and_worktree_forms(self):
-        copier = object.__new__(copy_to_native.Copier)
-        cases = (
-            ("F02461", "Effects::ScreenDistortion::AppendVignetteCorner", "arg3", "arg2",
-             "int* fn(int* arg2, void** arg3)\n{\n",
-             "int* fn(int* arg2, u_long* arg3)\n{\n",
-             "    arg2[0] = ", " | 0x06000000;\n"),
-            ("F02462", "Effects::ScreenDistortion::DrawVignette", "temp_s4", "var_s2",
-             "void fn(void)\n{\n    void** temp_s4;\n",
-             "void fn(void)\n{\n    u_long* temp_s4;\n",
-             "    var_s2[0] = ", " | 0x09000000;\n"),
-        )
-        for fid, name, link_var, packet_var, declaration, expected_declaration, read_prefix, read_suffix in cases:
-            row = {"id": fid, "final_name": name}
-            root_read = f"(LegacyGpu_Handle(*{link_var}) & 0xFFFFFF)"
-            worktree_read = f"((u_long)*{link_var} & 0xFFFFFF)"
-            root_write = f"*{link_var} = (void*)(((uintptr_t){packet_var} << 8) >> 8);"
-            worktree_write = f"*{link_var} = (void*)(((u_long){packet_var} << 8) >> 8);"
-            output_link_var = "ordering_head" if fid == "F02461" else "overlay_ordering_table"
-            output_packet_var = "packet_words"
-            output_read_prefix = "    packet_words[0] = "
-            expected = (expected_declaration.replace(packet_var, output_packet_var)
-                        .replace(link_var, output_link_var) +
-                        f"{output_read_prefix}(*{output_link_var} & 0xFFFFFF){read_suffix}" +
-                        f"    *{output_link_var} = LegacyGpu_Handle({output_packet_var});\n}}\n")
-            for read, write in ((root_read, root_write), (worktree_read, worktree_write)):
-                source = (declaration +
-                          f"{read_prefix}{read}{read_suffix}" +
-                          f"    {write}\n}}\n")
-                with self.subTest(fid=fid, read=read):
-                    copier.used_fixups = set()
-                    self.assertEqual(copier.apply_fixups(row, source), expected)
-                    self.assertEqual(
-                        sum(source.count(old) for used_fid, old in copier.used_fixups if used_fid == fid),
-                        3,
-                    )
-
-        missing_write = ("int* fn(int* arg2, void** arg3)\n{\n"
-                         "    arg2[0] = (LegacyGpu_Handle(*arg3) & 0xFFFFFF) | 0x06000000;\n}\n")
-        with self.assertRaisesRegex(SystemExit, "expected 3 variant matches, found 2"):
-            copier.apply_fixups(
-                {"id": "F02461", "final_name": "Effects::ScreenDistortion::AppendVignetteCorner"},
-                missing_write,
-            )
-
     def test_status_packet_links_accept_root_and_worktree_forms(self):
         copier = object.__new__(copy_to_native.Copier)
         cases = (
@@ -2298,21 +2230,6 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertIn("Battle::Ai::LiveActorNavigationOverrideStatus(id_);", caller)
         self.assertNotIn("LiveActorNavigationOverrideStatus();", caller)
-
-    def test_vignette_producers_publish_one_encoded_ordering_word(self):
-        for identifier, head, packet in (
-            ("F02461", "arg3", "arg2"),
-            ("F02462", "temp_s4", "var_s2"),
-        ):
-            fixes = copy_fixups.FIXES[identifier]
-            old = "\n".join(item[0] for item in fixes)
-            new = "\n".join(item[1] for item in fixes)
-            self.assertIn(f"void** {head}", old)
-            self.assertIn(f"u_long* {head}", new)
-            self.assertIn(f"(*{head} & 0xFFFFFF)", new)
-            self.assertIn(f"*{head} = LegacyGpu_Handle({packet});", new)
-            self.assertNotIn(f"LegacyGpu_Handle(*{head})", new)
-            self.assertNotIn("uintptr_t", new)
 
     @staticmethod
     def owned_items():
