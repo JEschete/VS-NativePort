@@ -135,6 +135,8 @@ intptr_t Event_ScriptMuteEnvironmentSoundOpcode(uint8_t* instruction,
                                                 int16_t thread_index);
 intptr_t Event_ScriptControlRoomAnimationOpcode(uint8_t* instruction,
                                                 int16_t thread_index);
+intptr_t Event_CommandCameraMotionOpcode(uint8_t* instruction,
+                                         int16_t thread_index);
 
 #ifdef __cplusplus
 }

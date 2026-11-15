@@ -414,6 +414,38 @@ class SdkMatrix(unittest.TestCase):
             m, (-32769, -32769, -32769), (-32768, -32768, -32768), 0x81C00000
         )
 
+    def ir_product(self, matrix, vector, command: int) -> Machine:
+        """mtc2 IR1-IR3, one MVMVA and mfc2 MAC1-MAC3 into v0, v1 and a3, as libgte ApplyMatrixLV does."""
+        cop2 = self.cop2
+        m = Machine(image(cop2(4, A0, 9), cop2(4, A1, 10), cop2(4, A2, 11), NOP, command,
+                          cop2(0, V0, 25), cop2(0, V1, 26), cop2(0, A3, 27), JR_RA, NOP))
+        m.gte_rotation = [(matrix[2 * i] & 0xFFFF) | (matrix[2 * i + 1] & 0xFFFF) << 16 for i in range(4)]
+        m.gte_rotation.append(matrix[8])
+        m.r[A0], m.r[A1], m.r[A2] = (value & differential.MASK for value in vector)
+        m.gte_flag = 0xFFFFF000
+        m.execute(BASE)
+        return m
+
+    def test_mvmva_ir_vector_without_shift_keeps_full_mac_and_limits_ir(self) -> None:
+        # SLUS_010.40 libgte/MTX_004.s RTIR0 (0x4A41E012): sf=0, rotation, IR, no translation.
+        m = self.ir_product(self.IDENTITY, (0x7FFF, -0x8000, 3), 0x4A41E012)
+        self.assertEqual(
+            tuple(differential.s32(m.r[register]) for register in (V0, V1, A3)),
+            (0x7FFF * 4096, -0x8000 * 4096, 3 * 4096),
+        )
+        self.assertEqual(tuple(m.gte_read(register) for register in (9, 10, 11)),
+                         (0x7FFF, 0xFFFF8000, 3 * 4096))
+        self.assertEqual(m.gte_flag, 0x81800000)
+
+    def test_mvmva_ir_vector_with_shift_matches_q12_rotation(self) -> None:
+        # SLUS_010.40 libgte/MTX_004.s RTIR12 (0x4A49E012): sf=1, rotation, IR, no translation.
+        matrix = (4096, 2048, -1024, -8192, 4096, 512, 256, -4096, 8192)
+        m = self.ir_product(matrix, (8, -16, 32), 0x4A49E012)
+        self.assertEqual(tuple(differential.s32(m.r[register]) for register in (V0, V1, A3)), (-8, -28, 80))
+        self.assertEqual(m.gte_flag, 0)
+        m = self.ir_product(self.IDENTITY, (0x12345, -7, 0), 0x4A49E012)
+        self.assertEqual(tuple(differential.s32(m.r[register]) for register in (V0, V1, A3)), (0x2345, -7, 0))
+
     def test_rotation_and_v0_moves_are_transfers_not_commands(self) -> None:
         cop2 = self.cop2
         for flag in (None, 0xFFFFF000):
@@ -545,7 +577,9 @@ class SdkMatrix(unittest.TestCase):
             command & ~(1 << 19),
             command | 1 << 10,
             *(command | value << 17 for value in (1, 2, 3)),
-            *(command | value << 15 for value in (1, 2, 3)),
+            *(command | value << 15 for value in (1, 2)),
+            (command | 3 << 15) & ~(3 << 13),
+            command | 3 << 15 | 1 << 10,
             *((command & ~(3 << 13)) | value << 13 for value in (1, 2)),
             *(command | 1 << bit for bit in (6, 7, 8, 9, 11, 12)),
         ]

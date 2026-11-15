@@ -24,10 +24,6 @@ constexpr std::int32_t kActorScaleDividend = kOne * kOne;
 constexpr Vec3 kWorldUp{0, kOne, 0};
 constexpr Vec3 kNegativeYAxis{0, -kOne, 0};
 constexpr std::int32_t kFarClipToLodShift = 3;
-// ApplyMatrixLV splits each word into sign-magnitude halves at bit 15.
-constexpr int kLongSplitShift = 15;
-constexpr std::uint32_t kLongSplitMask = (1u << kLongSplitShift) - 1;
-constexpr std::int32_t kHighHalfScale = 1 << (kLongSplitShift - kFixedShift);
 
 using Halfwords = std::array<std::int16_t, kMatrixOrder>;
 
@@ -58,51 +54,6 @@ Vec3 ApplyToHalfwords(const Mat3& matrix, const Halfwords& vector) {
   std::array<std::int32_t, kMatrixOrder> result{};
   for (int row = 0; row < kMatrixOrder; ++row) {
     result[row] = TruncatedWord(RowProduct(matrix, row, vector) >> kFixedShift);
-  }
-  return {result[0], result[1], result[2]};
-}
-
-struct SplitWords {
-  Halfwords high;
-  Halfwords low;
-};
-
-// Each component as high * 0x8000 + low with both halves carrying its sign;
-// the high half reaches the GTE as a signed halfword.
-SplitWords SplitLongComponents(const Vec3& vector) {
-  const std::array<std::int32_t, kMatrixOrder> words{vector.x, vector.y,
-                                                     vector.z};
-  SplitWords split{};
-  for (int index = 0; index < kMatrixOrder; ++index) {
-    const std::int32_t word = words[index];
-    const std::uint32_t magnitude = word < 0
-                                        ? 0u - static_cast<std::uint32_t>(word)
-                                        : static_cast<std::uint32_t>(word);
-    std::int32_t high = static_cast<std::int32_t>(magnitude >> kLongSplitShift);
-    std::int32_t low = static_cast<std::int32_t>(magnitude & kLongSplitMask);
-    if (word < 0) {
-      high = Core::Math::WrappingNegate(high);
-      low = -low;
-    }
-    split.high[index] = Halfword(high);
-    split.low[index] = static_cast<std::int16_t>(low);
-  }
-  return split;
-}
-
-// libgte ApplyMatrixLV (MTX_004.s): RTIR0 multiplies the high halves without
-// a shift and RTIR12 the low halves with one; the high result is scaled by 8
-// and the words added, all wrapping.
-Vec3 ApplyToWords(const Mat3& matrix, const Vec3& vector) {
-  const SplitWords split = SplitLongComponents(vector);
-  std::array<std::int32_t, kMatrixOrder> result{};
-  for (int row = 0; row < kMatrixOrder; ++row) {
-    const std::int32_t high =
-        TruncatedWord(RowProduct(matrix, row, split.high));
-    const std::int32_t low =
-        TruncatedWord(RowProduct(matrix, row, split.low) >> kFixedShift);
-    result[row] = Core::Math::WrappingAdd(
-        low, Core::Math::WrappingMultiply(high, kHighHalfScale));
   }
   return {result[0], result[1], result[2]};
 }
@@ -188,7 +139,7 @@ Transform3 BuildLookAtViewMatrix(Vec3 position, Vec3 target) noexcept {
   view.rotation.m[1] = {Halfword(up.x), Halfword(up.y), Halfword(up.z)};
   view.rotation.m[2] = {Halfword(forward.x), Halfword(forward.y),
                         Halfword(forward.z)};
-  const Vec3 translation = ApplyToWords(view.rotation, position);
+  const Vec3 translation = Core::Math::ApplyMatrixLong(view.rotation, position);
   view.translation = {Core::Math::WrappingNegate(translation.x),
                       Core::Math::WrappingNegate(translation.y),
                       Core::Math::WrappingNegate(translation.z)};

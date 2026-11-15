@@ -1,25 +1,21 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ActorStateLive.hpp"
-#include "Actors/SkeletonLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
-#include "Event/ScriptVmLive.hpp"
+#include "Event/EventCameraTrackLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CollisionMapLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/Location.h"
-#include "Core/Diagnostics.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Camera.h"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Render/FramebufferEffects.h"
 #include "State/Timers.h"
@@ -165,193 +161,8 @@ void Event_RestoreEventFieldCamera(short field_facing, int field_distance_mode)
             / 0x28000;
     if ((return_duration_frames << 0x10) != 0) {
         Event_fieldCameraReturnCommands[2] = Event_fieldCameraReturnCommands[6] = return_duration_frames;
-        Event_CommandCameraMotion(Event_fieldCameraReturnCommands, 0);
-        Event_CommandCameraMotion(Event_fieldCameraReturnCommands + 3, 0);
-    }
-}
-
-// decomp: BATTLE.PRG func_800BC2E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:3200)
-intptr_t Event_CommandCameraMotion(u_char* script, short unused)
-{
-    Event_CameraTrack* c;
-    Event_CameraTrack* other;
-    if (!(script[0] & 16)) {
-        c = &Event_camera->lookAt;
-        other = &Event_camera->eye;
-    } else {
-        c = &Event_camera->eye;
-        other = &Event_camera->lookAt;
-    }
-    switch (script[0] & 15) {
-    case 0:
-        Event_ReadScriptFixedVector(&c->destination, script + 1);
-        return 0;
-    case 1:
-        c->motionMode = 15;
-        VS::Core::Math::CopyLiveVector(&c->currentPosition, &c->destination);
-        VS::Core::Math::CopyLiveVector(&other->partnerPosition, &c->destination);
-        return 0;
-    case 2:
-        c->motionMode = 2;
-        c->elapsedFrames = 0;
-        c->easingPrimary = script[1];
-        c->durationFrames = script[2];
-        Core_Debugf("event.camera", "start track=%s mode=%u easing=%u duration=%u",
-            c == &Event_camera->eye ? "eye" : "look_at",
-            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
-            (unsigned)c->durationFrames);
-        VS::Core::Math::CopyLiveVector(&c->startPosition, &c->currentPosition);
-        VS::Core::Math::SubtractLiveVectors(&c->displacement, &c->destination, &c->currentPosition);
-        return 0;
-    case 3:
-        c->motionMode = 3;
-        c->elapsedFrames = 0;
-        c->easingPrimary = script[1];
-        c->durationFrames = script[2];
-        Core_Debugf("event.camera", "start track=%s mode=%u easing=%u duration=%u",
-            c == &Event_camera->eye ? "eye" : "look_at",
-            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
-            (unsigned)c->durationFrames);
-        VS::Core::Math::CopyLiveVector(&c->startPosition, &c->currentPosition);
-        VS::Core::Math::SubtractLiveVectors(&c->displacement, &c->destination, &c->currentPosition);
-        c->motionScalar = VS::Core::Math::MeasureLiveFixedVector(
-            VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->partnerPosition, &c->currentPosition));
-        return 0;
-    case 4: {
-        Event_CameraTrackScratch* s;
-        c->motionMode = 4;
-        c->elapsedFrames = 0;
-        c->durationFrames = script[3];
-        c->easingPrimary = script[1] >> 4;
-        c->easingSecondary = script[2] & 15;
-        c->easingTertiary = script[2] >> 4;
-        VS::Core::Math::CopyLiveVector(&c->startPosition, &c->partnerPosition);
-        s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        setVector(&s->currentOffset, c->currentPosition.vx - c->partnerPosition.vx, 0, c->currentPosition.vz - c->partnerPosition.vz);
-        c->motionScalar = VS::Core::Math::MeasureLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        c->orbitAngle = VS::Core::Math::FixedAtan2(s->currentOffset.vx, s->currentOffset.vz) & 4095;
-        setVector(
-            &s->destinationOffset, c->destination.vx - c->partnerPosition.vx, 0, c->destination.vz - c->partnerPosition.vz);
-        c->motionScalarDelta = VS::Core::Math::MeasureLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8)) - c->motionScalar;
-        s->value = (VS::Core::Math::FixedAtan2(s->destinationOffset.vx, s->destinationOffset.vz) & 4095) - c->orbitAngle;
-        if (s->value < -ONE / 2) {
-            s->value += ONE;
-        }
-        if (s->value > ONE / 2) {
-            s->value -= ONE;
-        }
-        switch (script[1] & 15) {
-        case 15:
-            if (s->value == 0) {
-                s->value = -ONE;
-            } else if (s->value > 0) {
-                s->value -= ONE;
-            }
-            break;
-        case 1:
-            if (s->value == 0) {
-                s->value = ONE;
-            } else if (s->value < 0) {
-                s->value += ONE;
-            }
-            break;
-        }
-        c->orbitAngleDelta = ((Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088))->value;
-        c->heightOffset.vy = c->currentPosition.vy - c->partnerPosition.vy;
-        c->displacement.vy = c->destination.vy - c->partnerPosition.vy - c->heightOffset.vy;
-        return 0;
-    }
-    case 5: {
-        Event_CameraTrackScratch* s;
-        int height;
-        c->motionMode = 5;
-        c->elapsedFrames = 0;
-        c->durationFrames = script[8];
-        c->easingPrimary = script[6] & 15;
-        c->easingSecondary = script[6] >> 4;
-        c->easingTertiary = script[7] & 15;
-        VS::Core::Math::CopyLiveVector(&c->destination, &c->partnerPosition);
-        s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        setVector(&s->currentOffset, c->currentPosition.vx - c->partnerPosition.vx, 0, c->currentPosition.vz - c->partnerPosition.vz);
-        c->motionScalar = VS::Core::Math::MeasureLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        c->motionScalarDelta = ((c->motionScalar * script[5]) >> 6) - c->motionScalar;
-        c->orbitAngle = VS::Core::Math::FixedAtan2(s->currentOffset.vx, s->currentOffset.vz);
-        c->orbitAngleDelta = VS::Core::Memory::ReadLiveUnalignedShort(script + 1);
-        height = VS::Core::Memory::ReadLiveUnalignedShort(script + 3) * ONE;
-        c->startPosition.vy = c->currentPosition.vy;
-        c->displacement.vy = height - c->startPosition.vy;
-        return 0;
-    }
-    case 7:
-        VS::Actors::LiveActorTaggedBonePosition(VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1)), script[3],
-            (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), 2);
-        VS::Core::Math::WidenLiveShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8));
-        Event_ReadScriptFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), script + 4);
-        VS::Core::Math::AddLiveVectors(&c->destination, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8));
-        if (Event_camera->originActorId != 0x2000) {
-            VS::Core::Math::SubtractLiveVectors(&c->destination, &c->destination, &Event_camera->originOffset);
-        }
-        return 0;
-    case 8:
-        c->motionMode = 8;
-        c->motionScalar = VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
-        c->motionScalarDelta = script[3];
-        c->elapsedFrames = 0;
-        c->durationFrames = script[10];
-        Event_ReadScriptFixedVector(&c->displacement, script + 4);
-        return 0;
-    case 9:
-        c->motionMode = 9;
-        c->elapsedFrames = 0;
-        c->durationFrames = script[1];
-        VS::Core::Math::SubtractLiveVectors(&c->displacement, &c->currentPosition, &c->partnerPosition);
-        return 0;
-    case 10: {
-        int id = VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
-        Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        s->value = id;
-        Actors_ActorLocation placement{};
-        VS::Actors::LiveActorPlacement(id, &placement);
-        s->actorRotation.vz = 0;
-        s->actorRotation.vx = 0;
-        s->actorRotation.vy = placement.position.pad;
-        VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-        Event_ReadScriptFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), script + 4);
-        Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        VS::Actors::LiveActorTaggedBonePosition(s->value, script[3], (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0), 2);
-        VS::Core::Math::AddLiveVectors(&c->destination,
-            VS::Core::Math::WidenLiveShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0)),
-            (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        if (Event_camera->originActorId != 0x2000) {
-            VS::Core::Math::SubtractLiveVectors(&c->destination, &c->destination, &Event_camera->originOffset);
-        }
-        return 0;
-    }
-    case 11: {
-        Event_CameraTrackScratch* s;
-        c->motionMode = 11;
-        c->elapsedFrames = 0;
-        c->easingPrimary = 0;
-        c->durationFrames = script[2];
-        Core_Debugf("event.camera", "start track=%s mode=%u easing=%u duration=%u",
-            c == &Event_camera->eye ? "eye" : "look_at",
-            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
-            (unsigned)c->durationFrames);
-        VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->partnerPosition, &c->currentPosition);
-        VS::Core::Math::BuildLiveDirectionRotationMatrix((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-        s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        s->matrix.t[0] = c->currentPosition.vx >> 12;
-        s->matrix.t[1] = c->currentPosition.vy >> 12;
-        s->matrix.t[2] = c->currentPosition.vz >> 12;
-        c->currentPosition.vy = Event_EventCameraGroundClearance((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-        VS::Core::Math::CopyLiveVector(&c->computedPosition, &c->currentPosition);
-        c->motionScalarDelta = VS::Core::Math::MeasureLiveFixedVector(
-            VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->destination, &c->computedPosition));
-        c->motionScalar = c->motionScalarDelta / script[2];
-        Event_camera->lastTerrainPosition.vx = Event_camera->lastTerrainPosition.vy = Event_camera->lastTerrainPosition.vz =
-            0x80000000;
-        return 0;
-    }
+        Event_CommandCameraMotionOpcode(Event_fieldCameraReturnCommands, 0);
+        Event_CommandCameraMotionOpcode(Event_fieldCameraReturnCommands + 3, 0);
     }
 }
 
@@ -364,235 +175,14 @@ void Event_UpdateEventCameraTracks(void)
     Event_camera->lookAt.partnerPosition.vx = Event_camera->eye.currentPosition.vx;
     Event_camera->lookAt.partnerPosition.vy = Event_camera->eye.currentPosition.vy;
     Event_camera->lookAt.partnerPosition.vz = Event_camera->eye.currentPosition.vz;
-    Event_UpdateEventCameraTrack(&Event_camera->lookAt, &Event_camera->eye);
-    Event_UpdateEventCameraTrack(&Event_camera->eye, &Event_camera->lookAt);
+    VS::Event::UpdateEventCameraTrackEntry(&Event_camera->lookAt, &Event_camera->eye);
+    VS::Event::UpdateEventCameraTrackEntry(&Event_camera->eye, &Event_camera->lookAt);
     Event_UpdateEventAngleTween(&Event_camera->cameraRoll);
     Event_UpdateEventAngleTween(&Event_camera->capturedScreenRoll);
     Event_UpdateEventLensTween(&Event_camera->projectionDistance);
     Event_UpdateEventLensTween(&Event_camera->nearClip);
     Event_UpdateEventLensTween(&Event_camera->farClip);
     Event_UpdateEventCameraShake();
-}
-
-// decomp: BATTLE.PRG func_800BCA8C (src/BATTLE/BATTLE.PRG/4A0A8.c:3389)
-void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other)
-{
-    if (c->motionMode == 15) {
-        return;
-    }
-    if (c->durationFrames == 0 && c->motionMode != 11) {
-        Core_Warnf("event.camera", "zero duration track=%s mode=%u easing=%u elapsed=%u tick_speed=%u",
-            c == &Event_camera->eye ? "eye" : "look_at",
-            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
-            (unsigned)c->elapsedFrames, (unsigned)State_tickSpeed);
-    }
-    if (c->motionMode != 11) {
-        c->elapsedFrames += State_tickSpeed >> 1;
-        if (c->elapsedFrames > c->durationFrames) {
-            c->elapsedFrames = c->durationFrames;
-        }
-    }
-    switch (c->motionMode) {
-    case 2:
-        ((Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088))->value =
-            ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames);
-        VS::Core::Math::ScaleLiveFixedVector(
-            (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->displacement, ((Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088))->value);
-        VS::Core::Math::AddLiveVectors(&c->computedPosition, &c->startPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        break;
-    case 3: {
-        Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        s->value = ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames);
-        VS::Core::Math::ScaleLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->displacement, s->value);
-        VS::Core::Math::AddLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->startPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->partnerPosition);
-        VS::Core::Math::NormalizeLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        s->distance = VS::Core::Math::MeasureLiveFixedVector(
-            VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->partnerPosition, &c->destination));
-        s->value = c->motionScalar
-                 + VS::Core::Math::MultiplyFixed(s->distance - c->motionScalar,
-                     ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames));
-        VS::Core::Math::ScaleLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), s->value);
-        VS::Core::Math::AddLiveVectors(&c->computedPosition, &c->partnerPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        break;
-    }
-    case 4: {
-        Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        s->rotation.vz = 0;
-        s->rotation.vx = 0;
-        s->rotation.vy =
-            c->orbitAngle
-            + ((c->orbitAngleDelta * ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames)) >> 12);
-        VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-        s->currentOffset.vz =
-            c->motionScalar
-            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
-        s->currentOffset.vx = 0;
-        s->currentOffset.vy = 0;
-        Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        s->currentOffset.vy = c->heightOffset.vy
-                 + VS::Core::Math::MultiplyFixed(
-                     c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
-        VS::Core::Math::AddLiveVectors(&c->computedPosition, &c->startPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        break;
-    }
-    case 5: {
-        Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        s->rotation.vz = 0;
-        s->rotation.vx = 0;
-        s->rotation.vy =
-            c->orbitAngle
-            + ((c->orbitAngleDelta * ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingPrimary, c->elapsedFrames, c->durationFrames)) >> 12);
-        VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-        s->currentOffset.vz =
-            c->motionScalar
-            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
-        s->currentOffset.vx = 0;
-        s->currentOffset.vy = 0;
-        Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        c->computedPosition.vx = c->destination.vx + s->currentOffset.vx;
-        c->computedPosition.vz = c->destination.vz + s->currentOffset.vz;
-        c->computedPosition.vy = c->startPosition.vy
-                       + VS::Core::Math::MultiplyFixed(
-                           c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
-        break;
-    }
-    case 8:
-        VS::Actors::LiveActorTaggedBonePosition(c->motionScalar, c->motionScalarDelta, (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), 2);
-        VS::Core::Math::AddLiveVectors(&c->computedPosition,
-            VS::Core::Math::WidenLiveShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8)),
-            &c->displacement);
-        break;
-    case 9:
-        VS::Core::Math::AddLiveVectors(&c->computedPosition, &c->displacement, &c->partnerPosition);
-        break;
-    case 11:
-        Event_AdvanceTerrainCameraTrack(c);
-        break;
-    }
-    VS::Core::Math::CopyLiveVector(&c->previousCameraPosition, &c->currentPosition);
-    if (c->followRequest & c->isFollowing) {
-        int fraction;
-        Event_CameraTrackScratch* s;
-        VS::Core::Math::AddLiveVectors(&c->followPosition, &c->followPosition, &c->followDelta);
-        fraction = ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(1, c->elapsedFrames, c->durationFrames);
-        s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        s->value = fraction;
-        VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->computedPosition, &c->followPosition);
-        VS::Core::Math::ScaleLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), s->value);
-        VS::Core::Math::AddLiveVectors(&c->currentPosition, &c->followPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-    } else {
-        VS::Core::Math::CopyLiveVector(&c->currentPosition, &c->computedPosition);
-    }
-    if (c->elapsedFrames == c->durationFrames) {
-        c->motionMode = 15;
-        if (c->followRequest) {
-            c->isFollowing = 1;
-            VS::Core::Math::CopyLiveVector(&c->followPosition, &c->currentPosition);
-            VS::Core::Math::SubtractLiveVectors(&c->followDelta, &c->currentPosition, &c->previousCameraPosition);
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800BCFB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:3502)
-void Event_AdvanceTerrainCameraTrack(Event_CameraTrack* c)
-{
-    Event_CameraMotionScratch* scratch;
-    Event_CameraMotionScratch* finalScratch;
-    short i;
-    int height;
-    VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->partnerPosition, &c->destination);
-    VS::Core::Math::BuildLiveDirectionRotationMatrix((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-    scratch = (Event_CameraMotionScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-    scratch->matrix.t[0] = c->destination.vx >> 12;
-    scratch->matrix.t[1] = c->destination.vy >> 12;
-    scratch->matrix.t[2] = c->destination.vz >> 12;
-    setVector(&scratch->delta, c->destination.vx - c->computedPosition.vx,
-        Event_EventCameraGroundClearance((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8)) - c->computedPosition.vy,
-        c->destination.vz - c->computedPosition.vz);
-    scratch->distance = VS::Core::Math::MeasureLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-    scratch->steps = scratch->distance / c->motionScalar;
-    if (scratch->steps < 2) {
-        c->elapsedFrames = c->durationFrames;
-    } else if (scratch->steps > 10) {
-        scratch->steps = 10;
-    }
-    VS::Core::Math::NormalizeLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-    VS::Core::Math::ScaleLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), c->motionScalar);
-    VS::Core::Math::CopyLiveVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->computedPosition);
-    for (i = 1; i <= ((Event_CameraMotionScratch*)((uintptr_t)Core_ScratchBase() + 0x088))->steps; ++i) {
-        scratch = (Event_CameraMotionScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-        VS::Core::Math::AddLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-        VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0B8), &c->partnerPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8));
-        VS::Core::Math::BuildLiveDirectionRotationMatrix((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0B8), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-        scratch->matrix.t[0] = scratch->candidate.vx >> 12;
-        scratch->matrix.t[1] = scratch->candidate.vy >> 12;
-        scratch->matrix.t[2] = scratch->candidate.vz >> 12;
-        height = Event_EventCameraGroundClearance((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
-        if (height < scratch->candidate.vy) {
-            setVector(&scratch->delta, scratch->candidate.vx - c->computedPosition.vx,
-                height - c->computedPosition.vy, scratch->candidate.vz - c->computedPosition.vz);
-            VS::Core::Math::NormalizeLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
-            VS::Core::Math::ScaleLiveFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), c->motionScalar);
-            break;
-        }
-    }
-    VS::Core::Math::AddLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->computedPosition);
-    finalScratch = (Event_CameraMotionScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-    if (finalScratch->candidate.vx == Event_camera->lastTerrainPosition.vx
-        && finalScratch->candidate.vy == Event_camera->lastTerrainPosition.vy
-        && finalScratch->candidate.vz == Event_camera->lastTerrainPosition.vz) {
-        c->elapsedFrames = c->durationFrames;
-    } else {
-        VS::Core::Math::CopyLiveVector(&Event_camera->lastTerrainPosition, &c->computedPosition);
-        VS::Core::Math::CopyLiveVector(&c->computedPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8));
-    }
-}
-
-// decomp: BATTLE.PRG func_800BD2B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:3556)
-int Event_EventCameraGroundClearance(MATRIX* camera_transform)
-{
-    VECTOR pos;
-    SVECTOR offset;
-    long flag;
-    int first;
-    int second;
-    int h;
-    short lowest;
-
-    Core_Gte_SetRotMatrix(camera_transform);
-    Core_Gte_SetTransMatrix(camera_transform);
-
-    setVector(&offset, 80, 80, 150);
-    Core_Gte_RotTrans(&offset, &pos, &flag);
-    first = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
-    lowest = first;
-
-    setVector(&offset, -80, 80, 150);
-    Core_Gte_RotTrans(&offset, &pos, &flag);
-    second = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
-
-    if (second < first) {
-        lowest = second;
-    }
-
-    setVector(&offset, 80, -80, 150);
-    Core_Gte_RotTrans(&offset, &pos, &flag);
-    h = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
-
-    if (h < lowest) {
-        lowest = h;
-    }
-
-    setVector(&offset, -80, -80, 150);
-    Core_Gte_RotTrans(&offset, &pos, &flag);
-    h = ((VS::Field::LiveFloorHeightAt(pos.vx, pos.vz) << 0x11) >> 0x11) - 200;
-
-    if (h < lowest) {
-        lowest = h;
-    }
-
-    return lowest * ONE;
 }
 
 // decomp: BATTLE.PRG func_800BD444 (src/BATTLE/BATTLE.PRG/4A0A8.c:3601)
@@ -1076,50 +666,8 @@ void Event_StartEventCameraOrbitReturn(char orbit_side_selector)
     VS::Core::Math::CopyLiveVector(&Event_camera->eye.destination, &destination_eye_position);
     VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.destination, &destination_look_at);
 
-    Event_CommandCameraMotion(Event_kOrbitReturnFirstCommand, 0);
-    Event_CommandCameraMotion(Event_kOrbitReturnSecondCommand, 0);
-}
-
-// decomp: BATTLE.PRG func_800BE53C (src/BATTLE/BATTLE.PRG/4A0A8.c:4074)
-void Event_ScaleEventCameraTrackDuration(Event_CameraTrack* camera_track)
-{
-    VECTOR remaining_displacement;
-
-    VS::Core::Math::SubtractLiveVectors(&remaining_displacement, &camera_track->currentPosition, &camera_track->destination);
-    camera_track->durationFrames = ((VS::Core::Math::MeasureLiveFixedVector(&remaining_displacement) >> 0xC) * camera_track->durationFrames) / 1000;
-}
-
-// decomp: BATTLE.PRG func_800BE5A4 (src/BATTLE/BATTLE.PRG/4A0A8.c:4082)
-void Event_ScaleEventCameraDuration(short track_selector)
-{
-    Event_CameraTrack* look_at_track;
-    Event_CameraTrack* selected_track;
-    Event_CameraTrack* eye_track;
-
-    look_at_track = &Event_camera->lookAt;
-    eye_track = &Event_camera->eye;
-
-    if (track_selector == 2) {
-        Event_ScaleEventCameraTrackDuration(look_at_track);
-        Event_ScaleEventCameraTrackDuration(eye_track);
-        look_at_track->durationFrames = eye_track->durationFrames =
-            (look_at_track->durationFrames + eye_track->durationFrames) >> 1;
-
-        return;
-    }
-    selected_track = look_at_track;
-    if (track_selector != 0) {
-        selected_track = eye_track;
-    }
-    Event_ScaleEventCameraTrackDuration(selected_track);
-}
-
-// decomp: BATTLE.PRG _setVectorImm (src/BATTLE/BATTLE.PRG/4A0A8.c:4148)
-VECTOR* Event_ReadScriptFixedVector(VECTOR* destination, u_char* operand_bytes)
-{
-    setVector(destination, VS::Core::Memory::ReadLiveUnalignedShort(operand_bytes) * ONE, VS::Core::Memory::ReadLiveUnalignedShort(operand_bytes + 2) * ONE,
-        VS::Core::Memory::ReadLiveUnalignedShort(operand_bytes + 4) * ONE);
-    return destination;
+    Event_CommandCameraMotionOpcode(Event_kOrbitReturnFirstCommand, 0);
+    Event_CommandCameraMotionOpcode(Event_kOrbitReturnSecondCommand, 0);
 }
 
 }  // extern "C"

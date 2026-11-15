@@ -81,6 +81,7 @@
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
+#include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 #include "Field/TrapsLive.hpp"
@@ -387,11 +388,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BB450u, 0u, (void*)&Event_CommandSetScreenCapture, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BBF14u, 0u, (void*)&Event_ApplyEventCameraState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BC1CCu, 0u, (void*)&Event_RestoreEventFieldCamera, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BC2E8u, 0u, (void*)&Event_CommandCameraMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BC9E0u, 0u, (void*)&Event_UpdateEventCameraTracks, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BCA8Cu, 0u, (void*)&Event_UpdateEventCameraTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BCFB4u, 0u, (void*)&Event_AdvanceTerrainCameraTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BD2B8u, 0u, (void*)&Event_EventCameraGroundClearance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BD444u, 0u, (void*)&Event_CommandTweenCameraRoll, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BD57Cu, 0u, (void*)&Event_UpdateEventAngleTween, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BD610u, 0u, (void*)&Event_EventCameraCompletionMask, 0u, 0u, 0u},
@@ -405,9 +402,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BE36Cu, 0u, (void*)&Event_SetEventCameraFollowing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE3A0u, 0u, (void*)&Event_StopEventCameraMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE3D0u, 0u, (void*)&Event_StartEventCameraOrbitReturn, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BE53Cu, 0u, (void*)&Event_ScaleEventCameraTrackDuration, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BE5A4u, 0u, (void*)&Event_ScaleEventCameraDuration, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BE7B8u, 0u, (void*)&Event_ReadScriptFixedVector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0990u, 0u, (void*)&Battle_DrawSphereWireLine, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0D78u, 0u, (void*)&Battle_DrawSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C282Cu, 0u, (void*)&Battle_BuildSphereCameraBasis, 0u, 0u, 0u},
@@ -1137,6 +1131,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BBE04u, 0u, (void*)&VS::Event::SetEventFieldCameraOverrideEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BBE10u, 0u, (void*)&VS::Event::SetEventCameraOriginActorEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BBE94u, 0u, (void*)&VS::Event::UpdateEventCameraOriginEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BCA8Cu, 0u, (void*)&VS::Event::UpdateEventCameraTrackEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BCFB4u, 0u, (void*)&VS::Event::AdvanceTerrainCameraTrackEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BD2B8u, 0u, (void*)&VS::Event::EventCameraGroundClearanceEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BE53Cu, 0u, (void*)&VS::Event::ScaleEventCameraTrackDurationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BE5A4u, 0u, (void*)&VS::Event::ScaleEventCameraDurationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BE7B8u, 0u, (void*)&VS::Event::ReadScriptFixedVectorEntry, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042364u, 0u, (void*)&VS::Boot::ResetToTitleLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042420u, 0u, (void*)&VS::Boot::EnterBattleLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800424E4u, 0u, (void*)&VS::Boot::RunEndingAndReturnToTitleLive, 0u, 0u, 0u},
@@ -1211,6 +1211,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BA0E4u, 0u, (void*)&Event_ScriptSetParticleVariationEnabledOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BA108u, 0u, (void*)&Event_ScriptMuteEnvironmentSoundOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BA194u, 0u, (void*)&Event_ScriptControlRoomAnimationOpcode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BC2E8u, 0u, (void*)&Event_CommandCameraMotionOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7428u, 0u, (void*)&Event_ScriptResetActorGroupStateOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7490u, 0u, (void*)&Event_ScriptStoreActorTileOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7574u, 0u, (void*)&Event_ScriptSpawnActorOpcode, 0u, 0u, 0u},

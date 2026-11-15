@@ -471,6 +471,9 @@
     <ClCompile Include="src\EventCameraOwnershipTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventCameraTrackTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EventRetentionPredicateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -27,11 +27,7 @@ intptr_t Event_CommandWaitCameraTracks(u_char* instruction, short thread_index);
 intptr_t Event_CommandSetScreenCapture(u_char* instruction, short thread_index);
 void Event_ApplyEventCameraState(void);
 void Event_RestoreEventFieldCamera(short field_facing, int field_distance_mode);
-intptr_t Event_CommandCameraMotion(u_char* script, short unused);
 void Event_UpdateEventCameraTracks(void);
-void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other);
-void Event_AdvanceTerrainCameraTrack(Event_CameraTrack* c);
-int Event_EventCameraGroundClearance(MATRIX* camera_transform);
 intptr_t Event_CommandTweenCameraRoll(u_char* instruction, short thread_index);
 void Event_UpdateEventAngleTween(Event_AngleTween* angle_tween);
 int Event_EventCameraCompletionMask(void);
@@ -45,8 +41,5 @@ void Event_UpdateEventCameraShake(void);
 void Event_SetEventCameraFollowing(int look_at_follow, int eye_follow);
 void Event_StopEventCameraMotion(void);
 void Event_StartEventCameraOrbitReturn(char orbit_side_selector);
-void Event_ScaleEventCameraTrackDuration(Event_CameraTrack* camera_track);
-void Event_ScaleEventCameraDuration(short track_selector);
-VECTOR* Event_ReadScriptFixedVector(VECTOR* destination, u_char* operand_bytes);
 
 #endif // VS_EVENT_SCRIPTCAMERA_H_DECLS

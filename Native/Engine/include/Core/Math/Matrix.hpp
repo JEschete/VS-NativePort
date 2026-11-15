@@ -43,4 +43,11 @@ struct Transform3 {
 // (T * 4096 + R * v) >> 12, each component truncated to a word.
 [[nodiscard]] Vec3 RotateTranslate(const Transform3& transform,
                                    Vec3 point) noexcept;
+
+// libgte ApplyMatrixLV: `rotation` times a full-word vector, in two GTE
+// passes. Each component is split by sign and magnitude at bit 15; the high
+// halves enter as signed halfwords (so components of 2^30 and more lose high
+// bits) and are multiplied unshifted, the low halves with the Q12 shift. The
+// result adds the high product times 8 to the low one, all wrapping.
+[[nodiscard]] Vec3 ApplyMatrixLong(const Mat3& rotation, Vec3 vector) noexcept;
 }  // namespace VS::Core::Math

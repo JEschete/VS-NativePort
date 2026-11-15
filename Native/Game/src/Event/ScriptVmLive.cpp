@@ -27,6 +27,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
+#include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptRoomCommands.hpp"
@@ -999,7 +1000,7 @@ void LiveVmHost::ApplySpecialOperation(SpecialOperation operation,
       Field::LiveSetCameraPitchPreset(static_cast<std::int16_t>(argument));
       break;
     case SpecialOperation::kScaleCameraDuration:
-      Event_ScaleEventCameraDuration(static_cast<std::int16_t>(argument));
+      ScaleEventCameraDurationEntry(static_cast<std::int16_t>(argument));
       break;
     case SpecialOperation::kFreezeMovingPlatforms:
       Field_FreezeMovingPlatformsEntry(argument);

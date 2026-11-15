@@ -43,9 +43,10 @@ translation and OFX/OFY/H control writes are modelled; other control moves
 RTPS supports only sf=1/lm=0, including signed44 accumulation, saturation, integer UNR
 division, screen/depth FIFOs and DQA/DQB depth cueing. Controls start deterministically
 at zero, not physical game state; fixtures must initialize their transform/projection
-state. The SQR, GPF and NCLIP commands are also modelled. MVMVA supports only sf=1,
-rotation matrix, V0, TR or no translation and lm=0 (SDK RotTrans/ApplyMatrixSV);
-other configurations raise. Only its fake command-number bits are ignored.
+state. The SQR, GPF and NCLIP commands are also modelled. MVMVA supports only the rotation
+matrix with lm=0, either sf=1 with V0 and TR or no translation (SDK RotTrans/ApplyMatrixSV)
+or sf=0/sf=1 with IR1-IR3 and no translation (SDK ApplyMatrixLV); other configurations
+raise. Only its fake command-number bits are ignored.
 RotTrans's SWC2 MAC1-MAC3 result stores preserve the full post-shift MAC words,
 not the saturated IR values. Other data-register store aliases still raise.
 FLAG command results are modelled for RTPS, NCLIP and this MVMVA subset; reading FLAG
@@ -542,13 +543,16 @@ class Machine:
             self.gte_nclip()
         elif op == 0x12 and rs & 0x10 and funct == GTE_MVMVA:
             configuration = word & ~0x01F00000
-            if configuration not in (0x4A086012, 0x4A080012):
+            if configuration not in (0x4A086012, 0x4A080012, 0x4A01E012, 0x4A09E012):
                 raise Fault(f"unsupported GTE MVMVA configuration {word:#010x} at {pc:#x} "
-                            "(only sf=1, rotation, V0, TR/no translation, lm=0 is modelled)")
+                            "(only rotation with lm=0 and sf=1 V0 TR/no translation or "
+                            "sf=0/1 IR without translation is modelled)")
             if configuration == 0x4A080012:
                 self.gte_write_flag(self.gte_transform_v0(self.gte_translation))
-            else:
+            elif configuration == 0x4A086012:
                 self.gte_rotate_v0()
+            else:
+                self.gte_rotate_ir(shift=12 if configuration & 1 << 19 else 0)
         elif op == 0x12 and rs & 0x10 and funct == GTE_SQR:
             self.gte_square(shift=word >> 19 & 1, low_limit=word >> 10 & 1)
         elif op == 0x12 and rs & 0x10 and funct == GTE_GPF:
@@ -668,15 +672,26 @@ class Machine:
         """SDK ApplyMatrixSV MVMVA: sf=1, rotation matrix, V0, no translation, lm=0."""
         self.gte_write_flag(self.gte_transform_v0((0, 0, 0)))
 
+    def gte_rotate_ir(self, shift: int) -> None:
+        """SDK ApplyMatrixLV MVMVA: rotation matrix, IR1-IR3, no translation, lm=0, sf=0 or 1."""
+        # libgte/MTX_004.s multiplies the high halves with sf=0 and the low ones with sf=1.
+        vector = (self.gte[IR[0]], self.gte[IR[1]], self.gte[IR[2]])
+        self.gte_write_flag(self.gte_transform(vector, (0, 0, 0), shift))
+
     def gte_transform_v0(self, translation: Iterable[int]) -> int:
         """Shared sf=1/lm=0 rotation/V0 transform; return its MAC/IR status bits."""
-        # Sony Inline Programming Reference 5-24..27, 6-3..7, 6-26.
         # SDK callers: libgte/MTX_06.s, SMP_02.s and SMP_04.s (RotTrans).
         vector = (
             s16(self.gte[VXY0]),
             s16(self.gte[VXY0] >> 16),
             s16(self.gte[VZ0]),
         )
+        return self.gte_transform(vector, translation, 12)
+
+    def gte_transform(self, vector: tuple[int, int, int], translation: Iterable[int], shift: int) -> int:
+        """Rotation-matrix transform with lm=0 and a final `shift` of 12 (sf=1) or 0 (sf=0); return
+        its MAC/IR status bits. IR saturates to a signed halfword in both cases (documented Lm_B)."""
+        # Sony Inline Programming Reference 5-24..27, 6-3..7, 6-26.
         flag = 0
         for row, (ir, mac, offset) in enumerate(zip(IR, MAC, translation, strict=True)):
             value = s32(offset) << 12
@@ -689,7 +704,7 @@ class Machine:
                 elif value < -(1 << 43):
                     flag |= 1 << (27 - row)
                 value = ((value + (1 << 43)) & ((1 << 44) - 1)) - (1 << 43)
-            value >>= 12
+            value >>= shift
             self.gte[mac] = value & MASK
             self.gte[ir] = max(-0x8000, min(0x7FFF, value))
             if not -0x8000 <= value <= 0x7FFF:

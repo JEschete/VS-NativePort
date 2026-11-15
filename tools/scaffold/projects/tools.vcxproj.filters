@@ -2700,6 +2700,12 @@
     <None Include="..\..\port\differentials\event_camera_ownership_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\event_camera_track.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\event_camera_track_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\event_room_commands_common.py">
       <Filter>tools\port\differentials</Filter>
     </None>

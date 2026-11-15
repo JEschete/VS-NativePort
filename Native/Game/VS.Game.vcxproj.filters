@@ -1782,6 +1782,12 @@
     <ClCompile Include="src\Event\EventCameraOwnershipLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
+    <ClCompile Include="src\Event\EventCameraTrack.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\EventCameraTrackLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClInclude Include="src\Event\Interpolation.h">
       <Filter>src\Event</Filter>
     </ClInclude>
@@ -3667,6 +3673,12 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\EventCameraOwnershipLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventCameraTrack.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventCameraTrackLive.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\RoomTriggers.hpp">

@@ -3187,30 +3187,25 @@ class EncounterFixupTests(unittest.TestCase):
                 source = source.replace(old, new)
             self.assertEqual(source, f"u_char {name}[{extent}];")
         source = (
-            "Event_CommandCameraMotion(&Event_kOrbitReturnFirstCommand, 0);\n"
-            "Event_CommandCameraMotion(&Event_kOrbitReturnSecondCommand, 0);"
+            "Event_CommandCameraMotionOpcode(&Event_kOrbitReturnFirstCommand, 0);\n"
+            "Event_CommandCameraMotionOpcode(&Event_kOrbitReturnSecondCommand, 0);"
         )
         for old, new, _ in copy_fixups.FIXES["F01238"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertNotIn("&Event_kOrbitReturn", source)
 
-    def test_camera_track_diagnostics_preserve_duration_and_update_order(self):
-        source = "        c->durationFrames = script[2];"
-        for old, new, _ in copy_fixups.FIXES["F01221"]:
-            if "durationFrames" not in old:
-                continue
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertTrue(source.startswith("        c->durationFrames = script[2];"))
-        self.assertIn("Core_Debugf", source)
-        # #276 slice 19b: case 10 reads the actor's facing from a typed local placement, not camera offset 0x1DA.
-        old, new, _ = next(item for item in copy_fixups.FIXES["F01221"] if "actorQueryScratch" in item[0])
-        self.assertIn("*(short*)((char*)Event_camera + 0x1DA)", old)
-        self.assertIn("Actors_ActorLocation placement{};", new)
-        self.assertIn("VS::Actors::LiveActorPlacement(id, &placement);", new)
-        self.assertIn("s->actorRotation.vy = placement.position.pad;", new)
-        self.assertNotIn("Event_camera", new)
+    def test_camera_track_motion_is_owned_by_the_typed_track(self):
+        # #276 row 35: the typed track (EventCameraTrack.cpp) replaces the copied motion, its start and
+        # zero-duration diagnostics and the case-10 placement fix-up.
+        for fid in ("F01221", "F01223"):
+            self.assertNotIn(fid, copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        generated = (root / r"Native\Game\src\Event\ScriptCamera.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("void Event_CommandCameraMotion(", generated)
+        self.assertNotIn("void Event_UpdateEventCameraTrack(", generated)
+        self.assertIn("Event_CommandCameraMotionOpcode(Event_kOrbitReturnFirstCommand, 0);", generated)
+        self.assertIn("VS::Event::UpdateEventCameraTrackEntry(&Event_camera->lookAt, &Event_camera->eye);", generated)
 
     def test_script_actor_tile_store_reads_a_typed_placement(self):
         # #276 slice 19b, then row 34: the tile bytes come from the typed placement view, not a 12-byte stack buffer.
@@ -3225,13 +3220,6 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(f"host.SetFlag({flag}, tile.{field});", handler)
         generated = (root / r"Native\Game\src\Event\ScriptActors.cpp").read_text(encoding="utf-8")
         self.assertNotIn("u_char position[12];", generated)
-        source = "    if (c->motionMode != 11) {"
-        for old, new, _ in copy_fixups.FIXES["F01223"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertIn("Core_Warnf", source)
-        self.assertNotIn("return", source)
-        self.assertTrue(source.endswith("    if (c->motionMode != 11) {"))
 
     def test_template_instances_apply_fixups_without_option_overrides(self):
         # The textured PLG265 dispatcher no longer needs a fixup: the template

@@ -15,6 +15,15 @@ constexpr int kFractionBits = 12;
 constexpr int kHalvedFractionBits = 13;
 constexpr int kIntermediateBits = 2;
 constexpr std::int16_t kFixedOne = 4096;
+// ApplyMatrixLV splits each word into sign-magnitude halves at bit 15.
+constexpr int kLongSplit = 15;
+constexpr std::uint32_t kLongLowMask = (1u << kLongSplit) - 1;
+constexpr std::int32_t kHighHalfScale = 1 << (kLongSplit - kFractionBits);
+
+constexpr std::int32_t TruncatedWord(std::int64_t value) noexcept {
+  return static_cast<std::int32_t>(
+      static_cast<std::uint32_t>(static_cast<std::uint64_t>(value)));
+}
 
 // The GTE GPF product (IR0 * IRn) >> 12 for the in-range sine products the
 // rotation builder feeds it.
@@ -112,6 +121,41 @@ Vec3 RotateTranslate(const Transform3& transform, Vec3 point) noexcept {
              vector.at(column);
     }
     result.at(row) = static_cast<std::int32_t>(sum >> kFractionBits);
+  }
+  return Vec3{result[0], result[1], result[2]};
+}
+
+// decomp: SLUS_010.40 ApplyMatrixLV (src/SLUS_010.40/libgte/MTX_004.s:7,
+// 0x800415C8). RTIR (sf=0) multiplies the high halves and RTIR (sf=1) the low
+// ones; the MAC registers keep the low 32 bits of each row sum.
+Vec3 ApplyMatrixLong(const Mat3& rotation, Vec3 vector) noexcept {
+  const std::array<std::int32_t, kMatrixOrder> words{vector.x, vector.y,
+                                                     vector.z};
+  std::array<std::int64_t, kMatrixOrder> high{};
+  std::array<std::int64_t, kMatrixOrder> low{};
+  for (std::size_t index = 0; index < words.size(); ++index) {
+    const std::int32_t word = words.at(index);
+    const std::uint32_t magnitude = word < 0
+                                        ? 0u - static_cast<std::uint32_t>(word)
+                                        : static_cast<std::uint32_t>(word);
+    const auto high_half = static_cast<std::int32_t>(magnitude >> kLongSplit);
+    const auto low_half = static_cast<std::int32_t>(magnitude & kLongLowMask);
+    high.at(index) = WrapSigned16(static_cast<std::uint32_t>(
+        word < 0 ? WrappingNegate(high_half) : high_half));
+    low.at(index) = word < 0 ? -low_half : low_half;
+  }
+  std::array<std::int32_t, kMatrixOrder> result{};
+  for (std::size_t row = 0; row < result.size(); ++row) {
+    std::int64_t high_sum = 0;
+    std::int64_t low_sum = 0;
+    for (std::size_t column = 0; column < words.size(); ++column) {
+      const std::int64_t element = rotation.m.at(row).at(column);
+      high_sum += element * high.at(column);
+      low_sum += element * low.at(column);
+    }
+    result.at(row) =
+        WrappingAdd(TruncatedWord(low_sum >> kFractionBits),
+                    WrappingMultiply(TruncatedWord(high_sum), kHighHalfScale));
   }
   return Vec3{result[0], result[1], result[2]};
 }

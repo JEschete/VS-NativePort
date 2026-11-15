@@ -204,6 +204,7 @@
     <ClCompile Include="src\EquipmentDetailControllersTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
     <ClCompile Include="src\EventCameraOwnershipTests.cpp" />
+    <ClCompile Include="src\EventCameraTrackTests.cpp" />
     <ClCompile Include="src\EventRetentionPredicateTests.cpp" />
     <ClCompile Include="src\EventScriptActorCommandsTests.cpp" />
     <ClCompile Include="src\EventScriptAudioCommandsTests.cpp" />

@@ -15,6 +15,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ScriptSources.hpp"
@@ -319,14 +320,16 @@ TEST_CASE("Orbit return tracks retain original easing and 85-tick completion",
   REQUIRE(sizeof Event_kOrbitReturnFirstCommand == 4);
   REQUIRE(sizeof Event_kOrbitReturnSecondCommand == 3);
   fixture.LoadCommands();
-  Event_CommandCameraMotion(
+  VS::Event::CommandCameraMotionEntry(
       reinterpret_cast<u_char*>(&Event_kOrbitReturnFirstCommand), 0);
-  Event_CommandCameraMotion(
+  VS::Event::CommandCameraMotionEntry(
       reinterpret_cast<u_char*>(&Event_kOrbitReturnSecondCommand), 0);
   fixture.CheckStarted();
   for (int frame = 0; frame < 85; ++frame) {
-    Event_UpdateEventCameraTrack(&fixture.camera.lookAt, &fixture.camera.eye);
-    Event_UpdateEventCameraTrack(&fixture.camera.eye, &fixture.camera.lookAt);
+    VS::Event::UpdateEventCameraTrackEntry(&fixture.camera.lookAt,
+                                           &fixture.camera.eye);
+    VS::Event::UpdateEventCameraTrackEntry(&fixture.camera.eye,
+                                           &fixture.camera.lookAt);
   }
   fixture.CheckFinished();
 }
