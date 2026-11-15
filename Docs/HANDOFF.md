@@ -1,6 +1,50 @@
 # Current Handoff
 
-Updated 2026-11-13. Rows 28 (battle AI) and 29 (damage/status) of the C++ promotion work (#276) are source-complete and published; row 30 (battle-actions) is active. The earlier perception promotion is the
+Updated 2026-11-15. **Paused at the owner's request** after finishing the existing
+bone/weapon-trail WIP. Do not begin another promotion group until the owner resumes.
+This stopping point supersedes the older continuation instructions below.
+
+## Owner-requested stopping point
+
+- Code commit:
+  [`08b0f20960cb6a8e5d62c8924c170b6e6d7fa4db`](https://github.com/JEschete/VS-NativePort/commit/08b0f20960cb6a8e5d62c8924c170b6e6d7fa4db).
+  Group O promotes F00056, F00057, F01417, F01418, F01447, F01448, F01451 and
+  F01452 to typed bone/weapon-trail operations and checked Live bindings.
+- The original [900-function cohort](ledgers/REMAINING_FUNCTIONS.csv) is
+  **458 resolved (449 promoted, nine retired), 442 remaining**. Row 39 is
+  23/80 complete and remains active. All three ledger checks pass.
+- Final integrated evidence:
+  [group-20261115-011011](../build/promotion-check/group-20261115-011011/summary.json),
+  464 seconds, on base `f0169c4ee9226228e92347b961c2dc617d5cddb5` plus the frozen
+  scoped changes (60 dirty files at group start). Debug and Release each pass
+  7,394 regression cases/12,933,269 assertions and 52 focused cases/275 assertions.
+  Both canonical replays, copier stability/controls and zero-new quality pass.
+- Eight original MIPS differentials: 792 instructions, 2,048 vectors, zero
+  mismatches; 40 original mutants and all eight native broken variants detected
+  (1,024 vectors per native variant). Commands, source fingerprints, per-function
+  reports and publication details are in
+  [verification.json](../build/scratch/bone-trails/verification.json).
+  The final ledger specification is retained beside it. Publication and
+  exact-pushed-revision CI are recorded in the
+  [#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276).
+- No interactive weapon-trail/Combat Lab verification, gameplay completion or
+  compatibility retirement is claimed. The differentials' external-call stubs
+  and original undefined-behaviour exclusions remain explicit in the ledger.
+  [#390](https://github.com/JEschete/VS-NativePort/issues/390) records the validator's
+  parameter-name false positive; the descriptive parameter name avoids it but
+  does not fix the validator. [#296](https://github.com/JEschete/VS-NativePort/issues/296)
+  remains separately blocked.
+- Unrelated #384 edits to `tools\naming\sym_gen\common.py`,
+  `tools\naming\test_sym_gen.py` and `tools\port\ref_index.py` were excluded from
+  verification/publication and restored byte-for-byte. The reference gitlink
+  change and older autostash remain untouched. No Group O conversion WIP remains.
+- On a future resumption, recover current issue/CI state and continue the
+  remaining row-39 effects in maintained order. PLG128 Ghidra preparation is
+  reference assistance, not a completed promotion.
+
+## Earlier status (2026-11-13)
+
+Rows 28 (battle AI) and 29 (damage/status) of the C++ promotion work (#276) were source-complete and published; row 30 (battle-actions) was active. The earlier perception promotion is the
 F01638-F01640/F01643 perception group in `33ad4f3e`
 ([CI 43073456695](https://github.com/JEschete/VS-NativePort/actions/runs/43073456695)). Each published row-28
 commit and its exact-revision CI run are recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276)
@@ -8,7 +52,7 @@ and in the ledgers. The per-function publish list, Latest Work and Verified sect
 [archived handoff](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF.md).
 The step-by-step procedure is [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
 See [Coordinated continuation](#coordinated-continuation) and
-[Current continuation and blocker](#current-continuation-and-blocker) for the current boundary.
+[Current continuation and blocker](#current-continuation-and-blocker) for that earlier boundary.
 
 ## Coordinated continuation
 
