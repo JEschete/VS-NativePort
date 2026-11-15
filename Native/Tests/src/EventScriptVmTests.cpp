@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <expected>
 #include <functional>
+#include <initializer_list>
 #include <limits>
 #include <memory>
 #include <stdexcept>
@@ -16,6 +17,7 @@
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptDialogCommands.hpp"
+#include "Event/ScriptRoomCommands.hpp"
 #include "Event/ScriptSources.hpp"
 #include "Event/ScriptVm.hpp"
 
@@ -39,6 +41,8 @@ class RecordingHost final : public event::ScriptVmHost {
   std::function<Flow(Location, int)> dispatch;
   std::vector<std::pair<Refusal, int>> refusals;
   std::vector<std::string> calls;
+  // The room systems' calls in order, each with its arguments.
+  std::vector<std::string> room_calls;
   std::vector<std::pair<Location, int>> instructions;
   Bytes palette_command = Bytes(8);
   Bytes sound_marker{0x82, 0x05, 0, 0};
@@ -183,7 +187,10 @@ class RecordingHost final : public event::ScriptVmHost {
   }
   bool ScanlineOverlayEnabled() const override { return scanline; }
   void SetScanlineOverlayEnabled(bool value) override { scanline = value; }
-  void SetScriptBackdropEnabled(bool value) override { backdrop = value; }
+  void SetScriptBackdropEnabled(bool value) override {
+    backdrop = value;
+    room_calls.emplace_back(value ? "Backdrop on" : "Backdrop off");
+  }
   bool MenuTransitionActive() const override { return menu_transition; }
   void SetMenuTransitionActive(bool value) override { menu_transition = value; }
   void SetAmbientSoundSuspended(bool value) override {
@@ -400,6 +407,37 @@ class RecordingHost final : public event::ScriptVmHost {
   void StopAllSfx() override { calls.emplace_back("StopSfx"); }
   void StopScriptVibration() override { calls.emplace_back("StopVibration"); }
   void RestartRoomEffectSound() override { calls.emplace_back("RoomSound"); }
+  void SetMovingPlatformVisibility(int platform, int visibility) override {
+    NoteRoom("Platform", {platform, visibility});
+  }
+  void SetRoomTextureLodDepth(int depth) override {
+    NoteRoom("LodDepth", {depth});
+  }
+  void SetRoomGeometryDrawMode(int mode) override {
+    NoteRoom("DrawMode", {mode});
+  }
+  void ShowRoomGeometryGroup(int group) override { NoteRoom("Show", {group}); }
+  void HideRoomGeometryGroup(int group) override { NoteRoom("Hide", {group}); }
+  void SwapRoomGeometryGroupFlags(int first, int second) override {
+    NoteRoom("Swap", {first, second});
+  }
+  void SetCollisionCellBlocked(
+      const event::CollisionCellChange& change) override {
+    NoteRoom("Collision",
+             {change.tile_x, change.tile_z, change.layer, change.blocked});
+  }
+  void AddRoomGeometryDepthBias(int group, int depth_bias) override {
+    NoteRoom("DepthBias", {group, depth_bias});
+  }
+
+ private:
+  void NoteRoom(const char* name, std::initializer_list<int> values) {
+    std::string call = name;
+    for (const int value : values) {
+      call += ' ' + std::to_string(value);
+    }
+    room_calls.push_back(std::move(call));
+  }
 };
 
 Location At(std::uint32_t offset, Region region = Region::kEventScript,
@@ -477,6 +515,127 @@ TEST_CASE("VM instructions reject every truncated operand span", "[event-vm]") {
       CHECK(host.flag_writes.empty());
     }
   }
+}
+
+namespace {
+using Calls = std::vector<std::string>;
+
+// Runs one complete room opcode and returns the room calls it made.
+Calls RoomCalls(Handler handler, const Bytes& bytes) {
+  RecordingHost host;
+  CHECK(Run(handler, host, bytes) == Flow::Of(Kind::kAdvance));
+  CHECK(host.refusals.empty());
+  return host.room_calls;
+}
+
+Calls DepthCueCalls(std::uint16_t operand) {
+  Bytes bytes{0x61, 0, 0};
+  Half(bytes, 1, operand);
+  return RoomCalls(event::ScriptOverrideDepthCueDistance, bytes);
+}
+}  // namespace
+
+TEST_CASE("Room opcodes refuse truncated operand spans",
+          "[event][script][room-commands][event-vm]") {
+  const std::array commands{
+      std::pair{event::ScriptSetGimmickVisibility, 3},
+      std::pair{event::ScriptOverrideDepthCueDistance, 3},
+      std::pair{event::ScriptSetRoomLightingMode, 2},
+      std::pair{event::ScriptShowGeometryGroup, 2},
+      std::pair{event::ScriptHideGeometryGroup, 2},
+      std::pair{event::ScriptSwapGeometryGroupFlags, 3},
+      std::pair{event::ScriptSetCollisionTileMode, 5},
+      std::pair{event::ScriptAdjustGeometryDepthBias, 3},
+  };
+  for (const auto& [handler, length] : commands) {
+    for (int size = 0; size < length; ++size) {
+      RecordingHost host;
+      CHECK(Run(handler, host, Bytes(static_cast<std::size_t>(size))) ==
+            Flow::Of(Kind::kAdvance));
+      REQUIRE(host.refusals.size() == 1);
+      CHECK(host.refusals[0] == std::pair{Refusal::kShortInstruction, size});
+      CHECK(host.room_calls.empty());
+    }
+  }
+}
+
+TEST_CASE("Gimmick visibility passes its platform and visibility bytes",
+          "[event][script][room-commands][event-vm]") {
+  CHECK(RoomCalls(event::ScriptSetGimmickVisibility, {0x60, 0, 1}) ==
+        Calls{"Platform 0 1"});
+  CHECK(RoomCalls(event::ScriptSetGimmickVisibility, {0x60, 0x80, 0xFF}) ==
+        Calls{"Platform 128 255"});
+  CHECK(RoomCalls(event::ScriptSetGimmickVisibility, {0x60, 0x7F, 0x80, 9}) ==
+        Calls{"Platform 127 128"});
+}
+
+TEST_CASE("Depth cue override keeps the masked depth only for a set sign bit",
+          "[event][script][room-commands][event-vm]") {
+  CHECK(DepthCueCalls(0x8000) == Calls{"Backdrop on", "LodDepth 0"});
+  CHECK(DepthCueCalls(0x87FF) == Calls{"Backdrop on", "LodDepth 2047"});
+  CHECK(DepthCueCalls(0x8800) == Calls{"Backdrop on", "LodDepth 0"});
+  CHECK(DepthCueCalls(0xFFFF) == Calls{"Backdrop on", "LodDepth 2047"});
+  CHECK(DepthCueCalls(0x7FFF) == Calls{"Backdrop off"});
+  CHECK(DepthCueCalls(0x0000) == Calls{"Backdrop off"});
+  CHECK(DepthCueCalls(0x00FF) == Calls{"Backdrop off"});
+  // Little-endian: the second byte holds the sign bit.
+  CHECK(RoomCalls(event::ScriptOverrideDepthCueDistance, {0x61, 0x34, 0x82}) ==
+        Calls{"Backdrop on", "LodDepth 564"});
+  CHECK(RoomCalls(event::ScriptOverrideDepthCueDistance, {0x61, 0x82, 0x34}) ==
+        Calls{"Backdrop off"});
+}
+
+TEST_CASE("Room lighting mode passes the mode byte zero-extended",
+          "[event][script][room-commands][event-vm]") {
+  CHECK(RoomCalls(event::ScriptSetRoomLightingMode, {0x62, 0}) ==
+        Calls{"DrawMode 0"});
+  CHECK(RoomCalls(event::ScriptSetRoomLightingMode, {0x62, 1}) ==
+        Calls{"DrawMode 1"});
+  CHECK(RoomCalls(event::ScriptSetRoomLightingMode, {0x62, 0x80}) ==
+        Calls{"DrawMode 128"});
+  CHECK(RoomCalls(event::ScriptSetRoomLightingMode, {0x62, 0xFF, 0x12}) ==
+        Calls{"DrawMode 255"});
+}
+
+TEST_CASE("Geometry group opcodes pass unsigned group bytes",
+          "[event][script][room-commands][event-vm]") {
+  CHECK(RoomCalls(event::ScriptShowGeometryGroup, {0x64, 0}) ==
+        Calls{"Show 0"});
+  CHECK(RoomCalls(event::ScriptShowGeometryGroup, {0x64, 0xFE}) ==
+        Calls{"Show 254"});
+  CHECK(RoomCalls(event::ScriptHideGeometryGroup, {0x65, 0x80}) ==
+        Calls{"Hide 128"});
+  CHECK(RoomCalls(event::ScriptHideGeometryGroup, {0x65, 0x7F}) ==
+        Calls{"Hide 127"});
+  CHECK(RoomCalls(event::ScriptSwapGeometryGroupFlags, {0x66, 0x81, 0x7F}) ==
+        Calls{"Swap 129 127"});
+  CHECK(RoomCalls(event::ScriptSwapGeometryGroupFlags, {0x66, 0xFF, 0}) ==
+        Calls{"Swap 255 0"});
+}
+
+TEST_CASE("Collision tile mode reorders its tile operands",
+          "[event][script][room-commands][event-vm]") {
+  // The recorded order is x, z, layer, blocked.
+  CHECK(RoomCalls(event::ScriptSetCollisionTileMode, {0x67, 1, 2, 3, 4}) ==
+        Calls{"Collision 1 3 2 4"});
+  CHECK(RoomCalls(event::ScriptSetCollisionTileMode,
+                  {0x67, 0xFF, 0x80, 0x7F, 0}) ==
+        Calls{"Collision 255 127 128 0"});
+  CHECK(RoomCalls(event::ScriptSetCollisionTileMode,
+                  {0x67, 0, 1, 0x80, 0xFF, 7}) ==
+        Calls{"Collision 0 128 1 255"});
+}
+
+TEST_CASE("Geometry depth bias sign-extends its bias byte",
+          "[event][script][room-commands][event-vm]") {
+  CHECK(RoomCalls(event::ScriptAdjustGeometryDepthBias, {0x7D, 0x90, 0x80}) ==
+        Calls{"DepthBias 144 -128"});
+  CHECK(RoomCalls(event::ScriptAdjustGeometryDepthBias, {0x7D, 3, 0xFF}) ==
+        Calls{"DepthBias 3 -1"});
+  CHECK(RoomCalls(event::ScriptAdjustGeometryDepthBias, {0x7D, 0xFF, 0x7F}) ==
+        Calls{"DepthBias 255 127"});
+  CHECK(RoomCalls(event::ScriptAdjustGeometryDepthBias, {0x7D, 0, 0}) ==
+        Calls{"DepthBias 0 0"});
 }
 
 namespace {

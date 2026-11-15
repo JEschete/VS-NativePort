@@ -1408,6 +1408,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Event\ScriptRoomCommands.cpp" />
     <ClCompile Include="src\Event\ScriptScreen.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2637,6 +2638,7 @@
     <ClInclude Include="include\Event\ScriptDialogCommandsLive.hpp" />
     <ClInclude Include="include\Event\ScriptEffectCommands.hpp" />
     <ClInclude Include="include\Event\ScriptEffectCommandsLive.hpp" />
+    <ClInclude Include="include\Event\ScriptRoomCommands.hpp" />
     <ClInclude Include="include\Event\ScriptSources.hpp" />
     <ClInclude Include="include\Event\ScriptStep.hpp" />
     <ClInclude Include="include\Event\ScriptVm.hpp" />

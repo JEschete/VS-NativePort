@@ -68,6 +68,22 @@ intptr_t Event_CommandFinishEventOpcode(uint8_t* instruction,
                                         int16_t thread_index);
 intptr_t Event_CommandSpecialOperationOpcode(uint8_t* instruction,
                                              int16_t thread_index);
+intptr_t Event_ScriptSetGimmickVisibilityOpcode(uint8_t* instruction,
+                                                int16_t thread_index);
+intptr_t Event_ScriptOverrideDepthCueDistanceOpcode(uint8_t* instruction,
+                                                    int16_t thread_index);
+intptr_t Event_ScriptSetRoomLightingModeOpcode(uint8_t* instruction,
+                                               int16_t thread_index);
+intptr_t Event_ScriptShowGeometryGroupOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
+intptr_t Event_ScriptHideGeometryGroupOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
+intptr_t Event_ScriptSwapGeometryGroupFlagsOpcode(uint8_t* instruction,
+                                                  int16_t thread_index);
+intptr_t Event_ScriptSetCollisionTileModeOpcode(uint8_t* instruction,
+                                                int16_t thread_index);
+intptr_t Event_ScriptAdjustGeometryDepthBiasOpcode(uint8_t* instruction,
+                                                   int16_t thread_index);
 
 #ifdef __cplusplus
 }

@@ -3268,6 +3268,15 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01202", 0x800BB504, "CommandWaitScriptContext"),
     ("F01203", 0x800BB554, "CommandStartScriptContext"),
     ("F01204", 0x800BB5A4, "CommandStopScriptContext"),
+    # #276 row 35 A35-07 room opcodes (Event/ScriptRoomCommands.cpp)
+    ("F01112", 0x800B9770, "ScriptSetGimmickVisibility"),
+    ("F01113", 0x800B979C, "ScriptOverrideDepthCueDistance"),
+    ("F01114", 0x800B97E4, "ScriptSetRoomLightingMode"),
+    ("F01116", 0x800B9818, "ScriptShowGeometryGroup"),
+    ("F01117", 0x800B983C, "ScriptHideGeometryGroup"),
+    ("F01118", 0x800B9860, "ScriptSwapGeometryGroupFlags"),
+    ("F01119", 0x800B988C, "ScriptSetCollisionTileMode"),
+    ("F01141", 0x800BA288, "ScriptAdjustGeometryDepthBias"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"

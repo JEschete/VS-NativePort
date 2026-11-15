@@ -1,0 +1,225 @@
+// Native side of the event-script room opcode differentials (event_room_commands_common.py, #276).
+// One vector per line: mode, the backdrop byte and draw mode word before the opcode, the instruction's
+// length and its bytes. Prints the flow kind, the refusals, the backdrop byte and draw mode word after
+// the opcode, then the room calls as [count, kind and arguments of each call...].
+#include <cstdint>
+#include <iostream>
+#include <span>
+#include <vector>
+
+#include "Event/ScriptRoomCommands.hpp"
+#include "Event/ScriptVm.hpp"
+
+namespace {
+using namespace VS::Event;
+
+// The handlers event_room_commands_common.py compares, by mode.
+constexpr ScriptFlow (*kHandlers[])(const ScriptInstruction&, ScriptVmHost&) = {
+    ScriptSetGimmickVisibility,
+    ScriptOverrideDepthCueDistance,
+    ScriptSetRoomLightingMode,
+    ScriptShowGeometryGroup,
+    ScriptHideGeometryGroup,
+    ScriptSwapGeometryGroupFlags,
+    ScriptSetCollisionTileMode,
+    ScriptAdjustGeometryDepthBias,
+};
+
+// The call kinds the harness records for the stubbed callees.
+enum Call : int {
+    kCallPlatform = 1,
+    kCallLodDepth,
+    kCallShow,
+    kCallHide,
+    kCallSwap,
+    kCallCollision,
+    kCallDepthBias,
+};
+
+// The backdrop byte stores 0xFF or 0 as LiveVmHost does; the draw mode word takes the mode as passed.
+class RoomHost final : public ScriptVmHost {
+public:
+    int refusals = 0;
+    int backdrop = 0;
+    std::int32_t draw_mode = 0;
+    std::vector<std::vector<long long>> calls;
+
+    void Refuse(ScriptVmRefusal, int) override { ++refusals; }
+    void SetScriptBackdropEnabled(bool enabled) override { backdrop = enabled ? 0xFF : 0; }
+    void SetMovingPlatformVisibility(int platform, int visibility) override
+    {
+        calls.push_back({ kCallPlatform, platform, visibility });
+    }
+    void SetRoomTextureLodDepth(int depth) override { calls.push_back({ kCallLodDepth, depth }); }
+    void SetRoomGeometryDrawMode(int mode) override { draw_mode = mode; }
+    void ShowRoomGeometryGroup(int group) override { calls.push_back({ kCallShow, group }); }
+    void HideRoomGeometryGroup(int group) override { calls.push_back({ kCallHide, group }); }
+    void SwapRoomGeometryGroupFlags(int first_group, int second_group) override
+    {
+        calls.push_back({ kCallSwap, first_group, second_group });
+    }
+    void SetCollisionCellBlocked(const CollisionCellChange& change) override
+    {
+        calls.push_back({ kCallCollision, change.tile_x, change.tile_z, change.layer, change.blocked });
+    }
+    void AddRoomGeometryDepthBias(int group, int depth_bias) override
+    {
+        calls.push_back({ kCallDepthBias, group, depth_bias });
+    }
+
+    // Everything else the room opcodes must not touch.
+    void NoteInvalidOpcode(const ScriptInstruction&) override { }
+    void NoteUndefinedSpecialOperation(int) override { }
+    void NoteCutsceneSkip(int) override { }
+    std::span<const std::uint8_t> Region(ScriptRegion) const override { return {}; }
+    std::uint64_t RegionGeneration(ScriptRegion) const override { return {}; }
+    std::span<const std::uint8_t> OpcodeSizes() const override { return {}; }
+    ScriptFlow RunOpcode(ScriptLocation, int) override { return {}; }
+    std::span<const std::uint8_t> PaletteResetCommand() const override { return {}; }
+    std::span<const std::uint8_t> SoundRestoreMarker() const override { return {}; }
+    std::span<const std::int16_t> SceneTimerModes() const override { return {}; }
+    std::span<const std::int16_t> SceneTimerScopes() const override { return {}; }
+    std::span<const std::int16_t> CameraPitchPresets() const override { return {}; }
+    PlaybackPhase Phase() const override { return {}; }
+    void SetPhase(PlaybackPhase) override { }
+    bool StartConfirmed() const override { return {}; }
+    void SetStartConfirmed(bool) override { }
+    EventSource Source() const override { return {}; }
+    void SetSource(EventSource) override { }
+    std::int16_t EventId() const override { return {}; }
+    void SetEventId(std::int16_t) override { }
+    bool MainThreadFinished() const override { return {}; }
+    void SetMainThreadFinished(bool) override { }
+    bool ChainedEventLoaded() const override { return {}; }
+    void SetChainedEventLoaded(bool) override { }
+    std::int16_t RoomChangeState() const override { return {}; }
+    void SetRoomChangeState(std::int16_t) override { }
+    bool FieldCameraRestoreScripted() const override { return {}; }
+    void SetFieldCameraRestoreScripted(bool) override { }
+    bool ScanlineOverlayEnabled() const override { return {}; }
+    void SetScanlineOverlayEnabled(bool) override { }
+    bool MenuTransitionActive() const override { return {}; }
+    void SetMenuTransitionActive(bool) override { }
+    void SetAmbientSoundSuspended(bool) override { }
+    ScriptLocation ThreadCursor(int) const override { return {}; }
+    void SetThreadCursor(int, ScriptLocation) override { }
+    std::int16_t WaitFrames(int) const override { return {}; }
+    void SetWaitFrames(int, std::int16_t) override { }
+    ScriptLocation SubroutineReturn() const override { return {}; }
+    void SetSubroutineReturn(ScriptLocation) override { }
+    std::uint8_t LoopCounter(int) const override { return {}; }
+    void SetLoopCounter(int, std::uint8_t) override { }
+    std::int8_t CachedFlag() const override { return {}; }
+    void SetCachedFlag(std::int8_t) override { }
+    CutsceneSkip SkipState() const override { return {}; }
+    void SetSkipState(CutsceneSkip) override { }
+    bool SkipForced() const override { return {}; }
+    void SetSkipForced(bool) override { }
+    bool StopsMusicOnSkip() const override { return {}; }
+    void SetStopsMusicOnSkip(bool) override { }
+    void SetDialogStrings(ScriptLocation) override { }
+    void SetTextBoxFrameStyle(int, ScriptLocation) override { }
+    void SetVibrationPattern(int, ScriptLocation) override { }
+    EasingCurve CustomEasingCurve(int) const override { return {}; }
+    void SetCustomEasingCurve(int, EasingCurve) override { }
+    void SetTextBoxAwaitingClose(int, bool) override { }
+    void SetWeaponTransitionPending(bool) override { }
+    void SetTextSelectionActive(bool) override { }
+    void SetEffectWaitPending(bool) override { }
+    void CancelImageTweens() override { }
+    void CaptureEventMusicSlot() override { }
+    bool ScriptControlledActor(int) const override { return {}; }
+    void ClearScriptControlledActors() override { }
+    bool BindRoomDoorSource() override { return {}; }
+    EventFileStatus EventFile() const override { return {}; }
+    bool QueueEventFileLoad(int, EventBuffer) override { return {}; }
+    void ReleaseEventFile() override { }
+    void CancelEventFile() override { }
+    void ClearEventFile() override { }
+    bool AllocateChainedEventBuffer() override { return {}; }
+    bool AdoptChainedEvent() override { return {}; }
+    void DiscardChainedEventBuffer() override { }
+    bool AllocateEventBuffers() override { return {}; }
+    std::uint8_t Flag(int) const override { return {}; }
+    void SetFlag(int, std::uint8_t) override { }
+    std::uint32_t HeldButtons() const override { return {}; }
+    void ClearHeldButtons() override { }
+    bool StartPressed() const override { return {}; }
+    std::uint8_t PressedButtonsLowByte() const override { return {}; }
+    int PreviousButtons() const override { return {}; }
+    int CountInventoryItem(int) override { return {}; }
+    void StartSceneTimer(int, int, int) override { }
+    void ResetSceneTimer() override { }
+    void SetTickSpeed(int) override { }
+    bool DismissTextBox(int) override { return {}; }
+    bool UpdateRewardSequence() override { return {}; }
+    void BeginEventRewardResults() override { }
+    void RunEndingAndReturnToTitle() override { }
+    bool IsActionUnlocked(int) override { return {}; }
+    void UnlockAction(int) override { }
+    int CountActorsByDisposition(int) override { return {}; }
+    int FindActorByModelId(int) override { return {}; }
+    void ApplySpecialOperation(SpecialOperation, int) override { }
+    void InitializeEventCamera() override { }
+    void FreeEventCamera() override { }
+    void UpdateEventCameraOrigin() override { }
+    void RestoreEventFieldCamera() override { }
+    void UpdateEventCameraTracks() override { }
+    void UpdateEventScreenTransforms() override { }
+    void ApplyEventCameraState() override { }
+    std::uint8_t EventCameraCompletionMask() override { return {}; }
+    void UpdateImageTweens() override { }
+    void UpdateWeatherTween() override { }
+    void DrawScanlineOverlay() override { }
+    void TransformPalettes(ScriptCommand) override { }
+    void MoveTextureRectangle(const TextureMove&) override { }
+    void BeginSkipFadeOut() override { }
+    void DisableDisplay() override { }
+    void ReturnAllActorsToIdle() override { }
+    void ResetActorMovement(int) override { }
+    bool ActorPresent(int) override { return {}; }
+    void PlayActorIdleAnimation(int) override { }
+    void StopEventMusic() override { }
+    void StopAllSfx() override { }
+    void StopScriptVibration() override { }
+    void RestartRoomEffectSound() override { }
+};
+
+template <typename Value> bool Read(Value& value)
+{
+    long long read = 0;
+    if (!(std::cin >> read))
+        return false;
+    value = static_cast<Value>(read);
+    return true;
+}
+} // namespace
+
+int main()
+{
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    std::size_t mode = 0;
+    while (Read(mode)) {
+        RoomHost host;
+        std::size_t length = 0;
+        if (mode >= std::size(kHandlers) || !Read(host.backdrop) || !Read(host.draw_mode) || !Read(length))
+            return 1;
+        std::vector<std::uint8_t> bytes(length);
+        for (std::uint8_t& byte : bytes) {
+            if (!Read(byte))
+                return 1;
+        }
+        const ScriptInstruction instruction { .bytes = std::span<const std::uint8_t>(bytes) };
+        const ScriptFlow flow = kHandlers[mode](instruction, host);
+        std::cout << static_cast<int>(flow.kind) << ' ' << host.refusals << ' ' << host.backdrop << ' '
+                  << host.draw_mode << ' ' << host.calls.size();
+        for (const auto& call : host.calls) {
+            for (const long long word : call)
+                std::cout << ' ' << word;
+        }
+        std::cout << '\n';
+    }
+    return 0;
+}

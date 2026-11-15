@@ -162,6 +162,18 @@ struct TextureMove {
                                    const TextureMove&) = default;
 };
 
+// A collision cell to block or unblock, set by opcode 0x67: the tile
+// coordinates, the floor layer and whether the cell becomes impassable.
+struct CollisionCellChange {
+  std::uint8_t tile_x = 0;
+  std::uint8_t tile_z = 0;
+  std::uint8_t layer = 0;
+  std::uint8_t blocked = 0;
+
+  friend constexpr bool operator==(const CollisionCellChange&,
+                                   const CollisionCellChange&) = default;
+};
+
 // The operations of opcode 0xB7 (4A0A8.c:2651) the host carries out with
 // the operation's argument byte.
 enum class SpecialOperation : std::uint8_t {
@@ -407,6 +419,20 @@ class ScriptVmHost {
   virtual void StopAllSfx() = 0;
   virtual void StopScriptVibration() = 0;
   virtual void RestartRoomEffectSound() = 0;
+
+  // The room systems the room opcodes drive (Event/ScriptRoomCommands.hpp):
+  // moving platforms, the texture LOD depth, the geometry draw mode, the
+  // geometry groups and the collision map. Operands arrive as the script
+  // encoded them; the room systems check them.
+  virtual void SetMovingPlatformVisibility(int platform, int visibility) = 0;
+  virtual void SetRoomTextureLodDepth(int depth) = 0;
+  virtual void SetRoomGeometryDrawMode(int mode) = 0;
+  virtual void ShowRoomGeometryGroup(int group) = 0;
+  virtual void HideRoomGeometryGroup(int group) = 0;
+  virtual void SwapRoomGeometryGroupFlags(int first_group,
+                                          int second_group) = 0;
+  virtual void SetCollisionCellBlocked(const CollisionCellChange& change) = 0;
+  virtual void AddRoomGeometryDepthBias(int group, int depth_bias) = 0;
 };
 
 // decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)

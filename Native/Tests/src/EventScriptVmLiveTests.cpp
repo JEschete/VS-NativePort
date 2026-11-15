@@ -18,6 +18,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Input/ControllerLiveState.h"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -30,6 +31,7 @@ extern "C" {
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
+#include "Field/CameraLiveState.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -1849,6 +1851,88 @@ TEST_CASE("Native control opcode bindings refuse detached command borrows",
     CAPTURE(entry.address);
     CHECK(entry.handler(command.data(), 0) == expected);
   }
+}
+
+namespace {
+// The room opcode adapters with their original handlers' addresses.
+constexpr auto kRoomControlEntries = std::to_array<ControlEntry>({
+    {0x800B9770, Event_ScriptSetGimmickVisibilityOpcode},
+    {0x800B979C, Event_ScriptOverrideDepthCueDistanceOpcode},
+    {0x800B97E4, Event_ScriptSetRoomLightingModeOpcode},
+    {0x800B9818, Event_ScriptShowGeometryGroupOpcode},
+    {0x800B983C, Event_ScriptHideGeometryGroupOpcode},
+    {0x800B9860, Event_ScriptSwapGeometryGroupFlagsOpcode},
+    {0x800B988C, Event_ScriptSetCollisionTileModeOpcode},
+    {0x800BA288, Event_ScriptAdjustGeometryDepthBiasOpcode},
+});
+
+// Restores the draw mode, the texture LOD preserve flag and the room clip
+// state the lighting and depth cue opcodes write.
+struct RoomOpcodeStateFixture {
+  int draw_mode = Field_roomGeometryDrawMode;
+  char preserve_lod = Event_isScriptBackdropEnabled;
+  VS::Render::RoomClipState clip = VS::Render::LiveRoomClipState();
+
+  RoomOpcodeStateFixture() = default;
+  ~RoomOpcodeStateFixture() {
+    Field_roomGeometryDrawMode = draw_mode;
+    Event_isScriptBackdropEnabled = preserve_lod;
+    VS::Render::LiveRoomClipState() = clip;
+  }
+  RoomOpcodeStateFixture(const RoomOpcodeStateFixture&) = delete;
+  RoomOpcodeStateFixture& operator=(const RoomOpcodeStateFixture&) = delete;
+  RoomOpcodeStateFixture(RoomOpcodeStateFixture&&) = delete;
+  RoomOpcodeStateFixture& operator=(RoomOpcodeStateFixture&&) = delete;
+};
+
+void RunRoomScript(Bytes bytes) {
+  const auto start = MountScript(std::move(bytes));
+  Event_kOpcodeHandlers[0x61] = Event_ScriptOverrideDepthCueDistanceOpcode;
+  Event_kOpcodeHandlers[0x62] = Event_ScriptSetRoomLightingModeOpcode;
+  Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0x61] = 3;
+  Event_kOpcodeSizes[0x62] = 2;
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+}
+}  // namespace
+
+TEST_CASE("Native room opcode bindings refuse detached command borrows",
+          "[event][script][room-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint8_t, 5> command{};
+  const auto expected =
+      static_cast<std::intptr_t>(event::ScriptFlowKind::kStop);
+  for (const auto& entry : kRoomControlEntries) {
+    CAPTURE(entry.address);
+    CHECK(entry.handler(command.data(), 0) == expected);
+  }
+}
+
+TEST_CASE("Native room bindings keep a scripted LOD depth and draw mode",
+          "[event][script][room-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const RoomOpcodeStateFixture room;
+  Field_roomGeometryDrawMode = 0;
+  Event_isScriptBackdropEnabled = 0;
+  VS::Render::LiveRoomClipState().lod_depth = 100;
+  RunRoomScript({0x62, 0x81, 0x61, 0x34, 0x82, 0xF0});
+  CHECK(Field_roomGeometryDrawMode == 0x81);
+  CHECK(Event_isScriptBackdropEnabled == static_cast<char>(-1));
+  CHECK(VS::Render::LiveRoomClipState().lod_depth == 0x234);
+}
+
+TEST_CASE("Native depth cue binding releases the LOD depth unchanged",
+          "[event][script][room-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const RoomOpcodeStateFixture room;
+  Event_isScriptBackdropEnabled = static_cast<char>(-1);
+  VS::Render::LiveRoomClipState().lod_depth = 100;
+  RunRoomScript({0x61, 0xFF, 0x7F, 0xF0});
+  CHECK(Event_isScriptBackdropEnabled == 0);
+  CHECK(VS::Render::LiveRoomClipState().lod_depth == 100);
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",

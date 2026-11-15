@@ -25,7 +25,10 @@
 #include "Content/CdDriveLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
+#include "Event/ScriptRoomCommands.hpp"
 #include "Field/CameraLive.hpp"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
@@ -33,6 +36,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -53,6 +57,7 @@ extern "C" {
 #include "Event/ScriptScreen.h"
 #include "Event/ScriptVm.h"
 #include "Event/Weather.h"
+#include "Field/CameraLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Input/ControllerLiveState.h"
@@ -124,6 +129,22 @@ constexpr std::array kControlBindings{
                    CommandStopScriptContext},
     ControlBinding{Event_CommandLoadNextEventOpcode, CommandLoadNextEvent},
     ControlBinding{Event_CommandFinishEventOpcode, CommandFinishEvent},
+    ControlBinding{Event_ScriptSetGimmickVisibilityOpcode,
+                   ScriptSetGimmickVisibility},
+    ControlBinding{Event_ScriptOverrideDepthCueDistanceOpcode,
+                   ScriptOverrideDepthCueDistance},
+    ControlBinding{Event_ScriptSetRoomLightingModeOpcode,
+                   ScriptSetRoomLightingMode},
+    ControlBinding{Event_ScriptShowGeometryGroupOpcode,
+                   ScriptShowGeometryGroup},
+    ControlBinding{Event_ScriptHideGeometryGroupOpcode,
+                   ScriptHideGeometryGroup},
+    ControlBinding{Event_ScriptSwapGeometryGroupFlagsOpcode,
+                   ScriptSwapGeometryGroupFlags},
+    ControlBinding{Event_ScriptSetCollisionTileModeOpcode,
+                   ScriptSetCollisionTileMode},
+    ControlBinding{Event_ScriptAdjustGeometryDepthBiasOpcode,
+                   ScriptAdjustGeometryDepthBias},
 };
 
 ScriptControlOpcode NativeControl(OpcodeHandler handler) {
@@ -266,8 +287,10 @@ class LiveVmHost final : public ScriptVmHost {
   void SetScanlineOverlayEnabled(bool value) override {
     Event_isScanlineOverlayEnabled = static_cast<char>(value);
   }
+  // The original stores the spread sign bit of opcode 0x61's operand: 0xFF
+  // while a scripted texture LOD depth is kept.
   void SetScriptBackdropEnabled(bool value) override {
-    Event_isScriptBackdropEnabled = static_cast<char>(value);
+    Event_isScriptBackdropEnabled = value ? static_cast<char>(-1) : 0;
   }
   bool MenuTransitionActive() const override {
     return Event_isMenuTransitionActive != 0;
@@ -473,6 +496,33 @@ class LiveVmHost final : public ScriptVmHost {
   }
   void RestartRoomEffectSound() override {
     Field::LiveRestartRoomEffectSound();
+  }
+  void SetMovingPlatformVisibility(int platform, int visibility) override {
+    static_cast<void>(
+        Field::SetLiveMovingPlatformVisibility(platform, visibility));
+  }
+  void SetRoomTextureLodDepth(int depth) override {
+    Render::SetRoomTextureLodDepth(Render::LiveRoomClipState(), depth);
+  }
+  void SetRoomGeometryDrawMode(int mode) override {
+    Field_roomGeometryDrawMode = mode;
+  }
+  void ShowRoomGeometryGroup(int group) override {
+    static_cast<void>(Field::LiveShowRoomGeometryGroup(group));
+  }
+  void HideRoomGeometryGroup(int group) override {
+    static_cast<void>(Field::LiveHideRoomGeometryGroup(group));
+  }
+  void SwapRoomGeometryGroupFlags(int first_group, int second_group) override {
+    static_cast<void>(
+        Field::LiveSwapRoomGeometryGroupFlags(first_group, second_group));
+  }
+  void SetCollisionCellBlocked(const CollisionCellChange& change) override {
+    static_cast<void>(Field::SetLiveCollisionCellBlocked(
+        change.tile_x, change.tile_z, change.layer, change.blocked));
+  }
+  void AddRoomGeometryDepthBias(int group, int depth_bias) override {
+    static_cast<void>(Field::LiveAddRoomGeometryDepthBias(group, depth_bias));
   }
 
  private:
@@ -1167,4 +1217,60 @@ std::intptr_t Event_CommandSpecialOperationOpcode(std::uint8_t* instruction,
                                                   std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandSpecialOperation);
+}
+
+// decomp: BATTLE.PRG func_800B9770 (4A0A8.c:1966).
+std::intptr_t Event_ScriptSetGimmickVisibilityOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetGimmickVisibility);
+}
+
+// decomp: BATTLE.PRG func_800B979C (4A0A8.c:1972).
+std::intptr_t Event_ScriptOverrideDepthCueDistanceOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptOverrideDepthCueDistance);
+}
+
+// decomp: BATTLE.PRG func_800B97E4 (4A0A8.c:1982).
+std::intptr_t Event_ScriptSetRoomLightingModeOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetRoomLightingMode);
+}
+
+// decomp: BATTLE.PRG func_800B9818 (4A0A8.c:1994).
+std::intptr_t Event_ScriptShowGeometryGroupOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptShowGeometryGroup);
+}
+
+// decomp: BATTLE.PRG func_800B983C (4A0A8.c:2000).
+std::intptr_t Event_ScriptHideGeometryGroupOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptHideGeometryGroup);
+}
+
+// decomp: BATTLE.PRG func_800B9860 (4A0A8.c:2006).
+std::intptr_t Event_ScriptSwapGeometryGroupFlagsOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSwapGeometryGroupFlags);
+}
+
+// decomp: BATTLE.PRG func_800B988C (4A0A8.c:2012).
+std::intptr_t Event_ScriptSetCollisionTileModeOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetCollisionTileMode);
+}
+
+// decomp: BATTLE.PRG func_800BA288 (4A0A8.c:2268).
+std::intptr_t Event_ScriptAdjustGeometryDepthBiasOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptAdjustGeometryDepthBias);
 }

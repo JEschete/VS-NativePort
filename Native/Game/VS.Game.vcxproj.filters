@@ -1872,6 +1872,9 @@
     <ClInclude Include="src\Event\ScriptField.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\ScriptRoomCommands.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Event\ScriptScreen.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -3646,6 +3649,9 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\ScriptEffectCommandsLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\ScriptRoomCommands.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\ScriptSources.hpp">

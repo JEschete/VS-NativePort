@@ -6,14 +6,11 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Render/RoomDraw.hpp"
-#include "Render/RoomDrawLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -22,10 +19,8 @@ extern "C" {
 #include "Event/ScriptField.h"
 #include "Event/ScriptVm.h"
 #include "Event/Weather.h"
-#include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
-#include "Field/PlatformPlacementLive.h"
 
 // decomp: D_800E9BF0 (D_800E9BF0@BATTLE/BATTLE.PRG)
 u_char Event_kMenuTransitionModes[320]; /* contents: module image (ModuleData.cpp) */
@@ -113,59 +108,6 @@ intptr_t Event_ScriptRunMenuTransition(u_char* script, short thread_index)
         return 1;
     }
     return 4;
-}
-
-// decomp: BATTLE.PRG func_800B9770 (src/BATTLE/BATTLE.PRG/4A0A8.c:1966)
-intptr_t Event_ScriptSetGimmickVisibility(u_char* instruction, short thread_index)
-{
-    Field_SetMovingPlatformVisibilityEntry(instruction[1], instruction[2]);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B979C (src/BATTLE/BATTLE.PRG/4A0A8.c:1972)
-intptr_t Event_ScriptOverrideDepthCueDistance(u_char* instruction, short thread_index)
-{
-    short depth_cue_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
-    Event_isScriptBackdropEnabled = (depth_cue_operand << 0x10) >> 0x1F;
-    if (Event_isScriptBackdropEnabled) {
-        VS::Render::SetRoomTextureLodDepth(VS::Render::LiveRoomClipState(), depth_cue_operand & 0x7FF);
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B97E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1982)
-intptr_t Event_ScriptSetRoomLightingMode(u_char* instruction, short thread_index)
-{
-    Field_roomGeometryDrawMode = instruction[1];
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9818 (src/BATTLE/BATTLE.PRG/4A0A8.c:1994)
-intptr_t Event_ScriptShowGeometryGroup(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveShowRoomGeometryGroup(instruction[1]);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B983C (src/BATTLE/BATTLE.PRG/4A0A8.c:2000)
-intptr_t Event_ScriptHideGeometryGroup(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveHideRoomGeometryGroup(instruction[1]);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9860 (src/BATTLE/BATTLE.PRG/4A0A8.c:2006)
-intptr_t Event_ScriptSwapGeometryGroupFlags(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSwapRoomGeometryGroupFlags(instruction[1], instruction[2]);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B988C (src/BATTLE/BATTLE.PRG/4A0A8.c:2012)
-intptr_t Event_ScriptSetCollisionTileMode(u_char* instruction, short thread_index)
-{
-    VS::Field::SetLiveCollisionCellBlocked(instruction[1], instruction[3], instruction[2], instruction[4]);
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800B98C0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2018)
@@ -315,13 +257,6 @@ intptr_t Event_ScriptSetBackgroundOffset(u_char* instruction, short thread_index
 intptr_t Event_ScriptSetFirstPersonView(u_char* instruction, short thread_index)
 {
     VS::Field::LiveSetFirstPersonViewDisabled(instruction[1] != 0);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BA288 (src/BATTLE/BATTLE.PRG/4A0A8.c:2268)
-intptr_t Event_ScriptAdjustGeometryDepthBias(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveAddRoomGeometryDepthBias(instruction[1], (signed char)instruction[2]);
     return 0;
 }
 
