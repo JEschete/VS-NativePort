@@ -181,12 +181,39 @@ class ReviewedConsumerTests(unittest.TestCase):
         self.assertIs(gen.layout("T00123"), layout)
 
     def test_adopted_ai_state_layout_uses_upstream_member_spans(self):
-        layout = Gen("Shared").layout("T00532")
-        fields = {field["name"]: field for field in layout["fields"]}
+        key = "struct:AiState"
+        pinned = {"key": key, "size": 0x40, "fields": [
+            {"name": "unk0", "offset": 0, "type": "int"},
+            {"name": "unkB4", "offset": 0x20 * 8, "type": "u_char"},
+        ]}
+        upstream = {"key": key, "size": 0x484, "fields": [
+            {"name": "unk0", "offset": 0, "type": "char"},
+            {"name": "unkB4", "offset": 0xB4 * 8, "type": "int"},
+            {"name": "unkC0", "offset": 0xC0 * 8, "type": "u_short"},
+            {"name": "unkC2", "offset": 0xC2 * 8, "type": "u_short"},
+        ]}
+        gen = Gen.__new__(Gen)
+        gen.types = {"T00532": {"key": key}, "T00999": {"key": key}}
+        wanted = [{"name": "unk0"}, {"name": "unkB4"}, {"name": "unkC0"}]
+        gen.members = {"T00532": wanted, "T00999": wanted}
+        gen.trees = {
+            "": SimpleNamespace(ix={"types": {"pinned": pinned}}),
+            "upstream:": SimpleNamespace(ix={"types": {"upstream": upstream}}),
+        }
 
-        self.assertEqual((fields["unk0"]["offset"], fields["unk0"]["type"]), (0, "char"))
-        self.assertEqual((fields["unkB4"]["offset"], fields["unkB4"]["type"]), (0xB4 * 8, "int"))
-        self.assertEqual((fields["unkC0"]["offset"], fields["unkC0"]["type"]), (0xC0 * 8, "u_short"))
+        def spans(layout):
+            return [(field["name"], field["offset"], field["type"]) for field in layout["fields"]]
+
+        adopted = gen.layout("T00532")
+        self.assertEqual(adopted["size"], 0x484)
+        self.assertEqual(spans(adopted), [
+            ("unk0", 0, "char"), ("unkB4", 0xB4 * 8, "int"), ("unkC0", 0xC0 * 8, "u_short"),
+        ])
+        default = gen.layout("T00999")
+        self.assertEqual(default["size"], 0x40)
+        self.assertEqual(spans(default), [
+            ("unk0", 0, "int"), ("unkB4", 0x20 * 8, "u_char"), ("unkC0", 0xC0 * 8, "u_short"),
+        ])
 
     def test_ledger_reader_preserves_rows_and_closes_on_success_and_error(self):
         with tempfile.TemporaryDirectory() as directory:
