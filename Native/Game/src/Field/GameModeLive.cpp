@@ -11,6 +11,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Core/Log.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
@@ -118,7 +119,7 @@ class LiveFieldModeHost final : public FieldModeHost {
   void SpawnTrapTileEffectAtAshley() override {
     Actors_ActorLocationQuery placement{};
     static_cast<void>(Actors::LiveActorPlacement(kAshley, &placement));
-    Effects_SpawnTrapTileEffect(&placement.location);
+    VS::Effects::LiveSpawnTrapTileEffect(&placement.location);
   }
   void SetScriptFlag(int flag, int value) override {
     State::SetLiveScriptFlag(flag, value);

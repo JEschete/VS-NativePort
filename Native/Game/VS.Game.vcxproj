@@ -1218,6 +1218,10 @@
     <ClCompile Include="src\Effects\ScreenEffectState.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Effects\SecondaryEffectRequests.cpp" />
+    <ClCompile Include="src\Effects\SecondaryEffectRequestsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\Templates\ClosedRing.cpp" />
     <ClCompile Include="src\Effects\Templates\Grid.cpp" />
     <ClCompile Include="src\Effects\Templates\Mesh10.cpp" />
@@ -2619,6 +2623,8 @@
     <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlayLifetime.hpp" />
     <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlays.hpp" />
     <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp" />
+    <ClInclude Include="include\Effects\SecondaryEffectRequests.hpp" />
+    <ClInclude Include="include\Effects\SecondaryEffectRequestsLive.hpp" />
     <ClInclude Include="include\Effects\Templates\ClosedRing.hpp" />
     <ClInclude Include="include\Effects\Templates\Grid.hpp" />
     <ClInclude Include="include\Effects\Templates\Mesh10.hpp" />

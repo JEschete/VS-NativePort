@@ -347,6 +347,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\TimelinePlaybackLive.cpp",
                 r"src\Effects\EffectInstancesLive.cpp",
                 r"src\Effects\EffectRuntimeLive.cpp",
+                r"src\Effects\SecondaryEffectRequestsLive.cpp",
                 r"src\Effects\ParticlePoolLive.cpp",
                 r"src\Effects\ParticleMotionLive.cpp",
                 r"src\Effects\ParticleTextureAnimationLive.cpp",

@@ -26,6 +26,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -428,7 +429,7 @@ class LiveEventHost final : public AnimationEventHost {
   }
 
   bool QueueImpactEffects() override {
-    return Effects_QueueActionImpactEffects(id_) != 0;
+    return VS::Effects::LiveQueueActionImpactEffects(id_) != 0;
   }
   void PlayAnimation(int animation, int blend_frames) override {
     static_cast<void>(PlayLiveActorAnimation(id_, animation, 0, blend_frames));

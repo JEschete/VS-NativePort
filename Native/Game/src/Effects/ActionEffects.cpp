@@ -1,7 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AnimationControlLive.hpp"
-#include "Actors/SkeletonLive.hpp"
-#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
@@ -11,18 +9,10 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
-#include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
-#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
-#include "Battle/Hit.h"
-#include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Field/Interactions.h"
@@ -30,98 +20,6 @@ extern "C" {
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
 #include "State/Timers.h"
-
-// decomp: BATTLE.PRG func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1927)
-void Effects_QueueActionHitEffect(int effect_id, Battle_HitResult* hit_result, int targetLimb)
-{
-    Effects_HitEffectRequest hit_effect_request;
-    Battle_ActionRequest* queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
-
-    hit_effect_request.opaque0 = effect_id;
-    hit_effect_request.opaque2 = 1;
-    hit_effect_request.opaque3 = 0;
-    hit_effect_request.opaque4 = 4;
-    hit_effect_request.targetActor = queued_action->primaryTarget.target.targetActor;
-    hit_effect_request.opaqueA = 0;
-
-    if (hit_result->targetsPosition == 0) {
-        hit_effect_request.opaque10 = 4;
-        hit_effect_request.opaque14.targetActor = hit_result->target.targetActor;
-        hit_effect_request.opaque14.targetLimb = targetLimb;
-        hit_effect_request.opaque14.hitThreshold =
-            VS::Actors::FindLiveActorBoneTag(hit_result->target.targetActor, hit_result->target.targetLimb, 2);
-    } else {
-        hit_effect_request.opaque10 = 5;
-        hit_effect_request.opaque14 = hit_result->target;
-    }
-
-    hit_effect_request.opaque12 = queued_action->effectVariant;
-
-    VS::Effects::LiveBeginSecondaryEffects((Effects_ActionEffectRequest*)&hit_effect_request, 0);
-}
-
-// decomp: BATTLE.PRG func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:2044)
-int Effects_QueueActionImpactEffects(int attacker_index)
-{
-    Battle_ActionRequest* queued_action;
-    int i;
-
-    queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
-
-    for (i = 0; i < queued_action->targetCount; ++i) {
-        if (queued_action->targets[i].targetsPosition == 0) {
-            if (queued_action->actionId < 0x28) {
-
-                if (((Battle_actionDefinitions[queued_action->actionId]
-                            .hits[0]
-                            .prerequisiteFunctionId))
-                    == 3) {
-
-                    Effects_QueueActionHitEffect(queued_action->actionId, &queued_action->targets[i],
-                        queued_action->targets[i].target.impactKind);
-
-                } else {
-                    switch (queued_action->targets[i].target.impactKind) {
-                    case 0:
-                    case 2:
-                    case 5:
-                        if (queued_action->actionId < 0x16) {
-                            Effects_QueueActionHitEffect(
-                                1, &queued_action->targets[i], queued_action->targets[i].target.impactKind);
-                        } else {
-                            Effects_QueueActionHitEffect(queued_action->actionId, &queued_action->targets[i],
-                                queued_action->targets[i].target.impactKind);
-                        }
-                        break;
-
-                    case 1:
-                        Effects_QueueActionHitEffect(
-                            0x27, &queued_action->targets[i], queued_action->targets[i].target.impactKind);
-                        break;
-
-                    case 3:
-                    case 4:
-                    case 6:
-                        Effects_QueueActionHitEffect(
-                            0x26, &queued_action->targets[i], queued_action->targets[i].target.impactKind);
-                        break;
-                    }
-                }
-
-            } else {
-                Effects_QueueActionHitEffect(queued_action->actionId, &queued_action->targets[i],
-                    queued_action->targets[i].target.impactKind);
-            }
-
-        } else {
-            Effects_QueueActionHitEffect(0x26, &queued_action->targets[i], 0);
-        }
-
-        VS::Battle::PlayLiveWeaponHitSounds(attacker_index);
-    }
-
-    return 1;
-}
 
 // decomp: BATTLE.PRG func_8006CDB8 (src/BATTLE/BATTLE.PRG/146C.c:2149)
 void Effects_SignalActorEffectAnimation(int actor_index) { VS::Actors::RequestLiveActorAnimationAdvance(actor_index); }
@@ -138,57 +36,6 @@ void Effects_RestoreActionActorTint(void)
 {
     VS::Render::TransformLiveActorColors(8, 4, Effects_tintedActor, 0, 0, 0);
     Effects_tintedActor = 0;
-}
-
-// decomp: BATTLE.PRG func_8006F450 (src/BATTLE/BATTLE.PRG/146C.c:3171)
-void Effects_SpawnGroundPlaneImpactEffect(u_short* world_position_components)
-{
-    Effects_ActionEffectRequest request;
-
-    request.effectId = 36;
-    request.count = 1;
-    request.source.type = 4;
-    request.otherCount = 0;
-    request.source.value.actor.actor = 0;
-    request.targets[0].type = 5;
-    request.targets[0].value.position.vx = world_position_components[0];
-    request.targets[0].value.position.vz = world_position_components[2];
-    request.targets[0].value.position.vy = 0;
-    VS::Effects::LiveBeginSecondaryEffects(&request, 0);
-}
-
-// decomp: BATTLE.PRG func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:3187)
-void Effects_SpawnTrapTileEffect(Actors_ActorLocation* actor_location)
-{
-    Effects_ActionEffectRequest request{};
-
-    request.effectId = 33;
-    request.count = 1;
-    request.source.type = 4;
-    request.otherCount = 0;
-    request.source.value.actor.actor = 0;
-    request.targets[0].type = 5;
-    request.targets[0].value.position.vx = actor_location->packedTile.target.tileX * 128 + 64;
-    request.targets[0].value.position.vz = actor_location->packedTile.target.tileZ * 128 + 64;
-    request.targets[0].value.position.vy = actor_location->position.vy;
-    if (!(Effects_effectBusyFlags & 2)) {
-        VS::Effects::LiveBeginSecondaryEffects(&request, 0);
-    }
-}
-
-// decomp: BATTLE.PRG func_8006F848 (src/BATTLE/BATTLE.PRG/146C.c:3298)
-void Effects_SpawnAbilityLearnedEffect(void)
-{
-    Effects_ActionEffectRequest request;
-
-    request.effectId = 20;
-    request.count = 1;
-    request.source.type = 5;
-    request.targets[0].type = 4;
-    request.otherCount = 0;
-    request.targets[0].value.actor.actor = 0;
-    request.targets[0].value.actor.part = 0xFD;
-    VS::Effects::LiveBeginSecondaryEffects(&request, 0);
 }
 
 // decomp: BATTLE.PRG func_800733F8 (src/BATTLE/BATTLE.PRG/146C.c:4613)

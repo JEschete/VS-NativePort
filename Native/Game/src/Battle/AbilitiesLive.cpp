@@ -15,6 +15,7 @@
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -204,7 +205,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
     VS::Actors::PlayLiveActorActionPose(0, nullptr, kAbilityLearnedPose);
   }
   void SpawnAbilityLearnedEffect() override {
-    Effects_SpawnAbilityLearnedEffect();
+    VS::Effects::LiveSpawnAbilityLearnedEffect();
   }
   void PauseMovingPlatforms() override {
     Field_SetMovingPlatformsPausedEntry(1);

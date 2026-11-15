@@ -817,6 +817,13 @@
     <None Include="..\..\port\differentials\screen_overlay_lifetime_f01389.py" />
     <None Include="..\..\port\differentials\screen_overlay_lifetime_f01390.py" />
     <None Include="..\..\port\differentials\screen_overlay_lifetime_f01391.py" />
+    <None Include="..\..\port\differentials\secondary_effects_common.py" />
+    <None Include="..\..\port\differentials\secondary_effects_driver.cpp" />
+    <None Include="..\..\port\differentials\secondary_effects_f00058.py" />
+    <None Include="..\..\port\differentials\secondary_effects_f00060.py" />
+    <None Include="..\..\port\differentials\secondary_effects_f00085.py" />
+    <None Include="..\..\port\differentials\secondary_effects_f00086.py" />
+    <None Include="..\..\port\differentials\secondary_effects_f00092.py" />
     <None Include="..\..\port\differentials\sorting_vectors.py" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />

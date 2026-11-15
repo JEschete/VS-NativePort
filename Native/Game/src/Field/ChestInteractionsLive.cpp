@@ -22,6 +22,7 @@
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractions.hpp"
@@ -351,7 +352,7 @@ class LiveAshleyTileHost final : public VS::Field::AshleyTileTriggerHost {
     location.position.vy = placement.position.y;
     location.position.vz = placement.position.z;
     location.position.pad = placement.position.w;
-    Effects_SpawnTrapTileEffect(&location);
+    VS::Effects::LiveSpawnTrapTileEffect(&location);
   }
   void BeginTrap(VS::Field::TrapTarget target,
                  const VS::Actors::ActorPlacementView& placement,

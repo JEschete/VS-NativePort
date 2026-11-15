@@ -18,6 +18,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Core/Log.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
@@ -227,7 +228,7 @@ class LiveMovementHost final : public MovementHost {
   void SpawnGroundImpact(int x, int z) override {
     std::array<u_short, kPositionAxes> position{static_cast<u_short>(x), 0,
                                                 static_cast<u_short>(z)};
-    Effects_SpawnGroundPlaneImpactEffect(position.data());
+    VS::Effects::LiveSpawnGroundPlaneImpactEffect(position.data());
   }
 
   int SampleSupportHeight(const MotionVector& origin, int offset_x,

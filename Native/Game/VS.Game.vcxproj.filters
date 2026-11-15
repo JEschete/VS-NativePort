@@ -1584,6 +1584,12 @@
     <ClInclude Include="src\Effects\ScreenEffectState.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\SecondaryEffectRequests.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\SecondaryEffectRequestsLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\Templates\ClosedRing.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
@@ -3566,6 +3572,12 @@
     </ClInclude>
     <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp">
       <Filter>include\Effects\ScreenDistortion</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\SecondaryEffectRequests.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\SecondaryEffectRequestsLive.hpp">
+      <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\Templates\ClosedRing.hpp">
       <Filter>include\Effects\Templates</Filter>

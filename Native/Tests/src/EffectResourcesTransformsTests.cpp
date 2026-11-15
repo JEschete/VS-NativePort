@@ -27,6 +27,7 @@
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
 #include "TestSupport/EffectProgramScope.hpp"
@@ -429,13 +430,13 @@ TEST_CASE("Trap tile producer initializes copied actor endpoint and busy gate",
   location.position.vy = -12;
   using LocationBytes = std::array<std::byte, sizeof(Actors_ActorLocation)>;
   const auto before = std::bit_cast<LocationBytes>(location);
-  Effects_SpawnTrapTileEffect(&location);
+  VS::Effects::LiveSpawnTrapTileEffect(&location);
   CheckTrapTileRequestHeader(Effects_secondaryRequest);
   CheckTrapTileTarget(Effects_secondaryRequest.targets[0]);
   CHECK(std::bit_cast<LocationBytes>(location) == before);
   Effects_effectBusyFlags = 2;
   Effects_secondaryRequest.effectId = 77;
-  Effects_SpawnTrapTileEffect(&location);
+  VS::Effects::LiveSpawnTrapTileEffect(&location);
   CHECK(Effects_secondaryRequest.effectId == 77);
 }
 

@@ -558,14 +558,11 @@ class EncounterFixupTests(unittest.TestCase):
             source = source.replace(old, new)
         self.assertEqual(source, "    Field_MpdDoorRecord destination{};\n")
 
-    def test_trap_tile_effect_initializes_actor_endpoint_fields(self):
-        source = "    Effects_ActionEffectRequest request;\n"
-        edits = [edit for edit in copy_fixups.FIXES["F00086"] if "#324" in edit[2]]
-        self.assertEqual(len(edits), 1)
-        for old, new, _ in edits:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertEqual(source, "    Effects_ActionEffectRequest request{};\n")
+    def test_trap_tile_effect_is_owned_instead_of_patched(self):
+        # #324's zero-initialization FIX retired when row 39 moved F00086 to the typed
+        # SecondaryEffectRequests core, whose request value-initializes every endpoint field.
+        self.assertFalse(any("#324" in edit[2] for edit in copy_fixups.FIXES.get("F00086", [])))
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F00086"], "VS::Effects::LiveSpawnTrapTileEffect")
 
     def test_unchecked_cell_readers_read_an_absent_cell(self):
         self.assertEqual(

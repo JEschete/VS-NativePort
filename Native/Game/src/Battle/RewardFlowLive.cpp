@@ -9,6 +9,7 @@
 #include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/RewardFlow.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -111,7 +112,9 @@ class LiveWorld final : public RewardDispatchWorld {
     constexpr int kLearnedPose = 6;
     Actors::PlayLiveActorActionPose(0, nullptr, kLearnedPose);
   }
-  void SpawnLearnedEffect() override { Effects_SpawnAbilityLearnedEffect(); }
+  void SpawnLearnedEffect() override {
+    VS::Effects::LiveSpawnAbilityLearnedEffect();
+  }
   void PauseMovingPlatforms() override {
     Field_SetMovingPlatformsPausedEntry(1);
   }

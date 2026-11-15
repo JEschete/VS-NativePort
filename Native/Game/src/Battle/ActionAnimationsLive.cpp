@@ -11,6 +11,7 @@
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionAnimations.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
@@ -161,7 +162,7 @@ class LiveWorld final : public ActionReactionWorld {
   }
   void QueueImpactEffects(int slot) override {
     Require(Battle_actionState != nullptr);
-    static_cast<void>(Effects_QueueActionImpactEffects(slot));
+    static_cast<void>(VS::Effects::LiveQueueActionImpactEffects(slot));
   }
 
  private:

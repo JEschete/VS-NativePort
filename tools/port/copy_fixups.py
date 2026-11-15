@@ -1609,6 +1609,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Magic::UpdateSorcererMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Menu::Magic::UpdateEnchanterMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Effects::Plg128::UpdateLiveEffectCamera": r"Native\Game\include\Effects\Plugins\Plg128CameraLive.hpp",
+    "VS::Effects::LiveQueueActionHitEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
+    "VS::Effects::LiveQueueActionImpactEffects": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
+    "VS::Effects::LiveSpawnGroundPlaneImpactEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
+    "VS::Effects::LiveSpawnTrapTileEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
+    "VS::Effects::LiveSpawnAbilityLearnedEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2862,6 +2867,11 @@ OWNED_CALL_BINDINGS["F01389"] = "VS::Effects::ScreenDistortion::DrawLiveScreenOv
 OWNED_CALL_BINDINGS["F01390"] = "VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay"
 OWNED_CALL_BINDINGS["F01391"] = "VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay"
 OWNED_CALL_BINDINGS["F01388"] = "VS::Effects::ScreenDistortion::LoadLiveScreenOverlay"
+OWNED_CALL_BINDINGS["F00058"] = "VS::Effects::LiveQueueActionHitEffect"
+OWNED_CALL_BINDINGS["F00060"] = "VS::Effects::LiveQueueActionImpactEffects"
+OWNED_CALL_BINDINGS["F00085"] = "VS::Effects::LiveSpawnGroundPlaneImpactEffect"
+OWNED_CALL_BINDINGS["F00086"] = "VS::Effects::LiveSpawnTrapTileEffect"
+OWNED_CALL_BINDINGS["F00092"] = "VS::Effects::LiveSpawnAbilityLearnedEffect"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4612,6 +4622,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800CB79C, "VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay"),  # F01390
     ("BATTLE/BATTLE.PRG", 0x800CB7DC, "VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay"),  # F01391
     ("BATTLE/BATTLE.PRG", 0x800CB678, "VS::Effects::ScreenDistortion::LoadLiveScreenOverlay"),  # F01388
+    ("BATTLE/BATTLE.PRG", 0x8006C4C4, "VS::Effects::LiveQueueActionHitEffect"),  # F00058
+    ("BATTLE/BATTLE.PRG", 0x8006C84C, "VS::Effects::LiveQueueActionImpactEffects"),  # F00060
+    ("BATTLE/BATTLE.PRG", 0x8006F450, "VS::Effects::LiveSpawnGroundPlaneImpactEffect"),  # F00085
+    ("BATTLE/BATTLE.PRG", 0x8006F4B0, "VS::Effects::LiveSpawnTrapTileEffect"),  # F00086
+    ("BATTLE/BATTLE.PRG", 0x8006F848, "VS::Effects::LiveSpawnAbilityLearnedEffect"),  # F00092
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5358,11 +5373,6 @@ FIXES.setdefault("F00158", []).append(
     ("    Field_MpdDoorRecord destination;\n",
      "    Field_MpdDoorRecord destination{};\n",
      "#323: the scripted-fall producer leaves unlock/id/reserved fields unassigned, but DoorRecordOf copies them"))
-
-FIXES.setdefault("F00086", []).append(
-    ("    Effects_ActionEffectRequest request;\n",
-     "    Effects_ActionEffectRequest request{};\n",
-     "#324: the trap-tile producer leaves actor endpoint part/padding unassigned, but EndpointOf reads and copies them"))
 
 # #288: these readers dereference func_8008B764's result unchecked, so off the grid, without a cell table or on a
 # missing platform layer the original reads PS1 RAM word 0. They read a never-null cell that is kAbsentCellWord then.
@@ -8431,24 +8441,12 @@ REGEX_FIXES += [
         ("Effects::StartWeaponTrail",
          (('arg0', 'actor_index'), ('arg1', 'bone_index')),
          "F00056 Forwarded to SpawnBoneTrail, whose packed bytes become BoneTrailConfig.actor and .bone."),
-        ("Effects::QueueActionHitEffect",
-         (('arg1', 'hit_result'), ('arg0', 'effect_id'), ('sp10', 'hit_effect_request'), ('temp_s0', 'queued_action')),
-         "F00058 Source builds the overlay hit request from current action source, hit target/position and limb; opaque0 overlays request.effectId."),
-        ("Effects::QueueActionImpactEffects",
-         (('arg0', 'attacker_index'), ('temp_s0', 'queued_action')),
-         "F00060 Current action queue drives target selection; arg0 is passed unchanged to Battle_PlayWeaponHitSounds, which resolves the attacker model and weapon."),
         ("Effects::SignalActorEffectAnimation",
          (('arg0', 'actor_index'),),
          "F00064 Passed to actor animation advance or stored as tinted actor and passed to palette actor transform."),
         ("Effects::TintActionActorRed",
          (('arg0', 'actor_index'),),
          "F00068 Passed to actor animation advance or stored as tinted actor and passed to palette actor transform."),
-        ("Effects::SpawnGroundPlaneImpactEffect",
-         (('arg0', 'world_position_components'),),
-         "F00085 Unsigned-short source elements 0 and 2 become target vx/vz; target vy is forced to zero. No signedness or layout change."),
-        ("Effects::SpawnTrapTileEffect",
-         (('arg0', 'actor_location'),),
-         "F00086 Actor-location tile XZ becomes tile-center world coordinates (*128+64), position.vy supplies height; busy bit2 gates effect33."),
         ("Effects::BeginAshleyStandaloneEffect",
          (('arg0', 'effect_id'),),
          "F00119 Assigned to request.effectId before production BeginActionEffect."),
