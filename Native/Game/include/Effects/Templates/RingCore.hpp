@@ -393,4 +393,8 @@ bool FinishRingTick(RingFrame& frame, RingHost& host);
 // The fifteen GPU words of `quad`, linked to the ordering entry `link`.
 [[nodiscard]] std::array<std::uint32_t, kRingPacketWords> EncodeRingPacket(
     const RingQuad& quad, std::uint32_t link) noexcept;
+// The same words with GPU command `code` in place of kRingQuadCode (the bone
+// trails' quads share the ring layout).
+[[nodiscard]] std::array<std::uint32_t, kRingPacketWords> EncodeRingPacket(
+    const RingQuad& quad, std::uint32_t link, std::uint8_t code) noexcept;
 }  // namespace VS::Effects::Templates

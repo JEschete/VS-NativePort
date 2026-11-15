@@ -343,6 +343,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\ParticlePoolLive.cpp",
                 r"src\Effects\ParticleMotionLive.cpp",
                 r"src\Effects\ParticleTextureAnimationLive.cpp",
+                r"src\Effects\BoneTrailLive.cpp",
                 r"src\Title\TitleMenuLive.cpp",
                 r"src\Field\CameraLive.cpp",
                 r"src\Field\BackgroundLive.cpp",

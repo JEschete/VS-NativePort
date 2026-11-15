@@ -24,6 +24,7 @@
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
+#include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -513,10 +514,10 @@ class LiveEventHost final : public AnimationEventHost {
   }
 
   void StartWeaponTrail(int trail) override {
-    Effects_StartWeaponTrail(id_, trail);
+    Effects::LiveStartWeaponTrail(id_, trail);
   }
-  void FadeWeaponTrails(int frames) override {
-    Effects_FadeWeaponTrails(id_, frames);
+  void FadeWeaponTrails(int /*frames*/) override {
+    Effects::LiveFadeWeaponTrails();
   }
   void StartEffectTrack(int track) override {
     static_cast<void>(VS::Effects::LiveStartEffectTrack(track));

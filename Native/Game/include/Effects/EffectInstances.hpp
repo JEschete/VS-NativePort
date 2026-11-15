@@ -104,6 +104,7 @@ class RecordChain {
 enum class RendererCommand : std::uint32_t {
   kStart = 1,   // the slot was attached; the parameters are the attach's
   kUpdate = 2,  // each frame; the renderer returns 0 once it has finished
+  kFade = 3,    // the renderer winds down (bone trails; FadeBoneTrails)
   kStop = 4,    // the slot's instance is being destroyed
 };
 

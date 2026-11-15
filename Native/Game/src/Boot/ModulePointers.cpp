@@ -62,6 +62,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
+#include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
@@ -275,7 +276,6 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/FramebufferEffects.h"
-#include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/ScreenTransition.h"
 #include "Render/Text/CompactFont.h"
@@ -325,8 +325,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x8006C480u, 0u, (void*)&Effects_StartWeaponTrail, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006C4A4u, 0u, (void*)&Effects_FadeWeaponTrails, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C4C4u, 0u, (void*)&Effects_QueueActionHitEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C84Cu, 0u, (void*)&Effects_QueueActionImpactEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&Effects_SignalActorEffectAnimation, 0u, 0u, 0u},
@@ -488,12 +486,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CD158u, 0u, (void*)&Menu_DrawInformationBoxBackdrop, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CD3A0u, 0u, (void*)&Menu_FlipTextBoxShapePoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CD3E4u, 0u, (void*)&Menu_DrawTextBoxFrame, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CDCBCu, 0u, (void*)&Effects_DrawTrailSegment, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CE174u, 0u, (void*)&Effects_UpdateBoneTrail, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF7A8u, 0u, (void*)&Effects_SpawnBoneTrail, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF830u, 0u, (void*)&Effects_FadeBoneTrails, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF92Cu, 0u, (void*)&Effects_ClampTrailTexturePoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF988u, 0u, (void*)&Effects_MapTrailFramebufferTexture, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D2ADCu, 0u, (void*)&Effects_EmitParticleEvent, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8184u, 16u, (void*)&Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8194u, 32u, (void*)&Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget, 1u, 1u},
@@ -2010,6 +2002,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&VS::Effects::LiveClearParticleTextureState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&VS::Effects::LiveInitializeParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&VS::Effects::LiveAdvanceParticleTextureAnimation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CDCBCu, 0u, (void*)&VS::Effects::LiveDrawTrailSegment, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CE174u, 0u, (void*)&VS::Effects::LiveUpdateBoneTrail, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF7A8u, 0u, (void*)&VS::Effects::LiveSpawnBoneTrail, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF830u, 0u, (void*)&VS::Effects::LiveFadeBoneTrails, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF92Cu, 0u, (void*)&VS::Effects::LiveClampTrailTexturePoint, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF988u, 0u, (void*)&VS::Effects::LiveMapTrailFramebufferTexture, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006C480u, 0u, (void*)&VS::Effects::LiveStartWeaponTrail, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006C4A4u, 0u, (void*)&VS::Effects::LiveFadeWeaponTrails, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},

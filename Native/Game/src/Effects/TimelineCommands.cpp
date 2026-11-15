@@ -102,8 +102,8 @@ void SpawnTransformWeaponTrail(TransformAnchor anchor,
   host.SpawnBoneTrail(
       {.actor = anchor.actor,
        .bone = anchor.bone,
-       .texture = static_cast<std::uint8_t>(packed_style % kTrailStyleBase),
-       .colour = static_cast<std::uint8_t>(packed_style / kTrailStyleBase)});
+       .color = static_cast<std::uint8_t>(packed_style % kTrailStyleBase),
+       .texture = static_cast<std::uint8_t>(packed_style / kTrailStyleBase)});
   host.RestoreResourceContext();
 }
 

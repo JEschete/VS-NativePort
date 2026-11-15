@@ -15,6 +15,7 @@
 #include <span>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Event/InterpolationCurveLive.h"
@@ -199,10 +200,10 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
   }
 
   void StartWeaponTrail(int actor, int bone) override {
-    Effects_StartWeaponTrail(actor, bone);
+    VS::Effects::LiveStartWeaponTrail(actor, bone);
   }
-  void FadeWeaponTrails(int actor, int bone) override {
-    Effects_FadeWeaponTrails(actor, bone);
+  void FadeWeaponTrails(int /*actor*/, int /*bone*/) override {
+    VS::Effects::LiveFadeWeaponTrails();
   }
 
   [[nodiscard]] bool ScreenEffectsLoading() const override {

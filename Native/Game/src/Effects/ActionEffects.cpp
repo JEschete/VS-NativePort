@@ -25,18 +25,11 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Effects/Trails.h"
 #include "Field/Interactions.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
 #include "State/Timers.h"
-
-// decomp: BATTLE.PRG func_8006C480 (src/BATTLE/BATTLE.PRG/146C.c:1923)
-void Effects_StartWeaponTrail(int actor_index, int bone_index) { Effects_SpawnBoneTrail(actor_index, bone_index, 0, 0); }
-
-// decomp: BATTLE.PRG func_8006C4A4 (src/BATTLE/BATTLE.PRG/146C.c:1925)
-void Effects_FadeWeaponTrails(int arg0, int arg1) { Effects_FadeBoneTrails(arg0, arg1); }
 
 // decomp: BATTLE.PRG func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1927)
 void Effects_QueueActionHitEffect(int effect_id, Battle_HitResult* hit_result, int targetLimb)

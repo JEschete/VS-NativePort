@@ -13,8 +13,6 @@
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"
 
-void Effects_StartWeaponTrail(int actor_index, int bone_index);
-void Effects_FadeWeaponTrails(int arg0, int arg1);
 void Effects_QueueActionHitEffect(int effect_id, Battle_HitResult* hit_result, int targetLimb);
 int Effects_QueueActionImpactEffects(int attacker_index);
 void Effects_SignalActorEffectAnimation(int actor_index);

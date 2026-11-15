@@ -5,8 +5,6 @@ d0c8615f684b,ALWAYS-TRUE-GUARD,high,compiler,F01877,VS_TRAIL_CONTROL_FUNCTION,Na
 fecb27f0f444,BYTE-OFFSET,medium,pattern,F01920,Effects_Plg052_UpdateRepeatingRing,Native/Game/src/Effects/Plugins/Plg052.cpp,87,(u_char*)Effects_Plg077_ringColorFactors) +,61,31,open,
 86f41f1e7622,BYTE-OFFSET,medium,pattern,F02209,Effects_Plg162_UpdateTransposedRing,Native/Game/src/Effects/Plugins/Plg162.cpp,94,(u_char*)Effects_Plg162_ringColorFactors) +,61,31,open,
 407734ee3b21,BYTE-OFFSET,medium,pattern,F02398,Effects_Plg300_UpdateForegroundRepeatingRing,Native/Game/src/Effects/Plugins/Plg300.cpp,97,(u_char*)Effects_Plg300_ringColorFactors2) +,61,31,open,
-38560a9f5550,BYTE-OFFSET,medium,pattern,F01417,Effects_DrawTrailSegment,Native/Game/src/Effects/Trails.cpp,58,(u_char*)Render_frameScratch.orderingTable +,61,31,open,
-64c73dd49bf2,BYTE-OFFSET,medium,pattern,F01417,Effects_DrawTrailSegment,Native/Game/src/Effects/Trails.cpp,58,(u_char*)Render_frameScratch.orderingTable +,61,31,open,
 252ee5e7d383,BYTE-OFFSET,medium,pattern,F02985,Menu_Container_UpdateItemList,Native/Game/src/Menu/Container/ItemView.cpp,190,(char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag +,60,34,open,
 38d94bb45445,BYTE-OFFSET,medium,pattern,F02985,Menu_Container_UpdateItemList,Native/Game/src/Menu/Container/ItemView.cpp,190,(char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag +,60,34,open,
 b60773d7d08e,BYTE-OFFSET,medium,pattern,F02987,Menu_Container_UpdateScreen,Native/Game/src/Menu/Container/ItemView.cpp,904,(char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_screenResult +,60,34,open,

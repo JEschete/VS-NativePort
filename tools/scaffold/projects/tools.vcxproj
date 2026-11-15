@@ -319,6 +319,7 @@
     <None Include="..\..\permuter_settings.toml" />
     <None Include="..\..\port\action_presentation_audit.py" />
     <None Include="..\..\port\audit_assembly_gaps.py" />
+    <None Include="..\..\port\bone_trail_differential.py" />
     <None Include="..\..\port\breakarts_differential.py" />
     <None Include="..\..\port\check_event_dispatch.py" />
     <None Include="..\..\port\check_leftovers.py" />
@@ -384,6 +385,15 @@
     <None Include="..\..\port\differentials\battle_outcomes_guard_driver.cpp" />
     <None Include="..\..\port\differentials\blocked_movement.py" />
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp" />
+    <None Include="..\..\port\differentials\bone_trail_clamp.py" />
+    <None Include="..\..\port\differentials\bone_trail_draw.py" />
+    <None Include="..\..\port\differentials\bone_trail_driver.cpp" />
+    <None Include="..\..\port\differentials\bone_trail_fade.py" />
+    <None Include="..\..\port\differentials\bone_trail_fade_weapon.py" />
+    <None Include="..\..\port\differentials\bone_trail_map.py" />
+    <None Include="..\..\port\differentials\bone_trail_spawn.py" />
+    <None Include="..\..\port\differentials\bone_trail_start.py" />
+    <None Include="..\..\port\differentials\bone_trail_update.py" />
     <None Include="..\..\port\differentials\boss_orbit.py" />
     <None Include="..\..\port\differentials\boss_orbit_driver.cpp" />
     <None Include="..\..\port\differentials\breakarts_driver.cpp" />
@@ -688,6 +698,14 @@
     <None Include="..\..\port\differentials\native_compile_support.py" />
     <None Include="..\..\port\differentials\obstacle_detour.py" />
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp" />
+    <None Include="..\..\port\differentials\particle_motion_advance.py" />
+    <None Include="..\..\port\differentials\particle_motion_clear.py" />
+    <None Include="..\..\port\differentials\particle_motion_driver.cpp" />
+    <None Include="..\..\port\differentials\particle_motion_init.py" />
+    <None Include="..\..\port\differentials\particle_motion_integrate.py" />
+    <None Include="..\..\port\differentials\particle_motion_spawn.py" />
+    <None Include="..\..\port\differentials\particle_motion_step_point.py" />
+    <None Include="..\..\port\differentials\particle_motion_tick.py" />
     <None Include="..\..\port\differentials\particle_pool_acquire.py" />
     <None Include="..\..\port\differentials\particle_pool_allocate.py" />
     <None Include="..\..\port\differentials\particle_pool_drag.py" />
@@ -809,6 +827,7 @@
     <None Include="..\..\port\native_views.py" />
     <None Include="..\..\port\own.py" />
     <None Include="..\..\port\owned.csv" />
+    <None Include="..\..\port\particle_motion_differential.py" />
     <None Include="..\..\port\particle_pool_differential.py" />
     <None Include="..\..\port\primary_effect_differential.py" />
     <None Include="..\..\port\promote.py" />

@@ -53,7 +53,7 @@ public:
     void RestoreResourceContext() override { calls.push_back({ kCallRestore }); }
     void SpawnBoneTrail(const fx::WeaponTrail& trail) override
     {
-        calls.push_back({ kCallSpawn, trail.actor, trail.bone, trail.texture, trail.colour });
+        calls.push_back({ kCallSpawn, trail.actor, trail.bone, trail.color, trail.texture });
     }
     void FadeBoneTrails() override { calls.push_back({ kCallFade, 0, 0 }); }
     void FreezeRoomObjects() override { calls.push_back({ kCallPause }); }

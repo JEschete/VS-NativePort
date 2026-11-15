@@ -12,6 +12,7 @@
 #include "Battle/ActionPhases.hpp"
 #include "Battle/BattleModeLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
+#include "Effects/BoneTrailLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/Diagnostics.h"
-#include "Effects/ActionEffects.h"
 #include "Field/Interactions.h"
 #include "State/Progress.h"
 #include "State/Timers.h"
@@ -105,8 +105,9 @@ class LiveWorld final : public ActionPhaseWorld {
     constexpr int kWeaponTag = 0xF0;
     return Actors::FindLiveActorBoneTag(actor, kWeaponTag, 0);
   }
-  void FadeTrails(std::uint8_t actor, int bone) override {
-    Effects_FadeWeaponTrails(actor, bone);
+  void FadeTrails(std::uint8_t /*actor*/, int /*bone*/) override {
+    // The original fade ignored its actor and bone; every trail fades.
+    Effects::LiveFadeWeaponTrails();
   }
   void ToggleAshleyWeapon() override {
     LiveSetActorBattleMode(0, kToggleWeapon);

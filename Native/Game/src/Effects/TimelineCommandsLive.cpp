@@ -12,6 +12,7 @@
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Log.hpp"
+#include "Effects/BoneTrailLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/TimelineCommands.hpp"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Core/Gte.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
-#include "Effects/Trails.h"
 #include "Effects/Transforms.h"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/InteractionTargetLive.h"
@@ -106,10 +106,9 @@ class LiveTimelineEffectHost final : public TimelineEffectHost {
   void SaveResourceContext() override { LiveSaveEffectResourceContext(); }
   void RestoreResourceContext() override { LiveRestoreEffectResourceContext(); }
   void SpawnBoneTrail(const WeaponTrail& trail) override {
-    Effects_SpawnBoneTrail(trail.actor, trail.bone, trail.texture,
-                           trail.colour);
+    LiveSpawnBoneTrail(trail.actor, trail.bone, trail.color, trail.texture);
   }
-  void FadeBoneTrails() override { Effects_FadeBoneTrails(0, 0); }
+  void FadeBoneTrails() override { LiveFadeBoneTrails(); }
   void FreezeRoomObjects() override {
     static_cast<void>(Field::FreezeLiveRoomGimmicksTemporarily());
   }

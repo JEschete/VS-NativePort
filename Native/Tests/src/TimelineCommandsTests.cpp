@@ -241,10 +241,9 @@ TEST_CASE("Weapon trails spawn inside the action's resource context",
   fx::SpawnTransformWeaponTrail({.actor = 1, .bone = 0}, 0xFF, host);
   CHECK(host.calls == std::vector<std::string>{"save", "spawn", "restore",
                                                "save", "spawn", "restore"});
-  CHECK(host.trails ==
-        std::vector<fx::WeaponTrail>{
-            {.actor = 7, .bone = 3, .texture = 7, .colour = 4},
-            {.actor = 1, .bone = 0, .texture = 5, .colour = 25}});
+  CHECK(host.trails == std::vector<fx::WeaponTrail>{
+                           {.actor = 7, .bone = 3, .color = 7, .texture = 4},
+                           {.actor = 1, .bone = 0, .color = 5, .texture = 25}});
 
   RecordingEffectHost others;
   fx::FadeActionWeaponTrails(others);

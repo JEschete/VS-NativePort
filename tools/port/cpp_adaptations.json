@@ -390,7 +390,7 @@
 ],
 "Native\\Game\\src\\Effects\\Particles.cpp": [
 [
-531,
+480,
 [
 "            Core_Gte_SetRotMatrix(scratch);"
 ],
@@ -399,7 +399,7 @@
 ]
 ],
 [
-560,
+509,
 [
 "            Core_Gte_SetRotMatrix(scratch);"
 ],
@@ -450,7 +450,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg052.cpp": [
 [
-58,
+59,
 [
 "    state = renderer_slot->rendererState;"
 ],
@@ -459,7 +459,7 @@
 ]
 ],
 [
-62,
+63,
 [
 "        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
@@ -468,7 +468,7 @@
 ]
 ],
 [
-207,
+208,
 [
 "                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);",
 "                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);"
@@ -479,7 +479,7 @@
 ]
 ],
 [
-228,
+229,
 [
 "                    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -488,7 +488,7 @@
 ]
 ],
 [
-259,
+260,
 [
 "                prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -528,7 +528,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg162.cpp": [
 [
-65,
+66,
 [
 "    state = renderer_slot->rendererState;"
 ],
@@ -537,7 +537,7 @@
 ]
 ],
 [
-69,
+70,
 [
 "        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
@@ -546,7 +546,7 @@
 ]
 ],
 [
-214,
+215,
 [
 "                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);",
 "                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);"
@@ -557,7 +557,7 @@
 ]
 ],
 [
-235,
+236,
 [
 "                    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -566,7 +566,7 @@
 ]
 ],
 [
-266,
+267,
 [
 "                prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -577,7 +577,7 @@
 ],
 "Native\\Game\\src\\Effects\\Plugins\\Plg300.cpp": [
 [
-68,
+69,
 [
 "    state = renderer_slot->rendererState;"
 ],
@@ -586,7 +586,7 @@
 ]
 ],
 [
-72,
+73,
 [
 "        state = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
 ],
@@ -595,7 +595,7 @@
 ]
 ],
 [
-217,
+218,
 [
 "                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);",
 "                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);"
@@ -606,7 +606,7 @@
 ]
 ],
 [
-238,
+239,
 [
 "                    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -615,7 +615,7 @@
 ]
 ],
 [
-268,
+269,
 [
 "                prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -663,53 +663,6 @@
 [
 "    overlay_ordering_table = (u_long *)(Render_frameScratch.overlayOrderingTable);",
 "    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0xE00140, 6, (int *)(Render_frameScratch.primitiveCursor), overlay_ordering_table);"
-]
-]
-],
-"Native\\Game\\src\\Effects\\Trails.cpp": [
-[
-38,
-[
-"    p = Render_frameScratch.primitiveCursor;"
-],
-[
-"    p = (Render_TrailPacket *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-57,
-[
-"        addPrim(Render_frameScratch.orderingTable + depth * 4, p);"
-],
-[
-"        addPrim((u_char*)Render_frameScratch.orderingTable + depth * 4, p);"
-]
-],
-[
-81,
-[
-"        addPrim(Render_frameScratch.orderingTable + depth * 4, p);"
-],
-[
-"        addPrim((u_char*)Render_frameScratch.orderingTable + depth * 4, p);"
-]
-],
-[
-88,
-[
-"    Effects_BoneTrail* t = node->rendererState;"
-],
-[
-"    Effects_BoneTrail* t = (Effects_BoneTrail *)(node->rendererState);"
-]
-],
-[
-93,
-[
-"        t = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *t);"
-],
-[
-"        t = (Effects_BoneTrail *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *t));"
 ]
 ]
 ],

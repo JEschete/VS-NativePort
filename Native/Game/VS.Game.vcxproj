@@ -659,6 +659,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Effects\BoneTrail.cpp" />
+    <ClCompile Include="src\Effects\BoneTrailLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\Camera.cpp" />
     <ClCompile Include="src\Effects\CameraLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2537,6 +2541,8 @@
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
     <ClInclude Include="include\Diagnostics\SceneTrace.h" />
+    <ClInclude Include="include\Effects\BoneTrail.hpp" />
+    <ClInclude Include="include\Effects\BoneTrailLive.hpp" />
     <ClInclude Include="include\Effects\Camera.hpp" />
     <ClInclude Include="include\Effects\CameraLive.hpp" />
     <ClInclude Include="include\Effects\Curves.hpp" />

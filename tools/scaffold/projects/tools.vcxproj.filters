@@ -1929,6 +1929,9 @@
     <None Include="..\..\port\audit_assembly_gaps.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\bone_trail_differential.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\breakarts_differential.py">
       <Filter>tools\port</Filter>
     </None>
@@ -2122,6 +2125,33 @@
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\blocked_movement_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_clamp.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_draw.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_fade.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_fade_weapon.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_map.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_spawn.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_start.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\bone_trail_update.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\boss_orbit.py">
@@ -3036,6 +3066,30 @@
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\particle_motion_advance.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_motion_clear.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_motion_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_motion_init.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_motion_integrate.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_motion_spawn.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_motion_step_point.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_motion_tick.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\particle_pool_acquire.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -3397,6 +3451,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\owned.csv">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\particle_motion_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\particle_pool_differential.py">

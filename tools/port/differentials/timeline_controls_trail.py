@@ -9,7 +9,7 @@ globals().update(
         0x800D6448,
         0x800D64E4,
         {
-            "texture-from-colour": {0x800D64B8: 0x30E600FF},
+            "color-from-texture": {0x800D64B8: 0x30E600FF},
             "bone-reads-actor": {0x800D649C: 0x92450050},
             "transform-stride-0x68": {0x800D6490: 0x000210C0},
             "restore-skipped": {0x800D64C4: 0x00000000},

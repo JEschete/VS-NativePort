@@ -717,6 +717,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveClearParticleTextureState": r"Native\Game\include\Effects\ParticleTextureAnimationLive.hpp",
     "VS::Effects::LiveInitializeParticleTextureAnimation": r"Native\Game\include\Effects\ParticleTextureAnimationLive.hpp",
     "VS::Effects::LiveAdvanceParticleTextureAnimation": r"Native\Game\include\Effects\ParticleTextureAnimationLive.hpp",
+    "VS::Effects::LiveDrawTrailSegment": r"Native\Game\include\Effects\BoneTrailLive.hpp",
+    "VS::Effects::LiveUpdateBoneTrail": r"Native\Game\include\Effects\BoneTrailLive.hpp",
+    "VS::Effects::LiveSpawnBoneTrail": r"Native\Game\include\Effects\BoneTrailLive.hpp",
+    "VS::Effects::LiveFadeBoneTrails": r"Native\Game\include\Effects\BoneTrailLive.hpp",
+    "VS::Effects::LiveClampTrailTexturePoint": r"Native\Game\include\Effects\BoneTrailLive.hpp",
+    "VS::Effects::LiveMapTrailFramebufferTexture": r"Native\Game\include\Effects\BoneTrailLive.hpp",
+    "VS::Effects::LiveStartWeaponTrail": r"Native\Game\include\Effects\BoneTrailLive.hpp",
+    "VS::Effects::LiveFadeWeaponTrails": r"Native\Game\include\Effects\BoneTrailLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2743,6 +2751,14 @@ OWNED_CALL_BINDINGS["F01554"] = "VS::Effects::LiveIntegrateParticleMotion"
 OWNED_CALL_BINDINGS["F01590"] = "VS::Effects::LiveClearParticleTextureState"
 OWNED_CALL_BINDINGS["F01591"] = "VS::Effects::LiveInitializeParticleTextureAnimation"
 OWNED_CALL_BINDINGS["F01592"] = "VS::Effects::LiveAdvanceParticleTextureAnimation"
+OWNED_CALL_BINDINGS["F01417"] = "VS::Effects::LiveDrawTrailSegment"
+OWNED_CALL_BINDINGS["F01418"] = "VS::Effects::LiveUpdateBoneTrail"
+OWNED_CALL_BINDINGS["F01447"] = "VS::Effects::LiveSpawnBoneTrail"
+OWNED_CALL_BINDINGS["F01448"] = "VS::Effects::LiveFadeBoneTrails"
+OWNED_CALL_BINDINGS["F01451"] = "VS::Effects::LiveClampTrailTexturePoint"
+OWNED_CALL_BINDINGS["F01452"] = "VS::Effects::LiveMapTrailFramebufferTexture"
+OWNED_CALL_BINDINGS["F00056"] = "VS::Effects::LiveStartWeaponTrail"
+OWNED_CALL_BINDINGS["F00057"] = "VS::Effects::LiveFadeWeaponTrails"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4291,6 +4307,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D6CCC, "VS::Effects::LiveClearParticleTextureState"),  # F01590
     ("BATTLE/BATTLE.PRG", 0x800D6CF0, "VS::Effects::LiveInitializeParticleTextureAnimation"),  # F01591
     ("BATTLE/BATTLE.PRG", 0x800D6D24, "VS::Effects::LiveAdvanceParticleTextureAnimation"),  # F01592
+    ("BATTLE/BATTLE.PRG", 0x800CDCBC, "VS::Effects::LiveDrawTrailSegment"),  # F01417
+    ("BATTLE/BATTLE.PRG", 0x800CE174, "VS::Effects::LiveUpdateBoneTrail"),  # F01418
+    ("BATTLE/BATTLE.PRG", 0x800CF7A8, "VS::Effects::LiveSpawnBoneTrail"),  # F01447
+    ("BATTLE/BATTLE.PRG", 0x800CF830, "VS::Effects::LiveFadeBoneTrails"),  # F01448
+    ("BATTLE/BATTLE.PRG", 0x800CF92C, "VS::Effects::LiveClampTrailTexturePoint"),  # F01451
+    ("BATTLE/BATTLE.PRG", 0x800CF988, "VS::Effects::LiveMapTrailFramebufferTexture"),  # F01452
+    ("BATTLE/BATTLE.PRG", 0x8006C480, "VS::Effects::LiveStartWeaponTrail"),  # F00056
+    ("BATTLE/BATTLE.PRG", 0x8006C4A4, "VS::Effects::LiveFadeWeaponTrails"),  # F00057
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
@@ -8556,8 +8580,8 @@ REGEX_FIXES += [
          (('arg0', 'effect_instance'), ('arg1', 'renderer_slot'), ('var_v1', 'renderer_cursor')),
          "F01446 Finds predecessor and unlinks slot; owned rendererState and slot are freed."),
         ("Effects::SpawnBoneTrail",
-         (('arg0', 'actor_index'), ('arg1', 'bone_index'), ('arg2', 'texture_index'), ('arg3', 'color_index')),
-         "F01447 Packed bytes/nibbles match BoneTrailConfig actor/bone/texture/color and life FF; consumer DrawTrailSegment indexes texture and color tables."),
+         (('arg0', 'actor_index'), ('arg1', 'bone_index'), ('arg2', 'color_index'), ('arg3', 'texture_index')),
+         "F01447 Packed bytes/nibbles match BoneTrailConfig actor/bone/color/texture and life FF; consumer DrawTrailSegment indexes the color and texture tables."),
         ("Effects::FadeBoneTrails",
          (('var_s1', 'instance_cursor'), ('var_s0', 'renderer_cursor')),
          "F01448 FadeBoneTrails enumerates every secondary renderer and sends command 3; both formal integers are unused, including the forwarded wrapper inputs."),
@@ -8806,7 +8830,7 @@ REGEX_FIXES += [
          "F01573 Position-tagged instance target supplies world position to trap disable consumer."),
         ("Effects::SpawnTransformWeaponTrail",
          (('arg0', 'effect_instance'), ('arg1', 'transform_index'), ('arg2', 'packed_trail_style')),
-         "F01574 Selected transform supplies actor/bone; decimal remainder and quotient produce texture index and color index."),
+         "F01574 Selected transform supplies actor/bone; decimal remainder and quotient produce color index and texture index."),
         ("Effects::ResumeEffectTransformMotion",
          (('arg0', 'transform_controls'), ('arg1', 'transform_index')),
          "F01576 Advances existing transform-control pointer by index and updates motionResumed or attachmentMode. Does not repair or reinterpret caller cast."),

@@ -166,10 +166,11 @@ void ColorRows(RingFrame& frame, const RingPaletteEntry& factors,
   }
 }
 
-[[nodiscard]] constexpr std::uint32_t ColorWord(RingColor color) noexcept {
+[[nodiscard]] constexpr std::uint32_t ColorWord(RingColor color,
+                                                std::uint8_t code) noexcept {
   return color.r | (static_cast<std::uint32_t>(color.g) << kByteBits) |
          (static_cast<std::uint32_t>(color.b) << kHalfwordBits) |
-         (static_cast<std::uint32_t>(kRingQuadCode) << kCodeShift);
+         (static_cast<std::uint32_t>(code) << kCodeShift);
 }
 }  // namespace
 
@@ -387,6 +388,11 @@ bool FinishRingTick(RingFrame& frame, RingHost& host) {
 
 std::array<std::uint32_t, kRingPacketWords> EncodeRingPacket(
     const RingQuad& quad, std::uint32_t link) noexcept {
+  return EncodeRingPacket(quad, link, kRingQuadCode);
+}
+
+std::array<std::uint32_t, kRingPacketWords> EncodeRingPacket(
+    const RingQuad& quad, std::uint32_t link, std::uint8_t code) noexcept {
   std::array<std::uint32_t, kRingPacketWords> words{};
   words[0] = (link & kRingLinkMask) | kRingPacketLength;
   words[kModeWord] = kRingDrawModeWord;
@@ -397,7 +403,7 @@ std::array<std::uint32_t, kRingPacketWords> EncodeRingPacket(
   for (std::size_t corner = 0; corner < kRingQuadCorners; ++corner) {
     const std::size_t at = kFirstCornerWord + (corner * kCornerWords);
     const RingUv uv = quad.uvs.at(corner);
-    words.at(at) = ColorWord(quad.colors.at(corner));
+    words.at(at) = ColorWord(quad.colors.at(corner), code);
     words.at(at + 1) = quad.screens.at(corner);
     words.at(at + 2) = uv.u | (static_cast<std::uint32_t>(uv.v) << kByteBits) |
                        (texture_high.at(corner) << kHalfwordBits);

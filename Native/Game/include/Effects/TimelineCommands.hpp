@@ -115,8 +115,8 @@ struct ReactionSound {
 
 // Effects_EffectTimeline.flags: the timeline stays on its frame.
 inline constexpr std::uint8_t kTimelineFrameHeld = 0x1;
-// A packed trail style's low decimal digit picks the texture, the rest the
-// colour.
+// A packed trail style's low decimal digit picks the colour, the rest the
+// texture.
 inline constexpr std::uint8_t kTrailStyleBase = 10;
 
 // The transform slot a command operand names; nullopt from
@@ -134,8 +134,8 @@ struct TransformAnchor {
 struct WeaponTrail {
   std::uint8_t actor{};
   std::uint8_t bone{};
+  std::uint8_t color{};
   std::uint8_t texture{};
-  std::uint8_t colour{};
 
   friend bool operator==(const WeaponTrail&, const WeaponTrail&) = default;
 };
@@ -149,9 +149,9 @@ class TimelineEffectHost {
   virtual void SaveResourceContext() = 0;
   // LiveRestoreEffectResourceContext.
   virtual void RestoreResourceContext() = 0;
-  // Effects_SpawnBoneTrail.
+  // LiveSpawnBoneTrail.
   virtual void SpawnBoneTrail(const WeaponTrail& trail) = 0;
-  // Effects_FadeBoneTrails: every weapon trail fades out.
+  // LiveFadeBoneTrails: every weapon trail fades out.
   virtual void FadeBoneTrails() = 0;
   // FreezeLiveRoomGimmicksTemporarily.
   virtual void FreezeRoomObjects() = 0;

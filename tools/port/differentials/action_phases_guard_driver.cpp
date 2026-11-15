@@ -18,7 +18,6 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Effects/ActionEffects.h"
 #include "Field/Interactions.h"
 #include "State/Timers.h"
 Battle_Actor* Battle_actors[42] { };
@@ -51,11 +50,9 @@ void Battle_SetActorMarkersHidden(int hidden)
     Battle_recoveryRewardMode = 99;
     State_tickSpeed = 99;
 }
-void Effects_FadeWeaponTrails(int actor, int bone)
-{
-    valid &= actor == 7 && bone == -9;
-    Record(8, actor, bone);
 }
+namespace VS::Effects {
+void LiveFadeWeaponTrails() { Record(8); }
 }
 namespace VS::Actors {
 void RestoreLiveActorIdlePose(int slot)
@@ -161,8 +158,7 @@ int main(int argc, char** argv)
         replacement.queue[0].primaryTarget.target.targetActor = 99;
         Battle_actionState = &first;
         b::BeginLiveActionTrailFade();
-        return valid && events == std::vector<Event> { { 7, 3, 0xF0 }, { 8, 7, -9 } } ? 0
-                                                                                      : 1;
+        return valid && events == std::vector<Event> { { 7, 3, 0xF0 }, { 8, 0, 0 } } ? 0 : 1;
     }
     if (selected == "toggle") {
         Field_controlMode = 77;
