@@ -21,6 +21,17 @@ from ref_index import Ledgers, ledger_layout_type, norm_key  # noqa: E402
 class ReviewedConsumerTests(unittest.TestCase):
     root = Path(__file__).resolve().parents[2]
 
+    def reference_ledgers(self, index):
+        read_text = Path.read_text
+
+        def read_text_without_generated_context(path, *args, **kwargs):
+            if path.name == "symbol_context.json":
+                return "{}"
+            return read_text(path, *args, **kwargs)
+
+        with patch.object(Path, "read_text", read_text_without_generated_context):
+            return Ledgers(index)
+
     def tree(self, path):
         return ast.parse((self.root / path).read_text(encoding="utf-8-sig"))
 
@@ -112,13 +123,13 @@ class ReviewedConsumerTests(unittest.TestCase):
                 {"name": "loaded", "value": 5},
             ],
         }
-        ledgers = Ledgers({"types": {"enum:state": type_record}})
+        ledgers = self.reference_ledgers({"types": {"enum:state": type_record}})
         layout = ledgers.layout[("enum:state", "src/MENU/MENU7.PRG/260.c", 565)]
 
         self.assertIn(f"enum:state#{layout}", ledgers.t_by_key)
 
     def test_ledger_aggregate_type_resolves_split_pinned_member(self):
-        ledgers = Ledgers({"types": {}})
+        ledgers = self.reference_ledgers({"types": {}})
         members = ledgers.gen.members["T00532"]
         fields = []
         for i, member in enumerate(members):
