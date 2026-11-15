@@ -171,7 +171,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_CommandCameraMotion, Event_CommandCameraMotion, Event_CommandCameraMotion, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_CommandStopCameraMotion, Event_CommandSetCameraFollowing, Event_ScriptYieldFrameOpcode, Event_CommandSetScreenCapture,
     Event_CommandTweenCameraRoll, Event_CommandTweenCameraRoll, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_CommandScreenTransform,
-    Event_CommandScreenTransform, Event_CommandSetCameraOriginActor, Event_CommandRestoreFieldCamera, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake,
+    Event_CommandScreenTransform, Event_CommandSetCameraOriginActorOpcode, Event_CommandRestoreFieldCamera, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake,
     Event_CommandCameraLensOrShake, Event_CommandScreenTransform, Event_CommandCameraLensOrShake, Event_CommandCameraLensOrShake, Event_ScriptYieldFrameOpcode,
     Event_CommandSetTickSpeedOpcode, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContextOpcode,
     Event_CommandStartScriptContextOpcode, Event_CommandStopScriptContextOpcode, Event_CommandLoadNextEventOpcode, Event_ScriptReportInvalidOpcodeOpcode,

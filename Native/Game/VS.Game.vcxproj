@@ -1336,6 +1336,10 @@
     <ClCompile Include="src\Event\CutsceneLifecycleLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Event\EventCameraOwnership.cpp" />
+    <ClCompile Include="src\Event\EventCameraOwnershipLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Event\InterpolationCurveLive.cpp" />
     <ClCompile Include="src\Event\Playback.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2635,6 +2639,8 @@
     <ClInclude Include="include\Ending\EndingLive.hpp" />
     <ClInclude Include="include\Event\CutsceneLifecycle.hpp" />
     <ClInclude Include="include\Event\CutsceneLifecycleLive.hpp" />
+    <ClInclude Include="include\Event\EventCameraOwnership.hpp" />
+    <ClInclude Include="include\Event\EventCameraOwnershipLive.hpp" />
     <ClInclude Include="include\Event\RoomTriggers.hpp" />
     <ClInclude Include="include\Event\ScriptActorCommands.hpp" />
     <ClInclude Include="include\Event\ScriptActorCommandsLive.hpp" />

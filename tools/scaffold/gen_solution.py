@@ -254,6 +254,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Event\ScriptDialogCommandsLive.cpp",
                 r"src\Event\ScriptEffectCommandsLive.cpp",
                 r"src\Event\CutsceneLifecycleLive.cpp",
+                r"src\Event\EventCameraOwnershipLive.cpp",
                 r"src\Event\ScriptVmLive.cpp",
                 r"src\Effects\ScreenEffectState.cpp",
                 r"src\Effects\ScreenDistortion\RadialWarpLive.cpp",

@@ -23,6 +23,8 @@
 #include "Battle/RewardFlowLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
+#include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptRoomCommands.hpp"
@@ -464,9 +466,12 @@ class LiveVmHost final : public ScriptVmHost {
     return Actors::FindLiveActorByModelId(model);
   }
   void ApplySpecialOperation(SpecialOperation operation, int argument) override;
-  void InitializeEventCamera() override { Event_InitializeEventCamera(); }
-  void FreeEventCamera() override { Event_FreeEventCamera(); }
-  void UpdateEventCameraOrigin() override { Event_UpdateEventCameraOrigin(); }
+  void InitializeEventCamera() override { InitializeEventCameraEntry(); }
+  // F01215 (func_800BBDDC) only forwarded to the high-end free; retired.
+  void FreeEventCamera() override {
+    Core::Memory::FreeLiveFromHighEnd(Event_camera);
+  }
+  void UpdateEventCameraOrigin() override { UpdateEventCameraOriginEntry(); }
   void RestoreEventFieldCamera() override {
     Event_RestoreEventFieldCamera(-1, -1);
   }
@@ -815,7 +820,7 @@ void LiveVmHost::ApplySpecialOperation(SpecialOperation operation,
       DiscardChainedEventBuffer();
       break;
     case SpecialOperation::kSetFieldCameraOverride:
-      Event_SetEventFieldCameraOverride(argument);
+      SetEventFieldCameraOverrideEntry(argument);
       break;
     case SpecialOperation::kPauseSceneTimer:
       State::SetLiveSceneTimerPaused(argument);

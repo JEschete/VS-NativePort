@@ -456,6 +456,10 @@ NATIVE_HELPER_HEADERS = {
     "Event_EvaluateInterpolationCurveEntry": r"Native\Game\src\Event\InterpolationCurveLive.h",
     "Event_EvaluateRoomEventTriggersEntry": r"Native\Game\src\Event\RoomTriggerEntryLive.h",
     "VS::Event::ResolveLiveScriptActorReference": r"Native\Game\include\Event\ScriptVmLive.hpp",
+    "VS::Event::InitializeEventCameraEntry": r"Native\Game\include\Event\EventCameraOwnershipLive.hpp",
+    "VS::Event::SetEventFieldCameraOverrideEntry": r"Native\Game\include\Event\EventCameraOwnershipLive.hpp",
+    "VS::Event::SetEventCameraOriginActorEntry": r"Native\Game\include\Event\EventCameraOwnershipLive.hpp",
+    "VS::Event::UpdateEventCameraOriginEntry": r"Native\Game\include\Event\EventCameraOwnershipLive.hpp",
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
@@ -1643,6 +1647,10 @@ OWNED_CALL_BINDINGS = {
     fid: f"VS::Field::{name}" for rows in _FIELD_ACTOR_COLLISION_LIVE.values() for name, fid in rows
 }
 OWNED_CALL_BINDINGS["F01275"] = "VS::Event::ResolveLiveScriptActorReference"
+OWNED_CALL_BINDINGS["F01214"] = "VS::Event::InitializeEventCameraEntry"
+OWNED_CALL_BINDINGS["F01216"] = "VS::Event::SetEventFieldCameraOverrideEntry"
+OWNED_CALL_BINDINGS["F01217"] = "VS::Event::SetEventCameraOriginActorEntry"
+OWNED_CALL_BINDINGS["F01218"] = "VS::Event::UpdateEventCameraOriginEntry"
 OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
 OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
 OWNED_CALL_BINDINGS["F00853"] = "Field_GimmickPlacementEntry"
@@ -3297,6 +3305,8 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01139", 0x800BA218, "ScriptSetBackgroundOffset"),
     ("F01140", 0x800BA264, "ScriptSetFirstPersonView"),
     ("F01142", 0x800BA2B4, "ScriptSetBackgroundParallax"),
+    # #276 row 35 A35-01 camera origin opcode (Event/EventCameraOwnershipLive.cpp)
+    ("F01195", 0x800BB38C, "CommandSetCameraOriginActor"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -3711,6 +3721,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800BFEBC, "Event_EvaluateInterpolationCurveEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BEC58, "Event_EvaluateRoomEventTriggersEntry"),
     ("BATTLE/BATTLE.PRG", 0x800BFE50, "VS::Event::ResolveLiveScriptActorReference"),
+    ("BATTLE/BATTLE.PRG", 0x800BBBE8, "VS::Event::InitializeEventCameraEntry"),  # F01214
+    ("BATTLE/BATTLE.PRG", 0x800BBE04, "VS::Event::SetEventFieldCameraOverrideEntry"),  # F01216
+    ("BATTLE/BATTLE.PRG", 0x800BBE10, "VS::Event::SetEventCameraOriginActorEntry"),  # F01217
+    ("BATTLE/BATTLE.PRG", 0x800BBE94, "VS::Event::UpdateEventCameraOriginEntry"),  # F01218
     ("SLUS_010.40", 0x80042364, "VS::Boot::ResetToTitleLive"),  # F03423
     ("SLUS_010.40", 0x80042420, "VS::Boot::EnterBattleLive"),  # F03424
     ("SLUS_010.40", 0x800424E4, "VS::Boot::RunEndingAndReturnToTitleLive"),  # F03425

@@ -590,17 +590,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Event\\ScriptCamera.cpp": [
-[
-102,
-[
-"    Event_camera = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera);"
-],
-[
-"    Event_camera = (Event_CameraState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera));"
-]
-]
-],
 "Native\\Game\\src\\Menu\\BattleAbilities.cpp": [
 [
 116,

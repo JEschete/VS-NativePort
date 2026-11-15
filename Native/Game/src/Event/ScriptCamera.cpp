@@ -5,7 +5,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -64,13 +63,6 @@ intptr_t Event_CommandSetCameraFollowing(u_char* instruction, short thread_index
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800BB38C (src/BATTLE/BATTLE.PRG/4A0A8.c:2774)
-intptr_t Event_CommandSetCameraOriginActor(u_char* instruction, short thread_index)
-{
-    Event_SetEventCameraOriginActor(VS::Event::ResolveLiveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800BB3BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2780)
 intptr_t Event_CommandRestoreFieldCamera(u_char* instruction, short thread_index)
 {
@@ -91,114 +83,6 @@ intptr_t Event_CommandSetScreenCapture(u_char* instruction, short thread_index)
 {
     VS::Render::SetLiveFramebufferEffectEnabled(instruction[1]);
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800BBBE8 (src/BATTLE/BATTLE.PRG/4A0A8.c:3014)
-void Event_InitializeEventCamera(void)
-{
-    VECTOR _ __attribute__((unused));
-    VECTOR field_eye_position;
-    VECTOR field_look_at;
-
-    Event_camera = (Event_CameraState *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Event_camera));
-    Event_skipNextFieldCameraRestore = 0;
-
-    VS::Field::LiveCameraPosition(&field_eye_position);
-    VS::Field::LiveCameraLookAt(&field_look_at);
-    VS::Core::Math::CopyLiveVector(&Event_camera->eye.currentPosition, &field_eye_position);
-    VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.partnerPosition, &field_eye_position);
-    VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.currentPosition, &field_look_at);
-    VS::Core::Math::CopyLiveVector(&Event_camera->eye.partnerPosition, &field_look_at);
-
-    Event_camera->lookAt.motionMode = 0xF;
-    Event_camera->lookAt.followRequest = Event_camera->lookAt.isFollowing = 0;
-    Event_camera->eye.motionMode = 0xF;
-    Event_camera->eye.followRequest = Event_camera->eye.isFollowing = 0;
-    Event_camera->cameraRoll.durationFrames = 0;
-    Event_camera->cameraRoll.angle = 0;
-    Event_camera->cameraRoll.hasChanged = 1;
-
-    VS::Render::SetLiveFramebufferEffectEnabled(0);
-
-    Event_camera->capturedScreenRoll.durationFrames = 0;
-    Event_camera->capturedScreenRoll.angle = 0;
-
-    VS::Render::SetLiveFramebufferEffectRotation(0);
-
-    Event_camera->capturedScreenRoll.hasChanged = 1;
-    Event_camera->screenScale.currentValue1 = ONE;
-    Event_camera->screenScale.currentValue0 = ONE;
-
-    VS::Render::SetLiveFramebufferEffectScale(&Event_kDefaultScreenTransform);
-
-    Event_camera->screenTint.currentValue0 = Event_camera->screenTint.currentValue1 = Event_camera->screenTint.currentValue2 =
-        Event_camera->screenScale.durationFrames = 0;
-
-    VS::Render::SetLiveFramebufferEffectTint(&Event_kDefaultScreenTint);
-
-    Event_camera->screenTint.durationFrames = 0;
-    Event_camera->screenTranslation.currentValue1 = ONE;
-    Event_camera->screenTranslation.currentValue0 = ONE;
-
-    VS::Render::SetLiveFramebufferEffectOffset(&Event_kDefaultScreenTransform);
-
-    Event_camera->screenTranslation.durationFrames = 0;
-
-    VS::Render::SetLiveFramebufferEffectBlendMode(1);
-
-    Event_camera->screenEffectTween.currentValue0 = ONE;
-    Event_camera->screenEffectTween.durationFrames = Event_camera->screenEffectTween.currentValue1 = 0;
-    Event_camera->projectionDistance.value = 0x200;
-    Event_camera->projectionDistance.durationFrames = 0;
-    Event_camera->projectionDistance.hasChanged = 1;
-    Event_camera->nearClip.value = 0x40;
-    Event_camera->nearClip.durationFrames = 0;
-    Event_camera->nearClip.hasChanged = 1;
-    Event_camera->farClip.value = 0x1000;
-    Event_camera->farClip.durationFrames = 0;
-    Event_camera->farClip.hasChanged = 1;
-    Event_camera->shakeOscillatorA.envelopeShape.count = 0;
-    Event_camera->shakeOscillatorA.reserved0B = Event_camera->shakeOscillatorB.reserved0B = 0;
-    Event_camera->originActorId = 0x2000;
-}
-
-// decomp: BATTLE.PRG func_800BBDDC (src/BATTLE/BATTLE.PRG/4A0A8.c:3082)
-void Event_FreeEventCamera(void) { VS::Core::Memory::FreeLiveFromHighEnd(Event_camera); }
-
-// decomp: BATTLE.PRG func_800BBE04 (src/BATTLE/BATTLE.PRG/4A0A8.c:3084)
-void Event_SetEventFieldCameraOverride(int field_camera_override) { Event_skipNextFieldCameraRestore = field_camera_override; }
-
-// decomp: BATTLE.PRG func_800BBE10 (src/BATTLE/BATTLE.PRG/4A0A8.c:3086)
-void Event_SetEventCameraOriginActor(u_short origin_actor)
-{
-    int _[4];
-    if (origin_actor == 0x2000) {
-        if (Event_camera->originActorId != origin_actor) {
-            VS::Core::Math::AddLiveVectors(
-                &Event_camera->eye.currentPosition, &Event_camera->eye.currentPosition, &Event_camera->originOffset);
-            VS::Core::Math::AddLiveVectors(&Event_camera->lookAt.currentPosition, &Event_camera->lookAt.currentPosition,
-                &Event_camera->originOffset);
-        }
-    }
-    Event_camera->originActorId = origin_actor;
-    Event_UpdateEventCameraOrigin();
-}
-
-// decomp: BATTLE.PRG func_800BBE94 (src/BATTLE/BATTLE.PRG/4A0A8.c:3101)
-void Event_UpdateEventCameraOrigin(void)
-{
-    Actors_ActorLocationQuery origin_actor_location;
-
-    if (Event_camera->originActorId == 0x2000) {
-        Event_camera->originOffset.vz = 0;
-        Event_camera->originOffset.vy = 0;
-        Event_camera->originOffset.vx = 0;
-        return;
-    }
-    VS::Actors::LiveActorPlacement(Event_camera->originActorId, &origin_actor_location);
-    Event_camera->originOffset.vx = origin_actor_location.location.position.vx * ONE;
-    Event_camera->originOffset.vy = origin_actor_location.location.position.vy * ONE;
-    Event_camera->originOffset.vz = origin_actor_location.location.position.vz * ONE;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyCameraState (src/BATTLE/BATTLE.PRG/4A0A8.c:3117)
