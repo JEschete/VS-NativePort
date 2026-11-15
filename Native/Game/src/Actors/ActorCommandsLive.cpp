@@ -21,6 +21,7 @@
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractionsLive.h"
 
@@ -157,9 +158,9 @@ class LiveCommandHost final : public ActorCommandHost {
     VS::Audio::LivePlayActorModelSound(Required(actor_id).model, sound);
   }
   void TintRed(int actor_id) override {
-    Effects_TintActionActorRed(actor_id, 0);
+    VS::Effects::LiveTintActionActorRed(actor_id, 0);
   }
-  void RestoreTint() override { Effects_RestoreActionActorTint(); }
+  void RestoreTint() override { VS::Effects::LiveRestoreActionActorTint(); }
   void RestoreNeutralPose(int actor_id) override {
     RestoreLiveActorNeutralPose(actor_id);
   }

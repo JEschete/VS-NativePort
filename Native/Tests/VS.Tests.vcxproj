@@ -53,6 +53,7 @@
     <ClCompile Include="src\ActionCameraSelectionLiveTests.cpp" />
     <ClCompile Include="src\ActionCameraSelectionTests.cpp" />
     <ClCompile Include="src\ActionCostsTests.cpp" />
+    <ClCompile Include="src\ActionEffectCallbacksTests.cpp" />
     <ClCompile Include="src\ActionEffectDispatchTests.cpp" />
     <ClCompile Include="src\ActionOutcomesLiveTests.cpp" />
     <ClCompile Include="src\ActionOutcomesTests.cpp" />

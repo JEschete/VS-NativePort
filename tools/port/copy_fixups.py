@@ -1614,6 +1614,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveSpawnGroundPlaneImpactEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
     "VS::Effects::LiveSpawnTrapTileEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
     "VS::Effects::LiveSpawnAbilityLearnedEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
+    "VS::Effects::LiveSignalActorEffectAnimation": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
+    "VS::Effects::LiveTintActionActorRed": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
+    "VS::Effects::LiveRestoreActionActorTint": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
+    "VS::Effects::LiveBeginAshleyStandaloneEffect": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
+    "VS::Effects::LiveEndAshleyStandaloneEffect": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
+    "VS::Effects::LiveActionEffectBusyFlags": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2872,6 +2878,12 @@ OWNED_CALL_BINDINGS["F00060"] = "VS::Effects::LiveQueueActionImpactEffects"
 OWNED_CALL_BINDINGS["F00085"] = "VS::Effects::LiveSpawnGroundPlaneImpactEffect"
 OWNED_CALL_BINDINGS["F00086"] = "VS::Effects::LiveSpawnTrapTileEffect"
 OWNED_CALL_BINDINGS["F00092"] = "VS::Effects::LiveSpawnAbilityLearnedEffect"
+OWNED_CALL_BINDINGS["F00064"] = "VS::Effects::LiveSignalActorEffectAnimation"
+OWNED_CALL_BINDINGS["F00068"] = "VS::Effects::LiveTintActionActorRed"
+OWNED_CALL_BINDINGS["F00069"] = "VS::Effects::LiveRestoreActionActorTint"
+OWNED_CALL_BINDINGS["F00119"] = "VS::Effects::LiveBeginAshleyStandaloneEffect"
+OWNED_CALL_BINDINGS["F00120"] = "VS::Effects::LiveEndAshleyStandaloneEffect"
+OWNED_CALL_BINDINGS["F00143"] = "VS::Effects::LiveActionEffectBusyFlags"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4627,6 +4639,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8006F450, "VS::Effects::LiveSpawnGroundPlaneImpactEffect"),  # F00085
     ("BATTLE/BATTLE.PRG", 0x8006F4B0, "VS::Effects::LiveSpawnTrapTileEffect"),  # F00086
     ("BATTLE/BATTLE.PRG", 0x8006F848, "VS::Effects::LiveSpawnAbilityLearnedEffect"),  # F00092
+    ("BATTLE/BATTLE.PRG", 0x8006CDB8, "VS::Effects::LiveSignalActorEffectAnimation"),  # F00064
+    ("BATTLE/BATTLE.PRG", 0x8006D028, "VS::Effects::LiveTintActionActorRed"),  # F00068
+    ("BATTLE/BATTLE.PRG", 0x8006D064, "VS::Effects::LiveRestoreActionActorTint"),  # F00069
+    ("BATTLE/BATTLE.PRG", 0x800733F8, "VS::Effects::LiveBeginAshleyStandaloneEffect"),  # F00119
+    ("BATTLE/BATTLE.PRG", 0x80073484, "VS::Effects::LiveEndAshleyStandaloneEffect"),  # F00120
+    ("BATTLE/BATTLE.PRG", 0x80074294, "VS::Effects::LiveActionEffectBusyFlags"),  # F00143
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -8441,15 +8459,6 @@ REGEX_FIXES += [
         ("Effects::StartWeaponTrail",
          (('arg0', 'actor_index'), ('arg1', 'bone_index')),
          "F00056 Forwarded to SpawnBoneTrail, whose packed bytes become BoneTrailConfig.actor and .bone."),
-        ("Effects::SignalActorEffectAnimation",
-         (('arg0', 'actor_index'),),
-         "F00064 Passed to actor animation advance or stored as tinted actor and passed to palette actor transform."),
-        ("Effects::TintActionActorRed",
-         (('arg0', 'actor_index'),),
-         "F00068 Passed to actor animation advance or stored as tinted actor and passed to palette actor transform."),
-        ("Effects::BeginAshleyStandaloneEffect",
-         (('arg0', 'effect_id'),),
-         "F00119 Assigned to request.effectId before production BeginActionEffect."),
         ("Effects::StartScriptedActorEffect",
          (('arg0', 'effect_id'), ('arg1', 'target_actor_index')),
          "F00238 Becomes targets[0].actor and is excluded from the separately built others list."),

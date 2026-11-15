@@ -667,6 +667,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Diagnostics\SceneTrace.cpp" />
+    <ClCompile Include="src\Effects\ActionEffectCallbacks.cpp" />
+    <ClCompile Include="src\Effects\ActionEffectCallbacksLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\ActionEffects.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2591,6 +2595,8 @@
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
     <ClInclude Include="include\Diagnostics\SceneTrace.h" />
+    <ClInclude Include="include\Effects\ActionEffectCallbacks.hpp" />
+    <ClInclude Include="include\Effects\ActionEffectCallbacksLive.hpp" />
     <ClInclude Include="include\Effects\BoneTrail.hpp" />
     <ClInclude Include="include\Effects\BoneTrailLive.hpp" />
     <ClInclude Include="include\Effects\Camera.hpp" />

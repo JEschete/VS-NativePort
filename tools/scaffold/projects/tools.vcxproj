@@ -346,6 +346,14 @@
     <None Include="..\..\port\differentials\action_animations_common.py" />
     <None Include="..\..\port\differentials\action_animations_driver.cpp" />
     <None Include="..\..\port\differentials\action_animations_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\action_callbacks_common.py" />
+    <None Include="..\..\port\differentials\action_callbacks_driver.cpp" />
+    <None Include="..\..\port\differentials\action_callbacks_f00064.py" />
+    <None Include="..\..\port\differentials\action_callbacks_f00068.py" />
+    <None Include="..\..\port\differentials\action_callbacks_f00069.py" />
+    <None Include="..\..\port\differentials\action_callbacks_f00119.py" />
+    <None Include="..\..\port\differentials\action_callbacks_f00120.py" />
+    <None Include="..\..\port\differentials\action_callbacks_f00143.py" />
     <None Include="..\..\port\differentials\action_costs.py" />
     <None Include="..\..\port\differentials\action_costs_driver.cpp" />
     <None Include="..\..\port\differentials\action_costs_guard_driver.cpp" />

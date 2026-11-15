@@ -28,6 +28,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
@@ -381,7 +382,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Field_DispatchTrapOrChestInteractionEntry();
   }
   [[nodiscard]] bool IsActionEffectBusy() override {
-    return Effects_ActionEffectBusyFlags() != 0;
+    return VS::Effects::LiveActionEffectBusyFlags() != 0;
   }
   void FinishTrapInteraction() override { Field_FinishTrapInteractionEntry(); }
   [[nodiscard]] bool IsChestAnimationReady() override {
@@ -409,7 +410,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     static_cast<void>(VS::Effects::LiveStartEffectTrack(0));
   }
   void EndAshleyStandaloneEffect() override {
-    Effects_EndAshleyStandaloneEffect();
+    VS::Effects::LiveEndAshleyStandaloneEffect();
   }
   void BeginActorActionSelection(int slot, int action) override {
     VS::Battle::LiveBeginActorActionSelection(slot,

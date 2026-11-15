@@ -66,6 +66,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
+#include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -336,12 +337,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&Effects_SignalActorEffectAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006D028u, 0u, (void*)&Effects_TintActionActorRed, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006D064u, 0u, (void*)&Effects_RestoreActionActorTint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&Effects_BeginAshleyStandaloneEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&Effects_EndAshleyStandaloneEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&Effects_ActionEffectBusyFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BE20u, 0u, (void*)&Effects_StartScriptedActorEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
@@ -2118,6 +2113,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006F450u, 0u, (void*)&VS::Effects::LiveSpawnGroundPlaneImpactEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006F4B0u, 0u, (void*)&VS::Effects::LiveSpawnTrapTileEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006F848u, 0u, (void*)&VS::Effects::LiveSpawnAbilityLearnedEffect, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&VS::Effects::LiveSignalActorEffectAnimation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006D028u, 0u, (void*)&VS::Effects::LiveTintActionActorRed, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006D064u, 0u, (void*)&VS::Effects::LiveRestoreActionActorTint, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&VS::Effects::LiveBeginAshleyStandaloneEffect, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&VS::Effects::LiveEndAshleyStandaloneEffect, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&VS::Effects::LiveActionEffectBusyFlags, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

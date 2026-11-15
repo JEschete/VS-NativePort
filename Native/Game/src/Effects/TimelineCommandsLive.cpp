@@ -12,6 +12,7 @@
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Log.hpp"
+#include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
@@ -177,7 +178,7 @@ void LiveActivateTargetRoomTile(Effects_EffectInstance* instance) {
 void LiveSignalSourceActorFromTimeline(Effects_EffectInstance* instance) {
   if (Refused(instance, "signal source actor")) return;
   if (const auto actor = TimelineSourceActorToSignal(EndpointsOf(*instance))) {
-    Effects_SignalActorEffectAnimation(*actor);
+    VS::Effects::LiveSignalActorEffectAnimation(*actor);
   }
 }
 

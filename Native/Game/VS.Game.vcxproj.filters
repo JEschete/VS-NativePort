@@ -1050,6 +1050,12 @@
     <ClCompile Include="src\Diagnostics\SceneTrace.cpp">
       <Filter>src\Diagnostics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\ActionEffectCallbacks.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\ActionEffectCallbacksLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ActionEffects.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3476,6 +3482,12 @@
     </ClInclude>
     <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ActionEffectCallbacks.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ActionEffectCallbacksLive.hpp">
+      <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\BoneTrail.hpp">
       <Filter>include\Effects</Filter>

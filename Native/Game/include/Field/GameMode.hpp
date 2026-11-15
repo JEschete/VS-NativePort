@@ -17,7 +17,7 @@ enum class FieldControlMode : std::int32_t {
   kExploration = 1,             // EnterFieldExplorationMode
   kBattleAction = 2,            // VS::Battle::LiveBeginActorActionSelection
   kCutscene = 3,                // BeginLiveQueuedCutscene
-  kStandaloneEffect = 4,        // Effects_BeginAshleyStandaloneEffect
+  kStandaloneEffect = 4,        // VS::Effects::LiveBeginAshleyStandaloneEffect
   kActionMenu = 5,              // BeginBattleActionMenu
   kShortcutMenu = 6,            // BeginShortcutMenu
   kFirstPersonView = 7,         // Field::BeginFirstPersonView
