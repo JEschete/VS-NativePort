@@ -1027,6 +1027,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::AppendSphereCircleVerticesEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
     "VS::Battle::AppendSphereConeVerticesEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
     "VS::Battle::BuildSphereWireframeEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
+    "VS::Battle::DrawRightTargetLabelLinkEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
+    "VS::Battle::DrawLeftTargetLabelLinkEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
+    "VS::Battle::AreTargetLabelsSettledEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
+    "VS::Battle::DrawSphereTargetLabelEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
+    "VS::Battle::UpdateSphereTargetLabelsEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
+    "VS::Battle::UpdateSphereTargetHighlightsEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1966,6 +1972,12 @@ OWNED_CALL_BINDINGS["F01286"] = "VS::Battle::BuildSphereVolumeTransformEntry"
 OWNED_CALL_BINDINGS["F01303"] = "VS::Battle::AppendSphereCircleVerticesEntry"
 OWNED_CALL_BINDINGS["F01304"] = "VS::Battle::AppendSphereConeVerticesEntry"
 OWNED_CALL_BINDINGS["F01305"] = "VS::Battle::BuildSphereWireframeEntry"
+OWNED_CALL_BINDINGS["F01298"] = "VS::Battle::DrawRightTargetLabelLinkEntry"
+OWNED_CALL_BINDINGS["F01299"] = "VS::Battle::DrawLeftTargetLabelLinkEntry"
+OWNED_CALL_BINDINGS["F01300"] = "VS::Battle::AreTargetLabelsSettledEntry"
+OWNED_CALL_BINDINGS["F01301"] = "VS::Battle::DrawSphereTargetLabelEntry"
+OWNED_CALL_BINDINGS["F01302"] = "VS::Battle::UpdateSphereTargetLabelsEntry"
+OWNED_CALL_BINDINGS["F01310"] = "VS::Battle::UpdateSphereTargetHighlightsEntry"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -4039,6 +4051,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800C2254, "VS::Battle::AppendSphereCircleVerticesEntry"),  # F01303
     ("BATTLE/BATTLE.PRG", 0x800C2368, "VS::Battle::AppendSphereConeVerticesEntry"),  # F01304
     ("BATTLE/BATTLE.PRG", 0x800C253C, "VS::Battle::BuildSphereWireframeEntry"),  # F01305
+    ("BATTLE/BATTLE.PRG", 0x800C16FC, "VS::Battle::DrawRightTargetLabelLinkEntry"),  # F01298
+    ("BATTLE/BATTLE.PRG", 0x800C1A40, "VS::Battle::DrawLeftTargetLabelLinkEntry"),  # F01299
+    ("BATTLE/BATTLE.PRG", 0x800C1D84, "VS::Battle::AreTargetLabelsSettledEntry"),  # F01300
+    ("BATTLE/BATTLE.PRG", 0x800C1DC4, "VS::Battle::DrawSphereTargetLabelEntry"),  # F01301
+    ("BATTLE/BATTLE.PRG", 0x800C20B4, "VS::Battle::UpdateSphereTargetLabelsEntry"),  # F01302
+    ("BATTLE/BATTLE.PRG", 0x800C4650, "VS::Battle::UpdateSphereTargetHighlightsEntry"),  # F01310
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4849,21 +4867,11 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("    Render_gimLayers = NULL;", "    VS::Render::ForgetLiveGimImages();",
          "#276 row 6: the heap was reset under the GIM set; the typed set is forgotten without being freed"),
     ],
-    "F01301": [
-        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "target-label backdrop uses native ordering links"),
-    ],
     "F01289": [
-        ("    Battle_UpdateSphereTargetLabels();",
-         "    Battle_UpdateSphereTargetLabels();\n"
+        ("    VS::Battle::UpdateSphereTargetLabelsEntry();",
+         "    VS::Battle::UpdateSphereTargetLabelsEntry();\n"
          "    Battle_DrawTargetPageHint();",
          "Only extended native target lists display a readable page indicator"),
-    ],
-    "F01302": [
-        ("    for (var_s3 = 0; var_s3 < 24; ++var_s3, var_s0 += 10, ++var_s1) {",
-         "    for (var_s3 = 0; var_s3 < 24; ++var_s3, ++var_s1) {\n"
-         "        var_s0 = &var_s1->screenX;",
-         "follow the native label stride; the PS1 20-byte step corrupts adjacent text pointers"),
     ],
     "F01287": [
         ("((u_long)primitive << 8) >> 8", "LegacyGpu_Handle(primitive)",
@@ -6304,13 +6312,6 @@ for _row, _variable in (
         "        return;\n    }",
         "retain the guarded movement primitive's optional actor contract in its rate wrapper",
     ))
-
-FIXES.setdefault("F01310", []).append((
-    "VS::Battle::IsLivePointInTargetVolume(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)"
-    "->volumes[1], arg0->opaque0)",
-    "VS::Battle::IsLivePointInCurrentSphereVolume(1, arg0->opaque0)",
-    "5BE50.c:65 containment reads the current native sphere and its known point-component array",
-))
 
 NATIVE_HELPER_HEADERS |= {
     "VS::Battle::CommitLiveFloatingLabel": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",

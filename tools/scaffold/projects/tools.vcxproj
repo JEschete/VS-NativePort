@@ -574,6 +574,16 @@
     <None Include="..\..\port\differentials\equipment_detail_b_guard_driver.cpp" />
     <None Include="..\..\port\differentials\equipment_stats_common.py" />
     <None Include="..\..\port\differentials\equipment_stats_driver.cpp" />
+    <None Include="..\..\port\differentials\event_room_commands_common.py" />
+    <None Include="..\..\port\differentials\event_room_commands_driver.cpp" />
+    <None Include="..\..\port\differentials\event_room_commands_f01112.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01113.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01114.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01116.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01117.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01118.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01119.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01141.py" />
     <None Include="..\..\port\differentials\f02640_equipment_weapon.py" />
     <None Include="..\..\port\differentials\f02641_equipment_shield.py" />
     <None Include="..\..\port\differentials\f02642_equipment_armor.py" />
@@ -765,6 +775,8 @@
     <None Include="..\..\port\differentials\sphere_geometry_f01305.py" />
     <None Include="..\..\port\differentials\sphere_lifecycle.py" />
     <None Include="..\..\port\differentials\sphere_lifecycle_driver.cpp" />
+    <None Include="..\..\port\differentials\sphere_target_labels.py" />
+    <None Include="..\..\port\differentials\sphere_target_labels_driver.cpp" />
     <None Include="..\..\port\differentials\stat_factors.py" />
     <None Include="..\..\port\differentials\stat_factors_driver.cpp" />
     <None Include="..\..\port\differentials\stat_factors_guard_driver.cpp" />

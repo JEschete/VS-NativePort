@@ -7,9 +7,6 @@
 // decomp: src/include/gpu.h:96
 #define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
 
-// decomp: src/include/gpu.h:105
-#define vs_getRGB0Raw(code, rgb0) (((code) << 24) | (rgb0))
-
 // decomp: src/include/gpu.h:110
 #define vs_getUV1Tpage(u, v, x, y, tp, abr)                                              \
     (((u) | ((v) << 8)) | (getTPage((tp), (abr), (x), (y)) << 16))
@@ -33,14 +30,8 @@ extern u_char Battle_reuseSphereVolumes;
 extern Battle_TargetSphereSetupView* Battle_targetSphere;
 void Battle_DrawSphereWireLine(SVECTOR* start, SVECTOR* end, u_int color, int intensity);
 void Battle_DrawSphere(void);
-void Battle_DrawRightTargetLabelLink(int x0, int x1, int count);
-void Battle_DrawLeftTargetLabelLink(int x0, int x1, int count);
-int Battle_AreTargetLabelsSettled(void);
-void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* label);
-void Battle_UpdateSphereTargetLabels(void);
 void* Battle_BuildSphereCameraBasis(void);
 void Battle_DrawSpherePositionCursor(SVECTOR* position, int lock_pitch);
 void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row);
-void Battle_UpdateSphereTargetHighlights(Battle_TargetLabelLine* target_lines, int target_count);
 
 #endif // VS_BATTLE_SPHERE_H_DECLS

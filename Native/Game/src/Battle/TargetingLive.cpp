@@ -29,6 +29,7 @@
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
+#include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -964,7 +965,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
       VS_LOG_ERROR("battle.targeting", "{} area targets without a list", count);
       return;
     }
-    Battle_UpdateSphereTargetHighlights(
+    VS::Battle::UpdateSphereTargetHighlightsEntry(
         reinterpret_cast<Battle_TargetLabelLine*>(list), count);
   }
   void DrawTerrainIntersection(TargetPoint point, int scale) override {
@@ -1091,7 +1092,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
         text.skip_first_character ? &name[1] : &name[0];
   }
   [[nodiscard]] bool LabelsSettled() const override {
-    return Battle_AreTargetLabelsSettled() != 0;
+    return VS::Battle::AreTargetLabelsSettledEntry() != 0;
   }
   [[nodiscard]] bool HandlePageButtons() override {
     return Battle_HandleTargetPageButtons() != 0;

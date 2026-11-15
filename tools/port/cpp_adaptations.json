@@ -142,7 +142,7 @@
 ],
 "Native\\Game\\src\\Battle\\Sphere.cpp": [
 [
-137,
+134,
 [
 "    primitive = Render_frameScratch.primitiveCursor;",
 "    orderingTable = Render_frameScratch.orderingTable;"
@@ -153,7 +153,7 @@
 ]
 ],
 [
-173,
+170,
 [
 "        Core_Gte_LoadV0(shape->position);"
 ],
@@ -162,7 +162,7 @@
 ]
 ],
 [
-175,
+172,
 [
 "        Core_Gte_StoreSz3Otz(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)->depth);"
 ],
@@ -171,126 +171,7 @@
 ]
 ],
 [
-272,
-[
-"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
-],
-[
-"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),"
-]
-],
-[
-280,
-[
-"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
-],
-[
-"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
-]
-],
-[
-285,
-[
-"                    VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
-],
-[
-"                    VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
-]
-],
-[
-294,
-[
-"            VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
-],
-[
-"            VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
-]
-],
-[
-300,
-[
-"        _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), Render_frameScratch.overlayOrderingTable);"
-],
-[
-"        _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), (u_long *)(Render_frameScratch.overlayOrderingTable));"
-]
-],
-[
-357,
-[
-"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
-],
-[
-"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),"
-]
-],
-[
-365,
-[
-"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
-],
-[
-"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
-]
-],
-[
-370,
-[
-"                    VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
-],
-[
-"                    VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
-]
-],
-[
-379,
-[
-"            VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
-],
-[
-"            VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
-]
-],
-[
-385,
-[
-"        _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), Render_frameScratch.overlayOrderingTable);"
-],
-[
-"        _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), (u_long *)(Render_frameScratch.overlayOrderingTable));"
-]
-],
-[
-404,
-[
-"    u_long* nextPrim = Render_frameScratch.overlayOrderingTable - (label->depth * 4 - 8);"
-],
-[
-"    u_long* nextPrim = (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - (label->depth * 4 - 8));"
-]
-],
-[
-443,
-[
-"    prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"    prim = (Battle_TargetLabelPrimitive *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-476,
-[
-"        Core_Gte_StoreSxy2(&sxy);",
-"        Core_Gte_StoreOtz(&otz);"
-],
-[
-"        Core_Gte_StoreSxy2((long *)(&sxy));",
-"        Core_Gte_StoreOtz((long *)(&otz));"
-]
-],
-[
-594,
+241,
 [
 "    u_long* ot = Render_frameScratch.orderingTable - 4;"
 ],
@@ -299,7 +180,7 @@
 ]
 ],
 [
-598,
+245,
 [
 "    Core_Gte_StoreSxy2(&xy);"
 ],
@@ -308,7 +189,7 @@
 ]
 ],
 [
-603,
+250,
 [
 "        prim = Render_frameScratch.primitiveCursor;"
 ],

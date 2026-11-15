@@ -14,6 +14,7 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionSequenceLive.hpp"
+#include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Field/GimmickPlacementLive.h"
@@ -477,8 +478,8 @@ int Tests_TargetLabelStride(void) {
   }
   Battle_targetSphere =
       reinterpret_cast<Battle_TargetSphereSetupView*>(&sphere);
-  Battle_UpdateSphereTargetLabels();
-  int passed = Battle_AreTargetLabelsSettled() == 1;
+  VS::Battle::UpdateSphereTargetLabelsEntry();
+  int passed = VS::Battle::AreTargetLabelsSettledEntry() == 1;
   for (unsigned index = 0; index < 24; ++index) {
     passed = passed && sphere.labels[index].screenX == 3032 &&
              sphere.labels[index].state == 0 &&

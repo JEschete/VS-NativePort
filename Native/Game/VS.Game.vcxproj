@@ -548,6 +548,10 @@
     <ClCompile Include="src\Battle\SphereReleaseLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\SphereTargetLabels.cpp" />
+    <ClCompile Include="src\Battle\SphereTargetLabelsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\SphereTerrain.cpp" />
     <ClCompile Include="src\Battle\SphereTerrainLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2535,6 +2539,8 @@
     <ClInclude Include="include\Battle\SphereLifecycle.hpp" />
     <ClInclude Include="include\Battle\SphereLifecycleLive.hpp" />
     <ClInclude Include="include\Battle\SphereReleaseLive.hpp" />
+    <ClInclude Include="include\Battle\SphereTargetLabels.hpp" />
+    <ClInclude Include="include\Battle\SphereTargetLabelsLive.hpp" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
     <ClInclude Include="include\Battle\StatFactors.hpp" />
