@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <span>
 
+#include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetingDraw.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -35,7 +36,7 @@ class LiveWireCanvas final : public TargetWireCanvas {
     std::array<u_char, kTargetVolumeExtents> scale{};
     std::copy(extents.begin(), extents.end(), scale.begin());
     return math::MatrixOf(
-        *Battle_BuildSphereVolumeTransform(scale.data(), angle));
+        *BuildSphereVolumeTransformEntry(scale.data(), angle));
   }
 
   void BeginProjection() override { VS::Render::LoadLiveFrameViewMatrix(); }

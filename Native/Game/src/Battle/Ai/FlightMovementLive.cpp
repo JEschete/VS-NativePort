@@ -146,7 +146,9 @@ class LiveFlightWorld final : public FlightMovementWorld {
                             .body_height = other->bodyHeight,
                             .position = std::nullopt};
     if (other->model != nullptr) {
-      const auto& position = other->model->opaque1C;
+      const auto& position =
+          reinterpret_cast<const Actors_ActorRecord*>(other->model)
+              ->instance.position;
       obstacle.position =
           FlightPoint{.x = position.vx, .y = position.vy, .z = position.vz};
     }

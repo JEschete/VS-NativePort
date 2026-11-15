@@ -23,6 +23,7 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 }
 
@@ -83,8 +84,8 @@ struct GroundFixture {
       states[index].actorId = static_cast<u_char>(index);
       states[index].actor =
           reinterpret_cast<Battle_Ai_EngagementData*>(&actors[index]);
-      states[index].model =
-          reinterpret_cast<Battle_Ai_AiModelView*>(&models[index]);
+      states[index].model = reinterpret_cast<Battle_Ai_ModelStatePrefix*>(
+          &models[index].instance);
       states[index].collision_radius = 32;
       states[index].bodyHeight = 128;
       states[index].maxRange = 32;

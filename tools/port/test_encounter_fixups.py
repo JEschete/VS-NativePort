@@ -1290,6 +1290,22 @@ class EncounterFixupTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "saved decision callback slot"):
             native_views.rebase("T00392", "char reserved6C[4];\n", [])
 
+    def test_ai_state_linked_actor_byte_bitfield_is_rebased_without_widening(self):
+        state = native_views.rebase(
+            "T00532",
+            "    signed char linkedActor : 8;\n"
+            "    char reserved160[8];\n"
+            "    char reserved18C[14];\n"
+            "    char reserved19B[5];\n",
+            [("reserved18C", {"offset": 0x18C * 8, "type": "char[14]"})],
+        )
+        self.assertIn("signed char linkedActor;", state)
+        self.assertNotIn("linkedActor :", state)
+        self.assertIn("u_int scriptedTargetXZ;", state)
+        self.assertIn("void* nativePointer18C;", state)
+        self.assertIn("u_int navigationFlags;", state)
+        self.assertIn("u_char route_gate;", state)
+
     def test_ashley_alliance_ownership_and_source_integer_comparison(self):
         root = Path(__file__).resolve().parents[2]
         owned = self.owned_items()
@@ -2481,7 +2497,8 @@ class EncounterFixupTests(unittest.TestCase):
             for fix in copy_fixups.TYPE_FIXES["T00532"]
             if fix[0] == "char reserved3C[8];"
         )
-        self.assertIn(old, new)
+        self.assertEqual(old, "char reserved3C[8];")
+        self.assertIn("char reserved3C[8];", new)
         self.assertIn("u_int rememberedTargetTile;", new)
         self.assertIn("u_short targetMemoryFrames;", new)
         self.assertIn("short savedRelationOptions;", new)
@@ -2494,6 +2511,18 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01792"]["path"],
             r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp",
         )
+
+    def test_ai_planned_tile_fields_do_not_inflate_native_layout(self):
+        old, new, _ = next(
+            fix
+            for fix in copy_fixups.TYPE_FIXES["T00532"]
+            if "Battle_Ai_TilePosition plannedTile;" in fix[0]
+        )
+        self.assertIn("u_char ground_area;", new)
+        self.assertIn("u_char reserved133;", new)
+        self.assertIn("Battle_Ai_TilePosition plannedTile;", new)
+        self.assertNotIn("union {", new)
+        self.assertEqual(old.count("\n"), 1)
 
     def test_ai_target_forget_keeps_its_module_address_and_callers(self):
         # #276 row 28: Battle_Ai_ForgetAiActionTarget (F01793) is typed C++ beside the target memory it clears.
@@ -3530,6 +3559,20 @@ class EncounterFixupTests(unittest.TestCase):
             source = source.replace(old, new)
         self.assertEqual(source, "u_short pulsedPalette[16];")
 
+    def test_gimmick_rotation_fields_keep_ledger_spans(self):
+        source = (
+            "    u_short rotationY;\n    int rotationZ;\n    short scaleX;\n"
+            "    int rotationDeltaX;\n    int rotationDeltaZ;\n    int reserved44;"
+        )
+        for old, new, _ in copy_fixups.TYPE_FIXES["T00255"]:
+            source = source.replace(old, new)
+        self.assertIn("u_short rotationZ;\n    short reserved2A;", source)
+        self.assertIn(
+            "short rotationDeltaX;\n    short rotationDeltaY;\n"
+            "    short rotationDeltaZ;\n    short reserved42;",
+            source,
+        )
+
     def test_room_ai_alias_fixup_matches_generated_merged_layout(self):
         text = (
             "typedef struct Battle_Ai_RoomAiState {\n"
@@ -4519,7 +4562,10 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertNotIn("InitSphere", body)
         live = (root / "Native/Game/src/Battle/TargetingLive.cpp").read_text(encoding="utf-8")
         start = live.index("void ShowAreaVolume() override {")
-        self.assertIn("Battle_SetSecondarySphereVolume(&area);", live[start:live.index("\n  }\n", start)])
+        self.assertIn(
+            "VS::Battle::SetSecondarySphereVolumeEntry(&area);",
+            live[start : live.index("\n  }\n", start)],
+        )
 
     def test_native_target_capacity_is_not_a_ps1_allocation_or_visible_limit(self):
         root = Path(__file__).resolve().parents[2]

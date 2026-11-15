@@ -61,7 +61,7 @@ ACTOR_VIEWS = frozenset(["T00358", "T00379", "T00383", "T00388", "T00390", "T003
 ACTOR_POINTERS = (0, 0x3C, 0x44, 0x48, 0x4C)
 
 # D_800F4538_t / D_800F4538_unk0 (3A1A0.h). More distant model fields are validated against ActorRecord.
-MODEL_VIEWS = frozenset(["T00360", "T00384", "T00387", "T00411", "T00527", "T00553", "T00558", "T00560", "T00568", "T00588", "T00589", "T00612", "T00622", "T00739"])
+MODEL_VIEWS = frozenset(["T00360", "T00384", "T00387", "T00411", "T00553", "T00558", "T00560", "T00568", "T00588", "T00589", "T00612", "T00622", "T00739"])
 MODEL_POINTERS = (0x68, *range(0x5D0, 0x5EC, 4))
 
 GIMMICK_VIEWS = frozenset(("T00565", "T00566"))
@@ -96,7 +96,11 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
         return text
     # GCC packed these full-byte bitfields; MSVC reserves the entire declared short.
     if tid in ('T00532', 'T00412'):
-        text, count = re.subn(r'(?:int|short) linkedActor\s*:\s*8;', 'signed char linkedActor;', text)
+        text, count = re.subn(
+            r'(?:int|short|signed char) linkedActor\s*:\s*8;',
+            'signed char linkedActor;',
+            text,
+        )
         if count != 1:
             raise ValueError(f'{tid}: linkedActor byte not found')
     # 7C7E0.s:196 frees the navigation override; perception only tests its presence.

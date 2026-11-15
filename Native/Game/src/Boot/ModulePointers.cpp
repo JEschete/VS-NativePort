@@ -52,6 +52,9 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/SphereContainmentLive.hpp"
+#include "Battle/SphereGeometryLive.hpp"
+#include "Battle/SphereLifecycleLive.hpp"
+#include "Battle/SphereReleaseLive.hpp"
 #include "Battle/StatFactorsLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -441,30 +444,17 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BE53Cu, 0u, (void*)&Event_ScaleEventCameraTrackDuration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE5A4u, 0u, (void*)&Event_ScaleEventCameraDuration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE7B8u, 0u, (void*)&Event_ReadScriptFixedVector, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C031Cu, 0u, (void*)&Battle_InitSphere, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C05B4u, 0u, (void*)&Battle_FreeSphere, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C05ECu, 0u, (void*)&Battle_SetSphereVolumes, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C06E0u, 0u, (void*)&Battle_ClearPrimarySphereVolume, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0700u, 0u, (void*)&Battle_SetSecondarySphereVolume, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0738u, 0u, (void*)&Battle_ClearSecondarySphereVolume, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0758u, 0u, (void*)&Battle_AppendSphereArcVertices, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C085Cu, 0u, (void*)&Battle_BuildSphereVolumeTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0990u, 0u, (void*)&Battle_DrawSphereWireLine, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0D78u, 0u, (void*)&Battle_DrawSphere, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C16DCu, 0u, (void*)&Battle_ClearSphereTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C16FCu, 0u, (void*)&Battle_DrawRightTargetLabelLink, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1A40u, 0u, (void*)&Battle_DrawLeftTargetLabelLink, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1D84u, 0u, (void*)&Battle_AreTargetLabelsSettled, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1DC4u, 0u, (void*)&Battle_DrawSphereTargetLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C20B4u, 0u, (void*)&Battle_UpdateSphereTargetLabels, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C2254u, 0u, (void*)&Battle_AppendSphereCircleVertices, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C2368u, 0u, (void*)&Battle_AppendSphereConeVertices, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C253Cu, 0u, (void*)&Battle_BuildSphereWireframe, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C282Cu, 0u, (void*)&Battle_BuildSphereCameraBasis, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C28ACu, 0u, (void*)&Battle_DrawSpherePositionCursor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C2B0Cu, 0u, (void*)&Battle_CacheSphereTerrainRow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4650u, 0u, (void*)&Battle_UpdateSphereTargetHighlights, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C4734u, 0u, (void*)&Battle_SphereInteractionMode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&Menu_SetTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&Menu_SelectTextBoxChoice, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
@@ -1685,6 +1675,19 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800958A4u, 0u, (void*)&VS::Battle::DrawLiveAbilityTimingResult, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80095A4Cu, 0u, (void*)&VS::Battle::DrawLiveChainCount, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800970BCu, 0u, (void*)&VS::Battle::DrawLiveAbilityTimingCue, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C031Cu, 0u, (void*)&VS::Battle::InitializeSphereEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C05B4u, 0u, (void*)&VS::Battle::FreeSphereEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C05ECu, 0u, (void*)&VS::Battle::SetSphereVolumesEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C06E0u, 0u, (void*)&VS::Battle::ClearPrimarySphereVolumeEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C0700u, 0u, (void*)&VS::Battle::SetSecondarySphereVolumeEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C0738u, 0u, (void*)&VS::Battle::ClearSecondarySphereVolumeEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C16DCu, 0u, (void*)&VS::Battle::ClearSphereTargetsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C4734u, 0u, (void*)&VS::Battle::SphereInteractionModeEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C0758u, 0u, (void*)&VS::Battle::AppendSphereArcVerticesEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C085Cu, 0u, (void*)&VS::Battle::BuildSphereVolumeTransformEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C2254u, 0u, (void*)&VS::Battle::AppendSphereCircleVerticesEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C2368u, 0u, (void*)&VS::Battle::AppendSphereConeVerticesEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C253Cu, 0u, (void*)&VS::Battle::BuildSphereWireframeEntry, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

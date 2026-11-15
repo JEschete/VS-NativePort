@@ -939,6 +939,12 @@
     <ClCompile Include="src\SphereContainmentTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SphereGeometryTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SphereLifecycleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SphereTerrainSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

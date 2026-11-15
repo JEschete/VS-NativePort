@@ -384,6 +384,8 @@
     <ClCompile Include="src\SphereContainmentLiveTests.cpp" />
     <ClCompile Include="src\SphereContainmentModuleTests.cpp" />
     <ClCompile Include="src\SphereContainmentTests.cpp" />
+    <ClCompile Include="src\SphereGeometryTests.cpp" />
+    <ClCompile Include="src\SphereLifecycleTests.cpp" />
     <ClCompile Include="src\SphereTerrainSliceTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\SpritesTests.cpp" />

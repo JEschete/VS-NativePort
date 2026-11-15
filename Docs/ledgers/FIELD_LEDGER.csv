@@ -4642,17 +4642,6 @@ T00527.001,T00527,func_800E1238_t,1,unk4,1,int,,,,reserved4,Not read by decompil
 T00527.002,T00527,func_800E1238_t,2,unk8_0,1,u_int,21,,,reserved8Bit0,Not read by decompiled code,low,declaration-only;source:6F014.c:136
 T00527.003,T00527,func_800E1238_t,3,unk8_21,1,u_int,1,,,opaqueABit5,"Used, but its meaning is not established",low,source:771A8.c:1322
 T00527.004,T00527,func_800E1238_t,4,unk8_22,1,u_int,10,,,reservedABit6,Not read by decompiled code,low,declaration-only;source:6F014.c:138
-T00527.005,T00527,func_800E1238_t,5,unkC,1,char[8],,,layout:upstream,reservedC,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:155
-T00527.006,T00527,func_800E1238_t,6,unk14,1,short,,,layout:upstream,opaque14,"Used, but its meaning is not established",low,source:upstream:6E644.c:3496
-T00527.007,T00527,func_800E1238_t,7,unk16,1,char[6],,,layout:upstream,reserved16,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:157
-T00527.008,T00527,func_800E1238_t,8,unk1C,1,SVECTOR,,,layout:upstream,opaque1C,"Used, but its meaning is not established",low,source:upstream:6E644.c:2862
-T00527.009,T00527,func_800E1238_t,9,unk24,1,char[2],,,layout:upstream,reserved24,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:159
-T00527.010,T00527,func_800E1238_t,10,unk26,1,short,,,layout:upstream,opaque26,"Used, but its meaning is not established",low,source:upstream:6E644.c:3496
-T00527.011,T00527,func_800E1238_t,11,unk28,1,char[52],,,layout:upstream,reserved28,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:161
-T00527.012,T00527,func_800E1238_t,12,unk5C,1,vs_battle_movementPosition,,,layout:upstream,opaque5C,"Used, but its meaning is not established",low,source:upstream:6E644.c:1332
-T00527.013,T00527,func_800E1238_t,13,unk60,1,char[1360],,,layout:upstream,reserved60,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:163
-T00527.014,T00527,func_800E1238_t,14,unk5B0_0,1,u_int,4,,layout:upstream,reserved5B0Bit0,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:164
-T00527.015,T00527,func_800E1238_t,15,unk5B0_4,1,u_int,1,,layout:upstream,opaque5B0Bit4,"Used, but its meaning is not established",low,source:upstream:6E644.c:3947
 T00528.000,T00528,func_800E5568_t,0,rangeX,0,char,,,,reserved0,Not read by decompiled code,low,source:7CD68.c:482
 T00528.001,T00528,func_800E5568_t,1,rangeY,0,char,,,,rangeY,Named in the fork; see cited use,med,source:7CD68.c:449
 T00528.002,T00528,func_800E5568_t,2,rangeZ,0,char,,,,rangeZ,Named in the fork; see cited use,med,source:7CD68.c:446

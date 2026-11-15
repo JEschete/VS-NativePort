@@ -677,7 +677,7 @@ void CheckLiveStateLinks(const Battle_Ai_ActorAiState& state,
   CHECK(state.actorId == 0);
   CHECK(state.actor ==
         reinterpret_cast<const Battle_Ai_EngagementData*>(&fixture.actor));
-  CHECK(state.model == reinterpret_cast<const Battle_Ai_AiModelView*>(
+  CHECK(state.model == reinterpret_cast<const Battle_Ai_ModelStatePrefix*>(
                            &fixture.record.instance));
   CHECK(state.stats == &fixture.stats);
   CHECK(state.nativePointer60 == &fixture.record.instance.position);

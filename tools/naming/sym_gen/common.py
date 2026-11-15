@@ -210,7 +210,7 @@ class Gen:
         return any(f"{n}.{member}" in self.field_refs() for n in names)
 
     def layout(self, tid: str) -> dict:
-        """Index layout matching the ledger's member list: pinned first, then upstream (adopted merged layouts)."""
+        """Match ledger members to an indexed layout or merge their spans by member name."""
         key = canonical_type_key(self.types[tid]["key"].partition("#")[0])
         want = [m["name"] for m in self.members[tid]]
         for p in ("", "upstream:"):
@@ -222,7 +222,9 @@ class Gen:
                 if canonical_type_key(x["key"]) == key and len(x["fields"]) == len(want):
                     return x
         # merged layout (UPSTREAM_LAYOUTS): each member's offset from the pinned layout by name, else upstream's
-        sources = [x for p in ("", "upstream:") for x in self.trees[p].ix["types"].values()
+        # T00532's fork views are partial overlapping spans; its adopted layout uses the shared upstream definition.
+        prefixes = ("upstream:", "") if tid == "T00532" else ("", "upstream:")
+        sources = [x for p in prefixes for x in self.trees[p].ix["types"].values()
                    if canonical_type_key(x["key"]) == key]
         fields = []
         for n in want:

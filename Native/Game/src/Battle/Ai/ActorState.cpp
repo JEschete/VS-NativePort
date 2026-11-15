@@ -2,15 +2,18 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
+#include "Actors/ActorRecord.h"
+#include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
+#include "Actors/Movement.h"
+#include "Actors/Shadow.h"
+#include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
+#include "Render/Palette.h"
 
 // decomp: D_80069C18 (D_80069C18@BATTLE/BATTLE.PRG)
 unsigned char Battle_Ai_kSettingsBits30Values[1284]; /* contents: module image (ModuleData.cpp) */

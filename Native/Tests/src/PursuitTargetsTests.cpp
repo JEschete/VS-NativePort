@@ -53,8 +53,8 @@ struct PursuitFixture {
       states[index].actorId = static_cast<u_char>(index);
       states[index].actor =
           reinterpret_cast<Battle_Ai_EngagementData*>(&actors[index]);
-      states[index].model =
-          reinterpret_cast<Battle_Ai_AiModelView*>(&models[index]);
+      states[index].model = reinterpret_cast<Battle_Ai_ModelStatePrefix*>(
+          &models[index].instance);
     }
     Field_roomData.movingPlatforms = platforms.data();
     Field_roomData.header.movingPlatformsLength = sizeof platforms;

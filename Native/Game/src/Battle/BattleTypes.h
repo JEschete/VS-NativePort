@@ -188,29 +188,29 @@ typedef struct Battle_TargetSphereLabelEntry {
     char* limbName;
 } Battle_TargetSphereLabelEntry;
 
-// layout: ledger (upstream merge) for func_800C56C0_t
+// decomp: func_800C56C0_t (src/BATTLE/BATTLE.PRG/5BF94.c:300)
 typedef struct Battle_TargetSphereLabelView {
-    /* 0x00 */ Battle_TargetVolume opaque0[2];
-    /* 0x20 */ short reserved20;
-    /* 0x22 */ short opaque22;
-    /* 0x24 */ int reserved24;
-    /* 0x28 */ short reserved28;
-    /* 0x2A */ short opaque2A;
-    /* 0x2C */ u_char opaque2C;
-    /* 0x2D */ u_char opaque2D;
-    /* 0x2E */ u_char opaque2E;
-    /* 0x2F */ u_char opaque2F;
-    /* 0x30 */ signed char opaque30;
-    /* 0x31 */ u_char opaque31;
-    /* 0x32 */ char reserved32[2];
-    /* 0x34 */ int opaque34;
-    /* 0x38 */ SVECTOR opaque38;
-    /* 0x40 */ Battle_TargetInfoLine *opaque40;
-    /* 0x44 */ Battle_TargetInfoLine *opaque44;
-    /* 0x48 */ char reserved48[2376];
-    /* 0x990 */ Battle_TargetSphereLabelEntry opaque990[24];
-    /* 0xB70 */ char reservedB70[16100];
-    /* 0x4A54 */ char textBuffer[200];
+    Battle_TargetVolume opaque0[2];
+    short reserved20;
+    short opaque22;
+    int reserved24;
+    short reserved28;
+    short opaque2A;
+    u_char opaque2C;
+    u_char opaque2D;
+    u_char opaque2E;
+    u_char opaque2F;
+    signed char opaque30;
+    u_char opaque31;
+    char reserved32[2];
+    int opaque34;
+    SVECTOR opaque38;
+    Battle_TargetInfoLine* opaque40;
+    Battle_TargetInfoLine* opaque44;
+    char reserved48[0x948];
+    Battle_TargetSphereLabelEntry opaque990[24];
+    char reservedB70[0x3EE4];
+    char textBuffer[200];
 } Battle_TargetSphereLabelView;
 
 // decomp: func_800C5798_t (src/BATTLE/BATTLE.PRG/5BF94.c:265)

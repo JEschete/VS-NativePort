@@ -14,6 +14,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
+#include "Battle/SphereLifecycleLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -369,7 +370,7 @@ bool LiveCameraHost::TargetPagesUseShoulders() {
 }
 
 int LiveCameraHost::SphereInteractionMode() {
-  return Battle_SphereInteractionMode();
+  return VS::Battle::SphereInteractionModeEntry();
 }
 
 // The core reports a missing action itself.

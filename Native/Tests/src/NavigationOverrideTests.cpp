@@ -28,6 +28,7 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/BiosRand.h"
@@ -139,7 +140,8 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     source.nativePointer18C = nullptr;
     source.actorId = 1;
     source.actor = reinterpret_cast<Battle_Ai_EngagementData*>(&actors[1]);
-    source.model = reinterpret_cast<Battle_Ai_AiModelView*>(&model);
+    source.model =
+        reinterpret_cast<Battle_Ai_ModelStatePrefix*>(&model.instance);
     source.nativePointer64 = &model.instance.currentTileX;
     source.radius = 16;
     source.walkStep = 32;

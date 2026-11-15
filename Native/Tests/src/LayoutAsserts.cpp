@@ -27,6 +27,7 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingState.h"

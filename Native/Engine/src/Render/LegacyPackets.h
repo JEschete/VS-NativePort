@@ -179,12 +179,13 @@ typedef struct Render_ClosedRingTexCoord {
 } Render_ClosedRingTexCoord;
 _Static_assert(sizeof(Render_ClosedRingTexCoord) == 0x2, "Render_ClosedRingTexCoord must keep its PS1 layout");
 
-// layout: ledger (upstream merge) for vs_gridPrim
+// decomp: vs_gridPrim (src/EFFECT/grids.h:21)
 typedef struct Render_GridPacket {
-    /* 0x00 */ int tag;
-    /* 0x04 */ POLY_FT4 poly;
-    /* 0x2C */ int drawMode;
-    /* 0x30 */ int reserved30[3];
+    int tag;
+    POLY_FT4 poly;
+    int drawMode;
+    /* Effect packets reserve 60 bytes even for the shorter flat-textured quad. */
+    int reserved30[3];
 } Render_GridPacket;
 _Static_assert(sizeof(Render_GridPacket) == 0x3C, "Render_GridPacket must keep its PS1 layout");
 

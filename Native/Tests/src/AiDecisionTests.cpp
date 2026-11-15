@@ -401,7 +401,8 @@ struct PerceptionFixture : DecisionFixture {
     actors[0].model = &records[0].instance;
     actors[1].model = &records[1].instance;
     actors[1].next = nullptr;
-    state.model = reinterpret_cast<Battle_Ai_AiModelView*>(&records[1]);
+    state.model =
+        reinterpret_cast<Battle_Ai_ModelStatePrefix*>(&records[1].instance);
     state.position = records[1].instance.position = {64, 0, 96, 0};
     records[0].instance.position = {64, 0, 32, 0};
     View().nearDistanceSquared = View().farDistanceSquared = 768 * 768;

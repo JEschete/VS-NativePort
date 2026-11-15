@@ -15,7 +15,6 @@ typedef struct Battle_Ai_ActionSlotMetadata Battle_Ai_ActionSlotMetadata;
 typedef struct Battle_Ai_ActorAiState Battle_Ai_ActorAiState;
 typedef struct Battle_Ai_AiActorView Battle_Ai_AiActorView;
 typedef struct Battle_Ai_AiCreationView Battle_Ai_AiCreationView;
-typedef struct Battle_Ai_AiModelView Battle_Ai_AiModelView;
 typedef struct Battle_Ai_ApproachActorView Battle_Ai_ApproachActorView;
 typedef struct Battle_Ai_ApproachTargetRecordView Battle_Ai_ApproachTargetRecordView;
 typedef struct Battle_Ai_AreaRouteView Battle_Ai_AreaRouteView;
@@ -36,6 +35,7 @@ typedef struct Battle_Ai_EscortView Battle_Ai_EscortView;
 typedef struct Battle_Ai_FloorHeightView Battle_Ai_FloorHeightView;
 typedef struct Battle_Ai_MetadataStatsView Battle_Ai_MetadataStatsView;
 typedef struct Battle_Ai_ModelActiveView Battle_Ai_ModelActiveView;
+typedef struct Battle_Ai_ModelStatePrefix Battle_Ai_ModelStatePrefix;
 typedef struct Battle_Ai_MoveTargetView Battle_Ai_MoveTargetView;
 typedef struct Battle_Ai_MovementCheckView Battle_Ai_MovementCheckView;
 typedef struct Battle_Ai_MovementDecisionView Battle_Ai_MovementDecisionView;
@@ -86,17 +86,22 @@ typedef struct Battle_Ai_RoomAiState {
     /* 0x03 */ u_char minTileZ;
     /* 0x04 */ char reserved4[4];
     /* 0x08 */ u_char defaultActionDelay;
-    /* 0x09 */ char reserved9;
-    /* 0x0A */ u_char allowsNonSpellActions;
-    /* 0x0B */ union {
-        char reservedB[9];
+    /* 0x09 */ union {
+        char reserved9;
         struct {
-            u_char reservedBPrefix[2];
-            u_char engagementLimit;
-            u_char reservedEPrefix[2];
-            u_char engaged_mask_bytes[2];
-            u_char engagedCount;
-            u_char reserved13;
+            char reserved9Prefix;
+            u_char allowsNonSpellActions;
+            union {
+                char reservedB[9];
+                struct {
+                    u_char reservedBPrefix[2];
+                    u_char engagementLimit;
+                    u_char reservedEPrefix[2];
+                    u_char engaged_mask_bytes[2];
+                    u_char engagedCount;
+                    u_char reserved13;
+                };
+            };
         };
     };
     /* 0x14 */ int flightCeiling;
@@ -828,7 +833,7 @@ typedef struct Battle_Ai_FloorHeightView {
     short reserved4E;
     char reserved50_50[4];
     void* nativePointer54; /* PS1 pointer slot 0x54 */
-    Battle_Ai_AiModelView* model;
+    Battle_Ai_ModelStatePrefix* model;
     void* nativePointer5C; /* PS1 pointer slot 0x5C */
     void* nativePointer60; /* PS1 pointer slot 0x60 */
     void* nativePointer64; /* PS1 pointer slot 0x64 */
@@ -924,7 +929,7 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x48 */ Battle_Ai_TilePosition savedDestination;
     /* 0x4C */ SVECTOR position;
     /* 0x54 */ Battle_Ai_EngagementData *actor;
-    /* 0x58 */ Battle_Ai_AiModelView *model;
+    /* 0x58 */ Battle_Ai_ModelStatePrefix *model;
     /* 0x5C */ Battle_ActorStats *stats;
     void* nativePointer60; /* PS1 pointer slot 0x60 */
     void* nativePointer64; /* PS1 pointer slot 0x64 */
@@ -1039,13 +1044,8 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x12F */ signed char opaque12F;
     /* 0x130 */ signed char opaque130;
     /* 0x131 */ u_char actionStatus;
-    /* 0x132 */ union {
-        char reserved132[2];
-        struct {
-            u_char ground_area;
-            u_char reserved133;
-        };
-    };
+    /* 0x132 */ u_char ground_area;
+    /* 0x133 */ u_char reserved133;
     /* 0x134 */ Battle_Ai_TilePosition plannedTile;
     /* 0x138 */ u_short awarenessMarker;
     /* 0x13A */ u_short opaque13A;
@@ -1078,7 +1078,7 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x180 */ int moveZ;
     /* 0x184 */ int moveY;
     /* 0x188 */ short heading;
-    /* 0x18A */ short angle : 16;
+    /* 0x18A */ short angle;
     void* nativePointer18C; /* PS1 pointer slot 0x18C */
     u_int navigationFlags;
     union { char reserved194[6]; struct {

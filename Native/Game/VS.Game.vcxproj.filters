@@ -894,6 +894,21 @@
     <ClCompile Include="src\Battle\SphereContainmentLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\SphereGeometry.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\SphereGeometryLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\SphereLifecycle.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\SphereLifecycleLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\SphereReleaseLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\SphereTerrain.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3307,6 +3322,21 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\SphereContainmentLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\SphereGeometry.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\SphereGeometryLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\SphereLifecycle.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\SphereLifecycleLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\SphereReleaseLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\SphereTerrain.hpp">

@@ -15,19 +15,18 @@ typedef struct Effects_Plg128_CameraEffectState Effects_Plg128_CameraEffectState
 #undef VS_EFFECTS_PLUGINS_PLG128_H_SET_TYPES_ONLY
 #endif
 
-// layout: ledger (upstream merge) for func_800FD9A4_t
+// decomp: func_800FD9A4_t (src/EFFECT/PLG128.BIN/F8.c:24)
 typedef struct Effects_Plg128_CameraEffectState {
-    /* 0x00 */ u_char lifetime;
-    /* 0x01 */ u_char effect;
-    /* 0x02 */ short mode;
-    /* 0x04 */ int age;
-    /* 0x08 */ Effects_EffectCamera startCamera;
-    /* 0x48 */ Effects_EffectCamera endCamera;
-    /* 0x88 */ VECTOR lookAt;
-    /* 0x98 */ VECTOR eye;
-    /* 0xA8 */ MATRIX view;
-    /* 0xC8 */ int nearClip;
-    /* 0xCC */ int reservedCC;
+    u_char lifetime, effect;
+    short mode;
+    int age;
+    Effects_EffectCamera startCamera;
+    Effects_EffectCamera endCamera;
+    VECTOR lookAt;
+    VECTOR eye;
+    MATRIX view;
+    int nearClip;
+    int reservedCC;
 } Effects_Plg128_CameraEffectState;
 _Static_assert(sizeof(Effects_Plg128_CameraEffectState) == 0xD0, "Effects_Plg128_CameraEffectState must keep its PS1 layout");
 

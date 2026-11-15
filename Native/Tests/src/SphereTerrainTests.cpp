@@ -10,6 +10,7 @@
 
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetingLive.hpp"
@@ -47,7 +48,7 @@ struct SliceFixture {
 
   SliceFixture() {
     Battle_targetSphere = &storage;
-    Battle_InitSphere();
+    VS::Battle::InitializeSphereEntry();
     for (int& value : Sphere().terrainHeights) value = Terrain(0, -1024);
     Camera(0);
   }
@@ -514,7 +515,7 @@ TEST_CASE("Player secondary sphere updates preserve complete volume state",
   Battle_TargetSphereSpec volume{2, 3, 4, 5, 128, -64, 256};
   sphere.storage.primaryVolume.kind = 7;
   sphere.storage.wireShape = 15;
-  Battle_SetSecondarySphereVolume(&volume);
+  VS::Battle::SetSecondarySphereVolumeEntry(&volume);
   const auto& actual = sphere.storage.secondaryVolume;
   CHECK(actual.kind == 2);
   CHECK(actual.reserved1 == 3);

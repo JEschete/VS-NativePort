@@ -1,11 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
 #include "Battle/SphereContainmentLive.hpp"
+#include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
-#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/CopyLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -22,6 +20,7 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
+#include "Battle/TargetPages.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingState.h"
 #include "Core/Math/FixedPoint.h"
@@ -29,7 +28,6 @@ extern "C" {
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
-#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
@@ -66,207 +64,6 @@ u_char Battle_reuseSphereVolumes; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800EB9B8 (D_800EB9B8@BATTLE/BATTLE.PRG)
 Battle_TargetSphereSetupView* Battle_targetSphere; /* data: contents loaded in Step 5 */
-
-// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363)
-#include "Battle/TargetPages.h"
-
-void Battle_InitSphere(void)
-{
-    Battle_ResetTargetPages();
-    int index;
-    int x;
-    int y;
-    short* edges;
-
-    if (Battle_targetSphere == NULL) {
-        Battle_targetSphere = (Battle_TargetSphereSetupView *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Battle_targetSphere));
-    }
-
-    VS::Core::Memory::ZeroLiveWordsBackward(Battle_targetSphere, sizeof *Battle_targetSphere);
-    index = 0;
-    Battle_targetSphere->selectedTarget = -1;
-    edges = Battle_targetSphere->wireEdges;
-
-    for (y = 0;; ++y) {
-        for (x = 0; x < 9; ++x) {
-            edges[index++] = x + (y << 4) + ((x + 1) << 8) + (y << 12);
-        }
-
-        if (y == 9) {
-            break;
-        }
-
-        for (x = 0; x < 10; ++x) {
-            edges[index++] = x + (y << 4) + (x << 8) + ((y + 1) << 12);
-        }
-    }
-
-    for (x = 0;; ++x) {
-        for (y = 9; y > 0; --y) {
-            edges[index++] = x + (y << 4) + (x << 8) + ((y - 1) << 12);
-        }
-
-        if (x == 9) {
-            break;
-        }
-
-        for (y = 9; y >= 0; --y) {
-            edges[index++] = x + (y << 4) + ((x + 1) << 8) + (y << 12);
-        }
-    }
-
-    for (y = 9;; --y) {
-        for (x = 9; x > 0; --x) {
-            edges[index++] = x + (y << 4) + ((x - 1) << 8) + (y << 12);
-        }
-
-        if (y == 0) {
-            break;
-        }
-
-        for (x = 9; x >= 0; --x) {
-            edges[index++] = x + (y << 4) + (x << 8) + ((y - 1) << 12);
-        }
-    }
-
-    for (x = 9;; --x) {
-        for (y = 0; y < 9; ++y) {
-            edges[index++] = x + (y << 4) + (x << 8) + ((y + 1) << 12);
-        }
-
-        if (x == 0) {
-            break;
-        }
-
-        for (y = 0; y < 10; ++y) {
-            edges[index++] = x + (y << 4) + ((x - 1) << 8) + (y << 12);
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800C05B4 (src/BATTLE/BATTLE.PRG/573B8.c:436)
-void Battle_FreeSphere(void)
-{
-    Battle_ResetTargetPages();
-    if (Battle_targetSphere != NULL) {
-        VS::Core::Memory::FreeLiveFromLowEnd(Battle_targetSphere);
-        Battle_targetSphere = NULL;
-    }
-}
-
-// decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444)
-void Battle_SetSphereVolumes(Battle_TargetSphereSpec* primary_volume, Battle_TargetSphereSpec* secondary_volume, u_char sphere_mode, Battle_TargetPreview* target_previews)
-{
-    Battle_targetSphere->primaryVolume = *primary_volume;
-
-    if (primary_volume->kind != 1) {
-        Battle_targetSphere->wirePhaseA = 0;
-        Battle_targetSphere->wirePhaseC = 0;
-    }
-
-    if (Battle_reuseSphereVolumes != 0) {
-        Battle_targetSphere->primaryVolume.kind |= 0x80;
-        Battle_targetSphere->secondaryVolume.kind = secondary_volume->kind;
-        Battle_reuseSphereVolumes = 0;
-        return;
-    }
-
-    Battle_targetSphere->reserved38 = 0;
-    Battle_targetSphere->reserved3C = 0;
-    Battle_targetSphere->wireShape = 0xF;
-
-    if (secondary_volume != NULL) {
-        Battle_targetSphere->secondaryVolume = *secondary_volume;
-        Battle_targetSphere->secondaryVolume.kind |= 0x80;
-        Battle_targetSphere->sphereMode = sphere_mode;
-        Battle_targetSphere->targetList1 = target_previews;
-        return;
-    }
-
-    Battle_targetSphere->secondaryVolume.kind = 0;
-}
-
-// decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/573B8.c:475)
-void Battle_ClearPrimarySphereVolume(void)
-{
-    if (Battle_targetSphere != NULL) {
-        Battle_targetSphere->primaryVolume.kind = 0;
-    }
-}
-
-// decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482)
-void Battle_SetSecondarySphereVolume(Battle_TargetSphereSpec* secondary_volume)
-{
-    Battle_targetSphere->secondaryVolume = *secondary_volume;
-    Battle_targetSphere->wireShape = 0;
-}
-
-// decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/573B8.c:488)
-void Battle_ClearSecondarySphereVolume(void)
-{
-    if (Battle_targetSphere != NULL) {
-        Battle_targetSphere->secondaryVolume.kind = 0;
-    }
-}
-
-// decomp: BATTLE.PRG func_800C0758 (src/BATTLE/BATTLE.PRG/573B8.c:495)
-int Battle_AppendSphereArcVertices(int phase, int segments, int index)
-{
-    short* sine = (short *)((void*)((uintptr_t)Core_ScratchBase() + 0x3B0));
-    short (*basis)[4] = (short (*)[4])((void*)((uintptr_t)Core_ScratchBase() + 0x398));
-    int i;
-    int component;
-    Battle_ShapeVertex* vertex = &Battle_targetSphere->wireVertices[index];
-
-    for (i = 0; i <= segments; ++index, ++i, ++vertex) {
-        for (component = 0; component < 3; ++component) {
-            vertex->xyz[component] =
-                basis[0][component]
-                + ((basis[1][component] * sine[(i + phase + 8) & 31]) >> 12)
-                + ((basis[2][component] * sine[(i + phase) & 31]) >> 12);
-        }
-
-        component = i != 0;
-
-        if (component && segments != 32) {
-            component += segments - i < 2;
-        }
-
-        vertex->opaque6 = component;
-    }
-
-    return index;
-}
-
-// decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/573B8.c:523)
-MATRIX* Battle_BuildSphereVolumeTransform(u_char* scale, int angle)
-{
-    short* scratch = (short *)((void*)((uintptr_t)Core_ScratchBase() + 0x350));
-    MATRIX* rotation = (MATRIX *)((void*)((uintptr_t)Core_ScratchBase() + 0x330));
-    int axis;
-    int component;
-
-    scratch[0] = -(scale[3] * 16);
-    scratch[1] = angle;
-    scratch[2] = 0;
-    VS::Core::Math::BuildLiveEulerRotationMatrix((SVECTOR*)scratch, rotation);
-
-    for (axis = 0; axis < 3; ++axis) {
-        for (component = 0; component < 3; ++component) {
-            scratch[component] = axis == component ? scale[axis] * 32 : 0;
-        }
-
-        Core_Gte_ApplyMatrixSV(rotation, (SVECTOR*)scratch, (SVECTOR*)&scratch[8 + axis * 4]);
-    }
-
-    for (axis = 0; axis < 3; ++axis) {
-        for (component = 0; component < 3; ++component) {
-            scratch[axis * 3 + component] = scratch[8 + component * 4 + axis];
-        }
-    }
-
-    return (MATRIX *)((void*)scratch);
-}
 
 // decomp: BATTLE.PRG func_800C0990 (src/BATTLE/BATTLE.PRG/573B8.c:552)
 void Battle_DrawSphereWireLine(SVECTOR* start, SVECTOR* end, u_int color, int intensity)
@@ -384,7 +181,7 @@ void Battle_DrawSphere(void)
             break;
         case 2:
             shape->scale.extents[1] <<= 1;
-            m = Battle_BuildSphereVolumeTransform(shape->scale.extents, shape->angle);
+            m = VS::Battle::BuildSphereVolumeTransformEntry(shape->scale.extents, shape->angle);
             for (j = 0; j < 3; ++j) {
                 shape->position[j] += m->m[j][1] >> 1;
             }
@@ -395,7 +192,7 @@ void Battle_DrawSphere(void)
             break;
         case 4:
             shape->scale.extents[3] += 0x80;
-            m = Battle_BuildSphereVolumeTransform(shape->scale.extents, shape->angle);
+            m = VS::Battle::BuildSphereVolumeTransformEntry(shape->scale.extents, shape->angle);
             for (j = 0; j < 3; ++j) {
                 shape->position[j] += m->m[j][1];
             }
@@ -413,20 +210,11 @@ void Battle_DrawSphere(void)
         default:
             continue;
         }
-        Battle_BuildSphereWireframe(type);
+        VS::Battle::BuildSphereWireframeEntry(type);
         VS::Battle::DrawLiveSphereVolumeWireframe(shape, color);
     }
     Battle_UpdateSphereTargetLabels();
     Battle_DrawTargetPageHint();
-}
-
-// decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470)
-void Battle_ClearSphereTargets(void)
-{
-    Battle_ResetTargetPages();
-    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {
-        (*(Battle_TargetSphere* (*))&Battle_targetSphere)->targetCount = 0;
-    }
 }
 
 // decomp: BATTLE.PRG func_800C16FC (src/BATTLE/BATTLE.PRG/58578.c:477)
@@ -779,153 +567,6 @@ void Battle_UpdateSphereTargetLabels(void)
     }
 }
 
-// decomp: BATTLE.PRG func_800C2254 (src/BATTLE/BATTLE.PRG/58578.c:821)
-int Battle_AppendSphereCircleVertices(int angle, int index)
-{
-    short (*basis)[3] = (short (*)[3])((void*)((uintptr_t)Core_ScratchBase() + 0x398));
-    int point = 0;
-    int phase = angle;
-    Battle_ShapeVertex* vertex = &(*(Battle_TargetSphere* (*))&Battle_targetSphere)->wireVertices[index];
-
-    for (; point < 33; ++index, phase += ONE / 32, ++point, ++vertex) {
-        int component;
-
-        for (component = 0; component < 3; ++component) {
-            int cosine = VS::Core::Math::Cosine(phase);
-            int sine = VS::Core::Math::Sine(phase);
-
-            vertex->xyz[component] = basis[0][component]
-                                   + ((basis[1][component] * cosine) >> 12)
-                                   + ((basis[2][component] * sine) >> 12);
-        }
-        component = point != 0;
-        vertex->opaque6 = component;
-    }
-    return index;
-}
-
-// decomp: BATTLE.PRG func_800C2368 (src/BATTLE/BATTLE.PRG/58578.c:845)
-int Battle_AppendSphereConeVertices(int step, int radius, int index)
-{
-    short* basis = (short*)((uintptr_t)Core_ScratchBase() + 0x398);
-    int base;
-    int i;
-    Battle_ShapeVertex* vertex = &(*(Battle_TargetSphere* (*))&Battle_targetSphere)->wireVertices[index];
-
-    for (base = 0; base < ONE; base += ONE / 4) {
-        int x = 0;
-        int y = 0;
-        int z = 0;
-        int phase = base - step * 4;
-        int point;
-
-        for (point = 0; point <= radius; ++index, ++point, phase += step, ++vertex) {
-            vertex->xyz[0] = (x * VS::Core::Math::Cosine(phase)) >> 12;
-            vertex->xyz[1] = y;
-            vertex->xyz[2] = (z * VS::Core::Math::Sine(phase)) >> 12;
-            i = point != 0;
-            vertex->opaque6 = i;
-            x += ONE / 8;
-            y -= ONE / 8;
-            z += ONE / 8;
-        }
-    }
-    radius *= ONE / 8;
-    for (i = 8; i >= 0; --i) {
-        basis[i] = 0;
-    }
-    basis[1] = -radius;
-    basis[3] = radius;
-    basis[8] = radius;
-    index = Battle_AppendSphereCircleVertices(step * 7, index);
-    if (radius >= 5) {
-        basis[1] = -ONE / 2;
-        basis[3] = ONE / 2;
-        basis[8] = ONE / 2;
-        index = Battle_AppendSphereCircleVertices(step * 4, index);
-    }
-    return index;
-}
-
-// decomp: BATTLE.PRG func_800C253C (src/BATTLE/BATTLE.PRG/58578.c:887)
-void Battle_BuildSphereWireframe(int type)
-{
-    short* basis = (short*)((uintptr_t)Core_ScratchBase() + 0x398);
-    int index = 0;
-    int shape = (*(Battle_TargetSphere* (*))&Battle_targetSphere)->wireShape;
-    Battle_ShapeVertex* vertices = (*(Battle_TargetSphere* (*))&Battle_targetSphere)->wireVertices;
-    int count;
-    int command;
-    u_short* commands;
-
-    if (shape != 0) {
-        (*(Battle_TargetSphere* (*))&Battle_targetSphere)->wireShape = shape - 1;
-    }
-    if (type < 3u) {
-        if (type == 0) {
-            (*(Battle_TargetSphere* (*))&Battle_targetSphere)->wirePhaseA += (shape + 1) * 3;
-            (*(Battle_TargetSphere* (*))&Battle_targetSphere)->wirePhaseC += (shape + 1) * 11;
-        }
-        (*(Battle_TargetSphere* (*))&Battle_targetSphere)->wirePhaseB += (shape * 2 + 1) * 7;
-        shape += type * 16;
-    } else {
-        shape = type + 0x2D;
-    }
-
-    command = Battle_sphereShapeCommandStarts[shape];
-    commands = &Battle_sphereWireframeCommands[command];
-
-    for (count = Battle_sphereShapeCommandStarts[shape + 1] - command; count > 0; --count) {
-        short* src;
-        int i;
-        int j;
-
-        command = *commands++;
-        switch ((command >> 14) & 3) {
-        case 0:
-            src = &Battle_sphereArcBases[(command << 2) & 0x7C];
-            for (i = 0; i < 3; ++i) {
-                basis[i] = *src++;
-            }
-            for (i = 4; i < 11; ++i) {
-                basis[i] = 0;
-            }
-            j = (command >> 3) & 0x1C;
-            i = *src;
-            basis[(0x546465 >> j) & 0xF] = i;
-            basis[(0x8A998A >> j) & 0xF] = i;
-            i = (command >> 9) & 0x1C;
-            if (i == 0) {
-                i = 0x20;
-            }
-            index = Battle_AppendSphereArcVertices((command >> 6) & 0x1C, i, index);
-            break;
-        case 1:
-            index = Battle_AppendSphereConeVertices(command & 0x3FF, ((command >> 10) & 7) + 1, index);
-            break;
-        case 2:
-            src = &Battle_sphereMirroredVertices[command & 0x3FF];
-            command = ((command >> 10) & 7) + 2;
-            for (j = 0; j < 2; ++j) {
-                for (i = command; i > 0; --i) {
-                    vertices[index].xyz[0] = src[0];
-                    src[0] = -vertices[index].xyz[0];
-                    vertices[index].xyz[1] = src[1];
-                    vertices[index].xyz[2] = src[2];
-                    src[2] = -vertices[index].xyz[2];
-                    vertices[index].opaque6 = 1;
-                    ++index;
-                    src += 3;
-                }
-                vertices[index - command].opaque6 = 0;
-                src -= command * 3;
-            }
-            break;
-        }
-    }
-    (*(Battle_TargetSphere* (*))&Battle_targetSphere)->vertexCount = index;
-}
-
 // decomp: BATTLE.PRG func_800C282C (src/BATTLE/BATTLE.PRG/58578.c:965)
 void* Battle_BuildSphereCameraBasis(void)
 {
@@ -1100,18 +741,6 @@ void Battle_UpdateSphereTargetHighlights(Battle_TargetLabelLine* target_lines, i
             }
         }
     }
-}
-
-// decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/5BE50.c:93)
-int Battle_SphereInteractionMode(void)
-{
-    if (((*(Battle_TargetSphere* (*))&Battle_targetSphere) == NULL) || ((*(Battle_TargetSphere* (*))&Battle_targetSphere)->wireShape != 0)) {
-        return 0;
-    }
-    if (((*(Battle_TargetSphere* (*))&Battle_targetSphere)->inputLocked == 0) || (Input_buttonsState & 0x80)) {
-        return 1;
-    }
-    return 2;
 }
 
 }  // extern "C"

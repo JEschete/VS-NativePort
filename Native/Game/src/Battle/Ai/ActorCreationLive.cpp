@@ -374,7 +374,7 @@ class LiveCreationHost final : public ActorCreationHost {
     // The AI state's actor and model links are views of the battle actor
     // and its actor record (AiState.h).
     state->actor = reinterpret_cast<Battle_Ai_EngagementData*>(&live);
-    state->model = reinterpret_cast<Battle_Ai_AiModelView*>(live.model);
+    state->model = reinterpret_cast<Battle_Ai_ModelStatePrefix*>(live.model);
     state->stats = live.stats;
     state->nativePointer60 = &live.model->position;
     state->nativePointer64 = &live.model->currentTileX;

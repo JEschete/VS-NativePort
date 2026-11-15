@@ -1416,9 +1416,11 @@ class Copier:
         for idx, (m, f) in enumerate(zip(g.members[r["id"]], fields_all, strict=True)):
             t = self.spelled_type(f["type"]).strip()
             ft = (self.fields.get(m["id"]) or {}).get("type", "").strip()
+            if r["id"] == "T00532" and ft:
+                t = self.spelled_type(ft).strip()
             nxt = next((x["offset"] for x in fields_all[idx + 1:] if x["offset"] > f["offset"]), None)
             gap = (nxt - f["offset"]) // 8 if nxt is not None else 4
-            if ft and ft != f["type"] and re.fullmatch(self.SCALAR, t) and re.fullmatch(self.SCALAR, ft) and \
+            if r["id"] != "T00532" and ft and ft != f["type"] and re.fullmatch(self.SCALAR, t) and re.fullmatch(self.SCALAR, ft) and \
                     not m.get("bits") and scalar_size(ft) <= gap:
                 # a merged upstream layout: the field ledger has the member's real width (Field::GimmickInstance
                 # unk28 is a u_short next to unk2A, where the pinned view had one int)
@@ -1579,8 +1581,14 @@ class Copier:
                         raise SystemExit(f"copy_fixups: {tid} {r['final_name']}: '{old}' not found ({why})")
                     text = text.replace(old, new)
                 if nv.pointer_slots(tid):
-                    text = nv.rebase(tid, text, [(m["final_name"], f) for m, f in
-                                     zip(self._gen.members[tid], self._gen.layout(tid)["fields"], strict=True)])
+                    view_fields = []
+                    for member, field in zip(
+                        self._gen.members[tid], self._gen.layout(tid)["fields"], strict=True
+                    ):
+                        if tid == "T00532":
+                            field = {**field, "type": self.fields[member["id"]]["type"]}
+                        view_fields.append((member["final_name"], field))
+                    text = nv.rebase(tid, text, view_fields)
                     text = self.bitfield_units(tid, text)
                 text += self.size_assert(tid, name)
                 need = sorted({self._tid_by_name[n] for f in self._gen.layout(tid)["fields"]

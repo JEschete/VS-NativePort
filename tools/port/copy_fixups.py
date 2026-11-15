@@ -364,6 +364,7 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
+    "Battle_DrawTargetPageHint": r"Native\Game\include\Battle\TargetPages.h",
     "Battle_Ai_RefreshActionCandidateReadinessEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
     "Battle_Ai_ApplySimulatedActionResultsEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
     "Battle_Ai_SimulateActionCandidateEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
@@ -1013,6 +1014,19 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveAbilityTimingResult": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
     "VS::Battle::DrawLiveChainCount": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
     "VS::Battle::DrawLiveAbilityTimingCue": r"Native\Game\include\Battle\FloatingLabelRenderingLive.hpp",
+    "VS::Battle::InitializeSphereEntry": r"Native\Game\include\Battle\SphereLifecycleLive.hpp",
+    "VS::Battle::FreeSphereEntry": r"Native\Game\include\Battle\SphereReleaseLive.hpp",
+    "VS::Battle::SetSphereVolumesEntry": r"Native\Game\include\Battle\SphereLifecycleLive.hpp",
+    "VS::Battle::ClearPrimarySphereVolumeEntry": r"Native\Game\include\Battle\SphereLifecycleLive.hpp",
+    "VS::Battle::SetSecondarySphereVolumeEntry": r"Native\Game\include\Battle\SphereLifecycleLive.hpp",
+    "VS::Battle::ClearSecondarySphereVolumeEntry": r"Native\Game\include\Battle\SphereLifecycleLive.hpp",
+    "VS::Battle::ClearSphereTargetsEntry": r"Native\Game\include\Battle\SphereLifecycleLive.hpp",
+    "VS::Battle::SphereInteractionModeEntry": r"Native\Game\include\Battle\SphereLifecycleLive.hpp",
+    "VS::Battle::AppendSphereArcVerticesEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
+    "VS::Battle::BuildSphereVolumeTransformEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
+    "VS::Battle::AppendSphereCircleVerticesEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
+    "VS::Battle::AppendSphereConeVerticesEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
+    "VS::Battle::BuildSphereWireframeEntry": r"Native\Game\include\Battle\SphereGeometryLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -1939,6 +1953,19 @@ OWNED_CALL_BINDINGS["F00726"] = "VS::Battle::DrawLiveStatusRemovalMarker"
 OWNED_CALL_BINDINGS["F00727"] = "VS::Battle::DrawLiveAbilityTimingResult"
 OWNED_CALL_BINDINGS["F00728"] = "VS::Battle::DrawLiveChainCount"
 OWNED_CALL_BINDINGS["F00741"] = "VS::Battle::DrawLiveAbilityTimingCue"
+OWNED_CALL_BINDINGS["F01279"] = "VS::Battle::InitializeSphereEntry"
+OWNED_CALL_BINDINGS["F01280"] = "VS::Battle::FreeSphereEntry"
+OWNED_CALL_BINDINGS["F01281"] = "VS::Battle::SetSphereVolumesEntry"
+OWNED_CALL_BINDINGS["F01282"] = "VS::Battle::ClearPrimarySphereVolumeEntry"
+OWNED_CALL_BINDINGS["F01283"] = "VS::Battle::SetSecondarySphereVolumeEntry"
+OWNED_CALL_BINDINGS["F01284"] = "VS::Battle::ClearSecondarySphereVolumeEntry"
+OWNED_CALL_BINDINGS["F01297"] = "VS::Battle::ClearSphereTargetsEntry"
+OWNED_CALL_BINDINGS["F01312"] = "VS::Battle::SphereInteractionModeEntry"
+OWNED_CALL_BINDINGS["F01285"] = "VS::Battle::AppendSphereArcVerticesEntry"
+OWNED_CALL_BINDINGS["F01286"] = "VS::Battle::BuildSphereVolumeTransformEntry"
+OWNED_CALL_BINDINGS["F01303"] = "VS::Battle::AppendSphereCircleVerticesEntry"
+OWNED_CALL_BINDINGS["F01304"] = "VS::Battle::AppendSphereConeVerticesEntry"
+OWNED_CALL_BINDINGS["F01305"] = "VS::Battle::BuildSphereWireframeEntry"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -3990,6 +4017,19 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800958A4, "VS::Battle::DrawLiveAbilityTimingResult"),  # F00727
     ("BATTLE/BATTLE.PRG", 0x80095A4C, "VS::Battle::DrawLiveChainCount"),  # F00728
     ("BATTLE/BATTLE.PRG", 0x800970BC, "VS::Battle::DrawLiveAbilityTimingCue"),  # F00741
+    ("BATTLE/BATTLE.PRG", 0x800C031C, "VS::Battle::InitializeSphereEntry"),  # F01279
+    ("BATTLE/BATTLE.PRG", 0x800C05B4, "VS::Battle::FreeSphereEntry"),  # F01280
+    ("BATTLE/BATTLE.PRG", 0x800C05EC, "VS::Battle::SetSphereVolumesEntry"),  # F01281
+    ("BATTLE/BATTLE.PRG", 0x800C06E0, "VS::Battle::ClearPrimarySphereVolumeEntry"),  # F01282
+    ("BATTLE/BATTLE.PRG", 0x800C0700, "VS::Battle::SetSecondarySphereVolumeEntry"),  # F01283
+    ("BATTLE/BATTLE.PRG", 0x800C0738, "VS::Battle::ClearSecondarySphereVolumeEntry"),  # F01284
+    ("BATTLE/BATTLE.PRG", 0x800C16DC, "VS::Battle::ClearSphereTargetsEntry"),  # F01297
+    ("BATTLE/BATTLE.PRG", 0x800C4734, "VS::Battle::SphereInteractionModeEntry"),  # F01312
+    ("BATTLE/BATTLE.PRG", 0x800C0758, "VS::Battle::AppendSphereArcVerticesEntry"),  # F01285
+    ("BATTLE/BATTLE.PRG", 0x800C085C, "VS::Battle::BuildSphereVolumeTransformEntry"),  # F01286
+    ("BATTLE/BATTLE.PRG", 0x800C2254, "VS::Battle::AppendSphereCircleVerticesEntry"),  # F01303
+    ("BATTLE/BATTLE.PRG", 0x800C2368, "VS::Battle::AppendSphereConeVerticesEntry"),  # F01304
+    ("BATTLE/BATTLE.PRG", 0x800C253C, "VS::Battle::BuildSphereWireframeEntry"),  # F01305
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4632,23 +4672,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("VS::Core::Memory::AllocateFromHighEnd(0x6C00U)",
          "VS::Core::Memory::AllocateFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace))",
          "#370: both rebuilt and pending row workspaces require the native pointer-width extent"),
-    ],
-    "F01279": [
-        ("void Battle_InitSphere(void)",
-         '#include "Battle/TargetPages.h"\n\nvoid Battle_InitSphere(void)',
-         "Expose native page lifetime hooks to the sphere translation unit"),
-        ("    int index;", "    Battle_ResetTargetPages();\n    int index;",
-         "New sphere entry clears any previous action page view"),
-    ],
-    "F01280": [
-        ("    if (Battle_targetSphere != NULL) {",
-         "    Battle_ResetTargetPages();\n    if (Battle_targetSphere != NULL) {",
-         "Free/re-entry cannot retain a borrowed page pointer into an old action state"),
-    ],
-    "F01297": [
-        ("    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",
-         "    Battle_ResetTargetPages();\n    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",
-         "Clearing target selection invalidates the native page view"),
     ],
     "F02703": [
         ("*(int**)Core_ScratchAddr(1) + 7",
@@ -6005,6 +6028,13 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
     "T00255": [
         ("u_char pulsedPalette[0x20];", "u_short pulsedPalette[16];",
          "3A1A0.h:521 / 40564.c:1710; T00255.072 and T00469.006 agree on sixteen 16-bit CLUT entries"),
+        ("    u_short rotationY;\n    int rotationZ;\n    short scaleX;",
+         "    u_short rotationY;\n    u_short rotationZ;\n    short reserved2A;\n    short scaleX;",
+         "T00255.040-.041 retain the 16-bit Z rotation and following source byte span"),
+        ("    int rotationDeltaX;\n    int rotationDeltaZ;\n    int reserved44;",
+         "    short rotationDeltaX;\n    short rotationDeltaY;\n    short rotationDeltaZ;\n"
+         "    short reserved42;\n    int reserved44;",
+         "T00255.050-.053 retain three 16-bit axis deltas and their following source span"),
     ],
     "T00225": [
         ("Battle_TargetPreview previews[23];", "Battle_TargetPreview previews[255];",
@@ -6065,11 +6095,12 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "            u_short collision_radius;\n            u_char reserved96[2];\n"
          "        };\n    };",
          "70D4C.s uses the native collision radius initialized by actor creation"),
-        ("char reserved132[2];",
-         "union {\n        char reserved132[2];\n        struct {\n"
-         "            u_char ground_area;\n            u_char reserved133;\n"
-         "        };\n    };",
-         "70D4C.s compares the destination area against original byte 0x132"),
+        ("    /* 0x132 */ char reserved132[2];\n"
+         "    /* 0x134 */ Battle_Ai_TilePosition plannedTile;",
+        "    /* 0x132 */ u_char ground_area;\n"
+        "    /* 0x133 */ u_char reserved133;\n"
+        "    /* 0x134 */ Battle_Ai_TilePosition plannedTile;",
+        "Keep byte 0x132 naturally aligned while preserving the packed four-byte tile at 0x134"),
         ("char reserved22[4];",
          "union {\n        char reserved22[4];\n        struct {\n"
          "            u_char reserved22Prefix;\n            signed char movementEnabled;\n"
@@ -6132,6 +6163,9 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "            union { u_char reserved156[2]; u_short movement_wait; };\n"
          "        };\n    };",
          "func_800E4358 decrements the decision timer at original offset 0x155"),
+        ("    /* 0x18A */ int angle : 16;",
+         "    /* 0x18A */ short angle;",
+         "Retain the named 16-bit angle at the start of the indexed source span"),
         ("char reserved224[4];",
          "union {\n        char reserved224[4];\n        struct {\n"
          "            u_short locomotionFlags;\n            u_char walkStep;\n"

@@ -537,6 +537,17 @@
     <ClCompile Include="src\Battle\SphereContainmentLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\SphereGeometry.cpp" />
+    <ClCompile Include="src\Battle\SphereGeometryLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Battle\SphereLifecycle.cpp" />
+    <ClCompile Include="src\Battle\SphereLifecycleLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Battle\SphereReleaseLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\SphereTerrain.cpp" />
     <ClCompile Include="src\Battle\SphereTerrainLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2518,6 +2529,11 @@
     <ClInclude Include="include\Battle\RewardFlowLive.hpp" />
     <ClInclude Include="include\Battle\SphereContainment.hpp" />
     <ClInclude Include="include\Battle\SphereContainmentLive.hpp" />
+    <ClInclude Include="include\Battle\SphereGeometry.hpp" />
+    <ClInclude Include="include\Battle\SphereGeometryLive.hpp" />
+    <ClInclude Include="include\Battle\SphereLifecycle.hpp" />
+    <ClInclude Include="include\Battle\SphereLifecycleLive.hpp" />
+    <ClInclude Include="include\Battle\SphereReleaseLive.hpp" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
     <ClInclude Include="include\Battle\StatFactors.hpp" />

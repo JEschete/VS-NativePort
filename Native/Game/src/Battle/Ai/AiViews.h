@@ -19,7 +19,6 @@ typedef struct Battle_Ai_ActionTiming Battle_Ai_ActionTiming;
 typedef struct Battle_Ai_ActorListNodeView Battle_Ai_ActorListNodeView;
 typedef struct Battle_Ai_ActorPositionView Battle_Ai_ActorPositionView;
 typedef union Battle_Ai_ActorStateFlags Battle_Ai_ActorStateFlags;
-typedef struct Battle_Ai_AiModelView Battle_Ai_AiModelView;
 typedef struct Battle_Ai_ApproachActorView Battle_Ai_ApproachActorView;
 typedef struct Battle_Ai_ApproachRelationBits Battle_Ai_ApproachRelationBits;
 typedef struct Battle_Ai_ApproachTargetRecordView Battle_Ai_ApproachTargetRecordView;
@@ -58,6 +57,7 @@ typedef struct Battle_Ai_MetadataSlotView Battle_Ai_MetadataSlotView;
 typedef struct Battle_Ai_MetadataStatsView Battle_Ai_MetadataStatsView;
 typedef union Battle_Ai_MetadataWord Battle_Ai_MetadataWord;
 typedef struct Battle_Ai_ModelActiveView Battle_Ai_ModelActiveView;
+typedef struct Battle_Ai_ModelStatePrefix Battle_Ai_ModelStatePrefix;
 typedef struct Battle_Ai_ObstructionCache Battle_Ai_ObstructionCache;
 typedef struct Battle_Ai_ObstructionModel Battle_Ai_ObstructionModel;
 typedef struct Battle_Ai_ObstructionVector Battle_Ai_ObstructionVector;
@@ -625,27 +625,15 @@ typedef struct Battle_Ai_RouteGateTile {
 } Battle_Ai_RouteGateTile;
 _Static_assert(sizeof(Battle_Ai_RouteGateTile) == 0x3, "Battle_Ai_RouteGateTile must keep its PS1 layout");
 
-// layout: ledger (upstream merge) for func_800E1238_t
-typedef struct Battle_Ai_AiModelView {
-    /* 0x00 */ int reserved0;
-    /* 0x04 */ int reserved4;
-    /* 0x08 */ u_int reserved8Bit0 : 21;
-    /* 0x0A */ u_int opaqueABit5 : 1;
-    /* 0x0A */ u_int reservedABit6 : 10;
-    /* 0x0C */ char reservedC[8];
-    /* 0x14 */ short opaque14;
-    /* 0x16 */ char reserved16[6];
-    /* 0x1C */ SVECTOR opaque1C;
-    /* 0x24 */ char reserved24[2];
-    /* 0x26 */ short opaque26;
-    /* 0x28 */ char reserved28[52];
-    /* 0x5C */ Battle_Ai_TilePosition opaque5C;
-    char reserved60_60[8];
-    void* nativePointer68; /* PS1 pointer slot 0x68 */
-    char reserved60_6C[1348];
-    /* 0x5B0 */ u_int reserved5B0Bit0 : 4;
-    /* 0x5B0 */ u_int opaque5B0Bit4 : 1;
-} Battle_Ai_AiModelView;
+// decomp: func_800E1238_t (src/BATTLE/BATTLE.PRG/6F014.c:139)
+typedef struct Battle_Ai_ModelStatePrefix {
+    int reserved0;
+    int reserved4;
+    u_int reserved8Bit0 : 21;
+    u_int opaqueABit5 : 1;
+    u_int reservedABit6 : 10;
+} Battle_Ai_ModelStatePrefix;
+_Static_assert(sizeof(Battle_Ai_ModelStatePrefix) == 0xC, "Battle_Ai_ModelStatePrefix must keep its PS1 layout");
 
 // decomp: func_800E5568_t (src/BATTLE/BATTLE.PRG/6F014.c:27)
 typedef struct Battle_Ai_ActionRangeShape {

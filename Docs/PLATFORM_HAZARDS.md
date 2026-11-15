@@ -51,7 +51,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `NULL-TABLE` | Sparse table entry read without a check | 31 | 0 | 0 | 23 | 8 | 30 |
 | `NULL-RETURN` | Lookup result read without a check | 0 | 0 | 0 | 0 | 0 | 0 |
-| `GUARD-AFTER-READ` | Null check that follows the read it protects | 3 | 0 | 0 | 3 | 0 | 3 |
+| `GUARD-AFTER-READ` | Null check that follows the read it protects | 2 | 0 | 0 | 2 | 0 | 2 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
 | `DIV-ZERO` | Division by a value that was not checked | 133 | 0 | 0 | 110 | 23 | 126 |
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 82 |
@@ -66,7 +66,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 22 | 0 | 0 | 22 | 0 | 22 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 542 | 239 | 239 | 272 | 31 | 532 |
+| **Total** | | 541 | 239 | 239 | 271 | 31 | 531 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -91,7 +91,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | Roadmap issue | Sites |
 | --- | ---: |
 | #60 | 113 |
-| #56 | 96 |
+| #56 | 95 |
 | no roadmap issue | 79 |
 | #61 | 61 |
 | #253 | 50 |

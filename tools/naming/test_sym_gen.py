@@ -180,6 +180,14 @@ class ReviewedConsumerTests(unittest.TestCase):
 
         self.assertIs(gen.layout("T00123"), layout)
 
+    def test_adopted_ai_state_layout_uses_upstream_member_spans(self):
+        layout = Gen("Shared").layout("T00532")
+        fields = {field["name"]: field for field in layout["fields"]}
+
+        self.assertEqual((fields["unk0"]["offset"], fields["unk0"]["type"]), (0, "char"))
+        self.assertEqual((fields["unkB4"]["offset"], fields["unkB4"]["type"]), (0xB4 * 8, "int"))
+        self.assertEqual((fields["unkC0"]["offset"], fields["unkC0"]["type"]), (0xC0 * 8, "u_short"))
+
     def test_ledger_reader_preserves_rows_and_closes_on_success_and_error(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

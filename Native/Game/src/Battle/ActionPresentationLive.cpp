@@ -22,6 +22,7 @@
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
+#include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -198,10 +199,10 @@ class LiveWorld final : public ActionPresentationWorld {
   void PrepareCamera() override {
     Field::LiveStorePreferredActionCameraDistance();
   }
-  void ClearSphereTargets() override { Battle_ClearSphereTargets(); }
-  void ClearPrimaryVolume() override { Battle_ClearPrimarySphereVolume(); }
-  void ClearSecondaryVolume() override { Battle_ClearSecondarySphereVolume(); }
-  void FreeSphere() override { Battle_FreeSphere(); }
+  void ClearSphereTargets() override { ClearSphereTargetsEntry(); }
+  void ClearPrimaryVolume() override { ClearPrimarySphereVolumeEntry(); }
+  void ClearSecondaryVolume() override { ClearSecondarySphereVolumeEntry(); }
+  void FreeSphere() override { FreeSphereEntry(); }
   void ReleaseMenu() override { Menu::Framework::ReleaseLiveMenuRows(); }
   void ResetReaction(int actor) override {
     Ai::ResetActorAiReactionDelay(Ai::BattleActorReactionDelays(), actor);

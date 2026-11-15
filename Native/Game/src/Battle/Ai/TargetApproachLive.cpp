@@ -111,6 +111,9 @@ const Approach& ApproachOf(const AiState& state) {
 TargetApproacher Load(const AiState& state) {
   const Approach& view = ApproachOf(state);
   const auto* model = state.model;
+  const auto* model_record =
+      model != nullptr ? reinterpret_cast<const Actors_ActorRecord*>(model)
+                       : nullptr;
   TargetApproacher approacher{
       .close_approach = view.opaque0,
       .gait = view.opaque1,
@@ -127,9 +130,11 @@ TargetApproacher Load(const AiState& state) {
       .z = view.z,
       .flies = model != nullptr && model->opaqueABit5 != 0,
       .model_look_yaw =
-          model != nullptr ? model->opaque14 : static_cast<std::int16_t>(0),
-      .model_facing =
-          model != nullptr ? model->opaque26 : static_cast<std::int16_t>(0),
+          model_record != nullptr
+              ? std::bit_cast<std::int16_t>(model_record->instance.lookYaw)
+              : static_cast<std::int16_t>(0),
+      .model_facing = model_record != nullptr ? model_record->instance.facing
+                                              : static_cast<std::int16_t>(0),
       .actor_id = view.actorId,
       .facing_delay = state.facingDelay,
       .range = view.range,

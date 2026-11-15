@@ -10,6 +10,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionCameraSelection.hpp"
 #include "Battle/ActionPresentationLive.hpp"
+#include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -170,10 +171,10 @@ class LiveSelectionWorld final : public ActionSelectionWorld {
   void InitializeTargeting(std::uint16_t action) override {
     LiveInitializeActionTargeting(action);
   }
-  void ClearSphereTargets() override { Battle_ClearSphereTargets(); }
-  void ClearPrimaryVolume() override { Battle_ClearPrimarySphereVolume(); }
-  void ClearSecondaryVolume() override { Battle_ClearSecondarySphereVolume(); }
-  void FreeSphere() override { Battle_FreeSphere(); }
+  void ClearSphereTargets() override { ClearSphereTargetsEntry(); }
+  void ClearPrimaryVolume() override { ClearPrimarySphereVolumeEntry(); }
+  void ClearSecondaryVolume() override { ClearSecondarySphereVolumeEntry(); }
+  void FreeSphere() override { FreeSphereEntry(); }
   void ReturnToMenu() override { LiveReturnToBattleActionMenu(); }
 
  private:

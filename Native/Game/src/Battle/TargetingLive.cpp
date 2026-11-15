@@ -27,6 +27,8 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/SphereContainmentLive.hpp"
+#include "Battle/SphereGeometryLive.hpp"
+#include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -647,14 +649,14 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     return VS::Field::LiveFloorHeightAt(x, z);
   }
 
-  void InitSphere() override { Battle_InitSphere(); }
-  void FreeSphere() override { Battle_FreeSphere(); }
-  void ClearSphereTargets() override { Battle_ClearSphereTargets(); }
+  void InitSphere() override { VS::Battle::InitializeSphereEntry(); }
+  void FreeSphere() override { VS::Battle::FreeSphereEntry(); }
+  void ClearSphereTargets() override { VS::Battle::ClearSphereTargetsEntry(); }
   void ClearPrimarySphereVolume() override {
-    Battle_ClearPrimarySphereVolume();
+    VS::Battle::ClearPrimarySphereVolumeEntry();
   }
   void ClearSecondarySphereVolume() override {
-    Battle_ClearSecondarySphereVolume();
+    VS::Battle::ClearSecondarySphereVolumeEntry();
   }
   void ShowRangeVolume(bool with_area, int preview_count) override {
     if (!SphereReady("range volume")) {
@@ -663,14 +665,14 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     Battle_TargetSphereSpec range =
         SphereSpec(Volume(TargetingVolumeSlot::kRange));
     if (!with_area) {
-      Battle_SetSphereVolumes(&range, nullptr, 0, nullptr);
+      VS::Battle::SetSphereVolumesEntry(&range, nullptr, 0, nullptr);
       return;
     }
     Battle_TargetSphereSpec area =
         SphereSpec(Volume(TargetingVolumeSlot::kArea));
-    Battle_SetSphereVolumes(&range, &area,
-                            static_cast<std::uint8_t>(preview_count),
-                            state_.previews);
+    VS::Battle::SetSphereVolumesEntry(&range, &area,
+                                      static_cast<std::uint8_t>(preview_count),
+                                      state_.previews);
   }
   void ShowAreaVolume() override {
     if (!SphereReady("area volume")) {
@@ -678,7 +680,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     }
     Battle_TargetSphereSpec area =
         SphereSpec(Volume(TargetingVolumeSlot::kArea));
-    Battle_SetSecondarySphereVolume(&area);
+    VS::Battle::SetSecondarySphereVolumeEntry(&area);
   }
   void ShowSphereTargets(int preview_count, int mode) override {
     battle::SetLiveSphereTargets(
@@ -940,8 +942,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   void BuildCameraBasis() override { Battle_BuildSphereCameraBasis(); }
   [[nodiscard]] battle::SphereBasis BuildVolumeTransform() override {
     Battle_TargetVolume& volume = sphere_.volumes[0];
-    const MATRIX* matrix =
-        Battle_BuildSphereVolumeTransform(volume.scale.extents, volume.angle);
+    const MATRIX* matrix = VS::Battle::BuildSphereVolumeTransformEntry(
+        volume.scale.extents, volume.angle);
     VS::Render::LoadLiveFrameViewMatrix();
     if (matrix == nullptr) {
       VS_LOG_ERROR("battle.targeting", "sphere volume transform is missing");
@@ -982,7 +984,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     Battle_DrawSpherePositionCursor(&position, lock_pitch ? 1 : 0);
   }
   void ClearPrimarySphereVolume() override {
-    Battle_ClearPrimarySphereVolume();
+    VS::Battle::ClearPrimarySphereVolumeEntry();
   }
   void SetReuseSphereVolumes(bool reuse) override {
     Battle_reuseSphereVolumes = reuse ? 1 : 0;

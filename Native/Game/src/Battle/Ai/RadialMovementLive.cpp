@@ -2,6 +2,7 @@
 // Live binding for the radial movement (RadialMovement.cpp).
 #include "Battle/Ai/RadialMovementLive.hpp"
 
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -40,6 +41,9 @@ void Require(bool valid, const char* message) {
 // them require one.
 RadialMover Load(const AiState& state) {
   const auto* model = state.model;
+  const auto* model_record =
+      model != nullptr ? reinterpret_cast<const Actors_ActorRecord*>(model)
+                       : nullptr;
   return {.toward_point = state.opaque9,
           .approach_directly = state.opaqueD,
           .tile = state.tile.word,
@@ -48,9 +52,12 @@ RadialMover Load(const AiState& state) {
           .z = state.position.vz,
           .flies = model != nullptr && model->opaqueABit5 != 0,
           .model_look_yaw =
-              model != nullptr ? model->opaque14 : static_cast<std::int16_t>(0),
-          .model_facing =
-              model != nullptr ? model->opaque26 : static_cast<std::int16_t>(0),
+              model_record != nullptr
+                  ? std::bit_cast<std::int16_t>(model_record->instance.lookYaw)
+                  : static_cast<std::int16_t>(0),
+          .model_facing = model_record != nullptr
+                              ? model_record->instance.facing
+                              : static_cast<std::int16_t>(0),
           .move_attempts = state.moveAttempts,
           .move_distance = state.moveDistance,
           .turn_timer = state.opaque13A,
