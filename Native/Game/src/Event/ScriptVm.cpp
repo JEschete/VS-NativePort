@@ -3,7 +3,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Event/ScriptActorOpcodes.h"
 #include "Event/ScriptAudioOpcodes.h"
-#include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptEffectOpcodes.h"
@@ -160,18 +159,18 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_CommandSetEnteredDoorOpcode, Event_CommandStoreActorRangeBearingOpcode, Event_CommandSetActorActivityOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_CommandConsumeMiscItemOpcode, Event_CommandStoreActorDistanceOpcode, Event_CommandSpecialOperationOpcode,
-    Event_CommandWaitScreenEffectLoadOpcode, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_ScriptNoOperationOpcode, Event_CommandLoadScreenEffectsOpcode,
-    Event_CommandReservedScreenEffectOpcode, Event_CommandFreeScreenEffectsOpcode, Event_CommandScreenTransform, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode,
+    Event_CommandWaitScreenEffectLoadOpcode, Event_CommandScreenTransformOpcode, Event_CommandScreenTransformOpcode, Event_ScriptNoOperationOpcode, Event_CommandLoadScreenEffectsOpcode,
+    Event_CommandReservedScreenEffectOpcode, Event_CommandFreeScreenEffectsOpcode, Event_CommandScreenTransformOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode,
     Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode,
     Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode,
     Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_CommandCameraMotionOpcode, Event_ScriptReportInvalidOpcodeOpcode,
-    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandStopCameraMotionOpcode, Event_CommandSetCameraFollowingOpcode, Event_ScriptYieldFrameOpcode, Event_CommandSetScreenCapture,
-    Event_CommandTweenCameraRoll, Event_CommandTweenCameraRoll, Event_CommandScreenTransform, Event_CommandScreenTransform, Event_CommandScreenTransform,
-    Event_CommandScreenTransform, Event_CommandSetCameraOriginActorOpcode, Event_CommandRestoreFieldCameraOpcode, Event_CommandCameraLensOrShakeOpcode, Event_CommandCameraLensOrShakeOpcode,
-    Event_CommandCameraLensOrShakeOpcode, Event_CommandScreenTransform, Event_CommandCameraLensOrShakeOpcode, Event_CommandCameraLensOrShakeOpcode, Event_ScriptYieldFrameOpcode,
+    Event_ScriptReportInvalidOpcodeOpcode, Event_CommandStopCameraMotionOpcode, Event_CommandSetCameraFollowingOpcode, Event_ScriptYieldFrameOpcode, Event_CommandSetScreenCaptureOpcode,
+    Event_CommandTweenCameraRollOpcode, Event_CommandTweenCameraRollOpcode, Event_CommandScreenTransformOpcode, Event_CommandScreenTransformOpcode, Event_CommandScreenTransformOpcode,
+    Event_CommandScreenTransformOpcode, Event_CommandSetCameraOriginActorOpcode, Event_CommandRestoreFieldCameraOpcode, Event_CommandCameraLensOrShakeOpcode, Event_CommandCameraLensOrShakeOpcode,
+    Event_CommandCameraLensOrShakeOpcode, Event_CommandScreenTransformOpcode, Event_CommandCameraLensOrShakeOpcode, Event_CommandCameraLensOrShakeOpcode, Event_ScriptYieldFrameOpcode,
     Event_CommandSetTickSpeedOpcode, Event_CommandPlayMenuSelectSfxOpcode, Event_CommandSetScanlineOverlayOpcode, Event_CommandWaitScriptContextOpcode,
     Event_CommandStartScriptContextOpcode, Event_CommandStopScriptContextOpcode, Event_CommandLoadNextEventOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,

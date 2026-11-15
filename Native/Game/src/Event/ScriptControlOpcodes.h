@@ -102,6 +102,12 @@ intptr_t Event_CommandSetCameraOriginActorOpcode(uint8_t* instruction,
                                                  int16_t thread_index);
 intptr_t Event_CommandCameraLensOrShakeOpcode(uint8_t* instruction,
                                               int16_t thread_index);
+intptr_t Event_CommandSetScreenCaptureOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
+intptr_t Event_CommandTweenCameraRollOpcode(uint8_t* instruction,
+                                            int16_t thread_index);
+intptr_t Event_CommandScreenTransformOpcode(uint8_t* instruction,
+                                            int16_t thread_index);
 intptr_t Event_ScriptFadeOutAndWaitOpcode(uint8_t* instruction,
                                           int16_t thread_index);
 intptr_t Event_ScriptFadeInOpcode(uint8_t* instruction, int16_t thread_index);

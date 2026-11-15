@@ -1803,6 +1803,12 @@
     <ClCompile Include="src\Event\EventCameraTrackLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
+    <ClCompile Include="src\Event\EventScreenTweens.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\EventScreenTweensLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClInclude Include="src\Event\Interpolation.h">
       <Filter>src\Event</Filter>
     </ClInclude>
@@ -3715,6 +3721,12 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\EventCameraTrackLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventScreenTweens.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventScreenTweensLive.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\RoomTriggers.hpp">

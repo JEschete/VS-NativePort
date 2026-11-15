@@ -473,6 +473,9 @@ NATIVE_HELPER_HEADERS = {
     "VS::Event::UpdateEventLensTweenEntry": r"Native\Game\include\Event\EventCameraLensLive.hpp",
     "VS::Event::UpdateEventShakeOscillatorEntry": r"Native\Game\include\Event\EventCameraLensLive.hpp",
     "VS::Event::UpdateEventCameraShakeEntry": r"Native\Game\include\Event\EventCameraLensLive.hpp",
+    "VS::Event::UpdateEventAngleTweenEntry": r"Native\Game\include\Event\EventScreenTweensLive.hpp",
+    "VS::Event::UpdateEventScreenTransformsEntry": r"Native\Game\include\Event\EventScreenTweensLive.hpp",
+    "VS::Event::UpdateEventTripleTweenEntry": r"Native\Game\include\Event\EventScreenTweensLive.hpp",
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
@@ -1689,6 +1692,9 @@ OWNED_CALL_BINDINGS["F01238"] = "VS::Event::StartEventCameraOrbitReturnEntry"
 OWNED_CALL_BINDINGS["F01233"] = "VS::Event::UpdateEventLensTweenEntry"
 OWNED_CALL_BINDINGS["F01234"] = "VS::Event::UpdateEventShakeOscillatorEntry"
 OWNED_CALL_BINDINGS["F01235"] = "VS::Event::UpdateEventCameraShakeEntry"
+OWNED_CALL_BINDINGS["F01227"] = "VS::Event::UpdateEventAngleTweenEntry"
+OWNED_CALL_BINDINGS["F01230"] = "VS::Event::UpdateEventScreenTransformsEntry"
+OWNED_CALL_BINDINGS["F01231"] = "VS::Event::UpdateEventTripleTweenEntry"
 OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
 OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
 OWNED_CALL_BINDINGS["F00853"] = "Field_GimmickPlacementEntry"
@@ -3385,6 +3391,11 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     # #276 row 35 A35-05 camera lens and shake opcodes 0xEA-0xEC, 0xEE and 0xEF
     # (Event/EventCameraLensLive.cpp)
     ("F01232", 0x800BDC9C, "CommandCameraLensOrShake"),
+    # #276 row 35 A35-04 captured screen, roll and screen transform opcodes 0xE1, 0xE2/0xE3, 0xB9, 0xBA, 0xBF and
+    # 0xE4-0xE7 (Event/EventScreenTweensLive.cpp)
+    ("F01198", 0x800BB450, "CommandSetScreenCapture"),
+    ("F01226", 0x800BD444, "CommandTweenCameraRoll"),
+    ("F01229", 0x800BD6C4, "CommandScreenTransform"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -3816,6 +3827,9 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800BDF6C, "VS::Event::UpdateEventLensTweenEntry"),  # F01233
     ("BATTLE/BATTLE.PRG", 0x800BE01C, "VS::Event::UpdateEventShakeOscillatorEntry"),  # F01234
     ("BATTLE/BATTLE.PRG", 0x800BE180, "VS::Event::UpdateEventCameraShakeEntry"),  # F01235
+    ("BATTLE/BATTLE.PRG", 0x800BD57C, "VS::Event::UpdateEventAngleTweenEntry"),  # F01227
+    ("BATTLE/BATTLE.PRG", 0x800BDAB4, "VS::Event::UpdateEventScreenTransformsEntry"),  # F01230
+    ("BATTLE/BATTLE.PRG", 0x800BDBB4, "VS::Event::UpdateEventTripleTweenEntry"),  # F01231
     ("SLUS_010.40", 0x80042364, "VS::Boot::ResetToTitleLive"),  # F03423
     ("SLUS_010.40", 0x80042420, "VS::Boot::EnterBattleLive"),  # F03424
     ("SLUS_010.40", 0x800424E4, "VS::Boot::RunEndingAndReturnToTitleLive"),  # F03425
@@ -5299,10 +5313,6 @@ FIXES["F00783"] = FIXES.get("F00783", []) + [
      "        VS::Core::Memory::FreeFromLowEnd(temp_s0->model);",
      "#269: the released SHP no longer has an extent"),
 ]
-FIXES.setdefault("F01229", []).append(
-    ("VS::Render::ReadLiveFramebufferEffectScale(&values.x)", "VS::Render::ReadLiveFramebufferEffectScale(&values)",
-     "#276 slice A5: 4A0A8.c passes the record's first word for the three-word scale getter; the binding takes the "
-     "record"))
 
 # #276 row 23 remainder (field-actor-collision): the probe cell is a typed CollisionCellRef the Live layer reads back
 # as one word, and the gimmick samples pass their three-halfword position by value.
@@ -6414,21 +6424,9 @@ REGEX_FIXES += [
         ("Event::UpdateEventCameraOrigin",
          (('sp10', 'origin_actor_location'),),
          "F01218 4A0A8.c:3101-3115 clears the offset for0x2000, otherwise fills sp10 using func_800A1108(originActor) and multiplies its position components by ONE. F01217 produces the selected origin. sp10 is the placement query, not the resulting fixed-point offset."),
-        ("Event::CommandTweenCameraRoll",
-         (('var_s0', 'roll_tween'),),
-         "F01226 4A0A8.c:3601-3645 selects var_s0 from camera roll for0xE2 or captured-screen roll for0xE3, then initializes duration/current/start/delta/easing fields. F01227 advances the same typed state. roll_tween covers either target; missing-default behavior stays untouched."),
-        ("Event::UpdateEventAngleTween",
-         (('arg0', 'angle_tween'),),
-         "F01227 4A0A8.c:3647-3661 advances arg0 elapsed time, computes start+delta*eased-fraction, clears duration at completion, and marks changed. Event-camera updater passes both camera and captured-screen roll. No member token is named angle_tween."),
         ("Event::EventCameraCompletionMask",
          (('temp_a2', 'completion_mask'),),
          "F01228 4A0A8.c:3663-3689 initializes temp_a2 from look-at idle state and ORs eye/roll/lens/effect/shake completion bits through0x80. Opcode 2788-2791 compares its requested mask with this result. Preserve char type/signedness; naming is not a completion-logic fix."),
-        ("Event::UpdateEventScreenTransforms",
-         (('sp10', 'screen_transform'), ('sp20', 'screen_tint')),
-         "F01230 4A0A8.c:3812-3836 uses sp10 for both two-component scale and translation outputs and sp20 for RGB tint, only when respective tweens update. screen_transform deliberately avoids assigning sp10 solely a scale or solely an offset role."),
-        ("Event::UpdateEventTripleTween",
-         (('arg0', 'triple_tween'), ('a0', 'fraction_scratch'), ('v0', 'eased_fraction')),
-         "F01231 4A0A8.c:3838-3860 advances arg0 and interpolates its three values. v0 is func_800BFEBC result; a0 points at0x1F800088 and stores/reads that fraction. Native Event_EasedFractionScratch.easedFraction remains a member and is not renamed. Snake-case eased_fraction is absent from the current body and differs from that member."),
         ("Event::EvaluateRoomEventTriggers",
          (('arg0', 'trigger_request'), ('arg1', 'event_or_actor_id'), ('arg2', 'trigger_context'), ('arg3', 'context_kind')),
          "F01261 4A0A8.c:4302-4584 copies arg0 to type, supporting trigger mask plus requests0xFF/0x40; arg1 supplies direct event id for0x40 and first actor comparison in predicate6. arg2 is compared with second actor id when mode0, but dereferenced as tile bytes[0]/[2] when mode1. arg3 selects mode. Original146C.c:5260-5268/native Field_TryTriggerFacingTileEvent pass tile buffer/mode1; GameLoop passes actor number/mode0. Broad names cover both uses and preserve existing pointer/integer compatibility contract, not silently fix it."),

@@ -30,6 +30,7 @@
 #include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
+#include "Event/EventScreenTweensLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptRoomCommands.hpp"
@@ -517,7 +518,7 @@ class LiveVmHost final : public ScriptVmHost {
   }
   void UpdateEventCameraTracks() override { Event_UpdateEventCameraTracks(); }
   void UpdateEventScreenTransforms() override {
-    Event_UpdateEventScreenTransforms();
+    UpdateEventScreenTransformsEntry();
   }
   void ApplyEventCameraState() override { Event_ApplyEventCameraState(); }
   std::uint8_t EventCameraCompletionMask() override {
