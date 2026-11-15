@@ -65,6 +65,7 @@
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/ParticlePoolLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
@@ -492,17 +493,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CF92Cu, 0u, (void*)&Effects_ClampTrailTexturePoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF988u, 0u, (void*)&Effects_MapTrailFramebufferTexture, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CFAACu, 0u, (void*)&Effects_StepParticleEndpointTowardStart, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D268Cu, 0u, (void*)&Effects_ResetParticlePoolReferences, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D2698u, 0u, (void*)&Effects_AcquireParticlePool, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D278Cu, 0u, (void*)&Effects_ReleaseParticlePool, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D27F0u, 0u, (void*)&Effects_AllocateEffectParticle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D2888u, 0u, (void*)&Effects_ReleaseEffectParticle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D2904u, 0u, (void*)&Effects_ReleaseAllEffectParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D2A38u, 0u, (void*)&Effects_SetParticleSpawnPosition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D2ADCu, 0u, (void*)&Effects_EmitParticleEvent, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4C18u, 0u, (void*)&Effects_TickEffectParticles, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5260u, 0u, (void*)&Effects_SetParticleGravity, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D5294u, 0u, (void*)&Effects_SetParticleDrag, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D52A4u, 0u, (void*)&Effects_IntegrateParticleMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&Effects_ClearParticleTextureState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&Effects_InitializeParticleTextureAnimation, 0u, 0u, 0u},
@@ -2007,6 +2000,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D47F4u, 0u, (void*)&VS::Effects::LiveAttachScriptRenderer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4910u, 0u, (void*)&VS::Effects::LiveTickEffectRenderers, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4BD0u, 0u, (void*)&VS::Effects::LiveEmitParticlesFromScriptRegister, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D268Cu, 0u, (void*)&VS::Effects::LiveResetParticlePoolReferences, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D2698u, 0u, (void*)&VS::Effects::LiveAcquireParticlePool, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D278Cu, 0u, (void*)&VS::Effects::LiveReleaseParticlePool, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D27F0u, 0u, (void*)&VS::Effects::LiveAllocateEffectParticle, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D2888u, 0u, (void*)&VS::Effects::LiveReleaseEffectParticle, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D2904u, 0u, (void*)&VS::Effects::LiveReleaseAllEffectParticles, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5260u, 0u, (void*)&VS::Effects::LiveSetParticleGravity, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D5294u, 0u, (void*)&VS::Effects::LiveSetParticleDrag, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},

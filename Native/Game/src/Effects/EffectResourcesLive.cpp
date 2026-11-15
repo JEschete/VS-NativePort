@@ -21,6 +21,7 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticlePoolLive.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
 #include "Render/TexturePagesLive.hpp"
@@ -479,7 +480,7 @@ class LiveLifecycleHost final : public EffectLifecycleHost {
   }
 
   void AcquireParticlePool(std::int32_t count) override {
-    Effects_AcquireParticlePool(count);
+    LiveAcquireParticlePool(count);
   }
 
   void ClearReloadedBlocks() override {
@@ -501,12 +502,12 @@ class LiveParticleForceHost final : public ParticleForceHost {
  public:
   void SetParticleGravity(Core::Math::Vec3 gravity) override {
     Effects_ParticleGravity vector{gravity.x, gravity.y, gravity.z, 0};
-    Effects_SetParticleGravity(&vector);
+    LiveSetParticleGravity(&vector);
   }
 
   void SetParticleDrag(std::int32_t drag) override {
     int value = drag;
-    Effects_SetParticleDrag(&value);
+    LiveSetParticleDrag(&value);
   }
 };
 

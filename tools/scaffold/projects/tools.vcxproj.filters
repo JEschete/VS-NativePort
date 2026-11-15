@@ -3036,6 +3036,33 @@
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\particle_pool_acquire.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_allocate.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_drag.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_gravity.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_release.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_release_all.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_release_particle.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\particle_pool_reset.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\perception.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -3370,6 +3397,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\owned.csv">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\particle_pool_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\primary_effect_differential.py">

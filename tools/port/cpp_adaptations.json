@@ -390,16 +390,7 @@
 ],
 "Native\\Game\\src\\Effects\\Particles.cpp": [
 [
-97,
-[
-"    Effects_particlePool = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Effects_particlePool * count);"
-],
-[
-"    Effects_particlePool = (Effects_Particle *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Effects_particlePool * count));"
-]
-],
-[
-648,
+531,
 [
 "            Core_Gte_SetRotMatrix(scratch);"
 ],
@@ -408,7 +399,7 @@
 ]
 ],
 [
-677,
+560,
 [
 "            Core_Gte_SetRotMatrix(scratch);"
 ],
@@ -635,7 +626,7 @@
 ],
 "Native\\Game\\src\\Effects\\Runtime.cpp": [
 [
-110,
+94,
 [
 "Effects_EffectRenderer Effects_rendererTableAlias[];"
 ],
@@ -677,7 +668,7 @@
 ],
 "Native\\Game\\src\\Effects\\Trails.cpp": [
 [
-37,
+38,
 [
 "    p = Render_frameScratch.primitiveCursor;"
 ],
@@ -686,7 +677,7 @@
 ]
 ],
 [
-56,
+57,
 [
 "        addPrim(Render_frameScratch.orderingTable + depth * 4, p);"
 ],
@@ -695,7 +686,7 @@
 ]
 ],
 [
-80,
+81,
 [
 "        addPrim(Render_frameScratch.orderingTable + depth * 4, p);"
 ],
@@ -704,7 +695,7 @@
 ]
 ],
 [
-87,
+88,
 [
 "    Effects_BoneTrail* t = node->rendererState;"
 ],
@@ -713,7 +704,7 @@
 ]
 ],
 [
-92,
+93,
 [
 "        t = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *t);"
 ],

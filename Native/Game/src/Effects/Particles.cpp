@@ -4,9 +4,8 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Effects/EffectScriptLive.hpp"
+#include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -80,122 +79,6 @@ void Effects_StepParticleEndpointTowardStart(Effects_ParticleEndpointView* parti
             particle_endpoints->startX += sx;
         }
     }
-}
-
-// decomp: BATTLE.PRG func_800D268C (src/BATTLE/BATTLE.PRG/5BF94.c:6777)
-void Effects_ResetParticlePoolReferences(void) { Effects_particlePoolReferences = 0; }
-
-// decomp: BATTLE.PRG func_800D2698 (src/BATTLE/BATTLE.PRG/5BF94.c:6779)
-void Effects_AcquireParticlePool(int count)
-{
-    int i;
-
-    if (Effects_particlePoolReferences != 0) {
-        ++Effects_particlePoolReferences;
-        return;
-    }
-
-    Effects_particlePool = (Effects_Particle *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *Effects_particlePool * count));
-    Effects_particlePool[0].previous = NULL;
-    Effects_particlePool[0].next = &Effects_particlePool[1];
-
-    for (i = 1; i < count - 1; ++i) {
-        Effects_particlePool[i].previous = &Effects_particlePool[i - 1];
-        Effects_particlePool[i].next = &Effects_particlePool[i + 1];
-    }
-
-    Effects_usedParticleCount = 0;
-    Effects_particleCapacity = count;
-    Effects_particlePoolReferences = 1;
-    Effects_particlePool[i].previous = &Effects_particlePool[i - 1];
-    Effects_particlePool[i].next = NULL;
-    Effects_freeParticles = Effects_particlePool;
-}
-
-// decomp: BATTLE.PRG func_800D278C (src/BATTLE/BATTLE.PRG/5BF94.c:6805)
-void Effects_ReleaseParticlePool(void)
-{
-    if (Effects_particlePoolReferences == 1) {
-        if (Effects_particlePool != NULL) {
-            VS::Core::Memory::FreeLiveFromHighEnd(Effects_particlePool);
-            Effects_particlePool = NULL;
-        }
-        Effects_particlePoolReferences = 0;
-        return;
-    }
-    --Effects_particlePoolReferences;
-}
-
-// decomp: BATTLE.PRG func_800D27F0 (src/BATTLE/BATTLE.PRG/5BF94.c:6818)
-Effects_Particle* Effects_AllocateEffectParticle(Effects_EffectInstance* effect_instance)
-{
-    Effects_Particle* node = Effects_freeParticles;
-
-    if (node == NULL) {
-        VS::Effects::LiveReportEffectDiagnostic(0x14);
-    }
-
-    Effects_ClearParticleTextureState((int*)&node->textureAnimation);
-
-    node->age = 0xFF;
-    node->previous = NULL;
-    ++Effects_usedParticleCount;
-    Effects_freeParticles = node->next;
-    node->next = effect_instance->particles;
-
-    if (effect_instance->particles != NULL) {
-        effect_instance->particles->previous = node;
-    }
-
-    effect_instance->particles = node;
-    ++effect_instance->particleCount;
-
-    do {
-    } while (0);
-
-    return node;
-}
-
-// decomp: BATTLE.PRG func_800D2888 (src/BATTLE/BATTLE.PRG/5BF94.c:6847)
-void Effects_ReleaseEffectParticle(Effects_Particle* particle_node, Effects_EffectInstance* effect_instance)
-{
-    if (particle_node->next != NULL) {
-        particle_node->next->previous = particle_node->previous;
-    }
-
-    if (particle_node->previous != NULL) {
-        particle_node->previous->next = particle_node->next;
-    } else {
-        effect_instance->particles = particle_node->next;
-    }
-
-    particle_node->next = Effects_freeParticles;
-    Effects_freeParticles = particle_node;
-    --Effects_usedParticleCount;
-    --effect_instance->particleCount;
-}
-
-// decomp: BATTLE.PRG func_800D2904 (src/BATTLE/BATTLE.PRG/5BF94.c:6865)
-void Effects_ReleaseAllEffectParticles(Effects_EffectInstance* effect_instance)
-{
-    Effects_Particle* particle_list_head;
-    Effects_Particle* particle_list_tail;
-
-    particle_list_head = effect_instance->particles;
-    particle_list_tail = particle_list_head;
-
-    if (particle_list_head == 0) {
-        return;
-    }
-
-    while (particle_list_tail->next != 0) {
-        particle_list_tail = particle_list_tail->next;
-    }
-
-    particle_list_tail->next = Effects_freeParticles;
-    Effects_freeParticles = particle_list_head;
-    Effects_usedParticleCount -= effect_instance->particleCount;
-    effect_instance->particleCount = 0;
 }
 
 // decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6915)
@@ -282,7 +165,7 @@ void Effects_EmitParticleEvent(
     }
 
     for (i = 0; i < count; ++i) {
-        node = Effects_AllocateEffectParticle(effect_instance);
+        node = VS::Effects::LiveAllocateEffectParticle(effect_instance);
         node->transformIndex = scratch->transformIndex;
         node->attractionTransform = scratch->attractionTransform;
         Effects_InitializeParticleTextureAnimation(&node->textureAnimation, def->textureIndex, def->animationId);
@@ -829,24 +712,18 @@ int Effects_TickEffectParticles(Effects_EffectInstance* effect_instance)
                 if (node->endEvent != 0) {
                     Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
                 }
-                Effects_ReleaseEffectParticle(node, effect_instance);
+                VS::Effects::LiveReleaseEffectParticle(node, effect_instance);
             }
         } else if (--node->lifetime == 0) {
             if (node->endEvent != 0) {
                 Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
             }
-            Effects_ReleaseEffectParticle(node, effect_instance);
+            VS::Effects::LiveReleaseEffectParticle(node, effect_instance);
         }
         node = next;
     }
     return 1;
 }
-
-// decomp: BATTLE.PRG func_800D5260 (src/BATTLE/BATTLE.PRG/5BF94.c:7826)
-void Effects_SetParticleGravity(Effects_ParticleGravity* gravity_vector) { Effects_particleGravity = *gravity_vector; }
-
-// decomp: BATTLE.PRG func_800D5294 (src/BATTLE/BATTLE.PRG/5BF94.c:7828)
-void Effects_SetParticleDrag(int* drag_value) { Effects_particleDrag = *drag_value; }
 
 // decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7830)
 void Effects_IntegrateParticleMotion(Effects_Particle* node)

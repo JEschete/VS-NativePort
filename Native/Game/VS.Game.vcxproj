@@ -687,6 +687,10 @@
     <ClCompile Include="src\Effects\PackageExtentsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Effects\ParticlePool.cpp" />
+    <ClCompile Include="src\Effects\ParticlePoolLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\ParticleRender.cpp" />
     <ClCompile Include="src\Effects\ParticleRenderLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2538,6 +2542,8 @@
     <ClInclude Include="include\Effects\EffectScript.hpp" />
     <ClInclude Include="include\Effects\EffectScriptLive.hpp" />
     <ClInclude Include="include\Effects\PackageExtents.hpp" />
+    <ClInclude Include="include\Effects\ParticlePool.hpp" />
+    <ClInclude Include="include\Effects\ParticlePoolLive.hpp" />
     <ClInclude Include="include\Effects\ParticleRender.hpp" />
     <ClInclude Include="include\Effects\ParticleRenderLive.hpp" />
     <ClInclude Include="include\Effects\PrimaryEffect.hpp" />

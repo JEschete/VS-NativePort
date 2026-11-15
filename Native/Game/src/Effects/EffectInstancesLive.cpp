@@ -15,6 +15,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectInstances.hpp"
+#include "Effects/ParticlePoolLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 
 extern "C" {
@@ -180,7 +181,7 @@ class LiveInstanceChain final : public EffectInstanceChain {
     return instance;
   }
   void ReleaseParticles(Instance& instance) override {
-    Effects_ReleaseAllEffectParticles(&instance);
+    LiveReleaseAllEffectParticles(&instance);
   }
   RendererChain& Renderers(Instance& instance) override {
     renderers_.Target(instance);

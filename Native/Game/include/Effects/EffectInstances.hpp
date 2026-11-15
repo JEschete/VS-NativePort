@@ -137,7 +137,7 @@ class EffectInstanceChain : public RecordChain<Effects_EffectInstance> {
   // A new instance started from the spawn (InitEffectInstance); null
   // (refused) when the heap has no room.
   [[nodiscard]] virtual Effects_EffectInstance* StartInstance() = 0;
-  // Effects_ReleaseAllEffectParticles.
+  // Returns its particles to the pool (ReleaseAllEffectParticles).
   virtual void ReleaseParticles(Effects_EffectInstance& instance) = 0;
   // The instance's renderers.
   [[nodiscard]] virtual RendererChain& Renderers(

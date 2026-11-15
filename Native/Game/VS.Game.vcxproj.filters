@@ -1089,6 +1089,12 @@
     <ClCompile Include="src\Effects\PackageExtentsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\ParticlePool.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\ParticlePoolLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ParticleRender.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3391,6 +3397,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\PackageExtents.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ParticlePool.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ParticlePoolLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ParticleRender.hpp">

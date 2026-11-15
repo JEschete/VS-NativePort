@@ -26,6 +26,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/ParticlePoolLive.hpp"
 #include "Effects/PrimaryEffect.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Input/ControllerLive.hpp"
@@ -47,7 +48,7 @@ namespace {
 using Instance = Effects_EffectInstance;
 using Slot = Effects_RendererSlot;
 
-// The particles Effects_AcquireParticlePool reserves for a secondary
+// The particles LiveAcquireParticlePool reserves for a secondary
 // instance.
 constexpr int kSecondaryParticles = 0xFF;
 // ReleaseLiveOverlayWorkspace's owner tag for the purge overlay.
@@ -102,7 +103,7 @@ class LivePlayback : public Host {
   void SetFrame(Instance& instance, std::uint16_t frame) override {
     instance.frame = frame;
   }
-  void ReleaseParticlePool() override { Effects_ReleaseParticlePool(); }
+  void ReleaseParticlePool() override { LiveReleaseParticlePool(); }
   void SelectPackage(ActivePackage package) override {
     LiveSelectEffectResourceContext(std::to_underlying(package));
   }
@@ -266,7 +267,7 @@ class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
     LiveSetSecondaryEffectPhase(std::to_underlying(phase), &instance);
   }
   void AcquireParticlePool() override {
-    Effects_AcquireParticlePool(kSecondaryParticles);
+    LiveAcquireParticlePool(kSecondaryParticles);
   }
   Slot* FirstRenderer(Instance& instance) override {
     return instance.context.renderer;
@@ -368,7 +369,7 @@ class LiveStartup final : public EffectRuntimeStartup {
   void ResetInstances() override { LiveResetEffectInstances(); }
   void InitializeResources() override { LiveInitializeEffectResources(); }
   void ResetParticlePoolReferences() override {
-    Effects_ResetParticlePoolReferences();
+    LiveResetParticlePoolReferences();
   }
 };
 

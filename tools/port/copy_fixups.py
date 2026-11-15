@@ -702,6 +702,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveAttachScriptRenderer": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveTickEffectRenderers": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     "VS::Effects::LiveEmitParticlesFromScriptRegister": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveResetParticlePoolReferences": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveAcquireParticlePool": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveReleaseParticlePool": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveAllocateEffectParticle": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveReleaseEffectParticle": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveReleaseAllEffectParticles": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveSetParticleGravity": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveSetParticleDrag": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2713,6 +2721,14 @@ OWNED_CALL_BINDINGS["F01519"] = "VS::Effects::LiveSpawnEffectScript"
 OWNED_CALL_BINDINGS["F01522"] = "VS::Effects::LiveAttachScriptRenderer"
 OWNED_CALL_BINDINGS["F01526"] = "VS::Effects::LiveTickEffectRenderers"
 OWNED_CALL_BINDINGS["F01534"] = "VS::Effects::LiveEmitParticlesFromScriptRegister"
+OWNED_CALL_BINDINGS["F01504"] = "VS::Effects::LiveResetParticlePoolReferences"
+OWNED_CALL_BINDINGS["F01505"] = "VS::Effects::LiveAcquireParticlePool"
+OWNED_CALL_BINDINGS["F01506"] = "VS::Effects::LiveReleaseParticlePool"
+OWNED_CALL_BINDINGS["F01507"] = "VS::Effects::LiveAllocateEffectParticle"
+OWNED_CALL_BINDINGS["F01508"] = "VS::Effects::LiveReleaseEffectParticle"
+OWNED_CALL_BINDINGS["F01509"] = "VS::Effects::LiveReleaseAllEffectParticles"
+OWNED_CALL_BINDINGS["F01552"] = "VS::Effects::LiveSetParticleGravity"
+OWNED_CALL_BINDINGS["F01553"] = "VS::Effects::LiveSetParticleDrag"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4246,6 +4262,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D47F4, "VS::Effects::LiveAttachScriptRenderer"),  # F01522
     ("BATTLE/BATTLE.PRG", 0x800D4910, "VS::Effects::LiveTickEffectRenderers"),  # F01526
     ("BATTLE/BATTLE.PRG", 0x800D4BD0, "VS::Effects::LiveEmitParticlesFromScriptRegister"),  # F01534
+    ("BATTLE/BATTLE.PRG", 0x800D268C, "VS::Effects::LiveResetParticlePoolReferences"),  # F01504
+    ("BATTLE/BATTLE.PRG", 0x800D2698, "VS::Effects::LiveAcquireParticlePool"),  # F01505
+    ("BATTLE/BATTLE.PRG", 0x800D278C, "VS::Effects::LiveReleaseParticlePool"),  # F01506
+    ("BATTLE/BATTLE.PRG", 0x800D27F0, "VS::Effects::LiveAllocateEffectParticle"),  # F01507
+    ("BATTLE/BATTLE.PRG", 0x800D2888, "VS::Effects::LiveReleaseEffectParticle"),  # F01508
+    ("BATTLE/BATTLE.PRG", 0x800D2904, "VS::Effects::LiveReleaseAllEffectParticles"),  # F01509
+    ("BATTLE/BATTLE.PRG", 0x800D5260, "VS::Effects::LiveSetParticleGravity"),  # F01552
+    ("BATTLE/BATTLE.PRG", 0x800D5294, "VS::Effects::LiveSetParticleDrag"),  # F01553
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
@@ -4444,13 +4468,13 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "Consolidation restoration includes every supported row."),
     ],
     "F01515": [
-        ("    for (i = 0; i < count; ++i) {\n        node = Effects_AllocateEffectParticle(arg0);",
+        ("    for (i = 0; i < count; ++i) {\n        node = VS::Effects::LiveAllocateEffectParticle(arg0);",
          '    if (count <= 0) {\n'
          '        Core_Debugf("effects", "particle emission skipped: count=%d used=%d capacity=%d",\n'
          '            count, Effects_usedParticleCount, Effects_particleCapacity);\n'
          '        return;\n'
          '    }\n\n'
-         '    for (i = 0; i < count; ++i) {\n        node = Effects_AllocateEffectParticle(arg0);',
+         '    for (i = 0; i < count; ++i) {\n        node = VS::Effects::LiveAllocateEffectParticle(arg0);',
          "zero/full-capacity bursts have no first particle; avoid the copied C's uninitialized node"),
         ("""                scratch->vector.vx =
                     (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
