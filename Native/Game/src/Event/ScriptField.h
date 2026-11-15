@@ -16,9 +16,5 @@ intptr_t Event_ScriptClearRoomActorCache(u_char* instruction, short thread_index
 intptr_t Event_ScriptSetHudVisible(u_char* instruction, short thread_index);
 intptr_t Event_ScriptRunMenuTransition(u_char* script, short thread_index);
 intptr_t Event_ScriptChangeRoom(u_char* instruction, short thread_index);
-intptr_t Event_ScriptSetEnvironmentParticles(u_char* instruction, short thread_index);
-intptr_t Event_ScriptSetParticleVariationEnabled(u_char* instruction, short thread_index);
-intptr_t Event_ScriptMuteEnvironmentSound(u_char* instruction, short thread_index);
-intptr_t Event_ScriptControlRoomAnimation(u_char* instruction, short thread_index);
 
 #endif // VS_EVENT_SCRIPTFIELD_H_DECLS

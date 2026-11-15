@@ -245,6 +245,21 @@ public:
     void SetRoomBackgroundOffset(int, int) override { }
     void SetBackgroundParallaxScale(int, int) override { }
     void SetFirstPersonViewDisabled(bool) override { }
+    void SetRoomWeather(int) override { }
+    void SetWeatherIntensity(int) override { }
+    void SetWeatherWindAngles(int, int) override { }
+    void SetWeatherVariationEnabled(int) override { }
+    WeatherTween EventWeatherTween() const override { return {}; }
+    void SetEventWeatherTween(const WeatherTween&) override { }
+    bool AmbientSoundSuspended() const override { return {}; }
+    std::int16_t SuspendedAmbientSound() const override { return {}; }
+    void SetSuspendedAmbientSound(std::int16_t) override { }
+    bool RoomAmbientSequenceAbsent() override { return {}; }
+    int ExchangeWeatherAmbientSound(int) override { return {}; }
+    bool RoomEffectActive(int) override { return {}; }
+    void FinishRoomDoorRotation(int) override { }
+    void StartRoomEffect(int) override { }
+    void ToggleRoomEffectUpdates(int) override { }
     bool SplashImageLoading() override { return {}; }
     bool SplashImagesPresent() const override { return {}; }
     void QueueSplashImage(int, int) override { }

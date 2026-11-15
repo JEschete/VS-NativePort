@@ -1,8 +1,10 @@
 // Native side of the event-script room opcode differentials (event_room_commands_common.py, #276).
 // One vector per line: mode, the backdrop byte and draw mode word before the opcode, the cutscene
-// skip byte, the word the background callees return, the instruction's length and its bytes. Prints
-// the flow kind, the refusals, the backdrop byte and draw mode word after the opcode, then the room
-// calls as [count, kind and arguments of each call...].
+// skip byte, the word the background callees return, whether the room lacks an ambient section, the
+// previous ambient sound, the muted ambience byte and saved sound, the weather tween's eleven fields,
+// the instruction's length and its bytes. Prints the flow kind, the refusals, the backdrop byte, the
+// draw mode word, the tween's fields, the muted ambience byte and the saved sound after the opcode,
+// then the room calls as [count, kind and arguments of each call...].
 #include <cstdint>
 #include <iostream>
 #include <optional>
@@ -32,6 +34,10 @@ constexpr ScriptFlow (*kHandlers[])(const ScriptInstruction&, ScriptVmHost&) = {
     ScriptSetBackgroundOffset,
     ScriptSetFirstPersonView,
     ScriptSetBackgroundParallax,
+    ScriptSetEnvironmentParticles,
+    ScriptSetParticleVariationEnabled,
+    ScriptMuteEnvironmentSound,
+    ScriptControlRoomAnimation,
 };
 
 // The call kinds the harness records for the stubbed callees.
@@ -50,10 +56,21 @@ enum Call : int {
     kCallBackgroundOffset,
     kCallFirstPerson,
     kCallParallax,
+    kCallWeather,
+    kCallIntensity,
+    kCallWind,
+    kCallVariation,
+    kCallAmbientAbsent,
+    kCallAmbientSound,
+    kCallEffectActive,
+    kCallFinishRotation,
+    kCallStartEffect,
+    kCallToggleEffect,
 };
 
 // The backdrop byte stores 0xFF or 0 as LiveVmHost does; the draw mode word takes the mode as passed.
-// The background load reports its last step as func_8008F0FC does, by a nonzero result.
+// The background load reports its last step as func_8008F0FC does, by a nonzero result, and so does
+// func_80093764 for an active room effect. The muted ambience byte stores 1 or 0 as LiveVmHost does.
 class RoomHost final : public ScriptVmHost {
 public:
     int refusals = 0;
@@ -61,6 +78,11 @@ public:
     std::int32_t draw_mode = 0;
     std::uint8_t skip_state = 0;
     std::int32_t result = 0;
+    int absent = 0;
+    std::int32_t previous = 0;
+    int suspended = 0;
+    std::int16_t saved_sound = 0;
+    WeatherTween tween;
     std::vector<std::vector<long long>> calls;
 
     void Refuse(ScriptVmRefusal, int) override { ++refusals; }
@@ -109,6 +131,37 @@ public:
         calls.push_back({ kCallFirstPerson, disabled ? 1 : 0 });
     }
     CutsceneSkip SkipState() const override { return static_cast<CutsceneSkip>(skip_state); }
+    void SetRoomWeather(int kind) override { calls.push_back({ kCallWeather, kind }); }
+    void SetWeatherIntensity(int intensity) override { calls.push_back({ kCallIntensity, intensity }); }
+    void SetWeatherWindAngles(int direction, int strength) override
+    {
+        calls.push_back({ kCallWind, direction, strength });
+    }
+    void SetWeatherVariationEnabled(int enabled) override { calls.push_back({ kCallVariation, enabled }); }
+    WeatherTween EventWeatherTween() const override { return tween; }
+    void SetEventWeatherTween(const WeatherTween& value) override { tween = value; }
+    bool AmbientSoundSuspended() const override { return suspended != 0; }
+    void SetAmbientSoundSuspended(bool value) override { suspended = value ? 1 : 0; }
+    std::int16_t SuspendedAmbientSound() const override { return saved_sound; }
+    void SetSuspendedAmbientSound(std::int16_t sound) override { saved_sound = sound; }
+    bool RoomAmbientSequenceAbsent() override
+    {
+        calls.push_back({ kCallAmbientAbsent });
+        return absent != 0;
+    }
+    int ExchangeWeatherAmbientSound(int sound) override
+    {
+        calls.push_back({ kCallAmbientSound, sound });
+        return previous;
+    }
+    bool RoomEffectActive(int effect) override
+    {
+        calls.push_back({ kCallEffectActive, effect });
+        return result != 0;
+    }
+    void FinishRoomDoorRotation(int effect) override { calls.push_back({ kCallFinishRotation, effect }); }
+    void StartRoomEffect(int effect) override { calls.push_back({ kCallStartEffect, effect }); }
+    void ToggleRoomEffectUpdates(int effect) override { calls.push_back({ kCallToggleEffect, effect }); }
 
     // Everything else the room opcodes must not touch.
     void NoteInvalidOpcode(const ScriptInstruction&) override { }
@@ -143,7 +196,6 @@ public:
     void SetScanlineOverlayEnabled(bool) override { }
     bool MenuTransitionActive() const override { return {}; }
     void SetMenuTransitionActive(bool) override { }
-    void SetAmbientSoundSuspended(bool) override { }
     ScriptLocation ThreadCursor(int) const override { return {}; }
     void SetThreadCursor(int, ScriptLocation) override { }
     std::int16_t WaitFrames(int) const override { return {}; }
@@ -259,6 +311,14 @@ template <typename Value> bool Read(Value& value)
     value = static_cast<Value>(read);
     return true;
 }
+
+bool ReadTween(WeatherTween& tween)
+{
+    return Read(tween.elapsed) && Read(tween.duration) && Read(tween.wind_direction)
+        && Read(tween.start_wind_direction) && Read(tween.delta_wind_direction) && Read(tween.wind_strength)
+        && Read(tween.start_wind_strength) && Read(tween.delta_wind_strength) && Read(tween.intensity)
+        && Read(tween.start_intensity) && Read(tween.delta_intensity);
+}
 } // namespace
 
 int main()
@@ -271,7 +331,8 @@ int main()
         RoomHost host;
         std::size_t length = 0;
         if (mode >= std::size(kHandlers) || !Read(host.backdrop) || !Read(host.draw_mode) || !Read(host.skip_state)
-            || !Read(host.result) || !Read(length))
+            || !Read(host.result) || !Read(host.absent) || !Read(host.previous) || !Read(host.suspended)
+            || !Read(host.saved_sound) || !ReadTween(host.tween) || !Read(length))
             return 1;
         std::vector<std::uint8_t> bytes(length);
         for (std::uint8_t& byte : bytes) {
@@ -281,7 +342,14 @@ int main()
         const ScriptInstruction instruction { .bytes = std::span<const std::uint8_t>(bytes) };
         const ScriptFlow flow = kHandlers[mode](instruction, host);
         std::cout << static_cast<int>(flow.kind) << ' ' << host.refusals << ' ' << host.backdrop << ' '
-                  << host.draw_mode << ' ' << host.calls.size();
+                  << host.draw_mode;
+        const WeatherTween& tween = host.tween;
+        for (const int field : { int { tween.elapsed }, int { tween.duration }, int { tween.wind_direction },
+                 int { tween.start_wind_direction }, int { tween.delta_wind_direction }, int { tween.wind_strength },
+                 int { tween.start_wind_strength }, int { tween.delta_wind_strength }, int { tween.intensity },
+                 int { tween.start_intensity }, int { tween.delta_intensity } })
+            std::cout << ' ' << field;
+        std::cout << ' ' << host.suspended << ' ' << host.saved_sound << ' ' << host.calls.size();
         for (const auto& call : host.calls) {
             for (const long long word : call)
                 std::cout << ' ' << word;

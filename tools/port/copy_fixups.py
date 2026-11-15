@@ -3321,6 +3321,10 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01045", 0x800B70E8, "ScriptTweenSplashLayer"),
     ("F01046", 0x800B71C4, "ScriptFreeSplashImage"),
     ("F01047", 0x800B71F4, "ScriptWaitForSplashTween"),
+    ("F01135", 0x800B9FC0, "ScriptSetEnvironmentParticles"),
+    ("F01136", 0x800BA0E4, "ScriptSetParticleVariationEnabled"),
+    ("F01137", 0x800BA108, "ScriptMuteEnvironmentSound"),
+    ("F01138", 0x800BA194, "ScriptControlRoomAnimation"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -6401,9 +6405,6 @@ REGEX_FIXES += [
         ("Event::ScriptChangeRoom",
          (('sp10', 'door_record'),),
          "F01120 4A0A8.c:2018-2047 fills sp10 as _mpdRoomDoorSection_t from room/zone, entry tile/direction/elevation, and flags, then passes it to func_8007C580 or func_8007C654. State0 creates the transition, state2 acknowledges it. Native Field_MpdDoorRecord preserves this relationship and partially initialized layout."),
-        ("Event::ScriptControlRoomAnimation",
-         (('temp_s0', 'room_effect_id'),),
-         "F01138 4A0A8.c:2238-2254 reads temp_s0 from byte2. Start mode optionally finishes an active effect while skipping, then starts that effect; toggle mode passes the same id to func_800936F8. Native room-effect consumers interpret it as selected room effect, not animation frame."),
         ("Event::CommandSpecialOperation",
          (('sp10', 'diagnostic_message'),),
          "F01187 4A0A8.c:2651-2731 declares sp10[32] and uses it only as sprintf destination for the undefined-special-operation diagnostic. Other switch branches never access it. This names an existing diagnostic staging role without adding output or changing side effects."),

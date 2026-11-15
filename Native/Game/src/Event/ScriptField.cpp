@@ -3,15 +3,11 @@
 #include "Audio/MusicLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
-#include "Field/EnvironmentLive.hpp"
-#include "Field/RoomEffectsLive.hpp"
-#include "Field/RoomLoadingLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptField.h"
 #include "Event/ScriptVm.h"
@@ -137,86 +133,6 @@ intptr_t Event_ScriptChangeRoom(u_char* instruction, short thread_index)
         return 0;
     }
     return 1;
-}
-
-// decomp: BATTLE.PRG func_800B9FC0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2180)
-intptr_t Event_ScriptSetEnvironmentParticles(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSetRoomWeather(instruction[1] >> 4);
-    if (instruction[4] == 0) {
-        Event_weatherTween.intensity = instruction[1] & 0xF;
-        VS::Field::LiveSetWeatherIntensity(Event_weatherTween.intensity);
-        Event_weatherTween.windDirection = instruction[2] * 16;
-        Event_weatherTween.windStrength = instruction[3] * 4 + ONE / 8;
-        VS::Field::LiveSetWeatherWindAngles(Event_weatherTween.windDirection, Event_weatherTween.windStrength);
-    } else {
-        int v = instruction[1] & 0xF;
-        short base;
-        int delta;
-
-        Event_weatherTween.startIntensity = Event_weatherTween.intensity;
-        Event_weatherTween.deltaIntensity = v - Event_weatherTween.intensity;
-        Event_weatherTween.deltaWindStrength =
-            instruction[3] * 4 - (base = (Event_weatherTween.startWindStrength = Event_weatherTween.windStrength) - ONE / 8);
-        delta = instruction[2] * 16 - (Event_weatherTween.startWindDirection = Event_weatherTween.windDirection);
-        if (delta < -ONE / 2) {
-            delta += ONE;
-        } else if (delta > ONE / 2) {
-            delta -= ONE;
-        }
-        Event_weatherTween.deltaWindDirection = delta;
-        Event_weatherTween.durationFrames = instruction[4];
-        Event_weatherTween.elapsedFrames = 0;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BA0E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2211)
-intptr_t Event_ScriptSetParticleVariationEnabled(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSetWeatherVariationEnabled(instruction[1] ^ 1);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BA108 (src/BATTLE/BATTLE.PRG/4A0A8.c:2217)
-intptr_t Event_ScriptMuteEnvironmentSound(u_char* instruction, short thread_index)
-{
-    if (instruction[1] != 0) {
-        if (Event_isAmbientSoundSuspended != 0) {
-            return 0;
-        }
-
-        Event_isAmbientSoundSuspended = VS::Field::LiveIsRoomAudioSequenceAbsent();
-
-        if (Event_isAmbientSoundSuspended) {
-            Event_suspendedAmbientSoundId = VS::Field::LiveSetWeatherAmbientSound(-1);
-        }
-
-    } else if (Event_isAmbientSoundSuspended != 0) {
-        VS::Field::LiveSetWeatherAmbientSound(Event_suspendedAmbientSoundId);
-        Event_isAmbientSoundSuspended = 0;
-    }
-
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BA194 (src/BATTLE/BATTLE.PRG/4A0A8.c:2238)
-intptr_t Event_ScriptControlRoomAnimation(u_char* instruction, short thread_index)
-{
-    int room_effect_id = instruction[2];
-
-    switch (instruction[1]) {
-    case 0:
-        if ((Event_skipState == 2) && (VS::Field::LiveIsRoomEffectActive(room_effect_id) != 0)) {
-            VS::Field::LiveFinishRoomDoorRotation(room_effect_id);
-        }
-        VS::Field::LiveStartRoomEffect(room_effect_id);
-        break;
-    case 1:
-        VS::Field::LiveToggleRoomEffectUpdates(room_effect_id);
-        break;
-    }
-    return 0;
 }
 
 }  // extern "C"

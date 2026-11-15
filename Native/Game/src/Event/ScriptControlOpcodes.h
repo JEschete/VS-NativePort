@@ -127,6 +127,14 @@ intptr_t Event_ScriptFreeSplashImageOpcode(uint8_t* instruction,
                                            int16_t thread_index);
 intptr_t Event_ScriptWaitForSplashTweenOpcode(uint8_t* instruction,
                                               int16_t thread_index);
+intptr_t Event_ScriptSetEnvironmentParticlesOpcode(uint8_t* instruction,
+                                                   int16_t thread_index);
+intptr_t Event_ScriptSetParticleVariationEnabledOpcode(uint8_t* instruction,
+                                                       int16_t thread_index);
+intptr_t Event_ScriptMuteEnvironmentSoundOpcode(uint8_t* instruction,
+                                                int16_t thread_index);
+intptr_t Event_ScriptControlRoomAnimationOpcode(uint8_t* instruction,
+                                                int16_t thread_index);
 
 #ifdef __cplusplus
 }

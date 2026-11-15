@@ -34,6 +34,11 @@ constexpr std::size_t kFourthOperand = 4;
   return steps * kBackgroundParallaxOperandScale;
 }
 
+// A value kept in a halfword, wrapped as the original's stores did.
+[[nodiscard]] constexpr std::int16_t Halfword(int value) {
+  return static_cast<std::int16_t>(value);
+}
+
 [[nodiscard]] ScriptCommand Bytes(const ScriptInstruction& instruction) {
   return instruction.bytes;
 }
@@ -230,6 +235,115 @@ ScriptFlow ScriptSetBackgroundParallax(const ScriptInstruction& instruction,
   const ScriptCommand command = Bytes(instruction);
   host.SetBackgroundParallaxScale(ParallaxScale(command, kFirstOperand),
                                   ParallaxScale(command, kSecondOperand));
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800B9FC0 (4A0A8.c:2180). The weather is selected
+// first. An immediate change leaves a running tween's frames, start and
+// deltas alone. The tween's deltas are kept in halfwords, as the original's
+// were; the wind direction's is first moved towards the short way round by
+// one full turn at most.
+ScriptFlow ScriptSetEnvironmentParticles(const ScriptInstruction& instruction,
+                                         ScriptVmHost& host) {
+  if (!InstructionFits(instruction, kSetEnvironmentParticlesLength, host)) {
+    return Advance();
+  }
+  const ScriptCommand command = Bytes(instruction);
+  const std::uint8_t weather = OperandByte(command, kFirstOperand);
+  const auto intensity = static_cast<int>(weather & kWeatherIntensityMask);
+  const int direction =
+      OperandByte(command, kSecondOperand) * kWeatherDirectionOperandScale;
+  const int strength =
+      OperandByte(command, kThirdOperand) * kWeatherStrengthOperandScale;
+  const std::uint8_t frames = OperandByte(command, kFourthOperand);
+
+  host.SetRoomWeather(weather >> kWeatherKindShift);
+  WeatherTween tween = host.EventWeatherTween();
+  if (frames == 0) {
+    tween.intensity = Halfword(intensity);
+    tween.wind_direction = Halfword(direction);
+    tween.wind_strength = Halfword(strength + kWeatherStrengthBase);
+    host.SetEventWeatherTween(tween);
+    host.SetWeatherIntensity(tween.intensity);
+    host.SetWeatherWindAngles(tween.wind_direction, tween.wind_strength);
+    return Advance();
+  }
+  tween.start_intensity = tween.intensity;
+  tween.delta_intensity = Halfword(intensity - tween.intensity);
+  tween.start_wind_strength = tween.wind_strength;
+  tween.delta_wind_strength =
+      Halfword(strength - (tween.wind_strength - kWeatherStrengthBase));
+  tween.start_wind_direction = tween.wind_direction;
+  int turn = direction - tween.wind_direction;
+  if (turn < -kWeatherHalfTurn) {
+    turn += kWeatherFullTurn;
+  } else if (turn > kWeatherHalfTurn) {
+    turn -= kWeatherFullTurn;
+  }
+  tween.delta_wind_direction = Halfword(turn);
+  tween.duration = frames;
+  tween.elapsed = 0;
+  host.SetEventWeatherTween(tween);
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800BA0E4 (4A0A8.c:2211). Only the operand's low
+// bit is inverted; func_80091314 stores the result as the enabled flag.
+ScriptFlow ScriptSetParticleVariationEnabled(
+    const ScriptInstruction& instruction, ScriptVmHost& host) {
+  if (!InstructionFits(instruction, kSetParticleVariationEnabledLength, host)) {
+    return Advance();
+  }
+  const std::uint8_t disabled = OperandByte(Bytes(instruction), kFirstOperand);
+  host.SetWeatherVariationEnabled(static_cast<int>(disabled ^ 1U));
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800BA108 (4A0A8.c:2217). Muting while already
+// muted keeps the first saved sound; the saved sound is a halfword.
+ScriptFlow ScriptMuteEnvironmentSound(const ScriptInstruction& instruction,
+                                      ScriptVmHost& host) {
+  if (!InstructionFits(instruction, kMuteEnvironmentSoundLength, host)) {
+    return Advance();
+  }
+  const bool mute = OperandByte(Bytes(instruction), kFirstOperand) != 0;
+  if (mute) {
+    if (host.AmbientSoundSuspended()) {
+      return Advance();
+    }
+    const bool suspended = host.RoomAmbientSequenceAbsent();
+    host.SetAmbientSoundSuspended(suspended);
+    if (suspended) {
+      host.SetSuspendedAmbientSound(Halfword(
+          host.ExchangeWeatherAmbientSound(kMutedWeatherAmbientSound)));
+    }
+  } else if (host.AmbientSoundSuspended()) {
+    static_cast<void>(
+        host.ExchangeWeatherAmbientSound(host.SuspendedAmbientSound()));
+    host.SetAmbientSoundSuspended(false);
+  }
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800BA194 (4A0A8.c:2238). The effect byte is read
+// whatever the mode.
+ScriptFlow ScriptControlRoomAnimation(const ScriptInstruction& instruction,
+                                      ScriptVmHost& host) {
+  if (!InstructionFits(instruction, kControlRoomAnimationLength, host)) {
+    return Advance();
+  }
+  const ScriptCommand command = Bytes(instruction);
+  const std::uint8_t mode = OperandByte(command, kFirstOperand);
+  const int effect = OperandByte(command, kSecondOperand);
+  if (mode == kStartRoomAnimation) {
+    if (host.SkipState() == CutsceneSkip::kSkipping &&
+        host.RoomEffectActive(effect)) {
+      host.FinishRoomDoorRotation(effect);
+    }
+    host.StartRoomEffect(effect);
+  } else if (mode == kToggleRoomAnimation) {
+    host.ToggleRoomEffectUpdates(effect);
+  }
   return Advance();
 }
 

@@ -387,6 +387,22 @@ void SetLiveSplashTween(int layer, const SplashTween& tween) {
   record.deltaBrightness = tween.delta_brightness;
 }
 
+WeatherTween LiveWeatherTween() { return FromRecord(Event_weatherTween); }
+
+void StoreLiveWeatherTween(const WeatherTween& tween) {
+  Event_weatherTween.elapsedFrames = static_cast<char>(tween.elapsed);
+  Event_weatherTween.durationFrames = static_cast<char>(tween.duration);
+  Event_weatherTween.windDirection = tween.wind_direction;
+  Event_weatherTween.startWindDirection = tween.start_wind_direction;
+  Event_weatherTween.deltaWindDirection = tween.delta_wind_direction;
+  Event_weatherTween.windStrength = tween.wind_strength;
+  Event_weatherTween.startWindStrength = tween.start_wind_strength;
+  Event_weatherTween.deltaWindStrength = tween.delta_wind_strength;
+  Event_weatherTween.intensity = tween.intensity;
+  Event_weatherTween.startIntensity = tween.start_intensity;
+  Event_weatherTween.deltaIntensity = tween.delta_intensity;
+}
+
 }  // namespace VS::Event
 
 // decomp: func_800BA8BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2454), opcode 0xA0

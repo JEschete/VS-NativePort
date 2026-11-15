@@ -62,6 +62,12 @@ class RecordingHost final : public event::ScriptVmHost {
   std::array<std::optional<event::ImageLayerPlacement>, 4> splash_layers{};
   std::array<event::SplashTween, 4> splash_tweens{};
   std::vector<std::string> splash_calls;
+  // The weather tween, the weather ambience and the room effects.
+  event::WeatherTween tween;
+  std::int16_t suspended_sound = 0;
+  bool ambient_absent = false;
+  int ambient_sound = 0;
+  bool effect_active = false;
   std::vector<std::pair<Location, int>> instructions;
   Bytes palette_command = Bytes(8);
   Bytes sound_marker{0x82, 0x05, 0, 0};
@@ -555,6 +561,48 @@ class RecordingHost final : public event::ScriptVmHost {
     splash_calls.push_back("Tween " + std::to_string(layer));
     splash_tweens.at(static_cast<std::size_t>(layer)) = tween;
   }
+  void SetRoomWeather(int kind) override { NoteRoom("Weather", {kind}); }
+  void SetWeatherIntensity(int intensity) override {
+    NoteRoom("Intensity", {intensity});
+  }
+  void SetWeatherWindAngles(int direction, int strength) override {
+    NoteRoom("Wind", {direction, strength});
+  }
+  void SetWeatherVariationEnabled(int enabled) override {
+    NoteRoom("Variation", {enabled});
+  }
+  event::WeatherTween EventWeatherTween() const override { return tween; }
+  void SetEventWeatherTween(const event::WeatherTween& value) override {
+    tween = value;
+  }
+  bool AmbientSoundSuspended() const override { return ambient_suspended; }
+  std::int16_t SuspendedAmbientSound() const override {
+    return suspended_sound;
+  }
+  void SetSuspendedAmbientSound(std::int16_t sound) override {
+    suspended_sound = sound;
+  }
+  bool RoomAmbientSequenceAbsent() override {
+    NoteRoom("AmbientAbsent", {});
+    return ambient_absent;
+  }
+  int ExchangeWeatherAmbientSound(int sound) override {
+    NoteRoom("Ambient", {sound});
+    return std::exchange(ambient_sound, sound);
+  }
+  bool RoomEffectActive(int effect) override {
+    NoteRoom("EffectActive", {effect});
+    return effect_active;
+  }
+  void FinishRoomDoorRotation(int effect) override {
+    NoteRoom("FinishRotation", {effect});
+  }
+  void StartRoomEffect(int effect) override {
+    NoteRoom("StartEffect", {effect});
+  }
+  void ToggleRoomEffectUpdates(int effect) override {
+    NoteRoom("ToggleEffect", {effect});
+  }
 
  private:
   static std::string Note(const char* name, std::initializer_list<int> values) {
@@ -866,6 +914,217 @@ TEST_CASE("Background parallax widens signed bytes to the Q12 scale",
         Calls{"Parallax -128 128"});
   CHECK(RoomCalls(event::ScriptSetBackgroundParallax,
                   {0x7E, 0, 0, 0xFF, 0x7F}) == Calls{"Parallax 0 0"});
+}
+
+TEST_CASE("Environment opcodes refuse truncated operand spans",
+          "[event][script][environment-commands][event-vm]") {
+  const std::array commands{
+      std::pair{event::ScriptSetEnvironmentParticles, 5},
+      std::pair{event::ScriptSetParticleVariationEnabled, 2},
+      std::pair{event::ScriptControlRoomAnimation, 3},
+      std::pair{event::ScriptMuteEnvironmentSound, 2},
+  };
+  for (const auto& [handler, length] : commands) {
+    for (int size = 0; size < length; ++size) {
+      RecordingHost host;
+      host.ambient_suspended = true;
+      host.tween.duration = 9;
+      CHECK(Run(handler, host, Bytes(static_cast<std::size_t>(size))) ==
+            Flow::Of(Kind::kAdvance));
+      REQUIRE(host.refusals.size() == 1);
+      CHECK(host.refusals[0] == std::pair{Refusal::kShortInstruction, size});
+      CHECK(host.room_calls.empty());
+      CHECK(host.ambient_suspended);
+      CHECK(host.tween.duration == 9);
+    }
+  }
+}
+
+namespace {
+// The tween's fields in memory order: elapsed and duration frames, then the
+// wind direction, wind strength and intensity, each current, start and delta.
+using TweenFields = std::array<int, 11>;
+
+TweenFields Fields(const event::WeatherTween& tween) {
+  return {tween.elapsed,
+          tween.duration,
+          tween.wind_direction,
+          tween.start_wind_direction,
+          tween.delta_wind_direction,
+          tween.wind_strength,
+          tween.start_wind_strength,
+          tween.delta_wind_strength,
+          tween.intensity,
+          tween.start_intensity,
+          tween.delta_intensity};
+}
+
+// Runs opcode 0x77 with `operands` over a tween at `tween`, checking its calls
+// and returning the tween's fields after it.
+TweenFields RunParticles(const event::WeatherTween& tween, Bytes operands,
+                         const Calls& calls) {
+  RecordingHost host;
+  host.tween = tween;
+  operands.insert(operands.begin(), 0x77);
+  CHECK(Run(event::ScriptSetEnvironmentParticles, host, operands) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.room_calls == calls);
+  return Fields(host.tween);
+}
+}  // namespace
+
+TEST_CASE("Immediate weather sets intensity and wind but keeps a running tween",
+          "[event][script][environment-commands][event-vm]") {
+  const event::WeatherTween running{.elapsed = 3,
+                                    .duration = 7,
+                                    .start_wind_direction = 11,
+                                    .delta_wind_direction = 12,
+                                    .start_wind_strength = 13,
+                                    .delta_wind_strength = 14,
+                                    .start_intensity = 15,
+                                    .delta_intensity = 16};
+  CHECK(RunParticles(running, {0x35, 0x10, 0x20, 0, 0x99},
+                     {"Weather 3", "Intensity 5", "Wind 256 640"}) ==
+        TweenFields{3, 7, 256, 11, 12, 640, 13, 14, 5, 15, 16});
+  CHECK(RunParticles({}, {0xFF, 0xFF, 0xFF, 0},
+                     {"Weather 15", "Intensity 15", "Wind 4080 1532"}) ==
+        TweenFields{0, 0, 4080, 0, 0, 1532, 0, 0, 15, 0, 0});
+}
+
+TEST_CASE("Weather tween starts from the current values the short way round",
+          "[event][script][environment-commands][event-vm]") {
+  // 3840 - 100 is past half a turn, so the wind turns back by 356.
+  CHECK(RunParticles({.elapsed = 5,
+                      .wind_direction = 100,
+                      .wind_strength = 700,
+                      .intensity = 9},
+                     {0x23, 0xF0, 0x10, 30}, {"Weather 2"}) ==
+        TweenFields{0, 30, 100, 100, -356, 700, 700, -124, 9, 9, -6});
+  // Turning forwards past half a turn back; at exactly half a turn it stays.
+  CHECK(RunParticles({.wind_direction = 3000}, {0, 0, 0, 1},
+                     {"Weather 0"})[4] == 1096);
+  CHECK(RunParticles({.wind_direction = 2048}, {0, 0, 0, 1},
+                     {"Weather 0"})[4] == -2048);
+}
+
+TEST_CASE("Weather tween turns at most once then wraps its deltas to halfwords",
+          "[event][script][environment-commands][event-vm]") {
+  CHECK(RunParticles({.wind_direction = 32767,
+                      .wind_strength = -32768,
+                      .intensity = -32768},
+                     {0x0F, 0, 0xFF, 0xFF}, {"Weather 0"}) ==
+        TweenFields{0, 255, 32767, 32767, -28671, -32768, -32768, -31236,
+                    -32768, -32768, -32753});
+}
+
+TEST_CASE("Particle variation inverts the low bit of its operand",
+          "[event][script][environment-commands][event-vm]") {
+  CHECK(RoomCalls(event::ScriptSetParticleVariationEnabled, {0x78, 0}) ==
+        Calls{"Variation 1"});
+  CHECK(RoomCalls(event::ScriptSetParticleVariationEnabled, {0x78, 1}) ==
+        Calls{"Variation 0"});
+  CHECK(RoomCalls(event::ScriptSetParticleVariationEnabled, {0x78, 2, 1}) ==
+        Calls{"Variation 3"});
+  CHECK(RoomCalls(event::ScriptSetParticleVariationEnabled, {0x78, 0xFF}) ==
+        Calls{"Variation 254"});
+}
+
+TEST_CASE("Environment sound mute saves the ambience once",
+          "[event][script][environment-commands][event-vm]") {
+  RecordingHost host;
+  host.ambient_absent = true;
+  host.ambient_sound = 0x1234;
+  CHECK(Run(event::ScriptMuteEnvironmentSound, host, {0x7A, 1}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.room_calls == Calls{"AmbientAbsent", "Ambient -1"});
+  CHECK(host.ambient_suspended);
+  CHECK(host.suspended_sound == 0x1234);
+
+  // A second mute keeps the first saved sound.
+  host.room_calls.clear();
+  CHECK(Run(event::ScriptMuteEnvironmentSound, host, {0x7A, 0x80}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.room_calls.empty());
+  CHECK(host.suspended_sound == 0x1234);
+}
+
+TEST_CASE("Environment sound restore plays the saved ambience once",
+          "[event][script][environment-commands][event-vm]") {
+  RecordingHost host;
+  host.ambient_suspended = true;
+  host.suspended_sound = 0x1234;
+  host.ambient_sound = -1;
+  CHECK(Run(event::ScriptMuteEnvironmentSound, host, {0x7A, 0}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.room_calls == Calls{"Ambient 4660"});
+  CHECK_FALSE(host.ambient_suspended);
+  CHECK(host.ambient_sound == 0x1234);
+
+  // Restoring again does nothing.
+  host.room_calls.clear();
+  CHECK(Run(event::ScriptMuteEnvironmentSound, host, {0x7A, 0}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.room_calls.empty());
+}
+
+TEST_CASE("Environment sound stays on in a room with an ambient section",
+          "[event][script][environment-commands][event-vm]") {
+  RecordingHost host;
+  host.suspended_sound = 77;
+  CHECK(Run(event::ScriptMuteEnvironmentSound, host, {0x7A, 1}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.room_calls == Calls{"AmbientAbsent"});
+  CHECK_FALSE(host.ambient_suspended);
+  CHECK(host.suspended_sound == 77);
+
+  // The saved sound is a halfword.
+  RecordingHost wide;
+  wide.ambient_absent = true;
+  wide.ambient_sound = 0x18000;
+  CHECK(Run(event::ScriptMuteEnvironmentSound, wide, {0x7A, 1}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(wide.suspended_sound == -32768);
+  CHECK(Run(event::ScriptMuteEnvironmentSound, wide, {0x7A, 0}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(wide.ambient_sound == -32768);
+}
+
+TEST_CASE("Room animation start finishes an active effect only while skipping",
+          "[event][script][environment-commands][event-vm]") {
+  const std::array skips{event::CutsceneSkip::kNone,
+                         event::CutsceneSkip::kSkippable,
+                         event::CutsceneSkip::kSkipping};
+  for (const auto skip : skips) {
+    for (const bool active : {false, true}) {
+      CAPTURE(static_cast<int>(skip), active);
+      RecordingHost host;
+      host.skip = skip;
+      host.effect_active = active;
+      CHECK(Run(event::ScriptControlRoomAnimation, host, {0x79, 0, 0xFF}) ==
+            Flow::Of(Kind::kAdvance));
+      Calls expected;
+      if (skip == event::CutsceneSkip::kSkipping) {
+        expected.emplace_back("EffectActive 255");
+        if (active) {
+          expected.emplace_back("FinishRotation 255");
+        }
+      }
+      expected.emplace_back("StartEffect 255");
+      CHECK(host.room_calls == expected);
+    }
+  }
+}
+
+TEST_CASE("Room animation toggles updates and ignores other modes",
+          "[event][script][environment-commands][event-vm]") {
+  RecordingHost host;
+  host.skip = event::CutsceneSkip::kSkipping;
+  host.effect_active = true;
+  CHECK(Run(event::ScriptControlRoomAnimation, host, {0x79, 1, 4}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.room_calls == Calls{"ToggleEffect 4"});
+  CHECK(RoomCalls(event::ScriptControlRoomAnimation, {0x79, 2, 4}).empty());
+  CHECK(RoomCalls(event::ScriptControlRoomAnimation, {0x79, 0xFF, 4}).empty());
 }
 
 namespace {

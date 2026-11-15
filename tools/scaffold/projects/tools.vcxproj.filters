@@ -2739,6 +2739,18 @@
     <None Include="..\..\port\differentials\event_room_commands_f01134.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\event_room_commands_f01135.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\event_room_commands_f01136.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\event_room_commands_f01137.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\event_room_commands_f01138.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\event_room_commands_f01139.py">
       <Filter>tools\port\differentials</Filter>
     </None>

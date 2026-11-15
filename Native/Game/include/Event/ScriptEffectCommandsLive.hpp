@@ -20,4 +20,9 @@ void UpdateLiveWeatherTween();
 // Stores `layer`'s splash tween record, keeping its reserved byte; nothing
 // happens past the records.
 void SetLiveSplashTween(int layer, const SplashTween& tween);
+
+// The event's weather tween (D_800F4B88) as a typed value, and back; the
+// store leaves the record's two reserved bytes alone.
+[[nodiscard]] WeatherTween LiveWeatherTween();
+void StoreLiveWeatherTween(const WeatherTween& tween);
 }  // namespace VS::Event

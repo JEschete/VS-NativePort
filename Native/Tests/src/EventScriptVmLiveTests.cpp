@@ -20,6 +20,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
+#include "Field/EnvironmentLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Render/GimImagesLive.hpp"
@@ -35,6 +36,7 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptActors.h"
+#include "Event/ScriptAudio.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
@@ -1879,6 +1881,10 @@ constexpr auto kRoomControlEntries = std::to_array<ControlEntry>({
     {0x800BA218, Event_ScriptSetBackgroundOffsetOpcode},
     {0x800BA264, Event_ScriptSetFirstPersonViewOpcode},
     {0x800BA2B4, Event_ScriptSetBackgroundParallaxOpcode},
+    {0x800B9FC0, Event_ScriptSetEnvironmentParticlesOpcode},
+    {0x800BA0E4, Event_ScriptSetParticleVariationEnabledOpcode},
+    {0x800BA108, Event_ScriptMuteEnvironmentSoundOpcode},
+    {0x800BA194, Event_ScriptControlRoomAnimationOpcode},
 });
 
 // Restores the draw mode, the texture LOD preserve flag and the room clip
@@ -2399,6 +2405,102 @@ TEST_CASE("Native splash free binding yields while a skip runs",
     CHECK(RunSplashScript({0x19, 0xF0}) == (skip == 2 ? 1 : -1));
     CHECK_FALSE(VS::Render::LiveGimImagesPresent());
   }
+}
+
+namespace {
+// Restores the room weather, the event weather tween and the muted
+// ambience the environment opcodes write.
+struct EnvironmentOpcodeStateFixture {
+  VS::Field::RoomWeatherState weather = VS::Field::LoadLiveRoomWeatherState();
+  event::WeatherTween tween = event::LiveWeatherTween();
+  char suspended = Event_isAmbientSoundSuspended;
+  std::int16_t saved_sound = Event_suspendedAmbientSoundId;
+
+  EnvironmentOpcodeStateFixture() = default;
+  ~EnvironmentOpcodeStateFixture() {
+    VS::Field::StoreLiveRoomWeatherState(weather);
+    event::StoreLiveWeatherTween(tween);
+    Event_isAmbientSoundSuspended = suspended;
+    Event_suspendedAmbientSoundId = saved_sound;
+  }
+  EnvironmentOpcodeStateFixture(const EnvironmentOpcodeStateFixture&) = delete;
+  EnvironmentOpcodeStateFixture& operator=(
+      const EnvironmentOpcodeStateFixture&) = delete;
+  EnvironmentOpcodeStateFixture(EnvironmentOpcodeStateFixture&&) = delete;
+  EnvironmentOpcodeStateFixture& operator=(EnvironmentOpcodeStateFixture&&) =
+      delete;
+};
+
+// Binds the particle, variation and mute opcodes in both tables with their
+// original sizes.
+void RunEnvironmentScript(Bytes bytes) {
+  const auto start = MountScript(std::move(bytes));
+  const std::array bindings{
+      std::pair<std::uint8_t, Handler>{
+          0x77, Event_ScriptSetEnvironmentParticlesOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0x78, Event_ScriptSetParticleVariationEnabledOpcode},
+      std::pair<std::uint8_t, Handler>{0x7A,
+                                       Event_ScriptMuteEnvironmentSoundOpcode},
+      std::pair<std::uint8_t, Handler>{0xF0,
+                                       Event_CommandStopScriptContextOpcode},
+  };
+  for (const auto& [opcode, handler] : bindings) {
+    Event_kOpcodeHandlers[opcode] = handler;
+    Event_kSkipOpcodeHandlers[opcode] = handler;
+  }
+  Event_kOpcodeSizes[0x77] = 5;
+  Event_kOpcodeSizes[0x78] = 2;
+  Event_kOpcodeSizes[0x7A] = 2;
+  auto& host = event::LiveScriptVm();
+  host.SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+}
+}  // namespace
+
+TEST_CASE("Native environment bindings restore the muted ambience",
+          "[event][script][environment-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const EnvironmentOpcodeStateFixture environment;
+  auto weather = VS::Field::LoadLiveRoomWeatherState();
+  weather.ambient_sound_id = 0x55;
+  weather.intensity = 0;
+  weather.variation_enabled = 1;
+  VS::Field::StoreLiveRoomWeatherState(weather);
+  Event_isAmbientSoundSuspended = 1;
+  Event_suspendedAmbientSoundId = -1;
+  // Muting again keeps the saved sound, then the restore and the variation
+  // write the room weather.
+  RunEnvironmentScript({0x7A, 0x01, 0x78, 0x03, 0x7A, 0x00, 0xF0});
+  const auto after = VS::Field::LoadLiveRoomWeatherState();
+  CHECK(after.ambient_sound_id == -1);
+  CHECK(after.variation_enabled == 2);
+  CHECK(Event_isAmbientSoundSuspended == 0);
+  CHECK(Event_suspendedAmbientSoundId == -1);
+}
+
+TEST_CASE("Native environment particle binding starts the event tween",
+          "[event][script][environment-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const EnvironmentOpcodeStateFixture environment;
+  auto weather = VS::Field::LoadLiveRoomWeatherState();
+  weather.ambient_sound_id = -1;
+  VS::Field::StoreLiveRoomWeatherState(weather);
+  event::StoreLiveWeatherTween({.elapsed = 4,
+                                .wind_direction = 100,
+                                .wind_strength = 700,
+                                .intensity = 9});
+  RunEnvironmentScript({0x77, 0x23, 0xF0, 0x10, 30, 0xF0});
+  const auto tween = event::LiveWeatherTween();
+  CHECK(tween.elapsed == 0);
+  CHECK(tween.duration == 30);
+  CHECK(tween.start_intensity == 9);
+  CHECK(tween.delta_intensity == -6);
+  CHECK(tween.start_wind_strength == 700);
+  CHECK(tween.delta_wind_strength == -124);
+  CHECK(tween.start_wind_direction == 100);
+  CHECK(tween.delta_wind_direction == -356);
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",

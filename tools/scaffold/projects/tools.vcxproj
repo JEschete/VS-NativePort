@@ -589,6 +589,10 @@
     <None Include="..\..\port\differentials\event_room_commands_f01132.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01133.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01134.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01135.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01136.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01137.py" />
+    <None Include="..\..\port\differentials\event_room_commands_f01138.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01139.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01140.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01141.py" />

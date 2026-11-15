@@ -520,6 +520,28 @@ class ScriptVmHost {
       int layer) = 0;
   [[nodiscard]] virtual SplashTween SplashImageTween(int layer) const = 0;
   virtual void SetSplashImageTween(int layer, const SplashTween& tween) = 0;
+
+  // The room weather (Field/Environment.hpp), the event's weather tween
+  // (D_800F4B88), the suspended weather ambience (D_800F4C08 and D_800F4C4C)
+  // and the room effects (Field/RoomEffects.hpp).
+  // ExchangeWeatherAmbientSound plays a sound, -1 for none, and returns the
+  // one it replaced; RoomAmbientSequenceAbsent is true for a room with no
+  // ambient sound section.
+  virtual void SetRoomWeather(int kind) = 0;
+  virtual void SetWeatherIntensity(int intensity) = 0;
+  virtual void SetWeatherWindAngles(int direction, int strength) = 0;
+  virtual void SetWeatherVariationEnabled(int enabled) = 0;
+  [[nodiscard]] virtual WeatherTween EventWeatherTween() const = 0;
+  virtual void SetEventWeatherTween(const WeatherTween& tween) = 0;
+  [[nodiscard]] virtual bool AmbientSoundSuspended() const = 0;
+  [[nodiscard]] virtual std::int16_t SuspendedAmbientSound() const = 0;
+  virtual void SetSuspendedAmbientSound(std::int16_t sound) = 0;
+  [[nodiscard]] virtual bool RoomAmbientSequenceAbsent() = 0;
+  [[nodiscard]] virtual int ExchangeWeatherAmbientSound(int sound) = 0;
+  [[nodiscard]] virtual bool RoomEffectActive(int effect) = 0;
+  virtual void FinishRoomDoorRotation(int effect) = 0;
+  virtual void StartRoomEffect(int effect) = 0;
+  virtual void ToggleRoomEffectUpdates(int effect) = 0;
 };
 
 // decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)

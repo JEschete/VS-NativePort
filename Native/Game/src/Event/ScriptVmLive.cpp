@@ -38,6 +38,7 @@
 #include "Field/EnvironmentLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
@@ -192,6 +193,14 @@ constexpr std::array kControlBindings{
     ControlBinding{Event_ScriptFreeSplashImageOpcode, ScriptFreeSplashImage},
     ControlBinding{Event_ScriptWaitForSplashTweenOpcode,
                    ScriptWaitForSplashTween},
+    ControlBinding{Event_ScriptSetEnvironmentParticlesOpcode,
+                   ScriptSetEnvironmentParticles},
+    ControlBinding{Event_ScriptSetParticleVariationEnabledOpcode,
+                   ScriptSetParticleVariationEnabled},
+    ControlBinding{Event_ScriptMuteEnvironmentSoundOpcode,
+                   ScriptMuteEnvironmentSound},
+    ControlBinding{Event_ScriptControlRoomAnimationOpcode,
+                   ScriptControlRoomAnimation},
 };
 
 ScriptControlOpcode NativeControl(OpcodeHandler handler) {
@@ -678,6 +687,47 @@ class LiveVmHost final : public ScriptVmHost {
   }
   void SetSplashImageTween(int layer, const SplashTween& tween) override {
     SetLiveSplashTween(layer, tween);
+  }
+  void SetRoomWeather(int kind) override { Field::LiveSetRoomWeather(kind); }
+  void SetWeatherIntensity(int intensity) override {
+    Field::LiveSetWeatherIntensity(intensity);
+  }
+  void SetWeatherWindAngles(int direction, int strength) override {
+    Field::LiveSetWeatherWindAngles(direction, strength);
+  }
+  void SetWeatherVariationEnabled(int enabled) override {
+    Field::LiveSetWeatherVariationEnabled(enabled);
+  }
+  WeatherTween EventWeatherTween() const override { return LiveWeatherTween(); }
+  void SetEventWeatherTween(const WeatherTween& tween) override {
+    StoreLiveWeatherTween(tween);
+  }
+  bool AmbientSoundSuspended() const override {
+    return Event_isAmbientSoundSuspended != 0;
+  }
+  std::int16_t SuspendedAmbientSound() const override {
+    return Event_suspendedAmbientSoundId;
+  }
+  void SetSuspendedAmbientSound(std::int16_t sound) override {
+    Event_suspendedAmbientSoundId = sound;
+  }
+  bool RoomAmbientSequenceAbsent() override {
+    return Field::LiveIsRoomAudioSequenceAbsent() != 0;
+  }
+  int ExchangeWeatherAmbientSound(int sound) override {
+    return Field::LiveSetWeatherAmbientSound(sound);
+  }
+  bool RoomEffectActive(int effect) override {
+    return Field::LiveIsRoomEffectActive(effect) != 0;
+  }
+  void FinishRoomDoorRotation(int effect) override {
+    Field::LiveFinishRoomDoorRotation(effect);
+  }
+  void StartRoomEffect(int effect) override {
+    static_cast<void>(Field::LiveStartRoomEffect(effect));
+  }
+  void ToggleRoomEffectUpdates(int effect) override {
+    static_cast<void>(Field::LiveToggleRoomEffectUpdates(effect));
   }
 
  private:
@@ -1579,4 +1629,32 @@ std::intptr_t Event_ScriptWaitForSplashTweenOpcode(std::uint8_t* instruction,
                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForSplashTween);
+}
+
+// decomp: BATTLE.PRG func_800B9FC0 (4A0A8.c:2180).
+std::intptr_t Event_ScriptSetEnvironmentParticlesOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetEnvironmentParticles);
+}
+
+// decomp: BATTLE.PRG func_800BA0E4 (4A0A8.c:2211).
+std::intptr_t Event_ScriptSetParticleVariationEnabledOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetParticleVariationEnabled);
+}
+
+// decomp: BATTLE.PRG func_800BA108 (4A0A8.c:2217).
+std::intptr_t Event_ScriptMuteEnvironmentSoundOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptMuteEnvironmentSound);
+}
+
+// decomp: BATTLE.PRG func_800BA194 (4A0A8.c:2238).
+std::intptr_t Event_ScriptControlRoomAnimationOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptControlRoomAnimation);
 }
