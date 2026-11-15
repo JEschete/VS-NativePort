@@ -40,7 +40,6 @@ extern "C" {
 #include "Actors/WeaponModel.h"
 #include "Battle/ActionAnimation.h"
 #include "Core/Diagnostics.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/ScriptVm.h"
 #include "Field/Gimmicks.h"

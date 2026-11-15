@@ -1056,12 +1056,6 @@
     <ClCompile Include="src\Effects\ActionEffectCallbacksLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Effects\ActionEffects.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\ActionEffects.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\BoneTrail.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1590,6 +1584,12 @@
     <ClInclude Include="src\Effects\ScreenEffectState.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\ScriptedEffectTriggers.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\ScriptedEffectTriggersLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\SecondaryEffectRequests.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -3584,6 +3584,12 @@
     </ClInclude>
     <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp">
       <Filter>include\Effects\ScreenDistortion</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ScriptedEffectTriggers.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ScriptedEffectTriggersLive.hpp">
+      <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\SecondaryEffectRequests.hpp">
       <Filter>include\Effects</Filter>

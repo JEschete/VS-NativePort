@@ -1620,6 +1620,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveBeginAshleyStandaloneEffect": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
     "VS::Effects::LiveEndAshleyStandaloneEffect": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
     "VS::Effects::LiveActionEffectBusyFlags": r"Native\Game\include\Effects\ActionEffectCallbacksLive.hpp",
+    "VS::Effects::LiveStartScriptedActorEffect": r"Native\Game\include\Effects\ScriptedEffectTriggersLive.hpp",
+    "VS::Effects::LiveReleaseScriptedEffectTrigger": r"Native\Game\include\Effects\ScriptedEffectTriggersLive.hpp",
+    "VS::Effects::LiveScriptedEffectPlaybackState": r"Native\Game\include\Effects\ScriptedEffectTriggersLive.hpp",
+    "VS::Effects::LiveIsScriptedEffectTriggerReady": r"Native\Game\include\Effects\ScriptedEffectTriggersLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2884,6 +2888,10 @@ OWNED_CALL_BINDINGS["F00069"] = "VS::Effects::LiveRestoreActionActorTint"
 OWNED_CALL_BINDINGS["F00119"] = "VS::Effects::LiveBeginAshleyStandaloneEffect"
 OWNED_CALL_BINDINGS["F00120"] = "VS::Effects::LiveEndAshleyStandaloneEffect"
 OWNED_CALL_BINDINGS["F00143"] = "VS::Effects::LiveActionEffectBusyFlags"
+OWNED_CALL_BINDINGS["F00238"] = "VS::Effects::LiveStartScriptedActorEffect"
+OWNED_CALL_BINDINGS["F00239"] = "VS::Effects::LiveReleaseScriptedEffectTrigger"
+OWNED_CALL_BINDINGS["F00240"] = "VS::Effects::LiveScriptedEffectPlaybackState"
+OWNED_CALL_BINDINGS["F00242"] = "VS::Effects::LiveIsScriptedEffectTriggerReady"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4645,6 +4653,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800733F8, "VS::Effects::LiveBeginAshleyStandaloneEffect"),  # F00119
     ("BATTLE/BATTLE.PRG", 0x80073484, "VS::Effects::LiveEndAshleyStandaloneEffect"),  # F00120
     ("BATTLE/BATTLE.PRG", 0x80074294, "VS::Effects::LiveActionEffectBusyFlags"),  # F00143
+    ("BATTLE/BATTLE.PRG", 0x8007BE20, "VS::Effects::LiveStartScriptedActorEffect"),  # F00238
+    ("BATTLE/BATTLE.PRG", 0x8007BEC4, "VS::Effects::LiveReleaseScriptedEffectTrigger"),  # F00239
+    ("BATTLE/BATTLE.PRG", 0x8007BEE4, "VS::Effects::LiveScriptedEffectPlaybackState"),  # F00240
+    ("BATTLE/BATTLE.PRG", 0x8007BF0C, "VS::Effects::LiveIsScriptedEffectTriggerReady"),  # F00242
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -8459,12 +8471,6 @@ REGEX_FIXES += [
         ("Effects::StartWeaponTrail",
          (('arg0', 'actor_index'), ('arg1', 'bone_index')),
          "F00056 Forwarded to SpawnBoneTrail, whose packed bytes become BoneTrailConfig.actor and .bone."),
-        ("Effects::StartScriptedActorEffect",
-         (('arg0', 'effect_id'), ('arg1', 'target_actor_index')),
-         "F00238 Becomes targets[0].actor and is excluded from the separately built others list."),
-        ("Effects::ReleaseScriptedEffectTrigger",
-         (('arg0', 'track_index'),),
-         "F00239 Indexes pendingTracks bits; StartEffectTrack multiplies index by 3 for script entry offset."),
         ("Effects::InitializeRoomWeather",
          (('arg0', 'suppress_rain'), ('new_var2', 'room_environment'), ('new_var4', 'selected_environment')),
          "F00638 Only weatherKind==1 is suppressed when arg0 is nonzero; source environment pointers remain distinct bindings including redundant reload."),

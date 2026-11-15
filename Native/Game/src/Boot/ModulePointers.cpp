@@ -77,6 +77,7 @@
 #include "Effects/Plugins/Plg128CameraLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
+#include "Effects/ScriptedEffectTriggersLive.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
@@ -185,7 +186,6 @@ extern "C" {
 #include "Core/Overlays.h"
 #include "Core/Random.h"
 #include "DiscQueue.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/CameraLiveState.h"
 #include "Effects/EffectResourcesLiveState.h"
 #include "Effects/Package.h"
@@ -337,10 +337,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x8007BE20u, 0u, (void*)&Effects_StartScriptedActorEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E8F8u, 0u, (void*)&Effects_AllocateWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EA90u, 0u, (void*)&Effects_InitializeRoomWeather, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008EB04u, 0u, (void*)&Effects_RoomWeatherState, 0u, 0u, 0u},
@@ -2119,6 +2115,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800733F8u, 0u, (void*)&VS::Effects::LiveBeginAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80073484u, 0u, (void*)&VS::Effects::LiveEndAshleyStandaloneEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80074294u, 0u, (void*)&VS::Effects::LiveActionEffectBusyFlags, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007BE20u, 0u, (void*)&VS::Effects::LiveStartScriptedActorEffect, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&VS::Effects::LiveReleaseScriptedEffectTrigger, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&VS::Effects::LiveScriptedEffectPlaybackState, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&VS::Effects::LiveIsScriptedEffectTriggerReady, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

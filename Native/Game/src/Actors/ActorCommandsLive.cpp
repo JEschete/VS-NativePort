@@ -37,7 +37,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
-#include "Effects/ActionEffects.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
 #include "Field/Interactions.h"

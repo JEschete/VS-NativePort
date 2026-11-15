@@ -28,7 +28,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/TargetingState.h"
-#include "Effects/ActionEffects.h"
 #include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"

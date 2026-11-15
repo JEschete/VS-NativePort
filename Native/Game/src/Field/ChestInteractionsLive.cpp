@@ -53,7 +53,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Field/Doors.h"

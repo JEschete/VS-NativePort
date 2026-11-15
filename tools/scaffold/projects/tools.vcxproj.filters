@@ -3453,6 +3453,24 @@
     <None Include="..\..\port\differentials\screen_overlay_lifetime_f01391.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\scripted_effect_triggers_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scripted_effect_triggers_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00238.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00239.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00240.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00242.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\secondary_effects_common.py">
       <Filter>tools\port\differentials</Filter>
     </None>

@@ -28,7 +28,6 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Effects/ActionEffects.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"

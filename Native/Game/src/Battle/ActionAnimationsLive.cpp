@@ -19,7 +19,6 @@ extern "C" {
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionFlow.h"
 #include "Core/Diagnostics.h"
-#include "Effects/ActionEffects.h"
 }
 
 namespace VS::Battle {

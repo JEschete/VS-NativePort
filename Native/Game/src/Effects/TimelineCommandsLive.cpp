@@ -24,7 +24,6 @@
 extern "C" {
 #include "Core/BiosRand.h"
 #include "Core/Gte.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 #include "Field/ChestInteractionsLive.h"

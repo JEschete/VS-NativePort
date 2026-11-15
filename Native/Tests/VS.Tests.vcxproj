@@ -368,6 +368,7 @@
     <ClCompile Include="src\ScreenOverlayLifetimeTests.cpp" />
     <ClCompile Include="src\ScreenOverlaysTests.cpp" />
     <ClCompile Include="src\ScreenWarpTests.cpp" />
+    <ClCompile Include="src\ScriptedEffectTriggersTests.cpp" />
     <ClCompile Include="src\ScriptSourcesTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
     <ClCompile Include="src\SecondaryEffectRequestsTests.cpp" />

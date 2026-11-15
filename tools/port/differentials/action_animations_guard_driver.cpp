@@ -23,7 +23,6 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Core/Diagnostics.h"
-#include "Effects/ActionEffects.h"
 
 Actors_ActorRecord* Actors_actorRecords[17];
 Battle_ActionState* Battle_actionState;

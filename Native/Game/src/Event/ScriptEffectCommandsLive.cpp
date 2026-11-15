@@ -19,6 +19,7 @@
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
+#include "Effects/ScriptedEffectTriggersLive.hpp"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.h"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptActors.h"
@@ -129,10 +129,10 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
                 effect, static_cast<unsigned>(selector), actor);
   }
   void StartActorEffect(int effect, int actor) override {
-    Effects_StartScriptedActorEffect(effect, actor);
+    VS::Effects::LiveStartScriptedActorEffect(effect, actor);
   }
   void ReleaseEffectTrigger(int track) override {
-    Effects_ReleaseScriptedEffectTrigger(track);
+    VS::Effects::LiveReleaseScriptedEffectTrigger(track);
   }
   void RequeueEffectTrack(int track) override {
     VS::Effects::LiveRequeueEffectTrack(track);
@@ -141,10 +141,10 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
     VS::Effects::LiveClearPrimaryEffects();
   }
   [[nodiscard]] int EffectPlaybackState() override {
-    return Effects_ScriptedEffectPlaybackState();
+    return VS::Effects::LiveScriptedEffectPlaybackState();
   }
   [[nodiscard]] bool EffectTriggerReady() override {
-    return Effects_IsScriptedEffectTriggerReady() == 1;
+    return VS::Effects::LiveIsScriptedEffectTriggerReady() == 1;
   }
   [[nodiscard]] bool EffectWaitPending() const override {
     return Event_isEffectWaitPending != 0;

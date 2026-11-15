@@ -34,7 +34,6 @@
 
 extern "C" {
 #include "Actors/Location.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/CameraLiveState.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"

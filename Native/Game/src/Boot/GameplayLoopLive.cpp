@@ -74,7 +74,6 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Boot/GameLoop.h"
 #include "Core/Gte.h"
-#include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"

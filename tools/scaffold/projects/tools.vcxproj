@@ -827,6 +827,12 @@
     <None Include="..\..\port\differentials\screen_overlay_lifetime_f01389.py" />
     <None Include="..\..\port\differentials\screen_overlay_lifetime_f01390.py" />
     <None Include="..\..\port\differentials\screen_overlay_lifetime_f01391.py" />
+    <None Include="..\..\port\differentials\scripted_effect_triggers_common.py" />
+    <None Include="..\..\port\differentials\scripted_effect_triggers_driver.cpp" />
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00238.py" />
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00239.py" />
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00240.py" />
+    <None Include="..\..\port\differentials\scripted_effect_triggers_f00242.py" />
     <None Include="..\..\port\differentials\secondary_effects_common.py" />
     <None Include="..\..\port\differentials\secondary_effects_driver.cpp" />
     <None Include="..\..\port\differentials\secondary_effects_f00058.py" />

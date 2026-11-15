@@ -28,7 +28,6 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
-#include "Effects/ActionEffects.h"
 #include "Field/Collision.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
