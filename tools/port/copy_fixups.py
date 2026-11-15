@@ -470,6 +470,9 @@ NATIVE_HELPER_HEADERS = {
     "VS::Event::SetEventCameraFollowingEntry": r"Native\Game\include\Event\EventCameraControlLive.hpp",
     "VS::Event::StopEventCameraMotionEntry": r"Native\Game\include\Event\EventCameraControlLive.hpp",
     "VS::Event::StartEventCameraOrbitReturnEntry": r"Native\Game\include\Event\EventCameraControlLive.hpp",
+    "VS::Event::UpdateEventLensTweenEntry": r"Native\Game\include\Event\EventCameraLensLive.hpp",
+    "VS::Event::UpdateEventShakeOscillatorEntry": r"Native\Game\include\Event\EventCameraLensLive.hpp",
+    "VS::Event::UpdateEventCameraShakeEntry": r"Native\Game\include\Event\EventCameraLensLive.hpp",
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
@@ -1672,6 +1675,9 @@ OWNED_CALL_BINDINGS["F01220"] = "VS::Event::RestoreEventFieldCameraEntry"
 OWNED_CALL_BINDINGS["F01236"] = "VS::Event::SetEventCameraFollowingEntry"
 OWNED_CALL_BINDINGS["F01237"] = "VS::Event::StopEventCameraMotionEntry"
 OWNED_CALL_BINDINGS["F01238"] = "VS::Event::StartEventCameraOrbitReturnEntry"
+OWNED_CALL_BINDINGS["F01233"] = "VS::Event::UpdateEventLensTweenEntry"
+OWNED_CALL_BINDINGS["F01234"] = "VS::Event::UpdateEventShakeOscillatorEntry"
+OWNED_CALL_BINDINGS["F01235"] = "VS::Event::UpdateEventCameraShakeEntry"
 OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
 OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
 OWNED_CALL_BINDINGS["F00853"] = "Field_GimmickPlacementEntry"
@@ -3354,6 +3360,9 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01193", 0x800BB33C, "CommandStopCameraMotion"),
     ("F01194", 0x800BB35C, "CommandSetCameraFollowing"),
     ("F01196", 0x800BB3BC, "CommandRestoreFieldCamera"),
+    # #276 row 35 A35-05 camera lens and shake opcodes 0xEA-0xEC, 0xEE and 0xEF
+    # (Event/EventCameraLensLive.cpp)
+    ("F01232", 0x800BDC9C, "CommandCameraLensOrShake"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -3782,6 +3791,9 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800BE36C, "VS::Event::SetEventCameraFollowingEntry"),  # F01236
     ("BATTLE/BATTLE.PRG", 0x800BE3A0, "VS::Event::StopEventCameraMotionEntry"),  # F01237
     ("BATTLE/BATTLE.PRG", 0x800BE3D0, "VS::Event::StartEventCameraOrbitReturnEntry"),  # F01238
+    ("BATTLE/BATTLE.PRG", 0x800BDF6C, "VS::Event::UpdateEventLensTweenEntry"),  # F01233
+    ("BATTLE/BATTLE.PRG", 0x800BE01C, "VS::Event::UpdateEventShakeOscillatorEntry"),  # F01234
+    ("BATTLE/BATTLE.PRG", 0x800BE180, "VS::Event::UpdateEventCameraShakeEntry"),  # F01235
     ("SLUS_010.40", 0x80042364, "VS::Boot::ResetToTitleLive"),  # F03423
     ("SLUS_010.40", 0x80042420, "VS::Boot::EnterBattleLive"),  # F03424
     ("SLUS_010.40", 0x800424E4, "VS::Boot::RunEndingAndReturnToTitleLive"),  # F03425
@@ -6443,12 +6455,6 @@ REGEX_FIXES += [
         ("Event::UpdateEventTripleTween",
          (('arg0', 'triple_tween'), ('a0', 'fraction_scratch'), ('v0', 'eased_fraction')),
          "F01231 4A0A8.c:3838-3860 advances arg0 and interpolates its three values. v0 is func_800BFEBC result; a0 points at0x1F800088 and stores/reads that fraction. Native Event_EasedFractionScratch.easedFraction remains a member and is not renamed. Snake-case eased_fraction is absent from the current body and differs from that member."),
-        ("Event::UpdateEventLensTween",
-         (('arg0', 'lens_tween'), ('new_var', 'delta_value_ptr')),
-         "F01233 4A0A8.c:3927-3943 advances/clamps arg0 elapsed time and updates value/change state. new_var is specifically &arg0->unk6, dereferenced in start+delta*curve interpolation. Native LensTween identifies that member as deltaValue; pointer naming changes no member or scratch arithmetic."),
-        ("Event::UpdateEventShakeOscillator",
-         (('arg0', 'shake_oscillator'), ('temp_s1', 'total_phase_angle')),
-         "F01234 4A0A8.c:3945-3980 computes temp_s1=arg0->unk4<<12 and uses it in rsin(temp_s1*elapsed/duration), times amplitude and a separate envelope. Setup at3862-3925 writes cycles from the instruction and resets elapsed; update clears duration. total_phase_angle means cycles times one4096-unit turn, not instantaneous frequency/frame count."),
         ("Event::EvaluateRoomEventTriggers",
          (('arg0', 'trigger_request'), ('arg1', 'event_or_actor_id'), ('arg2', 'trigger_context'), ('arg3', 'context_kind')),
          "F01261 4A0A8.c:4302-4584 copies arg0 to type, supporting trigger mask plus requests0xFF/0x40; arg1 supplies direct event id for0x40 and first actor comparison in predicate6. arg2 is compared with second actor id when mode0, but dereferenced as tile bytes[0]/[2] when mode1. arg3 selects mode. Original146C.c:5260-5268/native Field_TryTriggerFacingTileEvent pass tile buffer/mode1; GameLoop passes actor number/mode0. Broad names cover both uses and preserve existing pointer/integer compatibility contract, not silently fix it."),

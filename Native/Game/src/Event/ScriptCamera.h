@@ -30,9 +30,5 @@ int Event_EventCameraCompletionMask(void);
 intptr_t Event_CommandScreenTransform(u_char* script, short thread_index);
 void Event_UpdateEventScreenTransforms(void);
 int Event_UpdateEventTripleTween(Event_TripleTween* triple_tween);
-intptr_t Event_CommandCameraLensOrShake(u_char* script, short thread_index);
-void Event_UpdateEventLensTween(Event_LensTween* lens_tween);
-int Event_UpdateEventShakeOscillator(Event_ShakeOscillator* shake_oscillator);
-void Event_UpdateEventCameraShake(void);
 
 #endif // VS_EVENT_SCRIPTCAMERA_H_DECLS

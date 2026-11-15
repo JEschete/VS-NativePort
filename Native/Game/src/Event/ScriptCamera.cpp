@@ -3,6 +3,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
+#include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -125,10 +126,10 @@ void Event_UpdateEventCameraTracks(void)
     VS::Event::UpdateEventCameraTrackEntry(&Event_camera->eye, &Event_camera->lookAt);
     Event_UpdateEventAngleTween(&Event_camera->cameraRoll);
     Event_UpdateEventAngleTween(&Event_camera->capturedScreenRoll);
-    Event_UpdateEventLensTween(&Event_camera->projectionDistance);
-    Event_UpdateEventLensTween(&Event_camera->nearClip);
-    Event_UpdateEventLensTween(&Event_camera->farClip);
-    Event_UpdateEventCameraShake();
+    VS::Event::UpdateEventLensTweenEntry(&Event_camera->projectionDistance);
+    VS::Event::UpdateEventLensTweenEntry(&Event_camera->nearClip);
+    VS::Event::UpdateEventLensTweenEntry(&Event_camera->farClip);
+    VS::Event::UpdateEventCameraShakeEntry();
 }
 
 // decomp: BATTLE.PRG func_800BD444 (src/BATTLE/BATTLE.PRG/4A0A8.c:3601)
@@ -396,165 +397,6 @@ int Event_UpdateEventTripleTween(Event_TripleTween* triple_tween)
         triple_tween->durationFrames = 0;
     }
     return 1;
-}
-
-// decomp: BATTLE.PRG func_800BDC9C (src/BATTLE/BATTLE.PRG/4A0A8.c:3862)
-intptr_t Event_CommandCameraLensOrShake(u_char* script, short thread_index)
-{
-    Event_ShakeOscillator* entry;
-    short i;
-    switch (script[0]) {
-    case 234:
-        if ((Event_camera->projectionDistance.durationFrames = script[3]) == 0) {
-            Event_camera->projectionDistance.value = script[1] ? (script[1] << 2) : ONE / 8;
-            Event_camera->projectionDistance.hasChanged = 1;
-        } else {
-            Event_camera->projectionDistance.deltaValue =
-                script[1] ? (script[1] << 2)
-                                - (Event_camera->projectionDistance.startValue =
-                                        Event_camera->projectionDistance.value)
-                          : ONE / 8;
-            Event_camera->projectionDistance.easingMode = script[2];
-            Event_camera->projectionDistance.elapsedFrames = 0;
-        }
-        return 0;
-    case 235:
-        if ((Event_camera->nearClip.durationFrames = script[3]) == 0) {
-            Event_camera->nearClip.value = script[1] ? script[1] : 64;
-            Event_camera->nearClip.hasChanged = 1;
-        } else {
-            Event_camera->nearClip.deltaValue =
-                (script[1] ? script[1] : 64)
-                - (Event_camera->nearClip.startValue = Event_camera->nearClip.value);
-            Event_camera->nearClip.easingMode = script[2];
-            Event_camera->nearClip.elapsedFrames = 0;
-        }
-        return 0;
-    case 236:
-        if ((Event_camera->farClip.durationFrames = script[3]) == 0) {
-            Event_camera->farClip.value = script[1] ? (script[1] << 7) : ONE;
-            Event_camera->farClip.hasChanged = 1;
-        } else {
-            Event_camera->farClip.deltaValue =
-                script[1] ? (script[1] << 7)
-                                - (Event_camera->farClip.startValue = Event_camera->farClip.value)
-                          : ONE;
-            Event_camera->farClip.easingMode = script[2];
-            Event_camera->farClip.elapsedFrames = 0;
-        }
-        return 0;
-    case 239:
-        entry = (Event_ShakeOscillator*)&Event_camera->shakeOscillatorA.displacement;
-        if (script[2] == 0) {
-            entry[0].durationFrames = entry[1].durationFrames = 0;
-            return 0;
-        }
-        for (i = 0; i < 2; ++i, ++entry) {
-            if (entry->durationFrames == 0) {
-                entry->cycles = script[1];
-                entry->amplitude = script[2];
-                entry->axisMask = script[3];
-                entry->envelopeShape.bytes[1] = script[4];
-                entry->durationFrames = script[5];
-                entry->elapsedFrames = 0;
-                break;
-            }
-        }
-        return 0;
-    }
-}
-
-// decomp: BATTLE.PRG func_800BDF6C (src/BATTLE/BATTLE.PRG/4A0A8.c:3927)
-void Event_UpdateEventLensTween(Event_LensTween* lens_tween)
-{
-    if (lens_tween->durationFrames != 0) {
-        short* delta_value_ptr;
-        lens_tween->elapsedFrames += State_tickSpeed >> 1;
-        if (lens_tween->durationFrames < lens_tween->elapsedFrames) {
-            lens_tween->elapsedFrames = lens_tween->durationFrames;
-        }
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = ((int (*)(int, int, int))Event_EvaluateInterpolationCurveEntry)(lens_tween->easingMode, lens_tween->elapsedFrames, lens_tween->durationFrames);
-        delta_value_ptr = &lens_tween->deltaValue;
-        lens_tween->value = lens_tween->startValue + ((*delta_value_ptr * *(int*)((uintptr_t)Core_ScratchBase() + 0x088)) >> 0xC);
-        if (lens_tween->elapsedFrames == lens_tween->durationFrames) {
-            lens_tween->durationFrames = 0;
-        }
-        lens_tween->hasChanged = 1;
-    }
-}
-
-// decomp: BATTLE.PRG func_800BE01C (src/BATTLE/BATTLE.PRG/4A0A8.c:3945)
-int Event_UpdateEventShakeOscillator(Event_ShakeOscillator* shake_oscillator)
-{
-    int total_phase_angle = shake_oscillator->cycles << 0xC;
-
-    if (shake_oscillator->durationFrames == 0) {
-        return 0;
-    }
-
-    shake_oscillator->elapsedFrames += State_tickSpeed >> 1;
-
-    if (shake_oscillator->durationFrames < shake_oscillator->elapsedFrames) {
-        shake_oscillator->elapsedFrames = shake_oscillator->durationFrames;
-    }
-
-    switch (shake_oscillator->envelopeShape.bytes[1]) {
-    case 0:
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = 0x1000;
-        break;
-    case 1:
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = VS::Core::Math::Sine(((shake_oscillator->elapsedFrames << 0xA) / shake_oscillator->durationFrames) + 0x400);
-        break;
-    case 2:
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = VS::Core::Math::Sine((shake_oscillator->elapsedFrames << 0xB) / shake_oscillator->durationFrames);
-        break;
-    case 3:
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = VS::Core::Math::Sine((shake_oscillator->elapsedFrames << 0xA) / shake_oscillator->durationFrames);
-        break;
-    }
-    shake_oscillator->displacement = (((VS::Core::Math::Sine((total_phase_angle * shake_oscillator->elapsedFrames) / shake_oscillator->durationFrames) * shake_oscillator->amplitude) >> 0xC)
-                     * *(int*)((uintptr_t)Core_ScratchBase() + 0x088))
-              >> 0xC;
-    if (shake_oscillator->elapsedFrames == shake_oscillator->durationFrames) {
-        shake_oscillator->durationFrames = 0;
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800BE180 (src/BATTLE/BATTLE.PRG/4A0A8.c:3983)
-void Event_UpdateEventCameraShake(void)
-{
-    short count = 0;
-    Event_CameraShakeScratch* clear = (Event_CameraShakeScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-    short i = 0;
-    int x, y, z;
-    Event_CameraShakeScratch* scratch;
-    Event_ShakeOscillator* entry = (Event_ShakeOscillator*)&Event_camera->shakeOscillatorA.displacement;
-    clear->eyeShake.vx = clear->eyeShake.vy = clear->eyeShake.vz = clear->lookAtShake.vx = clear->lookAtShake.vy = clear->lookAtShake.vz = 0;
-    scratch = (Event_CameraShakeScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-    for (; i < 2; ++entry, ++i) {
-        if (Event_UpdateEventShakeOscillator(entry)) {
-            setVector(&scratch->axisShake, x = entry->displacement * (((entry->axisMask >> 2) & 3) - 1),
-                y = entry->displacement * (((entry->axisMask >> 4) & 3) - 1),
-                z = entry->displacement * ((entry->axisMask >> 6) - 1));
-            if (entry->axisMask & 1) {
-                applyVector(&scratch->eyeShake, x, y, z, +=);
-            }
-            if (entry->axisMask & 2) {
-                addVector(&scratch->lookAtShake, &scratch->axisShake);
-            }
-            ++count;
-        }
-    }
-    Event_camera->shakeOscillatorA.envelopeShape.count = count;
-    if (count) {
-        Event_camera->shakeEyeOffsetX = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8))->vx;
-        Event_camera->shakeEyeOffsetY = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8))->vy;
-        Event_camera->shakeEyeOffsetZ = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8))->vz;
-        Event_camera->shakeLookAtOffsetX = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0))->vx;
-        Event_camera->shakeLookAtOffsetY = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0))->vy;
-        Event_camera->shakeLookAtOffsetZ = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0))->vz;
-    }
 }
 
 }  // extern "C"

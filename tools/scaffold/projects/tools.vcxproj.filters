@@ -2700,6 +2700,12 @@
     <None Include="..\..\port\differentials\event_camera_control_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\event_camera_lens.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\event_camera_lens_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\event_camera_ownership.py">
       <Filter>tools\port\differentials</Filter>
     </None>

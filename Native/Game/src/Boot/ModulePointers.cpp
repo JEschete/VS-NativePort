@@ -81,6 +81,7 @@
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Event/EventCameraControlLive.hpp"
+#include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -392,10 +393,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BD6C4u, 0u, (void*)&Event_CommandScreenTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BDAB4u, 0u, (void*)&Event_UpdateEventScreenTransforms, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BDBB4u, 0u, (void*)&Event_UpdateEventTripleTween, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BDC9Cu, 0u, (void*)&Event_CommandCameraLensOrShake, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BDF6Cu, 0u, (void*)&Event_UpdateEventLensTween, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BE01Cu, 0u, (void*)&Event_UpdateEventShakeOscillator, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BE180u, 0u, (void*)&Event_UpdateEventCameraShake, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0990u, 0u, (void*)&Battle_DrawSphereWireLine, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0D78u, 0u, (void*)&Battle_DrawSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C282Cu, 0u, (void*)&Battle_BuildSphereCameraBasis, 0u, 0u, 0u},
@@ -1135,6 +1132,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BE36Cu, 0u, (void*)&VS::Event::SetEventCameraFollowingEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE3A0u, 0u, (void*)&VS::Event::StopEventCameraMotionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BE3D0u, 0u, (void*)&VS::Event::StartEventCameraOrbitReturnEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BDF6Cu, 0u, (void*)&VS::Event::UpdateEventLensTweenEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BE01Cu, 0u, (void*)&VS::Event::UpdateEventShakeOscillatorEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BE180u, 0u, (void*)&VS::Event::UpdateEventCameraShakeEntry, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042364u, 0u, (void*)&VS::Boot::ResetToTitleLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042420u, 0u, (void*)&VS::Boot::EnterBattleLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800424E4u, 0u, (void*)&VS::Boot::RunEndingAndReturnToTitleLive, 0u, 0u, 0u},
@@ -1213,6 +1213,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BB33Cu, 0u, (void*)&Event_CommandStopCameraMotionOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BB35Cu, 0u, (void*)&Event_CommandSetCameraFollowingOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BB3BCu, 0u, (void*)&Event_CommandRestoreFieldCameraOpcode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BDC9Cu, 0u, (void*)&Event_CommandCameraLensOrShakeOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7428u, 0u, (void*)&Event_ScriptResetActorGroupStateOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7490u, 0u, (void*)&Event_ScriptStoreActorTileOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B7574u, 0u, (void*)&Event_ScriptSpawnActorOpcode, 0u, 0u, 0u},

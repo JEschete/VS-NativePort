@@ -3214,6 +3214,19 @@ class EncounterFixupTests(unittest.TestCase):
         for name in ("CommandStopCameraMotion", "CommandSetCameraFollowing", "CommandRestoreFieldCamera"):
             self.assertIn(f"Event_{name}Opcode", vm)
 
+    def test_camera_lens_and_shake_are_owned_by_the_typed_lens(self):
+        # #276 row 35 A35-05: the typed lens (EventCameraLens.cpp) replaces the lens/shake opcode and the
+        # per-frame lens tween, shake oscillator and camera shake updates.
+        root = Path(__file__).resolve().parents[2]
+        generated = (root / r"Native\Game\src\Event\ScriptCamera.cpp").read_text(encoding="utf-8")
+        for name in ("CommandCameraLensOrShake", "UpdateEventLensTween", "UpdateEventShakeOscillator",
+                     "UpdateEventCameraShake"):
+            self.assertNotRegex(generated, rf"\bEvent_{name}\(")
+        self.assertIn("VS::Event::UpdateEventLensTweenEntry(&Event_camera->farClip);", generated)
+        self.assertIn("VS::Event::UpdateEventCameraShakeEntry();", generated)
+        vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
+        self.assertEqual(vm.count("Event_CommandCameraLensOrShakeOpcode"), 5)
+
     def test_script_actor_tile_store_reads_a_typed_placement(self):
         # #276 slice 19b, then row 34: the tile bytes come from the typed placement view, not a 12-byte stack buffer.
         self.assertNotIn("F01052", copy_fixups.FIXES)

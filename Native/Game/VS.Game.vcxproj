@@ -1344,6 +1344,10 @@
     <ClCompile Include="src\Event\EventCameraControlLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Event\EventCameraLens.cpp" />
+    <ClCompile Include="src\Event\EventCameraLensLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Event\EventCameraOwnership.cpp" />
     <ClCompile Include="src\Event\EventCameraOwnershipLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2657,6 +2661,8 @@
     <ClInclude Include="include\Event\CutsceneLifecycleLive.hpp" />
     <ClInclude Include="include\Event\EventCameraControl.hpp" />
     <ClInclude Include="include\Event\EventCameraControlLive.hpp" />
+    <ClInclude Include="include\Event\EventCameraLens.hpp" />
+    <ClInclude Include="include\Event\EventCameraLensLive.hpp" />
     <ClInclude Include="include\Event\EventCameraOwnership.hpp" />
     <ClInclude Include="include\Event\EventCameraOwnershipLive.hpp" />
     <ClInclude Include="include\Event\EventCameraTrack.hpp" />

@@ -1782,6 +1782,12 @@
     <ClCompile Include="src\Event\EventCameraControlLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
+    <ClCompile Include="src\Event\EventCameraLens.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\EventCameraLensLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Event\EventCameraOwnership.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -3679,6 +3685,12 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\EventCameraControlLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventCameraLens.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventCameraLensLive.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\EventCameraOwnership.hpp">
