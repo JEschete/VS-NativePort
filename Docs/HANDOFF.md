@@ -1,96 +1,78 @@
 # Current Handoff
 
-Updated 2026-11-15. The latest published MA-04 batch is the eight-function
-bone/weapon-trail promotion. The cohort has 458 resolved (449 promoted, nine
-retired) and 442 remaining; see the CSV and issue #276 for current status.
+Updated 2026-11-15. The latest published MA-04 batch is the 13-function
+battle-sphere lifecycle/geometry promotion. The cohort has 471 resolved (462
+promoted, nine retired) and 429 remaining; see the CSV and issue #276 for
+current status.
 
 ## Current status and next steps
 
-- Code commit:
-  [`08b0f20960cb6a8e5d62c8924c170b6e6d7fa4db`](https://github.com/JEschete/VS-NativePort/commit/08b0f20960cb6a8e5d62c8924c170b6e6d7fa4db).
-  Group O promotes F00056, F00057, F01417, F01418, F01447, F01448, F01451 and
-  F01452 to typed bone/weapon-trail operations and checked Live bindings.
-- The original [900-function cohort](ledgers/REMAINING_FUNCTIONS.csv) is
-  **458 resolved (449 promoted, nine retired), 442 remaining**. Row 39 is
-  23/80 complete and deferred while earlier row-32 work is integrated. All
-  three ledger checks pass.
-- Final integrated evidence:
-  [group-20261115-011011](../build/promotion-check/group-20261115-011011/summary.json),
-  464 seconds, on base `f0169c4ee9226228e92347b961c2dc617d5cddb5` plus the frozen
-  scoped changes (60 dirty files at group start). Debug and Release each pass
-  7,394 regression cases/12,933,269 assertions and 52 focused cases/275 assertions.
-  Both canonical replays, copier stability/controls and zero-new quality pass.
-- Eight original MIPS differentials: 792 instructions, 2,048 vectors, zero
-  mismatches; 40 original mutants and all eight native broken variants detected
-  (1,024 vectors per native variant). Commands, source fingerprints, per-function
-  reports and publication details are in
-  [verification.json](../build/scratch/bone-trails/verification.json).
-  The final ledger specification is retained beside it. Publication and
-  exact-pushed-revision CI are recorded in the
-  [#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276).
-- No interactive weapon-trail/Combat Lab verification, gameplay completion or
-  compatibility retirement is claimed. The differentials' external-call stubs
-  and original undefined-behaviour exclusions remain explicit in the ledger.
-  [#390](https://github.com/JEschete/VS-NativePort/issues/390) records the validator's
-  parameter-name false positive; the descriptive parameter name avoids it but
-  does not fix the validator. [#296](https://github.com/JEschete/VS-NativePort/issues/296)
-  remains separately blocked.
-- Unrelated #384 edits to `tools\naming\sym_gen\common.py`,
-  `tools\naming\test_sym_gen.py` and `tools\port\ref_index.py` were excluded from
-  verification/publication and restored byte-for-byte. The reference gitlink
-  change and older autostash remain untouched. These unrelated local changes are
-  still present; keep them separate from promotion work until their scope is
-  reconciled. No Group O conversion WIP remains.
-- Fresh-index copier reconciliation is partial. T00239/T00255 adoption rows
-  were removed and the T00255 array-bound fixup now matches the source spelling.
-  The T00271 merged-layout alias fix is covered by focused tests and is tracked
-  in #392. `Copier.copy_types()` now reaches T00527, where current indexes fail
-  to find the ledger's 16-member layout. `upstream_layout.py report --ids
-  T00527` classifies it as fork-only; the current pinned source has a 12-byte
-  stub, while the native `AiModelView` remains a 0x5B4 model-record view used
-  by AI code. Deleting its fields or falling back to the stub is unsafe; this
-  source/provenance and type-identity decision is recorded on #391. An
-  in-memory skip of T00527 reaches T00532, where 13 of 20 current type-fixup
-  inputs are absent; that multi-span adaptation drift is also tracked on #391.
-  No type ledger or T00532 fixups were changed. Broad generated
-  DATA/TYPE/FIELD ledger churn was restored, so no full copier or promotion
-  group gate has passed. Preserve the dirty LootInventory packet worktree;
-  #377's group gate has not been rerun on the root-normalization fix.
-- The next candidate is the five-function row-39 `ActionEffects.cpp` batch:
-  F00058, F00060, F00064, F00068 and F00069. They meet the 4–8 same-file group
-  size, but cover distinct behaviors; per-function tests and differentials are
-  still required. Its implementation remains paused in the isolated
-  `batch-action-effects-f00058-f00069-5c3a6242` worktree until row 32 is
-  integrated; no promotion is integrated yet.
-- Row-32 sphere lifecycle and geometry preparations are in the root worktree:
-  F01279–F01284/F01297/F01312 and F01285/F01286/F01303–F01305. Their original
-  MIPS differentials pass: lifecycle 8,192 vectors and eight detected mutants;
-  each of the five geometry cases 512 vectors and one detected mutant, all
-  with zero mismatches. These are preparation results only: no ownership,
-  module-entry wiring, generated-project integration, native broken variants
-  or shared group gates have passed, so no function is counted resolved.
-  Production adapters must preserve the exported ABI and side effects: in
-  particular F01279 resets target pages, allocates only when needed, clears
-  and initializes the workspace in order; F01280/F01297 also reset target
-  pages, and F01312 reads the current input override state.
+- Commits on `imp/01-ma04-gates`:
+  - [`54f4f6ab2`](https://github.com/JEschete/VS-NativePort/commit/54f4f6ab2512f91a8a6943c83dfc217c11c0bafb)
+    zeroes AI engagement roster fields in live test fixtures (#393).
+  - [`e4ed84c8f`](https://github.com/JEschete/VS-NativePort/commit/e4ed84c8f7b3b3d061f512e337bc2a5f5beba1eb)
+    lists `test_build_symbol_ledgers.py` in the generated tools project.
+  - [`4dc191b04`](https://github.com/JEschete/VS-NativePort/commit/4dc191b04c586ad212d8c982ca8bb094779d99e2)
+    promotes F01279-F01286, F01297, F01303-F01305 and F01312 and carries the
+    copier layout reconciliation needed to render them (#391, #392).
+  - [`22d6112a0`](https://github.com/JEschete/VS-NativePort/commit/22d6112a01cbb0923e4e30caf4bd77515c2f3943)
+    makes the new T00532 layout-merge test independent of git-ignored indexes;
+    Source Quality failed on `4dc191b04` only for that test (#394).
+- Sphere batch: lifecycle F01279-F01284, F01297 and F01312 in
+  `SphereLifecycle(Live)`, with the F01280 release entry isolated in
+  `SphereReleaseLive.cpp` so its registered file has no bridge-header
+  dependency; geometry F01285, F01286 and F01303-F01305 in `SphereGeometry(Live)`.
+  Callers and module bindings use the `VS::Battle::*Entry` wrappers.
+- Evidence (worktree based on `de9e8aeca`, recorded in
+  `VR-BATTLE-SPHERE-LIFECYCLE-GEOMETRY`): Debug and Release each pass 7,436
+  regression cases/12,933,460 assertions and 1,093 focused `[ai],[battle][sphere]`
+  cases/3,189,693 assertions; both canonical replays match. Differentials
+  `sphere_lifecycle` and `sphere_geometry_f01285/f01286/f01303/f01304/f01305`:
+  10,752 vectors, zero mismatches, 13/13 original mutants detected. Each
+  function's native `--replace` broken variant was detected (1,024 vectors);
+  F01280's was rerun in `SphereReleaseLive.cpp` (61 mismatching vectors).
+  Copier render is byte-stable on a second run; changed-file tidy has zero new
+  findings; ledger gates, modernization and hazard checks pass.
+- Copier blockers resolved for this render: T00527 is emitted as its 12-byte
+  `ModelStatePrefix` with wider reads through `Actors_ActorRecord`; T00532 uses
+  ledger-typed emission and rebasing (planned-tile union at 0x132 made
+  sequential); T00255 keeps its 16-bit Gimmick rotation fields; T00271's alias
+  fixup matches. #391 and #392 stay open until their own fresh-index ledger
+  and stability acceptance is checked.
+- No interactive combat verification, gameplay completion or compatibility
+  retirement is claimed. F00830 (#296) remains blocked; #390 and #371 remain open.
+- Active isolated worker lanes, both based on `4dc191b04` with a read-only
+  `Native\data` junction to the root data:
+  - A32-06 sphere target labels (F01298-F01302, F01310) in
+    `D:\Dev\NativePort\wt\batch-sphere-labels-4dc191b0`.
+  - A35-01 event camera ownership (F01195, F01214-F01218) in
+    `D:\Dev\NativePort\wt\batch-event-camera-own-4dc191b0`.
+  Workers deliver typed code, tests and differentials as a local commit; the
+  coordinator owns registration, copier output, ledgers, gates and publication.
+  Their preparation is not a promotion until integrated and verified.
+- The paused row-39 ActionEffects packet remains in
+  `batch-action-effects-f00058-f00069-5c3a6242`; preserve it and the other
+  older worktrees as unverified prior art.
 
 Next steps:
 
-1. Resolve the fresh-index copier blockers on #391/#392 and verify the current
-   root-normalization work for #377 without overwriting the preserved packet
-   worktree or dirty reference checkout.
-2. Continue #276 in the maintained plan order by integrating and validating
-   the row-32 sphere batches above. Then resume the five-function
-   `ActionEffects.cpp` batch and recheck callers, dependencies, issues and CI.
-3. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md):
-   typed implementation and Live bindings, per-function tests and MIPS/native
-   mutation controls, shared Debug/Release/replay/quality checks, ledger/CSV
-   synchronization, scoped commit and push, and exact-revision CI.
-4. Keep row 30's F00830 blocker (#296) and the typed-interface validator issue
-   #390 explicit; do not mark either resolved without its own acceptance
-   evidence. PLG128 Ghidra preparation is reference assistance, not a completed
-   promotion.
+1. Confirm Source Quality on `22d6112a0` and close #394; close #393 with its
+   evidence.
+2. Integrate A32-06 and A35-01 as they arrive: registration through
+   `promote.py`, copier regeneration and stability, Debug/Release builds,
+   regressions, focused tests, differentials with mutants and native variants,
+   ledgers, scoped commit and push, exact-revision CI.
+3. Continue the ordered plan: remaining row-32 groups A32-01/02/03/07 carry a
+   #371 projection applicability gate; row 35 continues with A35-02 through
+   A35-06 in camera-chain order.
+4. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
 
+### Previous published batch (Group O)
+
+[`08b0f209`](https://github.com/JEschete/VS-NativePort/commit/08b0f20960cb6a8e5d62c8924c170b6e6d7fa4db)
+promoted F00056, F00057, F01417, F01418, F01447, F01448, F01451 and F01452 to
+typed bone/weapon-trail operations; its evidence and exact-revision CI are on
+the [#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276).
 ## Earlier status (2026-11-13)
 
 Rows 28 (battle AI) and 29 (damage/status) of the C++ promotion work (#276) were source-complete and published; row 30 (battle-actions) was active. The earlier perception promotion is the
