@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cstdint>
 
+#include "Core/Math/ScalarMath.hpp"
+
 // Fixed-point math replacing the GTE (plan §6.1). Arithmetic follows the
 // documented GTE behaviour: 4.12 matrices, 64-bit accumulation, >>12 scaling,
 // saturation of the 16-bit results and the projection divide. Rounding and flag
@@ -31,17 +33,47 @@ struct GteState {
 
 GteState g;
 
-int16_t SaturateIr(int64_t v, bool lm = false) {
-  const int64_t lo = lm ? 0 : -0x8000;
-  if (v < lo) {
-    g.flag |= 1u << 24;
-    return static_cast<int16_t>(lo);
+// FLAG bits: MAC1-3 positive/negative overflow (30-28/27-25), IR1-3 (24-22),
+// SZ3 (18), divide overflow (17), MAC0 (16/15), SX2/SY2 (14/13) and IR0
+// (12). Bit 31 summarizes bits 30-23 and 18-13.
+constexpr uint32_t kFlagErrorBits = 0x7F87E000u;
+constexpr uint32_t kFlagError = 0x80000000u;
+constexpr int64_t kMacLimit = int64_t{1} << 43;
+
+void FinishFlag() {
+  if ((g.flag & kFlagErrorBits) != 0) {
+    g.flag |= kFlagError;
   }
-  if (v > 0x7FFF) {
-    g.flag |= 1u << 24;
-    return 0x7FFF;
+}
+
+// The GTE keeps MAC1-3 intermediates in signed 44 bits.
+int64_t WrapSigned44(int64_t value) {
+  constexpr uint64_t kMask = (uint64_t{1} << 44) - 1;
+  return static_cast<int64_t>(
+             (static_cast<uint64_t>(value) + static_cast<uint64_t>(kMacLimit)) &
+             kMask) -
+         kMacLimit;
+}
+
+int64_t Limit(int64_t v, int64_t lo, int64_t hi, unsigned flag_bit) {
+  if (v < lo || v > hi) {
+    g.flag |= 1u << flag_bit;
   }
-  return static_cast<int16_t>(v);
+  return std::clamp(v, lo, hi);
+}
+
+int16_t SaturateIr(int64_t v, unsigned flag_bit) {
+  return static_cast<int16_t>(Limit(v, -0x8000, 0x7FFF, flag_bit));
+}
+
+// MAC0 keeps the low word of a wider sum; flag the sum when it leaves the
+// signed word range.
+void CheckMac0(int64_t v) {
+  if (v > INT32_MAX) {
+    g.flag |= 1u << 16;
+  } else if (v < INT32_MIN) {
+    g.flag |= 1u << 15;
+  }
 }
 
 void PushScreenXY(int16_t x, int16_t y) {
@@ -55,38 +87,44 @@ void PushZ(uint16_t z) {
 }
 
 // Rotate and translate a vector by the current state: MAC = (T << 12 + R * v)
-// >> 12.
+// >> 12, each partial sum flagged and wrapped to signed 44 bits.
 void RotateTranslate(const int16_t v[3]) {
-  for (int i = 0; i < 3; ++i) {
+  for (unsigned i = 0; i < 3; ++i) {
     int64_t acc = static_cast<int64_t>(g.trans[i]) * 4096;
     for (int j = 0; j < 3; ++j) {
       acc += static_cast<int64_t>(g.rot[i][j]) * v[j];
+      if (acc >= kMacLimit) {
+        g.flag |= 1u << (30 - i);
+      } else if (acc < -kMacLimit) {
+        g.flag |= 1u << (27 - i);
+      }
+      acc = WrapSigned44(acc);
     }
     g.mac[i] = static_cast<int32_t>(acc >> 12);
-    g.ir[i] = SaturateIr(g.mac[i]);
+    g.ir[i] = SaturateIr(g.mac[i], 24 - i);
   }
 }
 
+// RTPS projection (SDK RotTransPers, libgte/SMP_02.s at 0x80041814): the
+// reciprocal divide, screen and depth-cue sums are wider than a word. SX2/SY2
+// and IR0 saturate from the wide sums while MAC0 keeps the low word.
 void Project() {
-  const int32_t z = std::clamp(g.mac[2], 0, 0xFFFF);
-  if (z != g.mac[2]) {
-    g.flag |= 1u << 18;
-  }
-  PushZ(static_cast<uint16_t>(z));
-  int64_t n;
-  if (z > 0 && g.h < static_cast<uint32_t>(z) * 2) {
-    n = std::min<int64_t>(((static_cast<int64_t>(g.h) * 0x20000 / z) + 1) / 2,
-                          0x1FFFF);
-  } else {
-    n = 0x1FFFF;
+  const auto z = static_cast<uint16_t>(Limit(g.mac[2], 0, 0xFFFF, 18));
+  PushZ(z);
+  if (VS::Core::Math::PerspectiveDivideOverflows(g.h, z)) {
     g.flag |= 1u << 17;
   }
-  const int64_t x = (n * g.ir[0] + g.ofx) >> 16;
-  const int64_t y = (n * g.ir[1] + g.ofy) >> 16;
-  PushScreenXY(static_cast<int16_t>(std::clamp<int64_t>(x, -0x400, 0x3FF)),
-               static_cast<int16_t>(std::clamp<int64_t>(y, -0x400, 0x3FF)));
-  g.mac0 = static_cast<int32_t>(n * g.dqa + g.dqb);
-  g.ir0 = static_cast<int16_t>(std::clamp(g.mac0 >> 12, 0, 0x1000));
+  const int64_t n = VS::Core::Math::DividePerspective(g.h, z);
+  const int64_t x = n * g.ir[0] + g.ofx;
+  CheckMac0(x);
+  const int64_t y = n * g.ir[1] + g.ofy;
+  CheckMac0(y);
+  PushScreenXY(static_cast<int16_t>(Limit(x >> 16, -0x400, 0x3FF, 14)),
+               static_cast<int16_t>(Limit(y >> 16, -0x400, 0x3FF, 13)));
+  const int64_t cue = n * g.dqa + g.dqb;
+  CheckMac0(cue);
+  g.mac0 = static_cast<int32_t>(static_cast<uint32_t>(cue));
+  g.ir0 = static_cast<int16_t>(Limit(cue >> 12, 0, 0x1000, 12));
 }
 
 long PackXY(int i) {
@@ -190,11 +228,13 @@ void Core_Gte_Rtps(void) {
   g.flag = 0;
   RotateTranslate(g.v0);
   Project();
+  FinishFlag();
 }
 
 void Core_Gte_Rtv0Tr(void) {
   g.flag = 0;
   RotateTranslate(g.v0);
+  FinishFlag();
 }
 
 void Core_Gte_Nclip(void) {
@@ -269,7 +309,8 @@ SVECTOR* Core_Gte_ApplyMatrixSV(MATRIX* m, SVECTOR* v0, SVECTOR* v1) {
   short r[3];
   for (int i = 0; i < 3; ++i) {
     r[i] = SaturateIr(
-        (m->m[i][0] * v[0] + m->m[i][1] * v[1] + m->m[i][2] * v[2]) >> 12);
+        (m->m[i][0] * v[0] + m->m[i][1] * v[1] + m->m[i][2] * v[2]) >> 12,
+        static_cast<unsigned>(24 - i));
   }
   v1->vx = r[0], v1->vy = r[1], v1->vz = r[2];
   return v1;

@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstdint>
 #include <limits>
 #include <span>
@@ -9,6 +8,7 @@
 
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
 #include "Render/DepthCue.hpp"
 #include "Render/DepthCueLive.hpp"
@@ -40,11 +40,14 @@ Core_GteWord ReferenceCue(Core_GteWord near_distance, Core_GteWord projection,
       std::clamp<std::int64_t>(-std::int64_t{near_distance} * 320 /
                                    std::max<Core_GteWord>(projection, 1),
                                -32768, 32767);
-  const auto quotient = std::min<std::int64_t>(
-      ((std::int64_t{projection} * 131072 / depth) + 1) / 2, 131071);
-  const auto accumulator = std::bit_cast<std::int32_t>(
-      static_cast<std::uint32_t>(quotient * coefficient + 20971520));
-  return std::clamp<Core_GteWord>(accumulator >> 12, 0, 4096);
+  // RTPS divides with the UNR reciprocal and saturates IR0 from the wide
+  // MAC0 sum, not from its stored low word (#371).
+  const auto quotient = std::int64_t{
+      VS::Core::Math::DividePerspective(static_cast<std::uint16_t>(projection),
+                                        static_cast<std::uint16_t>(depth))};
+  const auto accumulator = quotient * coefficient + 20971520;
+  return static_cast<Core_GteWord>(
+      std::clamp<std::int64_t>(accumulator >> 12, 0, 4096));
 }
 
 void CheckCue(Core_GteWord near_distance, Core_GteWord projection,
@@ -183,6 +186,38 @@ TEST_CASE("Native fog covers source-scaled projection and depth tuples",
         CheckCue(near_distance, projection, depth);
       }
     }
+  }
+}
+
+TEST_CASE("Map fog depth cue saturates from the wide product",
+          "[render][fog][projection-rounding]") {
+  // SDK RTPS fixtures from #371: the clipped gain times the saturated DQA
+  // is negative beyond 32 bits, so IR0 is 0 while MAC0 keeps the low word.
+  struct Fixture {
+    Core_GteWord projection;
+    std::int16_t depth;
+    Core_GteWord mac0;
+  };
+  constexpr std::array<Fixture, 5> kFixtures{{{64, 1, 21004288},
+                                              {64, 32, 21004288},
+                                              {128, 1, 1631604736},
+                                              {128, 32, 1631604736},
+                                              {128, 64, 1631604736}}};
+  FogFixture fixture;
+  for (const Fixture& entry : kFixtures) {
+    Core_Gte_SetGeomScreen(entry.projection);
+    Render::SetLiveFogNearDistance(8192, entry.projection);
+    SVECTOR vertex{0, 0, entry.depth, 91};
+    Core_GteWord screen = -1;
+    Core_GteWord cue = -1;
+    Core_GteWord flags = 0;
+    CHECK(Core_Gte_RotTransPers(&vertex, &screen, &cue, &flags) ==
+          entry.depth / 4);
+    Core_GteWord mac0 = 0;
+    Core_Gte_StoreOpz(&mac0);
+    CHECK(cue == 0);
+    CHECK(mac0 == entry.mac0);
+    CHECK(static_cast<std::uint32_t>(flags) == 0x80029000u);
   }
 }
 

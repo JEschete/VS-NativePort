@@ -40,7 +40,14 @@ current status.
   fixup matches. #391 and #392 stay open until their own fresh-index ledger
   and stability acceptance is checked.
 - No interactive combat verification, gameplay completion or compatibility
-  retirement is claimed. F00830 (#296) remains blocked; #390 and #371 remain open.
+  retirement is claimed. F00830 (#296) remains blocked; #390 remains open.
+- #371 fixed: `Core_Gte` RTPS now uses the GTE's unsigned Newton-Raphson
+  perspective divide (`Core::Math::DividePerspective`), derives IR0 and SX2/SY2
+  from the wide sums, wraps MAC1-3 to 44 bits and sets per-row FLAG bits with
+  the bit-31 summary. The `gte_projection` differential runs SDK `RotTransPers`
+  (0x80041814): 8,192 vectors including the ten issue vectors, 0 mismatches,
+  7 mutants and 7 native variants detected. `RotTransPers4` still runs four
+  RTPS steps rather than one RTPT (not modelled by the interpreter).
 - Active isolated worker lanes, both based on `4dc191b04` with a read-only
   `Native\data` junction to the root data:
   - A32-06 sphere target labels (F01298-F01302, F01310) in
@@ -62,8 +69,8 @@ Next steps:
    `promote.py`, copier regeneration and stability, Debug/Release builds,
    regressions, focused tests, differentials with mutants and native variants,
    ledgers, scoped commit and push, exact-revision CI.
-3. Continue the ordered plan: remaining row-32 groups A32-01/02/03/07 carry a
-   #371 projection applicability gate; row 35 continues with A35-02 through
+3. Continue the ordered plan: remaining row-32 groups A32-01/02/03/07 no
+   longer wait on #371 (fixed); row 35 continues with A35-02 through
    A35-06 in camera-chain order.
 4. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
 

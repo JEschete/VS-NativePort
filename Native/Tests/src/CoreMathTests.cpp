@@ -6,6 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Gte.h"
 #include "Core/Math/Interpolation.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/Matrix.hpp"
@@ -218,4 +219,158 @@ TEST_CASE("Timed interpolation with no duration stays defined",
         Math::InterpolateThirteenBitScalar({0, 8192}, -1));
   CHECK(Math::InterpolateTimedScalar({0, 8192}, {-5, 0}) ==
         Math::InterpolateThirteenBitScalar({0, 8192}, 1));
+}
+
+namespace {
+struct ProjectionFixture {
+  ProjectionFixture() {
+    Core_Gte_Reset();
+    Core_Gte_SetGeomOffset(160, 120);
+    Core_Gte_SetGeomScreen(256);
+  }
+  ProjectionFixture(const ProjectionFixture&) = delete;
+  ProjectionFixture& operator=(const ProjectionFixture&) = delete;
+  ~ProjectionFixture() { Core_Gte_Reset(); }
+};
+
+struct ProjectionWitness {
+  std::int16_t x;
+  std::int16_t z;
+  std::int16_t screen_x;
+};
+
+// Issue #371 vectors with SDK RotTransPers results (identity transform, H=256,
+// origin 160,120): ideal rounded division moved the second to fifth and the
+// ninth by one pixel; the rest were already equal.
+constexpr std::array<ProjectionWitness, 10> kProjectionWitnesses{{
+    {64, 1024, 176},
+    {-47, 188, 96},
+    {-87, 232, 64},
+    {-77, 308, 95},
+    {-79, 316, 95},
+    {128, 1024, 192},
+    {132, 1024, 193},
+    {0, 1024, 160},
+    {85, 170, 287},
+    {-128, 1024, 128},
+}};
+
+Core_GteWord PackScreen(std::int16_t x, std::int16_t y) {
+  return static_cast<Core_GteWord>(
+      (static_cast<std::uint32_t>(static_cast<std::uint16_t>(y)) << 16) |
+      static_cast<std::uint16_t>(x));
+}
+}  // namespace
+
+TEST_CASE("Perspective gain keeps the SDK reciprocal precision",
+          "[core-math][projection-rounding]") {
+  struct GainCase {
+    std::uint16_t projection;
+    std::uint16_t depth;
+    std::uint32_t gain;
+    bool overflows;
+  };
+  // Values from the original RotTransPers RTPS divide.
+  constexpr std::array<GainCase, 14> kCases{{
+      {0, 0, 131071, true},
+      {1, 0, 131071, true},
+      {0, 1, 0, false},
+      {1, 1, 65536, false},
+      {2, 1, 131071, true},
+      {256, 188, 89240, false},
+      {256, 232, 72315, false},
+      {256, 308, 54472, false},
+      {256, 316, 53093, false},
+      {256, 170, 98689, false},
+      {65535, 32768, 131070, false},
+      {65535, 65535, 65535, false},
+      {65087, 32544, 131071, false},
+      {61461, 30731, 131071, false},
+  }};
+  for (const auto& [projection, depth, gain, overflows] : kCases) {
+    CAPTURE(projection, depth);
+    CHECK(Math::DividePerspective(projection, depth) == gain);
+    CHECK(Math::PerspectiveDivideOverflows(projection, depth) == overflows);
+  }
+}
+
+TEST_CASE("Single-point projection matches the SDK issue vectors",
+          "[core-math][projection-rounding]") {
+  for (const auto& [x, z, screen_x] : kProjectionWitnesses) {
+    CAPTURE(x, z);
+    ProjectionFixture fixture;
+    SVECTOR point{x, 0, z, 91};
+    Core_GteWord screen = -1;
+    Core_GteWord cue = -1;
+    Core_GteWord flags = -1;
+    CHECK(Core_Gte_RotTransPers(&point, &screen, &cue, &flags) == z / 4);
+    CHECK(screen == PackScreen(screen_x, 120));
+    CHECK(cue == 0);
+    CHECK(flags == 0);
+    CHECK(point.vx == x);
+    CHECK(point.vz == z);
+    CHECK(point.pad == 91);
+  }
+}
+
+TEST_CASE("Four-point projection matches the SDK issue vectors",
+          "[core-math][projection-rounding]") {
+  for (const auto& [x, z, screen_x] : kProjectionWitnesses) {
+    CAPTURE(x, z);
+    ProjectionFixture fixture;
+    SVECTOR point{x, 0, z, 91};
+    Core_GteWord cue = -1;
+    Core_GteWord flags = -1;
+    const auto expected = PackScreen(screen_x, 120);
+    std::array<Core_GteWord, 4> screens{};
+    CHECK(Core_Gte_RotTransPers4(&point, &point, &point, &point, &screens[0],
+                                 &screens[1], &screens[2], &screens[3], &cue,
+                                 &flags) == z / 4);
+    CHECK(screens ==
+          std::array<Core_GteWord, 4>{expected, expected, expected, expected});
+    CHECK(cue == 0);
+    CHECK(flags == 0);
+  }
+}
+
+TEST_CASE("Projection reports the SDK status flags and saturated results",
+          "[core-math][projection-rounding]") {
+  struct FlagCase {
+    MATRIX transform;
+    SVECTOR point;
+    Core_GteWord depth;
+    std::int16_t screen_x;
+    std::int16_t screen_y;
+    std::uint32_t flags;
+  };
+  constexpr MATRIX kIdentity{{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}},
+                             {0, 0, 0}};
+  // Original RotTransPers results: signed44 MAC1 positive and MAC2 negative
+  // overflow with IR1-IR3 saturation; a zero depth (divide overflow); a
+  // negative depth (SZ3 and divide); SX2/SY2 saturation.
+  constexpr std::array<FlagCase, 4> kCases{{
+      {{{{32767, 32767, 32767}, {-32768, -32768, -32768}, {0, 0, 4096}},
+        {INT32_MAX, INT32_MIN, 100}},
+       {32767, 32767, 32767, 0},
+       8216,
+       -95,
+       374,
+       0xC5C00000u},
+      {kIdentity, {10, -10, 0, 0}, 0, 179, 100, 0x80020000u},
+      {kIdentity, {-500, 300, -5, 0}, 0, -840, 719, 0x80060000u},
+      {kIdentity, {-4000, 4000, 300, 0}, 75, -1024, 1023, 0x80006000u},
+  }};
+  for (auto [transform, point, depth, screen_x, screen_y, flags] : kCases) {
+    CAPTURE(point.vx, point.vy, point.vz);
+    ProjectionFixture fixture;
+    Core_Gte_SetRotMatrix(&transform);
+    Core_Gte_SetTransMatrix(&transform);
+    Core_GteWord screen = -1;
+    Core_GteWord cue = -1;
+    Core_GteWord status = -1;
+    CHECK(Core_Gte_RotTransPers(&point, &screen, &cue, &status) == depth);
+    CHECK(screen == PackScreen(screen_x, screen_y));
+    CHECK(cue == 0);
+    CHECK(static_cast<std::uint32_t>(status) == flags);
+  }
 }

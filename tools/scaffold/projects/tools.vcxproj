@@ -656,6 +656,8 @@
     <None Include="..\..\port\differentials\floating_label_rendering_guard_driver.cpp" />
     <None Include="..\..\port\differentials\floating_label_rendering_support.py" />
     <None Include="..\..\port\differentials\floating_label_timing.py" />
+    <None Include="..\..\port\differentials\gte_projection.py" />
+    <None Include="..\..\port\differentials\gte_projection_driver.cpp" />
     <None Include="..\..\port\differentials\height_filter.py" />
     <None Include="..\..\port\differentials\height_filter_driver.cpp" />
     <None Include="..\..\port\differentials\hit_calculations.py" />

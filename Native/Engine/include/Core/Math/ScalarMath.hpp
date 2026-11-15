@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <bit>
 #include <concepts>
 #include <cstdint>
 #include <optional>
@@ -114,6 +115,40 @@ struct NormalizedVector {
 [[nodiscard]] constexpr std::uint32_t R3000UnsignedQuotient(
     std::uint32_t dividend, std::uint32_t divisor) noexcept {
   return divisor == 0 ? ~0u : dividend / divisor;
+}
+
+// True when a perspective divide of projection by depth overflows: the
+// projection is at least twice the depth (always for a zero depth).
+[[nodiscard]] constexpr bool PerspectiveDivideOverflows(
+    std::uint16_t projection, std::uint16_t depth) noexcept {
+  return static_cast<std::uint32_t>(projection) >=
+         static_cast<std::uint32_t>(depth) * 2;
+}
+
+// Q16 perspective gain projection / depth with the unsigned Newton-Raphson
+// reciprocal of the original RTPS divide (SDK RotTransPers, libgte/SMP_02.s),
+// not ideal rounded division, which differs by one at some depths. An
+// overflowing divide, or a result past 0x1FFFF, gives 0x1FFFF.
+[[nodiscard]] constexpr std::uint32_t DividePerspective(
+    std::uint16_t projection, std::uint16_t depth) noexcept {
+  constexpr std::uint32_t kMaximumGain = 0x1FFFF;
+  if (PerspectiveDivideOverflows(projection, depth)) {
+    return kMaximumGain;
+  }
+  // Normalize the depth to 0x8000..0xFFFF, seed from the 257-entry reciprocal
+  // table, then refine once.
+  const auto shift = std::countl_zero(depth);
+  const std::uint32_t denominator = static_cast<std::uint32_t>(depth) << shift;
+  const std::uint32_t index = (denominator - 0x7FC0u) >> 7;
+  const std::uint32_t seed =
+      (R3000UnsignedQuotient(0x40000u, index + 0x100u) + 1u) / 2u;
+  const std::uint32_t estimate = seed > 0x101u ? seed : 0x101u;
+  const std::uint32_t correction = (0x2000080u - denominator * estimate) >> 8;
+  const std::uint32_t reciprocal = (0x80u + correction * estimate) >> 8;
+  const auto numerator = static_cast<std::uint64_t>(projection) << shift;
+  const auto gain =
+      static_cast<std::uint32_t>((numerator * reciprocal + 0x8000u) >> 16);
+  return gain > kMaximumGain ? kMaximumGain : gain;
 }
 
 // Q12 sine and cosine of an angle in 4096-per-turn units; only the low 12
