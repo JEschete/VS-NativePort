@@ -22,6 +22,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.naming.sym_gen.common import canonical_type_key  # noqa: E402
+
 LEDGERS = ROOT / "Docs" / "ledgers"
 INDEX = ROOT / "build" / "port" / "index.json"
 INDEX_UPSTREAM = ROOT / "build" / "port" / "index_upstream.json"
@@ -111,6 +114,57 @@ def parse_refs(v):
     return ast.literal_eval(v) if isinstance(v, str) else (v or {})
 
 
+def existing_types_by_identity(rows: dict[str, dict]) -> dict[tuple[str, tuple[str, ...]], list[dict]]:
+    indexed: dict[tuple[str, tuple[str, ...]], list[dict]] = defaultdict(list)
+    for row in rows.values():
+        files = tuple(row.get("files", "").split())
+        identity = canonical_type_key(row["key"].partition("#")[0]), files
+        indexed[identity].append(row)
+    return indexed
+
+
+def layout_identity(size, fields: list[dict]) -> str:
+    signature = [
+        "" if size is None else str(size),
+        [[x.get("name") or "", canonical_type_key(x.get("type") or ""),
+          str(x.get("bits") or ""), "" if x.get("value") is None else str(x.get("value"))]
+         for x in fields],
+    ]
+    return json.dumps(signature)
+
+
+def match_existing_type(old_types: dict, old_fields: dict, key: str, layout_hash: str,
+                        decls: list[dict]) -> dict | None:
+    files = tuple(sorted({d["file"].removeprefix("src/") for d in decls})[:6])
+    candidates = old_types.get((key, files), [])
+    if len(candidates) == 1:
+        return candidates[0]
+    if len(candidates) > 1:
+        exact = [row for row in candidates if row["key"].partition("#")[2] == layout_hash]
+        if len(exact) == 1:
+            return exact[0]
+        current = decls[0]
+        current_layout = layout_identity(current.get("size"), current["fields"])
+        matched = []
+        for row in candidates:
+            fields = sorted(
+                (field for field in old_fields.values() if field["type_id"] == row["id"]),
+                key=lambda field: int(field["index"]),
+            )
+            if layout_identity(row["size"], fields) == current_layout:
+                matched.append(row)
+        if len(matched) == 1:
+            return matched[0]
+        raise ValueError(f"multiple existing type IDs match {key} in {' '.join(files)}")
+    return None
+
+
+def stable_type_spelling(current: str, previous: str) -> str:
+    if current and previous and canonical_type_key(current) == canonical_type_key(previous):
+        return previous
+    return current
+
+
 def field_hints() -> dict[str, list[str]]:
     """fields:Type.unkN=meaning notes left by the function naming agents."""
     hints: dict[str, list[str]] = defaultdict(list)
@@ -148,7 +202,7 @@ def adopted_layouts(index: dict) -> tuple[dict[str, dict], list[dict]]:
         if rec["merge"] is None:
             sys.exit(f"{rec['row']['id']} {rec['row']['name']}: adopted layout no longer differs ({rec['class']}); "
                      f"remove it from {ADOPTED.name}")
-        out[rec["row"]["key"]] = rec["merge"]
+        out[canonical_type_key(rec["row"]["key"])] = rec["merge"]
         for dep in rec["deps"]:
             if dep not in seen:
                 seen.add(dep)
@@ -169,8 +223,8 @@ def main() -> int:
 
     # ---- types: group declarations by (key, layout) -------------------------------------------
     def layout(t: dict) -> str:
-        sig = json.dumps([t.get("size"), [[x.get("name"), x.get("type"), x.get("bits"), x.get("value")]
-                                          for x in t["fields"]]])
+        sig = json.dumps([t.get("size"), [[x.get("name"), canonical_type_key(x.get("type") or ""),
+                                           x.get("bits"), x.get("value")] for x in t["fields"]]])
         return hashlib.sha1(sig.encode()).hexdigest()[:8]
 
     by_key: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
@@ -178,14 +232,15 @@ def main() -> int:
         name = t["key"].split(":", 1)[1]
         if name in sdk_types:
             continue
-        by_key[t["key"]][layout(t)].append(t)
+        by_key[canonical_type_key(t["key"])][layout(t)].append(t)
 
     # typedef X -> struct Y collapses into the struct row as an alias
     alias_of: dict[str, str] = {}
     for key, lays in by_key.items():
         if key.startswith("typedef:"):
             t = next(iter(lays.values()))[0]
-            deps = [k for k in t.get("deps", {}) if k.split(":")[0] in ("struct", "union", "enum")]
+            deps = [canonical_type_key(k) for k in t.get("deps", {})
+                    if k.split(":")[0] in ("struct", "union", "enum")]
             if not t["fields"] and len(deps) == 1 and deps[0] in by_key:
                 alias_of[key] = deps[0]
 
@@ -201,6 +256,7 @@ def main() -> int:
         func_label[f'{fn["file"]}:{fn["name"]}'] = (
             f'{cat.get("final_name") or fn["name"]} ({fn["file"].removeprefix("src/")}:{fn["line"]} {fn["name"]})')
         for tk in refs.get("type", {}):
+            tk = canonical_type_key(tk)
             tk = alias_of.get(tk, tk)
             func_type_refs[tk] += 1
             type_funcs[tk].append(f'{fn["file"]}:{fn["name"]}')
@@ -251,7 +307,8 @@ def main() -> int:
     type_globals: Counter = Counter()
     for g in idents:
         if g.get("type_key"):
-            tk = alias_of.get(g["type_key"], g["type_key"])
+            tk = canonical_type_key(g["type_key"])
+            tk = alias_of.get(tk, tk)
             type_globals[tk] += 1
             sysc = g_systems.get(g["key"])
             if sysc and tk not in type_systems:
@@ -266,30 +323,37 @@ def main() -> int:
         for lh, decls in sorted(lays.items(), key=lambda kv: -len(kv[1])):
             row_key = f"{key}#{lh}" if multi else key
             t_rows_src.append((row_key, key, lh, decls, len(lays)))
-    old_t = load_existing(LEDGERS / "TYPE_LEDGER.csv", "key")
-    tids = assign_ids([r[0] for r in t_rows_src], old_t, "T")
+    old_t_rows = load_existing(LEDGERS / "TYPE_LEDGER.csv", "key")
+    old_f = load_existing(LEDGERS / "FIELD_LEDGER.csv", "id")
+    old_t = existing_types_by_identity(old_t_rows)
+    old_t_for_current = {}
+    for row_key, key, _layout_hash, decls, _nlay in t_rows_src:
+        previous = match_existing_type(old_t, old_f, key, _layout_hash, decls)
+        if previous is not None:
+            old_t_for_current[row_key] = previous
+    tids = assign_ids([r[0] for r in t_rows_src], old_t_for_current, "T")
     tid_of_key: dict[str, str] = {}
     aliases: dict[str, list[str]] = defaultdict(list)
     for a, target in alias_of.items():
         aliases[target].append(a.split(":", 1)[1])
 
     hints = field_hints()
-    old_f = load_existing(LEDGERS / "FIELD_LEDGER.csv", "id")
     t_rows, f_rows = [], []
     for row_key, key, _layout_hash, decls, nlay in t_rows_src:
         t = decls[0]
         m = merged.get(row_key)
         t_fields = m["fields"] if m else t["fields"]
         kind, name = key.split(":", 1)
+        prev = old_t_for_current.get(row_key, {})
+        name = prev.get("name", name)
         tid = tids[row_key]
         tid_of_key.setdefault(key, tid)
         names = [name, *aliases.get(key, [])]
         gen_fields = sum(1 for x in t_fields if GENERIC_FIELD.match(x.get("name") or ""))
         sysc = type_systems.get(key) or type_systems.get("~" + key) or Counter(
             {s: 1 for s in [fallback_system(t["file"])] if s})
-        prev = old_t.get(row_key, {})
         row = {
-            "id": tid, "key": row_key, "kind": kind, "name": name,
+            "id": tid, "key": prev.get("key", row_key), "kind": kind, "name": prev.get("name", name),
             "generic": int(bool(GENERIC_TYPE.search(name))), "aliases": " ".join(aliases.get(key, [])),
             "size": m["size"] if m else t.get("size", ""), "fields": len(t_fields), "generic_fields": gen_fields,
             "layouts": nlay, "decls": len(decls),
@@ -305,8 +369,9 @@ def main() -> int:
             h = sorted({v for nm in names for v in hints.get(f"{nm}.{fname}", [])})
             if x.get("source") == "upstream":
                 h.append("layout:upstream")
+            field_type = stable_type_spelling(x.get("type", ""), old_f.get(fid, {}).get("type", ""))
             fr = {"id": fid, "type_id": tid, "type_name": name, "index": n, "name": fname,
-                  "generic": int(bool(GENERIC_FIELD.match(fname))), "type": x.get("type", ""),
+                  "generic": int(bool(GENERIC_FIELD.match(fname))), "type": field_type,
                   "bits": x.get("bits", "") or "", "value": x.get("value", ""), "hints": " | ".join(h)}
             fr.update({c: old_f.get(fid, {}).get(c, "") for c in FIELD_HUMAN})
             f_rows.append(fr)
@@ -338,14 +403,16 @@ def main() -> int:
     d_rows = []
     for g in idents:
         k = g["key"]
-        tk = alias_of.get(g.get("type_key", ""), g.get("type_key", ""))
+        tk = canonical_type_key(g.get("type_key", ""))
+        tk = alias_of.get(tk, tk)
         sysc = g_systems.get(k) or Counter({s: 1 for s in [fallback_system(g.get("overlay") or k.split("@")[1])] if s})
         prev = old_d.get(k, {})
         row = {
             "id": gids[k], "key": k, "name": g["name"], "generic": int(bool(GENERIC_GLOBAL.match(g["name"]))),
             "overlay": g.get("overlay") or "", "linkage": g.get("linkage", ""), "segment": g.get("segment", ""),
             "address": g.get("address", ""), "file_offset": g.get("file_offset", ""), "size": g.get("size", ""),
-            "type": g.get("type", ""), "type_id": tid_of_key.get(tk, ""),
+            "type": stable_type_spelling(g.get("type", ""), prev.get("type", "")),
+            "type_id": tid_of_key.get(tk, ""),
             "has_pointers": int(bool(g.get("has_pointers"))), "init": int(bool(g.get("init"))),
             "instances": " ".join(g.get("instances", [])),
             "files": " ".join(f.removeprefix("src/") for f in g.get("files", [])),
