@@ -33,6 +33,7 @@
     <None Include="..\..\ledger\hazards.py" />
     <None Include="..\..\ledger\modernization.py" />
     <None Include="..\..\ledger\reconcile_locations.py" />
+    <None Include="..\..\ledger\test_build_symbol_ledgers.py" />
     <None Include="..\..\ledger\test_gates.py" />
     <None Include="..\..\ledger\test_hazards.py" />
     <None Include="..\..\ledger\test_modernization.py" />
