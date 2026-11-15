@@ -62,7 +62,6 @@ void Core_Errorf(const char*,const char* message,...){
   std::fprintf(stderr,"%s\n",message);std::_Exit(85);
 }
 void Menu_ReleaseSceneNotification(){}
-void Effects_ClearActionEffectMode(){++phase_callbacks;if(Battle_actionFlowMode!=6)std::_Exit(92);Battle_actionFlowMode=91;}
 void Battle_ClearSphereTargets(){}
 void Battle_ClearPrimarySphereVolume(){}
 void Battle_ClearSecondarySphereVolume(){}
@@ -74,6 +73,7 @@ int Effects_BeginActionEffect(Effects_ActionEffectRequest* request,int,int){
   ++dispatches;guarded.request=*request;check_canaries();return 0;
 }
 }
+namespace VS::Effects { void LiveClearActionEffectMode(){++phase_callbacks;if(Battle_actionFlowMode!=6)std::_Exit(92);Battle_actionFlowMode=91;} }
 namespace VS::State { void SetLiveScriptFlag(int,int){} }
 namespace VS::Actors {
 int LiveAnimationBattleWindowFrame(int actor){return swap_pose?actor+65535:2;}

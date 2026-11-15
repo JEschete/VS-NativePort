@@ -4,7 +4,17 @@
 #include <utility>
 #include <vector>
 
+#include "Effects/EffectInstances.hpp"
 #include "Effects/EffectScript.hpp"
+
+// The renderer chain the RENDERERS mode runs: each slot knows its position.
+struct Effects_EffectInstance {
+    int index;
+};
+struct Effects_RendererSlot {
+    std::size_t index;
+    long long result;
+};
 
 namespace {
 namespace fx = VS::Effects;
@@ -19,6 +29,10 @@ enum Mode : int {
     kUpdate,
     kInitialize,
     kEnvironment,
+    kSpawn,
+    kAttach,
+    kRenderers,
+    kEmit,
 };
 
 // The call kinds the harness's stubs record.
@@ -29,6 +43,12 @@ enum Call : int {
     kUpdated,
     kInitialized,
     kRefreshed,
+    kSpawned,
+    kAttached,
+    kParameters,
+    kRendered,
+    kDetached,
+    kEmitted,
 };
 
 constexpr std::size_t kProgramBytes = 0x10000;
@@ -41,6 +61,39 @@ template <typename Value> bool Read(Value& value)
     value = static_cast<Value>(read);
     return true;
 }
+
+using Calls = std::vector<std::pair<int, long long>>;
+
+// Updates a chain of slots, each finished when its result is zero.
+class RecordingRenderers final : public fx::EffectRendererUpdates {
+public:
+    RecordingRenderers(std::vector<Effects_RendererSlot>& slots, Calls& calls)
+        : slots_(&slots)
+        , calls_(&calls)
+    {
+    }
+    Effects_RendererSlot* FirstRenderer(Effects_EffectInstance&) override
+    {
+        return slots_->empty() ? nullptr : slots_->data();
+    }
+    Effects_RendererSlot* NextRenderer(Effects_RendererSlot& slot) override
+    {
+        return slot.index + 1 < slots_->size() ? &(*slots_)[slot.index + 1] : nullptr;
+    }
+    bool UpdateRenderer(Effects_RendererSlot& slot) override
+    {
+        calls_->emplace_back(kRendered, static_cast<long long>(slot.index));
+        return slot.result != 0;
+    }
+    void DetachRenderer(Effects_EffectInstance&, Effects_RendererSlot& slot) override
+    {
+        calls_->emplace_back(kDetached, static_cast<long long>(slot.index));
+    }
+
+private:
+    std::vector<Effects_RendererSlot>* slots_;
+    Calls* calls_;
+};
 
 // Records the calls the core makes; a freed timeline clears `timeline`.
 class RecordingHost final : public fx::ScriptEffectHost {
@@ -55,9 +108,23 @@ public:
     void UpdateTransforms() override { calls.emplace_back(kUpdated, 0); }
     void InitializeTransforms() override { calls.emplace_back(kInitialized, 0); }
     void UpdateParticleEnvironment() override { calls.emplace_back(kRefreshed, 0); }
+    void SpawnScript(std::uint16_t script_offset) override { calls.emplace_back(kSpawned, script_offset); }
+    void AttachRenderer(std::uint8_t index, std::int32_t parameters) override
+    {
+        calls.emplace_back(kAttached, index);
+        calls.emplace_back(kParameters, parameters);
+    }
+    void UpdateRenderers() override
+    {
+        Effects_EffectInstance instance { 0 };
+        RecordingRenderers renderers(slots, calls);
+        fx::UpdateEffectRenderers(instance, renderers);
+    }
+    void EmitParticles(std::uint8_t event) override { calls.emplace_back(kEmitted, event); }
 
-    std::vector<std::pair<int, long long>> calls;
+    Calls calls;
     std::uint32_t timeline = 0;
+    std::vector<Effects_RendererSlot> slots;
 };
 
 bool ReadProgram(std::vector<std::byte>& program, std::uint16_t& offset)
@@ -124,6 +191,20 @@ bool Program(int mode)
         step = fx::LoadRegisterTimeline(cursor, registers, has_parent != 0, remap, host);
     } else if (mode == kTick) {
         step = fx::TickTimelineFromScript(cursor, true, host);
+    } else if (mode == kSpawn) {
+        step = fx::SpawnChildScript(cursor, host);
+    } else if (mode == kAttach) {
+        std::int32_t parameter = 0;
+        if (!Read(parameter))
+            return false;
+        step = fx::AttachScriptRenderer(cursor, parameter, host);
+    } else if (mode == kEmit) {
+        fx::ScriptRegisters registers { };
+        for (auto& value : registers) {
+            if (!Read(value))
+                return false;
+        }
+        step = fx::EmitRegisterParticles(cursor, registers, host);
     } else {
         std::uint32_t active = 0;
         if (!Read(active))
@@ -164,6 +245,24 @@ void Service(int mode)
     PrintCalls(host);
     std::cout << '\n';
 }
+
+bool Renderers()
+{
+    RecordingHost host;
+    std::size_t count = 0;
+    if (!Read(count))
+        return false;
+    for (std::size_t index = 0; index < count; ++index) {
+        long long result = 0;
+        if (!Read(result))
+            return false;
+        host.slots.push_back({ .index = index, .result = result });
+    }
+    PrintStep(fx::TickScriptRenderers(host));
+    PrintCalls(host);
+    std::cout << '\n';
+    return true;
+}
 } // namespace
 
 int main()
@@ -179,7 +278,13 @@ int main()
         case kRegister:
         case kTick:
         case kFinished:
+        case kSpawn:
+        case kAttach:
+        case kEmit:
             read = Program(mode);
+            break;
+        case kRenderers:
+            read = Renderers();
             break;
         case kFree:
             read = Free();

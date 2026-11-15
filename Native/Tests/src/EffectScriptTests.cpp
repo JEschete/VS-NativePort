@@ -800,6 +800,14 @@ class RecordingHost final : public fx::ScriptEffectHost {
   void UpdateTransforms() override { ++updated; }
   void InitializeTransforms() override { ++initialized; }
   void UpdateParticleEnvironment() override { ++refreshed; }
+  void SpawnScript(std::uint16_t script_offset) override {
+    spawned.push_back(script_offset);
+  }
+  void AttachRenderer(std::uint8_t index, std::int32_t parameters) override {
+    attached.emplace_back(index, parameters);
+  }
+  void UpdateRenderers() override { ++renderer_updates; }
+  void EmitParticles(std::uint8_t event) override { emitted.push_back(event); }
 
   std::vector<std::uint8_t> loaded;
   std::vector<std::uint16_t> ticked;
@@ -807,6 +815,10 @@ class RecordingHost final : public fx::ScriptEffectHost {
   int updated = 0;
   int initialized = 0;
   int refreshed = 0;
+  std::vector<std::uint16_t> spawned;
+  std::vector<std::pair<std::uint8_t, std::int32_t>> attached;
+  int renderer_updates = 0;
+  std::vector<std::uint8_t> emitted;
 };
 
 constexpr Step kTimelineRefused{std::unexpect, Refusal::kTimeline};
@@ -975,4 +987,104 @@ TEST_CASE(
   CHECK(fx::LiveTickEffectTransforms(nullptr) == 2);
   CHECK(fx::LiveInitializeScriptEffectTransforms(nullptr) == 2);
   CHECK(fx::LiveRefreshScriptParticleEnvironment(nullptr) == 2);
+}
+
+namespace {
+constexpr Step kRendererRefused{std::unexpect, Refusal::kRenderer};
+}  // namespace
+
+TEST_CASE("F01519 child script spawns read the script offset halfword",
+          "[effect-script][F01519]") {
+  const auto program = Program({0x34, 0x12});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  RecordingHost host;
+  CHECK(fx::SpawnChildScript(cursor, host) == kContinued);
+  CHECK(cursor.offset == 2);
+  CHECK(host.spawned == std::vector<std::uint16_t>{0x1234});
+
+  ScriptCursor truncated{.program = std::span{program}.first(1), .offset = 0};
+  CHECK(fx::SpawnChildScript(truncated, host) == kOperandRefused);
+  CHECK(host.spawned.size() == 1);
+}
+
+TEST_CASE("F01522 renderer attaches join the parameter halfwords",
+          "[effect-script][F01522]") {
+  const auto program = Program({1, 0x34, 0x12, 0x78, 0xF6});
+  using Attached = std::vector<std::pair<std::uint8_t, std::int32_t>>;
+  RecordingHost host;
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::AttachScriptRenderer(cursor, 0, host) == kContinued);
+  CHECK(cursor.offset == 5);
+  CHECK(host.attached == Attached{{1, static_cast<std::int32_t>(0xF6781234U)}});
+
+  // A nonzero instance parameter replaces the operands, once they are read.
+  cursor.offset = 0;
+  CHECK(fx::AttachScriptRenderer(cursor, -7, host) == kContinued);
+  CHECK(cursor.offset == 5);
+  CHECK(host.attached.back() == Attached::value_type{1, -7});
+}
+
+TEST_CASE("F01522 renderer attaches refuse operands and unknown renderers",
+          "[effect-script][F01522]") {
+  const auto program = Program({2, 0x34, 0x12, 0x78, 0xF6});
+  RecordingHost host;
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::AttachScriptRenderer(cursor, 0, host) == kRendererRefused);
+  CHECK(cursor.offset == 5);
+  const auto length = GENERATE(0U, 1U, 2U, 3U, 4U);
+  const auto valid = Program({0, 0x34, 0x12, 0x78, 0xF6});
+  ScriptCursor truncated{.program = std::span{valid}.first(length),
+                         .offset = 0};
+  CHECK(fx::AttachScriptRenderer(truncated, 0, host) == kOperandRefused);
+  CHECK(host.attached.empty());
+}
+
+TEST_CASE("F01526 renderer ticks update the instance's renderers",
+          "[effect-script][F01526]") {
+  RecordingHost host;
+  CHECK(fx::TickScriptRenderers(host) == ScriptStep::kContinue);
+  CHECK(host.renderer_updates == 1);
+}
+
+TEST_CASE("F01534 register particles emit the event the register holds",
+          "[effect-script][F01534]") {
+  const fx::ScriptRegisters registers{0x10, 0x80, 0xFF, 3};
+  RecordingHost host;
+  const auto index = GENERATE(0U, 1U, 2U, 3U);
+  const auto program = Program({static_cast<std::uint8_t>(index)});
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::EmitRegisterParticles(cursor, registers, host) == kContinued);
+  CHECK(cursor.offset == 1);
+  CHECK(host.emitted == std::vector<std::uint8_t>{registers.at(index)});
+}
+
+TEST_CASE("F01534 register particles refuse operands and registers",
+          "[effect-script][F01534]") {
+  const auto program = Program({4});
+  RecordingHost host;
+  ScriptCursor cursor{.program = program, .offset = 0};
+  CHECK(fx::EmitRegisterParticles(cursor, {}, host) == kRegisterRefused);
+  CHECK(cursor.offset == 1);
+  CHECK(fx::EmitRegisterParticles(cursor, {}, host) == kOperandRefused);
+  CHECK(host.emitted.empty());
+}
+
+TEST_CASE("F01522 the Live attach ends on an unknown renderer",
+          "[effect-script][F01522]") {
+  auto program = Program({2, 0x34, 0x12, 0x78, 0xF6});
+  const VS::test_support::EffectProgramScope recorded{program};
+  auto instance = InstanceAt(program, 0);
+  CHECK(fx::LiveAttachScriptRenderer(&instance) == 2);
+  CHECK(instance.scriptOffset == 5);
+  CHECK(instance.context.renderer == nullptr);
+}
+
+TEST_CASE(
+    "Live effect script spawn, renderer and emit opcodes refuse null "
+    "instances",
+    "[effect-script][F01519][F01522][F01526][F01534]") {
+  CHECK(fx::LiveSpawnEffectScript(nullptr) == 2);
+  CHECK(fx::LiveAttachScriptRenderer(nullptr) == 2);
+  CHECK(fx::LiveTickEffectRenderers(nullptr) == 2);
+  CHECK(fx::LiveEmitParticlesFromScriptRegister(nullptr) == 2);
 }

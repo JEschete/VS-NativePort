@@ -521,7 +521,7 @@ class LiveEventHost final : public AnimationEventHost {
   void StartEffectTrack(int track) override {
     static_cast<void>(VS::Effects::LiveStartEffectTrack(track));
   }
-  void SpawnSourceEffect() override { Effects_SpawnSourceActorEffect(); }
+  void SpawnSourceEffect() override { Effects::LiveSpawnSourceActorEffect(); }
   void ApplyGimmickInteraction(int command) override {
     static_cast<void>(
         VS::Field::ApplyLiveGimmickInteractionCommand(&actor_, command));

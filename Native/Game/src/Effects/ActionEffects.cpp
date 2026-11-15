@@ -64,7 +64,7 @@ void Effects_QueueActionHitEffect(int effect_id, Battle_HitResult* hit_result, i
 
     hit_effect_request.opaque12 = queued_action->effectVariant;
 
-    Effects_BeginSecondaryEffects((Effects_ActionEffectRequest*)&hit_effect_request, 0);
+    VS::Effects::LiveBeginSecondaryEffects((Effects_ActionEffectRequest*)&hit_effect_request, 0);
 }
 
 // decomp: BATTLE.PRG func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:2044)
@@ -161,7 +161,7 @@ void Effects_SpawnGroundPlaneImpactEffect(u_short* world_position_components)
     request.targets[0].value.position.vx = world_position_components[0];
     request.targets[0].value.position.vz = world_position_components[2];
     request.targets[0].value.position.vy = 0;
-    Effects_BeginSecondaryEffects(&request, 0);
+    VS::Effects::LiveBeginSecondaryEffects(&request, 0);
 }
 
 // decomp: BATTLE.PRG func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:3187)
@@ -179,7 +179,7 @@ void Effects_SpawnTrapTileEffect(Actors_ActorLocation* actor_location)
     request.targets[0].value.position.vz = actor_location->packedTile.target.tileZ * 128 + 64;
     request.targets[0].value.position.vy = actor_location->position.vy;
     if (!(Effects_effectBusyFlags & 2)) {
-        Effects_BeginSecondaryEffects(&request, 0);
+        VS::Effects::LiveBeginSecondaryEffects(&request, 0);
     }
 }
 
@@ -195,7 +195,7 @@ void Effects_SpawnAbilityLearnedEffect(void)
     request.otherCount = 0;
     request.targets[0].value.actor.actor = 0;
     request.targets[0].value.actor.part = 0xFD;
-    Effects_BeginSecondaryEffects(&request, 0);
+    VS::Effects::LiveBeginSecondaryEffects(&request, 0);
 }
 
 // decomp: BATTLE.PRG func_800733F8 (src/BATTLE/BATTLE.PRG/146C.c:4613)

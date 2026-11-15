@@ -1527,12 +1527,6 @@
     <ClInclude Include="src\Effects\ScreenEffectState.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
-    <ClCompile Include="src\Effects\ScriptVm.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\ScriptVm.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\ClosedRing.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>

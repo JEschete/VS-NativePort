@@ -15,7 +15,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectInstances.hpp"
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffect.hpp"
@@ -833,4 +835,284 @@ TEST_CASE("F01433 the Live action effect refuses a missing request",
   CHECK(fx::LiveBeginActionEffect(nullptr, 1, 2) == 0);
   CHECK(Effects_primaryPhase == 0);
   Effects_primaryPhase = phase;
+}
+
+namespace {
+class FakeSpawner final : public fx::SecondaryEffectSpawner {
+ public:
+  FakeSpawner(std::span<Instance> instances, Log& log)
+      : instances_(instances), log_(&log) {}
+
+  bool HasPackage() override { return has_package; }
+  std::uint8_t AllocateToken() override {
+    log_->emplace_back("token");
+    return token;
+  }
+  void StoreRequest() override { log_->emplace_back("store request"); }
+  std::uint16_t TargetType(std::size_t target) override {
+    return static_cast<std::uint16_t>(kFirstType + target);
+  }
+  Instance* CreateSecondary(const fx::SecondarySpawn& spawn) override {
+    spawns.push_back(spawn);
+    log_->push_back("create t" + std::to_string(spawn.target));
+    return refused.contains(spawn.target) ? nullptr : &instances_[spawn.target];
+  }
+  void StartSecondary(Instance& instance, std::int32_t parameter,
+                      std::uint16_t effect_id,
+                      std::uint8_t busy_bits) override {
+    log_->push_back(
+        "start " + Name(instance) + " " + std::to_string(parameter) + " " +
+        std::to_string(effect_id) + " " + std::to_string(busy_bits));
+  }
+  void SetPhase(Instance& instance, SecondaryEffectPhase phase) override {
+    log_->push_back("phase " + Name(instance) + " " +
+                    std::to_string(std::to_underlying(phase)));
+  }
+  void SelectPackage(fx::ActivePackage package) override {
+    log_->push_back("select " + std::to_string(std::to_underlying(package)));
+  }
+  void CaptureSavedCamera() override { log_->emplace_back("capture saved"); }
+  void CaptureEffectCamera() override { log_->emplace_back("capture effect"); }
+
+  static constexpr std::uint16_t kFirstType = 10;
+  bool has_package = true;
+  std::uint8_t token = 9;
+  std::set<std::size_t> refused;
+  std::vector<fx::SecondarySpawn> spawns;
+
+ private:
+  [[nodiscard]] std::string Name(const Instance& instance) const {
+    return "i" + std::to_string(&instance - instances_.data());
+  }
+
+  std::span<Instance> instances_;
+  Log* log_;
+};
+}  // namespace
+
+TEST_CASE("F01435 each target starts a secondary instance with the token",
+          "[effect-runtime][F01435]") {
+  std::vector<Instance> instances(fx::kActionEffectTargets);
+  Log log;
+  FakeSpawner spawner(instances, log);
+  CHECK(fx::SpawnSecondaryEffects({.effect_id = 7, .target_count = 2}, -5,
+                                  spawner) == 9);
+  CHECK(log == Log{"token", "store request", "create t0", "start i0 -5 7 2",
+                   "phase i0 3", "create t1", "start i1 -5 7 2", "phase i1 3"});
+  REQUIRE(spawner.spawns.size() == 2);
+  for (std::size_t target = 0; target < 2; ++target) {
+    const fx::SecondarySpawn& spawn = spawner.spawns[target];
+    CHECK(spawn.target == target);
+    CHECK_FALSE(spawn.toward_source);
+    CHECK(spawn.priority == FakeSpawner::kFirstType + target);
+    CHECK(spawn.script_offset == 21);
+    CHECK(spawn.token == 9);
+  }
+}
+
+TEST_CASE("F01435 the effect sets the emit direction and busy bits",
+          "[effect-runtime][F01435]") {
+  const auto [effect, toward, busy] =
+      GENERATE(std::tuple{std::uint16_t{22}, false, 2}, std::tuple{23, true, 2},
+               std::tuple{24, false, 2}, std::tuple{25, true, 2},
+               std::tuple{39, false, 2}, std::tuple{40, true, 2},
+               std::tuple{41, true, 2}, std::tuple{42, false, 2},
+               std::tuple{43, false, 2}, std::tuple{44, true, 2},
+               std::tuple{53, true, 2}, std::tuple{54, false, 4},
+               std::tuple{0x8017, false, 2});
+  CHECK(fx::EmitsTowardSource(effect) == toward);
+  CHECK(fx::SecondaryBusyBits(effect) == busy);
+  std::vector<Instance> instances(1);
+  Log log;
+  FakeSpawner spawner(instances, log);
+  static_cast<void>(fx::SpawnSecondaryEffects(
+      {.effect_id = effect, .target_count = 1}, 0, spawner));
+  REQUIRE(spawner.spawns.size() == 1);
+  CHECK(spawner.spawns.front().toward_source == toward);
+  CHECK(spawner.spawns.front().script_offset == effect * 3);
+  CHECK(log.at(3) ==
+        "start i0 0 " + std::to_string(effect) + " " + std::to_string(busy));
+}
+
+TEST_CASE("F01435 a spawn without a package takes no token",
+          "[effect-runtime][F01435]") {
+  std::vector<Instance> instances(1);
+  Log log;
+  FakeSpawner spawner(instances, log);
+  spawner.has_package = false;
+  CHECK(fx::SpawnSecondaryEffects({.effect_id = 7, .target_count = 1}, 0,
+                                  spawner) == 0);
+  CHECK(log.empty());
+}
+
+TEST_CASE("F01435 the spawn stops at the request's targets",
+          "[effect-runtime][F01435]") {
+  std::vector<Instance> instances(fx::kActionEffectTargets);
+  Log log;
+  FakeSpawner spawner(instances, log);
+  const auto count = GENERATE(std::uint8_t{0}, std::uint8_t{16},
+                              std::uint8_t{17}, std::uint8_t{255});
+  CHECK(fx::SpawnSecondaryEffects({.effect_id = 1, .target_count = count}, 0,
+                                  spawner) == 9);
+  CHECK(spawner.spawns.size() ==
+        std::min<std::size_t>(count, fx::kActionEffectTargets));
+}
+
+TEST_CASE("F01435 a refused instance is skipped", "[effect-runtime][F01435]") {
+  std::vector<Instance> instances(3);
+  Log log;
+  FakeSpawner spawner(instances, log);
+  spawner.refused = {1};
+  CHECK(fx::SpawnSecondaryEffects({.effect_id = 2, .target_count = 3}, 4,
+                                  spawner) == 9);
+  CHECK(log == Log{"token", "store request", "create t0", "start i0 4 2 2",
+                   "phase i0 3", "create t1", "create t2", "start i2 4 2 2",
+                   "phase i2 3"});
+}
+
+TEST_CASE("F01436 the secondary package and both cameras precede the spawn",
+          "[effect-runtime][F01436]") {
+  std::vector<Instance> instances(1);
+  Log log;
+  FakeSpawner spawner(instances, log);
+  CHECK(fx::BeginSecondaryEffects({.effect_id = 54, .target_count = 1}, 6,
+                                  spawner) == 9);
+  CHECK(log == Log{"select 0", "capture saved", "capture effect", "token",
+                   "store request", "create t0", "start i0 6 54 4",
+                   "phase i0 3"});
+}
+
+TEST_CASE("F01449 the source actor effect targets the origin",
+          "[effect-runtime][F01449]") {
+  const fx::SourceActorEffect effect = fx::MakeSourceActorEffect(0xC7);
+  CHECK(effect.effect_id == 0x38);
+  CHECK(effect.target_count == 1);
+  CHECK(effect.other_count == 0);
+  CHECK(effect.source_type == fx::kActorBoneEndpoint);
+  CHECK(effect.actor == 0xC7);
+  CHECK(effect.part == 0);
+  CHECK(effect.target_type == fx::kPositionEndpoint);
+  CHECK((effect.target_x == 0 && effect.target_y == 0 && effect.target_z == 0));
+}
+
+TEST_CASE("F01450 the action effect mode clear resets the variant",
+          "[effect-runtime][F01450]") {
+  std::uint8_t variant = 3;
+  fx::ClearActionEffectMode(variant);
+  CHECK(variant == 0);
+  const auto saved = Effects_actionVariant;
+  Effects_actionVariant = 5;
+  fx::LiveClearActionEffectMode();
+  CHECK(Effects_actionVariant == 0);
+  Effects_actionVariant = saved;
+}
+
+namespace {
+// Saves the globals a Live secondary spawn touches and gives it a script
+// package and an empty game heap; the destructor restores them.
+class LiveSecondaryScope {
+ public:
+  LiveSecondaryScope()
+      : saved_package_(std::exchange(Effects_package, &package_)),
+        saved_secondaries_(std::exchange(Effects_secondaryInstances, nullptr)),
+        saved_request_(Effects_secondaryRequest) {
+    package_.block8Data = script_.data();
+    std::ranges::copy(Effects_tokenBitmaps, saved_tokens_.begin());
+  }
+  LiveSecondaryScope(const LiveSecondaryScope&) = delete;
+  LiveSecondaryScope& operator=(const LiveSecondaryScope&) = delete;
+  LiveSecondaryScope(LiveSecondaryScope&&) = delete;
+  LiveSecondaryScope& operator=(LiveSecondaryScope&&) = delete;
+  ~LiveSecondaryScope() {
+    Effects_secondaryRequest = saved_request_;
+    std::ranges::copy(saved_tokens_, std::begin(Effects_tokenBitmaps));
+    Effects_secondaryInstances = saved_secondaries_;
+    Effects_package = saved_package_;
+  }
+
+  [[nodiscard]] const char* Script() const { return script_.data(); }
+
+ private:
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 2048> arena_{};
+  VS::Core::Memory::ScopedLiveGameHeap heap_{arena_};
+  std::array<char, 128> script_{};
+  Effects_EffectPackage package_{};
+  Effects_EffectPackage* saved_package_;
+  Instance* saved_secondaries_;
+  Effects_ActionEffectRequest saved_request_;
+  std::array<int, std::size(Effects_tokenBitmaps)> saved_tokens_{};
+};
+
+Effects_ActionEffectRequest TwoTargetRequest() {
+  Effects_ActionEffectRequest request{};
+  request.effectId = 23;
+  request.count = 2;
+  request.source.type = fx::kActorBoneEndpoint;
+  request.source.value.actor.actor = 3;
+  const std::span targets{request.targets};
+  targets[0].type = fx::kPositionEndpoint;
+  targets[0].value.position = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
+  targets[1].type = 7;
+  targets[1].value.position = {.vx = 4, .vy = 5, .vz = 6, .pad = 0};
+  return request;
+}
+
+std::vector<Instance*> SecondaryInstances() {
+  std::vector<Instance*> instances;
+  for (Instance* instance = Effects_secondaryInstances; instance != nullptr;
+       instance = instance->next) {
+    instances.push_back(instance);
+  }
+  return instances;
+}
+
+// Effect 23 emits toward the source, so each instance's emitter is its target.
+void CheckTowardSourceEndpoints(const Instance& instance) {
+  const auto type = instance.context.target.type;
+  CHECK((type == fx::kPositionEndpoint || type == 7));
+  CHECK(instance.priority == type);
+  CHECK(instance.context.emitFrom.type == type);
+  CHECK(instance.context.emitTo.type == fx::kActorBoneEndpoint);
+  CHECK(instance.context.source.type == fx::kActorBoneEndpoint);
+}
+
+void CheckStartedInstance(const Instance& instance, const char* script,
+                          int token) {
+  CHECK(instance.script == script);
+  CHECK(instance.scriptOffset == 69);
+  CHECK(instance.token == static_cast<unsigned>(token));
+  CHECK(instance.busyBits == 2);
+  CHECK(instance.context.parameter == 0x1234);
+  CHECK(instance.context.effectId == 23);
+  CHECK(instance.context.phase ==
+        std::to_underlying(SecondaryEffectPhase::kStarting));
+}
+}  // namespace
+
+TEST_CASE("F01437 the Live spawn starts each target's secondary instance",
+          "[effect-runtime][F01435][F01437]") {
+  const LiveSecondaryScope scope;
+  Effects_ActionEffectRequest request = TwoTargetRequest();
+  const int token = fx::LiveSpawnSecondaryEffectRequest(&request, 0, 0x1234);
+  CHECK(token != 0);
+  CHECK(Effects_secondaryRequest.effectId == 23);
+
+  const std::vector<Instance*> spawned = SecondaryInstances();
+  REQUIRE(spawned.size() == 2);
+  for (Instance* instance : spawned) {
+    CheckTowardSourceEndpoints(*instance);
+    CheckStartedInstance(*instance, scope.Script(), token);
+    fx::LiveDestroySecondaryEffectInstance(instance);
+  }
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("F01435 the Live secondary spawns refuse a missing request",
+          "[effect-runtime][F01435][F01436][F01437]") {
+  const int tokens = Effects_tokenBitmaps[0];
+  CHECK(fx::LiveSpawnSecondaryEffects(nullptr, 0, 1) == 0);
+  CHECK(fx::LiveBeginSecondaryEffects(nullptr, 1) == 0);
+  CHECK(fx::LiveSpawnSecondaryEffectRequest(nullptr, 0, 1) == 0);
+  CHECK(Effects_tokenBitmaps[0] == tokens);
 }

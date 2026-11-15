@@ -16,6 +16,7 @@
 
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
@@ -49,6 +50,8 @@ static_assert(std::extent_v<decltype(Effects_particleColorPresetTable)> >=
               VS::Effects::kParticleColorPresets);
 static_assert(std::extent_v<decltype(Effects_particleColorPresetTable), 1> ==
               VS::Effects::kColorPresetEntries);
+static_assert(std::extent_v<decltype(Effects_scriptRenderers)> ==
+              VS::Effects::kScriptRenderers);
 
 namespace VS::Effects {
 namespace {
@@ -59,6 +62,7 @@ std::uint64_t refused_registers = 0;
 std::uint64_t refused_definitions = 0;
 std::uint64_t refused_presets = 0;
 std::uint64_t refused_timelines = 0;
+std::uint64_t refused_renderers = 0;
 std::uint64_t unmapped_timelines = 0;
 std::uint64_t clamped_transforms = 0;
 std::uint64_t wrapped_children = 0;
@@ -157,6 +161,14 @@ void ReportOpcodeRefusal(const char* entry, ScriptRefusal refusal,
                     "effect script: {} before {:#x} needs a timeline the "
                     "instance has not loaded ({} refusals)",
                     entry, offset, refused_timelines);
+      }
+      return;
+    case ScriptRefusal::kRenderer:
+      if (ShouldReport(refused_renderers)) {
+        VS_LOG_WARN("effects",
+                    "effect script: {} before {:#x} names a renderer past the "
+                    "{} script renderers ({} refusals)",
+                    entry, offset, kScriptRenderers, refused_renderers);
       }
       return;
   }
@@ -322,7 +334,7 @@ PresetTables() {
   return remap;
 }
 
-// The instance's timeline, transforms and the particle environment.
+// The instance's timeline, transforms, renderers, particles and children.
 class InstanceEffectHost final : public ScriptEffectHost {
  public:
   explicit InstanceEffectHost(Effects_EffectInstance& instance)
@@ -344,6 +356,31 @@ class InstanceEffectHost final : public ScriptEffectHost {
   }
   void UpdateParticleEnvironment() override {
     LiveUpdateParticleGravityAndDrag();
+  }
+  // The original set only the source, script and offset, leaving the other
+  // endpoints, priority, parent and token as whatever its stack held; the
+  // child takes the instance's endpoints, priority and token, without a
+  // parent.
+  void SpawnScript(std::uint16_t script_offset) override {
+    Effects_EffectInstanceTargets& context = instance_->context;
+    Effects_EffectSpawnRequest spawn{};
+    spawn.source = &context.source;
+    spawn.emitFrom = &context.emitFrom;
+    spawn.target = &context.target;
+    spawn.emitTo = &context.emitTo;
+    spawn.priority = static_cast<std::uint8_t>(instance_->priority);
+    spawn.script = instance_->script;
+    spawn.scriptOffset = script_offset;
+    spawn.token = static_cast<u_char>(instance_->token);
+    (void)LiveCreatePrimaryEffectInstance(&spawn);
+  }
+  void AttachRenderer(std::uint8_t index, std::int32_t parameters) override {
+    (void)LiveAttachEffectRenderer(
+        instance_, std::span(Effects_scriptRenderers)[index], parameters);
+  }
+  void UpdateRenderers() override { LiveUpdateEffectRenderers(instance_); }
+  void EmitParticles(std::uint8_t event) override {
+    Effects_EmitParticleEvent(instance_, event, 0, 0, nullptr);
   }
 
  private:
@@ -709,6 +746,44 @@ int LiveRefreshScriptParticleEnvironment(Effects_EffectInstance* instance) {
       [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
         return RefreshParticleEnvironment(host);
       });
+}
+
+// decomp: func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:7527)
+int LiveSpawnEffectScript(Effects_EffectInstance* instance) {
+  return RunOpcode(instance, "spawn script",
+                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                     InstanceEffectHost host{effect};
+                     return SpawnChildScript(cursor, host);
+                   });
+}
+
+// decomp: func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:7546)
+int LiveAttachScriptRenderer(Effects_EffectInstance* instance) {
+  return RunOpcode(instance, "attach renderer",
+                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                     InstanceEffectHost host{effect};
+                     return AttachScriptRenderer(
+                         cursor, effect.context.parameter, host);
+                   });
+}
+
+// decomp: func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
+int LiveTickEffectRenderers(Effects_EffectInstance* instance) {
+  return RunHostStep(
+      instance, "tick renderers",
+      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+        return TickScriptRenderers(host);
+      });
+}
+
+// decomp: func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:7651)
+int LiveEmitParticlesFromScriptRegister(Effects_EffectInstance* instance) {
+  return RunOpcode(instance, "emit register particles",
+                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                     InstanceEffectHost host{effect};
+                     return EmitRegisterParticles(cursor, RegistersOf(effect),
+                                                  host);
+                   });
 }
 
 // decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)

@@ -21,6 +21,7 @@
 #include "Core/Random.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/EffectScriptLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 #include "Effects/Templates/ParticlesLive.hpp"
@@ -49,7 +50,6 @@ extern "C" {
 #include "Effects/Plugins/Plg082.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
-#include "Effects/ScriptVm.h"
 #include "Effects/Templates/TemplateState.h"
 #include "Effects/Trails.h"
 #include "Render/Camera.h"
@@ -1882,10 +1882,10 @@ TEST_CASE(
       REQUIRE(slot->rendererState != nullptr);
     }
 
-    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    CHECK(VS::Effects::LiveTickEffectRenderers(&fixture.instance) == 1);
     REQUIRE(fixture.instance.context.renderer != nullptr);
     fixture.ResetPackets();
-    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    CHECK(VS::Effects::LiveTickEffectRenderers(&fixture.instance) == 1);
     CHECK(fixture.instance.context.renderer == nullptr);
     CHECK(VS::Core::Memory::GameHeap().Empty());
     fixture.CheckGuards();
@@ -1909,12 +1909,12 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
         &fixture.instance, &VS::Effects::Templates::UpdateLivePlg053ClosedRing,
         2);
     REQUIRE(slot != nullptr);
-    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    CHECK(VS::Effects::LiveTickEffectRenderers(&fixture.instance) == 1);
     const auto* packets = reinterpret_cast<const Render_ClosedRingPacket*>(
         fixture.storage.data() + 1);
     CheckGravityRingMaterial(packets);
     fixture.ResetPackets();
-    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    CHECK(VS::Effects::LiveTickEffectRenderers(&fixture.instance) == 1);
     CHECK(fixture.instance.context.renderer == nullptr);
     CHECK(VS::Core::Memory::GameHeap().Empty());
     fixture.ResetPackets();

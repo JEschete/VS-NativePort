@@ -11,7 +11,8 @@ struct Effects_ActionEffectRequest;
 // callers and the module's function pointers. A missing action request,
 // package, package block or renderer is refused with a diagnostic, as is a
 // track outside the pending mask; a renderer slot without a renderer is
-// detached as finished.
+// detached as finished. A secondary request with more targets than it holds
+// spawns only those it holds, and a refused secondary instance is skipped.
 namespace VS::Effects {
 // func_800CE64C (5BF94.c:5047).
 void LiveInitEffectRuntime();
@@ -30,4 +31,19 @@ int LiveBeginActionEffect(Effects_ActionEffectRequest* request,
                           int action_variant, int variant_argument);
 // func_800CF1A8 (5BF94.c:5462).
 void LiveClearPrimaryEffects();
+// func_800CF218 (5BF94.c:5479): the secondary instances' token; 0 when the
+// request or package is missing. The second argument is unused.
+int LiveSpawnSecondaryEffects(Effects_ActionEffectRequest* request, int unused,
+                              int parameter);
+// func_800CF3F8 (5BF94.c:5532): the secondary instances' token.
+int LiveBeginSecondaryEffects(Effects_ActionEffectRequest* request,
+                              int parameter);
+// func_800CF458 (5BF94.c:5541): LiveSpawnSecondaryEffects under its other
+// entry.
+int LiveSpawnSecondaryEffectRequest(Effects_ActionEffectRequest* request,
+                                    int unused, int parameter);
+// func_800CF8BC (5BF94.c:5697): effect 0x38 on the acting actor.
+void LiveSpawnSourceActorEffect();
+// func_800CF920 (5BF94.c:5712).
+void LiveClearActionEffectMode();
 }  // namespace VS::Effects

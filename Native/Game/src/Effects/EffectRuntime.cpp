@@ -1,6 +1,9 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Effects/EffectRuntime.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 
@@ -10,6 +13,28 @@
 
 namespace VS::Effects {
 namespace {
+struct EffectIdRange {
+  std::uint16_t first;
+  std::uint16_t last;
+};
+
+// The secondary effects whose instances emit from their target toward the
+// request's source instead of from the source toward the target.
+constexpr std::array<EffectIdRange, 4> kTowardSourceEffects{{
+    {.first = 23, .last = 23},
+    {.first = 25, .last = 25},
+    {.first = 40, .last = 41},
+    {.first = 44, .last = 53},
+}};
+
+// Every secondary instance marks busy bit 1, except effect 54's, which mark
+// bit 2.
+constexpr std::uint16_t kAlternateBusyEffect = 54;
+constexpr std::uint8_t kAlternateBusyBits = 4;
+constexpr std::uint8_t kDefaultBusyBits = 2;
+
+constexpr std::uint16_t kSourceActorEffectId = 0x38;
+
 void SetPhase(PrimaryEffectRuntime& runtime, PrimaryEffectPhase phase) {
   PrimaryEffectState state = runtime.Primary();
   SetPrimaryEffectPhase(state, phase);
@@ -157,14 +182,7 @@ void PlayTracks(PrimaryEffectRuntime& runtime) {
     runtime.SetPhase(instance, SecondaryEffectPhase::kPlaying);
   } else if (phase == SecondaryEffectPhase::kPlaying) {
     BeginInstanceFrame(instance, runtime);
-    Effects_RendererSlot* slot = runtime.FirstRenderer(instance);
-    while (slot != nullptr) {
-      Effects_RendererSlot* next = runtime.NextRenderer(*slot);
-      if (!runtime.UpdateRenderer(*slot)) {
-        runtime.DetachRenderer(instance, *slot);
-      }
-      slot = next;
-    }
+    UpdateEffectRenderers(instance, runtime);
     if (!runtime.RunScript(instance)) {
       const std::uint8_t busy = runtime.BusyBits(instance);
       runtime.DestroySecondary(instance);
@@ -315,4 +333,71 @@ void ClearPrimaryEffects(PrimaryEffectRuntime& runtime) {
     instance = next;
   }
 }
+
+bool EmitsTowardSource(std::uint16_t effect_id) {
+  return std::ranges::any_of(
+      kTowardSourceEffects, [effect_id](const EffectIdRange& range) {
+        return effect_id >= range.first && effect_id <= range.last;
+      });
+}
+
+std::uint8_t SecondaryBusyBits(std::uint16_t effect_id) {
+  return effect_id == kAlternateBusyEffect ? kAlternateBusyBits
+                                           : kDefaultBusyBits;
+}
+
+// decomp: func_800CF218 (src/BATTLE/BATTLE.PRG/5BF94.c:5479)
+std::uint8_t SpawnSecondaryEffects(const SecondaryEffectRequest& request,
+                                   std::int32_t parameter,
+                                   SecondaryEffectSpawner& spawner) {
+  if (!spawner.HasPackage()) {
+    return 0;
+  }
+  const std::uint8_t token = spawner.AllocateToken();
+  spawner.StoreRequest();
+  const std::size_t targets =
+      std::min<std::size_t>(request.target_count, kActionEffectTargets);
+  for (std::size_t target = 0; target < targets; ++target) {
+    Effects_EffectInstance* instance = spawner.CreateSecondary(
+        {.target = target,
+         .toward_source = EmitsTowardSource(request.effect_id),
+         .priority = spawner.TargetType(target),
+         .script_offset = request.effect_id * kTrackScriptStride,
+         .token = token});
+    if (instance == nullptr) {
+      continue;
+    }
+    spawner.StartSecondary(*instance, parameter, request.effect_id,
+                           SecondaryBusyBits(request.effect_id));
+    spawner.SetPhase(*instance, SecondaryEffectPhase::kStarting);
+  }
+  return token;
+}
+
+// decomp: func_800CF3F8 (src/BATTLE/BATTLE.PRG/5BF94.c:5532)
+std::uint8_t BeginSecondaryEffects(const SecondaryEffectRequest& request,
+                                   std::int32_t parameter,
+                                   SecondaryEffectSpawner& spawner) {
+  spawner.SelectPackage(ActivePackage::kSecondary);
+  spawner.CaptureSavedCamera();
+  spawner.CaptureEffectCamera();
+  return SpawnSecondaryEffects(request, parameter, spawner);
+}
+
+// decomp: func_800CF8BC (src/BATTLE/BATTLE.PRG/5BF94.c:5697)
+SourceActorEffect MakeSourceActorEffect(std::uint8_t actor) {
+  return {.effect_id = kSourceActorEffectId,
+          .target_count = 1,
+          .other_count = 0,
+          .source_type = kActorBoneEndpoint,
+          .actor = actor,
+          .part = 0,
+          .target_type = kPositionEndpoint,
+          .target_x = 0,
+          .target_y = 0,
+          .target_z = 0};
+}
+
+// decomp: func_800CF920 (src/BATTLE/BATTLE.PRG/5BF94.c:5712)
+void ClearActionEffectMode(std::uint8_t& action_variant) { action_variant = 0; }
 }  // namespace VS::Effects

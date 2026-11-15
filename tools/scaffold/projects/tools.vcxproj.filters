@@ -2457,6 +2457,48 @@
     <None Include="..\..\port\differentials\effect_instances_phase.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_runtime_begin_action.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_begin_secondary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_clear_mode.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_clear_primary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_init.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_reset.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_source_actor.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_spawn_request.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_spawn_secondary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_start_track.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_update.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_update_primary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_runtime_update_secondary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_branch.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -2529,7 +2571,13 @@
     <None Include="..\..\port\differentials\effect_script_signal_source.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_attach.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_timeline_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_emit.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_timeline_finished.py">
@@ -2542,6 +2590,12 @@
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_timeline_register.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_renderers.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_script_timeline_spawn.py">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\effect_script_timeline_tick.py">
@@ -3274,6 +3328,9 @@
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\effect_instances_differential.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\effect_runtime_differential.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\effect_script_differential.py">

@@ -28,19 +28,19 @@ architecture changes rather than per-function work, so this ledger is what track
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
 | 26: #59 Event VM results and execution | 0 | 71 | 1,444 | 188 | 49 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
-| 31: #61 Typed effects and playback sessions | 0 | 89 | 4,384 | 719 | 48 | 0 |
+| 31: #61 Typed effects and playback sessions | 0 | 80 | 4,269 | 725 | 42 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 268 | 18,890 | 429 | 216 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 469 | 26,885 | 3411 | 324 | 0 |
+| **Total** | 5 | 460 | 26,770 | 3417 | 318 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,261 |
+| done | 3,270 |
 | in-progress | 4 |
-| todo | 470 |
+| todo | 461 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (5 active, 45 done, 4 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (4 active, 46 done, 4 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -80,7 +80,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 34 | event-script-actors | done | self | 3 | 0 | 0 |
 | 35 | event-script-camera-screen-field | planned | - | 3 | 71 | 1,444 |
 | 36 | event-script-audio-dialog-effects | done | self | 10 | 0 | 0 |
-| 37 | effects-runtime-vm | active | - | 3 | 9 | 115 |
+| 37 | effects-runtime-vm | done | - | 3 | 0 | 0 |
 | 38 | effects-resources-transforms | done | self | 8 | 0 | 0 |
 | 39 | effects-particles-screen-plugins | planned | - | 11 | 80 | 4,269 |
 | 40 | effects-particle-templates | done | self | 8 | 0 | 0 |
@@ -101,11 +101,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 113 |
-| Referenced by the original-address module table | 1 | 193 |
+| Called from generated code | 1 | 112 |
+| Referenced by the original-address module table | 1 | 184 |
 | Calls an SDK shim | 0 | 70 |
 | Signature uses SDK integer types or `void*` | 0 | 91 |
-| Compiled with relaxed settings | 0 | 469 |
+| Compiled with relaxed settings | 0 | 460 |
 
 Function bodies: 3,735 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 

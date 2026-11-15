@@ -21,6 +21,7 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractions.hpp"
@@ -520,7 +521,7 @@ class LiveTrapActionHost final : public VS::Field::TrapActionHost {
       return false;
     }
     auto request = VS::Field::LiveTrapEffectRecord(effect);
-    static_cast<void>(Effects_BeginSecondaryEffects(&request, 0));
+    static_cast<void>(VS::Effects::LiveBeginSecondaryEffects(&request, 0));
     return true;
   }
 };

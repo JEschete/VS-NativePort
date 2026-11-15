@@ -332,10 +332,5 @@ extern Effects_EffectRenderer Effects_rendererTableAlias[];
 extern Effects_EffectRenderer Effects_effectRenderers[8];
 extern Effects_EffectPackage Effects_actionPackage;
 extern Effects_EffectPackage Effects_secondaryPackage;
-char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* effect_request, int arg1, int renderer_parameters);
-int Effects_BeginSecondaryEffects(Effects_ActionEffectRequest* effect_request, int renderer_parameters);
-int Effects_SpawnSecondaryEffectRequest(Effects_ActionEffectRequest* effect_request, int arg1, int renderer_parameters);
-void Effects_SpawnSourceActorEffect(void);
-void Effects_ClearActionEffectMode(void);
 
 #endif // VS_EFFECTS_RUNTIME_H_DECLS

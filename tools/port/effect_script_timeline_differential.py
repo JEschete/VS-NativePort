@@ -1,21 +1,26 @@
-"""Shared harness for the effect script timeline, transform and particle-environment opcode
-differentials (BATTLE.PRG 5BF94.c:7569-7740, #276).
+"""Shared harness for the effect script timeline, transform, particle-environment, spawn,
+renderer and particle-event opcode differentials (BATTLE.PRG 5BF94.c:7527-7740, #276).
 
 Each case runs one original under the R3000 interpreter against the typed VS::Effects core in
 effect_script_timeline_driver.cpp. The originals' runtime callees (the timeline load and tick,
-the heap free, the transform update and set-up, and the particle environment) are stubs that
-record their calls; the driver's recording host prints the calls the core makes, so a case
-compares the step, the script offset, which callee ran with which argument, and the timeline
-field. The bound package is a fake record behind D_800F569C whose block 9 holds the vector's
-timeline ids at +0x16 and whose block 3, when bound, leads with its timeline count.
+the heap free, the transform update and set-up, the particle environment, the primary spawn,
+the renderer attach and detach, and the particle emitter) are stubs that record their calls;
+the driver's recording host prints the calls the core makes, so a case compares the step, the
+script offset, which callee ran with which argument, and the timeline field. The bound package
+is a fake record behind D_800F569C whose block 9 holds the vector's timeline ids at +0x16 and
+whose block 3, when bound, leads with its timeline count. The renderer update runs a chain of
+fake slots whose renderer returns the vector's result per slot; the driver runs the shared
+UpdateEffectRenderers over the same chain.
 
 Native differences outside the compared domain (covered by EffectScriptTests.cpp): register
 operands past the four registers are refused instead of reading the instance bytes that
-follow, and the timeline tick and finished branch refuse an instance without a timeline
-instead of reading through null. Vectors therefore name registers 0-3 and give the tick and
-the branch a timeline. The native host interface carries the instance implicitly, so each call
-is checked against the original's: the instance (or the freed timeline) in $a0, and the
-original's always-zero third load argument in $a2.
+follow, a script renderer past the two in the table is refused instead of read past it, and
+the timeline tick and finished branch refuse an instance without a timeline instead of reading
+through null. Vectors therefore name registers 0-3 and renderers 0-1 and give the tick and the
+branch a timeline. The native host interface carries the instance implicitly, so each call is
+checked against the original's: the instance (or the freed timeline) in $a0, the original's
+always-zero third load argument in $a2, the spawn's script and source, the renderer update's
+constant arguments and the emitter's zero override, variant and parent.
 """
 
 from __future__ import annotations
@@ -67,12 +72,38 @@ FREE_ADDRESS = 0x80043C60
 UPDATE_ADDRESS = 0x800D0D08
 INITIALIZE_ADDRESS = 0x800CFEF0
 ENVIRONMENT_ADDRESS = 0x800D78F0
+SPAWN_ADDRESS = 0x800CE83C
+ATTACH_ADDRESS = 0x800CF694
+DETACH_ADDRESS = 0x800CF70C
+EMIT_ADDRESS = 0x800D2ADC
 
-IMMEDIATE, REGISTER, TICK, FINISHED, FREE, UPDATE, INITIALIZE, ENVIRONMENT = range(8)
-LOADED, TICKED, FREED, UPDATED, INITIALIZED, REFRESHED = range(1, 7)
+CONTEXT_FIELD = 0xD1C
+RENDERER_FIELD = 0xD50
+PARAMETER_FIELD = 0xD58
+SPAWN_SOURCE_FIELD = 0x0
+SPAWN_SCRIPT_FIELD = 0x14
+SPAWN_OFFSET_FIELD = 0x18
+EMIT_PARENT_ARGUMENT = 0x10
+# Effects_scriptRenderers, which the vectors fill with the fake renderers below.
+SCRIPT_RENDERERS = 0x800EC324
+SCRIPT_RENDERER_FUNCTIONS = (0x80470000, 0x80470100)
+# The renderer every slot of a RENDERERS vector runs; a slot is a next pointer and a renderer.
+SLOT_RENDERER = 0x80470200
+SLOTS = 0x80480000
+SLOT_STRIDE = 0x10
+SLOT_NEXT_FIELD = 0x0
+SLOT_RENDERER_FIELD = 0x4
+MAX_SLOTS = 6
+RENDERER_UPDATE = 2
+
+(IMMEDIATE, REGISTER, TICK, FINISHED, FREE, UPDATE, INITIALIZE, ENVIRONMENT, SPAWN, ATTACH, RENDERERS,
+ EMIT) = range(12)
+(LOADED, TICKED, FREED, UPDATED, INITIALIZED, REFRESHED, SPAWNED, ATTACHED, PARAMETERS, RENDERED, DETACHED,
+ EMITTED) = range(1, 13)
 CALL_NAMES = {LOADED: "load", TICKED: "tick", FREED: "free", UPDATED: "update",
-              INITIALIZED: "initialize", REFRESHED: "refresh"}
-PROGRAM_MODES = (IMMEDIATE, REGISTER, TICK, FINISHED)
+              INITIALIZED: "initialize", REFRESHED: "refresh", SPAWNED: "spawn", ATTACHED: "attach",
+              PARAMETERS: "parameters", RENDERED: "render", DETACHED: "detach", EMITTED: "emit"}
+PROGRAM_MODES = (IMMEDIATE, REGISTER, TICK, FINISHED, SPAWN, ATTACH, EMIT)
 SERVICE_CALLS = {UPDATE: (UPDATE_ADDRESS, UPDATED), INITIALIZE: (INITIALIZE_ADDRESS, INITIALIZED),
                  ENVIRONMENT: (ENVIRONMENT_ADDRESS, REFRESHED)}
 
@@ -106,21 +137,30 @@ def vector(rng: random.Random, number: int, mode: int) -> dict:
         operands: tuple[int, ...]
         if mode == IMMEDIATE:
             operands = (byte(rng),)
-        elif mode == REGISTER:
+        elif mode in (REGISTER, EMIT):
             operands = (rng.choice((1, 1, 0, 2, 3)),)
+        elif mode == ATTACH:
+            operands = (rng.choice((0, 1)), byte(rng), byte(rng), byte(rng), byte(rng))
         else:
             operands = (rng.randrange(256), rng.choice((0, 0, 1, rng.randrange(256))))
         placed: dict[int, int] = {}
         place(placed, offset, operands)
         value |= {"offset": offset, "placed": sorted(placed.items()), "operands": list(operands)}
+    if mode in (REGISTER, EMIT):
+        value |= {"registers": [register_value(rng) for _ in range(4)]}
     if mode == REGISTER:
-        value |= {"registers": [register_value(rng) for _ in range(4)], "parent": rng.randrange(4) == 0,
+        value |= {"parent": rng.randrange(4) == 0,
                   "ids": [timeline_id(rng) for _ in range(TIMELINE_IDS)], "count": timeline_count(rng),
                   "filler": [rng.randrange(1, 256) for _ in range(BLOCK9_BYTES)]}
     elif mode == FINISHED:
         value |= {"active": word(rng), "tracks": word(rng)}
     elif mode == FREE:
         value |= {"timeline": rng.choice((0, 0, TIMELINE, TIMELINE, rng.randrange(1, 1 << 32)))}
+    elif mode == ATTACH:
+        value |= {"parameter": rng.choice((0, 0, 0, 1, -1, 0x10000, s32(word(rng))))}
+    elif mode == RENDERERS:
+        value |= {"results": [rng.choice((0, 0, 1, 2, 0x100, -1, s32(word(rng))))
+                              for _ in range(rng.randrange(MAX_SLOTS + 1))]}
     return value
 
 
@@ -161,6 +201,20 @@ def prepare(machine: Machine, value: dict) -> None:
         machine.store(INSTANCE + REGISTERS_FIELD, bytes(value["registers"]))
         machine.map_zero(PARENT, 4)
         machine.put(INSTANCE + PARENT_FIELD, PARENT if value["parent"] else 0)
+    elif mode == EMIT:
+        machine.store(INSTANCE + REGISTERS_FIELD, bytes(value["registers"]))
+    elif mode == ATTACH:
+        for index, renderer in enumerate(SCRIPT_RENDERER_FUNCTIONS):
+            machine.put(SCRIPT_RENDERERS + 4 * index, renderer)
+        machine.put(INSTANCE + PARAMETER_FIELD, value["parameter"])
+    elif mode == RENDERERS:
+        count = len(value["results"])
+        machine.map_zero(SLOTS, SLOT_STRIDE * MAX_SLOTS)
+        for index in range(count):
+            slot = SLOTS + SLOT_STRIDE * index
+            machine.put(slot + SLOT_NEXT_FIELD, slot + SLOT_STRIDE if index + 1 < count else 0)
+            machine.put(slot + SLOT_RENDERER_FIELD, SLOT_RENDERER)
+        machine.put(INSTANCE + RENDERER_FIELD, SLOTS if count else 0)
     elif mode == FINISHED:
         machine.map_zero(TIMELINE, TIMELINE_BYTES)
         machine.put(TIMELINE + TRACK_COUNT_FIELD, value["tracks"])
@@ -183,6 +237,55 @@ def record(calls: list[tuple[int, int]], problems: list[str], kind: int, expecte
     return stub
 
 
+def slot_index(address: int) -> int:
+    return (address - SLOTS) // SLOT_STRIDE
+
+
+def runtime_stubs(machine: Machine, value: dict, calls: list[tuple[int, int]], problems: list[str]) -> None:
+    """The spawn, renderer and particle callees, whose arguments the native host carries
+    implicitly; each checks the instance and the original's constant arguments."""
+    def spawn(machine: Machine) -> None:
+        request = machine.r[4]
+        calls.append((SPAWNED, machine.load(request + SPAWN_OFFSET_FIELD)))
+        if machine.load(request + SPAWN_SCRIPT_FIELD) != PROGRAM:
+            problems.append("spawn did not pass the instance's script")
+        if machine.load(request + SPAWN_SOURCE_FIELD) != INSTANCE + CONTEXT_FIELD:
+            problems.append("spawn did not pass the instance's source")
+
+    def attach(machine: Machine) -> None:
+        renderer = machine.r[5]
+        index = (SCRIPT_RENDERER_FUNCTIONS.index(renderer) if renderer in SCRIPT_RENDERER_FUNCTIONS
+                 else renderer)
+        calls.append((ATTACHED, index))
+        calls.append((PARAMETERS, s32(machine.r[6])))
+        if machine.r[4] != INSTANCE:
+            problems.append(f"attach passed $a0 {machine.r[4]:#x}")
+
+    def render(machine: Machine) -> None:
+        index = slot_index(machine.r[4])
+        calls.append((RENDERED, index))
+        if machine.r[5] != RENDERER_UPDATE or machine.r[6] != 0:
+            problems.append(f"renderer {index} ran with {machine.r[5]:#x}, {machine.r[6]:#x}")
+        machine.r[2] = value["results"][index] & 0xFFFFFFFF
+
+    def detach(machine: Machine) -> None:
+        calls.append((DETACHED, slot_index(machine.r[5])))
+        if machine.r[4] != INSTANCE:
+            problems.append(f"detach passed $a0 {machine.r[4]:#x}")
+
+    def emit(machine: Machine) -> None:
+        calls.append((EMITTED, machine.r[5]))
+        parent = machine.load(machine.r[29] + EMIT_PARENT_ARGUMENT)
+        if machine.r[4] != INSTANCE or machine.r[6] or machine.r[7] or parent:
+            problems.append(f"emit passed {machine.r[4]:#x}, {machine.r[6]:#x}, {machine.r[7]:#x}, {parent:#x}")
+
+    machine.stub(SPAWN_ADDRESS, spawn)
+    machine.stub(ATTACH_ADDRESS, attach)
+    machine.stub(SLOT_RENDERER, render)
+    machine.stub(DETACH_ADDRESS, detach)
+    machine.stub(EMIT_ADDRESS, emit)
+
+
 def run(machine: Machine, value: dict, entry: int) -> tuple:
     mode = value["mode"]
     prepare(machine, value)
@@ -194,6 +297,7 @@ def run(machine: Machine, value: dict, entry: int) -> tuple:
     machine.stub(UPDATE_ADDRESS, record(calls, problems, UPDATED))
     machine.stub(INITIALIZE_ADDRESS, record(calls, problems, INITIALIZED))
     machine.stub(ENVIRONMENT_ADDRESS, record(calls, problems, REFRESHED, None))
+    runtime_stubs(machine, value, calls, problems)
     machine.r[4] = INSTANCE
     machine.execute(entry)
 
@@ -213,6 +317,12 @@ def run(machine: Machine, value: dict, entry: int) -> tuple:
     elif mode == FREE:
         values.append(machine.load(INSTANCE + TIMELINE_FIELD))
         inputs += [value["timeline"]]
+    elif mode == EMIT:
+        inputs += value["registers"]
+    elif mode == ATTACH:
+        inputs += [value["parameter"]]
+    elif mode == RENDERERS:
+        inputs += [len(value["results"]), *value["results"]]
     return {"values": values, "problems": problems, "stores": list(machine.stores)}, inputs
 
 
@@ -251,6 +361,16 @@ def describe(image, results) -> list[str]:
     if mode == FREE:
         freed = sum(1 for _, observation, _ in results if observation["values"][1])
         return [f"{freed} of {len(results)} vectors freed a timeline"]
+    if mode in (SPAWN, ATTACH, RENDERERS, EMIT):
+        kinds = [kind for _, observation, _ in results
+                 for kind in observation["values"][3 if mode != RENDERERS else 2::2]]
+        if mode == ATTACH:
+            overridden = sum(1 for value, _, _ in results if value["parameter"])
+            return [f"{overridden} of {len(results)} vectors attached with the instance's parameter"]
+        if mode == RENDERERS:
+            return [f"{kinds.count(RENDERED)} renderers updated, {kinds.count(DETACHED)} detached"]
+        arguments = {observation["values"][-1] for _, observation, _ in results}
+        return [f"{len(arguments)} distinct {'script offsets' if mode == SPAWN else 'events'} passed"]
     loads = sorted({observation["values"][-1] for _, observation, _ in results})
     if mode in (IMMEDIATE, TICK):
         return [f"{len(loads)} distinct {'timelines' if mode == IMMEDIATE else 'child offsets'} passed"]
@@ -259,6 +379,7 @@ def describe(image, results) -> list[str]:
 
 def configure(function: int, mode: int, entry: int, end: int, mutants: dict) -> dict:
     """Case-module globals for one original compared in `mode`."""
-    return case_globals(function, entry, end, mutants, driver=DRIVER,
+    case = case_globals(function, entry, end, mutants, driver=DRIVER,
                         vector=lambda rng, number: vector(rng, number, mode),
                         run=lambda machine, value: run(machine, value, entry), check=check, describe=describe)
+    return case | {"SOURCES": (*case["SOURCES"], r"Native\Game\src\Effects\EffectInstances.cpp")}

@@ -39,4 +39,10 @@ Effects_RendererSlot* LiveAttachEffectRenderer(Effects_EffectInstance* instance,
 // func_800CF70C (5BF94.c:5647).
 void LiveDetachEffectRenderer(Effects_EffectInstance* instance,
                               Effects_RendererSlot* slot);
+// Sends the slot's renderer RendererCommand::kUpdate; false once it has
+// finished. A slot without a renderer is refused and counts as finished.
+[[nodiscard]] bool LiveUpdateEffectRenderer(Effects_RendererSlot& slot);
+// func_800D4910 (5BF94.c:7582): UpdateEffectRenderers over the instance's
+// renderers.
+void LiveUpdateEffectRenderers(Effects_EffectInstance* instance);
 }  // namespace VS::Effects

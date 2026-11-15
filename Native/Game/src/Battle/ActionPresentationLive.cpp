@@ -194,7 +194,7 @@ class LiveWorld final : public ActionPresentationWorld {
     Audio::LiveStopSfx(kBattleBank, sound);
   }
   void ReleaseNotification() override { Menu_ReleaseSceneNotification(); }
-  void ClearEffectMode() override { Effects_ClearActionEffectMode(); }
+  void ClearEffectMode() override { Effects::LiveClearActionEffectMode(); }
   void PrepareCamera() override {
     Field::LiveStorePreferredActionCameraDistance();
   }

@@ -1,12 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Effects/CameraLive.hpp"
-#include "Effects/EffectInstancesLive.hpp"
-#include "Effects/EffectResourcesLive.hpp"
-#include "Effects/PrimaryEffectLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
-#include "Effects/CameraLiveState.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -107,94 +102,5 @@ Effects_EffectPackage Effects_actionPackage;
 
 // decomp: D_800F57A0 (D_800F57A0@BATTLE/BATTLE.PRG)
 Effects_EffectPackage Effects_secondaryPackage;
-
-// decomp: BATTLE.PRG func_800CF218 (src/BATTLE/BATTLE.PRG/5BF94.c:5479)
-char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* effect_request, int arg1, int renderer_parameters)
-{
-    Effects_EffectSpawnRequest spawn;
-    int _[4] __attribute__((unused));
-    char token = VS::Effects::LiveAllocateEffectToken();
-    int i;
-
-    spawn.source = &effect_request->source;
-    spawn.script = Effects_package->block8Data;
-    spawn.scriptOffset = effect_request->effectId * 3;
-    spawn.parent = NULL;
-    spawn.token = token;
-    Effects_secondaryRequest = *effect_request;
-
-    for (i = 0; i < effect_request->count; ++i) {
-        Effects_EffectInstance* child;
-        int id = effect_request->effectId;
-
-        if ((id >= 40 && id <= 41) || (id >= 44 && id <= 53)) {
-            spawn.emitFrom = &effect_request->targets[i];
-            spawn.emitTo = &effect_request->source;
-        } else {
-            switch ((u_short)id) {
-            case 23:
-            case 25:
-                spawn.emitFrom = &effect_request->targets[i];
-                spawn.emitTo = &effect_request->source;
-                break;
-            default:
-                spawn.emitFrom = &effect_request->source;
-                spawn.emitTo = &effect_request->targets[i];
-                break;
-            }
-        }
-
-        spawn.target = &effect_request->targets[i];
-        spawn.priority = effect_request->targets[i].type;
-        child = VS::Effects::LiveCreateSecondaryEffectInstance(&spawn);
-        child->context.parameter = renderer_parameters;
-        child->context.effectId = effect_request->effectId;
-
-        if (effect_request->effectId == 54) {
-            child->busyBits = 4;
-        } else {
-            child->busyBits = 2;
-        }
-
-        VS::Effects::LiveSetSecondaryEffectPhase(3, child);
-    }
-
-    return token;
-}
-
-// decomp: BATTLE.PRG func_800CF3F8 (src/BATTLE/BATTLE.PRG/5BF94.c:5532)
-int Effects_BeginSecondaryEffects(Effects_ActionEffectRequest* effect_request, int renderer_parameters)
-{
-    int _[4] __attribute__((unused));
-    VS::Effects::LiveSelectEffectResourceContext(0);
-    VS::Effects::LiveCaptureEffectCamera(&Effects_savedActionCamera);
-    VS::Effects::LiveCaptureEffectCamera(&Effects_effectCamera);
-    return Effects_SpawnSecondaryEffects(effect_request, 0, renderer_parameters);
-}
-
-// decomp: BATTLE.PRG func_800CF458 (src/BATTLE/BATTLE.PRG/5BF94.c:5541)
-int Effects_SpawnSecondaryEffectRequest(Effects_ActionEffectRequest* effect_request, int arg1, int renderer_parameters)
-{
-    return Effects_SpawnSecondaryEffects(effect_request, arg1, renderer_parameters);
-}
-
-// decomp: BATTLE.PRG func_800CF8BC (src/BATTLE/BATTLE.PRG/5BF94.c:5697)
-void Effects_SpawnSourceActorEffect(void)
-{
-    Effects_ActionEffectRequest request;
-
-    request.effectId = 56;
-    request.count = 1;
-    request.source.type = 4;
-    request.source.value.actor.part = 0;
-    request.targets[0].type = 5;
-    setVector(&request.targets[0].value.position, 0, 0, 0);
-    request.otherCount = 0;
-    request.source.value.actor.actor = Effects_actionRequest.source.value.actor.actor;
-    Effects_BeginSecondaryEffects(&request, 0);
-}
-
-// decomp: BATTLE.PRG func_800CF920 (src/BATTLE/BATTLE.PRG/5BF94.c:5712)
-void Effects_ClearActionEffectMode(void) { Effects_actionVariant = 0; }
 
 }  // extern "C"

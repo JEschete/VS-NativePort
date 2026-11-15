@@ -182,4 +182,33 @@ void DestroySecondaryEffectInstance(Effects_EffectInstance& instance,
 // attached; the original searched past the chain's end.
 [[nodiscard]] bool DetachEffectRenderer(RendererChain& renderers,
                                         Effects_RendererSlot& slot);
+
+// An instance's renderers, as a frame updates them.
+class EffectRendererUpdates {
+ public:
+  virtual ~EffectRendererUpdates() = default;
+  [[nodiscard]] virtual Effects_RendererSlot* FirstRenderer(
+      Effects_EffectInstance& instance) = 0;
+  [[nodiscard]] virtual Effects_RendererSlot* NextRenderer(
+      Effects_RendererSlot& slot) = 0;
+  // Sends the slot's renderer RendererCommand::kUpdate; false once it has
+  // finished.
+  [[nodiscard]] virtual bool UpdateRenderer(Effects_RendererSlot& slot) = 0;
+  virtual void DetachRenderer(Effects_EffectInstance& instance,
+                              Effects_RendererSlot& slot) = 0;
+
+ protected:
+  EffectRendererUpdates() = default;
+  EffectRendererUpdates(const EffectRendererUpdates&) = default;
+  EffectRendererUpdates& operator=(const EffectRendererUpdates&) = default;
+  EffectRendererUpdates(EffectRendererUpdates&&) = default;
+  EffectRendererUpdates& operator=(EffectRendererUpdates&&) = default;
+};
+
+// func_800D4910 (5BF94.c:7582), and the renderer pass of func_800CED60
+// (5BF94.c:5321): updates each renderer, newest first, and detaches each one
+// that has finished. The next slot is read before the update, as in the
+// original, so a renderer may detach itself.
+void UpdateEffectRenderers(Effects_EffectInstance& instance,
+                           EffectRendererUpdates& renderers);
 }  // namespace VS::Effects

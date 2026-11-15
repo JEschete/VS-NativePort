@@ -32,6 +32,11 @@ enum Mode : int {
     kUpdateRuntime,
     kBeginAction,
     kClearPrimary,
+    kSpawnSecondary,
+    kBeginSecondary,
+    kSpawnRequest,
+    kSourceActor,
+    kClearMode,
 };
 
 enum Call : int {
@@ -70,6 +75,11 @@ enum Call : int {
     kAllocateToken,
     kCapture,
     kFree,
+    kSecondary,
+    kSecondaryScript,
+    kSource,
+    kSourceEndpoint,
+    kSourceTarget,
 };
 
 constexpr int kNull = -1;
@@ -85,6 +95,12 @@ constexpr int kAllPatterns = 0;
 constexpr int kBattleOwner = 1;
 constexpr int kPurgeOwner = 2;
 constexpr int kSecondaryParticles = 0xFF;
+constexpr int kTargets = 16;
+constexpr std::uint32_t kBusyMask = 0x700U;
+constexpr unsigned kBusyShift = 8;
+// LiveSpawnSourceActorEffect begins its request with parameter 0.
+constexpr int kSourceActorParameter = 0;
+constexpr unsigned kByteShift = 8;
 
 std::array<Effects_EffectInstance, kInstances> instances { { { 0 }, { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 } } };
 std::array<Effects_RendererSlot, kSlots> slots { };
@@ -359,6 +375,54 @@ public:
     }
 };
 
+// The secondary request, token pool and instances a secondary spawn uses.
+class SpawnerHost final : public fx::SecondaryEffectSpawner {
+public:
+    explicit SpawnerHost(Recorded& recorded) : recorded_(recorded) { }
+
+    std::uint8_t token = 0;
+    int stored = 0;
+    std::array<std::uint16_t, kTargets> types { };
+    std::array<int, kTargets> created { };
+    std::array<std::uint32_t, kInstances> busy { };
+    std::array<std::int32_t, kInstances> parameters { };
+    std::array<std::uint16_t, kInstances> effects { };
+    std::array<std::uint16_t, kInstances> phases { };
+
+    bool HasPackage() override { return true; }
+    std::uint8_t AllocateToken() override
+    {
+        recorded_.Add(kAllocateToken);
+        return token;
+    }
+    void StoreRequest() override { ++stored; }
+    std::uint16_t TargetType(std::size_t target) override { return types.at(target); }
+    Effects_EffectInstance* CreateSecondary(const fx::SecondarySpawn& spawn) override
+    {
+        recorded_.Add(kSecondary, static_cast<long long>(spawn.target), spawn.toward_source ? 1 : 0, spawn.priority);
+        recorded_.Add(kSecondaryScript, spawn.script_offset, spawn.token, 1);
+        return InstanceAt(created.at(spawn.target));
+    }
+    void StartSecondary(Effects_EffectInstance& instance, std::int32_t parameter, std::uint16_t effect_id,
+        std::uint8_t busy_bits) override
+    {
+        parameters.at(instance.index) = parameter;
+        effects.at(instance.index) = effect_id;
+        std::uint32_t& word = busy.at(instance.index);
+        word = (word & ~kBusyMask) | ((static_cast<std::uint32_t>(busy_bits) << kBusyShift) & kBusyMask);
+    }
+    void SetPhase(Effects_EffectInstance& instance, fx::SecondaryEffectPhase phase) override
+    {
+        phases.at(instance.index) = static_cast<std::uint16_t>(std::to_underlying(phase));
+    }
+    void SelectPackage(fx::ActivePackage package) override { recorded_.Add(kSelect, std::to_underlying(package)); }
+    void CaptureSavedCamera() override { recorded_.Add(kCapture, 0); }
+    void CaptureEffectCamera() override { recorded_.Add(kCapture, 1); }
+
+private:
+    Recorded& recorded_;
+};
+
 class StartupHost final : public fx::EffectRuntimeStartup {
 public:
     explicit StartupHost(Recorded& recorded) : recorded_(recorded) { }
@@ -550,6 +614,53 @@ bool ClearPrimary()
     recorded.Print();
     return true;
 }
+
+bool Spawn(int mode)
+{
+    Recorded recorded;
+    SpawnerHost spawner(recorded);
+    fx::SecondaryEffectRequest request;
+    std::int32_t parameter = 0;
+    if (!Read(request.effect_id) || !Read(request.target_count) || !Read(parameter) || !Read(spawner.token)
+        || !ReadAll(spawner.types) || !ReadAll(spawner.created) || !ReadAll(spawner.busy)
+        || !ReadAll(spawner.parameters) || !ReadAll(spawner.effects) || !ReadAll(spawner.phases))
+        return false;
+    const std::uint8_t token = mode == kBeginSecondary ? fx::BeginSecondaryEffects(request, parameter, spawner)
+                                                       : fx::SpawnSecondaryEffects(request, parameter, spawner);
+    std::cout << static_cast<int>(token) << ' ' << (spawner.stored == 1 ? 1 : 0);
+    PrintAll(spawner.parameters);
+    PrintAll(spawner.effects);
+    PrintAll(spawner.busy);
+    PrintAll(spawner.phases);
+    recorded.Print();
+    return true;
+}
+
+bool SourceActor()
+{
+    Recorded recorded;
+    std::uint8_t actor = 0;
+    if (!Read(actor))
+        return false;
+    const fx::SourceActorEffect effect = fx::MakeSourceActorEffect(actor);
+    recorded.Add(kSource, effect.effect_id, effect.target_count | (effect.other_count << kByteShift),
+        effect.source_type);
+    recorded.Add(kSourceEndpoint, effect.actor | (effect.part << kByteShift), effect.target_type,
+        kSourceActorParameter);
+    recorded.Add(kSourceTarget, effect.target_x, effect.target_y, effect.target_z);
+    recorded.Print();
+    return true;
+}
+
+bool ClearMode()
+{
+    std::uint8_t variant = 0;
+    if (!Read(variant))
+        return false;
+    fx::ClearActionEffectMode(variant);
+    std::cout << static_cast<int>(variant) << " 0\n";
+    return true;
+}
 } // namespace
 
 int main()
@@ -584,6 +695,17 @@ int main()
             break;
         case kClearPrimary:
             read = ClearPrimary();
+            break;
+        case kSpawnSecondary:
+        case kBeginSecondary:
+        case kSpawnRequest:
+            read = Spawn(mode);
+            break;
+        case kSourceActor:
+            read = SourceActor();
+            break;
+        case kClearMode:
+            read = ClearMode();
             break;
         default:
             return 1;

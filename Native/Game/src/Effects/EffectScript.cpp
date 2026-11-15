@@ -410,4 +410,55 @@ ScriptStep RefreshParticleEnvironment(ScriptEffectHost& host) {
   host.UpdateParticleEnvironment();
   return ScriptStep::kContinue;
 }
+
+// decomp: func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:7527)
+OpcodeStep SpawnChildScript(ScriptCursor& cursor, ScriptEffectHost& host) {
+  const auto script_offset = ReadScriptHalfword(cursor);
+  if (!script_offset) return std::unexpected(ScriptRefusal::kOperand);
+  host.SpawnScript(*script_offset);
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:7546)
+OpcodeStep AttachScriptRenderer(ScriptCursor& cursor,
+                                std::int32_t instance_parameter,
+                                ScriptEffectHost& host) {
+  const auto index = ReadScriptByte(cursor);
+  if (!index) return std::unexpected(ScriptRefusal::kOperand);
+  const auto low = ReadScriptHalfword(cursor);
+  if (!low) return std::unexpected(ScriptRefusal::kOperand);
+  const auto high = ReadScriptHalfword(cursor);
+  if (!high) return std::unexpected(ScriptRefusal::kOperand);
+  if (*index >= kScriptRenderers) {
+    return std::unexpected(ScriptRefusal::kRenderer);
+  }
+  constexpr unsigned kHighHalfwordShift = 16;
+  const std::int32_t parameters =
+      instance_parameter != 0
+          ? instance_parameter
+          : static_cast<std::int32_t>(
+                static_cast<std::uint32_t>(*low) |
+                (static_cast<std::uint32_t>(*high) << kHighHalfwordShift));
+  host.AttachRenderer(*index, parameters);
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
+ScriptStep TickScriptRenderers(ScriptEffectHost& host) {
+  host.UpdateRenderers();
+  return ScriptStep::kContinue;
+}
+
+// decomp: func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:7651)
+OpcodeStep EmitRegisterParticles(ScriptCursor& cursor,
+                                 const ScriptRegisters& registers,
+                                 ScriptEffectHost& host) {
+  const auto index = ReadScriptByte(cursor);
+  if (!index) return std::unexpected(ScriptRefusal::kOperand);
+  if (*index >= registers.size()) {
+    return std::unexpected(ScriptRefusal::kRegister);
+  }
+  host.EmitParticles(registers.at(*index));
+  return ScriptStep::kContinue;
+}
 }  // namespace VS::Effects

@@ -693,6 +693,15 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveUpdateEffectRuntime": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
     "VS::Effects::LiveBeginActionEffect": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
     "VS::Effects::LiveClearPrimaryEffects": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveSpawnSecondaryEffects": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveBeginSecondaryEffects": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveSpawnSecondaryEffectRequest": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveSpawnSourceActorEffect": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveClearActionEffectMode": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveSpawnEffectScript": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveAttachScriptRenderer": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveTickEffectRenderers": r"Native\Game\include\Effects\EffectScriptLive.hpp",
+    "VS::Effects::LiveEmitParticlesFromScriptRegister": r"Native\Game\include\Effects\EffectScriptLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2695,6 +2704,15 @@ OWNED_CALL_BINDINGS["F01431"] = "VS::Effects::LiveStartEffectTrack"
 OWNED_CALL_BINDINGS["F01432"] = "VS::Effects::LiveUpdateEffectRuntime"
 OWNED_CALL_BINDINGS["F01433"] = "VS::Effects::LiveBeginActionEffect"
 OWNED_CALL_BINDINGS["F01434"] = "VS::Effects::LiveClearPrimaryEffects"
+OWNED_CALL_BINDINGS["F01435"] = "VS::Effects::LiveSpawnSecondaryEffects"
+OWNED_CALL_BINDINGS["F01436"] = "VS::Effects::LiveBeginSecondaryEffects"
+OWNED_CALL_BINDINGS["F01437"] = "VS::Effects::LiveSpawnSecondaryEffectRequest"
+OWNED_CALL_BINDINGS["F01449"] = "VS::Effects::LiveSpawnSourceActorEffect"
+OWNED_CALL_BINDINGS["F01450"] = "VS::Effects::LiveClearActionEffectMode"
+OWNED_CALL_BINDINGS["F01519"] = "VS::Effects::LiveSpawnEffectScript"
+OWNED_CALL_BINDINGS["F01522"] = "VS::Effects::LiveAttachScriptRenderer"
+OWNED_CALL_BINDINGS["F01526"] = "VS::Effects::LiveTickEffectRenderers"
+OWNED_CALL_BINDINGS["F01534"] = "VS::Effects::LiveEmitParticlesFromScriptRegister"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4219,6 +4237,15 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800CF060, "VS::Effects::LiveUpdateEffectRuntime"),  # F01432
     ("BATTLE/BATTLE.PRG", 0x800CF0E8, "VS::Effects::LiveBeginActionEffect"),  # F01433
     ("BATTLE/BATTLE.PRG", 0x800CF1A8, "VS::Effects::LiveClearPrimaryEffects"),  # F01434
+    ("BATTLE/BATTLE.PRG", 0x800CF218, "VS::Effects::LiveSpawnSecondaryEffects"),  # F01435
+    ("BATTLE/BATTLE.PRG", 0x800CF3F8, "VS::Effects::LiveBeginSecondaryEffects"),  # F01436
+    ("BATTLE/BATTLE.PRG", 0x800CF458, "VS::Effects::LiveSpawnSecondaryEffectRequest"),  # F01437
+    ("BATTLE/BATTLE.PRG", 0x800CF8BC, "VS::Effects::LiveSpawnSourceActorEffect"),  # F01449
+    ("BATTLE/BATTLE.PRG", 0x800CF920, "VS::Effects::LiveClearActionEffectMode"),  # F01450
+    ("BATTLE/BATTLE.PRG", 0x800D4778, "VS::Effects::LiveSpawnEffectScript"),  # F01519
+    ("BATTLE/BATTLE.PRG", 0x800D47F4, "VS::Effects::LiveAttachScriptRenderer"),  # F01522
+    ("BATTLE/BATTLE.PRG", 0x800D4910, "VS::Effects::LiveTickEffectRenderers"),  # F01526
+    ("BATTLE/BATTLE.PRG", 0x800D4BD0, "VS::Effects::LiveEmitParticlesFromScriptRegister"),  # F01534
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567

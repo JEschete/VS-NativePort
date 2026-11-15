@@ -2,6 +2,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/BattleTypes.h"
@@ -182,7 +183,7 @@ void Effects_SpawnBoneTrail(int actor_index, int bone_index, int texture_index, 
     setVector(&request.source.value.position, 0, 0, 0);
     setVector(&request.targets[0].value.position, 0, 0, 0);
     request.otherCount = 0;
-    Effects_BeginSecondaryEffects(&request, (actor_index & 0xFF) | ((bone_index & 0xFF) << 8) | ((texture_index & 0xF) << 0x10)
+    VS::Effects::LiveBeginSecondaryEffects(&request, (actor_index & 0xFF) | ((bone_index & 0xFF) << 8) | ((texture_index & 0xF) << 0x10)
                                 | ((color_index & 0xF) << 0x14) | 0xFF000000);
 }
 

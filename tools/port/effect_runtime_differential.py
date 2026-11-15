@@ -1,4 +1,5 @@
-"""Shared harness for the effect runtime differentials (BATTLE.PRG 5BF94.c:5047-5070, 5170-5477, #276).
+"""Shared harness for the effect runtime differentials (BATTLE.PRG 5BF94.c:5047-5070, 5170-5540,
+5697-5714, #276).
 
 Each case runs one original under the R3000 interpreter against the typed VS::Effects core that
 effect_runtime_driver.cpp drives. The runtime's globals stay at their PS1 addresses; instances 0-6,
@@ -16,7 +17,13 @@ the disc queue refuses is not enqueued where the original enqueued the null requ
 the 32-track mask is refused where the original shifted by its low five bits, a slot without a
 renderer is refused, and an ended secondary instance's busy bits are read before it is destroyed
 where the original read them from the freed record (the stub frees nothing). Vectors therefore get a
-disc request, start tracks 0-31 and give every slot a renderer.
+disc request, start tracks 0-31 and give every slot a renderer. A secondary spawn without a package
+is refused before its token, targets past the request's 16 are not spawned and a refused instance is
+skipped, where the original read through the null package, read past the request and wrote through
+the null instance: spawn vectors have a package, at most 16 targets and an instance for each. The
+secondary instance creation is a stub recording its spawn record, and the source actor effect's
+secondary start a stub recording its request; the stack starts as garbage so an unwritten field
+shows.
 """
 
 from __future__ import annotations
@@ -53,7 +60,13 @@ SOURCES = (
     UPDATE_RUNTIME,
     BEGIN_ACTION,
     CLEAR_PRIMARY,
-) = range(8)
+    SPAWN_SECONDARY,
+    BEGIN_SECONDARY,
+    SPAWN_REQUEST,
+    SOURCE_ACTOR,
+    CLEAR_MODE,
+) = range(13)
+SPAWN_MODES = (SPAWN_SECONDARY, BEGIN_SECONDARY, SPAWN_REQUEST)
 
 # Runtime globals.
 BUFFER_INDEX = 0x800EC2E4
@@ -64,6 +77,7 @@ STARTED = 0x800F5228
 VARIANT = 0x800F522C
 REQUEST = 0x800F5230
 REQUEST_BYTES = 0xE8
+ACTING_ACTOR = REQUEST + 8
 TOKEN = 0x800F5318
 PHASE = 0x800F531C
 TOKENS = 0x800F5320
@@ -72,6 +86,7 @@ CURVE_SAMPLE = 0x800F5330
 UNUSED = 0x800F53B4
 PRIMARY_HEAD = 0x800F53B8
 CURRENT = 0x800F53BC
+SECONDARY_REQUEST = 0x800F53C0
 LOADED = 0x800F54A8
 VARIANT_ARGUMENT = 0x800F54A9
 SECONDARY_HEAD = 0x800F54B0
@@ -106,7 +121,9 @@ BUSY_WORD = 0x14
 FRAME = 0x16
 TIMELINE = 0xD4C
 RENDERER_HEAD = 0xD50
+EFFECT_ID = 0xD54
 SECONDARY_PHASE = 0xD56
+PARAMETER = 0xD58
 CURVES = 0x8C
 SCRIPT_BLOCK = 0x90
 TRACK_BLOCK = 0xB4
@@ -126,8 +143,11 @@ UPDATE_SECONDARY_ADDRESS = 0x800CED60
 CAN_START = 0x800CEEBC
 SET_PHASE = 0x800CF478
 SET_SECONDARY_PHASE = 0x800CF484
+SPAWN_SECONDARY_ADDRESS = 0x800CF218
+BEGIN_SECONDARY_ADDRESS = 0x800CF3F8
 ALLOCATE_TOKEN = 0x800CF49C
 RELEASE_TOKEN = 0x800CF514
+CREATE_SECONDARY = 0x800CF55C
 DESTROY_SECONDARY = 0x800CF614
 DETACH = 0x800CF70C
 SAMPLE = 0x800D1104
@@ -196,7 +216,12 @@ POLLS = (LOAD_PURGE, LOAD_TEXTURES, LOAD_PLUGINS, LOAD_PACKAGE)
     ALLOCATE_TOKEN_CALL,
     CAPTURE_CALL,
     FREE_CALL,
-) = range(1, 36)
+    SECONDARY_CALL,
+    SECONDARY_SCRIPT_CALL,
+    SOURCE_CALL,
+    SOURCE_ENDPOINT_CALL,
+    SOURCE_TARGET_CALL,
+) = range(1, 41)
 
 NULL = -1
 SLOT_REF = 100
@@ -450,7 +475,56 @@ def vector(rng: random.Random, number: int, mode: int) -> dict:
         instance_chain(rng, value)
         value["timelines"] = [rng.randrange(2) for _ in range(INSTANCE_RECORDS)]
         value["moved"] = rng.choice((NULL, rng.randrange(INSTANCE_RECORDS)))
+    elif mode in SPAWN_MODES:
+        spawn_vector(rng, value)
+    elif mode == SOURCE_ACTOR:
+        value.update(
+            actor=rng.randrange(256),
+            beside=list(rng.randbytes(3)),
+            stack=list(rng.randbytes(SOURCE_FRAME)),
+        )
+    elif mode == CLEAR_MODE:
+        value.update(
+            variant=rng.choice((0, 1, 0xFF, rng.randrange(1, 256))),
+            beside=rng.randrange(256),
+        )
     return value
+
+
+TARGETS = 16
+TARGET_TYPES = 0x10
+TARGET_STRIDE = 0xC
+SOURCE_ENDPOINT = REQUEST_RECORD + 4
+SOURCE_FRAME = 0x100
+# Effects either side of each EmitsTowardSource range, 54's busy bits and the source actor effect.
+EFFECT_IDS = (22, 23, 24, 25, 26, 39, 40, 41, 42, 43, 44, 49, 52, 53, 54, 54, 0x38)
+TOWARD_SOURCE = {23, 25, 40, 41, *range(44, 54)}
+BUSIEST = 54
+
+
+def spawn_vector(rng: random.Random, value: dict) -> None:
+    effect = rng.choice((*EFFECT_IDS, rng.randrange(1 << 16)))
+    count = rng.choice((0, 1, 1, 2, 3, TARGETS, rng.randrange(TARGETS + 1)))
+    request = list(rng.randbytes(REQUEST_BYTES))
+    request[0:2] = effect.to_bytes(2, "little")
+    request[2] = count
+    value.update(
+        request=request,
+        effect=effect,
+        count=count,
+        parameter=s32(rng.randrange(1 << 32)),
+        unused=rng.randrange(1 << 32),
+        token=rng.choice((rng.randrange(256), rng.randrange(1 << 32))),
+        types=[
+            int.from_bytes(request[at : at + 2], "little")
+            for at in range(TARGET_TYPES, TARGET_TYPES + TARGETS * TARGET_STRIDE, TARGET_STRIDE)
+        ],
+        created=[rng.randrange(INSTANCE_RECORDS) for _ in range(TARGETS)],
+        busy=[rng.randrange(1 << 32) for _ in range(INSTANCE_RECORDS)],
+        parameters=[s32(rng.randrange(1 << 32)) for _ in range(INSTANCE_RECORDS)],
+        effects=[rng.randrange(1 << 16) for _ in range(INSTANCE_RECORDS)],
+        phases=[rng.randrange(1 << 16) for _ in range(INSTANCE_RECORDS)],
+    )
 
 
 class Stubs:
@@ -905,6 +979,139 @@ def run_clear_primary(machine: Machine, value: dict, entry: int, stubs: Stubs) -
     return values, names, inputs
 
 
+SPAWN_FIELDS = (
+    (PARAMETER, 4, True, "parameter"),
+    (EFFECT_ID, 2, False, "effect"),
+    (BUSY_WORD, 4, False, "busy word"),
+    (SECONDARY_PHASE, 2, False, "phase"),
+)
+
+
+def spawned(machine: Machine, spawn: int, value: dict) -> tuple:
+    """The two calls recording the spawn record at `spawn` and the instance created for it."""
+    target_at = machine.load(spawn + 8)
+    offset = target_at - (REQUEST_RECORD + TARGET_TYPES)
+    target = (
+        offset // TARGET_STRIDE
+        if 0 <= offset < TARGETS * TARGET_STRIDE and offset % TARGET_STRIDE == 0
+        else OTHER
+    )
+    endpoints = (machine.load(spawn + 4), machine.load(spawn + 0xC))
+    toward = {(target_at, SOURCE_ENDPOINT): 1, (SOURCE_ENDPOINT, target_at): 0}
+    shaped = (
+        machine.load(spawn) == SOURCE_ENDPOINT
+        and machine.load(spawn + 0x14) == BLOCK8
+        and machine.load(spawn + 0x1C) == 0
+    )
+    return (
+        call(SECONDARY_CALL, target, toward.get(endpoints, OTHER), machine.load(spawn + 0x10)),
+        call(
+            SECONDARY_SCRIPT_CALL,
+            s32(machine.load(spawn + 0x18)),
+            machine.load(spawn + 0x20, 1),
+            int(shaped),
+        ),
+        instance(value["created"][target] if target != OTHER else 0),
+    )
+
+
+def run_spawn(machine: Machine, value: dict, entry: int, stubs: Stubs) -> tuple:
+    put_package(machine, value)
+    machine.map_zero(REQUEST_RECORD, 0x100)
+    machine.store(REQUEST_RECORD, bytes(value["request"]))
+    machine.map_zero(INSTANCES, INSTANCE_RECORDS * INSTANCE_STRIDE)
+    for index in range(INSTANCE_RECORDS):
+        for (offset, size, _, _), initial in zip(
+            SPAWN_FIELDS,
+            (value["parameters"], value["effects"], value["busy"], value["phases"]),
+            strict=True,
+        ):
+            machine.put(instance(index) + offset, initial[index], size)
+    stubs.record(ALLOCATE_TOKEN, ALLOCATE_TOKEN_CALL, result=value["token"])
+    stubs.record(SELECT, SELECT_CALL, arguments=((4, s32),))
+    cameras = {SAVED_CAMERA: 0, EFFECT_CAMERA: 1}
+    stubs.record(
+        CAPTURE, CAPTURE_CALL, arguments=((4, lambda word: cameras.get(word, OTHER)),)
+    )
+
+    def create(machine: Machine) -> None:
+        shape, script, created = spawned(machine, machine.r[4], value)
+        stubs.calls += [shape, script]
+        machine.r[2] = created
+
+    machine.stub(CREATE_SECONDARY, create)
+    machine.follow.update((SPAWN_SECONDARY_ADDRESS, SET_SECONDARY_PHASE))
+    machine.r[4] = REQUEST_RECORD
+    if value["mode"] == BEGIN_SECONDARY:
+        machine.r[5] = value["parameter"]
+    else:
+        machine.r[5], machine.r[6] = value["unused"], value["parameter"]
+    machine.execute(entry)
+    values = [
+        s32(machine.r[2]),
+        int(machine.bytes(SECONDARY_REQUEST, REQUEST_BYTES) == bytes(value["request"])),
+    ]
+    names = ["result", "stored"]
+    for offset, size, signed, name in SPAWN_FIELDS:
+        values += [
+            machine.load(instance(index) + offset, size, signed)
+            for index in range(INSTANCE_RECORDS)
+        ]
+        names += [f"instance {index} {name}" for index in range(INSTANCE_RECORDS)]
+    inputs = [
+        value["effect"],
+        value["count"],
+        value["parameter"],
+        value["token"],
+        *value["types"],
+        *value["created"],
+        *value["busy"],
+        *value["parameters"],
+        *value["effects"],
+        *value["phases"],
+    ]
+    return values, names, inputs
+
+
+def run_source_actor(machine: Machine, value: dict, entry: int, stubs: Stubs) -> tuple:
+    # Stack garbage, so a field the original leaves unwritten shows.
+    machine.store(DEFAULT_STACK - SOURCE_FRAME, bytes(value["stack"]))
+    machine.put(ACTING_ACTOR, value["actor"], 1)
+    machine.store(ACTING_ACTOR + 1, bytes(value["beside"]))
+
+    def begin(machine: Machine) -> None:
+        request = machine.r[4]
+        stubs.calls += [
+            call(
+                SOURCE_CALL,
+                machine.load(request, 2),
+                machine.load(request + 2, 1) | machine.load(request + 3, 1) << 8,
+                machine.load(request + 4, 2),
+            ),
+            call(
+                SOURCE_ENDPOINT_CALL,
+                machine.load(request + 8, 1) | machine.load(request + 0xA, 1) << 8,
+                machine.load(request + TARGET_TYPES, 2),
+                s32(machine.r[5]),
+            ),
+            call(
+                SOURCE_TARGET_CALL,
+                *(machine.load(request + at, 2, True) for at in (0x14, 0x16, 0x18)),
+            ),
+        ]
+
+    machine.stub(BEGIN_SECONDARY_ADDRESS, begin)
+    machine.execute(entry)
+    return [], [], [value["actor"]]
+
+
+def run_clear_mode(machine: Machine, value: dict, entry: int, stubs: Stubs) -> tuple:
+    machine.put(VARIANT, value["variant"], 1)
+    machine.put(VARIANT + 1, value["beside"], 1)
+    machine.execute(entry)
+    return [machine.load(VARIANT, 1)], ["variant"], [value["variant"]]
+
+
 RUNNERS = {
     INIT: run_init,
     RESET: run_reset,
@@ -914,6 +1121,9 @@ RUNNERS = {
     UPDATE_RUNTIME: run_update_runtime,
     BEGIN_ACTION: run_begin_action,
     CLEAR_PRIMARY: run_clear_primary,
+    **dict.fromkeys(SPAWN_MODES, run_spawn),
+    SOURCE_ACTOR: run_source_actor,
+    CLEAR_MODE: run_clear_mode,
 }
 
 
@@ -967,6 +1177,19 @@ ALLOWED = {
         span(PHASE),
     ],
     CLEAR_PRIMARY: instance_spans(TIMELINE, 4),
+    **dict.fromkeys(
+        SPAWN_MODES,
+        [
+            span(SECONDARY_REQUEST, REQUEST_BYTES),
+            *(
+                item
+                for offset, size, _, _ in SPAWN_FIELDS
+                for item in instance_spans(offset, size)
+            ),
+        ],
+    ),
+    SOURCE_ACTOR: [],
+    CLEAR_MODE: [span(VARIANT, 1)],
 }
 
 
@@ -1034,6 +1257,21 @@ def describe(image, results) -> list[str]:
             len(walk(value["head"], value["next"])) for value, _, _ in results
         )
         return [f"{cleared} instances cleared over {total} vectors"]
+    if mode in SPAWN_MODES:
+        spawns = sum(
+            sum(1 for item in observation["calls"] if item[0] == SECONDARY_CALL)
+            for _, observation, _ in results
+        )
+        toward = sum(
+            value["count"] for value, _, _ in results if value["effect"] in TOWARD_SOURCE
+        )
+        busiest = sum(
+            value["count"] for value, _, _ in results if value["effect"] == BUSIEST
+        )
+        return [
+            f"{spawns} instances spawned over {total} vectors; "
+            f"{toward} toward the source, {busiest} of effect {BUSIEST}"
+        ]
     return []
 
 

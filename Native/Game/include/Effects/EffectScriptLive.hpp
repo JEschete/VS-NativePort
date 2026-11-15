@@ -89,6 +89,19 @@ int LiveInitializeScriptEffectTransforms(Effects_EffectInstance* instance);
 // func_800D4D44 (5BF94.c:7691).
 int LiveRefreshScriptParticleEnvironment(Effects_EffectInstance* instance);
 
+// The spawn, renderer and particle opcodes. A renderer index past the two
+// script renderers, or a register past the four, ends the instance (2) with a
+// diagnostic; the original read past its tables.
+// func_800D4778 (5BF94.c:7527): the child takes the instance's endpoints,
+// priority and token, which the original left uninitialized.
+int LiveSpawnEffectScript(Effects_EffectInstance* instance);
+// func_800D47F4 (5BF94.c:7546).
+int LiveAttachScriptRenderer(Effects_EffectInstance* instance);
+// func_800D4910 (5BF94.c:7582).
+int LiveTickEffectRenderers(Effects_EffectInstance* instance);
+// func_800D4BD0 (5BF94.c:7651).
+int LiveEmitParticlesFromScriptRegister(Effects_EffectInstance* instance);
+
 // func_800CE644 (5BF94.c:5045): the original's empty diagnostic hook, now a
 // rate-limited warning naming the code.
 void LiveReportEffectDiagnostic(int code);

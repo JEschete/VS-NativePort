@@ -183,6 +183,16 @@ int RecordingRenderer(Slot* slot, unsigned int command, int parameters) {
   return 1;
 }
 
+// Records its commands, keeps renderer state from its start and finishes on
+// its first update.
+int FinishingRenderer(Slot* slot, unsigned int command, int parameters) {
+  RendererCalls().push_back({slot, command, parameters});
+  if (command == std::to_underlying(fx::RendererCommand::kStart)) {
+    slot->rendererState = Memory::AllocateLiveFromHighEnd(16);
+  }
+  return command == std::to_underlying(fx::RendererCommand::kUpdate) ? 0 : 1;
+}
+
 // The game heap, the effect chains and the token pool's first word, restored
 // afterwards.
 class LiveInstances {
@@ -465,6 +475,28 @@ TEST_CASE("Live renderers start on attach and stop newest first at the end",
         std::vector<RendererCall>{
             {first, 1, 11}, {second, 1, 22}, {second, 4, 0}, {first, 4, 0}});
   CHECK(Effects_primaryInstances == nullptr);
+  CHECK(Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Live renderer updates detach each finished renderer, newest first",
+          "[effect-instances][F01526]") {
+  LiveInstances live;
+  Instance* instance = fx::LiveCreatePrimaryEffectInstance(live.Spawn(0));
+  REQUIRE(instance != nullptr);
+  Slot* oldest = fx::LiveAttachEffectRenderer(instance, &RecordingRenderer, 1);
+  Slot* finishing =
+      fx::LiveAttachEffectRenderer(instance, &FinishingRenderer, 2);
+  Slot* newest = fx::LiveAttachEffectRenderer(instance, &RecordingRenderer, 3);
+  REQUIRE((oldest != nullptr && finishing != nullptr && newest != nullptr));
+  RendererCalls().clear();
+  fx::LiveUpdateEffectRenderers(instance);
+  CHECK(RendererCalls() == std::vector<RendererCall>{{newest, 2, 0},
+                                                     {finishing, 2, 0},
+                                                     {oldest, 2, 0}});
+  CHECK((instance->context.renderer == newest && newest->next == oldest &&
+         oldest->next == nullptr));
+  fx::LiveUpdateEffectRenderers(nullptr);
+  fx::LiveDestroyPrimaryEffectInstance(instance);
   CHECK(Memory::GameHeap().Empty());
 }
 

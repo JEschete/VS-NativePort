@@ -144,4 +144,17 @@ bool DetachEffectRenderer(RendererChain& renderers,
   renderers.Free(slot);
   return true;
 }
+
+// decomp: BATTLE.PRG func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
+void UpdateEffectRenderers(Effects_EffectInstance& instance,
+                           EffectRendererUpdates& renderers) {
+  Effects_RendererSlot* slot = renderers.FirstRenderer(instance);
+  while (slot != nullptr) {
+    Effects_RendererSlot* next = renderers.NextRenderer(*slot);
+    if (!renderers.UpdateRenderer(*slot)) {
+      renderers.DetachRenderer(instance, *slot);
+    }
+    slot = next;
+  }
+}
 }  // namespace VS::Effects

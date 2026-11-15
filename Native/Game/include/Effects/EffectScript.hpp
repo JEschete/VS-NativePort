@@ -100,17 +100,19 @@ using ActionVariantValues = std::array<std::uint8_t, kActionVariantValues>;
 
 // Why an operand opcode refused: an operand read past the program, a
 // register operand past the four registers, a particle definition past the
-// package's definitions, a colour preset past the seven presets, or a
-// timeline opcode run before the instance has a timeline. The original wrote
-// and read whatever followed, or read through the null timeline; no shipped
-// program reaches one (the effect packages only name registers 0, 1 and 3,
-// and every colour opcode names definitions its package has).
+// package's definitions, a colour preset past the seven presets, a timeline
+// opcode run before the instance has a timeline, or a renderer past the
+// script's renderers. The original wrote and read whatever followed, or read
+// through the null timeline; no shipped program reaches one (the effect
+// packages only name registers 0, 1 and 3, and every colour opcode names
+// definitions its package has).
 enum class ScriptRefusal : std::uint8_t {
   kOperand,
   kRegister,
   kDefinition,
   kColorPreset,
   kTimeline,
+  kRenderer,
 };
 
 using OpcodeStep = std::expected<ScriptStep, ScriptRefusal>;
@@ -240,7 +242,7 @@ struct ScriptDiagnosticStep {
 // dispatcher's jalr target), a yield result.
 [[nodiscard]] ScriptDiagnosticStep ReportInvalidInstruction();
 
-// The effect runtime the timeline, transform and particle-environment
+// The effect runtime the timeline, transform, particle, renderer and spawn
 // opcodes run for their instance.
 class ScriptEffectHost {
  public:
@@ -266,6 +268,18 @@ class ScriptEffectHost {
   // func_800D78F0 (6F014.c:477): applies the package's particle gravity and
   // drag.
   virtual void UpdateParticleEnvironment() = 0;
+  // func_800CE83C (5BF94.c:5114): starts a primary instance running the
+  // instance's script from `script_offset`, with the instance's source.
+  virtual void SpawnScript(std::uint16_t script_offset) = 0;
+  // func_800CF694 (5BF94.c:5636): attaches the script renderer `index`
+  // (below kScriptRenderers), started with `parameters`.
+  virtual void AttachRenderer(std::uint8_t index, std::int32_t parameters) = 0;
+  // UpdateEffectRenderers (EffectInstances.hpp) over the instance's
+  // renderers.
+  virtual void UpdateRenderers() = 0;
+  // func_800D2ADC (5BF94.c:6935): emits the particles of `event` without a
+  // transparency override, variant or parent.
+  virtual void EmitParticles(std::uint8_t event) = 0;
 };
 
 // Where func_800D48A4 moves the script: E000.P, the only package whose
@@ -319,4 +333,32 @@ struct TimelineRemap {
 // func_800D4D44 (5BF94.c:7691): applies the package's particle gravity and
 // drag.
 [[nodiscard]] ScriptStep RefreshParticleEnvironment(ScriptEffectHost& host);
+
+// func_800D4778 (5BF94.c:7527): reads a script offset and starts a primary
+// instance running the instance's script from it. No shipped program uses the
+// opcode.
+[[nodiscard]] OpcodeStep SpawnChildScript(ScriptCursor& cursor,
+                                          ScriptEffectHost& host);
+
+// The renderers func_800D47F4 attaches (Effects_scriptRenderers).
+inline constexpr std::size_t kScriptRenderers = 2;
+
+// func_800D47F4 (5BF94.c:7546): reads a renderer index and the low and high
+// halfwords of its parameters, then attaches the renderer with them, or with
+// the instance's parameter when that is nonzero. A renderer past the
+// kScriptRenderers is refused once its operands are read; the original read
+// past the table.
+[[nodiscard]] OpcodeStep AttachScriptRenderer(ScriptCursor& cursor,
+                                              std::int32_t instance_parameter,
+                                              ScriptEffectHost& host);
+
+// func_800D4910 (5BF94.c:7582): updates the instance's renderers.
+[[nodiscard]] ScriptStep TickScriptRenderers(ScriptEffectHost& host);
+
+// func_800D4BD0 (5BF94.c:7651): reads a register index and emits the
+// particles of the event the register holds, read unsigned as the original
+// did.
+[[nodiscard]] OpcodeStep EmitRegisterParticles(ScriptCursor& cursor,
+                                               const ScriptRegisters& registers,
+                                               ScriptEffectHost& host);
 }  // namespace VS::Effects

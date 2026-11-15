@@ -209,6 +209,21 @@ using Create = Instance* (*)(std::int32_t, EffectInstanceChain&);
   LiveInstanceChain chain(first, spawn);
   return create(spawn->priority, chain);
 }
+
+// An instance's renderers, as a frame updates them.
+class LiveRendererUpdates final : public EffectRendererUpdates {
+ public:
+  Slot* FirstRenderer(Instance& instance) override {
+    return instance.context.renderer;
+  }
+  Slot* NextRenderer(Slot& slot) override { return slot.next; }
+  bool UpdateRenderer(Slot& slot) override {
+    return LiveUpdateEffectRenderer(slot);
+  }
+  void DetachRenderer(Instance& instance, Slot& slot) override {
+    LiveDetachEffectRenderer(&instance, &slot);
+  }
+};
 }  // namespace
 
 void LiveInitEffectInstance(Effects_EffectSpawnRequest* spawn_request,
@@ -283,5 +298,23 @@ void LiveDetachEffectRenderer(Effects_EffectInstance* instance,
   if (!DetachEffectRenderer(renderers, *slot)) {
     Refuse("detach renderer", "a slot the instance does not hold");
   }
+}
+
+bool LiveUpdateEffectRenderer(Effects_RendererSlot& slot) {
+  if (slot.renderer == nullptr) {
+    Refuse("renderer update", "the slot has no renderer; detached");
+    return false;
+  }
+  return slot.renderer(&slot, std::to_underlying(RendererCommand::kUpdate),
+                       0) != 0;
+}
+
+void LiveUpdateEffectRenderers(Effects_EffectInstance* instance) {
+  if (instance == nullptr) {
+    Refuse("update renderers", "no effect instance");
+    return;
+  }
+  LiveRendererUpdates renderers;
+  UpdateEffectRenderers(*instance, renderers);
 }
 }  // namespace VS::Effects

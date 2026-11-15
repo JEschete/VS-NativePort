@@ -273,12 +273,7 @@ class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
   }
   Slot* NextRenderer(Slot& slot) override { return slot.next; }
   bool UpdateRenderer(Slot& slot) override {
-    if (slot.renderer == nullptr) {
-      Refuse("renderer update", "the slot has no renderer; detached");
-      return false;
-    }
-    return slot.renderer(&slot, std::to_underlying(RendererCommand::kUpdate),
-                         0) != 0;
+    return LiveUpdateEffectRenderer(slot);
   }
   void DetachRenderer(Instance& instance, Slot& slot) override {
     LiveDetachEffectRenderer(&instance, &slot);
@@ -290,6 +285,83 @@ class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
     LiveDestroySecondaryEffectInstance(&instance);
   }
 };
+
+// The secondary instances of a request: their endpoints point into the
+// caller's request, which the instances copy as they start.
+class LiveSecondarySpawner final : public SecondaryEffectSpawner {
+ public:
+  explicit LiveSecondarySpawner(Effects_ActionEffectRequest& request)
+      : request_(&request) {}
+
+  bool HasPackage() override {
+    return CurrentPackage("secondary spawn") != nullptr;
+  }
+  std::uint8_t AllocateToken() override {
+    return static_cast<std::uint8_t>(LiveAllocateEffectToken());
+  }
+  void StoreRequest() override { Effects_secondaryRequest = *request_; }
+  std::uint16_t TargetType(std::size_t target) override {
+    return std::span(request_->targets)[target].type;
+  }
+  Instance* CreateSecondary(const SecondarySpawn& spawn) override {
+    Effects_ActionEffectTarget& target =
+        std::span(request_->targets)[spawn.target];
+    Effects_EffectSpawnRequest request{};
+    request.source = &request_->source;
+    request.emitFrom = spawn.toward_source ? &target : &request_->source;
+    request.target = &target;
+    request.emitTo = spawn.toward_source ? &request_->source : &target;
+    request.priority = spawn.priority;
+    request.script = Effects_package->block8Data;
+    request.scriptOffset = spawn.script_offset;
+    request.parent = nullptr;
+    request.token = spawn.token;
+    Instance* instance = LiveCreateSecondaryEffectInstance(&request);
+    if (instance == nullptr) {
+      Refuse("secondary spawn", "no free secondary instance");
+    }
+    return instance;
+  }
+  void StartSecondary(Instance& instance, std::int32_t parameter,
+                      std::uint16_t effect_id,
+                      std::uint8_t busy_bits) override {
+    instance.context.parameter = parameter;
+    instance.context.effectId = static_cast<std::int16_t>(effect_id);
+    instance.busyBits = busy_bits;
+  }
+  void SetPhase(Instance& instance, SecondaryEffectPhase phase) override {
+    LiveSetSecondaryEffectPhase(std::to_underlying(phase), &instance);
+  }
+  void SelectPackage(ActivePackage package) override {
+    LiveSelectEffectResourceContext(std::to_underlying(package));
+  }
+  void CaptureSavedCamera() override {
+    LiveCaptureEffectCamera(&Effects_savedActionCamera);
+  }
+  void CaptureEffectCamera() override {
+    LiveCaptureEffectCamera(&Effects_effectCamera);
+  }
+
+ private:
+  Effects_ActionEffectRequest* request_;
+};
+
+// The request, or null with a diagnostic; a count past the request's targets
+// is reported and clamped.
+[[nodiscard]] Effects_ActionEffectRequest* CheckedSecondaryRequest(
+    Effects_ActionEffectRequest* request, std::string_view call) {
+  if (request == nullptr) {
+    Refuse(call, "no effect request");
+  } else if (request->count > kActionEffectTargets) {
+    Refuse(call, "more targets than the request holds; the rest are skipped");
+  }
+  return request;
+}
+
+[[nodiscard]] SecondaryEffectRequest SecondaryRequestOf(
+    const Effects_ActionEffectRequest& request) {
+  return {.effect_id = request.effectId, .target_count = request.count};
+}
 
 class LiveStartup final : public EffectRuntimeStartup {
  public:
@@ -382,5 +454,56 @@ int LiveBeginActionEffect(Effects_ActionEffectRequest* request,
 void LiveClearPrimaryEffects() {
   LivePrimary primary;
   ClearPrimaryEffects(primary);
+}
+
+int LiveSpawnSecondaryEffects(Effects_ActionEffectRequest* request,
+                              int /*unused*/, int parameter) {
+  if (CheckedSecondaryRequest(request, "secondary spawn") == nullptr) {
+    return 0;
+  }
+  LiveSecondarySpawner spawner(*request);
+  return SpawnSecondaryEffects(SecondaryRequestOf(*request), parameter,
+                               spawner);
+}
+
+int LiveBeginSecondaryEffects(Effects_ActionEffectRequest* request,
+                              int parameter) {
+  if (CheckedSecondaryRequest(request, "secondary effects") == nullptr) {
+    return 0;
+  }
+  LiveSecondarySpawner spawner(*request);
+  return BeginSecondaryEffects(SecondaryRequestOf(*request), parameter,
+                               spawner);
+}
+
+int LiveSpawnSecondaryEffectRequest(Effects_ActionEffectRequest* request,
+                                    int unused, int parameter) {
+  return LiveSpawnSecondaryEffects(request, unused, parameter);
+}
+
+void LiveSpawnSourceActorEffect() {
+  const SourceActorEffect effect =
+      MakeSourceActorEffect(static_cast<std::uint8_t>(
+          Effects_actionRequest.source.value.actor.actor));
+  Effects_ActionEffectRequest request{};
+  request.effectId = effect.effect_id;
+  request.count = effect.target_count;
+  request.otherCount = effect.other_count;
+  request.source.type = effect.source_type;
+  request.source.value.actor.actor = effect.actor;
+  request.source.value.actor.part = effect.part;
+  Effects_ActionEffectTarget& target = std::span{request.targets}.front();
+  target.type = effect.target_type;
+  target.value.position = {.vx = effect.target_x,
+                           .vy = effect.target_y,
+                           .vz = effect.target_z,
+                           .pad = 0};
+  static_cast<void>(LiveBeginSecondaryEffects(&request, 0));
+}
+
+void LiveClearActionEffectMode() {
+  std::uint8_t variant = Effects_actionVariant;
+  ClearActionEffectMode(variant);
+  Effects_actionVariant = variant;
 }
 }  // namespace VS::Effects
