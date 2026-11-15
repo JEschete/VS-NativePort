@@ -15,7 +15,7 @@ import copy_to_native
 REPO = Path(__file__).resolve().parents[2]
 MODULE_POINTERS = REPO / "Native" / "Game" / "src" / "Boot" / "ModulePointers.cpp"
 ENTRY = re.compile(
-    r'^\s*\{"(?P<module>[^"]+)", 0x(?P<address>[0-9A-F]+)u, (?P<size>\d+)u, \(void\*\)&?(?P<name>\w+), '
+    r'^\s*\{"(?P<module>[^"]+)", 0x(?P<address>[0-9A-F]+)u, (?P<size>\d+)u, \(void\*\)&?(?P<name>[\w:]+), '
     r"(?P<native>[^,]+), (?P<source_element>[^,]+), (?P<native_element>[^}]+)\},"
 )
 
@@ -87,6 +87,14 @@ class GeneratedSymbolTableTests(unittest.TestCase):
                 by_module.setdefault(m["module"], []).append(
                     (int(m["address"], 16), int(m["size"]), m["name"], interior))
         return by_module
+
+    def test_namespace_qualified_entries_are_parsed(self):
+        # Promoted functions bind their module address to a qualified Live entry (#397).
+        line = '    {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&VS::Effects::LiveSignalActorEffectAnimation, 0u, 0u, 0u},'
+        m = ENTRY.match(line)
+        self.assertIsNotNone(m)
+        assert m is not None
+        self.assertEqual(m["name"], "VS::Effects::LiveSignalActorEffectAnimation")
 
     def test_interior_extents_end_before_the_next_entry(self):
         blobs = {blob[4] for blob in copy_fixups.MODULE_DATA_BLOBS}
