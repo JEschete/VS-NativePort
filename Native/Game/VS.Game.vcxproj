@@ -1296,6 +1296,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Effects\WeatherPool.cpp" />
+    <ClCompile Include="src\Effects\WeatherPoolLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Ending\ClearResults.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2667,6 +2671,8 @@
     <ClInclude Include="include\Effects\TrailEmitterLive.hpp" />
     <ClInclude Include="include\Effects\Transforms.hpp" />
     <ClInclude Include="include\Effects\TransformsLive.hpp" />
+    <ClInclude Include="include\Effects\WeatherPool.hpp" />
+    <ClInclude Include="include\Effects\WeatherPoolLive.hpp" />
     <ClInclude Include="include\Ending\ClearResultsCore.hpp" />
     <ClInclude Include="include\Ending\Credits\StaffRollCore.hpp" />
     <ClInclude Include="include\Ending\DisplayHost.hpp" />

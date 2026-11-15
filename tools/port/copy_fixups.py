@@ -1624,6 +1624,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveReleaseScriptedEffectTrigger": r"Native\Game\include\Effects\ScriptedEffectTriggersLive.hpp",
     "VS::Effects::LiveScriptedEffectPlaybackState": r"Native\Game\include\Effects\ScriptedEffectTriggersLive.hpp",
     "VS::Effects::LiveIsScriptedEffectTriggerReady": r"Native\Game\include\Effects\ScriptedEffectTriggersLive.hpp",
+    "VS::Effects::LiveAllocateWeatherParticles": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
+    "VS::Effects::LiveInitializeRoomWeather": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
+    "VS::Effects::LiveRoomWeatherState": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
+    "VS::Effects::LiveInitializeFallingWeatherParticles": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
+    "VS::Effects::LiveInitializeScreenWeatherParticles": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
+    "VS::Effects::LiveResetFallingWeatherParticle": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
+    "VS::Effects::LiveRecalculateWeatherVelocity": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2892,6 +2899,13 @@ OWNED_CALL_BINDINGS["F00238"] = "VS::Effects::LiveStartScriptedActorEffect"
 OWNED_CALL_BINDINGS["F00239"] = "VS::Effects::LiveReleaseScriptedEffectTrigger"
 OWNED_CALL_BINDINGS["F00240"] = "VS::Effects::LiveScriptedEffectPlaybackState"
 OWNED_CALL_BINDINGS["F00242"] = "VS::Effects::LiveIsScriptedEffectTriggerReady"
+OWNED_CALL_BINDINGS["F00636"] = "VS::Effects::LiveAllocateWeatherParticles"
+OWNED_CALL_BINDINGS["F00638"] = "VS::Effects::LiveInitializeRoomWeather"
+OWNED_CALL_BINDINGS["F00641"] = "VS::Effects::LiveRoomWeatherState"
+OWNED_CALL_BINDINGS["F00648"] = "VS::Effects::LiveInitializeFallingWeatherParticles"
+OWNED_CALL_BINDINGS["F00649"] = "VS::Effects::LiveInitializeScreenWeatherParticles"
+OWNED_CALL_BINDINGS["F00656"] = "VS::Effects::LiveResetFallingWeatherParticle"
+OWNED_CALL_BINDINGS["F00657"] = "VS::Effects::LiveRecalculateWeatherVelocity"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4657,6 +4671,13 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8007BEC4, "VS::Effects::LiveReleaseScriptedEffectTrigger"),  # F00239
     ("BATTLE/BATTLE.PRG", 0x8007BEE4, "VS::Effects::LiveScriptedEffectPlaybackState"),  # F00240
     ("BATTLE/BATTLE.PRG", 0x8007BF0C, "VS::Effects::LiveIsScriptedEffectTriggerReady"),  # F00242
+    ("BATTLE/BATTLE.PRG", 0x8008E8F8, "VS::Effects::LiveAllocateWeatherParticles"),  # F00636
+    ("BATTLE/BATTLE.PRG", 0x8008EA90, "VS::Effects::LiveInitializeRoomWeather"),  # F00638
+    ("BATTLE/BATTLE.PRG", 0x8008EB04, "VS::Effects::LiveRoomWeatherState"),  # F00641
+    ("BATTLE/BATTLE.PRG", 0x8008F29C, "VS::Effects::LiveInitializeFallingWeatherParticles"),  # F00648
+    ("BATTLE/BATTLE.PRG", 0x8008F30C, "VS::Effects::LiveInitializeScreenWeatherParticles"),  # F00649
+    ("BATTLE/BATTLE.PRG", 0x80090A1C, "VS::Effects::LiveResetFallingWeatherParticle"),  # F00656
+    ("BATTLE/BATTLE.PRG", 0x80090B28, "VS::Effects::LiveRecalculateWeatherVelocity"),  # F00657
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -8471,30 +8492,12 @@ REGEX_FIXES += [
         ("Effects::StartWeaponTrail",
          (('arg0', 'actor_index'), ('arg1', 'bone_index')),
          "F00056 Forwarded to SpawnBoneTrail, whose packed bytes become BoneTrailConfig.actor and .bone."),
-        ("Effects::InitializeRoomWeather",
-         (('arg0', 'suppress_rain'), ('new_var2', 'room_environment'), ('new_var4', 'selected_environment')),
-         "F00638 Only weatherKind==1 is suppressed when arg0 is nonzero; source environment pointers remain distinct bindings including redundant reload."),
-        ("Effects::RoomWeatherState",
-         (('arg0', 'weather_kind_output'), ('arg1', 'intensity_output')),
-         "F00641 Writes roomWeatherKind and weatherIntensity through distinct output pointers."),
-        ("Effects::InitializeFallingWeatherParticles",
-         (('arg0', 'particle_count'), ('arg1', 'weather_kind'), ('var_s1', 'particle_cursor')),
-         "F00648 Count initializes capacity and active count; kind selects weather mode; cursor advances through the particle array."),
-        ("Effects::InitializeScreenWeatherParticles",
-         (('arg0', 'particle_count'), ('arg1', 'weather_kind'), ('var_s1', 'particle_cursor')),
-         "F00649 Count initializes capacity and active count; kind selects weather mode; cursor advances through the particle array."),
         ("Effects::InitializeRisingEmberParticles",
          (('arg0', 'particle_count'), ('arg1', 'weather_kind'), ('var_s1', 'particle_cursor')),
          "F00651 Count initializes capacity and active count; kind selects weather mode; cursor advances through the particle array."),
         ("Effects::ResetRisingEmberParticle",
          (('arg0', 'weather_particle'), ('temp_s0', 'room_environment')),
          "F00652 Mpd environment weatherArea determines XZ ranges; native particle fields set spawn Y and weather-specific state."),
-        ("Effects::ResetFallingWeatherParticle",
-         (('arg0', 'weather_particle'), ('temp_s0', 'room_environment')),
-         "F00656 Mpd environment weatherArea determines XZ ranges; native particle fields set spawn Y and weather-specific state."),
-        ("Effects::RecalculateWeatherVelocity",
-         (('temp_v1', 'elevation_cosine'), ('var_s0', 'horizontal_direction_product'), ('var_v0', 'direction_component_product')),
-         "F00657 Signed intermediate products compute sin/cos heading times magnitude, apply elevation, then vertical sine; +0xFFF before >>12 preserves truncation toward zero."),
         ("Effects::IgnoreRuntimeDiagnostic",
          (('arg0', 'diagnostic_code'),),
          "F01419 Call sites pass 0x14 for pool exhaustion and 0x1E for invalid opcode; original empty diagnostic hook remains empty."),

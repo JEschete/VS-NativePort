@@ -15,6 +15,7 @@
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundSlotsLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/WeatherPoolLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 
@@ -27,7 +28,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Core/BiosRand.h"
-#include "Effects/Weather.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -213,7 +213,7 @@ class LiveActorSoundHost final : public ActorSoundHost {
 
   RoomWeather Weather() override {
     RoomWeather weather;
-    Effects_RoomWeatherState(&weather.kind, &weather.intensity);
+    Effects::LiveRoomWeatherState(&weather.kind, &weather.intensity);
     return weather;
   }
 

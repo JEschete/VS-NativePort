@@ -440,16 +440,7 @@
 ],
 "Native\\Game\\src\\Effects\\Weather.cpp": [
 [
-30,
-[
-"    Field_weatherParticles = VS::Core::Memory::AllocateLiveFromLowEnd(0x800);"
-],
-[
-"    Field_weatherParticles = (Field_WeatherParticle *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x800));"
-]
-],
-[
-124,
+52,
 [
 "            line = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -458,7 +449,7 @@
 ]
 ],
 [
-173,
+101,
 [
 "            splash = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -467,7 +458,7 @@
 ]
 ],
 [
-252,
+180,
 [
 "        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -476,7 +467,7 @@
 ]
 ],
 [
-329,
+257,
 [
 "            prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -485,7 +476,7 @@
 ]
 ],
 [
-388,
+316,
 [
 "            prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -494,7 +485,7 @@
 ]
 ],
 [
-446,
+374,
 [
 "    prim = cursor;"
 ],
@@ -503,7 +494,7 @@
 ]
 ],
 [
-506,
+434,
 [
 "            cursor += sizeof(TILE);"
 ],
@@ -512,7 +503,7 @@
 ]
 ],
 [
-520,
+448,
 [
 "            cursor += sizeof(TILE);"
 ],
@@ -521,7 +512,7 @@
 ]
 ],
 [
-532,
+460,
 [
 "            cursor += sizeof(TILE);"
 ],

@@ -22,18 +22,11 @@
 #define VS_EFFECTS_WEATHER_H_DECLS
 #include "Field/Weather.h"
 
-void Effects_AllocateWeatherParticles(void);
-int Effects_InitializeRoomWeather(int suppress_rain);
-void Effects_RoomWeatherState(int* weather_kind_output, int* intensity_output);
-void Effects_InitializeFallingWeatherParticles(int particle_count, int weather_kind);
-void Effects_InitializeScreenWeatherParticles(int particle_count, int weather_kind);
 void Effects_DrawRainParticles(void);
 void Effects_InitializeRisingEmberParticles(int particle_count, int weather_kind);
 void Effects_ResetRisingEmberParticle(Field_WeatherParticle* weather_particle);
 void Effects_DrawRisingEmberParticles(void);
 void Effects_DrawSnowParticles(void);
 void Effects_DrawScreenWeatherParticles(void);
-void Effects_ResetFallingWeatherParticle(Field_WeatherParticle* weather_particle);
-void Effects_RecalculateWeatherVelocity(void);
 
 #endif // VS_EFFECTS_WEATHER_H_DECLS

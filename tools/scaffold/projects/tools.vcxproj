@@ -920,6 +920,15 @@
     <None Include="..\..\port\differentials\waypoint_patrol_driver.cpp" />
     <None Include="..\..\port\differentials\waypoint_search.py" />
     <None Include="..\..\port\differentials\waypoint_search_driver.cpp" />
+    <None Include="..\..\port\differentials\weather_pool_common.py" />
+    <None Include="..\..\port\differentials\weather_pool_driver.cpp" />
+    <None Include="..\..\port\differentials\weather_pool_f00636.py" />
+    <None Include="..\..\port\differentials\weather_pool_f00638.py" />
+    <None Include="..\..\port\differentials\weather_pool_f00641.py" />
+    <None Include="..\..\port\differentials\weather_pool_f00648.py" />
+    <None Include="..\..\port\differentials\weather_pool_f00649.py" />
+    <None Include="..\..\port\differentials\weather_pool_f00656.py" />
+    <None Include="..\..\port\differentials\weather_pool_f00657.py" />
     <None Include="..\..\port\effect_instances_differential.py" />
     <None Include="..\..\port\effect_runtime_differential.py" />
     <None Include="..\..\port\effect_script_differential.py" />

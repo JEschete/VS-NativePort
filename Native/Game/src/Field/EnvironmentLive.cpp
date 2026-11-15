@@ -8,6 +8,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/WeatherPoolLive.hpp"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -146,20 +147,21 @@ std::uint16_t LiveWeatherHost::RoomAnimationTicks() {
 std::int32_t LiveWeatherHost::Random() { return Core_Random_Rand(); }
 
 void LiveWeatherHost::RecalculateWeatherVelocity() {
-  Escape([] { Effects_RecalculateWeatherVelocity(); });
+  Escape([] { Effects::LiveRecalculateWeatherVelocity(); });
 }
 
 void LiveWeatherHost::InitializeFallingParticles(std::int32_t count,
                                                  std::int32_t kind) {
   Escape([count, kind] {
-    Effects_InitializeFallingWeatherParticles(count, kind);
+    Effects::LiveInitializeFallingWeatherParticles(count, kind);
   });
 }
 
 void LiveWeatherHost::InitializeScreenParticles(std::int32_t count,
                                                 std::int32_t kind) {
-  Escape(
-      [count, kind] { Effects_InitializeScreenWeatherParticles(count, kind); });
+  Escape([count, kind] {
+    Effects::LiveInitializeScreenWeatherParticles(count, kind);
+  });
 }
 
 void LiveWeatherHost::InitializeRisingEmberParticles(std::int32_t count,

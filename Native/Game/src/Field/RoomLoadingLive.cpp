@@ -34,6 +34,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Effects/WeatherPoolLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggers.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -81,7 +82,6 @@ extern "C" {
 #include "Core/Scratch.h"
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
-#include "Effects/Weather.h"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
@@ -601,7 +601,7 @@ class LiveSections : public Host {
     Items::RestoreLiveRoomChestStates();
     Field_InitializeMovingPlatformsEntry();
     Battle::ResetLiveFloatingLabels();
-    Effects_AllocateWeatherParticles();
+    Effects::LiveAllocateWeatherParticles();
     LiveInitializeRoomBackgroundColors();
     LiveUploadRoomPalettes();
     Field_reservedResetByte = 0;
@@ -1200,7 +1200,8 @@ class LiveRoomLoadHost final
   }
 
   void InitializeWeather(bool event_running) override {
-    static_cast<void>(Effects_InitializeRoomWeather(event_running ? 1 : 0));
+    static_cast<void>(
+        Effects::LiveInitializeRoomWeather(event_running ? 1 : 0));
   }
 
   void PrepareCutsceneActors() override { Event::PrepareLiveCutsceneActors(); }
@@ -1209,7 +1210,7 @@ class LiveRoomLoadHost final
   void EnterExploration() override {
     LiveShowPrimaryRoomGeometry();
     Actors::EnableAllLiveActorModels();
-    static_cast<void>(Effects_InitializeRoomWeather(0));
+    static_cast<void>(Effects::LiveInitializeRoomWeather(0));
     LiveRestoreRoomEffectSoundVolume();
     LiveEnterFieldExplorationMode();
     VS::Battle::SetLiveHudHidden(0);

@@ -1,8 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
+#include "Effects/WeatherPoolLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/EnvironmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Weather.h"
@@ -21,77 +20,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-
-// decomp: BATTLE.PRG func_8008E8F8 (src/BATTLE/BATTLE.PRG/146C.c:17445)
-void Effects_AllocateWeatherParticles(void)
-{
-    if (Field_weatherParticles != NULL) {
-        VS::Core::Memory::FreeLiveFromLowEnd(Field_weatherParticles);
-    }
-    Field_weatherParticles = (Field_WeatherParticle *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x800));
-}
-
-// decomp: BATTLE.PRG func_8008EA90 (src/BATTLE/BATTLE.PRG/146C.c:17500)
-int Effects_InitializeRoomWeather(int suppress_rain)
-{
-    Field_MpdEnvironment* room_environment = Field_roomData.environment;
-
-    if (room_environment != 0) {
-        Field_MpdEnvironment* selected_environment = room_environment;
-        room_environment = Field_roomData.environment;
-        if ((suppress_rain == 0) || (selected_environment->weatherKind != 1)) {
-            VS::Field::LiveSetRoomWeather(selected_environment->weatherKind);
-        } else {
-            VS::Field::LiveSetRoomWeather(0);
-        }
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_8008EB04 (src/BATTLE/BATTLE.PRG/146C.c:17525)
-void Effects_RoomWeatherState(int* weather_kind_output, int* intensity_output)
-{
-    *weather_kind_output = Field_roomWeatherKind;
-    *intensity_output = Field_weatherIntensity;
-}
-
-// decomp: BATTLE.PRG func_8008F29C (src/BATTLE/BATTLE.PRG/146C.c:17723)
-void Effects_InitializeFallingWeatherParticles(int particle_count, int weather_kind)
-{
-    int i;
-    Field_WeatherParticle* particle_cursor = Field_weatherParticles;
-    Field_roomWeatherKind = weather_kind;
-    Field_weatherParticleCapacity = particle_count;
-    Field_weatherParticleCount = particle_count;
-
-    for (i = 0; i < particle_count; ++i) {
-        Effects_ResetFallingWeatherParticle(particle_cursor);
-        ++particle_cursor;
-    }
-}
-
-// decomp: BATTLE.PRG func_8008F30C (src/BATTLE/BATTLE.PRG/146C.c:17737)
-void Effects_InitializeScreenWeatherParticles(int particle_count, int weather_kind)
-{
-    Field_WeatherParticle* particle_cursor;
-    int i;
-
-    particle_cursor = Field_weatherParticles;
-    Field_screenWeatherFade = 0;
-    Field_roomWeatherKind = weather_kind;
-    Field_weatherParticleCapacity = particle_count;
-    Field_weatherParticleCount = particle_count;
-
-    for (i = 0; i < particle_count; ++i, ++particle_cursor) {
-        particle_cursor->speed = Core_Random_Rand() & 0x7F;
-        particle_cursor->position.vx = Core_Random_Rand() % 320;
-        particle_cursor->position.vy = Core_Random_Rand() % 240;
-        particle_cursor->position.vz = Core_Random_Rand() % 256;
-        particle_cursor->screenX = -1;
-        particle_cursor->screenY = -1;
-    }
-}
 
 // decomp: BATTLE.PRG func_8008F440 (src/BATTLE/BATTLE.PRG/146C.c:17758)
 void Effects_DrawRainParticles(void)
@@ -142,7 +70,7 @@ void Effects_DrawRainParticles(void)
                     particle->fallShift = 0;
                 }
             } else {
-                Effects_ResetFallingWeatherParticle(particle);
+                VS::Effects::LiveResetFallingWeatherParticle(particle);
             }
             if (particle->position.vy > 0) {
                 if ((particle->fallShift == 0) && (i & 1)) {
@@ -156,10 +84,10 @@ void Effects_DrawRainParticles(void)
                             >> 17;
                         particle->position.vy = projection;
                     } else {
-                        Effects_ResetFallingWeatherParticle(particle);
+                        VS::Effects::LiveResetFallingWeatherParticle(particle);
                     }
                 } else {
-                    Effects_ResetFallingWeatherParticle(particle);
+                    VS::Effects::LiveResetFallingWeatherParticle(particle);
                 }
             }
         } else {
@@ -191,10 +119,10 @@ void Effects_DrawRainParticles(void)
                     particle->swayPhase += State_tickSpeed >> 1;
                 }
                 if (particle->swayPhase >= 8) {
-                    Effects_ResetFallingWeatherParticle(particle);
+                    VS::Effects::LiveResetFallingWeatherParticle(particle);
                 }
             } else {
-                Effects_ResetFallingWeatherParticle(particle);
+                VS::Effects::LiveResetFallingWeatherParticle(particle);
             }
         }
     }
@@ -370,7 +298,7 @@ void Effects_DrawSnowParticles(void)
                     }
                 }
             } else {
-                Effects_ResetFallingWeatherParticle(particle);
+                VS::Effects::LiveResetFallingWeatherParticle(particle);
             }
             if (particle->position.vy > 0) {
                 if ((particle->fallShift == 0) && (i & 1)) {
@@ -382,7 +310,7 @@ void Effects_DrawSnowParticles(void)
                         >> 17;
                     particle->position.vy = projection;
                 } else {
-                    Effects_ResetFallingWeatherParticle(particle);
+                    VS::Effects::LiveResetFallingWeatherParticle(particle);
                 }
             }
         } else {
@@ -403,10 +331,10 @@ void Effects_DrawSnowParticles(void)
                     particle->swayPhase += State_tickSpeed >> 1;
                 }
                 if (particle->swayPhase >= 8) {
-                    Effects_ResetFallingWeatherParticle(particle);
+                    VS::Effects::LiveResetFallingWeatherParticle(particle);
                 }
             } else {
-                Effects_ResetFallingWeatherParticle(particle);
+                VS::Effects::LiveResetFallingWeatherParticle(particle);
             }
         }
     }
@@ -539,65 +467,6 @@ void Effects_DrawScreenWeatherParticles(void)
     }
     ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = cursor;
     _insertTPage(4, getTPage(0, 1, 64, 256));
-}
-
-// decomp: BATTLE.PRG func_80090A1C (src/BATTLE/BATTLE.PRG/146C.c:18200)
-void Effects_ResetFallingWeatherParticle(Field_WeatherParticle* weather_particle)
-{
-    Field_MpdEnvironment* room_environment;
-
-    room_environment = Field_roomData.environment;
-    if (room_environment != NULL) {
-        weather_particle->position.vx =
-            room_environment->weatherArea[0].halves[0] + (Core_Random_Rand() % room_environment->weatherArea[1].halves[0]);
-        weather_particle->position.vz =
-            room_environment->weatherArea[0].halves[1] + (Core_Random_Rand() % room_environment->weatherArea[1].halves[1]);
-    } else {
-        weather_particle->position.vx = Core_Random_Rand() % 4096;
-        weather_particle->position.vz = Core_Random_Rand() % 4096;
-    }
-    weather_particle->position.vy = (Core_Random_Rand() % 512) - 2560;
-    weather_particle->fallShift = 2;
-    weather_particle->opaqueC = 0;
-    weather_particle->swayPhase = 0;
-    weather_particle->speed = Core_Random_Rand() & 0x7F;
-}
-
-// decomp: BATTLE.PRG func_80090B28 (src/BATTLE/BATTLE.PRG/146C.c:18221)
-void Effects_RecalculateWeatherVelocity(void)
-{
-    int elevation_cosine;
-    int horizontal_direction_product;
-    int direction_component_product;
-
-    horizontal_direction_product = VS::Core::Math::Sine(Field_weatherParameters[5]);
-    elevation_cosine = VS::Core::Math::Cosine(Field_weatherParameters[4]);
-    horizontal_direction_product *= Field_weatherParameters[6];
-    if (horizontal_direction_product < 0) {
-        horizontal_direction_product += 0xFFF;
-    }
-    direction_component_product = (horizontal_direction_product >> 0xC) * elevation_cosine;
-    if (direction_component_product < 0) {
-        direction_component_product += 0xFFF;
-    }
-    Field_weatherParameters[0] = (direction_component_product >> 0xC);
-    horizontal_direction_product = VS::Core::Math::Cosine(Field_weatherParameters[5]);
-    elevation_cosine = VS::Core::Math::Cosine(Field_weatherParameters[4]);
-    horizontal_direction_product = -horizontal_direction_product;
-    horizontal_direction_product *= Field_weatherParameters[6];
-    if (horizontal_direction_product < 0) {
-        horizontal_direction_product += 0xFFF;
-    }
-    direction_component_product = (horizontal_direction_product >> 0xC) * elevation_cosine;
-    if (direction_component_product < 0) {
-        direction_component_product += 0xFFF;
-    }
-    Field_weatherParameters[2] = (direction_component_product >> 0xC);
-    direction_component_product = VS::Core::Math::Sine(Field_weatherParameters[4]) * Field_weatherParameters[6];
-    if (direction_component_product < 0) {
-        direction_component_product += 0xFFF;
-    }
-    Field_weatherParameters[1] = (direction_component_product >> 0xC);
 }
 
 }  // extern "C"
