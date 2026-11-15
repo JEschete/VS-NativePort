@@ -29,7 +29,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
-#include "Effects/Weather.h"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/BattleAbilities.h"

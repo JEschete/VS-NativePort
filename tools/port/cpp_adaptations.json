@@ -438,89 +438,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Effects\\Weather.cpp": [
-[
-52,
-[
-"            line = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"            line = (LINE_G2 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-101,
-[
-"            splash = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"            splash = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-180,
-[
-"        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"        prim = (POLY_G4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-257,
-[
-"            prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"            prim = (TILE *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-316,
-[
-"            prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"            prim = (TILE *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-374,
-[
-"    prim = cursor;"
-],
-[
-"    prim = (TILE *)(cursor);"
-]
-],
-[
-434,
-[
-"            cursor += sizeof(TILE);"
-],
-[
-"            cursor = (u_char*)(cursor) + (sizeof(TILE));"
-]
-],
-[
-448,
-[
-"            cursor += sizeof(TILE);"
-],
-[
-"            cursor = (u_char*)(cursor) + (sizeof(TILE));"
-]
-],
-[
-460,
-[
-"            cursor += sizeof(TILE);"
-],
-[
-"            cursor = (u_char*)(cursor) + (sizeof(TILE));"
-]
-]
-],
 "Native\\Game\\src\\Menu\\BattleAbilities.cpp": [
 [
 116,
@@ -865,7 +782,7 @@
 ],
 "Native\\Game\\src\\Menu\\Manual.cpp": [
 [
-277,
+276,
 [
 "            Menu_Manual_helpText = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size);",
 "            Menu_Manual_helpAssets = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size);"
@@ -876,7 +793,7 @@
 ]
 ],
 [
-584,
+583,
 [
 "    area = p->primitiveCursor;"
 ],
@@ -885,7 +802,7 @@
 ]
 ],
 [
-598,
+597,
 [
 "        Menu_Manual_DrawIllustration(&spriteData[spriteData[i + 1]]);"
 ],
@@ -894,7 +811,7 @@
 ]
 ],
 [
-610,
+609,
 [
 "    area = q->primitiveCursor;"
 ],
@@ -903,7 +820,7 @@
 ]
 ],
 [
-687,
+686,
 [
 "            sprite = Render_frameScratch.primitiveCursor;"
 ],
@@ -912,7 +829,7 @@
 ]
 ],
 [
-722,
+721,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -921,7 +838,7 @@
 ]
 ],
 [
-758,
+757,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -930,7 +847,7 @@
 ]
 ],
 [
-784,
+783,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
@@ -939,7 +856,7 @@
 ]
 ],
 [
-811,
+810,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -948,7 +865,7 @@
 ]
 ],
 [
-838,
+837,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
@@ -957,7 +874,7 @@
 ]
 ],
 [
-898,
+897,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -2097,7 +2014,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-168,
+167,
 [
 "    menuText = menuItem->text;"
 ],
@@ -2106,7 +2023,7 @@
 ]
 ],
 [
-176,
+175,
 [
 "    before = Render_frameScratch.overlayOrderingTable + 8;"
 ],
@@ -2115,7 +2032,7 @@
 ]
 ],
 [
-224,
+223,
 [
 "    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -2124,7 +2041,7 @@
 ]
 ],
 [
-544,
+543,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
@@ -2133,7 +2050,7 @@
 ]
 ],
 [
-1429,
+1428,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -2142,7 +2059,7 @@
 ]
 ],
 [
-1439,
+1438,
 [
 "        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
 ],
@@ -2151,7 +2068,7 @@
 ]
 ],
 [
-1450,
+1449,
 [
 "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
 ],
@@ -2160,7 +2077,7 @@
 ]
 ],
 [
-1473,
+1472,
 [
 "    polyG4 = scratch[0];"
 ],
@@ -2169,7 +2086,7 @@
 ]
 ],
 [
-1488,
+1487,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -2178,7 +2095,7 @@
 ]
 ],
 [
-1498,
+1497,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -2187,7 +2104,7 @@
 ]
 ],
 [
-1510,
+1509,
 [
 "    POLY_G4* polyG4 = scratch[0];"
 ],
@@ -2196,7 +2113,7 @@
 ]
 ],
 [
-1520,
+1519,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -2205,7 +2122,7 @@
 ]
 ],
 [
-1528,
+1527,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -2214,7 +2131,7 @@
 ]
 ],
 [
-1563,
+1562,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -2223,7 +2140,7 @@
 ]
 ],
 [
-1565,
+1564,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -2232,7 +2149,7 @@
 ]
 ],
 [
-1570,
+1569,
 [
 "        scratch[1] + 0x1C);"
 ],
@@ -2241,7 +2158,7 @@
 ]
 ],
 [
-1580,
+1579,
 [
 "    POLY_G4* poly = scratch[0];"
 ],
@@ -2250,7 +2167,7 @@
 ]
 ],
 [
-1590,
+1589,
 [
 "    AddPrim(scratch[1] + 0x20, poly++);"
 ],
@@ -2259,7 +2176,7 @@
 ]
 ],
 [
-1600,
+1599,
 [
 "    AddPrim(scratch[1] + 32, poly++);"
 ],

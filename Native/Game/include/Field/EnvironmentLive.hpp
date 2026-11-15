@@ -8,13 +8,13 @@
 
 // Live binding for the room weather (Environment.hpp) over the copied weather
 // globals (EnvironmentLiveState.h), the room record, the room clock, the
-// random generator, the weather effects (Effects/Weather.h), the field sound
-// group and the low-end heap. Each entry loads the globals into a
-// RoomWeatherState, runs the typed core and stores them back; the weather
-// effects read and write the globals themselves, so the host stores the state
-// before each and reloads it after. The entries keep the original call shapes
-// (BATTLE.PRG 2842C.c:266-547) for the generated room, script and effect
-// callers and the ambience binding.
+// random generator, the weather effects (WeatherPoolLive.hpp and
+// WeatherRenderLive.hpp), the field sound group and the low-end heap. Each
+// entry loads the globals into a RoomWeatherState, runs the typed core and
+// stores them back; the weather effects read and write the globals
+// themselves, so the host stores the state before each and reloads it after.
+// The entries keep the original call shapes (BATTLE.PRG 2842C.c:266-547) for
+// the generated room, script and effect callers and the ambience binding.
 namespace VS::Field {
 // The weather globals as a typed value, and back. D_800F1DA4 is the
 // original's D_800F1D98[6]: the store writes the intensity scale to both.

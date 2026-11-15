@@ -26,15 +26,6 @@ constexpr std::int16_t kUnprojected = -1;
 constexpr std::int32_t kQ12Shift = 12;
 constexpr std::int32_t kQ12Rounding = 0xFFF;
 
-// The remainder the R3000's DIV leaves in HI: a zero divisor leaves the
-// dividend, and INT32_MIN by -1 leaves 0.
-[[nodiscard]] constexpr std::int32_t R3000Remainder(
-    std::int32_t dividend, std::int32_t divisor) noexcept {
-  if (divisor == 0) return dividend;
-  if (divisor == -1) return 0;
-  return dividend % divisor;
-}
-
 [[nodiscard]] constexpr std::int16_t Half(std::int32_t value) noexcept {
   return Math::WrapSigned16(static_cast<std::uint32_t>(value));
 }
@@ -103,9 +94,9 @@ WeatherParticle ResetFallingWeatherParticle(
     WeatherPoolHost& host, WeatherParticle particle,
     const std::optional<Field::WeatherArea>& area) {
   if (area) {
-    const std::int32_t x = R3000Remainder(host.Random(), area->extent_x);
+    const std::int32_t x = Math::R3000Remainder(host.Random(), area->extent_x);
     particle.x = Half(Math::WrappingAdd(area->origin_x, x));
-    const std::int32_t z = R3000Remainder(host.Random(), area->extent_z);
+    const std::int32_t z = Math::R3000Remainder(host.Random(), area->extent_z);
     particle.z = Half(Math::WrappingAdd(area->origin_z, z));
   } else {
     particle.x = Half(host.Random() % kOpenAreaSpan);

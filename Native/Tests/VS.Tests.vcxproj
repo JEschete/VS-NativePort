@@ -428,6 +428,7 @@
     <ClCompile Include="src\VoiceOutputTests.cpp" />
     <ClCompile Include="src\WeaponModeSliceTests.cpp" />
     <ClCompile Include="src\WeatherPoolTests.cpp" />
+    <ClCompile Include="src\WeatherRenderTests.cpp" />
     <ClCompile Include="src\XaMixTests.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\DiscValidation.cpp" />

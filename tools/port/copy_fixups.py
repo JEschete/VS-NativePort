@@ -1631,6 +1631,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveInitializeScreenWeatherParticles": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
     "VS::Effects::LiveResetFallingWeatherParticle": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
     "VS::Effects::LiveRecalculateWeatherVelocity": r"Native\Game\include\Effects\WeatherPoolLive.hpp",
+    "VS::Effects::LiveDrawRainParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
+    "VS::Effects::LiveInitializeRisingEmberParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
+    "VS::Effects::LiveResetRisingEmberParticle": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
+    "VS::Effects::LiveDrawRisingEmberParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
+    "VS::Effects::LiveDrawSnowParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
+    "VS::Effects::LiveDrawScreenWeatherParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2906,6 +2912,12 @@ OWNED_CALL_BINDINGS["F00648"] = "VS::Effects::LiveInitializeFallingWeatherPartic
 OWNED_CALL_BINDINGS["F00649"] = "VS::Effects::LiveInitializeScreenWeatherParticles"
 OWNED_CALL_BINDINGS["F00656"] = "VS::Effects::LiveResetFallingWeatherParticle"
 OWNED_CALL_BINDINGS["F00657"] = "VS::Effects::LiveRecalculateWeatherVelocity"
+OWNED_CALL_BINDINGS["F00650"] = "VS::Effects::LiveDrawRainParticles"
+OWNED_CALL_BINDINGS["F00651"] = "VS::Effects::LiveInitializeRisingEmberParticles"
+OWNED_CALL_BINDINGS["F00652"] = "VS::Effects::LiveResetRisingEmberParticle"
+OWNED_CALL_BINDINGS["F00653"] = "VS::Effects::LiveDrawRisingEmberParticles"
+OWNED_CALL_BINDINGS["F00654"] = "VS::Effects::LiveDrawSnowParticles"
+OWNED_CALL_BINDINGS["F00655"] = "VS::Effects::LiveDrawScreenWeatherParticles"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4678,6 +4690,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8008F30C, "VS::Effects::LiveInitializeScreenWeatherParticles"),  # F00649
     ("BATTLE/BATTLE.PRG", 0x80090A1C, "VS::Effects::LiveResetFallingWeatherParticle"),  # F00656
     ("BATTLE/BATTLE.PRG", 0x80090B28, "VS::Effects::LiveRecalculateWeatherVelocity"),  # F00657
+    ("BATTLE/BATTLE.PRG", 0x8008F440, "VS::Effects::LiveDrawRainParticles"),  # F00650
+    ("BATTLE/BATTLE.PRG", 0x8008F9A4, "VS::Effects::LiveInitializeRisingEmberParticles"),  # F00651
+    ("BATTLE/BATTLE.PRG", 0x8008FA14, "VS::Effects::LiveResetRisingEmberParticle"),  # F00652
+    ("BATTLE/BATTLE.PRG", 0x8008FAC8, "VS::Effects::LiveDrawRisingEmberParticles"),  # F00653
+    ("BATTLE/BATTLE.PRG", 0x8008FDC4, "VS::Effects::LiveDrawSnowParticles"),  # F00654
+    ("BATTLE/BATTLE.PRG", 0x80090434, "VS::Effects::LiveDrawScreenWeatherParticles"),  # F00655
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -8492,12 +8510,6 @@ REGEX_FIXES += [
         ("Effects::StartWeaponTrail",
          (('arg0', 'actor_index'), ('arg1', 'bone_index')),
          "F00056 Forwarded to SpawnBoneTrail, whose packed bytes become BoneTrailConfig.actor and .bone."),
-        ("Effects::InitializeRisingEmberParticles",
-         (('arg0', 'particle_count'), ('arg1', 'weather_kind'), ('var_s1', 'particle_cursor')),
-         "F00651 Count initializes capacity and active count; kind selects weather mode; cursor advances through the particle array."),
-        ("Effects::ResetRisingEmberParticle",
-         (('arg0', 'weather_particle'), ('temp_s0', 'room_environment')),
-         "F00652 Mpd environment weatherArea determines XZ ranges; native particle fields set spawn Y and weather-specific state."),
         ("Effects::IgnoreRuntimeDiagnostic",
          (('arg0', 'diagnostic_code'),),
          "F01419 Call sites pass 0x14 for pool exhaustion and 0x1E for invalid opcode; original empty diagnostic hook remains empty."),

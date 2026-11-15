@@ -85,6 +85,7 @@
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
+#include "Effects/WeatherRenderLive.hpp"
 #include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
@@ -196,7 +197,6 @@ extern "C" {
 #include "Effects/ScreenEffects.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
-#include "Effects/Weather.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Event/Actors.h"
 #include "Event/Camera.h"
@@ -257,7 +257,6 @@ extern "C" {
 #include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLiveState.h"
 #include "Field/TriggerMarkers.h"
-#include "Field/Weather.h"
 #include "Field/Zone.h"
 #include "Input/Controllers.h"
 #include "Input/Vibration.h"
@@ -338,12 +337,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x8008F440u, 0u, (void*)&Effects_DrawRainParticles, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008F9A4u, 0u, (void*)&Effects_InitializeRisingEmberParticles, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008FA14u, 0u, (void*)&Effects_ResetRisingEmberParticle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008FAC8u, 0u, (void*)&Effects_DrawRisingEmberParticles, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008FDC4u, 0u, (void*)&Effects_DrawSnowParticles, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80090434u, 0u, (void*)&Effects_DrawScreenWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80093B68u, 0u, (void*)&Battle_QueueActorValueLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80093E64u, 0u, (void*)&Battle_QueueAbilityTimingResult, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80093F24u, 0u, (void*)&Battle_QueueChainCount, 0u, 0u, 0u},
@@ -2120,6 +2113,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008F30Cu, 0u, (void*)&VS::Effects::LiveInitializeScreenWeatherParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80090A1Cu, 0u, (void*)&VS::Effects::LiveResetFallingWeatherParticle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80090B28u, 0u, (void*)&VS::Effects::LiveRecalculateWeatherVelocity, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008F440u, 0u, (void*)&VS::Effects::LiveDrawRainParticles, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008F9A4u, 0u, (void*)&VS::Effects::LiveInitializeRisingEmberParticles, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008FA14u, 0u, (void*)&VS::Effects::LiveResetRisingEmberParticle, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008FAC8u, 0u, (void*)&VS::Effects::LiveDrawRisingEmberParticles, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8008FDC4u, 0u, (void*)&VS::Effects::LiveDrawSnowParticles, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80090434u, 0u, (void*)&VS::Effects::LiveDrawScreenWeatherParticles, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

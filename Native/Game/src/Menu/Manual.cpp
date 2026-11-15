@@ -15,7 +15,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
-#include "Effects/Weather.h"
 #include "Field/Locations.h"
 #include "Field/Manual.h"
 #include "Input/ControllerLiveState.h"

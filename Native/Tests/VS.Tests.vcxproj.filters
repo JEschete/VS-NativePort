@@ -1071,6 +1071,9 @@
     <ClCompile Include="src\WeatherPoolTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WeatherRenderTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

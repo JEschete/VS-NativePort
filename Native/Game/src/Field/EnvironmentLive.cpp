@@ -9,13 +9,13 @@
 #include "Audio/SfxLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
+#include "Effects/WeatherRenderLive.hpp"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 
 extern "C" {
 #include "Core/BiosRand.h"
-#include "Effects/Weather.h"
 #include "Field/EnvironmentLiveState.h"
 #include "Field/Gimmicks.h"
 
@@ -166,24 +166,25 @@ void LiveWeatherHost::InitializeScreenParticles(std::int32_t count,
 
 void LiveWeatherHost::InitializeRisingEmberParticles(std::int32_t count,
                                                      std::int32_t kind) {
-  Escape(
-      [count, kind] { Effects_InitializeRisingEmberParticles(count, kind); });
+  Escape([count, kind] {
+    Effects::LiveInitializeRisingEmberParticles(count, kind);
+  });
 }
 
 void LiveWeatherHost::DrawRainParticles() {
-  Escape([] { Effects_DrawRainParticles(); });
+  Escape([] { Effects::LiveDrawRainParticles(); });
 }
 
 void LiveWeatherHost::DrawSnowParticles() {
-  Escape([] { Effects_DrawSnowParticles(); });
+  Escape([] { Effects::LiveDrawSnowParticles(); });
 }
 
 void LiveWeatherHost::DrawScreenWeatherParticles() {
-  Escape([] { Effects_DrawScreenWeatherParticles(); });
+  Escape([] { Effects::LiveDrawScreenWeatherParticles(); });
 }
 
 void LiveWeatherHost::DrawRisingEmberParticles() {
-  Escape([] { Effects_DrawRisingEmberParticles(); });
+  Escape([] { Effects::LiveDrawRisingEmberParticles(); });
 }
 
 void LiveWeatherHost::StopSound(std::int32_t sound) {

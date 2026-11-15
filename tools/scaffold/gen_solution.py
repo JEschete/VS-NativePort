@@ -352,6 +352,8 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\ScriptedEffectTriggersLive.cpp",
                 r"src\Effects\ParticlePoolLive.cpp",
                 r"src\Effects\WeatherPoolLive.cpp",
+                r"src\Menu\MapNavigationLive.cpp",
+                r"src\Effects\WeatherRenderLive.cpp",
                 r"src\Effects\ParticleMotionLive.cpp",
                 r"src\Effects\ParticleTextureAnimationLive.cpp",
                 r"src\Effects\BoneTrailLive.cpp",

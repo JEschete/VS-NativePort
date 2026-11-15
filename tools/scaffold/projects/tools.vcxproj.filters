@@ -3759,6 +3759,30 @@
     <None Include="..\..\port\differentials\weather_pool_f00657.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\weather_render_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\weather_render_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\weather_render_f00650.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\weather_render_f00651.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\weather_render_f00652.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\weather_render_f00653.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\weather_render_f00654.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\weather_render_f00655.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\effect_instances_differential.py">
       <Filter>tools\port</Filter>
     </None>

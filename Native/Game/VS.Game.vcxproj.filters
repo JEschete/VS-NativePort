@@ -1728,16 +1728,19 @@
     <ClCompile Include="src\Effects\TransformsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Effects\Weather.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Weather.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\WeatherPool.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
     <ClCompile Include="src\Effects\WeatherPoolLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\WeatherPoolLiveSupport.hpp">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\WeatherRender.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\WeatherRenderLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
     <ClCompile Include="src\Ending\ClearResults.cpp">
@@ -3721,6 +3724,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\WeatherPoolLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\WeatherRender.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\WeatherRenderLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Ending\ClearResultsCore.hpp">

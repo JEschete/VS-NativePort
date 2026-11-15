@@ -117,6 +117,20 @@ struct NormalizedVector {
   return divisor == 0 ? ~0u : dividend / divisor;
 }
 
+// The remainder the R3000 DIV instruction leaves in HI: truncating, with a
+// zero divisor leaving the dividend and INT32_MIN % -1 giving 0. Defined for
+// every input.
+[[nodiscard]] constexpr std::int32_t R3000Remainder(
+    std::int32_t dividend, std::int32_t divisor) noexcept {
+  if (divisor == 0) {
+    return dividend;
+  }
+  if (divisor == -1) {
+    return 0;
+  }
+  return dividend % divisor;
+}
+
 // True when a perspective divide of projection by depth overflows: the
 // projection is at least twice the depth (always for a zero depth).
 [[nodiscard]] constexpr bool PerspectiveDivideOverflows(

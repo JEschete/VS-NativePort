@@ -16,6 +16,18 @@ typedef struct Menu_Manual_BackgroundTransparencies Menu_Manual_BackgroundTransp
 // decomp: src/SLUS_010.40/sfx.h:5
 #define VS_SFX_MENULEAVE 6
 
+// decomp: src/include/insertTPage.h:3
+#define _insertTPage(after, texture_page_mode)                                                              \
+    do {                                                                                        \
+        u_long* ot_ = (u_long*)Render_frameScratch.orderingTable + (after);                    \
+        u_long* p_ = (u_long*)Render_frameScratch.primitiveCursor;                             \
+        p_[1] = 0xE1000200 | ((texture_page_mode) & 0x1FF);                                                 \
+        p_[2] = 0;                                                                             \
+        p_[0] = 0x02000000 | (*ot_ & 0xFFFFFF);                                                \
+        *ot_ = (*ot_ & 0xFF000000) | LegacyGpu_Handle(p_);                                     \
+        Render_frameScratch.primitiveCursor = p_ + 3;                                          \
+    } while (0)
+
 // decomp: src/include/lbaMacros.h:9
 #define mkHfoPair(file) mkCdFile(file##_HF1), mkCdFile(file##_HF0)
 

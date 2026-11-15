@@ -929,6 +929,14 @@
     <None Include="..\..\port\differentials\weather_pool_f00649.py" />
     <None Include="..\..\port\differentials\weather_pool_f00656.py" />
     <None Include="..\..\port\differentials\weather_pool_f00657.py" />
+    <None Include="..\..\port\differentials\weather_render_common.py" />
+    <None Include="..\..\port\differentials\weather_render_driver.cpp" />
+    <None Include="..\..\port\differentials\weather_render_f00650.py" />
+    <None Include="..\..\port\differentials\weather_render_f00651.py" />
+    <None Include="..\..\port\differentials\weather_render_f00652.py" />
+    <None Include="..\..\port\differentials\weather_render_f00653.py" />
+    <None Include="..\..\port\differentials\weather_render_f00654.py" />
+    <None Include="..\..\port\differentials\weather_render_f00655.py" />
     <None Include="..\..\port\effect_instances_differential.py" />
     <None Include="..\..\port\effect_runtime_differential.py" />
     <None Include="..\..\port\effect_script_differential.py" />

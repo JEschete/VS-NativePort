@@ -1289,15 +1289,12 @@
     <ClCompile Include="src\Effects\TransformsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Effects\Weather.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Effects\WeatherPool.cpp" />
     <ClCompile Include="src\Effects\WeatherPoolLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Effects\WeatherRender.cpp" />
+    <ClCompile Include="src\Effects\WeatherRenderLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Ending\ClearResults.cpp">
@@ -2261,7 +2258,7 @@
     <ClInclude Include="src\Effects\TimelineTrackKeys.hpp" />
     <ClInclude Include="src\Effects\Trails.h" />
     <ClInclude Include="src\Effects\Transforms.h" />
-    <ClInclude Include="src\Effects\Weather.h" />
+    <ClInclude Include="src\Effects\WeatherPoolLiveSupport.hpp" />
     <ClInclude Include="src\Ending\ClearResults.h" />
     <ClInclude Include="src\Ending\Credits\EmbeddedArt.h" />
     <ClInclude Include="src\Ending\Credits\StaffRoll.h" />
@@ -2673,6 +2670,8 @@
     <ClInclude Include="include\Effects\TransformsLive.hpp" />
     <ClInclude Include="include\Effects\WeatherPool.hpp" />
     <ClInclude Include="include\Effects\WeatherPoolLive.hpp" />
+    <ClInclude Include="include\Effects\WeatherRender.hpp" />
+    <ClInclude Include="include\Effects\WeatherRenderLive.hpp" />
     <ClInclude Include="include\Ending\ClearResultsCore.hpp" />
     <ClInclude Include="include\Ending\Credits\StaffRollCore.hpp" />
     <ClInclude Include="include\Ending\DisplayHost.hpp" />
