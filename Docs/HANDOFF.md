@@ -44,14 +44,20 @@ retired) and 442 remaining; see the CSV and issue #276 for current status.
   were removed and the T00255 array-bound fixup now matches the source spelling.
   The T00271 merged-layout alias fix is covered by focused tests and is tracked
   in #392. `Copier.copy_types()` now reaches T00527, where current indexes fail
-  to find the ledger's 16-member layout; this is recorded on #391. Broad
+  to find the ledger's 16-member layout. `upstream_layout.py report --ids
+  T00527` classifies it as fork-only; the current pinned source has a 12-byte
+  stub, while the native `AiModelView` remains a 0x5B4 model-record view used
+  by AI code. Deleting its fields or falling back to the stub is unsafe; this
+  source/provenance and type-identity decision is recorded on #391. Broad
   generated DATA/TYPE/FIELD ledger churn was restored, so no full copier or
   promotion-group gate has passed. Preserve the dirty LootInventory packet
   worktree; #377's group gate has not been rerun on the root-normalization fix.
 - The next candidate is the five-function row-39 `ActionEffects.cpp` batch:
   F00058, F00060, F00064, F00068 and F00069. They meet the 4–8 same-file group
   size, but cover distinct behaviors; per-function tests and differentials are
-  still required. No new promotion group has started.
+  still required. Implementation is underway in the isolated
+  `batch-action-effects-f00058-f00069-5c3a6242` worktree; no promotion is
+  integrated yet.
 
 Next steps:
 
