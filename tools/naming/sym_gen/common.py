@@ -30,7 +30,10 @@ LABEL = re.compile(r"\(([^:()]+):(\d+) (\w+)\)$")
 
 
 def canonical_type_key(key: str) -> str:
-    match = re.fullmatch(r"(?P<head>.*\(unnamed at )(?P<path>.*):(?P<line>\d+):(?P<column>\d+)\)", key)
+    match = re.search(
+        r"\(unnamed(?:\s+(?:struct|union|enum))?\s+at (?P<path>.*):(?P<line>\d+):(?P<column>\d+)\)",
+        key,
+    )
     if match is None:
         return key
     path = match["path"].replace("\\", "/")
@@ -41,7 +44,7 @@ def canonical_type_key(key: str) -> str:
             break
     else:
         return key
-    return f"{match['head']}{path}:{match['line']}:{match['column']})"
+    return f"{key[:match.start('path')]}{path}{key[match.end('path'):]}"
 
 
 def ledger_rows(name: str) -> list[dict[str, str]]:

@@ -14,6 +14,9 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
 from common import Gen, canonical_type_key  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "port"))
+from ref_index import Ledgers, ledger_layout_type, norm_key  # noqa: E402
+
 
 class ReviewedConsumerTests(unittest.TestCase):
     root = Path(__file__).resolve().parents[2]
@@ -49,6 +52,102 @@ class ReviewedConsumerTests(unittest.TestCase):
             canonical_type_key(repository_key.replace("rood-reverseWin", "rood-reverse")),
             canonical_type_key(repository_key),
         )
+
+    def test_nested_anonymous_type_keys_ignore_checkout_root(self):
+        repository_type = (
+            r"union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src"
+            r"\MENU\MENU7.PRG\260.c:138:5) *"
+        )
+        worktree_type = (
+            r"union (unnamed union at D:\Dev\NativePort\wt\batch-loot-screen\resources\rood-reverseWin\src"
+            r"\MENU\MENU7.PRG\260.c:138:5) *"
+        )
+
+        self.assertEqual(canonical_type_key(repository_type), canonical_type_key(worktree_type))
+
+    def test_reference_type_keys_ignore_checkout_root(self):
+        repository_key = (
+            r"struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src"
+            r"\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5)"
+        )
+        worktree_key = (
+            r"struct:(unnamed at D:\Dev\NativePort\wt\batch-loot-screen\resources\rood-reverseWin\src"
+            r"\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5)"
+        )
+
+        self.assertEqual(norm_key(repository_key), norm_key(worktree_key))
+        self.assertNotEqual(
+            norm_key(repository_key.replace("rood-reverseWin", "rood-reverse")),
+            norm_key(repository_key),
+        )
+
+    def test_layout_hash_types_use_the_ledger_source_root(self):
+        root = "D:\\Dev\\NativePort\\VS-NativePort\\"
+        ledger_type = (
+            r"union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src"
+            r"\MENU\MENU7.PRG\260.c:138:5) *"
+        )
+        worktree_type = (
+            r"union (unnamed union at D:\Dev\NativePort\wt\batch-loot-screen\resources\rood-reverseWin\src"
+            r"\MENU\MENU7.PRG\260.c:138:5) *"
+        )
+
+        self.assertEqual(
+            ledger_layout_type(worktree_type, {"rood-reversewin": root}),
+            ledger_type,
+        )
+
+    def test_layout_hash_keeps_missing_enum_field_type_null(self):
+        type_record = {
+            "key": "enum:state",
+            "file": "src/MENU/MENU7.PRG/260.c",
+            "line": 565,
+            "size": 4,
+            "fields": [
+                {"name": "init", "value": 0},
+                {"name": "ready", "value": 1},
+                {"name": "unformatted", "value": 2},
+                {"name": "confirmed", "value": 3},
+                {"name": "loadReady", "value": 4},
+                {"name": "loaded", "value": 5},
+            ],
+        }
+        ledgers = Ledgers({"types": {"enum:state": type_record}})
+        layout = ledgers.layout[("enum:state", "src/MENU/MENU7.PRG/260.c", 565)]
+
+        self.assertIn(f"enum:state#{layout}", ledgers.t_by_key)
+
+    def test_ledger_aggregate_type_resolves_split_pinned_member(self):
+        ledgers = Ledgers({"types": {}})
+        members = ledgers.gen.members["T00532"]
+        fields = []
+        for i, member in enumerate(members):
+            if member["id"] == "T00532.038":
+                offset = 416
+            elif member["id"] == "T00532.039":
+                offset = 448
+            elif i < 38:
+                offset = i * 8
+            else:
+                offset = 456 + (i - 40) * 8
+            fields.append({"name": member["name"], "offset": offset, "type": "u_char"})
+
+        nested_type = next(m["type"] for m in ledgers.gen.members["T00815"] if m["id"] == "T00815.001")
+        ledgers._layouts["T00815"] = [
+            (0, 32, "T00815.000", "unsigned int"),
+            (0, 32, "T00815.001", nested_type),
+        ]
+        ledgers._layouts["T00135"] = [
+            (0, 8, "T00135.000", "unsigned int"),
+            (8, 8, "T00135.001", "unsigned int"),
+            (16, 8, "T00135.002", "unsigned int"),
+            (24, 8, "T00135.003", "unsigned int"),
+        ]
+        with patch.object(ledgers.gen, "layout", return_value={"size": 1156, "fields": fields}):
+            self.assertEqual(
+                ledgers.field_by_offset("T00532", 424, 8),
+                "T00532.038>T00815.001>T00135.001",
+            )
 
     def test_layout_matches_member_lists_across_checkout_roots(self):
         repository_key = (

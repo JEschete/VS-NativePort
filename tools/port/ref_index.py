@@ -53,6 +53,9 @@ import decomp_index as dx  # noqa: E402
 REPO = dx.REPO
 LEDGERS = REPO / "Docs" / "ledgers"
 OUT = REPO / "build" / "port" / "refs.json"
+sys.path.insert(0, str(REPO / "tools" / "naming" / "sym_gen"))
+from common import canonical_type_key  # noqa: E402
+
 K = ci.CursorKind
 RESIDENT = ("SLUS_010.40", "BATTLE/BATTLE.PRG")
 # Names the decomp defines only at link time (Makefile --defsym) for byte-matching, mapped to the function they are.
@@ -83,13 +86,42 @@ def spelling_location(loc: ci.SourceLocation) -> tuple[str | None, int, int]:
     return name, line.value, col.value
 
 
-UNNAMED = re.compile(r"\(unnamed at (.+?):(\d+):(\d+)\)")
+UNNAMED = re.compile(
+    r"\(unnamed(?P<kind>\s+(?:struct|union|enum))?\s+at (?P<path>.+?):(?P<line>\d+):(?P<column>\d+)\)"
+)
+ANONYMOUS_LAYOUT = re.compile(
+    r"(?P<head>\(unnamed(?:\s+(?:struct|union|enum))?\s+at )"
+    r"(?P<path>.*?)(?P<tail>:\d+:\d+\))"
+)
+SOURCE_ROOT = re.compile(r"resources[\\/](?P<tree>rood-reverseWin|rood-reverse)[\\/]src[\\/]", re.IGNORECASE)
 
 
 def norm_key(key: str) -> str:
     """Unnamed types are keyed by the include path libclang used ("...\\BATTLE.PRG\\..\\..\\SLUS_010.40\\main.h:166:5"),
-    which differs per translation unit; normalise the path so every TU agrees."""
-    return UNNAMED.sub(lambda m: f"(unnamed at {os.path.normcase(os.path.normpath(m[1]))}:{m[2]}:{m[3]})", key)
+    which differs per translation unit and checkout; normalise it so every TU and worktree agrees."""
+    normalized = UNNAMED.sub(
+        lambda m: f"(unnamed{m['kind'] or ''} at "
+        f"{os.path.normcase(os.path.normpath(m['path']))}:{m['line']}:{m['column']})",
+        key,
+    )
+    return canonical_type_key(normalized)
+
+
+def ledger_layout_type(spelling: str, source_roots: dict[str, str]) -> str:
+    """Use the source root recorded in TYPE_LEDGER for anonymous member types in layout hashes."""
+    def replace(match):
+        path = match["path"]
+        source = SOURCE_ROOT.search(path)
+        if source is None:
+            return match.group(0)
+        root = source_roots.get(source["tree"].lower())
+        if root is None:
+            return match.group(0)
+        separator = "\\" if root.endswith("\\") else "/"
+        suffix = path[source.start():].replace("\\", separator).replace("/", separator)
+        return f"{match['head']}{root}{suffix}{match['tail']}"
+
+    return ANONYMOUS_LAYOUT.sub(replace, spelling)
 
 
 # Modules resident while a module runs, after the module itself: MENUx overlays run with MAINMENU loaded, and
@@ -125,6 +157,16 @@ class Ledgers:
         for r in self.data:
             self.g_by_name[r["name"]].append(r)
         types = read_rows("TYPE_LEDGER.csv")
+        self.source_roots = {}
+        for row in types:
+            source = SOURCE_ROOT.search(row["key"])
+            if source:
+                path_start = row["key"].rfind(" at ", 0, source.start())
+                if path_start >= 0:
+                    self.source_roots.setdefault(
+                        source["tree"].lower(),
+                        row["key"][path_start + len(" at "):source.start()],
+                    )
         self.t_by_key = {norm_key(r["key"]): r["id"] for r in types}
         self.t_alias = {}
         for r in types:
@@ -137,8 +179,13 @@ class Ledgers:
         # layout hash of each indexed declaration, as build_symbol_ledgers.py computes it
         self.layout = {}
         for t in index["types"].values():
-            sig = json.dumps([t.get("size"), [[x.get("name"), x.get("type"), x.get("bits"), x.get("value")]
-                                              for x in t["fields"]]])
+            fields = []
+            for field in t["fields"]:
+                field_type = field.get("type")
+                if field_type is not None:
+                    field_type = ledger_layout_type(field_type, self.source_roots)
+                fields.append([field.get("name"), field_type, field.get("bits"), field.get("value")])
+            sig = json.dumps([t.get("size"), fields])
             self.layout[(norm_key(t["key"]), t["file"], t["line"])] = hashlib.sha1(sig.encode()).hexdigest()[:8]
         # address -> symbol per module, from the splat symbol files (keyed like the catalog's overlay column)
         self.symbols = {}
@@ -236,7 +283,11 @@ class Ledgers:
             for i, (m, f) in enumerate(zip(ms, fs, strict=True)):
                 nxt = next((o for o in offs[i + 1:] if o > offs[i]), lay["size"] * 8)
                 w = int(m["bits"]) if m.get("bits") else max(nxt - offs[i], 0)
-                out.append((offs[i], w, m["id"], f.get("type", "")))
+                typ = f.get("type", "")
+                ledger_type = m.get("type", "")
+                if ledger_type and self.struct_tids(ledger_type):
+                    typ = ledger_type
+                out.append((offs[i], w, m["id"], typ))
             self._layouts[tid] = out
         return self._layouts[tid]
 
