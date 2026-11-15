@@ -2430,6 +2430,33 @@
     <None Include="..\..\port\differentials\effect_diagnostic_hook.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\effect_instances_attach.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_create_primary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_create_secondary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_destroy_primary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_destroy_secondary.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_detach.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_init.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\effect_instances_phase.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\effect_script_branch.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -3245,6 +3272,9 @@
     </None>
     <None Include="..\..\port\differentials\waypoint_search_driver.cpp">
       <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\effect_instances_differential.py">
+      <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\effect_script_differential.py">
       <Filter>tools\port</Filter>

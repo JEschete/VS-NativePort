@@ -675,6 +675,10 @@
     <ClCompile Include="src\Effects\EffectResourcesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Effects\EffectRuntime.cpp" />
+    <ClCompile Include="src\Effects\EffectRuntimeLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\EffectScript.cpp" />
     <ClCompile Include="src\Effects\EffectScriptLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2537,6 +2541,8 @@
     <ClInclude Include="include\Effects\EffectInstancesLive.hpp" />
     <ClInclude Include="include\Effects\EffectResources.hpp" />
     <ClInclude Include="include\Effects\EffectResourcesLive.hpp" />
+    <ClInclude Include="include\Effects\EffectRuntime.hpp" />
+    <ClInclude Include="include\Effects\EffectRuntimeLive.hpp" />
     <ClInclude Include="include\Effects\EffectScript.hpp" />
     <ClInclude Include="include\Effects\EffectScriptLive.hpp" />
     <ClInclude Include="include\Effects\PackageExtents.hpp" />

@@ -3,6 +3,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/HudStateLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/MapLive.hpp"
@@ -217,7 +218,7 @@ void Effects_BeginAshleyStandaloneEffect(int effect_id)
     request.position.vz = 0;
     request.position.vy = 0;
     request.position.vx = 0;
-    Effects_BeginActionEffect(&request, 0, 0);
+    VS::Effects::LiveBeginActionEffect(&request, 0, 0);
     State_tickSpeed = 4;
     VS::Battle::SetLiveHudHidden(1);
     VS::Field::SetLiveMinimapVisible(0);
@@ -263,11 +264,11 @@ void Effects_StartScriptedActorEffect(int effect_id, int target_actor_index)
     }
 
     request.otherCount = count;
-    Effects_BeginActionEffect(&request, 0, 0);
+    VS::Effects::LiveBeginActionEffect(&request, 0, 0);
 }
 
 // decomp: BATTLE.PRG func_8007BEC4 (src/BATTLE/BATTLE.PRG/146C.c:8611)
-void Effects_ReleaseScriptedEffectTrigger(int track_index) { Effects_StartEffectTrack(track_index); }
+void Effects_ReleaseScriptedEffectTrigger(int track_index) { VS::Effects::LiveStartEffectTrack(track_index); }
 
 // decomp: BATTLE.PRG func_8007BEE4 (src/BATTLE/BATTLE.PRG/146C.c:8613)
 int Effects_ScriptedEffectPlaybackState(void) { return VS::Effects::LivePrimaryEffectPhase(); }

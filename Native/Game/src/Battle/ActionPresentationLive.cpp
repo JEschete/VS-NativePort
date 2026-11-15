@@ -24,6 +24,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -287,7 +288,7 @@ class LiveWorld final : public ActionPresentationWorld {
   void Dispatch(const ActionPresentationRequest& request, int mode,
                 std::uint8_t variant) override {
     auto live = LiveRequest(request);
-    Effects_BeginActionEffect(&live, mode, variant);
+    VS::Effects::LiveBeginActionEffect(&live, mode, variant);
   }
   std::uint8_t SourceMaterial(int actor) override {
     return Actor(actor).equippedWeaponCategory;

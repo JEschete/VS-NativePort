@@ -12,6 +12,7 @@
 #include "Content/SystemResourcesLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -87,7 +88,9 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
       std::abort();
     }
   }
-  void InitializeEffectRuntime() override { Effects_InitEffectRuntime(); }
+  void InitializeEffectRuntime() override {
+    VS::Effects::LiveInitEffectRuntime();
+  }
   void InitializeRoomRuntimeState() override {
     VS::Field::LiveInitializeRoomRuntimeState();
   }

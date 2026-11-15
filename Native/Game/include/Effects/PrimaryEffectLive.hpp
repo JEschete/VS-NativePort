@@ -1,6 +1,8 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include "Effects/PrimaryEffect.hpp"
+
 // Live binding for the primary effect state and the effect token pool
 // (PrimaryEffect.hpp) over Runtime.cpp's globals. The entries keep the
 // original signatures for the generated runtime, the battle and event callers
@@ -8,6 +10,11 @@
 // phase the runtime never sets and a token outside the pool are refused with
 // a diagnostic, leaving the state.
 namespace VS::Effects {
+// The primary effect state in Runtime.cpp's globals. The phase is kept as
+// stored, a number the runtime never sets included.
+[[nodiscard]] PrimaryEffectState LivePrimaryEffectState();
+void StoreLivePrimaryEffectState(const PrimaryEffectState& state);
+
 // func_800CEEBC (5BF94.c:5373): 1 when a track can start.
 int LiveCanStartEffectTrack();
 // func_800CEF0C (5BF94.c:5382).

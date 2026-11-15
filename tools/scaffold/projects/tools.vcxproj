@@ -486,6 +486,15 @@
     <None Include="..\..\port\differentials\damage_recovery_driver.cpp" />
     <None Include="..\..\port\differentials\damage_recovery_guard_driver.cpp" />
     <None Include="..\..\port\differentials\effect_diagnostic_hook.py" />
+    <None Include="..\..\port\differentials\effect_instances_attach.py" />
+    <None Include="..\..\port\differentials\effect_instances_create_primary.py" />
+    <None Include="..\..\port\differentials\effect_instances_create_secondary.py" />
+    <None Include="..\..\port\differentials\effect_instances_destroy_primary.py" />
+    <None Include="..\..\port\differentials\effect_instances_destroy_secondary.py" />
+    <None Include="..\..\port\differentials\effect_instances_detach.py" />
+    <None Include="..\..\port\differentials\effect_instances_driver.cpp" />
+    <None Include="..\..\port\differentials\effect_instances_init.py" />
+    <None Include="..\..\port\differentials\effect_instances_phase.py" />
     <None Include="..\..\port\differentials\effect_script_branch.py" />
     <None Include="..\..\port\differentials\effect_script_child_complete.py" />
     <None Include="..\..\port\differentials\effect_script_clear_variant.py" />
@@ -758,6 +767,7 @@
     <None Include="..\..\port\differentials\waypoint_patrol_driver.cpp" />
     <None Include="..\..\port\differentials\waypoint_search.py" />
     <None Include="..\..\port\differentials\waypoint_search_driver.cpp" />
+    <None Include="..\..\port\effect_instances_differential.py" />
     <None Include="..\..\port\effect_script_differential.py" />
     <None Include="..\..\port\effect_script_opcode_differential.py" />
     <None Include="..\..\port\effect_script_particle_differential.py" />

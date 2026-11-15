@@ -16,6 +16,7 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -101,7 +102,7 @@ class LiveWorld final : public ActionSequenceWorld {
   void AdvanceEffectPhase() override { AdvanceLiveActionEffectPhase(); }
   std::uint32_t EffectBusyFlags() override { return Effects_effectBusyFlags; }
   void StartAnimation() override { StartLiveActionAnimation(); }
-  void StartEffectTrack() override { Effects_StartEffectTrack(0); }
+  void StartEffectTrack() override { VS::Effects::LiveStartEffectTrack(0); }
   void ReleaseAttacks() override { ReleaseLiveQueuedActorAttacks(); }
   void FadeTrails() override { BeginLiveActionTrailFade(); }
   int AnimationBusy(int actor) override {

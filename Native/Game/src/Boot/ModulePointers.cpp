@@ -63,6 +63,7 @@
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
 #include "Effects/EffectInstancesLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
@@ -487,14 +488,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CD3E4u, 0u, (void*)&Menu_DrawTextBoxFrame, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CDCBCu, 0u, (void*)&Effects_DrawTrailSegment, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CE174u, 0u, (void*)&Effects_UpdateBoneTrail, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CE64Cu, 0u, (void*)&Effects_InitEffectRuntime, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CE67Cu, 0u, (void*)&Effects_ResetEffectInstances, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CE9B0u, 0u, (void*)&Effects_UpdatePrimaryEffects, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CED60u, 0u, (void*)&Effects_UpdateSecondaryEffects, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CEF74u, 0u, (void*)&Effects_StartEffectTrack, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF060u, 0u, (void*)&Effects_UpdateEffectRuntime, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF0E8u, 0u, (void*)&Effects_BeginActionEffect, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CF1A8u, 0u, (void*)&Effects_ClearPrimaryEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF218u, 0u, (void*)&Effects_SpawnSecondaryEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF3F8u, 0u, (void*)&Effects_BeginSecondaryEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF458u, 0u, (void*)&Effects_SpawnSecondaryEffectRequest, 0u, 0u, 0u},
@@ -2007,6 +2000,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CF614u, 0u, (void*)&VS::Effects::LiveDestroySecondaryEffectInstance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF694u, 0u, (void*)&VS::Effects::LiveAttachEffectRenderer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF70Cu, 0u, (void*)&VS::Effects::LiveDetachEffectRenderer, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CE64Cu, 0u, (void*)&VS::Effects::LiveInitEffectRuntime, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CE67Cu, 0u, (void*)&VS::Effects::LiveResetEffectInstances, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CE9B0u, 0u, (void*)&VS::Effects::LiveUpdatePrimaryEffects, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CED60u, 0u, (void*)&VS::Effects::LiveUpdateSecondaryEffects, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CEF74u, 0u, (void*)&VS::Effects::LiveStartEffectTrack, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF060u, 0u, (void*)&VS::Effects::LiveUpdateEffectRuntime, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF0E8u, 0u, (void*)&VS::Effects::LiveBeginActionEffect, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CF1A8u, 0u, (void*)&VS::Effects::LiveClearPrimaryEffects, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},

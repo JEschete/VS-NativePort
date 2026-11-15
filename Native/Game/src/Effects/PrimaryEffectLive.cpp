@@ -31,11 +31,7 @@ std::uint64_t exhausted_pools = 0;
 }
 
 [[nodiscard]] PrimaryEffectState LiveState() {
-  return {.phase = static_cast<PrimaryEffectPhase>(Effects_primaryPhase),
-          .track_count = Effects_trackCount,
-          .started_tracks = Effects_startedTrackCount,
-          .pending_tracks = Effects_pendingTracks,
-          .loaded = Effects_primaryLoaded != 0};
+  return LivePrimaryEffectState();
 }
 
 [[nodiscard]] std::span<int, kEffectTokenWords> LiveTokenWords() {
@@ -56,6 +52,22 @@ void CommitTokenPool(const EffectTokenPool& pool) {
       [](std::uint32_t word) { return static_cast<int>(word); });
 }
 }  // namespace
+
+PrimaryEffectState LivePrimaryEffectState() {
+  return {.phase = static_cast<PrimaryEffectPhase>(Effects_primaryPhase),
+          .track_count = Effects_trackCount,
+          .started_tracks = Effects_startedTrackCount,
+          .pending_tracks = Effects_pendingTracks,
+          .loaded = Effects_primaryLoaded != 0};
+}
+
+void StoreLivePrimaryEffectState(const PrimaryEffectState& state) {
+  Effects_primaryPhase = std::to_underlying(state.phase);
+  Effects_trackCount = state.track_count;
+  Effects_startedTrackCount = state.started_tracks;
+  Effects_pendingTracks = state.pending_tracks;
+  Effects_primaryLoaded = state.loaded ? char{1} : char{0};
+}
 
 int LiveCanStartEffectTrack() { return CanStartTrack(LiveState()) ? 1 : 0; }
 

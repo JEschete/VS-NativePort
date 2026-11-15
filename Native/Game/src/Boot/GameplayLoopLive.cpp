@@ -28,6 +28,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.h"
@@ -405,7 +406,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return VS::Effects::LiveCanStartEffectTrack() != 0;
   }
   void StartEffectTrack() override {
-    static_cast<void>(Effects_StartEffectTrack(0));
+    static_cast<void>(VS::Effects::LiveStartEffectTrack(0));
   }
   void EndAshleyStandaloneEffect() override {
     Effects_EndAshleyStandaloneEffect();
@@ -496,7 +497,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Battle_UpdateAndDrawFloatingLabels();
   }
   void UpdateEffectRuntime() override {
-    Effects_effectBusyFlags = Effects_UpdateEffectRuntime();
+    Effects_effectBusyFlags = VS::Effects::LiveUpdateEffectRuntime();
   }
   void DrawBattleHud() override { VS::Battle::DrawLiveBattleHud(); }
   void UpdateTextBoxes() override { Menu_UpdateTextBoxes(); }

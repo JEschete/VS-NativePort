@@ -3630,8 +3630,9 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # F02899 left it for the owned Combination.cpp LoadCombinationRecipes (#276 row 49), whose SetupLive.cpp
         # StartRecipeLoad keeps the guard below. F00532 and F00542 left it for the owned RoomLoading.cpp
         # QueueZoneLoad and QueueRoomLoad (#276 row 25c), whose RoomLoadingLive.cpp BeginRead keeps the guard
-        # below.
-        self.assertGreaterEqual(len(guarded), 20)
+        # below. F01425 left it for the owned EffectRuntime.cpp UpdatePrimaryEffects (#276 row 37), which keeps
+        # a refused menu reload request from the queue.
+        self.assertGreaterEqual(len(guarded), 19)
         owned = self.owned_items()
         self.assertEqual(owned["F03526"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03547"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
@@ -3647,7 +3648,12 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         self.assertEqual(owned["F02899"]["path"], r"Native\Game\src\Menu\Setup\Combination.cpp")
         self.assertEqual(owned["F00532"]["path"], r"Native\Game\src\Field\RoomLoading.cpp")
         self.assertEqual(owned["F00542"]["path"], r"Native\Game\src\Field\RoomLoading.cpp")
+        self.assertEqual(owned["F01425"]["path"], r"Native\Game\src\Effects\EffectRuntime.cpp")
         root = Path(__file__).resolve().parents[2]
+        runtime = "".join((root / r"Native\Game\src\Effects\EffectRuntime.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("if(slot!=nullptr){runtime.EnqueueMenuReload(*slot);}", runtime)
+        runtime_tests = (root / r"Native\Tests\src\EffectRuntimeTests.cpp").read_text(encoding="utf-8")
+        self.assertIn('expected.back() = "reload slot none";', runtime_tests)
         background = "".join((root / r"Native\Game\src\Field\Background.cpp").read_text(encoding="utf-8").split())
         self.assertIn("state.texture_read=host.CompleteRefusedRead(section->texture,state.tim_buffer);", background)
         self.assertIn("state.layout_read=host.CompleteRefusedRead(section->layout,state.layout);", background)
@@ -3679,9 +3685,7 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
                 old, new = "".join(old.split()), "".join(new.split())
                 call = re.search(r"VS::Content::EnqueueLive\w*\((.+?),.*?\);", old)
                 self.assertIn(f"if({call.group(1)}!=NULL){{{call.group(0)}}}", new)
-                if fid != "F01425":
-                    self.assertIn(
-                        f"}}else{{{call.group(1)}=VS::Content::CompleteLiveRefusedDiscRequest(", new)
+                self.assertIn(f"}}else{{{call.group(1)}=VS::Content::CompleteLiveRefusedDiscRequest(", new)
         root = Path(__file__).resolve().parents[2]
         sites = 0
         for path in (root / "Native").rglob("*.cpp"):
@@ -3705,7 +3709,8 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # ItemRowsLive.cpp StartItemTextLoad. Row 24 moved Background.cpp's tiled TIM and layout reads into the
         # owned QueueTiledBackgroundLoad, whose BackgroundLive.cpp EnqueueRead runs only for an allocated read.
         # Row 49 moved Combination.cpp's recipe read into SetupLive.cpp StartRecipeLoad. Row 25c moved
-        # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead.
+        # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead. Row 37 moved Runtime.cpp's menu
+        # reload request into the owned EffectRuntime.cpp UpdatePrimaryEffects.
         event_source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(encoding="utf-8")
         event = "".join(re.sub(r"//[^\n]*", "", event_source).split())
         self.assertIn(
@@ -3718,7 +3723,7 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             event,
         )
         sites += 1
-        self.assertGreaterEqual(sites, 15)
+        self.assertGreaterEqual(sites, 14)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)

@@ -178,6 +178,7 @@
     <ClCompile Include="src\EffectParticleTests.cpp" />
     <ClCompile Include="src\EffectResourcesTransformsTests.cpp" />
     <ClCompile Include="src\EffectRingTests.cpp" />
+    <ClCompile Include="src\EffectRuntimeTests.cpp" />
     <ClCompile Include="src\EffectScriptTests.cpp" />
     <ClCompile Include="src\EffectSurfaceTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />

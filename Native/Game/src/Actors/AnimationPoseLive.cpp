@@ -24,6 +24,7 @@
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -518,7 +519,7 @@ class LiveEventHost final : public AnimationEventHost {
     Effects_FadeWeaponTrails(id_, frames);
   }
   void StartEffectTrack(int track) override {
-    static_cast<void>(Effects_StartEffectTrack(track));
+    static_cast<void>(VS::Effects::LiveStartEffectTrack(track));
   }
   void SpawnSourceEffect() override { Effects_SpawnSourceActorEffect(); }
   void ApplyGimmickInteraction(int command) override {

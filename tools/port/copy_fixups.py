@@ -685,6 +685,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveDestroySecondaryEffectInstance": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
     "VS::Effects::LiveAttachEffectRenderer": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
     "VS::Effects::LiveDetachEffectRenderer": r"Native\Game\include\Effects\EffectInstancesLive.hpp",
+    "VS::Effects::LiveInitEffectRuntime": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveResetEffectInstances": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveUpdatePrimaryEffects": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveUpdateSecondaryEffects": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveStartEffectTrack": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveUpdateEffectRuntime": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveBeginActionEffect": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
+    "VS::Effects::LiveClearPrimaryEffects": r"Native\Game\include\Effects\EffectRuntimeLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2679,6 +2687,14 @@ OWNED_CALL_BINDINGS["F01443"] = "VS::Effects::LiveCreateSecondaryEffectInstance"
 OWNED_CALL_BINDINGS["F01444"] = "VS::Effects::LiveDestroySecondaryEffectInstance"
 OWNED_CALL_BINDINGS["F01445"] = "VS::Effects::LiveAttachEffectRenderer"
 OWNED_CALL_BINDINGS["F01446"] = "VS::Effects::LiveDetachEffectRenderer"
+OWNED_CALL_BINDINGS["F01420"] = "VS::Effects::LiveInitEffectRuntime"
+OWNED_CALL_BINDINGS["F01421"] = "VS::Effects::LiveResetEffectInstances"
+OWNED_CALL_BINDINGS["F01425"] = "VS::Effects::LiveUpdatePrimaryEffects"
+OWNED_CALL_BINDINGS["F01426"] = "VS::Effects::LiveUpdateSecondaryEffects"
+OWNED_CALL_BINDINGS["F01431"] = "VS::Effects::LiveStartEffectTrack"
+OWNED_CALL_BINDINGS["F01432"] = "VS::Effects::LiveUpdateEffectRuntime"
+OWNED_CALL_BINDINGS["F01433"] = "VS::Effects::LiveBeginActionEffect"
+OWNED_CALL_BINDINGS["F01434"] = "VS::Effects::LiveClearPrimaryEffects"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4195,6 +4211,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800CF614, "VS::Effects::LiveDestroySecondaryEffectInstance"),  # F01444
     ("BATTLE/BATTLE.PRG", 0x800CF694, "VS::Effects::LiveAttachEffectRenderer"),  # F01445
     ("BATTLE/BATTLE.PRG", 0x800CF70C, "VS::Effects::LiveDetachEffectRenderer"),  # F01446
+    ("BATTLE/BATTLE.PRG", 0x800CE64C, "VS::Effects::LiveInitEffectRuntime"),  # F01420
+    ("BATTLE/BATTLE.PRG", 0x800CE67C, "VS::Effects::LiveResetEffectInstances"),  # F01421
+    ("BATTLE/BATTLE.PRG", 0x800CE9B0, "VS::Effects::LiveUpdatePrimaryEffects"),  # F01425
+    ("BATTLE/BATTLE.PRG", 0x800CED60, "VS::Effects::LiveUpdateSecondaryEffects"),  # F01426
+    ("BATTLE/BATTLE.PRG", 0x800CEF74, "VS::Effects::LiveStartEffectTrack"),  # F01431
+    ("BATTLE/BATTLE.PRG", 0x800CF060, "VS::Effects::LiveUpdateEffectRuntime"),  # F01432
+    ("BATTLE/BATTLE.PRG", 0x800CF0E8, "VS::Effects::LiveBeginActionEffect"),  # F01433
+    ("BATTLE/BATTLE.PRG", 0x800CF1A8, "VS::Effects::LiveClearPrimaryEffects"),  # F01434
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
@@ -6166,14 +6190,6 @@ for _row, _fixup in (
 ):
     FIXES.setdefault(_row, []).append(_fixup)
 
-# The primary effects' menu-overlay reload request reads nothing (size 0, no destination) and case 9 already skips a
-# null request, so a refused one is only kept from the queue (#282).
-FIXES.setdefault("F01425", []).append((
-    "            VS::Content::EnqueueLiveDiscRequest(Effects_menuReloadSlot, NULL);",
-    "            if (Effects_menuReloadSlot != NULL) {\n"
-    "                VS::Content::EnqueueLiveDiscRequest(Effects_menuReloadSlot, NULL);\n"
-    "            }",
-    "main.c:9411 a refused (null) request is not enqueued; case 9 skips it (#282)"))
 
 
 
