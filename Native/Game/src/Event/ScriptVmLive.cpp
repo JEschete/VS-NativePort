@@ -26,6 +26,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
@@ -512,7 +513,7 @@ class LiveVmHost final : public ScriptVmHost {
   }
   void UpdateEventCameraOrigin() override { UpdateEventCameraOriginEntry(); }
   void RestoreEventFieldCamera() override {
-    Event_RestoreEventFieldCamera(-1, -1);
+    RestoreEventFieldCameraEntry(-1, -1);
   }
   void UpdateEventCameraTracks() override { Event_UpdateEventCameraTracks(); }
   void UpdateEventScreenTransforms() override {
@@ -994,7 +995,7 @@ void LiveVmHost::ApplySpecialOperation(SpecialOperation operation,
       State::SetLiveSceneTimerPaused(argument);
       break;
     case SpecialOperation::kStartCameraOrbitReturn:
-      Event_StartEventCameraOrbitReturn(static_cast<char>(argument));
+      StartEventCameraOrbitReturnEntry(static_cast<char>(argument));
       break;
     case SpecialOperation::kSetCameraPitchPreset:
       Field::LiveSetCameraPitchPreset(static_cast<std::int16_t>(argument));

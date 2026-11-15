@@ -121,7 +121,9 @@ void StoreTrack(Event_CameraTrack& record, const EventCameraTrack& track) {
   StoreVector(record.partnerPosition, track.partner_position);
 }
 
-EventCameraTracks LoadTracks(const Event_CameraState& camera) {
+}  // namespace
+
+EventCameraTracks LoadLiveEventCameraTracks(const Event_CameraState& camera) {
   return {.look_at = LoadTrack(camera.lookAt),
           .eye = LoadTrack(camera.eye),
           .origin_actor = camera.originActorId,
@@ -129,47 +131,47 @@ EventCameraTracks LoadTracks(const Event_CameraState& camera) {
           .last_terrain_position = LoadVector(camera.lastTerrainPosition)};
 }
 
-void StoreTracks(Event_CameraState& camera, const EventCameraTracks& tracks) {
+void StoreLiveEventCameraTracks(Event_CameraState& camera,
+                                const EventCameraTracks& tracks) {
   StoreTrack(camera.lookAt, tracks.look_at);
   StoreTrack(camera.eye, tracks.eye);
   StoreVector(camera.lastTerrainPosition, tracks.last_terrain_position);
 }
 
-class LiveEventCameraTrackHost final : public EventCameraTrackHost {
- public:
-  std::int16_t FloorHeight(std::int32_t world_x,
-                           std::int32_t world_z) override {
-    return Field::LiveFloorHeightAt(world_x, world_z);
-  }
+std::int16_t LiveEventCameraTrackHost::FloorHeight(std::int32_t world_x,
+                                                   std::int32_t world_z) {
+  return Field::LiveFloorHeightAt(world_x, world_z);
+}
 
-  std::int32_t Ease(std::uint8_t curve, std::uint8_t frame,
-                    std::uint8_t duration) override {
-    return Event_EvaluateInterpolationCurveEntry(curve, frame, duration);
-  }
+std::int32_t LiveEventCameraTrackHost::Ease(std::uint8_t curve,
+                                            std::uint8_t frame,
+                                            std::uint8_t duration) {
+  return Event_EvaluateInterpolationCurveEntry(curve, frame, duration);
+}
 
-  int ResolveActorReference(std::uint16_t reference) override {
-    return ResolveLiveScriptActorReference(reference);
-  }
+int LiveEventCameraTrackHost::ResolveActorReference(std::uint16_t reference) {
+  return ResolveLiveScriptActorReference(reference);
+}
 
-  std::optional<std::int16_t> ActorFacing(int actor) override {
-    const std::optional<Actors::ActorPlacementView> placement =
-        Actors::LiveActorPlacementView(actor);
-    if (!placement.has_value()) return std::nullopt;
-    return placement->position.w;
-  }
+std::optional<std::int16_t> LiveEventCameraTrackHost::ActorFacing(int actor) {
+  const std::optional<Actors::ActorPlacementView> placement =
+      Actors::LiveActorPlacementView(actor);
+  if (!placement.has_value()) return std::nullopt;
+  return placement->position.w;
+}
 
-  std::optional<Core::Math::Position3> TaggedBonePosition(int actor,
-                                                          int tag) override {
-    SVECTOR position{};
-    if (Actors::LiveActorTaggedBonePosition(actor, tag, &position,
-                                            kBoneEndpoint) < 0) {
-      return std::nullopt;
-    }
-    return Core::Math::Position3{
-        .x = position.vx, .y = position.vy, .z = position.vz};
+std::optional<Core::Math::Position3>
+LiveEventCameraTrackHost::TaggedBonePosition(int actor, int tag) {
+  SVECTOR position{};
+  if (Actors::LiveActorTaggedBonePosition(actor, tag, &position,
+                                          kBoneEndpoint) < 0) {
+    return std::nullopt;
   }
-};
+  return Core::Math::Position3{
+      .x = position.vx, .y = position.vy, .z = position.vz};
+}
 
+namespace {
 // The track update needs the workspace only for the terrain glide's last
 // position, where the original read it.
 void UpdateTrack(Event_CameraTrack& record, std::int32_t tick_speed,
@@ -210,12 +212,12 @@ std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
   if (instruction == nullptr) Refuse(kOperation, "missing instruction");
   Event_CameraState& camera = RequiredCamera(kOperation);
   LiveEventCameraTrackHost host;
-  EventCameraTracks tracks = LoadTracks(camera);
+  EventCameraTracks tracks = LoadLiveEventCameraTracks(camera);
   const ScriptCommand command{instruction,
                               CameraMotionCommandLength(instruction[0])};
   const CameraMotionOutcome outcome =
       CommandCameraMotion(command, tracks, host);
-  StoreTracks(camera, tracks);
+  StoreLiveEventCameraTracks(camera, tracks);
   if (outcome == CameraMotionOutcome::kApplied) {
     const Event_CameraTrack& started =
         (instruction[0] & kCameraMotionEyeTrackBit) != 0 ? camera.eye

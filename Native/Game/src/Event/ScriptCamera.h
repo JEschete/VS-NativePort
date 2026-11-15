@@ -20,13 +20,9 @@ extern u_char Event_kOrbitReturnFirstCommand[4];
 extern u_char Event_kOrbitReturnSecondCommand[3];
 extern char Event_skipNextFieldCameraRestore;
 extern Event_CameraState* Event_camera;
-intptr_t Event_CommandStopCameraMotion(u_char* instruction, short thread_index);
-intptr_t Event_CommandSetCameraFollowing(u_char* instruction, short thread_index);
-intptr_t Event_CommandRestoreFieldCamera(u_char* instruction, short thread_index);
 intptr_t Event_CommandWaitCameraTracks(u_char* instruction, short thread_index);
 intptr_t Event_CommandSetScreenCapture(u_char* instruction, short thread_index);
 void Event_ApplyEventCameraState(void);
-void Event_RestoreEventFieldCamera(short field_facing, int field_distance_mode);
 void Event_UpdateEventCameraTracks(void);
 intptr_t Event_CommandTweenCameraRoll(u_char* instruction, short thread_index);
 void Event_UpdateEventAngleTween(Event_AngleTween* angle_tween);
@@ -38,8 +34,5 @@ intptr_t Event_CommandCameraLensOrShake(u_char* script, short thread_index);
 void Event_UpdateEventLensTween(Event_LensTween* lens_tween);
 int Event_UpdateEventShakeOscillator(Event_ShakeOscillator* shake_oscillator);
 void Event_UpdateEventCameraShake(void);
-void Event_SetEventCameraFollowing(int look_at_follow, int eye_follow);
-void Event_StopEventCameraMotion(void);
-void Event_StartEventCameraOrbitReturn(char orbit_side_selector);
 
 #endif // VS_EVENT_SCRIPTCAMERA_H_DECLS

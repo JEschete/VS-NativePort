@@ -466,6 +466,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Event::ScaleEventCameraTrackDurationEntry": r"Native\Game\include\Event\EventCameraTrackLive.hpp",
     "VS::Event::ScaleEventCameraDurationEntry": r"Native\Game\include\Event\EventCameraTrackLive.hpp",
     "VS::Event::ReadScriptFixedVectorEntry": r"Native\Game\include\Event\EventCameraTrackLive.hpp",
+    "VS::Event::RestoreEventFieldCameraEntry": r"Native\Game\include\Event\EventCameraControlLive.hpp",
+    "VS::Event::SetEventCameraFollowingEntry": r"Native\Game\include\Event\EventCameraControlLive.hpp",
+    "VS::Event::StopEventCameraMotionEntry": r"Native\Game\include\Event\EventCameraControlLive.hpp",
+    "VS::Event::StartEventCameraOrbitReturnEntry": r"Native\Game\include\Event\EventCameraControlLive.hpp",
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
@@ -1664,6 +1668,10 @@ OWNED_CALL_BINDINGS["F01225"] = "VS::Event::EventCameraGroundClearanceEntry"
 OWNED_CALL_BINDINGS["F01239"] = "VS::Event::ScaleEventCameraTrackDurationEntry"
 OWNED_CALL_BINDINGS["F01240"] = "VS::Event::ScaleEventCameraDurationEntry"
 OWNED_CALL_BINDINGS["F01246"] = "VS::Event::ReadScriptFixedVectorEntry"
+OWNED_CALL_BINDINGS["F01220"] = "VS::Event::RestoreEventFieldCameraEntry"
+OWNED_CALL_BINDINGS["F01236"] = "VS::Event::SetEventCameraFollowingEntry"
+OWNED_CALL_BINDINGS["F01237"] = "VS::Event::StopEventCameraMotionEntry"
+OWNED_CALL_BINDINGS["F01238"] = "VS::Event::StartEventCameraOrbitReturnEntry"
 OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
 OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
 OWNED_CALL_BINDINGS["F00853"] = "Field_GimmickPlacementEntry"
@@ -3341,6 +3349,11 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01138", 0x800BA194, "ScriptControlRoomAnimation"),
     # #276 row 35 A35-02 camera track motion opcodes 0xC0-0xDF (Event/EventCameraTrackLive.cpp)
     ("F01221", 0x800BC2E8, "CommandCameraMotion"),
+    # #276 row 35 A35-03 camera stop, follow and field-return opcodes 0xDE, 0xDF and 0xE9
+    # (Event/EventCameraControlLive.cpp)
+    ("F01193", 0x800BB33C, "CommandStopCameraMotion"),
+    ("F01194", 0x800BB35C, "CommandSetCameraFollowing"),
+    ("F01196", 0x800BB3BC, "CommandRestoreFieldCamera"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -3765,6 +3778,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800BE53C, "VS::Event::ScaleEventCameraTrackDurationEntry"),  # F01239
     ("BATTLE/BATTLE.PRG", 0x800BE5A4, "VS::Event::ScaleEventCameraDurationEntry"),  # F01240
     ("BATTLE/BATTLE.PRG", 0x800BE7B8, "VS::Event::ReadScriptFixedVectorEntry"),  # F01246
+    ("BATTLE/BATTLE.PRG", 0x800BC1CC, "VS::Event::RestoreEventFieldCameraEntry"),  # F01220
+    ("BATTLE/BATTLE.PRG", 0x800BE36C, "VS::Event::SetEventCameraFollowingEntry"),  # F01236
+    ("BATTLE/BATTLE.PRG", 0x800BE3A0, "VS::Event::StopEventCameraMotionEntry"),  # F01237
+    ("BATTLE/BATTLE.PRG", 0x800BE3D0, "VS::Event::StartEventCameraOrbitReturnEntry"),  # F01238
     ("SLUS_010.40", 0x80042364, "VS::Boot::ResetToTitleLive"),  # F03423
     ("SLUS_010.40", 0x80042420, "VS::Boot::EnterBattleLive"),  # F03424
     ("SLUS_010.40", 0x800424E4, "VS::Boot::RunEndingAndReturnToTitleLive"),  # F03425
@@ -4951,12 +4968,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "    case 2:\n        return arg0;\n    }\n    return arg0;\n}",
          "#303: 573B8.c:156 has no return after the switch; the PS1 epilogue (func_800BFE50) returns the reference "
          "in v0 unchanged for types 3-15, so the native path returns it instead of an indeterminate value"),
-    ],
-    "F01238": [
-        ("&Event_kOrbitReturnFirstCommand", "Event_kOrbitReturnFirstCommand",
-         "4A0A8.c:4068 consumes the complete four-byte eye-orbit command"),
-        ("&Event_kOrbitReturnSecondCommand", "Event_kOrbitReturnSecondCommand",
-         "4A0A8.c:4069 consumes the complete three-byte look-at tween command"),
     ],
     "F01392": [
         ("VS::Battle::DrawLivePuzzleTimer(&Battle_puzzleTimer);",
@@ -6399,9 +6410,6 @@ REGEX_FIXES += [
         ("Event::CommandSpecialOperation",
          (('sp10', 'diagnostic_message'),),
          "F01187 4A0A8.c:2651-2731 declares sp10[32] and uses it only as sprintf destination for the undefined-special-operation diagnostic. Other switch branches never access it. This names an existing diagnostic staging role without adding output or changing side effects."),
-        ("Event::CommandSetCameraFollowing",
-         (('new_var', 'eye_follow_bit'),),
-         "F01194 4A0A8.c:2767-2772 masks byte1 with2 into new_var, then booleanizes it for the second argument of func_800BE36C. At 4018-4024 that argument becomes eye.follow, while the first becomes lookAt.follow. It is the raw eye-follow bit, not already a bool."),
         ("Event::CommandWaitScriptContext",
          (('temp_a0', 'target_thread_index'),),
          "F01202 4A0A8.c:2827-2835 masks byte1 with3 into temp_a0, then clears that cursor if bit7 is set or returns whether it remains active. This is the operand-selected thread, not the handler calling thread_index parameter, which stays meaningful and unchanged."),
@@ -6420,9 +6428,6 @@ REGEX_FIXES += [
         ("Event::UpdateEventCameraOrigin",
          (('sp10', 'origin_actor_location'),),
          "F01218 4A0A8.c:3101-3115 clears the offset for0x2000, otherwise fills sp10 using func_800A1108(originActor) and multiplies its position components by ONE. F01217 produces the selected origin. sp10 is the placement query, not the resulting fixed-point offset."),
-        ("Event::RestoreEventFieldCamera",
-         (('arg0', 'field_facing'), ('arg1', 'field_distance_mode'), ('sp10', 'field_eye_position'), ('sp20', 'field_look_at'), ('temp_s0', 'eye_travel_distance'), ('temp_v0', 'return_duration_frames')),
-         "F01220 4A0A8.c:3173-3198 passes arg0 and narrowed arg1 into vs_battle_initialiseCameraFromSpherical, producing sp10/sp20 and destination tracks. Original 146C.c:9071-9105 names inputs facing/mode, with modes1/2 selecting distances0x600/0x900. temp_s0 is eye displacement magnitude; temp_v0 sums eye/look-at travel divided by0x28000 and is written into both camera-motion command durations. Override early return/narrowing are preserved."),
         ("Event::CommandTweenCameraRoll",
          (('var_s0', 'roll_tween'),),
          "F01226 4A0A8.c:3601-3645 selects var_s0 from camera roll for0xE2 or captured-screen roll for0xE3, then initializes duration/current/start/delta/easing fields. F01227 advances the same typed state. roll_tween covers either target; missing-default behavior stays untouched."),
@@ -6444,12 +6449,6 @@ REGEX_FIXES += [
         ("Event::UpdateEventShakeOscillator",
          (('arg0', 'shake_oscillator'), ('temp_s1', 'total_phase_angle')),
          "F01234 4A0A8.c:3945-3980 computes temp_s1=arg0->unk4<<12 and uses it in rsin(temp_s1*elapsed/duration), times amplitude and a separate envelope. Setup at3862-3925 writes cycles from the instruction and resets elapsed; update clears duration. total_phase_angle means cycles times one4096-unit turn, not instantaneous frequency/frame count."),
-        ("Event::SetEventCameraFollowing",
-         (('arg0', 'look_at_follow'), ('arg1', 'eye_follow')),
-         "F01236 4A0A8.c:4018-4024 assigns arg0 to lookAt.follow, arg1 to eye.follow, and clears both following latches. F01194 independently decodes instruction bits0/1 into these arguments; native track update consumes followRequest/isFollowing."),
-        ("Event::StartEventCameraOrbitReturn",
-         (('arg0', 'orbit_side_selector'), ('sp10', 'start_look_at'), ('sp20', 'destination_look_at'), ('sp30', 'start_eye_position'), ('sp40', 'destination_eye_position'), ('temp_s0', 'distance_mode_index'), ('temp_s3', 'saved_facing'), ('new_var', 'preceding_facing')),
-         "F01238 4A0A8.c:4039-4072 reads temp_s3 from flag0xAF and temp_s0 from0xB0; new_var=temp_s3-1. arg0 modifies start facing as(new_var+arg0*2)&7. sp30/sp10 receive start eye/look-at and height adjustment; sp40/sp20 receive final eye/look-at. Producer146C.c:4720-4734 saves facing/512 and distance index0 for0x600, otherwise1; consumer146C.c:9071-9105 uses temp_s0+1 as distance mode. Do not assert selector is restricted to bool."),
         ("Event::EvaluateRoomEventTriggers",
          (('arg0', 'trigger_request'), ('arg1', 'event_or_actor_id'), ('arg2', 'trigger_context'), ('arg3', 'context_kind')),
          "F01261 4A0A8.c:4302-4584 copies arg0 to type, supporting trigger mask plus requests0xFF/0x40; arg1 supplies direct event id for0x40 and first actor comparison in predicate6. arg2 is compared with second actor id when mode0, but dereferenced as tile bytes[0]/[2] when mode1. arg3 selects mode. Original146C.c:5260-5268/native Field_TryTriggerFacingTileEvent pass tile buffer/mode1; GameLoop passes actor number/mode0. Broad names cover both uses and preserve existing pointer/integer compatibility contract, not silently fix it."),

@@ -3186,14 +3186,9 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertIn(old, source)
                 source = source.replace(old, new)
             self.assertEqual(source, f"u_char {name}[{extent}];")
-        source = (
-            "Event_CommandCameraMotionOpcode(&Event_kOrbitReturnFirstCommand, 0);\n"
-            "Event_CommandCameraMotionOpcode(&Event_kOrbitReturnSecondCommand, 0);"
-        )
-        for old, new, _ in copy_fixups.FIXES["F01238"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertNotIn("&Event_kOrbitReturn", source)
+        # #276 row 35 A35-03: the typed orbit return (EventCameraControl.cpp) builds the same commands itself, so
+        # the copy's fix-up that passed the complete objects is gone with it.
+        self.assertNotIn("F01238", copy_fixups.FIXES)
 
     def test_camera_track_motion_is_owned_by_the_typed_track(self):
         # #276 row 35: the typed track (EventCameraTrack.cpp) replaces the copied motion, its start and
@@ -3204,8 +3199,20 @@ class EncounterFixupTests(unittest.TestCase):
         generated = (root / r"Native\Game\src\Event\ScriptCamera.cpp").read_text(encoding="utf-8")
         self.assertNotIn("void Event_CommandCameraMotion(", generated)
         self.assertNotIn("void Event_UpdateEventCameraTrack(", generated)
-        self.assertIn("Event_CommandCameraMotionOpcode(Event_kOrbitReturnFirstCommand, 0);", generated)
         self.assertIn("VS::Event::UpdateEventCameraTrackEntry(&Event_camera->lookAt, &Event_camera->eye);", generated)
+
+    def test_camera_follow_stop_and_field_returns_are_owned_by_the_typed_control(self):
+        # #276 row 35 A35-03: the typed control (EventCameraControl.cpp) replaces the stop, follow and field
+        # restore opcodes, the field return glide and the orbit return.
+        root = Path(__file__).resolve().parents[2]
+        generated = (root / r"Native\Game\src\Event\ScriptCamera.cpp").read_text(encoding="utf-8")
+        for name in ("CommandStopCameraMotion", "CommandSetCameraFollowing", "CommandRestoreFieldCamera",
+                     "RestoreEventFieldCamera", "SetEventCameraFollowing", "StopEventCameraMotion",
+                     "StartEventCameraOrbitReturn"):
+            self.assertNotRegex(generated, rf"\bEvent_{name}\(")
+        vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
+        for name in ("CommandStopCameraMotion", "CommandSetCameraFollowing", "CommandRestoreFieldCamera"):
+            self.assertIn(f"Event_{name}Opcode", vm)
 
     def test_script_actor_tile_store_reads_a_typed_placement(self):
         # #276 slice 19b, then row 34: the tile bytes come from the typed placement view, not a 12-byte stack buffer.

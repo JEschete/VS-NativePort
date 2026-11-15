@@ -7,7 +7,6 @@
 #include "Field/CameraLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
@@ -15,7 +14,6 @@ extern "C" {
 #include "Event/InterpolationCurveLive.h"
 #include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
-#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Render/FramebufferEffects.h"
 #include "State/Timers.h"
@@ -43,30 +41,6 @@ char Event_skipNextFieldCameraRestore;
 
 // decomp: D_800F4BA4 (D_800F4BA4@BATTLE/BATTLE.PRG)
 Event_CameraState* Event_camera;
-
-// decomp: BATTLE.PRG func_800BB33C (src/BATTLE/BATTLE.PRG/4A0A8.c:2761)
-intptr_t Event_CommandStopCameraMotion(u_char* instruction, short thread_index)
-{
-    Event_StopEventCameraMotion();
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BB35C (src/BATTLE/BATTLE.PRG/4A0A8.c:2767)
-intptr_t Event_CommandSetCameraFollowing(u_char* instruction, short thread_index)
-{
-    int eye_follow_bit = instruction[1] & 2;
-    Event_SetEventCameraFollowing(instruction[1] & 1, eye_follow_bit != 0);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BB3BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2780)
-intptr_t Event_CommandRestoreFieldCamera(u_char* instruction, short thread_index)
-{
-    Event_RestoreEventFieldCamera(
-        instruction[1] != 0xFF ? ((instruction[1] + 4) & 7) : -1, instruction[2] != 0 ? instruction[2] : -1);
-    Event_isFieldCameraRestoreScripted = 1;
-    return 0;
-}
 
 // decomp: BATTLE.PRG func_800BB41C (src/BATTLE/BATTLE.PRG/4A0A8.c:2788)
 intptr_t Event_CommandWaitCameraTracks(u_char* instruction, short thread_index)
@@ -135,34 +109,6 @@ void Event_ApplyEventCameraState(void)
     if (Event_camera->farClip.hasChanged != 0) {
         VS::Render::SetLiveCameraFarClip(Event_camera->farClip.value, Event_isScriptBackdropEnabled);
         Event_camera->farClip.hasChanged = 0;
-    }
-}
-
-// decomp: BATTLE.PRG func_800BC1CC (src/BATTLE/BATTLE.PRG/4A0A8.c:3173)
-void Event_RestoreEventFieldCamera(short field_facing, int field_distance_mode)
-{
-    VECTOR field_eye_position;
-    VECTOR field_look_at;
-    int eye_travel_distance;
-    short return_duration_frames;
-
-    if (Event_skipNextFieldCameraRestore != 0) {
-        Event_skipNextFieldCameraRestore = 0;
-        return;
-    }
-    VS::Field::LiveInitializeSphericalCamera(&field_eye_position, &field_look_at, field_facing, (short)field_distance_mode);
-    VS::Core::Math::CopyLiveVector(&Event_camera->eye.destination, &field_eye_position);
-    VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.destination, &field_look_at);
-    eye_travel_distance = VS::Core::Math::MeasureLiveFixedVector(VS::Core::Math::SubtractLiveVectors(
-        (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &Event_camera->eye.currentPosition, &Event_camera->eye.destination));
-    return_duration_frames = (eye_travel_distance
-                  + VS::Core::Math::MeasureLiveFixedVector(VS::Core::Math::SubtractLiveVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098),
-                      &Event_camera->lookAt.currentPosition, &Event_camera->lookAt.destination)))
-            / 0x28000;
-    if ((return_duration_frames << 0x10) != 0) {
-        Event_fieldCameraReturnCommands[2] = Event_fieldCameraReturnCommands[6] = return_duration_frames;
-        Event_CommandCameraMotionOpcode(Event_fieldCameraReturnCommands, 0);
-        Event_CommandCameraMotionOpcode(Event_fieldCameraReturnCommands + 3, 0);
     }
 }
 
@@ -609,65 +555,6 @@ void Event_UpdateEventCameraShake(void)
         Event_camera->shakeLookAtOffsetY = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0))->vy;
         Event_camera->shakeLookAtOffsetZ = ((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0E0))->vz;
     }
-}
-
-// decomp: BATTLE.PRG func_800BE36C (src/BATTLE/BATTLE.PRG/4A0A8.c:4018)
-void Event_SetEventCameraFollowing(int look_at_follow, int eye_follow)
-{
-    Event_camera->lookAt.followRequest = look_at_follow;
-    Event_camera->lookAt.isFollowing = 0;
-    Event_camera->eye.followRequest = eye_follow;
-    Event_camera->eye.isFollowing = 0;
-}
-
-// decomp: BATTLE.PRG func_800BE3A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:4026)
-void Event_StopEventCameraMotion(void)
-{
-    Event_CameraState* c1 = Event_camera;
-    Event_CameraState* c2;
-    c1->eye.motionMode = 0xF;
-    c1->lookAt.motionMode = 0xF;
-    c2 = Event_camera;
-    c2->eye.isFollowing = 0;
-    c2->eye.followRequest = 0;
-    c2->lookAt.isFollowing = 0;
-    c2->lookAt.followRequest = 0;
-}
-
-// decomp: BATTLE.PRG func_800BE3D0 (src/BATTLE/BATTLE.PRG/4A0A8.c:4039)
-void Event_StartEventCameraOrbitReturn(char orbit_side_selector)
-{
-    VECTOR start_look_at;
-    VECTOR destination_look_at;
-    VECTOR start_eye_position;
-    VECTOR destination_eye_position;
-    u_char distance_mode_index;
-    u_char saved_facing;
-    int preceding_facing;
-
-    saved_facing = VS::State::LiveScriptFlag(0xAF);
-    distance_mode_index = VS::State::LiveScriptFlag(0xB0);
-    preceding_facing = saved_facing - 1;
-    VS::Field::LiveInitializeSphericalCamera(
-        &start_eye_position, &start_look_at, (preceding_facing + (orbit_side_selector * 2)) & 7, distance_mode_index + 1);
-
-    start_eye_position.vy += Event_kOrbitReturnHeightOffsets[distance_mode_index] << 0xC;
-    start_look_at.vy += Event_kOrbitReturnHeightOffsets[distance_mode_index] << 0xC;
-
-    VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.currentPosition, &start_look_at);
-    VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.partnerPosition, &start_eye_position);
-    VS::Core::Math::CopyLiveVector(&Event_camera->eye.partnerPosition, &start_look_at);
-    VS::Core::Math::CopyLiveVector(&Event_camera->eye.currentPosition, &start_eye_position);
-
-    Event_camera->lookAt.motionMode = 0xF;
-
-    VS::Field::LiveInitializeSphericalCamera(&destination_eye_position, &destination_look_at, saved_facing, distance_mode_index + 1);
-
-    VS::Core::Math::CopyLiveVector(&Event_camera->eye.destination, &destination_eye_position);
-    VS::Core::Math::CopyLiveVector(&Event_camera->lookAt.destination, &destination_look_at);
-
-    Event_CommandCameraMotionOpcode(Event_kOrbitReturnFirstCommand, 0);
-    Event_CommandCameraMotionOpcode(Event_kOrbitReturnSecondCommand, 0);
 }
 
 }  // extern "C"

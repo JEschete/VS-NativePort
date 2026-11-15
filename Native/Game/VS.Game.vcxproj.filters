@@ -1776,6 +1776,12 @@
     <ClInclude Include="src\Event\Dialog.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\EventCameraControl.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\EventCameraControlLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Event\EventCameraOwnership.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -3667,6 +3673,12 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\CutsceneLifecycleLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventCameraControl.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventCameraControlLive.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\EventCameraOwnership.hpp">

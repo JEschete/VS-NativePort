@@ -7,12 +7,39 @@
 // it in place of the copy. A missing workspace or track is refused where the
 // original wrote or read through a null pointer.
 #include <cstdint>
+#include <optional>
 
+#include "Core/Math/Distance.hpp"
+#include "Event/EventCameraTrack.hpp"
+
+struct Event_CameraState;
 struct Event_CameraTrack;
 struct MATRIX;
 struct VECTOR;
 
 namespace VS::Event {
+// The workspace's tracks, origin and last terrain position, and back. Storing
+// writes the tracks and the last terrain position, which the motion may
+// change, and keeps the VECTOR pads.
+[[nodiscard]] EventCameraTracks LoadLiveEventCameraTracks(
+    const Event_CameraState& camera);
+void StoreLiveEventCameraTracks(Event_CameraState& camera,
+                                const EventCameraTracks& tracks);
+
+// The motion services over the live floor, easing curves, script actor
+// references, actor placements and bones.
+class LiveEventCameraTrackHost final : public EventCameraTrackHost {
+ public:
+  [[nodiscard]] std::int16_t FloorHeight(std::int32_t world_x,
+                                         std::int32_t world_z) override;
+  [[nodiscard]] std::int32_t Ease(std::uint8_t curve, std::uint8_t frame,
+                                  std::uint8_t duration) override;
+  [[nodiscard]] int ResolveActorReference(std::uint16_t reference) override;
+  [[nodiscard]] std::optional<std::int16_t> ActorFacing(int actor) override;
+  [[nodiscard]] std::optional<Core::Math::Position3> TaggedBonePosition(
+      int actor, int tag) override;
+};
+
 // decomp: BATTLE.PRG func_800BC2E8 (F01221, 4A0A8.c:3200), opcodes 0xC0-0xDF
 // Operation 6 has no case: it warns and returns -1 where the original
 // returned its epilogue address.
