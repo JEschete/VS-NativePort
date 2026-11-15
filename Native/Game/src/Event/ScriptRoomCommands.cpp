@@ -16,16 +16,6 @@ constexpr std::size_t kSecondOperand = 2;
 constexpr std::size_t kThirdOperand = 3;
 constexpr std::size_t kFourthOperand = 4;
 
-[[nodiscard]] bool Fits(const ScriptInstruction& instruction,
-                        std::size_t length, ScriptVmHost& host) {
-  if (instruction.bytes.size() >= length) {
-    return true;
-  }
-  host.Refuse(ScriptVmRefusal::kShortInstruction,
-              static_cast<int>(instruction.bytes.size()));
-  return false;
-}
-
 [[nodiscard]] constexpr ScriptFlow Advance() {
   return ScriptFlow::Of(ScriptFlowKind::kAdvance);
 }
@@ -53,7 +43,7 @@ constexpr std::size_t kFourthOperand = 4;
 // decomp: BATTLE.PRG func_800B9770 (4A0A8.c:1966).
 ScriptFlow ScriptSetGimmickVisibility(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
-  if (!Fits(instruction, kSetGimmickVisibilityLength, host)) {
+  if (!InstructionFits(instruction, kSetGimmickVisibilityLength, host)) {
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
@@ -68,7 +58,7 @@ ScriptFlow ScriptSetGimmickVisibility(const ScriptInstruction& instruction,
 // only while that flag is set.
 ScriptFlow ScriptOverrideDepthCueDistance(const ScriptInstruction& instruction,
                                           ScriptVmHost& host) {
-  if (!Fits(instruction, kOverrideDepthCueDistanceLength, host)) {
+  if (!InstructionFits(instruction, kOverrideDepthCueDistanceLength, host)) {
     return Advance();
   }
   const auto depth_cue = static_cast<std::uint16_t>(
@@ -86,7 +76,7 @@ ScriptFlow ScriptOverrideDepthCueDistance(const ScriptInstruction& instruction,
 // zero-extended into the draw mode word.
 ScriptFlow ScriptSetRoomLightingMode(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
-  if (!Fits(instruction, kSetRoomLightingModeLength, host)) {
+  if (!InstructionFits(instruction, kSetRoomLightingModeLength, host)) {
     return Advance();
   }
   const std::uint8_t draw_mode = OperandByte(Bytes(instruction), kFirstOperand);
@@ -97,7 +87,7 @@ ScriptFlow ScriptSetRoomLightingMode(const ScriptInstruction& instruction,
 // decomp: BATTLE.PRG func_800B9818 (4A0A8.c:1994).
 ScriptFlow ScriptShowGeometryGroup(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
-  if (!Fits(instruction, kShowGeometryGroupLength, host)) {
+  if (!InstructionFits(instruction, kShowGeometryGroupLength, host)) {
     return Advance();
   }
   const std::uint8_t shown_group =
@@ -109,7 +99,7 @@ ScriptFlow ScriptShowGeometryGroup(const ScriptInstruction& instruction,
 // decomp: BATTLE.PRG func_800B983C (4A0A8.c:2000).
 ScriptFlow ScriptHideGeometryGroup(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
-  if (!Fits(instruction, kHideGeometryGroupLength, host)) {
+  if (!InstructionFits(instruction, kHideGeometryGroupLength, host)) {
     return Advance();
   }
   const std::uint8_t hidden_group =
@@ -121,7 +111,7 @@ ScriptFlow ScriptHideGeometryGroup(const ScriptInstruction& instruction,
 // decomp: BATTLE.PRG func_800B9860 (4A0A8.c:2006).
 ScriptFlow ScriptSwapGeometryGroupFlags(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
-  if (!Fits(instruction, kSwapGeometryGroupFlagsLength, host)) {
+  if (!InstructionFits(instruction, kSwapGeometryGroupFlagsLength, host)) {
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
@@ -135,7 +125,7 @@ ScriptFlow ScriptSwapGeometryGroupFlags(const ScriptInstruction& instruction,
 // operands x, layer, z, blocked; func_8008B808 takes x, z, layer, blocked.
 ScriptFlow ScriptSetCollisionTileMode(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
-  if (!Fits(instruction, kSetCollisionTileModeLength, host)) {
+  if (!InstructionFits(instruction, kSetCollisionTileModeLength, host)) {
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
@@ -150,7 +140,7 @@ ScriptFlow ScriptSetCollisionTileMode(const ScriptInstruction& instruction,
 // decomp: BATTLE.PRG func_800BA288 (4A0A8.c:2268). The bias byte is signed.
 ScriptFlow ScriptAdjustGeometryDepthBias(const ScriptInstruction& instruction,
                                          ScriptVmHost& host) {
-  if (!Fits(instruction, kAdjustGeometryDepthBiasLength, host)) {
+  if (!InstructionFits(instruction, kAdjustGeometryDepthBiasLength, host)) {
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
@@ -165,7 +155,7 @@ ScriptFlow ScriptAdjustGeometryDepthBias(const ScriptInstruction& instruction,
 // the background's enabled flag unchanged.
 ScriptFlow ScriptSetRoomBackgroundVisible(const ScriptInstruction& instruction,
                                           ScriptVmHost& host) {
-  if (!Fits(instruction, kSetRoomBackgroundVisibleLength, host)) {
+  if (!InstructionFits(instruction, kSetRoomBackgroundVisibleLength, host)) {
     return Advance();
   }
   const std::uint8_t enabled = OperandByte(Bytes(instruction), kFirstOperand);
@@ -177,7 +167,7 @@ ScriptFlow ScriptSetRoomBackgroundVisible(const ScriptInstruction& instruction,
 // queued is ignored; the wait opcode follows them.
 ScriptFlow ScriptLoadRoomBackground(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
-  if (!Fits(instruction, kLoadRoomBackgroundLength, host)) {
+  if (!InstructionFits(instruction, kLoadRoomBackgroundLength, host)) {
     return Advance();
   }
   const std::uint8_t texture_page =
@@ -209,7 +199,7 @@ ScriptFlow ScriptFreeRoomBackground(const ScriptInstruction& /*instruction*/,
 // little-endian halfword sign-extended by vs_battle_getShort.
 ScriptFlow ScriptSetBackgroundOffset(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
-  if (!Fits(instruction, kSetBackgroundOffsetLength, host)) {
+  if (!InstructionFits(instruction, kSetBackgroundOffsetLength, host)) {
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);
@@ -223,7 +213,7 @@ ScriptFlow ScriptSetBackgroundOffset(const ScriptInstruction& instruction,
 // to 0 or 1 before func_8007BDD8 takes it as the disabled flag.
 ScriptFlow ScriptSetFirstPersonView(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
-  if (!Fits(instruction, kSetFirstPersonViewLength, host)) {
+  if (!InstructionFits(instruction, kSetFirstPersonViewLength, host)) {
     return Advance();
   }
   const bool disabled = OperandByte(Bytes(instruction), kFirstOperand) != 0;
@@ -234,7 +224,7 @@ ScriptFlow ScriptSetFirstPersonView(const ScriptInstruction& instruction,
 // decomp: BATTLE.PRG func_800BA2B4 (4A0A8.c:2274). Both bytes are signed.
 ScriptFlow ScriptSetBackgroundParallax(const ScriptInstruction& instruction,
                                        ScriptVmHost& host) {
-  if (!Fits(instruction, kSetBackgroundParallaxLength, host)) {
+  if (!InstructionFits(instruction, kSetBackgroundParallaxLength, host)) {
     return Advance();
   }
   const ScriptCommand command = Bytes(instruction);

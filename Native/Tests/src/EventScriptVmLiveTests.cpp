@@ -18,7 +18,9 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
+#include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLiveState.h"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
@@ -2056,6 +2058,157 @@ TEST_CASE("Native background wait holds without a pending load",
     CHECK_FALSE(event::ExecuteLiveScriptThread(0));
     CHECK(host.ThreadCursor(0) == start);
   }
+}
+
+namespace {
+// The fade, display and palette opcode adapters with their original
+// handlers' addresses.
+constexpr auto kScreenControlEntries = std::to_array<ControlEntry>({
+    {0x800B9A40, Event_ScriptFadeOutAndWaitOpcode},
+    {0x800B9A94, Event_ScriptFadeInOpcode},
+    {0x800B9AC4, Event_ScriptSetWipeAngleOpcode},
+    {0x800B9AE8, Event_ScriptConfigureScreenTransitionOpcode},
+    {0x800B9B18, Event_ScriptSetRoomDisplayFlagsOpcode},
+    {0x800B9BF8, Event_ScriptWaitForScreenTransitionOpcode},
+    {0x800B9C18, Event_ScriptTogglePaletteHookOpcode},
+    {0x800B9C58, Event_ScriptTransformPalettesOpcode},
+});
+
+// Restores the screen transition and the palette animation the screen
+// opcodes write.
+struct ScreenOpcodeStateFixture {
+  VS::Field::RoomTransitionState transition =
+      VS::Field::LoadLiveRoomTransition();
+  VS::Render::PaletteAnimation palette = VS::Render::LivePaletteAnimation();
+
+  ScreenOpcodeStateFixture() = default;
+  ~ScreenOpcodeStateFixture() {
+    VS::Field::StoreLiveRoomTransition(transition);
+    const_cast<VS::Render::PaletteAnimation&>(
+        VS::Render::LivePaletteAnimation()) = palette;
+  }
+  ScreenOpcodeStateFixture(const ScreenOpcodeStateFixture&) = delete;
+  ScreenOpcodeStateFixture& operator=(const ScreenOpcodeStateFixture&) = delete;
+  ScreenOpcodeStateFixture(ScreenOpcodeStateFixture&&) = delete;
+  ScreenOpcodeStateFixture& operator=(ScreenOpcodeStateFixture&&) = delete;
+};
+
+void SetTransitionStep(VS::Field::TransitionStep step) {
+  auto state = VS::Field::LoadLiveRoomTransition();
+  state.screen.step = static_cast<std::uint32_t>(step);
+  VS::Field::StoreLiveRoomTransition(state);
+}
+
+// Mounts a script whose screen opcodes use the native bindings and points
+// thread 0 at it.
+void MountScreenScript(Bytes bytes) {
+  const auto start = MountScript(std::move(bytes));
+  Event_kOpcodeHandlers[0x69] = Event_ScriptFadeOutAndWaitOpcode;
+  Event_kOpcodeHandlers[0x6B] = Event_ScriptSetWipeAngleOpcode;
+  Event_kOpcodeHandlers[0x6C] = Event_ScriptConfigureScreenTransitionOpcode;
+  Event_kOpcodeHandlers[0x6E] = Event_ScriptWaitForScreenTransitionOpcode;
+  Event_kOpcodeHandlers[0x70] = Event_ScriptTransformPalettesOpcode;
+  Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeSizes[0x69] = 4;
+  Event_kOpcodeSizes[0x6B] = 2;
+  Event_kOpcodeSizes[0x6C] = 4;
+  Event_kOpcodeSizes[0x6E] = 1;
+  Event_kOpcodeSizes[0x70] = 8;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+}
+}  // namespace
+
+TEST_CASE("Native screen opcode bindings refuse detached command borrows",
+          "[event][script][screen-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  std::array<std::uint8_t, 8> command{};
+  const auto expected =
+      static_cast<std::intptr_t>(event::ScriptFlowKind::kStop);
+  for (const auto& entry : kScreenControlEntries) {
+    CAPTURE(entry.address);
+    CHECK(entry.handler(command.data(), 0) == expected);
+  }
+}
+
+TEST_CASE("Native transition style bindings set the live screen transition",
+          "[event][script][screen-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const ScreenOpcodeStateFixture screen;
+  MountScreenScript({0x6C, 2, 3, 4, 0x6B, 9, 0xF0});
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+  const auto state = VS::Field::LoadLiveRoomTransition().screen;
+  CHECK(state.effect == 2);
+  CHECK(state.speed == 3);
+  CHECK(state.wipe_angle == 144);
+}
+
+TEST_CASE("Native fade-out binding starts the live fade and holds",
+          "[event][script][screen-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const ScreenOpcodeStateFixture screen;
+  SetTransitionStep(VS::Field::TransitionStep::kIdle);
+  MountScreenScript({0x69, 1, 2, 3, 0xF0});
+  auto& host = event::LiveScriptVm();
+  const auto start = host.ThreadCursor(0);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(host.ThreadCursor(0) == start);
+  const auto state = VS::Field::LoadLiveRoomTransition().screen;
+  CHECK(state.step ==
+        static_cast<std::uint32_t>(VS::Field::TransitionStep::kFadeOut));
+  CHECK(state.effect == 1);
+  CHECK(state.speed == 2);
+  CHECK(state.wipe_angle == 48);
+}
+
+TEST_CASE("Native fade-out binding holds until the covered screen",
+          "[event][script][screen-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const ScreenOpcodeStateFixture screen;
+  SetTransitionStep(VS::Field::TransitionStep::kFadeOut);
+  MountScreenScript({0x69, 1, 2, 3, 0xF0});
+  auto& host = event::LiveScriptVm();
+  const auto start = host.ThreadCursor(0);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(host.ThreadCursor(0) == start);
+  CHECK(VS::Field::LoadLiveRoomTransition().screen.step ==
+        static_cast<std::uint32_t>(VS::Field::TransitionStep::kFadeOut));
+  SetTransitionStep(VS::Field::TransitionStep::kFadedOut);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+}
+
+TEST_CASE("Native transition wait binding holds while a transition runs",
+          "[event][script][screen-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const ScreenOpcodeStateFixture screen;
+  SetTransitionStep(VS::Field::TransitionStep::kFadeIn);
+  MountScreenScript({0x6E, 0xF0});
+  auto& host = event::LiveScriptVm();
+  const auto start = host.ThreadCursor(0);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(host.ThreadCursor(0) == start);
+  SetTransitionStep(VS::Field::TransitionStep::kIdle);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(host.ThreadCursor(0).Present());
+}
+
+TEST_CASE("Native palette binding transforms the live background colours",
+          "[event][script][screen-commands][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const ScreenOpcodeStateFixture screen;
+  VS::Render::SetLiveClutAnimationEnabled(1);
+  const VS::Render::PaletteAnimation before =
+      VS::Render::LivePaletteAnimation();
+  const auto refused = VS::Render::RefusedLivePaletteRequestCount();
+  // Target 3 does nothing, then target 2 runs a 16-frame background transform.
+  MountScreenScript({0x70, 0x30, 0, 0, 4, 0x10, 0x10, 0x10, 0x70, 0x20, 0, 0, 4,
+                     0x10, 0x10, 0x10, 0xF0});
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+  CHECK(VS::Render::LivePaletteAnimation().background != before.background);
+  CHECK(VS::Render::LivePaletteAnimation().tints == before.tints);
+  CHECK(VS::Render::RefusedLivePaletteRequestCount() == refused);
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",

@@ -18,6 +18,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptRoomCommands.hpp"
+#include "Event/ScriptScreenCommands.hpp"
 #include "Event/ScriptSources.hpp"
 #include "Event/ScriptVm.hpp"
 
@@ -45,6 +46,13 @@ class RecordingHost final : public event::ScriptVmHost {
   std::vector<std::string> room_calls;
   // Whether FinishTiledBackgroundLoad reports the load's last step.
   bool background_loaded = false;
+  // The screen systems' calls in order, each with its arguments.
+  std::vector<std::string> screen_calls;
+  int transition_phase = 0;
+  int phase_reads = 0;
+  // The ids the actor selection returns, ending with the sentinel 1.
+  std::vector<std::uint16_t> selected_actors{1};
+  std::size_t selection_cursor = 0;
   std::vector<std::pair<Location, int>> instructions;
   Bytes palette_command = Bytes(8);
   Bytes sound_marker{0x82, 0x05, 0, 0};
@@ -393,7 +401,10 @@ class RecordingHost final : public event::ScriptVmHost {
     moves.push_back(move);
   }
   void BeginSkipFadeOut() override { calls.emplace_back("Fade"); }
-  void DisableDisplay() override { calls.emplace_back("DisableDisplay"); }
+  void DisableDisplay() override {
+    calls.emplace_back("DisableDisplay");
+    NoteScreen("DisableDisplay", {});
+  }
   void ReturnAllActorsToIdle() override { calls.emplace_back("ActorsIdle"); }
   void ResetActorMovement(int actor) override {
     cleanup_order.push_back(actor);
@@ -451,14 +462,76 @@ class RecordingHost final : public event::ScriptVmHost {
   void SetFirstPersonViewDisabled(bool disabled) override {
     NoteRoom("FirstPersonDisabled", {static_cast<int>(disabled)});
   }
+  int ScreenTransitionPhase() override {
+    ++phase_reads;
+    return transition_phase;
+  }
+  void BeginScreenFadeOut(
+      const event::ScreenTransitionRequest& request) override {
+    NoteScreen("FadeOut", {request.effect, request.speed, request.wipe_angle});
+  }
+  void BeginScreenFadeIn(
+      const event::ScreenTransitionRequest& request) override {
+    NoteScreen("FadeIn", {request.effect, request.speed, request.wipe_angle});
+  }
+  void SetTransitionWipeAngle(int wipe_angle) override {
+    NoteScreen("WipeAngle", {wipe_angle});
+  }
+  void ConfigureScreenTransition(
+      const event::ScreenTransitionRequest& request) override {
+    NoteScreen("Configure",
+               {request.effect, request.speed, request.wipe_angle});
+  }
+  void EnableDisplay() override { NoteScreen("EnableDisplay", {}); }
+  void ShowPrimaryRoomGeometry() override { NoteScreen("ShowRoom", {}); }
+  void HidePrimaryRoomGeometry() override { NoteScreen("HideRoom", {}); }
+  void EnableAllActorModels() override { NoteScreen("ShowActors", {}); }
+  void DisableAllActorModels() override { NoteScreen("HideActors", {}); }
+  void RunPaletteHook(event::PaletteHook hook) override {
+    NoteScreen("Hook", {static_cast<int>(hook)});
+  }
+  void BeginScriptActorSelection(std::uint16_t selector) override {
+    NoteScreen("Select", {selector});
+    selection_cursor = 0;
+  }
+  std::uint16_t NextScriptSelectedActor() override {
+    if (selection_cursor >= selected_actors.size()) {
+      FAIL_CHECK("the selection was read past its end sentinel");
+      return 1;
+    }
+    return selected_actors[selection_cursor++];
+  }
+  void TransformActorColors(const event::PaletteTransform& transform,
+                            int actor) override {
+    NoteScreen("ActorColors",
+               {transform.mode, transform.duration, actor, transform.red_offset,
+                transform.green_offset, transform.blue_offset});
+  }
+  void TransformSceneColors(const event::PaletteTransform& transform) override {
+    NoteScreen("SceneColors",
+               {transform.mode, transform.duration, transform.red_offset,
+                transform.green_offset, transform.blue_offset});
+  }
+  void TransformBackgroundColors(
+      const event::PaletteTransform& transform) override {
+    NoteScreen("BackgroundColors",
+               {transform.mode, transform.duration, transform.red_offset,
+                transform.green_offset, transform.blue_offset});
+  }
 
  private:
-  void NoteRoom(const char* name, std::initializer_list<int> values) {
+  static std::string Note(const char* name, std::initializer_list<int> values) {
     std::string call = name;
     for (const int value : values) {
       call += ' ' + std::to_string(value);
     }
-    room_calls.push_back(std::move(call));
+    return call;
+  }
+  void NoteRoom(const char* name, std::initializer_list<int> values) {
+    room_calls.push_back(Note(name, values));
+  }
+  void NoteScreen(const char* name, std::initializer_list<int> values) {
+    screen_calls.push_back(Note(name, values));
   }
 };
 
@@ -756,6 +829,204 @@ TEST_CASE("Background parallax widens signed bytes to the Q12 scale",
         Calls{"Parallax -128 128"});
   CHECK(RoomCalls(event::ScriptSetBackgroundParallax,
                   {0x7E, 0, 0, 0xFF, 0x7F}) == Calls{"Parallax 0 0"});
+}
+
+namespace {
+// Runs one complete screen opcode at a transition phase, checks its flow and
+// returns the screen calls it made.
+Calls ScreenCalls(Handler handler, const Bytes& bytes,
+                  Kind expected = Kind::kAdvance, int phase = 0) {
+  RecordingHost host;
+  host.transition_phase = phase;
+  CHECK(Run(handler, host, bytes) == Flow::Of(expected));
+  CHECK(host.refusals.empty());
+  return host.screen_calls;
+}
+
+Calls PaletteCalls(const Bytes& bytes, std::vector<std::uint16_t> actors) {
+  RecordingHost host;
+  host.selected_actors = std::move(actors);
+  CHECK(Run(event::ScriptTransformPalettes, host, bytes) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.refusals.empty());
+  return host.screen_calls;
+}
+
+// Opcode 0x70 on the scene with the duration operand `shift`.
+Calls SceneDuration(std::uint8_t shift) {
+  return PaletteCalls({0x70, 0x10, 0, 0, shift, 0, 0, 0}, {1});
+}
+}  // namespace
+
+TEST_CASE("Screen opcodes refuse truncated operand spans",
+          "[event][script][screen-commands][event-vm]") {
+  const std::array commands{
+      std::pair{event::ScriptFadeOutAndWait, 4},
+      std::pair{event::ScriptFadeIn, 4},
+      std::pair{event::ScriptSetWipeAngle, 2},
+      std::pair{event::ScriptConfigureScreenTransition, 4},
+      std::pair{event::ScriptSetRoomDisplayFlags, 2},
+      std::pair{event::ScriptTogglePaletteHook, 2},
+      std::pair{event::ScriptTransformPalettes, 8},
+  };
+  for (const auto& [handler, length] : commands) {
+    for (int size = 0; size < length; ++size) {
+      RecordingHost host;
+      CHECK(Run(handler, host, Bytes(static_cast<std::size_t>(size))) ==
+            Flow::Of(Kind::kAdvance));
+      REQUIRE(host.refusals.size() == 1);
+      CHECK(host.refusals[0] == std::pair{Refusal::kShortInstruction, size});
+      CHECK(host.screen_calls.empty());
+      CHECK(host.phase_reads == 0);
+    }
+  }
+}
+
+TEST_CASE("Fade-out starts on an idle transition and waits for phase 5",
+          "[event][script][screen-commands][event-vm]") {
+  const Bytes command{0x69, 0x81, 0xFF, 0xFF};
+  CHECK(ScreenCalls(event::ScriptFadeOutAndWait, command, Kind::kHold, 0) ==
+        Calls{"FadeOut 129 255 4080"});
+  CHECK(ScreenCalls(event::ScriptFadeOutAndWait, {0x69, 0, 1, 2}, Kind::kHold,
+                    0) == Calls{"FadeOut 0 1 32"});
+  CHECK(ScreenCalls(event::ScriptFadeOutAndWait, command, Kind::kAdvance, 5)
+            .empty());
+  for (const int phase : {1, 2, 3, 4, 6, 7, -1}) {
+    CAPTURE(phase);
+    CHECK(ScreenCalls(event::ScriptFadeOutAndWait, command, Kind::kHold, phase)
+              .empty());
+  }
+}
+
+TEST_CASE("Fade-out polls the phase once per run and starts the fade once",
+          "[event][script][screen-commands][event-vm]") {
+  RecordingHost host;
+  const Bytes command{0x69, 2, 8, 0x10};
+  CHECK(Run(event::ScriptFadeOutAndWait, host, command) ==
+        Flow::Of(Kind::kHold));
+  host.transition_phase = 4;
+  CHECK(Run(event::ScriptFadeOutAndWait, host, command) ==
+        Flow::Of(Kind::kHold));
+  host.transition_phase = 5;
+  CHECK(Run(event::ScriptFadeOutAndWait, host, command) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.phase_reads == 3);
+  CHECK(host.screen_calls == Calls{"FadeOut 2 8 256"});
+}
+
+TEST_CASE("Fade-in passes effect speed and the scaled wipe angle",
+          "[event][script][screen-commands][event-vm]") {
+  RecordingHost host;
+  host.transition_phase = 4;
+  CHECK(Run(event::ScriptFadeIn, host, {0x6A, 0x80, 0x7F, 0x80, 9}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.screen_calls == Calls{"FadeIn 128 127 2048"});
+  CHECK(host.phase_reads == 0);
+  CHECK(ScreenCalls(event::ScriptFadeIn, {0x6A, 0, 0, 0}) ==
+        Calls{"FadeIn 0 0 0"});
+}
+
+TEST_CASE("Wipe angle scales its unsigned byte by sixteen",
+          "[event][script][screen-commands][event-vm]") {
+  CHECK(ScreenCalls(event::ScriptSetWipeAngle, {0x6B, 0}) ==
+        Calls{"WipeAngle 0"});
+  CHECK(ScreenCalls(event::ScriptSetWipeAngle, {0x6B, 0x80}) ==
+        Calls{"WipeAngle 2048"});
+  CHECK(ScreenCalls(event::ScriptSetWipeAngle, {0x6B, 0xFF, 0x12}) ==
+        Calls{"WipeAngle 4080"});
+}
+
+TEST_CASE("Screen transition style passes unsigned operands",
+          "[event][script][screen-commands][event-vm]") {
+  CHECK(ScreenCalls(event::ScriptConfigureScreenTransition,
+                    {0x6C, 0xFF, 0x80, 0x7F}) ==
+        Calls{"Configure 255 128 2032"});
+  CHECK(ScreenCalls(event::ScriptConfigureScreenTransition,
+                    {0x6C, 1, 2, 3, 0xFF}) == Calls{"Configure 1 2 48"});
+}
+
+TEST_CASE("Room display flags switch display then room then actors",
+          "[event][script][screen-commands][event-vm]") {
+  const auto flags = [](std::uint8_t value) {
+    return ScreenCalls(event::ScriptSetRoomDisplayFlags, {0x6D, value});
+  };
+  CHECK(flags(0x00) == Calls{"DisableDisplay", "HideRoom", "HideActors"});
+  CHECK(flags(0x15) == Calls{"EnableDisplay", "ShowRoom", "ShowActors"});
+  CHECK(flags(0x3F).empty());
+  CHECK(flags(0xEA).empty());
+  CHECK(flags(0xC4) == Calls{"DisableDisplay", "ShowRoom", "HideActors"});
+  CHECK(flags(0x31) == Calls{"EnableDisplay", "HideRoom"});
+  CHECK(flags(0x2E) == Calls{});
+  CHECK(flags(0x19) == Calls{"EnableDisplay", "ShowActors"});
+  CHECK(flags(0x03) == Calls{"HideRoom", "HideActors"});
+}
+
+TEST_CASE("Screen transition wait holds while any phase is active",
+          "[event][script][screen-commands][event-vm]") {
+  CHECK(ScreenCalls(event::ScriptWaitForScreenTransition, {0x6E},
+                    Kind::kAdvance, 0)
+            .empty());
+  for (const int phase : {1, 4, 5, 6, -1}) {
+    CAPTURE(phase);
+    CHECK(ScreenCalls(event::ScriptWaitForScreenTransition, {0x6E}, Kind::kHold,
+                      phase)
+              .empty());
+  }
+  // It reads no operand, so even an empty span is not refused.
+  RecordingHost host;
+  CHECK(Run(event::ScriptWaitForScreenTransition, host, {}) ==
+        Flow::Of(Kind::kAdvance));
+  CHECK(host.refusals.empty());
+  CHECK(host.phase_reads == 1);
+}
+
+TEST_CASE("Palette hook toggle selects the hook by a nonzero operand",
+          "[event][script][screen-commands][event-vm]") {
+  CHECK(ScreenCalls(event::ScriptTogglePaletteHook, {0x6F, 0}) ==
+        Calls{"Hook 0"});
+  CHECK(ScreenCalls(event::ScriptTogglePaletteHook, {0x6F, 1}) ==
+        Calls{"Hook 1"});
+  CHECK(ScreenCalls(event::ScriptTogglePaletteHook, {0x6F, 0x80}) ==
+        Calls{"Hook 1"});
+  CHECK(ScreenCalls(event::ScriptTogglePaletteHook, {0x6F, 0xFF}) ==
+        Calls{"Hook 1"});
+}
+
+TEST_CASE("Actor palette transform runs until the selection sentinel",
+          "[event][script][screen-commands][event-vm]") {
+  const Bytes command{0x70, 0x0A, 0x34, 0x12, 2, 0x80, 0xFF, 0x7F};
+  CHECK(PaletteCalls(command, {5, 0x8000, 0, 1, 7}) ==
+        Calls{"Select 4660", "ActorColors 10 4 5 -128 -1 127",
+              "ActorColors 10 4 32768 -128 -1 127",
+              "ActorColors 10 4 0 -128 -1 127"});
+  CHECK(PaletteCalls(command, {1}) == Calls{"Select 4660"});
+  CHECK(PaletteCalls({0x70, 0x0F, 0xFF, 0xFF, 0, 1, 2, 3}, {0xFFFF, 1}) ==
+        Calls{"Select 65535", "ActorColors 15 1 65535 1 2 3"});
+}
+
+TEST_CASE("Palette transform duration shifts modulo 32 into five bits",
+          "[event][script][screen-commands][event-vm]") {
+  const std::array cases{
+      std::pair{0, 1},  std::pair{4, 16},    std::pair{5, 0},
+      std::pair{31, 0}, std::pair{32, 1},    std::pair{36, 16},
+      std::pair{37, 0}, std::pair{0xE4, 16}, std::pair{0xFF, 0}};
+  for (const auto& [shift, duration] : cases) {
+    CAPTURE(shift);
+    CHECK(SceneDuration(static_cast<std::uint8_t>(shift)) ==
+          Calls{"SceneColors 0 " + std::to_string(duration) + " 0 0 0"});
+  }
+}
+
+TEST_CASE("Palette transform targets the scene or background or nothing",
+          "[event][script][screen-commands][event-vm]") {
+  CHECK(PaletteCalls({0x70, 0x13, 9, 9, 1, 0x81, 0x7E, 0}, {}) ==
+        Calls{"SceneColors 3 2 -127 126 0"});
+  CHECK(PaletteCalls({0x70, 0x2F, 9, 9, 3, 0xFF, 0, 0x80}, {}) ==
+        Calls{"BackgroundColors 15 8 -1 0 -128"});
+  for (const std::uint8_t selector : {0x30, 0x3F, 0x80, 0xF0, 0xFF}) {
+    CAPTURE(selector);
+    CHECK(PaletteCalls({0x70, selector, 0, 0, 1, 1, 1, 1}, {}).empty());
+  }
 }
 
 namespace {

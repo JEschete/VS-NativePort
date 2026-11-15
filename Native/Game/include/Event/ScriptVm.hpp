@@ -174,6 +174,40 @@ struct CollisionCellChange {
                                    const CollisionCellChange&) = default;
 };
 
+// A screen fade, wipe or room transition style set by opcodes 0x69, 0x6A and
+// 0x6C: the transition effect, its speed and the wipe angle, already scaled
+// by the opcode's sixteen-unit step.
+struct ScreenTransitionRequest {
+  int effect = 0;
+  int speed = 0;
+  int wipe_angle = 0;
+
+  friend constexpr bool operator==(const ScreenTransitionRequest&,
+                                   const ScreenTransitionRequest&) = default;
+};
+
+// The two palette hooks opcode 0x6F selects between. Both are empty in this
+// executable (BATTLE.PRG func_8007B0FC and func_8007B104, 146C.c:8237-8239).
+enum class PaletteHook : std::uint8_t {
+  // func_8007B0FC, run for a zero operand.
+  kZeroOperand = 0,
+  // func_8007B104, run for any other operand.
+  kNonzeroOperand = 1,
+};
+
+// One colour transform requested by opcode 0x70: the transform mode, its
+// duration in frames and the signed red, green and blue offsets.
+struct PaletteTransform {
+  int mode = 0;
+  int duration = 0;
+  std::int16_t red_offset = 0;
+  std::int16_t green_offset = 0;
+  std::int16_t blue_offset = 0;
+
+  friend constexpr bool operator==(const PaletteTransform&,
+                                   const PaletteTransform&) = default;
+};
+
 // The operations of opcode 0xB7 (4A0A8.c:2651) the host carries out with
 // the operation's argument byte.
 enum class SpecialOperation : std::uint8_t {
@@ -444,6 +478,31 @@ class ScriptVmHost {
   virtual void SetRoomBackgroundOffset(int offset_x, int offset_y) = 0;
   virtual void SetBackgroundParallaxScale(int parallax_x, int parallax_y) = 0;
   virtual void SetFirstPersonViewDisabled(bool disabled) = 0;
+
+  // The screen systems the fade, display and palette opcodes drive
+  // (Event/ScriptScreenCommands.hpp): the screen transitions, the display,
+  // the primary room geometry, the actor models, the palette hooks, the
+  // script actor selection and the colour transforms.
+  [[nodiscard]] virtual int ScreenTransitionPhase() = 0;
+  virtual void BeginScreenFadeOut(const ScreenTransitionRequest& request) = 0;
+  virtual void BeginScreenFadeIn(const ScreenTransitionRequest& request) = 0;
+  virtual void SetTransitionWipeAngle(int wipe_angle) = 0;
+  virtual void ConfigureScreenTransition(
+      const ScreenTransitionRequest& request) = 0;
+  virtual void EnableDisplay() = 0;
+  virtual void ShowPrimaryRoomGeometry() = 0;
+  virtual void HidePrimaryRoomGeometry() = 0;
+  virtual void EnableAllActorModels() = 0;
+  virtual void DisableAllActorModels() = 0;
+  virtual void RunPaletteHook(PaletteHook hook) = 0;
+  // Starts the host-held actor selection the selector names; the next id is
+  // read with NextScriptSelectedActor until it returns the end sentinel 1.
+  virtual void BeginScriptActorSelection(std::uint16_t selector) = 0;
+  [[nodiscard]] virtual std::uint16_t NextScriptSelectedActor() = 0;
+  virtual void TransformActorColors(const PaletteTransform& transform,
+                                    int actor) = 0;
+  virtual void TransformSceneColors(const PaletteTransform& transform) = 0;
+  virtual void TransformBackgroundColors(const PaletteTransform& transform) = 0;
 };
 
 // decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)
@@ -594,6 +653,18 @@ int UpdateEventPlayback(ScriptVmHost& host);
 bool ExecuteScriptThread(ScriptThreadId thread, ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BFD9C (src/BATTLE/BATTLE.PRG/573B8.c:133)
 void ReleaseScriptActorControl(ScriptVmHost& host);
+// Whether `instruction` holds its opcode's `length` bytes. A shorter one is
+// refused with kShortInstruction so the opcode reads none of its operands.
+[[nodiscard]] inline bool InstructionFits(const ScriptInstruction& instruction,
+                                          std::size_t length,
+                                          ScriptVmHost& host) {
+  if (instruction.bytes.size() >= length) {
+    return true;
+  }
+  host.Refuse(ScriptVmRefusal::kShortInstruction,
+              static_cast<int>(instruction.bytes.size()));
+  return false;
+}
 // decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)
 [[nodiscard]] int OpcodeSize(std::uint8_t opcode, const ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BFE50 (src/BATTLE/BATTLE.PRG/573B8.c:156)

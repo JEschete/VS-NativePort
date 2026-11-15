@@ -24,10 +24,12 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Runtime.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptRoomCommands.hpp"
+#include "Event/ScriptScreenCommands.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -40,6 +42,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
@@ -50,6 +53,7 @@ extern "C" {
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
+#include "Event/Actors.h"
 #include "Event/Playback.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
@@ -163,6 +167,19 @@ constexpr std::array kControlBindings{
                    ScriptSetFirstPersonView},
     ControlBinding{Event_ScriptSetBackgroundParallaxOpcode,
                    ScriptSetBackgroundParallax},
+    ControlBinding{Event_ScriptFadeOutAndWaitOpcode, ScriptFadeOutAndWait},
+    ControlBinding{Event_ScriptFadeInOpcode, ScriptFadeIn},
+    ControlBinding{Event_ScriptSetWipeAngleOpcode, ScriptSetWipeAngle},
+    ControlBinding{Event_ScriptConfigureScreenTransitionOpcode,
+                   ScriptConfigureScreenTransition},
+    ControlBinding{Event_ScriptSetRoomDisplayFlagsOpcode,
+                   ScriptSetRoomDisplayFlags},
+    ControlBinding{Event_ScriptWaitForScreenTransitionOpcode,
+                   ScriptWaitForScreenTransition},
+    ControlBinding{Event_ScriptTogglePaletteHookOpcode,
+                   ScriptTogglePaletteHook},
+    ControlBinding{Event_ScriptTransformPalettesOpcode,
+                   ScriptTransformPalettes},
 };
 
 ScriptControlOpcode NativeControl(OpcodeHandler handler) {
@@ -487,7 +504,8 @@ class LiveVmHost final : public ScriptVmHost {
   void UpdateWeatherTween() override { UpdateLiveWeatherTween(); }
   void DrawScanlineOverlay() override { DrawLiveScanlineOverlay(); }
   void TransformPalettes(ScriptCommand command) override {
-    Event_ScriptTransformPalettes(const_cast<std::uint8_t*>(command.data()), 0);
+    static_cast<void>(
+        ScriptTransformPalettes(ScriptInstruction{.bytes = command}, *this));
   }
   void MoveTextureRectangle(const TextureMove& move) override {
     const Render::ScreenRect source{move.x, move.y, move.width, move.height};
@@ -566,8 +584,64 @@ class LiveVmHost final : public ScriptVmHost {
   void SetFirstPersonViewDisabled(bool disabled) override {
     static_cast<void>(Field::LiveSetFirstPersonViewDisabled(disabled ? 1 : 0));
   }
+  int ScreenTransitionPhase() override {
+    return Field::LiveScreenTransitionPhase();
+  }
+  void BeginScreenFadeOut(const ScreenTransitionRequest& request) override {
+    Field::LiveBeginScreenFadeOut(request.effect, request.speed,
+                                  request.wipe_angle);
+  }
+  void BeginScreenFadeIn(const ScreenTransitionRequest& request) override {
+    Field::LiveBeginScreenFadeIn(request.effect, request.speed,
+                                 request.wipe_angle);
+  }
+  void SetTransitionWipeAngle(int wipe_angle) override {
+    Field::LiveSetTransitionWipeAngle(wipe_angle);
+  }
+  void ConfigureScreenTransition(
+      const ScreenTransitionRequest& request) override {
+    Field::LiveConfigureScreenTransition(request.effect, request.speed,
+                                         request.wipe_angle);
+  }
+  void EnableDisplay() override { Render::EnableLiveDisplay(); }
+  void ShowPrimaryRoomGeometry() override {
+    Field::LiveShowPrimaryRoomGeometry();
+  }
+  void HidePrimaryRoomGeometry() override {
+    Field::LiveHidePrimaryRoomGeometry();
+  }
+  void EnableAllActorModels() override { Actors::EnableAllLiveActorModels(); }
+  void DisableAllActorModels() override { Actors::DisableAllLiveActorModels(); }
+  // func_8007B0FC and func_8007B104 (146C.c:8237-8239) are both empty.
+  void RunPaletteHook(PaletteHook /*hook*/) override { Core::NoOperation(); }
+  void BeginScriptActorSelection(std::uint16_t selector) override {
+    BuildLiveScriptActorSelection(selector, &actor_selection_);
+  }
+  std::uint16_t NextScriptSelectedActor() override {
+    return NextLiveScriptSelectedActor(&actor_selection_);
+  }
+  void TransformActorColors(const PaletteTransform& transform,
+                            int actor) override {
+    Render::TransformLiveActorColors(
+        transform.mode, transform.duration, actor, transform.red_offset,
+        transform.green_offset, transform.blue_offset);
+  }
+  void TransformSceneColors(const PaletteTransform& transform) override {
+    Render::TransformLiveSceneColors(
+        transform.mode, transform.duration, transform.red_offset,
+        transform.green_offset, transform.blue_offset);
+  }
+  void TransformBackgroundColors(const PaletteTransform& transform) override {
+    Render::TransformLiveBackgroundColors(
+        transform.mode, transform.duration, transform.red_offset,
+        transform.green_offset, transform.blue_offset);
+  }
 
  private:
+  // Opcode 0x70's actor selection (func_800B9C58's sp18), rebuilt by each
+  // BeginScriptActorSelection.
+  Event_ActorSelection actor_selection_{};
+
   void BindData(ScriptDataLease& binding, ScriptLocation location) {
     if (!location.Present()) {
       binding = {};
@@ -1364,4 +1438,60 @@ std::intptr_t Event_ScriptSetBackgroundParallaxOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetBackgroundParallax);
+}
+
+// decomp: BATTLE.PRG func_800B9A40 (4A0A8.c:2049).
+std::intptr_t Event_ScriptFadeOutAndWaitOpcode(std::uint8_t* instruction,
+                                               std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptFadeOutAndWait);
+}
+
+// decomp: BATTLE.PRG func_800B9A94 (4A0A8.c:2061).
+std::intptr_t Event_ScriptFadeInOpcode(std::uint8_t* instruction,
+                                       std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(instruction, thread_index,
+                                                    VS::Event::ScriptFadeIn);
+}
+
+// decomp: BATTLE.PRG func_800B9AC4 (4A0A8.c:2067).
+std::intptr_t Event_ScriptSetWipeAngleOpcode(std::uint8_t* instruction,
+                                             std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetWipeAngle);
+}
+
+// decomp: BATTLE.PRG func_800B9AE8 (4A0A8.c:2073).
+std::intptr_t Event_ScriptConfigureScreenTransitionOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptConfigureScreenTransition);
+}
+
+// decomp: BATTLE.PRG func_800B9B18 (4A0A8.c:2079).
+std::intptr_t Event_ScriptSetRoomDisplayFlagsOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetRoomDisplayFlags);
+}
+
+// decomp: BATTLE.PRG func_800B9BF8 (4A0A8.c:2110).
+std::intptr_t Event_ScriptWaitForScreenTransitionOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptWaitForScreenTransition);
+}
+
+// decomp: BATTLE.PRG func_800B9C18 (4A0A8.c:2112).
+std::intptr_t Event_ScriptTogglePaletteHookOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptTogglePaletteHook);
+}
+
+// decomp: BATTLE.PRG func_800B9C58 (4A0A8.c:2122).
+std::intptr_t Event_ScriptTransformPalettesOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptTransformPalettes);
 }

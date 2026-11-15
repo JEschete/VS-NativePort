@@ -593,6 +593,16 @@
     <None Include="..\..\port\differentials\event_room_commands_f01140.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01141.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01142.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_common.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_driver.cpp" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01121.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01122.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01123.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01124.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01125.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01126.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01127.py" />
+    <None Include="..\..\port\differentials\event_screen_commands_f01128.py" />
     <None Include="..\..\port\differentials\f02640_equipment_weapon.py" />
     <None Include="..\..\port\differentials\f02641_equipment_shield.py" />
     <None Include="..\..\port\differentials\f02642_equipment_armor.py" />

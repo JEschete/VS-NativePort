@@ -224,6 +224,22 @@ public:
     void StopAllSfx() override { }
     void StopScriptVibration() override { }
     void RestartRoomEffectSound() override { }
+    int ScreenTransitionPhase() override { return {}; }
+    void BeginScreenFadeOut(const ScreenTransitionRequest&) override { }
+    void BeginScreenFadeIn(const ScreenTransitionRequest&) override { }
+    void SetTransitionWipeAngle(int) override { }
+    void ConfigureScreenTransition(const ScreenTransitionRequest&) override { }
+    void EnableDisplay() override { }
+    void ShowPrimaryRoomGeometry() override { }
+    void HidePrimaryRoomGeometry() override { }
+    void EnableAllActorModels() override { }
+    void DisableAllActorModels() override { }
+    void RunPaletteHook(PaletteHook) override { }
+    void BeginScriptActorSelection(std::uint16_t) override { }
+    std::uint16_t NextScriptSelectedActor() override { return 1; }
+    void TransformActorColors(const PaletteTransform&, int) override { }
+    void TransformSceneColors(const PaletteTransform&) override { }
+    void TransformBackgroundColors(const PaletteTransform&) override { }
 };
 
 template <typename Value> bool Read(Value& value)

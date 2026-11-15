@@ -1,16 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ActorStateLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
-#include "Core/Runtime.hpp"
-#include "Event/ScriptActorCommandsLive.hpp"
-#include "Field/RoomStateLive.hpp"
-#include "Field/TransitionsLive.hpp"
-#include "Render/DisplayControlLive.hpp"
 #include "Render/GimImagesLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Event/Actors.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptScreen.h"
 #include "Event/Splash.h"
@@ -77,116 +69,6 @@ intptr_t Event_ScriptFreeSplashImage(u_char* instruction, short thread_index)
 intptr_t Event_ScriptWaitForSplashTween(u_char* instruction, short thread_index)
 {
     return (Event_splashTweens[2].durationFrames | (Event_splashTweens[0].durationFrames | Event_splashTweens[1].durationFrames)) != 0;
-}
-
-// decomp: BATTLE.PRG func_800B9A40 (src/BATTLE/BATTLE.PRG/4A0A8.c:2049)
-intptr_t Event_ScriptFadeOutAndWait(u_char* instruction, short thread_index)
-{
-    int transition_phase = VS::Field::LiveScreenTransitionPhase();
-    if (transition_phase != 5) {
-        if (transition_phase == 0) {
-            VS::Field::LiveBeginScreenFadeOut(instruction[1], instruction[2], instruction[3] * 0x10);
-        }
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9A94 (src/BATTLE/BATTLE.PRG/4A0A8.c:2061)
-intptr_t Event_ScriptFadeIn(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveBeginScreenFadeIn(instruction[1], instruction[2], instruction[3] * 0x10);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9AC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2067)
-intptr_t Event_ScriptSetWipeAngle(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSetTransitionWipeAngle(instruction[1] * 0x10);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9AE8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2073)
-intptr_t Event_ScriptConfigureScreenTransition(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveConfigureScreenTransition(instruction[1], instruction[2], instruction[3] * 0x10);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9B18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2079)
-intptr_t Event_ScriptSetRoomDisplayFlags(u_char* instruction, short thread_index)
-{
-    switch (instruction[1] & 3) {
-    case 0:
-        VS::Render::DisableLiveDisplay();
-        break;
-    case 1:
-        VS::Render::EnableLiveDisplay();
-        break;
-    }
-
-    switch ((instruction[1] >> 2) & 3) {
-    case 0:
-        VS::Field::LiveHidePrimaryRoomGeometry();
-        break;
-    case 1:
-        VS::Field::LiveShowPrimaryRoomGeometry();
-        break;
-    }
-
-    switch ((instruction[1] >> 4) & 3) {
-    case 0:
-        VS::Actors::DisableAllLiveActorModels();
-        break;
-    case 1:
-        VS::Actors::EnableAllLiveActorModels();
-        break;
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9BF8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2110)
-intptr_t Event_ScriptWaitForScreenTransition(u_char* instruction, short thread_index) { return VS::Field::LiveScreenTransitionPhase() != 0; }
-
-// decomp: BATTLE.PRG func_800B9C18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2112)
-intptr_t Event_ScriptTogglePaletteHook(u_char* instruction, short thread_index)
-{
-    if (instruction[1] != 0) {
-        VS::Core::NoOperation();
-    } else {
-        VS::Core::NoOperation();
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9C58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2122)
-intptr_t Event_ScriptTransformPalettes(u_char* instruction, short thread_index)
-{
-    Event_ActorSelection actor_selection;
-    int actor_id;
-
-    switch (instruction[1] >> 4) {
-    case 0:
-        VS::Event::BuildLiveScriptActorSelection(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2), &actor_selection);
-        while (1) {
-            actor_id = VS::Event::NextLiveScriptSelectedActor(&actor_selection);
-            if (actor_id == 1) {
-                break;
-            }
-            VS::Render::TransformLiveActorColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, actor_id,
-                (signed char)instruction[5], (signed char)instruction[6], (signed char)instruction[7]);
-        }
-        break;
-    case 1:
-        VS::Render::TransformLiveSceneColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, (signed char)instruction[5],
-            (signed char)instruction[6], (signed char)instruction[7]);
-        break;
-    case 2:
-        VS::Render::TransformLiveBackgroundColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, (signed char)instruction[5],
-            (signed char)instruction[6], (signed char)instruction[7]);
-        break;
-    }
-    return 0;
 }
 
 }  // extern "C"

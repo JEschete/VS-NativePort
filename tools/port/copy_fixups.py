@@ -3307,6 +3307,14 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01142", 0x800BA2B4, "ScriptSetBackgroundParallax"),
     # #276 row 35 A35-01 camera origin opcode (Event/EventCameraOwnershipLive.cpp)
     ("F01195", 0x800BB38C, "CommandSetCameraOriginActor"),
+    ("F01121", 0x800B9A40, "ScriptFadeOutAndWait"),
+    ("F01122", 0x800B9A94, "ScriptFadeIn"),
+    ("F01123", 0x800B9AC4, "ScriptSetWipeAngle"),
+    ("F01124", 0x800B9AE8, "ScriptConfigureScreenTransition"),
+    ("F01125", 0x800B9B18, "ScriptSetRoomDisplayFlags"),
+    ("F01126", 0x800B9BF8, "ScriptWaitForScreenTransition"),
+    ("F01127", 0x800B9C18, "ScriptTogglePaletteHook"),
+    ("F01128", 0x800B9C58, "ScriptTransformPalettes"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -5292,9 +5300,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "    VS::Core::Memory::ZeroAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);",
          "native globals survive overlay loads; a new gameplay session must not resume old event threads"),
     ],
-    # BATTLE 4A0A8.c:2110 is called only through the opcode table; it ignores both dispatch arguments.
-    "F01126": [("Event_ScriptWaitForScreenTransition(void)",
-                 "Event_ScriptWaitForScreenTransition(u_char* arg0, short arg1)", "consistent opcode signature")],
     # 771A8.c:942 adds a direction delta to `arg0->unk34`, an int in the pinned view; the merged layout of
     # T00532 has the packed tile word as Battle::Ai::TilePosition (union of the word and its bytes).
     "F01731": [("arg0->tile + ", "arg0->tile.word + ", "packed tile word arithmetic (771A8.c:950)")],
@@ -6391,11 +6396,6 @@ EVENT_OPCODE_BINDINGS: dict[str, str] = {
     **{fid: f"Event_{name}Opcode" for fid, _, name in EVENT_SCRIPT_MEDIA_OPCODES},
 }
 
-# This normal-only handler omits its unused thread argument in 4A0A8.c. It has no direct C callers,
-# but the dispatch ABI still requires both arguments (check_event_dispatch.py checks all table targets).
-for fid in ("F01122",):
-    FIXES.setdefault(fid, []).append(("(u_char* arg0)", "(u_char* arg0, short arg1)", "consistent opcode signature"))
-
 # The MPD section E header (Field::MpdSectionE, 146C.c:15700): two array pointers into its own payload, set by
 # the room section load (VS::Field::LoadRoomSections) and read only by assembly-era code; offsets from the header natively.
 ONDISC_OFFSETS.update({"T00337.003": "MPD section E first array", "T00337.004": "MPD section E second array"})
@@ -6453,12 +6453,6 @@ REGEX_FIXES += [
         ("Event::ScriptChangeRoom",
          (('sp10', 'door_record'),),
          "F01120 4A0A8.c:2018-2047 fills sp10 as _mpdRoomDoorSection_t from room/zone, entry tile/direction/elevation, and flags, then passes it to func_8007C580 or func_8007C654. State0 creates the transition, state2 acknowledges it. Native Field_MpdDoorRecord preserves this relationship and partially initialized layout."),
-        ("Event::ScriptFadeOutAndWait",
-         (('temp_v0', 'transition_phase'),),
-         "F01121 4A0A8.c:2049-2059 reads temp_v0 from func_8007C398; phase0 initiates fade, phase5 completes waiting, all other phases keep waiting. Native Field_ScreenTransitionPhase and F01121 ledger corroborate the phase interpretation."),
-        ("Event::ScriptTransformPalettes",
-         (('sp18', 'actor_selection'), ('temp_a2', 'actor_id')),
-         "F01128 4A0A8.c:2122-2149 builds/advances sp18 only for the actor-palette case; temp_a2 is the actor passed to func_8007B29C until sentinel1. Room/shared palette branches do not use them. F01208/F01209 establish selection contract; never substitute these spellings globally."),
         ("Event::ScriptControlRoomAnimation",
          (('temp_s0', 'room_effect_id'),),
          "F01138 4A0A8.c:2238-2254 reads temp_s0 from byte2. Start mode optionally finishes an active effect while skipping, then starts that effect; toggle mode passes the same id to func_800936F8. Native room-effect consumers interpret it as selected room effect, not animation frame."),

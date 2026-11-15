@@ -100,6 +100,21 @@ intptr_t Event_ScriptSetBackgroundParallaxOpcode(uint8_t* instruction,
                                                  int16_t thread_index);
 intptr_t Event_CommandSetCameraOriginActorOpcode(uint8_t* instruction,
                                                  int16_t thread_index);
+intptr_t Event_ScriptFadeOutAndWaitOpcode(uint8_t* instruction,
+                                          int16_t thread_index);
+intptr_t Event_ScriptFadeInOpcode(uint8_t* instruction, int16_t thread_index);
+intptr_t Event_ScriptSetWipeAngleOpcode(uint8_t* instruction,
+                                        int16_t thread_index);
+intptr_t Event_ScriptConfigureScreenTransitionOpcode(uint8_t* instruction,
+                                                     int16_t thread_index);
+intptr_t Event_ScriptSetRoomDisplayFlagsOpcode(uint8_t* instruction,
+                                               int16_t thread_index);
+intptr_t Event_ScriptWaitForScreenTransitionOpcode(uint8_t* instruction,
+                                                   int16_t thread_index);
+intptr_t Event_ScriptTogglePaletteHookOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
+intptr_t Event_ScriptTransformPalettesOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
 
 #ifdef __cplusplus
 }
