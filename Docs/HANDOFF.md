@@ -1,10 +1,10 @@
 # Current Handoff
 
-Updated 2026-11-15. **Paused at the owner's request** after finishing the existing
-bone/weapon-trail WIP. Do not begin another promotion group until the owner resumes.
-This stopping point supersedes the older continuation instructions below.
+Updated 2026-11-15. The latest published MA-04 batch is the eight-function
+bone/weapon-trail promotion. The cohort has 458 resolved (449 promoted, nine
+retired) and 442 remaining; see the CSV and issue #276 for current status.
 
-## Owner-requested stopping point
+## Current status and next steps
 
 - Code commit:
   [`08b0f20960cb6a8e5d62c8924c170b6e6d7fa4db`](https://github.com/JEschete/VS-NativePort/commit/08b0f20960cb6a8e5d62c8924c170b6e6d7fa4db).
@@ -37,10 +37,27 @@ This stopping point supersedes the older continuation instructions below.
 - Unrelated #384 edits to `tools\naming\sym_gen\common.py`,
   `tools\naming\test_sym_gen.py` and `tools\port\ref_index.py` were excluded from
   verification/publication and restored byte-for-byte. The reference gitlink
-  change and older autostash remain untouched. No Group O conversion WIP remains.
-- On a future resumption, recover current issue/CI state and continue the
-  remaining row-39 effects in maintained order. PLG128 Ghidra preparation is
-  reference assistance, not a completed promotion.
+  change and older autostash remain untouched. These unrelated local changes are
+  still present; keep them separate from promotion work until their scope is
+  reconciled. No Group O conversion WIP remains.
+
+Next steps:
+
+1. Reconcile the existing #384/#377 anonymous-type normalization WIP and the
+   dirty reference checkout before broadening or staging any files. Preserve
+   those changes; they are not part of the trail promotion.
+2. Continue #276 in the maintained plan order. Row 39 is active at 23/80; its
+   first unresolved CSV entries are F00058, F00060, F00064, F00068 and F00069.
+   Recheck current callers, dependencies, issues and CI, then choose the next
+   coherent group rather than treating that list as a preapproved batch.
+3. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md):
+   typed implementation and Live bindings, per-function tests and MIPS/native
+   mutation controls, shared Debug/Release/replay/quality checks, ledger/CSV
+   synchronization, scoped commit and push, and exact-revision CI.
+4. Keep row 30's F00830 blocker (#296) and the typed-interface validator issue
+   #390 explicit; do not mark either resolved without its own acceptance
+   evidence. PLG128 Ghidra preparation is reference assistance, not a completed
+   promotion.
 
 ## Earlier status (2026-11-13)
 
@@ -81,11 +98,10 @@ and the CI-backed issue checkpoints.
 Routine batches use the canonical ledgers, machine-readable evidence and concise
 CI-backed issue checkpoints, not a handoff diary.
 
-## Earlier owner-requested pause
+## Reward-flow checkpoint (2026-11-13)
 
-The owner paused the work on 2026-11-12 and requested completion of only the
-eight-function reward WIP on 2026-11-13. That batch is complete. This section
-records that earlier boundary, not a current instruction to pause.
+The eight-function reward-flow batch was completed on 2026-11-13. This section
+records its evidence; current cohort progress is maintained in the CSV.
 
 - F04123-F04126 and F00220-F00223 are eight typed reward-flow promotions.
   The original 900-row cohort is **196 resolved (187 promoted, nine retired),
@@ -102,11 +118,11 @@ records that earlier boundary, not a current instruction to pause.
   376 seconds; Debug/Release each pass 6,380 cases/12,926,759 assertions.
   Both canonical replays, copier stability/controls and zero-new quality pass.
   Ordered camera/shadow controls pass 39 cases/175 assertions in each configuration.
-- Canonical ledgers and the CSV are synchronized and checked. No reward WIP from
-  the paused batch remains; nine other generated reward functions and both reward
-  globals are retained. The earlier `owner-pause.json` is a historical WIP snapshot.
+- Canonical ledgers and the CSV are synchronized and checked. No reward
+  implementation WIP remains; nine other generated reward functions and both
+  reward globals are retained. The earlier WIP snapshot is historical.
 
-The coordinated continuation above starts with the remaining reward package.
+The coordinated continuation above records the earlier reward package.
 F00830 remains separately blocked under #296; row 30 is not complete.
 No gameplay or compatibility-retirement completion is claimed.
 
@@ -114,7 +130,8 @@ No gameplay or compatibility-retirement completion is claimed.
 
 Routine batch status now lives in [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv),
 the canonical ledgers, machine-readable evidence and [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The older continuation sections below are historical checkpoints, not current next-work instructions.
+The older continuation sections below are historical checkpoints; use the current
+CSV, ledgers and issue #276 for next-work status.
 
 The six animation policies are published in `10f09362`, with successful exact-revision
 [CI 43354155209](https://github.com/JEschete/VS-NativePort/actions/runs/43354155209).
@@ -136,8 +153,8 @@ function or row 30 complete.
 
 The owner requested completion of the original 900-function cohort and progress
 tracking in `REMAINING_FUNCTIONS.csv`. Work resumed from clean `0e8989ad`;
-exact-revision Source Quality `43105524312` passed. The earlier stopping point
-below is retained as historical evidence, not an instruction to pause.
+exact-revision Source Quality `43105524312` passed. The earlier checkpoint below
+is retained as historical evidence.
 
 ### Latest row-30 group
 
@@ -574,9 +591,9 @@ On owner request, obsolete and duplicate documents were removed from `Docs`. The
 `NAMING_CONVENTIONS.md` §11.3 keeps only the rules from the old dated logs. The owner's `Decomp Process.md` notes and
 the Reddit draft were local, untracked files: the notes moved to `C:\Tools\Decomp Process.md` and the draft was deleted.
 
-## Stopping Point
+## Historical execution checkpoint (2026-10-23)
 
-The continuation is active, not paused. Row 28 is published and green. The
+Row 28 was published and green. The
 row-29 checkpoint has all 88 IDs resolved (85 promoted, three retired),
 published and green in `7b797783`. #349, #350 and #351 are closed.
 Row 30's first 23 effect producers are published and green through `7a3360d4`.
