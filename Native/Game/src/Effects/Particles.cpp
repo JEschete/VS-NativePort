@@ -5,11 +5,11 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/ParticleRenderLive.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Diagnostics.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -44,57 +44,6 @@ int Effects_particleDrag;
 
 // decomp: D_800F5620 (D_800F5620@BATTLE/BATTLE.PRG)
 Effects_ParticleGravity Effects_particleGravity;
-
-// decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5770)
-void Effects_StepParticleEndpointTowardStart(Effects_ParticleEndpointView* particle_endpoints)
-{
-    int dx;
-    int dy;
-    int sx;
-    int sy;
-
-    if (*(int*)&particle_endpoints->endX == *(int*)&particle_endpoints->startX) {
-        return;
-    }
-    sx = -1;
-    sy = -1;
-    dx = particle_endpoints->startX - particle_endpoints->endX;
-    dy = particle_endpoints->startY - particle_endpoints->endY;
-    if (dx < 0) {
-        dx = -dx;
-        sx = 1;
-    }
-    if (dy < 0) {
-        dy = -dy;
-        sy = 1;
-    }
-    if (dy < dx) {
-        particle_endpoints->startX += sx;
-        if (dx < dy * 2) {
-            particle_endpoints->startY += sy;
-        }
-    } else {
-        particle_endpoints->startY += sy;
-        if (dy < dx * 2) {
-            particle_endpoints->startX += sx;
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6915)
-void Effects_SetParticleSpawnPosition(Effects_ParticleEmitterScratch* emitter_scratch, Effects_Particle* particle_node)
-{
-    if (emitter_scratch->flags & 0x40000) {
-        Core_Gte_ApplyRotMatrix(&emitter_scratch->vector, &emitter_scratch->aimPoint);
-    } else {
-        emitter_scratch->aimPoint.vx = emitter_scratch->vector.vx;
-        emitter_scratch->aimPoint.vy = emitter_scratch->vector.vy;
-        emitter_scratch->aimPoint.vz = emitter_scratch->vector.vz;
-    }
-    particle_node->motion.position.vx = emitter_scratch->position.vx + emitter_scratch->aimPoint.vx * ONE;
-    particle_node->motion.position.vy = emitter_scratch->position.vy + emitter_scratch->aimPoint.vy * ONE;
-    particle_node->motion.position.vz = emitter_scratch->position.vz + emitter_scratch->aimPoint.vz * ONE;
-}
 
 // decomp: src/BATTLE/BATTLE.PRG/5BF94.c:6930
 #define RAND_UNIFORM_WIDE(a, b)                                                    \
@@ -168,7 +117,7 @@ void Effects_EmitParticleEvent(
         node = VS::Effects::LiveAllocateEffectParticle(effect_instance);
         node->transformIndex = scratch->transformIndex;
         node->attractionTransform = scratch->attractionTransform;
-        Effects_InitializeParticleTextureAnimation(&node->textureAnimation, def->textureIndex, def->animationId);
+        VS::Effects::LiveInitializeParticleTextureAnimation(&node->textureAnimation, def->textureIndex, def->animationId);
     }
 
     sample = def->positionCurve;
@@ -241,7 +190,7 @@ void Effects_EmitParticleEvent(
                 scratch->vector.vz = (scratch->vector.vz * scratch->sinAngle0) >> 12;
                 break;
             }
-            Effects_SetParticleSpawnPosition(scratch, node);
+            VS::Effects::LiveSetParticleSpawnPosition(scratch, node);
             node = node->next;
         }
         break;
@@ -323,7 +272,7 @@ void Effects_EmitParticleEvent(
                     (Effects_emissionCounter & 4) ? scratch->extent.vz : -scratch->extent.vz;
                 break;
             }
-            Effects_SetParticleSpawnPosition(scratch, node);
+            VS::Effects::LiveSetParticleSpawnPosition(scratch, node);
             node = node->next;
         }
         break;
@@ -364,7 +313,7 @@ void Effects_EmitParticleEvent(
                 }
                 break;
             }
-            Effects_SetParticleSpawnPosition(scratch, node);
+            VS::Effects::LiveSetParticleSpawnPosition(scratch, node);
             node = node->next;
         }
         break;
@@ -395,7 +344,7 @@ void Effects_EmitParticleEvent(
                 scratch->vector.vz = (scratch->vector.vz * scratch->sinAngle0) >> 12;
                 break;
             }
-            Effects_SetParticleSpawnPosition(scratch, node);
+            VS::Effects::LiveSetParticleSpawnPosition(scratch, node);
             node = node->next;
         }
         break;
@@ -426,7 +375,7 @@ void Effects_EmitParticleEvent(
                 scratch->vector.vz = (scratch->vector.vz * scratch->sinAngle0) >> 12;
                 break;
             }
-            Effects_SetParticleSpawnPosition(scratch, node);
+            VS::Effects::LiveSetParticleSpawnPosition(scratch, node);
             node = node->next;
         }
         break;
@@ -478,7 +427,7 @@ void Effects_EmitParticleEvent(
                 }
             }
             scratch->vector.vy = 0;
-            Effects_SetParticleSpawnPosition(scratch, node);
+            VS::Effects::LiveSetParticleSpawnPosition(scratch, node);
             node = node->next;
         }
         break;
@@ -685,158 +634,5 @@ void Effects_EmitParticleEvent(
     }
 }
 #undef RAND_UNIFORM_WIDE
-
-// decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:7658)
-int Effects_TickEffectParticles(Effects_EffectInstance* effect_instance)
-{
-    Effects_Particle* next = effect_instance->particles;
-    Effects_Particle* node;
-
-    Effects_IntegrateParticleMotion(next);
-    VS::Effects::DrawLiveEffectParticleList(effect_instance->particles);
-    node = next;
-    while (next != NULL) {
-        next = node->next;
-        ++node->age;
-        Effects_PluginEffectState parent = {0};
-        parent.position.vx = node->motion.position.vx;
-        parent.position.vy = node->motion.position.vy;
-        parent.position.vz = node->motion.position.vz;
-        parent.transparency = node->transparency;
-        parent.variant = node->opaque61Bit0;
-        if (node->tickEvent != 0) {
-            Effects_EmitParticleEvent(effect_instance, node->tickEvent - 1, 0, 0, &parent);
-        }
-        if (node->lifetime == -1) {
-            if (node->textureAnimation.frameTimer == 0) {
-                if (node->endEvent != 0) {
-                    Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
-                }
-                VS::Effects::LiveReleaseEffectParticle(node, effect_instance);
-            }
-        } else if (--node->lifetime == 0) {
-            if (node->endEvent != 0) {
-                Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
-            }
-            VS::Effects::LiveReleaseEffectParticle(node, effect_instance);
-        }
-        node = next;
-    }
-    return 1;
-}
-
-// decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7830)
-void Effects_IntegrateParticleMotion(Effects_Particle* node)
-{
-    VECTOR direction;
-    Effects_ParticleMotionView* state;
-    int damping;
-    int drag = Effects_particleDrag;
-    int gravityX = Effects_particleGravity.x;
-    int gravityY = Effects_particleGravity.y;
-    int gravityZ = Effects_particleGravity.z;
-
-    for (; node != NULL; node = node->next) {
-        state = (Effects_ParticleMotionView*)&node->motion.mass;
-        damping = node->motion.mass - drag;
-        state->vx = (state->vx * damping + (state->fx << 12)) / node->motion.mass
-                  + ((gravityX * state->gravityScale) >> 12);
-        state->x += state->vx;
-        state->vy = (state->vy * damping + (state->fy << 12)) / node->motion.mass
-                  + ((gravityY * state->gravityScale) >> 12);
-        state->y += state->vy;
-        state->vz = (state->vz * damping + (state->fz << 12)) / node->motion.mass
-                  + ((gravityZ * state->gravityScale) >> 12);
-        state->z += state->vz;
-        damping = node->attraction;
-        if (damping != 0) {
-            direction.vx = node->attractionTarget[0] - (state->x >> 12);
-            direction.vy = node->attractionTarget[1] - (state->y >> 12);
-            direction.vz = node->attractionTarget[2] - (state->z >> 12);
-            if (direction.vx != 0 || direction.vy != 0 || direction.vz != 0) {
-                VS::Core::Math::NormalizeLiveVector(&direction, &direction);
-                direction.vx = (direction.vx * damping) >> 12;
-                direction.vy = (direction.vy * damping) >> 12;
-                direction.vz = (direction.vz * damping) >> 12;
-            }
-            state->fx += state->ax + direction.vx;
-            state->fy += state->ay + direction.vy;
-            state->fz += state->az + direction.vz;
-        } else {
-            state->fx += state->ax;
-            state->fy += state->ay;
-            state->fz += state->az;
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800D6CCC (src/BATTLE/BATTLE.PRG/5BF94.c:8501)
-void Effects_ClearParticleTextureState(int* storage)
-{
-    Effects_ParticleTextureAnimation* state = (Effects_ParticleTextureAnimation*)storage;
-    *state = (Effects_ParticleTextureAnimation){0};
-}
-
-// decomp: BATTLE.PRG func_800D6CF0 (src/BATTLE/BATTLE.PRG/5BF94.c:8513)
-void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* animation, int textureIndex, int programIndex)
-{
-    if (textureIndex < 0 || textureIndex >= Effects_package->block1TableCount ||
-        textureIndex >= 4 || Effects_package->textureInfoTable[textureIndex] == NULL) {
-        Core_Debugf("effects.texture", "unbound texture=%d tables=%d program=%d context=%s request_effect=%u",
-            textureIndex, Effects_package->block1TableCount, programIndex,
-            Effects_package == &Effects_actionPackage ? "primary" : "secondary",
-            (unsigned)(Effects_package == &Effects_actionPackage ?
-                Effects_actionRequest.effectId : Effects_secondaryRequest.effectId));
-    }
-    animation->textureIndex = textureIndex;
-    animation->program = (u_char*)Effects_package->block2Data + Effects_package->block2Data[programIndex + 2];
-    animation->cursor = 0;
-    animation->frameTimer = 0;
-}
-
-// decomp: BATTLE.PRG func_800D6D24 (src/BATTLE/BATTLE.PRG/5BF94.c:8521)
-void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* animation)
-{
-    if (animation->frameTimer != 0) {
-        animation->frameTimer -= 2;
-        if (animation->frameTimer != 0) {
-            return;
-        }
-    }
-
-    while (1) {
-        int command = *(int*)(animation->program + animation->cursor);
-
-        switch (command & 0xF0000000) {
-        case 0:
-            if (animation->textureIndex >= 4 ||
-                animation->textureIndex >= Effects_package->block1TableCount ||
-                Effects_package->textureInfoTable[animation->textureIndex] == NULL) {
-                Core_Warnf("effects.texture", "unbound frame table=%u tables=%d cursor=%u word=0x%08X context=%s request_effect=%u program=%p previous=%p",
-                    (unsigned)animation->textureIndex, Effects_package->block1TableCount,
-                    (unsigned)animation->cursor, (unsigned)command,
-                    Effects_package == &Effects_actionPackage ? "primary" : "secondary",
-                    (unsigned)(Effects_package == &Effects_actionPackage ?
-                        Effects_actionRequest.effectId : Effects_secondaryRequest.effectId),
-                    (void*)animation->program, (void*)animation->textureInfo);
-            }
-            animation->textureInfo =
-                Effects_package->textureInfoTable[animation->textureIndex] + (command & 0xFFFF);
-            *(short*)&animation->frameTimer = (command >> 16) & 0x3FFF;
-            animation->cursor += 4;
-            return;
-        case 0x10000000:
-            animation->frameOffsetX = (command << 18) >> 18;
-            animation->frameOffsetY = (command << 4) >> 18;
-            animation->cursor += 4;
-            break;
-        case 0x20000000:
-            animation->cursor = 0;
-            break;
-        case 0x30000000:
-            return;
-        }
-    }
-}
 
 }  // extern "C"

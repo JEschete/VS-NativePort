@@ -687,6 +687,10 @@
     <ClCompile Include="src\Effects\PackageExtentsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Effects\ParticleMotion.cpp" />
+    <ClCompile Include="src\Effects\ParticleMotionLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\ParticlePool.cpp" />
     <ClCompile Include="src\Effects\ParticlePoolLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -701,6 +705,10 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Effects\ParticleTextureAnimation.cpp" />
+    <ClCompile Include="src\Effects\ParticleTextureAnimationLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Effects\Plugins\Plg005.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2542,10 +2550,14 @@
     <ClInclude Include="include\Effects\EffectScript.hpp" />
     <ClInclude Include="include\Effects\EffectScriptLive.hpp" />
     <ClInclude Include="include\Effects\PackageExtents.hpp" />
+    <ClInclude Include="include\Effects\ParticleMotion.hpp" />
+    <ClInclude Include="include\Effects\ParticleMotionLive.hpp" />
     <ClInclude Include="include\Effects\ParticlePool.hpp" />
     <ClInclude Include="include\Effects\ParticlePoolLive.hpp" />
     <ClInclude Include="include\Effects\ParticleRender.hpp" />
     <ClInclude Include="include\Effects\ParticleRenderLive.hpp" />
+    <ClInclude Include="include\Effects\ParticleTextureAnimation.hpp" />
+    <ClInclude Include="include\Effects\ParticleTextureAnimationLive.hpp" />
     <ClInclude Include="include\Effects\PrimaryEffect.hpp" />
     <ClInclude Include="include\Effects\PrimaryEffectLive.hpp" />
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarp.hpp" />

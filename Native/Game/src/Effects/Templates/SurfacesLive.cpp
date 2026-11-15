@@ -19,6 +19,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/Grid.hpp"
 #include "Effects/Templates/Mesh10.hpp"
 #include "Effects/Templates/MirrorSurface.hpp"
@@ -425,8 +426,7 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
                      std::cmp_less(table, Effects_package->block1TableCount) &&
                      Effects_package->textureInfoTable[table] != nullptr;
   if (bound) {
-    // Cross-slice calls: retarget when those rows are promoted.
-    Effects_AdvanceParticleTextureAnimation(&animation);
+    LiveAdvanceParticleTextureAnimation(&animation);
   }
   if (!bound || animation.textureInfo == nullptr) {
     if (ShouldReport(refused_textures)) {
@@ -532,10 +532,9 @@ void LiveSurfaceServices::StartAnimation(
                  name_, source.table, tables);
   }
   // Clearing the record also cleared the texture animation, as
-  // Effects_ClearParticleTextureState did.
-  // Cross-slice calls: retarget when those rows are promoted.
-  Effects_InitializeParticleTextureAnimation(&animation, source.table,
-                                             source.program);
+  // func_800D6CCC did.
+  LiveInitializeParticleTextureAnimation(&animation, source.table,
+                                         source.program);
 }
 
 template <typename Legacy>

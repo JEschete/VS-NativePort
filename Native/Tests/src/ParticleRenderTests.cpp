@@ -23,7 +23,9 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/ParticlesLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
@@ -129,6 +131,7 @@ struct ParticleFixture {
     Effects_particlePool = &particle;
     Effects_particleCapacity = 1;
     package.textures = &texture;
+    package.block1TableCount = 1;
     package.textureInfoTable[0] = &info;
     package.curveBlock =
         reinterpret_cast<Effects_CurveBlock*>(curve_block.data());
@@ -146,6 +149,8 @@ struct ParticleFixture {
     texture.reserved12 = texture.reserved14 = texture.reserved16 = 4;
     particle.textureAnimation.program =
         reinterpret_cast<u_char*>(script.data());
+    VS::Effects::RecordLiveAnimationTable(
+        std::as_writable_bytes(std::span(script)));
     particle.motion.position.vz = 1024 << 12;
     particle.transparency = 16;
     Render_frameBuf = 0;
@@ -174,6 +179,7 @@ struct ParticleFixture {
     Render_nearClip = saved_near;
     Render_projectionDistance = saved_projection;
     VS::Effects::ForgetLivePackageExtents();
+    VS::Effects::ForgetLiveAnimationTable(script.data());
     Effects_package = saved_package;
     Effects_currentInstance = saved_instance;
     Effects_particlePool = saved_pool;
@@ -366,7 +372,7 @@ TEST_CASE("Particle texture reset clears native pointer tails without overflow",
     std::uint64_t after = 0x0FEDCBA987654321;
   } fixture;
   std::memset(&fixture.animation, 0xCD, sizeof fixture.animation);
-  Effects_ClearParticleTextureState(reinterpret_cast<int*>(&fixture.animation));
+  VS::Effects::LiveClearParticleTextureState(&fixture.animation);
   CHECK(fixture.before == 0x123456789ABCDEF0);
   CHECK(fixture.after == 0x0FEDCBA987654321);
   CHECK(fixture.animation.program == nullptr);
@@ -483,12 +489,15 @@ struct EmissionFixture : ParticleFixture {
   EmissionFixture() {
     package.block5Data = reinterpret_cast<Effects_PackageBlock5*>(&definitions);
     package.block2Data = programs.data();
+    VS::Effects::RecordLiveAnimationTable(
+        std::as_writable_bytes(std::span(programs)));
     auto& definition = definitions.entries[0];
     definition.intervalRange[0] = definition.intervalRange[1] = 1;
     definition.countRange[0] = definition.countRange[1] = 1;
     Effects_usedParticleCount = 0;
     Effects_freeParticles = &particle;
   }
+  ~EmissionFixture() { VS::Effects::ForgetLiveAnimationTable(programs.data()); }
 
   void CheckTexture(const Effects_ParticleQuadSet& state) const {
     CHECK(state.textureAnimation.program ==
@@ -536,6 +545,8 @@ struct ChildEmissionFixture : EmissionFixture {
       parent.textureAnimation.program =
           reinterpret_cast<u_char*>(terminal.data());
       parent.textureAnimation.textureInfo = &info;
+      VS::Effects::RecordLiveAnimationTable(
+          std::as_writable_bytes(std::span(terminal)));
     }
     Effects_particlePool = nodes.data();
     Effects_particleCapacity = static_cast<int>(nodes.size());
@@ -549,6 +560,7 @@ struct ChildEmissionFixture : EmissionFixture {
     Effects_particleGravity = saved_gravity;
     Effects_particleDrag = saved_drag;
     Effects_curveSamples[0] = saved_sample;
+    VS::Effects::ForgetLiveAnimationTable(terminal.data());
   }
 
   void CheckChildCoordinates() const {
@@ -614,7 +626,7 @@ TEST_CASE(
   const auto trigger = GENERATE(ChildTrigger::kTick, ChildTrigger::kLifetimeEnd,
                                 ChildTrigger::kTextureEnd);
   ChildEmissionFixture fixture(trigger);
-  REQUIRE(Effects_TickEffectParticles(&fixture.instance) == 1);
+  REQUIRE(VS::Effects::LiveTickEffectParticles(&fixture.instance) == 1);
   REQUIRE(fixture.instance.particles == &fixture.nodes[1]);
   fixture.CheckChildCoordinates();
   fixture.CheckChildAppearance();
@@ -937,7 +949,7 @@ TEST_CASE("Particle rendering flags cannot invent target attraction",
   particle.textureAnimation.program = program.data();
   particle.textureAnimation.textureInfo = &texture;
   particle.motion.velocity.vx = 4096;
-  Effects_IntegrateParticleMotion(&particle);
+  VS::Effects::LiveIntegrateParticleMotion(&particle);
   CHECK(particle.motion.position.vx == 4096);
   CHECK(particle.motion.position.vy == 0);
   CHECK(particle.motion.position.vz == 0);
@@ -955,7 +967,7 @@ TEST_CASE("Particle attraction uses its native target and signed strength",
   auto& particle = fixture.particle;
   particle.attractionTarget[axis] = 32;
   particle.attraction = GENERATE(-4096, 0, 4096);
-  Effects_IntegrateParticleMotion(&particle);
+  VS::Effects::LiveIntegrateParticleMotion(&particle);
   const std::array force{particle.motion.force.vx, particle.motion.force.vy,
                          particle.motion.force.vz};
   for (int component = 0; component < 3; ++component) {
@@ -975,7 +987,7 @@ TEST_CASE("Linked particles retain independent native attraction state",
   second.attractionTarget[2] = 32;
   fixture.particle.emitFlags = 0x20000;
   fixture.particle.next = &second;
-  Effects_IntegrateParticleMotion(&fixture.particle);
+  VS::Effects::LiveIntegrateParticleMotion(&fixture.particle);
   CHECK(fixture.particle.motion.force.vx == 0);
   CHECK(fixture.particle.motion.force.vy == 0);
   CHECK(fixture.particle.motion.force.vz == 0);

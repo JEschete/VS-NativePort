@@ -4,6 +4,7 @@
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Package.h"
@@ -78,8 +79,8 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* renderer_slot, u_i
         state->angle = 0;
         state->age = 0;
         effect = &Effects_package->block5Data->definitions[state->effect];
-        Effects_ClearParticleTextureState((int*)(&state->texture));
-        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);
+        VS::Effects::LiveClearParticleTextureState(&state->texture);
+        VS::Effects::LiveInitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);
         break;
 
     case 2: {
@@ -217,7 +218,7 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* renderer_slot, u_i
             }
         }
 
-        Effects_AdvanceParticleTextureAnimation(&state->texture);
+        VS::Effects::LiveAdvanceParticleTextureAnimation(&state->texture);
         texture = &Effects_package->textures[state->texture.textureInfo->dataIndex];
         for (column = 0; column < 17; ++column) {
             v[column] = texture->v + ((texture->h * column) / 16);

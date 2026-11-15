@@ -710,6 +710,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveReleaseAllEffectParticles": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
     "VS::Effects::LiveSetParticleGravity": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
     "VS::Effects::LiveSetParticleDrag": r"Native\Game\include\Effects\ParticlePoolLive.hpp",
+    "VS::Effects::LiveStepParticleEndpointTowardStart": r"Native\Game\include\Effects\ParticleMotionLive.hpp",
+    "VS::Effects::LiveSetParticleSpawnPosition": r"Native\Game\include\Effects\ParticleMotionLive.hpp",
+    "VS::Effects::LiveTickEffectParticles": r"Native\Game\include\Effects\ParticleMotionLive.hpp",
+    "VS::Effects::LiveIntegrateParticleMotion": r"Native\Game\include\Effects\ParticleMotionLive.hpp",
+    "VS::Effects::LiveClearParticleTextureState": r"Native\Game\include\Effects\ParticleTextureAnimationLive.hpp",
+    "VS::Effects::LiveInitializeParticleTextureAnimation": r"Native\Game\include\Effects\ParticleTextureAnimationLive.hpp",
+    "VS::Effects::LiveAdvanceParticleTextureAnimation": r"Native\Game\include\Effects\ParticleTextureAnimationLive.hpp",
     **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
        for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
@@ -2729,6 +2736,13 @@ OWNED_CALL_BINDINGS["F01508"] = "VS::Effects::LiveReleaseEffectParticle"
 OWNED_CALL_BINDINGS["F01509"] = "VS::Effects::LiveReleaseAllEffectParticles"
 OWNED_CALL_BINDINGS["F01552"] = "VS::Effects::LiveSetParticleGravity"
 OWNED_CALL_BINDINGS["F01553"] = "VS::Effects::LiveSetParticleDrag"
+OWNED_CALL_BINDINGS["F01453"] = "VS::Effects::LiveStepParticleEndpointTowardStart"
+OWNED_CALL_BINDINGS["F01514"] = "VS::Effects::LiveSetParticleSpawnPosition"
+OWNED_CALL_BINDINGS["F01535"] = "VS::Effects::LiveTickEffectParticles"
+OWNED_CALL_BINDINGS["F01554"] = "VS::Effects::LiveIntegrateParticleMotion"
+OWNED_CALL_BINDINGS["F01590"] = "VS::Effects::LiveClearParticleTextureState"
+OWNED_CALL_BINDINGS["F01591"] = "VS::Effects::LiveInitializeParticleTextureAnimation"
+OWNED_CALL_BINDINGS["F01592"] = "VS::Effects::LiveAdvanceParticleTextureAnimation"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4270,6 +4284,13 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800D2904, "VS::Effects::LiveReleaseAllEffectParticles"),  # F01509
     ("BATTLE/BATTLE.PRG", 0x800D5260, "VS::Effects::LiveSetParticleGravity"),  # F01552
     ("BATTLE/BATTLE.PRG", 0x800D5294, "VS::Effects::LiveSetParticleDrag"),  # F01553
+    ("BATTLE/BATTLE.PRG", 0x800CFAAC, "VS::Effects::LiveStepParticleEndpointTowardStart"),  # F01453
+    ("BATTLE/BATTLE.PRG", 0x800D2A38, "VS::Effects::LiveSetParticleSpawnPosition"),  # F01514
+    ("BATTLE/BATTLE.PRG", 0x800D4C18, "VS::Effects::LiveTickEffectParticles"),  # F01535
+    ("BATTLE/BATTLE.PRG", 0x800D52A4, "VS::Effects::LiveIntegrateParticleMotion"),  # F01554
+    ("BATTLE/BATTLE.PRG", 0x800D6CCC, "VS::Effects::LiveClearParticleTextureState"),  # F01590
+    ("BATTLE/BATTLE.PRG", 0x800D6CF0, "VS::Effects::LiveInitializeParticleTextureAnimation"),  # F01591
+    ("BATTLE/BATTLE.PRG", 0x800D6D24, "VS::Effects::LiveAdvanceParticleTextureAnimation"),  # F01592
     ("MENU/MENU3.PRG", 0x8010296C, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENUB.PRG", 0x80104F98, "VS::Menu::Inventory::SetLivePanelVisibility"),  # F02566
     ("MENU/MENU3.PRG", 0x80102988, "VS::Menu::Inventory::PollLiveDetailsPaging"),  # F02567
@@ -4497,26 +4518,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
          "without changing nonzero scaling, particle emission or RNG consumption."),
     ],
-    "F01535": [
-        ("    /* The original caller supplies arguments to this argument-free wrapper. */\n", "",
-         "the retained assembly renderer now has an explicit native particle-list contract"),
-        ("((void (*)())VS::Effects::DrawEffectParticleList)(arg0->particles, (void*)((uintptr_t)Core_ScratchBase() + 0x15C));",
-         "VS::Effects::DrawLiveEffectParticleList(arg0->particles);",
-         "F01593 typed core takes pool indices and a renderer; the generated caller uses the live binding"),
-        ("        ++node->age;\n",
-         "        ++node->age;\n"
-         "        Effects_PluginEffectState parent = {0};\n"
-         "        parent.position.vx = node->motion.position.vx;\n"
-         "        parent.position.vy = node->motion.position.vy;\n"
-         "        parent.position.vz = node->motion.position.vz;\n"
-         "        parent.transparency = node->transparency;\n"
-         "        parent.variant = node->opaque61Bit0;\n",
-         "project native particle fields into the existing child-emission context; "
-         "the original PS1 prefix alias no longer matches after pointer widening"),
-        ("(void*)node", "&parent",
-         "tick, lifetime-end and texture-end emissions must not reinterpret "
-         "native particle links and texture pointers as parent coordinates or appearance"),
-    ],
     "F00731": [
         ("*ot = ((u_long)prim << 8) >> 8;", "*ot = LegacyGpu_Handle(prim);",
          "overhead awareness frame links must retain native packet ownership, not truncated addresses"),
@@ -4607,15 +4608,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("VS::Core::Memory::AllocateFromHighEnd(0x6C00U)",
          "VS::Core::Memory::AllocateFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace))",
          "#370: both rebuilt and pending row workspaces require the native pointer-width extent"),
-    ],
-    "F01554": [
-        ("((Effects_ParticleAttractionView*)node)->attraction",
-         "node->attraction",
-         "Read native attraction strength rather than emitter flags at the old PS1 offset"),
-        *[(f"((Effects_ParticleAttractionView*)node)->target{axis}",
-           f"node->attractionTarget[{index}]",
-           "Read the native particle target rather than texture-animation pointer bytes")
-          for index, axis in enumerate("XYZ")],
     ],
     "F01279": [
         ("void Battle_InitSphere(void)",
@@ -4878,26 +4870,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("        Render_activeTextBoxIndex = id;\n\n", "",
          "#276 row 6: the text box drawers take the box's layers from its index in Menu_textBoxes (D_800F4E80 retired)"),
     ],
-    "F01590": [
-        ("    arg0[0] = 0;\n    arg0[1] = 0;\n    arg0[2] = 0;\n"
-         "    arg0[3] = 0;\n    arg0[4] = 0;\n    arg0[5] = 0;\n"
-         "    arg0[6] = 0;\n    arg0[7] = 0;",
-         "    Effects_ParticleTextureAnimation* state = (Effects_ParticleTextureAnimation*)arg0;\n"
-         "    *state = (Effects_ParticleTextureAnimation){0};",
-         "func_800D6CCC: retain the existing C entry contract but clear the complete native texture state, including widened pointers"),
-    ],
-    "F01591": [
-        ("    arg0->textureIndex = textureIndex;",
-         "    if (textureIndex < 0 || textureIndex >= Effects_package->block1TableCount ||\n"
-         "        textureIndex >= 4 || Effects_package->textureInfoTable[textureIndex] == NULL) {\n"
-         '        Core_Debugf("effects.texture", "unbound texture=%d tables=%d program=%d context=%s request_effect=%u",\n'
-         "            textureIndex, Effects_package->block1TableCount, arg2,\n"
-         '            Effects_package == &Effects_actionPackage ? "primary" : "secondary",\n'
-         "            (unsigned)(Effects_package == &Effects_actionPackage ?\n"
-         "                Effects_actionRequest.effectId : Effects_secondaryRequest.effectId));\n"
-         "    }\n    arg0->textureIndex = textureIndex;",
-         "record unavailable texture-group provenance before investigating malformed frames; no fallback or changed playback"),
-    ],
     "F01861": [
         ("        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);",
          "        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);\n"
@@ -4916,22 +4888,20 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "        }",
          "capture the exact closed-ring definition and packed arguments for an unavailable texture group without changing rendering"),
     ],
-    "F01592": [
-        ("        case 0:\n            arg0->textureInfo =",
-         "        case 0:\n"
-         "            if (arg0->textureIndex >= 4 ||\n"
-         "                arg0->textureIndex >= Effects_package->block1TableCount ||\n"
-         "                Effects_package->textureInfoTable[arg0->textureIndex] == NULL) {\n"
-         '                Core_Warnf("effects.texture", "unbound frame table=%u tables=%d cursor=%u word=0x%08X context=%s request_effect=%u program=%p previous=%p",\n'
-         "                    (unsigned)arg0->textureIndex, Effects_package->block1TableCount,\n"
-         "                    (unsigned)arg0->cursor, (unsigned)w,\n"
-         '                    Effects_package == &Effects_actionPackage ? "primary" : "secondary",\n'
-         "                    (unsigned)(Effects_package == &Effects_actionPackage ?\n"
-         "                        Effects_actionRequest.effectId : Effects_secondaryRequest.effectId),\n"
-         "                    (void*)arg0->program, (void*)arg0->textureInfo);\n"
-         "            }\n"
-         "            arg0->textureInfo =",
-         "capture an unavailable frame table at consumption time to distinguish context changes from initial binding"),
+    "F01920": [
+        ("VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));",
+         "VS::Effects::LiveClearParticleTextureState(&state->texture);",
+         "F01590 is typed: the ring clears its texture-animation record, not int storage"),
+    ],
+    "F02209": [
+        ("VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));",
+         "VS::Effects::LiveClearParticleTextureState(&state->texture);",
+         "F01590 is typed: the ring clears its texture-animation record, not int storage"),
+    ],
+    "F02398": [
+        ("VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));",
+         "VS::Effects::LiveClearParticleTextureState(&state->texture);",
+         "F01590 is typed: the ring clears its texture-animation record, not int storage"),
     ],
     "F00836": [
         ("    i = 0;\n\n    while ((temp_v0_2 = func_800A3C00",
@@ -5905,15 +5875,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     *[(r"^Field::AddRoomGeometryDepthBias$", rf"\b{old}\b", new,
        "2842C.c:596 and event signed-byte operand verify upper-halfword depth bias")
       for old, new in (("arg1", "depth_bias"), ("temp_v0", "group_halfwords"))],
-    (r"^Effects::ClearParticleTextureState$", r"\barg0\b", "storage",
-     "5BF94.c:8501 existing C entry receives native texture-state storage"),
-    (r"^Effects::(?:Initialize|Advance)ParticleTextureAnimation$",
-     r"\barg0\b", "animation",
-     "5BF94.c:8513/8521 verified texture-animation state ownership"),
-    (r"^Effects::InitializeParticleTextureAnimation$", r"\barg2\b", "programIndex",
-     "5BF94.c:8513 verified block2 halfword program-offset selection"),
-    (r"^Effects::AdvanceParticleTextureAnimation$", r"\bw\b", "command",
-     "5BF94.c:8521 verified frame/offset/loop/end command word"),
     *[(r"^Menu::Score::QueueEnemyModelRead$", rf"\b{old}\b", new,
        "592C.c:171 verified source-file and palette-variant selection meanings")
       for old, new in (("id", "zudId"), ("cdFile", "sourceFile"),

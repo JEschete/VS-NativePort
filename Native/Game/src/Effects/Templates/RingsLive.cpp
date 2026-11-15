@@ -17,6 +17,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/ClosedRing.hpp"
 #include "Effects/Templates/Ring.hpp"
 #include "Effects/Templates/RingCore.hpp"
@@ -398,9 +399,8 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
                  state.definition_index, table, tables);
   }
   // Clearing the record also cleared the texture animation, as
-  // Effects_ClearParticleTextureState did.
-  // Cross-slice calls: retarget when those rows are promoted.
-  Effects_InitializeParticleTextureAnimation(&live->texture, table, program);
+  // func_800D6CCC did.
+  LiveInitializeParticleTextureAnimation(&live->texture, table, program);
 }
 
 std::optional<RingTickInputs> LiveRingHost::BeginTick(
@@ -490,8 +490,7 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
                      std::cmp_less(table, Effects_package->block1TableCount) &&
                      Effects_package->textureInfoTable[table] != nullptr;
   if (bound) {
-    // Cross-slice calls: retarget when those rows are promoted.
-    Effects_AdvanceParticleTextureAnimation(&animation);
+    LiveAdvanceParticleTextureAnimation(&animation);
   }
   if (!bound || animation.textureInfo == nullptr) {
     if (ShouldReport(refused_textures)) {

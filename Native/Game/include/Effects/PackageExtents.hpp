@@ -44,4 +44,19 @@ void ForgetLiveEffectPrograms(const void* programs);
 // The recorded program block starting at `programs`; empty when none is.
 [[nodiscard]] std::span<const std::byte> LiveEffectPrograms(
     const void* programs);
+
+// Bound block-2 particle animation tables. A texture animation keeps a bare
+// pointer into its table, as the original did, so its program's extent is
+// looked up by the table containing that pointer. Recording a table withdraws
+// every recorded table it overlaps, so a reused buffer has one extent; with
+// every extent in use, the oldest is replaced.
+void RecordLiveAnimationTable(std::span<std::byte> table);
+// Withdraws the animation table starting at `table`.
+void ForgetLiveAnimationTable(const void* table);
+// The recorded animation table starting at `table`; empty when none is.
+[[nodiscard]] std::span<std::byte> LiveAnimationTable(const void* table);
+// The bytes from `program` to the end of the recorded animation table that
+// contains it; empty when none does.
+[[nodiscard]] std::span<const std::byte> LiveAnimationProgram(
+    const void* program);
 }  // namespace VS::Effects

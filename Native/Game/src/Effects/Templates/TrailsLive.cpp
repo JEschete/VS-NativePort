@@ -18,6 +18,7 @@
 #include "Core/RandomLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailCore.hpp"
@@ -503,8 +504,7 @@ std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
   const std::size_t table = animation.textureIndex;
   const Effects_PackageTextureInfo* frame = nullptr;
   if (TextureTableBound(table)) {
-    // Cross-slice calls: retarget when those rows are promoted.
-    Effects_AdvanceParticleTextureAnimation(&animation);
+    LiveAdvanceParticleTextureAnimation(&animation);
     frame = animation.textureInfo;
   }
   if (frame == nullptr) {

@@ -34,4 +34,6 @@ void LiveReleaseAllEffectParticles(Effects_EffectInstance* instance);
 void LiveSetParticleGravity(Effects_ParticleGravity* gravity);
 // func_800D5294 (5BF94.c:7828).
 void LiveSetParticleDrag(int* drag);
+// The forces Effects_particleGravity and Effects_particleDrag hold.
+[[nodiscard]] ParticleForces LoadLiveParticleForces();
 }  // namespace VS::Effects

@@ -20,6 +20,8 @@
 #include "Core/RandomLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleMotion.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/ParticleCore.hpp"
 #include "Effects/Templates/ParticleDispatch.hpp"
 #include "Legacy/Psx.h"
@@ -422,11 +424,10 @@ void LiveParticleHost::Create(const ParticleSetState& state,
   }
   if (textured) {
     // Clearing the record also cleared the texture animation, as
-    // Effects_ClearParticleTextureState did.
-    // Cross-slice call: retarget when that row is promoted.
-    Effects_InitializeParticleTextureAnimation(&live->textureAnimation,
-                                               definition->textureIndex,
-                                               definition->animationId);
+    // func_800D6CCC did.
+    VS::Effects::LiveInitializeParticleTextureAnimation(
+        &live->textureAnimation, definition->textureIndex,
+        definition->animationId);
   }
 }
 
@@ -598,8 +599,7 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
                      std::cmp_less(table, Effects_package->block1TableCount) &&
                      Effects_package->textureInfoTable[table] != nullptr;
   if (bound) {
-    // Cross-slice call: retarget when that row is promoted.
-    Effects_AdvanceParticleTextureAnimation(&animation);
+    VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   }
   if (!bound || animation.textureInfo == nullptr) {
     if (ShouldReport(refused_textures)) {
@@ -673,13 +673,15 @@ void LiveParticleHost::SubmitLine(const ParticleLine& line,
     return;
   }
   const auto [entry, packet] = *reserved;
+  // The original stepped the linked packet's second point (func_800CFAAC);
+  // the step is applied before encoding, which the link does not read.
+  ParticleLine stepped = line;
+  stepped.screens[1] =
+      VS::Effects::StepScreenPointToward(line.screens[1], line.screens[0]);
   std::ranges::copy(
-      EncodeParticleLinePacket(line, static_cast<std::uint32_t>(*entry)),
+      EncodeParticleLinePacket(stepped, static_cast<std::uint32_t>(*entry)),
       packet);
   Link(entry, packet, kParticleLineWords);
-  // Cross-slice call: retarget when that row is promoted.
-  Effects_StepParticleEndpointTowardStart(
-      reinterpret_cast<Effects_ParticleEndpointView*>(packet));
 }
 
 using ParticleInstance = bool (*)(ParticleCommand, std::int32_t,

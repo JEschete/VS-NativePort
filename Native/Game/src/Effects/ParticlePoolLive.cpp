@@ -64,8 +64,8 @@ class LiveParticleRecords final : public ParticleRecords {
     particle.next = next;
   }
   void Renew(Particle& particle) override {
-    // Clears the texture animation, as Effects_ClearParticleTextureState
-    // (func_800D6CCC) does.
+    // Clears the texture animation, as func_800D6CCC
+    // (LiveClearParticleTextureState) does.
     particle.textureAnimation = {};
     particle.age = kUnagedParticle;
   }
@@ -124,11 +124,7 @@ class LiveList {
 // The forces, loaded for one call and stored back.
 class LiveForces {
  public:
-  LiveForces()
-      : forces_{.gravity = {.x = Effects_particleGravity.x,
-                            .y = Effects_particleGravity.y,
-                            .z = Effects_particleGravity.z},
-                .drag = Effects_particleDrag} {}
+  LiveForces() : forces_(LoadLiveParticleForces()) {}
   LiveForces(const LiveForces&) = delete;
   LiveForces& operator=(const LiveForces&) = delete;
   LiveForces(LiveForces&&) = delete;
@@ -235,5 +231,12 @@ void LiveSetParticleDrag(int* drag) {
   }
   LiveForces forces;
   SetParticleDrag(forces.Forces(), *drag);
+}
+
+ParticleForces LoadLiveParticleForces() {
+  return {.gravity = {.x = Effects_particleGravity.x,
+                      .y = Effects_particleGravity.y,
+                      .z = Effects_particleGravity.z},
+          .drag = Effects_particleDrag};
 }
 }  // namespace VS::Effects

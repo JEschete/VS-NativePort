@@ -768,6 +768,9 @@
     <ClCompile Include="src\OptionsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ParticleMotionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ParticlePoolTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

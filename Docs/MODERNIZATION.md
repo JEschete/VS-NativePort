@@ -28,17 +28,17 @@ architecture changes rather than per-function work, so this ledger is what track
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
 | 26: #59 Event VM results and execution | 0 | 71 | 1,444 | 188 | 49 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
-| 31: #61 Typed effects and playback sessions | 0 | 72 | 4,168 | 725 | 42 | 0 |
+| 31: #61 Typed effects and playback sessions | 0 | 65 | 4,003 | 726 | 41 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 268 | 18,890 | 429 | 216 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 452 | 26,669 | 3417 | 318 | 0 |
+| **Total** | 5 | 445 | 26,504 | 3418 | 317 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,278 |
+| done | 3,285 |
 | in-progress | 4 |
-| todo | 453 |
+| todo | 446 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (5 active, 46 done, 3 planned); open functions in no slice: 0.
 
@@ -82,7 +82,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 36 | event-script-audio-dialog-effects | done | self | 10 | 0 | 0 |
 | 37 | effects-runtime-vm | done | - | 3 | 0 | 0 |
 | 38 | effects-resources-transforms | done | self | 8 | 0 | 0 |
-| 39 | effects-particles-screen-plugins | active | - | 11 | 72 | 4,168 |
+| 39 | effects-particles-screen-plugins | active | - | 11 | 65 | 4,003 |
 | 40 | effects-particle-templates | done | self | 8 | 0 | 0 |
 | 41 | effects-trail-templates | done | self | 11 | 0 | 0 |
 | 42 | effects-trail-nine-templates | done | self | 7 | 0 | 0 |
@@ -101,11 +101,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 112 |
-| Referenced by the original-address module table | 1 | 176 |
+| Called from generated code | 1 | 109 |
+| Referenced by the original-address module table | 1 | 169 |
 | Calls an SDK shim | 0 | 70 |
 | Signature uses SDK integer types or `void*` | 0 | 91 |
-| Compiled with relaxed settings | 0 | 452 |
+| Compiled with relaxed settings | 0 | 445 |
 
 Function bodies: 3,735 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 

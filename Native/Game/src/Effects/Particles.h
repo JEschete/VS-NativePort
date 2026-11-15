@@ -276,14 +276,7 @@ extern Effects_Particle* Effects_particlePool;
 extern int Effects_particlePoolReferences;
 extern int Effects_particleDrag;
 extern Effects_ParticleGravity Effects_particleGravity;
-void Effects_StepParticleEndpointTowardStart(Effects_ParticleEndpointView* particle_endpoints);
-void Effects_SetParticleSpawnPosition(Effects_ParticleEmitterScratch* emitter_scratch, Effects_Particle* particle_node);
 void Effects_EmitParticleEvent(
     Effects_EffectInstance* effect_instance, int event, int transparency_override, int particle_variant, Effects_PluginEffectState* parent);
-int Effects_TickEffectParticles(Effects_EffectInstance* effect_instance);
-void Effects_IntegrateParticleMotion(Effects_Particle* node);
-void Effects_ClearParticleTextureState(int* storage);
-void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* animation, int textureIndex, int programIndex);
-void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* animation);
 
 #endif // VS_EFFECTS_PARTICLES_H_DECLS

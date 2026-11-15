@@ -190,17 +190,56 @@ def output_problems(names, native: list[int], observation: dict, allowed: list[t
     return problems + store_problems(observation["stores"], allowed)
 
 
+def mode_run(runners: dict, machine: Machine, value: dict, entry: int) -> tuple[dict, list[int]]:
+    """Runs value["mode"]'s runner, `(machine, value, entry, calls) -> (values, names, inputs)`, and returns
+    its recorded observation with the driver's inputs, which start with the mode."""
+    calls: list[list[int]] = []
+    values, names, inputs = runners[value["mode"]](machine, value, entry, calls)
+    return recorded_observation(machine, values, names, calls), [value["mode"], *inputs]
+
+
 def mode_case(function: int, mode: int, entry: int, end: int, mutants: dict, *, harness: ModuleType) -> dict:
     """Case-module globals for one original that a mode-switched `harness` compares. The harness provides DRIVER,
-    SOURCES and MODULES, `vector(rng, number, mode)`, `run(machine, value, entry)`, `check` and `describe`."""
+    SOURCES and MODULES, `vector(rng, number, mode)` and `describe`; `run(machine, value, entry)` or a RUNNERS
+    table for `mode_run`; and `check` or `allowed_stores(value)` for `printed_problems`."""
+    run = getattr(harness, "run", None) or (lambda machine, value, at: mode_run(harness.RUNNERS, machine, value, at))
+    check = getattr(harness, "check", None) or (
+        lambda image, value, observation, native, reference:
+            printed_problems(observation, native, harness.allowed_stores(value)))
     return {
         "ID": f"F{function:05}", "ENTRY": entry, "END": end,
         "DRIVER": harness.DRIVER, "SOURCES": harness.SOURCES, "MODULES": harness.MODULES, "CXX_STANDARD": "c++latest",
         "VECTORS": 256, "SEED": function, "MUTANT_VECTORS": 64, "MUTANTS": mutants,
         "vector": lambda rng, number: harness.vector(rng, number, mode),
-        "run": lambda machine, value: harness.run(machine, value, entry),
-        "check": harness.check, "describe": harness.describe,
+        "run": lambda machine, value: run(machine, value, entry),
+        "check": check, "describe": harness.describe,
     }
+
+
+NULL_RECORD = -1
+OTHER_RECORD = 999
+
+
+@dataclass(frozen=True)
+class Records:
+    """`count` fixture records of `stride` bytes from `base`. Drivers print a link as its record number:
+    NULL_RECORD for null and OTHER_RECORD for an address no record has."""
+
+    base: int
+    stride: int
+    count: int
+
+    def at(self, index: int) -> int:
+        return self.base + index * self.stride
+
+    def number(self, address: int) -> int:
+        if address == 0:
+            return NULL_RECORD
+        index, rest = divmod(address - self.base, self.stride)
+        return index if rest == 0 and 0 <= index < self.count else OTHER_RECORD
+
+    def address(self, record: int) -> int:
+        return 0 if record == NULL_RECORD else self.at(record)
 
 
 # Vector helpers for the battle-AI cases. A tile word holds x in byte 0 and z in byte 2; bytes 1

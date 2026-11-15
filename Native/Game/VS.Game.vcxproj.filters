@@ -1089,6 +1089,12 @@
     <ClCompile Include="src\Effects\PackageExtentsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\ParticleMotion.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\ParticleMotionLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ParticlePool.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1107,6 +1113,12 @@
     <ClInclude Include="src\Effects\Particles.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\ParticleTextureAnimation.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\ParticleTextureAnimationLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\Plugins\Plg005.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
@@ -3399,6 +3411,12 @@
     <ClInclude Include="include\Effects\PackageExtents.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
+    <ClInclude Include="include\Effects\ParticleMotion.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ParticleMotionLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
     <ClInclude Include="include\Effects\ParticlePool.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
@@ -3409,6 +3427,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ParticleRenderLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ParticleTextureAnimation.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ParticleTextureAnimationLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\PrimaryEffect.hpp">

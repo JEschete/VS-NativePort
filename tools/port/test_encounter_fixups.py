@@ -2691,22 +2691,18 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("*(int*)&Audio_Seq_pendingMusicData", live)
 
     def test_particle_child_events_project_native_parent_fields(self):
-        source = """        ++node->age;
-        Effects_EmitParticleEvent(arg0, node->tickEvent - 1, 0, 0, (void*)node);
-        Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, (void*)node);
-        Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, (void*)node);"""
-        for old, new, _ in copy_fixups.FIXES["F01535"]:
-            source = source.replace(old, new)
-        self.assertIn("Effects_PluginEffectState parent = {0};", source)
-        for axis in "xyz":
-            self.assertIn(
-                f"parent.position.v{axis} = node->motion.position.v{axis};",
-                source,
-            )
-        self.assertIn("parent.transparency = node->transparency;", source)
-        self.assertIn("parent.variant = node->opaque61Bit0;", source)
-        self.assertEqual(source.count("&parent"), 3)
-        self.assertNotIn("(void*)node", source)
+        # #276 Group N: the tick (F01535) is owned; its Live host builds the
+        # parent from the particle's native fields instead of passing it.
+        self.assertNotIn("F01535", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Effects\ParticleMotionLive.cpp").read_text(encoding="utf-8")
+        emit = live[live.index("void Emit(Particle& particle"):]
+        emit = emit[:emit.index("\n  }\n")]
+        self.assertIn("Effects_PluginEffectState parent{};", emit)
+        self.assertIn("StoreWide(parent.position, Wide(particle.motion.position));", emit)
+        self.assertIn("parent.transparency = particle.transparency;", emit)
+        self.assertIn("parent.variant = particle.opaque61Bit0;", emit)
+        self.assertIn("Effects_EmitParticleEvent(instance_, event, 0, 0, &parent);", emit)
 
     def test_original_occlusion_queries_use_the_owned_terrain_decoder(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
@@ -3255,23 +3251,35 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("SurfaceTextureSpan::kSixteenColumns", blocks["Surface2"])
 
     def test_texture_reset_uses_the_complete_native_state(self):
-        source = "\n".join(f"    arg0[{index}] = 0;" for index in range(8))
-        for old, new, _ in copy_fixups.FIXES["F01590"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertIn("*state = (Effects_ParticleTextureAnimation){0};", source)
-        self.assertNotIn("arg0[", source)
+        # #276 Group N: the clear (F01590) is owned and typed; the ring
+        # plugins pass their texture record instead of int storage.
+        self.assertNotIn("F01590", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Effects\ParticleTextureAnimationLive.cpp").read_text(encoding="utf-8")
+        clear = live[live.index("void LiveClearParticleTextureState("):]
+        self.assertIn("*animation = {};", clear[:clear.index("\n}\n")])
+        source = "        VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));"
+        for fid in ("F01920", "F02209", "F02398"):
+            with self.subTest(fid=fid):
+                fixed = source
+                for old, new, _ in copy_fixups.FIXES[fid]:
+                    self.assertIn(old, fixed)
+                    fixed = fixed.replace(old, new)
+                self.assertEqual(
+                    fixed, "        VS::Effects::LiveClearParticleTextureState(&state->texture);")
 
     def test_unbound_texture_diagnostics_do_not_invent_a_frame(self):
-        source = "    arg0->textureIndex = textureIndex;"
-        for old, new, _ in copy_fixups.FIXES["F01591"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertIn("Core_Debugf", source)
-        self.assertIn("request_effect=%u", source)
-        self.assertNotIn("Effects_currentInstance->context.effectId", source)
-        self.assertNotIn("return", source)
-        self.assertTrue(source.endswith("arg0->textureIndex = textureIndex;"))
+        # #276 Group N: the restart (F01591) is owned; its Live binding
+        # reports an unbound table and still restarts the animation.
+        self.assertNotIn("F01591", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Effects\ParticleTextureAnimationLive.cpp").read_text(encoding="utf-8")
+        start = live.index("void LiveInitializeParticleTextureAnimation(")
+        source = live[start:live.index("\n}\n", start)]
+        self.assertIn("BoundTextureTable(texture_index) == nullptr", source)
+        self.assertIn("request_effect={}", source)
+        self.assertLess(source.index("VS_LOG_DEBUG"), source.index("RestartTextureAnimation("))
+        self.assertNotIn("Effects_currentInstance", source)
         source = "        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);"
         for old, new, _ in copy_fixups.FIXES["F01861"]:
             self.assertIn(old, source)
@@ -3280,37 +3288,36 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("return", source)
 
     def test_texture_provenance_does_not_read_secondary_only_instance_metadata(self):
-        for fid in ("F01591", "F01592", "F01861"):
-            with self.subTest(fid=fid):
-                replacement = "\n".join(new for _, new, _ in copy_fixups.FIXES[fid])
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Effects\ParticleTextureAnimationLive.cpp").read_text(encoding="utf-8")
+        replacements = {
+            "F01861": "\n".join(new for _, new, _ in copy_fixups.FIXES["F01861"]),
+            "ParticleTextureAnimationLive": live,
+        }
+        for name, replacement in replacements.items():
+            with self.subTest(name=name):
                 self.assertNotIn("Effects_currentInstance", replacement)
                 self.assertIn("Effects_secondaryRequest.effectId", replacement)
                 self.assertIn("Effects_actionRequest.effectId", replacement)
 
     def test_texture_names_preserve_state_and_stream_roles(self):
-        examples = (
-            (
-                "Effects::ClearParticleTextureState",
-                "void clear(int* arg0) { state = arg0; }",
-                "void clear(int* storage) { state = storage; }",
-            ),
-            (
-                "Effects::InitializeParticleTextureAnimation",
-                "void init(State* arg0, int textureIndex, int arg2) { arg0->program = table[arg2 + 2]; }",
-                "void init(State* animation, int textureIndex, int programIndex) { animation->program = table[programIndex + 2]; }",
-            ),
-            (
-                "Effects::AdvanceParticleTextureAnimation",
-                "void advance(State* arg0) { int w = read(arg0); switch (w & 0xF0000000) {} }",
-                "void advance(State* animation) { int command = read(animation); switch (command & 0xF0000000) {} }",
-            ),
-        )
-        for name, source, expected in examples:
+        # #276 Group N: the texture animation calls are owned Live adapters
+        # with semantic parameters, so no rename pattern targets them.
+        for name in (
+            "ClearParticleTextureState",
+            "InitializeParticleTextureAnimation",
+            "AdvanceParticleTextureAnimation",
+        ):
             with self.subTest(name=name):
-                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
-                        source = re.sub(pattern, replacement, source)
-                self.assertEqual(source, expected)
+                self.assertFalse([row for row, _, _, _ in copy_fixups.REGEX_FIXES if name in row])
+        root = Path(__file__).resolve().parents[2]
+        header = (root / r"Native\Game\include\Effects\ParticleTextureAnimationLive.hpp").read_text(encoding="utf-8")
+        self.assertIn("void LiveClearParticleTextureState(", header)
+        self.assertRegex(
+            header,
+            r"LiveInitializeParticleTextureAnimation\(\s*Effects_ParticleTextureAnimation\* animation,"
+            r"\s*int texture_index,\s*int program_index\)")
+        self.assertIn("void LiveAdvanceParticleTextureAnimation(", header)
 
     def test_shared_bank_retirement_unwinds_before_detaching_and_freeing(self):
         # #276 slice 20b: UnloadSharedSequence (F00279) is the typed core; generated callers bind the Live adapter.
@@ -4618,21 +4625,14 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertNotIn("0x8006CB04u", table)
 
     def test_particle_attraction_uses_native_fields_after_pointer_widening(self):
-        source = """damping = ((Effects_ParticleAttractionView*)node)->attraction;
-direction.vx = ((Effects_ParticleAttractionView*)node)->targetX - (state->x >> 12);
-direction.vy = ((Effects_ParticleAttractionView*)node)->targetY - (state->y >> 12);
-direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 12);
-"""
-        for old, new, _ in copy_fixups.FIXES["F01554"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertIn("damping = node->attraction;", source)
-        for index, axis in enumerate("xyz"):
-            self.assertIn(
-                f"direction.v{axis} = node->attractionTarget[{index}] - (state->{axis} >> 12);",
-                source,
-            )
-        self.assertNotIn("Effects_ParticleAttractionView", source)
+        # #276 Group N: the integrator (F01554) is owned; its Live records
+        # read the particle's native attraction fields.
+        self.assertNotIn("F01554", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Effects\ParticleMotionLive.cpp").read_text(encoding="utf-8")
+        self.assertIn(".target = {.x = particle.attractionTarget[0],", live)
+        self.assertIn(".attraction = particle.attraction}", live)
+        self.assertNotIn("Effects_ParticleAttractionView", live)
 
     def test_door_queries_keep_owned_native_pointer_storage(self):
         root = Path(__file__).resolve().parents[2]

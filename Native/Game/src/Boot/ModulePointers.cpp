@@ -65,7 +65,9 @@
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
@@ -492,14 +494,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CF830u, 0u, (void*)&Effects_FadeBoneTrails, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF92Cu, 0u, (void*)&Effects_ClampTrailTexturePoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CF988u, 0u, (void*)&Effects_MapTrailFramebufferTexture, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CFAACu, 0u, (void*)&Effects_StepParticleEndpointTowardStart, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D2A38u, 0u, (void*)&Effects_SetParticleSpawnPosition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D2ADCu, 0u, (void*)&Effects_EmitParticleEvent, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D4C18u, 0u, (void*)&Effects_TickEffectParticles, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D52A4u, 0u, (void*)&Effects_IntegrateParticleMotion, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&Effects_ClearParticleTextureState, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&Effects_InitializeParticleTextureAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&Effects_AdvanceParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8184u, 16u, (void*)&Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8194u, 32u, (void*)&Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81B4u, 16u, (void*)&Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor, 1u, 1u},
@@ -2008,6 +2003,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D2904u, 0u, (void*)&VS::Effects::LiveReleaseAllEffectParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5260u, 0u, (void*)&VS::Effects::LiveSetParticleGravity, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D5294u, 0u, (void*)&VS::Effects::LiveSetParticleDrag, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CFAACu, 0u, (void*)&VS::Effects::LiveStepParticleEndpointTowardStart, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D2A38u, 0u, (void*)&VS::Effects::LiveSetParticleSpawnPosition, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D4C18u, 0u, (void*)&VS::Effects::LiveTickEffectParticles, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D52A4u, 0u, (void*)&VS::Effects::LiveIntegrateParticleMotion, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&VS::Effects::LiveClearParticleTextureState, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&VS::Effects::LiveInitializeParticleTextureAnimation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&VS::Effects::LiveAdvanceParticleTextureAnimation, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010296Cu, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104F98u, 0u, (void*)&VS::Menu::Inventory::SetLivePanelVisibility, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80102988u, 0u, (void*)&VS::Menu::Inventory::PollLiveDetailsPaging, 0u, 0u, 0u},

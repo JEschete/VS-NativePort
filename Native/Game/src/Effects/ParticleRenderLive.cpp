@@ -18,6 +18,7 @@
 #include "Core/Log.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/ParticleRender.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -266,7 +267,7 @@ std::vector<std::size_t> CollectParticleSlots(const Effects_Particle* head) {
 class LiveParticleRenderer final : public ParticleRenderer {
  public:
   void AdvanceTextureAnimation(std::size_t particle) override {
-    Effects_AdvanceParticleTextureAnimation(&Node(particle).textureAnimation);
+    LiveAdvanceParticleTextureAnimation(&Node(particle).textureAnimation);
   }
 
   [[nodiscard]] std::optional<ParticleProjection> Project(

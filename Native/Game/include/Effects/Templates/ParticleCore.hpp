@@ -413,9 +413,9 @@ class ParticleSetHost {
   // drawn. The render stage calls it only for a textured set.
   [[nodiscard]] virtual std::optional<ParticleTexture> AdvanceTexture() = 0;
   virtual void SubmitQuad(const ParticleQuad& quad, std::int32_t depth) = 0;
-  // Submits the line, then moves its second point (`screens[1]`) one pixel
-  // toward its first, as Effects_StepParticleEndpointTowardStart did after
-  // the original linked each line.
+  // Submits the line with its second point (`screens[1]`) moved one pixel
+  // toward its first (StepScreenPointToward, Effects/ParticleMotion.hpp), as
+  // func_800CFAAC did after the original linked each line.
   virtual void SubmitLine(const ParticleLine& line, std::int32_t depth) = 0;
 };
 

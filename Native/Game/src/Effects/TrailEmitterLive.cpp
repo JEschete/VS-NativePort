@@ -18,6 +18,7 @@
 #include "Core/RandomLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailInit.hpp"
 #include "Effects/Templates/TrailRender.hpp"
@@ -399,9 +400,9 @@ void LiveTrailEmitterHost<Emitter>::Create(TrailEmitterPlan plan) {
   std::ranges::copy(samples,
                     reinterpret_cast<u_char*>(state) + kSamplesAt<Emitter>);
   Effects_ParticleTextureAnimation& texture = state->*Layout::kTexture;
-  Effects_ClearParticleTextureState(reinterpret_cast<int*>(&texture));
-  Effects_InitializeParticleTextureAnimation(&texture, definition->textureIndex,
-                                             definition->animationId);
+  LiveClearParticleTextureState(&texture);
+  LiveInitializeParticleTextureAnimation(&texture, definition->textureIndex,
+                                         definition->animationId);
 }
 
 template <typename Emitter>

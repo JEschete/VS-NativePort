@@ -279,6 +279,10 @@ void RecordExtents(const EffectPackageBlocks& blocks, const PackageWalk& walk) {
   if ((walk.bound_types & PackageBlockBit(PackageBlockType::kPrograms)) != 0) {
     RecordLiveEffectPrograms(blocks.programs);
   }
+  if ((walk.bound_types & PackageBlockBit(PackageBlockType::kAnimationTable)) !=
+      0) {
+    RecordLiveAnimationTable(blocks.animation_table);
+  }
 }
 
 void ReportWalk(const PackageWalk& walk) {

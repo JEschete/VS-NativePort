@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <span>
 
 #include "Effects/PackageExtents.hpp"
@@ -44,6 +45,32 @@ ProgramExtent* FindProgram(const void* data) {
   if (data == nullptr) return nullptr;
   const auto found = std::ranges::find(programs, data, &ProgramExtent::data);
   return found == programs.end() ? nullptr : &*found;
+}
+
+// The action and secondary packages' animation tables, with room for tables
+// rebound at other addresses and for test tables.
+constexpr std::size_t kAnimationTableCapacity = 8;
+
+struct AnimationTableExtent {
+  std::byte* data = nullptr;
+  std::size_t size = 0;
+  // Order of recording; the oldest extent is replaced when none is free.
+  std::uint64_t recorded = 0;
+
+  [[nodiscard]] std::uintptr_t Begin() const {
+    return reinterpret_cast<std::uintptr_t>(data);
+  }
+  [[nodiscard]] std::uintptr_t End() const { return Begin() + size; }
+};
+
+std::array<AnimationTableExtent, kAnimationTableCapacity> animation_tables{};
+std::uint64_t animation_records = 0;
+
+AnimationTableExtent* FindAnimationTable(const void* data) {
+  if (data == nullptr) return nullptr;
+  const auto found =
+      std::ranges::find(animation_tables, data, &AnimationTableExtent::data);
+  return found == animation_tables.end() ? nullptr : &*found;
 }
 
 PackageExtentRecord* Find() {
@@ -117,5 +144,43 @@ std::span<const std::byte> LiveEffectPrograms(const void* data) {
   const auto* extent = FindProgram(data);
   if (extent == nullptr) return {};
   return {extent->data, extent->size};
+}
+
+void RecordLiveAnimationTable(std::span<std::byte> table) {
+  if (table.data() == nullptr) return;
+  const AnimationTableExtent recorded{.data = table.data(),
+                                      .size = table.size(),
+                                      .recorded = ++animation_records};
+  for (auto& extent : animation_tables) {
+    if (extent.data != nullptr && extent.Begin() < recorded.End() &&
+        recorded.Begin() < extent.End()) {
+      extent = {};
+    }
+  }
+  // A free extent, else the oldest; a free one has the lowest order.
+  *std::ranges::min_element(animation_tables, {},
+                            &AnimationTableExtent::recorded) = recorded;
+}
+
+void ForgetLiveAnimationTable(const void* data) {
+  if (auto* extent = FindAnimationTable(data)) *extent = {};
+}
+
+std::span<std::byte> LiveAnimationTable(const void* data) {
+  const auto* extent = FindAnimationTable(data);
+  if (extent == nullptr) return {};
+  return {extent->data, extent->size};
+}
+
+std::span<const std::byte> LiveAnimationProgram(const void* program) {
+  const auto at = reinterpret_cast<std::uintptr_t>(program);
+  const auto found =
+      std::ranges::find_if(animation_tables, [at](const auto& extent) {
+        return extent.data != nullptr && extent.Begin() <= at &&
+               at < extent.End();
+      });
+  if (found == animation_tables.end()) return {};
+  const std::span<const std::byte> table(found->data, found->size);
+  return table.subspan(at - found->Begin());
 }
 }  // namespace VS::Effects
