@@ -43,6 +43,8 @@ class RecordingHost final : public event::ScriptVmHost {
   std::vector<std::string> calls;
   // The room systems' calls in order, each with its arguments.
   std::vector<std::string> room_calls;
+  // Whether FinishTiledBackgroundLoad reports the load's last step.
+  bool background_loaded = false;
   std::vector<std::pair<Location, int>> instructions;
   Bytes palette_command = Bytes(8);
   Bytes sound_marker{0x82, 0x05, 0, 0};
@@ -429,6 +431,26 @@ class RecordingHost final : public event::ScriptVmHost {
   void AddRoomGeometryDepthBias(int group, int depth_bias) override {
     NoteRoom("DepthBias", {group, depth_bias});
   }
+  void SetTiledBackgroundEnabled(int enabled) override {
+    NoteRoom("Background", {enabled});
+  }
+  void QueueTiledBackgroundLoad(int texture_page) override {
+    NoteRoom("LoadBackground", {texture_page});
+  }
+  bool FinishTiledBackgroundLoad() override {
+    NoteRoom("FinishBackground", {});
+    return background_loaded;
+  }
+  void ReleaseTiledBackground() override { NoteRoom("FreeBackground", {}); }
+  void SetRoomBackgroundOffset(int offset_x, int offset_y) override {
+    NoteRoom("Offset", {offset_x, offset_y});
+  }
+  void SetBackgroundParallaxScale(int parallax_x, int parallax_y) override {
+    NoteRoom("Parallax", {parallax_x, parallax_y});
+  }
+  void SetFirstPersonViewDisabled(bool disabled) override {
+    NoteRoom("FirstPersonDisabled", {static_cast<int>(disabled)});
+  }
 
  private:
   void NoteRoom(const char* name, std::initializer_list<int> values) {
@@ -546,6 +568,11 @@ TEST_CASE("Room opcodes refuse truncated operand spans",
       std::pair{event::ScriptSwapGeometryGroupFlags, 3},
       std::pair{event::ScriptSetCollisionTileMode, 5},
       std::pair{event::ScriptAdjustGeometryDepthBias, 3},
+      std::pair{event::ScriptSetRoomBackgroundVisible, 2},
+      std::pair{event::ScriptLoadRoomBackground, 2},
+      std::pair{event::ScriptSetBackgroundOffset, 5},
+      std::pair{event::ScriptSetFirstPersonView, 2},
+      std::pair{event::ScriptSetBackgroundParallax, 4},
   };
   for (const auto& [handler, length] : commands) {
     for (int size = 0; size < length; ++size) {
@@ -636,6 +663,99 @@ TEST_CASE("Geometry depth bias sign-extends its bias byte",
         Calls{"DepthBias 255 127"});
   CHECK(RoomCalls(event::ScriptAdjustGeometryDepthBias, {0x7D, 0, 0}) ==
         Calls{"DepthBias 0 0"});
+}
+
+TEST_CASE("Room background visibility and load pass unsigned operand bytes",
+          "[event][script][room-commands][room-background][event-vm]") {
+  CHECK(RoomCalls(event::ScriptSetRoomBackgroundVisible, {0x73, 0}) ==
+        Calls{"Background 0"});
+  CHECK(RoomCalls(event::ScriptSetRoomBackgroundVisible, {0x73, 1}) ==
+        Calls{"Background 1"});
+  // The byte is the background's enabled flag unchanged, not a boolean.
+  CHECK(RoomCalls(event::ScriptSetRoomBackgroundVisible, {0x73, 0x80, 7}) ==
+        Calls{"Background 128"});
+  CHECK(RoomCalls(event::ScriptSetRoomBackgroundVisible, {0x73, 0xFF}) ==
+        Calls{"Background 255"});
+  CHECK(RoomCalls(event::ScriptLoadRoomBackground, {0x74, 0}) ==
+        Calls{"LoadBackground 0"});
+  CHECK(RoomCalls(event::ScriptLoadRoomBackground, {0x74, 0x1F}) ==
+        Calls{"LoadBackground 31"});
+  CHECK(RoomCalls(event::ScriptLoadRoomBackground, {0x74, 0xFF, 0x12}) ==
+        Calls{"LoadBackground 255"});
+}
+
+TEST_CASE("Room background wait holds until the load reports its last step",
+          "[event][script][room-commands][room-background][event-vm]") {
+  for (const bool loaded : {false, true}) {
+    // The opcode is one byte; even an empty span reads no operands.
+    for (const Bytes& bytes : {Bytes{0x75}, Bytes{}}) {
+      RecordingHost host;
+      host.background_loaded = loaded;
+      CHECK(Run(event::ScriptWaitForRoomBackground, host, bytes) ==
+            Flow::Of(loaded ? Kind::kAdvance : Kind::kHold));
+      CHECK(host.refusals.empty());
+      CHECK(host.room_calls == Calls{"FinishBackground"});
+    }
+  }
+}
+
+TEST_CASE("Room background release yields only while a cutscene is skipped",
+          "[event][script][room-commands][room-background][event-vm]") {
+  const std::array cases{
+      std::pair{event::CutsceneSkip::kNone, Kind::kAdvance},
+      std::pair{event::CutsceneSkip::kSkippable, Kind::kAdvance},
+      std::pair{event::CutsceneSkip::kSkipping, Kind::kAdvanceAndYield},
+  };
+  for (const auto& [skip, kind] : cases) {
+    RecordingHost host;
+    host.skip = skip;
+    CHECK(Run(event::ScriptFreeRoomBackground, host, {0x76}) == Flow::Of(kind));
+    CHECK(host.refusals.empty());
+    CHECK(host.room_calls == Calls{"FreeBackground"});
+    CHECK(host.skip == skip);
+  }
+}
+
+TEST_CASE("Background offset sign-extends two little-endian halfwords",
+          "[event][script][room-commands][room-background][event-vm]") {
+  CHECK(RoomCalls(event::ScriptSetBackgroundOffset,
+                  {0x7B, 0x34, 0x12, 0x78, 0x56}) ==
+        Calls{"Offset 4660 22136"});
+  CHECK(RoomCalls(event::ScriptSetBackgroundOffset,
+                  {0x7B, 0x00, 0x80, 0xFF, 0xFF}) == Calls{"Offset -32768 -1"});
+  CHECK(RoomCalls(event::ScriptSetBackgroundOffset,
+                  {0x7B, 0xFF, 0x7F, 0x01, 0x00, 0x99}) ==
+        Calls{"Offset 32767 1"});
+  CHECK(RoomCalls(event::ScriptSetBackgroundOffset, {0x7B, 0, 0, 0, 0}) ==
+        Calls{"Offset 0 0"});
+}
+
+TEST_CASE("First-person view reduces its operand to a disabled flag",
+          "[event][script][room-commands][room-background][event-vm]") {
+  CHECK(RoomCalls(event::ScriptSetFirstPersonView, {0x7C, 0}) ==
+        Calls{"FirstPersonDisabled 0"});
+  CHECK(RoomCalls(event::ScriptSetFirstPersonView, {0x7C, 1}) ==
+        Calls{"FirstPersonDisabled 1"});
+  CHECK(RoomCalls(event::ScriptSetFirstPersonView, {0x7C, 2}) ==
+        Calls{"FirstPersonDisabled 1"});
+  CHECK(RoomCalls(event::ScriptSetFirstPersonView, {0x7C, 0x80}) ==
+        Calls{"FirstPersonDisabled 1"});
+  CHECK(RoomCalls(event::ScriptSetFirstPersonView, {0x7C, 0xFF, 0}) ==
+        Calls{"FirstPersonDisabled 1"});
+  CHECK(RoomCalls(event::ScriptSetFirstPersonView, {0x7C, 0, 0xFF}) ==
+        Calls{"FirstPersonDisabled 0"});
+}
+
+TEST_CASE("Background parallax widens signed bytes to the Q12 scale",
+          "[event][script][room-commands][room-background][event-vm]") {
+  CHECK(RoomCalls(event::ScriptSetBackgroundParallax, {0x7E, 0x20, 0xE0, 0}) ==
+        Calls{"Parallax 4096 -4096"});
+  CHECK(RoomCalls(event::ScriptSetBackgroundParallax, {0x7E, 0x80, 0x7F, 9}) ==
+        Calls{"Parallax -16384 16256"});
+  CHECK(RoomCalls(event::ScriptSetBackgroundParallax, {0x7E, 0xFF, 1, 0}) ==
+        Calls{"Parallax -128 128"});
+  CHECK(RoomCalls(event::ScriptSetBackgroundParallax,
+                  {0x7E, 0, 0, 0xFF, 0x7F}) == Calls{"Parallax 0 0"});
 }
 
 namespace {

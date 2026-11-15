@@ -26,19 +26,19 @@ architecture changes rather than per-function work, so this ledger is what track
 | 23: #57 AI, navigation and collision contexts | 0 | 0 | 0 | 236 | 0 | 0 |
 | 24: #56 Combat intents and results | 0 | 22 | 1,493 | 344 | 6 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
-| 26: #59 Event VM results and execution | 0 | 63 | 1,408 | 194 | 43 | 0 |
+| 26: #59 Event VM results and execution | 0 | 56 | 1,383 | 201 | 36 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 57 | 3,779 | 732 | 35 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 268 | 18,890 | 429 | 216 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 410 | 25,570 | 3435 | 300 | 0 |
+| **Total** | 5 | 403 | 25,545 | 3442 | 293 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,320 |
+| done | 3,327 |
 | in-progress | 4 |
-| todo | 411 |
+| todo | 404 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (6 active, 46 done, 2 planned); open functions in no slice: 0.
 
@@ -78,7 +78,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 32 | battle-sphere-hud-rewards | active | self | 4 | 21 | 1,376 |
 | 33 | event-vm-triggers | done | self | 9 | 0 | 0 |
 | 34 | event-script-actors | done | self | 3 | 0 | 0 |
-| 35 | event-script-camera-screen-field | active | - | 3 | 63 | 1,408 |
+| 35 | event-script-camera-screen-field | active | - | 3 | 56 | 1,383 |
 | 36 | event-script-audio-dialog-effects | done | self | 10 | 0 | 0 |
 | 37 | effects-runtime-vm | done | - | 3 | 0 | 0 |
 | 38 | effects-resources-transforms | done | self | 8 | 0 | 0 |
@@ -101,11 +101,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 99 |
-| Referenced by the original-address module table | 1 | 134 |
+| Called from generated code | 1 | 92 |
+| Referenced by the original-address module table | 1 | 127 |
 | Calls an SDK shim | 0 | 69 |
-| Signature uses SDK integer types or `void*` | 0 | 79 |
-| Compiled with relaxed settings | 0 | 410 |
+| Signature uses SDK integer types or `void*` | 0 | 72 |
+| Compiled with relaxed settings | 0 | 403 |
 
 Function bodies: 3,735 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 

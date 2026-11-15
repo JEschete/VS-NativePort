@@ -1,7 +1,8 @@
 // Native side of the event-script room opcode differentials (event_room_commands_common.py, #276).
-// One vector per line: mode, the backdrop byte and draw mode word before the opcode, the instruction's
-// length and its bytes. Prints the flow kind, the refusals, the backdrop byte and draw mode word after
-// the opcode, then the room calls as [count, kind and arguments of each call...].
+// One vector per line: mode, the backdrop byte and draw mode word before the opcode, the cutscene
+// skip byte, the word the background callees return, the instruction's length and its bytes. Prints
+// the flow kind, the refusals, the backdrop byte and draw mode word after the opcode, then the room
+// calls as [count, kind and arguments of each call...].
 #include <cstdint>
 #include <iostream>
 #include <span>
@@ -23,6 +24,13 @@ constexpr ScriptFlow (*kHandlers[])(const ScriptInstruction&, ScriptVmHost&) = {
     ScriptSwapGeometryGroupFlags,
     ScriptSetCollisionTileMode,
     ScriptAdjustGeometryDepthBias,
+    ScriptSetRoomBackgroundVisible,
+    ScriptLoadRoomBackground,
+    ScriptWaitForRoomBackground,
+    ScriptFreeRoomBackground,
+    ScriptSetBackgroundOffset,
+    ScriptSetFirstPersonView,
+    ScriptSetBackgroundParallax,
 };
 
 // The call kinds the harness records for the stubbed callees.
@@ -34,14 +42,24 @@ enum Call : int {
     kCallSwap,
     kCallCollision,
     kCallDepthBias,
+    kCallBackgroundEnabled,
+    kCallBackgroundLoad,
+    kCallBackgroundFinish,
+    kCallBackgroundRelease,
+    kCallBackgroundOffset,
+    kCallFirstPerson,
+    kCallParallax,
 };
 
 // The backdrop byte stores 0xFF or 0 as LiveVmHost does; the draw mode word takes the mode as passed.
+// The background load reports its last step as func_8008F0FC does, by a nonzero result.
 class RoomHost final : public ScriptVmHost {
 public:
     int refusals = 0;
     int backdrop = 0;
     std::int32_t draw_mode = 0;
+    std::uint8_t skip_state = 0;
+    std::int32_t result = 0;
     std::vector<std::vector<long long>> calls;
 
     void Refuse(ScriptVmRefusal, int) override { ++refusals; }
@@ -66,6 +84,30 @@ public:
     {
         calls.push_back({ kCallDepthBias, group, depth_bias });
     }
+    void SetTiledBackgroundEnabled(int enabled) override { calls.push_back({ kCallBackgroundEnabled, enabled }); }
+    void QueueTiledBackgroundLoad(int texture_page) override
+    {
+        calls.push_back({ kCallBackgroundLoad, texture_page });
+    }
+    bool FinishTiledBackgroundLoad() override
+    {
+        calls.push_back({ kCallBackgroundFinish });
+        return result != 0;
+    }
+    void ReleaseTiledBackground() override { calls.push_back({ kCallBackgroundRelease }); }
+    void SetRoomBackgroundOffset(int offset_x, int offset_y) override
+    {
+        calls.push_back({ kCallBackgroundOffset, offset_x, offset_y });
+    }
+    void SetBackgroundParallaxScale(int parallax_x, int parallax_y) override
+    {
+        calls.push_back({ kCallParallax, parallax_x, parallax_y });
+    }
+    void SetFirstPersonViewDisabled(bool disabled) override
+    {
+        calls.push_back({ kCallFirstPerson, disabled ? 1 : 0 });
+    }
+    CutsceneSkip SkipState() const override { return static_cast<CutsceneSkip>(skip_state); }
 
     // Everything else the room opcodes must not touch.
     void NoteInvalidOpcode(const ScriptInstruction&) override { }
@@ -111,7 +153,6 @@ public:
     void SetLoopCounter(int, std::uint8_t) override { }
     std::int8_t CachedFlag() const override { return {}; }
     void SetCachedFlag(std::int8_t) override { }
-    CutsceneSkip SkipState() const override { return {}; }
     void SetSkipState(CutsceneSkip) override { }
     bool SkipForced() const override { return {}; }
     void SetSkipForced(bool) override { }
@@ -204,7 +245,8 @@ int main()
     while (Read(mode)) {
         RoomHost host;
         std::size_t length = 0;
-        if (mode >= std::size(kHandlers) || !Read(host.backdrop) || !Read(host.draw_mode) || !Read(length))
+        if (mode >= std::size(kHandlers) || !Read(host.backdrop) || !Read(host.draw_mode) || !Read(host.skip_state)
+            || !Read(host.result) || !Read(length))
             return 1;
         std::vector<std::uint8_t> bytes(length);
         for (std::uint8_t& byte : bytes) {

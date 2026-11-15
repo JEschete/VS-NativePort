@@ -26,8 +26,10 @@
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptRoomCommands.hpp"
+#include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/EnvironmentLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -145,6 +147,20 @@ constexpr std::array kControlBindings{
                    ScriptSetCollisionTileMode},
     ControlBinding{Event_ScriptAdjustGeometryDepthBiasOpcode,
                    ScriptAdjustGeometryDepthBias},
+    ControlBinding{Event_ScriptSetRoomBackgroundVisibleOpcode,
+                   ScriptSetRoomBackgroundVisible},
+    ControlBinding{Event_ScriptLoadRoomBackgroundOpcode,
+                   ScriptLoadRoomBackground},
+    ControlBinding{Event_ScriptWaitForRoomBackgroundOpcode,
+                   ScriptWaitForRoomBackground},
+    ControlBinding{Event_ScriptFreeRoomBackgroundOpcode,
+                   ScriptFreeRoomBackground},
+    ControlBinding{Event_ScriptSetBackgroundOffsetOpcode,
+                   ScriptSetBackgroundOffset},
+    ControlBinding{Event_ScriptSetFirstPersonViewOpcode,
+                   ScriptSetFirstPersonView},
+    ControlBinding{Event_ScriptSetBackgroundParallaxOpcode,
+                   ScriptSetBackgroundParallax},
 };
 
 ScriptControlOpcode NativeControl(OpcodeHandler handler) {
@@ -523,6 +539,27 @@ class LiveVmHost final : public ScriptVmHost {
   }
   void AddRoomGeometryDepthBias(int group, int depth_bias) override {
     static_cast<void>(Field::LiveAddRoomGeometryDepthBias(group, depth_bias));
+  }
+  void SetTiledBackgroundEnabled(int enabled) override {
+    Field::LiveSetTiledBackgroundEnabled(enabled);
+  }
+  void QueueTiledBackgroundLoad(int texture_page) override {
+    static_cast<void>(Field::LiveQueueTiledBackgroundLoad(texture_page));
+  }
+  bool FinishTiledBackgroundLoad() override {
+    return Field::LiveFinishTiledBackgroundLoad() != 0;
+  }
+  void ReleaseTiledBackground() override {
+    static_cast<void>(Field::LiveReleaseTiledBackground());
+  }
+  void SetRoomBackgroundOffset(int offset_x, int offset_y) override {
+    Field::LiveSetRoomBackgroundOffset(offset_x, offset_y);
+  }
+  void SetBackgroundParallaxScale(int parallax_x, int parallax_y) override {
+    Field::LiveSetBackgroundParallaxScale(parallax_x, parallax_y);
+  }
+  void SetFirstPersonViewDisabled(bool disabled) override {
+    static_cast<void>(Field::LiveSetFirstPersonViewDisabled(disabled ? 1 : 0));
   }
 
  private:
@@ -1273,4 +1310,53 @@ std::intptr_t Event_ScriptAdjustGeometryDepthBiasOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptAdjustGeometryDepthBias);
+}
+
+// decomp: BATTLE.PRG func_800B9F28 (4A0A8.c:2160).
+std::intptr_t Event_ScriptSetRoomBackgroundVisibleOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetRoomBackgroundVisible);
+}
+
+// decomp: BATTLE.PRG func_800B9F4C (4A0A8.c:2166).
+std::intptr_t Event_ScriptLoadRoomBackgroundOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptLoadRoomBackground);
+}
+
+// decomp: BATTLE.PRG func_800B9F70 (4A0A8.c:2172).
+std::intptr_t Event_ScriptWaitForRoomBackgroundOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptWaitForRoomBackground);
+}
+
+// decomp: BATTLE.PRG func_800B9F90 (4A0A8.c:2174).
+std::intptr_t Event_ScriptFreeRoomBackgroundOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptFreeRoomBackground);
+}
+
+// decomp: BATTLE.PRG func_800BA218 (4A0A8.c:2256).
+std::intptr_t Event_ScriptSetBackgroundOffsetOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetBackgroundOffset);
+}
+
+// decomp: BATTLE.PRG func_800BA264 (4A0A8.c:2262).
+std::intptr_t Event_ScriptSetFirstPersonViewOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetFirstPersonView);
+}
+
+// decomp: BATTLE.PRG func_800BA2B4 (4A0A8.c:2274).
+std::intptr_t Event_ScriptSetBackgroundParallaxOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
+  return VS::Event::DispatchLiveScriptControlOpcode(
+      instruction, thread_index, VS::Event::ScriptSetBackgroundParallax);
 }

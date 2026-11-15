@@ -3,9 +3,6 @@
 #include "Audio/MusicLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
-#include "Core/Memory/CopyLive.hpp"
-#include "Field/BackgroundLive.hpp"
-#include "Field/CameraLive.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
@@ -142,30 +139,6 @@ intptr_t Event_ScriptChangeRoom(u_char* instruction, short thread_index)
     return 1;
 }
 
-// decomp: BATTLE.PRG func_800B9F28 (src/BATTLE/BATTLE.PRG/4A0A8.c:2160)
-intptr_t Event_ScriptSetRoomBackgroundVisible(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSetTiledBackgroundEnabled(instruction[1]);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9F4C (src/BATTLE/BATTLE.PRG/4A0A8.c:2166)
-intptr_t Event_ScriptLoadRoomBackground(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveQueueTiledBackgroundLoad(instruction[1]);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B9F70 (src/BATTLE/BATTLE.PRG/4A0A8.c:2172)
-intptr_t Event_ScriptWaitForRoomBackground(u_char* instruction, short thread_index) { return VS::Field::LiveFinishTiledBackgroundLoad() == 0; }
-
-// decomp: BATTLE.PRG func_800B9F90 (src/BATTLE/BATTLE.PRG/4A0A8.c:2174)
-intptr_t Event_ScriptFreeRoomBackground(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveReleaseTiledBackground();
-    return (Event_skipState == 2) * 4;
-}
-
 // decomp: BATTLE.PRG func_800B9FC0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2180)
 intptr_t Event_ScriptSetEnvironmentParticles(u_char* instruction, short thread_index)
 {
@@ -243,27 +216,6 @@ intptr_t Event_ScriptControlRoomAnimation(u_char* instruction, short thread_inde
         VS::Field::LiveToggleRoomEffectUpdates(room_effect_id);
         break;
     }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BA218 (src/BATTLE/BATTLE.PRG/4A0A8.c:2256)
-intptr_t Event_ScriptSetBackgroundOffset(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSetRoomBackgroundOffset(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3));
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BA264 (src/BATTLE/BATTLE.PRG/4A0A8.c:2262)
-intptr_t Event_ScriptSetFirstPersonView(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSetFirstPersonViewDisabled(instruction[1] != 0);
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800BA2B4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2274)
-intptr_t Event_ScriptSetBackgroundParallax(u_char* instruction, short thread_index)
-{
-    VS::Field::LiveSetBackgroundParallaxScale((signed char)instruction[1] << 7, (signed char)instruction[2] << 7);
     return 0;
 }
 

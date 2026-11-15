@@ -433,6 +433,17 @@ class ScriptVmHost {
                                           int second_group) = 0;
   virtual void SetCollisionCellBlocked(const CollisionCellChange& change) = 0;
   virtual void AddRoomGeometryDepthBias(int group, int depth_bias) = 0;
+  // The tiled background (Field/Background.hpp) and the first-person view.
+  // FinishTiledBackgroundLoad advances the background's reads by one step and
+  // is true only on the step that retires the layout read, its last;
+  // ReleaseTiledBackground also hides the background.
+  virtual void SetTiledBackgroundEnabled(int enabled) = 0;
+  virtual void QueueTiledBackgroundLoad(int texture_page) = 0;
+  [[nodiscard]] virtual bool FinishTiledBackgroundLoad() = 0;
+  virtual void ReleaseTiledBackground() = 0;
+  virtual void SetRoomBackgroundOffset(int offset_x, int offset_y) = 0;
+  virtual void SetBackgroundParallaxScale(int parallax_x, int parallax_y) = 0;
+  virtual void SetFirstPersonViewDisabled(bool disabled) = 0;
 };
 
 // decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)

@@ -30,6 +30,20 @@ constexpr std::size_t kFourthOperand = 4;
   return ScriptFlow::Of(ScriptFlowKind::kAdvance);
 }
 
+[[nodiscard]] constexpr ScriptFlow Hold() {
+  return ScriptFlow::Of(ScriptFlowKind::kHold);
+}
+
+[[nodiscard]] constexpr ScriptFlow Yield() {
+  return ScriptFlow::Of(ScriptFlowKind::kAdvanceAndYield);
+}
+
+// A signed parallax operand in the background's 1/4096 steps.
+[[nodiscard]] int ParallaxScale(ScriptCommand command, std::size_t offset) {
+  const auto steps = static_cast<std::int8_t>(OperandByte(command, offset));
+  return steps * kBackgroundParallaxOperandScale;
+}
+
 [[nodiscard]] ScriptCommand Bytes(const ScriptInstruction& instruction) {
   return instruction.bytes;
 }
@@ -144,6 +158,88 @@ ScriptFlow ScriptAdjustGeometryDepthBias(const ScriptInstruction& instruction,
       static_cast<std::int8_t>(OperandByte(command, kSecondOperand));
   host.AddRoomGeometryDepthBias(OperandByte(command, kFirstOperand),
                                 depth_bias);
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800B9F28 (4A0A8.c:2160). The byte is stored as
+// the background's enabled flag unchanged.
+ScriptFlow ScriptSetRoomBackgroundVisible(const ScriptInstruction& instruction,
+                                          ScriptVmHost& host) {
+  if (!Fits(instruction, kSetRoomBackgroundVisibleLength, host)) {
+    return Advance();
+  }
+  const std::uint8_t enabled = OperandByte(Bytes(instruction), kFirstOperand);
+  host.SetTiledBackgroundEnabled(enabled);
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800B9F4C (4A0A8.c:2166). Whether the reads were
+// queued is ignored; the wait opcode follows them.
+ScriptFlow ScriptLoadRoomBackground(const ScriptInstruction& instruction,
+                                    ScriptVmHost& host) {
+  if (!Fits(instruction, kLoadRoomBackgroundLength, host)) {
+    return Advance();
+  }
+  const std::uint8_t texture_page =
+      OperandByte(Bytes(instruction), kFirstOperand);
+  host.QueueTiledBackgroundLoad(texture_page);
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800B9F70 (4A0A8.c:2172): returns
+// func_8008F0FC() == 0, holding on every step before the last.
+ScriptFlow ScriptWaitForRoomBackground(const ScriptInstruction& /*instruction*/,
+                                       ScriptVmHost& host) {
+  const bool loaded = host.FinishTiledBackgroundLoad();
+  return loaded ? Advance() : Hold();
+}
+
+// decomp: BATTLE.PRG func_800B9F90 (4A0A8.c:2174): returns
+// (D_800F4C2C == 2) * 4, read after the release.
+ScriptFlow ScriptFreeRoomBackground(const ScriptInstruction& /*instruction*/,
+                                    ScriptVmHost& host) {
+  host.ReleaseTiledBackground();
+  if (host.SkipState() == CutsceneSkip::kSkipping) {
+    return Yield();
+  }
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800BA218 (4A0A8.c:2256). Each offset is a
+// little-endian halfword sign-extended by vs_battle_getShort.
+ScriptFlow ScriptSetBackgroundOffset(const ScriptInstruction& instruction,
+                                     ScriptVmHost& host) {
+  if (!Fits(instruction, kSetBackgroundOffsetLength, host)) {
+    return Advance();
+  }
+  const ScriptCommand command = Bytes(instruction);
+  const std::int16_t offset_x = OperandHalf(command, kFirstOperand);
+  const std::int16_t offset_y = OperandHalf(command, kThirdOperand);
+  host.SetRoomBackgroundOffset(offset_x, offset_y);
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800BA264 (4A0A8.c:2262). The operand is reduced
+// to 0 or 1 before func_8007BDD8 takes it as the disabled flag.
+ScriptFlow ScriptSetFirstPersonView(const ScriptInstruction& instruction,
+                                    ScriptVmHost& host) {
+  if (!Fits(instruction, kSetFirstPersonViewLength, host)) {
+    return Advance();
+  }
+  const bool disabled = OperandByte(Bytes(instruction), kFirstOperand) != 0;
+  host.SetFirstPersonViewDisabled(disabled);
+  return Advance();
+}
+
+// decomp: BATTLE.PRG func_800BA2B4 (4A0A8.c:2274). Both bytes are signed.
+ScriptFlow ScriptSetBackgroundParallax(const ScriptInstruction& instruction,
+                                       ScriptVmHost& host) {
+  if (!Fits(instruction, kSetBackgroundParallaxLength, host)) {
+    return Advance();
+  }
+  const ScriptCommand command = Bytes(instruction);
+  host.SetBackgroundParallaxScale(ParallaxScale(command, kFirstOperand),
+                                  ParallaxScale(command, kSecondOperand));
   return Advance();
 }
 

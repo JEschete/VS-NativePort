@@ -84,6 +84,20 @@ intptr_t Event_ScriptSetCollisionTileModeOpcode(uint8_t* instruction,
                                                 int16_t thread_index);
 intptr_t Event_ScriptAdjustGeometryDepthBiasOpcode(uint8_t* instruction,
                                                    int16_t thread_index);
+intptr_t Event_ScriptSetRoomBackgroundVisibleOpcode(uint8_t* instruction,
+                                                    int16_t thread_index);
+intptr_t Event_ScriptLoadRoomBackgroundOpcode(uint8_t* instruction,
+                                              int16_t thread_index);
+intptr_t Event_ScriptWaitForRoomBackgroundOpcode(uint8_t* instruction,
+                                                 int16_t thread_index);
+intptr_t Event_ScriptFreeRoomBackgroundOpcode(uint8_t* instruction,
+                                              int16_t thread_index);
+intptr_t Event_ScriptSetBackgroundOffsetOpcode(uint8_t* instruction,
+                                               int16_t thread_index);
+intptr_t Event_ScriptSetFirstPersonViewOpcode(uint8_t* instruction,
+                                              int16_t thread_index);
+intptr_t Event_ScriptSetBackgroundParallaxOpcode(uint8_t* instruction,
+                                                 int16_t thread_index);
 
 #ifdef __cplusplus
 }

@@ -3289,6 +3289,14 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01118", 0x800B9860, "ScriptSwapGeometryGroupFlags"),
     ("F01119", 0x800B988C, "ScriptSetCollisionTileMode"),
     ("F01141", 0x800BA288, "ScriptAdjustGeometryDepthBias"),
+    # #276 row 35 A35-08 background opcodes (Event/ScriptRoomCommands.cpp)
+    ("F01131", 0x800B9F28, "ScriptSetRoomBackgroundVisible"),
+    ("F01132", 0x800B9F4C, "ScriptLoadRoomBackground"),
+    ("F01133", 0x800B9F70, "ScriptWaitForRoomBackground"),
+    ("F01134", 0x800B9F90, "ScriptFreeRoomBackground"),
+    ("F01139", 0x800BA218, "ScriptSetBackgroundOffset"),
+    ("F01140", 0x800BA264, "ScriptSetFirstPersonView"),
+    ("F01142", 0x800BA2B4, "ScriptSetBackgroundParallax"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"

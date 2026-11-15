@@ -17,6 +17,7 @@
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/TriggersLive.hpp"
+#include "Field/BackgroundLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -31,6 +32,7 @@ extern "C" {
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
+#include "Field/BackgroundLiveState.h"
 #include "Field/CameraLiveState.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -1864,6 +1866,13 @@ constexpr auto kRoomControlEntries = std::to_array<ControlEntry>({
     {0x800B9860, Event_ScriptSwapGeometryGroupFlagsOpcode},
     {0x800B988C, Event_ScriptSetCollisionTileModeOpcode},
     {0x800BA288, Event_ScriptAdjustGeometryDepthBiasOpcode},
+    {0x800B9F28, Event_ScriptSetRoomBackgroundVisibleOpcode},
+    {0x800B9F4C, Event_ScriptLoadRoomBackgroundOpcode},
+    {0x800B9F70, Event_ScriptWaitForRoomBackgroundOpcode},
+    {0x800B9F90, Event_ScriptFreeRoomBackgroundOpcode},
+    {0x800BA218, Event_ScriptSetBackgroundOffsetOpcode},
+    {0x800BA264, Event_ScriptSetFirstPersonViewOpcode},
+    {0x800BA2B4, Event_ScriptSetBackgroundParallaxOpcode},
 });
 
 // Restores the draw mode, the texture LOD preserve flag and the room clip
@@ -1933,6 +1942,120 @@ TEST_CASE("Native depth cue binding releases the LOD depth unchanged",
   RunRoomScript({0x61, 0xFF, 0x7F, 0xF0});
   CHECK(Event_isScriptBackdropEnabled == 0);
   CHECK(VS::Render::LiveRoomClipState().lod_depth == 100);
+}
+
+namespace {
+// Restores the tiled background and the first-person view the background
+// opcodes write, starting each test with no background reads or layout.
+struct BackgroundOpcodeStateFixture {
+  VS::Field::RoomBackgroundState background =
+      VS::Field::LoadLiveRoomBackgroundState();
+  int first_person = Field_isFirstPersonViewEnabled;
+
+  BackgroundOpcodeStateFixture() {
+    Field_backgroundTextureDiscRequest = nullptr;
+    Field_backgroundLayoutDiscRequest = nullptr;
+    Field_loadedBackgroundLayout = nullptr;
+  }
+  ~BackgroundOpcodeStateFixture() {
+    VS::Field::StoreLiveRoomBackgroundState(background);
+    Field_isFirstPersonViewEnabled = first_person;
+  }
+  BackgroundOpcodeStateFixture(const BackgroundOpcodeStateFixture&) = delete;
+  BackgroundOpcodeStateFixture& operator=(const BackgroundOpcodeStateFixture&) =
+      delete;
+  BackgroundOpcodeStateFixture(BackgroundOpcodeStateFixture&&) = delete;
+  BackgroundOpcodeStateFixture& operator=(BackgroundOpcodeStateFixture&&) =
+      delete;
+};
+
+// Binds the background opcodes in both tables with their original sizes.
+event::ScriptLocation MountBackgroundScript(Bytes bytes) {
+  const auto start = MountScript(std::move(bytes));
+  const std::array bindings{
+      std::pair<std::uint8_t, Handler>{
+          0x73, Event_ScriptSetRoomBackgroundVisibleOpcode},
+      std::pair<std::uint8_t, Handler>{0x75,
+                                       Event_ScriptWaitForRoomBackgroundOpcode},
+      std::pair<std::uint8_t, Handler>{0x76,
+                                       Event_ScriptFreeRoomBackgroundOpcode},
+      std::pair<std::uint8_t, Handler>{0x7B,
+                                       Event_ScriptSetBackgroundOffsetOpcode},
+      std::pair<std::uint8_t, Handler>{0x7C,
+                                       Event_ScriptSetFirstPersonViewOpcode},
+      std::pair<std::uint8_t, Handler>{0x7E,
+                                       Event_ScriptSetBackgroundParallaxOpcode},
+      std::pair<std::uint8_t, Handler>{0xF0,
+                                       Event_CommandStopScriptContextOpcode},
+  };
+  for (const auto& [opcode, handler] : bindings) {
+    Event_kOpcodeHandlers[opcode] = handler;
+    Event_kSkipOpcodeHandlers[opcode] = handler;
+  }
+  Event_kOpcodeSizes[0x73] = 2;
+  Event_kOpcodeSizes[0x75] = 1;
+  Event_kOpcodeSizes[0x76] = 1;
+  Event_kOpcodeSizes[0x7B] = 5;
+  Event_kOpcodeSizes[0x7C] = 2;
+  Event_kOpcodeSizes[0x7E] = 4;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  return start;
+}
+}  // namespace
+
+TEST_CASE("Native background bindings store visibility offset and parallax",
+          "[event][script][room-commands][room-background][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const BackgroundOpcodeStateFixture background;
+  Field_isTiledBackgroundEnabled = 0;
+  Field_isFirstPersonViewEnabled = 1;
+  static_cast<void>(
+      MountBackgroundScript({0x73, 0x80, 0x7B, 0x00, 0x80, 0xFF, 0x7F, 0x7E,
+                             0xE0, 0x20, 0x00, 0x7C, 0x02, 0xF0}));
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+  CHECK(Field_isTiledBackgroundEnabled == 0x80);
+  CHECK(Field_backgroundOffsetX == -32768);
+  CHECK(Field_backgroundOffsetY == 0x7FFF);
+  CHECK(Field_backgroundParallaxScaleXFixed12 == -4096);
+  CHECK(Field_backgroundParallaxScaleYFixed12 == 4096);
+  CHECK(Field_isFirstPersonViewEnabled == 0);
+}
+
+TEST_CASE("Native background release yields only while skipping",
+          "[event][script][room-commands][room-background][event-vm-live]") {
+  for (const char skip : {char{0}, char{2}}) {
+    CAPTURE(static_cast<int>(skip));
+    const LiveVmFixture fixture;
+    const BackgroundOpcodeStateFixture background;
+    Field_isTiledBackgroundEnabled = 1;
+    Event_skipState = skip;
+    const auto start = MountBackgroundScript({0x76, 0x73, 0x05, 0xF0});
+    auto& host = event::LiveScriptVm();
+    CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+    if (skip == 2) {
+      // The release yielded before the visibility opcode ran.
+      CHECK(Field_isTiledBackgroundEnabled == 0);
+      CHECK(host.ThreadCursor(0) == event::ScriptLocation{start.region,
+                                                          start.offset + 1,
+                                                          start.generation});
+      CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+    }
+    CHECK(Field_isTiledBackgroundEnabled == 5);
+    CHECK_FALSE(host.ThreadCursor(0).Present());
+  }
+}
+
+TEST_CASE("Native background wait holds without a pending load",
+          "[event][script][room-commands][room-background][event-vm-live]") {
+  const LiveVmFixture fixture;
+  const BackgroundOpcodeStateFixture background;
+  const auto start = MountBackgroundScript({0x75, 0xF0});
+  auto& host = event::LiveScriptVm();
+  for (int frame = 0; frame < 3; ++frame) {
+    CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+    CHECK(host.ThreadCursor(0) == start);
+  }
 }
 
 TEST_CASE("Native wait bindings preserve countdown and tick resume state",

@@ -1,5 +1,6 @@
 """Regressions for native source adaptations, without game assets."""
 
+import contextlib
 import csv
 import json
 import re
@@ -20,6 +21,15 @@ import native_views
 def flat(source: str) -> str:
     """Source text regardless of how the formatter wrapped it."""
     return " ".join(source.split())
+
+
+@contextlib.contextmanager
+def unpromoted_opcode_handlers(*identifiers: str):
+    """Fixture handlers stay unpromoted however many real handlers later gain an opcode binding."""
+    with mock.patch.dict(copy_fixups.EVENT_OPCODE_BINDINGS):
+        for identifier in identifiers:
+            copy_fixups.EVENT_OPCODE_BINDINGS.pop(identifier, None)
+        yield
 
 
 class EncounterFixupTests(unittest.TestCase):
@@ -1024,34 +1034,37 @@ class EncounterFixupTests(unittest.TestCase):
             "T00001": {"header": r"Native\Game\include\CppOnly.hpp"},
             "F01033": {},
         }
-        self.assertEqual(
-            check_event_dispatch.event_headers(manifest, owned),
-            [
-                r"Native\Game\src\Event\ScriptVm.h",
-                r"Native\Game\src\Event\WeaponStub.h",
-            ],
-        )
+        with unpromoted_opcode_handlers("F01131"):
+            self.assertEqual(
+                check_event_dispatch.event_headers(manifest, owned),
+                [
+                    r"Native\Game\src\Event\ScriptVm.h",
+                    r"Native\Game\src\Event\WeaponStub.h",
+                ],
+            )
 
     def test_event_dispatch_audit_rejects_an_owned_handler_without_a_header(self):
         for row in ({}, {"header": ""}, {"header": " \t "}):
             with (
                 self.subTest(row=row),
+                unpromoted_opcode_handlers("F01131"),
                 self.assertRaisesRegex(ValueError, "F01131.*header"),
             ):
                 check_event_dispatch.event_headers({}, {"F01131": row})
 
     def test_event_dispatch_audit_deduplicates_shared_and_generated_headers(self):
         header = r"Native\Game\src\Event\WeaponStub.h"
-        self.assertEqual(
-            check_event_dispatch.event_headers(
-                {header: "generated"},
-                {
-                    "F01131": {"header": f" \t{header}\t "},
-                    "F01031": {"header": header},
-                },
-            ),
-            [header],
-        )
+        with unpromoted_opcode_handlers("F01131", "F01031"):
+            self.assertEqual(
+                check_event_dispatch.event_headers(
+                    {header: "generated"},
+                    {
+                        "F01131": {"header": f" \t{header}\t "},
+                        "F01031": {"header": header},
+                    },
+                ),
+                [header],
+            )
         self.assertEqual(
             check_event_dispatch.event_headers({}, {"F01027": {"header": header}}),
             [copy_fixups.NATIVE_HELPER_HEADERS[copy_fixups.EVENT_OPCODE_BINDINGS["F01027"]]],
@@ -1071,9 +1084,10 @@ class EncounterFixupTests(unittest.TestCase):
         )
 
     def test_event_dispatch_audit_names_unpromoted_handlers_by_catalog(self):
-        self.assertEqual(
-            check_event_dispatch.opcode_symbol("F01131", "Event::ScriptWaitForActor"), "Event_ScriptWaitForActor"
-        )
+        with unpromoted_opcode_handlers("F01131"):
+            self.assertEqual(
+                check_event_dispatch.opcode_symbol("F01131", "Event::ScriptWaitForActor"), "Event_ScriptWaitForActor"
+            )
         self.assertTrue(set(copy_fixups.EVENT_OPCODE_BINDINGS) <= copy_fixups.EVENT_OPCODE_HANDLERS)
         for binding in copy_fixups.EVENT_OPCODE_BINDINGS.values():
             self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
