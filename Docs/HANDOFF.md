@@ -40,16 +40,27 @@ retired) and 442 remaining; see the CSV and issue #276 for current status.
   change and older autostash remain untouched. These unrelated local changes are
   still present; keep them separate from promotion work until their scope is
   reconciled. No Group O conversion WIP remains.
+- Fresh-index copier reconciliation is partial. T00239/T00255 adoption rows
+  were removed and the T00255 array-bound fixup now matches the source spelling.
+  The T00271 merged-layout alias fix is covered by focused tests and is tracked
+  in #392. `Copier.copy_types()` now reaches T00527, where current indexes fail
+  to find the ledger's 16-member layout; this is recorded on #391. Broad
+  generated DATA/TYPE/FIELD ledger churn was restored, so no full copier or
+  promotion-group gate has passed. Preserve the dirty LootInventory packet
+  worktree; #377's group gate has not been rerun on the root-normalization fix.
+- The next candidate is the five-function row-39 `ActionEffects.cpp` batch:
+  F00058, F00060, F00064, F00068 and F00069. They meet the 4–8 same-file group
+  size, but cover distinct behaviors; per-function tests and differentials are
+  still required. No new promotion group has started.
 
 Next steps:
 
-1. Reconcile the existing #384/#377 anonymous-type normalization WIP and the
-   dirty reference checkout before broadening or staging any files. Preserve
-   those changes; they are not part of the trail promotion.
-2. Continue #276 in the maintained plan order. Row 39 is active at 23/80; its
-   first unresolved CSV entries are F00058, F00060, F00064, F00068 and F00069.
-   Recheck current callers, dependencies, issues and CI, then choose the next
-   coherent group rather than treating that list as a preapproved batch.
+1. Resolve the fresh-index copier blockers on #391/#392 and verify the current
+   root-normalization work for #377 without overwriting the preserved packet
+   worktree or dirty reference checkout.
+2. Continue #276 in the maintained plan order. Row 39 is active at 23/80; after
+   copier/group gates are available, begin the five-function `ActionEffects.cpp`
+   batch above and recheck callers, dependencies, issues and CI.
 3. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md):
    typed implementation and Live bindings, per-function tests and MIPS/native
    mutation controls, shared Debug/Release/replay/quality checks, ledger/CSV

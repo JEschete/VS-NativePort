@@ -6003,7 +6003,7 @@ ONDISC_OFFSETS: dict[str, str] = {
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.cpp.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
     "T00255": [
-        ("u_char pulsedPalette[32];", "u_short pulsedPalette[16];",
+        ("u_char pulsedPalette[0x20];", "u_short pulsedPalette[16];",
          "3A1A0.h:521 / 40564.c:1710; T00255.072 and T00469.006 agree on sixteen 16-bit CLUT entries"),
     ],
     "T00225": [
@@ -6019,11 +6019,27 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "The target-row producer stores unsigned pixel offsets including rows below 127"),
     ],
     "T00271": [
-        ("char reservedB[9];",
-         "union {\n        char reservedB[9];\n        struct {\n"
-         "            u_char reservedBPrefix[2];\n            u_char engagementLimit;\n"
-         "            u_char reservedEPrefix[2];\n            u_char engaged_mask_bytes[2];\n"
-         "            u_char engagedCount;\n            u_char reserved13;\n        };\n    };",
+        ("    /* 0x09 */ char reserved9[11];\n"
+         "    /* 0x0A */ u_char allowsNonSpellActions;\n"
+         "    /* 0x0B */ char reservedB[2];",
+         "    /* 0x09 */ union {\n"
+         "        char reserved9;\n"
+         "        struct {\n"
+         "            char reserved9Prefix;\n"
+         "            u_char allowsNonSpellActions;\n"
+         "            union {\n"
+         "                char reservedB[9];\n"
+         "                struct {\n"
+         "                    u_char reservedBPrefix[2];\n"
+         "                    u_char engagementLimit;\n"
+         "                    u_char reservedEPrefix[2];\n"
+         "                    u_char engaged_mask_bytes[2];\n"
+         "                    u_char engagedCount;\n"
+         "                    u_char reserved13;\n"
+         "                };\n"
+         "            };\n"
+         "        };\n"
+         "    };",
          "func_800D836C/82CC use the encounter limit, membership mask and member count; byte aliases preserve native layout"),
     ],
     "T00532": [

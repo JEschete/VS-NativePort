@@ -3525,10 +3525,34 @@ class EncounterFixupTests(unittest.TestCase):
             room_live.count("void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }"), 2)
 
     def test_gimmick_palette_matches_ledger_element_width_without_growth(self):
-        source = "u_char pulsedPalette[32];"
+        source = "u_char pulsedPalette[0x20];"
         for old, new, _ in copy_fixups.TYPE_FIXES["T00255"]:
             source = source.replace(old, new)
         self.assertEqual(source, "u_short pulsedPalette[16];")
+
+    def test_room_ai_alias_fixup_matches_generated_merged_layout(self):
+        text = (
+            "typedef struct Battle_Ai_RoomAiState {\n"
+            "    /* 0x09 */ char reserved9[11];\n"
+            "    /* 0x0A */ u_char allowsNonSpellActions;\n"
+            "    /* 0x0B */ char reservedB[2];\n"
+            "    /* 0x14 */ int flightCeiling;\n"
+            "} Battle_Ai_RoomAiState;"
+        )
+        for old, new, _ in copy_fixups.TYPE_FIXES["T00271"]:
+            self.assertIn(old, text)
+            text = text.replace(old, new, 1)
+
+        self.assertIn("/* 0x09 */ union {", text)
+        self.assertIn("char reserved9;", text)
+        self.assertIn("u_char allowsNonSpellActions;", text)
+        self.assertIn("char reservedB[9];", text)
+        self.assertIn("u_char engagementLimit;", text)
+        self.assertIn("u_char engaged_mask_bytes[2];", text)
+        self.assertIn("u_char engagedCount;", text)
+        self.assertIn("/* 0x14 */ int flightCeiling;", text)
+        self.assertNotIn("/* 0x09 */ char reserved9[11];", text)
+        self.assertNotIn("/* 0x0B */ char reservedB[2];", text)
 
     def test_pressed_button_ports_use_the_ledger_inline_struct_type(self):
         copier = object.__new__(copy_to_native.Copier)
