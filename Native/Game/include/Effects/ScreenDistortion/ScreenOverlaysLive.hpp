@@ -30,4 +30,20 @@ int* AppendLiveVignetteCorner(int packed_corner_xy, int first_angular_step,
                               int* packet_words, u_long* ordering_head);
 // func_800F9FB8: the vignette in front of the frame's overlay table.
 void DrawLiveVignette();
+
+// The controller lifetime (ScreenOverlayLifetime.cpp) over D_800EB9B4 and its
+// default controller (Effects_screenEffectDefaults), the disc queue, overlay
+// workspace and texture pages. Attaching points D_800EB9B4 at the defaults;
+// detaching resets the defaults.
+// func_800CA97C.
+void ResetLiveScreenOverlay();
+// _loadScreff2. Refuses and reports a missing controller; a missing read
+// request is reported and stays pending.
+void LoadLiveScreenOverlay(int begin_load);
+// func_800CB708.
+void DrawLiveScreenOverlay();
+// func_800CB79C.
+void AcquireLiveScreenOverlay();
+// func_800CB7DC.
+void ReleaseLiveScreenOverlay();
 }  // namespace VS::Effects::ScreenDistortion

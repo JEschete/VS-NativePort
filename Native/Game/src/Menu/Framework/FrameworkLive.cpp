@@ -28,6 +28,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/BreakArtsLive.hpp"
@@ -1036,7 +1037,7 @@ class LiveHost final : public Host {
     Battle_battleModeIndicatorStep = 0;
     Battle_statusIconCarousel.word = kStatusIconCarouselIdle;
     Menu_sceneNotificationBuffer = nullptr;
-    Effects_ResetScreenEffectState();
+    VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
     Battle_actionSelection = &Menu_Framework_actionSelection;
     Menu_textBoxes[0] = Menu_TextBoxState{};
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;

@@ -3378,6 +3378,27 @@
     <None Include="..\..\port\differentials\screen_distortion_f02462.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01363.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01388.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01389.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01390.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01391.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\sorting_vectors.py">
       <Filter>tools\port\differentials</Filter>
     </None>

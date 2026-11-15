@@ -210,8 +210,12 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
     return Effects_screenEffectOverlay != nullptr &&
            Effects_screenEffectOverlay->loading != 0;
   }
-  void AcquireScreenEffects() override { Effects_AcquireScreenEffectOverlay(); }
-  void ReleaseScreenEffects() override { Effects_ReleaseScreenEffectOverlay(); }
+  void AcquireScreenEffects() override {
+    VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay();
+  }
+  void ReleaseScreenEffects() override {
+    VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay();
+  }
   void SetDistortionLayer(int layer) override {
     VS::Effects::ScreenDistortion::SetLiveFeedbackLayer(layer);
   }

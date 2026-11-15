@@ -23,10 +23,5 @@ typedef struct Effects_ScreenEffectOverlay {
 #define VS_EFFECTS_SCREENEFFECTS_H_DECLS
 
 extern Effects_ScreenEffectOverlay* Effects_screenEffectOverlay;
-void Effects_ResetScreenEffectState(void);
-void Effects_LoadScreenEffectOverlay(int begin_load);
-void Effects_DrawScreenEffectOverlay(void);
-void Effects_AcquireScreenEffectOverlay(void);
-void Effects_ReleaseScreenEffectOverlay(void);
 
 #endif // VS_EFFECTS_SCREENEFFECTS_H_DECLS

@@ -1563,6 +1563,9 @@
     <ClCompile Include="src\Effects\ScreenDistortion\RadialWarpLive.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\ScreenDistortion\ScreenOverlayLifetime.cpp">
+      <Filter>src\Effects\ScreenDistortion</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ScreenDistortion\ScreenOverlays.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>
@@ -3547,6 +3550,9 @@
       <Filter>include\Effects\ScreenDistortion</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarpLive.hpp">
+      <Filter>include\Effects\ScreenDistortion</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlayLifetime.hpp">
       <Filter>include\Effects\ScreenDistortion</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ScreenDistortion\ScreenOverlays.hpp">

@@ -802,6 +802,13 @@
     <None Include="..\..\port\differentials\screen_distortion_f02460.py" />
     <None Include="..\..\port\differentials\screen_distortion_f02461.py" />
     <None Include="..\..\port\differentials\screen_distortion_f02462.py" />
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_common.py" />
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_driver.cpp" />
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01363.py" />
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01388.py" />
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01389.py" />
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01390.py" />
+    <None Include="..\..\port\differentials\screen_overlay_lifetime_f01391.py" />
     <None Include="..\..\port\differentials\sorting_vectors.py" />
     <None Include="..\..\port\differentials\special_terrain.py" />
     <None Include="..\..\port\differentials\special_terrain_driver.cpp" />

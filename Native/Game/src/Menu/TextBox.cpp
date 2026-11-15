@@ -4,6 +4,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Effects/ScreenEffects.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
@@ -381,7 +381,7 @@ void Menu_UpdateTextBoxes(void)
         VS::Battle::DrawLivePuzzleTimer(&State_sceneTimer);
     }
 
-    Effects_DrawScreenEffectOverlay();
+    VS::Effects::ScreenDistortion::DrawLiveScreenOverlay();
     VS::Core::NextLiveInterfaceRandomBits(0);
 }
 

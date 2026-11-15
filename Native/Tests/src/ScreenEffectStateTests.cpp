@@ -36,7 +36,7 @@ struct ScreenStateFixture {
                 Content_DiscQueueSlot{});
     Content_discRequestCounts = {};
     Content_overlayWorkspaceOwner = 0;
-    Effects_ResetScreenEffectState();
+    VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   }
 
   ~ScreenStateFixture() {
@@ -88,10 +88,10 @@ TEST_CASE("Screen-effect reset clears the entire native request pointer",
   Effects_screenEffectDefaults = {
       1, 1, 7, -1, -2, 99, &Content_discRequestSlots[31]};
   Effects_screenEffectOverlay = &Effects_screenEffectDefaults;
-  Effects_ResetScreenEffectState();
+  VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   CHECK(Effects_screenEffectOverlay == nullptr);
   CheckDefaultState();
-  Effects_ResetScreenEffectState();
+  VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   CheckDefaultState();
 }
 
@@ -99,15 +99,15 @@ TEST_CASE("Screen-effect acquisition and reentry use one typed native state",
           "[effects][screen-state]") {
   const ScreenStateFixture fixture;
   for (int cycle = 0; cycle < 2; ++cycle) {
-    Effects_AcquireScreenEffectOverlay();
+    VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay();
     REQUIRE(Effects_screenEffectOverlay == &Effects_screenEffectDefaults);
     auto* request = &Content_discRequestSlots[cycle];
     CHECK(Effects_screenEffectDefaults.slot == request);
     CheckQueuedRequest(request, cycle + 1);
-    Effects_AcquireScreenEffectOverlay();
+    VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay();
     CHECK(Effects_screenEffectDefaults.slot == request);
     CHECK(Content_discRequestCounts.waiting == cycle + 1);
-    Effects_ReleaseScreenEffectOverlay();
+    VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay();
     CHECK(Effects_screenEffectOverlay == nullptr);
     CHECK(Content_overlayWorkspaceOwner == 0);
     CheckDefaultState();
@@ -123,7 +123,7 @@ TEST_CASE("Screen-effect queue pointer writes stay within native object guards",
     std::uint64_t suffix = 0x0FEDCBA987654321;
   } guarded;
   Effects_screenEffectOverlay = &guarded.state;
-  Effects_LoadScreenEffectOverlay(1);
+  VS::Effects::ScreenDistortion::LoadLiveScreenOverlay(1);
   CHECK(guarded.state.slot == &Content_discRequestSlots[0]);
   CHECK(guarded.state.loading == 1);
   CHECK(guarded.prefix == 0x123456789ABCDEF0);
@@ -165,6 +165,6 @@ TEST_CASE("Screen-effect parameter setters retain the typed default controller",
   CHECK(Effects_screenEffectDefaults.radialWarpArg1 == -567);
   CHECK(Effects_screenEffectDefaults.vignetteEnabled == 7);
   CHECK(Effects_screenEffectDefaults.slot == nullptr);
-  Effects_ResetScreenEffectState();
+  VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   CheckDefaultState();
 }

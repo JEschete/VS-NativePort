@@ -3,11 +3,20 @@
 
 #include <cstdint>
 
+#include "Boot/SessionLive.hpp"
+#include "Content/CdDriveLive.hpp"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
+#include "Effects/ScreenDistortion/RadialWarpLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
+#include "Content/DiscLayout.h"
+#include "Core/Overlays.h"
+#include "DiscQueue.h"
+#include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
@@ -123,5 +132,129 @@ void DrawLiveVignette() {
   Render::LivePacketQueue overlay(
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kOverlay, 0));
   DrawVignette(overlay);
+}
+
+namespace {
+class LiveScreenOverlayLoader final : public ScreenOverlayLoader {
+ public:
+  void AcquireWorkspace(int owner_tag) override {
+    static_cast<void>(Content::AcquireLiveOverlayWorkspace(owner_tag));
+  }
+  void ReleaseWorkspace(int owner_tag) override {
+    static_cast<void>(Content::ReleaseLiveOverlayWorkspace(owner_tag));
+  }
+  Content_DiscQueueSlot* AllocateOverlayRead() override {
+    const Content_DiscFile file = OverlayFile();
+    return Content::AllocateLiveDiscRequest(&file);
+  }
+  void EnqueueOverlayRead(Content_DiscQueueSlot* read) override {
+    Content::EnqueueLiveDiscRequest(read, Core_overlaySlots[1]);
+  }
+  Content_DiscQueueSlot* CompleteRefusedOverlayRead() override {
+    const Content_DiscFile file = OverlayFile();
+    return Content::CompleteLiveRefusedDiscRequest(&file, Core_overlaySlots[1]);
+  }
+  bool OverlayReadLoaded(const Content_DiscQueueSlot* read) override {
+    if (read == nullptr) {
+      VS_LOG_ERROR("effects", "screen overlay load poll: no read request");
+      return false;
+    }
+    return read->state == Content_DiscRequestState_Loaded;
+  }
+  void ReleaseOverlayRead(Content_DiscQueueSlot* read) override {
+    Content::ReleaseLiveDiscRequest(read);
+  }
+  void WaitForOverlayReady() override { Boot::WaitForOverlayReadyLive(); }
+
+ private:
+  static Content_DiscFile OverlayFile() {
+    return {.lba = VS_SCREFF2_PRG_LBA, .size = VS_SCREFF2_PRG_SIZE};
+  }
+};
+
+class LiveScreenOverlayPainter final : public ScreenOverlayPainter {
+ public:
+  // The live draws read the same words from the attached controller.
+  void WarpPolygons(RadialWarpSettings /*settings*/) override {
+    WarpLivePolygonVertices();
+  }
+  void DrawFeedbackTiles(std::uint16_t /*feedback_layer*/) override {
+    DrawLiveFeedbackTiles();
+  }
+  void DrawVignette() override { DrawLiveVignette(); }
+};
+
+// The attached controller, or the defaults the next attach points at.
+Effects_ScreenEffectOverlay& LiveLifetimeRecord() {
+  return Effects_screenEffectOverlay != nullptr ? *Effects_screenEffectOverlay
+                                                : Effects_screenEffectDefaults;
+}
+
+ScreenOverlayLifetime ReadLiveLifetime() {
+  const Effects_ScreenEffectOverlay& record = LiveLifetimeRecord();
+  return {.attached = Effects_screenEffectOverlay != nullptr,
+          .loading = record.loading,
+          .controls = ReadControls(record),
+          .read = record.slot};
+}
+
+// Attaching points D_800EB9B4 at the defaults; a detached lifetime is
+// written to the defaults, as the original's reset cleared them.
+void WriteLiveLifetime(const ScreenOverlayLifetime& lifetime) {
+  if (!lifetime.attached) {
+    Effects_screenEffectOverlay = nullptr;
+  } else if (Effects_screenEffectOverlay == nullptr) {
+    Effects_screenEffectOverlay = &Effects_screenEffectDefaults;
+  }
+  Effects_ScreenEffectOverlay& record = LiveLifetimeRecord();
+  record.loading = lifetime.loading;
+  WriteControls(record, lifetime.controls);
+  record.slot = lifetime.read;
+}
+
+template <typename Update>
+void UpdateLiveLifetime(Update update) {
+  ScreenOverlayLifetime lifetime = ReadLiveLifetime();
+  update(lifetime);
+  WriteLiveLifetime(lifetime);
+}
+}  // namespace
+
+void ResetLiveScreenOverlay() {
+  UpdateLiveLifetime(
+      [](ScreenOverlayLifetime& lifetime) { ResetScreenOverlay(lifetime); });
+}
+
+void LoadLiveScreenOverlay(int begin_load) {
+  if (LiveOverlay("load") == nullptr) {
+    return;
+  }
+  UpdateLiveLifetime([&](ScreenOverlayLifetime& lifetime) {
+    LiveScreenOverlayLoader loader;
+    LoadScreenOverlay(lifetime, begin_load, loader);
+  });
+}
+
+void DrawLiveScreenOverlay() {
+  UpdateLiveLifetime([](ScreenOverlayLifetime& lifetime) {
+    LiveScreenOverlayLoader loader;
+    LiveScreenOverlayPainter painter;
+    DrawScreenOverlay(lifetime, loader, painter);
+  });
+}
+
+void AcquireLiveScreenOverlay() {
+  UpdateLiveLifetime([](ScreenOverlayLifetime& lifetime) {
+    LiveScreenOverlayLoader loader;
+    AcquireScreenOverlay(lifetime, loader);
+  });
+}
+
+void ReleaseLiveScreenOverlay() {
+  UpdateLiveLifetime([](ScreenOverlayLifetime& lifetime) {
+    LiveScreenOverlayLoader loader;
+    LiveFeedbackTexturePages pages;
+    ReleaseScreenOverlay(lifetime, loader, pages);
+  });
 }
 }  // namespace VS::Effects::ScreenDistortion

@@ -1739,12 +1739,12 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertFalse(
             (root / r"Native\Game\src\Effects\ScreenDistortion\RadialWarp.h").exists()
         )
-        caller = (root / r"Native\Game\src\Effects\ScreenEffects.cpp").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn(
-            "VS::Effects::ScreenDistortion::WarpLivePolygonVertices();", caller
-        )
+        # F01389 left the generated ScreenEffects.cpp for the owned ScreenOverlayLifetime.cpp DrawScreenOverlay
+        # (#276 row 39), whose ScreenOverlaysLive.cpp painter port runs the live warp.
+        caller = (
+            root / r"Native\Game\src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("    WarpLivePolygonVertices();", caller)
         self.assertIn(
             '#include "Effects/ScreenDistortion/RadialWarpLive.hpp"', caller
         )
@@ -1774,15 +1774,6 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(owned["G00512"]["kind"], "global")
         self.assertEqual(
             owned["G00512"]["path"], r"Native\Game\src\Effects\ScreenEffectState.cpp"
-        )
-        for identity in ("F01363", "F01389", "F01390"):
-            self.assertEqual(len(copy_fixups.FIXES[identity]), 1)
-        self.assertIn(
-            "Effects_screenEffectDefaults.radialWarpArg0",
-            copy_fixups.FIXES["F01363"][0][1],
-        )
-        self.assertEqual(
-            copy_fixups.FIXES["F01390"][0][1], "&Effects_screenEffectDefaults"
         )
         with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(
             encoding="utf-8", newline=""
@@ -3644,8 +3635,10 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # StartRecipeLoad keeps the guard below. F00532 and F00542 left it for the owned RoomLoading.cpp
         # QueueZoneLoad and QueueRoomLoad (#276 row 25c), whose RoomLoadingLive.cpp BeginRead keeps the guard
         # below. F01425 left it for the owned EffectRuntime.cpp UpdatePrimaryEffects (#276 row 37), which keeps
-        # a refused menu reload request from the queue.
-        self.assertGreaterEqual(len(guarded), 19)
+        # a refused menu reload request from the queue. F01388 left it for the owned ScreenOverlayLifetime.cpp
+        # LoadScreenOverlay (#276 row 39), which completes a refused read through the loader's
+        # CompleteRefusedOverlayRead (ScreenOverlaysLive.cpp).
+        self.assertGreaterEqual(len(guarded), 18)
         owned = self.owned_items()
         self.assertEqual(owned["F03526"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03547"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
@@ -3662,7 +3655,19 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         self.assertEqual(owned["F00532"]["path"], r"Native\Game\src\Field\RoomLoading.cpp")
         self.assertEqual(owned["F00542"]["path"], r"Native\Game\src\Field\RoomLoading.cpp")
         self.assertEqual(owned["F01425"]["path"], r"Native\Game\src\Effects\EffectRuntime.cpp")
+        self.assertEqual(
+            owned["F01388"]["path"], r"Native\Game\src\Effects\ScreenDistortion\ScreenOverlayLifetime.cpp"
+        )
         root = Path(__file__).resolve().parents[2]
+        overlay = "".join(
+            (root / r"Native\Game\src\Effects\ScreenDistortion\ScreenOverlayLifetime.cpp")
+            .read_text(encoding="utf-8").split()
+        )
+        self.assertIn("}else{lifetime.read=loader.CompleteRefusedOverlayRead();}", overlay)
+        overlay_live = (root / r"Native\Game\src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Content::CompleteLiveRefusedDiscRequest(&file, Core_overlaySlots[1]);", overlay_live)
         runtime = "".join((root / r"Native\Game\src\Effects\EffectRuntime.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){runtime.EnqueueMenuReload(*slot);}", runtime)
         runtime_tests = (root / r"Native\Tests\src\EffectRuntimeTests.cpp").read_text(encoding="utf-8")
@@ -3723,7 +3728,9 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # owned QueueTiledBackgroundLoad, whose BackgroundLive.cpp EnqueueRead runs only for an allocated read.
         # Row 49 moved Combination.cpp's recipe read into SetupLive.cpp StartRecipeLoad. Row 25c moved
         # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead. Row 37 moved Runtime.cpp's menu
-        # reload request into the owned EffectRuntime.cpp UpdatePrimaryEffects.
+        # reload request into the owned EffectRuntime.cpp UpdatePrimaryEffects. Row 39 moved ScreenEffects.cpp's
+        # overlay load into the owned ScreenOverlayLifetime.cpp LoadScreenOverlay, whose ScreenOverlaysLive.cpp
+        # EnqueueOverlayRead runs only for an allocated read.
         event_source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(encoding="utf-8")
         event = "".join(re.sub(r"//[^\n]*", "", event_source).split())
         self.assertIn(
@@ -3736,7 +3743,7 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             event,
         )
         sites += 1
-        self.assertGreaterEqual(sites, 14)
+        self.assertGreaterEqual(sites, 13)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)

@@ -618,6 +618,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::ScreenDistortion::SetLiveVignetteEnabled": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
     "VS::Effects::ScreenDistortion::AppendLiveVignetteCorner": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
     "VS::Effects::ScreenDistortion::DrawLiveVignette": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::ResetLiveScreenOverlay": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::DrawLiveScreenOverlay": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
+    "VS::Effects::ScreenDistortion::LoadLiveScreenOverlay": r"Native\Game\include\Effects\ScreenDistortion\ScreenOverlaysLive.hpp",
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
@@ -2846,6 +2851,11 @@ OWNED_CALL_BINDINGS["F02457"] = "VS::Effects::ScreenDistortion::SetLiveRadialWar
 OWNED_CALL_BINDINGS["F02459"] = "VS::Effects::ScreenDistortion::SetLiveVignetteEnabled"
 OWNED_CALL_BINDINGS["F02461"] = "VS::Effects::ScreenDistortion::AppendLiveVignetteCorner"
 OWNED_CALL_BINDINGS["F02462"] = "VS::Effects::ScreenDistortion::DrawLiveVignette"
+OWNED_CALL_BINDINGS["F01363"] = "VS::Effects::ScreenDistortion::ResetLiveScreenOverlay"
+OWNED_CALL_BINDINGS["F01389"] = "VS::Effects::ScreenDistortion::DrawLiveScreenOverlay"
+OWNED_CALL_BINDINGS["F01390"] = "VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay"
+OWNED_CALL_BINDINGS["F01391"] = "VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay"
+OWNED_CALL_BINDINGS["F01388"] = "VS::Effects::ScreenDistortion::LoadLiveScreenOverlay"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4583,6 +4593,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU0.PRG", 0x801037A8, "VS::Menu::Magic::UpdateSorcererMenuLive"),  # F02606
     ("MENU/MENU0.PRG", 0x80103AEC, "VS::Menu::Magic::UpdateEnchanterMenuLive"),  # F02607
     ("EFFECT/PLG128.BIN", 0x800FDEC4, "VS::Effects::Plg128::UpdateLiveEffectCamera"),  # F02068
+    ("BATTLE/BATTLE.PRG", 0x800CA97C, "VS::Effects::ScreenDistortion::ResetLiveScreenOverlay"),  # F01363
+    ("BATTLE/BATTLE.PRG", 0x800CB708, "VS::Effects::ScreenDistortion::DrawLiveScreenOverlay"),  # F01389
+    ("BATTLE/BATTLE.PRG", 0x800CB79C, "VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay"),  # F01390
+    ("BATTLE/BATTLE.PRG", 0x800CB7DC, "VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay"),  # F01391
+    ("BATTLE/BATTLE.PRG", 0x800CB678, "VS::Effects::ScreenDistortion::LoadLiveScreenOverlay"),  # F01388
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -4594,21 +4609,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("VS::Battle::Ai::AddAiTileOccupant(object);",
          "VS::Battle::Ai::AddAiTileOccupant((const Field_GimmickInstance*)object);",
          "the rebased physics view aliases the native owning Gimmick; pass its checked tile prefix explicitly"),
-    ],
-    "F01363": [
-        ("Effects_screenEffectDefaults[2] = 0x1000;",
-         "Effects_screenEffectDefaults.radialWarpArg0 = 0x1000;",
-         "G00512 owns the complete native overlay state; reset by typed member rather than PS1 short-array index"),
-    ],
-    "F01389": [
-        ("*(int*)&temp_s0->radialWarpArg0 != 0x1000",
-         "temp_s0->radialWarpArg0 != 0x1000 || temp_s0->radialWarpArg1 != 0",
-         "Compare the two typed warp parameters without aliasing adjacent shorts as int"),
-    ],
-    "F01390": [
-        ("(Effects_ScreenEffectOverlay*)Effects_screenEffectDefaults",
-         "&Effects_screenEffectDefaults",
-         "Default controller storage is a native overlay object including its widened request pointer"),
     ],
     "F00298": [
         ("VS::Battle::Ai::ActorNavigationOverrideStatus()",
@@ -6227,7 +6227,6 @@ for _row, _fixup in (
     ("F03417", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[1]", "&cdFile", priority=True)),
     ("F03418", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
     ("F03419", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
-    ("F01388", _refused_disc_request(" " * 8, "p->slot", "*new_var", "&file")),
     ("F01277", _refused_disc_request(
         " " * 4, _EVENT_FILE_REQUEST, "arg1", "&Event_eventFileDiscLocation")),
     ("F02503", _refused_disc_request(
@@ -8485,12 +8484,6 @@ REGEX_FIXES += [
         ("Effects::RecalculateWeatherVelocity",
          (('temp_v1', 'elevation_cosine'), ('var_s0', 'horizontal_direction_product'), ('var_v0', 'direction_component_product')),
          "F00657 Signed intermediate products compute sin/cos heading times magnitude, apply elevation, then vertical sine; +0xFFF before >>12 preserves truncation toward zero."),
-        ("Effects::LoadScreenEffectOverlay",
-         (('arg0', 'begin_load'), ('new_var', 'overlay_destination_slot')),
-         "F01388 Nonzero begins SCREFF2 disc read into Core_overlaySlots[1], zero polls/completes existing request."),
-        ("Effects::DrawScreenEffectOverlay",
-         (('temp_s0', 'screen_effect_state'),),
-         "F01389 Nullable overlay state gates load polling, radial warp, feedback and vignette consumers."),
         ("Effects::IgnoreRuntimeDiagnostic",
          (('arg0', 'diagnostic_code'),),
          "F01419 Call sites pass 0x14 for pool exhaustion and 0x1E for invalid opcode; original empty diagnostic hook remains empty."),

@@ -13,6 +13,7 @@
 
 #include "Content/ModuleData.h"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -174,7 +175,7 @@ TEST_CASE("The production screen overlay applies radial warp to scene vertices",
   WarpFixture fixture;
   const auto tag = fixture.triangle[0];
   const auto root = fixture.ordering[0];
-  Effects_DrawScreenEffectOverlay();
+  VS::Effects::ScreenDistortion::DrawLiveScreenOverlay();
   CHECK(fixture.triangle[2] == Point(96, 88));
   CHECK(fixture.triangle[3] == Point(224, 88));
   CHECK(fixture.triangle[4] == Point(160, 152));
@@ -276,7 +277,7 @@ TEST_CASE("Screen warp no longer publishes an original overlay entry",
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "GIM/SCREFF2.PRG",
                                           0x800F9BD8u) == nullptr);
-  Effects_DrawScreenEffectOverlay();
+  VS::Effects::ScreenDistortion::DrawLiveScreenOverlay();
   CHECK(fixture.triangle[2] == Point(96, 88));
 }
 

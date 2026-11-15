@@ -75,6 +75,7 @@
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Plugins/Plg128CameraLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
@@ -401,15 +402,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&Menu_SetTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&Menu_SelectTextBoxChoice, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CA97Cu, 0u, (void*)&Effects_ResetScreenEffectState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB268u, 0u, (void*)&Menu_DismissAllTextBoxes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB2B8u, 0u, (void*)&Menu_ShowSceneNotification, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&Menu_IsSceneNotificationPending, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&Menu_ReleaseSceneNotification, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB678u, 0u, (void*)&Effects_LoadScreenEffectOverlay, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB708u, 0u, (void*)&Effects_DrawScreenEffectOverlay, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB79Cu, 0u, (void*)&Effects_AcquireScreenEffectOverlay, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB7DCu, 0u, (void*)&Effects_ReleaseScreenEffectOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&Menu_UpdateTextBoxes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCDF4u, 0u, (void*)&Menu_TextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCE10u, 0u, (void*)&Menu_TextBoxAnchor, 0u, 0u, 0u},
@@ -2116,6 +2112,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU0.PRG", 0x801037A8u, 0u, (void*)&VS::Menu::Magic::UpdateSorcererMenuLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x80103AECu, 0u, (void*)&VS::Menu::Magic::UpdateEnchanterMenuLive, 0u, 0u, 0u},
     {"EFFECT/PLG128.BIN", 0x800FDEC4u, 0u, (void*)&VS::Effects::Plg128::UpdateLiveEffectCamera, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CA97Cu, 0u, (void*)&VS::Effects::ScreenDistortion::ResetLiveScreenOverlay, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB708u, 0u, (void*)&VS::Effects::ScreenDistortion::DrawLiveScreenOverlay, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB79Cu, 0u, (void*)&VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB7DCu, 0u, (void*)&VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB678u, 0u, (void*)&VS::Effects::ScreenDistortion::LoadLiveScreenOverlay, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
