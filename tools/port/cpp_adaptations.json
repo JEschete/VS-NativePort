@@ -329,35 +329,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Effects\\Plugins\\Plg128.cpp": [
-[
-117,
-[
-"    Effects_Plg128_CameraEffectState* state = renderer_slot->rendererState;"
-],
-[
-"    Effects_Plg128_CameraEffectState* state = (Effects_Plg128_CameraEffectState *)(renderer_slot->rendererState);"
-]
-],
-[
-119,
-[
-"    Effects_ParticleEmitterScratch* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x1D0);"
-],
-[
-"    Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch *)((void*)((uintptr_t)Core_ScratchBase() + 0x1D0));"
-]
-],
-[
-125,
-[
-"        state = renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state));"
-],
-[
-"        state = (Effects_Plg128_CameraEffectState *)(renderer_slot->rendererState = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(*state)));"
-]
-]
-],
 "Native\\Game\\src\\Effects\\Plugins\\Plg162.cpp": [
 [
 66,

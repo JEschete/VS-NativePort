@@ -73,6 +73,7 @@
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
+#include "Effects/Plugins/Plg128CameraLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
@@ -2111,6 +2112,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU0.PRG", 0x80103464u, 0u, (void*)&VS::Menu::Magic::UpdateShamanMenuLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x801037A8u, 0u, (void*)&VS::Menu::Magic::UpdateSorcererMenuLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x80103AECu, 0u, (void*)&VS::Menu::Magic::UpdateEnchanterMenuLive, 0u, 0u, 0u},
+    {"EFFECT/PLG128.BIN", 0x800FDEC4u, 0u, (void*)&VS::Effects::Plg128::UpdateLiveEffectCamera, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

@@ -331,6 +331,7 @@
     <ClCompile Include="src\PlanningWorkspaceSliceTests.cpp" />
     <ClCompile Include="src\PlatformPlacementTests.cpp" />
     <ClCompile Include="src\PlaybackResetTests.cpp" />
+    <ClCompile Include="src\Plg128CameraTests.cpp" />
     <ClCompile Include="src\PrimaryEffectTests.cpp" />
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RadialWarpSliceTests.cpp" />

@@ -34,20 +34,10 @@ _Static_assert(sizeof(Effects_Plg128_CameraEffectState) == 0xD0, "Effects_Plg128
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG128_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG128_H_DECLS
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
 
 extern SVECTOR Effects_Plg128_surfaceVertices[5][16];
 extern CVECTOR Effects_Plg128_closedRingColorFactors[8];
 extern SVECTOR Effects_Plg128_surfaceVertices2[5][16];
 extern int Effects_Plg128_trailEmissionCounter;
-void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* camera_effect, VECTOR* translation);
-void Effects_Plg128_ResolveCameraEndpoints(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* emitter_scratch, Effects_EffectInstance* effect_instance,
-    Effects_ParticleDefinition* particle_definition);
-void Effects_Plg128_ResolveActorFacingCamera(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* emitter_scratch, Effects_EffectInstance* effect_instance,
-    Effects_ParticleDefinition* particle_definition);
-void Effects_Plg128_StoreCameraEndpoints(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* scratch);
-int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_PLUGINS_PLG128_H_DECLS

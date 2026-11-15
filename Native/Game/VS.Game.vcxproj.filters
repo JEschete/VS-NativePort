@@ -22,6 +22,9 @@
     <Filter Include="include\Effects">
       <UniqueIdentifier>{9071A53F-D4E1-5F56-812B-DA257B8749BD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Effects\Plugins">
+      <UniqueIdentifier>{D4CFAD23-0C4A-5886-880E-FBDDCE16B5E5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Effects\ScreenDistortion">
       <UniqueIdentifier>{82C05CD2-F240-59F0-A0D1-317CD68B16FD}</UniqueIdentifier>
     </Filter>
@@ -1278,6 +1281,12 @@
     <ClInclude Include="src\Effects\Plugins\Plg128.h">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg128Camera.cpp">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\Plugins\Plg128CameraLive.cpp">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\Plugins\Plg129.cpp">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
@@ -3503,6 +3512,12 @@
     </ClInclude>
     <ClInclude Include="include\Effects\ParticleTextureAnimationLive.hpp">
       <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Plugins\Plg128Camera.hpp">
+      <Filter>include\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\Plugins\Plg128CameraLive.hpp">
+      <Filter>include\Effects\Plugins</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\PrimaryEffect.hpp">
       <Filter>include\Effects</Filter>

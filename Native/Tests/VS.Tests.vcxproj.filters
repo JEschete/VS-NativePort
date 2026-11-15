@@ -798,6 +798,9 @@
     <ClCompile Include="src\PlaybackResetTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Plg128CameraTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\PrimaryEffectTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

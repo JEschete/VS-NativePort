@@ -268,6 +268,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\Templates\ParticlesLive.cpp",
                 r"src\Effects\Templates\TrailsLive.cpp",
                 r"src\Effects\Templates\SurfacesLive.cpp",
+                r"src\Effects\Plugins\Plg128CameraLive.cpp",
                 r"src\Menu\Framework\FrameworkLive.cpp",
                 r"src\Menu\FilesLive.cpp",
                 r"src\Menu\OptionsLive.cpp",

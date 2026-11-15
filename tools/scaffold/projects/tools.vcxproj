@@ -759,6 +759,8 @@
     <None Include="..\..\port\differentials\particle_pool_reset.py" />
     <None Include="..\..\port\differentials\perception.py" />
     <None Include="..\..\port\differentials\perception_driver.cpp" />
+    <None Include="..\..\port\differentials\plg128_camera.py" />
+    <None Include="..\..\port\differentials\plg128_camera_driver.cpp" />
     <None Include="..\..\port\differentials\primary_effect_allocate_token.py" />
     <None Include="..\..\port\differentials\primary_effect_can_start.py" />
     <None Include="..\..\port\differentials\primary_effect_driver.cpp" />

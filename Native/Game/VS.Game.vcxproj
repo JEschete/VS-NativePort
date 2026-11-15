@@ -883,6 +883,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Effects\Plugins\Plg128Camera.cpp" />
+    <ClCompile Include="src\Effects\Plugins\Plg128CameraLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\Plugins\Plg129.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2593,6 +2597,8 @@
     <ClInclude Include="include\Effects\ParticleRenderLive.hpp" />
     <ClInclude Include="include\Effects\ParticleTextureAnimation.hpp" />
     <ClInclude Include="include\Effects\ParticleTextureAnimationLive.hpp" />
+    <ClInclude Include="include\Effects\Plugins\Plg128Camera.hpp" />
+    <ClInclude Include="include\Effects\Plugins\Plg128CameraLive.hpp" />
     <ClInclude Include="include\Effects\PrimaryEffect.hpp" />
     <ClInclude Include="include\Effects\PrimaryEffectLive.hpp" />
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarp.hpp" />

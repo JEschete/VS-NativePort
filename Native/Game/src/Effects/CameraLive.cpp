@@ -87,7 +87,9 @@ std::uint64_t refused_calls = 0;
   return std::has_single_bit(++count);
 }
 
-[[nodiscard]] EffectCameraPose PoseOf(const Effects_EffectCamera& camera) {
+}  // namespace
+
+EffectCameraPose LoadLiveEffectCameraPose(const Effects_EffectCamera& camera) {
   return {.position = Math::VectorOf(camera.position),
           .look_at = Math::VectorOf(camera.lookAt),
           .shake_lateral = camera.shakeLateral,
@@ -100,7 +102,8 @@ std::uint64_t refused_calls = 0;
           .far_clip = camera.farClip};
 }
 
-void StorePose(Effects_EffectCamera& camera, const EffectCameraPose& pose) {
+void StoreLiveEffectCameraPose(Effects_EffectCamera& camera,
+                               const EffectCameraPose& pose) {
   Math::StoreVector(camera.position, pose.position);
   Math::StoreVector(camera.lookAt, pose.look_at);
   camera.shakeLateral = pose.shake_lateral;
@@ -113,6 +116,7 @@ void StorePose(Effects_EffectCamera& camera, const EffectCameraPose& pose) {
   camera.farClip = pose.far_clip;
 }
 
+namespace {
 [[nodiscard]] CameraShakeChannel ChannelOf(
     const Effects_CameraShakeChannel& channel) {
   return {.phase = channel.phase,
@@ -194,14 +198,16 @@ EffectCameraState LoadLiveEffectCameraState() {
     state.channels.at(i) = ChannelOf(Effects_cameraShakeChannels[i]);
   }
   state.motion_frame = Effects_cameraMotionFrame;
-  state.camera = PoseOf(Effects_effectCamera);
+  state.camera = LoadLiveEffectCameraPose(Effects_effectCamera);
   state.enabled_channels =
       static_cast<std::uint8_t>(Effects_enabledShakeChannels);
   for (std::size_t i = 0; i < state.motion_ends.size(); ++i) {
-    state.motion_ends.at(i) = PoseOf(Effects_cameraMotionEnds[i]);
+    state.motion_ends.at(i) =
+        LoadLiveEffectCameraPose(Effects_cameraMotionEnds[i]);
   }
   state.motion_duration = Effects_cameraMotionDuration;
-  state.saved_action_camera = PoseOf(Effects_savedActionCamera);
+  state.saved_action_camera =
+      LoadLiveEffectCameraPose(Effects_savedActionCamera);
   state.transition_mode = Effects_cameraTransitionMode;
   return state;
 }
@@ -211,13 +217,15 @@ void StoreLiveEffectCameraState(const EffectCameraState& state) {
     StoreChannel(Effects_cameraShakeChannels[i], state.channels.at(i));
   }
   Effects_cameraMotionFrame = state.motion_frame;
-  StorePose(Effects_effectCamera, state.camera);
+  StoreLiveEffectCameraPose(Effects_effectCamera, state.camera);
   Effects_enabledShakeChannels = static_cast<char>(state.enabled_channels);
   for (std::size_t i = 0; i < state.motion_ends.size(); ++i) {
-    StorePose(Effects_cameraMotionEnds[i], state.motion_ends.at(i));
+    StoreLiveEffectCameraPose(Effects_cameraMotionEnds[i],
+                              state.motion_ends.at(i));
   }
   Effects_cameraMotionDuration = state.motion_duration;
-  StorePose(Effects_savedActionCamera, state.saved_action_camera);
+  StoreLiveEffectCameraPose(Effects_savedActionCamera,
+                            state.saved_action_camera);
   Effects_cameraTransitionMode = state.transition_mode;
 }
 
@@ -237,9 +245,9 @@ void LiveCaptureEffectCamera(Effects_EffectCamera* camera) {
     ReportRefusal("capture", "no camera");
     return;
   }
-  EffectCameraPose pose = PoseOf(*camera);
+  EffectCameraPose pose = LoadLiveEffectCameraPose(*camera);
   CaptureEffectCamera(LiveEffectCameraHost(), pose);
-  StorePose(*camera, pose);
+  StoreLiveEffectCameraPose(*camera, pose);
 }
 
 void LiveSetEffectCameraTransitionMode(int transition_mode) {

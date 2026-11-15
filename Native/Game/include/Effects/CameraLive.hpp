@@ -22,6 +22,13 @@ namespace VS::Effects {
 [[nodiscard]] EffectCameraState LoadLiveEffectCameraState();
 void StoreLiveEffectCameraState(const EffectCameraState& state);
 
+// One Effects_EffectCamera record as a typed pose, and back. Storing keeps
+// the VECTOR pads.
+[[nodiscard]] EffectCameraPose LoadLiveEffectCameraPose(
+    const Effects_EffectCamera& camera);
+void StoreLiveEffectCameraPose(Effects_EffectCamera& camera,
+                               const EffectCameraPose& pose);
+
 // The host the entries run the core over.
 [[nodiscard]] EffectCameraHost& LiveEffectCameraHost();
 

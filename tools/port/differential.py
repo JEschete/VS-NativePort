@@ -78,6 +78,7 @@ CASES = Path(__file__).resolve().parent / "differentials"
 OUTPUT = ROOT / "build" / "differential"
 MODULE_BASES = {
     "BATTLE/BATTLE.PRG": 0x80068800,
+    "EFFECT/PLG128.BIN": 0x800F9800,
     "MENU/MENUB.PRG": 0x80102800,
 }
 STOP = 0xFFFFFFF0

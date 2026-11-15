@@ -3249,6 +3249,12 @@
     <None Include="..\..\port\differentials\perception_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\plg128_camera.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\plg128_camera_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\primary_effect_allocate_token.py">
       <Filter>tools\port\differentials</Filter>
     </None>

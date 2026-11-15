@@ -1581,6 +1581,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Magic::UpdateShamanMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Menu::Magic::UpdateSorcererMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Menu::Magic::UpdateEnchanterMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
+    "VS::Effects::Plg128::UpdateLiveEffectCamera": r"Native\Game\include\Effects\Plugins\Plg128CameraLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2806,6 +2807,7 @@ OWNED_CALL_BINDINGS["F01451"] = "VS::Effects::LiveClampTrailTexturePoint"
 OWNED_CALL_BINDINGS["F01452"] = "VS::Effects::LiveMapTrailFramebufferTexture"
 OWNED_CALL_BINDINGS["F00056"] = "VS::Effects::LiveStartWeaponTrail"
 OWNED_CALL_BINDINGS["F00057"] = "VS::Effects::LiveFadeWeaponTrails"
+OWNED_CALL_BINDINGS["F02068"] = "VS::Effects::Plg128::UpdateLiveEffectCamera"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4519,6 +4521,7 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU0.PRG", 0x80103464, "VS::Menu::Magic::UpdateShamanMenuLive"),  # F02605
     ("MENU/MENU0.PRG", 0x801037A8, "VS::Menu::Magic::UpdateSorcererMenuLive"),  # F02606
     ("MENU/MENU0.PRG", 0x80103AEC, "VS::Menu::Magic::UpdateEnchanterMenuLive"),  # F02607
+    ("EFFECT/PLG128.BIN", 0x800FDEC4, "VS::Effects::Plg128::UpdateLiveEffectCamera"),  # F02068
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -9027,21 +9030,6 @@ REGEX_FIXES += [
         ("Effects::Plg052::UpdateRepeatingRing",
          (('arg0', 'renderer_slot'), ('arg1', 'lifecycle_command'), ('arg2', 'packed_parameters'), ('speed', 'angular_step')),
          "F01920 Each independently inspected ring renderer stores parameter low byte lifetime and upper byte definition; random sampled speed is added to state.angle before Sin/Cos. This is angular increment, not translation speed. Packet v0..v3 remain SDK V-coordinate members. Native provenance explicitly takes C from PLG077 func_800FA324 (F01998, src/EFFECT/PLG077.BIN/18.c:37); that original C body and angular-step assignment at148-162 were read. PLG052 INCLUDE_ASM declaration is not misrepresented as a readable C body or freshly proven binary equivalence."),
-        ("Effects::Plg128::BuildCameraOffsetTransform",
-         (('arg0', 'camera_effect'), ('arg1', 'translation')),
-         "F02064 Builds look-at orientation from camera state and writes input VECTOR XYZ to matrix translation."),
-        ("Effects::Plg128::ResolveCameraEndpoints",
-         (('arg2', 'effect_instance'), ('arg1', 'emitter_scratch'), ('arg3', 'particle_definition'), ('arg0', 'camera_effect')),
-         "F02065 Particle definition indexes source/attraction transforms in current instance; scratch position/attraction offsets form camera-effect lookAt/eye. Case flags0..2/0x80/0xC0 retain actual source conventions."),
-        ("Effects::Plg128::ResolveActorFacingCamera",
-         (('arg2', 'effect_instance'), ('arg1', 'emitter_scratch'), ('arg3', 'particle_definition'), ('arg0', 'camera_effect')),
-         "F02066 Definition transform selects instance placement/facing; scratch position and attractionJitter.vx yield effect eye and sin/cos-offset lookAt. No guessed eye/lookAt reversal fix."),
-        ("Effects::Plg128::StoreCameraEndpoints",
-         (('arg0', 'camera_effect'),),
-         "F02067 Effect state's lookAt becomes endCamera.position<<12 while eye becomes endCamera.lookAt<<12, exactly as original; scratch formal already named and unused."),
-        ("Effects::Plg128::UpdateEffectCamera",
-         (('arg0', 'renderer_slot'), ('arg1', 'lifecycle_command'), ('arg2', 'packed_parameters')),
-         "F02068 Low byte lifetime/duration, next byte definition, upper bits camera mode; command2 reads curves and camera endpoint helpers, without changing fixed-point shifts."),
         ("Effects::Plg162::UpdateTransposedRing",
          (('arg0', 'renderer_slot'), ('arg1', 'lifecycle_command'), ('arg2', 'packed_parameters'), ('speed', 'angular_step')),
          "F02209 Each independently inspected ring renderer stores parameter low byte lifetime and upper byte definition; random sampled speed is added to state.angle before Sin/Cos. This is angular increment, not translation speed. Packet v0..v3 remain SDK V-coordinate members."),

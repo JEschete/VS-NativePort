@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Effects/Plugins/Plg128CameraLive.hpp"
 #include "Effects/Templates/ParticlesLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Effects/Loading.h"
 #include "Effects/Plugins/Plg005.h"
 #include "Effects/Plugins/Plg052.h"
-#include "Effects/Plugins/Plg128.h"
 #include "Effects/Plugins/Plg162.h"
 #include "Effects/Plugins/Plg300.h"
 #include "Effects/PurgeTables.h"
@@ -99,7 +99,7 @@ Effects_EffectRenderer Effects_effectEntryPoints[] = { Effects_Plg005_UpdateAnal
     VS::Effects::Templates::UpdateLivePlg085Grid, VS::Effects::Templates::UpdateLivePlg085TiledRing, VS::Effects::Templates::UpdateLivePlg086ClosedRing, VS::Effects::Templates::UpdateLivePlg086RotatingSurface, VS::Effects::Templates::UpdateLivePlg086Grid,
     VS::Effects::Templates::UpdateLivePlg086Trail, VS::Effects::Templates::UpdateLivePlg087Surface, VS::Effects::Templates::UpdateLivePlg087ClosedRing, VS::Effects::Templates::UpdateLivePlg087Grid, VS::Effects::Templates::UpdateLivePlg087Trail,
     VS::Effects::Templates::UpdateLivePlg087ParticleDispatch, VS::Effects::Templates::UpdateLivePlg045ParticleDispatch, VS::Effects::Templates::UpdateLivePlg114ParticleDispatch, VS::Effects::Templates::UpdateLivePlg114ParticleDispatch2, VS::Effects::Templates::UpdateLivePlg128Surface,
-    VS::Effects::Templates::UpdateLivePlg128ClosedRing, VS::Effects::Templates::UpdateLivePlg128RotatingSurface, VS::Effects::Templates::UpdateLivePlg128Grid, VS::Effects::Templates::UpdateLivePlg128Surface2, NULL, Effects_Plg128_UpdateEffectCamera,
+    VS::Effects::Templates::UpdateLivePlg128ClosedRing, VS::Effects::Templates::UpdateLivePlg128RotatingSurface, VS::Effects::Templates::UpdateLivePlg128Grid, VS::Effects::Templates::UpdateLivePlg128Surface2, NULL, VS::Effects::Plg128::UpdateLiveEffectCamera,
     VS::Effects::Templates::UpdateLivePlg128Trail, VS::Effects::Templates::UpdateLivePlg129Ring, NULL, VS::Effects::Templates::UpdateLivePlg129Mesh10, VS::Effects::Templates::UpdateLivePlg129Surface, VS::Effects::Templates::UpdateLivePlg129Ring2,
     VS::Effects::Templates::UpdateLivePlg129RotatingSurface, VS::Effects::Templates::UpdateLivePlg044TiledRing, VS::Effects::Templates::UpdateLivePlg044TiledRing, VS::Effects::Templates::UpdateLivePlg134Trail, VS::Effects::Templates::UpdateLivePlg134ClosedRing, NULL,
     VS::Effects::Templates::UpdateLivePlg135ClosedRing, NULL, VS::Effects::Templates::UpdateLivePlg135TrailNine, VS::Effects::Templates::UpdateLivePlg053Grid, VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg137Mesh10,
