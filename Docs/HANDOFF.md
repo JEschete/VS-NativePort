@@ -12,7 +12,8 @@ retired) and 442 remaining; see the CSV and issue #276 for current status.
   F01452 to typed bone/weapon-trail operations and checked Live bindings.
 - The original [900-function cohort](ledgers/REMAINING_FUNCTIONS.csv) is
   **458 resolved (449 promoted, nine retired), 442 remaining**. Row 39 is
-  23/80 complete and remains active. All three ledger checks pass.
+  23/80 complete and deferred while earlier row-32 work is integrated. All
+  three ledger checks pass.
 - Final integrated evidence:
   [group-20261115-011011](../build/promotion-check/group-20261115-011011/summary.json),
   464 seconds, on base `f0169c4ee9226228e92347b961c2dc617d5cddb5` plus the frozen
@@ -48,25 +49,39 @@ retired) and 442 remaining; see the CSV and issue #276 for current status.
   T00527` classifies it as fork-only; the current pinned source has a 12-byte
   stub, while the native `AiModelView` remains a 0x5B4 model-record view used
   by AI code. Deleting its fields or falling back to the stub is unsafe; this
-  source/provenance and type-identity decision is recorded on #391. Broad
-  generated DATA/TYPE/FIELD ledger churn was restored, so no full copier or
-  promotion-group gate has passed. Preserve the dirty LootInventory packet
-  worktree; #377's group gate has not been rerun on the root-normalization fix.
+  source/provenance and type-identity decision is recorded on #391. An
+  in-memory skip of T00527 reaches T00532, where 13 of 20 current type-fixup
+  inputs are absent; that multi-span adaptation drift is also tracked on #391.
+  No type ledger or T00532 fixups were changed. Broad generated
+  DATA/TYPE/FIELD ledger churn was restored, so no full copier or promotion
+  group gate has passed. Preserve the dirty LootInventory packet worktree;
+  #377's group gate has not been rerun on the root-normalization fix.
 - The next candidate is the five-function row-39 `ActionEffects.cpp` batch:
   F00058, F00060, F00064, F00068 and F00069. They meet the 4–8 same-file group
   size, but cover distinct behaviors; per-function tests and differentials are
-  still required. Implementation is underway in the isolated
-  `batch-action-effects-f00058-f00069-5c3a6242` worktree; no promotion is
-  integrated yet.
+  still required. Its implementation remains paused in the isolated
+  `batch-action-effects-f00058-f00069-5c3a6242` worktree until row 32 is
+  integrated; no promotion is integrated yet.
+- Row-32 sphere lifecycle and geometry preparations are in the root worktree:
+  F01279–F01284/F01297/F01312 and F01285/F01286/F01303–F01305. Their original
+  MIPS differentials pass: lifecycle 8,192 vectors and eight detected mutants;
+  each of the five geometry cases 512 vectors and one detected mutant, all
+  with zero mismatches. These are preparation results only: no ownership,
+  module-entry wiring, generated-project integration, native broken variants
+  or shared group gates have passed, so no function is counted resolved.
+  Production adapters must preserve the exported ABI and side effects: in
+  particular F01279 resets target pages, allocates only when needed, clears
+  and initializes the workspace in order; F01280/F01297 also reset target
+  pages, and F01312 reads the current input override state.
 
 Next steps:
 
 1. Resolve the fresh-index copier blockers on #391/#392 and verify the current
    root-normalization work for #377 without overwriting the preserved packet
    worktree or dirty reference checkout.
-2. Continue #276 in the maintained plan order. Row 39 is active at 23/80; after
-   copier/group gates are available, begin the five-function `ActionEffects.cpp`
-   batch above and recheck callers, dependencies, issues and CI.
+2. Continue #276 in the maintained plan order by integrating and validating
+   the row-32 sphere batches above. Then resume the five-function
+   `ActionEffects.cpp` batch and recheck callers, dependencies, issues and CI.
 3. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md):
    typed implementation and Live bindings, per-function tests and MIPS/native
    mutation controls, shared Debug/Release/replay/quality checks, ledger/CSV
