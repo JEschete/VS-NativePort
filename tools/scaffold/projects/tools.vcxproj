@@ -867,6 +867,13 @@
     <None Include="..\..\port\differentials\sphere_containment_guard_driver.cpp" />
     <None Include="..\..\port\differentials\sphere_containment_prism.py" />
     <None Include="..\..\port\differentials\sphere_containment_transform.py" />
+    <None Include="..\..\port\differentials\sphere_draw_common.py" />
+    <None Include="..\..\port\differentials\sphere_draw_driver.cpp" />
+    <None Include="..\..\port\differentials\sphere_draw_f01287.py" />
+    <None Include="..\..\port\differentials\sphere_draw_f01289.py" />
+    <None Include="..\..\port\differentials\sphere_draw_f01306.py" />
+    <None Include="..\..\port\differentials\sphere_draw_f01307.py" />
+    <None Include="..\..\port\differentials\sphere_draw_f01308.py" />
     <None Include="..\..\port\differentials\sphere_geometry_common.py" />
     <None Include="..\..\port\differentials\sphere_geometry_driver.cpp" />
     <None Include="..\..\port\differentials\sphere_geometry_f01285.py" />

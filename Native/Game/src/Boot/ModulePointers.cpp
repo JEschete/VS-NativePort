@@ -53,6 +53,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/SphereContainmentLive.hpp"
+#include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereReleaseLive.hpp"
@@ -351,11 +352,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80096FF0u, 0u, (void*)&Battle_ShowAbilityTimingCue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800971D4u, 0u, (void*)&Battle_CommitEquipmentStatChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009EA14u, 0u, (void*)&Battle_PlayActorDamageReaction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0990u, 0u, (void*)&Battle_DrawSphereWireLine, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0D78u, 0u, (void*)&Battle_DrawSphere, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C282Cu, 0u, (void*)&Battle_BuildSphereCameraBasis, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C28ACu, 0u, (void*)&Battle_DrawSpherePositionCursor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C2B0Cu, 0u, (void*)&Battle_CacheSphereTerrainRow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&Menu_SetTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&Menu_SelectTextBoxChoice, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
@@ -1665,6 +1661,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80093F24u, 0u, (void*)&VS::Battle::LiveQueueChainCount, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80093FECu, 0u, (void*)&VS::Battle::LiveQueueActorStatusLabels, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009406Cu, 0u, (void*)&VS::Battle::LiveQueueActorStatusLabel, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C0990u, 0u, (void*)&VS::Battle::LiveDrawSphereWireLine, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C0D78u, 0u, (void*)&VS::Battle::LiveDrawSphere, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C282Cu, 0u, (void*)&VS::Battle::LiveBuildSphereCameraBasis, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C28ACu, 0u, (void*)&VS::Battle::LiveDrawSpherePositionCursor, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C2B0Cu, 0u, (void*)&VS::Battle::LiveCacheSphereTerrainRow, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

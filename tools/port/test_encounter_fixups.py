@@ -580,7 +580,6 @@ class EncounterFixupTests(unittest.TestCase):
             "F00596": "        Field_MpdTileCell* cell;\n"
                       "        cell = VS::Field::LiveCollisionCellAt(object->positionX / (ONE * 128), "
                       "object->positionZ / (ONE * 128), 0);\n",
-            "F01308": "            Field_MpdTileCell* room = VS::Field::LiveCollisionCellAt(x, z, 0);\n",
         }
         for function_id, source in sources.items():
             with self.subTest(function_id):
@@ -4627,8 +4626,10 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertFalse((root / "Native/Game/src/Battle/TargetingDraw.h").exists())
         text = (root / "Native/Game/src/Battle/Sphere.cpp").read_text(encoding="utf-8")
         self.assertNotIn("Battle_DrawSphereVolumeWireframe(", text)
-        self.assertIn("VS::Battle::DrawLiveSphereVolumeWireframe(shape, color);", text)
-        self.assertIn('#include "Battle/TargetingDrawLive.hpp"', text)
+        live = (root / "Native/Game/src/Battle/SphereDrawLive.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Battle_DrawSphereVolumeWireframe(", live)
+        self.assertIn("DrawLiveSphereVolumeWireframe(staged, static_cast<int>(color));", live)
+        self.assertIn('#include "Battle/TargetingDrawLive.hpp"', live)
         core = (root / "Native/Game/src/Battle/TargetingDraw.cpp").read_text(encoding="utf-8")
         self.assertNotIn("Legacy/", core)
         self.assertNotIn("Core_Gte", core)

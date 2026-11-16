@@ -4,6 +4,10 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:110
+#define vs_getUV1Tpage(u, v, x, y, tp, abr)                                              \
+    (((u) | ((v) << 8)) | (getTPage((tp), (abr), (x), (y)) << 16))
+
 // decomp: _renderLimbUiState (src/MENU/MENU4.PRG/120.c:1138)
 enum Menu_Status_LimbUiMode { Menu_Status_LimbUiMode_None, Menu_Status_LimbUiMode_Init };
 typedef enum Menu_Status_LimbUiMode Menu_Status_LimbUiMode;

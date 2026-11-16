@@ -5,6 +5,9 @@
 
 typedef struct Menu_Results_BuffReel Menu_Results_BuffReel;
 
+// decomp: src/include/gpu.h:96
+#define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
+
 // decomp: BuffReelStats (src/MENU/MENUF.PRG/3B8.c:708)
 enum Menu_Results_BuffReelStat {
     Menu_Results_BuffReelStat_Str = 13,

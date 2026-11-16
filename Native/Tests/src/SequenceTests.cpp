@@ -494,12 +494,18 @@ int Tests_TargetSphereWireframe(void) {
   Render_FrameScratch* frame =
       reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase());
   const Render_FrameScratch savedFrame = *frame;
+  void* saved_primitives = Render_legacyPrimitiveBuffers[0];
+  const int saved_frame_buffer = Render_frameBuf;
   Battle_TargetSphereSetupView* savedSphere = Battle_targetSphere;
   Battle_TargetSphere sphere = {0};
   Battle_TargetVolume volume = {0};
   u_long ordering[0x822];
   u_long packets[12];
   memset(packets, 0xA5, sizeof packets);
+  // The Live wire line reserves its packets inside the frame's primitive
+  // buffer.
+  Render_frameBuf = 0;
+  Render_legacyPrimitiveBuffers[0] = packets + 1;
   Core_Gte_Reset();
   Core_Gte_SetGeomOffset(160, 120);
   Core_Gte_SetGeomScreen(256);
@@ -534,6 +540,8 @@ int Tests_TargetSphereWireframe(void) {
   VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   passed = passed && frame->primitiveCursor == packets + 11;
   Battle_targetSphere = savedSphere;
+  Render_legacyPrimitiveBuffers[0] = saved_primitives;
+  Render_frameBuf = saved_frame_buffer;
   *frame = savedFrame;
   Core_Gte_Reset();
   return passed;

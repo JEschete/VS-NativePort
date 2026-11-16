@@ -4,13 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/include/gpu.h:96
-#define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
-
-// decomp: src/include/gpu.h:110
-#define vs_getUV1Tpage(u, v, x, y, tp, abr)                                              \
-    (((u) | ((v) << 8)) | (getTPage((tp), (abr), (x), (y)) << 16))
-
 #endif // VS_BATTLE_SPHERE_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_SPHERE_H_DECLS)
@@ -28,10 +21,5 @@ extern int Battle_positionCursorSpriteTexCoords[116];
 extern u_char Battle_positionCursorBlinkFrame;
 extern u_char Battle_reuseSphereVolumes;
 extern Battle_TargetSphereSetupView* Battle_targetSphere;
-void Battle_DrawSphereWireLine(SVECTOR* start, SVECTOR* end, u_int color, int intensity);
-void Battle_DrawSphere(void);
-void* Battle_BuildSphereCameraBasis(void);
-void Battle_DrawSpherePositionCursor(SVECTOR* position, int lock_pitch);
-void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row);
 
 #endif // VS_BATTLE_SPHERE_H_DECLS

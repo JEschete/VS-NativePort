@@ -17,7 +17,6 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-#include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"

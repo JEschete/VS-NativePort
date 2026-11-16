@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <span>
 
+#include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetingDraw.hpp"
 #include "Core/Log.hpp"
@@ -59,7 +60,7 @@ class LiveWireCanvas final : public TargetWireCanvas {
                 std::uint32_t command_color, int intensity) override {
     SVECTOR from = {start.x, start.y, start.depth, 0};
     SVECTOR to = {end.x, end.y, end.depth, 0};
-    Battle_DrawSphereWireLine(&from, &to, command_color, intensity);
+    LiveDrawSphereWireLine(&from, &to, command_color, intensity);
   }
 };
 }  // namespace

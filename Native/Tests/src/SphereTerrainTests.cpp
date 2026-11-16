@@ -10,6 +10,7 @@
 
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -377,7 +378,7 @@ TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",
   volume.scale.extents[0] = volume.scale.extents[2] = 16;
   volume.scale.extents[1] = 24;
   volume.scale.extents[3] = 32;
-  Battle_DrawSphere();
+  VS::Battle::LiveDrawSphere();
   auto* cursor = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
   REQUIRE(cursor >= fixture.slice.packets.data() + 1);
   REQUIRE(cursor < fixture.slice.packets.data() + fixture.slice.packets.size());
@@ -386,6 +387,40 @@ TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",
         fixture.ordering.data() + 32);
   CHECK(fixture.slice.packets.front() == kGuard);
   CHECK(fixture.slice.packets.back() == kGuard);
+}
+
+// #401: the cursor quads link in front of the first ordering-table slot
+// through packet handles, so the walk reaches both quads and the table after.
+TEST_CASE("Live sphere position cursor links both pitch quads",
+          "[render][sphere][sphere-draw]") {
+  SphereLabelFixture fixture;
+  const u_char saved_blink = Battle_positionCursorBlinkFrame;
+  Battle_positionCursorBlinkFrame = 0;
+  SVECTOR position = fixture.slice.center;
+  VS::Battle::LiveDrawSpherePositionCursor(&position, 0);
+  Battle_positionCursorBlinkFrame = saved_blink;
+  const auto* cursor =
+      static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
+  const u_long* const next_slot = &fixture.ordering[62];
+  const u_long* link = &fixture.ordering[63];
+  int quads = 0;
+  int sprites = 0;
+  for (int steps = 0; link != next_slot; ++steps) {
+    REQUIRE(steps < 16);
+    link = static_cast<const u_long*>(LegacyGpu_Pointer(*link));
+    REQUIRE(link != nullptr);
+    if (link == next_slot) break;
+    REQUIRE(link >= fixture.slice.packets.data() + 1);
+    REQUIRE(link < cursor);
+    if (*link >> 24 == 9 && link[1] == 0x2C808080) {
+      ++quads;
+    } else {
+      ++sprites;
+    }
+  }
+  CHECK(quads == 2);
+  CHECK(sprites == 3);
+  CHECK(fixture.slice.packets.front() == kGuard);
 }
 
 TEST_CASE("Spell elevation slice uses visible native-linked scanlines",

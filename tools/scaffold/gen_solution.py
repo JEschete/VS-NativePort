@@ -405,6 +405,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\SphereGeometryLive.cpp",
                 r"src\Battle\SphereReleaseLive.cpp",
                 r"src\Battle\SphereTargetLabelsLive.cpp",
+                r"src\Battle\SphereDrawLive.cpp",
                 r"src\Menu\Inventory\DetailsPoliciesLive.cpp",
                 r"src\Menu\Inventory\EquipmentDetailControllersLive.cpp",
                 r"src\Menu\Inventory\ItemDetailDispatchLive.cpp",

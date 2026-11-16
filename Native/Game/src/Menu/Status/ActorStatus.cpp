@@ -29,7 +29,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
-#include "Battle/Sphere.h"
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"

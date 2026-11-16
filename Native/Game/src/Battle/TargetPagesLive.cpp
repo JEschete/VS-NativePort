@@ -192,6 +192,6 @@ void Battle_DrawTargetPageHint(void) {
   std::array<char, kHintBufferSize> text{};
   std::snprintf(text.data(), text.size(), "L1  %d/%d  R1", info.page,
                 info.pages);
-  VS::Render::DrawLiveCompactTextColor(text.data(), vs_getXY_2(kHintX, kHintY),
+  VS::Render::DrawLiveCompactTextColor(text.data(), vs_getXY(kHintX, kHintY),
                                        kHintColor, nullptr);
 }

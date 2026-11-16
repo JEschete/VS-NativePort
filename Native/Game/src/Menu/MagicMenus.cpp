@@ -458,8 +458,10 @@ void DrawWarlockLevelArrow(u_long* spell_level_ordering_table) {
       vs_getUV0Clut(95, 48, kSpellLevelTexturePageU, kSpellLevelTexturePageV);
   prim[kArrowSecondPositionWord] = vs_getXY(240, 100);
   prim[kArrowTpageWord] =
-      vs_getUV1Tpage(79, 48, kSpellLevelPageX, Render_TextureFormat_Palette4Bit,
-                     Render_BlendMode_Average, Render_Dithering_Off);
+      vs_getUV(79, 48) |
+      (getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Average,
+                kSpellLevelPageX, 0)
+       << kClutWordShift);
   prim[kArrowThirdPositionWord] = vs_getXY(224, 116);
   prim[kArrowSecondUvWord] = vs_getUV(95, 64);
   prim[kArrowFourthPositionWord] = vs_getXY(240, 116);

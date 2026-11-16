@@ -1072,6 +1072,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LiveQueueChainCount": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
     "VS::Battle::LiveQueueActorStatusLabels": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
     "VS::Battle::LiveQueueActorStatusLabel": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
+    "VS::Battle::LiveDrawSphereWireLine": r"Native\Game\include\Battle\SphereDrawLive.hpp",
+    "VS::Battle::LiveDrawSphere": r"Native\Game\include\Battle\SphereDrawLive.hpp",
+    "VS::Battle::LiveBuildSphereCameraBasis": r"Native\Game\include\Battle\SphereDrawLive.hpp",
+    "VS::Battle::LiveDrawSpherePositionCursor": r"Native\Game\include\Battle\SphereDrawLive.hpp",
+    "VS::Battle::LiveCacheSphereTerrainRow": r"Native\Game\include\Battle\SphereDrawLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -2074,6 +2079,11 @@ OWNED_CALL_BINDINGS["F00715"] = "VS::Battle::LiveQueueAbilityTimingResult"
 OWNED_CALL_BINDINGS["F00716"] = "VS::Battle::LiveQueueChainCount"
 OWNED_CALL_BINDINGS["F00717"] = "VS::Battle::LiveQueueActorStatusLabels"
 OWNED_CALL_BINDINGS["F00718"] = "VS::Battle::LiveQueueActorStatusLabel"
+OWNED_CALL_BINDINGS["F01287"] = "VS::Battle::LiveDrawSphereWireLine"
+OWNED_CALL_BINDINGS["F01289"] = "VS::Battle::LiveDrawSphere"
+OWNED_CALL_BINDINGS["F01306"] = "VS::Battle::LiveBuildSphereCameraBasis"
+OWNED_CALL_BINDINGS["F01307"] = "VS::Battle::LiveDrawSpherePositionCursor"
+OWNED_CALL_BINDINGS["F01308"] = "VS::Battle::LiveCacheSphereTerrainRow"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -4272,6 +4282,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80093F24, "VS::Battle::LiveQueueChainCount"),  # F00716
     ("BATTLE/BATTLE.PRG", 0x80093FEC, "VS::Battle::LiveQueueActorStatusLabels"),  # F00717
     ("BATTLE/BATTLE.PRG", 0x8009406C, "VS::Battle::LiveQueueActorStatusLabel"),  # F00718
+    ("BATTLE/BATTLE.PRG", 0x800C0990, "VS::Battle::LiveDrawSphereWireLine"),  # F01287
+    ("BATTLE/BATTLE.PRG", 0x800C0D78, "VS::Battle::LiveDrawSphere"),  # F01289
+    ("BATTLE/BATTLE.PRG", 0x800C282C, "VS::Battle::LiveBuildSphereCameraBasis"),  # F01306
+    ("BATTLE/BATTLE.PRG", 0x800C28AC, "VS::Battle::LiveDrawSpherePositionCursor"),  # F01307
+    ("BATTLE/BATTLE.PRG", 0x800C2B0C, "VS::Battle::LiveCacheSphereTerrainRow"),  # F01308
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -5073,16 +5088,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("    Render_gimLayers = NULL;", "    VS::Render::ForgetLiveGimImages();",
          "#276 row 6: the heap was reset under the GIM set; the typed set is forgotten without being freed"),
     ],
-    "F01289": [
-        ("    VS::Battle::UpdateSphereTargetLabelsEntry();",
-         "    VS::Battle::UpdateSphereTargetLabelsEntry();\n"
-         "    Battle_DrawTargetPageHint();",
-         "Only extended native target lists display a readable page indicator"),
-    ],
-    "F01287": [
-        ("((u_long)primitive << 8) >> 8", "LegacyGpu_Handle(primitive)",
-         "sphere wireframe packets use native ordering links"),
-    ],
     "G00229": [
         ("Effects_PackageFile Effects_emptyPackage", "u_int Effects_emptyPackage[0x5200 / sizeof(u_int)]",
          "D_800EC4BC contains nine tagged blocks and the terminator at +0x51FC, not just a header"),
@@ -5485,9 +5490,7 @@ for _row, _decl, _where in (
          "146C.c:5531 reads hasRoomTrigger"),
         ("F00547", None, "146C.c:15556 reads hasRoomTrigger"),
         ("F00596", ("        Field_MpdTileCell* cell;\n", "        const Field_MpdTileCell* cell;\n"),
-         "146C.c:16717 reads isPit and surfaceKind"),
-        ("F01308", ("Field_MpdTileCell* room = ", "const Field_MpdTileCell* room = "),
-         "58578.c:1060 reads blocksSphereTerrain, doorPassability and occlusionAndFloorFlags")):
+         "146C.c:16717 reads isPit and surfaceKind")):
     _evidence = f"#288: {_where} of the cell lookup without a NULL check"
     FIXES.setdefault(_row, []).extend(
         ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
@@ -8363,12 +8366,6 @@ REGEX_FIXES += [
         ("Battle::UpdateSphereTargetLabels",
          (('temp_a0', 'screen_x'), ('var_s3', 'label_index'), ('var_v1', 'animation_step'), ('var_s1', 'label'), ('var_s0', 'screen_x_ptr'), ('v1', 'label_state')),
          "F01302 F01302 Battle::UpdateSphereTargetLabels: original func_800C20B4 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:750 (function lines 750-819). temp_a0 -> screen_x (screen x). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:752-808. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:989-1046. v1 -> label_state (label state). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:759-765. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:997-1003. var_s0 -> screen_x_ptr (screen x ptr). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:756-813. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:993-1051. var_s1 -> label (label). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:755-816. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:992-1054. var_s3 -> label_index (label index). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:753-758. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:990-995. var_v1 -> animation_step (animation step). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:754-802. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:991-1040. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::BuildSphereCameraBasis",
-         (('temp_a0', 'yaw_sine'), ('temp_s2', 'yaw_cosine')),
-         "F01306 F01306 Battle::BuildSphereCameraBasis: original func_800C282C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:965 (function lines 965-982). temp_a0 -> yaw_sine (yaw sine). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:968-978. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:1210-1220. temp_s2 -> yaw_cosine (yaw cosine). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:969-979. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:1211-1221. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
-        ("Battle::DrawSpherePositionCursor",
-         (('arg1', 'lock_pitch'),),
-         "F01307 F01307 Battle::DrawSpherePositionCursor: original func_800C28AC at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:984 (function lines 984-1034). arg1 -> lock_pitch (lock pitch). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\58578.c:984-1027. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:1227-1270. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),
         ("Battle::UpdateSphereTargetHighlights",
          (('arg0', 'target_lines'), ('arg1', 'target_count')),
          "F01310 F01310 Battle::UpdateSphereTargetHighlights: original func_800C4650 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BE50.c:65 (function lines 65-80). arg0 -> target_lines (target lines). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BE50.c:65-76. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:1365-1376. arg1 -> target_count (target count). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\5BE50.c:65-70. Native references: Native\\Game\\src\\Battle\\Sphere.cpp:1365-1370. Review context: Original and native individual candidate dataflow reviewed. Names follow actual status mask/stat writes, equipment affinity indices, target-volume geometry, source/target preview records, label animation, pulse API parameters or range test consumers; no layout or behavioral change."),

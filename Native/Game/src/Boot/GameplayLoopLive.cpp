@@ -22,6 +22,7 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
+#include "Battle/SphereDrawLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Boot/GameplayLoop.hpp"
@@ -481,7 +482,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         break;
     }
   }
-  void DrawSphere() override { Battle_DrawSphere(); }
+  void DrawSphere() override { Battle::LiveDrawSphere(); }
 
   void DrawRoomScenery() override {
     VS::Field::LiveDrawRoomBackground(nullptr);

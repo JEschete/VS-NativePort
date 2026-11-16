@@ -27,6 +27,7 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/SphereContainmentLive.hpp"
+#include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
@@ -940,7 +941,9 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
         static_cast<std::size_t>(battle::kTargetPreviewCapacity));
     return ReadPreview(targets[static_cast<std::size_t>(index)]);
   }
-  void BuildCameraBasis() override { Battle_BuildSphereCameraBasis(); }
+  void BuildCameraBasis() override {
+    static_cast<void>(VS::Battle::LiveBuildSphereCameraBasis());
+  }
   [[nodiscard]] battle::SphereBasis BuildVolumeTransform() override {
     Battle_TargetVolume& volume = sphere_.volumes[0];
     const MATRIX* matrix = VS::Battle::BuildSphereVolumeTransformEntry(
@@ -956,7 +959,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   void CacheTerrainRow(int row) override {
     SVECTOR position = ToSvector(PositionOf(sphere_.volumes[0]));
-    Battle_CacheSphereTerrainRow(&position, static_cast<std::uint32_t>(row));
+    VS::Battle::LiveCacheSphereTerrainRow(&position,
+                                          static_cast<std::uint32_t>(row));
   }
   void UpdateTargetHighlights() override {
     const int count = Byte(sphere_.sphereMode);
@@ -982,7 +986,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   void DrawPositionCursor(TargetPoint point, bool lock_pitch) override {
     SVECTOR position = ToSvector(point);
-    Battle_DrawSpherePositionCursor(&position, lock_pitch ? 1 : 0);
+    VS::Battle::LiveDrawSpherePositionCursor(&position, lock_pitch ? 1 : 0);
   }
   void ClearPrimarySphereVolume() override {
     VS::Battle::ClearPrimarySphereVolumeEntry();
