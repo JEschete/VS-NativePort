@@ -144,14 +144,6 @@ void Menu_Results_DrawBonusReelTexture(int x, int y, int texId);
 void Menu_Results_DetermineRiskbreakerRank(void);
 void Menu_Results_CalculateScore(void);
 void Menu_Results_ApplyHealingScoreBonus(void);
-int Menu_Results_AshleyTotalStrength(void);
-int Menu_Results_AshleyTotalIntelligence(void);
-int Menu_Results_AshleyTotalAgility(void);
-void Menu_Results_ApplyStrengthBonus(int amount);
-void Menu_Results_ApplyIntelligenceBonus(int amount);
-void Menu_Results_ApplyAgilityBonus(int amount);
-void Menu_Results_ApplyHpBonus(int amount);
-void Menu_Results_ApplyMpBonus(int amount);
 void Menu_Results_ResetMenufStatics(void);
 
 #endif // VS_MENU_RESULTS_RESULTS_H_DECLS

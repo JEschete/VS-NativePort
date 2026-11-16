@@ -1662,6 +1662,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveDrawRisingEmberParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
     "VS::Effects::LiveDrawSnowParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
     "VS::Effects::LiveDrawScreenWeatherParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
+    "VS::Menu::Results::AshleyLiveTotalStrength": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::AshleyLiveTotalIntelligence": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::AshleyLiveTotalAgility": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::ApplyLiveStrengthBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::ApplyLiveIntelligenceBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::ApplyLiveAgilityBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::ApplyLiveHpBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::ApplyLiveMpBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2968,6 +2976,14 @@ OWNED_CALL_BINDINGS["F00652"] = "VS::Effects::LiveResetRisingEmberParticle"
 OWNED_CALL_BINDINGS["F00653"] = "VS::Effects::LiveDrawRisingEmberParticles"
 OWNED_CALL_BINDINGS["F00654"] = "VS::Effects::LiveDrawSnowParticles"
 OWNED_CALL_BINDINGS["F00655"] = "VS::Effects::LiveDrawScreenWeatherParticles"
+OWNED_CALL_BINDINGS["F03066"] = "VS::Menu::Results::AshleyLiveTotalStrength"
+OWNED_CALL_BINDINGS["F03067"] = "VS::Menu::Results::AshleyLiveTotalIntelligence"
+OWNED_CALL_BINDINGS["F03068"] = "VS::Menu::Results::AshleyLiveTotalAgility"
+OWNED_CALL_BINDINGS["F03069"] = "VS::Menu::Results::ApplyLiveStrengthBonus"
+OWNED_CALL_BINDINGS["F03070"] = "VS::Menu::Results::ApplyLiveIntelligenceBonus"
+OWNED_CALL_BINDINGS["F03071"] = "VS::Menu::Results::ApplyLiveAgilityBonus"
+OWNED_CALL_BINDINGS["F03072"] = "VS::Menu::Results::ApplyLiveHpBonus"
+OWNED_CALL_BINDINGS["F03073"] = "VS::Menu::Results::ApplyLiveMpBonus"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4779,6 +4795,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8008FAC8, "VS::Effects::LiveDrawRisingEmberParticles"),  # F00653
     ("BATTLE/BATTLE.PRG", 0x8008FDC4, "VS::Effects::LiveDrawSnowParticles"),  # F00654
     ("BATTLE/BATTLE.PRG", 0x80090434, "VS::Effects::LiveDrawScreenWeatherParticles"),  # F00655
+    ("MENU/MENUF.PRG", 0x80108EA8, "VS::Menu::Results::AshleyLiveTotalStrength"),  # F03066
+    ("MENU/MENUF.PRG", 0x80108EC8, "VS::Menu::Results::AshleyLiveTotalIntelligence"),  # F03067
+    ("MENU/MENUF.PRG", 0x80108EE8, "VS::Menu::Results::AshleyLiveTotalAgility"),  # F03068
+    ("MENU/MENUF.PRG", 0x80108F08, "VS::Menu::Results::ApplyLiveStrengthBonus"),  # F03069
+    ("MENU/MENUF.PRG", 0x80108F98, "VS::Menu::Results::ApplyLiveIntelligenceBonus"),  # F03070
+    ("MENU/MENUF.PRG", 0x80109028, "VS::Menu::Results::ApplyLiveAgilityBonus"),  # F03071
+    ("MENU/MENUF.PRG", 0x801090B8, "VS::Menu::Results::ApplyLiveHpBonus"),  # F03072
+    ("MENU/MENUF.PRG", 0x80109148, "VS::Menu::Results::ApplyLiveMpBonus"),  # F03073
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

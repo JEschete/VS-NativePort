@@ -30,17 +30,17 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 12 | 2,646 | 756 | 11 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 5 | 260 | 18,682 | 432 | 213 | 0 |
+| 34: #60 Menu screens and workspaces | 5 | 252 | 18,612 | 435 | 210 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 280 | 22,064 | 3508 | 226 | 0 |
+| **Total** | 5 | 272 | 21,994 | 3511 | 223 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,449 |
+| done | 3,457 |
 | in-progress | 4 |
-| todo | 281 |
+| todo | 273 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (6 active, 47 done, 1 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (7 active, 47 done); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -93,7 +93,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 47 | menu-inventory-container | active | self | 5 | 27 | 4,007 |
 | 48 | menu-loot-status-abilities | active | - | 8 | 68 | 6,287 |
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
-| 50 | menu-results-score | planned | - | 6 | 103 | 5,020 |
+| 50 | menu-results-score | active | - | 6 | 95 | 4,950 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
 | 52 | menu-map-manual-text | active | - | 4 | 67 | 3,368 |
 | 53 | title | done | self | 4 | 0 | 0 |
@@ -105,7 +105,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | Referenced by the original-address module table | 1 | 16 |
 | Calls an SDK shim | 0 | 59 |
 | Signature uses SDK integer types or `void*` | 0 | 30 |
-| Compiled with relaxed settings | 0 | 280 |
+| Compiled with relaxed settings | 0 | 272 |
 
 Function bodies: 3,734 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 

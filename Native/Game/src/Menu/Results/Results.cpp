@@ -4,32 +4,25 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
+#include "Menu/Results/ResultsStatsLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanks.h"
-#include "Battle/AbilityState.h"
-#include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
 #include "Render/Images.h"
-#include "Render/Palette.h"
 #include "Render/Render.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -394,9 +387,9 @@ int Menu_Results_InitializeGameClear(void)
         Menu_Results_elementAnimationState = 0;
         Menu_Results_buffReelSelection = (Core_Random_Rand() & 0xF0) | 8;
 
-        strength = Menu_Results_AshleyTotalStrength();
-        intelligence = Menu_Results_AshleyTotalIntelligence();
-        agility = Menu_Results_AshleyTotalAgility();
+        strength = VS::Menu::Results::AshleyLiveTotalStrength();
+        intelligence = VS::Menu::Results::AshleyLiveTotalIntelligence();
+        agility = VS::Menu::Results::AshleyLiveTotalAgility();
 
         if ((intelligence >= strength) && (agility >= strength)) {
             Menu_Results_buffReelIndex = 0;
@@ -618,23 +611,23 @@ int Menu_Results_UpdateGameClear(void)
             switch ((short)(Menu_Results_buffReels[Menu_Results_buffReelIndex][(char)Menu_Results_buffReelSelection / 16].stat
                             - 13)) {
             case 0:
-                Menu_Results_ApplyStrengthBonus(amount);
+                VS::Menu::Results::ApplyLiveStrengthBonus(amount);
                 break;
 
             case 1:
-                Menu_Results_ApplyAgilityBonus(amount);
+                VS::Menu::Results::ApplyLiveAgilityBonus(amount);
                 break;
 
             case 2:
-                Menu_Results_ApplyIntelligenceBonus(amount);
+                VS::Menu::Results::ApplyLiveIntelligenceBonus(amount);
                 break;
 
             case 3:
-                Menu_Results_ApplyHpBonus(amount);
+                VS::Menu::Results::ApplyLiveHpBonus(amount);
                 break;
 
             case 4:
-                Menu_Results_ApplyMpBonus(amount);
+                VS::Menu::Results::ApplyLiveMpBonus(amount);
                 break;
             }
 
@@ -1452,98 +1445,6 @@ void Menu_Results_ApplyHealingScoreBonus(void)
     }
 
     Audio_Seq_unusedScoredata.healCount = 0;
-}
-
-// decomp: MENUF.PRG _getTotalStrength (src/MENU/MENUF.PRG/3B8.c:2880)
-int Menu_Results_AshleyTotalStrength(void) { return Battle_characterState->stats->totalStrength; }
-
-// decomp: MENUF.PRG _getTotalIntelligence (src/MENU/MENUF.PRG/3B8.c:2882)
-int Menu_Results_AshleyTotalIntelligence(void)
-{
-    return Battle_characterState->stats->totalIntelligence;
-}
-
-// decomp: MENUF.PRG _getTotalAgility (src/MENU/MENUF.PRG/3B8.c:2887)
-int Menu_Results_AshleyTotalAgility(void) { return Battle_characterState->stats->totalAgility; }
-
-// decomp: MENUF.PRG _raiseMaxStrength (src/MENU/MENUF.PRG/3B8.c:2889)
-void Menu_Results_ApplyStrengthBonus(int amount)
-{
-    Battle_characterState->stats->totalStrength += amount;
-
-    if (Battle_characterState->stats->totalStrength > 999) {
-        Battle_characterState->stats->totalStrength = 999;
-    }
-
-    Battle_characterState->stats->strength += amount;
-
-    if (Battle_characterState->stats->strength > 999) {
-        Battle_characterState->stats->strength = 999;
-    }
-}
-
-// decomp: MENUF.PRG _raiseMaxIntelligence (src/MENU/MENUF.PRG/3B8.c:2904)
-void Menu_Results_ApplyIntelligenceBonus(int amount)
-{
-    Battle_characterState->stats->totalIntelligence += amount;
-
-    if (Battle_characterState->stats->totalIntelligence > 999) {
-        Battle_characterState->stats->totalIntelligence = 999;
-    }
-
-    Battle_characterState->stats->intelligence += amount;
-
-    if (Battle_characterState->stats->intelligence > 999) {
-        Battle_characterState->stats->intelligence = 999;
-    }
-}
-
-// decomp: MENUF.PRG _raiseMaxAgility (src/MENU/MENUF.PRG/3B8.c:2919)
-void Menu_Results_ApplyAgilityBonus(int amount)
-{
-    Battle_characterState->stats->totalAgility += amount;
-
-    if (Battle_characterState->stats->totalAgility > 999) {
-        Battle_characterState->stats->totalAgility = 999;
-    }
-
-    Battle_characterState->stats->agility += amount;
-
-    if (Battle_characterState->stats->agility > 999) {
-        Battle_characterState->stats->agility = 999;
-    }
-}
-
-// decomp: MENUF.PRG _raiseMaxHP (src/MENU/MENUF.PRG/3B8.c:2934)
-void Menu_Results_ApplyHpBonus(int amount)
-{
-    Battle_characterState->stats->maxHp += amount;
-
-    if (Battle_characterState->stats->maxHp > 999) {
-        Battle_characterState->stats->maxHp = 999;
-    }
-
-    Battle_characterState->stats->currentHp += amount;
-
-    if (Battle_characterState->stats->currentHp > 999) {
-        Battle_characterState->stats->currentHp = 999;
-    }
-}
-
-// decomp: MENUF.PRG _raiseMaxMP (src/MENU/MENUF.PRG/3B8.c:2949)
-void Menu_Results_ApplyMpBonus(int amount)
-{
-    Battle_characterState->stats->maxMp += amount;
-
-    if (Battle_characterState->stats->maxMp > 999) {
-        Battle_characterState->stats->maxMp = 999;
-    }
-
-    Battle_characterState->stats->currentMp += amount;
-
-    if (Battle_characterState->stats->currentMp > 999) {
-        Battle_characterState->stats->currentMp = 999;
-    }
 }
 
 // MENUF.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

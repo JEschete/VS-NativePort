@@ -858,6 +858,9 @@
     <ClCompile Include="src\ResultsRouletteTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ResultsStatsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ResultsTextureTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

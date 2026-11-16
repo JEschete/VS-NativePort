@@ -1945,6 +1945,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\ResultsStats.cpp" />
+    <ClCompile Include="src\Menu\Results\ResultsStatsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\TimeAttack.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2864,6 +2868,8 @@
     <ClInclude Include="include\Menu\OptionsLive.hpp" />
     <ClInclude Include="include\Menu\Rename.hpp" />
     <ClInclude Include="include\Menu\RenameLive.hpp" />
+    <ClInclude Include="include\Menu\Results\ResultsStats.hpp" />
+    <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp" />
     <ClInclude Include="include\Menu\Setup\Assembly.hpp" />
     <ClInclude Include="include\Menu\Setup\Combination.hpp" />
     <ClInclude Include="include\Menu\Setup\SetupLive.hpp" />

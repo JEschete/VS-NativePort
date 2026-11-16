@@ -61,6 +61,9 @@
     <Filter Include="include\Menu\Loot">
       <UniqueIdentifier>{87C127D0-0575-5A56-B30B-870835CC05DE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Menu\Results">
+      <UniqueIdentifier>{D5F2AD51-6A0B-5241-9E9D-1E80C194E171}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Menu\Setup">
       <UniqueIdentifier>{09910199-A0A9-57B0-A127-053BA74AC746}</UniqueIdentifier>
     </Filter>
@@ -2745,6 +2748,12 @@
     <ClInclude Include="src\Menu\Results\Results.h">
       <Filter>src\Menu\Results</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Results\ResultsStats.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Results\ResultsStatsLive.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\TimeAttack.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
@@ -4271,6 +4280,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\RenameLive.hpp">
       <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\ResultsStats.hpp">
+      <Filter>include\Menu\Results</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp">
+      <Filter>include\Menu\Results</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Setup\Assembly.hpp">
       <Filter>include\Menu\Setup</Filter>

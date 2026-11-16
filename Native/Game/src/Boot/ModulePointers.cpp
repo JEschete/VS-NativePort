@@ -116,6 +116,7 @@
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
+#include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -2124,6 +2125,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008FAC8u, 0u, (void*)&VS::Effects::LiveDrawRisingEmberParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008FDC4u, 0u, (void*)&VS::Effects::LiveDrawSnowParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80090434u, 0u, (void*)&VS::Effects::LiveDrawScreenWeatherParticles, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108EA8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalStrength, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108EC8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalIntelligence, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108EE8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalAgility, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108F08u, 0u, (void*)&VS::Menu::Results::ApplyLiveStrengthBonus, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108F98u, 0u, (void*)&VS::Menu::Results::ApplyLiveIntelligenceBonus, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80109028u, 0u, (void*)&VS::Menu::Results::ApplyLiveAgilityBonus, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801090B8u, 0u, (void*)&VS::Menu::Results::ApplyLiveHpBonus, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80109148u, 0u, (void*)&VS::Menu::Results::ApplyLiveMpBonus, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
