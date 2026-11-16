@@ -584,6 +584,12 @@
     <None Include="..\..\port\differentials\equipment_stats_driver.cpp" />
     <None Include="..\..\port\differentials\event_camera_control.py" />
     <None Include="..\..\port\differentials\event_camera_control_driver.cpp" />
+    <None Include="..\..\port\differentials\event_camera_frame_common.py" />
+    <None Include="..\..\port\differentials\event_camera_frame_driver.cpp" />
+    <None Include="..\..\port\differentials\event_camera_frame_f01197.py" />
+    <None Include="..\..\port\differentials\event_camera_frame_f01219.py" />
+    <None Include="..\..\port\differentials\event_camera_frame_f01222.py" />
+    <None Include="..\..\port\differentials\event_camera_frame_f01228.py" />
     <None Include="..\..\port\differentials\event_camera_lens.py" />
     <None Include="..\..\port\differentials\event_camera_lens_driver.cpp" />
     <None Include="..\..\port\differentials\event_camera_ownership.py" />

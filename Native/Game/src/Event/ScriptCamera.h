@@ -20,9 +20,5 @@ extern u_char Event_kOrbitReturnFirstCommand[4];
 extern u_char Event_kOrbitReturnSecondCommand[3];
 extern char Event_skipNextFieldCameraRestore;
 extern Event_CameraState* Event_camera;
-intptr_t Event_CommandWaitCameraTracks(u_char* instruction, short thread_index);
-void Event_ApplyEventCameraState(void);
-void Event_UpdateEventCameraTracks(void);
-int Event_EventCameraCompletionMask(void);
 
 #endif // VS_EVENT_SCRIPTCAMERA_H_DECLS

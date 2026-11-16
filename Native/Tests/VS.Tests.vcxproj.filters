@@ -474,6 +474,9 @@
     <ClCompile Include="src\EventCameraControlTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventCameraFrameTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EventCameraLensTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

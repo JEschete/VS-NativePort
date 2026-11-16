@@ -3104,7 +3104,11 @@ class EncounterFixupTests(unittest.TestCase):
         generated = (root / r"Native\Game\src\Event\ScriptCamera.cpp").read_text(encoding="utf-8")
         self.assertNotIn("void Event_CommandCameraMotion(", generated)
         self.assertNotIn("void Event_UpdateEventCameraTrack(", generated)
-        self.assertIn("VS::Event::UpdateEventCameraTrackEntry(&Event_camera->lookAt, &Event_camera->eye);", generated)
+        # A35-06: the typed frame step (EventCameraFrameLive.cpp) now drives the tracks, not the copy.
+        self.assertNotRegex(generated, r"\bEvent_UpdateEventCameraTracks\(")
+        frame = (root / r"Native\Game\src\Event\EventCameraFrameLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("UpdateEventCameraTrackEntry(&camera.lookAt, &camera.eye);", frame)
+        self.assertIn("UpdateEventCameraTrackEntry(&camera.eye, &camera.lookAt);", frame)
 
     def test_camera_follow_stop_and_field_returns_are_owned_by_the_typed_control(self):
         # #276 row 35 A35-03: the typed control (EventCameraControl.cpp) replaces the stop, follow and field
@@ -3127,8 +3131,10 @@ class EncounterFixupTests(unittest.TestCase):
         for name in ("CommandCameraLensOrShake", "UpdateEventLensTween", "UpdateEventShakeOscillator",
                      "UpdateEventCameraShake"):
             self.assertNotRegex(generated, rf"\bEvent_{name}\(")
-        self.assertIn("VS::Event::UpdateEventLensTweenEntry(&Event_camera->farClip);", generated)
-        self.assertIn("VS::Event::UpdateEventCameraShakeEntry();", generated)
+        # A35-06: the typed frame step (EventCameraFrameLive.cpp) now drives the lenses and the shake.
+        frame = (root / r"Native\Game\src\Event\EventCameraFrameLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("UpdateEventLensTweenEntry(&camera.farClip);", frame)
+        self.assertIn("UpdateEventCameraShakeEntry();", frame)
         vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
         self.assertEqual(vm.count("Event_CommandCameraLensOrShakeOpcode"), 5)
 

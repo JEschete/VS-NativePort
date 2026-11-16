@@ -28,6 +28,7 @@
 #include "Core/Runtime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/EventCameraControlLive.hpp"
+#include "Event/EventCameraFrameLive.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/EventScreenTweensLive.hpp"
@@ -516,13 +517,13 @@ class LiveVmHost final : public ScriptVmHost {
   void RestoreEventFieldCamera() override {
     RestoreEventFieldCameraEntry(-1, -1);
   }
-  void UpdateEventCameraTracks() override { Event_UpdateEventCameraTracks(); }
+  void UpdateEventCameraTracks() override { UpdateEventCameraTracksEntry(); }
   void UpdateEventScreenTransforms() override {
     UpdateEventScreenTransformsEntry();
   }
-  void ApplyEventCameraState() override { Event_ApplyEventCameraState(); }
+  void ApplyEventCameraState() override { ApplyEventCameraStateEntry(); }
   std::uint8_t EventCameraCompletionMask() override {
-    return static_cast<std::uint8_t>(Event_EventCameraCompletionMask());
+    return static_cast<std::uint8_t>(EventCameraCompletionMaskEntry());
   }
   void UpdateImageTweens() override { UpdateLiveImageTweens(); }
   void UpdateWeatherTween() override { UpdateLiveWeatherTween(); }

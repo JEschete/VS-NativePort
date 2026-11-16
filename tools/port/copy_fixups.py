@@ -476,6 +476,9 @@ NATIVE_HELPER_HEADERS = {
     "VS::Event::UpdateEventAngleTweenEntry": r"Native\Game\include\Event\EventScreenTweensLive.hpp",
     "VS::Event::UpdateEventScreenTransformsEntry": r"Native\Game\include\Event\EventScreenTweensLive.hpp",
     "VS::Event::UpdateEventTripleTweenEntry": r"Native\Game\include\Event\EventScreenTweensLive.hpp",
+    "VS::Event::ApplyEventCameraStateEntry": r"Native\Game\include\Event\EventCameraFrameLive.hpp",
+    "VS::Event::UpdateEventCameraTracksEntry": r"Native\Game\include\Event\EventCameraFrameLive.hpp",
+    "VS::Event::EventCameraCompletionMaskEntry": r"Native\Game\include\Event\EventCameraFrameLive.hpp",
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
@@ -1723,6 +1726,9 @@ OWNED_CALL_BINDINGS["F01235"] = "VS::Event::UpdateEventCameraShakeEntry"
 OWNED_CALL_BINDINGS["F01227"] = "VS::Event::UpdateEventAngleTweenEntry"
 OWNED_CALL_BINDINGS["F01230"] = "VS::Event::UpdateEventScreenTransformsEntry"
 OWNED_CALL_BINDINGS["F01231"] = "VS::Event::UpdateEventTripleTweenEntry"
+OWNED_CALL_BINDINGS["F01219"] = "VS::Event::ApplyEventCameraStateEntry"
+OWNED_CALL_BINDINGS["F01222"] = "VS::Event::UpdateEventCameraTracksEntry"
+OWNED_CALL_BINDINGS["F01228"] = "VS::Event::EventCameraCompletionMaskEntry"
 OWNED_CALL_BINDINGS["F01276"] = "Event_EvaluateInterpolationCurveEntry"
 OWNED_CALL_BINDINGS["F01261"] = "Event_EvaluateRoomEventTriggersEntry"
 OWNED_CALL_BINDINGS["F00853"] = "Field_GimmickPlacementEntry"
@@ -3452,6 +3458,8 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01198", 0x800BB450, "CommandSetScreenCapture"),
     ("F01226", 0x800BD444, "CommandTweenCameraRoll"),
     ("F01229", 0x800BD6C4, "CommandScreenTransform"),
+    # #276 row 35 A35-06 camera wait opcode 0xE0 (Event/EventCameraFrameLive.cpp)
+    ("F01197", 0x800BB41C, "CommandWaitCameraTracks"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -3886,6 +3894,9 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800BD57C, "VS::Event::UpdateEventAngleTweenEntry"),  # F01227
     ("BATTLE/BATTLE.PRG", 0x800BDAB4, "VS::Event::UpdateEventScreenTransformsEntry"),  # F01230
     ("BATTLE/BATTLE.PRG", 0x800BDBB4, "VS::Event::UpdateEventTripleTweenEntry"),  # F01231
+    ("BATTLE/BATTLE.PRG", 0x800BBF14, "VS::Event::ApplyEventCameraStateEntry"),  # F01219
+    ("BATTLE/BATTLE.PRG", 0x800BC9E0, "VS::Event::UpdateEventCameraTracksEntry"),  # F01222
+    ("BATTLE/BATTLE.PRG", 0x800BD610, "VS::Event::EventCameraCompletionMaskEntry"),  # F01228
     ("SLUS_010.40", 0x80042364, "VS::Boot::ResetToTitleLive"),  # F03423
     ("SLUS_010.40", 0x80042420, "VS::Boot::EnterBattleLive"),  # F03424
     ("SLUS_010.40", 0x800424E4, "VS::Boot::RunEndingAndReturnToTitleLive"),  # F03425
@@ -6503,9 +6514,6 @@ REGEX_FIXES += [
         ("Event::UpdateEventCameraOrigin",
          (('sp10', 'origin_actor_location'),),
          "F01218 4A0A8.c:3101-3115 clears the offset for0x2000, otherwise fills sp10 using func_800A1108(originActor) and multiplies its position components by ONE. F01217 produces the selected origin. sp10 is the placement query, not the resulting fixed-point offset."),
-        ("Event::EventCameraCompletionMask",
-         (('temp_a2', 'completion_mask'),),
-         "F01228 4A0A8.c:3663-3689 initializes temp_a2 from look-at idle state and ORs eye/roll/lens/effect/shake completion bits through0x80. Opcode 2788-2791 compares its requested mask with this result. Preserve char type/signedness; naming is not a completion-logic fix."),
         ("Event::EvaluateRoomEventTriggers",
          (('arg0', 'trigger_request'), ('arg1', 'event_or_actor_id'), ('arg2', 'trigger_context'), ('arg3', 'context_kind')),
          "F01261 4A0A8.c:4302-4584 copies arg0 to type, supporting trigger mask plus requests0xFF/0x40; arg1 supplies direct event id for0x40 and first actor comparison in predicate6. arg2 is compared with second actor id when mode0, but dereferenced as tile bytes[0]/[2] when mode1. arg3 selects mode. Original146C.c:5260-5268/native Field_TryTriggerFacingTileEvent pass tile buffer/mode1; GameLoop passes actor number/mode0. Broad names cover both uses and preserve existing pointer/integer compatibility contract, not silently fix it."),
