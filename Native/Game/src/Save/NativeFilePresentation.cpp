@@ -16,6 +16,7 @@
 #include "Content/DataStore.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Menu/FilesLive.hpp"
+#include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
@@ -92,14 +93,14 @@ struct SpriteAsset {
 };
 
 using EncodedRoomName = decltype(NativeFileSummary::room_name);
-constexpr int kCursorUv = vs_getUV0Clut(32, 48, 896, 223);
-constexpr int kCursorSize = vs_getWH(16, 16);
+constexpr int kCursorUv = VS::Render::PackUvClutWord(32, 48, 896, 223);
+constexpr int kCursorSize = VS::Render::PackScreenWord(16, 16);
 constexpr int kCursorPage = getTPage(0, 0, 768, 0);
 constexpr SpriteAsset kCursorSprite{kCursorUv, kCursorSize, kCursorPage};
 constexpr Point kPalettePosition{768, 227};
-constexpr int kPaletteSize = vs_getWH(256, 1);
+constexpr int kPaletteSize = VS::Render::PackScreenWord(256, 1);
 constexpr std::size_t kPaletteColors = 256;
-constexpr int kArtworkSize = vs_getWH(64, 32);
+constexpr int kArtworkSize = VS::Render::PackScreenWord(64, 32);
 
 Point AtRow(Point position, int top) { return {position.x, position.y + top}; }
 
@@ -287,13 +288,13 @@ class Frontend {
   }
 
   void Sprite(Point position, SpriteAsset asset) const {
-    const int xy = vs_getXY(position.x, position.y);
+    const int xy = VS::Render::PackScreenWord(position.x, position.y);
     VS::Render::DrawLiveImmediateSprite(xy, asset.uv_clut, asset.size,
                                         asset.page);
   }
 
   void Label(Point position, Menu_Files_FileMenuUiId label) const {
-    const int xy = vs_getXY(position.x, position.y);
+    const int xy = VS::Render::PackScreenWord(position.x, position.y);
     VS::Menu::Files::DrawLiveSummaryLabel(
         xy, static_cast<VS::Menu::Files::Label>(label));
   }
@@ -303,7 +304,7 @@ class Frontend {
     const unsigned limit =
         std::clamp(maximum, 0, static_cast<int>(kMaximumStat));
     const unsigned value = std::clamp(current, 0, static_cast<int>(limit));
-    const int xy = vs_getXY(position.x, position.y);
+    const int xy = VS::Render::PackScreenWord(position.x, position.y);
     VS::Menu::Files::DrawLiveHpMpSummary(
         xy, static_cast<VS::Menu::Files::Stat>(stat), value, limit);
   }
@@ -380,8 +381,8 @@ std::span<const char> OriginalText(std::size_t offset) {
 }
 
 void Integer(Point position, unsigned value, unsigned divisor) {
-  VS::Menu::Files::DrawLiveInteger(vs_getXY(position.x, position.y), value,
-                                   divisor);
+  VS::Menu::Files::DrawLiveInteger(
+      VS::Render::PackScreenWord(position.x, position.y), value, divisor);
 }
 
 unsigned MapPercent(const State_RoomVisitFlags& visits) {
@@ -413,9 +414,10 @@ void Artwork(const Frontend& frontend, int artwork, int y, bool selected) {
   constexpr int kTextureBase = 832;
   constexpr int kVramXMask = 0x3FF;
   constexpr int kPageShift = 6;
-  constexpr int kPlaceholderUv = vs_getUV0Clut(64, 0, 768, 227);
-  constexpr int kImageUv = vs_getUV0Clut(0, 0, 768, 227);
-  const int palette_xy = vs_getXY(kPalettePosition.x, kPalettePosition.y);
+  constexpr int kPlaceholderUv = VS::Render::PackUvClutWord(64, 0, 768, 227);
+  constexpr int kImageUv = VS::Render::PackUvClutWord(0, 0, 768, 227);
+  const int palette_xy =
+      VS::Render::PackScreenWord(kPalettePosition.x, kPalettePosition.y);
   std::array<std::uint16_t, kPaletteColors> previous{};
   VS::Render::ReadLiveImageRectangle(palette_xy, previous.data(), kPaletteSize);
   const unsigned palette =
@@ -449,8 +451,9 @@ void Stats(const Frontend& frontend, const Snapshot& state, int top) {
   constexpr Point kTime{240, 17}, kHours{268, 17}, kHundredHours{263, 17};
   constexpr Point kHourColon{279, 17}, kMinuteColon{293, 17};
   constexpr Point kMinutes{282, 17}, kSeconds{296, 17};
-  constexpr SpriteAsset kClearSprite{vs_getUV0Clut(240, 16, 912, 223),
-                                     vs_getWH(16, 16), getTPage(0, 0, 768, 0)};
+  constexpr SpriteAsset kClearSprite{
+      VS::Render::PackUvClutWord(240, 16, 912, 223),
+      VS::Render::PackScreenWord(16, 16), getTPage(0, 0, 768, 0)};
   const unsigned percent = MapPercent(state.visits);
   frontend.Label(AtRow(kMap, top), Menu_Files_FileMenuUiId_Map);
   frontend.Label(AtRow(kMapColon, top), Menu_Files_FileMenuUiId_Colon);

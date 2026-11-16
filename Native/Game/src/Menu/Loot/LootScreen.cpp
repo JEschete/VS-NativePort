@@ -18,7 +18,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"

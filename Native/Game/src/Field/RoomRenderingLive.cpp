@@ -8,6 +8,7 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/ActorMarkersLive.hpp"
 #include "Core/Log.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
@@ -263,7 +264,7 @@ class LiveSceneHost final : public RoomSceneHost {
   bool RoomUpdatesPaused() override { return Field_areRoomUpdatesPaused != 0; }
   void LoadViewTransform() override { Field::LoadViewTransform(); }
   void DrawTriggerMarkers() override { DrawLiveRoomTriggerMarkers(); }
-  void DrawActorMarkers() override { Battle_DrawActorMarkers(); }
+  void DrawActorMarkers() override { VS::Battle::LiveDrawActorMarkers(); }
   void UpdateGimmickAnimations() override {
     Field_UpdateGimmickAnimationQueueEntry();
   }

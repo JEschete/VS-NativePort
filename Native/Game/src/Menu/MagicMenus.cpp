@@ -37,6 +37,7 @@
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPackets.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
 
@@ -112,6 +113,11 @@ constexpr int kSpellLevelArrowBrightness = 128;
 constexpr int kSpellLevelArrowX = 80;
 constexpr int kSpellLevelArrowY = 100;
 constexpr int kSpellLevelArrowSize = 16;
+constexpr int kSpellLevelArrowV = 48;
+// The right arrow: the same texels mirrored horizontally (u from 95 to 79).
+constexpr int kMirroredArrowX = 224;
+constexpr int kMirroredArrowLeftEdgeU = 95;
+constexpr int kMirroredArrowRightEdgeU = 79;
 constexpr int kSpellLevelClutX = 848;
 constexpr int kSpellLevelClutY = 223;
 constexpr int kSpellLevelPageX = 768;
@@ -124,6 +130,9 @@ constexpr int kSpellLevelLockedDrawMode = 0x64602000;
 constexpr int kPrimitiveSemitransparencyFlag = 0x02000000;
 constexpr int kSpellLevelArrowPrimitiveWords = 6;
 constexpr int kSpellLevelArrowTotalWords = 10;
+// The second arrow's POLY_FT4 words after its tag, drawn in neutral colour.
+constexpr std::uint32_t kSpellLevelArrowPacketWords = 9;
+constexpr std::uint32_t kSpellLevelArrowNeutralColor = 128;
 constexpr int kSpellLevelOrderingTableOffset = 4;
 constexpr int kClutWordShift = 16;
 constexpr int kEnchanterMenuRow = 3;
@@ -355,19 +364,20 @@ void DrawWarlockLevelRows(int selected_level, int available_level_count) {
       VS::Render::DrawLiveCompactText(
           Menu_Magic_warlockMenuSpellLevels[level],
           (kSpellLevelTextBaseX + level * kSpellLevelColumnSpacing) |
-              vs_getXY(0, kSpellLevelTextY),
+              VS::Render::PackScreenWord(0, kSpellLevelTextY),
           nullptr);
 
       prim = VS::Render::QueueLiveSpriteWithTexturePage(
           Menu_Framework_cursorBrightnessAnimation
               [Menu_Magic_warlockLevelCursorBlink],
           (kSpellLevelIconBaseX + level * kSpellLevelColumnSpacing) |
-              vs_getXY(0, kSpellLevelIconY),
-          vs_getWH(kSpellLevelSpriteWidth, kSpellLevelSpriteHeight),
+              VS::Render::PackScreenWord(0, kSpellLevelIconY),
+          VS::Render::PackScreenWord(kSpellLevelSpriteWidth,
+                                     kSpellLevelSpriteHeight),
           spell_level_ordering_table);
-      prim[kSpriteUvClutWord] =
-          vs_getUV0Clut(kSpellLevelUvX, kSpellLevelUvY, kSpellLevelTexturePageU,
-                        kSpellLevelTexturePageV);
+      prim[kSpriteUvClutWord] = VS::Render::PackUvClutWord(
+          kSpellLevelUvX, kSpellLevelUvY, kSpellLevelTexturePageU,
+          kSpellLevelTexturePageV);
 
       const auto blink = Menu_Magic_warlockLevelCursorBlink;
       if (level == selected_level) {
@@ -380,36 +390,38 @@ void DrawWarlockLevelRows(int selected_level, int available_level_count) {
       VS::Render::DrawLiveCompactText(
           Menu_Magic_warlockMenuSpellLevels[level],
           (kSpellLevelTextBaseX + level * kSpellLevelColumnSpacing) |
-              vs_getXY(0, kSpellLevelTextY),
+              VS::Render::PackScreenWord(0, kSpellLevelTextY),
           nullptr);
 
       prim = VS::Render::QueueLiveSpriteWithTexturePage(
           kLockedSpellLevelBrightness,
           (kSpellLevelIconBaseX + level * kSpellLevelColumnSpacing) |
-              vs_getXY(0, kSpellLevelIconY),
-          vs_getWH(kSpellLevelSpriteWidth, kSpellLevelSpriteHeight),
+              VS::Render::PackScreenWord(0, kSpellLevelIconY),
+          VS::Render::PackScreenWord(kSpellLevelSpriteWidth,
+                                     kSpellLevelSpriteHeight),
           spell_level_ordering_table);
-      prim[kSpriteUvClutWord] =
-          vs_getUV0Clut(kSpellLevelUvX, kSpellLevelUvY,
-                        kSpellLevelLockedTexturePageU, kSpellLevelTexturePageV);
+      prim[kSpriteUvClutWord] = VS::Render::PackUvClutWord(
+          kSpellLevelUvX, kSpellLevelUvY, kSpellLevelLockedTexturePageU,
+          kSpellLevelTexturePageV);
     } else {
       level_locked = true;
       VS::Render::DrawLiveCompactText(
           Menu_Magic_warlockMenuSpellLevels[kFourthSpellLevel],
           (kLockedSpellLevelTextBaseX + level * kSpellLevelColumnSpacing) |
-              vs_getXY(0, kSpellLevelTextY),
+              VS::Render::PackScreenWord(0, kSpellLevelTextY),
           nullptr);
 
       prim = VS::Render::QueueLiveSpriteWithTexturePage(
           0,
           (kSpellLevelIconBaseX + level * kSpellLevelColumnSpacing) |
-              vs_getXY(0, kSpellLevelIconY),
-          vs_getWH(kSpellLevelSpriteWidth, kSpellLevelSpriteHeight),
+              VS::Render::PackScreenWord(0, kSpellLevelIconY),
+          VS::Render::PackScreenWord(kSpellLevelSpriteWidth,
+                                     kSpellLevelSpriteHeight),
           spell_level_ordering_table);
       prim[kArrowColorWord] = kSpellLevelLockedDrawMode;
-      prim[kSpriteUvClutWord] =
-          vs_getUV0Clut(kSpellLevelUvX, kSpellLevelUvY,
-                        kSpellLevelLockedTexturePageU, kSpellLevelTexturePageV);
+      prim[kSpriteUvClutWord] = VS::Render::PackUvClutWord(
+          kSpellLevelUvX, kSpellLevelUvY, kSpellLevelLockedTexturePageU,
+          kSpellLevelTexturePageV);
     }
 
     prim[kPrimitiveClutOffset] =
@@ -443,29 +455,40 @@ void DrawWarlockLevelRows(int selected_level, int available_level_count) {
 void DrawWarlockLevelArrow(u_long* spell_level_ordering_table) {
   u_long* prim = VS::Render::QueueLiveSpriteWithTexturePage(
       kSpellLevelArrowBrightness,
-      vs_getXY(kSpellLevelArrowX, kSpellLevelArrowY),
-      vs_getWH(kSpellLevelArrowSize, kSpellLevelArrowSize),
+      VS::Render::PackScreenWord(kSpellLevelArrowX, kSpellLevelArrowY),
+      VS::Render::PackScreenWord(kSpellLevelArrowSize, kSpellLevelArrowSize),
       spell_level_ordering_table);
-  prim[kSpriteUvClutWord] = vs_getUV0Clut(
-      kSpellLevelArrowX, 48, kSpellLevelTexturePageU, kSpellLevelTexturePageV);
+  prim[kSpriteUvClutWord] = VS::Render::PackUvClutWord(
+      kSpellLevelArrowX, kSpellLevelArrowV, kSpellLevelTexturePageU,
+      kSpellLevelTexturePageV);
   prim += kSpellLevelArrowPrimitiveWords;
 
-  prim[kArrowTagWord] = vs_getTag(u_long[9], *spell_level_ordering_table);
-  prim[kArrowColorWord] =
-      vs_getRGB0(Render_LegacyPrimitiveCode_PolyFt4, 128, 128, 128);
-  prim[kArrowFirstPositionWord] = vs_getXY(224, 100);
-  prim[kArrowFirstUvWord] =
-      vs_getUV0Clut(95, 48, kSpellLevelTexturePageU, kSpellLevelTexturePageV);
-  prim[kArrowSecondPositionWord] = vs_getXY(240, 100);
+  prim[kArrowTagWord] = VS::Render::PackTagWord(kSpellLevelArrowPacketWords,
+                                                *spell_level_ordering_table);
+  prim[kArrowColorWord] = VS::Render::PackColorCommand(
+      Render_LegacyPrimitiveCode_PolyFt4, kSpellLevelArrowNeutralColor,
+      kSpellLevelArrowNeutralColor, kSpellLevelArrowNeutralColor);
+  constexpr int kArrowBottom = kSpellLevelArrowY + kSpellLevelArrowSize;
+  constexpr int kArrowRight = kMirroredArrowX + kSpellLevelArrowSize;
+  constexpr int kArrowBottomV = kSpellLevelArrowV + kSpellLevelArrowSize;
+  prim[kArrowFirstPositionWord] =
+      VS::Render::PackScreenWord(kMirroredArrowX, kSpellLevelArrowY);
+  prim[kArrowFirstUvWord] = VS::Render::PackUvClutWord(
+      kMirroredArrowLeftEdgeU, kSpellLevelArrowV, kSpellLevelTexturePageU,
+      kSpellLevelTexturePageV);
+  prim[kArrowSecondPositionWord] =
+      VS::Render::PackScreenWord(kArrowRight, kSpellLevelArrowY);
   prim[kArrowTpageWord] =
-      vs_getUV(79, 48) |
+      vs_getUV(kMirroredArrowRightEdgeU, kSpellLevelArrowV) |
       (getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Average,
                 kSpellLevelPageX, 0)
        << kClutWordShift);
-  prim[kArrowThirdPositionWord] = vs_getXY(224, 116);
-  prim[kArrowSecondUvWord] = vs_getUV(95, 64);
-  prim[kArrowFourthPositionWord] = vs_getXY(240, 116);
-  prim[kArrowThirdUvWord] = vs_getUV(79, 64);
+  prim[kArrowThirdPositionWord] =
+      VS::Render::PackScreenWord(kMirroredArrowX, kArrowBottom);
+  prim[kArrowSecondUvWord] = vs_getUV(kMirroredArrowLeftEdgeU, kArrowBottomV);
+  prim[kArrowFourthPositionWord] =
+      VS::Render::PackScreenWord(kArrowRight, kArrowBottom);
+  prim[kArrowThirdUvWord] = vs_getUV(kMirroredArrowRightEdgeU, kArrowBottomV);
 
   *spell_level_ordering_table = LegacyGpu_Handle(prim);
   Render_frameScratch.primitiveCursor = prim + kSpellLevelArrowTotalWords;

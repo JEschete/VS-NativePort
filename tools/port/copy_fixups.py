@@ -1077,6 +1077,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LiveBuildSphereCameraBasis": r"Native\Game\include\Battle\SphereDrawLive.hpp",
     "VS::Battle::LiveDrawSpherePositionCursor": r"Native\Game\include\Battle\SphereDrawLive.hpp",
     "VS::Battle::LiveCacheSphereTerrainRow": r"Native\Game\include\Battle\SphereDrawLive.hpp",
+    "VS::Battle::LiveDrawActorMarker": r"Native\Game\include\Battle\ActorMarkersLive.hpp",
+    "VS::Battle::LiveDrawActorMarkers": r"Native\Game\include\Battle\ActorMarkersLive.hpp",
+    "VS::Battle::LiveDrawOffscreenActorArrow": r"Native\Game\include\Battle\ActorMarkersLive.hpp",
+    "VS::Battle::LiveShowAbilityTimingCue": r"Native\Game\include\Battle\ActorMarkersLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -2084,6 +2088,10 @@ OWNED_CALL_BINDINGS["F01289"] = "VS::Battle::LiveDrawSphere"
 OWNED_CALL_BINDINGS["F01306"] = "VS::Battle::LiveBuildSphereCameraBasis"
 OWNED_CALL_BINDINGS["F01307"] = "VS::Battle::LiveDrawSpherePositionCursor"
 OWNED_CALL_BINDINGS["F01308"] = "VS::Battle::LiveCacheSphereTerrainRow"
+OWNED_CALL_BINDINGS["F00731"] = "VS::Battle::LiveDrawActorMarker"
+OWNED_CALL_BINDINGS["F00733"] = "VS::Battle::LiveDrawActorMarkers"
+OWNED_CALL_BINDINGS["F00737"] = "VS::Battle::LiveDrawOffscreenActorArrow"
+OWNED_CALL_BINDINGS["F00740"] = "VS::Battle::LiveShowAbilityTimingCue"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -4287,6 +4295,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800C282C, "VS::Battle::LiveBuildSphereCameraBasis"),  # F01306
     ("BATTLE/BATTLE.PRG", 0x800C28AC, "VS::Battle::LiveDrawSpherePositionCursor"),  # F01307
     ("BATTLE/BATTLE.PRG", 0x800C2B0C, "VS::Battle::LiveCacheSphereTerrainRow"),  # F01308
+    ("BATTLE/BATTLE.PRG", 0x80095C18, "VS::Battle::LiveDrawActorMarker"),  # F00731
+    ("BATTLE/BATTLE.PRG", 0x8009627C, "VS::Battle::LiveDrawActorMarkers"),  # F00733
+    ("BATTLE/BATTLE.PRG", 0x8009651C, "VS::Battle::LiveDrawOffscreenActorArrow"),  # F00737
+    ("BATTLE/BATTLE.PRG", 0x80096FF0, "VS::Battle::LiveShowAbilityTimingCue"),  # F00740
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -4829,10 +4841,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                 }""",
          "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
          "without changing nonzero scaling, particle emission or RNG consumption."),
-    ],
-    "F00731": [
-        ("*ot = ((u_long)prim << 8) >> 8;", "*ot = LegacyGpu_Handle(prim);",
-         "overhead awareness frame links must retain native packet ownership, not truncated addresses"),
     ],
     "F02799": [
         ("*before = ((u_long)prim << 8) >> 8;",
@@ -8309,9 +8317,6 @@ REGEX_FIXES += [
         ("Battle::QueueEquipmentStatChange",
          (('arg1', 'stat_label_kind'), ('arg2', 'encoded_amount')),
          "F00738 F00738 Battle::QueueEquipmentStatChange: original func_80096768 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2694 (function lines 2694-2763). arg0 intentionally retained: Original func_80096768 receives equipment/bone tag (including 240 weapon, 241 shield), then reassigns it to display icon index 0..6 before storing colorFlags. Intentionally merged tag/index lifetime, not a single unchanged equipment identifier. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2694-2748. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:1317-1371. arg1 -> stat_label_kind (stat label kind). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2694-2749. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:1317-1372. arg2 -> encoded_amount (encoded amount). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2694-2754. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:1317-1377. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
-        ("Battle::ShowAbilityTimingCue",
-         (('arg0', 'cue_duration_frames'),),
-         "F00740 F00740 Battle::ShowAbilityTimingCue: original func_80096FF0 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2838 (function lines 2838-2862). arg0 -> cue_duration_frames (cue duration frames). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2838-2861. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:1463-1486. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names. Producer UpdateBattleAbilityTiming sets cue lifetime from (margin*2)/State_tickSpeed, not elapsed time. ResetFloatingLabels zeroes it; UpdateFloatingLabels decrements once per draw. Original 2842C.c:1468,1764-1766,2861 verifies duration_frames."),
         ("Battle::PlayMeleeAttackAnimation",
          (('arg0', 'actor_slot'), ('arg1', 'target_position'), ('arg2', 'animation_parameter'), ('temp_s0', 'actor'), ('temp_v0', 'target_pitch'), ('var_a1', 'animation_id')),
          "F00817 F00817 Battle::PlayMeleeAttackAnimation: original func_8009DD00 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\30DB0.c:2331 (function lines 2331-2363). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\30DB0.c:2331-2360. Native references: Native\\Game\\src\\Battle\\ActionAnimation.cpp:27-56. arg1 -> target_position (target position). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\30DB0.c:2331-2346. Native references: Native\\Game\\src\\Battle\\ActionAnimation.cpp:27-42. arg2 -> animation_parameter (animation parameter). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\30DB0.c:2331-2352. Native references: Native\\Game\\src\\Battle\\ActionAnimation.cpp:27-48. temp_s0 -> actor (actor). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\30DB0.c:2334-2361. Native references: Native\\Game\\src\\Battle\\ActionAnimation.cpp:30-57. temp_v0 -> target_pitch (target pitch). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\30DB0.c:2335-2352. Native references: Native\\Game\\src\\Battle\\ActionAnimation.cpp:31-48. var_a1 -> animation_id (animation id). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\30DB0.c:2336-2360. Native references: Native\\Game\\src\\Battle\\ActionAnimation.cpp:32-56. Review context: Reviewed original function and native producers/consumers. Actor array indices, position/pitch calculations, animation header out-parameter and PlayActorAnimation blend argument preserve the original contracts; Abilities queue source, mapped input slots and unlock bit packing follow their actual consumers."),

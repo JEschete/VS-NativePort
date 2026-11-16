@@ -12,6 +12,7 @@
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
+#include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -232,7 +233,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
     battle::LiveQueueChainCount(count);
   }
   void ShowAbilityTimingCue(int frames) override {
-    Battle_ShowAbilityTimingCue(frames);
+    VS::Battle::LiveShowAbilityTimingCue(frames);
   }
   void QueueAbilityTimingResult(int result) override {
     battle::LiveQueueAbilityTimingResult(result);

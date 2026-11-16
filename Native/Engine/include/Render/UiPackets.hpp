@@ -21,6 +21,59 @@ namespace VS::Render {
 inline constexpr std::uint32_t kPacketLinkMask = 0xFFFFFF;
 inline constexpr int kPacketLengthShift = 24;
 
+// Packed UI words, as the int the Live calls take, for the decomp's
+// vs_getXY, vs_getWH, vs_getUV0Clut, vs_getRGB0 and vs_getTag (the copier
+// moves those macros to whichever generated header uses them most).
+inline constexpr std::uint32_t kPackedWordLowMask = 0xFFFF;
+inline constexpr int kPackedWordHighShift = 16;
+inline constexpr int kPackedTexelRowShift = 8;
+inline constexpr int kPackedClutRowShift = 6;
+inline constexpr int kPackedClutColumnShift = 4;
+inline constexpr std::uint32_t kPackedClutColumnMask = 0x3F;
+inline constexpr std::uint32_t kPackedChannelMask = 0xFF;
+inline constexpr int kPackedGreenShift = 8;
+inline constexpr int kPackedBlueShift = 16;
+inline constexpr int kPackedCommandShift = 24;
+
+// A screen position or size: low | high << 16.
+[[nodiscard]] constexpr std::int32_t PackScreenWord(
+    std::int32_t low, std::int32_t high) noexcept {
+  return static_cast<std::int32_t>(
+      (static_cast<std::uint32_t>(high) << kPackedWordHighShift) |
+      (static_cast<std::uint32_t>(low) & kPackedWordLowMask));
+}
+
+// Texture coordinates and the CLUT at (clut_x, clut_y): u | v << 8 |
+// clut << 16.
+[[nodiscard]] constexpr std::int32_t PackUvClutWord(
+    std::int32_t u, std::int32_t v, std::int32_t clut_x,
+    std::int32_t clut_y) noexcept {
+  const std::uint32_t clut =
+      (static_cast<std::uint32_t>(clut_y) << kPackedClutRowShift) |
+      ((static_cast<std::uint32_t>(clut_x) >> kPackedClutColumnShift) &
+       kPackedClutColumnMask);
+  return static_cast<std::int32_t>(
+      static_cast<std::uint32_t>(u) |
+      (static_cast<std::uint32_t>(v) << kPackedTexelRowShift) |
+      (clut << kPackedWordHighShift));
+}
+
+// A primitive's command and colour word: code << 24 | b << 16 | g << 8 | r.
+[[nodiscard]] constexpr std::uint32_t PackColorCommand(
+    std::uint32_t code, std::uint32_t r, std::uint32_t g,
+    std::uint32_t b) noexcept {
+  return (code << kPackedCommandShift) |
+         ((b & kPackedChannelMask) << kPackedBlueShift) |
+         ((g & kPackedChannelMask) << kPackedGreenShift) |
+         (r & kPackedChannelMask);
+}
+
+// A tag word: the packet's word count and the link it continues to.
+[[nodiscard]] constexpr std::uint32_t PackTagWord(std::uint32_t words,
+                                                  std::uint32_t link) noexcept {
+  return (words << kPacketLengthShift) | (link & kPacketLinkMask);
+}
+
 class PacketQueue {
  public:
   virtual ~PacketQueue() = default;

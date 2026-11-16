@@ -35,7 +35,6 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
@@ -57,6 +56,7 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
+#include "Menu/Map.h"
 #include "Render/Palette.h"
 
 // decomp: _ashleyRenderState (_ashleyRenderState@src/MENU/items1.h)

@@ -7,6 +7,10 @@
 // decomp: src/include/gpu.h:102
 #define vs_getRGB(r, g, b) vs_getRGB0(0, (r), (g), (b))
 
+// decomp: src/include/gpu.h:103
+#define vs_getRGB0(code, r, g, b)                                                        \
+    (((code) << 24) | (((b) & 0xFF) << 16) | (((g) & 0xFF) << 8) | ((r) & 0xFF))
+
 #endif // VS_MENU_LOOT_LOOTSCREEN_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_LOOT_LOOTSCREEN_H_DECLS)

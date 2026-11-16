@@ -4,22 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/include/gpu.h:95
-#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
-
-// decomp: src/include/gpu.h:97
-#define vs_getWH(w, h) vs_getXY((w), (h))
-
-// decomp: src/include/gpu.h:98
-#define vs_getTag(type, addr) (((sizeof(type) / 4) << 24) | ((addr) & 0xFFFFFF))
-
-// decomp: src/include/gpu.h:103
-#define vs_getRGB0(code, r, g, b)                                                        \
-    (((code) << 24) | (((b) & 0xFF) << 16) | (((g) & 0xFF) << 8) | ((r) & 0xFF))
-
-// decomp: src/include/gpu.h:109
-#define vs_getUV0Clut(u, v, x, y) (((u) | ((v) << 8)) | (getClut((x), (y)) << 16))
-
 // decomp: src/include/gpu.h:112
 #define vs_getUV(u, v) ((u) | ((v) << 8))
 
@@ -55,12 +39,8 @@ void Battle_UpdateAndDrawFloatingLabels(void);
 void Battle_PlaceActorValueLabel(short* pos, Battle_FloatingLabel* label);
 void Battle_DrawActorValueLabel(int x, int y, Battle_FloatingLabel* p);
 void Battle_DrawActorStatusLabel(int x, int y, Battle_FloatingLabel* p);
-void Battle_DrawActorMarker(int actor, int kind);
-void Battle_DrawActorMarkers(void);
-void Battle_DrawOffscreenActorArrow(SVECTOR* position, int direction);
 int Battle_QueueEquipmentStatChange(int arg0, int stat_label_kind, int encoded_amount);
 void Battle_DrawEquipmentStatChange(int x, int y, Battle_FloatingLabel* p);
-void Battle_ShowAbilityTimingCue(int cue_duration_frames);
 void Battle_CommitEquipmentStatChanges(void);
 
 #endif // VS_BATTLE_FEEDBACK_H_DECLS

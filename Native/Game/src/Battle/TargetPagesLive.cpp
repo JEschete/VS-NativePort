@@ -14,6 +14,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
+#include "Render/UiPackets.hpp"
 extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -192,6 +193,7 @@ void Battle_DrawTargetPageHint(void) {
   std::array<char, kHintBufferSize> text{};
   std::snprintf(text.data(), text.size(), "L1  %d/%d  R1", info.page,
                 info.pages);
-  VS::Render::DrawLiveCompactTextColor(text.data(), vs_getXY(kHintX, kHintY),
-                                       kHintColor, nullptr);
+  VS::Render::DrawLiveCompactTextColor(
+      text.data(), VS::Render::PackScreenWord(kHintX, kHintY), kHintColor,
+      nullptr);
 }

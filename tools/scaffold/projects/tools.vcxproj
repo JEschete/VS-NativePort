@@ -375,6 +375,12 @@
     <None Include="..\..\port\differentials\action_sequence_guard_driver.cpp" />
     <None Include="..\..\port\differentials\actor_creation.py" />
     <None Include="..\..\port\differentials\actor_creation_driver.cpp" />
+    <None Include="..\..\port\differentials\actor_markers_common.py" />
+    <None Include="..\..\port\differentials\actor_markers_driver.cpp" />
+    <None Include="..\..\port\differentials\actor_markers_f00731.py" />
+    <None Include="..\..\port\differentials\actor_markers_f00733.py" />
+    <None Include="..\..\port\differentials\actor_markers_f00737.py" />
+    <None Include="..\..\port\differentials\actor_markers_f00740.py" />
     <None Include="..\..\port\differentials\actor_reaction.py" />
     <None Include="..\..\port\differentials\actor_reaction_driver.cpp" />
     <None Include="..\..\port\differentials\actor_settings.py" />

@@ -6,6 +6,12 @@
 typedef struct Menu_Map_CompassBound Menu_Map_CompassBound;
 typedef struct Menu_Map_MapLabel Menu_Map_MapLabel;
 
+// decomp: src/include/gpu.h:95
+#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
+
+// decomp: src/include/gpu.h:97
+#define vs_getWH(w, h) vs_getXY((w), (h))
+
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8) (src/MENU/MENU5.PRG/4D8.c:1064)
 struct Menu_Map_CompassBound {
     int x;

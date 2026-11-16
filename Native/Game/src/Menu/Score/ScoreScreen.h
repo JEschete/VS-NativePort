@@ -12,6 +12,9 @@ typedef struct Menu_Score_ZudHeader Menu_Score_ZudHeader;
 #define vs_getTpage(x, y, tp, abr, dtd)                                                  \
     ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
 
+// decomp: src/include/gpu.h:109
+#define vs_getUV0Clut(u, v, x, y) (((u) | ((v) << 8)) | (getClut((x), (y)) << 16))
+
 // decomp: _gazetteRow (src/MENU/MENU9.PRG/238.c:363)
 typedef struct Menu_Score_Row {
     char selected;

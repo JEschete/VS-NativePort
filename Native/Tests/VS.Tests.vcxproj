@@ -74,6 +74,7 @@
     <ClCompile Include="src\ActorCommandQueueTests.cpp" />
     <ClCompile Include="src\ActorCommandSliceTests.cpp" />
     <ClCompile Include="src\ActorCommandTests.cpp" />
+    <ClCompile Include="src\ActorMarkersTests.cpp" />
     <ClCompile Include="src\ActorMotionTests.cpp" />
     <ClCompile Include="src\ActorMovementTests.cpp" />
     <ClCompile Include="src\ActorReactionTests.cpp" />

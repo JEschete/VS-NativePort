@@ -7,6 +7,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/ActorMarkersLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -25,6 +26,7 @@ struct MarkerFixture {
   Actors_ActorRecord* saved_player = Actors_actorRecords[0];
   Actors_ActorRecord* saved_enemy = Actors_actorRecords[2];
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* saved_ordering = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   int saved_sides = Battle_actorMarkerSides;
   Actors_ActorRecord player{};
@@ -40,6 +42,7 @@ struct MarkerFixture {
     player.targetPointHeight = enemy.targetPointHeight = 64;
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
       Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
@@ -58,6 +61,7 @@ struct MarkerFixture {
     Actors_actorRecords[2] = saved_enemy;
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_legacyOrderingTables[0] = saved_ordering;
     Render_frameBuf = saved_framebuffer;
     Battle_actorMarkerSides = saved_sides;
     Core_Gte_Reset();
@@ -97,7 +101,7 @@ TEST_CASE(
   REQUIRE(VS::Actors::ProjectLiveActorTaggedBone(2, 251, &projected, 0) == 0);
   CHECK(projected.vx == 160);
   CHECK(projected.vz == 384);
-  Battle_DrawActorMarker(2, kind);
+  VS::Battle::LiveDrawActorMarker(2, kind);
   const int icons = kind <= 3 ? kind : kind <= 5 ? 1 : 0;
   fixture.CheckChain(icons);
 }
