@@ -3639,9 +3639,13 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # below. F01425 left it for the owned EffectRuntime.cpp UpdatePrimaryEffects (#276 row 37), which keeps
         # a refused menu reload request from the queue. F01388 left it for the owned ScreenOverlayLifetime.cpp
         # LoadScreenOverlay (#276 row 39), which completes a refused read through the loader's
-        # CompleteRefusedOverlayRead (ScreenOverlaysLive.cpp).
-        self.assertGreaterEqual(len(guarded), 18)
+        # CompleteRefusedOverlayRead (ScreenOverlaysLive.cpp). F04148 and F04150 left it for the owned
+        # MapLoading.cpp LoadBackground and LoadSceneMap (#276 row 52), whose MapLoadingLive.cpp
+        # EnqueueBackgroundRead and EnqueueSceneRead keep the guard below.
+        self.assertGreaterEqual(len(guarded), 16)
         owned = self.owned_items()
+        self.assertEqual(owned["F04148"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
+        self.assertEqual(owned["F04150"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F03526"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03547"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03496"]["path"], r"Native\Engine\src\Audio\MusicCore.cpp")
@@ -3681,6 +3685,17 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         self.assertIn("Content::CompleteLiveRefusedDiscRequest(", background_live)
         room_loading_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
         self.assertIn("request = Content::CompleteLiveRefusedDiscRequest(&disc_file, data);", room_loading_live)
+        map_loading_live = "".join(
+            (root / r"Native\Game\src\Menu\MapLoadingLive.cpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "background.request=Content::CompleteLiveRefusedDiscRequest(&background.file,background.image);",
+            map_loading_live,
+        )
+        self.assertIn(
+            "Menu_Map_sceneCdQueueSlot=Content::CompleteLiveRefusedDiscRequest(file_,Battle_unusedSceneBuffer);",
+            map_loading_live,
+        )
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
         self.assertIn('"CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"', background_tests)
         effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
@@ -3732,7 +3747,8 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead. Row 37 moved Runtime.cpp's menu
         # reload request into the owned EffectRuntime.cpp UpdatePrimaryEffects. Row 39 moved ScreenEffects.cpp's
         # overlay load into the owned ScreenOverlayLifetime.cpp LoadScreenOverlay, whose ScreenOverlaysLive.cpp
-        # EnqueueOverlayRead runs only for an allocated read.
+        # EnqueueOverlayRead runs only for an allocated read. Row 52 moved Map.cpp's background and scene ARM
+        # reads into MapLoadingLive.cpp EnqueueBackgroundRead and EnqueueSceneRead.
         event_source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(encoding="utf-8")
         event = "".join(re.sub(r"//[^\n]*", "", event_source).split())
         self.assertIn(
@@ -3745,7 +3761,7 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             event,
         )
         sites += 1
-        self.assertGreaterEqual(sites, 13)
+        self.assertGreaterEqual(sites, 11)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)

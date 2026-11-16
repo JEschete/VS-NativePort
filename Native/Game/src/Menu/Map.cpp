@@ -7,9 +7,9 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/DepthCueLive.hpp"
@@ -37,7 +37,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
-#include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -220,115 +219,6 @@ void Menu_Map_DrawAshleyMarker(int id, int xy, int brightness, u_long* nextPrim)
     ((u_long*)Render_frameScratch.primitiveCursor)[-4] = (int)(brightness | 0x64000000);
 }
 
-// decomp: MENU5.PRG _configureMapMenu (src/MENU/MENU5.PRG/4D8.c:129)
-void Menu_Map_ConfigureAreaList(int rowCount, int currentMap, char* menuText[])
-{
-    int rowTypes[rowCount];
-    int i;
-    int cursorMemory;
-
-    if (Menu_Map_currentMapRow == -1) {
-        Menu_Map_currentMapRow = currentMap;
-    }
-
-    for (i = 0; i < rowCount; ++i) {
-        rowTypes[i] = 0;
-    }
-
-    if (!(currentMap & 0x80)) {
-        if (Menu_Map_currentMapRow < rowCount) {
-            rowTypes[Menu_Map_currentMapRow] |= 4;
-        }
-    }
-
-    currentMap &= 0x7F;
-
-    if ((rowCount < 9) || (currentMap < 8)) {
-        Menu_Framework_menuMemory.cursorMemories[0] = currentMap;
-        Menu_Framework_menuMemory.cursorMemories[1] = 0;
-    } else if (currentMap >= (rowCount - 8)) {
-        Menu_Framework_menuMemory.cursorMemories[0] = currentMap - (rowCount - 9);
-        Menu_Framework_menuMemory.cursorMemories[1] = rowCount - 9;
-    } else {
-        Menu_Framework_menuMemory.cursorMemories[0] = 4;
-        Menu_Framework_menuMemory.cursorMemories[1] = currentMap - 4;
-    }
-
-    cursorMemory = Input_settings.cursorMemory;
-    Input_settings.cursorMemory = 1;
-
-    VS::Menu::Framework::CreateLiveMenuRows(rowCount, 256, menuText, rowTypes);
-
-    Input_settings.cursorMemory = cursorMemory;
-}
-
-// decomp: MENU5.PRG _mapSelection (src/MENU/MENU5.PRG/4D8.c:175)
-int Menu_Map_PollAreaSelection(void)
-{
-    int row = VS::Menu::Framework::LiveSelectedRow();
-
-    if (row < -1) {
-        VS::Menu::Framework::ClearLiveMenuExcept(5);
-    } else if (row >= 0) {
-        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[0], 1);
-    }
-
-    return row;
-}
-
-// decomp: MENU5.PRG _setMenuItemMapName (src/MENU/MENU5.PRG/4D8.c:188)
-void Menu_Map_ShowAreaName(char* mapName, char fontColor)
-{
-    Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::SetLiveMenuItem(10, 320, 34, 0x8C, 8, mapName);
-
-    menuItem->state = 2;
-    menuItem->targetPosition0 = 0xB4;
-    menuItem->selected = 1;
-    menuItem->fontColor = fontColor;
-}
-
-// decomp: MENU5.PRG _menuReady (src/MENU/MENU5.PRG/4D8.c:204)
-void Menu_Map_PollMenuReady(void) { VS::Menu::Framework::AreLiveMenuRowsIdle(); }
-
-// decomp: MENU5.PRG _loadMapBackground (src/MENU/MENU5.PRG/4D8.c:206)
-int Menu_Map_LoadBackground(int begin_background_load)
-{
-    static Content_DiscQueueSlot* Menu_Map_loadBackgroundSlot;
-    static u_short* Menu_Map_backgroundImage;
-    static int Menu_Map_loadBackgroundState;
-
-    if (begin_background_load != 0) {
-        Content_DiscFile cdFile;
-        cdFile.lba = VS_MAPBG_BIN_LBA;
-        cdFile.size = VS_MAPBG_BIN_SIZE;
-        Menu_Map_loadBackgroundSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
-        Menu_Map_backgroundImage = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_MAPBG_BIN_SIZE));
-        if (Menu_Map_loadBackgroundSlot != NULL) {
-            VS::Content::EnqueueLiveDiscRequest(Menu_Map_loadBackgroundSlot, Menu_Map_backgroundImage);
-        } else {
-            Menu_Map_loadBackgroundSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Menu_Map_backgroundImage);
-        }
-        Menu_Map_loadBackgroundState = 0;
-        return 0;
-    }
-    switch (Menu_Map_loadBackgroundState) {
-    case 0:
-        if (Menu_Map_loadBackgroundSlot->state == 4) {
-            VS::Content::ReleaseLiveDiscRequest(Menu_Map_loadBackgroundSlot);
-            VS::Render::LoadLiveClutColors(Menu_Map_backgroundImage, 3, 0, 256);
-            VS::Render::UploadLiveImageRectangle(vs_getXY(640, 256), Menu_Map_backgroundImage + 256, vs_getWH(160, 240));
-            VS::Menu::Framework::SetLiveBackgroundPriority(-4, 128);
-            Menu_Map_loadBackgroundState = 1;
-        }
-        return 0;
-    case 1:
-        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Map_backgroundImage);
-        return 1;
-    default:
-        return 0;
-    }
-}
-
 // decomp: MENU5.PRG vs_menu5_exec (src/MENU/MENU5.PRG/4D8.c:240)
 int Menu_Map_UpdateScreen(u_char* state)
 {
@@ -355,13 +245,13 @@ int Menu_Map_UpdateScreen(u_char* state)
 
         StoreImage(&Menu_Map_screenMenuBgBackRects[0], Menu_Map_screenMenuBgBackup);
         StoreImage(&Menu_Map_screenMenuBgBackRects[1], Menu_Map_screenMenuBgBackup + 128);
-        Menu_Map_LoadBackground(1);
+        VS::Menu::map::LiveLoadBackground(1);
 
         *state = 4;
         break;
 
     case 4:
-        if (Menu_Map_LoadBackground(0) == 0) {
+        if (VS::Menu::map::LiveLoadBackground(0) == 0) {
             break;
         }
 
@@ -375,7 +265,7 @@ int Menu_Map_UpdateScreen(u_char* state)
 
     case 5:
         if (Menu_Map_screenArmFileLoaded == 0) {
-            Menu_Map_screenArmFileLoaded = Menu_Map_LoadSceneMap();
+            Menu_Map_screenArmFileLoaded = VS::Menu::map::LiveLoadSceneMap();
         }
 
         if (Menu_Map_screenArmfileLoadDelay != 0) {
@@ -457,81 +347,6 @@ int Menu_Map_UpdateScreen(u_char* state)
     return 0;
 }
 
-// decomp: MENU5.PRG _loadArmFile (src/MENU/MENU5.PRG/4D8.c:448)
-int Menu_Map_LoadSceneMap(void)
-{
-
-    Audio_Seq_unusedStateFlags.mapPaling[0] = 1;
-
-    if (Battle_unusedSceneBuffer == NULL) {
-        int paling;
-
-        if (State_roomVisitProgress.roomFlags[1] & 0x800000) {
-            State_roomVisitProgress.roomFlags[1] |= 0x400000;
-        }
-
-        Menu_Map_triggerHideUi = 0;
-        Menu_Map_hideUi = 0;
-
-        VS::Core::Memory::ZeroLiveAlignedWords(&Menu_Map_cameraAngles, sizeof Menu_Map_cameraAngles);
-        VS::Core::Memory::ZeroLiveAlignedWords(&Menu_Map_cameraPos, sizeof Menu_Map_cameraPos);
-
-        Menu_Map_cameraAngles.vx = 568;
-        Menu_Map_currentRoomIndex = 0;
-        Menu_Map_cameraAngles.vz = Menu_Map_cameraAngles.vy = 2048 - (u_short)Render_frameScratch.camera.angles.vy;
-
-        Menu_Map_currentScene = VS::Field::LiveCurrentSceneId();
-
-        if (Menu_Map_currentScene >= 32) {
-            Menu_Map_currentScene = 0;
-        }
-
-        paling = Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene];
-
-        Menu_Map_currentSceneRow = Menu_Map_currentScene;
-        Menu_Map_menuState = 0;
-        Menu_Map_backgroundBrightness = 128;
-        Menu_Map_menuFramesCounter = 0;
-        Menu_Map_geomOffsetX = -384;
-        Menu_Map_geomOffsetY = 0;
-        Menu_Map_quitState = 1;
-        Menu_Map_cameraDistance = ONE * 3 / 16;
-        Menu_Map_menuCommandsState = 5;
-        Menu_Map_uiAnimationState = 0;
-        Menu_Map_isPaling = paling;
-
-        Battle_unusedSceneBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
-        Menu_Map_sceneCdQueueSlot = VS::Content::AllocateLiveDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]);
-        if (Menu_Map_sceneCdQueueSlot != NULL) {
-            VS::Content::EnqueueLiveDiscRequest(Menu_Map_sceneCdQueueSlot, Battle_unusedSceneBuffer);
-        } else {
-            Menu_Map_sceneCdQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene], Battle_unusedSceneBuffer);
-        }
-
-        return 0;
-    }
-
-    if (Menu_Map_sceneCdQueueSlot->state != Content_DiscRequestState_Loaded) {
-        return 0;
-    }
-
-    VS::Content::ReleaseLiveDiscRequest(Menu_Map_sceneCdQueueSlot);
-
-    Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
-
-    VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
-    VS::Menu::map::LiveScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
-
-    Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
-
-    VS::Menu::map::LiveCenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
-    VS::Render::SetLiveFogNearDistance(768, Render_projectionDistance);
-    Core_Gte_SetFarColor(0, 0, 0);
-    Menu_Map_ShowAreaName((char*)&Menu_Map_mapNames[Menu_Map_mapNames[Menu_Map_currentScene]], 1);
-
-    return 1;
-}
-
 // decomp: MENU5.PRG _menuManager (src/MENU/MENU5.PRG/4D8.c:523)
 int Menu_Map_UpdateMapMenu(void)
 {
@@ -601,7 +416,7 @@ int Menu_Map_UpdateMapMenu(void)
                 VS::Menu::Framework::SetLiveMenuVisible(1);
             }
 
-            Menu_Map_UpdateAreaSelection(1);
+            VS::Menu::map::LiveUpdateAreaSelection(1);
 
         } else if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
@@ -806,7 +621,7 @@ int Menu_Map_UpdateMapMenu(void)
     case Menu_Map_MapMenuState_DisplayMapMenu:
         Menu_Map_DrawFrame();
 
-        Menu_Map_selectedMap = area_selection_result = Menu_Map_UpdateAreaSelection(0);
+        Menu_Map_selectedMap = area_selection_result = VS::Menu::map::LiveUpdateAreaSelection(0);
 
         if (area_selection_result == -1) {
             break;
@@ -820,7 +635,7 @@ int Menu_Map_UpdateMapMenu(void)
         } else if (area_selection_result == -2) {
             Menu_Map_menuState = Menu_Map_MapMenuState_ProcessInput;
 
-            Menu_Map_ShowAreaName((char*)&Menu_Map_mapNames[Menu_Map_mapNames[Menu_Map_currentScene]],
+            VS::Menu::map::LiveShowAreaName((char*)&Menu_Map_mapNames[Menu_Map_mapNames[Menu_Map_currentScene]],
                 Menu_Map_currentScene == Menu_Map_currentSceneRow);
         } else {
 
@@ -971,73 +786,6 @@ void Menu_Map_ApplyCamera(void)
     Core_Gte_ApplyMatrix(&view_rotation, &negative_camera_position, (VECTOR*)sp38.t);
     Core_Gte_SetRotMatrix(&view_rotation);
     Core_Gte_SetTransMatrix(&sp38);
-}
-
-// decomp: MENU5.PRG _mapSelectionMenu (src/MENU/MENU5.PRG/4D8.c:979)
-int Menu_Map_UpdateAreaSelection(int initialize)
-{
-    enum Menu_Map_AreaSelectionState { Menu_Map_AreaSelectionState_Init, Menu_Map_AreaSelectionState_GetSelection };
-
-    static int Menu_Map_areaSelectionState;
-    static int Menu_Map_areaSelectionSelectedMap;
-
-    char* menuText[64];
-    int mapCount;
-    int currentMap;
-    int i;
-    int areaVisited;
-
-    if (initialize != 0) {
-        Menu_Map_areaSelectionState = Menu_Map_AreaSelectionState_Init;
-        Menu_Map_areaSelectionSelectedMap = 0;
-    }
-
-    switch (Menu_Map_areaSelectionState) {
-    case Menu_Map_AreaSelectionState_Init:
-        currentMap = 0;
-
-        for (i = 1, mapCount = 0; i < 32; ++i) {
-
-            areaVisited = State_roomVisitProgress.areaFlags[i >> 5] & (1 << (i & 0x1F));
-
-            if (areaVisited) {
-
-                Menu_Map_sceneRowIdMap[mapCount] = i;
-                menuText[mapCount * 2] = (char*)&Menu_Map_mapNames[Menu_Map_mapNames[i]];
-                menuText[mapCount * 2 + 1] = NULL;
-
-                if (Menu_Map_currentScene == i) {
-                    currentMap = mapCount;
-                }
-
-                ++mapCount;
-            }
-        }
-
-        if (mapCount == 0) {
-            return -2;
-        }
-
-        if (Menu_Map_currentSceneRow == 0) {
-            currentMap = 0x80;
-        }
-
-        Menu_Map_ConfigureAreaList(mapCount, currentMap, menuText);
-
-        ++Menu_Map_areaSelectionState;
-        break;
-
-    case Menu_Map_AreaSelectionState_GetSelection:
-        Menu_Map_areaSelectionSelectedMap = Menu_Map_PollAreaSelection();
-
-        if (Menu_Map_areaSelectionSelectedMap != -1) {
-            return Menu_Map_areaSelectionSelectedMap;
-        }
-
-        break;
-    }
-
-    return -1;
 }
 
 // decomp: MENU5.PRG _renderMap (src/MENU/MENU5.PRG/4D8.c:1081)

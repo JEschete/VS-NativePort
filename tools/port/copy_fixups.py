@@ -1682,6 +1682,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::map::LiveScaleRoomVertices": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveInitialRoomIndex": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSelectAdjacentVisitedRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
+    "VS::Menu::map::LiveConfigureAreaList": r"Native\Game\include\Menu\MapLoadingLive.hpp",
+    "VS::Menu::map::LivePollAreaSelection": r"Native\Game\include\Menu\MapLoadingLive.hpp",
+    "VS::Menu::map::LiveShowAreaName": r"Native\Game\include\Menu\MapLoadingLive.hpp",
+    "VS::Menu::map::LivePollMenuReady": r"Native\Game\include\Menu\MapLoadingLive.hpp",
+    "VS::Menu::map::LiveLoadBackground": r"Native\Game\include\Menu\MapLoadingLive.hpp",
+    "VS::Menu::map::LiveLoadSceneMap": r"Native\Game\include\Menu\MapLoadingLive.hpp",
+    "VS::Menu::map::LiveUpdateAreaSelection": r"Native\Game\include\Menu\MapLoadingLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3008,6 +3015,13 @@ OWNED_CALL_BINDINGS["F02695"] = "VS::Menu::map::LiveAnimateCentering"
 OWNED_CALL_BINDINGS["F02696"] = "VS::Menu::map::LiveScaleRoomVertices"
 OWNED_CALL_BINDINGS["F02700"] = "VS::Menu::map::LiveInitialRoomIndex"
 OWNED_CALL_BINDINGS["F02701"] = "VS::Menu::map::LiveSelectAdjacentVisitedRoom"
+OWNED_CALL_BINDINGS["F02685"] = "VS::Menu::map::LiveConfigureAreaList"
+OWNED_CALL_BINDINGS["F02686"] = "VS::Menu::map::LivePollAreaSelection"
+OWNED_CALL_BINDINGS["F02687"] = "VS::Menu::map::LiveShowAreaName"
+OWNED_CALL_BINDINGS["F04147"] = "VS::Menu::map::LivePollMenuReady"
+OWNED_CALL_BINDINGS["F04148"] = "VS::Menu::map::LiveLoadBackground"
+OWNED_CALL_BINDINGS["F04150"] = "VS::Menu::map::LiveLoadSceneMap"
+OWNED_CALL_BINDINGS["F02691"] = "VS::Menu::map::LiveUpdateAreaSelection"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4839,6 +4853,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU5.PRG", 0x801060E0, "VS::Menu::map::LiveScaleRoomVertices"),  # F02696
     ("MENU/MENU5.PRG", 0x80106570, "VS::Menu::map::LiveInitialRoomIndex"),  # F02700
     ("MENU/MENU5.PRG", 0x80106618, "VS::Menu::map::LiveSelectAdjacentVisitedRoom"),  # F02701
+    ("MENU/MENU5.PRG", 0x80102D90, "VS::Menu::map::LiveConfigureAreaList"),  # F02685
+    ("MENU/MENU5.PRG", 0x80102ED8, "VS::Menu::map::LivePollAreaSelection"),  # F02686
+    ("MENU/MENU5.PRG", 0x80102F30, "VS::Menu::map::LiveShowAreaName"),  # F02687
+    ("MENU/MENU5.PRG", 0x80102FAC, "VS::Menu::map::LivePollMenuReady"),  # F04147
+    ("MENU/MENU5.PRG", 0x80102FCC, "VS::Menu::map::LiveLoadBackground"),  # F04148
+    ("MENU/MENU5.PRG", 0x80103418, "VS::Menu::map::LiveLoadSceneMap"),  # F04150
+    ("MENU/MENU5.PRG", 0x8010451C, "VS::Menu::map::LiveUpdateAreaSelection"),  # F02691
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5086,7 +5107,7 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "          [99] = Core_TextCode_Terminator, [100] = 0 }",
          "58EC.c:475 pragma vsstring encodes |!0| as F8 00; retain 96-byte payload and both E7 guards"),
     ],
-    **{fid: [
+    "F04151": [
         ("VS::Field::ResolveSceneRoomData(Battle_unusedSceneBuffer)",
          "VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
          "bound ARM scene decoding to its loaded file extent"),
@@ -5096,7 +5117,7 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("*(u_short*)Core_ScratchAddr(22)",
          "(u_short)Render_frameScratch.camera.angles.vy",
          "map camera initialization/reset must follow native yaw, not original scratch byte88"),
-    ] for fid in ("F04150", "F04151")},
+    ],
     "G00620": [
         (r'"Ashley|>6|Riot\0"',
          r'"\x0A\x36\x2B\x2F\x28\x3C\xFA\x06\x1B\x2C\x32\x37\xE7"',
@@ -6453,10 +6474,6 @@ for _row, _fixup in (
     ("F04163", _refused_disc_request(
         " " * 12, "Menu_Manual_helpTextCdQueue", "Menu_Manual_helpText",
         "&Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1]")),
-    ("F04148", _refused_disc_request(" " * 8, "Menu_Map_loadBackgroundSlot", "Menu_Map_backgroundImage", "&cdFile")),
-    ("F04150", _refused_disc_request(
-        " " * 8, "Menu_Map_sceneCdQueueSlot", "Battle_unusedSceneBuffer",
-        "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
     ("F04151", _refused_disc_request(
         " " * 12, "Menu_Map_sceneCdQueueSlot", "Menu_Map_armFileBuff",
         "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
@@ -7919,9 +7936,6 @@ REGEX_FIXES += [
         ("Menu::Framework::UpdateMainMenu",
          (('arg0', 'packed_menu_state'),),
          "F04146 src\\MENU\\MAINMENU.PRG\\C48.c:334-478 (vs_mainMenu_exec). Named roles: packed menu state."),
-        ("Menu::Map::LoadBackground",
-         (('arg0', 'begin_background_load'),),
-         "F04148 src\\MENU\\MENU5.PRG\\4D8.c:206-238 (_loadMapBackground). Named roles: begin background load."),
         ("Menu::Map::UpdateMapMenu",
          (('new_var2', 'area_selection_result'), ('var_s2', 'controls_state')),
          "F04151 src\\MENU\\MENU5.PRG\\4D8.c:523-893 (_menuManager). Named roles: area selection result, controls state."),

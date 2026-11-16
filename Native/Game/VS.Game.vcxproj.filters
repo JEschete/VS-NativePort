@@ -2724,6 +2724,12 @@
     <ClInclude Include="src\Menu\Map.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\MapLoading.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\MapLoadingLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\MapNavigation.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -4285,6 +4291,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\MagicSpellMenu.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MapLoading.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MapLoadingLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\MapNavigation.hpp">
