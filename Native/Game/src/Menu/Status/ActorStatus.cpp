@@ -42,7 +42,7 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Score/Records.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
 #include "Render/Camera.h"

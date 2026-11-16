@@ -7,6 +7,13 @@
 // decomp: src/include/gpu.h:96
 #define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
 
+// decomp: src/include/gpu.h:102
+#define vs_getRGB(r, g, b) vs_getRGB0(0, (r), (g), (b))
+
+// decomp: src/include/gpu.h:103
+#define vs_getRGB0(code, r, g, b)                                                        \
+    (((code) << 24) | (((b) & 0xFF) << 16) | (((g) & 0xFF) << 8) | ((r) & 0xFF))
+
 #endif // VS_MENU_SCORE_RECORDS_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_RECORDS_H_DECLS)

@@ -2,6 +2,7 @@
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
+#include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 extern "C" {
@@ -70,6 +71,7 @@ void Boot_ResetMenubStatics(void)
 {
     Menu_Inventory_ResetMenubStatics();
     Menu_Loot_LootScreen_ResetMenubStatics();
+    VS::Menu::Loot::Live::ResetPolicyStatics();
 }
 
 // Call where the original loads MENUD.PRG: restores the statics its reload re-read from the disc.

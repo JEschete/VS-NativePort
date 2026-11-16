@@ -1625,6 +1625,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Loot::Live::StageDropRecord": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
     "VS::Menu::Loot::Live::BuildStagedInventory": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
     "VS::Menu::Loot::Live::RecordClaimedKey": r"Native\Game\include\Menu\Loot\LootRowsLive.hpp",
+    "VS::Menu::Loot::Live::RenderBagCapacities": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
+    "VS::Menu::Loot::Live::RenderLootRows": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
+    "VS::Menu::Loot::Live::ShowLootDescription": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
+    "VS::Menu::Loot::Live::UpdateLeaveConfirmation": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
+    "VS::Menu::Loot::Live::UpdateOrganizationMenu": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
     "VS::Menu::Framework::PopulateLiveWeaponStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveShieldStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveArmorStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
@@ -2906,6 +2911,11 @@ OWNED_CALL_BINDINGS["F02857"] = "VS::Menu::Loot::Live::IsDropAllowed"
 OWNED_CALL_BINDINGS["F02858"] = "VS::Menu::Loot::Live::StageDropRecord"
 OWNED_CALL_BINDINGS["F02859"] = "VS::Menu::Loot::Live::BuildStagedInventory"
 OWNED_CALL_BINDINGS["F02866"] = "VS::Menu::Loot::Live::RecordClaimedKey"
+OWNED_CALL_BINDINGS["F02856"] = "VS::Menu::Loot::Live::RenderBagCapacities"
+OWNED_CALL_BINDINGS["F02860"] = "VS::Menu::Loot::Live::RenderLootRows"
+OWNED_CALL_BINDINGS["F02861"] = "VS::Menu::Loot::Live::ShowLootDescription"
+OWNED_CALL_BINDINGS["F02862"] = "VS::Menu::Loot::Live::UpdateLeaveConfirmation"
+OWNED_CALL_BINDINGS["F02863"] = "VS::Menu::Loot::Live::UpdateOrganizationMenu"
 OWNED_CALL_BINDINGS["F02640"] = "VS::Menu::Framework::PopulateLiveWeaponStats"
 OWNED_CALL_BINDINGS["F02641"] = "VS::Menu::Framework::PopulateLiveShieldStats"
 OWNED_CALL_BINDINGS["F02642"] = "VS::Menu::Framework::PopulateLiveArmorStats"
@@ -4959,6 +4969,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x801086F4, "VS::Menu::Loot::Live::StageDropRecord"),  # F02858
     ("MENU/MENUB.PRG", 0x801088D4, "VS::Menu::Loot::Live::BuildStagedInventory"),  # F02859
     ("MENU/MENUB.PRG", 0x8010A24C, "VS::Menu::Loot::Live::RecordClaimedKey"),  # F02866
+    ("MENU/MENUB.PRG", 0x8010837C, "VS::Menu::Loot::Live::RenderBagCapacities"),  # F02856
+    ("MENU/MENUB.PRG", 0x80108938, "VS::Menu::Loot::Live::RenderLootRows"),  # F02860
+    ("MENU/MENUB.PRG", 0x80108E78, "VS::Menu::Loot::Live::ShowLootDescription"),  # F02861
+    ("MENU/MENUB.PRG", 0x801090A4, "VS::Menu::Loot::Live::UpdateLeaveConfirmation"),  # F02862
+    ("MENU/MENUB.PRG", 0x80109444, "VS::Menu::Loot::Live::UpdateOrganizationMenu"),  # F02863
     ("MENU/MENU1.PRG", 0x80102830, "VS::Menu::break_arts::SetHpCostLive"),  # F02608
     ("MENU/MENU1.PRG", 0x80102914, "VS::Menu::break_arts::DrawNextUnlockPointsLive"),  # F02609
     ("MENU/MENU1.PRG", 0x80102A4C, "VS::Menu::break_arts::UpdateArtListLive"),  # F02610
@@ -7771,21 +7786,12 @@ REGEX_FIXES += [
         ("Menu::Loot::CountContainedCategory",
          (('arg0', 'counted_category'), ('arg1', 'loot_list_item')),
          "F02855 src\\MENU\\MENUB.PRG\\260.c:968-1010 (_itemIncludesItemsInCategory). Named roles: counted category, loot list item."),
-        ("Menu::Loot::RenderBagCapacities",
-         (('var_a2', 'all_command_color'), ('var_fp', 'all_command_availability')),
-         "F02856 src\\MENU\\MENUB.PRG\\260.c:1015-1105 (_displayInventoryCapacities). Named roles: all command color, all command availability."),
         ("Menu::Loot::IsDropAllowed",
          (('arg0', 'drop_difficulty_flags'),),
          "F02857 src\\MENU\\MENUB.PRG\\260.c:1113-1116 (_droppableUnderCurrentDifficulty). Named roles: drop difficulty flags."),
         ("Menu::Loot::StageDropRecord",
          (('arg0', 'drop_record'),),
          "F02858 src\\MENU\\MENUB.PRG\\260.c:1124-1168 (_applyLootList). Named roles: drop record."),
-        ("Menu::Loot::RenderLootRows",
-         (('temp_v1_3', 'loot_row_state'),),
-         "F02860 src\\MENU\\MENUB.PRG\\260.c:1192-1313 (_displayCurrentLoot). Named roles: loot row state."),
-        ("Menu::Loot::UpdateLeaveConfirmation",
-         (('var_v1', 'leave_confirmation_result'),),
-         "F02862 src\\MENU\\MENUB.PRG\\260.c:1377-1500 (_discardItems). Named roles: leave confirmation result."),
         ("Menu::Loot::UpdateLootSelection",
          (('var_v0_4', 'nested_menu_result'),),
          "F02864 src\\MENU\\MENUB.PRG\\260.c:1622-1943 (_processLootMenu). Named roles: nested menu result. Retained: temp_s2: Merged previous lootClaimed accumulator and later absolute selected-loot index."),

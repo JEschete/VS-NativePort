@@ -20,7 +20,7 @@ extern "C" {
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Loot/LootScreen.h"
+#include "Menu/Score/Records.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxFramesLive.h"

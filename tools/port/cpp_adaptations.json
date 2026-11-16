@@ -104,6 +104,7 @@
 "#include \"Menu/Container/ContainerListTransferLive.hpp\"",
 "#include \"Menu/Container/ContainerMenuDialogsLive.hpp\"",
 "#include \"Menu/Inventory/EquipmentRowsLive.hpp\"",
+"#include \"Menu/Loot/LootPoliciesLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\""
 ]
@@ -136,6 +137,16 @@
 [
 "    Menu_Score_Records_ResetMenu9Statics();",
 "    VS::Menu::Score::ResetGazetteRowsLive();"
+]
+],
+[
+63,
+[
+"    Menu_Loot_LootScreen_ResetMenubStatics();"
+],
+[
+"    Menu_Loot_LootScreen_ResetMenubStatics();",
+"    VS::Menu::Loot::Live::ResetPolicyStatics();"
 ]
 ],
 [
@@ -555,7 +566,7 @@
 ],
 "Native\\Game\\src\\Menu\\Loot\\LootScreen.cpp": [
 [
-381,
+376,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -564,7 +575,7 @@
 ]
 ],
 [
-615,
+610,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -573,25 +584,7 @@
 ]
 ],
 [
-1053,
-[
-"        VS::Menu::InitLiveInformationTextBox(1);"
-],
-[
-"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-],
-[
-1107,
-[
-"        VS::Menu::InitLiveInformationTextBox(1);"
-],
-[
-"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-],
-[
-1576,
+1078,
 [
 "        Menu_Loot_inventory = buf;",
 "        Menu_Loot_inventoryBackup = buf + sizeof *Menu_Loot_inventory;",
@@ -604,7 +597,7 @@
 ]
 ],
 [
-1580,
+1082,
 [
 "            buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity;"
 ],
@@ -613,7 +606,7 @@
 ]
 ],
 [
-1604,
+1106,
 [
 "                VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -1088,7 +1081,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Records.cpp": [
 [
-175,
+174,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -1097,7 +1090,7 @@
 ]
 ],
 [
-210,
+209,
 [
 "        p->title = (void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]];",
 "        p->description = (void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]];"
@@ -1108,7 +1101,7 @@
 ]
 ],
 [
-512,
+511,
 [
 "        \"PLAYER TIME\", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, p[1] + 0x1C);"
 ],
@@ -1117,7 +1110,7 @@
 ]
 ],
 [
-515,
+514,
 [
 "        \"1ST\", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, p[1] + 0x1C);"
 ],
@@ -1126,7 +1119,7 @@
 ]
 ],
 [
-517,
+516,
 [
 "        \"2ND\", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, p[1] + 0x1C);"
 ],
@@ -1135,7 +1128,7 @@
 ]
 ],
 [
-519,
+518,
 [
 "        \"3RD\", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, p[1] + 0x1C);"
 ],
@@ -1144,7 +1137,7 @@
 ]
 ],
 [
-531,
+530,
 [
 "                q[1] + 0x1C);"
 ],
@@ -1153,7 +1146,7 @@
 ]
 ],
 [
-536,
+535,
 [
 "                q[1] + 0x1C);"
 ],
@@ -1162,7 +1155,7 @@
 ]
 ],
 [
-541,
+540,
 [
 "                q[1] + 0x1C);"
 ],
@@ -1171,7 +1164,7 @@
 ]
 ],
 [
-548,
+547,
 [
 "        vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -1180,7 +1173,7 @@
 ]
 ],
 [
-554,
+553,
 [
 "                \"$--:--:--\", vs_getXY(88, 158), vs_getRGB(80, 80, 80), r[1] + 0x1C);"
 ],
@@ -1189,7 +1182,7 @@
 ]
 ],
 [
-557,
+556,
 [
 "                vs_getXY(88, 158), vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],

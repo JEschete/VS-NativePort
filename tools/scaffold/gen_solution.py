@@ -426,6 +426,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\Container\ContainerListTransferLive.cpp",
                 r"src\Menu\Loot\LootStagingLive.cpp",
                 r"src\Menu\Loot\LootRowsLive.cpp",
+                r"src\Menu\Loot\LootPoliciesLive.cpp",
                 r"src\Menu\BreakArtsLive.cpp",
                 r"src\Menu\MagicMenus.cpp",
                 r"src\Menu\MagicMenusLive.cpp",

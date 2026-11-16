@@ -308,6 +308,7 @@
     <ClCompile Include="src\LegacyGpuTests.cpp" />
     <ClCompile Include="src\LogObserverTests.cpp" />
     <ClCompile Include="src\LogTests.cpp" />
+    <ClCompile Include="src\LootPoliciesTests.cpp" />
     <ClCompile Include="src\LootRowsTests.cpp" />
     <ClCompile Include="src\LootStagingTests.cpp" />
     <ClCompile Include="src\MagicCostsTests.cpp" />

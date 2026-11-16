@@ -2688,6 +2688,12 @@
     <ClInclude Include="src\Menu\Loot\LootInventory.h">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Loot\LootPolicies.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Loot\LootPoliciesLive.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Loot\LootRows.cpp">
       <Filter>src\Menu\Loot</Filter>
     </ClCompile>
@@ -4367,6 +4373,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\ItemListRowsLive.hpp">
       <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootPolicies.hpp">
+      <Filter>include\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootPoliciesLive.hpp">
+      <Filter>include\Menu\Loot</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Loot\LootRows.hpp">
       <Filter>include\Menu\Loot</Filter>

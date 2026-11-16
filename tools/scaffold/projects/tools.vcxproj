@@ -817,6 +817,13 @@
     <None Include="..\..\port\differentials\loot_gem_staging.py" />
     <None Include="..\..\port\differentials\loot_grip_staging.py" />
     <None Include="..\..\port\differentials\loot_misc_staging.py" />
+    <None Include="..\..\port\differentials\loot_policies_common.py" />
+    <None Include="..\..\port\differentials\loot_policies_driver.cpp" />
+    <None Include="..\..\port\differentials\loot_policies_f02856.py" />
+    <None Include="..\..\port\differentials\loot_policies_f02860.py" />
+    <None Include="..\..\port\differentials\loot_policies_f02861.py" />
+    <None Include="..\..\port\differentials\loot_policies_f02862.py" />
+    <None Include="..\..\port\differentials\loot_policies_f02863.py" />
     <None Include="..\..\port\differentials\loot_rows_append.py" />
     <None Include="..\..\port\differentials\loot_rows_build.py" />
     <None Include="..\..\port\differentials\loot_rows_count_category.py" />
