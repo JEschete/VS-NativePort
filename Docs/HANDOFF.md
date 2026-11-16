@@ -36,9 +36,9 @@ passed. The original 900-function cohort has **788 resolved (776 promoted,
   [#410](https://github.com/JEschete/VS-NativePort/issues/410) records two
   unconfirmed lifecycle hypotheses; reproduce them separately before
   classifying or fixing either one.
-- Remaining order and blockers are tracked in issue #4, the plan, and the
-  ledgers. F00830 remains blocked by #296; honor the listed dependencies before
-  dispatching later slices.
+- Keep the promotion plan order and dependencies aligned with issue #4. Current
+  blockers are F00830 (#296), B48-01 (#378), B48-08 (#376), and B48-06/07
+  (#373); #384 waits on #377. The copier gates #381 and #383 are closed.
 - No interactive combat verification, gameplay completion or compatibility
   retirement is claimed.
 
