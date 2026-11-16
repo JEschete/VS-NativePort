@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
+#include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -39,6 +40,7 @@ void Boot_ResetMenu3Statics(void)
 {
     Menu_Inventory_ResetMenu3Statics();
     Menu_Inventory_ItemList_ResetMenu3Statics();
+    VS::Menu::Inventory::ResetEquipmentRowsLive();
 }
 
 // Call where the original loads MENU4.PRG: restores the statics its reload re-read from the disc.

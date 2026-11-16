@@ -1,35 +1,23 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/AnimationControlLive.hpp"
-#include "Actors/SequencePlaybackLive.hpp"
-#include "Audio/SfxLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
+#include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/TextureAnimation.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
@@ -37,8 +25,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Content/StringTables.h"
-#include "Core/Text/TextCode.h"
-#include "Field/Actors.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -47,12 +33,10 @@ extern "C" {
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Menu/BattleAbilities.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/MenuItems.h"
-#include "Menu/Framework/MenuRows.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
@@ -107,9 +91,6 @@ u_char Menu_Inventory_miscItemToActionMap[] = { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0x
     0x5A, 0x5B, 0x4D, 0x3C, 0x36, 0x3D, 0x37, 0x3E, 0x38, 0x3F, 0x39, 0x4B, 0x4C, 0x52,
     0x53, 0x55, 0x4F, 0x50, 0x5C, 0x5D, 0x3A, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
     0x49 };
-
-// decomp: local static of _processEquipSubMenu, at file scope so the module reset reaches it
-static char Menu_Inventory_equipmentChoicesCursorAnimation = 0;
 
 // decomp: local static of vs_menu3_exec, at file scope so the module reset reaches it
 static char Menu_Inventory_restoreItemCursor = 0;
@@ -336,298 +317,6 @@ void Menu_Inventory_UpdateMiscItemShortcut(int initialize)
     return;
 }
 
-// decomp: MENU3.PRG _populateMenuRows (src/MENU/MENU3.PRG/16C.c:39)
-void Menu_Inventory_CreateEquipmentRows(int count, u_short** menuText, int* rowTypes)
-{
-    int i;
-    int j;
-    Menu_Framework_MenuRow* menuItem;
-
-    Menu_Inventory_menuRowCount = count;
-    Menu_Inventory_itemsFirstRow = 0;
-    Menu_Inventory_selectedItemRow = 0;
-    Menu_Inventory_equipListStep = 1;
-
-    if (Menu_Inventory_itemsText && Menu_Inventory_itemsText) { }
-
-    Menu_Inventory_itemsText = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(count * 128));
-
-    for (i = 0; i < count; ++i) {
-        u_short* text;
-
-        ((Menu_Framework_ItemText*)Menu_Inventory_itemsText)[i].menuRowFlags = rowTypes[i];
-
-        text = menuText[i * 2];
-
-        if (text != NULL) {
-            for (j = 0; j < 13; j++) {
-                ((u_short*)Menu_Inventory_itemsText)[i * 64 + j] = text[j];
-            }
-            ((u_short*)(i * 128 + Menu_Inventory_itemsText))[13] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        } else {
-            ((u_short*)(i * 128 + Menu_Inventory_itemsText))[0] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        }
-
-        text = menuText[i * 2 + 1];
-
-        if (text != NULL) {
-            ((Menu_Framework_ItemText*)Menu_Inventory_itemsText)[i].description[0] = Core_TextCode_ChunkSize;
-            for (j = 0; j < 46; ++j) {
-                ((u_short*)(Menu_Inventory_itemsText))[i * 64 + j + 17] = text[j];
-            }
-            ((Menu_Framework_ItemText*)Menu_Inventory_itemsText)[i].description[47] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        } else {
-            ((Menu_Framework_ItemText*)Menu_Inventory_itemsText)[i].description[0] =
-                Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
-        }
-    }
-
-    j = rowTypes[0];
-    menuItem = VS::Menu::Framework::SetLiveMenuItem(20, 155, 18, 165, 0, (char*)Menu_Inventory_itemsText);
-    menuItem->unselectable = j & 1;
-    menuItem->rowIcon = j >> 26;
-    menuItem->material = (j >> 16) & 7;
-    menuItem->selected = 1;
-    Menu_Inventory_equippedItem = (j >> 19) & 0x7F;
-}
-
-// decomp: MENU3.PRG _getSelectedItemRow (src/MENU/MENU3.PRG/16C.c:101)
-int Menu_Inventory_GetSelectedEquipmentRow(void)
-{
-    return Menu_Inventory_itemsText != NULL ? -1 : Menu_Inventory_selectedItemRow;
-}
-
-// decomp: MENU3.PRG _processEquipSubMenu (src/MENU/MENU3.PRG/16C.c:111)
-void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
-{
-
-    int temp_s0;
-    int selected_absolute_row;
-    int i;
-    int previous_first_row;
-    Menu_Framework_MenuRow* menuItem;
-
-    if (Menu_Inventory_equipListStep < 6) {
-        if (Menu_Inventory_equipListStep == Menu_Inventory_menuRowCount) {
-            Menu_Inventory_equipListStep = 16;
-            return;
-        }
-
-        menuItem = VS::Menu::Framework::SetLiveMenuItem(
-            Menu_Inventory_equipListStep + 20, 320, (Menu_Inventory_equipListStep * 16) + 18, 151, 0, Menu_Inventory_itemsText + (Menu_Inventory_equipListStep << 7));
-        menuItem->state = 2;
-        menuItem->targetPosition0 = 0xA9;
-        temp_s0 = ((Menu_Framework_ItemText*)Menu_Inventory_itemsText)[Menu_Inventory_equipListStep].menuRowFlags;
-        menuItem->unselectable = temp_s0 & 1;
-        menuItem->rowIcon = (temp_s0 >> 0x1A);
-
-        if (((temp_s0 >> 9) & 0x7F) != 0) {
-            menuItem->outsetIcon = ((temp_s0 >> 9) & 0x7F) - 100;
-        }
-
-        menuItem->material = (temp_s0 >> 0x10) & 7;
-        ++Menu_Inventory_equipListStep;
-
-        if (Menu_Inventory_equipListStep == 6) {
-            if (Menu_Inventory_menuRowCount >= 7) {
-                menuItem->isScrollable = 2;
-            }
-
-            Menu_Inventory_equipListStep = 16;
-        }
-
-        return;
-    }
-
-    previous_first_row = Menu_Inventory_itemsFirstRow;
-    selected_absolute_row = Menu_Inventory_selectedItemRow + previous_first_row;
-
-    menuItem = VS::Menu::Framework::LiveMenuItem(Menu_Inventory_selectedItemRow + 20);
-    VS::Menu::Framework::SetLiveInformationMessage(Menu_Inventory_itemsText + ((selected_absolute_row << 7) + 0x20));
-
-    switch (Menu_Inventory_equipListStep) {
-    case 16:
-        if (VS::Menu::Framework::AreLiveMenuRowsIdle()) {
-            Menu_Inventory_equipListStep = 17;
-        }
-        break;
-
-    case 17:
-        if (Input_buttonsPressed.allButtons & PADRup) {
-
-            // Pointless check, value is always 0 in practice
-            if (!(hasSfx & 2)) {
-                VS::Menu::PlayLeaveSound();
-            }
-
-            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Inventory_itemsText);
-
-            Menu_Inventory_itemsText = NULL;
-            Menu_Inventory_selectedItemRow = -3;
-
-            break;
-        }
-
-        if (Input_buttonsPressed.allButtons & PADRright) {
-            if (menuItem->unselectable) {
-                VS::Menu::PlayInvalidSound();
-            } else {
-
-                VS::Core::Memory::FreeLiveFromHighEnd(Menu_Inventory_itemsText);
-
-                Menu_Inventory_itemsText = NULL;
-                Menu_Inventory_selectedItemRow = selected_absolute_row;
-
-                if (hasSfx != 0) {
-                    if (selected_absolute_row == 0) {
-                        VS::Audio::LivePlaySfxCentered(0x7E, 0x22);
-                    } else {
-                        VS::Audio::LivePlaySfxCentered(0x7E, 0x21);
-                    }
-                }
-                break;
-            }
-        }
-
-        menuItem->selected = 0;
-
-        if (Input_buttonsPressed.allButtons & PADRdown) {
-
-            VS::Menu::PlayLeaveSound();
-            VS::Core::Memory::FreeLiveFromHighEnd(Menu_Inventory_itemsText);
-
-            Menu_Inventory_itemsText = NULL;
-            Menu_Inventory_selectedItemRow = -2;
-
-            break;
-        }
-
-        if (Input_buttonRepeat & PADLup) {
-            if (Menu_Inventory_menuRowCount < 7 || Menu_Inventory_itemsFirstRow == 0) {
-                if (Menu_Inventory_selectedItemRow != 0) {
-                    --Menu_Inventory_selectedItemRow;
-                }
-            } else if (Menu_Inventory_selectedItemRow == 2) {
-                --Menu_Inventory_itemsFirstRow;
-            } else {
-                --Menu_Inventory_selectedItemRow;
-            }
-        }
-
-        if (Input_buttonRepeat & PADLdown) {
-            if (Menu_Inventory_menuRowCount < 7) {
-                if (Menu_Inventory_selectedItemRow < (Menu_Inventory_menuRowCount - 1)) {
-                    ++Menu_Inventory_selectedItemRow;
-                }
-            } else if (Menu_Inventory_itemsFirstRow == (Menu_Inventory_menuRowCount - 6)) {
-                if (Menu_Inventory_selectedItemRow < 5) {
-                    ++Menu_Inventory_selectedItemRow;
-                }
-            } else if (Menu_Inventory_selectedItemRow == 4) {
-                ++Menu_Inventory_itemsFirstRow;
-            } else {
-                ++Menu_Inventory_selectedItemRow;
-            }
-        }
-
-        if (selected_absolute_row != (Menu_Inventory_selectedItemRow + Menu_Inventory_itemsFirstRow)) {
-            VS::Menu::PlayChangeSound();
-
-            if (Menu_Inventory_itemsFirstRow != previous_first_row) {
-                char buf[Menu_Inventory_menuRowCount];
-                for (i = 0; i < Menu_Inventory_menuRowCount; ++i) {
-                    buf[i] = 0;
-                }
-                temp_s0 = Menu_Inventory_menuRowCount;
-
-                if (Menu_Inventory_menuRowCount >= 7) {
-                    temp_s0 = 6;
-                }
-                for (i = 1; i < temp_s0; ++i) {
-                    buf[i + previous_first_row] = VS::Menu::Framework::LiveMenuItem(i + 0x14)->gradientState;
-                }
-
-                for (i = 1;;) {
-                    menuItem = VS::Menu::Framework::SetLiveMenuItem(i + 0x14, 0xA9, 0x12 + i * 0x10,
-                        0x97, 0, Menu_Inventory_itemsText + ((i + Menu_Inventory_itemsFirstRow) << 7));
-                    menuItem->gradientState = buf[i + Menu_Inventory_itemsFirstRow];
-                    temp_s0 =
-                        ((Menu_Framework_ItemText*)Menu_Inventory_itemsText)[i + Menu_Inventory_itemsFirstRow].menuRowFlags;
-                    menuItem->unselectable = temp_s0 & 1;
-                    menuItem->rowIcon = temp_s0 >> 0x1A;
-
-                    if (((temp_s0 >> 9) & 0x7F) != 0) {
-                        menuItem->outsetIcon = ((temp_s0 >> 9) & 0x7F) - 0x64;
-                    }
-
-                    menuItem->material = (temp_s0 >> 0x10) & 7;
-                    i++;
-
-                    if (i == Menu_Inventory_menuRowCount) {
-                        break;
-                    }
-                    if (i == 6) {
-                        if ((Menu_Inventory_itemsFirstRow + 6) < Menu_Inventory_menuRowCount) {
-                            menuItem->isScrollable = 2;
-                        }
-                        break;
-                    }
-                }
-
-                if (Menu_Inventory_itemsFirstRow != 0) {
-                    VS::Menu::Framework::LiveMenuItem(0x15)->isScrollable = 1;
-                }
-            }
-
-            temp_s0 = ((Menu_Framework_ItemText*)Menu_Inventory_itemsText)[Menu_Inventory_selectedItemRow + Menu_Inventory_itemsFirstRow]
-                          .menuRowFlags;
-            Menu_Inventory_equippedItem = (temp_s0 >> 19) & 0x7F;
-        }
-
-        VS::Menu::Framework::LiveMenuItem(Menu_Inventory_selectedItemRow + 0x14)->selected = 1;
-
-        i = (((Menu_Inventory_selectedItemRow * 0x10) + 0xA) << 0x10) | 0x9B;
-
-        if (Menu_Inventory_selectedItemRow == 0) {
-            i -= 0xE;
-        }
-
-        Menu_Inventory_equipmentChoicesCursorAnimation = VS::Menu::Framework::DrawLiveCursor(Menu_Inventory_equipmentChoicesCursorAnimation, i);
-        break;
-    }
-}
-
-// decomp: MENU3.PRG _populateUiAccessory (src/MENU/MENU3.PRG/16C.c:311)
-void Menu_Inventory_SetAccessoryPreviewStats(int accessoryId)
-{
-
-    VS::Menu::Framework::ResetLiveEquipmentStats();
-
-    if (accessoryId != 0) {
-        int i;
-        Items_AccessorySpawnLoadout accessory;
-
-        VS::Items::LoadLiveInventoryAccessoryStats(&accessory, &Menu_Framework_armor[accessoryId - 1]);
-
-        for (i = 0; i < 16; ++i) {
-            Menu_Framework_equipmentStats[i] = accessory.classes[i & 7];
-            Menu_Framework_equipmentStats[i + 16] = accessory.affinities[i & 7];
-            Menu_Framework_equipmentStats[i + 32] = accessory.types[i & 7];
-        }
-
-        VS::Menu::Framework::SetLivePrimaryStats(
-            accessory.currentStr, accessory.currentInt, accessory.currentAgility, 2);
-    }
-
-    Menu_Framework_equipmentSubtype = 32;
-    Menu_Framework_currentStatusViewItem = accessoryId;
-
-    VS::Menu::Framework::SetLiveEnabledStatPages(7);
-}
-
 // decomp: MENU3.PRG _equipAccessoryMenu (src/MENU/MENU3.PRG/16C.c:343)
 int Menu_Inventory_UpdateAccessoryMenu(int initialize)
 {
@@ -656,7 +345,7 @@ int Menu_Inventory_UpdateAccessoryMenu(int initialize)
 
         Menu_Inventory_accessoryMenuEquippedAccessory = index;
 
-        Menu_Inventory_SetAccessoryPreviewStats(index);
+        VS::Menu::Inventory::SetLiveAccessoryPreviewStats(index);
         VS::Menu::Framework::UpdateLiveEquipmentStatPages(7);
         VS::Menu::Framework::UpdateLivePrimaryStatPanel(1);
 
@@ -728,17 +417,17 @@ int Menu_Inventory_UpdateAccessoryMenu(int initialize)
                 }
             }
 
-            Menu_Inventory_CreateEquipmentRows(rowCount, menuText, rowTypes);
+            VS::Menu::Inventory::LiveCreateEquipmentRows(rowCount, menuText, rowTypes);
 
             Menu_Inventory_accessoryMenuState = Menu_Inventory_EquipmentSlotMenuState_HandleInput;
         }
         break;
     }
     case Menu_Inventory_EquipmentSlotMenuState_HandleInput:
-        Menu_Inventory_SetAccessoryPreviewStats(Menu_Inventory_equippedItem);
-        Menu_Inventory_UpdateEquipmentChoices(1);
+        VS::Menu::Inventory::SetLiveAccessoryPreviewStats(Menu_Inventory_equippedItem);
+        VS::Menu::Inventory::UpdateLiveEquipmentChoices(1);
 
-        Menu_Inventory_accessoryMenuSelectedAccessory = Menu_Inventory_GetSelectedEquipmentRow() + 1;
+        Menu_Inventory_accessoryMenuSelectedAccessory = VS::Menu::Inventory::LiveSelectedEquipmentRow() + 1;
 
         if (!Menu_Inventory_accessoryMenuSelectedAccessory) {
             break;
@@ -888,7 +577,7 @@ int Menu_Inventory_UpdateWeaponMenu(int initialize)
                 }
             }
 
-            Menu_Inventory_CreateEquipmentRows(rowCount, menuText, rowTypes);
+            VS::Menu::Inventory::LiveCreateEquipmentRows(rowCount, menuText, rowTypes);
 
             Menu_Inventory_weaponMenuState = Menu_Inventory_EquipmentSlotMenuState_HandleInput;
         }
@@ -896,9 +585,9 @@ int Menu_Inventory_UpdateWeaponMenu(int initialize)
     }
     case Menu_Inventory_EquipmentSlotMenuState_HandleInput:
         VS::Menu::Framework::SetLiveWeaponStats(Menu_Inventory_equippedItem);
-        Menu_Inventory_UpdateEquipmentChoices(0);
+        VS::Menu::Inventory::UpdateLiveEquipmentChoices(0);
 
-        Menu_Inventory_weaponMenuSelectedWeapon = Menu_Inventory_GetSelectedEquipmentRow() + 1;
+        Menu_Inventory_weaponMenuSelectedWeapon = VS::Menu::Inventory::LiveSelectedEquipmentRow() + 1;
 
         if (Menu_Inventory_weaponMenuSelectedWeapon == 0) {
             break;
@@ -942,7 +631,7 @@ int Menu_Inventory_UpdateWeaponMenu(int initialize)
         break;
 
     case Menu_Inventory_EquipmentSlotMenuState_LoadObject:
-        if (Menu_Inventory_ReloadEquipmentModels(Menu_Inventory_weaponMenuCategory, Menu_Inventory_weaponMenuWepId, Menu_Inventory_weaponMenuMaterial)) {
+        if (VS::Menu::Inventory::ReloadLiveEquipmentModels(Menu_Inventory_weaponMenuCategory, Menu_Inventory_weaponMenuWepId, Menu_Inventory_weaponMenuMaterial)) {
             break;
         }
 
@@ -1058,7 +747,7 @@ int Menu_Inventory_UpdateShieldMenu(int initialize)
                 }
             }
 
-            Menu_Inventory_CreateEquipmentRows(rowCount, menuText, rowTypes);
+            VS::Menu::Inventory::LiveCreateEquipmentRows(rowCount, menuText, rowTypes);
 
             Menu_Inventory_shieldMenuState = Menu_Inventory_EquipmentSlotMenuState_HandleInput;
         }
@@ -1067,9 +756,9 @@ int Menu_Inventory_UpdateShieldMenu(int initialize)
 
     case Menu_Inventory_EquipmentSlotMenuState_HandleInput:
         VS::Menu::Framework::SetLiveShieldStats(Menu_Inventory_equippedItem);
-        Menu_Inventory_UpdateEquipmentChoices(0);
+        VS::Menu::Inventory::UpdateLiveEquipmentChoices(0);
 
-        Menu_Inventory_shieldMenuSelectedShield = Menu_Inventory_GetSelectedEquipmentRow() + 1;
+        Menu_Inventory_shieldMenuSelectedShield = VS::Menu::Inventory::LiveSelectedEquipmentRow() + 1;
 
         if (Menu_Inventory_shieldMenuSelectedShield == 0) {
             break;
@@ -1112,7 +801,7 @@ int Menu_Inventory_UpdateShieldMenu(int initialize)
         break;
 
     case Menu_Inventory_EquipmentSlotMenuState_LoadObject:
-        if (Menu_Inventory_ReloadEquipmentModels(0, Menu_Inventory_shieldMenuWepId, Menu_Inventory_shieldMenuMaterial)) {
+        if (VS::Menu::Inventory::ReloadLiveEquipmentModels(0, Menu_Inventory_shieldMenuWepId, Menu_Inventory_shieldMenuMaterial)) {
             break;
         }
         Menu_Inventory_shieldMenuState = Menu_Inventory_EquipmentSlotMenuState_WaitMenuReady;
@@ -1237,7 +926,7 @@ int Menu_Inventory_UpdateArmorMenu(int initBodyPart)
                     ++rowCount;
                 }
             }
-            Menu_Inventory_CreateEquipmentRows(rowCount, menuText, rowTypes);
+            VS::Menu::Inventory::LiveCreateEquipmentRows(rowCount, menuText, rowTypes);
 
             Menu_Inventory_armorMenuState = Menu_Inventory_EquipmentSlotMenuState_HandleInput;
         }
@@ -1247,9 +936,9 @@ int Menu_Inventory_UpdateArmorMenu(int initBodyPart)
 
     case Menu_Inventory_EquipmentSlotMenuState_HandleInput:
         VS::Menu::Framework::SetLiveArmorStats(Menu_Inventory_equippedItem);
-        Menu_Inventory_UpdateEquipmentChoices(1);
+        VS::Menu::Inventory::UpdateLiveEquipmentChoices(1);
 
-        Menu_Inventory_armorMenuSelectedArmor = Menu_Inventory_GetSelectedEquipmentRow() + 1;
+        Menu_Inventory_armorMenuSelectedArmor = VS::Menu::Inventory::LiveSelectedEquipmentRow() + 1;
 
         if (Menu_Inventory_armorMenuSelectedArmor == 0) {
             break;
@@ -1806,127 +1495,6 @@ int Menu_Inventory_Update(u_char* state)
     return 0;
 }
 
-// decomp: MENU3.PRG _loadObjectData (src/MENU/MENU3.PRG/68C4.c:12)
-int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
-{
-    int _[6] __attribute__((unused));
-    int i;
-    Actors_ActorRecord* preview_actor = Actors_actorRecords[1];
-
-    switch (Menu_Inventory_equipmentModelLoadStep) {
-    case 0:
-        if (category == 0) {
-
-            VS::Content::ReleaseLiveWeaponModel(1);
-
-            if ((i = wepId) && Menu_Inventory_IsTwoHandedWeapon(preview_actor->sequenceModelId)) {
-                VS::Content::ReleaseLiveWeaponModel(0);
-                VS::Menu::Framework::QueueLiveAshleyWeaponAnimations(10);
-            }
-        } else {
-            if (category != preview_actor->sequenceModelId) {
-                VS::Menu::Framework::QueueLiveAshleyWeaponAnimations(category);
-            }
-
-            VS::Content::ReleaseLiveWeaponModel(0);
-
-            if (Actors_weaponModels[3] != NULL && Menu_Inventory_IsTwoHandedWeapon(category)) {
-                VS::Content::ReleaseLiveWeaponModel(1);
-            }
-        }
-
-        Menu_Inventory_QueueEquipmentModel(wepId, material);
-        VS::Actors::SetLiveActorWeaponDrawn(1, 0, 1);
-
-        ++Menu_Inventory_equipmentModelLoadStep;
-        break;
-
-    case 1:
-        if ((VS::Content::UpdateLiveActorAssetQueue() == 0) && (preview_actor->animationId == 1)) {
-            VS::Menu::Framework::ResetLiveAshleyEquipmentPose();
-
-            ++Menu_Inventory_equipmentModelLoadStep;
-        }
-        break;
-
-    case 2:
-        VS::Menu::Framework::ReleaseLiveActorPreview();
-        VS::Menu::Framework::CloneLiveActorPreview(0);
-        VS::Menu::Framework::ResetLiveActorPreviewPose();
-
-        preview_actor->instance.weaponDrawn = 0;
-
-        VS::Actors::PlayLiveActorAnimation(1, 1, 0, 0);
-        VS::Actors::AdvanceLiveSkeletalAnimation(*preview_actor, 1);
-        VS::Core::Memory::CopyLiveAlignedWords(&preview_actor->blendPose, &preview_actor->pose, sizeof preview_actor->blendPose);
-
-        for (i = 0; i < 2; ++i) {
-            if (Actors_weaponModels[i + 2] != NULL) {
-                Actors_weaponModels[i + 2]->reserved11 = 0;
-            }
-        }
-
-        VS::Actors::SetLiveActorWeaponDrawn(1, 1, 1);
-
-        ++Menu_Inventory_equipmentModelLoadStep;
-        break;
-
-    case 3:
-        if (preview_actor->animationId == 101) {
-            Menu_Inventory_equipmentModelLoadStep = 0;
-            return 0;
-        }
-
-        break;
-    }
-    return 1;
-}
-
-// decomp: MENU3.PRG func_80109320 (src/MENU/MENU3.PRG/68C4.c:87)
-int Menu_Inventory_IsTwoHandedWeapon(int category)
-{
-    if (category < 3) {
-        return 0;
-    }
-
-    if (category == 8) {
-        return 1;
-    }
-
-    return category & 1;
-}
-
-// decomp: MENU3.PRG _populateDataSlot (src/MENU/MENU3.PRG/68C4.c:100)
-void Menu_Inventory_QueueEquipmentModel(int wepId, int material)
-{
-    Content_ActorAssetRequest objData;
-    int index;
-    int equipment_texture_slot;
-
-    if (wepId == 0) {
-        return;
-    }
-
-    index = 0;
-
-    if (wepId < 96) {
-        equipment_texture_slot = 240;
-    } else {
-        index = 1;
-        equipment_texture_slot = 241;
-    }
-
-    objData.assetKind = 3;
-    objData.targetSlot = index;
-    objData.modelId = wepId;
-    objData.destination = Battle_characterState->equipmentModels[index];
-    objData.subKind = 0;
-    objData.textureSlot = equipment_texture_slot;
-    objData.material = material;
-
-    VS::Content::QueueLiveActorAssetRequest(&objData);
-}
-
 // MAINMENU.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Inventory_ResetMainMenuStatics(void)
 {
@@ -1946,10 +1514,6 @@ void Menu_Inventory_ResetMenu3Statics(void)
     {
         static const int initial = 0;
         memcpy((void*)&Menu_Inventory_ashleyYOffset, &initial, sizeof Menu_Inventory_ashleyYOffset);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Inventory_equipmentChoicesCursorAnimation, &initial, sizeof Menu_Inventory_equipmentChoicesCursorAnimation);
     }
     {
         static const char initial[] = { 0, 5, 5, 2, 3, 4, 6, 7 };

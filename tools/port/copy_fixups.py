@@ -1547,6 +1547,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Inventory::LiveBuildItemRows": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
     "VS::Menu::Inventory::LiveBuildLootItemRows": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
     "VS::Menu::Inventory::LiveRestoreItemRows": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
+    "VS::Menu::Inventory::LiveCreateEquipmentRows": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
+    "VS::Menu::Inventory::LiveSelectedEquipmentRow": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveEquipmentChoices": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
+    "VS::Menu::Inventory::SetLiveAccessoryPreviewStats": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
+    "VS::Menu::Inventory::ReloadLiveEquipmentModels": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
+    "VS::Menu::Inventory::LiveIsTwoHandedWeapon": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
+    "VS::Menu::Inventory::QueueLiveEquipmentModel": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
     "VS::Items::LiveContainerCategoryIndices": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::FindLiveContainerItemRow": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::AppendLiveContainerItemIndex": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
@@ -2798,6 +2805,13 @@ OWNED_CALL_BINDINGS["F02593"] = "VS::Menu::Inventory::LiveParentWeaponIndex"
 OWNED_CALL_BINDINGS["F02594"] = "VS::Menu::Inventory::LiveParentShieldIndex"
 OWNED_CALL_BINDINGS["F02595"] = "VS::Menu::Inventory::LiveBuildItemRows"
 OWNED_CALL_BINDINGS["F02596"] = "VS::Menu::Inventory::LiveRestoreItemRows"
+OWNED_CALL_BINDINGS["F02626"] = "VS::Menu::Inventory::LiveCreateEquipmentRows"
+OWNED_CALL_BINDINGS["F02627"] = "VS::Menu::Inventory::LiveSelectedEquipmentRow"
+OWNED_CALL_BINDINGS["F02628"] = "VS::Menu::Inventory::UpdateLiveEquipmentChoices"
+OWNED_CALL_BINDINGS["F02629"] = "VS::Menu::Inventory::SetLiveAccessoryPreviewStats"
+OWNED_CALL_BINDINGS["F02637"] = "VS::Menu::Inventory::ReloadLiveEquipmentModels"
+OWNED_CALL_BINDINGS["F02638"] = "VS::Menu::Inventory::LiveIsTwoHandedWeapon"
+OWNED_CALL_BINDINGS["F02639"] = "VS::Menu::Inventory::QueueLiveEquipmentModel"
 OWNED_CALL_BINDINGS["F02927"] = "VS::Items::LiveContainerCategoryIndices"
 OWNED_CALL_BINDINGS["F02928"] = "VS::Items::FindLiveContainerItemRow"
 OWNED_CALL_BINDINGS["F02929"] = "VS::Items::AppendLiveContainerItemIndex"
@@ -4838,6 +4852,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x80105088, "VS::Menu::Inventory::LiveBuildLootItemRows"),  # F02595
     ("MENU/MENU3.PRG", 0x80105314, "VS::Menu::Inventory::LiveRestoreItemRows"),  # F02596
     ("MENU/MENUB.PRG", 0x8010537C, "VS::Menu::Inventory::LiveRestoreItemRows"),  # F02596
+    ("MENU/MENU3.PRG", 0x80106390, "VS::Menu::Inventory::LiveCreateEquipmentRows"),  # F02626
+    ("MENU/MENU3.PRG", 0x80106574, "VS::Menu::Inventory::LiveSelectedEquipmentRow"),  # F02627
+    ("MENU/MENU3.PRG", 0x8010659C, "VS::Menu::Inventory::UpdateLiveEquipmentChoices"),  # F02628
+    ("MENU/MENU3.PRG", 0x80106BB4, "VS::Menu::Inventory::SetLiveAccessoryPreviewStats"),  # F02629
+    ("MENU/MENU3.PRG", 0x801090C4, "VS::Menu::Inventory::ReloadLiveEquipmentModels"),  # F02637
+    ("MENU/MENU3.PRG", 0x80109320, "VS::Menu::Inventory::LiveIsTwoHandedWeapon"),  # F02638
+    ("MENU/MENU3.PRG", 0x80109344, "VS::Menu::Inventory::QueueLiveEquipmentModel"),  # F02639
     ("MENU/MENUD.PRG", 0x80102A34, "VS::Menu::container::BuildLiveWeaponStats"),  # F02925
     ("MENU/MENUD.PRG", 0x80102BB0, "VS::Menu::container::BuildLiveShieldStats"),  # F02926
     ("MENU/MENUD.PRG", 0x80103D50, "VS::Menu::container::SetLivePanelVisibility"),  # F02942
@@ -5305,15 +5326,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "D_800F4590 is the preview pair at vs_battle_wepModels+8, not independent pose storage"),
         ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
          "check the real preview weapon/shield slots using native pointer stride"),
-    ],
-    "F02637": [
-        ("Battle_unusedGlobal2 &&", "Actors_weaponModels[3] != NULL &&",
-         "D_800F4594 aliases vs_battle_wepModels[3]; two-handed changes release the real shield"),
-        ("Battle_unusedGlobal1[i]->opaque11 = 0;",
-         "Actors_weaponModels[i + 2]->reserved11 = 0;",
-         "MENU3/68C4.c resets the preview weapon fade at byte 0x11 of the same model"),
-        ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
-         "D_800F4590 aliases vs_battle_wepModels[2], including its second preview slot"),
     ],
     "F01364": [
         ("    VS::Core::Memory::ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);",
@@ -7578,18 +7590,9 @@ REGEX_FIXES += [
         ("Menu::BattleAbilities::UpdateDefenseAbilityMenu",
          (('arg0', 'reset_menu'),),
          "F02623 src\\MENU\\MENU2.PRG\\64.c:553-605 (_defenseAbilityMenu). Named roles: reset menu."),
-        ("Menu::Inventory::UpdateEquipmentChoices",
-         (('temp_s4', 'selected_absolute_row'), ('temp_s6', 'previous_first_row')),
-         "F02628 src\\MENU\\MENU3.PRG\\16C.c:111-309 (_processEquipSubMenu). Named roles: selected absolute row, previous first row. Retained: temp_s0: Merged packed menu-row flags and temporary visible-row loop bound capped at six."),
         ("Menu::Inventory::Update",
          (('temp_a1', 'item_use_return_menu'), ('temp_a1_2', 'equipment_return_menu')),
          "F02636 src\\MENU\\MENU3.PRG\\16C.c:1236-1548 (vs_menu3_exec). Named roles: item use return menu, equipment return menu."),
-        ("Menu::Inventory::ReloadEquipmentModels",
-         (('temp_s1', 'preview_actor'),),
-         "F02637 src\\MENU\\MENU3.PRG\\68C4.c:12-85 (_loadObjectData). Named roles: preview actor."),
-        ("Menu::Inventory::QueueEquipmentModel",
-         (('var_a3', 'equipment_texture_slot'),),
-         "F02639 src\\MENU\\MENU3.PRG\\68C4.c:100-128 (_populateDataSlot). Named roles: equipment texture slot."),
         ("Menu::Status::ArmorDescription",
          (('arg0', 'armor_loadout'),),
          "F02652 src\\MENU\\MENU4.PRG\\120.c:368-376 (_drawArmorInfoRow). Named roles: armor loadout."),

@@ -2634,6 +2634,12 @@
     <ClCompile Include="src\Menu\Inventory\EquipmentDetailControllersLive.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\EquipmentRows.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\EquipmentRowsLive.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Inventory\Inventory.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
@@ -4306,6 +4312,12 @@
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\EquipmentDetailControllersLive.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\EquipmentRows.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\EquipmentRowsLive.hpp">
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\InventorySorting.hpp">

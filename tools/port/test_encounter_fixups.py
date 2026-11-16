@@ -4970,14 +4970,22 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertIn("return Actors_weaponModels[slot];", live)
         self.assertIn("model->reserved08Bit4 = 1;", live)
         self.assertNotIn("Battle_unusedGlobal1", preview + live)
-        inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
-        self.assertIn("Actors_weaponModels[i + 2]->reserved11 = 0;", inventory)
-        self.assertNotIn("Battle_unusedGlobal1", inventory)
+        # #276 row 47 B47-01 promoted func_801090C4 (F02637) to the owned EquipmentRows.cpp
+        # ReloadEquipmentModels; its Live host clears the flag on weapon model slots 2 and 3.
+        self.assertEqual(self.owned_items()["F02637"]["path"], r"Native\Game\src\Menu\Inventory\EquipmentRows.cpp")
+        rows = (root / "Native/Game/src/Menu/Inventory/EquipmentRows.cpp").read_text()
+        self.assertIn("constexpr int kFirstPreviewWeaponModel = 2;", rows)
+        self.assertIn("host.ClearWeaponModelFlag(kFirstPreviewWeaponModel + i);", rows)
         self.assertIn(
-            "Actors_weaponModels[3] != NULL && Menu_Inventory_IsTwoHandedWeapon(category)",
-            inventory,
+            "host.HasWeaponModel(kFirstPreviewWeaponModel + 1) &&\n            IsTwoHandedWeapon(choice.category)",
+            rows,
         )
-        self.assertNotIn("Battle_unusedGlobal2", inventory)
+        rows_live = (root / "Native/Game/src/Menu/Inventory/EquipmentRowsLive.cpp").read_text()
+        self.assertIn("return Actors_weaponModels[slot];", rows_live)
+        self.assertIn("model->reserved11 = 0;", rows_live)
+        self.assertNotIn("Battle_unusedGlobal", rows + rows_live)
+        inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
+        self.assertNotIn("Battle_unusedGlobal", inventory)
 
     def test_equipment_slot_storage_is_owned_and_native_sized(self):
         root = Path(__file__).resolve().parents[2]

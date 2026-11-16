@@ -49,11 +49,11 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Class | What it is | Sites | Compiler | High | Medium | Low | Open |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `NULL-TABLE` | Sparse table entry read without a check | 22 | 0 | 0 | 15 | 7 | 21 |
+| `NULL-TABLE` | Sparse table entry read without a check | 21 | 0 | 0 | 14 | 7 | 20 |
 | `NULL-RETURN` | Lookup result read without a check | 0 | 0 | 0 | 0 | 0 | 0 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 2 | 0 | 0 | 2 | 0 | 2 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
-| `DIV-ZERO` | Division by a value that was not checked | 130 | 0 | 0 | 109 | 21 | 123 |
+| `DIV-ZERO` | Division by a value that was not checked | 131 | 0 | 0 | 110 | 21 | 124 |
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 82 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
@@ -64,9 +64,9 @@ there would have hidden the defect and left the wrong behavior in place.
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 2 | 2 | 2 | 0 | 0 | 2 |
 | `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 4 | 0 | 0 | 4 | 0 | 4 |
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
-| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 22 | 0 | 0 | 22 | 0 | 22 |
+| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 21 | 0 | 0 | 21 | 0 | 21 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 526 | 239 | 239 | 259 | 28 | 516 |
+| **Total** | | 525 | 239 | 239 | 258 | 28 | 515 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Roadmap issue | Sites |
 | --- | ---: |
-| #60 | 108 |
+| #60 | 107 |
 | #56 | 92 |
 | no roadmap issue | 79 |
 | #61 | 55 |

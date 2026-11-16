@@ -102,7 +102,18 @@
 [
 "// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.",
 "#include \"Menu/Container/ContainerMenuDialogsLive.hpp\"",
+"#include \"Menu/Inventory/EquipmentRowsLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\""
+]
+],
+[
+38,
+[
+"    Menu_Inventory_ItemList_ResetMenu3Statics();"
+],
+[
+"    Menu_Inventory_ItemList_ResetMenu3Statics();",
+"    VS::Menu::Inventory::ResetEquipmentRowsLive();"
 ]
 ],
 [
@@ -479,7 +490,7 @@
 ],
 "Native\\Game\\src\\Menu\\Inventory\\Inventory.cpp": [
 [
-218,
+199,
 [
 "        rowTypes = buf + 0x1800;",
 "        menuText = buf + 0x1900;"
@@ -490,21 +501,12 @@
 ]
 ],
 [
-232,
+213,
 [
 "            VS::Menu::Framework::FormatLiveMiscItemRow(misc, &menuText[i * 2], rowTypes - -i, buf + i * 96);"
 ],
 [
 "            VS::Menu::Framework::FormatLiveMiscItemRow(misc, &menuText[i * 2], rowTypes - -i, ((u_char*)(buf)) + i * 96);"
-]
-],
-[
-352,
-[
-"    Menu_Inventory_itemsText = VS::Core::Memory::AllocateLiveFromHighEnd(count * 128);"
-],
-[
-"    Menu_Inventory_itemsText = (char *)(VS::Core::Memory::AllocateLiveFromHighEnd(count * 128));"
 ]
 ]
 ],

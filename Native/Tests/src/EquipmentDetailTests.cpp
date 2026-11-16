@@ -11,6 +11,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/RenameLive.hpp"
 #include "Render/GameFontLive.hpp"
 
@@ -371,8 +372,9 @@ TEST_CASE("Equipment reload releases shields through the actual preview slot",
   const bool two_handed = category == 3 || category == 5 || category == 7 ||
                           category == 8 || category == 9;
   const bool release = has_preview && two_handed;
-  CHECK(Menu_Inventory_IsTwoHandedWeapon(category) == two_handed);
-  CHECK(Menu_Inventory_ReloadEquipmentModels(category, 0, 0) == 1);
+  CHECK(VS::Menu::Inventory::LiveIsTwoHandedWeapon(category) ==
+        (two_handed ? 1 : 0));
+  CHECK(VS::Menu::Inventory::ReloadLiveEquipmentModels(category, 0, 0) == 1);
   CHECK(Menu_Inventory_equipmentModelLoadStep == 1);
   CHECK(Actors_weaponModels[1] == (release ? nullptr : &fixture.shield));
   CHECK(Actors_weaponModels[3] ==
