@@ -509,6 +509,16 @@
     <None Include="..\..\port\differentials\container_transfers_f02940.py" />
     <None Include="..\..\port\differentials\container_transfers_f02941.py" />
     <None Include="..\..\port\differentials\container_transfers_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\cube_text_common.py" />
+    <None Include="..\..\port\differentials\cube_text_driver.cpp" />
+    <None Include="..\..\port\differentials\cube_text_f03052.py" />
+    <None Include="..\..\port\differentials\cube_text_f03053.py" />
+    <None Include="..\..\port\differentials\cube_text_f03054.py" />
+    <None Include="..\..\port\differentials\cube_text_f03055.py" />
+    <None Include="..\..\port\differentials\cube_text_f03056.py" />
+    <None Include="..\..\port\differentials\cube_text_f03057.py" />
+    <None Include="..\..\port\differentials\cube_text_f03058.py" />
+    <None Include="..\..\port\differentials\cube_text_f03059.py" />
     <None Include="..\..\port\differentials\damage_calculations.py" />
     <None Include="..\..\port\differentials\damage_calculations_driver.cpp" />
     <None Include="..\..\port\differentials\damage_calculations_guard_driver.cpp" />

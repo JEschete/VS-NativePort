@@ -1724,6 +1724,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::LiveDrawNewRecord": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
     "VS::Menu::Results::LiveDrawLeaderboard": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
     "VS::Menu::Results::LiveDrawLeaderboardEntry": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawGivingUp": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
+    "VS::Menu::Results::LiveDrawChicken": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
+    "VS::Menu::Results::LiveDrawEvolveOrDie": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
+    "VS::Menu::Results::LiveDrawFoodChain": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
+    "VS::Menu::Results::LiveDrawAverageTimeHeading": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
+    "VS::Menu::Results::LiveDrawCubePuzzleParTime": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
+    "VS::Menu::Results::LiveDrawCubePuzzleRank": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
+    "VS::Menu::Results::LiveDrawCountingCubePuzzleTime": r"Native\Game\include\Menu\Results\CubePuzzleTextLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -3160,6 +3168,14 @@ OWNED_CALL_BINDINGS["F03036"] = "VS::Menu::Results::LiveDrawCountingTimeAttackTi
 OWNED_CALL_BINDINGS["F03037"] = "VS::Menu::Results::LiveDrawNewRecord"
 OWNED_CALL_BINDINGS["F03038"] = "VS::Menu::Results::LiveDrawLeaderboard"
 OWNED_CALL_BINDINGS["F03039"] = "VS::Menu::Results::LiveDrawLeaderboardEntry"
+OWNED_CALL_BINDINGS["F03052"] = "VS::Menu::Results::LiveDrawGivingUp"
+OWNED_CALL_BINDINGS["F03053"] = "VS::Menu::Results::LiveDrawChicken"
+OWNED_CALL_BINDINGS["F03054"] = "VS::Menu::Results::LiveDrawEvolveOrDie"
+OWNED_CALL_BINDINGS["F03055"] = "VS::Menu::Results::LiveDrawFoodChain"
+OWNED_CALL_BINDINGS["F03056"] = "VS::Menu::Results::LiveDrawAverageTimeHeading"
+OWNED_CALL_BINDINGS["F03057"] = "VS::Menu::Results::LiveDrawCubePuzzleParTime"
+OWNED_CALL_BINDINGS["F03058"] = "VS::Menu::Results::LiveDrawCubePuzzleRank"
+OWNED_CALL_BINDINGS["F03059"] = "VS::Menu::Results::LiveDrawCountingCubePuzzleTime"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -5106,6 +5122,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x801059B8, "VS::Menu::Results::LiveDrawNewRecord"),  # F03037
     ("MENU/MENUF.PRG", 0x801059FC, "VS::Menu::Results::LiveDrawLeaderboard"),  # F03038
     ("MENU/MENUF.PRG", 0x80105B30, "VS::Menu::Results::LiveDrawLeaderboardEntry"),  # F03039
+    ("MENU/MENUF.PRG", 0x801084F4, "VS::Menu::Results::LiveDrawGivingUp"),  # F03052
+    ("MENU/MENUF.PRG", 0x80108564, "VS::Menu::Results::LiveDrawChicken"),  # F03053
+    ("MENU/MENUF.PRG", 0x801085D4, "VS::Menu::Results::LiveDrawEvolveOrDie"),  # F03054
+    ("MENU/MENUF.PRG", 0x80108688, "VS::Menu::Results::LiveDrawFoodChain"),  # F03055
+    ("MENU/MENUF.PRG", 0x8010873C, "VS::Menu::Results::LiveDrawAverageTimeHeading"),  # F03056
+    ("MENU/MENUF.PRG", 0x80108784, "VS::Menu::Results::LiveDrawCubePuzzleParTime"),  # F03057
+    ("MENU/MENUF.PRG", 0x8010880C, "VS::Menu::Results::LiveDrawCubePuzzleRank"),  # F03058
+    ("MENU/MENUF.PRG", 0x8010887C, "VS::Menu::Results::LiveDrawCountingCubePuzzleTime"),  # F03059
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -6341,12 +6365,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"^Menu::Results::", r"\bVS::Render::DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"VS::Render::DrawLiveTexture\1(Menu_Results_disMap, ",
      "MENUF uses its own _disMap G01780 (3B8.c:26), not the shorter ENDING table; issue #244."),
-    (r"^Menu::Results::",
-     r"&(Menu_Results_(?:foodChain|evolveOrDie)Colors)"
-     r"\[1\]",
-     r"std::span(\1).subspan(1)",
-     "The MENUF pop-ins pass the second of three colors onward; a subspan keeps the pair's extent "
-     "checked (issue #259)"),
     (r"^Actors::", r"\bField_gimmickInstances\[([A-Za-z_]\w*)\](?!\s*=(?!=))",
      r"Field_FindGimmickForActorSlot(\1)",
      "renderer slots and gimmick slots are distinct domains; reserved renderer16 "
@@ -8023,18 +8041,6 @@ REGEX_FIXES += [
         ("Menu::Results::UpdateCubePuzzleResults",
          (('var_v0', 'rank_index_bias'),),
          "F03050 src\\MENU\\MENUF.PRG\\3B8.c:2477-2561 (_renderCubePuzzleEnd). Named roles: rank index bias."),
-        ("Menu::Results::DrawGivingUp",
-         (('arg0', 'draw_y'), ('arg1', 'fade_timer')),
-         "F03052 src\\MENU\\MENUF.PRG\\3B8.c:2610-2622 (_renderGivingUp). Named roles: draw y, fade timer."),
-        ("Menu::Results::DrawChicken",
-         (('arg0', 'draw_y'), ('arg1', 'fade_timer')),
-         "F03053 src\\MENU\\MENUF.PRG\\3B8.c:2624-2638 (_renderChicken). Named roles: draw y, fade timer."),
-        ("Menu::Results::DrawCubePuzzleParTime",
-         (('new_var', 'seconds_shifted_for_packing'),),
-         "F03057 src\\MENU\\MENUF.PRG\\3B8.c:2699-2710 (_renderCubePuzzleTime). Named roles: seconds shifted for packing."),
-        ("Menu::Results::DrawCountingCubePuzzleTime",
-         (('new_var2', 'display_minutes'), ('new_var4', 'time_accumulator_address')),
-         "F03059 src\\MENU\\MENUF.PRG\\3B8.c:2732-2772 (_renderCubePuzzleIncrementalTime). Named roles: display minutes, time accumulator address. Retained: temp_a3: Merged raw puzzle seconds, full duration in centiseconds, and interpolated seconds component."),
         ("Menu::Results::ApplyHealingScoreBonus",
          (('new_var', 'score_before_healing_penalty'),),
          "F03064 src\\MENU\\MENUF.PRG\\3B8.c:2865-2876 (_addHealBonus). Named roles: score before healing penalty."),

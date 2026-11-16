@@ -128,6 +128,7 @@
 #include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
+#include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
@@ -2211,6 +2212,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x801059B8u, 0u, (void*)&VS::Menu::Results::LiveDrawNewRecord, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x801059FCu, 0u, (void*)&VS::Menu::Results::LiveDrawLeaderboard, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80105B30u, 0u, (void*)&VS::Menu::Results::LiveDrawLeaderboardEntry, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801084F4u, 0u, (void*)&VS::Menu::Results::LiveDrawGivingUp, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108564u, 0u, (void*)&VS::Menu::Results::LiveDrawChicken, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801085D4u, 0u, (void*)&VS::Menu::Results::LiveDrawEvolveOrDie, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108688u, 0u, (void*)&VS::Menu::Results::LiveDrawFoodChain, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010873Cu, 0u, (void*)&VS::Menu::Results::LiveDrawAverageTimeHeading, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108784u, 0u, (void*)&VS::Menu::Results::LiveDrawCubePuzzleParTime, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010880Cu, 0u, (void*)&VS::Menu::Results::LiveDrawCubePuzzleRank, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010887Cu, 0u, (void*)&VS::Menu::Results::LiveDrawCountingCubePuzzleTime, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},

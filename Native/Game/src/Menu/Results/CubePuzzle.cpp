@@ -5,9 +5,9 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Framework/Framework.hpp"
+#include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
 #include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -26,7 +26,6 @@ extern "C" {
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
-#include "Render/Images.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -38,15 +37,6 @@ short Menu_Results_puzzleParTime;
 
 // decomp: _puzzleRankCap (_puzzleRankCap@src/MENU/MENUF.PRG/3B8.c)
 short Menu_Results_puzzleRankCap;
-
-// decomp: local static of _renderCubePuzzleRank, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_cubePuzzleRankColors[] = { { 128, 128, 128 }, { 128, 128, 128 } };
-
-// decomp: local static of _renderEvolveOrDie, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_evolveOrDieColors[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
-
-// decomp: local static of _renderFoodchain, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_foodChainColors[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
 
 // decomp: MENUF.PRG _pulseCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:1294)
 void Menu_Results_PulseCubePuzzleClut(int blend_weight)
@@ -281,9 +271,9 @@ int Menu_Results_UpdateCubePuzzleStart(void)
         VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
     }
 
-    Menu_Results_DrawEvolveOrDie(160, 64, Menu_Results_screenTimer);
-    Menu_Results_DrawAverageTimeHeading(128, 116, Menu_Results_screenTimer - 15);
-    Menu_Results_DrawCubePuzzleParTime(192, 144, Menu_Results_screenTimer - 30);
+    VS::Menu::Results::LiveDrawEvolveOrDie(160, 64, Menu_Results_screenTimer);
+    VS::Menu::Results::LiveDrawAverageTimeHeading(128, 116, Menu_Results_screenTimer - 15);
+    VS::Menu::Results::LiveDrawCubePuzzleParTime(192, 144, Menu_Results_screenTimer - 30);
     VS::Menu::Results::LiveDrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 30, Menu_Results_screenTimer);
 
     if (Menu_Results_screenTimer < 32767) {
@@ -363,9 +353,9 @@ int Menu_Results_UpdateCubePuzzleResults(void)
             VS::Audio::LivePlaySfxCentered(0x7E, 0x7D);
         }
 
-        Menu_Results_DrawCountingCubePuzzleTime(88, 64, Menu_Results_screenTimer);
-        Menu_Results_DrawFoodChain(160, 100, Menu_Results_screenTimer - 75);
-        Menu_Results_DrawCubePuzzleRank(160, 124, Menu_Results_screenTimer - 90, rank);
+        VS::Menu::Results::LiveDrawCountingCubePuzzleTime(88, 64, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawFoodChain(160, 100, Menu_Results_screenTimer - 75);
+        VS::Menu::Results::LiveDrawCubePuzzleRank(160, 124, Menu_Results_screenTimer - 90, rank);
         VS::Menu::Results::LiveDrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 90, Menu_Results_screenTimer);
 
         if (Menu_Results_screenTimer < 32767) {
@@ -413,8 +403,8 @@ int Menu_Results_UpdateCubePuzzleQuit(void)
         VS::Audio::LivePlaySfxCentered(0x7E, 0x7A);
     }
 
-    Menu_Results_DrawGivingUp(64, Menu_Results_screenTimer);
-    Menu_Results_DrawChicken(100, Menu_Results_screenTimer - 15);
+    VS::Menu::Results::LiveDrawGivingUp(64, Menu_Results_screenTimer);
+    VS::Menu::Results::LiveDrawChicken(100, Menu_Results_screenTimer - 15);
     VS::Menu::Results::LiveDrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 15, Menu_Results_screenTimer);
 
     if (Menu_Results_screenTimer < 0x7FFF) {
@@ -437,191 +427,6 @@ int Menu_Results_UpdateCubePuzzleQuit(void)
     }
 
     return 0;
-}
-
-// decomp: MENUF.PRG _renderGivingUp (src/MENU/MENUF.PRG/3B8.c:2610)
-void Menu_Results_DrawGivingUp(int draw_y, int fade_timer)
-{
-    if (fade_timer < 0) {
-        fade_timer = 0;
-    }
-    if (fade_timer > 64) {
-        fade_timer = 64;
-    }
-    if (fade_timer > 0) {
-        VS::Menu::Results::LiveDrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0GivingUp, fade_timer);
-        VS::Menu::Results::LiveDrawFadingTexture(160, draw_y, Menu_Results_DisIndex_Esc0GivingUp + 1, fade_timer);
-    }
-}
-
-// decomp: MENUF.PRG _renderChicken (src/MENU/MENUF.PRG/3B8.c:2624)
-void Menu_Results_DrawChicken(int draw_y, int fade_timer)
-{
-    if (fade_timer < 0) {
-        fade_timer = 0;
-    }
-
-    if (fade_timer > 64) {
-        fade_timer = 64;
-    }
-
-    if (fade_timer > 0) {
-        VS::Menu::Results::LiveDrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0Chicken, fade_timer);
-        VS::Menu::Results::LiveDrawFadingTexture(0xA0, draw_y, Menu_Results_DisIndex_Esc0Chicken + 1, fade_timer);
-    }
-}
-
-// decomp: MENUF.PRG _renderEvolveOrDie (src/MENU/MENUF.PRG/3B8.c:2640)
-void Menu_Results_DrawEvolveOrDie(int x, int y, int step)
-{
-
-    if (step < 0) {
-        step = 0;
-    }
-
-    if (step > 64) {
-        step = 64;
-    }
-
-    if (step > 0) {
-        Menu_Results_evolveOrDieColors[0].cd = step;
-        Menu_Results_evolveOrDieColors[1].cd = step;
-        x -= (Menu_Results_disMap[Menu_Results_DisIndex_Iq0EvolveOrDie].w + Menu_Results_disMap[Menu_Results_DisIndex_Iq0EvolveOrDie + 1].w)
-          >> 1;
-
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Iq0EvolveOrDie, Menu_Results_evolveOrDieColors);
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Iq0EvolveOrDie].w, y,
-            Menu_Results_DisIndex_Iq0EvolveOrDie + 1, std::span(Menu_Results_evolveOrDieColors).subspan(1));
-    }
-}
-
-// decomp: MENUF.PRG _renderFoodchain (src/MENU/MENUF.PRG/3B8.c:2664)
-void Menu_Results_DrawFoodChain(int x, int y, int timer)
-{
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        Menu_Results_foodChainColors[0].cd = timer;
-        Menu_Results_foodChainColors[1].cd = timer;
-        x -= (Menu_Results_disMap[Menu_Results_DisIndex_Iq0Foodchain].w + Menu_Results_disMap[Menu_Results_DisIndex_Iq0Foodchain + 1].w) >> 1;
-
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Iq0Foodchain, Menu_Results_foodChainColors);
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Iq0Foodchain].w, y, Menu_Results_DisIndex_Iq0Foodchain + 1, std::span(Menu_Results_foodChainColors).subspan(1));
-    }
-}
-
-// decomp: MENUF.PRG _renderAverageTimeHeader (src/MENU/MENUF.PRG/3B8.c:2687)
-void Menu_Results_DrawAverageTimeHeading(int x, int y, int timer)
-{
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        VS::Menu::Results::LiveDrawFadingTexture(x - (Menu_Results_disMap[Menu_Results_DisIndex_Iq0AverageTime].w >> 1), y,
-            Menu_Results_DisIndex_Iq0AverageTime, timer);
-    }
-}
-
-// decomp: MENUF.PRG _renderCubePuzzleTime (src/MENU/MENUF.PRG/3B8.c:2699)
-void Menu_Results_DrawCubePuzzleParTime(int x, int y, int timer)
-{
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        int seconds_shifted_for_packing = (Menu_Results_puzzleParTime % 60) << 0x10;
-
-        VS::Menu::Results::LiveDrawTime(x, y, timer, ((Menu_Results_puzzleParTime / 60) << 0x10) | (seconds_shifted_for_packing >> 8), 0);
-    }
-}
-
-// decomp: MENUF.PRG _renderCubePuzzleRank (src/MENU/MENUF.PRG/3B8.c:2712)
-void Menu_Results_DrawCubePuzzleRank(int x, int y, int timer, int rank)
-{
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        Menu_Results_cubePuzzleRankColors[0].cd = timer;
-
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x - (Menu_Results_disMap[rank + Menu_Results_DisIndex_Iq1GameDesigner].w >> 1), y,
-            rank + Menu_Results_DisIndex_Iq1GameDesigner, Menu_Results_cubePuzzleRankColors);
-    }
-}
-
-// decomp: MENUF.PRG _renderCubePuzzleIncrementalTime (src/MENU/MENUF.PRG/3B8.c:2732)
-void Menu_Results_DrawCountingCubePuzzleTime(int x, int y, int timer)
-{
-    int temp_a3;
-    int time;
-    int display_minutes;
-    int* time_accumulator_address;
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer <= 0) {
-        return;
-    }
-
-    VS::Menu::Results::LiveDrawFadingTexture(x, y, 72, timer);
-
-    x += Menu_Results_disMap[72].w;
-
-    if (timer >= 16) {
-        temp_a3 = Audio_Seq_unusedStateFlags.puzzleTimerSeconds;
-        display_minutes = Audio_Seq_unusedStateFlags.puzzleTimerMins;
-        temp_a3 = ((display_minutes * 6000) + (temp_a3 * 100))
-                + Audio_Seq_unusedStateFlags.puzzleTimerHundredths;
-        time = temp_a3;
-        time = ((*(time_accumulator_address = &time)) * (timer - 16)) / 48;
-        display_minutes = time / 6000;
-        time = time % 6000;
-        temp_a3 = time / 100;
-        time = time % 100;
-        time = (display_minutes << 0x10) | (temp_a3 << 8) | time;
-    } else {
-        time = 0;
-    }
-
-    VS::Menu::Results::LiveDrawTime(x, y + 2, timer, time, 0);
-}
-
-// MENUF.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Results_CubePuzzle_ResetMenufStatics(void)
-{
-    {
-        static const CVECTOR initial[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
-        memcpy((void*)&Menu_Results_evolveOrDieColors, &initial, sizeof Menu_Results_evolveOrDieColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
-        memcpy((void*)&Menu_Results_foodChainColors, &initial, sizeof Menu_Results_foodChainColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 128, 128, 128 }, { 128, 128, 128 } };
-        memcpy((void*)&Menu_Results_cubePuzzleRankColors, &initial, sizeof Menu_Results_cubePuzzleRankColors);
-    }
 }
 
 }  // extern "C"

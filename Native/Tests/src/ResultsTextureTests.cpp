@@ -9,12 +9,12 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Legacy/Psx.h"
+#include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 
 extern "C" {
 #include "Ending/Results.h"
-#include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
@@ -97,8 +97,8 @@ TEST_CASE("Cube results draw both food-chain pieces and every rank from MENUF",
   const int fade = GENERATE(1, 7, 8, 9, 10, 11, 12, 13, 14, 64);
   const int rank = GENERATE(Catch::Generators::range(0, 16));
   ResultsTextureFixture fixture;
-  Menu_Results_DrawFoodChain(160, 80, fade);
-  Menu_Results_DrawCubePuzzleRank(160, 120, fade, rank);
+  VS::Menu::Results::LiveDrawFoodChain(160, 80, fade);
+  VS::Menu::Results::LiveDrawCubePuzzleRank(160, 120, fade, rank);
   fixture.CheckCount(3);
 
   const auto* packets = fixture.Packets();
@@ -122,8 +122,8 @@ TEST_CASE("Hidden cube results emit no textures",
   const int fade = GENERATE(-1, 0);
   ResultsTextureFixture fixture;
   const auto original_ordering = fixture.ordering;
-  Menu_Results_DrawFoodChain(160, 80, fade);
-  Menu_Results_DrawCubePuzzleRank(160, 120, fade, 0);
+  VS::Menu::Results::LiveDrawFoodChain(160, 80, fade);
+  VS::Menu::Results::LiveDrawCubePuzzleRank(160, 120, fade, 0);
   fixture.CheckCount(0);
   CHECK(fixture.ordering == original_ordering);
 }

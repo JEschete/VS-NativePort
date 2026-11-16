@@ -19,14 +19,5 @@ int Menu_Results_InitializeCubePuzzleQuit(void);
 int Menu_Results_UpdateCubePuzzleStart(void);
 int Menu_Results_UpdateCubePuzzleResults(void);
 int Menu_Results_UpdateCubePuzzleQuit(void);
-void Menu_Results_DrawGivingUp(int draw_y, int fade_timer);
-void Menu_Results_DrawChicken(int draw_y, int fade_timer);
-void Menu_Results_DrawEvolveOrDie(int x, int y, int step);
-void Menu_Results_DrawFoodChain(int x, int y, int timer);
-void Menu_Results_DrawAverageTimeHeading(int x, int y, int timer);
-void Menu_Results_DrawCubePuzzleParTime(int x, int y, int timer);
-void Menu_Results_DrawCubePuzzleRank(int x, int y, int timer, int rank);
-void Menu_Results_DrawCountingCubePuzzleTime(int x, int y, int timer);
-void Menu_Results_CubePuzzle_ResetMenufStatics(void);
 
 #endif // VS_MENU_RESULTS_CUBEPUZZLE_H_DECLS

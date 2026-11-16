@@ -15,7 +15,6 @@ extern "C" {
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
-#include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Menu/Score/Encyclopedia.h"
@@ -91,7 +90,6 @@ void Boot_ResetMenueStatics(void)
 // Call where the original loads MENUF.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenufStatics(void)
 {
-    Menu_Results_CubePuzzle_ResetMenufStatics();
     Menu_Results_ResetMenufStatics();
     Menu_Results_TimeAttack_ResetMenufStatics();
 }

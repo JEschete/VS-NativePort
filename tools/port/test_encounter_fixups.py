@@ -429,25 +429,6 @@ class EncounterFixupTests(unittest.TestCase):
             source = source.replace(old, new)
         self.assertTrue(source.endswith("    }\n    return arg0;\n}"))
 
-    def test_texture_pop_ins_pass_bounded_color_pairs(self):
-        copier = object.__new__(copy_to_native.Copier)
-        copier.used_fixups = set()
-        for namespace, colors in (
-            ("Menu::Results::", "Menu_Results_foodChainColors"),
-            ("Menu::Results::", "Menu_Results_evolveOrDieColors"),
-        ):
-            with self.subTest(colors=colors):
-                row = {"id": "test", "final_name": namespace + "DrawHeading"}
-                self.assertEqual(
-                    copier.apply_fixups(row, f"Draw(x, &{colors}[1]);"),
-                    f"Draw(x, std::span({colors}).subspan(1));",
-                )
-        row = {"id": "test", "final_name": "Menu::Results::DrawStart"}
-        self.assertEqual(
-            copier.apply_fixups(row, "Tint(&Menu_Results_timeAttackStartColors[1]);"),
-            "Tint(&Menu_Results_timeAttackStartColors[1]);",
-        )
-
     def test_status_packet_links_accept_root_and_worktree_forms(self):
         copier = object.__new__(copy_to_native.Copier)
         cases = (
