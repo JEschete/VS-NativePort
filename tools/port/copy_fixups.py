@@ -1710,6 +1710,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::LiveDrawCountingMapCompletion": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
     "VS::Menu::Results::LiveDrawRiskbreakerRankHeading": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
     "VS::Menu::Results::LiveDrawRiskbreakerRank": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
+    "VS::Menu::Results::LiveDrawTimeAttackHeading": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
+    "VS::Menu::Results::LiveDrawCourseNumber": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
+    "VS::Menu::Results::LiveDrawBossName": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
+    "VS::Menu::Results::LiveDrawBestTime": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
+    "VS::Menu::Results::LiveDrawStartCountdown": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
+    "VS::Menu::Results::LivePulseTimeAttackClut": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -3132,6 +3138,12 @@ OWNED_CALL_BINDINGS["F03028"] = "VS::Menu::Results::LiveDrawMapCompletion"
 OWNED_CALL_BINDINGS["F03029"] = "VS::Menu::Results::LiveDrawCountingMapCompletion"
 OWNED_CALL_BINDINGS["F03030"] = "VS::Menu::Results::LiveDrawRiskbreakerRankHeading"
 OWNED_CALL_BINDINGS["F03031"] = "VS::Menu::Results::LiveDrawRiskbreakerRank"
+OWNED_CALL_BINDINGS["F03018"] = "VS::Menu::Results::LiveDrawTimeAttackHeading"
+OWNED_CALL_BINDINGS["F03019"] = "VS::Menu::Results::LiveDrawCourseNumber"
+OWNED_CALL_BINDINGS["F03020"] = "VS::Menu::Results::LiveDrawBossName"
+OWNED_CALL_BINDINGS["F03021"] = "VS::Menu::Results::LiveDrawBestTime"
+OWNED_CALL_BINDINGS["F03022"] = "VS::Menu::Results::LiveDrawStartCountdown"
+OWNED_CALL_BINDINGS["F03023"] = "VS::Menu::Results::LivePulseTimeAttackClut"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -5064,6 +5076,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x8010516C, "VS::Menu::Results::LiveDrawCountingMapCompletion"),  # F03029
     ("MENU/MENUF.PRG", 0x801053B0, "VS::Menu::Results::LiveDrawRiskbreakerRankHeading"),  # F03030
     ("MENU/MENUF.PRG", 0x8010540C, "VS::Menu::Results::LiveDrawRiskbreakerRank"),  # F03031
+    ("MENU/MENUF.PRG", 0x8010459C, "VS::Menu::Results::LiveDrawTimeAttackHeading"),  # F03018
+    ("MENU/MENUF.PRG", 0x80104650, "VS::Menu::Results::LiveDrawCourseNumber"),  # F03019
+    ("MENU/MENUF.PRG", 0x801046F8, "VS::Menu::Results::LiveDrawBossName"),  # F03020
+    ("MENU/MENUF.PRG", 0x801047D4, "VS::Menu::Results::LiveDrawBestTime"),  # F03021
+    ("MENU/MENUF.PRG", 0x8010489C, "VS::Menu::Results::LiveDrawStartCountdown"),  # F03022
+    ("MENU/MENUF.PRG", 0x80104914, "VS::Menu::Results::LivePulseTimeAttackClut"),  # F03023
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -6300,7 +6318,7 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Render::DrawLiveTexture\1(Menu_Results_disMap, ",
      "MENUF uses its own _disMap G01780 (3B8.c:26), not the shorter ENDING table; issue #244."),
     (r"^Menu::Results::",
-     r"&(Menu_Results_(?:foodChain|evolveOrDie|congratulations|timeAttackHeading)Colors)"
+     r"&(Menu_Results_(?:foodChain|evolveOrDie)Colors)"
      r"\[1\]",
      r"std::span(\1).subspan(1)",
      "The MENUF pop-ins pass the second of three colors onward; a subspan keeps the pair's extent "
@@ -7972,18 +7990,6 @@ REGEX_FIXES += [
         ("Menu::Results::UpdateTimeAttackStart",
          (('temp_v1_2', 'countdown_interval'),),
          "F03017 src\\MENU\\MENUF.PRG\\3B8.c:1014-1144 (_renderTimeAttackStart). Named roles: countdown interval."),
-        ("Menu::Results::DrawCourseNumber",
-         (('new_var', 'course_number_base_x'),),
-         "F03019 src\\MENU\\MENUF.PRG\\3B8.c:1175-1193 (_renderCourse). Named roles: course number base x."),
-        ("Menu::Results::DrawBestTime",
-         (('new_var', 'best_time_base_x'),),
-         "F03021 src\\MENU\\MENUF.PRG\\3B8.c:1226-1246 (_renderBestTimeHeader). Named roles: best time base x."),
-        ("Menu::Results::DrawStartCountdown",
-         (('temp_a2', 'countdown_texture_id'),),
-         "F03022 src\\MENU\\MENUF.PRG\\3B8.c:1248-1254 (_renderStartCountdown). Named roles: countdown texture id."),
-        ("Menu::Results::PulseTimeAttackClut",
-         (('arg0', 'blend_weight'), ('new_var3', 'packed_blue'), ('new_var4', 'packed_red_green'), ('var_a1', 'weighted_red')),
-         "F03023 src\\MENU\\MENUF.PRG\\3B8.c:1256-1292 (_pulseTimeAttackEnd). Named roles: blend weight, packed blue, packed red green, weighted red."),
         ("Menu::Results::PulseCubePuzzleClut",
          (('arg0', 'blend_weight'), ('new_var3', 'packed_blue'), ('new_var4', 'packed_red_green'), ('var_a1', 'weighted_red'), ('var_a2', 'weighted_green')),
          "F03024 src\\MENU\\MENUF.PRG\\3B8.c:1294-1330 (_pulseCubePuzzleEnd). Named roles: blend weight, packed blue, packed red green, weighted red, weighted green."),

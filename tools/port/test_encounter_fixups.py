@@ -434,7 +434,7 @@ class EncounterFixupTests(unittest.TestCase):
         copier.used_fixups = set()
         for namespace, colors in (
             ("Menu::Results::", "Menu_Results_foodChainColors"),
-            ("Menu::Results::", "Menu_Results_timeAttackHeadingColors"),
+            ("Menu::Results::", "Menu_Results_evolveOrDieColors"),
         ):
             with self.subTest(colors=colors):
                 row = {"id": "test", "final_name": namespace + "DrawHeading"}

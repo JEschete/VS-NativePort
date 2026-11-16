@@ -2850,6 +2850,12 @@
     <ClInclude Include="src\Menu\Results\TimeAttack.h">
       <Filter>src\Menu\Results</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Results\TimeAttackHeading.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Results\TimeAttackHeadingLive.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\Encyclopedia.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
@@ -4486,6 +4492,12 @@
       <Filter>include\Menu\Results</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp">
+      <Filter>include\Menu\Results</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\TimeAttackHeading.hpp">
+      <Filter>include\Menu\Results</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\TimeAttackHeadingLive.hpp">
       <Filter>include\Menu\Results</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp">

@@ -442,6 +442,7 @@
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />
     <ClCompile Include="src\TexturePagesTests.cpp" />
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
+    <ClCompile Include="src\TimeAttackHeadingTests.cpp" />
     <ClCompile Include="src\TimelineCommandsTests.cpp" />
     <ClCompile Include="src\TimelinePlaybackTests.cpp" />
     <ClCompile Include="src\TimelineTracksTests.cpp" />

@@ -2015,6 +2015,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\TimeAttackHeading.cpp" />
+    <ClCompile Include="src\Menu\Results\TimeAttackHeadingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\Encyclopedia.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2974,6 +2978,8 @@
     <ClInclude Include="include\Menu\Results\ResultsRankLive.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsStats.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp" />
+    <ClInclude Include="include\Menu\Results\TimeAttackHeading.hpp" />
+    <ClInclude Include="include\Menu\Results\TimeAttackHeadingLive.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRows.hpp" />

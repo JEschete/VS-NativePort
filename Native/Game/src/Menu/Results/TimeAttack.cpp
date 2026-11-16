@@ -6,6 +6,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
+#include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -42,9 +43,6 @@ int Menu_Results_screenTimer;
 
 // decomp: _timeTrialTime (_timeTrialTime@src/MENU/MENUF.PRG/3B8.c)
 int Menu_Results_timeTrialTime;
-
-// decomp: local static of _renderTimeAttackHeader, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_timeAttackHeadingColors[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
 
 // decomp: local static of _renderTimeAttackRatingWipe, at file scope so the module reset reaches it
 static CVECTOR Menu_Results_timeAttackRatingWipeColors[] = { { 128, 128, 128 }, { 128, 128, 128 } };
@@ -250,7 +248,7 @@ int Menu_Results_UpdateTimeAttackResults(void)
 {
     int palette_pulse_sine = VS::Core::Math::Sine(Menu_Results_elementAnimationState);
 
-    Menu_Results_PulseTimeAttackClut(ABS(palette_pulse_sine) / 256);
+    VS::Menu::Results::LivePulseTimeAttackClut(ABS(palette_pulse_sine) / 256);
 
     Menu_Results_elementAnimationState = (Menu_Results_elementAnimationState + 64) & 0xFFF;
 
@@ -366,10 +364,10 @@ int Menu_Results_UpdateTimeAttackStart(void)
             VS::Audio::LivePlaySfxCentered(0x7E, 0x7C);
         }
 
-        Menu_Results_DrawTimeAttackHeading(160, 48, Menu_Results_screenTimer);
-        Menu_Results_DrawCourseNumber(160, 92, Menu_Results_screenTimer - 15);
-        Menu_Results_DrawBossName(160, 120, Menu_Results_screenTimer - 30);
-        Menu_Results_DrawBestTime(160, 156, Menu_Results_screenTimer - 45);
+        VS::Menu::Results::LiveDrawTimeAttackHeading(160, 48, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawCourseNumber(160, 92, Menu_Results_screenTimer - 15);
+        VS::Menu::Results::LiveDrawBossName(160, 120, Menu_Results_screenTimer - 30);
+        VS::Menu::Results::LiveDrawBestTime(160, 156, Menu_Results_screenTimer - 45);
 
         ++Menu_Results_screenTimer;
 
@@ -383,10 +381,10 @@ int Menu_Results_UpdateTimeAttackStart(void)
     } else if (Menu_Results_screenState == 1) {
         --Menu_Results_screenTimer;
 
-        Menu_Results_DrawTimeAttackHeading(160, 48, Menu_Results_screenTimer);
-        Menu_Results_DrawCourseNumber(160, 92, Menu_Results_screenTimer);
-        Menu_Results_DrawBossName(160, 120, Menu_Results_screenTimer);
-        Menu_Results_DrawBestTime(160, 156, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawTimeAttackHeading(160, 48, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawCourseNumber(160, 92, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawBossName(160, 120, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawBestTime(160, 156, Menu_Results_screenTimer);
 
         if ((Input_buttonsPressed.allButtons & PADRright) || (Menu_Results_screenTimer == 0)) {
             Menu_Results_screenState = 2;
@@ -449,7 +447,7 @@ int Menu_Results_UpdateTimeAttackStart(void)
                 x = 45;
             }
 
-            Menu_Results_DrawStartCountdown(160, 120, x);
+            VS::Menu::Results::LiveDrawStartCountdown(160, 120, x);
 
         } else {
             x = Menu_Results_screenTimer % 15;
@@ -460,7 +458,7 @@ int Menu_Results_UpdateTimeAttackStart(void)
 
             x = Menu_Results_timeAttackStartCountdownOffsets[x];
 
-            Menu_Results_DrawStartCountdown(x + 160, 120, Menu_Results_screenTimer);
+            VS::Menu::Results::LiveDrawStartCountdown(x + 160, 120, Menu_Results_screenTimer);
         }
 
         ++Menu_Results_screenTimer;
@@ -479,154 +477,6 @@ int Menu_Results_UpdateTimeAttackStart(void)
     }
 
     return 0;
-}
-
-// decomp: MENUF.PRG _renderTimeAttackHeader (src/MENU/MENUF.PRG/3B8.c:1146)
-void Menu_Results_DrawTimeAttackHeading(int x, int y, int timer)
-{
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 0x40) {
-        timer = 0x40;
-    }
-
-    if (timer > 0) {
-
-        Menu_Results_timeAttackHeadingColors[0].cd = timer;
-        Menu_Results_timeAttackHeadingColors[1].cd = timer;
-        x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack].w
-                 + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack + 1].w)
-          >> 1;
-
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x, y, 100, Menu_Results_timeAttackHeadingColors);
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack].w, y,
-            Menu_Results_DisIndex_Attack0TimeAttack + 1, std::span(Menu_Results_timeAttackHeadingColors).subspan(1));
-    }
-}
-
-// decomp: MENUF.PRG _renderCourse (src/MENU/MENUF.PRG/3B8.c:1175)
-void Menu_Results_DrawCourseNumber(int x, int y, int timer)
-{
-    int course_number_base_x;
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0Course].w + 24) >> 1;
-
-        VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0Course, timer);
-
-        course_number_base_x = x + 12;
-
-        VS::Menu::Results::LiveDrawFadingTextureClut(course_number_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0Course].w, y - 1,
-            Audio_Seq_unusedStateFlags.timeAttackBoss + 1, timer, 0x7FF4);
-    }
-}
-
-// decomp: MENUF.PRG _renderBossName (src/MENU/MENUF.PRG/3B8.c:1195)
-void Menu_Results_DrawBossName(int x, int y, int timer)
-{
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        if (Audio_Seq_unusedStateFlags.timeAttackBoss != 6) {
-
-            VS::Menu::Results::LiveDrawFadingTexture(x
-                                     - (Menu_Results_disMap[Audio_Seq_unusedStateFlags.timeAttackBoss
-                                                + Menu_Results_DisIndex_Attack0Minotaur]
-                                             .w
-                                         >> 1),
-                y, Audio_Seq_unusedStateFlags.timeAttackBoss + Menu_Results_DisIndex_Attack0Minotaur, timer);
-
-        } else {
-            x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0Death].w + Menu_Results_disMap[Menu_Results_DisIndex_Attack0OgreZombie].w)
-              >> 1;
-
-            VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0Death, timer);
-
-            x += Menu_Results_disMap[Menu_Results_DisIndex_Attack0Death].w;
-
-            VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0OgreZombie, timer);
-        }
-    }
-}
-
-// decomp: MENUF.PRG _renderBestTimeHeader (src/MENU/MENUF.PRG/3B8.c:1226)
-void Menu_Results_DrawBestTime(int x, int y, int timer)
-{
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        int best_time_base_x;
-        x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w + 96) >> 1;
-
-        VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0BestTime, timer);
-
-        x++;
-        best_time_base_x = x + 11;
-
-        VS::Menu::Results::LiveDrawTime(best_time_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w, y + 2, timer,
-            Audio_Seq_unusedScoredata.bossTimeTrialScores[Audio_Seq_unusedStateFlags.timeAttackBoss][0]
-                .time,
-            0);
-    }
-}
-
-// decomp: MENUF.PRG _renderStartCountdown (src/MENU/MENUF.PRG/3B8.c:1248)
-void Menu_Results_DrawStartCountdown(int x, int y, int timer)
-{
-    int countdown_texture_id = (timer / 15) + Menu_Results_DisIndex_Attack0Three;
-
-    VS::Menu::Results::LiveDrawFadingTexture(
-        x - (Menu_Results_disMap[countdown_texture_id].w / 2), y - (Menu_Results_disMap[countdown_texture_id].h / 2), countdown_texture_id, timer % 15);
-}
-
-// decomp: MENUF.PRG _pulseTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:1256)
-void Menu_Results_PulseTimeAttackClut(int blend_weight)
-{
-    RECT rect;
-    int weighted_red;
-    int r;
-    int g;
-    int b;
-    int i;
-    int packed_blue;
-    int packed_red_green;
-
-    for (i = 0; i < 32; ++i) {
-
-        b = Menu_Results_clutBuf[128 + i];
-
-        weighted_red = ((Menu_Results_clutBuf[32 + i] & 0x1F) * blend_weight)
-               + ((Menu_Results_clutBuf[96 + i] & 0x1F) * (16 - blend_weight));
-
-        r = (weighted_red / 16) & 0x1F;
-
-        g = ((Menu_Results_clutBuf[32 + i] & 0x3E0) * blend_weight)
-          + ((Menu_Results_clutBuf[96 + i] & 0x3E0) * (16 - blend_weight));
-
-        packed_red_green = r | ((g / 16) & 0x3E0);
-
-        b = ((Menu_Results_clutBuf[32 + i] & 0x7C00) * blend_weight)
-          + ((Menu_Results_clutBuf[96 + i] & 0x7C00) * (16 - blend_weight));
-
-        packed_blue = (b / 16) & 0x7C00;
-
-        Menu_Results_clutBuf[128 + i] = (packed_red_green | packed_blue) | (Menu_Results_clutBuf[32 + i] & 0x8000);
-    }
-
-    setRECT(&rect, 768, 511, 160, 1);
-
-    LoadImage(&rect, (u_long*)Menu_Results_clutBuf);
 }
 
 // decomp: MENUF.PRG _renderTimeAttackResultsHeader (src/MENU/MENUF.PRG/3B8.c:1654)
@@ -864,10 +714,6 @@ void Menu_Results_TimeAttack_ResetMenufStatics(void)
     {
         static const CVECTOR initial[] = { { 220, 80, 64 }, { 64, 128, 220 }, { 128, 128, 128 } };
         memcpy((void*)&Menu_Results_timeAttackStartColors, &initial, sizeof Menu_Results_timeAttackStartColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
-        memcpy((void*)&Menu_Results_timeAttackHeadingColors, &initial, sizeof Menu_Results_timeAttackHeadingColors);
     }
     {
         static const CVECTOR initial[] = { { 128, 128, 128 }, { 128, 128, 128 } };

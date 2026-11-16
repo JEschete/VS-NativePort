@@ -132,6 +132,7 @@
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
+#include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
@@ -2195,6 +2196,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x8010516Cu, 0u, (void*)&VS::Menu::Results::LiveDrawCountingMapCompletion, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x801053B0u, 0u, (void*)&VS::Menu::Results::LiveDrawRiskbreakerRankHeading, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x8010540Cu, 0u, (void*)&VS::Menu::Results::LiveDrawRiskbreakerRank, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010459Cu, 0u, (void*)&VS::Menu::Results::LiveDrawTimeAttackHeading, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80104650u, 0u, (void*)&VS::Menu::Results::LiveDrawCourseNumber, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801046F8u, 0u, (void*)&VS::Menu::Results::LiveDrawBossName, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801047D4u, 0u, (void*)&VS::Menu::Results::LiveDrawBestTime, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010489Cu, 0u, (void*)&VS::Menu::Results::LiveDrawStartCountdown, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80104914u, 0u, (void*)&VS::Menu::Results::LivePulseTimeAttackClut, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},

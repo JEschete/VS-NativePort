@@ -9,6 +9,7 @@ ResultsDrawTarget that models the PS1 primitive cursor and ordering entry.
 from __future__ import annotations
 
 import random
+import struct
 
 from differential import (
     DEFAULT_STACK,
@@ -161,6 +162,37 @@ def bounce(rng: random.Random, number: int) -> int:
 def atlas_entry(rng: random.Random) -> list[int]:
     return [rng.getrandbits(8), rng.getrandbits(8), rng.getrandbits(8), rng.getrandbits(8),
             rng.getrandbits(16), rng.getrandbits(16)]
+
+
+def place_atlas(machine: Machine, atlas: list[list[int]] | None) -> list[list[int]]:
+    """Writes a vector's _disMap entries (u, v, w, h, page, palette), or reads the module's own."""
+    if atlas is None:
+        return [list(struct.unpack("<4B2H", machine.bytes(ATLAS + 8 * index, 8))) for index in range(ATLAS_ENTRIES)]
+    for index, fields in enumerate(atlas):
+        machine.store(ATLAS + 8 * index, struct.pack("<4B2H", *fields))
+    return atlas
+
+
+def edit_mutants(edits: dict[str, tuple[int, int, int]]) -> dict:
+    """Mutants from {name: (address, original word, mutated word)}; the words stay static so --list reads no disc."""
+    return {name: {address: edit} for name, (address, _original, edit) in edits.items()}
+
+
+def verify_edits(edits: dict[str, tuple[int, int, int]], image) -> None:
+    for name, (address, original, _edit) in edits.items():
+        found = image.read(address)
+        if found != original:
+            raise SystemExit(f"{name}: {address:#x} holds {found:#010x}, expected {original:#010x}")
+
+
+def call_difference(calls: list[list[int]], original_calls: list[list[int]]) -> list[str]:
+    """The first differing recorded call, or nothing when both sequences match."""
+    if calls == original_calls:
+        return []
+    first = next((i for i, (a, b) in enumerate(zip(calls, original_calls, strict=False)) if a != b),
+                 min(len(calls), len(original_calls)))
+    return [f"calls differ from {first} ({len(calls)} native, {len(original_calls)} original): "
+            f"native {calls[first:first + 1]} original {original_calls[first:first + 1]}"]
 
 
 def vector_for(identifier: str, rng: random.Random, number: int) -> dict:

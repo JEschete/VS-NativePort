@@ -11,7 +11,6 @@ values and counters through Menu::Results and a recording GameClearDrawHost.
 from __future__ import annotations
 
 import random
-import struct
 
 from differential import (
     DEFAULT_STACK,
@@ -22,7 +21,15 @@ from differential import (
     s32,
     store_problems,
 )
-from differentials.results_drawing_common import atlas_entry, c_string, coordinate
+from differentials.results_drawing_common import (
+    atlas_entry,
+    c_string,
+    call_difference,
+    coordinate,
+    edit_mutants,
+    place_atlas,
+    verify_edits,
+)
 
 MODULE = "MENU/MENUF.PRG"
 MODULE_BASES[MODULE] = 0x80102800
@@ -124,14 +131,11 @@ EDITS = {
 
 
 def mutants(identifier: str) -> dict:
-    return {name: {address: edit} for name, (address, _original, edit) in EDITS[identifier].items()}
+    return edit_mutants(EDITS[identifier])
 
 
 def verify_original_words(identifier: str, image) -> None:
-    for name, (address, original, _edit) in EDITS[identifier].items():
-        found = image.read(address)
-        if found != original:
-            raise SystemExit(f"{name}: {address:#x} holds {found:#010x}, expected {original:#010x}")
+    verify_edits(EDITS[identifier], image)
 
 
 # ---------------------------------------------------------------------------------------------- vectors
@@ -231,14 +235,6 @@ def sprintf(machine: Machine) -> None:
     machine.r[2] = len(text)
 
 
-def place_atlas(machine: Machine, atlas: list[list[int]] | None) -> list[list[int]]:
-    """Writes a vector's _disMap entries (u, v, w, h, page, palette), or reads the module's own."""
-    if atlas is None:
-        return [list(struct.unpack("<4B2H", machine.bytes(ATLAS + 8 * index, 8))) for index in range(ATLAS_ENTRIES)]
-    for index, fields in enumerate(atlas):
-        machine.store(ATLAS + 8 * index, struct.pack("<4B2H", *fields))
-    return atlas
-
 
 def run_original(machine: Machine, value: dict) -> tuple[dict, list[int]]:
     operation = value["operation"]
@@ -330,11 +326,8 @@ def check_original(_image, value: dict, observation: dict, native: list[int], _r
         expected_status = 0 if any(call[0] in DRAWS for call in original_calls) else 1
         if status != expected_status:
             problems.append(f"status native {status} original {expected_status}")
-    if calls != original_calls:
-        first = next((i for i, (a, b) in enumerate(zip(calls, original_calls, strict=False)) if a != b),
-                     min(len(calls), len(original_calls)))
-        problems.append(f"calls differ from {first} ({len(calls)} native, {len(original_calls)} original): "
-                        f"native {calls[first:first + 1]} original {original_calls[first:first + 1]}")
+    problems += call_difference(calls, original_calls)
+
     allowed = [(DEFAULT_STACK - DEFAULT_STACK_SIZE, DEFAULT_STACK), COLORS, (SHOWN_MAP, SHOWN_SCORE + 4),
                (COUNTING_SCORE, COUNTING_MAP + 4)]
     return problems + store_problems(observation["stores"], allowed)
