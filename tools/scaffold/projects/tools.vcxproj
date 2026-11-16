@@ -719,6 +719,14 @@
     <None Include="..\..\port\differentials\gameclear_score_f03029.py" />
     <None Include="..\..\port\differentials\gameclear_score_f03030.py" />
     <None Include="..\..\port\differentials\gameclear_score_f03031.py" />
+    <None Include="..\..\port\differentials\gazette_rows_common.py" />
+    <None Include="..\..\port\differentials\gazette_rows_driver.cpp" />
+    <None Include="..\..\port\differentials\gazette_rows_f02799.py" />
+    <None Include="..\..\port\differentials\gazette_rows_f02800.py" />
+    <None Include="..\..\port\differentials\gazette_rows_f02801.py" />
+    <None Include="..\..\port\differentials\gazette_rows_f02806.py" />
+    <None Include="..\..\port\differentials\gazette_rows_f04154.py" />
+    <None Include="..\..\port\differentials\gazette_rows_f04155.py" />
     <None Include="..\..\port\differentials\gte_projection.py" />
     <None Include="..\..\port\differentials\gte_projection_driver.cpp" />
     <None Include="..\..\port\differentials\height_filter.py" />

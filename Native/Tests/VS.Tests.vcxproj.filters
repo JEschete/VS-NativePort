@@ -609,6 +609,9 @@
     <ClCompile Include="src\GameplayLoopTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GazetteRowsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GimImagesTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

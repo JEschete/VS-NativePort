@@ -4442,17 +4442,6 @@ AddPrim(*((void**)Core_ScratchAddr(1)) + 0x1C, line++);
         self.assertIn("Render_frameScratch.primitiveCursor = poly;", source)
         self.assertNotIn("Core_ScratchAddr", source)
 
-    def test_score_scroll_links_keep_the_original_byte_displacement(self):
-        source = """before = Render_frameScratch.overlayOrderingTable + 8;
-*before = ((u_long)prim << 8) >> 8;
-"""
-        for old, new, _ in copy_fixups.FIXES["F02799"]:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertIn("*before = LegacyGpu_Handle(prim);", source)
-        self.assertIn("Render_frameScratch.overlayOrderingTable + 8;", source)
-        self.assertNotIn("((u_long)prim", source)
-
     def test_score_number_buffers_include_all_digits_and_terminators(self):
         cases = (
             (

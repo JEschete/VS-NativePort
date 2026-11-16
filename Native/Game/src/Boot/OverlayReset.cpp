@@ -2,6 +2,7 @@
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Menu/Results/TimeAttack.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
-#include "Menu/Score/ScoreScreen.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
 
@@ -62,7 +62,7 @@ void Boot_ResetMenu9Statics(void)
 {
     Menu_Score_Encyclopedia_ResetMenu9Statics();
     Menu_Score_Records_ResetMenu9Statics();
-    Menu_Score_ScoreScreen_ResetMenu9Statics();
+    VS::Menu::Score::ResetGazetteRowsLive();
 }
 
 // Call where the original loads MENUB.PRG: restores the statics its reload re-read from the disc.

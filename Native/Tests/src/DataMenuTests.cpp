@@ -12,6 +12,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
 
 extern "C" {
 #include "Core/Random.h"
@@ -289,7 +290,7 @@ TEST_CASE("Score scroll fades keep every packet in its native ordering chain",
   row.state = GENERATE(0, 1);
   row.isScrollable = GENERATE(1, 2);
   row.gradientState = GENERATE(0, 8);
-  Menu_Score_RenderScrollableRow(&row);
+  VS::Menu::Score::RenderLiveScrollableRow(&row);
   const auto begin = reinterpret_cast<uintptr_t>(fixture.storage.data() + 1);
   const auto end =
       reinterpret_cast<uintptr_t>(Render_frameScratch.primitiveCursor);

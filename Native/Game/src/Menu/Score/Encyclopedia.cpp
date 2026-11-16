@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
@@ -16,6 +17,7 @@ extern "C" {
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
+#include "Menu/Status/ActorStatus.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
@@ -373,7 +375,7 @@ void Menu_Score_RenderEnemyList(int animState)
             x - 14, y, cursorMem->encyclopaediaPage + i + 1, menuItem->isScrollable & 1);
 
         if ((menuItem->isScrollable != 0) && (animState == 8)) {
-            Menu_Score_RenderScrollableRow(menuItem);
+            VS::Menu::Score::RenderLiveScrollableRow(menuItem);
         } else {
             VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }

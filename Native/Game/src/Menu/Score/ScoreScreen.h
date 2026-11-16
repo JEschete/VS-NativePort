@@ -8,19 +8,6 @@ typedef struct Menu_Score_EnemyEntry Menu_Score_EnemyEntry;
 typedef struct Menu_Score_Row Menu_Score_Row;
 typedef struct Menu_Score_ZudHeader Menu_Score_ZudHeader;
 
-// decomp: src/include/gpu.h:95
-#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
-
-// decomp: src/include/gpu.h:97
-#define vs_getWH(w, h) vs_getXY((w), (h))
-
-// decomp: src/include/gpu.h:99
-#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
-    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
-
-// decomp: src/include/gpu.h:109
-#define vs_getUV0Clut(u, v, x, y) (((u) | ((v) << 8)) | (getClut((x), (y)) << 16))
-
 // decomp: _gazetteRow (src/MENU/MENU9.PRG/238.c:363)
 typedef struct Menu_Score_Row {
     char selected;
@@ -89,7 +76,6 @@ _Static_assert(sizeof(Menu_Score_CursorMemory) == 0x8, "Menu_Score_CursorMemory 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_SCORESCREEN_H_DECLS)
 #define VS_MENU_SCORE_SCORESCREEN_H_DECLS
 #include "DiscQueue.h"
-#include "Menu/Framework/Framework.h"
 
 extern int Menu_Score_layoutPadding1;;
 extern int Menu_Score_layoutPadding2[2];;
@@ -120,21 +106,14 @@ extern int Menu_Score_rotationColor;;
 extern short Menu_Score_selectedEnemy;;
 extern char Menu_Score_unusedYesString[] __attribute__((unused));
 extern int Menu_Score_zoomColor;;
-void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem);
-void Menu_Score_RestoreTopMenuCursor(int rowCount, int absoluteRow, char* text[]);
-int Menu_Score_GetSelectedTopMenuRow(void);
-void Menu_Score_ClearMenuExceptRow8(void);
-void Menu_Score_PollMenuReady(void);
 int Menu_Score_UpdateScreen(u_char* state);
 int Menu_Score_Update(void);
 void Menu_Score_RestoreCamera(void);
-int Menu_Score_UpdateTopMenu(int initialize);
 void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix);
 void Menu_Score_DrawEnemyBanner(int x, int y, int w, int h, int color);
 void Menu_Score_DrawGradientPanel(int x, int y, int w, int h, int color);
 void Menu_Score_DrawFooterBackground(int x);
 void Menu_Score_RenderOverview(int animStep);
 void Menu_Score_DrawViewerEdgeFade(void);
-void Menu_Score_ScoreScreen_ResetMenu9Statics(void);
 
 #endif // VS_MENU_SCORE_SCORESCREEN_H_DECLS

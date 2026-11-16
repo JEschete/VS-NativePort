@@ -9,12 +9,11 @@
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -28,21 +27,16 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/TextBoxes.h"
 #include "Content/DiscLayout.h"
-#include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Loot/LootScreen.h"
 #include "Menu/Manual.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Display.h"
-#include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -112,9 +106,6 @@ Menu_Score_EnemyEntry* Menu_Score_monBinData;
 // decomp: _monBinFile (_monBinFile@src/MENU/MENU9.PRG/238.c)
 const Content_DiscFile Menu_Score_kMonBinFile = { VS_MON_BIN_LBA, VS_MON_BIN_SIZE };
 
-// decomp: local static of _renderScrollableMenuItem, at file scope so the module reset reaches it
-static char Menu_Score_scrollableRowNavigationAnimState = 0;
-
 // decomp: _nextState (_nextState@src/MENU/MENU9.PRG/238.c)
 int Menu_Score_nextState;
 
@@ -123,9 +114,6 @@ char Menu_Score_unusedNoString[] __attribute__((unused)) = "NO\0";
 
 // decomp: _openedChestCount (_openedChestCount@src/MENU/MENU9.PRG/238.c)
 u_short Menu_Score_openedChestCount;
-
-// decomp: local static of _renderScrollableMenuItem, at file scope so the module reset reaches it
-static char Menu_Score_scrollableRowPreviousFrameBuf = 0;
 
 // decomp: _rankText (_rankText@src/MENU/MENU9.PRG/238.c)
 u_short Menu_Score_rankText[192]; /* contents: disc string table (ModuleData.cpp) */
@@ -141,193 +129,6 @@ char Menu_Score_unusedYesString[] __attribute__((unused)) = "YES\0";
 
 // decomp: _zoomColor (_zoomColor@src/MENU/MENU9.PRG/238.c)
 int Menu_Score_zoomColor;
-
-// decomp: MENU9.PRG _renderScrollableMenuItem (src/MENU/MENU9.PRG/238.c:54)
-void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
-{
-
-    int w;
-    int frameBuf;
-    int animState;
-    int bgWidth;
-    int isScrollable;
-    char texture_u;
-    int brightness;
-    int var_s0;
-    int i;
-    u_long* prim;
-    u_char* menuText;
-    u_int texture_v;
-    u_int xy;
-    u_long* before;
-    int state;
-    int gradient_intensity_offset;
-
-    menuText = (u_char *)(menuItem->text);
-    frameBuf = 0;
-
-    if (Render_frameBuf == 0) {
-        frameBuf = 320;
-    }
-
-    xy = *(int*)&menuItem->x;
-    before = (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 8);
-    w = menuItem->w;
-    animState = menuItem->gradientState;
-    isScrollable = menuItem->isScrollable - 1;
-    bgWidth = menuItem->backgroundWidth;
-
-    if (Render_frameBuf != Menu_Score_scrollableRowPreviousFrameBuf) {
-
-        ++Menu_Score_scrollableRowNavigationAnimState;
-        Menu_Score_scrollableRowPreviousFrameBuf = Render_frameBuf;
-
-        if (Menu_Score_scrollableRowNavigationAnimState >= 12) {
-            Menu_Score_scrollableRowNavigationAnimState = 0;
-        }
-    }
-
-    state = menuItem->state;
-
-    if ((state == 1) && (menuItem->x < 128u)) {
-
-        var_s0 = Menu_Score_scrollableRowNavigationAnimState >> 2;
-
-        if (isScrollable == 0) {
-            var_s0 -= 5;
-        } else {
-            var_s0 = state - var_s0;
-        }
-
-        VS::Render::QueueLiveSpriteWithTexturePage(128,
-            (menuItem->x - 14) | ((menuItem->y + var_s0) << 0x10), vs_getWH(16, 16),
-            before - 1)[4] = (isScrollable << 4) | vs_getUV0Clut(0, 48, 912, 223);
-    }
-
-    i = menuItem->x + 6;
-
-    while ((var_s0 = *menuText++) != Core_TextCode_PrintString) {
-        if (var_s0 == Core_TextCode_Spacing) {
-            i += *menuText++;
-        } else {
-            i = VS::Menu::Framework::DrawLiveFeatheredRowCharacter(
-                var_s0 | (isScrollable << 0x1F), i, menuItem, before);
-        }
-    }
-
-    if (w == 0) {
-        return;
-    }
-
-    prim = (u_long *)(Render_frameScratch.primitiveCursor);
-
-    for (i = 0, gradient_intensity_offset = 0; i < 12; gradient_intensity_offset += 8, ++i) {
-        if (isScrollable == 0) {
-            var_s0 = gradient_intensity_offset + 32;
-        } else {
-            var_s0 = gradient_intensity_offset;
-            var_s0 = 120 - gradient_intensity_offset;
-        }
-
-        prim[0] = (*before & 0xFFFFFF) | (6 << 24);
-        prim[1] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_On);
-        prim[2] = VS::Menu::Framework::LiveGradientStopColor(8 - animState, bgWidth, var_s0)
-                | vs_getRGB0(Render_LegacyPrimitiveCode_LineG2SemiTrans, 0, 0, 0);
-        prim[3] = xy;
-        prim[4] = VS::Menu::Framework::LiveGradientStopColor(animState, bgWidth, var_s0);
-        prim[5] = ((xy + w - 1) & 0xFFFF) | ((xy >> 0x10) << 0x10);
-        prim[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
-
-        *before = LegacyGpu_Handle(prim);
-        prim += 7;
-        xy += vs_getXY(0, 1);
-    }
-
-    Render_frameScratch.primitiveCursor = prim;
-
-    if (isScrollable == 0) {
-        VS::Render::InsertLiveThreeWordPrimitive(before, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0),
-            ((xy + 2) & 0xFFFF) | ((xy >> 0x10) << 0x10), w | vs_getWH(0, 2));
-    }
-
-    if (animState != 0) {
-        menuItem->gradientState = animState - 1;
-    }
-
-    xy += -12 << 16;
-    w |= vs_getWH(0, 1);
-    var_s0 = (menuItem->x >= 128) << 7;
-
-    for (i = 0; i < 12; ++i) {
-
-        if (isScrollable == 0) {
-            brightness = 120 - i * 8;
-        } else {
-            brightness = i * 8 + 32;
-        }
-
-        prim = VS::Render::QueueLiveSprite(brightness, xy, w, before);
-
-        texture_u = xy - var_s0;
-        texture_v = xy >> 0x10;
-        xy += 1 << 16;
-
-        prim[1] = ((u_int)(frameBuf + var_s0) >> 6)
-                | vs_getTpage(
-                    0, 0, Render_BlendMode_Subtract, Render_BlendMode_Add, Render_Dithering_Off);
-        prim[4] = texture_u | (texture_v << 8);
-    }
-}
-
-// decomp: MENU9.PRG _setRows (src/MENU/MENU9.PRG/238.c:196)
-void Menu_Score_RestoreTopMenuCursor(int rowCount, int absoluteRow, char* text[])
-{
-    int rowTypes[rowCount];
-    int i;
-    char cursorBackup;
-
-    for (i = 0; i < rowCount; ++i) {
-        rowTypes[i] = 0;
-    }
-
-    if ((rowCount < 9) || (absoluteRow < 8)) {
-        Menu_Framework_menuMemory.cursorMemories[2] = absoluteRow;
-        Menu_Framework_menuMemory.cursorMemories[3] = 0;
-    } else if (absoluteRow >= (rowCount - 8)) {
-        Menu_Framework_menuMemory.cursorMemories[2] = absoluteRow - (rowCount - 9);
-        Menu_Framework_menuMemory.cursorMemories[3] = rowCount - 9;
-    } else {
-        Menu_Framework_menuMemory.cursorMemories[2] = 4;
-        Menu_Framework_menuMemory.cursorMemories[3] = absoluteRow - 4;
-    }
-
-    cursorBackup = Input_settings.cursorMemory;
-    Input_settings.cursorMemory = 1;
-
-    VS::Menu::Framework::CreateLiveMenuRows(rowCount, menuRowInfo(1, 0, 1), text, rowTypes);
-
-    Input_settings.cursorMemory = cursorBackup;
-}
-
-// decomp: MENU9.PRG _getSelectedRow (src/MENU/MENU9.PRG/238.c:228)
-int Menu_Score_GetSelectedTopMenuRow(void)
-{
-    int row = VS::Menu::Framework::LiveSelectedRow();
-
-    if (row < -1) {
-        VS::Menu::Framework::ClearLiveMenuExcept(5);
-    } else if (row >= 0) {
-        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[2], 1);
-    }
-
-    return row;
-}
-
-// decomp: MENU9.PRG _clearMenuExceptRow8 (src/MENU/MENU9.PRG/238.c:258)
-void Menu_Score_ClearMenuExceptRow8(void) { VS::Menu::Framework::ClearLiveMenuExcept(8); }
-
-// decomp: MENU9.PRG _menuReady (src/MENU/MENU9.PRG/238.c:264)
-void Menu_Score_PollMenuReady(void) { VS::Menu::Framework::AreLiveMenuRowsIdle(); }
 
 // decomp: MENU9.PRG vs_menu9_exec (src/MENU/MENU9.PRG/238.c:269)
 int Menu_Score_UpdateScreen(u_char* state)
@@ -453,7 +254,7 @@ int Menu_Score_Update(void)
 
         VS::Menu::InitLiveTextBox(0, 0, 0xB, 0xF8, 0x10, 1, 0xB, 0xF8);
         VS::Menu::SetLiveTextBoxText(0, (char*)&Menu_Score_rankText[Menu_Score_rankText[Menu_Score_characterRank]]);
-        Menu_Score_UpdateTopMenu(1);
+        VS::Menu::Score::UpdateLiveTopMenu(1);
 
         Menu_Score_updateMenuAnimState = 0;
         ++Menu_Score_menuState;
@@ -469,7 +270,7 @@ int Menu_Score_Update(void)
             ++Menu_Score_updateMenuAnimState;
         }
 
-        selectedRow = Menu_Score_UpdateTopMenu(0);
+        selectedRow = VS::Menu::Score::UpdateLiveTopMenu(0);
 
         if (selectedRow == -1) {
             return 0;
@@ -1280,45 +1081,6 @@ void Menu_Score_RestoreCamera(void)
         &Menu_Score_cameraAnglesBackup, sizeof Menu_Score_cameraAnglesBackup);
 }
 
-// decomp: MENU9.PRG _topMenu (src/MENU/MENU9.PRG/238.c:1430)
-int Menu_Score_UpdateTopMenu(int initialize)
-{
-    static int Menu_Score_topMenuState;
-    static int Menu_Score_topMenuSelectedRow;
-
-    char* menuText[8];
-    int i;
-
-    if (initialize != 0) {
-        Menu_Score_topMenuState = 0;
-        Menu_Score_topMenuSelectedRow = 0;
-    }
-
-    switch (Menu_Score_topMenuState) {
-    case 0:
-        for (i = 0; i < 4; ++i) {
-            menuText[i * 2] = (char*)&Menu_Score_menuText[Menu_Score_menuText[i]];
-            menuText[i * 2 + 1] = NULL;
-        }
-
-        Menu_Score_RestoreTopMenuCursor(4, Battle_unusedMenu9CursorMemory.gazetteRow, menuText);
-
-        ++Menu_Score_topMenuState;
-        break;
-
-    case 1:
-        Menu_Score_topMenuSelectedRow = Menu_Score_GetSelectedTopMenuRow();
-
-        if (Menu_Score_topMenuSelectedRow == -1) {
-            break;
-        }
-
-        return Menu_Score_topMenuSelectedRow;
-    }
-
-    return -1;
-}
-
 // decomp: MENU9.PRG _buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1474)
 void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix)
 {
@@ -1541,19 +1303,6 @@ void Menu_Score_DrawViewerEdgeFade(void)
     scratch[0] = poly;
 
     _insertTPage(8, getTPage(0, 2, 0, 0));
-}
-
-// MENU9.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
-void Menu_Score_ScoreScreen_ResetMenu9Statics(void)
-{
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Score_scrollableRowNavigationAnimState, &initial, sizeof Menu_Score_scrollableRowNavigationAnimState);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Score_scrollableRowPreviousFrameBuf, &initial, sizeof Menu_Score_scrollableRowPreviousFrameBuf);
-    }
 }
 
 }  // extern "C"

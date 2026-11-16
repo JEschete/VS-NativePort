@@ -131,6 +131,7 @@
 #include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -2234,6 +2235,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU9.PRG", 0x801076A4u, 0u, (void*)&VS::Menu::Score::AwardLiveTitles, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80107C34u, 0u, (void*)&VS::Menu::Score::CalculateLiveScore, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x801031BCu, 0u, (void*)&VS::Menu::Score::CalculateLiveProgress, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80102A7Cu, 0u, (void*)&VS::Menu::Score::RenderLiveScrollableRow, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80102E10u, 0u, (void*)&VS::Menu::Score::RestoreLiveTopMenuCursor, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80102F0Cu, 0u, (void*)&VS::Menu::Score::LiveSelectedTopMenuRow, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80104BD0u, 0u, (void*)&VS::Menu::Score::UpdateLiveTopMenu, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80102FB8u, 0u, (void*)&VS::Menu::Score::ClearLiveMenuExceptRow8, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80102FD8u, 0u, (void*)&VS::Menu::Score::PollLiveMenuReady, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103A24u, 0u, (void*)&VS::Menu::manual::LiveUploadSpriteTiles, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103AD8u, 0u, (void*)&VS::Menu::manual::LiveUploadCluts, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103E6Cu, 0u, (void*)&VS::Menu::manual::LiveDrawIllustration, 0u, 0u, 0u},

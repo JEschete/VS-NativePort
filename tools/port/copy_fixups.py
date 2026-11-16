@@ -1752,6 +1752,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Score::AwardLiveTitles": r"Native\Game\include\Menu\Score\ScoreRankLive.hpp",
     "VS::Menu::Score::CalculateLiveScore": r"Native\Game\include\Menu\Score\ScoreRankLive.hpp",
     "VS::Menu::Score::CalculateLiveProgress": r"Native\Game\include\Menu\Score\ScoreRankLive.hpp",
+    "VS::Menu::Score::RenderLiveScrollableRow": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
+    "VS::Menu::Score::RestoreLiveTopMenuCursor": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
+    "VS::Menu::Score::LiveSelectedTopMenuRow": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
+    "VS::Menu::Score::UpdateLiveTopMenu": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
+    "VS::Menu::Score::ClearLiveMenuExceptRow8": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
+    "VS::Menu::Score::PollLiveMenuReady": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
     "VS::Menu::manual::LiveUploadSpriteTiles": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveUploadCluts": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
@@ -3157,6 +3163,12 @@ OWNED_CALL_BINDINGS["F02832"] = "VS::Menu::Score::DetermineLiveRiskbreakerRank"
 OWNED_CALL_BINDINGS["F02833"] = "VS::Menu::Score::AwardLiveTitles"
 OWNED_CALL_BINDINGS["F02835"] = "VS::Menu::Score::CalculateLiveScore"
 OWNED_CALL_BINDINGS["F04157"] = "VS::Menu::Score::CalculateLiveProgress"
+OWNED_CALL_BINDINGS["F02799"] = "VS::Menu::Score::RenderLiveScrollableRow"
+OWNED_CALL_BINDINGS["F02800"] = "VS::Menu::Score::RestoreLiveTopMenuCursor"
+OWNED_CALL_BINDINGS["F02801"] = "VS::Menu::Score::LiveSelectedTopMenuRow"
+OWNED_CALL_BINDINGS["F02806"] = "VS::Menu::Score::UpdateLiveTopMenu"
+OWNED_CALL_BINDINGS["F04154"] = "VS::Menu::Score::ClearLiveMenuExceptRow8"
+OWNED_CALL_BINDINGS["F04155"] = "VS::Menu::Score::PollLiveMenuReady"
 OWNED_CALL_BINDINGS["F02992"] = "VS::Menu::manual::LiveUploadSpriteTiles"
 OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
 OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
@@ -5072,6 +5084,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU9.PRG", 0x801076A4, "VS::Menu::Score::AwardLiveTitles"),  # F02833
     ("MENU/MENU9.PRG", 0x80107C34, "VS::Menu::Score::CalculateLiveScore"),  # F02835
     ("MENU/MENU9.PRG", 0x801031BC, "VS::Menu::Score::CalculateLiveProgress"),  # F04157
+    ("MENU/MENU9.PRG", 0x80102A7C, "VS::Menu::Score::RenderLiveScrollableRow"),  # F02799
+    ("MENU/MENU9.PRG", 0x80102E10, "VS::Menu::Score::RestoreLiveTopMenuCursor"),  # F02800
+    ("MENU/MENU9.PRG", 0x80102F0C, "VS::Menu::Score::LiveSelectedTopMenuRow"),  # F02801
+    ("MENU/MENU9.PRG", 0x80104BD0, "VS::Menu::Score::UpdateLiveTopMenu"),  # F02806
+    ("MENU/MENU9.PRG", 0x80102FB8, "VS::Menu::Score::ClearLiveMenuExceptRow8"),  # F04154
+    ("MENU/MENU9.PRG", 0x80102FD8, "VS::Menu::Score::PollLiveMenuReady"),  # F04155
     ("MENU/MENUE.PRG", 0x80103A24, "VS::Menu::manual::LiveUploadSpriteTiles"),  # F02992
     ("MENU/MENUE.PRG", 0x80103AD8, "VS::Menu::manual::LiveUploadCluts"),  # F02993
     ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000
@@ -5168,11 +5186,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                 }""",
          "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
          "without changing nonzero scaling, particle emission or RNG consumption."),
-    ],
-    "F02799": [
-        ("*before = ((u_long)prim << 8) >> 8;",
-         "*before = LegacyGpu_Handle(prim);",
-         "238.c:54 retain every Score scroll-fade packet in the native ordering chain"),
     ],
     "F02810": [
         ("    void** scratch = (void**)Core_ScratchAddr(0);\n\n"
@@ -7713,9 +7726,6 @@ REGEX_FIXES += [
         ("Menu::Options::Update",
          (('temp_v1_2', 'settings_with_puzzle_mode'), ('var_v1', 'updated_settings_word')),
          "F02797 src\\MENU\\MENU8.PRG\\88.c:551-826 (vs_menu8_exec). Named roles: settings with puzzle mode, updated settings word."),
-        ("Menu::Score::RenderScrollableRow",
-         (('s5', 'gradient_intensity_offset'), ('temp_a0', 'texture_v'), ('temp_v1_2', 'texture_u')),
-         "F02799 src\\MENU\\MENU9.PRG\\238.c:54-190 (_renderScrollableMenuItem). Named roles: gradient intensity offset, texture v, texture u. Retained: var_s0: Merged arrow animation Y, decoded text character, gradient intensity and texture-page X origin."),
         ("Menu::Score::Update",
          (('temp_v1_10', 'reselected_enemy_camera_distance'), ('temp_v1_4', 'initial_enemy_camera_distance'), ('var_s0', 'gazette_row_cursor')),
          "F02803 src\\MENU\\MENU9.PRG\\238.c:548-1397 (_menuInput). Named roles: reselected enemy camera distance, initial enemy camera distance, gazette row cursor."),

@@ -4,6 +4,19 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:95
+#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
+
+// decomp: src/include/gpu.h:97
+#define vs_getWH(w, h) vs_getXY((w), (h))
+
+// decomp: src/include/gpu.h:99
+#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
+    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
+
+// decomp: src/include/gpu.h:109
+#define vs_getUV0Clut(u, v, x, y) (((u) | ((v) << 8)) | (getClut((x), (y)) << 16))
+
 // decomp: src/include/gpu.h:110
 #define vs_getUV1Tpage(u, v, x, y, tp, abr)                                              \
     (((u) | ((v) << 8)) | (getTPage((tp), (abr), (x), (y)) << 16))

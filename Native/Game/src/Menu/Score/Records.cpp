@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/String/GameTextLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -14,6 +15,7 @@ extern "C" {
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
+#include "Menu/Status/ActorStatus.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
@@ -152,7 +154,7 @@ void Menu_Score_RenderTitles(int animState)
         Menu_Score_DrawTitleNumber(row->x - 14, y, row->rowIndex, menuItem->isScrollable & 1);
 
         if ((menuItem->isScrollable != Menu_Framework_MenuItemScroll_None) && (animState == 8)) {
-            Menu_Score_RenderScrollableRow(menuItem);
+            VS::Menu::Score::RenderLiveScrollableRow(menuItem);
         } else {
             VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }
@@ -278,7 +280,7 @@ void Menu_Score_RenderStatistics(int animState)
         }
 
         if ((menuItem->isScrollable != 0) && (animState == 8)) {
-            Menu_Score_RenderScrollableRow(menuItem);
+            VS::Menu::Score::RenderLiveScrollableRow(menuItem);
         } else {
             VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }
@@ -326,7 +328,7 @@ void Menu_Score_RenderStatistics(int animState)
         }
 
         if ((menuItem->isScrollable != 0) && (animState == 8)) {
-            Menu_Score_RenderScrollableRow(menuItem);
+            VS::Menu::Score::RenderLiveScrollableRow(menuItem);
         } else {
             VS::Menu::Framework::DrawLiveMenuItem(menuItem);
         }
