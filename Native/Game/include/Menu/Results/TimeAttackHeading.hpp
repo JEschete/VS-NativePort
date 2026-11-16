@@ -1,11 +1,11 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // MENUF.PRG time-attack start screen: the "TIME ATTACK" heading, the course
-// number, the boss name, the best time, the start countdown and the palette
-// pulse of the time-attack end screen (F03018-F03023). The draws turn atlas
-// widths, a reveal timer and the course into flash-fade, fade and time draws
-// for a TimeAttackDrawHost; the pulse blends the screen's palette rows and
-// hands them to a ResultsClutTarget, so the cores reach no global state.
+// number, the boss name, the best time and the start countdown
+// (F03018-F03022). The draws turn atlas widths, a reveal timer and the course
+// into flash-fade, fade and time draws for a TimeAttackDrawHost, so the cores
+// reach no global state. The end screen's palette pulse (F03023) is in
+// ResultsPalette.hpp.
 
 #include <array>
 #include <cstddef>
@@ -44,17 +44,6 @@ inline constexpr std::int32_t kTimeAttackCourseClut = 0x7FF4;
 // brightness zero.
 inline constexpr std::int32_t kTimeAttackCountdownFrames = 15;
 
-// clutBuf: five 32-color rows uploaded to (768, 511). The pulse mixes the
-// second row (weighted by the blend weight) with the fourth (weighted by 16
-// minus it) into the fifth.
-inline constexpr std::size_t kResultsClutRowColors = 32;
-inline constexpr std::size_t kResultsClutWords = 160;
-inline constexpr std::size_t kTimeAttackPulseFirstRow = 32;
-inline constexpr std::size_t kTimeAttackPulseSecondRow = 96;
-inline constexpr std::size_t kTimeAttackPulseTargetRow = 128;
-inline constexpr std::int32_t kTimeAttackPulseWeights = 16;
-inline constexpr Render::ScreenRect kResultsClutArea{768, 511, 160, 1};
-
 // The left and right colors of one flash-fade draw; the left color's step
 // drives it.
 using TimeAttackColors = std::array<Render::RegionColor, 2>;
@@ -81,19 +70,6 @@ class TimeAttackDrawHost {
   // _renderTime, never in the new-record palette.
   virtual void DrawTime(ResultsPoint origin, std::int32_t timer,
                         std::int32_t time) = 0;
-};
-
-// Where the pulsed palette goes (LoadImage).
-class ResultsClutTarget {
- public:
-  ResultsClutTarget() = default;
-  ResultsClutTarget(const ResultsClutTarget&) = delete;
-  ResultsClutTarget& operator=(const ResultsClutTarget&) = delete;
-  ResultsClutTarget(ResultsClutTarget&&) = delete;
-  ResultsClutTarget& operator=(ResultsClutTarget&&) = delete;
-  virtual ~ResultsClutTarget() = default;
-  virtual void Upload(const Render::ScreenRect& area,
-                      std::span<const std::uint16_t> colors) = 0;
 };
 
 // "TIME" and "ATTACK" flashed in side by side, centred on `x`. kHidden at a
@@ -133,10 +109,4 @@ ResultsDrawResult DrawBestTime(
 ResultsDrawResult DrawStartCountdown(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, TimeAttackDrawHost& host);
-
-// Mixes the second and fourth palette rows by `blend_weight` sixteenths into
-// the fifth, keeping the second row's mask bits, then uploads all five rows.
-// Each component's weighted sum wraps in 32 bits as on the R3000.
-void PulseTimeAttackClut(std::span<std::uint16_t, kResultsClutWords> clut,
-                         std::int32_t blend_weight, ResultsClutTarget& target);
 }  // namespace VS::Menu::Results

@@ -4,6 +4,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
+#include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
@@ -19,7 +20,6 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
@@ -278,15 +278,15 @@ int Menu_Results_InitializeScreen(void)
         break;
 
     case 4:
-        ret = Menu_Results_InitializeCubePuzzleStart();
+        ret = VS::Menu::Results::LiveInitializeCubePuzzleStart();
         break;
 
     case 5:
-        ret = Menu_Results_InitializeCubePuzzleResults();
+        ret = VS::Menu::Results::LiveInitializeCubePuzzleResults();
         break;
 
     case 6:
-        ret = Menu_Results_InitializeCubePuzzleQuit();
+        ret = VS::Menu::Results::LiveInitializeCubePuzzleQuit();
         break;
     }
 
@@ -466,15 +466,15 @@ int Menu_Results_UpdatePresentation(void)
         break;
 
     case 4:
-        ret = Menu_Results_UpdateCubePuzzleStart();
+        ret = VS::Menu::Results::LiveUpdateCubePuzzleStart();
         break;
 
     case 5:
-        ret = Menu_Results_UpdateCubePuzzleResults();
+        ret = VS::Menu::Results::LiveUpdateCubePuzzleResults();
         break;
 
     case 6:
-        ret = Menu_Results_UpdateCubePuzzleQuit();
+        ret = VS::Menu::Results::LiveUpdateCubePuzzleQuit();
         break;
     }
 

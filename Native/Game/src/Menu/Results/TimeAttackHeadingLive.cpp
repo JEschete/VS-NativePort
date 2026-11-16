@@ -15,6 +15,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
+#include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/TextureRegionDrawLive.hpp"

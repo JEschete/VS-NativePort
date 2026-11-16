@@ -367,7 +367,10 @@ def build_case(identifier: str) -> dict:
         "END": end,
         "MODULES": (MODULE,),
         "DRIVER": "timeattack_heading_driver.cpp",
-        "SOURCES": (r"Native\Game\src\Menu\Results\TimeAttackHeading.cpp",),
+        "SOURCES": (
+            r"Native\Game\src\Menu\Results\TimeAttackHeading.cpp",
+            r"Native\Game\src\Menu\Results\ResultsPalette.cpp",
+        ),
         "CXX_STANDARD": "c++latest",
         "VECTORS": 1024,
         "SEED": int(identifier[1:]),

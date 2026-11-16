@@ -3615,13 +3615,17 @@ class EncounterFixupTests(unittest.TestCase):
         # EncyclopediaPreview.cpp QueueEnemyModelRead (#276 row 50), which completes a refused read through the
         # host's ReadRefused (EncyclopediaPreviewLive.cpp). F04163 (two reads) left it for the owned
         # ManualScreen.cpp UpdateHelpPages (#276 row 52), whose ManualScreenLive.cpp RequestHelpFile keeps the
-        # guard below.
-        self.assertGreaterEqual(len(guarded), 13)
+        # guard below. F03046 and F03048 left it for the owned CubePuzzleLifecycle.cpp InitializeCubePuzzleStart
+        # and InitializeCubePuzzleQuit (#276 row 50), whose CubePuzzleLifecycleLive.cpp disc read keeps the guard
+        # below.
+        self.assertGreaterEqual(len(guarded), 11)
         owned = self.owned_items()
         self.assertEqual(owned["F04148"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F04150"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F02839"]["path"], r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp")
         self.assertEqual(owned["F04163"]["path"], r"Native\Game\src\Menu\ManualScreen.cpp")
+        self.assertEqual(owned["F03046"]["path"], r"Native\Game\src\Menu\Results\CubePuzzleLifecycle.cpp")
+        self.assertEqual(owned["F03048"]["path"], r"Native\Game\src\Menu\Results\CubePuzzleLifecycle.cpp")
         self.assertEqual(owned["F03526"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03547"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03496"]["path"], r"Native\Engine\src\Audio\MusicCore.cpp")
@@ -3680,6 +3684,10 @@ class EncounterFixupTests(unittest.TestCase):
         )
         manual_live = "".join((root / r"Native\Game\src\Menu\ManualScreenLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("request=Content::CompleteLiveRefusedDiscRequest(&disc_file,HelpBuffer(file));", manual_live)
+        cube_live = "".join(
+            (root / r"Native\Game\src\Menu\Results\CubePuzzleLifecycleLive.cpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn("load_.request=Content::CompleteLiveRefusedDiscRequest(&file_,load_.buffer);", cube_live)
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
         self.assertIn('"CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"', background_tests)
         effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
@@ -3734,7 +3742,8 @@ class EncounterFixupTests(unittest.TestCase):
         # EnqueueOverlayRead runs only for an allocated read. Row 52 moved Map.cpp's background and scene ARM
         # reads into MapLoadingLive.cpp EnqueueBackgroundRead and EnqueueSceneRead. Row 50 moved Encyclopedia.cpp's
         # ZUD read into the owned EncyclopediaPreview.cpp QueueEnemyModelRead, and row 52 moved Manual.cpp's help
-        # asset and text reads into ManualScreenLive.cpp RequestHelpFile.
+        # asset and text reads into ManualScreenLive.cpp RequestHelpFile, and row 50 moved CubePuzzle.cpp's IQ.DIS
+        # and ESC.DIS reads into CubePuzzleLifecycleLive.cpp.
         event_source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(encoding="utf-8")
         event = "".join(re.sub(r"//[^\n]*", "", event_source).split())
         self.assertIn(
@@ -3747,7 +3756,7 @@ class EncounterFixupTests(unittest.TestCase):
             event,
         )
         sites += 1
-        self.assertGreaterEqual(sites, 8)
+        self.assertGreaterEqual(sites, 6)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)

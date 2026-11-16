@@ -509,6 +509,15 @@
     <None Include="..\..\port\differentials\container_transfers_f02940.py" />
     <None Include="..\..\port\differentials\container_transfers_f02941.py" />
     <None Include="..\..\port\differentials\container_transfers_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\cube_lifecycle_common.py" />
+    <None Include="..\..\port\differentials\cube_lifecycle_driver.cpp" />
+    <None Include="..\..\port\differentials\cube_lifecycle_f03024.py" />
+    <None Include="..\..\port\differentials\cube_lifecycle_f03046.py" />
+    <None Include="..\..\port\differentials\cube_lifecycle_f03047.py" />
+    <None Include="..\..\port\differentials\cube_lifecycle_f03048.py" />
+    <None Include="..\..\port\differentials\cube_lifecycle_f03049.py" />
+    <None Include="..\..\port\differentials\cube_lifecycle_f03050.py" />
+    <None Include="..\..\port\differentials\cube_lifecycle_f03051.py" />
     <None Include="..\..\port\differentials\cube_text_common.py" />
     <None Include="..\..\port\differentials\cube_text_driver.cpp" />
     <None Include="..\..\port\differentials\cube_text_f03052.py" />

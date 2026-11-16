@@ -12,6 +12,7 @@
 "#include \"Menu/Inventory/EquipmentRowsLive.hpp\"",
 "#include \"Menu/Loot/LootPoliciesLive.hpp\"",
 "#include \"Menu/ManualScreenLive.hpp\"",
+"#include \"Menu/Results/CubePuzzleLifecycleLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\""
 ]
@@ -71,6 +72,16 @@
 "void Boot_ResetMenueStatics(void)",
 "{",
 "    VS::Menu::manual::ResetLiveManualScreenStatics();"
+]
+],
+[
+74,
+[
+"    Menu_Results_TimeAttack_ResetMenufStatics();"
+],
+[
+"    Menu_Results_TimeAttack_ResetMenufStatics();",
+"    VS::Menu::Results::ResetLiveCubePuzzleLifecycleStatics();"
 ]
 ]
 ],
@@ -701,35 +712,6 @@
 ],
 [
 "        static const RECT initial[2] = {};"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Results\\CubePuzzle.cpp": [
-[
-115,
-[
-"                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleStartIqDisData + i * 0x8220, &tim);"
-],
-[
-"                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleStartIqDisData)) + i * 0x8220), &tim);"
-]
-],
-[
-142,
-[
-"            puzzleData = Menu_Results_initializeCubePuzzleStartIqDisData + 0x10440;"
-],
-[
-"            puzzleData = (decltype(puzzleData))(((u_char*)(Menu_Results_initializeCubePuzzleStartIqDisData)) + 0x10440);"
-]
-],
-[
-216,
-[
-"                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleQuitEscDisData + i * 0x8220, &tim);"
-],
-[
-"                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleQuitEscDisData)) + i * 0x8220), &tim);"
 ]
 ]
 ],

@@ -24,12 +24,6 @@ constexpr std::int32_t kBestTimePadding = 96;
 constexpr std::int32_t kBestTimeGap = 12;
 constexpr std::int32_t kBestTimeDrop = 2;
 
-// The PS1 15-bit color's components and mask bit.
-constexpr std::int32_t kRedMask = 0x1F;
-constexpr std::int32_t kGreenMask = 0x3E0;
-constexpr std::int32_t kBlueMask = 0x7C00;
-constexpr std::int32_t kMaskBit = 0x8000;
-
 constexpr std::size_t kHeadingAtlasEntries = kTimeAttackHeading + 2;
 constexpr std::size_t kCourseAtlasEntries = kTimeAttackCourseLabel + 1;
 constexpr std::size_t kPairedNameAtlasEntries = kTimeAttackOgreZombie + 1;
@@ -56,19 +50,6 @@ constexpr Rgb kHeadingLight{.r = 200, .g = 180, .b = 160};
 [[nodiscard]] std::int32_t Width(std::span<const Render::TextureRegion> atlas,
                                  std::size_t index) {
   return atlas[index].width;
-}
-
-// One component of the pulse: both rows' component weighted, summed and
-// divided by 16 with the R3000's 32-bit wrap and truncating division.
-[[nodiscard]] std::int32_t MixComponent(std::int32_t first, std::int32_t second,
-                                        std::int32_t blend_weight,
-                                        std::int32_t mask) {
-  const std::int32_t sum = math::WrappingAdd(
-      math::WrappingMultiply(first & mask, blend_weight),
-      math::WrappingMultiply(
-          second & mask,
-          math::WrappingSubtract(kTimeAttackPulseWeights, blend_weight)));
-  return (sum / kTimeAttackPulseWeights) & mask;
 }
 }  // namespace
 
@@ -200,21 +181,5 @@ ResultsDrawResult DrawStartCountdown(
                  .y = math::WrappingSubtract(y, texture.height >> 1)},
                 index, brightness);
   return ResultsDrawResult::kDrawn;
-}
-
-// decomp: MENUF.PRG _pulseTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:1256),
-// 0x80104914
-void PulseTimeAttackClut(std::span<std::uint16_t, kResultsClutWords> clut,
-                         std::int32_t blend_weight, ResultsClutTarget& target) {
-  for (std::size_t i = 0; i < kResultsClutRowColors; ++i) {
-    const std::int32_t first = clut[kTimeAttackPulseFirstRow + i];
-    const std::int32_t second = clut[kTimeAttackPulseSecondRow + i];
-    clut[kTimeAttackPulseTargetRow + i] = static_cast<std::uint16_t>(
-        MixComponent(first, second, blend_weight, kRedMask) |
-        MixComponent(first, second, blend_weight, kGreenMask) |
-        MixComponent(first, second, blend_weight, kBlueMask) |
-        (first & kMaskBit));
-  }
-  target.Upload(kResultsClutArea, clut);
 }
 }  // namespace VS::Menu::Results

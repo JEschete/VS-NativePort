@@ -12,12 +12,5 @@
 extern u_short Menu_Results_clutBuf[160];;
 extern short Menu_Results_puzzleParTime;;
 extern short Menu_Results_puzzleRankCap;;
-void Menu_Results_PulseCubePuzzleClut(int blend_weight);
-int Menu_Results_InitializeCubePuzzleStart(void);
-int Menu_Results_InitializeCubePuzzleResults(void);
-int Menu_Results_InitializeCubePuzzleQuit(void);
-int Menu_Results_UpdateCubePuzzleStart(void);
-int Menu_Results_UpdateCubePuzzleResults(void);
-int Menu_Results_UpdateCubePuzzleQuit(void);
 
 #endif // VS_MENU_RESULTS_CUBEPUZZLE_H_DECLS

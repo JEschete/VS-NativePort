@@ -1994,6 +1994,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\CubePuzzleLifecycle.cpp" />
+    <ClCompile Include="src\Menu\Results\CubePuzzleLifecycleLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\CubePuzzleText.cpp" />
     <ClCompile Include="src\Menu\Results\CubePuzzleTextLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2013,6 +2017,7 @@
     <ClCompile Include="src\Menu\Results\ResultsDrawingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\ResultsPalette.cpp" />
     <ClCompile Include="src\Menu\Results\ResultsRankLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -2991,12 +2996,15 @@
     <ClInclude Include="include\Menu\OptionsLive.hpp" />
     <ClInclude Include="include\Menu\Rename.hpp" />
     <ClInclude Include="include\Menu\RenameLive.hpp" />
+    <ClInclude Include="include\Menu\Results\CubePuzzleLifecycle.hpp" />
+    <ClInclude Include="include\Menu\Results\CubePuzzleLifecycleLive.hpp" />
     <ClInclude Include="include\Menu\Results\CubePuzzleText.hpp" />
     <ClInclude Include="include\Menu\Results\CubePuzzleTextLive.hpp" />
     <ClInclude Include="include\Menu\Results\GameClearScore.hpp" />
     <ClInclude Include="include\Menu\Results\GameClearScoreLive.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsDrawing.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsDrawingLive.hpp" />
+    <ClInclude Include="include\Menu\Results\ResultsPalette.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsRankLive.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsStats.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp" />

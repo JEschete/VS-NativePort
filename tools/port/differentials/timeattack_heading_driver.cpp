@@ -13,6 +13,7 @@
 #include <span>
 #include <vector>
 
+#include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttackHeading.hpp"
 
 namespace {

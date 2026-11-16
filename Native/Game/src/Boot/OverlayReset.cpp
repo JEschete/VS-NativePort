@@ -4,6 +4,7 @@
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
+#include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 extern "C" {
@@ -92,6 +93,7 @@ void Boot_ResetMenufStatics(void)
 {
     Menu_Results_ResetMenufStatics();
     Menu_Results_TimeAttack_ResetMenufStatics();
+    VS::Menu::Results::ResetLiveCubePuzzleLifecycleStatics();
 }
 
 }  // extern "C"
