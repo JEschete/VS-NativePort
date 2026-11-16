@@ -1936,6 +1936,10 @@
     <ClCompile Include="src\Menu\ManualIllustrationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\ManualTopics.cpp" />
+    <ClCompile Include="src\Menu\ManualTopicsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Map.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2929,6 +2933,8 @@
     <ClInclude Include="include\Menu\MagicSpellMenu.hpp" />
     <ClInclude Include="include\Menu\ManualIllustration.hpp" />
     <ClInclude Include="include\Menu\ManualIllustrationLive.hpp" />
+    <ClInclude Include="include\Menu\ManualTopics.hpp" />
+    <ClInclude Include="include\Menu\ManualTopicsLive.hpp" />
     <ClInclude Include="include\Menu\MapDrawing.hpp" />
     <ClInclude Include="include\Menu\MapDrawingLive.hpp" />
     <ClInclude Include="include\Menu\MapLoading.hpp" />

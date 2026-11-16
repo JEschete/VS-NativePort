@@ -7,6 +7,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
+#include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Hud.h"
 #include "Content/DiscLayout.h"
-#include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Field/Locations.h"
 #include "Field/Manual.h"
@@ -94,51 +94,6 @@ static char Menu_Manual_screenIsInit = 0;
 
 // decomp: local static of vs_menuE_exec, at file scope so the module reset reaches it
 static int Menu_Manual_screenMenuResult = 0;
-
-// decomp: MENUE.PRG _setMenuRows (src/MENU/MENUE.PRG/494.c:76)
-void Menu_Manual_SetTopicRows(int rowCount, int highlightedRow, char** strings)
-{
-    int rowTypes[rowCount];
-    int i;
-    char cursor;
-
-    for (i = 0; i < rowCount; ++i) {
-        rowTypes[i] = 0;
-    }
-
-    rowTypes[rowCount - 1] |= 4;
-
-    if ((rowCount < 9) || (highlightedRow < 8)) {
-        Menu_Framework_menuMemory.cursorMemories[4] = highlightedRow;
-        Menu_Framework_menuMemory.cursorMemories[5] = 0;
-    } else if (highlightedRow >= (rowCount - 8)) {
-        Menu_Framework_menuMemory.cursorMemories[4] = highlightedRow - (rowCount - 9);
-        Menu_Framework_menuMemory.cursorMemories[5] = rowCount - 9;
-    } else {
-        Menu_Framework_menuMemory.cursorMemories[4] = 4;
-        Menu_Framework_menuMemory.cursorMemories[5] = highlightedRow - 4;
-    }
-    cursor = Input_settings.cursorMemory;
-    Input_settings.cursorMemory = 1;
-    VS::Menu::Framework::CreateLiveMenuRows(rowCount, 0x102, strings, rowTypes);
-    Input_settings.cursorMemory = cursor;
-}
-
-// decomp: MENUE.PRG _getSelectedRow (src/MENU/MENUE.PRG/494.c:104)
-int Menu_Manual_GetSelectedTopicRow(void)
-{
-    int row;
-
-    row = VS::Menu::Framework::LiveSelectedRow();
-    if (row < -1) {
-        VS::Menu::Framework::ClearLiveMenuExcept(5);
-        return row;
-    }
-    if (row >= 0) {
-        VS::Menu::Framework::FlyOutLiveRowsAndHoistSelection(Menu_Framework_menuMemory.cursorMemories[4], 1);
-    }
-    return row;
-}
 
 // decomp: MENUE.PRG func_80102E9C (src/MENU/MENUE.PRG/494.c:132)
 void Menu_Manual_ClearMenuExceptRow8(void) { VS::Menu::Framework::ClearLiveMenuExcept(8); }
@@ -250,11 +205,11 @@ int Menu_Manual_UpdateHelpPages(void)
         break;
     case Menu_Manual_ManualMenuState_InitMenu:
         VS::Menu::Framework::InitializeLiveInformationBox();
-        Menu_Manual_UpdateTopicMenu(1);
+        VS::Menu::manual::LiveUpdateTopicMenu(1);
         ++Menu_Manual_showMenuState;
         break;
     case Menu_Manual_ManualMenuState_GetSelection:
-        selectedRow = Menu_Manual_UpdateTopicMenu(0);
+        selectedRow = VS::Menu::manual::LiveUpdateTopicMenu(0);
         if (selectedRow == -1) {
             break;
         }
@@ -317,7 +272,7 @@ int Menu_Manual_UpdateHelpPages(void)
         Menu_Manual_scrollPosition =
             Field_manualDisplayState
                 .scrollPositions[Field_manualDisplayState.currentManual];
-        Menu_Manual_lineCount = Menu_Manual_LastPageLineOffset();
+        Menu_Manual_lineCount = VS::Menu::manual::LiveLastPageLineOffset();
         Menu_Manual_showMenuState = Menu_Manual_ManualMenuState_ShowSubMenu;
         Menu_Manual_helpPageLoadCounter = 0;
         break;
@@ -412,7 +367,7 @@ int Menu_Manual_UpdateHelpPages(void)
         } else {
             Menu_Manual_DrawPageContent();
         }
-        Menu_Manual_CopyPageText();
+        VS::Menu::manual::LiveCopyPageText();
         break;
     case Menu_Manual_ManualMenuState_ExitToMenu:
         if (Menu_Manual_helpText != NULL) {
@@ -434,104 +389,6 @@ int Menu_Manual_UpdateHelpPages(void)
         return 2;
     }
     return 0;
-}
-
-// decomp: MENUE.PRG _topMenu (src/MENU/MENUE.PRG/494.c:450)
-int Menu_Manual_UpdateTopicMenu(int init)
-{
-    enum Menu_Manual_TopicMenuState { Menu_Manual_TopicMenuState_InitRows, Menu_Manual_TopicMenuState_SelectRow };
-
-    char* strings[28];
-    int i;
-
-    if (init != 0) {
-        Menu_Manual_topMenuState = Menu_Manual_TopicMenuState_InitRows;
-        Menu_Manual_selectedRow = 0;
-    }
-
-    switch (Menu_Manual_topMenuState) {
-    case Menu_Manual_TopicMenuState_InitRows:
-        for (i = 0; i < 14; ++i) {
-            strings[i * 2] = (char*)&Menu_Manual_menuText[Menu_Manual_menuText[i]];
-            strings[i * 2 + 1] = (char*)&Menu_Manual_menuText[Menu_Manual_menuText[14 + i]];
-        }
-        Menu_Manual_SetTopicRows(14, Field_manualDisplayState.currentManual, strings);
-        ++Menu_Manual_topMenuState;
-        break;
-    case Menu_Manual_TopicMenuState_SelectRow:
-        Menu_Manual_selectedRow = Menu_Manual_GetSelectedTopicRow();
-        if (Menu_Manual_selectedRow != -1) {
-            return Menu_Manual_selectedRow;
-        }
-        break;
-    }
-    return -1;
-}
-
-// decomp: MENUE.PRG _getRoundedLineCount (src/MENU/MENUE.PRG/494.c:514)
-int Menu_Manual_LastPageLineOffset(void)
-{
-    int remainder;
-    int lineCount;
-
-    lineCount = Menu_Manual_helpText[4] & 0xFFFF;
-    remainder = (Menu_Manual_helpText[4] & 0xFFFF) % 10;
-    if (remainder > 0) {
-        lineCount += 10 - remainder;
-    }
-    lineCount -= 10;
-    if (lineCount < 0) {
-        lineCount = 0;
-    }
-    return lineCount;
-}
-
-// decomp: MENUE.PRG _copyNextPageText (src/MENU/MENUE.PRG/494.c:531)
-void Menu_Manual_CopyPageText(void)
-{
-    static char buffer[1024];
-    int i;
-    int nextPage;
-    u_short* offsets;
-    char* pBuffer;
-
-    buffer[0] = Core_TextCode_ChunkSize;
-    buffer[1] = Core_TextCode_NoChunking;
-    buffer[2] = Core_TextCode_FontTable;
-    buffer[3] = Core_TextCode_FontTableZero;
-    buffer[4] = Core_TextCode_Newline;
-
-    offsets = (ushort*)(Menu_Manual_helpText + 4);
-    nextPage = Menu_Manual_scrollPosition + 10;
-    pBuffer = buffer + 4;
-
-    if ((u_short)Menu_Manual_helpText[4] < nextPage) {
-        nextPage = (u_short)Menu_Manual_helpText[4];
-    }
-
-    for (i = Menu_Manual_scrollPosition; i < nextPage; ++i) {
-        pBuffer = Menu_Manual_CopyEncodedLine(pBuffer, (char*)(offsets + offsets[i + 1]));
-    }
-
-    pBuffer[-1] = Core_TextCode_Terminator;
-    VS::Menu::SetLiveTextBoxText(0, buffer);
-}
-
-// decomp: MENUE.PRG _vsStrcpy (src/MENU/MENUE.PRG/494.c:561)
-char* Menu_Manual_CopyEncodedLine(char* destination_text, char* source_text)
-{
-    char c;
-
-    for (c = *source_text; c != Core_TextCode_Terminator; c = *source_text) {
-        if (c >= Core_TextCode_Control) {
-            *destination_text = c;
-            ++source_text;
-            ++destination_text;
-        }
-        *destination_text++ = *source_text++;
-    }
-    *destination_text = Core_TextCode_Newline;
-    return destination_text + 1;
 }
 
 // decomp: MENUE.PRG _drawContent (src/MENU/MENUE.PRG/494.c:577)

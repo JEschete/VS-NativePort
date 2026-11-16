@@ -30,15 +30,15 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 12 | 2,646 | 756 | 11 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 5 | 171 | 14,295 | 508 | 135 | 0 |
+| 34: #60 Menu screens and workspaces | 5 | 165 | 14,169 | 512 | 131 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 191 | 17,677 | 3584 | 148 | 0 |
+| **Total** | 5 | 185 | 17,551 | 3588 | 144 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,536 |
+| done | 3,542 |
 | in-progress | 4 |
-| todo | 192 |
+| todo | 186 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (7 active, 47 done); open functions in no slice: 0.
 
@@ -95,7 +95,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | active | - | 6 | 79 | 4,290 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
-| 52 | menu-map-manual-text | active | - | 4 | 31 | 1,742 |
+| 52 | menu-map-manual-text | active | - | 4 | 25 | 1,616 |
 | 53 | title | done | self | 4 | 0 | 0 |
 | 54 | ending | done | self | 5 | 0 | 0 |
 
@@ -105,7 +105,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | Referenced by the original-address module table | 1 | 16 |
 | Calls an SDK shim | 0 | 46 |
 | Signature uses SDK integer types or `void*` | 0 | 23 |
-| Compiled with relaxed settings | 0 | 191 |
+| Compiled with relaxed settings | 0 | 185 |
 
 Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 

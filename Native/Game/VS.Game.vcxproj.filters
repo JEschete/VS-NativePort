@@ -2745,6 +2745,12 @@
     <ClCompile Include="src\Menu\ManualIllustrationLive.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\ManualTopics.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\ManualTopicsLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Map.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -4381,6 +4387,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ManualIllustrationLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ManualTopics.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\ManualTopicsLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\MapDrawing.hpp">

@@ -8,7 +8,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 
 extern "C" {
@@ -128,13 +130,22 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
     line[1] = static_cast<char>(40 + index);
     line[2] = static_cast<char>(Core_TextCode_Terminator);
   }
+  // The Live page text reads help text only from a game heap payload.
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, std::size_t{16} * 1024>
+          arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  auto* payload = static_cast<int*>(
+      VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(help)));
+  REQUIRE(payload != nullptr);
+  std::ranges::copy(help, payload);
   const auto saved_box = *VS::Menu::LiveTextBox(0);
   auto* saved_help = Menu_Manual_helpText;
   const int saved_scroll = Menu_Manual_scrollPosition;
-  Menu_Manual_helpText = help.data();
+  Menu_Manual_helpText = payload;
   Menu_Manual_scrollPosition = scroll;
   VS::Menu::LiveTextBox(0)->flags.speakerTexture = 32;
-  Menu_Manual_CopyPageText();
+  VS::Menu::manual::LiveCopyPageText();
   ReuseReturnedStack();
   std::string expected{static_cast<char>(Core_TextCode_ChunkSize),
                        static_cast<char>(Core_TextCode_NoChunking),

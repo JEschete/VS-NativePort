@@ -831,6 +831,14 @@
     <None Include="..\..\port\differentials\manual_illustration_f03000.py" />
     <None Include="..\..\port\differentials\manual_illustration_f03005.py" />
     <None Include="..\..\port\differentials\manual_illustration_f03006.py" />
+    <None Include="..\..\port\differentials\manual_topics_common.py" />
+    <None Include="..\..\port\differentials\manual_topics_driver.cpp" />
+    <None Include="..\..\port\differentials\manual_topics_f02989.py" />
+    <None Include="..\..\port\differentials\manual_topics_f02991.py" />
+    <None Include="..\..\port\differentials\manual_topics_f02994.py" />
+    <None Include="..\..\port\differentials\manual_topics_f02995.py" />
+    <None Include="..\..\port\differentials\manual_topics_f02996.py" />
+    <None Include="..\..\port\differentials\manual_topics_f04158.py" />
     <None Include="..\..\port\differentials\map_drawing_common.py" />
     <None Include="..\..\port\differentials\map_drawing_driver.cpp" />
     <None Include="..\..\port\differentials\map_drawing_f02703.py" />

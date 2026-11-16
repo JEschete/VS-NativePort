@@ -1750,6 +1750,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveDrawDiagramLines": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveAdvanceVisibilityAnimation": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
+    "VS::Menu::manual::LiveSetTopicRows": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
+    "VS::Menu::manual::LiveGetSelectedTopicRow": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
+    "VS::Menu::manual::LiveUpdateTopicMenu": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
+    "VS::Menu::manual::LiveLastPageLineOffset": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
+    "VS::Menu::manual::LiveCopyPageText": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3143,6 +3148,11 @@ OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
 OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
 OWNED_CALL_BINDINGS["F03005"] = "VS::Menu::manual::LiveDrawDiagramLines"
 OWNED_CALL_BINDINGS["F03006"] = "VS::Menu::manual::LiveAdvanceVisibilityAnimation"
+OWNED_CALL_BINDINGS["F04158"] = "VS::Menu::manual::LiveSetTopicRows"
+OWNED_CALL_BINDINGS["F02989"] = "VS::Menu::manual::LiveGetSelectedTopicRow"
+OWNED_CALL_BINDINGS["F02991"] = "VS::Menu::manual::LiveUpdateTopicMenu"
+OWNED_CALL_BINDINGS["F02994"] = "VS::Menu::manual::LiveLastPageLineOffset"
+OWNED_CALL_BINDINGS["F02995"] = "VS::Menu::manual::LiveCopyPageText"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -5046,6 +5056,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000
     ("MENU/MENUE.PRG", 0x80104A44, "VS::Menu::manual::LiveDrawDiagramLines"),  # F03005
     ("MENU/MENUE.PRG", 0x80104C30, "VS::Menu::manual::LiveAdvanceVisibilityAnimation"),  # F03006
+    ("MENU/MENUE.PRG", 0x80102CD8, "VS::Menu::manual::LiveSetTopicRows"),  # F04158
+    ("MENU/MENUE.PRG", 0x80102DF0, "VS::Menu::manual::LiveGetSelectedTopicRow"),  # F02989
+    ("MENU/MENUE.PRG", 0x8010391C, "VS::Menu::manual::LiveUpdateTopicMenu"),  # F02991
+    ("MENU/MENUE.PRG", 0x80103B6C, "VS::Menu::manual::LiveLastPageLineOffset"),  # F02994
+    ("MENU/MENUE.PRG", 0x80103BC8, "VS::Menu::manual::LiveCopyPageText"),  # F02995
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5465,10 +5480,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     "G01780": [("Render_TextureRegion Menu_Results_disMap[]", "Render_TextureRegion Menu_Results_disMap[127]",
                  "3B8.c:1162 _texture_t[127]; the typed texture draws take bounds-checked atlas spans")],
     # Animation-header outputs are native pointers, not PS1-sized integers.
-    "F02995": [
-        ("    char buffer[1024];", "    static char buffer[1024];",
-         "retain manual text until the deferred textbox update and render"),
-    ],
     # MENUE 494.c:577-988 shares the native frame, not two four-byte scratch words.
     "F04163": [
         ("    u_long** s0;", "    Render_FrameScratch* s0;", "typed manual frame"),
@@ -7927,9 +7938,6 @@ REGEX_FIXES += [
         ("Menu::Container::UpdateTransferConfirmation",
          (('arg0', 'initialize_confirmation'), ('sp10', 'confirmation_row_text'), ('sp20', 'confirmation_row_types'), ('temp_s0', 'confirmation_step')),
          "F02984 src\\MENU\\MENUD.PRG\\234.c:2332-2391 (func_801072B0). Named roles: initialize confirmation, confirmation row text, confirmation row types, confirmation step."),
-        ("Menu::Manual::CopyEncodedLine",
-         (('arg0', 'destination_text'), ('arg1', 'source_text')),
-         "F02996 src\\MENU\\MENUE.PRG\\494.c:561-575 (_vsStrcpy). Named roles: destination text, source text."),
         ("Menu::Manual::DrawUpperScrollFade",
          (('var_v0', 'transparency_source'), ('var_v1', 'transparency_destination')),
          "F03002 src\\MENU\\MENUE.PRG\\494.c:740-789 (_fadeMenuUpper). Named roles: transparency source, transparency destination."),
