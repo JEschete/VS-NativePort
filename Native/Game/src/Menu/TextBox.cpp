@@ -21,7 +21,7 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Map.h"
+#include "Menu/Score/ScoreScreen.h"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxFramesLive.h"
 #include "Render/Display.h"

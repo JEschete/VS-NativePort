@@ -118,6 +118,7 @@
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
+#include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -2155,6 +2156,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU5.PRG", 0x80102FCCu, 0u, (void*)&VS::Menu::map::LiveLoadBackground, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80103418u, 0u, (void*)&VS::Menu::map::LiveLoadSceneMap, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010451Cu, 0u, (void*)&VS::Menu::map::LiveUpdateAreaSelection, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80102D1Cu, 0u, (void*)&VS::Menu::map::LiveDrawAshleyMarker, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801074ACu, 0u, (void*)&VS::Menu::map::LiveDrawFeatureMarker, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80107630u, 0u, (void*)&VS::Menu::map::LiveDrawDoorStateMarker, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801079B8u, 0u, (void*)&VS::Menu::map::LiveDrawDoorLabel, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80107A9Cu, 0u, (void*)&VS::Menu::map::LiveAppendLabelLine, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x8010815Cu, 0u, (void*)&VS::Menu::map::LiveDrawConnectingAreaLabel, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80108274u, 0u, (void*)&VS::Menu::map::LiveQueueLabel, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x8010839Cu, 0u, (void*)&VS::Menu::map::LiveShouldDrawDoorStateMarker, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

@@ -1689,6 +1689,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::map::LiveLoadBackground": r"Native\Game\include\Menu\MapLoadingLive.hpp",
     "VS::Menu::map::LiveLoadSceneMap": r"Native\Game\include\Menu\MapLoadingLive.hpp",
     "VS::Menu::map::LiveUpdateAreaSelection": r"Native\Game\include\Menu\MapLoadingLive.hpp",
+    "VS::Menu::map::LiveDrawAshleyMarker": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveDrawFeatureMarker": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveDrawDoorStateMarker": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveDrawDoorLabel": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveAppendLabelLine": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveDrawConnectingAreaLabel": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveQueueLabel": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveShouldDrawDoorStateMarker": r"Native\Game\include\Menu\MapMarkersLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3022,6 +3030,14 @@ OWNED_CALL_BINDINGS["F04147"] = "VS::Menu::map::LivePollMenuReady"
 OWNED_CALL_BINDINGS["F04148"] = "VS::Menu::map::LiveLoadBackground"
 OWNED_CALL_BINDINGS["F04150"] = "VS::Menu::map::LiveLoadSceneMap"
 OWNED_CALL_BINDINGS["F02691"] = "VS::Menu::map::LiveUpdateAreaSelection"
+OWNED_CALL_BINDINGS["F02684"] = "VS::Menu::map::LiveDrawAshleyMarker"
+OWNED_CALL_BINDINGS["F02705"] = "VS::Menu::map::LiveDrawFeatureMarker"
+OWNED_CALL_BINDINGS["F02706"] = "VS::Menu::map::LiveDrawDoorStateMarker"
+OWNED_CALL_BINDINGS["F02707"] = "VS::Menu::map::LiveDrawDoorLabel"
+OWNED_CALL_BINDINGS["F02708"] = "VS::Menu::map::LiveAppendLabelLine"
+OWNED_CALL_BINDINGS["F02711"] = "VS::Menu::map::LiveDrawConnectingAreaLabel"
+OWNED_CALL_BINDINGS["F02712"] = "VS::Menu::map::LiveQueueLabel"
+OWNED_CALL_BINDINGS["F02714"] = "VS::Menu::map::LiveShouldDrawDoorStateMarker"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4860,6 +4876,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU5.PRG", 0x80102FCC, "VS::Menu::map::LiveLoadBackground"),  # F04148
     ("MENU/MENU5.PRG", 0x80103418, "VS::Menu::map::LiveLoadSceneMap"),  # F04150
     ("MENU/MENU5.PRG", 0x8010451C, "VS::Menu::map::LiveUpdateAreaSelection"),  # F02691
+    ("MENU/MENU5.PRG", 0x80102D1C, "VS::Menu::map::LiveDrawAshleyMarker"),  # F02684
+    ("MENU/MENU5.PRG", 0x801074AC, "VS::Menu::map::LiveDrawFeatureMarker"),  # F02705
+    ("MENU/MENU5.PRG", 0x80107630, "VS::Menu::map::LiveDrawDoorStateMarker"),  # F02706
+    ("MENU/MENU5.PRG", 0x801079B8, "VS::Menu::map::LiveDrawDoorLabel"),  # F02707
+    ("MENU/MENU5.PRG", 0x80107A9C, "VS::Menu::map::LiveAppendLabelLine"),  # F02708
+    ("MENU/MENU5.PRG", 0x8010815C, "VS::Menu::map::LiveDrawConnectingAreaLabel"),  # F02711
+    ("MENU/MENU5.PRG", 0x80108274, "VS::Menu::map::LiveQueueLabel"),  # F02712
+    ("MENU/MENU5.PRG", 0x8010839C, "VS::Menu::map::LiveShouldDrawDoorStateMarker"),  # F02714
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -7540,18 +7564,12 @@ REGEX_FIXES += [
         ("Menu::Map::DrawControls",
          (('s1', 'legacy_button_render_scratch'),),
          "F02704 src\\MENU\\MENU5.PRG\\4D8.c:1991-2151 (_drawUIControls). Named roles: legacy button render scratch. Retained: s0: Six distinct block-local aliases of original address 0x1F800000, each reading ordering-table slot 1 for a control state."),
-        ("Menu::Map::DrawDoorStateMarker",
-         (('new_var', 'legacy_render_scratch'), ('s6', 'zero_based_marker_id')),
-         "F02706 src\\MENU\\MENU5.PRG\\4D8.c:2180-2222 (func_80107630). Named roles: legacy render scratch, zero based marker id."),
         ("Menu::Map::DrawCompass",
          (('new_var2', 'legacy_primitive_scratch'), ('new_var3', 'legacy_ordering_table_scratch'), ('new_var4', 'compass_texture_right_u')),
          "F02709 src\\MENU\\MENU5.PRG\\4D8.c:2272-2375 (_renderCompass). Named roles: legacy primitive scratch, legacy ordering table scratch, compass texture right u."),
         ("Menu::Map::ComputeCompassCorners",
          (('arg0', 'compass_center_x'), ('arg1', 'compass_center_y'), ('arg2', 'compass_half_width'), ('arg3', 'compass_half_height'), ('arg4', 'compass_angle'), ('temp_s1', 'angle_sine'), ('temp_v0', 'angle_cosine')),
          "F02710 src\\MENU\\MENU5.PRG\\4D8.c:2377-2398 (_computeRotatedRect). Named roles: compass center x, compass center y, compass half width, compass half height, compass angle, angle sine, angle cosine."),
-        ("Menu::Map::ShouldDrawDoorStateMarker",
-         (('arg0', 'door_state_id'), ('arg1', 'zone_id'), ('arg2', 'map_id'), ('temp_a2', 'sigil_door_kind')),
-         "F02714 src\\MENU\\MENU5.PRG\\4D8.c:2471-2479 (func_8010839C). Named roles: door state id, zone id, map id, sigil door kind."),
         ("Menu::Files::DrawHpMpSummary",
          (('new_var4', 'value_right_edge_offset'),),
          "F02743 src\\MENU\\MENU7.PRG\\260.c:1270-1344 (_drawHPMP). Named roles: value right edge offset."),

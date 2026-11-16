@@ -357,6 +357,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\MapNavigationLive.cpp",
                 r"src\Effects\WeatherRenderLive.cpp",
                 r"src\Menu\MapLoadingLive.cpp",
+                r"src\Menu\MapMarkersLive.cpp",
                 r"src\Effects\ParticleMotionLive.cpp",
                 r"src\Effects\ParticleTextureAnimationLive.cpp",
                 r"src\Effects\BoneTrailLive.cpp",

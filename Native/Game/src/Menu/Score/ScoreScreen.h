@@ -8,6 +8,12 @@ typedef struct Menu_Score_EnemyEntry Menu_Score_EnemyEntry;
 typedef struct Menu_Score_Row Menu_Score_Row;
 typedef struct Menu_Score_ZudHeader Menu_Score_ZudHeader;
 
+// decomp: src/include/gpu.h:95
+#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
+
+// decomp: src/include/gpu.h:97
+#define vs_getWH(w, h) vs_getXY((w), (h))
+
 // decomp: src/include/gpu.h:99
 #define vs_getTpage(x, y, tp, abr, dtd)                                                  \
     ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))

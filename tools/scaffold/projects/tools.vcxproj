@@ -798,6 +798,16 @@
     <None Include="..\..\port\differentials\map_loading_f04147.py" />
     <None Include="..\..\port\differentials\map_loading_f04148.py" />
     <None Include="..\..\port\differentials\map_loading_f04150.py" />
+    <None Include="..\..\port\differentials\map_markers_common.py" />
+    <None Include="..\..\port\differentials\map_markers_driver.cpp" />
+    <None Include="..\..\port\differentials\map_markers_f02684.py" />
+    <None Include="..\..\port\differentials\map_markers_f02705.py" />
+    <None Include="..\..\port\differentials\map_markers_f02706.py" />
+    <None Include="..\..\port\differentials\map_markers_f02707.py" />
+    <None Include="..\..\port\differentials\map_markers_f02708.py" />
+    <None Include="..\..\port\differentials\map_markers_f02711.py" />
+    <None Include="..\..\port\differentials\map_markers_f02712.py" />
+    <None Include="..\..\port\differentials\map_markers_f02714.py" />
     <None Include="..\..\port\differentials\map_navigation_common.py" />
     <None Include="..\..\port\differentials\map_navigation_driver.cpp" />
     <None Include="..\..\port\differentials\map_navigation_f02692.py" />

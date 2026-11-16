@@ -8,7 +8,7 @@ extern "C" {
 #include "Battle/ValueLabels.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/Map.h"
+#include "Menu/Score/ScoreScreen.h"
 #include "Render/Render.h"
 #include "State/Timers.h"
 

@@ -38,7 +38,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Manual.h"
-#include "Menu/Map.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"

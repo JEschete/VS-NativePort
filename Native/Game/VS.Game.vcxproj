@@ -1931,6 +1931,10 @@
     <ClCompile Include="src\Menu\MapLoadingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\MapMarkers.cpp" />
+    <ClCompile Include="src\Menu\MapMarkersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\MapNavigation.cpp" />
     <ClCompile Include="src\Menu\MapNavigationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2880,6 +2884,8 @@
     <ClInclude Include="include\Menu\MagicSpellMenu.hpp" />
     <ClInclude Include="include\Menu\MapLoading.hpp" />
     <ClInclude Include="include\Menu\MapLoadingLive.hpp" />
+    <ClInclude Include="include\Menu\MapMarkers.hpp" />
+    <ClInclude Include="include\Menu\MapMarkersLive.hpp" />
     <ClInclude Include="include\Menu\MapNavigation.hpp" />
     <ClInclude Include="include\Menu\MapNavigationLive.hpp" />
     <ClInclude Include="include\Menu\Options.hpp" />

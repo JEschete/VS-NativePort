@@ -10,13 +10,13 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
+#include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -25,11 +25,9 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/TextBoxes.h"
 #include "Content/DiscLayout.h"
-#include "Content/StringTables.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
 #include "Field/Map.h"
-#include "Field/RoomSwitchesLive.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
@@ -37,10 +35,10 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
+#include "Menu/Score/ScoreScreen.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Progress.h"
 #include "State/StateFlags.h"
 
 // decomp: D_80102C40 (D_80102C40@src/MENU/MENU5.PRG/4D8.c)
@@ -205,19 +203,6 @@ short Menu_Map_uiAnimationState;
 
 // decomp: local static of vs_menu5_exec, at file scope so the module reset reaches it
 static RECT Menu_Map_screenMenuBgBackRects[2];
-
-// decomp: MENU5.PRG _renderDefaultIcon (src/MENU/MENU5.PRG/4D8.c:106)
-void Menu_Map_DrawAshleyMarker(int id, int xy, int brightness, u_long* nextPrim)
-{
-    if (nextPrim == 0) {
-        nextPrim = (u_long *)(Render_frameScratch.overlayOrderingTable);
-    }
-
-    VS::Render::QueueLiveSpriteWithTexturePage(128, xy, vs_getWH(16, 16), nextPrim)[4] =
-        ((id + 4) << 4) | (getClut(976, 223) << 16) | 0x8000;
-
-    ((u_long*)Render_frameScratch.primitiveCursor)[-4] = (int)(brightness | 0x64000000);
-}
 
 // decomp: MENU5.PRG vs_menu5_exec (src/MENU/MENU5.PRG/4D8.c:240)
 int Menu_Map_UpdateScreen(u_char* state)
@@ -1096,10 +1081,10 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
         sp3C = 0;
         *(void**)Core_ScratchAddr(0) = tile;
 
-        if ((room_element_cursor[3] != 0) && (Menu_Map_ShouldDrawDoorStateMarker(room_element_cursor[3], zone_id, map_id) != 0)
+        if ((room_element_cursor[3] != 0) && (VS::Menu::map::LiveShouldDrawDoorStateMarker(room_element_cursor[3], zone_id, map_id) != 0)
             && (roomIndex == Menu_Map_currentRoomIndex)) {
 
-            Menu_Map_DrawDoorStateMarker(projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE, room_element_cursor[3]);
+            VS::Menu::map::LiveDrawDoorStateMarker(projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE, room_element_cursor[3]);
 
             tile = (TILE *)(*(void**)Core_ScratchAddr(0));
             sp3C = 1;
@@ -1108,8 +1093,8 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
         if (sp3C == 0) {
             if ((room_element_cursor[2] & 4) && (roomIndex == Menu_Map_currentRoomIndex)) {
 
-                Menu_Map_DrawFeatureMarker(0, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
-                Menu_Map_QueueLabel(projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1], 1, room_element_cursor[1]);
+                VS::Menu::map::LiveDrawFeatureMarker(0, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
+                VS::Menu::map::LiveQueueLabel(projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1], 1, room_element_cursor[1]);
 
                 if ((roomIndex == Menu_Map_isCurrentScene) && (i == Field_enteredDoorId)) {
                     if (Menu_Map_menuFramesCounter & 0x10) {
@@ -1171,7 +1156,7 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
 
                 switch (available_marker_kinds[(Menu_Map_menuFramesCounter >> 5) % j]) {
                 case 0:
-                    Menu_Map_DrawAshleyMarker(0,
+                    VS::Menu::map::LiveDrawAshleyMarker(0,
                         ((projected_vertex_rows[room_element_cursor[0]][0] - 8) & 0xFFFF)
                             | ((projected_vertex_rows[room_element_cursor[0]][1] << 16) + 0xFFF80000),
                         *((Menu_Map_menuFramesCounter & 0xF) + (new_var = Menu_Map_kAshleyIconBrightness)),
@@ -1179,15 +1164,15 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
                     break;
 
                 case 1:
-                    Menu_Map_DrawFeatureMarker(2, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
+                    VS::Menu::map::LiveDrawFeatureMarker(2, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
                     break;
 
                 case 2:
-                    Menu_Map_DrawFeatureMarker(1, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
+                    VS::Menu::map::LiveDrawFeatureMarker(1, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
                     break;
 
                 case 3:
-                    Menu_Map_DrawFeatureMarker(3, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
+                    VS::Menu::map::LiveDrawFeatureMarker(3, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
                     break;
                 }
             }
@@ -1541,121 +1526,6 @@ void Menu_Map_DrawControls(void)
     }
 }
 
-// decomp: MENU5.PRG _renderIcon (src/MENU/MENU5.PRG/4D8.c:2158)
-void Menu_Map_DrawFeatureMarker(int id, int x, int y)
-{
-    RECT* icon;
-    void** scratch = (void**)Core_ScratchAddr(0);
-    POLY_FT4* poly = (POLY_FT4 *)(scratch[0]);
-
-    setPolyFT4(poly);
-    setShadeTex(poly, 1);
-
-    icon = &Menu_Map_iconRects[id];
-
-    setXY4(poly, x - icon->w / 2, y, icon->w + (x - icon->w / 2), y, x - icon->w / 2,
-        y + 8, icon->w + (x - icon->w / 2), y + 8);
-    setUV4(poly, icon->x, icon->y, icon->x + icon->w, icon->y, icon->x, icon->y + 8,
-        icon->x + icon->w, icon->y + 8);
-    setTPage(poly, 0, 0, 768, 0);
-    setClut(poly, 848, 223);
-
-    AddPrim(((u_char*)(scratch[1])) + 28, poly++);
-    scratch[0] = poly;
-}
-
-// decomp: MENU5.PRG func_80107630 (src/MENU/MENU5.PRG/4D8.c:2180)
-void Menu_Map_DrawDoorStateMarker(int x, int y, int id)
-{
-    RECT* rect0;
-    RECT* rect1;
-    int temp;
-    void** legacy_render_scratch = (void**)Core_ScratchAddr(0);
-    POLY_FT4* poly = (POLY_FT4 *)(legacy_render_scratch[0]);
-    int zero_based_marker_id = (id - 1);
-
-    id = Audio_Seq_unusedStateFlags.opaque33F[id] & 1;
-    rect0 = &Menu_Map_kDoorMarkerUpperRects[id];
-
-    setPolyFT4(poly);
-    setShadeTex(poly, 1);
-    setXY4(poly, x - (rect0->w / 2), y, rect0->w + (x - rect0->w / 2), y,
-        x - (rect0->w / 2), rect0->h + y, rect0->w + (x - rect0->w / 2), rect0->h + y);
-    setUV4(poly, rect0->x, rect0->y, rect0->x + rect0->w, rect0->y, rect0->x,
-        rect0->y + rect0->h, rect0->x + rect0->w, rect0->y + rect0->h);
-    setTPage(poly, 0, 0, 768, 0);
-    setClut(poly, 976, 223);
-
-    temp = zero_based_marker_id & 0x7F;
-
-    AddPrim(((u_char*)(legacy_render_scratch[1])) + 28, poly++);
-
-    y += rect0->h;
-    rect1 = &Menu_Map_kDoorMarkerLowerRects[id];
-
-    setPolyFT4(poly);
-    setShadeTex(poly, 1);
-    setXY4(poly, x - (rect1->w / 2), y, rect1->w + (x - rect1->w / 2), y,
-        x - (rect1->w / 2), rect1->h + y, rect1->w + (x - rect1->w / 2), rect1->h + y);
-    setUV4(poly, rect1->x, rect1->y, rect1->x + rect1->w, rect1->y, rect1->x,
-        rect1->y + rect1->h, rect1->x + rect1->w, rect1->y + rect1->h);
-    setTPage(poly, 0, 0, 768, 0);
-    setClut(poly, 864, 223);
-
-    AddPrim(((u_char*)(legacy_render_scratch[1])) + 28, poly++);
-
-    legacy_render_scratch[0] = poly;
-
-    Menu_Map_QueueLabel(x, y, 0, temp);
-}
-
-// decomp: MENU5.PRG _renderDoorName (src/MENU/MENU5.PRG/4D8.c:2227)
-void Menu_Map_DrawDoorLabel(int x, int y, int doorId)
-{
-    int linePivotX;
-    int xOffset = 186 - x;
-    Menu_Framework_MenuRow* menuItem;
-
-    if (xOffset < 0) {
-        xOffset += 3;
-    }
-
-    linePivotX = xOffset >> 2;
-
-    if (linePivotX >= 0) {
-        linePivotX = 186 - linePivotX;
-    } else {
-        linePivotX = 186;
-    }
-
-    Menu_Map_AppendLabelLine(x, y, linePivotX, Menu_Map_mapLabelY + 8);
-    Menu_Map_AppendLabelLine(linePivotX, Menu_Map_mapLabelY + 8, 194, Menu_Map_mapLabelY + 8);
-
-    menuItem =
-        VS::Menu::Framework::SetLiveMenuItem(0, 194, Menu_Map_mapLabelY, 128, 0, (char*)&Menu_Map_doors[Menu_Map_doors[doorId]]);
-    menuItem->backgroundWidth = 16;
-
-    Menu_Map_mapLabelY -= 16;
-
-    VS::Menu::Framework::DrawLiveMenuItem(menuItem);
-    VS::Menu::Framework::LiveMenuItem(0)->state = 0;
-}
-
-// decomp: MENU5.PRG _insertLine (src/MENU/MENU5.PRG/4D8.c:2258)
-void Menu_Map_AppendLabelLine(int x0, int y0, int x1, int y1)
-{
-    u_long** p = (u_long**)Core_ScratchAddr(0);
-    LINE_F2* line = *(LINE_F2**)p;
-
-    setLineF2(line);
-    setXY2(line, x0, y0, x1, y1);
-    setRGB0(line, 128, 128, 128);
-
-    AddPrim(p[1] + 8, line++);
-
-    p[0] = (u_long*)line;
-}
-
 // decomp: MENU5.PRG _renderCompass (src/MENU/MENU5.PRG/4D8.c:2272)
 void Menu_Map_DrawCompass(int x, int y, int angle)
 {
@@ -1786,55 +1656,6 @@ void Menu_Map_ComputeCompassCorners(int compass_center_x, int compass_center_y, 
     }
 }
 
-// decomp: MENU5.PRG _renderConnectingMapName (src/MENU/MENU5.PRG/4D8.c:2403)
-void Menu_Map_DrawConnectingAreaLabel(int x, int y, int mapId)
-{
-    int linePivotX;
-    Menu_Framework_MenuRow* menuItem;
-    int areaVisited;
-    int xOffset = 170 - x;
-
-    if (xOffset < 0) {
-        xOffset += 3;
-    }
-
-    linePivotX = xOffset >> 2;
-
-    if (linePivotX < 0) {
-        linePivotX = 170;
-    } else {
-        linePivotX = 170 - linePivotX;
-    }
-
-    Menu_Map_AppendLabelLine(x, y, linePivotX, Menu_Map_mapLabelY + 8);
-    Menu_Map_AppendLabelLine(linePivotX, Menu_Map_mapLabelY + 8, 194, Menu_Map_mapLabelY + 8);
-
-    areaVisited = State_roomVisitProgress.areaFlags[mapId >> 5] & (1 << (mapId & 0x1F));
-
-    if (!areaVisited) {
-        mapId = Text_Menu5_connectingMaps_Index_notVisited;
-    }
-
-    menuItem = VS::Menu::Framework::SetLiveMenuItem(
-        0, 178, Menu_Map_mapLabelY, 144, 0, (char*)&Menu_Map_connectingMaps[Menu_Map_connectingMaps[mapId]]);
-    menuItem->backgroundWidth = 8;
-
-    Menu_Map_mapLabelY -= 16;
-
-    VS::Menu::Framework::DrawLiveMenuItem(menuItem);
-    VS::Menu::Framework::LiveMenuItem(0)->state = 0;
-}
-
-// decomp: MENU5.PRG _addMapLabel (src/MENU/MENU5.PRG/4D8.c:2441)
-void Menu_Map_QueueLabel(int x, int y, int type, int labelId)
-{
-    Menu_Map_mapLabels[Menu_Map_mapLabelCount].x = x;
-    Menu_Map_mapLabels[Menu_Map_mapLabelCount].y = y;
-    Menu_Map_mapLabels[Menu_Map_mapLabelCount].type = type;
-    Menu_Map_mapLabels[Menu_Map_mapLabelCount].id = labelId;
-    ++Menu_Map_mapLabelCount;
-}
-
 // decomp: MENU5.PRG renderMapLabels (src/MENU/MENU5.PRG/4D8.c:2450)
 void Menu_Map_DrawLabels(void)
 {
@@ -1846,26 +1667,15 @@ void Menu_Map_DrawLabels(void)
 
     for (i = 0; i < Menu_Map_mapLabelCount; ++i) {
         if (Menu_Map_mapLabels[i].type == 0) {
-            Menu_Map_DrawDoorLabel(Menu_Map_mapLabels[i].x, Menu_Map_mapLabels[i].y, Menu_Map_mapLabels[i].id);
+            VS::Menu::map::LiveDrawDoorLabel(Menu_Map_mapLabels[i].x, Menu_Map_mapLabels[i].y, Menu_Map_mapLabels[i].id);
         }
     }
 
     for (i = 0; i < Menu_Map_mapLabelCount; ++i) {
         if (Menu_Map_mapLabels[i].type != 0) {
-            Menu_Map_DrawConnectingAreaLabel(Menu_Map_mapLabels[i].x, Menu_Map_mapLabels[i].y, Menu_Map_mapLabels[i].id);
+            VS::Menu::map::LiveDrawConnectingAreaLabel(Menu_Map_mapLabels[i].x, Menu_Map_mapLabels[i].y, Menu_Map_mapLabels[i].id);
         }
     }
-}
-
-// decomp: MENU5.PRG func_8010839C (src/MENU/MENU5.PRG/4D8.c:2471)
-int Menu_Map_ShouldDrawDoorStateMarker(int door_state_id, int zone_id, int map_id)
-{
-    u_int sigil_door_kind = door_state_id - 0x41;
-
-    if ((sigil_door_kind < 7) && ((Field_IsRoomSigilDoorUnlockedEntry(zone_id, map_id, sigil_door_kind) != 0))) {
-        return 0;
-    }
-    return Audio_Seq_unusedStateFlags.opaque33F[door_state_id] < 2;
 }
 
 // MENU5.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

@@ -6,12 +6,6 @@
 typedef struct Menu_Map_CompassBound Menu_Map_CompassBound;
 typedef struct Menu_Map_MapLabel Menu_Map_MapLabel;
 
-// decomp: src/include/gpu.h:95
-#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
-
-// decomp: src/include/gpu.h:97
-#define vs_getWH(w, h) vs_getXY((w), (h))
-
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8) (src/MENU/MENU5.PRG/4D8.c:1064)
 struct Menu_Map_CompassBound {
     int x;
@@ -77,7 +71,6 @@ extern int Menu_Map_sceneRowIdMap[32];;
 extern int Menu_Map_selectedMap;;
 extern int Menu_Map_triggerHideUi;;
 extern short Menu_Map_uiAnimationState;;
-void Menu_Map_DrawAshleyMarker(int id, int xy, int brightness, u_long* nextPrim);
 int Menu_Map_UpdateScreen(u_char* state);
 int Menu_Map_UpdateMapMenu(void);
 void Menu_Map_DrawFrame(void);
@@ -88,16 +81,9 @@ void Menu_Map_DarkenBackground(void);
 void Menu_Map_DrawPalingDistortion(void);
 void Menu_Map_DrawControlBackdrop(int x, int y, int w, int h);
 void Menu_Map_DrawControls(void);
-void Menu_Map_DrawFeatureMarker(int id, int x, int y);
-void Menu_Map_DrawDoorStateMarker(int x, int y, int id);
-void Menu_Map_DrawDoorLabel(int x, int y, int doorId);
-void Menu_Map_AppendLabelLine(int x0, int y0, int x1, int y1);
 void Menu_Map_DrawCompass(int x, int y, int angle);
 void Menu_Map_ComputeCompassCorners(int compass_center_x, int compass_center_y, int compass_half_width, int compass_half_height, int compass_angle);
-void Menu_Map_DrawConnectingAreaLabel(int x, int y, int mapId);
-void Menu_Map_QueueLabel(int x, int y, int type, int labelId);
 void Menu_Map_DrawLabels(void);
-int Menu_Map_ShouldDrawDoorStateMarker(int door_state_id, int zone_id, int map_id);
 void Menu_Map_ResetMenu5Statics(void);
 
 #endif // VS_MENU_MAP_H_DECLS
