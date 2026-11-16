@@ -478,6 +478,22 @@ These scripts regenerate committed files. They are not part of the build.
 | `python tools\naming\merge_names.py --check-all` | Validate the function catalog naming |
 | `python tools\scaffold\gen_solution.py` | Regenerate the `.sln` / `.vcxproj` files, including the `Tools` solution folder that shows `tools\`, `C:\Tools` and `D:\Dev\Modding\VS-Workshop` (source, docs, scripts; set `VS_EXTERNAL_TOOLS` / `VS_WORKSHOP` for other locations; both are optional: on a machine without them the projects list nothing and regenerating leaves them alone) and `Solution Items`, discovered from the repository (root files, all of `Docs\` with its subfolders, `.github\`; new files appear on the next run). **Run it after any project change**; do not hand-edit the project files. |
 
+The copier also needs the extracted `Native\data\disc\EFFECT\PLG*.BIN` files to
+resolve identical plugin overlays, and the pinned reference's `splat_symbols.csv`
+analysis for `BATTLE\BATTLE.PRG` and `SLUS_010.40` to relocate module pointer tables.
+Missing inputs fail before generated files are written. The symbol maps default
+to `resources\rood-reverseWin\build\splat-artifacts`; an isolated worktree can read
+the same analysis without modifying the reference:
+
+```powershell
+python tools\port\copy_to_native.py --splat-artifacts D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\build\splat-artifacts
+```
+
+Generate declaration, reference and hazard indexes inside each worktree from its
+own source bytes. Do not copy those indexes between LF/CRLF checkouts. Sharing
+read-only extracted data and the matching symbol-map analysis does not replace
+worktree-local indexing.
+
 **Legacy, do not use:** `tools\Setup-Windows.ps1`, `tools\Probe-Native.ps1` and `tools\windows.py` belong to the
 earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). They are not part of this build.
 

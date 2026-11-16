@@ -35,7 +35,7 @@ The output is regenerated from the decomp until each item is modernized. Two saf
                generated file was edited by hand, or a file to be written exists and is not generated, the run
                stops without writing anything: take ownership with own.py (or revert the edit) instead.
 
-  python tools\\port\\copy_to_native.py [--report] [--mark]
+  python tools\\port\\copy_to_native.py [--report] [--mark] [--splat-artifacts <directory>]
 """
 from __future__ import annotations
 
@@ -1849,8 +1849,7 @@ class Copier:
                                 key=lambda r: (r["file"], int(r["line"] or 0)))
                 row = firsts[0] if firsts else None
             if row is None:
-                self.report["plugin-entry-unresolved"].append(f"{name} ({ov})")
-                continue
+                raise ValueError(f"Unresolved effect entry {name} ({ov}); check the extracted effect plugins")
             cname = self.promoted_name(row["id"]) or c_name(row["final_name"])
             self.plugin_ref[off] = cname
             if call:
@@ -1859,12 +1858,17 @@ class Copier:
     @staticmethod
     def plugin_twins() -> dict[str, str]:
         """48 plugin files on the disc have no decomp source because they are byte-identical to one that does
-        (plan §4.6): map each to that plugin, comparing the shipped files in SLUS-01040\\EFFECT."""
+        (plan §4.6): map each to that plugin using the extracted Native\\data\\disc\\EFFECT files."""
         import hashlib
-        root, covered = REPO / "SLUS-01040" / "EFFECT", {p.name for p in (dx.SRC / "EFFECT").iterdir() if p.is_dir()}
+        root = REPO / "Native" / "data" / "disc" / "EFFECT"
+        plugins = sorted(root.glob("PLG*.BIN"))
+        if not plugins:
+            raise FileNotFoundError(f"Missing extracted effect plugins in {root}; run VS.Extract first")
+        covered = {p.name for p in (dx.SRC / "EFFECT").iterdir() if p.is_dir()}
         by_hash: dict[str, list[str]] = collections.defaultdict(list)
-        for p in sorted(root.glob("PLG*.BIN")):
+        for p in plugins:
             data = p.read_bytes()
+            # Shipped zero-length PLGs are unused slots, not equivalent executable overlays.
             if data:
                 by_hash[hashlib.sha1(data).hexdigest()].append(p.name)
         twins = {}
@@ -2103,8 +2107,8 @@ class Copier:
         for module in sorted(modules):
             path = self.SPLAT_ARTIFACTS / module / "splat_symbols.csv"
             if not path.exists():
-                self.report["module-pointers-no-symbols"].append(module)
-                continue
+                raise FileNotFoundError(
+                    f"Missing module symbol map: {path}; use --splat-artifacts to select the reference analysis")
             seen = set()
             with path.open(encoding="utf-8", newline="") as fh:
                 splat = [s for s in csv.DictReader(fh) if s["defined"] == "True"]
@@ -2670,8 +2674,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", action="store_true", help="print the full report lists")
     ap.add_argument("--mark", action="store_true", help="after a successful build: fill copied/compiles")
+    ap.add_argument("--splat-artifacts", type=Path, default=Copier.SPLAT_ARTIFACTS,
+                    help="read-only splat symbol-map directory for the pinned reference")
     a = ap.parse_args()
     cp = Copier()
+    cp.SPLAT_ARTIFACTS = a.splat_artifacts
     rendered = apply_cpp_adaptations(render(cp))
     cp.report_type_cycles()
     write_output(cp, rendered)

@@ -1,5 +1,6 @@
 """Regressions for native source adaptations, without game assets."""
 
+import collections
 import contextlib
 import csv
 import json
@@ -33,6 +34,81 @@ def unpromoted_opcode_handlers(*identifiers: str):
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_plugin_twins_use_extracted_data_across_checkout_roots(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for checkout in ("coordinator", "isolated"):
+                root = Path(directory) / checkout
+                source = root / "resources" / "rood-reverseWin" / "src"
+                plugins = root / "Native" / "data" / "disc" / "EFFECT"
+                plugins.mkdir(parents=True)
+                (source / "EFFECT" / "PLG001.BIN").mkdir(parents=True)
+                (source / "EFFECT" / "PLG004.BIN").mkdir()
+                for name, content in (
+                    ("PLG001.BIN", b"first"), ("PLG002.BIN", b"first"),
+                    ("PLG003.BIN", b"second"), ("PLG004.BIN", b"second"),
+                    ("PLG005.BIN", b"unique"),
+                ):
+                    (plugins / name).write_bytes(content)
+                with self.subTest(checkout=checkout), \
+                        mock.patch.object(copy_to_native, "REPO", root), \
+                        mock.patch.object(copy_to_native.dx, "SRC", source):
+                    self.assertEqual(copy_to_native.Copier.plugin_twins(), {
+                        "PLG002.BIN": "PLG001.BIN", "PLG003.BIN": "PLG004.BIN",
+                    })
+
+    def test_plugin_twins_refuse_missing_and_empty_extracted_plugins(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "resources" / "rood-reverseWin" / "src"
+            (source / "EFFECT").mkdir(parents=True)
+            plugins = root / "Native" / "data" / "disc" / "EFFECT"
+            with mock.patch.object(copy_to_native, "REPO", root), \
+                    mock.patch.object(copy_to_native.dx, "SRC", source):
+                with self.assertRaisesRegex(FileNotFoundError, "extracted effect plugins"):
+                    copy_to_native.Copier.plugin_twins()
+                plugins.mkdir(parents=True)
+                with self.assertRaisesRegex(FileNotFoundError, "extracted effect plugins"):
+                    copy_to_native.Copier.plugin_twins()
+                (plugins / "PLG001.BIN").write_bytes(b"")
+                (plugins / "PLG002.BIN").write_bytes(b"")
+                (plugins / "PLG003.BIN").write_bytes(b"used")
+                (plugins / "PLG004.BIN").write_bytes(b"used")
+                (source / "EFFECT" / "PLG001.BIN").mkdir()
+                (source / "EFFECT" / "PLG003.BIN").mkdir()
+                self.assertEqual(copy_to_native.Copier.plugin_twins(), {"PLG004.BIN": "PLG003.BIN"})
+
+    def test_plugin_slots_refuse_an_unresolved_overlay_entry(self):
+        source = b"""
+int _effectEntryPointIndices[] = {0};
+int _plgFiles[] = {PLG(002)};
+void* _effectEntryPoints[] = {func_800F9800};
+int func_800F9800(void) {
+    func_800F9800(NULL, 2, 0);
+}
+"""
+        copier = copy_to_native.Copier.__new__(copy_to_native.Copier)
+        copier.src = SimpleNamespace(load=lambda _rel: source)
+        copier.cat = []
+        copier.report = collections.defaultdict(list)
+        copier.plugin_twins = lambda: {}
+        with self.assertRaisesRegex(ValueError, "func_800F9800.*PLG002.BIN"):
+            copier.load_plugin_slots()
+
+    def test_module_pointers_refuse_a_missing_symbol_map(self):
+        copier = copy_to_native.Copier.__new__(copy_to_native.Copier)
+        copier.module_pointers = [({"id": "G00001", "name": "table", "size": "4"}, "table", 1)]
+        copier.module_data_source = lambda _row, **_kwargs: ("BATTLE/BATTLE.PRG", 0)
+        copier.files = {}
+        copier.owned = {}
+        copier.cat_by_id = {}
+        copier.data = []
+        copier.report = collections.defaultdict(list)
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.dict(copy_fixups.NATIVE_FUNCTION_REDIRECTS, {}, clear=True):
+            copier.SPLAT_ARTIFACTS = Path(directory)
+            with self.assertRaisesRegex(FileNotFoundError, "BATTLE.PRG.*splat_symbols.csv"):
+                copier.copy_module_pointers()
+
     def test_reset_initializer_qualifies_function_pointers_not_their_returns(self):
         declarations = (
             ("int (*initial[])(int) = { first, second }",
