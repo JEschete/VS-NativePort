@@ -677,7 +677,7 @@
 ],
 "Native\\Game\\src\\Menu\\Manual.cpp": [
 [
-274,
+275,
 [
 "            Menu_Manual_helpText = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size);",
 "            Menu_Manual_helpAssets = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size);"
@@ -688,7 +688,7 @@
 ]
 ],
 [
-581,
+547,
 [
 "    area = p->primitiveCursor;"
 ],
@@ -697,16 +697,16 @@
 ]
 ],
 [
-595,
+561,
 [
-"        Menu_Manual_DrawIllustration(&spriteData[spriteData[i + 1]]);"
+"        VS::Menu::manual::LiveDrawIllustration(&spriteData[spriteData[i + 1]]);"
 ],
 [
-"        Menu_Manual_DrawIllustration((short *)(&spriteData[spriteData[i + 1]]));"
+"        VS::Menu::manual::LiveDrawIllustration((short *)(&spriteData[spriteData[i + 1]]));"
 ]
 ],
 [
-607,
+573,
 [
 "    area = q->primitiveCursor;"
 ],
@@ -715,16 +715,7 @@
 ]
 ],
 [
-684,
-[
-"            sprite = Render_frameScratch.primitiveCursor;"
-],
-[
-"            sprite = (SPRT *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-719,
+585,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -733,7 +724,7 @@
 ]
 ],
 [
-755,
+621,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -742,7 +733,7 @@
 ]
 ],
 [
-781,
+647,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
@@ -751,7 +742,7 @@
 ]
 ],
 [
-808,
+674,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -760,21 +751,12 @@
 ]
 ],
 [
-835,
+701,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
 [
 "    Render_frameScratch.primitiveCursor = ((u_char*)((void*)poly)) + 16 * sizeof(TILE);"
-]
-],
-[
-895,
-[
-"    line = Render_frameScratch.primitiveCursor;"
-],
-[
-"    line = (LINE_F2 *)(Render_frameScratch.primitiveCursor);"
 ]
 ]
 ],

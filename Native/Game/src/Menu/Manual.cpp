@@ -6,6 +6,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -299,8 +300,8 @@ int Menu_Manual_UpdateHelpPages(void)
             break;
         }
         VS::Content::ReleaseLiveDiscRequest(Menu_Manual_helpAssetsCdQueue);
-        Menu_Manual_UploadSpriteTiles(Menu_Manual_helpAssets + 2, Menu_Manual_helpAssets[0]);
-        Menu_Manual_UploadCluts(Menu_Manual_helpAssets + ((Menu_Manual_helpAssets[0] << 5) + 2), Menu_Manual_helpAssets[1]);
+        VS::Menu::manual::LiveUploadSpriteTiles(Menu_Manual_helpAssets + 2, Menu_Manual_helpAssets[0]);
+        VS::Menu::manual::LiveUploadCluts(Menu_Manual_helpAssets + ((Menu_Manual_helpAssets[0] << 5) + 2), Menu_Manual_helpAssets[1]);
         if (Menu_Manual_helpAssets != NULL) {
             VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpAssets);
         }
@@ -467,41 +468,6 @@ int Menu_Manual_UpdateTopicMenu(int init)
     return -1;
 }
 
-// decomp: MENUE.PRG _copySprites (src/MENU/MENUE.PRG/494.c:481)
-void Menu_Manual_UploadSpriteTiles(u_long const* buffer, int count)
-{
-    RECT rect;
-    int i;
-
-    i = 0;
-    rect.w = 4;
-    rect.h = 16;
-
-    for (i = 0; i < count; ++i) {
-        rect.x = (i % 48) * 4 + 832;
-        rect.y = (i / 48) * 16 + 256;
-        LoadImage2(&rect, (u_long*)buffer);
-        buffer += 4 * 16 / 2;
-    }
-}
-
-// decomp: MENUE.PRG _copyCluts (src/MENU/MENUE.PRG/494.c:498)
-void Menu_Manual_UploadCluts(u_long* buffer, int count)
-{
-    RECT rect;
-    int i;
-
-    rect.w = 16;
-    rect.h = 1;
-
-    for (i = 0; i < count; ++i) {
-        rect.x = (i % 16) * 16 + 768;
-        rect.y = i / 16 + 496;
-        LoadImage2(&rect, buffer);
-        buffer += 8;
-    }
-}
-
 // decomp: MENUE.PRG _getRoundedLineCount (src/MENU/MENUE.PRG/494.c:514)
 int Menu_Manual_LastPageLineOffset(void)
 {
@@ -584,7 +550,7 @@ void Menu_Manual_DrawPageContent(void)
     AddPrim(p->orderingTable, area++);
     p->primitiveCursor = area;
 
-    Menu_Manual_DrawDiagramLines();
+    VS::Menu::manual::LiveDrawDiagramLines();
 
     spriteOffset = Menu_Manual_helpText[0];
     if (spriteOffset < 0) {
@@ -593,7 +559,7 @@ void Menu_Manual_DrawPageContent(void)
     spriteData = (u_short*)Menu_Manual_helpText + 8 + (spriteOffset >> 2) * 2;
 
     for (i = 0; i < spriteData[0]; ++i) {
-        Menu_Manual_DrawIllustration((short *)(&spriteData[spriteData[i + 1]]));
+        VS::Menu::manual::LiveDrawIllustration((short *)(&spriteData[spriteData[i + 1]]));
     }
     if (Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip.x >= 320) {
         rect.x = 333;
@@ -609,106 +575,6 @@ void Menu_Manual_DrawPageContent(void)
     SetDrawArea(area, &rect);
     AddPrim(q->orderingTable, area++);
     q->primitiveCursor = area;
-}
-
-// decomp: MENUE.PRG _min (src/MENU/MENUE.PRG/494.c:619)
-int Menu_Manual_MinTileExtent(int remaining_extent, int tile_extent_limit)
-{
-    if (remaining_extent >= tile_extent_limit) {
-        return tile_extent_limit;
-    }
-    return remaining_extent;
-}
-
-// decomp: MENUE.PRG _add_int (src/MENU/MENUE.PRG/494.c:627)
-int Menu_Manual_AddSpriteOffset(int sprite_origin, int tile_offset) { return (sprite_origin + tile_offset); }
-
-// decomp: MENUE.PRG _drawSprite (src/MENU/MENUE.PRG/494.c:629)
-void Menu_Manual_DrawIllustration(short* data)
-{
-    short posX;
-    short posY;
-    short width;
-    short height;
-    short colors;
-    short clutPacked;
-    int spriteW;
-    int spriteH;
-    int tileStride;
-    int spriteX;
-    int spriteY;
-    int j;
-    int i;
-    SPRT* sprite;
-    Render_FrameScratch* scratch;
-    short tPage;
-
-    if ((*data != 0) && ((Menu_Manual_AdvanceVisibilityAnimation((Menu_Manual_AnimationState*)data) << 0x10) != 0)) {
-        return;
-    }
-
-    data += 8;
-    posX = *data++;
-    posY = *data++;
-    width = *data++;
-    height = *data++;
-    ++data; // num_sprites
-    colors = *data++;
-    clutPacked = *data++;
-
-    clutPacked =
-        ((((clutPacked % 16) << 4) + 0x300) >> 4) | (((clutPacked / 16) + 0x1F0) << 6);
-
-    tileStride = 8;
-
-    if (colors == 16) {
-        tileStride = 16;
-    }
-
-    for (i = 0; i < height; i += 16) {
-        spriteH = Menu_Manual_MinTileExtent(height - i, 16);
-
-        for (j = 0; j < width; ++data, j += tileStride) {
-            int spriteU0;
-            int spriteV0;
-
-            spriteW = Menu_Manual_MinTileExtent(width - j, tileStride);
-            spriteX = 0x0D;
-            spriteX = posX + (j + spriteX);
-            spriteY = Menu_Manual_AddSpriteOffset(posY, i + 0x37);
-            spriteY -= Menu_Manual_scrollPosition * 0xD;
-
-            if ((spriteY < 0x27) || (0xB9 <= spriteY)) {
-                continue;
-            }
-
-            sprite = (SPRT *)(Render_frameScratch.primitiveCursor);
-            setSprt(sprite);
-            setShadeTex(sprite, 1);
-            sprite->clut = clutPacked;
-            setXY0(sprite, spriteX, spriteY);
-
-            spriteU0 = (*data / 16);
-            tPage = spriteU0;
-            tPage = tPage % 3 + 0x1D;
-
-            if (colors == 16) {
-                sprite->u0 = ((*data - (spriteU0 << 4)) << 16) >> 12;
-            } else {
-                tPage |= 0x80;
-                sprite->u0 = ((*data - (spriteU0 << 4)) << 16) >> 13;
-            }
-
-            spriteV0 = (*data / 48);
-            sprite->v0 = (spriteV0 << 4);
-            setWH(sprite, spriteW, spriteH);
-
-            scratch = &Render_frameScratch;
-            AddPrim(scratch->orderingTable, sprite++);
-            scratch->primitiveCursor = (void*)sprite;
-            _insertTPage(0, tPage);
-        }
-    }
 }
 
 // decomp: MENUE.PRG _setPageBg (src/MENU/MENUE.PRG/494.c:716)
@@ -875,87 +741,6 @@ void Menu_Manual_DrawPageArrow(enum Menu_Manual_ArrowType arrowType)
     p = &Render_frameScratch;
     AddPrim(((u_long*)p->orderingTable) - 7, poly++);
     p->primitiveCursor = (void*)poly;
-}
-
-// decomp: MENUE.PRG _drawContentLines (src/MENU/MENUE.PRG/494.c:883)
-void Menu_Manual_DrawDiagramLines(void)
-{
-    short animationState;
-    short i;
-    short* linesData;
-    int linesOffset;
-    int spriteOffset;
-    LINE_F2* line;
-    short linesCount;
-    char* c;
-
-    if (Menu_Manual_helpText[2] <= 0) {
-        return;
-    }
-
-    line = (LINE_F2 *)(Render_frameScratch.primitiveCursor);
-
-    spriteOffset = Menu_Manual_helpText[0];
-    if (spriteOffset < 0) {
-        spriteOffset += 3;
-    }
-    spriteOffset >>= 2;
-
-    linesOffset = Menu_Manual_helpText[1];
-    if (linesOffset < 0) {
-        linesOffset += 3;
-    }
-
-    linesOffset = spriteOffset + (linesOffset >> 2);
-    linesData = (short*)&(Menu_Manual_helpText)[linesOffset + 4];
-
-    linesCount = *linesData++;
-
-    for (i = 0; i < linesCount; ++i) {
-        animationState = 0;
-        if (*linesData != 0) {
-            animationState = Menu_Manual_AdvanceVisibilityAnimation((Menu_Manual_AnimationState*)linesData);
-        }
-        linesData += 8;
-        setLineF2(line);
-        line->x0 = *linesData++ + 13;
-        line->y0 = *linesData++ + 55 - Menu_Manual_scrollPosition * 13;
-        line->x1 = *linesData++ + 13;
-        line->y1 = *linesData++ + 55 - Menu_Manual_scrollPosition * 13;
-        c = (char*)linesData;
-        setRGB0(line, c[0], c[1], c[2]);
-        linesData += 2;
-        if ((line->y0 < 55) && ((line->y1 >= 55) == 0)) {
-            continue;
-        }
-        if (((line->y0 < 186) || (line->y1 < 186)) && ((animationState << 16) == 0)) {
-            AddPrim(Render_frameScratch.orderingTable, line++);
-        }
-    }
-    Render_frameScratch.primitiveCursor = line;
-}
-
-// decomp: MENUE.PRG _getAnimationState (src/MENU/MENUE.PRG/494.c:940)
-short Menu_Manual_AdvanceVisibilityAnimation(Menu_Manual_AnimationState* state)
-{
-    short nextState;
-
-    if (state->currentFrame >= 16) {
-        return state->isActive;
-    }
-
-    nextState = state->frameMask >> state->currentFrame;
-    nextState = nextState & 1;
-
-    if ((++state->timer) >= state->frameDuration) {
-        state->timer = 0;
-        if ((++state->currentFrame) >= 16) {
-            if (state->repeat != 0) {
-                state->currentFrame = 0;
-            }
-        }
-    }
-    return state->isActive = nextState ^ 1;
 }
 
 // decomp: MENUE.PRG _drawControlsBg (src/MENU/MENUE.PRG/494.c:962)

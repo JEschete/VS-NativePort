@@ -1711,6 +1711,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Score::QueueLiveEnemyModelRead": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::LoadLiveEnemyModelParts": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::FreeLiveEnemyModelBuffer": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
+    "VS::Menu::manual::LiveUploadSpriteTiles": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
+    "VS::Menu::manual::LiveUploadCluts": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
+    "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
+    "VS::Menu::manual::LiveDrawDiagramLines": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
+    "VS::Menu::manual::LiveAdvanceVisibilityAnimation": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3066,6 +3071,11 @@ OWNED_CALL_BINDINGS["F02838"] = "VS::Menu::Score::InitializeLiveAshleyPreviewPos
 OWNED_CALL_BINDINGS["F02839"] = "VS::Menu::Score::QueueLiveEnemyModelRead"
 OWNED_CALL_BINDINGS["F02840"] = "VS::Menu::Score::LoadLiveEnemyModelParts"
 OWNED_CALL_BINDINGS["F02841"] = "VS::Menu::Score::FreeLiveEnemyModelBuffer"
+OWNED_CALL_BINDINGS["F02992"] = "VS::Menu::manual::LiveUploadSpriteTiles"
+OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
+OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
+OWNED_CALL_BINDINGS["F03005"] = "VS::Menu::manual::LiveDrawDiagramLines"
+OWNED_CALL_BINDINGS["F03006"] = "VS::Menu::manual::LiveAdvanceVisibilityAnimation"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4926,6 +4936,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU9.PRG", 0x8010812C, "VS::Menu::Score::QueueLiveEnemyModelRead"),  # F02839
     ("MENU/MENU9.PRG", 0x8010823C, "VS::Menu::Score::LoadLiveEnemyModelParts"),  # F02840
     ("MENU/MENU9.PRG", 0x801084E4, "VS::Menu::Score::FreeLiveEnemyModelBuffer"),  # F02841
+    ("MENU/MENUE.PRG", 0x80103A24, "VS::Menu::manual::LiveUploadSpriteTiles"),  # F02992
+    ("MENU/MENUE.PRG", 0x80103AD8, "VS::Menu::manual::LiveUploadCluts"),  # F02993
+    ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000
+    ("MENU/MENUE.PRG", 0x80104A44, "VS::Menu::manual::LiveDrawDiagramLines"),  # F03005
+    ("MENU/MENUE.PRG", 0x80104C30, "VS::Menu::manual::LiveAdvanceVisibilityAnimation"),  # F03006
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5388,14 +5403,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
           for name in ("p", "q")
           for index, member in ((0, "primitiveCursor"), (1, "orderingTable"))],
     ],
-    "F03000": [
-        ("    u_long** scratch;", "    Render_FrameScratch* scratch;", "typed illustration frame"),
-        ("sprite = *((void**)((uintptr_t)Core_ScratchBase() + 0x000));",
-         "sprite = Render_frameScratch.primitiveCursor;", "full native sprite cursor"),
-        ("scratch = (void*)Core_ScratchAddr(0);", "scratch = &Render_frameScratch;", "native frame owner"),
-        ("scratch[0]", "scratch->primitiveCursor", "native sprite cursor handoff"),
-        ("scratch[1]", "scratch->orderingTable", "native sprite ordering"),
-    ],
     **{fid: [
         ("    u_long** p;", "    Render_FrameScratch* p;", "typed manual panel frame"),
         ("p = (u_long**)Core_ScratchAddr(0);", "p = &Render_frameScratch;", "native frame owner"),
@@ -5417,11 +5424,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("*(u_long**)Core_ScratchAddr(1)", "((u_long*)Render_frameScratch.orderingTable)",
          "native fade ordering"),
     ] for fid in ("F03002", "F03003")},
-    "F03005": [
-        ("*(LINE_F2**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "native diagram cursor"),
-        ("*(void**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "native diagram cursor handoff"),
-        ("*(void**)Core_ScratchAddr(1)", "Render_frameScratch.orderingTable", "native diagram ordering"),
-    ],
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
     "F04146": [
         ("VS::Menu::Files::UpdateContainerSave(submenuState);",
@@ -7874,12 +7876,6 @@ REGEX_FIXES += [
         ("Menu::Manual::CopyEncodedLine",
          (('arg0', 'destination_text'), ('arg1', 'source_text')),
          "F02996 src\\MENU\\MENUE.PRG\\494.c:561-575 (_vsStrcpy). Named roles: destination text, source text."),
-        ("Menu::Manual::MinTileExtent",
-         (('arg0', 'remaining_extent'), ('arg1', 'tile_extent_limit')),
-         "F02998 src\\MENU\\MENUE.PRG\\494.c:619-625 (_min). Named roles: remaining extent, tile extent limit."),
-        ("Menu::Manual::AddSpriteOffset",
-         (('arg0', 'sprite_origin'), ('arg1', 'tile_offset')),
-         "F02999 src\\MENU\\MENUE.PRG\\494.c:627-627 (_add_int). Named roles: sprite origin, tile offset."),
         ("Menu::Manual::DrawUpperScrollFade",
          (('var_v0', 'transparency_source'), ('var_v1', 'transparency_destination')),
          "F03002 src\\MENU\\MENUE.PRG\\494.c:740-789 (_fadeMenuUpper). Named roles: transparency source, transparency destination."),
