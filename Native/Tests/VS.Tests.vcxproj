@@ -377,6 +377,7 @@
     <ClCompile Include="src\ScaledFontLayoutTests.cpp" />
     <ClCompile Include="src\SceneCatalogTests.cpp" />
     <ClCompile Include="src\ScenePlaybackTests.cpp" />
+    <ClCompile Include="src\ScoreRankTests.cpp" />
     <ClCompile Include="src\ScreenEffectStateTests.cpp" />
     <ClCompile Include="src\ScreenOverlayLifetimeTests.cpp" />
     <ClCompile Include="src\ScreenOverlaysTests.cpp" />

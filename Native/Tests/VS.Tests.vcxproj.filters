@@ -936,6 +936,9 @@
     <ClCompile Include="src\ScenePlaybackTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ScoreRankTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ScreenEffectStateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

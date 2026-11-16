@@ -2793,6 +2793,9 @@
     <ClCompile Include="src\Menu\Results\ResultsDrawingLive.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\ResultsRankLive.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\ResultsStats.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
@@ -2823,6 +2826,12 @@
     <ClInclude Include="src\Menu\Score\Records.h">
       <Filter>src\Menu\Score</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Score\ScoreRank.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Score\ScoreRankLive.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\ScoreScreen.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
@@ -4380,6 +4389,9 @@
     <ClInclude Include="include\Menu\Results\ResultsDrawingLive.hpp">
       <Filter>include\Menu\Results</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\Results\ResultsRankLive.hpp">
+      <Filter>include\Menu\Results</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\Results\ResultsStats.hpp">
       <Filter>include\Menu\Results</Filter>
     </ClInclude>
@@ -4390,6 +4402,12 @@
       <Filter>include\Menu\Score</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp">
+      <Filter>include\Menu\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\ScoreRank.hpp">
+      <Filter>include\Menu\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\ScoreRankLive.hpp">
       <Filter>include\Menu\Score</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Setup\Assembly.hpp">

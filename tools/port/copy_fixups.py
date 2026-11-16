@@ -1679,6 +1679,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::LiveDrawFadingTextureClut": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
     "VS::Menu::Results::LiveDrawTime": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
     "VS::Menu::Results::LiveDrawPressButtonPrompt": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
+    "VS::Menu::Results::DetermineLiveRiskbreakerRank": r"Native\Game\include\Menu\Results\ResultsRankLive.hpp",
+    "VS::Menu::Results::CalculateLiveScore": r"Native\Game\include\Menu\Results\ResultsRankLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -1722,6 +1724,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Score::QueueLiveEnemyModelRead": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::LoadLiveEnemyModelParts": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::FreeLiveEnemyModelBuffer": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
+    "VS::Menu::Score::DetermineLiveRiskbreakerRank": r"Native\Game\include\Menu\Score\ScoreRankLive.hpp",
+    "VS::Menu::Score::AwardLiveTitles": r"Native\Game\include\Menu\Score\ScoreRankLive.hpp",
+    "VS::Menu::Score::CalculateLiveScore": r"Native\Game\include\Menu\Score\ScoreRankLive.hpp",
+    "VS::Menu::Score::CalculateLiveProgress": r"Native\Game\include\Menu\Score\ScoreRankLive.hpp",
     "VS::Menu::manual::LiveUploadSpriteTiles": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveUploadCluts": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
@@ -3050,6 +3056,8 @@ OWNED_CALL_BINDINGS["F03040"] = "VS::Menu::Results::LiveDrawFadingTexture"
 OWNED_CALL_BINDINGS["F03041"] = "VS::Menu::Results::LiveDrawFadingTextureClut"
 OWNED_CALL_BINDINGS["F03042"] = "VS::Menu::Results::LiveDrawTime"
 OWNED_CALL_BINDINGS["F03044"] = "VS::Menu::Results::LiveDrawPressButtonPrompt"
+OWNED_CALL_BINDINGS["F03060"] = "VS::Menu::Results::DetermineLiveRiskbreakerRank"
+OWNED_CALL_BINDINGS["F03061"] = "VS::Menu::Results::CalculateLiveScore"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -3093,6 +3101,10 @@ OWNED_CALL_BINDINGS["F02838"] = "VS::Menu::Score::InitializeLiveAshleyPreviewPos
 OWNED_CALL_BINDINGS["F02839"] = "VS::Menu::Score::QueueLiveEnemyModelRead"
 OWNED_CALL_BINDINGS["F02840"] = "VS::Menu::Score::LoadLiveEnemyModelParts"
 OWNED_CALL_BINDINGS["F02841"] = "VS::Menu::Score::FreeLiveEnemyModelBuffer"
+OWNED_CALL_BINDINGS["F02832"] = "VS::Menu::Score::DetermineLiveRiskbreakerRank"
+OWNED_CALL_BINDINGS["F02833"] = "VS::Menu::Score::AwardLiveTitles"
+OWNED_CALL_BINDINGS["F02835"] = "VS::Menu::Score::CalculateLiveScore"
+OWNED_CALL_BINDINGS["F04157"] = "VS::Menu::Score::CalculateLiveProgress"
 OWNED_CALL_BINDINGS["F02992"] = "VS::Menu::manual::LiveUploadSpriteTiles"
 OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
 OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
@@ -4926,6 +4938,8 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x80105DD8, "VS::Menu::Results::LiveDrawFadingTextureClut"),  # F03041
     ("MENU/MENUF.PRG", 0x80105F6C, "VS::Menu::Results::LiveDrawTime"),  # F03042
     ("MENU/MENUF.PRG", 0x801064D4, "VS::Menu::Results::LiveDrawPressButtonPrompt"),  # F03044
+    ("MENU/MENUF.PRG", 0x80108A0C, "VS::Menu::Results::DetermineLiveRiskbreakerRank"),  # F03060
+    ("MENU/MENUF.PRG", 0x80108AB0, "VS::Menu::Results::CalculateLiveScore"),  # F03061
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -4969,6 +4983,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU9.PRG", 0x8010812C, "VS::Menu::Score::QueueLiveEnemyModelRead"),  # F02839
     ("MENU/MENU9.PRG", 0x8010823C, "VS::Menu::Score::LoadLiveEnemyModelParts"),  # F02840
     ("MENU/MENU9.PRG", 0x801084E4, "VS::Menu::Score::FreeLiveEnemyModelBuffer"),  # F02841
+    ("MENU/MENU9.PRG", 0x80107600, "VS::Menu::Score::DetermineLiveRiskbreakerRank"),  # F02832
+    ("MENU/MENU9.PRG", 0x801076A4, "VS::Menu::Score::AwardLiveTitles"),  # F02833
+    ("MENU/MENU9.PRG", 0x80107C34, "VS::Menu::Score::CalculateLiveScore"),  # F02835
+    ("MENU/MENU9.PRG", 0x801031BC, "VS::Menu::Score::CalculateLiveProgress"),  # F04157
     ("MENU/MENUE.PRG", 0x80103A24, "VS::Menu::manual::LiveUploadSpriteTiles"),  # F02992
     ("MENU/MENUE.PRG", 0x80103AD8, "VS::Menu::manual::LiveUploadCluts"),  # F02993
     ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000

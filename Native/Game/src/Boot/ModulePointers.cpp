@@ -123,8 +123,10 @@
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
+#include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
+#include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
@@ -2151,6 +2153,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x80105DD8u, 0u, (void*)&VS::Menu::Results::LiveDrawFadingTextureClut, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80105F6Cu, 0u, (void*)&VS::Menu::Results::LiveDrawTime, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x801064D4u, 0u, (void*)&VS::Menu::Results::LiveDrawPressButtonPrompt, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108A0Cu, 0u, (void*)&VS::Menu::Results::DetermineLiveRiskbreakerRank, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108AB0u, 0u, (void*)&VS::Menu::Results::CalculateLiveScore, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},
@@ -2194,6 +2198,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU9.PRG", 0x8010812Cu, 0u, (void*)&VS::Menu::Score::QueueLiveEnemyModelRead, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x8010823Cu, 0u, (void*)&VS::Menu::Score::LoadLiveEnemyModelParts, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x801084E4u, 0u, (void*)&VS::Menu::Score::FreeLiveEnemyModelBuffer, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80107600u, 0u, (void*)&VS::Menu::Score::DetermineLiveRiskbreakerRank, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x801076A4u, 0u, (void*)&VS::Menu::Score::AwardLiveTitles, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80107C34u, 0u, (void*)&VS::Menu::Score::CalculateLiveScore, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x801031BCu, 0u, (void*)&VS::Menu::Score::CalculateLiveProgress, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103A24u, 0u, (void*)&VS::Menu::manual::LiveUploadSpriteTiles, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103AD8u, 0u, (void*)&VS::Menu::manual::LiveUploadCluts, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103E6Cu, 0u, (void*)&VS::Menu::manual::LiveDrawIllustration, 0u, 0u, 0u},

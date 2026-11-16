@@ -134,8 +134,6 @@ void Menu_Results_DrawRiskbreakerRankHeading(int x, int y, int timer);
 void Menu_Results_DrawRiskbreakerRank(int x, int y, int timer);
 void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_state);
 void Menu_Results_DrawBonusReelTexture(int x, int y, int texId);
-void Menu_Results_DetermineRiskbreakerRank(void);
-void Menu_Results_CalculateScore(void);
 void Menu_Results_ApplyHealingScoreBonus(void);
 void Menu_Results_ResetMenufStatics(void);
 

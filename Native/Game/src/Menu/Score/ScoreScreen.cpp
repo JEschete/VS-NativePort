@@ -9,6 +9,7 @@
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
+#include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -23,14 +24,12 @@ extern "C" {
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Audio/Seq/Channel.h"
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TextBoxes.h"
 #include "Content/DiscLayout.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
-#include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
@@ -47,8 +46,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
 
 // decomp: _0 (_0@src/MENU/MENU9.PRG/238.c)
 int Menu_Score_layoutPadding1;
@@ -355,7 +352,7 @@ int Menu_Score_UpdateScreen(u_char* state)
 
     case Menu_Score_ScoreOverlayState_InitData:
         if (Menu_Score_screenCalculateProgressComplete == 0) {
-            Menu_Score_screenCalculateProgressComplete = Menu_Score_CalculateProgress();
+            Menu_Score_screenCalculateProgressComplete = VS::Menu::Score::CalculateLiveProgress();
         }
 
         if (Menu_Score_screenInitDelay != 0) {
@@ -416,65 +413,6 @@ int Menu_Score_UpdateScreen(u_char* state)
         break;
     }
     return 0;
-}
-
-// decomp: MENU9.PRG _calculateProgress (src/MENU/MENU9.PRG/238.c:418)
-int Menu_Score_CalculateProgress(void)
-{
-    int i;
-    int j;
-
-    if (State_roomVisitProgress.roomFlags[1] & 0x800000) {
-        State_roomVisitProgress.roomFlags[1] |= 0x400000;
-    }
-
-    Menu_Score_menuState = 0;
-    Menu_Score_hideUi = 0;
-
-    if (Input_settings.cursorMemory == 0) {
-        VS::Core::Memory::ZeroLiveAlignedWords(&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory);
-    }
-
-    Menu_Score_mapCompletion = 0;
-
-    for (i = 0; i < 16; ++i) {
-        for (j = 0; j < 32; ++j) {
-            int v = 1;
-            if (State_roomVisitProgress.roomFlags[i] & Field_countableRoomMask[i]
-                & (v << j)) {
-                ++Menu_Score_mapCompletion;
-            }
-        }
-    }
-
-    Menu_Score_openedChestCount = 0;
-
-    for (i = 0; i < 64; ++i) {
-        if (Audio_Seq_unusedStateFlags.chestsOpened[i] != 0) {
-            ++Menu_Score_openedChestCount;
-        }
-    }
-
-    Menu_Score_clearCount = Audio_Seq_unusedStateFlags.clearCount;
-
-    if (Menu_Score_mapCompletion > Audio_Seq_unusedScoredata.mapCompletion) {
-        Audio_Seq_unusedScoredata.mapCompletion = Menu_Score_mapCompletion;
-    }
-    if (Menu_Score_openedChestCount > Audio_Seq_unusedScoredata.openedChestCount) {
-        Audio_Seq_unusedScoredata.openedChestCount = Menu_Score_openedChestCount;
-    }
-
-    VS::Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraPositionBackup,
-        &((Render_FrameScratch*)Core_ScratchAddr(0))->camera.position,
-        sizeof Menu_Score_cameraPositionBackup);
-    VS::Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraAnglesBackup,
-        &((Render_FrameScratch*)Core_ScratchAddr(0))->camera.angles.vx,
-        sizeof Menu_Score_cameraAnglesBackup);
-    Menu_Score_AwardTitles();
-    Menu_Score_CalculateScore();
-    Menu_Score_DetermineRiskbreakerRank();
-
-    return 1;
 }
 
 // decomp: MENU9.PRG _menuInput (src/MENU/MENU9.PRG/238.c:548)

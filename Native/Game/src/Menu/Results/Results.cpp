@@ -5,6 +5,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
+#include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -442,8 +443,8 @@ int Menu_Results_InitializeGameClear(void)
 
         Menu_Results_mapCompletion = (mapCompletion * 100) / 361;
 
-        Menu_Results_CalculateScore();
-        Menu_Results_DetermineRiskbreakerRank();
+        VS::Menu::Results::CalculateLiveScore();
+        VS::Menu::Results::DetermineLiveRiskbreakerRank();
 
         return 1;
     }
@@ -1171,95 +1172,6 @@ void Menu_Results_DrawBonusReelTexture(int x, int y, int texId)
     }
 
     p[0] = poly;
-}
-
-// decomp: MENUF.PRG _determineRank (src/MENU/MENUF.PRG/3B8.c:2774)
-void Menu_Results_DetermineRiskbreakerRank(void)
-{
-    static short Menu_Results_determineRiskbreakerRankTitleThresholds[16] = { 16, 12, 8 };
-    static u_int Menu_Results_determineRiskbreakerRankScores[] = { 100000000, 75000000, 60000000, 40000000, 32000000,
-        24000000, 16000000, 12000000, 8000000, 5000000, 4000000, 3000000, 2000000,
-        1000000, 500000, 0 };
-
-    int unlockedTitles;
-    int i;
-    int flag;
-
-    for (i = 0, unlockedTitles = 0, flag = 1; i < 16; ++i) {
-        if (Audio_Seq_unusedScoredata.titles & (flag << i)) {
-            ++unlockedTitles;
-        }
-    }
-
-    for (i = 0; i < 16; ++i) {
-        if (unlockedTitles >= Menu_Results_determineRiskbreakerRankTitleThresholds[i]) {
-            if (Menu_Results_score >= Menu_Results_determineRiskbreakerRankScores[i]) {
-                Menu_Results_rank = i;
-                return;
-            }
-        }
-    }
-}
-
-// decomp: MENUF.PRG _calculateScore (src/MENU/MENUF.PRG/3B8.c:2801)
-void Menu_Results_CalculateScore(void)
-{
-    short classPoints[] = { 20, 20, 40, 80, 100, 60 };
-    short weaponClassPoints[] = { 20, 40, 20, 100, 60, 100, 60, 100, 80, 60 };
-    int i;
-
-    Menu_Results_score = 0;
-
-    for (i = 0; i < 6; ++i) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.enemyKills[i] * classPoints[i];
-    }
-
-    for (i = 0; i < 10; ++i) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.weaponAttacks[i] * weaponClassPoints[i];
-    }
-
-    for (i = 0; i < 8; ++i) {
-        if ((Audio_Seq_unusedScoredata.bossTimeTrialScores[i][0].time) != 0x800000) {
-            Menu_Results_score += 20000;
-        }
-    }
-
-    if (Audio_Seq_unusedScoredata.maxChain < 6) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 10;
-    } else if (Audio_Seq_unusedScoredata.maxChain < 11) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 20;
-    } else if (Audio_Seq_unusedScoredata.maxChain < 16) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 40;
-    } else if (Audio_Seq_unusedScoredata.maxChain < 21) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 80;
-    } else if (Audio_Seq_unusedScoredata.maxChain < 26) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 160;
-    } else if (Audio_Seq_unusedScoredata.maxChain < 31) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 320;
-    } else if (Audio_Seq_unusedScoredata.maxChain < 51) {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 640;
-    } else {
-        Menu_Results_score += Audio_Seq_unusedScoredata.maxChain * 1280;
-    }
-
-    Menu_Results_score += Menu_Results_clearCount * 100000;
-
-    if ((Menu_Results_clearCount != 0) && (Audio_Seq_unusedScoredata.completionTimeMinutes < 600)) {
-        if (Audio_Seq_unusedScoredata.completionTimeMinutes >= 540) {
-            Menu_Results_score = Menu_Results_score + (Menu_Results_score >> 2);
-        } else if (Audio_Seq_unusedScoredata.completionTimeMinutes >= 300) {
-            Menu_Results_score = Menu_Results_score + (Menu_Results_score >> 1);
-        } else {
-            Menu_Results_score = Menu_Results_score * 2;
-        }
-    }
-
-    Menu_Results_score = Menu_Results_score + Audio_Seq_unusedScoredata.streakScore;
-    Menu_Results_score = Menu_Results_score + Audio_Seq_unusedScoredata.miscScore;
-
-    if (Menu_Results_score > 999999999) {
-        Menu_Results_score = 999999999;
-    }
 }
 
 // decomp: MENUF.PRG _addHealBonus (src/MENU/MENUF.PRG/3B8.c:2865)

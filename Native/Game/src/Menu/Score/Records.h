@@ -33,9 +33,6 @@ void Menu_Score_FormatFastestClearTime(char* buf, int rounds, int totalSeconds);
 void Menu_Score_CreateTimeTrialRows(void);
 void Menu_Score_LeaveTimeTrialMenu(void);
 void Menu_Score_RenderTimeTrialRecords(int selected);
-void Menu_Score_DetermineRiskbreakerRank(void);
-void Menu_Score_AwardTitles(void);
-void Menu_Score_CalculateScore(void);
 void Menu_Score_Records_ResetMenu9Statics(void);
 
 #endif // VS_MENU_SCORE_RECORDS_H_DECLS

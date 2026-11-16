@@ -126,7 +126,6 @@ int Menu_Score_GetSelectedTopMenuRow(void);
 void Menu_Score_ClearMenuExceptRow8(void);
 void Menu_Score_PollMenuReady(void);
 int Menu_Score_UpdateScreen(u_char* state);
-int Menu_Score_CalculateProgress(void);
 int Menu_Score_Update(void);
 void Menu_Score_RestoreCamera(void);
 int Menu_Score_UpdateTopMenu(int initialize);

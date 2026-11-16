@@ -907,6 +907,14 @@
     <None Include="..\..\port\differentials\reward_flow.py" />
     <None Include="..\..\port\differentials\reward_flow_driver.cpp" />
     <None Include="..\..\port\differentials\reward_flow_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\score_rank_common.py" />
+    <None Include="..\..\port\differentials\score_rank_driver.cpp" />
+    <None Include="..\..\port\differentials\score_rank_f02832.py" />
+    <None Include="..\..\port\differentials\score_rank_f02833.py" />
+    <None Include="..\..\port\differentials\score_rank_f02835.py" />
+    <None Include="..\..\port\differentials\score_rank_f03060.py" />
+    <None Include="..\..\port\differentials\score_rank_f03061.py" />
+    <None Include="..\..\port\differentials\score_rank_f04157.py" />
     <None Include="..\..\port\differentials\screen_distortion_common.py" />
     <None Include="..\..\port\differentials\screen_distortion_driver.cpp" />
     <None Include="..\..\port\differentials\screen_distortion_f02455.py" />
