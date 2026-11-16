@@ -71,6 +71,7 @@
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
+#include "Effects/AnalyzeGridLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -2188,6 +2189,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008FAC8u, 0u, (void*)&VS::Effects::LiveDrawRisingEmberParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008FDC4u, 0u, (void*)&VS::Effects::LiveDrawSnowParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80090434u, 0u, (void*)&VS::Effects::LiveDrawScreenWeatherParticles, 0u, 0u, 0u},
+    {"EFFECT/PLG005.BIN", 0x800F9818u, 0u, (void*)&VS::Effects::UpdateLivePlg005AnalyzeGrid, 0u, 0u, 0u},
+    {"EFFECT/PLG054.BIN", 0x800F9818u, 0u, (void*)&VS::Effects::UpdateLivePlg054AnalyzeGrid, 0u, 0u, 0u},
+    {"EFFECT/PLG055.BIN", 0x800F9818u, 0u, (void*)&VS::Effects::UpdateLivePlg055AnalyzeGrid, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FE3ECu, 0u, (void*)&VS::Effects::UpdateLivePlg074AnalyzeGrid, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108EA8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalStrength, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108EC8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalIntelligence, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108EE8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalAgility, 0u, 0u, 0u},

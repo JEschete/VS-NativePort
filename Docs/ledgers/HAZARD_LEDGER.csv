@@ -143,8 +143,6 @@ d2f84bfba13e,DIV-ZERO,medium,pattern,F01473,SampleEffectCurve,Native/Game/src/Ef
 a8e81ea7325a,DIV-ZERO,medium,pattern,,FindOrAdd,Native/Game/src/Effects/PackageExtentsLive.cpp,87,records.size(),61,31,open,
 ebca43a1cdb3,DIV-ZERO,medium,pattern,,RecordLiveEffectPrograms,Native/Game/src/Effects/PackageExtentsLive.cpp,134,programs.size(),61,31,open,
 0748f6b9e8d1,DIV-ZERO,medium,pattern,F01594,DrawAnimatedSpriteParticles,Native/Game/src/Effects/ParticleRender.cpp,171,projection->depth,61,31,open,
-8fd132eafa6a,DIV-ZERO,medium,pattern,F01893,Effects_Plg005_UpdateAnalyzeGrid,Native/Game/src/Effects/Plugins/Plg005.cpp,182,particle_definition->pairRanges[0][0],61,31,open,
-198684e3b6e0,DIV-ZERO,medium,pattern,F01893,Effects_Plg005_UpdateAnalyzeGrid,Native/Game/src/Effects/Plugins/Plg005.cpp,188,particle_definition->pairRanges[0][2],61,31,open,
 33a3cc978aeb,DIV-ZERO,low,pattern,F01920,Effects_Plg052_UpdateRepeatingRing,Native/Game/src/Effects/Plugins/Plg052.cpp,139,((scratch->speedRange[0] - scratch->speedRange[1]) + 1),61,31,open,
 7cfd189b3f2b,DIV-ZERO,low,pattern,F01920,Effects_Plg052_UpdateRepeatingRing,Native/Game/src/Effects/Plugins/Plg052.cpp,142,((scratch->speedRange[1] - scratch->speedRange[0]) + 1),61,31,open,
 7dc973702c3c,DIV-ZERO,low,pattern,F02209,Effects_Plg162_UpdateTransposedRing,Native/Game/src/Effects/Plugins/Plg162.cpp,146,((scratch->speedRange[0] - scratch->speedRange[1]) + 1),61,31,open,

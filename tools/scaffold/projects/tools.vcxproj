@@ -387,6 +387,12 @@
     <None Include="..\..\port\differentials\actor_settings_driver.cpp" />
     <None Include="..\..\port\differentials\actor_vitals.py" />
     <None Include="..\..\port\differentials\actor_vitals_driver.cpp" />
+    <None Include="..\..\port\differentials\analyze_grid_common.py" />
+    <None Include="..\..\port\differentials\analyze_grid_driver.cpp" />
+    <None Include="..\..\port\differentials\analyze_grid_f01893.py" />
+    <None Include="..\..\port\differentials\analyze_grid_f01926.py" />
+    <None Include="..\..\port\differentials\analyze_grid_f01928.py" />
+    <None Include="..\..\port\differentials\analyze_grid_f01996.py" />
     <None Include="..\..\port\differentials\area_movement.py" />
     <None Include="..\..\port\differentials\area_movement_driver.cpp" />
     <None Include="..\..\port\differentials\area_route.py" />

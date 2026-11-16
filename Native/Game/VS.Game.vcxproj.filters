@@ -1086,6 +1086,12 @@
     <ClCompile Include="src\Effects\ActionEffectCallbacksLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Effects\AnalyzeGrid.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\AnalyzeGridLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\BoneTrail.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1178,9 +1184,6 @@
     </ClCompile>
     <ClCompile Include="src\Effects\ParticleTextureAnimationLive.cpp">
       <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Effects\Plugins\Plg005.cpp">
-      <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
     <ClInclude Include="src\Effects\Plugins\Plg005.h">
       <Filter>src\Effects\Plugins</Filter>
@@ -3730,6 +3733,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ActionEffectCallbacksLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\AnalyzeGrid.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\AnalyzeGridLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\BoneTrail.hpp">

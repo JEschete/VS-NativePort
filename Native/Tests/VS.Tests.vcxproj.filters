@@ -219,6 +219,12 @@
     <ClCompile Include="src\AiWaypointTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AnalyzeGridLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AnalyzeGridTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AnimationControlTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -1702,6 +1702,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::LiveDrawRisingEmberParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
     "VS::Effects::LiveDrawSnowParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
     "VS::Effects::LiveDrawScreenWeatherParticles": r"Native\Game\include\Effects\WeatherRenderLive.hpp",
+    "VS::Effects::UpdateLivePlg005AnalyzeGrid": r"Native\Game\include\Effects\AnalyzeGridLive.hpp",
+    "VS::Effects::UpdateLivePlg054AnalyzeGrid": r"Native\Game\include\Effects\AnalyzeGridLive.hpp",
+    "VS::Effects::UpdateLivePlg055AnalyzeGrid": r"Native\Game\include\Effects\AnalyzeGridLive.hpp",
+    "VS::Effects::UpdateLivePlg074AnalyzeGrid": r"Native\Game\include\Effects\AnalyzeGridLive.hpp",
     "VS::Menu::Results::AshleyLiveTotalStrength": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::AshleyLiveTotalIntelligence": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::AshleyLiveTotalAgility": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
@@ -3178,6 +3182,10 @@ OWNED_CALL_BINDINGS["F00652"] = "VS::Effects::LiveResetRisingEmberParticle"
 OWNED_CALL_BINDINGS["F00653"] = "VS::Effects::LiveDrawRisingEmberParticles"
 OWNED_CALL_BINDINGS["F00654"] = "VS::Effects::LiveDrawSnowParticles"
 OWNED_CALL_BINDINGS["F00655"] = "VS::Effects::LiveDrawScreenWeatherParticles"
+OWNED_CALL_BINDINGS["F01893"] = "VS::Effects::UpdateLivePlg005AnalyzeGrid"
+OWNED_CALL_BINDINGS["F01926"] = "VS::Effects::UpdateLivePlg054AnalyzeGrid"
+OWNED_CALL_BINDINGS["F01928"] = "VS::Effects::UpdateLivePlg055AnalyzeGrid"
+OWNED_CALL_BINDINGS["F01996"] = "VS::Effects::UpdateLivePlg074AnalyzeGrid"
 OWNED_CALL_BINDINGS["F03066"] = "VS::Menu::Results::AshleyLiveTotalStrength"
 OWNED_CALL_BINDINGS["F03067"] = "VS::Menu::Results::AshleyLiveTotalIntelligence"
 OWNED_CALL_BINDINGS["F03068"] = "VS::Menu::Results::AshleyLiveTotalAgility"
@@ -5164,6 +5172,10 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8008FAC8, "VS::Effects::LiveDrawRisingEmberParticles"),  # F00653
     ("BATTLE/BATTLE.PRG", 0x8008FDC4, "VS::Effects::LiveDrawSnowParticles"),  # F00654
     ("BATTLE/BATTLE.PRG", 0x80090434, "VS::Effects::LiveDrawScreenWeatherParticles"),  # F00655
+    ("EFFECT/PLG005.BIN", 0x800F9818, "VS::Effects::UpdateLivePlg005AnalyzeGrid"),  # F01893
+    ("EFFECT/PLG054.BIN", 0x800F9818, "VS::Effects::UpdateLivePlg054AnalyzeGrid"),  # F01926
+    ("EFFECT/PLG055.BIN", 0x800F9818, "VS::Effects::UpdateLivePlg055AnalyzeGrid"),  # F01928
+    ("EFFECT/PLG074.BIN", 0x800FE3EC, "VS::Effects::UpdateLivePlg074AnalyzeGrid"),  # F01996
     ("MENU/MENUF.PRG", 0x80108EA8, "VS::Menu::Results::AshleyLiveTotalStrength"),  # F03066
     ("MENU/MENUF.PRG", 0x80108EC8, "VS::Menu::Results::AshleyLiveTotalIntelligence"),  # F03067
     ("MENU/MENUF.PRG", 0x80108EE8, "VS::Menu::Results::AshleyLiveTotalAgility"),  # F03068

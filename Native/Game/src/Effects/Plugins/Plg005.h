@@ -26,11 +26,3 @@ typedef struct Effects_Plg005_AnalyzeGridQuad {
 _Static_assert(sizeof(Effects_Plg005_AnalyzeGridQuad) == 0x1C, "Effects_Plg005_AnalyzeGridQuad must keep its PS1 layout");
 
 #endif // VS_EFFECTS_PLUGINS_PLG005_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG005_H_DECLS)
-#define VS_EFFECTS_PLUGINS_PLG005_H_DECLS
-#include "Effects/Runtime.h"
-
-int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
-
-#endif // VS_EFFECTS_PLUGINS_PLG005_H_DECLS

@@ -687,6 +687,10 @@
     <ClCompile Include="src\Effects\ActionEffectCallbacksLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Effects\AnalyzeGrid.cpp" />
+    <ClCompile Include="src\Effects\AnalyzeGridLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\BoneTrail.cpp" />
     <ClCompile Include="src\Effects\BoneTrailLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -741,13 +745,6 @@
     <ClCompile Include="src\Effects\ParticleTextureAnimation.cpp" />
     <ClCompile Include="src\Effects\ParticleTextureAnimationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="src\Effects\Plugins\Plg005.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Effects\Plugins\Plg044.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2738,6 +2735,8 @@
     <ClInclude Include="include\Diagnostics\SceneTrace.h" />
     <ClInclude Include="include\Effects\ActionEffectCallbacks.hpp" />
     <ClInclude Include="include\Effects\ActionEffectCallbacksLive.hpp" />
+    <ClInclude Include="include\Effects\AnalyzeGrid.hpp" />
+    <ClInclude Include="include\Effects\AnalyzeGridLive.hpp" />
     <ClInclude Include="include\Effects\BoneTrail.hpp" />
     <ClInclude Include="include\Effects\BoneTrailLive.hpp" />
     <ClInclude Include="include\Effects\Camera.hpp" />

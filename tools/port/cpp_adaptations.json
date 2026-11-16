@@ -119,46 +119,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Effects\\Plugins\\Plg005.cpp": [
-[
-47,
-[
-"    fp = renderer_slot->rendererState;"
-],
-[
-"    fp = (Effects_Plg005_AnalyzeGridQuad *)(renderer_slot->rendererState);"
-]
-],
-[
-52,
-[
-"        fp = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *fp);"
-],
-[
-"        fp = (Effects_Plg005_AnalyzeGridQuad *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *fp));"
-]
-],
-[
-204,
-[
-"                Core_Gte_StoreSxy2(&screenXY[i][j]);",
-"                Core_Gte_StoreSz3Otz(&depths[i][j]);"
-],
-[
-"                Core_Gte_StoreSxy2((long *)(&screenXY[i][j]));",
-"                Core_Gte_StoreSz3Otz((long *)(&depths[i][j]));"
-]
-],
-[
-238,
-[
-"                    prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"                    prim = (Render_EffectFlatQuadPacket *)(Render_frameScratch.primitiveCursor);"
-]
-]
-],
 "Native\\Game\\src\\Effects\\Plugins\\Plg052.cpp": [
 [
 59,

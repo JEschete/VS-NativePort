@@ -1,16 +1,16 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest published #276 group is B47-04, equipment-menu
-controllers ([`6ac956aaa`](https://github.com/JEschete/VS-NativePort/commit/6ac956aaa7c3c9ef722a9387cc8dd84c27adf1d1));
-exact-revision [Source Quality CI 43935352653](https://github.com/JEschete/VS-NativePort/actions/runs/43935352653)
-passed. The original 900-function cohort has **788 resolved (776 promoted,
-12 retired) and 112 remaining**; see
+Updated 2026-11-16. The latest integrated #276 group is A39-05, the four
+overlay-specific Analyze-grid functions. Its full local group gate passed;
+the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
+The original 900-function cohort has **792 resolved (780 promoted,
+12 retired) and 108 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
-[#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6926467609).
+[promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
-- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 12, 47: 5,
+- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 8, 47: 5,
   48: 50, 50: 30, 52: 14. Five ledger entries are WIP: F02604-F02607 and
   F01416; do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -20,6 +20,25 @@ passed. The original 900-function cohort has **788 resolved (776 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- A39-05 evidence (`VR-EFFECTS-ANALYZE-GRID`): F01893, F01926, F01928 and
+  F01996. Each independently loaded original passed 1,024 vectors, zero
+  mismatches and 48 detected original mutants; all four native variants were
+  detected. Debug and Release each passed 8,762 regression cases /
+  12,944,536 assertions, 57 focused cases / 1,280 assertions and matching
+  canonical replays. The focused suite exercises the actual EFFPURGE entries
+  0, 16, 18 and 91, including lifecycle and outer-owner cleanup. Copier
+  stability, copier tests and changed-file tidy passed. Local evidence:
+  `build\promotion-check\group-20261116-174153\summary.json`; per-ID proof:
+  `D:\Dev\NativePort\wt\batch-analyze-grid-69396c5e\build\scratch\analyze-grid\verification.json`.
+  Original allocation is stubbed; reserved bytes and unwritten packet fields
+  are not compared. No interactive Analyze acceptance or EC-04 retirement.
+- Clean-checkout generation blocker [#407](https://github.com/JEschete/VS-NativePort/issues/407)
+  is fixed in [`b4b11beb0`](https://github.com/JEschete/VS-NativePort/commit/b4b11beb058400b4f31a3c52d1ba145637854b29);
+  exact-revision [Source Quality 43964697564](https://github.com/JEschete/VS-NativePort/actions/runs/43964697564)
+  passed. Plugin twins use canonical extracted data and required symbol maps
+  fail explicitly when absent. Fresh worktree-local CRLF indexes reproduce
+  committed Native output; a second generation is stable. This does not
+  resolve the separate #391 fresh symbol-ledger churn.
 - B47-04 evidence (`VR-MENU-EQUIPMENT-MENUS`): F02630-F02635. Each differential
   passed 1,024 vectors with zero mismatches; all 92 original mutants and six
   native broken variants were detected. Debug and Release group checks each
@@ -44,8 +63,13 @@ passed. The original 900-function cohort has **788 resolved (776 promoted,
 
 Next steps:
 
-1. Continue with the next unblocked tracker-priority slice, coordinating the
-   five existing WIP ledger entries and honoring their dependencies.
+1. Finish the active isolated emitter/rings and inventory-terminal packets.
+   The four-function text-frame packet is isolated at
+   `D:\Dev\NativePort\wt\batch-text-frame-b4b11beb0`; do not count its local
+   focused tests or differentials as final integration. Continue the
+   dependency-ordered remaining-function plan, coordinating existing WIP
+   ledger entries. F00830 remains blocked on the actual climbing-hit contract
+   in #296, not a guessed blend constant.
 2. Keep #410 open until the loader and reward caller paths are reproduced; do
    not present B50-05 as a completed promotion.
 3. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md),

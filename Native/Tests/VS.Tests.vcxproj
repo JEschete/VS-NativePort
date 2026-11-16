@@ -108,6 +108,8 @@
     <ClCompile Include="src\AiTargetApproachTests.cpp" />
     <ClCompile Include="src\AiWanderTests.cpp" />
     <ClCompile Include="src\AiWaypointTests.cpp" />
+    <ClCompile Include="src\AnalyzeGridLiveTests.cpp" />
+    <ClCompile Include="src\AnalyzeGridTests.cpp" />
     <ClCompile Include="src\AnimationControlTests.cpp" />
     <ClCompile Include="src\AnimationPoseTests.cpp" />
     <ClCompile Include="src\AppearanceTests.cpp" />
