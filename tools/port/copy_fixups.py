@@ -1675,6 +1675,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::ApplyLiveAgilityBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::ApplyLiveHpBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::ApplyLiveMpBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
+    "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
+    "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
+    "VS::Menu::map::LiveAnimateCentering": r"Native\Game\include\Menu\MapNavigationLive.hpp",
+    "VS::Menu::map::LiveScaleRoomVertices": r"Native\Game\include\Menu\MapNavigationLive.hpp",
+    "VS::Menu::map::LiveInitialRoomIndex": r"Native\Game\include\Menu\MapNavigationLive.hpp",
+    "VS::Menu::map::LiveSelectAdjacentVisitedRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -2994,6 +3001,13 @@ OWNED_CALL_BINDINGS["F03070"] = "VS::Menu::Results::ApplyLiveIntelligenceBonus"
 OWNED_CALL_BINDINGS["F03071"] = "VS::Menu::Results::ApplyLiveAgilityBonus"
 OWNED_CALL_BINDINGS["F03072"] = "VS::Menu::Results::ApplyLiveHpBonus"
 OWNED_CALL_BINDINGS["F03073"] = "VS::Menu::Results::ApplyLiveMpBonus"
+OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
+OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
+OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
+OWNED_CALL_BINDINGS["F02695"] = "VS::Menu::map::LiveAnimateCentering"
+OWNED_CALL_BINDINGS["F02696"] = "VS::Menu::map::LiveScaleRoomVertices"
+OWNED_CALL_BINDINGS["F02700"] = "VS::Menu::map::LiveInitialRoomIndex"
+OWNED_CALL_BINDINGS["F02701"] = "VS::Menu::map::LiveSelectAdjacentVisitedRoom"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4818,6 +4832,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x80109028, "VS::Menu::Results::ApplyLiveAgilityBonus"),  # F03071
     ("MENU/MENUF.PRG", 0x801090B8, "VS::Menu::Results::ApplyLiveHpBonus"),  # F03072
     ("MENU/MENUF.PRG", 0x80109148, "VS::Menu::Results::ApplyLiveMpBonus"),  # F03073
+    ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
+    ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
+    ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
+    ("MENU/MENU5.PRG", 0x80105EC0, "VS::Menu::map::LiveAnimateCentering"),  # F02695
+    ("MENU/MENU5.PRG", 0x801060E0, "VS::Menu::map::LiveScaleRoomVertices"),  # F02696
+    ("MENU/MENU5.PRG", 0x80106570, "VS::Menu::map::LiveInitialRoomIndex"),  # F02700
+    ("MENU/MENU5.PRG", 0x80106618, "VS::Menu::map::LiveSelectAdjacentVisitedRoom"),  # F02701
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

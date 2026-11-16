@@ -10,6 +10,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/MapNavigationLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -27,15 +28,9 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
-#include "Field/Gimmicks.h"
 #include "Field/Map.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
 #include "Field/RoomSwitchesLive.h"
-#include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
@@ -525,11 +520,11 @@ int Menu_Map_LoadSceneMap(void)
     Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
     VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
-    Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
+    VS::Menu::map::LiveScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
 
-    Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
+    Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
 
-    Menu_Map_CenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
+    VS::Menu::map::LiveCenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
     VS::Render::SetLiveFogNearDistance(768, Render_projectionDistance);
     Core_Gte_SetFarColor(0, 0, 0);
     Menu_Map_ShowAreaName((char*)&Menu_Map_mapNames[Menu_Map_mapNames[Menu_Map_currentScene]], 1);
@@ -730,9 +725,9 @@ int Menu_Map_UpdateMapMenu(void)
                     Menu_Map_cameraDistance = ONE * 3 / 16;
                     Menu_Map_cameraAngles.vx = 0x238;
                     Menu_Map_cameraAngles.vy = 0x800 - (u_short)Render_frameScratch.camera.angles.vy;
-                    Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
+                    Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
 
-                    Menu_Map_CenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
+                    VS::Menu::map::LiveCenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
 
                 } else {
                     int rstickX;
@@ -788,11 +783,11 @@ int Menu_Map_UpdateMapMenu(void)
                         != (PADL1 | PADR1)) {
 
                         if (Input_buttonRepeat & 8) {
-                            Menu_Map_SelectAdjacentVisitedRoom(1);
-                            Menu_Map_SetRoomCenterTarget((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
+                            VS::Menu::map::LiveSelectAdjacentVisitedRoom(1);
+                            VS::Menu::map::LiveSetRoomCenterTarget((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
                         } else if (Input_buttonRepeat & 4) {
-                            Menu_Map_SelectAdjacentVisitedRoom(-1);
-                            Menu_Map_SetRoomCenterTarget((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
+                            VS::Menu::map::LiveSelectAdjacentVisitedRoom(-1);
+                            VS::Menu::map::LiveSetRoomCenterTarget((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
                         }
                     }
 
@@ -881,11 +876,11 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
             VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
-            Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
+            VS::Menu::map::LiveScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
 
-            Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
+            Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
 
-            Menu_Map_CenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
+            VS::Menu::map::LiveCenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
             VS::Menu::SetLiveTextBoxText(0, Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].name);
 
             Menu_Map_geomOffsetX = -384;
@@ -909,7 +904,7 @@ int Menu_Map_UpdateMapMenu(void)
 
     ++Menu_Map_menuFramesCounter;
 
-    Menu_Map_AnimateCentering((Field_MapScene *)(Battle_unusedSceneBuffer));
+    VS::Menu::map::LiveAnimateCentering((Field_MapScene *)(Battle_unusedSceneBuffer));
 
     return 0;
 }
@@ -1043,22 +1038,6 @@ int Menu_Map_UpdateAreaSelection(int initialize)
     }
 
     return -1;
-}
-
-// decomp: MENU5.PRG func_8010467C (src/MENU/MENU5.PRG/4D8.c:1048)
-void Menu_Map_MarkAllRoomsVisited(int* data)
-{
-    int count;
-    int i;
-    int* ptr;
-
-    ptr = data + 1;
-    count = *data;
-
-    for (i = 0; i < count; ++i) {
-        *ptr = 1;
-        ptr += 3;
-    }
 }
 
 // decomp: MENU5.PRG _renderMap (src/MENU/MENU5.PRG/4D8.c:1081)
@@ -1495,255 +1474,6 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
     return 1;
 }
 
-// decomp: MENU5.PRG _snapMapToRoom (src/MENU/MENU5.PRG/4D8.c:1511)
-void Menu_Map_CenterOnRoom(Field_MapScene* scene, int roomId)
-{
-    SVECTOR maxCorner;
-    SVECTOR minCorner;
-    int roomCount;
-    int vertexCount;
-    int i;
-    int j;
-    Field_MapRoomVertices* roomVertices;
-    SVECTOR* vector;
-    u_int zSum;
-    Field_MapRoom* room = scene->rooms;
-
-    maxCorner.vx = 0x7FFF;
-    maxCorner.vy = 0x7FFF;
-    maxCorner.vz = 0x7FFF;
-    minCorner.vx = -0x8000;
-    minCorner.vy = -0x8000;
-    minCorner.vz = -0x8000;
-
-    roomVertices = (Field_MapRoomVertices *)(VS_ONDISC_DOT(room[roomId], dataAddress, void *));
-    roomCount = scene->roomCount;
-    vertexCount = roomVertices->vertexCount;
-    vector = roomVertices->vertices;
-
-    for (i = 0; i < vertexCount; ++i, ++vector) {
-        if (maxCorner.vx > vector->vx) {
-            maxCorner.vx = vector->vx;
-        }
-        if (maxCorner.vy > vector->vy) {
-            maxCorner.vy = vector->vy;
-        }
-        if (maxCorner.vz > vector->vz) {
-            maxCorner.vz = vector->vz;
-        }
-        if (minCorner.vx < vector->vx) {
-            minCorner.vx = vector->vx;
-        }
-        if (minCorner.vy < vector->vy) {
-            minCorner.vy = vector->vy;
-        }
-        if (minCorner.vz < vector->vz) {
-            minCorner.vz = vector->vz;
-        }
-    }
-
-    Menu_Map_centerPoint.vx = ((maxCorner.vx + minCorner.vx) / 2);
-    zSum = maxCorner.vz + minCorner.vz;
-    Menu_Map_centerPoint.vz = (int)(zSum + ((u_int)zSum >> 0x1F)) >> 1;
-    Menu_Map_centerPoint.vy = minCorner.vy;
-
-    for (j = 0; j < roomCount; ++j, ++room) {
-        roomVertices = (Field_MapRoomVertices *)(VS_ONDISC(room, dataAddress, void *));
-        vertexCount = roomVertices->vertexCount;
-        vector = (SVECTOR*)roomVertices;
-        vector = (SVECTOR*)((short*)vector + 2);
-        for (i = 0; i < vertexCount; ++i, ++vector) {
-            vector->vx -= Menu_Map_centerPoint.vx;
-            vector->vy -= Menu_Map_centerPoint.vy;
-            vector->vz -= Menu_Map_centerPoint.vz;
-        }
-    }
-    Menu_Map_centerPoint.vx = 0;
-    Menu_Map_centerPoint.vz = 0;
-    Menu_Map_centerPoint.vy = 0;
-}
-
-// decomp: MENU5.PRG _setCenterpoint (src/MENU/MENU5.PRG/4D8.c:1578)
-void Menu_Map_SetRoomCenterTarget(Field_MapScene* scene, int roomId)
-{
-    SVECTOR maxCorner;
-    SVECTOR minCorner;
-    int roomCount;
-    int vertexCount;
-    int i;
-    Field_MapRoomVertices* roomVertices;
-    SVECTOR* vector;
-    u_int zSum;
-    Field_MapRoom* room = scene->rooms;
-
-    maxCorner.vx = 0x7FFF;
-    maxCorner.vy = 0x7FFF;
-    maxCorner.vz = 0x7FFF;
-    minCorner.vx = -0x8000;
-    minCorner.vy = -0x8000;
-    minCorner.vz = -0x8000;
-
-    roomVertices = (Field_MapRoomVertices *)(VS_ONDISC_DOT(room[roomId], dataAddress, void *));
-    roomCount = scene->roomCount;
-    vertexCount = roomVertices->vertexCount;
-    vector = roomVertices->vertices;
-
-    for (i = 0; i < vertexCount; ++i, ++vector) {
-        if (maxCorner.vx > vector->vx) {
-            maxCorner.vx = vector->vx;
-        }
-        if (maxCorner.vy > vector->vy) {
-            maxCorner.vy = vector->vy;
-        }
-        if (maxCorner.vz > vector->vz) {
-            maxCorner.vz = vector->vz;
-        }
-        if (minCorner.vx < vector->vx) {
-            minCorner.vx = vector->vx;
-        }
-        if (minCorner.vy < vector->vy) {
-            minCorner.vy = vector->vy;
-        }
-        if (minCorner.vz < vector->vz) {
-            minCorner.vz = vector->vz;
-        }
-    }
-
-    Menu_Map_centerPoint.vx = ((maxCorner.vx + minCorner.vx) / 2);
-    zSum = maxCorner.vz + minCorner.vz;
-    Menu_Map_centerPoint.vz = (int)(zSum + ((u_int)zSum >> 0x1F)) >> 1;
-    Menu_Map_centerPoint.vy = minCorner.vy;
-}
-
-// decomp: MENU5.PRG _smoothMapToCenterpoint (src/MENU/MENU5.PRG/4D8.c:1629)
-void Menu_Map_AnimateCentering(Field_MapScene* scene)
-{
-    SVECTOR svector;
-    int coord;
-    int roomCount;
-    int vertexCount;
-    int j;
-    int i;
-    Field_MapRoomVertices* dataAddress;
-    SVECTOR* vector;
-    Field_MapRoom* room;
-
-    if (Menu_Map_centerPoint.vx == 0 && Menu_Map_centerPoint.vy == 0 && Menu_Map_centerPoint.vz == 0) {
-        return;
-    }
-
-    coord = ABS(Menu_Map_centerPoint.vx);
-
-    if (coord < 8) {
-        svector.vx = Menu_Map_centerPoint.vx;
-    } else {
-        if (coord >= 0x81) {
-            int var_v0 = Menu_Map_centerPoint.vx;
-            if (Menu_Map_centerPoint.vx < 0) {
-                var_v0 = Menu_Map_centerPoint.vx + 7;
-            }
-            svector.vx = var_v0 >> 3;
-        } else if (Menu_Map_centerPoint.vx <= 0) {
-            if (Menu_Map_centerPoint.vx < 0) {
-                svector.vx = -8;
-            }
-        } else {
-            svector.vx = 8;
-        }
-    }
-
-    coord = ABS(Menu_Map_centerPoint.vy);
-
-    if (coord < 8) {
-        svector.vy = Menu_Map_centerPoint.vy;
-    } else {
-        if (coord >= 0x81) {
-            int var_v0 = Menu_Map_centerPoint.vy;
-            if (Menu_Map_centerPoint.vy < 0) {
-                var_v0 = Menu_Map_centerPoint.vy + 7;
-            }
-            svector.vy = var_v0 >> 3;
-        } else if (Menu_Map_centerPoint.vy <= 0) {
-            if (Menu_Map_centerPoint.vy < 0) {
-                svector.vy = -8;
-            }
-        } else {
-            svector.vy = 8;
-        }
-    }
-
-    coord = ABS(Menu_Map_centerPoint.vz);
-
-    if (coord < 8) {
-        svector.vz = Menu_Map_centerPoint.vz;
-    } else {
-        if (coord >= 0x81) {
-            int var_v0 = Menu_Map_centerPoint.vz;
-            do {
-                if (Menu_Map_centerPoint.vz < 0) {
-                    var_v0 = Menu_Map_centerPoint.vz + 7;
-                }
-                svector.vz = var_v0 >> 3;
-            } while (0);
-        } else if (Menu_Map_centerPoint.vz <= 0) {
-            if (Menu_Map_centerPoint.vz < 0) {
-                svector.vz = -8;
-            }
-        } else {
-            svector.vz = 8;
-        }
-    }
-
-    room = scene->rooms;
-    roomCount = scene->roomCount;
-
-    for (i = 0; i < roomCount; ++i) {
-        dataAddress = (Field_MapRoomVertices *)(VS_ONDISC(room, dataAddress, void *));
-        vertexCount = dataAddress->vertexCount;
-        vector = (SVECTOR*)dataAddress;
-        vector = dataAddress->vertices;
-        for (j = 0; j < vertexCount; ++j) {
-            vector->vx -= svector.vx;
-            vector->vy -= svector.vy;
-            vector->vz -= svector.vz;
-            ++vector;
-        }
-        ++room;
-    }
-    Menu_Map_centerPoint.vx -= svector.vx;
-    Menu_Map_centerPoint.vy -= svector.vy;
-    Menu_Map_centerPoint.vz -= svector.vz;
-}
-
-// decomp: MENU5.PRG _scaleRoomVertices (src/MENU/MENU5.PRG/4D8.c:1728)
-void Menu_Map_ScaleRoomVertices(Field_MapScene* scene, int factor)
-{
-    SVECTOR* vector;
-    int roomCount;
-    int vertextCount;
-    int j;
-    int i;
-    Field_MapRoomVertices* roomVertices;
-    Field_MapRoom* room;
-
-    room = scene->rooms;
-    roomCount = scene->roomCount;
-
-    for (i = 0; i < roomCount; ++i) {
-        roomVertices = (Field_MapRoomVertices *)(VS_ONDISC(room, dataAddress, void *));
-        vertextCount = roomVertices->vertexCount;
-        vector = (SVECTOR*)roomVertices;
-        vector = (SVECTOR*)((int*)vector + 1);
-        for (j = 0; j < vertextCount; ++j) {
-            vector->vx *= factor;
-            vector->vy *= factor;
-            vector->vz *= factor;
-            ++vector;
-        }
-        ++room;
-    }
-}
-
 // decomp: MENU5.PRG _darkenBackground (src/MENU/MENU5.PRG/4D8.c:1788)
 void Menu_Map_DarkenBackground(void)
 {
@@ -1784,54 +1514,6 @@ void Menu_Map_DarkenBackground(void)
         _insertTPage(0x7FE, getTPage(2, 0, 512, 0));
     } else {
         _insertTPage(0x7FE, getTPage(2, 0, 192, 0));
-    }
-}
-
-// decomp: MENU5.PRG _getCurrentRoomIndex (src/MENU/MENU5.PRG/4D8.c:1834)
-int Menu_Map_InitialRoomIndex(Field_MapScene* scene)
-{
-    int i;
-
-    int roomCount = scene->roomCount;
-    Field_MapRoom* room = Field_roomData.minimapScene->rooms;
-    int zoneId = room->zoneId;
-    int mapId = room->mapId;
-    room = scene->rooms;
-
-    for (i = 0; i < roomCount; ++i, ++room) {
-        if ((room->zoneId == zoneId) && (room->mapId == mapId)) {
-            return Menu_Map_isCurrentScene = i;
-        }
-    }
-
-    room = scene->rooms;
-    Menu_Map_isCurrentScene = -1;
-    mapId = 0;
-
-    for (i = 0; i < roomCount; ++i, ++room) {
-        if (room->visited != 0) {
-            return i;
-        }
-    }
-    return 0;
-}
-
-// decomp: MENU5.PRG _updateRoomIndex (src/MENU/MENU5.PRG/4D8.c:1862)
-void Menu_Map_SelectAdjacentVisitedRoom(int searchForward)
-{
-    int currentIndex = Menu_Map_currentRoomIndex;
-    Field_MapRoom* room = ((Field_MapScene*)Battle_unusedSceneBuffer)->rooms;
-
-    do {
-        if (searchForward > 0) {
-            Menu_Map_currentRoomIndex = Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].next;
-        } else {
-            Menu_Map_currentRoomIndex = Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].prev;
-        }
-    } while (room[Menu_Map_currentRoomIndex].visited == 0);
-
-    if (currentIndex != Menu_Map_currentRoomIndex) {
-        VS::Audio::LivePlaySfxCentered(0x7E, 0xB);
     }
 }
 

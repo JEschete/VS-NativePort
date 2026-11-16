@@ -117,6 +117,7 @@
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
+#include "Menu/MapNavigationLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
@@ -2139,6 +2140,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x80109028u, 0u, (void*)&VS::Menu::Results::ApplyLiveAgilityBonus, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x801090B8u, 0u, (void*)&VS::Menu::Results::ApplyLiveHpBonus, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80109148u, 0u, (void*)&VS::Menu::Results::ApplyLiveMpBonus, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80105EC0u, 0u, (void*)&VS::Menu::map::LiveAnimateCentering, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801060E0u, 0u, (void*)&VS::Menu::map::LiveScaleRoomVertices, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80106570u, 0u, (void*)&VS::Menu::map::LiveInitialRoomIndex, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80106618u, 0u, (void*)&VS::Menu::map::LiveSelectAdjacentVisitedRoom, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

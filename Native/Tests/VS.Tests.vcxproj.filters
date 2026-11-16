@@ -729,6 +729,9 @@
     <ClCompile Include="src\ManualRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MapNavigationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MapRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
