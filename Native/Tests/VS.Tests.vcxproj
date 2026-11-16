@@ -196,6 +196,7 @@
     <ClCompile Include="src\EffectTrailTests.cpp" />
     <ClCompile Include="src\EncounterProfileTests.cpp" />
     <ClCompile Include="src\EncounterTests.cpp" />
+    <ClCompile Include="src\EncyclopediaPreviewTests.cpp" />
     <ClCompile Include="src\EndingArtTests.cpp" />
     <ClCompile Include="src\EndingCreditsTests.cpp" />
     <ClCompile Include="src\EndingResultsTests.cpp" />

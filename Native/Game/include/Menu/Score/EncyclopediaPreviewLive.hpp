@@ -1,0 +1,33 @@
+#pragma once
+// Hand-maintained (tools/port/owned.csv).
+
+#include <cstdint>
+
+// Binds the encyclopedia preview (EncyclopediaPreview.hpp) to the shared
+// model load step (Menu_Inventory_equipmentModelLoadStep), the ZUD file
+// table (Menu_Score_zudLbas, Menu_Score_zudSizes, Menu_Score_paletteFlags),
+// the disc queue, the game heap, the battle asset queue and the actor
+// records, in the shapes the copied score screen calls. The preview's state
+// lives here instead of 592C.c's statics. An id past the file table, a file
+// or section the heap block cannot hold, a missing record and a read while
+// an earlier preview still holds its blocks are refused and reported on the
+// "menu.score" channel.
+namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
+struct EnemyPreviewState;
+
+// MENU9.PRG (57BC.c, 592C.c).
+int LoadLiveEnemyPreview(int zud_id);
+void FreeLiveEnemyPreview();
+void InitializeLiveAshleyPreviewPose();
+void QueueLiveEnemyModelRead(int zud_id);
+int LoadLiveEnemyModelParts();
+void FreeLiveEnemyModelBuffer();
+
+// Call where MENU9.PRG loads: its reload zeroes the state (592C.c's statics
+// are bss). Releases nothing, as the reload released nothing.
+void ResetLiveEnemyPreview();
+// The bound state, for the reset and tests.
+[[nodiscard]] EnemyPreviewState& LiveEnemyPreviewState() noexcept;
+// Inputs the binding refused since start-up.
+[[nodiscard]] std::uint64_t LiveEnemyPreviewRefusals() noexcept;
+}  // namespace VS::Menu::Score

@@ -1,38 +1,21 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/ActorStateLive.hpp"
-#include "Actors/AnimationControlLive.hpp"
-#include "Actors/AnimationPoseLive.hpp"
-#include "Content/ActorAssetsLive.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/WeaponModel.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
-#include "Field/Actors.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
@@ -529,197 +512,6 @@ void Menu_Score_UpdateEnemyNavigation(int direction)
 
         scratch[0] = poly;
     }
-}
-
-// decomp: MENU9.PRG vs_menu9_loadZud (src/MENU/MENU9.PRG/57BC.c:10)
-int Menu_Score_LoadEnemyPreview(int zudId)
-{
-    int state = Menu_Inventory_equipmentModelLoadStep;
-
-    switch (state) {
-    case 0:
-        Menu_Score_QueueEnemyModelRead(zudId);
-
-        ++Menu_Inventory_equipmentModelLoadStep;
-        break;
-
-    case 1:
-        if (Menu_Score_LoadEnemyModelParts() != 1) {
-            ++Menu_Inventory_equipmentModelLoadStep;
-        }
-
-        break;
-
-    case 2:
-        VS::Menu::Framework::ResetLiveActorPreviewPose();
-
-        Actors_actorRecords[1]->instance.weaponDrawn = 1;
-
-        VS::Actors::PlayLiveActorAnimation(1, 1, 0, 0);
-
-        Menu_Inventory_equipmentModelLoadStep = 0;
-        return 0;
-    }
-
-    return 1;
-}
-
-// decomp: MENU9.PRG vs_menu9_freeZud (src/MENU/MENU9.PRG/57BC.c:42)
-void Menu_Score_FreeEnemyPreview(void)
-{
-    VS::Content::ReleaseLiveActorModel(1);
-    VS::Content::ReleaseLiveActorModel(16);
-    ((void (*)(...))Menu_Score_FreeEnemyModelBuffer)();
-}
-
-// decomp: MENU9.PRG func_801080C8 (src/MENU/MENU9.PRG/57BC.c:49)
-void Menu_Score_InitializeAshleyPreviewPose(void)
-{
-    Actors_ActorRecord* p = Actors_actorRecords[1];
-
-    p->animationId = 33;
-    p->instance.weaponDrawn = 0;
-
-    VS::Actors::InitializeLiveActorAnimationPose(p, &p->blendPose);
-    VS::Actors::SetLiveActorDisplayFlags(1, 3);
-    VS::Actors::SetLiveActorCompanion(1, 0, NULL, NULL);
-}
-
-// decomp: MENU9.PRG vs_menu9_loadZudFile (src/MENU/MENU9.PRG/592C.c:171)
-void Menu_Score_QueueEnemyModelRead(int zudId)
-{
-    static int Menu_Score_queueEnemyModelReadZudId;
-
-    Content_DiscFile sourceFile;
-    int variantIndex;
-
-    sourceFile.lba = Menu_Score_zudLbas[zudId];
-    Menu_Score_queueEnemyModelReadZudId = zudId;
-    sourceFile.size = Menu_Score_zudSizes[zudId];
-    Menu_Score_zudCdSlot = VS::Content::AllocateLiveDiscRequest(&sourceFile);
-    Menu_Score_zudData = (Menu_Score_ZudHeader *)(VS::Core::Memory::AllocateLiveFromHighEnd(sourceFile.size));
-
-    if (Menu_Score_zudCdSlot != NULL) {
-        VS::Content::EnqueueLivePriorityDiscRequest(Menu_Score_zudCdSlot, Menu_Score_zudData);
-    } else {
-        Menu_Score_zudCdSlot = VS::Content::CompleteLiveRefusedDiscRequest(&sourceFile, Menu_Score_zudData);
-    }
-
-    Menu_Score_paletteFlag = Menu_Score_paletteFlags[zudId];
-    Menu_Score_modelVariant = 0;
-
-    for (variantIndex = 0; variantIndex < 6; ++variantIndex) {
-        if (zudId == Menu_Score_modelVariants[variantIndex]) {
-            Menu_Score_modelVariant = variantIndex;
-            break;
-        }
-    }
-
-    if (Menu_Score_modelVariant != 0) {
-        Menu_Score_zudBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(2 * sizeof(Actors_ActorRecord));
-    } else {
-        Menu_Score_zudBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord) + 2 * sizeof(Actors_WeaponModel));
-    }
-}
-
-// decomp: MENU9.PRG vs_menu9_parseZudFile (src/MENU/MENU9.PRG/592C.c:203)
-int Menu_Score_LoadEnemyModelParts(void)
-{
-    Content_ActorAssetRequest request = {0};
-
-    if (Menu_Score_zudCdSlot != NULL) {
-        if (Menu_Score_zudCdSlot->state != Content_DiscRequestState_Loaded) {
-            return 1;
-        }
-
-        VS::Content::ReleaseLiveDiscRequest(Menu_Score_zudCdSlot);
-        Menu_Score_zudCdSlot = NULL;
-
-        request.assetKind = 2;
-        request.targetSlot = 1;
-        request.dataAddress = Menu_Score_zudData->shpOffset + (uintptr_t)Menu_Score_zudData;
-        request.modelId = Menu_Score_zudData->characterId;
-        request.destination = Menu_Score_zudBuffer;
-        request.subKind = 0xFF;
-        request.variant = Menu_Score_paletteFlag & 1;
-        request.material = Menu_Score_zudData->defaultMaterial;
-        VS::Content::QueueLiveActorAssetRequest(&request);
-
-        if (Menu_Score_modelVariant != 0) {
-            request.assetKind = 1;
-            request.targetSlot = 16;
-            request.modelId = Menu_Score_variantMap[Menu_Score_modelVariant];
-            request.destination = (u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord);
-            request.subKind = 1;
-            request.textureSlot = 0xFC;
-            request.variant = 0;
-            VS::Content::QueueLiveActorAssetRequest(&request);
-        } else {
-
-            if (Menu_Score_zudData->weapon != 0) {
-                request.assetKind = 4;
-                request.targetSlot = 2;
-                request.dataAddress = Menu_Score_zudData->weaponWepOffset + (uintptr_t)Menu_Score_zudData;
-                request.modelId = Menu_Score_zudData->weapon;
-                request.destination = (u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord);
-                request.subKind = 1;
-                request.textureSlot = 0xF0;
-                request.material = Menu_Score_zudData->weaponMaterial;
-                VS::Content::QueueLiveActorAssetRequest(&request);
-            }
-
-            if (Menu_Score_zudData->shield != 0) {
-                request.assetKind = 4;
-                request.targetSlot = 3;
-                request.dataAddress = Menu_Score_zudData->shieldWepOffset + (uintptr_t)Menu_Score_zudData;
-                request.modelId = Menu_Score_zudData->shield;
-                request.destination = (u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord) + sizeof(Actors_WeaponModel);
-                request.subKind = 1;
-                request.textureSlot = 0xF1;
-                request.material = Menu_Score_zudData->shieldMaterial;
-                VS::Content::QueueLiveActorAssetRequest(&request);
-            }
-        }
-
-        if (Menu_Score_zudData->battleSeqLen != 0) {
-            request.assetKind = 8;
-            request.targetSlot = 1;
-            request.dataAddress = Menu_Score_zudData->battleSeqOffset + (uintptr_t)Menu_Score_zudData;
-            request.subKind = 0;
-            request.modelId = Menu_Score_zudData->opaque2;
-            VS::Content::QueueLiveActorAssetRequest(&request);
-        }
-
-        if (Menu_Score_zudData->commonSeqLen != 0) {
-            request.assetKind = 8;
-            request.targetSlot = 1;
-            request.dataAddress = Menu_Score_zudData->commonSeqOffset + (uintptr_t)Menu_Score_zudData;
-            request.subKind = 0;
-            request.modelId = 0;
-            VS::Content::QueueLiveActorAssetRequest(&request);
-        }
-        return 1;
-    }
-
-    if (Menu_Score_zudData == NULL) {
-        return 0;
-    }
-
-    VS::Content::UpdateLiveActorAssetQueue();
-
-    if (VS::Content::FindLiveFreeActorAssetRequest() == 0) {
-        VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_zudData);
-        Menu_Score_zudData = NULL;
-    }
-
-    return 1;
-}
-
-// decomp: MENU9.PRG vs_menu9_freeZudFile (src/MENU/MENU9.PRG/592C.c:295)
-void Menu_Score_FreeEnemyModelBuffer(void)
-{
-    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_zudBuffer);
-    Menu_Score_zudBuffer = NULL;
 }
 
 // MENU9.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

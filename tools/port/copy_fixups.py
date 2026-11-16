@@ -1705,6 +1705,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Status::LiveDrawVitals": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveLimbCount": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveEquipmentRowCount": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Score::LoadLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
+    "VS::Menu::Score::FreeLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
+    "VS::Menu::Score::InitializeLiveAshleyPreviewPose": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
+    "VS::Menu::Score::QueueLiveEnemyModelRead": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
+    "VS::Menu::Score::LoadLiveEnemyModelParts": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
+    "VS::Menu::Score::FreeLiveEnemyModelBuffer": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3054,6 +3060,12 @@ OWNED_CALL_BINDINGS["F02660"] = "VS::Menu::Status::LiveDrawVitalBar"
 OWNED_CALL_BINDINGS["F02661"] = "VS::Menu::Status::LiveDrawVitals"
 OWNED_CALL_BINDINGS["F02666"] = "VS::Menu::Status::LiveLimbCount"
 OWNED_CALL_BINDINGS["F02667"] = "VS::Menu::Status::LiveEquipmentRowCount"
+OWNED_CALL_BINDINGS["F02836"] = "VS::Menu::Score::LoadLiveEnemyPreview"
+OWNED_CALL_BINDINGS["F02837"] = "VS::Menu::Score::FreeLiveEnemyPreview"
+OWNED_CALL_BINDINGS["F02838"] = "VS::Menu::Score::InitializeLiveAshleyPreviewPose"
+OWNED_CALL_BINDINGS["F02839"] = "VS::Menu::Score::QueueLiveEnemyModelRead"
+OWNED_CALL_BINDINGS["F02840"] = "VS::Menu::Score::LoadLiveEnemyModelParts"
+OWNED_CALL_BINDINGS["F02841"] = "VS::Menu::Score::FreeLiveEnemyModelBuffer"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4908,6 +4920,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU4.PRG", 0x80103AC8, "VS::Menu::Status::LiveDrawVitals"),  # F02661
     ("MENU/MENU4.PRG", 0x80104514, "VS::Menu::Status::LiveLimbCount"),  # F02666
     ("MENU/MENU4.PRG", 0x8010455C, "VS::Menu::Status::LiveEquipmentRowCount"),  # F02667
+    ("MENU/MENU9.PRG", 0x80107FBC, "VS::Menu::Score::LoadLiveEnemyPreview"),  # F02836
+    ("MENU/MENU9.PRG", 0x80108098, "VS::Menu::Score::FreeLiveEnemyPreview"),  # F02837
+    ("MENU/MENU9.PRG", 0x801080C8, "VS::Menu::Score::InitializeLiveAshleyPreviewPose"),  # F02838
+    ("MENU/MENU9.PRG", 0x8010812C, "VS::Menu::Score::QueueLiveEnemyModelRead"),  # F02839
+    ("MENU/MENU9.PRG", 0x8010823C, "VS::Menu::Score::LoadLiveEnemyModelParts"),  # F02840
+    ("MENU/MENU9.PRG", 0x801084E4, "VS::Menu::Score::FreeLiveEnemyModelBuffer"),  # F02841
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5044,27 +5062,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     "F02820": [
         ("char sp60[12];", 'char sp60[sizeof "NO.   000/000"];',
          "238.c:2069 preserve the complete valid encyclopedia header and its terminator"),
-    ],
-    "F02839": [
-        ("VS::Core::Memory::AllocateFromLowEnd(0x3200)",
-         "VS::Core::Memory::AllocateFromLowEnd(2 * sizeof(Actors_ActorRecord))",
-         "592C.c:171 companion previews own two native actor records"),
-        ("VS::Core::Memory::AllocateFromLowEnd(0x24D0)",
-         "VS::Core::Memory::AllocateFromLowEnd(sizeof(Actors_ActorRecord) + "
-         "2 * sizeof(Actors_WeaponModel))",
-         "Normal previews own a native actor plus two native equipment records"),
-    ],
-    "F02840": [
-        ("Content_ActorAssetRequest slot;",
-         "Content_ActorAssetRequest slot = {0};",
-         "592C.c:203 deterministic preview placement must not inherit moving-platform bits from the stack"),
-        ("Menu_Score_zudBuffer + 0x1900",
-         "(u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord)",
-         "Companion and first equipment records follow the complete native actor record"),
-        ("Menu_Score_zudBuffer + 0x1EE8",
-         "(u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord) + "
-         "sizeof(Actors_WeaponModel)",
-         "Shield storage follows the complete native weapon record without overlap"),
     ],
     "F02553": [
         (r'"MISC\00000|0xF8|"',
@@ -6540,8 +6537,6 @@ for _row, _fixup in (
     ("F03012", _refused_disc_request(
         " " * 8, "Menu_Results_initializeTimeAttackStartCdSlot", "Menu_Results_initializeTimeAttackStartTimData",
         "&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack]")),
-    ("F02839", _refused_disc_request(
-        " " * 4, "Menu_Score_zudCdSlot", "Menu_Score_zudData", "&sourceFile", priority=True)),
     ("F02803", _refused_disc_request(
         " " * 12, "Menu_Score_monBinCdQueueSlot", "Menu_Score_monBinData", "&Menu_Score_kMonBinFile")),
 ):

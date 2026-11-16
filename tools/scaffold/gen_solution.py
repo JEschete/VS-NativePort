@@ -284,6 +284,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\Framework\ItemRowsLive.cpp",
                 r"src\Menu\Framework\EquipmentDetailsLive.cpp",
                 r"src\Menu\Framework\ActorPreviewLive.cpp",
+                r"src\Menu\Score\EncyclopediaPreviewLive.cpp",
                 r"src\Menu\Setup\SetupLive.cpp",
                 r"src\Effects\TextureBindingsLive.cpp",
                 r"src\Battle\Ai\GroundNavigationLive.cpp",

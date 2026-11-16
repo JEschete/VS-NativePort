@@ -64,6 +64,9 @@
     <Filter Include="include\Menu\Results">
       <UniqueIdentifier>{D5F2AD51-6A0B-5241-9E9D-1E80C194E171}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Menu\Score">
+      <UniqueIdentifier>{2095BD07-BA4A-5596-97D8-E7311F01E6B3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Menu\Setup">
       <UniqueIdentifier>{09910199-A0A9-57B0-A127-053BA74AC746}</UniqueIdentifier>
     </Filter>
@@ -2790,6 +2793,12 @@
     <ClInclude Include="src\Menu\Score\Encyclopedia.h">
       <Filter>src\Menu\Score</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Score\EncyclopediaPreview.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Score\EncyclopediaPreviewLive.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\Records.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
@@ -4340,6 +4349,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp">
       <Filter>include\Menu\Results</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp">
+      <Filter>include\Menu\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp">
+      <Filter>include\Menu\Score</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Setup\Assembly.hpp">
       <Filter>include\Menu\Setup</Filter>

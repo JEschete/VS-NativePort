@@ -573,6 +573,14 @@
     <None Include="..\..\port\differentials\effect_script_variant_cleared.py" />
     <None Include="..\..\port\differentials\effect_script_vertical_offset.py" />
     <None Include="..\..\port\differentials\effect_script_yield.py" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_common.py" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_driver.cpp" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_f02836.py" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_f02837.py" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_f02838.py" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_f02839.py" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_f02840.py" />
+    <None Include="..\..\port\differentials\encyclopedia_preview_f02841.py" />
     <None Include="..\..\port\differentials\engaged_list.py" />
     <None Include="..\..\port\differentials\engaged_list_driver.cpp" />
     <None Include="..\..\port\differentials\equipment_detail_b_common.py" />

@@ -28,12 +28,6 @@ void Menu_Score_InitializeEnemyList(void);
 void Menu_Score_RenderEnemyList(int animState);
 void Menu_Score_RenderEnemyViewer(int animState, int state);
 void Menu_Score_UpdateEnemyNavigation(int direction);
-int Menu_Score_LoadEnemyPreview(int zudId);
-void Menu_Score_FreeEnemyPreview(void);
-void Menu_Score_InitializeAshleyPreviewPose(void);
-void Menu_Score_QueueEnemyModelRead(int zudId);
-int Menu_Score_LoadEnemyModelParts(void);
-void Menu_Score_FreeEnemyModelBuffer(void);
 void Menu_Score_Encyclopedia_ResetMenu9Statics(void);
 
 #endif // VS_MENU_SCORE_ENCYCLOPEDIA_H_DECLS

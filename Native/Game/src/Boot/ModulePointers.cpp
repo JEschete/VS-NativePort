@@ -121,6 +121,7 @@
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
+#include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
@@ -2173,6 +2174,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU4.PRG", 0x80103AC8u, 0u, (void*)&VS::Menu::Status::LiveDrawVitals, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80104514u, 0u, (void*)&VS::Menu::Status::LiveLimbCount, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x8010455Cu, 0u, (void*)&VS::Menu::Status::LiveEquipmentRowCount, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80107FBCu, 0u, (void*)&VS::Menu::Score::LoadLiveEnemyPreview, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80108098u, 0u, (void*)&VS::Menu::Score::FreeLiveEnemyPreview, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x801080C8u, 0u, (void*)&VS::Menu::Score::InitializeLiveAshleyPreviewPose, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x8010812Cu, 0u, (void*)&VS::Menu::Score::QueueLiveEnemyModelRead, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x8010823Cu, 0u, (void*)&VS::Menu::Score::LoadLiveEnemyModelParts, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x801084E4u, 0u, (void*)&VS::Menu::Score::FreeLiveEnemyModelBuffer, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

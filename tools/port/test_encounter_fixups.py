@@ -3587,32 +3587,21 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("std::bit_cast<std::uint8_t>(value)", registers[:registers.index("}\n")])
 
     def test_score_preview_requests_use_initialized_native_record_storage(self):
-        source = """Content_ActorAssetRequest slot;
-slot.destination = Menu_Score_zudBuffer + 0x1900;
-slot.destination = Menu_Score_zudBuffer + 0x1900;
-slot.destination = Menu_Score_zudBuffer + 0x1EE8;
-"""
-        for old, new, _ in copy_fixups.FIXES["F02840"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-            if re.search(row, "Menu::Score::LoadEnemyModelParts"):
-                source = re.sub(pattern, replacement, source)
-        self.assertIn("Content_ActorAssetRequest request = {0};", source)
-        self.assertEqual(source.count("sizeof(Actors_ActorRecord)"), 3)
-        self.assertIn("sizeof(Actors_WeaponModel)", source)
-        self.assertNotIn("0x1900", source)
-        self.assertNotIn("0x1EE8", source)
-        allocation = """VS::Core::Memory::AllocateFromLowEnd(0x3200);
-VS::Core::Memory::AllocateFromLowEnd(0x24D0);
-"""
-        for old, new, why in copy_fixups.FIXES["F02839"]:
-            if "#282" in why:
-                continue
-            self.assertIn(old, allocation)
-            allocation = allocation.replace(old, new)
-        self.assertIn("2 * sizeof(Actors_ActorRecord)", allocation)
-        self.assertIn("2 * sizeof(Actors_WeaponModel)", allocation)
+        # 592C.c:171-253 sized and placed the preview parts with PS1 record strides; the owned
+        # EncyclopediaPreview.cpp cores (#276 row 50) start each request zero-initialised and the Live
+        # binding places the parts at the native record sizes, not copy fixups.
+        for function_id in ("F02839", "F02840"):
+            self.assertNotIn(function_id, copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        core = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp").read_text(encoding="utf-8")
+        self.assertIn("ActorAssetRequest request{};", core)
+        live = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreviewLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("constexpr std::size_t kRecordBytes = sizeof(Actors_ActorRecord);", live)
+        self.assertIn("constexpr std::size_t kWeaponBytes = sizeof(Actors_WeaponModel);", live)
+        self.assertIn("constexpr std::size_t kCompanionBufferBytes = 2 * kRecordBytes;", live)
+        self.assertIn("constexpr std::size_t kEquippedBufferBytes = kRecordBytes + (2 * kWeaponBytes);", live)
+        self.assertNotIn("0x1900", live)
+        self.assertNotIn("0x1EE8", live)
 
     def test_disc_request_callers_handle_a_full_queue(self):
         # main.c:9411 returns no request when all 32 are busy (#282).
@@ -3641,11 +3630,14 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # LoadScreenOverlay (#276 row 39), which completes a refused read through the loader's
         # CompleteRefusedOverlayRead (ScreenOverlaysLive.cpp). F04148 and F04150 left it for the owned
         # MapLoading.cpp LoadBackground and LoadSceneMap (#276 row 52), whose MapLoadingLive.cpp
-        # EnqueueBackgroundRead and EnqueueSceneRead keep the guard below.
-        self.assertGreaterEqual(len(guarded), 16)
+        # EnqueueBackgroundRead and EnqueueSceneRead keep the guard below. F02839 left it for the owned
+        # EncyclopediaPreview.cpp QueueEnemyModelRead (#276 row 50), which completes a refused read through the
+        # host's ReadRefused (EncyclopediaPreviewLive.cpp).
+        self.assertGreaterEqual(len(guarded), 15)
         owned = self.owned_items()
         self.assertEqual(owned["F04148"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F04150"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
+        self.assertEqual(owned["F02839"]["path"], r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp")
         self.assertEqual(owned["F03526"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03547"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03496"]["path"], r"Native\Engine\src\Audio\MusicCore.cpp")
@@ -3678,6 +3670,12 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         self.assertIn("if(slot!=nullptr){runtime.EnqueueMenuReload(*slot);}", runtime)
         runtime_tests = (root / r"Native\Tests\src\EffectRuntimeTests.cpp").read_text(encoding="utf-8")
         self.assertIn('expected.back() = "reload slot none";', runtime_tests)
+        preview = "".join(
+            (root / r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn("}else{read=host.ReadRefused(file,data);}", preview)
+        preview_live = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreviewLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination))", preview_live)
         background = "".join((root / r"Native\Game\src\Field\Background.cpp").read_text(encoding="utf-8").split())
         self.assertIn("state.texture_read=host.CompleteRefusedRead(section->texture,state.tim_buffer);", background)
         self.assertIn("state.layout_read=host.CompleteRefusedRead(section->layout,state.layout);", background)
@@ -3748,7 +3746,8 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         # reload request into the owned EffectRuntime.cpp UpdatePrimaryEffects. Row 39 moved ScreenEffects.cpp's
         # overlay load into the owned ScreenOverlayLifetime.cpp LoadScreenOverlay, whose ScreenOverlaysLive.cpp
         # EnqueueOverlayRead runs only for an allocated read. Row 52 moved Map.cpp's background and scene ARM
-        # reads into MapLoadingLive.cpp EnqueueBackgroundRead and EnqueueSceneRead.
+        # reads into MapLoadingLive.cpp EnqueueBackgroundRead and EnqueueSceneRead. Row 50 moved Encyclopedia.cpp's
+        # ZUD read into the owned EncyclopediaPreview.cpp QueueEnemyModelRead.
         event_source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(encoding="utf-8")
         event = "".join(re.sub(r"//[^\n]*", "", event_source).split())
         self.assertIn(
@@ -3761,7 +3760,7 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             event,
         )
         sites += 1
-        self.assertGreaterEqual(sites, 11)
+        self.assertGreaterEqual(sites, 10)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)

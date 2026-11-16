@@ -8,6 +8,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -503,7 +504,7 @@ int Menu_Score_Update(void)
 
     case Menu_Score_ScoreMenuState_InitData:
         VS::Menu::Framework::LoadLiveActorPreview(0);
-        Menu_Score_InitializeAshleyPreviewPose();
+        VS::Menu::Score::InitializeLiveAshleyPreviewPose();
 
         Menu_Score_cameraDistance = 0x150;
         Menu_Score_cameraHeightOffset = 0x6B;
@@ -945,7 +946,7 @@ int Menu_Score_Update(void)
                 != 0) {
 
                 VS::Audio::LivePlaySfxCentered(0x7E, 5);
-                Menu_Score_LoadEnemyPreview(
+                VS::Menu::Score::LoadLiveEnemyPreview(
                     Menu_Score_monBinData[Battle_unusedMenu9CursorMemory.encyclopaediaPage
                                 + Battle_unusedMenu9CursorMemory.encyclopaediaRow]
                         .zudId);
@@ -1004,7 +1005,7 @@ int Menu_Score_Update(void)
         break;
 
     case 19:
-        if (Menu_Score_LoadEnemyPreview(Menu_Score_monBinData[Battle_unusedMenu9CursorMemory.encyclopaediaPage
+        if (VS::Menu::Score::LoadLiveEnemyPreview(Menu_Score_monBinData[Battle_unusedMenu9CursorMemory.encyclopaediaPage
                                          + Battle_unusedMenu9CursorMemory.encyclopaediaRow]
                     .zudId)
             == 0) {
@@ -1257,7 +1258,7 @@ int Menu_Score_Update(void)
             break;
         }
 
-        Menu_Score_FreeEnemyPreview();
+        VS::Menu::Score::FreeLiveEnemyPreview();
 
         if (Menu_Score_nextState != 0) {
             VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_monBinData);
@@ -1284,8 +1285,8 @@ int Menu_Score_Update(void)
             break;
         }
 
-        Menu_Score_FreeEnemyPreview();
-        Menu_Score_LoadEnemyPreview(Menu_Score_monBinData[Menu_Score_selectedEnemy].zudId);
+        VS::Menu::Score::FreeLiveEnemyPreview();
+        VS::Menu::Score::LoadLiveEnemyPreview(Menu_Score_monBinData[Menu_Score_selectedEnemy].zudId);
 
         ++Menu_Score_menuState;
         break;
@@ -1295,7 +1296,7 @@ int Menu_Score_Update(void)
         Menu_Score_UpdateEnemyNavigation(3);
         Menu_Score_RenderEnemyViewer(Menu_Score_updateMenuAnimState, 3);
 
-        if (Menu_Score_LoadEnemyPreview(Menu_Score_monBinData[Battle_unusedMenu9CursorMemory.encyclopaediaPage
+        if (VS::Menu::Score::LoadLiveEnemyPreview(Menu_Score_monBinData[Battle_unusedMenu9CursorMemory.encyclopaediaPage
                                          + Battle_unusedMenu9CursorMemory.encyclopaediaRow]
                     .zudId)
             == 0) {

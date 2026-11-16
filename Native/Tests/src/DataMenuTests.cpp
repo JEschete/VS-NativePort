@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstdint>
 #include <format>
 #include <string>
@@ -11,24 +10,18 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Content/ActorAssetsLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
 
 extern "C" {
-#include "ActorAssets.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/WeaponModel.h"
 #include "Core/Random.h"
 #include "Core/Text/TextCode.h"
-#include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/FilesLiveState.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
-#include "ModelLoading.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -370,86 +363,4 @@ TEST_CASE("Score viewer banners use the native main ordering pointer",
         reinterpret_cast<const u_char*>(first) + bytes - 3 * sizeof(u_long));
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
-}
-
-namespace {
-struct ScoreAssetFixture {
-  decltype(std::to_array(Content_legacyActorAssetRequests)) saved_requests =
-      std::to_array(Content_legacyActorAssetRequests);
-  decltype(Menu_Score_zudCdSlot) saved_disc = Menu_Score_zudCdSlot;
-  decltype(Menu_Score_zudData) saved_data = Menu_Score_zudData;
-  decltype(Menu_Score_zudBuffer) saved_buffer = Menu_Score_zudBuffer;
-  int saved_variant = Menu_Score_modelVariant;
-  int saved_palette = Menu_Score_paletteFlag;
-  // The ZUD read is a queue slot, as the menu's own reads are.
-  Content_DiscQueueSlot saved_disc_slot = Content_discRequestSlots[31];
-  Content_DiscQueueSlot* disc = &Content_discRequestSlots[31];
-  Menu_Score_ZudHeader header{};
-  alignas(Actors_ActorRecord)
-      std::array<u_char, 2 * sizeof(Actors_ActorRecord)> storage{};
-
-  explicit ScoreAssetFixture(bool companion) {
-    std::fill_n(Content_legacyActorAssetRequests, saved_requests.size(),
-                Content_ActorAssetRequest{});
-    *disc = Content_DiscQueueSlot{};
-    disc->state = Content_DiscRequestState_Loaded;
-    header.characterId = 13;
-    header.weapon = 17;
-    header.shield = 27;
-    header.shpOffset = 48;
-    header.weaponWepOffset = 128;
-    header.shieldWepOffset = 256;
-    header.battleSeqOffset = 384;
-    header.commonSeqOffset = 512;
-    header.battleSeqLen = header.commonSeqLen = 1;
-    Menu_Score_zudCdSlot = disc;
-    Menu_Score_zudData = &header;
-    Menu_Score_zudBuffer = storage.data();
-    Menu_Score_modelVariant = companion ? 1 : 0;
-    Menu_Score_paletteFlag = 1;
-  }
-
-  void CheckBodyRequest() {
-    const auto& body = Content_legacyActorAssetRequests[0];
-    CHECK(body.destination == storage.data());
-    CHECK(std::bit_cast<u_int>(body.placement) == 0);
-  }
-
-  void CheckAttachmentRequests(bool companion) {
-    const auto& attachment = Content_legacyActorAssetRequests[1];
-    CHECK(attachment.destination ==
-          storage.data() + sizeof(Actors_ActorRecord));
-    CHECK(attachment.assetKind == (companion ? 1 : 4));
-    CHECK(attachment.targetSlot == (companion ? 16 : 2));
-    if (!companion) {
-      const auto& shield = Content_legacyActorAssetRequests[2];
-      CHECK(shield.destination == storage.data() + sizeof(Actors_ActorRecord) +
-                                      sizeof(Actors_WeaponModel));
-      CHECK(shield.targetSlot == 3);
-    }
-  }
-
-  ~ScoreAssetFixture() {
-    std::copy(saved_requests.begin(), saved_requests.end(),
-              Content_legacyActorAssetRequests);
-    Menu_Score_zudCdSlot = saved_disc;
-    Menu_Score_zudData = saved_data;
-    Menu_Score_zudBuffer = saved_buffer;
-    Menu_Score_modelVariant = saved_variant;
-    Menu_Score_paletteFlag = saved_palette;
-    *disc = saved_disc_slot;
-  }
-};
-}  // namespace
-
-TEST_CASE("Score model requests use native record strides and fresh placement",
-          "[menu][score][assets]") {
-  const bool companion = GENERATE(false, true);
-  ScoreAssetFixture fixture(companion);
-  REQUIRE(Menu_Score_LoadEnemyModelParts() == 1);
-  REQUIRE(VS::Content::FindLiveFreeActorAssetRequest() == (companion ? 4 : 5));
-  fixture.CheckBodyRequest();
-  fixture.CheckAttachmentRequests(companion);
-  CHECK(fixture.disc->state == Content_DiscRequestState_Free);
-  CHECK(Menu_Score_zudCdSlot == nullptr);
 }
