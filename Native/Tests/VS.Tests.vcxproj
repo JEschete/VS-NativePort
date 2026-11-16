@@ -310,6 +310,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ManualIllustrationTests.cpp" />
     <ClCompile Include="src\ManualRenderTests.cpp" />
+    <ClCompile Include="src\MapDrawingTests.cpp" />
     <ClCompile Include="src\MapLoadingTests.cpp" />
     <ClCompile Include="src\MapMarkersTests.cpp" />
     <ClCompile Include="src\MapNavigationTests.cpp" />

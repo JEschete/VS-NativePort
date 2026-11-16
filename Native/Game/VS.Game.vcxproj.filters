@@ -2733,6 +2733,12 @@
     <ClInclude Include="src\Menu\Map.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\MapDrawing.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\MapDrawingLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\MapLoading.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -4330,6 +4336,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ManualIllustrationLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MapDrawing.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MapDrawingLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\MapLoading.hpp">

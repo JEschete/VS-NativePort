@@ -1701,6 +1701,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::map::LiveDrawConnectingAreaLabel": r"Native\Game\include\Menu\MapMarkersLive.hpp",
     "VS::Menu::map::LiveQueueLabel": r"Native\Game\include\Menu\MapMarkersLive.hpp",
     "VS::Menu::map::LiveShouldDrawDoorStateMarker": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::map::LiveDrawVisitedRooms": r"Native\Game\include\Menu\MapDrawingLive.hpp",
+    "VS::Menu::map::LiveDrawRoom": r"Native\Game\include\Menu\MapDrawingLive.hpp",
+    "VS::Menu::map::LiveDrawControlBackdrop": r"Native\Game\include\Menu\MapDrawingLive.hpp",
+    "VS::Menu::map::LiveDrawControls": r"Native\Game\include\Menu\MapDrawingLive.hpp",
+    "VS::Menu::map::LiveDrawCompass": r"Native\Game\include\Menu\MapDrawingLive.hpp",
+    "VS::Menu::map::LiveComputeCompassCorners": r"Native\Game\include\Menu\MapDrawingLive.hpp",
+    "VS::Menu::map::LiveDrawLabels": r"Native\Game\include\Menu\MapDrawingLive.hpp",
     "VS::Menu::Status::LiveBeginVitalsTransition": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveFindNextInspectableActor": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveAnimateActorSwitch": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
@@ -3065,6 +3072,13 @@ OWNED_CALL_BINDINGS["F02708"] = "VS::Menu::map::LiveAppendLabelLine"
 OWNED_CALL_BINDINGS["F02711"] = "VS::Menu::map::LiveDrawConnectingAreaLabel"
 OWNED_CALL_BINDINGS["F02712"] = "VS::Menu::map::LiveQueueLabel"
 OWNED_CALL_BINDINGS["F02714"] = "VS::Menu::map::LiveShouldDrawDoorStateMarker"
+OWNED_CALL_BINDINGS["F04152"] = "VS::Menu::map::LiveDrawVisitedRooms"
+OWNED_CALL_BINDINGS["F04153"] = "VS::Menu::map::LiveDrawRoom"
+OWNED_CALL_BINDINGS["F02703"] = "VS::Menu::map::LiveDrawControlBackdrop"
+OWNED_CALL_BINDINGS["F02704"] = "VS::Menu::map::LiveDrawControls"
+OWNED_CALL_BINDINGS["F02709"] = "VS::Menu::map::LiveDrawCompass"
+OWNED_CALL_BINDINGS["F02710"] = "VS::Menu::map::LiveComputeCompassCorners"
+OWNED_CALL_BINDINGS["F02713"] = "VS::Menu::map::LiveDrawLabels"
 OWNED_CALL_BINDINGS["F02656"] = "VS::Menu::Status::LiveBeginVitalsTransition"
 OWNED_CALL_BINDINGS["F02657"] = "VS::Menu::Status::LiveFindNextInspectableActor"
 OWNED_CALL_BINDINGS["F02658"] = "VS::Menu::Status::LiveAnimateActorSwitch"
@@ -4934,6 +4948,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU5.PRG", 0x8010815C, "VS::Menu::map::LiveDrawConnectingAreaLabel"),  # F02711
     ("MENU/MENU5.PRG", 0x80108274, "VS::Menu::map::LiveQueueLabel"),  # F02712
     ("MENU/MENU5.PRG", 0x8010839C, "VS::Menu::map::LiveShouldDrawDoorStateMarker"),  # F02714
+    ("MENU/MENU5.PRG", 0x801046B0, "VS::Menu::map::LiveDrawVisitedRooms"),  # F04152
+    ("MENU/MENU5.PRG", 0x80104780, "VS::Menu::map::LiveDrawRoom"),  # F04153
+    ("MENU/MENU5.PRG", 0x80106AF4, "VS::Menu::map::LiveDrawControlBackdrop"),  # F02703
+    ("MENU/MENU5.PRG", 0x80106C84, "VS::Menu::map::LiveDrawControls"),  # F02704
+    ("MENU/MENU5.PRG", 0x80107B10, "VS::Menu::map::LiveDrawCompass"),  # F02709
+    ("MENU/MENU5.PRG", 0x8010800C, "VS::Menu::map::LiveComputeCompassCorners"),  # F02710
+    ("MENU/MENU5.PRG", 0x801082A8, "VS::Menu::map::LiveDrawLabels"),  # F02713
     ("MENU/MENU4.PRG", 0x80103608, "VS::Menu::Status::LiveBeginVitalsTransition"),  # F02656
     ("MENU/MENU4.PRG", 0x80103688, "VS::Menu::Status::LiveFindNextInspectableActor"),  # F02657
     ("MENU/MENU4.PRG", 0x80103744, "VS::Menu::Status::LiveAnimateActorSwitch"),  # F02658
@@ -5106,11 +5127,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "VS::Core::Memory::AllocateFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace))",
          "#370: both rebuilt and pending row workspaces require the native pointer-width extent"),
     ],
-    "F02703": [
-        ("*(int**)Core_ScratchAddr(1) + 7",
-         "(u_long*)Render_frameScratch.orderingTable + 7",
-         "4D8.c:1965 scratch word1 is the upper half of a native cursor, not the native ordering pointer"),
-    ],
     "F02699": [
         ("    u_long* pScratch1;\n    u_long* pScratch2;\n", "",
          "4D8.c:1788 use native frame fields instead of two32-bit scratch words"),
@@ -5139,13 +5155,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("pScratch2[0] = (u_long)sprt;",
          "Render_frameScratch.primitiveCursor = sprt;",
          "do not truncate the second strip cursor through a32-bit lvalue"),
-    ],
-    "F04153": [
-        ("    short (*var_s1)[4] = (void*)Core_ScratchAddr(64);",
-         "    enum { kMapVertexCapacity = 256 };\n"
-         "    short projectedVertices[kMapVertexCapacity][4];\n"
-         "    short (*var_s1)[4] = projectedVertices;",
-         "4D8.c:1112 byte-indexed scene vertices need a local256-entry cache, not the96-entry shared scratch tail"),
     ],
     "G00864": [
         ("char Menu_Framework_comparisonStatTotals[8]",
@@ -7591,15 +7600,6 @@ REGEX_FIXES += [
         ("Menu::Map::DrawPalingDistortion",
          (('new_var', 'legacy_render_scratch'),),
          "F02702 src\\MENU\\MENU5.PRG\\4D8.c:1880-1963 (_applyPalingScreenEffect). Named roles: legacy render scratch."),
-        ("Menu::Map::DrawControls",
-         (('s1', 'legacy_button_render_scratch'),),
-         "F02704 src\\MENU\\MENU5.PRG\\4D8.c:1991-2151 (_drawUIControls). Named roles: legacy button render scratch. Retained: s0: Six distinct block-local aliases of original address 0x1F800000, each reading ordering-table slot 1 for a control state."),
-        ("Menu::Map::DrawCompass",
-         (('new_var2', 'legacy_primitive_scratch'), ('new_var3', 'legacy_ordering_table_scratch'), ('new_var4', 'compass_texture_right_u')),
-         "F02709 src\\MENU\\MENU5.PRG\\4D8.c:2272-2375 (_renderCompass). Named roles: legacy primitive scratch, legacy ordering table scratch, compass texture right u."),
-        ("Menu::Map::ComputeCompassCorners",
-         (('arg0', 'compass_center_x'), ('arg1', 'compass_center_y'), ('arg2', 'compass_half_width'), ('arg3', 'compass_half_height'), ('arg4', 'compass_angle'), ('temp_s1', 'angle_sine'), ('temp_v0', 'angle_cosine')),
-         "F02710 src\\MENU\\MENU5.PRG\\4D8.c:2377-2398 (_computeRotatedRect). Named roles: compass center x, compass center y, compass half width, compass half height, compass angle, angle sine, angle cosine."),
         ("Menu::Files::DrawHpMpSummary",
          (('new_var4', 'value_right_edge_offset'),),
          "F02743 src\\MENU\\MENU7.PRG\\260.c:1270-1344 (_drawHPMP). Named roles: value right edge offset."),
@@ -7975,12 +7975,6 @@ REGEX_FIXES += [
         ("Menu::Map::UpdateMapMenu",
          (('new_var2', 'area_selection_result'), ('var_s2', 'controls_state')),
          "F04151 src\\MENU\\MENU5.PRG\\4D8.c:523-893 (_menuManager). Named roles: area selection result, controls state."),
-        ("Menu::Map::DrawVisitedRooms",
-         (('new_var', 'room_count_address'),),
-         "F04152 src\\MENU\\MENU5.PRG\\4D8.c:1081-1110 (_renderMap). Named roles: room count address."),
-        ("Menu::Map::DrawRoom",
-         (('arg2', 'zone_id'), ('arg3', 'map_id'), ('s2', 'legacy_render_scratch'), ('sp28', 'available_marker_kinds'), ('v0', 'projected_depth'), ('var_s1', 'projected_vertex_rows'), ('var_s3', 'room_element_cursor')),
-         "F04153 src\\MENU\\MENU5.PRG\\4D8.c:1112-1509 (_renderRoom). Named roles: zone id, map id, legacy render scratch, available marker kinds, projected depth, projected vertex rows, room element cursor. Retained: new_var: Merged const-int pointer to serialized element count and later Ashley-icon brightness table; sp38: Merged RotTransPers depth-cue output (stored in projected vertex word 3) and later polygon/line/tile ordering-table depth index (from word 2); sp3C: Merged RotTransPers projection flags and later room-feature highlight/draw predicate."),
         ("Menu::Manual::UpdateHelpPages",
          (('s0', 'frame_scratch'),),
          "F04163 src\\MENU\\MENUE.PRG\\494.c:245-448 (_showMenu). Named roles: frame scratch."),

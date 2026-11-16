@@ -804,6 +804,15 @@
     <None Include="..\..\port\differentials\manual_illustration_f03000.py" />
     <None Include="..\..\port\differentials\manual_illustration_f03005.py" />
     <None Include="..\..\port\differentials\manual_illustration_f03006.py" />
+    <None Include="..\..\port\differentials\map_drawing_common.py" />
+    <None Include="..\..\port\differentials\map_drawing_driver.cpp" />
+    <None Include="..\..\port\differentials\map_drawing_f02703.py" />
+    <None Include="..\..\port\differentials\map_drawing_f02704.py" />
+    <None Include="..\..\port\differentials\map_drawing_f02709.py" />
+    <None Include="..\..\port\differentials\map_drawing_f02710.py" />
+    <None Include="..\..\port\differentials\map_drawing_f02713.py" />
+    <None Include="..\..\port\differentials\map_drawing_f04152.py" />
+    <None Include="..\..\port\differentials\map_drawing_f04153.py" />
     <None Include="..\..\port\differentials\map_loading_common.py" />
     <None Include="..\..\port\differentials\map_loading_driver.cpp" />
     <None Include="..\..\port\differentials\map_loading_f02685.py" />

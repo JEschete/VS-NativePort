@@ -1,0 +1,594 @@
+// Hand-maintained (tools/port/owned.csv).
+#include "Menu/MapDrawingLive.hpp"
+
+#include <array>
+#include <bit>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <functional>
+#include <optional>
+#include <span>
+#include <string_view>
+#include <vector>
+
+#include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Field/MinimapScene.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/MapDrawing.hpp"
+#include "Menu/MapMarkersLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
+#include "Render/DepthCueLive.hpp"
+#include "Render/GameFontLive.hpp"
+#include "Render/RoomDrawLive.hpp"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
+
+extern "C" {
+#include "Audio/Seq/Channel.h"
+#include "Battle/StatusEffects.h"
+#include "Core/Gte.h"
+#include "Field/Doors.h"
+#include "Field/Gimmicks.h"
+#include "Field/Map.h"
+#include "Field/Room.h"
+#include "Legacy/Psx.h"
+#include "Menu/Framework/Framework.h"
+#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Map.h"
+#include "Render/Render.h"
+#include "Render/UiPrimitives.h"
+#include "State/StateFlags.h"
+}
+
+namespace VS::Menu::map {
+namespace {
+constexpr std::size_t kWordBytes = 4;
+constexpr std::size_t kDataOffset = 4;
+// Menu_Map_kSceneArmFiles' entries and the state flags' mapPaling bytes.
+constexpr int kSceneArmFileCount = 32;
+constexpr int kMapPalingScenes = 32;
+// The ordering-table words the original links into.
+constexpr int kBackdropSlot = 7;
+constexpr int kLegendSlot = 6;
+constexpr int kAshleySlot = 8;
+constexpr int kTexturePageSlot = 7;
+// getTPage(2, 0, 192, 0).
+constexpr u_long kLegendTexturePage = 0x103;
+// insertTPage's draw-mode command with dithering enabled.
+constexpr u_long kTexturePageCommand = 0xE1000200;
+constexpr int kTexturePageWords = 2;
+
+struct LegendTexturePage {
+  u_long tag;
+  u_long mode;
+  u_long padding;
+};
+// The legend's slide starts and stops here (uiXOffset).
+constexpr int kHiddenLegendOffset = -128;
+
+static_assert(sizeof(Menu_Map_MapLabel) == sizeof(MapLabel));
+static_assert(sizeof(Field_MapRoom) == Field::kMapSceneRoomRecordBytes);
+static_assert(offsetof(Field_MapRoom, dataAddress) == kDataOffset);
+static_assert(sizeof(u_long) == sizeof(std::uint32_t));
+static_assert(sizeof(Menu_Map_CompassBound) == sizeof(CompassPoint));
+static_assert(static_cast<int>(ControlButton::kL1) ==
+              Menu_Framework_ButtonId_L1);
+static_assert(static_cast<int>(ControlButton::kR1) ==
+              Menu_Framework_ButtonId_R1);
+static_assert(static_cast<int>(ControlButton::kL2) ==
+              Menu_Framework_ButtonId_L2);
+static_assert(static_cast<int>(ControlButton::kR2) ==
+              Menu_Framework_ButtonId_R2);
+static_assert(static_cast<int>(ControlButton::kCircle) ==
+              Menu_Framework_ButtonId_Circle);
+static_assert(std::size(State_StateFlags{}.mapPaling) == kMapPalingScenes);
+
+std::uint64_t refused_calls = 0;
+int legend_offset = 0;
+RoomWorkspace room_workspace{};
+
+void Refuse(std::string_view call, std::string_view reason) {
+  if (std::has_single_bit(++refused_calls)) {
+    VS_LOG_WARN("menu", "map drawing: {} refused: {} ({} refusals)", call,
+                reason, refused_calls);
+  }
+}
+
+template <typename Primitive>
+[[nodiscard]] Primitive* ReservePrimitive() {
+  constexpr std::size_t kWords =
+      (sizeof(Primitive) + sizeof(u_long) - 1) / sizeof(u_long);
+  return reinterpret_cast<Primitive*>(
+      Render::ReserveLivePrimitiveWords(kWords));
+}
+
+// Reserves a packet for ordering-table word `slot`; null, and refused, when
+// the entry lies outside the frame's table or the buffer is full.
+template <typename Primitive>
+[[nodiscard]] Primitive* PacketFor(std::string_view call, int slot,
+                                   u_long*& entry) {
+  entry =
+      Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, slot);
+  if (entry == nullptr) {
+    Refuse(call, "ordering-table entry outside the frame's table");
+    return nullptr;
+  }
+  auto* packet = ReservePrimitive<Primitive>();
+  if (packet == nullptr) {
+    Refuse(call, "no room in the frame primitive buffer");
+  }
+  return packet;
+}
+
+template <typename Primitive>
+void Link(u_long* entry, Primitive* packet) {
+  AddPrim(entry, packet);
+  Render_frameScratch.primitiveCursor = packet + 1;
+}
+
+[[nodiscard]] std::span<const MapLabel> Labels() {
+  return {reinterpret_cast<const MapLabel*>(Menu_Map_mapLabels),
+          kMapLabelCapacity};
+}
+
+void StoreCompassBounds(const CompassCorners& corners) {
+  std::memcpy(Menu_Map_compassBounds, corners.data(), sizeof(corners));
+}
+
+// The buffer `scene` was loaded into: the ARM scene the menu loaded or the
+// current room's minimap scene (MapNavigationLive.cpp).
+[[nodiscard]] std::optional<std::span<const std::byte>> SceneBytes(
+    const void* scene) {
+  if (scene == nullptr) return std::nullopt;
+  if (scene == Battle_unusedSceneBuffer) {
+    if (Menu_Map_currentScene < 0 ||
+        Menu_Map_currentScene >= kSceneArmFileCount) {
+      return std::nullopt;
+    }
+    const int size = Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size;
+    if (size < 0) return std::nullopt;
+    return std::span{static_cast<const std::byte*>(Battle_unusedSceneBuffer),
+                     static_cast<std::size_t>(size)};
+  }
+  if (scene == Field_roomData.minimapScene) {
+    return std::span{
+        reinterpret_cast<const std::byte*>(Field_roomData.minimapScene),
+        static_cast<std::size_t>(Field_roomData.header.minimapSceneLength)};
+  }
+  return std::nullopt;
+}
+
+// The bytes from `data` to the end of the loaded scene that holds it.
+[[nodiscard]] std::optional<std::span<const std::byte>> RoomBytes(
+    const void* data) {
+  for (const void* scene :
+       {static_cast<const void*>(Battle_unusedSceneBuffer),
+        static_cast<const void*>(Field_roomData.minimapScene)}) {
+    const auto bytes = SceneBytes(scene);
+    if (!bytes || bytes->empty()) continue;
+    const std::less_equal<const void*> not_after;
+    const std::less<const void*> before;
+    if (not_after(bytes->data(), data) &&
+        before(data, bytes->data() + bytes->size())) {
+      const auto offset = static_cast<std::size_t>(
+          static_cast<const std::byte*>(data) - bytes->data());
+      return bytes->subspan(offset);
+    }
+  }
+  return std::nullopt;
+}
+
+class LiveRoomHost final : public RoomDrawHost {
+ public:
+  Projection Project(const RoomVertex& vertex) override {
+    SVECTOR input{.vx = vertex.x, .vy = vertex.y, .vz = vertex.z, .pad = 0};
+    Core_GteWord screen = 0;
+    Core_GteWord interpolation = 0;
+    Core_GteWord flag = 0;
+    const Core_GteWord depth =
+        Core_Gte_RotTransPers(&input, &screen, &interpolation, &flag);
+    const auto packed = static_cast<std::uint32_t>(screen);
+    constexpr std::uint32_t kHalfShift = 16;
+    return {.screen = {.x = Core::Math::WrapSigned16(packed),
+                       .y = Core::Math::WrapSigned16(packed >> kHalfShift)},
+            .depth = static_cast<std::int32_t>(depth),
+            .interpolation = static_cast<std::int32_t>(interpolation)};
+  }
+
+  Rgb DepthCue(const Rgb& color, std::int32_t interpolation) override {
+    const CVECTOR input{.r = color.r, .g = color.g, .b = color.b, .cd = 0};
+    CVECTOR output{};
+    Render::ApplyLiveDepthCueColor(&input, interpolation, &output);
+    return {.r = output.r, .g = output.g, .b = output.b};
+  }
+
+  void AddTriangle(const RoomTriangle& triangle, std::int32_t depth) override {
+    u_long* entry = nullptr;
+    auto* poly = PacketFor<POLY_G3>(kCall, depth, entry);
+    if (poly == nullptr) return;
+    setPolyG3(poly);
+    const auto& [a, b, c] = triangle.corners;
+    setXY3(poly, a.x, a.y, b.x, b.y, c.x, c.y);
+    const auto& [ca, cb, cc] = triangle.colors;
+    setRGB0(poly, ca.r, ca.g, ca.b);
+    setRGB1(poly, cb.r, cb.g, cb.b);
+    setRGB2(poly, cc.r, cc.g, cc.b);
+    Link(entry, poly);
+  }
+
+  void AddQuad(const RoomQuad& quad, std::int32_t depth) override {
+    u_long* entry = nullptr;
+    auto* poly = PacketFor<POLY_G4>(kCall, depth, entry);
+    if (poly == nullptr) return;
+    setPolyG4(poly);
+    const auto& [a, b, c, d] = quad.corners;
+    setXY4(poly, a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
+    const auto& [ca, cb, cc, cd] = quad.colors;
+    setRGB0(poly, ca.r, ca.g, ca.b);
+    setRGB1(poly, cb.r, cb.g, cb.b);
+    setRGB2(poly, cc.r, cc.g, cc.b);
+    setRGB3(poly, cd.r, cd.g, cd.b);
+    Link(entry, poly);
+  }
+
+  void AddEdge(const RoomEdge& edge, std::int32_t depth) override {
+    u_long* entry = nullptr;
+    auto* line = PacketFor<LINE_G2>(kCall, depth, entry);
+    if (line == nullptr) return;
+    setLineG2(line);
+    setSemiTrans(line, edge.semi_transparent ? 1 : 0);
+    setXY2(line, edge.from.x, edge.from.y, edge.to.x, edge.to.y);
+    setRGB0(line, edge.from_color.r, edge.from_color.g, edge.from_color.b);
+    setRGB1(line, edge.to_color.r, edge.to_color.g, edge.to_color.b);
+    Link(entry, line);
+  }
+
+  void AddTile(const RoomTile& tile, std::int32_t depth) override {
+    u_long* entry = nullptr;
+    auto* packet = PacketFor<TILE>(kCall, depth, entry);
+    if (packet == nullptr) return;
+    setTile(packet);
+    setXY0(packet, tile.position.x, tile.position.y);
+    setWH(packet, tile.width, tile.height);
+    setRGB0(packet, tile.color.r, tile.color.g, tile.color.b);
+    Link(entry, packet);
+  }
+
+  bool ShouldDrawDoorState(std::int32_t state_id, std::int32_t zone_id,
+                           std::int32_t map_id) override {
+    return LiveShouldDrawDoorStateMarker(state_id, zone_id, map_id) != 0;
+  }
+
+  void DrawDoorState(std::int32_t x, std::int32_t y,
+                     std::int32_t state_id) override {
+    LiveDrawDoorStateMarker(x, y, state_id);
+  }
+
+  void DrawFeature(std::int32_t icon, std::int32_t x, std::int32_t y) override {
+    LiveDrawFeatureMarker(icon, x, y);
+  }
+
+  void QueueLabel(std::int32_t x, std::int32_t y, std::int32_t kind,
+                  std::int32_t label_id) override {
+    LiveQueueLabel(x, y, kind, label_id);
+  }
+
+  void DrawAshley(std::int32_t position, std::int32_t brightness) override {
+    u_long* entry = Render::LiveFrameOrderingEntry(
+        Render::LiveOrderingBase::kScene, kAshleySlot);
+    if (entry == nullptr) {
+      Refuse(kCall, "ordering-table entry outside the frame's table");
+      return;
+    }
+    LiveDrawAshleyMarker(0, position, brightness, entry);
+  }
+
+ private:
+  static constexpr std::string_view kCall = "DrawRoom";
+};
+
+[[nodiscard]] int DrawRoomBytes(std::span<const std::byte> room, int room_index,
+                                int zone_id, int map_id) {
+  const RoomContext context{
+      .room_index = room_index,
+      .current_room = Menu_Map_currentRoomIndex,
+      .scene_room = Menu_Map_isCurrentScene,
+      .entered_door = Field_enteredDoorId,
+      .frame_counter = Menu_Map_menuFramesCounter,
+      .zone_id = zone_id,
+      .map_id = map_id,
+      .brightness =
+          std::span{Menu_Map_kAshleyIconBrightness, kAshleyBrightnessSteps}};
+  LiveRoomHost host;
+  switch (DrawRoom(host, room, context, room_workspace)) {
+    case RoomDrawResult::kDrawn:
+      return 1;
+    case RoomDrawResult::kOutOfDepthRange:
+      return 0;
+    case RoomDrawResult::kMalformed:
+      Refuse("DrawRoom", "room tables reach past the scene");
+      return 0;
+  }
+  return 0;
+}
+
+class LiveVisitedRoomsHost final : public VisitedRoomsHost {
+ public:
+  explicit LiveVisitedRoomsHost(std::span<const std::byte> scene)
+      : scene_(scene) {}
+
+  ScreenOffset GetScreenOffset() override {
+    const Render_ScreenOffset offset = Render::GetLiveProjectionScreenOffset();
+    return {.x = offset.x, .y = offset.y};
+  }
+
+  void SetScreenOffset(const ScreenOffset& offset) override {
+    Render::SetLiveProjectionScreenOffset({.x = offset.x, .y = offset.y});
+  }
+
+  void ClearLabels() override { Menu_Map_mapLabelCount = 0; }
+
+  void DrawRoom(std::size_t index, std::int32_t zone_id,
+                std::int32_t map_id) override {
+    const std::size_t record =
+        kWordBytes + (index * Field::kMapSceneRoomRecordBytes);
+    // The record's on-disc pointer, resolved to an offset from the record.
+    std::uint32_t relative = 0;
+    std::memcpy(&relative, scene_.subspan(record + kDataOffset).data(),
+                sizeof(relative));
+    if (relative >= scene_.size() - record) {
+      Refuse("DrawVisitedRooms", "room data outside the scene");
+      return;
+    }
+    static_cast<void>(DrawRoomBytes(scene_.subspan(record + relative),
+                                    static_cast<int>(index), zone_id, map_id));
+  }
+
+  void DrawLabels() override { LiveDrawLabels(); }
+
+ private:
+  std::span<const std::byte> scene_;
+};
+
+class LiveLabelHost final : public LabelDrainHost {
+ public:
+  void DrawDoorLabel(std::int32_t x, std::int32_t y,
+                     std::int32_t door_id) override {
+    LiveDrawDoorLabel(x, y, door_id);
+  }
+
+  void DrawAreaLabel(std::int32_t x, std::int32_t y,
+                     std::int32_t area_id) override {
+    LiveDrawConnectingAreaLabel(x, y, area_id);
+  }
+};
+
+class LiveBackdropHost final : public BackdropHost {
+ public:
+  void AddBackdropLine(const BackdropLine& line) override {
+    u_long* entry = nullptr;
+    auto* packet = PacketFor<LINE_G2>(kCall, kBackdropSlot, entry);
+    if (packet == nullptr) return;
+    setLineG2(packet);
+    setXY2(packet, line.from.x, line.from.y, line.to.x, line.to.y);
+    setRGB0(packet, kBackdropLeftColor.r, kBackdropLeftColor.g,
+            kBackdropLeftColor.b);
+    setRGB1(packet, kBackdropRightColor.r, kBackdropRightColor.g,
+            kBackdropRightColor.b);
+    Link(entry, packet);
+  }
+
+  void AddBackdropShadow(
+      const std::array<ScreenPoint, kQuadCorners>& corners) override {
+    u_long* entry = nullptr;
+    auto* poly = PacketFor<POLY_F4>(kCall, kBackdropSlot, entry);
+    if (poly == nullptr) return;
+    setPolyF4(poly);
+    const auto& [a, b, c, d] = corners;
+    setXY4(poly, a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
+    setRGB0(poly, 0, 0, 0);
+    Link(entry, poly);
+  }
+
+ private:
+  static constexpr std::string_view kCall = "DrawControlBackdrop";
+};
+
+class LiveCompassHost final : public CompassHost {
+ public:
+  std::int32_t Sine(std::int32_t angle) override {
+    return Core::Math::Sine(angle);
+  }
+
+  std::int32_t Cosine(std::int32_t angle) override {
+    return Core::Math::Cosine(angle);
+  }
+
+  void AddCompassQuad(const CompassQuad& compass) override {
+    u_long* entry = nullptr;
+    auto* poly = PacketFor<POLY_FT4>(
+        "DrawCompass",
+        compass.slot_bytes / static_cast<std::int32_t>(sizeof(u_long)), entry);
+    if (poly == nullptr) return;
+    setPolyFT4(poly);
+    setSemiTrans(poly, compass.semi_transparent ? 1 : 0);
+    setShadeTex(poly, 1);
+    const MarkerQuad& quad = compass.quad;
+    const auto& [a, b, c, d] = quad.corners;
+    setXY4(poly, a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
+    const auto& [ta, tb, tc, td] = quad.texture;
+    setUV4(poly, ta.u, ta.v, tb.u, tb.v, tc.u, tc.v, td.u, td.v);
+    poly->tpage = quad.texture_page;
+    poly->clut = quad.clut;
+    Link(entry, poly);
+  }
+};
+
+class LiveControlsHost final : public ControlsHost {
+ public:
+  void ShiftTextBox(std::int32_t delta) override {
+    Menu_TextBoxState* box = LiveTextBox(0);
+    if (box == nullptr) return;
+    box->y =
+        Core::Math::WrapSigned16(static_cast<std::uint32_t>(box->y + delta));
+    box->yIndent = Core::Math::WrapSigned16(
+        static_cast<std::uint32_t>(box->yIndent + delta));
+  }
+
+  std::optional<bool> IsJammed() override {
+    if (Menu_Map_currentScene < 0 ||
+        Menu_Map_currentScene >= kMapPalingScenes) {
+      Refuse(kCall, "scene outside the map paling flags");
+      return std::nullopt;
+    }
+    return Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene] != 0;
+  }
+
+  void DrawButton(ControlButton button, std::int32_t x,
+                  std::int32_t y) override {
+    if (u_long* entry = LegendEntry(); entry != nullptr) {
+      Framework::DrawLiveButtonIcon(static_cast<int>(button), x, y, entry);
+    }
+  }
+
+  void DrawCaption(ControlCaption caption, std::int32_t packed_xy,
+                   std::uint32_t color) override {
+    constexpr std::array<const char*, 6> kTexts{"BACK", "NEXT", "ROTATION",
+                                                "ZOOM", "MENU", "JAMMING"};
+    if (u_long* entry = LegendEntry(); entry != nullptr) {
+      Render::DrawLiveCompactTextColor(
+          kTexts.at(static_cast<std::size_t>(caption)), packed_xy,
+          static_cast<int>(color), entry);
+    }
+  }
+
+  void DrawBackdrop(std::int32_t x, std::int32_t y, std::int32_t width,
+                    std::int32_t height) override {
+    LiveDrawControlBackdrop(x, y, width, height);
+  }
+
+  // The original's inline insertTPage: a two-word packet whose second word
+  // is zero, not AppendLiveTexturePage's one-word DR_TPAGE.
+  void AddTexturePage() override {
+    u_long* entry = nullptr;
+    auto* packet =
+        PacketFor<LegendTexturePage>("DrawControls", kTexturePageSlot, entry);
+    if (packet == nullptr) return;
+    packet->mode = kTexturePageCommand | kLegendTexturePage;
+    packet->padding = 0;
+    setlen(packet, kTexturePageWords);
+    Link(entry, packet);
+  }
+
+  void DrawCompass(std::int32_t x, std::int32_t y,
+                   std::int32_t angle) override {
+    LiveDrawCompass(x, y, angle);
+  }
+
+ private:
+  static constexpr std::string_view kCall = "DrawControls";
+
+  [[nodiscard]] static u_long* LegendEntry() {
+    u_long* entry = Render::LiveFrameOrderingEntry(
+        Render::LiveOrderingBase::kScene, kLegendSlot);
+    if (entry == nullptr) {
+      Refuse(kCall, "ordering-table entry outside the frame's table");
+    }
+    return entry;
+  }
+};
+}  // namespace
+
+// decomp: MENU5.PRG _renderMap (4D8.c:1081).
+void LiveDrawVisitedRooms(Field_MapScene* scene) {
+  constexpr std::string_view kCall = "DrawVisitedRooms";
+  const auto bytes = SceneBytes(scene);
+  if (!bytes || bytes->size() < kWordBytes) {
+    Refuse(kCall, "scene is not the menu's loaded scene");
+    return;
+  }
+  std::int32_t count = 0;
+  std::memcpy(&count, bytes->data(), sizeof(count));
+  const std::size_t rooms = count <= 0 ? 0 : static_cast<std::size_t>(count);
+  if (rooms > (bytes->size() - kWordBytes) / Field::kMapSceneRoomRecordBytes) {
+    Refuse(kCall, "room records reach past the scene");
+    return;
+  }
+  std::vector<MapRoom> records(rooms);
+  for (std::size_t room = 0; room < rooms; ++room) {
+    Field_MapRoom record{};
+    std::memcpy(
+        &record,
+        bytes->subspan(kWordBytes + (room * Field::kMapSceneRoomRecordBytes))
+            .data(),
+        sizeof(record));
+    records[room] = {.visited = record.visited,
+                     .zone_id = record.zoneId,
+                     .map_id = record.mapId};
+  }
+  LiveVisitedRoomsHost host(*bytes);
+  DrawVisitedRooms(host, Menu_Map_geomOffsetX, Menu_Map_geomOffsetY, records);
+}
+
+// decomp: MENU5.PRG _renderRoom (4D8.c:1112).
+int LiveDrawRoom(int room_index, void* room_data, int zone_id, int map_id) {
+  const auto room = RoomBytes(room_data);
+  if (!room) {
+    Refuse("DrawRoom", "room data outside the menu's loaded scene");
+    return 0;
+  }
+  return DrawRoomBytes(*room, room_index, zone_id, map_id);
+}
+
+// decomp: MENU5.PRG _drawUIControlsBackground (4D8.c:1965).
+void LiveDrawControlBackdrop(int x, int y, int w, int h) {
+  LiveBackdropHost host;
+  if (!DrawControlBackdrop(host, x, y, w, h)) {
+    Refuse("DrawControlBackdrop", "more rows than a backdrop draws");
+  }
+}
+
+// decomp: MENU5.PRG _drawUIControls (4D8.c:1991).
+void LiveDrawControls() {
+  ControlsState state{.animation_state = Menu_Map_uiAnimationState,
+                      .x_offset = legend_offset};
+  const ControlsFrame frame{.hide_ui = Menu_Map_triggerHideUi != 0,
+                            .commands_state = Menu_Map_menuCommandsState,
+                            .compass_angle = Menu_Map_cameraAngles.vy};
+  LiveControlsHost host;
+  static_cast<void>(DrawControls(host, state, frame));
+  Menu_Map_uiAnimationState = state.animation_state;
+  legend_offset = state.x_offset;
+}
+
+// decomp: MENU5.PRG _renderCompass (4D8.c:2272).
+void LiveDrawCompass(int x, int y, int angle) {
+  LiveCompassHost host;
+  StoreCompassBounds(DrawCompass(host, x, y, angle, Menu_Map_cameraAngles.vz));
+}
+
+// decomp: MENU5.PRG _computeRotatedRect (4D8.c:2377).
+void LiveComputeCompassCorners(int center_x, int center_y, int width,
+                               int height, int angle) {
+  const std::int32_t sine = Core::Math::Sine(angle);
+  const std::int32_t cosine = Core::Math::Cosine(angle);
+  StoreCompassBounds(
+      ComputeCompassCorners(center_x, center_y, width, height, sine, cosine));
+}
+
+// decomp: MENU5.PRG renderMapLabels (4D8.c:2450).
+void LiveDrawLabels() {
+  LiveLabelHost host;
+  if (!DrawLabels(host, Menu_Map_menuCommandsState, Menu_Map_triggerHideUi != 0,
+                  Labels(), Menu_Map_mapLabelCount)) {
+    Refuse("DrawLabels", "label count past _mapLabels");
+  }
+}
+
+void ResetMapDrawingLive() {
+  legend_offset = kHiddenLegendOffset;
+  room_workspace = {};
+}
+}  // namespace VS::Menu::map

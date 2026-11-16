@@ -10,9 +10,11 @@
 
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Menu/MapDrawingLive.hpp"
 #include "Render/DepthCueLive.hpp"
 
 extern "C" {
+#include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Menu/Map.h"
 #include "Render/Display.h"
@@ -30,6 +32,10 @@ struct MapFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   std::array<void*, 2> saved_buffers{Render_legacyPrimitiveBuffers[0],
                                      Render_legacyPrimitiveBuffers[1]};
+  std::array<void*, 2> saved_tables{Render_legacyOrderingTables[0],
+                                    Render_legacyOrderingTables[1]};
+  Field_MapScene* saved_minimap = Field_roomData.minimapScene;
+  u_int saved_minimap_length = Field_roomData.header.minimapSceneLength;
   int saved_framebuffer = Render_frameBuf;
   int saved_room = Menu_Map_currentRoomIndex;
   std::vector<u_long> storage =
@@ -45,6 +51,7 @@ struct MapFixture {
     Core_Gte_SetTransVector(&translation);
     Render_frameBuf = framebuffer;
     Render_legacyPrimitiveBuffers[framebuffer] = storage.data() + 1;
+    Render_legacyOrderingTables[framebuffer] = ordering.data();
     Render_frameScratch.primitiveCursor = storage.data() + 1;
     Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
     Render_frameScratch.orderingTable = ordering.data() + 18;
@@ -53,15 +60,29 @@ struct MapFixture {
                     sizeof(Render_FrameScratch),
                 saved_tail.size(), saved_tail.begin());
     Menu_Map_currentRoomIndex = 0;
+    VS::Menu::map::ResetMapDrawingLive();
   }
 
   ~MapFixture() {
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffers[0];
     Render_legacyPrimitiveBuffers[1] = saved_buffers[1];
+    Render_legacyOrderingTables[0] = saved_tables[0];
+    Render_legacyOrderingTables[1] = saved_tables[1];
+    Field_roomData.minimapScene = saved_minimap;
+    Field_roomData.header.minimapSceneLength = saved_minimap_length;
+    VS::Menu::map::ResetMapDrawingLive();
     Render_frameBuf = saved_framebuffer;
     Menu_Map_currentRoomIndex = saved_room;
     Core_Gte_Reset();
+  }
+
+  // Loads scene as the room's minimap scene, the buffer room data must lie in.
+  static void LoadMinimap(std::vector<u_long>& scene) {
+    Field_roomData.minimapScene =
+        reinterpret_cast<Field_MapScene*>(scene.data());
+    Field_roomData.header.minimapSceneLength =
+        static_cast<u_int>(scene.size() * sizeof(u_long));
   }
 
   bool CompleteChain() const {
@@ -94,7 +115,7 @@ TEST_CASE("Map control backdrops retain native cursor and ordering pointers",
           "[render][map][links]") {
   MapFixture fixture(GENERATE(0, 1));
   const int height = GENERATE(1, 2, 12);
-  Menu_Map_DrawControlBackdrop(-20, 10, 40, height);
+  VS::Menu::map::LiveDrawControlBackdrop(-20, 10, 40, height);
   const size_t bytes =
       static_cast<size_t>(height - 1) * sizeof(LINE_G2) + sizeof(POLY_F4);
   CHECK(Render_frameScratch.primitiveCursor ==
@@ -140,9 +161,10 @@ TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
       SceneBytes(scene.data(), scene.size() * sizeof(u_long))));
   VS::Field::ResolveLiveSceneRoomData(scene.data(),
                                       scene.size() * sizeof(u_long));
+  MapFixture::LoadMinimap(scene);
   auto* map = reinterpret_cast<Field_MapScene*>(scene.data());
-  CHECK(Menu_Map_DrawRoom(1, VS_ONDISC(&map->rooms[0], dataAddress, void*), 1,
-                          1) == 1);
+  CHECK(VS::Menu::map::LiveDrawRoom(
+            1, VS_ONDISC(&map->rooms[0], dataAddress, void*), 1, 1) == 1);
   const auto* triangle =
       reinterpret_cast<const POLY_G3*>(fixture.storage.data() + 1);
   const std::array<int16_t, 6> coordinates{triangle->x0, triangle->y0,
@@ -172,6 +194,7 @@ TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
       SceneBytes(scene.data(), scene.size() * sizeof(u_long))));
   VS::Field::ResolveLiveSceneRoomData(scene.data(),
                                       scene.size() * sizeof(u_long));
+  MapFixture::LoadMinimap(scene);
   const auto* map = reinterpret_cast<Field_MapScene*>(scene.data());
   auto* data = VS_ONDISC(&map->rooms[0], dataAddress, void*);
   constexpr std::array<unsigned char, 9> kExpected{0,   64, 128, 0,  64,
@@ -179,12 +202,12 @@ TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
   VS::Render::SetLiveFogNearDistance(0, 320);
   auto* baseline =
       reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
-  REQUIRE(Menu_Map_DrawRoom(1, data, 1, 1) == 1);
+  REQUIRE(VS::Menu::map::LiveDrawRoom(1, data, 1, 1) == 1);
   CHECK(TriangleRgb(*baseline) == kExpected);
   VS::Render::SetLiveFogNearDistance(768, 320);
   auto* fogged =
       reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
-  REQUIRE(Menu_Map_DrawRoom(1, data, 1, 1) == 1);
+  REQUIRE(VS::Menu::map::LiveDrawRoom(1, data, 1, 1) == 1);
   CHECK(TriangleRgb(*fogged) == kExpected);
   CHECK(fixture.CompleteChain());
 }

@@ -118,6 +118,7 @@
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
+#include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
@@ -2172,6 +2173,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU5.PRG", 0x8010815Cu, 0u, (void*)&VS::Menu::map::LiveDrawConnectingAreaLabel, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80108274u, 0u, (void*)&VS::Menu::map::LiveQueueLabel, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010839Cu, 0u, (void*)&VS::Menu::map::LiveShouldDrawDoorStateMarker, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801046B0u, 0u, (void*)&VS::Menu::map::LiveDrawVisitedRooms, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80104780u, 0u, (void*)&VS::Menu::map::LiveDrawRoom, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80106AF4u, 0u, (void*)&VS::Menu::map::LiveDrawControlBackdrop, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80106C84u, 0u, (void*)&VS::Menu::map::LiveDrawControls, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80107B10u, 0u, (void*)&VS::Menu::map::LiveDrawCompass, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x8010800Cu, 0u, (void*)&VS::Menu::map::LiveComputeCompassCorners, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801082A8u, 0u, (void*)&VS::Menu::map::LiveDrawLabels, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80103608u, 0u, (void*)&VS::Menu::Status::LiveBeginVitalsTransition, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80103688u, 0u, (void*)&VS::Menu::Status::LiveFindNextInspectableActor, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80103744u, 0u, (void*)&VS::Menu::Status::LiveAnimateActorSwitch, 0u, 0u, 0u},

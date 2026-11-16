@@ -75,15 +75,8 @@ int Menu_Map_UpdateScreen(u_char* state);
 int Menu_Map_UpdateMapMenu(void);
 void Menu_Map_DrawFrame(void);
 void Menu_Map_ApplyCamera(void);
-void Menu_Map_DrawVisitedRooms(Field_MapScene* scene);
-int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id);
 void Menu_Map_DarkenBackground(void);
 void Menu_Map_DrawPalingDistortion(void);
-void Menu_Map_DrawControlBackdrop(int x, int y, int w, int h);
-void Menu_Map_DrawControls(void);
-void Menu_Map_DrawCompass(int x, int y, int angle);
-void Menu_Map_ComputeCompassCorners(int compass_center_x, int compass_center_y, int compass_half_width, int compass_half_height, int compass_angle);
-void Menu_Map_DrawLabels(void);
 void Menu_Map_ResetMenu5Statics(void);
 
 #endif // VS_MENU_MAP_H_DECLS
