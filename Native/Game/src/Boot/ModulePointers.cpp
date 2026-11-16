@@ -122,6 +122,7 @@
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
+#include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
@@ -2257,6 +2258,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUE.PRG", 0x8010391Cu, 0u, (void*)&VS::Menu::manual::LiveUpdateTopicMenu, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103B6Cu, 0u, (void*)&VS::Menu::manual::LiveLastPageLineOffset, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103BC8u, 0u, (void*)&VS::Menu::manual::LiveCopyPageText, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80103CF0u, 0u, (void*)&VS::Menu::manual::LiveDrawPageContent, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80104204u, 0u, (void*)&VS::Menu::manual::LiveDrawPageBackground, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x8010435Cu, 0u, (void*)&VS::Menu::manual::LiveDrawUpperScrollFade, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80104620u, 0u, (void*)&VS::Menu::manual::LiveDrawLowerScrollFade, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80104908u, 0u, (void*)&VS::Menu::manual::LiveDrawPageArrow, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80104CC4u, 0u, (void*)&VS::Menu::manual::LiveDrawControlsBackground, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

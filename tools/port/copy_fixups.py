@@ -1773,6 +1773,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::manual::LiveUpdateTopicMenu": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
     "VS::Menu::manual::LiveLastPageLineOffset": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
     "VS::Menu::manual::LiveCopyPageText": r"Native\Game\include\Menu\ManualTopicsLive.hpp",
+    "VS::Menu::manual::LiveDrawPageContent": r"Native\Game\include\Menu\ManualPageLive.hpp",
+    "VS::Menu::manual::LiveDrawPageBackground": r"Native\Game\include\Menu\ManualPageLive.hpp",
+    "VS::Menu::manual::LiveDrawUpperScrollFade": r"Native\Game\include\Menu\ManualPageLive.hpp",
+    "VS::Menu::manual::LiveDrawLowerScrollFade": r"Native\Game\include\Menu\ManualPageLive.hpp",
+    "VS::Menu::manual::LiveDrawPageArrow": r"Native\Game\include\Menu\ManualPageLive.hpp",
+    "VS::Menu::manual::LiveDrawControlsBackground": r"Native\Game\include\Menu\ManualPageLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3189,6 +3195,12 @@ OWNED_CALL_BINDINGS["F02989"] = "VS::Menu::manual::LiveGetSelectedTopicRow"
 OWNED_CALL_BINDINGS["F02991"] = "VS::Menu::manual::LiveUpdateTopicMenu"
 OWNED_CALL_BINDINGS["F02994"] = "VS::Menu::manual::LiveLastPageLineOffset"
 OWNED_CALL_BINDINGS["F02995"] = "VS::Menu::manual::LiveCopyPageText"
+OWNED_CALL_BINDINGS["F02997"] = "VS::Menu::manual::LiveDrawPageContent"
+OWNED_CALL_BINDINGS["F03001"] = "VS::Menu::manual::LiveDrawPageBackground"
+OWNED_CALL_BINDINGS["F03002"] = "VS::Menu::manual::LiveDrawUpperScrollFade"
+OWNED_CALL_BINDINGS["F03003"] = "VS::Menu::manual::LiveDrawLowerScrollFade"
+OWNED_CALL_BINDINGS["F03004"] = "VS::Menu::manual::LiveDrawPageArrow"
+OWNED_CALL_BINDINGS["F03007"] = "VS::Menu::manual::LiveDrawControlsBackground"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -5115,6 +5127,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUE.PRG", 0x8010391C, "VS::Menu::manual::LiveUpdateTopicMenu"),  # F02991
     ("MENU/MENUE.PRG", 0x80103B6C, "VS::Menu::manual::LiveLastPageLineOffset"),  # F02994
     ("MENU/MENUE.PRG", 0x80103BC8, "VS::Menu::manual::LiveCopyPageText"),  # F02995
+    ("MENU/MENUE.PRG", 0x80103CF0, "VS::Menu::manual::LiveDrawPageContent"),  # F02997
+    ("MENU/MENUE.PRG", 0x80104204, "VS::Menu::manual::LiveDrawPageBackground"),  # F03001
+    ("MENU/MENUE.PRG", 0x8010435C, "VS::Menu::manual::LiveDrawUpperScrollFade"),  # F03002
+    ("MENU/MENUE.PRG", 0x80104620, "VS::Menu::manual::LiveDrawLowerScrollFade"),  # F03003
+    ("MENU/MENUE.PRG", 0x80104908, "VS::Menu::manual::LiveDrawPageArrow"),  # F03004
+    ("MENU/MENUE.PRG", 0x80104CC4, "VS::Menu::manual::LiveDrawControlsBackground"),  # F03007
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5535,36 +5553,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("s0 = (u_long**)Core_ScratchAddr(0);", "s0 = &Render_frameScratch;", "native frame owner"),
         ("s0[1]", "((u_long*)s0->orderingTable)", "manual control-label ordering"),
     ],
-    "F02997": [
-        ("    void** q;", "    Render_FrameScratch* q;", "typed clipping frame"),
-        ("void** p = (void**)Core_ScratchAddr(0);",
-         "Render_FrameScratch* p = &Render_frameScratch;", "native frame owner"),
-        ("q = (void**)Core_ScratchAddr(0);", "q = &Render_frameScratch;", "native frame owner"),
-        *[(f"{name}[{index}]", f"{name}->{member}", "typed manual clipping packet state")
-          for name in ("p", "q")
-          for index, member in ((0, "primitiveCursor"), (1, "orderingTable"))],
-    ],
-    **{fid: [
-        ("    u_long** p;", "    Render_FrameScratch* p;", "typed manual panel frame"),
-        ("p = (u_long**)Core_ScratchAddr(0);", "p = &Render_frameScratch;", "native frame owner"),
-        ("p[0]", "p->primitiveCursor", "native panel cursor handoff"),
-        ("p[1]", "((u_long*)p->orderingTable)", "native panel ordering"),
-    ] + cursor for fid, cursor in (
-        ("F03001", [("*(POLY_G4**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor",
-                     "full native page-background cursor")]),
-        ("F03004", [("*Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor",
-                     "full native page-arrow cursor")]),
-        ("F03007", [
-            ("*Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "full native controls cursor"),
-            ("*(u_long**)Core_ScratchAddr(1)", "((u_long*)Render_frameScratch.orderingTable)",
-             "ordering table follows a native pointer, not a four-byte word"),
-        ]),
-    )},
-    **{fid: [
-        ("*(void**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "native fade cursor"),
-        ("*(u_long**)Core_ScratchAddr(1)", "((u_long*)Render_frameScratch.orderingTable)",
-         "native fade ordering"),
-    ] for fid in ("F03002", "F03003")},
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
     "F04146": [
         ("VS::Menu::Files::UpdateContainerSave(submenuState);",
@@ -7975,15 +7963,6 @@ REGEX_FIXES += [
         ("Menu::Container::UpdateTransferConfirmation",
          (('arg0', 'initialize_confirmation'), ('sp10', 'confirmation_row_text'), ('sp20', 'confirmation_row_types'), ('temp_s0', 'confirmation_step')),
          "F02984 src\\MENU\\MENUD.PRG\\234.c:2332-2391 (func_801072B0). Named roles: initialize confirmation, confirmation row text, confirmation row types, confirmation step."),
-        ("Menu::Manual::DrawUpperScrollFade",
-         (('var_v0', 'transparency_source'), ('var_v1', 'transparency_destination')),
-         "F03002 src\\MENU\\MENUE.PRG\\494.c:740-789 (_fadeMenuUpper). Named roles: transparency source, transparency destination."),
-        ("Menu::Manual::DrawLowerScrollFade",
-         (('var_v0', 'transparency_source'), ('var_v1', 'transparency_destination')),
-         "F03003 src\\MENU\\MENUE.PRG\\494.c:791-842 (_fadeMenuLower). Named roles: transparency source, transparency destination."),
-        ("Menu::Manual::DrawPageArrow",
-         (('v0', 'upper_arrow_base_y'),),
-         "F03004 src\\MENU\\MENUE.PRG\\494.c:844-881 (_drawPaginationArrow). Named roles: upper arrow base y."),
         ("Menu::Results::UpdateGameClear",
          (('temp_a2_2', 'prompt_slide_step'), ('temp_v1', 'updated_reel_phase')),
          "F03015 src\\MENU\\MENUF.PRG\\3B8.c:755-893 (_renderCongratulationsScreen). Named roles: prompt slide step, updated reel phase."),

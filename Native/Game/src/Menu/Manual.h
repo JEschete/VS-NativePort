@@ -16,18 +16,6 @@ typedef struct Menu_Manual_BackgroundTransparencies Menu_Manual_BackgroundTransp
 // decomp: src/SLUS_010.40/sfx.h:5
 #define VS_SFX_MENULEAVE 6
 
-// decomp: src/include/insertTPage.h:3
-#define _insertTPage(after, texture_page_mode)                                                              \
-    do {                                                                                        \
-        u_long* ot_ = (u_long*)Render_frameScratch.orderingTable + (after);                    \
-        u_long* p_ = (u_long*)Render_frameScratch.primitiveCursor;                             \
-        p_[1] = 0xE1000200 | ((texture_page_mode) & 0x1FF);                                                 \
-        p_[2] = 0;                                                                             \
-        p_[0] = 0x02000000 | (*ot_ & 0xFFFFFF);                                                \
-        *ot_ = (*ot_ & 0xFF000000) | LegacyGpu_Handle(p_);                                     \
-        Render_frameScratch.primitiveCursor = p_ + 3;                                          \
-    } while (0)
-
 // decomp: src/include/lbaMacros.h:9
 #define mkHfoPair(file) mkCdFile(file##_HF1), mkCdFile(file##_HF0)
 
@@ -96,12 +84,6 @@ void Menu_Manual_PollMenuReady(void);
 int Menu_Manual_UpdateScreen(u_char* state);
 int Menu_Manual_InitHelpState(void);
 int Menu_Manual_UpdateHelpPages(void);
-void Menu_Manual_DrawPageContent(void);
-void Menu_Manual_DrawPageBackground(int x, int y, int w, int h, int color);
-void Menu_Manual_DrawUpperScrollFade(void);
-void Menu_Manual_DrawLowerScrollFade(void);
-void Menu_Manual_DrawPageArrow(enum Menu_Manual_ArrowType arrowType);
-void Menu_Manual_DrawControlsBackground(int x, int y, int w, int h);
 void Menu_Manual_ResetMenueStatics(void);
 
 #endif // VS_MENU_MANUAL_H_DECLS

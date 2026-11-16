@@ -750,6 +750,9 @@
     <ClCompile Include="src\ManualIllustrationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ManualPageTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ManualRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

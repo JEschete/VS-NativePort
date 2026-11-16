@@ -626,83 +626,11 @@
 "            Menu_Manual_helpText = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size));",
 "            Menu_Manual_helpAssets = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size));"
 ]
-],
-[
-404,
-[
-"    area = p->primitiveCursor;"
-],
-[
-"    area = (DR_AREA *)(p->primitiveCursor);"
-]
-],
-[
-418,
-[
-"        VS::Menu::manual::LiveDrawIllustration(&spriteData[spriteData[i + 1]]);"
-],
-[
-"        VS::Menu::manual::LiveDrawIllustration((short *)(&spriteData[spriteData[i + 1]]));"
-]
-],
-[
-430,
-[
-"    area = q->primitiveCursor;"
-],
-[
-"    area = (DR_AREA *)(q->primitiveCursor);"
-]
-],
-[
-442,
-[
-"    poly = Render_frameScratch.primitiveCursor;"
-],
-[
-"    poly = (POLY_G4 *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-478,
-[
-"    poly = Render_frameScratch.primitiveCursor;"
-],
-[
-"    poly = (POLY_FT4 *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-504,
-[
-"    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
-],
-[
-"    Render_frameScratch.primitiveCursor = ((u_char*)((void*)poly)) + 16 * sizeof(TILE);"
-]
-],
-[
-531,
-[
-"    poly = Render_frameScratch.primitiveCursor;"
-],
-[
-"    poly = (POLY_FT4 *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-558,
-[
-"    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
-],
-[
-"    Render_frameScratch.primitiveCursor = ((u_char*)((void*)poly)) + 16 * sizeof(TILE);"
-]
 ]
 ],
 "Native\\Game\\src\\Menu\\Map.cpp": [
 [
-212,
+211,
 [
 "        Menu_Map_screenMenuBgBackup = VS::Core::Memory::AllocateLiveFromHighEnd(0xB600);"
 ],
@@ -711,7 +639,7 @@
 ]
 ],
 [
-519,
+518,
 [
 "                    Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -720,7 +648,7 @@
 ]
 ],
 [
-521,
+520,
 [
 "                    VS::Menu::map::LiveCenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -729,7 +657,7 @@
 ]
 ],
 [
-578,
+577,
 [
 "                            VS::Menu::map::LiveSetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -738,7 +666,7 @@
 ]
 ],
 [
-581,
+580,
 [
 "                            VS::Menu::map::LiveSetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -747,7 +675,7 @@
 ]
 ],
 [
-670,
+669,
 [
 "            VS::Menu::map::LiveScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
 ],
@@ -756,7 +684,7 @@
 ]
 ],
 [
-672,
+671,
 [
 "            Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex(Battle_unusedSceneBuffer);"
 ],
@@ -765,7 +693,7 @@
 ]
 ],
 [
-674,
+673,
 [
 "            VS::Menu::map::LiveCenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
 ],
@@ -774,7 +702,7 @@
 ]
 ],
 [
-698,
+697,
 [
 "    VS::Menu::map::LiveAnimateCentering(Battle_unusedSceneBuffer);"
 ],
@@ -783,7 +711,7 @@
 ]
 ],
 [
-717,
+716,
 [
 "    AddPrim((DR_STP*)(pScratch[1] + 0x1FFC), stp++);"
 ],
@@ -792,7 +720,7 @@
 ]
 ],
 [
-737,
+736,
 [
 "        VS::Menu::map::LiveDrawVisitedRooms(Battle_unusedSceneBuffer);"
 ],
@@ -801,7 +729,7 @@
 ]
 ],
 [
-774,
+773,
 [
 "    sprt = Render_frameScratch.primitiveCursor;"
 ],
@@ -810,7 +738,7 @@
 ]
 ],
 [
-791,
+790,
 [
 "    sprt = Render_frameScratch.primitiveCursor;"
 ],
@@ -819,7 +747,7 @@
 ]
 ],
 [
-821,
+820,
 [
 "        SPRT* sprt = *(void**)Core_ScratchAddr(0);"
 ],
@@ -828,7 +756,7 @@
 ]
 ],
 [
-849,
+848,
 [
 "        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
 ],
@@ -837,7 +765,7 @@
 ]
 ],
 [
-859,
+858,
 [
 "        sprt = *(void**)Core_ScratchAddr(0);"
 ],
@@ -846,7 +774,7 @@
 ]
 ],
 [
-884,
+883,
 [
 "        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
 ],
@@ -855,7 +783,7 @@
 ]
 ],
 [
-910,
+909,
 [
 "        static const RECT initial[2];"
 ],
@@ -1193,7 +1121,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-283,
+284,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
@@ -1202,7 +1130,7 @@
 ]
 ],
 [
-1129,
+1130,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -1211,7 +1139,7 @@
 ]
 ],
 [
-1139,
+1140,
 [
 "        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
 ],
@@ -1220,7 +1148,7 @@
 ]
 ],
 [
-1150,
+1151,
 [
 "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
 ],
@@ -1229,7 +1157,7 @@
 ]
 ],
 [
-1173,
+1174,
 [
 "    polyG4 = scratch[0];"
 ],
@@ -1238,7 +1166,7 @@
 ]
 ],
 [
-1188,
+1189,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -1247,7 +1175,7 @@
 ]
 ],
 [
-1198,
+1199,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -1256,7 +1184,7 @@
 ]
 ],
 [
-1210,
+1211,
 [
 "    POLY_G4* polyG4 = scratch[0];"
 ],
@@ -1265,7 +1193,7 @@
 ]
 ],
 [
-1220,
+1221,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -1274,7 +1202,7 @@
 ]
 ],
 [
-1228,
+1229,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -1283,7 +1211,7 @@
 ]
 ],
 [
-1263,
+1264,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -1292,7 +1220,7 @@
 ]
 ],
 [
-1265,
+1266,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -1301,7 +1229,7 @@
 ]
 ],
 [
-1270,
+1271,
 [
 "        scratch[1] + 0x1C);"
 ],
@@ -1310,7 +1238,7 @@
 ]
 ],
 [
-1280,
+1281,
 [
 "    POLY_G4* poly = scratch[0];"
 ],
@@ -1319,7 +1247,7 @@
 ]
 ],
 [
-1290,
+1291,
 [
 "    AddPrim(scratch[1] + 0x20, poly++);"
 ],
@@ -1328,7 +1256,7 @@
 ]
 ],
 [
-1300,
+1301,
 [
 "    AddPrim(scratch[1] + 32, poly++);"
 ],

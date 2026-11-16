@@ -26,7 +26,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Manual.h"
 #include "Menu/Map.h"
 #include "Render/Display.h"
 #include "Render/Render.h"

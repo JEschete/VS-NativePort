@@ -3537,6 +3537,30 @@
     <None Include="..\..\port\differentials\manual_illustration_f03006.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\manual_page_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\manual_page_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\manual_page_f02997.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\manual_page_f03001.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\manual_page_f03002.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\manual_page_f03003.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\manual_page_f03004.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\manual_page_f03007.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\manual_topics_common.py">
       <Filter>tools\port\differentials</Filter>
     </None>

@@ -315,6 +315,7 @@
     <ClCompile Include="src\MagicSpellMenuTests.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ManualIllustrationTests.cpp" />
+    <ClCompile Include="src\ManualPageTests.cpp" />
     <ClCompile Include="src\ManualRenderTests.cpp" />
     <ClCompile Include="src\ManualTopicsTests.cpp" />
     <ClCompile Include="src\MapDrawingTests.cpp" />

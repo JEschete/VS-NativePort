@@ -10,6 +10,7 @@
 
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 
@@ -34,6 +35,7 @@ __declspec(noinline) void ReuseReturnedStack() {
 struct ManualFrameFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* saved_ordering = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   int saved_scroll = Menu_Manual_scrollPosition;
   int saved_arrow = Menu_Manual_pageArrowAnimState;
@@ -44,6 +46,7 @@ struct ManualFrameFixture {
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch.primitiveCursor = storage.data() + 1;
     Render_frameScratch.orderingTable = ordering.data() + 16;
     Menu_Manual_scrollPosition = 0;
@@ -53,6 +56,7 @@ struct ManualFrameFixture {
   ~ManualFrameFixture() {
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_legacyOrderingTables[0] = saved_ordering;
     Render_frameBuf = saved_framebuffer;
     Menu_Manual_scrollPosition = saved_scroll;
     Menu_Manual_pageArrowAnimState = saved_arrow;
@@ -88,28 +92,29 @@ TEST_CASE("Manual panels use full native frame pointers and packet links",
   unsigned packets = 0;
   switch (operation) {
     case 0:
-      Menu_Manual_DrawControlsBackground(16, 18, 96, 12);
+      VS::Menu::manual::LiveDrawControlsBackground(16, 18, 96, 12);
       bytes = 11 * sizeof(LINE_G2) + sizeof(POLY_F4);
       packets = 12;
       break;
     case 1:
-      Menu_Manual_DrawPageBackground(8, 52, 310, 136, 0);
+      VS::Menu::manual::LiveDrawPageBackground(8, 52, 310, 136, 0);
       bytes = sizeof(POLY_G4) + 3 * sizeof(u_long);
       packets = 2;
       break;
     case 2:
-      Menu_Manual_DrawUpperScrollFade();
+      VS::Menu::manual::LiveDrawUpperScrollFade();
       bytes = 49 * sizeof(POLY_FT4) + 16 * sizeof(TILE) + 3 * sizeof(u_long);
       packets = 66;
       break;
     case 3:
-      Menu_Manual_DrawLowerScrollFade();
+      VS::Menu::manual::LiveDrawLowerScrollFade();
       bytes = 49 * sizeof(POLY_FT4) + 16 * sizeof(TILE) + 3 * sizeof(u_long);
       packets = 66;
       break;
     default:
-      Menu_Manual_DrawPageArrow(operation == 4 ? Menu_Manual_ArrowType_Up
-                                               : Menu_Manual_ArrowType_Down);
+      VS::Menu::manual::LiveDrawPageArrow(operation == 4
+                                              ? Menu_Manual_ArrowType_Up
+                                              : Menu_Manual_ArrowType_Down);
       bytes = sizeof(POLY_FT4);
       packets = 1;
       break;

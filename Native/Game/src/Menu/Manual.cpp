@@ -7,6 +7,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
+#include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Manual.h"
-#include "Render/Display.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -329,10 +329,10 @@ int Menu_Manual_UpdateHelpPages(void)
         frame_scratch = &Render_frameScratch;
         VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, ((u_long*)frame_scratch->orderingTable) + 6);
         VS::Render::DrawLiveCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
-        Menu_Manual_DrawControlsBackground(0x10, 0x12, 0x60, 0xC);
+        VS::Menu::manual::LiveDrawControlsBackground(0x10, 0x12, 0x60, 0xC);
         VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, ((u_long*)frame_scratch->orderingTable) + 6);
         VS::Render::DrawLiveCompactTextColor("MENU", 0x24001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
-        Menu_Manual_DrawControlsBackground(0x10, 0x24, 0x40, 0xC);
+        VS::Menu::manual::LiveDrawControlsBackground(0x10, 0x24, 0x40, 0xC);
         VS::Render::DrawLiveCompactTextColor("PAGE", 0xC400D8, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
         sprintf(charBuf, "#%d/", currentPage + 1);
         VS::Render::DrawLiveCompactTextColor(charBuf, 0xC40118, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
@@ -354,18 +354,18 @@ int Menu_Manual_UpdateHelpPages(void)
             Menu_Manual_helpText = NULL;
             break;
         }
-        Menu_Manual_DrawPageBackground(8, 52, 310, 136, 0);
+        VS::Menu::manual::LiveDrawPageBackground(8, 52, 310, 136, 0);
         Menu_Manual_pageArrowAnimState = (Menu_Manual_pageArrowAnimState + 1) & 0xF;
         if (Menu_Manual_scrollPosition > 0) {
-            Menu_Manual_DrawUpperScrollFade();
+            VS::Menu::manual::LiveDrawUpperScrollFade();
         }
         if (Menu_Manual_scrollPosition < Menu_Manual_lineCount) {
-            Menu_Manual_DrawLowerScrollFade();
+            VS::Menu::manual::LiveDrawLowerScrollFade();
         }
         if (Menu_Manual_helpPageLoadCounter < 8) {
             ++Menu_Manual_helpPageLoadCounter;
         } else {
-            Menu_Manual_DrawPageContent();
+            VS::Menu::manual::LiveDrawPageContent();
         }
         VS::Menu::manual::LiveCopyPageText();
         break;
@@ -389,244 +389,6 @@ int Menu_Manual_UpdateHelpPages(void)
         return 2;
     }
     return 0;
-}
-
-// decomp: MENUE.PRG _drawContent (src/MENU/MENUE.PRG/494.c:577)
-void Menu_Manual_DrawPageContent(void)
-{
-    RECT rect;
-    DR_AREA* area;
-    int i;
-    int spriteOffset;
-    u_short* spriteData;
-    Render_FrameScratch* q;
-    Render_FrameScratch* p = &Render_frameScratch;
-
-    area = (DR_AREA *)(p->primitiveCursor);
-    SetDrawArea(area, &Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip);
-    AddPrim(p->orderingTable, area++);
-    p->primitiveCursor = area;
-
-    VS::Menu::manual::LiveDrawDiagramLines();
-
-    spriteOffset = Menu_Manual_helpText[0];
-    if (spriteOffset < 0) {
-        spriteOffset += 3;
-    }
-    spriteData = (u_short*)Menu_Manual_helpText + 8 + (spriteOffset >> 2) * 2;
-
-    for (i = 0; i < spriteData[0]; ++i) {
-        VS::Menu::manual::LiveDrawIllustration((short *)(&spriteData[spriteData[i + 1]]));
-    }
-    if (Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip.x >= 320) {
-        rect.x = 333;
-    } else {
-        rect.x = 13;
-    }
-    rect.w = 300;
-    rect.y = 55;
-    rect.h = 130;
-
-    q = &Render_frameScratch;
-    area = (DR_AREA *)(q->primitiveCursor);
-    SetDrawArea(area, &rect);
-    AddPrim(q->orderingTable, area++);
-    q->primitiveCursor = area;
-}
-
-// decomp: MENUE.PRG _setPageBg (src/MENU/MENUE.PRG/494.c:716)
-void Menu_Manual_DrawPageBackground(int x, int y, int w, int h, int color)
-{
-    POLY_G4* poly;
-    Render_FrameScratch* p;
-
-    poly = (POLY_G4 *)(Render_frameScratch.primitiveCursor);
-    setPolyG4(poly);
-    setXY4(poly, x, y, (x + w) - 1, y, x, (y + h) - 1, (x + w) - 1, (y + h) - 1);
-    setRGB0(poly, Menu_Manual_kColorStops0[color].r, Menu_Manual_kColorStops0[color].g, Menu_Manual_kColorStops0[color].b);
-    setRGB1(poly, Menu_Manual_kColorStops1[color].r, Menu_Manual_kColorStops1[color].g, Menu_Manual_kColorStops1[color].b);
-    setRGB2(poly, Menu_Manual_kColorStops0[color].r, Menu_Manual_kColorStops0[color].g, Menu_Manual_kColorStops0[color].b);
-    setRGB3(poly, Menu_Manual_kColorStops1[color].r, Menu_Manual_kColorStops1[color].g, Menu_Manual_kColorStops1[color].b);
-
-    p = &Render_frameScratch;
-    AddPrim(((u_long*)p->orderingTable) + 7, poly++);
-    p->primitiveCursor = (u_long*)poly;
-    _insertTPage(7, getTPage(0, 3, 0, 0));
-}
-
-// decomp: MENUE.PRG _fadeMenuUpper (src/MENU/MENUE.PRG/494.c:740)
-void Menu_Manual_DrawUpperScrollFade(void)
-{
-    int widths[4];
-    int transparency[16];
-    Menu_Manual_BackgroundTransparencies const* transparency_source;
-    Menu_Manual_BackgroundTransparencies* transparency_destination;
-    int i;
-    int j;
-    POLY_FT4* poly;
-    TILE* tile;
-
-    *(Menu_Manual_BackgroundChunkWidths*)widths = Menu_Manual_kMenuBgChunkWidths;
-
-    transparency_destination = (Menu_Manual_BackgroundTransparencies*)transparency;
-    transparency_source = Menu_Manual_kMenuBgTransparencies;
-
-    do {
-        *transparency_destination++ = *transparency_source++;
-    } while (transparency_source != (Menu_Manual_kMenuBgTransparencies + 4));
-
-    Menu_Manual_DrawPageArrow(Menu_Manual_ArrowType_Up);
-    poly = (POLY_FT4 *)(Render_frameScratch.primitiveCursor);
-
-    for (i = 0; i < 16; ++i) {
-        for (j = 0; j < 3; ++j) {
-            setPolyFT4(poly);
-            setXY4(poly, j << 7, i + 52, widths[j] + (j << 7), i + 52, j << 7, i + 53,
-                widths[j] + (j << 7), i + 53);
-            setUV4(poly, 0, i + 52, widths[j], i + 52, 0, i + 53, widths[j], i + 53);
-            setClut(poly, 768, 227);
-            poly->tpage = (j + 32) | 128 | (640 >> 6) | (256 >> 4);
-            setSemiTrans(poly, 1);
-            setRGB0(poly, transparency[i], transparency[i], transparency[i]);
-            AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, poly++);
-        }
-    }
-
-    tile = (TILE*)poly;
-    for (i = 0; i < 16; ++i) {
-        setTile(&tile[i]);
-        setSemiTrans(&tile[i], 1);
-        setXY0(&tile[i], 0, i + 52);
-        setWH(&tile[i], 320, 1);
-        setRGB0(&tile[i], transparency[i], transparency[i], transparency[i]);
-        AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, &tile[i]);
-    }
-
-    Render_frameScratch.primitiveCursor = ((u_char*)((void*)poly)) + 16 * sizeof(TILE);
-    _insertTPage(-7, getTPage(0, 2, 0, 0));
-}
-
-// decomp: MENUE.PRG _fadeMenuLower (src/MENU/MENUE.PRG/494.c:791)
-void Menu_Manual_DrawLowerScrollFade(void)
-{
-    int widths[4];
-    int transparency[16];
-    Menu_Manual_BackgroundTransparencies const* transparency_source;
-    Menu_Manual_BackgroundTransparencies* transparency_destination;
-    int i;
-    int j;
-    POLY_FT4* poly;
-    TILE* tile;
-
-    *(Menu_Manual_BackgroundChunkWidths*)widths = Menu_Manual_kMenuBgChunkWidths;
-
-    transparency_destination = (Menu_Manual_BackgroundTransparencies*)transparency;
-    transparency_source = Menu_Manual_kMenuBgTransparencies;
-
-    do {
-        *transparency_destination++ = *transparency_source++;
-    } while (transparency_source != (Menu_Manual_kMenuBgTransparencies + 4));
-
-    Menu_Manual_DrawPageArrow(Menu_Manual_ArrowType_Down);
-
-    poly = (POLY_FT4 *)(Render_frameScratch.primitiveCursor);
-
-    for (i = 0; i < 16; ++i) {
-        for (j = 0; j < 3; ++j) {
-            setPolyFT4(poly);
-            setXY4(poly, j << 7, 187 - i, widths[j] + (j << 7), 187 - i, j << 7, 188 - i,
-                widths[j] + (j << 7), 188 - i);
-            setUV4(poly, 0, -69 - i, widths[j], -69 - i, 0, -68 - i, widths[j], -68 - i);
-            setClut(poly, 768, 227);
-            poly->tpage = (j + 32) | 128 | (640 >> 6) | (256 >> 4);
-            setSemiTrans(poly, 1);
-            setRGB0(poly, transparency[i], transparency[i], transparency[i]);
-            AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, poly++);
-        }
-    }
-
-    tile = (TILE*)poly;
-
-    for (i = 0; i < 16; ++i) {
-        setTile(&tile[i]);
-        setSemiTrans(&tile[i], 1);
-        setXY0(&tile[i], 0, 0xBB - i);
-        setWH(&tile[i], 320, 1);
-        setRGB0(&tile[i], transparency[i], transparency[i], transparency[i]);
-        AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, &tile[i]);
-    }
-
-    Render_frameScratch.primitiveCursor = ((u_char*)((void*)poly)) + 16 * sizeof(TILE);
-    _insertTPage(-7, getTPage(0, 2, 0, 0));
-}
-
-// decomp: MENUE.PRG _drawPaginationArrow (src/MENU/MENUE.PRG/494.c:844)
-void Menu_Manual_DrawPageArrow(enum Menu_Manual_ArrowType arrowType)
-{
-    int y;
-    POLY_FT4* poly;
-    Render_FrameScratch* p;
-
-    if (arrowType != Menu_Manual_ArrowType_Up) {
-        if (Menu_Manual_pageArrowAnimState < 9) {
-            y = (Menu_Manual_pageArrowAnimState >> 1) + 184;
-        } else {
-            y = -(Menu_Manual_pageArrowAnimState >> 2) + 190;
-        }
-    } else {
-        if (Menu_Manual_pageArrowAnimState < 9) {
-            int upper_arrow_base_y = 40;
-            y = upper_arrow_base_y - (Menu_Manual_pageArrowAnimState >> 1);
-        } else {
-            y = (Menu_Manual_pageArrowAnimState >> 2) + 34;
-        }
-    }
-
-    poly = (POLY_FT4*)Render_frameScratch.primitiveCursor;
-    setPolyFT4(poly);
-    setShadeTex(poly, 1);
-    setXY4(poly, 152, y, 168, y, 152, y + 16, 168, y + 16);
-    setUV4(poly, arrowType * 16, 48, arrowType * 16 + 16, 48, arrowType * 16, 64,
-        arrowType * 16 + 16, 64);
-    setTPage(poly, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, 768, 0);
-
-    if (Input_previousButtons & PADRleft) {
-        setClut(poly, 896, 223);
-    } else {
-        setClut(poly, 912, 223);
-    }
-    p = &Render_frameScratch;
-    AddPrim(((u_long*)p->orderingTable) - 7, poly++);
-    p->primitiveCursor = (void*)poly;
-}
-
-// decomp: MENUE.PRG _drawControlsBg (src/MENU/MENUE.PRG/494.c:962)
-void Menu_Manual_DrawControlsBackground(int x, int y, int w, int h)
-{
-    int i;
-    int j;
-    LINE_G2* line;
-    POLY_F4* poly;
-    Render_FrameScratch* p;
-
-    line = (LINE_G2*)Render_frameScratch.primitiveCursor;
-    for (i = y, j = w; i < (y + h) - 1; ++i, --j) {
-        setLineG2(line);
-        setXY2(line, x, i, (x + j) - 1, i);
-        setRGB0(line, 64, 56, 32);
-        setRGB1(line, 16, 16, 8);
-        AddPrim(((u_long*)Render_frameScratch.orderingTable) + 7, line++);
-    }
-    x += 2;
-    y += 2;
-    poly = (POLY_F4*)line;
-    setPolyF4(poly);
-    setXY4(poly, x, y, (x + w) - 1, y, x, (y + h) - 1, (x + w) - h, (y + h) - 1);
-    setRGB0(poly, 0, 0, 0);
-
-    p = &Render_frameScratch;
-    AddPrim(((u_long*)p->orderingTable) + 7, poly);
-    p->primitiveCursor = (u_long*)(poly + 1);
 }
 
 // MENUE.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
